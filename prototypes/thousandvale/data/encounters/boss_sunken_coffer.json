@@ -223,7 +223,7 @@
       ],
       "first": 16,
       "cast": 1.5,
-      "say": "The vault is flooding — get up on a ledge!",
+      "say": "The vault is flooding — get into one of the dry circles!",
       "telegraphs": [
         {
           "shape": "circle",
@@ -358,7 +358,10 @@
       ],
       "onEnter": [
         {
-          "shield": true
+          "shield": {
+            "seconds": 20,
+            "pool": 0.1
+          }
         },
         {
           "adds": {
@@ -369,10 +372,19 @@
           }
         },
         {
-          "say": "The Coffer locks itself shut! Force open all three strongboxes!",
+          "say": "The Coffer locks itself shut! Force open all three strongboxes! It fails by itself in 20 seconds.",
           "style": "warn"
         }
-      ]
+      ],
+      "ward": {
+        "seconds": 20,
+        "break": "objects",
+        "need": 3,
+        "what": "brazier",
+        "say": "The Coffer locks itself shut! Force open all three strongboxes! It fails by itself in 20 seconds.",
+        "fade": "The ward fails by itself. No opening this time.",
+        "pool": 0.1
+      }
     },
     {
       "name": "Bankrupt",

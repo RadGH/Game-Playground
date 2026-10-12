@@ -1,0 +1,26 @@
+/* Thousandvale — play-test 7 interface (stream D-UI). */
+
+/* V11: every scrollbar in the game, one rule set — thin, a dark track, a gold-ish thumb. Firefox reads the two standard
+   properties; WebKit / Chromium read the ::-webkit- parts (and, where they also know the standard ones, those win). */
+* { scrollbar-width: thin; scrollbar-color: rgba(217, 178, 106, 0.55) rgba(10, 8, 6, 0.55); }
+*::-webkit-scrollbar { width: 9px; height: 9px; }
+*::-webkit-scrollbar-track { background: rgba(10, 8, 6, 0.55); border-radius: 5px; }
+*::-webkit-scrollbar-thumb { background: linear-gradient(180deg, rgba(217, 178, 106, 0.75), rgba(138, 106, 52, 0.75)); border-radius: 5px; border: 2px solid rgba(10, 8, 6, 0.55); }
+*::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #f1d595, #b48a3e); }
+*::-webkit-scrollbar-corner { background: transparent; }
+/* (rows that hide their bar on purpose — tab strips that scroll sideways — keep doing so: their own rule is more specific) */
+.chat-tabs { scrollbar-width: none; }
+
+/* V13: the shop's compare card under the shelf */
+.shop-buy { display: flex; flex-direction: column; gap: 6px; }
+.shop-buy .shop-list { max-height: min(34vh, 300px); }
+.shop-row.sel { border-color: var(--gold-hi); background: rgba(217, 178, 106, 0.12); }
+.shop-card { padding: 8px 10px; border: 1px solid var(--edge); border-radius: 8px; background: rgba(0, 0, 0, 0.35); font-size: 13px; }
+.shop-cardbody { max-height: min(26vh, 220px); overflow-y: auto; }   /* the card scrolls; the price and Buy stay in view */
+.shop-card .itemtip { min-width: 0; max-width: none; }
+.shop-card .dim { margin: 0; color: var(--ink-faint); font-style: italic; }
+.shop-cardfoot { margin: 6px 0 0 !important; } .shop-cardfoot .bad { color: var(--bad); font-size: 12.5px; } .shop-cardfoot .price { color: #ffd56a; font-weight: 700; }
+
+/* protocol §23.1: split a stack */
+.tv-split input[type='range'] { width: 100%; margin: 4px 0; accent-color: var(--gold); }
+.tv-split input[type='number'] { width: 90px; margin: 0 auto 8px; display: block; text-align: center; background: rgba(0, 0, 0, 0.45); border: 1px solid var(--edge); border-radius: 6px; padding: 6px; color: var(--ink); }

@@ -1,5 +1,5 @@
 {
-  "name": "z14_04",
+  "name": "Lowmoor (z14_04)",
   "zone": "z14_04",
   "sheet": {
     "sheet": "torbor_downs",
@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 2,
-  "inputHash": "32f7a264",
+  "bakeVersion": 4,
+  "inputHash": "63302176",
   "waterKinds": [
     "none",
     "sea",
@@ -33,7 +33,7 @@
       "height": 224,
       "method": "pangea",
       "seaLevel": 0.2,
-      "inputHash": "9803699e"
+      "inputHash": "9805a835"
     },
     "zone": {
       "zx": 14,
@@ -89,64 +89,152 @@
       "z": 704
     },
     {
+      "type": "settlement",
+      "kind": "town",
+      "name": "Lowmoor",
+      "x": 1219,
+      "z": 1026,
+      "ask": true,
+      "askR": 70,
+      "hub": true,
+      "radius": 90
+    },
+    {
+      "type": "settlement",
+      "kind": "hamlet",
+      "name": "Deepdene",
+      "x": 1347,
+      "z": 289,
+      "ask": true,
+      "askR": 40,
+      "radius": 40
+    },
+    {
       "type": "dungeon",
       "id": "door_1",
       "name": "Barrow entrance",
-      "x": 560,
-      "z": 870,
-      "yaw": -1.424
+      "x": 1401,
+      "z": 1081,
+      "yaw": -1.622,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_sunken_wolds",
-      "x": 1024,
-      "z": 1024,
-      "r": 40
+      "x": 1068,
+      "z": 1007,
+      "r": 40,
+      "pinned": true
     }
   ],
   "spawn": {
-    "x": 1024,
-    "z": 1024
+    "x": 1199,
+    "z": 1026
   },
+  "bridges": [],
   "summary": {
     "zone": "z14_04",
     "province": "Petbeck Basin",
-    "inputHash": "32f7a264",
+    "inputHash": "63302176",
     "rivers": 3,
-    "wetShare": 0.011,
-    "unwalkableShare": 0.007,
-    "towns": [],
-    "roads": 0,
+    "wetShare": 0.01,
+    "unwalkableShare": 0.004,
+    "towns": [
+      {
+        "name": "Lowmoor",
+        "kind": "town",
+        "hub": true,
+        "at": [
+          1219,
+          1026
+        ],
+        "radius": 90,
+        "movedFrom": null,
+        "culture": "halfling",
+        "plots": 24,
+        "streets": 70,
+        "links": 1,
+        "overlaps": 0,
+        "highStreets": 1,
+        "w6": {
+          "plotsBefore": 24,
+          "plots": 24,
+          "kept": 24,
+          "removed": []
+        }
+      },
+      {
+        "name": "Deepdene",
+        "kind": "hamlet",
+        "hub": false,
+        "at": [
+          1347,
+          289
+        ],
+        "radius": 40,
+        "movedFrom": null,
+        "culture": "halfling",
+        "plots": 7,
+        "streets": 22,
+        "links": 2,
+        "overlaps": 0,
+        "highStreets": 2,
+        "w6": {
+          "plotsBefore": 9,
+          "plots": 7,
+          "kept": 7,
+          "removed": [
+            {
+              "plot": 6,
+              "want": "hut",
+              "office": false
+            },
+            {
+              "plot": 7,
+              "want": "hut",
+              "office": false
+            }
+          ]
+        }
+      }
+    ],
+    "roads": 2,
     "bridges": 0,
-    "scatter": 7037,
+    "paths": 6,
+    "pathMetres": 240,
+    "scatter": 11931,
     "scatterKinds": {
-      "rock_large": 343,
-      "tree_acacia": 1750,
-      "bush": 3232,
-      "rock_small": 1280,
-      "tree_dead": 86,
-      "boulder": 148,
-      "tree_broadleaf": 198
+      "rock_large": 741,
+      "tree_acacia": 2426,
+      "bush": 5317,
+      "rock_small": 2298,
+      "tree_broadleaf": 208,
+      "boulder": 198,
+      "tree_dead": 114,
+      "tree_conifer": 5,
+      "hedge": 624
     },
     "sites": [
       "landmark ancientwood The Elder Stondhealweast 1472 1728",
       "lair lair Tadaden 448 704",
       "lair lair The Lamnund Lair 448 1856",
       "lair lair Tifilden 1600 704",
-      "dungeon door_1 Barrow entrance 560 870  -1.424",
-      "event event_sunken_wolds  1024 1024 40"
+      "settlement(HUB) town Lowmoor 1219 1026 90",
+      "settlement hamlet Deepdene 1347 289 40",
+      "dungeon door_1 Barrow entrance 1401 1081  -1.622",
+      "event event_sunken_wolds  1068 1007 40"
     ],
     "spawn": {
-      "x": 1024,
-      "z": 1024
+      "x": 1199,
+      "z": 1026
     },
-    "placements": 6,
-    "vignettesAvoided": 0
+    "placements": 173,
+    "vignettesAvoided": 664
   },
   "files": {
-    "terrain.bin": 6305822,
-    "nav.bin": 1050717,
-    "scatter.bin": 56380,
-    "placements.json": 1602
+    "terrain.bin": 499712,
+    "nav.bin": 19260,
+    "scatter.bin": 95532,
+    "placements.json": 92599
   }
 }

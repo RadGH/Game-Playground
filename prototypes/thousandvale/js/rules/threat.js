@@ -16,6 +16,8 @@
 // State lives on the monster (`m.threat: Map<id, number>`, `m.targetId`, `m.tauntBy`, `m.tauntFor`)
 // so a saved/handed-off monster carries it, and two rooms can never share it.
 
+import { PERK_RULES } from './perk-rules.js';
+
 export const THREAT = {
   HEAL_SHARE: 0.5,
   NOTICE: 1,
@@ -31,7 +33,10 @@ function table(m) { return m.threat || (m.threat = new Map()); }
 /** Add raw threat from `who` (an entity with `id`, optionally `threatMult`). Returns the new value. */
 export function addThreat(m, who, amount) {
   if (!m || !who || who.id == null || !(amount > 0) || m.dying != null) return 0;
-  const k = who.threatMult ?? 1;
+  // a tank stance's `threatMult`, times the perk forest's threat rules (js/rules/perk-rules.js)
+  const f = who.perkFlags;
+  // `threatScale`: the room's own per-unit multiplier (owner feedback 8 W1: a newcomer in a raided town draws a quarter)
+  const k = (who.threatMult ?? 1) * (who.threatScale ?? 1) * (f ? (f.quietHand ? PERK_RULES.quietHand.threat : 1) * (f.ironPresence ? PERK_RULES.ironPresence.threat : 1) * (1 + (who.derived?.threatPct || 0) / 100) : 1);
   const t = table(m);
   const v = (t.get(who.id) || 0) + amount * k;
   t.set(who.id, v);
@@ -63,6 +68,7 @@ export function notice(m, who) {
 /** Force `m` onto `who` for `seconds`, and lift `who` to the top of the table. */
 export function taunt(m, who, seconds = THREAT.TAUNT_SECONDS, { lift = true } = {}) {
   if (!m || !who || m.dying != null || m.removed) return;
+  if (who.perkFlags?.ironPresence) seconds += PERK_RULES.ironPresence.tauntLonger;   // the perk forest's Iron Presence
   // `lift: false` — a hard taunt that holds only while it lasts (a turned monster drawing its own side):
   // nothing is written into the table, so the monster goes back to whoever it was fighting
   if (lift) {

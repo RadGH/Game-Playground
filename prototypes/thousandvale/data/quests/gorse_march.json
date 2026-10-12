@@ -6,19 +6,48 @@
       "name": "Captain Hollis Gorse",
       "role": "guard",
       "at": "Gorsehold Redoubt",
-      "greeting": "The redoubt holds the march. The gorse holds everything else, prickly."
+      "greeting": "The redoubt holds the march. The gorse holds everything else, prickly.",
+      "titled": true
     },
     "barn_widow": {
       "name": "Widow Edda",
       "role": "farmer",
       "at": "Burnt Barns",
-      "greeting": "They burned the barns. I'm still here. They should be worried."
+      "greeting": "They burned the barns. I'm still here. They should be worried.",
+      "titled": true
     },
     "march_trader": {
       "name": "Garrick the pedlar",
       "role": "trader",
       "at": "Gorsehold",
-      "greeting": "Pins, needles, arrowheads. All pointy. It's that sort of country."
+      "greeting": "Pins, needles, arrowheads. All pointy. It's that sort of country.",
+      "titled": true
+    },
+    "angler_gorsehold": {
+      "name": "Corporal Finch Loach",
+      "role": "angler",
+      "at": "Gorsehold",
+      "greeting": "Sentry duty by the river, they said. Nobody said I could not bring a rod. See the ripples, just south of where I'm standing? That's the town pool. It never fishes out.",
+      "placedBy": "content-pools",
+      "titled": true
+    },
+    "carter_gorsehold": {
+      "name": "Petronel Rookwood",
+      "role": "carter",
+      "at": "Gorsehold",
+      "greeting": "Name a town. If it has a gate, I have been stuck outside it.",
+      "cart": "cart_gorsehold",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_burnt_barns": {
+      "name": "Tibbot Ashby",
+      "role": "carter",
+      "at": "Burnt Barns",
+      "greeting": "Walking is free. Riding is nearly free, and you arrive with your legs.",
+      "cart": "cart_burnt_barns",
+      "placedBy": "content-towns",
+      "titled": true
     }
   },
   "quests": [
@@ -33,18 +62,20 @@
           "kind": "kill",
           "type": "cinder_imp",
           "count": 6,
-          "where": "the burnt barns",
-          "text": "Cinder imps"
+          "where": "the burnt barns by Burnt Barns hamlet",
+          "text": "Kill 6 cinder imps at the barns"
         }
       ],
       "done": "The hay's safe. What's left of it.",
       "reward": {
         "xp": 0.45,
         "gold": 8,
-        "item": {
-          "tier": "common",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "uncommon"
+          }
+        ]
       },
       "next": "cinder_farm"
     },
@@ -59,14 +90,20 @@
           "kind": "kill",
           "type": "crag_hyena",
           "count": 6,
-          "where": "the gorse thickets",
-          "text": "Crag hyenas"
+          "where": "the gorse thickets of the March",
+          "text": "Kill 6 crag hyenas"
         }
       ],
       "done": "No more laughing. My patrols are much happier.",
       "reward": {
         "xp": 0.4,
-        "gold": 7
+        "gold": 7,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       }
     },
     {
@@ -80,8 +117,8 @@
           "kind": "kill",
           "type": "brigand_archer",
           "count": 5,
-          "where": "the raider camps",
-          "text": "Raider archers"
+          "where": "the raider camps of the Gorse March",
+          "text": "Kill 5 raider archers"
         },
         {
           "kind": "collect",
@@ -89,7 +126,8 @@
           "count": 1,
           "from": "brigand_archer",
           "chance": 0.3,
-          "text": "Arrowheads recovered"
+          "text": "Recover the crate of arrowheads",
+          "where": "raider archers in the camps of the March"
         }
       ],
       "done": "Back in stock! Arrowheads, half price, slightly used.",
@@ -113,8 +151,8 @@
           "kind": "kill",
           "type": "road_brigand",
           "count": 8,
-          "where": "the raider camps",
-          "text": "Raiders"
+          "where": "the raider camps near Gorsehold Redoubt",
+          "text": "Kill 8 raiders at their camps"
         }
       ],
       "done": "Soft spot still secret. Good.",
@@ -135,14 +173,16 @@
         {
           "kind": "clear",
           "dungeon": "door",
-          "text": "Take the middle floors",
-          "floor": 1
+          "text": "Take the middle floors of the Signal Stair",
+          "floor": 1,
+          "where": "The Signal Stair, the dungeon door in the Gorse March"
         },
         {
           "kind": "clear",
           "dungeon": "door",
-          "text": "Retake the top",
-          "boss": true
+          "text": "Retake the top of the Signal Stair",
+          "boss": true,
+          "where": "the top of the Signal Stair"
         }
       ],
       "done": "Our flag flies on the hill. The gorse looks almost friendly.",
@@ -166,7 +206,8 @@
           "kind": "killRare",
           "zone": "gorse_march",
           "slot": 0,
-          "text": "The march's rare slain"
+          "text": "Hunt down Sergeant Gutch",
+          "where": "roams the Gorse March"
         }
       ],
       "done": "Let them go hungry. Good.",

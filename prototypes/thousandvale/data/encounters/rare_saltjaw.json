@@ -2,6 +2,7 @@
   "id": "rare_saltjaw",
   "name": "Saltjaw",
   "tier": "rare",
+  "secret": true,
   "zone": "saltmouth",
   "body": "silt_lurker",
   "place": "burrows in the sand flats north of Saltmouth at low tide",

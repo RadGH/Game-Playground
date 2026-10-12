@@ -1,9 +1,9 @@
 {
- "_doc": "Stream E. Content placements for world zone z12_04 (E zone 'coldwater', Coldwater Mere) — tools/place-vignettes.mjs against stream B's bake (terrain 64fa44ba). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
+ "_doc": "Stream E. Content placements for world zone z12_04 (E zone 'coldwater', Coldwater Mere) — tools/place-vignettes.mjs against stream B's bake (terrain e88810dc). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
  "zone": "z12_04",
  "sheetZone": "coldwater",
  "province": "torbor_downs",
- "terrainHash": "64fa44ba",
+ "terrainHash": "e88810dc",
  "band": [
   5,
   7
@@ -46,64 +46,153 @@
    "gap": 30,
    "slope": 26
   },
+  "wayside": {
+   "townGap": 20,
+   "gap": 12,
+   "slope": 34,
+   "edge": 24
+  },
   "settlement": {
    "townGap": 300,
    "gap": 60,
    "slope": 10
+  },
+  "curio": {
+   "townGap": 30,
+   "gap": 10,
+   "slope": 26,
+   "edge": 30
+  },
+  "stray": {
+   "townGap": 70,
+   "gap": 16,
+   "slope": 26,
+   "edge": 30
+  },
+  "folk": {
+   "townGap": 30,
+   "gap": 12,
+   "slope": 24,
+   "edge": 30
+  },
+  "setpiece": {
+   "townGap": 20,
+   "gap": 25,
+   "slope": 20
   }
  },
- "mainWalkableShare": 0.805,
+ "mainWalkableShare": 0.785,
  "settlements": [
   {
    "name": "Coldwater",
    "kind": "town",
    "x": 1474,
    "z": 1846,
-   "r": 70,
-   "source": "ask",
-   "bakeId": null
+   "r": 90,
+   "source": "bake",
+   "bakeId": "coldwater"
   },
   {
    "name": "Netherby",
    "kind": "hamlet",
    "x": 711,
    "z": 732,
-   "r": 40,
-   "source": "ask",
-   "bakeId": null
+   "r": 46,
+   "source": "bake",
+   "bakeId": "netherby"
   }
  ],
  "checks": [
   {
    "id": "door_1",
    "kind": "dungeon_door",
-   "x": 1761,
-   "z": 1815,
+   "x": 1369,
+   "z": 1953,
    "reachable": true,
    "openShare": 1
   },
   {
    "id": "event_coldwater",
    "kind": "event_site",
-   "x": 736,
-   "z": 1301,
+   "x": 903,
+   "z": 1790,
    "reachable": true,
-   "openShare": 1
+   "openShare": 0.81
   }
  ],
  "problems": [],
  "placements": [
+  {
+   "type": "folk",
+   "id": "coldwater_graveyard_slot0",
+   "in": "coldwater_graveyard",
+   "slotOf": "coldwater_graveyard",
+   "role": "sexton",
+   "name": null,
+   "work": "dig",
+   "chatter": [
+    "role.sexton",
+    "role.gravedigger"
+   ],
+   "x": 1559.5,
+   "z": 1778.9,
+   "yaw": 0,
+   "path": [
+    [
+     1559.5,
+     1778.9
+    ],
+    [
+     1562,
+     1779.9
+    ],
+    [
+     1560.5,
+     1781.4
+    ]
+   ]
+  },
+  {
+   "type": "folk",
+   "id": "netherby_graveyard_slot0",
+   "in": "netherby_graveyard",
+   "slotOf": "netherby_graveyard",
+   "role": "sexton",
+   "name": null,
+   "work": "dig",
+   "chatter": [
+    "role.sexton",
+    "role.gravedigger"
+   ],
+   "x": 658.5,
+   "z": 680.5,
+   "yaw": 0,
+   "path": [
+    [
+     658.5,
+     680.5
+    ],
+    [
+     661,
+     681.5
+    ],
+    [
+     659.5,
+     683
+    ]
+   ]
+  },
   {
    "type": "fort",
    "id": "fort_coldwater_0",
    "name": "Mere Tower",
    "template": "watchtower_garrison",
    "friendly": true,
-   "x": 271,
-   "z": 445,
-   "yaw": 0.79,
+   "x": 596,
+   "z": 1286,
+   "yaw": -3.14,
    "radius": 16,
-   "level": 5
+   "level": 7
   },
   {
    "type": "farm",
@@ -112,28 +201,44 @@
    "template": "arable",
    "flavour": null,
    "settlement": "Coldwater",
-   "x": 1527,
-   "z": 1741,
-   "yaw": -1.96,
+   "x": 1262,
+   "z": 1977,
+   "yaw": 0.79,
    "radius": 22,
-   "level": 5
+   "level": 6
   },
   {
    "type": "farm",
    "id": "farm_coldwater_1",
-   "name": "Netherby Farm",
-   "template": "arable",
+   "name": "Netherby Orchard",
+   "template": "orchard",
    "flavour": null,
    "settlement": "Netherby",
-   "x": 654,
-   "z": 929,
-   "yaw": -1.57,
-   "radius": 22,
+   "x": 328,
+   "z": 422,
+   "yaw": -1.96,
+   "radius": 24,
    "level": 5
   },
   {
    "type": "cave",
    "id": "cave_coldwater_0",
+   "name": "Smugglers' cave",
+   "template": "smugglers_cave",
+   "plan": {
+    "family": "flooded_cistern",
+    "floors": 1,
+    "level": 7
+   },
+   "x": 127,
+   "z": 1739,
+   "yaw": 2.36,
+   "radius": 10,
+   "level": 7
+  },
+  {
+   "type": "cave",
+   "id": "cave_coldwater_1",
    "name": "Sump grotto",
    "template": "sump_grotto",
    "plan": {
@@ -141,8 +246,8 @@
     "floors": 1,
     "level": 6
    },
-   "x": 84,
-   "z": 1675,
+   "x": 1931,
+   "z": 458,
    "yaw": -3.14,
    "radius": 10,
    "level": 6
@@ -152,132 +257,152 @@
    "id": "the_reflection_mere",
    "name": "The Mirror Mere",
    "kind": "compositional",
-   "x": 996,
-   "z": 1848,
+   "x": 1275,
+   "z": 1539,
    "yaw": 0,
    "radius": 20,
    "where": "best fit for: a still lake with a ruin on the far shore",
-   "needMet": false
+   "needMet": true
   },
   {
    "type": "vignette",
-   "id": "broken_aqueduct",
-   "name": "The Broken Aqueduct",
-   "x": 1695,
-   "z": 740,
-   "yaw": 5.24,
-   "radius": 14,
+   "id": "drowned_chapel",
+   "name": "The Drowned Chapel",
+   "x": 890,
+   "z": 1648,
+   "yaw": 2.61,
+   "radius": 13,
    "biome": "hills",
-   "biomeFits": true,
-   "level": 1
+   "biomeFits": false,
+   "level": 1,
+   "levelBase": 6,
+   "levelCap": 7
   },
   {
    "type": "vignette",
-   "id": "dark_lighthouse",
-   "name": "The Dark Lighthouse",
-   "x": 1865,
-   "z": 73,
-   "yaw": 5.34,
-   "radius": 10,
-   "biome": "hills",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "drift_mine_entry",
-   "name": "The Drift Entry",
-   "x": 921,
-   "z": 231,
-   "yaw": 2.21,
-   "radius": 10,
-   "biome": "hills",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "ferry_landing",
-   "name": "The Stranded Ferry",
-   "x": 1357,
-   "z": 596,
-   "yaw": 1,
-   "radius": 12,
+   "id": "eel_traps",
+   "name": "The Eel Weir",
+   "x": 1350,
+   "z": 592,
+   "yaw": 4.99,
+   "radius": 11,
    "biome": "grassland",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 5,
+   "levelCap": 6
   },
   {
    "type": "vignette",
-   "id": "ferryman_shrine",
-   "name": "The Ferryman's Coin",
-   "x": 1312,
-   "z": 1178,
-   "yaw": 6.24,
+   "id": "heron_island",
+   "name": "Heron Island",
+   "x": 1808,
+   "z": 1221,
+   "yaw": 4.32,
    "radius": 10,
    "biome": "mountains",
    "biomeFits": false,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "flooded_mill",
-   "name": "The Flooded Mill",
-   "x": 583,
-   "z": 1505,
-   "yaw": 4.65,
-   "radius": 12,
-   "biome": "hills",
-   "biomeFits": false,
-   "level": 1
+   "level": 1,
+   "levelBase": 6,
+   "levelCap": 7
   },
   {
    "type": "vignette",
    "id": "roadside_shrine",
    "name": "The Wayside Saint",
-   "x": 1800,
-   "z": 1205,
-   "yaw": 0.78,
+   "x": 1037,
+   "z": 80,
+   "yaw": 0.13,
    "radius": 8,
+   "biome": "hills",
+   "biomeFits": true,
+   "level": 1,
+   "levelBase": 5,
+   "levelCap": 6
+  },
+  {
+   "type": "vignette",
+   "id": "sinkhole_garden",
+   "name": "The Sinkhole Garden",
+   "x": 1829,
+   "z": 1791,
+   "yaw": 0.15,
+   "radius": 11,
    "biome": "mountains",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 6,
+   "levelCap": 7
   },
   {
    "type": "vignette",
    "id": "smugglers_beacon",
    "name": "The False Beacon",
-   "x": 192,
-   "z": 1162,
-   "yaw": 3.95,
+   "x": 838,
+   "z": 743,
+   "yaw": 1.8,
    "radius": 11,
    "biome": "mountains",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 5,
+   "levelCap": 6
+  },
+  {
+   "type": "vignette",
+   "id": "stilt_house",
+   "name": "The Empty Stilt House",
+   "x": 1037,
+   "z": 1502,
+   "yaw": 5.4,
+   "radius": 10,
+   "biome": "hills",
+   "biomeFits": false,
+   "level": 1,
+   "levelBase": 6,
+   "levelCap": 7
   },
   {
    "type": "vignette",
    "id": "toll_bridge_trolls",
    "name": "The Toll Bridge",
-   "x": 467,
-   "z": 1959,
-   "yaw": 5.05,
+   "x": 159,
+   "z": 1054,
+   "yaw": 4.28,
    "radius": 11,
    "biome": "mountains",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 5,
+   "levelCap": 6
   },
   {
    "type": "vignette",
-   "id": "trapper_lines",
-   "name": "The Trapper's Line",
-   "x": 903,
-   "z": 1256,
-   "yaw": 2.8,
+   "id": "weavers_bridge_toll",
+   "name": "The Spider Bridge",
+   "x": 1290,
+   "z": 1094,
+   "yaw": 5.95,
    "radius": 12,
    "biome": "mountains",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 6,
+   "levelCap": 7
+  },
+  {
+   "type": "vignette",
+   "id": "will_o_lights",
+   "name": "The Lantern Path",
+   "x": 767,
+   "z": 1318,
+   "yaw": 2.53,
+   "radius": 14,
+   "biome": "hills",
+   "biomeFits": false,
+   "level": 1,
+   "levelBase": 6,
+   "levelCap": 7
   },
   {
    "type": "camp",
@@ -285,15 +410,15 @@
    "monster": "bog_slime",
    "with": null,
    "level": [
-    5,
+    6,
     7
    ],
    "count": [
     2,
     4
    ],
-   "x": 1047,
-   "z": 894,
+   "x": 549,
+   "z": 1867,
    "yaw": 0,
    "radius": 10
   },
@@ -304,14 +429,14 @@
    "with": null,
    "level": [
     5,
-    7
+    6
    ],
    "count": [
     2,
     4
    ],
-   "x": 82,
-   "z": 62,
+   "x": 1891,
+   "z": 831,
    "yaw": 0,
    "radius": 10
   },
@@ -321,15 +446,15 @@
    "monster": "reed_serpent",
    "with": null,
    "level": [
-    6,
-    7
+    5,
+    6
    ],
    "count": [
     2,
     4
    ],
-   "x": 778,
-   "z": 575,
+   "x": 764,
+   "z": 392,
    "yaw": 0,
    "radius": 10
   },
@@ -339,15 +464,15 @@
    "monster": "reed_serpent",
    "with": null,
    "level": [
-    6,
-    7
+    5,
+    6
    ],
    "count": [
     2,
     4
    ],
-   "x": 376,
-   "z": 738,
+   "x": 436,
+   "z": 868,
    "yaw": 0,
    "radius": 10
   },
@@ -357,15 +482,15 @@
    "monster": "marsh_wisp",
    "with": null,
    "level": [
-    5,
+    6,
     7
    ],
    "count": [
     2,
     4
    ],
-   "x": 1610,
-   "z": 341,
+   "x": 745,
+   "z": 1202,
    "yaw": 0,
    "radius": 10
   },
@@ -375,15 +500,15 @@
    "monster": "marsh_wisp",
    "with": null,
    "level": [
-    5,
+    6,
     7
    ],
    "count": [
     2,
     4
    ],
-   "x": 1274,
-   "z": 1518,
+   "x": 613,
+   "z": 1173,
    "yaw": 0,
    "radius": 10
   },
@@ -400,8 +525,8 @@
     2,
     4
    ],
-   "x": 1935,
-   "z": 410,
+   "x": 391,
+   "z": 1543,
    "yaw": 0,
    "radius": 10
   },
@@ -418,8 +543,8 @@
     2,
     4
    ],
-   "x": 1853,
-   "z": 1696,
+   "x": 1714,
+   "z": 1516,
    "yaw": 0,
    "radius": 10
   },
@@ -429,15 +554,15 @@
    "monster": "silt_lurker",
    "with": null,
    "level": [
-    5,
+    6,
     7
    ],
    "count": [
     2,
     4
    ],
-   "x": 1291,
-   "z": 1984,
+   "x": 1123,
+   "z": 1818,
    "yaw": 0,
    "radius": 10
   },
@@ -447,15 +572,15 @@
    "monster": "silt_lurker",
    "with": null,
    "level": [
-    5,
+    6,
     7
    ],
    "count": [
     2,
     4
    ],
-   "x": 1646,
-   "z": 1506,
+   "x": 1254,
+   "z": 1770,
    "yaw": 0,
    "radius": 10
   },
@@ -472,8 +597,8 @@
     2,
     4
    ],
-   "x": 1284,
-   "z": 1754,
+   "x": 1309,
+   "z": 1694,
    "yaw": 0,
    "radius": 10
   },
@@ -490,8 +615,8 @@
     2,
     4
    ],
-   "x": 1685,
-   "z": 1894,
+   "x": 1171,
+   "z": 1814,
    "yaw": 0,
    "radius": 10
   },
@@ -500,30 +625,30 @@
    "id": "rare_old_coldmouth",
    "slot": 0,
    "name": "Old Coldmouth",
-   "x": 1063,
-   "z": 1564,
+   "x": 1305,
+   "z": 1355,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     1124,
-     1525
+     1339,
+     1298
     ],
     [
-     1102,
-     1625
+     1390,
+     1367
     ],
     [
-     1023,
-     1663
+     1289,
+     1426
     ],
     [
-     987,
-     1516
+     1243,
+     1354
     ],
     [
-     1061,
-     1463
+     1250,
+     1309
     ]
    ],
    "respawnMin": [
@@ -537,30 +662,30 @@
    "id": "rare_mere_moth_queen",
    "slot": 1,
    "name": "The Mere Moth Queen",
-   "x": 1691,
-   "z": 1705,
+   "x": 991,
+   "z": 1899,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     1607,
-     1669
+     1074,
+     1840
     ],
     [
-     1704,
-     1632
+     1066,
+     1964
     ],
     [
-     1757,
-     1669
+     972,
+     2014
     ],
     [
-     1740,
-     1757
+     891,
+     1914
     ],
     [
-     1639,
-     1752
+     981,
+     1814
     ]
    ],
    "respawnMin": [
@@ -573,8 +698,8 @@
    "type": "waystone",
    "id": "ws_z12_04_coldwater",
    "name": "Coldwater",
-   "x": 1380.8,
-   "z": 1810.5,
+   "x": 1461.1,
+   "z": 1825.1,
    "yaw": 0,
    "settlement": "Coldwater",
    "radius": 1
@@ -583,8 +708,8 @@
    "type": "waystone",
    "id": "ws_z12_04_netherby",
    "name": "Netherby",
-   "x": 641.3,
-   "z": 736.7,
+   "x": 653.1,
+   "z": 685,
    "yaw": 0,
    "settlement": "Netherby",
    "radius": 1
@@ -592,12 +717,31 @@
   {
    "type": "waystone",
    "id": "ws_z12_04_door",
-   "name": "Barrow entrance",
-   "x": 1765.3,
-   "z": 1856.8,
+   "name": "The Mere-Sunk Sanctum",
+   "x": 1360.8,
+   "z": 1947,
    "yaw": 0,
    "door": "door_1",
    "radius": 1
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_door",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1331,
+   "z": 1950,
+   "yaw": 0,
+   "radius": 6,
+   "doorGuard": true
   },
   {
    "type": "npc",
@@ -605,9 +749,9 @@
    "name": "Warden Oswy",
    "role": "guard",
    "at": "Mere Tower",
-   "x": 272.6,
-   "z": 443.8,
-   "yaw": 1.4,
+   "x": 594.6,
+   "z": 1284.5,
+   "yaw": 1.92,
    "radius": 1
   },
   {
@@ -616,9 +760,10 @@
    "name": "Elder Wenna",
    "role": "elder",
    "at": "Coldwater",
-   "x": 1476.3,
-   "z": 1848.1,
-   "yaw": 2.32,
+   "x": 1473.8,
+   "z": 1819.5,
+   "yaw": 5.518,
+   "office": "coldwater_plot_4",
    "radius": 1
   },
   {
@@ -627,9 +772,9 @@
    "name": "Pike of Netherby",
    "role": "fisher",
    "at": "Netherby",
-   "x": 708.4,
-   "z": 733.5,
-   "yaw": 5.7,
+   "x": 719.6,
+   "z": 733,
+   "yaw": 4.47,
    "radius": 1
   },
   {
@@ -640,8 +785,8 @@
    "clue": "drunks_story",
    "how": null,
    "shimmer": null,
-   "x": 680.1,
-   "z": 765,
+   "x": 673.2,
+   "z": 766.5,
    "yaw": 0,
    "where": "edge of Netherby",
    "radius": 1
@@ -654,8 +799,8 @@
    "clue": "map_piece",
    "how": null,
    "shimmer": null,
-   "x": 269.1,
-   "z": 445.6,
+   "x": 594,
+   "z": 1286.3,
    "yaw": 0,
    "where": "fort Mere Tower",
    "radius": 1
@@ -668,12 +813,8567 @@
    "clue": null,
    "how": "dig",
    "shimmer": 15,
-   "x": 642.6,
-   "z": 651.9,
+   "x": 765.3,
+   "z": 801,
    "yaw": 0,
    "where": "near Netherby",
    "radius": 1
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_coldwater_0",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 1540,
+   "z": 244,
+   "yaw": 4.31,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f1",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1580,
+   "z": 902,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_coldwater_2",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 172,
+   "z": 704,
+   "yaw": 3.47,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f3",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 202,
+   "z": 1587,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_coldwater_4",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 278,
+   "z": 2007,
+   "yaw": 5.17,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f5",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1017,
+   "z": 991,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_coldwater_6",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 512,
+   "z": 160,
+   "yaw": 0.8,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f7",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 170,
+   "z": 1399,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cottage_corner_coldwater_8",
+   "kind": "cottage_corner",
+   "name": "Ruined Cottage",
+   "x": 1663,
+   "z": 606,
+   "yaw": 0.23,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_coldwater_9",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 740,
+   "z": 42,
+   "yaw": 4.34,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_tree_coldwater_10",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 79,
+   "z": 343,
+   "yaw": 3.23,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f11",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 255,
+   "z": 1233,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_coldwater_12",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1282,
+   "z": 137,
+   "yaw": 2.54,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f13",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1146,
+   "z": 732,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "woodpile_stack_coldwater_14",
+   "kind": "woodpile_stack",
+   "name": "Woodpile",
+   "x": 1804,
+   "z": 192,
+   "yaw": 5.94,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f15",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1093,
+   "z": 1986,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_coldwater_16",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1535,
+   "z": 1188,
+   "yaw": 3.8,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f17",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1059,
+   "z": 1265,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_coldwater_18",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 308,
+   "z": 1074,
+   "yaw": 5.58,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f19",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 644,
+   "z": 1584,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_coldwater_20",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 969,
+   "z": 530,
+   "yaw": 4.38,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f21",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 264,
+   "z": 165,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_coldwater_22",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 743,
+   "z": 2008,
+   "yaw": 5.94,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f23",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 989,
+   "z": 1987,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_coldwater_24",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1750,
+   "z": 2008,
+   "yaw": 0.63,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f25",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1333,
+   "z": 388,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_coldwater_26",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 550,
+   "z": 494,
+   "yaw": 2.02,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f27",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 303,
+   "z": 644,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_coldwater_28",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 1711,
+   "z": 381,
+   "yaw": 4.5,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f29",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 344,
+   "z": 1792,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "woodpile_stack_coldwater_30",
+   "kind": "woodpile_stack",
+   "name": "Woodpile",
+   "x": 48,
+   "z": 2008,
+   "yaw": 0.32,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f31",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1490,
+   "z": 1484,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_coldwater_32",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 76,
+   "z": 134,
+   "yaw": 3.39,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f33",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1445,
+   "z": 784,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_coldwater_34",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1916,
+   "z": 1592,
+   "yaw": 4.34,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f35",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 617,
+   "z": 943,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_tree_coldwater_36",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 1767,
+   "z": 1007,
+   "yaw": 4.23,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f37",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 878,
+   "z": 207,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_coldwater_38",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1509,
+   "z": 25,
+   "yaw": 0.06,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f39",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 773,
+   "z": 1014,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "woodpile_stack_coldwater_40",
+   "kind": "woodpile_stack",
+   "name": "Woodpile",
+   "x": 1524,
+   "z": 452,
+   "yaw": 2.35,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f41",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1156,
+   "z": 499,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_coldwater_42",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1940,
+   "z": 40,
+   "yaw": 1.73,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f43",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1934,
+   "z": 1191,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_coldwater_44",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1246,
+   "z": 903,
+   "yaw": 2.69,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f45",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1781,
+   "z": 1475,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_coldwater_46",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 25,
+   "z": 1526,
+   "yaw": 1.52,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f47",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 264,
+   "z": 876,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "wayside_well_coldwater_48",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 412,
+   "z": 1348,
+   "yaw": 1.03,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f49",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 682,
+   "z": 231,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "wayside_well_coldwater_50",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 151,
+   "z": 499,
+   "yaw": 1.75,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f51",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1566,
+   "z": 1298,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_coldwater_52",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1815,
+   "z": 664,
+   "yaw": 2.58,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f53",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 913,
+   "z": 1141,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_coldwater_54",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 496,
+   "z": 1696,
+   "yaw": 1.34,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_f55",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 169,
+   "z": 274,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_coldwater_d1",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1722,
+   "z": 63,
+   "yaw": 3.61,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s1",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1961,
+   "z": 193,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "wayside_well_coldwater_d2",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 1928,
+   "z": 994,
+   "yaw": 5.04,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_1",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 35,
+   "z": 1206,
+   "yaw": 3.95,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_coldwater_d3",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 2008,
+   "z": 1337,
+   "yaw": 3.78,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s2",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 712,
+   "z": 1744,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_coldwater_d4",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 2016,
+   "z": 1759,
+   "yaw": 1.65,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_coldwater_d5",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 28,
+   "z": 910,
+   "yaw": 3.51,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_2",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 470,
+   "z": 1077,
+   "yaw": 3.63,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s3",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 799,
+   "z": 1479,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_coldwater_d6",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 446,
+   "z": 1992,
+   "yaw": 4.54,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_3",
+   "recipe": "cu_spring_altar",
+   "name": "Spring Altar",
+   "kind": "shrine",
+   "x": 473,
+   "z": 307,
+   "yaw": 1.4,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_coldwater_d7",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 992,
+   "z": 835,
+   "yaw": 2.65,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_4",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 381,
+   "z": 43,
+   "yaw": 5.3,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_5",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 1719,
+   "z": 811,
+   "yaw": 5.56,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_6",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 536,
+   "z": 1456,
+   "yaw": 0.64,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_coldwater_d8",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1128,
+   "z": 1112,
+   "yaw": 4.93,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "stone_trough_coldwater_d9",
+   "kind": "stone_trough",
+   "name": "Stone Trough",
+   "x": 41,
+   "z": 616,
+   "yaw": 3.25,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_7",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 168,
+   "z": 1896,
+   "yaw": 3.6,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_8",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 1506,
+   "z": 629,
+   "yaw": 3.23,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_9",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 900,
+   "z": 360,
+   "yaw": 0.99,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_coldwater_d10",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1648,
+   "z": 1075,
+   "yaw": 4.78,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_coldwater_d11",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 954,
+   "z": 662,
+   "yaw": 0.27,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_coldwater_d12",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1791,
+   "z": 510,
+   "yaw": 5.18,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_10",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 1432,
+   "z": 1096,
+   "yaw": 0.11,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_coldwater_d13",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 2014,
+   "z": 740,
+   "yaw": 3.39,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_11",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 592,
+   "z": 39,
+   "yaw": 0.26,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "sheep_pen_coldwater_d14",
+   "kind": "sheep_pen",
+   "name": "Sheep Pen",
+   "x": 1873,
+   "z": 318,
+   "yaw": 3.26,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_12",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 600,
+   "z": 2009,
+   "yaw": 0.19,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s4",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 920,
+   "z": 1328,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_13",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 1784,
+   "z": 1649,
+   "yaw": 2.84,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_14",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 589,
+   "z": 367,
+   "yaw": 2.27,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s5",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1595,
+   "z": 736,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_15",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 912,
+   "z": 41,
+   "yaw": 1.2,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_coldwater_d15",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 180,
+   "z": 41,
+   "yaw": 1.95,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_coldwater_d16",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1189,
+   "z": 35,
+   "yaw": 3.97,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_coldwater_d17",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 861,
+   "z": 894,
+   "yaw": 2.69,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_coldwater_d18",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1132,
+   "z": 147,
+   "yaw": 3.38,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_16",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 426,
+   "z": 1231,
+   "yaw": 4.8,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_17",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 1944,
+   "z": 1471,
+   "yaw": 3.7,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s6",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1234,
+   "z": 258,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_coldwater_d19",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 1681,
+   "z": 250,
+   "yaw": 2.68,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_18",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 1996,
+   "z": 321,
+   "yaw": 3.41,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_19",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 31,
+   "z": 1377,
+   "yaw": 1.56,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_coldwater_d20",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1376,
+   "z": 40,
+   "yaw": 0.66,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_coldwater_1",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 688,
+   "z": 1880,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     657,
+     1904
+    ],
+    [
+     640,
+     1855
+    ],
+    [
+     710,
+     1840
+    ],
+    [
+     732,
+     1913
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_20",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 30,
+   "z": 1846,
+   "yaw": 4.5,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_coldwater_d21",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 671,
+   "z": 1424,
+   "yaw": 1.55,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s7",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1092,
+   "z": 864,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_21",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 304,
+   "z": 1432,
+   "yaw": 4.57,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_22",
+   "recipe": "cu_boundary_cross",
+   "name": "Boundary Cross",
+   "kind": "marker",
+   "x": 1614,
+   "z": 125,
+   "yaw": 6.13,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_23",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 1701,
+   "z": 1219,
+   "yaw": 2.05,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_coldwater_d22",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1057,
+   "z": 614,
+   "yaw": 6.25,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_coldwater_d23",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 136,
+   "z": 832,
+   "yaw": 2.33,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s8",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1616,
+   "z": 1424,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_coldwater_d24",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 387,
+   "z": 733,
+   "yaw": 6.2,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_24",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 344,
+   "z": 275,
+   "yaw": 5.91,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s9",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 321,
+   "z": 1654,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_25",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 1106,
+   "z": 1380,
+   "yaw": 6,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_26",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 2010,
+   "z": 868,
+   "yaw": 3.95,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_27",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 1027,
+   "z": 210,
+   "yaw": 3.35,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "toll_stone_coldwater_d25",
+   "kind": "toll_stone",
+   "name": "Old Toll Stone",
+   "x": 1216,
+   "z": 617,
+   "yaw": 2.73,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_coldwater_d26",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1896,
+   "z": 1900,
+   "yaw": 5.09,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s10",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1459,
+   "z": 350,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_28",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1333,
+   "z": 694,
+   "yaw": 4.99,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_coldwater_d27",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1867,
+   "z": 1317,
+   "yaw": 1.97,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_29",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1027,
+   "z": 431,
+   "yaw": 4.09,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_coldwater_d28",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 39,
+   "z": 1650,
+   "yaw": 2.33,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_30",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 512,
+   "z": 1577,
+   "yaw": 4.92,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s11",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 768,
+   "z": 1606,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_31",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1616,
+   "z": 465,
+   "yaw": 4.36,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_32",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 136,
+   "z": 1272,
+   "yaw": 3.65,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_33",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 1214,
+   "z": 385,
+   "yaw": 3.06,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_coldwater_d29",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 362,
+   "z": 967,
+   "yaw": 5.98,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s12",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1585,
+   "z": 1993,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_34",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 401,
+   "z": 137,
+   "yaw": 3.91,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_35",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 665,
+   "z": 463,
+   "yaw": 0.56,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_36",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 884,
+   "z": 1021,
+   "yaw": 1.91,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_coldwater_d30",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 43,
+   "z": 1062,
+   "yaw": 4.53,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_coldwater_d31",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 382,
+   "z": 552,
+   "yaw": 0.76,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_37",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1600,
+   "z": 344,
+   "yaw": 4.86,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_38",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 349,
+   "z": 1921,
+   "yaw": 3.2,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s13",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1625,
+   "z": 1551,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_39",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 1157,
+   "z": 1232,
+   "yaw": 0.34,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_coldwater_d32",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1452,
+   "z": 879,
+   "yaw": 1.4,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_40",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 192,
+   "z": 392,
+   "yaw": 0.03,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s14",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1424,
+   "z": 1216,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_41",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 665,
+   "z": 1064,
+   "yaw": 0.17,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s15",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1423,
+   "z": 489,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_42",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 1159,
+   "z": 1483,
+   "yaw": 6.05,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_coldwater_d33",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 1864,
+   "z": 2010,
+   "yaw": 1.7,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_43",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 531,
+   "z": 611,
+   "yaw": 2.59,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_44",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1396,
+   "z": 1549,
+   "yaw": 0.55,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_coldwater_d34",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1912,
+   "z": 1717,
+   "yaw": 0.75,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_45",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1280,
+   "z": 496,
+   "yaw": 5.2,
+   "radius": 7,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_coldwater_1",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 732,
+   "z": 901,
+   "yaw": 5.39,
+   "radius": 6,
+   "path": [
+    [
+     754,
+     861
+    ],
+    [
+     781,
+     935
+    ],
+    [
+     678,
+     918
+    ]
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s16",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 257,
+   "z": 536,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_coldwater_d35",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1832,
+   "z": 80,
+   "yaw": 2.92,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_46",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 158,
+   "z": 2008,
+   "yaw": 2.46,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s17",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 280,
+   "z": 760,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_47",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 748,
+   "z": 145,
+   "yaw": 4.34,
+   "radius": 7,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_48",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 595,
+   "z": 1689,
+   "yaw": 0.77,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_coldwater_d36",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 866,
+   "z": 570,
+   "yaw": 1.29,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s18",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1774,
+   "z": 1913,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_49",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 1785,
+   "z": 1115,
+   "yaw": 1.02,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_coldwater_d37",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1673,
+   "z": 1293,
+   "yaw": 4.77,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s19",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 224,
+   "z": 1800,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_coldwater_d38",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 40,
+   "z": 240,
+   "yaw": 0.06,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_50",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 1013,
+   "z": 759,
+   "yaw": 1.3,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s20",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1718,
+   "z": 711,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_51",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 160,
+   "z": 941,
+   "yaw": 5.13,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_coldwater_d39",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 784,
+   "z": 280,
+   "yaw": 0.35,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_52",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 159,
+   "z": 1161,
+   "yaw": 4.63,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s21",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 455,
+   "z": 1800,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_53",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1805,
+   "z": 919,
+   "yaw": 4.7,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_54",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 896,
+   "z": 464,
+   "yaw": 3.59,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s22",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1029,
+   "z": 1157,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_coldwater_d40",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1801,
+   "z": 418,
+   "yaw": 0.2,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_coldwater_d41",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 566,
+   "z": 835,
+   "yaw": 2.89,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_coldwater_d42",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 1133,
+   "z": 991,
+   "yaw": 2.58,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_55",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 129,
+   "z": 1504,
+   "yaw": 5.67,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_coldwater_d43",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1519,
+   "z": 978,
+   "yaw": 5.77,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_56",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 857,
+   "z": 1239,
+   "yaw": 3.59,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_57",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 510,
+   "z": 45,
+   "yaw": 3,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_58",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 1253,
+   "z": 1201,
+   "yaw": 2.66,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s23",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 151,
+   "z": 609,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "sheep_pen_coldwater_d44",
+   "kind": "sheep_pen",
+   "name": "Sheep Pen",
+   "x": 256,
+   "z": 984,
+   "yaw": 2.24,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_59",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 1727,
+   "z": 1744,
+   "yaw": 2.85,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_coldwater_d45",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 2022,
+   "z": 1115,
+   "yaw": 2.86,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_60",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 313,
+   "z": 1329,
+   "yaw": 4.84,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_coldwater_d46",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 1637,
+   "z": 987,
+   "yaw": 6.2,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_coldwater_d47",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1784,
+   "z": 1371,
+   "yaw": 4.85,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_coldwater_d48",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 568,
+   "z": 1040,
+   "yaw": 5.06,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s24",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 40,
+   "z": 40,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_61",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 2008,
+   "z": 1552,
+   "yaw": 4.49,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_coldwater_d49",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 654,
+   "z": 117,
+   "yaw": 5.56,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_62",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 1775,
+   "z": 268,
+   "yaw": 4.93,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s25",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 229,
+   "z": 1700,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_coldwater_d50",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 280,
+   "z": 55,
+   "yaw": 1.7,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_63",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 846,
+   "z": 2015,
+   "yaw": 0.5,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s26",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 512,
+   "z": 1361,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_coldwater_d51",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1503,
+   "z": 1344,
+   "yaw": 5.92,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lonely_pier_coldwater_d52",
+   "kind": "lonely_pier",
+   "name": "Bridge Pier",
+   "x": 1807,
+   "z": 767,
+   "yaw": 3.7,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_64",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 1266,
+   "z": 1009,
+   "yaw": 1.4,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_coldwater_d53",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 411,
+   "z": 1126,
+   "yaw": 0.5,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_65",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 810,
+   "z": 1112,
+   "yaw": 1.67,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_66",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 1568,
+   "z": 552,
+   "yaw": 3.2,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s27",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 432,
+   "z": 1447,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_67",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 288,
+   "z": 1526,
+   "yaw": 2.59,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_coldwater_d54",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 776,
+   "z": 497,
+   "yaw": 1.79,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_68",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 952,
+   "z": 136,
+   "yaw": 3.38,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_coldwater_2",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1688,
+   "z": 1632,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1717,
+     1586
+    ],
+    [
+     1723,
+     1658
+    ],
+    [
+     1653,
+     1662
+    ],
+    [
+     1647,
+     1593
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s28",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 960,
+   "z": 1232,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_69",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1008,
+   "z": 1376,
+   "yaw": 5.7,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_coldwater_2",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 515,
+   "z": 1155,
+   "yaw": 4.85,
+   "radius": 6,
+   "path": [
+    [
+     568,
+     1133
+    ],
+    [
+     498,
+     1189
+    ],
+    [
+     478,
+     1127
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_70",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 881,
+   "z": 1543,
+   "yaw": 5.55,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s29",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 945,
+   "z": 265,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_coldwater_d55",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 616,
+   "z": 568,
+   "yaw": 1.55,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_71",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1712,
+   "z": 160,
+   "yaw": 3.4,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_coldwater_d56",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1906,
+   "z": 739,
+   "yaw": 2.9,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_72",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 1496,
+   "z": 1583,
+   "yaw": 6.18,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_coldwater_d57",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 439,
+   "z": 368,
+   "yaw": 2.36,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_73",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 676,
+   "z": 344,
+   "yaw": 2.29,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_coldwater_d58",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 1678,
+   "z": 899,
+   "yaw": 6.14,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s30",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 264,
+   "z": 328,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_74",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 1909,
+   "z": 1805,
+   "yaw": 2.9,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_coldwater_3",
+   "role": "poacher",
+   "name": "Poacher",
+   "work": "gather",
+   "chatter": [
+    "role.poacher"
+   ],
+   "x": 2009,
+   "z": 104,
+   "yaw": 2.96,
+   "radius": 6,
+   "path": [
+    [
+     2033,
+     83
+    ],
+    [
+     2015,
+     140
+    ],
+    [
+     1976,
+     84
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_75",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 968,
+   "z": 1577,
+   "yaw": 2.36,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_coldwater_d59",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 1666,
+   "z": 517,
+   "yaw": 3.15,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_coldwater_d60",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 880,
+   "z": 1416,
+   "yaw": 3.6,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_76",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 801,
+   "z": 1704,
+   "yaw": 1.25,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_coldwater_3",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1160,
+   "z": 1913,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1214,
+     1909
+    ],
+    [
+     1155,
+     1968
+    ],
+    [
+     1099,
+     1912
+    ],
+    [
+     1170,
+     1854
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s31",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 440,
+   "z": 1896,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_77",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 168,
+   "z": 143,
+   "yaw": 1.98,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_coldwater_d61",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1441,
+   "z": 91,
+   "yaw": 1.84,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_78",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 424,
+   "z": 1640,
+   "yaw": 6.18,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s32",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1424,
+   "z": 680,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_coldwater_d62",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 330,
+   "z": 1151,
+   "yaw": 2.84,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_coldwater_d63",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 214,
+   "z": 1312,
+   "yaw": 1.88,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_79",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1229,
+   "z": 681,
+   "yaw": 3.37,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_80",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 1852,
+   "z": 1437,
+   "yaw": 2.6,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s33",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1536,
+   "z": 816,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_81",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 434,
+   "z": 231,
+   "yaw": 2.49,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_coldwater_d64",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 965,
+   "z": 914,
+   "yaw": 0.62,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_82",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 257,
+   "z": 1919,
+   "yaw": 4.84,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_coldwater_4",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 556,
+   "z": 1769,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     602,
+     1777
+    ],
+    [
+     552,
+     1824
+    ],
+    [
+     491,
+     1752
+    ],
+    [
+     570,
+     1709
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_83",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1922,
+   "z": 530,
+   "yaw": 5.22,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_84",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1839,
+   "z": 1577,
+   "yaw": 3.08,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_coldwater_4",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 1114,
+   "z": 414,
+   "yaw": 5.73,
+   "radius": 6,
+   "path": [
+    [
+     1077,
+     400
+    ],
+    [
+     1144,
+     391
+    ],
+    [
+     1138,
+     455
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_85",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 81,
+   "z": 1921,
+   "yaw": 0.9,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_86",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 1152,
+   "z": 255,
+   "yaw": 0.26,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_coldwater_d65",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1276,
+   "z": 57,
+   "yaw": 1.39,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_coldwater_d66",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1876,
+   "z": 1031,
+   "yaw": 2.87,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s34",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 904,
+   "z": 821,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_87",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 712,
+   "z": 1512,
+   "yaw": 5.19,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_coldwater_5",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 342,
+   "z": 828,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     380,
+     828
+    ],
+    [
+     359,
+     875
+    ],
+    [
+     295,
+     840
+    ],
+    [
+     320,
+     786
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "toll_stone_coldwater_d67",
+   "kind": "toll_stone",
+   "name": "Old Toll Stone",
+   "x": 1761,
+   "z": 588,
+   "yaw": 5.98,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_coldwater_d68",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1056,
+   "z": 520,
+   "yaw": 5.8,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s35",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 104,
+   "z": 1592,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_88",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1632,
+   "z": 824,
+   "yaw": 2.46,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_coldwater_5",
+   "role": "prospector",
+   "name": "Prospector",
+   "work": "dig",
+   "chatter": [
+    "role.prospector"
+   ],
+   "x": 1373,
+   "z": 1476,
+   "yaw": 1.63,
+   "radius": 6,
+   "path": [
+    [
+     1359,
+     1468
+    ],
+    [
+     1383,
+     1469
+    ],
+    [
+     1378,
+     1489
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_89",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 371,
+   "z": 650,
+   "yaw": 0.22,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s36",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 52,
+   "z": 1762,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s37",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 241,
+   "z": 1128,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lonely_pier_coldwater_d69",
+   "kind": "lonely_pier",
+   "name": "Bridge Pier",
+   "x": 616,
+   "z": 1496,
+   "yaw": 4.47,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_90",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 87,
+   "z": 994,
+   "yaw": 6.23,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_coldwater_6",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 510,
+   "z": 1945,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     544,
+     1989
+    ],
+    [
+     459,
+     1982
+    ],
+    [
+     463,
+     1886
+    ],
+    [
+     544,
+     1903
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_coldwater_d70",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 498,
+   "z": 905,
+   "yaw": 1.72,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_coldwater_d71",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1359,
+   "z": 132,
+   "yaw": 1.76,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lonely_pier_coldwater_d72",
+   "kind": "lonely_pier",
+   "name": "Bridge Pier",
+   "x": 1880,
+   "z": 152,
+   "yaw": 1.73,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_coldwater_d73",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 893,
+   "z": 108,
+   "yaw": 4.47,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_coldwater_d74",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1587,
+   "z": 1151,
+   "yaw": 0.14,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_91",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1336,
+   "z": 1176,
+   "yaw": 4.64,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s38",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1699,
+   "z": 1417,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_92",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1003,
+   "z": 1055,
+   "yaw": 2.76,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_coldwater_d75",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 800,
+   "z": 1857,
+   "yaw": 5.82,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_93",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 129,
+   "z": 425,
+   "yaw": 0.65,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s39",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 216,
+   "z": 1480,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_94",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 858,
+   "z": 663,
+   "yaw": 1.58,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_95",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 358,
+   "z": 1270,
+   "yaw": 1.85,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_96",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1439,
+   "z": 577,
+   "yaw": 1.62,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s40",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1941,
+   "z": 1280,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_coldwater_d76",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 512,
+   "z": 247,
+   "yaw": 3.16,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_97",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 57,
+   "z": 1294,
+   "yaw": 2.84,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s41",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 399,
+   "z": 1718,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_98",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 116,
+   "z": 1822,
+   "yaw": 0.65,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_99",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 362,
+   "z": 2012,
+   "yaw": 0.44,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_100",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 693,
+   "z": 1658,
+   "yaw": 4.7,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_coldwater_d77",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 619,
+   "z": 282,
+   "yaw": 5.61,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s42",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1860,
+   "z": 1162,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_101",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 1935,
+   "z": 915,
+   "yaw": 4.12,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_coldwater_6",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 1512,
+   "z": 712,
+   "yaw": 3.38,
+   "radius": 6,
+   "path": [
+    [
+     1470,
+     708
+    ],
+    [
+     1532,
+     690
+    ],
+    [
+     1527,
+     756
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_102",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 1138,
+   "z": 575,
+   "yaw": 0.46,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s43",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 592,
+   "z": 1392,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_coldwater_d78",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1744,
+   "z": 1824,
+   "yaw": 0.52,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_103",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 1664,
+   "z": 1978,
+   "yaw": 2.26,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_104",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 1208,
+   "z": 190,
+   "yaw": 0.97,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s44",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 753,
+   "z": 1410,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_coldwater_d79",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1206,
+   "z": 1130,
+   "yaw": 4.85,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_coldwater_d80",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 424,
+   "z": 922,
+   "yaw": 1.51,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_105",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 1362,
+   "z": 1623,
+   "yaw": 1.2,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s45",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 364,
+   "z": 1054,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_106",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 729,
+   "z": 1112,
+   "yaw": 3.76,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_coldwater_d81",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 2000,
+   "z": 391,
+   "yaw": 5.4,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_coldwater_d82",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1775,
+   "z": 1314,
+   "yaw": 0.27,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_coldwater_d83",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1160,
+   "z": 1317,
+   "yaw": 1.91,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_coldwater_d84",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1432,
+   "z": 2008,
+   "yaw": 0.4,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_107",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 642,
+   "z": 834,
+   "yaw": 2.32,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_coldwater_7",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 206,
+   "z": 780,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     234,
+     731
+    ],
+    [
+     239,
+     815
+    ],
+    [
+     173,
+     815
+    ],
+    [
+     169,
+     752
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s46",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 682,
+   "z": 1351,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "wayside_well_coldwater_d85",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 917,
+   "z": 729,
+   "yaw": 4.45,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_coldwater_7",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 499,
+   "z": 1272,
+   "yaw": 1.51,
+   "radius": 6,
+   "path": [
+    [
+     529,
+     1306
+    ],
+    [
+     439,
+     1275
+    ],
+    [
+     517,
+     1239
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_108",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 111,
+   "z": 1442,
+   "yaw": 1.14,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_coldwater_d86",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1735,
+   "z": 449,
+   "yaw": 5.88,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_coldwater_d87",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1877,
+   "z": 233,
+   "yaw": 4.28,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_coldwater_d88",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 294,
+   "z": 1868,
+   "yaw": 5.92,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_109",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 508,
+   "z": 748,
+   "yaw": 2.37,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s47",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1853,
+   "z": 1663,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_coldwater_d89",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 125,
+   "z": 652,
+   "yaw": 1.92,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_110",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 1112,
+   "z": 40,
+   "yaw": 2.11,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_111",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 800,
+   "z": 1909,
+   "yaw": 2.16,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_coldwater_d90",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1208,
+   "z": 112,
+   "yaw": 4.05,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s48",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 112,
+   "z": 207,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_coldwater_d91",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1960,
+   "z": 1655,
+   "yaw": 5.81,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_112",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 1416,
+   "z": 1296,
+   "yaw": 4.68,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_113",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1616,
+   "z": 207,
+   "yaw": 4.91,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_coldwater_d92",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 97,
+   "z": 1113,
+   "yaw": 2.31,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "wayside_well_coldwater_d93",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 344,
+   "z": 189,
+   "yaw": 1.99,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_114",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 252,
+   "z": 250,
+   "yaw": 4.09,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_115",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 525,
+   "z": 1013,
+   "yaw": 0.32,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s49",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 862,
+   "z": 288,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_116",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 1544,
+   "z": 1448,
+   "yaw": 0.68,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_coldwater_d94",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1879,
+   "z": 1512,
+   "yaw": 1.98,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_117",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 1499,
+   "z": 1252,
+   "yaw": 1.03,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s50",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 156,
+   "z": 1656,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_118",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 1184,
+   "z": 1408,
+   "yaw": 3.95,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_coldwater_d95",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1605,
+   "z": 1217,
+   "yaw": 3.98,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_coldwater_d96",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 1332,
+   "z": 1054,
+   "yaw": 5.07,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_coldwater_d97",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 525,
+   "z": 375,
+   "yaw": 1.66,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_119",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 783,
+   "z": 1785,
+   "yaw": 2.01,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_120",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 1970,
+   "z": 814,
+   "yaw": 0.5,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_coldwater_d98",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1769,
+   "z": 342,
+   "yaw": 0.84,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_121",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 563,
+   "z": 87,
+   "yaw": 0.85,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_coldwater_8",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 232,
+   "z": 456,
+   "yaw": 4.53,
+   "radius": 6,
+   "path": [
+    [
+     256,
+     500
+    ],
+    [
+     187,
+     450
+    ],
+    [
+     244,
+     407
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_122",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1052,
+   "z": 1044,
+   "yaw": 3.38,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s51",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 673,
+   "z": 1974,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_coldwater_d99",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 328,
+   "z": 112,
+   "yaw": 0.77,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_123",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 1141,
+   "z": 794,
+   "yaw": 5.97,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_124",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 1155,
+   "z": 1053,
+   "yaw": 2.7,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_125",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 1514,
+   "z": 1132,
+   "yaw": 2.78,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_coldwater_d100",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 102,
+   "z": 1354,
+   "yaw": 5.8,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_coldwater_d101",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1654,
+   "z": 1145,
+   "yaw": 1.69,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_coldwater_d102",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1470,
+   "z": 286,
+   "yaw": 0.99,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_126",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1594,
+   "z": 626,
+   "yaw": 4.64,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_coldwater_d103",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 949,
+   "z": 415,
+   "yaw": 2.04,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_coldwater_d104",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 256,
+   "z": 1376,
+   "yaw": 2.47,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_tree_coldwater_d105",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 839,
+   "z": 392,
+   "yaw": 2.89,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s52",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1920,
+   "z": 376,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_coldwater_d106",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1497,
+   "z": 520,
+   "yaw": 1.52,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_coldwater_d107",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1795,
+   "z": 846,
+   "yaw": 2.76,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_coldwater_d108",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1097,
+   "z": 686,
+   "yaw": 3.77,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "toll_stone_coldwater_d109",
+   "kind": "toll_stone",
+   "name": "Old Toll Stone",
+   "x": 1017,
+   "z": 712,
+   "yaw": 0.41,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_coldwater_d110",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 224,
+   "z": 640,
+   "yaw": 2.57,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_coldwater_d111",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1558,
+   "z": 196,
+   "yaw": 2.24,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_127",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1936,
+   "z": 280,
+   "yaw": 1.2,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_coldwater_d112",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 1640,
+   "z": 671,
+   "yaw": 4.97,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s53",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1534,
+   "z": 383,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_128",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 482,
+   "z": 1512,
+   "yaw": 3.38,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_coldwater_d113",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 40,
+   "z": 1457,
+   "yaw": 0.2,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_coldwater_d114",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 803,
+   "z": 213,
+   "yaw": 0.41,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_coldwater_8",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 697,
+   "z": 992,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     676,
+     1040
+    ],
+    [
+     659,
+     978
+    ],
+    [
+     715,
+     943
+    ],
+    [
+     729,
+     995
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s54",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1504,
+   "z": 2012,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_coldwater_d115",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1428,
+   "z": 1435,
+   "yaw": 2.81,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_129",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 847,
+   "z": 1353,
+   "yaw": 0.29,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_coldwater_d116",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1081,
+   "z": 938,
+   "yaw": 0.25,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s55",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 112,
+   "z": 64,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "toll_stone_coldwater_d117",
+   "kind": "toll_stone",
+   "name": "Old Toll Stone",
+   "x": 1408,
+   "z": 409,
+   "yaw": 2.51,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_coldwater_d118",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1096,
+   "z": 1192,
+   "yaw": 1.79,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s56",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 992,
+   "z": 1305,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_130",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 1351,
+   "z": 464,
+   "yaw": 2.61,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_131",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 916,
+   "z": 578,
+   "yaw": 0.57,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "stone_trough_coldwater_d119",
+   "kind": "stone_trough",
+   "name": "Stone Trough",
+   "x": 665,
+   "z": 25,
+   "yaw": 1.17,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "sheep_pen_coldwater_d120",
+   "kind": "sheep_pen",
+   "name": "Sheep Pen",
+   "x": 905,
+   "z": 955,
+   "yaw": 2.85,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_132",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 136,
+   "z": 910,
+   "yaw": 6.04,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_133",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 1223,
+   "z": 544,
+   "yaw": 4.18,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_coldwater_9",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 1672,
+   "z": 320,
+   "yaw": 1.94,
+   "radius": 6,
+   "path": [
+    [
+     1704,
+     317
+    ],
+    [
+     1657,
+     344
+    ],
+    [
+     1664,
+     295
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_coldwater_d121",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 381,
+   "z": 1866,
+   "yaw": 0.89,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_134",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 1536,
+   "z": 1531,
+   "yaw": 0.16,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s57",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 224,
+   "z": 96,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_coldwater_d122",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 568,
+   "z": 1624,
+   "yaw": 0.98,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_135",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 1287,
+   "z": 640,
+   "yaw": 1.53,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_coldwater_d123",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 461,
+   "z": 92,
+   "yaw": 4.07,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s58",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1394,
+   "z": 744,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_coldwater_d124",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 309,
+   "z": 561,
+   "yaw": 4.98,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_136",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 1896,
+   "z": 934,
+   "yaw": 1.11,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_coldwater_d125",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1800,
+   "z": 1720,
+   "yaw": 6.2,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_137",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 1777,
+   "z": 126,
+   "yaw": 1,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s59",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 304,
+   "z": 1729,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_138",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 815,
+   "z": 830,
+   "yaw": 1.95,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_139",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1168,
+   "z": 648,
+   "yaw": 4.84,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "cottage_corner_coldwater_d126",
+   "kind": "cottage_corner",
+   "name": "Ruined Cottage",
+   "x": 609,
+   "z": 428,
+   "yaw": 6.22,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cottage_corner_coldwater_d127",
+   "kind": "cottage_corner",
+   "name": "Ruined Cottage",
+   "x": 1664,
+   "z": 760,
+   "yaw": 6.08,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_140",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 375,
+   "z": 337,
+   "yaw": 1.9,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_141",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 361,
+   "z": 1471,
+   "yaw": 4.58,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s60",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1333,
+   "z": 1743,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_142",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 1993,
+   "z": 1176,
+   "yaw": 0.52,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_coldwater_10",
+   "role": "pilgrim_resting",
+   "name": "Resting pilgrim",
+   "work": "pray",
+   "chatter": [
+    "role.pilgrim"
+   ],
+   "x": 1097,
+   "z": 1456,
+   "yaw": 2.26,
+   "radius": 6,
+   "path": [
+    [
+     1091,
+     1457
+    ],
+    [
+     1100,
+     1453
+    ],
+    [
+     1099,
+     1460
+    ]
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s61",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1998,
+   "z": 243,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_coldwater_d128",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 360,
+   "z": 1392,
+   "yaw": 4.08,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_coldwater_d129",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 104,
+   "z": 1208,
+   "yaw": 0.13,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s62",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1666,
+   "z": 1783,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_143",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 237,
+   "z": 1052,
+   "yaw": 0.77,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_144",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 540,
+   "z": 541,
+   "yaw": 0.74,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_145",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 576,
+   "z": 1552,
+   "yaw": 6.12,
+   "radius": 7,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_coldwater_d130",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1215,
+   "z": 457,
+   "yaw": 1.03,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_coldwater_d131",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 388,
+   "z": 463,
+   "yaw": 4.46,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_146",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 829,
+   "z": 1189,
+   "yaw": 0.54,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_coldwater_d132",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 2006,
+   "z": 1277,
+   "yaw": 0.71,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_147",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 1542,
+   "z": 313,
+   "yaw": 2.62,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s63",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1817,
+   "z": 1866,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_coldwater_d133",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 944,
+   "z": 1400,
+   "yaw": 3.13,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_148",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 1895,
+   "z": 1244,
+   "yaw": 2.18,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_coldwater_9",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 200,
+   "z": 207,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     274,
+     205
+    ],
+    [
+     208,
+     277
+    ],
+    [
+     128,
+     223
+    ],
+    [
+     210,
+     125
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s64",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1224,
+   "z": 1464,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_149",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 1060,
+   "z": 149,
+   "yaw": 5.2,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_coldwater_d134",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 941,
+   "z": 1076,
+   "yaw": 3.85,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_150",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 1276,
+   "z": 241,
+   "yaw": 0.08,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s65",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1426,
+   "z": 1623,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_151",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1733,
+   "z": 1190,
+   "yaw": 5.72,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_coldwater_d135",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1560,
+   "z": 1373,
+   "yaw": 1.41,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s66",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 319,
+   "z": 1611,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_152",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 216,
+   "z": 1965,
+   "yaw": 4.09,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_coldwater_d136",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1799,
+   "z": 1971,
+   "yaw": 3.1,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_153",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 1546,
+   "z": 1598,
+   "yaw": 4.75,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_coldwater_d137",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1363,
+   "z": 1124,
+   "yaw": 3.83,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_154",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1419,
+   "z": 853,
+   "yaw": 4.1,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_155",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 292,
+   "z": 925,
+   "yaw": 3.81,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_coldwater_11",
+   "role": "pilgrim_resting",
+   "name": "Resting pilgrim",
+   "work": "pray",
+   "chatter": [
+    "role.pilgrim"
+   ],
+   "x": 902,
+   "z": 2009,
+   "yaw": 1.01,
+   "radius": 6,
+   "path": [
+    [
+     908,
+     2003
+    ],
+    [
+     904,
+     2015
+    ],
+    [
+     894,
+     2008
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_coldwater_d138",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1182,
+   "z": 771,
+   "yaw": 5.62,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s67",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 810,
+   "z": 1552,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_coldwater_d139",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1081,
+   "z": 768,
+   "yaw": 5.96,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_coldwater_d140",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 184,
+   "z": 1224,
+   "yaw": 3.12,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s68",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 649,
+   "z": 518,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_156",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 1816,
+   "z": 986,
+   "yaw": 2.19,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_coldwater_d141",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 782,
+   "z": 154,
+   "yaw": 0.24,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "stone_trough_coldwater_d142",
+   "kind": "stone_trough",
+   "name": "Stone Trough",
+   "x": 722,
+   "z": 295,
+   "yaw": 3.98,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_coldwater_d143",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 575,
+   "z": 114,
+   "yaw": 5.35,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_coldwater_d144",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 511,
+   "z": 838,
+   "yaw": 1.49,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_coldwater_12",
+   "role": "pilgrim_resting",
+   "name": "Resting pilgrim",
+   "work": "pray",
+   "chatter": [
+    "role.pilgrim"
+   ],
+   "x": 1272,
+   "z": 424,
+   "yaw": 0.59,
+   "radius": 6,
+   "path": [
+    [
+     1267,
+     420
+    ],
+    [
+     1277,
+     421
+    ],
+    [
+     1270,
+     431
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_coldwater_d145",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1224,
+   "z": 1064,
+   "yaw": 1.51,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s69",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1896,
+   "z": 88,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_coldwater_d146",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1402,
+   "z": 340,
+   "yaw": 4.22,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_157",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 976,
+   "z": 48,
+   "yaw": 0.39,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_158",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 1740,
+   "z": 613,
+   "yaw": 3.65,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s70",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1670,
+   "z": 431,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_159",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 1776,
+   "z": 1552,
+   "yaw": 1.06,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "sheep_pen_coldwater_d147",
+   "kind": "sheep_pen",
+   "name": "Sheep Pen",
+   "x": 1602,
+   "z": 273,
+   "yaw": 2.41,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_160",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 1032,
+   "z": 896,
+   "yaw": 1.01,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s71",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 600,
+   "z": 1944,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_coldwater_d148",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 309,
+   "z": 1011,
+   "yaw": 4.6,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_161",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 872,
+   "z": 1480,
+   "yaw": 2.3,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s72",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 336,
+   "z": 712,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_162",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 809,
+   "z": 968,
+   "yaw": 2.14,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_coldwater_d149",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 191,
+   "z": 884,
+   "yaw": 4.66,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_163",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 737,
+   "z": 470,
+   "yaw": 2.87,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_164",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1280,
+   "z": 572,
+   "yaw": 0.81,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_coldwater_d150",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1657,
+   "z": 1323,
+   "yaw": 3.06,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_165",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1472,
+   "z": 416,
+   "yaw": 0.09,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_coldwater_d151",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1304,
+   "z": 1240,
+   "yaw": 6.14,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "wayside_well_coldwater_d152",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 1664,
+   "z": 104,
+   "yaw": 4.83,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_coldwater_d153",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 665,
+   "z": 422,
+   "yaw": 4.28,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s73",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1648,
+   "z": 1488,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_coldwater_d154",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 309,
+   "z": 508,
+   "yaw": 1.18,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_coldwater_d155",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 509,
+   "z": 657,
+   "yaw": 5.49,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_166",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 145,
+   "z": 346,
+   "yaw": 6,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_167",
+   "recipe": "cu_tinkers_halt",
+   "name": "Tinker's Halt",
+   "kind": "camp",
+   "x": 206,
+   "z": 550,
+   "yaw": 3.13,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_coldwater_d156",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1527,
+   "z": 916,
+   "yaw": 0.7,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s74",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 960,
+   "z": 200,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_168",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 1938,
+   "z": 1545,
+   "yaw": 5.96,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_coldwater_13",
+   "role": "prospector",
+   "name": "Prospector",
+   "work": "dig",
+   "chatter": [
+    "role.prospector"
+   ],
+   "x": 1807,
+   "z": 38,
+   "yaw": 4.77,
+   "radius": 6,
+   "path": [
+    [
+     1800,
+     43
+    ],
+    [
+     1806,
+     27
+    ],
+    [
+     1814,
+     43
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_169",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 1056,
+   "z": 1336,
+   "yaw": 3.86,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_coldwater_d157",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 29,
+   "z": 1145,
+   "yaw": 3.08,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_coldwater_d158",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 256,
+   "z": 1630,
+   "yaw": 5.27,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_170",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 680,
+   "z": 1152,
+   "yaw": 0.69,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_coldwater_d159",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1888,
+   "z": 427,
+   "yaw": 0.79,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s75",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 651,
+   "z": 1754,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_coldwater_d160",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1152,
+   "z": 1168,
+   "yaw": 3.28,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_coldwater_d161",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 1795,
+   "z": 1077,
+   "yaw": 0.51,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_coldwater_d162",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 348,
+   "z": 1231,
+   "yaw": 4.98,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s76",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 859,
+   "z": 1079,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_171",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 1719,
+   "z": 1952,
+   "yaw": 6.06,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_172",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 1170,
+   "z": 106,
+   "yaw": 4.2,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s77",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 106,
+   "z": 260,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_coldwater_d163",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1015,
+   "z": 596,
+   "yaw": 3.22,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_coldwater_d164",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 937,
+   "z": 1022,
+   "yaw": 5.79,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_173",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1830,
+   "z": 743,
+   "yaw": 3.73,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_coldwater_d165",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1399,
+   "z": 1054,
+   "yaw": 1.93,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_174",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 1271,
+   "z": 952,
+   "yaw": 3.02,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_175",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 142,
+   "z": 723,
+   "yaw": 4.9,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_coldwater_14",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 590,
+   "z": 625,
+   "yaw": 3.87,
+   "radius": 6,
+   "path": [
+    [
+     555,
+     589
+    ],
+    [
+     645,
+     611
+    ],
+    [
+     570,
+     669
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_176",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 448,
+   "z": 1584,
+   "yaw": 5.33,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s78",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 132,
+   "z": 551,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_coldwater_d166",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 791,
+   "z": 558,
+   "yaw": 3.09,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_177",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 96,
+   "z": 1680,
+   "yaw": 1.01,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s79",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 817,
+   "z": 615,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_coldwater_d167",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1900,
+   "z": 1951,
+   "yaw": 1.73,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_coldwater_d168",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1456,
+   "z": 1160,
+   "yaw": 5.79,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_178",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 39,
+   "z": 1585,
+   "yaw": 5.86,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_coldwater_d169",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 232,
+   "z": 1864,
+   "yaw": 2.8,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s80",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 992,
+   "z": 473,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_coldwater_15",
+   "role": "pilgrim_resting",
+   "name": "Resting pilgrim",
+   "work": "pray",
+   "chatter": [
+    "role.pilgrim"
+   ],
+   "x": 771,
+   "z": 1991,
+   "yaw": 4.87,
+   "radius": 6,
+   "path": [
+    [
+     763,
+     1995
+    ],
+    [
+     773,
+     1986
+    ],
+    [
+     777,
+     1995
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_coldwater_d170",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1934,
+   "z": 1326,
+   "yaw": 3.16,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s81",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 136,
+   "z": 1952,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_coldwater_d171",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1033,
+   "z": 1434,
+   "yaw": 2.46,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_179",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 1073,
+   "z": 1812,
+   "yaw": 2.43,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s82",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 488,
+   "z": 1632,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_180",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 808,
+   "z": 336,
+   "yaw": 4.15,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "woodpile_stack_coldwater_d172",
+   "kind": "woodpile_stack",
+   "name": "Woodpile",
+   "x": 792,
+   "z": 1248,
+   "yaw": 5.3,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_181",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 1929,
+   "z": 1769,
+   "yaw": 2.78,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_coldwater_d173",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 573,
+   "z": 969,
+   "yaw": 2.18,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_182",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 1745,
+   "z": 213,
+   "yaw": 5.93,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_183",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 713,
+   "z": 1576,
+   "yaw": 0.65,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s83",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 785,
+   "z": 451,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_coldwater_d174",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1999,
+   "z": 1799,
+   "yaw": 4.76,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_coldwater_d175",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1064,
+   "z": 1106,
+   "yaw": 2.35,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_184",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1371,
+   "z": 525,
+   "yaw": 2.34,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_coldwater_d176",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1868,
+   "z": 375,
+   "yaw": 2.68,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_coldwater_d177",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 924,
+   "z": 349,
+   "yaw": 0.76,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_185",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 816,
+   "z": 1417,
+   "yaw": 1.74,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_186",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1055,
+   "z": 825,
+   "yaw": 3.29,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_187",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 730,
+   "z": 191,
+   "yaw": 1.23,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s84",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 192,
+   "z": 992,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "toll_stone_coldwater_d178",
+   "kind": "toll_stone",
+   "name": "Old Toll Stone",
+   "x": 1600,
+   "z": 408,
+   "yaw": 5.55,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_188",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 417,
+   "z": 286,
+   "yaw": 6.01,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_coldwater_d179",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 864,
+   "z": 163,
+   "yaw": 2.51,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_coldwater_d180",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1217,
+   "z": 1256,
+   "yaw": 2.65,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_189",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 1304,
+   "z": 1606,
+   "yaw": 4.09,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_coldwater_d181",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1747,
+   "z": 1232,
+   "yaw": 5.6,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_coldwater_d182",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 829,
+   "z": 1298,
+   "yaw": 0.25,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s85",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 752,
+   "z": 1672,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_coldwater_d183",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 1591,
+   "z": 1494,
+   "yaw": 2.6,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_190",
+   "recipe": "cu_boundary_cross",
+   "name": "Boundary Cross",
+   "kind": "marker",
+   "x": 624,
+   "z": 1104,
+   "yaw": 4.25,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s86",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 446,
+   "z": 166,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "sheep_pen_coldwater_d184",
+   "kind": "sheep_pen",
+   "name": "Sheep Pen",
+   "x": 911,
+   "z": 521,
+   "yaw": 1.34,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_191",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 52,
+   "z": 953,
+   "yaw": 2.87,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_coldwater_d185",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1139,
+   "z": 898,
+   "yaw": 3.27,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_192",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 817,
+   "z": 1648,
+   "yaw": 3.15,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_coldwater_d186",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1713,
+   "z": 840,
+   "yaw": 4.92,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_coldwater_d187",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 160,
+   "z": 1337,
+   "yaw": 6.27,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_coldwater_d188",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 837,
+   "z": 1955,
+   "yaw": 3.58,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_coldwater_d189",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1505,
+   "z": 1426,
+   "yaw": 4.04,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_coldwater_d190",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1973,
+   "z": 1602,
+   "yaw": 4.77,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_193",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 1889,
+   "z": 879,
+   "yaw": 5.96,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_194",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 413,
+   "z": 1941,
+   "yaw": 2.46,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_coldwater_d191",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 1336,
+   "z": 80,
+   "yaw": 2.24,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_coldwater_d192",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 199,
+   "z": 345,
+   "yaw": 1.79,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_coldwater_d193",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1856,
+   "z": 1728,
+   "yaw": 5,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s87",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 152,
+   "z": 1799,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s88",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1938,
+   "z": 138,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_195",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 1096,
+   "z": 96,
+   "yaw": 4.72,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_coldwater_d194",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1025,
+   "z": 644,
+   "yaw": 5.54,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_coldwater_d195",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1368,
+   "z": 1240,
+   "yaw": 5.26,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s89",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 929,
+   "z": 1535,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_coldwater_d196",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1072,
+   "z": 464,
+   "yaw": 0.29,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_196",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 243,
+   "z": 956,
+   "yaw": 4.68,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_197",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 926,
+   "z": 795,
+   "yaw": 5.98,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_198",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 1557,
+   "z": 496,
+   "yaw": 5.53,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_199",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 1630,
+   "z": 546,
+   "yaw": 0.38,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_coldwater_d197",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 456,
+   "z": 1383,
+   "yaw": 0.82,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_coldwater_d198",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 80,
+   "z": 1537,
+   "yaw": 2.61,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s90",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 965,
+   "z": 1161,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_200",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 1344,
+   "z": 2008,
+   "yaw": 3.3,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_coldwater_16",
+   "role": "prospector",
+   "name": "Prospector",
+   "work": "dig",
+   "chatter": [
+    "role.prospector"
+   ],
+   "x": 904,
+   "z": 1208,
+   "yaw": 6.01,
+   "radius": 6,
+   "path": [
+    [
+     894,
+     1202
+    ],
+    [
+     915,
+     1193
+    ],
+    [
+     907,
+     1226
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_coldwater_d199",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 280,
+   "z": 1176,
+   "yaw": 5.74,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s91",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1797,
+   "z": 1533,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_coldwater_d200",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 685,
+   "z": 821,
+   "yaw": 5.42,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_coldwater_d201",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 528,
+   "z": 1088,
+   "yaw": 0.31,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_201",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 1593,
+   "z": 1928,
+   "yaw": 6.01,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_202",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 1831,
+   "z": 272,
+   "yaw": 1.62,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s92",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1456,
+   "z": 1536,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_203",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 49,
+   "z": 184,
+   "yaw": 3.54,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_coldwater_d202",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1376,
+   "z": 1680,
+   "yaw": 0.46,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_204",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 468,
+   "z": 1162,
+   "yaw": 3.22,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_coldwater_d203",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 923,
+   "z": 869,
+   "yaw": 6.14,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_205",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 1960,
+   "z": 771,
+   "yaw": 5.31,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_206",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1007,
+   "z": 263,
+   "yaw": 0.47,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_coldwater_d204",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1709,
+   "z": 671,
+   "yaw": 3.37,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_207",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 1954,
+   "z": 929,
+   "yaw": 2.28,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_coldwater_d205",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 632,
+   "z": 1648,
+   "yaw": 4.33,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_208",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 1343,
+   "z": 1568,
+   "yaw": 3.85,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_coldwater_d206",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1818,
+   "z": 1280,
+   "yaw": 3.91,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s93",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 856,
+   "z": 1712,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_209",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 39,
+   "z": 1703,
+   "yaw": 2.79,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_coldwater_17",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 857,
+   "z": 1590,
+   "yaw": 0.8,
+   "radius": 6,
+   "path": [
+    [
+     807,
+     1574
+    ],
+    [
+     889,
+     1570
+    ],
+    [
+     857,
+     1634
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_coldwater_d207",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 73,
+   "z": 285,
+   "yaw": 0.61,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_coldwater_d208",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 385,
+   "z": 629,
+   "yaw": 3.73,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_coldwater_d209",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 715,
+   "z": 520,
+   "yaw": 2.55,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_210",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 109,
+   "z": 1027,
+   "yaw": 4.93,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s94",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 305,
+   "z": 1958,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_211",
+   "recipe": "cu_charcoal_mound",
+   "name": "Charcoal Clamp",
+   "kind": "camp",
+   "x": 1780,
+   "z": 724,
+   "yaw": 2.17,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_coldwater_d210",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 205,
+   "z": 1525,
+   "yaw": 4.88,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_212",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1611,
+   "z": 1016,
+   "yaw": 5.62,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_coldwater_d211",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 1120,
+   "z": 1280,
+   "yaw": 0.85,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_coldwater_d212",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 904,
+   "z": 632,
+   "yaw": 6.2,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s95",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 267,
+   "z": 1575,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_coldwater_d213",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1436,
+   "z": 1362,
+   "yaw": 2.06,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_coldwater_18",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 464,
+   "z": 1328,
+   "yaw": 4.31,
+   "radius": 6,
+   "path": [
+    [
+     440,
+     1363
+    ],
+    [
+     438,
+     1296
+    ],
+    [
+     506,
+     1319
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_213",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 320,
+   "z": 344,
+   "yaw": 2.21,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s96",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1408,
+   "z": 624,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_coldwater_d214",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1016,
+   "z": 1219,
+   "yaw": 5.26,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_coldwater_d215",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 232,
+   "z": 1424,
+   "yaw": 5.27,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_coldwater_10",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 280,
+   "z": 1784,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     316,
+     1747
+    ],
+    [
+     303,
+     1819
+    ],
+    [
+     247,
+     1811
+    ],
+    [
+     247,
+     1732
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_coldwater_s97",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 915,
+   "z": 1932,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_214",
+   "recipe": "cu_charcoal_mound",
+   "name": "Charcoal Clamp",
+   "kind": "camp",
+   "x": 1456,
+   "z": 40,
+   "yaw": 3.42,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_coldwater_d216",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 667,
+   "z": 193,
+   "yaw": 0.4,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_coldwater_215",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1055,
+   "z": 970,
+   "yaw": 0.37,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_coldwater_d217",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 184,
+   "z": 1112,
+   "yaw": 6.1,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "woodpile_stack_coldwater_rp0",
+   "kind": "woodpile_stack",
+   "name": "Woodpile",
+   "x": 457,
+   "z": 933,
+   "yaw": 2.79,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_coldwater_rp1",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 540,
+   "z": 991,
+   "yaw": 1.29,
+   "radius": 3,
+   "filler": true
   }
  ],
- "features": []
+ "features": [],
+ "density": {
+  "target": 50,
+  "roadTarget": 45,
+  "added": {
+   "curio": 215,
+   "wayside": 217,
+   "stray": 97,
+   "roamer": 10,
+   "folk": 18
+  },
+  "openShareCovered": 0.999,
+  "roadShareCovered": 0.981
+ },
+ "levels": [
+  5,
+  7
+ ]
 }

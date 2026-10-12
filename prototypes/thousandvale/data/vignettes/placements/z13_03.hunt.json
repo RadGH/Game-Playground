@@ -1,0 +1,561 @@
+{
+ "_doc": "Stream E (play-test 3 R2). Extra monster camps near the start for world zone z13_03: solos and pairs (a third roaming a small loop) wherever the level ramp is <= 3.5 — tools/content-living.mjs fillHunting. Same record shape as the main placements file (type camp, stray/roam, hunt: true); js/sim/content.js merges them. Not read by stream B's bake (monsters need no cleared ground).",
+ "zone": "z13_03",
+ "eid": "millbrook",
+ "terrainHash": "13703724",
+ "stats": {
+  "targets": 2953,
+  "added": 21,
+  "stray": 14,
+  "roamer": 7,
+  "covered": 1
+ },
+ "placements": [
+  {
+   "type": "camp",
+   "id": "hunt_millbrook_1",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 138,
+   "z": 129,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_millbrook_2",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 281,
+   "z": 439,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_millbrook_3",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 343,
+   "z": 350,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_millbrook_4",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 159,
+   "z": 523,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_millbrook_5",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 183,
+   "z": 41,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_millbrook_6",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 170,
+   "z": 213,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_millbrook_7",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 49,
+   "z": 440,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     7,
+     405
+    ],
+    [
+     88,
+     404
+    ],
+    [
+     81,
+     493
+    ],
+    [
+     15,
+     479
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_millbrook_8",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 199,
+   "z": 448,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_millbrook_9",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 78,
+   "z": 183,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_millbrook_10",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 345,
+   "z": 161,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_millbrook_11",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 150,
+   "z": 287,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     187,
+     285
+    ],
+    [
+     146,
+     316
+    ],
+    [
+     118,
+     284
+    ],
+    [
+     145,
+     254
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_millbrook_12",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 107,
+   "z": 55,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_millbrook_13",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 344,
+   "z": 272,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     372,
+     302
+    ],
+    [
+     321,
+     296
+    ],
+    [
+     316,
+     254
+    ],
+    [
+     368,
+     248
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_millbrook_14",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 39,
+   "z": 643,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_millbrook_15",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 448,
+   "z": 50,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     421,
+     119
+    ],
+    [
+     394,
+     44
+    ],
+    [
+     472,
+     4
+    ],
+    [
+     509,
+     84
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_millbrook_16",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 210,
+   "z": 147,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_millbrook_17",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 183,
+   "z": 385,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     240,
+     432
+    ],
+    [
+     145,
+     425
+    ],
+    [
+     139,
+     361
+    ],
+    [
+     225,
+     320
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_millbrook_18",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 279,
+   "z": 360,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     243,
+     351
+    ],
+    [
+     278,
+     320
+    ],
+    [
+     334,
+     364
+    ],
+    [
+     266,
+     413
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_millbrook_19",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 242,
+   "z": 503,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_millbrook_20",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 104,
+   "z": 561,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     132,
+     514
+    ],
+    [
+     141,
+     588
+    ],
+    [
+     78,
+     624
+    ],
+    [
+     62,
+     537
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_millbrook_21",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 37,
+   "z": 86,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  }
+ ]
+}

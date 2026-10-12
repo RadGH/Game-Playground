@@ -1,0 +1,6527 @@
+{
+ "_doc": "Stream E (play-test 3 R2). Extra monster camps near the start for world zone z12_02: solos and pairs (a third roaming a small loop) wherever the level ramp is <= 3.5 — tools/content-living.mjs fillHunting. Same record shape as the main placements file (type camp, stray/roam, hunt: true); js/sim/content.js merges them. Not read by stream B's bake (monsters need no cleared ground).",
+ "zone": "z12_02",
+ "eid": "test",
+ "terrainHash": "0ba48d02",
+ "stats": {
+  "targets": 54775,
+  "added": 259,
+  "stray": 185,
+  "roamer": 74,
+  "covered": 0.976
+ },
+ "placements": [
+  {
+   "type": "camp",
+   "id": "hunt_test_1",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 613,
+   "z": 1036,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     629,
+     1076
+    ],
+    [
+     572,
+     1040
+    ],
+    [
+     600,
+     977
+    ],
+    [
+     661,
+     1036
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_2",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 51,
+   "z": 1810,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     54,
+     1837
+    ],
+    [
+     15,
+     1822
+    ],
+    [
+     49,
+     1783
+    ],
+    [
+     86,
+     1809
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_3",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 50,
+   "z": 1968,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     54,
+     1991
+    ],
+    [
+     18,
+     1979
+    ],
+    [
+     41,
+     1936
+    ],
+    [
+     71,
+     1965
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_4",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 505,
+   "z": 41,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_5",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 453,
+   "z": 225,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_6",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 824,
+   "z": 346,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_7",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 592,
+   "z": 337,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_8",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 391,
+   "z": 482,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_9",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 190,
+   "z": 565,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_10",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 211,
+   "z": 716,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_11",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 515,
+   "z": 1418,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_12",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1562,
+   "z": 1786,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1590,
+     1779
+    ],
+    [
+     1567,
+     1833
+    ],
+    [
+     1519,
+     1793
+    ],
+    [
+     1545,
+     1755
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_13",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1549,
+   "z": 1980,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1581,
+     1998
+    ],
+    [
+     1525,
+     2005
+    ],
+    [
+     1526,
+     1969
+    ],
+    [
+     1564,
+     1960
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_14",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 937,
+   "z": 1984,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_15",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1262,
+   "z": 1994,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1221,
+     1996
+    ],
+    [
+     1269,
+     1949
+    ],
+    [
+     1315,
+     1999
+    ],
+    [
+     1267,
+     2034
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_16",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 886,
+   "z": 604,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_17",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1872,
+   "z": 1832,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_18",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 646,
+   "z": 769,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_19",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1681,
+   "z": 995,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1638,
+     956
+    ],
+    [
+     1711,
+     950
+    ],
+    [
+     1725,
+     1019
+    ],
+    [
+     1645,
+     1053
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_20",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 313,
+   "z": 1509,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_21",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 326,
+   "z": 2015,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_22",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1064,
+   "z": 2009,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_23",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1371,
+   "z": 1691,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_24",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1595,
+   "z": 1332,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_25",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 2001,
+   "z": 983,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_26",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1486,
+   "z": 477,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_27",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 724,
+   "z": 383,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_28",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 493,
+   "z": 448,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_29",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1700,
+   "z": 2005,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_30",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 495,
+   "z": 1127,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_31",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 267,
+   "z": 878,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_32",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1992,
+   "z": 1801,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_33",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 183,
+   "z": 2013,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_34",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 838,
+   "z": 1646,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_35",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 369,
+   "z": 1784,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_36",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 409,
+   "z": 1238,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_37",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 759,
+   "z": 1281,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_38",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 846,
+   "z": 220,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_39",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1166,
+   "z": 993,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_40",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1539,
+   "z": 369,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1563,
+     383
+    ],
+    [
+     1518,
+     393
+    ],
+    [
+     1511,
+     354
+    ],
+    [
+     1549,
+     349
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_41",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 194,
+   "z": 341,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_42",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 687,
+   "z": 246,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_43",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 888,
+   "z": 488,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     917,
+     480
+    ],
+    [
+     908,
+     521
+    ],
+    [
+     852,
+     514
+    ],
+    [
+     860,
+     455
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_44",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 305,
+   "z": 543,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_45",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 422,
+   "z": 1461,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_46",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1495,
+   "z": 735,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1516,
+     715
+    ],
+    [
+     1534,
+     763
+    ],
+    [
+     1470,
+     766
+    ],
+    [
+     1463,
+     699
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_47",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 717,
+   "z": 1958,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_48",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1702,
+   "z": 284,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_49",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 487,
+   "z": 302,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_50",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 824,
+   "z": 1528,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     851,
+     1488
+    ],
+    [
+     866,
+     1552
+    ],
+    [
+     802,
+     1571
+    ],
+    [
+     785,
+     1493
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_51",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1775,
+   "z": 1785,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1744,
+     1809
+    ],
+    [
+     1755,
+     1758
+    ],
+    [
+     1795,
+     1759
+    ],
+    [
+     1799,
+     1827
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_52",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 2004,
+   "z": 1267,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1969,
+     1308
+    ],
+    [
+     1957,
+     1232
+    ],
+    [
+     2046,
+     1235
+    ],
+    [
+     2032,
+     1300
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_53",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 508,
+   "z": 993,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_54",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 189,
+   "z": 1822,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_55",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 523,
+   "z": 1523,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     480,
+     1520
+    ],
+    [
+     524,
+     1481
+    ],
+    [
+     576,
+     1529
+    ],
+    [
+     512,
+     1563
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_56",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 544,
+   "z": 153,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_57",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1419,
+   "z": 1465,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_58",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 424,
+   "z": 1345,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_59",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1416,
+   "z": 1976,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_60",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1507,
+   "z": 41,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_61",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 747,
+   "z": 604,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_62",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 826,
+   "z": 1096,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     845,
+     1049
+    ],
+    [
+     861,
+     1096
+    ],
+    [
+     817,
+     1148
+    ],
+    [
+     781,
+     1096
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_63",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1894,
+   "z": 967,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1842,
+     921
+    ],
+    [
+     1922,
+     906
+    ],
+    [
+     1961,
+     988
+    ],
+    [
+     1870,
+     1011
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_64",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 667,
+   "z": 1448,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_65",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1056,
+   "z": 1688,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1116,
+     1662
+    ],
+    [
+     1080,
+     1735
+    ],
+    [
+     996,
+     1718
+    ],
+    [
+     1037,
+     1624
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_66",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 696,
+   "z": 949,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_67",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1659,
+   "z": 1408,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1671,
+     1431
+    ],
+    [
+     1630,
+     1424
+    ],
+    [
+     1655,
+     1375
+    ],
+    [
+     1685,
+     1401
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_68",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 193,
+   "z": 115,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_69",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 416,
+   "z": 560,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_70",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 599,
+   "z": 83,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_71",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1448,
+   "z": 1016,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_72",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 926,
+   "z": 248,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     871,
+     245
+    ],
+    [
+     919,
+     183
+    ],
+    [
+     986,
+     242
+    ],
+    [
+     921,
+     328
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_73",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1251,
+   "z": 1376,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_74",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 153,
+   "z": 1728,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_75",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 870,
+   "z": 1318,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_76",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 607,
+   "z": 1673,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_77",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1273,
+   "z": 1128,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1232,
+     1124
+    ],
+    [
+     1275,
+     1098
+    ],
+    [
+     1304,
+     1144
+    ],
+    [
+     1269,
+     1162
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_78",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 415,
+   "z": 988,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_79",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1123,
+   "z": 1404,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_80",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1842,
+   "z": 1468,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1832,
+     1440
+    ],
+    [
+     1869,
+     1447
+    ],
+    [
+     1850,
+     1493
+    ],
+    [
+     1826,
+     1482
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_81",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1640,
+   "z": 1895,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_82",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1432,
+   "z": 1176,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_83",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1728,
+   "z": 202,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_84",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1027,
+   "z": 530,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1014,
+     550
+    ],
+    [
+     1006,
+     501
+    ],
+    [
+     1050,
+     510
+    ],
+    [
+     1046,
+     542
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_85",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 119,
+   "z": 1908,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_86",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 680,
+   "z": 830,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     620,
+     837
+    ],
+    [
+     668,
+     776
+    ],
+    [
+     735,
+     806
+    ],
+    [
+     693,
+     875
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_87",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1305,
+   "z": 1452,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_88",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1941,
+   "z": 1982,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1936,
+     2027
+    ],
+    [
+     1890,
+     1979
+    ],
+    [
+     1965,
+     1930
+    ],
+    [
+     1993,
+     2010
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_89",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1282,
+   "z": 1696,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_90",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 316,
+   "z": 936,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_91",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 251,
+   "z": 1356,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_92",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 524,
+   "z": 2004,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_93",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1587,
+   "z": 830,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_94",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1559,
+   "z": 1167,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_95",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1074,
+   "z": 987,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_96",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1552,
+   "z": 1031,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1578,
+     1003
+    ],
+    [
+     1591,
+     1051
+    ],
+    [
+     1518,
+     1068
+    ],
+    [
+     1521,
+     989
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_97",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 848,
+   "z": 1932,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_98",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1267,
+   "z": 59,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_99",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1017,
+   "z": 1936,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_100",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 375,
+   "z": 721,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_101",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1032,
+   "z": 1246,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_102",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 235,
+   "z": 620,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_103",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1299,
+   "z": 1029,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_104",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 556,
+   "z": 246,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_105",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 200,
+   "z": 198,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_106",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1887,
+   "z": 319,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_107",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1581,
+   "z": 1267,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_108",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1829,
+   "z": 506,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1815,
+     443
+    ],
+    [
+     1906,
+     487
+    ],
+    [
+     1840,
+     558
+    ],
+    [
+     1756,
+     516
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_109",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1624,
+   "z": 664,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_110",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 455,
+   "z": 779,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     458,
+     817
+    ],
+    [
+     426,
+     781
+    ],
+    [
+     459,
+     752
+    ],
+    [
+     479,
+     771
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_111",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 39,
+   "z": 1109,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_112",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 95,
+   "z": 269,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_113",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 723,
+   "z": 1123,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     661,
+     1119
+    ],
+    [
+     709,
+     1068
+    ],
+    [
+     776,
+     1115
+    ],
+    [
+     724,
+     1173
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_114",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1771,
+   "z": 358,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_115",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1665,
+   "z": 1737,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_116",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1136,
+   "z": 1968,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1104,
+     2024
+    ],
+    [
+     1098,
+     1947
+    ],
+    [
+     1149,
+     1912
+    ],
+    [
+     1180,
+     1983
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_117",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1449,
+   "z": 1719,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1454,
+     1660
+    ],
+    [
+     1497,
+     1739
+    ],
+    [
+     1427,
+     1768
+    ],
+    [
+     1398,
+     1716
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_118",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 332,
+   "z": 1599,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_119",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1497,
+   "z": 1889,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_120",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1624,
+   "z": 312,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_121",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1040,
+   "z": 1384,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_122",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 160,
+   "z": 521,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_123",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 263,
+   "z": 1437,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     305,
+     1439
+    ],
+    [
+     261,
+     1477
+    ],
+    [
+     212,
+     1438
+    ],
+    [
+     267,
+     1378
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_124",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1278,
+   "z": 288,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1238,
+     255
+    ],
+    [
+     1304,
+     265
+    ],
+    [
+     1319,
+     326
+    ],
+    [
+     1256,
+     315
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_125",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1841,
+   "z": 1897,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_126",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1889,
+   "z": 1359,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_127",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 696,
+   "z": 695,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_128",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1132,
+   "z": 897,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1174,
+     861
+    ],
+    [
+     1167,
+     956
+    ],
+    [
+     1080,
+     949
+    ],
+    [
+     1089,
+     847
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_129",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 302,
+   "z": 1787,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_130",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 344,
+   "z": 1705,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     374,
+     1670
+    ],
+    [
+     390,
+     1724
+    ],
+    [
+     317,
+     1744
+    ],
+    [
+     308,
+     1691
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_131",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 429,
+   "z": 1130,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_132",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 657,
+   "z": 396,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_133",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 287,
+   "z": 712,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_134",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 960,
+   "z": 1408,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_135",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 161,
+   "z": 762,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_136",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 520,
+   "z": 906,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_137",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 609,
+   "z": 721,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_138",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1716,
+   "z": 643,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_139",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1140,
+   "z": 219,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1184,
+     218
+    ],
+    [
+     1140,
+     259
+    ],
+    [
+     1088,
+     238
+    ],
+    [
+     1138,
+     180
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_140",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1751,
+   "z": 735,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_141",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 50,
+   "z": 987,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     81,
+     956
+    ],
+    [
+     83,
+     1023
+    ],
+    [
+     5,
+     1012
+    ],
+    [
+     13,
+     946
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_142",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 572,
+   "z": 1923,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_143",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1444,
+   "z": 520,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_144",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1391,
+   "z": 779,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_145",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 523,
+   "z": 489,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_146",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 921,
+   "z": 1162,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     894,
+     1174
+    ],
+    [
+     904,
+     1142
+    ],
+    [
+     941,
+     1146
+    ],
+    [
+     938,
+     1195
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_147",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 256,
+   "z": 1559,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_148",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1434,
+   "z": 435,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1416,
+     407
+    ],
+    [
+     1466,
+     407
+    ],
+    [
+     1458,
+     463
+    ],
+    [
+     1395,
+     462
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_149",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1391,
+   "z": 577,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_150",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 799,
+   "z": 413,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     815,
+     348
+    ],
+    [
+     852,
+     422
+    ],
+    [
+     800,
+     463
+    ],
+    [
+     733,
+     408
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_151",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1765,
+   "z": 1976,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_152",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 419,
+   "z": 433,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_153",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 949,
+   "z": 1903,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_154",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 646,
+   "z": 1729,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_155",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1963,
+   "z": 1694,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_156",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1118,
+   "z": 1480,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_157",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 400,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     421,
+     1984
+    ],
+    [
+     427,
+     2027
+    ],
+    [
+     383,
+     2033
+    ],
+    [
+     371,
+     1991
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_158",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 570,
+   "z": 1575,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_159",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1872,
+   "z": 1088,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_160",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1372,
+   "z": 1901,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1306,
+     1908
+    ],
+    [
+     1380,
+     1862
+    ],
+    [
+     1420,
+     1897
+    ],
+    [
+     1365,
+     1940
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_161",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 2009,
+   "z": 768,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_162",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 391,
+   "z": 657,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_163",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1275,
+   "z": 1321,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1245,
+     1323
+    ],
+    [
+     1281,
+     1282
+    ],
+    [
+     1305,
+     1327
+    ],
+    [
+     1271,
+     1352
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_164",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 203,
+   "z": 1700,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     192,
+     1665
+    ],
+    [
+     222,
+     1686
+    ],
+    [
+     224,
+     1727
+    ],
+    [
+     176,
+     1717
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_165",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1935,
+   "z": 1839,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_166",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 350,
+   "z": 111,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_167",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 473,
+   "z": 1047,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     466,
+     1013
+    ],
+    [
+     506,
+     1035
+    ],
+    [
+     478,
+     1072
+    ],
+    [
+     435,
+     1047
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_168",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 763,
+   "z": 905,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_169",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1516,
+   "z": 1319,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1485,
+     1352
+    ],
+    [
+     1476,
+     1293
+    ],
+    [
+     1545,
+     1274
+    ],
+    [
+     1565,
+     1369
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_170",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1513,
+   "z": 847,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_171",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 975,
+   "z": 128,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_172",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 426,
+   "z": 293,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_173",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1482,
+   "z": 102,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_174",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 787,
+   "z": 585,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_175",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1354,
+   "z": 105,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_176",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1221,
+   "z": 93,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_177",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1831,
+   "z": 1332,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_178",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 2008,
+   "z": 911,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_179",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 794,
+   "z": 760,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_180",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 776,
+   "z": 1364,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_181",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 715,
+   "z": 1898,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_182",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1928,
+   "z": 592,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_183",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1658,
+   "z": 1281,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_184",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 779,
+   "z": 1642,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_185",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1397,
+   "z": 1248,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_186",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1425,
+   "z": 1105,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_187",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1204,
+   "z": 1542,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_188",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1785,
+   "z": 969,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_189",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 900,
+   "z": 407,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_190",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1704,
+   "z": 136,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_191",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1175,
+   "z": 1168,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_192",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 181,
+   "z": 1319,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_193",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 648,
+   "z": 1944,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_194",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1889,
+   "z": 1772,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_195",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 761,
+   "z": 994,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_196",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 40,
+   "z": 1311,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     12,
+     1289
+    ],
+    [
+     76,
+     1290
+    ],
+    [
+     69,
+     1342
+    ],
+    [
+     19,
+     1330
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_197",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1834,
+   "z": 1613,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1824,
+     1658
+    ],
+    [
+     1794,
+     1607
+    ],
+    [
+     1830,
+     1568
+    ],
+    [
+     1890,
+     1626
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_198",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 351,
+   "z": 866,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_199",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 374,
+   "z": 1527,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_200",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 877,
+   "z": 989,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_201",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 42,
+   "z": 1481,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_202",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1626,
+   "z": 889,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1660,
+     841
+    ],
+    [
+     1659,
+     946
+    ],
+    [
+     1580,
+     935
+    ],
+    [
+     1587,
+     848
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_203",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1703,
+   "z": 352,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1676,
+     387
+    ],
+    [
+     1677,
+     339
+    ],
+    [
+     1725,
+     310
+    ],
+    [
+     1737,
+     378
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_204",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1553,
+   "z": 456,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_205",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 872,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     875,
+     1968
+    ],
+    [
+     900,
+     2017
+    ],
+    [
+     860,
+     2045
+    ],
+    [
+     839,
+     1999
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_206",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1475,
+   "z": 1518,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1517,
+     1543
+    ],
+    [
+     1467,
+     1563
+    ],
+    [
+     1435,
+     1496
+    ],
+    [
+     1481,
+     1486
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_207",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 922,
+   "z": 1649,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     894,
+     1654
+    ],
+    [
+     918,
+     1609
+    ],
+    [
+     958,
+     1636
+    ],
+    [
+     929,
+     1686
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_208",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1209,
+   "z": 552,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_209",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1731,
+   "z": 804,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1738,
+     828
+    ],
+    [
+     1709,
+     815
+    ],
+    [
+     1722,
+     778
+    ],
+    [
+     1760,
+     790
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_210",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 765,
+   "z": 1950,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_211",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1107,
+   "z": 1139,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1140,
+     1176
+    ],
+    [
+     1080,
+     1170
+    ],
+    [
+     1069,
+     1105
+    ],
+    [
+     1154,
+     1102
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_212",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1555,
+   "z": 512,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1544,
+     474
+    ],
+    [
+     1596,
+     487
+    ],
+    [
+     1574,
+     546
+    ],
+    [
+     1532,
+     529
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_213",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1723,
+   "z": 1445,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1789,
+     1435
+    ],
+    [
+     1732,
+     1496
+    ],
+    [
+     1658,
+     1464
+    ],
+    [
+     1719,
+     1381
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_214",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 654,
+   "z": 1793,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     689,
+     1822
+    ],
+    [
+     605,
+     1829
+    ],
+    [
+     626,
+     1755
+    ],
+    [
+     706,
+     1763
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_215",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1373,
+   "z": 229,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1381,
+     203
+    ],
+    [
+     1410,
+     238
+    ],
+    [
+     1374,
+     271
+    ],
+    [
+     1331,
+     224
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_216",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1648,
+   "z": 1960,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1601,
+     1973
+    ],
+    [
+     1625,
+     1906
+    ],
+    [
+     1692,
+     1958
+    ],
+    [
+     1668,
+     2002
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_217",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 791,
+   "z": 1713,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     817,
+     1686
+    ],
+    [
+     808,
+     1741
+    ],
+    [
+     758,
+     1752
+    ],
+    [
+     764,
+     1685
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_218",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 828,
+   "z": 1246,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     873,
+     1240
+    ],
+    [
+     852,
+     1291
+    ],
+    [
+     776,
+     1272
+    ],
+    [
+     811,
+     1179
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_219",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1641,
+   "z": 1840,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_220",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1312,
+   "z": 616,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1354,
+     639
+    ],
+    [
+     1291,
+     687
+    ],
+    [
+     1250,
+     598
+    ],
+    [
+     1347,
+     560
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_221",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 428,
+   "z": 1409,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_222",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 430,
+   "z": 1801,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     418,
+     1736
+    ],
+    [
+     476,
+     1792
+    ],
+    [
+     442,
+     1871
+    ],
+    [
+     362,
+     1803
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_223",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1436,
+   "z": 1396,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_224",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1000,
+   "z": 2000,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_225",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 370,
+   "z": 600,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     402,
+     570
+    ],
+    [
+     391,
+     626
+    ],
+    [
+     338,
+     629
+    ],
+    [
+     348,
+     571
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_226",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 713,
+   "z": 1496,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     736,
+     1522
+    ],
+    [
+     678,
+     1518
+    ],
+    [
+     679,
+     1455
+    ],
+    [
+     745,
+     1467
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_227",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 331,
+   "z": 1021,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_228",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 138,
+   "z": 81,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_229",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 32,
+   "z": 1181,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_230",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1498,
+   "z": 1190,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_231",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1930,
+   "z": 1054,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_232",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 844,
+   "z": 153,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     851,
+     116
+    ],
+    [
+     884,
+     167
+    ],
+    [
+     826,
+     201
+    ],
+    [
+     813,
+     154
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_233",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 483,
+   "z": 660,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_234",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1904,
+   "z": 1904,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_235",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 604,
+   "z": 1484,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     572,
+     1526
+    ],
+    [
+     568,
+     1474
+    ],
+    [
+     631,
+     1434
+    ],
+    [
+     648,
+     1507
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_236",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1770,
+   "z": 608,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_237",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 133,
+   "z": 2011,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_238",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1034,
+   "z": 292,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_239",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 617,
+   "z": 231,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     635,
+     200
+    ],
+    [
+     647,
+     239
+    ],
+    [
+     595,
+     259
+    ],
+    [
+     585,
+     215
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_240",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1999,
+   "z": 687,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_241",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1376,
+   "z": 1144,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_242",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1710,
+   "z": 1075,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_243",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1216,
+   "z": 160,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1225,
+     191
+    ],
+    [
+     1183,
+     185
+    ],
+    [
+     1205,
+     117
+    ],
+    [
+     1255,
+     153
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_244",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1044,
+   "z": 698,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_245",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1204,
+   "z": 1400,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_246",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 920,
+   "z": 1360,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     910,
+     1308
+    ],
+    [
+     991,
+     1324
+    ],
+    [
+     923,
+     1435
+    ],
+    [
+     871,
+     1372
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_247",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 104,
+   "z": 1680,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_248",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1404,
+   "z": 732,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1472,
+     767
+    ],
+    [
+     1367,
+     776
+    ],
+    [
+     1331,
+     704
+    ],
+    [
+     1429,
+     688
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_249",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1024,
+   "z": 1024,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     950,
+     1041
+    ],
+    [
+     1013,
+     951
+    ],
+    [
+     1084,
+     1022
+    ],
+    [
+     1031,
+     1084
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_250",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1987,
+   "z": 1468,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_251",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1294,
+   "z": 943,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_252",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 543,
+   "z": 1701,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     522,
+     1730
+    ],
+    [
+     513,
+     1675
+    ],
+    [
+     568,
+     1671
+    ],
+    [
+     571,
+     1720
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_253",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1560,
+   "z": 1896,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_254",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    1,
+    2
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 356,
+   "z": 1406,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     309,
+     1409
+    ],
+    [
+     352,
+     1363
+    ],
+    [
+     389,
+     1409
+    ],
+    [
+     349,
+     1444
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_255",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 273,
+   "z": 104,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_256",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1642,
+   "z": 68,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_257",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1564,
+   "z": 1430,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_258",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1232,
+   "z": 1060,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_test_259",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1891,
+   "z": 1234,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  }
+ ]
+}

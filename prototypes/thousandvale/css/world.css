@@ -1,0 +1,117 @@
+/* Thousandvale — the living-world HUD (js/client/world-ui.js): clock, dialogs, waystones, realm event,
+   open groups, zone deeds, vignette lore, object labels. Loaded after client.css; same tokens. */
+
+.tv-clock { position: absolute; top: 52px; right: 14px; display: flex; align-items: center; gap: 8px; padding: 5px 14px;
+  background: var(--panel); border: 1px solid var(--edge); border-radius: 20px; font-size: 13px; color: var(--ink-dim); letter-spacing: 0.03em; }
+.tv-clock i { width: 10px; height: 10px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff4c8, #f2b54a); box-shadow: 0 0 8px #f2b54a; }
+.tv-clock.night i { background: radial-gradient(circle at 35% 35%, #ffffff, #9fb4ff); box-shadow: 0 0 8px #9fb4ff; }
+
+/* dialogs: talking, notes, graves, waystones */
+.tv-dialog { position: absolute; left: 50%; bottom: 120px; transform: translateX(-50%); width: min(520px, calc(100vw - 32px)); max-height: 56vh; display: flex; flex-direction: column;
+  background: var(--panel); border: 1px solid var(--edge-strong); border-radius: 10px; box-shadow: var(--shadow); pointer-events: auto; backdrop-filter: blur(6px); }
+.tv-dialog header { display: flex; align-items: baseline; gap: 10px; padding: 12px 14px 6px; border-bottom: 1px solid var(--edge); }
+.tv-dialog header strong { font-family: var(--serif); color: var(--gold-hi); font-size: 17px; letter-spacing: 0.04em; }
+.tv-dialog header em { color: var(--ink-faint); font-size: 13px; flex: 1; }
+.tv-dialog header button { padding: 0 8px; font-size: 18px; }
+.tv-dialog .body { padding: 10px 14px; overflow-y: auto; line-height: 1.45; }
+.tv-dialog .body p { margin: 0 0 8px; }
+.tv-dialog .say { font-size: 17px; font-style: italic; color: var(--ink); }
+.tv-dialog .note-text { font-family: Georgia, serif; font-style: italic; color: #e9dcc0; background: rgba(60, 46, 28, 0.45); padding: 10px 12px; border-left: 3px solid var(--gold); border-radius: 4px; }
+.tv-dialog .quest { color: var(--warn); }
+.tv-dialog .tiny { color: var(--ink-faint); font-size: 12px; }
+.tv-dialog footer { display: flex; justify-content: flex-end; gap: 8px; padding: 8px 14px 12px; }
+.tv-dialog footer button { padding: 6px 14px; }
+.ws-list { list-style: none; margin: 0 0 8px; padding: 0; }
+.ws-list li { display: flex; align-items: center; gap: 10px; padding: 7px 4px; border-bottom: 1px solid rgba(217, 178, 106, 0.14); }
+.ws-list li.unknown { color: var(--ink-faint); font-style: italic; }
+.ws-list li.here .ws-name { color: var(--good); }
+.ws-list .ws-name { flex: 1; }
+.ws-list .ws-fare { color: var(--gold); font-size: 13px; min-width: 70px; text-align: right; }
+.ws-list button { padding: 3px 10px; }
+.ws-event { color: #ffb36a; display: flex; align-items: center; gap: 10px; justify-content: space-between; }
+
+/* realm event announcement */
+.tv-event { position: absolute; top: 92px; right: 14px; width: min(340px, calc(100vw - 32px)); padding: 10px 14px 12px; text-align: center;
+  background: linear-gradient(180deg, rgba(60, 20, 14, 0.9), rgba(24, 12, 10, 0.88)); border: 1px solid rgba(255, 120, 80, 0.6); border-radius: 10px; box-shadow: 0 0 24px rgba(255, 90, 50, 0.25), var(--shadow); pointer-events: auto; }
+.tv-event .ev-head { display: flex; justify-content: center; gap: 10px; font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; color: #ffb36a; }
+.tv-event .ev-time { color: var(--ink); letter-spacing: 0.05em; font-variant-numeric: tabular-nums; }
+.tv-event .ev-name { display: block; font-family: var(--serif); font-size: 17px; color: var(--gold-hi); margin: 4px 0 2px; }
+.tv-event .ev-sub { font-size: 13px; color: var(--ink-dim); }
+.tv-event .ev-go { margin-top: 8px; padding: 6px 16px; width: auto; display: none; }
+.tv-event.live .ev-go { display: inline-block; }
+.tv-event.live { animation: evpulse 2.4s ease-in-out infinite; }
+.tv-event.ended { border-color: var(--edge-strong); background: var(--panel); }
+@keyframes evpulse { 50% { box-shadow: 0 0 34px rgba(255, 90, 50, 0.5), var(--shadow); } }
+.tv-eventframe { position: absolute; top: 236px; right: 14px; width: 340px; padding: 6px 10px; background: var(--panel); border: 1px solid rgba(255, 120, 80, 0.5); border-radius: 8px; font-size: 12px; text-align: center; }
+.tv-eventframe b { display: block; color: var(--gold-hi); font-family: var(--serif); }
+.tv-eventframe .bar { height: 8px; margin: 4px 0; background: rgba(0, 0, 0, 0.5); border-radius: 4px; overflow: hidden; }
+.tv-eventframe .bar i { display: block; height: 100%; background: linear-gradient(90deg, #a52a20, #e65a45); }
+.tv-eventframe span { color: var(--ink-dim); }
+
+/* open groups */
+.tv-group { position: absolute; top: 320px; right: 14px; max-width: 320px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 12px;
+  background: var(--panel); border: 1px solid var(--edge-strong); border-radius: 10px; box-shadow: var(--shadow); pointer-events: auto; animation: slidein 0.3s ease; }
+.tv-group span { flex: 1 1 100%; font-size: 14px; }
+.tv-group .primary { width: auto; padding: 6px 14px; font-size: 14px; }
+.tv-group .ghost { padding: 4px 10px; }
+@keyframes slidein { from { transform: translateX(30px); opacity: 0; } }
+
+/* zone deeds, under the self frame */
+.tv-deeds { position: absolute; top: 88px; left: 14px; max-width: 280px; padding: 6px 10px; background: rgba(18, 15, 12, 0.55); border-left: 2px solid var(--edge-strong); border-radius: 0 6px 6px 0; font-size: 12px; color: var(--ink-dim); }
+.tv-deeds b { display: block; font-family: var(--serif); color: var(--gold); font-size: 12px; letter-spacing: 0.05em; font-weight: 600; }
+.tv-deeds ul { list-style: none; margin: 2px 0 0; padding: 0; }
+.tv-deeds li { line-height: 1.35; }
+.tv-deeds li.quiet { font-style: italic; color: var(--ink-faint); }
+
+/* vignette lore card */
+.tv-lore { position: absolute; left: 50%; top: 30vh; transform: translateX(-50%); width: min(460px, calc(100vw - 32px)); text-align: center; padding: 10px 16px;
+  background: linear-gradient(180deg, rgba(18, 15, 12, 0.0), rgba(18, 15, 12, 0.7) 20%, rgba(18, 15, 12, 0.7) 80%, rgba(18, 15, 12, 0)); transition: opacity 1.2s; animation: lorein 0.8s ease; }
+.tv-lore b { font-family: var(--serif); color: var(--gold-hi); font-size: 18px; letter-spacing: 0.06em; }
+.tv-lore p { margin: 4px 0 0; font-style: italic; color: var(--ink); text-shadow: 0 1px 3px #000; }
+.tv-lore.out { opacity: 0; }
+@keyframes lorein { from { opacity: 0; transform: translate(-50%, 8px); } }
+.chat-log .lore { color: #d8c9a6; font-style: italic; }
+.chat-log .event { color: #ffb36a; font-weight: 700; }
+
+/* floating object labels ("Cleared by …") */
+.obj-label { position: absolute; left: 0; top: 0; padding: 2px 8px; font-size: 12px; color: var(--gold-hi); background: rgba(18, 15, 12, 0.7); border: 1px solid var(--edge); border-radius: 4px; white-space: nowrap; text-shadow: 0 1px 2px #000; }
+
+/* town folk plates */
+.plate.npc .plate-n { color: #bfe3ff; }
+.plate.npc .plate-bar { display: none; }
+.plate.npc .plate-lvl { display: none; }
+
+/* far-player stand-ins keep a small plate */
+.plate.far .plate-bar { display: none; }
+
+@media (max-width: 760px) {
+  .tv-clock { top: 52px; right: 8px; }
+  .tv-event { top: 86px; right: 8px; left: 8px; width: auto; }
+  .tv-eventframe { right: 8px; left: 8px; width: auto; top: 220px; }
+  .tv-deeds { display: none; }
+  .tv-group { right: 8px; left: 8px; max-width: none; top: auto; bottom: 150px; }
+  .tv-dialog { bottom: 96px; }
+}
+.tv-dialog .primary, .ws-event .primary { width: auto; padding: 6px 14px; font-size: 14px; }
+
+/* skill slots (1–6) */
+.slot .face { font-family: var(--serif); font-weight: 700; font-size: 17px; color: var(--gold-hi); letter-spacing: 0.04em; text-shadow: 0 1px 2px #000; }
+.slot.ally .face { color: #9fe6a8; }
+.slot.locked { opacity: 0.4; filter: grayscale(0.8); }
+.slot.locked::after { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(45deg, rgba(0,0,0,0.25) 0 4px, transparent 4px 8px); }
+
+/* quests: offers in the dialog, the tracker */
+.q-block h4 { margin: 10px 0 4px; font-family: var(--serif); color: var(--gold); font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
+.q-row { display: flex; gap: 10px; align-items: flex-start; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(217, 178, 106, 0.14); }
+.q-row p { margin: 2px 0; font-size: 13px; color: var(--ink-dim); }
+.q-row small { color: var(--ink-faint); }
+.q-row .q-reward { color: var(--warn); }
+.q-row .primary { width: auto; padding: 5px 12px; font-size: 13px; flex: none; }
+.tv-quests { position: absolute; left: 14px; top: 350px; width: 260px; max-height: calc(100vh - 560px); overflow: hidden; padding: 8px 10px; background: rgba(18, 15, 12, 0.55); border-left: 2px solid var(--edge-strong); border-radius: 0 6px 6px 0; font-size: 12px; }
+.tv-quests > b { font-family: var(--serif); color: var(--gold); letter-spacing: 0.06em; }
+.tv-quests ol { margin: 4px 0 0; padding-left: 16px; }
+.tv-quests li { margin-bottom: 4px; }
+.tv-quests li b { display: block; color: var(--ink); font-weight: 600; }
+.tv-quests li span { color: var(--ink-dim); }
+.tv-quests li.ready span { color: var(--good); }
+@media (max-width: 760px) { .tv-quests { display: none; } }

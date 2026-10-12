@@ -7,55 +7,64 @@
       "n": 1,
       "zone": "test",
       "quest": "toll_at_fitockpi",
-      "beat": "Free Fitockpi Ford from Hobb Gallowsby's toll gang."
+      "beat": "Free Fitockpi Ford from Hobb Gallowsby's toll gang.",
+      "where": "The Torbor Fields (ask in Torborhold)"
     },
     {
       "n": 2,
       "zone": "saint_orrins_rise",
       "quest": "the_restless_cloister",
-      "beat": "The dead at Saint Orrin's abbey are getting up. Someone is stirring the province's graves."
+      "beat": "The dead at Saint Orrin's abbey are getting up. Someone is stirring the province's graves.",
+      "where": "Saint Orrin's Rise (ask in Orrinsford)"
     },
     {
       "n": 3,
       "zone": "torbor_cross",
       "quest": "bells_for_halsbridge",
-      "beat": "The capital, Halsbridge: the roads in are full of cutpurses paid by someone further off."
+      "beat": "The capital, Halsbridge: the roads in are full of cutpurses paid by someone further off.",
+      "where": "Torbor Cross (ask in Halsbridge)"
     },
     {
       "n": 4,
       "zone": "millbrook",
       "quest": "millbrook_wheels",
-      "beat": "Millbrook's lanes are blocked; the reeve points you to the old keep at Ashcombe."
+      "beat": "Millbrook's lanes are blocked; the reeve points you to the old keep at Ashcombe.",
+      "where": "Millbrook Vale (ask in Millbrook)"
     },
     {
       "n": 5,
       "zone": "ashcombe",
       "quest": "the_broken_keep",
-      "beat": "Scavengers in the Broken Keep carry warband coin."
+      "beat": "Scavengers in the Broken Keep carry warband coin.",
+      "where": "The Ashcombe Ruins (ask in Ashcombe)"
     },
     {
       "n": 6,
       "zone": "delvers_hill",
       "quest": "copper_and_candles",
-      "beat": "The warband buys copper from Delvers' Hill by the cartload. For what?"
+      "beat": "The warband buys copper from Delvers' Hill by the cartload. For what?",
+      "where": "Delvers' Hill (ask in Copperdell)"
     },
     {
       "n": 7,
       "zone": "brackwater",
       "quest": "eels_and_omens",
-      "beat": "Omens in the fen point west, toward Wychwood."
+      "beat": "Omens in the fen point west, toward Wychwood.",
+      "where": "Brackwater Fen (ask in Brackwater)"
     },
     {
       "n": 8,
       "zone": "wychwood",
       "quest": "the_antler_stockade",
-      "beat": "The forest road is cut; open it to reach the frontier."
+      "beat": "The forest road is cut; open it to reach the frontier.",
+      "where": "Wychwood (ask in Hermit's Rest)"
     },
     {
       "n": 9,
       "zone": "redcliff",
       "quest": "flags_over_redcliff",
-      "beat": "Warband raiders burn the frontier. They come from Blackthorn Scar."
+      "beat": "Warband raiders burn the frontier. They come from Blackthorn Scar.",
+      "where": "The Redcliff Frontier (ask in Redcliff)"
     },
     {
       "n": 10,
@@ -64,7 +73,8 @@
       "then": "the_heart_of_the_scar",
       "kind": "killOne",
       "encounter": "world_grimtallow",
-      "beat": "Clear the thorn roads, then stand with the whole province against what wakes at the heart of the Scar."
+      "beat": "Clear the thorn roads, then stand with the whole province against what wakes at the heart of the Scar.",
+      "where": "Blackthorn Scar (ask in Last Lantern)"
     }
   ],
   "crossZone": [

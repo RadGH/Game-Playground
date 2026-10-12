@@ -2,6 +2,7 @@
   "id": "elite_hobb_gallowsby",
   "name": "Hobb Gallowsby, Toll-Captain",
   "tier": "elite",
+  "level": 4,
   "body": "brigand_captain",
   "place": "wilds: holds Fitockpi Ford with a brigand camp (zone 'test', ~1600, 832); respawn 20 min per copy",
   "_doc": "Stream E. The wilds ELITE. A talker. He demands a toll from the farthest player (a circle that follows them — run it away from the group), scatters caltrops that stay, and whistles for archers on the bank (three circles on random players). At 60% he calls two brigands; at 35% he stops talking and spins his cleaver (a get-in-close ring). He binds his own wounds with an interruptible bandage.",

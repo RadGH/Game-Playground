@@ -1,0 +1,313 @@
+{
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z12_04, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "zone": "z12_04",
+ "terrainHash": "e88810dc",
+ "placements": [
+  {
+   "type": "camp",
+   "id": "quest_cold_slimes_0_0",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    7,
+    7
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1331,
+   "z": 1950,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "cold_slimes",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_tower_lights_0_0",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    7,
+    7
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 592,
+   "z": 1392,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "tower_lights",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z12_04_1",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 40,
+   "z": 40,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "ironclad"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z12_04_2",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    6
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 336,
+   "z": 712,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "vicious"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z12_04_3",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    6,
+    6
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 216,
+   "z": 1480,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "frostbound"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z12_04_4",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    7,
+    7
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 52,
+   "z": 1762,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "gilded"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "npc",
+   "id": "angler_coldwater",
+   "name": "Marta Stillmere",
+   "role": "angler",
+   "at": "Coldwater",
+   "x": 1272,
+   "z": 1628,
+   "yaw": -0.79,
+   "angler": true,
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "npc",
+   "id": "carter_coldwater",
+   "name": "Fenna Furlong",
+   "role": "carter",
+   "at": "Coldwater",
+   "x": 1426,
+   "z": 1904,
+   "yaw": -2.27,
+   "cart": "cart_coldwater",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_coldwater",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Coldwater",
+   "carter": "carter_coldwater",
+   "x": 1428,
+   "z": 1906,
+   "yaw": -0.755,
+   "radius": 2.2
+  },
+  {
+   "type": "npc",
+   "id": "carter_netherby",
+   "name": "Alys Ashby",
+   "role": "carter",
+   "at": "Netherby",
+   "x": 712,
+   "z": 788,
+   "yaw": -1.52,
+   "cart": "cart_netherby",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_netherby",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Netherby",
+   "carter": "carter_netherby",
+   "x": 714,
+   "z": 788,
+   "yaw": -0.072,
+   "radius": 2.2
+  },
+  {
+   "type": "guard",
+   "id": "guard_coldwater_0",
+   "name": "Coldwater Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Coldwater",
+   "post": "gate",
+   "gate": "coldwater_gate_0",
+   "x": 1430,
+   "z": 1886,
+   "yaw": -0.65,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_coldwater_1",
+   "name": "Coldwater Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Coldwater",
+   "post": "gate",
+   "gate": "coldwater_gate_0",
+   "x": 1436,
+   "z": 1892,
+   "yaw": -0.65,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_coldwater_2",
+   "name": "Sergeant Eastmere",
+   "role": "guard",
+   "rank": "sergeant",
+   "tier": "town",
+   "town": "Coldwater",
+   "post": "square",
+   "x": 1468,
+   "z": 1830,
+   "yaw": -1.588,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_coldwater_3",
+   "name": "Coldwater Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Coldwater",
+   "post": "square",
+   "x": 1456,
+   "z": 1822,
+   "yaw": 0.416,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_coldwater_4",
+   "name": "Coldwater Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Coldwater",
+   "post": "square",
+   "x": 1454,
+   "z": 1838,
+   "yaw": 2.55,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_netherby_0",
+   "name": "Netherby Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "hamlet",
+   "town": "Netherby",
+   "post": "gate",
+   "gate": "netherby_gate_0",
+   "x": 706,
+   "z": 770,
+   "yaw": -0.238,
+   "titled": false
+  }
+ ]
+}

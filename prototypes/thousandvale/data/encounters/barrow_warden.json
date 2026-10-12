@@ -51,7 +51,8 @@
     { "name": "The Ward", "at": 0.7, "say": "Rise, hounds of the barrow! The ward will hold!",
       "shieldWhileAdds": false,
       "abilities": ["rend", "grave_cross"],
-      "onEnter": [ { "shield": true }, { "adds": { "type": "barrow_hound", "count": 3, "radius": 8 } }, { "say": "Light the three braziers to break the ward!", "style": "warn" } ] },
+      "ward": {"seconds": 20, "pool": 0.1, "break": "objects", "need": 3, "what": "brazier", "addsToo": true, "say": "Kill the hounds and light the three braziers to break the ward! It fails by itself in 20 seconds.", "fade": "The ward fails by itself. No opening this time."},
+      "onEnter": [ { "shield": { "seconds": 20, "pool": 0.1 } }, { "adds": { "type": "barrow_hound", "count": 3, "radius": 8 } }, { "say": "Kill the hounds and light the three braziers to break the ward! It fails by itself in 20 seconds.", "style": "warn" } ] },
     { "name": "Unbound", "newBar": { "hp": 0.6 }, "say": "You have broken my ward. Now I am unbound!",
       "abilities": ["rend", "close_ward", "lantern_beams", "mourning_toll", "shelter"] }
   ],

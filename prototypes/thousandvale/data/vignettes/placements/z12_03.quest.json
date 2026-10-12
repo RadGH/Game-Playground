@@ -1,0 +1,371 @@
+{
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z12_03, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "zone": "z12_03",
+ "terrainHash": "a6a668c3",
+ "placements": [
+  {
+   "type": "camp",
+   "id": "quest_the_restless_cloister_0_0",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 961,
+   "z": 1762,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "the_restless_cloister",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_candles_for_the_crypt_0_0",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1154,
+   "z": 1961,
+   "yaw": 0,
+   "radius": 3,
+   "quest": "candles_for_the_crypt",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z12_03_1",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 493,
+   "z": 130,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "stormlash"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z12_03_2",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 345,
+   "z": 378,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "giant"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z12_03_3",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 170,
+   "z": 620,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "frostbound"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z12_03_4",
+   "monster": "hollow_wraith",
+   "with": null,
+   "level": [
+    3,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 40,
+   "z": 976,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "gilded"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z12_03_5",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 39,
+   "z": 1714,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "gilded"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "npc",
+   "id": "angler_orrinsford",
+   "name": "Sister Brindle",
+   "role": "angler",
+   "at": "Orrinsford",
+   "x": 336,
+   "z": 580,
+   "yaw": -0.39,
+   "angler": true,
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "npc",
+   "id": "carter_orrinsford",
+   "name": "Gervase Sallow",
+   "role": "carter",
+   "at": "Orrinsford",
+   "x": 256,
+   "z": 582,
+   "yaw": 3.11,
+   "cart": "cart_orrinsford",
+   "placedBy": "content-towns",
+   "quests": 1,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_orrinsford",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Orrinsford",
+   "carter": "carter_orrinsford",
+   "x": 256,
+   "z": 584,
+   "yaw": -1.549,
+   "radius": 2.2
+  },
+  {
+   "type": "npc",
+   "id": "carter_pilgrim_s_halt",
+   "name": "Wat Quarrie",
+   "role": "carter",
+   "at": "Pilgrim's Halt",
+   "x": 632,
+   "z": 202,
+   "yaw": -0.795,
+   "cart": "cart_pilgrim_s_halt",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_pilgrim_s_halt",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Pilgrim's Halt",
+   "carter": "carter_pilgrim_s_halt",
+   "x": 634,
+   "z": 200,
+   "yaw": -2.238,
+   "radius": 2.2
+  },
+  {
+   "type": "guard",
+   "id": "guard_orrinsford_0",
+   "name": "Orrinsford Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Orrinsford",
+   "post": "gate",
+   "gate": "orrinsford_gate_0",
+   "x": 276,
+   "z": 570,
+   "yaw": -1.406,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_orrinsford_1",
+   "name": "Orrinsford Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Orrinsford",
+   "post": "gate",
+   "gate": "orrinsford_gate_0",
+   "x": 278,
+   "z": 580,
+   "yaw": -1.406,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_orrinsford_2",
+   "name": "Orrinsford Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Orrinsford",
+   "post": "gate",
+   "gate": "orrinsford_gate_1",
+   "x": 324,
+   "z": 520,
+   "yaw": -3.113,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_orrinsford_3",
+   "name": "Orrinsford Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Orrinsford",
+   "post": "gate",
+   "gate": "orrinsford_gate_1",
+   "x": 316,
+   "z": 520,
+   "yaw": -3.113,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_orrinsford_4",
+   "name": "Sergeant Applegarth",
+   "role": "guard",
+   "rank": "sergeant",
+   "tier": "town",
+   "town": "Orrinsford",
+   "post": "square",
+   "x": 326,
+   "z": 572,
+   "yaw": 2.421,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_orrinsford_5",
+   "name": "Orrinsford Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Orrinsford",
+   "post": "square",
+   "x": 338,
+   "z": 568,
+   "yaw": -1.863,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_orrinsford_6",
+   "name": "Orrinsford Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Orrinsford",
+   "post": "square",
+   "x": 330,
+   "z": 560,
+   "yaw": 0.212,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_pilgrim_s_halt_0",
+   "name": "Pilgrim's Halt Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "hamlet",
+   "town": "Pilgrim's Halt",
+   "post": "gate",
+   "gate": "pilgrim_s_halt_gate_0",
+   "x": 642,
+   "z": 214,
+   "yaw": -2.347,
+   "titled": false
+  }
+ ]
+}

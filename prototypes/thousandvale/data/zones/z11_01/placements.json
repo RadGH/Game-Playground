@@ -1,34 +1,36 @@
 {
- "_doc": "Stream B zone placements (tools/bake-zone.mjs). Zone metres; yaw = atan2(dx, dz), the way the thing faces. kinds: settlement (data.radius, hub, planned), town_square, street (data.pts, width, cls), building (a proctown plot: data.w along `angle` (local +x = (cos angle, sin angle)), data.d across, want; yaw faces the nearest drawn street, data.streetGap = metres from the front to it), town_wall, road (data.pts [[x,z,h]], width, cls, spur), bridge (yaw along the road, span, deck height), dungeon_door, event_site, camp_site, landmark/dungeon/pass/crossing (World Forge nodes).",
+ "_doc": "Stream B zone placements (tools/bake-zone.mjs). Zone metres; yaw = atan2(dx, dz), the way the thing faces. kinds: settlement (data.radius, hub, planned), town_square, street (data.pts, width, cls), building (a proctown plot: data.w along `angle` (local +x = (cos angle, sin angle)), data.d across, want; yaw faces the nearest drawn street, data.streetGap = metres from the front to it), town_wall (play-test 4: every planned settlement; data.style/material/tier/h/thick/tint/radius, runs [[[x,z,h]…]…] open polylines between openings, towers [{x,z,h,yaw}], gates [{id,x,z,h,yaw = the way OUT along the road,out:[dx,dz],width,pass,kind gatehouse|posts|gap,way,ways,led,ends,approaches}], openings [{kind water|keep,ends,grate}] — SOLID in nav.bin except the gates; tools/lib/zone-walls.mjs), road (data.pts [[x,z,h]], width, cls, spur), bridge (yaw along the road, span, deck height), dungeon_door, event_site, camp_site, landmark/dungeon/pass/crossing (World Forge nodes).",
  "zone": "z11_01",
- "terrainHash": "740c92aa",
+ "terrainHash": "6a42e50c",
  "placements": [
   {
    "kind": "settlement",
-   "id": "fiderow",
+   "id": "hollin_toll",
    "x": 1728,
    "z": 560,
    "yaw": 0,
    "data": {
     "kind": "town",
-    "name": "Fiderow",
+    "name": "Hollin Toll",
     "radius": 90,
     "hub": true,
-    "planned": true
+    "planned": true,
+    "wfName": "Fiderow"
    }
   },
   {
    "kind": "settlement",
-   "id": "old_mosshearth",
+   "id": "scree_end",
    "x": 112,
    "z": 1472,
    "yaw": 0,
    "data": {
     "kind": "hamlet",
-    "name": "Old Mosshearth",
+    "name": "Scree End",
     "radius": 46,
     "hub": false,
-    "planned": true
+    "planned": true,
+    "wfName": "Old Mosshearth"
    }
   },
   {
@@ -89,24 +91,42 @@
   },
   {
    "kind": "town_square",
-   "id": "fiderow_square",
+   "id": "hollin_toll_square",
    "x": 1727.74,
    "z": 561.46,
    "yaw": 0,
    "data": {
     "r": 3.17,
-    "town": "fiderow",
-    "culture": "halfling"
+    "town": "hollin_toll",
+    "culture": "halfling",
+    "stalls": [
+     [
+      1733.18,
+      563.76
+     ],
+     [
+      1712.64,
+      555.07
+     ],
+     [
+      1733.01,
+      556.27
+     ],
+     [
+      1726.52,
+      570.27
+     ]
+    ]
    }
   },
   {
    "kind": "street",
-   "id": "fiderow_street_0",
+   "id": "hollin_toll_street_0",
    "x": 1703.25,
    "z": 510.88,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "main",
     "width": 5,
     "pts": [
@@ -127,12 +147,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_1",
+   "id": "hollin_toll_street_1",
    "x": 1699.58,
    "z": 604.64,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "lane",
     "width": 3.2,
     "pts": [
@@ -153,12 +173,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_2",
+   "id": "hollin_toll_street_2",
    "x": 1680.26,
    "z": 581.89,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -179,12 +199,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_3",
+   "id": "hollin_toll_street_3",
    "x": 1673.23,
    "z": 554.99,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -205,12 +225,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_4",
+   "id": "hollin_toll_street_4",
    "x": 1674.99,
    "z": 569.79,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -231,12 +251,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_5",
+   "id": "hollin_toll_street_5",
    "x": 1673.01,
    "z": 560.94,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -257,12 +277,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_6",
+   "id": "hollin_toll_street_6",
    "x": 1677.37,
    "z": 567.9,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -283,12 +303,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_7",
+   "id": "hollin_toll_street_7",
    "x": 1677.75,
    "z": 546.41,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -309,12 +329,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_8",
+   "id": "hollin_toll_street_8",
    "x": 1683.29,
    "z": 559.1,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -335,12 +355,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_9",
+   "id": "hollin_toll_street_9",
    "x": 1676.55,
    "z": 555.22,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -361,12 +381,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_10",
+   "id": "hollin_toll_street_10",
    "x": 1689.03,
    "z": 551,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -387,12 +407,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_11",
+   "id": "hollin_toll_street_11",
    "x": 1680.85,
    "z": 541.03,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -413,12 +433,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_12",
+   "id": "hollin_toll_street_12",
    "x": 1681.92,
    "z": 546.91,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -439,12 +459,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_13",
+   "id": "hollin_toll_street_13",
    "x": 1683.31,
    "z": 536.75,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -465,12 +485,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_14",
+   "id": "hollin_toll_street_14",
    "x": 1687.34,
    "z": 543.11,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -491,12 +511,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_15",
+   "id": "hollin_toll_street_15",
    "x": 1688.67,
    "z": 538.32,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -517,12 +537,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_16",
+   "id": "hollin_toll_street_16",
    "x": 1693.7,
    "z": 545.09,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -543,12 +563,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_17",
+   "id": "hollin_toll_street_17",
    "x": 1706.91,
    "z": 555.04,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -569,12 +589,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_18",
+   "id": "hollin_toll_street_18",
    "x": 1697.46,
    "z": 565.34,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -595,12 +615,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_19",
+   "id": "hollin_toll_street_19",
    "x": 1694.03,
    "z": 588.46,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -621,12 +641,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_20",
+   "id": "hollin_toll_street_20",
    "x": 1692.02,
    "z": 571.28,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -647,12 +667,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_21",
+   "id": "hollin_toll_street_21",
    "x": 1690.4,
    "z": 585.14,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -673,12 +693,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_22",
+   "id": "hollin_toll_street_22",
    "x": 1686.96,
    "z": 576.8,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -699,12 +719,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_23",
+   "id": "hollin_toll_street_23",
    "x": 1695.45,
    "z": 581.61,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -725,12 +745,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_24",
+   "id": "hollin_toll_street_24",
    "x": 1698.68,
    "z": 575.82,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -751,12 +771,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_25",
+   "id": "hollin_toll_street_25",
    "x": 1699.66,
    "z": 584.27,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -777,12 +797,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_26",
+   "id": "hollin_toll_street_26",
    "x": 1705.14,
    "z": 570.13,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -803,12 +823,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_27",
+   "id": "hollin_toll_street_27",
    "x": 1703.34,
    "z": 558.93,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -829,12 +849,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_28",
+   "id": "hollin_toll_street_28",
    "x": 1708.38,
    "z": 573.1,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -855,12 +875,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_29",
+   "id": "hollin_toll_street_29",
    "x": 1711.46,
    "z": 565.21,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -881,12 +901,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_30",
+   "id": "hollin_toll_street_30",
    "x": 1712.45,
    "z": 570.79,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -907,12 +927,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_31",
+   "id": "hollin_toll_street_31",
    "x": 1719.81,
    "z": 564.69,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -933,12 +953,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_32",
+   "id": "hollin_toll_street_32",
    "x": 1715.01,
    "z": 560.29,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -959,12 +979,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_33",
+   "id": "hollin_toll_street_33",
    "x": 1711.6,
    "z": 549.92,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -985,12 +1005,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_34",
+   "id": "hollin_toll_street_34",
    "x": 1719.02,
    "z": 557.69,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1011,12 +1031,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_35",
+   "id": "hollin_toll_street_35",
    "x": 1723.12,
    "z": 563.18,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1037,12 +1057,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_36",
+   "id": "hollin_toll_street_36",
    "x": 1731.59,
    "z": 581.07,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1063,12 +1083,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_37",
+   "id": "hollin_toll_street_37",
    "x": 1720.23,
    "z": 592.55,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1089,12 +1109,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_38",
+   "id": "hollin_toll_street_38",
    "x": 1723.57,
    "z": 614.82,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1115,12 +1135,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_39",
+   "id": "hollin_toll_street_39",
    "x": 1713.26,
    "z": 608.87,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1141,12 +1161,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_40",
+   "id": "hollin_toll_street_40",
    "x": 1714.1,
    "z": 599.71,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1167,12 +1187,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_41",
+   "id": "hollin_toll_street_41",
    "x": 1716.79,
    "z": 606.71,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1193,12 +1213,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_42",
+   "id": "hollin_toll_street_42",
    "x": 1720.01,
    "z": 602.95,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1219,12 +1239,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_43",
+   "id": "hollin_toll_street_43",
    "x": 1729.32,
    "z": 610.12,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1245,12 +1265,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_44",
+   "id": "hollin_toll_street_44",
    "x": 1735.15,
    "z": 602.84,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1271,12 +1291,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_45",
+   "id": "hollin_toll_street_45",
    "x": 1726.97,
    "z": 595.85,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1297,12 +1317,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_46",
+   "id": "hollin_toll_street_46",
    "x": 1743.01,
    "z": 591.55,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1323,12 +1343,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_47",
+   "id": "hollin_toll_street_47",
    "x": 1740.42,
    "z": 575.37,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1349,12 +1369,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_48",
+   "id": "hollin_toll_street_48",
    "x": 1739.25,
    "z": 586.53,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1375,12 +1395,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_49",
+   "id": "hollin_toll_street_49",
    "x": 1745.3,
    "z": 579.42,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1401,12 +1421,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_50",
+   "id": "hollin_toll_street_50",
    "x": 1747.68,
    "z": 589.94,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1427,12 +1447,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_51",
+   "id": "hollin_toll_street_51",
    "x": 1746.05,
    "z": 595.61,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1453,12 +1473,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_52",
+   "id": "hollin_toll_street_52",
    "x": 1753.23,
    "z": 595.07,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1479,12 +1499,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_53",
+   "id": "hollin_toll_street_53",
    "x": 1742.64,
    "z": 536.87,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "lane",
     "width": 3.2,
     "pts": [
@@ -1505,12 +1525,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_54",
+   "id": "hollin_toll_street_54",
    "x": 1734.08,
    "z": 521.7,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1531,12 +1551,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_55",
+   "id": "hollin_toll_street_55",
    "x": 1735.4,
    "z": 507.25,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1557,12 +1577,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_56",
+   "id": "hollin_toll_street_56",
    "x": 1739.84,
    "z": 518.83,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1583,12 +1603,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_57",
+   "id": "hollin_toll_street_57",
    "x": 1737.88,
    "z": 525.24,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1609,12 +1629,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_58",
+   "id": "hollin_toll_street_58",
    "x": 1748.16,
    "z": 512.77,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1635,12 +1655,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_59",
+   "id": "hollin_toll_street_59",
    "x": 1746.21,
    "z": 525.3,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1661,12 +1681,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_60",
+   "id": "hollin_toll_street_60",
    "x": 1753.45,
    "z": 517.54,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1687,12 +1707,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_61",
+   "id": "hollin_toll_street_61",
    "x": 1756.71,
    "z": 554.88,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1713,12 +1733,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_62",
+   "id": "hollin_toll_street_62",
    "x": 1758.16,
    "z": 534.65,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1739,12 +1759,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_63",
+   "id": "hollin_toll_street_63",
    "x": 1754.53,
    "z": 547.53,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1765,12 +1785,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_64",
+   "id": "hollin_toll_street_64",
    "x": 1762.78,
    "z": 539.06,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1791,12 +1811,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_65",
+   "id": "hollin_toll_street_65",
    "x": 1768.98,
    "z": 551.86,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1817,12 +1837,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_66",
+   "id": "hollin_toll_street_66",
    "x": 1760.36,
    "z": 558.46,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1843,12 +1863,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_67",
+   "id": "hollin_toll_street_67",
    "x": 1771.9,
    "z": 556.21,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1869,34 +1889,37 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_68",
-   "x": 1724.08,
-   "z": 505.14,
+   "id": "hollin_toll_street_68",
+   "x": 1723.37,
+   "z": 495.17,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "main",
     "width": 5,
     "pts": [
      [
-      1724.08,
-      505.14
+      1723.37,
+      495.17
      ],
      [
-      1735.4,
-      507.25
+      1727.53,
+      558.3
      ]
-    ]
+    ],
+    "high": true,
+    "to": "square",
+    "road": "spur_hollin_toll"
    }
   },
   {
    "kind": "street",
-   "id": "fiderow_street_69",
+   "id": "hollin_toll_street_69",
    "x": 1720.63,
    "z": 584.58,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1913,12 +1936,34 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_70",
+   "id": "hollin_toll_street_70",
+   "x": 1734.08,
+   "z": 521.7,
+   "yaw": 0,
+   "data": {
+    "town": "hollin_toll",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1734.08,
+      521.7
+     ],
+     [
+      1725.16,
+      522.29
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "hollin_toll_street_71",
    "x": 1736.86,
    "z": 552.02,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1927,20 +1972,20 @@
       552.02
      ],
      [
-      1727.18,
-      556.65
+      1727.16,
+      552.66
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "fiderow_street_71",
+   "id": "hollin_toll_street_72",
    "x": 1720.23,
    "z": 592.55,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1957,12 +2002,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_72",
+   "id": "hollin_toll_street_73",
    "x": 1741.31,
    "z": 592,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1979,56 +2024,34 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_73",
-   "x": 1742.64,
-   "z": 536.87,
+   "id": "hollin_toll_street_74",
+   "x": 1753,
+   "z": 530.77,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      1742.64,
-      536.87
+      1753,
+      530.77
      ],
-     [
-      1731.75,
-      545.77
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "fiderow_street_74",
-   "x": 1747.39,
-   "z": 529.19,
-   "yaw": 0,
-   "data": {
-    "town": "fiderow",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
      [
       1747.39,
       529.19
-     ],
-     [
-      1749.53,
-      532.81
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "fiderow_street_75",
+   "id": "hollin_toll_street_75",
    "x": 1758.16,
    "z": 534.65,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2045,12 +2068,12 @@
   },
   {
    "kind": "street",
-   "id": "fiderow_street_76",
+   "id": "hollin_toll_street_76",
    "x": 1768.98,
    "z": 551.86,
    "yaw": 0,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2067,13 +2090,13 @@
   },
   {
    "kind": "building",
-   "id": "fiderow_plot_0",
+   "id": "hollin_toll_plot_0",
    "x": 1683.41,
    "z": 566.22,
    "yaw": -0.5218,
    "data": {
-    "town": "fiderow",
-    "want": "chapel",
+    "town": "hollin_toll",
+    "want": "house",
     "district": "residential",
     "w": 5.28,
     "d": 7.6,
@@ -2084,12 +2107,12 @@
   },
   {
    "kind": "building",
-   "id": "fiderow_plot_1",
+   "id": "hollin_toll_plot_1",
    "x": 1681.56,
    "z": 554.3,
    "yaw": 1.049,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "want": "house",
     "district": "residential",
     "w": 5.39,
@@ -2101,63 +2124,75 @@
   },
   {
    "kind": "building",
-   "id": "fiderow_plot_2",
+   "id": "hollin_toll_plot_2",
    "x": 1688.93,
    "z": 558.54,
    "yaw": -2.0926,
    "data": {
-    "town": "fiderow",
-    "want": "house",
+    "town": "hollin_toll",
+    "want": "bowyer",
     "district": "residential",
     "w": 5.39,
     "d": 5.69,
     "angle": 5.2342,
     "front": 9.9466,
-    "streetGap": -0.29
+    "streetGap": -0.29,
+    "office": "bowyer",
+    "role": "bowyer",
+    "lit": true,
+    "label": "Bowyer"
    }
   },
   {
    "kind": "building",
-   "id": "fiderow_plot_3",
+   "id": "hollin_toll_plot_3",
    "x": 1694.15,
    "z": 550.34,
    "yaw": 2.6198,
    "data": {
-    "town": "fiderow",
-    "want": "house",
+    "town": "hollin_toll",
+    "want": "study",
     "district": "residential",
     "w": 5.06,
     "d": 4.81,
     "angle": 5.2342,
     "front": 5.2342,
-    "streetGap": -0.4
+    "streetGap": -0.4,
+    "office": "study",
+    "role": "unbinder",
+    "lit": false,
+    "label": "Unbinder's Study"
    }
   },
   {
    "kind": "building",
-   "id": "fiderow_plot_4",
+   "id": "hollin_toll_plot_4",
    "x": 1699.08,
    "z": 541.78,
    "yaw": -2.0926,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "want": "stable",
     "district": "residential",
     "w": 7.52,
     "d": 4.81,
     "angle": 5.2342,
     "front": 9.9466,
-    "streetGap": -0.38
+    "streetGap": -0.38,
+    "office": "stable",
+    "role": "stablehand",
+    "lit": true,
+    "label": "Stables"
    }
   },
   {
    "kind": "building",
-   "id": "fiderow_plot_5",
+   "id": "hollin_toll_plot_5",
    "x": 1692.03,
    "z": 576.33,
    "yaw": -0.7418,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "want": "house",
     "district": "residential",
     "w": 3.92,
@@ -2169,12 +2204,12 @@
   },
   {
    "kind": "building",
-   "id": "fiderow_plot_6",
+   "id": "hollin_toll_plot_6",
    "x": 1697.07,
    "z": 570.79,
    "yaw": 0.829,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "want": "hut",
     "district": "craft",
     "w": 4.05,
@@ -2186,63 +2221,75 @@
   },
   {
    "kind": "building",
-   "id": "fiderow_plot_7",
+   "id": "hollin_toll_plot_7",
    "x": 1699.66,
    "z": 589.85,
    "yaw": 2.3998,
    "data": {
-    "town": "fiderow",
-    "want": "house",
+    "town": "hollin_toll",
+    "want": "tailor",
     "district": "residential",
     "w": 4.38,
     "d": 6.33,
     "angle": 5.4542,
     "front": 5.4542,
-    "streetGap": -0.4
+    "streetGap": -0.4,
+    "office": "tailor",
+    "role": "tailor",
+    "lit": true,
+    "label": "Tailor"
    }
   },
   {
    "kind": "building",
-   "id": "fiderow_plot_8",
+   "id": "hollin_toll_plot_8",
    "x": 1706.54,
    "z": 582.35,
    "yaw": -2.3126,
    "data": {
-    "town": "fiderow",
-    "want": "hall",
+    "town": "hollin_toll",
+    "want": "shop",
     "district": "craft",
     "w": 8.3,
     "d": 6.33,
     "angle": 5.4542,
     "front": 10.1666,
-    "streetGap": -0.3
+    "streetGap": -0.3,
+    "office": "shop",
+    "role": "merchant",
+    "lit": true,
+    "label": "General Goods"
    }
   },
   {
    "kind": "building",
-   "id": "fiderow_plot_9",
+   "id": "hollin_toll_plot_9",
    "x": 1703.35,
    "z": 564.51,
    "yaw": 2.3998,
    "data": {
-    "town": "fiderow",
-    "want": "hut",
+    "town": "hollin_toll",
+    "want": "forge",
     "district": "craft",
     "w": 4.68,
     "d": 6.36,
     "angle": 5.4542,
     "front": 5.4542,
-    "streetGap": -0.26
+    "streetGap": -0.26,
+    "office": "forge",
+    "role": "smith",
+    "lit": true,
+    "label": "Smithy"
    }
   },
   {
    "kind": "building",
-   "id": "fiderow_plot_10",
+   "id": "hollin_toll_plot_10",
    "x": 1717.62,
    "z": 570.48,
    "yaw": -0.7418,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "want": "hut",
     "district": "civic",
     "w": 3.89,
@@ -2254,63 +2301,75 @@
   },
   {
    "kind": "building",
-   "id": "fiderow_plot_11",
+   "id": "hollin_toll_plot_11",
    "x": 1725.86,
    "z": 603,
    "yaw": 2.4337,
    "data": {
-    "town": "fiderow",
-    "want": "house",
+    "town": "hollin_toll",
+    "want": "provisioner",
     "district": "residential",
     "w": 3.58,
     "d": 7.74,
     "angle": 5.4203,
     "front": 5.4203,
-    "streetGap": -0.32
+    "streetGap": -0.32,
+    "office": "provisioner",
+    "role": "provisioner",
+    "lit": true,
+    "label": "Provisioner"
    }
   },
   {
    "kind": "building",
-   "id": "fiderow_plot_12",
+   "id": "hollin_toll_plot_12",
    "x": 1726.33,
    "z": 590.16,
    "yaw": 0.8629,
    "data": {
-    "town": "fiderow",
-    "want": "hut",
+    "town": "hollin_toll",
+    "want": "inn",
     "district": "craft",
     "w": 6.6,
     "d": 4.96,
     "angle": 5.4203,
     "front": 6.9911,
-    "streetGap": -0.4
+    "streetGap": -0.4,
+    "office": "inn",
+    "role": "innkeeper",
+    "lit": true,
+    "label": "Inn"
    }
   },
   {
    "kind": "building",
-   "id": "fiderow_plot_13",
+   "id": "hollin_toll_plot_13",
    "x": 1733.53,
    "z": 596.33,
    "yaw": -2.2787,
    "data": {
-    "town": "fiderow",
-    "want": "inn",
+    "town": "hollin_toll",
+    "want": "barber",
     "district": "residential",
     "w": 6.6,
     "d": 7.19,
     "angle": 5.4203,
     "front": 10.1326,
-    "streetGap": -0.4
+    "streetGap": -0.4,
+    "office": "barber",
+    "role": "barber",
+    "lit": true,
+    "label": "Barber"
    }
   },
   {
    "kind": "building",
-   "id": "fiderow_plot_14",
+   "id": "hollin_toll_plot_14",
    "x": 1740.76,
    "z": 602.51,
    "yaw": -2.2787,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "want": "house",
     "district": "residential",
     "w": 6.6,
@@ -2322,47 +2381,72 @@
   },
   {
    "kind": "building",
-   "id": "fiderow_plot_15",
+   "id": "hollin_toll_plot_15",
    "x": 1738.9,
    "z": 580.95,
    "yaw": 0.6429,
    "data": {
-    "town": "fiderow",
-    "want": "hut",
+    "town": "hollin_toll",
+    "want": "hall",
     "district": "craft",
     "w": 4.94,
     "d": 5.9,
     "angle": 5.6403,
     "front": 7.2111,
-    "streetGap": -0.35
+    "streetGap": -0.35,
+    "office": "hall",
+    "role": "elder",
+    "lit": false,
+    "label": "Town Hall"
    }
   },
   {
    "kind": "building",
-   "id": "fiderow_plot_16",
+   "id": "hollin_toll_plot_16",
    "x": 1753.49,
    "z": 589.52,
    "yaw": 0.6429,
    "data": {
-    "town": "fiderow",
-    "want": "house",
+    "town": "hollin_toll",
+    "want": "apothecary",
     "district": "residential",
     "w": 5.87,
     "d": 5.11,
     "angle": 5.6403,
     "front": 7.2111,
-    "streetGap": -0.35
+    "streetGap": -0.35,
+    "office": "apothecary",
+    "role": "apothecary",
+    "lit": true,
+    "label": "Apothecary"
    }
   },
   {
    "kind": "building",
-   "id": "fiderow_plot_17",
+   "id": "hollin_toll_plot_24",
+   "x": 1735.41,
+   "z": 513.36,
+   "yaw": 2.4208,
+   "data": {
+    "town": "hollin_toll",
+    "want": "house",
+    "district": "residential",
+    "w": 5.63,
+    "d": 6.88,
+    "angle": 5.4332,
+    "front": 5.4332,
+    "streetGap": -0.27
+   }
+  },
+  {
+   "kind": "building",
+   "id": "hollin_toll_plot_17",
    "x": 1746.22,
    "z": 518.95,
    "yaw": 0.63,
    "data": {
-    "town": "fiderow",
-    "want": "granary",
+    "town": "hollin_toll",
+    "want": "house",
     "district": "residential",
     "w": 6.29,
     "d": 6.52,
@@ -2373,46 +2457,54 @@
   },
   {
    "kind": "building",
-   "id": "fiderow_plot_18",
+   "id": "hollin_toll_plot_18",
    "x": 1755.32,
    "z": 540.95,
    "yaw": 0.5561,
    "data": {
-    "town": "fiderow",
-    "want": "market",
+    "town": "hollin_toll",
+    "want": "temple",
     "district": "residential",
     "w": 7.1,
     "d": 6.49,
     "angle": 5.727,
     "front": 7.2978,
-    "streetGap": 0.06
+    "streetGap": 0.06,
+    "office": "temple",
+    "role": "healer",
+    "lit": false,
+    "label": "Temple"
    }
   },
   {
    "kind": "building",
-   "id": "fiderow_plot_19",
+   "id": "hollin_toll_plot_19",
    "x": 1760.03,
    "z": 548.52,
    "yaw": -2.5855,
    "data": {
-    "town": "fiderow",
-    "want": "house",
+    "town": "hollin_toll",
+    "want": "counting_house",
     "district": "residential",
     "w": 7.1,
     "d": 3.62,
     "angle": 5.727,
     "front": 10.4394,
-    "streetGap": -0.4
+    "streetGap": -0.4,
+    "office": "counting_house",
+    "role": "broker",
+    "lit": false,
+    "label": "Counting House"
    }
   },
   {
    "kind": "building",
-   "id": "fiderow_plot_20",
+   "id": "hollin_toll_plot_20",
    "x": 1763.5,
    "z": 534.22,
    "yaw": 0.5561,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "want": "house",
     "district": "residential",
     "w": 5.14,
@@ -2424,13 +2516,13 @@
   },
   {
    "kind": "building",
-   "id": "fiderow_plot_21",
+   "id": "hollin_toll_plot_21",
    "x": 1768.18,
    "z": 541.75,
    "yaw": -1.0147,
    "data": {
-    "town": "fiderow",
-    "want": "warehouse",
+    "town": "hollin_toll",
+    "want": "house",
     "district": "residential",
     "w": 5.14,
     "d": 6.52,
@@ -2441,29 +2533,33 @@
   },
   {
    "kind": "building",
-   "id": "fiderow_plot_22",
+   "id": "hollin_toll_plot_22",
    "x": 1766.27,
    "z": 561.76,
    "yaw": -2.8055,
    "data": {
-    "town": "fiderow",
-    "want": "forge",
+    "town": "hollin_toll",
+    "want": "armoury",
     "district": "residential",
     "w": 7.8,
     "d": 6.2,
     "angle": 5.947,
     "front": 10.6594,
-    "streetGap": -0.4
+    "streetGap": -0.4,
+    "office": "armoury",
+    "role": "armourer",
+    "lit": true,
+    "label": "Armourer"
    }
   },
   {
    "kind": "building",
-   "id": "fiderow_plot_23",
+   "id": "hollin_toll_plot_23",
    "x": 1775.88,
    "z": 559.15,
    "yaw": -2.8055,
    "data": {
-    "town": "fiderow",
+    "town": "hollin_toll",
     "want": "house",
     "district": "residential",
     "w": 4.37,
@@ -2475,24 +2571,42 @@
   },
   {
    "kind": "town_square",
-   "id": "old_mosshearth_square",
+   "id": "scree_end_square",
    "x": 124.87,
    "z": 1468.68,
    "yaw": 0,
    "data": {
     "r": 1.93,
-    "town": "old_mosshearth",
-    "culture": "halfling"
+    "town": "scree_end",
+    "culture": "halfling",
+    "stalls": [
+     [
+      124.82,
+      1474.78
+     ],
+     [
+      130.86,
+      1473.35
+     ],
+     [
+      112.77,
+      1468.59
+     ],
+     [
+      120.45,
+      1484.68
+     ]
+    ]
    }
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_0",
+   "id": "scree_end_street_0",
    "x": 77.83,
    "z": 1456.07,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "main",
     "width": 5,
     "pts": [
@@ -2513,12 +2627,12 @@
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_1",
+   "id": "scree_end_street_1",
    "x": 109.77,
    "z": 1505.88,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "lane",
     "width": 3.2,
     "pts": [
@@ -2539,12 +2653,12 @@
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_2",
+   "id": "scree_end_street_2",
    "x": 93.52,
    "z": 1498.85,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2565,12 +2679,12 @@
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_3",
+   "id": "scree_end_street_3",
    "x": 79.24,
    "z": 1490.66,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2591,12 +2705,12 @@
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_4",
+   "id": "scree_end_street_4",
    "x": 87.14,
    "z": 1495.7,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2617,12 +2731,12 @@
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_5",
+   "id": "scree_end_street_5",
    "x": 87.03,
    "z": 1489.52,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2643,12 +2757,12 @@
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_6",
+   "id": "scree_end_street_6",
    "x": 79.29,
    "z": 1484.08,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2669,12 +2783,12 @@
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_7",
+   "id": "scree_end_street_7",
    "x": 88.53,
    "z": 1486.8,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2695,12 +2809,12 @@
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_8",
+   "id": "scree_end_street_8",
    "x": 98.08,
    "z": 1487.42,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2721,12 +2835,12 @@
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_9",
+   "id": "scree_end_street_9",
    "x": 101.82,
    "z": 1499.71,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2747,12 +2861,12 @@
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_10",
+   "id": "scree_end_street_10",
    "x": 103,
    "z": 1487.52,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2773,12 +2887,12 @@
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_11",
+   "id": "scree_end_street_11",
    "x": 114.85,
    "z": 1499.19,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2799,12 +2913,12 @@
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_12",
+   "id": "scree_end_street_12",
    "x": 118.99,
    "z": 1490.71,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2825,12 +2939,12 @@
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_13",
+   "id": "scree_end_street_13",
    "x": 119.31,
    "z": 1499.28,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2851,12 +2965,12 @@
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_14",
+   "id": "scree_end_street_14",
    "x": 123.81,
    "z": 1490.99,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2877,12 +2991,12 @@
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_15",
+   "id": "scree_end_street_15",
    "x": 106.97,
    "z": 1463.24,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "lane",
     "width": 3.2,
     "pts": [
@@ -2903,12 +3017,12 @@
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_16",
+   "id": "scree_end_street_16",
    "x": 94.12,
    "z": 1438.81,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2929,12 +3043,12 @@
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_17",
+   "id": "scree_end_street_17",
    "x": 100.86,
    "z": 1454.19,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2955,12 +3069,12 @@
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_18",
+   "id": "scree_end_street_18",
    "x": 92.29,
    "z": 1446.69,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2981,12 +3095,12 @@
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_19",
+   "id": "scree_end_street_19",
    "x": 102.71,
    "z": 1451.38,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3007,12 +3121,12 @@
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_20",
+   "id": "scree_end_street_20",
    "x": 102.29,
    "z": 1439.22,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3033,12 +3147,12 @@
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_21",
+   "id": "scree_end_street_21",
    "x": 120.22,
    "z": 1470.05,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3059,12 +3173,12 @@
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_22",
+   "id": "scree_end_street_22",
    "x": 117.44,
    "z": 1455.55,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3085,12 +3199,12 @@
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_23",
+   "id": "scree_end_street_23",
    "x": 121.52,
    "z": 1445.92,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3111,12 +3225,12 @@
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_24",
+   "id": "scree_end_street_24",
    "x": 132.27,
    "z": 1455.02,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3137,12 +3251,12 @@
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_25",
+   "id": "scree_end_street_25",
    "x": 134.36,
    "z": 1477.71,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3163,12 +3277,12 @@
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_26",
+   "id": "scree_end_street_26",
    "x": 125.03,
    "z": 1465.14,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3189,12 +3303,12 @@
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_27",
+   "id": "scree_end_street_27",
    "x": 126.35,
    "z": 1471.98,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3215,12 +3329,12 @@
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_28",
+   "id": "scree_end_street_28",
    "x": 133.63,
    "z": 1469.88,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3241,12 +3355,12 @@
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_29",
+   "id": "scree_end_street_29",
    "x": 140.56,
    "z": 1471.21,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3267,12 +3381,12 @@
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_30",
+   "id": "scree_end_street_30",
    "x": 143.89,
    "z": 1461.27,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3293,12 +3407,12 @@
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_31",
+   "id": "scree_end_street_31",
    "x": 136.49,
    "z": 1455.98,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3319,100 +3433,63 @@
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_32",
-   "x": 112.69,
-   "z": 1434.31,
+   "id": "scree_end_street_32",
+   "x": 112.87,
+   "z": 1424.31,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "main",
-    "width": 5,
+    "width": 3.6,
     "pts": [
      [
-      112.69,
-      1434.31
+      112.87,
+      1424.31
      ],
      [
-      104.25,
-      1435.11
+      112,
+      1463
+     ],
+     [
+      122.5,
+      1467.5
      ]
-    ]
+    ],
+    "high": true,
+    "to": "square",
+    "road": "spur_scree_end"
    }
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_33",
-   "x": 128.7,
-   "z": 1448.97,
+   "id": "scree_end_street_33",
+   "x": 121.52,
+   "z": 1445.92,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      128.7,
-      1448.97
+      121.52,
+      1445.92
      ],
      [
-      132.03,
-      1450.99
+      118.47,
+      1444.39
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_34",
-   "x": 115.49,
-   "z": 1450.33,
-   "yaw": 0,
-   "data": {
-    "town": "old_mosshearth",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      115.49,
-      1450.33
-     ],
-     [
-      117.44,
-      1455.55
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "old_mosshearth_street_35",
-   "x": 107.66,
-   "z": 1452.43,
-   "yaw": 0,
-   "data": {
-    "town": "old_mosshearth",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      107.66,
-      1452.43
-     ],
-     [
-      112.15,
-      1455.4
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "old_mosshearth_street_36",
+   "id": "scree_end_street_34",
    "x": 110.36,
    "z": 1475.2,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3429,12 +3506,12 @@
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_37",
+   "id": "scree_end_street_35",
    "x": 116.6,
    "z": 1484.11,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3451,12 +3528,12 @@
   },
   {
    "kind": "street",
-   "id": "old_mosshearth_street_38",
+   "id": "scree_end_street_36",
    "x": 108.93,
    "z": 1490.34,
    "yaw": 0,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -3473,12 +3550,12 @@
   },
   {
    "kind": "building",
-   "id": "old_mosshearth_plot_0",
+   "id": "scree_end_plot_0",
    "x": 98.63,
    "z": 1496.03,
    "yaw": 1.3082,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "want": "house",
     "district": "residential",
     "w": 4.25,
@@ -3490,12 +3567,12 @@
   },
   {
    "kind": "building",
-   "id": "old_mosshearth_plot_1",
+   "id": "scree_end_plot_1",
    "x": 99.73,
    "z": 1491.92,
    "yaw": 2.879,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "want": "house",
     "district": "residential",
     "w": 4.25,
@@ -3507,12 +3584,12 @@
   },
   {
    "kind": "building",
-   "id": "old_mosshearth_plot_2",
+   "id": "scree_end_plot_2",
    "x": 107.46,
    "z": 1485.7,
    "yaw": -1.8334,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "want": "house",
     "district": "residential",
     "w": 4.63,
@@ -3524,29 +3601,33 @@
   },
   {
    "kind": "building",
-   "id": "old_mosshearth_plot_3",
+   "id": "scree_end_plot_3",
    "x": 124.36,
    "z": 1497.41,
    "yaw": 2.8181,
    "data": {
-    "town": "old_mosshearth",
-    "want": "house",
+    "town": "scree_end",
+    "want": "shrine",
     "district": "residential",
     "w": 5.54,
     "d": 4.59,
     "angle": 5.0359,
     "front": 5.0359,
-    "streetGap": -0.13
+    "streetGap": -0.13,
+    "office": "shrine",
+    "role": null,
+    "lit": false,
+    "label": "Shrine"
    }
   },
   {
    "kind": "building",
-   "id": "old_mosshearth_plot_4",
+   "id": "scree_end_plot_4",
    "x": 106.05,
    "z": 1447.85,
    "yaw": -1.7806,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "want": "house",
     "district": "residential",
     "w": 4.6,
@@ -3558,80 +3639,96 @@
   },
   {
    "kind": "building",
-   "id": "old_mosshearth_plot_5",
+   "id": "scree_end_plot_5",
    "x": 119.41,
    "z": 1460.9,
-   "yaw": 2.7405,
+   "yaw": -0.4011,
    "data": {
-    "town": "old_mosshearth",
-    "want": "hut",
+    "town": "scree_end",
+    "want": "shop",
     "district": "civic",
     "w": 4.81,
     "d": 6.6,
     "angle": 5.1135,
-    "front": 5.1135,
-    "streetGap": -0.3
+    "front": 8.2551,
+    "streetGap": -0.36,
+    "office": "shop",
+    "role": "merchant",
+    "lit": true,
+    "label": "General Goods"
    }
   },
   {
    "kind": "building",
-   "id": "old_mosshearth_plot_6",
+   "id": "scree_end_plot_6",
    "x": 123.07,
    "z": 1452.26,
    "yaw": 2.7405,
    "data": {
-    "town": "old_mosshearth",
-    "want": "shrine",
+    "town": "scree_end",
+    "want": "mill",
     "district": "craft",
     "w": 6.96,
     "d": 6.6,
     "angle": 5.1135,
     "front": 5.1135,
-    "streetGap": -0.4
+    "streetGap": -0.4,
+    "office": "mill",
+    "role": "miller",
+    "lit": false,
+    "label": "Mill"
    }
   },
   {
    "kind": "building",
-   "id": "old_mosshearth_plot_7",
+   "id": "scree_end_plot_7",
    "x": 131.95,
    "z": 1462.76,
    "yaw": -0.6211,
    "data": {
-    "town": "old_mosshearth",
-    "want": "granary",
+    "town": "scree_end",
+    "want": "inn",
     "district": "civic",
     "w": 8.42,
     "d": 7.29,
     "angle": 5.3335,
     "front": 8.4751,
-    "streetGap": -0.32
+    "streetGap": -0.32,
+    "office": "inn",
+    "role": "innkeeper",
+    "lit": true,
+    "label": "Inn"
    }
   },
   {
    "kind": "building",
-   "id": "old_mosshearth_plot_8",
+   "id": "scree_end_plot_8",
    "x": 140.23,
    "z": 1477.18,
    "yaw": 2.5205,
    "data": {
-    "town": "old_mosshearth",
-    "want": "hut",
+    "town": "scree_end",
+    "want": "granary",
     "district": "craft",
     "w": 6.49,
     "d": 5.23,
     "angle": 5.3335,
     "front": 5.3335,
-    "streetGap": -0.4
+    "streetGap": -0.4,
+    "office": "granary",
+    "role": "farmer",
+    "lit": false,
+    "label": "Granary"
    }
   },
   {
    "kind": "building",
-   "id": "old_mosshearth_plot_9",
+   "id": "scree_end_plot_9",
    "x": 145.46,
    "z": 1469.88,
    "yaw": -2.1919,
    "data": {
-    "town": "old_mosshearth",
+    "town": "scree_end",
     "want": "hut",
     "district": "craft",
     "w": 4.26,
@@ -3650,7 +3747,25 @@
    "data": {
     "r": 3.16,
     "town": "wolditford",
-    "culture": "halfling"
+    "culture": "halfling",
+    "stalls": [
+     [
+      450.94,
+      883.98
+     ],
+     [
+      446.61,
+      890.51
+     ],
+     [
+      456.2,
+      873.61
+     ],
+     [
+      458.07,
+      894.43
+     ]
+    ]
    }
   },
   {
@@ -4463,22 +4578,25 @@
    "kind": "street",
    "id": "wolditford_street_31",
    "x": 448,
-   "z": 842.3,
+   "z": 832.3,
    "yaw": 0,
    "data": {
     "town": "wolditford",
     "cls": "main",
-    "width": 5,
+    "width": 3.6,
     "pts": [
      [
       448,
-      842.3
+      832.3
      ],
      [
-      445.58,
-      842.38
+      444.58,
+      878.66
      ]
-    ]
+    ],
+    "high": true,
+    "to": "square",
+    "road": "spur_wolditford"
    }
   },
   {
@@ -4497,8 +4615,8 @@
       868.9
      ],
      [
-      432.08,
-      870.01
+      443.69,
+      866.6
      ]
     ]
    }
@@ -4506,28 +4624,6 @@
   {
    "kind": "street",
    "id": "wolditford_street_33",
-   "x": 443.69,
-   "z": 866.6,
-   "yaw": 0,
-   "data": {
-    "town": "wolditford",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      443.69,
-      866.6
-     ],
-     [
-      441.49,
-      870.72
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "wolditford_street_34",
    "x": 457.23,
    "z": 887.04,
    "yaw": 0,
@@ -4549,7 +4645,7 @@
   },
   {
    "kind": "street",
-   "id": "wolditford_street_35",
+   "id": "wolditford_street_34",
    "x": 457.01,
    "z": 899.84,
    "yaw": 0,
@@ -4571,7 +4667,7 @@
   },
   {
    "kind": "street",
-   "id": "wolditford_street_36",
+   "id": "wolditford_street_35",
    "x": 477.76,
    "z": 886.44,
    "yaw": 0,
@@ -4599,13 +4695,17 @@
    "yaw": 0.5402,
    "data": {
     "town": "wolditford",
-    "want": "house",
+    "want": "shrine",
     "district": "residential",
     "w": 4.88,
     "d": 6.53,
     "angle": 4.1722,
     "front": 7.3138,
-    "streetGap": -0.4
+    "streetGap": -0.4,
+    "office": "shrine",
+    "role": null,
+    "lit": false,
+    "label": "Shrine"
    }
   },
   {
@@ -4650,13 +4750,17 @@
    "yaw": 1.0509,
    "data": {
     "town": "wolditford",
-    "want": "hut",
+    "want": "granary",
     "district": "craft",
     "w": 8.21,
     "d": 5.65,
     "angle": 3.6615,
     "front": 6.8031,
-    "streetGap": -0.23
+    "streetGap": -0.23,
+    "office": "granary",
+    "role": "farmer",
+    "lit": false,
+    "label": "Granary"
    }
   },
   {
@@ -4667,13 +4771,17 @@
    "yaw": -2.0907,
    "data": {
     "town": "wolditford",
-    "want": "hut",
+    "want": "inn",
     "district": "civic",
     "w": 5.74,
     "d": 6.63,
     "angle": 3.6615,
     "front": 3.6615,
-    "streetGap": -0.36
+    "streetGap": -0.36,
+    "office": "inn",
+    "role": "innkeeper",
+    "lit": true,
+    "label": "Inn"
    }
   },
   {
@@ -4684,13 +4792,17 @@
    "yaw": 1.0509,
    "data": {
     "town": "wolditford",
-    "want": "hut",
+    "want": "shop",
     "district": "civic",
     "w": 7.07,
     "d": 4.25,
     "angle": 3.6615,
     "front": 6.8031,
-    "streetGap": -0.4
+    "streetGap": -0.4,
+    "office": "shop",
+    "role": "merchant",
+    "lit": true,
+    "label": "General Goods"
    }
   },
   {
@@ -4735,13 +4847,17 @@
    "yaw": 2.598,
    "data": {
     "town": "wolditford",
-    "want": "shrine",
+    "want": "mill",
     "district": "craft",
     "w": 8.26,
     "d": 6.82,
     "angle": 3.6852,
     "front": 5.256,
-    "streetGap": -0.4
+    "streetGap": -0.4,
+    "office": "mill",
+    "role": "miller",
+    "lit": false,
+    "label": "Mill"
    }
   },
   {
@@ -4752,30 +4868,13 @@
    "yaw": -0.5436,
    "data": {
     "town": "wolditford",
-    "want": "granary",
+    "want": "house",
     "district": "residential",
     "w": 8.26,
     "d": 7.11,
     "angle": 3.6852,
     "front": 8.3976,
     "streetGap": -0.1
-   }
-  },
-  {
-   "kind": "building",
-   "id": "wolditford_plot_10",
-   "x": 446.46,
-   "z": 854.33,
-   "yaw": 2.378,
-   "data": {
-    "town": "wolditford",
-    "want": "house",
-    "district": "residential",
-    "w": 4.21,
-    "d": 5.05,
-    "angle": 3.9052,
-    "front": 5.476,
-    "streetGap": -0.26
    }
   },
   {
@@ -7838,7 +7937,7 @@
   },
   {
    "kind": "road",
-   "id": "spur_fiderow",
+   "id": "spur_hollin_toll",
    "x": 1721.59,
    "z": 470.23,
    "yaw": 0,
@@ -7850,24 +7949,24 @@
      [
       1721.59,
       470.23,
-      10.73
+      9.36
      ],
      [
       1721.14,
       464,
-      10.61
+      9.16
      ],
      [
       1720,
       448,
-      10.42
+      8.88
      ]
     ]
    }
   },
   {
    "kind": "road",
-   "id": "spur_old_mosshearth",
+   "id": "spur_scree_end",
    "x": 112.84,
    "z": 1426.01,
    "yaw": 0,
@@ -7879,137 +7978,137 @@
      [
       112.84,
       1426.01,
-      63.49
+      63.48
      ],
      [
       112.86,
       1424.86,
-      63.44
+      63.43
      ],
      [
       113.14,
       1409.14,
-      62.25
+      62.23
      ],
      [
       113.43,
       1393.43,
-      60.79
+      60.77
      ],
      [
       113.71,
       1377.71,
-      59.06
+      59.03
      ],
      [
       114,
       1362,
-      57.19
+      57.15
      ],
      [
       114.29,
       1346.29,
-      55.3
+      55.25
      ],
      [
       114.57,
       1330.57,
-      53.55
+      53.49
      ],
      [
       114.86,
       1314.86,
-      51.93
+      51.86
      ],
      [
       115.14,
       1299.14,
-      50.44
+      50.35
      ],
      [
       115.43,
       1283.43,
-      49.19
+      49.09
      ],
      [
       115.71,
       1267.71,
-      48.35
+      48.24
      ],
      [
       116,
       1252,
-      47.5
+      47.37
      ],
      [
       116.29,
       1236.29,
-      46.43
+      46.29
      ],
      [
       116.57,
       1220.57,
-      44.95
+      44.79
      ],
      [
       116.86,
       1204.86,
-      43.41
+      43.24
      ],
      [
       117.14,
       1189.14,
-      41.86
+      41.68
      ],
      [
       117.43,
       1173.43,
-      40.27
+      40.08
      ],
      [
       117.71,
       1157.71,
-      38.45
+      38.24
      ],
      [
       118,
       1142,
-      36.7
+      36.48
      ],
      [
       118.29,
       1126.29,
-      35.19
+      34.97
      ],
      [
       118.57,
       1110.57,
-      34.3
+      34.07
      ],
      [
       118.86,
       1094.86,
-      33.54
+      33.3
      ],
      [
       119.14,
       1079.14,
-      33.02
+      32.78
      ],
      [
       119.43,
       1063.43,
-      32.63
+      32.38
      ],
      [
       119.71,
       1047.71,
-      32.35
+      32.09
      ],
      [
       120,
       1032,
-      32.2
+      31.94
      ]
     ]
    }
@@ -8028,12 +8127,5450 @@
      [
       448,
       834,
-      35.98
+      35.29
      ],
      [
       448,
       832,
-      35.98
+      35.26
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_door_1",
+   "x": 1902,
+   "z": 558,
+   "yaw": 0,
+   "data": {
+    "from": "door_1",
+    "to": "town:Hollin Toll",
+    "width": 2.2,
+    "pts": [
+     [
+      1902,
+      558,
+      15.13
+     ],
+     [
+      1901.25,
+      558,
+      15.04
+     ],
+     [
+      1899.5,
+      558,
+      14.84
+     ],
+     [
+      1897.5,
+      557.25,
+      14.54
+     ],
+     [
+      1895.5,
+      555.5,
+      14.15
+     ],
+     [
+      1893.5,
+      554.25,
+      13.94
+     ],
+     [
+      1891.5,
+      554,
+      13.83
+     ],
+     [
+      1889.5,
+      553.25,
+      13.63
+     ],
+     [
+      1887.5,
+      551.5,
+      13.3
+     ],
+     [
+      1885.5,
+      549.5,
+      13.01
+     ],
+     [
+      1883.5,
+      547.5,
+      12.8
+     ],
+     [
+      1881.5,
+      546.25,
+      12.7
+     ],
+     [
+      1879.5,
+      546,
+      12.62
+     ],
+     [
+      1877.5,
+      546,
+      12.49
+     ],
+     [
+      1875.5,
+      546,
+      12.26
+     ],
+     [
+      1873.5,
+      546,
+      12.06
+     ],
+     [
+      1871.5,
+      546,
+      11.95
+     ],
+     [
+      1869.5,
+      546,
+      11.84
+     ],
+     [
+      1867.5,
+      546,
+      11.69
+     ],
+     [
+      1865.5,
+      546,
+      11.64
+     ],
+     [
+      1863.5,
+      546,
+      11.71
+     ],
+     [
+      1861.5,
+      546,
+      11.84
+     ],
+     [
+      1859.5,
+      546,
+      11.98
+     ],
+     [
+      1857.5,
+      546,
+      11.99
+     ],
+     [
+      1855.5,
+      546,
+      11.97
+     ],
+     [
+      1853.5,
+      546,
+      11.99
+     ],
+     [
+      1851.5,
+      546,
+      12.06
+     ],
+     [
+      1849.5,
+      546,
+      12.21
+     ],
+     [
+      1847.5,
+      546,
+      12.34
+     ],
+     [
+      1845.5,
+      546,
+      12.41
+     ],
+     [
+      1843.5,
+      546,
+      12.44
+     ],
+     [
+      1841.5,
+      546,
+      12.46
+     ],
+     [
+      1839.5,
+      546,
+      12.43
+     ],
+     [
+      1837.5,
+      546,
+      12.45
+     ],
+     [
+      1835.5,
+      546,
+      12.51
+     ],
+     [
+      1833.5,
+      546,
+      12.59
+     ],
+     [
+      1831.5,
+      546,
+      12.61
+     ],
+     [
+      1829.5,
+      546,
+      12.61
+     ],
+     [
+      1827.5,
+      546,
+      12.62
+     ],
+     [
+      1825.5,
+      546,
+      12.65
+     ],
+     [
+      1823.5,
+      546,
+      12.71
+     ],
+     [
+      1821.5,
+      546,
+      12.75
+     ],
+     [
+      1819.5,
+      546,
+      12.72
+     ],
+     [
+      1817.5,
+      546,
+      12.7
+     ],
+     [
+      1815.5,
+      546,
+      12.7
+     ],
+     [
+      1814.25,
+      546,
+      12.7
+     ],
+     [
+      1814,
+      546,
+      12.7
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_event_hollin_pass",
+   "x": 1422,
+   "z": 766,
+   "yaw": 0,
+   "data": {
+    "from": "event_hollin_pass",
+    "to": "town:Hollin Toll",
+    "width": 2.2,
+    "pts": [
+     [
+      1422,
+      766,
+      34.03
+     ],
+     [
+      1422,
+      765.25,
+      34
+     ],
+     [
+      1422,
+      763.5,
+      33.94
+     ],
+     [
+      1422.75,
+      761.5,
+      33.77
+     ],
+     [
+      1424.5,
+      759.5,
+      33.35
+     ],
+     [
+      1426.5,
+      757.5,
+      32.73
+     ],
+     [
+      1428.5,
+      755.5,
+      31.97
+     ],
+     [
+      1429.75,
+      753.5,
+      31.44
+     ],
+     [
+      1430,
+      751.5,
+      31.04
+     ],
+     [
+      1430,
+      749.5,
+      30.55
+     ],
+     [
+      1430,
+      747.5,
+      30.08
+     ],
+     [
+      1430,
+      745.5,
+      29.73
+     ],
+     [
+      1430,
+      743.5,
+      29.45
+     ],
+     [
+      1430.75,
+      741.5,
+      29.11
+     ],
+     [
+      1432.5,
+      739.5,
+      28.59
+     ],
+     [
+      1434.5,
+      737.5,
+      28.03
+     ],
+     [
+      1436.5,
+      735.5,
+      27.46
+     ],
+     [
+      1438.5,
+      733.5,
+      26.92
+     ],
+     [
+      1440.5,
+      731.5,
+      26.37
+     ],
+     [
+      1442.5,
+      729.5,
+      25.71
+     ],
+     [
+      1444.5,
+      727.5,
+      25.04
+     ],
+     [
+      1446.5,
+      725.5,
+      24.5
+     ],
+     [
+      1448.5,
+      723.5,
+      24.21
+     ],
+     [
+      1450.5,
+      721.5,
+      23.91
+     ],
+     [
+      1452.5,
+      719.5,
+      23.42
+     ],
+     [
+      1454.5,
+      717.5,
+      23.02
+     ],
+     [
+      1456.5,
+      715.5,
+      22.91
+     ],
+     [
+      1458.5,
+      713.5,
+      22.81
+     ],
+     [
+      1460.5,
+      711.5,
+      22.65
+     ],
+     [
+      1462.5,
+      709.5,
+      22.44
+     ],
+     [
+      1464.5,
+      707.5,
+      22.1
+     ],
+     [
+      1466.5,
+      705.5,
+      21.65
+     ],
+     [
+      1468.5,
+      703.5,
+      21.16
+     ],
+     [
+      1470.5,
+      701.5,
+      20.79
+     ],
+     [
+      1472.5,
+      699.5,
+      20.71
+     ],
+     [
+      1474.5,
+      697.5,
+      20.65
+     ],
+     [
+      1476.5,
+      695.5,
+      20.57
+     ],
+     [
+      1478.5,
+      693.5,
+      20.52
+     ],
+     [
+      1480.5,
+      691.5,
+      20.52
+     ],
+     [
+      1482.5,
+      689.5,
+      20.6
+     ],
+     [
+      1484.5,
+      687.5,
+      20.63
+     ],
+     [
+      1486.5,
+      686.25,
+      20.62
+     ],
+     [
+      1488.5,
+      686,
+      20.62
+     ],
+     [
+      1490.5,
+      685.25,
+      20.61
+     ],
+     [
+      1492.5,
+      683.5,
+      20.56
+     ],
+     [
+      1494.5,
+      682.25,
+      20.53
+     ],
+     [
+      1496.5,
+      682,
+      20.56
+     ],
+     [
+      1498.5,
+      681.25,
+      20.53
+     ],
+     [
+      1500.5,
+      679.5,
+      20.42
+     ],
+     [
+      1502.5,
+      677.5,
+      20.08
+     ],
+     [
+      1504.5,
+      675.5,
+      19.63
+     ],
+     [
+      1506.5,
+      673.5,
+      19.3
+     ],
+     [
+      1508.5,
+      671.5,
+      18.86
+     ],
+     [
+      1510.5,
+      669.5,
+      18.27
+     ],
+     [
+      1512.5,
+      667.5,
+      17.93
+     ],
+     [
+      1514.5,
+      665.5,
+      17.91
+     ],
+     [
+      1516.5,
+      663.5,
+      18.02
+     ],
+     [
+      1518.5,
+      661.5,
+      18.12
+     ],
+     [
+      1520.5,
+      659.5,
+      18.21
+     ],
+     [
+      1522.5,
+      657.5,
+      18.2
+     ],
+     [
+      1524.5,
+      655.5,
+      18.04
+     ],
+     [
+      1526.5,
+      653.5,
+      17.83
+     ],
+     [
+      1528.5,
+      651.5,
+      17.57
+     ],
+     [
+      1530.5,
+      649.5,
+      17.23
+     ],
+     [
+      1532.5,
+      647.5,
+      16.85
+     ],
+     [
+      1534.5,
+      645.5,
+      16.53
+     ],
+     [
+      1536.5,
+      643.5,
+      16.22
+     ],
+     [
+      1538.5,
+      641.5,
+      15.94
+     ],
+     [
+      1540.5,
+      639.5,
+      15.76
+     ],
+     [
+      1542.5,
+      637.5,
+      15.71
+     ],
+     [
+      1544.5,
+      635.5,
+      15.59
+     ],
+     [
+      1546.5,
+      633.5,
+      15.54
+     ],
+     [
+      1548.5,
+      631.5,
+      15.65
+     ],
+     [
+      1550.5,
+      629.5,
+      15.67
+     ],
+     [
+      1552.5,
+      627.5,
+      15.75
+     ],
+     [
+      1553.75,
+      625.5,
+      15.76
+     ],
+     [
+      1554,
+      623.5,
+      15.75
+     ],
+     [
+      1554.75,
+      621.5,
+      15.79
+     ],
+     [
+      1556.5,
+      619.5,
+      15.83
+     ],
+     [
+      1558.5,
+      617.5,
+      15.89
+     ],
+     [
+      1560.5,
+      615.5,
+      16.15
+     ],
+     [
+      1561.75,
+      613.5,
+      16.39
+     ],
+     [
+      1562,
+      611.5,
+      16.55
+     ],
+     [
+      1562,
+      609.5,
+      16.66
+     ],
+     [
+      1562,
+      607.5,
+      16.74
+     ],
+     [
+      1562,
+      605.5,
+      16.78
+     ],
+     [
+      1562,
+      603.5,
+      16.75
+     ],
+     [
+      1562.75,
+      601.5,
+      16.74
+     ],
+     [
+      1564.5,
+      599.5,
+      16.72
+     ],
+     [
+      1566.5,
+      597.5,
+      16.81
+     ],
+     [
+      1568.5,
+      595.5,
+      16.88
+     ],
+     [
+      1569.75,
+      593.5,
+      16.95
+     ],
+     [
+      1570,
+      591.5,
+      17.04
+     ],
+     [
+      1570.75,
+      589.5,
+      17.15
+     ],
+     [
+      1572.5,
+      587.5,
+      17.2
+     ],
+     [
+      1574.5,
+      585.5,
+      17.2
+     ],
+     [
+      1576.5,
+      583.5,
+      17.2
+     ],
+     [
+      1578.5,
+      581.5,
+      17.29
+     ],
+     [
+      1580.5,
+      579.5,
+      17.23
+     ],
+     [
+      1582.5,
+      577.5,
+      17.15
+     ],
+     [
+      1584.5,
+      575.5,
+      17.12
+     ],
+     [
+      1586.5,
+      573.5,
+      17.03
+     ],
+     [
+      1588.5,
+      571.5,
+      16.83
+     ],
+     [
+      1590.5,
+      569.5,
+      16.6
+     ],
+     [
+      1592.5,
+      567.5,
+      16.47
+     ],
+     [
+      1594.5,
+      565.5,
+      16.28
+     ],
+     [
+      1596.5,
+      563.5,
+      15.78
+     ],
+     [
+      1598.5,
+      561.5,
+      15.35
+     ],
+     [
+      1600.5,
+      559.5,
+      15.18
+     ],
+     [
+      1602.5,
+      557.5,
+      15.04
+     ],
+     [
+      1604.5,
+      555.5,
+      14.9
+     ],
+     [
+      1606.5,
+      554.25,
+      14.65
+     ],
+     [
+      1608.5,
+      554,
+      14.35
+     ],
+     [
+      1610.5,
+      554,
+      14.13
+     ],
+     [
+      1612.5,
+      554,
+      13.98
+     ],
+     [
+      1614.5,
+      554,
+      13.91
+     ],
+     [
+      1616.5,
+      554,
+      13.87
+     ],
+     [
+      1618.5,
+      554,
+      13.81
+     ],
+     [
+      1620.5,
+      554,
+      13.75
+     ],
+     [
+      1622.5,
+      554,
+      13.66
+     ],
+     [
+      1624.5,
+      554,
+      13.59
+     ],
+     [
+      1626.5,
+      554,
+      13.53
+     ],
+     [
+      1628.5,
+      554,
+      13.38
+     ],
+     [
+      1630.5,
+      554,
+      13.25
+     ],
+     [
+      1632.5,
+      554,
+      13.25
+     ],
+     [
+      1634.5,
+      554,
+      13.24
+     ],
+     [
+      1636.5,
+      554,
+      13.22
+     ],
+     [
+      1638.5,
+      554,
+      13.22
+     ],
+     [
+      1640.5,
+      554,
+      13.25
+     ],
+     [
+      1641.75,
+      554,
+      13.25
+     ],
+     [
+      1642,
+      554,
+      13.25
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_hollin_toll_graveyard",
+   "x": 1630,
+   "z": 462,
+   "yaw": 0,
+   "data": {
+    "from": "hollin_toll_graveyard",
+    "to": "town:Hollin Toll",
+    "width": 2.2,
+    "pts": [
+     [
+      1630,
+      462,
+      11.65
+     ],
+     [
+      1630.75,
+      462,
+      11.65
+     ],
+     [
+      1632.5,
+      462,
+      11.65
+     ],
+     [
+      1634.5,
+      462,
+      11.65
+     ],
+     [
+      1636.5,
+      462,
+      11.65
+     ],
+     [
+      1638.5,
+      462,
+      11.65
+     ],
+     [
+      1640.5,
+      462,
+      11.66
+     ],
+     [
+      1642.5,
+      462,
+      11.68
+     ],
+     [
+      1644.5,
+      462,
+      11.68
+     ],
+     [
+      1646.5,
+      462.75,
+      11.69
+     ],
+     [
+      1648.5,
+      464.5,
+      11.72
+     ],
+     [
+      1650.5,
+      466.5,
+      11.8
+     ],
+     [
+      1652.5,
+      468.5,
+      11.85
+     ],
+     [
+      1654.5,
+      470.5,
+      11.82
+     ],
+     [
+      1656.5,
+      472.5,
+      11.83
+     ],
+     [
+      1658.5,
+      474.5,
+      11.93
+     ],
+     [
+      1660.5,
+      476.5,
+      12.11
+     ],
+     [
+      1662.5,
+      478.5,
+      12.32
+     ],
+     [
+      1664.5,
+      480.5,
+      12.55
+     ],
+     [
+      1666.5,
+      482.5,
+      12.75
+     ],
+     [
+      1668.5,
+      484.5,
+      12.87
+     ],
+     [
+      1670.5,
+      486.5,
+      12.97
+     ],
+     [
+      1672.5,
+      488.5,
+      13.03
+     ],
+     [
+      1673.75,
+      489.75,
+      13.07
+     ],
+     [
+      1674,
+      490,
+      13.07
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_scree_end_graveyard",
+   "x": 138,
+   "z": 1378,
+   "yaw": 0,
+   "data": {
+    "from": "scree_end_graveyard",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      138,
+      1378,
+      57.63
+     ],
+     [
+      137.25,
+      1378,
+      57.67
+     ],
+     [
+      135.5,
+      1378,
+      57.76
+     ],
+     [
+      133.5,
+      1378,
+      57.93
+     ],
+     [
+      131.5,
+      1378,
+      58.08
+     ],
+     [
+      129.5,
+      1378,
+      58.24
+     ],
+     [
+      127.5,
+      1378,
+      58.5
+     ],
+     [
+      125.5,
+      1378,
+      58.79
+     ],
+     [
+      123.5,
+      1378,
+      59
+     ],
+     [
+      121.5,
+      1378,
+      59.08
+     ],
+     [
+      119.5,
+      1378,
+      59.05
+     ],
+     [
+      117.5,
+      1378,
+      59.06
+     ],
+     [
+      115.5,
+      1378,
+      59.08
+     ],
+     [
+      114.25,
+      1378,
+      59.08
+     ],
+     [
+      114,
+      1378,
+      59.08
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_wolditford_graveyard",
+   "x": 398,
+   "z": 814,
+   "yaw": 0,
+   "data": {
+    "from": "wolditford_graveyard",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      398,
+      814,
+      30
+     ],
+     [
+      397.25,
+      814.75,
+      29.98
+     ],
+     [
+      395.5,
+      816.5,
+      29.94
+     ],
+     [
+      393.5,
+      818.5,
+      29.95
+     ],
+     [
+      391.5,
+      820.5,
+      30.03
+     ],
+     [
+      389.5,
+      821.75,
+      30.01
+     ],
+     [
+      387.5,
+      822,
+      29.9
+     ],
+     [
+      385.5,
+      822.75,
+      29.83
+     ],
+     [
+      383.5,
+      824.5,
+      29.76
+     ],
+     [
+      381.5,
+      826.5,
+      29.81
+     ],
+     [
+      379.5,
+      828.5,
+      30.03
+     ],
+     [
+      377.5,
+      830.5,
+      30.1
+     ],
+     [
+      375.5,
+      832.5,
+      30
+     ],
+     [
+      374.25,
+      833.75,
+      29.93
+     ],
+     [
+      374,
+      834,
+      29.92
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_hollin_farm",
+   "x": 1486,
+   "z": 718,
+   "yaw": 0,
+   "data": {
+    "from": "hollin_farm",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      1486,
+      718,
+      20.58
+     ],
+     [
+      1485.25,
+      717.25,
+      20.47
+     ],
+     [
+      1483.5,
+      715.5,
+      20.33
+     ],
+     [
+      1481.5,
+      713.5,
+      20.32
+     ],
+     [
+      1479.5,
+      711.5,
+      20.41
+     ],
+     [
+      1477.5,
+      709.5,
+      20.52
+     ],
+     [
+      1475.5,
+      707.5,
+      20.55
+     ],
+     [
+      1473.5,
+      705.5,
+      20.73
+     ],
+     [
+      1471.5,
+      703.5,
+      20.79
+     ],
+     [
+      1470.25,
+      702.25,
+      20.82
+     ],
+     [
+      1470,
+      702,
+      20.81
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_wold_fold",
+   "x": 726,
+   "z": 1142,
+   "yaw": 0,
+   "data": {
+    "from": "wold_fold",
+    "to": "town:Wolditford",
+    "width": 2.2,
+    "pts": [
+     [
+      726,
+      1142,
+      60.36
+     ],
+     [
+      725.25,
+      1142,
+      60.34
+     ],
+     [
+      723.5,
+      1142,
+      60.3
+     ],
+     [
+      721.5,
+      1142,
+      60.3
+     ],
+     [
+      719.5,
+      1142,
+      60.3
+     ],
+     [
+      717.5,
+      1141.25,
+      60.16
+     ],
+     [
+      715.5,
+      1139.5,
+      59.91
+     ],
+     [
+      713.5,
+      1137.5,
+      59.74
+     ],
+     [
+      711.5,
+      1135.5,
+      59.6
+     ],
+     [
+      709.5,
+      1133.5,
+      59.42
+     ],
+     [
+      707.5,
+      1131.5,
+      59.35
+     ],
+     [
+      705.5,
+      1129.5,
+      59.26
+     ],
+     [
+      703.5,
+      1127.5,
+      59
+     ],
+     [
+      701.5,
+      1126.25,
+      58.8
+     ],
+     [
+      699.5,
+      1126,
+      58.63
+     ],
+     [
+      697.5,
+      1125.25,
+      58.28
+     ],
+     [
+      695.5,
+      1123.5,
+      57.73
+     ],
+     [
+      693.5,
+      1121.5,
+      57.24
+     ],
+     [
+      691.5,
+      1119.5,
+      56.71
+     ],
+     [
+      689.5,
+      1117.5,
+      56.27
+     ],
+     [
+      687.5,
+      1115.5,
+      55.89
+     ],
+     [
+      685.5,
+      1113.5,
+      55.55
+     ],
+     [
+      683.5,
+      1111.5,
+      55.11
+     ],
+     [
+      681.5,
+      1109.5,
+      54.62
+     ],
+     [
+      679.5,
+      1107.5,
+      54.17
+     ],
+     [
+      677.5,
+      1105.5,
+      53.66
+     ],
+     [
+      675.5,
+      1103.5,
+      53.18
+     ],
+     [
+      673.5,
+      1101.5,
+      52.65
+     ],
+     [
+      671.5,
+      1099.5,
+      52.19
+     ],
+     [
+      669.5,
+      1097.5,
+      51.66
+     ],
+     [
+      667.5,
+      1095.5,
+      51.1
+     ],
+     [
+      665.5,
+      1093.5,
+      50.65
+     ],
+     [
+      663.5,
+      1091.5,
+      50.06
+     ],
+     [
+      661.5,
+      1089.5,
+      49.69
+     ],
+     [
+      659.5,
+      1087.5,
+      49.32
+     ],
+     [
+      657.5,
+      1085.5,
+      48.86
+     ],
+     [
+      655.5,
+      1083.5,
+      48.42
+     ],
+     [
+      653.5,
+      1081.5,
+      48.09
+     ],
+     [
+      651.5,
+      1079.5,
+      47.89
+     ],
+     [
+      649.5,
+      1077.5,
+      47.72
+     ],
+     [
+      647.5,
+      1075.5,
+      47.44
+     ],
+     [
+      645.5,
+      1073.5,
+      47.25
+     ],
+     [
+      643.5,
+      1071.5,
+      47.24
+     ],
+     [
+      641.5,
+      1069.5,
+      47.18
+     ],
+     [
+      639.5,
+      1067.5,
+      46.98
+     ],
+     [
+      637.5,
+      1065.5,
+      46.7
+     ],
+     [
+      635.5,
+      1063.5,
+      46.49
+     ],
+     [
+      633.5,
+      1061.5,
+      46.4
+     ],
+     [
+      631.5,
+      1059.5,
+      46.46
+     ],
+     [
+      629.5,
+      1057.5,
+      46.44
+     ],
+     [
+      627.5,
+      1055.5,
+      46.26
+     ],
+     [
+      625.5,
+      1053.5,
+      46.2
+     ],
+     [
+      623.5,
+      1051.5,
+      46.01
+     ],
+     [
+      621.5,
+      1049.5,
+      45.86
+     ],
+     [
+      619.5,
+      1047.5,
+      45.8
+     ],
+     [
+      617.5,
+      1045.5,
+      45.77
+     ],
+     [
+      615.5,
+      1043.5,
+      45.75
+     ],
+     [
+      613.5,
+      1041.5,
+      45.75
+     ],
+     [
+      611.5,
+      1039.5,
+      45.84
+     ],
+     [
+      609.5,
+      1037.5,
+      45.96
+     ],
+     [
+      607.5,
+      1035.5,
+      46.06
+     ],
+     [
+      605.5,
+      1033.5,
+      46.07
+     ],
+     [
+      603.5,
+      1031.5,
+      46.18
+     ],
+     [
+      601.5,
+      1029.5,
+      46.18
+     ],
+     [
+      599.5,
+      1027.5,
+      46.13
+     ],
+     [
+      597.5,
+      1025.5,
+      46.1
+     ],
+     [
+      595.5,
+      1023.5,
+      45.89
+     ],
+     [
+      593.5,
+      1021.5,
+      45.72
+     ],
+     [
+      591.5,
+      1019.5,
+      45.64
+     ],
+     [
+      589.5,
+      1017.5,
+      45.67
+     ],
+     [
+      587.5,
+      1015.5,
+      45.61
+     ],
+     [
+      585.5,
+      1013.5,
+      45.59
+     ],
+     [
+      583.5,
+      1011.5,
+      45.51
+     ],
+     [
+      581.5,
+      1009.5,
+      45.57
+     ],
+     [
+      579.5,
+      1007.5,
+      45.62
+     ],
+     [
+      577.5,
+      1005.5,
+      45.7
+     ],
+     [
+      575.5,
+      1003.5,
+      45.84
+     ],
+     [
+      573.5,
+      1001.5,
+      45.82
+     ],
+     [
+      571.5,
+      999.5,
+      45.82
+     ],
+     [
+      569.5,
+      997.5,
+      45.92
+     ],
+     [
+      567.5,
+      995.5,
+      45.92
+     ],
+     [
+      565.5,
+      993.5,
+      45.99
+     ],
+     [
+      563.5,
+      991.5,
+      46.07
+     ],
+     [
+      561.5,
+      989.5,
+      45.99
+     ],
+     [
+      559.5,
+      987.5,
+      45.91
+     ],
+     [
+      557.5,
+      985.5,
+      45.97
+     ],
+     [
+      555.5,
+      983.5,
+      46.08
+     ],
+     [
+      553.5,
+      981.5,
+      46.34
+     ],
+     [
+      551.5,
+      979.5,
+      46.67
+     ],
+     [
+      549.5,
+      977.5,
+      47
+     ],
+     [
+      547.5,
+      975.5,
+      47.28
+     ],
+     [
+      545.5,
+      973.5,
+      47.3
+     ],
+     [
+      543.5,
+      971.5,
+      47.15
+     ],
+     [
+      541.5,
+      969.5,
+      46.94
+     ],
+     [
+      539.5,
+      967.5,
+      46.64
+     ],
+     [
+      537.5,
+      965.5,
+      46.39
+     ],
+     [
+      535.5,
+      963.5,
+      46.23
+     ],
+     [
+      533.5,
+      961.5,
+      45.99
+     ],
+     [
+      531.5,
+      959.5,
+      45.68
+     ],
+     [
+      529.5,
+      957.5,
+      45.42
+     ],
+     [
+      527.5,
+      955.5,
+      45.25
+     ],
+     [
+      525.5,
+      953.5,
+      45.22
+     ],
+     [
+      523.5,
+      951.5,
+      45.17
+     ],
+     [
+      521.5,
+      949.5,
+      45.03
+     ],
+     [
+      519.5,
+      947.5,
+      44.84
+     ],
+     [
+      517.5,
+      945.5,
+      44.62
+     ],
+     [
+      515.5,
+      943.5,
+      44.54
+     ],
+     [
+      513.5,
+      941.5,
+      44.72
+     ],
+     [
+      511.5,
+      939.5,
+      44.5
+     ],
+     [
+      509.5,
+      937.5,
+      43.99
+     ],
+     [
+      507.5,
+      935.5,
+      43.59
+     ],
+     [
+      505.5,
+      933.5,
+      43.22
+     ],
+     [
+      503.5,
+      931.5,
+      42.59
+     ],
+     [
+      501.5,
+      929.5,
+      41.88
+     ],
+     [
+      499.5,
+      927.5,
+      41.12
+     ],
+     [
+      497.5,
+      925.5,
+      40.55
+     ],
+     [
+      495.5,
+      923.5,
+      40.18
+     ],
+     [
+      493.5,
+      921.5,
+      39.69
+     ],
+     [
+      491.5,
+      919.5,
+      39.18
+     ],
+     [
+      489.5,
+      917.5,
+      38.72
+     ],
+     [
+      487.5,
+      915.5,
+      38.3
+     ],
+     [
+      485.5,
+      913.5,
+      37.93
+     ],
+     [
+      483.5,
+      911.5,
+      37.68
+     ],
+     [
+      482.25,
+      910.25,
+      37.54
+     ],
+     [
+      482,
+      910,
+      37.51
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_farm_hollin_pass_0",
+   "x": 1786,
+   "z": 658,
+   "yaw": 0,
+   "data": {
+    "from": "farm_hollin_pass_0",
+    "to": "town:Hollin Toll",
+    "width": 2.2,
+    "pts": [
+     [
+      1786,
+      658,
+      15.13
+     ],
+     [
+      1785.25,
+      657.25,
+      14.99
+     ],
+     [
+      1783.5,
+      655.5,
+      14.67
+     ],
+     [
+      1781.5,
+      653.5,
+      14.38
+     ],
+     [
+      1779.5,
+      651.5,
+      14.17
+     ],
+     [
+      1778.25,
+      649.5,
+      13.95
+     ],
+     [
+      1778,
+      647.5,
+      13.85
+     ],
+     [
+      1777.25,
+      645.5,
+      13.78
+     ],
+     [
+      1775.5,
+      643.5,
+      13.66
+     ],
+     [
+      1773.5,
+      641.5,
+      13.62
+     ],
+     [
+      1771.5,
+      639.5,
+      13.59
+     ],
+     [
+      1770.25,
+      638.25,
+      13.59
+     ],
+     [
+      1770,
+      638,
+      13.59
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_farm_hollin_pass_1",
+   "x": 86,
+   "z": 1550,
+   "yaw": 0,
+   "data": {
+    "from": "farm_hollin_pass_1",
+    "to": "town:Scree End",
+    "width": 2.2,
+    "pts": [
+     [
+      86,
+      1550,
+      66.88
+     ],
+     [
+      86.75,
+      1549.25,
+      66.77
+     ],
+     [
+      88.5,
+      1547.5,
+      66.52
+     ],
+     [
+      89.75,
+      1545.5,
+      66.28
+     ],
+     [
+      90,
+      1543.5,
+      66.14
+     ],
+     [
+      90,
+      1541.5,
+      65.96
+     ],
+     [
+      90,
+      1539.5,
+      65.75
+     ],
+     [
+      90,
+      1537.5,
+      65.51
+     ],
+     [
+      90,
+      1535.5,
+      65.28
+     ],
+     [
+      90,
+      1533.5,
+      65.14
+     ],
+     [
+      90,
+      1531.5,
+      64.99
+     ],
+     [
+      90,
+      1529.5,
+      64.85
+     ],
+     [
+      90,
+      1527.5,
+      64.74
+     ],
+     [
+      90,
+      1525.5,
+      64.65
+     ],
+     [
+      90,
+      1523.5,
+      64.53
+     ],
+     [
+      90,
+      1521.5,
+      64.4
+     ],
+     [
+      90,
+      1519.5,
+      64.36
+     ],
+     [
+      90.75,
+      1517.5,
+      64.37
+     ],
+     [
+      92.5,
+      1515.5,
+      64.39
+     ],
+     [
+      93.75,
+      1514.25,
+      64.39
+     ],
+     [
+      94,
+      1514,
+      64.39
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_cave_hollin_pass_0",
+   "x": 1546,
+   "z": 1950,
+   "yaw": 0,
+   "data": {
+    "from": "cave_hollin_pass_0",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      1546,
+      1950,
+      323.9
+     ],
+     [
+      1546,
+      1949.25,
+      323.44
+     ],
+     [
+      1546,
+      1947.5,
+      322.43
+     ],
+     [
+      1546,
+      1945.5,
+      321.46
+     ],
+     [
+      1546,
+      1943.5,
+      320.5
+     ],
+     [
+      1546,
+      1941.5,
+      319.39
+     ],
+     [
+      1546,
+      1939.5,
+      318.1
+     ],
+     [
+      1546,
+      1937.5,
+      316.55
+     ],
+     [
+      1546,
+      1935.5,
+      314.98
+     ],
+     [
+      1546,
+      1933.5,
+      313.68
+     ],
+     [
+      1546,
+      1931.5,
+      312.41
+     ],
+     [
+      1546,
+      1929.5,
+      310.97
+     ],
+     [
+      1546,
+      1927.5,
+      309.49
+     ],
+     [
+      1546,
+      1925.5,
+      307.97
+     ],
+     [
+      1546,
+      1923.5,
+      306.47
+     ],
+     [
+      1546,
+      1921.5,
+      305.2
+     ],
+     [
+      1546,
+      1919.5,
+      304.1
+     ],
+     [
+      1546,
+      1917.5,
+      303.07
+     ],
+     [
+      1546,
+      1915.5,
+      301.93
+     ],
+     [
+      1546,
+      1913.5,
+      300.65
+     ],
+     [
+      1546,
+      1911.5,
+      299.24
+     ],
+     [
+      1546,
+      1909.5,
+      297.62
+     ],
+     [
+      1546,
+      1907.5,
+      295.88
+     ],
+     [
+      1546,
+      1905.5,
+      294.26
+     ],
+     [
+      1546,
+      1903.5,
+      292.69
+     ],
+     [
+      1546,
+      1901.5,
+      291.03
+     ],
+     [
+      1546,
+      1899.5,
+      289.41
+     ],
+     [
+      1546,
+      1897.5,
+      287.94
+     ],
+     [
+      1546,
+      1895.5,
+      286.35
+     ],
+     [
+      1546,
+      1893.5,
+      284.63
+     ],
+     [
+      1546,
+      1891.5,
+      282.97
+     ],
+     [
+      1546,
+      1889.5,
+      281.45
+     ],
+     [
+      1546,
+      1887.5,
+      280.03
+     ],
+     [
+      1546,
+      1885.5,
+      278.6
+     ],
+     [
+      1546,
+      1883.5,
+      277.09
+     ],
+     [
+      1546,
+      1881.5,
+      275.66
+     ],
+     [
+      1546,
+      1879.5,
+      274.33
+     ],
+     [
+      1546,
+      1877.5,
+      273.12
+     ],
+     [
+      1546,
+      1875.5,
+      271.99
+     ],
+     [
+      1546,
+      1873.5,
+      270.8
+     ],
+     [
+      1546,
+      1871.5,
+      269.56
+     ],
+     [
+      1546,
+      1869.5,
+      268.22
+     ],
+     [
+      1546,
+      1867.5,
+      266.84
+     ],
+     [
+      1546,
+      1865.5,
+      265.56
+     ],
+     [
+      1546,
+      1863.5,
+      264.23
+     ],
+     [
+      1546.75,
+      1861.5,
+      262.81
+     ],
+     [
+      1548.5,
+      1859.5,
+      261.35
+     ],
+     [
+      1549.75,
+      1857.5,
+      260.06
+     ],
+     [
+      1550,
+      1855.5,
+      258.95
+     ],
+     [
+      1550,
+      1853.5,
+      257.73
+     ],
+     [
+      1550,
+      1851.5,
+      256.45
+     ],
+     [
+      1550,
+      1849.5,
+      255.29
+     ],
+     [
+      1550,
+      1847.5,
+      254.21
+     ],
+     [
+      1550,
+      1845.5,
+      253.21
+     ],
+     [
+      1550,
+      1843.5,
+      252.23
+     ],
+     [
+      1550,
+      1841.5,
+      251.2
+     ],
+     [
+      1550,
+      1839.5,
+      250.31
+     ],
+     [
+      1550,
+      1837.5,
+      249.74
+     ],
+     [
+      1550,
+      1835.5,
+      249.23
+     ],
+     [
+      1549.25,
+      1833.5,
+      248.35
+     ],
+     [
+      1547.5,
+      1831.5,
+      246.99
+     ],
+     [
+      1545.5,
+      1829.5,
+      245.31
+     ],
+     [
+      1543.5,
+      1827.5,
+      243.41
+     ],
+     [
+      1541.5,
+      1825.5,
+      241.6
+     ],
+     [
+      1539.5,
+      1823.5,
+      239.55
+     ],
+     [
+      1537.5,
+      1821.5,
+      237.64
+     ],
+     [
+      1535.5,
+      1819.5,
+      235.96
+     ],
+     [
+      1533.5,
+      1817.5,
+      234.65
+     ],
+     [
+      1531.5,
+      1815.5,
+      233.34
+     ],
+     [
+      1530.25,
+      1813.5,
+      232.42
+     ],
+     [
+      1530,
+      1811.5,
+      231.83
+     ],
+     [
+      1530,
+      1809.5,
+      231.27
+     ],
+     [
+      1530,
+      1807.5,
+      230.71
+     ],
+     [
+      1530,
+      1805.5,
+      230.06
+     ],
+     [
+      1530,
+      1803.5,
+      229.28
+     ],
+     [
+      1530,
+      1801.5,
+      228.4
+     ],
+     [
+      1530,
+      1799.5,
+      227.48
+     ],
+     [
+      1530,
+      1797.5,
+      226.61
+     ],
+     [
+      1530,
+      1795.5,
+      225.82
+     ],
+     [
+      1530,
+      1793.5,
+      225.03
+     ],
+     [
+      1530,
+      1791.5,
+      224.2
+     ],
+     [
+      1530,
+      1789.5,
+      223.27
+     ],
+     [
+      1530,
+      1787.5,
+      222.24
+     ],
+     [
+      1530,
+      1785.5,
+      221.3
+     ],
+     [
+      1530,
+      1783.5,
+      220.5
+     ],
+     [
+      1530,
+      1781.5,
+      219.6
+     ],
+     [
+      1530,
+      1779.5,
+      218.5
+     ],
+     [
+      1530,
+      1777.5,
+      217.44
+     ],
+     [
+      1530,
+      1775.5,
+      216.55
+     ],
+     [
+      1530,
+      1773.5,
+      215.84
+     ],
+     [
+      1530,
+      1771.5,
+      215.29
+     ],
+     [
+      1530,
+      1769.5,
+      214.82
+     ],
+     [
+      1530,
+      1767.5,
+      214.3
+     ],
+     [
+      1530,
+      1765.5,
+      213.69
+     ],
+     [
+      1530,
+      1763.5,
+      213.07
+     ],
+     [
+      1530,
+      1761.5,
+      212.37
+     ],
+     [
+      1530,
+      1759.5,
+      211.64
+     ],
+     [
+      1530,
+      1757.5,
+      211.14
+     ],
+     [
+      1530,
+      1755.5,
+      210.86
+     ],
+     [
+      1530,
+      1753.5,
+      210.51
+     ],
+     [
+      1530,
+      1751.5,
+      210.02
+     ],
+     [
+      1530,
+      1749.5,
+      209.45
+     ],
+     [
+      1530,
+      1747.5,
+      208.82
+     ],
+     [
+      1530,
+      1745.5,
+      208.28
+     ],
+     [
+      1530,
+      1743.5,
+      207.93
+     ],
+     [
+      1530,
+      1741.5,
+      207.58
+     ],
+     [
+      1530,
+      1739.5,
+      207.28
+     ],
+     [
+      1530.75,
+      1737.5,
+      207.1
+     ],
+     [
+      1532.5,
+      1735.5,
+      206.99
+     ],
+     [
+      1534.5,
+      1733.5,
+      206.7
+     ],
+     [
+      1536.5,
+      1731.5,
+      206.11
+     ],
+     [
+      1537.75,
+      1729.5,
+      205.82
+     ],
+     [
+      1538,
+      1727.5,
+      205.72
+     ],
+     [
+      1538,
+      1725.5,
+      205.6
+     ],
+     [
+      1538,
+      1723.5,
+      205.59
+     ],
+     [
+      1538.75,
+      1721.5,
+      205.48
+     ],
+     [
+      1540.5,
+      1719.5,
+      205.03
+     ],
+     [
+      1541.75,
+      1717.5,
+      204.58
+     ],
+     [
+      1542,
+      1715.5,
+      204.4
+     ],
+     [
+      1542,
+      1713.5,
+      204.35
+     ],
+     [
+      1542,
+      1711.5,
+      204.41
+     ],
+     [
+      1542,
+      1709.5,
+      204.43
+     ],
+     [
+      1542,
+      1707.5,
+      204.15
+     ],
+     [
+      1542,
+      1705.5,
+      203.68
+     ],
+     [
+      1542,
+      1703.5,
+      203.3
+     ],
+     [
+      1542,
+      1701.5,
+      202.99
+     ],
+     [
+      1542,
+      1699.5,
+      202.59
+     ],
+     [
+      1542,
+      1697.5,
+      202.1
+     ],
+     [
+      1542,
+      1695.5,
+      201.6
+     ],
+     [
+      1542,
+      1693.5,
+      201.01
+     ],
+     [
+      1542,
+      1691.5,
+      200.48
+     ],
+     [
+      1542,
+      1689.5,
+      200.01
+     ],
+     [
+      1542,
+      1687.5,
+      199.51
+     ],
+     [
+      1542,
+      1685.5,
+      199.02
+     ],
+     [
+      1542,
+      1683.5,
+      198.65
+     ],
+     [
+      1542,
+      1681.5,
+      198.27
+     ],
+     [
+      1542,
+      1679.5,
+      197.75
+     ],
+     [
+      1542.75,
+      1677.5,
+      197.01
+     ],
+     [
+      1544.5,
+      1675.5,
+      195.92
+     ],
+     [
+      1545.75,
+      1673.5,
+      194.84
+     ],
+     [
+      1546,
+      1671.5,
+      194.11
+     ],
+     [
+      1546.75,
+      1669.5,
+      193.2
+     ],
+     [
+      1548.5,
+      1667.5,
+      192.02
+     ],
+     [
+      1549.75,
+      1665.5,
+      191.03
+     ],
+     [
+      1550,
+      1663.5,
+      190.24
+     ],
+     [
+      1550,
+      1661.5,
+      189.7
+     ],
+     [
+      1550,
+      1659.5,
+      189.37
+     ],
+     [
+      1550,
+      1657.5,
+      188.96
+     ],
+     [
+      1550,
+      1655.5,
+      188.53
+     ],
+     [
+      1550,
+      1653.5,
+      188.29
+     ],
+     [
+      1550,
+      1651.5,
+      188.05
+     ],
+     [
+      1550,
+      1649.5,
+      187.6
+     ],
+     [
+      1550,
+      1647.5,
+      187.02
+     ],
+     [
+      1550,
+      1645.5,
+      186.58
+     ],
+     [
+      1550,
+      1643.5,
+      186.34
+     ],
+     [
+      1550,
+      1641.5,
+      186.12
+     ],
+     [
+      1550,
+      1639.5,
+      185.87
+     ],
+     [
+      1550,
+      1637.5,
+      185.66
+     ],
+     [
+      1550,
+      1635.5,
+      185.39
+     ],
+     [
+      1550,
+      1633.5,
+      185.11
+     ],
+     [
+      1550,
+      1631.5,
+      184.83
+     ],
+     [
+      1550,
+      1629.5,
+      184.35
+     ],
+     [
+      1550,
+      1627.5,
+      183.73
+     ],
+     [
+      1550,
+      1625.5,
+      183.06
+     ],
+     [
+      1550,
+      1623.5,
+      182.26
+     ],
+     [
+      1550,
+      1621.5,
+      181.46
+     ],
+     [
+      1550,
+      1619.5,
+      180.81
+     ],
+     [
+      1550,
+      1617.5,
+      180.27
+     ],
+     [
+      1550,
+      1615.5,
+      179.68
+     ],
+     [
+      1550,
+      1613.5,
+      179.09
+     ],
+     [
+      1550,
+      1611.5,
+      178.49
+     ],
+     [
+      1549.25,
+      1609.5,
+      177.6
+     ],
+     [
+      1547.5,
+      1607.5,
+      176.28
+     ],
+     [
+      1546.25,
+      1605.5,
+      175.06
+     ],
+     [
+      1546,
+      1603.5,
+      174.07
+     ],
+     [
+      1545.25,
+      1601.5,
+      172.99
+     ],
+     [
+      1543.5,
+      1599.5,
+      171.67
+     ],
+     [
+      1542.25,
+      1597.5,
+      170.74
+     ],
+     [
+      1542,
+      1595.5,
+      170.13
+     ],
+     [
+      1542,
+      1593.5,
+      169.86
+     ],
+     [
+      1542,
+      1591.5,
+      169.72
+     ],
+     [
+      1542,
+      1589.5,
+      169.51
+     ],
+     [
+      1542,
+      1587.5,
+      169.28
+     ],
+     [
+      1541.25,
+      1585.5,
+      169.04
+     ],
+     [
+      1539.5,
+      1583.5,
+      168.71
+     ],
+     [
+      1538.25,
+      1581.5,
+      168.29
+     ],
+     [
+      1538,
+      1579.5,
+      167.85
+     ],
+     [
+      1537.25,
+      1577.5,
+      167.01
+     ],
+     [
+      1535.5,
+      1575.5,
+      165.72
+     ],
+     [
+      1534.25,
+      1573.5,
+      164.52
+     ],
+     [
+      1534,
+      1571.5,
+      163.48
+     ],
+     [
+      1534,
+      1569.5,
+      162.62
+     ],
+     [
+      1534,
+      1567.5,
+      162.01
+     ],
+     [
+      1534,
+      1565.5,
+      161.57
+     ],
+     [
+      1534,
+      1563.5,
+      161.19
+     ],
+     [
+      1533.25,
+      1561.5,
+      160.53
+     ],
+     [
+      1531.5,
+      1559.5,
+      159.39
+     ],
+     [
+      1529.5,
+      1557.5,
+      158.34
+     ],
+     [
+      1527.5,
+      1555.5,
+      157.36
+     ],
+     [
+      1526.25,
+      1553.5,
+      156.51
+     ],
+     [
+      1526,
+      1551.5,
+      155.87
+     ],
+     [
+      1526,
+      1549.5,
+      155.08
+     ],
+     [
+      1526,
+      1547.5,
+      154.18
+     ],
+     [
+      1526,
+      1545.5,
+      153.38
+     ],
+     [
+      1526,
+      1543.5,
+      152.63
+     ],
+     [
+      1525.25,
+      1541.5,
+      151.67
+     ],
+     [
+      1523.5,
+      1539.5,
+      150.52
+     ],
+     [
+      1521.5,
+      1537.5,
+      149.35
+     ],
+     [
+      1519.5,
+      1535.5,
+      148
+     ],
+     [
+      1517.5,
+      1533.5,
+      146.41
+     ],
+     [
+      1515.5,
+      1531.5,
+      144.81
+     ],
+     [
+      1513.5,
+      1529.5,
+      143.18
+     ],
+     [
+      1511.5,
+      1527.5,
+      141.22
+     ],
+     [
+      1509.5,
+      1525.5,
+      139.43
+     ],
+     [
+      1507.5,
+      1523.5,
+      137.77
+     ],
+     [
+      1505.5,
+      1521.5,
+      136.24
+     ],
+     [
+      1503.5,
+      1519.5,
+      134.77
+     ],
+     [
+      1502.25,
+      1517.5,
+      133.71
+     ],
+     [
+      1502,
+      1515.5,
+      133
+     ],
+     [
+      1501.25,
+      1513.5,
+      132.15
+     ],
+     [
+      1499.5,
+      1511.5,
+      131.09
+     ],
+     [
+      1498.25,
+      1509.5,
+      130.29
+     ],
+     [
+      1498,
+      1507.5,
+      129.61
+     ],
+     [
+      1498,
+      1505.5,
+      128.99
+     ],
+     [
+      1498,
+      1503.5,
+      128.29
+     ],
+     [
+      1498,
+      1501.5,
+      127.49
+     ],
+     [
+      1498,
+      1499.5,
+      126.62
+     ],
+     [
+      1498,
+      1497.5,
+      125.75
+     ],
+     [
+      1498,
+      1495.5,
+      124.85
+     ],
+     [
+      1498,
+      1493.5,
+      123.88
+     ],
+     [
+      1498,
+      1491.5,
+      122.97
+     ],
+     [
+      1498,
+      1489.5,
+      122.16
+     ],
+     [
+      1498,
+      1487.5,
+      121.45
+     ],
+     [
+      1497.25,
+      1485.5,
+      120.8
+     ],
+     [
+      1495.5,
+      1483.5,
+      120.06
+     ],
+     [
+      1494.25,
+      1481.5,
+      119.46
+     ],
+     [
+      1494,
+      1479.5,
+      119.06
+     ],
+     [
+      1494,
+      1477.5,
+      118.57
+     ],
+     [
+      1494,
+      1475.5,
+      118.1
+     ],
+     [
+      1494,
+      1473.5,
+      117.62
+     ],
+     [
+      1494,
+      1471.5,
+      117.19
+     ],
+     [
+      1493.25,
+      1469.5,
+      116.78
+     ],
+     [
+      1491.5,
+      1467.5,
+      116.17
+     ],
+     [
+      1490.25,
+      1465.5,
+      115.72
+     ],
+     [
+      1490,
+      1463.5,
+      115.38
+     ],
+     [
+      1489.25,
+      1461.5,
+      115.06
+     ],
+     [
+      1487.5,
+      1459.5,
+      114.76
+     ],
+     [
+      1486.25,
+      1457.5,
+      114.55
+     ],
+     [
+      1486,
+      1455.5,
+      114.47
+     ],
+     [
+      1485.25,
+      1453.5,
+      114.39
+     ],
+     [
+      1483.5,
+      1451.5,
+      114.19
+     ],
+     [
+      1481.5,
+      1449.5,
+      113.94
+     ],
+     [
+      1479.5,
+      1447.5,
+      113.69
+     ],
+     [
+      1477.5,
+      1445.5,
+      113.6
+     ],
+     [
+      1475.5,
+      1443.5,
+      113.25
+     ],
+     [
+      1473.5,
+      1441.5,
+      112.73
+     ],
+     [
+      1471.5,
+      1439.5,
+      112.26
+     ],
+     [
+      1469.5,
+      1437.5,
+      111.81
+     ],
+     [
+      1467.5,
+      1435.5,
+      111.4
+     ],
+     [
+      1465.5,
+      1433.5,
+      111.09
+     ],
+     [
+      1463.5,
+      1431.5,
+      110.83
+     ],
+     [
+      1461.5,
+      1429.5,
+      110.51
+     ],
+     [
+      1459.5,
+      1427.5,
+      110.25
+     ],
+     [
+      1457.5,
+      1425.5,
+      110.13
+     ],
+     [
+      1455.5,
+      1423.5,
+      110.3
+     ],
+     [
+      1454.25,
+      1421.5,
+      110.35
+     ],
+     [
+      1454,
+      1419.5,
+      110.43
+     ],
+     [
+      1453.25,
+      1417.5,
+      110.65
+     ],
+     [
+      1451.5,
+      1415.5,
+      111.04
+     ],
+     [
+      1449.5,
+      1413.5,
+      111.1
+     ],
+     [
+      1447.5,
+      1411.5,
+      111.04
+     ],
+     [
+      1445.5,
+      1409.5,
+      110.92
+     ],
+     [
+      1443.5,
+      1407.5,
+      110.85
+     ],
+     [
+      1442.25,
+      1405.5,
+      110.89
+     ],
+     [
+      1442,
+      1403.5,
+      111.02
+     ],
+     [
+      1442,
+      1401.5,
+      111.16
+     ],
+     [
+      1442,
+      1399.5,
+      111.31
+     ],
+     [
+      1441.25,
+      1397.5,
+      111.56
+     ],
+     [
+      1439.5,
+      1395.5,
+      111.99
+     ],
+     [
+      1437.5,
+      1393.5,
+      112.46
+     ],
+     [
+      1435.5,
+      1391.5,
+      113.1
+     ],
+     [
+      1433.5,
+      1389.5,
+      113.88
+     ],
+     [
+      1431.5,
+      1387.5,
+      114.53
+     ],
+     [
+      1429.5,
+      1385.5,
+      115.01
+     ],
+     [
+      1427.5,
+      1383.5,
+      115.39
+     ],
+     [
+      1425.5,
+      1381.5,
+      115.66
+     ],
+     [
+      1423.5,
+      1379.5,
+      116.03
+     ],
+     [
+      1421.5,
+      1377.5,
+      116.36
+     ],
+     [
+      1419.5,
+      1375.5,
+      116.54
+     ],
+     [
+      1417.5,
+      1373.5,
+      116.62
+     ],
+     [
+      1415.5,
+      1371.5,
+      116.82
+     ],
+     [
+      1413.5,
+      1369.5,
+      117.02
+     ],
+     [
+      1411.5,
+      1367.5,
+      117.26
+     ],
+     [
+      1410.25,
+      1365.5,
+      117.43
+     ],
+     [
+      1410,
+      1363.5,
+      117.63
+     ],
+     [
+      1410,
+      1361.5,
+      117.8
+     ],
+     [
+      1410,
+      1359.5,
+      117.96
+     ],
+     [
+      1409.25,
+      1357.5,
+      118.21
+     ],
+     [
+      1407.5,
+      1355.5,
+      118.55
+     ],
+     [
+      1405.5,
+      1353.5,
+      118.88
+     ],
+     [
+      1403.5,
+      1351.5,
+      119.12
+     ],
+     [
+      1401.5,
+      1349.5,
+      119.41
+     ],
+     [
+      1399.5,
+      1347.5,
+      119.97
+     ],
+     [
+      1397.5,
+      1345.5,
+      120.5
+     ],
+     [
+      1395.5,
+      1343.5,
+      121
+     ],
+     [
+      1393.5,
+      1341.5,
+      121.58
+     ],
+     [
+      1391.5,
+      1339.5,
+      122.02
+     ],
+     [
+      1390.25,
+      1337.5,
+      122.35
+     ],
+     [
+      1390,
+      1335.5,
+      122.43
+     ],
+     [
+      1390,
+      1333.5,
+      122.46
+     ],
+     [
+      1390,
+      1331.5,
+      122.6
+     ],
+     [
+      1390,
+      1329.5,
+      122.83
+     ],
+     [
+      1390,
+      1327.5,
+      123.11
+     ],
+     [
+      1390,
+      1325.5,
+      123.26
+     ],
+     [
+      1390,
+      1323.5,
+      123.26
+     ],
+     [
+      1389.25,
+      1321.5,
+      122.95
+     ],
+     [
+      1387.5,
+      1319.5,
+      122.51
+     ],
+     [
+      1385.5,
+      1317.5,
+      122.08
+     ],
+     [
+      1383.5,
+      1315.5,
+      121.31
+     ],
+     [
+      1381.5,
+      1313.5,
+      120.42
+     ],
+     [
+      1379.5,
+      1311.5,
+      119.58
+     ],
+     [
+      1378.25,
+      1309.5,
+      118.97
+     ],
+     [
+      1378,
+      1307.5,
+      118.6
+     ],
+     [
+      1378,
+      1305.5,
+      118.52
+     ],
+     [
+      1378,
+      1303.5,
+      118.51
+     ],
+     [
+      1377.25,
+      1301.5,
+      118.26
+     ],
+     [
+      1375.5,
+      1299.5,
+      117.69
+     ],
+     [
+      1373.5,
+      1297.5,
+      116.97
+     ],
+     [
+      1371.5,
+      1295.5,
+      116.1
+     ],
+     [
+      1370.25,
+      1293.5,
+      115.51
+     ],
+     [
+      1370,
+      1291.5,
+      115.11
+     ],
+     [
+      1369.25,
+      1289.5,
+      114.62
+     ],
+     [
+      1367.5,
+      1287.5,
+      113.81
+     ],
+     [
+      1365.5,
+      1285.5,
+      113.04
+     ],
+     [
+      1363.5,
+      1283.5,
+      112.27
+     ],
+     [
+      1361.5,
+      1281.5,
+      111.54
+     ],
+     [
+      1359.5,
+      1279.5,
+      110.73
+     ],
+     [
+      1357.5,
+      1277.5,
+      109.96
+     ],
+     [
+      1355.5,
+      1275.5,
+      109.3
+     ],
+     [
+      1353.5,
+      1273.5,
+      108.69
+     ],
+     [
+      1351.5,
+      1271.5,
+      107.78
+     ],
+     [
+      1349.5,
+      1269.5,
+      106.69
+     ],
+     [
+      1347.5,
+      1267.5,
+      105.64
+     ],
+     [
+      1346.25,
+      1265.5,
+      105.13
+     ],
+     [
+      1346,
+      1263.5,
+      104.75
+     ],
+     [
+      1346,
+      1261.5,
+      104.47
+     ],
+     [
+      1346,
+      1259.5,
+      104.27
+     ],
+     [
+      1345.25,
+      1257.5,
+      103.76
+     ],
+     [
+      1343.5,
+      1255.5,
+      102.89
+     ],
+     [
+      1341.5,
+      1253.5,
+      102.03
+     ],
+     [
+      1339.5,
+      1251.5,
+      101.01
+     ],
+     [
+      1337.5,
+      1249.5,
+      99.85
+     ],
+     [
+      1335.5,
+      1247.5,
+      98.38
+     ],
+     [
+      1333.5,
+      1245.5,
+      97.32
+     ],
+     [
+      1331.5,
+      1243.5,
+      96.44
+     ],
+     [
+      1330.25,
+      1241.5,
+      95.72
+     ],
+     [
+      1330,
+      1239.5,
+      95.16
+     ],
+     [
+      1330,
+      1237.5,
+      94.55
+     ],
+     [
+      1330,
+      1235.5,
+      94.04
+     ],
+     [
+      1330,
+      1233.5,
+      93.69
+     ],
+     [
+      1330,
+      1231.5,
+      93.44
+     ],
+     [
+      1329.25,
+      1229.5,
+      93.14
+     ],
+     [
+      1327.5,
+      1227.5,
+      92.68
+     ],
+     [
+      1326.25,
+      1225.5,
+      92.38
+     ],
+     [
+      1326,
+      1223.5,
+      92.18
+     ],
+     [
+      1326,
+      1221.5,
+      92.04
+     ],
+     [
+      1326,
+      1219.5,
+      91.92
+     ],
+     [
+      1326,
+      1217.5,
+      91.89
+     ],
+     [
+      1326,
+      1215.5,
+      91.93
+     ],
+     [
+      1326,
+      1213.5,
+      91.92
+     ],
+     [
+      1326,
+      1211.5,
+      91.92
+     ],
+     [
+      1326,
+      1209.5,
+      92
+     ],
+     [
+      1326,
+      1207.5,
+      92.03
+     ],
+     [
+      1326,
+      1205.5,
+      91.95
+     ],
+     [
+      1326,
+      1203.5,
+      91.82
+     ],
+     [
+      1325.25,
+      1201.5,
+      91.78
+     ],
+     [
+      1323.5,
+      1199.5,
+      92.16
+     ],
+     [
+      1322.25,
+      1197.5,
+      92.42
+     ],
+     [
+      1322,
+      1195.5,
+      92.39
+     ],
+     [
+      1322,
+      1193.5,
+      92.37
+     ],
+     [
+      1322,
+      1191.5,
+      92.22
+     ],
+     [
+      1322,
+      1189.5,
+      91.88
+     ],
+     [
+      1322,
+      1187.5,
+      91.58
+     ],
+     [
+      1321.25,
+      1185.5,
+      91.28
+     ],
+     [
+      1319.5,
+      1183.5,
+      90.71
+     ],
+     [
+      1318.25,
+      1181.5,
+      90.15
+     ],
+     [
+      1318,
+      1179.5,
+      89.87
+     ],
+     [
+      1318,
+      1177.5,
+      89.5
+     ],
+     [
+      1318,
+      1175.5,
+      89.02
+     ],
+     [
+      1318,
+      1173.5,
+      88.53
+     ],
+     [
+      1318,
+      1171.5,
+      88.04
+     ],
+     [
+      1318,
+      1169.5,
+      87.55
+     ],
+     [
+      1318,
+      1167.5,
+      87.11
+     ],
+     [
+      1318,
+      1165.5,
+      86.75
+     ],
+     [
+      1318,
+      1163.5,
+      86.43
+     ],
+     [
+      1318,
+      1161.5,
+      86.13
+     ],
+     [
+      1318,
+      1159.5,
+      85.92
+     ],
+     [
+      1318,
+      1157.5,
+      85.7
+     ],
+     [
+      1318,
+      1155.5,
+      85.41
+     ],
+     [
+      1318,
+      1153.5,
+      85.22
+     ],
+     [
+      1318,
+      1151.5,
+      85.16
+     ],
+     [
+      1318,
+      1149.5,
+      85.09
+     ],
+     [
+      1318,
+      1147.5,
+      84.94
+     ],
+     [
+      1318,
+      1145.5,
+      84.66
+     ],
+     [
+      1318,
+      1143.5,
+      84.37
+     ],
+     [
+      1318,
+      1141.5,
+      84.18
+     ],
+     [
+      1318,
+      1139.5,
+      84.05
+     ],
+     [
+      1318,
+      1137.5,
+      83.93
+     ],
+     [
+      1318,
+      1135.5,
+      83.78
+     ],
+     [
+      1318,
+      1133.5,
+      83.57
+     ],
+     [
+      1318,
+      1131.5,
+      83.44
+     ],
+     [
+      1318,
+      1129.5,
+      83.31
+     ],
+     [
+      1318,
+      1127.5,
+      83.13
+     ],
+     [
+      1318,
+      1125.5,
+      82.97
+     ],
+     [
+      1318,
+      1123.5,
+      82.79
+     ],
+     [
+      1318,
+      1121.5,
+      82.52
+     ],
+     [
+      1318,
+      1119.5,
+      82.27
+     ],
+     [
+      1318.75,
+      1117.5,
+      82.04
+     ],
+     [
+      1320.5,
+      1115.5,
+      81.63
+     ],
+     [
+      1322.5,
+      1113.5,
+      81.02
+     ],
+     [
+      1324.5,
+      1111.5,
+      80.37
+     ],
+     [
+      1326.5,
+      1109.5,
+      79.66
+     ],
+     [
+      1328.5,
+      1107.5,
+      78.83
+     ],
+     [
+      1329.75,
+      1105.5,
+      78.21
+     ],
+     [
+      1330,
+      1103.5,
+      77.91
+     ],
+     [
+      1330,
+      1101.5,
+      77.73
+     ],
+     [
+      1330,
+      1099.5,
+      77.63
+     ],
+     [
+      1330,
+      1097.5,
+      77.44
+     ],
+     [
+      1330,
+      1095.5,
+      77.11
+     ],
+     [
+      1330,
+      1093.5,
+      76.73
+     ],
+     [
+      1330,
+      1091.5,
+      76.38
+     ],
+     [
+      1330,
+      1089.5,
+      76.13
+     ],
+     [
+      1330,
+      1087.5,
+      75.9
+     ],
+     [
+      1330,
+      1085.5,
+      75.68
+     ],
+     [
+      1330,
+      1083.5,
+      75.5
+     ],
+     [
+      1330,
+      1081.5,
+      75.25
+     ],
+     [
+      1330,
+      1079.5,
+      74.85
+     ],
+     [
+      1330,
+      1077.5,
+      74.47
+     ],
+     [
+      1330,
+      1075.5,
+      74.12
+     ],
+     [
+      1330,
+      1073.5,
+      73.84
+     ],
+     [
+      1330,
+      1071.5,
+      73.62
+     ],
+     [
+      1330,
+      1069.5,
+      73.39
+     ],
+     [
+      1330,
+      1067.5,
+      73.12
+     ],
+     [
+      1330,
+      1065.5,
+      72.85
+     ],
+     [
+      1330,
+      1063.5,
+      72.48
+     ],
+     [
+      1330.75,
+      1061.5,
+      72.04
+     ],
+     [
+      1332.5,
+      1059.5,
+      71.54
+     ],
+     [
+      1333.75,
+      1057.5,
+      71.02
+     ],
+     [
+      1334,
+      1055.5,
+      70.72
+     ],
+     [
+      1334.75,
+      1053.5,
+      70.38
+     ],
+     [
+      1336.5,
+      1051.5,
+      70.02
+     ],
+     [
+      1338.5,
+      1049.5,
+      69.82
+     ],
+     [
+      1340.5,
+      1047.5,
+      69.62
+     ],
+     [
+      1342.5,
+      1045.5,
+      69.36
+     ],
+     [
+      1344.5,
+      1043.5,
+      69.17
+     ],
+     [
+      1345.75,
+      1041.5,
+      69
+     ],
+     [
+      1346,
+      1039.5,
+      68.92
+     ],
+     [
+      1346.75,
+      1037.5,
+      68.77
+     ],
+     [
+      1348.5,
+      1035.5,
+      68.48
+     ],
+     [
+      1349.75,
+      1033.5,
+      68.24
+     ],
+     [
+      1350,
+      1031.5,
+      68.13
+     ],
+     [
+      1350,
+      1029.5,
+      68
+     ],
+     [
+      1350,
+      1027.5,
+      67.8
+     ],
+     [
+      1350,
+      1025.5,
+      67.5
+     ],
+     [
+      1350,
+      1023.5,
+      67.21
+     ],
+     [
+      1350,
+      1021.5,
+      67.03
+     ],
+     [
+      1350,
+      1019.5,
+      66.93
+     ],
+     [
+      1350,
+      1017.5,
+      66.79
+     ],
+     [
+      1350,
+      1015.5,
+      66.68
+     ],
+     [
+      1350,
+      1013.5,
+      66.7
+     ],
+     [
+      1350,
+      1011.5,
+      66.76
+     ],
+     [
+      1350,
+      1009.5,
+      66.71
+     ],
+     [
+      1350,
+      1007.5,
+      66.6
+     ],
+     [
+      1350.75,
+      1005.5,
+      66.54
+     ],
+     [
+      1352.5,
+      1003.5,
+      66.56
+     ],
+     [
+      1353.75,
+      1001.5,
+      66.6
+     ],
+     [
+      1354,
+      999.5,
+      66.49
+     ],
+     [
+      1354.75,
+      997.5,
+      66.28
+     ],
+     [
+      1356.5,
+      995.5,
+      65.97
+     ],
+     [
+      1358.5,
+      993.5,
+      65.52
+     ],
+     [
+      1360.5,
+      991.5,
+      64.95
+     ],
+     [
+      1362.5,
+      989.5,
+      64.5
+     ],
+     [
+      1364.5,
+      987.5,
+      64.2
+     ],
+     [
+      1366.5,
+      985.5,
+      63.75
+     ],
+     [
+      1368.5,
+      983.5,
+      63.22
+     ],
+     [
+      1370.5,
+      981.5,
+      62.91
+     ],
+     [
+      1372.5,
+      979.5,
+      62.77
+     ],
+     [
+      1374.5,
+      977.5,
+      62.54
+     ],
+     [
+      1376.5,
+      975.5,
+      62.24
+     ],
+     [
+      1377.75,
+      973.5,
+      62.07
+     ],
+     [
+      1378,
+      971.5,
+      62.05
+     ],
+     [
+      1378,
+      969.5,
+      62.07
+     ],
+     [
+      1378,
+      967.5,
+      62.05
+     ],
+     [
+      1378,
+      965.5,
+      61.95
+     ],
+     [
+      1378,
+      963.5,
+      61.82
+     ],
+     [
+      1378.75,
+      961.5,
+      61.75
+     ],
+     [
+      1380.5,
+      959.5,
+      61.76
+     ],
+     [
+      1381.75,
+      957.5,
+      61.77
+     ],
+     [
+      1382,
+      955.5,
+      61.63
+     ],
+     [
+      1382,
+      953.5,
+      61.53
+     ],
+     [
+      1382,
+      951.5,
+      61.47
+     ],
+     [
+      1382,
+      949.5,
+      61.42
+     ],
+     [
+      1382,
+      947.5,
+      61.41
+     ],
+     [
+      1382,
+      945.5,
+      61.45
+     ],
+     [
+      1382,
+      943.5,
+      61.56
+     ],
+     [
+      1382,
+      941.5,
+      61.75
+     ],
+     [
+      1382,
+      939.5,
+      61.97
+     ],
+     [
+      1382,
+      937.5,
+      62.12
+     ],
+     [
+      1382,
+      935.5,
+      62.18
+     ],
+     [
+      1382,
+      933.5,
+      62.13
+     ],
+     [
+      1382,
+      931.5,
+      61.99
+     ],
+     [
+      1382,
+      929.5,
+      61.79
+     ],
+     [
+      1382,
+      927.5,
+      61.6
+     ],
+     [
+      1382.75,
+      925.5,
+      61.44
+     ],
+     [
+      1384.5,
+      923.5,
+      61.27
+     ],
+     [
+      1386.5,
+      921.5,
+      61.12
+     ],
+     [
+      1388.5,
+      919.5,
+      60.99
+     ],
+     [
+      1390.5,
+      917.5,
+      60.69
+     ],
+     [
+      1392.5,
+      915.5,
+      60.28
+     ],
+     [
+      1394.5,
+      913.5,
+      59.84
+     ],
+     [
+      1396.5,
+      911.5,
+      59.32
+     ],
+     [
+      1397.75,
+      909.5,
+      58.64
+     ],
+     [
+      1398,
+      907.5,
+      58.11
+     ],
+     [
+      1398,
+      905.5,
+      57.71
+     ],
+     [
+      1398,
+      903.5,
+      57.28
+     ],
+     [
+      1398,
+      901.5,
+      56.78
+     ],
+     [
+      1398,
+      899.5,
+      56.26
+     ],
+     [
+      1398,
+      897.5,
+      55.73
+     ],
+     [
+      1398,
+      895.5,
+      55.25
+     ],
+     [
+      1398,
+      893.5,
+      54.89
+     ],
+     [
+      1398,
+      891.5,
+      54.55
+     ],
+     [
+      1398,
+      889.5,
+      54.16
+     ],
+     [
+      1398,
+      887.5,
+      53.86
+     ],
+     [
+      1398,
+      885.5,
+      53.58
+     ],
+     [
+      1398,
+      883.5,
+      53.28
+     ],
+     [
+      1398.75,
+      881.5,
+      53.04
+     ],
+     [
+      1400.5,
+      879.5,
+      52.78
+     ],
+     [
+      1401.75,
+      877.5,
+      52.51
+     ],
+     [
+      1402,
+      875.5,
+      52.17
+     ],
+     [
+      1402,
+      873.5,
+      51.76
+     ],
+     [
+      1402,
+      871.5,
+      51.31
+     ],
+     [
+      1402.75,
+      869.5,
+      50.76
+     ],
+     [
+      1404.5,
+      867.5,
+      50.14
+     ],
+     [
+      1406.5,
+      865.5,
+      49.5
+     ],
+     [
+      1408.5,
+      863.5,
+      48.88
+     ],
+     [
+      1410.5,
+      861.5,
+      48.3
+     ],
+     [
+      1412.5,
+      859.5,
+      47.71
+     ],
+     [
+      1414.5,
+      857.5,
+      47.09
+     ],
+     [
+      1416.5,
+      855.5,
+      46.41
+     ],
+     [
+      1418.5,
+      853.5,
+      45.72
+     ],
+     [
+      1420.5,
+      851.5,
+      45.2
+     ],
+     [
+      1421.75,
+      849.5,
+      44.78
+     ],
+     [
+      1422,
+      847.5,
+      44.37
+     ],
+     [
+      1422,
+      845.5,
+      43.97
+     ],
+     [
+      1422,
+      843.5,
+      43.59
+     ],
+     [
+      1422,
+      841.5,
+      43.24
+     ],
+     [
+      1422,
+      839.5,
+      42.96
+     ],
+     [
+      1422,
+      837.5,
+      42.67
+     ],
+     [
+      1422,
+      835.5,
+      42.33
+     ],
+     [
+      1422,
+      833.5,
+      41.98
+     ],
+     [
+      1422,
+      831.5,
+      41.69
+     ],
+     [
+      1422,
+      829.5,
+      41.48
+     ],
+     [
+      1422,
+      827.5,
+      41.31
+     ],
+     [
+      1422,
+      825.5,
+      41.09
+     ],
+     [
+      1422,
+      823.5,
+      40.94
+     ],
+     [
+      1422,
+      821.5,
+      40.85
+     ],
+     [
+      1422,
+      819.5,
+      40.73
+     ],
+     [
+      1422,
+      817.5,
+      40.49
+     ],
+     [
+      1422,
+      815.5,
+      40.24
+     ],
+     [
+      1422,
+      813.5,
+      39.99
+     ],
+     [
+      1422,
+      811.5,
+      39.69
+     ],
+     [
+      1422,
+      809.5,
+      39.38
+     ],
+     [
+      1422,
+      807.5,
+      39.11
+     ],
+     [
+      1422,
+      805.5,
+      38.85
+     ],
+     [
+      1422,
+      803.5,
+      38.55
+     ],
+     [
+      1422,
+      801.5,
+      38.32
+     ],
+     [
+      1422,
+      799.5,
+      38.2
+     ],
+     [
+      1422,
+      797.5,
+      38.05
+     ],
+     [
+      1422,
+      795.5,
+      37.88
+     ],
+     [
+      1422,
+      793.5,
+      37.68
+     ],
+     [
+      1422,
+      791.5,
+      37.4
+     ],
+     [
+      1422,
+      789.5,
+      37.09
+     ],
+     [
+      1422,
+      787.5,
+      36.81
+     ],
+     [
+      1422,
+      785.5,
+      36.53
+     ],
+     [
+      1422,
+      783.5,
+      36.22
+     ],
+     [
+      1422,
+      781.5,
+      35.92
+     ],
+     [
+      1422,
+      779.5,
+      35.58
+     ],
+     [
+      1422,
+      777.5,
+      35.27
+     ],
+     [
+      1422,
+      775.5,
+      35.03
+     ],
+     [
+      1422,
+      773.5,
+      34.84
+     ],
+     [
+      1422,
+      771.5,
+      34.58
+     ],
+     [
+      1422,
+      769.5,
+      34.36
+     ],
+     [
+      1422,
+      767.5,
+      34.16
+     ],
+     [
+      1422,
+      766.25,
+      34.06
+     ],
+     [
+      1422,
+      766,
+      34.03
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_cave_hollin_pass_1",
+   "x": 1574,
+   "z": 1430,
+   "yaw": 0,
+   "data": {
+    "from": "cave_hollin_pass_1",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      1574,
+      1430,
+      118.31
+     ],
+     [
+      1573.25,
+      1429.25,
+      117.86
+     ],
+     [
+      1571.5,
+      1427.5,
+      116.83
+     ],
+     [
+      1569.5,
+      1425.5,
+      115.8
+     ],
+     [
+      1567.5,
+      1423.5,
+      114.96
+     ],
+     [
+      1565.5,
+      1421.5,
+      114.33
+     ],
+     [
+      1563.5,
+      1419.5,
+      113.89
+     ],
+     [
+      1561.5,
+      1418.25,
+      113.8
+     ],
+     [
+      1559.5,
+      1418,
+      113.85
+     ],
+     [
+      1557.5,
+      1418,
+      113.83
+     ],
+     [
+      1555.5,
+      1418,
+      113.73
+     ],
+     [
+      1553.5,
+      1418,
+      113.6
+     ],
+     [
+      1551.5,
+      1418,
+      113.54
+     ],
+     [
+      1549.5,
+      1418,
+      113.46
+     ],
+     [
+      1547.5,
+      1418,
+      113.34
+     ],
+     [
+      1545.5,
+      1418,
+      113.31
+     ],
+     [
+      1543.5,
+      1418,
+      113.32
+     ],
+     [
+      1541.5,
+      1418,
+      113.26
+     ],
+     [
+      1539.5,
+      1418,
+      113.14
+     ],
+     [
+      1537.5,
+      1418.75,
+      113.18
+     ],
+     [
+      1535.5,
+      1420.5,
+      113.42
+     ],
+     [
+      1533.5,
+      1421.75,
+      113.54
+     ],
+     [
+      1531.5,
+      1422,
+      113.39
+     ],
+     [
+      1529.5,
+      1422,
+      113.31
+     ],
+     [
+      1527.5,
+      1422,
+      113.25
+     ],
+     [
+      1525.5,
+      1422,
+      113.15
+     ],
+     [
+      1523.5,
+      1422,
+      113.01
+     ],
+     [
+      1521.5,
+      1422.75,
+      112.89
+     ],
+     [
+      1519.5,
+      1424.5,
+      112.8
+     ],
+     [
+      1517.5,
+      1426.5,
+      112.78
+     ],
+     [
+      1515.5,
+      1428.5,
+      112.83
+     ],
+     [
+      1513.5,
+      1430.5,
+      112.95
+     ],
+     [
+      1511.5,
+      1432.5,
+      113.21
+     ],
+     [
+      1509.5,
+      1434.5,
+      113.5
+     ],
+     [
+      1507.5,
+      1436.5,
+      113.61
+     ],
+     [
+      1505.5,
+      1438.5,
+      113.7
+     ],
+     [
+      1503.5,
+      1440.5,
+      113.82
+     ],
+     [
+      1501.5,
+      1442.5,
+      114.07
+     ],
+     [
+      1499.5,
+      1444.5,
+      114.37
+     ],
+     [
+      1497.5,
+      1446.5,
+      114.65
+     ],
+     [
+      1495.5,
+      1448.5,
+      114.7
+     ],
+     [
+      1493.5,
+      1450.5,
+      114.65
+     ],
+     [
+      1491.5,
+      1452.5,
+      114.58
+     ],
+     [
+      1489.5,
+      1453.75,
+      114.52
+     ],
+     [
+      1487.5,
+      1454,
+      114.47
+     ],
+     [
+      1486.25,
+      1454,
+      114.44
+     ],
+     [
+      1486,
+      1454,
+      114.43
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_ws_z11_01_wolditford",
+   "x": 478,
+   "z": 830,
+   "yaw": 0,
+   "data": {
+    "from": "ws_z11_01_wolditford",
+    "to": "town:Wolditford",
+    "width": 2.2,
+    "pts": [
+     [
+      478,
+      830,
+      36.24
+     ],
+     [
+      477.25,
+      830,
+      36.23
+     ],
+     [
+      475.5,
+      830,
+      36.2
+     ],
+     [
+      473.5,
+      830.75,
+      36.2
+     ],
+     [
+      471.5,
+      832.5,
+      36.24
+     ],
+     [
+      469.5,
+      834.5,
+      36.27
+     ],
+     [
+      467.5,
+      836.5,
+      36.27
+     ],
+     [
+      466.25,
+      837.75,
+      36.29
+     ],
+     [
+      466,
+      838,
+      36.3
      ]
     ]
    }
@@ -8041,13 +13578,4296 @@
   {
    "kind": "bridge",
    "id": "bridge_91_57_0",
-   "x": 242.19,
-   "z": 909.81,
+   "x": 242.47,
+   "z": 909.53,
    "yaw": 2.3562,
    "data": {
-    "span": 20,
-    "deck": 31.495,
-    "road": "road_91"
+    "span": 24.62,
+    "deck": 30.788,
+    "width": 4.5,
+    "a": [
+     233.77,
+     918.23,
+     30.788
+    ],
+    "b": [
+     251.18,
+     900.82,
+     30.788
+    ],
+    "road": "road_91",
+    "river": 57,
+    "cls": 2,
+    "surface": 29.288,
+    "ramp": 15
+   }
+  },
+  {
+   "kind": "town_wall",
+   "id": "hollin_toll_wall",
+   "x": 1728,
+   "z": 560,
+   "yaw": 0,
+   "data": {
+    "town": "hollin_toll",
+    "name": "Hollin Toll",
+    "settlement": "town",
+    "style": "curtain",
+    "material": "stone",
+    "tier": "wall",
+    "h": 4.4,
+    "thick": 1.2,
+    "tint": "#a29c90",
+    "radius": 60.7,
+    "solid": true,
+    "runs": [
+     [
+      [
+       1728.36,
+       499.3,
+       12.71
+      ],
+      [
+       1745.81,
+       501.97,
+       12.78
+      ],
+      [
+       1761.75,
+       509.55,
+       12.81
+      ],
+      [
+       1774.84,
+       521.39,
+       12.81
+      ],
+      [
+       1783.96,
+       536.49,
+       12.96
+      ],
+      [
+       1788.36,
+       553.59,
+       12.82
+      ],
+      [
+       1787.65,
+       571.22,
+       12.88
+      ],
+      [
+       1781.9,
+       587.91,
+       12.9
+      ],
+      [
+       1771.59,
+       602.24,
+       12.98
+      ],
+      [
+       1757.6,
+       612.99,
+       13.17
+      ],
+      [
+       1741.1,
+       619.27,
+       13.53
+      ],
+      [
+       1723.5,
+       620.53,
+       13.35
+      ],
+      [
+       1706.28,
+       616.68,
+       13.35
+      ],
+      [
+       1690.89,
+       608.03,
+       13.42
+      ],
+      [
+       1678.64,
+       595.33,
+       13.67
+      ],
+      [
+       1670.56,
+       579.63,
+       13.59
+      ],
+      [
+       1667.34,
+       562.28,
+       13.47
+      ],
+      [
+       1669.25,
+       544.73,
+       13.5
+      ],
+      [
+       1676.13,
+       528.48,
+       13.56
+      ],
+      [
+       1687.39,
+       514.89,
+       13.25
+      ],
+      [
+       1702.09,
+       505.11,
+       13
+      ],
+      [
+       1718.97,
+       499.98,
+       12.75
+      ]
+     ]
+    ],
+    "towers": [
+     {
+      "x": 1731.26,
+      "z": 499.39,
+      "h": 12.7,
+      "yaw": 3.0879
+     },
+     {
+      "x": 1716.12,
+      "z": 500.47,
+      "h": 12.73,
+      "yaw": -2.9445
+     },
+     {
+      "x": 1766.49,
+      "z": 513.06,
+      "h": 12.84,
+      "yaw": 2.4548
+     },
+     {
+      "x": 1787.45,
+      "z": 547.76,
+      "h": 12.92,
+      "yaw": 1.7739
+     },
+     {
+      "x": 1781.9,
+      "z": 587.91,
+      "h": 12.9,
+      "yaw": 1.093
+     },
+     {
+      "x": 1752.31,
+      "z": 615.62,
+      "h": 13.27,
+      "yaw": 0.4121
+     },
+     {
+      "x": 1711.88,
+      "z": 618.52,
+      "h": 13.36,
+      "yaw": -0.2688
+     },
+     {
+      "x": 1678.64,
+      "z": 595.33,
+      "h": 13.67,
+      "yaw": -0.9496
+     },
+     {
+      "x": 1667.41,
+      "z": 556.38,
+      "h": 13.43,
+      "yaw": -1.6305
+     },
+     {
+      "x": 1683.2,
+      "z": 519.04,
+      "h": 13.32,
+      "yaw": -2.3114
+     }
+    ],
+    "gates": [
+     {
+      "id": "hollin_toll_gate_0",
+      "x": 1723.65,
+      "z": 499.46,
+      "h": 12.75,
+      "yaw": -3.0757,
+      "out": [
+       -0.0658,
+       -0.9978
+      ],
+      "wallYaw": -3.0699,
+      "open": 6.22,
+      "width": 6.2,
+      "pass": 6.2,
+      "slant": 0.006,
+      "kind": "gatehouse",
+      "way": "hollin_toll_street_68",
+      "wayKind": "road",
+      "road": "spur_hollin_toll",
+      "ways": [
+       "hollin_toll_street_68"
+      ],
+      "led": [],
+      "ends": [
+       [
+        1718.97,
+        499.98
+       ],
+       [
+        1728.36,
+        499.3
+       ]
+      ],
+      "main": {
+       "street": "hollin_toll_street_68",
+       "width": 5,
+       "pts": [
+        [
+         1723.65,
+         499.46
+        ],
+        [
+         1727.53,
+         558.3
+        ]
+       ],
+       "metres": 58.97
+      },
+      "approaches": [
+       {
+        "way": "spur_hollin_toll",
+        "width": 3.5,
+        "pts": [
+         [
+          1723.3,
+          494.22
+         ],
+         [
+          1723.17,
+          492.44
+         ],
+         [
+          1723.05,
+          490.67
+         ],
+         [
+          1722.92,
+          488.89
+         ],
+         [
+          1722.79,
+          487.11
+         ],
+         [
+          1722.67,
+          485.33
+         ],
+         [
+          1722.54,
+          483.56
+         ],
+         [
+          1722.41,
+          481.78
+         ],
+         [
+          1722.29,
+          480
+         ],
+         [
+          1722.16,
+          478.22
+         ],
+         [
+          1722.03,
+          476.44
+         ],
+         [
+          1721.9,
+          474.67
+         ],
+         [
+          1721.78,
+          472.89
+         ],
+         [
+          1721.65,
+          471.11
+         ],
+         [
+          1721.52,
+          469.33
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "openings": []
+   }
+  },
+  {
+   "kind": "town_wall",
+   "id": "scree_end_wall",
+   "x": 112,
+   "z": 1472,
+   "yaw": 0,
+   "data": {
+    "town": "scree_end",
+    "name": "Scree End",
+    "settlement": "hamlet",
+    "style": "fence",
+    "material": "rail",
+    "tier": "low",
+    "h": 1.25,
+    "thick": 0.3,
+    "tint": "#8a6c50",
+    "radius": 42.95,
+    "solid": true,
+    "runs": [
+     [
+      [
+       116.31,
+       1429.27,
+       64.45
+      ],
+      [
+       126.15,
+       1431.45,
+       64.5
+      ],
+      [
+       135.22,
+       1435.87,
+       64.55
+      ],
+      [
+       143,
+       1442.27,
+       64.8
+      ],
+      [
+       149.08,
+       1450.32,
+       64.67
+      ],
+      [
+       153.11,
+       1459.56,
+       64.51
+      ],
+      [
+       154.88,
+       1469.49,
+       64.31
+      ],
+      [
+       154.28,
+       1479.55,
+       64.1
+      ],
+      [
+       151.36,
+       1489.2,
+       63.88
+      ],
+      [
+       146.26,
+       1497.9,
+       63.82
+      ],
+      [
+       139.28,
+       1505.18,
+       64.26
+      ],
+      [
+       130.79,
+       1510.62,
+       64.61
+      ],
+      [
+       121.27,
+       1513.94,
+       64.68
+      ],
+      [
+       111.24,
+       1514.94,
+       64.72
+      ],
+      [
+       101.25,
+       1513.58,
+       64.56
+      ],
+      [
+       91.85,
+       1509.93,
+       64.39
+      ],
+      [
+       83.56,
+       1504.19,
+       64.37
+      ],
+      [
+       76.84,
+       1496.67,
+       64.26
+      ],
+      [
+       72.06,
+       1487.8,
+       64.1
+      ],
+      [
+       69.48,
+       1478.05,
+       64.18
+      ],
+      [
+       69.24,
+       1467.97,
+       64.32
+      ],
+      [
+       71.36,
+       1458.11,
+       64.43
+      ],
+      [
+       75.71,
+       1449.02,
+       64.54
+      ],
+      [
+       82.07,
+       1441.19,
+       64.57
+      ],
+      [
+       90.08,
+       1435.07,
+       64.54
+      ],
+      [
+       99.29,
+       1430.97,
+       64.49
+      ],
+      [
+       109.21,
+       1429.14,
+       64.44
+      ]
+     ]
+    ],
+    "towers": [],
+    "gates": [
+     {
+      "id": "scree_end_gate_0",
+      "x": 112.76,
+      "z": 1429.06,
+      "h": 64.39,
+      "yaw": 3.1192,
+      "out": [
+       0.0224,
+       -0.9997
+      ],
+      "wallYaw": 3.1239,
+      "open": 4.81,
+      "width": 4.8,
+      "pass": 4.8,
+      "slant": 0.005,
+      "kind": "posts",
+      "way": "scree_end_street_32",
+      "wayKind": "road",
+      "road": "spur_scree_end",
+      "ways": [
+       "scree_end_street_32"
+      ],
+      "led": [],
+      "ends": [
+       [
+        109.21,
+        1429.14
+       ],
+       [
+        116.31,
+        1429.27
+       ]
+      ],
+      "main": {
+       "street": "scree_end_street_32",
+       "width": 3.6,
+       "pts": [
+        [
+         112.76,
+         1429.06
+        ],
+        [
+         112,
+         1463
+        ],
+        [
+         122.5,
+         1467.5
+        ]
+       ],
+       "metres": 45.38
+      },
+      "approaches": [
+       {
+        "way": "spur_scree_end",
+        "width": 3.5,
+        "pts": [
+         [
+          112.89,
+          1422.89
+         ],
+         [
+          112.93,
+          1420.93
+         ],
+         [
+          112.96,
+          1418.96
+         ],
+         [
+          113,
+          1417
+         ]
+        ]
+       },
+       {
+        "way": "spur_scree_end",
+        "width": 3.5,
+        "pts": [
+         [
+          112.86,
+          1424.86
+         ],
+         [
+          112.89,
+          1422.89
+         ],
+         [
+          112.93,
+          1420.93
+         ],
+         [
+          112.96,
+          1418.96
+         ],
+         [
+          113,
+          1417
+         ]
+        ],
+        "passing": true
+       }
+      ]
+     }
+    ],
+    "openings": []
+   }
+  },
+  {
+   "kind": "town_wall",
+   "id": "wolditford_wall",
+   "x": 448,
+   "z": 880,
+   "yaw": 0,
+   "data": {
+    "town": "wolditford",
+    "name": "Wolditford",
+    "settlement": "hamlet",
+    "style": "fence",
+    "material": "rail",
+    "tier": "low",
+    "h": 1.25,
+    "thick": 0.3,
+    "tint": "#8a6c50",
+    "radius": 42.95,
+    "solid": true,
+    "runs": [
+     [
+      [
+       451.33,
+       837.18,
+       36.29
+      ],
+      [
+       461.21,
+       839.13,
+       36.26
+      ],
+      [
+       470.36,
+       843.33,
+       36.62
+      ],
+      [
+       478.29,
+       849.55,
+       36.95
+      ],
+      [
+       484.55,
+       857.44,
+       37.08
+      ],
+      [
+       488.8,
+       866.57,
+       37.03
+      ],
+      [
+       490.8,
+       876.45,
+       37.19
+      ],
+      [
+       490.45,
+       886.51,
+       37.31
+      ],
+      [
+       487.77,
+       896.22,
+       37.31
+      ],
+      [
+       482.9,
+       905.04,
+       37.37
+      ],
+      [
+       476.11,
+       912.48,
+       37.38
+      ],
+      [
+       467.77,
+       918.13,
+       37.25
+      ],
+      [
+       458.34,
+       921.69,
+       37.04
+      ],
+      [
+       448.35,
+       922.95,
+       36.97
+      ],
+      [
+       438.34,
+       921.85,
+       36.87
+      ],
+      [
+       428.86,
+       918.45,
+       36.85
+      ],
+      [
+       420.43,
+       912.93,
+       36.71
+      ],
+      [
+       413.52,
+       905.6,
+       36.49
+      ],
+      [
+       408.5,
+       896.87,
+       36.28
+      ],
+      [
+       405.66,
+       887.21,
+       36.26
+      ],
+      [
+       405.14,
+       877.15,
+       36.17
+      ],
+      [
+       406.99,
+       867.24,
+       36.18
+      ],
+      [
+       411.09,
+       858.04,
+       36.28
+      ],
+      [
+       417.22,
+       850.05,
+       36.24
+      ],
+      [
+       425.04,
+       843.7,
+       36.32
+      ],
+      [
+       434.13,
+       839.35,
+       36.38
+      ],
+      [
+       443.97,
+       837.24,
+       36.34
+      ]
+     ]
+    ],
+    "towers": [],
+    "gates": [
+     {
+      "id": "wolditford_gate_0",
+      "x": 447.65,
+      "z": 837.05,
+      "h": 36.27,
+      "yaw": 3.0679,
+      "out": [
+       0.0736,
+       -0.9973
+      ],
+      "wallYaw": -3.1334,
+      "open": 5.06,
+      "width": 4.8,
+      "pass": 4.8,
+      "slant": 0.082,
+      "kind": "posts",
+      "way": "wolditford_street_31",
+      "wayKind": "road",
+      "road": "spur_wolditford",
+      "ways": [
+       "wolditford_street_31"
+      ],
+      "led": [],
+      "ends": [
+       [
+        443.97,
+        837.24
+       ],
+       [
+        451.33,
+        837.18
+       ]
+      ],
+      "main": {
+       "street": "wolditford_street_31",
+       "width": 3.6,
+       "pts": [
+        [
+         447.65,
+         837.05
+        ],
+        [
+         444.58,
+         878.66
+        ]
+       ],
+       "metres": 41.72
+      },
+      "approaches": []
+     }
+    ],
+    "openings": []
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "hollin_toll_graveyard",
+   "x": 1628,
+   "z": 476,
+   "yaw": 1.5708,
+   "data": {
+    "piece": "graveyard",
+    "name": "Hollin Toll Graveyard",
+    "town": "Hollin Toll",
+    "auto": true,
+    "r": 20.81,
+    "poly": [
+     [
+      1611,
+      464
+     ],
+     [
+      1645,
+      464
+     ],
+     [
+      1645,
+      488
+     ],
+     [
+      1611,
+      488
+     ]
+    ],
+    "w": 34,
+    "d": 24,
+    "angle": 0,
+    "gate": {
+     "x": 1628,
+     "z": 464,
+     "width": 3.2,
+     "yaw": 0
+    },
+    "graves": [
+     [
+      1613.31,
+      466.27,
+      3.13,
+      "cross"
+     ],
+     [
+      1613.25,
+      468.96,
+      3.119,
+      "headstone"
+     ],
+     [
+      1613.2,
+      471.5,
+      3.179,
+      "headstone"
+     ],
+     [
+      1613.16,
+      474.19,
+      3.124,
+      "mound"
+     ],
+     [
+      1613.22,
+      477.12,
+      3.15,
+      "cross"
+     ],
+     [
+      1613.11,
+      479.7,
+      3.112,
+      "headstone"
+     ],
+     [
+      1613.12,
+      482.34,
+      3.142,
+      "headstone"
+     ],
+     [
+      1613.19,
+      485.14,
+      3.157,
+      "tomb"
+     ],
+     [
+      1614.85,
+      466.24,
+      3.143,
+      "mound"
+     ],
+     [
+      1614.73,
+      468.95,
+      3.171,
+      "slab"
+     ],
+     [
+      1614.86,
+      471.59,
+      3.134,
+      "mound"
+     ],
+     [
+      1614.71,
+      474.26,
+      3.132,
+      "headstone"
+     ],
+     [
+      1614.88,
+      477.11,
+      3.149,
+      "headstone"
+     ],
+     [
+      1614.86,
+      479.68,
+      3.145,
+      "headstone"
+     ],
+     [
+      1614.84,
+      482.5,
+      3.143,
+      "headstone"
+     ],
+     [
+      1616.5,
+      466.22,
+      3.106,
+      "headstone"
+     ],
+     [
+      1616.46,
+      468.94,
+      3.113,
+      "slab"
+     ],
+     [
+      1616.29,
+      471.65,
+      3.156,
+      "tomb"
+     ],
+     [
+      1616.4,
+      474.2,
+      3.154,
+      "headstone"
+     ],
+     [
+      1616.31,
+      477.11,
+      3.116,
+      "cross"
+     ],
+     [
+      1616.34,
+      479.74,
+      3.16,
+      "tomb"
+     ],
+     [
+      1616.49,
+      485.1,
+      3.166,
+      "cross"
+     ],
+     [
+      1618.01,
+      468.81,
+      3.152,
+      "mound"
+     ],
+     [
+      1618.06,
+      471.49,
+      3.147,
+      "headstone"
+     ],
+     [
+      1618.04,
+      474.32,
+      3.119,
+      "headstone"
+     ],
+     [
+      1617.99,
+      476.92,
+      3.135,
+      "cross"
+     ],
+     [
+      1617.92,
+      479.69,
+      3.112,
+      "tomb"
+     ],
+     [
+      1617.88,
+      482.43,
+      3.135,
+      "headstone"
+     ],
+     [
+      1617.99,
+      485.01,
+      3.162,
+      "tomb"
+     ],
+     [
+      1619.67,
+      466.18,
+      3.114,
+      "tomb"
+     ],
+     [
+      1619.61,
+      471.64,
+      3.173,
+      "mound"
+     ],
+     [
+      1619.65,
+      474.33,
+      3.168,
+      "mound"
+     ],
+     [
+      1619.55,
+      476.91,
+      3.137,
+      "cross"
+     ],
+     [
+      1619.61,
+      479.81,
+      3.103,
+      "headstone"
+     ],
+     [
+      1619.5,
+      485.08,
+      3.158,
+      "tomb"
+     ],
+     [
+      1621.32,
+      466.13,
+      3.127,
+      "headstone"
+     ],
+     [
+      1621.23,
+      468.79,
+      3.128,
+      "cross"
+     ],
+     [
+      1621.1,
+      471.62,
+      3.169,
+      "cross"
+     ],
+     [
+      1621.3,
+      474.26,
+      3.129,
+      "slab"
+     ],
+     [
+      1621.24,
+      477.01,
+      3.131,
+      "cross"
+     ],
+     [
+      1621.25,
+      479.58,
+      3.164,
+      "headstone"
+     ],
+     [
+      1621.16,
+      482.36,
+      3.104,
+      "mound"
+     ],
+     [
+      1621.27,
+      485.17,
+      3.163,
+      "cross"
+     ],
+     [
+      1622.83,
+      466.19,
+      3.106,
+      "mound"
+     ],
+     [
+      1622.85,
+      468.93,
+      3.155,
+      "cross"
+     ],
+     [
+      1622.86,
+      471.69,
+      3.127,
+      "headstone"
+     ],
+     [
+      1622.68,
+      474.31,
+      3.146,
+      "headstone"
+     ],
+     [
+      1622.77,
+      476.88,
+      3.172,
+      "headstone"
+     ],
+     [
+      1622.83,
+      479.71,
+      3.104,
+      "slab"
+     ],
+     [
+      1622.84,
+      485.04,
+      3.107,
+      "tomb"
+     ],
+     [
+      1624.46,
+      466.19,
+      3.115,
+      "slab"
+     ],
+     [
+      1624.4,
+      468.81,
+      3.115,
+      "headstone"
+     ],
+     [
+      1624.52,
+      471.64,
+      3.111,
+      "headstone"
+     ],
+     [
+      1624.41,
+      474.36,
+      3.159,
+      "tomb"
+     ],
+     [
+      1624.52,
+      476.88,
+      3.172,
+      "headstone"
+     ],
+     [
+      1630.83,
+      466.24,
+      3.154,
+      "tomb"
+     ],
+     [
+      1630.92,
+      469.01,
+      3.162,
+      "mound"
+     ],
+     [
+      1630.88,
+      471.54,
+      3.179,
+      "cross"
+     ],
+     [
+      1630.72,
+      474.34,
+      3.151,
+      "cross"
+     ],
+     [
+      1630.86,
+      477.08,
+      3.134,
+      "cross"
+     ],
+     [
+      1632.42,
+      466.28,
+      3.106,
+      "headstone"
+     ],
+     [
+      1632.29,
+      468.83,
+      3.103,
+      "headstone"
+     ],
+     [
+      1632.34,
+      471.61,
+      3.127,
+      "headstone"
+     ],
+     [
+      1632.36,
+      477.04,
+      3.116,
+      "headstone"
+     ],
+     [
+      1634.11,
+      466.3,
+      3.174,
+      "mound"
+     ],
+     [
+      1633.88,
+      468.98,
+      3.141,
+      "cross"
+     ],
+     [
+      1633.96,
+      474.2,
+      3.141,
+      "slab"
+     ],
+     [
+      1634.02,
+      476.98,
+      3.138,
+      "headstone"
+     ],
+     [
+      1633.88,
+      479.77,
+      3.179,
+      "cross"
+     ],
+     [
+      1634.1,
+      482.29,
+      3.145,
+      "headstone"
+     ],
+     [
+      1634.01,
+      485,
+      3.159,
+      "tomb"
+     ],
+     [
+      1635.62,
+      466.25,
+      3.148,
+      "mound"
+     ],
+     [
+      1635.56,
+      468.91,
+      3.163,
+      "headstone"
+     ],
+     [
+      1635.64,
+      471.49,
+      3.147,
+      "mound"
+     ],
+     [
+      1635.7,
+      474.33,
+      3.124,
+      "cross"
+     ],
+     [
+      1635.68,
+      477.05,
+      3.118,
+      "headstone"
+     ],
+     [
+      1635.56,
+      479.6,
+      3.107,
+      "cross"
+     ],
+     [
+      1635.68,
+      482.52,
+      3.144,
+      "mound"
+     ],
+     [
+      1635.71,
+      485.12,
+      3.151,
+      "cross"
+     ],
+     [
+      1637.17,
+      466.16,
+      3.109,
+      "tomb"
+     ],
+     [
+      1637.32,
+      469.02,
+      3.129,
+      "headstone"
+     ],
+     [
+      1637.18,
+      471.71,
+      3.146,
+      "headstone"
+     ],
+     [
+      1637.22,
+      476.89,
+      3.105,
+      "tomb"
+     ],
+     [
+      1637.12,
+      479.81,
+      3.113,
+      "headstone"
+     ],
+     [
+      1637.22,
+      482.33,
+      3.144,
+      "mound"
+     ],
+     [
+      1637.1,
+      485.15,
+      3.165,
+      "cross"
+     ],
+     [
+      1638.82,
+      466.3,
+      3.115,
+      "headstone"
+     ],
+     [
+      1638.78,
+      471.58,
+      3.127,
+      "slab"
+     ],
+     [
+      1638.75,
+      474.19,
+      3.117,
+      "headstone"
+     ],
+     [
+      1638.91,
+      476.89,
+      3.168,
+      "slab"
+     ],
+     [
+      1638.68,
+      479.74,
+      3.133,
+      "mound"
+     ],
+     [
+      1638.75,
+      482.38,
+      3.125,
+      "cross"
+     ],
+     [
+      1638.85,
+      485.09,
+      3.162,
+      "slab"
+     ],
+     [
+      1640.41,
+      466.21,
+      3.173,
+      "mound"
+     ],
+     [
+      1640.45,
+      468.96,
+      3.145,
+      "tomb"
+     ],
+     [
+      1640.43,
+      471.68,
+      3.138,
+      "mound"
+     ],
+     [
+      1640.48,
+      474.42,
+      3.108,
+      "headstone"
+     ],
+     [
+      1640.47,
+      482.38,
+      3.164,
+      "headstone"
+     ],
+     [
+      1640.43,
+      485.02,
+      3.152,
+      "headstone"
+     ],
+     [
+      1641.9,
+      466.2,
+      3.136,
+      "headstone"
+     ],
+     [
+      1642.07,
+      468.94,
+      3.134,
+      "mound"
+     ],
+     [
+      1641.91,
+      471.49,
+      3.119,
+      "mound"
+     ],
+     [
+      1641.95,
+      477.08,
+      3.15,
+      "cross"
+     ],
+     [
+      1642.08,
+      479.6,
+      3.13,
+      "headstone"
+     ],
+     [
+      1642.04,
+      482.41,
+      3.151,
+      "cross"
+     ],
+     [
+      1642.05,
+      484.99,
+      3.116,
+      "cross"
+     ]
+    ],
+    "graveStyles": [
+     "headstone",
+     "cross",
+     "slab",
+     "mound",
+     "tomb"
+    ],
+    "level": 11.72,
+    "slots": [
+     {
+      "kind": "gravedigger",
+      "x": 1628,
+      "z": 464,
+      "r": 1.5,
+      "yaw": 0
+     }
+    ]
+   }
+  },
+  {
+   "kind": "wall",
+   "id": "hollin_toll_graveyard_wall_0",
+   "x": 1629.6,
+   "z": 464.4,
+   "yaw": 0,
+   "data": {
+    "setPiece": "hollin_toll_graveyard",
+    "h": 0.95,
+    "material": "drystone",
+    "pts": [
+     [
+      1629.6,
+      464.4,
+      11.71
+     ],
+     [
+      1644.6,
+      464.4,
+      11.72
+     ],
+     [
+      1644.6,
+      487.6,
+      11.74
+     ],
+     [
+      1611.4,
+      487.6,
+      11.75
+     ],
+     [
+      1611.4,
+      464.4,
+      11.71
+     ],
+     [
+      1626.4,
+      464.4,
+      11.71
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "set_building",
+   "id": "hollin_toll_graveyard_bldg_0",
+   "x": 1628,
+   "z": 483.65,
+   "yaw": -3.1416,
+   "data": {
+    "setPiece": "hollin_toll_graveyard",
+    "piece": "graveyard",
+    "want": "chapel",
+    "w": 7.5,
+    "d": 5.5,
+    "angle": 0,
+    "front": 4.7124,
+    "culture": "halfling",
+    "label": "Chapel",
+    "lit": false,
+    "ground": 11.74
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "scree_end_graveyard",
+   "x": 148,
+   "z": 1380,
+   "yaw": 3.1234,
+   "data": {
+    "piece": "graveyard",
+    "name": "Scree End Graveyard",
+    "town": "Scree End",
+    "auto": true,
+    "r": 12.5,
+    "poly": [
+     [
+      140.32,
+      1389.86
+     ],
+     [
+      140.68,
+      1369.87
+     ],
+     [
+      155.68,
+      1370.14
+     ],
+     [
+      155.32,
+      1390.13
+     ]
+    ],
+    "w": 20,
+    "d": 15,
+    "angle": -1.5526,
+    "gate": {
+     "x": 140.5,
+     "z": 1379.86,
+     "width": 3.2,
+     "yaw": 1.5526
+    },
+    "graves": [
+     [
+      142.58,
+      1387.82,
+      -1.575,
+      "headstone"
+     ],
+     [
+      145.16,
+      1387.73,
+      -1.628,
+      "tomb"
+     ],
+     [
+      147.9,
+      1387.75,
+      -1.58,
+      "headstone"
+     ],
+     [
+      150.76,
+      1387.88,
+      -1.559,
+      "mound"
+     ],
+     [
+      142.64,
+      1386.2,
+      -1.551,
+      "headstone"
+     ],
+     [
+      145.3,
+      1386.2,
+      -1.565,
+      "headstone"
+     ],
+     [
+      148.08,
+      1386.13,
+      -1.617,
+      "mound"
+     ],
+     [
+      150.75,
+      1386.32,
+      -1.624,
+      "headstone"
+     ],
+     [
+      142.53,
+      1384.4,
+      -1.608,
+      "mound"
+     ],
+     [
+      145.37,
+      1384.59,
+      -1.556,
+      "mound"
+     ],
+     [
+      148.12,
+      1384.65,
+      -1.576,
+      "headstone"
+     ],
+     [
+      150.71,
+      1384.65,
+      -1.591,
+      "tomb"
+     ],
+     [
+      145.27,
+      1382.93,
+      -1.552,
+      "headstone"
+     ],
+     [
+      147.96,
+      1382.99,
+      -1.618,
+      "mound"
+     ],
+     [
+      150.78,
+      1383.16,
+      -1.586,
+      "cross"
+     ],
+     [
+      142.88,
+      1376.51,
+      -1.601,
+      "mound"
+     ],
+     [
+      145.48,
+      1376.58,
+      -1.599,
+      "headstone"
+     ],
+     [
+      148.13,
+      1376.6,
+      -1.555,
+      "headstone"
+     ],
+     [
+      150.83,
+      1376.68,
+      -1.623,
+      "headstone"
+     ],
+     [
+      142.84,
+      1374.87,
+      -1.555,
+      "headstone"
+     ],
+     [
+      148.09,
+      1375.07,
+      -1.584,
+      "headstone"
+     ],
+     [
+      142.86,
+      1373.2,
+      -1.607,
+      "mound"
+     ],
+     [
+      145.49,
+      1373.36,
+      -1.555,
+      "mound"
+     ],
+     [
+      148.3,
+      1373.49,
+      -1.553,
+      "headstone"
+     ]
+    ],
+    "graveStyles": [
+     "headstone",
+     "cross",
+     "slab",
+     "mound",
+     "tomb"
+    ],
+    "level": 57.6,
+    "slots": [
+     {
+      "kind": "gravedigger",
+      "x": 140.5,
+      "z": 1379.86,
+      "r": 1.5,
+      "yaw": 1.5526
+     }
+    ]
+   }
+  },
+  {
+   "kind": "wall",
+   "id": "scree_end_graveyard_wall_0",
+   "x": 140.93,
+   "z": 1378.27,
+   "yaw": 0,
+   "data": {
+    "setPiece": "scree_end_graveyard",
+    "h": 0.95,
+    "material": "drystone",
+    "pts": [
+     [
+      140.93,
+      1378.27,
+      57.6
+     ],
+     [
+      141.08,
+      1370.27,
+      57.58
+     ],
+     [
+      155.27,
+      1370.53,
+      57.56
+     ],
+     [
+      154.92,
+      1389.73,
+      57.61
+     ],
+     [
+      140.73,
+      1389.47,
+      57.63
+     ],
+     [
+      140.87,
+      1381.47,
+      57.6
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "wolditford_graveyard",
+   "x": 396,
+   "z": 804,
+   "yaw": 1.5708,
+   "data": {
+    "piece": "graveyard",
+    "name": "Wolditford Graveyard",
+    "town": "Wolditford",
+    "auto": true,
+    "r": 12.5,
+    "poly": [
+     [
+      386,
+      796.5
+     ],
+     [
+      406,
+      796.5
+     ],
+     [
+      406,
+      811.5
+     ],
+     [
+      386,
+      811.5
+     ]
+    ],
+    "w": 20,
+    "d": 15,
+    "angle": 0,
+    "gate": {
+     "x": 396,
+     "z": 811.5,
+     "width": 3.2,
+     "yaw": 3.1416
+    },
+    "graves": [
+     [
+      388.19,
+      801.51,
+      0.018,
+      "slab"
+     ],
+     [
+      388.29,
+      806.9,
+      -0.025,
+      "headstone"
+     ],
+     [
+      389.69,
+      798.76,
+      -0.009,
+      "slab"
+     ],
+     [
+      389.79,
+      801.31,
+      0.016,
+      "cross"
+     ],
+     [
+      389.77,
+      806.9,
+      -0.016,
+      "mound"
+     ],
+     [
+      391.41,
+      798.81,
+      -0.003,
+      "mound"
+     ],
+     [
+      391.34,
+      801.33,
+      -0.015,
+      "mound"
+     ],
+     [
+      391.32,
+      804.18,
+      -0.028,
+      "mound"
+     ],
+     [
+      391.32,
+      806.75,
+      -0.012,
+      "mound"
+     ],
+     [
+      393.01,
+      798.73,
+      0.034,
+      "mound"
+     ],
+     [
+      393.04,
+      801.45,
+      0.03,
+      "headstone"
+     ],
+     [
+      393.03,
+      804.04,
+      -0.029,
+      "headstone"
+     ],
+     [
+      393.02,
+      806.76,
+      -0.024,
+      "cross"
+     ],
+     [
+      399.33,
+      798.62,
+      0.01,
+      "cross"
+     ],
+     [
+      399.34,
+      801.35,
+      0.033,
+      "headstone"
+     ],
+     [
+      399.43,
+      804.2,
+      -0.021,
+      "mound"
+     ],
+     [
+      399.5,
+      806.9,
+      0.027,
+      "cross"
+     ],
+     [
+      400.89,
+      798.64,
+      -0.019,
+      "cross"
+     ],
+     [
+      401.02,
+      804.03,
+      -0.023,
+      "mound"
+     ],
+     [
+      400.89,
+      806.86,
+      -0.006,
+      "slab"
+     ],
+     [
+      402.56,
+      801.48,
+      -0.035,
+      "mound"
+     ],
+     [
+      402.58,
+      804.1,
+      0.02,
+      "cross"
+     ],
+     [
+      402.55,
+      806.68,
+      -0.032,
+      "headstone"
+     ]
+    ],
+    "graveStyles": [
+     "headstone",
+     "cross",
+     "slab",
+     "mound",
+     "tomb"
+    ],
+    "level": 30.05,
+    "slots": [
+     {
+      "kind": "gravedigger",
+      "x": 396,
+      "z": 811.5,
+      "r": 1.5,
+      "yaw": 3.1416
+     }
+    ]
+   }
+  },
+  {
+   "kind": "wall",
+   "id": "wolditford_graveyard_wall_0",
+   "x": 394.4,
+   "z": 811.1,
+   "yaw": 0,
+   "data": {
+    "setPiece": "wolditford_graveyard",
+    "h": 0.95,
+    "material": "drystone",
+    "pts": [
+     [
+      394.4,
+      811.1,
+      30.03
+     ],
+     [
+      386.4,
+      811.1,
+      30.03
+     ],
+     [
+      386.4,
+      796.9,
+      30.03
+     ],
+     [
+      405.6,
+      796.9,
+      30.06
+     ],
+     [
+      405.6,
+      811.1,
+      30.06
+     ],
+     [
+      397.6,
+      811.1,
+      30.03
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "hollin_farm",
+   "x": 1504,
+   "z": 700,
+   "yaw": 0.2558,
+   "data": {
+    "piece": "farm",
+    "name": "Hollin Farm",
+    "town": "Hollin Toll",
+    "r": 21.3,
+    "poly": [
+     [
+      1514.72,
+      681.69
+     ],
+     [
+      1522.31,
+      710.72
+     ],
+     [
+      1493.28,
+      718.31
+     ],
+     [
+      1485.69,
+      689.28
+     ]
+    ],
+    "w": 30,
+    "d": 30,
+    "angle": 1.315,
+    "fields": 6,
+    "slots": [
+     {
+      "kind": "farmstead",
+      "x": 1504,
+      "z": 700,
+      "r": 15,
+      "yaw": 0
+     },
+     {
+      "kind": "farmer",
+      "x": 1506.91,
+      "z": 687.4,
+      "r": 1,
+      "yaw": 0.2558
+     }
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "hollin_farm_field_0",
+   "x": 1518.17,
+   "z": 754.18,
+   "yaw": 0.2558,
+   "data": {
+    "piece": "farm",
+    "name": "Hollin Farm",
+    "town": "Hollin Toll",
+    "setPiece": "hollin_farm",
+    "crop": "pasture",
+    "grows": "sheep",
+    "poly": [
+     [
+      1527.32,
+      725.94
+     ],
+     [
+      1539.98,
+      774.32
+     ],
+     [
+      1509.02,
+      782.41
+     ],
+     [
+      1496.37,
+      734.04
+     ]
+    ],
+    "w": 50,
+    "d": 32,
+    "angle": 1.315,
+    "furrowAngle": 1.315,
+    "boundary": "fence",
+    "gate": {
+     "x": 1511.84,
+     "z": 729.99,
+     "width": 3,
+     "yaw": 0.2558
+    }
+   }
+  },
+  {
+   "kind": "fence",
+   "id": "hollin_farm_field_0_fence_0",
+   "x": 1513.5,
+   "z": 730.39,
+   "yaw": 0,
+   "data": {
+    "setPiece": "hollin_farm",
+    "h": 1.1,
+    "pts": [
+     [
+      1513.5,
+      730.39,
+      22.74
+     ],
+     [
+      1526.75,
+      726.92,
+      21.93
+     ],
+     [
+      1539,
+      773.74,
+      28.04
+     ],
+     [
+      1509.59,
+      781.44,
+      30.13
+     ],
+     [
+      1497.34,
+      734.61,
+      23.7
+     ],
+     [
+      1510.6,
+      731.14,
+      22.92
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "hollin_farm_field_1",
+   "x": 1489.83,
+   "z": 645.82,
+   "yaw": 0.2558,
+   "data": {
+    "piece": "farm",
+    "name": "Hollin Farm",
+    "town": "Hollin Toll",
+    "setPiece": "hollin_farm",
+    "crop": "pasture",
+    "grows": "sheep",
+    "poly": [
+     [
+      1498.98,
+      617.59
+     ],
+     [
+      1511.63,
+      665.96
+     ],
+     [
+      1480.68,
+      674.06
+     ],
+     [
+      1468.02,
+      625.68
+     ]
+    ],
+    "w": 50,
+    "d": 32,
+    "angle": 1.315,
+    "furrowAngle": 1.315,
+    "boundary": "fence",
+    "gate": {
+     "x": 1496.16,
+     "z": 670.01,
+     "width": 3,
+     "yaw": -2.8858
+    }
+   }
+  },
+  {
+   "kind": "fence",
+   "id": "hollin_farm_field_1_fence_0",
+   "x": 1494.5,
+   "z": 669.61,
+   "yaw": 0,
+   "data": {
+    "setPiece": "hollin_farm",
+    "h": 1.1,
+    "pts": [
+     [
+      1494.5,
+      669.61,
+      18.49
+     ],
+     [
+      1481.25,
+      673.08,
+      18.92
+     ],
+     [
+      1469,
+      626.26,
+      16.88
+     ],
+     [
+      1498.41,
+      618.56,
+      15.56
+     ],
+     [
+      1510.66,
+      665.39,
+      17.73
+     ],
+     [
+      1497.4,
+      668.86,
+      18.34
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "hollin_farm_field_2",
+   "x": 1484.57,
+   "z": 775.89,
+   "yaw": -1.315,
+   "data": {
+    "piece": "farm",
+    "name": "Hollin Farm",
+    "town": "Hollin Toll",
+    "setPiece": "hollin_farm",
+    "crop": "crop",
+    "grows": "turnips",
+    "poly": [
+     [
+      1497.08,
+      760.47
+     ],
+     [
+      1503.02,
+      783.21
+     ],
+     [
+      1472.06,
+      791.3
+     ],
+     [
+      1466.12,
+      768.57
+     ]
+    ],
+    "w": 23.5,
+    "d": 32,
+    "angle": 1.315,
+    "furrowAngle": 2.8858,
+    "boundary": "hedge",
+    "gate": {
+     "x": 1481.6,
+     "z": 764.52,
+     "width": 4,
+     "yaw": 0.2558
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "hollin_farm_field_2_hedge_0",
+   "x": 1483.73,
+   "z": 764.79,
+   "yaw": 0,
+   "data": {
+    "setPiece": "hollin_farm",
+    "h": 1.6,
+    "pts": [
+     [
+      1483.73,
+      764.79,
+      29.14
+     ],
+     [
+      1496.5,
+      761.45,
+      27.5
+     ],
+     [
+      1502.05,
+      782.63,
+      30.47
+     ],
+     [
+      1472.64,
+      790.33,
+      33.95
+     ],
+     [
+      1467.09,
+      769.14,
+      31.15
+     ],
+     [
+      1479.86,
+      765.8,
+      29.67
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "hollin_farm_field_3",
+   "x": 1523.43,
+   "z": 624.11,
+   "yaw": -1.315,
+   "data": {
+    "piece": "farm",
+    "name": "Hollin Farm",
+    "town": "Hollin Toll",
+    "setPiece": "hollin_farm",
+    "crop": "field",
+    "grows": "tilled",
+    "poly": [
+     [
+      1535.94,
+      608.7
+     ],
+     [
+      1541.88,
+      631.43
+     ],
+     [
+      1510.92,
+      639.53
+     ],
+     [
+      1504.98,
+      616.79
+     ]
+    ],
+    "w": 23.5,
+    "d": 32,
+    "angle": 1.315,
+    "furrowAngle": 2.8858,
+    "boundary": "hedge",
+    "gate": {
+     "x": 1526.4,
+     "z": 635.48,
+     "width": 4,
+     "yaw": -2.8858
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "hollin_farm_field_3_hedge_0",
+   "x": 1524.27,
+   "z": 635.21,
+   "yaw": 0,
+   "data": {
+    "setPiece": "hollin_farm",
+    "h": 1.6,
+    "pts": [
+     [
+      1524.27,
+      635.21,
+      15.77
+     ],
+     [
+      1511.5,
+      638.55,
+      16.22
+     ],
+     [
+      1505.95,
+      617.37,
+      15.1
+     ],
+     [
+      1535.36,
+      609.67,
+      14.16
+     ],
+     [
+      1540.91,
+      630.86,
+      15.24
+     ],
+     [
+      1528.14,
+      634.2,
+      15.63
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "hollin_farm_field_4",
+   "x": 1453.07,
+   "z": 655.44,
+   "yaw": 0.2558,
+   "data": {
+    "piece": "farm",
+    "name": "Hollin Farm",
+    "town": "Hollin Toll",
+    "setPiece": "hollin_farm",
+    "crop": "crop",
+    "grows": "barley",
+    "poly": [
+     [
+      1462.22,
+      627.2
+     ],
+     [
+      1474.87,
+      675.58
+     ],
+     [
+      1443.91,
+      683.67
+     ],
+     [
+      1431.26,
+      635.3
+     ]
+    ],
+    "w": 50,
+    "d": 32,
+    "angle": 1.315,
+    "furrowAngle": 1.315,
+    "boundary": "hedge",
+    "gate": {
+     "x": 1468.55,
+     "z": 651.39,
+     "width": 4,
+     "yaw": -1.315
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "hollin_farm_field_4_hedge_0",
+   "x": 1468.28,
+   "z": 653.53,
+   "yaw": 0,
+   "data": {
+    "setPiece": "hollin_farm",
+    "h": 1.6,
+    "pts": [
+     [
+      1468.28,
+      653.53,
+      18.25
+     ],
+     [
+      1473.9,
+      675,
+      19.05
+     ],
+     [
+      1444.48,
+      682.7,
+      22.06
+     ],
+     [
+      1432.24,
+      635.87,
+      20.59
+     ],
+     [
+      1461.65,
+      628.18,
+      17.49
+     ],
+     [
+      1467.27,
+      649.66,
+      18.11
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "hollin_farm_field_5",
+   "x": 1551.77,
+   "z": 732.47,
+   "yaw": -1.315,
+   "data": {
+    "piece": "farm",
+    "name": "Hollin Farm",
+    "town": "Hollin Toll",
+    "setPiece": "hollin_farm",
+    "crop": "crop",
+    "grows": "barley",
+    "poly": [
+     [
+      1564.28,
+      717.05
+     ],
+     [
+      1570.22,
+      739.79
+     ],
+     [
+      1539.26,
+      747.88
+     ],
+     [
+      1533.32,
+      725.15
+     ]
+    ],
+    "w": 23.5,
+    "d": 32,
+    "angle": 1.315,
+    "furrowAngle": 2.8858,
+    "boundary": "hedge",
+    "gate": {
+     "x": 1548.8,
+     "z": 721.1,
+     "width": 4,
+     "yaw": 0.2558
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "hollin_farm_field_5_hedge_0",
+   "x": 1550.93,
+   "z": 721.37,
+   "yaw": 0,
+   "data": {
+    "setPiece": "hollin_farm",
+    "h": 1.6,
+    "pts": [
+     [
+      1550.93,
+      721.37,
+      21.49
+     ],
+     [
+      1563.71,
+      718.03,
+      20.68
+     ],
+     [
+      1569.25,
+      739.22,
+      22.43
+     ],
+     [
+      1539.84,
+      746.91,
+      24.1
+     ],
+     [
+      1534.29,
+      725.72,
+      22.47
+     ],
+     [
+      1547.07,
+      722.38,
+      21.72
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "set_building",
+   "id": "hollin_farm_bldg_0",
+   "x": 1508.48,
+   "z": 693.4,
+   "yaw": -2.8858,
+   "data": {
+    "setPiece": "hollin_farm",
+    "piece": "farm",
+    "want": "house",
+    "w": 10,
+    "d": 7,
+    "angle": 1.315,
+    "front": 4.4566,
+    "culture": "halfling",
+    "label": null,
+    "lit": false,
+    "ground": 20.69
+   }
+  },
+  {
+   "kind": "set_building",
+   "id": "hollin_farm_bldg_1",
+   "x": 1509.34,
+   "z": 705.58,
+   "yaw": -2.8858,
+   "data": {
+    "setPiece": "hollin_farm",
+    "piece": "farm",
+    "want": "granary",
+    "w": 9,
+    "d": 12,
+    "angle": 1.315,
+    "front": 4.4566,
+    "culture": "halfling",
+    "label": null,
+    "lit": false,
+    "ground": 20.67
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "wold_fold",
+   "x": 720,
+   "z": 1128,
+   "yaw": 0,
+   "data": {
+    "piece": "sheepfold",
+    "name": "Wold Fold",
+    "town": "Wolditford",
+    "r": 9,
+    "gate": {
+     "x": 723.4,
+     "z": 1136.33,
+     "width": 5.6621980910901195,
+     "yaw": -2.7542
+    },
+    "slots": [
+     {
+      "kind": "shepherd",
+      "x": 724.16,
+      "z": 1138.18,
+      "r": 1.5,
+      "yaw": -2.7542
+     },
+     {
+      "kind": "flock",
+      "x": 720,
+      "z": 1128,
+      "r": 6.3,
+      "yaw": 0
+     }
+    ]
+   }
+  },
+  {
+   "kind": "wall",
+   "id": "wold_fold_wall_0",
+   "x": 720.61,
+   "z": 1136.98,
+   "yaw": 0,
+   "data": {
+    "setPiece": "wold_fold",
+    "h": 1,
+    "material": "drystone",
+    "pts": [
+     [
+      720.61,
+      1136.98,
+      59.55
+     ],
+     [
+      718.08,
+      1136.79,
+      59.55
+     ],
+     [
+      715.71,
+      1135.91,
+      59.49
+     ],
+     [
+      713.68,
+      1134.4,
+      59.44
+     ],
+     [
+      712.14,
+      1132.39,
+      59.31
+     ],
+     [
+      711.23,
+      1130.03,
+      59.21
+     ],
+     [
+      711.01,
+      1127.51,
+      59.14
+     ],
+     [
+      711.51,
+      1125.02,
+      59.04
+     ],
+     [
+      712.67,
+      1122.78,
+      58.95
+     ],
+     [
+      714.41,
+      1120.94,
+      58.89
+     ],
+     [
+      716.6,
+      1119.67,
+      58.8
+     ],
+     [
+      719.05,
+      1119.05,
+      58.74
+     ],
+     [
+      721.58,
+      1119.14,
+      58.74
+     ],
+     [
+      723.99,
+      1119.93,
+      58.79
+     ],
+     [
+      726.08,
+      1121.36,
+      58.86
+     ],
+     [
+      727.68,
+      1123.32,
+      58.94
+     ],
+     [
+      728.69,
+      1125.64,
+      59.03
+     ],
+     [
+      729,
+      1128.15,
+      59.16
+     ],
+     [
+      728.6,
+      1130.65,
+      59.27
+     ],
+     [
+      727.52,
+      1132.94,
+      59.35
+     ],
+     [
+      725.85,
+      1134.84,
+      59.42
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "scree_stones",
+   "x": 420,
+   "z": 1188,
+   "yaw": 0,
+   "data": {
+    "piece": "stone_circle",
+    "name": "The Scree Stones",
+    "town": "Wolditford",
+    "r": 10,
+    "stones": [
+     [
+      425.37,
+      1179.56,
+      6.85,
+      "standing"
+     ],
+     [
+      428.28,
+      1182.39,
+      7.258,
+      "fallen"
+     ],
+     [
+      429.99,
+      1187.46,
+      7.8,
+      "standing"
+     ],
+     [
+      429.05,
+      1192.25,
+      8.293,
+      "standing"
+     ],
+     [
+      426.17,
+      1195.87,
+      8.76,
+      "standing"
+     ],
+     [
+      421.3,
+      1197.92,
+      9.295,
+      "standing"
+     ],
+     [
+      416.52,
+      1197.38,
+      9.78,
+      "standing"
+     ],
+     [
+      412.83,
+      1194.97,
+      10.224,
+      "fallen"
+     ],
+     [
+      410.57,
+      1191.32,
+      10.657,
+      "standing"
+     ],
+     [
+      410.11,
+      1186.5,
+      11.146,
+      "standing"
+     ],
+     [
+      412.21,
+      1181.73,
+      11.673,
+      "standing"
+     ],
+     [
+      415.53,
+      1179.06,
+      12.103,
+      "fallen"
+     ],
+     [
+      420.46,
+      1178.01,
+      12.612,
+      "standing"
+     ]
+    ],
+    "slots": [
+     {
+      "kind": "ritual",
+      "x": 420,
+      "z": 1188,
+      "r": 6,
+      "yaw": 0
+     }
+    ]
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "hollin_copse",
+   "x": 1008,
+   "z": 1432,
+   "yaw": 0,
+   "data": {
+    "piece": "copse",
+    "name": "Tollwood Copse",
+    "town": "Wolditford",
+    "r": 30,
+    "trees": 108,
+    "slots": []
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "hollin_toll_belt",
+   "x": 1728,
+   "z": 560,
+   "yaw": 0,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Hollin Toll",
+    "auto": true,
+    "r": 210,
+    "fields": 10,
+    "slots": []
+   }
+  },
+  {
+   "kind": "field",
+   "id": "hollin_toll_belt_field_0",
+   "x": 1681.1,
+   "z": 663.9,
+   "yaw": -1.9948,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Hollin Toll",
+    "auto": true,
+    "setPiece": "hollin_toll_belt",
+    "crop": "crop",
+    "grows": "barley",
+    "poly": [
+     [
+      1696.71,
+      685.22
+     ],
+     [
+      1654.78,
+      666.29
+     ],
+     [
+      1665.48,
+      642.59
+     ],
+     [
+      1707.41,
+      661.52
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 3.5656,
+    "furrowAngle": 3.5656,
+    "boundary": "none"
+   }
+  },
+  {
+   "kind": "field",
+   "id": "hollin_toll_belt_field_1",
+   "x": 1638.18,
+   "z": 630.21,
+   "yaw": -2.4781,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Hollin Toll",
+    "auto": true,
+    "setPiece": "hollin_toll_belt",
+    "crop": "crop",
+    "grows": "cabbages",
+    "poly": [
+     [
+      1642.1,
+      656.33
+     ],
+     [
+      1613.78,
+      620.09
+     ],
+     [
+      1634.26,
+      604.08
+     ],
+     [
+      1662.59,
+      640.32
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 4.0489,
+    "furrowAngle": 4.0489,
+    "boundary": "hedge",
+    "gate": {
+     "x": 1648.42,
+     "z": 622.2,
+     "width": 4,
+     "yaw": -0.9074
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "hollin_toll_belt_field_1_hedge_0",
+   "x": 1649.03,
+   "z": 624.27,
+   "yaw": 0,
+   "data": {
+    "setPiece": "hollin_toll_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      1649.03,
+      624.27,
+      12.57
+     ],
+     [
+      1661.47,
+      640.18,
+      12.33
+     ],
+     [
+      1642.24,
+      655.21,
+      11.58
+     ],
+     [
+      1614.9,
+      620.23,
+      12.04
+     ],
+     [
+      1634.12,
+      605.2,
+      12.78
+     ],
+     [
+      1646.56,
+      621.12,
+      12.61
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "hollin_toll_belt_field_2",
+   "x": 1615.84,
+   "z": 580.42,
+   "yaw": -2.9615,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Hollin Toll",
+    "auto": true,
+    "setPiece": "hollin_toll_belt",
+    "crop": "field",
+    "grows": "tilled",
+    "poly": [
+     [
+      1607.18,
+      605.38
+     ],
+     [
+      1598.93,
+      560.12
+     ],
+     [
+      1624.51,
+      555.47
+     ],
+     [
+      1632.75,
+      600.72
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 4.5323,
+    "furrowAngle": 4.5323,
+    "boundary": "hedge",
+    "gate": {
+     "x": 1628.63,
+     "z": 578.09,
+     "width": 4,
+     "yaw": -1.3907
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "hollin_toll_belt_field_2_hedge_0",
+   "x": 1628.21,
+   "z": 580.21,
+   "yaw": 0,
+   "data": {
+    "setPiece": "hollin_toll_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      1628.21,
+      580.21,
+      13.3
+     ],
+     [
+      1631.82,
+      600.08,
+      12.91
+     ],
+     [
+      1607.82,
+      604.45,
+      14.22
+     ],
+     [
+      1599.86,
+      560.77,
+      15.23
+     ],
+     [
+      1623.87,
+      556.4,
+      13.66
+     ],
+     [
+      1627.49,
+      576.27,
+      13.36
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "hollin_toll_belt_field_3",
+   "x": 1619.2,
+   "z": 525.96,
+   "yaw": 2.8384,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Hollin Toll",
+    "auto": true,
+    "setPiece": "hollin_toll_belt",
+    "crop": "crop",
+    "grows": "oats",
+    "poly": [
+     [
+      1599.93,
+      544.03
+     ],
+     [
+      1613.66,
+      500.13
+     ],
+     [
+      1638.47,
+      507.89
+     ],
+     [
+      1624.74,
+      551.79
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 5.0156,
+    "furrowAngle": 5.0156,
+    "boundary": "hedge",
+    "gate": {
+     "x": 1631.61,
+     "z": 529.84,
+     "width": 4,
+     "yaw": -1.874
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "hollin_toll_belt_field_3_hedge_0",
+   "x": 1630.25,
+   "z": 531.51,
+   "yaw": 0,
+   "data": {
+    "setPiece": "hollin_toll_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      1630.25,
+      531.51,
+      13.06
+     ],
+     [
+      1624.22,
+      550.79,
+      13.56
+     ],
+     [
+      1600.93,
+      543.51,
+      14.85
+     ],
+     [
+      1614.18,
+      501.13,
+      13.52
+     ],
+     [
+      1637.47,
+      508.42,
+      12.43
+     ],
+     [
+      1631.44,
+      527.7,
+      12.98
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "hollin_toll_belt_field_4",
+   "x": 1832.01,
+   "z": 513.33,
+   "yaw": 0.4218,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Hollin Toll",
+    "auto": true,
+    "setPiece": "hollin_toll_belt",
+    "crop": "pasture",
+    "grows": "sheep",
+    "poly": [
+     [
+      1834.45,
+      487.02
+     ],
+     [
+      1853.29,
+      528.99
+     ],
+     [
+      1829.56,
+      539.64
+     ],
+     [
+      1810.73,
+      497.67
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 7.4322,
+    "furrowAngle": 7.4322,
+    "boundary": "fence",
+    "gate": {
+     "x": 1820.15,
+     "z": 518.65,
+     "width": 3,
+     "yaw": 1.9926
+    }
+   }
+  },
+  {
+   "kind": "fence",
+   "id": "hollin_toll_belt_field_4_fence_0",
+   "x": 1820.26,
+   "z": 516.96,
+   "yaw": 0,
+   "data": {
+    "setPiece": "hollin_toll_belt",
+    "h": 1.1,
+    "pts": [
+     [
+      1820.26,
+      516.96,
+      12.71
+     ],
+     [
+      1811.79,
+      498.07,
+      12.47
+     ],
+     [
+      1834.05,
+      488.08,
+      11.8
+     ],
+     [
+      1852.23,
+      528.59,
+      12.53
+     ],
+     [
+      1829.97,
+      538.58,
+      12.96
+     ],
+     [
+      1821.49,
+      519.69,
+      12.75
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "hollin_toll_belt_field_5",
+   "x": 1825.49,
+   "z": 619.09,
+   "yaw": -0.5449,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Hollin Toll",
+    "auto": true,
+    "setPiece": "hollin_toll_belt",
+    "crop": "field",
+    "grows": "tilled",
+    "poly": [
+     [
+      1848.53,
+      606.15
+     ],
+     [
+      1824.69,
+      645.49
+     ],
+     [
+      1802.45,
+      632.02
+     ],
+     [
+      1826.3,
+      592.68
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 8.3988,
+    "furrowAngle": 8.3988,
+    "boundary": "none"
+   }
+  },
+  {
+   "kind": "field",
+   "id": "hollin_toll_belt_field_6",
+   "x": 1667.11,
+   "z": 694.89,
+   "yaw": -1.9948,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Hollin Toll",
+    "auto": true,
+    "setPiece": "hollin_toll_belt",
+    "crop": "pasture",
+    "grows": "cattle",
+    "poly": [
+     [
+      1682.72,
+      716.2
+     ],
+     [
+      1640.8,
+      697.28
+     ],
+     [
+      1651.49,
+      673.58
+     ],
+     [
+      1693.42,
+      692.51
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 3.5656,
+    "furrowAngle": 3.5656,
+    "boundary": "fence",
+    "gate": {
+     "x": 1672.46,
+     "z": 683.04,
+     "width": 3,
+     "yaw": -0.424
+    }
+   }
+  },
+  {
+   "kind": "fence",
+   "id": "hollin_toll_belt_field_6_fence_0",
+   "x": 1673.49,
+   "z": 684.39,
+   "yaw": 0,
+   "data": {
+    "setPiece": "hollin_toll_belt",
+    "h": 1.1,
+    "pts": [
+     [
+      1673.49,
+      684.39,
+      16.81
+     ],
+     [
+      1692.36,
+      692.91,
+      18.22
+     ],
+     [
+      1682.32,
+      715.15,
+      20.83
+     ],
+     [
+      1641.85,
+      696.88,
+      17.61
+     ],
+     [
+      1651.89,
+      674.64,
+      15.06
+     ],
+     [
+      1670.76,
+      683.16,
+      16.61
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "hollin_toll_belt_field_7",
+   "x": 1592.12,
+   "z": 618.66,
+   "yaw": -2.734,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Hollin Toll",
+    "auto": true,
+    "setPiece": "hollin_toll_belt",
+    "crop": "field",
+    "grows": "tilled",
+    "poly": [
+     [
+      1589.3,
+      644.93
+     ],
+     [
+      1571.07,
+      602.7
+     ],
+     [
+      1594.94,
+      592.4
+     ],
+     [
+      1613.17,
+      634.63
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 4.3048,
+    "furrowAngle": 4.3048,
+    "boundary": "hedge",
+    "gate": {
+     "x": 1604.06,
+     "z": 613.51,
+     "width": 4,
+     "yaw": -1.1632
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "hollin_toll_belt_field_7_hedge_0",
+   "x": 1604.12,
+   "z": 615.66,
+   "yaw": 0,
+   "data": {
+    "setPiece": "hollin_toll_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      1604.12,
+      615.66,
+      13.4
+     ],
+     [
+      1612.12,
+      634.21,
+      11.79
+     ],
+     [
+      1589.72,
+      643.88,
+      13.15
+     ],
+     [
+      1572.12,
+      603.12,
+      16.83
+     ],
+     [
+      1594.52,
+      593.45,
+      15.57
+     ],
+     [
+      1602.53,
+      611.99,
+      13.76
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "hollin_toll_belt_field_8",
+   "x": 1708.76,
+   "z": 413.26,
+   "yaw": 1.7012,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Hollin Toll",
+    "auto": true,
+    "setPiece": "hollin_toll_belt",
+    "crop": "pasture",
+    "grows": "cattle",
+    "poly": [
+     [
+      1684.27,
+      403.36
+     ],
+     [
+      1729.87,
+      397.38
+     ],
+     [
+      1733.25,
+      423.16
+     ],
+     [
+      1687.65,
+      429.14
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 6.1528,
+    "furrowAngle": 6.1528,
+    "boundary": "fence",
+    "gate": {
+     "x": 1710.45,
+     "z": 426.15,
+     "width": 3,
+     "yaw": -3.0112
+    }
+   }
+  },
+  {
+   "kind": "fence",
+   "id": "hollin_toll_belt_field_8_fence_0",
+   "x": 1708.86,
+   "z": 425.55,
+   "yaw": 0,
+   "data": {
+    "setPiece": "hollin_toll_belt",
+    "h": 1.1,
+    "pts": [
+     [
+      1708.86,
+      425.55,
+      6.79
+     ],
+     [
+      1688.33,
+      428.24,
+      7.88
+     ],
+     [
+      1685.16,
+      404.05,
+      6.84
+     ],
+     [
+      1729.19,
+      398.27,
+      4.42
+     ],
+     [
+      1732.36,
+      422.47,
+      5.46
+     ],
+     [
+      1711.83,
+      425.16,
+      6.58
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "hollin_toll_belt_field_9",
+   "x": 1856.7,
+   "z": 633.08,
+   "yaw": -0.5164,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Hollin Toll",
+    "auto": true,
+    "setPiece": "hollin_toll_belt",
+    "crop": "field",
+    "grows": "tilled",
+    "poly": [
+     [
+      1879.36,
+      619.5
+     ],
+     [
+      1856.65,
+      659.5
+     ],
+     [
+      1834.04,
+      646.66
+     ],
+     [
+      1856.75,
+      606.66
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 8.3704,
+    "furrowAngle": 8.3704,
+    "boundary": "hedge",
+    "gate": {
+     "x": 1845.39,
+     "z": 626.66,
+     "width": 4,
+     "yaw": 1.0544
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "hollin_toll_belt_field_9_hedge_0",
+   "x": 1847.08,
+   "z": 625.32,
+   "yaw": 0,
+   "data": {
+    "setPiece": "hollin_toll_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      1847.08,
+      625.32,
+      17.11
+     ],
+     [
+      1857.05,
+      607.75,
+      16.27
+     ],
+     [
+      1878.27,
+      619.8,
+      17.71
+     ],
+     [
+      1856.35,
+      658.41,
+      19.43
+     ],
+     [
+      1835.13,
+      646.36,
+      17.96
+     ],
+     [
+      1845.1,
+      628.79,
+      17.31
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "scree_end_belt",
+   "x": 112,
+   "z": 1472,
+   "yaw": 0,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Scree End",
+    "auto": true,
+    "r": 166,
+    "fields": 3,
+    "slots": []
+   }
+  },
+  {
+   "kind": "field",
+   "id": "scree_end_belt_field_0",
+   "x": 156.7,
+   "z": 1341.44,
+   "yaw": 1.2409,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Scree End",
+    "auto": true,
+    "setPiece": "scree_end_belt",
+    "crop": "crop",
+    "grows": "turnips",
+    "poly": [
+     [
+      139.15,
+      1321.69
+     ],
+     [
+      182.67,
+      1336.59
+     ],
+     [
+      174.25,
+      1361.19
+     ],
+     [
+      130.73,
+      1346.29
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 6.6131,
+    "furrowAngle": 6.6131,
+    "boundary": "none"
+   }
+  },
+  {
+   "kind": "field",
+   "id": "scree_end_belt_field_1",
+   "x": 237.17,
+   "z": 1530.1,
+   "yaw": -0.4346,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Scree End",
+    "auto": true,
+    "setPiece": "scree_end_belt",
+    "crop": "crop",
+    "grows": "wheat",
+    "poly": [
+     [
+      258.65,
+      1514.71
+     ],
+     [
+      239.28,
+      1556.44
+     ],
+     [
+      215.7,
+      1545.49
+     ],
+     [
+      235.06,
+      1503.77
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 8.2886,
+    "furrowAngle": 8.2886,
+    "boundary": "none"
+   }
+  },
+  {
+   "kind": "field",
+   "id": "scree_end_belt_field_2",
+   "x": 202.72,
+   "z": 1575.99,
+   "yaw": -0.8535,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Scree End",
+    "auto": true,
+    "setPiece": "scree_end_belt",
+    "crop": "crop",
+    "grows": "oats",
+    "poly": [
+     [
+      228.6,
+      1570.67
+     ],
+     [
+      193.93,
+      1600.91
+     ],
+     [
+      176.84,
+      1581.32
+     ],
+     [
+      211.5,
+      1551.08
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 8.7074,
+    "furrowAngle": 8.7074,
+    "boundary": "none"
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "wolditford_belt",
+   "x": 448,
+   "z": 880,
+   "yaw": 0,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Wolditford",
+    "auto": true,
+    "r": 166,
+    "fields": 5,
+    "slots": []
+   }
+  },
+  {
+   "kind": "field",
+   "id": "wolditford_belt_field_0",
+   "x": 516.17,
+   "z": 895.91,
+   "yaw": -0.2293,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Wolditford",
+    "auto": true,
+    "setPiece": "wolditford_belt",
+    "crop": "field",
+    "grows": "tilled",
+    "poly": [
+     [
+      534.06,
+      876.47
+     ],
+     [
+      523.6,
+      921.26
+     ],
+     [
+      498.28,
+      915.35
+     ],
+     [
+      508.74,
+      870.56
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 8.0833,
+    "furrowAngle": 8.0833,
+    "boundary": "hedge",
+    "gate": {
+     "x": 503.51,
+     "z": 892.96,
+     "width": 4,
+     "yaw": 1.3415
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "wolditford_belt_field_0_hedge_0",
+   "x": 504.74,
+   "z": 891.19,
+   "yaw": 0,
+   "data": {
+    "setPiece": "wolditford_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      504.74,
+      891.19,
+      38.83
+     ],
+     [
+      509.33,
+      871.52,
+      37.95
+     ],
+     [
+      533.09,
+      877.06,
+      40.24
+     ],
+     [
+      523,
+      920.3,
+      42.71
+     ],
+     [
+      499.24,
+      914.76,
+      39.97
+     ],
+     [
+      503.83,
+      895.08,
+      39.02
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "wolditford_belt_field_1",
+   "x": 432.09,
+   "z": 948.17,
+   "yaw": -1.8001,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Wolditford",
+    "auto": true,
+    "setPiece": "wolditford_belt",
+    "crop": "pasture",
+    "grows": "sheep",
+    "poly": [
+     [
+      451.53,
+      966.06
+     ],
+     [
+      406.74,
+      955.6
+     ],
+     [
+      412.65,
+      930.28
+     ],
+     [
+      457.44,
+      940.74
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 9.6541,
+    "furrowAngle": 9.6541,
+    "boundary": "fence",
+    "gate": {
+     "x": 435.04,
+     "z": 935.51,
+     "width": 3,
+     "yaw": -0.2293
+    }
+   }
+  },
+  {
+   "kind": "fence",
+   "id": "wolditford_belt_field_1_fence_0",
+   "x": 436.32,
+   "z": 936.63,
+   "yaw": 0,
+   "data": {
+    "setPiece": "wolditford_belt",
+    "h": 1.1,
+    "pts": [
+     [
+      436.32,
+      936.63,
+      37.24
+     ],
+     [
+      456.48,
+      941.33,
+      38.44
+     ],
+     [
+      450.94,
+      965.09,
+      39.91
+     ],
+     [
+      407.7,
+      955,
+      37.41
+     ],
+     [
+      413.24,
+      931.24,
+      36.07
+     ],
+     [
+      433.4,
+      935.95,
+      37.11
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "wolditford_belt_field_2",
+   "x": 444.62,
+   "z": 776.05,
+   "yaw": 1.6033,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Wolditford",
+    "auto": true,
+    "setPiece": "wolditford_belt",
+    "crop": "field",
+    "grows": "tilled",
+    "poly": [
+     [
+      421.21,
+      763.81
+     ],
+     [
+      467.18,
+      762.31
+     ],
+     [
+      468.03,
+      788.3
+     ],
+     [
+      422.05,
+      789.8
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 6.2507,
+    "furrowAngle": 6.2507,
+    "boundary": "none"
+   }
+  },
+  {
+   "kind": "field",
+   "id": "wolditford_belt_field_3",
+   "x": 551.95,
+   "z": 876.62,
+   "yaw": 0.0325,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Wolditford",
+    "auto": true,
+    "setPiece": "wolditford_belt",
+    "crop": "field",
+    "grows": "tilled",
+    "poly": [
+     [
+      564.19,
+      853.21
+     ],
+     [
+      565.69,
+      899.18
+     ],
+     [
+      539.7,
+      900.03
+     ],
+     [
+      538.2,
+      854.05
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 7.8215,
+    "furrowAngle": 7.8215,
+    "boundary": "hedge",
+    "gate": {
+     "x": 538.95,
+     "z": 877.04,
+     "width": 4,
+     "yaw": 1.6033
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "wolditford_belt_field_3_hedge_0",
+   "x": 539.69,
+   "z": 875.02,
+   "yaw": 0,
+   "data": {
+    "setPiece": "wolditford_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      539.69,
+      875.02,
+      38.68
+     ],
+     [
+      539.03,
+      854.83,
+      36.82
+     ],
+     [
+      563.42,
+      854.03,
+      36.67
+     ],
+     [
+      564.86,
+      898.41,
+      40.79
+     ],
+     [
+      540.47,
+      899.2,
+      40.85
+     ],
+     [
+      539.82,
+      879.01,
+      39.03
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "wolditford_belt_field_4",
+   "x": 502.9,
+   "z": 968.33,
+   "yaw": -1.0147,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Wolditford",
+    "auto": true,
+    "setPiece": "wolditford_belt",
+    "crop": "field",
+    "grows": "tilled",
+    "poly": [
+     [
+      529.3,
+      967.23
+     ],
+     [
+      490.23,
+      991.51
+     ],
+     [
+      476.5,
+      969.43
+     ],
+     [
+      515.57,
+      945.15
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 8.8687,
+    "furrowAngle": 8.8687,
+    "boundary": "hedge",
+    "gate": {
+     "x": 496.04,
+     "z": 957.29,
+     "width": 4,
+     "yaw": 0.5561
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "wolditford_belt_field_4_hedge_0",
+   "x": 498.16,
+   "z": 956.91,
+   "yaw": 0,
+   "data": {
+    "setPiece": "wolditford_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      498.16,
+      956.91,
+      44.33
+     ],
+     [
+      515.31,
+      946.25,
+      44.46
+     ],
+     [
+      528.2,
+      966.97,
+      46.2
+     ],
+     [
+      490.49,
+      990.41,
+      46.08
+     ],
+     [
+      477.61,
+      969.69,
+      44.22
+     ],
+     [
+      494.76,
+      959.02,
+      44.31
+     ]
+    ]
    }
   }
  ]

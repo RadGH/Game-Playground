@@ -6,6 +6,9 @@
 // small proxy whose `rng` is whatever room the character is standing in (`ch.roomRng`), never the
 // engine's shared generator — a fight replays from its room's seed alone.
 
+import { isLightItem, lightRefund } from './tv-gear.js';
+import { settleHands } from './hands.js';
+import { itemPrice } from './economy.js';
 import { attuneWeapon, createSkillBar, describeSkill } from './farhold.js';
 
 /**
@@ -28,6 +31,7 @@ export function createCharacter(engine, { id, classId = 'warrior', level = 1, na
       const piece = attuneWeapon(rpg.loot.generate(key, 'normal', 'low', { rng: roll }));
       if (piece) rpg.equip(ch, piece, { force: true });
     }
+    for (const it of Object.values(ch.equipment || {})) if (it) engine.finishItem?.(it, { fresh: false, convert: false });
     // Farhold also hands over a torch, a mount and a gathering tool here. None of them change a
     // combat number at level 1 and their modules pull in Three.js (light.js), so they are left to
     // the inventory stream; tests/C/character.test.mjs pins that the sheet's damage is unaffected.
@@ -79,14 +83,14 @@ function barData(engine) {
 }
 export function buildSkillBar(engine, ch, rpgView) {
   const bar = createSkillBar({ data: barData(engine), player: ch, rpg: rpgView, canSummon: (petId, sl) => ch.canSummon?.(petId, sl) ?? { ok: true } });
-  fillSlots(engine, bar, engine.skillData.classes?.[ch.classId] || engine.skillData.classes?.ranger || []);
-  bar.relearn = (ids = null) => { fillSlots(engine, bar, ids || engine.skillData.classes?.[ch.classId] || []); return bar.slots.map(sl => sl.id); };
+  fillSlots(engine, bar, engine.skillData.classes?.[ch.classId] || engine.skillData.classes?.ranger || [], ch.classId);
+  bar.relearn = (ids = null) => { fillSlots(engine, bar, ids || engine.skillData.classes?.[ch.classId] || [], ch.classId); return bar.slots.map(sl => sl.id); };
   return bar;
 }
 /** skills.js `fill(ids)`, with the descriptions from the cache. */
-export function fillSlots(engine, bar, ids) {
+export function fillSlots(engine, bar, ids, classId = null) {
   const data = engine.skillData;
-  const unlockAt = data.unlockAt || [1, 3, 6, 12, 18, 24];
+  const unlockAt = unlockLadder(data, classId);
   const slots = bar.slots;
   const next = (ids || []).map((id, i) => ({
     id: id || null,
@@ -103,6 +107,20 @@ export function fillSlots(engine, bar, ids) {
   for (const sl of next) if (!sl.empty && data.skills[sl.id]) Object.assign(sl, describedSlot(engine, sl.id, sl.unlockAt));
   slots.length = 0;
   slots.push(...next);
+}
+
+/**
+ * The level each key opens at. Farhold's ladder is 1 / 3 / 6 / 12 / 18 / 24. Owner feedback 6 (U11): a level-2 druid
+ * "could not heal me" — the heal sat on key 2, which opened at level 3, so a healer had no heal for anyone in its
+ * first two levels. A HEALER class (skills-tv.json `healers`) has BOTH its first two keys from level 1: its direct
+ * heal and its attack.
+ */
+export function unlockLadder(data, classId = null) {
+  const base = data.unlockAt || [1, 3, 6, 12, 18, 24];
+  if (!classId || !(data.healers || []).includes(classId)) return base;
+  const out = [...base];
+  out[1] = out[0];
+  return out;
 }
 
 /** A character's current skill ids, slot by slot (empty slots are null). */
@@ -124,7 +142,32 @@ export function restoreGear(engine, ch, blob) {
   for (const slot of Object.keys(ch.equipment || {})) ch.equipment[slot] = null;
   for (const [slot, item] of Object.entries(blob.equipment || {})) {
     if (!item || typeof item !== 'object') continue;
-    engine.rpg.equip(ch, JSON.parse(JSON.stringify(item)), { into: slot, force: true });
+    const copy = JSON.parse(JSON.stringify(item));
+    // owner feedback 8 (W22): a light worn in an old save is not put back — its list price is owed to the player
+    // (index.js addEntity pays it through host.award, once: the next save no longer holds the item)
+    if (engine.tvGear && (slot === 'light' || isLightItem(copy, engine.tvGear))) {
+      ch.lightOwed = (ch.lightOwed || 0) + lightRefund({ ...copy, slot: 'light' }, engine.tvGear, it => itemPrice(engine.prices, it));
+      continue;
+    }
+    engine.finishItem?.(copy, { fresh: false, convert: false });        // an older save's caster item gets its card line (it keeps what it did)
+    // play-test 5 T7: the two HANDS are put back exactly as they were saved. Farhold's `equip` clears the off hand
+    // when a two-hander goes into the main hand unless the sheet has Doubled Grasp — and a login restores the gear
+    // BEFORE the perks, so a second two-hander fell into a bag that is then overwritten: gone on every login.
+    // …and so are Thousandvale's own slots (a cloak, a belt), which Farhold's `equip` does not know
+    if (slot === 'weapon' || slot === 'offhand' || slot === 'back' || slot === 'waist') ch.equipment[slot] = copy;
+    else engine.rpg.equip(ch, copy, { into: slot, force: true });
+  }
+  // owner feedback 10 (Y16): an item saved in a hand it may no longer use (a tome in the off hand, an orb as the
+  // weapon, two main-hand items) is moved — to the other hand when that is legal and empty, otherwise out to the bag.
+  // The room's bag is not the sheet's, so what leaves is listed on `ch.handsMoved` for index.js addEntity to hand over
+  // (host.award, once: the next save no longer holds it there). Doubled Grasp is not known yet at this point (perks
+  // are restored after the gear), so a second two-hander is never judged here — only the four hand words are.
+  if (engine.casterForms) {
+    const fixed = settleHands(ch.equipment.weapon, ch.equipment.offhand, { doubleGrip: true });
+    if (fixed.moved.length) {
+      ch.equipment.weapon = fixed.weapon; ch.equipment.offhand = fixed.offhand;
+      ch.handsMoved = [...(ch.handsMoved || []), ...fixed.moved];
+    }
   }
   ch.bag = Array.isArray(blob.bag) ? JSON.parse(JSON.stringify(blob.bag)) : [];
   engine.rpg.refresh(ch, { full: true });

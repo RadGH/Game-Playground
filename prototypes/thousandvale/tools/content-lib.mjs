@@ -8,7 +8,28 @@ export const J = p => JSON.parse(readFileSync(new URL(p, ROOT), 'utf8'));
 export const VIGNETTE_FILES = ['data/vignettes/m1.json', 'data/vignettes/m2.json', 'data/vignettes/m2b.json'];
 export const allVignettes = () => VIGNETTE_FILES.flatMap(f => J(f).vignettes);
 const NOT_ZONE = new Set(['jobs.json', 'treasure.json', 'province.json', 'events.json']);
-export const questFiles = () => readdirSync(new URL('data/quests/', ROOT)).filter(f => f.endsWith('.json') && !NOT_ZONE.has(f)).map(f => J('data/quests/' + f));
+/**
+ * A zone's quest file plus the PARTS it names in `include` (play-test 2: start.json, classes.json, setpieces.json —
+ * each `{ zone, part, npcs, quests }`), merged: npcs joined, quests appended. Stream A's loader does the same
+ * (js/sim/content.js; docs/requests.md E -> A play-test 2). A part never stands alone as a zone file.
+ */
+export function mergeQuestParts(main, readPart) {
+  if (!main || !Array.isArray(main.include) || !main.include.length) return main;
+  const out = { ...main, npcs: { ...(main.npcs || {}) }, quests: [...(main.quests || [])] };
+  for (const f of main.include) {
+    const part = readPart(f);
+    if (!part) continue;
+    Object.assign(out.npcs, part.npcs || {});
+    out.quests.push(...(part.quests || []).map(q => ({ ...q, part: part.part || f })));
+  }
+  return out;
+}
+const partFiles = () => new Set(readdirSync(new URL('data/quests/', ROOT)).filter(f => f.endsWith('.json')).flatMap(f => { try { return J('data/quests/' + f).include || []; } catch { return []; } }));
+export const questFiles = () => {
+  const parts = partFiles();
+  return readdirSync(new URL('data/quests/', ROOT)).filter(f => f.endsWith('.json') && !NOT_ZONE.has(f) && !parts.has(f))
+    .map(f => mergeQuestParts(J('data/quests/' + f), pf => (existsSync(new URL('data/quests/' + pf, ROOT)) ? J('data/quests/' + pf) : null)));
+};
 
 /** E zone id -> world zone id for a province (stream B's data/world/province-map.json). */
 export const provinceMap = (prov = 'torbor_downs') => J('data/world/province-map.json').provinces[prov].map;

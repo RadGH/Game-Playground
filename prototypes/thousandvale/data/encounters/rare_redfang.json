@@ -2,6 +2,10 @@
   "id": "rare_redfang",
   "name": "Redfang",
   "tier": "rare",
+  "announce": {
+    "r": 300,
+    "_doc": "S4: shown on the minimap of anyone within r metres while it lives"
+  },
   "zone": "redcliff",
   "body": "frost_stalker",
   "place": "stalks the scrub below Redcliff Fort and takes sentries off the wall",

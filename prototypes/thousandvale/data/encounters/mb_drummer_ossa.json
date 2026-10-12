@@ -206,7 +206,10 @@
       ],
       "onEnter": [
         {
-          "shield": true
+          "shield": {
+            "seconds": 15,
+            "pool": 0.08
+          }
         },
         {
           "adds": {
@@ -216,10 +219,19 @@
           }
         },
         {
-          "say": "A ward hums around Ossa in time with the drums. Smash all three war drums!",
+          "say": "A ward hums around Ossa in time with the drums. Smash all three war drums! It fails by itself in 15 seconds.",
           "style": "warn"
         }
-      ]
+      ],
+      "ward": {
+        "seconds": 15,
+        "break": "objects",
+        "need": 3,
+        "what": "brazier",
+        "say": "A ward hums around Ossa in time with the drums. Smash all three war drums! It fails by itself in 15 seconds.",
+        "fade": "The ward fails by itself. No opening this time.",
+        "pool": 0.08
+      }
     },
     {
       "name": "Off the Beat",

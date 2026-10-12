@@ -6,25 +6,55 @@
       "name": "Orla Coombe",
       "role": "scholar",
       "at": "Ashcombe",
-      "greeting": "Ruins are just history that's fallen over. I help it stand up again, on paper."
+      "greeting": "Ruins are just history that's fallen over. I help it stand up again, on paper.",
+      "titled": true
     },
     "digger_tobin": {
       "name": "Old Tobin the digger",
       "role": "trader",
       "at": "Kettle Cross",
-      "greeting": "I dig. Sometimes I find things. Sometimes things find me."
+      "greeting": "I dig. Sometimes I find things. Sometimes things find me.",
+      "titled": true
     },
     "captain_rosamund": {
       "name": "Captain Rosamund",
       "role": "guard",
       "at": "the Broken Keep",
-      "greeting": "The keep is broken. My temper is next."
+      "greeting": "The keep is broken. My temper is next.",
+      "titled": true
     },
     "scav_jory": {
       "name": "Mudfoot",
       "role": "scavenger",
       "at": "duel_stones",
-      "greeting": "Finders keepers. I find, you keep me alive, we split it."
+      "greeting": "Finders keepers. I find, you keep me alive, we split it.",
+      "titled": true
+    },
+    "angler_ashcombe": {
+      "name": "Old Nettie Cray",
+      "role": "angler",
+      "at": "Ashcombe",
+      "greeting": "The cellars flooded forty years back. The fishing has never been better. See the ripples, just west of where I'm standing? That's the town pool. It never fishes out.",
+      "placedBy": "content-pools",
+      "titled": true
+    },
+    "carter_ashcombe": {
+      "name": "Jankin Furlong",
+      "role": "carter",
+      "at": "Ashcombe",
+      "greeting": "Walking is free. Riding is nearly free, and you arrive with your legs.",
+      "cart": "cart_ashcombe",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_kettle_cross": {
+      "name": "Dickon Thatcher",
+      "role": "carter",
+      "at": "Kettle Cross",
+      "greeting": "Out of Kettle Cross by cart is the only way to leave with dignity. Pick a town.",
+      "cart": "cart_kettle_cross",
+      "placedBy": "content-towns",
+      "titled": true
     }
   },
   "quests": [
@@ -41,22 +71,25 @@
           "type": "road_brigand",
           "count": 8,
           "where": "the courtyard of the Broken Keep",
-          "text": "Scavengers routed"
+          "text": "Rout 8 scavengers at the Broken Keep"
         },
         {
           "kind": "talk",
           "npc": "scholar_orla",
-          "text": "Report to Orla Coombe in Ashcombe"
+          "text": "Report to Orla Coombe",
+          "where": "Orla Coombe, in Ashcombe"
         }
       ],
       "done": "Orla says there's something under the keep worth seeing. Orla always says that.",
       "reward": {
         "xp": 0.5,
         "gold": 10,
-        "item": {
-          "tier": "uncommon",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "uncommon"
+          }
+        ]
       },
       "next": "copper_and_candles"
     },
@@ -71,8 +104,8 @@
           "kind": "kill",
           "type": "barrow_hound",
           "count": 6,
-          "where": "the excavation trenches",
-          "text": "Barrow hounds"
+          "where": "the excavation trenches by Ashcombe",
+          "text": "Kill 6 barrow hounds at the dig"
         }
       ],
       "done": "Splendid. The skeletons are back where they belong: in my catalogue.",
@@ -92,8 +125,8 @@
           "kind": "kill",
           "type": "sporecap_walker",
           "count": 5,
-          "where": "the damp rooms of the ruins",
-          "text": "Sporecap walkers"
+          "where": "the damp rooms of the ruins near Kettle Cross",
+          "text": "Kill 5 sporecap walkers in the ruins"
         }
       ],
       "done": "Achoo. Sorry. Thank you. Achoo.",
@@ -112,24 +145,27 @@
         {
           "kind": "visit",
           "vignette": "duel_stones",
-          "text": "Go to the duelling stones"
+          "text": "Go to the Duelling Stones",
+          "where": "The Duelling Stones, out in the ruins"
         },
         {
           "kind": "kill",
           "type": "carrion_moth",
           "count": 3,
-          "where": "at the duelling stones",
-          "text": "Carrion moths"
+          "where": "The Duelling Stones",
+          "text": "Kill 3 carrion moths at the stones"
         }
       ],
       "done": "Here's your half. It's a big half. I'm feeling generous. And watched.",
       "reward": {
         "xp": 0.3,
         "gold": 8,
-        "item": {
-          "tier": "common",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       }
     },
     {
@@ -143,14 +179,16 @@
         {
           "kind": "clear",
           "dungeon": "door",
-          "text": "Reach the lower levels",
-          "floor": 1
+          "text": "Reach the lower levels of Harrowgate Keep",
+          "floor": 1,
+          "where": "Harrowgate Keep, the dungeon door in the Ashcombe Ruins"
         },
         {
           "kind": "clear",
           "dungeon": "door",
           "text": "Defeat the keep's last defender",
-          "boss": true
+          "boss": true,
+          "where": "the bottom of Harrowgate Keep"
         }
       ],
       "done": "Marvellous! I shall write a monograph. You'll be a footnote. A large one.",
@@ -174,7 +212,8 @@
           "kind": "killRare",
           "zone": "ashcombe",
           "slot": 0,
-          "text": "The rubble field's rare slain"
+          "text": "Hunt down Gravel Jack",
+          "where": "roams the rubble field of the Ashcombe Ruins"
         }
       ],
       "done": "Good riddance. Drinks at the keep. What's left of it.",

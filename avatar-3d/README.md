@@ -104,6 +104,100 @@ Emberveil 2 parks the party's vehicle behind them on the world stage, stands it 
 circle in the firelight, and rolls it across the stage during a crossing
 (`prototypes/emberveil/js/stage.js`: `setVehicle`, `parkVehicle`, `camp`, `travelAcross`).
 
+## Mounts (mounts.js) — `js/mounts.js` + pure `js/mount-types.js`, demo `mounts.html`
+
+Added 2026-10-05 for Thousandvale (play-test 2, Q16); built so Farhold, Bannerline or any page can use it.
+A mount is a **creature body** (creatures.js) wearing **tack**, plus a **seat** where a rider's hips go.
+Every piece of tack is parented to the creature's hip (or head), so it bobs and pitches with the gait —
+and so does a rider sitting on the seat.
+
+**Play-test 4 (S22, 2026-10-05/06):** the hoofed types (horse, pony, courser, warhorse, stag, dray) no longer ride the
+generic creatures.js quad — they are built by `js/equine.js` (`createEquine`, breed table `EQUINE_BREEDS`): lofted barrel
+with croup / saddle dip / withers / deep chest, an arched neck out of the chest (`neckK` thickness), a long head hung at
+the poll, jointed legs ending in hooves (socks, feathering on heavy breeds), mane, forelock and tail, and real walk / trot /
+gallop leg patterns with a 0.3 s crossfade. Each type names its `breed` in mount-types.js. Ram and drake still use creatures.js.
+
+**The equine body, rebuilt 2026-10-07/08 (Thousandvale owner feedback 8: "conical neck, bulging eyes — make horses more realistic, even
+for a cartoon game").** Three rounds of front / side / three-quarter renders against a real horse's outline:
+round 1 replaced the tube neck with the space between a CREST curve and a THROAT curve (deep at the chest, half as deep behind the jaw,
+flat-sided), hung a long head from the poll (flat forehead, round jowl, tapering nose, small dark almond eyes sunk under a brow on the
+SIDES of the skull), and made each leg a chain of its own bones (forearm / gaskin, knee / hock, cannon, fetlock, sloping pastern, hoof);
+round 2 turned the spike ears into leaves, deepened the jowl, squared the muzzle, fined the throat-latch and broadened the breast;
+round 3 sank the shoulder and haunch masses into the barrel (they read as lumps on a pale coat), enlarged the eye a touch, and took the
+reins off a riderless mount (a straight rein to an empty saddle cut through the neck). Exports, clip names, `seat` and `metrics()` are
+unchanged, so every caller (Thousandvale's `actors.setMount`, the demo page) works as before. A horse is about 8,000 triangles in ~23
+meshes on 5 materials (10,300 with tack). Shots: `prototypes/thousandvale/tests/D/shots/w3-*.png`.
+
+| type | creature | size | tack |
+|---|---|---|---|
+| `horse` | horse | 1 | saddle, saddlebags |
+| `pony` | pony | 1 | saddle, saddlebags |
+| `courser` | courser | 1 | saddle |
+| `warhorse` | horse (equine `draft`) | 1.12 | barding: caparison down both flanks + rump + chest, crinet on the neck, chanfron plate with a spike |
+| `stag` | elk (equine `elk`) | 1 | saddle |
+| `dray` | elk (equine `elk_dray`) | 1.15 | harness: padded breast collar, packs, bedroll (S22) |
+| `ram` | **ram** (new creature type: sheep frame on pony legs, short coat, `curlHorns`) | 1.25 | fur blanket + roll, saddlebags |
+| `drake` | drake | 1.7 | drake saddle: riding horn and a high back |
+
+Tack on every type: a blanket (curved over the barrel) with a trim, the seat, pommel and cantle, a girth,
+stirrup leathers down both flanks to an iron at the rider's foot height (0.36 m under the seat), a bridle
+(noseband, browband, cheek straps, bit rings) and two **reins re-laid every frame** from the bit rings to
+the rider's hand points (`mount.hands`), so they stay attached while the head sways.
+
+**API**
+
+```js
+import { createMount, seatRider, mountSpecFor, gaitFor, MOUNT_TYPES, CHIBI2_MOUNT_ANIMS } from './js/mounts.js';
+import { createChibi2Character, CHIBI2_ANIMS } from './js/chibi2.js';
+const mount = await createMount(mountSpecFor('riding_horse'), { detail: 1 });
+scene.add(mount.group);                                   // faces +z, feet at y = 0
+const rider = await createChibi2Character(avatar, { anims: [...CHIBI2_ANIMS, ...CHIBI2_MOUNT_ANIMS] });
+const unseat = seatRider(mount, rider);                    // rider.group -> child of mount.seat, plays 'ride'
+mount.setGait(speed);      // m/s -> 'idle' | 'walk' | 'trot' | 'gallop' (returned); the rider switches ride <-> rideGallop
+mount.update(dt, t); rider.update(dt);                     // every frame
+unseat();                                                  // rider back under its old parent, old transform, idle
+```
+
+- `createMount(spec)` returns `{ group, creature, spec, seat, hands, gait, riderClip, rider, setGait(speed), setAnim(name), update(dt, t), metrics() -> { height, length, width, seatY, backY }, dispose() }`. `setAnim` passes a creature clip straight through (idle / walk / run / dead / graze).
+- **Gaits** come from `MOUNT_TYPES[type].gaits` (`walk` / `trot` / `gallop` thresholds in m/s, `pace` = ground speed of the walk and run clips at rate 1). Trot is the quad's walk clip (its legs already move in diagonal pairs) run faster; gallop is the run clip. The rate is set from the speed so legs keep up with the ground. `gaitFor(speed, type)` is the same choice, pure.
+- **The seat** is an Object3D on the hip, counter-scaled by the mount's size, so whatever you parent to it is world-size. `seatRider` lifts the rider so its hip joint sits just above the saddle (`riderHipsY(body)` measures the Chibi 2 hip joint).
+- **Rider clips** (`chibi2-motion.js`, opt-in list `CHIBI2_MOUNT_ANIMS`): `ride` (astride: thighs spread round the barrel, shins down the flanks, hands low on the reins, small trot bounce) and `rideGallop` (crouched forward, hands out, bigger bounce). A rider built without them falls back to idle (standing in the saddle), so add the list.
+- **Dismount**: `unseat()`, then stand the rider where you like (the gallery puts it at the mount's left side). A game decides when (Thousandvale: the server's `you {mount:null, dismount}`).
+
+**Game ids** — `mountSpecFor(x)` takes a type key, a game id or a look object and returns `{ type, creature, size, colors, tack, label }`:
+`riding_horse`->horse, `grey_courser`->courser, `moor_stag`->stag, `pony`, `warhorse`; Thousandvale's `look { creature, size, colors }`:
+`deer`/`elk`->stag, `horse` at size < 0.9 -> pony, >= 1.1 -> warhorse, else horse; unknown -> horse. Look colours (`body`, `belly`,
+`accent`, `#rrggbb`) override the type's; `look.scale` multiplies the type's size (a look's own `size` is ignored: the type carries
+the proportions). The table and mapping are pure (`mount-types.js`), so a server can import them.
+
+**Play-test 4 (S22, 2026-10-05): the hoofed mounts ride an equine body — `js/equine.js`.** The owner: *"mounts (horse)
+still look silly"*. They rode creatures.js's generic quad (capsule barrel, a level capsule neck, a ball head, stick legs).
+`createEquine({ breed, size, colors })` builds a body made for them: the barrel, neck and head are each a LOFT of egg-shaped
+rings along a line or curve, read from short per-breed profiles (croup high, the back dipping at the saddle, withers, a deep
+chest and a belly tucked up at the flank; a deep flat-sided neck rising out of the chest and arching; a long head hung at the
+poll, deep at the jaw, narrow to a soft muzzle), coloured per vertex (belly fade, dark muzzle, blaze, an elk's pale rump);
+legs are joint chains (shoulder/stifle -> knee/hock -> fetlock -> pastern -> hoof) with a muscle mass at the top, a tapering
+forearm/gaskin, sock markings and feathering on heavy breeds; a mane sheet over the crest falling to the off side, forelock,
+a two-piece tail plume; ears, eyes with lids, nostrils, mouth line; elks get antlers, a dewlap and a shaggy collar.
+Breeds (`EQUINE_BREEDS`): `horse`, `pony`, `courser`, `draft` (the warhorse), `elk` (the stag), `elk_dray` (the new
+**`dray`** type — Thousandvale's level-15 Dray Elk had no type and was drawn as a plain horse).
+**Gaits are real leg patterns** on one phase: walk four-beat (LH, LF, RH, RF; 62 % stance, head nod), trot diagonal pairs
+with a bounce, gallop with the hinds then the fronts landing, the body rocking and the neck swinging, the tail lifting with
+speed; a 0.3 s crossfade between gaits on the same phase; the cadence comes from ground speed / the breed's stride (so hooves
+keep up with the ground). Idle breathes, shifts weight, drifts the head down, flicks the ears and swishes the tail.
+**Tack is cut from the body** (`frame.patch({ on: 'body'|'neck'|'head', u0, u1, a0, a1, push })` — a piece of that surface
+pushed outward): blanket with a hem, seat + skirts, pommel, a curved cantle, girth, breastplate, stirrups, saddlebags,
+bridle (browband, cheek straps, noseband, throatlatch, bit rings); the warhorse's caparison with trim and badge, a banded
+crinet and a chanfron; the dray's padded studded breast collar, packs and a bedroll (`tack.kind: 'harness'`). The ram and
+the drake keep their creatures.js bodies and the Q16 tack unchanged (`quadTack`). API unchanged: `createMount` / `seatRider`
+/ `setGait` / `metrics`; `mountSpecFor` now also returns `breed`; `MOUNT_TYPES[k].breed` (pure) says which body. A colour
+`hair` (mane + tail) defaults to `accent`. Used only by Thousandvale (no live game imports mounts.js). Tests: mounts.test.js
+gains three (equine for the hoofed types, hooves on the ground / neck rising, trot pairs + four-beat walk + gallop rock +
+cadence follows speed).
+
+`creatures.js` gained only two additive things for this: a read-only `parts` getter on the creature handle, and the `curlHorns`
+feature (read only when the flag is set, so no existing type changes). Tests: `node --test avatar-3d/tests/mounts.test.js`.
+
 ## Spell effects — `js/spellfx.js`, demo `spellfx.html`
 
 Combat effects for a 3D stage: **projectiles** that fly between two points, **impacts** that burst where they land, **cast** flashes, **heal**/**revive**, and looping **status auras** stuck to a body. Everything is built from shaped geometry (cones, spinning shard clusters, expanding torus rings, ground rune discs, tumbling planes, jagged lines) and the 49 particle sprites in `assets/data/fx/` drawn as billboards — deliberately **no glowing spheres**. Bright parts are additive with tone mapping off so they stay vivid; smoke, shadow and toxic cloud use normal blending so they read as dark against a bright sky.

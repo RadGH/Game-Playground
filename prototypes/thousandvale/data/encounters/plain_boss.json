@@ -1,0 +1,78 @@
+{
+  "id": "plain_boss",
+  "tier": "fallback",
+  "_doc": "Stream E (play-test 6 U8). THE FALLBACK for a boss-rank monster that names no encounter, outside a dungeon and outside the wilds (index.json defaults.boss.town / .any). It has NO name (the monster keeps its own), no ward, no adds and no arena objects, so it can never ask a player for a thing that is not there. Two readable attacks and an enrage. If you see this script in a fight, some boss is missing its own.",
+  "hpMult": 2,
+  "enrage": {
+    "seconds": 300,
+    "damage": 2.5,
+    "say": "{boss} stops holding back!"
+  },
+  "abilities": {
+    "heavy_swing": {
+      "id": "heavy_swing",
+      "name": "Heavy Swing",
+      "every": [
+        8,
+        11
+      ],
+      "first": 4,
+      "range": 6,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 6,
+          "arc": 2,
+          "wind": 1.8,
+          "damage": 1.8
+        }
+      ]
+    },
+    "ground_slam": {
+      "id": "ground_slam",
+      "name": "Ground Slam",
+      "every": [
+        13,
+        17
+      ],
+      "first": 8,
+      "range": 16,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "target",
+          "r": 3.5,
+          "wind": 1.8,
+          "damage": 1.6
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "The Fight",
+      "abilities": [
+        "heavy_swing",
+        "ground_slam"
+      ]
+    },
+    {
+      "name": "Cornered",
+      "at": 0.4,
+      "abilities": [
+        "heavy_swing",
+        "ground_slam"
+      ]
+    }
+  ],
+  "body": "brigand_captain",
+  "party": "Any size: two attacks you can see coming and nothing to fetch. It is a stand-in, not a designed fight.",
+  "say": {
+    "pull": [
+      "{boss} turns on you."
+    ],
+    "death": "{boss} falls.",
+    "reset": "{boss} loses interest."
+  }
+}

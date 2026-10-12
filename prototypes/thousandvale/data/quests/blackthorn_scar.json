@@ -6,19 +6,48 @@
       "name": "Rosa of Last Lantern",
       "role": "elder",
       "at": "Last Lantern",
-      "greeting": "As long as the lantern burns, the Scar doesn't take the village. It's very important you don't sneeze on it."
+      "greeting": "As long as the lantern burns, the Scar doesn't take the village. It's very important you don't sneeze on it.",
+      "titled": true
     },
     "penitent_jory": {
       "name": "Jory the penitent",
       "role": "pilgrim",
       "at": "Thornwick",
-      "greeting": "I joined the cult by mistake. I thought it was a baking club."
+      "greeting": "I joined the cult by mistake. I thought it was a baking club.",
+      "titled": true
     },
     "outrider_garrick": {
       "name": "Outrider Garrick",
       "role": "scout",
       "at": "the Warband Stockade",
-      "greeting": "Their stockade. My vantage. Their arrows. My problem."
+      "greeting": "Their stockade. My vantage. Their arrows. My problem.",
+      "titled": true
+    },
+    "angler_last_lantern": {
+      "name": "Wick Thornaby",
+      "role": "angler",
+      "at": "Last Lantern",
+      "greeting": "Throw back anything with thorns. Throw back anything that asks you to. No water for a mile, and what there was the blight drank. Sell me what you bring from elsewhere.",
+      "placedBy": "content-pools",
+      "titled": true
+    },
+    "carter_last_lantern": {
+      "name": "Alys Cobbold",
+      "role": "carter",
+      "at": "Last Lantern",
+      "greeting": "Name a town. If it has a gate, I have been stuck outside it.",
+      "cart": "cart_last_lantern",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_thornwick": {
+      "name": "Blanche Furlong",
+      "role": "carter",
+      "at": "Thornwick",
+      "greeting": "Longroad Carters. We go everywhere there is a gate, and we are never late, because we never say when.",
+      "cart": "cart_thornwick",
+      "placedBy": "content-towns",
+      "titled": true
     }
   },
   "quests": [
@@ -35,25 +64,27 @@
           "kind": "kill",
           "type": "cult_zealot",
           "count": 6,
-          "where": "the thorn roads",
-          "text": "Cult zealots"
+          "where": "the thorn roads of Blackthorn Scar",
+          "text": "Kill 6 cult zealots on the thorn roads"
         },
         {
           "kind": "kill",
           "type": "ossuary_crawler",
           "count": 4,
-          "where": "the bone pits",
-          "text": "Ossuary crawlers"
+          "where": "the bone pits of Blackthorn Scar",
+          "text": "Kill 4 ossuary crawlers in the bone pits"
         }
       ],
       "done": "The way is open. Gather everyone you can find. It wakes when the lantern dims.",
       "reward": {
         "xp": 0.7,
         "gold": 14,
-        "item": {
-          "tier": "uncommon",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "uncommon"
+          }
+        ]
       },
       "next": "the_heart_of_the_scar"
     },
@@ -70,12 +101,13 @@
           "kind": "killOne",
           "encounter": "world_grimtallow",
           "credit": "event",
-          "text": "The province's world boss defeated (event credit counts)"
+          "text": "Defeat Grimtallow with the province",
+          "where": "Grimtallow's arena at the heart of the Scar (realm event)"
         }
       ],
       "done": "The Scar is quiet. The lantern burns. Torbor Downs is safe, for now. Thank you.",
       "reward": {
-        "xp": 2.0,
+        "xp": 2,
         "gold": 120,
         "item": {
           "tier": "rare",
@@ -96,17 +128,20 @@
           "count": 1,
           "from": "cult_zealot",
           "chance": 0.35,
-          "text": "Recipe book recovered"
+          "text": "Take back the recipe book from cult zealots",
+          "where": "cult zealots on the thorn roads of the Scar"
         }
       ],
       "done": "My scones! Truly the light returns to the world.",
       "reward": {
         "xp": 0.45,
         "gold": 9,
-        "item": {
-          "tier": "common",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       }
     },
     {
@@ -120,8 +155,8 @@
           "kind": "kill",
           "type": "ossuary_crawler",
           "count": 6,
-          "where": "the bone pits",
-          "text": "Ossuary crawlers"
+          "where": "the bone pits of Blackthorn Scar",
+          "text": "Kill 6 ossuary crawlers"
         }
       ],
       "done": "Fewer crawlers. Fewer nightmares. Same number of arrows.",
@@ -141,14 +176,16 @@
         {
           "kind": "clear",
           "dungeon": "door",
-          "text": "Reach the inner barrows",
-          "floor": 2
+          "text": "Reach the inner Blackthorn Warrens",
+          "floor": 2,
+          "where": "The Blackthorn Warrens, the dungeon door in the Scar"
         },
         {
           "kind": "clear",
           "dungeon": "door",
-          "text": "Defeat the barrow's keeper",
-          "boss": true
+          "text": "Defeat the warrens' keeper",
+          "boss": true,
+          "where": "the bottom of the Blackthorn Warrens"
         }
       ],
       "done": "You came out. That's more than the warband expected.",
@@ -172,7 +209,8 @@
           "kind": "killRare",
           "zone": "blackthorn_scar",
           "slot": 0,
-          "text": "The Scar's rare slain"
+          "text": "Hunt down the Thornbound Crawler",
+          "where": "roams the edge of the lantern-light in Blackthorn Scar"
         }
       ],
       "done": "The edge of the light is a little further out tonight.",

@@ -6,25 +6,64 @@
       "name": "Foreman Hollis",
       "role": "elder",
       "at": "Copperdell",
-      "greeting": "Mine's open, seams are rich, and everyone's terrified. Normal week."
+      "greeting": "Mine's open, seams are rich, and everyone's terrified. Normal week.",
+      "titled": true
     },
     "lampwoman_gwen": {
       "name": "Gwen Lampwright",
       "role": "trader",
       "at": "Pickaxe Row",
-      "greeting": "Lamps! Oil! Candles! Everything you need to see what's eating you."
+      "greeting": "Lamps! Oil! Candles! Everything you need to see what's eating you.",
+      "titled": true
     },
     "sergeant_cadoc": {
       "name": "Sergeant Brask",
       "role": "guard",
       "at": "the Old Headframe Fort",
-      "greeting": "Headframe fort. Holds the hill. Also holds the lift, which is broken."
+      "greeting": "Headframe fort. Holds the hill. Also holds the lift, which is broken.",
+      "titled": true
     },
     "old_miner_pike": {
       "name": "Old Pike",
       "role": "miner",
       "at": "dry_well",
-      "greeting": "Down the well's quicker than the shaft, if you don't mind the rats."
+      "greeting": "Down the well's quicker than the shaft, if you don't mind the rats.",
+      "titled": true
+    },
+    "angler_copperdell": {
+      "name": "Dunmer Slagfoot",
+      "role": "angler",
+      "at": "Copperdell",
+      "greeting": "Twelve hours underground, then I come up here and stare at water. Do not talk to me about ore. See the ripples, just south-west of where I'm standing? That's the town pool. It never fishes out.",
+      "placedBy": "content-pools",
+      "titled": true
+    },
+    "carter_copperdell": {
+      "name": "Tobin Cattermole",
+      "role": "carter",
+      "at": "Copperdell",
+      "greeting": "Climb up. Mind the turnips. A few coins and you are in another town before your boots notice.",
+      "cart": "cart_copperdell",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_pickaxe_row": {
+      "name": "Wystan Furlong",
+      "role": "carter",
+      "at": "Pickaxe Row",
+      "greeting": "Climb up. Mind the turnips. A few coins and you are in another town before your boots notice.",
+      "cart": "cart_pickaxe_row",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_ashhaven": {
+      "name": "Hew Greenhill",
+      "role": "carter",
+      "at": "Ashhaven",
+      "greeting": "Out of Ashhaven by cart is the only way to leave with dignity. Pick a town.",
+      "cart": "cart_ashhaven",
+      "placedBy": "content-towns",
+      "titled": true
     }
   },
   "quests": [
@@ -40,8 +79,8 @@
           "kind": "kill",
           "type": "ironback_beetle",
           "count": 6,
-          "where": "the upper galleries",
-          "text": "Ironback beetles"
+          "where": "the upper galleries above Copperdell",
+          "text": "Kill 6 ironback beetles in the galleries"
         },
         {
           "kind": "collect",
@@ -49,17 +88,20 @@
           "count": 4,
           "from": "ironback_beetle",
           "chance": 0.5,
-          "text": "Copper the beetles swallowed"
+          "text": "Collect 4 copper nuggets from ironback beetles",
+          "where": "ironback beetles in the upper galleries"
         }
       ],
       "done": "Copper back, beetles gone. Head down to Brackwater, the reeve there sent for help.",
       "reward": {
         "xp": 0.5,
         "gold": 10,
-        "item": {
-          "tier": "uncommon",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "uncommon"
+          }
+        ]
       },
       "next": "eels_and_omens"
     },
@@ -76,13 +118,20 @@
           "count": 5,
           "from": "ash_wisp",
           "chance": 0.6,
-          "text": "Wisp sparks"
+          "text": "Collect 5 wisp sparks from ash wisps",
+          "where": "ash wisps in the old workings of Delvers' Hill"
         }
       ],
       "done": "Lovely bright ones. Lamps for everybody. Mind your eyebrows.",
       "reward": {
         "xp": 0.35,
-        "gold": 6
+        "gold": 6,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       }
     },
     {
@@ -96,8 +145,8 @@
           "kind": "kill",
           "type": "cairn_rat",
           "count": 10,
-          "where": "the lift house",
-          "text": "Cairn rats"
+          "where": "the lift house by the Old Headframe Fort",
+          "text": "Kill 10 cairn rats at the lift house"
         }
       ],
       "done": "Right. New rope. New rats probably. But not today.",
@@ -116,14 +165,15 @@
         {
           "kind": "visit",
           "vignette": "dry_well",
-          "text": "Find the dry well"
+          "text": "Find the Dry Well",
+          "where": "The Dry Well, out on Delvers' Hill"
         },
         {
           "kind": "kill",
           "type": "cairn_rat",
           "count": 5,
-          "where": "the dry well",
-          "text": "Rats in the well"
+          "where": "The Dry Well",
+          "text": "Kill 5 rats in the well"
         }
       ],
       "done": "Grandad's pipe! And his teeth. Don't ask why he kept his teeth.",
@@ -147,14 +197,16 @@
         {
           "kind": "clear",
           "dungeon": "door",
-          "text": "Reach the deep seam",
-          "floor": 1
+          "text": "Reach the deep seam of Old Copperdeep",
+          "floor": 1,
+          "where": "Old Copperdeep, the dungeon door on Delvers' Hill"
         },
         {
           "kind": "clear",
           "dungeon": "door",
           "text": "End the last shift",
-          "boss": true
+          "boss": true,
+          "where": "the bottom of Old Copperdeep"
         }
       ],
       "done": "Silence below. First quiet night in Copperdell in ten years.",
@@ -178,7 +230,8 @@
           "kind": "killRare",
           "zone": "delvers_hill",
           "slot": 0,
-          "text": "The hill's rare beast slain"
+          "text": "Hunt down Blind Gammer",
+          "where": "roams the spoil heaps of Delvers' Hill"
         }
       ],
       "done": "That's one fewer thing trying to eat my fort.",

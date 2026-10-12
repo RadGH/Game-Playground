@@ -20,6 +20,7 @@
 //   transmute scaling (client-side only). Leader escorts, auras, routs and sieges live in
 //   js/rules/warband.js (a siege needs the room's `structures` hook; no room has building yet).
 
+import { monsterSpeed, flightOf, projOf, projFields } from './projectiles.js';
 import {
   applyStatus, tickStatuses, slowOf, incomingFrom, outgoingFrom, groundAt, wetAt, cliffStep,
   climbable, crossesWall, COMBAT_FEEL,
@@ -27,6 +28,7 @@ import {
 import { pickTarget, notice as noticeThreat, clearThreat, threatFromDamage, taunt as threatTaunt } from './threat.js';
 import { pathfinderFor } from './pathfind.js';
 import { siegeOf } from './warband.js';
+import { afterHurt as perkAfterHurt } from './perk-rules.js';
 
 export const AI = {
   LEASH_METRES: 40,
@@ -37,7 +39,11 @@ export const AI = {
   RETURN_SPEED: 1.6,
   /** a leashed monster that has not made it home in this long (walled out) is put back there */
   RETURN_SNAP: 12,
+  /** LOD (rooms only, `field.lod`): an idle wanderer with nobody this close thinks once every LOD_EVERY ticks */
+  LOD_RADIUS: 70,
+  LOD_EVERY: 4,
 };
+const hashPhase = id => { const t = String(id); let h = 7; for (let i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) >>> 0; return h; };
 
 // --------------------------------------------------------------------------- spawning
 
@@ -49,6 +55,7 @@ export function spawnMonster(field, def, level, x, z, { rank = 'normal', modifie
   const r = rng || field.room.streams.get('spawn');
   const unit = field.rpg.makeEnemy(def, level, r, { rank: boss && rank === 'normal' ? 'boss' : rank, modifiers, name });
   if (id != null) unit.id = id;
+  unit.goldBase = def.gold ?? null;          // owner feedback 7: its own coin weight for js/rules/economy.js killGold
   unit.x = x; unit.z = z; unit.y = field.terrain ? groundAt(field.terrain, x, z) : 0;
   unit.state = 'wander'; unit.wanderTimer = 0; unit.swingTimer = 0; unit.hitFlash = 0;
   unit.stagger = 0; unit.push = null; unit.recoil = null; unit.sunder = 0; unit.sunderLeft = 0; unit.closing = 0;
@@ -110,7 +117,7 @@ export function statusOnHit(field, e, target) {
  * A monster's melee swing lands on `victim` (main.js `onEnemyStrike`, line ~9584): Farhold's
  * `rpg.strike` with the buffs both sides carry, life steal, the bite's status. Returns the result.
  */
-export function monsterStrike(field, e, victim, { element = 'physical', ranged = false, mult = 1, kind = null } = {}) {
+export function monsterStrike(field, e, victim, { element = 'physical', ranged = false, mult = 1, kind = null, flew = false } = {}) {
   if (victim?.side === 'foe') {
     // a monster swinging at another monster (it was hard-taunted by a turned one): actors.js strikes
     // the body plainly, `rpg.strike(e, object, rng, {})`, and kills it if it drops
@@ -125,18 +132,31 @@ export function monsterStrike(field, e, victim, { element = 'physical', ranged =
     e.lastCombatAt = field.clock;
     return null;
   }
+  // owner feedback 8 (W2): a hit that lands from beyond arm's reach and was not itself a flown shot (a telegraphed
+  // Pinning Shot, a caster's special) still shows where it came from — a short, purely cosmetic projectile
+  if (!flew && kind !== 'pool' && kind !== 'dot') {
+    const P = field.room?.engine?.projectiles || null;
+    if (P && Math.hypot(victim.x - e.x, victim.z - e.z) > (e.reach || 2.4) + 3) {
+      field.emit({ t: 'fx', kind: 'shot', id: e.id, to: victim.id, element, ms: P.special.ms, from: { x: e.x, z: e.z }, cosmetic: 1, ...(kind ? { skill: kind } : {}), ...(element === 'physical' ? {} : { proj: projOf(P, { element }) }) });
+    }
+  }
   // the victim's own skill statuses (wards, counters, "every N hits" bursts) act as the victim
   const hit = () => field.rpg.strike(e, victim, field.rng, { multiplier: mult * incomingFrom(victim) * outgoingFrom(e), element, ranged });
   const result = field.hooks?.asActor ? field.hooks.asActor(victim, hit) : hit();
   field.hooks?.onHurt?.(result, e, victim);                 // skill wards/counters (cast.js, M1)
+  if (victim.perkFlags) perkAfterHurt(field, victim, result, e, field.clock);   // the perk forest (Unbroken decides before the death)
   if (e.lifeSteal) e.hp = Math.min(e.maxHp, e.hp + Math.round(result.amount * e.lifeSteal));
   if (e.onHit?.length) statusOnHit(field, e, victim);
   e.lastCombatAt = field.clock;
+  // W1: whatever strikes a guard, or a player under a guard's eye, is the guards' business from now on
+  if (field.guards?.list.length && !e.guardFoe && (victim.guard || (victim.kind === 'player' && field.guards.watched(victim.x, victim.z)))) e.guardFoe = true;
   field.report(e, victim, result, kind || (ranged ? 'shot' : 'bite'));
   if (result.dead && victim.hp <= 0) {
     if (victim.kind === 'player') {
       victim.dead = true;
       field.emit({ t: 'death', id: victim.id, by: e.id });
+    } else if (victim.guard) {
+      victim.hp = 0;                       // a town guard goes DOWN and gets up again (js/rules/guards.js), it is never a corpse
     } else {
       victim.dying = 0;
       field.emit({ t: 'death', id: victim.id, by: e.id });
@@ -154,9 +174,14 @@ export function monsterStrike(field, e, victim, { element = 'physical', ranged =
 function shoot(field, e, target) {
   const spec = e.ranged || { range: 24, element: 'physical' };
   const dist = Math.hypot(target.x - e.x, target.z - e.z);
-  const flight = Math.max(0.11, dist / 40);
-  (field.shots || (field.shots = [])).push({ by: e, target, toX: target.x, toZ: target.z, left: flight, element: spec.element || 'physical' });
-  field.emit({ t: 'fx', kind: 'shot', id: e.id, to: target.id, element: spec.element || 'physical', ms: Math.round(flight * 1000) });
+  // owner feedback 8 (W2): "you take damage without knowing where from" — a slower shot that is SEEN, and that homes
+  // (it lands unless its target died; Farhold's 2.6 m dodge would make every slow arrow miss a walking player)
+  const P = field.room?.engine?.projectiles || null;
+  const element = spec.element || 'physical';
+  const speed = P ? monsterSpeed(P, element) : 40;
+  const flight = P ? flightOf(P, dist, speed) : Math.max(0.11, dist / 40);
+  (field.shots || (field.shots = [])).push({ by: e, target, toX: target.x, toZ: target.z, fromX: e.x, fromZ: e.z, left: flight, element, home: !!P });
+  field.emit({ t: 'fx', kind: 'shot', id: e.id, to: target.id, element, ms: Math.round(flight * 1000), ...(P ? { from: { x: e.x, z: e.z }, ...projFields(P, { speed, proj: element === 'physical' ? null : projOf(P, { element }), home: true, skill: 'basic' }) } : {}) });
 }
 
 function tickShots(field, dt) {
@@ -169,8 +194,14 @@ function tickShots(field, dt) {
     list.splice(i, 1);
     const v = s.target;
     if (!field.usable(v) || s.by.dying != null || s.by.removed) continue;
-    if (Math.hypot(v.x - s.toX, v.z - s.toZ) > 2.6) continue;
-    monsterStrike(field, s.by, v, { element: s.element, ranged: true });
+    if (!s.home && Math.hypot(v.x - s.toX, v.z - s.toZ) > 2.6) continue;
+    // owner feedback 10 (Y10): its target stepped behind a dungeon wall while it flew — it hits the wall
+    if (field.sight && !field.sight(s.fromX ?? s.by.x, s.fromZ ?? s.by.z, v.x, v.z)) {
+      const fx = s.fromX ?? s.by.x, fz = s.fromZ ?? s.by.z, ex = v.x - fx, ez = v.z - fz, len = Math.hypot(ex, ez) || 1, d = field.sight.reach(fx, fz, ex / len, ez / len, len);
+      field.emit({ t: 'fx', kind: 'blocked', id: s.by.id, x: fx + ex / len * d, z: fz + ez / len * d, by: 'wall' });
+      continue;
+    }
+    monsterStrike(field, s.by, v, { element: s.element, ranged: true, flew: true });
   }
 }
 
@@ -233,7 +264,7 @@ function spread(field) {
   const CELL = 4;
   const grid = new Map();
   for (const e of list) {
-    if (e.removed || e.dying != null || e.hover) continue;
+    if (e.removed || e.dying != null || e.hover || e.asleep || e.lodIdle) continue;   // (asleep / resting this tick: nobody near)
     const gx = Math.floor(e.x / CELL), gz = Math.floor(e.z / CELL);
     const key = gx * 1e6 + gz;
     let bucket = grid.get(key);
@@ -251,6 +282,30 @@ function spread(field) {
       }
     }
   }
+}
+
+/** Players bucketed by THINK_RADIUS cells; returns e => { friend, dist } (dist Infinity past THINK_RADIUS). */
+function playerBuckets(friends) {
+  const C = AI.THINK_RADIUS;
+  if (friends.length <= 8) return e => nearestFriend(null, e, friends);      // a handful: the scan is cheaper
+  const map = new Map();
+  for (const f of friends) {
+    const k = (Math.floor(f.x / C) + 32768) * 65536 + (Math.floor(f.z / C) + 32768);
+    let b = map.get(k);
+    if (!b) { b = []; map.set(k, b); }
+    b.push(f);
+  }
+  const NONE = { friend: null, dist: Infinity };
+  return e => {
+    const cx = Math.floor(e.x / C), cz = Math.floor(e.z / C);
+    let best = null, bd = Infinity;
+    for (let dx = -1; dx <= 1; dx++) for (let dz = -1; dz <= 1; dz++) {
+      const b = map.get((cx + dx + 32768) * 65536 + (cz + dz + 32768));
+      if (!b) continue;
+      for (const f of b) { const d = Math.hypot(f.x - e.x, f.z - e.z); if (d < bd) { bd = d; best = f; } }
+    }
+    return best ? { friend: best, dist: bd } : NONE;
+  };
 }
 
 /** The nearest usable friend to a point, and how far. */
@@ -302,6 +357,28 @@ export function resetMonster(field, e) {
   field.emit({ t: 'fx', kind: 'leash', id: e.id });
 }
 
+/**
+ * Owner feedback 10 (Y17, report #29): "training dummies… attackable, a ton of HP, auto regenerate". One tick of a
+ * dummy: its statuses burn (so a damage-over-time shows on the meter), it never moves, turns, notices, swings or
+ * builds threat, it cannot be killed (field.kill refuses it), and `resetSec` after the last thing that touched it it is
+ * at full health with nothing on it. It never reaches `field.onKill`, so it pays no experience, gold, loot or credit.
+ */
+export function tickDummy(field, e, dt, hooks = {}) {
+  e.dying = null; e.push = null; e.stagger = 0; e.state = 'wander'; e.targetId = null; e.anim = 'idle';
+  e.x = e.home[0]; e.z = e.home[1];
+  if (e.threat?.size) e.threat.clear();
+  if (e.statuses && Object.keys(e.statuses).length) {
+    const burned = tickStatuses(e, dt);
+    if (burned > 0) { hooks.onStatusDamage?.(e, burned); e.struckAt = field.clock; field.emit({ t: 'dot', id: e.id, amt: burned, hp: Math.max(1, Math.round(e.hp)) }); }
+  }
+  if (e.hp < 1) e.hp = 1;
+  const quiet = field.clock - (e.struckAt ?? -Infinity);
+  if (quiet >= (e.dummy.resetSec ?? 3) && (e.hp < e.maxHp || e.damageBy || e.playerDamage)) {
+    e.hp = e.maxHp; e.statuses = {}; e.damageBy = null; e.playerDamage = 0; e.sunder = 0; e.sunderLeft = 0;
+    field.emit({ t: 'fx', kind: 'dummy', id: e.id, reset: 1 });
+  }
+}
+
 // --------------------------------------------------------------------------- the tick
 
 /**
@@ -310,7 +387,8 @@ export function resetMonster(field, e) {
  *   onBossPhase(e, phase)
  *   onStrike(e, victim)         override the melee swing (default: monsterStrike)
  */
-export function tickMonsters(field, dt, hooks = {}) {
+export function tickMonsters(field, dtAll, hooks = {}) {
+  const tickN = (field.tickN = (field.tickN || 0) + 1);
   // who a monster NOTICES is a player (actors.js measures everything from the player); companions
   // draw it by biting it or by standing in its way (aimOf rules 1 and 2, below)
   // (an untargetable player is still THERE: it is noticed and keeps the brain awake, it just is not swung at)
@@ -324,6 +402,11 @@ export function tickMonsters(field, dt, hooks = {}) {
     if (band != null) awakeBands.add(band);
   }
   const lookup = id => field.get(id);
+  field.indexMonsters?.();
+  // M2 perf: the nearest player through a bucket grid of THINK_RADIUS cells (a 3 x 3 look finds every
+  // player within THINK_RADIUS — exactly what the scan found inside it; beyond it nobody thinks anyway)
+  const nearestOf = playerBuckets(friends);
+  const guardList = field.guards?.list.length ? field.guards : null;
   // the room's planner (js/rules/pathfind.js): null on a terrain that cannot block (Farhold, the parity fixtures)
   const pf = pathfinderFor(field);
   if (pf) pf.beginTick(field.clock);
@@ -331,8 +414,17 @@ export function tickMonsters(field, dt, hooks = {}) {
   for (let i = list.length - 1; i >= 0; i--) {
     const e = list[i];
     if (e.removed) continue;
-    const { friend: near, dist } = nearestFriend(field, e, friends);
+    let dt = dtAll;
+    let { friend: near, dist } = nearestOf(e);
+    // owner feedback 8 (W1): a RAIDER (rules.openingTarget) or something already fighting a guard also notices town
+    // guards — and when the nearest player is a newcomer (`threatScale` < 1) it goes for a guard in sight instead
+    if (guardList && (e.raider || e.guardFoe)) {
+      const g = guardList.nearest(e.x, e.z, AI.THINK_RADIUS);
+      if (g) { const gd = Math.hypot(g.x - e.x, g.z - e.z); if (gd < dist || ((near?.threatScale ?? 1) < 1 && gd < (e.aggroRange || 26) * 2)) { near = g; dist = gd; } }
+    }
 
+    // owner feedback 10 (Y17): a training dummy — it stands, takes everything, and is whole again a moment after the last hit
+    if (e.dummy) { tickDummy(field, e, dt, hooks); continue; }
     if (e.dying != null) {
       e.dying += dt;
       if (e.dying > AI.CORPSE_SECONDS) { field.remove(e); field.emit({ t: 'gone', id: e.id }); }
@@ -340,7 +432,21 @@ export function tickMonsters(field, dt, hooks = {}) {
     }
 
     // asleep by distance (PLAN §8.5): nothing near enough to matter, so it does not think at all
-    if (dist > AI.THINK_RADIUS && e.state !== 'return' && !e.boss) { e.anim = 'idle'; continue; }
+    if (dist > AI.THINK_RADIUS && e.state !== 'return' && !e.boss) { e.anim = 'idle'; e.asleep = true; continue; }
+    e.asleep = false;
+
+    // LOD (perf, a room only — `field.lod`, never the parity fixtures): a monster just milling about with
+    // nobody within LOD_RADIUS (well past any notice range), nothing on it and no awake band thinks once
+    // every LOD_EVERY ticks, on its own phase, with the time it skipped — so its stroll covers the same
+    // ground, and a body walking towards it is noticed within LOD_EVERY ticks of crossing LOD_RADIUS
+    if (field.lod && e.state === 'wander' && dist > AI.LOD_RADIUS && !e.boss && !e.push && !(e.stagger > 0) && !e.patrol
+      && !(e.statuses && Object.keys(e.statuses).length) && !awakeBands.has(e.leader ?? (e.leads ? e.id : null))) {
+      e.lodDt = (e.lodDt || 0) + dtAll;
+      const phase = typeof e.id === 'number' ? e.id : (e.lodPhase ??= hashPhase(e.id));
+      if ((tickN + phase) % AI.LOD_EVERY !== 0) { e.lodIdle = true; continue; }
+      dt = e.lodDt;
+    }
+    e.lodDt = 0; e.lodIdle = false;
 
     // ---- the leash (replaces Farhold's despawn ring)
     if (e.state === 'return') {
@@ -421,6 +527,8 @@ export function tickMonsters(field, dt, hooks = {}) {
         if (!e.hover && t?.blocked && t.blocked(cx, cz) && !t.blocked(e.x, e.z)) { cx = e.x; cz = e.z; }
         if (!wet(field, cx, cz, e.y) && (e.hover || !t || climbable(t, cx, cz, e.x, e.z, 0, e.y))
           && Math.hypot(cx - e.x, cz - e.z) > step * 0.4) {
+          // owner feedback 10 (Y12): how far a knock carried it this tick — its own wind-up shapes ride along (encounter.js)
+          e.knockDx = (e.knockDx || 0) + (cx - e.x); e.knockDz = (e.knockDz || 0) + (cz - e.z);
           e.x = cx; e.z = cz;
         } else if (!p.walled) {
           p.walled = true;
@@ -544,10 +652,14 @@ export function tickMonsters(field, dt, hooks = {}) {
     const aimAt = foe || target || (e.statuses?.turned?.follow ? near : null);
     const adx = aimAt ? aimAt.x - e.x : 0, adz = aimAt ? aimAt.z - e.z : 0;
     const adist = Math.hypot(adx, adz);
+    // owner feedback 10 (Y10): in an instance a monster must have a clear line to what it means to hit — within reach
+    // through a wall is not in reach; it walks round (the planner below) instead of swinging, shooting or casting
+    const seen = !field.sight || !aimAt || field.sight(e.x, e.z, aimAt.x, aimAt.z);
+    e.unseen = !seen;
     e.aimingAt = target && target.kind !== 'player' ? target : null;
 
     // an encounter's special or boss ability (js/rules/encounter.js): while it casts, it holds still
-    if (field.hooks?.think && e.state === 'chase' && !e.statuses?.turned && field.hooks.think(e, target, adist, dt)) {
+    if (field.hooks?.think && e.state === 'chase' && !e.statuses?.turned && field.hooks.think(e, seen ? target : null, adist, dt)) {
       e.y = ground(field, e.x, e.z, e.y);
       continue;
     }
@@ -567,16 +679,16 @@ export function tickMonsters(field, dt, hooks = {}) {
     } else if (e.state === 'chase') {
       if (aimAt) {
         // round a wall, a building or a cliff when the straight line is shut (pathfind.js); else straight at it
-        const w = pf && adist > (e.reach || 2.4) + 0.5 ? pf.steer(e, aimAt.x, aimAt.z) : null;
+        const w = pf && (adist > (e.reach || 2.4) + 0.5 || !seen) ? pf.steer(e, aimAt.x, aimAt.z) : null;
         e.facing = w ? Math.atan2(w.x - e.x, w.z - e.z) : Math.atan2(adx, adz);
         // following a path that reaches it counts as not stuck — but only while it keeps getting closer
         if (w && e.path?.reached && (e.pathBest == null || e.path.left < e.pathBest - 0.5)) { e.pathBest = e.path.left; e.pathingAt = field.clock; }
         if (adist <= (e.reach || 2.4) + 1) e.pathBest = null;
       }
       if (standOff > 0 && target) {
-        if (adist > standOff + 3) speed = e.speed;
+        if (adist > standOff + 3 || !seen) speed = e.speed;                    // Y10: no line — come round the wall
         else if (adist < standOff * 0.55) { speed = e.speed * 0.8; e.facing += Math.PI; }
-        if (e.swingTimer <= 0 && adist <= e.ranged.range) {
+        if (seen && e.swingTimer <= 0 && adist <= e.ranged.range) {
           e.swingTimer = e.attackEvery;
           e.anim = 'attack';
           shoot(field, e, target);
@@ -585,7 +697,7 @@ export function tickMonsters(field, dt, hooks = {}) {
         speed = 0;
       } else if (!foe && !target) {
         speed = adist > 3.5 ? e.speed : 0;             // turned and following, nobody to fight
-      } else if (foe && adist > e.reach) {
+      } else if (foe && (adist > e.reach || !seen)) {
         speed = e.speed;
       } else if (foe && e.swingTimer <= 0) {
         e.swingTimer = e.attackEvery;
@@ -608,7 +720,7 @@ export function tickMonsters(field, dt, hooks = {}) {
           field.emit({ t: 'fx', kind: 'siege', id: e.id, structure: siege.id, destroyed: !!hit?.destroyed });
           if (!hit || hit.destroyed || hit.ok === false) { e.siege = null; e.siegeCheck = 0; }
         }
-      } else if (adist > e.reach) {
+      } else if (adist > e.reach || !seen) {
         speed = e.speed;
       } else if (e.swingTimer <= 0) {
         e.swingTimer = e.attackEvery;
@@ -618,11 +730,21 @@ export function tickMonsters(field, dt, hooks = {}) {
         let victim = target;
         if (target?.kind === 'player' && field.allies.length) {
           let pet = null, bd = (e.reach || 2.4) + 0.6;
-          for (const p of field.allies) { if (p.dying != null) continue; const d = Math.hypot(p.x - e.x, p.z - e.z); if (d < bd) { bd = d; pet = p; } }
+          for (const p of field.allies) { if (p.dying != null) continue; const d = Math.hypot(p.x - e.x, p.z - e.z); if (d < bd && (!field.sight || field.sight(e.x, e.z, p.x, p.z))) { bd = d; pet = p; } }
           if (pet && field.rng() < 0.55) victim = pet;
         }
         if (hooks.onStrike) hooks.onStrike(e, victim); else monsterStrike(field, e, victim);
       }
+    } else if (e.patrol && e.state !== 'flee') {
+      // a rare walking its placement loop (A: `data.path`): waypoint to waypoint at a stroll, round
+      // walls when it must; its home rides along, so a leash measures from where it was pulled
+      const P = e.patrol;
+      let w = P.pts[P.i];
+      if (Math.hypot(w.x - e.x, w.z - e.z) < 2) { P.i = (P.i + 1) % P.pts.length; w = P.pts[P.i]; }
+      const s = pf ? pf.steer(e, w.x, w.z) : null;
+      e.facing = Math.atan2((s || w).x - e.x, (s || w).z - e.z);
+      speed = e.speed * 0.45;
+      e.home[0] = e.x; e.home[1] = e.z;
     } else {
       e.wanderTimer -= dt;
       if (e.wanderTimer <= 0) {
@@ -663,6 +785,6 @@ export function tickMonsters(field, dt, hooks = {}) {
     }
   }
 
-  tickShots(field, dt);
+  tickShots(field, dtAll);
   spread(field);
 }

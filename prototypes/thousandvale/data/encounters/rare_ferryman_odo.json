@@ -2,6 +2,10 @@
   "id": "rare_ferryman_odo",
   "name": "Ferryman Odo",
   "tier": "rare",
+  "announce": {
+    "r": 300,
+    "_doc": "S4: shown on the minimap of anyone within r metres while it lives"
+  },
   "zone": "gullwick",
   "body": "hollow_wraith",
   "place": "poles a boat nobody else can see between Gullwick and Ferry Hythe, and wants his fare",

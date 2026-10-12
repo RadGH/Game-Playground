@@ -338,7 +338,10 @@
       ],
       "onEnter": [
         {
-          "shield": true
+          "shield": {
+            "seconds": 20,
+            "pool": 0.1
+          }
         },
         {
           "adds": {
@@ -349,10 +352,19 @@
           }
         },
         {
-          "say": "A ward of sworn oaths surrounds the Castellan. Tip all three burning-oil cauldrons!",
+          "say": "A ward of sworn oaths surrounds the Castellan. Tip all three burning-oil cauldrons! It fails by itself in 20 seconds.",
           "style": "warn"
         }
-      ]
+      ],
+      "ward": {
+        "seconds": 20,
+        "break": "objects",
+        "need": 3,
+        "what": "brazier",
+        "say": "A ward of sworn oaths surrounds the Castellan. Tip all three burning-oil cauldrons! It fails by itself in 20 seconds.",
+        "fade": "The ward fails by itself. No opening this time.",
+        "pool": 0.1
+      }
     },
     {
       "name": "Oathbroken",

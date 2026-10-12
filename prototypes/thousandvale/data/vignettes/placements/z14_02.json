@@ -1,9 +1,9 @@
 {
- "_doc": "Stream E. Content placements for world zone z14_02 (E zone 'gullwick', The Gullwick Lakes) — tools/place-vignettes.mjs against stream B's bake (terrain 3b6a7e1e). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
+ "_doc": "Stream E. Content placements for world zone z14_02 (E zone 'gullwick', The Gullwick Lakes) — tools/place-vignettes.mjs against stream B's bake (terrain b8a99ae8). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
  "zone": "z14_02",
  "sheetZone": "gullwick",
  "province": "torbor_downs",
- "terrainHash": "3b6a7e1e",
+ "terrainHash": "b8a99ae8",
  "band": [
   5,
   7
@@ -46,13 +46,42 @@
    "gap": 30,
    "slope": 26
   },
+  "wayside": {
+   "townGap": 20,
+   "gap": 12,
+   "slope": 34,
+   "edge": 24
+  },
   "settlement": {
    "townGap": 300,
    "gap": 60,
    "slope": 10
+  },
+  "curio": {
+   "townGap": 30,
+   "gap": 10,
+   "slope": 26,
+   "edge": 30
+  },
+  "stray": {
+   "townGap": 70,
+   "gap": 16,
+   "slope": 26,
+   "edge": 30
+  },
+  "folk": {
+   "townGap": 30,
+   "gap": 12,
+   "slope": 24,
+   "edge": 30
+  },
+  "setpiece": {
+   "townGap": 20,
+   "gap": 25,
+   "slope": 20
   }
  },
- "mainWalkableShare": 0.959,
+ "mainWalkableShare": 0.962,
  "settlements": [
   {
    "name": "Gullwick",
@@ -61,7 +90,7 @@
    "z": 352,
    "r": 90,
    "source": "bake",
-   "bakeId": "tideford"
+   "bakeId": "gullwick"
   },
   {
    "name": "Ferry Hythe",
@@ -70,7 +99,7 @@
    "z": 560,
    "r": 65,
    "source": "bake",
-   "bakeId": "glimrow"
+   "bakeId": "ferry_hythe"
   },
   {
    "name": "Wyrmrow",
@@ -112,6 +141,126 @@
  "problems": [],
  "placements": [
   {
+   "type": "folk",
+   "id": "gullwick_graveyard_slot0",
+   "in": "gullwick_graveyard",
+   "slotOf": "gullwick_graveyard",
+   "role": "sexton",
+   "name": null,
+   "work": "dig",
+   "chatter": [
+    "role.sexton",
+    "role.gravedigger"
+   ],
+   "x": 1448,
+   "z": 252,
+   "yaw": 0,
+   "path": [
+    [
+     1448,
+     252
+    ],
+    [
+     1450.5,
+     253
+    ],
+    [
+     1449,
+     254.5
+    ]
+   ]
+  },
+  {
+   "type": "folk",
+   "id": "ferry_hythe_graveyard_slot0",
+   "in": "ferry_hythe_graveyard",
+   "slotOf": "ferry_hythe_graveyard",
+   "role": "sexton",
+   "name": null,
+   "work": "dig",
+   "chatter": [
+    "role.sexton",
+    "role.gravedigger"
+   ],
+   "x": 475.2,
+   "z": 638,
+   "yaw": 0,
+   "path": [
+    [
+     475.2,
+     638
+    ],
+    [
+     477.7,
+     639
+    ],
+    [
+     476.2,
+     640.5
+    ]
+   ]
+  },
+  {
+   "type": "folk",
+   "id": "wyrmrow_graveyard_slot0",
+   "in": "wyrmrow_graveyard",
+   "slotOf": "wyrmrow_graveyard",
+   "role": "sexton",
+   "name": null,
+   "work": "dig",
+   "chatter": [
+    "role.sexton",
+    "role.gravedigger"
+   ],
+   "x": 917.6,
+   "z": 1797.6,
+   "yaw": 0,
+   "path": [
+    [
+     917.6,
+     1797.6
+    ],
+    [
+     920.1,
+     1798.6
+    ],
+    [
+     918.6,
+     1800.1
+    ]
+   ]
+  },
+  {
+   "type": "folk",
+   "id": "mirekeep_graveyard_slot0",
+   "in": "mirekeep_graveyard",
+   "slotOf": "mirekeep_graveyard",
+   "role": "sexton",
+   "name": null,
+   "work": "dig",
+   "chatter": [
+    "role.sexton",
+    "role.gravedigger"
+   ],
+   "x": 980.5,
+   "z": 1340,
+   "yaw": 0,
+   "path": [
+    [
+     980.5,
+     1340
+    ],
+    [
+     983,
+     1341
+    ],
+    [
+     981.5,
+     1342.5
+    ]
+   ]
+  },
+  {
    "type": "fort",
    "id": "fort_gullwick_0",
    "name": "Stilt Fort",
@@ -121,7 +270,7 @@
    "z": 641,
    "yaw": 0,
    "radius": 24,
-   "level": 5
+   "level": 7
   },
   {
    "type": "farm",
@@ -131,10 +280,10 @@
    "flavour": null,
    "settlement": "Gullwick",
    "x": 1535,
-   "z": 496,
+   "z": 499,
    "yaw": -2.75,
    "radius": 16,
-   "level": 5
+   "level": 6
   },
   {
    "type": "farm",
@@ -143,19 +292,19 @@
    "template": "orchard",
    "flavour": null,
    "settlement": "Ferry Hythe",
-   "x": 480,
-   "z": 463,
-   "yaw": -0.79,
+   "x": 384,
+   "z": 673,
+   "yaw": 1.57,
    "radius": 24,
    "level": 5
   },
   {
    "type": "cave",
    "id": "cave_gullwick_0",
-   "name": "Sump grotto",
-   "template": "sump_grotto",
+   "name": "Smugglers' cave",
+   "template": "smugglers_cave",
    "plan": {
-    "family": "sunken_temple",
+    "family": "flooded_cistern",
     "floors": 1,
     "level": 6
    },
@@ -170,8 +319,8 @@
    "id": "the_floating_isle",
    "name": "The Drifting Isle",
    "kind": "compositional",
-   "x": 1115,
-   "z": 299,
+   "x": 1238,
+   "z": 219,
    "yaw": 0,
    "radius": 55,
    "where": "best fit for: a lake over 300 m",
@@ -179,39 +328,59 @@
   },
   {
    "type": "vignette",
-   "id": "broken_aqueduct",
-   "name": "The Broken Aqueduct",
+   "id": "dark_lighthouse",
+   "name": "The Dark Lighthouse",
    "x": 1221,
    "z": 1563,
-   "yaw": 1.59,
-   "radius": 14,
+   "yaw": 0.73,
+   "radius": 10,
    "biome": "grassland",
-   "biomeFits": true,
-   "level": 1
+   "biomeFits": false,
+   "level": 1,
+   "levelBase": 6,
+   "levelCap": 7
   },
   {
    "type": "vignette",
-   "id": "drowned_chapel",
-   "name": "The Drowned Chapel",
-   "x": 357,
-   "z": 1913,
-   "yaw": 5.69,
-   "radius": 13,
-   "biome": "marsh",
+   "id": "drowned_belfry",
+   "name": "The Drowned Belfry",
+   "x": 1725,
+   "z": 1141,
+   "yaw": 5.52,
+   "radius": 11,
+   "biome": "temperateForest",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 6,
+   "levelCap": 7
   },
   {
    "type": "vignette",
    "id": "drowned_shrine",
    "name": "The Drowned Shrine",
-   "x": 1899,
-   "z": 960,
-   "yaw": 3.16,
+   "x": 401,
+   "z": 1950,
+   "yaw": 3.73,
    "radius": 11,
    "biome": "marsh",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 5,
+   "levelCap": 6
+  },
+  {
+   "type": "vignette",
+   "id": "eel_traps",
+   "name": "The Eel Weir",
+   "x": 1923,
+   "z": 1836,
+   "yaw": 4.07,
+   "radius": 11,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1,
+   "levelBase": 6,
+   "levelCap": 7
   },
   {
    "type": "vignette",
@@ -219,83 +388,83 @@
    "name": "Heron Island",
    "x": 1452,
    "z": 877,
-   "yaw": 4.77,
+   "yaw": 3.2,
    "radius": 10,
    "biome": "marsh",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 6,
+   "levelCap": 7
   },
   {
    "type": "vignette",
-   "id": "mudlark_flats",
-   "name": "The Mudlark Flats",
-   "x": 1101,
-   "z": 1058,
-   "yaw": 2.38,
-   "radius": 13,
-   "biome": "marsh",
+   "id": "roadside_shrine",
+   "name": "The Wayside Saint",
+   "x": 472,
+   "z": 79,
+   "yaw": 6.11,
+   "radius": 8,
+   "biome": "grassland",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 5,
+   "levelCap": 6
   },
   {
    "type": "vignette",
-   "id": "stilt_house",
-   "name": "The Empty Stilt House",
-   "x": 86,
-   "z": 1169,
-   "yaw": 6.19,
-   "radius": 10,
-   "biome": "marsh",
+   "id": "smugglers_beacon",
+   "name": "The False Beacon",
+   "x": 1950,
+   "z": 61,
+   "yaw": 2.7,
+   "radius": 11,
+   "biome": "grassland",
    "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "tide_bell_post",
-   "name": "The Tide Post",
-   "x": 371,
-   "z": 836,
-   "yaw": 4.03,
-   "radius": 10,
-   "biome": "marsh",
-   "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 6,
+   "levelCap": 7
   },
   {
    "type": "vignette",
    "id": "toll_bridge_trolls",
    "name": "The Toll Bridge",
-   "x": 1919,
-   "z": 1678,
-   "yaw": 1.91,
+   "x": 895,
+   "z": 1127,
+   "yaw": 3.65,
    "radius": 11,
    "biome": "grassland",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 5,
+   "levelCap": 6
   },
   {
    "type": "vignette",
-   "id": "will_o_lights",
-   "name": "The Lantern Path",
-   "x": 685,
-   "z": 744,
-   "yaw": 2.85,
-   "radius": 14,
-   "biome": "marsh",
+   "id": "weavers_bridge_toll",
+   "name": "The Spider Bridge",
+   "x": 1985,
+   "z": 679,
+   "yaw": 2.18,
+   "radius": 12,
+   "biome": "temperateForest",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 6,
+   "levelCap": 7
   },
   {
    "type": "vignette",
    "id": "wreck_on_the_rocks",
    "name": "The Wreck of the Patience",
-   "x": 858,
-   "z": 81,
-   "yaw": 5.69,
+   "x": 865,
+   "z": 107,
+   "yaw": 1.57,
    "radius": 14,
    "biome": "borealForest",
    "biomeFits": false,
-   "level": 1
+   "level": 1,
+   "levelBase": 5,
+   "levelCap": 6
   },
   {
    "type": "camp",
@@ -303,15 +472,15 @@
    "monster": "reed_serpent",
    "with": null,
    "level": [
-    5,
+    6,
     7
    ],
    "count": [
     2,
     4
    ],
-   "x": 464,
-   "z": 884,
+   "x": 1108,
+   "z": 989,
    "yaw": 0,
    "radius": 10
   },
@@ -322,14 +491,14 @@
    "with": null,
    "level": [
     5,
-    7
+    6
    ],
    "count": [
     2,
     4
    ],
-   "x": 1945,
-   "z": 385,
+   "x": 474,
+   "z": 888,
    "yaw": 0,
    "radius": 10
   },
@@ -339,15 +508,15 @@
    "monster": "fen_croaker",
    "with": null,
    "level": [
-    6,
-    7
+    5,
+    6
    ],
    "count": [
     2,
     4
    ],
-   "x": 1549,
-   "z": 699,
+   "x": 871,
+   "z": 828,
    "yaw": 0,
    "radius": 10
   },
@@ -357,15 +526,15 @@
    "monster": "fen_croaker",
    "with": null,
    "level": [
-    6,
-    7
+    5,
+    6
    ],
    "count": [
     2,
     4
    ],
-   "x": 409,
-   "z": 1687,
+   "x": 81,
+   "z": 1181,
    "yaw": 0,
    "radius": 10
   },
@@ -376,14 +545,14 @@
    "with": null,
    "level": [
     5,
-    7
+    6
    ],
    "count": [
     2,
     4
    ],
-   "x": 830,
-   "z": 471,
+   "x": 818,
+   "z": 462,
    "yaw": 0,
    "radius": 10
   },
@@ -393,15 +562,15 @@
    "monster": "dusk_flitter",
    "with": null,
    "level": [
-    5,
+    6,
     7
    ],
    "count": [
     2,
     4
    ],
-   "x": 909,
-   "z": 879,
+   "x": 1058,
+   "z": 407,
    "yaw": 0,
    "radius": 10
   },
@@ -411,15 +580,15 @@
    "monster": "marsh_wisp",
    "with": null,
    "level": [
-    6,
-    7
+    5,
+    6
    ],
    "count": [
     2,
     4
    ],
-   "x": 1686,
-   "z": 1209,
+   "x": 656,
+   "z": 1744,
    "yaw": 0,
    "radius": 10
   },
@@ -429,15 +598,15 @@
    "monster": "marsh_wisp",
    "with": null,
    "level": [
-    6,
-    7
+    5,
+    6
    ],
    "count": [
     2,
     4
    ],
-   "x": 1978,
-   "z": 1242,
+   "x": 302,
+   "z": 1636,
    "yaw": 0,
    "radius": 10
   },
@@ -447,15 +616,15 @@
    "monster": "silt_lurker",
    "with": null,
    "level": [
-    5,
+    6,
     7
    ],
    "count": [
     2,
     4
    ],
-   "x": 1302,
-   "z": 255,
+   "x": 1518,
+   "z": 704,
    "yaw": 0,
    "radius": 10
   },
@@ -465,15 +634,15 @@
    "monster": "silt_lurker",
    "with": null,
    "level": [
-    5,
+    6,
     7
    ],
    "count": [
     2,
     4
    ],
-   "x": 1565,
-   "z": 593,
+   "x": 1136,
+   "z": 285,
    "yaw": 0,
    "radius": 10
   },
@@ -490,8 +659,8 @@
     2,
     4
    ],
-   "x": 1216,
-   "z": 247,
+   "x": 1567,
+   "z": 614,
    "yaw": 0,
    "radius": 10
   },
@@ -508,8 +677,8 @@
     2,
     4
    ],
-   "x": 1523,
-   "z": 644,
+   "x": 1302,
+   "z": 310,
    "yaw": 0,
    "radius": 10
   },
@@ -519,15 +688,15 @@
    "monster": "carrion_moth",
    "with": null,
    "level": [
-    5,
+    6,
     7
    ],
    "count": [
     2,
     4
    ],
-   "x": 1301,
-   "z": 301,
+   "x": 1529,
+   "z": 583,
    "yaw": 0,
    "radius": 10
   },
@@ -537,15 +706,15 @@
    "monster": "carrion_moth",
    "with": null,
    "level": [
-    5,
+    6,
     7
    ],
    "count": [
     2,
     4
    ],
-   "x": 1512,
-   "z": 748,
+   "x": 1558,
+   "z": 734,
    "yaw": 0,
    "radius": 10
   },
@@ -554,30 +723,30 @@
    "id": "rare_ferryman_odo",
    "slot": 0,
    "name": "Ferryman Odo",
-   "x": 1267,
-   "z": 190,
+   "x": 1006,
+   "z": 210,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     1325,
-     183
+     957,
+     258
     ],
     [
-     1273,
-     245
+     943,
+     171
     ],
     [
-     1197,
-     238
+     1045,
+     140
     ],
     [
-     1184,
-     156
+     1080,
+     205
     ],
     [
-     1274,
-     114
+     1024,
+     286
     ]
    ],
    "respawnMin": [
@@ -591,30 +760,30 @@
    "id": "rare_waterstrider_tolla",
    "slot": 1,
    "name": "Tolla Longlegs",
-   "x": 1453,
-   "z": 672,
+   "x": 1124,
+   "z": 216,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     1397,
-     688
+     1099,
+     165
     ],
     [
-     1419,
-     641
+     1191,
+     158
     ],
     [
-     1485,
-     608
+     1163,
+     265
     ],
     [
-     1514,
-     695
+     1118,
+     273
     ],
     [
-     1477,
-     742
+     1059,
+     228
     ]
    ],
    "respawnMin": [
@@ -627,8 +796,8 @@
    "type": "waystone",
    "id": "ws_z14_02_gullwick",
    "name": "Gullwick",
-   "x": 1451,
-   "z": 438.7,
+   "x": 1520.7,
+   "z": 361.9,
    "yaw": 0,
    "settlement": "Gullwick",
    "radius": 1
@@ -637,8 +806,8 @@
    "type": "waystone",
    "id": "ws_z14_02_ferry_hythe",
    "name": "Ferry Hythe",
-   "x": 425,
-   "z": 643.8,
+   "x": 458.4,
+   "z": 478.1,
    "yaw": 0,
    "settlement": "Ferry Hythe",
    "radius": 1
@@ -647,8 +816,8 @@
    "type": "waystone",
    "id": "ws_z14_02_wyrmrow",
    "name": "Wyrmrow",
-   "x": 883.7,
-   "z": 1792.6,
+   "x": 891.6,
+   "z": 1808.4,
    "yaw": 0,
    "settlement": "Wyrmrow",
    "radius": 1
@@ -657,8 +826,8 @@
    "type": "waystone",
    "id": "ws_z14_02_mirekeep",
    "name": "Mirekeep",
-   "x": 967,
-   "z": 1216.4,
+   "x": 967.3,
+   "z": 1307.5,
    "yaw": 0,
    "settlement": "Mirekeep",
    "radius": 1
@@ -666,12 +835,31 @@
   {
    "type": "waystone",
    "id": "ws_z14_02_door",
-   "name": "Barrow entrance",
-   "x": 1584.5,
-   "z": 458.1,
+   "name": "The Gullwick Throat",
+   "x": 1628,
+   "z": 466.3,
    "yaw": 0,
    "door": "door_1",
    "radius": 1
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_door",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1596,
+   "z": 503,
+   "yaw": 0,
+   "radius": 6,
+   "doorGuard": true
   },
   {
    "type": "npc",
@@ -679,9 +867,9 @@
    "name": "Ferrywoman Nell",
    "role": "trader",
    "at": "Ferry Hythe",
-   "x": 413.7,
-   "z": 570.4,
-   "yaw": 4.44,
+   "x": 409.3,
+   "z": 566.6,
+   "yaw": 4.13,
    "radius": 1
   },
   {
@@ -690,9 +878,10 @@
    "name": "Elder Hollis",
    "role": "elder",
    "at": "Gullwick",
-   "x": 1518.2,
-   "z": 363.7,
-   "yaw": 5.27,
+   "x": 1523,
+   "z": 367.2,
+   "yaw": 1.473,
+   "office": "gullwick_plot_16",
    "radius": 1
   },
   {
@@ -701,9 +890,9 @@
    "name": "Stilt-guard Emrys",
    "role": "guard",
    "at": "Stilt Fort",
-   "x": 1112,
-   "z": 640.6,
-   "yaw": 5.48,
+   "x": 1110.9,
+   "z": 642.8,
+   "yaw": 2.87,
    "radius": 1
   },
   {
@@ -712,9 +901,9 @@
    "name": "Tobin the angler",
    "role": "fisher",
    "at": "drowned_shrine",
-   "x": 1898.8,
-   "z": 962.6,
-   "yaw": 3.88,
+   "x": 398.6,
+   "z": 1950.6,
+   "yaw": 3.41,
    "radius": 1
   },
   {
@@ -725,8 +914,8 @@
    "clue": "carved_arrow",
    "how": null,
    "shimmer": null,
-   "x": 1111.3,
-   "z": 639.4,
+   "x": 1109.2,
+   "z": 642.9,
    "yaw": 0,
    "where": "fort Stilt Fort",
    "radius": 1
@@ -739,8 +928,8 @@
    "clue": null,
    "how": "dig",
    "shimmer": 15,
-   "x": 1041.4,
-   "z": 644.5,
+   "x": 1118.5,
+   "z": 559.5,
    "yaw": 0,
    "where": "near Stilt Fort",
    "radius": 1
@@ -753,8 +942,8 @@
    "clue": "drunks_story",
    "how": null,
    "shimmer": null,
-   "x": 475.2,
-   "z": 522.5,
+   "x": 358,
+   "z": 520.7,
    "yaw": 0,
    "where": "edge of Ferry Hythe",
    "radius": 1
@@ -767,8 +956,8 @@
    "clue": "carved_arrow",
    "how": null,
    "shimmer": null,
-   "x": 1898.8,
-   "z": 957,
+   "x": 399.1,
+   "z": 1947.7,
    "yaw": 0,
    "where": "vignette drowned_shrine",
    "radius": 1
@@ -781,12 +970,9885 @@
    "clue": null,
    "how": "dig",
    "shimmer": 15,
-   "x": 1913.3,
-   "z": 821.3,
+   "x": 462.3,
+   "z": 1852.6,
    "yaw": 0,
    "where": "near The Drowned Shrine",
    "radius": 1
+  },
+  {
+   "type": "wayside",
+   "id": "beehive_row_gullwick_0",
+   "kind": "beehive_row",
+   "name": "Beehive Row",
+   "x": 1633,
+   "z": 1532,
+   "yaw": 3.83,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f1",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1987,
+   "z": 1474,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "stone_trough_gullwick_2",
+   "kind": "stone_trough",
+   "name": "Stone Trough",
+   "x": 1284,
+   "z": 1925,
+   "yaw": 3.29,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f3",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1408,
+   "z": 1260,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cottage_corner_gullwick_4",
+   "kind": "cottage_corner",
+   "name": "Ruined Cottage",
+   "x": 84,
+   "z": 372,
+   "yaw": 5.3,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f5",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 112,
+   "z": 860,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_gullwick_6",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1564,
+   "z": 1824,
+   "yaw": 2,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f7",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1907,
+   "z": 370,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cart_ruts_wreck_gullwick_8",
+   "kind": "cart_ruts_wreck",
+   "name": "Abandoned Cart",
+   "x": 704,
+   "z": 1436,
+   "yaw": 1.05,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f9",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 204,
+   "z": 132,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_gullwick_10",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1785,
+   "z": 880,
+   "yaw": 1.67,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f11",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 608,
+   "z": 1112,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_gullwick_12",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 184,
+   "z": 1413,
+   "yaw": 3.15,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f13",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 316,
+   "z": 1091,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_gullwick_14",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 620,
+   "z": 284,
+   "yaw": 0.93,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f15",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 184,
+   "z": 1844,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_gullwick_16",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 120,
+   "z": 608,
+   "yaw": 4.47,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f17",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 908,
+   "z": 1556,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_gullwick_18",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 512,
+   "z": 1552,
+   "yaw": 5.43,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f19",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1436,
+   "z": 1636,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_gullwick_20",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1791,
+   "z": 1360,
+   "yaw": 0.6,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f21",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 700,
+   "z": 659,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_gullwick_22",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 808,
+   "z": 1170,
+   "yaw": 2.27,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f23",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1740,
+   "z": 1976,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_gullwick_24",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1316,
+   "z": 1060,
+   "yaw": 0.3,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f25",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 380,
+   "z": 276,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_gullwick_26",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 1821,
+   "z": 1640,
+   "yaw": 5.78,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f27",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1128,
+   "z": 1760,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_gullwick_28",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1756,
+   "z": 156,
+   "yaw": 0.48,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f29",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1524,
+   "z": 1083,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_gullwick_30",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 1792,
+   "z": 604,
+   "yaw": 1.92,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f31",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 684,
+   "z": 919,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cart_ruts_wreck_gullwick_32",
+   "kind": "cart_ruts_wreck",
+   "name": "Abandoned Cart",
+   "x": 672,
+   "z": 36,
+   "yaw": 4.96,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f33",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1434,
+   "z": 61,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "beehive_row_gullwick_34",
+   "kind": "beehive_row",
+   "name": "Beehive Row",
+   "x": 1228,
+   "z": 1348,
+   "yaw": 2.02,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f35",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1596,
+   "z": 1328,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_gullwick_36",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1088,
+   "z": 1956,
+   "yaw": 3.54,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f37",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1987,
+   "z": 893,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_gullwick_38",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 104,
+   "z": 1667,
+   "yaw": 0.3,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f39",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1959,
+   "z": 1280,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_tree_gullwick_40",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 1066,
+   "z": 26,
+   "yaw": 1.96,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f41",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 895,
+   "z": 632,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_gullwick_42",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 659,
+   "z": 1059,
+   "yaw": 3.11,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f43",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1383,
+   "z": 1452,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "wayside_well_gullwick_44",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 2008,
+   "z": 1669,
+   "yaw": 0.95,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f45",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 291,
+   "z": 908,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_gullwick_46",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 248,
+   "z": 1256,
+   "yaw": 3.12,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_f47",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1254,
+   "z": 516,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_1",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 40,
+   "z": 41,
+   "yaw": 5.52,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s1",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 40,
+   "z": 192,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_2",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 776,
+   "z": 272,
+   "yaw": 3.38,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "cottage_corner_gullwick_d1",
+   "kind": "cottage_corner",
+   "name": "Ruined Cottage",
+   "x": 1033,
+   "z": 816,
+   "yaw": 1.17,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_3",
+   "recipe": "cu_bog_hole",
+   "name": "Sucking Mire",
+   "kind": "hazard",
+   "x": 1272,
+   "z": 880,
+   "yaw": 3.97,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_4",
+   "recipe": "cu_fishing_rock",
+   "name": "Fishing Rock",
+   "kind": "fishing",
+   "x": 1616,
+   "z": 896,
+   "yaw": 5.27,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s2",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 583,
+   "z": 1273,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_5",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 1720,
+   "z": 1792,
+   "yaw": 6.24,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_gullwick_1",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 1439,
+   "z": 1976,
+   "yaw": 5.96,
+   "radius": 6,
+   "path": [
+    [
+     1472,
+     2011
+    ],
+    [
+     1400,
+     1982
+    ],
+    [
+     1460,
+     1931
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_6",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 1903,
+   "z": 2001,
+   "yaw": 2.08,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s3",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 40,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_gullwick_d2",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 200,
+   "z": 2008,
+   "yaw": 1.75,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_7",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 1288,
+   "z": 1768,
+   "yaw": 4.18,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s4",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 560,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_8",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 40,
+   "z": 1512,
+   "yaw": 5.93,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_9",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 2008,
+   "z": 224,
+   "yaw": 1.05,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_10",
+   "recipe": "cu_samphire",
+   "name": "Samphire Flats",
+   "kind": "forage",
+   "x": 336,
+   "z": 1472,
+   "yaw": 5.25,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_tree_gullwick_d3",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 2009,
+   "z": 512,
+   "yaw": 2.64,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s5",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 152,
+   "z": 1024,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_11",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 1064,
+   "z": 1496,
+   "yaw": 4.13,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_gullwick_2",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 40,
+   "z": 1344,
+   "yaw": 5.75,
+   "radius": 6,
+   "path": [
+    [
+     42,
+     1310
+    ],
+    [
+     84,
+     1350
+    ],
+    [
+     17,
+     1367
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_12",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 728,
+   "z": 1594,
+   "yaw": 0.24,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s6",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 240,
+   "z": 359,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "mushroom_ring_gullwick_d4",
+   "kind": "mushroom_ring",
+   "name": "Mushroom Ring",
+   "x": 495,
+   "z": 1705,
+   "yaw": 2.39,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_13",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 215,
+   "z": 736,
+   "yaw": 3.89,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_1",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 816,
+   "z": 1328,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     882,
+     1330
+    ],
+    [
+     836,
+     1400
+    ],
+    [
+     736,
+     1343
+    ],
+    [
+     806,
+     1248
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s7",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1840,
+   "z": 1024,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_14",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 1721,
+   "z": 743,
+   "yaw": 0.2,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "hay_rick_gullwick_d5",
+   "kind": "hay_rick",
+   "name": "Hay Rick",
+   "x": 1656,
+   "z": 40,
+   "yaw": 4.8,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_15",
+   "recipe": "cu_hollow_stump",
+   "name": "Hollow Stump",
+   "kind": "cache",
+   "x": 456,
+   "z": 1160,
+   "yaw": 4.31,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s8",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 830,
+   "z": 985,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_16",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1609,
+   "z": 1679,
+   "yaw": 0.53,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_17",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 1263,
+   "z": 1199,
+   "yaw": 4.12,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s9",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 328,
+   "z": 1792,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_18",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 327,
+   "z": 40,
+   "yaw": 2.36,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_gullwick_d6",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 671,
+   "z": 422,
+   "yaw": 6.07,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_19",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 40,
+   "z": 1800,
+   "yaw": 2.02,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_2",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 40,
+   "z": 728,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     2,
+     710
+    ],
+    [
+     56,
+     677
+    ],
+    [
+     78,
+     745
+    ],
+    [
+     25,
+     775
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s10",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1032,
+   "z": 1640,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_20",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 1777,
+   "z": 1503,
+   "yaw": 1.69,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_21",
+   "recipe": "cu_spring_altar",
+   "name": "Spring Altar",
+   "kind": "shrine",
+   "x": 592,
+   "z": 759,
+   "yaw": 5.09,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_22",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 551,
+   "z": 1418,
+   "yaw": 1.88,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s11",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1784,
+   "z": 464,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_gullwick_d7",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 1424,
+   "z": 1792,
+   "yaw": 4.21,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_23",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 184,
+   "z": 1552,
+   "yaw": 4.71,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s12",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1864,
+   "z": 768,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_24",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1872,
+   "z": 231,
+   "yaw": 3.26,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_3",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 186,
+   "z": 488,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     193,
+     575
+    ],
+    [
+     96,
+     501
+    ],
+    [
+     168,
+     412
+    ],
+    [
+     257,
+     452
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_25",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 590,
+   "z": 153,
+   "yaw": 4.27,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_gullwick_d8",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 1864,
+   "z": 1175,
+   "yaw": 5.27,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s13",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1288,
+   "z": 40,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_26",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 440,
+   "z": 1024,
+   "yaw": 3.31,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_gullwick_3",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 952,
+   "z": 503,
+   "yaw": 6.08,
+   "radius": 6,
+   "path": [
+    [
+     912,
+     484
+    ],
+    [
+     1005,
+     460
+    ],
+    [
+     971,
+     552
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_27",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 1703,
+   "z": 999,
+   "yaw": 5.51,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s14",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1601,
+   "z": 1960,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cottage_corner_gullwick_d9",
+   "kind": "cottage_corner",
+   "name": "Ruined Cottage",
+   "x": 1528,
+   "z": 1448,
+   "yaw": 6.21,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_28",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 736,
+   "z": 792,
+   "yaw": 3.02,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_29",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1816,
+   "z": 40,
+   "yaw": 1.15,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s15",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1391,
+   "z": 577,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_30",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 728,
+   "z": 152,
+   "yaw": 6.02,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_tree_gullwick_d10",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 1599,
+   "z": 1192,
+   "yaw": 2.8,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_31",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 160,
+   "z": 255,
+   "yaw": 1.63,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s16",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1160,
+   "z": 808,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_32",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 584,
+   "z": 1856,
+   "yaw": 3.2,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_33",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 1191,
+   "z": 1095,
+   "yaw": 0.25,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s17",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 977,
+   "z": 2009,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_34",
+   "recipe": "cu_boundary_cross",
+   "name": "Boundary Cross",
+   "kind": "marker",
+   "x": 560,
+   "z": 985,
+   "yaw": 5.76,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_gullwick_d11",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 505,
+   "z": 241,
+   "yaw": 6.04,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_35",
+   "recipe": "cu_charcoal_mound",
+   "name": "Charcoal Clamp",
+   "kind": "camp",
+   "x": 1200,
+   "z": 401,
+   "yaw": 5.51,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_36",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 2010,
+   "z": 1937,
+   "yaw": 1.16,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s18",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 40,
+   "z": 968,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_37",
+   "recipe": "cu_charcoal_mound",
+   "name": "Charcoal Clamp",
+   "kind": "camp",
+   "x": 1424,
+   "z": 999,
+   "yaw": 2.27,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_gullwick_4",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 608,
+   "z": 1624,
+   "yaw": 1.34,
+   "radius": 6,
+   "path": [
+    [
+     542,
+     1611
+    ],
+    [
+     650,
+     1570
+    ],
+    [
+     607,
+     1670
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_38",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1712,
+   "z": 1272,
+   "yaw": 2.82,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s19",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 328,
+   "z": 160,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_gullwick_d12",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 686,
+   "z": 1207,
+   "yaw": 2.41,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_39",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 200,
+   "z": 1143,
+   "yaw": 5.14,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s20",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1312,
+   "z": 1648,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_40",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1689,
+   "z": 1417,
+   "yaw": 5.64,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_4",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1888,
+   "z": 528,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1834,
+     545
+    ],
+    [
+     1873,
+     472
+    ],
+    [
+     1940,
+     502
+    ],
+    [
+     1900,
+     603
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_41",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 1201,
+   "z": 2008,
+   "yaw": 0.38,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "beehive_row_gullwick_d13",
+   "kind": "beehive_row",
+   "name": "Beehive Row",
+   "x": 1407,
+   "z": 1136,
+   "yaw": 4.08,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s21",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 890,
+   "z": 359,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_42",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 711,
+   "z": 537,
+   "yaw": 5.5,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_gullwick_5",
+   "role": "fisher",
+   "name": "Fisher",
+   "work": "fish",
+   "chatter": [
+    "role.fisher"
+   ],
+   "x": 1408,
+   "z": 760,
+   "yaw": 5.75,
+   "radius": 6,
+   "path": [
+    [
+     1382,
+     770
+    ],
+    [
+     1414,
+     737
+    ],
+    [
+     1422,
+     786
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_43",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1177,
+   "z": 1880,
+   "yaw": 5.62,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s22",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1926,
+   "z": 1584,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_gullwick_d14",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 208,
+   "z": 1722,
+   "yaw": 5.35,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_44",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 955,
+   "z": 919,
+   "yaw": 1.69,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_5",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 280,
+   "z": 1920,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     312,
+     1976
+    ],
+    [
+     233,
+     1934
+    ],
+    [
+     241,
+     1858
+    ],
+    [
+     322,
+     1905
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s23",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 296,
+   "z": 1360,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_45",
+   "recipe": "cu_spring_altar",
+   "name": "Spring Altar",
+   "kind": "shrine",
+   "x": 351,
+   "z": 1208,
+   "yaw": 3.88,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_gullwick_d15",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1801,
+   "z": 1873,
+   "yaw": 0.87,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_46",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 992,
+   "z": 704,
+   "yaw": 4.12,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s24",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 320,
+   "z": 791,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_47",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 1872,
+   "z": 1440,
+   "yaw": 4.94,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_48",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 912,
+   "z": 1683,
+   "yaw": 0.8,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s25",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1168,
+   "z": 1450,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_49",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1834,
+   "z": 1751,
+   "yaw": 3.66,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_gullwick_d16",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1800,
+   "z": 320,
+   "yaw": 3.29,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_gullwick_d17",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 970,
+   "z": 1461,
+   "yaw": 0.97,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_50",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 1713,
+   "z": 1616,
+   "yaw": 6.1,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_6",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1336,
+   "z": 424,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1377,
+     456
+    ],
+    [
+     1291,
+     472
+    ],
+    [
+     1306,
+     378
+    ],
+    [
+     1373,
+     384
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s26",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 432,
+   "z": 1624,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_51",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 1680,
+   "z": 584,
+   "yaw": 5.79,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_52",
+   "recipe": "cu_spring_altar",
+   "name": "Spring Altar",
+   "kind": "shrine",
+   "x": 1232,
+   "z": 985,
+   "yaw": 0.82,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_53",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 448,
+   "z": 1455,
+   "yaw": 3.52,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s27",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 792,
+   "z": 1503,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "stone_trough_gullwick_d18",
+   "kind": "stone_trough",
+   "name": "Stone Trough",
+   "x": 1529,
+   "z": 1567,
+   "yaw": 3.64,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_54",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 536,
+   "z": 360,
+   "yaw": 1.59,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s28",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1175,
+   "z": 41,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_gullwick_d19",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 2016,
+   "z": 335,
+   "yaw": 2.86,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_55",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1512,
+   "z": 1728,
+   "yaw": 2.71,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_7",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 810,
+   "z": 713,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     842,
+     776
+    ],
+    [
+     735,
+     744
+    ],
+    [
+     791,
+     656
+    ],
+    [
+     888,
+     657
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_56",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 80,
+   "z": 1904,
+   "yaw": 2.67,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "stone_trough_gullwick_d20",
+   "kind": "stone_trough",
+   "name": "Stone Trough",
+   "x": 1143,
+   "z": 1648,
+   "yaw": 1.79,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s29",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1465,
+   "z": 1361,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_57",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 1535,
+   "z": 968,
+   "yaw": 6.06,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_gullwick_6",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 1544,
+   "z": 40,
+   "yaw": 1.81,
+   "radius": 6,
+   "path": [
+    [
+     1535,
+     0
+    ],
+    [
+     1589,
+     61
+    ],
+    [
+     1503,
+     66
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_58",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 672,
+   "z": 2008,
+   "yaw": 2.07,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s30",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 960,
+   "z": 38,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_gullwick_d21",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1335,
+   "z": 1345,
+   "yaw": 1.96,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_59",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 585,
+   "z": 874,
+   "yaw": 3.91,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_60",
+   "recipe": "cu_drowned_saint",
+   "name": "Drowned Saint",
+   "kind": "shrine",
+   "x": 1880,
+   "z": 920,
+   "yaw": 0.56,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s31",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 144,
+   "z": 40,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_61",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 271,
+   "z": 255,
+   "yaw": 3.28,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "woodpile_stack_gullwick_d22",
+   "kind": "woodpile_stack",
+   "name": "Woodpile",
+   "x": 39,
+   "z": 1079,
+   "yaw": 5.48,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_62",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 761,
+   "z": 1072,
+   "yaw": 2.19,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s32",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1631,
+   "z": 1072,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_63",
+   "recipe": "cu_charcoal_mound",
+   "name": "Charcoal Clamp",
+   "kind": "camp",
+   "x": 772,
+   "z": 39,
+   "yaw": 5.77,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_64",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 824,
+   "z": 1633,
+   "yaw": 2.25,
+   "radius": 7,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s33",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1672,
+   "z": 1880,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_65",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 1326,
+   "z": 1543,
+   "yaw": 1.25,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_gullwick_d23",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 1496,
+   "z": 1192,
+   "yaw": 0.95,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_66",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 928,
+   "z": 1024,
+   "yaw": 4.75,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_8",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1272,
+   "z": 1440,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1341,
+     1415
+    ],
+    [
+     1293,
+     1539
+    ],
+    [
+     1187,
+     1449
+    ],
+    [
+     1239,
+     1362
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s34",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1815,
+   "z": 1263,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_67",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 567,
+   "z": 42,
+   "yaw": 6.18,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_gullwick_7",
+   "role": "fisher",
+   "name": "Fisher",
+   "work": "fish",
+   "chatter": [
+    "role.fisher"
+   ],
+   "x": 2007,
+   "z": 784,
+   "yaw": 6.14,
+   "radius": 6,
+   "path": [
+    [
+     1999,
+     773
+    ],
+    [
+     2016,
+     784
+    ],
+    [
+     2001,
+     795
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_68",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 2008,
+   "z": 1768,
+   "yaw": 0.53,
+   "radius": 7,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s35",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 784,
+   "z": 888,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_gullwick_d24",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 760,
+   "z": 368,
+   "yaw": 0.52,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_69",
+   "recipe": "cu_heron_nest",
+   "name": "Heron Rookery",
+   "kind": "nest",
+   "x": 152,
+   "z": 1271,
+   "yaw": 5.16,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s36",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1024,
+   "z": 1745,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_70",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1863,
+   "z": 128,
+   "yaw": 2.48,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_9",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 593,
+   "z": 656,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     573,
+     680
+    ],
+    [
+     565,
+     619
+    ],
+    [
+     612,
+     632
+    ],
+    [
+     631,
+     683
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_71",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 1640,
+   "z": 800,
+   "yaw": 3.07,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_gullwick_d25",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1912,
+   "z": 1688,
+   "yaw": 3.58,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s37",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 433,
+   "z": 174,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_72",
+   "recipe": "cu_boundary_cross",
+   "name": "Boundary Cross",
+   "kind": "marker",
+   "x": 1369,
+   "z": 1873,
+   "yaw": 4.2,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_gullwick_8",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 1952,
+   "z": 990,
+   "yaw": 1.62,
+   "radius": 6,
+   "path": [
+    [
+     1933,
+     998
+    ],
+    [
+     1949,
+     970
+    ],
+    [
+     1967,
+     1000
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_73",
+   "recipe": "cu_hollow_stump",
+   "name": "Hollow Stump",
+   "kind": "cache",
+   "x": 1328,
+   "z": 960,
+   "yaw": 5.81,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s38",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1649,
+   "z": 679,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_gullwick_d26",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 256,
+   "z": 1008,
+   "yaw": 2.58,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_74",
+   "recipe": "cu_drowned_saint",
+   "name": "Drowned Saint",
+   "kind": "shrine",
+   "x": 401,
+   "z": 1719,
+   "yaw": 0.88,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_10",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 216,
+   "z": 831,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     161,
+     841
+    ],
+    [
+     212,
+     772
+    ],
+    [
+     272,
+     843
+    ],
+    [
+     206,
+     892
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_gullwick_d27",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 496,
+   "z": 1255,
+   "yaw": 4.91,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s39",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 768,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_75",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 633,
+   "z": 1359,
+   "yaw": 3.52,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_gullwick_d28",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 2008,
+   "z": 1184,
+   "yaw": 3.76,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_76",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 2008,
+   "z": 1368,
+   "yaw": 5.08,
+   "radius": 7,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s40",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 858,
+   "z": 226,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_77",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 1222,
+   "z": 1699,
+   "yaw": 3.95,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s41",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1073,
+   "z": 898,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_78",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 1753,
+   "z": 1704,
+   "yaw": 0.43,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s42",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1440,
+   "z": 1536,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_79",
+   "recipe": "cu_hollow_stump",
+   "name": "Hollow Stump",
+   "kind": "cache",
+   "x": 1663,
+   "z": 136,
+   "yaw": 0.77,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_tree_gullwick_d29",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 1344,
+   "z": 121,
+   "yaw": 3.35,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_80",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 1176,
+   "z": 904,
+   "yaw": 2.21,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_11",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1088,
+   "z": 1857,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1151,
+     1893
+    ],
+    [
+     1074,
+     1914
+    ],
+    [
+     1013,
+     1822
+    ],
+    [
+     1121,
+     1781
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s43",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1544,
+   "z": 832,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_81",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 1097,
+   "z": 1088,
+   "yaw": 4.31,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_gullwick_9",
+   "role": "woodcutter",
+   "name": "Woodcutter",
+   "work": "chop",
+   "chatter": [
+    "role.woodcutter"
+   ],
+   "x": 809,
+   "z": 560,
+   "yaw": 0.39,
+   "radius": 6,
+   "path": [
+    [
+     822,
+     569
+    ],
+    [
+     791,
+     574
+    ],
+    [
+     808,
+     536
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_82",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 336,
+   "z": 368,
+   "yaw": 5.08,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s44",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1136,
+   "z": 472,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "sheep_pen_gullwick_d30",
+   "kind": "sheep_pen",
+   "name": "Sheep Pen",
+   "x": 40,
+   "z": 288,
+   "yaw": 4,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_83",
+   "recipe": "cu_drowned_saint",
+   "name": "Drowned Saint",
+   "kind": "shrine",
+   "x": 353,
+   "z": 993,
+   "yaw": 0.8,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s45",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1881,
+   "z": 1344,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_84",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 1802,
+   "z": 698,
+   "yaw": 3.56,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_12",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1744,
+   "z": 248,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1735,
+     311
+    ],
+    [
+     1698,
+     244
+    ],
+    [
+     1761,
+     203
+    ],
+    [
+     1779,
+     265
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_85",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 512,
+   "z": 1088,
+   "yaw": 2.77,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_gullwick_d31",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 558,
+   "z": 1767,
+   "yaw": 2.1,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s46",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 549,
+   "z": 1924,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_86",
+   "recipe": "cu_honey_tree",
+   "name": "Honey Tree",
+   "kind": "forage",
+   "x": 616,
+   "z": 1481,
+   "yaw": 0.08,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_87",
+   "recipe": "cu_smugglers_drop",
+   "name": "Smuggler's Drop",
+   "kind": "cache",
+   "x": 360,
+   "z": 1560,
+   "yaw": 0.83,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_88",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 130,
+   "z": 1759,
+   "yaw": 0.72,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s47",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 272,
+   "z": 1536,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_gullwick_d32",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 497,
+   "z": 735,
+   "yaw": 3.31,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_89",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1512,
+   "z": 1279,
+   "yaw": 4.66,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_13",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1632,
+   "z": 1769,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1560,
+     1741
+    ],
+    [
+     1693,
+     1695
+    ],
+    [
+     1697,
+     1812
+    ],
+    [
+     1579,
+     1839
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s48",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1704,
+   "z": 913,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_90",
+   "recipe": "cu_heron_nest",
+   "name": "Heron Rookery",
+   "kind": "nest",
+   "x": 374,
+   "z": 857,
+   "yaw": 2.43,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_gullwick_d33",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 39,
+   "z": 1600,
+   "yaw": 3.28,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_91",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1992,
+   "z": 424,
+   "yaw": 4.07,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s49",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1312,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_gullwick_d34",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1202,
+   "z": 603,
+   "yaw": 1.92,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_gullwick_d35",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1077,
+   "z": 755,
+   "yaw": 2.35,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_92",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 104,
+   "z": 1447,
+   "yaw": 3.35,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_gullwick_d36",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 888,
+   "z": 1204,
+   "yaw": 2.46,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_93",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 97,
+   "z": 120,
+   "yaw": 4.08,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s50",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1368,
+   "z": 1720,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_94",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 696,
+   "z": 240,
+   "yaw": 2.75,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "hay_rick_gullwick_d37",
+   "kind": "hay_rick",
+   "name": "Hay Rick",
+   "x": 41,
+   "z": 575,
+   "yaw": 1.06,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_95",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1128,
+   "z": 1560,
+   "yaw": 1.52,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_14",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 2008,
+   "z": 136,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1991,
+     173
+    ],
+    [
+     1974,
+     114
+    ],
+    [
+     2027,
+     94
+    ],
+    [
+     2036,
+     159
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s51",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1361,
+   "z": 865,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_96",
+   "recipe": "cu_charcoal_mound",
+   "name": "Charcoal Clamp",
+   "kind": "camp",
+   "x": 541,
+   "z": 1184,
+   "yaw": 0.52,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_gullwick_10",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 1056,
+   "z": 1410,
+   "yaw": 0.12,
+   "radius": 6,
+   "path": [
+    [
+     999,
+     1442
+    ],
+    [
+     1075,
+     1366
+    ],
+    [
+     1100,
+     1447
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_97",
+   "recipe": "cu_honey_tree",
+   "name": "Honey Tree",
+   "kind": "forage",
+   "x": 656,
+   "z": 825,
+   "yaw": 3.14,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s52",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 240,
+   "z": 40,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "wayside_well_gullwick_d38",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 1199,
+   "z": 1262,
+   "yaw": 5.22,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_98",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 249,
+   "z": 656,
+   "yaw": 1.32,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s53",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 520,
+   "z": 1338,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_99",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 952,
+   "z": 784,
+   "yaw": 6.09,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_15",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1872,
+   "z": 1919,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1803,
+     1903
+    ],
+    [
+     1875,
+     1862
+    ],
+    [
+     1929,
+     1926
+    ],
+    [
+     1860,
+     1985
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_100",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 192,
+   "z": 1640,
+   "yaw": 1.86,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_gullwick_d39",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 719,
+   "z": 1680,
+   "yaw": 1.25,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s54",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1896,
+   "z": 1096,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_101",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 1736,
+   "z": 72,
+   "yaw": 0.29,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_gullwick_11",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 456,
+   "z": 328,
+   "yaw": 3.53,
+   "radius": 6,
+   "path": [
+    [
+     488,
+     309
+    ],
+    [
+     478,
+     376
+    ],
+    [
+     420,
+     317
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_102",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1944,
+   "z": 279,
+   "yaw": 0.46,
+   "radius": 7,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s55",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 470,
+   "z": 2009,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_gullwick_d40",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 632,
+   "z": 496,
+   "yaw": 5.97,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_103",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1448,
+   "z": 648,
+   "yaw": 4.3,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_16",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1207,
+   "z": 1798,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1143,
+     1751
+    ],
+    [
+     1267,
+     1752
+    ],
+    [
+     1273,
+     1861
+    ],
+    [
+     1154,
+     1845
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s56",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 144,
+   "z": 689,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_104",
+   "recipe": "cu_tinkers_halt",
+   "name": "Tinker's Halt",
+   "kind": "camp",
+   "x": 1000,
+   "z": 1552,
+   "yaw": 5.95,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "wayside_well_gullwick_d41",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 1280,
+   "z": 1281,
+   "yaw": 2.45,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_gullwick_d42",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1708,
+   "z": 438,
+   "yaw": 3.48,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_105",
+   "recipe": "cu_boundary_cross",
+   "name": "Boundary Cross",
+   "kind": "marker",
+   "x": 1616,
+   "z": 984,
+   "yaw": 0.94,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s57",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1911,
+   "z": 838,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_106",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 975,
+   "z": 368,
+   "yaw": 4.82,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_107",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1840,
+   "z": 1560,
+   "yaw": 5.71,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s58",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1809,
+   "z": 1104,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_108",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 121,
+   "z": 1977,
+   "yaw": 5.58,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_gullwick_d43",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1608,
+   "z": 1415,
+   "yaw": 5.04,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_109",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 744,
+   "z": 984,
+   "yaw": 2.61,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_110",
+   "recipe": "cu_eel_trap",
+   "name": "Eel Trap",
+   "kind": "fishing",
+   "x": 1775,
+   "z": 958,
+   "yaw": 6.27,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s59",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 2008,
+   "z": 1560,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_111",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 1344,
+   "z": 1192,
+   "yaw": 4.79,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_gullwick_12",
+   "role": "woodcutter",
+   "name": "Woodcutter",
+   "work": "chop",
+   "chatter": [
+    "role.woodcutter"
+   ],
+   "x": 1896,
+   "z": 688,
+   "yaw": 2.99,
+   "radius": 6,
+   "path": [
+    [
+     1907,
+     696
+    ],
+    [
+     1877,
+     694
+    ],
+    [
+     1900,
+     670
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_112",
+   "recipe": "cu_honey_tree",
+   "name": "Honey Tree",
+   "kind": "forage",
+   "x": 1784,
+   "z": 802,
+   "yaw": 1.24,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s60",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 688,
+   "z": 328,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_gullwick_d44",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 889,
+   "z": 2008,
+   "yaw": 3.07,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_113",
+   "recipe": "cu_drowned_saint",
+   "name": "Drowned Saint",
+   "kind": "shrine",
+   "x": 210,
+   "z": 1337,
+   "yaw": 3.1,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s61",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 880,
+   "z": 1472,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_114",
+   "recipe": "cu_boundary_cross",
+   "name": "Boundary Cross",
+   "kind": "marker",
+   "x": 2008,
+   "z": 1856,
+   "yaw": 1.5,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_115",
+   "recipe": "cu_bog_body",
+   "name": "Bog Body",
+   "kind": "remains",
+   "x": 119,
+   "z": 1104,
+   "yaw": 2.48,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_116",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 256,
+   "z": 1448,
+   "yaw": 4.56,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_gullwick_d45",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 672,
+   "z": 1289,
+   "yaw": 2.53,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s62",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 39,
+   "z": 1721,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_117",
+   "recipe": "cu_smugglers_drop",
+   "name": "Smuggler's Drop",
+   "kind": "cache",
+   "x": 633,
+   "z": 1936,
+   "yaw": 2.99,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_gullwick_13",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 1487,
+   "z": 1849,
+   "yaw": 4.74,
+   "radius": 6,
+   "path": [
+    [
+     1538,
+     1834
+    ],
+    [
+     1476,
+     1895
+    ],
+    [
+     1457,
+     1795
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_118",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1528,
+   "z": 1648,
+   "yaw": 1.61,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s63",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1304,
+   "z": 801,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_tree_gullwick_d46",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 128,
+   "z": 944,
+   "yaw": 2.73,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_119",
+   "recipe": "cu_tinkers_halt",
+   "name": "Tinker's Halt",
+   "kind": "camp",
+   "x": 695,
+   "z": 1127,
+   "yaw": 5.48,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_17",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1992,
+   "z": 592,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     2025,
+     664
+    ],
+    [
+     1929,
+     615
+    ],
+    [
+     1964,
+     500
+    ],
+    [
+     2040,
+     556
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s64",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 344,
+   "z": 1288,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_120",
+   "recipe": "cu_eel_trap",
+   "name": "Eel Trap",
+   "kind": "fishing",
+   "x": 273,
+   "z": 1176,
+   "yaw": 1.22,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_gullwick_d47",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 397,
+   "z": 1103,
+   "yaw": 0.89,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_121",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 383,
+   "z": 95,
+   "yaw": 4.17,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s65",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 39,
+   "z": 442,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_122",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 592,
+   "z": 426,
+   "yaw": 3.52,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_123",
+   "recipe": "cu_bog_hole",
+   "name": "Sucking Mire",
+   "kind": "hazard",
+   "x": 409,
+   "z": 1387,
+   "yaw": 0.4,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s66",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1744,
+   "z": 537,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_124",
+   "recipe": "cu_eel_trap",
+   "name": "Eel Trap",
+   "kind": "fishing",
+   "x": 288,
+   "z": 1719,
+   "yaw": 1.89,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_gullwick_d48",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1728,
+   "z": 656,
+   "yaw": 3.83,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_125",
+   "recipe": "cu_fishing_rock",
+   "name": "Fishing Rock",
+   "kind": "fishing",
+   "x": 456,
+   "z": 1776,
+   "yaw": 0.61,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_18",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 512,
+   "z": 151,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     461,
+     163
+    ],
+    [
+     491,
+     96
+    ],
+    [
+     587,
+     153
+    ],
+    [
+     524,
+     212
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s67",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 872,
+   "z": 912,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_126",
+   "recipe": "cu_honey_tree",
+   "name": "Honey Tree",
+   "kind": "forage",
+   "x": 1263,
+   "z": 1120,
+   "yaw": 4.97,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_gullwick_14",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 1712,
+   "z": 832,
+   "yaw": 1.91,
+   "radius": 6,
+   "path": [
+    [
+     1668,
+     817
+    ],
+    [
+     1781,
+     807
+    ],
+    [
+     1706,
+     881
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_127",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1008,
+   "z": 624,
+   "yaw": 2.7,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_gullwick_d49",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 970,
+   "z": 1619,
+   "yaw": 0.69,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s68",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1048,
+   "z": 527,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_gullwick_d50",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1152,
+   "z": 728,
+   "yaw": 4.05,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_128",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 1440,
+   "z": 144,
+   "yaw": 5.88,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s69",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 400,
+   "z": 768,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_129",
+   "recipe": "cu_fishing_rock",
+   "name": "Fishing Rock",
+   "kind": "fishing",
+   "x": 104,
+   "z": 1560,
+   "yaw": 1.95,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_19",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 654,
+   "z": 110,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     731,
+     118
+    ],
+    [
+     657,
+     163
+    ],
+    [
+     589,
+     113
+    ],
+    [
+     648,
+     56
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_130",
+   "recipe": "cu_boundary_cross",
+   "name": "Boundary Cross",
+   "kind": "marker",
+   "x": 736,
+   "z": 463,
+   "yaw": 0.91,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_gullwick_d51",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 1821,
+   "z": 393,
+   "yaw": 4.38,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s70",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 432,
+   "z": 1536,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_131",
+   "recipe": "cu_fishing_rock",
+   "name": "Fishing Rock",
+   "kind": "fishing",
+   "x": 424,
+   "z": 1229,
+   "yaw": 3.63,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_gullwick_15",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 921,
+   "z": 1400,
+   "yaw": 5.73,
+   "radius": 6,
+   "path": [
+    [
+     939,
+     1428
+    ],
+    [
+     880,
+     1418
+    ],
+    [
+     946,
+     1354
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_132",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 840,
+   "z": 1067,
+   "yaw": 5.48,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s71",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1984,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cottage_corner_gullwick_d52",
+   "kind": "cottage_corner",
+   "name": "Ruined Cottage",
+   "x": 710,
+   "z": 1513,
+   "yaw": 1.13,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_133",
+   "recipe": "cu_honey_tree",
+   "name": "Honey Tree",
+   "kind": "forage",
+   "x": 1312,
+   "z": 584,
+   "yaw": 0.62,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_20",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1665,
+   "z": 2006,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1657,
+     1953
+    ],
+    [
+     1711,
+     1998
+    ],
+    [
+     1668,
+     2040
+    ],
+    [
+     1635,
+     2018
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s72",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 366,
+   "z": 1848,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_134",
+   "recipe": "cu_empty_gallows_post",
+   "name": "Weathered Post",
+   "kind": "lore",
+   "x": 1912,
+   "z": 1504,
+   "yaw": 0.04,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "beehive_row_gullwick_d53",
+   "kind": "beehive_row",
+   "name": "Beehive Row",
+   "x": 1190,
+   "z": 1175,
+   "yaw": 1.39,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_135",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 420,
+   "z": 944,
+   "yaw": 2.11,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s73",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1599,
+   "z": 1600,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_136",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1679,
+   "z": 1345,
+   "yaw": 3.22,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_137",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 1935,
+   "z": 1400,
+   "yaw": 3.91,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s74",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1128,
+   "z": 368,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_138",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 295,
+   "z": 712,
+   "yaw": 3.74,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_gullwick_d54",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1113,
+   "z": 87,
+   "yaw": 0.14,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_139",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 1936,
+   "z": 1200,
+   "yaw": 5.71,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_21",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1639,
+   "z": 1255,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1670,
+     1191
+    ],
+    [
+     1712,
+     1278
+    ],
+    [
+     1610,
+     1299
+    ],
+    [
+     1573,
+     1216
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s75",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 151,
+   "z": 337,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_140",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 119,
+   "z": 194,
+   "yaw": 0.08,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_gullwick_16",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 1702,
+   "z": 1487,
+   "yaw": 0.28,
+   "radius": 6,
+   "path": [
+    [
+     1678,
+     1532
+    ],
+    [
+     1685,
+     1439
+    ],
+    [
+     1743,
+     1493
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_141",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 1800,
+   "z": 1432,
+   "yaw": 1.34,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s76",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 632,
+   "z": 992,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_tree_gullwick_d55",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 801,
+   "z": 164,
+   "yaw": 2.64,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_142",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 535,
+   "z": 800,
+   "yaw": 1.49,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s77",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 616,
+   "z": 1191,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_143",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 1377,
+   "z": 654,
+   "yaw": 5.03,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_22",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1352,
+   "z": 1799,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1416,
+     1837
+    ],
+    [
+     1322,
+     1857
+    ],
+    [
+     1296,
+     1767
+    ],
+    [
+     1369,
+     1754
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_gullwick_d56",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 994,
+   "z": 1078,
+   "yaw": 0.01,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_144",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 1744,
+   "z": 1064,
+   "yaw": 3.55,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "woodpile_stack_gullwick_d57",
+   "kind": "woodpile_stack",
+   "name": "Woodpile",
+   "x": 488,
+   "z": 968,
+   "yaw": 1.32,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s78",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1793,
+   "z": 1184,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_145",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 102,
+   "z": 1831,
+   "yaw": 5.93,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_gullwick_17",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 40,
+   "z": 886,
+   "yaw": 1.54,
+   "radius": 6,
+   "path": [
+    [
+     32,
+     847
+    ],
+    [
+     74,
+     902
+    ],
+    [
+     4,
+     914
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_146",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 1440,
+   "z": 1072,
+   "yaw": 2.92,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s79",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 216,
+   "z": 208,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lonely_pier_gullwick_d58",
+   "kind": "lonely_pier",
+   "name": "Bridge Pier",
+   "x": 240,
+   "z": 1080,
+   "yaw": 1.09,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_147",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 1904,
+   "z": 1761,
+   "yaw": 4.51,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_23",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 544,
+   "z": 1488,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     531,
+     1573
+    ],
+    [
+     468,
+     1452
+    ],
+    [
+     553,
+     1420
+    ],
+    [
+     632,
+     1497
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s80",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1232,
+   "z": 96,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_148",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 840,
+   "z": 304,
+   "yaw": 3.28,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_gullwick_d59",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 248,
+   "z": 1784,
+   "yaw": 2.32,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_149",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 616,
+   "z": 362,
+   "yaw": 3.2,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s81",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 472,
+   "z": 1920,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_150",
+   "recipe": "cu_spring_altar",
+   "name": "Spring Altar",
+   "kind": "shrine",
+   "x": 1464,
+   "z": 546,
+   "yaw": 0.16,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_151",
+   "recipe": "cu_horse_bones",
+   "name": "Horse Bones",
+   "kind": "remains",
+   "x": 280,
+   "z": 104,
+   "yaw": 4.36,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s82",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 200,
+   "z": 968,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_152",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1368,
+   "z": 1599,
+   "yaw": 2.86,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_gullwick_d60",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1081,
+   "z": 1697,
+   "yaw": 4.48,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_153",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 1752,
+   "z": 384,
+   "yaw": 6.23,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_24",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 161,
+   "z": 1201,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     176,
+     1254
+    ],
+    [
+     122,
+     1211
+    ],
+    [
+     148,
+     1166
+    ],
+    [
+     209,
+     1171
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s83",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 648,
+   "z": 568,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_154",
+   "recipe": "cu_charcoal_mound",
+   "name": "Charcoal Clamp",
+   "kind": "camp",
+   "x": 152,
+   "z": 1912,
+   "yaw": 2.51,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_gullwick_18",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 1768,
+   "z": 1578,
+   "yaw": 2.7,
+   "radius": 6,
+   "path": [
+    [
+     1816,
+     1607
+    ],
+    [
+     1729,
+     1602
+    ],
+    [
+     1784,
+     1534
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_155",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1529,
+   "z": 1960,
+   "yaw": 1.8,
+   "radius": 7,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s84",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1888,
+   "z": 1257,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_gullwick_d61",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1495,
+   "z": 777,
+   "yaw": 3.23,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_156",
+   "recipe": "cu_bog_body",
+   "name": "Bog Body",
+   "kind": "remains",
+   "x": 168,
+   "z": 1480,
+   "yaw": 1.26,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s85",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1216,
+   "z": 1936,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_157",
+   "recipe": "cu_charcoal_mound",
+   "name": "Charcoal Clamp",
+   "kind": "camp",
+   "x": 904,
+   "z": 729,
+   "yaw": 3.27,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_gullwick_d62",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 538,
+   "z": 910,
+   "yaw": 1,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_25",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1872,
+   "z": 304,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1839,
+     281
+    ],
+    [
+     1906,
+     262
+    ],
+    [
+     1924,
+     323
+    ],
+    [
+     1850,
+     366
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_158",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 1536,
+   "z": 1376,
+   "yaw": 1.68,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_gullwick_d63",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1232,
+   "z": 792,
+   "yaw": 3.13,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s86",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1360,
+   "z": 48,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_159",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 1440,
+   "z": 1712,
+   "yaw": 2.58,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_gullwick_19",
+   "role": "fisher",
+   "name": "Fisher",
+   "work": "fish",
+   "chatter": [
+    "role.fisher"
+   ],
+   "x": 1391,
+   "z": 937,
+   "yaw": 4.13,
+   "radius": 6,
+   "path": [
+    [
+     1388,
+     929
+    ],
+    [
+     1399,
+     941
+    ],
+    [
+     1382,
+     947
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_160",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 248,
+   "z": 528,
+   "yaw": 4.83,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s87",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1008,
+   "z": 1944,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_gullwick_d64",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1456,
+   "z": 1438,
+   "yaw": 0.62,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_161",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 736,
+   "z": 1264,
+   "yaw": 4.56,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_26",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 640,
+   "z": 1815,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     680,
+     1769
+    ],
+    [
+     709,
+     1839
+    ],
+    [
+     602,
+     1856
+    ],
+    [
+     577,
+     1792
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s88",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1343,
+   "z": 521,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_162",
+   "recipe": "cu_fishing_rock",
+   "name": "Fishing Rock",
+   "kind": "fishing",
+   "x": 663,
+   "z": 754,
+   "yaw": 1.33,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_gullwick_d65",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1174,
+   "z": 1023,
+   "yaw": 5.7,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_163",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1920,
+   "z": 183,
+   "yaw": 4.99,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s89",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1568,
+   "z": 1511,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_164",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 1784,
+   "z": 1808,
+   "yaw": 4.98,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_165",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 1224,
+   "z": 337,
+   "yaw": 6.13,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s90",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1183,
+   "z": 535,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_166",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 1046,
+   "z": 2006,
+   "yaw": 1.7,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_gullwick_d66",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 1128,
+   "z": 2007,
+   "yaw": 4.92,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_167",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1160,
+   "z": 1376,
+   "yaw": 4.04,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_27",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 984,
+   "z": 104,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     966,
+     168
+    ],
+    [
+     920,
+     90
+    ],
+    [
+     1024,
+     38
+    ],
+    [
+     1052,
+     140
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s91",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 896,
+   "z": 560,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_168",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 823,
+   "z": 384,
+   "yaw": 0.32,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_gullwick_20",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 264,
+   "z": 592,
+   "yaw": 4.45,
+   "radius": 6,
+   "path": [
+    [
+     244,
+     559
+    ],
+    [
+     297,
+     580
+    ],
+    [
+     245,
+     626
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_169",
+   "recipe": "cu_hollow_stump",
+   "name": "Hollow Stump",
+   "kind": "cache",
+   "x": 721,
+   "z": 856,
+   "yaw": 1.99,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s92",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 768,
+   "z": 1416,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_gullwick_d67",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 40,
+   "z": 1240,
+   "yaw": 1.58,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_170",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 1401,
+   "z": 1336,
+   "yaw": 3.33,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s93",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 831,
+   "z": 1561,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_171",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1240,
+   "z": 1633,
+   "yaw": 5.84,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_28",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 578,
+   "z": 1048,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     574,
+     967
+    ],
+    [
+     636,
+     1053
+    ],
+    [
+     599,
+     1137
+    ],
+    [
+     514,
+     1064
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_172",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 977,
+   "z": 856,
+   "yaw": 0.16,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "toll_stone_gullwick_d68",
+   "kind": "toll_stone",
+   "name": "Old Toll Stone",
+   "x": 592,
+   "z": 223,
+   "yaw": 5.88,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s94",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1472,
+   "z": 950,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_173",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1064,
+   "z": 1576,
+   "yaw": 3.23,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_gullwick_21",
+   "role": "woodcutter",
+   "name": "Woodcutter",
+   "work": "chop",
+   "chatter": [
+    "role.woodcutter"
+   ],
+   "x": 1016,
+   "z": 944,
+   "yaw": 2.99,
+   "radius": 6,
+   "path": [
+    [
+     1001,
+     928
+    ],
+    [
+     1040,
+     940
+    ],
+    [
+     1010,
+     968
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_174",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 80,
+   "z": 1024,
+   "yaw": 4.59,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s95",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1248,
+   "z": 1057,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_gullwick_d69",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1840,
+   "z": 848,
+   "yaw": 0.59,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_175",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 976,
+   "z": 1696,
+   "yaw": 2.72,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_29",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 929,
+   "z": 416,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     941,
+     363
+    ],
+    [
+     976,
+     439
+    ],
+    [
+     911,
+     467
+    ],
+    [
+     876,
+     400
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s96",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 304,
+   "z": 312,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_176",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1328,
+   "z": 1128,
+   "yaw": 4.98,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_gullwick_d70",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 744,
+   "z": 1176,
+   "yaw": 4.16,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_177",
+   "recipe": "cu_spring_altar",
+   "name": "Spring Altar",
+   "kind": "shrine",
+   "x": 520,
+   "z": 1832,
+   "yaw": 0.1,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s97",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 416,
+   "z": 40,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_178",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 145,
+   "z": 769,
+   "yaw": 5,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_179",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 215,
+   "z": 288,
+   "yaw": 4.47,
+   "radius": 7,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s98",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1800,
+   "z": 107,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_180",
+   "recipe": "cu_charcoal_mound",
+   "name": "Charcoal Clamp",
+   "kind": "camp",
+   "x": 1680,
+   "z": 512,
+   "yaw": 5.13,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_gullwick_d71",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1489,
+   "z": 1015,
+   "yaw": 3.25,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_181",
+   "recipe": "cu_spring_altar",
+   "name": "Spring Altar",
+   "kind": "shrine",
+   "x": 1584,
+   "z": 1128,
+   "yaw": 2.39,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_182",
+   "recipe": "cu_spring_altar",
+   "name": "Spring Altar",
+   "kind": "shrine",
+   "x": 40,
+   "z": 1434,
+   "yaw": 5.42,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s99",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 344,
+   "z": 1408,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_183",
+   "recipe": "cu_tinkers_halt",
+   "name": "Tinker's Halt",
+   "kind": "camp",
+   "x": 1568,
+   "z": 1024,
+   "yaw": 4.23,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_gullwick_22",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 553,
+   "z": 289,
+   "yaw": 1.16,
+   "radius": 6,
+   "path": [
+    [
+     518,
+     325
+    ],
+    [
+     534,
+     257
+    ],
+    [
+     594,
+     286
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_184",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 1880,
+   "z": 56,
+   "yaw": 3.8,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s100",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 367,
+   "z": 1663,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_gullwick_d72",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 96,
+   "z": 256,
+   "yaw": 3.57,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_185",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1375,
+   "z": 1081,
+   "yaw": 4.08,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s101",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1735,
+   "z": 1904,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_186",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 1097,
+   "z": 833,
+   "yaw": 0.24,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_30",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1345,
+   "z": 1944,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1381,
+     1874
+    ],
+    [
+     1392,
+     1972
+    ],
+    [
+     1311,
+     1991
+    ],
+    [
+     1286,
+     1916
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s102",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 952,
+   "z": 1972,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_187",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1471,
+   "z": 1127,
+   "yaw": 5.17,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_gullwick_d73",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 672,
+   "z": 1640,
+   "yaw": 4.78,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s103",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 355,
+   "z": 918,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_gullwick_d74",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 231,
+   "z": 1592,
+   "yaw": 5.54,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_gullwick_23",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 441,
+   "z": 240,
+   "yaw": 4.43,
+   "radius": 6,
+   "path": [
+    [
+     474,
+     203
+    ],
+    [
+     440,
+     300
+    ],
+    [
+     377,
+     219
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_188",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 1360,
+   "z": 1016,
+   "yaw": 4.08,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s104",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 320,
+   "z": 432,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "beehive_row_gullwick_d75",
+   "kind": "beehive_row",
+   "name": "Beehive Row",
+   "x": 874,
+   "z": 1263,
+   "yaw": 4.56,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_189",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 473,
+   "z": 1384,
+   "yaw": 2.02,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_31",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1840,
+   "z": 1497,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1798,
+     1544
+    ],
+    [
+     1785,
+     1480
+    ],
+    [
+     1861,
+     1427
+    ],
+    [
+     1885,
+     1528
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s105",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1824,
+   "z": 184,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_190",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 889,
+   "z": 1624,
+   "yaw": 5.1,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_gullwick_d76",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 840,
+   "z": 38,
+   "yaw": 6.25,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_191",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 1207,
+   "z": 464,
+   "yaw": 5.54,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s106",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 152,
+   "z": 1360,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_192",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 1336,
+   "z": 1255,
+   "yaw": 1.09,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_193",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 104,
+   "z": 433,
+   "yaw": 0.41,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s107",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1617,
+   "z": 568,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_194",
+   "recipe": "cu_horse_bones",
+   "name": "Horse Bones",
+   "kind": "remains",
+   "x": 1231,
+   "z": 1496,
+   "yaw": 3.2,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_gullwick_d77",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1561,
+   "z": 1904,
+   "yaw": 5.33,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_195",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 752,
+   "z": 216,
+   "yaw": 4.58,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_32",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1735,
+   "z": 1216,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1767,
+     1197
+    ],
+    [
+     1758,
+     1257
+    ],
+    [
+     1702,
+     1246
+    ],
+    [
+     1723,
+     1179
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s108",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 640,
+   "z": 1424,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_196",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 904,
+   "z": 297,
+   "yaw": 4.62,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_gullwick_24",
+   "role": "charcoal_burner",
+   "name": "Charcoal burner",
+   "work": "watch",
+   "chatter": [
+    "role.charcoal_burner"
+   ],
+   "x": 1072,
+   "z": 333,
+   "yaw": 6,
+   "radius": 6,
+   "path": [
+    [
+     1084,
+     325
+    ],
+    [
+     1071,
+     343
+    ],
+    [
+     1063,
+     330
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_197",
+   "recipe": "cu_spring_altar",
+   "name": "Spring Altar",
+   "kind": "shrine",
+   "x": 1928,
+   "z": 760,
+   "yaw": 5.36,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s109",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 793,
+   "z": 823,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_gullwick_d78",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1550,
+   "z": 893,
+   "yaw": 3.01,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_198",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 902,
+   "z": 969,
+   "yaw": 6.21,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s110",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1496,
+   "z": 1504,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_199",
+   "recipe": "cu_bog_body",
+   "name": "Bog Body",
+   "kind": "remains",
+   "x": 394,
+   "z": 1775,
+   "yaw": 5.4,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_33",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1434,
+   "z": 1192,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1468,
+     1148
+    ],
+    [
+     1482,
+     1236
+    ],
+    [
+     1401,
+     1233
+    ],
+    [
+     1400,
+     1146
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_200",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1800,
+   "z": 2008,
+   "yaw": 4.54,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_gullwick_d79",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 137,
+   "z": 1616,
+   "yaw": 3.75,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s111",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1656,
+   "z": 1632,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_201",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 832,
+   "z": 1992,
+   "yaw": 4,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_gullwick_25",
+   "role": "pilgrim_resting",
+   "name": "Resting pilgrim",
+   "work": "pray",
+   "chatter": [
+    "role.pilgrim"
+   ],
+   "x": 1408,
+   "z": 512,
+   "yaw": 3.94,
+   "radius": 6,
+   "path": [
+    [
+     1402,
+     505
+    ],
+    [
+     1414,
+     509
+    ],
+    [
+     1405,
+     517
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_202",
+   "recipe": "cu_fishing_rock",
+   "name": "Fishing Rock",
+   "kind": "fishing",
+   "x": 1215,
+   "z": 855,
+   "yaw": 1.21,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s112",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 368,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_gullwick_d80",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1625,
+   "z": 1473,
+   "yaw": 0.75,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_203",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 880,
+   "z": 1736,
+   "yaw": 2.21,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_34",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1880,
+   "z": 1632,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1828,
+     1674
+    ],
+    [
+     1824,
+     1584
+    ],
+    [
+     1921,
+     1582
+    ],
+    [
+     1936,
+     1671
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s113",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1927,
+   "z": 431,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_204",
+   "recipe": "cu_boundary_cross",
+   "name": "Boundary Cross",
+   "kind": "marker",
+   "x": 1142,
+   "z": 1135,
+   "yaw": 3.53,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "woodpile_stack_gullwick_d81",
+   "kind": "woodpile_stack",
+   "name": "Woodpile",
+   "x": 728,
+   "z": 599,
+   "yaw": 2.27,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_205",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 1008,
+   "z": 761,
+   "yaw": 4.83,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s114",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 152,
+   "z": 1704,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_206",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 1288,
+   "z": 1008,
+   "yaw": 3.92,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_207",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 1839,
+   "z": 639,
+   "yaw": 3.71,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s115",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 247,
+   "z": 1674,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_208",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 711,
+   "z": 1032,
+   "yaw": 4.76,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_gullwick_d82",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 377,
+   "z": 1048,
+   "yaw": 0.26,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_209",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 792,
+   "z": 104,
+   "yaw": 0.43,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_35",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 184,
+   "z": 640,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     236,
+     585
+    ],
+    [
+     258,
+     688
+    ],
+    [
+     130,
+     689
+    ],
+    [
+     147,
+     586
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s116",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1744,
+   "z": 1400,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_210",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 776,
+   "z": 1672,
+   "yaw": 0.7,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_gullwick_26",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 264,
+   "z": 168,
+   "yaw": 4.3,
+   "radius": 6,
+   "path": [
+    [
+     240,
+     202
+    ],
+    [
+     251,
+     142
+    ],
+    [
+     300,
+     160
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_211",
+   "recipe": "cu_honey_tree",
+   "name": "Honey Tree",
+   "kind": "forage",
+   "x": 1944,
+   "z": 1135,
+   "yaw": 2.69,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s117",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1320,
+   "z": 1482,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_gullwick_d83",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1624,
+   "z": 736,
+   "yaw": 3.71,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_212",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 239,
+   "z": 1392,
+   "yaw": 4.51,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s118",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 416,
+   "z": 1148,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_gullwick_d84",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 437,
+   "z": 715,
+   "yaw": 4.49,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_213",
+   "recipe": "cu_smugglers_drop",
+   "name": "Smuggler's Drop",
+   "kind": "cache",
+   "x": 351,
+   "z": 1142,
+   "yaw": 1.09,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_36",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1169,
+   "z": 1513,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1243,
+     1458
+    ],
+    [
+     1227,
+     1572
+    ],
+    [
+     1120,
+     1591
+    ],
+    [
+     1117,
+     1431
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_214",
+   "recipe": "cu_boundary_cross",
+   "name": "Boundary Cross",
+   "kind": "marker",
+   "x": 1952,
+   "z": 1344,
+   "yaw": 5.82,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_gullwick_d85",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 583,
+   "z": 1536,
+   "yaw": 5.74,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s119",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1960,
+   "z": 1727,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_215",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1048,
+   "z": 688,
+   "yaw": 4.63,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_gullwick_27",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 1736,
+   "z": 1334,
+   "yaw": 3.01,
+   "radius": 6,
+   "path": [
+    [
+     1735,
+     1388
+    ],
+    [
+     1680,
+     1291
+    ],
+    [
+     1806,
+     1311
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_216",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 960,
+   "z": 654,
+   "yaw": 3.24,
+   "radius": 7,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s120",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 223,
+   "z": 1496,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_gullwick_d86",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 919,
+   "z": 871,
+   "yaw": 4.62,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_217",
+   "recipe": "cu_bog_body",
+   "name": "Bog Body",
+   "kind": "remains",
+   "x": 1168,
+   "z": 960,
+   "yaw": 3.21,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_37",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1408,
+   "z": 1391,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1338,
+     1396
+    ],
+    [
+     1403,
+     1326
+    ],
+    [
+     1482,
+     1380
+    ],
+    [
+     1432,
+     1443
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s121",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1654,
+   "z": 1127,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_218",
+   "recipe": "cu_bog_hole",
+   "name": "Sucking Mire",
+   "kind": "hazard",
+   "x": 194,
+   "z": 1775,
+   "yaw": 4.4,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_gullwick_d87",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 1608,
+   "z": 120,
+   "yaw": 0.32,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_219",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 1376,
+   "z": 1656,
+   "yaw": 2.64,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s122",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 414,
+   "z": 1478,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_220",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 40,
+   "z": 104,
+   "yaw": 0.4,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_221",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 543,
+   "z": 1672,
+   "yaw": 1.9,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s123",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 256,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_gullwick_d88",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 969,
+   "z": 1507,
+   "yaw": 2.2,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_222",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 164,
+   "z": 1065,
+   "yaw": 3.38,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_gullwick_d89",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 1984,
+   "z": 1617,
+   "yaw": 2.73,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_223",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 488,
+   "z": 1648,
+   "yaw": 2.1,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_38",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 416,
+   "z": 1886,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     443,
+     1927
+    ],
+    [
+     363,
+     1906
+    ],
+    [
+     402,
+     1847
+    ],
+    [
+     460,
+     1863
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s124",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 47,
+   "z": 1657,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_224",
+   "recipe": "cu_heron_nest",
+   "name": "Heron Rookery",
+   "kind": "nest",
+   "x": 344,
+   "z": 1728,
+   "yaw": 0.94,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_gullwick_28",
+   "role": "fisher",
+   "name": "Fisher",
+   "work": "fish",
+   "chatter": [
+    "role.fisher"
+   ],
+   "x": 1776,
+   "z": 1016,
+   "yaw": 1.21,
+   "radius": 6,
+   "path": [
+    [
+     1764,
+     1027
+    ],
+    [
+     1775,
+     1000
+    ],
+    [
+     1797,
+     1027
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_225",
+   "recipe": "cu_charcoal_mound",
+   "name": "Charcoal Clamp",
+   "kind": "camp",
+   "x": 2008,
+   "z": 952,
+   "yaw": 2.19,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s125",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 455,
+   "z": 1095,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "mushroom_ring_gullwick_d90",
+   "kind": "mushroom_ring",
+   "name": "Mushroom Ring",
+   "x": 48,
+   "z": 1856,
+   "yaw": 1.18,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_226",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 40,
+   "z": 1943,
+   "yaw": 5.29,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s126",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1241,
+   "z": 927,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_227",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1848,
+   "z": 1808,
+   "yaw": 1.2,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_39",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1503,
+   "z": 642,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1427,
+     623
+    ],
+    [
+     1533,
+     585
+    ],
+    [
+     1564,
+     690
+    ],
+    [
+     1472,
+     696
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_228",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1704,
+   "z": 184,
+   "yaw": 1.27,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_gullwick_d91",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 578,
+   "z": 1359,
+   "yaw": 2.3,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s127",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1072,
+   "z": 472,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_229",
+   "recipe": "cu_eel_trap",
+   "name": "Eel Trap",
+   "kind": "fishing",
+   "x": 592,
+   "z": 816,
+   "yaw": 6.11,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_gullwick_29",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 2008,
+   "z": 1240,
+   "yaw": 5.29,
+   "radius": 6,
+   "path": [
+    [
+     2002,
+     1177
+    ],
+    [
+     2046,
+     1266
+    ],
+    [
+     1975,
+     1269
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_230",
+   "recipe": "cu_hollow_stump",
+   "name": "Hollow Stump",
+   "kind": "cache",
+   "x": 1254,
+   "z": 420,
+   "yaw": 0.62,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s128",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 528,
+   "z": 855,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lonely_pier_gullwick_d92",
+   "kind": "lonely_pier",
+   "name": "Bridge Pier",
+   "x": 303,
+   "z": 1239,
+   "yaw": 4.95,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_231",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1161,
+   "z": 1959,
+   "yaw": 3.22,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_40",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 304,
+   "z": 1848,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     256,
+     1818
+    ],
+    [
+     317,
+     1793
+    ],
+    [
+     343,
+     1858
+    ],
+    [
+     277,
+     1887
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s129",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 849,
+   "z": 1688,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_gullwick_d93",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 88,
+   "z": 1272,
+   "yaw": 4.45,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "woodpile_stack_gullwick_d94",
+   "kind": "woodpile_stack",
+   "name": "Woodpile",
+   "x": 1256,
+   "z": 592,
+   "yaw": 6.07,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_232",
+   "recipe": "cu_bog_body",
+   "name": "Bog Body",
+   "kind": "remains",
+   "x": 1824,
+   "z": 926,
+   "yaw": 1.86,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s130",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 97,
+   "z": 1505,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_233",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1184,
+   "z": 657,
+   "yaw": 4.32,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_234",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 617,
+   "z": 919,
+   "yaw": 0.95,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s131",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 936,
+   "z": 1080,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_235",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 809,
+   "z": 1113,
+   "yaw": 1.3,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_gullwick_d95",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1360,
+   "z": 712,
+   "yaw": 4.12,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_236",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 1688,
+   "z": 1055,
+   "yaw": 3.86,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_gullwick_41",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1736,
+   "z": 598,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1712,
+     562
+    ],
+    [
+     1774,
+     557
+    ],
+    [
+     1758,
+     646
+    ],
+    [
+     1696,
+     614
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s132",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1527,
+   "z": 1145,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_237",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 80,
+   "z": 808,
+   "yaw": 5.78,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_gullwick_30",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 1968,
+   "z": 368,
+   "yaw": 6.15,
+   "radius": 6,
+   "path": [
+    [
+     2029,
+     375
+    ],
+    [
+     1937,
+     407
+    ],
+    [
+     1931,
+     315
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_238",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 40,
+   "z": 519,
+   "yaw": 0.76,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s133",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1479,
+   "z": 1592,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_gullwick_d96",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 2009,
+   "z": 279,
+   "yaw": 5.47,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_239",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 96,
+   "z": 312,
+   "yaw": 3.63,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s134",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 40,
+   "z": 1136,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_240",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 1166,
+   "z": 104,
+   "yaw": 0.74,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_241",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 1664,
+   "z": 960,
+   "yaw": 2.82,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_gullwick_d97",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 272,
+   "z": 1304,
+   "yaw": 5.34,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_gullwick_d98",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 713,
+   "z": 1967,
+   "yaw": 3.91,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s135",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 528,
+   "z": 416,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_242",
+   "recipe": "cu_boundary_cross",
+   "name": "Boundary Cross",
+   "kind": "marker",
+   "x": 1376,
+   "z": 1513,
+   "yaw": 5.41,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_gullwick_31",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 952,
+   "z": 1744,
+   "yaw": 4.22,
+   "radius": 6,
+   "path": [
+    [
+     981,
+     1781
+    ],
+    [
+     911,
+     1755
+    ],
+    [
+     993,
+     1693
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_243",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 688,
+   "z": 1376,
+   "yaw": 3.89,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s136",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1568,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_gullwick_d99",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1289,
+   "z": 111,
+   "yaw": 1.64,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_244",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 1808,
+   "z": 753,
+   "yaw": 3.61,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_gullwick_d100",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 356,
+   "z": 1345,
+   "yaw": 3.75,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s137",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1616,
+   "z": 1896,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_245",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 614,
+   "z": 1992,
+   "yaw": 5.66,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_gullwick_d101",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 88,
+   "z": 64,
+   "yaw": 2.66,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_246",
+   "recipe": "cu_samphire",
+   "name": "Samphire Flats",
+   "kind": "forage",
+   "x": 301,
+   "z": 954,
+   "yaw": 1.78,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s138",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 310,
+   "z": 1030,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_247",
+   "recipe": "cu_tinkers_halt",
+   "name": "Tinker's Halt",
+   "kind": "camp",
+   "x": 392,
+   "z": 370,
+   "yaw": 0.56,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_248",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 320,
+   "z": 232,
+   "yaw": 0.9,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_gullwick_s139",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1168,
+   "z": 1695,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_gullwick_249",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1065,
+   "z": 1793,
+   "yaw": 3.43,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_gullwick_d102",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 726,
+   "z": 1737,
+   "yaw": 5.5,
+   "radius": 3,
+   "filler": true
   }
  ],
- "features": []
+ "features": [],
+ "density": {
+  "target": 50,
+  "roadTarget": 45,
+  "added": {
+   "curio": 249,
+   "wayside": 102,
+   "stray": 139,
+   "roamer": 41,
+   "folk": 31
+  },
+  "openShareCovered": 1,
+  "roadShareCovered": 1
+ },
+ "levels": [
+  5,
+  7
+ ]
 }

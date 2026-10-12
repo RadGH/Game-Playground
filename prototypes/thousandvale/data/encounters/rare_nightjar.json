@@ -2,6 +2,7 @@
   "id": "rare_nightjar",
   "name": "Nightjar",
   "tier": "rare",
+  "secret": true,
   "zone": "sunken_wolds",
   "body": "dusk_flitter",
   "place": "leads the bat colony in the caves under the Wolds; comes out in the first dark",

@@ -1,5 +1,5 @@
 {
-  "name": "z13_04",
+  "name": "Gorsehold (z13_04)",
   "zone": "z13_04",
   "sheet": {
     "sheet": "torbor_downs",
@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 2,
-  "inputHash": "d1f5fae1",
+  "bakeVersion": 4,
+  "inputHash": "e8ce72cb",
   "waterKinds": [
     "none",
     "sea",
@@ -33,7 +33,7 @@
       "height": 224,
       "method": "pangea",
       "seaLevel": 0.2,
-      "inputHash": "9803699e"
+      "inputHash": "9805a835"
     },
     "zone": {
       "zx": 13,
@@ -74,64 +74,156 @@
       "z": 960
     },
     {
+      "type": "settlement",
+      "kind": "town",
+      "name": "Gorsehold",
+      "x": 1564,
+      "z": 1286,
+      "ask": true,
+      "askR": 70,
+      "hub": true,
+      "radius": 90
+    },
+    {
+      "type": "settlement",
+      "kind": "hamlet",
+      "name": "Burnt Barns",
+      "x": 1594,
+      "z": 367,
+      "ask": true,
+      "askR": 40,
+      "radius": 40
+    },
+    {
       "type": "dungeon",
       "id": "door_1",
       "name": "Barrow entrance",
-      "x": 1357,
-      "z": 579,
-      "yaw": 1.016
+      "x": 1364,
+      "z": 1286,
+      "yaw": 1.664,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_gorse_march",
-      "x": 1218,
-      "z": 1071,
-      "r": 40
+      "x": 1326,
+      "z": 1155,
+      "r": 40,
+      "pinned": true
     }
   ],
   "spawn": {
-    "x": 1024,
-    "z": 1024
+    "x": 1560,
+    "z": 1278
   },
+  "bridges": [],
   "summary": {
     "zone": "z13_04",
     "province": "Petbeck Basin",
-    "inputHash": "d1f5fae1",
+    "inputHash": "e8ce72cb",
     "rivers": 1,
     "wetShare": 0.004,
-    "unwalkableShare": 0.166,
-    "towns": [],
-    "roads": 0,
+    "unwalkableShare": 0.165,
+    "towns": [
+      {
+        "name": "Gorsehold",
+        "kind": "town",
+        "hub": true,
+        "at": [
+          1564,
+          1286
+        ],
+        "radius": 90,
+        "movedFrom": null,
+        "culture": "desert",
+        "plots": 24,
+        "streets": 45,
+        "links": 1,
+        "overlaps": 0,
+        "highStreets": 1,
+        "w6": {
+          "plotsBefore": 24,
+          "plots": 24,
+          "kept": 24,
+          "removed": []
+        }
+      },
+      {
+        "name": "Burnt Barns",
+        "kind": "hamlet",
+        "hub": false,
+        "at": [
+          1594,
+          367
+        ],
+        "radius": 40,
+        "movedFrom": null,
+        "culture": "desert",
+        "plots": 15,
+        "streets": 45,
+        "links": 2,
+        "overlaps": 0,
+        "highStreets": 2,
+        "w6": {
+          "plotsBefore": 18,
+          "plots": 15,
+          "kept": 15,
+          "removed": [
+            {
+              "plot": 2,
+              "want": "hut",
+              "office": false
+            },
+            {
+              "plot": 4,
+              "want": "house",
+              "office": false
+            },
+            {
+              "plot": 5,
+              "want": "house",
+              "office": false
+            }
+          ]
+        }
+      }
+    ],
+    "roads": 2,
     "bridges": 0,
-    "scatter": 7536,
+    "paths": 13,
+    "pathMetres": 2248,
+    "scatter": 10864,
     "scatterKinds": {
-      "rock_small": 2789,
-      "bush": 1698,
-      "tree_acacia": 321,
-      "tree_broadleaf": 19,
-      "rock_large": 1809,
-      "boulder": 458,
-      "tree_dead": 170,
-      "tree_conifer": 272
+      "bush": 2653,
+      "rock_small": 3454,
+      "tree_broadleaf": 64,
+      "tree_dead": 239,
+      "boulder": 541,
+      "rock_large": 2242,
+      "tree_acacia": 458,
+      "tree_conifer": 355,
+      "hedge": 858
     },
     "sites": [
       "landmark volcano The Becktack Forge 960 1984",
       "lair dungeon The Fitfe Undercroft 1472 704",
       "lair lair The Hitindack Lair 64 960",
-      "dungeon door_1 Barrow entrance 1357 579  1.016",
-      "event event_gorse_march  1218 1071 40"
+      "settlement(HUB) town Gorsehold 1564 1286 90",
+      "settlement hamlet Burnt Barns 1594 367 40",
+      "dungeon door_1 Barrow entrance 1364 1286  1.664",
+      "event event_gorse_march  1326 1155 40"
     ],
     "spawn": {
-      "x": 1024,
-      "z": 1024
+      "x": 1560,
+      "z": 1278
     },
-    "placements": 5,
-    "vignettesAvoided": 0
+    "placements": 190,
+    "vignettesAvoided": 628
   },
   "files": {
-    "terrain.bin": 6305690,
-    "nav.bin": 1050717,
-    "scatter.bin": 60372,
-    "placements.json": 1466
+    "terrain.bin": 705263,
+    "nav.bin": 46888,
+    "scatter.bin": 86996,
+    "placements.json": 147639
   }
 }

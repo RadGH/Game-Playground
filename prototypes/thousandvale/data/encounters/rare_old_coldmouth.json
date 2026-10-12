@@ -2,6 +2,7 @@
   "id": "rare_old_coldmouth",
   "name": "Old Coldmouth",
   "tier": "rare",
+  "secret": true,
   "zone": "coldwater",
   "body": "glacier_maw",
   "place": "lies half-sunk in the mere below Coldwater like an upturned boat; the water around it never warms",

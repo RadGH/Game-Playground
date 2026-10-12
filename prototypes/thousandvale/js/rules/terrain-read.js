@@ -11,13 +11,17 @@
 //
 //   import { parseTerrain } from './js/rules/terrain-read.js';
 //   const t = parseTerrain(buf);
-//   t.heightAt(x, z)      // ground height in metres (triangle interpolation — see below)
+//   t.heightAt(x, z)      // the surface you stand on, metres: ground (triangle interpolation — see below), or a
+//                         // bridge deck where one spans (meta.bridges); t.groundAt(x, z) is always the bare ground
 //   t.slopeAt(x, z)       // degrees, 0 = flat
 //   t.normalAt(x, z)      // [nx, ny, nz], unit, +y up
 //   t.waterAt(x, z)       // { kind: 'none'|'sea'|'lake'|'river', surface, depth }
 //   t.biomeAt(x, z)       // biome id (t.biomes[id] = { key, name, color })
 //   t.sample(x, z)        // all of the above in one object
-//   t.walkable(x, z)      // in bounds, slope ≤ MAX_WALK_SLOPE, water no deeper than WADE_DEPTH
+//   t.walkable(x, z)      // ON FOOT: in bounds, slope ≤ MAX_WALK_SLOPE, water no deeper than WADE_DEPTH
+//   t.moveAt(x, z)        // 'out' | 'steep' | 'walk' | 'wade' | 'swim' — the depth/swim layer (deck = 'walk')
+//   t.passable(x, z)      // walk, wade OR swim (not off-map, not too steep): a swimmer's movement check
+//   t.deckAt(x, z)        // bridge deck height, NaN off a deck
 //   t.heightGrid()        // Float32Array of metres, size*size, for building the mesh (use gridIndices())
 //   t.waterGrid()         // Float32Array water surface (NaN = dry), for the water mesh
 //
@@ -66,6 +70,14 @@ export const WATER_KINDS = ['none', 'sea', 'lake', 'river'];
 export const MAX_WALK_SLOPE = 46;
 /** Deepest water you wade through on foot, in metres; deeper is swimming. */
 export const WADE_DEPTH = 1.1;
+/** Below this depth water is a puddle/ford and costs nothing; WADE_DEPTH above it slows a walker (wading). */
+export const DRY_FOOT_DEPTH = 0.25;
+/**
+ * How a body moves at a point (moveAt): 'out' off the map, 'steep' too steep to climb (and not water deep
+ * enough to swim), 'walk' dry or ankle-deep, 'wade' walking through water up to WADE_DEPTH, 'swim' deeper.
+ * A bridge deck is always 'walk' (it is the surface there).
+ */
+export const MOVE_KINDS = Object.freeze(['out', 'steep', 'walk', 'wade', 'swim']);
 
 const RAD = 180 / Math.PI;
 
@@ -190,10 +202,37 @@ export function createTerrain({ meta, height, waterTop, waterKind, biome }) {
     return h11 + (h01 - h11) * (1 - fx) + (h10 - h11) * (1 - fz);
   }
 
-  function heightAt(x, z) { return tri(H, x, z); }
+  // Bridge decks (meta.bridges, written by the zone bake): flat strips from a to b, w wide, at height h. On a
+  // deck the walkable surface IS the deck, so heightAt / normalAt / slopeAt / waterAt / walkable / moveAt answer
+  // for the deck (max(ground, deck)), and every walker — server, client prediction, pets, monsters — crosses a
+  // bridge without knowing bridges exist. groundAt() is the bare ground (what heightGrid() draws).
+  const decks = (meta.bridges || []).map(b => {
+    const dx = b.b[0] - b.a[0], dz = b.b[1] - b.a[1], L = Math.hypot(dx, dz) || 1, hw = b.w / 2;
+    return { ax: b.a[0], az: b.a[1], ux: dx / L, uz: dz / L, L, hw, h: b.h,
+      x0: Math.min(b.a[0], b.b[0]) - hw, x1: Math.max(b.a[0], b.b[0]) + hw, z0: Math.min(b.a[1], b.b[1]) - hw, z1: Math.max(b.a[1], b.b[1]) + hw };
+  });
+  /** Deck height at (x, z), or NaN when no deck is there. */
+  function deckAt(x, z) {
+    for (let k = 0; k < decks.length; k++) {
+      const d = decks[k];
+      if (x < d.x0 || x > d.x1 || z < d.z0 || z > d.z1) continue;
+      const rx = x - d.ax, rz = z - d.az, along = rx * d.ux + rz * d.uz;
+      if (along < 0 || along > d.L || Math.abs(rx * d.uz - rz * d.ux) > d.hw) continue;
+      return d.h;
+    }
+    return NaN;
+  }
+  function groundAt(x, z) { return tri(H, x, z); }
+  function heightAt(x, z) {
+    const g = tri(H, x, z);
+    if (!decks.length) return g;
+    const d = deckAt(x, z);
+    return d > g ? d : g;
+  }
 
-  /** Unit normal of the triangle under (x, z) — flat per triangle, exactly what the mesh draws. */
+  /** Unit normal of the triangle under (x, z) — flat per triangle, exactly what the mesh draws (a deck is flat). */
   function normalAt(x, z) {
+    if (decks.length) { const d = deckAt(x, z); if (d > tri(H, x, z)) return [0, 1, 0]; }
     const [i, j, fx, fz] = cell(x, z);
     let dhdx, dhdz;
     if (fx + fz <= 1) { const h00 = H(i, j); dhdx = (H(i + 1, j) - h00) / step; dhdz = (H(i, j + 1) - h00) / step; }
@@ -232,6 +271,17 @@ export function createTerrain({ meta, height, waterTop, waterKind, biome }) {
     return waterAt(x, z).depth <= WADE_DEPTH;
   }
 
+  /** 'out' | 'steep' | 'walk' | 'wade' | 'swim' (MOVE_KINDS). Deep water is swum whatever the bed's slope. */
+  function moveAt(x, z) {
+    if (!inBounds(x, z)) return 'out';
+    const w = waterAt(x, z);
+    if (w.depth > WADE_DEPTH) return 'swim';
+    if (slopeAt(x, z) > MAX_WALK_SLOPE) return 'steep';
+    return w.depth > DRY_FOOT_DEPTH ? 'wade' : 'walk';
+  }
+  /** On foot OR swimming: anything but off-map and too steep. Use with moveAt() to set the swimming state. */
+  function passable(x, z) { const k = moveAt(x, z); return k !== 'out' && k !== 'steep'; }
+
   function sample(x, z) {
     const water = waterAt(x, z);
     const b = biomeAt(x, z);
@@ -260,6 +310,7 @@ export function createTerrain({ meta, height, waterTop, waterKind, biome }) {
     bounds: { minX: ox, minZ: oz, maxX: ox + extent, maxZ: oz + extent },
     biomes, layers: { height, waterTop, waterKind, biome },
     heightAt, normalAt, slopeAt, waterAt, biomeAt, sample, walkable, inBounds, clamp,
+    moveAt, passable, groundAt, deckAt, bridges: meta.bridges || [],
     /** Ground height of grid sample (i, j), for mesh builders. */
     heightOfSample: H, heightGrid, waterGrid,
     /** Water surface of grid sample (i, j), or NaN when dry. */
@@ -310,6 +361,9 @@ export function groundAdapter(t) {
     },
     waterAt: (x, z) => t.waterAt(x, z).depth,
     underwater: (x, z) => t.waterAt(x, z).depth > WADE_DEPTH,
+    moveAt: t.moveAt, passable: t.passable,
+    /** Water surface height at (x, z), NaN when dry (a swimmer floats at surface - body depth). */
+    surfaceAt: (x, z) => { const w = t.waterAt(x, z); return w.depth > 0 ? w.surface : NaN; },
     roadAt: () => 0,
     clampToWorld: t.clamp,
     biomeIdAt: t.biomeAt,
@@ -328,6 +382,9 @@ export const SCATTER_KINDS = Object.freeze([
   { key: 'bush', solid: false, r: 0.9 }, { key: 'rock_small', solid: false, r: 0.5 },
   { key: 'rock_large', solid: true, r: 1.4 }, { key: 'boulder', solid: true, r: 2.4 },
   { key: 'reed', solid: false, r: 0.6 },
+  // play-test 2 (Q18, set pieces): orchard fruit trees in rows; hedgerow bushes along field / orchard edges (walkable
+  // through, like a bush — a client draws them as a clipped hedge; the hedge LINES are `hedge` placements too)
+  { key: 'tree_fruit', solid: true, r: 0.35 }, { key: 'hedge', solid: false, r: 0.9 },
 ]);
 export const SCATTER_VERSION = 1;
 export const NAV_VERSION = 1;

@@ -4,7 +4,7 @@
   "tier": "miniboss",
   "body": "reed_serpent",
   "place": "dungeon flooded_cistern set A: floor 1 mini-boss (24 m chamber with two channels)",
-  "_doc": "Stream E (M2). A cistern eel thick as a mooring rope that lives in the two channels. P1: a lunge from the water, a tail sweep, and it DIVES into a channel — while it is submerged, coils lash up from both channels (stand on the walkway between them). P2 at 50%: it opens the sluice and the floor floods (slowing pools that grow); the Drain lever on the wall empties them and slams the gate on its tail (stun). Soft enrage from 3 min.",
+  "_doc": "Stream E (M2). A cistern eel thick as a mooring rope that lives in the two channels. P1: a lunge from the water, a tail sweep, and it DIVES into a channel — while it is submerged, coils lash up from both channels (stand in the middle, between them). P2 at 50%: it opens the sluice and the floor floods (slowing pools that grow); the Drain lever on the wall empties them and slams the gate on its tail (stun). Soft enrage from 3 min.",
   "party": "Solo: the lunge and the dive coils are the danger; 1 player can pull the drain lever between swings. 2-3: one holds the eel, one works the lever. 5: comfortable; M5 should raise health ~x1.6 for 5 and add a second coil line per extra player.",
   "hpMult": 2.2,
   "arena": {
@@ -146,7 +146,7 @@
       ],
       "first": 9,
       "cast": 1,
-      "say": "Sluicegrip dives! Coils lash out of both channels — stay on the middle walkway!",
+      "say": "Sluicegrip dives! Coils lash out of both channels — stay in the middle, between the two channels!",
       "telegraphs": [
         {
           "shape": "line",

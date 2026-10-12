@@ -579,6 +579,40 @@ attributes differ — which fails as a refusal, not a crash, so it looks like a 
   so 64 m cells gave four hundred draws holding three trees each. 128 m cells plus a **baked** far
   ring — at 22 triangles a tree, stamping two hundred into one geometry — took it to about 500.
 
+## Reviewing gear models, and measuring one (the Armory)
+
+`armory/` lists every wearable and holdable Chibi 2 model from the gear catalog
+
+**Gear catalog** (`avatar-3d/js/gear-catalog.js`, pure): `loadGearCatalog()` → `cat.find({ gameSlot, archetype, type, form, isNew })`, `cat.forItem(item)`, `applyGear(avatar, rows)`. 259 models, 66 of them the `g5_` set (one per armour slot × cloth/leather/mail/plate, per weapon type, per shield and focus kind, six wands + six staves by attack form, cloak/lantern/belt/torc/ring). Hands are `top.gloves`, rings `accessory.ring`. See `avatar-3d/CHIBI2.md` "Gear catalog".
+(`avatar-3d/data/gear-catalog.json`, reader `avatar-3d/js/gear-catalog.js`): source file and builder, triangles,
+size in metres, grip, which game items map to it, a 3D preview in either hand or both with any animation, and
+the in-game icon. Link straight to a model: `armory/#id=fh_daggers&hand=both&anim=flurry`. When you add a model,
+add its catalog row — the page and its filters pick it up, and nothing is listed by hand.
+
+`avatar-3d/js/preview-kit.js` is the shared viewer helper behind it (new, opt-in). Use it instead of writing
+another renderer + queue:
+
+```js
+import { createThumbnailer, frameBox, vertexKeys, extractAdded, holdOf, staticModel } from '../avatar-3d/js/preview-kit.js';
+const thumbs = createThumbnailer({ size: 192 });            // ONE WebGL context for every picture on the page
+img.src = await thumbs.request(key, async stage => { stage.scene.add(obj); frameBox(stage.camera, box); return () => stage.scene.remove(obj); });
+
+const keys = vertexKeys(await createChibi2Character(body));                    // the bare body
+const piece = extractAdded(await createChibi2Character(bodyWithSword), keys);   // { triangles, size, bones, colours, parts }
+const grip = holdOf(piece, character, 'gripR');                                 // { axis, palmAlong, offAxis, palmOnItem }
+```
+
+Chibi 2 gear is skinned into the body's own two meshes (no draw call per item), so "how many triangles is this
+sword" is answered by building the body with and without it — which also means the number is never stale.
+Cost: one extra body build per measurement (about 20–40 ms); thumbnails render one at a time and are cached.
+
+## The home page is data
+
+`index.html` is drawn by `js/home.js` from `data/experiments.json` — one row per card (group, title, href,
+summary, status, tags, extra links). A game with its own server gets `server: { port, path }` (a "Play on this
+network" button built from the page's hostname, hidden on the public site) and `live: "<key>"` into
+`data/live-links.json` (a separate "Live link" button; `tools/update-live-link.sh` refreshes the address).
+
 ## Worked example: Emberveil (a full RPG on the pieces)
 
 `prototypes/emberveil/` rebuilds the user's Emberveil RPG: its own data (copied by `tools/build-emberveil-data.mjs`), a loot engine with affixes/uniques/sets, a stat + talent system, an auto-battle simulator and a branching world map, all presented with Mii bodies (30 class looks with new gear parts), creature bodies and Lingo barks. Read its README for what maps to what.

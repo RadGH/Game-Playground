@@ -2,6 +2,7 @@
   "id": "rare_antlered_shade",
   "name": "The Antlered Shade",
   "tier": "rare",
+  "secret": true,
   "zone": "wychwood",
   "body": "dread_stag",
   "place": "is seen between the oldest trees of Wychwood on misty mornings, never twice in the same glade",

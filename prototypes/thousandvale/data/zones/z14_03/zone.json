@@ -1,5 +1,5 @@
 {
-  "name": "Hollowcross (z14_03)",
+  "name": "Redcliff (z14_03)",
   "zone": "z14_03",
   "sheet": {
     "sheet": "torbor_downs",
@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 2,
-  "inputHash": "8e298447",
+  "bakeVersion": 4,
+  "inputHash": "106d6a71",
   "waterKinds": [
     "none",
     "sea",
@@ -33,7 +33,7 @@
       "height": 224,
       "method": "pangea",
       "seaLevel": 0.2,
-      "inputHash": "9803699e"
+      "inputHash": "9805a835"
     },
     "zone": {
       "zx": 14,
@@ -66,12 +66,14 @@
   "sites": [
     {
       "type": "settlement",
-      "kind": "village",
-      "name": "Hollowcross",
-      "x": 416,
-      "z": 880,
+      "kind": "town",
+      "name": "Redcliff",
+      "x": 384,
+      "z": 864,
+      "wfName": "Hollowcross",
+      "grownFrom": "village",
       "hub": true,
-      "radius": 65,
+      "radius": 90,
       "movedFrom": {
         "x": 448,
         "z": 832
@@ -80,9 +82,10 @@
     {
       "type": "settlement",
       "kind": "village",
-      "name": "Bolwathold",
+      "name": "Cinder Farm",
       "x": 1216,
       "z": 1712,
+      "wfName": "Bolwathold",
       "radius": 65,
       "movedFrom": {
         "x": 1216,
@@ -129,65 +132,196 @@
       "type": "crossing",
       "kind": "ford",
       "name": "Mafil Ford",
-      "x": 448,
-      "z": 832
+      "x": 392,
+      "z": 826,
+      "snappedFrom": {
+        "x": 448,
+        "z": 832
+      }
     },
     {
       "type": "crossing",
       "kind": "ford",
       "name": "Hafe Ford",
-      "x": 448,
-      "z": 448
+      "x": 384,
+      "z": 444,
+      "snappedFrom": {
+        "x": 448,
+        "z": 448
+      }
     },
     {
       "type": "dungeon",
       "id": "door_1",
       "name": "Barrow entrance",
-      "x": 556,
-      "z": 1008,
-      "yaw": -2.153
+      "x": 555,
+      "z": 1018,
+      "yaw": -2.436,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_redcliff",
       "x": 693,
-      "z": 969,
-      "r": 40
+      "z": 955,
+      "r": 40,
+      "pinned": true
     }
   ],
   "spawn": {
-    "x": 420,
-    "z": 868
+    "x": 388,
+    "z": 864
   },
+  "bridges": [
+    {
+      "a": [
+        326.88,
+        1066.34
+      ],
+      "b": [
+        333.57,
+        1083.13
+      ],
+      "h": 46.82,
+      "w": 5.07
+    },
+    {
+      "a": [
+        831.5,
+        1184
+      ],
+      "b": [
+        846.11,
+        1182.47
+      ],
+      "h": 51.376,
+      "w": 6.16
+    },
+    {
+      "a": [
+        846.11,
+        1182.47
+      ],
+      "b": [
+        860.11,
+        1177.95
+      ],
+      "h": 51.376,
+      "w": 5.85
+    },
+    {
+      "a": [
+        860.11,
+        1177.95
+      ],
+      "b": [
+        873.2,
+        1171.1
+      ],
+      "h": 51.376,
+      "w": 4.97
+    },
+    {
+      "a": [
+        376.5,
+        448
+      ],
+      "b": [
+        390.5,
+        448
+      ],
+      "h": 45.121,
+      "w": 4.5
+    },
+    {
+      "a": [
+        617.13,
+        405.01
+      ],
+      "b": [
+        635.18,
+        388.82
+      ],
+      "h": 40.369,
+      "w": 4.97
+    },
+    {
+      "a": [
+        408.54,
+        909.3
+      ],
+      "b": [
+        389.11,
+        863.22
+      ],
+      "h": 43.935,
+      "w": 6
+    },
+    {
+      "a": [
+        405,
+        871.5
+      ],
+      "b": [
+        391,
+        871.48
+      ],
+      "h": 43.935,
+      "w": 6
+    }
+  ],
   "summary": {
     "zone": "z14_03",
     "province": "Petbeck Basin",
-    "inputHash": "8e298447",
+    "inputHash": "106d6a71",
     "rivers": 4,
-    "wetShare": 0.015,
-    "unwalkableShare": 0.009,
+    "wetShare": 0.014,
+    "unwalkableShare": 0.004,
     "towns": [
       {
-        "name": "Hollowcross",
-        "kind": "village",
+        "name": "Redcliff",
+        "kind": "town",
         "hub": true,
         "at": [
-          416,
-          880
+          384,
+          864
         ],
-        "radius": 65,
+        "radius": 90,
         "movedFrom": {
           "x": 448,
           "z": 832
         },
         "culture": "halfling",
-        "plots": 15,
-        "streets": 49,
-        "links": 2,
-        "overlaps": 0
+        "plots": 21,
+        "streets": 74,
+        "links": 4,
+        "overlaps": 0,
+        "highStreets": 4,
+        "w6": {
+          "plotsBefore": 23,
+          "plots": 21,
+          "kept": 20,
+          "removed": [
+            {
+              "plot": 3,
+              "want": "house",
+              "office": false
+            },
+            {
+              "plot": 5,
+              "want": "house",
+              "office": false
+            },
+            {
+              "plot": 13,
+              "want": "hut",
+              "office": false
+            }
+          ]
+        }
       },
       {
-        "name": "Bolwathold",
+        "name": "Cinder Farm",
         "kind": "village",
         "hub": false,
         "at": [
@@ -200,10 +334,43 @@
           "z": 1728
         },
         "culture": "halfling",
-        "plots": 26,
-        "streets": 68,
+        "plots": 21,
+        "streets": 65,
         "links": 3,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 3,
+        "w6": {
+          "plotsBefore": 26,
+          "plots": 21,
+          "kept": 21,
+          "removed": [
+            {
+              "plot": 0,
+              "want": "house",
+              "office": false
+            },
+            {
+              "plot": 2,
+              "want": "hut",
+              "office": false
+            },
+            {
+              "plot": 10,
+              "want": "hut",
+              "office": false
+            },
+            {
+              "plot": 21,
+              "want": "house",
+              "office": false
+            },
+            {
+              "plot": 22,
+              "want": "house",
+              "office": false
+            }
+          ]
+        }
       },
       {
         "name": "Ravenhaven",
@@ -219,10 +386,28 @@
           "z": 192
         },
         "culture": "halfling",
-        "plots": 14,
-        "streets": 44,
+        "plots": 13,
+        "streets": 41,
         "links": 2,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 2,
+        "w6": {
+          "plotsBefore": 14,
+          "plots": 13,
+          "kept": 12,
+          "removed": [
+            {
+              "plot": 7,
+              "want": "hut",
+              "office": false
+            },
+            {
+              "plot": 10,
+              "want": "hut",
+              "office": false
+            }
+          ]
+        }
       },
       {
         "name": "Minfenrow",
@@ -238,10 +423,23 @@
           "z": 1088
         },
         "culture": "halfling",
-        "plots": 11,
-        "streets": 33,
+        "plots": 10,
+        "streets": 32,
         "links": 2,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 2,
+        "w6": {
+          "plotsBefore": 11,
+          "plots": 10,
+          "kept": 10,
+          "removed": [
+            {
+              "plot": 6,
+              "want": "house",
+              "office": false
+            }
+          ]
+        }
       },
       {
         "name": "Bipetwatch",
@@ -257,47 +455,58 @@
           "z": 1472
         },
         "culture": "halfling",
-        "plots": 12,
+        "plots": 13,
         "streets": 45,
         "links": 2,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 2,
+        "w6": {
+          "plotsBefore": 12,
+          "plots": 13,
+          "kept": 12,
+          "removed": []
+        }
       }
     ],
-    "roads": 14,
+    "roads": 15,
     "bridges": 6,
-    "scatter": 14982,
+    "paths": 14,
+    "pathMetres": 692,
+    "scatter": 18867,
     "scatterKinds": {
-      "tree_broadleaf": 8036,
-      "bush": 4273,
-      "reed": 1270,
-      "rock_small": 925,
-      "rock_large": 157,
+      "tree_broadleaf": 8200,
+      "bush": 5876,
+      "reed": 1221,
+      "rock_small": 1608,
+      "rock_large": 344,
       "tree_dead": 88,
-      "boulder": 5,
-      "tree_acacia": 228
+      "tree_acacia": 339,
+      "boulder": 6,
+      "tree_conifer": 15,
+      "hedge": 1170
     },
     "sites": [
-      "settlement(HUB) village Hollowcross 416 880 65",
-      "settlement village Bolwathold 1216 1712 65",
+      "settlement(HUB) town Redcliff 384 864 90",
+      "settlement village Cinder Farm 1216 1712 65",
       "settlement hamlet Ravenhaven 112 224 46",
       "settlement hamlet Minfenrow 1104 1088 46",
       "settlement hamlet Bipetwatch 320 1424 46",
-      "crossing ford Mafil Ford 448 832",
-      "crossing ford Hafe Ford 448 448",
-      "dungeon door_1 Barrow entrance 556 1008  -2.153",
-      "event event_redcliff  693 969 40"
+      "crossing ford Mafil Ford 392 826",
+      "crossing ford Hafe Ford 384 444",
+      "dungeon door_1 Barrow entrance 555 1018  -2.436",
+      "event event_redcliff  693 955 40"
     ],
     "spawn": {
-      "x": 420,
-      "z": 868
+      "x": 388,
+      "z": 864
     },
-    "placements": 352,
-    "vignettesAvoided": 0
+    "placements": 463,
+    "vignettesAvoided": 634
   },
   "files": {
-    "terrain.bin": 6306294,
-    "nav.bin": 1050717,
-    "scatter.bin": 119940,
-    "placements.json": 133193
+    "terrain.bin": 510608,
+    "nav.bin": 34962,
+    "scatter.bin": 151020,
+    "placements.json": 260903
   }
 }

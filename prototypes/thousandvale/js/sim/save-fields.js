@@ -23,6 +23,20 @@ export const SAVE_FIELDS = Object.freeze([
   { k: 'exit', def: null },        // { x, z } in the wilds: where leaving an instance (or losing it) puts you
   { k: 'mutedUntil', def: 0 },     // wall ms; chat refused until then (admin hook)
   { k: 'waystones', def: [] },     // waystone keys this character has discovered (travel targets)
+  { k: 'treasure', def: {} },      // treasure chains: chain id -> { found: [clue steps], done?: wall ms } (PLAN §3.7)
+  { k: 'quests', def: { active: {}, done: {}, jobs: {} } },   // quest log, done quests, job boards (js/sim/quests.js)
+  { k: 'daily', def: {} },
+  { k: 'kitV', def: 0 },
+  { k: 'build', def: null },       // the rules' build blob: talents, perks, unlocks (C's rules.saveBuild; P4/P6)
+  { k: 'seen', def: { zones: [], places: [] } },   // map discovery: zone keys entered, place keys found (P3/P27)           // starting-kit version applied (play-test 1 P22: 1 = class weapon only, plain clothes)         // once-a-day things: key -> UTC day number (the world boss's first kill of the day)
+  { k: 'mounts', def: [] },        // mount ids this character owns (play-test 2, Q16)
+  { k: 'prefs', def: null },
+  { k: 'flags', def: {} },
+  { k: 'bind', def: null },        // the town room id this character calls home (an innkeeper's bind): recall + respawn go there         // one-off facts: { barberUsed } (the first barber visit is free, E's shops.json)       // display choices others see: { showGear, showHelm } (Q22)
+  { k: 'kit', def: null },         // play-test 5 T5: the starter kit picked at creation { armour, weapons } (applied once, kitV 2)
+  { k: 'played', def: 0 },         // owner feedback 8 W1: ms this character has been in the world (a newcomer = under level 3 or under 10 minutes)
+  { k: 'angling', def: null },     // play-test 5 T25: { xp, level, casts, catches: { species: { n, best, zone, zones } }, legends: [], titles: [] }
+  { k: 'professions', def: null }, // W9 (P-core): { known: [ids], xp: { id: n }, made: { recipe: n }, tools: { prof: 1 } } (js/sim/professions.js)
   { k: 'jseq', col: 'journal_seq', def: 0 },   // last journal row this blob contains (js/sim/journal.js)
 ]);
 

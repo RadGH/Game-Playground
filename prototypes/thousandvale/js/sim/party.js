@@ -6,10 +6,12 @@
 //   const P = createParties({ random })
 //   P.of(charId) -> party | null           party = { id, leader, members: [charId…], code, invites: Set<charId> }
 //   P.create(leader) ; P.invite(fromChar, toChar) ; P.accept(char, partyId) ; P.decline(char, partyId)
-//   P.join(char, code) ; P.leave(char) ; P.kick(byChar, char) ; P.lead(byChar, char)
+//   P.join(char, code) ; P.leave(char) ; P.kick(byChar, char) ; P.lead(byChar, char) ; P.loot(byChar, 'magic'|'rare'|'legendary')
 // Every call returns { ok: true, party, changed: [party…] } or { ok: false, why }.
 
-import { CODE_ALPHABET, CODE_LENGTH, PARTY_MAX } from '../net/protocol.js';
+import { CODE_ALPHABET, CODE_LENGTH, PARTY_MAX, LOOT_MINS } from '../net/protocol.js';
+
+const LOOT_ALIASES = { epic: 'legendary', set: 'unique', uncommon: 'magic' };      // C's THRESHOLD_ALIASES
 
 export function createParties({ random = Math.random } = {}) {
   const byId = new Map(), byChar = new Map(), byCode = new Map();
@@ -29,7 +31,7 @@ export function createParties({ random = Math.random } = {}) {
     create(leader) {
       const old = byChar.get(leader);
       if (old) return { ok: true, party: old, changed: [] };
-      const p = { id: nextId++, leader, members: [leader], code: newCode(), invites: new Set() };
+      const p = { id: nextId++, leader, members: [leader], code: newCode(), invites: new Set(), lootMin: 'rare' };
       byId.set(p.id, p); byChar.set(leader, p); byCode.set(p.code, p);
       return { ok: true, party: p, changed: [p] };
     },
@@ -69,6 +71,14 @@ export function createParties({ random = Math.random } = {}) {
       if (!p || p.leader !== by || by === c || !p.members.includes(c)) return { ok: false, why: 'party' };
       const r = P.leave(c);
       return { ...r, kicked: c };
+    },
+    /** Play-test 2 (Q4): the leader sets the party's loot threshold (items at/above it are rolled for). */
+    loot(by, min) {
+      const p = byChar.get(by);
+      min = LOOT_ALIASES[min] || min;
+      if (!p || p.leader !== by || !LOOT_MINS.includes(min)) return { ok: false, why: 'party' };
+      p.lootMin = min;
+      return { ok: true, party: p, changed: [p] };
     },
     lead(by, c) {
       const p = byChar.get(by);

@@ -4,14 +4,14 @@
 # copied to daily/, kept 14 days. The off-machine copy (S3/R2, PLAN §9.6) is not wired yet — it needs a bucket
 # key from the owner; when it exists, add it here (write-only key) and to /etc/thousandvale/env.
 set -eu
-DIR=/var/backups/thousandvale
+DIR=${TV_BACKUP_DIR:-/var/backups/thousandvale}   # overridable: ops/drill-local.sh runs this same script without sudo
 mkdir -p "$DIR/hourly" "$DIR/daily"
 STAMP=$(date -u +%Y%m%dT%H%M%SZ)
-OUT="$DIR/hourly/thousandvale_stable-$STAMP.dump"
+OUT="$DIR/hourly/${PGDATABASE:?}-$STAMP.dump"
 pg_dump -Fc --no-owner -f "$OUT.part" "${PGDATABASE:?}"
 mv "$OUT.part" "$OUT"
 DAY=$(date -u +%Y%m%d)
-ls "$DIR/daily/" 2>/dev/null | grep -q "$DAY" || cp "$OUT" "$DIR/daily/thousandvale_stable-$DAY.dump"
+ls "$DIR/daily/" 2>/dev/null | grep -q "$DAY" || cp "$OUT" "$DIR/daily/${PGDATABASE}-$DAY.dump"
 find "$DIR/hourly" -name '*.dump' -mmin +2880 -delete
 find "$DIR/daily" -name '*.dump' -mtime +14 -delete
 ln -sf "$OUT" "$DIR/latest.dump"

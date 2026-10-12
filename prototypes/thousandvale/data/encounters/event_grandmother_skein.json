@@ -55,8 +55,9 @@
     { "name": "Hush, Now", "abilities": ["lash", "web_volley", "lullaby"] },
     { "name": "The Brood", "at": 0.6, "say": "You've upset the babies. Grandmother needs a little lie-down.",
       "abilities": ["brood_call", "silk_rain"],
-      "onEnter": [ { "shield": true }, { "adds": { "type": "veil_spider", "count": 3, "radius": 12, "at": "home" } },
-        { "say": "A ward of silk closes over Grandmother Skein. Burn all three egg sacs!", "style": "warn" } ] },
+      "ward": {"seconds": 25, "pool": 0.1, "break": "objects", "need": 3, "what": "brazier", "say": "A ward of silk closes over Grandmother Skein. Burn all three egg sacs! It fails by itself in 25 seconds.", "fade": "The ward fails by itself. No opening this time."},
+      "onEnter": [ { "shield": { "seconds": 25, "pool": 0.1 } }, { "adds": { "type": "veil_spider", "count": 3, "radius": 12, "at": "home" } },
+        { "say": "A ward of silk closes over Grandmother Skein. Burn all three egg sacs! It fails by itself in 25 seconds.", "style": "warn" } ] },
     { "name": "Grandmother's Embrace", "newBar": { "hp": 0.5 }, "say": "My babies! My BABIES! Oh, you will pay for that, dears.",
       "abilities": ["lash", "cocoon", "threads", "embrace", "web_volley"] }
   ],

@@ -1,0 +1,558 @@
+/* Thousandvale — the PHONE layout (play-test 5, T26 — stream G). A PROPOSAL, built for the iPhone 15 Pro
+   (393 x 852 CSS px upright, 852 x 393 on its side; Dynamic Island and home bar kept clear).
+
+   Every rule here is under html[data-layout="phone"]. The game never sets that attribute until the owner approves the
+   layout (the one switch is PHONE_LAYOUT_ENABLED in js/client/input/layout.js); the gallery's frame sets it itself.
+   The controls it styles are made by js/client/input/touch.js; the skill buttons are the game's own action-bar slots.
+
+   Rules of the layout (docs/UI.md has the reasoning):
+     · nothing you can press is smaller than 44 x 44 px, and nothing sits under the island or the home bar
+     · the left thumb moves, the right thumb fights: the whole right cluster is within one thumb's arc of the corner
+     · windows are full-screen sheets with one tab bar; cards open on tap-and-hold, never on hover
+     · text is 13 px or larger; anything that was a hover hint is either written out or behind a hold            */
+
+html[data-layout="phone"] {
+  --safe-top: env(safe-area-inset-top, 0px); --safe-right: env(safe-area-inset-right, 0px); --safe-bottom: env(safe-area-inset-bottom, 0px); --safe-left: env(safe-area-inset-left, 0px);
+  --st: var(--safe-top); --sr: var(--safe-right); --sb: var(--safe-bottom); --sl: var(--safe-left);
+  --tap: 44px;
+  -webkit-text-size-adjust: 100%; touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none;
+}
+html[data-layout="phone"] body { font-size: 15px; overscroll-behavior: none; position: fixed; inset: 0; width: 100%; }   /* fixed: iOS cannot rubber-band the page */
+html[data-layout="phone"] canvas#view { height: 100%; }
+html[data-layout="phone"] input, html[data-layout="phone"] textarea, html[data-layout="phone"] select { font-size: 16px; user-select: text; -webkit-user-select: text; }   /* 16 px: iOS does not zoom the page on focus */
+
+/* ================================================================ what the desktop has and a phone does not need */
+html[data-layout="phone"] #menubar, html[data-layout="phone"] .tv-clock, html[data-layout="phone"] .conn, html[data-layout="phone"] .slot > .key, html[data-layout="phone"] .hb-sep,
+html[data-layout="phone"] .bag-hint, html[data-layout="phone"] .tv-deeds, html[data-layout="phone"] .interact kbd, html[data-layout="phone"] .rise small, html[data-layout="phone"] .tvp-sub { display: none !important; }
+
+/* ================================================================ the world HUD */
+/* your frame: top left, compact. A tap clears your target (heals go to you). */
+html[data-layout="phone"] .unitframe { transform: none; min-width: 0; top: calc(var(--st) + 6px); padding: 4px 10px 4px 4px; gap: 6px; border-radius: 26px 8px 8px 26px; pointer-events: auto; }
+html[data-layout="phone"] .unitframe.self { left: calc(var(--sl) + 6px); width: 172px; min-height: var(--tap); }
+html[data-layout="phone"] .unitframe .uf-portrait { width: 38px; height: 38px; font-size: 17px; }
+html[data-layout="phone"] .unitframe .uf-portrait em { font-size: 11px; min-width: 20px; height: 18px; line-height: 16px; bottom: -5px; right: -7px; }
+html[data-layout="phone"] .unitframe .uf-name { font-size: 12px; margin-bottom: 2px; }
+html[data-layout="phone"] .unitframe .bar { height: 13px; }
+html[data-layout="phone"] .unitframe .bar.mp { height: 8px; margin-top: 2px; }
+html[data-layout="phone"] .unitframe .bar.mp span { display: none; }
+html[data-layout="phone"] .unitframe .bar span { font-size: 10px; }
+/* the target: top centre */
+html[data-layout="phone"] .unitframe.target { left: 50%; top: calc(var(--st) + 6px); width: 190px; margin-left: -95px; min-height: var(--tap); }
+html[data-layout="phone"] .unitframe .uf-sub { font-size: 11px; margin-top: 1px; }
+/* party frames: a column of 44 px tap targets under your frame — a healer picks a friend with one thumb */
+html[data-layout="phone"] .partyframes { transform: none; top: calc(var(--st) + 58px); left: calc(var(--sl) + 6px); gap: 4px; }
+html[data-layout="phone"] .pmember { width: 132px; min-height: var(--tap); padding: 3px 8px 3px 5px; gap: 6px; border-radius: 22px 8px 8px 22px; }
+html[data-layout="phone"] .pmember .pm-icon { width: 32px; height: 32px; }
+html[data-layout="phone"] .pmember .pm-name { font-size: 12px; }
+html[data-layout="phone"] .pmember .pm-name small, html[data-layout="phone"] .pmember .pm-where:empty { display: none; }
+html[data-layout="phone"] .pmember .bar { height: 10px; }
+html[data-layout="phone"] .pmember .bar.mp { height: 5px; }
+html[data-layout="phone"] .pmember.targeted, html[data-layout="phone"] .pmember:active { border-color: var(--gold-hi); box-shadow: 0 0 10px rgba(241, 213, 149, 0.6); }
+html[data-layout="phone"] .pmember .pm-where { font-size: 10px; }
+
+/* minimap: top right, a tap opens the map */
+html[data-layout="phone"] .minimap { top: calc(var(--st) + 6px); right: calc(var(--sr) + 6px); transform: scale(0.5); transform-origin: top right; }   /* the canvas is 184 px: half = 92 */
+html[data-layout="phone"] .minimap .mm-btns, html[data-layout="phone"] .minimap .mm-zone { display: none; }
+/* V7 — quests and events live behind ONE bubble (js/client/input/touch.js .ph-info). Closed: nothing but the bubble and
+   its count. Open: the cards in full, and the minimap at a readable size beside / above them. */
+html[data-layout="phone"] .right-col { display: none; }
+html[data-layout="phone"][data-hudinfo="open"] .right-col { display: flex; top: calc(var(--st) + 56px); left: 50%; right: auto; width: 300px; margin-left: -150px; gap: 4px; max-height: calc(100% - var(--st) - var(--sb) - 70px); overflow-y: auto; z-index: 6; }
+html[data-layout="phone"] .right-col > * { font-size: 13px; }
+html[data-layout="phone"] .et-card, html[data-layout="phone"] .tv-tracker .tr-main, html[data-layout="phone"] .tv-tracker .tr-row { background: rgba(16, 13, 10, 0.92); }
+html[data-layout="phone"] .tv-tracker .tr-main, html[data-layout="phone"] .tv-tracker .tr-row { min-height: var(--tap); }
+html[data-layout="phone"] .et-x { min-width: var(--tap); min-height: var(--tap); }
+html[data-layout="phone"] .ph-btn.ph-info, html[data-layout="phone"] .ph-btn.ph-partymin { position: absolute; width: 46px; height: 46px; border-radius: 50%; pointer-events: auto; }
+html[data-layout="phone"] .ph-btn.ph-info { top: calc(var(--st) + 6px); right: calc(var(--sr) + 210px); }
+html[data-layout="phone"] .ph-btn.ph-info b { position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; background: #b8901c; color: #fff; font: 700 11px/18px var(--sans); }
+html[data-layout="phone"] .ph-btn.ph-info b:empty { display: none; }
+html[data-layout="phone"] .ph-btn.ph-partymin { top: calc(var(--st) + 58px); left: calc(var(--sl) + 146px); width: 44px; height: 44px; opacity: 0.8; }
+html[data-layout="phone"] #party[hidden] ~ .phone-ui .ph-partymin { display: none; }
+html[data-layout="phone"][data-hudinfo="open"] .minimap { transform: scale(0.62); }
+html[data-layout="phone"][data-hudinfo="open"] .minimap .mm-zone { display: block; }
+@media (orientation: portrait) {
+  html[data-layout="phone"] .unitframe.target { left: auto; right: calc(var(--sr) + 6px); margin: 0; top: calc(var(--st) + 104px); }
+  html[data-layout="phone"] .ph-btn.ph-info { top: calc(var(--st) + 156px); right: calc(var(--sr) + 6px); }
+  html[data-layout="phone"] .ph-btn.ph-partymin { top: calc(var(--st) + 56px); left: calc(var(--sl) + 184px); }
+  html[data-layout="phone"][data-hudinfo="open"] .minimap { transform: scale(0.8); top: calc(var(--st) + 156px); right: calc(var(--sr) + 58px); }
+  html[data-layout="phone"][data-hudinfo="open"] .minimap .mm-zone { display: none; }
+  html[data-layout="phone"][data-hudinfo="open"] .right-col { left: auto; margin: 0; right: calc(var(--sr) + 6px); top: calc(var(--st) + 312px); width: 250px; max-height: calc(100% - var(--st) - var(--sb) - 312px - 240px); }
+  html[data-layout="phone"] .boss { top: calc(var(--st) + 206px); left: calc(var(--sl) + 8px); right: calc(var(--sr) + 8px); width: auto; transform: none; }
+}
+/* V7 — the party as round portraits: health climbs the left side of the ring, mana the right; the one you have targeted wears a gold ring and a mark */
+html[data-layout="phone"][data-party="min"] .partyframes { gap: 6px; }
+html[data-layout="phone"][data-party="min"] .pmember { position: relative; width: 52px; height: 52px; min-height: 52px; padding: 0; border: 0; border-radius: 50%; background: rgba(12, 10, 8, 0.85); display: grid; place-items: center; }
+html[data-layout="phone"][data-party="min"] .pmember::before { content: ''; position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+  background: conic-gradient(from 180deg, #63d86a calc(var(--hp, 1) * 50%), rgba(0, 0, 0, 0.55) 0 50%, rgba(0, 0, 0, 0.55) calc(100% - var(--mp, 0) * 50%), #4f8dff 0);
+  -webkit-mask: radial-gradient(circle, transparent 20px, #000 21px); mask: radial-gradient(circle, transparent 20px, #000 21px); }
+html[data-layout="phone"][data-party="min"] .pmember::after { content: ''; position: absolute; left: 50%; top: -1px; bottom: -1px; width: 2px; margin-left: -1px; background: #0c0a08; pointer-events: none; -webkit-mask: linear-gradient(#000 0 7px, transparent 7px calc(100% - 7px), #000 0); mask: linear-gradient(#000 0 7px, transparent 7px calc(100% - 7px), #000 0); }
+html[data-layout="phone"][data-party="min"] .pmember .pm-icon { width: 38px; height: 38px; }
+html[data-layout="phone"][data-party="min"] .pmember .pm-body { display: none; }
+html[data-layout="phone"][data-party="min"] .pmember.dead .pm-icon { filter: grayscale(1) brightness(0.6); }
+html[data-layout="phone"][data-party="min"] .pmember.targeted { box-shadow: 0 0 0 3px var(--gold-hi), 0 0 14px rgba(241, 213, 149, 0.8); }
+html[data-layout="phone"] .pmember.targeted { position: relative; }
+html[data-layout="phone"] .pmember.targeted .pm-icon::before { content: '◆'; position: absolute; right: -9px; top: 50%; margin-top: -8px; font-size: 13px; line-height: 16px; color: var(--gold-hi); text-shadow: 0 0 4px #000; }
+html[data-layout="phone"] .pmember .pm-icon { position: relative; }
+html[data-layout="phone"][data-sheet]:not([data-sheet=""]) .right-col { display: none !important; }
+
+/* banners, toasts, call-outs: the band under the target frame */
+html[data-layout="phone"] .zone-banner { top: calc(var(--st) + 64px); }
+html[data-layout="phone"] .zone-banner strong { font-size: 24px; }
+html[data-layout="phone"] .toasts { top: calc(var(--st) + 150px); max-width: 70vw; text-align: center; }
+html[data-layout="phone"] .toast { font-size: 15px; }
+html[data-layout="phone"] .callout { top: calc(var(--st) + 84px); font-size: 20px; }
+html[data-layout="phone"] .center-stack { top: calc(var(--st) + 152px) !important; max-width: min(94vw, 420px); }
+html[data-layout="phone"] .invite-pop { position: relative; top: auto; right: auto; transform: none; width: auto; padding: 8px 10px; }
+html[data-layout="phone"] .invite-pop button { min-height: var(--tap); min-width: 72px; }
+html[data-layout="phone"] .boss { top: calc(var(--st) + 56px); width: min(300px, 60vw); z-index: 2; }
+html[data-layout="phone"] .boss:not([hidden]) ~ .right-col { display: none; }
+html[data-layout="phone"] .boss-head strong { font-size: 15px; } html[data-layout="phone"] .boss-head em { display: none; }
+html[data-layout="phone"] .boss-bar { height: 16px; }
+
+/* ---------------------------------------------------------------- the right thumb: attack + two arcs */
+/* Each control sets --x / --y (its centre, measured from the safe bottom-right corner) and --d (its size). */
+html[data-layout="phone"] .actionbar { position: static; transform: none; display: block; padding: 0; background: none; border: 0; box-shadow: none; }
+html[data-layout="phone"] .actionbar .slot, html[data-layout="phone"] .ph-btn.ph-jump, html[data-layout="phone"] .ph-btn.ph-target, html[data-layout="phone"] .ph-btn.ph-ally, html[data-layout="phone"] .ph-btn.ph-belt, html[data-layout="phone"] .ph-btn.ph-hook {
+  position: absolute; right: calc(var(--sr) + var(--x) - var(--d) / 2); bottom: calc(var(--sb) + var(--y) - var(--d) / 2); width: var(--d); height: var(--d); border-radius: 50%; pointer-events: auto; touch-action: none; }
+html[data-layout="phone"] .actionbar .slot { border: 2px solid rgba(217, 178, 106, 0.6); background: radial-gradient(circle at 40% 35%, rgba(70, 56, 38, 0.92), rgba(18, 14, 10, 0.92) 75%); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6); }
+html[data-layout="phone"] .actionbar .slot.empty { opacity: 0.35; }
+html[data-layout="phone"] .actionbar .slot .face { font-size: 15px; font-weight: 700; }
+html[data-layout="phone"] .actionbar .slot .cd { border-radius: 50%; }
+html[data-layout="phone"] .actionbar .slot.ally { border-color: #7fe08a; }
+html[data-layout="phone"] .hb-group { position: static; margin: 0; }
+html[data-layout="phone"] .actionbar .hb-slot { display: none; }                                   /* potions live behind the Belt (hold) */
+html[data-layout="phone"] .ph-btn { display: grid; place-items: center; padding: 0; border: 2px solid rgba(255, 255, 255, 0.35); background: rgba(14, 12, 10, 0.62); color: #f3ead8; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+html[data-layout="phone"] .ph-btn svg { width: 22px; height: 22px; }
+html[data-layout="phone"] .ph-btn.on, html[data-layout="phone"] .ph-btn:active { background: rgba(140, 100, 39, 0.9); border-color: var(--gold-hi); }
+html[data-layout="phone"] .phone-ui { position: absolute; inset: 0; pointer-events: none; }
+/* attack */
+html[data-layout="phone"] .actionbar > .slot:nth-child(1) { --x: 52px; --y: 52px; --d: 76px; border-color: var(--gold-hi); }
+html[data-layout="phone"] .actionbar > .slot:nth-child(1) svg { width: 40px; height: 40px; }
+/* inner arc, radius 112: skills 1–4 */
+html[data-layout="phone"] .actionbar > .slot:nth-child(2) { --x: 52px; --y: 164px; --d: 52px; }
+html[data-layout="phone"] .actionbar > .slot:nth-child(3) { --x: 108px; --y: 149px; --d: 52px; }
+html[data-layout="phone"] .actionbar > .slot:nth-child(4) { --x: 149px; --y: 108px; --d: 52px; }
+html[data-layout="phone"] .actionbar > .slot:nth-child(5) { --x: 164px; --y: 52px; --d: 52px; }
+/* outer arc, radius 176: skills 5–6, belt, target, ally, jump (most used nearest the top, where the thumb stretches easily) */
+html[data-layout="phone"] .actionbar > .slot:nth-child(6) { --x: 52px; --y: 228px; --d: 46px; }
+html[data-layout="phone"] .actionbar > .slot:nth-child(7) { --x: 106px; --y: 219px; --d: 46px; }
+html[data-layout="phone"] .ph-btn.ph-belt { --x: 155px; --y: 194px; --d: 46px; border-color: #ff9a8f; }
+html[data-layout="phone"] .ph-btn.ph-target { --x: 194px; --y: 155px; --d: 46px; }
+html[data-layout="phone"] .ph-btn.ph-ally { --x: 219px; --y: 106px; --d: 46px; border-color: #7fe08a; }
+html[data-layout="phone"] .ph-btn.ph-jump { --x: 228px; --y: 52px; --d: 46px; }
+/* a bite: the Hook / Reel button takes the attack button's place */
+html[data-layout="phone"] .ph-btn.ph-hook { --x: 52px; --y: 52px; --d: 84px; display: none; background: rgba(40, 110, 170, 0.92); border-color: #bfe6ff; font: 700 13px var(--sans); z-index: 3; }
+html[data-layout="phone"] .ph-btn.ph-hook svg { width: 28px; height: 28px; }
+html[data-layout="phone"][data-fishing="bite"] .ph-btn.ph-hook, html[data-layout="phone"][data-fishing="tug"] .ph-btn.ph-hook { display: grid; }
+
+/* Variant B (on its side only): a flat 2 x 4 grid instead of the arcs — everything in rows, nothing behind a hold */
+@media (orientation: landscape) {
+  html[data-layout="phone"][data-variant="b"] .actionbar > .slot:nth-child(2) { --x: 126px; --y: 36px; --d: 52px; }
+  html[data-layout="phone"][data-variant="b"] .actionbar > .slot:nth-child(3) { --x: 184px; --y: 36px; --d: 52px; }
+  html[data-layout="phone"][data-variant="b"] .actionbar > .slot:nth-child(4) { --x: 242px; --y: 36px; --d: 52px; }
+  html[data-layout="phone"][data-variant="b"] .actionbar > .slot:nth-child(5) { --x: 300px; --y: 36px; --d: 52px; }
+  html[data-layout="phone"][data-variant="b"] .actionbar > .slot:nth-child(6) { --x: 126px; --y: 94px; --d: 52px; }
+  html[data-layout="phone"][data-variant="b"] .actionbar > .slot:nth-child(7) { --x: 184px; --y: 94px; --d: 52px; }
+  html[data-layout="phone"][data-variant="b"] .actionbar .slot, html[data-layout="phone"][data-variant="b"] .ph-btn.ph-belt { border-radius: 12px; }
+  html[data-layout="phone"][data-variant="b"] .actionbar .slot .cd { border-radius: 10px; }
+  html[data-layout="phone"][data-variant="b"] .actionbar > .slot:nth-child(1) { border-radius: 50%; }
+  html[data-layout="phone"][data-variant="b"] .actionbar .hb-slot { display: grid; }
+  html[data-layout="phone"][data-variant="b"] .actionbar .hb-slot[data-hb="0"] { --x: 242px; --y: 94px; --d: 52px; }
+  html[data-layout="phone"][data-variant="b"] .actionbar .hb-slot[data-hb="1"] { --x: 300px; --y: 94px; --d: 52px; }
+  html[data-layout="phone"][data-variant="b"] .actionbar .hb-slot[data-hb="2"], html[data-layout="phone"][data-variant="b"] .actionbar .hb-slot[data-hb="3"] { display: none; }
+  html[data-layout="phone"][data-variant="b"] .ph-btn.ph-target { --x: 52px; --y: 124px; --d: 48px; }
+  html[data-layout="phone"][data-variant="b"] .ph-btn.ph-ally { --x: 52px; --y: 178px; --d: 48px; }
+  html[data-layout="phone"][data-variant="b"] .ph-btn.ph-jump { --x: 52px; --y: 232px; --d: 48px; }
+  html[data-layout="phone"][data-variant="b"] .ph-btn.ph-belt { --x: 110px; --y: 150px; --d: 46px; }
+}
+/* upright: the same two arcs, a little tighter (the screen is 393 wide) */
+@media (orientation: portrait) {
+  html[data-layout="phone"] .actionbar > .slot:nth-child(1) { --x: 46px; --y: 46px; --d: 68px; }
+  html[data-layout="phone"] .actionbar > .slot:nth-child(2) { --x: 46px; --y: 150px; --d: 48px; }
+  html[data-layout="phone"] .actionbar > .slot:nth-child(3) { --x: 98px; --y: 136px; --d: 48px; }
+  html[data-layout="phone"] .actionbar > .slot:nth-child(4) { --x: 136px; --y: 98px; --d: 48px; }
+  html[data-layout="phone"] .actionbar > .slot:nth-child(5) { --x: 150px; --y: 46px; --d: 48px; }
+  html[data-layout="phone"] .actionbar > .slot:nth-child(6) { --x: 46px; --y: 206px; --d: 44px; }
+  html[data-layout="phone"] .actionbar > .slot:nth-child(7) { --x: 95px; --y: 198px; --d: 44px; }
+  html[data-layout="phone"] .ph-btn.ph-belt { --x: 140px; --y: 175px; --d: 44px; }
+  html[data-layout="phone"] .ph-btn.ph-target { --x: 175px; --y: 140px; --d: 44px; }
+  html[data-layout="phone"] .ph-btn.ph-ally { --x: 198px; --y: 95px; --d: 44px; }
+  html[data-layout="phone"] .ph-btn.ph-jump { --x: 206px; --y: 46px; --d: 44px; }
+  html[data-layout="phone"] .ph-btn.ph-hook { --x: 46px; --y: 46px; --d: 76px; }
+}
+
+/* ---------------------------------------------------------------- the left thumb: a stick that appears where you touch */
+html[data-layout="phone"] .ph-stickzone { position: absolute; left: 0; bottom: 0; width: 42%; height: 58%; pointer-events: auto; touch-action: none; }
+html[data-layout="phone"] .ph-stick { position: absolute; left: calc(var(--sl) + 86px); top: calc(100% - var(--sb) - 86px); width: 0; height: 0; opacity: 0.4; transition: opacity 0.15s; }
+html[data-layout="phone"] .ph-stick.on { opacity: 1; }
+html[data-layout="phone"] .ph-stick .ph-ring { position: absolute; left: -62px; top: -62px; width: 124px; height: 124px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.4); background: rgba(10, 9, 7, 0.28); }
+html[data-layout="phone"] .ph-stick.sprint .ph-ring { border-color: var(--gold-hi); box-shadow: 0 0 14px rgba(241, 213, 149, 0.7); }
+html[data-layout="phone"] .ph-stick .ph-thumb { position: absolute; left: -27px; top: -27px; width: 54px; height: 54px; border-radius: 50%; background: rgba(243, 234, 216, 0.82); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6); }
+@media (orientation: portrait) { html[data-layout="phone"] .ph-stickzone { width: 46%; height: 34%; } html[data-layout="phone"] .ph-stick { left: calc(var(--sl) + 78px); top: calc(100% - var(--sb) - 84px); } }
+
+/* ---------------------------------------------------------------- small round buttons along the top right: wheel, chat */
+html[data-layout="phone"] .ph-btn.ph-wheel, html[data-layout="phone"] .ph-btn.ph-chat { position: absolute; top: calc(var(--st) + 6px); width: 46px; height: 46px; border-radius: 50%; pointer-events: auto; }
+html[data-layout="phone"] .ph-btn.ph-wheel { right: calc(var(--sr) + 106px); border-color: var(--gold-hi); }
+html[data-layout="phone"] .ph-btn.ph-chat { right: calc(var(--sr) + 158px); }
+html[data-layout="phone"] .ph-btn.ph-chat b { position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; background: #c7372f; color: #fff; font: 700 11px/18px var(--sans); }
+html[data-layout="phone"] .ph-btn.ph-chat b:empty { display: none; }
+
+/* the prompt ("Talk — Elder Maud") is a button: centre, above the home bar */
+html[data-layout="phone"] .interact { bottom: calc(var(--sb) + 18px); min-height: 48px; padding: 0 20px; font-size: 15px; pointer-events: auto; border-color: var(--gold-hi); border-radius: 24px; }
+html[data-layout="phone"] .ally-note { bottom: calc(var(--sb) + 72px) !important; font-size: 12px; max-width: 46vw; }
+html[data-layout="phone"] .ally-note small { display: none; }
+/* experience: a hairline over the home bar */
+html[data-layout="phone"] .xpbar { position: absolute; left: calc(var(--sl) + 0px); right: calc(var(--sr) + 0px); bottom: calc(var(--sb) + 0px); width: auto; height: 3px; margin: 0; border: 0; border-radius: 0; transform: none; }
+html[data-layout="phone"] .xpbar span { display: none; }
+html[data-layout="phone"] .buffrow { top: calc(var(--st) + 60px); left: calc(var(--sl) + 146px); }
+html[data-layout="phone"] .tv-fish { bottom: calc(var(--sb) + 76px); }
+
+/* ---------------------------------------------------------------- chat: folded away until you ask for it */
+html[data-layout="phone"] .chat { display: none; }
+html[data-layout="phone"][data-chat="open"] .chat { display: flex; flex-direction: column; position: absolute; left: calc(var(--sl) + 6px); top: calc(var(--st) + 6px); bottom: calc(var(--sb) + 6px); width: min(360px, calc(100vw - var(--sl) - var(--sr) - 12px)); z-index: 40; padding: 8px 10px; background: rgba(14, 12, 10, 0.94); border: 1px solid var(--edge-strong); border-radius: 12px; }
+html[data-layout="phone"][data-chat="open"] .chat-log { flex: 1; max-height: none; background: none; font-size: 15px; }
+html[data-layout="phone"][data-chat="open"] .chat-entry { opacity: 1; margin-top: 6px; }
+html[data-layout="phone"][data-chat="open"] .chat-entry input { min-height: var(--tap); }
+html[data-layout="phone"] .chat-tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-right: 48px; }
+html[data-layout="phone"] .chat-tabs button, html[data-layout="phone"] .chat-tab { min-height: var(--tap); padding: 0 12px; flex: none; }
+html[data-layout="phone"] .ph-chat-x { position: absolute; top: 4px; right: 4px; width: var(--tap); height: var(--tap); border-radius: 50%; border: 0; background: none; }
+@media (orientation: portrait) { html[data-layout="phone"][data-chat="open"] .chat { top: auto; height: 46%; width: auto; right: calc(var(--sr) + 6px); bottom: calc(var(--sb) + 6px); } }
+/* while the chat or a window is open the fight controls step aside */
+html[data-layout="phone"][data-chat="open"] .ph-stickzone, html[data-layout="phone"][data-chat="open"] .partyframes,
+html[data-layout="phone"][data-sheet]:not([data-sheet=""]) .ph-stickzone, html[data-layout="phone"][data-sheet]:not([data-sheet=""]) .actionbar, html[data-layout="phone"][data-sheet]:not([data-sheet=""]) .ph-btn:not(.pt-tab):not(.ph-chat-x),
+html[data-layout="phone"][data-sheet]:not([data-sheet=""]) .interact, html[data-layout="phone"][data-sheet]:not([data-sheet=""]) .unitframe, html[data-layout="phone"][data-sheet]:not([data-sheet=""]) .partyframes,
+html[data-layout="phone"][data-sheet]:not([data-sheet=""]) .minimap, html[data-layout="phone"][data-sheet]:not([data-sheet=""]) .right-col, html[data-layout="phone"][data-sheet]:not([data-sheet=""]) .xpbar, html[data-layout="phone"][data-sheet]:not([data-sheet=""]) .ally-note { display: none !important; }
+
+/* ================================================================ windows are sheets */
+html[data-layout="phone"] { --tabs: 56px; }
+html[data-layout="phone"] .tv-panel:not(.pause-panel), html[data-layout="phone"] .bag.inv, html[data-layout="phone"] .party-menu {
+  position: fixed !important; z-index: 60; left: calc(var(--sl) + var(--rail, 0px)) !important; right: var(--sr) !important; top: var(--st) !important; bottom: calc(var(--sb) + var(--bar, 0px)) !important;
+  width: auto !important; height: auto !important; max-width: none !important; max-height: none !important; margin: 0 !important; transform: none !important; border-radius: 0; border-width: 0; background: rgba(16, 13, 10, 0.97); box-shadow: none; display: flex; flex-direction: column; }
+@media (orientation: portrait) { html[data-layout="phone"] { --bar: var(--tabs); --rail: 0px; } }
+@media (orientation: landscape) { html[data-layout="phone"] { --rail: var(--tabs); --bar: 0px; } }
+html[data-layout="phone"][data-stage="title"] { --rail: 0px; --bar: 0px; }
+html[data-layout="phone"] .tv-panel .tvp-head, html[data-layout="phone"] .bag.inv > header { flex: none; min-height: 48px; padding: 0 4px 0 14px; display: flex; align-items: center; cursor: default; border-bottom: 1px solid var(--edge); margin: 0; }
+html[data-layout="phone"] .tv-panel .tvp-head h3, html[data-layout="phone"] .bag.inv h3 { font-size: 17px; }
+html[data-layout="phone"] .tvp-x, html[data-layout="phone"] #bag-close { width: var(--tap); height: var(--tap); min-width: var(--tap); font-size: 24px; margin-left: auto; border: 0; background: none; }
+html[data-layout="phone"] .tv-panel .tvp-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 10px 14px 16px; max-height: none; }
+/* every control inside a sheet is finger-sized */
+html[data-layout="phone"] .tv-panel button, html[data-layout="phone"] .bag.inv button, html[data-layout="phone"] .party-menu button, html[data-layout="phone"] .tv-dialog button, html[data-layout="phone"] .tv-confirm button, html[data-layout="phone"] .title button, html[data-layout="phone"] .phone-sheet button,
+html[data-layout="phone"] .tv-panel select, html[data-layout="phone"] .bag.inv select, html[data-layout="phone"] .title select, html[data-layout="phone"] .tv-panel input:not([type="checkbox"]):not([type="range"]), html[data-layout="phone"] .bag.inv input:not([type="checkbox"]), html[data-layout="phone"] .party-menu input, html[data-layout="phone"] .title input:not([type="checkbox"]),
+html[data-layout="phone"] .chip, html[data-layout="phone"] [role="tab"] { min-height: var(--tap); min-width: var(--tap); }
+html[data-layout="phone"] .chip { display: inline-flex; align-items: center; justify-content: center; padding: 0 14px; }
+html[data-layout="phone"] .chips { gap: 8px; }
+html[data-layout="phone"] button.small, html[data-layout="phone"] .ghost.small, html[data-layout="phone"] .primary.small { font-size: 14px; padding: 0 14px; }
+html[data-layout="phone"] input[type="checkbox"] { width: 24px; height: 24px; min-width: 0; min-height: 0; flex: none; }
+html[data-layout="phone"] label.check, html[data-layout="phone"] .set-row, html[data-layout="phone"] .inv-gearbox { min-height: var(--tap); display: flex; align-items: center; gap: 10px; }
+html[data-layout="phone"] .tv-panel input[type="range"] { min-height: var(--tap); flex: 1; }
+html[data-layout="phone"] li[tabindex], html[data-layout="phone"] .j-row, html[data-layout="phone"] .ml-row, html[data-layout="phone"] .loot-row, html[data-layout="phone"] .rp-row, html[data-layout="phone"] .ck-row, html[data-layout="phone"] .kit-choice { min-height: var(--tap); }
+html[data-layout="phone"] a { min-height: var(--tap); display: inline-flex; align-items: center; }
+
+/* the tab bar: along the bottom upright, a rail on the left on its side (height is the scarce thing there) */
+html[data-layout="phone"] .phone-tabs { display: none; position: fixed; z-index: 61; pointer-events: auto; background: rgba(10, 8, 6, 0.98); }
+html[data-layout="phone"][data-sheet]:not([data-sheet=""]) .phone-tabs { display: flex; }
+html[data-layout="phone"] .pt-tab { flex: 1 1 0; min-width: var(--tap); min-height: var(--tap); border: 0; border-radius: 0; background: none; box-shadow: none; display: grid; place-content: center; justify-items: center; gap: 1px; color: var(--ink-faint); font: 600 10px/1.1 var(--sans); -webkit-backdrop-filter: none; backdrop-filter: none; }
+html[data-layout="phone"] .pt-tab svg { width: 22px; height: 22px; }
+html[data-layout="phone"] .pt-tab.on { color: var(--gold-hi); background: linear-gradient(180deg, rgba(140, 100, 39, 0.35), transparent); }
+html[data-layout="phone"] .pt-tab.pt-close { color: #ffb3a3; }
+@media (orientation: portrait) { html[data-layout="phone"] .phone-tabs { left: var(--sl); right: var(--sr); bottom: 0; height: calc(var(--tabs) + var(--sb)); padding-bottom: var(--sb); border-top: 1px solid var(--edge); } }
+@media (orientation: landscape) { html[data-layout="phone"] .phone-tabs { left: 0; top: 0; bottom: 0; width: calc(var(--sl) + var(--tabs)); padding: 0 0 var(--sb) var(--sl); flex-direction: column; border-right: 1px solid var(--edge); } html[data-layout="phone"] .pt-tab span { display: none; } }
+
+/* small windows stay cards in the middle (the pause menu, confirm boxes, dialogs) — with finger-sized buttons */
+html[data-layout="phone"] .tv-panel.pause-panel { position: fixed !important; left: 50% !important; top: 50% !important; right: auto !important; transform: translate(-50%, -50%) !important; width: min(320px, 86vw) !important; z-index: 70; }
+html[data-layout="phone"] .pause-list button { min-height: 48px; }
+html[data-layout="phone"] .tv-confirm { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(360px, 88vw); z-index: 90; }
+html[data-layout="phone"] .tv-confirm button { min-width: 96px; }
+html[data-layout="phone"] .tv-dialog { position: fixed !important; left: calc(var(--sl) + 8px) !important; right: calc(var(--sr) + 8px) !important; bottom: calc(var(--sb) + 8px) !important; top: auto !important; width: auto !important; max-width: none !important; max-height: 78%; transform: none !important; overflow-y: auto; z-index: 65; pointer-events: auto; }
+html[data-layout="phone"] .tv-dialog header button { width: var(--tap); height: var(--tap); }
+html[data-layout="phone"] .tv-dialog footer { display: flex; flex-wrap: wrap; gap: 8px; }
+html[data-layout="phone"] .tv-dialog footer button { flex: 1 1 140px; min-height: 48px; }
+html[data-layout="phone"] .ent-menu, html[data-layout="phone"] .name-menu { position: fixed !important; left: calc(var(--sl) + 8px) !important; right: calc(var(--sr) + 8px) !important; bottom: calc(var(--sb) + 8px) !important; top: auto !important; width: auto !important; max-height: 70%; overflow-y: auto; z-index: 95; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 4px; padding: 8px; }
+html[data-layout="phone"] .ent-menu button, html[data-layout="phone"] .name-menu button { min-height: var(--tap); text-align: left; padding: 0 12px; }
+html[data-layout="phone"] .ent-menu .nm-title { grid-column: 1 / -1; }
+
+/* ---------------------------------------------------------------- cards on hold: a sheet from the bottom */
+html[data-layout="phone"] .tipbox { display: none !important; }
+html[data-layout="phone"] .phone-sheet { position: fixed; inset: 0; z-index: 99000; background: rgba(0, 0, 0, 0.5); display: flex; align-items: flex-end; justify-content: center; }
+html[data-layout="phone"] .ps-card { width: 100%; max-width: 520px; max-height: 82%; display: flex; flex-direction: column; margin: 0 var(--sr) 0 var(--sl); padding: 6px 16px calc(var(--sb) + 12px); background: #16120e; border: 1px solid var(--edge-strong); border-bottom: 0; border-radius: 16px 16px 0 0; box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.6); }
+html[data-layout="phone"] .ps-grip { width: 40px; height: 4px; margin: 4px auto 8px; border-radius: 2px; background: rgba(255, 255, 255, 0.28); flex: none; }
+html[data-layout="phone"] .ps-body { overflow-y: auto; -webkit-overflow-scrolling: touch; font-size: 15px; line-height: 1.4; }
+html[data-layout="phone"] .ps-body .ps-tip { position: static; display: block; opacity: 1; max-width: none; width: auto; padding: 0; background: none; border: 0; box-shadow: none; font-size: 15px; color: var(--ink); }
+html[data-layout="phone"] .ps-body .itemtip { max-width: none; min-width: 0; }
+html[data-layout="phone"] .ps-actions { flex: none; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+html[data-layout="phone"] .ps-actions button { flex: 1 1 120px; min-height: 48px; font-size: 15px; width: auto; }
+html[data-layout="phone"] .ps-actions .ps-x { flex: 0 0 96px; }
+@media (orientation: landscape) { html[data-layout="phone"] .phone-sheet { justify-content: flex-end; align-items: stretch; } html[data-layout="phone"] .ps-card { width: 360px; max-height: none; margin: 0; padding: calc(var(--st) + 10px) calc(var(--sr) + 14px) calc(var(--sb) + 10px) 16px; border-radius: 16px 0 0 16px; border: 1px solid var(--edge-strong); border-right: 0; } html[data-layout="phone"] .ps-grip { display: none; } html[data-layout="phone"] .ps-body { flex: 1; } }
+
+/* ================================================================ window by window */
+/* bag: the grid is the screen; the paper doll folds above it (upright) or sits beside it (on its side) */
+html[data-layout="phone"] .bag.inv { padding: 0; overflow: hidden; }
+html[data-layout="phone"] .bag.inv .inv-xp { margin: 0 14px; }
+html[data-layout="phone"] .inv-body { flex: 1 1 auto; min-height: 0; padding: 8px 14px 12px; gap: 10px; grid-template-columns: 1fr; grid-template-rows: auto 1fr; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+html[data-layout="phone"] .inv-doll { grid-template-columns: repeat(6, minmax(0, 1fr)); grid-template-rows: none; gap: 6px; padding: 8px; }
+html[data-layout="phone"] .inv-doll .doll-col, html[data-layout="phone"] .inv-doll .doll-bottom { display: contents; }
+html[data-layout="phone"] .inv-doll .doll-figure { display: none; }
+html[data-layout="phone"] .inv-doll .islot, html[data-layout="phone"] .doll-bottom .islot { width: auto; min-height: 52px; }
+html[data-layout="phone"] .inv-gearrow { grid-column: 1 / -1; display: flex; gap: 14px; flex-wrap: wrap; }
+html[data-layout="phone"] .bag.inv .bag-grid { grid-template-columns: repeat(auto-fill, minmax(58px, 1fr)); gap: 6px; overflow: visible; flex: none; }
+html[data-layout="phone"] .inv-bag { min-height: auto; }
+html[data-layout="phone"] .inv-filters { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 -14px; padding: 0 14px; }
+html[data-layout="phone"] .inv-filters .chip { flex: none; font-size: 14px; }
+html[data-layout="phone"] .inv-tools select { flex: 0 0 150px; width: 150px; margin: 0; }
+html[data-layout="phone"] .islot .slotname { font-size: 10px; }
+html[data-layout="phone"] .islot[draggable="true"] { cursor: pointer; -webkit-user-drag: none; }
+@media (orientation: landscape) {
+  html[data-layout="phone"] .inv-body { grid-template-columns: 250px 1fr; grid-template-rows: 1fr; overflow: hidden; }
+  html[data-layout="phone"] .inv-doll { grid-template-columns: repeat(4, minmax(0, 1fr)); align-content: start; overflow-y: auto; }
+  html[data-layout="phone"] .inv-bag { min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+}
+/* the Character sheet is its own tab on a phone (no room beside the bag) */
+html[data-layout="phone"] body.sheet-with-bag .bag.inv, html[data-layout="phone"] body.sheet-with-bag .sheet-panel { left: calc(var(--sl) + var(--rail, 0px)) !important; right: var(--sr) !important; }
+html[data-layout="phone"] .sh-row { min-height: 36px; font-size: 15px; }
+
+/* perk forest + talents: the graph is the screen; the staged-picks bar is pinned to the bottom, thumb-sized */
+html[data-layout="phone"] .tvt-perks .tvp-body { padding: 0; display: flex; flex-direction: column; overflow: hidden; }
+html[data-layout="phone"] .pf-top { padding: 6px 10px 0; }
+html[data-layout="phone"] .pf-bar { flex: none; display: flex; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; gap: 6px; padding: 6px 10px; align-items: center; }
+html[data-layout="phone"] .pf-bar > * { flex: none; }
+html[data-layout="phone"] .pf-bar input { width: 150px; }
+html[data-layout="phone"] .pf-arms { display: flex; gap: 6px; }
+html[data-layout="phone"] .pf-host { flex: 1 1 auto; min-height: 0; height: auto !important; order: 2; touch-action: none; }
+html[data-layout="phone"] .pf-host canvas { touch-action: none; }
+html[data-layout="phone"] .pf-foot { display: none; }
+html[data-layout="phone"] .pf-stage { order: 3; flex: none; padding: 6px 10px calc(6px); border-top: 1px solid var(--edge); background: rgba(10, 8, 6, 0.98); }
+html[data-layout="phone"] .stage-bar { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; margin: 0; padding: 0; border: 0; background: none; }
+html[data-layout="phone"] .stage-bar > span:first-child, html[data-layout="phone"] .stage-bar .sb-text { flex: 1 1 auto; min-width: 0; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html[data-layout="phone"] .stage-bar small { display: none; }
+html[data-layout="phone"] .stage-bar button { min-width: 64px; min-height: 48px; font-size: 14px; flex: none; width: auto; }
+html[data-layout="phone"] .stage-bar button.primary { min-width: 104px; }
+html[data-layout="phone"] .tvt-skills .tvp-body { padding-bottom: 8px; }
+html[data-layout="phone"] .tvt-skill, html[data-layout="phone"] .tvt-node { min-height: 48px; }
+
+/* map: the canvas is the screen (drag pans, pinch zooms, hold drops a pin) */
+html[data-layout="phone"] #panel-map { inset: auto; }
+html[data-layout="phone"] #panel-map .tvp-body { padding: 0; display: flex; flex-direction: column; overflow: hidden; }
+html[data-layout="phone"] .wm-bar, html[data-layout="phone"] .map-bar { flex: none; display: flex; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; gap: 6px; padding: 6px 10px; }
+html[data-layout="phone"] .wm-bar > *, html[data-layout="phone"] .map-bar > * { flex: none; }
+html[data-layout="phone"] .map-help, html[data-layout="phone"] .wm-help { display: none; }
+html[data-layout="phone"] .map-canvas, html[data-layout="phone"] .wm-canvas, html[data-layout="phone"] #panel-map canvas { touch-action: none; }
+
+/* journal / mail / friends: list above, the chosen one below (upright) or beside it (on its side) */
+html[data-layout="phone"] .j-split { grid-template-columns: 1fr; }
+html[data-layout="phone"] .j-list { max-height: 34vh; }
+@media (orientation: landscape) { html[data-layout="phone"] .j-split { grid-template-columns: minmax(200px, 38%) 1fr; } html[data-layout="phone"] .j-list { max-height: none; } }
+html[data-layout="phone"] .hub-tabs, html[data-layout="phone"] .set-tabs, html[data-layout="phone"] .j-tabs, html[data-layout="phone"] .bind-tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+html[data-layout="phone"] .hub-tabs > *, html[data-layout="phone"] .set-tabs > *, html[data-layout="phone"] .j-tabs > *, html[data-layout="phone"] .bind-tabs > * { flex: none; }
+html[data-layout="phone"] .hub-panel .tv-panel { position: static !important; }
+html[data-layout="phone"] .party-menu { padding: 12px 14px; }
+html[data-layout="phone"] .bind-list, html[data-layout="phone"] .settings-panel .ctl-ref, html[data-layout="phone"] .keys-list { max-height: none; }
+html[data-layout="phone"] .bind-row { grid-template-columns: 1fr auto var(--tap); min-height: var(--tap); font-size: 15px; }
+html[data-layout="phone"] .bind-row .bind-key { height: var(--tap); min-width: 96px; }
+html[data-layout="phone"] .bind-row .bind-reset { width: var(--tap); height: var(--tap); }
+html[data-layout="phone"] .help-grid { grid-template-columns: 1fr; }
+html[data-layout="phone"] .help-grid dl, html[data-layout="phone"] .ctl-ref dl { font-size: 14px; gap: 8px 12px; }
+
+/* shop, loot, trade, rolls */
+html[data-layout="phone"] .loot-row, html[data-layout="phone"] .shop-row { min-height: 52px; }
+html[data-layout="phone"] .roll-card { width: min(340px, 92vw); }
+html[data-layout="phone"] .rc-btns button { min-height: var(--tap); flex: 1; }
+html[data-layout="phone"] .roll-stack { bottom: calc(var(--sb) + 10px); }
+html[data-layout="phone"] .roll-card { width: 250px; }
+@media (orientation: portrait) { html[data-layout="phone"] .roll-stack { bottom: auto; top: calc(var(--st) + 410px); } html[data-layout="phone"] .roll-card { width: 300px; } }
+html[data-layout="phone"] .trade-panel .tr-split, html[data-layout="phone"] .tr-halves { grid-template-columns: 1fr 1fr; }
+
+/* fishing: the tug bar sits beside the Reel button's thumb, the bite prompt mid-screen */
+html[data-layout="phone"] .fish-tug { transform: none; }
+html[data-layout="phone"] .fish-pill small { display: none; }
+
+/* death + the offer to be raised */
+html[data-layout="phone"] .death { padding: var(--st) var(--sr) var(--sb) var(--sl); }
+html[data-layout="phone"] .death h2 { font-size: 30px; }
+html[data-layout="phone"] .death .rise { min-height: 52px; min-width: 220px; }
+html[data-layout="phone"] .revive-ask { max-width: min(420px, 88vw); padding: 10px 14px; margin-bottom: 10px; }
+html[data-layout="phone"] .revive-ask button { min-height: 48px; min-width: 120px; width: auto; }
+
+/* crate / gift reveal */
+html[data-layout="phone"] .tv-reveal button { min-height: 48px; min-width: 140px; }
+
+/* ================================================================ the title screen and character creation */
+html[data-layout="phone"] .title { grid-template-columns: 1fr; align-content: start; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: calc(var(--st) + 10px) calc(var(--sr) + 14px) calc(var(--sb) + 14px) calc(var(--sl) + 14px); background: linear-gradient(180deg, rgba(10, 8, 6, 0.55), rgba(10, 8, 6, 0.86) 55%); }
+html[data-layout="phone"] .brand { align-self: auto; margin-bottom: 10px; }
+html[data-layout="phone"] .brand h1 { font-size: 32px; }
+html[data-layout="phone"] .brand p { font-size: 14px; }
+html[data-layout="phone"] .card { padding: 14px; }
+html[data-layout="phone"] .card-tabs { display: flex; gap: 8px; margin-bottom: 8px; }
+html[data-layout="phone"] .card-tabs button { flex: 1; }
+html[data-layout="phone"] .title input { min-height: 48px; }
+html[data-layout="phone"] .title-foot a { padding: 0 8px; }
+html[data-layout="phone"] .linkish { min-height: var(--tap); padding: 0 6px; }
+@media (orientation: landscape) {
+  html[data-layout="phone"] .title { grid-template-columns: minmax(300px, 400px) 1fr; column-gap: 12px; background: linear-gradient(90deg, rgba(10, 8, 6, 0.92), rgba(10, 8, 6, 0.7) 46%, rgba(10, 8, 6, 0) 70%); }
+  html[data-layout="phone"] .brand h1 { font-size: 26px; } html[data-layout="phone"] .brand p { display: none; }
+  html[data-layout="phone"] .title .field { margin-bottom: 8px; }
+}
+/* the appearance editor: a sheet over the lower part upright (the figure stays in view above it), a column on its side.
+   The starting-equipment step is a full sheet upright (three sets and the weapon packs need the room). */
+html[data-layout="phone"] .tv-panel.appearance-panel.title-mode:not(.x), html[data-layout="phone"] .tv-panel.appearance-panel { top: 36% !important; bottom: var(--sb) !important; left: var(--sl) !important; right: var(--sr) !important; max-height: none !important; border-top: 1px solid var(--edge-strong); border-radius: 16px 16px 0 0; }
+html[data-layout="phone"] .tv-panel.kits-panel.title-mode:not(.x), html[data-layout="phone"] .tv-panel.kits-panel { top: var(--st) !important; bottom: var(--sb) !important; left: var(--sl) !important; right: var(--sr) !important; max-height: none !important; }
+html[data-layout="phone"] .appearance-panel .ap-body { max-height: none; }
+html[data-layout="phone"] .kit-intro { display: block; }
+@media (orientation: landscape) {
+  html[data-layout="phone"] .tv-panel.appearance-panel.title-mode:not(.x), html[data-layout="phone"] .tv-panel.appearance-panel, html[data-layout="phone"] .tv-panel.kits-panel.title-mode:not(.x), html[data-layout="phone"] .tv-panel.kits-panel { top: var(--st) !important; right: auto !important; width: 56% !important; border-radius: 0; border-top: 0; border-right: 1px solid var(--edge-strong); }
+}
+html[data-layout="phone"] .ap-row { flex-wrap: wrap; min-height: var(--tap); }
+html[data-layout="phone"] .ap-swatches { gap: 6px; flex: 1 1 100%; }
+html[data-layout="phone"] .ap-foot { flex-wrap: wrap; }
+html[data-layout="phone"] .ap-foot .primary { flex: 1 1 100%; order: -1; }
+html[data-layout="phone"] .step-title { display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: center; }
+html[data-layout="phone"] .ap-sw { min-width: var(--tap); min-height: var(--tap); }
+html[data-layout="phone"] .kit-choice { padding: 10px; }
+
+/* ================================================================ the quick wheel and the keyboard on a phone */
+html[data-layout="phone"] .tv-radial { --R: 118px; }
+html[data-layout="phone"] .tv-radial .rd-slice { width: 72px; height: 72px; margin: -36px 0 0 -36px; }
+html[data-layout="phone"] .tv-radial .rd-hub { width: 112px; height: 112px; margin: -56px 0 0 -56px; }
+
+/* ================================================================ found by the 44 px / safe-area audit (tests/G/gallery.spec.js) */
+html[data-layout="phone"] .fish-btn { display: none !important; }                       /* casting is in the quick wheel (and the rod in the bag) */
+html[data-layout="phone"] .title-foot { position: static; margin-top: 10px; grid-column: 1; }
+html[data-layout="phone"] a { min-width: var(--tap); justify-content: center; }
+html[data-layout="phone"] .ap-row.ap-gear, html[data-layout="phone"] .map-toggle { min-height: var(--tap); padding: 0 8px; }
+html[data-layout="phone"] .kit-item .islot, html[data-layout="phone"] .islot.small, html[data-layout="phone"] .gold-slot { width: var(--tap); height: var(--tap); }
+html[data-layout="phone"] .inv-bag, html[data-layout="phone"] .inv-tools, html[data-layout="phone"] .inv-filters, html[data-layout="phone"] .inv-doll, html[data-layout="phone"] .inv-tools .row { min-width: 0; max-width: 100%; }
+html[data-layout="phone"] .inv-tools input { min-width: 0; flex: 1 1 0; }
+
+/* ================================================================ owner feedback 7 */
+/* V4 (also fixed for every layout in css/input.css): breadcrumb, heading and step each get their own place */
+/* V8: every bag filter is visible — the row wraps instead of hiding the last chip off the edge */
+html[data-layout="phone"] .inv-filters { flex-wrap: wrap; overflow: visible; margin: 0; padding: 0; gap: 6px; }
+html[data-layout="phone"] .inv-filters .chip { padding: 0 11px; }
+/* V9: the Character window opened from the bag's Stats button comes out on top of the bag (windows carry their own z-index) */
+html[data-layout="phone"] .bag.inv { z-index: 20; }
+html[data-layout="phone"] .phone-tabs { z-index: 4000; }
+html[data-layout="phone"] .center-stack, html[data-layout="phone"] .tv-confirm { z-index: 4500; }
+html[data-layout="phone"][data-sheet]:not([data-sheet=""]) .center-stack { top: calc(var(--st) + 54px) !important; }
+/* V6: Preview folds the editor / the equipment step down to its title bar so the figure has the screen */
+html[data-layout="phone"] .ph-headbtn { margin-left: auto; padding: 0 12px; font-size: 13px; white-space: nowrap; }
+html[data-layout="phone"] .ph-headbtn + .tvp-x { margin-left: 4px; }
+html[data-layout="phone"] .ph-headbtn.on { border-color: var(--gold-hi); color: var(--gold-hi); }
+html[data-layout="phone"][data-peek="1"] .tv-panel.appearance-panel.title-mode:not(.x), html[data-layout="phone"][data-peek="1"] .tv-panel.kits-panel.title-mode:not(.x) { top: auto !important; height: 50px !important; overflow: hidden; background: rgba(16, 13, 10, 0.8); border-radius: 16px 16px 0 0; border-top: 1px solid var(--edge-strong); }
+html[data-layout="phone"][data-peek="1"] .title { background: none; }
+html[data-layout="phone"][data-peek="1"] .title > * { visibility: hidden; }
+@media (orientation: landscape) { html[data-layout="phone"][data-peek="1"] .tv-panel.appearance-panel.title-mode:not(.x), html[data-layout="phone"][data-peek="1"] .tv-panel.kits-panel.title-mode:not(.x) { width: 300px !important; } }
+/* V12: the map's quest / event / waystone list folds away */
+html[data-layout="phone"][data-mapside="1"] .map-side { display: none; }
+html[data-layout="phone"] .map-main { flex-direction: column; gap: 6px; padding: 0 8px 8px; }
+html[data-layout="phone"] .map-stage { flex: 1 1 auto; min-height: 180px; }
+html[data-layout="phone"] .map-side { width: auto; max-height: 38%; }
+html[data-layout="phone"] .map-top { flex-wrap: wrap; padding: 6px 8px; gap: 6px; }
+html[data-layout="phone"] .map-top > *, html[data-layout="phone"] .map-presets > *, html[data-layout="phone"] .map-layers > * { flex: none; }
+html[data-layout="phone"] .map-presets, html[data-layout="phone"] .map-layers { display: flex; flex-wrap: wrap; max-width: 100%; gap: 6px; }
+@media (orientation: landscape) { html[data-layout="phone"] .map-main { flex-direction: row; } html[data-layout="phone"] .map-side { width: 240px; max-height: none; } }
+/* V13: a shop row is one big tap target (the tap opens its card with the Buy button) */
+html[data-layout="phone"] .shop-row { cursor: pointer; padding: 4px 8px; gap: 10px; }
+html[data-layout="phone"] .shop-row .islot { pointer-events: none; }
+html[data-layout="phone"] .shop-cats, html[data-layout="phone"] .shop-tabs { flex-wrap: wrap; }
+/* V14: a friend's name sits over their level line, left-aligned */
+html[data-layout="phone"] .fr-main, html[data-layout="phone"] .g-main { align-items: flex-start; text-align: left; }
+html[data-layout="phone"] .fr-main > *, html[data-layout="phone"] .g-main > * { text-align: left; justify-content: flex-start; min-width: 0; padding-left: 0; }
+html[data-layout="phone"] .fr-row, html[data-layout="phone"] .g-row { flex-wrap: wrap; }
+html[data-layout="phone"] .fr-acts, html[data-layout="phone"] .g-acts { margin-left: auto; }
+/* V15: trade — both offers fit the sheet (three squares a row upright), the bag grid never scrolls sideways */
+html[data-layout="phone"] .tr-halves { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+html[data-layout="phone"] .tr-half { min-width: 0; padding: 6px; overflow: hidden; }
+html[data-layout="phone"] .tr-grid { grid-template-columns: repeat(auto-fill, minmax(var(--tap), 1fr)); gap: 4px; }
+html[data-layout="phone"] .tr-grid .islot, html[data-layout="phone"] .tr-baggrid .islot { width: auto; height: auto; aspect-ratio: 1; min-width: var(--tap); }
+html[data-layout="phone"] .tr-baggrid { grid-template-columns: repeat(auto-fill, minmax(var(--tap), 1fr)); gap: 4px; max-height: none; overflow: visible; }
+html[data-layout="phone"] .tr-gold input { width: 100%; min-width: 0; }
+html[data-layout="phone"] .tr-half h4 { flex-wrap: wrap; }
+/* the same classes of fault, everywhere: nothing in a sheet may be wider than the sheet */
+html[data-layout="phone"] .tv-panel .tvp-body, html[data-layout="phone"] .bag.inv { overflow-x: hidden; }
+html[data-layout="phone"] .tv-panel .tvp-body > *, html[data-layout="phone"] .tv-panel .row { max-width: 100%; min-width: 0; }
+html[data-layout="phone"] .tv-panel .row { flex-wrap: wrap; }
+html[data-layout="phone"] .tv-panel .row > input, html[data-layout="phone"] .tv-panel .row > select { flex: 1 1 140px; min-width: 0; }
+html[data-layout="phone"] .fr-main, html[data-layout="phone"] .g-main { flex: 1 1 60%; }
+html[data-layout="phone"] .fr-main a, html[data-layout="phone"] .g-main a { min-width: var(--tap); }
+html[data-layout="phone"] .fr-main small, html[data-layout="phone"] .g-main small { white-space: normal; }
+
+/* an event announces itself even with the bubble closed: a chip beside it for a few seconds, and a pulse while you are in one */
+html[data-layout="phone"] .ph-chip { position: absolute; pointer-events: auto; top: calc(var(--st) + 58px); right: calc(var(--sr) + 210px); max-width: min(300px, 60vw); min-height: var(--tap); padding: 0 14px; border-radius: 22px; border: 1px solid #ff9a5a; background: rgba(16, 13, 10, 0.94); color: var(--ink); font: 600 13px/1.25 var(--sans); text-align: left; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6); animation: popIn 0.25s ease; }
+html[data-layout="phone"] .ph-chip[data-state="won"] { border-color: var(--good); } html[data-layout="phone"] .ph-chip[data-state="lost"] { border-color: var(--bad); }
+html[data-layout="phone"] .ph-btn.ph-info.pulse { border-color: #ff9a5a; animation: ph-pulse 1.4s ease-in-out infinite; }
+@keyframes ph-pulse { 50% { box-shadow: 0 0 0 6px rgba(255, 154, 90, 0.35), 0 2px 8px rgba(0, 0, 0, 0.5); } }
+@media (orientation: portrait) { html[data-layout="phone"] .ph-chip { top: calc(var(--st) + 156px); right: calc(var(--sr) + 58px); max-width: 240px; } }
+html[data-layout="phone"][data-sheet]:not([data-sheet=""]) .ph-chip { display: none; }
+@media (prefers-reduced-motion: reduce) { html[data-layout="phone"] .ph-btn.ph-info.pulse { animation: none; } }
+/* found by playing the real game on a phone profile: upright, the "E — Loot" / "Talk" prompts sat under the skill arcs */
+html[data-layout="phone"] .interact { z-index: 7; }
+html[data-layout="phone"] .interact.loot-prompt { bottom: calc(var(--sb) + 74px); }
+@media (orientation: portrait) { html[data-layout="phone"] .interact { bottom: calc(var(--sb) + 262px); } html[data-layout="phone"] .interact.loot-prompt { bottom: calc(var(--sb) + 318px); } html[data-layout="phone"] .ally-note { bottom: calc(var(--sb) + 374px) !important; } html[data-layout="phone"] .tv-fish { bottom: calc(var(--sb) + 262px); } }
+
+/* ================================================================ play-test 10 (G2) */
+/* Y35: the Attack button while auto-attack is on (the ring itself is css/input.css .slot.auto, every layout) */
+html[data-layout="phone"] .actionbar > .slot.auto:nth-child(1) { border-color: #ffd36b; background: radial-gradient(circle at 40% 35%, rgba(150, 96, 30, 0.96), rgba(46, 26, 8, 0.94) 75%); }
+html[data-layout="phone"] .actionbar > .slot:nth-child(1)::after { content: 'Attack'; position: absolute; left: 50%; bottom: 7px; transform: translateX(-50%); font: 700 9.5px var(--sans); letter-spacing: 0.03em; color: rgba(243, 234, 216, 0.82); text-shadow: 0 1px 2px #000; pointer-events: none; }
+html[data-layout="phone"] .actionbar > .slot.auto:nth-child(1)::after { content: 'Attacking'; color: #ffe3a0; }
+html[data-layout="phone"] .actionbar > .slot:nth-child(1) svg { margin-top: -8px; }
+
+/* Y34: Mount and Fish — a shape of their own (not one more round fight button), each with its NAME on it */
+html[data-layout="phone"] .ph-btn.ph-cap { position: absolute; width: 58px; height: 52px; border-radius: 16px; pointer-events: auto; touch-action: none; grid-template-rows: 27px 15px; align-content: center; gap: 0; overflow: hidden; }
+html[data-layout="phone"] .ph-btn.ph-cap svg { width: 25px; height: 25px; }
+html[data-layout="phone"] .ph-btn.ph-cap small { font: 700 10px/1.1 var(--sans); letter-spacing: 0.01em; white-space: nowrap; color: #f3ead8; text-shadow: 0 1px 2px #000; }
+html[data-layout="phone"] .ph-btn.ph-cap[hidden] { display: none; }
+/* on its side: a pair just right of the stick's resting place (the right thumb's corner is full, the top row is the far reach) */
+html[data-layout="phone"] .ph-btn.ph-mount { left: calc(var(--sl) + 162px); bottom: calc(var(--sb) + 10px); border-color: #d9b26a; }
+html[data-layout="phone"] .ph-btn.ph-fish { left: calc(var(--sl) + 162px); bottom: calc(var(--sb) + 70px); border-color: #7fc4ee; color: #cfeaff; }
+/* upright: a column on the right edge, just above the skill arcs */
+@media (orientation: portrait) {
+  html[data-layout="phone"] .ph-btn.ph-mount { left: auto; right: calc(var(--sr) + 6px); bottom: calc(var(--sb) + 240px); }
+  html[data-layout="phone"] .ph-btn.ph-fish { left: auto; right: calc(var(--sr) + 6px); bottom: calc(var(--sb) + 300px); }
+}
+html[data-layout="phone"] .ph-btn.ph-fish.lit { background: rgba(28, 92, 140, 0.92); border-color: #bfe6ff; box-shadow: 0 0 12px rgba(120, 200, 255, 0.55), 0 2px 8px rgba(0, 0, 0, 0.5); }
+html[data-layout="phone"] .ph-btn.ph-fish.dim { opacity: 0.5; border-style: dashed; }
+html[data-layout="phone"] .ph-btn.ph-fish.dim small::after { content: ''; }
+html[data-layout="phone"] .ph-btn.ph-mount .ph-prog { display: none; position: absolute; left: 0; bottom: 0; height: 4px; width: calc(var(--p, 0) * 100%); background: #ffd36b; }
+html[data-layout="phone"] .ph-btn.ph-mount.calling .ph-prog { display: block; }
+html[data-layout="phone"] .ph-btn.ph-mount.calling { border-color: #ffd36b; }
+html[data-layout="phone"][data-fishing="bite"] .ph-btn.ph-fish, html[data-layout="phone"][data-fishing="tug"] .ph-btn.ph-fish { opacity: 0.4; }
+html[data-layout="phone"][data-chat="open"] .ph-btn.ph-cap { display: none; }
+/* the Belt wears the picture of what a tap will use */
+html[data-layout="phone"] .ph-btn.ph-belt img { width: 30px; height: 30px; object-fit: contain; border-radius: 6px; pointer-events: none; }
+html[data-layout="phone"] .ph-btn.ph-belt.empty { opacity: 0.55; }
+
+/* a long press on a control: its name and one sentence */
+html[data-layout="phone"] .ph-label { position: fixed; z-index: 98000; pointer-events: none; padding: 9px 12px; border-radius: 12px; border: 1px solid var(--gold-hi); background: rgba(16, 13, 10, 0.96); color: var(--ink); font: 400 13.5px/1.35 var(--sans); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7); }
+html[data-layout="phone"] .ph-label[hidden] { display: none; }
+html[data-layout="phone"] .ph-label b { display: block; margin-bottom: 2px; font: 700 14.5px var(--sans); color: var(--gold-hi); }
+
+/* the first-time fishing hint */
+html[data-layout="phone"] .ph-hint { position: absolute; z-index: 9; pointer-events: auto; left: 50%; top: calc(var(--st) + 112px); transform: translateX(-50%); width: min(330px, calc(100% - 28px)); padding: 12px 14px; border-radius: 14px; border: 1px solid #7fc4ee; background: rgba(12, 18, 24, 0.96); color: var(--ink); font: 400 14px/1.4 var(--sans); box-shadow: 0 4px 18px rgba(0, 0, 0, 0.7); }
+html[data-layout="phone"] .ph-hint[hidden] { display: none; }
+html[data-layout="phone"] .ph-hint strong { display: flex; align-items: center; gap: 8px; font: 700 15.5px var(--sans); color: #cfeaff; }
+html[data-layout="phone"] .ph-hint strong svg { width: 24px; height: 24px; flex: none; }
+html[data-layout="phone"] .ph-hint ol { margin: 8px 0 10px; padding-left: 22px; }
+html[data-layout="phone"] .ph-hint li { margin: 3px 0; }
+html[data-layout="phone"] .ph-hint button { min-height: 44px; width: 100%; font-size: 15px; }
+@media (orientation: landscape) { html[data-layout="phone"] .ph-hint { top: calc(var(--st) + 60px); width: 340px; } html[data-layout="phone"] .ph-hint ol { margin: 4px 0 6px; } }
+html[data-layout="phone"][data-sheet]:not([data-sheet=""]) .ph-hint { display: none; }
+
+/* "What do these buttons do?": a number on every control on screen, and the list that names them */
+html[data-layout="phone"] .ph-explain { position: fixed; inset: 0; z-index: 99500; background: rgba(0, 0, 0, 0.46); }
+html[data-layout="phone"] .ph-explain[hidden] { display: none; }
+html[data-layout="phone"] .ph-ex-n { position: absolute; width: 24px; height: 24px; margin: -12px 0 0 -12px; border-radius: 50%; display: grid; place-items: center; background: #ffd36b; color: #1a1206; font: 800 12.5px var(--sans); box-shadow: 0 0 0 2px #1a1206, 0 2px 6px rgba(0, 0, 0, 0.7); pointer-events: none; }
+html[data-layout="phone"] .ph-ex-card { position: absolute; left: calc(var(--sl) + 12px); right: calc(var(--sr) + 12px); top: calc(var(--st) + 112px); max-height: calc(100% - var(--st) - var(--sb) - 400px); min-height: 200px; display: flex; flex-direction: column; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--gold-hi); background: rgba(18, 14, 10, 0.97); color: var(--ink); box-shadow: 0 6px 22px rgba(0, 0, 0, 0.75); }
+html[data-layout="phone"] .ph-ex-card > strong { font: 700 16px var(--sans); color: var(--gold-hi); flex: none; }
+html[data-layout="phone"] .ph-ex-card ol { list-style: none; margin: 8px 0; padding: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; flex: 1 1 auto; min-height: 0; }
+html[data-layout="phone"] .ph-ex-card li { display: flex; gap: 10px; align-items: flex-start; padding: 6px 0; border-top: 1px solid rgba(255, 255, 255, 0.08); }
+html[data-layout="phone"] .ph-ex-card li > b { flex: none; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: #ffd36b; color: #1a1206; font: 800 12px var(--sans); }
+html[data-layout="phone"] .ph-ex-card li em { display: block; font: 700 14px var(--sans); font-style: normal; color: #f3ead8; }
+html[data-layout="phone"] .ph-ex-card li i { display: block; font: 400 13px/1.35 var(--sans); font-style: normal; color: var(--ink-dim); }
+html[data-layout="phone"] .ph-ex-card p { flex: none; margin: 0 0 8px; font-size: 13px; color: var(--ink-dim); }
+html[data-layout="phone"] .ph-ex-card button { flex: none; min-height: 46px; font-size: 15px; }
+@media (orientation: landscape) { html[data-layout="phone"] .ph-ex-card { left: calc(var(--sl) + 236px); right: calc(var(--sr) + 262px); top: calc(var(--st) + 58px); bottom: calc(var(--sb) + 10px); max-height: none; min-height: 0; padding: 8px 12px; } html[data-layout="phone"] .ph-ex-card p { display: none; } }
+
+/* a plain sheet (hold a party portrait: Track) */
+html[data-layout="phone"] .ps-plain strong { display: block; font: 700 17px var(--sans); color: var(--gold-hi); margin-bottom: 4px; }
+html[data-layout="phone"] .ps-plain span { display: block; color: var(--ink-dim); }
+/* Y36: the party's small edge arrows keep clear of the island and the home bar by their own margin; nothing to press */
+/* a long press is OURS on a phone (labels, cards, Track): iOS must not answer it with its own callout / magnifier */
+html[data-layout="phone"] .ph-btn, html[data-layout="phone"] .actionbar .slot, html[data-layout="phone"] .pmember, html[data-layout="phone"] .islot, html[data-layout="phone"] .pmember img, html[data-layout="phone"] .islot img { -webkit-touch-callout: none; }

@@ -1,0 +1,8985 @@
+{
+ "_doc": "Stream P-core (round 8, W9 Professions) — MADE by tools/content-professions.mjs; do not edit by hand (edit the tables in the tool and run it). materials: every stackable material (price = what a merchant pays for one). classes: the material of each tier 1-5 by what it is (metal, leather, cloth, wood, gem, herb, mushroom, fibre, ore, hide, resin). nodeKinds: what a node gives and how it looks (look.model boulder | tree | herb | mushroom | fibre). tools. recipes (kind material | tool | gear | potion | good; a gear recipe lists the real bases of C's catalog you may pick). goods: the consumables recipes make, as bag items. skins: which monsters a skinner can skin. trainers: NPCs this system places (world metres). jobs: job frames appended to the job board.",
+ "materials": {
+  "copper_ore": {
+   "id": "copper_ore",
+   "name": "Copper Ore",
+   "desc": "Broken out of a boulder. A smith smelts it into bronze, with tin.",
+   "tier": 1,
+   "prof": "mining",
+   "icon": "ore",
+   "tint": "#b87333",
+   "price": 2
+  },
+  "rough_quartz": {
+   "id": "rough_quartz",
+   "name": "Rough Quartz",
+   "desc": "A stone that sometimes comes out with the ore on a clean strike. Jewellery, casters' tools and tempering use it.",
+   "tier": 1,
+   "prof": "mining",
+   "icon": "gem",
+   "tint": "#e8eef4",
+   "price": 5
+  },
+  "ash_log": {
+   "id": "ash_log",
+   "name": "Ash Log",
+   "desc": "Timber from a marked tree: hafts, bows, staves and shields.",
+   "tier": 1,
+   "prof": "logging",
+   "icon": "log",
+   "tint": "#c9b48a",
+   "price": 2
+  },
+  "meadowmint": {
+   "id": "meadowmint",
+   "name": "Meadowmint",
+   "desc": "A herb for the still: potions and tonics.",
+   "tier": 1,
+   "prof": "foraging",
+   "icon": "herb",
+   "tint": "#7fc98a",
+   "price": 2
+  },
+  "field_mushroom": {
+   "id": "field_mushroom",
+   "name": "Field Mushroom",
+   "desc": "Grows under trees. Good in a pot, better in a potion.",
+   "tier": 1,
+   "prof": "foraging",
+   "icon": "mushroom",
+   "tint": "#e6dccb",
+   "price": 2
+  },
+  "flax": {
+   "id": "flax",
+   "name": "Flax",
+   "desc": "Plant fibre. An outfitter weaves it into cloth.",
+   "tier": 1,
+   "prof": "foraging",
+   "icon": "fibre",
+   "tint": "#8fb6e0",
+   "price": 2
+  },
+  "light_hide": {
+   "id": "light_hide",
+   "name": "Light Hide",
+   "desc": "Skinned from a beast. An outfitter cures it into leather.",
+   "tier": 1,
+   "prof": "skinning",
+   "icon": "hide",
+   "tint": "#b08a5e",
+   "price": 1
+  },
+  "iron_ore": {
+   "id": "iron_ore",
+   "name": "Iron Ore",
+   "desc": "Broken out of a boulder. A smith smelts it into iron bars.",
+   "tier": 2,
+   "prof": "mining",
+   "icon": "ore",
+   "tint": "#8a8f98",
+   "price": 6
+  },
+  "garnet": {
+   "id": "garnet",
+   "name": "Garnet",
+   "desc": "A stone that sometimes comes out with the ore on a clean strike. Jewellery, casters' tools and tempering use it.",
+   "tier": 2,
+   "prof": "mining",
+   "icon": "gem",
+   "tint": "#a8243a",
+   "price": 14
+  },
+  "oak_log": {
+   "id": "oak_log",
+   "name": "Oak Log",
+   "desc": "Timber from a marked tree: hafts, bows, staves and shields.",
+   "tier": 2,
+   "prof": "logging",
+   "icon": "log",
+   "tint": "#9a7446",
+   "price": 9
+  },
+  "feverleaf": {
+   "id": "feverleaf",
+   "name": "Feverleaf",
+   "desc": "A herb for the still: potions and tonics.",
+   "tier": 2,
+   "prof": "foraging",
+   "icon": "herb",
+   "tint": "#d8c24a",
+   "price": 7
+  },
+  "amber_cap": {
+   "id": "amber_cap",
+   "name": "Amber Cap",
+   "desc": "Grows under trees. Good in a pot, better in a potion.",
+   "tier": 2,
+   "prof": "foraging",
+   "icon": "mushroom",
+   "tint": "#d98a2b",
+   "price": 7
+  },
+  "hemp": {
+   "id": "hemp",
+   "name": "Hemp",
+   "desc": "Plant fibre. An outfitter weaves it into cloth.",
+   "tier": 2,
+   "prof": "foraging",
+   "icon": "fibre",
+   "tint": "#8aa35a",
+   "price": 7
+  },
+  "thick_hide": {
+   "id": "thick_hide",
+   "name": "Thick Hide",
+   "desc": "Skinned from a beast. An outfitter cures it into leather.",
+   "tier": 2,
+   "prof": "skinning",
+   "icon": "hide",
+   "tint": "#8c6a44",
+   "price": 4
+  },
+  "silver_ore": {
+   "id": "silver_ore",
+   "name": "Silver Ore",
+   "desc": "Broken out of a boulder. A smith smelts it into silversteel bars.",
+   "tier": 3,
+   "prof": "mining",
+   "icon": "ore",
+   "tint": "#d5dbe3",
+   "price": 26
+  },
+  "amethyst": {
+   "id": "amethyst",
+   "name": "Amethyst",
+   "desc": "A stone that sometimes comes out with the ore on a clean strike. Jewellery, casters' tools and tempering use it.",
+   "tier": 3,
+   "prof": "mining",
+   "icon": "gem",
+   "tint": "#8e5cc8",
+   "price": 36
+  },
+  "yew_log": {
+   "id": "yew_log",
+   "name": "Yew Log",
+   "desc": "Timber from a marked tree: hafts, bows, staves and shields.",
+   "tier": 3,
+   "prof": "logging",
+   "icon": "log",
+   "tint": "#b0623a",
+   "price": 30
+  },
+  "moonpetal": {
+   "id": "moonpetal",
+   "name": "Moonpetal",
+   "desc": "A herb for the still: potions and tonics.",
+   "tier": 3,
+   "prof": "foraging",
+   "icon": "herb",
+   "tint": "#c9d4f2",
+   "price": 32
+  },
+  "ghost_morel": {
+   "id": "ghost_morel",
+   "name": "Ghost Morel",
+   "desc": "Grows under trees. Good in a pot, better in a potion.",
+   "tier": 3,
+   "prof": "foraging",
+   "icon": "mushroom",
+   "tint": "#cfd6d2",
+   "price": 32
+  },
+  "silkweed": {
+   "id": "silkweed",
+   "name": "Silkweed",
+   "desc": "Plant fibre. An outfitter weaves it into cloth.",
+   "tier": 3,
+   "prof": "foraging",
+   "icon": "fibre",
+   "tint": "#f0e6f4",
+   "price": 32
+  },
+  "rugged_hide": {
+   "id": "rugged_hide",
+   "name": "Rugged Hide",
+   "desc": "Skinned from a beast. An outfitter cures it into leather.",
+   "tier": 3,
+   "prof": "skinning",
+   "icon": "hide",
+   "tint": "#6e5236",
+   "price": 8
+  },
+  "blackiron_ore": {
+   "id": "blackiron_ore",
+   "name": "Blackiron Ore",
+   "desc": "Broken out of a boulder. A smith smelts it into blackiron bars.",
+   "tier": 4,
+   "prof": "mining",
+   "icon": "ore",
+   "tint": "#3b3f4a",
+   "price": 38
+  },
+  "sapphire": {
+   "id": "sapphire",
+   "name": "Sapphire",
+   "desc": "A stone that sometimes comes out with the ore on a clean strike. Jewellery, casters' tools and tempering use it.",
+   "tier": 4,
+   "prof": "mining",
+   "icon": "gem",
+   "tint": "#2f6fd6",
+   "price": 70
+  },
+  "ironbark_log": {
+   "id": "ironbark_log",
+   "name": "Ironbark Log",
+   "desc": "Timber from a marked tree: hafts, bows, staves and shields.",
+   "tier": 4,
+   "prof": "logging",
+   "icon": "log",
+   "tint": "#5e5348",
+   "price": 50
+  },
+  "frostbloom": {
+   "id": "frostbloom",
+   "name": "Frostbloom",
+   "desc": "A herb for the still: potions and tonics.",
+   "tier": 4,
+   "prof": "foraging",
+   "icon": "herb",
+   "tint": "#9fe0ee",
+   "price": 48
+  },
+  "king_bolete": {
+   "id": "king_bolete",
+   "name": "King Bolete",
+   "desc": "Grows under trees. Good in a pot, better in a potion.",
+   "tier": 4,
+   "prof": "foraging",
+   "icon": "mushroom",
+   "tint": "#8a5a34",
+   "price": 48
+  },
+  "moonflax": {
+   "id": "moonflax",
+   "name": "Moonflax",
+   "desc": "Plant fibre. An outfitter weaves it into cloth.",
+   "tier": 4,
+   "prof": "foraging",
+   "icon": "fibre",
+   "tint": "#b8c4f0",
+   "price": 48
+  },
+  "heavy_hide": {
+   "id": "heavy_hide",
+   "name": "Heavy Hide",
+   "desc": "Skinned from a beast. An outfitter cures it into leather.",
+   "tier": 4,
+   "prof": "skinning",
+   "icon": "hide",
+   "tint": "#57402a",
+   "price": 14
+  },
+  "sunsteel_ore": {
+   "id": "sunsteel_ore",
+   "name": "Sunsteel Ore",
+   "desc": "Broken out of a boulder. A smith smelts it into sunsteel bars.",
+   "tier": 5,
+   "prof": "mining",
+   "icon": "ore",
+   "tint": "#f0c040",
+   "price": 64
+  },
+  "star_opal": {
+   "id": "star_opal",
+   "name": "Star Opal",
+   "desc": "A stone that sometimes comes out with the ore on a clean strike. Jewellery, casters' tools and tempering use it.",
+   "tier": 5,
+   "prof": "mining",
+   "icon": "gem",
+   "tint": "#bfe8e0",
+   "price": 120
+  },
+  "heartwood_log": {
+   "id": "heartwood_log",
+   "name": "Heartwood Log",
+   "desc": "Timber from a marked tree: hafts, bows, staves and shields.",
+   "tier": 5,
+   "prof": "logging",
+   "icon": "log",
+   "tint": "#7a2f2a",
+   "price": 80
+  },
+  "sunroot": {
+   "id": "sunroot",
+   "name": "Sunroot",
+   "desc": "A herb for the still: potions and tonics.",
+   "tier": 5,
+   "prof": "foraging",
+   "icon": "herb",
+   "tint": "#f0a030",
+   "price": 78
+  },
+  "starcap": {
+   "id": "starcap",
+   "name": "Starcap",
+   "desc": "Grows under trees. Good in a pot, better in a potion.",
+   "tier": 5,
+   "prof": "foraging",
+   "icon": "mushroom",
+   "tint": "#7a6fe0",
+   "price": 78
+  },
+  "sunsilk": {
+   "id": "sunsilk",
+   "name": "Sunsilk",
+   "desc": "Plant fibre. An outfitter weaves it into cloth.",
+   "tier": 5,
+   "prof": "foraging",
+   "icon": "fibre",
+   "tint": "#f6dc8a",
+   "price": 78
+  },
+  "drake_hide": {
+   "id": "drake_hide",
+   "name": "Drake Hide",
+   "desc": "Skinned from a beast. An outfitter cures it into leather.",
+   "tier": 5,
+   "prof": "skinning",
+   "icon": "hide",
+   "tint": "#4c7a5a",
+   "price": 24
+  },
+  "tin_ore": {
+   "id": "tin_ore",
+   "name": "Tin Ore",
+   "desc": "Soft grey ore. Smelted with copper it makes bronze.",
+   "tier": 1,
+   "prof": "mining",
+   "icon": "ore",
+   "tint": "#c9ccd2",
+   "price": 2
+  },
+  "pine_resin": {
+   "id": "pine_resin",
+   "name": "Pine Resin",
+   "desc": "Sticky sap from a clean cut. Tempering and a few brews need it.",
+   "tier": 1,
+   "prof": "logging",
+   "icon": "resin",
+   "tint": "#d9a441",
+   "price": 3
+  },
+  "game_meat": {
+   "id": "game_meat",
+   "name": "Game Meat",
+   "desc": "Fresh meat from a beast. Cook it at any fire.",
+   "tier": 1,
+   "prof": "skinning",
+   "icon": "meat",
+   "tint": "#b8504a",
+   "price": 1
+  },
+  "sovereign_core": {
+   "id": "sovereign_core",
+   "name": "Sovereign Core",
+   "desc": "The hot heart of something that should not have been killed. Only world bosses and the hardest events leave one. A master temperer can promote a rare item to legendary with it.",
+   "tier": 5,
+   "prof": "tempering",
+   "icon": "core",
+   "tint": "#ffd24a",
+   "rarity": "legendary",
+   "price": 1
+  },
+  "beast_fang": {
+   "id": "beast_fang",
+   "name": "Beast Fang",
+   "desc": "A good fang, taken with a careful cut. It sells.",
+   "tier": 1,
+   "prof": "skinning",
+   "icon": "trophy",
+   "tint": "#efe6d2",
+   "price": 1
+  },
+  "bronze_bar": {
+   "id": "bronze_bar",
+   "name": "Bronze Bar",
+   "desc": "Copper and tin, smelted together. The metal of a first sword.",
+   "tier": 1,
+   "prof": "smithing",
+   "icon": "bar",
+   "tint": "#c08a4a",
+   "price": 5,
+   "made": true
+  },
+  "light_leather": {
+   "id": "light_leather",
+   "name": "Light Leather",
+   "desc": "Hide, scraped, cured and oiled.",
+   "tier": 1,
+   "prof": "outfitting",
+   "icon": "leather",
+   "tint": "#c49a68",
+   "price": 3,
+   "made": true
+  },
+  "linen_bolt": {
+   "id": "linen_bolt",
+   "name": "Bolt of Linen",
+   "desc": "Fibre, spun and woven on the bench.",
+   "tier": 1,
+   "prof": "outfitting",
+   "icon": "cloth",
+   "tint": "#e4dcc8",
+   "price": 5,
+   "made": true
+  },
+  "iron_bar": {
+   "id": "iron_bar",
+   "name": "Iron Bar",
+   "desc": "Smelted iron ore, ready for the anvil.",
+   "tier": 2,
+   "prof": "smithing",
+   "icon": "bar",
+   "tint": "#9aa0aa",
+   "price": 14,
+   "made": true
+  },
+  "thick_leather": {
+   "id": "thick_leather",
+   "name": "Thick Leather",
+   "desc": "Hide, scraped, cured and oiled.",
+   "tier": 2,
+   "prof": "outfitting",
+   "icon": "leather",
+   "tint": "#9c764c",
+   "price": 9,
+   "made": true
+  },
+  "canvas_bolt": {
+   "id": "canvas_bolt",
+   "name": "Bolt of Canvas",
+   "desc": "Fibre, spun and woven on the bench.",
+   "tier": 2,
+   "prof": "outfitting",
+   "icon": "cloth",
+   "tint": "#b9ad8a",
+   "price": 16,
+   "made": true
+  },
+  "silversteel_bar": {
+   "id": "silversteel_bar",
+   "name": "Silversteel Bar",
+   "desc": "Smelted silver ore, ready for the anvil.",
+   "tier": 3,
+   "prof": "smithing",
+   "icon": "bar",
+   "tint": "#dfe6ee",
+   "price": 67,
+   "made": true
+  },
+  "rugged_leather": {
+   "id": "rugged_leather",
+   "name": "Rugged Leather",
+   "desc": "Hide, scraped, cured and oiled.",
+   "tier": 3,
+   "prof": "outfitting",
+   "icon": "leather",
+   "tint": "#7c5c3c",
+   "price": 18,
+   "made": true
+  },
+  "silk_bolt": {
+   "id": "silk_bolt",
+   "name": "Bolt of Silk",
+   "desc": "Fibre, spun and woven on the bench.",
+   "tier": 3,
+   "prof": "outfitting",
+   "icon": "cloth",
+   "tint": "#f2e8f6",
+   "price": 74,
+   "made": true
+  },
+  "blackiron_bar": {
+   "id": "blackiron_bar",
+   "name": "Blackiron Bar",
+   "desc": "Smelted blackiron ore, ready for the anvil.",
+   "tier": 4,
+   "prof": "smithing",
+   "icon": "bar",
+   "tint": "#4a4f5c",
+   "price": 87,
+   "made": true
+  },
+  "heavy_leather": {
+   "id": "heavy_leather",
+   "name": "Heavy Leather",
+   "desc": "Hide, scraped, cured and oiled.",
+   "tier": 4,
+   "prof": "outfitting",
+   "icon": "leather",
+   "tint": "#624830",
+   "price": 32,
+   "made": true
+  },
+  "moonweave_bolt": {
+   "id": "moonweave_bolt",
+   "name": "Bolt of Moonweave",
+   "desc": "Fibre, spun and woven on the bench.",
+   "tier": 4,
+   "prof": "outfitting",
+   "icon": "cloth",
+   "tint": "#c2ccf4",
+   "price": 110,
+   "made": true
+  },
+  "sunsteel_bar": {
+   "id": "sunsteel_bar",
+   "name": "Sunsteel Bar",
+   "desc": "Smelted sunsteel ore, ready for the anvil.",
+   "tier": 5,
+   "prof": "smithing",
+   "icon": "bar",
+   "tint": "#f4cf5a",
+   "price": 147,
+   "made": true
+  },
+  "drake_leather": {
+   "id": "drake_leather",
+   "name": "Drake Leather",
+   "desc": "Hide, scraped, cured and oiled.",
+   "tier": 5,
+   "prof": "outfitting",
+   "icon": "leather",
+   "tint": "#588a66",
+   "price": 55,
+   "made": true
+  },
+  "sunsilk_bolt": {
+   "id": "sunsilk_bolt",
+   "name": "Bolt of Sunsilk",
+   "desc": "Fibre, spun and woven on the bench.",
+   "tier": 5,
+   "prof": "outfitting",
+   "icon": "cloth",
+   "tint": "#f8e29a",
+   "price": 179,
+   "made": true
+  }
+ },
+ "classes": {
+  "ore": [
+   "copper_ore",
+   "iron_ore",
+   "silver_ore",
+   "blackiron_ore",
+   "sunsteel_ore"
+  ],
+  "metal": [
+   "bronze_bar",
+   "iron_bar",
+   "silversteel_bar",
+   "blackiron_bar",
+   "sunsteel_bar"
+  ],
+  "gem": [
+   "rough_quartz",
+   "garnet",
+   "amethyst",
+   "sapphire",
+   "star_opal"
+  ],
+  "wood": [
+   "ash_log",
+   "oak_log",
+   "yew_log",
+   "ironbark_log",
+   "heartwood_log"
+  ],
+  "herb": [
+   "meadowmint",
+   "feverleaf",
+   "moonpetal",
+   "frostbloom",
+   "sunroot"
+  ],
+  "mushroom": [
+   "field_mushroom",
+   "amber_cap",
+   "ghost_morel",
+   "king_bolete",
+   "starcap"
+  ],
+  "fibre": [
+   "flax",
+   "hemp",
+   "silkweed",
+   "moonflax",
+   "sunsilk"
+  ],
+  "cloth": [
+   "linen_bolt",
+   "canvas_bolt",
+   "silk_bolt",
+   "moonweave_bolt",
+   "sunsilk_bolt"
+  ],
+  "hide": [
+   "light_hide",
+   "thick_hide",
+   "rugged_hide",
+   "heavy_hide",
+   "drake_hide"
+  ],
+  "leather": [
+   "light_leather",
+   "thick_leather",
+   "rugged_leather",
+   "heavy_leather",
+   "drake_leather"
+  ],
+  "resin": [
+   "pine_resin",
+   "pine_resin",
+   "pine_resin",
+   "pine_resin",
+   "pine_resin"
+  ]
+ },
+ "nodeKinds": {
+  "copper": {
+   "id": "copper",
+   "prof": "mining",
+   "tier": 1,
+   "name": "Copper Boulder",
+   "gives": "copper_ore",
+   "bonus": "rough_quartz",
+   "look": {
+    "model": "boulder",
+    "size": 1.7000000000000002,
+    "tint": "#b87333",
+    "n": 5
+   }
+  },
+  "ash": {
+   "id": "ash",
+   "prof": "logging",
+   "tier": 1,
+   "name": "Marked Ash",
+   "gives": "ash_log",
+   "bonus": "pine_resin",
+   "look": {
+    "model": "tree",
+    "size": 7,
+    "tint": "#d04a3a",
+    "n": 1
+   }
+  },
+  "meadowmint": {
+   "id": "meadowmint",
+   "prof": "foraging",
+   "tier": 1,
+   "name": "Meadowmint Patch",
+   "gives": "meadowmint",
+   "bonus": null,
+   "look": {
+    "model": "herb",
+    "size": 0.5,
+    "tint": "#7fc98a",
+    "n": 6
+   }
+  },
+  "field_mushroom": {
+   "id": "field_mushroom",
+   "prof": "foraging",
+   "tier": 1,
+   "name": "Field Mushroom Ring",
+   "gives": "field_mushroom",
+   "bonus": null,
+   "look": {
+    "model": "mushroom",
+    "size": 0.35,
+    "tint": "#e6dccb",
+    "n": 6
+   }
+  },
+  "flax": {
+   "id": "flax",
+   "prof": "foraging",
+   "tier": 1,
+   "name": "Flax Stand",
+   "gives": "flax",
+   "bonus": null,
+   "look": {
+    "model": "fibre",
+    "size": 1.1,
+    "tint": "#8fb6e0",
+    "n": 6
+   }
+  },
+  "iron": {
+   "id": "iron",
+   "prof": "mining",
+   "tier": 2,
+   "name": "Iron Boulder",
+   "gives": "iron_ore",
+   "bonus": "garnet",
+   "look": {
+    "model": "boulder",
+    "size": 1.8,
+    "tint": "#8a8f98",
+    "n": 6
+   }
+  },
+  "oak": {
+   "id": "oak",
+   "prof": "logging",
+   "tier": 2,
+   "name": "Marked Oak",
+   "gives": "oak_log",
+   "bonus": "pine_resin",
+   "look": {
+    "model": "tree",
+    "size": 8,
+    "tint": "#e0a020",
+    "n": 1
+   }
+  },
+  "feverleaf": {
+   "id": "feverleaf",
+   "prof": "foraging",
+   "tier": 2,
+   "name": "Feverleaf Patch",
+   "gives": "feverleaf",
+   "bonus": null,
+   "look": {
+    "model": "herb",
+    "size": 0.5,
+    "tint": "#d8c24a",
+    "n": 6
+   }
+  },
+  "amber_cap": {
+   "id": "amber_cap",
+   "prof": "foraging",
+   "tier": 2,
+   "name": "Amber Cap Ring",
+   "gives": "amber_cap",
+   "bonus": null,
+   "look": {
+    "model": "mushroom",
+    "size": 0.35,
+    "tint": "#d98a2b",
+    "n": 6
+   }
+  },
+  "hemp": {
+   "id": "hemp",
+   "prof": "foraging",
+   "tier": 2,
+   "name": "Hemp Stand",
+   "gives": "hemp",
+   "bonus": null,
+   "look": {
+    "model": "fibre",
+    "size": 1.1,
+    "tint": "#8aa35a",
+    "n": 6
+   }
+  },
+  "silver": {
+   "id": "silver",
+   "prof": "mining",
+   "tier": 3,
+   "name": "Silver Boulder",
+   "gives": "silver_ore",
+   "bonus": "amethyst",
+   "look": {
+    "model": "boulder",
+    "size": 1.9000000000000001,
+    "tint": "#d5dbe3",
+    "n": 7
+   }
+  },
+  "yew": {
+   "id": "yew",
+   "prof": "logging",
+   "tier": 3,
+   "name": "Marked Yew",
+   "gives": "yew_log",
+   "bonus": "pine_resin",
+   "look": {
+    "model": "tree",
+    "size": 9,
+    "tint": "#3a7ad0",
+    "n": 1
+   }
+  },
+  "moonpetal": {
+   "id": "moonpetal",
+   "prof": "foraging",
+   "tier": 3,
+   "name": "Moonpetal Patch",
+   "gives": "moonpetal",
+   "bonus": null,
+   "look": {
+    "model": "herb",
+    "size": 0.5,
+    "tint": "#c9d4f2",
+    "n": 6
+   }
+  },
+  "ghost_morel": {
+   "id": "ghost_morel",
+   "prof": "foraging",
+   "tier": 3,
+   "name": "Ghost Morel Ring",
+   "gives": "ghost_morel",
+   "bonus": null,
+   "look": {
+    "model": "mushroom",
+    "size": 0.35,
+    "tint": "#cfd6d2",
+    "n": 6
+   }
+  },
+  "silkweed": {
+   "id": "silkweed",
+   "prof": "foraging",
+   "tier": 3,
+   "name": "Silkweed Stand",
+   "gives": "silkweed",
+   "bonus": null,
+   "look": {
+    "model": "fibre",
+    "size": 1.1,
+    "tint": "#f0e6f4",
+    "n": 6
+   }
+  },
+  "blackiron": {
+   "id": "blackiron",
+   "prof": "mining",
+   "tier": 4,
+   "name": "Blackiron Boulder",
+   "gives": "blackiron_ore",
+   "bonus": "sapphire",
+   "look": {
+    "model": "boulder",
+    "size": 2,
+    "tint": "#3b3f4a",
+    "n": 8
+   }
+  },
+  "ironbark": {
+   "id": "ironbark",
+   "prof": "logging",
+   "tier": 4,
+   "name": "Marked Ironbark",
+   "gives": "ironbark_log",
+   "bonus": "pine_resin",
+   "look": {
+    "model": "tree",
+    "size": 10,
+    "tint": "#8a3ad0",
+    "n": 1
+   }
+  },
+  "frostbloom": {
+   "id": "frostbloom",
+   "prof": "foraging",
+   "tier": 4,
+   "name": "Frostbloom Patch",
+   "gives": "frostbloom",
+   "bonus": null,
+   "look": {
+    "model": "herb",
+    "size": 0.5,
+    "tint": "#9fe0ee",
+    "n": 6
+   }
+  },
+  "king_bolete": {
+   "id": "king_bolete",
+   "prof": "foraging",
+   "tier": 4,
+   "name": "King Bolete Ring",
+   "gives": "king_bolete",
+   "bonus": null,
+   "look": {
+    "model": "mushroom",
+    "size": 0.35,
+    "tint": "#8a5a34",
+    "n": 6
+   }
+  },
+  "moonflax": {
+   "id": "moonflax",
+   "prof": "foraging",
+   "tier": 4,
+   "name": "Moonflax Stand",
+   "gives": "moonflax",
+   "bonus": null,
+   "look": {
+    "model": "fibre",
+    "size": 1.1,
+    "tint": "#b8c4f0",
+    "n": 6
+   }
+  },
+  "sunsteel": {
+   "id": "sunsteel",
+   "prof": "mining",
+   "tier": 5,
+   "name": "Sunsteel Boulder",
+   "gives": "sunsteel_ore",
+   "bonus": "star_opal",
+   "look": {
+    "model": "boulder",
+    "size": 2.1,
+    "tint": "#f0c040",
+    "n": 9
+   }
+  },
+  "heartwood": {
+   "id": "heartwood",
+   "prof": "logging",
+   "tier": 5,
+   "name": "Marked Heartwood",
+   "gives": "heartwood_log",
+   "bonus": "pine_resin",
+   "look": {
+    "model": "tree",
+    "size": 11,
+    "tint": "#e8e8e8",
+    "n": 1
+   }
+  },
+  "sunroot": {
+   "id": "sunroot",
+   "prof": "foraging",
+   "tier": 5,
+   "name": "Sunroot Patch",
+   "gives": "sunroot",
+   "bonus": null,
+   "look": {
+    "model": "herb",
+    "size": 0.5,
+    "tint": "#f0a030",
+    "n": 6
+   }
+  },
+  "starcap": {
+   "id": "starcap",
+   "prof": "foraging",
+   "tier": 5,
+   "name": "Starcap Ring",
+   "gives": "starcap",
+   "bonus": null,
+   "look": {
+    "model": "mushroom",
+    "size": 0.35,
+    "tint": "#7a6fe0",
+    "n": 6
+   }
+  },
+  "sunsilk": {
+   "id": "sunsilk",
+   "prof": "foraging",
+   "tier": 5,
+   "name": "Sunsilk Stand",
+   "gives": "sunsilk",
+   "bonus": null,
+   "look": {
+    "model": "fibre",
+    "size": 1.1,
+    "tint": "#f6dc8a",
+    "n": 6
+   }
+  },
+  "tin": {
+   "id": "tin",
+   "prof": "mining",
+   "tier": 1,
+   "name": "Tin Boulder",
+   "gives": "tin_ore",
+   "bonus": "rough_quartz",
+   "look": {
+    "model": "boulder",
+    "size": 1.6,
+    "tint": "#c9ccd2",
+    "n": 5
+   }
+  }
+ },
+ "tools": [
+  {
+   "id": "plain_pick",
+   "name": "Prospector's Pick",
+   "prof": "mining",
+   "kind": "pick",
+   "tier": 1,
+   "ease": 0,
+   "extra": 0,
+   "price": 12,
+   "desc": "A tool, not a weapon: it takes no slot. With it in your bag you can mine ore boulders."
+  },
+  {
+   "id": "iron_pick",
+   "name": "Iron Pick",
+   "prof": "mining",
+   "kind": "pick",
+   "tier": 2,
+   "ease": 0.2,
+   "extra": 0.1,
+   "price": 61,
+   "desc": "A better pick: the timing windows are 10% wider and one node in 10 gives an extra piece. Takes no slot; the best one in your bag is used."
+  },
+  {
+   "id": "silversteel_pick",
+   "name": "Silversteel Pick",
+   "prof": "mining",
+   "kind": "pick",
+   "tier": 3,
+   "ease": 0.4,
+   "extra": 0.2,
+   "price": 277,
+   "desc": "A better pick: the timing windows are 20% wider and one node in 5 gives an extra piece. Takes no slot; the best one in your bag is used."
+  },
+  {
+   "id": "plain_hatchet",
+   "name": "Woodsman's Hatchet",
+   "prof": "logging",
+   "kind": "hatchet",
+   "tier": 1,
+   "ease": 0,
+   "extra": 0,
+   "price": 12,
+   "desc": "A tool, not a weapon: it takes no slot. With it in your bag you can fell marked trees."
+  },
+  {
+   "id": "iron_hatchet",
+   "name": "Iron Hatchet",
+   "prof": "logging",
+   "kind": "hatchet",
+   "tier": 2,
+   "ease": 0.2,
+   "extra": 0.1,
+   "price": 61,
+   "desc": "A better hatchet: the timing windows are 10% wider and one node in 10 gives an extra piece. Takes no slot; the best one in your bag is used."
+  },
+  {
+   "id": "silversteel_hatchet",
+   "name": "Silversteel Hatchet",
+   "prof": "logging",
+   "kind": "hatchet",
+   "tier": 3,
+   "ease": 0.4,
+   "extra": 0.2,
+   "price": 277,
+   "desc": "A better hatchet: the timing windows are 20% wider and one node in 5 gives an extra piece. Takes no slot; the best one in your bag is used."
+  },
+  {
+   "id": "plain_knife",
+   "name": "Plain Skinning Knife",
+   "prof": "skinning",
+   "kind": "knife",
+   "tier": 1,
+   "ease": 0,
+   "extra": 0,
+   "price": 12,
+   "desc": "A tool, not a weapon: it takes no slot. With it in your bag you can skin beasts you killed."
+  },
+  {
+   "id": "iron_knife",
+   "name": "Iron Skinning Knife",
+   "prof": "skinning",
+   "kind": "knife",
+   "tier": 2,
+   "ease": 0.2,
+   "extra": 0.1,
+   "price": 61,
+   "desc": "A better skinning knife: the timing windows are 10% wider and one node in 10 gives an extra piece. Takes no slot; the best one in your bag is used."
+  },
+  {
+   "id": "silversteel_knife",
+   "name": "Silversteel Skinning Knife",
+   "prof": "skinning",
+   "kind": "knife",
+   "tier": 3,
+   "ease": 0.4,
+   "extra": 0.2,
+   "price": 277,
+   "desc": "A better skinning knife: the timing windows are 20% wider and one node in 5 gives an extra piece. Takes no slot; the best one in your bag is used."
+  },
+  {
+   "id": "plain_sickle",
+   "name": "Forager's Sickle",
+   "prof": "foraging",
+   "kind": "sickle",
+   "tier": 1,
+   "ease": 0,
+   "extra": 0,
+   "price": 12,
+   "desc": "A tool, not a weapon: it takes no slot. With it in your bag you can gather herbs, mushrooms and fibre."
+  },
+  {
+   "id": "iron_sickle",
+   "name": "Iron Sickle",
+   "prof": "foraging",
+   "kind": "sickle",
+   "tier": 2,
+   "ease": 0.2,
+   "extra": 0.1,
+   "price": 61,
+   "desc": "A better sickle: the timing windows are 10% wider and one node in 10 gives an extra piece. Takes no slot; the best one in your bag is used."
+  },
+  {
+   "id": "silversteel_sickle",
+   "name": "Silversteel Sickle",
+   "prof": "foraging",
+   "kind": "sickle",
+   "tier": 3,
+   "ease": 0.4,
+   "extra": 0.2,
+   "price": 277,
+   "desc": "A better sickle: the timing windows are 20% wider and one node in 5 gives an extra piece. Takes no slot; the best one in your bag is used."
+  }
+ ],
+ "starterTools": {
+  "mining": "plain_pick",
+  "logging": "plain_hatchet",
+  "skinning": "plain_knife",
+  "foraging": "plain_sickle"
+ },
+ "recipes": [
+  {
+   "id": "smelt_bronze_bar",
+   "prof": "smithing",
+   "tier": 1,
+   "skill": 1,
+   "name": "Bronze Bar",
+   "desc": "Copper and tin, smelted together. The metal of a first sword.",
+   "kind": "material",
+   "refine": true,
+   "needs": [
+    {
+     "id": "copper_ore",
+     "n": 1
+    },
+    {
+     "id": "tin_ore",
+     "n": 1
+    }
+   ],
+   "makes": {
+    "id": "bronze_bar",
+    "n": 1
+   }
+  },
+  {
+   "id": "cure_light_leather",
+   "prof": "outfitting",
+   "tier": 1,
+   "skill": 1,
+   "name": "Light Leather",
+   "desc": "Hide, scraped, cured and oiled.",
+   "kind": "material",
+   "refine": true,
+   "needs": [
+    {
+     "id": "light_hide",
+     "n": 2
+    }
+   ],
+   "makes": {
+    "id": "light_leather",
+    "n": 1
+   }
+  },
+  {
+   "id": "weave_linen_bolt",
+   "prof": "outfitting",
+   "tier": 1,
+   "skill": 1,
+   "name": "Bolt of Linen",
+   "desc": "Fibre, spun and woven on the bench.",
+   "kind": "material",
+   "refine": true,
+   "needs": [
+    {
+     "id": "flax",
+     "n": 2
+    }
+   ],
+   "makes": {
+    "id": "linen_bolt",
+    "n": 1
+   }
+  },
+  {
+   "id": "smelt_iron_bar",
+   "prof": "smithing",
+   "tier": 2,
+   "skill": 25,
+   "name": "Iron Bar",
+   "desc": "Smelted iron ore, ready for the anvil.",
+   "kind": "material",
+   "refine": true,
+   "needs": [
+    {
+     "id": "iron_ore",
+     "n": 2
+    }
+   ],
+   "makes": {
+    "id": "iron_bar",
+    "n": 1
+   }
+  },
+  {
+   "id": "cure_thick_leather",
+   "prof": "outfitting",
+   "tier": 2,
+   "skill": 25,
+   "name": "Thick Leather",
+   "desc": "Hide, scraped, cured and oiled.",
+   "kind": "material",
+   "refine": true,
+   "needs": [
+    {
+     "id": "thick_hide",
+     "n": 2
+    }
+   ],
+   "makes": {
+    "id": "thick_leather",
+    "n": 1
+   }
+  },
+  {
+   "id": "weave_canvas_bolt",
+   "prof": "outfitting",
+   "tier": 2,
+   "skill": 25,
+   "name": "Bolt of Canvas",
+   "desc": "Fibre, spun and woven on the bench.",
+   "kind": "material",
+   "refine": true,
+   "needs": [
+    {
+     "id": "hemp",
+     "n": 2
+    }
+   ],
+   "makes": {
+    "id": "canvas_bolt",
+    "n": 1
+   }
+  },
+  {
+   "id": "smelt_silversteel_bar",
+   "prof": "smithing",
+   "tier": 3,
+   "skill": 50,
+   "name": "Silversteel Bar",
+   "desc": "Smelted silver ore, ready for the anvil.",
+   "kind": "material",
+   "refine": true,
+   "needs": [
+    {
+     "id": "silver_ore",
+     "n": 2
+    },
+    {
+     "id": "iron_ore",
+     "n": 1
+    }
+   ],
+   "makes": {
+    "id": "silversteel_bar",
+    "n": 1
+   }
+  },
+  {
+   "id": "cure_rugged_leather",
+   "prof": "outfitting",
+   "tier": 3,
+   "skill": 50,
+   "name": "Rugged Leather",
+   "desc": "Hide, scraped, cured and oiled.",
+   "kind": "material",
+   "refine": true,
+   "needs": [
+    {
+     "id": "rugged_hide",
+     "n": 2
+    }
+   ],
+   "makes": {
+    "id": "rugged_leather",
+    "n": 1
+   }
+  },
+  {
+   "id": "weave_silk_bolt",
+   "prof": "outfitting",
+   "tier": 3,
+   "skill": 50,
+   "name": "Bolt of Silk",
+   "desc": "Fibre, spun and woven on the bench.",
+   "kind": "material",
+   "refine": true,
+   "needs": [
+    {
+     "id": "silkweed",
+     "n": 2
+    }
+   ],
+   "makes": {
+    "id": "silk_bolt",
+    "n": 1
+   }
+  },
+  {
+   "id": "smelt_blackiron_bar",
+   "prof": "smithing",
+   "tier": 4,
+   "skill": 75,
+   "name": "Blackiron Bar",
+   "desc": "Smelted blackiron ore, ready for the anvil.",
+   "kind": "material",
+   "refine": true,
+   "needs": [
+    {
+     "id": "blackiron_ore",
+     "n": 2
+    }
+   ],
+   "makes": {
+    "id": "blackiron_bar",
+    "n": 1
+   }
+  },
+  {
+   "id": "cure_heavy_leather",
+   "prof": "outfitting",
+   "tier": 4,
+   "skill": 75,
+   "name": "Heavy Leather",
+   "desc": "Hide, scraped, cured and oiled.",
+   "kind": "material",
+   "refine": true,
+   "needs": [
+    {
+     "id": "heavy_hide",
+     "n": 2
+    }
+   ],
+   "makes": {
+    "id": "heavy_leather",
+    "n": 1
+   }
+  },
+  {
+   "id": "weave_moonweave_bolt",
+   "prof": "outfitting",
+   "tier": 4,
+   "skill": 75,
+   "name": "Bolt of Moonweave",
+   "desc": "Fibre, spun and woven on the bench.",
+   "kind": "material",
+   "refine": true,
+   "needs": [
+    {
+     "id": "moonflax",
+     "n": 2
+    }
+   ],
+   "makes": {
+    "id": "moonweave_bolt",
+    "n": 1
+   }
+  },
+  {
+   "id": "smelt_sunsteel_bar",
+   "prof": "smithing",
+   "tier": 5,
+   "skill": 90,
+   "name": "Sunsteel Bar",
+   "desc": "Smelted sunsteel ore, ready for the anvil.",
+   "kind": "material",
+   "refine": true,
+   "needs": [
+    {
+     "id": "sunsteel_ore",
+     "n": 2
+    }
+   ],
+   "makes": {
+    "id": "sunsteel_bar",
+    "n": 1
+   }
+  },
+  {
+   "id": "cure_drake_leather",
+   "prof": "outfitting",
+   "tier": 5,
+   "skill": 90,
+   "name": "Drake Leather",
+   "desc": "Hide, scraped, cured and oiled.",
+   "kind": "material",
+   "refine": true,
+   "needs": [
+    {
+     "id": "drake_hide",
+     "n": 2
+    }
+   ],
+   "makes": {
+    "id": "drake_leather",
+    "n": 1
+   }
+  },
+  {
+   "id": "weave_sunsilk_bolt",
+   "prof": "outfitting",
+   "tier": 5,
+   "skill": 90,
+   "name": "Bolt of Sunsilk",
+   "desc": "Fibre, spun and woven on the bench.",
+   "kind": "material",
+   "refine": true,
+   "needs": [
+    {
+     "id": "sunsilk",
+     "n": 2
+    }
+   ],
+   "makes": {
+    "id": "sunsilk_bolt",
+    "n": 1
+   }
+  },
+  {
+   "id": "tool_iron_pick",
+   "prof": "smithing",
+   "tier": 2,
+   "skill": 30,
+   "name": "Iron Pick",
+   "desc": "A gathering tool.",
+   "kind": "tool",
+   "needs": [
+    {
+     "id": "iron_bar",
+     "n": 3
+    },
+    {
+     "id": "oak_log",
+     "n": 1
+    }
+   ],
+   "makes": {
+    "id": "iron_pick",
+    "n": 1
+   }
+  },
+  {
+   "id": "tool_silversteel_pick",
+   "prof": "smithing",
+   "tier": 3,
+   "skill": 55,
+   "name": "Silversteel Pick",
+   "desc": "A gathering tool.",
+   "kind": "tool",
+   "needs": [
+    {
+     "id": "silversteel_bar",
+     "n": 3
+    },
+    {
+     "id": "yew_log",
+     "n": 1
+    }
+   ],
+   "makes": {
+    "id": "silversteel_pick",
+    "n": 1
+   }
+  },
+  {
+   "id": "tool_iron_hatchet",
+   "prof": "smithing",
+   "tier": 2,
+   "skill": 30,
+   "name": "Iron Hatchet",
+   "desc": "A gathering tool.",
+   "kind": "tool",
+   "needs": [
+    {
+     "id": "iron_bar",
+     "n": 3
+    },
+    {
+     "id": "oak_log",
+     "n": 1
+    }
+   ],
+   "makes": {
+    "id": "iron_hatchet",
+    "n": 1
+   }
+  },
+  {
+   "id": "tool_silversteel_hatchet",
+   "prof": "smithing",
+   "tier": 3,
+   "skill": 55,
+   "name": "Silversteel Hatchet",
+   "desc": "A gathering tool.",
+   "kind": "tool",
+   "needs": [
+    {
+     "id": "silversteel_bar",
+     "n": 3
+    },
+    {
+     "id": "yew_log",
+     "n": 1
+    }
+   ],
+   "makes": {
+    "id": "silversteel_hatchet",
+    "n": 1
+   }
+  },
+  {
+   "id": "tool_iron_knife",
+   "prof": "smithing",
+   "tier": 2,
+   "skill": 30,
+   "name": "Iron Skinning Knife",
+   "desc": "A gathering tool.",
+   "kind": "tool",
+   "needs": [
+    {
+     "id": "iron_bar",
+     "n": 3
+    },
+    {
+     "id": "oak_log",
+     "n": 1
+    }
+   ],
+   "makes": {
+    "id": "iron_knife",
+    "n": 1
+   }
+  },
+  {
+   "id": "tool_silversteel_knife",
+   "prof": "smithing",
+   "tier": 3,
+   "skill": 55,
+   "name": "Silversteel Skinning Knife",
+   "desc": "A gathering tool.",
+   "kind": "tool",
+   "needs": [
+    {
+     "id": "silversteel_bar",
+     "n": 3
+    },
+    {
+     "id": "yew_log",
+     "n": 1
+    }
+   ],
+   "makes": {
+    "id": "silversteel_knife",
+    "n": 1
+   }
+  },
+  {
+   "id": "tool_iron_sickle",
+   "prof": "smithing",
+   "tier": 2,
+   "skill": 30,
+   "name": "Iron Sickle",
+   "desc": "A gathering tool.",
+   "kind": "tool",
+   "needs": [
+    {
+     "id": "iron_bar",
+     "n": 3
+    },
+    {
+     "id": "oak_log",
+     "n": 1
+    }
+   ],
+   "makes": {
+    "id": "iron_sickle",
+    "n": 1
+   }
+  },
+  {
+   "id": "tool_silversteel_sickle",
+   "prof": "smithing",
+   "tier": 3,
+   "skill": 55,
+   "name": "Silversteel Sickle",
+   "desc": "A gathering tool.",
+   "kind": "tool",
+   "needs": [
+    {
+     "id": "silversteel_bar",
+     "n": 3
+    },
+    {
+     "id": "yew_log",
+     "n": 1
+    }
+   ],
+   "makes": {
+    "id": "silversteel_sickle",
+    "n": 1
+   }
+  },
+  {
+   "id": "blades_1",
+   "prof": "smithing",
+   "tier": 1,
+   "skill": 1,
+   "name": "Bronze-grade Blades",
+   "pattern": "blades",
+   "desc": "Swords and daggers. You choose the pattern; the item comes out at up to level 10, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "bronze_bar",
+     "n": 3
+    }
+   ],
+   "bases": [
+    {
+     "key": "dagger",
+     "name": "Dagger",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "militia_sabre",
+     "name": "Militia Sabre",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "rapier",
+     "name": "Rapier",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "sword",
+     "name": "Sword",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_leafblade",
+     "name": "Marsh Leafblade",
+     "slot": "weapon",
+     "from": 2
+    },
+    {
+     "key": "g5_kris",
+     "name": "Tidewater Kris",
+     "slot": "weapon",
+     "from": 2
+    },
+    {
+     "key": "forager_blade",
+     "name": "Forager's Blade",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "tithe_dagger",
+     "name": "Tithe Dagger",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "longsword",
+     "name": "Longsword",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
+     "key": "houndmasters_lash",
+     "name": "Houndmaster's Lash",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "rimecut_sabre",
+     "name": "Rimecut Sabre",
+     "slot": "weapon",
+     "from": 9
+    }
+   ]
+  },
+  {
+   "id": "blades_2",
+   "prof": "smithing",
+   "tier": 2,
+   "skill": 25,
+   "name": "Iron-grade Blades",
+   "pattern": "blades",
+   "desc": "Swords and daggers. You choose the pattern; the item comes out at up to level 20, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "iron_bar",
+     "n": 3
+    }
+   ],
+   "bases": [
+    {
+     "key": "dagger",
+     "name": "Dagger",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "militia_sabre",
+     "name": "Militia Sabre",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "rapier",
+     "name": "Rapier",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "sword",
+     "name": "Sword",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_leafblade",
+     "name": "Marsh Leafblade",
+     "slot": "weapon",
+     "from": 2
+    },
+    {
+     "key": "g5_kris",
+     "name": "Tidewater Kris",
+     "slot": "weapon",
+     "from": 2
+    },
+    {
+     "key": "forager_blade",
+     "name": "Forager's Blade",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "tithe_dagger",
+     "name": "Tithe Dagger",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "longsword",
+     "name": "Longsword",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
+     "key": "houndmasters_lash",
+     "name": "Houndmaster's Lash",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "rimecut_sabre",
+     "name": "Rimecut Sabre",
+     "slot": "weapon",
+     "from": 9
+    },
+    {
+     "key": "obsidian_scimitar",
+     "name": "Obsidian Scimitar",
+     "slot": "weapon",
+     "from": 14
+    }
+   ]
+  },
+  {
+   "id": "blades_3",
+   "prof": "smithing",
+   "tier": 3,
+   "skill": 50,
+   "name": "Silversteel-grade Blades",
+   "pattern": "blades",
+   "desc": "Swords and daggers. You choose the pattern; the item comes out at up to level 30, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "silversteel_bar",
+     "n": 3
+    }
+   ],
+   "bases": [
+    {
+     "key": "dagger",
+     "name": "Dagger",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "militia_sabre",
+     "name": "Militia Sabre",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "rapier",
+     "name": "Rapier",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "sword",
+     "name": "Sword",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_leafblade",
+     "name": "Marsh Leafblade",
+     "slot": "weapon",
+     "from": 2
+    },
+    {
+     "key": "g5_kris",
+     "name": "Tidewater Kris",
+     "slot": "weapon",
+     "from": 2
+    },
+    {
+     "key": "forager_blade",
+     "name": "Forager's Blade",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "tithe_dagger",
+     "name": "Tithe Dagger",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "longsword",
+     "name": "Longsword",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
+     "key": "houndmasters_lash",
+     "name": "Houndmaster's Lash",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "rimecut_sabre",
+     "name": "Rimecut Sabre",
+     "slot": "weapon",
+     "from": 9
+    },
+    {
+     "key": "obsidian_scimitar",
+     "name": "Obsidian Scimitar",
+     "slot": "weapon",
+     "from": 14
+    },
+    {
+     "key": "dragonfang_sword",
+     "name": "Dragonfang Sword",
+     "slot": "weapon",
+     "from": 23
+    }
+   ]
+  },
+  {
+   "id": "blades_4",
+   "prof": "smithing",
+   "tier": 4,
+   "skill": 75,
+   "name": "Blackiron-grade Blades",
+   "pattern": "blades",
+   "desc": "Swords and daggers. You choose the pattern; the item comes out at up to level 40, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "blackiron_bar",
+     "n": 3
+    }
+   ],
+   "bases": [
+    {
+     "key": "dagger",
+     "name": "Dagger",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "militia_sabre",
+     "name": "Militia Sabre",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "rapier",
+     "name": "Rapier",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "sword",
+     "name": "Sword",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_leafblade",
+     "name": "Marsh Leafblade",
+     "slot": "weapon",
+     "from": 2
+    },
+    {
+     "key": "g5_kris",
+     "name": "Tidewater Kris",
+     "slot": "weapon",
+     "from": 2
+    },
+    {
+     "key": "forager_blade",
+     "name": "Forager's Blade",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "tithe_dagger",
+     "name": "Tithe Dagger",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "longsword",
+     "name": "Longsword",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
+     "key": "houndmasters_lash",
+     "name": "Houndmaster's Lash",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "rimecut_sabre",
+     "name": "Rimecut Sabre",
+     "slot": "weapon",
+     "from": 9
+    },
+    {
+     "key": "obsidian_scimitar",
+     "name": "Obsidian Scimitar",
+     "slot": "weapon",
+     "from": 14
+    },
+    {
+     "key": "dragonfang_sword",
+     "name": "Dragonfang Sword",
+     "slot": "weapon",
+     "from": 23
+    }
+   ]
+  },
+  {
+   "id": "blades_5",
+   "prof": "smithing",
+   "tier": 5,
+   "skill": 90,
+   "name": "Sunsteel-grade Blades",
+   "pattern": "blades",
+   "desc": "Swords and daggers. You choose the pattern; the item comes out at up to level 50, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "sunsteel_bar",
+     "n": 3
+    }
+   ],
+   "bases": [
+    {
+     "key": "dagger",
+     "name": "Dagger",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "militia_sabre",
+     "name": "Militia Sabre",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "rapier",
+     "name": "Rapier",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "sword",
+     "name": "Sword",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_leafblade",
+     "name": "Marsh Leafblade",
+     "slot": "weapon",
+     "from": 2
+    },
+    {
+     "key": "g5_kris",
+     "name": "Tidewater Kris",
+     "slot": "weapon",
+     "from": 2
+    },
+    {
+     "key": "forager_blade",
+     "name": "Forager's Blade",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "tithe_dagger",
+     "name": "Tithe Dagger",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "longsword",
+     "name": "Longsword",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
+     "key": "houndmasters_lash",
+     "name": "Houndmaster's Lash",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "rimecut_sabre",
+     "name": "Rimecut Sabre",
+     "slot": "weapon",
+     "from": 9
+    },
+    {
+     "key": "obsidian_scimitar",
+     "name": "Obsidian Scimitar",
+     "slot": "weapon",
+     "from": 14
+    },
+    {
+     "key": "dragonfang_sword",
+     "name": "Dragonfang Sword",
+     "slot": "weapon",
+     "from": 23
+    }
+   ]
+  },
+  {
+   "id": "axes_1",
+   "prof": "smithing",
+   "tier": 1,
+   "skill": 4,
+   "name": "Bronze-grade Axes",
+   "pattern": "axes",
+   "desc": "Axes, one-handed and great. You choose the pattern; the item comes out at up to level 10, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "bronze_bar",
+     "n": 4
+    },
+    {
+     "id": "ash_log",
+     "n": 2
+    }
+   ],
+   "bases": [
+    {
+     "key": "battleaxe",
+     "name": "Battleaxe",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "woodsman_axe",
+     "name": "Woodsman's Axe",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "axe2h",
+     "name": "Greataxe",
+     "slot": "weapon",
+     "from": 2
+    },
+    {
+     "key": "g5_moonaxe",
+     "name": "Halfmoon Axe",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "g5_headsman",
+     "name": "Headsman's Longaxe",
+     "slot": "weapon",
+     "from": 7
+    }
+   ]
+  },
+  {
+   "id": "axes_2",
+   "prof": "smithing",
+   "tier": 2,
+   "skill": 28,
+   "name": "Iron-grade Axes",
+   "pattern": "axes",
+   "desc": "Axes, one-handed and great. You choose the pattern; the item comes out at up to level 20, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "iron_bar",
+     "n": 4
+    },
+    {
+     "id": "oak_log",
+     "n": 2
+    }
+   ],
+   "bases": [
+    {
+     "key": "battleaxe",
+     "name": "Battleaxe",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "woodsman_axe",
+     "name": "Woodsman's Axe",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "axe2h",
+     "name": "Greataxe",
+     "slot": "weapon",
+     "from": 2
+    },
+    {
+     "key": "g5_moonaxe",
+     "name": "Halfmoon Axe",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "g5_headsman",
+     "name": "Headsman's Longaxe",
+     "slot": "weapon",
+     "from": 7
+    },
+    {
+     "key": "breakers_pick",
+     "name": "Breaker's Pick",
+     "slot": "weapon",
+     "from": 12
+    }
+   ]
+  },
+  {
+   "id": "axes_3",
+   "prof": "smithing",
+   "tier": 3,
+   "skill": 53,
+   "name": "Silversteel-grade Axes",
+   "pattern": "axes",
+   "desc": "Axes, one-handed and great. You choose the pattern; the item comes out at up to level 30, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "silversteel_bar",
+     "n": 4
+    },
+    {
+     "id": "yew_log",
+     "n": 2
+    }
+   ],
+   "bases": [
+    {
+     "key": "battleaxe",
+     "name": "Battleaxe",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "woodsman_axe",
+     "name": "Woodsman's Axe",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "axe2h",
+     "name": "Greataxe",
+     "slot": "weapon",
+     "from": 2
+    },
+    {
+     "key": "g5_moonaxe",
+     "name": "Halfmoon Axe",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "g5_headsman",
+     "name": "Headsman's Longaxe",
+     "slot": "weapon",
+     "from": 7
+    },
+    {
+     "key": "breakers_pick",
+     "name": "Breaker's Pick",
+     "slot": "weapon",
+     "from": 12
+    }
+   ]
+  },
+  {
+   "id": "axes_4",
+   "prof": "smithing",
+   "tier": 4,
+   "skill": 78,
+   "name": "Blackiron-grade Axes",
+   "pattern": "axes",
+   "desc": "Axes, one-handed and great. You choose the pattern; the item comes out at up to level 40, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "blackiron_bar",
+     "n": 4
+    },
+    {
+     "id": "ironbark_log",
+     "n": 2
+    }
+   ],
+   "bases": [
+    {
+     "key": "battleaxe",
+     "name": "Battleaxe",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "woodsman_axe",
+     "name": "Woodsman's Axe",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "axe2h",
+     "name": "Greataxe",
+     "slot": "weapon",
+     "from": 2
+    },
+    {
+     "key": "g5_moonaxe",
+     "name": "Halfmoon Axe",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "g5_headsman",
+     "name": "Headsman's Longaxe",
+     "slot": "weapon",
+     "from": 7
+    },
+    {
+     "key": "breakers_pick",
+     "name": "Breaker's Pick",
+     "slot": "weapon",
+     "from": 12
+    }
+   ]
+  },
+  {
+   "id": "axes_5",
+   "prof": "smithing",
+   "tier": 5,
+   "skill": 93,
+   "name": "Sunsteel-grade Axes",
+   "pattern": "axes",
+   "desc": "Axes, one-handed and great. You choose the pattern; the item comes out at up to level 50, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "sunsteel_bar",
+     "n": 4
+    },
+    {
+     "id": "heartwood_log",
+     "n": 2
+    }
+   ],
+   "bases": [
+    {
+     "key": "battleaxe",
+     "name": "Battleaxe",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "woodsman_axe",
+     "name": "Woodsman's Axe",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "axe2h",
+     "name": "Greataxe",
+     "slot": "weapon",
+     "from": 2
+    },
+    {
+     "key": "g5_moonaxe",
+     "name": "Halfmoon Axe",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "g5_headsman",
+     "name": "Headsman's Longaxe",
+     "slot": "weapon",
+     "from": 7
+    },
+    {
+     "key": "breakers_pick",
+     "name": "Breaker's Pick",
+     "slot": "weapon",
+     "from": 12
+    }
+   ]
+  },
+  {
+   "id": "maces_1",
+   "prof": "smithing",
+   "tier": 1,
+   "skill": 4,
+   "name": "Bronze-grade Maces and Hammers",
+   "pattern": "maces",
+   "desc": "Maces, hammers and mauls. You choose the pattern; the item comes out at up to level 10, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "bronze_bar",
+     "n": 4
+    },
+    {
+     "id": "ash_log",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "hammer",
+     "name": "Hammer",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "iron_mace",
+     "name": "Iron Mace",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_mallet",
+     "name": "Cooper's Mallet",
+     "slot": "weapon",
+     "from": 2
+    },
+    {
+     "key": "lantern_mace",
+     "name": "Lantern Mace",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "g5_morningstar",
+     "name": "Thornhead Morningstar",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "warhammer",
+     "name": "Warhammer",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
+     "key": "g5_stonemaul",
+     "name": "Quarrybound Sledge",
+     "slot": "weapon",
+     "from": 9
+    }
+   ]
+  },
+  {
+   "id": "maces_2",
+   "prof": "smithing",
+   "tier": 2,
+   "skill": 28,
+   "name": "Iron-grade Maces and Hammers",
+   "pattern": "maces",
+   "desc": "Maces, hammers and mauls. You choose the pattern; the item comes out at up to level 20, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "iron_bar",
+     "n": 4
+    },
+    {
+     "id": "oak_log",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "hammer",
+     "name": "Hammer",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "iron_mace",
+     "name": "Iron Mace",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_mallet",
+     "name": "Cooper's Mallet",
+     "slot": "weapon",
+     "from": 2
+    },
+    {
+     "key": "lantern_mace",
+     "name": "Lantern Mace",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "g5_morningstar",
+     "name": "Thornhead Morningstar",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "warhammer",
+     "name": "Warhammer",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
+     "key": "g5_stonemaul",
+     "name": "Quarrybound Sledge",
+     "slot": "weapon",
+     "from": 9
+    },
+    {
+     "key": "axle_club",
+     "name": "Wagon-Axle Club",
+     "slot": "weapon",
+     "from": 11
+    },
+    {
+     "key": "dawnwarden_hammer",
+     "name": "Dawnwarden Hammer",
+     "slot": "weapon",
+     "from": 16
+    }
+   ]
+  },
+  {
+   "id": "maces_3",
+   "prof": "smithing",
+   "tier": 3,
+   "skill": 53,
+   "name": "Silversteel-grade Maces and Hammers",
+   "pattern": "maces",
+   "desc": "Maces, hammers and mauls. You choose the pattern; the item comes out at up to level 30, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "silversteel_bar",
+     "n": 4
+    },
+    {
+     "id": "yew_log",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "hammer",
+     "name": "Hammer",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "iron_mace",
+     "name": "Iron Mace",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_mallet",
+     "name": "Cooper's Mallet",
+     "slot": "weapon",
+     "from": 2
+    },
+    {
+     "key": "lantern_mace",
+     "name": "Lantern Mace",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "g5_morningstar",
+     "name": "Thornhead Morningstar",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "warhammer",
+     "name": "Warhammer",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
+     "key": "g5_stonemaul",
+     "name": "Quarrybound Sledge",
+     "slot": "weapon",
+     "from": 9
+    },
+    {
+     "key": "axle_club",
+     "name": "Wagon-Axle Club",
+     "slot": "weapon",
+     "from": 11
+    },
+    {
+     "key": "dawnwarden_hammer",
+     "name": "Dawnwarden Hammer",
+     "slot": "weapon",
+     "from": 16
+    },
+    {
+     "key": "drakehammer",
+     "name": "Drakehammer",
+     "slot": "weapon",
+     "from": 23
+    }
+   ]
+  },
+  {
+   "id": "maces_4",
+   "prof": "smithing",
+   "tier": 4,
+   "skill": 78,
+   "name": "Blackiron-grade Maces and Hammers",
+   "pattern": "maces",
+   "desc": "Maces, hammers and mauls. You choose the pattern; the item comes out at up to level 40, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "blackiron_bar",
+     "n": 4
+    },
+    {
+     "id": "ironbark_log",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "hammer",
+     "name": "Hammer",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "iron_mace",
+     "name": "Iron Mace",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_mallet",
+     "name": "Cooper's Mallet",
+     "slot": "weapon",
+     "from": 2
+    },
+    {
+     "key": "lantern_mace",
+     "name": "Lantern Mace",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "g5_morningstar",
+     "name": "Thornhead Morningstar",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "warhammer",
+     "name": "Warhammer",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
+     "key": "g5_stonemaul",
+     "name": "Quarrybound Sledge",
+     "slot": "weapon",
+     "from": 9
+    },
+    {
+     "key": "axle_club",
+     "name": "Wagon-Axle Club",
+     "slot": "weapon",
+     "from": 11
+    },
+    {
+     "key": "dawnwarden_hammer",
+     "name": "Dawnwarden Hammer",
+     "slot": "weapon",
+     "from": 16
+    },
+    {
+     "key": "drakehammer",
+     "name": "Drakehammer",
+     "slot": "weapon",
+     "from": 23
+    }
+   ]
+  },
+  {
+   "id": "maces_5",
+   "prof": "smithing",
+   "tier": 5,
+   "skill": 93,
+   "name": "Sunsteel-grade Maces and Hammers",
+   "pattern": "maces",
+   "desc": "Maces, hammers and mauls. You choose the pattern; the item comes out at up to level 50, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "sunsteel_bar",
+     "n": 4
+    },
+    {
+     "id": "heartwood_log",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "hammer",
+     "name": "Hammer",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "iron_mace",
+     "name": "Iron Mace",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_mallet",
+     "name": "Cooper's Mallet",
+     "slot": "weapon",
+     "from": 2
+    },
+    {
+     "key": "lantern_mace",
+     "name": "Lantern Mace",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "g5_morningstar",
+     "name": "Thornhead Morningstar",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "warhammer",
+     "name": "Warhammer",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
+     "key": "g5_stonemaul",
+     "name": "Quarrybound Sledge",
+     "slot": "weapon",
+     "from": 9
+    },
+    {
+     "key": "axle_club",
+     "name": "Wagon-Axle Club",
+     "slot": "weapon",
+     "from": 11
+    },
+    {
+     "key": "dawnwarden_hammer",
+     "name": "Dawnwarden Hammer",
+     "slot": "weapon",
+     "from": 16
+    },
+    {
+     "key": "drakehammer",
+     "name": "Drakehammer",
+     "slot": "weapon",
+     "from": 23
+    }
+   ]
+  },
+  {
+   "id": "greatblades_1",
+   "prof": "smithing",
+   "tier": 1,
+   "skill": 7,
+   "name": "Bronze-grade Greatswords",
+   "pattern": "greatblades",
+   "desc": "Two-handed swords. You choose the pattern; the item comes out at up to level 10, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "bronze_bar",
+     "n": 5
+    },
+    {
+     "id": "ash_log",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "sword2h",
+     "name": "Greatsword",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "greatsword",
+     "name": "Greatsword",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "g5_flamberge",
+     "name": "Rippled Greatblade",
+     "slot": "weapon",
+     "from": 8
+    }
+   ]
+  },
+  {
+   "id": "greatblades_2",
+   "prof": "smithing",
+   "tier": 2,
+   "skill": 31,
+   "name": "Iron-grade Greatswords",
+   "pattern": "greatblades",
+   "desc": "Two-handed swords. You choose the pattern; the item comes out at up to level 20, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "iron_bar",
+     "n": 5
+    },
+    {
+     "id": "oak_log",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "sword2h",
+     "name": "Greatsword",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "greatsword",
+     "name": "Greatsword",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "g5_flamberge",
+     "name": "Rippled Greatblade",
+     "slot": "weapon",
+     "from": 8
+    }
+   ]
+  },
+  {
+   "id": "greatblades_3",
+   "prof": "smithing",
+   "tier": 3,
+   "skill": 56,
+   "name": "Silversteel-grade Greatswords",
+   "pattern": "greatblades",
+   "desc": "Two-handed swords. You choose the pattern; the item comes out at up to level 30, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "silversteel_bar",
+     "n": 5
+    },
+    {
+     "id": "yew_log",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "sword2h",
+     "name": "Greatsword",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "greatsword",
+     "name": "Greatsword",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "g5_flamberge",
+     "name": "Rippled Greatblade",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "bloodledger_blade",
+     "name": "Blood Ledger",
+     "slot": "weapon",
+     "from": 23
+    },
+    {
+     "key": "dragonfang_greatsword",
+     "name": "Dragonfang Greatsword",
+     "slot": "weapon",
+     "from": 23
+    },
+    {
+     "key": "grudgebrand",
+     "name": "Grudgebrand",
+     "slot": "weapon",
+     "from": 23
+    }
+   ]
+  },
+  {
+   "id": "greatblades_4",
+   "prof": "smithing",
+   "tier": 4,
+   "skill": 81,
+   "name": "Blackiron-grade Greatswords",
+   "pattern": "greatblades",
+   "desc": "Two-handed swords. You choose the pattern; the item comes out at up to level 40, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "blackiron_bar",
+     "n": 5
+    },
+    {
+     "id": "ironbark_log",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "sword2h",
+     "name": "Greatsword",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "greatsword",
+     "name": "Greatsword",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "g5_flamberge",
+     "name": "Rippled Greatblade",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "bloodledger_blade",
+     "name": "Blood Ledger",
+     "slot": "weapon",
+     "from": 23
+    },
+    {
+     "key": "dragonfang_greatsword",
+     "name": "Dragonfang Greatsword",
+     "slot": "weapon",
+     "from": 23
+    },
+    {
+     "key": "grudgebrand",
+     "name": "Grudgebrand",
+     "slot": "weapon",
+     "from": 23
+    }
+   ]
+  },
+  {
+   "id": "greatblades_5",
+   "prof": "smithing",
+   "tier": 5,
+   "skill": 96,
+   "name": "Sunsteel-grade Greatswords",
+   "pattern": "greatblades",
+   "desc": "Two-handed swords. You choose the pattern; the item comes out at up to level 50, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "sunsteel_bar",
+     "n": 5
+    },
+    {
+     "id": "heartwood_log",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "sword2h",
+     "name": "Greatsword",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "greatsword",
+     "name": "Greatsword",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "g5_flamberge",
+     "name": "Rippled Greatblade",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "bloodledger_blade",
+     "name": "Blood Ledger",
+     "slot": "weapon",
+     "from": 23
+    },
+    {
+     "key": "dragonfang_greatsword",
+     "name": "Dragonfang Greatsword",
+     "slot": "weapon",
+     "from": 23
+    },
+    {
+     "key": "grudgebrand",
+     "name": "Grudgebrand",
+     "slot": "weapon",
+     "from": 23
+    }
+   ]
+  },
+  {
+   "id": "polearms_1",
+   "prof": "smithing",
+   "tier": 1,
+   "skill": 7,
+   "name": "Bronze-grade Spears and Polearms",
+   "pattern": "polearms",
+   "desc": "Spears, javelins and halberds. You choose the pattern; the item comes out at up to level 10, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "bronze_bar",
+     "n": 2
+    },
+    {
+     "id": "ash_log",
+     "n": 3
+    }
+   ],
+   "bases": [
+    {
+     "key": "halberd",
+     "name": "Halberd",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "javelin",
+     "name": "Javelin",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "spear",
+     "name": "Spear",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_harpoon",
+     "name": "Barbed Harpoon",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "pathfinder_javelin",
+     "name": "Pathfinder Javelin",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "g5_partisan",
+     "name": "Winged Partisan",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "g5_bardiche",
+     "name": "Reaper's Bardiche",
+     "slot": "weapon",
+     "from": 10
+    }
+   ]
+  },
+  {
+   "id": "polearms_2",
+   "prof": "smithing",
+   "tier": 2,
+   "skill": 31,
+   "name": "Iron-grade Spears and Polearms",
+   "pattern": "polearms",
+   "desc": "Spears, javelins and halberds. You choose the pattern; the item comes out at up to level 20, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "iron_bar",
+     "n": 2
+    },
+    {
+     "id": "oak_log",
+     "n": 3
+    }
+   ],
+   "bases": [
+    {
+     "key": "halberd",
+     "name": "Halberd",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "javelin",
+     "name": "Javelin",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "spear",
+     "name": "Spear",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_harpoon",
+     "name": "Barbed Harpoon",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "pathfinder_javelin",
+     "name": "Pathfinder Javelin",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "g5_partisan",
+     "name": "Winged Partisan",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "g5_bardiche",
+     "name": "Reaper's Bardiche",
+     "slot": "weapon",
+     "from": 10
+    },
+    {
+     "key": "watchfire_glaive",
+     "name": "Watchfire Glaive",
+     "slot": "weapon",
+     "from": 16
+    }
+   ]
+  },
+  {
+   "id": "polearms_3",
+   "prof": "smithing",
+   "tier": 3,
+   "skill": 56,
+   "name": "Silversteel-grade Spears and Polearms",
+   "pattern": "polearms",
+   "desc": "Spears, javelins and halberds. You choose the pattern; the item comes out at up to level 30, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "silversteel_bar",
+     "n": 2
+    },
+    {
+     "id": "yew_log",
+     "n": 3
+    }
+   ],
+   "bases": [
+    {
+     "key": "halberd",
+     "name": "Halberd",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "javelin",
+     "name": "Javelin",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "spear",
+     "name": "Spear",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_harpoon",
+     "name": "Barbed Harpoon",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "pathfinder_javelin",
+     "name": "Pathfinder Javelin",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "g5_partisan",
+     "name": "Winged Partisan",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "g5_bardiche",
+     "name": "Reaper's Bardiche",
+     "slot": "weapon",
+     "from": 10
+    },
+    {
+     "key": "watchfire_glaive",
+     "name": "Watchfire Glaive",
+     "slot": "weapon",
+     "from": 16
+    }
+   ]
+  },
+  {
+   "id": "polearms_4",
+   "prof": "smithing",
+   "tier": 4,
+   "skill": 81,
+   "name": "Blackiron-grade Spears and Polearms",
+   "pattern": "polearms",
+   "desc": "Spears, javelins and halberds. You choose the pattern; the item comes out at up to level 40, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "blackiron_bar",
+     "n": 2
+    },
+    {
+     "id": "ironbark_log",
+     "n": 3
+    }
+   ],
+   "bases": [
+    {
+     "key": "halberd",
+     "name": "Halberd",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "javelin",
+     "name": "Javelin",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "spear",
+     "name": "Spear",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_harpoon",
+     "name": "Barbed Harpoon",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "pathfinder_javelin",
+     "name": "Pathfinder Javelin",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "g5_partisan",
+     "name": "Winged Partisan",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "g5_bardiche",
+     "name": "Reaper's Bardiche",
+     "slot": "weapon",
+     "from": 10
+    },
+    {
+     "key": "watchfire_glaive",
+     "name": "Watchfire Glaive",
+     "slot": "weapon",
+     "from": 16
+    }
+   ]
+  },
+  {
+   "id": "polearms_5",
+   "prof": "smithing",
+   "tier": 5,
+   "skill": 96,
+   "name": "Sunsteel-grade Spears and Polearms",
+   "pattern": "polearms",
+   "desc": "Spears, javelins and halberds. You choose the pattern; the item comes out at up to level 50, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "sunsteel_bar",
+     "n": 2
+    },
+    {
+     "id": "heartwood_log",
+     "n": 3
+    }
+   ],
+   "bases": [
+    {
+     "key": "halberd",
+     "name": "Halberd",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "javelin",
+     "name": "Javelin",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "spear",
+     "name": "Spear",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_harpoon",
+     "name": "Barbed Harpoon",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "pathfinder_javelin",
+     "name": "Pathfinder Javelin",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "g5_partisan",
+     "name": "Winged Partisan",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "g5_bardiche",
+     "name": "Reaper's Bardiche",
+     "slot": "weapon",
+     "from": 10
+    },
+    {
+     "key": "watchfire_glaive",
+     "name": "Watchfire Glaive",
+     "slot": "weapon",
+     "from": 16
+    }
+   ]
+  },
+  {
+   "id": "shields_1",
+   "prof": "smithing",
+   "tier": 1,
+   "skill": 6,
+   "name": "Bronze-grade Shields",
+   "pattern": "shields",
+   "desc": "Bucklers to tower shields. You choose the pattern; the item comes out at up to level 10, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "bronze_bar",
+     "n": 3
+    },
+    {
+     "id": "ash_log",
+     "n": 2
+    }
+   ],
+   "bases": [
+    {
+     "key": "buckler",
+     "name": "Buckler",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "shield",
+     "name": "Shield",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "g5_targe",
+     "name": "Studded Targe",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "kite_shield",
+     "name": "Kite Shield",
+     "slot": "offhand",
+     "from": 3
+    },
+    {
+     "key": "g5_scutcheon",
+     "name": "Notched Scutcheon",
+     "slot": "offhand",
+     "from": 3
+    },
+    {
+     "key": "g5_almond",
+     "name": "Almond Kite",
+     "slot": "offhand",
+     "from": 6
+    },
+    {
+     "key": "tower_shield",
+     "name": "Tower Shield",
+     "slot": "offhand",
+     "from": 6
+    },
+    {
+     "key": "g5_pavise",
+     "name": "Ridged Pavise",
+     "slot": "offhand",
+     "from": 10
+    }
+   ]
+  },
+  {
+   "id": "shields_2",
+   "prof": "smithing",
+   "tier": 2,
+   "skill": 30,
+   "name": "Iron-grade Shields",
+   "pattern": "shields",
+   "desc": "Bucklers to tower shields. You choose the pattern; the item comes out at up to level 20, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "iron_bar",
+     "n": 3
+    },
+    {
+     "id": "oak_log",
+     "n": 2
+    }
+   ],
+   "bases": [
+    {
+     "key": "buckler",
+     "name": "Buckler",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "shield",
+     "name": "Shield",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "g5_targe",
+     "name": "Studded Targe",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "kite_shield",
+     "name": "Kite Shield",
+     "slot": "offhand",
+     "from": 3
+    },
+    {
+     "key": "g5_scutcheon",
+     "name": "Notched Scutcheon",
+     "slot": "offhand",
+     "from": 3
+    },
+    {
+     "key": "g5_almond",
+     "name": "Almond Kite",
+     "slot": "offhand",
+     "from": 6
+    },
+    {
+     "key": "tower_shield",
+     "name": "Tower Shield",
+     "slot": "offhand",
+     "from": 6
+    },
+    {
+     "key": "g5_pavise",
+     "name": "Ridged Pavise",
+     "slot": "offhand",
+     "from": 10
+    }
+   ]
+  },
+  {
+   "id": "shields_3",
+   "prof": "smithing",
+   "tier": 3,
+   "skill": 55,
+   "name": "Silversteel-grade Shields",
+   "pattern": "shields",
+   "desc": "Bucklers to tower shields. You choose the pattern; the item comes out at up to level 30, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "silversteel_bar",
+     "n": 3
+    },
+    {
+     "id": "yew_log",
+     "n": 2
+    }
+   ],
+   "bases": [
+    {
+     "key": "buckler",
+     "name": "Buckler",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "shield",
+     "name": "Shield",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "g5_targe",
+     "name": "Studded Targe",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "kite_shield",
+     "name": "Kite Shield",
+     "slot": "offhand",
+     "from": 3
+    },
+    {
+     "key": "g5_scutcheon",
+     "name": "Notched Scutcheon",
+     "slot": "offhand",
+     "from": 3
+    },
+    {
+     "key": "g5_almond",
+     "name": "Almond Kite",
+     "slot": "offhand",
+     "from": 6
+    },
+    {
+     "key": "tower_shield",
+     "name": "Tower Shield",
+     "slot": "offhand",
+     "from": 6
+    },
+    {
+     "key": "g5_pavise",
+     "name": "Ridged Pavise",
+     "slot": "offhand",
+     "from": 10
+    }
+   ]
+  },
+  {
+   "id": "shields_4",
+   "prof": "smithing",
+   "tier": 4,
+   "skill": 80,
+   "name": "Blackiron-grade Shields",
+   "pattern": "shields",
+   "desc": "Bucklers to tower shields. You choose the pattern; the item comes out at up to level 40, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "blackiron_bar",
+     "n": 3
+    },
+    {
+     "id": "ironbark_log",
+     "n": 2
+    }
+   ],
+   "bases": [
+    {
+     "key": "buckler",
+     "name": "Buckler",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "shield",
+     "name": "Shield",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "g5_targe",
+     "name": "Studded Targe",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "kite_shield",
+     "name": "Kite Shield",
+     "slot": "offhand",
+     "from": 3
+    },
+    {
+     "key": "g5_scutcheon",
+     "name": "Notched Scutcheon",
+     "slot": "offhand",
+     "from": 3
+    },
+    {
+     "key": "g5_almond",
+     "name": "Almond Kite",
+     "slot": "offhand",
+     "from": 6
+    },
+    {
+     "key": "tower_shield",
+     "name": "Tower Shield",
+     "slot": "offhand",
+     "from": 6
+    },
+    {
+     "key": "g5_pavise",
+     "name": "Ridged Pavise",
+     "slot": "offhand",
+     "from": 10
+    }
+   ]
+  },
+  {
+   "id": "shields_5",
+   "prof": "smithing",
+   "tier": 5,
+   "skill": 95,
+   "name": "Sunsteel-grade Shields",
+   "pattern": "shields",
+   "desc": "Bucklers to tower shields. You choose the pattern; the item comes out at up to level 50, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "sunsteel_bar",
+     "n": 3
+    },
+    {
+     "id": "heartwood_log",
+     "n": 2
+    }
+   ],
+   "bases": [
+    {
+     "key": "buckler",
+     "name": "Buckler",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "shield",
+     "name": "Shield",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "g5_targe",
+     "name": "Studded Targe",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "kite_shield",
+     "name": "Kite Shield",
+     "slot": "offhand",
+     "from": 3
+    },
+    {
+     "key": "g5_scutcheon",
+     "name": "Notched Scutcheon",
+     "slot": "offhand",
+     "from": 3
+    },
+    {
+     "key": "g5_almond",
+     "name": "Almond Kite",
+     "slot": "offhand",
+     "from": 6
+    },
+    {
+     "key": "tower_shield",
+     "name": "Tower Shield",
+     "slot": "offhand",
+     "from": 6
+    },
+    {
+     "key": "g5_pavise",
+     "name": "Ridged Pavise",
+     "slot": "offhand",
+     "from": 10
+    }
+   ]
+  },
+  {
+   "id": "mail_1",
+   "prof": "smithing",
+   "tier": 1,
+   "skill": 9,
+   "name": "Bronze-grade Mail",
+   "pattern": "mail",
+   "desc": "Medium armour: mail and scale. You choose the pattern; the item comes out at up to level 10, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "bronze_bar",
+     "n": 4
+    },
+    {
+     "id": "light_leather",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "medium_boots",
+     "name": "Chain Boots",
+     "slot": "feet",
+     "from": 1
+    },
+    {
+     "key": "medium_helm",
+     "name": "Chain Coif",
+     "slot": "head",
+     "from": 1
+    },
+    {
+     "key": "medium_gauntlets",
+     "name": "Chain Gauntlets",
+     "slot": "hands",
+     "from": 1
+    },
+    {
+     "key": "medium_legs",
+     "name": "Chain Legs",
+     "slot": "legs",
+     "from": 1
+    },
+    {
+     "key": "medium_chest",
+     "name": "Chain Shirt",
+     "slot": "chest",
+     "from": 1
+    },
+    {
+     "key": "g5_mail_cap",
+     "name": "Banded Cap and Aventail",
+     "slot": "head",
+     "from": 5
+    },
+    {
+     "key": "g5_mail_chausses",
+     "name": "Mail Chausses",
+     "slot": "legs",
+     "from": 5
+    },
+    {
+     "key": "g5_mail_mitts",
+     "name": "Mail Mittens",
+     "slot": "hands",
+     "from": 5
+    },
+    {
+     "key": "g5_mail_splints",
+     "name": "Splinted Boots",
+     "slot": "feet",
+     "from": 5
+    },
+    {
+     "key": "g5_mail_hauberk",
+     "name": "Yoked Hauberk",
+     "slot": "chest",
+     "from": 5
+    },
+    {
+     "key": "scaled_legs",
+     "name": "Scaled Greaves",
+     "slot": "legs",
+     "from": 6
+    },
+    {
+     "key": "scaled_chest",
+     "name": "Scaled Hauberk",
+     "slot": "chest",
+     "from": 6
+    }
+   ]
+  },
+  {
+   "id": "mail_2",
+   "prof": "smithing",
+   "tier": 2,
+   "skill": 33,
+   "name": "Iron-grade Mail",
+   "pattern": "mail",
+   "desc": "Medium armour: mail and scale. You choose the pattern; the item comes out at up to level 20, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "iron_bar",
+     "n": 4
+    },
+    {
+     "id": "thick_leather",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "medium_boots",
+     "name": "Chain Boots",
+     "slot": "feet",
+     "from": 1
+    },
+    {
+     "key": "medium_helm",
+     "name": "Chain Coif",
+     "slot": "head",
+     "from": 1
+    },
+    {
+     "key": "medium_gauntlets",
+     "name": "Chain Gauntlets",
+     "slot": "hands",
+     "from": 1
+    },
+    {
+     "key": "medium_legs",
+     "name": "Chain Legs",
+     "slot": "legs",
+     "from": 1
+    },
+    {
+     "key": "medium_chest",
+     "name": "Chain Shirt",
+     "slot": "chest",
+     "from": 1
+    },
+    {
+     "key": "g5_mail_cap",
+     "name": "Banded Cap and Aventail",
+     "slot": "head",
+     "from": 5
+    },
+    {
+     "key": "g5_mail_chausses",
+     "name": "Mail Chausses",
+     "slot": "legs",
+     "from": 5
+    },
+    {
+     "key": "g5_mail_mitts",
+     "name": "Mail Mittens",
+     "slot": "hands",
+     "from": 5
+    },
+    {
+     "key": "g5_mail_splints",
+     "name": "Splinted Boots",
+     "slot": "feet",
+     "from": 5
+    },
+    {
+     "key": "g5_mail_hauberk",
+     "name": "Yoked Hauberk",
+     "slot": "chest",
+     "from": 5
+    },
+    {
+     "key": "scaled_legs",
+     "name": "Scaled Greaves",
+     "slot": "legs",
+     "from": 6
+    },
+    {
+     "key": "scaled_chest",
+     "name": "Scaled Hauberk",
+     "slot": "chest",
+     "from": 6
+    }
+   ]
+  },
+  {
+   "id": "mail_3",
+   "prof": "smithing",
+   "tier": 3,
+   "skill": 58,
+   "name": "Silversteel-grade Mail",
+   "pattern": "mail",
+   "desc": "Medium armour: mail and scale. You choose the pattern; the item comes out at up to level 30, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "silversteel_bar",
+     "n": 4
+    },
+    {
+     "id": "rugged_leather",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "medium_boots",
+     "name": "Chain Boots",
+     "slot": "feet",
+     "from": 1
+    },
+    {
+     "key": "medium_helm",
+     "name": "Chain Coif",
+     "slot": "head",
+     "from": 1
+    },
+    {
+     "key": "medium_gauntlets",
+     "name": "Chain Gauntlets",
+     "slot": "hands",
+     "from": 1
+    },
+    {
+     "key": "medium_legs",
+     "name": "Chain Legs",
+     "slot": "legs",
+     "from": 1
+    },
+    {
+     "key": "medium_chest",
+     "name": "Chain Shirt",
+     "slot": "chest",
+     "from": 1
+    },
+    {
+     "key": "g5_mail_cap",
+     "name": "Banded Cap and Aventail",
+     "slot": "head",
+     "from": 5
+    },
+    {
+     "key": "g5_mail_chausses",
+     "name": "Mail Chausses",
+     "slot": "legs",
+     "from": 5
+    },
+    {
+     "key": "g5_mail_mitts",
+     "name": "Mail Mittens",
+     "slot": "hands",
+     "from": 5
+    },
+    {
+     "key": "g5_mail_splints",
+     "name": "Splinted Boots",
+     "slot": "feet",
+     "from": 5
+    },
+    {
+     "key": "g5_mail_hauberk",
+     "name": "Yoked Hauberk",
+     "slot": "chest",
+     "from": 5
+    },
+    {
+     "key": "scaled_legs",
+     "name": "Scaled Greaves",
+     "slot": "legs",
+     "from": 6
+    },
+    {
+     "key": "scaled_chest",
+     "name": "Scaled Hauberk",
+     "slot": "chest",
+     "from": 6
+    }
+   ]
+  },
+  {
+   "id": "mail_4",
+   "prof": "smithing",
+   "tier": 4,
+   "skill": 83,
+   "name": "Blackiron-grade Mail",
+   "pattern": "mail",
+   "desc": "Medium armour: mail and scale. You choose the pattern; the item comes out at up to level 40, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "blackiron_bar",
+     "n": 4
+    },
+    {
+     "id": "heavy_leather",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "medium_boots",
+     "name": "Chain Boots",
+     "slot": "feet",
+     "from": 1
+    },
+    {
+     "key": "medium_helm",
+     "name": "Chain Coif",
+     "slot": "head",
+     "from": 1
+    },
+    {
+     "key": "medium_gauntlets",
+     "name": "Chain Gauntlets",
+     "slot": "hands",
+     "from": 1
+    },
+    {
+     "key": "medium_legs",
+     "name": "Chain Legs",
+     "slot": "legs",
+     "from": 1
+    },
+    {
+     "key": "medium_chest",
+     "name": "Chain Shirt",
+     "slot": "chest",
+     "from": 1
+    },
+    {
+     "key": "g5_mail_cap",
+     "name": "Banded Cap and Aventail",
+     "slot": "head",
+     "from": 5
+    },
+    {
+     "key": "g5_mail_chausses",
+     "name": "Mail Chausses",
+     "slot": "legs",
+     "from": 5
+    },
+    {
+     "key": "g5_mail_mitts",
+     "name": "Mail Mittens",
+     "slot": "hands",
+     "from": 5
+    },
+    {
+     "key": "g5_mail_splints",
+     "name": "Splinted Boots",
+     "slot": "feet",
+     "from": 5
+    },
+    {
+     "key": "g5_mail_hauberk",
+     "name": "Yoked Hauberk",
+     "slot": "chest",
+     "from": 5
+    },
+    {
+     "key": "scaled_legs",
+     "name": "Scaled Greaves",
+     "slot": "legs",
+     "from": 6
+    },
+    {
+     "key": "scaled_chest",
+     "name": "Scaled Hauberk",
+     "slot": "chest",
+     "from": 6
+    }
+   ]
+  },
+  {
+   "id": "mail_5",
+   "prof": "smithing",
+   "tier": 5,
+   "skill": 98,
+   "name": "Sunsteel-grade Mail",
+   "pattern": "mail",
+   "desc": "Medium armour: mail and scale. You choose the pattern; the item comes out at up to level 50, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "sunsteel_bar",
+     "n": 4
+    },
+    {
+     "id": "drake_leather",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "medium_boots",
+     "name": "Chain Boots",
+     "slot": "feet",
+     "from": 1
+    },
+    {
+     "key": "medium_helm",
+     "name": "Chain Coif",
+     "slot": "head",
+     "from": 1
+    },
+    {
+     "key": "medium_gauntlets",
+     "name": "Chain Gauntlets",
+     "slot": "hands",
+     "from": 1
+    },
+    {
+     "key": "medium_legs",
+     "name": "Chain Legs",
+     "slot": "legs",
+     "from": 1
+    },
+    {
+     "key": "medium_chest",
+     "name": "Chain Shirt",
+     "slot": "chest",
+     "from": 1
+    },
+    {
+     "key": "g5_mail_cap",
+     "name": "Banded Cap and Aventail",
+     "slot": "head",
+     "from": 5
+    },
+    {
+     "key": "g5_mail_chausses",
+     "name": "Mail Chausses",
+     "slot": "legs",
+     "from": 5
+    },
+    {
+     "key": "g5_mail_mitts",
+     "name": "Mail Mittens",
+     "slot": "hands",
+     "from": 5
+    },
+    {
+     "key": "g5_mail_splints",
+     "name": "Splinted Boots",
+     "slot": "feet",
+     "from": 5
+    },
+    {
+     "key": "g5_mail_hauberk",
+     "name": "Yoked Hauberk",
+     "slot": "chest",
+     "from": 5
+    },
+    {
+     "key": "scaled_legs",
+     "name": "Scaled Greaves",
+     "slot": "legs",
+     "from": 6
+    },
+    {
+     "key": "scaled_chest",
+     "name": "Scaled Hauberk",
+     "slot": "chest",
+     "from": 6
+    }
+   ]
+  },
+  {
+   "id": "plate_1",
+   "prof": "smithing",
+   "tier": 1,
+   "skill": 15,
+   "name": "Bronze-grade Plate",
+   "pattern": "plate",
+   "desc": "Heavy armour. You choose the pattern; the item comes out at up to level 10, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "bronze_bar",
+     "n": 6
+    },
+    {
+     "id": "light_leather",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "heavy_chest",
+     "name": "Plate Armor",
+     "slot": "chest",
+     "from": 3
+    },
+    {
+     "key": "heavy_boots",
+     "name": "Plate Boots",
+     "slot": "feet",
+     "from": 3
+    },
+    {
+     "key": "heavy_gauntlets",
+     "name": "Plate Gauntlets",
+     "slot": "hands",
+     "from": 3
+    },
+    {
+     "key": "heavy_legs",
+     "name": "Plate Legs",
+     "slot": "legs",
+     "from": 3
+    },
+    {
+     "key": "heavy_helm",
+     "name": "War Helm",
+     "slot": "head",
+     "from": 3
+    },
+    {
+     "key": "g5_plate_cuisses",
+     "name": "Fan-kneed Cuisses",
+     "slot": "legs",
+     "from": 9
+    },
+    {
+     "key": "g5_plate_cuirass",
+     "name": "Fluted Cuirass",
+     "slot": "chest",
+     "from": 9
+    },
+    {
+     "key": "g5_plate_armet",
+     "name": "Houndsnout Armet",
+     "slot": "head",
+     "from": 9
+    },
+    {
+     "key": "g5_plate_gauntlets",
+     "name": "Hourglass Gauntlets",
+     "slot": "hands",
+     "from": 9
+    },
+    {
+     "key": "g5_plate_sabatons",
+     "name": "Pointed Sabatons",
+     "slot": "feet",
+     "from": 9
+    }
+   ]
+  },
+  {
+   "id": "plate_2",
+   "prof": "smithing",
+   "tier": 2,
+   "skill": 39,
+   "name": "Iron-grade Plate",
+   "pattern": "plate",
+   "desc": "Heavy armour. You choose the pattern; the item comes out at up to level 20, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "iron_bar",
+     "n": 6
+    },
+    {
+     "id": "thick_leather",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "heavy_chest",
+     "name": "Plate Armor",
+     "slot": "chest",
+     "from": 3
+    },
+    {
+     "key": "heavy_boots",
+     "name": "Plate Boots",
+     "slot": "feet",
+     "from": 3
+    },
+    {
+     "key": "heavy_gauntlets",
+     "name": "Plate Gauntlets",
+     "slot": "hands",
+     "from": 3
+    },
+    {
+     "key": "heavy_legs",
+     "name": "Plate Legs",
+     "slot": "legs",
+     "from": 3
+    },
+    {
+     "key": "heavy_helm",
+     "name": "War Helm",
+     "slot": "head",
+     "from": 3
+    },
+    {
+     "key": "g5_plate_cuisses",
+     "name": "Fan-kneed Cuisses",
+     "slot": "legs",
+     "from": 9
+    },
+    {
+     "key": "g5_plate_cuirass",
+     "name": "Fluted Cuirass",
+     "slot": "chest",
+     "from": 9
+    },
+    {
+     "key": "g5_plate_armet",
+     "name": "Houndsnout Armet",
+     "slot": "head",
+     "from": 9
+    },
+    {
+     "key": "g5_plate_gauntlets",
+     "name": "Hourglass Gauntlets",
+     "slot": "hands",
+     "from": 9
+    },
+    {
+     "key": "g5_plate_sabatons",
+     "name": "Pointed Sabatons",
+     "slot": "feet",
+     "from": 9
+    },
+    {
+     "key": "plate_helm",
+     "name": "Plate Helm",
+     "slot": "head",
+     "from": 16
+    },
+    {
+     "key": "runed_chest",
+     "name": "Runed Cuirass",
+     "slot": "chest",
+     "from": 16
+    },
+    {
+     "key": "runed_gauntlets",
+     "name": "Runed Gauntlets",
+     "slot": "hands",
+     "from": 16
+    },
+    {
+     "key": "runed_boots",
+     "name": "Runed Sabatons",
+     "slot": "feet",
+     "from": 16
+    }
+   ]
+  },
+  {
+   "id": "plate_3",
+   "prof": "smithing",
+   "tier": 3,
+   "skill": 64,
+   "name": "Silversteel-grade Plate",
+   "pattern": "plate",
+   "desc": "Heavy armour. You choose the pattern; the item comes out at up to level 30, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "silversteel_bar",
+     "n": 6
+    },
+    {
+     "id": "rugged_leather",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "heavy_chest",
+     "name": "Plate Armor",
+     "slot": "chest",
+     "from": 3
+    },
+    {
+     "key": "heavy_boots",
+     "name": "Plate Boots",
+     "slot": "feet",
+     "from": 3
+    },
+    {
+     "key": "heavy_gauntlets",
+     "name": "Plate Gauntlets",
+     "slot": "hands",
+     "from": 3
+    },
+    {
+     "key": "heavy_legs",
+     "name": "Plate Legs",
+     "slot": "legs",
+     "from": 3
+    },
+    {
+     "key": "heavy_helm",
+     "name": "War Helm",
+     "slot": "head",
+     "from": 3
+    },
+    {
+     "key": "g5_plate_cuisses",
+     "name": "Fan-kneed Cuisses",
+     "slot": "legs",
+     "from": 9
+    },
+    {
+     "key": "g5_plate_cuirass",
+     "name": "Fluted Cuirass",
+     "slot": "chest",
+     "from": 9
+    },
+    {
+     "key": "g5_plate_armet",
+     "name": "Houndsnout Armet",
+     "slot": "head",
+     "from": 9
+    },
+    {
+     "key": "g5_plate_gauntlets",
+     "name": "Hourglass Gauntlets",
+     "slot": "hands",
+     "from": 9
+    },
+    {
+     "key": "g5_plate_sabatons",
+     "name": "Pointed Sabatons",
+     "slot": "feet",
+     "from": 9
+    },
+    {
+     "key": "plate_helm",
+     "name": "Plate Helm",
+     "slot": "head",
+     "from": 16
+    },
+    {
+     "key": "runed_chest",
+     "name": "Runed Cuirass",
+     "slot": "chest",
+     "from": 16
+    },
+    {
+     "key": "runed_gauntlets",
+     "name": "Runed Gauntlets",
+     "slot": "hands",
+     "from": 16
+    },
+    {
+     "key": "runed_boots",
+     "name": "Runed Sabatons",
+     "slot": "feet",
+     "from": 16
+    },
+    {
+     "key": "runed_legs",
+     "name": "Runed Greaves",
+     "slot": "legs",
+     "from": 23
+    }
+   ]
+  },
+  {
+   "id": "plate_4",
+   "prof": "smithing",
+   "tier": 4,
+   "skill": 89,
+   "name": "Blackiron-grade Plate",
+   "pattern": "plate",
+   "desc": "Heavy armour. You choose the pattern; the item comes out at up to level 40, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "blackiron_bar",
+     "n": 6
+    },
+    {
+     "id": "heavy_leather",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "heavy_chest",
+     "name": "Plate Armor",
+     "slot": "chest",
+     "from": 3
+    },
+    {
+     "key": "heavy_boots",
+     "name": "Plate Boots",
+     "slot": "feet",
+     "from": 3
+    },
+    {
+     "key": "heavy_gauntlets",
+     "name": "Plate Gauntlets",
+     "slot": "hands",
+     "from": 3
+    },
+    {
+     "key": "heavy_legs",
+     "name": "Plate Legs",
+     "slot": "legs",
+     "from": 3
+    },
+    {
+     "key": "heavy_helm",
+     "name": "War Helm",
+     "slot": "head",
+     "from": 3
+    },
+    {
+     "key": "g5_plate_cuisses",
+     "name": "Fan-kneed Cuisses",
+     "slot": "legs",
+     "from": 9
+    },
+    {
+     "key": "g5_plate_cuirass",
+     "name": "Fluted Cuirass",
+     "slot": "chest",
+     "from": 9
+    },
+    {
+     "key": "g5_plate_armet",
+     "name": "Houndsnout Armet",
+     "slot": "head",
+     "from": 9
+    },
+    {
+     "key": "g5_plate_gauntlets",
+     "name": "Hourglass Gauntlets",
+     "slot": "hands",
+     "from": 9
+    },
+    {
+     "key": "g5_plate_sabatons",
+     "name": "Pointed Sabatons",
+     "slot": "feet",
+     "from": 9
+    },
+    {
+     "key": "plate_helm",
+     "name": "Plate Helm",
+     "slot": "head",
+     "from": 16
+    },
+    {
+     "key": "runed_chest",
+     "name": "Runed Cuirass",
+     "slot": "chest",
+     "from": 16
+    },
+    {
+     "key": "runed_gauntlets",
+     "name": "Runed Gauntlets",
+     "slot": "hands",
+     "from": 16
+    },
+    {
+     "key": "runed_boots",
+     "name": "Runed Sabatons",
+     "slot": "feet",
+     "from": 16
+    },
+    {
+     "key": "runed_legs",
+     "name": "Runed Greaves",
+     "slot": "legs",
+     "from": 23
+    }
+   ]
+  },
+  {
+   "id": "plate_5",
+   "prof": "smithing",
+   "tier": 5,
+   "skill": 100,
+   "name": "Sunsteel-grade Plate",
+   "pattern": "plate",
+   "desc": "Heavy armour. You choose the pattern; the item comes out at up to level 50, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "sunsteel_bar",
+     "n": 6
+    },
+    {
+     "id": "drake_leather",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "heavy_chest",
+     "name": "Plate Armor",
+     "slot": "chest",
+     "from": 3
+    },
+    {
+     "key": "heavy_boots",
+     "name": "Plate Boots",
+     "slot": "feet",
+     "from": 3
+    },
+    {
+     "key": "heavy_gauntlets",
+     "name": "Plate Gauntlets",
+     "slot": "hands",
+     "from": 3
+    },
+    {
+     "key": "heavy_legs",
+     "name": "Plate Legs",
+     "slot": "legs",
+     "from": 3
+    },
+    {
+     "key": "heavy_helm",
+     "name": "War Helm",
+     "slot": "head",
+     "from": 3
+    },
+    {
+     "key": "g5_plate_cuisses",
+     "name": "Fan-kneed Cuisses",
+     "slot": "legs",
+     "from": 9
+    },
+    {
+     "key": "g5_plate_cuirass",
+     "name": "Fluted Cuirass",
+     "slot": "chest",
+     "from": 9
+    },
+    {
+     "key": "g5_plate_armet",
+     "name": "Houndsnout Armet",
+     "slot": "head",
+     "from": 9
+    },
+    {
+     "key": "g5_plate_gauntlets",
+     "name": "Hourglass Gauntlets",
+     "slot": "hands",
+     "from": 9
+    },
+    {
+     "key": "g5_plate_sabatons",
+     "name": "Pointed Sabatons",
+     "slot": "feet",
+     "from": 9
+    },
+    {
+     "key": "plate_helm",
+     "name": "Plate Helm",
+     "slot": "head",
+     "from": 16
+    },
+    {
+     "key": "runed_chest",
+     "name": "Runed Cuirass",
+     "slot": "chest",
+     "from": 16
+    },
+    {
+     "key": "runed_gauntlets",
+     "name": "Runed Gauntlets",
+     "slot": "hands",
+     "from": 16
+    },
+    {
+     "key": "runed_boots",
+     "name": "Runed Sabatons",
+     "slot": "feet",
+     "from": 16
+    },
+    {
+     "key": "runed_legs",
+     "name": "Runed Greaves",
+     "slot": "legs",
+     "from": 23
+    }
+   ]
+  },
+  {
+   "id": "jewellery_1",
+   "prof": "smithing",
+   "tier": 1,
+   "skill": 11,
+   "name": "Bronze-grade Rings and Amulets",
+   "pattern": "jewellery",
+   "desc": "A ring or an amulet, set with a stone. You choose the pattern; the item comes out at up to level 10, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "bronze_bar",
+     "n": 1
+    },
+    {
+     "id": "rough_quartz",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "necklace",
+     "name": "Necklace",
+     "slot": "necklace",
+     "from": 1
+    },
+    {
+     "key": "ring",
+     "name": "Ring",
+     "slot": "ring",
+     "from": 1
+    },
+    {
+     "key": "g5_signet",
+     "name": "Signet Band",
+     "slot": "ring",
+     "from": 3
+    },
+    {
+     "key": "g5_torc",
+     "name": "Twisted Torc",
+     "slot": "necklace",
+     "from": 3
+    },
+    {
+     "key": "gold_signet",
+     "name": "Gold Signet",
+     "slot": "ring",
+     "from": 6
+    },
+    {
+     "key": "silver_amulet",
+     "name": "Silver Amulet",
+     "slot": "necklace",
+     "from": 6
+    }
+   ]
+  },
+  {
+   "id": "jewellery_2",
+   "prof": "smithing",
+   "tier": 2,
+   "skill": 35,
+   "name": "Iron-grade Rings and Amulets",
+   "pattern": "jewellery",
+   "desc": "A ring or an amulet, set with a stone. You choose the pattern; the item comes out at up to level 20, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "iron_bar",
+     "n": 1
+    },
+    {
+     "id": "garnet",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "necklace",
+     "name": "Necklace",
+     "slot": "necklace",
+     "from": 1
+    },
+    {
+     "key": "ring",
+     "name": "Ring",
+     "slot": "ring",
+     "from": 1
+    },
+    {
+     "key": "g5_signet",
+     "name": "Signet Band",
+     "slot": "ring",
+     "from": 3
+    },
+    {
+     "key": "g5_torc",
+     "name": "Twisted Torc",
+     "slot": "necklace",
+     "from": 3
+    },
+    {
+     "key": "gold_signet",
+     "name": "Gold Signet",
+     "slot": "ring",
+     "from": 6
+    },
+    {
+     "key": "silver_amulet",
+     "name": "Silver Amulet",
+     "slot": "necklace",
+     "from": 6
+    }
+   ]
+  },
+  {
+   "id": "jewellery_3",
+   "prof": "smithing",
+   "tier": 3,
+   "skill": 60,
+   "name": "Silversteel-grade Rings and Amulets",
+   "pattern": "jewellery",
+   "desc": "A ring or an amulet, set with a stone. You choose the pattern; the item comes out at up to level 30, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "silversteel_bar",
+     "n": 1
+    },
+    {
+     "id": "amethyst",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "necklace",
+     "name": "Necklace",
+     "slot": "necklace",
+     "from": 1
+    },
+    {
+     "key": "ring",
+     "name": "Ring",
+     "slot": "ring",
+     "from": 1
+    },
+    {
+     "key": "g5_signet",
+     "name": "Signet Band",
+     "slot": "ring",
+     "from": 3
+    },
+    {
+     "key": "g5_torc",
+     "name": "Twisted Torc",
+     "slot": "necklace",
+     "from": 3
+    },
+    {
+     "key": "gold_signet",
+     "name": "Gold Signet",
+     "slot": "ring",
+     "from": 6
+    },
+    {
+     "key": "silver_amulet",
+     "name": "Silver Amulet",
+     "slot": "necklace",
+     "from": 6
+    }
+   ]
+  },
+  {
+   "id": "jewellery_4",
+   "prof": "smithing",
+   "tier": 4,
+   "skill": 85,
+   "name": "Blackiron-grade Rings and Amulets",
+   "pattern": "jewellery",
+   "desc": "A ring or an amulet, set with a stone. You choose the pattern; the item comes out at up to level 40, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "blackiron_bar",
+     "n": 1
+    },
+    {
+     "id": "sapphire",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "necklace",
+     "name": "Necklace",
+     "slot": "necklace",
+     "from": 1
+    },
+    {
+     "key": "ring",
+     "name": "Ring",
+     "slot": "ring",
+     "from": 1
+    },
+    {
+     "key": "g5_signet",
+     "name": "Signet Band",
+     "slot": "ring",
+     "from": 3
+    },
+    {
+     "key": "g5_torc",
+     "name": "Twisted Torc",
+     "slot": "necklace",
+     "from": 3
+    },
+    {
+     "key": "gold_signet",
+     "name": "Gold Signet",
+     "slot": "ring",
+     "from": 6
+    },
+    {
+     "key": "silver_amulet",
+     "name": "Silver Amulet",
+     "slot": "necklace",
+     "from": 6
+    }
+   ]
+  },
+  {
+   "id": "jewellery_5",
+   "prof": "smithing",
+   "tier": 5,
+   "skill": 100,
+   "name": "Sunsteel-grade Rings and Amulets",
+   "pattern": "jewellery",
+   "desc": "A ring or an amulet, set with a stone. You choose the pattern; the item comes out at up to level 50, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "sunsteel_bar",
+     "n": 1
+    },
+    {
+     "id": "star_opal",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "necklace",
+     "name": "Necklace",
+     "slot": "necklace",
+     "from": 1
+    },
+    {
+     "key": "ring",
+     "name": "Ring",
+     "slot": "ring",
+     "from": 1
+    },
+    {
+     "key": "g5_signet",
+     "name": "Signet Band",
+     "slot": "ring",
+     "from": 3
+    },
+    {
+     "key": "g5_torc",
+     "name": "Twisted Torc",
+     "slot": "necklace",
+     "from": 3
+    },
+    {
+     "key": "gold_signet",
+     "name": "Gold Signet",
+     "slot": "ring",
+     "from": 6
+    },
+    {
+     "key": "silver_amulet",
+     "name": "Silver Amulet",
+     "slot": "necklace",
+     "from": 6
+    }
+   ]
+  },
+  {
+   "id": "clothwork_1",
+   "prof": "outfitting",
+   "tier": 1,
+   "skill": 1,
+   "name": "Bronze-grade Cloth Armour",
+   "pattern": "clothwork",
+   "desc": "Robes, hoods, wraps and shoes. You choose the pattern; the item comes out at up to level 10, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "linen_bolt",
+     "n": 4
+    }
+   ],
+   "bases": [
+    {
+     "key": "cloth_gloves",
+     "name": "Cloth Gloves",
+     "slot": "hands",
+     "from": 1
+    },
+    {
+     "key": "cloth_shoes",
+     "name": "Cloth Shoes",
+     "slot": "feet",
+     "from": 1
+    },
+    {
+     "key": "g5_cloth_curltoes",
+     "name": "Curl-toe Slippers",
+     "slot": "feet",
+     "from": 1
+    },
+    {
+     "key": "cloth_helm",
+     "name": "Hood",
+     "slot": "head",
+     "from": 1
+    },
+    {
+     "key": "g5_cloth_vestment",
+     "name": "Layered Vestment",
+     "slot": "chest",
+     "from": 1
+    },
+    {
+     "key": "cloth_legs",
+     "name": "Linen Leggings",
+     "slot": "legs",
+     "from": 1
+    },
+    {
+     "key": "g5_cloth_pleats",
+     "name": "Pleated Wideleg",
+     "slot": "legs",
+     "from": 1
+    },
+    {
+     "key": "cloth_chest",
+     "name": "Robes",
+     "slot": "chest",
+     "from": 1
+    },
+    {
+     "key": "g5_cloth_wrap",
+     "name": "Scholar's Headwrap",
+     "slot": "head",
+     "from": 1
+    },
+    {
+     "key": "g5_cloth_handwraps",
+     "name": "Silk Handwraps",
+     "slot": "hands",
+     "from": 1
+    }
+   ]
+  },
+  {
+   "id": "clothwork_2",
+   "prof": "outfitting",
+   "tier": 2,
+   "skill": 25,
+   "name": "Iron-grade Cloth Armour",
+   "pattern": "clothwork",
+   "desc": "Robes, hoods, wraps and shoes. You choose the pattern; the item comes out at up to level 20, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "canvas_bolt",
+     "n": 4
+    }
+   ],
+   "bases": [
+    {
+     "key": "cloth_gloves",
+     "name": "Cloth Gloves",
+     "slot": "hands",
+     "from": 1
+    },
+    {
+     "key": "cloth_shoes",
+     "name": "Cloth Shoes",
+     "slot": "feet",
+     "from": 1
+    },
+    {
+     "key": "g5_cloth_curltoes",
+     "name": "Curl-toe Slippers",
+     "slot": "feet",
+     "from": 1
+    },
+    {
+     "key": "cloth_helm",
+     "name": "Hood",
+     "slot": "head",
+     "from": 1
+    },
+    {
+     "key": "g5_cloth_vestment",
+     "name": "Layered Vestment",
+     "slot": "chest",
+     "from": 1
+    },
+    {
+     "key": "cloth_legs",
+     "name": "Linen Leggings",
+     "slot": "legs",
+     "from": 1
+    },
+    {
+     "key": "g5_cloth_pleats",
+     "name": "Pleated Wideleg",
+     "slot": "legs",
+     "from": 1
+    },
+    {
+     "key": "cloth_chest",
+     "name": "Robes",
+     "slot": "chest",
+     "from": 1
+    },
+    {
+     "key": "g5_cloth_wrap",
+     "name": "Scholar's Headwrap",
+     "slot": "head",
+     "from": 1
+    },
+    {
+     "key": "g5_cloth_handwraps",
+     "name": "Silk Handwraps",
+     "slot": "hands",
+     "from": 1
+    }
+   ]
+  },
+  {
+   "id": "clothwork_3",
+   "prof": "outfitting",
+   "tier": 3,
+   "skill": 50,
+   "name": "Silversteel-grade Cloth Armour",
+   "pattern": "clothwork",
+   "desc": "Robes, hoods, wraps and shoes. You choose the pattern; the item comes out at up to level 30, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "silk_bolt",
+     "n": 4
+    }
+   ],
+   "bases": [
+    {
+     "key": "cloth_gloves",
+     "name": "Cloth Gloves",
+     "slot": "hands",
+     "from": 1
+    },
+    {
+     "key": "cloth_shoes",
+     "name": "Cloth Shoes",
+     "slot": "feet",
+     "from": 1
+    },
+    {
+     "key": "g5_cloth_curltoes",
+     "name": "Curl-toe Slippers",
+     "slot": "feet",
+     "from": 1
+    },
+    {
+     "key": "cloth_helm",
+     "name": "Hood",
+     "slot": "head",
+     "from": 1
+    },
+    {
+     "key": "g5_cloth_vestment",
+     "name": "Layered Vestment",
+     "slot": "chest",
+     "from": 1
+    },
+    {
+     "key": "cloth_legs",
+     "name": "Linen Leggings",
+     "slot": "legs",
+     "from": 1
+    },
+    {
+     "key": "g5_cloth_pleats",
+     "name": "Pleated Wideleg",
+     "slot": "legs",
+     "from": 1
+    },
+    {
+     "key": "cloth_chest",
+     "name": "Robes",
+     "slot": "chest",
+     "from": 1
+    },
+    {
+     "key": "g5_cloth_wrap",
+     "name": "Scholar's Headwrap",
+     "slot": "head",
+     "from": 1
+    },
+    {
+     "key": "g5_cloth_handwraps",
+     "name": "Silk Handwraps",
+     "slot": "hands",
+     "from": 1
+    }
+   ]
+  },
+  {
+   "id": "clothwork_4",
+   "prof": "outfitting",
+   "tier": 4,
+   "skill": 75,
+   "name": "Blackiron-grade Cloth Armour",
+   "pattern": "clothwork",
+   "desc": "Robes, hoods, wraps and shoes. You choose the pattern; the item comes out at up to level 40, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "moonweave_bolt",
+     "n": 4
+    }
+   ],
+   "bases": [
+    {
+     "key": "cloth_gloves",
+     "name": "Cloth Gloves",
+     "slot": "hands",
+     "from": 1
+    },
+    {
+     "key": "cloth_shoes",
+     "name": "Cloth Shoes",
+     "slot": "feet",
+     "from": 1
+    },
+    {
+     "key": "g5_cloth_curltoes",
+     "name": "Curl-toe Slippers",
+     "slot": "feet",
+     "from": 1
+    },
+    {
+     "key": "cloth_helm",
+     "name": "Hood",
+     "slot": "head",
+     "from": 1
+    },
+    {
+     "key": "g5_cloth_vestment",
+     "name": "Layered Vestment",
+     "slot": "chest",
+     "from": 1
+    },
+    {
+     "key": "cloth_legs",
+     "name": "Linen Leggings",
+     "slot": "legs",
+     "from": 1
+    },
+    {
+     "key": "g5_cloth_pleats",
+     "name": "Pleated Wideleg",
+     "slot": "legs",
+     "from": 1
+    },
+    {
+     "key": "cloth_chest",
+     "name": "Robes",
+     "slot": "chest",
+     "from": 1
+    },
+    {
+     "key": "g5_cloth_wrap",
+     "name": "Scholar's Headwrap",
+     "slot": "head",
+     "from": 1
+    },
+    {
+     "key": "g5_cloth_handwraps",
+     "name": "Silk Handwraps",
+     "slot": "hands",
+     "from": 1
+    }
+   ]
+  },
+  {
+   "id": "clothwork_5",
+   "prof": "outfitting",
+   "tier": 5,
+   "skill": 90,
+   "name": "Sunsteel-grade Cloth Armour",
+   "pattern": "clothwork",
+   "desc": "Robes, hoods, wraps and shoes. You choose the pattern; the item comes out at up to level 50, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "sunsilk_bolt",
+     "n": 4
+    }
+   ],
+   "bases": [
+    {
+     "key": "cloth_gloves",
+     "name": "Cloth Gloves",
+     "slot": "hands",
+     "from": 1
+    },
+    {
+     "key": "cloth_shoes",
+     "name": "Cloth Shoes",
+     "slot": "feet",
+     "from": 1
+    },
+    {
+     "key": "g5_cloth_curltoes",
+     "name": "Curl-toe Slippers",
+     "slot": "feet",
+     "from": 1
+    },
+    {
+     "key": "cloth_helm",
+     "name": "Hood",
+     "slot": "head",
+     "from": 1
+    },
+    {
+     "key": "g5_cloth_vestment",
+     "name": "Layered Vestment",
+     "slot": "chest",
+     "from": 1
+    },
+    {
+     "key": "cloth_legs",
+     "name": "Linen Leggings",
+     "slot": "legs",
+     "from": 1
+    },
+    {
+     "key": "g5_cloth_pleats",
+     "name": "Pleated Wideleg",
+     "slot": "legs",
+     "from": 1
+    },
+    {
+     "key": "cloth_chest",
+     "name": "Robes",
+     "slot": "chest",
+     "from": 1
+    },
+    {
+     "key": "g5_cloth_wrap",
+     "name": "Scholar's Headwrap",
+     "slot": "head",
+     "from": 1
+    },
+    {
+     "key": "g5_cloth_handwraps",
+     "name": "Silk Handwraps",
+     "slot": "hands",
+     "from": 1
+    }
+   ]
+  },
+  {
+   "id": "leatherwork_1",
+   "prof": "outfitting",
+   "tier": 1,
+   "skill": 4,
+   "name": "Bronze-grade Leather Armour",
+   "pattern": "leatherwork",
+   "desc": "Light armour. You choose the pattern; the item comes out at up to level 10, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "light_leather",
+     "n": 4
+    }
+   ],
+   "bases": [
+    {
+     "key": "light_chest",
+     "name": "Leather Armor",
+     "slot": "chest",
+     "from": 1
+    },
+    {
+     "key": "light_boots",
+     "name": "Leather Boots",
+     "slot": "feet",
+     "from": 1
+    },
+    {
+     "key": "light_helm",
+     "name": "Leather Cap",
+     "slot": "head",
+     "from": 1
+    },
+    {
+     "key": "light_gauntlets",
+     "name": "Leather Gauntlets",
+     "slot": "hands",
+     "from": 1
+    },
+    {
+     "key": "light_legs",
+     "name": "Leather Legs",
+     "slot": "legs",
+     "from": 1
+    },
+    {
+     "key": "g5_leather_cuffboots",
+     "name": "Cuffed Riding Boots",
+     "slot": "feet",
+     "from": 2
+    },
+    {
+     "key": "g5_leather_slouch",
+     "name": "Pinned Slouch Hat",
+     "slot": "head",
+     "from": 2
+    },
+    {
+     "key": "g5_leather_chaps",
+     "name": "Strapped Chaps",
+     "slot": "legs",
+     "from": 2
+    },
+    {
+     "key": "g5_leather_brigandine",
+     "name": "Studded Brigandine",
+     "slot": "chest",
+     "from": 2
+    },
+    {
+     "key": "g5_leather_gloves",
+     "name": "Studded Longgloves",
+     "slot": "hands",
+     "from": 2
+    }
+   ]
+  },
+  {
+   "id": "leatherwork_2",
+   "prof": "outfitting",
+   "tier": 2,
+   "skill": 28,
+   "name": "Iron-grade Leather Armour",
+   "pattern": "leatherwork",
+   "desc": "Light armour. You choose the pattern; the item comes out at up to level 20, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "thick_leather",
+     "n": 4
+    }
+   ],
+   "bases": [
+    {
+     "key": "light_chest",
+     "name": "Leather Armor",
+     "slot": "chest",
+     "from": 1
+    },
+    {
+     "key": "light_boots",
+     "name": "Leather Boots",
+     "slot": "feet",
+     "from": 1
+    },
+    {
+     "key": "light_helm",
+     "name": "Leather Cap",
+     "slot": "head",
+     "from": 1
+    },
+    {
+     "key": "light_gauntlets",
+     "name": "Leather Gauntlets",
+     "slot": "hands",
+     "from": 1
+    },
+    {
+     "key": "light_legs",
+     "name": "Leather Legs",
+     "slot": "legs",
+     "from": 1
+    },
+    {
+     "key": "g5_leather_cuffboots",
+     "name": "Cuffed Riding Boots",
+     "slot": "feet",
+     "from": 2
+    },
+    {
+     "key": "g5_leather_slouch",
+     "name": "Pinned Slouch Hat",
+     "slot": "head",
+     "from": 2
+    },
+    {
+     "key": "g5_leather_chaps",
+     "name": "Strapped Chaps",
+     "slot": "legs",
+     "from": 2
+    },
+    {
+     "key": "g5_leather_brigandine",
+     "name": "Studded Brigandine",
+     "slot": "chest",
+     "from": 2
+    },
+    {
+     "key": "g5_leather_gloves",
+     "name": "Studded Longgloves",
+     "slot": "hands",
+     "from": 2
+    }
+   ]
+  },
+  {
+   "id": "leatherwork_3",
+   "prof": "outfitting",
+   "tier": 3,
+   "skill": 53,
+   "name": "Silversteel-grade Leather Armour",
+   "pattern": "leatherwork",
+   "desc": "Light armour. You choose the pattern; the item comes out at up to level 30, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "rugged_leather",
+     "n": 4
+    }
+   ],
+   "bases": [
+    {
+     "key": "light_chest",
+     "name": "Leather Armor",
+     "slot": "chest",
+     "from": 1
+    },
+    {
+     "key": "light_boots",
+     "name": "Leather Boots",
+     "slot": "feet",
+     "from": 1
+    },
+    {
+     "key": "light_helm",
+     "name": "Leather Cap",
+     "slot": "head",
+     "from": 1
+    },
+    {
+     "key": "light_gauntlets",
+     "name": "Leather Gauntlets",
+     "slot": "hands",
+     "from": 1
+    },
+    {
+     "key": "light_legs",
+     "name": "Leather Legs",
+     "slot": "legs",
+     "from": 1
+    },
+    {
+     "key": "g5_leather_cuffboots",
+     "name": "Cuffed Riding Boots",
+     "slot": "feet",
+     "from": 2
+    },
+    {
+     "key": "g5_leather_slouch",
+     "name": "Pinned Slouch Hat",
+     "slot": "head",
+     "from": 2
+    },
+    {
+     "key": "g5_leather_chaps",
+     "name": "Strapped Chaps",
+     "slot": "legs",
+     "from": 2
+    },
+    {
+     "key": "g5_leather_brigandine",
+     "name": "Studded Brigandine",
+     "slot": "chest",
+     "from": 2
+    },
+    {
+     "key": "g5_leather_gloves",
+     "name": "Studded Longgloves",
+     "slot": "hands",
+     "from": 2
+    }
+   ]
+  },
+  {
+   "id": "leatherwork_4",
+   "prof": "outfitting",
+   "tier": 4,
+   "skill": 78,
+   "name": "Blackiron-grade Leather Armour",
+   "pattern": "leatherwork",
+   "desc": "Light armour. You choose the pattern; the item comes out at up to level 40, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "heavy_leather",
+     "n": 4
+    }
+   ],
+   "bases": [
+    {
+     "key": "light_chest",
+     "name": "Leather Armor",
+     "slot": "chest",
+     "from": 1
+    },
+    {
+     "key": "light_boots",
+     "name": "Leather Boots",
+     "slot": "feet",
+     "from": 1
+    },
+    {
+     "key": "light_helm",
+     "name": "Leather Cap",
+     "slot": "head",
+     "from": 1
+    },
+    {
+     "key": "light_gauntlets",
+     "name": "Leather Gauntlets",
+     "slot": "hands",
+     "from": 1
+    },
+    {
+     "key": "light_legs",
+     "name": "Leather Legs",
+     "slot": "legs",
+     "from": 1
+    },
+    {
+     "key": "g5_leather_cuffboots",
+     "name": "Cuffed Riding Boots",
+     "slot": "feet",
+     "from": 2
+    },
+    {
+     "key": "g5_leather_slouch",
+     "name": "Pinned Slouch Hat",
+     "slot": "head",
+     "from": 2
+    },
+    {
+     "key": "g5_leather_chaps",
+     "name": "Strapped Chaps",
+     "slot": "legs",
+     "from": 2
+    },
+    {
+     "key": "g5_leather_brigandine",
+     "name": "Studded Brigandine",
+     "slot": "chest",
+     "from": 2
+    },
+    {
+     "key": "g5_leather_gloves",
+     "name": "Studded Longgloves",
+     "slot": "hands",
+     "from": 2
+    }
+   ]
+  },
+  {
+   "id": "leatherwork_5",
+   "prof": "outfitting",
+   "tier": 5,
+   "skill": 93,
+   "name": "Sunsteel-grade Leather Armour",
+   "pattern": "leatherwork",
+   "desc": "Light armour. You choose the pattern; the item comes out at up to level 50, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "drake_leather",
+     "n": 4
+    }
+   ],
+   "bases": [
+    {
+     "key": "light_chest",
+     "name": "Leather Armor",
+     "slot": "chest",
+     "from": 1
+    },
+    {
+     "key": "light_boots",
+     "name": "Leather Boots",
+     "slot": "feet",
+     "from": 1
+    },
+    {
+     "key": "light_helm",
+     "name": "Leather Cap",
+     "slot": "head",
+     "from": 1
+    },
+    {
+     "key": "light_gauntlets",
+     "name": "Leather Gauntlets",
+     "slot": "hands",
+     "from": 1
+    },
+    {
+     "key": "light_legs",
+     "name": "Leather Legs",
+     "slot": "legs",
+     "from": 1
+    },
+    {
+     "key": "g5_leather_cuffboots",
+     "name": "Cuffed Riding Boots",
+     "slot": "feet",
+     "from": 2
+    },
+    {
+     "key": "g5_leather_slouch",
+     "name": "Pinned Slouch Hat",
+     "slot": "head",
+     "from": 2
+    },
+    {
+     "key": "g5_leather_chaps",
+     "name": "Strapped Chaps",
+     "slot": "legs",
+     "from": 2
+    },
+    {
+     "key": "g5_leather_brigandine",
+     "name": "Studded Brigandine",
+     "slot": "chest",
+     "from": 2
+    },
+    {
+     "key": "g5_leather_gloves",
+     "name": "Studded Longgloves",
+     "slot": "hands",
+     "from": 2
+    }
+   ]
+  },
+  {
+   "id": "belts_1",
+   "prof": "outfitting",
+   "tier": 1,
+   "skill": 5,
+   "name": "Bronze-grade Belts",
+   "pattern": "belts",
+   "desc": "A belt with a proper buckle. You choose the pattern; the item comes out at up to level 10, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "light_leather",
+     "n": 2
+    },
+    {
+     "id": "bronze_bar",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "g5_girdle",
+     "name": "Buckled War Girdle",
+     "slot": "waist",
+     "from": 2
+    },
+    {
+     "key": "leather_belt",
+     "name": "Leather Belt",
+     "slot": "waist",
+     "from": 2
+    }
+   ]
+  },
+  {
+   "id": "belts_2",
+   "prof": "outfitting",
+   "tier": 2,
+   "skill": 29,
+   "name": "Iron-grade Belts",
+   "pattern": "belts",
+   "desc": "A belt with a proper buckle. You choose the pattern; the item comes out at up to level 20, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "thick_leather",
+     "n": 2
+    },
+    {
+     "id": "iron_bar",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "g5_girdle",
+     "name": "Buckled War Girdle",
+     "slot": "waist",
+     "from": 2
+    },
+    {
+     "key": "leather_belt",
+     "name": "Leather Belt",
+     "slot": "waist",
+     "from": 2
+    }
+   ]
+  },
+  {
+   "id": "belts_3",
+   "prof": "outfitting",
+   "tier": 3,
+   "skill": 54,
+   "name": "Silversteel-grade Belts",
+   "pattern": "belts",
+   "desc": "A belt with a proper buckle. You choose the pattern; the item comes out at up to level 30, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "rugged_leather",
+     "n": 2
+    },
+    {
+     "id": "silversteel_bar",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "g5_girdle",
+     "name": "Buckled War Girdle",
+     "slot": "waist",
+     "from": 2
+    },
+    {
+     "key": "leather_belt",
+     "name": "Leather Belt",
+     "slot": "waist",
+     "from": 2
+    }
+   ]
+  },
+  {
+   "id": "belts_4",
+   "prof": "outfitting",
+   "tier": 4,
+   "skill": 79,
+   "name": "Blackiron-grade Belts",
+   "pattern": "belts",
+   "desc": "A belt with a proper buckle. You choose the pattern; the item comes out at up to level 40, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "heavy_leather",
+     "n": 2
+    },
+    {
+     "id": "blackiron_bar",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "g5_girdle",
+     "name": "Buckled War Girdle",
+     "slot": "waist",
+     "from": 2
+    },
+    {
+     "key": "leather_belt",
+     "name": "Leather Belt",
+     "slot": "waist",
+     "from": 2
+    }
+   ]
+  },
+  {
+   "id": "belts_5",
+   "prof": "outfitting",
+   "tier": 5,
+   "skill": 94,
+   "name": "Sunsteel-grade Belts",
+   "pattern": "belts",
+   "desc": "A belt with a proper buckle. You choose the pattern; the item comes out at up to level 50, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "drake_leather",
+     "n": 2
+    },
+    {
+     "id": "sunsteel_bar",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "g5_girdle",
+     "name": "Buckled War Girdle",
+     "slot": "waist",
+     "from": 2
+    },
+    {
+     "key": "leather_belt",
+     "name": "Leather Belt",
+     "slot": "waist",
+     "from": 2
+    }
+   ]
+  },
+  {
+   "id": "cloaks_1",
+   "prof": "outfitting",
+   "tier": 1,
+   "skill": 7,
+   "name": "Bronze-grade Cloaks",
+   "pattern": "cloaks",
+   "desc": "A cloak for the back slot. You choose the pattern; the item comes out at up to level 10, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "linen_bolt",
+     "n": 3
+    },
+    {
+     "id": "light_leather",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "g5_swallowtail",
+     "name": "Swallowtail Cloak",
+     "slot": "back",
+     "from": 3
+    },
+    {
+     "key": "travel_cloak",
+     "name": "Travel Cloak",
+     "slot": "back",
+     "from": 3
+    }
+   ]
+  },
+  {
+   "id": "cloaks_2",
+   "prof": "outfitting",
+   "tier": 2,
+   "skill": 31,
+   "name": "Iron-grade Cloaks",
+   "pattern": "cloaks",
+   "desc": "A cloak for the back slot. You choose the pattern; the item comes out at up to level 20, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "canvas_bolt",
+     "n": 3
+    },
+    {
+     "id": "thick_leather",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "g5_swallowtail",
+     "name": "Swallowtail Cloak",
+     "slot": "back",
+     "from": 3
+    },
+    {
+     "key": "travel_cloak",
+     "name": "Travel Cloak",
+     "slot": "back",
+     "from": 3
+    }
+   ]
+  },
+  {
+   "id": "cloaks_3",
+   "prof": "outfitting",
+   "tier": 3,
+   "skill": 56,
+   "name": "Silversteel-grade Cloaks",
+   "pattern": "cloaks",
+   "desc": "A cloak for the back slot. You choose the pattern; the item comes out at up to level 30, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "silk_bolt",
+     "n": 3
+    },
+    {
+     "id": "rugged_leather",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "g5_swallowtail",
+     "name": "Swallowtail Cloak",
+     "slot": "back",
+     "from": 3
+    },
+    {
+     "key": "travel_cloak",
+     "name": "Travel Cloak",
+     "slot": "back",
+     "from": 3
+    }
+   ]
+  },
+  {
+   "id": "cloaks_4",
+   "prof": "outfitting",
+   "tier": 4,
+   "skill": 81,
+   "name": "Blackiron-grade Cloaks",
+   "pattern": "cloaks",
+   "desc": "A cloak for the back slot. You choose the pattern; the item comes out at up to level 40, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "moonweave_bolt",
+     "n": 3
+    },
+    {
+     "id": "heavy_leather",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "g5_swallowtail",
+     "name": "Swallowtail Cloak",
+     "slot": "back",
+     "from": 3
+    },
+    {
+     "key": "travel_cloak",
+     "name": "Travel Cloak",
+     "slot": "back",
+     "from": 3
+    }
+   ]
+  },
+  {
+   "id": "cloaks_5",
+   "prof": "outfitting",
+   "tier": 5,
+   "skill": 96,
+   "name": "Sunsteel-grade Cloaks",
+   "pattern": "cloaks",
+   "desc": "A cloak for the back slot. You choose the pattern; the item comes out at up to level 50, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "sunsilk_bolt",
+     "n": 3
+    },
+    {
+     "id": "drake_leather",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "g5_swallowtail",
+     "name": "Swallowtail Cloak",
+     "slot": "back",
+     "from": 3
+    },
+    {
+     "key": "travel_cloak",
+     "name": "Travel Cloak",
+     "slot": "back",
+     "from": 3
+    }
+   ]
+  },
+  {
+   "id": "packs_1",
+   "prof": "outfitting",
+   "tier": 1,
+   "skill": 9,
+   "name": "Bronze-grade Backpacks",
+   "pattern": "packs",
+   "desc": "A backpack for the back slot: fewer properties than a cloak, more room in your bag. You choose the pattern; the item comes out at up to level 10, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "light_leather",
+     "n": 3
+    },
+    {
+     "id": "linen_bolt",
+     "n": 2
+    }
+   ],
+   "bases": [
+    {
+     "key": "sling_satchel",
+     "name": "Sling Satchel",
+     "slot": "back",
+     "from": 1
+    },
+    {
+     "key": "trail_rucksack",
+     "name": "Trail Rucksack",
+     "slot": "back",
+     "from": 10
+    }
+   ]
+  },
+  {
+   "id": "packs_2",
+   "prof": "outfitting",
+   "tier": 2,
+   "skill": 33,
+   "name": "Iron-grade Backpacks",
+   "pattern": "packs",
+   "desc": "A backpack for the back slot: fewer properties than a cloak, more room in your bag. You choose the pattern; the item comes out at up to level 20, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "thick_leather",
+     "n": 3
+    },
+    {
+     "id": "canvas_bolt",
+     "n": 2
+    }
+   ],
+   "bases": [
+    {
+     "key": "sling_satchel",
+     "name": "Sling Satchel",
+     "slot": "back",
+     "from": 1
+    },
+    {
+     "key": "trail_rucksack",
+     "name": "Trail Rucksack",
+     "slot": "back",
+     "from": 10
+    },
+    {
+     "key": "expedition_pack",
+     "name": "Expedition Pack",
+     "slot": "back",
+     "from": 20
+    }
+   ]
+  },
+  {
+   "id": "packs_3",
+   "prof": "outfitting",
+   "tier": 3,
+   "skill": 58,
+   "name": "Silversteel-grade Backpacks",
+   "pattern": "packs",
+   "desc": "A backpack for the back slot: fewer properties than a cloak, more room in your bag. You choose the pattern; the item comes out at up to level 30, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "rugged_leather",
+     "n": 3
+    },
+    {
+     "id": "silk_bolt",
+     "n": 2
+    }
+   ],
+   "bases": [
+    {
+     "key": "sling_satchel",
+     "name": "Sling Satchel",
+     "slot": "back",
+     "from": 1
+    },
+    {
+     "key": "trail_rucksack",
+     "name": "Trail Rucksack",
+     "slot": "back",
+     "from": 10
+    },
+    {
+     "key": "expedition_pack",
+     "name": "Expedition Pack",
+     "slot": "back",
+     "from": 20
+    }
+   ]
+  },
+  {
+   "id": "packs_4",
+   "prof": "outfitting",
+   "tier": 4,
+   "skill": 83,
+   "name": "Blackiron-grade Backpacks",
+   "pattern": "packs",
+   "desc": "A backpack for the back slot: fewer properties than a cloak, more room in your bag. You choose the pattern; the item comes out at up to level 40, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "heavy_leather",
+     "n": 3
+    },
+    {
+     "id": "moonweave_bolt",
+     "n": 2
+    }
+   ],
+   "bases": [
+    {
+     "key": "sling_satchel",
+     "name": "Sling Satchel",
+     "slot": "back",
+     "from": 1
+    },
+    {
+     "key": "trail_rucksack",
+     "name": "Trail Rucksack",
+     "slot": "back",
+     "from": 10
+    },
+    {
+     "key": "expedition_pack",
+     "name": "Expedition Pack",
+     "slot": "back",
+     "from": 20
+    }
+   ]
+  },
+  {
+   "id": "packs_5",
+   "prof": "outfitting",
+   "tier": 5,
+   "skill": 98,
+   "name": "Sunsteel-grade Backpacks",
+   "pattern": "packs",
+   "desc": "A backpack for the back slot: fewer properties than a cloak, more room in your bag. You choose the pattern; the item comes out at up to level 50, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "drake_leather",
+     "n": 3
+    },
+    {
+     "id": "sunsilk_bolt",
+     "n": 2
+    }
+   ],
+   "bases": [
+    {
+     "key": "sling_satchel",
+     "name": "Sling Satchel",
+     "slot": "back",
+     "from": 1
+    },
+    {
+     "key": "trail_rucksack",
+     "name": "Trail Rucksack",
+     "slot": "back",
+     "from": 10
+    },
+    {
+     "key": "expedition_pack",
+     "name": "Expedition Pack",
+     "slot": "back",
+     "from": 20
+    }
+   ]
+  },
+  {
+   "id": "bows_1",
+   "prof": "outfitting",
+   "tier": 1,
+   "skill": 7,
+   "name": "Bronze-grade Bows and Quivers",
+   "pattern": "bows",
+   "desc": "Bows, crossbows and quivers. You choose the pattern; the item comes out at up to level 10, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "ash_log",
+     "n": 3
+    },
+    {
+     "id": "light_leather",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "crossbow",
+     "name": "Crossbow",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "quiver",
+     "name": "Quiver",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "shortbow",
+     "name": "Shortbow",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_hipquiver",
+     "name": "Hip Quiver",
+     "slot": "offhand",
+     "from": 2
+    },
+    {
+     "key": "bow",
+     "name": "Bow",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "g5_recurve",
+     "name": "Horn Recurve",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "roadwarden_bow",
+     "name": "Roadwarden Bow",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "g5_arbalest",
+     "name": "Stirrup Arbalest",
+     "slot": "weapon",
+     "from": 8
+    }
+   ]
+  },
+  {
+   "id": "bows_2",
+   "prof": "outfitting",
+   "tier": 2,
+   "skill": 31,
+   "name": "Iron-grade Bows and Quivers",
+   "pattern": "bows",
+   "desc": "Bows, crossbows and quivers. You choose the pattern; the item comes out at up to level 20, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "oak_log",
+     "n": 3
+    },
+    {
+     "id": "thick_leather",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "crossbow",
+     "name": "Crossbow",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "quiver",
+     "name": "Quiver",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "shortbow",
+     "name": "Shortbow",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_hipquiver",
+     "name": "Hip Quiver",
+     "slot": "offhand",
+     "from": 2
+    },
+    {
+     "key": "bow",
+     "name": "Bow",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "g5_recurve",
+     "name": "Horn Recurve",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "roadwarden_bow",
+     "name": "Roadwarden Bow",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "g5_arbalest",
+     "name": "Stirrup Arbalest",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "stormpin_crossbow",
+     "name": "Stormpin Crossbow",
+     "slot": "weapon",
+     "from": 11
+    },
+    {
+     "key": "starwake_bow",
+     "name": "Starwake Bow",
+     "slot": "weapon",
+     "from": 16
+    }
+   ]
+  },
+  {
+   "id": "bows_3",
+   "prof": "outfitting",
+   "tier": 3,
+   "skill": 56,
+   "name": "Silversteel-grade Bows and Quivers",
+   "pattern": "bows",
+   "desc": "Bows, crossbows and quivers. You choose the pattern; the item comes out at up to level 30, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "yew_log",
+     "n": 3
+    },
+    {
+     "id": "rugged_leather",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "crossbow",
+     "name": "Crossbow",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "quiver",
+     "name": "Quiver",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "shortbow",
+     "name": "Shortbow",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_hipquiver",
+     "name": "Hip Quiver",
+     "slot": "offhand",
+     "from": 2
+    },
+    {
+     "key": "bow",
+     "name": "Bow",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "g5_recurve",
+     "name": "Horn Recurve",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "roadwarden_bow",
+     "name": "Roadwarden Bow",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "g5_arbalest",
+     "name": "Stirrup Arbalest",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "stormpin_crossbow",
+     "name": "Stormpin Crossbow",
+     "slot": "weapon",
+     "from": 11
+    },
+    {
+     "key": "starwake_bow",
+     "name": "Starwake Bow",
+     "slot": "weapon",
+     "from": 16
+    },
+    {
+     "key": "wyrmscale_bow",
+     "name": "Wyrmscale Bow",
+     "slot": "weapon",
+     "from": 23
+    }
+   ]
+  },
+  {
+   "id": "bows_4",
+   "prof": "outfitting",
+   "tier": 4,
+   "skill": 81,
+   "name": "Blackiron-grade Bows and Quivers",
+   "pattern": "bows",
+   "desc": "Bows, crossbows and quivers. You choose the pattern; the item comes out at up to level 40, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "ironbark_log",
+     "n": 3
+    },
+    {
+     "id": "heavy_leather",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "crossbow",
+     "name": "Crossbow",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "quiver",
+     "name": "Quiver",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "shortbow",
+     "name": "Shortbow",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_hipquiver",
+     "name": "Hip Quiver",
+     "slot": "offhand",
+     "from": 2
+    },
+    {
+     "key": "bow",
+     "name": "Bow",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "g5_recurve",
+     "name": "Horn Recurve",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "roadwarden_bow",
+     "name": "Roadwarden Bow",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "g5_arbalest",
+     "name": "Stirrup Arbalest",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "stormpin_crossbow",
+     "name": "Stormpin Crossbow",
+     "slot": "weapon",
+     "from": 11
+    },
+    {
+     "key": "starwake_bow",
+     "name": "Starwake Bow",
+     "slot": "weapon",
+     "from": 16
+    },
+    {
+     "key": "wyrmscale_bow",
+     "name": "Wyrmscale Bow",
+     "slot": "weapon",
+     "from": 23
+    }
+   ]
+  },
+  {
+   "id": "bows_5",
+   "prof": "outfitting",
+   "tier": 5,
+   "skill": 96,
+   "name": "Sunsteel-grade Bows and Quivers",
+   "pattern": "bows",
+   "desc": "Bows, crossbows and quivers. You choose the pattern; the item comes out at up to level 50, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "heartwood_log",
+     "n": 3
+    },
+    {
+     "id": "drake_leather",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "crossbow",
+     "name": "Crossbow",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "quiver",
+     "name": "Quiver",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "shortbow",
+     "name": "Shortbow",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_hipquiver",
+     "name": "Hip Quiver",
+     "slot": "offhand",
+     "from": 2
+    },
+    {
+     "key": "bow",
+     "name": "Bow",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "g5_recurve",
+     "name": "Horn Recurve",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "roadwarden_bow",
+     "name": "Roadwarden Bow",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "g5_arbalest",
+     "name": "Stirrup Arbalest",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "stormpin_crossbow",
+     "name": "Stormpin Crossbow",
+     "slot": "weapon",
+     "from": 11
+    },
+    {
+     "key": "starwake_bow",
+     "name": "Starwake Bow",
+     "slot": "weapon",
+     "from": 16
+    },
+    {
+     "key": "wyrmscale_bow",
+     "name": "Wyrmscale Bow",
+     "slot": "weapon",
+     "from": 23
+    }
+   ]
+  },
+  {
+   "id": "staves_1",
+   "prof": "alchemy",
+   "tier": 1,
+   "skill": 7,
+   "name": "Bronze-grade Staves",
+   "pattern": "staves",
+   "desc": "A staff, steeped until it holds a charge. You choose the pattern; the item comes out at up to level 10, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "ash_log",
+     "n": 3
+    },
+    {
+     "id": "meadowmint",
+     "n": 2
+    }
+   ],
+   "bases": [
+    {
+     "key": "g5_staff_spire",
+     "name": "Spire Staff",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "staff",
+     "name": "Staff",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_bostaff",
+     "name": "Ironshod Bo",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "g5_staff_horn",
+     "name": "Horncall Staff",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "quarterstaff",
+     "name": "Quarterstaff",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "g5_staff_halo",
+     "name": "Halo Staff",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
+     "key": "pilgrims_staff",
+     "name": "Pilgrim's Staff",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "g5_staff_lens",
+     "name": "Sunglass Staff",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "bramble_staff",
+     "name": "Bramble Staff",
+     "slot": "weapon",
+     "from": 9
+    },
+    {
+     "key": "g5_staff_branch",
+     "name": "Stormbranch Staff",
+     "slot": "weapon",
+     "from": 10
+    }
+   ]
+  },
+  {
+   "id": "staves_2",
+   "prof": "alchemy",
+   "tier": 2,
+   "skill": 31,
+   "name": "Iron-grade Staves",
+   "pattern": "staves",
+   "desc": "A staff, steeped until it holds a charge. You choose the pattern; the item comes out at up to level 20, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "oak_log",
+     "n": 3
+    },
+    {
+     "id": "feverleaf",
+     "n": 2
+    }
+   ],
+   "bases": [
+    {
+     "key": "g5_staff_spire",
+     "name": "Spire Staff",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "staff",
+     "name": "Staff",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_bostaff",
+     "name": "Ironshod Bo",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "g5_staff_horn",
+     "name": "Horncall Staff",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "quarterstaff",
+     "name": "Quarterstaff",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "g5_staff_halo",
+     "name": "Halo Staff",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
+     "key": "pilgrims_staff",
+     "name": "Pilgrim's Staff",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "g5_staff_lens",
+     "name": "Sunglass Staff",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "bramble_staff",
+     "name": "Bramble Staff",
+     "slot": "weapon",
+     "from": 9
+    },
+    {
+     "key": "g5_staff_branch",
+     "name": "Stormbranch Staff",
+     "slot": "weapon",
+     "from": 10
+    },
+    {
+     "key": "g5_staff_aegis",
+     "name": "Bulwark Staff",
+     "slot": "weapon",
+     "from": 12
+    }
+   ]
+  },
+  {
+   "id": "staves_3",
+   "prof": "alchemy",
+   "tier": 3,
+   "skill": 56,
+   "name": "Silversteel-grade Staves",
+   "pattern": "staves",
+   "desc": "A staff, steeped until it holds a charge. You choose the pattern; the item comes out at up to level 30, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "yew_log",
+     "n": 3
+    },
+    {
+     "id": "moonpetal",
+     "n": 2
+    }
+   ],
+   "bases": [
+    {
+     "key": "g5_staff_spire",
+     "name": "Spire Staff",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "staff",
+     "name": "Staff",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_bostaff",
+     "name": "Ironshod Bo",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "g5_staff_horn",
+     "name": "Horncall Staff",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "quarterstaff",
+     "name": "Quarterstaff",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "g5_staff_halo",
+     "name": "Halo Staff",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
+     "key": "pilgrims_staff",
+     "name": "Pilgrim's Staff",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "g5_staff_lens",
+     "name": "Sunglass Staff",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "bramble_staff",
+     "name": "Bramble Staff",
+     "slot": "weapon",
+     "from": 9
+    },
+    {
+     "key": "g5_staff_branch",
+     "name": "Stormbranch Staff",
+     "slot": "weapon",
+     "from": 10
+    },
+    {
+     "key": "g5_staff_aegis",
+     "name": "Bulwark Staff",
+     "slot": "weapon",
+     "from": 12
+    },
+    {
+     "key": "dragonbone_staff",
+     "name": "Dragonbone Staff",
+     "slot": "weapon",
+     "from": 23
+    }
+   ]
+  },
+  {
+   "id": "staves_4",
+   "prof": "alchemy",
+   "tier": 4,
+   "skill": 81,
+   "name": "Blackiron-grade Staves",
+   "pattern": "staves",
+   "desc": "A staff, steeped until it holds a charge. You choose the pattern; the item comes out at up to level 40, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "ironbark_log",
+     "n": 3
+    },
+    {
+     "id": "frostbloom",
+     "n": 2
+    }
+   ],
+   "bases": [
+    {
+     "key": "g5_staff_spire",
+     "name": "Spire Staff",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "staff",
+     "name": "Staff",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_bostaff",
+     "name": "Ironshod Bo",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "g5_staff_horn",
+     "name": "Horncall Staff",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "quarterstaff",
+     "name": "Quarterstaff",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "g5_staff_halo",
+     "name": "Halo Staff",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
+     "key": "pilgrims_staff",
+     "name": "Pilgrim's Staff",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "g5_staff_lens",
+     "name": "Sunglass Staff",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "bramble_staff",
+     "name": "Bramble Staff",
+     "slot": "weapon",
+     "from": 9
+    },
+    {
+     "key": "g5_staff_branch",
+     "name": "Stormbranch Staff",
+     "slot": "weapon",
+     "from": 10
+    },
+    {
+     "key": "g5_staff_aegis",
+     "name": "Bulwark Staff",
+     "slot": "weapon",
+     "from": 12
+    },
+    {
+     "key": "dragonbone_staff",
+     "name": "Dragonbone Staff",
+     "slot": "weapon",
+     "from": 23
+    }
+   ]
+  },
+  {
+   "id": "staves_5",
+   "prof": "alchemy",
+   "tier": 5,
+   "skill": 96,
+   "name": "Sunsteel-grade Staves",
+   "pattern": "staves",
+   "desc": "A staff, steeped until it holds a charge. You choose the pattern; the item comes out at up to level 50, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "heartwood_log",
+     "n": 3
+    },
+    {
+     "id": "sunroot",
+     "n": 2
+    }
+   ],
+   "bases": [
+    {
+     "key": "g5_staff_spire",
+     "name": "Spire Staff",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "staff",
+     "name": "Staff",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_bostaff",
+     "name": "Ironshod Bo",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "g5_staff_horn",
+     "name": "Horncall Staff",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "quarterstaff",
+     "name": "Quarterstaff",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "g5_staff_halo",
+     "name": "Halo Staff",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
+     "key": "pilgrims_staff",
+     "name": "Pilgrim's Staff",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "g5_staff_lens",
+     "name": "Sunglass Staff",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "bramble_staff",
+     "name": "Bramble Staff",
+     "slot": "weapon",
+     "from": 9
+    },
+    {
+     "key": "g5_staff_branch",
+     "name": "Stormbranch Staff",
+     "slot": "weapon",
+     "from": 10
+    },
+    {
+     "key": "g5_staff_aegis",
+     "name": "Bulwark Staff",
+     "slot": "weapon",
+     "from": 12
+    },
+    {
+     "key": "dragonbone_staff",
+     "name": "Dragonbone Staff",
+     "slot": "weapon",
+     "from": 23
+    }
+   ]
+  },
+  {
+   "id": "wands_1",
+   "prof": "alchemy",
+   "tier": 1,
+   "skill": 9,
+   "name": "Bronze-grade Wands and Sceptres",
+   "pattern": "wands",
+   "desc": "A wand or a sceptre with a stone at its heart. You choose the pattern; the item comes out at up to level 10, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "ash_log",
+     "n": 1
+    },
+    {
+     "id": "rough_quartz",
+     "n": 1
+    },
+    {
+     "id": "meadowmint",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "g5_wand_dart",
+     "name": "Dart Wand",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "scepter",
+     "name": "Scepter",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "wand",
+     "name": "Wand",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_wand_bell",
+     "name": "Bellmouth Wand",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "g5_crownsceptre",
+     "name": "Crownhead Sceptre",
+     "slot": "weapon",
+     "from": 5
+    },
+    {
+     "key": "g5_wand_hoop",
+     "name": "Hoop Wand",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
+     "key": "g5_wand_lens",
+     "name": "Sunglass Wand",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "g5_wand_fork",
+     "name": "Forked Wand",
+     "slot": "weapon",
+     "from": 10
+    }
+   ]
+  },
+  {
+   "id": "wands_2",
+   "prof": "alchemy",
+   "tier": 2,
+   "skill": 33,
+   "name": "Iron-grade Wands and Sceptres",
+   "pattern": "wands",
+   "desc": "A wand or a sceptre with a stone at its heart. You choose the pattern; the item comes out at up to level 20, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "oak_log",
+     "n": 1
+    },
+    {
+     "id": "garnet",
+     "n": 1
+    },
+    {
+     "id": "feverleaf",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "g5_wand_dart",
+     "name": "Dart Wand",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "scepter",
+     "name": "Scepter",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "wand",
+     "name": "Wand",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_wand_bell",
+     "name": "Bellmouth Wand",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "g5_crownsceptre",
+     "name": "Crownhead Sceptre",
+     "slot": "weapon",
+     "from": 5
+    },
+    {
+     "key": "g5_wand_hoop",
+     "name": "Hoop Wand",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
+     "key": "g5_wand_lens",
+     "name": "Sunglass Wand",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "g5_wand_fork",
+     "name": "Forked Wand",
+     "slot": "weapon",
+     "from": 10
+    },
+    {
+     "key": "g5_wand_ward",
+     "name": "Warding Wand",
+     "slot": "weapon",
+     "from": 12
+    },
+    {
+     "key": "gravebound_scepter",
+     "name": "Gravebound Scepter",
+     "slot": "weapon",
+     "from": 16
+    }
+   ]
+  },
+  {
+   "id": "wands_3",
+   "prof": "alchemy",
+   "tier": 3,
+   "skill": 58,
+   "name": "Silversteel-grade Wands and Sceptres",
+   "pattern": "wands",
+   "desc": "A wand or a sceptre with a stone at its heart. You choose the pattern; the item comes out at up to level 30, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "yew_log",
+     "n": 1
+    },
+    {
+     "id": "amethyst",
+     "n": 1
+    },
+    {
+     "id": "moonpetal",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "g5_wand_dart",
+     "name": "Dart Wand",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "scepter",
+     "name": "Scepter",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "wand",
+     "name": "Wand",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_wand_bell",
+     "name": "Bellmouth Wand",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "g5_crownsceptre",
+     "name": "Crownhead Sceptre",
+     "slot": "weapon",
+     "from": 5
+    },
+    {
+     "key": "g5_wand_hoop",
+     "name": "Hoop Wand",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
+     "key": "g5_wand_lens",
+     "name": "Sunglass Wand",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "g5_wand_fork",
+     "name": "Forked Wand",
+     "slot": "weapon",
+     "from": 10
+    },
+    {
+     "key": "g5_wand_ward",
+     "name": "Warding Wand",
+     "slot": "weapon",
+     "from": 12
+    },
+    {
+     "key": "gravebound_scepter",
+     "name": "Gravebound Scepter",
+     "slot": "weapon",
+     "from": 16
+    },
+    {
+     "key": "dragontooth_wand",
+     "name": "Dragontooth Wand",
+     "slot": "weapon",
+     "from": 23
+    }
+   ]
+  },
+  {
+   "id": "wands_4",
+   "prof": "alchemy",
+   "tier": 4,
+   "skill": 83,
+   "name": "Blackiron-grade Wands and Sceptres",
+   "pattern": "wands",
+   "desc": "A wand or a sceptre with a stone at its heart. You choose the pattern; the item comes out at up to level 40, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "ironbark_log",
+     "n": 1
+    },
+    {
+     "id": "sapphire",
+     "n": 1
+    },
+    {
+     "id": "frostbloom",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "g5_wand_dart",
+     "name": "Dart Wand",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "scepter",
+     "name": "Scepter",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "wand",
+     "name": "Wand",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_wand_bell",
+     "name": "Bellmouth Wand",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "g5_crownsceptre",
+     "name": "Crownhead Sceptre",
+     "slot": "weapon",
+     "from": 5
+    },
+    {
+     "key": "g5_wand_hoop",
+     "name": "Hoop Wand",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
+     "key": "g5_wand_lens",
+     "name": "Sunglass Wand",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "g5_wand_fork",
+     "name": "Forked Wand",
+     "slot": "weapon",
+     "from": 10
+    },
+    {
+     "key": "g5_wand_ward",
+     "name": "Warding Wand",
+     "slot": "weapon",
+     "from": 12
+    },
+    {
+     "key": "gravebound_scepter",
+     "name": "Gravebound Scepter",
+     "slot": "weapon",
+     "from": 16
+    },
+    {
+     "key": "dragontooth_wand",
+     "name": "Dragontooth Wand",
+     "slot": "weapon",
+     "from": 23
+    }
+   ]
+  },
+  {
+   "id": "wands_5",
+   "prof": "alchemy",
+   "tier": 5,
+   "skill": 98,
+   "name": "Sunsteel-grade Wands and Sceptres",
+   "pattern": "wands",
+   "desc": "A wand or a sceptre with a stone at its heart. You choose the pattern; the item comes out at up to level 50, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "heartwood_log",
+     "n": 1
+    },
+    {
+     "id": "star_opal",
+     "n": 1
+    },
+    {
+     "id": "sunroot",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "g5_wand_dart",
+     "name": "Dart Wand",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "scepter",
+     "name": "Scepter",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "wand",
+     "name": "Wand",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_wand_bell",
+     "name": "Bellmouth Wand",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "g5_crownsceptre",
+     "name": "Crownhead Sceptre",
+     "slot": "weapon",
+     "from": 5
+    },
+    {
+     "key": "g5_wand_hoop",
+     "name": "Hoop Wand",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
+     "key": "g5_wand_lens",
+     "name": "Sunglass Wand",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "g5_wand_fork",
+     "name": "Forked Wand",
+     "slot": "weapon",
+     "from": 10
+    },
+    {
+     "key": "g5_wand_ward",
+     "name": "Warding Wand",
+     "slot": "weapon",
+     "from": 12
+    },
+    {
+     "key": "gravebound_scepter",
+     "name": "Gravebound Scepter",
+     "slot": "weapon",
+     "from": 16
+    },
+    {
+     "key": "dragontooth_wand",
+     "name": "Dragontooth Wand",
+     "slot": "weapon",
+     "from": 23
+    }
+   ]
+  },
+  {
+   "id": "foci_1",
+   "prof": "alchemy",
+   "tier": 1,
+   "skill": 11,
+   "name": "Bronze-grade Orbs, Tomes and Charms",
+   "pattern": "foci",
+   "desc": "A caster's off-hand or orb. You choose the pattern; the item comes out at up to level 10, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "linen_bolt",
+     "n": 1
+    },
+    {
+     "id": "rough_quartz",
+     "n": 1
+    },
+    {
+     "id": "field_mushroom",
+     "n": 2
+    }
+   ],
+   "bases": [
+    {
+     "key": "grimoire",
+     "name": "Grimoire",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "orb",
+     "name": "Orb",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "tome",
+     "name": "Tome",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "warded_focus",
+     "name": "Warded Focus",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "psalter",
+     "name": "Psalter",
+     "slot": "offhand",
+     "from": 2
+    },
+    {
+     "key": "g5_folio",
+     "name": "Sealed Folio",
+     "slot": "offhand",
+     "from": 3
+    },
+    {
+     "key": "spellguard_orb",
+     "name": "Spellguard Orb",
+     "slot": "offhand",
+     "from": 3
+    },
+    {
+     "key": "g5_codex",
+     "name": "Open Codex",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "reliquary",
+     "name": "Reliquary",
+     "slot": "offhand",
+     "from": 4
+    },
+    {
+     "key": "seer_orb",
+     "name": "Seer's Orb",
+     "slot": "offhand",
+     "from": 4
+    },
+    {
+     "key": "g5_armillary",
+     "name": "Armillary Orb",
+     "slot": "weapon",
+     "from": 5
+    },
+    {
+     "key": "g5_starglass",
+     "name": "Caged Starglass",
+     "slot": "offhand",
+     "from": 5
+    },
+    {
+     "key": "g5_thurible",
+     "name": "Pilgrim's Thurible",
+     "slot": "offhand",
+     "from": 5
+    },
+    {
+     "key": "effigy",
+     "name": "Effigy",
+     "slot": "offhand",
+     "from": 6
+    },
+    {
+     "key": "g5_sigilplate",
+     "name": "Sigil Plate",
+     "slot": "offhand",
+     "from": 6
+    },
+    {
+     "key": "g5_antlerrod",
+     "name": "Antler Rod",
+     "slot": "offhand",
+     "from": 8
+    },
+    {
+     "key": "g5_seeingmask",
+     "name": "Seeing Mask",
+     "slot": "offhand",
+     "from": 8
+    }
+   ]
+  },
+  {
+   "id": "foci_2",
+   "prof": "alchemy",
+   "tier": 2,
+   "skill": 35,
+   "name": "Iron-grade Orbs, Tomes and Charms",
+   "pattern": "foci",
+   "desc": "A caster's off-hand or orb. You choose the pattern; the item comes out at up to level 20, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "canvas_bolt",
+     "n": 1
+    },
+    {
+     "id": "garnet",
+     "n": 1
+    },
+    {
+     "id": "amber_cap",
+     "n": 2
+    }
+   ],
+   "bases": [
+    {
+     "key": "grimoire",
+     "name": "Grimoire",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "orb",
+     "name": "Orb",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "tome",
+     "name": "Tome",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "warded_focus",
+     "name": "Warded Focus",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "psalter",
+     "name": "Psalter",
+     "slot": "offhand",
+     "from": 2
+    },
+    {
+     "key": "g5_folio",
+     "name": "Sealed Folio",
+     "slot": "offhand",
+     "from": 3
+    },
+    {
+     "key": "spellguard_orb",
+     "name": "Spellguard Orb",
+     "slot": "offhand",
+     "from": 3
+    },
+    {
+     "key": "g5_codex",
+     "name": "Open Codex",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "reliquary",
+     "name": "Reliquary",
+     "slot": "offhand",
+     "from": 4
+    },
+    {
+     "key": "seer_orb",
+     "name": "Seer's Orb",
+     "slot": "offhand",
+     "from": 4
+    },
+    {
+     "key": "g5_armillary",
+     "name": "Armillary Orb",
+     "slot": "weapon",
+     "from": 5
+    },
+    {
+     "key": "g5_starglass",
+     "name": "Caged Starglass",
+     "slot": "offhand",
+     "from": 5
+    },
+    {
+     "key": "g5_thurible",
+     "name": "Pilgrim's Thurible",
+     "slot": "offhand",
+     "from": 5
+    },
+    {
+     "key": "effigy",
+     "name": "Effigy",
+     "slot": "offhand",
+     "from": 6
+    },
+    {
+     "key": "g5_sigilplate",
+     "name": "Sigil Plate",
+     "slot": "offhand",
+     "from": 6
+    },
+    {
+     "key": "g5_antlerrod",
+     "name": "Antler Rod",
+     "slot": "offhand",
+     "from": 8
+    },
+    {
+     "key": "g5_seeingmask",
+     "name": "Seeing Mask",
+     "slot": "offhand",
+     "from": 8
+    }
+   ]
+  },
+  {
+   "id": "foci_3",
+   "prof": "alchemy",
+   "tier": 3,
+   "skill": 60,
+   "name": "Silversteel-grade Orbs, Tomes and Charms",
+   "pattern": "foci",
+   "desc": "A caster's off-hand or orb. You choose the pattern; the item comes out at up to level 30, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "silk_bolt",
+     "n": 1
+    },
+    {
+     "id": "amethyst",
+     "n": 1
+    },
+    {
+     "id": "ghost_morel",
+     "n": 2
+    }
+   ],
+   "bases": [
+    {
+     "key": "grimoire",
+     "name": "Grimoire",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "orb",
+     "name": "Orb",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "tome",
+     "name": "Tome",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "warded_focus",
+     "name": "Warded Focus",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "psalter",
+     "name": "Psalter",
+     "slot": "offhand",
+     "from": 2
+    },
+    {
+     "key": "g5_folio",
+     "name": "Sealed Folio",
+     "slot": "offhand",
+     "from": 3
+    },
+    {
+     "key": "spellguard_orb",
+     "name": "Spellguard Orb",
+     "slot": "offhand",
+     "from": 3
+    },
+    {
+     "key": "g5_codex",
+     "name": "Open Codex",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "reliquary",
+     "name": "Reliquary",
+     "slot": "offhand",
+     "from": 4
+    },
+    {
+     "key": "seer_orb",
+     "name": "Seer's Orb",
+     "slot": "offhand",
+     "from": 4
+    },
+    {
+     "key": "g5_armillary",
+     "name": "Armillary Orb",
+     "slot": "weapon",
+     "from": 5
+    },
+    {
+     "key": "g5_starglass",
+     "name": "Caged Starglass",
+     "slot": "offhand",
+     "from": 5
+    },
+    {
+     "key": "g5_thurible",
+     "name": "Pilgrim's Thurible",
+     "slot": "offhand",
+     "from": 5
+    },
+    {
+     "key": "effigy",
+     "name": "Effigy",
+     "slot": "offhand",
+     "from": 6
+    },
+    {
+     "key": "g5_sigilplate",
+     "name": "Sigil Plate",
+     "slot": "offhand",
+     "from": 6
+    },
+    {
+     "key": "g5_antlerrod",
+     "name": "Antler Rod",
+     "slot": "offhand",
+     "from": 8
+    },
+    {
+     "key": "g5_seeingmask",
+     "name": "Seeing Mask",
+     "slot": "offhand",
+     "from": 8
+    }
+   ]
+  },
+  {
+   "id": "foci_4",
+   "prof": "alchemy",
+   "tier": 4,
+   "skill": 85,
+   "name": "Blackiron-grade Orbs, Tomes and Charms",
+   "pattern": "foci",
+   "desc": "A caster's off-hand or orb. You choose the pattern; the item comes out at up to level 40, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "moonweave_bolt",
+     "n": 1
+    },
+    {
+     "id": "sapphire",
+     "n": 1
+    },
+    {
+     "id": "king_bolete",
+     "n": 2
+    }
+   ],
+   "bases": [
+    {
+     "key": "grimoire",
+     "name": "Grimoire",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "orb",
+     "name": "Orb",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "tome",
+     "name": "Tome",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "warded_focus",
+     "name": "Warded Focus",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "psalter",
+     "name": "Psalter",
+     "slot": "offhand",
+     "from": 2
+    },
+    {
+     "key": "g5_folio",
+     "name": "Sealed Folio",
+     "slot": "offhand",
+     "from": 3
+    },
+    {
+     "key": "spellguard_orb",
+     "name": "Spellguard Orb",
+     "slot": "offhand",
+     "from": 3
+    },
+    {
+     "key": "g5_codex",
+     "name": "Open Codex",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "reliquary",
+     "name": "Reliquary",
+     "slot": "offhand",
+     "from": 4
+    },
+    {
+     "key": "seer_orb",
+     "name": "Seer's Orb",
+     "slot": "offhand",
+     "from": 4
+    },
+    {
+     "key": "g5_armillary",
+     "name": "Armillary Orb",
+     "slot": "weapon",
+     "from": 5
+    },
+    {
+     "key": "g5_starglass",
+     "name": "Caged Starglass",
+     "slot": "offhand",
+     "from": 5
+    },
+    {
+     "key": "g5_thurible",
+     "name": "Pilgrim's Thurible",
+     "slot": "offhand",
+     "from": 5
+    },
+    {
+     "key": "effigy",
+     "name": "Effigy",
+     "slot": "offhand",
+     "from": 6
+    },
+    {
+     "key": "g5_sigilplate",
+     "name": "Sigil Plate",
+     "slot": "offhand",
+     "from": 6
+    },
+    {
+     "key": "g5_antlerrod",
+     "name": "Antler Rod",
+     "slot": "offhand",
+     "from": 8
+    },
+    {
+     "key": "g5_seeingmask",
+     "name": "Seeing Mask",
+     "slot": "offhand",
+     "from": 8
+    }
+   ]
+  },
+  {
+   "id": "foci_5",
+   "prof": "alchemy",
+   "tier": 5,
+   "skill": 100,
+   "name": "Sunsteel-grade Orbs, Tomes and Charms",
+   "pattern": "foci",
+   "desc": "A caster's off-hand or orb. You choose the pattern; the item comes out at up to level 50, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "sunsilk_bolt",
+     "n": 1
+    },
+    {
+     "id": "star_opal",
+     "n": 1
+    },
+    {
+     "id": "starcap",
+     "n": 2
+    }
+   ],
+   "bases": [
+    {
+     "key": "grimoire",
+     "name": "Grimoire",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "orb",
+     "name": "Orb",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "tome",
+     "name": "Tome",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "warded_focus",
+     "name": "Warded Focus",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "psalter",
+     "name": "Psalter",
+     "slot": "offhand",
+     "from": 2
+    },
+    {
+     "key": "g5_folio",
+     "name": "Sealed Folio",
+     "slot": "offhand",
+     "from": 3
+    },
+    {
+     "key": "spellguard_orb",
+     "name": "Spellguard Orb",
+     "slot": "offhand",
+     "from": 3
+    },
+    {
+     "key": "g5_codex",
+     "name": "Open Codex",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "reliquary",
+     "name": "Reliquary",
+     "slot": "offhand",
+     "from": 4
+    },
+    {
+     "key": "seer_orb",
+     "name": "Seer's Orb",
+     "slot": "offhand",
+     "from": 4
+    },
+    {
+     "key": "g5_armillary",
+     "name": "Armillary Orb",
+     "slot": "weapon",
+     "from": 5
+    },
+    {
+     "key": "g5_starglass",
+     "name": "Caged Starglass",
+     "slot": "offhand",
+     "from": 5
+    },
+    {
+     "key": "g5_thurible",
+     "name": "Pilgrim's Thurible",
+     "slot": "offhand",
+     "from": 5
+    },
+    {
+     "key": "effigy",
+     "name": "Effigy",
+     "slot": "offhand",
+     "from": 6
+    },
+    {
+     "key": "g5_sigilplate",
+     "name": "Sigil Plate",
+     "slot": "offhand",
+     "from": 6
+    },
+    {
+     "key": "g5_antlerrod",
+     "name": "Antler Rod",
+     "slot": "offhand",
+     "from": 8
+    },
+    {
+     "key": "g5_seeingmask",
+     "name": "Seeing Mask",
+     "slot": "offhand",
+     "from": 8
+    }
+   ]
+  },
+  {
+   "id": "brew_healing",
+   "prof": "alchemy",
+   "tier": 1,
+   "skill": 1,
+   "name": "Healing Potion",
+   "desc": "Restores 40 HP to one ally.",
+   "kind": "potion",
+   "needs": [
+    {
+     "id": "meadowmint",
+     "n": 2
+    },
+    {
+     "id": "field_mushroom",
+     "n": 1
+    }
+   ],
+   "makes": {
+    "id": "healing_potion",
+    "n": 1
+   }
+  },
+  {
+   "id": "brew_mana",
+   "prof": "alchemy",
+   "tier": 1,
+   "skill": 7,
+   "name": "Mana Potion",
+   "desc": "Restores 40 MP to one ally.",
+   "kind": "potion",
+   "needs": [
+    {
+     "id": "meadowmint",
+     "n": 1
+    },
+    {
+     "id": "field_mushroom",
+     "n": 2
+    }
+   ],
+   "makes": {
+    "id": "mana_potion",
+    "n": 1
+   }
+  },
+  {
+   "id": "brew_antidote",
+   "prof": "alchemy",
+   "tier": 1,
+   "skill": 13,
+   "name": "Antidote",
+   "desc": "Removes Poison and Bleed from one ally.",
+   "kind": "potion",
+   "needs": [
+    {
+     "id": "field_mushroom",
+     "n": 1
+    },
+    {
+     "id": "pine_resin",
+     "n": 1
+    }
+   ],
+   "makes": {
+    "id": "antidote",
+    "n": 1
+   }
+  },
+  {
+   "id": "brew_armour_oil",
+   "prof": "alchemy",
+   "tier": 1,
+   "skill": 17,
+   "name": "Armour Oil",
+   "desc": "Oil the joints: +4% armour for 15 minutes.",
+   "kind": "good",
+   "needs": [
+    {
+     "id": "pine_resin",
+     "n": 2
+    },
+    {
+     "id": "flax",
+     "n": 1
+    }
+   ],
+   "makes": {
+    "id": "armour_oil",
+    "n": 1
+   }
+  },
+  {
+   "id": "brew_greater_healing",
+   "prof": "alchemy",
+   "tier": 2,
+   "skill": 25,
+   "name": "Greater Healing Potion",
+   "desc": "Restores 80 HP to one ally.",
+   "kind": "potion",
+   "needs": [
+    {
+     "id": "feverleaf",
+     "n": 2
+    },
+    {
+     "id": "amber_cap",
+     "n": 1
+    }
+   ],
+   "makes": {
+    "id": "greater_healing",
+    "n": 1
+   }
+  },
+  {
+   "id": "brew_group_tonic",
+   "prof": "alchemy",
+   "tier": 2,
+   "skill": 35,
+   "name": "Group Tonic",
+   "desc": "Restores 25 HP to all living allies.",
+   "kind": "potion",
+   "needs": [
+    {
+     "id": "feverleaf",
+     "n": 2
+    },
+    {
+     "id": "amber_cap",
+     "n": 2
+    }
+   ],
+   "makes": {
+    "id": "group_tonic",
+    "n": 1
+   }
+  },
+  {
+   "id": "brew_revival",
+   "prof": "alchemy",
+   "tier": 3,
+   "skill": 50,
+   "name": "Revival Flask",
+   "desc": "Wakes a fallen ally at 25% max HP with damage immunity until their next action.",
+   "kind": "potion",
+   "needs": [
+    {
+     "id": "moonpetal",
+     "n": 3
+    },
+    {
+     "id": "ghost_morel",
+     "n": 2
+    },
+    {
+     "id": "amethyst",
+     "n": 1
+    }
+   ],
+   "makes": {
+    "id": "revival_flask",
+    "n": 1
+   }
+  },
+  {
+   "id": "cook_roast",
+   "prof": "cooking",
+   "tier": 1,
+   "skill": 1,
+   "name": "Roast Game",
+   "desc": "Meat off the spit. Eat out of combat to recover health over 20 seconds.",
+   "kind": "good",
+   "steps": 1,
+   "needs": [
+    {
+     "id": "game_meat",
+     "n": 1
+    }
+   ],
+   "makes": {
+    "id": "roast_game",
+    "n": 1
+   }
+  },
+  {
+   "id": "cook_mint_tea",
+   "prof": "cooking",
+   "tier": 1,
+   "skill": 5,
+   "name": "Mint Tea",
+   "desc": "Hot and sharp. Drink out of combat to recover mana over 20 seconds.",
+   "kind": "good",
+   "steps": 1,
+   "needs": [
+    {
+     "id": "meadowmint",
+     "n": 2
+    }
+   ],
+   "makes": {
+    "id": "mint_tea",
+    "n": 1
+   }
+  },
+  {
+   "id": "cook_mushroom_skewer",
+   "prof": "cooking",
+   "tier": 1,
+   "skill": 9,
+   "name": "Mushroom Skewers",
+   "desc": "Eat out of combat to recover health over 20 seconds.",
+   "kind": "good",
+   "steps": 1,
+   "needs": [
+    {
+     "id": "field_mushroom",
+     "n": 2
+    },
+    {
+     "id": "game_meat",
+     "n": 1
+    }
+   ],
+   "makes": {
+    "id": "mushroom_skewers",
+    "n": 1
+   }
+  },
+  {
+   "id": "cook_foragers_stew",
+   "prof": "cooking",
+   "tier": 1,
+   "skill": 16,
+   "name": "Forager's Stew",
+   "desc": "Eat out of combat: recover health and mana over 20 seconds, then +5% health for 30 minutes.",
+   "kind": "good",
+   "steps": 1,
+   "needs": [
+    {
+     "id": "game_meat",
+     "n": 2
+    },
+    {
+     "id": "field_mushroom",
+     "n": 1
+    },
+    {
+     "id": "meadowmint",
+     "n": 1
+    }
+   ],
+   "makes": {
+    "id": "foragers_stew",
+    "n": 1
+   }
+  },
+  {
+   "id": "cook_amber_broth",
+   "prof": "cooking",
+   "tier": 2,
+   "skill": 25,
+   "name": "Amber Broth",
+   "desc": "Eat out of combat: recover health and mana over 20 seconds, then +8% health for 30 minutes.",
+   "kind": "good",
+   "steps": 1,
+   "needs": [
+    {
+     "id": "amber_cap",
+     "n": 2
+    },
+    {
+     "id": "feverleaf",
+     "n": 1
+    },
+    {
+     "id": "game_meat",
+     "n": 1
+    }
+   ],
+   "makes": {
+    "id": "amber_broth",
+    "n": 1
+   }
+  }
+ ],
+ "goods": {
+  "healing_potion": {
+   "kind": "potion",
+   "id": "healing_potion",
+   "name": "Healing Potion",
+   "desc": "Restores 40 HP to one ally.",
+   "rarity": "normal",
+   "effect": {
+    "type": "heal",
+    "amount": 40
+   }
+  },
+  "mana_potion": {
+   "kind": "potion",
+   "id": "mana_potion",
+   "name": "Mana Potion",
+   "desc": "Restores 40 MP to one ally.",
+   "rarity": "normal",
+   "effect": {
+    "type": "mana",
+    "amount": 40
+   }
+  },
+  "antidote": {
+   "kind": "potion",
+   "id": "antidote",
+   "name": "Antidote",
+   "desc": "Removes Poison and Bleed from one ally.",
+   "rarity": "normal",
+   "effect": {
+    "type": "cleanse",
+    "statuses": [
+     "poison",
+     "bleed"
+    ]
+   }
+  },
+  "armour_oil": {
+   "kind": "good",
+   "id": "armour_oil",
+   "name": "Armour oil",
+   "desc": "Oil the joints: +4% armour for 15 minutes.",
+   "rarity": "normal",
+   "use": {
+    "type": "buff",
+    "buff": {
+     "stat": "armorPct",
+     "amount": 0.04,
+     "minutes": 15
+    }
+   }
+  },
+  "greater_healing": {
+   "kind": "potion",
+   "id": "greater_healing",
+   "name": "Greater Healing Potion",
+   "desc": "Restores 80 HP to one ally.",
+   "rarity": "normal",
+   "effect": {
+    "type": "heal",
+    "amount": 80
+   }
+  },
+  "group_tonic": {
+   "kind": "potion",
+   "id": "group_tonic",
+   "name": "Group Tonic",
+   "desc": "Restores 25 HP to all living allies.",
+   "rarity": "normal",
+   "effect": {
+    "type": "heal",
+    "amount": 25
+   }
+  },
+  "revival_flask": {
+   "kind": "potion",
+   "id": "revival_flask",
+   "name": "Revival Flask",
+   "desc": "Wakes a fallen ally at 25% max HP with damage immunity until their next action.",
+   "rarity": "normal",
+   "effect": {
+    "type": "revive",
+    "pct": 0.25,
+    "immune": true
+   }
+  },
+  "roast_game": {
+   "kind": "good",
+   "id": "roast_game",
+   "name": "Roast Game",
+   "desc": "Meat off the spit. Eat out of combat to recover health over 20 seconds.",
+   "rarity": "normal",
+   "cooked": true,
+   "value": 3,
+   "use": {
+    "type": "food",
+    "regen": 0.045,
+    "seconds": 20
+   }
+  },
+  "mint_tea": {
+   "kind": "good",
+   "id": "mint_tea",
+   "name": "Mint Tea",
+   "desc": "Hot and sharp. Drink out of combat to recover mana over 20 seconds.",
+   "rarity": "normal",
+   "cooked": true,
+   "value": 3,
+   "use": {
+    "type": "drink",
+    "regen": 0.045,
+    "seconds": 20
+   }
+  },
+  "mushroom_skewers": {
+   "kind": "good",
+   "id": "mushroom_skewers",
+   "name": "Mushroom Skewers",
+   "desc": "Eat out of combat to recover health over 20 seconds.",
+   "rarity": "normal",
+   "cooked": true,
+   "value": 3,
+   "use": {
+    "type": "food",
+    "regen": 0.05,
+    "seconds": 20
+   }
+  },
+  "foragers_stew": {
+   "kind": "good",
+   "id": "foragers_stew",
+   "name": "Forager's Stew",
+   "desc": "Eat out of combat: recover health and mana over 20 seconds, then +5% health for 30 minutes.",
+   "rarity": "normal",
+   "cooked": true,
+   "value": 3,
+   "use": {
+    "type": "food",
+    "regen": 0.05,
+    "seconds": 20,
+    "buff": {
+     "stat": "hpPct",
+     "amount": 0.05,
+     "minutes": 30
+    }
+   }
+  },
+  "amber_broth": {
+   "kind": "good",
+   "id": "amber_broth",
+   "name": "Amber Broth",
+   "desc": "Eat out of combat: recover health and mana over 20 seconds, then +8% health for 30 minutes.",
+   "rarity": "normal",
+   "cooked": true,
+   "value": 3,
+   "use": {
+    "type": "food",
+    "regen": 0.06,
+    "seconds": 20,
+    "buff": {
+     "stat": "hpPct",
+     "amount": 0.08,
+     "minutes": 30
+    }
+   }
+  }
+ },
+ "skins": {
+  "meat": "game_meat",
+  "bonus": "beast_fang",
+  "types": {
+   "moor_hound": {
+    "name": "Moor Hound"
+   },
+   "cairn_rat": {
+    "name": "Cairn Gnawer"
+   },
+   "thicket_boar": {
+    "name": "Thicket Boar"
+   },
+   "fen_croaker": {
+    "name": "Fen Croaker"
+   },
+   "dusk_flitter": {
+    "name": "Dusk Flitter"
+   },
+   "gallows_owl": {
+    "name": "Gallows Owl"
+   },
+   "veil_spider": {
+    "name": "Veil Spider"
+   },
+   "dune_centipede": {
+    "name": "Dune Centipede"
+   },
+   "carrion_moth": {
+    "name": "Carrion Moth"
+   },
+   "ironback_beetle": {
+    "name": "Ironback Beetle"
+   },
+   "reed_serpent": {
+    "name": "Reed Serpent"
+   },
+   "frost_stalker": {
+    "name": "Frost Stalker"
+   },
+   "crag_hyena": {
+    "name": "Crag Hyena"
+   },
+   "silt_lurker": {
+    "name": "Silt Lurker"
+   },
+   "glacier_maw": {
+    "name": "Glacier Maw"
+   },
+   "ridge_griffin": {
+    "name": "Ridge Griffin"
+   },
+   "mire_drake": {
+    "name": "Mire Drake",
+    "noMeat": true
+   },
+   "dread_stag": {
+    "name": "Dread Stag"
+   },
+   "rime_wyrm": {
+    "name": "Rime Wyrm",
+    "noMeat": true
+   }
+  }
+ },
+ "jobs": [
+  {
+   "id": "prof_copper_for_the_forge",
+   "scope": "zone",
+   "weight": 4,
+   "giverRole": "smith",
+   "needs": [],
+   "title": "Mine 6 Copper Ore",
+   "text": "The forge eats copper faster than I can swing. Six lumps of ore, any boulder with green in it.",
+   "goal": {
+    "kind": "gather",
+    "mat": "copper_ore",
+    "count": 6
+   },
+   "reward": {
+    "xp": 0.2,
+    "gold": 4
+   },
+   "where": "anywhere in {zone.name}"
+  },
+  {
+   "id": "prof_tin_too",
+   "scope": "zone",
+   "weight": 4,
+   "giverRole": "smith",
+   "needs": [],
+   "title": "Mine 4 Tin Ore",
+   "text": "Copper without tin is a doorstop. Four of tin, the grey boulders.",
+   "goal": {
+    "kind": "gather",
+    "mat": "tin_ore",
+    "count": 4
+   },
+   "reward": {
+    "xp": 0.2,
+    "gold": 4
+   },
+   "where": "anywhere in {zone.name}"
+  },
+  {
+   "id": "prof_bars_on_the_rack",
+   "scope": "zone",
+   "weight": 4,
+   "giverRole": "smith",
+   "needs": [],
+   "title": "Smelt 3 Bronze Bars",
+   "text": "Use my fire. Three bronze bars on the rack and I will pay you for the sweat.",
+   "goal": {
+    "kind": "craft",
+    "recipe": "smelt_bronze_bar",
+    "count": 3
+   },
+   "reward": {
+    "xp": 0.2,
+    "gold": 5
+   },
+   "where": "anywhere in {zone.name}"
+  },
+  {
+   "id": "prof_prospectors_round",
+   "scope": "zone",
+   "weight": 4,
+   "giverRole": "prospector",
+   "needs": [],
+   "title": "Mine 8 pieces of ore",
+   "text": "Walk the road, hit what glints. Eight pieces of any ore and you have earned your supper.",
+   "goal": {
+    "kind": "gather",
+    "prof": "mining",
+    "count": 8
+   },
+   "reward": {
+    "xp": 0.2,
+    "gold": 4
+   },
+   "where": "anywhere in {zone.name}"
+  },
+  {
+   "id": "prof_timber_for_staves",
+   "scope": "zone",
+   "weight": 4,
+   "giverRole": "bowyer",
+   "needs": [],
+   "title": "Fell 6 logs",
+   "text": "I mark the trees, you fell them. Six logs, from the trees with the painted band.",
+   "goal": {
+    "kind": "gather",
+    "prof": "logging",
+    "count": 6
+   },
+   "reward": {
+    "xp": 0.2,
+    "gold": 4
+   },
+   "where": "anywhere in {zone.name}"
+  },
+  {
+   "id": "prof_hides_for_the_bench",
+   "scope": "zone",
+   "weight": 4,
+   "giverRole": "tailor",
+   "needs": [],
+   "title": "Skin 4 hides",
+   "text": "Four hides, off anything with fur. Keep the knife moving and do not hack.",
+   "goal": {
+    "kind": "gather",
+    "prof": "skinning",
+    "count": 4
+   },
+   "reward": {
+    "xp": 0.2,
+    "gold": 4
+   },
+   "where": "anywhere in {zone.name}"
+  },
+  {
+   "id": "prof_herbs_for_the_still",
+   "scope": "zone",
+   "weight": 4,
+   "giverRole": "apothecary",
+   "needs": [],
+   "title": "Gather 6 Meadowmint",
+   "text": "Meadowmint, six sprigs. The blue-green patches in open grass. Not the nettles. Never the nettles.",
+   "goal": {
+    "kind": "gather",
+    "mat": "meadowmint",
+    "count": 6
+   },
+   "reward": {
+    "xp": 0.2,
+    "gold": 4
+   },
+   "where": "anywhere in {zone.name}"
+  },
+  {
+   "id": "prof_a_brew_for_the_shelf",
+   "scope": "zone",
+   "weight": 4,
+   "giverRole": "apothecary",
+   "needs": [],
+   "title": "Brew 2 Healing Potions",
+   "text": "My hands shake before noon. Brew two healing potions on my still and the shelf and I are both grateful.",
+   "goal": {
+    "kind": "craft",
+    "recipe": "brew_healing",
+    "count": 2
+   },
+   "reward": {
+    "xp": 0.2,
+    "gold": 5
+   },
+   "where": "anywhere in {zone.name}"
+  }
+ ],
+ "trainers": [
+  {
+   "id": "prospector_torborhold",
+   "name": "Bram Delver",
+   "role": "prospector",
+   "title": "Prospector",
+   "town": "Torborhold",
+   "zone": "z12_02",
+   "gate": "torborhold_gate_0",
+   "x": 25116.5,
+   "z": 5381.5,
+   "yaw": -3.12,
+   "greeting": "See the boulders with green in them, out past the gate? That is copper, and it is yours for the price of three good swings.",
+   "starters": [
+    {
+     "x": 25064,
+     "z": 5384,
+     "kind": "copper"
+    },
+    {
+     "x": 25048,
+     "z": 5400,
+     "kind": "copper"
+    },
+    {
+     "x": 25072,
+     "z": 5416,
+     "kind": "tin"
+    },
+    {
+     "x": 25032,
+     "z": 5416,
+     "kind": "copper"
+    },
+    {
+     "x": 25016,
+     "z": 5432,
+     "kind": "tin"
+    }
+   ]
+  }
+ ]
+}

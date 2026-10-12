@@ -1,0 +1,23 @@
+# Thousandvale QUICK tunnel (trycloudflare.com) — a systemd USER unit for radgh (stream H, M3 first test).
+# Installed by ops/tunnel/quick.sh --install into ~/.config/systemd/user/. NOT enabled: it never starts at boot.
+# Started only by `ops/tunnel/quick.sh --start`, which refuses unless `sudo ops/lib/check-public.sh --mode quick`
+# passed within the last hour for the build that is live.
+#
+# What it exposes: exactly one origin, the STABLE game server on 127.0.0.1:8490 (published copy, user thousandvale).
+# A quick tunnel has no ingress file: --url is the only thing it can reach. Never 8400/8401 (serve.py writes files),
+# never 8491 (dev), never 8492 (admin), never Postgres.
+# No config file on purpose: a quick tunnel must not pick up a config.yml (check-public FAILS if one exists in
+# ~/.cloudflared, /etc/cloudflared or /usr/local/etc/cloudflared). The named tunnel uses /etc/cloudflared/thousandvale.yml.
+# The public URL (https://<random words>.trycloudflare.com) changes every time this starts; `quick.sh --url` prints it.
+# KILL SWITCH: systemctl --user stop thousandvale-quick-tunnel   (or ops/tunnel/quick.sh --stop)
+
+[Unit]
+Description=Thousandvale quick tunnel (trycloudflare) -> 127.0.0.1:8490
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStart=@CLOUDFLARED@ tunnel --no-autoupdate --metrics 127.0.0.1:20241 --url http://127.0.0.1:8490
+Restart=on-failure
+RestartSec=10
+NoNewPrivileges=yes

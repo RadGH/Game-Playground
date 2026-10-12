@@ -1,11 +1,11 @@
 {
- "_doc": "Stream E. Content placements for world zone z13_01 (E zone 'brackwater', Brackwater Fen) — tools/place-vignettes.mjs against stream B's bake (terrain 3c176bbc). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
+ "_doc": "Stream E. Content placements for world zone z13_01 (E zone 'brackwater', Brackwater Fen) — tools/place-vignettes.mjs against stream B's bake (terrain f3d4195e). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
  "zone": "z13_01",
  "sheetZone": "brackwater",
  "province": "torbor_downs",
- "terrainHash": "3c176bbc",
+ "terrainHash": "f3d4195e",
  "band": [
-  5,
+  4,
   7
  ],
  "archetype": "marsh",
@@ -46,22 +46,51 @@
    "gap": 30,
    "slope": 26
   },
+  "wayside": {
+   "townGap": 20,
+   "gap": 12,
+   "slope": 34,
+   "edge": 24
+  },
   "settlement": {
    "townGap": 300,
    "gap": 60,
    "slope": 10
+  },
+  "curio": {
+   "townGap": 30,
+   "gap": 10,
+   "slope": 26,
+   "edge": 30
+  },
+  "stray": {
+   "townGap": 70,
+   "gap": 16,
+   "slope": 26,
+   "edge": 30
+  },
+  "folk": {
+   "townGap": 30,
+   "gap": 12,
+   "slope": 24,
+   "edge": 30
+  },
+  "setpiece": {
+   "townGap": 20,
+   "gap": 25,
+   "slope": 20
   }
  },
- "mainWalkableShare": 0.997,
+ "mainWalkableShare": 0.99,
  "settlements": [
   {
    "name": "Brackwater",
    "kind": "town",
    "x": 1136,
    "z": 870,
-   "r": 70,
-   "source": "ask",
-   "bakeId": null
+   "r": 90,
+   "source": "bake",
+   "bakeId": "brackwater"
   },
   {
    "name": "Eelwick",
@@ -69,24 +98,24 @@
    "x": 1164,
    "z": 427,
    "r": 40,
-   "source": "ask",
-   "bakeId": null
+   "source": "bake",
+   "bakeId": "eelwick"
   }
  ],
  "checks": [
   {
    "id": "door_1",
    "kind": "dungeon_door",
-   "x": 946,
-   "z": 1186,
+   "x": 1061,
+   "z": 1066,
    "reachable": true,
    "openShare": 1
   },
   {
    "id": "event_brackwater",
    "kind": "event_site",
-   "x": 1024,
-   "z": 1024,
+   "x": 1026,
+   "z": 981,
    "reachable": true,
    "openShare": 1
   }
@@ -94,16 +123,163 @@
  "problems": [],
  "placements": [
   {
+   "type": "folk",
+   "id": "brackwater_graveyard_slot0",
+   "in": "brackwater_graveyard",
+   "slotOf": "brackwater_graveyard",
+   "role": "sexton",
+   "name": null,
+   "work": "dig",
+   "chatter": [
+    "role.sexton",
+    "role.gravedigger"
+   ],
+   "x": 1120.3,
+   "z": 740.7,
+   "yaw": 0,
+   "path": [
+    [
+     1120.3,
+     740.7
+    ],
+    [
+     1122.8,
+     741.7
+    ],
+    [
+     1121.3,
+     743.2
+    ]
+   ]
+  },
+  {
+   "type": "folk",
+   "id": "eelwick_graveyard_slot0",
+   "in": "eelwick_graveyard",
+   "slotOf": "eelwick_graveyard",
+   "role": "sexton",
+   "name": null,
+   "work": "dig",
+   "chatter": [
+    "role.sexton",
+    "role.gravedigger"
+   ],
+   "x": 1199.3,
+   "z": 344.8,
+   "yaw": 0,
+   "path": [
+    [
+     1199.3,
+     344.8
+    ],
+    [
+     1201.8,
+     345.8
+    ],
+    [
+     1200.3,
+     347.3
+    ]
+   ]
+  },
+  {
+   "type": "folk",
+   "id": "brack_farm_slot1",
+   "in": "brack_farm",
+   "slotOf": "brack_farm",
+   "role": "farmer",
+   "name": null,
+   "work": "farm",
+   "chatter": [
+    "role.farmer"
+   ],
+   "x": 924.9,
+   "z": 1116,
+   "yaw": 0,
+   "path": [
+    [
+     924.9,
+     1116
+    ],
+    [
+     927.4,
+     1117
+    ],
+    [
+     925.9,
+     1118.5
+    ]
+   ]
+  },
+  {
+   "type": "folk",
+   "id": "eel_orchard_slot0",
+   "in": "eel_orchard",
+   "slotOf": "eel_orchard",
+   "role": "orchard_keeper",
+   "name": null,
+   "work": "tend",
+   "chatter": [
+    "role.orchard_keeper"
+   ],
+   "x": 1329.3,
+   "z": 457,
+   "yaw": 0,
+   "path": [
+    [
+     1329.3,
+     457
+    ],
+    [
+     1331.8,
+     458
+    ],
+    [
+     1330.3,
+     459.5
+    ]
+   ]
+  },
+  {
+   "type": "folk",
+   "id": "brack_fold_slot0",
+   "in": "brack_fold",
+   "slotOf": "brack_fold",
+   "role": "shepherd",
+   "name": null,
+   "work": "tend",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 682.7,
+   "z": 701.6,
+   "yaw": 0,
+   "path": [
+    [
+     682.7,
+     701.6
+    ],
+    [
+     685.2,
+     702.6
+    ],
+    [
+     683.7,
+     704.1
+    ]
+   ]
+  },
+  {
    "type": "fort",
    "id": "fort_brackwater_0",
    "name": "Reedwall Tower",
    "template": "watchtower_garrison",
    "friendly": true,
-   "x": 1055,
-   "z": 1195,
-   "yaw": 1.57,
+   "x": 824,
+   "z": 731,
+   "yaw": -1.96,
    "radius": 16,
-   "level": 5
+   "level": 6
   },
   {
    "type": "farm",
@@ -112,44 +288,28 @@
    "template": "pig",
    "flavour": null,
    "settlement": "Brackwater",
-   "x": 1141,
-   "z": 509,
-   "yaw": 1.57,
+   "x": 1250,
+   "z": 364,
+   "yaw": -0.79,
    "radius": 18,
-   "level": 5
+   "level": 6
   },
   {
    "type": "farm",
    "id": "farm_brackwater_1",
-   "name": "Eelwick Farm",
-   "template": "arable",
+   "name": "Eelwick Fishing Plot",
+   "template": "fishing_plot",
    "flavour": null,
    "settlement": "Eelwick",
-   "x": 993,
-   "z": 840,
-   "yaw": 1.57,
-   "radius": 22,
+   "x": 1402,
+   "z": 817,
+   "yaw": -1.96,
+   "radius": 16,
    "level": 5
   },
   {
    "type": "cave",
    "id": "cave_brackwater_0",
-   "name": "Spider hollow",
-   "template": "spider_hollow",
-   "plan": {
-    "family": "cave_river",
-    "floors": 1,
-    "level": 6
-   },
-   "x": 407,
-   "z": 649,
-   "yaw": -0.39,
-   "radius": 10,
-   "level": 6
-  },
-  {
-   "type": "cave",
-   "id": "cave_brackwater_1",
    "name": "Sump grotto",
    "template": "sump_grotto",
    "plan": {
@@ -157,9 +317,9 @@
     "floors": 1,
     "level": 6
    },
-   "x": 1753,
-   "z": 1767,
-   "yaw": 2.75,
+   "x": 1226,
+   "z": 1521,
+   "yaw": -2.75,
    "radius": 10,
    "level": 6
   },
@@ -168,132 +328,152 @@
    "id": "the_drowned_bells",
    "name": "The Drowned Bells",
    "kind": "compositional",
-   "x": 152,
-   "z": 1565,
+   "x": 1651,
+   "z": 1265,
    "yaw": 0,
    "radius": 20,
    "where": "best fit for: deep water",
-   "needMet": false
-  },
-  {
-   "type": "vignette",
-   "id": "beekeeper_hives",
-   "name": "The Angry Hives",
-   "x": 747,
-   "z": 1713,
-   "yaw": 4.79,
-   "radius": 10,
-   "biome": "grassland",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "drowned_belfry",
-   "name": "The Drowned Belfry",
-   "x": 1577,
-   "z": 92,
-   "yaw": 0.38,
-   "radius": 11,
-   "biome": "grassland",
-   "biomeFits": false,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "eel_traps",
-   "name": "The Eel Weir",
-   "x": 1816,
-   "z": 993,
-   "yaw": 4.91,
-   "radius": 11,
-   "biome": "grassland",
-   "biomeFits": true,
-   "level": 1
+   "needMet": true
   },
   {
    "type": "vignette",
    "id": "fen_witch_hut",
    "name": "Old Mabry's Stilt Hut",
-   "x": 616,
-   "z": 64,
-   "yaw": 0.69,
+   "x": 83,
+   "z": 442,
+   "yaw": 5.24,
    "radius": 12,
    "biome": "grassland",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 5,
+   "levelCap": 6
   },
   {
    "type": "vignette",
-   "id": "ferryman_shrine",
-   "name": "The Ferryman's Coin",
-   "x": 524,
-   "z": 1184,
-   "yaw": 0.34,
-   "radius": 10,
-   "biome": "grassland",
-   "biomeFits": false,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "flooded_mill",
-   "name": "The Flooded Mill",
-   "x": 64,
-   "z": 109,
-   "yaw": 5.6,
+   "id": "lock_keeper_house",
+   "name": "The Lock-Keeper's Cottage",
+   "x": 171,
+   "z": 1426,
+   "yaw": 1.15,
    "radius": 12,
    "biome": "grassland",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 4,
+   "levelCap": 5
   },
   {
    "type": "vignette",
    "id": "lone_archer_post",
    "name": "The Reed Hide",
-   "x": 1986,
-   "z": 474,
-   "yaw": 0.32,
+   "x": 1213,
+   "z": 1137,
+   "yaw": 0.15,
    "radius": 9,
+   "biome": "marsh",
+   "biomeFits": true,
+   "level": 1,
+   "levelBase": 5,
+   "levelCap": 6
+  },
+  {
+   "type": "vignette",
+   "id": "peat_cutters",
+   "name": "The Peat Cutters' Camp",
+   "x": 643,
+   "z": 1846,
+   "yaw": 2.28,
+   "radius": 12,
    "biome": "grassland",
-   "biomeFits": false,
-   "level": 1
+   "biomeFits": true,
+   "level": 1,
+   "levelBase": 4,
+   "levelCap": 5
+  },
+  {
+   "type": "vignette",
+   "id": "sinkhole_garden",
+   "name": "The Sinkhole Garden",
+   "x": 1832,
+   "z": 100,
+   "yaw": 0.81,
+   "radius": 11,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1,
+   "levelBase": 6,
+   "levelCap": 7
+  },
+  {
+   "type": "vignette",
+   "id": "stone_circle_hum",
+   "name": "The Humming Stones",
+   "x": 1891,
+   "z": 1898,
+   "yaw": 0.44,
+   "radius": 12,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1,
+   "levelBase": 5,
+   "levelCap": 6
   },
   {
    "type": "vignette",
    "id": "tar_pits",
    "name": "The Tar Seep",
-   "x": 1226,
-   "z": 1920,
-   "yaw": 4.26,
+   "x": 1689,
+   "z": 950,
+   "yaw": 1,
    "radius": 12,
-   "biome": "grassland",
-   "biomeFits": false,
-   "level": 1
+   "biome": "marsh",
+   "biomeFits": true,
+   "level": 1,
+   "levelBase": 6,
+   "levelCap": 7
   },
   {
    "type": "vignette",
-   "id": "weavers_bridge_toll",
-   "name": "The Spider Bridge",
-   "x": 1501,
-   "z": 1338,
-   "yaw": 4.22,
-   "radius": 12,
-   "biome": "grassland",
-   "biomeFits": false,
-   "level": 1
+   "id": "tide_bell_post",
+   "name": "The Tide Post",
+   "x": 1462,
+   "z": 1049,
+   "yaw": 2.24,
+   "radius": 10,
+   "biome": "marsh",
+   "biomeFits": true,
+   "level": 1,
+   "levelBase": 5,
+   "levelCap": 6
+  },
+  {
+   "type": "vignette",
+   "id": "will_o_lights",
+   "name": "The Lantern Path",
+   "x": 1496,
+   "z": 1466,
+   "yaw": 0.88,
+   "radius": 14,
+   "biome": "marsh",
+   "biomeFits": true,
+   "level": 1,
+   "levelBase": 5,
+   "levelCap": 6
   },
   {
    "type": "vignette",
    "id": "witch_stump",
    "name": "The Wishing Stump",
-   "x": 70,
-   "z": 981,
-   "yaw": 3.42,
+   "x": 631,
+   "z": 115,
+   "yaw": 4.13,
    "radius": 10,
    "biome": "grassland",
    "biomeFits": false,
-   "level": 1
+   "level": 1,
+   "levelBase": 5,
+   "levelCap": 6
   },
   {
    "type": "camp",
@@ -302,14 +482,14 @@
    "with": null,
    "level": [
     5,
-    7
+    6
    ],
    "count": [
     2,
     4
    ],
-   "x": 363,
-   "z": 1969,
+   "x": 1393,
+   "z": 1266,
    "yaw": 0,
    "radius": 10
   },
@@ -319,15 +499,15 @@
    "monster": "reed_serpent",
    "with": null,
    "level": [
-    5,
+    6,
     7
    ],
    "count": [
     2,
     4
    ],
-   "x": 1144,
-   "z": 71,
+   "x": 1487,
+   "z": 729,
    "yaw": 0,
    "radius": 10
   },
@@ -344,8 +524,8 @@
     2,
     4
    ],
-   "x": 1555,
-   "z": 568,
+   "x": 1892,
+   "z": 541,
    "yaw": 0,
    "radius": 10
   },
@@ -362,8 +542,8 @@
     2,
     4
    ],
-   "x": 1975,
-   "z": 1403,
+   "x": 1480,
+   "z": 91,
    "yaw": 0,
    "radius": 10
   },
@@ -374,14 +554,14 @@
    "with": null,
    "level": [
     5,
-    7
+    6
    ],
    "count": [
     2,
     4
    ],
-   "x": 818,
-   "z": 367,
+   "x": 898,
+   "z": 356,
    "yaw": 0,
    "radius": 10
   },
@@ -391,15 +571,15 @@
    "monster": "fen_croaker",
    "with": null,
    "level": [
-    5,
+    6,
     7
    ],
    "count": [
     2,
     4
    ],
-   "x": 1355,
-   "z": 293,
+   "x": 1066,
+   "z": 83,
    "yaw": 0,
    "radius": 10
   },
@@ -409,15 +589,15 @@
    "monster": "marsh_wisp",
    "with": null,
    "level": [
-    6,
-    7
+    5,
+    6
    ],
    "count": [
     2,
     4
    ],
-   "x": 1380,
-   "z": 944,
+   "x": 1514,
+   "z": 943,
    "yaw": 0,
    "radius": 10
   },
@@ -427,15 +607,15 @@
    "monster": "marsh_wisp",
    "with": null,
    "level": [
-    6,
-    7
+    5,
+    6
    ],
    "count": [
     2,
     4
    ],
-   "x": 815,
-   "z": 1053,
+   "x": 1025,
+   "z": 1230,
    "yaw": 0,
    "radius": 10
   },
@@ -446,14 +626,14 @@
    "with": null,
    "level": [
     5,
-    7
+    6
    ],
    "count": [
     2,
     4
    ],
-   "x": 857,
-   "z": 621,
+   "x": 1341,
+   "z": 1097,
    "yaw": 0,
    "radius": 10
   },
@@ -464,14 +644,14 @@
    "with": null,
    "level": [
     5,
-    7
+    6
    ],
    "count": [
     2,
     4
    ],
-   "x": 1335,
-   "z": 674,
+   "x": 1417,
+   "z": 758,
    "yaw": 0,
    "radius": 10
   },
@@ -481,15 +661,15 @@
    "monster": "veil_spider",
    "with": null,
    "level": [
-    6,
-    7
+    5,
+    6
    ],
    "count": [
     2,
     4
    ],
-   "x": 1302,
-   "z": 1189,
+   "x": 1298,
+   "z": 1023,
    "yaw": 0,
    "radius": 10
   },
@@ -506,8 +686,8 @@
     2,
     4
    ],
-   "x": 760,
-   "z": 841,
+   "x": 1496,
+   "z": 823,
    "yaw": 0,
    "radius": 10
   },
@@ -516,30 +696,30 @@
    "id": "rare_reedmother_ysolt",
    "slot": 0,
    "name": "Reedmother Ysolt",
-   "x": 1611,
-   "z": 811,
+   "x": 1231,
+   "z": 1352,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     1620,
-     747
+     1263,
+     1416
     ],
     [
-     1663,
-     782
+     1180,
+     1380
     ],
     [
-     1639,
-     900
+     1183,
+     1298
     ],
     [
-     1558,
-     872
+     1247,
+     1287
     ],
     [
-     1564,
-     776
+     1319,
+     1367
     ]
    ],
    "respawnMin": [
@@ -553,30 +733,30 @@
    "id": "rare_lantern_drowner",
    "slot": 1,
    "name": "The Lantern Drowner",
-   "x": 1539,
-   "z": 1102,
+   "x": 1126,
+   "z": 1215,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     1642,
-     1075
+     1071,
+     1239
     ],
     [
-     1557,
-     1187
+     1102,
+     1176
     ],
     [
-     1484,
-     1175
+     1143,
+     1166
     ],
     [
-     1479,
-     1067
+     1170,
+     1237
     ],
     [
-     1572,
-     1033
+     1146,
+     1281
     ]
    ],
    "respawnMin": [
@@ -589,8 +769,8 @@
    "type": "waystone",
    "id": "ws_z13_01_brackwater",
    "name": "Brackwater",
-   "x": 1114.6,
-   "z": 782.8,
+   "x": 1147.2,
+   "z": 870,
    "yaw": 0,
    "settlement": "Brackwater",
    "radius": 1
@@ -599,8 +779,8 @@
    "type": "waystone",
    "id": "ws_z13_01_eelwick",
    "name": "Eelwick",
-   "x": 1131.8,
-   "z": 367.6,
+   "x": 1224.6,
+   "z": 396.5,
    "yaw": 0,
    "settlement": "Eelwick",
    "radius": 1
@@ -608,12 +788,31 @@
   {
    "type": "waystone",
    "id": "ws_z13_01_door",
-   "name": "Barrow entrance",
-   "x": 918.9,
-   "z": 1218.1,
+   "name": "The Drowned Chancel",
+   "x": 1070,
+   "z": 1061.6,
    "yaw": 0,
    "door": "door_1",
    "radius": 1
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_door",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1081,
+   "z": 1099,
+   "yaw": 0,
+   "radius": 6,
+   "doorGuard": true
   },
   {
    "type": "npc",
@@ -621,9 +820,10 @@
    "name": "Reeve Mabry Fenwick",
    "role": "elder",
    "at": "Brackwater",
-   "x": 1133.5,
-   "z": 871.8,
-   "yaw": 5,
+   "x": 1150.4,
+   "z": 881,
+   "yaw": 1.929,
+   "office": "brackwater_plot_15",
    "radius": 1
   },
   {
@@ -632,9 +832,9 @@
    "name": "Wenna Eelwife",
    "role": "fisher",
    "at": "Eelwick",
-   "x": 1162.9,
-   "z": 424,
-   "yaw": 4.43,
+   "x": 1158.5,
+   "z": 430.4,
+   "yaw": 0.9,
    "radius": 1
   },
   {
@@ -643,9 +843,9 @@
    "name": "Keeper Haskel",
    "role": "guard",
    "at": "Reedwall Tower",
-   "x": 1055.8,
-   "z": 1193.1,
-   "yaw": 2.95,
+   "x": 826,
+   "z": 731.3,
+   "yaw": 2.74,
    "radius": 1
   },
   {
@@ -654,9 +854,9 @@
    "name": "Old Mabry",
    "role": "hedge-witch",
    "at": "fen_witch_hut",
-   "x": 613.4,
-   "z": 64.2,
-   "yaw": 1.1,
+   "x": 84.2,
+   "z": 439.8,
+   "yaw": 1.33,
    "radius": 1
   },
   {
@@ -667,8 +867,8 @@
    "clue": "drunks_story",
    "how": null,
    "shimmer": null,
-   "x": 1155.3,
-   "z": 471.3,
+   "x": 1133.1,
+   "z": 459.8,
    "yaw": 0,
    "where": "edge of Eelwick",
    "radius": 1
@@ -681,8 +881,8 @@
    "clue": "note",
    "how": null,
    "shimmer": null,
-   "x": 618.1,
-   "z": 61.7,
+   "x": 81.9,
+   "z": 444.8,
    "yaw": 0,
    "where": "vignette fen_witch_hut",
    "radius": 1
@@ -695,12 +895,10119 @@
    "clue": null,
    "how": "chest",
    "shimmer": 15,
-   "x": 1055,
-   "z": 1197,
+   "x": 824.2,
+   "z": 729,
    "yaw": 0,
    "where": "fort Reedwall Tower",
    "radius": 1
+  },
+  {
+   "type": "wayside",
+   "id": "cottage_corner_brackwater_0",
+   "kind": "cottage_corner",
+   "name": "Ruined Cottage",
+   "x": 313,
+   "z": 988,
+   "yaw": 2.89,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f1",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 214,
+   "z": 64,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "wayside_well_brackwater_2",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 600,
+   "z": 1384,
+   "yaw": 4.03,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f3",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 272,
+   "z": 1784,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_brackwater_4",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1019,
+   "z": 1820,
+   "yaw": 3.7,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f5",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 460,
+   "z": 424,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cottage_corner_brackwater_6",
+   "kind": "cottage_corner",
+   "name": "Ruined Cottage",
+   "x": 1476,
+   "z": 1832,
+   "yaw": 0.35,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f7",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1836,
+   "z": 1560,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lonely_pier_brackwater_8",
+   "kind": "lonely_pier",
+   "name": "Bridge Pier",
+   "x": 880,
+   "z": 1536,
+   "yaw": 5.63,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f9",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1625,
+   "z": 371,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cart_ruts_wreck_brackwater_10",
+   "kind": "cart_ruts_wreck",
+   "name": "Abandoned Cart",
+   "x": 634,
+   "z": 1016,
+   "yaw": 2.73,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f11",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 272,
+   "z": 688,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cart_ruts_wreck_brackwater_12",
+   "kind": "cart_ruts_wreck",
+   "name": "Abandoned Cart",
+   "x": 1925,
+   "z": 1139,
+   "yaw": 5.92,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f13",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 492,
+   "z": 1620,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cart_ruts_wreck_brackwater_14",
+   "kind": "cart_ruts_wreck",
+   "name": "Abandoned Cart",
+   "x": 380,
+   "z": 1240,
+   "yaw": 0.1,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f15",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 396,
+   "z": 1986,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_brackwater_16",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 2024,
+   "z": 221,
+   "yaw": 5.61,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f17",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1888,
+   "z": 796,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_brackwater_18",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 1248,
+   "z": 1768,
+   "yaw": 0.45,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f19",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 480,
+   "z": 808,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "scarecrow_brackwater_20",
+   "kind": "scarecrow",
+   "name": "Scarecrow",
+   "x": 1696,
+   "z": 1756,
+   "yaw": 1.11,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f21",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 412,
+   "z": 192,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_brackwater_22",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 160,
+   "z": 1176,
+   "yaw": 1.54,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f23",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 692,
+   "z": 464,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "hay_rick_brackwater_24",
+   "kind": "hay_rick",
+   "name": "Hay Rick",
+   "x": 812,
+   "z": 1312,
+   "yaw": 1.01,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f25",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1679,
+   "z": 612,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "wayside_well_brackwater_26",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 84,
+   "z": 1632,
+   "yaw": 1.54,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f27",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 847,
+   "z": 60,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "wayside_well_brackwater_28",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 120,
+   "z": 860,
+   "yaw": 4.55,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f29",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1935,
+   "z": 1368,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "scarecrow_brackwater_30",
+   "kind": "scarecrow",
+   "name": "Scarecrow",
+   "x": 1840,
+   "z": 332,
+   "yaw": 2.06,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f31",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 840,
+   "z": 1928,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_brackwater_32",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 1273,
+   "z": 136,
+   "yaw": 1.97,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f33",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1988,
+   "z": 1709,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_brackwater_34",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 955,
+   "z": 556,
+   "yaw": 3.7,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f35",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 60,
+   "z": 661,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "sheep_pen_brackwater_36",
+   "kind": "sheep_pen",
+   "name": "Sheep Pen",
+   "x": 708,
+   "z": 1648,
+   "yaw": 1.26,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f37",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 228,
+   "z": 280,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_brackwater_38",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 396,
+   "z": 1444,
+   "yaw": 1.01,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f39",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1444,
+   "z": 293,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cottage_corner_brackwater_40",
+   "kind": "cottage_corner",
+   "name": "Ruined Cottage",
+   "x": 1408,
+   "z": 1648,
+   "yaw": 4.4,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f41",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1057,
+   "z": 1627,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "wayside_well_brackwater_42",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 112,
+   "z": 1908,
+   "yaw": 3.85,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f43",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 516,
+   "z": 613,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cart_ruts_wreck_brackwater_44",
+   "kind": "cart_ruts_wreck",
+   "name": "Abandoned Cart",
+   "x": 564,
+   "z": 1192,
+   "yaw": 6.14,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f45",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1628,
+   "z": 1956,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_brackwater_46",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1500,
+   "z": 528,
+   "yaw": 0.12,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f47",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1652,
+   "z": 176,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_brackwater_48",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 804,
+   "z": 936,
+   "yaw": 0.64,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f49",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 276,
+   "z": 484,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_brackwater_50",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1044,
+   "z": 1428,
+   "yaw": 3.44,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f51",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1172,
+   "z": 1936,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_brackwater_52",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1268,
+   "z": 628,
+   "yaw": 0.71,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f53",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 728,
+   "z": 276,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_brackwater_54",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 288,
+   "z": 1592,
+   "yaw": 4.27,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f55",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 460,
+   "z": 1808,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_brackwater_56",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 864,
+   "z": 1736,
+   "yaw": 5.62,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_f57",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1648,
+   "z": 1584,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_1",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 40,
+   "z": 40,
+   "yaw": 2.92,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s1",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1993,
+   "z": 42,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_2",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 40,
+   "z": 200,
+   "yaw": 0.53,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_brackwater_d1",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1993,
+   "z": 375,
+   "yaw": 4.26,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_3",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1655,
+   "z": 776,
+   "yaw": 0.2,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_1",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1858,
+   "z": 960,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1829,
+     900
+    ],
+    [
+     1919,
+     936
+    ],
+    [
+     1893,
+     1042
+    ],
+    [
+     1799,
+     964
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s2",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 472,
+   "z": 968,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_4",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 39,
+   "z": 1015,
+   "yaw": 6.1,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_brackwater_1",
+   "role": "fisher",
+   "name": "Fisher",
+   "work": "fish",
+   "chatter": [
+    "role.fisher"
+   ],
+   "x": 2000,
+   "z": 1528,
+   "yaw": 5.4,
+   "radius": 6,
+   "path": [
+    [
+     1994,
+     1534
+    ],
+    [
+     1993,
+     1521
+    ],
+    [
+     2010,
+     1526
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_5",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1002,
+   "z": 1977,
+   "yaw": 3.29,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s3",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1336,
+   "z": 1992,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_brackwater_d2",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 560,
+   "z": 2008,
+   "yaw": 2.33,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_6",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 568,
+   "z": 280,
+   "yaw": 0.55,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s4",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 40,
+   "z": 1304,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_7",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 1779,
+   "z": 1401,
+   "yaw": 0.36,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_8",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 2006,
+   "z": 672,
+   "yaw": 3.15,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_9",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 481,
+   "z": 38,
+   "yaw": 5.65,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_brackwater_d3",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 728,
+   "z": 1480,
+   "yaw": 2.22,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s5",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 942,
+   "z": 191,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_10",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1752,
+   "z": 1120,
+   "yaw": 2.67,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_brackwater_2",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 231,
+   "z": 2007,
+   "yaw": 1.04,
+   "radius": 6,
+   "path": [
+    [
+     234,
+     2021
+    ],
+    [
+     211,
+     2003
+    ],
+    [
+     248,
+     1997
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_11",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 664,
+   "z": 865,
+   "yaw": 5.98,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s6",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 2008,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "hay_rick_brackwater_d4",
+   "kind": "hay_rick",
+   "name": "Hay Rick",
+   "x": 1752,
+   "z": 464,
+   "yaw": 2.01,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_12",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 1777,
+   "z": 2008,
+   "yaw": 2.75,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_2",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 40,
+   "z": 1776,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     20,
+     1827
+    ],
+    [
+     0,
+     1770
+    ],
+    [
+     40,
+     1715
+    ],
+    [
+     82,
+     1782
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s7",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1823,
+   "z": 1256,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_13",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 328,
+   "z": 832,
+   "yaw": 4.53,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_brackwater_d5",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 808,
+   "z": 572,
+   "yaw": 1.75,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_14",
+   "recipe": "cu_blight_pool",
+   "name": "Blight Pool",
+   "kind": "hazard",
+   "x": 1599,
+   "z": 1114,
+   "yaw": 1.89,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s8",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 712,
+   "z": 2007,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_15",
+   "recipe": "cu_tinkers_halt",
+   "name": "Tinker's Halt",
+   "kind": "camp",
+   "x": 1840,
+   "z": 1743,
+   "yaw": 2.58,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_16",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1551,
+   "z": 1706,
+   "yaw": 4.07,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s9",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1488,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_17",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 248,
+   "z": 1296,
+   "yaw": 6.09,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "beehive_row_brackwater_d6",
+   "kind": "beehive_row",
+   "name": "Beehive Row",
+   "x": 704,
+   "z": 1216,
+   "yaw": 5.26,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_18",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 43,
+   "z": 1496,
+   "yaw": 0.79,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_3",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 440,
+   "z": 1112,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     383,
+     1158
+    ],
+    [
+     372,
+     1049
+    ],
+    [
+     528,
+     1066
+    ],
+    [
+     487,
+     1160
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s10",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1815,
+   "z": 664,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_19",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 184,
+   "z": 1040,
+   "yaw": 4.65,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_20",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1696,
+   "z": 41,
+   "yaw": 3.85,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_21",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1153,
+   "z": 200,
+   "yaw": 2.81,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s11",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 600,
+   "z": 1528,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_brackwater_d7",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 376,
+   "z": 592,
+   "yaw": 2.69,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_22",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1640,
+   "z": 1416,
+   "yaw": 2.34,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s12",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 2009,
+   "z": 1249,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_23",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 176,
+   "z": 584,
+   "yaw": 3.58,
+   "radius": 7,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_4",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 911,
+   "z": 1400,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     901,
+     1458
+    ],
+    [
+     859,
+     1375
+    ],
+    [
+     937,
+     1362
+    ],
+    [
+     947,
+     1420
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_24",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1744,
+   "z": 1881,
+   "yaw": 0.39,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "lonely_pier_brackwater_d8",
+   "kind": "lonely_pier",
+   "name": "Bridge Pier",
+   "x": 361,
+   "z": 328,
+   "yaw": 1.07,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s13",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 480,
+   "z": 1328,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_25",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 352,
+   "z": 64,
+   "yaw": 2.29,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_brackwater_3",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 1400,
+   "z": 616,
+   "yaw": 5.71,
+   "radius": 6,
+   "path": [
+    [
+     1424,
+     634
+    ],
+    [
+     1368,
+     633
+    ],
+    [
+     1407,
+     577
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_26",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 375,
+   "z": 1695,
+   "yaw": 0.79,
+   "radius": 7,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s14",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 592,
+   "z": 1712,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_brackwater_d9",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 1344,
+   "z": 1857,
+   "yaw": 4.61,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_27",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 1355,
+   "z": 1527,
+   "yaw": 1.44,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_5",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1120,
+   "z": 1743,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1182,
+     1743
+    ],
+    [
+     1109,
+     1821
+    ],
+    [
+     1045,
+     1733
+    ],
+    [
+     1133,
+     1668
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s15",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1516,
+   "z": 1214,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_28",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 1192,
+   "z": 40,
+   "yaw": 4.53,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "beehive_row_brackwater_d10",
+   "kind": "beehive_row",
+   "name": "Beehive Row",
+   "x": 1776,
+   "z": 224,
+   "yaw": 1.11,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_29",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1280,
+   "z": 1640,
+   "yaw": 2.16,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s16",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1359,
+   "z": 42,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_30",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 41,
+   "z": 1143,
+   "yaw": 3.39,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_31",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 39,
+   "z": 2009,
+   "yaw": 5.43,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s17",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 97,
+   "z": 311,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_32",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 2006,
+   "z": 1840,
+   "yaw": 3.08,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_brackwater_d11",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 568,
+   "z": 496,
+   "yaw": 1.99,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_33",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 2007,
+   "z": 840,
+   "yaw": 5.24,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_6",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1904,
+   "z": 209,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1869,
+     272
+    ],
+    [
+     1863,
+     175
+    ],
+    [
+     1962,
+     153
+    ],
+    [
+     1972,
+     245
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s18",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1320,
+   "z": 249,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_34",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 817,
+   "z": 183,
+   "yaw": 2.41,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_brackwater_4",
+   "role": "hermit",
+   "name": "Hermit",
+   "work": "sit",
+   "chatter": [
+    "role.hermit"
+   ],
+   "x": 1600,
+   "z": 1832,
+   "yaw": 5.49,
+   "radius": 6,
+   "path": [
+    [
+     1606,
+     1825
+    ],
+    [
+     1606,
+     1843
+    ],
+    [
+     1591,
+     1832
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_35",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 768,
+   "z": 1816,
+   "yaw": 6.08,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s19",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 200,
+   "z": 1680,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_brackwater_d12",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 287,
+   "z": 168,
+   "yaw": 1.85,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_36",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1496,
+   "z": 408,
+   "yaw": 3.1,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s20",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1046,
+   "z": 257,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_37",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 1615,
+   "z": 496,
+   "yaw": 4.07,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_7",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 160,
+   "z": 744,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     146,
+     677
+    ],
+    [
+     221,
+     739
+    ],
+    [
+     158,
+     812
+    ],
+    [
+     85,
+     744
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_38",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 401,
+   "z": 713,
+   "yaw": 4.57,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_brackwater_d13",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 2007,
+   "z": 496,
+   "yaw": 2.78,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s21",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 159,
+   "z": 176,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_39",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 176,
+   "z": 1552,
+   "yaw": 6.28,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_brackwater_5",
+   "role": "beekeeper",
+   "name": "Beekeeper",
+   "work": "gather",
+   "chatter": [
+    "role.beekeeper"
+   ],
+   "x": 647,
+   "z": 585,
+   "yaw": 3.74,
+   "radius": 6,
+   "path": [
+    [
+     640,
+     591
+    ],
+    [
+     647,
+     574
+    ],
+    [
+     654,
+     591
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_40",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 817,
+   "z": 449,
+   "yaw": 0.01,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s22",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1551,
+   "z": 1343,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_brackwater_d14",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 720,
+   "z": 1096,
+   "yaw": 4.21,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_41",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1760,
+   "z": 1656,
+   "yaw": 3.76,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_8",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1560,
+   "z": 256,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1510,
+     244
+    ],
+    [
+     1572,
+     212
+    ],
+    [
+     1611,
+     269
+    ],
+    [
+     1558,
+     320
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s23",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 935,
+   "z": 1639,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_42",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1391,
+   "z": 945,
+   "yaw": 4.18,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_brackwater_d15",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 225,
+   "z": 912,
+   "yaw": 3.48,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_43",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 729,
+   "z": 40,
+   "yaw": 3.61,
+   "radius": 7,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s24",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1560,
+   "z": 632,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_44",
+   "recipe": "cu_boundary_cross",
+   "name": "Boundary Cross",
+   "kind": "marker",
+   "x": 936,
+   "z": 672,
+   "yaw": 3.94,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_45",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 264,
+   "z": 1128,
+   "yaw": 3.83,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s25",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1767,
+   "z": 792,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_46",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 2008,
+   "z": 1016,
+   "yaw": 5.62,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "cottage_corner_brackwater_d16",
+   "kind": "cottage_corner",
+   "name": "Ruined Cottage",
+   "x": 282,
+   "z": 1480,
+   "yaw": 0.1,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_47",
+   "recipe": "cu_horse_bones",
+   "name": "Horse Bones",
+   "kind": "remains",
+   "x": 350,
+   "z": 1872,
+   "yaw": 4.96,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_brackwater_d17",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1378,
+   "z": 142,
+   "yaw": 2.68,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_9",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 712,
+   "z": 1368,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     725,
+     1339
+    ],
+    [
+     743,
+     1373
+    ],
+    [
+     701,
+     1415
+    ],
+    [
+     672,
+     1349
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s26",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 192,
+   "z": 392,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_48",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 529,
+   "z": 174,
+   "yaw": 3.24,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_brackwater_6",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 992,
+   "z": 1528,
+   "yaw": 2.8,
+   "radius": 6,
+   "path": [
+    [
+     973,
+     1559
+    ],
+    [
+     978,
+     1498
+    ],
+    [
+     1023,
+     1527
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_49",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 535,
+   "z": 1896,
+   "yaw": 3.67,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s27",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 607,
+   "z": 384,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_brackwater_d18",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 504,
+   "z": 1464,
+   "yaw": 3.07,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_50",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1583,
+   "z": 38,
+   "yaw": 2.25,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s28",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 392,
+   "z": 1560,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_51",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1736,
+   "z": 1504,
+   "yaw": 0.48,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_10",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 560,
+   "z": 896,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     623,
+     916
+    ],
+    [
+     540,
+     950
+    ],
+    [
+     518,
+     877
+    ],
+    [
+     597,
+     854
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_52",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 960,
+   "z": 40,
+   "yaw": 2.41,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_brackwater_d19",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1160,
+   "z": 617,
+   "yaw": 6.05,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s29",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1393,
+   "z": 1762,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_53",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 815,
+   "z": 1633,
+   "yaw": 6.21,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_brackwater_7",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 559,
+   "z": 718,
+   "yaw": 4.81,
+   "radius": 6,
+   "path": [
+    [
+     558,
+     679
+    ],
+    [
+     578,
+     732
+    ],
+    [
+     531,
+     732
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_54",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 1896,
+   "z": 424,
+   "yaw": 3.96,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s30",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 911,
+   "z": 1840,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_brackwater_d20",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 223,
+   "z": 1888,
+   "yaw": 0.41,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_55",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 350,
+   "z": 1347,
+   "yaw": 2.8,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_11",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 863,
+   "z": 848,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     896,
+     837
+    ],
+    [
+     882,
+     892
+    ],
+    [
+     815,
+     847
+    ],
+    [
+     854,
+     804
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s31",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1727,
+   "z": 320,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_56",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1599,
+   "z": 871,
+   "yaw": 2.24,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "wayside_well_brackwater_d21",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 466,
+   "z": 297,
+   "yaw": 2.56,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_57",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 1047,
+   "z": 616,
+   "yaw": 2.2,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s32",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 40,
+   "z": 552,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_58",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1432,
+   "z": 1367,
+   "yaw": 0.15,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_59",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 144,
+   "z": 1280,
+   "yaw": 3.88,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s33",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1880,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_60",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1871,
+   "z": 1456,
+   "yaw": 2.59,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "wayside_well_brackwater_d22",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 1930,
+   "z": 1614,
+   "yaw": 0.72,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_61",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1783,
+   "z": 561,
+   "yaw": 3.12,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_12",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 936,
+   "z": 456,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     903,
+     431
+    ],
+    [
+     972,
+     418
+    ],
+    [
+     979,
+     479
+    ],
+    [
+     913,
+     495
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s34",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1422,
+   "z": 1922,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_62",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 1303,
+   "z": 1200,
+   "yaw": 3.07,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_63",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 1134,
+   "z": 1474,
+   "yaw": 1.21,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_64",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 129,
+   "z": 961,
+   "yaw": 0.78,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s35",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1600,
+   "z": 1008,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_brackwater_d23",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 456,
+   "z": 528,
+   "yaw": 0.32,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_65",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 408,
+   "z": 887,
+   "yaw": 1.17,
+   "radius": 7,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s36",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 720,
+   "z": 169,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_66",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 697,
+   "z": 1751,
+   "yaw": 5.67,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_13",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 582,
+   "z": 1288,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     543,
+     1288
+    ],
+    [
+     566,
+     1245
+    ],
+    [
+     624,
+     1283
+    ],
+    [
+     585,
+     1326
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_67",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1096,
+   "z": 2007,
+   "yaw": 0.71,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "toll_stone_brackwater_d24",
+   "kind": "toll_stone",
+   "name": "Old Toll Stone",
+   "x": 1912,
+   "z": 697,
+   "yaw": 0.63,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s37",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 904,
+   "z": 2009,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_68",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 754,
+   "z": 377,
+   "yaw": 4.17,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_brackwater_8",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 625,
+   "z": 1112,
+   "yaw": 2.01,
+   "radius": 6,
+   "path": [
+    [
+     577,
+     1109
+    ],
+    [
+     645,
+     1078
+    ],
+    [
+     638,
+     1147
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_69",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 40,
+   "z": 911,
+   "yaw": 5.89,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s38",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 712,
+   "z": 960,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_brackwater_d25",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 1248,
+   "z": 1864,
+   "yaw": 1.81,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_70",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 64,
+   "z": 1400,
+   "yaw": 2.8,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_14",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 728,
+   "z": 1904,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     714,
+     1951
+    ],
+    [
+     680,
+     1900
+    ],
+    [
+     739,
+     1864
+    ],
+    [
+     771,
+     1919
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s39",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1224,
+   "z": 545,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_71",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 1719,
+   "z": 705,
+   "yaw": 4.14,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_brackwater_d26",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 832,
+   "z": 280,
+   "yaw": 4.96,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_72",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 728,
+   "z": 790,
+   "yaw": 3.18,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s40",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1920,
+   "z": 1800,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_73",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 377,
+   "z": 480,
+   "yaw": 0,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_74",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 282,
+   "z": 584,
+   "yaw": 4.17,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s41",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1072,
+   "z": 1913,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_75",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1528,
+   "z": 1912,
+   "yaw": 3.56,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_brackwater_d27",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 1069,
+   "z": 1337,
+   "yaw": 1.89,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_76",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1240,
+   "z": 2009,
+   "yaw": 5.07,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_15",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 177,
+   "z": 488,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     181,
+     572
+    ],
+    [
+     93,
+     501
+    ],
+    [
+     176,
+     421
+    ],
+    [
+     265,
+     489
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s42",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 176,
+   "z": 1808,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_77",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1136,
+   "z": 1568,
+   "yaw": 6.15,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_brackwater_9",
+   "role": "pilgrim_resting",
+   "name": "Resting pilgrim",
+   "work": "pray",
+   "chatter": [
+    "role.pilgrim"
+   ],
+   "x": 639,
+   "z": 225,
+   "yaw": 1.5,
+   "radius": 6,
+   "path": [
+    [
+     645,
+     228
+    ],
+    [
+     633,
+     231
+    ],
+    [
+     636,
+     217
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_78",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 120,
+   "z": 89,
+   "yaw": 2.46,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s43",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 289,
+   "z": 384,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cottage_corner_brackwater_d28",
+   "kind": "cottage_corner",
+   "name": "Ruined Cottage",
+   "x": 1736,
+   "z": 128,
+   "yaw": 3.04,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_79",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1986,
+   "z": 582,
+   "yaw": 3.8,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s44",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1641,
+   "z": 1678,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_80",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 784,
+   "z": 1024,
+   "yaw": 3.51,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_16",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1695,
+   "z": 1048,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1714,
+     1093
+    ],
+    [
+     1640,
+     1059
+    ],
+    [
+     1671,
+     977
+    ],
+    [
+     1768,
+     1031
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_81",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1359,
+   "z": 344,
+   "yaw": 4.98,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_brackwater_d29",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 752,
+   "z": 1567,
+   "yaw": 0.44,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s45",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 954,
+   "z": 1751,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_82",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 106,
+   "z": 1080,
+   "yaw": 0.05,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_brackwater_10",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 496,
+   "z": 1720,
+   "yaw": 1.92,
+   "radius": 6,
+   "path": [
+    [
+     513,
+     1692
+    ],
+    [
+     511,
+     1754
+    ],
+    [
+     450,
+     1720
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_83",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 1375,
+   "z": 1441,
+   "yaw": 5.67,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s46",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 759,
+   "z": 648,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "beehive_row_brackwater_d30",
+   "kind": "beehive_row",
+   "name": "Beehive Row",
+   "x": 1832,
+   "z": 1160,
+   "yaw": 4.88,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_84",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 935,
+   "z": 1266,
+   "yaw": 2.8,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_17",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1744,
+   "z": 1312,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1782,
+     1293
+    ],
+    [
+     1766,
+     1336
+    ],
+    [
+     1716,
+     1344
+    ],
+    [
+     1724,
+     1281
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s47",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1911,
+   "z": 1234,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_85",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 2008,
+   "z": 1104,
+   "yaw": 3.56,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "scarecrow_brackwater_d31",
+   "kind": "scarecrow",
+   "name": "Scarecrow",
+   "x": 264,
+   "z": 1392,
+   "yaw": 4.89,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_86",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 288,
+   "z": 1216,
+   "yaw": 2.83,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s48",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 448,
+   "z": 1904,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_87",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1582,
+   "z": 720,
+   "yaw": 3.74,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_88",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 625,
+   "z": 1615,
+   "yaw": 2.84,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s49",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 777,
+   "z": 1712,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_89",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 1815,
+   "z": 1832,
+   "yaw": 3.59,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_brackwater_d32",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 568,
+   "z": 40,
+   "yaw": 1.05,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_90",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 40,
+   "z": 825,
+   "yaw": 1.17,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_18",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1224,
+   "z": 248,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1189,
+     247
+    ],
+    [
+     1226,
+     214
+    ],
+    [
+     1272,
+     241
+    ],
+    [
+     1235,
+     282
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s50",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 320,
+   "z": 247,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_91",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 368,
+   "z": 1784,
+   "yaw": 2.36,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_brackwater_11",
+   "role": "fisher",
+   "name": "Fisher",
+   "work": "fish",
+   "chatter": [
+    "role.fisher"
+   ],
+   "x": 1696,
+   "z": 856,
+   "yaw": 0.07,
+   "radius": 6,
+   "path": [
+    [
+     1711,
+     856
+    ],
+    [
+     1689,
+     868
+    ],
+    [
+     1694,
+     846
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_92",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 2009,
+   "z": 1433,
+   "yaw": 4.43,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s51",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 961,
+   "z": 289,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "hay_rick_brackwater_d33",
+   "kind": "hay_rick",
+   "name": "Hay Rick",
+   "x": 1032,
+   "z": 168,
+   "yaw": 5.01,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_93",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 872,
+   "z": 992,
+   "yaw": 1.47,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s52",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1976,
+   "z": 752,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_94",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 1849,
+   "z": 1658,
+   "yaw": 2.34,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_19",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 2007,
+   "z": 929,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1968,
+     953
+    ],
+    [
+     1971,
+     889
+    ],
+    [
+     2048,
+     911
+    ],
+    [
+     2026,
+     965
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_95",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 808,
+   "z": 1449,
+   "yaw": 2.24,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_tree_brackwater_d34",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 1905,
+   "z": 40,
+   "yaw": 0.55,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s53",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 289,
+   "z": 1687,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_96",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 800,
+   "z": 2008,
+   "yaw": 0.06,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_brackwater_12",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 1568,
+   "z": 120,
+   "yaw": 1.11,
+   "radius": 6,
+   "path": [
+    [
+     1576,
+     137
+    ],
+    [
+     1554,
+     119
+    ],
+    [
+     1582,
+     110
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_97",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 858,
+   "z": 641,
+   "yaw": 4.92,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s54",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 80,
+   "z": 1224,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_brackwater_d35",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1982,
+   "z": 1918,
+   "yaw": 1.78,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_98",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1464,
+   "z": 1712,
+   "yaw": 4.07,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_20",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 464,
+   "z": 120,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     400,
+     98
+    ],
+    [
+     484,
+     68
+    ],
+    [
+     523,
+     152
+    ],
+    [
+     448,
+     161
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s55",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 792,
+   "z": 1232,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_99",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1166,
+   "z": 122,
+   "yaw": 0.27,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_brackwater_d36",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1320,
+   "z": 1712,
+   "yaw": 6.24,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_100",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 1458,
+   "z": 174,
+   "yaw": 4.44,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s56",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1660,
+   "z": 1172,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_101",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 976,
+   "z": 1895,
+   "yaw": 6.11,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_102",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 119,
+   "z": 1991,
+   "yaw": 0.01,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s57",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 520,
+   "z": 360,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_103",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 728,
+   "z": 544,
+   "yaw": 3.45,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_brackwater_d37",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 1336,
+   "z": 712,
+   "yaw": 1.92,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_104",
+   "recipe": "cu_bog_body",
+   "name": "Bog Body",
+   "kind": "remains",
+   "x": 1480,
+   "z": 1296,
+   "yaw": 0.81,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_21",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1504,
+   "z": 1640,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1491,
+     1594
+    ],
+    [
+     1534,
+     1631
+    ],
+    [
+     1525,
+     1678
+    ],
+    [
+     1461,
+     1664
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s58",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1273,
+   "z": 46,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_105",
+   "recipe": "cu_tinkers_halt",
+   "name": "Tinker's Halt",
+   "kind": "camp",
+   "x": 247,
+   "z": 824,
+   "yaw": 3.2,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_brackwater_13",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 1920,
+   "z": 342,
+   "yaw": 1.01,
+   "radius": 6,
+   "path": [
+    [
+     1891,
+     313
+    ],
+    [
+     1959,
+     322
+    ],
+    [
+     1910,
+     399
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_106",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 919,
+   "z": 754,
+   "yaw": 4.23,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s59",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1816,
+   "z": 417,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_brackwater_d38",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1703,
+   "z": 527,
+   "yaw": 4.2,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_107",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1200,
+   "z": 1616,
+   "yaw": 6.03,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s60",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1695,
+   "z": 2010,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_108",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1848,
+   "z": 1352,
+   "yaw": 5.99,
+   "radius": 7,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_22",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1808,
+   "z": 1928,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1736,
+     1939
+    ],
+    [
+     1822,
+     1870
+    ],
+    [
+     1891,
+     1914
+    ],
+    [
+     1792,
+     2009
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_109",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1744,
+   "z": 1200,
+   "yaw": 2.69,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_brackwater_d39",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 464,
+   "z": 1239,
+   "yaw": 3.76,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s61",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 632,
+   "z": 1968,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_110",
+   "recipe": "cu_drowned_saint",
+   "name": "Drowned Saint",
+   "kind": "shrine",
+   "x": 1522,
+   "z": 1128,
+   "yaw": 5.29,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_brackwater_14",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 481,
+   "z": 2001,
+   "yaw": 3.32,
+   "radius": 6,
+   "path": [
+    [
+     489,
+     2031
+    ],
+    [
+     456,
+     1991
+    ],
+    [
+     505,
+     1985
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_111",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 313,
+   "z": 1944,
+   "yaw": 0.13,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s62",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 329,
+   "z": 753,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_brackwater_d40",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1160,
+   "z": 1071,
+   "yaw": 0.41,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_112",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 472,
+   "z": 1536,
+   "yaw": 0.66,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_23",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 2007,
+   "z": 1625,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     2046,
+     1664
+    ],
+    [
+     1972,
+     1669
+    ],
+    [
+     1956,
+     1601
+    ],
+    [
+     2043,
+     1568
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s63",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 47,
+   "z": 120,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_113",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1632,
+   "z": 1496,
+   "yaw": 2.23,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_brackwater_d41",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 648,
+   "z": 312,
+   "yaw": 1.08,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_114",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 648,
+   "z": 784,
+   "yaw": 5.71,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s64",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1703,
+   "z": 401,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_115",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 919,
+   "z": 111,
+   "yaw": 2.58,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_116",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 96,
+   "z": 1551,
+   "yaw": 5.81,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s65",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1887,
+   "z": 626,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_117",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1321,
+   "z": 568,
+   "yaw": 0.44,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "toll_stone_brackwater_d42",
+   "kind": "toll_stone",
+   "name": "Old Toll Stone",
+   "x": 119,
+   "z": 1704,
+   "yaw": 1.4,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_118",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 39,
+   "z": 368,
+   "yaw": 5.97,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_24",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1912,
+   "z": 1528,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1861,
+     1520
+    ],
+    [
+     1932,
+     1476
+    ],
+    [
+     1953,
+     1544
+    ],
+    [
+     1897,
+     1578
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s66",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 776,
+   "z": 104,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_119",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 561,
+   "z": 1823,
+   "yaw": 2.06,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_brackwater_15",
+   "role": "beekeeper",
+   "name": "Beekeeper",
+   "work": "gather",
+   "chatter": [
+    "role.beekeeper"
+   ],
+   "x": 390,
+   "z": 969,
+   "yaw": 1.82,
+   "radius": 6,
+   "path": [
+    [
+     383,
+     977
+    ],
+    [
+     382,
+     958
+    ],
+    [
+     403,
+     972
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_120",
+   "recipe": "cu_samphire",
+   "name": "Samphire Flats",
+   "kind": "forage",
+   "x": 1384,
+   "z": 1024,
+   "yaw": 3.64,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s67",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1425,
+   "z": 384,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_brackwater_d43",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1568,
+   "z": 432,
+   "yaw": 2.33,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_121",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 303,
+   "z": 906,
+   "yaw": 3.23,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s68",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1272,
+   "z": 1936,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_122",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 439,
+   "z": 647,
+   "yaw": 3.87,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_25",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 680,
+   "z": 1545,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     631,
+     1518
+    ],
+    [
+     697,
+     1490
+    ],
+    [
+     711,
+     1561
+    ],
+    [
+     663,
+     1585
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_123",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 401,
+   "z": 792,
+   "yaw": 2.76,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_brackwater_d44",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 264,
+   "z": 1047,
+   "yaw": 0.3,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s69",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1823,
+   "z": 496,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_124",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 1392,
+   "z": 216,
+   "yaw": 5.48,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_brackwater_16",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 1775,
+   "z": 40,
+   "yaw": 5.67,
+   "radius": 6,
+   "path": [
+    [
+     1776,
+     65
+    ],
+    [
+     1746,
+     15
+    ],
+    [
+     1797,
+     26
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_125",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 2007,
+   "z": 1328,
+   "yaw": 0.45,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s70",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 744,
+   "z": 888,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_brackwater_d45",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 760,
+   "z": 1160,
+   "yaw": 2.39,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_126",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 42,
+   "z": 1928,
+   "yaw": 0.97,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_26",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1577,
+   "z": 800,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1547,
+     781
+    ],
+    [
+     1599,
+     771
+    ],
+    [
+     1604,
+     823
+    ],
+    [
+     1561,
+     847
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s71",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1687,
+   "z": 249,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_127",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1687,
+   "z": 1835,
+   "yaw": 2,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "hay_rick_brackwater_d46",
+   "kind": "hay_rick",
+   "name": "Hay Rick",
+   "x": 1729,
+   "z": 1584,
+   "yaw": 2.5,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_128",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1345,
+   "z": 1600,
+   "yaw": 1.62,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s72",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 120,
+   "z": 1351,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_129",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 152,
+   "z": 256,
+   "yaw": 5.54,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_130",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 384,
+   "z": 400,
+   "yaw": 4.72,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s73",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1526,
+   "z": 1776,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_131",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1416,
+   "z": 1568,
+   "yaw": 4.88,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_brackwater_d47",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 207,
+   "z": 1233,
+   "yaw": 1.97,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_132",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 840,
+   "z": 1807,
+   "yaw": 3.12,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_27",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1568,
+   "z": 2009,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1555,
+     1963
+    ],
+    [
+     1622,
+     2005
+    ],
+    [
+     1582,
+     2041
+    ],
+    [
+     1517,
+     2008
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s74",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 999,
+   "z": 1313,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_133",
+   "recipe": "cu_heron_nest",
+   "name": "Heron Rookery",
+   "kind": "nest",
+   "x": 1448,
+   "z": 896,
+   "yaw": 0.58,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_brackwater_17",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 1768,
+   "z": 1776,
+   "yaw": 3.68,
+   "radius": 6,
+   "path": [
+    [
+     1726,
+     1792
+    ],
+    [
+     1784,
+     1740
+    ],
+    [
+     1795,
+     1817
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_134",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1347,
+   "z": 881,
+   "yaw": 1.3,
+   "radius": 7,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s75",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 527,
+   "z": 1392,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "sheep_pen_brackwater_d48",
+   "kind": "sheep_pen",
+   "name": "Sheep Pen",
+   "x": 1608,
+   "z": 568,
+   "yaw": 5.43,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_135",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 1320,
+   "z": 1784,
+   "yaw": 4.09,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s76",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 879,
+   "z": 568,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_136",
+   "recipe": "cu_tinkers_halt",
+   "name": "Tinker's Halt",
+   "kind": "camp",
+   "x": 576,
+   "z": 1456,
+   "yaw": 3.44,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_28",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1714,
+   "z": 1433,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1771,
+     1476
+    ],
+    [
+     1665,
+     1466
+    ],
+    [
+     1674,
+     1380
+    ],
+    [
+     1769,
+     1395
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_137",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 1904,
+   "z": 1704,
+   "yaw": 2.48,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "stone_trough_brackwater_d49",
+   "kind": "stone_trough",
+   "name": "Stone Trough",
+   "x": 1176,
+   "z": 1856,
+   "yaw": 5.28,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s77",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 288,
+   "z": 96,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_138",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 192,
+   "z": 1112,
+   "yaw": 3.05,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_brackwater_18",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 200,
+   "z": 1352,
+   "yaw": 3.78,
+   "radius": 6,
+   "path": [
+    [
+     199,
+     1375
+    ],
+    [
+     177,
+     1335
+    ],
+    [
+     226,
+     1344
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_139",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 352,
+   "z": 1624,
+   "yaw": 0.34,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s78",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1824,
+   "z": 1087,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_brackwater_d50",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1648,
+   "z": 688,
+   "yaw": 0.81,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_140",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 1456,
+   "z": 474,
+   "yaw": 3.12,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_29",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1623,
+   "z": 1750,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1605,
+     1685
+    ],
+    [
+     1684,
+     1729
+    ],
+    [
+     1637,
+     1809
+    ],
+    [
+     1560,
+     1761
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s79",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 808,
+   "z": 1520,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_141",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 1992,
+   "z": 1176,
+   "yaw": 1.02,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "stone_trough_brackwater_d51",
+   "kind": "stone_trough",
+   "name": "Stone Trough",
+   "x": 648,
+   "z": 41,
+   "yaw": 5.45,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_142",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 416,
+   "z": 1376,
+   "yaw": 5.39,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s80",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1840,
+   "z": 736,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_143",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 114,
+   "z": 1479,
+   "yaw": 4.21,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_144",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 1296,
+   "z": 1488,
+   "yaw": 2.69,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s81",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 827,
+   "z": 377,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_145",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 344,
+   "z": 656,
+   "yaw": 2.69,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_brackwater_d52",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 329,
+   "z": 1424,
+   "yaw": 4.36,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_146",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 1568,
+   "z": 1424,
+   "yaw": 4.5,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_30",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1232,
+   "z": 1064,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1207,
+     1086
+    ],
+    [
+     1204,
+     1031
+    ],
+    [
+     1271,
+     1041
+    ],
+    [
+     1249,
+     1098
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s82",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1584,
+   "z": 1184,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_147",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 224,
+   "z": 984,
+   "yaw": 5.61,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_brackwater_19",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 535,
+   "z": 431,
+   "yaw": 5.04,
+   "radius": 6,
+   "path": [
+    [
+     537,
+     470
+    ],
+    [
+     512,
+     413
+    ],
+    [
+     572,
+     406
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_148",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 456,
+   "z": 1040,
+   "yaw": 4.48,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s83",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1545,
+   "z": 1056,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cart_ruts_wreck_brackwater_d53",
+   "kind": "cart_ruts_wreck",
+   "name": "Abandoned Cart",
+   "x": 1408,
+   "z": 2007,
+   "yaw": 3.78,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_149",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 864,
+   "z": 1256,
+   "yaw": 5.78,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s84",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 992,
+   "z": 104,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_150",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 320,
+   "z": 1280,
+   "yaw": 0.1,
+   "radius": 7,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_31",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 104,
+   "z": 592,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     91,
+     552
+    ],
+    [
+     146,
+     579
+    ],
+    [
+     126,
+     634
+    ],
+    [
+     45,
+     595
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_151",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 677,
+   "z": 378,
+   "yaw": 1.42,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_brackwater_d54",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 919,
+   "z": 1937,
+   "yaw": 1.1,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s85",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1120,
+   "z": 273,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_152",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 897,
+   "z": 248,
+   "yaw": 0.85,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_brackwater_20",
+   "role": "fisher",
+   "name": "Fisher",
+   "work": "fish",
+   "chatter": [
+    "role.fisher"
+   ],
+   "x": 1319,
+   "z": 1288,
+   "yaw": 2.65,
+   "radius": 6,
+   "path": [
+    [
+     1330,
+     1292
+    ],
+    [
+     1311,
+     1299
+    ],
+    [
+     1315,
+     1280
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_153",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1104,
+   "z": 152,
+   "yaw": 0.95,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s86",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 408,
+   "z": 1304,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_brackwater_d55",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 1938,
+   "z": 479,
+   "yaw": 5.96,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_154",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1240,
+   "z": 1696,
+   "yaw": 0.35,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_32",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 391,
+   "z": 264,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     404,
+     362
+    ],
+    [
+     321,
+     252
+    ],
+    [
+     392,
+     165
+    ],
+    [
+     472,
+     270
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s87",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1112,
+   "z": 1408,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_155",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1488,
+   "z": 600,
+   "yaw": 4.02,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_brackwater_d56",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 152,
+   "z": 1624,
+   "yaw": 1.34,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_156",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 1319,
+   "z": 952,
+   "yaw": 3.02,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s88",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1104,
+   "z": 655,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_157",
+   "recipe": "cu_empty_gallows_post",
+   "name": "Weathered Post",
+   "kind": "lore",
+   "x": 352,
+   "z": 1496,
+   "yaw": 1.87,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_158",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1656,
+   "z": 97,
+   "yaw": 0.48,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s89",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1024,
+   "z": 552,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_159",
+   "recipe": "cu_samphire",
+   "name": "Samphire Flats",
+   "kind": "forage",
+   "x": 1424,
+   "z": 1496,
+   "yaw": 6.17,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "sheep_pen_brackwater_d57",
+   "kind": "sheep_pen",
+   "name": "Sheep Pen",
+   "x": 1750,
+   "z": 624,
+   "yaw": 3.51,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_160",
+   "recipe": "cu_fishing_rock",
+   "name": "Fishing Rock",
+   "kind": "fishing",
+   "x": 1559,
+   "z": 1273,
+   "yaw": 6.2,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_33",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 536,
+   "z": 1560,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     548,
+     1612
+    ],
+    [
+     504,
+     1572
+    ],
+    [
+     520,
+     1528
+    ],
+    [
+     569,
+     1538
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s90",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1944,
+   "z": 1976,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_161",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 224,
+   "z": 144,
+   "yaw": 4.61,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_brackwater_21",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 335,
+   "z": 536,
+   "yaw": 3.13,
+   "radius": 6,
+   "path": [
+    [
+     333,
+     575
+    ],
+    [
+     316,
+     505
+    ],
+    [
+     372,
+     529
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_162",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 1288,
+   "z": 1561,
+   "yaw": 5.5,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s91",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 177,
+   "z": 1935,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cottage_corner_brackwater_d58",
+   "kind": "cottage_corner",
+   "name": "Ruined Cottage",
+   "x": 229,
+   "z": 1608,
+   "yaw": 5.1,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_163",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 1367,
+   "z": 1188,
+   "yaw": 2.36,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s92",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1000,
+   "z": 1674,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_164",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 332,
+   "z": 1103,
+   "yaw": 4.22,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_34",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 552,
+   "z": 799,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     614,
+     743
+    ],
+    [
+     600,
+     865
+    ],
+    [
+     494,
+     858
+    ],
+    [
+     489,
+     735
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_165",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1943,
+   "z": 1297,
+   "yaw": 5.4,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "hay_rick_brackwater_d59",
+   "kind": "hay_rick",
+   "name": "Hay Rick",
+   "x": 1408,
+   "z": 1840,
+   "yaw": 4.36,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s93",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 930,
+   "z": 950,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_166",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 1169,
+   "z": 2008,
+   "yaw": 5.64,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_brackwater_22",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 1906,
+   "z": 111,
+   "yaw": 5.4,
+   "radius": 6,
+   "path": [
+    [
+     1928,
+     78
+    ],
+    [
+     1929,
+     153
+    ],
+    [
+     1867,
+     109
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_167",
+   "recipe": "cu_tinkers_halt",
+   "name": "Tinker's Halt",
+   "kind": "camp",
+   "x": 167,
+   "z": 320,
+   "yaw": 4.97,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s94",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 704,
+   "z": 1032,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_brackwater_d60",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 216,
+   "z": 1496,
+   "yaw": 3.21,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_168",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 216,
+   "z": 640,
+   "yaw": 3.73,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_169",
+   "recipe": "cu_smugglers_drop",
+   "name": "Smuggler's Drop",
+   "kind": "cache",
+   "x": 1608,
+   "z": 936,
+   "yaw": 0.65,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s95",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 416,
+   "z": 1640,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_170",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1000,
+   "z": 664,
+   "yaw": 3.24,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_brackwater_d61",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 1751,
+   "z": 911,
+   "yaw": 4.4,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_171",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1672,
+   "z": 462,
+   "yaw": 1.6,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s96",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 279,
+   "z": 1857,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_172",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 40,
+   "z": 272,
+   "yaw": 0.23,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_173",
+   "recipe": "cu_eel_trap",
+   "name": "Eel Trap",
+   "kind": "fishing",
+   "x": 1240,
+   "z": 1216,
+   "yaw": 2.2,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s97",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1792,
+   "z": 288,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_174",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 991,
+   "z": 351,
+   "yaw": 0.62,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_tree_brackwater_d62",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 120,
+   "z": 376,
+   "yaw": 1.59,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_175",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 632,
+   "z": 1768,
+   "yaw": 2.25,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_35",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1496,
+   "z": 1384,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1556,
+     1335
+    ],
+    [
+     1571,
+     1424
+    ],
+    [
+     1457,
+     1440
+    ],
+    [
+     1449,
+     1320
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s98",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1126,
+   "z": 50,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_176",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 231,
+   "z": 208,
+   "yaw": 4.37,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_brackwater_23",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 760,
+   "z": 488,
+   "yaw": 3.18,
+   "radius": 6,
+   "path": [
+    [
+     795,
+     436
+    ],
+    [
+     766,
+     539
+    ],
+    [
+     709,
+     484
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_177",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 632,
+   "z": 504,
+   "yaw": 3.54,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s99",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 576,
+   "z": 560,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_brackwater_d63",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 870,
+   "z": 1672,
+   "yaw": 2.08,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_178",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 656,
+   "z": 1688,
+   "yaw": 5.82,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s100",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 839,
+   "z": 514,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_179",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 600,
+   "z": 1905,
+   "yaw": 1.51,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_36",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1825,
+   "z": 831,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1813,
+     901
+    ],
+    [
+     1756,
+     820
+    ],
+    [
+     1854,
+     782
+    ],
+    [
+     1880,
+     846
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_180",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 1432,
+   "z": 40,
+   "yaw": 2.51,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_brackwater_d64",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 2007,
+   "z": 1778,
+   "yaw": 2.89,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s101",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 328,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_181",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1328,
+   "z": 104,
+   "yaw": 0.1,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_brackwater_24",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 1352,
+   "z": 1921,
+   "yaw": 6.16,
+   "radius": 6,
+   "path": [
+    [
+     1374,
+     1895
+    ],
+    [
+     1372,
+     1954
+    ],
+    [
+     1321,
+     1918
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_182",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 737,
+   "z": 1272,
+   "yaw": 2.08,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s102",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 872,
+   "z": 1600,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_brackwater_d65",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 634,
+   "z": 1216,
+   "yaw": 5.32,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_183",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 1107,
+   "z": 585,
+   "yaw": 0.47,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_37",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1224,
+   "z": 96,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1309,
+     62
+    ],
+    [
+     1229,
+     187
+    ],
+    [
+     1169,
+     97
+    ],
+    [
+     1212,
+     38
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s103",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1664,
+   "z": 1897,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_184",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 40,
+   "z": 1080,
+   "yaw": 0.58,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_brackwater_d66",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 40,
+   "z": 1584,
+   "yaw": 1.26,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_185",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 704,
+   "z": 103,
+   "yaw": 1.96,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s104",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1449,
+   "z": 975,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_186",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 625,
+   "z": 656,
+   "yaw": 2.18,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_187",
+   "recipe": "cu_boundary_cross",
+   "name": "Boundary Cross",
+   "kind": "marker",
+   "x": 1697,
+   "z": 1640,
+   "yaw": 3.57,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s105",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 879,
+   "z": 161,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_188",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1792,
+   "z": 162,
+   "yaw": 2.72,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "cottage_corner_brackwater_d67",
+   "kind": "cottage_corner",
+   "name": "Ruined Cottage",
+   "x": 640,
+   "z": 1448,
+   "yaw": 4.73,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_189",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 1952,
+   "z": 639,
+   "yaw": 5.84,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_38",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1496,
+   "z": 344,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1511,
+     377
+    ],
+    [
+     1467,
+     353
+    ],
+    [
+     1476,
+     315
+    ],
+    [
+     1545,
+     331
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s106",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 105,
+   "z": 214,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_190",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 784,
+   "z": 320,
+   "yaw": 2.98,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_brackwater_25",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 1959,
+   "z": 1057,
+   "yaw": 5.87,
+   "radius": 6,
+   "path": [
+    [
+     1988,
+     1098
+    ],
+    [
+     1923,
+     1055
+    ],
+    [
+     1975,
+     1024
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_191",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 809,
+   "z": 1866,
+   "yaw": 5.09,
+   "radius": 7,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s107",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 88,
+   "z": 1848,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_brackwater_d68",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 105,
+   "z": 1144,
+   "yaw": 4.15,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_192",
+   "recipe": "cu_boundary_cross",
+   "name": "Boundary Cross",
+   "kind": "marker",
+   "x": 290,
+   "z": 315,
+   "yaw": 2.94,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s108",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 216,
+   "z": 1744,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_193",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1720,
+   "z": 192,
+   "yaw": 6.17,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_39",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1209,
+   "z": 658,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1168,
+     636
+    ],
+    [
+     1219,
+     623
+    ],
+    [
+     1251,
+     685
+    ],
+    [
+     1196,
+     715
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_194",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 970,
+   "z": 1192,
+   "yaw": 0.42,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_brackwater_d69",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1118,
+   "z": 1023,
+   "yaw": 3.96,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s109",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1319,
+   "z": 175,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_195",
+   "recipe": "cu_horse_bones",
+   "name": "Horse Bones",
+   "kind": "remains",
+   "x": 1879,
+   "z": 1296,
+   "yaw": 3.69,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_brackwater_26",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 465,
+   "z": 1415,
+   "yaw": 3.95,
+   "radius": 6,
+   "path": [
+    [
+     463,
+     1402
+    ],
+    [
+     479,
+     1419
+    ],
+    [
+     452,
+     1425
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_196",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1086,
+   "z": 1521,
+   "yaw": 0.69,
+   "radius": 7,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s110",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1784,
+   "z": 360,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_brackwater_d70",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 327,
+   "z": 442,
+   "yaw": 5.63,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_197",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1552,
+   "z": 496,
+   "yaw": 1.08,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_40",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1306,
+   "z": 313,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1308,
+     251
+    ],
+    [
+     1358,
+     328
+    ],
+    [
+     1288,
+     364
+    ],
+    [
+     1247,
+     299
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s111",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 888,
+   "z": 1312,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_198",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 977,
+   "z": 729,
+   "yaw": 3.13,
+   "radius": 7,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_brackwater_d71",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 750,
+   "z": 720,
+   "yaw": 4.44,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_199",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 784,
+   "z": 240,
+   "yaw": 1.19,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s112",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1504,
+   "z": 664,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_200",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1776,
+   "z": 727,
+   "yaw": 0.27,
+   "radius": 7,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_201",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 567,
+   "z": 1009,
+   "yaw": 2.22,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s113",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 962,
+   "z": 615,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_202",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1160,
+   "z": 553,
+   "yaw": 1.11,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "scarecrow_brackwater_d72",
+   "kind": "scarecrow",
+   "name": "Scarecrow",
+   "x": 1000,
+   "z": 1384,
+   "yaw": 1.14,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_203",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 160,
+   "z": 1871,
+   "yaw": 4.3,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_41",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1623,
+   "z": 1337,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1637,
+     1285
+    ],
+    [
+     1683,
+     1364
+    ],
+    [
+     1601,
+     1381
+    ],
+    [
+     1577,
+     1319
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s114",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 2008,
+   "z": 432,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_204",
+   "recipe": "cu_horse_bones",
+   "name": "Horse Bones",
+   "kind": "remains",
+   "x": 1342,
+   "z": 770,
+   "yaw": 0.32,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_brackwater_27",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 592,
+   "z": 168,
+   "yaw": 4.73,
+   "radius": 6,
+   "path": [
+    [
+     563,
+     155
+    ],
+    [
+     613,
+     158
+    ],
+    [
+     586,
+     188
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_205",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 2008,
+   "z": 103,
+   "yaw": 6.26,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s115",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1376,
+   "z": 1336,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_brackwater_d73",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 408,
+   "z": 1848,
+   "yaw": 0.47,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_206",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 152,
+   "z": 40,
+   "yaw": 0.01,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s116",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1664,
+   "z": 312,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_207",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1831,
+   "z": 1025,
+   "yaw": 4.5,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_42",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 225,
+   "z": 1174,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     261,
+     1141
+    ],
+    [
+     276,
+     1195
+    ],
+    [
+     190,
+     1229
+    ],
+    [
+     170,
+     1147
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_208",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 1545,
+   "z": 567,
+   "yaw": 2.78,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_brackwater_d74",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 160,
+   "z": 904,
+   "yaw": 3.25,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s117",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1520,
+   "z": 176,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_209",
+   "recipe": "cu_blight_pool",
+   "name": "Blight Pool",
+   "kind": "hazard",
+   "x": 1128,
+   "z": 1344,
+   "yaw": 4.92,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_brackwater_28",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 512,
+   "z": 543,
+   "yaw": 3.24,
+   "radius": 6,
+   "path": [
+    [
+     497,
+     553
+    ],
+    [
+     503,
+     522
+    ],
+    [
+     533,
+     547
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_210",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 440,
+   "z": 585,
+   "yaw": 5,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s118",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1952,
+   "z": 1864,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_brackwater_d75",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 1944,
+   "z": 832,
+   "yaw": 1.87,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_211",
+   "recipe": "cu_boundary_cross",
+   "name": "Boundary Cross",
+   "kind": "marker",
+   "x": 424,
+   "z": 1496,
+   "yaw": 5.64,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_43",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1841,
+   "z": 584,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1797,
+     581
+    ],
+    [
+     1839,
+     528
+    ],
+    [
+     1892,
+     576
+    ],
+    [
+     1847,
+     630
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s119",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 694,
+   "z": 638,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_212",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1520,
+   "z": 40,
+   "yaw": 0.26,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_brackwater_d76",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1428,
+   "z": 122,
+   "yaw": 1.31,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_brackwater_d77",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 242,
+   "z": 344,
+   "yaw": 2.23,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_213",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 256,
+   "z": 1544,
+   "yaw": 1.01,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s120",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 319,
+   "z": 1546,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_214",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 327,
+   "z": 1735,
+   "yaw": 1.9,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_215",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 336,
+   "z": 136,
+   "yaw": 3.04,
+   "radius": 7,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s121",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 104,
+   "z": 1016,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_216",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1400,
+   "z": 697,
+   "yaw": 2.02,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_brackwater_d78",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1480,
+   "z": 1944,
+   "yaw": 4.9,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_217",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 104,
+   "z": 144,
+   "yaw": 1.17,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_44",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1096,
+   "z": 215,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1160,
+     249
+    ],
+    [
+     1085,
+     267
+    ],
+    [
+     1035,
+     173
+    ],
+    [
+     1110,
+     172
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s122",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 385,
+   "z": 1919,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_218",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1680,
+   "z": 1529,
+   "yaw": 5.03,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_brackwater_29",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 776,
+   "z": 1080,
+   "yaw": 4.8,
+   "radius": 6,
+   "path": [
+    [
+     790,
+     1105
+    ],
+    [
+     744,
+     1091
+    ],
+    [
+     791,
+     1052
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_219",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 705,
+   "z": 1152,
+   "yaw": 0.36,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s123",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 712,
+   "z": 1807,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "toll_stone_brackwater_d79",
+   "kind": "toll_stone",
+   "name": "Old Toll Stone",
+   "x": 1584,
+   "z": 1904,
+   "yaw": 4.05,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_220",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 1456,
+   "z": 1776,
+   "yaw": 3.39,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s124",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 885,
+   "z": 697,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_221",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 536,
+   "z": 232,
+   "yaw": 0.24,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_45",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 633,
+   "z": 439,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     676,
+     413
+    ],
+    [
+     653,
+     494
+    ],
+    [
+     571,
+     468
+    ],
+    [
+     601,
+     378
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_222",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1281,
+   "z": 520,
+   "yaw": 4.83,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_brackwater_d80",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 1129,
+   "z": 1887,
+   "yaw": 2.63,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s125",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1783,
+   "z": 1599,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_223",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 240,
+   "z": 432,
+   "yaw": 4.14,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_brackwater_30",
+   "role": "fisher",
+   "name": "Fisher",
+   "work": "fish",
+   "chatter": [
+    "role.fisher"
+   ],
+   "x": 424,
+   "z": 40,
+   "yaw": 4.91,
+   "radius": 6,
+   "path": [
+    [
+     433,
+     42
+    ],
+    [
+     416,
+     48
+    ],
+    [
+     419,
+     29
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_224",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 152,
+   "z": 1752,
+   "yaw": 4.31,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s126",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1048,
+   "z": 320,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_brackwater_d81",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1320,
+   "z": 824,
+   "yaw": 5.21,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_225",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1383,
+   "z": 272,
+   "yaw": 3.2,
+   "radius": 7,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_46",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1213,
+   "z": 1814,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1248,
+     1780
+    ],
+    [
+     1240,
+     1851
+    ],
+    [
+     1168,
+     1859
+    ],
+    [
+     1187,
+     1778
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s127",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 96,
+   "z": 808,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_226",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1600,
+   "z": 1623,
+   "yaw": 5.03,
+   "radius": 7,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "sheep_pen_brackwater_d82",
+   "kind": "sheep_pen",
+   "name": "Sheep Pen",
+   "x": 1376,
+   "z": 1704,
+   "yaw": 5.53,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_227",
+   "recipe": "cu_bog_hole",
+   "name": "Sucking Mire",
+   "kind": "hazard",
+   "x": 1296,
+   "z": 1144,
+   "yaw": 3.7,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s128",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 240,
+   "z": 544,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_228",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 496,
+   "z": 672,
+   "yaw": 3.22,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_229",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 298,
+   "z": 1339,
+   "yaw": 4.68,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s129",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 802,
+   "z": 1394,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_230",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 552,
+   "z": 96,
+   "yaw": 4.88,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "toll_stone_brackwater_d83",
+   "kind": "toll_stone",
+   "name": "Old Toll Stone",
+   "x": 1641,
+   "z": 41,
+   "yaw": 3.39,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_231",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 96,
+   "z": 912,
+   "yaw": 0.5,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_47",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1710,
+   "z": 768,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1747,
+     829
+    ],
+    [
+     1650,
+     789
+    ],
+    [
+     1683,
+     693
+    ],
+    [
+     1785,
+     725
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s130",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1537,
+   "z": 1855,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_232",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 992,
+   "z": 222,
+   "yaw": 2.14,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_brackwater_31",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 799,
+   "z": 1768,
+   "yaw": 1.4,
+   "radius": 6,
+   "path": [
+    [
+     824,
+     1795
+    ],
+    [
+     764,
+     1771
+    ],
+    [
+     819,
+     1737
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_233",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 432,
+   "z": 1192,
+   "yaw": 4.96,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s131",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 792,
+   "z": 793,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "hay_rick_brackwater_d84",
+   "kind": "hay_rick",
+   "name": "Hay Rick",
+   "x": 568,
+   "z": 1952,
+   "yaw": 0.11,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_234",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 257,
+   "z": 1936,
+   "yaw": 1.11,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s132",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1421,
+   "z": 520,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_235",
+   "recipe": "cu_blight_pool",
+   "name": "Blight Pool",
+   "kind": "hazard",
+   "x": 1264,
+   "z": 968,
+   "yaw": 4.42,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_48",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 176,
+   "z": 112,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     206,
+     46
+    ],
+    [
+     226,
+     132
+    ],
+    [
+     142,
+     166
+    ],
+    [
+     96,
+     97
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_236",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 1881,
+   "z": 481,
+   "yaw": 3.92,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_tree_brackwater_d85",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 1448,
+   "z": 233,
+   "yaw": 2.33,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s133",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 199,
+   "z": 853,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_237",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1321,
+   "z": 1431,
+   "yaw": 5.44,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_brackwater_32",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 762,
+   "z": 1624,
+   "yaw": 0.07,
+   "radius": 6,
+   "path": [
+    [
+     756,
+     1583
+    ],
+    [
+     804,
+     1621
+    ],
+    [
+     724,
+     1655
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_238",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1336,
+   "z": 1656,
+   "yaw": 5.84,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s134",
+   "monster": "marsh_wisp",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1880,
+   "z": 1401,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "stone_trough_brackwater_d86",
+   "kind": "stone_trough",
+   "name": "Stone Trough",
+   "x": 713,
+   "z": 335,
+   "yaw": 1.83,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_239",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 272,
+   "z": 768,
+   "yaw": 1.01,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_brackwater_49",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1624,
+   "z": 434,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1589,
+     392
+    ],
+    [
+     1662,
+     369
+    ],
+    [
+     1666,
+     457
+    ],
+    [
+     1596,
+     492
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s135",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 232,
+   "z": 1440,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_240",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 1016,
+   "z": 48,
+   "yaw": 1.05,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "beehive_row_brackwater_d87",
+   "kind": "beehive_row",
+   "name": "Beehive Row",
+   "x": 64,
+   "z": 960,
+   "yaw": 0.93,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_241",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 992,
+   "z": 1616,
+   "yaw": 2.91,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s136",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1878,
+   "z": 1104,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_242",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 920,
+   "z": 1696,
+   "yaw": 5.48,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_243",
+   "recipe": "cu_spring_altar",
+   "name": "Spring Altar",
+   "kind": "shrine",
+   "x": 1512,
+   "z": 1008,
+   "yaw": 2.85,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_brackwater_s137",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 272,
+   "z": 40,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_244",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 832,
+   "z": 120,
+   "yaw": 1.2,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_brackwater_d88",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1952,
+   "z": 536,
+   "yaw": 4.2,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_brackwater_245",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1472,
+   "z": 1888,
+   "yaw": 2.41,
+   "radius": 6,
+   "levelBase": 5
   }
  ],
- "features": []
+ "features": [],
+ "density": {
+  "target": 50,
+  "roadTarget": 45,
+  "added": {
+   "curio": 245,
+   "wayside": 88,
+   "stray": 137,
+   "roamer": 49,
+   "folk": 32
+  },
+  "openShareCovered": 1,
+  "roadShareCovered": 1
+ },
+ "levels": [
+  4,
+  7
+ ]
 }

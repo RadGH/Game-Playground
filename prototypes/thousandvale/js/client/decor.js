@@ -9,6 +9,7 @@
 // Placements use the shape stream B's bake will emit: { kind: 'prop' | 'ring', id, x, z, yaw, data }.
 
 import * as THREE from 'three';
+import { LIGHTS } from './lightpool.js';
 import { buildTree, buildBush, makeRng } from '../../../../highdef-3d/js/kit/trees.js';
 import { buildRock, buildProp } from '../../../../highdef-3d/js/kit/rocks.js';
 import { loadFoliageAtlas, makeSurface } from '../../../../highdef-3d/js/kit/textures.js';
@@ -17,7 +18,7 @@ import { makeNoise2D, fbm } from '../../../../worldgen/js/noise.js';
 const SPECIES = ['pine', 'fir', 'oak', 'birch'];
 const VARIANTS = 2;
 
-const windUniform = { value: 0 };
+export const windUniform = { value: 0 };      // the page's one wind clock (leaves here; standing crops in setpiece-view.js)
 function addWind(material, amount) {
   material.onBeforeCompile = shader => {
     shader.uniforms.uWindT = windUniform;
@@ -37,28 +38,40 @@ function addWind(material, amount) {
   return material;
 }
 
+/** One set of foliage materials per page (bark, leaves with wind, rock, props) — every view shares them. */
+const MAT_CACHE = new Map();
+export function foliageMaterials(cheap = false) {
+  const k = cheap ? 'cheap' : 'full';
+  if (!MAT_CACHE.has(k)) MAT_CACHE.set(k, (async () => {
+    const atlas = await loadFoliageAtlas();
+    const bark = makeSurface('bark_pine', { size: 256, seed: 3 });
+    bark.map.wrapS = bark.map.wrapT = THREE.RepeatWrapping;
+    // Cheap mode (software renderers): Lambert, no wind, so a leaf pixel costs one texture read.
+    return cheap ? {
+      bark: new THREE.MeshLambertMaterial({ map: bark.map, vertexColors: true }),
+      leaf: new THREE.MeshLambertMaterial({ map: atlas.texture, alphaTest: 0.35, side: THREE.DoubleSide, vertexColors: true, emissive: '#1c2a12', emissiveMap: atlas.texture, emissiveIntensity: 0.5 }),
+      rock: new THREE.MeshLambertMaterial({ vertexColors: true, color: '#a29d94' }),
+      prop: new THREE.MeshLambertMaterial({ vertexColors: true }),
+    } : {
+      bark: addWind(new THREE.MeshStandardMaterial({ map: bark.map, vertexColors: true, roughness: 0.95 }), 0.25),
+      leaf: addWind(new THREE.MeshStandardMaterial({ map: atlas.texture, alphaTest: 0.3, side: THREE.DoubleSide, vertexColors: true, roughness: 0.85, emissive: '#1c2a12', emissiveMap: atlas.texture, emissiveIntensity: 0.55 }), 0.5),
+      rock: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, color: '#a29d94' }),
+      prop: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.85 }),
+    };
+  })());
+  return MAT_CACHE.get(k);
+}
+/** Advance the shared wind clock (leaves of every view sway together). */
+export function setWindTime(t) { windUniform.value = t; }
+
 export async function createDecor(hf, { placements = [], paths = [], seed = 7, avoid = [], density = 1, lodFar = [70, 220], cheap = false } = {}) {
   const LOD_FAR = lodFar;   // metres: lod0 inside [0], lod1 inside [1], billboard beyond
   const group = new THREE.Group(); group.name = 'decor';
   const rng = makeRng(seed * 101 + 9);
   const nForest = makeNoise2D(seed * 13 + 5);   // breaks woods into groves
 
-  // --- materials --------------------------------------------------------------------------------
-  const atlas = await loadFoliageAtlas();
-  const bark = makeSurface('bark_pine', { size: 256, seed: 3 });
-  bark.map.wrapS = bark.map.wrapT = THREE.RepeatWrapping;
-  // Cheap mode (software renderers): Lambert, no wind, so a leaf pixel costs one texture read.
-  const mats = cheap ? {
-    bark: new THREE.MeshLambertMaterial({ map: bark.map, vertexColors: true }),
-    leaf: new THREE.MeshLambertMaterial({ map: atlas.texture, alphaTest: 0.35, side: THREE.DoubleSide, vertexColors: true, emissive: '#1c2a12', emissiveMap: atlas.texture, emissiveIntensity: 0.5 }),
-    rock: new THREE.MeshLambertMaterial({ vertexColors: true, color: '#a29d94' }),
-    prop: new THREE.MeshLambertMaterial({ vertexColors: true }),
-  } : {
-    bark: addWind(new THREE.MeshStandardMaterial({ map: bark.map, vertexColors: true, roughness: 0.95 }), 0.25),
-    leaf: addWind(new THREE.MeshStandardMaterial({ map: atlas.texture, alphaTest: 0.3, side: THREE.DoubleSide, vertexColors: true, roughness: 0.85, emissive: '#1c2a12', emissiveMap: atlas.texture, emissiveIntensity: 0.55 }), 0.5),
-    rock: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, color: '#a29d94' }),
-    prop: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.85 }),
-  };
+  // --- materials (shared by every zone and the scatter views) ----------------------------------
+  const mats = await foliageMaterials(cheap);
 
   // --- where trees grow -------------------------------------------------------------------------
   const segDist = (x, z) => {
@@ -164,7 +177,7 @@ export async function createDecor(hf, { placements = [], paths = [], seed = 7, a
   // --- placed props -----------------------------------------------------------------------------
   const lights = [];   // flickering fires
   const flames = [];
-  const propCache = new Map();
+  const propCache = PROP_CACHE;          // shared by every zone (P1)
   const propGeo = id => { if (!propCache.has(id)) { try { propCache.set(id, buildProp(id, { seed: 5, lod: 0 }).geometry); } catch { try { propCache.set(id, buildRock(id, { seed: 5, lod: 0 }).geometry); } catch { propCache.set(id, null); } } } return propCache.get(id); };
   const flameMat = new THREE.SpriteMaterial({ map: makeFlameTexture(), color: 0xffc070, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true });
   // Props are batched by id into one InstancedMesh each (a palisade is 150 stakes, one draw).
@@ -180,12 +193,11 @@ export async function createDecor(hf, { placements = [], paths = [], seed = 7, a
       const fl = new THREE.Sprite(flameMat); fl.scale.set(id === 'torch_post' ? 0.6 : 1.3, id === 'torch_post' ? 0.9 : 1.7, 1);
       fl.position.set(x, y + top + (id === 'torch_post' ? 0.25 : 0.55), z); group.add(fl); flames.push(fl);
       if (id === 'campfire' || lights.length < 3) {
-        const l = new THREE.PointLight('#ffae5c', id === 'campfire' ? 22 : 8, id === 'campfire' ? 16 : 9, 1.6);
-        l.position.set(x, y + top + 0.6, z); group.add(l); lights.push(l);
+        lights.push(LIGHTS.add({ x, y: y + top + 0.6, z, color: '#ffae5c', intensity: id === 'campfire' ? 22 : 8, distance: id === 'campfire' ? 16 : 9, decay: 1.6, flicker: 0.14, owner: group }));
       }
     }
     if (data.glow) {
-      const l = new THREE.PointLight(data.glow, 10, 10, 1.8); l.position.set(x, y + 1.6, z); group.add(l);
+      lights.push(LIGHTS.add({ x, y: y + 1.6, z, color: data.glow, intensity: 10, distance: 10, decay: 1.8, owner: group }));
       const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: makeGlowTexture(), color: data.glow, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true }));
       s.position.set(x, y + 1.3, z); s.scale.set(2.6, 3.2, 1); group.add(s); flames.push(s);
     }
@@ -206,26 +218,32 @@ export async function createDecor(hf, { placements = [], paths = [], seed = 7, a
   let relodAt = 0, t = 0;
   return {
     group, stats: { trees: trees.length, rocks: rocks.length, bushes: bushes.length },
+    dispose() { for (const h of lights) h.remove(); lights.length = 0; },
     update(dt, cam) {
       t += dt; windUniform.value = t;
       if (t >= relodAt) { relodAt = t + 0.5; relod(cam); }
-      for (let i = 0; i < lights.length; i++) lights[i].intensity = (i === 0 ? 22 : 8) * (0.85 + Math.sin(t * 11 + i * 3) * 0.08 + Math.sin(t * 23 + i) * 0.06);
       for (let i = 0; i < flames.length; i++) flames[i].material.rotation = Math.sin(t * 6 + i) * 0.08;
     },
   };
 }
 
-function makeFlameTexture() {
+const PROP_CACHE = new Map();
+let FLAME = null;
+export function makeFlameTexture() {
+  if (FLAME) return FLAME;
   const c = document.createElement('canvas'); c.width = 64; c.height = 128; const g = c.getContext('2d');
   const grd = g.createRadialGradient(32, 92, 2, 32, 80, 50);
   grd.addColorStop(0, 'rgba(255,250,220,1)'); grd.addColorStop(0.25, 'rgba(255,190,90,0.9)'); grd.addColorStop(0.6, 'rgba(230,90,30,0.45)'); grd.addColorStop(1, 'rgba(120,20,0,0)');
   g.fillStyle = grd; g.beginPath(); g.moveTo(32, 4); g.quadraticCurveTo(62, 70, 46, 118); g.lineTo(18, 118); g.quadraticCurveTo(2, 70, 32, 4); g.fill();
-  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; FLAME = t; return t;
 }
+let GLOW = null;
+/** A soft round glow (one texture for the whole page — made once, never disposed). */
 export function makeGlowTexture() {
+  if (GLOW) return GLOW;
   const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d');
   const grd = g.createRadialGradient(32, 32, 0, 32, 32, 32);
   grd.addColorStop(0, 'rgba(255,255,255,0.9)'); grd.addColorStop(0.4, 'rgba(255,255,255,0.25)'); grd.addColorStop(1, 'rgba(255,255,255,0)');
   g.fillStyle = grd; g.fillRect(0, 0, 64, 64);
-  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; GLOW = t; return t;
 }

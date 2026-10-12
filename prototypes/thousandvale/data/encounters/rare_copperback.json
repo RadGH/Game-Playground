@@ -2,6 +2,7 @@
   "id": "rare_copperback",
   "name": "Copperback",
   "tier": "rare",
+  "secret": true,
   "zone": "delvers_hill",
   "body": "ironback_beetle",
   "place": "grazes the copper seam in the open cut above Pickaxe Row; its shell is green with verdigris",

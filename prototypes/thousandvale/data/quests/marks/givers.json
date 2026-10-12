@@ -1,0 +1,2818 @@
+{
+ "_doc": "Stream E (owner feedback 8, W12 \"show quest markers (! and ?) above NPCs\" + W27). MADE by tools/content-givers.mjs; do not edit. `npcs.<quest NPC id>` = { name, role, zone (world zone), sheet (E zone id), at, gives: quests this NPC hands out (`giver`), takes: quests it can take back (the same ones: js/sim/quests.js gives()), mustTake: the ones that can ONLY be handed in to it (`needsGiver`; every other quest also pays itself when its last step is done), talks: quests with a talk / deliver step AT this NPC (a \"?\" while that step is the one you are on), jobs: it offers radiant jobs (its role is one of JOB_ROLES — always something to ask), trains: class ids for a trainer, offers: it has anything for the player at all, titled: W27 }. `objects.<vignette>/<object>` = quests started from a thing in the world (`startsFrom`). Stream A decides per player which mark to send: \"!\" when one of `gives` (or a job) is available to that character now, \"?\" when one of `takes` is finished or the current step of one of `talks` is here, grey when it has one for later.",
+ "province": "torbor_downs",
+ "jobRoles": [
+  "elder",
+  "sergeant",
+  "captain",
+  "quartermaster",
+  "tollkeeper",
+  "broker",
+  "innkeeper",
+  "angler",
+  "smith",
+  "apothecary",
+  "tailor",
+  "bowyer",
+  "prospector"
+ ],
+ "npcs": {
+  "angler_torborhold": {
+   "name": "Tam Sedgeley",
+   "role": "angler",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "Torborhold",
+   "gives": [
+    "angle_first_cast",
+    "angle_supper",
+    "angle_silver_lining",
+    "angle_the_patient"
+   ],
+   "takes": [
+    "angle_first_cast",
+    "angle_supper",
+    "angle_silver_lining",
+    "angle_the_patient"
+   ],
+   "mustTake": [],
+   "talks": [
+    "angle_first_cast",
+    "angle_supper",
+    "angle_silver_lining",
+    "angle_the_patient"
+   ],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "scholar_orla": {
+   "name": "Orla Coombe",
+   "role": "scholar",
+   "zone": "z12_01",
+   "sheet": "ashcombe",
+   "at": "Ashcombe",
+   "gives": [
+    "bones_in_the_dust",
+    "under_the_broken_keep"
+   ],
+   "takes": [
+    "bones_in_the_dust",
+    "under_the_broken_keep"
+   ],
+   "mustTake": [],
+   "talks": [
+    "the_broken_keep"
+   ],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "digger_tobin": {
+   "name": "Old Tobin the digger",
+   "role": "trader",
+   "zone": "z12_01",
+   "sheet": "ashcombe",
+   "at": "Kettle Cross",
+   "gives": [
+    "spore_season"
+   ],
+   "takes": [
+    "spore_season"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "captain_rosamund": {
+   "name": "Captain Rosamund",
+   "role": "guard",
+   "zone": "z12_01",
+   "sheet": "ashcombe",
+   "at": "the Broken Keep",
+   "gives": [
+    "the_broken_keep",
+    "ashcombe_rare"
+   ],
+   "takes": [
+    "the_broken_keep",
+    "ashcombe_rare"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "scav_jory": {
+   "name": "Mudfoot",
+   "role": "scavenger",
+   "zone": "z12_01",
+   "sheet": "ashcombe",
+   "at": "duel_stones",
+   "gives": [
+    "a_duellists_purse"
+   ],
+   "takes": [
+    "a_duellists_purse"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "angler_ashcombe": {
+   "name": "Old Nettie Cray",
+   "role": "angler",
+   "zone": "z12_01",
+   "sheet": "ashcombe",
+   "at": "Ashcombe",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "carter_ashcombe": {
+   "name": "Jankin Furlong",
+   "role": "carter",
+   "zone": "z12_01",
+   "sheet": "ashcombe",
+   "at": "Ashcombe",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "carter_kettle_cross": {
+   "name": "Dickon Thatcher",
+   "role": "carter",
+   "zone": "z12_01",
+   "sheet": "ashcombe",
+   "at": "Kettle Cross",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "lantern_keeper_rosa": {
+   "name": "Rosa of Last Lantern",
+   "role": "elder",
+   "zone": "z11_04",
+   "sheet": "blackthorn_scar",
+   "at": "Last Lantern",
+   "gives": [
+    "into_the_scar",
+    "the_heart_of_the_scar",
+    "scar_rare"
+   ],
+   "takes": [
+    "into_the_scar",
+    "the_heart_of_the_scar",
+    "scar_rare"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "penitent_jory": {
+   "name": "Jory the penitent",
+   "role": "pilgrim",
+   "zone": "z11_04",
+   "sheet": "blackthorn_scar",
+   "at": "Thornwick",
+   "gives": [
+    "baking_club"
+   ],
+   "takes": [
+    "baking_club"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "outrider_garrick": {
+   "name": "Outrider Garrick",
+   "role": "scout",
+   "zone": "z11_04",
+   "sheet": "blackthorn_scar",
+   "at": "the Warband Stockade",
+   "gives": [
+    "crawlers_in_the_pits",
+    "the_barrows_of_the_scar"
+   ],
+   "takes": [
+    "crawlers_in_the_pits",
+    "the_barrows_of_the_scar"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "angler_last_lantern": {
+   "name": "Wick Thornaby",
+   "role": "angler",
+   "zone": "z11_04",
+   "sheet": "blackthorn_scar",
+   "at": "Last Lantern",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "carter_last_lantern": {
+   "name": "Alys Cobbold",
+   "role": "carter",
+   "zone": "z11_04",
+   "sheet": "blackthorn_scar",
+   "at": "Last Lantern",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "carter_thornwick": {
+   "name": "Blanche Furlong",
+   "role": "carter",
+   "zone": "z11_04",
+   "sheet": "blackthorn_scar",
+   "at": "Thornwick",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "reeve_mabry": {
+   "name": "Reeve Mabry Fenwick",
+   "role": "elder",
+   "zone": "z13_01",
+   "sheet": "brackwater",
+   "at": "Brackwater",
+   "gives": [
+    "eels_and_omens",
+    "the_drowned_steps"
+   ],
+   "takes": [
+    "eels_and_omens",
+    "the_drowned_steps"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "eel_woman_wenna": {
+   "name": "Wenna Eelwife",
+   "role": "fisher",
+   "zone": "z13_01",
+   "sheet": "brackwater",
+   "at": "Eelwick",
+   "gives": [
+    "frog_chorus",
+    "brackwater_rare"
+   ],
+   "takes": [
+    "frog_chorus",
+    "brackwater_rare"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "tower_keeper_hob": {
+   "name": "Keeper Haskel",
+   "role": "guard",
+   "zone": "z13_01",
+   "sheet": "brackwater",
+   "at": "Reedwall Tower",
+   "gives": [
+    "lights_in_the_fen"
+   ],
+   "takes": [
+    "lights_in_the_fen"
+   ],
+   "mustTake": [],
+   "talks": [
+    "eels_and_omens"
+   ],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "witch_mabry": {
+   "name": "Old Mabry",
+   "role": "hedge-witch",
+   "zone": "z13_01",
+   "sheet": "brackwater",
+   "at": "fen_witch_hut",
+   "gives": [
+    "slime_jars"
+   ],
+   "takes": [
+    "slime_jars"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "angler_brackwater": {
+   "name": "Mog Eelwright",
+   "role": "angler",
+   "zone": "z13_01",
+   "sheet": "brackwater",
+   "at": "Brackwater",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "carter_brackwater": {
+   "name": "Garrick Kettleby",
+   "role": "carter",
+   "zone": "z13_01",
+   "sheet": "brackwater",
+   "at": "Brackwater",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "carter_eelwick": {
+   "name": "Dickon Pike",
+   "role": "carter",
+   "zone": "z13_01",
+   "sheet": "brackwater",
+   "at": "Eelwick",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "trainer_arms": {
+   "name": "Sergeant-at-Arms Brede Holloway",
+   "role": "trainer",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "sp_drill_field",
+   "gives": [
+    "class_warrior",
+    "class_fighter",
+    "class_knight",
+    "class_swashbuckler",
+    "class_dragon_knight",
+    "class_tactician"
+   ],
+   "takes": [
+    "class_warrior",
+    "class_fighter",
+    "class_knight",
+    "class_swashbuckler",
+    "class_dragon_knight",
+    "class_tactician"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "trains": [
+    "warrior",
+    "fighter",
+    "knight",
+    "swashbuckler",
+    "dragon_knight",
+    "tactician"
+   ],
+   "offers": true,
+   "titled": true
+  },
+  "trainer_holy": {
+   "name": "Mother Ansel",
+   "role": "trainer",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "Torborhold",
+   "gives": [
+    "class_cleric",
+    "class_priest",
+    "class_paladin"
+   ],
+   "takes": [
+    "class_cleric",
+    "class_priest",
+    "class_paladin"
+   ],
+   "mustTake": [
+    "class_priest"
+   ],
+   "talks": [],
+   "jobs": false,
+   "trains": [
+    "cleric",
+    "priest",
+    "paladin"
+   ],
+   "offers": true,
+   "titled": true
+  },
+  "trainer_arcane": {
+   "name": "Magister Pellam Voss",
+   "role": "trainer",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "Torborhold",
+   "gives": [
+    "class_mage",
+    "class_sorcerer",
+    "class_chronomancer",
+    "class_enchanter",
+    "class_stormcaller",
+    "class_pyromancer"
+   ],
+   "takes": [
+    "class_mage",
+    "class_sorcerer",
+    "class_chronomancer",
+    "class_enchanter",
+    "class_stormcaller",
+    "class_pyromancer"
+   ],
+   "mustTake": [
+    "class_sorcerer",
+    "class_enchanter",
+    "class_stormcaller",
+    "class_pyromancer"
+   ],
+   "talks": [],
+   "jobs": false,
+   "trains": [
+    "mage",
+    "sorcerer",
+    "chronomancer",
+    "enchanter",
+    "stormcaller",
+    "pyromancer"
+   ],
+   "offers": true,
+   "titled": true
+  },
+  "trainer_shadow": {
+   "name": "Sly Mabry",
+   "role": "trainer",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "Torborhold",
+   "gives": [
+    "class_rogue",
+    "class_shadow_dancer",
+    "class_scavenger"
+   ],
+   "takes": [
+    "class_rogue",
+    "class_shadow_dancer",
+    "class_scavenger"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "trains": [
+    "rogue",
+    "shadow_dancer",
+    "scavenger"
+   ],
+   "offers": true,
+   "titled": true
+  },
+  "trainer_runes": {
+   "name": "Garrick Stonehand",
+   "role": "trainer",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "Torborhold",
+   "gives": [
+    "class_runesmith"
+   ],
+   "takes": [
+    "class_runesmith"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "trains": [
+    "runesmith"
+   ],
+   "offers": true,
+   "titled": true
+  },
+  "trainer_hunt": {
+   "name": "Oswy Greyfletch",
+   "role": "trainer",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "sp_greyfletch_camp",
+   "gives": [
+    "class_ranger",
+    "class_witch_hunter",
+    "class_demon_hunter",
+    "start_old_gristle"
+   ],
+   "takes": [
+    "class_ranger",
+    "class_witch_hunter",
+    "class_demon_hunter",
+    "start_old_gristle"
+   ],
+   "mustTake": [
+    "class_ranger",
+    "class_demon_hunter"
+   ],
+   "talks": [
+    "start_signs_of_the_beast"
+   ],
+   "jobs": false,
+   "trains": [
+    "ranger",
+    "witch_hunter",
+    "demon_hunter"
+   ],
+   "offers": true,
+   "titled": true
+  },
+  "trainer_wilds": {
+   "name": "Wenna of the Stones",
+   "role": "trainer",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "sp_nine_maidens",
+   "gives": [
+    "class_druid",
+    "class_shaman"
+   ],
+   "takes": [
+    "class_druid",
+    "class_shaman"
+   ],
+   "mustTake": [
+    "class_druid",
+    "class_shaman"
+   ],
+   "talks": [],
+   "jobs": false,
+   "trains": [
+    "druid",
+    "shaman"
+   ],
+   "offers": true,
+   "titled": true
+  },
+  "trainer_grave": {
+   "name": "Old Mother Quell",
+   "role": "trainer",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "sp_saint_hulda_yard",
+   "gives": [
+    "class_necromancer"
+   ],
+   "takes": [
+    "class_necromancer"
+   ],
+   "mustTake": [
+    "class_necromancer"
+   ],
+   "talks": [
+    "class_knight"
+   ],
+   "jobs": false,
+   "trains": [
+    "necromancer"
+   ],
+   "offers": true,
+   "titled": true
+  },
+  "trainer_pact": {
+   "name": "Ysolde Coldharrow",
+   "role": "trainer",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "sp_coldharrow_ruins",
+   "gives": [
+    "class_warlock"
+   ],
+   "takes": [
+    "class_warlock"
+   ],
+   "mustTake": [
+    "class_warlock"
+   ],
+   "talks": [],
+   "jobs": false,
+   "trains": [
+    "warlock"
+   ],
+   "offers": true,
+   "titled": true
+  },
+  "trainer_mind": {
+   "name": "Brother Cadoc",
+   "role": "trainer",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "sp_kind_mother_shrine",
+   "gives": [
+    "class_monk",
+    "class_oracle"
+   ],
+   "takes": [
+    "class_monk",
+    "class_oracle"
+   ],
+   "mustTake": [
+    "class_oracle"
+   ],
+   "talks": [],
+   "jobs": false,
+   "trains": [
+    "monk",
+    "oracle"
+   ],
+   "offers": true,
+   "titled": true
+  },
+  "trainer_tinker": {
+   "name": "Jory Millward",
+   "role": "trainer",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "sp_turnwater_mill",
+   "gives": [
+    "class_tinker"
+   ],
+   "takes": [
+    "class_tinker"
+   ],
+   "mustTake": [
+    "class_tinker"
+   ],
+   "talks": [
+    "class_chronomancer"
+   ],
+   "jobs": false,
+   "trains": [
+    "tinker"
+   ],
+   "offers": true,
+   "titled": true
+  },
+  "trainer_bard": {
+   "name": "Lute-master Emrys Fenwick",
+   "role": "trainer",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "sp_pail_and_plough",
+   "gives": [
+    "class_bard"
+   ],
+   "takes": [
+    "class_bard"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "trains": [
+    "bard"
+   ],
+   "offers": true,
+   "titled": true
+  },
+  "mere_warden": {
+   "name": "Warden Oswy",
+   "role": "guard",
+   "zone": "z12_04",
+   "sheet": "coldwater",
+   "at": "Mere Tower",
+   "gives": [
+    "tower_lights",
+    "the_drowned_temple"
+   ],
+   "takes": [
+    "tower_lights",
+    "the_drowned_temple"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "elder_wenna": {
+   "name": "Elder Wenna",
+   "role": "elder",
+   "zone": "z12_04",
+   "sheet": "coldwater",
+   "at": "Coldwater",
+   "gives": [
+    "cold_slimes",
+    "frogs_in_the_well"
+   ],
+   "takes": [
+    "cold_slimes",
+    "frogs_in_the_well"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "netherby_fisher": {
+   "name": "Pike of Netherby",
+   "role": "fisher",
+   "zone": "z12_04",
+   "sheet": "coldwater",
+   "at": "Netherby",
+   "gives": [
+    "serpent_season",
+    "coldwater_rare"
+   ],
+   "takes": [
+    "serpent_season",
+    "coldwater_rare"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "angler_coldwater": {
+   "name": "Marta Stillmere",
+   "role": "angler",
+   "zone": "z12_04",
+   "sheet": "coldwater",
+   "at": "Coldwater",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "carter_coldwater": {
+   "name": "Fenna Furlong",
+   "role": "carter",
+   "zone": "z12_04",
+   "sheet": "coldwater",
+   "at": "Coldwater",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "carter_netherby": {
+   "name": "Alys Ashby",
+   "role": "carter",
+   "zone": "z12_04",
+   "sheet": "coldwater",
+   "at": "Netherby",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "foreman_hollis": {
+   "name": "Foreman Hollis",
+   "role": "elder",
+   "zone": "z11_02",
+   "sheet": "delvers_hill",
+   "at": "Copperdell",
+   "gives": [
+    "copper_and_candles",
+    "the_deep_seam"
+   ],
+   "takes": [
+    "copper_and_candles",
+    "the_deep_seam"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "lampwoman_gwen": {
+   "name": "Gwen Lampwright",
+   "role": "trader",
+   "zone": "z11_02",
+   "sheet": "delvers_hill",
+   "at": "Pickaxe Row",
+   "gives": [
+    "lamp_oil"
+   ],
+   "takes": [
+    "lamp_oil"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "sergeant_cadoc": {
+   "name": "Sergeant Brask",
+   "role": "guard",
+   "zone": "z11_02",
+   "sheet": "delvers_hill",
+   "at": "the Old Headframe Fort",
+   "gives": [
+    "rats_in_the_lift",
+    "delvers_rare"
+   ],
+   "takes": [
+    "rats_in_the_lift",
+    "delvers_rare"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "old_miner_pike": {
+   "name": "Old Pike",
+   "role": "miner",
+   "zone": "z11_02",
+   "sheet": "delvers_hill",
+   "at": "dry_well",
+   "gives": [
+    "down_the_well"
+   ],
+   "takes": [
+    "down_the_well"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "angler_copperdell": {
+   "name": "Dunmer Slagfoot",
+   "role": "angler",
+   "zone": "z11_02",
+   "sheet": "delvers_hill",
+   "at": "Copperdell",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "carter_copperdell": {
+   "name": "Tobin Cattermole",
+   "role": "carter",
+   "zone": "z11_02",
+   "sheet": "delvers_hill",
+   "at": "Copperdell",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "carter_pickaxe_row": {
+   "name": "Wystan Furlong",
+   "role": "carter",
+   "zone": "z11_02",
+   "sheet": "delvers_hill",
+   "at": "Pickaxe Row",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "carter_ashhaven": {
+   "name": "Hew Greenhill",
+   "role": "carter",
+   "zone": "z11_02",
+   "sheet": "delvers_hill",
+   "at": "Ashhaven",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "redoubt_captain": {
+   "name": "Captain Hollis Gorse",
+   "role": "guard",
+   "zone": "z13_04",
+   "sheet": "gorse_march",
+   "at": "Gorsehold Redoubt",
+   "gives": [
+    "hyenas_in_the_gorse",
+    "redoubt_relief",
+    "the_march_tower"
+   ],
+   "takes": [
+    "hyenas_in_the_gorse",
+    "redoubt_relief",
+    "the_march_tower"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "barn_widow": {
+   "name": "Widow Edda",
+   "role": "farmer",
+   "zone": "z13_04",
+   "sheet": "gorse_march",
+   "at": "Burnt Barns",
+   "gives": [
+    "burnt_barns",
+    "gorse_rare"
+   ],
+   "takes": [
+    "burnt_barns",
+    "gorse_rare"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "march_trader": {
+   "name": "Garrick the pedlar",
+   "role": "trader",
+   "zone": "z13_04",
+   "sheet": "gorse_march",
+   "at": "Gorsehold",
+   "gives": [
+    "pointy_business"
+   ],
+   "takes": [
+    "pointy_business"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "angler_gorsehold": {
+   "name": "Corporal Finch Loach",
+   "role": "angler",
+   "zone": "z13_04",
+   "sheet": "gorse_march",
+   "at": "Gorsehold",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "carter_gorsehold": {
+   "name": "Petronel Rookwood",
+   "role": "carter",
+   "zone": "z13_04",
+   "sheet": "gorse_march",
+   "at": "Gorsehold",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "carter_burnt_barns": {
+   "name": "Tibbot Ashby",
+   "role": "carter",
+   "zone": "z13_04",
+   "sheet": "gorse_march",
+   "at": "Burnt Barns",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "ferrywoman_nell": {
+   "name": "Ferrywoman Nell",
+   "role": "trader",
+   "zone": "z14_02",
+   "sheet": "gullwick",
+   "at": "Ferry Hythe",
+   "gives": [
+    "serpents_at_the_ferry",
+    "gullwick_rare"
+   ],
+   "takes": [
+    "serpents_at_the_ferry",
+    "gullwick_rare"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "elder_hollis": {
+   "name": "Elder Hollis",
+   "role": "elder",
+   "zone": "z14_02",
+   "sheet": "gullwick",
+   "at": "Gullwick",
+   "gives": [
+    "croaking_at_dawn",
+    "the_underground_river"
+   ],
+   "takes": [
+    "croaking_at_dawn",
+    "the_underground_river"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "stilt_guard": {
+   "name": "Stilt-guard Emrys",
+   "role": "guard",
+   "zone": "z14_02",
+   "sheet": "gullwick",
+   "at": "Stilt Fort",
+   "gives": [
+    "wobbly_fort"
+   ],
+   "takes": [
+    "wobbly_fort"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "angler_tobin": {
+   "name": "Tobin the angler",
+   "role": "fisher",
+   "zone": "z14_02",
+   "sheet": "gullwick",
+   "at": "drowned_shrine",
+   "gives": [
+    "shrine_fishing"
+   ],
+   "takes": [
+    "shrine_fishing"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "angler_gullwick": {
+   "name": "Josey Fourlakes",
+   "role": "angler",
+   "zone": "z14_02",
+   "sheet": "gullwick",
+   "at": "Gullwick",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "carter_gullwick": {
+   "name": "Alder Rookwood",
+   "role": "carter",
+   "zone": "z14_02",
+   "sheet": "gullwick",
+   "at": "Gullwick",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "carter_ferry_hythe": {
+   "name": "Emmot Sallow",
+   "role": "carter",
+   "zone": "z14_02",
+   "sheet": "gullwick",
+   "at": "Ferry Hythe",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "carter_wyrmrow": {
+   "name": "Rhosyn Cattermole",
+   "role": "carter",
+   "zone": "z14_02",
+   "sheet": "gullwick",
+   "at": "Wyrmrow",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "carter_mirekeep": {
+   "name": "Alder Brackenridge",
+   "role": "carter",
+   "zone": "z14_02",
+   "sheet": "gullwick",
+   "at": "Mirekeep",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "tollkeeper_brann": {
+   "name": "Tollkeeper Brann",
+   "role": "elder",
+   "zone": "z11_01",
+   "sheet": "hollin_pass",
+   "at": "Hollin Toll",
+   "gives": [
+    "snow_in_the_pass",
+    "brigand_toll"
+   ],
+   "takes": [
+    "snow_in_the_pass",
+    "brigand_toll"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "goatherd_isolde": {
+   "name": "Isolde the goatherd",
+   "role": "farmer",
+   "zone": "z11_01",
+   "sheet": "hollin_pass",
+   "at": "Scree End",
+   "gives": [
+    "hyenas_and_goats"
+   ],
+   "takes": [
+    "hyenas_and_goats"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "fort_sergeant": {
+   "name": "Sergeant Kettle",
+   "role": "guard",
+   "zone": "z11_01",
+   "sheet": "hollin_pass",
+   "at": "Hollin Toll Fort",
+   "gives": [
+    "beetles_on_the_road",
+    "hollin_rare"
+   ],
+   "takes": [
+    "beetles_on_the_road",
+    "hollin_rare"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "climber_cadoc": {
+   "name": "Cadoc the climber",
+   "role": "scout",
+   "zone": "z11_01",
+   "sheet": "hollin_pass",
+   "at": "Scree End",
+   "gives": [
+    "the_old_tower"
+   ],
+   "takes": [
+    "the_old_tower"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "angler_hollin_toll": {
+   "name": "Greta Icewell",
+   "role": "angler",
+   "zone": "z11_01",
+   "sheet": "hollin_pass",
+   "at": "Hollin Toll",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "carter_hollin_toll": {
+   "name": "Tibbot Eastmere",
+   "role": "carter",
+   "zone": "z11_01",
+   "sheet": "hollin_pass",
+   "at": "Hollin Toll",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "carter_scree_end": {
+   "name": "Jory Furlong",
+   "role": "carter",
+   "zone": "z11_01",
+   "sheet": "hollin_pass",
+   "at": "Scree End",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "carter_wolditford": {
+   "name": "Gervase Eastmere",
+   "role": "carter",
+   "zone": "z11_01",
+   "sheet": "hollin_pass",
+   "at": "Wolditford",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "reeve_garrick": {
+   "name": "Reeve Garrick Pike",
+   "role": "elder",
+   "zone": "z13_03",
+   "sheet": "millbrook",
+   "at": "Millbrook",
+   "gives": [
+    "millbrook_wheels",
+    "below_three_wheels"
+   ],
+   "takes": [
+    "millbrook_wheels",
+    "below_three_wheels"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "goodwife_edda": {
+   "name": "Goodwife Edda",
+   "role": "farmer",
+   "zone": "z13_03",
+   "sheet": "millbrook",
+   "at": "Three Wheels",
+   "gives": [
+    "moth_eaten",
+    "millbrook_rare"
+   ],
+   "takes": [
+    "moth_eaten",
+    "millbrook_rare"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "castellan_oswy": {
+   "name": "Castellan Oswy",
+   "role": "guard",
+   "zone": "z13_03",
+   "sheet": "millbrook",
+   "at": "Millbrook Keep",
+   "gives": [
+    "keep_watch"
+   ],
+   "takes": [
+    "keep_watch"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "tinker_cadoc": {
+   "name": "Cadoc the tinker",
+   "role": "trader",
+   "zone": "z13_03",
+   "sheet": "millbrook",
+   "at": "tinker_wagon",
+   "gives": [
+    "the_tinkers_tools"
+   ],
+   "takes": [
+    "the_tinkers_tools"
+   ],
+   "mustTake": [],
+   "talks": [
+    "the_tinkers_tools"
+   ],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "angler_millbrook": {
+   "name": "Jed Weirside",
+   "role": "angler",
+   "zone": "z13_03",
+   "sheet": "millbrook",
+   "at": "Millbrook",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "carter_millbrook": {
+   "name": "Dowsabel Kettleby",
+   "role": "carter",
+   "zone": "z13_03",
+   "sheet": "millbrook",
+   "at": "Millbrook",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "carter_three_wheels": {
+   "name": "Emmot Ladd",
+   "role": "carter",
+   "zone": "z13_03",
+   "sheet": "millbrook",
+   "at": "Three Wheels",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "carter_stormrow": {
+   "name": "Cressy Ashby",
+   "role": "carter",
+   "zone": "z13_03",
+   "sheet": "millbrook",
+   "at": "Stormrow",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "carter_ravencross": {
+   "name": "Kenric Hayward",
+   "role": "carter",
+   "zone": "z13_03",
+   "sheet": "millbrook",
+   "at": "Ravencross",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "carter_wildmere": {
+   "name": "Tegan Coombe",
+   "role": "carter",
+   "zone": "z13_03",
+   "sheet": "millbrook",
+   "at": "Wildmere",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "prospector_torborhold": {
+   "name": "Bram Delver",
+   "role": "prospector",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "Torborhold",
+   "gives": [
+    "prof_three_good_swings",
+    "prof_bronze_not_copper",
+    "prof_an_edge_on_it"
+   ],
+   "takes": [
+    "prof_three_good_swings",
+    "prof_bronze_not_copper",
+    "prof_an_edge_on_it"
+   ],
+   "mustTake": [],
+   "talks": [
+    "prof_three_good_swings",
+    "prof_bronze_not_copper",
+    "prof_an_edge_on_it"
+   ],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "commander_hild": {
+   "name": "Commander Hild Barrowman",
+   "role": "guard",
+   "zone": "z14_03",
+   "sheet": "redcliff",
+   "at": "Redcliff Fort",
+   "gives": [
+    "flags_over_redcliff",
+    "the_frontier_keep",
+    "redcliff_rare"
+   ],
+   "takes": [
+    "flags_over_redcliff",
+    "the_frontier_keep",
+    "redcliff_rare"
+   ],
+   "mustTake": [],
+   "talks": [
+    "supply_run"
+   ],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "farmer_wat": {
+   "name": "Wat of Cinder Farm",
+   "role": "farmer",
+   "zone": "z14_03",
+   "sheet": "redcliff",
+   "at": "Cinder Farm",
+   "gives": [
+    "cinder_farm"
+   ],
+   "takes": [
+    "cinder_farm"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "quartermaster_pike": {
+   "name": "Quartermaster Pike",
+   "role": "trader",
+   "zone": "z14_03",
+   "sheet": "redcliff",
+   "at": "Redcliff",
+   "gives": [
+    "supply_run"
+   ],
+   "takes": [
+    "supply_run"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "scout_orla": {
+   "name": "Scout Tamsin",
+   "role": "scout",
+   "zone": "z14_03",
+   "sheet": "redcliff",
+   "at": "cult_cellar",
+   "gives": [
+    "cellar_cultists"
+   ],
+   "takes": [
+    "cellar_cultists"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "angler_redcliff": {
+   "name": "Corwen Claywater",
+   "role": "angler",
+   "zone": "z14_03",
+   "sheet": "redcliff",
+   "at": "Redcliff",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "carter_redcliff": {
+   "name": "Nell Applegarth",
+   "role": "carter",
+   "zone": "z14_03",
+   "sheet": "redcliff",
+   "at": "Redcliff",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "carter_cinder_farm": {
+   "name": "Alder Harl",
+   "role": "carter",
+   "zone": "z14_03",
+   "sheet": "redcliff",
+   "at": "Cinder Farm",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "carter_ravenhaven": {
+   "name": "Cadoc Dunstable",
+   "role": "carter",
+   "zone": "z14_03",
+   "sheet": "redcliff",
+   "at": "Ravenhaven",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "carter_minfenrow": {
+   "name": "Kitt Sallow",
+   "role": "carter",
+   "zone": "z14_03",
+   "sheet": "redcliff",
+   "at": "Minfenrow",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "carter_bipetwatch": {
+   "name": "Orla Pennock",
+   "role": "carter",
+   "zone": "z14_03",
+   "sheet": "redcliff",
+   "at": "Bipetwatch",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "abbot_wendel": {
+   "name": "Prior Wendel",
+   "role": "elder",
+   "zone": "z12_03",
+   "sheet": "saint_orrins_rise",
+   "at": "Orrinsford",
+   "gives": [
+    "the_restless_cloister",
+    "the_saints_bones",
+    "start_the_priors_favour"
+   ],
+   "takes": [
+    "the_restless_cloister",
+    "the_saints_bones",
+    "start_the_priors_favour"
+   ],
+   "mustTake": [],
+   "talks": [
+    "a_pilgrim_lost",
+    "start_road_to_orrinsford"
+   ],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "sister_hild": {
+   "name": "Sister Hild",
+   "role": "healer",
+   "zone": "z12_03",
+   "sheet": "saint_orrins_rise",
+   "at": "Pilgrim's Halt",
+   "gives": [
+    "candles_for_the_crypt"
+   ],
+   "takes": [
+    "candles_for_the_crypt"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "brother_tobin": {
+   "name": "Brother Tobin",
+   "role": "guard",
+   "zone": "z12_03",
+   "sheet": "saint_orrins_rise",
+   "at": "the Abbey Wall",
+   "gives": [
+    "owls_in_the_belfry",
+    "the_rises_rare_one"
+   ],
+   "takes": [
+    "owls_in_the_belfry",
+    "the_rises_rare_one"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "pilgrim_nell": {
+   "name": "Nell the pilgrim",
+   "role": "pilgrim",
+   "zone": "z12_03",
+   "sheet": "saint_orrins_rise",
+   "at": "drowned_shrine",
+   "gives": [
+    "a_pilgrim_lost"
+   ],
+   "takes": [
+    "a_pilgrim_lost"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "angler_orrinsford": {
+   "name": "Sister Brindle",
+   "role": "angler",
+   "zone": "z12_03",
+   "sheet": "saint_orrins_rise",
+   "at": "Orrinsford",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "carter_orrinsford": {
+   "name": "Gervase Sallow",
+   "role": "carter",
+   "zone": "z12_03",
+   "sheet": "saint_orrins_rise",
+   "at": "Orrinsford",
+   "gives": [
+    "start_wheels_for_hire"
+   ],
+   "takes": [
+    "start_wheels_for_hire"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "carter_pilgrim_s_halt": {
+   "name": "Wat Quarrie",
+   "role": "carter",
+   "zone": "z12_03",
+   "sheet": "saint_orrins_rise",
+   "at": "Pilgrim's Halt",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "harbourmaster_orla": {
+   "name": "Harbourmaster Orla Pike",
+   "role": "elder",
+   "zone": "z14_01",
+   "sheet": "saltmouth",
+   "at": "Saltmouth",
+   "gives": [
+    "crabs_and_cutthroats",
+    "the_flooded_vaults"
+   ],
+   "takes": [
+    "crabs_and_cutthroats",
+    "the_flooded_vaults"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "net_mender": {
+   "name": "Old Netty",
+   "role": "fisher",
+   "zone": "z14_01",
+   "sheet": "saltmouth",
+   "at": "Gull Steps",
+   "gives": [
+    "gull_steps"
+   ],
+   "takes": [
+    "gull_steps"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "gunner_wat": {
+   "name": "Gunner Wat",
+   "role": "guard",
+   "zone": "z14_01",
+   "sheet": "saltmouth",
+   "at": "Saltmouth Battery",
+   "gives": [
+    "battery_moths",
+    "saltmouth_rare"
+   ],
+   "takes": [
+    "battery_moths",
+    "saltmouth_rare"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "smuggler_jory": {
+   "name": "Jory Coombe",
+   "role": "smuggler",
+   "zone": "z14_01",
+   "sheet": "saltmouth",
+   "at": "smugglers_cellar",
+   "gives": [
+    "the_respectable_importer"
+   ],
+   "takes": [
+    "the_respectable_importer"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "angler_saltmouth": {
+   "name": "Skipper Hale Tarrow",
+   "role": "angler",
+   "zone": "z14_01",
+   "sheet": "saltmouth",
+   "at": "Saltmouth",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "carter_saltmouth": {
+   "name": "Edda Dunstable",
+   "role": "carter",
+   "zone": "z14_01",
+   "sheet": "saltmouth",
+   "at": "Saltmouth",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "carter_gull_steps": {
+   "name": "Dickon Fallowfield",
+   "role": "carter",
+   "zone": "z14_01",
+   "sheet": "saltmouth",
+   "at": "Gull Steps",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "corporal_jenk": {
+   "name": "Corporal Jenk",
+   "role": "guard",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "sp_drill_field",
+   "gives": [
+    "practice_makes_bruises"
+   ],
+   "takes": [
+    "practice_makes_bruises"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "hesketh_brannock": {
+   "name": "Hesketh Brannock",
+   "role": "farmer",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "sp_brannock_fields",
+   "gives": [
+    "scarecrow_duty"
+   ],
+   "takes": [
+    "scarecrow_duty"
+   ],
+   "mustTake": [],
+   "talks": [
+    "who_moved_duchess"
+   ],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "ada_orchard": {
+   "name": "Ada of the Orchard",
+   "role": "orchardist",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "sp_brannock_fields",
+   "gives": [
+    "cider_for_the_watch"
+   ],
+   "takes": [
+    "cider_for_the_watch"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "hob_turnwater": {
+   "name": "Miller Hob Turnwater",
+   "role": "miller",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "sp_turnwater_mill",
+   "gives": [
+    "rats_in_the_grist",
+    "open_the_race"
+   ],
+   "takes": [
+    "rats_in_the_grist",
+    "open_the_race"
+   ],
+   "mustTake": [],
+   "talks": [
+    "open_the_race"
+   ],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "abel_fenn": {
+   "name": "Sexton Abel Fenn",
+   "role": "sexton",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "sp_saint_hulda_yard",
+   "gives": [
+    "diggers_in_the_yard",
+    "ring_for_the_dead"
+   ],
+   "takes": [
+    "diggers_in_the_yard",
+    "ring_for_the_dead"
+   ],
+   "mustTake": [],
+   "talks": [
+    "ring_for_the_dead"
+   ],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "kit_greyfletch": {
+   "name": "Kit Greyfletch",
+   "role": "hunter",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "sp_greyfletch_camp",
+   "gives": [
+    "tallies_for_the_board"
+   ],
+   "takes": [
+    "tallies_for_the_board"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "bettony": {
+   "name": "Bettony the herb-woman",
+   "role": "herbalist",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "sp_nine_maidens",
+   "gives": [
+    "the_fairy_ring"
+   ],
+   "takes": [
+    "the_fairy_ring"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "pilgrim_orla": {
+   "name": "Orla the pilgrim",
+   "role": "pilgrim",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "sp_kind_mother_shrine",
+   "gives": [
+    "stones_for_the_mother"
+   ],
+   "takes": [
+    "stones_for_the_mother"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "warden_maddoc": {
+   "name": "Warden Maddoc",
+   "role": "guard",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "sp_coldharrow_ruins",
+   "gives": [
+    "squatters_at_coldharrow",
+    "the_coldharrow_fire"
+   ],
+   "takes": [
+    "squatters_at_coldharrow",
+    "the_coldharrow_fire"
+   ],
+   "mustTake": [],
+   "talks": [
+    "the_coldharrow_fire"
+   ],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "edda_ashby": {
+   "name": "Foreman Edda Ashby",
+   "role": "foreman",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "sp_ashby_lumber_camp",
+   "gives": [
+    "bats_in_the_timber",
+    "the_missing_saw"
+   ],
+   "takes": [
+    "bats_in_the_timber",
+    "the_missing_saw"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "old_wat": {
+   "name": "Old Wat the fisher",
+   "role": "fisher",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "sp_tench_pool",
+   "gives": [
+    "croakers_in_the_keepnet"
+   ],
+   "takes": [
+    "croakers_in_the_keepnet"
+   ],
+   "mustTake": [],
+   "talks": [
+    "the_missing_saw"
+   ],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "drover_gil": {
+   "name": "Gil the drover",
+   "role": "drover",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "sp_pail_and_plough",
+   "gives": [
+    "who_moved_duchess"
+   ],
+   "takes": [
+    "who_moved_duchess"
+   ],
+   "mustTake": [],
+   "talks": [
+    "who_moved_duchess"
+   ],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "innkeeper_marra": {
+   "name": "Marra Thatcher",
+   "role": "innkeeper",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "sp_pail_and_plough",
+   "gives": [
+    "start_road_to_orrinsford",
+    "start_signs_of_the_beast"
+   ],
+   "takes": [
+    "start_road_to_orrinsford",
+    "start_signs_of_the_beast"
+   ],
+   "mustTake": [],
+   "talks": [
+    "start_letters_south"
+   ],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "lowmoor_elder": {
+   "name": "Elder Coombe",
+   "role": "elder",
+   "zone": "z14_04",
+   "sheet": "sunken_wolds",
+   "at": "Lowmoor",
+   "gives": [
+    "mushroom_men",
+    "the_wold_caves"
+   ],
+   "takes": [
+    "mushroom_men",
+    "the_wold_caves"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "bastion_keeper": {
+   "name": "Keeper Isolde",
+   "role": "guard",
+   "zone": "z14_04",
+   "sheet": "sunken_wolds",
+   "at": "the Mossy Bastion",
+   "gives": [
+    "stalkers_in_the_moss",
+    "wolds_rare"
+   ],
+   "takes": [
+    "stalkers_in_the_moss",
+    "wolds_rare"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "deepdene_digger": {
+   "name": "Digger Wat",
+   "role": "miner",
+   "zone": "z14_04",
+   "sheet": "sunken_wolds",
+   "at": "Deepdene",
+   "gives": [
+    "the_lurker_below",
+    "not_a_chest"
+   ],
+   "takes": [
+    "the_lurker_below",
+    "not_a_chest"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "angler_lowmoor": {
+   "name": "Ysmay Drownfield",
+   "role": "angler",
+   "zone": "z14_04",
+   "sheet": "sunken_wolds",
+   "at": "Lowmoor",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "carter_lowmoor": {
+   "name": "Ganna Fenwick",
+   "role": "carter",
+   "zone": "z14_04",
+   "sheet": "sunken_wolds",
+   "at": "Lowmoor",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "carter_deepdene": {
+   "name": "Lambert Sallow",
+   "role": "carter",
+   "zone": "z14_04",
+   "sheet": "sunken_wolds",
+   "at": "Deepdene",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "elder_maud": {
+   "name": "Elder Maud Torbor",
+   "role": "elder",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "Torborhold",
+   "gives": [
+    "start_two_good_legs",
+    "start_letters_south",
+    "start_home_with_news",
+    "wolves_at_the_fold",
+    "what_lies_below"
+   ],
+   "takes": [
+    "start_two_good_legs",
+    "start_letters_south",
+    "start_home_with_news",
+    "wolves_at_the_fold",
+    "what_lies_below"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "reeve_corwin": {
+   "name": "Reeve Corwin Ashby",
+   "role": "guard",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "Torborhold",
+   "gives": [
+    "toll_at_fitockpi"
+   ],
+   "takes": [
+    "toll_at_fitockpi"
+   ],
+   "mustTake": [],
+   "talks": [
+    "cider_for_the_watch",
+    "start_home_with_news",
+    "the_carter_s_crates"
+   ],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "bryn_bonesetter": {
+   "name": "Bryn the Bonesetter",
+   "role": "healer",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "Torborhold",
+   "gives": [
+    "bones_for_bryn"
+   ],
+   "takes": [
+    "bones_for_bryn"
+   ],
+   "mustTake": [],
+   "talks": [
+    "class_cleric"
+   ],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "goody_harl": {
+   "name": "Goody Harl",
+   "role": "farmer",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "Wamonhold",
+   "gives": [
+    "tusks_in_the_turnips",
+    "the_old_sow"
+   ],
+   "takes": [
+    "tusks_in_the_turnips",
+    "the_old_sow"
+   ],
+   "mustTake": [],
+   "talks": [
+    "class_tactician",
+    "class_enchanter",
+    "class_bard"
+   ],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "old_pell": {
+   "name": "Old Pell",
+   "role": "shepherd",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "Wamonhold",
+   "gives": [
+    "rope_for_old_pell"
+   ],
+   "takes": [
+    "rope_for_old_pell"
+   ],
+   "mustTake": [],
+   "talks": [
+    "rope_for_old_pell"
+   ],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "tamsin_reed": {
+   "name": "Tamsin Reed",
+   "role": "fisher",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "Mawehaven",
+   "gives": [
+    "frogs_are_not_food",
+    "the_big_one",
+    "webs_in_the_barley",
+    "grandmother_wakes"
+   ],
+   "takes": [
+    "frogs_are_not_food",
+    "the_big_one",
+    "webs_in_the_barley",
+    "grandmother_wakes"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "dunnet": {
+   "name": "Dunnet the carter",
+   "role": "trader",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "overturned_cart",
+   "gives": [
+    "the_carter_s_crates"
+   ],
+   "takes": [
+    "the_carter_s_crates"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "carter_torborhold": {
+   "name": "Mabry Brookes",
+   "role": "carter",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "Torborhold",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "carter_mawehaven": {
+   "name": "Tobin Underhill",
+   "role": "carter",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "Mawehaven",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "carter_wamonhold": {
+   "name": "Idony Fenwick",
+   "role": "carter",
+   "zone": "z12_02",
+   "sheet": "test",
+   "at": "Wamonhold",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "provost_isolde": {
+   "name": "Provost Isolde Hollis",
+   "role": "elder",
+   "zone": "z13_02",
+   "sheet": "torbor_cross",
+   "at": "Halsbridge",
+   "gives": [
+    "bells_for_halsbridge",
+    "the_cisterns_below"
+   ],
+   "takes": [
+    "bells_for_halsbridge",
+    "the_cisterns_below"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "watch_sergeant_wat": {
+   "name": "Sergeant Wat",
+   "role": "guard",
+   "zone": "z13_02",
+   "sheet": "torbor_cross",
+   "at": "Halsbridge Gatehouse",
+   "gives": [
+    "archers_on_the_bridge",
+    "cross_rare"
+   ],
+   "takes": [
+    "archers_on_the_bridge",
+    "cross_rare"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "miller_emrys": {
+   "name": "Emrys Millward",
+   "role": "farmer",
+   "zone": "z13_02",
+   "sheet": "torbor_cross",
+   "at": "Mill End",
+   "gives": [
+    "flour_and_fangs"
+   ],
+   "takes": [
+    "flour_and_fangs"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "ratcatcher_jory": {
+   "name": "Jory the ratcatcher",
+   "role": "trader",
+   "zone": "z13_02",
+   "sheet": "torbor_cross",
+   "at": "Halsbridge",
+   "gives": [
+    "under_the_cobbles"
+   ],
+   "takes": [
+    "under_the_cobbles"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "angler_halsbridge": {
+   "name": "Perrin Underarch",
+   "role": "angler",
+   "zone": "z13_02",
+   "sheet": "torbor_cross",
+   "at": "Halsbridge",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "carter_halsbridge": {
+   "name": "Kitt Dimmock",
+   "role": "carter",
+   "zone": "z13_02",
+   "sheet": "torbor_cross",
+   "at": "Halsbridge",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "carter_mill_end": {
+   "name": "Clement Hobday",
+   "role": "carter",
+   "zone": "z13_02",
+   "sheet": "torbor_cross",
+   "at": "Mill End",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "carter_lower_mossgate": {
+   "name": "Gwen Fenwick",
+   "role": "carter",
+   "zone": "z13_02",
+   "sheet": "torbor_cross",
+   "at": "Lower Mossgate",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "carter_mirestead": {
+   "name": "Hobb Fenwick",
+   "role": "carter",
+   "zone": "z13_02",
+   "sheet": "torbor_cross",
+   "at": "Mirestead",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "hermit_aled": {
+   "name": "The Hermit of Wychwood",
+   "role": "hermit",
+   "zone": "z11_03",
+   "sheet": "wychwood",
+   "at": "Hermit's Rest",
+   "gives": [
+    "the_hermits_peace",
+    "the_barrow_rings"
+   ],
+   "takes": [
+    "the_hermits_peace",
+    "the_barrow_rings"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "collier_nan": {
+   "name": "Collier Nan",
+   "role": "trader",
+   "zone": "z11_03",
+   "sheet": "wychwood",
+   "at": "Charcoal Burners",
+   "gives": [
+    "charcoal_and_cobwebs"
+   ],
+   "takes": [
+    "charcoal_and_cobwebs"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "warden_emrys": {
+   "name": "Warden Emrys",
+   "role": "guard",
+   "zone": "z11_03",
+   "sheet": "wychwood",
+   "at": "the Antler Stockade",
+   "gives": [
+    "the_antler_stockade",
+    "wychwood_rare"
+   ],
+   "takes": [
+    "the_antler_stockade",
+    "wychwood_rare"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "lost_hunter": {
+   "name": "Hob the hunter",
+   "role": "hunter",
+   "zone": "z11_03",
+   "sheet": "wychwood",
+   "at": "hunters_hide",
+   "gives": [
+    "lost_and_hound"
+   ],
+   "takes": [
+    "lost_and_hound"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "angler_hermits_rest": {
+   "name": "Quiet Oswin",
+   "role": "angler",
+   "zone": "z11_03",
+   "sheet": "wychwood",
+   "at": "Hermit's Rest",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "carter_hermit_s_rest": {
+   "name": "Bartle Kettleby",
+   "role": "carter",
+   "zone": "z11_03",
+   "sheet": "wychwood",
+   "at": "Hermit's Rest",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "carter_charcoal_burners": {
+   "name": "Bryn Quarrie",
+   "role": "carter",
+   "zone": "z11_03",
+   "sheet": "wychwood",
+   "at": "Charcoal Burners",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "carter_wildhaven": {
+   "name": "Emrys Kettleby",
+   "role": "carter",
+   "zone": "z11_03",
+   "sheet": "wychwood",
+   "at": "Wildhaven",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  }
+ },
+ "objects": {},
+ "missing": []
+}

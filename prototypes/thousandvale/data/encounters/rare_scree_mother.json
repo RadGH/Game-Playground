@@ -2,6 +2,10 @@
   "id": "rare_scree_mother",
   "name": "The Scree Mother",
   "tier": "rare",
+  "announce": {
+    "r": 300,
+    "_doc": "S4: shown on the minimap of anyone within r metres while it lives"
+  },
   "zone": "hollin_pass",
   "body": "stone_sentinel",
   "place": "stands like a cairn beside the high pass and wakes when people stop to rest",

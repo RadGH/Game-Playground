@@ -23,6 +23,7 @@ import {
   traitsOf, applyStatus, staggerFor, pushFor, COMBAT_FEEL, addCorpse, untargetable,
 } from './farhold.js';
 import { threatFromDamage } from './threat.js';
+import { landed as perkLanded } from './perk-rules.js';
 
 /** The bleed row out of data/skills.json, used when the room has no status table (as actors.js does). */
 const BLEED = { name: 'Bleeding', kind: 'damage', element: 'physical', perSecond: 0.26, seconds: 6 };
@@ -89,6 +90,52 @@ export function attachField(room, { terrain = null, safeZones = [] } = {}) {
     if (ent.homeField === field) ent.homeField = null;
   };
   field.get = id => field.byId.get(id) || null;
+
+  // --------------------------------------------------------------- the monster index (M2 perf)
+  // A province copy holds ~1,300 monsters. Whatever asks "which monsters are near this point" every
+  // tick (a player's fighting flag, a follower looking for something to bite) reads this bucket grid,
+  // rebuilt once a tick by monster-ai.js; it answers with live positions, so a monster that moved half
+  // a metre since the rebuild is still measured where it is. Strikes keep walking the list in order
+  // (their rolls depend on the order). No index yet (a test that never ticks monsters): the whole list.
+  const MCELL = 24, PAD = 2;
+  const buckets = new Map();
+  let indexed = false;
+  const bkey = (cx, cz) => (cx + 32768) * 65536 + (cz + 32768);
+  field.indexMonsters = () => {
+    buckets.clear();
+    for (const m of field.monsters) {
+      if (m.dying != null || m.removed) continue;
+      const k = bkey(Math.floor(m.x / MCELL), Math.floor(m.z / MCELL));
+      let b = buckets.get(k);
+      if (!b) { b = []; buckets.set(k, b); }
+      b.push(m);
+    }
+    indexed = true;
+  };
+  /** live monsters within `r` of (x, z) (dying/removed skipped) — calls `fn(m, d)`; return true from fn to stop */
+  field.eachMonsterNear = (x, z, r, fn) => {
+    if (!indexed) {
+      for (const m of field.monsters) {
+        if (m.dying != null || m.removed) continue;
+        const d = Math.hypot(m.x - x, m.z - z);
+        if (d <= r && fn(m, d)) return true;
+      }
+      return false;
+    }
+    const R = r + PAD;
+    const c0x = Math.floor((x - R) / MCELL), c1x = Math.floor((x + R) / MCELL);
+    const c0z = Math.floor((z - R) / MCELL), c1z = Math.floor((z + R) / MCELL);
+    for (let cx = c0x; cx <= c1x; cx++) for (let cz = c0z; cz <= c1z; cz++) {
+      const b = buckets.get(bkey(cx, cz));
+      if (!b) continue;
+      for (const m of b) {
+        if (m.dying != null || m.removed) continue;
+        const d = Math.hypot(m.x - x, m.z - z);
+        if (d <= r && fn(m, d)) return true;
+      }
+    }
+    return false;
+  };
   field.emit = ev => { field.out.push(ev); return ev; };
   field.drain = () => { const o = field.out; field.out = []; return o; };
 
@@ -117,7 +164,9 @@ export function attachField(room, { terrain = null, safeZones = [] } = {}) {
   function credit(e, by, amount) {
     if (!e || !(amount > 0)) return;
     e.playerDamage = (e.playerDamage || 0) + amount;          // Farhold's own field, kept for `kill`
+    if (e.dummy) return;                             // Y17: a dummy keeps no tally of who hit it and holds no threat
     if (by && by.id != null) {
+      e.lastHitBy = by.owner?.id ?? by.id;       // the killing blow's owner (perk-rules.js Momentum, Spoils)
       (e.damageBy || (e.damageBy = new Map())).set(by.id, (e.damageBy.get(by.id) || 0) + amount);
       threatFromDamage(e, by, amount);
     }
@@ -128,18 +177,28 @@ export function attachField(room, { terrain = null, safeZones = [] } = {}) {
    * actors.js `land` (line ~1493), server half. `by` is the attacking entity (for credit/threat).
    * Drawing (impact, sparks, recoil, hit-stop, shake) becomes `fx` events.
    */
-  field.land = (e, result, { strike = null, fromX = 0, fromZ = 0, element = 'physical', share = 1, by = null } = {}) => {
+  field.land = (e, result, { strike = null, fromX = 0, fromZ = 0, element = 'physical', share = 1, by = null, skill = null } = {}) => {
     credit(e, by, result.amount);
     e.struckAt = field.clock;
+    if (e.dummy) {                                   // Y17: no chase, no knock, no stagger — only the number and the spark
+      if (e.hp < 1) e.hp = 1;
+      if (result.amount > 0) field.emit({ t: 'fx', kind: 'impact', id: e.id, src: by?.id ?? undefined, crit: !!result.crit, killed: false, strike: strike?.key || null, el: element !== 'physical' ? element : undefined, ab: typeof skill === 'string' ? skill : undefined });
+      return;
+    }
     if (e.state !== 'chase') e.state = 'chase';
     if (!(result.amount > 0) && !result.blocked && !result.noDamage) return;
+    if (by?.perkFlags && result.amount > 0) perkLanded(field, by, e, result, element);   // play-test 4 S16: the storm/lore cornerstones
     const dx = e.x - fromX, dz = e.z - fromZ;
     const len = Math.hypot(dx, dz) || 1;
-    if (!strike) return;
+    // play-test 1 P20: every landed hit has an impact the client can draw — Farhold drew the spark
+    // only for a strike with a shape, so a skill with no knock landed with nothing to see
+    const impact = { t: 'fx', kind: 'impact', id: e.id, src: by?.id ?? undefined, crit: !!result.crit, killed: !!result.dead, strike: strike?.key || null, el: element !== 'physical' ? element : undefined, ab: typeof skill === 'string' ? skill : undefined };
+    if (!strike) { field.emit(impact); return; }
     const push = pushFor(e, (strike.push || 0) * share);
     if (push > 0.01) {
       const span = COMBAT_FEEL.knockbackSeconds;
       e.push = { dx: dx / len, dz: dz / len, metres: push, t: span, span, done: 0 };
+      e.knockedAt = field.clock; e.knockedM = push;                    // Y12: a knock may break a wind-up (encounter.js)
       if (strike.carry && by) e.push.carry = { mult: strike.carry.mult ?? 0.6, stagger: strike.carry.stagger ?? 0.4, by, hit: new Set([e]) };
     }
     if (strike.interrupt && result.amount > 0) { e.swingTimer = Math.max(e.swingTimer || 0, e.attackEvery || 1); e.lastInterruptAt = field.clock; }
@@ -150,7 +209,7 @@ export function attachField(room, { terrain = null, safeZones = [] } = {}) {
       e.anim = 'hit';
       if (stagger > 0.4) field.emit({ t: 'fx', kind: 'status', id: e.id, status: 'stun', on: true });
     }
-    field.emit({ t: 'fx', kind: 'impact', id: e.id, crit: !!result.crit, killed: !!result.dead, strike: strike.key || null });
+    field.emit(impact);
   };
 
   /** actors.js `sunder` */
@@ -169,11 +228,11 @@ export function attachField(room, { terrain = null, safeZones = [] } = {}) {
   };
 
   /** One reported hit, for the client's numbers and the log. */
-  function report(by, e, result, kind) {
+  function report(by, e, result, kind, skill = null) {
     field.emit({
-      t: 'hit', src: by?.id ?? null, dst: e.id, amt: result.amount, crit: !!result.crit,
+      t: 'hit', src: by?.id ?? null, dst: e.id, amt: result.amount, crit: !!result.crit, ab: typeof skill === 'string' ? skill : undefined,
       kind, element: result.element || 'physical', dodged: !!result.dodged, blocked: result.blocked || 0,
-      absorbed: result.absorbed || 0, hp: Math.max(0, Math.round(e.hp)), dead: !!result.dead,
+      absorbed: result.absorbed || 0, over: result.over || 0, hp: Math.max(0, Math.round(e.hp)), dead: !!result.dead,
     });
   }
   field.report = report;
@@ -184,7 +243,11 @@ export function attachField(room, { terrain = null, safeZones = [] } = {}) {
    * (`onKill`), reached through `field.onKill`.
    */
   field.kill = (e) => {
-    if (e.dying != null) return;
+    // (a body the room took away without a death — a parked camp — is never killed after the fact by a
+    // delayed strike or a DoT holding a reference to it: no death event, no reward, no corpse)
+    if (e.dying != null || e.removed) return;
+    // owner feedback 10 (Y17): a training dummy cannot be killed — the blow is counted, the dummy stands at 1 health
+    if (e.dummy) { e.hp = Math.max(1, e.hp); return; }
     // an encounter may refuse a death: a boss with another health bar to go (js/rules/encounter.js)
     if (field.hooks?.beforeKill?.(e)) return;
     e.dying = 0;
@@ -211,7 +274,7 @@ export function attachField(room, { terrain = null, safeZones = [] } = {}) {
    * `unit` = its sheet (the same object for a Thousandvale player). `strike` is the shape out of
    * weapons.js `withArea(strikeAt(...))` — Farhold reads it off `feel.swing.strike`; we pass it.
    */
-  field.strike = (from, unit, { reach = 2.9, arc = 1.5, power = 1, element = 'physical', skill = null, onHit = null, applyStatus: applyFn = null, hand = null, strike: shapeIn = null, rules = null, knock = null, noDamage = false, kind = 'swing' } = {}) => {
+  field.strike = (from, unit, { reach = 2.9, arc = 1.5, power = 1, element = 'physical', skill = null, onHit = null, applyStatus: applyFn = null, hand = null, strike: shapeIn = null, rules = null, knock = null, noDamage = false, kind = 'swing', bonus = null } = {}) => {
     const hits = [];
     const shape = shapeIn || null;
     const weapon = shape?.item || null;
@@ -228,6 +291,7 @@ export function attachField(room, { terrain = null, safeZones = [] } = {}) {
       const dx = e.x - from.x, dz = e.z - from.z;
       const dist = Math.hypot(dx, dz);
       if (dist > reach + (e.reach || 2) * 0.4) continue;
+      if (field.sight && !field.sight(from.x, from.z, e.x, e.z)) continue;      // Y10: not through a dungeon wall
       if (line) {
         const along = dx * fx + dz * fz;
         if (along < 0 || along > reach) continue;
@@ -250,15 +314,17 @@ export function attachField(room, { terrain = null, safeZones = [] } = {}) {
         if (behind) mult *= traits.backstab;
       }
       if (traits.brace && shape?.key === 'thrust' && e.closing > 0) mult *= 1 + traits.brace;
+      // owner feedback 10 (Y9): a share folded into this one hit (cast.js: the splash a melee swing used to add as a SECOND hit)
+      if (bonus) mult *= 1 + (bonus(e) || 0);
 
       const result = field.rpg.strike(unit, e, field.rng, {
         multiplier: mult, element, skill, applyStatus: applyFn,
         hand: which, pen: shape?.pen || 0, rules, crowd, noDamage,
       });
-      field.land(e, result, { strike: knock || shape, fromX: from.x, fromZ: from.z, element, share: power, by: unit });
+      field.land(e, result, { strike: knock || shape, fromX: from.x, fromZ: from.z, element, share: power, by: unit, skill });
       if (traits.armourBreak && result.amount > 0) field.sunder(e, traits.armourBreak);
       if (result.amount > 0 && (behind || (traits.bleed && shape?.key === 'cleave'))) field.bleed(e, result.amount);
-      report(unit, e, result, kind);
+      report(unit, e, result, kind, skill);
       onHit?.(e, result);
       hits.push({ enemy: e, result });
       if (result.dead) field.kill(e);
@@ -271,19 +337,21 @@ export function attachField(room, { terrain = null, safeZones = [] } = {}) {
    * actors.js `strikeArea` (line ~1664): everything within `radius` of a point. Farhold falls back
    * to `feel.swing.shot` when `power` is null (an arrow's draw); here an arrow passes its power.
    */
-  field.strikeArea = (x, z, radius, attacker, { falloff = 0.45, power = null, element = 'physical', skill = null, onHit = null, applyStatus: applyFn = null, proc = false, rules = null, knock = null, from = null, noDamage = false, kind = 'area' } = {}) => {
+  field.strikeArea = (x, z, radius, attacker, { falloff = 0.45, power = null, element = 'physical', skill = null, onHit = null, applyStatus: applyFn = null, proc = false, rules = null, knock = null, from = null, noDamage = false, kind = 'area', skip = null } = {}) => {
     const hits = [];
     const mult = power != null ? power : 1;
     const shape = knock || null;
-    const inside = field.monsters.filter(e => e.dying == null && Math.hypot(e.x - x, e.z - z) <= radius + (e.reach || 2) * 0.25);
+    // Y10: a burst does not reach round a dungeon wall (measured from where it goes off)
+    const inside = field.monsters.filter(e => e.dying == null && !(skip && skip.has(e)) && Math.hypot(e.x - x, e.z - z) <= radius + (e.reach || 2) * 0.25
+      && (!field.sight || field.sight(x, z, e.x, e.z)));
     const crowd = inside.length;
     for (const e of inside) {
       if (e.dying != null) continue;
       const d = Math.hypot(e.x - x, e.z - z);
       const near = 1 - (1 - falloff) * Math.min(1, d / Math.max(0.001, radius));
       const result = field.rpg.strike(attacker, e, field.rng, { multiplier: near * mult, element, skill, applyStatus: applyFn, proc, rules, crowd, noDamage });
-      field.land(e, result, { strike: shape, fromX: from ? from.x : x, fromZ: from ? from.z : z, element, share: near, by: attacker });
-      report(attacker, e, result, kind);
+      field.land(e, result, { strike: shape, fromX: from ? from.x : x, fromZ: from ? from.z : z, element, share: near, by: attacker, skill });
+      report(attacker, e, result, kind, skill);
       onHit?.(e, result);
       hits.push({ enemy: e, result });
       if (result.dead) field.kill(e);
@@ -299,7 +367,8 @@ export function attachField(room, { terrain = null, safeZones = [] } = {}) {
     const near = field.monsters.filter(e => {
       if (e.dying != null || e === opts.except) return false;
       const t = Math.max(0, Math.min(1, ((e.x - x0) * dx + (e.z - z0) * dz) / len2));
-      return Math.hypot(e.x - (x0 + dx * t), e.z - (z0 + dz * t)) <= reachOf(e);
+      if (Math.hypot(e.x - (x0 + dx * t), e.z - (z0 + dz * t)) > reachOf(e)) return false;
+      return !field.sight || field.sight(x0, z0, e.x, e.z);                     // Y10: a line stops at a dungeon wall
     });
     const crowd = near.length;
     const falloff = opts.falloff ?? 0.8;
@@ -313,8 +382,8 @@ export function attachField(room, { terrain = null, safeZones = [] } = {}) {
         multiplier: (opts.power ?? 1) * share, element: opts.element || 'physical', skill: opts.skill || null,
         applyStatus: opts.applyStatus || null, rules: opts.rules || null, noDamage: !!opts.noDamage, proc: !!opts.proc, crowd,
       });
-      field.land(e, result, { strike: opts.knock || null, fromX: px, fromZ: pz, element: opts.element || 'physical', by: attacker });
-      report(attacker, e, result, opts.kind || 'line');
+      field.land(e, result, { strike: opts.knock || null, fromX: px, fromZ: pz, element: opts.element || 'physical', by: attacker, skill: opts.skill || null });
+      report(attacker, e, result, opts.kind || 'line', opts.skill || null);
       opts.onHit?.(e, result);
       hits.push({ enemy: e, result });
       if (result.dead) field.kill(e);

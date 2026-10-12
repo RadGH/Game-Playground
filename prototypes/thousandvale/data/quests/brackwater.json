@@ -6,25 +6,55 @@
       "name": "Reeve Mabry Fenwick",
       "role": "elder",
       "at": "Brackwater",
-      "greeting": "Mind the planks. Mind the water. Mind everything, really."
+      "greeting": "Mind the planks. Mind the water. Mind everything, really.",
+      "titled": true
     },
     "eel_woman_wenna": {
       "name": "Wenna Eelwife",
       "role": "fisher",
       "at": "Eelwick",
-      "greeting": "Eels. Want some? No? More for me."
+      "greeting": "Eels. Want some? No? More for me.",
+      "titled": true
     },
     "tower_keeper_hob": {
       "name": "Keeper Haskel",
       "role": "guard",
       "at": "Reedwall Tower",
-      "greeting": "Reedwall Tower: the only dry spot for a mile, and it's damp."
+      "greeting": "Reedwall Tower: the only dry spot for a mile, and it's damp.",
+      "titled": true
     },
     "witch_mabry": {
       "name": "Old Mabry",
       "role": "hedge-witch",
       "at": "fen_witch_hut",
-      "greeting": "My jars are open and my slimes are loose. Help a poor old woman, dear, it's slightly your fault for existing."
+      "greeting": "My jars are open and my slimes are loose. Help a poor old woman, dear, it's slightly your fault for existing.",
+      "titled": true
+    },
+    "angler_brackwater": {
+      "name": "Mog Eelwright",
+      "role": "angler",
+      "at": "Brackwater",
+      "greeting": "If it wriggles, I sell it. If it does not, give it a minute. See the ripples, just south-east of where I'm standing? That's the town pool. It never fishes out.",
+      "placedBy": "content-pools",
+      "titled": true
+    },
+    "carter_brackwater": {
+      "name": "Garrick Kettleby",
+      "role": "carter",
+      "at": "Brackwater",
+      "greeting": "Walking is free. Riding is nearly free, and you arrive with your legs.",
+      "cart": "cart_brackwater",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_eelwick": {
+      "name": "Dickon Pike",
+      "role": "carter",
+      "at": "Eelwick",
+      "greeting": "The ox is called Thunder. It is a joke. Where are we going?",
+      "cart": "cart_eelwick",
+      "placedBy": "content-towns",
+      "titled": true
     }
   },
   "quests": [
@@ -40,23 +70,26 @@
           "kind": "kill",
           "type": "reed_serpent",
           "count": 6,
-          "where": "the reed beds",
-          "text": "Reed serpents"
+          "where": "the reed beds around Brackwater",
+          "text": "Kill 6 reed serpents in the reed beds"
         },
         {
           "kind": "talk",
           "npc": "tower_keeper_hob",
-          "text": "Report at Reedwall Tower"
+          "text": "Report to Hob at Reedwall Tower",
+          "where": "Hob, at Reedwall Tower"
         }
       ],
       "done": "Keeper Haskel says the omens point west, to Wychwood. Omens always point somewhere damp.",
       "reward": {
         "xp": 0.5,
         "gold": 10,
-        "item": {
-          "tier": "uncommon",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "uncommon"
+          }
+        ]
       },
       "next": "the_antler_stockade"
     },
@@ -70,24 +103,27 @@
         {
           "kind": "visit",
           "vignette": "fen_witch_hut",
-          "text": "Visit the hedge-witch's stilt hut"
+          "text": "Visit Old Mabry's Stilt Hut",
+          "where": "Old Mabry's Stilt Hut, in the fen"
         },
         {
           "kind": "kill",
           "type": "bog_slime",
           "count": 5,
-          "where": "around the stilt hut",
-          "text": "Escaped bog slimes"
+          "where": "around Old Mabry's Stilt Hut",
+          "text": "Squash 5 escaped bog slimes"
         }
       ],
       "done": "Lovely. I'll keep the lid on next time. I said that last time too.",
       "reward": {
         "xp": 0.4,
         "gold": 7,
-        "item": {
-          "tier": "common",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       }
     },
     {
@@ -101,8 +137,8 @@
           "kind": "kill",
           "type": "fen_croaker",
           "count": 8,
-          "where": "around Eelwick",
-          "text": "Fen croakers"
+          "where": "the shallows around Eelwick",
+          "text": "Kill 8 fen croakers"
         }
       ],
       "done": "Quiet! I can hear the eels thinking now.",
@@ -124,7 +160,8 @@
           "count": 4,
           "from": "marsh_wisp",
           "chance": 0.6,
-          "text": "Wisp-light bottled"
+          "text": "Bottle 4 wisp-lights from marsh wisps",
+          "where": "marsh wisps over the fen planks"
         }
       ],
       "done": "There. Brightest lamp in the fen. Mildly haunted.",
@@ -144,14 +181,16 @@
         {
           "kind": "clear",
           "dungeon": "door",
-          "text": "Reach the lower sanctum",
-          "floor": 1
+          "text": "Reach the lower sanctum of the Drowned Chancel",
+          "floor": 1,
+          "where": "The Drowned Chancel, the dungeon door in Brackwater Fen"
         },
         {
           "kind": "clear",
           "dungeon": "door",
           "text": "Silence the bell",
-          "boss": true
+          "boss": true,
+          "where": "the bottom of the Drowned Chancel"
         }
       ],
       "done": "No bell. No omens. Just eels. Bliss.",
@@ -175,7 +214,8 @@
           "kind": "killRare",
           "zone": "brackwater",
           "slot": 0,
-          "text": "The fen's rare slain"
+          "text": "Hunt down Reedmother Ysolt",
+          "where": "roams the deep fen of Brackwater"
         }
       ],
       "done": "Gran would be proud. Gran would also say 'about time'.",

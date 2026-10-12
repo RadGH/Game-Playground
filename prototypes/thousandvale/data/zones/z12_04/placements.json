@@ -1,7 +1,7 @@
 {
- "_doc": "Stream B zone placements (tools/bake-zone.mjs). Zone metres; yaw = atan2(dx, dz), the way the thing faces. kinds: settlement (data.radius, hub, planned), town_square, street (data.pts, width, cls), building (a proctown plot: data.w along `angle` (local +x = (cos angle, sin angle)), data.d across, want; yaw faces the nearest drawn street, data.streetGap = metres from the front to it), town_wall, road (data.pts [[x,z,h]], width, cls, spur), bridge (yaw along the road, span, deck height), dungeon_door, event_site, camp_site, landmark/dungeon/pass/crossing (World Forge nodes).",
+ "_doc": "Stream B zone placements (tools/bake-zone.mjs). Zone metres; yaw = atan2(dx, dz), the way the thing faces. kinds: settlement (data.radius, hub, planned), town_square, street (data.pts, width, cls), building (a proctown plot: data.w along `angle` (local +x = (cos angle, sin angle)), data.d across, want; yaw faces the nearest drawn street, data.streetGap = metres from the front to it), town_wall (play-test 4: every planned settlement; data.style/material/tier/h/thick/tint/radius, runs [[[x,z,h]…]…] open polylines between openings, towers [{x,z,h,yaw}], gates [{id,x,z,h,yaw = the way OUT along the road,out:[dx,dz],width,pass,kind gatehouse|posts|gap,way,ways,led,ends,approaches}], openings [{kind water|keep,ends,grate}] — SOLID in nav.bin except the gates; tools/lib/zone-walls.mjs), road (data.pts [[x,z,h]], width, cls, spur), bridge (yaw along the road, span, deck height), dungeon_door, event_site, camp_site, landmark/dungeon/pass/crossing (World Forge nodes).",
  "zone": "z12_04",
- "terrainHash": "64fa44ba",
+ "terrainHash": "e88810dc",
  "placements": [
   {
    "kind": "lair",
@@ -37,11 +37,41 @@
    }
   },
   {
+   "kind": "settlement",
+   "id": "coldwater",
+   "x": 1474,
+   "z": 1846,
+   "yaw": 0,
+   "data": {
+    "kind": "town",
+    "name": "Coldwater",
+    "radius": 90,
+    "hub": true,
+    "planned": true,
+    "ask": true
+   }
+  },
+  {
+   "kind": "settlement",
+   "id": "netherby",
+   "x": 711,
+   "z": 732,
+   "yaw": 0,
+   "data": {
+    "kind": "hamlet",
+    "name": "Netherby",
+    "radius": 46,
+    "hub": false,
+    "planned": true,
+    "ask": true
+   }
+  },
+  {
    "kind": "dungeon_door",
    "id": "door_1",
-   "x": 1761,
-   "z": 1815,
-   "yaw": 0.198,
+   "x": 1369,
+   "z": 1953,
+   "yaw": -2.755,
    "data": {
     "name": "Barrow entrance"
    }
@@ -49,11 +79,2585 @@
   {
    "kind": "event_site",
    "id": "event_coldwater",
-   "x": 736,
-   "z": 1301,
+   "x": 903,
+   "z": 1790,
    "yaw": 0,
    "data": {
     "r": 40
+   }
+  },
+  {
+   "kind": "lake",
+   "id": "coldwater_mere",
+   "x": 1101,
+   "z": 1645,
+   "yaw": 0,
+   "data": {
+    "r": 150,
+    "level": 1032.62,
+    "kind": "mere",
+    "name": "Coldwater Mere"
+   }
+  },
+  {
+   "kind": "lake",
+   "id": "the_reflection_mere",
+   "x": 684,
+   "z": 1260,
+   "yaw": 0,
+   "data": {
+    "r": 75,
+    "level": 1008.01,
+    "kind": "mere",
+    "name": "the Reflection Mere"
+   }
+  },
+  {
+   "kind": "town_square",
+   "id": "coldwater_square",
+   "x": 1459.47,
+   "z": 1829.85,
+   "yaw": 0,
+   "data": {
+    "r": 6.77,
+    "town": "coldwater",
+    "culture": "halfling",
+    "stalls": [
+     [
+      1468.88,
+      1833.83
+     ],
+     [
+      1451.5,
+      1819.3
+     ],
+     [
+      1451.34,
+      1840.28
+     ],
+     [
+      1461.08,
+      1818.24
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_0",
+   "x": 1515.49,
+   "z": 1809.9,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      1515.49,
+      1809.9
+     ],
+     [
+      1476.38,
+      1848.4
+     ],
+     [
+      1437.46,
+      1887.11
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_1",
+   "x": 1430.74,
+   "z": 1820.32,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      1430.74,
+      1820.32
+     ],
+     [
+      1449.42,
+      1833.67
+     ],
+     [
+      1466.51,
+      1849.02
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_2",
+   "x": 1442.84,
+   "z": 1806.19,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1442.84,
+      1806.19
+     ],
+     [
+      1458.45,
+      1821.53
+     ],
+     [
+      1475.69,
+      1835.01
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_3",
+   "x": 1476.18,
+   "z": 1791.04,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1476.18,
+      1791.04
+     ],
+     [
+      1467.25,
+      1801.43
+     ],
+     [
+      1455.44,
+      1812.45
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_4",
+   "x": 1457.87,
+   "z": 1793.42,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1457.87,
+      1793.42
+     ],
+     [
+      1460.68,
+      1796.07
+     ],
+     [
+      1464.67,
+      1799.97
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_5",
+   "x": 1448.67,
+   "z": 1800.53,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1448.67,
+      1800.53
+     ],
+     [
+      1452.61,
+      1804.48
+     ],
+     [
+      1456.72,
+      1808.25
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_6",
+   "x": 1470.12,
+   "z": 1800.02,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1470.12,
+      1800.02
+     ],
+     [
+      1479.28,
+      1809.42
+     ],
+     [
+      1489.04,
+      1818.19
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_7",
+   "x": 1491.1,
+   "z": 1801.98,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1491.1,
+      1801.98
+     ],
+     [
+      1486.84,
+      1805.91
+     ],
+     [
+      1483.08,
+      1810.33
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_8",
+   "x": 1485.34,
+   "z": 1796.45,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1485.34,
+      1796.45
+     ],
+     [
+      1481.09,
+      1800.39
+     ],
+     [
+      1477.32,
+      1804.8
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_9",
+   "x": 1476.34,
+   "z": 1808.13,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1476.34,
+      1808.13
+     ],
+     [
+      1470.11,
+      1814.34
+     ],
+     [
+      1464.15,
+      1820.82
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_10",
+   "x": 1461.02,
+   "z": 1809.5,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1461.02,
+      1809.5
+     ],
+     [
+      1464.09,
+      1812.66
+     ],
+     [
+      1467.37,
+      1815.61
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_11",
+   "x": 1470.74,
+   "z": 1815.82,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1470.74,
+      1815.82
+     ],
+     [
+      1476.08,
+      1820.98
+     ],
+     [
+      1481.45,
+      1826.1
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_12",
+   "x": 1484.73,
+   "z": 1816.18,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1484.73,
+      1816.18
+     ],
+     [
+      1481.73,
+      1819.06
+     ],
+     [
+      1478.98,
+      1822.17
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_13",
+   "x": 1477.61,
+   "z": 1823.97,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1477.61,
+      1823.97
+     ],
+     [
+      1475.32,
+      1826.65
+     ],
+     [
+      1472.73,
+      1829.06
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_14",
+   "x": 1454.32,
+   "z": 1822.81,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1454.32,
+      1822.81
+     ],
+     [
+      1452.43,
+      1825.58
+     ],
+     [
+      1450.85,
+      1828.54
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_15",
+   "x": 1438.88,
+   "z": 1835.76,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1438.88,
+      1835.76
+     ],
+     [
+      1433.29,
+      1847.53
+     ],
+     [
+      1426.4,
+      1858.6
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_16",
+   "x": 1421.08,
+   "z": 1842.4,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1421.08,
+      1842.4
+     ],
+     [
+      1425.49,
+      1844.11
+     ],
+     [
+      1429.89,
+      1845.81
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_17",
+   "x": 1434.41,
+   "z": 1849.58,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1434.41,
+      1849.58
+     ],
+     [
+      1442.64,
+      1854.74
+     ],
+     [
+      1450.55,
+      1860.38
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_18",
+   "x": 1451.88,
+   "z": 1844.53,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1451.88,
+      1844.53
+     ],
+     [
+      1448.41,
+      1849.74
+     ],
+     [
+      1444.91,
+      1854.94
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_19",
+   "x": 1442.79,
+   "z": 1856.85,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1442.79,
+      1856.85
+     ],
+     [
+      1440.37,
+      1860.2
+     ],
+     [
+      1438.19,
+      1863.72
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_20",
+   "x": 1472.2,
+   "z": 1860.99,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      1472.2,
+      1860.99
+     ],
+     [
+      1483.85,
+      1877.07
+     ],
+     [
+      1496.98,
+      1891.96
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_21",
+   "x": 1496.19,
+   "z": 1845.51,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1496.19,
+      1845.51
+     ],
+     [
+      1508.11,
+      1857.74
+     ],
+     [
+      1520.55,
+      1869.44
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_22",
+   "x": 1524.52,
+   "z": 1840.52,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1524.52,
+      1840.52
+     ],
+     [
+      1517.16,
+      1848.07
+     ],
+     [
+      1510.66,
+      1856.37
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_23",
+   "x": 1507.08,
+   "z": 1836.19,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1507.08,
+      1836.19
+     ],
+     [
+      1512.48,
+      1840.87
+     ],
+     [
+      1517.85,
+      1845.61
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_24",
+   "x": 1518.55,
+   "z": 1835.3,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1518.55,
+      1835.3
+     ],
+     [
+      1516.13,
+      1837.9
+     ],
+     [
+      1513.88,
+      1840.63
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_25",
+   "x": 1509.2,
+   "z": 1839.54,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1509.2,
+      1839.54
+     ],
+     [
+      1505.18,
+      1843.8
+     ],
+     [
+      1501.5,
+      1848.35
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_26",
+   "x": 1520.12,
+   "z": 1848.08,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1520.12,
+      1848.08
+     ],
+     [
+      1525.21,
+      1852.77
+     ],
+     [
+      1528.21,
+      1855.26
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_27",
+   "x": 1508.69,
+   "z": 1863.7,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1508.69,
+      1863.7
+     ],
+     [
+      1501.55,
+      1869.42
+     ],
+     [
+      1493.94,
+      1874.5
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_28",
+   "x": 1492.31,
+   "z": 1854.6,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1492.31,
+      1854.6
+     ],
+     [
+      1496.85,
+      1860.9
+     ],
+     [
+      1501.48,
+      1867.12
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_29",
+   "x": 1501.87,
+   "z": 1854.39,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1501.87,
+      1854.39
+     ],
+     [
+      1499.15,
+      1856.33
+     ],
+     [
+      1496.48,
+      1858.34
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_30",
+   "x": 1498.16,
+   "z": 1864.54,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1498.16,
+      1864.54
+     ],
+     [
+      1494.43,
+      1867.31
+     ],
+     [
+      1490.67,
+      1870.03
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_31",
+   "x": 1500.7,
+   "z": 1871.41,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1500.7,
+      1871.41
+     ],
+     [
+      1503.27,
+      1875.24
+     ],
+     [
+      1506.14,
+      1878.84
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_32",
+   "x": 1480.6,
+   "z": 1877.95,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1480.6,
+      1877.95
+     ],
+     [
+      1469.91,
+      1884.22
+     ],
+     [
+      1459.81,
+      1891.4
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_33",
+   "x": 1466.74,
+   "z": 1870.94,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1466.74,
+      1870.94
+     ],
+     [
+      1469.58,
+      1875.77
+     ],
+     [
+      1471.85,
+      1880.89
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_34",
+   "x": 1468.12,
+   "z": 1890.06,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1468.12,
+      1890.06
+     ],
+     [
+      1473.41,
+      1896.02
+     ],
+     [
+      1477.22,
+      1900.91
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_35",
+   "x": 1484.44,
+   "z": 1887.04,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1484.44,
+      1887.04
+     ],
+     [
+      1479.26,
+      1891.07
+     ],
+     [
+      1474.36,
+      1895.44
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_36",
+   "x": 1471.77,
+   "z": 1896.57,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1471.77,
+      1896.57
+     ],
+     [
+      1469.54,
+      1898.27
+     ],
+     [
+      1467.45,
+      1900.17
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_37",
+   "x": 1429.43,
+   "z": 1893.31,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      1429.43,
+      1893.31
+     ],
+     [
+      1462,
+      1850.5
+     ],
+     [
+      1461.73,
+      1836.23
+     ]
+    ],
+    "high": true,
+    "to": "square",
+    "road": "road_link_coldwater"
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_38",
+   "x": 1472.73,
+   "z": 1829.06,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1472.73,
+      1829.06
+     ],
+     [
+      1470.96,
+      1831.32
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_39",
+   "x": 1454.32,
+   "z": 1822.81,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1454.32,
+      1822.81
+     ],
+     [
+      1456.99,
+      1820.1
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_40",
+   "x": 1449.42,
+   "z": 1833.67,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1449.42,
+      1833.67
+     ],
+     [
+      1450.85,
+      1828.54
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_41",
+   "x": 1464.67,
+   "z": 1799.97,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1464.67,
+      1799.97
+     ],
+     [
+      1466.6,
+      1802.04
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_42",
+   "x": 1496.19,
+   "z": 1845.51,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1496.19,
+      1845.51
+     ],
+     [
+      1487.89,
+      1837.08
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_43",
+   "x": 1472.2,
+   "z": 1860.99,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1472.2,
+      1860.99
+     ],
+     [
+      1467.99,
+      1856.75
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_44",
+   "x": 1429.89,
+   "z": 1845.81,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1429.89,
+      1845.81
+     ],
+     [
+      1433.11,
+      1847.82
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "coldwater_street_45",
+   "x": 1468.12,
+   "z": 1890.06,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1468.12,
+      1890.06
+     ],
+     [
+      1465.96,
+      1887.03
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "building",
+   "id": "coldwater_plot_0",
+   "x": 1477.75,
+   "z": 1797.18,
+   "yaw": 0.8056,
+   "data": {
+    "town": "coldwater",
+    "want": "apothecary",
+    "district": "residential",
+    "w": 5.86,
+    "d": 10.38,
+    "angle": 0.7652,
+    "front": 0.7652,
+    "streetGap": -0.4,
+    "office": "apothecary",
+    "role": "apothecary",
+    "lit": true,
+    "label": "Apothecary"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "coldwater_plot_1",
+   "x": 1491.13,
+   "z": 1810.04,
+   "yaw": -0.7652,
+   "data": {
+    "town": "coldwater",
+    "want": "study",
+    "district": "residential",
+    "w": 7.08,
+    "d": 10.38,
+    "angle": 0.7652,
+    "front": 2.336,
+    "streetGap": 0.18,
+    "office": "study",
+    "role": "unbinder",
+    "lit": false,
+    "label": "Unbinder's Study"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "coldwater_plot_2",
+   "x": 1468.65,
+   "z": 1807.92,
+   "yaw": 0.8056,
+   "data": {
+    "town": "coldwater",
+    "want": "shop",
+    "district": "craft",
+    "w": 7.61,
+    "d": 9.16,
+    "angle": 0.7652,
+    "front": 0.7652,
+    "streetGap": -0.32,
+    "office": "shop",
+    "role": "merchant",
+    "lit": true,
+    "label": "General Goods"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "coldwater_plot_3",
+   "x": 1477.67,
+   "z": 1815.16,
+   "yaw": 0.8056,
+   "data": {
+    "town": "coldwater",
+    "want": "stable",
+    "district": "craft",
+    "w": 7.87,
+    "d": 7.1,
+    "angle": 0.7652,
+    "front": 0.7652,
+    "streetGap": -0.4,
+    "office": "stable",
+    "role": "stablehand",
+    "lit": true,
+    "label": "Stables"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "coldwater_plot_4",
+   "x": 1470.88,
+   "z": 1822.39,
+   "yaw": 2.3764,
+   "data": {
+    "town": "coldwater",
+    "want": "hall",
+    "district": "civic",
+    "w": 8.1,
+    "d": 5.85,
+    "angle": 0.7652,
+    "front": 5.4776,
+    "streetGap": -0.39,
+    "office": "hall",
+    "role": "elder",
+    "lit": false,
+    "label": "Town Hall"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "coldwater_plot_5",
+   "x": 1447.16,
+   "z": 1822.38,
+   "yaw": 1.0256,
+   "data": {
+    "town": "coldwater",
+    "want": "forge",
+    "district": "civic",
+    "w": 8.94,
+    "d": 5.51,
+    "angle": 0.5452,
+    "front": 0.5452,
+    "streetGap": -0.4,
+    "office": "forge",
+    "role": "smith",
+    "lit": true,
+    "label": "Smithy"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "coldwater_plot_6",
+   "x": 1427.67,
+   "z": 1838.48,
+   "yaw": -0.3698,
+   "data": {
+    "town": "coldwater",
+    "want": "barber",
+    "district": "craft",
+    "w": 8.25,
+    "d": 8.66,
+    "angle": 0.3698,
+    "front": 1.9406,
+    "streetGap": -0.39,
+    "office": "barber",
+    "role": "barber",
+    "lit": true,
+    "label": "Barber"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "coldwater_plot_7",
+   "x": 1443.07,
+   "z": 1846.17,
+   "yaw": 0.981,
+   "data": {
+    "town": "coldwater",
+    "want": "inn",
+    "district": "craft",
+    "w": 9.4,
+    "d": 11.33,
+    "angle": 0.5898,
+    "front": 0.5898,
+    "streetGap": -0.37,
+    "office": "inn",
+    "role": "innkeeper",
+    "lit": true,
+    "label": "Inn"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "coldwater_plot_8",
+   "x": 1452.07,
+   "z": 1852.19,
+   "yaw": -2.1606,
+   "data": {
+    "town": "coldwater",
+    "want": "temple",
+    "district": "craft",
+    "w": 5.39,
+    "d": 11.33,
+    "angle": 0.5898,
+    "front": 3.7314,
+    "streetGap": -0.4,
+    "office": "temple",
+    "role": "healer",
+    "lit": false,
+    "label": "Temple"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "coldwater_plot_9",
+   "x": 1435.4,
+   "z": 1856.88,
+   "yaw": 0.981,
+   "data": {
+    "town": "coldwater",
+    "want": "counting_house",
+    "district": "residential",
+    "w": 8.57,
+    "d": 7.06,
+    "angle": 0.5898,
+    "front": 0.5898,
+    "streetGap": -0.4,
+    "office": "counting_house",
+    "role": "broker",
+    "lit": false,
+    "label": "Counting House"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "coldwater_plot_10",
+   "x": 1444.5,
+   "z": 1862.97,
+   "yaw": -2.1606,
+   "data": {
+    "town": "coldwater",
+    "want": "armoury",
+    "district": "residential",
+    "w": 5.97,
+    "d": 7.06,
+    "angle": 0.5898,
+    "front": 3.7314,
+    "streetGap": -0.11,
+    "office": "armoury",
+    "role": "armourer",
+    "lit": true,
+    "label": "Armourer"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "coldwater_plot_11",
+   "x": 1512.73,
+   "z": 1834.92,
+   "yaw": 0.8523,
+   "data": {
+    "town": "coldwater",
+    "want": "house",
+    "district": "residential",
+    "w": 5.64,
+    "d": 5.89,
+    "angle": 0.7185,
+    "front": 0.7185,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "coldwater_plot_12",
+   "x": 1509.8,
+   "z": 1847.84,
+   "yaw": 2.4231,
+   "data": {
+    "town": "coldwater",
+    "want": "house",
+    "district": "residential",
+    "w": 7.98,
+    "d": 10.5,
+    "angle": 0.7185,
+    "front": 5.4309,
+    "streetGap": -0.35
+   }
+  },
+  {
+   "kind": "building",
+   "id": "coldwater_plot_13",
+   "x": 1518.43,
+   "z": 1855.73,
+   "yaw": 2.4231,
+   "data": {
+    "town": "coldwater",
+    "want": "house",
+    "district": "residential",
+    "w": 6.31,
+    "d": 9.98,
+    "angle": 0.7185,
+    "front": 5.4309,
+    "streetGap": -0.32
+   }
+  },
+  {
+   "kind": "building",
+   "id": "coldwater_plot_14",
+   "x": 1502.48,
+   "z": 1860.87,
+   "yaw": -2.5093,
+   "data": {
+    "town": "coldwater",
+    "want": "house",
+    "district": "residential",
+    "w": 7.7,
+    "d": 5.48,
+    "angle": 0.9385,
+    "front": 4.0801,
+    "streetGap": -0.32
+   }
+  },
+  {
+   "kind": "building",
+   "id": "coldwater_plot_15",
+   "x": 1490.69,
+   "z": 1862.2,
+   "yaw": 2.2031,
+   "data": {
+    "town": "coldwater",
+    "want": "bowyer",
+    "district": "residential",
+    "w": 9.14,
+    "d": 8.09,
+    "angle": 0.9385,
+    "front": 5.6509,
+    "streetGap": -0.38,
+    "office": "bowyer",
+    "role": "bowyer",
+    "lit": true,
+    "label": "Bowyer"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "coldwater_plot_16",
+   "x": 1508.38,
+   "z": 1871.49,
+   "yaw": -2.5093,
+   "data": {
+    "town": "coldwater",
+    "want": "house",
+    "district": "residential",
+    "w": 8.01,
+    "d": 8.5,
+    "angle": 0.9385,
+    "front": 4.0801,
+    "streetGap": -0.21
+   }
+  },
+  {
+   "kind": "building",
+   "id": "coldwater_plot_17",
+   "x": 1462.22,
+   "z": 1879.55,
+   "yaw": 2.0453,
+   "data": {
+    "town": "coldwater",
+    "want": "house",
+    "district": "residential",
+    "w": 9.98,
+    "d": 11.87,
+    "angle": 1.0963,
+    "front": 5.8087,
+    "streetGap": 0.24
+   }
+  },
+  {
+   "kind": "building",
+   "id": "coldwater_plot_18",
+   "x": 1478.67,
+   "z": 1885.7,
+   "yaw": 0.6945,
+   "data": {
+    "town": "coldwater",
+    "want": "house",
+    "district": "residential",
+    "w": 5.61,
+    "d": 5.96,
+    "angle": 0.8763,
+    "front": 0.8763,
+    "streetGap": -0.3
+   }
+  },
+  {
+   "kind": "building",
+   "id": "coldwater_plot_19",
+   "x": 1474.09,
+   "z": 1889.52,
+   "yaw": 0.6945,
+   "data": {
+    "town": "coldwater",
+    "want": "house",
+    "district": "residential",
+    "w": 5.61,
+    "d": 5.96,
+    "angle": 0.8763,
+    "front": 0.8763,
+    "streetGap": -0.3
+   }
+  },
+  {
+   "kind": "building",
+   "id": "coldwater_plot_20",
+   "x": 1482.32,
+   "z": 1894.75,
+   "yaw": -0.8763,
+   "data": {
+    "town": "coldwater",
+    "want": "house",
+    "district": "residential",
+    "w": 5.29,
+    "d": 11.92,
+    "angle": 0.8763,
+    "front": 2.4471,
+    "streetGap": -0.25
+   }
+  },
+  {
+   "kind": "town_square",
+   "id": "netherby_square",
+   "x": 718.32,
+   "z": 735.71,
+   "yaw": 0,
+   "data": {
+    "r": 3.38,
+    "town": "netherby",
+    "culture": "halfling",
+    "stalls": [
+     [
+      713.01,
+      732.59
+     ],
+     [
+      722.33,
+      745.59
+     ],
+     [
+      724.84,
+      729.28
+     ],
+     [
+      718.36,
+      729.54
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "netherby_street_0",
+   "x": 747.26,
+   "z": 721.68,
+   "yaw": 0,
+   "data": {
+    "town": "netherby",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      747.26,
+      721.68
+     ],
+     [
+      710.9,
+      723.31
+     ],
+     [
+      674.5,
+      722.55
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "netherby_street_1",
+   "x": 707.76,
+   "z": 697.34,
+   "yaw": 0,
+   "data": {
+    "town": "netherby",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      707.76,
+      697.34
+     ],
+     [
+      706.96,
+      705.87
+     ],
+     [
+      705.71,
+      714.35
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "netherby_street_2",
+   "x": 719.86,
+   "z": 699.45,
+   "yaw": 0,
+   "data": {
+    "town": "netherby",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      719.86,
+      699.45
+     ],
+     [
+      718.74,
+      706.94
+     ],
+     [
+      716.86,
+      714.28
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "netherby_street_3",
+   "x": 728.02,
+   "z": 701.75,
+   "yaw": 0,
+   "data": {
+    "town": "netherby",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      728.02,
+      701.75
+     ],
+     [
+      725.83,
+      708.15
+     ],
+     [
+      723.78,
+      714.59
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "netherby_street_4",
+   "x": 694.76,
+   "z": 697.98,
+   "yaw": 0,
+   "data": {
+    "town": "netherby",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      694.76,
+      697.98
+     ],
+     [
+      694.83,
+      704.36
+     ],
+     [
+      694.96,
+      711.78
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "netherby_street_5",
+   "x": 708.61,
+   "z": 728.79,
+   "yaw": 0,
+   "data": {
+    "town": "netherby",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      708.61,
+      728.79
+     ],
+     [
+      711.45,
+      747.73
+     ],
+     [
+      712.44,
+      766.85
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "netherby_street_6",
+   "x": 739.64,
+   "z": 736.88,
+   "yaw": 0,
+   "data": {
+    "town": "netherby",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      739.64,
+      736.88
+     ],
+     [
+      726.89,
+      740.05
+     ],
+     [
+      714.23,
+      743.54
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "netherby_street_7",
+   "x": 721.76,
+   "z": 731.78,
+   "yaw": 0,
+   "data": {
+    "town": "netherby",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      721.76,
+      731.78
+     ],
+     [
+      722.08,
+      735.16
+     ],
+     [
+      722.74,
+      738.48
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "netherby_street_8",
+   "x": 725.3,
+   "z": 743.4,
+   "yaw": 0,
+   "data": {
+    "town": "netherby",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      725.3,
+      743.4
+     ],
+     [
+      728.28,
+      752.19
+     ],
+     [
+      731.92,
+      760.72
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "netherby_street_9",
+   "x": 741.69,
+   "z": 749.82,
+   "yaw": 0,
+   "data": {
+    "town": "netherby",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      741.69,
+      749.82
+     ],
+     [
+      736.24,
+      751.76
+     ],
+     [
+      730.88,
+      753.94
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "netherby_street_10",
+   "x": 726.35,
+   "z": 750.21,
+   "yaw": 0,
+   "data": {
+    "town": "netherby",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      726.35,
+      750.21
+     ],
+     [
+      722.23,
+      751.71
+     ],
+     [
+      718.15,
+      753.35
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "netherby_street_11",
+   "x": 706.74,
+   "z": 742.43,
+   "yaw": 0,
+   "data": {
+    "town": "netherby",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      706.74,
+      742.43
+     ],
+     [
+      693.04,
+      743.56
+     ],
+     [
+      679.29,
+      743.43
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "netherby_street_12",
+   "x": 692.84,
+   "z": 733.34,
+   "yaw": 0,
+   "data": {
+    "town": "netherby",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      692.84,
+      733.34
+     ],
+     [
+      693.37,
+      736.4
+     ],
+     [
+      694.16,
+      739.41
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "netherby_street_13",
+   "x": 696.55,
+   "z": 745.21,
+   "yaw": 0,
+   "data": {
+    "town": "netherby",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      696.55,
+      745.21
+     ],
+     [
+      696.62,
+      755.97
+     ],
+     [
+      696.42,
+      766.73
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "netherby_street_14",
+   "x": 706.59,
+   "z": 751.11,
+   "yaw": 0,
+   "data": {
+    "town": "netherby",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      706.59,
+      751.11
+     ],
+     [
+      702.17,
+      751.13
+     ],
+     [
+      697.75,
+      751.06
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "netherby_street_15",
+   "x": 706.56,
+   "z": 756.12,
+   "yaw": 0,
+   "data": {
+    "town": "netherby",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      706.56,
+      756.12
+     ],
+     [
+      702.14,
+      755.98
+     ],
+     [
+      697.72,
+      756.06
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "netherby_street_16",
+   "x": 695.23,
+   "z": 760.97,
+   "yaw": 0,
+   "data": {
+    "town": "netherby",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      695.23,
+      760.97
+     ],
+     [
+      687.81,
+      761.35
+     ],
+     [
+      687.3,
+      761.32
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "netherby_street_17",
+   "x": 688.97,
+   "z": 745.17,
+   "yaw": 0,
+   "data": {
+    "town": "netherby",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      688.97,
+      745.17
+     ],
+     [
+      689.38,
+      752.29
+     ],
+     [
+      688.89,
+      759.4
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "netherby_street_18",
+   "x": 695.27,
+   "z": 753.05,
+   "yaw": 0,
+   "data": {
+    "town": "netherby",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      695.27,
+      753.05
+     ],
+     [
+      692.88,
+      752.97
+     ],
+     [
+      690.48,
+      753.02
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "netherby_street_19",
+   "x": 687.39,
+   "z": 749.87,
+   "yaw": 0,
+   "data": {
+    "town": "netherby",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      687.39,
+      749.87
+     ],
+     [
+      683.92,
+      749.89
+     ],
+     [
+      680.46,
+      749.83
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "netherby_street_20",
+   "x": 690.68,
+   "z": 762.47,
+   "yaw": 0,
+   "data": {
+    "town": "netherby",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      690.68,
+      762.47
+     ],
+     [
+      690.67,
+      763.75
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "netherby_street_21",
+   "x": 707.67,
+   "z": 779.58,
+   "yaw": 0,
+   "data": {
+    "town": "netherby",
+    "cls": "main",
+    "width": 3.6,
+    "pts": [
+     [
+      707.67,
+      779.58
+     ],
+     [
+      717.52,
+      739
+     ]
+    ],
+    "high": true,
+    "to": "square",
+    "road": "road_link_netherby"
+   }
+  },
+  {
+   "kind": "street",
+   "id": "netherby_street_22",
+   "x": 725.3,
+   "z": 743.4,
+   "yaw": 0,
+   "data": {
+    "town": "netherby",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      725.3,
+      743.4
+     ],
+     [
+      724.56,
+      740.69
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "netherby_street_23",
+   "x": 706.74,
+   "z": 742.43,
+   "yaw": 0,
+   "data": {
+    "town": "netherby",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      706.74,
+      742.43
+     ],
+     [
+      710.57,
+      741.86
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "netherby_street_24",
+   "x": 710.9,
+   "z": 723.31,
+   "yaw": 0,
+   "data": {
+    "town": "netherby",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      710.9,
+      723.31
+     ],
+     [
+      708.61,
+      728.79
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "netherby_street_25",
+   "x": 705.71,
+   "z": 714.35,
+   "yaw": 0,
+   "data": {
+    "town": "netherby",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      705.71,
+      714.35
+     ],
+     [
+      705.52,
+      723.19
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "netherby_street_26",
+   "x": 694.16,
+   "z": 739.41,
+   "yaw": 0,
+   "data": {
+    "town": "netherby",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      694.16,
+      739.41
+     ],
+     [
+      694.49,
+      743.44
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "netherby_street_27",
+   "x": 716.86,
+   "z": 714.28,
+   "yaw": 0,
+   "data": {
+    "town": "netherby",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      716.86,
+      714.28
+     ],
+     [
+      717.25,
+      723.02
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "netherby_street_28",
+   "x": 723.78,
+   "z": 714.59,
+   "yaw": 0,
+   "data": {
+    "town": "netherby",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      723.78,
+      714.59
+     ],
+     [
+      717.21,
+      712.9
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "netherby_street_29",
+   "x": 694.96,
+   "z": 711.78,
+   "yaw": 0,
+   "data": {
+    "town": "netherby",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      694.96,
+      711.78
+     ],
+     [
+      705.85,
+      713.38
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "building",
+   "id": "netherby_plot_0",
+   "x": 730.74,
+   "z": 709.77,
+   "yaw": -1.8899,
+   "data": {
+    "town": "netherby",
+    "want": "shrine",
+    "district": "residential",
+    "w": 12.32,
+    "d": 6.65,
+    "angle": 1.8899,
+    "front": 3.4607,
+    "streetGap": -0.26,
+    "office": "shrine",
+    "role": null,
+    "lit": false,
+    "label": "Shrine"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "netherby_plot_1",
+   "x": 699.94,
+   "z": 701.33,
+   "yaw": -1.6273,
+   "data": {
+    "town": "netherby",
+    "want": "house",
+    "district": "residential",
+    "w": 5.93,
+    "d": 5.49,
+    "angle": 1.6273,
+    "front": 3.1981,
+    "streetGap": 0.31
+   }
+  },
+  {
+   "kind": "building",
+   "id": "netherby_plot_2",
+   "x": 699.61,
+   "z": 707.25,
+   "yaw": -1.6273,
+   "data": {
+    "town": "netherby",
+    "want": "house",
+    "district": "residential",
+    "w": 5.93,
+    "d": 5.49,
+    "angle": 1.6273,
+    "front": 3.1981,
+    "streetGap": -0.11
+   }
+  },
+  {
+   "kind": "building",
+   "id": "netherby_plot_3",
+   "x": 729.41,
+   "z": 734.09,
+   "yaw": -1.4259,
+   "data": {
+    "town": "netherby",
+    "want": "inn",
+    "district": "civic",
+    "w": 5.57,
+    "d": 10.74,
+    "angle": 1.4259,
+    "front": 2.9967,
+    "streetGap": -0.07,
+    "office": "inn",
+    "role": "innkeeper",
+    "lit": true,
+    "label": "Inn"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "netherby_plot_4",
+   "x": 733.95,
+   "z": 745.77,
+   "yaw": 0.3649,
+   "data": {
+    "town": "netherby",
+    "want": "shop",
+    "district": "craft",
+    "w": 9.41,
+    "d": 10.37,
+    "angle": 1.2059,
+    "front": 1.2059,
+    "streetGap": -0.4,
+    "office": "shop",
+    "role": "merchant",
+    "lit": true,
+    "label": "General Goods"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "netherby_plot_5",
+   "x": 724.57,
+   "z": 757.84,
+   "yaw": -2.7767,
+   "data": {
+    "town": "netherby",
+    "want": "granary",
+    "district": "craft",
+    "w": 9.43,
+    "d": 7.58,
+    "angle": 1.2059,
+    "front": 4.3475,
+    "streetGap": -0.26,
+    "office": "granary",
+    "role": "farmer",
+    "lit": false,
+    "label": "Granary"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "netherby_plot_6",
+   "x": 698.21,
+   "z": 735.35,
+   "yaw": -1.3568,
+   "data": {
+    "town": "netherby",
+    "want": "mill",
+    "district": "craft",
+    "w": 5.02,
+    "d": 5.97,
+    "angle": 1.3568,
+    "front": 2.9276,
+    "streetGap": -0.13,
+    "office": "mill",
+    "role": "miller",
+    "lit": false,
+    "label": "Mill"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "netherby_plot_7",
+   "x": 688.07,
+   "z": 737.55,
+   "yaw": 1.7848,
+   "data": {
+    "town": "netherby",
+    "want": "house",
+    "district": "residential",
+    "w": 5.02,
+    "d": 7.43,
+    "angle": 1.3568,
+    "front": 6.0692,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "netherby_plot_8",
+   "x": 702.1,
+   "z": 762.03,
+   "yaw": -1.5768,
+   "data": {
+    "town": "netherby",
+    "want": "house",
+    "district": "residential",
+    "w": 8.26,
+    "d": 7.64,
+    "angle": 1.5768,
+    "front": 3.1476,
+    "streetGap": -0.33
    }
   },
   {
@@ -2642,6 +5246,5561 @@
       254.8
      ]
     ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_link_coldwater",
+   "x": 1412.29,
+   "z": 1911.51,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      1412.29,
+      1911.51,
+      1165.77
+     ],
+     [
+      1400.88,
+      1923.63,
+      1163.62
+     ],
+     [
+      1384.66,
+      1940.72,
+      1160.09
+     ],
+     [
+      1368.47,
+      1957.66,
+      1155.94
+     ],
+     [
+      1352.31,
+      1974.44,
+      1151.6
+     ],
+     [
+      1336.19,
+      1991.06,
+      1147.45
+     ],
+     [
+      1320.09,
+      2007.53,
+      1143.93
+     ],
+     [
+      1304.03,
+      2023.84,
+      1141.21
+     ],
+     [
+      1288,
+      2040,
+      1139.25
+     ],
+     [
+      1272,
+      2056,
+      1138.62
+     ],
+     [
+      1256,
+      2070,
+      1139.38
+     ],
+     [
+      1240,
+      2082,
+      1141.28
+     ],
+     [
+      1224,
+      2092,
+      1144.09
+     ],
+     [
+      1208,
+      2100,
+      1147.24
+     ],
+     [
+      1192,
+      2106,
+      1150.07
+     ],
+     [
+      1176,
+      2110,
+      1152.56
+     ],
+     [
+      1160,
+      2112,
+      1154.61
+     ],
+     [
+      1144,
+      2112,
+      1156.17
+     ],
+     [
+      1128,
+      2112,
+      1157.15
+     ],
+     [
+      1112,
+      2112,
+      1157.58
+     ],
+     [
+      1096,
+      2112,
+      1157.84
+     ],
+     [
+      1080,
+      2112,
+      1158.01
+     ],
+     [
+      1064,
+      2112,
+      1158.11
+     ],
+     [
+      1048,
+      2112,
+      1157.94
+     ],
+     [
+      1032,
+      2112,
+      1157.76
+     ],
+     [
+      1016,
+      2112,
+      1157.7
+     ],
+     [
+      1000,
+      2112,
+      1157.23
+     ],
+     [
+      984,
+      2112,
+      1156.27
+     ],
+     [
+      968,
+      2112,
+      1154.68
+     ],
+     [
+      952,
+      2112,
+      1152.71
+     ],
+     [
+      936,
+      2112,
+      1150.45
+     ],
+     [
+      920,
+      2112,
+      1148.24
+     ],
+     [
+      904,
+      2112,
+      1145.96
+     ],
+     [
+      888,
+      2112,
+      1143.77
+     ],
+     [
+      872,
+      2110,
+      1142.38
+     ],
+     [
+      856,
+      2106,
+      1142.24
+     ],
+     [
+      840,
+      2100,
+      1143.53
+     ],
+     [
+      824,
+      2092,
+      1146.83
+     ],
+     [
+      808,
+      2082,
+      1150.96
+     ],
+     [
+      792,
+      2070,
+      1156.28
+     ],
+     [
+      776,
+      2056,
+      1162.86
+     ],
+     [
+      760,
+      2040,
+      1169.53
+     ],
+     [
+      744,
+      2026,
+      1176.42
+     ],
+     [
+      728,
+      2014,
+      1182.4
+     ],
+     [
+      712,
+      2004,
+      1186.78
+     ],
+     [
+      696,
+      1996,
+      1190.77
+     ],
+     [
+      680,
+      1990,
+      1193.97
+     ],
+     [
+      664,
+      1986,
+      1196.31
+     ],
+     [
+      648,
+      1984,
+      1197.61
+     ],
+     [
+      632,
+      1984,
+      1196.82
+     ],
+     [
+      616,
+      1982,
+      1194.57
+     ],
+     [
+      600,
+      1978,
+      1190.78
+     ],
+     [
+      584,
+      1972,
+      1184.76
+     ],
+     [
+      568,
+      1964,
+      1177.19
+     ],
+     [
+      552,
+      1954,
+      1168.83
+     ],
+     [
+      536,
+      1942,
+      1160.86
+     ],
+     [
+      520,
+      1928,
+      1154.07
+     ],
+     [
+      504,
+      1912,
+      1148.29
+     ],
+     [
+      488,
+      1898,
+      1144.31
+     ],
+     [
+      472,
+      1886,
+      1142.42
+     ],
+     [
+      456,
+      1876,
+      1141.89
+     ],
+     [
+      440,
+      1868,
+      1142.23
+     ],
+     [
+      424,
+      1862,
+      1142.94
+     ],
+     [
+      408,
+      1858,
+      1143.47
+     ],
+     [
+      392,
+      1856,
+      1144.07
+     ],
+     [
+      376,
+      1856,
+      1143.94
+     ],
+     [
+      360,
+      1856,
+      1142.95
+     ],
+     [
+      344,
+      1856,
+      1141.2
+     ],
+     [
+      328,
+      1856,
+      1138.29
+     ],
+     [
+      312,
+      1856,
+      1134.66
+     ],
+     [
+      296,
+      1856,
+      1130.92
+     ],
+     [
+      280,
+      1856,
+      1127.18
+     ],
+     [
+      264,
+      1856,
+      1124.05
+     ],
+     [
+      248,
+      1856,
+      1121.72
+     ],
+     [
+      232.88,
+      1853.13,
+      1120.51
+     ],
+     [
+      218.63,
+      1847.38,
+      1120.71
+     ],
+     [
+      205.25,
+      1838.75,
+      1122.09
+     ],
+     [
+      192.75,
+      1827.25,
+      1123.78
+     ],
+     [
+      181.13,
+      1812.88,
+      1125.36
+     ],
+     [
+      170.38,
+      1795.63,
+      1126.26
+     ],
+     [
+      160.5,
+      1775.5,
+      1126
+     ],
+     [
+      156,
+      1764,
+      1124.13
+     ],
+     [
+      151.5,
+      1752.5,
+      1121.18
+     ],
+     [
+      143.63,
+      1732.38,
+      1116.9
+     ],
+     [
+      136.88,
+      1715.13,
+      1112.09
+     ],
+     [
+      131.25,
+      1700.75,
+      1107.27
+     ],
+     [
+      126.75,
+      1689.25,
+      1102.91
+     ],
+     [
+      123.38,
+      1680.63,
+      1100.35
+     ],
+     [
+      121.13,
+      1674.88,
+      1098.35
+     ],
+     [
+      120,
+      1672,
+      1096.57
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_link_netherby",
+   "x": 707.79,
+   "z": 777.89,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      707.79,
+      777.89,
+      950.38
+     ],
+     [
+      707.06,
+      788.25,
+      953.12
+     ],
+     [
+      704.3,
+      801.19,
+      957.65
+     ],
+     [
+      699.64,
+      814.56,
+      963.12
+     ],
+     [
+      693.09,
+      828.38,
+      969.32
+     ],
+     [
+      684.66,
+      842.63,
+      976.03
+     ],
+     [
+      674.33,
+      857.31,
+      982.46
+     ],
+     [
+      662.11,
+      872.44,
+      987.61
+     ],
+     [
+      648,
+      888,
+      990.39
+     ],
+     [
+      632,
+      904,
+      990.21
+     ],
+     [
+      616,
+      918,
+      986.97
+     ],
+     [
+      600,
+      930,
+      980.53
+     ],
+     [
+      584,
+      940,
+      971.91
+     ],
+     [
+      568,
+      948,
+      961.79
+     ],
+     [
+      552,
+      954,
+      950.29
+     ],
+     [
+      536,
+      958,
+      938.16
+     ],
+     [
+      520,
+      960,
+      925.46
+     ],
+     [
+      504,
+      960,
+      912.74
+     ],
+     [
+      488,
+      959.13,
+      900.13
+     ],
+     [
+      472,
+      957.38,
+      886.69
+     ],
+     [
+      456,
+      954.75,
+      872.54
+     ],
+     [
+      440,
+      951.25,
+      858.96
+     ],
+     [
+      424,
+      946.88,
+      846.2
+     ],
+     [
+      408,
+      941.63,
+      834.85
+     ],
+     [
+      392,
+      935.5,
+      824.92
+     ],
+     [
+      376,
+      928.5,
+      816.48
+     ],
+     [
+      362,
+      922.38,
+      809.85
+     ],
+     [
+      350,
+      917.13,
+      805.06
+     ],
+     [
+      340,
+      912.75,
+      801.47
+     ],
+     [
+      332,
+      909.25,
+      799.04
+     ],
+     [
+      326,
+      906.63,
+      797.76
+     ],
+     [
+      322,
+      904.88,
+      796.78
+     ],
+     [
+      320,
+      904,
+      796.12
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_door_1",
+   "x": 1366,
+   "z": 1946,
+   "yaw": 0,
+   "data": {
+    "from": "door_1",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      1366,
+      1946,
+      1154.84
+     ],
+     [
+      1366.75,
+      1946,
+      1154.98
+     ],
+     [
+      1368.5,
+      1946,
+      1155.29
+     ],
+     [
+      1370.5,
+      1946.75,
+      1155.6
+     ],
+     [
+      1372.5,
+      1948.5,
+      1156.83
+     ],
+     [
+      1373.75,
+      1949.75,
+      1157.42
+     ],
+     [
+      1374,
+      1950,
+      1157.48
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_event_coldwater",
+   "x": 874,
+   "z": 1818,
+   "yaw": 0,
+   "data": {
+    "from": "event_coldwater",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      874,
+      1818,
+      1085.64
+     ],
+     [
+      874.75,
+      1817.25,
+      1085.73
+     ],
+     [
+      876.5,
+      1815.5,
+      1085.99
+     ],
+     [
+      878.5,
+      1813.5,
+      1086.32
+     ],
+     [
+      880.5,
+      1811.5,
+      1086.49
+     ],
+     [
+      882.5,
+      1809.5,
+      1086.64
+     ],
+     [
+      884.5,
+      1807.5,
+      1086.68
+     ],
+     [
+      886.5,
+      1806.25,
+      1086.57
+     ],
+     [
+      888.5,
+      1806,
+      1086.54
+     ],
+     [
+      890.5,
+      1806,
+      1086.51
+     ],
+     [
+      892.5,
+      1806,
+      1086.35
+     ],
+     [
+      894.5,
+      1806,
+      1086.09
+     ],
+     [
+      896.5,
+      1806,
+      1085.84
+     ],
+     [
+      898.5,
+      1806,
+      1085.61
+     ],
+     [
+      900.5,
+      1806,
+      1085.41
+     ],
+     [
+      902.5,
+      1806,
+      1085.22
+     ],
+     [
+      904.5,
+      1806,
+      1085.04
+     ],
+     [
+      906.5,
+      1806,
+      1084.85
+     ],
+     [
+      908.5,
+      1806,
+      1084.58
+     ],
+     [
+      910.5,
+      1806,
+      1084.29
+     ],
+     [
+      912.5,
+      1806,
+      1084.03
+     ],
+     [
+      914.5,
+      1806,
+      1083.9
+     ],
+     [
+      916.5,
+      1806,
+      1083.77
+     ],
+     [
+      918.5,
+      1806,
+      1083.61
+     ],
+     [
+      920.5,
+      1806,
+      1083.52
+     ],
+     [
+      922.5,
+      1806,
+      1083.36
+     ],
+     [
+      924.5,
+      1806,
+      1083.03
+     ],
+     [
+      926.5,
+      1806,
+      1082.65
+     ],
+     [
+      928.5,
+      1806,
+      1082.46
+     ],
+     [
+      930.5,
+      1806,
+      1082.43
+     ],
+     [
+      932.5,
+      1806,
+      1082.51
+     ],
+     [
+      934.5,
+      1806,
+      1082.68
+     ],
+     [
+      936.5,
+      1806,
+      1082.9
+     ],
+     [
+      938.5,
+      1806,
+      1083.11
+     ],
+     [
+      940.5,
+      1806,
+      1083.36
+     ],
+     [
+      942.5,
+      1806,
+      1083.77
+     ],
+     [
+      944.5,
+      1806,
+      1084.15
+     ],
+     [
+      946.5,
+      1806,
+      1084.46
+     ],
+     [
+      948.5,
+      1806,
+      1084.76
+     ],
+     [
+      950.5,
+      1806,
+      1085.06
+     ],
+     [
+      952.5,
+      1806,
+      1085.29
+     ],
+     [
+      954.5,
+      1806,
+      1085.54
+     ],
+     [
+      956.5,
+      1806,
+      1085.83
+     ],
+     [
+      958.5,
+      1806,
+      1086.19
+     ],
+     [
+      960.5,
+      1806,
+      1086.68
+     ],
+     [
+      962.5,
+      1806,
+      1087.28
+     ],
+     [
+      964.5,
+      1806,
+      1087.93
+     ],
+     [
+      966.5,
+      1806,
+      1088.54
+     ],
+     [
+      968.5,
+      1806,
+      1089.09
+     ],
+     [
+      970.5,
+      1806,
+      1089.57
+     ],
+     [
+      972.5,
+      1806,
+      1090.01
+     ],
+     [
+      974.5,
+      1806.75,
+      1090.51
+     ],
+     [
+      976.5,
+      1808.5,
+      1091.09
+     ],
+     [
+      978.5,
+      1809.75,
+      1091.69
+     ],
+     [
+      980.5,
+      1810,
+      1092.17
+     ],
+     [
+      982.5,
+      1810,
+      1092.54
+     ],
+     [
+      984.5,
+      1810,
+      1092.91
+     ],
+     [
+      986.5,
+      1810,
+      1093.39
+     ],
+     [
+      988.5,
+      1810,
+      1093.91
+     ],
+     [
+      990.5,
+      1810.75,
+      1094.52
+     ],
+     [
+      992.5,
+      1812.5,
+      1095.6
+     ],
+     [
+      994.5,
+      1814.5,
+      1096.71
+     ],
+     [
+      996.5,
+      1816.5,
+      1097.72
+     ],
+     [
+      998.5,
+      1817.75,
+      1098.44
+     ],
+     [
+      1000.5,
+      1818,
+      1098.92
+     ],
+     [
+      1002.5,
+      1818,
+      1099.42
+     ],
+     [
+      1004.5,
+      1818,
+      1099.91
+     ],
+     [
+      1006.5,
+      1818.75,
+      1100.49
+     ],
+     [
+      1008.5,
+      1820.5,
+      1101.19
+     ],
+     [
+      1010.5,
+      1822.5,
+      1101.81
+     ],
+     [
+      1012.5,
+      1824.5,
+      1102.24
+     ],
+     [
+      1014.5,
+      1826.5,
+      1102.6
+     ],
+     [
+      1016.5,
+      1828.5,
+      1103.3
+     ],
+     [
+      1018.5,
+      1830.5,
+      1104.08
+     ],
+     [
+      1020.5,
+      1832.5,
+      1104.6
+     ],
+     [
+      1022.5,
+      1834.5,
+      1105.25
+     ],
+     [
+      1024.5,
+      1836.5,
+      1105.85
+     ],
+     [
+      1026.5,
+      1837.75,
+      1106.36
+     ],
+     [
+      1028.5,
+      1838,
+      1106.64
+     ],
+     [
+      1030.5,
+      1838.75,
+      1106.88
+     ],
+     [
+      1032.5,
+      1840.5,
+      1107.1
+     ],
+     [
+      1034.5,
+      1842.5,
+      1107.16
+     ],
+     [
+      1036.5,
+      1844.5,
+      1107.17
+     ],
+     [
+      1038.5,
+      1846.5,
+      1107.27
+     ],
+     [
+      1040.5,
+      1848.5,
+      1107.38
+     ],
+     [
+      1042.5,
+      1850.5,
+      1107.43
+     ],
+     [
+      1044.5,
+      1852.5,
+      1107.73
+     ],
+     [
+      1046.5,
+      1854.5,
+      1108.35
+     ],
+     [
+      1048.5,
+      1856.5,
+      1109.05
+     ],
+     [
+      1050.5,
+      1858.5,
+      1109.77
+     ],
+     [
+      1052.5,
+      1860.5,
+      1110.39
+     ],
+     [
+      1054.5,
+      1862.5,
+      1110.85
+     ],
+     [
+      1056.5,
+      1864.5,
+      1111.09
+     ],
+     [
+      1058.5,
+      1866.5,
+      1111.32
+     ],
+     [
+      1060.5,
+      1868.5,
+      1111.67
+     ],
+     [
+      1062.5,
+      1870.5,
+      1111.96
+     ],
+     [
+      1064.5,
+      1872.5,
+      1112.05
+     ],
+     [
+      1066.5,
+      1874.5,
+      1112.03
+     ],
+     [
+      1068.5,
+      1876.5,
+      1112.11
+     ],
+     [
+      1070.5,
+      1878.5,
+      1112.35
+     ],
+     [
+      1072.5,
+      1880.5,
+      1112.89
+     ],
+     [
+      1074.5,
+      1882.5,
+      1113.4
+     ],
+     [
+      1076.5,
+      1884.5,
+      1113.47
+     ],
+     [
+      1078.5,
+      1886.5,
+      1113.7
+     ],
+     [
+      1080.5,
+      1888.5,
+      1114.26
+     ],
+     [
+      1082.5,
+      1890.5,
+      1114.74
+     ],
+     [
+      1084.5,
+      1892.5,
+      1115.12
+     ],
+     [
+      1086.5,
+      1894.5,
+      1115.75
+     ],
+     [
+      1088.5,
+      1896.5,
+      1116.4
+     ],
+     [
+      1090.5,
+      1898.5,
+      1117.11
+     ],
+     [
+      1092.5,
+      1900.5,
+      1117.93
+     ],
+     [
+      1094.5,
+      1902.5,
+      1118.72
+     ],
+     [
+      1096.5,
+      1904.5,
+      1119.72
+     ],
+     [
+      1098.5,
+      1906.5,
+      1120.7
+     ],
+     [
+      1100.5,
+      1908.5,
+      1121.57
+     ],
+     [
+      1102.5,
+      1910.5,
+      1122.27
+     ],
+     [
+      1104.5,
+      1912.5,
+      1122.68
+     ],
+     [
+      1106.5,
+      1914.5,
+      1122.8
+     ],
+     [
+      1108.5,
+      1916.5,
+      1122.88
+     ],
+     [
+      1110.5,
+      1918.5,
+      1122.91
+     ],
+     [
+      1112.5,
+      1920.5,
+      1122.99
+     ],
+     [
+      1114.5,
+      1922.5,
+      1123.26
+     ],
+     [
+      1116.5,
+      1924.5,
+      1123.65
+     ],
+     [
+      1117.75,
+      1926.5,
+      1124.07
+     ],
+     [
+      1118,
+      1928.5,
+      1124.57
+     ],
+     [
+      1118.75,
+      1930.5,
+      1125.19
+     ],
+     [
+      1120.5,
+      1932.5,
+      1125.97
+     ],
+     [
+      1121.75,
+      1934.5,
+      1126.76
+     ],
+     [
+      1122,
+      1936.5,
+      1127.41
+     ],
+     [
+      1122.75,
+      1938.5,
+      1128.09
+     ],
+     [
+      1124.5,
+      1940.5,
+      1128.85
+     ],
+     [
+      1126.5,
+      1942.5,
+      1129.41
+     ],
+     [
+      1128.5,
+      1944.5,
+      1129.96
+     ],
+     [
+      1130.5,
+      1946.5,
+      1130.49
+     ],
+     [
+      1132.5,
+      1948.5,
+      1131.15
+     ],
+     [
+      1134.5,
+      1949.75,
+      1131.77
+     ],
+     [
+      1136.5,
+      1950,
+      1131.94
+     ],
+     [
+      1138.5,
+      1950,
+      1132.1
+     ],
+     [
+      1140.5,
+      1950,
+      1132.39
+     ],
+     [
+      1142.5,
+      1950.75,
+      1132.66
+     ],
+     [
+      1144.5,
+      1952.5,
+      1133
+     ],
+     [
+      1146.5,
+      1954.5,
+      1133.52
+     ],
+     [
+      1148.5,
+      1956.5,
+      1134.09
+     ],
+     [
+      1150.5,
+      1958.5,
+      1134.39
+     ],
+     [
+      1152.5,
+      1960.5,
+      1134.68
+     ],
+     [
+      1154.5,
+      1962.5,
+      1134.84
+     ],
+     [
+      1156.5,
+      1964.5,
+      1134.77
+     ],
+     [
+      1158.5,
+      1965.75,
+      1134.63
+     ],
+     [
+      1160.5,
+      1966,
+      1134.5
+     ],
+     [
+      1162.5,
+      1966,
+      1134.33
+     ],
+     [
+      1164.5,
+      1966,
+      1134.15
+     ],
+     [
+      1166.5,
+      1966.75,
+      1133.98
+     ],
+     [
+      1168.5,
+      1968.5,
+      1133.97
+     ],
+     [
+      1170.5,
+      1970.5,
+      1134.35
+     ],
+     [
+      1172.5,
+      1972.5,
+      1134.9
+     ],
+     [
+      1174.5,
+      1974.5,
+      1135.38
+     ],
+     [
+      1176.5,
+      1976.5,
+      1135.67
+     ],
+     [
+      1178.5,
+      1977.75,
+      1135.83
+     ],
+     [
+      1180.5,
+      1978,
+      1135.82
+     ],
+     [
+      1182.5,
+      1978,
+      1135.87
+     ],
+     [
+      1184.5,
+      1978,
+      1136.05
+     ],
+     [
+      1186.5,
+      1978,
+      1136.23
+     ],
+     [
+      1188.5,
+      1978,
+      1136.21
+     ],
+     [
+      1190.5,
+      1978.75,
+      1136.23
+     ],
+     [
+      1192.5,
+      1980.5,
+      1136.26
+     ],
+     [
+      1194.5,
+      1982.5,
+      1136.08
+     ],
+     [
+      1196.5,
+      1984.5,
+      1135.67
+     ],
+     [
+      1198.5,
+      1986.5,
+      1135.32
+     ],
+     [
+      1200.5,
+      1988.5,
+      1135
+     ],
+     [
+      1202.5,
+      1989.75,
+      1134.72
+     ],
+     [
+      1204.5,
+      1990,
+      1134.6
+     ],
+     [
+      1206.5,
+      1990.75,
+      1134.54
+     ],
+     [
+      1208.5,
+      1992.5,
+      1134.33
+     ],
+     [
+      1210.5,
+      1993.75,
+      1134.14
+     ],
+     [
+      1212.5,
+      1994,
+      1134.15
+     ],
+     [
+      1214.5,
+      1994,
+      1134.17
+     ],
+     [
+      1216.5,
+      1994,
+      1134.16
+     ],
+     [
+      1218.5,
+      1994,
+      1134.13
+     ],
+     [
+      1220.5,
+      1994,
+      1134.09
+     ],
+     [
+      1222.5,
+      1994,
+      1134.1
+     ],
+     [
+      1224.5,
+      1994,
+      1134.02
+     ],
+     [
+      1226.5,
+      1994,
+      1133.91
+     ],
+     [
+      1228.5,
+      1994,
+      1133.79
+     ],
+     [
+      1230.5,
+      1994.75,
+      1133.63
+     ],
+     [
+      1232.5,
+      1996.5,
+      1133.33
+     ],
+     [
+      1234.5,
+      1998.5,
+      1132.9
+     ],
+     [
+      1236.5,
+      2000.5,
+      1132.55
+     ],
+     [
+      1238.5,
+      2001.75,
+      1132.29
+     ],
+     [
+      1240.5,
+      2002,
+      1132.26
+     ],
+     [
+      1242.5,
+      2002.75,
+      1132.23
+     ],
+     [
+      1244.5,
+      2004.5,
+      1132.03
+     ],
+     [
+      1246.5,
+      2005.75,
+      1131.84
+     ],
+     [
+      1248.5,
+      2006,
+      1131.76
+     ],
+     [
+      1250.5,
+      2006,
+      1131.78
+     ],
+     [
+      1252.5,
+      2006,
+      1131.89
+     ],
+     [
+      1254.5,
+      2006.75,
+      1132.04
+     ],
+     [
+      1256.5,
+      2008.5,
+      1132.2
+     ],
+     [
+      1258.5,
+      2010.5,
+      1132.18
+     ],
+     [
+      1260.5,
+      2012.5,
+      1132.29
+     ],
+     [
+      1262.5,
+      2013.75,
+      1132.41
+     ],
+     [
+      1264.5,
+      2014,
+      1132.53
+     ],
+     [
+      1266.5,
+      2014.75,
+      1132.58
+     ],
+     [
+      1268.5,
+      2016.5,
+      1132.75
+     ],
+     [
+      1270.5,
+      2018.5,
+      1133
+     ],
+     [
+      1272.5,
+      2020.5,
+      1133.2
+     ],
+     [
+      1274.5,
+      2021.75,
+      1133.37
+     ],
+     [
+      1276.5,
+      2022,
+      1133.55
+     ],
+     [
+      1278.5,
+      2022.75,
+      1133.69
+     ],
+     [
+      1280.5,
+      2024.5,
+      1133.74
+     ],
+     [
+      1282.5,
+      2025.75,
+      1133.77
+     ],
+     [
+      1284.5,
+      2026,
+      1133.9
+     ],
+     [
+      1286.5,
+      2026,
+      1134.1
+     ],
+     [
+      1288.5,
+      2026,
+      1134.34
+     ],
+     [
+      1290.5,
+      2026.75,
+      1134.64
+     ],
+     [
+      1292.5,
+      2028.5,
+      1135.74
+     ],
+     [
+      1294.5,
+      2029.75,
+      1139.11
+     ],
+     [
+      1296.5,
+      2030,
+      1139.9
+     ],
+     [
+      1297.75,
+      2030,
+      1140
+     ],
+     [
+      1298,
+      2030,
+      1140.03
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_coldwater_graveyard",
+   "x": 1558,
+   "z": 1782,
+   "yaw": 0,
+   "data": {
+    "from": "coldwater_graveyard",
+    "to": "town:Coldwater",
+    "width": 2.2,
+    "pts": [
+     [
+      1558,
+      1782,
+      1176.32
+     ],
+     [
+      1557.25,
+      1782.75,
+      1176.3
+     ],
+     [
+      1555.5,
+      1784.5,
+      1176.24
+     ],
+     [
+      1553.5,
+      1786.5,
+      1176.17
+     ],
+     [
+      1551.5,
+      1788.5,
+      1176.16
+     ],
+     [
+      1549.5,
+      1790.5,
+      1176.19
+     ],
+     [
+      1547.5,
+      1792.5,
+      1176.27
+     ],
+     [
+      1546.25,
+      1793.75,
+      1176.36
+     ],
+     [
+      1546,
+      1794,
+      1176.38
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_netherby_graveyard",
+   "x": 662,
+   "z": 682,
+   "yaw": 0,
+   "data": {
+    "from": "netherby_graveyard",
+    "to": "town:Netherby",
+    "width": 2.2,
+    "pts": [
+     [
+      662,
+      682,
+      946.97
+     ],
+     [
+      662,
+      682.75,
+      946.93
+     ],
+     [
+      662,
+      684.5,
+      946.87
+     ],
+     [
+      662.75,
+      686.5,
+      946.75
+     ],
+     [
+      664.5,
+      688.5,
+      946.33
+     ],
+     [
+      666.5,
+      690.5,
+      945.55
+     ],
+     [
+      668.5,
+      692.5,
+      944.92
+     ],
+     [
+      670.5,
+      694.5,
+      944.55
+     ],
+     [
+      672.5,
+      696.5,
+      944.26
+     ],
+     [
+      674.5,
+      698.5,
+      944.03
+     ],
+     [
+      676.5,
+      700.5,
+      943.85
+     ],
+     [
+      677.75,
+      701.75,
+      943.74
+     ],
+     [
+      678,
+      702,
+      943.72
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_fort_coldwater_0",
+   "x": 574,
+   "z": 1278,
+   "yaw": 0,
+   "data": {
+    "from": "fort_coldwater_0",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      574,
+      1278,
+      1009.42
+     ],
+     [
+      574.75,
+      1277.25,
+      1009.36
+     ],
+     [
+      576.5,
+      1275.5,
+      1009.25
+     ],
+     [
+      578.5,
+      1273.5,
+      1009.22
+     ],
+     [
+      580.5,
+      1271.5,
+      1009.32
+     ],
+     [
+      582.5,
+      1269.5,
+      1009.29
+     ],
+     [
+      584.5,
+      1267.5,
+      1009.26
+     ],
+     [
+      585.75,
+      1265.5,
+      1009.08
+     ],
+     [
+      586,
+      1263.5,
+      1008.78
+     ],
+     [
+      586.75,
+      1261.5,
+      1008.53
+     ],
+     [
+      588.5,
+      1259.5,
+      1008.48
+     ],
+     [
+      590.5,
+      1257.5,
+      1008.56
+     ],
+     [
+      592.5,
+      1255.5,
+      1008.58
+     ],
+     [
+      594.5,
+      1253.5,
+      1008.51
+     ],
+     [
+      596.5,
+      1251.5,
+      1008.49
+     ],
+     [
+      597.75,
+      1249.5,
+      1008.46
+     ],
+     [
+      598,
+      1247.5,
+      1008.38
+     ],
+     [
+      598,
+      1245.5,
+      1008.26
+     ],
+     [
+      598,
+      1243.5,
+      1008.09
+     ],
+     [
+      598,
+      1241.5,
+      1008.01
+     ],
+     [
+      598,
+      1239.5,
+      1007.93
+     ],
+     [
+      598,
+      1237.5,
+      1007.81
+     ],
+     [
+      598,
+      1235.5,
+      1007.81
+     ],
+     [
+      598,
+      1233.5,
+      1007.84
+     ],
+     [
+      598,
+      1231.5,
+      1007.66
+     ],
+     [
+      598.75,
+      1229.5,
+      1007.72
+     ],
+     [
+      600.5,
+      1227.5,
+      1008.17
+     ],
+     [
+      601.75,
+      1225.5,
+      1008.09
+     ],
+     [
+      602,
+      1223.5,
+      1008.05
+     ],
+     [
+      602.75,
+      1221.5,
+      1007.86
+     ],
+     [
+      604.5,
+      1219.5,
+      1008.22
+     ],
+     [
+      605.75,
+      1217.5,
+      1008.3
+     ],
+     [
+      606,
+      1215.5,
+      1008.28
+     ],
+     [
+      606.75,
+      1213.5,
+      1008.28
+     ],
+     [
+      608.5,
+      1211.5,
+      1008.5
+     ],
+     [
+      610.5,
+      1209.5,
+      1008.68
+     ],
+     [
+      612.5,
+      1207.5,
+      1008.88
+     ],
+     [
+      613.75,
+      1205.5,
+      1008.99
+     ],
+     [
+      614,
+      1203.5,
+      1009.01
+     ],
+     [
+      614.75,
+      1201.5,
+      1009.08
+     ],
+     [
+      616.5,
+      1199.5,
+      1009.21
+     ],
+     [
+      618.5,
+      1197.5,
+      1009.33
+     ],
+     [
+      620.5,
+      1195.5,
+      1009.44
+     ],
+     [
+      622.5,
+      1193.5,
+      1009.51
+     ],
+     [
+      624.5,
+      1191.5,
+      1009.54
+     ],
+     [
+      626.5,
+      1189.5,
+      1009.56
+     ],
+     [
+      628.5,
+      1187.5,
+      1009.55
+     ],
+     [
+      630.5,
+      1185.5,
+      1009.53
+     ],
+     [
+      632.5,
+      1183.5,
+      1009.55
+     ],
+     [
+      634.5,
+      1181.5,
+      1009.63
+     ],
+     [
+      636.5,
+      1179.5,
+      1009.79
+     ],
+     [
+      638.5,
+      1177.5,
+      1009.9
+     ],
+     [
+      640.5,
+      1175.5,
+      1009.98
+     ],
+     [
+      642.5,
+      1173.5,
+      1010.03
+     ],
+     [
+      644.5,
+      1171.5,
+      1010.01
+     ],
+     [
+      645.75,
+      1169.5,
+      1009.93
+     ],
+     [
+      646,
+      1167.5,
+      1009.83
+     ],
+     [
+      646.75,
+      1165.5,
+      1009.72
+     ],
+     [
+      648.5,
+      1163.5,
+      1009.58
+     ],
+     [
+      649.75,
+      1161.5,
+      1009.51
+     ],
+     [
+      650,
+      1159.5,
+      1009.43
+     ],
+     [
+      650.75,
+      1157.5,
+      1009.19
+     ],
+     [
+      652.5,
+      1155.5,
+      1008.78
+     ],
+     [
+      654.5,
+      1153.5,
+      1008.26
+     ],
+     [
+      656.5,
+      1151.5,
+      1007.6
+     ],
+     [
+      657.75,
+      1149.5,
+      1007.1
+     ],
+     [
+      658,
+      1147.5,
+      1006.93
+     ],
+     [
+      658,
+      1145.5,
+      1006.81
+     ],
+     [
+      658,
+      1143.5,
+      1006.53
+     ],
+     [
+      658,
+      1141.5,
+      1006.08
+     ],
+     [
+      658,
+      1139.5,
+      1005.48
+     ],
+     [
+      658,
+      1137.5,
+      1004.86
+     ],
+     [
+      658,
+      1135.5,
+      1004.47
+     ],
+     [
+      658,
+      1133.5,
+      1004.26
+     ],
+     [
+      658,
+      1131.5,
+      1004.02
+     ],
+     [
+      658,
+      1129.5,
+      1003.79
+     ],
+     [
+      658,
+      1127.5,
+      1003.68
+     ],
+     [
+      658,
+      1125.5,
+      1003.6
+     ],
+     [
+      658,
+      1123.5,
+      1003.55
+     ],
+     [
+      658,
+      1121.5,
+      1003.49
+     ],
+     [
+      658,
+      1119.5,
+      1003.44
+     ],
+     [
+      658,
+      1117.5,
+      1003.36
+     ],
+     [
+      658,
+      1115.5,
+      1003.1
+     ],
+     [
+      658,
+      1113.5,
+      1002.81
+     ],
+     [
+      658,
+      1111.5,
+      1002.57
+     ],
+     [
+      658,
+      1109.5,
+      1002.32
+     ],
+     [
+      658,
+      1107.5,
+      1002.12
+     ],
+     [
+      658,
+      1105.5,
+      1001.9
+     ],
+     [
+      658,
+      1103.5,
+      1001.67
+     ],
+     [
+      658.75,
+      1101.5,
+      1001.51
+     ],
+     [
+      660.5,
+      1099.5,
+      1001.4
+     ],
+     [
+      661.75,
+      1097.5,
+      1001.4
+     ],
+     [
+      662,
+      1095.5,
+      1001.55
+     ],
+     [
+      662,
+      1093.5,
+      1001.73
+     ],
+     [
+      662,
+      1091.5,
+      1001.83
+     ],
+     [
+      662.75,
+      1089.5,
+      1002.02
+     ],
+     [
+      664.5,
+      1087.5,
+      1002.35
+     ],
+     [
+      665.75,
+      1085.5,
+      1002.58
+     ],
+     [
+      666,
+      1083.5,
+      1002.56
+     ],
+     [
+      666.75,
+      1081.5,
+      1002.48
+     ],
+     [
+      668.5,
+      1079.5,
+      1002.31
+     ],
+     [
+      670.5,
+      1077.5,
+      1002.08
+     ],
+     [
+      672.5,
+      1075.5,
+      1001.87
+     ],
+     [
+      673.75,
+      1073.5,
+      1001.63
+     ],
+     [
+      674,
+      1071.5,
+      1001.22
+     ],
+     [
+      674,
+      1069.5,
+      1000.82
+     ],
+     [
+      674,
+      1067.5,
+      1000.53
+     ],
+     [
+      674,
+      1065.5,
+      1000.23
+     ],
+     [
+      674,
+      1063.5,
+      999.89
+     ],
+     [
+      674,
+      1061.5,
+      999.57
+     ],
+     [
+      674,
+      1059.5,
+      999.26
+     ],
+     [
+      674,
+      1057.5,
+      999.05
+     ],
+     [
+      674,
+      1055.5,
+      999.04
+     ],
+     [
+      674,
+      1053.5,
+      999.15
+     ],
+     [
+      674,
+      1051.5,
+      999.16
+     ],
+     [
+      674,
+      1049.5,
+      999.18
+     ],
+     [
+      674,
+      1047.5,
+      999.18
+     ],
+     [
+      674,
+      1045.5,
+      999.17
+     ],
+     [
+      674,
+      1043.5,
+      999.12
+     ],
+     [
+      674.75,
+      1041.5,
+      999.04
+     ],
+     [
+      676.5,
+      1039.5,
+      998.91
+     ],
+     [
+      677.75,
+      1037.5,
+      998.74
+     ],
+     [
+      678,
+      1035.5,
+      998.57
+     ],
+     [
+      678,
+      1033.5,
+      998.5
+     ],
+     [
+      678,
+      1031.5,
+      998.54
+     ],
+     [
+      678.75,
+      1029.5,
+      998.5
+     ],
+     [
+      680.5,
+      1027.5,
+      998.31
+     ],
+     [
+      681.75,
+      1025.5,
+      998.08
+     ],
+     [
+      682,
+      1023.5,
+      997.92
+     ],
+     [
+      682,
+      1021.5,
+      997.62
+     ],
+     [
+      682,
+      1019.5,
+      997.34
+     ],
+     [
+      682,
+      1017.5,
+      997.19
+     ],
+     [
+      682,
+      1015.5,
+      997.14
+     ],
+     [
+      682,
+      1013.5,
+      997.22
+     ],
+     [
+      682,
+      1011.5,
+      997.36
+     ],
+     [
+      682,
+      1009.5,
+      997.52
+     ],
+     [
+      682,
+      1007.5,
+      997.7
+     ],
+     [
+      682,
+      1005.5,
+      997.8
+     ],
+     [
+      682,
+      1003.5,
+      997.79
+     ],
+     [
+      682,
+      1001.5,
+      997.65
+     ],
+     [
+      682,
+      999.5,
+      997.42
+     ],
+     [
+      682,
+      997.5,
+      997.24
+     ],
+     [
+      682,
+      995.5,
+      997.13
+     ],
+     [
+      682,
+      993.5,
+      997.04
+     ],
+     [
+      682,
+      991.5,
+      996.94
+     ],
+     [
+      682,
+      989.5,
+      996.77
+     ],
+     [
+      682,
+      987.5,
+      996.67
+     ],
+     [
+      682,
+      985.5,
+      996.73
+     ],
+     [
+      682,
+      983.5,
+      996.75
+     ],
+     [
+      682,
+      981.5,
+      996.67
+     ],
+     [
+      682,
+      979.5,
+      996.63
+     ],
+     [
+      682,
+      977.5,
+      996.8
+     ],
+     [
+      682,
+      975.5,
+      997.13
+     ],
+     [
+      682,
+      973.5,
+      997.34
+     ],
+     [
+      682,
+      971.5,
+      997.41
+     ],
+     [
+      681.25,
+      969.5,
+      997.5
+     ],
+     [
+      679.5,
+      967.5,
+      997.59
+     ],
+     [
+      678.25,
+      965.5,
+      997.63
+     ],
+     [
+      678,
+      963.5,
+      997.78
+     ],
+     [
+      677.25,
+      961.5,
+      998.04
+     ],
+     [
+      675.5,
+      959.5,
+      998.39
+     ],
+     [
+      674.25,
+      957.5,
+      998.7
+     ],
+     [
+      674,
+      955.5,
+      998.88
+     ],
+     [
+      673.25,
+      953.5,
+      999
+     ],
+     [
+      671.5,
+      951.5,
+      999.06
+     ],
+     [
+      670.25,
+      949.5,
+      999.21
+     ],
+     [
+      670,
+      947.5,
+      999.46
+     ],
+     [
+      669.25,
+      945.5,
+      999.49
+     ],
+     [
+      667.5,
+      943.5,
+      999.53
+     ],
+     [
+      665.5,
+      941.5,
+      999.5
+     ],
+     [
+      663.5,
+      939.5,
+      999.44
+     ],
+     [
+      661.5,
+      937.5,
+      999.47
+     ],
+     [
+      659.5,
+      935.5,
+      999.38
+     ],
+     [
+      657.5,
+      933.5,
+      999.26
+     ],
+     [
+      655.5,
+      931.5,
+      999.44
+     ],
+     [
+      653.5,
+      929.5,
+      999.75
+     ],
+     [
+      651.5,
+      927.5,
+      1000.07
+     ],
+     [
+      649.5,
+      925.5,
+      1000.17
+     ],
+     [
+      647.5,
+      923.5,
+      1000.17
+     ],
+     [
+      645.5,
+      921.5,
+      1000.07
+     ],
+     [
+      643.5,
+      919.5,
+      999.96
+     ],
+     [
+      641.5,
+      917.5,
+      999.89
+     ],
+     [
+      639.5,
+      915.5,
+      999.96
+     ],
+     [
+      637.5,
+      913.5,
+      999.99
+     ],
+     [
+      635.5,
+      911.5,
+      999.77
+     ],
+     [
+      633.5,
+      909.5,
+      998.18
+     ],
+     [
+      631.5,
+      907.5,
+      991.67
+     ],
+     [
+      630.25,
+      906.25,
+      990.69
+     ],
+     [
+      630,
+      906,
+      990.69
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_cave_coldwater_0",
+   "x": 126,
+   "z": 1722,
+   "yaw": 0,
+   "data": {
+    "from": "cave_coldwater_0",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      126,
+      1722,
+      1118.6
+     ],
+     [
+      126.75,
+      1722,
+      1118.6
+     ],
+     [
+      128.5,
+      1722,
+      1118.56
+     ],
+     [
+      130.5,
+      1722.75,
+      1118.71
+     ],
+     [
+      132.5,
+      1724.5,
+      1119.46
+     ],
+     [
+      134.5,
+      1725,
+      1119.28
+     ],
+     [
+      136.5,
+      1723.5,
+      1116.63
+     ],
+     [
+      137.75,
+      1722.25,
+      1114.67
+     ],
+     [
+      138,
+      1722,
+      1114.28
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "town_wall",
+   "id": "coldwater_wall",
+   "x": 1474,
+   "z": 1846,
+   "yaw": 0,
+   "data": {
+    "town": "coldwater",
+    "name": "Coldwater",
+    "settlement": "town",
+    "style": "curtain",
+    "material": "stone",
+    "tier": "wall",
+    "h": 4.4,
+    "thick": 1.2,
+    "tint": "#a29c90",
+    "radius": 62.86,
+    "solid": true,
+    "runs": [
+     [
+      [
+       1427.31,
+       1888.09,
+       1173.63
+      ],
+      [
+       1417.17,
+       1872.88,
+       1173.29
+      ],
+      [
+       1411.84,
+       1855.4,
+       1173.12
+      ],
+      [
+       1411.77,
+       1837.12,
+       1173.31
+      ],
+      [
+       1416.95,
+       1819.6,
+       1173.41
+      ],
+      [
+       1426.96,
+       1804.3,
+       1173.37
+      ],
+      [
+       1440.94,
+       1792.53,
+       1173.9
+      ],
+      [
+       1457.72,
+       1785.28,
+       1174.7
+      ],
+      [
+       1475.87,
+       1783.16,
+       1175.75
+      ],
+      [
+       1493.87,
+       1786.36,
+       1176.22
+      ],
+      [
+       1510.18,
+       1794.59,
+       1176.6
+      ],
+      [
+       1523.44,
+       1807.17,
+       1176.42
+      ],
+      [
+       1532.52,
+       1823.03,
+       1176.7
+      ],
+      [
+       1536.65,
+       1840.84,
+       1176.55
+      ],
+      [
+       1535.49,
+       1859.08,
+       1176.38
+      ],
+      [
+       1529.13,
+       1876.21,
+       1176
+      ],
+      [
+       1518.11,
+       1890.79,
+       1175.84
+      ],
+      [
+       1503.36,
+       1901.59,
+       1175.33
+      ],
+      [
+       1486.13,
+       1907.68,
+       1174.67
+      ],
+      [
+       1467.87,
+       1908.57,
+       1174.31
+      ],
+      [
+       1450.13,
+       1904.16,
+       1174
+      ],
+      [
+       1434.41,
+       1894.84,
+       1174.11
+      ]
+     ]
+    ],
+    "towers": [
+     {
+      "x": 1425.42,
+      "z": 1885.89,
+      "h": 1173.53,
+      "yaw": -0.8833
+     },
+     {
+      "x": 1436.71,
+      "z": 1896.61,
+      "h": 1174.22,
+      "yaw": -0.635
+     },
+     {
+      "x": 1411.22,
+      "z": 1849.32,
+      "h": 1173.31,
+      "yaw": -1.518
+     },
+     {
+      "x": 1423.13,
+      "z": 1809.07,
+      "h": 1173.43,
+      "yaw": -2.1988
+     },
+     {
+      "x": 1457.72,
+      "z": 1785.28,
+      "h": 1174.7,
+      "yaw": -2.8796
+     },
+     {
+      "x": 1499.56,
+      "z": 1788.57,
+      "h": 1176.49,
+      "yaw": 2.7228
+     },
+     {
+      "x": 1530.01,
+      "z": 1817.46,
+      "h": 1176.59,
+      "yaw": 2.042
+     },
+     {
+      "x": 1535.49,
+      "z": 1859.08,
+      "h": 1176.38,
+      "yaw": 1.3612
+     },
+     {
+      "x": 1513.55,
+      "z": 1894.87,
+      "h": 1175.75,
+      "yaw": 0.6804
+     },
+     {
+      "x": 1473.98,
+      "z": 1908.86,
+      "h": 1174.38,
+      "yaw": -0.0004
+     }
+    ],
+    "gates": [
+     {
+      "id": "coldwater_gate_0",
+      "x": 1430.73,
+      "z": 1891.6,
+      "h": 1173.88,
+      "yaw": -0.6504,
+      "out": [
+       -0.6055,
+       0.7958
+      ],
+      "wallYaw": -0.7592,
+      "open": 6.61,
+      "width": 6.2,
+      "pass": 6.2,
+      "slant": 0.109,
+      "kind": "gatehouse",
+      "way": "coldwater_street_37",
+      "wayKind": "road",
+      "road": "road_link_coldwater",
+      "ways": [
+       "coldwater_street_37"
+      ],
+      "led": [],
+      "ends": [
+       [
+        1434.41,
+        1894.84
+       ],
+       [
+        1427.31,
+        1888.09
+       ]
+      ],
+      "main": {
+       "street": "coldwater_street_37",
+       "width": 5,
+       "pts": [
+        [
+         1430.73,
+         1891.6
+        ],
+        [
+         1462,
+         1850.5
+        ],
+        [
+         1461.73,
+         1836.23
+        ]
+       ],
+       "metres": 65.92
+      },
+      "approaches": [
+       {
+        "way": "road_link_coldwater",
+        "width": 3.5,
+        "pts": [
+         [
+          1428.76,
+          1894.03
+         ],
+         [
+          1427.46,
+          1895.4
+         ],
+         [
+          1426.17,
+          1896.77
+         ],
+         [
+          1424.88,
+          1898.14
+         ],
+         [
+          1423.59,
+          1899.52
+         ],
+         [
+          1422.3,
+          1900.89
+         ],
+         [
+          1421.01,
+          1902.26
+         ],
+         [
+          1419.71,
+          1903.63
+         ],
+         [
+          1418.42,
+          1905.01
+         ],
+         [
+          1417.13,
+          1906.38
+         ],
+         [
+          1415.78,
+          1907.82
+         ],
+         [
+          1414.42,
+          1909.25
+         ],
+         [
+          1413.07,
+          1910.69
+         ],
+         [
+          1411.71,
+          1912.13
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "openings": []
+   }
+  },
+  {
+   "kind": "town_wall",
+   "id": "netherby_wall",
+   "x": 711,
+   "z": 732,
+   "yaw": 0,
+   "data": {
+    "town": "netherby",
+    "name": "Netherby",
+    "settlement": "hamlet",
+    "style": "fence",
+    "material": "rail",
+    "tier": "low",
+    "h": 1.25,
+    "thick": 0.3,
+    "tint": "#8a6c50",
+    "radius": 42.95,
+    "solid": true,
+    "runs": [
+     [
+      [
+       704.95,
+       774.52,
+       944.97
+      ],
+      [
+       695.23,
+       771.95,
+       944.56
+      ],
+      [
+       686.37,
+       767.19,
+       944.72
+      ],
+      [
+       678.86,
+       760.49,
+       944.68
+      ],
+      [
+       673.12,
+       752.24,
+       944.3
+      ],
+      [
+       669.45,
+       742.87,
+       944.15
+      ],
+      [
+       668.06,
+       732.91,
+       944.02
+      ],
+      [
+       669.03,
+       722.9,
+       943.75
+      ],
+      [
+       672.29,
+       713.39,
+       943.52
+      ],
+      [
+       677.68,
+       704.89,
+       943.57
+      ],
+      [
+       684.9,
+       697.89,
+       943.61
+      ],
+      [
+       693.55,
+       692.75,
+       943.26
+      ],
+      [
+       703.16,
+       689.77,
+       943.2
+      ],
+      [
+       713.19,
+       689.11,
+       942.95
+      ],
+      [
+       723.11,
+       690.79,
+       942.83
+      ],
+      [
+       732.36,
+       694.74,
+       942.79
+      ],
+      [
+       740.44,
+       700.73,
+       942.59
+      ],
+      [
+       746.91,
+       708.43,
+       942.6
+      ],
+      [
+       751.4,
+       717.43,
+       942.83
+      ],
+      [
+       753.68,
+       727.22,
+       942.88
+      ],
+      [
+       753.62,
+       737.28,
+       942.85
+      ],
+      [
+       751.23,
+       747.05,
+       943.12
+      ],
+      [
+       746.62,
+       755.99,
+       943.43
+      ],
+      [
+       740.07,
+       763.62,
+       943.88
+      ],
+      [
+       731.92,
+       769.51,
+       944.16
+      ],
+      [
+       722.62,
+       773.35,
+       944.53
+      ],
+      [
+       712.68,
+       774.92,
+       944.79
+      ]
+     ]
+    ],
+    "towers": [],
+    "gates": [
+     {
+      "id": "netherby_gate_0",
+      "x": 708.81,
+      "z": 774.89,
+      "h": 945.16,
+      "yaw": -0.2381,
+      "out": [
+       -0.2358,
+       0.9718
+      ],
+      "wallYaw": -0.0511,
+      "open": 5.45,
+      "width": 4.8,
+      "pass": 4.8,
+      "slant": 0.187,
+      "kind": "posts",
+      "way": "netherby_street_21",
+      "wayKind": "road",
+      "road": "road_link_netherby",
+      "ways": [
+       "netherby_street_21"
+      ],
+      "led": [],
+      "ends": [
+       [
+        712.68,
+        774.92
+       ],
+       [
+        704.95,
+        774.52
+       ]
+      ],
+      "main": {
+       "street": "netherby_street_21",
+       "width": 3.6,
+       "pts": [
+        [
+         708.81,
+         774.89
+        ],
+        [
+         717.52,
+         739
+        ]
+       ],
+       "metres": 36.94
+      },
+      "approaches": [
+       {
+        "way": "road_link_netherby",
+        "width": 3.5,
+        "pts": [
+         [
+          707.69,
+          779.32
+         ],
+         [
+          707.56,
+          781.11
+         ],
+         [
+          707.44,
+          782.89
+         ],
+         [
+          707.31,
+          784.68
+         ],
+         [
+          707.19,
+          786.46
+         ],
+         [
+          707.06,
+          788.25
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "openings": []
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "coldwater_graveyard",
+   "x": 1574,
+   "z": 1770,
+   "yaw": -1.0174,
+   "data": {
+    "piece": "graveyard",
+    "name": "Coldwater Graveyard",
+    "town": "Coldwater",
+    "auto": true,
+    "r": 20.81,
+    "poly": [
+     [
+      1594.77,
+      1771.27
+     ],
+     [
+      1565.84,
+      1789.14
+     ],
+     [
+      1553.23,
+      1768.73
+     ],
+     [
+      1582.16,
+      1750.86
+     ]
+    ],
+    "w": 34,
+    "d": 24,
+    "angle": 2.5882,
+    "gate": {
+     "x": 1559.54,
+     "z": 1778.93,
+     "width": 3.2,
+     "yaw": 2.1242
+    },
+    "graves": [
+     [
+      1591.69,
+      1770.45,
+      -1.041,
+      "headstone"
+     ],
+     [
+      1591.02,
+      1769.25,
+      -1.052,
+      "slab"
+     ],
+     [
+      1589.36,
+      1766.51,
+      -0.986,
+      "tomb"
+     ],
+     [
+      1582.52,
+      1755.46,
+      -0.996,
+      "headstone"
+     ],
+     [
+      1581.66,
+      1754.08,
+      -0.996,
+      "cross"
+     ],
+     [
+      1589.47,
+      1771.91,
+      -1.035,
+      "slab"
+     ],
+     [
+      1588.67,
+      1770.6,
+      -0.981,
+      "tomb"
+     ],
+     [
+      1581.18,
+      1758.4,
+      -1.057,
+      "headstone"
+     ],
+     [
+      1579.27,
+      1755.6,
+      -1.003,
+      "slab"
+     ],
+     [
+      1587.18,
+      1773.38,
+      -0.985,
+      "mound"
+     ],
+     [
+      1586.33,
+      1772.04,
+      -1.057,
+      "mound"
+     ],
+     [
+      1585.45,
+      1770.83,
+      -0.98,
+      "headstone"
+     ],
+     [
+      1578.84,
+      1759.77,
+      -1.012,
+      "mound"
+     ],
+     [
+      1577.02,
+      1756.94,
+      -0.997,
+      "headstone"
+     ],
+     [
+      1584.83,
+      1774.7,
+      -1.024,
+      "mound"
+     ],
+     [
+      1583.93,
+      1773.47,
+      -1.039,
+      "slab"
+     ],
+     [
+      1583.28,
+      1772.13,
+      -1.054,
+      "mound"
+     ],
+     [
+      1582.42,
+      1770.65,
+      -0.98,
+      "cross"
+     ],
+     [
+      1581.43,
+      1769.48,
+      -1.028,
+      "mound"
+     ],
+     [
+      1578.12,
+      1763.9,
+      -1.026,
+      "cross"
+     ],
+     [
+      1577.34,
+      1762.63,
+      -1.055,
+      "slab"
+     ],
+     [
+      1576.42,
+      1761.29,
+      -0.986,
+      "tomb"
+     ],
+     [
+      1575.56,
+      1759.95,
+      -1.055,
+      "headstone"
+     ],
+     [
+      1574.76,
+      1758.38,
+      -1.044,
+      "cross"
+     ],
+     [
+      1582.48,
+      1776.14,
+      -1.002,
+      "cross"
+     ],
+     [
+      1581.65,
+      1774.94,
+      -1.017,
+      "tomb"
+     ],
+     [
+      1579.08,
+      1770.78,
+      -1.046,
+      "mound"
+     ],
+     [
+      1575.81,
+      1765.26,
+      -0.984,
+      "headstone"
+     ],
+     [
+      1574.96,
+      1763.88,
+      -1,
+      "cross"
+     ],
+     [
+      1574.15,
+      1762.63,
+      -1.004,
+      "mound"
+     ],
+     [
+      1573.26,
+      1761.18,
+      -1.036,
+      "cross"
+     ],
+     [
+      1580.32,
+      1777.64,
+      -1.006,
+      "cross"
+     ],
+     [
+      1579.38,
+      1776.27,
+      -0.983,
+      "mound"
+     ],
+     [
+      1578.52,
+      1774.87,
+      -1.019,
+      "headstone"
+     ],
+     [
+      1577.72,
+      1773.57,
+      -0.995,
+      "cross"
+     ],
+     [
+      1576.99,
+      1772.21,
+      -1.044,
+      "headstone"
+     ],
+     [
+      1572.72,
+      1765.33,
+      -1.054,
+      "headstone"
+     ],
+     [
+      1570.99,
+      1762.66,
+      -1.047,
+      "cross"
+     ],
+     [
+      1570.21,
+      1761.23,
+      -1.041,
+      "slab"
+     ],
+     [
+      1577.89,
+      1779.06,
+      -1.022,
+      "slab"
+     ],
+     [
+      1577.1,
+      1777.68,
+      -1.01,
+      "cross"
+     ],
+     [
+      1576.31,
+      1776.39,
+      -1.051,
+      "headstone"
+     ],
+     [
+      1575.45,
+      1775.11,
+      -1.045,
+      "headstone"
+     ],
+     [
+      1574.5,
+      1773.62,
+      -0.99,
+      "cross"
+     ],
+     [
+      1570.3,
+      1766.88,
+      -0.987,
+      "cross"
+     ],
+     [
+      1569.56,
+      1765.56,
+      -1.043,
+      "headstone"
+     ],
+     [
+      1568.86,
+      1764.13,
+      -1.006,
+      "tomb"
+     ],
+     [
+      1567.92,
+      1762.69,
+      -1,
+      "mound"
+     ],
+     [
+      1574.87,
+      1779,
+      -1.021,
+      "headstone"
+     ],
+     [
+      1574.11,
+      1777.75,
+      -1.013,
+      "headstone"
+     ],
+     [
+      1573.15,
+      1776.42,
+      -0.984,
+      "cross"
+     ],
+     [
+      1572.34,
+      1775.02,
+      -0.997,
+      "headstone"
+     ],
+     [
+      1568.86,
+      1769.56,
+      -1.049,
+      "cross"
+     ],
+     [
+      1568.03,
+      1768.35,
+      -1.016,
+      "cross"
+     ],
+     [
+      1567.36,
+      1766.95,
+      -1.032,
+      "headstone"
+     ],
+     [
+      1566.38,
+      1765.56,
+      -1.018,
+      "cross"
+     ],
+     [
+      1565.64,
+      1764.19,
+      -1.028,
+      "mound"
+     ],
+     [
+      1573.36,
+      1781.94,
+      -0.983,
+      "mound"
+     ],
+     [
+      1572.55,
+      1780.55,
+      -0.978,
+      "headstone"
+     ],
+     [
+      1571.74,
+      1779.08,
+      -1.054,
+      "cross"
+     ],
+     [
+      1570.94,
+      1777.85,
+      -0.98,
+      "cross"
+     ],
+     [
+      1570.11,
+      1776.42,
+      -1.046,
+      "headstone"
+     ],
+     [
+      1565.81,
+      1769.79,
+      -1.025,
+      "mound"
+     ],
+     [
+      1565.05,
+      1768.31,
+      -1.012,
+      "mound"
+     ],
+     [
+      1564.12,
+      1766.82,
+      -0.999,
+      "headstone"
+     ],
+     [
+      1563.35,
+      1765.5,
+      -1.049,
+      "cross"
+     ],
+     [
+      1571.03,
+      1783.38,
+      -0.994,
+      "mound"
+     ],
+     [
+      1570.15,
+      1782,
+      -0.987,
+      "tomb"
+     ],
+     [
+      1569.41,
+      1780.57,
+      -0.988,
+      "headstone"
+     ],
+     [
+      1568.67,
+      1779.32,
+      -1.014,
+      "slab"
+     ],
+     [
+      1567.62,
+      1777.82,
+      -0.983,
+      "mound"
+     ],
+     [
+      1564.32,
+      1772.4,
+      -1.023,
+      "slab"
+     ],
+     [
+      1563.39,
+      1771.1,
+      -0.985,
+      "cross"
+     ],
+     [
+      1562.71,
+      1769.77,
+      -1.016,
+      "cross"
+     ],
+     [
+      1561.93,
+      1768.43,
+      -1.023,
+      "mound"
+     ],
+     [
+      1560.88,
+      1766.96,
+      -1.03,
+      "cross"
+     ],
+     [
+      1567.99,
+      1783.33,
+      -1.02,
+      "headstone"
+     ],
+     [
+      1567.05,
+      1781.9,
+      -1.039,
+      "cross"
+     ],
+     [
+      1566.24,
+      1780.63,
+      -1.013,
+      "cross"
+     ],
+     [
+      1562.05,
+      1773.91,
+      -1.036,
+      "cross"
+     ],
+     [
+      1561.29,
+      1772.53,
+      -1.039,
+      "headstone"
+     ],
+     [
+      1560.37,
+      1771.2,
+      -1.006,
+      "tomb"
+     ],
+     [
+      1559.65,
+      1769.76,
+      -1,
+      "tomb"
+     ],
+     [
+      1558.57,
+      1768.38,
+      -0.981,
+      "headstone"
+     ]
+    ],
+    "graveStyles": [
+     "headstone",
+     "cross",
+     "slab",
+     "mound",
+     "tomb"
+    ],
+    "level": 1176.38,
+    "slots": [
+     {
+      "kind": "gravedigger",
+      "x": 1559.54,
+      "z": 1778.93,
+      "r": 1.5,
+      "yaw": 2.1242
+     }
+    ]
+   }
+  },
+  {
+   "kind": "wall",
+   "id": "coldwater_graveyard_wall_0",
+   "x": 1559.04,
+   "z": 1777.36,
+   "yaw": 0,
+   "data": {
+    "setPiece": "coldwater_graveyard",
+    "h": 0.95,
+    "material": "drystone",
+    "pts": [
+     [
+      1559.04,
+      1777.36,
+      1176.37
+     ],
+     [
+      1553.78,
+      1768.86,
+      1176.38
+     ],
+     [
+      1582.03,
+      1751.41,
+      1176.38
+     ],
+     [
+      1594.22,
+      1771.14,
+      1176.34
+     ],
+     [
+      1565.97,
+      1788.59,
+      1176.38
+     ],
+     [
+      1560.72,
+      1780.09,
+      1176.38
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "set_building",
+   "id": "coldwater_graveyard_bldg_0",
+   "x": 1583.91,
+   "z": 1763.88,
+   "yaw": -1.0174,
+   "data": {
+    "setPiece": "coldwater_graveyard",
+    "piece": "graveyard",
+    "want": "chapel",
+    "w": 5.5,
+    "d": 7.5,
+    "angle": 2.5882,
+    "front": 8.8714,
+    "culture": "halfling",
+    "label": "Chapel",
+    "lit": false,
+    "ground": 1176.38
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "netherby_graveyard",
+   "x": 651,
+   "z": 680,
+   "yaw": -0.0704,
+   "data": {
+    "piece": "graveyard",
+    "name": "Netherby Graveyard",
+    "town": "Netherby",
+    "auto": true,
+    "r": 12.5,
+    "poly": [
+     [
+      659.18,
+      670.55
+     ],
+     [
+      657.78,
+      690.5
+     ],
+     [
+      642.82,
+      689.45
+     ],
+     [
+      644.22,
+      669.5
+     ]
+    ],
+    "w": 20,
+    "d": 15,
+    "angle": 1.6412,
+    "gate": {
+     "x": 658.48,
+     "z": 680.53,
+     "width": 3.2,
+     "yaw": -1.6412
+    },
+    "graves": [
+     [
+      656.92,
+      672.52,
+      1.499,
+      "tomb"
+     ],
+     [
+      654.21,
+      672.53,
+      1.527,
+      "headstone"
+     ],
+     [
+      651.39,
+      672.31,
+      1.488,
+      "headstone"
+     ],
+     [
+      648.65,
+      672.03,
+      1.504,
+      "mound"
+     ],
+     [
+      656.78,
+      674.31,
+      1.532,
+      "slab"
+     ],
+     [
+      654.11,
+      673.98,
+      1.49,
+      "tomb"
+     ],
+     [
+      651.22,
+      673.78,
+      1.48,
+      "cross"
+     ],
+     [
+      648.56,
+      673.64,
+      1.538,
+      "tomb"
+     ],
+     [
+      656.71,
+      675.69,
+      1.535,
+      "mound"
+     ],
+     [
+      653.94,
+      675.64,
+      1.504,
+      "mound"
+     ],
+     [
+      651.15,
+      675.48,
+      1.508,
+      "mound"
+     ],
+     [
+      648.49,
+      675.26,
+      1.515,
+      "cross"
+     ],
+     [
+      656.42,
+      677.33,
+      1.469,
+      "headstone"
+     ],
+     [
+      653.8,
+      677.24,
+      1.514,
+      "mound"
+     ],
+     [
+      651.14,
+      677.07,
+      1.505,
+      "slab"
+     ],
+     [
+      655.93,
+      683.75,
+      1.467,
+      "headstone"
+     ],
+     [
+      648.01,
+      683.23,
+      1.519,
+      "mound"
+     ],
+     [
+      656.06,
+      685.34,
+      1.523,
+      "tomb"
+     ],
+     [
+      653.36,
+      685.11,
+      1.518,
+      "headstone"
+     ],
+     [
+      650.49,
+      685.03,
+      1.495,
+      "tomb"
+     ],
+     [
+      647.84,
+      684.85,
+      1.492,
+      "cross"
+     ],
+     [
+      655.89,
+      686.87,
+      1.489,
+      "headstone"
+     ],
+     [
+      653.24,
+      686.75,
+      1.501,
+      "headstone"
+     ],
+     [
+      650.38,
+      686.56,
+      1.492,
+      "cross"
+     ],
+     [
+      647.63,
+      686.29,
+      1.468,
+      "cross"
+     ]
+    ],
+    "graveStyles": [
+     "headstone",
+     "cross",
+     "slab",
+     "mound",
+     "tomb"
+    ],
+    "level": 946.97,
+    "slots": [
+     {
+      "kind": "gravedigger",
+      "x": 658.48,
+      "z": 680.53,
+      "r": 1.5,
+      "yaw": -1.6412
+     }
+    ]
+   }
+  },
+  {
+   "kind": "wall",
+   "id": "netherby_graveyard_wall_0",
+   "x": 657.97,
+   "z": 682.1,
+   "yaw": 0,
+   "data": {
+    "setPiece": "netherby_graveyard",
+    "h": 0.95,
+    "material": "drystone",
+    "pts": [
+     [
+      657.97,
+      682.1,
+      946.97
+     ],
+     [
+      657.41,
+      690.08,
+      946.93
+     ],
+     [
+      643.24,
+      689.08,
+      946.96
+     ],
+     [
+      644.59,
+      669.92,
+      946.99
+     ],
+     [
+      658.76,
+      670.92,
+      946.97
+     ],
+     [
+      658.19,
+      678.9,
+      946.97
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "coldwater_belt",
+   "x": 1474,
+   "z": 1846,
+   "yaw": 0,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Coldwater",
+    "auto": true,
+    "r": 210,
+    "fields": 10,
+    "slots": []
+   }
+  },
+  {
+   "kind": "field",
+   "id": "coldwater_belt_field_0",
+   "x": 1434.7,
+   "z": 1738.99,
+   "yaw": 1.9228,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Coldwater",
+    "auto": true,
+    "setPiece": "coldwater_belt",
+    "crop": "crop",
+    "grows": "turnips",
+    "poly": [
+     [
+      1408.63,
+      1734.72
+     ],
+     [
+      1451.81,
+      1718.86
+     ],
+     [
+      1460.77,
+      1743.26
+     ],
+     [
+      1417.59,
+      1759.12
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 5.9312,
+    "furrowAngle": 5.9312,
+    "boundary": "hedge",
+    "gate": {
+     "x": 1439.18,
+     "z": 1751.19,
+     "width": 4,
+     "yaw": -2.7896
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "coldwater_belt_field_0_hedge_0",
+   "x": 1437.03,
+   "z": 1751.13,
+   "yaw": 0,
+   "data": {
+    "setPiece": "coldwater_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      1437.03,
+      1751.13,
+      1171.83
+     ],
+     [
+      1418.07,
+      1758.09,
+      1169.1
+     ],
+     [
+      1409.65,
+      1735.19,
+      1164.93
+     ],
+     [
+      1451.33,
+      1719.88,
+      1171.62
+     ],
+     [
+      1459.74,
+      1742.79,
+      1174.76
+     ],
+     [
+      1440.78,
+      1749.75,
+      1172.38
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "coldwater_belt_field_1",
+   "x": 1488.93,
+   "z": 1732.98,
+   "yaw": 1.4394,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Coldwater",
+    "auto": true,
+    "setPiece": "coldwater_belt",
+    "crop": "pasture",
+    "grows": "sheep",
+    "poly": [
+     [
+      1467.83,
+      1717.08
+     ],
+     [
+      1513.44,
+      1723.11
+     ],
+     [
+      1510.03,
+      1748.88
+     ],
+     [
+      1464.43,
+      1742.86
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 6.4145,
+    "furrowAngle": 6.4145,
+    "boundary": "fence",
+    "gate": {
+     "x": 1487.23,
+     "z": 1745.87,
+     "width": 3,
+     "yaw": 3.0102
+    }
+   }
+  },
+  {
+   "kind": "fence",
+   "id": "coldwater_belt_field_1_fence_0",
+   "x": 1485.85,
+   "z": 1744.88,
+   "yaw": 0,
+   "data": {
+    "setPiece": "coldwater_belt",
+    "h": 1.1,
+    "pts": [
+     [
+      1485.85,
+      1744.88,
+      1175.07
+     ],
+     [
+      1465.32,
+      1742.17,
+      1173.72
+     ],
+     [
+      1468.52,
+      1717.98,
+      1172.66
+     ],
+     [
+      1512.54,
+      1723.79,
+      1175.88
+     ],
+     [
+      1509.34,
+      1747.98,
+      1176.62
+     ],
+     [
+      1488.82,
+      1745.27,
+      1175.27
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "coldwater_belt_field_2",
+   "x": 1587.99,
+   "z": 1847.2,
+   "yaw": -0.0105,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Coldwater",
+    "auto": true,
+    "setPiece": "coldwater_belt",
+    "crop": "pasture",
+    "grows": "sheep",
+    "poly": [
+     [
+      1601.23,
+      1824.34
+     ],
+     [
+      1600.75,
+      1870.33
+     ],
+     [
+      1574.75,
+      1870.06
+     ],
+     [
+      1575.24,
+      1824.06
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 7.8645,
+    "furrowAngle": 7.8645,
+    "boundary": "fence",
+    "gate": {
+     "x": 1574.99,
+     "z": 1847.06,
+     "width": 3,
+     "yaw": 1.5603
+    }
+   }
+  },
+  {
+   "kind": "fence",
+   "id": "coldwater_belt_field_2_fence_0",
+   "x": 1575.81,
+   "z": 1845.57,
+   "yaw": 0,
+   "data": {
+    "setPiece": "coldwater_belt",
+    "h": 1.1,
+    "pts": [
+     [
+      1575.81,
+      1845.57,
+      1176.9
+     ],
+     [
+      1576.03,
+      1824.87,
+      1176.54
+     ],
+     [
+      1600.43,
+      1825.13,
+      1172.52
+     ],
+     [
+      1599.96,
+      1869.53,
+      1173.68
+     ],
+     [
+      1575.56,
+      1869.27,
+      1177.41
+     ],
+     [
+      1575.78,
+      1848.57,
+      1176.95
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "coldwater_belt_field_3",
+   "x": 1326.27,
+   "z": 1854.96,
+   "yaw": -3.081,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Coldwater",
+    "auto": true,
+    "setPiece": "coldwater_belt",
+    "crop": "field",
+    "grows": "tilled",
+    "poly": [
+     [
+      1314.69,
+      1878.7
+     ],
+     [
+      1311.9,
+      1832.79
+     ],
+     [
+      1337.86,
+      1831.21
+     ],
+     [
+      1340.64,
+      1877.13
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 4.6518,
+    "furrowAngle": 4.6518,
+    "boundary": "none"
+   }
+  },
+  {
+   "kind": "field",
+   "id": "coldwater_belt_field_4",
+   "x": 1451.45,
+   "z": 1699.73,
+   "yaw": 1.7238,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Coldwater",
+    "auto": true,
+    "setPiece": "coldwater_belt",
+    "crop": "pasture",
+    "grows": "cattle",
+    "poly": [
+     [
+      1426.74,
+      1690.38
+     ],
+     [
+      1472.2,
+      1683.38
+     ],
+     [
+      1476.16,
+      1709.07
+     ],
+     [
+      1430.7,
+      1716.08
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 6.1302,
+    "furrowAngle": 6.1302,
+    "boundary": "fence",
+    "gate": {
+     "x": 1453.43,
+     "z": 1712.58,
+     "width": 3,
+     "yaw": -2.9886
+    }
+   }
+  },
+  {
+   "kind": "fence",
+   "id": "coldwater_belt_field_4_fence_0",
+   "x": 1451.83,
+   "z": 1712.01,
+   "yaw": 0,
+   "data": {
+    "setPiece": "coldwater_belt",
+    "h": 1.1,
+    "pts": [
+     [
+      1451.83,
+      1712.01,
+      1172.01
+     ],
+     [
+      1431.37,
+      1715.17,
+      1169.09
+     ],
+     [
+      1427.65,
+      1691.05,
+      1165.54
+     ],
+     [
+      1471.53,
+      1684.29,
+      1171.25
+     ],
+     [
+      1475.25,
+      1708.4,
+      1174.63
+     ],
+     [
+      1454.79,
+      1711.56,
+      1172.38
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "coldwater_belt_field_5",
+   "x": 1505.81,
+   "z": 1701.46,
+   "yaw": 1.3542,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Coldwater",
+    "auto": true,
+    "setPiece": "coldwater_belt",
+    "crop": "pasture",
+    "grows": "sheep",
+    "poly": [
+     [
+      1486.14,
+      1683.82
+     ],
+     [
+      1531.07,
+      1693.71
+     ],
+     [
+      1525.48,
+      1719.1
+     ],
+     [
+      1480.56,
+      1709.21
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 6.4998,
+    "furrowAngle": 6.4998,
+    "boundary": "fence",
+    "gate": {
+     "x": 1503.02,
+     "z": 1714.16,
+     "width": 3,
+     "yaw": 2.925
+    }
+   }
+  },
+  {
+   "kind": "fence",
+   "id": "coldwater_belt_field_5_fence_0",
+   "x": 1501.73,
+   "z": 1713.05,
+   "yaw": 0,
+   "data": {
+    "setPiece": "coldwater_belt",
+    "h": 1.1,
+    "pts": [
+     [
+      1501.73,
+      1713.05,
+      1175.1
+     ],
+     [
+      1481.51,
+      1708.6,
+      1173.2
+     ],
+     [
+      1486.75,
+      1684.77,
+      1169.53
+     ],
+     [
+      1530.12,
+      1694.32,
+      1173.57
+     ],
+     [
+      1524.87,
+      1718.15,
+      1177.69
+     ],
+     [
+      1504.66,
+      1713.7,
+      1175.46
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "coldwater_belt_field_6",
+   "x": 1293.64,
+   "z": 1870.4,
+   "yaw": -3.0071,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Coldwater",
+    "auto": true,
+    "setPiece": "coldwater_belt",
+    "crop": "field",
+    "grows": "tilled",
+    "poly": [
+     [
+      1283.84,
+      1894.94
+     ],
+     [
+      1277.68,
+      1849.35
+     ],
+     [
+      1303.44,
+      1845.87
+     ],
+     [
+      1309.61,
+      1891.45
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 4.5779,
+    "furrowAngle": 4.5779,
+    "boundary": "hedge",
+    "gate": {
+     "x": 1306.53,
+     "z": 1868.66,
+     "width": 4,
+     "yaw": -1.4363
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "coldwater_belt_field_6_hedge_0",
+   "x": 1306,
+   "z": 1870.75,
+   "yaw": 0,
+   "data": {
+    "setPiece": "coldwater_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      1306,
+      1870.75,
+      1144.87
+     ],
+     [
+      1308.71,
+      1890.77,
+      1144.67
+     ],
+     [
+      1284.53,
+      1894.04,
+      1139.75
+     ],
+     [
+      1278.58,
+      1850.04,
+      1139.14
+     ],
+     [
+      1302.76,
+      1846.77,
+      1144.28
+     ],
+     [
+      1305.46,
+      1866.78,
+      1144.8
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "coldwater_belt_field_7",
+   "x": 1560.27,
+   "z": 1685.75,
+   "yaw": 1.077,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Coldwater",
+    "auto": true,
+    "setPiece": "coldwater_belt",
+    "crop": "pasture",
+    "grows": "cattle",
+    "poly": [
+     [
+      1546.18,
+      1663.4
+     ],
+     [
+      1586.68,
+      1685.2
+     ],
+     [
+      1574.36,
+      1708.09
+     ],
+     [
+      1533.86,
+      1686.29
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 6.777,
+    "furrowAngle": 6.777,
+    "boundary": "fence",
+    "gate": {
+     "x": 1554.11,
+     "z": 1697.19,
+     "width": 3,
+     "yaw": 2.6478
+    }
+   }
+  },
+  {
+   "kind": "fence",
+   "id": "coldwater_belt_field_7_fence_0",
+   "x": 1553.17,
+   "z": 1695.78,
+   "yaw": 0,
+   "data": {
+    "setPiece": "coldwater_belt",
+    "h": 1.1,
+    "pts": [
+     [
+      1553.17,
+      1695.78,
+      1172.49
+     ],
+     [
+      1534.94,
+      1685.96,
+      1169.54
+     ],
+     [
+      1546.51,
+      1664.48,
+      1165.84
+     ],
+     [
+      1585.6,
+      1685.53,
+      1173.65
+     ],
+     [
+      1574.03,
+      1707.01,
+      1176.3
+     ],
+     [
+      1555.81,
+      1697.2,
+      1172.95
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "coldwater_belt_field_8",
+   "x": 1605.57,
+   "z": 1720.25,
+   "yaw": 0.7628,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Coldwater",
+    "auto": true,
+    "setPiece": "coldwater_belt",
+    "crop": "pasture",
+    "grows": "sheep",
+    "poly": [
+     [
+      1599.07,
+      1694.64
+     ],
+     [
+      1630.86,
+      1727.89
+     ],
+     [
+      1612.06,
+      1745.86
+     ],
+     [
+      1580.28,
+      1712.6
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 7.0912,
+    "furrowAngle": 7.0912,
+    "boundary": "fence",
+    "gate": {
+     "x": 1596.17,
+     "z": 1729.23,
+     "width": 3,
+     "yaw": 2.3336
+    }
+   }
+  },
+  {
+   "kind": "fence",
+   "id": "coldwater_belt_field_8_fence_0",
+   "x": 1595.71,
+   "z": 1727.59,
+   "yaw": 0,
+   "data": {
+    "setPiece": "coldwater_belt",
+    "h": 1.1,
+    "pts": [
+     [
+      1595.71,
+      1727.59,
+      1177.08
+     ],
+     [
+      1581.41,
+      1712.63,
+      1177.33
+     ],
+     [
+      1599.05,
+      1695.77,
+      1180.76
+     ],
+     [
+      1629.73,
+      1727.87,
+      1179.65
+     ],
+     [
+      1612.09,
+      1744.73,
+      1176.21
+     ],
+     [
+      1597.79,
+      1729.76,
+      1177.01
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "coldwater_belt_field_9",
+   "x": 1653.07,
+   "z": 1878.53,
+   "yaw": -0.1797,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Coldwater",
+    "auto": true,
+    "setPiece": "coldwater_belt",
+    "crop": "field",
+    "grows": "tilled",
+    "poly": [
+     [
+      1669.97,
+      1858.22
+     ],
+     [
+      1661.75,
+      1903.48
+     ],
+     [
+      1636.17,
+      1898.83
+     ],
+     [
+      1644.39,
+      1853.57
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 8.0337,
+    "furrowAngle": 8.0337,
+    "boundary": "none"
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "netherby_belt",
+   "x": 711,
+   "z": 732,
+   "yaw": 0,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Netherby",
+    "auto": true,
+    "r": 166,
+    "fields": 5,
+    "slots": []
+   }
+  },
+  {
+   "kind": "field",
+   "id": "netherby_belt_field_0",
+   "x": 779.89,
+   "z": 744.39,
+   "yaw": -0.1779,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Netherby",
+    "auto": true,
+    "setPiece": "netherby_belt",
+    "crop": "crop",
+    "grows": "cabbages",
+    "poly": [
+     [
+      796.76,
+      724.06
+     ],
+     [
+      788.62,
+      769.33
+     ],
+     [
+      763.03,
+      764.73
+     ],
+     [
+      771.17,
+      719.45
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 8.0319,
+    "furrowAngle": 8.0319,
+    "boundary": "hedge",
+    "gate": {
+     "x": 767.1,
+     "z": 742.09,
+     "width": 4,
+     "yaw": 1.3928
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "netherby_belt_field_0_hedge_0",
+   "x": 768.24,
+   "z": 740.26,
+   "yaw": 0,
+   "data": {
+    "setPiece": "netherby_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      768.24,
+      740.26,
+      942.95
+     ],
+     [
+      771.82,
+      720.38,
+      941.57
+     ],
+     [
+      795.83,
+      724.7,
+      941.31
+     ],
+     [
+      787.97,
+      768.4,
+      943.92
+     ],
+     [
+      763.96,
+      764.08,
+      944.54
+     ],
+     [
+      767.53,
+      744.2,
+      943.22
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "netherby_belt_field_1",
+   "x": 729.41,
+   "z": 629.64,
+   "yaw": 1.3928,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Netherby",
+    "auto": true,
+    "setPiece": "netherby_belt",
+    "crop": "crop",
+    "grows": "cabbages",
+    "poly": [
+     [
+      709.07,
+      612.78
+     ],
+     [
+      754.35,
+      620.92
+     ],
+     [
+      749.74,
+      646.51
+     ],
+     [
+      704.47,
+      638.37
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 6.4611,
+    "furrowAngle": 6.4611,
+    "boundary": "hedge",
+    "gate": {
+     "x": 727.11,
+     "z": 642.44,
+     "width": 4,
+     "yaw": 2.9636
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "netherby_belt_field_1_hedge_0",
+   "x": 725.28,
+   "z": 641.3,
+   "yaw": 0,
+   "data": {
+    "setPiece": "netherby_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      725.28,
+      641.3,
+      936.76
+     ],
+     [
+      705.4,
+      637.72,
+      939.06
+     ],
+     [
+      709.72,
+      613.71,
+      937.93
+     ],
+     [
+      753.42,
+      621.56,
+      933.72
+     ],
+     [
+      749.1,
+      645.58,
+      934.34
+     ],
+     [
+      729.22,
+      642,
+      936.42
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "netherby_belt_field_2",
+   "x": 608.64,
+   "z": 713.59,
+   "yaw": 2.9636,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Netherby",
+    "auto": true,
+    "setPiece": "netherby_belt",
+    "crop": "pasture",
+    "grows": "sheep",
+    "poly": [
+     [
+      591.78,
+      733.93
+     ],
+     [
+      599.92,
+      688.65
+     ],
+     [
+      625.51,
+      693.26
+     ],
+     [
+      617.37,
+      738.53
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 11.1735,
+    "furrowAngle": 11.1735,
+    "boundary": "fence",
+    "gate": {
+     "x": 621.44,
+     "z": 715.89,
+     "width": 3,
+     "yaw": -1.7487
+    }
+   }
+  },
+  {
+   "kind": "fence",
+   "id": "netherby_belt_field_2_fence_0",
+   "x": 620.38,
+   "z": 717.23,
+   "yaw": 0,
+   "data": {
+    "setPiece": "netherby_belt",
+    "h": 1.1,
+    "pts": [
+     [
+      620.38,
+      717.23,
+      943.37
+     ],
+     [
+      616.72,
+      737.6,
+      942.83
+     ],
+     [
+      592.71,
+      733.28,
+      939.31
+     ],
+     [
+      600.56,
+      689.58,
+      940.15
+     ],
+     [
+      624.58,
+      693.9,
+      944.11
+     ],
+     [
+      620.92,
+      714.27,
+      943.51
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "netherby_belt_field_3",
+   "x": 735.43,
+   "z": 596.18,
+   "yaw": 1.3928,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Netherby",
+    "auto": true,
+    "setPiece": "netherby_belt",
+    "crop": "crop",
+    "grows": "cabbages",
+    "poly": [
+     [
+      715.09,
+      579.31
+     ],
+     [
+      760.37,
+      587.46
+     ],
+     [
+      755.76,
+      613.05
+     ],
+     [
+      710.49,
+      604.9
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 6.4611,
+    "furrowAngle": 6.4611,
+    "boundary": "none"
+   }
+  },
+  {
+   "kind": "field",
+   "id": "netherby_belt_field_4",
+   "x": 573.37,
+   "z": 721.9,
+   "yaw": 3.0684,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Netherby",
+    "auto": true,
+    "setPiece": "netherby_belt",
+    "crop": "field",
+    "grows": "tilled",
+    "poly": [
+     [
+      558.72,
+      743.89
+     ],
+     [
+      562.09,
+      698.01
+     ],
+     [
+      588.02,
+      699.92
+     ],
+     [
+      584.65,
+      745.79
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 11.0688,
+    "furrowAngle": 11.0688,
+    "boundary": "none"
    }
   }
  ]

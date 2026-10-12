@@ -19,6 +19,9 @@ import { profile, taperedCurve } from './chibi2-geometry.js';
  */
 import { buildFarholdHeld, buildFarholdOffhand, strapShield } from './chibi2-weapons.js';
 import { HELD_WEAPON_IDS } from './chibi2-weapon-ids.js';
+// PLAY-TEST 5 (T23): the g5_ models are built by chibi2-gear5.js (called by chibi2.js after this file);
+// the three builders below that have a catch-all default step aside for a g5_ id, and nothing else changes.
+import { isG5 } from './chibi2-gear5-ids.js';
 
 const low = () => new THREE.SphereGeometry(1, 8, 5);
 const gem = () => new THREE.IcosahedronGeometry(1, 0);
@@ -60,7 +63,7 @@ function drape(c, color, { x = 0, top, length, width, bottom, zTop, zBottom, sx 
 // ---------------------------------------------------------------- held (right hand)
 export function buildHeld(a, c) {
   const id = a.held.id, hc = a.held.color, { add, trim, leather, steel } = c;
-  if (id === 'none') return;
+  if (id === 'none' || isG5(id)) return;
   if (buildFarholdHeld(a, c)) return;            // an `fh_` weapon; everything below is unchanged
   const R = 'handR', z = 0.055;
   const shaft = (bone, from, to, r, color) => add(profile([[from, r, r], [to, r, r]], 8), bone, color, { position: [0, 0, z] });
@@ -222,7 +225,7 @@ export function buildHeld(a, c) {
 // ---------------------------------------------------------------- off-hand (left hand)
 export function buildOffhand(a, c) {
   const id = a.offhand.id, oc = a.offhand.color, { add, trim, leather, steel, W, T } = c, L = 'handL';
-  if (id === 'none') return;
+  if (id === 'none' || isG5(id)) return;
   if (buildFarholdOffhand(a, c)) return;         // an `fh_` shield, strapped to the forearm
   if (id === 'dagger') { add(profile([[-0.22, 0.015, 0.015], [0.15, 0.015, 0.015]], 5), L, steel, { position: [0, 0.01, 0.08], metal: true }); return; }
   if (id === 'book') {
@@ -275,6 +278,31 @@ export function buildOffhand(a, c) {
     for (const x of [-1, 1]) add(new THREE.SphereGeometry(0.009, 5, 4), L, '#140808', { position: [x * 0.017, 0.25, 0.14] });
     for (const y of [0.05, 0.12, 0.19]) add(new THREE.TorusGeometry(0.045, 0.006, 4, 12), L, cord, { position: [0, y, 0.10], rotation: [Math.PI / 2, 0, 0] });
     for (const x of [-1, 1]) add(new THREE.ConeGeometry(0.015, 0.05, 4), L, tone(straw, 0.8), { position: [x * 0.115, 0.14, 0.10], rotation: [0, 0, x * Math.PI / 2] });
+    return;
+  }
+  if (id === 'tv_ward') {
+    // PLAY-TEST 4 (S17): a WARDED FOCUS — a rune ring standing on a short handle, a hovering crystal
+    // in its middle and four tabs round the rim. Built up +y like the orb; held upright the same way.
+    const P = [0, 0.19, 0.10], glow = oc && oc !== '#9aa3ad' ? oc : '#9fe0ff', brass = '#c8a040';
+    add(new THREE.CylinderGeometry(0.02, 0.016, 0.12, 6), L, tone(brass, 0.7), { position: [0, 0.04, 0.10], metal: true });
+    add(new THREE.TorusGeometry(0.095, 0.012, 5, 18), L, brass, { position: P, metal: true });
+    for (let k = 0; k < 4; k++) { const t = k / 4 * Math.PI * 2 + Math.PI / 4; add(new THREE.BoxGeometry(0.03, 0.03, 0.02), L, lift(brass, 0.2), { position: [P[0] + Math.cos(t) * 0.1, P[1] + Math.sin(t) * 0.1, P[2]], rotation: [0, 0, t], metal: true }); }
+    add(new THREE.OctahedronGeometry(1), L, glow, { position: P, scale: [0.035, 0.055, 0.035] });
+    add(new THREE.TorusGeometry(0.06, 0.004, 4, 16), L, lift(glow, 0.5), { position: P, rotation: [0, 0, 0.6] });
+    return;
+  }
+  if (id === 'tv_totem') {
+    // PLAY-TEST 4 (S17): a TOTEM — a carved stack of three faces on a haft, a beak on top, two feathers.
+    const wood2 = oc && oc !== '#9aa3ad' ? oc : '#8a6a42', paint = '#b03a2a', teal = '#2a8a8a';
+    add(new THREE.CylinderGeometry(0.02, 0.02, 0.12, 6), L, wood, { position: [0, 0.03, 0.10] });
+    for (let k = 0; k < 3; k++) {
+      const y = 0.11 + k * 0.065;
+      add(new THREE.CylinderGeometry(0.042 - k * 0.004, 0.046 - k * 0.004, 0.06, 8), L, k % 2 ? tone(wood2, 0.85) : wood2, { position: [0, y, 0.10] });
+      for (const x of [-1, 1]) add(new THREE.BoxGeometry(0.012, 0.01, 0.01), L, k % 2 ? teal : paint, { position: [x * 0.016, y + 0.01, 0.10 + 0.043 - k * 0.004] });
+      add(new THREE.BoxGeometry(0.03, 0.006, 0.01), L, '#1a1008', { position: [0, y - 0.015, 0.10 + 0.043 - k * 0.004] });
+    }
+    add(new THREE.ConeGeometry(0.02, 0.06, 4), L, paint, { position: [0, 0.31, 0.13], rotation: [Math.PI / 2, 0, 0] });
+    for (const x of [-1, 1]) add(new THREE.BoxGeometry(0.012, 0.09, 0.004), L, x < 0 ? '#e8e0c8' : teal, { position: [x * 0.05, 0.3, 0.10], rotation: [0, 0, -x * 0.5] });
     return;
   }
   /**
@@ -372,7 +400,7 @@ export function buildMarks(a, c) {
 // ---------------------------------------------------------------- capes
 export function buildCape(a, c) {
   const id = a.cape.id, cc = a.cape.color, { add, trim, W, T } = c;
-  if (id === 'none') return;
+  if (id === 'none' || isG5(id)) return;
   const capelet = (low) => {
     add(profile([[low * T, 0.30 * W, 0.215 * W, -0.01], [0.22 * T, 0.29 * W, 0.205 * W, -0.01], [0.30 * T, 0.26 * W, 0.18 * W, -0.012], [0.335 * T, 0.15, 0.12, -0.02], [0.37 * T, 0.09, 0.08, -0.02]], 16), 'chest', cc);
     add(profile([[low * T - 0.012, 0.305 * W, 0.22 * W, -0.01], [low * T + 0.01, 0.305 * W, 0.22 * W, -0.01]], 16), 'chest', tone(cc, 0.75));

@@ -20,6 +20,7 @@ import { applyStatus, incomingFrom, outgoingFrom, statusRef } from './farhold.js
 import { inside, segmentNear, wireShape, BODY_RADIUS } from './telegraph.js';
 import { monsterStrike, spawnMonster, applyModifier } from './monster-ai.js';
 import { taunt as threatTaunt, clearThreat } from './threat.js';
+import { affixSpecials } from './affixes.js';
 
 /** How a rank scales a monster's specials. */
 export const RANK_SCALE = {
@@ -28,6 +29,35 @@ export const RANK_SCALE = {
   rare: { dmg: 1.6, size: 1.35, wind: 0.9, extra: 2, cd: 0.75 },
   boss: { dmg: 1, size: 1, wind: 1, extra: 0, cd: 1 },
 };
+/**
+ * Play-test 1 P12 — "red zones give no time to react" — and play-test 3 R4 — "get inside its reach happens too
+ * fast to react". The least time, in seconds, between a telegraph appearing on the client (`tele` event, sent
+ * with the ability's call-out text at the START of the cast) and its damage:
+ *   * REACT by the caster's rank — the time a person needs to see the zone, read the call-out and move
+ *     (1.6 s for an ordinary monster, a little more for a champion/rare/boss whose hit is bigger);
+ *   * + LATENCY 0.25 s — the warning reaches the player one way late and the step back reaches the server one
+ *     way late (a 150-250 ms round trip at the owner's distance), so that much is never theirs to use;
+ *   * + BIG 0.4 s for a hit worth x2 or more, or 7 m+ across (further to run);
+ *   * + MECHANIC 0.8 s when the answer is not "step out": a stack / soak / safe spot, a ring or donut you
+ *     must step INTO, or a line-of-sight blast you must hide from behind an arena object — the call-out has
+ *     to be read and understood before anyone moves.
+ * Normal 1.85 s, boss 2.05 s, a boss's donut 2.85 s, a big boss donut 3.25 s. The data's own wind is kept
+ * where it is longer. tests/C/playtest3.test.mjs walks every script and every special.
+ */
+export const MIN_WIND = { normal: 1.6, champion: 1.7, rare: 1.8, boss: 1.8, big: 0.4, mechanic: 0.8, latency: 0.25 };
+/** True when the answer to a telegraph is not simply "step out of the red" (R4). */
+export function isMechanic(spec = {}) {
+  return spec.kind === 'stack' || spec.kind === 'soak' || spec.kind === 'safe' || spec.shape === 'donut' || spec.shape === 'ring' || !!spec.los;
+}
+export function minWindFor(e, spec = {}) {
+  const rank = e?.boss ? 'boss' : (e?.rank in MIN_WIND ? e.rank : 'normal');
+  let w = (MIN_WIND[rank] ?? MIN_WIND.normal) + MIN_WIND.latency;
+  const size = Math.max(spec.r ?? 0, (spec.len ?? 0) / 2);
+  if ((spec.damage ?? 1) >= 2 || size >= 7) w += MIN_WIND.big;
+  if (isMechanic(spec)) w += MIN_WIND.mechanic;
+  return w;
+}
+
 export const ENCOUNTER = {
   /** seconds with nobody alive in the arena before a boss resets */
   WIPE_SECONDS: 4,
@@ -61,7 +91,7 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
     const id = e.encounterId
       || D.byType?.[e.defId]
       || (e.boss ? D.defaults?.boss?.[roomKind] || D.defaults?.boss?.any : null)
-      || (e.rank === 'champion' || e.rank === 'rare' ? D.defaults?.elite?.[roomKind] || D.defaults?.elite?.any : null);
+      || ((e.rank === 'champion' || e.rank === 'rare') && !e.affixed ? D.defaults?.elite?.[roomKind] || D.defaults?.elite?.any : null);   // S4: a rolled one uses its modifiers
     return id && D.scripts[id] ? D.scripts[id] : null;
   }
   function specialsFor(e) {
@@ -79,7 +109,7 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
       e, script, started: false, startedAt: 0, phase: -1, bar: 0, enraged: false, softStacks: 0, dmgScale: 1,
       timers: {}, cast: null, adds: new Set(), shield: false, wipeFor: 0, fired: new Set(), counters: {},
       baseMaxHp: e.maxHp, homeX: e.home?.[0] ?? e.x, homeZ: e.home?.[1] ?? e.z,
-      abilities: script ? [] : specialsFor(e),
+      abilities: script ? [] : [...specialsFor(e), ...affixSpecials(field.room.engine, e.modifiers || [])],   // S4: a modifier's own special
       scale: script ? RANK_SCALE.boss : (RANK_SCALE[e.rank] || RANK_SCALE.normal),
     };
     if (script?.hpMult && script.hpMult !== 1) { e.maxHp = Math.round(e.maxHp * script.hpMult); e.hp = e.maxHp; st.baseMaxHp = e.maxHp; }
@@ -170,7 +200,7 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
     if (st.cast) {
       if (st.cast.ab.interrupt && (e.lastInterruptAt ?? -1) >= st.cast.start) { cancelCast(st, 'interrupt'); return false; }
       if (held) return false;
-      if (now() + 1e-9 >= st.cast.end) { const c = st.cast; st.cast = null; fire(st, c.ab, c.target); return false; }
+      if (now() + 1e-9 >= st.cast.end) { const c = st.cast; st.cast = null; fire(st, c.ab, c.target, { placed: true }); return false; }
       if (st.cast.target && !st.cast.ab.lock) e.facing = Math.atan2(st.cast.target.x - e.x, st.cast.target.z - e.z);
       e.anim = 'cast';
       return !st.cast.ab.move;
@@ -185,8 +215,13 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
       const castS = (ab.cast ?? 0) * (st.script ? 1 : st.scale.wind);
       say(st, ab.say, target);
       if (castS > 0) {
-        st.cast = { ab, start: now(), end: now() + castS, target };
+        st.cast = { ab, start: now(), end: now() + castS, target, tele: [], gone: false };
+        e.knockDx = 0; e.knockDz = 0; e.knockSeen = e.knockedAt;            // (Y12) only a knock DURING the cast counts
         emit({ t: 'castbar', id: e.id, ab: ab.id, name: ab.name || ab.id, ms: Math.round(castS * 1000), int: ab.interrupt ? 1 : undefined });
+        // play-test 1 P12: the ground is marked when the cast STARTS, not when it ends — the red zone
+        // is on the client for the whole cast bar plus the wind-up, and goes off at the same moment
+        // it always did (cast end + wind)
+        placeAll(st, ab, target, castS, st.cast);
         e.anim = 'cast';
         return !ab.move;
       }
@@ -199,25 +234,37 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
   function cancelCast(st, why) {
     if (!st.cast) return;
     emit({ t: 'castX', id: st.e.id, ab: st.cast.ab.id, why });
+    // the zones marked at cast start go away with the cast (and the ones still waiting to be placed)
+    st.cast.gone = true;
+    for (const t of st.cast.tele) if (!t.dead) { t.dead = true; emit({ t: 'teleR', id: t.id, x: 1, why: why === 'interrupt' ? 'interrupted' : why }); }
     if (why === 'interrupt') runActions(st, st.cast.ab.onInterrupt || []);
     st.cast = null;
   }
 
   // ================================================================== firing: placing the telegraphs
 
-  /** An ability goes off: each telegraph spec, expanded by count/pattern, placed on its timer. */
-  function fire(st, ab, target) {
+  /**
+   * Every telegraph of an ability, expanded by count/pattern, each placed on its timer. `lead` = the
+   * seconds of cast bar still to run (P12: zones are placed at cast START and go off `lead` later
+   * than they would have at cast end); `cast` collects them so an interrupt can take them away.
+   */
+  function placeAll(st, ab, target, lead = 0, cast = null) {
     const gid = ++teleN;
-    st.counters[ab.id] = (st.counters[ab.id] || 0) + 1;
     for (const spec of ab.telegraphs || []) {
       const n = (spec.count ?? 1) + (spec.rankExtra === false ? 0 : st.scale.extra * (spec.extraPerRank ?? 0));
       const anchors = anchorsFor(st, spec, target, n);
       anchors.forEach((a, i) => {
-        const place = () => placeTele(st, ab, spec, a, i, gid, target);
+        const place = () => { const t = placeTele(st, ab, spec, a, i, gid, target, lead); if (t && cast) cast.tele.push(t); };
         const delay = (spec.delay ?? 0) * i + (spec.after ?? 0);
-        if (delay > 0) combat.later(delay, () => { if (st.e.dying == null || spec.afterDeath) place(); }); else place();
+        if (delay > 0) combat.later(delay, () => { if (cast?.gone) return; if (st.e.dying == null || spec.afterDeath) place(); }); else place();
       });
     }
+  }
+
+  /** An ability goes off (its telegraphs were placed at cast start when it had a cast bar). */
+  function fire(st, ab, target, { placed = false } = {}) {
+    st.counters[ab.id] = (st.counters[ab.id] || 0) + 1;
+    if (!placed) placeAll(st, ab, target);
     if (ab.melee) monsterStrike(field, st.e, target, { mult: (ab.melee.damage ?? 1) * st.dmgScale * st.scale.dmg, kind: ab.id });
     if (ab.stackOn && target) stackDebuff(st, ab, target);
     runActions(st, ab.actions || [], target);
@@ -246,8 +293,8 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
     return out;
   }
 
-  function placeTele(st, ab, spec, anchor, i, gid, target) {
-    if (tele.length >= ENCOUNTER.MAX_LIVE) return;
+  function placeTele(st, ab, spec, anchor, i, gid, target, lead = 0) {
+    if (tele.length >= ENCOUNTER.MAX_LIVE) return null;
     const e = st.e, sc = st.script ? 1 : st.scale.size;
     let x, z;
     const at = spec.at || 'target';
@@ -261,7 +308,7 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
       x = st.homeX + Math.cos(ang) * d; z = st.homeZ + Math.sin(ang) * d;
     } else {
       const u = anchor.unit || target;
-      if (!u) return;
+      if (!u) return null;
       x = u.x; z = u.z;
       if (spec.lead) { x += (u.x - (u.lastX ?? u.x)) * spec.lead; z += (u.z - (u.lastZ ?? u.z)) * spec.lead; }
     }
@@ -282,15 +329,29 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
       r: spec.r != null ? spec.r * sc * grow : undefined, r2: spec.r2 != null ? spec.r2 * sc * grow : undefined,
       arc: spec.arc, len: spec.len != null ? spec.len * sc * grow : undefined, w: spec.w,
       follow: spec.follow && anchor.unit ? anchor.unit : null,
-      placed: now(), at: now() + (spec.wind ?? 1.5) * (st.script ? 1 : st.scale.wind), dead: false,
+      // owner feedback 10 (Y12): a shape that starts AT its caster rides the caster when a knock moves it
+      onCaster: at === 'self' && !anchor.point,
+      placed: now(), at: now() + lead + windFor(st, spec, lead), dead: false,
     };
     if (t.shape === 'line' && t.len == null) t.len = 20;
     if (t.shape === 'line' && t.w == null) t.w = 3;
     if (t.shape === 'cone' && t.arc == null) t.arc = Math.PI / 3;
     if (t.shape === 'cross' && t.w == null) t.w = 3;
+    // (Y12) a knock from BEFORE this wind-up began neither moves it nor breaks it
+    if (!tele.some(o => !o.dead && o.owner === e) && !st.cast?.tele?.length) { e.knockDx = 0; e.knockDz = 0; e.knockSeen = e.knockedAt; }
     tele.push(t);
     enc.stats.placed++;
     emit({ t: 'tele', id: t.id, s: e.id, ab: ab.id, k: t.kind, ms: Math.round((t.at - t.placed) * 1000), el: spec.element || undefined, follow: t.follow?.id, ...wireShape(t) });
+    return t;
+  }
+
+  /**
+   * P12 — the wind-up a telegraph gets: the data's (scaled by rank for ordinary specials), but never
+   * less than `minWindFor` once the cast bar still to run (`lead`) is counted in.
+   */
+  function windFor(st, spec, lead = 0) {
+    const data = (spec.wind ?? 1.5) * (st.script ? 1 : st.scale.wind);
+    return Math.max(data, minWindFor(st.e, spec) - lead);
   }
 
   // ================================================================== resolving
@@ -299,6 +360,7 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
     const t0 = now();
     // followed telegraphs ride their unit until they go off
     for (const t of tele) if (t.follow && !t.follow.dead) { t.x = t.follow.x; t.z = t.follow.z; }
+    knocks();
     // resolve everything due, a safe group all at once
     const due = tele.filter(t => !t.dead && t.at <= t0 + 1e-9);
     if (!due.length) { if (tele.some(t => t.dead)) prune(); return; }
@@ -311,6 +373,47 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
     for (const g of groups.values()) resolveSafe(g);
     prune();
   }
+  /**
+   * Owner feedback 10 (Y12, report #44): "if an enemy is knocked back during a cone effect (1) it should sometimes be
+   * interrupted and (2) the cone area should be knocked back too." Once a tick, for every monster a knock touched:
+   *   * its wind-up shapes anchored on itself move by exactly what the knock moved it (`teleM`);
+   *   * a fresh knock of `minPush` metres or more rolls against its RANK (combat.json `knockInterrupt`: an ordinary
+   *     monster often, a champion or a rare sometimes, a boss never) — an interrupt ends every one of its wind-ups at
+   *     once and its cast bar with them (the round-6 rule: the shape goes the moment the cast does).
+   */
+  const KI = () => field.room.engine.combatCfg?.knockInterrupt || null;
+  function knocks() {
+    const cfg = KI();
+    if (!cfg) return;
+    const owners = new Set();
+    for (const t of tele) if (!t.dead) owners.add(t.owner);
+    for (const st of states.values()) if (st.cast) owners.add(st.e);
+    for (const e of owners) {
+      const dx = e.knockDx || 0, dz = e.knockDz || 0;
+      if (dx || dz) {
+        e.knockDx = 0; e.knockDz = 0;
+        for (const t of tele) if (!t.dead && t.owner === e && t.onCaster) { t.x += dx; t.z += dz; emit({ t: 'teleM', id: t.id, x: Math.round(t.x * 100) / 100, z: Math.round(t.z * 100) / 100 }); }
+      }
+      if (e.knockedAt != null && e.knockedAt !== e.knockSeen) {
+        e.knockSeen = e.knockedAt;
+        if ((e.knockedM || 0) < (cfg.minPush ?? 0.5) || e.dying != null) continue;
+        const rank = e.boss ? 'boss' : (e.rank in cfg ? e.rank : 'normal');
+        const chance = cfg[rank] ?? 0;
+        if (!(chance > 0) || rng() >= chance) continue;
+        interrupt(e, 'knock');
+      }
+    }
+  }
+  /** End every wind-up of `e` now: its cast bar (if any) and every live shape it owns. */
+  function interrupt(e, by = 'knock') {
+    const st = states.get(e);
+    let n = 0;
+    if (st?.cast) { cancelCast(st, 'interrupt'); n++; }
+    for (const t of tele) if (!t.dead && t.owner === e) { t.dead = true; n++; emit({ t: 'teleR', id: t.id, x: 1, why: 'interrupted' }); }
+    if (n) emit({ t: 'fx', kind: 'interrupt', id: e.id, by });
+    return n;
+  }
+  enc.interrupt = interrupt;
   function prune() { for (let i = tele.length - 1; i >= 0; i--) if (tele[i].dead) tele.splice(i, 1); }
 
   /** Who is inside (players and their allies), minus anyone a blocker hides when the spec says `los`. */
@@ -318,6 +421,8 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
     const out = [];
     for (const f of friends()) {
       if (!inside(t, f.x, f.z, BODY_RADIUS)) continue;
+      // owner feedback 10 (Y10): a red zone does not reach through a dungeon wall (measured from the shape's own anchor)
+      if (field.sight && !field.sight(t.x, t.z, f.x, f.z)) continue;
       if (t.spec.los && hiddenBy(t.owner, f, t)) continue;
       out.push(f);
     }
@@ -363,7 +468,7 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
       const hitObj = (spec.breaks && inside(t, o.x, o.z, o.r ?? 1)) || (spec.los && o.lastBlock === t.gid);
       if (hitObj) damageObject(st, o, 1);
     }
-    if (spec.leave) addObject(st, { ...spec.leave, x: t.x - st.homeX, z: t.z - st.homeZ, rel: true });
+    if (spec.leave) { const left = addObject(st, { ...spec.leave, x: t.x - st.homeX, z: t.z - st.homeZ, rel: true }); if (left) left.leftBy = st.e; }
     enc.stats.hits += hits.length;
     enc.stats.dodged += Math.max(0, players().filter(p => Math.hypot(p.x - t.x, p.z - t.z) < (t.r ?? t.len ?? 5) + 6).length - hits.length);
     emit({ t: 'teleR', id: t.id, hits: hits.map(([f]) => f.id) });
@@ -395,7 +500,9 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
       const base = field.statusData?.[r.id] || {};
       applyStatus(f, r.id, { ...base, ...r }, Math.max(1, res.amount * (spec.statusPower ?? 0.3)));
     }
-    if (spec.knock) {
+    // play-test 1 P8: a knock never moves a body that the hit just killed (a dead player was being
+    // slid along the ground by the correction the room sends for a knock)
+    if (spec.knock && !res.dead && !f.dead && f.dying == null && (f.hp ?? 1) > 0) {
       const dx = f.x - t.x, dz = f.z - t.z, len = Math.hypot(dx, dz) || 1;
       const k = spec.knock;
       // a knock moves a player (the room carries the new position to the client as a correction)
@@ -446,10 +553,10 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
   function spawnAdds(st, spec) {
     const def = field.room.engine.enemyDef(spec.type) || field.room.engine.enemyDef(st.e.defId);
     const n = spec.count ?? 2;
+    const cx = spec.at === 'home' ? st.homeX : st.e.x, cz = spec.at === 'home' ? st.homeZ : st.e.z;
     for (let i = 0; i < n; i++) {
       const ang = (i / n) * Math.PI * 2 + rng() * 0.4, d = spec.radius ?? 6;
-      const x = (spec.at === 'home' ? st.homeX : st.e.x) + Math.cos(ang) * d;
-      const z = (spec.at === 'home' ? st.homeZ : st.e.z) + Math.sin(ang) * d;
+      const { x, z } = addSpot(cx, cz, ang, d);
       const u = (spawn ? spawn(def, spec.level ?? st.e.level, x, z, { rank: spec.rank || 'normal' }) : spawnMonster(field, def, spec.level ?? st.e.level, x, z, { rank: spec.rank || 'normal' }));
       if (!u) continue;
       u.addOf = st.e;
@@ -459,11 +566,67 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
     }
   }
 
-  function setShield(st, on) {
-    st.shield = !!on;
-    // a shield is a barrier the size of a mountain: Farhold's strike takes damage off `barrier` first
-    st.e.barrier = on ? 1e12 : 0;
-    emit({ t: 'fx', kind: 'shield', id: st.e.id, on: !!on });
+  /**
+   * Play-test 3 R4: "it spawned minions inside dungeon walls, which got stuck". An add's spot must be FLOOR — not
+   * a wall tile, not a blocked nav sample (a tree, a rock, deep water), and reachable from where it is called in a
+   * straight line (never on the far side of a wall, in the next room). Tried at the wanted angle and radius first,
+   * then round the circle, then at shorter radii; the caller's own spot is the last resort (always floor: the boss
+   * is standing on it). No terrain `blocked` (Farhold's flat test field): the spot is used as it is.
+   */
+  function addSpot(cx, cz, ang, d) {
+    const T = field.terrain, B = T?.blocked;
+    const want = { x: cx + Math.cos(ang) * d, z: cz + Math.sin(ang) * d };
+    if (!B) return want;
+    // (B is nav.bin in the wilds — trees, rocks, buildings, deep water — and the wall tiles in a dungeon)
+    const floor = (x, z) => !B(x, z) && !B(x + 0.6, z) && !B(x - 0.6, z) && !B(x, z + 0.6) && !B(x, z - 0.6);
+    const reach = (x, z) => { const L = Math.hypot(x - cx, z - cz), n = Math.max(1, Math.ceil(L / 0.5)); for (let k = 1; k <= n; k++) { const t = k / n; if (B(cx + (x - cx) * t, cz + (z - cz) * t)) return false; } return true; };
+    for (const r of [d, d * 0.75, d * 0.5, d * 0.3, 1.5]) {
+      for (let k = 0; k < 12; k++) {
+        const a = ang + (k % 2 ? 1 : -1) * Math.ceil(k / 2) * (Math.PI / 6);
+        const x = cx + Math.cos(a) * r, z = cz + Math.sin(a) * r;
+        if (floor(x, z) && reach(x, z)) return { x, z };
+      }
+    }
+    return { x: cx, z: cz };
+  }
+  enc.addSpot = addSpot;
+
+  /**
+   * A boss WARD. Owner feedback 6 (U8): "the ward became shielded and it never went away and he became unkillable …
+   * it wore off but it took way too long". A ward used to be a barrier the size of a mountain with no clock: it
+   * stood until the script's own answer (three braziers) and nothing on screen said so. Now every ward has
+   *   * a LIFE (`seconds`, default data/rules/progression.json `ward.seconds`) after which it fades by itself, and
+   *   * a BREAKING POINT (`pool` x the boss's maximum health): it is a real barrier, and enough damage shatters it;
+   * the script's own way still drops it at once (with whatever bonus the script gives). `on` may be `true` or
+   * `{ seconds, pool }`. The client is told how long and how much: at the start, once a second, and why it ended.
+   */
+  function setShield(st, on, why = 'script') {
+    if (!on) {
+      if (!st.shield) return;
+      st.shield = false; st.ward = null;
+      st.e.barrier = 0;
+      emit({ t: 'fx', kind: 'shield', id: st.e.id, on: false, why });
+      return;
+    }
+    const W = room.engine?.progression?.ward || {};
+    const cfg = typeof on === 'object' ? on : {};
+    const seconds = cfg.seconds ?? W.seconds ?? 18;
+    const max = Math.max(1, Math.round((st.e.maxHp || 1) * (cfg.pool ?? W.pool ?? 0.1)));
+    st.shield = true;
+    st.ward = { left: seconds, ms: Math.round(seconds * 1000), max, next: 1 };
+    st.e.barrier = max;
+    emit({ t: 'fx', kind: 'shield', id: st.e.id, on: true, ms: st.ward.ms, pool: max, name: cfg.name || 'Ward' });
+  }
+  /** The ward on a unit right now, for the client's bar: `{ on, hp, max, leftMs, ms }`, or null. */
+  enc.wardOf = u => { const st = states.get(u); return st?.shield && st.ward ? { on: true, hp: Math.max(0, Math.round(u.barrier || 0)), max: st.ward.max, leftMs: Math.max(0, Math.round(st.ward.left * 1000)), ms: st.ward.ms } : null; };
+  function tickWard(st, dt) {
+    const w = st.ward;
+    if (!st.shield || !w) return;
+    if ((st.e.barrier || 0) <= 0) { setShield(st, false, 'broken'); say(st, st.script?.phases?.[st.phase]?.shieldBroken || 'The ward shatters under the blows!', null, 'warn'); return; }
+    w.left -= dt;
+    if (w.left <= 0) { setShield(st, false, 'expired'); say(st, st.script?.phases?.[st.phase]?.shieldFaded || 'The ward gutters out.', null, 'warn'); return; }
+    w.next -= dt;
+    if (w.next <= 0) { w.next = 1; emit({ t: 'fx', kind: 'shield', id: st.e.id, hp: Math.round(st.e.barrier), max: w.max, left: Math.round(w.left * 1000) }); }
   }
 
   // ---- arena objects
@@ -548,6 +711,7 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
       o.next = o.spec.every ?? 1;
       const st = states.get(o.enc);
       if (!st) continue;
+      if (o.leftBy && (o.leftBy.dying != null || o.leftBy.removed)) { removeObject(o); continue; }     // U3: nothing a dead caster left hurts anyone
       const s = o.spec;
       for (const f of friends()) {
         if (Math.hypot(f.x - o.x, f.z - o.z) > o.r + BODY_RADIUS) continue;
@@ -567,6 +731,7 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
     // adds that died leave the set; a shield tied to them drops with the last one
     for (const a of st.adds) if (a.dying != null || a.removed) st.adds.delete(a);
     if (st.shield && st.script?.phases?.[st.phase]?.shieldWhileAdds && st.adds.size === 0) { setShield(st, false); say(st, st.script.phases[st.phase].shieldDown); }
+    tickWard(st, dt);
     checkTriggers(st);
     checkPhases(st);
     const en = st.script.enrage;
@@ -600,6 +765,7 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
     if (st.base) Object.assign(e, { dmg: [...st.base.dmg], attackEvery: st.base.attackEvery, armor: st.base.armor, modDmg: st.base.modDmg, modifiers: st.base.modifiers });
     states.delete(e);
     e.maxHp = st.baseMaxHp / (st.script?.hpMult || 1);
+    setShield(st, false, 'reset');          // U8: a ward that ends with a reset says so (the client stops drawing it)
     e.hp = e.maxHp; e.statuses = {}; e.barrier = 0;
     clearThreat(e);
     e.state = 'return';
@@ -622,11 +788,26 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
     tickTele();
     tickObjects(dt);
     for (const st of states.values()) {
+      // owner feedback 6 (U3): "void zone / telegraph effects should end immediately when the enemy dies". A dead or
+      // removed caster's running telegraphs are withdrawn THIS tick (they used to stay drawn until they would have
+      // gone off) and the puddles it left behind are taken away (they used to keep hurting for their full 8 s)
+      if ((st.e.dying != null || st.e.removed) && !st.swept) { st.swept = true; sweepOwner(st.e, st.e.removed && st.e.dying == null ? 'gone' : 'dead'); }
       if (st.e.removed) { states.delete(st.e); continue; }
       if (st.script && st.started && st.e.dying == null) tickBoss(st, dt);
     }
   }
+  /** Withdraw everything `owner` still has on the ground: telegraphs (not an `afterDeath` one) and left-behind pools. */
+  function sweepOwner(owner, why = 'dead') {
+    let n = 0;
+    for (const t of tele) if (!t.dead && t.owner === owner && !t.spec?.afterDeath) { t.dead = true; n++; emit({ t: 'teleR', id: t.id, x: 1, why }); }
+    for (const o of [...objects.values()]) if (o.leftBy === owner) { removeObject(o); n++; }
+    if (n) prune();
+    return n;
+  }
+  enc.sweepOwner = sweepOwner;
   enc.tick = tick;
+  /** for tests: make a monster use an ability now (inside `room.run`) */
+  enc.fireForTest = (st, ab, target) => fire(st, ab, target);
   enc.think = think;
   enc.beforeKill = beforeKill;
 

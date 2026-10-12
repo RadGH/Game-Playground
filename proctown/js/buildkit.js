@@ -154,9 +154,29 @@ export function fitToPlot(plot = {}) {
  * Deterministic from `seed` alone: the same plot in the same town is the same building every time
  * you walk back into it, and nothing has to be stored. `townSeed` shifts the whole town's palette a
  * little, so a region reads as one place (section 3.7) without any two towns matching.
+ *
+ * `tune` is OPT-IN (Thousandvale play-test 5, T13: "many buildings are too short/squat, especially the
+ * trade buildings"). Without it nothing changes — not a number, not a random draw — so Farhold's towns
+ * are what they were. With it a game can make the same building taller without moving it:
+ *
+ *   storeyHeight [lo, hi]   metres a storey, REPLACING knobs.storeyHeight x the culture's storeyScale
+ *                           (a halfling storey is 2.0-2.5 m, and a 1.75 m character's head is in the thatch)
+ *   doorHeight   [lo, hi]   metres, replacing knobs.doorHeight      doorWidth [lo, hi] likewise
+ *   minStoreys   n          at least this many storeys, whatever the base says (a hovel is [1, 1])
+ *   sink         k          multiplies how far a dug-in base sinks (0 = it stands on the ground: a burrow's
+ *                           door starts 48% of a storey UNDER the grass, i.e. you cannot walk through it)
+ *   fill         0..1       the footprint takes at least this share of the plot it was given, each way,
+ *                           past the base's own max size and ratio (a hall on an 8.6 x 3.7 m plot was a
+ *                           2.6 m hut, because only a hovel fits that depth and a hovel is nearly square)
+ *   minPitch     p          the roof is at least this steep, as far as its roof TYPE allows
+ *   roofBias     {type: k}  multiplies the culture's weight for a roof type (fewer flat turf mounds)
+ *   windowScale  k          multiplies window size, so they keep their share of a taller wall
+ *
+ * Every knob changes a height or a size INSIDE the plot: the plot, the door's side and the building's
+ * yaw are untouched, so a game's collision and its NPC spots stay where they were.
  */
 export function describeBuilding({
-  plot = {}, culture = 'human', seed = 1, townSeed = 0, want = null, district = null,
+  plot = {}, culture = 'human', seed = 1, townSeed = 0, want = null, district = null, tune = null,
 } = {}) {
   const cult = CULTURE_KIT.cultures[culture] || CULTURE_KIT.cultures.human;
   const K = KIT.knobs;
@@ -197,16 +217,27 @@ export function describeBuilding({
   w = Math.min(avail.w, w * (1 - rng() * K.sizeJitter));
   d = Math.min(avail.d, d * (1 - rng() * K.sizeJitter));
   w = Math.max(2.2, w); d = Math.max(2.2, d);
+  if (tune && tune.fill > 0) {
+    w = Math.max(w, Math.min(avail.w, avail.w * tune.fill));
+    d = Math.max(d, Math.min(avail.d, avail.d * tune.fill));
+  }
 
   // ---- how tall. Money buys a storey; the culture decides how tall a storey is
-  const storeys = clamp(
+  let storeys = clamp(
     Math.round(lerp(base.storeys[0], base.storeys[1], rng() * 0.7 + wealth * 0.3)),
     1, 6,
   );
-  const storeyHeight = lerp(K.storeyHeight[0], K.storeyHeight[1], rng()) * (cult.storeyScale ?? 1);
+  if (tune && tune.minStoreys > storeys) storeys = clamp(Math.round(tune.minStoreys), 1, 6);
+  const storeyRoll = rng();
+  const storeyHeight = tune && tune.storeyHeight
+    ? lerp(tune.storeyHeight[0], tune.storeyHeight[1], storeyRoll)
+    : lerp(K.storeyHeight[0], K.storeyHeight[1], storeyRoll) * (cult.storeyScale ?? 1);
 
   // ---- roof type, then the material, then the pitch they agree on
-  const roofType = weighted(cult.roofs, rng, base.roofs.filter(r => KIT.roofs[r])) || base.roofs[0];
+  const roofWeights = tune && tune.roofBias
+    ? Object.fromEntries(Object.entries(cult.roofs).map(([k, v]) => [k, v * (tune.roofBias[k] ?? 1)]))
+    : cult.roofs;
+  const roofType = weighted(roofWeights, rng, base.roofs.filter(r => KIT.roofs[r])) || base.roofs[0];
   const roofDef = KIT.roofs[roofType];
   const okRoofMat = Object.keys(cult.roofMaterials).filter(m => {
     const def = KIT.roofMaterials[m];
@@ -219,7 +250,8 @@ export function describeBuilding({
   const rMat = KIT.roofMaterials[roofMaterial];
   const lo = Math.max(rMat.pitch[0], roofDef.pitch[0]);
   const hi = Math.max(lo, Math.min(rMat.pitch[1], roofDef.pitch[1]));
-  const roofPitch = lerp(lo, hi, rng());
+  let roofPitch = lerp(lo, hi, rng());
+  if (tune && tune.minPitch > roofPitch) roofPitch = Math.max(roofPitch, Math.min(tune.minPitch, roofDef.pitch[1]));
 
   const okWallMat = Object.keys(cult.wallMaterials).filter(m => {
     const def = KIT.wallMaterials[m];
@@ -271,7 +303,7 @@ export function describeBuilding({
     roof: m.roof ?? 'main',
     shape: m.shape === 'round' ? 'round' : 'box',
     lift: (m.lift ?? 0),
-    sink: (m.sink ?? 0) * storeyHeight,
+    sink: (m.sink ?? 0) * storeyHeight * (tune && Number.isFinite(tune.sink) ? tune.sink : 1),
     // metres the upper storeys hang out over the street, if this base jetties at all
     jetty: (m.jetty ?? 0) * lerp(K.jetty[0], K.jetty[1], rng()) * 2,
     taper: m.taper ?? 0,
@@ -283,13 +315,15 @@ export function describeBuilding({
   let frontMass = masses[0];
   for (const m of masses) if (m.floor === 0 && m.z + m.d / 2 > frontMass.z + frontMass.d / 2) frontMass = m;
 
-  const doorW = clamp(lerp(K.doorWidth[0], K.doorWidth[1], rng()), 0.8, frontMass.w * 0.55);
+  const doorWs = (tune && tune.doorWidth) || K.doorWidth, doorHs = (tune && tune.doorHeight) || K.doorHeight;
+  const winK = (tune && tune.windowScale) || 1;
+  const doorW = clamp(lerp(doorWs[0], doorWs[1], rng()), 0.8, frontMass.w * 0.55);
   const door = {
     mass: frontMass.index,
     x: frontMass.x + (rng() - 0.5) * Math.max(0, frontMass.w - doorW * 2.4) * 0.6,
     z: frontMass.z + frontMass.d / 2,
     w: doorW,
-    h: Math.min(lerp(K.doorHeight[0], K.doorHeight[1], rng()), storeyHeight - 0.25),
+    h: Math.min(lerp(doorHs[0], doorHs[1], rng()), storeyHeight - 0.25),
     round: (base.extras || []).includes('round_door'),
   };
 
@@ -313,8 +347,8 @@ export function describeBuilding({
           windows.push({
             mass: m.index, side, storey: s + m.floor,
             along,
-            w: lerp(KIT.knobs.windowSize[0], KIT.knobs.windowSize[1], rng()),
-            h: lerp(KIT.knobs.windowSize[0], KIT.knobs.windowSize[1], rng()) * 1.15,
+            w: lerp(KIT.knobs.windowSize[0], KIT.knobs.windowSize[1], rng()) * winK,
+            h: lerp(KIT.knobs.windowSize[0], KIT.knobs.windowSize[1], rng()) * 1.15 * winK,
             shutters: wealth > 0.45 && rng() < 0.5,
           });
         }
@@ -1376,6 +1410,131 @@ const FENCE_PIECES = {
     part('box', -0.14, 0.6, 0, 0.09, 0.12, 5, W3),
   ],
 };
+
+// ---------------------------------------------------------------------------- Thousandvale (play-test 4, S7)
+/**
+ * OPT-IN EDGE PIECES — the barricade, gate leaves, gate posts and the water grate.
+ *
+ * Thousandvale rings every settlement (a stone curtain for a town, a palisade for a village, a fence for a hamlet,
+ * a BARRICADE for a frontier or blighted place) and its gates have real doors. None of this is in WALL_KINDS or
+ * FENCE_KINDS: Farhold builds one InstancedMesh per kind in those lists, and adding a kind would add a mesh to
+ * every Farhold town. `wallKitParts('barricade', piece)` still works (the tables are looked up by name).
+ *
+ * Frames (same as the rest of the edge kit): a wall length runs WALL_SEG along +Z and its OUTSIDE is local +X (a
+ * barricade's stakes lean out that way); a gate's passage runs along Z with OUT = +Z, the opening centred on x = 0.
+ * Parts may carry `rx` / `rz` tilts applied after `yaw` (Euler 'YXZ', as offices.js parts do).
+ */
+export const EXTRA_WALL_KINDS = ['barricade'];
+/** Every kind wallKitParts can build. */
+export const ALL_WALL_KINDS = [...WALL_KINDS, ...EXTRA_WALL_KINDS];
+const tilt = (p, rx = 0, rz = 0) => ({ ...p, rx, rz });
+
+// a log rail on the ground, sharpened stakes leaning OUT (+X) over it, a plank screen behind, a crate at one end
+WALL_PIECES.barricade = () => [
+  tilt(part('cyl', 0.1, 0.05, -3, 0.5, 6, 0.5, W3), Math.PI / 2),
+  tilt(part('cyl', -0.35, 0.5, -3, 0.38, 6, 0.38, W4), Math.PI / 2),
+  ...Array.from({ length: 7 }, (_, i) => tilt(part('cone', 0.1, 0, -2.7 + i * 0.9, 0.2, 2.1 + (i % 3) * 0.2, 0.2, i % 2 ? W : W2), 0, -0.55 - (i % 2) * 0.12)),
+  ...Array.from({ length: 4 }, (_, i) => tilt(part('cone', 0.25, 0.15, -2.25 + i * 1.5, 0.16, 1.5, 0.16, W2), 0, 0.5)),
+  ...[-2.4, -1.2, 0, 1.2, 2.4].map((z, i) => part('box', -0.62, 0, z, 0.08, 1.2 + (i % 2) * 0.25, 1.15, i % 2 ? W2 : W3)),
+  part('box', -0.15, 0, 2.45, 0.85, 0.85, 0.85, W2),
+];
+TOWER_PIECES.barricade = () => [
+  ...[[-1, -1], [-1, 1], [1, -1], [1, 1]].map(([a, b]) => part('cyl', a * 1.3, 0, b * 1.3, 0.32, 4.2, 0.32, W2)),
+  part('box', 0, 3.4, 0, 3.0, 0.22, 3.0, W),
+  ...[[0, -1.45], [0, 1.45]].map(([a, b]) => part('box', a, 3.6, b, 3.0, 0.8, 0.12, W3)),
+  ...[[-1.45, 0], [1.45, 0]].map(([a, b]) => part('box', a, 3.6, b, 0.12, 0.8, 3.0, W3)),
+  part('shed', 0, 4.4, 0, 3.2, 0.9, 3.2, W4),
+];
+// a barricade "gate": a bundle of stakes and a barrel stack either side; the frame (a cheval de frise) that closes the
+// road is a separate leaf (`gateLeafParts('frise')`). Keeps the gatehouse rule: nothing inside x -2.1..2.1 below 4.9 m.
+GATEHOUSE_PIECES.barricade = () => [
+  ...GATE_SIDES.flatMap(x => [-0.6, 0, 0.6].map((z, i) => tilt(part('cone', x + Math.sign(x) * 0.1, 0, z, 0.32, 2.8 + i * 0.3, 0.32, i % 2 ? W : W2), 0, -Math.sign(x) * 0.18))),
+  ...GATE_SIDES.map(x => part('cyl', x, 0, 1.1, 0.8, 1.0, 0.8, W3)),
+  ...GATE_SIDES.map(x => part('cyl', x, 1.0, 1.1, 0.8, 1.0, 0.8, W2)),
+  ...GATE_SIDES.map(x => part('box', x, 0, -1.1, 1.0, 0.9, 0.9, W2)),
+];
+
+/**
+ * Gate posts for a low edge (fence, hedge, barricade) at an opening `width` m across: a post (or a stake bundle /
+ * a clipped hedge pier) either side, outside x = +/-width/2, nothing in the passage.
+ */
+export function gatePostParts(kind = 'rail', width = 4) {
+  const x = width / 2 + 0.2;
+  if (kind === 'barricade') return GATEHOUSE_PIECES.barricade().map(p => ({ ...p, x: p.x + Math.sign(p.x) * Math.max(0, x - 2.6) }));
+  if (kind === 'hedge') return [-1, 1].flatMap(sg => [part('box', sg * (x + 0.25), 0, 0, 0.9, 1.5, 1.0, W2), part('dome', sg * (x + 0.25), 1.35, 0, 0.9, 0.6, 1.1, W)]);
+  const post = kind === 'stake' ? 0.26 : 0.24;
+  return [-1, 1].flatMap(sg => [
+    part('box', sg * x, 0, 0, post, 1.9, post, W2),
+    part('hip', sg * x, 1.9, 0, post * 1.5, 0.22, post * 1.5, W3),
+  ]);
+}
+
+/**
+ * One gate LEAF, hinged at its local origin and running along +X, one unit long and one unit tall (the caller scales
+ * it to half the opening and to the door height, and turns it about the hinge to open it). Kinds:
+ *   'door'   heavy planks with two iron bands (a gatehouse)
+ *   'rail'   a field gate: frame, three rails and a diagonal brace (a fence or hedge)
+ *   'frise'  a cheval de frise: a log with stakes through it (a barricade), meant to be dragged aside
+ * Colours are near-white like the rest of the kit except the iron, which keeps its own dark grey.
+ */
+export function gateLeafParts(kind = 'door', thick = 0.16, len = 1) {
+  const IRON = '#3a3734';
+  if (kind === 'rail') return [
+    part('box', 0.04, 0, 0, 0.08, 1, thick * 0.6, W2), part('box', 0.96, 0, 0, 0.08, 1, thick * 0.6, W2),
+    ...[0.12, 0.5, 0.88].map(y => part('box', 0.5, y - 0.05, 0, 1, 0.1, thick * 0.5, W)),
+    { ...part('box', 0.5, 0.45, 0, 1.12, 0.08, thick * 0.5, W3), rz: 0.72, yaw: 0 },
+  ];
+  // (a frise is built at its real length `len` rather than scaled: its log is a turned cylinder, which a scale along x
+  // would only fatten)
+  if (kind === 'frise') {
+    const n = Math.max(3, Math.round(len / 0.45));
+    return [
+      tilt(part('cyl', 0, 0.42, 0, 0.32, len, 0.32, W3), 0, -Math.PI / 2),
+      ...Array.from({ length: n }, (_, i) => tilt(part('cone', 0.2 + (i * (len - 0.4)) / (n - 1), 0.12, 0, 0.09, 1.0, 0.09, W2), i % 2 ? 0.75 : -0.75)),
+    ];
+  }
+  return [
+    ...Array.from({ length: 5 }, (_, i) => part('box', 0.1 + i * 0.2, 0, 0, 0.19, 1, thick, i % 2 ? W : W2)),
+    part('box', 0.5, 0.2, 0, 1, 0.06, thick + 0.04, IRON),
+    part('box', 0.5, 0.78, 0, 1, 0.06, thick + 0.04, IRON),
+    part('box', 0.9, 0.46, 0, 0.06, 0.08, thick + 0.08, IRON),
+  ];
+}
+
+/**
+ * OPT-IN (Thousandvale play-test 5, T8b): a gatehouse whose clear opening is `open` metres instead of the kit's 4.2.
+ *
+ * `wallKitParts(kind, 'gatehouse')` is one fixed size, and the only way a game could widen it was to scale the whole
+ * piece along x — which fattens the jambs with it (a 9 m gate got 3.4 m jambs). Here the jambs keep their size and
+ * move apart, and only what spans the passage (the lintel, the walk above it, a rib arch) grows. The gatehouse rule
+ * still holds: nothing inside x = -open/2..open/2 below 4.9 m, nothing outside z = +/-1.9. `open` 4.2 returns the kit
+ * piece unchanged. Frame as the kit: the passage runs along Z (OUT = +Z), the gate's WIDTH — the wall line — along X.
+ */
+export function gatehouseParts(kind = 'stone', open = 4.2) {
+  const base = wallKitParts(kind, 'gatehouse');
+  const grow = Math.max(0, open - 4.2);
+  if (grow < 1e-6) return base;
+  const k = open / 4.2;
+  const mapX = x => (Math.abs(x) <= 2.1 ? x * k : x + Math.sign(x) * grow / 2);
+  return base.map(p => {
+    const turned = Math.abs(Math.sin(p.yaw || 0)) > 0.7;          // a part laid across (its `d` runs along X)
+    const along = turned ? p.d : p.w;
+    if (along > 4.2) return turned ? { ...p, d: p.d + grow } : { ...p, w: p.w + grow };   // spans the passage: stretch it
+    return { ...p, x: mapX(p.x) };                                 // a jamb, a cap, a merlon, an arch block: move it
+  });
+}
+
+/** An iron grate across a stream where it runs through a town's wall: `width` m along X, `h` m tall, piers either side. */
+export function grateParts(width = 6, h = 2.4) {
+  const IRON = '#3a3734';
+  const n = Math.max(3, Math.round(width / 0.35));
+  return [
+    ...Array.from({ length: n + 1 }, (_, i) => part('box', -width / 2 + (i * width) / n, -0.6, 0, 0.07, h + 0.6, 0.07, IRON)),
+    ...[0.3, h * 0.55, h - 0.1].map(y => part('box', 0, y, 0, width, 0.08, 0.1, IRON)),
+    ...[-1, 1].map(sg => part('box', sg * (width / 2 + 0.5), -0.6, 0, 1.0, h + 1.4, 1.4, W2)),
+    part('box', 0, h, 0, width + 2, 0.5, 1.2, W3),
+  ];
+}
 
 /** One piece of a town's edge: `piece` is 'wall' | 'tower' | 'gatehouse', `kind` a WALL_KINDS. */
 export function wallKitParts(kind = 'stone', piece = 'wall') {

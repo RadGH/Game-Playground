@@ -16,15 +16,31 @@
 // Every refusal returns { ok: false, why } — the client shows `why`, the evil-client suite checks
 // nothing happened.
 
+import { basicSpeed, flightOf, projOf, projFields } from './projectiles.js';
+import { onKill as perkOnKill } from './perk-rules.js';
 import {
   weaponHands, OFFHAND_DAMAGE, strikeAt, withArea, isStaff, elementOf, statusOf,
   applyStatus, controlFor, feel, STATUS_POWER_SHARE, drawPower, chargeAt, chargedForm, staffSpell,
   wandBehaviour, STAFF_CHARGE, talentPlan,
 } from './farhold.js';
 import { castSkillPlan, installSkillRuntime, throwBolt, runtimeFor } from './cast-skills.js';
+import { killGold, goldFound } from './economy.js';
+import { wandStyle, staffStyle, riderOf, isHeldFocus, isCaster, isSceptre, attackReach } from './caster-forms.js';
+import { hasteK as hasteOf, movingPace } from './combat-cfg.js';
 
 /** rpg.js CAST_ELEMENTS, element -> the status it leaves (Farhold main.js `statusForElement`). */
 const ELEMENT_LEAVES = { fire: 'burn', ice: 'chill', lightning: 'shock', poison: 'poison', shadow: 'curse', arcane: null };
+
+/**
+ * Play-test 3 R5 — "gloom staff: no attack animation, no particle effect. ALL weapons need a prominent effect."
+ * What every basic-attack event carries so the client can draw it without knowing the item: `wk` how the weapon
+ * attacks (melee | arrow | bolt | staff), `wt` its type (items.json `subtype`: sword, staff, wand, bow…), `el` its
+ * element (physical included — the client picks a look per element), `two` two-handed. The full event list is in
+ * docs/protocol.md "Basic attacks" and docs/requests.md (C/A -> D-world, play-test 3 R5).
+ */
+export function weaponTag(weapon, kind = 'melee') {
+  return { wk: kind, wt: weapon?.subtype || weapon?.baseKey || weapon?.key || 'fist', two: weapon?.twoHanded ? 1 : undefined };
+}
 
 export const CAST = {
   /** Farhold player.js `comboResetSeconds`: stop swinging this long and the pattern starts over */
@@ -56,7 +72,9 @@ export function createCombat(room) {
     }
     const longer = rpg.fx.sum(caster, 'statusLonger', { type, spec });
     const strength = rpg.fx.product(caster, 'statusPower', { type });
-    const entry = applyStatus(target, type, spec, power, { longer, strength });
+    // the perk forest's `dotPct`: +% from your burns, poisons, bleeds and curses (a harmful status only)
+    const dot = target.side === 'foe' && caster?.derived?.dotPct;
+    const entry = applyStatus(target, type, spec, dot ? power * (1 + dot / 100) : power, { longer, strength });
     if (entry) entry.by = caster.id;          // who to credit (threat, tagging) for a DoT tick
     return entry;
   }
@@ -74,11 +92,27 @@ export function createCombat(room) {
    */
   let uidN = 0;
   field.onKill = (e) => {
-    const xpCfg = balance.xp || {};
+    const xpCfg = engine.xpCfg || balance.xp || {};          // R2: kills x progression.json xp.killMult
     const lootRng = room.streams.get('loot');
-    for (const [id] of e.damageBy || []) {
-      const p = field.get(id);
-      if (!p || p.kind !== 'player') continue;
+    // Q3/Q4 — PARTY LOOT. When the room takes party loot (`combat.partyLoot`, js/rules/index.js -> the
+    // host), a party that tagged the kill gets ONE drop for the corpse, rolled once with the party's
+    // average magic find, and the host decides who gets what (free items / Need-Greed-Skip by threshold,
+    // js/rules/loot-rules.js). A solo tagger — or any tagging when the room does not take party loot —
+    // keeps its own roll, exactly as before.
+    const taggers = [];
+    for (const [id] of e.damageBy || []) { const p = field.get(id); if (p && p.kind === 'player') taggers.push(p); }
+    const groups = new Map();
+    if (combat.partyLoot) for (const p of taggers) if (p.partyId != null) (groups.get(p.partyId) || groups.set(p.partyId, []).get(p.partyId)).push(p);
+    const partyDrop = new Map();          // member -> true: its items went to the party pile
+    for (const [pid, members] of groups) {
+      if (members.length < 2) continue;
+      const mf = members.reduce((a, m) => a + (m.derived?.magicFind || 0), 0) / members.length;
+      const drops = rpg.rollDrops(e, { rng: lootRng, magicFind: mf }) || [];
+      for (const it of drops) it.uid = `${room.id}:${++uidN}`;
+      for (const m of members) partyDrop.set(m, true);
+      combat.partyLoot(members, drops, e, pid);
+    }
+    for (const p of taggers) {
       p.kills = (p.kills || 0) + 1;
       const back = rpg.onKillRestore(p);
       const post = rpg.fx.onKill({ self: p, target: e, applyStatus: (t, type, spec) => applyStatus(t, type, spec) });
@@ -100,9 +134,18 @@ export function createCombat(room) {
         }
         rtk.afterKill(p, post, e);
       });
-      const award = rpg.killXpFor(p, e, xpCfg);
-      const coin = foundGold(p, e.gold);
-      const drops = rpg.rollDrops(e, { rng: lootRng, magicFind: p.derived.magicFind }) || [];
+      // the perk forest's own kill rules (js/rules/perk-rules.js): Momentum, Spoils, Contagion
+      perkOnKill(field, p, e, { statuses, lastHit: e.lastHitBy === p.id });
+      let award = rpg.killXpFor(p, e, engine.xpCfgFor ? engine.xpCfgFor(e.level) : xpCfg);      // W4: low-level monsters pay more
+      // `xpFind` (gear and perks): Farhold's gainXp applies it; when the ROOM awards the experience it
+      // never sees the sheet, so it is applied here (and only here)
+      if (combat.award && p.derived?.xpFind) award = Math.round(award * (1 + p.derived.xpFind / 100));
+      // owner feedback 7 (V2): a kill pays by its LEVEL and rank (data/rules/prices.json), not by Farhold's health curve;
+      // gold find is applied here and nowhere else
+      const coin = engine.prices
+        ? goldFound(engine.prices, killGold(engine.prices, e.level || 1, { rank: e.rank, boss: !!e.boss, defGold: e.goldBase ?? null }), p.derived?.goldFind || 0)
+        : foundGold(p, e.gold);
+      const drops = partyDrop.has(p) ? [] : rpg.rollDrops(e, { rng: lootRng, magicFind: p.derived.magicFind }) || [];
       for (const it of drops) it.uid = `${room.id}:${++uidN}`;
       // the room owns experience, gold and the bag when it says so (js/rules/index.js sets `award`);
       // otherwise (tests, the parity fixtures) the sheet keeps them itself, as Farhold does
@@ -121,14 +164,31 @@ export function createCombat(room) {
    * server keeps the position). The swing clock is the weapon's own pattern, scaled by haste,
    * exactly as Farhold's controller runs it; damage lands after the wind-up.
    */
-  combat.attack = (ch, { hand = 'main', yaw = null, held = 0 } = {}) => {
+  combat.attack = (ch, { hand = 'main', yaw = null, held = null, target = null } = {}) => {
     if (!ch || ch.dead || ch.removed) return { ok: false, why: 'dead' };
+    if (ch.tvCast) runtimeFor(combat).cancelRevive(ch, 'acted');       // play-test 5 T4: swinging ends a revive being cast
     if (yaw != null && Number.isFinite(yaw)) ch.yaw = yaw;
     const hands = weaponHands(ch);
     const weapon = hand === 'off' ? hands.off : hands.main;
     if (hand === 'off' && !hands.dual) return { ok: false, why: 'no off-hand weapon' };
     const kind = isStaff(weapon) ? 'staff' : (weapon?.castElement && weapon?.ranged) ? 'bolt' : weapon?.ranged ? 'arrow' : 'melee';
-    if (hand === 'off' && kind !== 'melee') return { ok: false, why: 'the off hand only swings' };
+    // play-test 5 (T15/T16): `form` = the caster style this attack takes; `imbue` = a sceptre's elemental swing
+    const forms = engine.casterForms || null;
+    const style = forms ? (kind === 'bolt' ? wandStyle(forms, weapon) : kind === 'staff' ? staffStyle(forms, weapon) : null) : null;
+    const tag = { ...weaponTag(weapon, kind), el: elementOf(weapon) || 'physical',     // R5: on every swing event
+      ...(style ? { form: style.key } : {}), ...(forms && kind === 'melee' && isSceptre(weapon) && weapon.castElement ? { imbue: 1 } : {}) };
+    if (hand === 'off' && forms && isHeldFocus(weapon)) return { ok: false, why: 'a focus is held, not swung' };
+    // Farhold: only a melee weapon swings from the off hand. Thousandvale (T15): an off-hand WAND fires its own bolt.
+    if (hand === 'off' && kind !== 'melee' && !(forms && kind === 'bolt')) return { ok: false, why: 'the off hand only swings' };
+    // play-test 5 T14: a ranged or caster attack on a NAMED target further than the attack really reaches is refused
+    // before anything is spent — "a short-range cone starts shooting from out of range and waits for the enemy"
+    if (forms && hand !== 'off' && target && kind !== 'melee') {
+      const reach = attackReach(engine, ch);
+      const d = Math.hypot(target.x - ch.x, target.z - ch.z) - (target.bodyR || 0.5);
+      if (reach != null && d > reach + forms.rangeSlack) return { ok: false, why: `out of range (${Math.round(d)} m, reaches ${Math.round(reach)} m)`, refused: 'range', reach };
+      // owner feedback 10 (Y10): a ranged attack at something behind a dungeon wall is refused, nothing spent
+      if (field.sight && !field.sight(ch.x, ch.z, target.x, target.z)) return { ok: false, why: 'you cannot see your target', refused: 'sight' };
+    }
 
     const clock = ch.swing;
     const t = now();
@@ -143,26 +203,60 @@ export function createCombat(room) {
       if (t - (clock.lastAt ?? -Infinity) > CAST.COMBO_RESET + (clock.lastEvery || 0)) { clock.mainStep = 0; ch.combo = 0; }
       const hstep = clock.mainStep++;
       const h = Math.max(0, Math.min(Number.isFinite(held) ? held : 0, t - (clock.readySince ?? clock[readyKey] ?? 0), 5));
+      // owner feedback 10: Y26 — attack speed quickens a bow's draw and a staff's cast too (combat.json `speed`);
+      // Y7 — nothing here asks whether you are moving except the `moving` pace knob (1 = full rate)
+      const CC = engine.combatCfg || null;
+      const hk = CC ? ((plan.hold === 'draw' ? CC.speed.ranged : CC.speed.staff) ? hasteOf(engine, ch) : 1) / (ch.moving ? movingPace(engine, kind) : 1) : 1;
       if (plan.hold === 'draw') {
-        const d = drawPower(plan.draw, h);
-        if (!d.ready) return { ok: false, why: 'not drawn', need: plan.draw?.min };
-        clock[readyKey] = t + (plan.afterShot ?? 0.12);
+        const after = (plan.afterShot ?? 0.12) * hk;
+        // play-test 2 Q1: "entering combat spams the weapon and reads 'not drawn, not drawn'". The client's
+        // basic-attack key and its auto-attack send a CLICK (no `held`), and a click on a bow was refused
+        // outright. Farhold never refuses one either (player.js: "a click still shoots" keeps drawing to the
+        // nock on its own, and holding looses itself at full draw — `autoLoose`). So the server draws for you:
+        //   * no `held` (a click / auto-attack): draw to FULL and loose on its own — a steady stream of full
+        //     shots, the same cadence as holding the button in Farhold (draw.full + afterShot);
+        //   * a `held` short of the nock: keep drawing to the nock and loose the weak shot;
+        //   * a `held` past the nock: loose at once, at that draw's power (the parity path, unchanged).
+        const auto = !Number.isFinite(held);
+        const d = auto ? null : drawPower(plan.draw, h);
+        if (auto || !d.ready) {
+          const goal = auto ? (plan.draw?.full ?? 0.95) : (plan.draw?.min ?? 0.35);
+          const wait = Math.max(0, goal - h) * hk;
+          const power = drawPower(plan.draw, goal).power;
+          clock[readyKey] = t + wait + after;
+          clock.readySince = clock[readyKey];
+          clock.lastAt = t + wait; clock.lastEvery = after;
+          clock.drawing = { until: t + wait, target: target?.id ?? null };
+          field.emit({ t: 'swing', id: ch.id, hand, step: 0, clip: 'draw', wind: wait, every: wait + after, range: plan.range, ...tag });
+          combat.later(wait, () => {
+            clock.drawing = null;
+            if (ch.dead || ch.removed) return;
+            // a drawn arrow follows the target it was drawn on (the room faced you at it when you pressed)
+            const tg = target && target.dying == null && !target.dead && !target.removed ? target : null;
+            if (tg) ch.yaw = Math.atan2(tg.x - ch.x, tg.z - ch.z);
+            field.emit({ t: 'swing', id: ch.id, hand, step: 0, clip: 'shoot', wind: 0, every: after, range: plan.range, ...tag });
+            resolveArrow(ch, weapon, power, hstep);
+          }, ch.id);
+          return { ok: true, hand, kind, drawing: true, wind: wait, every: wait + after, power };
+        }
+        clock[readyKey] = t + after;
         clock.readySince = clock[readyKey];
-        clock.lastAt = t; clock.lastEvery = plan.afterShot ?? 0.12;
-        field.emit({ t: 'swing', id: ch.id, hand, step: 0, clip: 'shoot', wind: 0, every: plan.afterShot ?? 0.12 });
+        clock.lastAt = t; clock.lastEvery = after;
+        field.emit({ t: 'swing', id: ch.id, hand, step: 0, clip: 'shoot', wind: 0, every: after, range: plan.range, ...tag });
         resolveArrow(ch, weapon, d.power, hstep);
-        return { ok: true, hand, kind, power: d.power };
+        return { ok: true, hand, kind, power: d.power, every: after };
       }
       // the staff's channel drinks mana while held: hold no longer than you can pay for
       const c = plan.charge || STAFF_CHARGE;
       const affordable = (c.mana || 0) > 0 ? (ch.mp || 0) / c.mana : Infinity;
       const hh = h > c.min ? Math.max(c.min, Math.min(h, affordable)) : h;
-      clock[readyKey] = t + (plan.afterCast ?? 0.28);
+      const castEvery = (plan.afterCast ?? 0.28) * hk;
+      clock[readyKey] = t + castEvery;
       clock.readySince = clock[readyKey];
-      clock.lastAt = t; clock.lastEvery = plan.afterCast ?? 0.28;
-      field.emit({ t: 'swing', id: ch.id, hand, step: 0, clip: 'castStaff', wind: 0, every: plan.afterCast ?? 0.28 });
-      resolveStaff(ch, weapon, hh, c, hstep);
-      return { ok: true, hand, kind, held: hh };
+      clock.lastAt = t; clock.lastEvery = castEvery;
+      field.emit({ t: 'swing', id: ch.id, hand, step: 0, clip: 'castStaff', wind: 0, every: castEvery, ...tag });
+      resolveStaff(ch, weapon, hh, c, hstep, { target });
+      return { ok: true, hand, kind, held: hh, every: castEvery };
     }
 
     // ---- a click weapon (melee, wand, crossbow, javelin): the weapon's own pattern clock
@@ -170,8 +264,10 @@ export function createCombat(room) {
     if (t - (clock.lastAt ?? -Infinity) > CAST.COMBO_RESET + (clock.lastEvery || 0)) { clock.mainStep = 0; clock.offStep = 0; ch.combo = 0; }
     const step = hand === 'off' ? clock.offStep : clock.mainStep;
     // the clock: the weapon's own `every` for this step, scaled by haste (main.js line ~8905)
-    const base = balance.player?.attackEvery ?? 0.62;
-    const hasteK = (ch.derived.attackEvery ?? base) / base;
+    // owner feedback 10: Y26 — one answer for attack speed (capped; js/rules/combat-cfg.js), Y16 — a tome's slower
+    // clock (`style.pace`), Y7 — the pace while moving (1 = full rate: moving never slows or cancels an attack)
+    const CC = engine.combatCfg || null;
+    const hasteK = (CC && kind === 'bolt' && !CC.speed.caster ? 1 : hasteOf(engine, ch)) * (style?.pace ?? 1) / (CC && ch.moving ? movingPace(engine, kind) : 1);
     const sp = strikeAt(weapon, step);
     const nSteps = plan?.steps?.length || 1;
     const stepRow = plan?.steps?.[step % nSteps];
@@ -187,10 +283,11 @@ export function createCombat(room) {
     if (hand === 'off') clock.offStep++; else clock.mainStep++;
 
     const fire = kind === 'melee' ? () => resolveSwing(ch, hand, step, weapon)
-      : kind === 'bolt' ? () => resolveWand(ch, weapon, step)
+      : kind === 'bolt' ? () => resolveWand(ch, weapon, step, { hand, target })
         : () => resolveArrow(ch, weapon, plan?.power ?? 1, step);
     if (wind <= 0) fire(); else pending.push({ at: t + wind, fn: fire, who: ch.id });
-    field.emit({ t: 'swing', id: ch.id, hand, step, clip: stepRow?.clip || 'attack', wind, every });
+    const shapeNow = kind === 'melee' ? strikeAt(weapon, step) : null;
+    field.emit({ t: 'swing', id: ch.id, hand, step, clip: stepRow?.clip || 'attack', wind, every, ...tag, ...(shapeNow ? { reach: shapeNow.reach, arc: shapeNow.arc, strike: shapeNow.key || undefined } : {}) });
     return { ok: true, hand, kind, step, wind, every };
   };
 
@@ -213,8 +310,13 @@ export function createCombat(room) {
     // swingWith posts the weapon's strike shape for every kind of attack; a melee skill borrows it
     feel.swing.charge = null;
     ch.lastStrike = { ...withArea(strikeAt(weapon, step), ch.derived.areaPct || 0) };
-    const element = mods.element || elementOf(weapon);
-    const leaves = mods.element ? ELEMENT_LEAVES[mods.element] || null : statusOf(weapon);
+    // round 9 (the dead-data audit): "Every arrow deals this quiver's own element as damage instead of physical" — the
+    // line is on the quiver (Emberwing Quiver) and nothing here asked the quiver. A worn quiver that carries the line
+    // and an element gives it to the arrow, and the arrow leaves that element's status.
+    const quiver = engine.tvGear ? ch.equipment?.offhand : null;
+    const quiverEl = quiver?.element && quiver.element !== 'physical' && (quiver.affixes || []).some(a => a.stat === 'cond_quiverElement') ? quiver.element : null;
+    const element = mods.element || quiverEl || elementOf(weapon);
+    const leaves = mods.element ? ELEMENT_LEAVES[mods.element] || null : quiverEl ? ELEMENT_LEAVES[quiverEl] || null : statusOf(weapon);
     const plan = ch.derived.swing?.main;
     const range = plan?.range ?? balance.player?.arrowRange ?? 46;
     const speed = balance.player?.arrowSpeed ?? 42;
@@ -227,18 +329,30 @@ export function createCombat(room) {
       const k = shots === 1 ? 0 : (i / (shots - 1) - 0.5) * 2;
       const yaw = Math.atan2(a.dx, a.dz) + k * spread;
       const dx = Math.sin(yaw), dz = Math.cos(yaw);
-      const target = scanLine(ch.x, ch.z, dx, dz, range, 1.1 + homing * 2.6);
-      const dist = target ? target.distance : range;
+      const clearTo = field.sight ? field.sight.reach(ch.x, ch.z, dx, dz, range) : range;      // Y10: an arrow stops at a dungeon wall
+      const target = scanLine(ch.x, ch.z, dx, dz, clearTo, 1.1 + homing * 2.6);
+      const dist = target ? target.distance : clearTo;
       const at = { x: ch.x + dx * dist, z: ch.z + dz * dist };
-      field.emit({ t: 'fx', kind: 'arrow', id: ch.id, element, from: { x: ch.x, z: ch.z }, to: at, ms: Math.round(dist / speed * 1000) });
+      // owner feedback 8 (W14): a slower arrow that is seen, and that homes on what it was loosed at
+      const P = room.engine.projectiles || null;
+      const prey = P && target ? target.enemy : null;
+      const fly = P ? basicSpeed(P, weapon?.subtype) : speed;
+      const flight = P ? flightOf(P, dist, fly) : dist / speed;
+      field.emit({ t: 'fx', kind: 'arrow', id: ch.id, element, from: { x: ch.x, z: ch.z }, to: prey ? prey.id : at, ms: Math.round(flight * 1000), basic: 1, ...(!target && clearTo < range - 0.5 ? { wall: 1 } : {}), ...(P ? projFields(P, { speed: fly, proj: projOf(P, { element, wt: weapon?.subtype }), home: !!prey, skill: 'basic' }) : {}), ...weaponTag(weapon, 'arrow'), el: element });
       const brand = brandFor(ch, leaves);
       // main.js bursts a quiver's arrowBurst at the moment of the shot, around what the scan found
       if (target && burst > 0) {
         const c = target.enemy;
         for (const { enemy, result } of field.strikeArea(c.x, c.z, burst, ch, { falloff: 0.4, power: 0.55, kind: 'burst' })) if (enemy !== c) brand(enemy, result);
       }
-      combat.later(dist / speed, () => {
+      combat.later(flight, () => {
         if (ch.removed) return;
+        if (prey) { at.x = prey.x; at.z = prey.z; }          // where it is now, or where it fell
+        if (prey && field.sight && !field.sight(ch.x, ch.z, at.x, at.z)) {      // Y10: it stepped behind a wall: the arrow is in the wall
+          const ex = at.x - ch.x, ez = at.z - ch.z, len = Math.hypot(ex, ez) || 1, d = field.sight.reach(ch.x, ch.z, ex / len, ez / len, len);
+          at.x = ch.x + ex / len * d; at.z = ch.z + ez / len * d;
+          field.emit({ t: 'fx', kind: 'blocked', id: ch.id, x: at.x, z: at.z, by: 'wall' });
+        }
         const hits = field.strikeArea(at.x, at.z, balance.player?.arrowSplash ?? 2.6, ch, { element, applyStatus: hookFor(ch), power, kind: 'arrow' });   // main.js onArrowLand: the draw's power and nothing else
         for (const { enemy, result } of hits) brand(enemy, result);
         runtimeFor(combat).resolveAttack(ch, mods, hits, { x: ch.x, z: ch.z, at: { x: at.x, z: at.z }, element });
@@ -258,37 +372,146 @@ export function createCombat(room) {
   }
 
   /** A WAND (main.js `swingWith` wand branch): its behaviour row decides the bolt. */
-  function resolveWand(ch, weapon, step) {
-    if (runtimeFor(combat).formBasic(ch, 'main')) return;
-    const mods = rpg.attackMods(ch, 'bolt', { weapon, hand: 'main' });
-    const share = mods.power || 1;
+  function resolveWand(ch, weapon, step, { hand = 'main', target = null, scale = 1, echo = false } = {}) {
+    if (hand !== 'off' && runtimeFor(combat).formBasic(ch, 'main')) return;
+    const forms = engine.casterForms || null;
+    const st = forms ? wandStyle(forms, weapon) : null;
+    const mods = rpg.attackMods(ch, 'bolt', { weapon, hand });
+    // an off-hand wand (Thousandvale only) hits for the off-hand share; an Echo rider repeats at its own share
+    const share = (mods.power || 1) * (hand === 'off' ? (forms?.offhandBolt ?? OFFHAND_DAMAGE) : 1) * scale;
     feel.swing.charge = null;
     const shape = { ...withArea(strikeAt(weapon, step), ch.derived.areaPct || 0) };
     if (mods.scale && mods.scale !== 1) shape.scale = (shape.scale || 1) * mods.scale;
-    ch.lastStrike = shape;
+    if (hand !== 'off') ch.lastStrike = shape;
     const element = mods.element || elementOf(weapon);
     const leaves = mods.element ? ELEMENT_LEAVES[mods.element] || null : statusOf(weapon);
-    const how = wandBehaviour(weapon);
+    const how = st?.how || (st ? {} : wandBehaviour(weapon));
+    const a = aimOfCh(ch);
+    const mult = st?.mult ?? how.mult ?? 1;
+    const brand = brandFor(ch, leaves);
+    const rt = runtimeFor(combat);
+    const tagOf = () => ({ basic: 1, ...weaponTag(weapon, 'bolt'), el: element, ...(st ? { form: st.key } : {}), ...(hand === 'off' ? { hand: 'off' } : {}) });
+    const after = hits => { if (st) afterCasterHits(ch, weapon, hits, { hand, echo, element, share, redo: k => resolveWand(ch, weapon, step, { hand, target, scale: scale * k, echo: true }) }); };
+
+    // ---- play-test 5 T15: the shapes that are not a projectile
+    if (st && st.shape !== 'bolt') {
+      const opts = { element, onHit: brand, applyStatus: hookFor(ch), power: mult * share, kind: 'bolt' };
+      const yaw = Math.round(Math.atan2(a.dx, a.dz) * 1000) / 1000;
+      if (st.shape === 'cone') {
+        const reach = st.range * shape.scale, arc = st.arc * shape.scale;
+        field.emit({ t: 'fx', kind: 'attack', id: ch.id, ...tagOf(), shape: 'cone', x: ch.x, z: ch.z, yaw, reach: Math.round(reach * 100) / 100, arc: Math.round(arc * 1000) / 1000 });
+        const hits = field.strike(ch, ch, { reach, arc, strike: shape, ...opts });
+        rt.resolveAttack(ch, mods, hits, { x: ch.x, z: ch.z, at: null, element });
+        after(hits);
+      } else if (st.shape === 'beam') {
+        const len = field.sight ? field.sight.reach(ch.x, ch.z, a.dx, a.dz, st.range) : st.range, to = { x: ch.x + a.dx * len, z: ch.z + a.dz * len };
+        field.emit({ t: 'fx', kind: 'attack', id: ch.id, ...tagOf(), shape: 'beam', x: ch.x, z: ch.z, yaw, reach: Math.round(len * 10) / 10, w: st.width, to });
+        const hits = field.strikeSegment(ch.x + a.dx * 0.5, ch.z + a.dz * 0.5, to.x, to.z, st.width / 2 * shape.scale + 0.4, ch, { ...opts, falloff: 1 });
+        rt.resolveAttack(ch, mods, hits, { x: ch.x, z: ch.z, at: null, element });
+        after(hits);
+      } else if (st.shape === 'nova') {
+        const r = st.radius * shape.scale;
+        field.emit({ t: 'fx', kind: 'attack', id: ch.id, ...tagOf(), shape: 'nova', x: ch.x, z: ch.z, yaw, r: Math.round(r * 100) / 100 });
+        const hits = field.strikeArea(ch.x, ch.z, r, ch, { ...opts, falloff: 0.35 });
+        rt.resolveAttack(ch, mods, hits, { x: ch.x, z: ch.z, at: null, element });
+        after(hits);
+      } else {                                       // lob: an arc onto the target (else as far as it reaches along the aim)
+        const tg = target && target.dying == null && !target.removed ? target : null;
+        let dx = a.dx, dz = a.dz, dist = st.range;
+        if (tg) { const ex = tg.x - ch.x, ez = tg.z - ch.z, len = Math.hypot(ex, ez) || 1; dx = ex / len; dz = ez / len; dist = Math.min(st.range, len); }
+        if (field.sight) dist = Math.min(dist, Math.max(0, field.sight.reach(ch.x, ch.z, dx, dz, dist) - 0.4));       // Y10: it lands this side of a wall
+        const at = { x: ch.x + dx * dist, z: ch.z + dz * dist };
+        const ms = Math.max(0.2, dist / (st.speed || 20));
+        const r = st.radius * shape.scale;
+        field.emit({ t: 'fx', kind: 'attack', id: ch.id, ...tagOf(), shape: 'lob', x: ch.x, z: ch.z, yaw, to: at, r: Math.round(r * 100) / 100, ms: Math.round(ms * 1000) });
+        combat.later(ms, () => {
+          if (ch.removed) return;
+          rt.withCaster(ch, () => {
+            const hits = field.strikeArea(at.x, at.z, r, ch, { ...opts, falloff: 0.5 });
+            rt.resolveAttack(ch, mods, hits, { x: ch.x, z: ch.z, at: { x: at.x, z: at.z }, element });
+            after(hits);
+          });
+        }, ch.id);
+      }
+      return;
+    }
+
     const plan = {
-      element, range: (weapon.castRange ?? 34) * (how.slow ? 0.85 : 1),
-      splash: (how.splash ?? 2.2) * shape.scale, projectiles: how.projectiles || 1, spread: how.spread || 0,
+      element, range: st && !st.how ? st.range : (weapon.castRange ?? 34) * (how.slow ? 0.85 : 1),
+      splash: (st?.splash ?? how.splash ?? 2.2) * shape.scale, projectiles: how.projectiles || 1, spread: how.spread || 0,
       chains: how.chains || 0, homing: how.homing || 0, status: leaves, statusSpec: leaves ? statuses[leaves] : null,
     };
-    const a = aimOfCh(ch);
-    const opts = { element, onHit: brandFor(ch, leaves), applyStatus: hookFor(ch), power: (how.mult || 1) * share * shape.damage, kind: 'bolt' };
+    const opts = { element, onHit: brand, applyStatus: hookFor(ch), power: mult * share * shape.damage, kind: 'bolt' };
     // main.js passes `{ ...meleeOpts, power: how.mult * share }`, so the strike shape's own share is NOT in a wand bolt
-    opts.power = (how.mult || 1) * share;
+    opts.power = mult * share;
     plan.mods = mods;
-    throwBolt(combat, ch, plan, a, a.dx, a.dz, opts);
+    plan.fxTag = tagOf();      // R5: the client draws the wand's own bolt
+    // T15: a forking / warding / pooling bolt and a focus rider act when the bolt lands (`collect` is handed its hits)
+    let landed = false;
+    const collect = st ? hits => {
+      if (!landed) {
+        landed = true;
+        const first = hits.find(h => h.result?.amount > 0)?.enemy || null;
+        if (first && st.split) {
+          const used = new Set(hits.map(h => h.enemy));
+          const shards = [];
+          for (const e of field.near(first.x, first.z, st.split.range, first).filter(x => !used.has(x) && x.dying == null).slice(0, st.split.shards)) {
+            field.emit({ t: 'fx', kind: 'bolt', id: ch.id, element, from: { x: first.x, z: first.z }, to: e.id, ms: 120, ...plan.fxTag, fork: 1 });
+            shards.push(e.id);
+            for (const h of field.strikeArea(e.x, e.z, 1, ch, { ...opts, falloff: 1, power: opts.power * st.split.keep })) hits.push(h);
+          }
+          field.emit({ t: 'fx', kind: 'chain', id: ch.id, element, first: first.id, targets: shards, fork: 1, ...plan.fxTag });
+        }
+        if (first && st.pool) rt.dropPool(ch, { x: first.x, z: first.z, r: st.pool.radius, seconds: st.pool.seconds, element, power: st.pool.power * share });
+        if (first && st.ward) wardUp(ch, st.ward);
+        after(hits);
+      }
+      return hits;
+    } : (h => h);
+    throwBolt(combat, ch, plan, a, a.dx, a.dz, opts, {}, collect);
     // Twin Bolt: a second bolt a beat behind the first, at a share of its damage
-    if (mods.twin) combat.later(mods.twin.ms / 1000, () => throwBolt(combat, ch, { ...plan, mods: null }, aimOfCh(ch), Math.sin(ch.yaw), Math.cos(ch.yaw), { ...opts, power: (how.mult || 1) * share * mods.twin.power }), ch.id);
+    if (mods.twin) combat.later(mods.twin.ms / 1000, () => throwBolt(combat, ch, { ...plan, mods: null, fxTag: plan.fxTag }, aimOfCh(ch), Math.sin(ch.yaw), Math.cos(ch.yaw), { ...opts, power: mult * share * mods.twin.power }), ch.id);
+  }
+
+  /** T15: a ward — each attack that hits tops up a small barrier (never past its cap). */
+  function wardUp(u, w, by = null) {
+    const capAmt = Math.round(u.maxHp * (w.cap ?? 0.1));
+    const add = Math.round(u.maxHp * (w.share ?? 0.02));
+    if ((u.barrier || 0) >= capAmt) { u.castBarrierFor = Math.max(u.castBarrierFor || 0, w.seconds ?? 4); return; }
+    u.barrier = Math.min(capAmt, (u.barrier || 0) + add);
+    if (u.kind === 'player') u.castBarrierFor = Math.max(u.castBarrierFor || 0, w.seconds ?? 4); else u.barrierFor = w.seconds ?? 4;
+    field.emit({ t: 'fx', kind: 'ward', id: u.id, by: (by || u).id, amt: add });
+  }
+
+  /**
+   * T15: what an off-hand FOCUS adds to a caster's main-hand attack once its hits are in (data/rules/caster-forms.json
+   * `focusRiders`): Echo (every Nth attack repeats), Burst (a small burst round the first enemy struck), Ward (a
+   * barrier), Siphon (mana). Never on the off hand's own bolt, never on an echo.
+   */
+  function afterCasterHits(ch, weapon, hits, { hand = 'main', echo = false, element, share = 1, redo = null } = {}) {
+    const forms = engine.casterForms;
+    if (!forms || hand === 'off' || echo || !isCaster(weapon)) return;
+    const rider = riderOf(forms, weaponHands(ch).off);
+    if (!rider) return;
+    const first = hits.find(h => h.result?.amount > 0)?.enemy || null;
+    if (rider.key === 'echo') {
+      ch.swing.riderN = (ch.swing.riderN || 0) + 1;
+      if (ch.swing.riderN % (rider.every || 4) === 0 && redo) combat.later(rider.delay ?? 0.25, () => { if (!ch.dead && !ch.removed) { field.emit({ t: 'fx', kind: 'rider', id: ch.id, rider: 'echo' }); redo(rider.mult ?? 0.6); } }, ch.id);
+      return;
+    }
+    if (!first) return;
+    if (rider.key === 'burst') {
+      field.emit({ t: 'fx', kind: 'rider', id: ch.id, rider: 'burst', x: first.x, z: first.z, r: rider.radius, el: element });
+      runtimeFor(combat).withCaster(ch, () => field.strikeArea(first.x, first.z, rider.radius, ch, { element, power: (rider.mult ?? 0.35) * share, falloff: 0.5, proc: true, kind: 'focus' }));
+    } else if (rider.key === 'ward') wardUp(ch, rider);
+    else if (rider.key === 'siphon') { ch.mp = Math.min(ch.maxMp ?? ch.mp, (ch.mp || 0) + (rider.mana || 0)); field.emit({ t: 'fx', kind: 'rider', id: ch.id, rider: 'siphon', amt: rider.mana || 0 }); }
   }
 
   /**
    * A STAFF (main.js `swingWith` staff branch): a close-range spell by element, free to cast. A tap
    * is the ordinary spell; a real charge is its charged form (jet, dome, wall, mortar, storm).
    */
-  function resolveStaff(ch, weapon, held, c, step = 0) {
+  function resolveStaff(ch, weapon, held, c, step = 0, { target = null } = {}) {
     if (runtimeFor(combat).formBasic(ch, 'main')) return;
     const mods = rpg.attackMods(ch, 'staff', { weapon, hand: 'main' });
     const share = mods.power || 1;
@@ -312,6 +535,39 @@ export function createCombat(room) {
     const a = aimOfCh(ch);
     const statusOn = (enemy, k) => { if (spell.status) landStatus(ch, spell.status, statuses[spell.status], enemy, Math.max(1, base * k)); };
     const rt = runtimeFor(combat);
+    const tvStyle = engine.casterForms ? staffStyle(engine.casterForms, weapon) : null;      // play-test 5 T15
+    // R5: the staff's spell, drawn — the shape it really takes (a charged form, else the element's own spell)
+    if (!tvStyle) {
+      const form = charged?.shape || (spell.shape === 'nova' || spell.shape === 'cone' || spell.shape === 'wave' ? spell.shape : 'bolt');
+      const reachM = form === 'jet' ? (spell.range || 9) * shape.scale * (charged.rangeScale || 1.45) : (form === 'cone' || form === 'wave') ? (spell.range || 9) * shape.scale : form === 'bolt' || form === 'mortar' || form === 'storm' ? (spell.range || 12) * shape.scale : undefined;
+      field.emit({ t: 'fx', kind: 'attack', id: ch.id, ...weaponTag(weapon, 'staff'), el: element, shape: form, spell: spell.key || undefined, charged: charged ? 1 : undefined,
+        x: ch.x, z: ch.z, yaw: Math.round(Math.atan2(a.dx, a.dz) * 1000) / 1000, r: form === 'nova' || form === 'dome' || form === 'wall' ? Math.round(radius * 100) / 100 : undefined,
+        reach: reachM != null ? Math.round(reachM * 100) / 100 : undefined, arc: form === 'cone' ? (spell.arc || 0.9) * shape.scale : form === 'jet' ? (spell.arc || 0.9) * shape.scale * 0.8 : form === 'wave' ? 0.45 : undefined });
+    }
+    // ---- play-test 5 T15: Thousandvale's two staff styles (a lance, an aegis ring) replace the element's spell
+    if (tvStyle) {
+      const k = (tvStyle.mult ?? 1) * share * (shape.charge?.power || 1);
+      const yawR = Math.round(Math.atan2(a.dx, a.dz) * 1000) / 1000;
+      const tvTag = { ...weaponTag(weapon, 'staff'), el: element, form: tvStyle.key, basic: 1 };
+      if (tvStyle.shape === 'beam') {
+        const len = field.sight ? field.sight.reach(ch.x, ch.z, a.dx, a.dz, tvStyle.range * shape.scale) : tvStyle.range * shape.scale, to = { x: ch.x + a.dx * len, z: ch.z + a.dz * len };
+        field.emit({ t: 'fx', kind: 'attack', id: ch.id, ...tvTag, shape: 'beam', x: ch.x, z: ch.z, yaw: yawR, reach: Math.round(len * 100) / 100, w: tvStyle.width, to });
+        const hits = field.strikeSegment(ch.x + a.dx * 0.5, ch.z + a.dz * 0.5, to.x, to.z, tvStyle.width / 2 + 0.4, ch, { element, onHit: brand, applyStatus: hook, power: k, falloff: 1, kind: 'staff' });
+        for (const { enemy } of hits) statusOn(enemy, 0.6);
+        rt.resolveAttack(ch, mods, hits, { x: ch.x, z: ch.z, at: null, element });
+      } else {
+        const r = tvStyle.radius * shape.scale;
+        field.emit({ t: 'fx', kind: 'attack', id: ch.id, ...tvTag, shape: 'nova', x: ch.x, z: ch.z, yaw: yawR, r: Math.round(r * 100) / 100, ward: tvStyle.ward ? 1 : undefined });
+        const hits = field.strikeArea(ch.x, ch.z, r, ch, { falloff: 0.35, element, power: k, kind: 'staff' });
+        for (const { enemy, result } of hits) { brand(enemy, result); statusOn(enemy, 0.6); }
+        rt.resolveAttack(ch, mods, hits, { x: ch.x, z: ch.z, at: null, element });
+        if (tvStyle.ward && hits.some(h => h.result?.amount > 0)) {
+          wardUp(ch, tvStyle.ward);
+          if (tvStyle.ward.allies) for (const u of rt.allies(ch)) if (u !== ch && u.dying == null && !u.dead && Math.hypot(u.x - ch.x, u.z - ch.z) <= r) wardUp(u, tvStyle.ward, ch);
+        }
+      }
+      return;
+    }
     if (charged?.shape === 'jet') {
       const range = (spell.range || 9) * shape.scale * (charged.rangeScale || 1.45);
       const wide = (spell.arc || 0.9) * shape.scale * 0.8;
@@ -358,7 +614,11 @@ export function createCombat(room) {
         plan.kind = 'ground'; plan.radius = radius * 1.4; plan.groundRadius = radius * 1.4; plan.ground = Math.max(plan.ground || 0, 3);
       }
       if (charged?.shape === 'storm') plan.chains = charged.chains || 5;
+      // T15: Arc Lash's card says it chains — on a tap Farhold throws one plain bolt (only the charged storm jumps).
+      // Thousandvale makes the tap honest: it jumps `spell.chains` times.
+      else if (engine.casterForms && spell.shape === 'chain') plan.chains = spell.chains || 3;
       plan.mods = mods;
+      plan.fxTag = { basic: 1, ...weaponTag(weapon, 'staff'), el: element };
       throwBolt(combat, ch, plan, a, a.dx, a.dz, { ...opts, power: (spell.mult || 1) * (shape.charge?.power || 1) * (mods.power || 1) });
     }
   }
@@ -383,9 +643,26 @@ export function createCombat(room) {
       if (leaves && statuses[leaves] && result?.amount > 0) landStatus(ch, leaves, statuses[leaves], enemy, Math.max(1, result.amount * 0.7));
     };
     const opts = { element, onHit: brandHit, applyStatus: hookFor(ch), power: share * shape.damage, strike: shape, kind: 'swing' };
+    // owner feedback 10 (Y9, report #43: "two damage numbers from a single melee attack"). Farhold's swing strikes the
+    // arc and then "a little splash behind the arc" — a second strikeArea that re-hits everything the arc just hit, at
+    // 30-100% by distance. So EVERY melee swing landed twice on its own target (it was never the off hand). Here the
+    // share that second hit would have added is folded into the arc's one hit (same damage a second, one number), and
+    // the splash only ever strikes an enemy the arc did not reach.
+    const fold = !!engine.combatCfg?.melee?.foldSplash;
+    const splashR = (balance.player?.meleeSplash ?? 1) * (shape.splash || 1);
+    const sdx = Math.sin(ch.yaw), sdz = Math.cos(ch.yaw);
+    const scx = ch.x + sdx * reach * 0.6, scz = ch.z + sdz * reach * 0.6;
+    if (fold && splashR > 0) opts.bonus = e => {
+      const d = Math.hypot(e.x - scx, e.z - scz);
+      return d <= splashR + (e.reach || 2) * 0.25 ? 1 - 0.7 * Math.min(1, d / Math.max(0.001, splashR)) : 0;
+    };
+    // R5: the swing itself, drawn at the moment it lands (a trail along the arc, in the weapon's element)
+    const imbued = !!(engine.casterForms && isSceptre(weapon) && weapon.castElement);      // T16
+    field.emit({ t: 'fx', kind: 'attack', id: ch.id, ...weaponTag(weapon, 'melee'), el: element, shape: 'swing', hand, step, ...(imbued ? { imbue: 1 } : {}), x: ch.x, z: ch.z, yaw: Math.round((ch.yaw || 0) * 1000) / 1000, reach: Math.round(reach * 100) / 100, arc: Math.round(arc * 1000) / 1000, strike: shape.key || undefined });
     const hits = field.strike(ch, ch, { reach, arc, ...opts });
     runtimeFor(combat).resolveAttack(ch, mods, hits, { x: ch.x, z: ch.z, at: null, element });   // unique powers
     if (ch.perkFlags?.sunder && shape.last) for (const h of hits) h.enemy.armor = Math.max(0, (h.enemy.armor || 0) - 8);
+    if (imbued) afterCasterHits(ch, weapon, hits, { hand, element, share, redo: null });                 // T15: a focus rider on a sceptre
     const swung = { self: ch, mana: 0 };
     rpg.fx.onSwing(swung);
     if (swung.mana > 0) ch.mp = Math.min(ch.derived.maxMp || ch.mp, ch.mp + swung.mana);
@@ -393,14 +670,14 @@ export function createCombat(room) {
     if (splash > 0) {
       const dx = Math.sin(ch.yaw), dz = Math.cos(ch.yaw);
       const already = new Set(hits.map(h => h.enemy));
-      for (const { enemy, result } of field.strikeArea(ch.x + dx * reach * 0.6, ch.z + dz * reach * 0.6, splash, ch, { falloff: 0.3, element, power: share * shape.damage, kind: 'splash' })) {
+      for (const { enemy, result } of field.strikeArea(ch.x + dx * reach * 0.6, ch.z + dz * reach * 0.6, splash, ch, { falloff: 0.3, element, power: share * shape.damage, kind: 'splash', skip: fold ? already : null })) {
         if (!already.has(enemy)) { brandHit(enemy, result); hits.push({ enemy, result }); }
       }
     }
     return hits;
   }
   combat.resolveSwing = resolveSwing;
-  combat.resolveWand = (ch, w, step = 0) => resolveWand(ch, w, step);
+  combat.resolveWand = (ch, w, step = 0, opts = {}) => resolveWand(ch, w, step, opts);
   combat.resolveArrow = (ch, w, power = 1, step = 0) => resolveArrow(ch, w, power, step);
 
   // ------------------------------------------------------------------ skills

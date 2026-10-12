@@ -1,0 +1,584 @@
+{
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z13_02, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "zone": "z13_02",
+ "terrainHash": "b3a20e5d",
+ "placements": [
+  {
+   "type": "camp",
+   "id": "quest_bells_for_halsbridge_0_0",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1598,
+   "z": 1382,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "bells_for_halsbridge",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_under_the_cobbles_0_0",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1640,
+   "z": 1395,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "under_the_cobbles",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z13_02_1",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 184,
+   "z": 1656,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "stormlash"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z13_02_2",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 609,
+   "z": 1930,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "fiery"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z13_02_3",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 792,
+   "z": 1728,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "frostbound"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z13_02_4",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1296,
+   "z": 1256,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "packleader"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z13_02_5",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1447,
+   "z": 1523,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "stormlash"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z13_02_6",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1753,
+   "z": 1840,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "fiery"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "npc",
+   "id": "angler_halsbridge",
+   "name": "Perrin Underarch",
+   "role": "angler",
+   "at": "Halsbridge",
+   "x": 1620,
+   "z": 1236,
+   "yaw": -0.79,
+   "angler": true,
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "npc",
+   "id": "carter_halsbridge",
+   "name": "Kitt Dimmock",
+   "role": "carter",
+   "at": "Halsbridge",
+   "x": 1692,
+   "z": 1278,
+   "yaw": 1.528,
+   "cart": "cart_halsbridge",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_halsbridge",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Halsbridge",
+   "carter": "carter_halsbridge",
+   "x": 1690,
+   "z": 1278,
+   "yaw": 0.011,
+   "radius": 2.2
+  },
+  {
+   "type": "npc",
+   "id": "carter_mill_end",
+   "name": "Clement Hobday",
+   "role": "carter",
+   "at": "Mill End",
+   "x": 210,
+   "z": 1532,
+   "yaw": -1.468,
+   "cart": "cart_mill_end",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_mill_end",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Mill End",
+   "carter": "carter_mill_end",
+   "x": 212,
+   "z": 1532,
+   "yaw": -0.028,
+   "radius": 2.2
+  },
+  {
+   "type": "npc",
+   "id": "carter_lower_mossgate",
+   "name": "Gwen Fenwick",
+   "role": "carter",
+   "at": "Lower Mossgate",
+   "x": 708,
+   "z": 1618,
+   "yaw": -1.768,
+   "cart": "cart_lower_mossgate",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_lower_mossgate",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Lower Mossgate",
+   "carter": "carter_lower_mossgate",
+   "x": 710,
+   "z": 1618,
+   "yaw": -0.174,
+   "radius": 2.2
+  },
+  {
+   "type": "npc",
+   "id": "carter_mirestead",
+   "name": "Hobb Fenwick",
+   "role": "carter",
+   "at": "Mirestead",
+   "x": 1052,
+   "z": 1096,
+   "yaw": 0.194,
+   "cart": "cart_mirestead",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_mirestead",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Mirestead",
+   "carter": "carter_mirestead",
+   "x": 1052,
+   "z": 1094,
+   "yaw": -1.36,
+   "radius": 2.2
+  },
+  {
+   "type": "guard",
+   "id": "guard_halsbridge_0",
+   "name": "Halsbridge Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Halsbridge",
+   "post": "gate",
+   "gate": "halsbridge_gate_1",
+   "x": 1692,
+   "z": 1262,
+   "yaw": 0.005,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_halsbridge_1",
+   "name": "Halsbridge Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Halsbridge",
+   "post": "gate",
+   "gate": "halsbridge_gate_1",
+   "x": 1702,
+   "z": 1262,
+   "yaw": 0.005,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_halsbridge_2",
+   "name": "Halsbridge Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Halsbridge",
+   "post": "gate",
+   "gate": "halsbridge_gate_0",
+   "x": 1750,
+   "z": 1240,
+   "yaw": 0.571,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_halsbridge_3",
+   "name": "Halsbridge Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Halsbridge",
+   "post": "gate",
+   "gate": "halsbridge_gate_0",
+   "x": 1758,
+   "z": 1234,
+   "yaw": 0.571,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_halsbridge_4",
+   "name": "Halsbridge Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Halsbridge",
+   "post": "gate",
+   "gate": "halsbridge_gate_2",
+   "x": 1676,
+   "z": 1108,
+   "yaw": -2.578,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_halsbridge_5",
+   "name": "Halsbridge Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Halsbridge",
+   "post": "gate",
+   "gate": "halsbridge_gate_2",
+   "x": 1668,
+   "z": 1112,
+   "yaw": -2.578,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_halsbridge_6",
+   "name": "Sergeant Kettleby",
+   "role": "guard",
+   "rank": "sergeant",
+   "tier": "city",
+   "town": "Halsbridge",
+   "post": "square",
+   "x": 1702,
+   "z": 1190,
+   "yaw": -2.475,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_halsbridge_7",
+   "name": "Halsbridge Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Halsbridge",
+   "post": "square",
+   "x": 1704,
+   "z": 1182,
+   "yaw": -1.413,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_halsbridge_8",
+   "name": "Halsbridge Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Halsbridge",
+   "post": "square",
+   "x": 1696,
+   "z": 1176,
+   "yaw": 0.088,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_halsbridge_9",
+   "name": "Halsbridge Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Halsbridge",
+   "post": "square",
+   "x": 1690,
+   "z": 1184,
+   "yaw": 1.695,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_mill_end_0",
+   "name": "Mill End Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Mill End",
+   "post": "gate",
+   "gate": "mill_end_gate_0",
+   "x": 200,
+   "z": 1518,
+   "yaw": 0.611,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_mill_end_1",
+   "name": "Mill End Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Mill End",
+   "post": "gate",
+   "gate": "mill_end_gate_0",
+   "x": 206,
+   "z": 1514,
+   "yaw": 0.611,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_mill_end_2",
+   "name": "Sergeant Oakhurst",
+   "role": "guard",
+   "rank": "sergeant",
+   "tier": "town",
+   "town": "Mill End",
+   "post": "square",
+   "x": 192,
+   "z": 1462,
+   "yaw": 2.079,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_mill_end_3",
+   "name": "Mill End Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Mill End",
+   "post": "square",
+   "x": 206,
+   "z": 1462,
+   "yaw": -2.045,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_mill_end_4",
+   "name": "Mill End Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Mill End",
+   "post": "square",
+   "x": 198,
+   "z": 1450,
+   "yaw": 0.086,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_lower_mossgate_0",
+   "name": "Lower Mossgate Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "hamlet",
+   "town": "Lower Mossgate",
+   "post": "gate",
+   "gate": "lower_mossgate_gate_0",
+   "x": 702,
+   "z": 1590,
+   "yaw": -0.174,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_mirestead_0",
+   "name": "Mirestead Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "hamlet",
+   "town": "Mirestead",
+   "post": "gate",
+   "gate": "mirestead_gate_0",
+   "x": 1100,
+   "z": 1088,
+   "yaw": -1.36,
+   "titled": false
+  }
+ ]
+}

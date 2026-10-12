@@ -23,15 +23,19 @@
 import {
   applyStatus, controlFor, mechWorld, placeObject, tickPlaced, tickWalls, addWall, addCorpse, takeCorpses,
   pushFor, queueMech, statusRef, gainResource, formOf, repeatsOf, statusStatsKey,
-  resolveAttack, uniquesAfterKill, uniquesAfterDamaged, tickAuras, tickStatuses,
+  resolveAttack, uniquesAfterKill, uniquesAfterDamaged, tickAuras, tickStatuses, meleeSpanOf, weaponHands,
 } from './farhold.js';
+import { allyEffects, aimsAtAlly } from './ally.js';
+import { healed as perkHealed, weaveRefund } from './perk-rules.js';
 import { taunt as threatTaunt, threatFromHeal } from './threat.js';
+import { reviveOf } from './tv-skills.js';
 
 /** plan keys this file does not act on yet — reported, never silently dropped */
 export const PENDING_KEYS = [];   // everything a plan can carry is acted on (followers via js/rules/followers.js)
 /** kinds of plan the dispatcher refuses in a room built without js/rules/followers.js (tests, tools) */
 const REFUSED_KINDS = { summon: 'This place has no room for followers.', form: 'Shapes and stances need the follower system, which this place lacks.' };
 
+import { skillSpeed, basicSpeed, flightOf, projOf, projFields } from './projectiles.js';
 export const BOLT_SPEED = 48;          // main.js
 const ALLY_RANGE = 30;                 // how far an ally-targeted heal/buff reaches
 
@@ -45,6 +49,10 @@ function runtimeOf(combat) {
   const statusSpec = id => statuses[id] || null;
   const rt = { links: new Map(), tracked: [] };
   combat.skillRt = rt;
+  rt.field = field;
+  /** Thousandvale's own behaviour on (a parity engine has no combat.json and keeps Farhold's to the letter) */
+  const TV = !!room.engine.combatCfg;
+  rt.tv = TV;
 
   // ---- allies: the caster's party (and their pets) standing in this room
   // (your own followers wherever they are, as Farhold has it; other party members and their pets only
@@ -56,15 +64,22 @@ function runtimeOf(combat) {
   rt.partyPlayers = ch => allies(ch).filter(u => u !== ch && u.kind === 'player');
   const lift = ch => 1 + (ch.derived?.healingPct || 0);
   /** heal `u` by `amount`, credit the healer's threat; returns what was actually healed */
-  function healUnit(healer, u, amount) {
+  function healUnit(healer, u, amount, spill = true) {
     if (!u || u.dead || !(amount > 0)) return 0;
+    // the perk forest's `healPower` (+% healing you do: data/rules/perks.json, js/rules/perk-rules.js)
+    const hp = healer?.derived?.healPower;
+    if (hp) amount = Math.round(amount * (1 + hp / 100));
     const before = u.hp;
     u.hp = Math.min(u.maxHp, u.hp + amount);
     const done = u.hp - before;
     if (done > 0) {
       threatFromHeal(field.monsters, healer, u, done);
-      field.emit({ t: 'heal', src: healer.id, dst: u.id, amt: Math.round(done), hp: Math.round(u.hp) });
+      field.emit({ t: 'heal', src: healer.id, dst: u.id, amt: Math.round(done), over: Math.round(amount - done), hp: Math.round(u.hp) });
+    } else if (amount > 0 && u.hp >= u.maxHp) {
+      field.emit({ t: 'heal', src: healer.id, dst: u.id, amt: 0, over: Math.round(amount), hp: Math.round(u.hp) });     // a heal on a full bar: all of it is overheal (the meter counts it)
     }
+    // Brimming Cup: what spilled over goes to the most hurt party member in reach (once, never chained)
+    if (spill && healer?.perkFlags?.brimming) perkHealed(field, healer, u, amount, done, (to, n) => healUnit(healer, to, n / (1 + (hp || 0) / 100), false));
     return done;
   }
   rt.healUnit = healUnit;
@@ -104,7 +119,7 @@ function runtimeOf(combat) {
     const sign = metres < 0 ? -1 : 1;
     const want = sign < 0 ? Math.min(-metres, len * 0.9) : metres;
     const m = pushFor(e, want);
-    if (m > 0.01) e.push = { dx: sign * dx / len, dz: sign * dz / len, metres: m, t: 0.18, span: 0.18, done: 0 };
+    if (m > 0.01) { e.push = { dx: sign * dx / len, dz: sign * dz / len, metres: m, t: 0.18, span: 0.18, done: 0 }; e.knockedAt = field.clock; e.knockedM = m; }
   }
   rt.push = push;
 
@@ -154,13 +169,18 @@ function runtimeOf(combat) {
     obj.caster = ch.id;
     if (spec.taunt || spec.hp) obj.placed = true;
     for (const old of obj.removed || []) field.emit({ t: 'fx', kind: 'unplace', obj: old.id });
-    field.emit({ t: 'fx', kind: 'place', obj: obj.id, skill: obj.owner, x, z, r: obj.r, seconds: obj.left, element: obj.element });
+    // owner feedback 10 (Y25, report #52): a zone that RIDES someone says who — the rules always moved it (runPlaced),
+    // but the client was never told, so Blessed Earth with Moving Light was drawn where it was cast and left behind
+    const rides = follow === 'self' ? ch.id : (follow && typeof follow === 'object' && follow.id != null ? follow.id : null);
+    field.emit({ t: 'fx', kind: 'place', obj: obj.id, skill: obj.owner, x, z, r: obj.r, seconds: obj.left, element: obj.element, ...(rides != null ? { follow: rides } : {}), ...(!spec.strike && !spec.debuff && !spec.taunt && (spec.heal || spec.buff) ? { helps: true } : {}) });
     if (spec.taunt) {
       const target = objectTarget(obj);
       for (const e of field.near(x, z, obj.r + 2)) threatTaunt(e, target, spec.seconds ?? 6);
     }
     return obj;
   };
+  /** The live placed objects of one caster (tests, tools) — call inside `room.run`. */
+  rt.placedFor = casterId => mechWorld.placed.filter(o => o.caster === casterId);
   /** A placed thing a monster can be taunted onto and swing at: a field entity of kind 'object'. */
   function objectTarget(obj) {
     const id = `obj:${obj.id}`;
@@ -203,6 +223,8 @@ function runtimeOf(combat) {
         continue;
       }
       if (!ch) continue;                       // its caster left the room: it still ticks down, does nothing
+      // owner feedback 10 (Y10): a placed zone does not act through a dungeon wall (measured from its own middle)
+      if (field.sight && Array.isArray(act.targets)) act.targets = act.targets.filter(t => field.sight(o.x, o.z, t.x, t.z));
       const mine = new Set(allies(ch));
       rt.withCaster(ch, () => {
         switch (act.kind) {
@@ -259,10 +281,11 @@ function runtimeOf(combat) {
   // ---- main.js dropPool / tickPools: burning ground that strikes every 0.75 s and leaves its element's status
   const ELEMENT_LEAVES = { fire: 'burn', ice: 'chill', lightning: 'shock', poison: 'poison', shadow: 'curse' };
   rt.pools = [];
+  let poolN = 0;
   rt.dropPool = (ch, { x, z, r, seconds, element = 'physical', power = 0.5 }) => {
-    const pool = { caster: ch.id, x, z, r, left: seconds, life: seconds, every: 0.75, next: 0.75, element, power };
+    const pool = { pid: `${ch.id}:${++poolN}`, caster: ch.id, x, z, r, left: seconds, life: seconds, every: 0.75, next: 0.75, element, power };
     rt.pools.push(pool);
-    field.emit({ t: 'fx', kind: 'pool', id: ch.id, x, z, r, seconds, element });
+    field.emit({ t: 'fx', kind: 'pool', id: ch.id, pid: pool.pid, x, z, r, seconds, element });
     return pool;
   };
   function tickPools(dt) {
@@ -323,14 +346,23 @@ function runtimeOf(combat) {
         entered.aura.left = Infinity; entered.aura.life = Infinity;
       }
       if (spec.onEnter) castSub(ch, spec.onEnter, plan, { shape: spec.onEnter.shape || 'around' });
+      // owner feedback 6 (U18): a shape with a PACK (Moonpelt's Wolf Pack) calls its followers as it is taken
+      if (spec.pack && PF()) {
+        const pk = spec.pack;
+        entered.pack = PF().summon(pk.def || 'grove_wolf', ch, { count: pk.count ?? 2, at: { x: ch.x, z: ch.z }, temporary: true, lifetime: pk.seconds ?? 30 }) || [];
+      }
       if (spec.threatDrop) for (const e of field.monsters) if (e.dying == null && Math.hypot(e.x - ch.x, e.z - ch.z) > (spec.threatDrop.beyond ?? 10)) { e.state = 'wander'; e.threatFor = 0; e.threat?.delete(ch.id); }
-      field.emit({ t: 'fx', kind: 'form', id: ch.id, form: entered.id, group: entered.group, body: spec.body?.creature || null, on: true });
+      // owner feedback 6 (U16): `shape` = the whole body to draw (creature, scale, colours), not only its name
+      field.emit({ t: 'fx', kind: 'form', id: ch.id, form: entered.id, group: entered.group, body: spec.body?.creature || null, on: true, shape: shapeBody(entered) || undefined });
     } else if (left) field.emit({ t: 'fx', kind: 'form', id: ch.id, form: left.id, group: left.group, on: false });
     for (const sl of ch.skills.slots) sl.views = null;
   };
   function exitEffects(ch, left, plan = null) {
     const spec = left.spec || {};
     petBuffOn(ch, left, false);
+    // the pack leaves with the shape
+    for (const p of left.pack || []) if (p && p.dying == null && !p.removed) { p.lifetime = 0; p.left = 0; p.expireAt = 0; PF()?.dismiss?.(p); }
+    left.pack = null;
     if (left.aura) { left.aura.left = 0; const i = mechWorld.placed.indexOf(left.aura); if (i >= 0) mechWorld.placed.splice(i, 1); field.emit({ t: 'fx', kind: 'unplace', obj: left.aura.id }); }
     if (left.why === 'expired' || left.why === 'toggle' || left.why === 'swap') {
       const parent = plan || { skill: { id: left.skill, unlockAt: slotOf(ch, left.skill)?.unlockAt || 1 }, element: spec.element || 'nature' };
@@ -423,6 +455,8 @@ function runtimeOf(combat) {
     if (b.shape === 'bolt') {
       const spot = groundTargetOf(ch, {}, b.range ?? 14);
       const ms = Math.max(0.16, Math.hypot(spot.x - ch.x, spot.z - ch.z) / 22);
+      const P = combat.room.engine.projectiles || null;
+      if (P) field.emit({ t: 'fx', kind: 'bolt', id: ch.id, element: plan.element, from: { x: ch.x, z: ch.z }, to: { x: spot.x, z: spot.z }, ms: Math.round(ms * 1000), basic: 1, form: f.id, ...projFields(P, { speed: 22, proj: projOf(P, { element: plan.element }), skill: 'basic' }) });
       combat.later(ms, () => rt.withCaster(ch, () => {
         const sts = [...(b.status ? [b.status] : []), ...[].concat(b.statuses || [])];
         field.strikeArea(spot.x, spot.z, b.splash ?? 1.5, ch, { power: b.mult ?? 0.7, element: plan.element, falloff: 0.7, applyStatus: combat.hookFor(ch), rules: sts.length ? { skill: plan.skill.id, statuses: sts } : null, kind: 'form' });
@@ -470,9 +504,11 @@ function runtimeOf(combat) {
       get player() { return ch; },
       at: () => ({ x: ch.x, z: ch.z }),
       rng: () => room.rng(),
-      near: (x, z, r, except) => field.near(x, z, r, except),
+      // owner feedback 10 (Y10): an aura, an orb or a proc does not find or strike what is behind a dungeon wall
+      near: (x, z, r, except) => (field.sight ? field.near(x, z, r, except).filter(e => field.sight(x, z, e.x, e.z)) : field.near(x, z, r, except)),
       strikeOne(e, { power = 1, element = 'physical' } = {}) {
         if (!e || e.dying != null || e.removed) return null;
+        if (field.sight && !field.sight(ch.x, ch.z, e.x, e.z)) return null;
         return rt.withCaster(ch, () => {
           const result = rpg.strike(ch, e, room.rng, { multiplier: power, element, proc: true, applyStatus: hook });
           field.land(e, result, { fromX: ch.x, fromZ: ch.z, element, share: power, by: ch });
@@ -521,11 +557,12 @@ function runtimeOf(combat) {
     for (const p of field.players) {
       if (p.dead || p.removed) continue;
       const wasFighting = !!p.fighting;
-      p.fighting = field.monsters.some(m => m.dying == null && m.state === 'chase' && Math.hypot(m.x - p.x, m.z - p.z) < 60);
+      p.fighting = field.eachMonsterNear(p.x, p.z, 60, m => m.state === 'chase');
       if (p.fighting && !wasFighting) {
         const start = rpg.fx.combatStart({ self: p });
         if (start.strip) {
-          const big = field.monsters.find(e => e.dying == null && e.rank !== 'normal' && Math.hypot(e.x - p.x, e.z - p.z) < 60);
+          let big = null;
+          field.eachMonsterNear(p.x, p.z, 60, e => (e.rank !== 'normal' && !big ? (big = e, true) : false));
           if (big?.modifiers?.length) big.modifiers.pop();
         }
       }
@@ -548,6 +585,31 @@ function runtimeOf(combat) {
     }
   };
 
+  /**
+   * Owner feedback 6 (U3) — a zone ends with its caster: the moment a player dies, every zone / post they placed and
+   * every pool of burning ground they left is taken away (and the client told), so nothing of theirs strikes or
+   * heals after the death. An aura a form holds goes too (the form itself is ended by the death elsewhere).
+   */
+  rt.endZonesOf = (u) => {
+    let n = 0;
+    for (let i = mechWorld.placed.length - 1; i >= 0; i--) {
+      const o = mechWorld.placed[i];
+      if (o.caster !== u.id) continue;
+      mechWorld.placed.splice(i, 1);
+      field.byId.delete(`obj:${o.id}`);
+      field.emit({ t: 'fx', kind: 'unplace', obj: o.id, why: 'dead' });
+      n++;
+    }
+    for (let i = rt.pools.length - 1; i >= 0; i--) {
+      const p = rt.pools[i];
+      if (p.caster !== u.id) continue;
+      rt.pools.splice(i, 1);
+      field.emit({ t: 'fx', kind: 'pool', id: u.id, pid: p.pid, end: 1, why: 'dead' });
+      n++;
+    }
+    u.trail = null; u.skillAuras = [];
+    return n;
+  };
   /** A unit left this room (handed to another, or gone): nothing here acts for it any more. */
   rt.forget = (u) => {
     rt.links.delete(u.id);
@@ -576,16 +638,24 @@ function runtimeOf(combat) {
       const chn = p.mech?.channel;
       if (chn) {
         const moved = Math.hypot(p.x - chn.x, p.z - chn.z);
-        if (moved > 0.6 && !chn.moveK) { p.mech.channel = null; field.emit({ t: 'castX', id: p.id, ab: chn.plan.skill?.id, why: 'moved' }); }
+        // owner feedback 10 (Y20): a channelled BEAM tells the client when it stops, however it stops
+        const beamOver = why => { if (chn.beam) field.emit({ t: 'fx', kind: 'beamEnd', id: p.id, skill: chn.plan.skill?.id, why }); };
+        if (TV && p.dead) { p.mech.channel = null; field.emit({ t: 'castX', id: p.id, ab: chn.plan.skill?.id, why: 'dead' }); beamOver('dead'); }
+        else if (moved > 0.6 && !chn.moveK) { p.mech.channel = null; field.emit({ t: 'castX', id: p.id, ab: chn.plan.skill?.id, why: 'moved' }); beamOver('moved'); }
         else {
           chn.x = p.x; chn.z = p.z; chn.left -= dt; chn.next -= dt;
-          if (chn.next <= 0) {
-            chn.next = chn.every;
+          if (chn.next <= (TV ? 1e-9 : 0)) {
+            // Thousandvale: the remainder carries over, so a channel "every 0.4 s for 2.2 s" is six pulses on a 50 ms
+            // tick and not five (Farhold restarts the clock from the frame it fired on — kept for a parity engine)
+            chn.next = TV ? chn.next + chn.every : chn.every;
             const k = 1 + (chn.grow || 0) * chn.ticks;
-            chn.ticks++;
-            castPlan(combat, p, { ...chn.plan, mult: chn.plan.mult * k, damage: Math.round(chn.plan.damage * k) }, { echo: true, intent: chn.intent });
+            const n = chn.ticks++;
+            // …and what a cast leaves on the GROUND (a pool along the beam, a placed zone) is left by the first pulse only
+            const tickPlan = TV && n > 0 ? { ...chn.plan, pool: null, place: null, ground: 0 } : chn.plan;
+            if (chn.beam) field.emit({ t: 'fx', kind: 'beamPulse', id: p.id, skill: chn.plan.skill?.id, n: n + 1, of: chn.beam.pulses });
+            castPlan(combat, p, { ...tickPlan, mult: chn.plan.mult * k, damage: Math.round(chn.plan.damage * k) }, { echo: true, intent: chn.intent });
           }
-          if (chn.left <= 0) p.mech.channel = null;
+          if (chn.left <= (TV ? 1e-9 : 0)) { p.mech.channel = null; beamOver('done'); }
         }
       }
       if (p.imbue) { p.imbue.left -= dt; if (p.imbue.left <= 0) p.imbue = null; }
@@ -637,8 +707,132 @@ function runtimeOf(combat) {
     }
     rt.tickPlayers(dt);                // main.js: auras, orbs, trail, the player's statuses, the cast barrier
     tickPools(dt);                     // main.js ticks the pools last in the frame
+    for (const p of field.players) if (p.tvCast) tickRevive(p, dt);     // play-test 5 T4: a revive being cast
+    for (const p of field.players) { if (p.dead && !p._zonesEnded) { p._zonesEnded = true; rt.endZonesOf(p); } else if (!p.dead && p._zonesEnded) p._zonesEnded = false; }
+  };
+
+  // ---- play-test 5 T4: REVIVES (data/rules/skills-tv.json `tv.revive`; contract in docs/requests.md "Round 5 contracts — C")
+  /** Fallen party PLAYERS `ch` could raise right now: in its party, dead, within the skill's range (nearest first). */
+  rt.fallenFor = (ch, range = ALLY_RANGE) => field.players
+    .filter(u => u !== ch && u.dead && !u.removed && ch.partyId != null && u.partyId === ch.partyId && Math.hypot(u.x - ch.x, u.z - ch.z) <= range)
+    .sort((p, q) => Math.hypot(p.x - ch.x, p.z - ch.z) - Math.hypot(q.x - ch.x, q.z - ch.z));
+  /** "Fighting" for a revive: a live monster has you as its target. */
+  rt.inCombat = ch => field.monsters.some(m => m.dying == null && m.targetId === ch.id);
+  /** What the room is told about one revive (JSON only — A may hold it while the fallen player decides). */
+  rt.reviveSpec = (ch, row) => {
+    const rv = reviveOf(row);
+    return { skill: row.id || null, name: row.name, hpPct: rv.share ?? 0.5, ...(rv.mp ? { mpPct: rv.mp } : {}), mass: !!rv.mass, style: rv.style || null, by: ch.id, note: reviveNote(rv, statuses), apply: rv.apply ? JSON.parse(JSON.stringify(rv.apply)) : null };
+  };
+  /**
+   * Stand a fallen player up (the offer was accepted, or the room takes no offers): health, mana, a clean slate,
+   * no monster remembers them — then the skill's own rider (a mend over time, a barrier, a weakness).
+   * Safe to call on a body the room has already raised: it only adds what is missing.
+   */
+  rt.reviveUnit = (u, spec = {}, by = null) => {
+    if (!u || u.removed) return false;
+    const wasDead = !!u.dead;
+    combat.endStatuses?.(u);                 // index.js: statuses off + the `fx status on:false` for each
+    if (!combat.endStatuses) { u.statuses = {}; u.barrier = 0; u.castBarrierFor = 0; }
+    u.dead = false; u.killedBy = null;
+    const want = Math.max(1, Math.round(u.maxHp * Math.max(0.01, Math.min(1, spec.hpPct ?? 0.5))));
+    if (wasDead || u.hp < want) u.hp = want;
+    if (spec.mpPct) u.mp = Math.max(u.mp || 0, Math.round((u.maxMp || 0) * Math.min(1, spec.mpPct)));
+    u.revivedBy = by?.id ?? spec.by ?? null;
+    for (const m of field.monsters) if (m.threat?.has(u.id)) { m.threat.delete(u.id); if (m.targetId === u.id) m.targetId = null; }
+    field.emit({ t: 'revive', id: u.id, by: u.revivedBy, hp: u.hp, skill: spec.skill || null, style: spec.style || null, keep: 1 });
+    const a = spec.apply || {};
+    if (a.status) {
+      const base = statusSpec(a.status.id) || {};
+      applyStatus(u, a.status.id, { ...base, ...a.status }, 1);
+      field.emit({ t: 'fx', kind: 'status', id: u.id, status: a.status.id, on: true });
+    }
+    if (a.barrier) { u.barrier = Math.max(u.barrier || 0, Math.round(u.maxHp * (a.barrier.share ?? 0.2))); u.castBarrierFor = a.barrier.seconds ?? 8; }
+    if (a.debuff) {
+      const d = a.debuff;
+      applyStatus(u, d.id || 'grave_touched', { name: d.name || 'Weakened', kind: 'debuff', element: 'shadow', seconds: d.seconds ?? 10, dealLess: d.dealLess || 0, takeMore: d.takeMore || 0 }, 1);
+      field.emit({ t: 'fx', kind: 'status', id: u.id, status: d.id || 'grave_touched', on: true });
+    }
+    return true;
+  };
+  function cancelRevive(ch, why) {
+    const c = ch.tvCast;
+    if (!c) return;
+    ch.tvCast = null;
+    field.emit({ t: 'castX', id: ch.id, ab: c.row.id, why });
+  }
+  rt.cancelRevive = cancelRevive;
+  function tickRevive(ch, dt) {
+    const c = ch.tvCast;
+    if (ch.dead || ch.removed) return cancelRevive(ch, 'dead');
+    if (Math.hypot(ch.x - c.x, ch.z - c.z) > 0.6) return cancelRevive(ch, 'moved');
+    c.left -= dt;
+    if (c.left > 0) return;
+    ch.tvCast = null;
+    finishRevive(ch, c.slot, c.row, c.intent, c.targets);
+  }
+  /** The cast is done: pay for it (Farhold's bar), run the row's own riders, raise or offer each body. */
+  function finishRevive(ch, slot, row, intent, targetIds) {
+    const rv = reviveOf(row);
+    const range = rv.range ?? ALLY_RANGE;
+    const still = rt.fallenFor(ch, range + 2).filter(u => targetIds.includes(u.id));
+    if (!still.length && !fallenFollowers(ch, row)) { field.emit({ t: 'castX', id: ch.id, ab: row.id, why: 'target' }); return { ok: false, why: 'Nobody is left to raise.', refused: 'target' }; }
+    const plan = ch.skills.use(slot);
+    if (!plan.ok) { field.emit({ t: 'castX', id: ch.id, ab: row.id, why: 'notReady' }); return { ok: false, why: plan.why }; }
+    const out = castPlan(combat, ch, plan, { intent: { ...intent, target: null }, slot });
+    const spec = rt.reviveSpec(ch, { ...row, id: plan.skill?.id || row.id });
+    out.revived = [];
+    out.offered = [];
+    for (const u of still) {
+      field.emit({ t: 'fx', kind: 'reviveDone', id: ch.id, on: u.id, ab: spec.skill, style: spec.style, x: u.x, z: u.z });
+      const offered = combat.offerRevive ? combat.offerRevive(ch, u, spec) : null;
+      if (offered && offered.ok !== false) { out.offered.push(u.id); continue; }
+      if (rt.reviveUnit(u, spec, ch)) out.revived.push(u.id);
+    }
+    return out;
+  }
+  /** A row that also carries Farhold's follower `revive` (the cleric's) has something to do with only followers down. */
+  const fallenFollowers = (ch, row) => !!(row.revive && (PF()?.fallen?.(ch) ?? 0) > 0);
+  /**
+   * Begin a revive skill. Refused, before anything is spent, when nobody can be raised or the skill is for out
+   * of combat and you are fighting. A cast time puts up a cast bar; walking, dying or another action ends it.
+   */
+  rt.startRevive = (ch, slot, row, intent = {}) => {
+    const rv = reviveOf(row);
+    const range = rv.range ?? ALLY_RANGE;
+    const name = row.name || 'That';
+    const fallen = rt.fallenFor(ch, range);
+    const named = intent.target != null ? fallen.find(u => u.id === intent.target) : null;
+    const targets = rv.mass ? fallen : (named ? [named] : fallen.slice(0, 1));
+    if (!targets.length && !fallenFollowers(ch, row)) return { ok: false, why: `${name}: no fallen party member within ${range} m.`, refused: 'target' };
+    if (!rv.combat && rt.inCombat(ch)) return { ok: false, why: `${name}: not while you are fighting.`, refused: 'combat' };
+    const ids = targets.map(u => u.id);
+    if (!(rv.castTime > 0)) return finishRevive(ch, slot, row, intent, ids);
+    ch.tvCast = { slot, row, intent, targets: ids, left: rv.castTime, x: ch.x, z: ch.z };
+    const ms = Math.round(rv.castTime * 1000);
+    field.emit({ t: 'castbar', id: ch.id, ab: row.id, name, ms });
+    field.emit({ t: 'fx', kind: 'reviveCast', id: ch.id, on: ids.length === 1 ? ids[0] : ids, ab: row.id, style: rv.style || null, ms, x: targets[0]?.x ?? ch.x, z: targets[0]?.z ?? ch.z });
+    return { ok: true, casting: true, ms, targets: ids };
   };
   return rt;
+}
+
+/** Owner feedback 6 (U16): the body a shape form draws — `{ id, name, group, skill, creature, scale, colors, upright }` — or null (a stance, a song). */
+export function shapeBody(form) {
+  const b = form?.spec?.body;
+  if (!form || !b || !b.creature) return null;
+  return { id: form.id, name: form.name || form.spec.name || form.id, group: form.group || 'shape', skill: form.skill || null, creature: b.creature, scale: b.scale ?? 1, colors: b.colors ? { ...b.colors } : null, ...(b.upright ? { upright: true } : {}) };
+}
+/** The shape `u` is in right now (see shapeBody), or null. */
+export const shapeOfUnit = u => shapeBody(formOf(u, 'shape'));
+
+/** The one line an offer shows the fallen player (also the card's): what they come back with. */
+function reviveNote(rv, statuses = {}) {
+  const a = rv.apply || {};
+  if (a.status) return `You return with ${statuses[a.status.id]?.name || a.status.id}.`;
+  if (a.barrier) return `You return with a barrier worth ${Math.round((a.barrier.share ?? 0.2) * 100)}% of your health.`;
+  if (a.debuff) return `You return ${a.debuff.name || 'weakened'} for ${a.debuff.seconds ?? 10}s.`;
+  if (rv.share >= 1) return 'You return at full health.';
+  return '';
 }
 
 // ============================================================================ helpers
@@ -704,17 +898,77 @@ function aimedEnemy(field, ch, intent, a, range) {
 export function castSkillPlan(combat, ch, slot, intent = {}) {
   // the bar asks this before a summon (Farhold main.js passes `pets.canAdmit`)
   ch.canSummon = (petId, sl) => combat.room.followers?.canAdmit(ch, petId, { name: sl?.name }) ?? { ok: true };
+  const rt0 = runtimeOf(combat);
+  if (ch.tvCast) rt0.cancelRevive(ch, 'acted');          // T4: another cast ends a revive being cast (nothing was spent)
   const pre = ch.skills.check(slot);
   if (!pre.ok) return { ok: false, why: pre.why || 'not ready' };
   const row = ch.skills.rowFor(slot);
   const kind = row?.shape;
+  // play-test 5 T4: a revive skill (its own targeting, cast time and offer; mana and cooldown are paid when it completes)
+  if (reviveOf(row)) return rt0.withCaster(ch, () => rt0.startRevive(ch, slot, { ...row, id: ch.skills.slots[slot]?.id || row.id }, intent));
+  // play-test 1 P23: is there something to hit, in reach? asked BEFORE the bar spends mana or starts
+  // the cooldown (Farhold spends first, then flies a bolt at nothing). A recast or a channel's second
+  // press is never refused here.
+  if (!pre.recast && !pre.endChannel && combat.room.preflight !== false) {
+    const no = preflight(combat, ch, row, intent);
+    if (no) return { ok: false, why: no, refused: /cannot see/.test(no) ? 'sight' : 'range' };
+  }
   const hasFollowers = !!combat.room.followers;
   if (!hasFollowers && row?.form) return { ok: false, why: REFUSED_KINDS.form };
   if (!hasFollowers && kind === 'summon' && !row.summon?.temporary) return { ok: false, why: REFUSED_KINDS.summon };
   const plan = ch.skills.use(slot);
   if (!plan.ok) return { ok: false, why: plan.why };
+  plan.tv = row?.tv || null;                 // Thousandvale-only row fields (a touch heal's reach)
+  // the perk forest's Weave: a different skill than the last, inside the window, gives its mana back
+  const back = weaveRefund(ch, plan.skill?.id, plan.paidWith === 'mana' ? plan.spent : 0, combat.room.clock.now());
+  if (back > 0) ch.mp = Math.min(ch.maxMp, ch.mp + back);
   if (!hasFollowers && REFUSED_KINDS[plan.kind]) return { ok: false, why: REFUSED_KINDS[plan.kind] };
   return castPlan(combat, ch, plan, { intent, slot });
+}
+
+/** How far a skill reaches from the caster, by shape (P23). Null = no reach to check. */
+export function reachOf(ch, row) {
+  if (!row) return null;
+  switch (row.shape) {
+    case 'bolt': case 'beam': return row.range || 24;
+    case 'ground': return (row.range || 20) + (row.radius || 0);
+    case 'melee': {
+      // a melee skill reaches as far as the weapon swinging it (skills.js R26), plus a step
+      const span = meleeSpanOf(weaponHands(ch).main, ch.derived?.areaPct || 0);
+      return Math.max(row.reach ?? 3, span?.reach || 0) + 1.5;
+    }
+    default: return null;                  // self, around, dash, summon, forms: nothing to reach
+  }
+}
+
+/**
+ * P23 — refuse a cast that cannot land, before anything is spent. Returns the refusal sentence, or
+ * null to go ahead. Rules (every skill):
+ *   * a named ENEMY target that is dead, gone or out of the skill's reach -> refused;
+ *   * no named target, a damaging bolt / beam / melee skill with no live enemy anywhere in reach ->
+ *     refused (an aimed ground skill is clamped to its range and always lands somewhere);
+ *   * a skill that aims at an ally, does something for the group, or deals no damage is never refused
+ *     here (its own ally rules decide).
+ */
+export function preflight(combat, ch, row, intent = {}) {
+  if (!row || row.form) return null;
+  const reach = reachOf(ch, row);
+  if (reach == null) return null;
+  const field = combat.field;
+  const name = row.name || 'That skill';
+  const t = intent.target != null ? field.get(intent.target) : null;
+  if (t && t.side === 'foe') {
+    if (t.dying != null || t.removed || (t.hp ?? 1) <= 0) return `${name}: your target is dead.`;
+    const d = Math.hypot(t.x - ch.x, t.z - ch.z) - (t.bodyR || 0.5);
+    if (d > reach + 1) return `${name}: out of range (${Math.round(d)} m, reaches ${Math.round(reach)} m).`;
+    // owner feedback 10 (Y10): a wall between you — refused before anything is spent
+    if (field.sight && !field.sight(ch.x, ch.z, t.x, t.z)) return `${name}: you cannot see your target.`;
+    return null;
+  }
+  if (t || row.shape === 'ground' || !row.mult || aimsAtAlly(row) || allyEffects(row).size) return null;
+  let any = false;
+  field.eachMonsterNear(ch.x, ch.z, reach + 1, () => { any = true; return true; });
+  return any ? null : `${name}: nothing in range.`;
 }
 
 /** Carry out a plan (also used for echoes, delayed beams and a buff's `onEnd`). */
@@ -724,7 +978,7 @@ export function castPlan(combat, ch, plan, { echo = false, intent = {}, slot = n
   return rt.withCaster(ch, () => {
     const out = { ok: true, skill: plan.skill?.id, kind: plan.kind, hits: [], pending: PENDING_KEYS.filter(k => plan[k] != null && plan[k] !== false) };
     // skillrun.js `intercept`: a channel starts (and ticks in rt.tick), a second press ended it already
-    if (plan.kind === 'channelEnd') { field.emit({ t: 'castX', id: ch.id, ab: plan.skill?.id, why: 'released' }); return out; }
+    if (plan.kind === 'channelEnd') { field.emit({ t: 'castX', id: ch.id, ab: plan.skill?.id, why: 'released' }); if (plan.channel?.beam) field.emit({ t: 'fx', kind: 'beamEnd', id: ch.id, skill: plan.skill?.id, why: 'released' }); return out; }
     if (plan.kind === 'form' && rt.formCast) { rt.formCast(ch, plan); return out; }
     if (plan.channel && !plan.sub) { startChannel(rt, ch, plan, intent); ch.mech.channel.slot = slot; field.emit({ t: 'castbar', id: ch.id, ab: plan.skill?.id, name: plan.skill?.name, ms: Math.round((plan.channel.seconds ?? 3) * 1000), ch: 1 }); return out; }
     const a = plan.frozenAim || aimOf(ch, intent);
@@ -737,6 +991,8 @@ export function castPlan(combat, ch, plan, { echo = false, intent = {}, slot = n
     };
     const strikeOpts = decorate(rt, ch, plan, { power, element: plan.element, skill: plan.skill?.id, onHit, applyStatus: combat.hookFor(ch), kind: 'skill' });
     field.emit({ t: 'cast', id: ch.id, skill: plan.skill?.id, kind: plan.kind, element: plan.element, aim: { x: ch.x + a.dx * 10, z: ch.z + a.dz * 10 } });
+    // P20: what the spell LOOKS like, as geometry (the client draws one effect per shape and element)
+    const spell = extra => field.emit({ t: 'fx', kind: 'spell', id: ch.id, ab: plan.skill?.id, el: plan.element || 'physical', shape: plan.kind, fxs: plan.talentFx?.length ? plan.talentFx : undefined, scale: plan.fxScale && plan.fxScale !== 1 ? plan.fxScale : undefined, ...extra });
 
     if (plan.barrier > 0) {
       const gained = Math.max(1, Math.round((plan.damage || 0) * plan.barrier));
@@ -752,30 +1008,48 @@ export function castPlan(combat, ch, plan, { echo = false, intent = {}, slot = n
       if (chance > 0 && room.rng() < chance) combat.later(0.26, () => castPlan(combat, ch, { ...plan, mult: plan.mult * 0.5, damage: Math.round(plan.damage * 0.5) }, { echo: true, intent }), ch.id);
     }
 
-    const ground = range => { const s = groundTargetOf(ch, intent, range); plan.at = s; return s; };
+    // play-test 5 T3: a GROUND skill that heals (Mending Post) with a party member targeted lands at their feet
+    // (clamped to its range) and heals them at once; with nobody targeted it lands where you aim and heals you
+    const groundAlly = plan.kind === 'ground' && plan.healFrac > 0 && !plan.sub ? allyTargetOf(rt, ch, intent) : null;
+    const ground = range => {
+      const s = groundAlly && groundAlly !== ch ? groundTargetOf(ch, { aim: { x: groundAlly.x, z: groundAlly.z } }, range) : groundTargetOf(ch, intent, range);
+      // Y10: a spot on the far side of a dungeon wall is pulled back to this side of it
+      if (field.sight && s.dist > 1 && !field.sight(ch.x, ch.z, s.x, s.z)) {
+        const ux = (s.x - ch.x) / s.dist, uz = (s.z - ch.z) / s.dist;
+        const d = Math.max(0, field.sight.reach(ch.x, ch.z, ux, uz, s.dist) - 0.5);
+        s.x = ch.x + ux * d; s.z = ch.z + uz * d; s.dist = d;
+      }
+      plan.at = s;
+      return s;
+    };
+    if (groundAlly) { out.healed = rt.healUnit(ch, groundAlly, Math.round(groundAlly.maxHp * plan.healFrac * (1 + rpg.fx.sum(ch, 'healBonus')))); out.healTarget = groundAlly.id; }
 
     if (plan.kind === 'summon' && plan.summon && typeof plan.summon === 'object') {
       // summonFrom in afterCast puts it down
     } else if (plan.kind === 'summon' && plan.howl && room.followers?.canAdmit(ch, plan.pet)?.ok === false) {
       rt.howl(ch, plan);
     } else if (plan.kind === 'summon') {
+      spell({ x: ch.x, z: ch.z, pet: plan.pet });
       const made = room.followers?.summon(plan.pet, ch, { count: plan.petCount, at: { x: ch.x, z: ch.z } }) || [];
       if (made.refused && !made.length) out.why = made.refused;
     } else if (plan.kind === 'beam' && plan.delay > 0 && !plan.beamFired) {
       const strikeOnly = { ...plan, beamFired: true, sub: true, frozenAim: { ...a }, place: null, pool: null, selfBuff: null, summon: null, taunt: null, command: null, barrier: null, ward: null, counter: null, imbue: null, link: null, burst: null, again: null, afterimage: null, empowerNext: null, empowerRepeat: null, wall: null, rewind: null, cleanse: null, revive: null, healPets: null, overflowBarrier: null, allyStatus: null, corpseBurst: null, clusters: null, dashWith: null, resetOn: null };
       combat.later(plan.delay, () => castPlan(combat, ch, strikeOnly, { echo: true, intent }), ch.id);
     } else if (plan.kind === 'beam') {
+      // owner feedback 10: Y20 — always the whole length from the caster (never cut short at the target); Y10 — except by a dungeon wall
+      const beamLen = field.sight ? field.sight.reach(a.x, a.z, a.dx, a.dz, plan.range) : plan.range;
+      spell({ x: a.x, z: a.z, to: { x: a.x + a.dx * beamLen, z: a.z + a.dz * beamLen }, w: plan.width, len: Math.round(beamLen * 10) / 10 });
       let healed = 0;
       for (const e of [...field.monsters]) {
         if (e.dying != null) continue;
         const ex = e.x - a.x, ez = e.z - a.z;
         const along = ex * a.dx + ez * a.dz;
-        if (along < 0 || along > plan.range) continue;
+        if (along < 0 || along > beamLen + (e.reach || 2) * 0.3) continue;
         if (Math.hypot(ex - a.dx * along, ez - a.dz * along) > plan.width + (e.reach || 2) * 0.3) continue;
         const result = rpg.strike(ch, e, room.rng, { multiplier: power, element: plan.element, applyStatus: combat.hookFor(ch), skill: plan.skill?.id, rules: plan.rules, noDamage: !!plan.noDamage });
         if (e.state !== 'chase') e.state = 'chase';
-        field.land(e, result, { strike: strikeOpts.knock, fromX: ch.x, fromZ: ch.z, element: plan.element, by: ch });
-        field.report(ch, e, result, 'skill');
+        field.land(e, result, { strike: strikeOpts.knock, fromX: ch.x, fromZ: ch.z, element: plan.element, by: ch, skill: plan.skill?.id });
+        field.report(ch, e, result, 'skill', plan.skill?.id);
         strikeOpts.onHit(e, result);
         out.hits.push({ enemy: e, result });
         healed += Math.round(result.amount * (plan.healFrac || 0));
@@ -784,31 +1058,44 @@ export function castPlan(combat, ch, plan, { echo = false, intent = {}, slot = n
       if (healed) rt.healUnit(ch, ch, healed);
     } else if (plan.kind === 'ground' && (plan.line || takesRepeats(plan))) {
       const spot = ground(plan.range);
+      spell({ x: spot.x, z: spot.z, r: plan.radius || (plan.line?.width ?? 2), line: plan.line ? { len: plan.line.length ?? 10, w: plan.line.width ?? 2, across: !!plan.line.across } : undefined, ms: Math.round((plan.delay || 0) * 1000) || undefined, n: plan.repeats > 1 ? plan.repeats : undefined });
       if (!line(combat, rt, ch, plan, spot, strikeOpts, collect)) repeats(combat, rt, ch, plan, spot, strikeOpts, collect);
     } else if (plan.kind === 'ground') {
       const spot = ground(plan.range);
       const pulse = () => {
         if (ch.dead) return;
+        spell({ x: spot.x, z: spot.z, r: plan.radius, pull: plan.pull || undefined });
         if (plan.pull) for (const e of field.monsters) {
           if (e.dying != null || Math.hypot(e.x - spot.x, e.z - spot.z) > plan.radius + 1) continue;
           rt.push(e, spot.x, spot.z, -plan.pull);
         }
         rt.withCaster(ch, () => collect(field.strikeArea(spot.x, spot.z, plan.radius, ch, { falloff: 0.55, ...strikeOpts })));
       };
-      if (plan.delay) combat.later(plan.delay, pulse, ch.id); else pulse();
+      // a delayed blast is marked on the ground when it is cast, with how long until it lands (P20)
+      // owner feedback 10 (Y32): a row with `tv.sky` is a star that FALLS — the client is told where and when it lands
+      const sky = plan.tv?.sky || null;
+      const fall = (at, r, ms) => field.emit({ t: 'fx', kind: 'skyfall', id: ch.id, skill: plan.skill?.id, proj: sky.proj || 'skystar', el: plan.element || 'arcane', to: { x: Math.round(at.x * 100) / 100, z: Math.round(at.z * 100) / 100 }, r: Math.round(r * 100) / 100, ms });
+      if (sky && (plan.delay || 0) > 0) fall(spot, plan.radius, Math.round(plan.delay * 1000));
+      else if (sky) fall(spot, plan.radius, 0);
+      if (plan.delay) { spell({ x: spot.x, z: spot.z, r: plan.radius, ms: Math.round(plan.delay * 1000), mark: 1 }); combat.later(plan.delay, pulse, ch.id); } else pulse();
       for (let k = 1; k < plan.repeats; k++) combat.later((plan.delay + k * (plan.repeatEvery || 0.5)), pulse, ch.id);
       if (plan.ground > 0) rt.dropPool(ch, { x: spot.x, z: spot.z, r: plan.groundRadius || plan.radius, seconds: plan.ground, element: plan.element, power: power * 0.35 });
     } else if (plan.kind === 'dash' && plan.dash && typeof plan.dash === 'object') {
+      const from = { x: ch.x, z: ch.z };
       dash(combat, rt, ch, plan, a, intent, strikeOpts, collect);
+      spell({ x: from.x, z: from.z, to: { x: ch.x, z: ch.z } });
     } else if (plan.kind === 'dash') {
       const spot = ground(plan.range);
-      const dist = Math.min(plan.range, spot.dist);
+      const dist = Math.min(plan.range, spot.dist, field.sight ? Math.max(0, field.sight.reach(ch.x, ch.z, a.dx, a.dz, plan.range) - 0.6) : Infinity);
       collect(field.strikeSegment(ch.x + a.dx, ch.z + a.dz, ch.x + a.dx * dist, ch.z + a.dz * dist, plan.splash, ch, { ...strikeOpts, falloff: 0.8 }));
+      spell({ x: ch.x, z: ch.z, to: { x: ch.x + a.dx * dist, z: ch.z + a.dz * dist } });
       ch.x += a.dx * dist; ch.z += a.dz * dist;
       field.emit({ t: 'move', id: ch.id, x: ch.x, z: ch.z, why: 'dash' });
     } else if (plan.kind === 'self') {
       // ally targeting: a heal or a buff on a `self` skill may be aimed at a party member
-      const to = allyTargetOf(rt, ch, intent);
+      // a TOUCH heal (`tv.touch`, Mercy's Touch) only reaches a friend that close; further and it lands on you
+      const to = allyTargetOf(rt, ch, intent, plan.tv?.touch ?? ALLY_RANGE);
+      spell({ x: to.x, z: to.z, on: to.id, heal: plan.heal ? 1 : undefined, status: plan.status || undefined });
       if (plan.heal) {
         const share = plan.healFrac || (plan.heal / Math.max(1, ch.maxHp));
         const amount = to === ch ? plan.heal : Math.round(to.maxHp * share);
@@ -820,9 +1107,10 @@ export function castPlan(combat, ch, plan, { echo = false, intent = {}, slot = n
         // ally audit (M2): "you and every follower" (`pets`) is a GROUP buff — you, the party in range
         // and your followers; a mend over time (regen) can be aimed at one ally (+ your followers, as
         // Farhold mends them with you); any other status is personal and stays on the caster.
+        // play-test 5 T2: "all allies" is ONE list everywhere (rt.allies) — a party member's own pet is in it too
         const on = plan.pets ? [ch, ...rt.partyPlayers(ch)] : plan.status === 'regen' ? [to] : [ch];
         for (const u of on) applyStatus(u, plan.status, plan.statusSpec, 1);
-        if (plan.pets || plan.status === 'regen') for (const u of rt.allies(ch)) if (u.owner === ch) applyStatus(u, plan.status, plan.statusSpec, 1);
+        if (plan.pets || plan.status === 'regen') for (const u of rt.allies(ch)) if (u.owner === ch || (plan.pets && u.kind !== 'player' && !on.includes(u))) applyStatus(u, plan.status, plan.statusSpec, 1);
         out.statusOn = on.map(u => u.id);
       }
       if (plan.trail) ch.trail = { left: plan.trail.seconds, step: plan.trail.step || 1.4, radius: plan.trail.radius, burns: plan.trail.burns, power: plan.mult, element: plan.element, lastX: ch.x, lastZ: ch.z };
@@ -830,6 +1118,7 @@ export function castPlan(combat, ch, plan, { echo = false, intent = {}, slot = n
     } else if (plan.kind === 'melee') {
       const cone = () => {
         if (ch.dead) return;
+        spell({ x: ch.x, z: ch.z, yaw: ch.yaw, reach: plan.reach, arc: plan.arc, r: plan.splash || undefined });
         rt.withCaster(ch, () => {
           // Farhold's field.strike borrows the LAST basic swing's shape (feel.swing.strike) when a skill
           // passes none: its weapon traits, armour pierce and — when the skill has no knock — its knock.
@@ -848,17 +1137,21 @@ export function castPlan(combat, ch, plan, { echo = false, intent = {}, slot = n
       cone();
       for (let k = 1; k < plan.repeats; k++) combat.later(k * (plan.repeatEvery || 0.32), cone, ch.id);
     } else if (plan.kind === 'around' && takesRepeats(plan)) {
+      spell({ x: ch.x, z: ch.z, r: plan.radius, n: plan.repeats > 1 ? plan.repeats : undefined });
       repeats(combat, rt, ch, plan, { x: ch.x, z: ch.z }, strikeOpts, collect);
     } else if (plan.kind === 'around') {
+      spell({ x: ch.x, z: ch.z, r: plan.radius });
       collect(field.strikeArea(ch.x, ch.z, plan.radius, ch, { falloff: 0.6, ...strikeOpts }));
       for (let k = 1; k < plan.repeats; k++) {
         combat.later(k * (plan.repeatEvery || 0.32), () => {
           if (ch.dead) return;
+          spell({ x: ch.x, z: ch.z, r: plan.radius });
           rt.withCaster(ch, () => collect(field.strikeArea(ch.x, ch.z, plan.radius, ch, { falloff: 0.6, ...strikeOpts })));
         }, ch.id);
       }
       if (plan.ground > 0) rt.dropPool(ch, { x: ch.x, z: ch.z, r: plan.groundRadius || plan.radius, seconds: plan.ground, element: plan.element, power: power * 0.35 });
-      if (plan.healFrac) rt.healUnit(ch, ch, Math.round(ch.maxHp * plan.healFrac));
+      // play-test 5 T3: the heal of an `around` skill (Prayer of Dawn) is a DIRECT heal — the ally you target, else you
+      if (plan.healFrac) { const to = allyTargetOf(rt, ch, intent); out.healed = rt.healUnit(ch, to, Math.round(to.maxHp * plan.healFrac)); out.healTarget = to.id; }
     } else {
       // a bolt (main.js fireBolt), one per projectile
       const n = plan.projectiles || 1;
@@ -895,9 +1188,11 @@ function decorate(rt, ch, plan, opts) {
 const takesRepeats = plan => { const r = plan.repeatSpec; return !!(r && (r.grow || r.scatter || r.alternate || r.target)); };
 
 /** main.js `fireBolt`: flight time from the distance, the hit lands where the body is when it arrives. */
-function fireBolt(combat, rt, ch, plan, a, dx, dz, strikeOpts, collect, intent, hop = 0, from = null) {
+function fireBolt(combat, rt, ch, plan, a, dx, dz, strikeOpts, collect, intent, hop = 0, from = null, skip = null) {
   const field = combat.field;
   const origin = from || a;
+  // D-world's ask (play-test 5): one record of where a chain REALLY went, shared by every hop of this bolt
+  if (!hop && plan.chains > 0 && !plan._chain) plan = { ...plan, _chain: { ids: [], first: null } };
   const homing = (!hop && plan.homing) ? plan.homing : 0;
   // the Tab target, when it is roughly along the shot, is what the bolt is thrown at
   let target = null;
@@ -905,53 +1200,84 @@ function fireBolt(combat, rt, ch, plan, a, dx, dz, strikeOpts, collect, intent, 
     const t = field.get(intent.target);
     if (t && t.side === 'foe' && t.dying == null) {
       const ex = t.x - origin.x, ez = t.z - origin.z, len = Math.hypot(ex, ez);
-      if (len <= plan.range + 1) { dx = ex / (len || 1); dz = ez / (len || 1); target = { enemy: t, distance: len }; }
+      // owner feedback 10 (Y10): a target behind a dungeon wall is not what the bolt is thrown at — it flies where you face and stops at the wall
+      if (len <= plan.range + 1 && (!field.sight || field.sight(origin.x, origin.z, t.x, t.z))) { dx = ex / (len || 1); dz = ez / (len || 1); target = { enemy: t, distance: len }; }
     }
   }
-  if (!target) target = hitScan(field, origin.x, origin.z, dx, dz, plan.range, 1.4 + homing * 2.6);
+  // Y10: how far the shot is clear of walls along the way it is thrown (the whole range anywhere but an instance)
+  const clearTo = field.sight ? field.sight.reach(origin.x, origin.z, dx, dz, plan.range) : plan.range;
+  if (!target) target = hitScan(field, origin.x, origin.z, dx, dz, clearTo, 1.4 + homing * 2.6, skip);
   if (!target && homing > 0) {
     const reach = 2.5 + homing * 3.5;
     for (let t = 4; t <= plan.range && !target; t += 3) {
       const found = field.nearestTo(origin.x + dx * t, origin.z + dz * t, reach);
       if (!found) continue;
       const ex = found.x - origin.x, ez = found.z - origin.z, len = Math.hypot(ex, ez) || 1;
-      if (len > plan.range) continue;
+      if (len > plan.range || (field.sight && !field.sight(origin.x, origin.z, found.x, found.z))) continue;
       dx = ex / len; dz = ez / len;
       target = { enemy: found, distance: len };
     }
   }
-  const dist = (plan.pierce && !hop) ? plan.range : (target ? target.distance : plan.range);
+  const dist = (plan.pierce && !hop) ? Math.min(plan.range, clearTo) : (target ? target.distance : clearTo);
   const to = { x: origin.x + dx * dist, z: origin.z + dz * dist };
-  const flight = Math.max(0.09, dist / BOLT_SPEED);
+  const walled = !target && clearTo < plan.range - 0.5;
   const chase = target?.enemy || null;
-  field.emit({ t: 'fx', kind: 'bolt', id: ch.id, skill: plan.skill?.id, element: plan.element, from: { x: origin.x, z: origin.z }, to: chase ? chase.id : to, ms: Math.round(flight * 1000) });
+  // owner feedback 8 (W14): "Firebolt should have a projectile, not instant damage" — Farhold's 48 m/s crossed a fight
+  // in 4-6 frames. A per-skill speed (data/rules/projectiles.json), timed to the TARGET (a piercing bolt used to be
+  // timed to its full range), a hop quicker than the throw; it lands on the target wherever it is by then.
+  const P = combat.room.engine.projectiles || null;
+  const basicWt = plan.fxTag?.basic ? plan.fxTag.wt : null;
+  const speed = !P ? BOLT_SPEED : (basicWt ? basicSpeed(P, basicWt) : skillSpeed(P, plan.skill?.id, plan.element)) * (hop ? 1.6 : 1);
+  const flight = P ? flightOf(P, chase ? target.distance : dist, speed) : Math.max(0.09, dist / BOLT_SPEED);
+  const extra = P ? projFields(P, { speed, proj: projOf(P, { skillId: plan.skill?.id, element: plan.element, wt: basicWt }), home: !!chase, skill: plan.skill?.id || (basicWt ? 'basic' : null) }) : {};
+  field.emit({ t: 'fx', kind: 'bolt', id: ch.id, skill: plan.skill?.id, element: plan.element, from: { x: origin.x, z: origin.z }, to: chase ? chase.id : to, ms: Math.round(flight * 1000), ...(walled ? { wall: 1 } : {}), ...extra, ...(P && plan.pierce && !hop && chase ? { pierce: 1, end: to } : {}), ...(plan.fxTag || {}), ...(hop ? { hop, fromId: skip?.id ?? undefined } : {}) });
   combat.later(flight, () => {
-    const at = chase && chase.dying == null ? { x: chase.x, z: chase.z } : to;
+    // (W14) a target that died on the way: the bolt strikes where it FELL, not where it stood when the bolt left
+    let at = chase && (P || chase.dying == null) ? { x: chase.x, z: chase.z } : to;
+    // Y10: what it was chasing stepped behind a wall while it flew — it bursts on the wall
+    if (chase && field.sight && !field.sight(origin.x, origin.z, at.x, at.z)) {
+      const ex = at.x - origin.x, ez = at.z - origin.z, len = Math.hypot(ex, ez) || 1;
+      const d = field.sight.reach(origin.x, origin.z, ex / len, ez / len, len);
+      at = { x: origin.x + ex / len * d, z: origin.z + ez / len * d };
+      field.emit({ t: 'fx', kind: 'blocked', id: ch.id, x: at.x, z: at.z, by: 'wall' });
+    }
     const splash = plan.splash * (combat.room.engine.rpg.fx.sum(ch, 'boltSplash') || 1);
     rt.withCaster(ch, () => {
       const hits = collect(field.strikeArea(at.x, at.z, splash, ch, { falloff: 0.5, ...strikeOpts }));
       if (plan.mods && !hop) rt.resolveAttack(ch, plan.mods, hits, { x: ch.x, z: ch.z, at: { x: at.x, z: at.z }, element: plan.element });
       if (!hop && plan.skill) afterBolt(combat, rt, ch, plan, at, hits, strikeOpts, collect);
       const left = (plan.chains || 0) - hop;
+      const trail = plan._chain;
+      if (trail && chase) { if (hop) trail.ids.push(chase.id); else trail.first = chase.id; }
+      let hopped = false;
       if (left > 0) {
         const conductors = field.near(at.x, at.z, 12, chase).filter(e => e.statuses?.shock);
-        const next = (conductors.sort((p, q) => Math.hypot(p.x - at.x, p.z - at.z) - Math.hypot(q.x - at.x, q.z - at.z))[0]) || field.nearestTo(at.x, at.z, 8, chase) || null;
+        const seen = e => !field.sight || field.sight(at.x, at.z, e.x, e.z);       // Y10: a chain does not jump through a wall
+        const next = (conductors.filter(seen).sort((p, q) => Math.hypot(p.x - at.x, p.z - at.z) - Math.hypot(q.x - at.x, q.z - at.z))[0]) || [field.nearestTo(at.x, at.z, 8, chase)].filter(e => e && seen(e))[0] || null;
         if (next) {
+          hopped = true;
           const ndx = next.x - at.x, ndz = next.z - at.z, nlen = Math.hypot(ndx, ndz) || 1;
           const keep = plan.chainFalloff ?? 0.65;
-          fireBolt(combat, rt, ch, { ...plan, range: 14 }, a, ndx / nlen, ndz / nlen, { ...strikeOpts, power: (strikeOpts?.power ?? 1) * keep }, collect, intent, hop + 1, { x: at.x, z: at.z });
+          // play-test 5 (found by T15's chain test): the hop starts AT the body just struck, and the scan along it finds
+          // that same body first (distance 0) — in Farhold too (main.js fireBolt -> actors.js hitScan), so a "chain"
+          // struck one enemy two, three, four times and never jumped. Thousandvale's hop skips the body it left;
+          // the parity engine keeps Farhold's behaviour (reported to the lead as a Farhold finding).
+          const leave = combat.room.engine.casterForms ? chase : null;
+          fireBolt(combat, rt, ch, { ...plan, range: 14 }, a, ndx / nlen, ndz / nlen, { ...strikeOpts, power: (strikeOpts?.power ?? 1) * keep }, collect, intent, hop + 1, { x: at.x, z: at.z }, leave);
         }
       }
+      // the chain is over: `targets` = the entity ids it jumped to, in order (`first` = what the bolt itself struck)
+      if (trail && !hopped && !trail.sent) { trail.sent = true; field.emit({ t: 'fx', kind: 'chain', id: ch.id, skill: plan.skill?.id, element: plan.element, first: trail.first ?? undefined, targets: trail.ids, ...(plan.fxTag || {}) }); }
       void hits;
     });
   }, ch.id);
 }
 
 /** actors.js `hitScan` on the ground plane: the nearest live monster along a shot. */
-function hitScan(field, x, z, dx, dz, range, width) {
+function hitScan(field, x, z, dx, dz, range, width, skip = null) {
   let best = null, bestT = Infinity;
   for (const e of field.monsters) {
-    if (e.dying != null) continue;
+    if (e.dying != null || e === skip) continue;
     const ex = e.x - x, ez = e.z - z;
     const t = ex * dx + ez * dz;
     if (t < 0 || t > range) continue;
@@ -1023,6 +1349,14 @@ function repeats(combat, rt, ch, plan, origin, opts, collect) {
         }
         radius = r.strikeRadius ?? Math.min(2.4, plan.radius || 2.4);
       }
+      // owner feedback 10 (Y32): each strike of a `tv.sky` skill is a star coming down — announced `fallMs` before it lands
+      const sky = plan.tv?.sky || null;
+      if (sky) {
+        const ms = Math.max(0, sky.fallMs | 0);
+        field.emit({ t: 'fx', kind: 'skyfall', id: ch.id, skill: plan.skill?.id, proj: sky.proj || 'skystar', el: plan.element || 'arcane', to: { x: Math.round(x * 100) / 100, z: Math.round(z * 100) / 100 }, r: Math.round(radius * 100) / 100, ms, n: k + 1, of: n });
+        combat.later(ms / 1000, () => { if (!ch.dead) rt.withCaster(ch, () => collect(field.strikeArea(x, z, radius, ch, { falloff: 0.6, ...opts }))); }, ch.id);
+        return;
+      }
       rt.withCaster(ch, () => collect(field.strikeArea(x, z, radius, ch, { falloff: 0.6, ...opts })));
     }, ch.id);
   }
@@ -1037,8 +1371,8 @@ function dash(combat, rt, ch, plan, a, intent, opts, collect) {
   const from = { x: ch.x, z: ch.z };
   const strikeOne = (e, mult, fx, fz) => {
     const res = rpg.strike(ch, e, combat.room.rng, { multiplier: mult, element: plan.element, skill: plan.skill?.id, applyStatus: combat.hookFor(ch), rules: plan.rules, noDamage: !!plan.noDamage });
-    field.land(e, res, { strike: knockShape(plan.knock), fromX: fx, fromZ: fz, element: plan.element, by: ch });
-    field.report(ch, e, res, 'skill');
+    field.land(e, res, { strike: knockShape(plan.knock), fromX: fx, fromZ: fz, element: plan.element, by: ch, skill: plan.skill?.id });
+    field.report(ch, e, res, 'skill', plan.skill?.id);
     opts.onHit?.(e, res);
     collect([{ enemy: e, result: res }]);
     if (res.dead) field.kill(e);
@@ -1062,6 +1396,9 @@ function dash(combat, rt, ch, plan, a, intent, opts, collect) {
   const allyAlong = () => {
     const t = allyTargetOf(rt, ch, intent, range);
     if (t !== ch) return t;
+    return ownFollowerAlong();
+  };
+  const ownFollowerAlong = () => {
     let best = null, bd = Infinity;
     for (const p of rt.petsOf(ch)) {
       if (p.dying != null || p.decoy) continue;
@@ -1094,6 +1431,15 @@ function dash(combat, rt, ch, plan, a, intent, opts, collect) {
         to = { x: e.x, z: e.z };
         e.x = from.x; e.z = from.z;
         if (d.enemyStatus) { const r = statusRef(d.enemyStatus); combat.landStatus(ch, r.id, { ...(combat.room.engine.statuses[r.id] || {}), ...r }, e, 1); }
+      } else {
+        // play-test 5 T2: the card has always said "…the aimed follower or enemy"; the follower half was never ported.
+        // Your OWN follower only — another player is never moved by somebody else's skill.
+        const pet = ownFollowerAlong();
+        if (pet) {
+          to = { x: pet.x, z: pet.z };
+          pet.x = from.x; pet.z = from.z;
+          if (d.allyBarrier) { pet.barrier = Math.round(pet.maxHp * d.allyBarrier); pet.barrierFor = 6; }
+        }
       }
       break;
     }
@@ -1175,7 +1521,11 @@ function afterCast(combat, rt, ch, plan, ctx) {
       u.barrier = Math.max(u.barrier || 0, worth);
       u.castBarrierFor = b.seconds ?? 6;
     }
-    if (b.pets) Fo?.barrierAll(ch, worth, b.seconds ?? 6);
+    if (b.pets) {
+      Fo?.barrierAll(ch, worth, b.seconds ?? 6);
+      // T2: a party member's own pets are allies too
+      for (const u of rt.allies(ch)) if (u.kind !== 'player' && u.owner !== ch && u.dying == null) { u.barrier = Math.max(u.barrier || 0, Math.round(worth)); u.barrierFor = b.seconds ?? 6; }
+    }
   }
   if (plan.healPets) {
     // MMO: "your followers" becomes the rest of your party (pets included) — a group heal
@@ -1189,22 +1539,21 @@ function afterCast(combat, rt, ch, plan, ctx) {
     if (over > 0) { to.barrier = Math.max(to.barrier || 0, Math.min(Math.round(to.maxHp * plan.overflowBarrier), over)); to.castBarrierFor = 8; }
   }
   if (plan.revive) {
-    // MMO: raise fallen party members near the caster (Farhold: fallen followers)
+    // Farhold's `revive` key raises your own fallen FOLLOWERS, here as there. A fallen PLAYER is raised only by a
+    // revive skill (play-test 5 T4: `row.tv.revive`, startRevive below) — until then a hunter's "Unleash the Hound"
+    // stood dead party members up for free every 18 seconds.
     const share = typeof plan.revive === 'number' ? plan.revive : plan.revive.share ?? 0.5;
-    for (const u of field.players) {
-      if (!u.dead || u === ch || (ch.partyId == null || u.partyId !== ch.partyId)) continue;
-      if (Math.hypot(u.x - ch.x, u.z - ch.z) > ALLY_RANGE) continue;
-      u.dead = false;
-      u.hp = Math.max(1, Math.round(u.maxHp * share));
-      u.revivedBy = ch.id;
-      field.emit({ t: 'revive', id: u.id, by: ch.id, hp: u.hp });
-    }
-    Fo?.reviveAll(ch, share);                 // and fallen followers, as Farhold does
+    Fo?.reviveAll(ch, share);
   }
   if (plan.cleanse) {
     const cl = plan.cleanse;
     rt.cleanseUnit(allyTargetOf(rt, ch, ctx.intent), cl.count ?? 1, cl.types || null);
-    if (cl.pets) { for (const u of rt.allies(ch)) if (u !== ch && !u.owner) rt.cleanseUnit(u, cl.count ?? 1); Fo?.cleanseAll(ch, cl.count ?? 1); }
+    if (cl.pets) {
+      const first = allyTargetOf(rt, ch, ctx.intent);
+      if (first !== ch) rt.cleanseUnit(ch, cl.count ?? 1);          // "every ally" includes you when you aimed it at a friend
+      for (const u of rt.allies(ch)) if (u !== ch && u !== first && u.owner !== ch) rt.cleanseUnit(u, cl.count ?? 1);   // party members and THEIR pets
+      Fo?.cleanseAll(ch, cl.count ?? 1);                            // your own followers (Farhold's own pass)
+    }
   }
   if (plan.link) {
     const l = plan.link;
@@ -1224,7 +1573,9 @@ function afterCast(combat, rt, ch, plan, ctx) {
     const b = plan.selfBuff;
     const id = `buff:${plan.skill?.id || 'skill'}`;
     if (!b.petsOnly) apply(ch, id, { name: b.name || plan.skill?.name || 'Buff', kind: 'buff', element: plan.element, ...b, seconds: b.seconds ?? 8 });
-    if (b.pets || b.petsOnly) for (const u of rt.allies(ch)) if (u !== ch) apply(u, id, { name: b.name || 'Buff', kind: 'buff', ...b, seconds: b.seconds ?? 8 });
+    // T2: `pets` = all allies; `petsOnly` ("For 10s, your followers: …") = your OWN followers and nobody else — it
+    // used to land on every party member as well (Stoke the Familiar gave a whole party +50% damage)
+    if (b.pets || b.petsOnly) for (const u of rt.allies(ch)) if (u !== ch && (b.pets || u.owner === ch)) apply(u, id, { name: b.name || 'Buff', kind: 'buff', ...b, seconds: b.seconds ?? 8 });
     if (b.petsShare) {
       for (const pet of rt.petsOf(ch)) {
         if (pet.dying != null || Math.hypot(pet.x - ch.x, pet.z - ch.z) > 8) continue;
@@ -1249,15 +1600,31 @@ function afterCast(combat, rt, ch, plan, ctx) {
     if (w.pets) { give(ch); for (const u of rt.allies(ch)) if (u !== ch) give(u); }
     else give(allyTargetOf(rt, ch, ctx.intent));
   }
-  if (plan.place && plan.kind !== 'ground' && !plan.dash) {
+  // play-test 4 S13: a zone a BOLT leaves (Grounding, Toxic Bloom, Slow Burner, Seedling, a junk pile…) belongs where
+  // the bolt LANDS, not round the caster — afterCast runs as the bolt leaves the hand, so a bolt's place/pool is handed
+  // to afterBolt (`plan._impactZones`), which puts it down at the first impact. Self/around/melee zones stay on the
+  // caster, ground zones on the aimed spot, beam pools along the beam (unchanged).
+  // A zone that only HELPS (a heal / buff ring with no strike or debuff, e.g. Thornlash's Seedling) stays with the caster,
+  // where the friends are; a zone that hurts goes where the bolt lands.
+  const atImpact = plan.kind === 'bolt' && !plan.sub;
+  const harmful = z => !!z && (!!z.strike || !!z.debuff || !!z.trigger || !!z.triggerRadius || z.kind === 'trap' || (!z.heal && !z.buff && !z.healAllies));
+  const impPlace = atImpact && plan.place && plan.place.follow !== 'self' && harmful(plan.place) ? plan.place : null;
+  const impPool = atImpact && plan.pool && !plan.line && plan.pool.at !== 'ahead' && poolSpec({ element: plan.element, ...plan.pool }).strike ? plan.pool : null;
+  if (impPlace || impPool) plan._impactZones = { place: impPlace, pool: impPool, intent: ctx.intent, a, done: false };
+  const deferPlace = !!plan._impactZones?.place, deferPool = !!plan._impactZones?.pool;
+  if (plan.place && plan.kind !== 'ground' && !plan.dash && !deferPlace) {
     const follow = plan.place.follow === 'self' ? 'self' : plan.place.follow === 'target' ? aimedEnemy(field, ch, ctx.intent, a, plan.range || 30) : null;
     const at = plan.place.follow === 'self' || plan.kind === 'self' || plan.kind === 'around' ? { x: ch.x, z: ch.z } : spot;
     rt.place(ch, plan, plan.place, at.x, at.z, follow);
   } else if (plan.place && plan.kind === 'ground') {
-    const follow = plan.place.follow === 'target' ? aimedEnemy(field, ch, ctx.intent, a, plan.range || 30) : null;
-    rt.place(ch, plan, plan.place, spot.x, spot.z, follow);
+    // owner feedback 10 (Y25): a GROUND skill whose talent says "it follows you" (Moving Sanctuary, Carried Post, Moving
+    // Glyph, Drifting Field) never did — this branch only ever asked about `target` (Farhold's skillrun.js does the
+    // same: reported to the lead as a Farhold finding; a parity engine keeps it). It is put down on the caster and rides.
+    const self = rt.tv && plan.place.follow === 'self';
+    const follow = self ? 'self' : plan.place.follow === 'target' ? aimedEnemy(field, ch, ctx.intent, a, plan.range || 30) : null;
+    rt.place(ch, plan, plan.place, self ? ch.x : spot.x, self ? ch.z : spot.z, follow);
   }
-  if (plan.pool && !plan.line) {
+  if (plan.pool && !plan.line && !deferPool) {
     const spec = poolSpec({ element: plan.element, ...plan.pool });
     if (plan.pool.along === 'beam' || (plan.kind === 'beam' && plan.pool.along !== false)) {
       for (let t = 2; t <= (plan.range || 18); t += 3) rt.place(ch, plan, { ...spec, radius: plan.pool.radius ?? Math.max(1.2, (plan.width || 2) * 0.6) }, ctx.origin.x + a.dx * t, ctx.origin.z + a.dz * t);
@@ -1337,10 +1704,21 @@ function afterCast(combat, rt, ch, plan, ctx) {
 /** skillrun.js `afterBolt`: a ricochet, a split on a condition, a bolt that comes back. */
 function afterBolt(combat, rt, ch, plan, at, hits, opts, collect) {
   const field = combat.field;
+  // S13: the bolt's own zone, at the first impact (see afterCast)
+  const iz = plan._impactZones;
+  if (iz && !iz.done) {
+    iz.done = true;
+    if (iz.place) {
+      const follow = iz.place.follow === 'target' ? (hits.find(h => h.enemy?.dying == null)?.enemy || aimedEnemy(field, ch, iz.intent, iz.a, plan.range || 30)) : null;
+      rt.place(ch, plan, iz.place, at.x, at.z, follow);
+    }
+    if (iz.pool) rt.place(ch, plan, poolSpec({ element: plan.element, ...iz.pool }), at.x, at.z);
+  }
   const struck = hits.find(h => h.result?.amount > 0)?.enemy || null;
   if (struck) plan._struck = struck;
   const used = new Set(hits.map(h => h.enemy));
-  const hit = (from, e, keep) => { used.add(e); collect(field.strikeArea(e.x, e.z, 1.1, ch, { ...opts, falloff: 1, power: (opts.power ?? plan.mult) * keep })); return e; };
+  const jumped = [];
+  const hit = (from, e, keep) => { used.add(e); jumped.push(e.id); collect(field.strikeArea(e.x, e.z, 1.1, ch, { ...opts, falloff: 1, power: (opts.power ?? plan.mult) * keep })); return e; };
   const jump = (from, keep, n, range) => {
     let cur = from;
     for (let i = 0; i < n; i++) {
@@ -1359,6 +1737,8 @@ function afterBolt(combat, rt, ch, plan, at, hits, opts, collect) {
     const ok = when === 'hit' ? !!struck : when === 'kill' ? hits.some(h => h.result?.dead) : when.startsWith('tag:') ? hits.some(h => h.enemy.statuses?.[when.slice(4)]) : false;
     if (ok) for (const e of (field.near(at.x, at.z, sp.range ?? 8) || []).filter(e => !used.has(e)).slice(0, sp.shards ?? 2)) hit(at, e, sp.keep ?? 0.5);
   }
+  // a ricochet / split: the bodies it went on to, in order (D-world draws the arcs to exactly these)
+  if (jumped.length) field.emit({ t: 'fx', kind: 'chain', id: ch.id, skill: plan.skill?.id, element: plan.element, first: struck?.id ?? undefined, targets: jumped, fork: sp && !plan.ricochet ? 1 : undefined });
   if (plan.returns) {
     // the bolt flies back to its caster: a line from where it landed to where the caster is when it arrives
     const keep = typeof plan.returns === 'number' ? plan.returns : plan.returns.keep ?? 0.8;
@@ -1428,6 +1808,15 @@ function startChannel(rt, ch, plan, intent) {
   const c = plan.channel;
   ch.mech = ch.mech || { res: {} };
   ch.mech.channel = { plan: { ...plan, channel: null, sub: true }, left: c.seconds ?? 3, every: c.every ?? 0.5, next: 0, moveK: c.moveK || 0, x: ch.x, z: ch.z, ticks: 0, grow: c.grow || 0, intent };
+  // owner feedback 10 (Y20): a channelled beam (Storm Beam) is ONE held beam on screen — where it starts, how long and
+  // wide it is, how long it runs and how many times it pulses; each pulse and the end follow as `beamPulse` / `beamEnd`
+  if (plan.kind === 'beam' && rt.tv) {
+    const every = c.every ?? 0.5, seconds = c.seconds ?? 3;
+    const pulses = Math.floor(seconds / every + 1e-6) + 1;
+    ch.mech.channel.beam = { pulses };
+    rt.field.emit({ t: 'fx', kind: 'beam', id: ch.id, skill: plan.skill?.id, el: plan.element || 'physical', x: ch.x, z: ch.z, yaw: Math.round((ch.yaw || 0) * 1000) / 1000,
+      len: plan.range, w: plan.width, ms: Math.round(seconds * 1000), pulses, every: Math.round(every * 1000), move: c.moveK ? 1 : undefined });
+  }
 }
 
 /** skillrun.js `doRewind`, on the room clock: back to where you were `seconds` ago, health too. */

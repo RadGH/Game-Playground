@@ -76,6 +76,8 @@ export async function createCreature(spec, opts = {}) {
     setRate(r) { state.rate = Math.max(0.15, Math.min(3, Number(r) || 1)); },
     get rate() { return state.rate; },
     setSpec(sp) { build(sp); }, get spec() { return state.spec; },
+    /** The built parts (quad: hip, bodyY, neck, head, jaw, legs, tail…) — read-only, for tack and riders (mounts.js). */
+    get parts() { return state.parts; },
     metrics() { const b = new THREE.Box3().setFromObject(group); return { height: b.max.y - b.min.y, length: b.max.z - b.min.z, width: b.max.x - b.min.x }; },
     update(dt, t) { state.t += dt * (state.rate || 1); const fn = ({ quad: animQuad, spider: animSpider, bat: animBat, snake: animSnake, biped: animBiped, float: animFloat, roller: animRoller, fowl: animFowl })[state.plan]; if (fn) fn(state, dt); },
     dispose() { clear(); },
@@ -165,6 +167,17 @@ function buildQuad(root, T, s) {
   else if (T.ears === 'round') for (const x of [-1, 1]) { const e = sphere(B.headR * 0.28, C.body, 10); e.position.set(x * B.headR * 0.7, B.headR * 0.7, -B.headR * 0.1); head.add(e); const inner = sphere(B.headR * 0.16, C.belly, 8); inner.position.set(x * B.headR * 0.72, B.headR * 0.72, B.headR * 0.02); head.add(inner); }
   if (F.horns) for (const x of [-1, 1]) { const h = cone(B.headR * 0.18, B.headR * 1.1, C.accent, 7); h.position.set(x * B.headR * 0.5, B.headR * 0.9, -B.headR * 0.3); h.rotation.set(-0.7, 0, x * -0.35); head.add(h); }
   if (isDragon) for (let i = 0; i < 5; i++) { const crest = cone(B.headR * (0.10 - i * 0.01), B.headR * (0.45 - i * 0.04), C.accent, 6); crest.position.set(0, B.headR * (0.7 - i * 0.08), -B.headR * (0.34 - i * 0.18)); crest.rotation.x = -0.45; head.add(crest); }
+  // CURLED HORNS (the ram, 2026-10-05): a thick horn that sweeps back from the brow and curls down and forward round
+  // the ear — a torus arc in a plane turned out from the skull, thinning toward the tip
+  if (F.curlHorns) for (const x of [-1, 1]) {
+    const curl = new THREE.Group(); curl.position.set(x * B.headR * 0.62, B.headR * 0.55, -B.headR * 0.15); curl.rotation.set(0, x * 0.35, 0); head.add(curl);
+    const R = B.headR * 0.62;
+    for (let i = 0; i < 6; i++) {
+      const a0 = -0.6 + i * 0.75, seg = new THREE.Mesh(new THREE.TorusGeometry(R, B.headR * (0.2 - i * 0.022), 7, 6, 0.8), mat(shade(C.accent, -i * 0.04)));
+      seg.castShadow = true; seg.rotation.set(0, Math.PI / 2, a0); seg.scale.set(1 - i * 0.07, 1 - i * 0.07, 1);
+      seg.position.set(x * i * B.headR * 0.03, -R * 0.15 * i / 5, 0); curl.add(seg);
+    }
+  }
   if (F.antlers) for (const x of [-1, 1]) { const a = new THREE.Group(); a.position.set(x * B.headR * 0.45, B.headR * 0.8, -B.headR * 0.2); a.rotation.z = x * -0.35; head.add(a); const main = cyl(0.012, 0.02, B.headR * 2.2, C.accent, 6); main.position.y = B.headR * 1.1; a.add(main); for (let i = 1; i <= 3; i++) { const tine = cyl(0.008, 0.015, B.headR * 0.8, C.accent, 6); tine.position.set(x * B.headR * 0.25, B.headR * (0.5 + i * 0.5), 0); tine.rotation.z = x * -0.9; a.add(tine); } }
   if (F.whiskers) for (const x of [-1, 1]) for (const dy of [-0.02, 0.02]) { const w = cyl(0.003, 0.003, sr * 3, '#ddd', 4); w.rotation.z = Math.PI / 2; w.rotation.y = x * 0.3; w.position.set(x * sr * 1.2, -B.headR * 0.15 + dy, B.headR * 0.6 + sl * 0.8); head.add(w); }
   // tail

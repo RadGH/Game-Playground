@@ -7,8 +7,11 @@
 //
 // CLI:
 //   node prototypes/thousandvale/tools/bot-client.mjs --url ws://127.0.0.1:8491 --bots 20 --seconds 60
-//     --mode fight|walk|idle|town   fight (default): leave the town, wander, chase wolves within 30 m and swing
+//     --mode fight|walk|idle|town   fight (default): leave the town, wander, chase wolves within 30 m and swing;
+//                              with none in reach it hunts the nearest monster it can see (opts.hunt, 260 m)
 //                              walk: leave the town and wander; town: wander inside the town hub; idle: stand
+//                              script (library only): walk to bot.goal, swing at monsters within bot.fightRadius —
+//                              a driver (tools/first-hour-bot.mjs) sets the goals
 //     --radius 60              wander radius around the spawn, metres
 //     --cls warrior            Farhold class id for new characters
 //     --stagger 100            ms between bot logins
@@ -22,6 +25,14 @@
 //   bot.charId, bot.you, bot.ents (Map id -> { id, kind, type, name, x, z, hp, dead })
 //   bot.stop() -> closes the sockets (leave)
 //   bot.waitFor(pred, ms) -> resolves when pred(bot) is true
+//   script mode: bot.goal = {x, z} | null, bot.fightRadius = metres (0 = never swing); bot.party (partyState),
+//   bot.used (last `used` answer), bot.loot ([{items, gold}] from `loot` events), bot.zone (last `zone` message),
+//   bot.vitals ({hp, hpMax, mp, mpMax} from the snapshot), bot.route = (from, to) => waypoint | null (optional: how a
+//   script bot walks to the monster it chases — e.g. a dungeon floor route, so it does not walk into a wall at a
+//   monster in the next room), bot.avoid = e => true for monsters a script bot must not pick (e.g. elites),
+//   bot.focus = () => entity id | null (assist: hit this one when it is in reach, e.g. the partner's target),
+//   bot.skills = true (use the skill bar from `you.bar` like a player: unlocked damage skills on the target in reach,
+//   a heal/ally skill on whoever of me and bot.healTarget() is lower when one of us is under 55%)
 
 import { connect } from '../js/net/client.js';
 import { IN } from '../js/net/protocol.js';
@@ -51,7 +62,7 @@ function rngFor(seed) {
  * (found by the kill -9 test). Here an error before open counts as a close. Reported to stream A
  * (docs/requests.md); once js/net/sockets.js does the same, this can go.
  */
-export function nodeSafeWsFactory(base) {
+export function nodeSafeWsFactory(base, stats = null) {
   return path => {
     const ws = new WebSocket(base.replace(/\/$/, '') + path);
     ws.binaryType = 'arraybuffer';
@@ -64,7 +75,10 @@ export function nodeSafeWsFactory(base) {
     };
     const fireClose = (code, reason) => { if (closedOnce) return; closedOnce = true; s.onclose && s.onclose({ code, reason }); };
     ws.onopen = () => s.onopen && s.onopen();
-    ws.onmessage = ev => s.onmessage && s.onmessage({ data: ev.data });
+    ws.onmessage = ev => {
+      if (stats) stats.wireBytes = (stats.wireBytes || 0) + (typeof ev.data === 'string' ? ev.data.length : ev.data.byteLength);
+      s.onmessage && s.onmessage({ data: ev.data });
+    };
     ws.onclose = ev => fireClose(ev.code, ev.reason);
     ws.onerror = () => { if (ws.readyState !== 1) { fireClose(1006, 'error'); try { ws.close(); } catch { /* ignore */ } } };
     return s;
@@ -94,13 +108,15 @@ export async function startBot(opts = {}) {
     stats: { joins: 0, snaps: 0, bytes: 0, inputs: 0, casts: 0, hitsDealt: 0, hitsTaken: 0, kills: 0, deaths: 0, refusals: 0, errors: 0, kicks: 0, lastSnapAt: 0, firstPos: null },
     get token() { return token; },
     net: null,
+    goal: null, fightRadius: 0, party: null, used: null, loot: [], zone: null, rooms: [], vitals: null, route: null, avoid: null, focus: null, skills: false, healTarget: null, skillCasts: 0,
     stopped: false,
   };
 
   const net = connect({
     mode: 'ws', url,
     // stream A's ws shim now reports Node's refused connection as a close; opts.nodeSafe keeps our own copy for A/B checks
-    ...(opts.nodeSafe ? { socketFactory: nodeSafeWsFactory(url) } : {}),
+    // (it also counts every byte received, JSON + binary, into bot.stats.wireBytes — the load tests' bandwidth number)
+    ...(opts.nodeSafe ? { socketFactory: nodeSafeWsFactory(url, bot.stats) } : {}),
     tokenStore: { get: () => token, set: t => { token = t; } },
     build: opts.build || 'dev',
   });
@@ -152,6 +168,7 @@ export async function startBot(opts = {}) {
       }
     }
     bot.roomKind = j.room.kind || 'wilds';
+    bot.rooms.push({ t: Date.now(), id: j.room.id, kind: bot.roomKind, via: j.handoff?.via || null });
     bot.ents.clear(); bot.target = null; bot.waypoint = null;
   });
   net.on('info', ents => {
@@ -161,6 +178,7 @@ export async function startBot(opts = {}) {
     bot.stats.snaps++; bot.stats.lastSnapAt = Date.now();
     if (snap.bytes) bot.stats.bytes += snap.bytes;
     if (snap.self) bot.pos = { x: snap.self.x, y: snap.self.y, z: snap.self.z };
+    if (snap.vitals) bot.vitals = { ...snap.vitals };
     for (const id of snap.left || []) bot.ents.delete(id);
     for (const r of snap.ents || []) {
       const e = bot.ents.get(r.id) || { id: r.id };
@@ -178,7 +196,9 @@ export async function startBot(opts = {}) {
     for (const ev of e || []) {
       if (ev.type === 'hit' && ev.kind === 'dmg') {
         if (ev.s === bot.myId) bot.stats.hitsDealt++;
-        if (ev.d === bot.myId) bot.stats.hitsTaken++;
+        if (ev.d === bot.myId) { bot.stats.hitsTaken++; bot.lastHitBy = ev.s; }
+      } else if (ev.type === 'loot' && (ev.to == null || ev.to === bot.myId || ev.d === bot.myId)) {
+        bot.loot.push({ t: Date.now(), items: ev.items || [], gold: ev.gold || 0 }); bot.stats.loots = (bot.stats.loots || 0) + 1;
       } else if (ev.type === 'die') {
         const ent = bot.ents.get(ev.d);
         if (ent) ent.dead = true;
@@ -188,6 +208,12 @@ export async function startBot(opts = {}) {
     }
   });
   net.on('castR', () => { bot.stats.refusals++; });
+  // play-test 2 (stream A, Q3): kill loot waits on the corpse — a bot loots everything it is offered (retrying while it walks
+  // up: a refusal 'far' tries again for a few seconds), and passes on every party roll with Greed
+  const lootTry = (id, n = 0) => { if (bot.stopped || n > 8) return; bot.lootPending ||= new Map(); bot.lootPending.set(id, n); net.loot('all', { id }); };
+  net.on('lootable', m => { if (m.on) lootTry(m.id); else if (bot.lootPending) bot.lootPending.delete(m.id); });
+  net.on('lootR', m => { if (m.why === 'far' && bot.lootPending) for (const [id, n] of bot.lootPending) setTimeout(() => lootTry(id, n + 1), 600); });
+  net.on('lootRoll', m => net.loot('roll', { roll: m.roll, choice: 'greed' }));
   net.on('bag', m => {
     const t = Date.now();
     for (const uid of m.remove || []) bot.ledger.push({ t, type: 'remove', uid });
@@ -215,20 +241,37 @@ export async function startBot(opts = {}) {
     if (me.locked && them.locked && !me.confirmed) net.tradeOp('confirm', { id: tr.id });
   });
   net.on('kick', () => { bot.stats.kicks++; });
+  net.on('party', p => { bot.party = p; });
+  net.on('used', m => { bot.used = { t: Date.now(), ...m }; });
+  net.on('zone', m => { bot.zone = m; });
+  net.on('realm', m => { bot.realm = m; });
+  net.on('travelR', m => { bot.travelR = { t: Date.now(), ...m }; });
 
   // ---- behaviour: one input per 50 ms, a swing whenever a wolf is in reach ---------------------
   let seq = 0, lastCast = 0;
   const tickTimer = setInterval(() => {
     if (bot.stopped || !bot.pos || bot.myId == null || bot.wasDead) return;
     let goal = null;
-    if (mode === 'fight') {
-      let best = null, bestD = 30;
+    if (mode === 'fight' || (mode === 'script' && bot.fightRadius > 0)) {
+      let best = null, bestD = mode === 'script' ? bot.fightRadius : 30, far = null, farD = Infinity;
       for (const e of bot.ents.values()) {
         if (e.dead || e.x == null || !isMonster(e)) continue;
+        // a script bot leaves alone what the driver says to (it still fights back: whatever hits it is fair game)
+        if (mode === 'script' && bot.avoid && bot.avoid(e) && bot.lastHitBy !== e.id) continue;
         const d = Math.hypot(e.x - bot.pos.x, e.z - bot.pos.z);
         if (d < bestD) { bestD = d; best = e; }
+        if (d < farD) { farD = d; far = e; }
+      }
+      // assist: the driver's focus target wins when it is alive and in reach (a pair kills one thing at a time)
+      if (mode === 'script' && bot.focus) {
+        const fid = bot.focus(), f = fid != null ? bot.ents.get(fid) : null;
+        if (f && !f.dead && f.x != null) { const d = Math.hypot(f.x - bot.pos.x, f.z - bot.pos.z); if (d < (bot.fightRadius || 30)) { best = f; bestD = d; } }
       }
       bot.target = best ? best.id : null;
+      // fight mode hunts: camps sit ~140 m out of town, further than the 30 m chase reach, so a fighter
+      // with nothing in reach walks toward the nearest monster it can see (opts.hunt metres, 0 = off)
+      const hunt = opts.hunt ?? 260;
+      bot.hunt = (mode === 'fight' && !best && far && farD < hunt && !bot.town) ? far : null;
       if (best) {
         goal = best;
         const now = Date.now();
@@ -236,10 +279,28 @@ export async function startBot(opts = {}) {
           lastCast = now; bot.stats.casts++;
           net.cast({ slot: 0, aim: { x: best.x, z: best.z }, target: best.id });
         }
+        if (bot.skills && bestD < 3.0) useSkill(now, s => !s.ally && s.shape !== 'self', { aim: { x: best.x, z: best.z }, target: best.id });
         if (bestD < 2.0) goal = null;   // close enough: stand and swing
+        // a script bot with a route walks the route to it (dungeon walls are real; a straight line can pin it to a wall)
+        else if (mode === 'script' && bot.route && bestD > 4) goal = bot.route(bot.pos, best) || best;
       }
     }
-    if (!goal && bot.exit && mode !== 'idle') goal = bot.exit;
+    if (bot.skills) {
+      // heal whoever of the two is lower, when one of us is under 55%
+      const mine = bot.vitals && bot.vitals.hpMax ? bot.vitals.hp / bot.vitals.hpMax : 1;
+      const pid = bot.healTarget ? bot.healTarget() : null, pe = pid != null ? bot.ents.get(pid) : null;
+      const theirs = pe && pe.hp != null ? pe.hp : 1;          // snapshot hp is a share (0..1)
+      const pd = pe && pe.x != null ? Math.hypot(pe.x - bot.pos.x, pe.z - bot.pos.z) : Infinity;
+      if (Math.min(mine, pd < 20 ? theirs : 1) < 0.55) {
+        const who = pd < 20 && theirs < mine ? pe : null;
+        useSkill(Date.now(), s => s.ally || (s.shape === 'self' && /heal/i.test(s.desc || '')), who ? { target: who.id, aim: { x: who.x, z: who.z } } : { target: bot.myId, aim: { x: bot.pos.x, z: bot.pos.z } });
+      }
+    }
+    if (mode === 'script') {
+      if (!goal && bot.goal && Math.hypot(bot.goal.x - bot.pos.x, bot.goal.z - bot.pos.z) > 1.2) goal = bot.goal;
+    }
+    else if (!goal && bot.exit && mode !== 'idle') goal = bot.exit;
+    if (!goal && bot.hunt) goal = bot.hunt;
     // a follower keeps near its partner when it has nothing to fight (so a trading pair stays in reach)
     const partnerName = opts.follow || opts.trade?.partner;
     const partner = partnerName ? [...bot.ents.values()].find(e => e.name === partnerName && e.x != null) : null;
@@ -248,7 +309,7 @@ export async function startBot(opts = {}) {
       T.lastAsk = Date.now(); net.tradeOp('ask', { id: partner.id });
     }
     if (opts.trade && net.trade) goal = null;     // stand still while the window is open (walking apart cancels it)
-    if (!goal && !(opts.follow && partner) && !(opts.trade && net.trade) && mode !== 'idle' && !(mode === 'fight' && bot.target != null)) {
+    if (!goal && mode !== 'script' && !(opts.follow && partner) && !(opts.trade && net.trade) && mode !== 'idle' && !(mode === 'fight' && bot.target != null)) {
       if (!bot.waypoint || Math.hypot(bot.waypoint.x - bot.pos.x, bot.waypoint.z - bot.pos.z) < 3) {
         const lim = mode === 'town' && bot.town ? Math.min(radius, bot.town.r - 8) : radius;
         const a = rnd() * Math.PI * 2, r = lim * Math.sqrt(rnd());
@@ -257,6 +318,20 @@ export async function startBot(opts = {}) {
       }
       goal = bot.waypoint;
     }
+    // unstick (every walking mode): walking at a wall (a house, a fence, a cliff) for 2.5 s without getting anywhere -> sidestep for 1.5 s
+    const now = Date.now();
+    if (!bot.stuck || !goal) bot.stuck = { at: now, x: bot.pos.x, z: bot.pos.z, detour: null, until: 0 };
+    if (goal && now - bot.stuck.at > 2500) {
+      if (Math.hypot(bot.pos.x - bot.stuck.x, bot.pos.z - bot.stuck.z) < 0.8 && now > bot.stuck.until) {
+        const a = Math.atan2(goal.x - bot.pos.x, goal.z - bot.pos.z) + (rnd() < 0.5 ? 1.6 : -1.6);
+        bot.stuck.detour = { x: bot.pos.x + Math.sin(a) * 8, z: bot.pos.z + Math.cos(a) * 8 }; bot.stuck.until = now + 1500;
+        bot.stats.unstuck = (bot.stats.unstuck || 0) + 1;
+        // a town exit behind a wall: after a few tries pick another bearing out
+        if (bot.town && bot.exit && bot.stats.unstuck % 3 === 0) { const ea = rnd() * Math.PI * 2, er = bot.town.r + 30; bot.exit = { x: bot.town.x + Math.cos(ea) * er, z: bot.town.z + Math.sin(ea) * er }; }
+      }
+      bot.stuck.at = now; bot.stuck.x = bot.pos.x; bot.stuck.z = bot.pos.z;
+    }
+    if (bot.stuck.detour && now < bot.stuck.until) goal = bot.stuck.detour;
     let mx = 0, mz = 0, yaw = 0;
     if (goal) {
       const dx = goal.x - bot.pos.x, dz = goal.z - bot.pos.z, d = Math.hypot(dx, dz) || 1;
@@ -265,6 +340,24 @@ export async function startBot(opts = {}) {
     net.input({ s: ++seq, dt: 50, mx, mz, yaw, b: 0 });
     bot.stats.inputs++;
   }, 50);
+
+  // the skill bar (A's you.bar): one cast a second at most, local cooldowns, mana from the snapshot vitals
+  const skillReady = new Map();
+  let lastSkill = 0;
+  function useSkill(now, pick, aimTarget) {
+    if (now - lastSkill < 1000) return false;
+    const bar = net.joined?.you?.bar || bot.you?.bar || [];
+    const mp = bot.vitals ? bot.vitals.mp : Infinity;
+    for (const s of bar) {
+      if (!s || s.locked || s.empty || !s.id || !pick(s)) continue;
+      if ((skillReady.get(s.slot) || 0) > now || (s.mp || 0) > mp) continue;
+      skillReady.set(s.slot, now + (s.cd || 1000) + 150);
+      lastSkill = now; bot.skillCasts++; bot.stats.casts++;
+      net.cast({ slot: s.slot, ...aimTarget });
+      return true;
+    }
+    return false;
+  }
 
   bot.stop = async () => {
     bot.stopped = true; clearInterval(tickTimer);

@@ -1,5 +1,5 @@
 {
-  "name": "Fiderow (z11_01)",
+  "name": "Hollin Toll (z11_01)",
   "zone": "z11_01",
   "sheet": {
     "sheet": "torbor_downs",
@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 2,
-  "inputHash": "740c92aa",
+  "bakeVersion": 4,
+  "inputHash": "6a42e50c",
   "waterKinds": [
     "none",
     "sea",
@@ -33,7 +33,7 @@
       "height": 224,
       "method": "pangea",
       "seaLevel": 0.2,
-      "inputHash": "9803699e"
+      "inputHash": "9805a835"
     },
     "zone": {
       "zx": 11,
@@ -63,9 +63,10 @@
     {
       "type": "settlement",
       "kind": "town",
-      "name": "Fiderow",
+      "name": "Hollin Toll",
       "x": 1728,
       "z": 560,
+      "wfName": "Fiderow",
       "hub": true,
       "radius": 90,
       "movedFrom": {
@@ -76,9 +77,10 @@
     {
       "type": "settlement",
       "kind": "hamlet",
-      "name": "Old Mosshearth",
+      "name": "Scree End",
       "x": 112,
       "z": 1472,
+      "wfName": "Old Mosshearth",
       "radius": 46,
       "movedFrom": {
         "x": 64,
@@ -117,30 +119,59 @@
       "name": "Barrow entrance",
       "x": 1908,
       "z": 560,
-      "yaw": -1.933
+      "yaw": -1.933,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_hollin_pass",
       "x": 1387,
       "z": 781,
-      "r": 40
+      "r": 40,
+      "pinned": true
     }
   ],
   "spawn": {
     "x": 1732,
     "z": 560
   },
+  "bridges": [
+    {
+      "a": [
+        233.77,
+        918.23
+      ],
+      "b": [
+        251.18,
+        900.82
+      ],
+      "h": 30.788,
+      "w": 4.5
+    }
+  ],
+  "cliff": {
+    "road": "road_138",
+    "x": [
+      1890,
+      2030
+    ],
+    "height": [
+      18,
+      25
+    ],
+    "side": "north",
+    "offset": 8
+  },
   "summary": {
     "zone": "z11_01",
     "province": "Petbeck Basin",
-    "inputHash": "740c92aa",
+    "inputHash": "6a42e50c",
     "rivers": 3,
     "wetShare": 0.01,
-    "unwalkableShare": 0.044,
+    "unwalkableShare": 0.041,
     "towns": [
       {
-        "name": "Fiderow",
+        "name": "Hollin Toll",
         "kind": "town",
         "hub": true,
         "at": [
@@ -153,13 +184,20 @@
           "z": 448
         },
         "culture": "halfling",
-        "plots": 24,
+        "plots": 25,
         "streets": 77,
         "links": 1,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 1,
+        "w6": {
+          "plotsBefore": 24,
+          "plots": 25,
+          "kept": 24,
+          "removed": []
+        }
       },
       {
-        "name": "Old Mosshearth",
+        "name": "Scree End",
         "kind": "hamlet",
         "hub": false,
         "at": [
@@ -173,9 +211,16 @@
         },
         "culture": "halfling",
         "plots": 10,
-        "streets": 39,
+        "streets": 37,
         "links": 1,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 1,
+        "w6": {
+          "plotsBefore": 10,
+          "plots": 10,
+          "kept": 10,
+          "removed": []
+        }
       },
       {
         "name": "Wolditford",
@@ -191,26 +236,42 @@
           "z": 832
         },
         "culture": "halfling",
-        "plots": 11,
-        "streets": 37,
+        "plots": 10,
+        "streets": 36,
         "links": 1,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 1,
+        "w6": {
+          "plotsBefore": 11,
+          "plots": 10,
+          "kept": 10,
+          "removed": [
+            {
+              "plot": 10,
+              "want": "house",
+              "office": false
+            }
+          ]
+        }
       }
     ],
     "roads": 10,
     "bridges": 1,
-    "scatter": 16443,
+    "paths": 12,
+    "pathMetres": 2401,
+    "scatter": 20106,
     "scatterKinds": {
-      "tree_conifer": 9963,
-      "rock_small": 1261,
-      "bush": 2902,
-      "tree_broadleaf": 1015,
-      "rock_large": 1270,
-      "boulder": 32
+      "tree_conifer": 9691,
+      "bush": 4447,
+      "rock_small": 1891,
+      "tree_broadleaf": 1665,
+      "rock_large": 1476,
+      "boulder": 47,
+      "hedge": 889
     },
     "sites": [
-      "settlement(HUB) town Fiderow 1728 560 90",
-      "settlement hamlet Old Mosshearth 112 1472 46",
+      "settlement(HUB) town Hollin Toll 1728 560 90",
+      "settlement hamlet Scree End 112 1472 46",
       "settlement hamlet Wolditford 448 880 46",
       "landmark ancientwood The Mihackmo Heartwood 1728 1984",
       "landmark ancientwood The Petmato Heartwood 832 1600",
@@ -221,13 +282,13 @@
       "x": 1732,
       "z": 560
     },
-    "placements": 219,
-    "vignettesAvoided": 0
+    "placements": 290,
+    "vignettesAvoided": 640
   },
   "files": {
-    "terrain.bin": 6306062,
-    "nav.bin": 1050717,
-    "scatter.bin": 131628,
-    "placements.json": 99355
+    "terrain.bin": 579898,
+    "nav.bin": 44745,
+    "scatter.bin": 160932,
+    "placements.json": 219373
   }
 }

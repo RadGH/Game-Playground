@@ -1,0 +1,155 @@
+{
+ "_doc": "Stream E (owner feedback 7, V2 — E leads the economy). Every gold number a PLACE or a PERSON pays or charges; js/sim/economy-knobs.js reads it (same defaults as before when a key is missing) and tools/sim-economy.mjs measures the result: `node tools/sim-economy.mjs` prints gold per hour by activity and the price ladder. What a KILL pays and what an ITEM is worth are stream C's (data/rules/prices.json), a catch's gold is C's data/rules/fishing.json `value` over the species prices in data/provinces/angling.json, shop goods prices are data/provinces/shops.json. THE RULES these numbers serve are in `targets` and are what tests/E/playtest7-economy.test.js pins — ratios, never the numbers.",
+ "unit": {
+  "base": 4,
+  "perLevel": 1,
+  "_doc": "ONE KILL'S GOLD at a level — the same numbers as stream C's data/rules/prices.json `kill` (rules.killGold(level)); a test keeps the two equal, so there is no second table. Quest purses are reward.gold x unit x quest.mult."
+ },
+ "quest": {
+  "mult": 2.7,
+  "_doc": "a quest's purse = reward.gold (6-10 for an errand, 20-50 for a dungeon or story step) x one kill's gold x this. xpMult (owner feedback 8, W4): a hand-in pays reward.xp x the level span x stream C questMult x THIS. Stream C raised kill experience x1.5 at levels 1-6; without this an hour of questing levelled you SLOWER than an hour of standing in a camp at every level up to 6 (x0.64-0.9). `node tools/sim-economy.mjs --curve` prints the table.",
+  "xpMult": 1.5
+ },
+ "event": {
+  "perLevel": 1,
+  "mult": 2.8,
+  "_doc": "an event's gold = reward.gold x (1 + perLevel x (level - 1)) x mult (x the length factor, x2 for the world boss). It was perLevel 0.15, mult 1: a level-10 zone event paid 28 gold."
+ },
+ "roadChest": {
+  "base": 24,
+  "perLevel": 21,
+  "spread": 9
+ },
+ "chest": {
+  "base": 60,
+  "perLevel": 120,
+  "_doc": "a dungeon's reward chest / a vignette chest. It was 5 + 4 x level."
+ },
+ "treasure": {
+  "base": 120,
+  "perLevel": 90
+ },
+ "fare": {
+  "base": 6,
+  "metresPerGold": 135,
+  "crossProvinceMetres": 4000
+ },
+ "sell": {
+  "factor": 0.012,
+  "fish": 1,
+  "_doc": "what a merchant pays for gear as a share of its list price — stream C's prices.json gear.sellFactor is the one the rules use; keep the two the same. A fish sells for its own price."
+ },
+ "mounts": [
+  {
+   "id": "trail_horse",
+   "price": 750,
+   "level": 1
+  },
+  {
+   "id": "pony",
+   "price": 4200,
+   "level": 5
+  },
+  {
+   "id": "courser",
+   "price": 16500,
+   "level": 10
+  },
+  {
+   "id": "dray",
+   "price": 33000,
+   "level": 15
+  }
+ ],
+ "targets": {
+  "_doc": "The rules, as ratios against an hour of ordinary play (questing) at the same level. tests/E/playtest7-economy.test.js reads THESE bounds. cartShare: a ride to the NEXT town costs this share of an hour of questing at level 1 (the poorest rider). cartFarthestShare: the dearest ride in the province costs at most this share of a level-1 hour.",
+  "uncommonHours": [
+   0.55,
+   0.97
+  ],
+  "rareHours": [
+   2.5,
+   8
+  ],
+  "potionsWithTheUpgrade": 3,
+  "fishingShare": [
+   0.65,
+   1.05
+  ],
+  "fishingShareAim": [
+   0.7,
+   1
+  ],
+  "fishBestOverCheapest": 25,
+  "cratesPerFishingHour": 1,
+  "activityShare": {
+   "killing": [
+    0.5,
+    1.3
+   ],
+   "events": [
+    0.8,
+    1.5
+   ],
+   "dungeon": [
+    0.8,
+    3
+   ]
+  },
+  "shopRowHoursMax": 20,
+  "levels": [
+   1,
+   5,
+   10
+  ],
+  "extrapolated": [
+   20
+  ],
+  "cartShare": [
+   0.004,
+   0.04
+  ],
+  "cartFarthestShare": 0.12,
+  "cartUnderWaystone": true,
+  "questXp": {
+   "questingOverKilling": [
+    0.85,
+    2.2
+   ],
+   "handInShare": [
+    0.45,
+    0.85
+   ],
+   "levels": [
+    2,
+    10
+   ],
+   "_doc": "W4: at every level in `levels`, an hour of questing gives at least questingOverKilling[0] of the experience of an hour of pure killing (and never more than [1] — kills must stay a fair share), and hand-ins are handInShare of a questing hour."
+  }
+ },
+ "mail": {
+  "postage": 3
+ },
+ "guild": {
+  "fee": 30
+ },
+ "barber": {
+  "mult": 0,
+  "_mult": "owner feedback 9 (X4, dev report #16): the barber is free for now. mult multiplies every price below; 1 = these prices, 0 = free.",
+  "hair": 15,
+  "hairColour": 12,
+  "beard": 12,
+  "eyes": 18,
+  "face": 30,
+  "skin": 36,
+  "body": 60,
+  "everything": 120,
+  "perLevel": 0.05
+ },
+ "cart": {
+  "base": 3,
+  "metresPerGold": 250,
+  "minGold": 4,
+  "_doc": "W5 (owner feedback 8): an ox-cart ride. cartFare(metres of road) = max(minGold, round(base + metres / metresPerGold)); the table for every pair of towns is data/provinces/carts.json `fares` (tools/content-towns.mjs). Cheaper than a waystone over the same road (`fare`), and it takes you to a town you have never seen."
+ }
+}

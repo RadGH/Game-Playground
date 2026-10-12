@@ -6,19 +6,48 @@
       "name": "Elder Coombe",
       "role": "elder",
       "at": "Lowmoor",
-      "greeting": "The wolds sank, the village didn't. Yet."
+      "greeting": "The wolds sank, the village didn't. Yet.",
+      "titled": true
     },
     "bastion_keeper": {
       "name": "Keeper Isolde",
       "role": "guard",
       "at": "the Mossy Bastion",
-      "greeting": "The bastion's covered in moss. So is the keeper, some mornings."
+      "greeting": "The bastion's covered in moss. So is the keeper, some mornings.",
+      "titled": true
     },
     "deepdene_digger": {
       "name": "Digger Wat",
       "role": "miner",
       "at": "Deepdene",
-      "greeting": "There's caves under everything here. And things in the caves. And under the things, more caves."
+      "greeting": "There's caves under everything here. And things in the caves. And under the things, more caves.",
+      "titled": true
+    },
+    "angler_lowmoor": {
+      "name": "Ysmay Drownfield",
+      "role": "angler",
+      "at": "Lowmoor",
+      "greeting": "My grandmother's house is under that water. The perch keep it tidy. See the ripples, just west of where I'm standing? That's the town pool. It never fishes out.",
+      "placedBy": "content-pools",
+      "titled": true
+    },
+    "carter_lowmoor": {
+      "name": "Ganna Fenwick",
+      "role": "carter",
+      "at": "Lowmoor",
+      "greeting": "I do not go fast, I do not go far in the dark, and I do not stop for wolves. Fares are on the board.",
+      "cart": "cart_lowmoor",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_deepdene": {
+      "name": "Lambert Sallow",
+      "role": "carter",
+      "at": "Deepdene",
+      "greeting": "Walking is free. Riding is nearly free, and you arrive with your legs.",
+      "cart": "cart_deepdene",
+      "placedBy": "content-towns",
+      "titled": true
     }
   },
   "quests": [
@@ -33,18 +62,20 @@
           "kind": "kill",
           "type": "frost_stalker",
           "count": 6,
-          "where": "the mossy hollows",
-          "text": "Frost stalkers"
+          "where": "the mossy hollows near the Mossy Bastion",
+          "text": "Kill 6 frost stalkers in the hollows"
         }
       ],
       "done": "Sheep safe. Shepherds safe. Moss unbothered.",
       "reward": {
         "xp": 0.45,
         "gold": 9,
-        "item": {
-          "tier": "common",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "uncommon"
+          }
+        ]
       }
     },
     {
@@ -59,13 +90,19 @@
           "type": "sporecap_walker",
           "count": 6,
           "where": "around Lowmoor",
-          "text": "Sporecap walkers"
+          "text": "Kill 6 sporecap walkers"
         }
       ],
       "done": "Lowmoor smells of mushroom less. Thank you.",
       "reward": {
         "xp": 0.45,
-        "gold": 8
+        "gold": 8,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       }
     },
     {
@@ -79,8 +116,8 @@
           "kind": "kill",
           "type": "silt_lurker",
           "count": 5,
-          "where": "the sinkholes",
-          "text": "Silt lurkers"
+          "where": "the sinkholes by Deepdene",
+          "text": "Kill 5 silt lurkers in the sinkholes"
         }
       ],
       "done": "Ankles intact. Digging resumes.",
@@ -101,7 +138,7 @@
           "type": "hoard_mimic",
           "count": 3,
           "where": "the caves of Deepdene",
-          "text": "Hoard mimics"
+          "text": "Kill 3 hoard mimics in the caves"
         }
       ],
       "done": "Gold! And a boot! And a digger I lost last year — no, wait, that's just the boot.",
@@ -125,14 +162,16 @@
         {
           "kind": "clear",
           "dungeon": "door",
-          "text": "Follow the river down",
-          "floor": 2
+          "text": "Follow the river down the Weeping Caverns",
+          "floor": 2,
+          "where": "The Weeping Caverns, the dungeon door in the Sunken Wolds"
         },
         {
           "kind": "clear",
           "dungeon": "door",
           "text": "Defeat what lives at the bottom",
-          "boss": true
+          "boss": true,
+          "where": "the bottom of the Weeping Caverns"
         }
       ],
       "done": "The river runs cold again. And so do my nerves, finally.",
@@ -156,7 +195,8 @@
           "kind": "killRare",
           "zone": "sunken_wolds",
           "slot": 0,
-          "text": "The wolds' rare slain"
+          "text": "Hunt down the Green Shard",
+          "where": "roams the Sunken Wolds"
         }
       ],
       "done": "Brave of me. And of you, a bit.",

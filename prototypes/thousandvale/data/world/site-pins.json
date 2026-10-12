@@ -1,0 +1,187 @@
+{
+ "_doc": "Stream B. Door / event / camp sites PINNED at the positions stream E placed its content around (from the bake committed in ad99280). tools/bake-zone.mjs uses a pin instead of searching while it stays clear of every settlement, so a re-bake (which keeps scatter off E's discs) can never move a site E already avoided \u2014 the B<->E placement loop is closed. Delete a zone's entry to let the bake search again (then E re-places).",
+ "z11_01": {
+  "door_1": {
+   "x": 1908,
+   "z": 560,
+   "yaw": -1.933
+  },
+  "event_hollin_pass": {
+   "x": 1387,
+   "z": 781
+  }
+ },
+ "z12_01": {
+  "door_1": {
+   "x": 1566,
+   "z": 1434,
+   "yaw": -1.96
+  },
+  "event_ashcombe": {
+   "x": 1216,
+   "z": 1176
+  }
+ },
+ "z13_01": {
+  "door_1": {
+   "x": 1061,
+   "z": 1066,
+   "yaw": -3.247
+  },
+  "event_brackwater": {
+   "x": 1026,
+   "z": 981
+  }
+ },
+ "z14_01": {
+  "door_1": {
+   "x": 855,
+   "z": 1804,
+   "yaw": 2.294
+  },
+  "event_saltmouth": {
+   "x": 844,
+   "z": 1372
+  }
+ },
+ "z11_02": {
+  "door_1": {
+   "x": 146,
+   "z": 490,
+   "yaw": -3.593
+  },
+  "event_delvers_hill": {
+   "x": 688,
+   "z": 736
+  }
+ },
+ "z12_02": {
+  "door_1": {
+   "x": 354,
+   "z": 1292,
+   "yaw": 1.185
+  },
+  "event_grandmother_skein": {
+   "x": 357,
+   "z": 1944
+  },
+  "elite_hobb_gallowsby": {
+   "x": 72,
+   "z": 1879
+  }
+ },
+ "z13_02": {
+  "door_1": {
+   "x": 1593,
+   "z": 1344,
+   "yaw": 2.429
+  },
+  "event_torbor_cross": {
+   "x": 1360,
+   "z": 1104
+  }
+ },
+ "z14_02": {
+  "door_1": {
+   "x": 1623,
+   "z": 475,
+   "yaw": -2.777
+  },
+  "event_gullwick": {
+   "x": 1272,
+   "z": 688
+  }
+ },
+ "z11_03": {
+  "door_1": {
+   "x": 873,
+   "z": 718,
+   "yaw": 2.73
+  },
+  "event_wychwood": {
+   "x": 1112,
+   "z": 792
+  }
+ },
+ "z12_03": {
+  "door_1": {
+   "x": 350,
+   "z": 735,
+   "yaw": -2.692
+  },
+  "event_saint_orrins_rise": {
+   "x": 327,
+   "z": 872
+  }
+ },
+ "z13_03": {
+  "door_1": {
+   "x": 314,
+   "z": 1641,
+   "yaw": 1.824
+  },
+  "event_millbrook": {
+   "x": 784,
+   "z": 1336
+  }
+ },
+ "z14_03": {
+  "door_1": {
+   "x": 555,
+   "z": 1018,
+   "yaw": -2.436
+  },
+  "event_redcliff": {
+   "x": 693,
+   "z": 955
+  }
+ },
+ "z11_04": {
+  "door_1": {
+   "x": 994,
+   "z": 1171,
+   "yaw": -0.431
+  },
+  "world_grimtallow": {
+   "x": 1161,
+   "z": 1305
+  },
+  "event_blackthorn_scar": {
+   "x": 877,
+   "z": 1098
+  }
+ },
+ "z12_04": {
+  "door_1": {
+   "x": 1369,
+   "z": 1953,
+   "yaw": -2.755
+  },
+  "event_coldwater": {
+   "x": 903,
+   "z": 1790
+  }
+ },
+ "z13_04": {
+  "door_1": {
+   "x": 1364,
+   "z": 1286,
+   "yaw": 1.664
+  },
+  "event_gorse_march": {
+   "x": 1326,
+   "z": 1155
+  }
+ },
+ "z14_04": {
+  "door_1": {
+   "x": 1401,
+   "z": 1081,
+   "yaw": -1.622
+  },
+  "event_sunken_wolds": {
+   "x": 1068,
+   "z": 1007
+  }
+ }
+}

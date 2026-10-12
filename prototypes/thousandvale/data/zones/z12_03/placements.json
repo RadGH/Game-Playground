@@ -1,34 +1,36 @@
 {
- "_doc": "Stream B zone placements (tools/bake-zone.mjs). Zone metres; yaw = atan2(dx, dz), the way the thing faces. kinds: settlement (data.radius, hub, planned), town_square, street (data.pts, width, cls), building (a proctown plot: data.w along `angle` (local +x = (cos angle, sin angle)), data.d across, want; yaw faces the nearest drawn street, data.streetGap = metres from the front to it), town_wall, road (data.pts [[x,z,h]], width, cls, spur), bridge (yaw along the road, span, deck height), dungeon_door, event_site, camp_site, landmark/dungeon/pass/crossing (World Forge nodes).",
+ "_doc": "Stream B zone placements (tools/bake-zone.mjs). Zone metres; yaw = atan2(dx, dz), the way the thing faces. kinds: settlement (data.radius, hub, planned), town_square, street (data.pts, width, cls), building (a proctown plot: data.w along `angle` (local +x = (cos angle, sin angle)), data.d across, want; yaw faces the nearest drawn street, data.streetGap = metres from the front to it), town_wall (play-test 4: every planned settlement; data.style/material/tier/h/thick/tint/radius, runs [[[x,z,h]…]…] open polylines between openings, towers [{x,z,h,yaw}], gates [{id,x,z,h,yaw = the way OUT along the road,out:[dx,dz],width,pass,kind gatehouse|posts|gap,way,ways,led,ends,approaches}], openings [{kind water|keep,ends,grate}] — SOLID in nav.bin except the gates; tools/lib/zone-walls.mjs), road (data.pts [[x,z,h]], width, cls, spur), bridge (yaw along the road, span, deck height), dungeon_door, event_site, camp_site, landmark/dungeon/pass/crossing (World Forge nodes).",
  "zone": "z12_03",
- "terrainHash": "c5264009",
+ "terrainHash": "a6a668c3",
  "placements": [
   {
    "kind": "settlement",
-   "id": "wolfkeep",
+   "id": "orrinsford",
    "x": 336,
    "z": 576,
    "yaw": 0,
    "data": {
-    "kind": "village",
-    "name": "Wolfkeep",
-    "radius": 65,
+    "kind": "town",
+    "name": "Orrinsford",
+    "radius": 90,
     "hub": true,
-    "planned": true
+    "planned": true,
+    "wfName": "Wolfkeep"
    }
   },
   {
    "kind": "settlement",
-   "id": "duskhaven",
+   "id": "pilgrim_s_halt",
    "x": 672,
    "z": 240,
    "yaw": 0,
    "data": {
     "kind": "hamlet",
-    "name": "Duskhaven",
+    "name": "Pilgrim's Halt",
     "radius": 46,
     "hub": false,
-    "planned": true
+    "planned": true,
+    "wfName": "Duskhaven"
    }
   },
   {
@@ -45,8 +47,8 @@
   {
    "kind": "crossing",
    "id": "tethen_ford",
-   "x": 320,
-   "z": 576,
+   "x": 313,
+   "z": 571,
    "yaw": 0,
    "data": {
     "kind": "ford",
@@ -75,245 +77,1017 @@
   },
   {
    "kind": "town_square",
-   "id": "wolfkeep_square",
-   "x": 328.84,
-   "z": 568.61,
+   "id": "orrinsford_square",
+   "x": 331.29,
+   "z": 565.98,
    "yaw": 0,
    "data": {
-    "r": 3.52,
-    "town": "wolfkeep",
-    "culture": "halfling"
+    "r": 4.85,
+    "town": "orrinsford",
+    "culture": "halfling",
+    "stalls": [
+     [
+      338.58,
+      569.06
+     ],
+     [
+      325.5,
+      573.41
+     ],
+     [
+      340.78,
+      560.59
+     ],
+     [
+      331.2,
+      578.4
+     ]
+    ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_0",
-   "x": 364.81,
-   "z": 545.44,
+   "id": "orrinsford_street_0",
+   "x": 373.73,
+   "z": 535.98,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "main",
     "width": 5,
     "pts": [
      [
-      364.81,
-      545.44
+      373.73,
+      535.98
      ],
      [
-      340.66,
-      579.24
+      342.11,
+      580.24
      ],
      [
-      317.45,
-      613.68
+      311.71,
+      625.34
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_1",
-   "x": 299.3,
-   "z": 560.79,
+   "id": "orrinsford_street_1",
+   "x": 287.95,
+   "z": 556.08,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "lane",
     "width": 3.2,
     "pts": [
      [
-      299.3,
-      560.79
+      287.95,
+      556.08
      ],
      [
-      312.01,
-      573.58
+      304.87,
+      573.09
      ],
      [
-      325.7,
-      585.33
+      323.08,
+      588.72
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_2",
-   "x": 318.99,
-   "z": 543.48,
+   "id": "orrinsford_street_2",
+   "x": 313.69,
+   "z": 533.52,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      318.99,
-      543.48
+      313.69,
+      533.52
      ],
      [
-      329.47,
-      555.06
+      327.66,
+      548.93
      ],
      [
-      338.62,
-      567.73
+      339.82,
+      565.8
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_3",
-   "x": 337.2,
-   "z": 540.59,
+   "id": "orrinsford_street_3",
+   "x": 339.49,
+   "z": 527.82,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      337.2,
-      540.59
+      339.49,
+      527.82
      ],
      [
-      332.47,
-      545.29
+      331.2,
+      534.45
      ],
      [
-      327.73,
-      549.99
+      322.92,
+      541.09
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_4",
-   "x": 327.58,
-   "z": 539.81,
+   "id": "orrinsford_street_4",
+   "x": 324.48,
+   "z": 525.06,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      327.58,
-      539.81
+      324.48,
+      525.06
      ],
      [
-      329.64,
-      542.16
+      327.48,
+      529.34
      ],
      [
-      331.97,
-      544.23
+      331,
+      533.2
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_5",
-   "x": 343.29,
-   "z": 546.73,
+   "id": "orrinsford_street_5",
+   "x": 335.06,
+   "z": 522.28,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      343.29,
-      546.73
+      335.06,
+      522.28
      ],
      [
-      338.43,
-      551.29
+      331.64,
+      524.86
      ],
      [
-      333.83,
-      556.13
+      328.38,
+      527.63
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_6",
-   "x": 334.42,
-   "z": 544.9,
+   "id": "orrinsford_street_6",
+   "x": 325.81,
+   "z": 529.01,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      334.42,
-      544.9
+      325.81,
+      529.01
      ],
      [
-      336.72,
-      547.03
+      321.85,
+      531.91
      ],
      [
-      338.83,
-      549.34
+      318.15,
+      535.14
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_7",
-   "x": 339.94,
-   "z": 551.88,
+   "id": "orrinsford_street_7",
+   "x": 319.92,
+   "z": 528.72,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      339.94,
-      551.88
+      319.92,
+      528.72
      ],
      [
-      342.98,
-      555.12
+      320.7,
+      529.76
      ],
      [
-      346.19,
-      558.18
+      321.54,
+      530.75
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_8",
-   "x": 329.48,
-   "z": 563.01,
+   "id": "orrinsford_street_8",
+   "x": 321.19,
+   "z": 534.39,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      329.48,
-      563.01
+      321.19,
+      534.39
      ],
      [
-      323.76,
-      566.89
+      322.75,
+      536.47
      ],
      [
-      317.79,
+      324.45,
+      538.45
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_9",
+   "x": 344.98,
+   "z": 534.67,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      344.98,
+      534.67
+     ],
+     [
+      336.81,
+      541.46
+     ],
+     [
+      328.41,
+      547.95
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_10",
+   "x": 330.14,
+   "z": 536.71,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      330.14,
+      536.71
+     ],
+     [
+      332.16,
+      539.19
+     ],
+     [
+      334.13,
+      541.7
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_11",
+   "x": 337.64,
+   "z": 530.7,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      337.64,
+      530.7
+     ],
+     [
+      339.75,
+      533.11
+     ],
+     [
+      341.64,
+      535.69
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_12",
+   "x": 333.77,
+   "z": 545.3,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      333.77,
+      545.3
+     ],
+     [
+      340.17,
+      552.68
+     ],
+     [
+      345.97,
+      560.53
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_13",
+   "x": 354.27,
+   "z": 546.27,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      354.27,
+      546.27
+     ],
+     [
+      348.69,
+      550.44
+     ],
+     [
+      343.41,
+      554.97
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_14",
+   "x": 339.39,
+   "z": 540.81,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      339.39,
+      540.81
+     ],
+     [
+      343.22,
+      545.57
+     ],
+     [
+      347.04,
+      550.36
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_15",
+   "x": 348.98,
+   "z": 539.66,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      348.98,
+      539.66
+     ],
+     [
+      346.21,
+      541.88
+     ],
+     [
+      343.45,
+      544.09
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_16",
+   "x": 344.09,
+   "z": 548.46,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      344.09,
+      548.46
+     ],
+     [
+      342.35,
+      549.97
+     ],
+     [
+      340.5,
+      551.34
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_17",
+   "x": 347.26,
+   "z": 553.61,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      347.26,
+      553.61
+     ],
+     [
+      348.59,
+      555.48
+     ],
+     [
+      350.13,
+      557.19
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_18",
+   "x": 336.89,
+   "z": 551.56,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      336.89,
+      551.56
+     ],
+     [
+      335.27,
+      553.02
+     ],
+     [
+      333.49,
+      554.29
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_19",
+   "x": 340.2,
+   "z": 555.69,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      340.2,
+      555.69
+     ],
+     [
+      338.53,
+      557.09
+     ],
+     [
+      336.8,
+      558.42
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_20",
+   "x": 323.36,
+   "z": 549.41,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      323.36,
+      549.41
+     ],
+     [
+      314.48,
+      555.96
+     ],
+     [
+      306.04,
+      563.07
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_21",
+   "x": 302.24,
+   "z": 543.37,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      302.24,
+      543.37
+     ],
+     [
+      307.3,
+      549.8
+     ],
+     [
+      312.38,
+      556.22
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_22",
+   "x": 318.35,
+   "z": 543.05,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      318.35,
+      543.05
+     ],
+     [
+      313.85,
+      546.82
+     ],
+     [
+      309.14,
+      550.32
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_23",
+   "x": 306.88,
+   "z": 539.71,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      306.88,
+      539.71
+     ],
+     [
+      309.58,
+      542.97
+     ],
+     [
+      312.13,
+      546.35
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_24",
+   "x": 313.51,
+   "z": 548.48,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      313.51,
+      548.48
+     ],
+     [
+      315.21,
+      550.56
+     ],
+     [
+      316.84,
+      552.69
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_25",
+   "x": 305.59,
+   "z": 549.4,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      305.59,
+      549.4
+     ],
+     [
+      302.29,
+      551.77
+     ],
+     [
+      299.22,
+      554.43
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_26",
+   "x": 316.62,
+   "z": 556.59,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      316.62,
+      556.59
+     ],
+     [
+      323.65,
+      564.61
+     ],
+     [
+      329.82,
+      573.32
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_27",
+   "x": 330.74,
+   "z": 558.75,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      330.74,
+      558.75
+     ],
+     [
+      327.6,
+      561.31
+     ],
+     [
+      324.39,
+      563.76
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_28",
+   "x": 322.98,
+   "z": 567.33,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      322.98,
+      567.33
+     ],
+     [
+      318.84,
+      570.68
+     ],
+     [
+      314.61,
+      573.94
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_29",
+   "x": 319.87,
+   "z": 563.39,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      319.87,
+      563.39
+     ],
+     [
+      315.49,
+      566.44
+     ],
+     [
+      311.5,
+      569.99
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_30",
+   "x": 310.41,
+   "z": 561.48,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      310.41,
+      561.48
+     ],
+     [
+      312.2,
+      563.85
+     ],
+     [
+      314.09,
+      566.14
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_31",
+   "x": 316.11,
+   "z": 568.16,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      316.11,
+      568.16
+     ],
+     [
+      316.87,
+      569.12
+     ],
+     [
+      317.62,
+      570.08
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_32",
+   "x": 319.8,
+   "z": 571.32,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      319.8,
+      571.32
+     ],
+     [
+      322.2,
+      574.38
+     ],
+     [
+      324.61,
+      577.42
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_33",
+   "x": 303.06,
+   "z": 575.7,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      303.06,
+      575.7
+     ],
+     [
+      295.42,
+      584.74
+     ],
+     [
+      288.37,
+      594.24
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_34",
+   "x": 281.08,
+   "z": 579.01,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      281.08,
+      579.01
+     ],
+     [
+      284.58,
+      580.81
+     ],
+     [
+      292.33,
+      585.12
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_35",
+   "x": 294.15,
+   "z": 570.39,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      294.15,
+      570.39
+     ],
+     [
+      291.06,
+      575.89
+     ],
+     [
+      288.2,
+      581.51
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_36",
+   "x": 281.46,
+   "z": 568.94,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      281.46,
+      568.94
+     ],
+     [
+      285.93,
+      571.32
+     ],
+     [
+      290.85,
+      573.97
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_37",
+   "x": 288.19,
+   "z": 567.2,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      288.19,
+      567.2
+     ],
+     [
+      287.42,
+      568.83
+     ],
+     [
+      286.49,
       570.37
      ]
     ]
@@ -321,1257 +1095,1730 @@
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_9",
-   "x": 322.19,
-   "z": 551.43,
+   "id": "orrinsford_street_38",
+   "x": 286.02,
+   "z": 572.64,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      322.19,
-      551.43
+      286.02,
+      572.64
      ],
      [
-      316.41,
-      555.21
+      284.32,
+      575.58
      ],
      [
-      310.5,
-      558.78
+      282.82,
+      578.62
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_10",
-   "x": 312.68,
-   "z": 552.02,
+   "id": "orrinsford_street_39",
+   "x": 292.53,
+   "z": 576.02,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      312.68,
-      552.02
+      292.53,
+      576.02
      ],
      [
-      313.58,
-      553.42
+      294.34,
+      577
      ],
      [
-      314.45,
-      554.85
+      296.16,
+      577.97
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_11",
-   "x": 319.61,
-   "z": 554.5,
+   "id": "orrinsford_street_40",
+   "x": 285.26,
+   "z": 582.75,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      319.61,
-      554.5
+      285.26,
+      582.75
      ],
      [
-      322.77,
-      559.08
+      284.19,
+      584.94
      ],
      [
-      325.53,
-      563.91
+      282.96,
+      587.05
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_12",
-   "x": 327.13,
-   "z": 559.29,
+   "id": "orrinsford_street_41",
+   "x": 298.74,
+   "z": 584.41,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      327.13,
-      559.29
+      298.74,
+      584.41
      ],
      [
-      326.06,
-      559.91
+      304.96,
+      590.44
      ],
      [
-      325.03,
-      560.61
+      311.85,
+      595.71
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_13",
-   "x": 322.6,
-   "z": 561.76,
+   "id": "orrinsford_street_42",
+   "x": 310.22,
+   "z": 582.07,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      322.6,
-      561.76
+      310.22,
+      582.07
      ],
      [
-      318.85,
-      563.94
+      307.83,
+      585.06
      ],
      [
-      315.27,
-      566.37
+      305.22,
+      587.87
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_14",
-   "x": 323.3,
-   "z": 568.48,
+   "id": "orrinsford_street_43",
+   "x": 303.84,
+   "z": 590.93,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      323.3,
-      568.48
+      303.84,
+      590.93
      ],
      [
-      324.94,
-      571.07
+      300.1,
+      595.35
      ],
      [
-      326.56,
-      573.66
+      296.27,
+      599.7
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_15",
-   "x": 307.51,
-   "z": 573.56,
+   "id": "orrinsford_street_44",
+   "x": 292.67,
+   "z": 591.45,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      307.51,
-      573.56
+      292.67,
+      591.45
      ],
      [
-      302.45,
-      580.82
+      295.23,
+      593.81
      ],
      [
-      296.54,
-      587.41
+      297.95,
+      596
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_16",
-   "x": 294.02,
-   "z": 577.26,
+   "id": "orrinsford_street_45",
+   "x": 302.53,
+   "z": 594.21,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      294.02,
-      577.26
+      302.53,
+      594.21
      ],
      [
-      294.92,
-      577.9
+      305.6,
+      596.8
      ],
      [
-      299.3,
-      580.3
+      308.62,
+      599.46
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_17",
-   "x": 302.05,
-   "z": 570.56,
+   "id": "orrinsford_street_46",
+   "x": 346.32,
+   "z": 587.81,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      302.05,
-      570.56
-     ],
-     [
-      299.7,
-      573.99
-     ],
-     [
-      297.63,
-      577.6
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "wolfkeep_street_18",
-   "x": 295.98,
-   "z": 579.87,
-   "yaw": 0,
-   "data": {
-    "town": "wolfkeep",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      295.98,
-      579.87
-     ],
-     [
-      294.83,
-      581.57
-     ],
-     [
-      294.46,
-      582.2
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "wolfkeep_street_19",
-   "x": 303.56,
-   "z": 582.37,
-   "yaw": 0,
-   "data": {
-    "town": "wolfkeep",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      303.56,
-      582.37
-     ],
-     [
-      309.03,
-      587.62
-     ],
-     [
-      314.32,
-      593.04
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "wolfkeep_street_20",
-   "x": 314.22,
-   "z": 579.8,
-   "yaw": 0,
-   "data": {
-    "town": "wolfkeep",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      314.22,
-      579.8
-     ],
-     [
-      311.43,
-      582.74
-     ],
-     [
-      308.51,
-      585.55
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "wolfkeep_street_21",
-   "x": 308.12,
-   "z": 588.61,
-   "yaw": 0,
-   "data": {
-    "town": "wolfkeep",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      308.12,
-      588.61
-     ],
-     [
-      306.28,
-      590.57
-     ],
-     [
-      304.34,
-      592.43
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "wolfkeep_street_22",
-   "x": 341.67,
-   "z": 589.96,
-   "yaw": 0,
-   "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "lane",
     "width": 3.2,
     "pts": [
      [
-      341.67,
-      589.96
+      346.32,
+      587.81
      ],
      [
-      353.61,
-      596.57
+      362.47,
+      596.34
      ],
      [
-      365.24,
-      603.73
+      377.84,
+      606.23
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_23",
-   "x": 351.8,
-   "z": 575.98,
+   "id": "orrinsford_street_47",
+   "x": 358.34,
+   "z": 570.95,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      351.8,
-      575.98
+      358.34,
+      570.95
      ],
      [
-      362.98,
-      581.11
+      373.75,
+      577.43
      ],
      [
-      373.91,
-      586.74
+      388.37,
+      585.57
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_24",
-   "x": 369.54,
-   "z": 560.65,
+   "id": "orrinsford_street_48",
+   "x": 384.21,
+   "z": 557.25,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      369.54,
+      384.21,
+      557.25
+     ],
+     [
+      380.25,
+      566.69
+     ],
+     [
+      376.65,
+      576.26
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_49",
+   "x": 365.5,
+   "z": 559.85,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      365.5,
+      559.85
+     ],
+     [
+      372.59,
+      562.49
+     ],
+     [
+      379.56,
+      565.44
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_50",
+   "x": 373.93,
+   "z": 553.16,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      373.93,
+      553.16
+     ],
+     [
+      372.49,
+      556.93
+     ],
+     [
+      370.95,
       560.65
-     ],
-     [
-      364.54,
-      568.69
-     ],
-     [
-      359.81,
-      576.88
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_25",
-   "x": 360.29,
-   "z": 561.88,
+   "id": "orrinsford_street_51",
+   "x": 373.65,
+   "z": 564.46,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      360.29,
-      561.88
+      373.65,
+      564.46
      ],
      [
-      362.89,
-      563.42
+      371.65,
+      568.97
      ],
      [
-      365.48,
-      564.99
+      370.01,
+      573.62
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_26",
-   "x": 356.31,
-   "z": 568.53,
+   "id": "orrinsford_street_52",
+   "x": 362.97,
+   "z": 566.22,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      356.31,
-      568.53
+      362.97,
+      566.22
      ],
      [
-      358.87,
-      570.14
+      366.69,
+      567.66
      ],
      [
-      361.49,
-      571.63
+      370.39,
+      569.17
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_27",
-   "x": 365.32,
-   "z": 570.12,
+   "id": "orrinsford_street_53",
+   "x": 373.01,
+   "z": 569.56,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      365.32,
-      570.12
+      373.01,
+      569.56
      ],
      [
-      371.1,
-      573.92
+      375.15,
+      570.36
      ],
      [
-      377.17,
-      577.22
+      377.25,
+      571.24
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_28",
-   "x": 373.91,
-   "z": 563.27,
+   "id": "orrinsford_street_54",
+   "x": 381.03,
+   "z": 568.75,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      373.91,
-      563.27
+      381.03,
+      568.75
      ],
      [
-      371.71,
-      567.14
+      386.82,
+      571.06
      ],
      [
-      369.33,
-      570.9
+      390.9,
+      572.68
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_29",
-   "x": 371.48,
-   "z": 575.43,
+   "id": "orrinsford_street_55",
+   "x": 390.09,
+   "z": 566.05,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      371.48,
-      575.43
+      390.09,
+      566.05
      ],
      [
-      369.66,
-      578.57
-     ],
-     [
-      367.75,
-      581.64
+      388.51,
+      570.53
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_30",
-   "x": 360.37,
-   "z": 583.25,
+   "id": "orrinsford_street_56",
+   "x": 383.92,
+   "z": 561.48,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      360.37,
-      583.25
+      383.92,
+      561.48
      ],
      [
-      358.71,
-      588.11
+      386.84,
+      562.67
      ],
      [
-      357.14,
-      593.01
+      389.62,
+      563.75
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_31",
-   "x": 350.03,
-   "z": 585.38,
+   "id": "orrinsford_street_57",
+   "x": 386.33,
+   "z": 572.05,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      350.03,
-      585.38
+      386.33,
+      572.05
      ],
      [
-      353.82,
-      586.68
+      384.75,
+      575.45
      ],
      [
-      357.62,
-      587.9
+      383.56,
+      579.01
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_32",
-   "x": 360.47,
-   "z": 586.6,
+   "id": "orrinsford_street_58",
+   "x": 377.38,
+   "z": 585.5,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      360.47,
-      586.6
+      377.38,
+      585.5
      ],
      [
-      365.01,
-      587.94
+      373.89,
+      590.33
      ],
      [
-      369.46,
-      589.58
+      370.66,
+      595.34
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_33",
-   "x": 356.66,
-   "z": 603.63,
+   "id": "orrinsford_street_59",
+   "x": 371.09,
+   "z": 581.21,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      356.66,
-      603.63
+      371.09,
+      581.21
      ],
      [
-      350.06,
-      612.97
+      367.48,
+      585.96
      ],
      [
-      346.89,
-      616.56
+      364.38,
+      591.05
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_34",
-   "x": 338.64,
-   "z": 601.26,
+   "id": "orrinsford_street_60",
+   "x": 358.42,
+   "z": 579.9,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      338.64,
-      601.26
+      358.42,
+      579.9
      ],
      [
-      343.58,
-      605.63
+      362.41,
+      582.75
      ],
      [
-      348.21,
-      610.33
+      366.52,
+      585.42
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_35",
-   "x": 349.25,
-   "z": 599.51,
+   "id": "orrinsford_street_61",
+   "x": 370.02,
+   "z": 585.27,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      349.25,
-      599.51
+      370.02,
+      585.27
      ],
      [
-      346.76,
-      602.14
+      372.05,
+      586.69
      ],
      [
-      344.27,
-      604.77
+      374.11,
+      588.06
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_36",
-   "x": 344.43,
-   "z": 608.57,
+   "id": "orrinsford_street_62",
+   "x": 376.37,
+   "z": 589.19,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      344.43,
-      608.57
+      376.37,
+      589.19
      ],
      [
-      340.95,
-      612.36
+      378.58,
+      590.92
      ],
      [
-      337.35,
+      380.99,
+      592.34
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_63",
+   "x": 338.05,
+   "z": 607.06,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      338.05,
+      607.06
+     ],
+     [
+      350.94,
+      616.3
+     ],
+     [
+      360.85,
+      625.07
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_64",
+   "x": 359.83,
+   "z": 602.51,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      359.83,
+      602.51
+     ],
+     [
+      355.44,
+      608.31
+     ],
+     [
+      351.38,
+      614.35
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_65",
+   "x": 345.64,
+   "z": 599.85,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      345.64,
+      599.85
+     ],
+     [
+      350.49,
+      603.21
+     ],
+     [
+      355.24,
+      606.7
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_66",
+   "x": 354.22,
+   "z": 598.51,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      354.22,
+      598.51
+     ],
+     [
+      352.72,
+      600.45
+     ],
+     [
+      351.38,
+      602.49
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_67",
+   "x": 347.7,
+   "z": 602.77,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      347.7,
+      602.77
+     ],
+     [
+      345.4,
+      605.6
+     ],
+     [
+      343.47,
+      608.7
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_68",
+   "x": 356.78,
+   "z": 609,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      356.78,
+      609
+     ],
+     [
+      362.66,
+      613.1
+     ],
+     [
+      368.44,
+      617.32
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_69",
+   "x": 366.2,
+   "z": 607.06,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      366.2,
+      607.06
+     ],
+     [
+      364.6,
+      609.52
+     ],
+     [
+      362.79,
+      611.84
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_70",
+   "x": 361.63,
+   "z": 613.92,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      361.63,
+      613.92
+     ],
+     [
+      359.82,
+      616.5
+     ],
+     [
+      357.96,
+      619.05
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_71",
+   "x": 349.75,
+   "z": 621.7,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      349.75,
+      621.7
+     ],
+     [
+      345.46,
+      626.01
+     ],
+     [
+      340.71,
+      629.81
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_72",
+   "x": 335.85,
+   "z": 616.04,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      335.85,
       616.04
+     ],
+     [
+      340.14,
+      620.29
+     ],
+     [
+      343.9,
+      625.01
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_37",
-   "x": 335.09,
-   "z": 605,
+   "id": "orrinsford_street_73",
+   "x": 345.21,
+   "z": 616.64,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      335.09,
-      605
+      345.21,
+      616.64
      ],
      [
-      338.04,
-      607.73
+      343.25,
+      618.27
      ],
      [
-      340.93,
-      610.54
+      341.41,
+      620.05
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_38",
-   "x": 341.72,
-   "z": 613.16,
+   "id": "orrinsford_street_74",
+   "x": 339.45,
+   "z": 622.25,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      341.72,
-      613.16
+      339.45,
+      622.25
      ],
      [
-      342.7,
-      614.13
+      337.84,
+      623.53
      ],
      [
-      343.73,
-      615.06
+      336.39,
+      624.99
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_39",
+   "id": "orrinsford_street_75",
+   "x": 344.11,
+   "z": 628.71,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      344.11,
+      628.71
+     ],
+     [
+      345.39,
+      630.19
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_76",
    "x": 320,
-   "z": 537.17,
+   "z": 513,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "main",
     "width": 5,
     "pts": [
      [
       320,
-      537.17
+      513
      ],
      [
-      318.99,
-      543.48
+      321,
+      547.5
+     ],
+     [
+      315,
+      555
+     ],
+     [
+      316.5,
+      559.5
+     ],
+     [
+      322.5,
+      565.5
+     ],
+     [
+      326.45,
+      565.58
+     ]
+    ],
+    "high": true,
+    "to": "square",
+    "road": "road_100"
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_77",
+   "x": 271,
+   "z": 576,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      271,
+      576
+     ],
+     [
+      326.5,
+      566.77
+     ]
+    ],
+    "high": true,
+    "to": "square",
+    "road": "road_317"
+   }
+  },
+  {
+   "kind": "street",
+   "id": "orrinsford_street_78",
+   "x": 342.11,
+   "z": 580.24,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      342.11,
+      580.24
+     ],
+     [
+      329.82,
+      573.32
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_40",
-   "x": 329.47,
-   "z": 555.06,
+   "id": "orrinsford_street_79",
+   "x": 365.5,
+   "z": 559.85,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      329.47,
-      555.06
+      365.5,
+      559.85
      ],
      [
-      327.13,
-      559.29
+      359.66,
+      555.68
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_41",
-   "x": 312.01,
-   "z": 573.58,
+   "id": "orrinsford_street_80",
+   "x": 346.32,
+   "z": 587.81,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      312.01,
-      573.58
+      346.32,
+      587.81
      ],
      [
-      317.79,
-      570.37
+      339.92,
+      583.49
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_42",
-   "x": 340.66,
-   "z": 579.24,
+   "id": "orrinsford_street_81",
+   "x": 371.09,
+   "z": 581.21,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      340.66,
-      579.24
+      371.09,
+      581.21
      ],
      [
-      338.62,
-      567.73
+      372.84,
+      577.05
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_43",
-   "x": 341.67,
-   "z": 589.96,
+   "id": "orrinsford_street_82",
+   "x": 354.22,
+   "z": 598.51,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      341.67,
-      589.96
+      354.22,
+      598.51
      ],
      [
-      336.01,
-      586.14
+      356.92,
+      593.4
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "wolfkeep_street_44",
-   "x": 360.29,
-   "z": 561.88,
+   "id": "orrinsford_street_83",
+   "x": 345.21,
+   "z": 616.64,
    "yaw": 0,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      360.29,
-      561.88
+      345.21,
+      616.64
      ],
      [
-      355.51,
-      558.46
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "wolfkeep_street_45",
-   "x": 360.37,
-   "z": 583.25,
-   "yaw": 0,
-   "data": {
-    "town": "wolfkeep",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      360.37,
-      583.25
-     ],
-     [
-      361.64,
-      580.49
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "wolfkeep_street_46",
-   "x": 349.25,
-   "z": 599.51,
-   "yaw": 0,
-   "data": {
-    "town": "wolfkeep",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      349.25,
-      599.51
-     ],
-     [
-      351.52,
-      595.41
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "wolfkeep_street_47",
-   "x": 350.06,
-   "z": 612.97,
-   "yaw": 0,
-   "data": {
-    "town": "wolfkeep",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      350.06,
-      612.97
-     ],
-     [
-      348.21,
-      610.33
+      347.32,
+      613.7
      ]
     ]
    }
   },
   {
    "kind": "building",
-   "id": "wolfkeep_plot_0",
-   "x": 332.46,
-   "z": 539.35,
-   "yaw": 0.7816,
+   "id": "orrinsford_plot_0",
+   "x": 333.97,
+   "z": 527.77,
+   "yaw": 0.6754,
    "data": {
-    "town": "wolfkeep",
-    "want": "house",
+    "town": "orrinsford",
+    "want": "apothecary",
     "district": "residential",
-    "w": 5.04,
-    "d": 3.78,
-    "angle": 0.7891,
-    "front": 0.7891,
-    "streetGap": -0.4
+    "w": 3.57,
+    "d": 7.36,
+    "angle": 0.8954,
+    "front": 0.8954,
+    "streetGap": -0.4,
+    "office": "apothecary",
+    "role": "apothecary",
+    "lit": true,
+    "label": "Apothecary"
    }
   },
   {
    "kind": "building",
-   "id": "wolfkeep_plot_1",
-   "x": 326.81,
-   "z": 544.96,
-   "yaw": 2.3524,
+   "id": "orrinsford_plot_2",
+   "x": 335.85,
+   "z": 536.24,
+   "yaw": -0.8954,
    "data": {
-    "town": "wolfkeep",
-    "want": "hut",
+    "town": "orrinsford",
+    "want": "stable",
     "district": "craft",
-    "w": 5.04,
-    "d": 4.57,
-    "angle": 0.7891,
-    "front": 5.5015,
-    "streetGap": -0.4
+    "w": 5.19,
+    "d": 6.05,
+    "angle": 0.8954,
+    "front": 2.4662,
+    "streetGap": -0.4,
+    "office": "stable",
+    "role": "stablehand",
+    "lit": true,
+    "label": "Stables"
    }
   },
   {
    "kind": "building",
-   "id": "wolfkeep_plot_2",
-   "x": 333.23,
-   "z": 550.49,
-   "yaw": -2.3599,
+   "id": "orrinsford_plot_3",
+   "x": 328.43,
+   "z": 542.18,
+   "yaw": -2.4662,
    "data": {
-    "town": "wolfkeep",
-    "want": "hut",
-    "district": "craft",
-    "w": 5.06,
-    "d": 5.9,
-    "angle": 0.7891,
-    "front": 3.9307,
-    "streetGap": -0.4
-   }
-  },
-  {
-   "kind": "building",
-   "id": "wolfkeep_plot_3",
-   "x": 345.63,
-   "z": 552.48,
-   "yaw": -0.7891,
-   "data": {
-    "town": "wolfkeep",
-    "want": "hut",
-    "district": "craft",
-    "w": 7.68,
-    "d": 3.58,
-    "angle": 0.7891,
-    "front": 2.3599,
-    "streetGap": -0.15
-   }
-  },
-  {
-   "kind": "building",
-   "id": "wolfkeep_plot_4",
-   "x": 340.03,
-   "z": 558.04,
-   "yaw": 2.3524,
-   "data": {
-    "town": "wolfkeep",
-    "want": "granary",
-    "district": "craft",
-    "w": 7.68,
-    "d": 4.91,
-    "angle": 0.7891,
-    "front": 5.5015,
-    "streetGap": -0.4
-   }
-  },
-  {
-   "kind": "building",
-   "id": "wolfkeep_plot_5",
-   "x": 316.54,
-   "z": 560.26,
-   "yaw": 0.5616,
-   "data": {
-    "town": "wolfkeep",
-    "want": "inn",
-    "district": "craft",
-    "w": 5.29,
-    "d": 7.45,
-    "angle": 1.0091,
-    "front": 1.0091,
-    "streetGap": -0.4
-   }
-  },
-  {
-   "kind": "building",
-   "id": "wolfkeep_plot_6",
-   "x": 315.12,
-   "z": 586.4,
-   "yaw": -2.3516,
-   "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "want": "forge",
     "district": "craft",
-    "w": 7.01,
-    "d": 6.91,
-    "angle": 0.7808,
-    "front": 3.9224,
-    "streetGap": -0.4
-   }
-  },
-  {
-   "kind": "building",
-   "id": "wolfkeep_plot_7",
-   "x": 303.1,
-   "z": 587.42,
-   "yaw": 0.79,
-   "data": {
-    "town": "wolfkeep",
-    "want": "house",
-    "district": "residential",
-    "w": 5.27,
-    "d": 4.17,
-    "angle": 0.7808,
-    "front": 0.7808,
-    "streetGap": -0.26
-   }
-  },
-  {
-   "kind": "building",
-   "id": "wolfkeep_plot_8",
-   "x": 309.32,
-   "z": 593.58,
-   "yaw": -2.3516,
-   "data": {
-    "town": "wolfkeep",
-    "want": "house",
-    "district": "residential",
-    "w": 5.15,
-    "d": 4.17,
-    "angle": 0.7808,
-    "front": 3.9224,
-    "streetGap": -0.4
-   }
-  },
-  {
-   "kind": "building",
-   "id": "wolfkeep_plot_9",
-   "x": 360.91,
-   "z": 566.73,
-   "yaw": 1.0308,
-   "data": {
-    "town": "wolfkeep",
-    "want": "house",
-    "district": "residential",
-    "w": 4.85,
-    "d": 4.28,
-    "angle": 0.54,
-    "front": 0.54,
-    "streetGap": -0.4
-   }
-  },
-  {
-   "kind": "building",
-   "id": "wolfkeep_plot_10",
-   "x": 365.68,
-   "z": 576.18,
-   "yaw": 1.0308,
-   "data": {
-    "town": "wolfkeep",
-    "want": "stable",
-    "district": "residential",
-    "w": 5.66,
+    "w": 5.19,
     "d": 6.04,
-    "angle": 0.54,
-    "front": 0.54,
-    "streetGap": -0.29
+    "angle": 0.8954,
+    "front": 4.037,
+    "streetGap": -0.4,
+    "office": "forge",
+    "role": "smith",
+    "lit": true,
+    "label": "Smithy"
    }
   },
   {
    "kind": "building",
-   "id": "wolfkeep_plot_11",
-   "x": 363.64,
-   "z": 592.07,
-   "yaw": -1.8908,
+   "id": "orrinsford_plot_4",
+   "x": 348.79,
+   "z": 545.09,
+   "yaw": -2.4662,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
+    "want": "shop",
+    "district": "craft",
+    "w": 4.83,
+    "d": 5.88,
+    "angle": 0.8954,
+    "front": 4.037,
+    "streetGap": -0.4,
+    "office": "shop",
+    "role": "merchant",
+    "lit": true,
+    "label": "General Goods"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "orrinsford_plot_5",
+   "x": 312.7,
+   "z": 540.51,
+   "yaw": -0.9028,
+   "data": {
+    "town": "orrinsford",
+    "want": "counting_house",
+    "district": "craft",
+    "w": 7.27,
+    "d": 4.53,
+    "angle": 0.9028,
+    "front": 2.4736,
+    "streetGap": -0.4,
+    "office": "counting_house",
+    "role": "broker",
+    "lit": false,
+    "label": "Counting House"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "orrinsford_plot_7",
+   "x": 299.9,
+   "z": 548.74,
+   "yaw": 0.6679,
+   "data": {
+    "town": "orrinsford",
+    "want": "study",
+    "district": "residential",
+    "w": 4.32,
+    "d": 6.91,
+    "angle": 0.9028,
+    "front": 0.9028,
+    "streetGap": -0.4,
+    "office": "study",
+    "role": "unbinder",
+    "lit": false,
+    "label": "Unbinder's Study"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "orrinsford_plot_8",
+   "x": 305.76,
+   "z": 556.17,
+   "yaw": 2.2387,
+   "data": {
+    "town": "orrinsford",
+    "want": "inn",
+    "district": "craft",
+    "w": 7.06,
+    "d": 6.91,
+    "angle": 0.9028,
+    "front": 5.6152,
+    "streetGap": -0.4,
+    "office": "inn",
+    "role": "innkeeper",
+    "lit": true,
+    "label": "Inn"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "orrinsford_plot_9",
+   "x": 323.97,
+   "z": 556.7,
+   "yaw": 0.6679,
+   "data": {
+    "town": "orrinsford",
+    "want": "hall",
+    "district": "civic",
+    "w": 8.09,
+    "d": 6.89,
+    "angle": 0.9028,
+    "front": 0.9028,
+    "streetGap": -0.28,
+    "office": "hall",
+    "role": "elder",
+    "lit": false,
+    "label": "Town Hall"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "orrinsford_plot_11",
+   "x": 287.87,
+   "z": 586.92,
+   "yaw": -2.0624,
+   "data": {
+    "town": "orrinsford",
+    "want": "house",
+    "district": "residential",
+    "w": 4.95,
+    "d": 3.68,
+    "angle": 0.4916,
+    "front": 3.6332,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "orrinsford_plot_12",
+   "x": 304.53,
+   "z": 582.22,
+   "yaw": 0.8592,
+   "data": {
+    "town": "orrinsford",
+    "want": "barber",
+    "district": "craft",
+    "w": 4.71,
+    "d": 6.46,
+    "angle": 0.7116,
+    "front": 0.7116,
+    "streetGap": -0.11,
+    "office": "barber",
+    "role": "barber",
+    "lit": true,
+    "label": "Barber"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "orrinsford_plot_13",
+   "x": 312.03,
+   "z": 588.69,
+   "yaw": -2.2824,
+   "data": {
+    "town": "orrinsford",
+    "want": "temple",
+    "district": "craft",
+    "w": 7.7,
+    "d": 6.46,
+    "angle": 0.7116,
+    "front": 3.8532,
+    "streetGap": -0.4,
+    "office": "temple",
+    "role": "healer",
+    "lit": false,
+    "label": "Temple"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "orrinsford_plot_14",
+   "x": 298.22,
+   "z": 590.35,
+   "yaw": 0.8592,
+   "data": {
+    "town": "orrinsford",
+    "want": "bowyer",
+    "district": "residential",
+    "w": 5.77,
+    "d": 5.27,
+    "angle": 0.7116,
+    "front": 0.7116,
+    "streetGap": -0.32,
+    "office": "bowyer",
+    "role": "bowyer",
+    "lit": true,
+    "label": "Bowyer"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "orrinsford_plot_15",
+   "x": 302.51,
+   "z": 600.39,
+   "yaw": -2.2824,
+   "data": {
+    "town": "orrinsford",
+    "want": "tailor",
+    "district": "residential",
+    "w": 6.84,
+    "d": 5.9,
+    "angle": 0.7116,
+    "front": 3.8532,
+    "streetGap": -0.38,
+    "office": "tailor",
+    "role": "tailor",
+    "lit": true,
+    "label": "Tailor"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "orrinsford_plot_16",
+   "x": 377.52,
+   "z": 558.93,
+   "yaw": -1.9495,
+   "data": {
+    "town": "orrinsford",
+    "want": "provisioner",
+    "district": "residential",
+    "w": 7.41,
+    "d": 6.86,
+    "angle": 0.3787,
+    "front": 3.5202,
+    "streetGap": -0.4,
+    "office": "provisioner",
+    "role": "provisioner",
+    "lit": true,
+    "label": "Provisioner"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "orrinsford_plot_17",
+   "x": 385.4,
+   "z": 566.29,
+   "yaw": 2.7629,
+   "data": {
+    "town": "orrinsford",
+    "want": "house",
+    "district": "residential",
+    "w": 5.1,
+    "d": 4.4,
+    "angle": 0.3787,
+    "front": 5.091,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "orrinsford_plot_18",
+   "x": 381.48,
+   "z": 574.15,
+   "yaw": 1.1921,
+   "data": {
+    "town": "orrinsford",
+    "want": "house",
+    "district": "residential",
+    "w": 3.63,
+    "d": 6.29,
+    "angle": 0.3787,
+    "front": 0.3787,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "orrinsford_plot_19",
+   "x": 364.52,
+   "z": 579.66,
+   "yaw": 0.9721,
+   "data": {
+    "town": "orrinsford",
+    "want": "armoury",
+    "district": "residential",
+    "w": 8.6,
+    "d": 3.65,
+    "angle": 0.5987,
+    "front": 0.5987,
+    "streetGap": -0.22,
+    "office": "armoury",
+    "role": "armourer",
+    "lit": true,
+    "label": "Armourer"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "orrinsford_plot_20",
+   "x": 369.51,
+   "z": 590.42,
+   "yaw": 2.5429,
+   "data": {
+    "town": "orrinsford",
+    "want": "house",
+    "district": "residential",
+    "w": 3.75,
+    "d": 5.63,
+    "angle": 0.5987,
+    "front": 5.311,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "orrinsford_plot_21",
+   "x": 375.98,
+   "z": 594.72,
+   "yaw": 2.5429,
+   "data": {
+    "town": "orrinsford",
+    "want": "jeweller",
+    "district": "residential",
+    "w": 4.39,
+    "d": 5.82,
+    "angle": 0.5987,
+    "front": 5.311,
+    "streetGap": -0.4,
+    "office": "jeweller",
+    "role": "jeweller",
+    "lit": true,
+    "label": "Jeweller"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "orrinsford_plot_22",
+   "x": 349.78,
+   "z": 598.35,
+   "yaw": 0.9509,
+   "data": {
+    "town": "orrinsford",
+    "want": "house",
+    "district": "residential",
+    "w": 3.81,
+    "d": 3.7,
+    "angle": 0.6199,
+    "front": 0.6199,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "orrinsford_plot_23",
+   "x": 349.55,
+   "z": 608.57,
+   "yaw": 0.9509,
+   "data": {
+    "town": "orrinsford",
     "want": "market",
     "district": "residential",
-    "w": 8.26,
-    "d": 4.69,
-    "angle": 0.32,
-    "front": 3.4616,
-    "streetGap": -0.33
+    "w": 5.89,
+    "d": 6.09,
+    "angle": 0.6199,
+    "front": 0.6199,
+    "streetGap": -0.3,
+    "office": "market",
+    "role": "trader",
+    "lit": true,
+    "label": "Market"
    }
   },
   {
    "kind": "building",
-   "id": "wolfkeep_plot_12",
-   "x": 344,
-   "z": 599.52,
-   "yaw": 0.8124,
+   "id": "orrinsford_plot_24",
+   "x": 361.34,
+   "z": 607.2,
+   "yaw": -0.6199,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "want": "house",
     "district": "residential",
-    "w": 4.2,
-    "d": 6.04,
-    "angle": 0.7584,
-    "front": 0.7584,
-    "streetGap": -0.39
+    "w": 4.11,
+    "d": 4.67,
+    "angle": 0.6199,
+    "front": 2.1907,
+    "streetGap": -0.35
    }
   },
   {
    "kind": "building",
-   "id": "wolfkeep_plot_13",
-   "x": 349.59,
-   "z": 604.82,
-   "yaw": -2.3292,
+   "id": "orrinsford_plot_25",
+   "x": 368.16,
+   "z": 612.07,
+   "yaw": -2.1907,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
+    "want": "granary",
+    "district": "residential",
+    "w": 5.36,
+    "d": 4.67,
+    "angle": 0.6199,
+    "front": 3.7615,
+    "streetGap": -0.4,
+    "office": "granary",
+    "role": "farmer",
+    "lit": false,
+    "label": "Granary"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "orrinsford_plot_26",
+   "x": 356.57,
+   "z": 614.18,
+   "yaw": 0.9509,
+   "data": {
+    "town": "orrinsford",
     "want": "house",
     "district": "residential",
-    "w": 4.38,
-    "d": 6.04,
-    "angle": 0.7584,
-    "front": 3.9,
+    "w": 4.46,
+    "d": 5.11,
+    "angle": 0.6199,
+    "front": 0.6199,
+    "streetGap": -0.34
+   }
+  },
+  {
+   "kind": "building",
+   "id": "orrinsford_plot_27",
+   "x": 363.32,
+   "z": 619,
+   "yaw": -2.1907,
+   "data": {
+    "town": "orrinsford",
+    "want": "house",
+    "district": "residential",
+    "w": 5.19,
+    "d": 5.11,
+    "angle": 0.6199,
+    "front": 3.7615,
     "streetGap": -0.4
    }
   },
   {
    "kind": "building",
-   "id": "wolfkeep_plot_14",
-   "x": 335.39,
-   "z": 610.53,
-   "yaw": 2.3832,
+   "id": "orrinsford_plot_28",
+   "x": 340.68,
+   "z": 615.41,
+   "yaw": 0.7309,
    "data": {
-    "town": "wolfkeep",
+    "town": "orrinsford",
     "want": "house",
     "district": "residential",
-    "w": 6.85,
-    "d": 4.1,
-    "angle": 0.7584,
-    "front": 5.4708,
-    "streetGap": -0.3
+    "w": 4.3,
+    "d": 3.91,
+    "angle": 0.8399,
+    "front": 0.8399,
+    "streetGap": -0.4
    }
   },
   {
    "kind": "town_square",
-   "id": "duskhaven_square",
+   "id": "pilgrim_s_halt_square",
    "x": 670.21,
    "z": 245.48,
    "yaw": 0,
    "data": {
     "r": 2.53,
-    "town": "duskhaven",
-    "culture": "halfling"
+    "town": "pilgrim_s_halt",
+    "culture": "halfling",
+    "stalls": [
+     [
+      671.58,
+      240.53
+     ],
+     [
+      667.05,
+      252.97
+     ],
+     [
+      663.58,
+      245.43
+     ],
+     [
+      678.09,
+      243.43
+     ]
+    ]
    }
   },
   {
    "kind": "street",
-   "id": "duskhaven_street_0",
+   "id": "pilgrim_s_halt_street_0",
    "x": 677.8,
    "z": 202.75,
    "yaw": 0,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "cls": "main",
     "width": 5,
     "pts": [
@@ -1592,12 +2839,12 @@
   },
   {
    "kind": "street",
-   "id": "duskhaven_street_1",
+   "id": "pilgrim_s_halt_street_1",
    "x": 637.34,
    "z": 238.37,
    "yaw": 0,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "cls": "lane",
     "width": 3.2,
     "pts": [
@@ -1618,12 +2865,12 @@
   },
   {
    "kind": "street",
-   "id": "duskhaven_street_2",
+   "id": "pilgrim_s_halt_street_2",
    "x": 644.77,
    "z": 213.93,
    "yaw": 0,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1644,12 +2891,12 @@
   },
   {
    "kind": "street",
-   "id": "duskhaven_street_3",
+   "id": "pilgrim_s_halt_street_3",
    "x": 657.4,
    "z": 206.82,
    "yaw": 0,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1670,12 +2917,12 @@
   },
   {
    "kind": "street",
-   "id": "duskhaven_street_4",
+   "id": "pilgrim_s_halt_street_4",
    "x": 642.01,
    "z": 230.34,
    "yaw": 0,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1696,12 +2943,12 @@
   },
   {
    "kind": "street",
-   "id": "duskhaven_street_5",
+   "id": "pilgrim_s_halt_street_5",
    "x": 648.28,
    "z": 218.99,
    "yaw": 0,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1722,12 +2969,12 @@
   },
   {
    "kind": "street",
-   "id": "duskhaven_street_6",
+   "id": "pilgrim_s_halt_street_6",
    "x": 643.05,
    "z": 221.29,
    "yaw": 0,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1748,12 +2995,12 @@
   },
   {
    "kind": "street",
-   "id": "duskhaven_street_7",
+   "id": "pilgrim_s_halt_street_7",
    "x": 649.01,
    "z": 224.93,
    "yaw": 0,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1774,12 +3021,12 @@
   },
   {
    "kind": "street",
-   "id": "duskhaven_street_8",
+   "id": "pilgrim_s_halt_street_8",
    "x": 650.27,
    "z": 232.57,
    "yaw": 0,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1800,12 +3047,12 @@
   },
   {
    "kind": "street",
-   "id": "duskhaven_street_9",
+   "id": "pilgrim_s_halt_street_9",
    "x": 645.23,
    "z": 243.51,
    "yaw": 0,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1826,12 +3073,12 @@
   },
   {
    "kind": "street",
-   "id": "duskhaven_street_10",
+   "id": "pilgrim_s_halt_street_10",
    "x": 672.44,
    "z": 235.4,
    "yaw": 0,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "cls": "lane",
     "width": 3.2,
     "pts": [
@@ -1852,12 +3099,12 @@
   },
   {
    "kind": "street",
-   "id": "duskhaven_street_11",
+   "id": "pilgrim_s_halt_street_11",
    "x": 705.38,
    "z": 222.48,
    "yaw": 0,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1878,12 +3125,12 @@
   },
   {
    "kind": "street",
-   "id": "duskhaven_street_12",
+   "id": "pilgrim_s_halt_street_12",
    "x": 685.27,
    "z": 220.2,
    "yaw": 0,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1904,12 +3151,12 @@
   },
   {
    "kind": "street",
-   "id": "duskhaven_street_13",
+   "id": "pilgrim_s_halt_street_13",
    "x": 699.66,
    "z": 219.12,
    "yaw": 0,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1930,12 +3177,12 @@
   },
   {
    "kind": "street",
-   "id": "duskhaven_street_14",
+   "id": "pilgrim_s_halt_street_14",
    "x": 689.01,
    "z": 225.11,
    "yaw": 0,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1956,12 +3203,12 @@
   },
   {
    "kind": "street",
-   "id": "duskhaven_street_15",
+   "id": "pilgrim_s_halt_street_15",
    "x": 701.75,
    "z": 231.18,
    "yaw": 0,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -1982,12 +3229,12 @@
   },
   {
    "kind": "street",
-   "id": "duskhaven_street_16",
+   "id": "pilgrim_s_halt_street_16",
    "x": 697.54,
    "z": 238.86,
    "yaw": 0,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2008,12 +3255,12 @@
   },
   {
    "kind": "street",
-   "id": "duskhaven_street_17",
+   "id": "pilgrim_s_halt_street_17",
    "x": 687.23,
    "z": 246.47,
    "yaw": 0,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2034,12 +3281,12 @@
   },
   {
    "kind": "street",
-   "id": "duskhaven_street_18",
+   "id": "pilgrim_s_halt_street_18",
    "x": 664.58,
    "z": 256.3,
    "yaw": 0,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2060,12 +3307,12 @@
   },
   {
    "kind": "street",
-   "id": "duskhaven_street_19",
+   "id": "pilgrim_s_halt_street_19",
    "x": 667.09,
    "z": 248.59,
    "yaw": 0,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2086,12 +3333,12 @@
   },
   {
    "kind": "street",
-   "id": "duskhaven_street_20",
+   "id": "pilgrim_s_halt_street_20",
    "x": 674.01,
    "z": 244.05,
    "yaw": 0,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2112,12 +3359,12 @@
   },
   {
    "kind": "street",
-   "id": "duskhaven_street_21",
+   "id": "pilgrim_s_halt_street_21",
    "x": 671.81,
    "z": 251.59,
    "yaw": 0,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2138,12 +3385,12 @@
   },
   {
    "kind": "street",
-   "id": "duskhaven_street_22",
+   "id": "pilgrim_s_halt_street_22",
    "x": 673.14,
    "z": 260.37,
    "yaw": 0,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2164,12 +3411,12 @@
   },
   {
    "kind": "street",
-   "id": "duskhaven_street_23",
+   "id": "pilgrim_s_halt_street_23",
    "x": 663.03,
    "z": 261.08,
    "yaw": 0,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2190,12 +3437,12 @@
   },
   {
    "kind": "street",
-   "id": "duskhaven_street_24",
+   "id": "pilgrim_s_halt_street_24",
    "x": 672.03,
    "z": 267.55,
    "yaw": 0,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2216,12 +3463,12 @@
   },
   {
    "kind": "street",
-   "id": "duskhaven_street_25",
+   "id": "pilgrim_s_halt_street_25",
    "x": 685.16,
    "z": 259.41,
    "yaw": 0,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2242,12 +3489,12 @@
   },
   {
    "kind": "street",
-   "id": "duskhaven_street_26",
+   "id": "pilgrim_s_halt_street_26",
    "x": 694.68,
    "z": 252.85,
    "yaw": 0,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2268,12 +3515,12 @@
   },
   {
    "kind": "street",
-   "id": "duskhaven_street_27",
+   "id": "pilgrim_s_halt_street_27",
    "x": 680.19,
    "z": 267.8,
    "yaw": 0,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2294,12 +3541,12 @@
   },
   {
    "kind": "street",
-   "id": "duskhaven_street_28",
+   "id": "pilgrim_s_halt_street_28",
    "x": 690.42,
    "z": 264.08,
    "yaw": 0,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2320,12 +3567,12 @@
   },
   {
    "kind": "street",
-   "id": "duskhaven_street_29",
+   "id": "pilgrim_s_halt_street_29",
    "x": 685.38,
    "z": 272.56,
    "yaw": 0,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2346,122 +3593,81 @@
   },
   {
    "kind": "street",
-   "id": "duskhaven_street_30",
-   "x": 642.41,
-   "z": 216.64,
+   "id": "pilgrim_s_halt_street_30",
+   "x": 634.56,
+   "z": 210.44,
    "yaw": 0,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "cls": "main",
-    "width": 5,
+    "width": 3.6,
     "pts": [
      [
-      642.41,
-      216.64
+      634.56,
+      210.44
      ],
      [
-      644.77,
-      213.93
+      668.41,
+      243.7
      ]
-    ]
+    ],
+    "high": true,
+    "to": "square",
+    "road": "spur_pilgrim_s_halt"
    }
   },
   {
    "kind": "street",
-   "id": "duskhaven_street_31",
-   "x": 680.19,
-   "z": 267.8,
+   "id": "pilgrim_s_halt_street_31",
+   "x": 651.94,
+   "z": 216.55,
    "yaw": 0,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      680.19,
-      267.8
+      651.94,
+      216.55
      ],
      [
-      677.09,
-      266.57
+      648.28,
+      218.99
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "duskhaven_street_32",
-   "x": 691.39,
-   "z": 240.5,
+   "id": "pilgrim_s_halt_street_32",
+   "x": 667.09,
+   "z": 248.59,
    "yaw": 0,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "cls": "alley",
     "width": 2.2,
     "pts": [
      [
-      691.39,
-      240.5
+      667.09,
+      248.59
      ],
      [
-      689.26,
-      244.85
+      668.41,
+      243.7
      ]
     ]
    }
   },
   {
    "kind": "street",
-   "id": "duskhaven_street_33",
-   "x": 697.54,
-   "z": 238.86,
-   "yaw": 0,
-   "data": {
-    "town": "duskhaven",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      697.54,
-      238.86
-     ],
-     [
-      694.25,
-      236.5
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "duskhaven_street_34",
-   "x": 661.28,
-   "z": 235.42,
-   "yaw": 0,
-   "data": {
-    "town": "duskhaven",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      661.28,
-      235.42
-     ],
-     [
-      672.44,
-      235.4
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "duskhaven_street_35",
+   "id": "pilgrim_s_halt_street_33",
    "x": 653.18,
    "z": 242.66,
    "yaw": 0,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2478,12 +3684,78 @@
   },
   {
    "kind": "street",
-   "id": "duskhaven_street_36",
+   "id": "pilgrim_s_halt_street_34",
+   "x": 691.39,
+   "z": 240.5,
+   "yaw": 0,
+   "data": {
+    "town": "pilgrim_s_halt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      691.39,
+      240.5
+     ],
+     [
+      689.26,
+      244.85
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "pilgrim_s_halt_street_35",
+   "x": 680.19,
+   "z": 267.8,
+   "yaw": 0,
+   "data": {
+    "town": "pilgrim_s_halt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      680.19,
+      267.8
+     ],
+     [
+      677.09,
+      266.57
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "pilgrim_s_halt_street_36",
+   "x": 697.54,
+   "z": 238.86,
+   "yaw": 0,
+   "data": {
+    "town": "pilgrim_s_halt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      697.54,
+      238.86
+     ],
+     [
+      694.25,
+      236.5
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "pilgrim_s_halt_street_37",
    "x": 701.75,
    "z": 231.18,
    "yaw": 0,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "cls": "alley",
     "width": 2.2,
     "pts": [
@@ -2499,57 +3771,13 @@
    }
   },
   {
-   "kind": "street",
-   "id": "duskhaven_street_37",
-   "x": 649.88,
-   "z": 235.96,
-   "yaw": 0,
-   "data": {
-    "town": "duskhaven",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      649.88,
-      235.96
-     ],
-     [
-      648.23,
-      241.07
-     ]
-    ]
-   }
-  },
-  {
-   "kind": "street",
-   "id": "duskhaven_street_38",
-   "x": 651.94,
-   "z": 216.55,
-   "yaw": 0,
-   "data": {
-    "town": "duskhaven",
-    "cls": "alley",
-    "width": 2.2,
-    "pts": [
-     [
-      651.94,
-      216.55
-     ],
-     [
-      648.28,
-      218.99
-     ]
-    ]
-   }
-  },
-  {
    "kind": "building",
-   "id": "duskhaven_plot_0",
+   "id": "pilgrim_s_halt_plot_0",
    "x": 639.84,
    "z": 248.55,
    "yaw": 1.3656,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "want": "house",
     "district": "residential",
     "w": 4.87,
@@ -2561,12 +3789,12 @@
   },
   {
    "kind": "building",
-   "id": "duskhaven_plot_1",
+   "id": "pilgrim_s_halt_plot_1",
    "x": 693.65,
    "z": 217.27,
    "yaw": 0.8501,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "want": "house",
     "district": "residential",
     "w": 7.53,
@@ -2578,12 +3806,12 @@
   },
   {
    "kind": "building",
-   "id": "duskhaven_plot_2",
+   "id": "pilgrim_s_halt_plot_2",
    "x": 691.05,
    "z": 220.24,
    "yaw": -0.7207,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "want": "house",
     "district": "residential",
     "w": 7.53,
@@ -2595,46 +3823,54 @@
   },
   {
    "kind": "building",
-   "id": "duskhaven_plot_3",
+   "id": "pilgrim_s_halt_plot_3",
    "x": 683.07,
    "z": 226.36,
    "yaw": 2.4208,
    "data": {
-    "town": "duskhaven",
-    "want": "hut",
+    "town": "pilgrim_s_halt",
+    "want": "mill",
     "district": "craft",
     "w": 3.64,
     "d": 8.52,
     "angle": 0.7207,
     "front": 5.4331,
-    "streetGap": -0.24
+    "streetGap": -0.24,
+    "office": "mill",
+    "role": "miller",
+    "lit": false,
+    "label": "Mill"
    }
   },
   {
    "kind": "building",
-   "id": "duskhaven_plot_4",
+   "id": "pilgrim_s_halt_plot_4",
    "x": 689.68,
    "z": 232.16,
    "yaw": -2.2915,
    "data": {
-    "town": "duskhaven",
-    "want": "granary",
+    "town": "pilgrim_s_halt",
+    "want": "shop",
     "district": "residential",
     "w": 6.68,
     "d": 8.52,
     "angle": 0.7207,
     "front": 3.8623,
-    "streetGap": -0.4
+    "streetGap": -0.4,
+    "office": "shop",
+    "role": "merchant",
+    "lit": true,
+    "label": "General Goods"
    }
   },
   {
    "kind": "building",
-   "id": "duskhaven_plot_5",
+   "id": "pilgrim_s_halt_plot_5",
    "x": 703.2,
    "z": 237.02,
    "yaw": -0.5007,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "want": "house",
     "district": "residential",
     "w": 6.94,
@@ -2646,12 +3882,12 @@
   },
   {
    "kind": "building",
-   "id": "duskhaven_plot_6",
+   "id": "pilgrim_s_halt_plot_6",
    "x": 677.44,
    "z": 247.82,
    "yaw": -1.8848,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "want": "hut",
     "district": "civic",
     "w": 5.32,
@@ -2663,12 +3899,12 @@
   },
   {
    "kind": "building",
-   "id": "duskhaven_plot_7",
+   "id": "pilgrim_s_halt_plot_7",
    "x": 675.09,
    "z": 255.54,
    "yaw": -0.314,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "want": "hut",
     "district": "civic",
     "w": 5.02,
@@ -2680,63 +3916,75 @@
   },
   {
    "kind": "building",
-   "id": "duskhaven_plot_8",
+   "id": "pilgrim_s_halt_plot_8",
    "x": 665.77,
    "z": 265.98,
    "yaw": 1.2568,
    "data": {
-    "town": "duskhaven",
-    "want": "hut",
+    "town": "pilgrim_s_halt",
+    "want": "inn",
     "district": "craft",
     "w": 7.05,
     "d": 3.83,
     "angle": 0.314,
     "front": 0.314,
-    "streetGap": -0.37
+    "streetGap": -0.37,
+    "office": "inn",
+    "role": "innkeeper",
+    "lit": true,
+    "label": "Inn"
    }
   },
   {
    "kind": "building",
-   "id": "duskhaven_plot_9",
+   "id": "pilgrim_s_halt_plot_9",
    "x": 696.19,
    "z": 259.06,
    "yaw": -2.1048,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "want": "shrine",
     "district": "residential",
     "w": 5.06,
     "d": 7.95,
     "angle": 0.534,
     "front": 3.6756,
-    "streetGap": -0.4
+    "streetGap": -0.4,
+    "office": "shrine",
+    "role": null,
+    "lit": false,
+    "label": "Shrine"
    }
   },
   {
    "kind": "building",
-   "id": "duskhaven_plot_10",
+   "id": "pilgrim_s_halt_plot_10",
    "x": 685.2,
    "z": 265.03,
    "yaw": 1.0368,
    "data": {
-    "town": "duskhaven",
-    "want": "house",
+    "town": "pilgrim_s_halt",
+    "want": "granary",
     "district": "residential",
     "w": 4.6,
     "d": 5.76,
     "angle": 0.534,
     "front": 0.534,
-    "streetGap": -0.38
+    "streetGap": -0.38,
+    "office": "granary",
+    "role": "farmer",
+    "lit": false,
+    "label": "Granary"
    }
   },
   {
    "kind": "building",
-   "id": "duskhaven_plot_11",
+   "id": "pilgrim_s_halt_plot_11",
    "x": 680.6,
    "z": 272.79,
    "yaw": 1.0368,
    "data": {
-    "town": "duskhaven",
+    "town": "pilgrim_s_halt",
     "want": "house",
     "district": "residential",
     "w": 4.58,
@@ -3496,19 +4744,9 @@
       249.81
      ],
      [
-      322,
-      488,
-      251.39
-     ],
-     [
-      320,
-      504,
-      252.78
-     ],
-     [
-      320,
-      513,
-      253.38
+      322.24,
+      487.06,
+      251.3
      ]
     ]
    }
@@ -7136,28 +8374,18 @@
       263.31
      ],
      [
-      248,
-      576,
-      262.07
-     ],
-     [
-      264,
-      576,
-      260.65
-     ],
-     [
-      271,
-      576,
-      260.06
+      246,
+      576.25,
+      262.22
      ]
     ]
    }
   },
   {
    "kind": "road",
-   "id": "spur_wolfkeep",
-   "x": 271,
-   "z": 576,
+   "id": "spur_orrinsford",
+   "x": 246.02,
+   "z": 577.73,
    "yaw": 0,
    "data": {
     "cls": "trail",
@@ -7165,21 +8393,21 @@
     "spur": true,
     "pts": [
      [
-      271,
-      576,
-      258.17
+      246.02,
+      577.73,
+      262.51
      ],
      [
-      264,
-      576,
-      258.61
+      232,
+      578,
+      263.31
      ]
     ]
    }
   },
   {
    "kind": "road",
-   "id": "spur_duskhaven",
+   "id": "spur_pilgrim_s_halt",
    "x": 635.9,
    "z": 211.5,
    "yaw": 0,
@@ -7191,71 +8419,8794 @@
      [
       635.9,
       211.5,
-      279.46
+      278.55
      ],
      [
       634,
       210,
-      279.26
+      278.27
      ],
      [
       621.33,
       200,
-      276.96
+      275.31
      ],
      [
       608.67,
       190,
-      274.71
+      272.31
      ],
      [
       596,
       180,
-      272.56
+      269.38
      ],
      [
       583.33,
       170,
-      270.5
+      266.53
      ],
      [
       570.67,
       160,
-      268.38
+      263.67
      ],
      [
       558,
       150,
-      265.88
+      260.51
      ],
      [
       545.33,
       140,
-      265
+      259.11
      ],
      [
       532.67,
       130,
-      264.19
+      257.96
      ],
      [
       520,
       120,
-      263.36
+      257
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_door_1",
+   "x": 346,
+   "z": 730,
+   "yaw": 0,
+   "data": {
+    "from": "door_1",
+    "to": "town:Orrinsford",
+    "width": 2.2,
+    "pts": [
+     [
+      346,
+      730,
+      270.09
+     ],
+     [
+      345.25,
+      729.25,
+      269.97
+     ],
+     [
+      343.5,
+      727.5,
+      269.6
+     ],
+     [
+      342.25,
+      725.5,
+      269.16
+     ],
+     [
+      342,
+      723.5,
+      268.86
+     ],
+     [
+      342,
+      721.5,
+      268.68
+     ],
+     [
+      342,
+      719.5,
+      268.51
+     ],
+     [
+      342,
+      717.5,
+      268.33
+     ],
+     [
+      342,
+      715.5,
+      268.14
+     ],
+     [
+      342,
+      713.5,
+      268.01
+     ],
+     [
+      342,
+      711.5,
+      267.92
+     ],
+     [
+      342,
+      709.5,
+      267.69
+     ],
+     [
+      342,
+      707.5,
+      267.41
+     ],
+     [
+      342,
+      705.5,
+      267.26
+     ],
+     [
+      342,
+      703.5,
+      266.99
+     ],
+     [
+      342,
+      701.5,
+      266.41
+     ],
+     [
+      342,
+      699.5,
+      265.72
+     ],
+     [
+      342,
+      697.5,
+      265.11
+     ],
+     [
+      342,
+      695.5,
+      264.56
+     ],
+     [
+      342,
+      693.5,
+      263.99
+     ],
+     [
+      342,
+      691.5,
+      263.37
+     ],
+     [
+      342,
+      689.5,
+      262.71
+     ],
+     [
+      342,
+      687.5,
+      262.1
+     ],
+     [
+      342,
+      685.5,
+      261.6
+     ],
+     [
+      342,
+      683.5,
+      261.16
+     ],
+     [
+      342,
+      681.5,
+      260.69
+     ],
+     [
+      342,
+      679.5,
+      260.22
+     ],
+     [
+      342,
+      677.5,
+      259.85
+     ],
+     [
+      342,
+      675.5,
+      259.48
+     ],
+     [
+      342,
+      673.5,
+      259.14
+     ],
+     [
+      342,
+      671.5,
+      258.84
+     ],
+     [
+      342,
+      669.5,
+      258.61
+     ],
+     [
+      342,
+      667.5,
+      258.44
+     ],
+     [
+      342,
+      665.5,
+      258.35
+     ],
+     [
+      342,
+      663.5,
+      258.27
+     ],
+     [
+      342,
+      662.25,
+      258.21
+     ],
+     [
+      342,
+      662,
+      258.2
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_event_saint_orrins_rise",
+   "x": 326,
+   "z": 834,
+   "yaw": 0,
+   "data": {
+    "from": "event_saint_orrins_rise",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      326,
+      834,
+      287.8
+     ],
+     [
+      325.25,
+      833.25,
+      287.66
+     ],
+     [
+      323.5,
+      831.5,
+      287.31
+     ],
+     [
+      322.25,
+      829.5,
+      287.12
+     ],
+     [
+      322,
+      827.5,
+      287.03
+     ],
+     [
+      322,
+      825.5,
+      286.8
+     ],
+     [
+      322,
+      823.5,
+      286.51
+     ],
+     [
+      322,
+      821.5,
+      286.22
+     ],
+     [
+      322,
+      819.5,
+      285.96
+     ],
+     [
+      322,
+      817.5,
+      285.84
+     ],
+     [
+      322,
+      815.5,
+      285.9
+     ],
+     [
+      322,
+      813.5,
+      286
+     ],
+     [
+      322,
+      811.5,
+      285.95
+     ],
+     [
+      322,
+      809.5,
+      285.85
+     ],
+     [
+      322,
+      807.5,
+      285.79
+     ],
+     [
+      322,
+      805.5,
+      285.59
+     ],
+     [
+      322,
+      803.5,
+      285.24
+     ],
+     [
+      322,
+      801.5,
+      284.96
+     ],
+     [
+      322,
+      799.5,
+      284.7
+     ],
+     [
+      322,
+      797.5,
+      284.34
+     ],
+     [
+      322,
+      795.5,
+      283.97
+     ],
+     [
+      322,
+      793.5,
+      283.77
+     ],
+     [
+      322,
+      791.5,
+      283.63
+     ],
+     [
+      322,
+      789.5,
+      283.45
+     ],
+     [
+      322,
+      787.5,
+      283.29
+     ],
+     [
+      322,
+      785.5,
+      283.05
+     ],
+     [
+      322,
+      783.5,
+      282.71
+     ],
+     [
+      322,
+      781.5,
+      282.46
+     ],
+     [
+      322,
+      779.5,
+      282.29
+     ],
+     [
+      321.25,
+      777.5,
+      281.91
+     ],
+     [
+      319.5,
+      775.5,
+      281.08
+     ],
+     [
+      318.25,
+      773.5,
+      280.35
+     ],
+     [
+      318,
+      771.5,
+      279.77
+     ],
+     [
+      318,
+      769.5,
+      279.24
+     ],
+     [
+      318,
+      767.5,
+      278.88
+     ],
+     [
+      318,
+      765.5,
+      278.52
+     ],
+     [
+      318,
+      763.5,
+      278.02
+     ],
+     [
+      318,
+      761.5,
+      277.56
+     ],
+     [
+      318,
+      759.5,
+      277.15
+     ],
+     [
+      318,
+      757.5,
+      276.63
+     ],
+     [
+      318,
+      755.5,
+      275.99
+     ],
+     [
+      318,
+      753.5,
+      275.36
+     ],
+     [
+      318,
+      751.5,
+      274.68
+     ],
+     [
+      318.75,
+      749.5,
+      273.99
+     ],
+     [
+      320.5,
+      747.5,
+      273.26
+     ],
+     [
+      321.75,
+      745.5,
+      272.57
+     ],
+     [
+      322,
+      743.5,
+      272.03
+     ],
+     [
+      322.75,
+      741.5,
+      271.56
+     ],
+     [
+      324.5,
+      739.5,
+      271.13
+     ],
+     [
+      326.5,
+      737.5,
+      270.81
+     ],
+     [
+      328.5,
+      735.5,
+      270.47
+     ],
+     [
+      330.5,
+      733.5,
+      269.89
+     ],
+     [
+      332.5,
+      731.5,
+      269.31
+     ],
+     [
+      334.5,
+      729.5,
+      269.04
+     ],
+     [
+      336.5,
+      727.5,
+      268.91
+     ],
+     [
+      338.5,
+      726.25,
+      268.95
+     ],
+     [
+      340.5,
+      726,
+      269.12
+     ],
+     [
+      341.75,
+      726,
+      269.23
+     ],
+     [
+      342,
+      726,
+      269.25
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_saint_orrins_yard",
+   "x": 450,
+   "z": 602,
+   "yaw": 0,
+   "data": {
+    "from": "saint_orrins_yard",
+    "to": "town:Orrinsford",
+    "width": 2.2,
+    "pts": [
+     [
+      450,
+      602,
+      255.5
+     ],
+     [
+      449.25,
+      602,
+      255.54
+     ],
+     [
+      447.5,
+      602,
+      255.65
+     ],
+     [
+      445.5,
+      602,
+      255.85
+     ],
+     [
+      443.5,
+      602,
+      255.93
+     ],
+     [
+      441.5,
+      602,
+      255.93
+     ],
+     [
+      439.5,
+      602,
+      256.02
+     ],
+     [
+      437.5,
+      602,
+      256.09
+     ],
+     [
+      435.5,
+      602,
+      256.12
+     ],
+     [
+      433.5,
+      602,
+      256.15
+     ],
+     [
+      431.5,
+      602,
+      256.19
+     ],
+     [
+      429.5,
+      602,
+      256.28
+     ],
+     [
+      427.5,
+      602,
+      256.37
+     ],
+     [
+      425.5,
+      602,
+      256.45
+     ],
+     [
+      423.5,
+      602,
+      256.53
+     ],
+     [
+      422.25,
+      602,
+      256.57
+     ],
+     [
+      422,
+      602,
+      256.58
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_pilgrim_s_halt_graveyard",
+   "x": 594,
+   "z": 202,
+   "yaw": 0,
+   "data": {
+    "from": "pilgrim_s_halt_graveyard",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      594,
+      202,
+      275.51
+     ],
+     [
+      594.75,
+      201.25,
+      275.24
+     ],
+     [
+      596.5,
+      199.5,
+      274.81
+     ],
+     [
+      598.5,
+      197.5,
+      274.88
+     ],
+     [
+      600.5,
+      195.5,
+      274.78
+     ],
+     [
+      602.5,
+      193.5,
+      274.54
+     ],
+     [
+      604.5,
+      191.5,
+      273.6
+     ],
+     [
+      605.75,
+      190.25,
+      272.44
+     ],
+     [
+      606,
+      190,
+      272.2
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_orrinsford_farm",
+   "x": 602,
+   "z": 782,
+   "yaw": 0,
+   "data": {
+    "from": "orrinsford_farm",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      602,
+      782,
+      403.34
+     ],
+     [
+      601.25,
+      782,
+      403.19
+     ],
+     [
+      599.5,
+      782,
+      402.81
+     ],
+     [
+      597.5,
+      782.75,
+      402.34
+     ],
+     [
+      595.5,
+      784.5,
+      402.05
+     ],
+     [
+      593.5,
+      786.5,
+      401.91
+     ],
+     [
+      591.5,
+      788.5,
+      402.13
+     ],
+     [
+      589.5,
+      790.5,
+      402.31
+     ],
+     [
+      587.5,
+      792.5,
+      402.19
+     ],
+     [
+      585.5,
+      794.5,
+      402.05
+     ],
+     [
+      583.5,
+      796.5,
+      401.7
+     ],
+     [
+      581.5,
+      798.5,
+      401.5
+     ],
+     [
+      579.5,
+      800.5,
+      401.55
+     ],
+     [
+      577.5,
+      802.5,
+      401.34
+     ],
+     [
+      575.5,
+      804.5,
+      400.81
+     ],
+     [
+      573.5,
+      806.5,
+      400.33
+     ],
+     [
+      571.5,
+      808.5,
+      399.58
+     ],
+     [
+      570.25,
+      810.5,
+      398.98
+     ],
+     [
+      570,
+      812.5,
+      398.5
+     ],
+     [
+      570,
+      814.5,
+      397.75
+     ],
+     [
+      570,
+      816.5,
+      396.74
+     ],
+     [
+      570,
+      818.5,
+      395.63
+     ],
+     [
+      570,
+      820.5,
+      394.54
+     ],
+     [
+      570,
+      822.5,
+      393.64
+     ],
+     [
+      570,
+      824.5,
+      392.92
+     ],
+     [
+      570,
+      826.5,
+      392.31
+     ],
+     [
+      570,
+      828.5,
+      391.72
+     ],
+     [
+      570,
+      830.5,
+      391.16
+     ],
+     [
+      570,
+      832.5,
+      390.56
+     ],
+     [
+      570,
+      834.5,
+      389.87
+     ],
+     [
+      570,
+      836.5,
+      389.17
+     ],
+     [
+      569.25,
+      838.5,
+      388.5
+     ],
+     [
+      567.5,
+      840.5,
+      387.55
+     ],
+     [
+      566.25,
+      842.5,
+      386.34
+     ],
+     [
+      566,
+      844.5,
+      385.17
+     ],
+     [
+      565.25,
+      846.5,
+      383.83
+     ],
+     [
+      563.5,
+      848.5,
+      382.26
+     ],
+     [
+      562.25,
+      850.5,
+      380.75
+     ],
+     [
+      562,
+      852.5,
+      379.58
+     ],
+     [
+      561.25,
+      854.5,
+      378.09
+     ],
+     [
+      559.5,
+      856.5,
+      375.85
+     ],
+     [
+      557.5,
+      858.5,
+      373.55
+     ],
+     [
+      555.5,
+      860.5,
+      371.64
+     ],
+     [
+      553.5,
+      862.5,
+      369.76
+     ],
+     [
+      551.5,
+      864.5,
+      367.86
+     ],
+     [
+      549.5,
+      866.5,
+      365.97
+     ],
+     [
+      547.5,
+      868.5,
+      364.2
+     ],
+     [
+      545.5,
+      870.5,
+      362.59
+     ],
+     [
+      543.5,
+      872.5,
+      361.03
+     ],
+     [
+      541.5,
+      874.5,
+      359.49
+     ],
+     [
+      539.5,
+      876.5,
+      358.04
+     ],
+     [
+      537.5,
+      878.5,
+      356.9
+     ],
+     [
+      535.5,
+      880.5,
+      355.85
+     ],
+     [
+      533.5,
+      882.5,
+      354.78
+     ],
+     [
+      531.5,
+      884.5,
+      353.87
+     ],
+     [
+      529.5,
+      886.5,
+      352.93
+     ],
+     [
+      527.5,
+      888.5,
+      352
+     ],
+     [
+      525.5,
+      890.5,
+      350.82
+     ],
+     [
+      523.5,
+      892.5,
+      349.53
+     ],
+     [
+      521.5,
+      894.5,
+      348.33
+     ],
+     [
+      519.5,
+      896.5,
+      347.45
+     ],
+     [
+      517.5,
+      897.75,
+      346.86
+     ],
+     [
+      515.5,
+      898,
+      346.38
+     ],
+     [
+      513.5,
+      898,
+      345.87
+     ],
+     [
+      511.5,
+      898,
+      345.45
+     ],
+     [
+      509.5,
+      898,
+      345.16
+     ],
+     [
+      507.5,
+      898,
+      344.81
+     ],
+     [
+      505.5,
+      898,
+      344.41
+     ],
+     [
+      503.5,
+      898,
+      344.14
+     ],
+     [
+      501.5,
+      898,
+      343.92
+     ],
+     [
+      499.5,
+      898,
+      343.67
+     ],
+     [
+      497.5,
+      898,
+      343.41
+     ],
+     [
+      495.5,
+      898,
+      343.05
+     ],
+     [
+      493.5,
+      898,
+      342.65
+     ],
+     [
+      491.5,
+      898,
+      342.23
+     ],
+     [
+      489.5,
+      898,
+      341.68
+     ],
+     [
+      487.5,
+      898,
+      340.98
+     ],
+     [
+      485.5,
+      897.25,
+      340.06
+     ],
+     [
+      483.5,
+      895.5,
+      338.94
+     ],
+     [
+      481.5,
+      894.25,
+      338.02
+     ],
+     [
+      479.5,
+      894,
+      337.16
+     ],
+     [
+      477.5,
+      894,
+      336.28
+     ],
+     [
+      475.5,
+      894,
+      335.32
+     ],
+     [
+      473.5,
+      894,
+      334.21
+     ],
+     [
+      471.5,
+      894,
+      332.95
+     ],
+     [
+      469.5,
+      894,
+      331.86
+     ],
+     [
+      467.5,
+      894,
+      330.88
+     ],
+     [
+      465.5,
+      894,
+      329.87
+     ],
+     [
+      463.5,
+      894,
+      329.01
+     ],
+     [
+      461.5,
+      894.75,
+      328.08
+     ],
+     [
+      459.5,
+      896.5,
+      326.76
+     ],
+     [
+      457.5,
+      898.5,
+      325.63
+     ],
+     [
+      455.5,
+      900.5,
+      324.3
+     ],
+     [
+      453.5,
+      901.75,
+      323.05
+     ],
+     [
+      451.5,
+      902,
+      322.05
+     ],
+     [
+      449.5,
+      902.75,
+      320.79
+     ],
+     [
+      447.5,
+      904.5,
+      319.08
+     ],
+     [
+      445.5,
+      905.75,
+      317.53
+     ],
+     [
+      443.5,
+      906,
+      316.4
+     ],
+     [
+      441.5,
+      906,
+      315.4
+     ],
+     [
+      439.5,
+      906,
+      314.42
+     ],
+     [
+      437.5,
+      906,
+      313.43
+     ],
+     [
+      435.5,
+      906,
+      312.55
+     ],
+     [
+      433.5,
+      906,
+      311.83
+     ],
+     [
+      431.5,
+      906,
+      311.06
+     ],
+     [
+      429.5,
+      906,
+      310.11
+     ],
+     [
+      427.5,
+      906,
+      309.03
+     ],
+     [
+      425.5,
+      906,
+      308.07
+     ],
+     [
+      423.5,
+      906,
+      307.28
+     ],
+     [
+      421.5,
+      906,
+      306.6
+     ],
+     [
+      419.5,
+      906,
+      306.03
+     ],
+     [
+      417.5,
+      906,
+      305.41
+     ],
+     [
+      415.5,
+      906,
+      304.74
+     ],
+     [
+      413.5,
+      906,
+      304.04
+     ],
+     [
+      411.5,
+      906,
+      303.27
+     ],
+     [
+      409.5,
+      906,
+      302.54
+     ],
+     [
+      407.5,
+      906,
+      301.9
+     ],
+     [
+      405.5,
+      905.25,
+      301.06
+     ],
+     [
+      403.5,
+      903.5,
+      300.01
+     ],
+     [
+      401.5,
+      901.5,
+      299.06
+     ],
+     [
+      399.5,
+      899.5,
+      298.2
+     ],
+     [
+      397.5,
+      898.25,
+      297.46
+     ],
+     [
+      395.5,
+      898,
+      296.96
+     ],
+     [
+      393.5,
+      897.25,
+      296.53
+     ],
+     [
+      391.5,
+      895.5,
+      295.88
+     ],
+     [
+      389.5,
+      893.5,
+      295.38
+     ],
+     [
+      387.5,
+      891.5,
+      294.77
+     ],
+     [
+      385.5,
+      889.5,
+      294.06
+     ],
+     [
+      383.5,
+      887.5,
+      293.48
+     ],
+     [
+      381.5,
+      885.5,
+      293.3
+     ],
+     [
+      379.5,
+      883.5,
+      293.11
+     ],
+     [
+      377.5,
+      881.5,
+      292.65
+     ],
+     [
+      375.5,
+      879.5,
+      292.28
+     ],
+     [
+      373.5,
+      877.5,
+      292.13
+     ],
+     [
+      371.5,
+      875.5,
+      292.11
+     ],
+     [
+      369.5,
+      873.5,
+      292.03
+     ],
+     [
+      367.5,
+      871.5,
+      292.32
+     ],
+     [
+      365.5,
+      869.5,
+      292.49
+     ],
+     [
+      363.5,
+      867.5,
+      292.49
+     ],
+     [
+      361.5,
+      865.5,
+      292.38
+     ],
+     [
+      359.5,
+      863.5,
+      292.61
+     ],
+     [
+      357.5,
+      861.5,
+      292.73
+     ],
+     [
+      355.5,
+      859.5,
+      292.64
+     ],
+     [
+      353.5,
+      857.5,
+      292.6
+     ],
+     [
+      351.5,
+      855.5,
+      292.53
+     ],
+     [
+      349.5,
+      854.25,
+      292.45
+     ],
+     [
+      347.5,
+      854,
+      292.3
+     ],
+     [
+      345.5,
+      853.25,
+      292.09
+     ],
+     [
+      343.5,
+      851.5,
+      291.7
+     ],
+     [
+      341.5,
+      849.5,
+      291.1
+     ],
+     [
+      339.5,
+      847.5,
+      290.56
+     ],
+     [
+      337.5,
+      845.5,
+      290.32
+     ],
+     [
+      335.5,
+      843.5,
+      289.96
+     ],
+     [
+      333.5,
+      841.5,
+      289.64
+     ],
+     [
+      331.5,
+      839.5,
+      289.28
+     ],
+     [
+      329.5,
+      837.5,
+      288.74
+     ],
+     [
+      327.5,
+      835.5,
+      288.2
+     ],
+     [
+      326.25,
+      834.25,
+      287.86
+     ],
+     [
+      326,
+      834,
+      287.8
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_pilgrim_orchard",
+   "x": 158,
+   "z": 954,
+   "yaw": 0,
+   "data": {
+    "from": "pilgrim_orchard",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      158,
+      954,
+      298.67
+     ],
+     [
+      157.25,
+      954,
+      298.87
+     ],
+     [
+      155.5,
+      954,
+      299.3
+     ],
+     [
+      153.5,
+      954,
+      299.65
+     ],
+     [
+      151.5,
+      954,
+      299.8
+     ],
+     [
+      149.5,
+      953.25,
+      299.78
+     ],
+     [
+      147.5,
+      951.5,
+      299.71
+     ],
+     [
+      145.5,
+      949.5,
+      299.82
+     ],
+     [
+      143.5,
+      947.5,
+      300.01
+     ],
+     [
+      141.5,
+      946.25,
+      300.11
+     ],
+     [
+      139.5,
+      946,
+      300.17
+     ],
+     [
+      137.5,
+      946,
+      300.28
+     ],
+     [
+      135.5,
+      946,
+      300.43
+     ],
+     [
+      133.5,
+      946,
+      300.6
+     ],
+     [
+      131.5,
+      946,
+      300.78
+     ],
+     [
+      129.5,
+      946,
+      301
+     ],
+     [
+      127.5,
+      946,
+      301.23
+     ],
+     [
+      125.5,
+      946,
+      301.3
+     ],
+     [
+      123.5,
+      946,
+      301.23
+     ],
+     [
+      121.5,
+      946,
+      301.11
+     ],
+     [
+      119.5,
+      946,
+      301
+     ],
+     [
+      117.5,
+      946,
+      300.92
+     ],
+     [
+      115.5,
+      946,
+      300.84
+     ],
+     [
+      113.5,
+      946,
+      300.7
+     ],
+     [
+      111.5,
+      946,
+      300.63
+     ],
+     [
+      109.5,
+      946,
+      300.7
+     ],
+     [
+      107.5,
+      946,
+      300.78
+     ],
+     [
+      105.5,
+      946,
+      300.88
+     ],
+     [
+      103.5,
+      946,
+      300.99
+     ],
+     [
+      101.5,
+      946,
+      301.11
+     ],
+     [
+      99.5,
+      946,
+      301.2
+     ],
+     [
+      97.5,
+      946,
+      301.17
+     ],
+     [
+      95.5,
+      946,
+      301.07
+     ],
+     [
+      93.5,
+      946,
+      301.03
+     ],
+     [
+      91.5,
+      946,
+      301.09
+     ],
+     [
+      89.5,
+      946,
+      301.22
+     ],
+     [
+      87.5,
+      946,
+      301.27
+     ],
+     [
+      85.5,
+      946,
+      301.2
+     ],
+     [
+      83.5,
+      946,
+      301.12
+     ],
+     [
+      81.5,
+      946,
+      301.07
+     ],
+     [
+      79.5,
+      946,
+      301.06
+     ],
+     [
+      77.5,
+      946,
+      301.09
+     ],
+     [
+      75.5,
+      946,
+      301.13
+     ],
+     [
+      73.5,
+      946,
+      301.11
+     ],
+     [
+      71.5,
+      946,
+      301.13
+     ],
+     [
+      69.5,
+      946,
+      301.32
+     ],
+     [
+      67.5,
+      946,
+      301.72
+     ],
+     [
+      66.25,
+      946,
+      301.79
+     ],
+     [
+      66,
+      946,
+      301.81
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_orrin_clearing",
+   "x": 234,
+   "z": 1286,
+   "yaw": 0,
+   "data": {
+    "from": "orrin_clearing",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      234,
+      1286,
+      326.88
+     ],
+     [
+      233.25,
+      1286,
+      327.07
+     ],
+     [
+      231.5,
+      1286,
+      327.49
+     ],
+     [
+      229.5,
+      1286,
+      327.93
+     ],
+     [
+      227.5,
+      1286,
+      328.24
+     ],
+     [
+      225.5,
+      1286,
+      328.43
+     ],
+     [
+      223.5,
+      1286,
+      328.65
+     ],
+     [
+      221.5,
+      1286,
+      329.01
+     ],
+     [
+      219.5,
+      1286,
+      329.35
+     ],
+     [
+      217.5,
+      1286,
+      329.62
+     ],
+     [
+      215.5,
+      1286,
+      329.89
+     ],
+     [
+      213.5,
+      1286,
+      330.25
+     ],
+     [
+      211.5,
+      1286,
+      330.75
+     ],
+     [
+      209.5,
+      1286,
+      331.33
+     ],
+     [
+      207.5,
+      1286,
+      331.82
+     ],
+     [
+      205.5,
+      1286,
+      332.32
+     ],
+     [
+      203.5,
+      1286,
+      332.83
+     ],
+     [
+      201.5,
+      1286,
+      333.32
+     ],
+     [
+      199.5,
+      1286,
+      333.78
+     ],
+     [
+      197.5,
+      1286,
+      334.2
+     ],
+     [
+      195.5,
+      1286,
+      334.57
+     ],
+     [
+      193.5,
+      1285.25,
+      334.9
+     ],
+     [
+      191.5,
+      1283.5,
+      335.15
+     ],
+     [
+      189.5,
+      1282.25,
+      335.43
+     ],
+     [
+      187.5,
+      1282,
+      335.81
+     ],
+     [
+      185.5,
+      1282,
+      336.12
+     ],
+     [
+      183.5,
+      1282,
+      336.31
+     ],
+     [
+      181.5,
+      1282,
+      336.44
+     ],
+     [
+      179.5,
+      1282,
+      336.62
+     ],
+     [
+      177.5,
+      1282,
+      336.86
+     ],
+     [
+      175.5,
+      1282,
+      337.11
+     ],
+     [
+      173.5,
+      1282,
+      337.47
+     ],
+     [
+      171.5,
+      1282,
+      337.94
+     ],
+     [
+      169.5,
+      1282,
+      338.41
+     ],
+     [
+      167.5,
+      1282,
+      338.71
+     ],
+     [
+      165.5,
+      1282,
+      338.97
+     ],
+     [
+      163.5,
+      1282,
+      339.29
+     ],
+     [
+      161.5,
+      1282,
+      339.6
+     ],
+     [
+      159.5,
+      1282,
+      339.81
+     ],
+     [
+      157.5,
+      1281.25,
+      340.07
+     ],
+     [
+      155.5,
+      1279.5,
+      340.38
+     ],
+     [
+      153.5,
+      1277.5,
+      340.62
+     ],
+     [
+      151.5,
+      1275.5,
+      340.85
+     ],
+     [
+      149.5,
+      1274.25,
+      340.97
+     ],
+     [
+      147.5,
+      1274,
+      341.13
+     ],
+     [
+      145.5,
+      1274,
+      341.39
+     ],
+     [
+      143.5,
+      1274,
+      341.62
+     ],
+     [
+      141.5,
+      1274,
+      341.62
+     ],
+     [
+      139.5,
+      1274,
+      341.57
+     ],
+     [
+      137.5,
+      1274,
+      341.65
+     ],
+     [
+      135.5,
+      1274,
+      341.77
+     ],
+     [
+      133.5,
+      1274,
+      341.83
+     ],
+     [
+      131.5,
+      1274,
+      341.9
+     ],
+     [
+      129.5,
+      1274,
+      341.98
+     ],
+     [
+      127.5,
+      1274,
+      341.92
+     ],
+     [
+      125.5,
+      1274,
+      341.8
+     ],
+     [
+      123.5,
+      1274,
+      341.73
+     ],
+     [
+      121.5,
+      1274,
+      341.63
+     ],
+     [
+      119.5,
+      1274,
+      341.5
+     ],
+     [
+      117.5,
+      1274,
+      341.39
+     ],
+     [
+      115.5,
+      1274,
+      341.24
+     ],
+     [
+      113.5,
+      1274,
+      340.9
+     ],
+     [
+      111.5,
+      1274,
+      340.52
+     ],
+     [
+      109.5,
+      1274,
+      340.21
+     ],
+     [
+      107.5,
+      1274,
+      339.89
+     ],
+     [
+      105.5,
+      1274,
+      339.49
+     ],
+     [
+      103.5,
+      1274,
+      339.19
+     ],
+     [
+      101.5,
+      1274,
+      339.01
+     ],
+     [
+      99.5,
+      1274,
+      338.83
+     ],
+     [
+      97.5,
+      1274,
+      338.73
+     ],
+     [
+      95.5,
+      1274,
+      338.65
+     ],
+     [
+      93.5,
+      1274,
+      338.52
+     ],
+     [
+      91.5,
+      1274,
+      338.36
+     ],
+     [
+      89.5,
+      1274,
+      338.26
+     ],
+     [
+      87.5,
+      1274,
+      338.18
+     ],
+     [
+      85.5,
+      1274.75,
+      338.29
+     ],
+     [
+      83.5,
+      1276.5,
+      338.62
+     ],
+     [
+      81.5,
+      1277.75,
+      338.8
+     ],
+     [
+      79.5,
+      1278,
+      338.81
+     ],
+     [
+      77.5,
+      1278,
+      338.76
+     ],
+     [
+      75.5,
+      1278,
+      338.76
+     ],
+     [
+      73.5,
+      1278,
+      338.85
+     ],
+     [
+      71.5,
+      1278,
+      338.9
+     ],
+     [
+      69.5,
+      1278,
+      338.78
+     ],
+     [
+      67.5,
+      1278,
+      338.55
+     ],
+     [
+      66.25,
+      1278,
+      338.52
+     ],
+     [
+      66,
+      1278,
+      338.51
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_rise_fold",
+   "x": 902,
+   "z": 1490,
+   "yaw": 0,
+   "data": {
+    "from": "rise_fold",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      902,
+      1490,
+      711.41
+     ],
+     [
+      901.25,
+      1490,
+      711.31
+     ],
+     [
+      899.5,
+      1490,
+      711.04
+     ],
+     [
+      897.5,
+      1490,
+      710.62
+     ],
+     [
+      895.5,
+      1490,
+      710.21
+     ],
+     [
+      893.5,
+      1489.25,
+      709.92
+     ],
+     [
+      891.5,
+      1487.5,
+      709.46
+     ],
+     [
+      889.5,
+      1486.25,
+      709.01
+     ],
+     [
+      887.5,
+      1486,
+      708.85
+     ],
+     [
+      885.5,
+      1485.25,
+      708.7
+     ],
+     [
+      883.5,
+      1483.5,
+      708.41
+     ],
+     [
+      881.5,
+      1481.5,
+      708.22
+     ],
+     [
+      879.5,
+      1479.5,
+      707.88
+     ],
+     [
+      877.5,
+      1478.25,
+      707.44
+     ],
+     [
+      875.5,
+      1478,
+      707.08
+     ],
+     [
+      873.5,
+      1477.25,
+      706.6
+     ],
+     [
+      871.5,
+      1475.5,
+      705.85
+     ],
+     [
+      869.5,
+      1473.5,
+      705.2
+     ],
+     [
+      867.5,
+      1471.5,
+      704.6
+     ],
+     [
+      865.5,
+      1469.5,
+      703.8
+     ],
+     [
+      863.5,
+      1467.5,
+      702.66
+     ],
+     [
+      861.5,
+      1466.25,
+      701.93
+     ],
+     [
+      859.5,
+      1466,
+      701.66
+     ],
+     [
+      857.5,
+      1465.25,
+      701.44
+     ],
+     [
+      855.5,
+      1463.5,
+      701.39
+     ],
+     [
+      853.5,
+      1461.5,
+      701.14
+     ],
+     [
+      851.5,
+      1459.5,
+      700.72
+     ],
+     [
+      849.5,
+      1457.5,
+      700.55
+     ],
+     [
+      847.5,
+      1455.5,
+      700.12
+     ],
+     [
+      845.5,
+      1453.5,
+      699.4
+     ],
+     [
+      843.5,
+      1451.5,
+      698.36
+     ],
+     [
+      841.5,
+      1450.25,
+      697.57
+     ],
+     [
+      839.5,
+      1450,
+      697.09
+     ],
+     [
+      837.5,
+      1450,
+      696.61
+     ],
+     [
+      835.5,
+      1450,
+      695.93
+     ],
+     [
+      833.5,
+      1450,
+      695.05
+     ],
+     [
+      831.5,
+      1450,
+      693.84
+     ],
+     [
+      829.5,
+      1450,
+      692.49
+     ],
+     [
+      827.5,
+      1450,
+      691.31
+     ],
+     [
+      825.5,
+      1449.25,
+      689.74
+     ],
+     [
+      823.5,
+      1447.5,
+      687.25
+     ],
+     [
+      822.25,
+      1445.5,
+      685.3
+     ],
+     [
+      822,
+      1443.5,
+      684.05
+     ],
+     [
+      822,
+      1441.5,
+      682.95
+     ],
+     [
+      822,
+      1439.5,
+      681.8
+     ],
+     [
+      821.25,
+      1437.5,
+      679.84
+     ],
+     [
+      819.5,
+      1435.5,
+      677.1
+     ],
+     [
+      817.5,
+      1433.5,
+      674.47
+     ],
+     [
+      815.5,
+      1431.5,
+      671.92
+     ],
+     [
+      814.25,
+      1429.5,
+      669.85
+     ],
+     [
+      814,
+      1427.5,
+      668.46
+     ],
+     [
+      814,
+      1425.5,
+      667.25
+     ],
+     [
+      814,
+      1423.5,
+      665.95
+     ],
+     [
+      814,
+      1421.5,
+      664.6
+     ],
+     [
+      814,
+      1419.5,
+      663.24
+     ],
+     [
+      814,
+      1417.5,
+      661.85
+     ],
+     [
+      814,
+      1415.5,
+      660.63
+     ],
+     [
+      813.25,
+      1413.5,
+      659.28
+     ],
+     [
+      811.5,
+      1411.5,
+      657.51
+     ],
+     [
+      810.25,
+      1409.5,
+      656
+     ],
+     [
+      810,
+      1407.5,
+      654.86
+     ],
+     [
+      809.25,
+      1405.5,
+      653.47
+     ],
+     [
+      807.5,
+      1403.5,
+      651.96
+     ],
+     [
+      806.25,
+      1401.5,
+      650.71
+     ],
+     [
+      806,
+      1399.5,
+      649.83
+     ],
+     [
+      806,
+      1397.5,
+      649.01
+     ],
+     [
+      806,
+      1395.5,
+      648.03
+     ],
+     [
+      806,
+      1393.5,
+      647.07
+     ],
+     [
+      806,
+      1391.5,
+      646.43
+     ],
+     [
+      806,
+      1389.5,
+      646.07
+     ],
+     [
+      806,
+      1387.5,
+      645.67
+     ],
+     [
+      806,
+      1385.5,
+      645.31
+     ],
+     [
+      806,
+      1383.5,
+      644.97
+     ],
+     [
+      805.25,
+      1381.5,
+      644.37
+     ],
+     [
+      803.5,
+      1379.5,
+      643.17
+     ],
+     [
+      801.5,
+      1377.5,
+      641.72
+     ],
+     [
+      799.5,
+      1375.5,
+      640.23
+     ],
+     [
+      798.25,
+      1373.5,
+      638.93
+     ],
+     [
+      798,
+      1371.5,
+      638.08
+     ],
+     [
+      798,
+      1369.5,
+      637.15
+     ],
+     [
+      798,
+      1367.5,
+      636.27
+     ],
+     [
+      797.25,
+      1365.5,
+      635.53
+     ],
+     [
+      795.5,
+      1363.5,
+      634.73
+     ],
+     [
+      794.25,
+      1361.5,
+      634.13
+     ],
+     [
+      794,
+      1359.5,
+      633.77
+     ],
+     [
+      793.25,
+      1357.5,
+      633.34
+     ],
+     [
+      791.5,
+      1355.5,
+      632.69
+     ],
+     [
+      789.5,
+      1353.5,
+      631.79
+     ],
+     [
+      787.5,
+      1351.5,
+      630.64
+     ],
+     [
+      785.5,
+      1349.5,
+      629.58
+     ],
+     [
+      783.5,
+      1347.5,
+      628.58
+     ],
+     [
+      781.5,
+      1345.5,
+      627.44
+     ],
+     [
+      779.5,
+      1343.5,
+      626.26
+     ],
+     [
+      778.25,
+      1341.5,
+      625.28
+     ],
+     [
+      778,
+      1339.5,
+      624.3
+     ],
+     [
+      778,
+      1337.5,
+      623.34
+     ],
+     [
+      778,
+      1335.5,
+      622.42
+     ],
+     [
+      778,
+      1333.5,
+      621.44
+     ],
+     [
+      778,
+      1331.5,
+      620.32
+     ],
+     [
+      778,
+      1329.5,
+      619.05
+     ],
+     [
+      778,
+      1327.5,
+      617.75
+     ],
+     [
+      778,
+      1325.5,
+      616.57
+     ],
+     [
+      778,
+      1323.5,
+      615.41
+     ],
+     [
+      778,
+      1321.5,
+      614.21
+     ],
+     [
+      778,
+      1319.5,
+      612.85
+     ],
+     [
+      778,
+      1317.5,
+      611.4
+     ],
+     [
+      778,
+      1315.5,
+      609.98
+     ],
+     [
+      778,
+      1313.5,
+      608.59
+     ],
+     [
+      778,
+      1311.5,
+      607.24
+     ],
+     [
+      778,
+      1309.5,
+      605.79
+     ],
+     [
+      778,
+      1307.5,
+      604.26
+     ],
+     [
+      778,
+      1305.5,
+      602.96
+     ],
+     [
+      778,
+      1303.5,
+      601.87
+     ],
+     [
+      778,
+      1301.5,
+      600.87
+     ],
+     [
+      778,
+      1299.5,
+      600.02
+     ],
+     [
+      778,
+      1297.5,
+      599.32
+     ],
+     [
+      778,
+      1295.5,
+      598.61
+     ],
+     [
+      777.25,
+      1293.5,
+      597.87
+     ],
+     [
+      775.5,
+      1291.5,
+      596.88
+     ],
+     [
+      774.25,
+      1289.5,
+      596.12
+     ],
+     [
+      774,
+      1287.5,
+      595.65
+     ],
+     [
+      774,
+      1285.5,
+      595.06
+     ],
+     [
+      774,
+      1283.5,
+      594.42
+     ],
+     [
+      774,
+      1281.5,
+      593.96
+     ],
+     [
+      774,
+      1279.5,
+      593.46
+     ],
+     [
+      774,
+      1277.5,
+      592.85
+     ],
+     [
+      774,
+      1275.5,
+      592.26
+     ],
+     [
+      774,
+      1273.5,
+      591.71
+     ],
+     [
+      774,
+      1271.5,
+      591.1
+     ],
+     [
+      774,
+      1269.5,
+      590.6
+     ],
+     [
+      774,
+      1267.5,
+      590.31
+     ],
+     [
+      774,
+      1265.5,
+      590.12
+     ],
+     [
+      774,
+      1263.5,
+      590
+     ],
+     [
+      774,
+      1261.5,
+      589.9
+     ],
+     [
+      774,
+      1259.5,
+      589.59
+     ],
+     [
+      774,
+      1257.5,
+      589.02
+     ],
+     [
+      774,
+      1255.5,
+      588.46
+     ],
+     [
+      774,
+      1253.5,
+      588.02
+     ],
+     [
+      774,
+      1251.5,
+      587.54
+     ],
+     [
+      774,
+      1249.5,
+      587.04
+     ],
+     [
+      774,
+      1247.5,
+      586.46
+     ],
+     [
+      774,
+      1245.5,
+      585.78
+     ],
+     [
+      774,
+      1243.5,
+      584.88
+     ],
+     [
+      774,
+      1241.5,
+      583.89
+     ],
+     [
+      774,
+      1239.5,
+      583.12
+     ],
+     [
+      774,
+      1237.5,
+      582.52
+     ],
+     [
+      774,
+      1235.5,
+      581.85
+     ],
+     [
+      774,
+      1233.5,
+      581.12
+     ],
+     [
+      774,
+      1231.5,
+      580.41
+     ],
+     [
+      773.25,
+      1229.5,
+      579.48
+     ],
+     [
+      771.5,
+      1227.5,
+      578.36
+     ],
+     [
+      770.25,
+      1225.5,
+      577.48
+     ],
+     [
+      770,
+      1223.5,
+      576.73
+     ],
+     [
+      770,
+      1221.5,
+      575.77
+     ],
+     [
+      770,
+      1219.5,
+      574.78
+     ],
+     [
+      770,
+      1217.5,
+      573.66
+     ],
+     [
+      770,
+      1215.5,
+      572.56
+     ],
+     [
+      770,
+      1213.5,
+      571.66
+     ],
+     [
+      770,
+      1211.5,
+      570.99
+     ],
+     [
+      770,
+      1209.5,
+      570.51
+     ],
+     [
+      770,
+      1207.5,
+      570.03
+     ],
+     [
+      770,
+      1205.5,
+      569.4
+     ],
+     [
+      770,
+      1203.5,
+      568.69
+     ],
+     [
+      770,
+      1201.5,
+      567.92
+     ],
+     [
+      770,
+      1199.5,
+      567.27
+     ],
+     [
+      769.25,
+      1197.5,
+      566.59
+     ],
+     [
+      767.5,
+      1195.5,
+      565.57
+     ],
+     [
+      765.5,
+      1193.5,
+      564.51
+     ],
+     [
+      763.5,
+      1191.5,
+      563.63
+     ],
+     [
+      762.25,
+      1189.5,
+      563.1
+     ],
+     [
+      762,
+      1187.5,
+      562.46
+     ],
+     [
+      762,
+      1185.5,
+      561.7
+     ],
+     [
+      762,
+      1183.5,
+      560.93
+     ],
+     [
+      762,
+      1181.5,
+      560.27
+     ],
+     [
+      762,
+      1179.5,
+      559.78
+     ],
+     [
+      761.25,
+      1177.5,
+      559.18
+     ],
+     [
+      759.5,
+      1175.5,
+      558.36
+     ],
+     [
+      758.25,
+      1173.5,
+      557.89
+     ],
+     [
+      758,
+      1171.5,
+      557.61
+     ],
+     [
+      758,
+      1169.5,
+      557.31
+     ],
+     [
+      758,
+      1167.5,
+      557.09
+     ],
+     [
+      758,
+      1165.5,
+      556.85
+     ],
+     [
+      758,
+      1163.5,
+      556.52
+     ],
+     [
+      758,
+      1161.5,
+      556.31
+     ],
+     [
+      758,
+      1159.5,
+      556.28
+     ],
+     [
+      758,
+      1157.5,
+      556.49
+     ],
+     [
+      758,
+      1155.5,
+      556.78
+     ],
+     [
+      758,
+      1153.5,
+      557.1
+     ],
+     [
+      758,
+      1151.5,
+      557.35
+     ],
+     [
+      758,
+      1149.5,
+      557.47
+     ],
+     [
+      758,
+      1147.5,
+      557.53
+     ],
+     [
+      758,
+      1145.5,
+      557.53
+     ],
+     [
+      758,
+      1143.5,
+      557.29
+     ],
+     [
+      758,
+      1141.5,
+      556.86
+     ],
+     [
+      758,
+      1139.5,
+      556.43
+     ],
+     [
+      758,
+      1137.5,
+      556.06
+     ],
+     [
+      758,
+      1135.5,
+      555.82
+     ],
+     [
+      758,
+      1133.5,
+      555.6
+     ],
+     [
+      758,
+      1131.5,
+      555.22
+     ],
+     [
+      758,
+      1129.5,
+      554.75
+     ],
+     [
+      758,
+      1127.5,
+      554.42
+     ],
+     [
+      758,
+      1125.5,
+      554.22
+     ],
+     [
+      758,
+      1123.5,
+      554.02
+     ],
+     [
+      758,
+      1121.5,
+      553.8
+     ],
+     [
+      758,
+      1119.5,
+      553.41
+     ],
+     [
+      758,
+      1117.5,
+      552.85
+     ],
+     [
+      758,
+      1115.5,
+      552.28
+     ],
+     [
+      758,
+      1113.5,
+      551.75
+     ],
+     [
+      758,
+      1111.5,
+      551.17
+     ],
+     [
+      758.75,
+      1109.5,
+      550.6
+     ],
+     [
+      760.5,
+      1107.5,
+      550.01
+     ],
+     [
+      761.75,
+      1105.5,
+      549.34
+     ],
+     [
+      762,
+      1103.5,
+      548.59
+     ],
+     [
+      762,
+      1101.5,
+      547.8
+     ],
+     [
+      762,
+      1099.5,
+      547.12
+     ],
+     [
+      762,
+      1097.5,
+      546.48
+     ],
+     [
+      762,
+      1095.5,
+      545.84
+     ],
+     [
+      762,
+      1093.5,
+      545.18
+     ],
+     [
+      762,
+      1091.5,
+      544.56
+     ],
+     [
+      762,
+      1089.5,
+      543.98
+     ],
+     [
+      762,
+      1087.5,
+      543.39
+     ],
+     [
+      762,
+      1085.5,
+      542.8
+     ],
+     [
+      762,
+      1083.5,
+      542.27
+     ],
+     [
+      762,
+      1081.5,
+      541.66
+     ],
+     [
+      762,
+      1079.5,
+      540.79
+     ],
+     [
+      762,
+      1077.5,
+      539.8
+     ],
+     [
+      762,
+      1075.5,
+      538.88
+     ],
+     [
+      762,
+      1073.5,
+      538.01
+     ],
+     [
+      762,
+      1071.5,
+      537.25
+     ],
+     [
+      762,
+      1069.5,
+      536.52
+     ],
+     [
+      762,
+      1067.5,
+      535.64
+     ],
+     [
+      762,
+      1065.5,
+      534.63
+     ],
+     [
+      762,
+      1063.5,
+      533.58
+     ],
+     [
+      762,
+      1061.5,
+      532.63
+     ],
+     [
+      762,
+      1059.5,
+      531.79
+     ],
+     [
+      762.75,
+      1057.5,
+      530.97
+     ],
+     [
+      764.5,
+      1055.5,
+      529.89
+     ],
+     [
+      765.75,
+      1053.5,
+      528.79
+     ],
+     [
+      766,
+      1051.5,
+      527.97
+     ],
+     [
+      766,
+      1049.5,
+      527.16
+     ],
+     [
+      766,
+      1047.5,
+      526.37
+     ],
+     [
+      766,
+      1045.5,
+      525.64
+     ],
+     [
+      766,
+      1043.5,
+      524.89
+     ],
+     [
+      766,
+      1041.5,
+      524.15
+     ],
+     [
+      766,
+      1039.5,
+      523.46
+     ],
+     [
+      766,
+      1037.5,
+      522.7
+     ],
+     [
+      766,
+      1035.5,
+      521.87
+     ],
+     [
+      766,
+      1033.5,
+      520.95
+     ],
+     [
+      766,
+      1031.5,
+      519.88
+     ],
+     [
+      766,
+      1029.5,
+      518.85
+     ],
+     [
+      766,
+      1027.5,
+      518.01
+     ],
+     [
+      766,
+      1025.5,
+      517.2
+     ],
+     [
+      766,
+      1023.5,
+      516.32
+     ],
+     [
+      766,
+      1021.5,
+      515.44
+     ],
+     [
+      766,
+      1019.5,
+      514.75
+     ],
+     [
+      766,
+      1017.5,
+      514.19
+     ],
+     [
+      766,
+      1015.5,
+      513.65
+     ],
+     [
+      766,
+      1013.5,
+      513.06
+     ],
+     [
+      766,
+      1011.5,
+      512.43
+     ],
+     [
+      766,
+      1009.5,
+      511.8
+     ],
+     [
+      766,
+      1007.5,
+      511.14
+     ],
+     [
+      766,
+      1005.5,
+      510.51
+     ],
+     [
+      766,
+      1003.5,
+      509.98
+     ],
+     [
+      766,
+      1001.5,
+      509.43
+     ],
+     [
+      766,
+      999.5,
+      508.77
+     ],
+     [
+      766,
+      997.5,
+      508.12
+     ],
+     [
+      766,
+      995.5,
+      507.45
+     ],
+     [
+      766,
+      993.5,
+      506.78
+     ],
+     [
+      766,
+      991.5,
+      506.2
+     ],
+     [
+      766.75,
+      989.5,
+      505.5
+     ],
+     [
+      768.5,
+      987.5,
+      504.59
+     ],
+     [
+      769.75,
+      985.5,
+      503.88
+     ],
+     [
+      770,
+      983.5,
+      503.29
+     ],
+     [
+      770,
+      981.5,
+      502.7
+     ],
+     [
+      770,
+      979.5,
+      502.1
+     ],
+     [
+      770,
+      977.5,
+      501.35
+     ],
+     [
+      770,
+      975.5,
+      500.5
+     ],
+     [
+      770,
+      973.5,
+      499.59
+     ],
+     [
+      770,
+      971.5,
+      498.69
+     ],
+     [
+      770,
+      969.5,
+      497.9
+     ],
+     [
+      770,
+      967.5,
+      497.14
+     ],
+     [
+      770,
+      965.5,
+      496.29
+     ],
+     [
+      770,
+      963.5,
+      495.53
+     ],
+     [
+      770,
+      961.5,
+      494.79
+     ],
+     [
+      770,
+      959.5,
+      493.92
+     ],
+     [
+      770,
+      957.5,
+      493.12
+     ],
+     [
+      770,
+      955.5,
+      492.54
+     ],
+     [
+      770,
+      953.5,
+      492.07
+     ],
+     [
+      770,
+      951.5,
+      491.59
+     ],
+     [
+      770,
+      949.5,
+      491.18
+     ],
+     [
+      770,
+      947.5,
+      490.81
+     ],
+     [
+      770,
+      945.5,
+      490.36
+     ],
+     [
+      770,
+      943.5,
+      489.84
+     ],
+     [
+      770,
+      941.5,
+      489.37
+     ],
+     [
+      770,
+      939.5,
+      489.03
+     ],
+     [
+      770,
+      937.5,
+      488.92
+     ],
+     [
+      770,
+      935.5,
+      488.91
+     ],
+     [
+      770,
+      933.5,
+      488.88
+     ],
+     [
+      770,
+      931.5,
+      488.81
+     ],
+     [
+      770,
+      929.5,
+      488.56
+     ],
+     [
+      770,
+      927.5,
+      488.14
+     ],
+     [
+      770,
+      925.5,
+      487.64
+     ],
+     [
+      770,
+      923.5,
+      487.07
+     ],
+     [
+      770,
+      921.5,
+      486.55
+     ],
+     [
+      770,
+      919.5,
+      486.06
+     ],
+     [
+      770,
+      917.5,
+      485.35
+     ],
+     [
+      770,
+      915.5,
+      484.5
+     ],
+     [
+      770,
+      913.5,
+      483.67
+     ],
+     [
+      770,
+      911.5,
+      482.97
+     ],
+     [
+      770,
+      909.5,
+      482.35
+     ],
+     [
+      770,
+      907.5,
+      481.66
+     ],
+     [
+      770,
+      905.5,
+      480.89
+     ],
+     [
+      770,
+      903.5,
+      480.11
+     ],
+     [
+      770,
+      901.5,
+      479.43
+     ],
+     [
+      770,
+      899.5,
+      478.82
+     ],
+     [
+      770,
+      897.5,
+      478.37
+     ],
+     [
+      770,
+      895.5,
+      477.99
+     ],
+     [
+      769.25,
+      893.5,
+      477.43
+     ],
+     [
+      767.5,
+      891.5,
+      476.85
+     ],
+     [
+      766.25,
+      889.5,
+      476.65
+     ],
+     [
+      766,
+      887.5,
+      476.4
+     ],
+     [
+      766,
+      885.5,
+      476.13
+     ],
+     [
+      766,
+      883.5,
+      475.74
+     ],
+     [
+      766,
+      881.5,
+      475.21
+     ],
+     [
+      766,
+      879.5,
+      474.68
+     ],
+     [
+      766,
+      877.5,
+      474.19
+     ],
+     [
+      766,
+      875.5,
+      473.66
+     ],
+     [
+      766,
+      873.5,
+      473.01
+     ],
+     [
+      766,
+      871.5,
+      472.37
+     ],
+     [
+      766,
+      869.5,
+      471.73
+     ],
+     [
+      766,
+      867.5,
+      470.85
+     ],
+     [
+      766,
+      865.5,
+      469.77
+     ],
+     [
+      766,
+      863.5,
+      468.68
+     ],
+     [
+      766,
+      861.5,
+      467.63
+     ],
+     [
+      766,
+      859.5,
+      466.72
+     ],
+     [
+      765.25,
+      857.5,
+      465.84
+     ],
+     [
+      763.5,
+      855.5,
+      464.99
+     ],
+     [
+      761.5,
+      853.5,
+      464.25
+     ],
+     [
+      759.5,
+      851.5,
+      463.29
+     ],
+     [
+      758.25,
+      849.5,
+      462.57
+     ],
+     [
+      758,
+      847.5,
+      461.96
+     ],
+     [
+      757.25,
+      845.5,
+      461.4
+     ],
+     [
+      755.5,
+      843.5,
+      460.84
+     ],
+     [
+      754.25,
+      841.5,
+      460.33
+     ],
+     [
+      754,
+      839.5,
+      459.77
+     ],
+     [
+      754,
+      837.5,
+      459.13
+     ],
+     [
+      754,
+      835.5,
+      458.48
+     ],
+     [
+      753.25,
+      833.5,
+      457.51
+     ],
+     [
+      751.5,
+      831.5,
+      456.04
+     ],
+     [
+      749.5,
+      829.5,
+      454.59
+     ],
+     [
+      747.5,
+      827.5,
+      453.3
+     ],
+     [
+      745.5,
+      825.5,
+      451.96
+     ],
+     [
+      743.5,
+      823.5,
+      450.01
+     ],
+     [
+      741.5,
+      821.5,
+      448.11
+     ],
+     [
+      739.5,
+      819.5,
+      446.49
+     ],
+     [
+      737.5,
+      817.5,
+      445.37
+     ],
+     [
+      735.5,
+      815.5,
+      444.5
+     ],
+     [
+      733.5,
+      814.25,
+      443.71
+     ],
+     [
+      731.5,
+      814,
+      442.99
+     ],
+     [
+      729.5,
+      813.25,
+      441.92
+     ],
+     [
+      727.5,
+      811.5,
+      440.63
+     ],
+     [
+      725.5,
+      809.5,
+      439.46
+     ],
+     [
+      723.5,
+      807.5,
+      438.08
+     ],
+     [
+      721.5,
+      805.5,
+      436.69
+     ],
+     [
+      719.5,
+      803.5,
+      435.44
+     ],
+     [
+      717.5,
+      801.5,
+      434.16
+     ],
+     [
+      715.5,
+      799.5,
+      433.11
+     ],
+     [
+      713.5,
+      797.5,
+      432.05
+     ],
+     [
+      711.5,
+      795.5,
+      430.83
+     ],
+     [
+      709.5,
+      794.25,
+      429.7
+     ],
+     [
+      707.5,
+      794,
+      428.65
+     ],
+     [
+      705.5,
+      794,
+      427.54
+     ],
+     [
+      703.5,
+      794,
+      426.53
+     ],
+     [
+      701.5,
+      794,
+      425.58
+     ],
+     [
+      699.5,
+      794,
+      424.55
+     ],
+     [
+      697.5,
+      794,
+      423.43
+     ],
+     [
+      695.5,
+      794,
+      422.14
+     ],
+     [
+      693.5,
+      794,
+      420.71
+     ],
+     [
+      691.5,
+      794,
+      419.41
+     ],
+     [
+      689.5,
+      794,
+      418.34
+     ],
+     [
+      687.5,
+      794,
+      417.4
+     ],
+     [
+      685.5,
+      794,
+      416.61
+     ],
+     [
+      683.5,
+      794,
+      415.9
+     ],
+     [
+      681.5,
+      794,
+      415.27
+     ],
+     [
+      679.5,
+      794,
+      414.65
+     ],
+     [
+      677.5,
+      794,
+      413.98
+     ],
+     [
+      675.5,
+      794,
+      413.32
+     ],
+     [
+      673.5,
+      794,
+      412.67
+     ],
+     [
+      671.5,
+      794,
+      412.11
+     ],
+     [
+      669.5,
+      793.25,
+      411.36
+     ],
+     [
+      667.5,
+      791.5,
+      410.15
+     ],
+     [
+      665.5,
+      790.25,
+      409.15
+     ],
+     [
+      663.5,
+      790,
+      408.58
+     ],
+     [
+      661.5,
+      790,
+      408.26
+     ],
+     [
+      659.5,
+      790,
+      407.99
+     ],
+     [
+      657.5,
+      790,
+      407.71
+     ],
+     [
+      655.5,
+      790,
+      407.45
+     ],
+     [
+      653.5,
+      790,
+      407.07
+     ],
+     [
+      651.5,
+      790,
+      406.75
+     ],
+     [
+      649.5,
+      790,
+      406.6
+     ],
+     [
+      647.5,
+      790,
+      406.42
+     ],
+     [
+      645.5,
+      789.25,
+      406.02
+     ],
+     [
+      643.5,
+      787.5,
+      405.39
+     ],
+     [
+      641.5,
+      785.5,
+      404.7
+     ],
+     [
+      639.5,
+      783.5,
+      404.17
+     ],
+     [
+      637.5,
+      781.5,
+      403.83
+     ],
+     [
+      635.5,
+      779.5,
+      403.61
+     ],
+     [
+      633.5,
+      779,
+      403.42
+     ],
+     [
+      631.5,
+      780.5,
+      403.86
+     ],
+     [
+      629.5,
+      781.75,
+      404.12
+     ],
+     [
+      627.5,
+      782,
+      404.17
+     ],
+     [
+      625.5,
+      782,
+      404.13
+     ],
+     [
+      623.5,
+      782,
+      404.08
+     ],
+     [
+      621.5,
+      782,
+      404.05
+     ],
+     [
+      619.5,
+      782,
+      404.02
+     ],
+     [
+      617.5,
+      782,
+      404
+     ],
+     [
+      615.5,
+      782,
+      403.97
+     ],
+     [
+      613.5,
+      782,
+      403.93
+     ],
+     [
+      611.5,
+      782,
+      403.86
+     ],
+     [
+      609.5,
+      782,
+      403.78
+     ],
+     [
+      607.5,
+      782,
+      403.69
+     ],
+     [
+      605.5,
+      782,
+      403.59
+     ],
+     [
+      603.5,
+      782,
+      403.44
+     ],
+     [
+      602.25,
+      782,
+      403.35
+     ],
+     [
+      602,
+      782,
+      403.34
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_fort_saint_orrins_rise_0",
+   "x": 890,
+   "z": 1498,
+   "yaw": 0,
+   "data": {
+    "from": "fort_saint_orrins_rise_0",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      890,
+      1498,
+      710.57
+     ],
+     [
+      890.75,
+      1497.25,
+      710.45
+     ],
+     [
+      892.5,
+      1495.5,
+      710.22
+     ],
+     [
+      893.75,
+      1493.5,
+      710.11
+     ],
+     [
+      894,
+      1491.5,
+      710.08
+     ],
+     [
+      894,
+      1490.25,
+      710.03
+     ],
+     [
+      894,
+      1490,
+      710.01
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_farm_saint_orrins_rise_0",
+   "x": 306,
+   "z": 750,
+   "yaw": 0,
+   "data": {
+    "from": "farm_saint_orrins_rise_0",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      306,
+      750,
+      274.61
+     ],
+     [
+      306.75,
+      750.75,
+      274.8
+     ],
+     [
+      308.5,
+      752.5,
+      275.26
+     ],
+     [
+      310.5,
+      753.75,
+      275.61
+     ],
+     [
+      312.5,
+      754,
+      275.68
+     ],
+     [
+      314.5,
+      754,
+      275.67
+     ],
+     [
+      316.5,
+      754,
+      275.6
+     ],
+     [
+      317.75,
+      754,
+      275.55
+     ],
+     [
+      318,
+      754,
+      275.54
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_farm_saint_orrins_rise_1",
+   "x": 866,
+   "z": 150,
+   "yaw": 0,
+   "data": {
+    "from": "farm_saint_orrins_rise_1",
+    "to": "town:Pilgrim's Halt",
+    "width": 2.2,
+    "pts": [
+     [
+      866,
+      150,
+      231.27
+     ],
+     [
+      865.25,
+      150,
+      231.44
+     ],
+     [
+      863.5,
+      150,
+      231.86
+     ],
+     [
+      861.5,
+      150,
+      232.36
+     ],
+     [
+      859.5,
+      150,
+      232.83
+     ],
+     [
+      857.5,
+      150.75,
+      233.55
+     ],
+     [
+      855.5,
+      152.5,
+      234.63
+     ],
+     [
+      853.5,
+      153.75,
+      235.66
+     ],
+     [
+      851.5,
+      154,
+      236.44
+     ],
+     [
+      849.5,
+      154,
+      237.21
+     ],
+     [
+      847.5,
+      154,
+      238.02
+     ],
+     [
+      845.5,
+      154,
+      238.8
+     ],
+     [
+      843.5,
+      154,
+      239.57
+     ],
+     [
+      841.5,
+      154.75,
+      240.34
+     ],
+     [
+      839.5,
+      156.5,
+      241.22
+     ],
+     [
+      837.5,
+      158.5,
+      242.28
+     ],
+     [
+      835.5,
+      160.5,
+      243.32
+     ],
+     [
+      833.5,
+      161.75,
+      244.28
+     ],
+     [
+      831.5,
+      162,
+      245.21
+     ],
+     [
+      829.5,
+      162.75,
+      246.18
+     ],
+     [
+      827.5,
+      164.5,
+      247.16
+     ],
+     [
+      825.5,
+      166.5,
+      248.26
+     ],
+     [
+      823.5,
+      168.5,
+      249.41
+     ],
+     [
+      821.5,
+      169.75,
+      250.33
+     ],
+     [
+      819.5,
+      170,
+      251.13
+     ],
+     [
+      817.5,
+      170,
+      251.94
+     ],
+     [
+      815.5,
+      170,
+      252.61
+     ],
+     [
+      813.5,
+      170,
+      253.16
+     ],
+     [
+      811.5,
+      170,
+      253.66
+     ],
+     [
+      809.5,
+      170,
+      254.16
+     ],
+     [
+      807.5,
+      170,
+      254.7
+     ],
+     [
+      805.5,
+      170.75,
+      255.34
+     ],
+     [
+      803.5,
+      172.5,
+      256.18
+     ],
+     [
+      801.5,
+      174.5,
+      257.15
+     ],
+     [
+      799.5,
+      176.5,
+      258.16
+     ],
+     [
+      797.5,
+      178.5,
+      259.14
+     ],
+     [
+      795.5,
+      180.5,
+      259.96
+     ],
+     [
+      793.5,
+      182.5,
+      260.77
+     ],
+     [
+      791.5,
+      184.5,
+      261.6
+     ],
+     [
+      789.5,
+      185.75,
+      262.19
+     ],
+     [
+      787.5,
+      186,
+      262.61
+     ],
+     [
+      785.5,
+      186.75,
+      263.25
+     ],
+     [
+      783.5,
+      188.5,
+      264.12
+     ],
+     [
+      781.5,
+      190.5,
+      264.8
+     ],
+     [
+      779.5,
+      192.5,
+      265.47
+     ],
+     [
+      777.5,
+      193.75,
+      266.05
+     ],
+     [
+      775.5,
+      194,
+      266.29
+     ],
+     [
+      773.5,
+      194.75,
+      266.64
+     ],
+     [
+      771.5,
+      196.5,
+      267.17
+     ],
+     [
+      769.5,
+      198.5,
+      267.75
+     ],
+     [
+      767.5,
+      200.5,
+      268.26
+     ],
+     [
+      765.5,
+      201.75,
+      268.6
+     ],
+     [
+      763.5,
+      202,
+      268.8
+     ],
+     [
+      761.5,
+      202.75,
+      269.18
+     ],
+     [
+      759.5,
+      204.5,
+      269.76
+     ],
+     [
+      757.5,
+      206.5,
+      270.52
+     ],
+     [
+      755.5,
+      208.5,
+      271.46
+     ],
+     [
+      753.5,
+      210.5,
+      272.2
+     ],
+     [
+      751.5,
+      212.5,
+      272.86
+     ],
+     [
+      749.5,
+      213.75,
+      273.35
+     ],
+     [
+      747.5,
+      214,
+      273.65
+     ],
+     [
+      745.5,
+      214,
+      274.12
+     ],
+     [
+      743.5,
+      214,
+      274.67
+     ],
+     [
+      741.5,
+      214.75,
+      275.23
+     ],
+     [
+      739.5,
+      216.5,
+      275.92
+     ],
+     [
+      737.5,
+      217.75,
+      276.49
+     ],
+     [
+      735.5,
+      218,
+      276.92
+     ],
+     [
+      733.5,
+      218.75,
+      277.64
+     ],
+     [
+      731.5,
+      220.5,
+      278.61
+     ],
+     [
+      729.5,
+      221.75,
+      279.42
+     ],
+     [
+      727.5,
+      222,
+      280.09
+     ],
+     [
+      725.5,
+      222,
+      280.76
+     ],
+     [
+      723.5,
+      222,
+      281.35
+     ],
+     [
+      721.5,
+      222,
+      281.88
+     ],
+     [
+      719.5,
+      222,
+      282.43
+     ],
+     [
+      717.5,
+      222,
+      282.94
+     ],
+     [
+      715.5,
+      222,
+      283.29
+     ],
+     [
+      714.25,
+      222,
+      283.47
+     ],
+     [
+      714,
+      222,
+      283.51
      ]
     ]
    }
   },
   {
    "kind": "bridge",
-   "id": "bridge_317_83_0",
-   "x": 318.57,
-   "z": 576,
-   "yaw": 1.5708,
+   "id": "bridge_100_83_0",
+   "x": 348.57,
+   "z": 427.76,
+   "yaw": -0.5831,
    "data": {
-    "span": 12,
-    "deck": 255.087,
-    "road": "road_317"
+    "span": 36.81,
+    "deck": 247.356,
+    "width": 6.23,
+    "a": [
+     358.7,
+     412.4,
+     247.356
+    ],
+    "b": [
+     338.43,
+     443.13,
+     247.356
+    ],
+    "road": "road_100",
+    "river": 83,
+    "cls": 1,
+    "surface": 244.356,
+    "ramp": 30
+   }
+  },
+  {
+   "kind": "bridge",
+   "id": "bridge_orrinsford_street_0_83_1",
+   "x": 336.24,
+   "z": 588.94,
+   "yaw": -0.5928,
+   "data": {
+    "span": 14,
+    "deck": 254.716,
+    "width": 6,
+    "a": [
+     340.15,
+     583.14,
+     254.716
+    ],
+    "b": [
+     332.33,
+     594.75,
+     254.716
+    ],
+    "road": "orrinsford_street_0",
+    "street": true,
+    "river": 83,
+    "cls": 1,
+    "surface": 253.716,
+    "ramp": 14
+   }
+  },
+  {
+   "kind": "bridge",
+   "id": "bridge_orrinsford_street_77_83_2",
+   "x": 311.44,
+   "z": 569.28,
+   "yaw": 1.7356,
+   "data": {
+    "span": 14.99,
+    "deck": 254.716,
+    "width": 6,
+    "a": [
+     304.05,
+     570.51,
+     254.716
+    ],
+    "b": [
+     318.84,
+     568.05,
+     254.716
+    ],
+    "road": "orrinsford_street_77",
+    "street": true,
+    "river": 83,
+    "cls": 1,
+    "surface": 253.068,
+    "ramp": 14
+   }
+  },
+  {
+   "kind": "town_wall",
+   "id": "orrinsford_wall",
+   "x": 336,
+   "z": 576,
+   "yaw": 0,
+   "data": {
+    "town": "orrinsford",
+    "name": "Orrinsford",
+    "settlement": "town",
+    "style": "curtain",
+    "material": "stone",
+    "tier": "wall",
+    "h": 4.4,
+    "thick": 1.2,
+    "tint": "#a29c90",
+    "radius": 62.32,
+    "solid": true,
+    "runs": [
+     [
+      [
+       376.4,
+       623.46,
+       254.97
+      ],
+      [
+       361.98,
+       632.65,
+       256.96
+      ],
+      [
+       345.6,
+       637.58,
+       257.26
+      ],
+      [
+       328.5,
+       637.87,
+       257.58
+      ],
+      [
+       311.97,
+       633.5,
+       258
+      ],
+      [
+       297.24,
+       624.8,
+       258.02
+      ],
+      [
+       285.43,
+       612.43,
+       257.95
+      ],
+      [
+       277.43,
+       597.31,
+       257.99
+      ],
+      [
+       273.85,
+       580.59,
+       258.01
+      ]
+     ],
+     [
+      [
+       273.92,
+       570.52,
+       258.31
+      ],
+      [
+       279.11,
+       550.55,
+       258.15
+      ],
+      [
+       290.54,
+       533.37,
+       253.04
+      ]
+     ],
+     [
+      [
+       297.93,
+       526.66,
+       253.24
+      ],
+      [
+       315.13,
+       517.27,
+       256.78
+      ]
+     ],
+     [
+      [
+       325.14,
+       514.63,
+       256.64
+      ],
+      [
+       342.16,
+       513.98,
+       256.38
+      ],
+      [
+       358.72,
+       517.96,
+       256.65
+      ],
+      [
+       373.58,
+       526.28,
+       256.8
+      ],
+      [
+       385.64,
+       538.31,
+       257.23
+      ],
+      [
+       393.99,
+       553.16,
+       257.68
+      ],
+      [
+       398.01,
+       569.71,
+       257.43
+      ],
+      [
+       397.39,
+       586.73,
+       256.93
+      ],
+      [
+       392.2,
+       602.95,
+       256.68
+      ],
+      [
+       382.8,
+       617.16,
+       254.84
+      ]
+     ]
+    ],
+    "towers": [
+     {
+      "x": 274.13,
+      "z": 583.48,
+      "h": 257.97,
+      "yaw": -1.4505
+     },
+     {
+      "x": 334.2,
+      "z": 638.3,
+      "h": 257.36,
+      "yaw": -0.0288
+     },
+     {
+      "x": 292.93,
+      "z": 621.05,
+      "h": 257.99,
+      "yaw": -0.7629
+     },
+     {
+      "x": 274.24,
+      "z": 567.64,
+      "h": 258.34,
+      "yaw": -1.7054
+     },
+     {
+      "x": 312.42,
+      "z": 518.31,
+      "h": 256.81,
+      "yaw": -2.7536
+     },
+     {
+      "x": 328,
+      "z": 514.19,
+      "h": 256.58,
+      "yaw": -3.0129
+     },
+     {
+      "x": 362.64,
+      "z": 519.66,
+      "h": 256.74,
+      "yaw": 2.7
+     },
+     {
+      "x": 390.32,
+      "z": 545.45,
+      "h": 257.49,
+      "yaw": 2.0831
+     },
+     {
+      "x": 397.98,
+      "z": 582.5,
+      "h": 257.01,
+      "yaw": 1.4663
+     }
+    ],
+    "gates": [
+     {
+      "id": "orrinsford_gate_0",
+      "x": 273.68,
+      "z": 575.55,
+      "h": 258.2,
+      "yaw": -1.4061,
+      "out": [
+       -0.9865,
+       0.164
+      ],
+      "wallYaw": -1.5779,
+      "open": 6.88,
+      "width": 6.2,
+      "pass": 6.2,
+      "slant": 0.172,
+      "kind": "gatehouse",
+      "way": "orrinsford_street_77",
+      "wayKind": "road",
+      "road": "road_317",
+      "ways": [
+       "orrinsford_street_77",
+       "spur_orrinsford"
+      ],
+      "led": [
+       "spur_orrinsford"
+      ],
+      "ends": [
+       [
+        273.85,
+        580.59
+       ],
+       [
+        273.92,
+        570.52
+       ]
+      ],
+      "main": {
+       "street": "orrinsford_street_77",
+       "width": 5,
+       "pts": [
+        [
+         273.68,
+         575.55
+        ],
+        [
+         326.5,
+         566.77
+        ]
+       ],
+       "metres": 53.55
+      },
+      "approaches": [
+       {
+        "way": "road_317",
+        "width": 6,
+        "pts": [
+         [
+          244.44,
+          576.44
+         ],
+         [
+          246.22,
+          576.22
+         ],
+         [
+          248,
+          576
+         ],
+         [
+          250,
+          576
+         ],
+         [
+          252,
+          576
+         ],
+         [
+          254,
+          576
+         ],
+         [
+          256,
+          576
+         ],
+         [
+          258,
+          576
+         ],
+         [
+          260,
+          576
+         ],
+         [
+          262,
+          576
+         ],
+         [
+          264,
+          576
+         ],
+         [
+          266,
+          576
+         ],
+         [
+          268,
+          576
+         ],
+         [
+          270,
+          576
+         ]
+        ]
+       },
+       {
+        "way": "spur_orrinsford",
+        "width": 3.5,
+        "led": true,
+        "pts": [
+         [
+          245,
+          577.75
+         ],
+         [
+          246.86,
+          577.71
+         ],
+         [
+          248.71,
+          577.68
+         ],
+         [
+          250.57,
+          577.64
+         ],
+         [
+          252.43,
+          577.61
+         ],
+         [
+          254.29,
+          577.57
+         ],
+         [
+          256.14,
+          577.54
+         ],
+         [
+          258,
+          577.5
+         ],
+         [
+          259.86,
+          577.46
+         ],
+         [
+          261.71,
+          577.43
+         ],
+         [
+          263.57,
+          577.39
+         ],
+         [
+          263.57,
+          577.39
+         ],
+         [
+          264.97,
+          577.11
+         ],
+         [
+          266.36,
+          576.82
+         ],
+         [
+          267.76,
+          576.54
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "orrinsford_gate_1",
+      "x": 320.08,
+      "z": 515.74,
+      "h": 256.74,
+      "yaw": -3.1126,
+      "out": [
+       -0.029,
+       -0.9996
+      ],
+      "wallYaw": -2.8833,
+      "open": 7.16,
+      "width": 6.2,
+      "pass": 6.2,
+      "slant": 0.229,
+      "kind": "gatehouse",
+      "way": "orrinsford_street_76",
+      "wayKind": "road",
+      "road": "road_100",
+      "ways": [
+       "orrinsford_street_76"
+      ],
+      "led": [],
+      "ends": [
+       [
+        315.13,
+        517.27
+       ],
+       [
+        325.14,
+        514.63
+       ]
+      ],
+      "main": {
+       "street": "orrinsford_street_76",
+       "width": 5,
+       "pts": [
+        [
+         320.08,
+         515.74
+        ],
+        [
+         321,
+         547.5
+        ],
+        [
+         315,
+         555
+        ],
+        [
+         316.5,
+         559.5
+        ],
+        [
+         322.5,
+         565.5
+        ],
+        [
+         326.45,
+         565.58
+        ]
+       ],
+       "metres": 58.56
+      },
+      "approaches": [
+       {
+        "way": "road_100",
+        "width": 3.5,
+        "pts": [
+         [
+          322.44,
+          486.22
+         ],
+         [
+          322,
+          488
+         ],
+         [
+          321.78,
+          489.78
+         ],
+         [
+          321.56,
+          491.56
+         ],
+         [
+          321.33,
+          493.33
+         ],
+         [
+          321.11,
+          495.11
+         ],
+         [
+          320.89,
+          496.89
+         ],
+         [
+          320.67,
+          498.67
+         ],
+         [
+          320.44,
+          500.44
+         ],
+         [
+          320.22,
+          502.22
+         ],
+         [
+          320,
+          504
+         ],
+         [
+          320,
+          506
+         ],
+         [
+          320,
+          508
+         ],
+         [
+          320,
+          510
+         ],
+         [
+          320,
+          512
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "openings": [
+     {
+      "kind": "water",
+      "a0": 0.7213,
+      "a1": 0.8655,
+      "metres": 8.99,
+      "ends": [
+       [
+        382.8,
+        617.16
+       ],
+       [
+        376.4,
+        623.46
+       ]
+      ],
+      "grate": true,
+      "h": 254.97
+     },
+     {
+      "kind": "water",
+      "a0": 3.8949,
+      "a1": 4.0552,
+      "metres": 9.99,
+      "ends": [
+       [
+        290.54,
+        533.37
+       ],
+       [
+        297.93,
+        526.66
+       ]
+      ],
+      "grate": true,
+      "h": 253.24
+     }
+    ]
+   }
+  },
+  {
+   "kind": "town_wall",
+   "id": "pilgrim_s_halt_wall",
+   "x": 672,
+   "z": 240,
+   "yaw": 0,
+   "data": {
+    "town": "pilgrim_s_halt",
+    "name": "Pilgrim's Halt",
+    "settlement": "hamlet",
+    "style": "fence",
+    "material": "rail",
+    "tier": "low",
+    "h": 1.25,
+    "thick": 0.3,
+    "tint": "#8a6c50",
+    "radius": 42.95,
+    "solid": true,
+    "runs": [
+     [
+      [
+       640.39,
+       210.93,
+       283.55
+      ],
+      [
+       648.02,
+       204.37,
+       284.65
+      ],
+      [
+       656.98,
+       199.76,
+       285.29
+      ],
+      [
+       666.76,
+       197.37,
+       285.52
+      ],
+      [
+       676.82,
+       197.32,
+       284.93
+      ],
+      [
+       686.63,
+       199.62,
+       284.53
+      ],
+      [
+       695.62,
+       204.13,
+       284.53
+      ],
+      [
+       703.33,
+       210.62,
+       284.15
+      ],
+      [
+       709.31,
+       218.72,
+       283.95
+      ],
+      [
+       713.24,
+       227.98,
+       283.93
+      ],
+      [
+       714.9,
+       237.91,
+       284.31
+      ],
+      [
+       714.21,
+       247.96,
+       284.91
+      ],
+      [
+       711.19,
+       257.56,
+       284.68
+      ],
+      [
+       706.03,
+       266.21,
+       284.79
+      ],
+      [
+       698.99,
+       273.41,
+       285.01
+      ],
+      [
+       690.47,
+       278.77,
+       285.43
+      ],
+      [
+       680.94,
+       282.01,
+       285.73
+      ],
+      [
+       670.92,
+       282.94,
+       286.06
+      ],
+      [
+       660.95,
+       281.5,
+       286.55
+      ],
+      [
+       651.59,
+       277.79,
+       286.17
+      ],
+      [
+       643.36,
+       272,
+       285.77
+      ],
+      [
+       636.69,
+       264.46,
+       285.36
+      ],
+      [
+       631.97,
+       255.56,
+       285.02
+      ],
+      [
+       629.45,
+       245.82,
+       284.46
+      ],
+      [
+       629.26,
+       235.75,
+       283.62
+      ],
+      [
+       631.42,
+       225.92,
+       283.52
+      ],
+      [
+       635.82,
+       216.86,
+       283.58
+      ]
+     ]
+    ],
+    "towers": [],
+    "gates": [
+     {
+      "id": "pilgrim_s_halt_gate_0",
+      "x": 637.97,
+      "z": 213.79,
+      "h": 283.21,
+      "yaw": -2.3475,
+      "out": [
+       -0.7133,
+       -0.7009
+      ],
+      "wallYaw": -2.227,
+      "open": 5.2,
+      "width": 4.8,
+      "pass": 4.8,
+      "slant": 0.12,
+      "kind": "posts",
+      "way": "pilgrim_s_halt_street_30",
+      "wayKind": "road",
+      "road": "spur_pilgrim_s_halt",
+      "ways": [
+       "pilgrim_s_halt_street_30"
+      ],
+      "led": [],
+      "ends": [
+       [
+        635.82,
+        216.86
+       ],
+       [
+        640.39,
+        210.93
+       ]
+      ],
+      "main": {
+       "street": "pilgrim_s_halt_street_30",
+       "width": 3.6,
+       "pts": [
+        [
+         637.97,
+         213.79
+        ],
+        [
+         668.41,
+         243.7
+        ]
+       ],
+       "metres": 42.67
+      },
+      "approaches": [
+       {
+        "way": "spur_pilgrim_s_halt",
+        "width": 3.5,
+        "pts": [
+         [
+          634,
+          210
+         ],
+         [
+          632.59,
+          208.89
+         ],
+         [
+          631.19,
+          207.78
+         ],
+         [
+          629.78,
+          206.67
+         ],
+         [
+          628.37,
+          205.56
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "openings": []
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "saint_orrins_yard",
+   "x": 464,
+   "z": 616,
+   "yaw": -0.709,
+   "data": {
+    "piece": "graveyard",
+    "name": "Saint Orrin's Yard",
+    "town": "Orrinsford",
+    "r": 25.81,
+    "poly": [
+     [
+      489.06,
+      609.83
+     ],
+     [
+      461.71,
+      641.71
+     ],
+     [
+      438.94,
+      622.17
+     ],
+     [
+      466.29,
+      590.29
+     ]
+    ],
+    "w": 42,
+    "d": 30,
+    "angle": 2.2798,
+    "gate": {
+     "x": 452.62,
+     "z": 606.23,
+     "width": 3.2,
+     "yaw": 0.8618
+    },
+    "graves": [
+     [
+      486.04,
+      610.1,
+      -2.295,
+      "headstone"
+     ],
+     [
+      483.94,
+      608.44,
+      -2.303,
+      "headstone"
+     ],
+     [
+      479.94,
+      604.83,
+      -2.268,
+      "cross"
+     ],
+     [
+      477.86,
+      603.03,
+      -2.287,
+      "slab"
+     ],
+     [
+      475.62,
+      601.33,
+      -2.253,
+      "tomb"
+     ],
+     [
+      473.77,
+      599.51,
+      -2.24,
+      "headstone"
+     ],
+     [
+      471.59,
+      597.64,
+      -2.255,
+      "cross"
+     ],
+     [
+      467.45,
+      594.16,
+      -2.312,
+      "mound"
+     ],
+     [
+      484.82,
+      611.32,
+      -2.3,
+      "cross"
+     ],
+     [
+      482.87,
+      609.54,
+      -2.271,
+      "slab"
+     ],
+     [
+      480.87,
+      607.71,
+      -2.263,
+      "mound"
+     ],
+     [
+      478.82,
+      606.13,
+      -2.24,
+      "headstone"
+     ],
+     [
+      476.73,
+      604.14,
+      -2.298,
+      "headstone"
+     ],
+     [
+      474.66,
+      602.36,
+      -2.301,
+      "headstone"
+     ],
+     [
+      472.71,
+      600.72,
+      -2.317,
+      "mound"
+     ],
+     [
+      470.59,
+      599.04,
+      -2.262,
+      "cross"
+     ],
+     [
+      468.6,
+      597.12,
+      -2.309,
+      "headstone"
+     ],
+     [
+      466.42,
+      595.47,
+      -2.297,
+      "mound"
+     ],
+     [
+      483.86,
+      612.34,
+      -2.268,
+      "headstone"
+     ],
+     [
+      481.82,
+      610.64,
+      -2.317,
+      "headstone"
+     ],
+     [
+      479.73,
+      608.92,
+      -2.27,
+      "cross"
+     ],
+     [
+      477.79,
+      607.12,
+      -2.292,
+      "mound"
+     ],
+     [
+      475.71,
+      605.39,
+      -2.293,
+      "cross"
+     ],
+     [
+      473.56,
+      603.65,
+      -2.313,
+      "mound"
+     ],
+     [
+      471.51,
+      601.97,
+      -2.267,
+      "headstone"
+     ],
+     [
+      467.44,
+      598.3,
+      -2.246,
+      "headstone"
+     ],
+     [
+      465.57,
+      596.67,
+      -2.252,
+      "mound"
+     ],
+     [
+      482.86,
+      613.58,
+      -2.256,
+      "mound"
+     ],
+     [
+      480.9,
+      611.98,
+      -2.268,
+      "mound"
+     ],
+     [
+      478.8,
+      610.16,
+      -2.254,
+      "cross"
+     ],
+     [
+      474.55,
+      606.69,
+      -2.305,
+      "headstone"
+     ],
+     [
+      472.5,
+      604.95,
+      -2.305,
+      "headstone"
+     ],
+     [
+      470.6,
+      603.27,
+      -2.27,
+      "headstone"
+     ],
+     [
+      464.45,
+      597.82,
+      -2.27,
+      "cross"
+     ],
+     [
+      481.74,
+      614.98,
+      -2.262,
+      "tomb"
+     ],
+     [
+      479.73,
+      612.99,
+      -2.242,
+      "headstone"
+     ],
+     [
+      477.61,
+      611.47,
+      -2.289,
+      "cross"
+     ],
+     [
+      475.67,
+      609.52,
+      -2.29,
+      "mound"
+     ],
+     [
+      473.58,
+      607.76,
+      -2.309,
+      "cross"
+     ],
+     [
+      471.56,
+      606.05,
+      -2.315,
+      "headstone"
+     ],
+     [
+      469.45,
+      604.35,
+      -2.247,
+      "headstone"
+     ],
+     [
+      467.43,
+      602.47,
+      -2.292,
+      "slab"
+     ],
+     [
+      465.25,
+      600.85,
+      -2.305,
+      "headstone"
+     ],
+     [
+      478.67,
+      614.28,
+      -2.3,
+      "mound"
+     ],
+     [
+      476.7,
+      612.71,
+      -2.31,
+      "cross"
+     ],
+     [
+      474.66,
+      610.95,
+      -2.269,
+      "headstone"
+     ],
+     [
+      472.51,
+      609.14,
+      -2.31,
+      "headstone"
+     ],
+     [
+      470.59,
+      607.32,
+      -2.252,
+      "slab"
+     ],
+     [
+      468.48,
+      605.74,
+      -2.28,
+      "slab"
+     ],
+     [
+      466.34,
+      603.91,
+      -2.271,
+      "cross"
+     ],
+     [
+      462.3,
+      600.38,
+      -2.248,
+      "cross"
+     ],
+     [
+      479.62,
+      617.36,
+      -2.275,
+      "cross"
+     ],
+     [
+      477.78,
+      615.57,
+      -2.314,
+      "cross"
+     ],
+     [
+      475.56,
+      613.76,
+      -2.252,
+      "tomb"
+     ],
+     [
+      471.43,
+      610.42,
+      -2.311,
+      "slab"
+     ],
+     [
+      465.36,
+      605.02,
+      -2.245,
+      "cross"
+     ],
+     [
+      463.22,
+      603.21,
+      -2.255,
+      "mound"
+     ],
+     [
+      461.36,
+      601.6,
+      -2.279,
+      "slab"
+     ],
+     [
+      478.58,
+      618.5,
+      -2.268,
+      "headstone"
+     ],
+     [
+      476.59,
+      616.84,
+      -2.285,
+      "cross"
+     ],
+     [
+      474.52,
+      614.92,
+      -2.264,
+      "headstone"
+     ],
+     [
+      472.53,
+      613.44,
+      -2.266,
+      "headstone"
+     ],
+     [
+      470.56,
+      611.56,
+      -2.312,
+      "cross"
+     ],
+     [
+      468.46,
+      609.69,
+      -2.302,
+      "slab"
+     ],
+     [
+      466.32,
+      608.14,
+      -2.252,
+      "slab"
+     ],
+     [
+      464.26,
+      606.29,
+      -2.31,
+      "mound"
+     ],
+     [
+      462.2,
+      604.54,
+      -2.253,
+      "mound"
+     ],
+     [
+      473.46,
+      616.37,
+      -2.254,
+      "cross"
+     ],
+     [
+      471.39,
+      614.44,
+      -2.25,
+      "slab"
+     ],
+     [
+      469.41,
+      612.88,
+      -2.249,
+      "headstone"
+     ],
+     [
+      467.46,
+      610.94,
+      -2.28,
+      "mound"
+     ],
+     [
+      465.28,
+      609.34,
+      -2.29,
+      "headstone"
+     ],
+     [
+      461.17,
+      605.6,
+      -2.302,
+      "mound"
+     ],
+     [
+      459.22,
+      604,
+      -2.299,
+      "headstone"
+     ],
+     [
+      464.37,
+      610.47,
+      -2.285,
+      "cross"
+     ],
+     [
+      462.16,
+      608.65,
+      -2.268,
+      "cross"
+     ],
+     [
+      460.1,
+      606.95,
+      -2.315,
+      "headstone"
+     ],
+     [
+      467.34,
+      615.2,
+      -2.303,
+      "mound"
+     ],
+     [
+      465.42,
+      613.42,
+      -2.299,
+      "tomb"
+     ],
+     [
+      463.2,
+      611.73,
+      -2.257,
+      "cross"
+     ],
+     [
+      461.17,
+      609.76,
+      -2.284,
+      "mound"
+     ],
+     [
+      465.12,
+      621.77,
+      -2.277,
+      "mound"
+     ],
+     [
+      463.19,
+      620.16,
+      -2.288,
+      "mound"
+     ],
+     [
+      461.15,
+      618.28,
+      -2.302,
+      "tomb"
+     ],
+     [
+      459.07,
+      616.49,
+      -2.256,
+      "mound"
+     ],
+     [
+      457.09,
+      614.87,
+      -2.293,
+      "cross"
+     ],
+     [
+      454.95,
+      612.91,
+      -2.314,
+      "headstone"
+     ],
+     [
+      452.83,
+      611.2,
+      -2.31,
+      "mound"
+     ],
+     [
+      468.25,
+      626.6,
+      -2.279,
+      "tomb"
+     ],
+     [
+      466.24,
+      624.66,
+      -2.31,
+      "mound"
+     ],
+     [
+      464.05,
+      623.01,
+      -2.257,
+      "headstone"
+     ],
+     [
+      462.12,
+      621.33,
+      -2.308,
+      "mound"
+     ],
+     [
+      460.1,
+      619.62,
+      -2.244,
+      "mound"
+     ],
+     [
+      456.01,
+      615.84,
+      -2.314,
+      "slab"
+     ],
+     [
+      453.91,
+      614.09,
+      -2.299,
+      "mound"
+     ],
+     [
+      451.89,
+      612.33,
+      -2.248,
+      "slab"
+     ],
+     [
+      469.26,
+      629.43,
+      -2.251,
+      "mound"
+     ],
+     [
+      467.15,
+      627.68,
+      -2.282,
+      "headstone"
+     ],
+     [
+      465.11,
+      625.92,
+      -2.287,
+      "cross"
+     ],
+     [
+      463.23,
+      624.22,
+      -2.25,
+      "cross"
+     ],
+     [
+      461.25,
+      622.44,
+      -2.291,
+      "mound"
+     ],
+     [
+      459.05,
+      620.76,
+      -2.241,
+      "headstone"
+     ],
+     [
+      457.05,
+      618.94,
+      -2.282,
+      "headstone"
+     ],
+     [
+      454.92,
+      617.19,
+      -2.293,
+      "headstone"
+     ],
+     [
+      452.81,
+      615.51,
+      -2.279,
+      "tomb"
+     ],
+     [
+      450.83,
+      613.82,
+      -2.261,
+      "slab"
+     ],
+     [
+      468.15,
+      630.66,
+      -2.241,
+      "cross"
+     ],
+     [
+      466.26,
+      628.89,
+      -2.279,
+      "tomb"
+     ],
+     [
+      464.14,
+      627.33,
+      -2.266,
+      "headstone"
+     ],
+     [
+      462.18,
+      625.46,
+      -2.296,
+      "headstone"
+     ],
+     [
+      457.99,
+      622,
+      -2.274,
+      "tomb"
+     ],
+     [
+      456.07,
+      620.12,
+      -2.273,
+      "tomb"
+     ],
+     [
+      453.83,
+      618.36,
+      -2.288,
+      "cross"
+     ],
+     [
+      451.87,
+      616.69,
+      -2.245,
+      "mound"
+     ],
+     [
+      467.09,
+      631.94,
+      -2.257,
+      "tomb"
+     ],
+     [
+      465.14,
+      630.27,
+      -2.317,
+      "mound"
+     ],
+     [
+      463.06,
+      628.53,
+      -2.319,
+      "slab"
+     ],
+     [
+      461.09,
+      626.61,
+      -2.265,
+      "headstone"
+     ],
+     [
+      458.97,
+      624.96,
+      -2.243,
+      "headstone"
+     ],
+     [
+      456.91,
+      623.03,
+      -2.263,
+      "mound"
+     ],
+     [
+      454.85,
+      621.45,
+      -2.294,
+      "cross"
+     ],
+     [
+      452.8,
+      619.54,
+      -2.259,
+      "tomb"
+     ],
+     [
+      450.76,
+      617.79,
+      -2.25,
+      "headstone"
+     ],
+     [
+      466.16,
+      633.16,
+      -2.262,
+      "slab"
+     ],
+     [
+      464.06,
+      631.35,
+      -2.307,
+      "mound"
+     ],
+     [
+      462.16,
+      629.7,
+      -2.317,
+      "headstone"
+     ],
+     [
+      460.02,
+      627.77,
+      -2.268,
+      "cross"
+     ],
+     [
+      458.05,
+      626.15,
+      -2.299,
+      "cross"
+     ],
+     [
+      455.98,
+      624.39,
+      -2.258,
+      "headstone"
+     ],
+     [
+      453.99,
+      622.58,
+      -2.27,
+      "cross"
+     ],
+     [
+      449.72,
+      619.07,
+      -2.287,
+      "cross"
+     ],
+     [
+      447.73,
+      617.43,
+      -2.292,
+      "slab"
+     ],
+     [
+      465.02,
+      634.42,
+      -2.274,
+      "headstone"
+     ],
+     [
+      463.19,
+      632.6,
+      -2.291,
+      "mound"
+     ],
+     [
+      460.91,
+      630.85,
+      -2.286,
+      "headstone"
+     ],
+     [
+      458.93,
+      629.15,
+      -2.309,
+      "slab"
+     ],
+     [
+      456.92,
+      627.26,
+      -2.297,
+      "headstone"
+     ],
+     [
+      454.78,
+      625.64,
+      -2.29,
+      "headstone"
+     ],
+     [
+      450.76,
+      622.12,
+      -2.248,
+      "headstone"
+     ],
+     [
+      448.64,
+      620.34,
+      -2.252,
+      "mound"
+     ],
+     [
+      446.59,
+      618.46,
+      -2.247,
+      "mound"
+     ],
+     [
+      463.96,
+      635.57,
+      -2.319,
+      "cross"
+     ],
+     [
+      462.1,
+      633.76,
+      -2.309,
+      "headstone"
+     ],
+     [
+      460,
+      631.98,
+      -2.295,
+      "mound"
+     ],
+     [
+      457.95,
+      630.25,
+      -2.308,
+      "headstone"
+     ],
+     [
+      455.85,
+      628.4,
+      -2.316,
+      "headstone"
+     ],
+     [
+      453.87,
+      626.89,
+      -2.309,
+      "headstone"
+     ],
+     [
+      451.86,
+      625.02,
+      -2.27,
+      "headstone"
+     ],
+     [
+      449.81,
+      623.24,
+      -2.245,
+      "cross"
+     ],
+     [
+      447.59,
+      621.52,
+      -2.262,
+      "cross"
+     ],
+     [
+      445.49,
+      619.77,
+      -2.306,
+      "mound"
+     ],
+     [
+      463.07,
+      636.73,
+      -2.242,
+      "mound"
+     ],
+     [
+      461.02,
+      635.07,
+      -2.275,
+      "mound"
+     ],
+     [
+      458.97,
+      633.32,
+      -2.305,
+      "mound"
+     ],
+     [
+      454.81,
+      629.76,
+      -2.276,
+      "tomb"
+     ],
+     [
+      452.78,
+      628.05,
+      -2.261,
+      "mound"
+     ],
+     [
+      450.77,
+      626.23,
+      -2.285,
+      "tomb"
+     ],
+     [
+      448.72,
+      624.52,
+      -2.271,
+      "headstone"
+     ],
+     [
+      446.58,
+      622.73,
+      -2.242,
+      "headstone"
+     ],
+     [
+      444.61,
+      620.85,
+      -2.252,
+      "headstone"
+     ],
+     [
+      459.83,
+      636.21,
+      -2.265,
+      "cross"
+     ],
+     [
+      457.9,
+      634.55,
+      -2.311,
+      "cross"
+     ],
+     [
+      455.93,
+      632.68,
+      -2.31,
+      "cross"
+     ],
+     [
+      453.95,
+      630.97,
+      -2.267,
+      "mound"
+     ],
+     [
+      451.62,
+      629.19,
+      -2.319,
+      "mound"
+     ],
+     [
+      447.73,
+      625.68,
+      -2.252,
+      "cross"
+     ],
+     [
+      445.57,
+      623.97,
+      -2.303,
+      "mound"
+     ],
+     [
+      443.55,
+      622.07,
+      -2.263,
+      "mound"
+     ]
+    ],
+    "graveStyles": [
+     "headstone",
+     "cross",
+     "slab",
+     "mound",
+     "tomb"
+    ],
+    "level": 255.46,
+    "slots": [
+     {
+      "kind": "gravedigger",
+      "x": 452.62,
+      "z": 606.23,
+      "r": 1.5,
+      "yaw": 0.8618
+     }
+    ]
+   }
+  },
+  {
+   "kind": "wall",
+   "id": "saint_orrins_yard_wall_0",
+   "x": 453.96,
+   "z": 605.28,
+   "yaw": 0,
+   "data": {
+    "setPiece": "saint_orrins_yard",
+    "h": 0.95,
+    "material": "drystone",
+    "pts": [
+     [
+      453.96,
+      605.28,
+      255.45
+     ],
+     [
+      466.33,
+      590.86,
+      255.55
+     ],
+     [
+      488.49,
+      609.87,
+      255.5
+     ],
+     [
+      461.67,
+      641.14,
+      255.51
+     ],
+     [
+      439.51,
+      622.13,
+      255.45
+     ],
+     [
+      451.88,
+      607.71,
+      255.45
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "set_building",
+   "id": "saint_orrins_yard_bldg_0",
+   "x": 472.08,
+   "z": 622.93,
+   "yaw": -2.2798,
+   "data": {
+    "setPiece": "saint_orrins_yard",
+    "piece": "graveyard",
+    "want": "chapel",
+    "w": 7.5,
+    "d": 5.5,
+    "angle": 2.2798,
+    "front": 3.8506,
+    "culture": "halfling",
+    "label": "Chapel",
+    "lit": false,
+    "ground": 255.45
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "pilgrim_s_halt_graveyard",
+   "x": 588,
+   "z": 212,
+   "yaw": -2.2391,
+   "data": {
+    "piece": "graveyard",
+    "name": "Pilgrim's Halt Graveyard",
+    "town": "Pilgrim's Halt",
+    "auto": true,
+    "r": 12.5,
+    "poly": [
+     [
+      591.2,
+      224.08
+     ],
+     [
+      575.5,
+      211.69
+     ],
+     [
+      584.8,
+      199.92
+     ],
+     [
+      600.5,
+      212.31
+     ]
+    ],
+    "w": 20,
+    "d": 15,
+    "angle": -2.4733,
+    "gate": {
+     "x": 592.65,
+     "z": 206.11,
+     "width": 3.2,
+     "yaw": -0.6683
+    },
+    "graves": [
+     [
+      590.84,
+      220.9,
+      2.48,
+      "mound"
+     ],
+     [
+      592.49,
+      218.96,
+      2.478,
+      "headstone"
+     ],
+     [
+      594.13,
+      216.86,
+      2.459,
+      "cross"
+     ],
+     [
+      595.9,
+      214.74,
+      2.502,
+      "cross"
+     ],
+     [
+      589.74,
+      219.99,
+      2.434,
+      "mound"
+     ],
+     [
+      591.24,
+      217.81,
+      2.461,
+      "tomb"
+     ],
+     [
+      593.05,
+      215.73,
+      2.51,
+      "slab"
+     ],
+     [
+      594.57,
+      213.73,
+      2.441,
+      "headstone"
+     ],
+     [
+      589.99,
+      217,
+      2.5,
+      "cross"
+     ],
+     [
+      591.69,
+      214.9,
+      2.437,
+      "headstone"
+     ],
+     [
+      593.26,
+      212.7,
+      2.435,
+      "cross"
+     ],
+     [
+      588.76,
+      216.01,
+      2.447,
+      "headstone"
+     ],
+     [
+      592.2,
+      211.64,
+      2.495,
+      "mound"
+     ],
+     [
+      581.97,
+      214.15,
+      2.436,
+      "headstone"
+     ],
+     [
+      585.38,
+      209.72,
+      2.513,
+      "slab"
+     ],
+     [
+      587.09,
+      207.81,
+      2.452,
+      "mound"
+     ],
+     [
+      580.77,
+      213.07,
+      2.465,
+      "headstone"
+     ],
+     [
+      582.5,
+      210.94,
+      2.474,
+      "cross"
+     ],
+     [
+      584.08,
+      208.69,
+      2.465,
+      "headstone"
+     ],
+     [
+      585.65,
+      206.73,
+      2.466,
+      "cross"
+     ],
+     [
+      579.54,
+      212.06,
+      2.486,
+      "cross"
+     ],
+     [
+      581.21,
+      209.85,
+      2.462,
+      "headstone"
+     ],
+     [
+      582.93,
+      207.94,
+      2.447,
+      "tomb"
+     ],
+     [
+      584.57,
+      205.8,
+      2.438,
+      "tomb"
+     ]
+    ],
+    "graveStyles": [
+     "headstone",
+     "cross",
+     "slab",
+     "mound",
+     "tomb"
+    ],
+    "level": 276.26,
+    "slots": [
+     {
+      "kind": "gravedigger",
+      "x": 592.65,
+      "z": 206.11,
+      "r": 1.5,
+      "yaw": -0.6683
+     }
+    ]
+   }
+  },
+  {
+   "kind": "wall",
+   "id": "pilgrim_s_halt_graveyard_wall_0",
+   "x": 593.66,
+   "z": 207.42,
+   "yaw": 0,
+   "data": {
+    "setPiece": "pilgrim_s_halt_graveyard",
+    "h": 0.95,
+    "material": "drystone",
+    "pts": [
+     [
+      593.66,
+      207.42,
+      276.23
+     ],
+     [
+      599.93,
+      212.38,
+      276.26
+     ],
+     [
+      591.14,
+      223.52,
+      276.29
+     ],
+     [
+      576.07,
+      211.62,
+      276.29
+     ],
+     [
+      584.86,
+      200.48,
+      276.2
+     ],
+     [
+      591.14,
+      205.44,
+      276.21
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "orrinsford_farm",
+   "x": 620,
+   "z": 800,
+   "yaw": 0.1025,
+   "data": {
+    "piece": "farm",
+    "name": "Orrinsford Farm",
+    "town": "Orrinsford",
+    "r": 21.3,
+    "poly": [
+     [
+      633.39,
+      783.54
+     ],
+     [
+      636.46,
+      813.39
+     ],
+     [
+      606.61,
+      816.46
+     ],
+     [
+      603.54,
+      786.61
+     ]
+    ],
+    "w": 30,
+    "d": 30,
+    "angle": 1.4683,
+    "fields": 0,
+    "slots": [
+     {
+      "kind": "farmstead",
+      "x": 620,
+      "z": 800,
+      "r": 15,
+      "yaw": 0
+     },
+     {
+      "kind": "farmer",
+      "x": 620.76,
+      "z": 794.64,
+      "r": 1,
+      "yaw": 1.6733
+     }
+    ]
+   }
+  },
+  {
+   "kind": "set_building",
+   "id": "orrinsford_farm_bldg_0",
+   "x": 625.43,
+   "z": 794.16,
+   "yaw": -1.4683,
+   "data": {
+    "setPiece": "orrinsford_farm",
+    "piece": "farm",
+    "want": "house",
+    "w": 10,
+    "d": 7,
+    "angle": 1.4683,
+    "front": 3.0391,
+    "culture": "halfling",
+    "label": null,
+    "lit": false,
+    "ground": 404.34
+   }
+  },
+  {
+   "kind": "set_building",
+   "id": "orrinsford_farm_bldg_1",
+   "x": 624.42,
+   "z": 806.33,
+   "yaw": -1.4683,
+   "data": {
+    "setPiece": "orrinsford_farm",
+    "piece": "farm",
+    "want": "granary",
+    "w": 9,
+    "d": 12,
+    "angle": 1.4683,
+    "front": 3.0391,
+    "culture": "halfling",
+    "label": null,
+    "lit": false,
+    "ground": 404.41
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "pilgrim_orchard",
+   "x": 182,
+   "z": 952,
+   "yaw": 3.1416,
+   "data": {
+    "piece": "orchard",
+    "name": "Pilgrims' Orchard",
+    "town": "Orrinsford",
+    "r": 34.41,
+    "poly": [
+     [
+      162,
+      980
+     ],
+     [
+      162,
+      924
+     ],
+     [
+      202,
+      924
+     ],
+     [
+      202,
+      980
+     ]
+    ],
+    "w": 56,
+    "d": 40,
+    "angle": -1.5708,
+    "gate": {
+     "x": 162,
+     "z": 952,
+     "width": 3,
+     "yaw": 1.5708
+    },
+    "fruit": "apple",
+    "trees": 37,
+    "slots": [
+     {
+      "kind": "picker",
+      "x": 162,
+      "z": 952,
+      "r": 1.5,
+      "yaw": 1.5708
+     }
+    ]
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "pilgrim_orchard_hedge_0",
+   "x": 162.6,
+   "z": 950.5,
+   "yaw": 0,
+   "data": {
+    "setPiece": "pilgrim_orchard",
+    "h": 1.5,
+    "pts": [
+     [
+      162.6,
+      950.5,
+      297.97
+     ],
+     [
+      162.6,
+      924.6,
+      297.94
+     ],
+     [
+      201.4,
+      924.6,
+      293.84
+     ],
+     [
+      201.4,
+      979.4,
+      293.82
+     ],
+     [
+      162.6,
+      979.4,
+      297.93
+     ],
+     [
+      162.6,
+      953.5,
+      297.99
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "set_building",
+   "id": "pilgrim_orchard_bldg_0",
+   "x": 165,
+   "z": 946,
+   "yaw": -1.5708,
+   "data": {
+    "setPiece": "pilgrim_orchard",
+    "piece": "orchard",
+    "want": "hut",
+    "w": 5,
+    "d": 4,
+    "angle": -1.5708,
+    "front": 3.1416,
+    "culture": "halfling",
+    "label": null,
+    "lit": false,
+    "ground": 297.7
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "orrin_clearing",
+   "x": 260,
+   "z": 1284,
+   "yaw": 0,
+   "data": {
+    "piece": "clearing",
+    "name": "Penitents' Clearing",
+    "town": "Orrinsford",
+    "r": 22,
+    "for": "camp",
+    "yardR": 9.9,
+    "slots": [
+     {
+      "kind": "camp",
+      "x": 260,
+      "z": 1284,
+      "r": 13.2,
+      "yaw": 0
+     }
+    ]
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "pilgrims_ring",
+   "x": 1080,
+   "z": 416,
+   "yaw": 0,
+   "data": {
+    "piece": "stone_circle",
+    "name": "The Pilgrims' Ring",
+    "town": "Pilgrim's Halt",
+    "r": 11,
+    "stones": [
+     [
+      1071.03,
+      422.36,
+      4.096,
+      "standing"
+     ],
+     [
+      1069,
+      415.77,
+      4.733,
+      "standing"
+     ],
+     [
+      1072.01,
+      408.44,
+      5.47,
+      "standing"
+     ],
+     [
+      1078.96,
+      405.05,
+      6.188,
+      "standing"
+     ],
+     [
+      1085.94,
+      406.74,
+      6.854,
+      "standing"
+     ],
+     [
+      1090.53,
+      412.81,
+      7.56,
+      "fallen"
+     ],
+     [
+      1090.01,
+      420.55,
+      8.281,
+      "standing"
+     ],
+     [
+      1085.56,
+      425.49,
+      8.895,
+      "standing"
+     ],
+     [
+      1078.05,
+      426.83,
+      9.603,
+      "fallen"
+     ]
+    ],
+    "slots": [
+     {
+      "kind": "ritual",
+      "x": 1080,
+      "z": 416,
+      "r": 6.6,
+      "yaw": 0
+     }
+    ]
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "rise_fold",
+   "x": 912,
+   "z": 1480,
+   "yaw": 0,
+   "data": {
+    "piece": "sheepfold",
+    "name": "Rise Fold",
+    "town": "Orrinsford",
+    "r": 9,
+    "gate": {
+     "x": 905.57,
+     "z": 1486.3,
+     "width": 5.6621980910901195,
+     "yaw": 2.3456
+    },
+    "slots": [
+     {
+      "kind": "shepherd",
+      "x": 904.14,
+      "z": 1487.7,
+      "r": 1.5,
+      "yaw": 2.3456
+     },
+     {
+      "kind": "flock",
+      "x": 912,
+      "z": 1480,
+      "r": 6.3,
+      "yaw": 0
+     }
+    ]
+   }
+  },
+  {
+   "kind": "wall",
+   "id": "rise_fold_wall_0",
+   "x": 903.91,
+   "z": 1483.95,
+   "yaw": 0,
+   "data": {
+    "setPiece": "rise_fold",
+    "h": 1,
+    "material": "drystone",
+    "pts": [
+     [
+      903.91,
+      1483.95,
+      711.61
+     ],
+     [
+      903.13,
+      1481.55,
+      711.67
+     ],
+     [
+      903.05,
+      1479.02,
+      711.75
+     ],
+     [
+      903.68,
+      1476.56,
+      711.77
+     ],
+     [
+      904.97,
+      1474.38,
+      711.83
+     ],
+     [
+      906.81,
+      1472.65,
+      711.87
+     ],
+     [
+      909.06,
+      1471.49,
+      711.84
+     ],
+     [
+      911.55,
+      1471.01,
+      711.78
+     ],
+     [
+      914.07,
+      1471.24,
+      711.79
+     ],
+     [
+      916.42,
+      1472.16,
+      711.63
+     ],
+     [
+      918.43,
+      1473.7,
+      711.42
+     ],
+     [
+      919.93,
+      1475.74,
+      711.27
+     ],
+     [
+      920.8,
+      1478.12,
+      711.14
+     ],
+     [
+      920.98,
+      1480.64,
+      711.01
+     ],
+     [
+      920.44,
+      1483.12,
+      710.93
+     ],
+     [
+      919.24,
+      1485.35,
+      710.94
+     ],
+     [
+      917.47,
+      1487.15,
+      711.08
+     ],
+     [
+      915.26,
+      1488.39,
+      711.2
+     ],
+     [
+      912.79,
+      1488.96,
+      711.28
+     ],
+     [
+      910.27,
+      1488.83,
+      711.39
+     ],
+     [
+      907.88,
+      1488,
+      711.44
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "rise_copse",
+   "x": 520,
+   "z": 1576,
+   "yaw": 0,
+   "data": {
+    "piece": "copse",
+    "name": "Thorn Copse",
+    "town": "Orrinsford",
+    "r": 28,
+    "trees": 95,
+    "slots": []
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "orrinsford_belt",
+   "x": 336,
+   "z": 576,
+   "yaw": 0,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Orrinsford",
+    "auto": true,
+    "r": 210,
+    "fields": 10,
+    "slots": []
+   }
+  },
+  {
+   "kind": "field",
+   "id": "orrinsford_belt_field_0",
+   "x": 397.34,
+   "z": 479.91,
+   "yaw": 1.0027,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Orrinsford",
+    "auto": true,
+    "setPiece": "orrinsford_belt",
+    "crop": "crop",
+    "grows": "wheat",
+    "poly": [
+     [
+      384.95,
+      456.58
+     ],
+     [
+      423.72,
+      481.33
+     ],
+     [
+      409.73,
+      503.24
+     ],
+     [
+      370.96,
+      478.49
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 6.8513,
+    "furrowAngle": 6.8513,
+    "boundary": "hedge",
+    "gate": {
+     "x": 390.34,
+     "z": 490.87,
+     "width": 4,
+     "yaw": 2.5735
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "orrinsford_belt_field_0_hedge_0",
+   "x": 389.09,
+   "z": 489.12,
+   "yaw": 0,
+   "data": {
+    "setPiece": "orrinsford_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      389.09,
+      489.12,
+      257.8
+     ],
+     [
+      372.06,
+      478.25,
+      254.44
+     ],
+     [
+      385.19,
+      457.68,
+      255.55
+     ],
+     [
+      422.61,
+      481.57,
+      264.23
+     ],
+     [
+      409.49,
+      502.14,
+      261.77
+     ],
+     [
+      392.46,
+      491.27,
+      258.44
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "orrinsford_belt_field_1",
+   "x": 203.48,
+   "z": 510.1,
+   "yaw": 2.6801,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Orrinsford",
+    "auto": true,
+    "setPiece": "orrinsford_belt",
+    "crop": "pasture",
+    "grows": "cattle",
+    "poly": [
+     [
+      181.6,
+      524.9
+     ],
+     [
+      202.09,
+      483.71
+     ],
+     [
+      225.37,
+      495.29
+     ],
+     [
+      204.88,
+      536.48
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 5.1739,
+    "furrowAngle": 5.1739,
+    "boundary": "fence",
+    "gate": {
+     "x": 215.12,
+     "z": 515.88,
+     "width": 3,
+     "yaw": -2.0323
+    }
+   }
+  },
+  {
+   "kind": "fence",
+   "id": "orrinsford_belt_field_1_fence_0",
+   "x": 213.74,
+   "z": 516.87,
+   "yaw": 0,
+   "data": {
+    "setPiece": "orrinsford_belt",
+    "h": 1.1,
+    "pts": [
+     [
+      213.74,
+      516.87,
+      262.76
+     ],
+     [
+      204.52,
+      535.41,
+      265.05
+     ],
+     [
+      182.67,
+      524.54,
+      266.14
+     ],
+     [
+      202.45,
+      484.79,
+      261.49
+     ],
+     [
+      224.29,
+      495.65,
+      260.3
+     ],
+     [
+      215.08,
+      514.19,
+      262.44
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "orrinsford_belt_field_2",
+   "x": 236.24,
+   "z": 466.68,
+   "yaw": 2.3105,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Orrinsford",
+    "auto": true,
+    "setPiece": "orrinsford_belt",
+    "crop": "field",
+    "grows": "tilled",
+    "poly": [
+     [
+      210.49,
+      472.58
+     ],
+     [
+      244.47,
+      441.57
+     ],
+     [
+      261.99,
+      460.78
+     ],
+     [
+      228.01,
+      491.78
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 5.5435,
+    "furrowAngle": 5.5435,
+    "boundary": "hedge",
+    "gate": {
+     "x": 245,
+     "z": 476.28,
+     "width": 4,
+     "yaw": -2.4019
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "orrinsford_belt_field_2_hedge_0",
+   "x": 242.99,
+   "z": 477.04,
+   "yaw": 0,
+   "data": {
+    "setPiece": "orrinsford_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      242.99,
+      477.04,
+      258.29
+     ],
+     [
+      228.06,
+      490.65,
+      259.62
+     ],
+     [
+      211.62,
+      472.63,
+      261.69
+     ],
+     [
+      244.41,
+      442.7,
+      259.13
+     ],
+     [
+      260.86,
+      460.72,
+      256.77
+     ],
+     [
+      245.94,
+      474.34,
+      258.03
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "orrinsford_belt_field_3",
+   "x": 258.15,
+   "z": 701.87,
+   "yaw": -2.1247,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Orrinsford",
+    "auto": true,
+    "setPiece": "orrinsford_belt",
+    "crop": "field",
+    "grows": "tilled",
+    "poly": [
+     [
+      270.87,
+      725.02
+     ],
+     [
+      231.75,
+      700.83
+     ],
+     [
+      245.43,
+      678.72
+     ],
+     [
+      284.55,
+      702.91
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 9.9787,
+    "furrowAngle": 9.9787,
+    "boundary": "hedge",
+    "gate": {
+     "x": 264.99,
+     "z": 690.81,
+     "width": 4,
+     "yaw": -0.5539
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "orrinsford_belt_field_3_hedge_0",
+   "x": 266.27,
+   "z": 692.55,
+   "yaw": 0,
+   "data": {
+    "setPiece": "orrinsford_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      266.27,
+      692.55,
+      271.11
+     ],
+     [
+      283.45,
+      703.17,
+      272.07
+     ],
+     [
+      270.61,
+      723.92,
+      274.3
+     ],
+     [
+      232.85,
+      700.57,
+      272.01
+     ],
+     [
+      245.69,
+      679.82,
+      269.86
+     ],
+     [
+      262.87,
+      690.44,
+      270.95
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "orrinsford_belt_field_4",
+   "x": 217.94,
+   "z": 665.25,
+   "yaw": -2.4943,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Orrinsford",
+    "auto": true,
+    "setPiece": "orrinsford_belt",
+    "crop": "pasture",
+    "grows": "sheep",
+    "poly": [
+     [
+      221.44,
+      691.43
+     ],
+     [
+      193.7,
+      654.74
+     ],
+     [
+      214.44,
+      639.06
+     ],
+     [
+      242.18,
+      675.76
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 10.3483,
+    "furrowAngle": 10.3483,
+    "boundary": "fence",
+    "gate": {
+     "x": 228.31,
+     "z": 657.41,
+     "width": 3,
+     "yaw": -0.9235
+    }
+   }
+  },
+  {
+   "kind": "fence",
+   "id": "orrinsford_belt_field_4_fence_0",
+   "x": 228.57,
+   "z": 659.09,
+   "yaw": 0,
+   "data": {
+    "setPiece": "orrinsford_belt",
+    "h": 1.1,
+    "pts": [
+     [
+      228.57,
+      659.09,
+      267.17
+     ],
+     [
+      241.06,
+      675.6,
+      268.78
+     ],
+     [
+      221.59,
+      690.31,
+      271.28
+     ],
+     [
+      194.82,
+      654.9,
+      268.05
+     ],
+     [
+      214.28,
+      640.18,
+      265.61
+     ],
+     [
+      226.76,
+      656.69,
+      266.93
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "orrinsford_belt_field_5",
+   "x": 154.12,
+   "z": 569.36,
+   "yaw": 3.1051,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Orrinsford",
+    "auto": true,
+    "setPiece": "orrinsford_belt",
+    "crop": "crop",
+    "grows": "barley",
+    "poly": [
+     [
+      140.29,
+      591.87
+     ],
+     [
+      141.97,
+      545.91
+     ],
+     [
+      167.95,
+      546.85
+     ],
+     [
+      166.27,
+      592.82
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 4.7489,
+    "furrowAngle": 4.7489,
+    "boundary": "none"
+   }
+  },
+  {
+   "kind": "field",
+   "id": "orrinsford_belt_field_6",
+   "x": 165.07,
+   "z": 513.48,
+   "yaw": 2.791,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Orrinsford",
+    "auto": true,
+    "setPiece": "orrinsford_belt",
+    "crop": "pasture",
+    "grows": "sheep",
+    "poly": [
+     [
+      144.96,
+      530.62
+     ],
+     [
+      160.76,
+      487.42
+     ],
+     [
+      185.18,
+      496.35
+     ],
+     [
+      169.38,
+      539.55
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 5.063,
+    "furrowAngle": 5.063,
+    "boundary": "fence",
+    "gate": {
+     "x": 177.28,
+     "z": 517.95,
+     "width": 3,
+     "yaw": -1.9214
+    }
+   }
+  },
+  {
+   "kind": "fence",
+   "id": "orrinsford_belt_field_6_fence_0",
+   "x": 176.02,
+   "z": 519.08,
+   "yaw": 0,
+   "data": {
+    "setPiece": "orrinsford_belt",
+    "h": 1.1,
+    "pts": [
+     [
+      176.02,
+      519.08,
+      265.51
+     ],
+     [
+      168.91,
+      538.52,
+      266.46
+     ],
+     [
+      145.99,
+      530.14,
+      265.02
+     ],
+     [
+      161.24,
+      488.45,
+      263.14
+     ],
+     [
+      184.16,
+      496.83,
+      264.17
+     ],
+     [
+      177.05,
+      516.27,
+      265.35
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "orrinsford_belt_field_7",
+   "x": 192.76,
+   "z": 463.73,
+   "yaw": 2.4768,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Orrinsford",
+    "auto": true,
+    "setPiece": "orrinsford_belt",
+    "crop": "crop",
+    "grows": "flax",
+    "poly": [
+     [
+      168.34,
+      473.81
+     ],
+     [
+      196.71,
+      437.6
+     ],
+     [
+      217.18,
+      453.64
+     ],
+     [
+      188.8,
+      489.85
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 5.3772,
+    "furrowAngle": 5.3772,
+    "boundary": "none"
+   }
+  },
+  {
+   "kind": "field",
+   "id": "orrinsford_belt_field_8",
+   "x": 234.46,
+   "z": 424.96,
+   "yaw": 2.1626,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Orrinsford",
+    "auto": true,
+    "setPiece": "orrinsford_belt",
+    "crop": "crop",
+    "grows": "flax",
+    "poly": [
+     [
+      208.12,
+      427
+     ],
+     [
+      246.3,
+      401.34
+     ],
+     [
+      260.8,
+      422.91
+     ],
+     [
+      222.63,
+      448.58
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 5.6913,
+    "furrowAngle": 5.6913,
+    "boundary": "none"
+   }
+  },
+  {
+   "kind": "field",
+   "id": "orrinsford_belt_field_9",
+   "x": 286.11,
+   "z": 400.97,
+   "yaw": 1.8485,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Orrinsford",
+    "auto": true,
+    "setPiece": "orrinsford_belt",
+    "crop": "crop",
+    "grows": "barley",
+    "poly": [
+     [
+      260.42,
+      394.78
+     ],
+     [
+      304.66,
+      382.17
+     ],
+     [
+      311.79,
+      407.17
+     ],
+     [
+      267.55,
+      419.78
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 6.0055,
+    "furrowAngle": 6.0055,
+    "boundary": "hedge",
+    "gate": {
+     "x": 289.67,
+     "z": 413.47,
+     "width": 4,
+     "yaw": -2.8639
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "orrinsford_belt_field_9_hedge_0",
+   "x": 287.53,
+   "z": 413.25,
+   "yaw": 0,
+   "data": {
+    "setPiece": "orrinsford_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      287.53,
+      413.25,
+      251.03
+     ],
+     [
+      268.1,
+      418.79,
+      254.97
+     ],
+     [
+      261.41,
+      395.33,
+      256.46
+     ],
+     [
+      304.11,
+      383.15,
+      248.01
+     ],
+     [
+      310.8,
+      406.62,
+      246.66
+     ],
+     [
+      291.38,
+      412.16,
+      250.29
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "pilgrim_s_halt_belt",
+   "x": 672,
+   "z": 240,
+   "yaw": 0,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Pilgrim's Halt",
+    "auto": true,
+    "r": 166,
+    "fields": 5,
+    "slots": []
+   }
+  },
+  {
+   "kind": "field",
+   "id": "pilgrim_s_halt_belt_field_0",
+   "x": 737.21,
+   "z": 265.46,
+   "yaw": -0.3722,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Pilgrim's Halt",
+    "auto": true,
+    "setPiece": "pilgrim_s_halt_belt",
+    "crop": "crop",
+    "grows": "flax",
+    "poly": [
+     [
+      757.68,
+      248.76
+     ],
+     [
+      740.95,
+      291.61
+     ],
+     [
+      716.73,
+      282.15
+     ],
+     [
+      733.46,
+      239.3
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 8.2262,
+    "furrowAngle": 8.2262,
+    "boundary": "hedge",
+    "gate": {
+     "x": 725.1,
+     "z": 260.73,
+     "width": 4,
+     "yaw": 1.1986
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "pilgrim_s_halt_belt_field_0_hedge_0",
+   "x": 726.57,
+   "z": 259.16,
+   "yaw": 0,
+   "data": {
+    "setPiece": "pilgrim_s_halt_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      726.57,
+      259.16,
+      284.62
+     ],
+     [
+      733.92,
+      240.34,
+      281.31
+     ],
+     [
+      756.64,
+      249.21,
+      281.23
+     ],
+     [
+      740.5,
+      290.57,
+      288.6
+     ],
+     [
+      717.77,
+      281.7,
+      287.81
+     ],
+     [
+      725.11,
+      262.88,
+      285.1
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "pilgrim_s_halt_belt_field_1",
+   "x": 753.19,
+   "z": 175.01,
+   "yaw": 0.675,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Pilgrim's Halt",
+    "auto": true,
+    "setPiece": "pilgrim_s_halt_belt",
+    "crop": "field",
+    "grows": "tilled",
+    "poly": [
+     [
+      748.97,
+      148.93
+     ],
+     [
+      777.72,
+      184.85
+     ],
+     [
+      757.42,
+      201.09
+     ],
+     [
+      728.67,
+      165.18
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 7.179,
+    "furrowAngle": 7.179,
+    "boundary": "hedge",
+    "gate": {
+     "x": 743.05,
+     "z": 183.14,
+     "width": 4,
+     "yaw": 2.2458
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "pilgrim_s_halt_belt_field_1_hedge_0",
+   "x": 742.42,
+   "z": 181.07,
+   "yaw": 0,
+   "data": {
+    "setPiece": "pilgrim_s_halt_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      742.42,
+      181.07,
+      269.96
+     ],
+     [
+      729.8,
+      165.3,
+      269.93
+     ],
+     [
+      748.85,
+      150.06,
+      265.23
+     ],
+     [
+      776.59,
+      184.72,
+      264.66
+     ],
+     [
+      757.54,
+      199.97,
+      269.48
+     ],
+     [
+      744.92,
+      184.2,
+      269.94
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "pilgrim_s_halt_belt_field_2",
+   "x": 736.99,
+   "z": 321.19,
+   "yaw": -0.8958,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Pilgrim's Halt",
+    "auto": true,
+    "setPiece": "pilgrim_s_halt_belt",
+    "crop": "crop",
+    "grows": "cabbages",
+    "poly": [
+     [
+      763.07,
+      316.97
+     ],
+     [
+      727.15,
+      345.72
+     ],
+     [
+      710.91,
+      325.42
+     ],
+     [
+      746.82,
+      296.67
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 8.7498,
+    "furrowAngle": 8.7498,
+    "boundary": "hedge",
+    "gate": {
+     "x": 728.86,
+     "z": 311.05,
+     "width": 4,
+     "yaw": 0.675
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "pilgrim_s_halt_belt_field_2_hedge_0",
+   "x": 730.93,
+   "z": 310.42,
+   "yaw": 0,
+   "data": {
+    "setPiece": "pilgrim_s_halt_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      730.93,
+      310.42,
+      289.56
+     ],
+     [
+      746.7,
+      297.8,
+      289.19
+     ],
+     [
+      761.94,
+      316.85,
+      293.16
+     ],
+     [
+      727.28,
+      344.59,
+      294.8
+     ],
+     [
+      712.03,
+      325.54,
+      290.53
+     ],
+     [
+      727.8,
+      312.92,
+      289.72
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "pilgrim_s_halt_belt_field_3",
+   "x": 746.5,
+   "z": 356.16,
+   "yaw": -1.0005,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Pilgrim's Halt",
+    "auto": true,
+    "setPiece": "pilgrim_s_halt_belt",
+    "crop": "crop",
+    "grows": "oats",
+    "poly": [
+     [
+      772.88,
+      354.69
+     ],
+     [
+      734.16,
+      379.52
+     ],
+     [
+      720.12,
+      357.64
+     ],
+     [
+      758.84,
+      332.8
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 8.8545,
+    "furrowAngle": 8.8545,
+    "boundary": "none"
+   }
+  },
+  {
+   "kind": "field",
+   "id": "pilgrim_s_halt_belt_field_4",
+   "x": 584.54,
+   "z": 346.75,
+   "yaw": -2.2572,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Pilgrim's Halt",
+    "auto": true,
+    "setPiece": "pilgrim_s_halt_belt",
+    "crop": "crop",
+    "grows": "barley",
+    "poly": [
+     [
+      594.1,
+      371.38
+     ],
+     [
+      558.51,
+      342.23
+     ],
+     [
+      574.99,
+      322.12
+     ],
+     [
+      610.57,
+      351.27
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 10.1112,
+    "furrowAngle": 10.1112,
+    "boundary": "hedge",
+    "gate": {
+     "x": 592.78,
+     "z": 336.69,
+     "width": 4,
+     "yaw": -0.6864
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "pilgrim_s_halt_belt_field_4_hedge_0",
+   "x": 593.82,
+   "z": 338.58,
+   "yaw": 0,
+   "data": {
+    "setPiece": "pilgrim_s_halt_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      593.82,
+      338.58,
+      305.59
+     ],
+     [
+      609.45,
+      351.38,
+      307.57
+     ],
+     [
+      593.99,
+      370.26,
+      311.24
+     ],
+     [
+      559.64,
+      342.12,
+      306.87
+     ],
+     [
+      575.1,
+      323.24,
+      303.2
+     ],
+     [
+      590.73,
+      336.04,
+      305.1
+     ]
+    ]
    }
   }
  ]

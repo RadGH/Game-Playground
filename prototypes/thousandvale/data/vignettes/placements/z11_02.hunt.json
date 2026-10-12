@@ -1,0 +1,2197 @@
+{
+ "_doc": "Stream E (play-test 3 R2). Extra monster camps near the start for world zone z11_02: solos and pairs (a third roaming a small loop) wherever the level ramp is <= 3.5 — tools/content-living.mjs fillHunting. Same record shape as the main placements file (type camp, stray/roam, hunt: true); js/sim/content.js merges them. Not read by stream B's bake (monsters need no cleared ground).",
+ "zone": "z11_02",
+ "eid": "delvers_hill",
+ "terrainHash": "36526177",
+ "stats": {
+  "targets": 18255,
+  "added": 83,
+  "stray": 54,
+  "roamer": 29,
+  "covered": 0.98
+ },
+ "placements": [
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_1",
+   "monster": "shale_warden",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 2005,
+   "z": 2006,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     2021,
+     1964
+    ],
+    [
+     2047,
+     2028
+    ],
+    [
+     1980,
+     2035
+    ],
+    [
+     1958,
+     1989
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_2",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1827,
+   "z": 38,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_3",
+   "monster": "ash_wisp",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1540,
+   "z": 458,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_4",
+   "monster": "ash_wisp",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1431,
+   "z": 1983,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_5",
+   "monster": "shale_warden",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 2018,
+   "z": 358,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_6",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 2000,
+   "z": 1511,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1943,
+     1487
+    ],
+    [
+     2018,
+     1454
+    ],
+    [
+     2042,
+     1525
+    ],
+    [
+     1992,
+     1559
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_7",
+   "monster": "ash_wisp",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1632,
+   "z": 794,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_8",
+   "monster": "ash_wisp",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1980,
+   "z": 886,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_9",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1800,
+   "z": 1680,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_10",
+   "monster": "ash_wisp",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1563,
+   "z": 1746,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1592,
+     1738
+    ],
+    [
+     1566,
+     1773
+    ],
+    [
+     1531,
+     1751
+    ],
+    [
+     1560,
+     1714
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_11",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1668,
+   "z": 559,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_12",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1173,
+   "z": 1215,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_13",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1542,
+   "z": 755,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_14",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1704,
+   "z": 1006,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_15",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1856,
+   "z": 1896,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_16",
+   "monster": "shale_warden",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1872,
+   "z": 1761,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_17",
+   "monster": "ash_wisp",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1787,
+   "z": 271,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_18",
+   "monster": "shale_warden",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1718,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_19",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1390,
+   "z": 1906,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1416,
+     1938
+    ],
+    [
+     1350,
+     1940
+    ],
+    [
+     1349,
+     1888
+    ],
+    [
+     1417,
+     1870
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_20",
+   "monster": "ash_wisp",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1594,
+   "z": 871,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1557,
+     838
+    ],
+    [
+     1614,
+     833
+    ],
+    [
+     1638,
+     914
+    ],
+    [
+     1556,
+     914
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_21",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1521,
+   "z": 2007,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_22",
+   "monster": "shale_warden",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1320,
+   "z": 1184,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1340,
+     1134
+    ],
+    [
+     1365,
+     1201
+    ],
+    [
+     1284,
+     1229
+    ],
+    [
+     1288,
+     1152
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_23",
+   "monster": "shale_warden",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1809,
+   "z": 1290,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_24",
+   "monster": "shale_warden",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1553,
+   "z": 358,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1615,
+     334
+    ],
+    [
+     1564,
+     415
+    ],
+    [
+     1494,
+     371
+    ],
+    [
+     1549,
+     295
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_25",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1739,
+   "z": 1469,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1726,
+     1434
+    ],
+    [
+     1769,
+     1451
+    ],
+    [
+     1746,
+     1500
+    ],
+    [
+     1699,
+     1496
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_26",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1300,
+   "z": 930,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_27",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1458,
+   "z": 751,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_28",
+   "monster": "shale_warden",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1693,
+   "z": 1094,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_29",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1883,
+   "z": 1273,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_30",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1495,
+   "z": 1280,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_31",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1944,
+   "z": 816,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_32",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1484,
+   "z": 1660,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_33",
+   "monster": "shale_warden",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1791,
+   "z": 1020,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1796,
+     1067
+    ],
+    [
+     1745,
+     1023
+    ],
+    [
+     1778,
+     954
+    ],
+    [
+     1847,
+     997
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_34",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 2009,
+   "z": 1640,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     2036,
+     1612
+    ],
+    [
+     2044,
+     1668
+    ],
+    [
+     1975,
+     1696
+    ],
+    [
+     1963,
+     1600
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_35",
+   "monster": "shale_warden",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1567,
+   "z": 1880,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_36",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1768,
+   "z": 1360,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_37",
+   "monster": "ash_wisp",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1391,
+   "z": 970,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1457,
+     962
+    ],
+    [
+     1400,
+     1038
+    ],
+    [
+     1318,
+     986
+    ],
+    [
+     1380,
+     890
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_38",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1946,
+   "z": 1146,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     2006,
+     1136
+    ],
+    [
+     1953,
+     1208
+    ],
+    [
+     1897,
+     1163
+    ],
+    [
+     1943,
+     1079
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_39",
+   "monster": "ash_wisp",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1389,
+   "z": 1505,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_40",
+   "monster": "shale_warden",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 2005,
+   "z": 1371,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1946,
+     1325
+    ],
+    [
+     2040,
+     1320
+    ],
+    [
+     2039,
+     1410
+    ],
+    [
+     1978,
+     1409
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_41",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1792,
+   "z": 1952,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_42",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 2016,
+   "z": 258,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_43",
+   "monster": "shale_warden",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1438,
+   "z": 1779,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_44",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1504,
+   "z": 1933,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_45",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1819,
+   "z": 845,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_46",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1596,
+   "z": 233,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_47",
+   "monster": "shale_warden",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1888,
+   "z": 1691,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1921,
+     1699
+    ],
+    [
+     1877,
+     1720
+    ],
+    [
+     1847,
+     1671
+    ],
+    [
+     1906,
+     1660
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_48",
+   "monster": "ash_wisp",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1960,
+   "z": 1914,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1921,
+     1904
+    ],
+    [
+     1963,
+     1874
+    ],
+    [
+     1989,
+     1926
+    ],
+    [
+     1953,
+     1945
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_49",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1547,
+   "z": 1335,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_50",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1194,
+   "z": 1408,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_51",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1723,
+   "z": 1686,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_52",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1897,
+   "z": 479,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_53",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1270,
+   "z": 752,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_54",
+   "monster": "ash_wisp",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1873,
+   "z": 247,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_55",
+   "monster": "shale_warden",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1472,
+   "z": 1583,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_56",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1716,
+   "z": 841,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_57",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1626,
+   "z": 1074,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1642,
+     1106
+    ],
+    [
+     1577,
+     1093
+    ],
+    [
+     1600,
+     1026
+    ],
+    [
+     1677,
+     1059
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_58",
+   "monster": "shale_warden",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1589,
+   "z": 1513,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_59",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1332,
+   "z": 1553,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1343,
+     1597
+    ],
+    [
+     1300,
+     1554
+    ],
+    [
+     1322,
+     1517
+    ],
+    [
+     1368,
+     1549
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_60",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1615,
+   "z": 419,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_61",
+   "monster": "ash_wisp",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1665,
+   "z": 1716,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1641,
+     1690
+    ],
+    [
+     1694,
+     1683
+    ],
+    [
+     1703,
+     1741
+    ],
+    [
+     1629,
+     1746
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_62",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1806,
+   "z": 1586,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_63",
+   "monster": "shale_warden",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1483,
+   "z": 723,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_64",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1315,
+   "z": 720,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1262,
+     679
+    ],
+    [
+     1342,
+     676
+    ],
+    [
+     1373,
+     762
+    ],
+    [
+     1283,
+     759
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_65",
+   "monster": "ash_wisp",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1229,
+   "z": 1582,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1183,
+     1553
+    ],
+    [
+     1271,
+     1556
+    ],
+    [
+     1264,
+     1625
+    ],
+    [
+     1206,
+     1617
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_66",
+   "monster": "ash_wisp",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1780,
+   "z": 1741,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_67",
+   "monster": "shale_warden",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1872,
+   "z": 1834,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_68",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1816,
+   "z": 1504,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1841,
+     1496
+    ],
+    [
+     1821,
+     1534
+    ],
+    [
+     1788,
+     1516
+    ],
+    [
+     1810,
+     1475
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_69",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1671,
+   "z": 1927,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1683,
+     1886
+    ],
+    [
+     1714,
+     1932
+    ],
+    [
+     1662,
+     1960
+    ],
+    [
+     1634,
+     1917
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_70",
+   "monster": "ash_wisp",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 2009,
+   "z": 917,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_71",
+   "monster": "ash_wisp",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1761,
+   "z": 503,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_72",
+   "monster": "ash_wisp",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1780,
+   "z": 1884,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1823,
+     1864
+    ],
+    [
+     1808,
+     1932
+    ],
+    [
+     1740,
+     1902
+    ],
+    [
+     1743,
+     1835
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_73",
+   "monster": "ash_wisp",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1458,
+   "z": 905,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1504,
+     902
+    ],
+    [
+     1469,
+     947
+    ],
+    [
+     1425,
+     915
+    ],
+    [
+     1446,
+     870
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_74",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1807,
+   "z": 494,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_75",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1920,
+   "z": 915,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1975,
+     899
+    ],
+    [
+     1941,
+     959
+    ],
+    [
+     1865,
+     930
+    ],
+    [
+     1892,
+     875
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_76",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1398,
+   "z": 1766,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1385,
+     1811
+    ],
+    [
+     1352,
+     1765
+    ],
+    [
+     1404,
+     1720
+    ],
+    [
+     1452,
+     1774
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_77",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1767,
+   "z": 889,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_78",
+   "monster": "ash_wisp",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1232,
+   "z": 1184,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_79",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1200,
+   "z": 1269,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_80",
+   "monster": "shale_warden",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1936,
+   "z": 1768,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1865,
+     1766
+    ],
+    [
+     1938,
+     1705
+    ],
+    [
+     1978,
+     1756
+    ],
+    [
+     1948,
+     1827
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_81",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1771,
+   "z": 1632,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_82",
+   "monster": "ash_wisp",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1888,
+   "z": 1960,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1871,
+     1935
+    ],
+    [
+     1916,
+     1949
+    ],
+    [
+     1902,
+     1984
+    ],
+    [
+     1852,
+     1977
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_delvers_hill_83",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1883,
+   "z": 1046,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1862,
+     1011
+    ],
+    [
+     1924,
+     1018
+    ],
+    [
+     1897,
+     1111
+    ],
+    [
+     1824,
+     1082
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  }
+ ]
+}

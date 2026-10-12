@@ -1,0 +1,508 @@
+{
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z11_03, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "zone": "z11_03",
+ "terrainHash": "a23813e6",
+ "placements": [
+  {
+   "type": "camp",
+   "id": "quest_charcoal_and_cobwebs_0_0",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 94,
+   "z": 120,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "charcoal_and_cobwebs",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_the_hermits_peace_0_0",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    3,
+    3
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1193,
+   "z": 360,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "the_hermits_peace",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_lost_and_hound_1_0",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1081,
+   "z": 1945,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "lost_and_hound",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z11_03_1",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1704,
+   "z": 209,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "fiery"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z11_03_2",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    3,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1411,
+   "z": 177,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "vicious"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z11_03_3",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    3,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1155,
+   "z": 284,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "venomous"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z11_03_4",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 434,
+   "z": 194,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "ironclad"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "npc",
+   "id": "angler_hermits_rest",
+   "name": "Quiet Oswin",
+   "role": "angler",
+   "at": "Hermit's Rest",
+   "x": 1156,
+   "z": 616,
+   "yaw": 1.57,
+   "angler": true,
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "npc",
+   "id": "carter_hermit_s_rest",
+   "name": "Bartle Kettleby",
+   "role": "carter",
+   "at": "Hermit's Rest",
+   "x": 1092,
+   "z": 654,
+   "yaw": -1.571,
+   "cart": "cart_hermit_s_rest",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_hermit_s_rest",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Hermit's Rest",
+   "carter": "carter_hermit_s_rest",
+   "x": 1094,
+   "z": 654,
+   "yaw": 0,
+   "radius": 2.2
+  },
+  {
+   "type": "npc",
+   "id": "carter_charcoal_burners",
+   "name": "Bryn Quarrie",
+   "role": "carter",
+   "at": "Charcoal Burners",
+   "x": 194,
+   "z": 186,
+   "yaw": -0.41,
+   "cart": "cart_charcoal_burners",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_charcoal_burners",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Charcoal Burners",
+   "carter": "carter_charcoal_burners",
+   "x": 196,
+   "z": 184,
+   "yaw": -2.111,
+   "radius": 2.2
+  },
+  {
+   "type": "npc",
+   "id": "carter_wildhaven",
+   "name": "Emrys Kettleby",
+   "role": "carter",
+   "at": "Wildhaven",
+   "x": 1324,
+   "z": 196,
+   "yaw": 3.142,
+   "cart": "cart_wildhaven",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_wildhaven",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Wildhaven",
+   "carter": "carter_wildhaven",
+   "x": 1324,
+   "z": 198,
+   "yaw": 1.571,
+   "radius": 2.2
+  },
+  {
+   "type": "guard",
+   "id": "guard_hermit_s_rest_0",
+   "name": "Hermit's Rest Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Hermit's Rest",
+   "post": "gate",
+   "gate": "hermit_s_rest_gate_1",
+   "x": 1084,
+   "z": 636,
+   "yaw": -0.18,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_hermit_s_rest_1",
+   "name": "Hermit's Rest Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Hermit's Rest",
+   "post": "gate",
+   "gate": "hermit_s_rest_gate_1",
+   "x": 1094,
+   "z": 638,
+   "yaw": -0.18,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_hermit_s_rest_2",
+   "name": "Hermit's Rest Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Hermit's Rest",
+   "post": "gate",
+   "gate": "hermit_s_rest_gate_0",
+   "x": 1108,
+   "z": 640,
+   "yaw": 0.423,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_hermit_s_rest_3",
+   "name": "Hermit's Rest Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Hermit's Rest",
+   "post": "gate",
+   "gate": "hermit_s_rest_gate_0",
+   "x": 1116,
+   "z": 636,
+   "yaw": 0.423,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_hermit_s_rest_4",
+   "name": "Hermit's Rest Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Hermit's Rest",
+   "post": "gate",
+   "gate": "hermit_s_rest_gate_2",
+   "x": 1060,
+   "z": 496,
+   "yaw": -2.803,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_hermit_s_rest_5",
+   "name": "Hermit's Rest Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Hermit's Rest",
+   "post": "gate",
+   "gate": "hermit_s_rest_gate_2",
+   "x": 1052,
+   "z": 500,
+   "yaw": -2.803,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_hermit_s_rest_6",
+   "name": "Hermit's Rest Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Hermit's Rest",
+   "post": "gate",
+   "gate": "hermit_s_rest_gate_3",
+   "x": 1100,
+   "z": 482,
+   "yaw": -3.126,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_hermit_s_rest_7",
+   "name": "Hermit's Rest Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Hermit's Rest",
+   "post": "gate",
+   "gate": "hermit_s_rest_gate_3",
+   "x": 1090,
+   "z": 482,
+   "yaw": -3.126,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_hermit_s_rest_8",
+   "name": "Sergeant Fallowfield",
+   "role": "guard",
+   "rank": "sergeant",
+   "tier": "city",
+   "town": "Hermit's Rest",
+   "post": "square",
+   "x": 1104,
+   "z": 548,
+   "yaw": -0.027,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_hermit_s_rest_9",
+   "name": "Hermit's Rest Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Hermit's Rest",
+   "post": "square",
+   "x": 1098,
+   "z": 554,
+   "yaw": 1.654,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_hermit_s_rest_10",
+   "name": "Hermit's Rest Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Hermit's Rest",
+   "post": "square",
+   "x": 1106,
+   "z": 562,
+   "yaw": -2.894,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_hermit_s_rest_11",
+   "name": "Hermit's Rest Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Hermit's Rest",
+   "post": "square",
+   "x": 1110,
+   "z": 552,
+   "yaw": -1.33,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_charcoal_burners_0",
+   "name": "Charcoal Burners Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "village",
+   "town": "Charcoal Burners",
+   "post": "gate",
+   "gate": "charcoal_burners_gate_0",
+   "x": 208,
+   "z": 192,
+   "yaw": -2.111,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_charcoal_burners_1",
+   "name": "Charcoal Burners Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "village",
+   "town": "Charcoal Burners",
+   "post": "gate",
+   "gate": "charcoal_burners_gate_1",
+   "x": 308,
+   "z": 198,
+   "yaw": 2.047,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_charcoal_burners_2",
+   "name": "Charcoal Burners Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "village",
+   "town": "Charcoal Burners",
+   "post": "square",
+   "x": 248,
+   "z": 228,
+   "yaw": 2.487,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_wildhaven_0",
+   "name": "Wildhaven Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "hamlet",
+   "town": "Wildhaven",
+   "post": "gate",
+   "gate": "wildhaven_gate_1",
+   "x": 1312,
+   "z": 200,
+   "yaw": 2.344,
+   "titled": false
+  }
+ ]
+}

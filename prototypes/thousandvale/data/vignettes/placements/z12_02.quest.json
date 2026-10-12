@@ -1,0 +1,868 @@
+{
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z12_02, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "zone": "z12_02",
+ "terrainHash": "0ba48d02",
+ "placements": [
+  {
+   "type": "camp",
+   "id": "quest_tusks_in_the_turnips_0_0",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1475,
+   "z": 1518,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "tusks_in_the_turnips",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_tusks_in_the_turnips_0_1",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1475,
+   "z": 1518,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "tusks_in_the_turnips",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_frogs_are_not_food_0_0",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 183,
+   "z": 2013,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "frogs_are_not_food",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_bones_for_bryn_0_0",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 394,
+   "z": 1066,
+   "yaw": 0,
+   "radius": 2.905,
+   "quest": "bones_for_bryn",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_start_road_to_orrinsford_1_0",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    1,
+    1
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 730,
+   "z": 1704,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "start_road_to_orrinsford",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_fighter_1_0",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 409,
+   "z": 1238,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "class_fighter",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_fighter_1_1",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 409,
+   "z": 1238,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "class_fighter",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_dragon_knight_2_0",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    1,
+    1
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1060,
+   "z": 1295,
+   "yaw": 0,
+   "radius": 3.665,
+   "quest": "class_dragon_knight",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_priest_1_0",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 735,
+   "z": 1394,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "class_priest",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_mage_1_0",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 110,
+   "z": 1794,
+   "yaw": 0,
+   "radius": 4,
+   "quest": "class_mage",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_mage_2_0",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 104,
+   "z": 1680,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "class_mage",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_chronomancer_2_0",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    1,
+    1
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 828,
+   "z": 1290,
+   "yaw": 0,
+   "radius": 1.716,
+   "quest": "class_chronomancer",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_witch_hunter_2_0",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 428,
+   "z": 1409,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "class_witch_hunter",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_witch_hunter_2_1",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 428,
+   "z": 1409,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "class_witch_hunter",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_the_fairy_ring_0_0",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 104,
+   "z": 1680,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "the_fairy_ring",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_stones_for_the_mother_0_0",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1112,
+   "z": 1887,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "stones_for_the_mother",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_stones_for_the_mother_0_1",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1112,
+   "z": 1887,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "stones_for_the_mother",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z12_02_1",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 428,
+   "z": 1409,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "giant"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z12_02_2",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 784,
+   "z": 1800,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "fiery"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z12_02_3",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1176,
+   "z": 1624,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "packleader"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z12_02_4",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1595,
+   "z": 1332,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "frostbound"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z12_02_5",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    3,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1816,
+   "z": 1032,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "vicious"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z12_02_6",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 144,
+   "z": 1496,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "ironclad"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z12_02_7",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 189,
+   "z": 1822,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "venomous"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z12_02_8",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1504,
+   "z": 1654,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "thorned"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z12_02_9",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1888,
+   "z": 1696,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "packleader"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "npc",
+   "id": "angler_torborhold",
+   "name": "Tam Sedgeley",
+   "role": "angler",
+   "at": "Torborhold",
+   "x": 616,
+   "z": 1312,
+   "yaw": 1.18,
+   "angler": true,
+   "quests": 4,
+   "titled": true
+  },
+  {
+   "type": "npc",
+   "id": "prospector_torborhold",
+   "name": "Bram Delver",
+   "role": "prospector",
+   "at": "Torborhold",
+   "x": 540.5,
+   "z": 1285.5,
+   "yaw": -3.12,
+   "trainer": true,
+   "quests": 3,
+   "titled": true
+  },
+  {
+   "type": "npc",
+   "id": "carter_torborhold",
+   "name": "Mabry Brookes",
+   "role": "carter",
+   "at": "Torborhold",
+   "x": 514,
+   "z": 1270,
+   "yaw": 0.951,
+   "cart": "cart_torborhold",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_torborhold",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Torborhold",
+   "carter": "carter_torborhold",
+   "x": 512,
+   "z": 1268,
+   "yaw": -0.785,
+   "radius": 2.2
+  },
+  {
+   "type": "npc",
+   "id": "carter_mawehaven",
+   "name": "Tobin Underhill",
+   "role": "carter",
+   "at": "Mawehaven",
+   "x": 228,
+   "z": 1860,
+   "yaw": 1.957,
+   "cart": "cart_mawehaven",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_mawehaven",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Mawehaven",
+   "carter": "carter_mawehaven",
+   "x": 226,
+   "z": 1860,
+   "yaw": -2.835,
+   "radius": 2.2
+  },
+  {
+   "type": "npc",
+   "id": "carter_wamonhold",
+   "name": "Idony Fenwick",
+   "role": "carter",
+   "at": "Wamonhold",
+   "x": 1374,
+   "z": 1522,
+   "yaw": 0.992,
+   "cart": "cart_wamonhold",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_wamonhold",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Wamonhold",
+   "carter": "carter_wamonhold",
+   "x": 1372,
+   "z": 1520,
+   "yaw": 2.483,
+   "radius": 2.2
+  },
+  {
+   "type": "guard",
+   "id": "guard_torborhold_0",
+   "name": "Torborhold Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Torborhold",
+   "post": "gate",
+   "gate": "torborhold_gate_0",
+   "x": 534,
+   "z": 1276,
+   "yaw": -1.547,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_torborhold_1",
+   "name": "Torborhold Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Torborhold",
+   "post": "gate",
+   "gate": "torborhold_gate_0",
+   "x": 536,
+   "z": 1286,
+   "yaw": -1.547,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_torborhold_2",
+   "name": "Torborhold Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Torborhold",
+   "post": "gate",
+   "gate": "torborhold_gate_1",
+   "x": 594,
+   "z": 1206,
+   "yaw": 2.383,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_torborhold_3",
+   "name": "Torborhold Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Torborhold",
+   "post": "gate",
+   "gate": "torborhold_gate_1",
+   "x": 588,
+   "z": 1200,
+   "yaw": 2.383,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_torborhold_4",
+   "name": "Torborhold Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Torborhold",
+   "post": "gate",
+   "gate": "torborhold_gate_2",
+   "x": 636,
+   "z": 1222,
+   "yaw": 2.457,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_torborhold_5",
+   "name": "Torborhold Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Torborhold",
+   "post": "gate",
+   "gate": "torborhold_gate_2",
+   "x": 630,
+   "z": 1218,
+   "yaw": 2.457,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_torborhold_6",
+   "name": "Sergeant Kettleby",
+   "role": "guard",
+   "rank": "sergeant",
+   "tier": "town",
+   "town": "Torborhold",
+   "post": "square",
+   "x": 574,
+   "z": 1284,
+   "yaw": 2.169,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_torborhold_7",
+   "name": "Torborhold Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Torborhold",
+   "post": "square",
+   "x": 586,
+   "z": 1282,
+   "yaw": -1.947,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_torborhold_8",
+   "name": "Torborhold Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Torborhold",
+   "post": "square",
+   "x": 578,
+   "z": 1274,
+   "yaw": 0.376,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_mawehaven_0",
+   "name": "Mawehaven Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "hamlet",
+   "town": "Mawehaven",
+   "post": "gate",
+   "gate": "mawehaven_gate_0",
+   "x": 248,
+   "z": 1890,
+   "yaw": -2.835,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_wamonhold_0",
+   "name": "Wamonhold Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "hamlet",
+   "town": "Wamonhold",
+   "post": "gate",
+   "gate": "wamonhold_gate_0",
+   "x": 1372,
+   "z": 1538,
+   "yaw": 2.468,
+   "titled": false
+  }
+ ]
+}

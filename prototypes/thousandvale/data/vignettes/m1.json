@@ -37,7 +37,7 @@
       ],
       "monsters": [ { "type": "road_brigand", "count": 3, "level": 1, "x": -2, "z": 3, "radius": 5 } ],
       "objects": [
-        { "type": "npc", "name": "Dunnet the carter", "x": 0.5, "z": -0.5, "says": ["Are they gone? Gods. They work for Hobb, at the ford. Hobb Gallowsby. Everyone pays Hobb.", "Take what's left in the crates. Better you than them."], "quest": "toll_at_fitockpi" },
+        { "type": "npc", "name": "Dunnet the carter", "x": 0.5, "z": -0.5, "says": ["Are they gone? Gods, thank you. You saw them off. But their mates ran off with three of my crates.", "They work for Hobb, at the ford. Hobb Gallowsby. Everyone pays Hobb.", "Take what's left in the spilled crate. Better you than them."], "quest": "toll_at_fitockpi" },
         { "type": "chest", "name": "Spilled crate", "x": -1.5, "z": 1.5, "tier": "common" }
       ]
     },
@@ -51,9 +51,9 @@
       "props": [
         { "kind": "prop", "id": "well", "x": 0, "z": 0, "yaw": 0 },
         { "kind": "prop", "id": "stone_step", "x": 2, "z": 0, "yaw": 1.57 },
-        { "kind": "prop", "id": "fence_post", "x": -4, "z": -3, "yaw": 0 },
+        { "kind": "prop", "id": "fence_post", "x": -4, "z": -2.2, "yaw": 0 },
         { "kind": "prop", "id": "fence_rail", "x": -4, "z": -1, "yaw": 1.57 },
-        { "kind": "prop", "id": "fence_post", "x": -4, "z": 1, "yaw": 0 }
+        { "kind": "prop", "id": "fence_post", "x": -4, "z": 0.2, "yaw": 0 }
       ],
       "monsters": [ { "type": "cairn_rat", "count": 5, "level": 0, "x": 0, "z": 2, "radius": 5 } ],
       "objects": [
@@ -148,9 +148,9 @@
       "props": [
         { "kind": "prop", "id": "drying_rack", "x": -2, "z": -2, "yaw": 0.3 },
         { "kind": "prop", "id": "skull_totem", "x": 3, "z": -3, "yaw": 0 },
-        { "kind": "prop", "id": "fence_post", "x": -5, "z": 4, "yaw": 0 },
+        { "kind": "prop", "id": "fence_post", "x": -4.2, "z": 4, "yaw": 0 },
         { "kind": "prop", "id": "fence_rail", "x": -3, "z": 4, "yaw": 0 },
-        { "kind": "prop", "id": "fence_post", "x": -1, "z": 4, "yaw": 0 },
+        { "kind": "prop", "id": "fence_post", "x": -1.8, "z": 4, "yaw": 0 },
         { "kind": "prop", "id": "campfire", "x": 1, "z": 0, "yaw": 0 },
         { "kind": "ground", "id": "mushroom_ring", "x": 3, "z": 3, "yaw": 0 }
       ],

@@ -25,6 +25,7 @@ export class Predictor {
     this.lastAck = 0;
     this.corrections = 0;
     this.locked = false;                     // dead: the server position only
+    this.speedMul = 1;                       // riding (Q16): `you.speedMul`, the same factor the server's stepMove reads
   }
   get pos() { return this.st; }
 
@@ -40,6 +41,7 @@ export class Predictor {
   apply({ mx, mz, yaw, b }) {
     const inp = { s: ++this.seq, dt: this.stepMs, mx: round3(mx), mz: round3(mz), yaw: round3(yaw), b: b | 0 };
     this.prev = { x: this.st.x, y: this.st.y, z: this.st.z };
+    this.st.speedMul = this.speedMul;
     if (!this.locked && this.terrain) stepMove(this.st, inp, inp.dt, this.terrain);
     this.pending.push(inp);
     if (this.pending.length > this.maxPending) this.pending.shift();
@@ -51,7 +53,7 @@ export class Predictor {
     if (ack < this.lastAck) return 0;
     this.lastAck = ack;
     while (this.pending.length && this.pending[0].s <= ack) this.pending.shift();
-    const s = { x: p.x, y: p.y, z: p.z, vy: p.vy || 0, airborne: (p.vy || 0) !== 0 };
+    const s = { x: p.x, y: p.y, z: p.z, vy: p.vy || 0, airborne: (p.vy || 0) !== 0, speedMul: this.speedMul };
     if (!this.locked && this.terrain) for (const inp of this.pending) stepMove(s, inp, inp.dt, this.terrain);
     const dx = s.x - this.st.x, dy = s.y - this.st.y, dz = s.z - this.st.z;
     const d = Math.hypot(dx, dz);

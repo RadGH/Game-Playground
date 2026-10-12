@@ -1,14 +1,44 @@
 {
- "_doc": "Stream B zone placements (tools/bake-zone.mjs). Zone metres; yaw = atan2(dx, dz), the way the thing faces. kinds: settlement (data.radius, hub, planned), town_square, street (data.pts, width, cls), building (a proctown plot: data.w along `angle` (local +x = (cos angle, sin angle)), data.d across, want; yaw faces the nearest drawn street, data.streetGap = metres from the front to it), town_wall, road (data.pts [[x,z,h]], width, cls, spur), bridge (yaw along the road, span, deck height), dungeon_door, event_site, camp_site, landmark/dungeon/pass/crossing (World Forge nodes).",
+ "_doc": "Stream B zone placements (tools/bake-zone.mjs). Zone metres; yaw = atan2(dx, dz), the way the thing faces. kinds: settlement (data.radius, hub, planned), town_square, street (data.pts, width, cls), building (a proctown plot: data.w along `angle` (local +x = (cos angle, sin angle)), data.d across, want; yaw faces the nearest drawn street, data.streetGap = metres from the front to it), town_wall (play-test 4: every planned settlement; data.style/material/tier/h/thick/tint/radius, runs [[[x,z,h]…]…] open polylines between openings, towers [{x,z,h,yaw}], gates [{id,x,z,h,yaw = the way OUT along the road,out:[dx,dz],width,pass,kind gatehouse|posts|gap,way,ways,led,ends,approaches}], openings [{kind water|keep,ends,grate}] — SOLID in nav.bin except the gates; tools/lib/zone-walls.mjs), road (data.pts [[x,z,h]], width, cls, spur), bridge (yaw along the road, span, deck height), dungeon_door, event_site, camp_site, landmark/dungeon/pass/crossing (World Forge nodes).",
  "zone": "z13_01",
- "terrainHash": "3c176bbc",
+ "terrainHash": "f3d4195e",
  "placements": [
+  {
+   "kind": "settlement",
+   "id": "brackwater",
+   "x": 1136,
+   "z": 870,
+   "yaw": 0,
+   "data": {
+    "kind": "town",
+    "name": "Brackwater",
+    "radius": 90,
+    "hub": true,
+    "planned": true,
+    "ask": true
+   }
+  },
+  {
+   "kind": "settlement",
+   "id": "eelwick",
+   "x": 1164,
+   "z": 427,
+   "yaw": 0,
+   "data": {
+    "kind": "hamlet",
+    "name": "Eelwick",
+    "radius": 40,
+    "hub": false,
+    "planned": true,
+    "ask": true
+   }
+  },
   {
    "kind": "dungeon_door",
    "id": "door_1",
-   "x": 946,
-   "z": 1186,
-   "yaw": -2.398,
+   "x": 1061,
+   "z": 1066,
+   "yaw": -3.247,
    "data": {
     "name": "Barrow entrance"
    }
@@ -16,11 +46,10469 @@
   {
    "kind": "event_site",
    "id": "event_brackwater",
-   "x": 1024,
-   "z": 1024,
+   "x": 1026,
+   "z": 981,
    "yaw": 0,
    "data": {
     "r": 40
+   }
+  },
+  {
+   "kind": "lake",
+   "id": "the_black_mere",
+   "x": 1439,
+   "z": 1151,
+   "yaw": 0,
+   "data": {
+    "r": 90,
+    "level": 75.29,
+    "kind": "mere",
+    "name": "the Black Mere"
+   }
+  },
+  {
+   "kind": "lake",
+   "id": "pool_1",
+   "x": 1688,
+   "z": 1165,
+   "yaw": 0,
+   "data": {
+    "r": 23,
+    "level": 84.3,
+    "kind": "pool",
+    "name": null
+   }
+  },
+  {
+   "kind": "lake",
+   "id": "pool_2",
+   "x": 1281,
+   "z": 1344,
+   "yaw": 0,
+   "data": {
+    "r": 22,
+    "level": 83.11,
+    "kind": "pool",
+    "name": null
+   }
+  },
+  {
+   "kind": "lake",
+   "id": "pool_3",
+   "x": 1062,
+   "z": 1200,
+   "yaw": 0,
+   "data": {
+    "r": 37,
+    "level": 84.72,
+    "kind": "pool",
+    "name": null
+   }
+  },
+  {
+   "kind": "lake",
+   "id": "pool_4",
+   "x": 1461,
+   "z": 783,
+   "yaw": 0,
+   "data": {
+    "r": 38,
+    "level": 68.74,
+    "kind": "pool",
+    "name": null
+   }
+  },
+  {
+   "kind": "lake",
+   "id": "pool_5",
+   "x": 1540,
+   "z": 981,
+   "yaw": 0,
+   "data": {
+    "r": 27,
+    "level": 75.89,
+    "kind": "pool",
+    "name": null
+   }
+  },
+  {
+   "kind": "lake",
+   "id": "pool_6",
+   "x": 1667,
+   "z": 1328,
+   "yaw": 0,
+   "data": {
+    "r": 37,
+    "level": 83.98,
+    "kind": "pool",
+    "name": null
+   }
+  },
+  {
+   "kind": "lake",
+   "id": "pool_7",
+   "x": 1271,
+   "z": 1004,
+   "yaw": 0,
+   "data": {
+    "r": 18,
+    "level": 77.21,
+    "kind": "pool",
+    "name": null
+   }
+  },
+  {
+   "kind": "lake",
+   "id": "pool_8",
+   "x": 1226,
+   "z": 1171,
+   "yaw": 0,
+   "data": {
+    "r": 21,
+    "level": 82.6,
+    "kind": "pool",
+    "name": null
+   }
+  },
+  {
+   "kind": "lake",
+   "id": "pool_9",
+   "x": 1520,
+   "z": 1337,
+   "yaw": 0,
+   "data": {
+    "r": 21,
+    "level": 80,
+    "kind": "pool",
+    "name": null
+   }
+  },
+  {
+   "kind": "lake",
+   "id": "pool_10",
+   "x": 1144,
+   "z": 1046,
+   "yaw": 0,
+   "data": {
+    "r": 19,
+    "level": 78.62,
+    "kind": "pool",
+    "name": null
+   }
+  },
+  {
+   "kind": "lake",
+   "id": "pool_11",
+   "x": 1384,
+   "z": 1503,
+   "yaw": 0,
+   "data": {
+    "r": 34,
+    "level": 85.26,
+    "kind": "pool",
+    "name": null
+   }
+  },
+  {
+   "kind": "lake",
+   "id": "pool_12",
+   "x": 1536,
+   "z": 1463,
+   "yaw": 0,
+   "data": {
+    "r": 18,
+    "level": 84.53,
+    "kind": "pool",
+    "name": null
+   }
+  },
+  {
+   "kind": "lake",
+   "id": "pool_13",
+   "x": 1209,
+   "z": 1471,
+   "yaw": 0,
+   "data": {
+    "r": 39,
+    "level": 93.35,
+    "kind": "pool",
+    "name": null
+   }
+  },
+  {
+   "kind": "lake",
+   "id": "pool_14",
+   "x": 1719,
+   "z": 908,
+   "yaw": 0,
+   "data": {
+    "r": 22,
+    "level": 75.61,
+    "kind": "pool",
+    "name": null
+   }
+  },
+  {
+   "kind": "fen",
+   "id": "fen",
+   "x": 1439,
+   "z": 1151,
+   "yaw": 0,
+   "data": {
+    "r": 430
+   }
+  },
+  {
+   "kind": "town_square",
+   "id": "brackwater_square",
+   "x": 1142.62,
+   "z": 872.11,
+   "yaw": 0,
+   "data": {
+    "r": 4.59,
+    "town": "brackwater",
+    "culture": "halfling",
+    "stalls": [
+     [
+      1138.78,
+      878.66
+     ],
+     [
+      1148.22,
+      864.93
+     ],
+     [
+      1135.02,
+      872.05
+     ],
+     [
+      1146.05,
+      880.54
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_0",
+   "x": 1100.39,
+   "z": 828.08,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      1100.39,
+      828.08
+     ],
+     [
+      1125.8,
+      875.52
+     ],
+     [
+      1151.64,
+      922.73
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_1",
+   "x": 1089.46,
+   "z": 893.75,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      1089.46,
+      893.75
+     ],
+     [
+      1103.98,
+      883.82
+     ],
+     [
+      1119.28,
+      875.14
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_2",
+   "x": 1083.44,
+   "z": 876.71,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1083.44,
+      876.71
+     ],
+     [
+      1094.57,
+      867.33
+     ],
+     [
+      1104.8,
+      856.97
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_3",
+   "x": 1083.7,
+   "z": 852.98,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1083.7,
+      852.98
+     ],
+     [
+      1087.75,
+      857.11
+     ],
+     [
+      1094.29,
+      863
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_4",
+   "x": 1082.26,
+   "z": 858.31,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1082.26,
+      858.31
+     ],
+     [
+      1084.77,
+      855.78
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_5",
+   "x": 1081.42,
+   "z": 863.21,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1081.42,
+      863.21
+     ],
+     [
+      1084.3,
+      865.71
+     ],
+     [
+      1087.97,
+      869.59
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_6",
+   "x": 1086.4,
+   "z": 853.52,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1086.4,
+      853.52
+     ],
+     [
+      1089.64,
+      849.87
+     ],
+     [
+      1093.15,
+      846.48
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_7",
+   "x": 1097.85,
+   "z": 868.34,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1097.85,
+      868.34
+     ],
+     [
+      1100.19,
+      872.32
+     ],
+     [
+      1102.95,
+      876.03
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_8",
+   "x": 1100.86,
+   "z": 910.35,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1100.86,
+      910.35
+     ],
+     [
+      1115.99,
+      902.81
+     ],
+     [
+      1130.03,
+      893.41
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_9",
+   "x": 1102.97,
+   "z": 892.5,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1102.97,
+      892.5
+     ],
+     [
+      1106.29,
+      896.99
+     ],
+     [
+      1110.11,
+      901.06
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_10",
+   "x": 1110.56,
+   "z": 886.16,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1110.56,
+      886.16
+     ],
+     [
+      1114.01,
+      890.54
+     ],
+     [
+      1117.71,
+      894.72
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_11",
+   "x": 1116.6,
+   "z": 904.59,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1116.6,
+      904.59
+     ],
+     [
+      1122.32,
+      915.3
+     ],
+     [
+      1126.75,
+      924.22
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_12",
+   "x": 1110.33,
+   "z": 918.64,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1110.33,
+      918.64
+     ],
+     [
+      1113.71,
+      916.62
+     ],
+     [
+      1119.96,
+      913.89
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_13",
+   "x": 1124.36,
+   "z": 916.87,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1124.36,
+      916.87
+     ],
+     [
+      1131.18,
+      913.13
+     ],
+     [
+      1138.18,
+      909.75
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_14",
+   "x": 1127.05,
+   "z": 899.2,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1127.05,
+      899.2
+     ],
+     [
+      1130.13,
+      905.03
+     ],
+     [
+      1133.09,
+      910.91
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_15",
+   "x": 1132.77,
+   "z": 914.01,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1132.77,
+      914.01
+     ],
+     [
+      1134.88,
+      917.7
+     ],
+     [
+      1136.67,
+      921.57
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_16",
+   "x": 1130.96,
+   "z": 862.66,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      1130.96,
+      862.66
+     ],
+     [
+      1154.99,
+      854.93
+     ],
+     [
+      1178.57,
+      845.93
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_17",
+   "x": 1132.11,
+   "z": 824.44,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1132.11,
+      824.44
+     ],
+     [
+      1139.49,
+      838.87
+     ],
+     [
+      1145.65,
+      853.86
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_18",
+   "x": 1126.6,
+   "z": 840.78,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1126.6,
+      840.78
+     ],
+     [
+      1130.97,
+      838.66
+     ],
+     [
+      1135.54,
+      837
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_19",
+   "x": 1129.46,
+   "z": 847.56,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1129.46,
+      847.56
+     ],
+     [
+      1133.81,
+      845.39
+     ],
+     [
+      1138.41,
+      843.78
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_20",
+   "x": 1141.73,
+   "z": 836.88,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1141.73,
+      836.88
+     ],
+     [
+      1152.88,
+      829.71
+     ],
+     [
+      1163.38,
+      822.3
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_21",
+   "x": 1144.52,
+   "z": 821.8,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1144.52,
+      821.8
+     ],
+     [
+      1147.35,
+      825.65
+     ],
+     [
+      1149.86,
+      829.72
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_22",
+   "x": 1150.83,
+   "z": 817.55,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1150.83,
+      817.55
+     ],
+     [
+      1153.41,
+      821.57
+     ],
+     [
+      1156.17,
+      825.47
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_23",
+   "x": 1149.11,
+   "z": 833.58,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1149.11,
+      833.58
+     ],
+     [
+      1153.29,
+      840.2
+     ],
+     [
+      1157.86,
+      846.56
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_24",
+   "x": 1148.48,
+   "z": 846.89,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1148.48,
+      846.89
+     ],
+     [
+      1151.32,
+      845.17
+     ],
+     [
+      1153.97,
+      843.18
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_25",
+   "x": 1157.19,
+   "z": 828.14,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1157.19,
+      828.14
+     ],
+     [
+      1161.41,
+      834.73
+     ],
+     [
+      1165.94,
+      841.12
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_26",
+   "x": 1153.11,
+   "z": 837.13,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1153.11,
+      837.13
+     ],
+     [
+      1156.02,
+      835.07
+     ],
+     [
+      1159.02,
+      833.15
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_27",
+   "x": 1163.56,
+   "z": 835.28,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1163.56,
+      835.28
+     ],
+     [
+      1166.71,
+      833.24
+     ],
+     [
+      1169.78,
+      831.08
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_28",
+   "x": 1157.69,
+   "z": 858.5,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1157.69,
+      858.5
+     ],
+     [
+      1161.04,
+      878.74
+     ],
+     [
+      1166.29,
+      898.58
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_29",
+   "x": 1145.39,
+   "z": 887.69,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1145.39,
+      887.69
+     ],
+     [
+      1152.06,
+      884.71
+     ],
+     [
+      1159.05,
+      882.57
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_30",
+   "x": 1142,
+   "z": 878.64,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1142,
+      878.64
+     ],
+     [
+      1148.75,
+      875.88
+     ],
+     [
+      1155.66,
+      873.53
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_31",
+   "x": 1145.02,
+   "z": 866.31,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1145.02,
+      866.31
+     ],
+     [
+      1146.9,
+      870.5
+     ],
+     [
+      1148.23,
+      874.9
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_32",
+   "x": 1148.87,
+   "z": 877.48,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1148.87,
+      877.48
+     ],
+     [
+      1149.99,
+      880.68
+     ],
+     [
+      1151.25,
+      883.83
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_33",
+   "x": 1154.08,
+   "z": 886.09,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1154.08,
+      886.09
+     ],
+     [
+      1155.54,
+      890.72
+     ],
+     [
+      1157.49,
+      895.18
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_34",
+   "x": 1165.02,
+   "z": 876.2,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1165.02,
+      876.2
+     ],
+     [
+      1174.31,
+      874.28
+     ],
+     [
+      1183.76,
+      873.58
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_35",
+   "x": 1170.59,
+   "z": 858.18,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1170.59,
+      858.18
+     ],
+     [
+      1171.71,
+      865.78
+     ],
+     [
+      1172.71,
+      873.4
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_36",
+   "x": 1163.82,
+   "z": 867.6,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1163.82,
+      867.6
+     ],
+     [
+      1167.18,
+      866.92
+     ],
+     [
+      1170.6,
+      866.65
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_37",
+   "x": 1172.95,
+   "z": 866.65,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1172.95,
+      866.65
+     ],
+     [
+      1177.75,
+      865.81
+     ],
+     [
+      1182.61,
+      865.31
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_38",
+   "x": 1173.88,
+   "z": 876.69,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1173.88,
+      876.69
+     ],
+     [
+      1175.59,
+      885.19
+     ],
+     [
+      1176.26,
+      893.82
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_39",
+   "x": 1166.17,
+   "z": 884.46,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1166.17,
+      884.46
+     ],
+     [
+      1169.7,
+      884.16
+     ],
+     [
+      1173.18,
+      883.49
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_40",
+   "x": 1177.17,
+   "z": 888.54,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1177.17,
+      888.54
+     ],
+     [
+      1181.39,
+      887.67
+     ],
+     [
+      1185.68,
+      887.35
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_41",
+   "x": 1117.94,
+   "z": 807.56,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      1117.94,
+      807.56
+     ],
+     [
+      1128.5,
+      856.5
+     ],
+     [
+      1139.37,
+      868.87
+     ]
+    ],
+    "high": true,
+    "to": "square",
+    "road": "road_link_brackwater"
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_42",
+   "x": 1161.04,
+   "z": 878.74,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1161.04,
+      878.74
+     ],
+     [
+      1159.05,
+      882.57
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_43",
+   "x": 1154.99,
+   "z": 854.93,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1154.99,
+      854.93
+     ],
+     [
+      1157.69,
+      858.5
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_44",
+   "x": 1166.17,
+   "z": 884.46,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1166.17,
+      884.46
+     ],
+     [
+      1162.79,
+      885.36
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_45",
+   "x": 1130.03,
+   "z": 893.41,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1130.03,
+      893.41
+     ],
+     [
+      1145.39,
+      887.69
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_46",
+   "x": 1125.8,
+   "z": 875.52,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1125.8,
+      875.52
+     ],
+     [
+      1130.96,
+      862.66
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_47",
+   "x": 1141.73,
+   "z": 836.88,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1141.73,
+      836.88
+     ],
+     [
+      1139.15,
+      838.2
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_48",
+   "x": 1119.28,
+   "z": 875.14,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1119.28,
+      875.14
+     ],
+     [
+      1124.19,
+      872.51
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_49",
+   "x": 1110.56,
+   "z": 886.16,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1110.56,
+      886.16
+     ],
+     [
+      1107.95,
+      881.56
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_50",
+   "x": 1110.11,
+   "z": 901.06,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1110.11,
+      901.06
+     ],
+     [
+      1111.98,
+      904.81
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_51",
+   "x": 1102.95,
+   "z": 876.03,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1102.95,
+      876.03
+     ],
+     [
+      1106.54,
+      882.36
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_52",
+   "x": 1094.57,
+   "z": 867.33,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1094.57,
+      867.33
+     ],
+     [
+      1097.85,
+      868.34
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "brackwater_street_53",
+   "x": 1094.29,
+   "z": 863,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1094.29,
+      863
+     ],
+     [
+      1096.6,
+      865.28
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "building",
+   "id": "brackwater_plot_0",
+   "x": 1087.28,
+   "z": 862.61,
+   "yaw": -0.7643,
+   "data": {
+    "town": "brackwater",
+    "want": "house",
+    "district": "residential",
+    "w": 5.19,
+    "d": 9.45,
+    "angle": 5.4767,
+    "front": 8.6183,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "brackwater_plot_1",
+   "x": 1094.66,
+   "z": 854.69,
+   "yaw": -2.3351,
+   "data": {
+    "town": "brackwater",
+    "want": "house",
+    "district": "residential",
+    "w": 8.55,
+    "d": 9.76,
+    "angle": 5.4767,
+    "front": 10.1891,
+    "streetGap": -0.03
+   }
+  },
+  {
+   "kind": "building",
+   "id": "brackwater_plot_2",
+   "x": 1094.95,
+   "z": 875.8,
+   "yaw": 2.1573,
+   "data": {
+    "town": "brackwater",
+    "want": "house",
+    "district": "residential",
+    "w": 9.17,
+    "d": 8.03,
+    "angle": 5.6967,
+    "front": 5.6967,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "brackwater_plot_3",
+   "x": 1105.01,
+   "z": 869.12,
+   "yaw": -0.9843,
+   "data": {
+    "town": "brackwater",
+    "want": "armoury",
+    "district": "residential",
+    "w": 7.17,
+    "d": 8.03,
+    "angle": 5.6967,
+    "front": 8.8383,
+    "streetGap": 0.1,
+    "office": "armoury",
+    "role": "armourer",
+    "lit": true,
+    "label": "Armourer"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "brackwater_plot_4",
+   "x": 1110.4,
+   "z": 893.56,
+   "yaw": 2.2666,
+   "data": {
+    "town": "brackwater",
+    "want": "house",
+    "district": "residential",
+    "w": 6.01,
+    "d": 9.95,
+    "angle": 5.5873,
+    "front": 5.5873,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "brackwater_plot_5",
+   "x": 1117.58,
+   "z": 887.56,
+   "yaw": -0.875,
+   "data": {
+    "town": "brackwater",
+    "want": "temple",
+    "district": "craft",
+    "w": 5.25,
+    "d": 9.95,
+    "angle": 5.5873,
+    "front": 8.7289,
+    "streetGap": -0.07,
+    "office": "temple",
+    "role": "healer",
+    "lit": false,
+    "label": "Temple"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "brackwater_plot_6",
+   "x": 1114.07,
+   "z": 910.54,
+   "yaw": 0.4758,
+   "data": {
+    "town": "brackwater",
+    "want": "house",
+    "district": "residential",
+    "w": 6.2,
+    "d": 7.07,
+    "angle": 5.8073,
+    "front": 7.3781,
+    "streetGap": -0.2
+   }
+  },
+  {
+   "kind": "building",
+   "id": "brackwater_plot_7",
+   "x": 1123.52,
+   "z": 905.06,
+   "yaw": 2.0466,
+   "data": {
+    "town": "brackwater",
+    "want": "bowyer",
+    "district": "residential",
+    "w": 8.12,
+    "d": 5.98,
+    "angle": 5.8073,
+    "front": 5.8073,
+    "streetGap": -0.3,
+    "office": "bowyer",
+    "role": "bowyer",
+    "lit": true,
+    "label": "Bowyer"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "brackwater_plot_8",
+   "x": 1126.26,
+   "z": 910.38,
+   "yaw": -1.095,
+   "data": {
+    "town": "brackwater",
+    "want": "house",
+    "district": "residential",
+    "w": 8.12,
+    "d": 5.98,
+    "angle": 5.8073,
+    "front": 8.9489,
+    "streetGap": -0.36
+   }
+  },
+  {
+   "kind": "building",
+   "id": "brackwater_plot_10",
+   "x": 1136.33,
+   "z": 851.34,
+   "yaw": -2.7422,
+   "data": {
+    "town": "brackwater",
+    "want": "forge",
+    "district": "craft",
+    "w": 8.51,
+    "d": 8.32,
+    "angle": 5.8837,
+    "front": 10.5961,
+    "streetGap": 0.2,
+    "office": "forge",
+    "role": "smith",
+    "lit": true,
+    "label": "Smithy"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "brackwater_plot_11",
+   "x": 1142.2,
+   "z": 829.12,
+   "yaw": 0.5931,
+   "data": {
+    "town": "brackwater",
+    "want": "house",
+    "district": "residential",
+    "w": 8.24,
+    "d": 8.35,
+    "angle": 5.6901,
+    "front": 7.2609,
+    "streetGap": 0
+   }
+  },
+  {
+   "kind": "building",
+   "id": "brackwater_plot_12",
+   "x": 1147.89,
+   "z": 840.08,
+   "yaw": 2.1639,
+   "data": {
+    "town": "brackwater",
+    "want": "stable",
+    "district": "craft",
+    "w": 5.43,
+    "d": 8.21,
+    "angle": 5.6901,
+    "front": 5.6901,
+    "streetGap": -0.31,
+    "office": "stable",
+    "role": "stablehand",
+    "lit": true,
+    "label": "Stables"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "brackwater_plot_13",
+   "x": 1159.32,
+   "z": 839.98,
+   "yaw": 2.1639,
+   "data": {
+    "town": "brackwater",
+    "want": "study",
+    "district": "residential",
+    "w": 5.92,
+    "d": 8.08,
+    "angle": 5.6901,
+    "front": 5.6901,
+    "streetGap": -0.32,
+    "office": "study",
+    "role": "unbinder",
+    "lit": false,
+    "label": "Unbinder's Study"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "brackwater_plot_14",
+   "x": 1163.69,
+   "z": 828.76,
+   "yaw": 0.5931,
+   "data": {
+    "town": "brackwater",
+    "want": "house",
+    "district": "residential",
+    "w": 6.31,
+    "d": 7.11,
+    "angle": 5.6901,
+    "front": 7.2609,
+    "streetGap": -0.25
+   }
+  },
+  {
+   "kind": "building",
+   "id": "brackwater_plot_15",
+   "x": 1154.24,
+   "z": 879.09,
+   "yaw": -1.2123,
+   "data": {
+    "town": "brackwater",
+    "want": "hall",
+    "district": "civic",
+    "w": 5.36,
+    "d": 5.59,
+    "angle": 5.9247,
+    "front": 9.0663,
+    "streetGap": -0.23,
+    "office": "hall",
+    "role": "elder",
+    "lit": false,
+    "label": "Town Hall"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "brackwater_plot_16",
+   "x": 1151.07,
+   "z": 892.4,
+   "yaw": 1.9293,
+   "data": {
+    "town": "brackwater",
+    "want": "inn",
+    "district": "craft",
+    "w": 6.14,
+    "d": 8.51,
+    "angle": 5.9247,
+    "front": 5.9247,
+    "streetGap": -0.4,
+    "office": "inn",
+    "role": "innkeeper",
+    "lit": true,
+    "label": "Inn"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "brackwater_plot_17",
+   "x": 1166.54,
+   "z": 862.32,
+   "yaw": 0.1385,
+   "data": {
+    "town": "brackwater",
+    "want": "shop",
+    "district": "craft",
+    "w": 5.64,
+    "d": 5.88,
+    "angle": 6.1447,
+    "front": 7.7155,
+    "streetGap": -0.4,
+    "office": "shop",
+    "role": "merchant",
+    "lit": true,
+    "label": "General Goods"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "brackwater_plot_18",
+   "x": 1177.09,
+   "z": 861.03,
+   "yaw": 0.1385,
+   "data": {
+    "town": "brackwater",
+    "want": "counting_house",
+    "district": "residential",
+    "w": 8.55,
+    "d": 6.24,
+    "angle": 6.1447,
+    "front": 7.7155,
+    "streetGap": -0.4,
+    "office": "counting_house",
+    "role": "broker",
+    "lit": false,
+    "label": "Counting House"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "brackwater_plot_19",
+   "x": 1170.5,
+   "z": 889.89,
+   "yaw": -3.0031,
+   "data": {
+    "town": "brackwater",
+    "want": "barber",
+    "district": "craft",
+    "w": 5.87,
+    "d": 8.18,
+    "angle": 6.1447,
+    "front": 10.8571,
+    "streetGap": -0.4,
+    "office": "barber",
+    "role": "barber",
+    "lit": true,
+    "label": "Barber"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "brackwater_plot_20",
+   "x": 1180.49,
+   "z": 881.23,
+   "yaw": 0.1385,
+   "data": {
+    "town": "brackwater",
+    "want": "apothecary",
+    "district": "residential",
+    "w": 7.39,
+    "d": 9.61,
+    "angle": 6.1447,
+    "front": 7.7155,
+    "streetGap": -0.4,
+    "office": "apothecary",
+    "role": "apothecary",
+    "lit": true,
+    "label": "Apothecary"
+   }
+  },
+  {
+   "kind": "town_square",
+   "id": "eelwick_square",
+   "x": 1158.65,
+   "z": 427.37,
+   "yaw": 0,
+   "data": {
+    "r": 3.68,
+    "town": "eelwick",
+    "culture": "halfling",
+    "stalls": [
+     [
+      1165.1,
+      428.27
+     ],
+     [
+      1140.81,
+      422.45
+     ],
+     [
+      1157.14,
+      438.28
+     ],
+     [
+      1165.29,
+      436.15
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "eelwick_street_0",
+   "x": 1159.27,
+   "z": 398.39,
+   "yaw": 0,
+   "data": {
+    "town": "eelwick",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      1159.27,
+      398.39
+     ],
+     [
+      1168.83,
+      425.11
+     ],
+     [
+      1179.93,
+      451.23
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "eelwick_street_1",
+   "x": 1140.5,
+   "z": 437.05,
+   "yaw": 0,
+   "data": {
+    "town": "eelwick",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      1140.5,
+      437.05
+     ],
+     [
+      1152.32,
+      434.76
+     ],
+     [
+      1164.15,
+      432.5
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "eelwick_street_2",
+   "x": 1141.78,
+   "z": 412.39,
+   "yaw": 0,
+   "data": {
+    "town": "eelwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1141.78,
+      412.39
+     ],
+     [
+      1144.72,
+      423
+     ],
+     [
+      1147.37,
+      433.68
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "eelwick_street_3",
+   "x": 1141.2,
+   "z": 426.94,
+   "yaw": 0,
+   "data": {
+    "town": "eelwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1141.2,
+      426.94
+     ],
+     [
+      1142.32,
+      426.43
+     ],
+     [
+      1143.41,
+      425.88
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "eelwick_street_4",
+   "x": 1146.8,
+   "z": 425.79,
+   "yaw": 0,
+   "data": {
+    "town": "eelwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1146.8,
+      425.79
+     ],
+     [
+      1153.99,
+      423.9
+     ],
+     [
+      1161.27,
+      422.41
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "eelwick_street_5",
+   "x": 1150.96,
+   "z": 410.42,
+   "yaw": 0,
+   "data": {
+    "town": "eelwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1150.96,
+      410.42
+     ],
+     [
+      1152.62,
+      416.56
+     ],
+     [
+      1153.85,
+      422.81
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "eelwick_street_6",
+   "x": 1144.68,
+   "z": 416.71,
+   "yaw": 0,
+   "data": {
+    "town": "eelwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1144.68,
+      416.71
+     ],
+     [
+      1147.69,
+      415.89
+     ],
+     [
+      1150.74,
+      415.29
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "eelwick_street_7",
+   "x": 1153.64,
+   "z": 416.12,
+   "yaw": 0,
+   "data": {
+    "town": "eelwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1153.64,
+      416.12
+     ],
+     [
+      1156.54,
+      415.33
+     ],
+     [
+      1159.49,
+      414.76
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "eelwick_street_8",
+   "x": 1153.26,
+   "z": 425.62,
+   "yaw": 0,
+   "data": {
+    "town": "eelwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1153.26,
+      425.62
+     ],
+     [
+      1153.84,
+      428.49
+     ],
+     [
+      1154.59,
+      431.33
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "eelwick_street_9",
+   "x": 1151.86,
+   "z": 437.74,
+   "yaw": 0,
+   "data": {
+    "town": "eelwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1151.86,
+      437.74
+     ],
+     [
+      1152.1,
+      444.98
+     ],
+     [
+      1152.39,
+      452.22
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "eelwick_street_10",
+   "x": 1144.79,
+   "z": 445.5,
+   "yaw": 0,
+   "data": {
+    "town": "eelwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1144.79,
+      445.5
+     ],
+     [
+      1147.62,
+      445.11
+     ],
+     [
+      1150.45,
+      444.79
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "eelwick_street_11",
+   "x": 1154.24,
+   "z": 442.23,
+   "yaw": 0,
+   "data": {
+    "town": "eelwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1154.24,
+      442.23
+     ],
+     [
+      1158.95,
+      442.93
+     ],
+     [
+      1163.7,
+      443.14
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "eelwick_street_12",
+   "x": 1174.9,
+   "z": 426.17,
+   "yaw": 0,
+   "data": {
+    "town": "eelwick",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      1174.9,
+      426.17
+     ],
+     [
+      1183.09,
+      422.82
+     ],
+     [
+      1191.12,
+      419.12
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "eelwick_street_13",
+   "x": 1168.97,
+   "z": 411.88,
+   "yaw": 0,
+   "data": {
+    "town": "eelwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1168.97,
+      411.88
+     ],
+     [
+      1177.09,
+      409.06
+     ],
+     [
+      1183.82,
+      405.83
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "eelwick_street_14",
+   "x": 1169.44,
+   "z": 399.2,
+   "yaw": 0,
+   "data": {
+    "town": "eelwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1169.44,
+      399.2
+     ],
+     [
+      1171.74,
+      403.25
+     ],
+     [
+      1174.54,
+      406.99
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "eelwick_street_15",
+   "x": 1179.11,
+   "z": 409.74,
+   "yaw": 0,
+   "data": {
+    "town": "eelwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1179.11,
+      409.74
+     ],
+     [
+      1181.03,
+      414.91
+     ],
+     [
+      1182.99,
+      420.06
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "eelwick_street_16",
+   "x": 1171.69,
+   "z": 417.41,
+   "yaw": 0,
+   "data": {
+    "town": "eelwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1171.69,
+      417.41
+     ],
+     [
+      1175.65,
+      415.84
+     ],
+     [
+      1179.67,
+      414.41
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "eelwick_street_17",
+   "x": 1182.05,
+   "z": 414.39,
+   "yaw": 0,
+   "data": {
+    "town": "eelwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1182.05,
+      414.39
+     ],
+     [
+      1184.69,
+      413.37
+     ],
+     [
+      1187.35,
+      412.4
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "eelwick_street_18",
+   "x": 1181.23,
+   "z": 439.53,
+   "yaw": 0,
+   "data": {
+    "town": "eelwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1181.23,
+      439.53
+     ],
+     [
+      1188.82,
+      435.81
+     ],
+     [
+      1192.07,
+      434.27
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "eelwick_street_19",
+   "x": 1182.87,
+   "z": 426.59,
+   "yaw": 0,
+   "data": {
+    "town": "eelwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1182.87,
+      426.59
+     ],
+     [
+      1185.55,
+      430.14
+     ],
+     [
+      1188,
+      433.85
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "eelwick_street_20",
+   "x": 1187.17,
+   "z": 438.24,
+   "yaw": 0,
+   "data": {
+    "town": "eelwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1187.17,
+      438.24
+     ],
+     [
+      1188.54,
+      441.12
+     ],
+     [
+      1188.84,
+      441.97
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "eelwick_street_21",
+   "x": 1168.83,
+   "z": 425.11,
+   "yaw": 0,
+   "data": {
+    "town": "eelwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1168.83,
+      425.11
+     ],
+     [
+      1161.27,
+      422.41
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "eelwick_street_22",
+   "x": 1168.97,
+   "z": 411.88,
+   "yaw": 0,
+   "data": {
+    "town": "eelwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1168.97,
+      411.88
+     ],
+     [
+      1164.65,
+      413.43
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "eelwick_street_23",
+   "x": 1182.87,
+   "z": 426.59,
+   "yaw": 0,
+   "data": {
+    "town": "eelwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1182.87,
+      426.59
+     ],
+     [
+      1181.59,
+      423.44
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "building",
+   "id": "eelwick_plot_0",
+   "x": 1148.76,
+   "z": 420.49,
+   "yaw": 0.2291,
+   "data": {
+    "town": "eelwick",
+    "want": "inn",
+    "district": "craft",
+    "w": 5.03,
+    "d": 5.61,
+    "angle": 6.0541,
+    "front": 7.6249,
+    "streetGap": -0.28,
+    "office": "inn",
+    "role": "innkeeper",
+    "lit": true,
+    "label": "Inn"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "eelwick_plot_1",
+   "x": 1155.73,
+   "z": 411.85,
+   "yaw": 0.2291,
+   "data": {
+    "town": "eelwick",
+    "want": "hut",
+    "district": "craft",
+    "w": 4.8,
+    "d": 3.76,
+    "angle": 6.0541,
+    "front": 7.6249,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "eelwick_plot_2",
+   "x": 1157.45,
+   "z": 419.22,
+   "yaw": 0.2291,
+   "data": {
+    "town": "eelwick",
+    "want": "granary",
+    "district": "civic",
+    "w": 4.8,
+    "d": 4.15,
+    "angle": 6.0541,
+    "front": 7.6249,
+    "streetGap": -0.28,
+    "office": "granary",
+    "role": "farmer",
+    "lit": false,
+    "label": "Granary"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "eelwick_plot_3",
+   "x": 1150.26,
+   "z": 429.33,
+   "yaw": 1.7999,
+   "data": {
+    "town": "eelwick",
+    "want": "shrine",
+    "district": "civic",
+    "w": 3.95,
+    "d": 4.66,
+    "angle": 6.0541,
+    "front": 6.0541,
+    "streetGap": -0.4,
+    "office": "shrine",
+    "role": null,
+    "lit": false,
+    "label": "Shrine"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "eelwick_plot_4",
+   "x": 1147.17,
+   "z": 441.55,
+   "yaw": 0.1246,
+   "data": {
+    "town": "eelwick",
+    "want": "house",
+    "district": "residential",
+    "w": 4.51,
+    "d": 3.79,
+    "angle": 6.1586,
+    "front": 7.7294,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "eelwick_plot_5",
+   "x": 1156.45,
+   "z": 447.28,
+   "yaw": 3.0462,
+   "data": {
+    "town": "eelwick",
+    "want": "house",
+    "district": "residential",
+    "w": 4.15,
+    "d": 5.74,
+    "angle": 6.3786,
+    "front": 11.091,
+    "streetGap": -0.29
+   }
+  },
+  {
+   "kind": "building",
+   "id": "eelwick_plot_6",
+   "x": 1160.58,
+   "z": 447.67,
+   "yaw": 3.0462,
+   "data": {
+    "town": "eelwick",
+    "want": "house",
+    "district": "residential",
+    "w": 4.15,
+    "d": 5.74,
+    "angle": 6.3786,
+    "front": 11.091,
+    "streetGap": -0.29
+   }
+  },
+  {
+   "kind": "building",
+   "id": "eelwick_plot_7",
+   "x": 1177.02,
+   "z": 419.48,
+   "yaw": 1.9306,
+   "data": {
+    "town": "eelwick",
+    "want": "shop",
+    "district": "residential",
+    "w": 7.33,
+    "d": 4.08,
+    "angle": 5.9233,
+    "front": 5.9233,
+    "streetGap": -0.39,
+    "office": "shop",
+    "role": "merchant",
+    "lit": true,
+    "label": "General Goods"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "eelwick_plot_8",
+   "x": 1182.4,
+   "z": 432.36,
+   "yaw": 2.1854,
+   "data": {
+    "town": "eelwick",
+    "want": "mill",
+    "district": "residential",
+    "w": 3.76,
+    "d": 7.7,
+    "angle": 5.6685,
+    "front": 5.6685,
+    "streetGap": -0.12,
+    "office": "mill",
+    "role": "miller",
+    "lit": false,
+    "label": "Mill"
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_link_brackwater",
+   "x": 1111,
+   "z": 783.54,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      1111,
+      783.54,
+      78.34
+     ],
+     [
+      1109,
+      776.63,
+      78.27
+     ],
+     [
+      1103.75,
+      756.47,
+      77.92
+     ],
+     [
+      1099.25,
+      736.91,
+      77.39
+     ],
+     [
+      1095.5,
+      717.94,
+      76.51
+     ],
+     [
+      1092.5,
+      699.56,
+      75.44
+     ],
+     [
+      1090.25,
+      681.78,
+      74.12
+     ],
+     [
+      1088.75,
+      664.59,
+      72.59
+     ],
+     [
+      1088,
+      648,
+      71.14
+     ],
+     [
+      1088,
+      632,
+      69.92
+     ],
+     [
+      1090,
+      616,
+      68.95
+     ],
+     [
+      1094,
+      600,
+      68.14
+     ],
+     [
+      1100,
+      584,
+      67.27
+     ],
+     [
+      1108,
+      568,
+      66.67
+     ],
+     [
+      1118,
+      552,
+      66.02
+     ],
+     [
+      1130,
+      536,
+      65.24
+     ],
+     [
+      1144,
+      520,
+      64.31
+     ],
+     [
+      1160,
+      504,
+      63.11
+     ],
+     [
+      1174,
+      488,
+      62.09
+     ],
+     [
+      1186,
+      472,
+      61.41
+     ],
+     [
+      1196,
+      456,
+      60.7
+     ],
+     [
+      1204,
+      440,
+      60.2
+     ],
+     [
+      1210,
+      424,
+      59.82
+     ],
+     [
+      1214,
+      408,
+      59.44
+     ],
+     [
+      1216,
+      392,
+      59.19
+     ],
+     [
+      1216,
+      376,
+      59
+     ],
+     [
+      1218,
+      360,
+      58.57
+     ],
+     [
+      1222,
+      344,
+      58.07
+     ],
+     [
+      1228,
+      328,
+      57.49
+     ],
+     [
+      1236,
+      312,
+      56.8
+     ],
+     [
+      1246,
+      296,
+      55.66
+     ],
+     [
+      1258,
+      280,
+      53.95
+     ],
+     [
+      1272,
+      264,
+      52.03
+     ],
+     [
+      1288,
+      248,
+      50
+     ],
+     [
+      1304,
+      232,
+      48.01
+     ],
+     [
+      1320,
+      216,
+      45.82
+     ],
+     [
+      1336,
+      200,
+      43.72
+     ],
+     [
+      1352,
+      184,
+      41.94
+     ],
+     [
+      1368,
+      168,
+      40.85
+     ],
+     [
+      1384,
+      152,
+      40.1
+     ],
+     [
+      1400,
+      136,
+      39.79
+     ],
+     [
+      1416,
+      120,
+      39.74
+     ],
+     [
+      1430,
+      104,
+      40.02
+     ],
+     [
+      1442,
+      88,
+      40.71
+     ],
+     [
+      1452,
+      72,
+      41.74
+     ],
+     [
+      1460,
+      56,
+      42.85
+     ],
+     [
+      1466,
+      40,
+      43.78
+     ],
+     [
+      1470,
+      24,
+      44.52
+     ],
+     [
+      1472,
+      8,
+      44.97
+     ],
+     [
+      1472,
+      -8,
+      45.31
+     ],
+     [
+      1473.13,
+      -24.87,
+      45.42
+     ],
+     [
+      1475.38,
+      -42.62,
+      45.26
+     ],
+     [
+      1478.75,
+      -61.25,
+      44.97
+     ],
+     [
+      1483.25,
+      -80.75,
+      44.63
+     ],
+     [
+      1488.88,
+      -101.12,
+      44.28
+     ],
+     [
+      1495.63,
+      -122.37,
+      44.09
+     ],
+     [
+      1503.5,
+      -144.5,
+      43.96
+     ],
+     [
+      1508,
+      -156,
+      43.84
+     ],
+     [
+      1512.5,
+      -167.5,
+      43.91
+     ],
+     [
+      1520.38,
+      -187.62,
+      43.99
+     ],
+     [
+      1527.13,
+      -204.87,
+      44.21
+     ],
+     [
+      1532.75,
+      -219.25,
+      44.56
+     ],
+     [
+      1537.25,
+      -230.75,
+      44.86
+     ],
+     [
+      1540.63,
+      -239.37,
+      45.03
+     ],
+     [
+      1542.88,
+      -245.12,
+      45.19
+     ],
+     [
+      1544,
+      -248,
+      45.28
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_door_1",
+   "x": 1062,
+   "z": 1058,
+   "yaw": 0,
+   "data": {
+    "from": "door_1",
+    "to": "town:Brackwater",
+    "width": 2.2,
+    "pts": [
+     [
+      1062,
+      1058,
+      75.72
+     ],
+     [
+      1062,
+      1057.25,
+      75.68
+     ],
+     [
+      1062,
+      1055.5,
+      75.58
+     ],
+     [
+      1062.75,
+      1053.5,
+      75.51
+     ],
+     [
+      1064.5,
+      1051.5,
+      75.55
+     ],
+     [
+      1066.5,
+      1049.5,
+      75.64
+     ],
+     [
+      1068.5,
+      1047.5,
+      75.67
+     ],
+     [
+      1069.75,
+      1045.5,
+      75.65
+     ],
+     [
+      1070,
+      1043.5,
+      75.64
+     ],
+     [
+      1070.75,
+      1041.5,
+      75.76
+     ],
+     [
+      1072.5,
+      1039.5,
+      76.01
+     ],
+     [
+      1073.75,
+      1037.5,
+      76.18
+     ],
+     [
+      1074,
+      1035.5,
+      76.25
+     ],
+     [
+      1074.75,
+      1033.5,
+      76.48
+     ],
+     [
+      1076.5,
+      1031.5,
+      76.85
+     ],
+     [
+      1077.75,
+      1029.5,
+      77.13
+     ],
+     [
+      1078,
+      1027.5,
+      77.35
+     ],
+     [
+      1078.75,
+      1025.5,
+      77.61
+     ],
+     [
+      1080.5,
+      1023.5,
+      77.93
+     ],
+     [
+      1081.75,
+      1021.5,
+      78.28
+     ],
+     [
+      1082,
+      1019.5,
+      78.39
+     ],
+     [
+      1082.75,
+      1017.5,
+      78.4
+     ],
+     [
+      1084.5,
+      1015.5,
+      78.44
+     ],
+     [
+      1085.75,
+      1013.5,
+      78.5
+     ],
+     [
+      1086,
+      1011.5,
+      78.59
+     ],
+     [
+      1086.75,
+      1009.5,
+      78.73
+     ],
+     [
+      1088.5,
+      1007.5,
+      78.84
+     ],
+     [
+      1090.5,
+      1005.5,
+      78.92
+     ],
+     [
+      1092.5,
+      1003.5,
+      79.03
+     ],
+     [
+      1093.75,
+      1001.5,
+      79.06
+     ],
+     [
+      1094,
+      999.5,
+      79.16
+     ],
+     [
+      1094,
+      997.5,
+      79.33
+     ],
+     [
+      1094,
+      995.5,
+      79.46
+     ],
+     [
+      1094,
+      993.5,
+      79.53
+     ],
+     [
+      1094,
+      991.5,
+      79.54
+     ],
+     [
+      1094,
+      989.5,
+      79.51
+     ],
+     [
+      1094,
+      987.5,
+      79.45
+     ],
+     [
+      1094.75,
+      985.5,
+      79.39
+     ],
+     [
+      1096.5,
+      983.5,
+      79.35
+     ],
+     [
+      1098.5,
+      981.5,
+      79.35
+     ],
+     [
+      1100.5,
+      979.5,
+      79.38
+     ],
+     [
+      1102.5,
+      977.5,
+      79.55
+     ],
+     [
+      1104.5,
+      975.5,
+      79.79
+     ],
+     [
+      1105.75,
+      973.5,
+      80
+     ],
+     [
+      1106,
+      971.5,
+      80.11
+     ],
+     [
+      1106,
+      969.5,
+      80.13
+     ],
+     [
+      1106,
+      967.5,
+      80.14
+     ],
+     [
+      1106,
+      965.5,
+      80.16
+     ],
+     [
+      1106,
+      963.5,
+      80.15
+     ],
+     [
+      1106,
+      961.5,
+      80.13
+     ],
+     [
+      1106,
+      959.5,
+      80.13
+     ],
+     [
+      1106,
+      957.5,
+      80.14
+     ],
+     [
+      1106,
+      955.5,
+      80.17
+     ],
+     [
+      1106,
+      954.25,
+      80.19
+     ],
+     [
+      1106,
+      954,
+      80.19
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_event_brackwater",
+   "x": 1054,
+   "z": 1010,
+   "yaw": 0,
+   "data": {
+    "from": "event_brackwater",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      1054,
+      1010,
+      76.77
+     ],
+     [
+      1054.75,
+      1010.75,
+      76.68
+     ],
+     [
+      1056.5,
+      1012.5,
+      76.52
+     ],
+     [
+      1058.5,
+      1014.5,
+      76.49
+     ],
+     [
+      1060.5,
+      1016.5,
+      76.64
+     ],
+     [
+      1062.5,
+      1017.75,
+      76.85
+     ],
+     [
+      1064.5,
+      1018,
+      77
+     ],
+     [
+      1066.5,
+      1018.75,
+      77.08
+     ],
+     [
+      1068.5,
+      1020.5,
+      77.08
+     ],
+     [
+      1070.5,
+      1021.75,
+      77.17
+     ],
+     [
+      1072.5,
+      1022,
+      77.38
+     ],
+     [
+      1074.5,
+      1022.75,
+      77.56
+     ],
+     [
+      1076.5,
+      1024.5,
+      77.59
+     ],
+     [
+      1077.75,
+      1025.75,
+      77.53
+     ],
+     [
+      1078,
+      1026,
+      77.52
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_brackwater_graveyard",
+   "x": 1118,
+   "z": 742,
+   "yaw": 0,
+   "data": {
+    "from": "brackwater_graveyard",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      1118,
+      742,
+      78.94
+     ],
+     [
+      1117.25,
+      742,
+      78.91
+     ],
+     [
+      1115.5,
+      742,
+      78.83
+     ],
+     [
+      1113.5,
+      742,
+      78.75
+     ],
+     [
+      1111.5,
+      742,
+      78.67
+     ],
+     [
+      1109.5,
+      742,
+      78.6
+     ],
+     [
+      1107.5,
+      742,
+      78.53
+     ],
+     [
+      1105.5,
+      742,
+      78.38
+     ],
+     [
+      1103.5,
+      742,
+      77.92
+     ],
+     [
+      1102.25,
+      742,
+      77.69
+     ],
+     [
+      1102,
+      742,
+      77.64
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_eelwick_graveyard",
+   "x": 1202,
+   "z": 346,
+   "yaw": 0,
+   "data": {
+    "from": "eelwick_graveyard",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      1202,
+      346,
+      55.95
+     ],
+     [
+      1202.75,
+      346,
+      56.01
+     ],
+     [
+      1204.5,
+      346,
+      56.14
+     ],
+     [
+      1206.5,
+      346.75,
+      56.34
+     ],
+     [
+      1208.5,
+      348.5,
+      56.6
+     ],
+     [
+      1210.5,
+      349.75,
+      56.84
+     ],
+     [
+      1212.5,
+      350,
+      57.04
+     ],
+     [
+      1214.5,
+      350.75,
+      57.3
+     ],
+     [
+      1216.5,
+      352.5,
+      57.95
+     ],
+     [
+      1217.75,
+      353.75,
+      58.26
+     ],
+     [
+      1218,
+      354,
+      58.3
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_brack_farm",
+   "x": 938,
+   "z": 1106,
+   "yaw": 0,
+   "data": {
+    "from": "brack_farm",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      938,
+      1106,
+      73.03
+     ],
+     [
+      938.75,
+      1106.75,
+      73.09
+     ],
+     [
+      940.5,
+      1108.5,
+      73.26
+     ],
+     [
+      941.75,
+      1110.5,
+      73.35
+     ],
+     [
+      942,
+      1112.5,
+      73.32
+     ],
+     [
+      942.75,
+      1114.5,
+      73.42
+     ],
+     [
+      944.5,
+      1116.5,
+      73.64
+     ],
+     [
+      946.5,
+      1117.75,
+      73.79
+     ],
+     [
+      948.5,
+      1118,
+      73.92
+     ],
+     [
+      950.5,
+      1118,
+      74.13
+     ],
+     [
+      952.5,
+      1118,
+      74.38
+     ],
+     [
+      954.5,
+      1118,
+      74.62
+     ],
+     [
+      956.5,
+      1118,
+      74.67
+     ],
+     [
+      958.5,
+      1117.25,
+      74.6
+     ],
+     [
+      960.5,
+      1115.5,
+      74.54
+     ],
+     [
+      962.5,
+      1113.5,
+      74.54
+     ],
+     [
+      964.5,
+      1111.5,
+      74.54
+     ],
+     [
+      966.5,
+      1110.25,
+      74.58
+     ],
+     [
+      968.5,
+      1110,
+      74.66
+     ],
+     [
+      970.5,
+      1109.25,
+      74.79
+     ],
+     [
+      972.5,
+      1107.5,
+      74.9
+     ],
+     [
+      974.5,
+      1105.5,
+      74.95
+     ],
+     [
+      976.5,
+      1103.5,
+      74.98
+     ],
+     [
+      978.5,
+      1102.25,
+      75.05
+     ],
+     [
+      980.5,
+      1102,
+      75.17
+     ],
+     [
+      982.5,
+      1101.25,
+      75.28
+     ],
+     [
+      984.5,
+      1099.5,
+      75.38
+     ],
+     [
+      986.5,
+      1098.25,
+      75.42
+     ],
+     [
+      988.5,
+      1098,
+      75.51
+     ],
+     [
+      990.5,
+      1097.25,
+      75.6
+     ],
+     [
+      992.5,
+      1095.5,
+      75.68
+     ],
+     [
+      994.5,
+      1094.25,
+      75.79
+     ],
+     [
+      996.5,
+      1094,
+      76.01
+     ],
+     [
+      998.5,
+      1094,
+      76.15
+     ],
+     [
+      1000.5,
+      1094,
+      76.35
+     ],
+     [
+      1002.5,
+      1093.25,
+      76.47
+     ],
+     [
+      1004.5,
+      1091.5,
+      76.5
+     ],
+     [
+      1006.5,
+      1090.25,
+      76.51
+     ],
+     [
+      1008.5,
+      1090,
+      76.57
+     ],
+     [
+      1010.5,
+      1089.25,
+      76.69
+     ],
+     [
+      1012.5,
+      1087.5,
+      76.87
+     ],
+     [
+      1014.5,
+      1085.5,
+      76.99
+     ],
+     [
+      1016.5,
+      1083.5,
+      76.92
+     ],
+     [
+      1018.5,
+      1081.5,
+      76.8
+     ],
+     [
+      1020.5,
+      1079.5,
+      76.62
+     ],
+     [
+      1022.5,
+      1078.25,
+      76.51
+     ],
+     [
+      1024.5,
+      1078,
+      76.46
+     ],
+     [
+      1026.5,
+      1077.25,
+      76.36
+     ],
+     [
+      1028.5,
+      1075.5,
+      76.21
+     ],
+     [
+      1030.5,
+      1073.5,
+      76.07
+     ],
+     [
+      1032.5,
+      1071.5,
+      75.96
+     ],
+     [
+      1034.5,
+      1070.25,
+      75.94
+     ],
+     [
+      1036.5,
+      1070,
+      76.03
+     ],
+     [
+      1038.5,
+      1069.25,
+      76.2
+     ],
+     [
+      1040.5,
+      1067.5,
+      76.36
+     ],
+     [
+      1042.5,
+      1065.5,
+      76.41
+     ],
+     [
+      1044.5,
+      1063.5,
+      76.25
+     ],
+     [
+      1046.5,
+      1061.5,
+      76.03
+     ],
+     [
+      1048.5,
+      1059.5,
+      75.75
+     ],
+     [
+      1050.5,
+      1058.25,
+      75.6
+     ],
+     [
+      1052.5,
+      1058,
+      75.53
+     ],
+     [
+      1054.5,
+      1058,
+      75.46
+     ],
+     [
+      1056.5,
+      1058,
+      75.46
+     ],
+     [
+      1058.5,
+      1058,
+      75.54
+     ],
+     [
+      1060.5,
+      1058,
+      75.64
+     ],
+     [
+      1061.75,
+      1058,
+      75.71
+     ],
+     [
+      1062,
+      1058,
+      75.72
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_eel_orchard",
+   "x": 1326,
+   "z": 454,
+   "yaw": 0,
+   "data": {
+    "from": "eel_orchard",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      1326,
+      454,
+      60.33
+     ],
+     [
+      1325.25,
+      454.75,
+      60.34
+     ],
+     [
+      1323.5,
+      456.5,
+      60.37
+     ],
+     [
+      1321.5,
+      457.75,
+      60.4
+     ],
+     [
+      1319.5,
+      458,
+      60.47
+     ],
+     [
+      1317.5,
+      458,
+      60.59
+     ],
+     [
+      1315.5,
+      458,
+      60.69
+     ],
+     [
+      1313.5,
+      458,
+      60.75
+     ],
+     [
+      1311.5,
+      458,
+      60.8
+     ],
+     [
+      1309.5,
+      458,
+      60.84
+     ],
+     [
+      1307.5,
+      458,
+      60.88
+     ],
+     [
+      1305.5,
+      458,
+      60.83
+     ],
+     [
+      1303.5,
+      458,
+      60.63
+     ],
+     [
+      1301.5,
+      458,
+      60.47
+     ],
+     [
+      1299.5,
+      458,
+      60.36
+     ],
+     [
+      1297.5,
+      458,
+      60.25
+     ],
+     [
+      1295.5,
+      458,
+      60.16
+     ],
+     [
+      1293.5,
+      458,
+      60.05
+     ],
+     [
+      1291.5,
+      458,
+      60.01
+     ],
+     [
+      1289.5,
+      458,
+      60.02
+     ],
+     [
+      1287.5,
+      458,
+      60.06
+     ],
+     [
+      1285.5,
+      458,
+      60.14
+     ],
+     [
+      1283.5,
+      458,
+      60.18
+     ],
+     [
+      1281.5,
+      458,
+      60.19
+     ],
+     [
+      1279.5,
+      458,
+      60.24
+     ],
+     [
+      1277.5,
+      458,
+      60.35
+     ],
+     [
+      1275.5,
+      458,
+      60.54
+     ],
+     [
+      1273.5,
+      458,
+      60.66
+     ],
+     [
+      1271.5,
+      458,
+      60.74
+     ],
+     [
+      1269.5,
+      458,
+      60.83
+     ],
+     [
+      1267.5,
+      458,
+      60.82
+     ],
+     [
+      1265.5,
+      458,
+      60.7
+     ],
+     [
+      1263.5,
+      458,
+      60.56
+     ],
+     [
+      1261.5,
+      458,
+      60.43
+     ],
+     [
+      1259.5,
+      458,
+      60.28
+     ],
+     [
+      1257.5,
+      458,
+      60.19
+     ],
+     [
+      1255.5,
+      458,
+      60.11
+     ],
+     [
+      1253.5,
+      458,
+      60.06
+     ],
+     [
+      1251.5,
+      458,
+      60.03
+     ],
+     [
+      1249.5,
+      457.25,
+      60.03
+     ],
+     [
+      1247.5,
+      455.5,
+      60.13
+     ],
+     [
+      1245.5,
+      453.5,
+      60.26
+     ],
+     [
+      1243.5,
+      451.5,
+      60.56
+     ],
+     [
+      1241.5,
+      449.5,
+      60.68
+     ],
+     [
+      1239.5,
+      447.5,
+      60.62
+     ],
+     [
+      1237.5,
+      446.25,
+      60.62
+     ],
+     [
+      1235.5,
+      446,
+      60.58
+     ],
+     [
+      1233.5,
+      446,
+      60.53
+     ],
+     [
+      1231.5,
+      446,
+      60.36
+     ],
+     [
+      1229.5,
+      446,
+      60.13
+     ],
+     [
+      1227.5,
+      446,
+      59.92
+     ],
+     [
+      1225.5,
+      445.25,
+      59.64
+     ],
+     [
+      1223.5,
+      443.5,
+      59.25
+     ],
+     [
+      1221.5,
+      441.5,
+      58.91
+     ],
+     [
+      1219.5,
+      439.5,
+      58.58
+     ],
+     [
+      1217.5,
+      438.25,
+      58.4
+     ],
+     [
+      1215.5,
+      438,
+      58.3
+     ],
+     [
+      1213.5,
+      438,
+      58.18
+     ],
+     [
+      1211.5,
+      438,
+      58.08
+     ],
+     [
+      1209.5,
+      438,
+      58.05
+     ],
+     [
+      1207.5,
+      438,
+      58.16
+     ],
+     [
+      1206.25,
+      438,
+      58.18
+     ],
+     [
+      1206,
+      438,
+      58.18
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_brack_fold",
+   "x": 686,
+   "z": 702,
+   "yaw": 0,
+   "data": {
+    "from": "brack_fold",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      686,
+      702,
+      75.41
+     ],
+     [
+      686.75,
+      702,
+      75.31
+     ],
+     [
+      688.5,
+      702,
+      75.12
+     ],
+     [
+      690.5,
+      702,
+      75.01
+     ],
+     [
+      692.5,
+      702,
+      74.94
+     ],
+     [
+      694.5,
+      702,
+      74.93
+     ],
+     [
+      696.5,
+      702,
+      74.88
+     ],
+     [
+      698.5,
+      702,
+      74.78
+     ],
+     [
+      700.5,
+      702,
+      74.75
+     ],
+     [
+      702.5,
+      702,
+      74.75
+     ],
+     [
+      704.5,
+      702,
+      74.64
+     ],
+     [
+      706.5,
+      702,
+      74.5
+     ],
+     [
+      708.5,
+      702,
+      74.36
+     ],
+     [
+      710.5,
+      702,
+      74.26
+     ],
+     [
+      712.5,
+      702,
+      74.19
+     ],
+     [
+      714.5,
+      702,
+      74.07
+     ],
+     [
+      716.5,
+      702,
+      73.98
+     ],
+     [
+      718.5,
+      702,
+      73.96
+     ],
+     [
+      720.5,
+      702,
+      73.96
+     ],
+     [
+      722.5,
+      702,
+      73.99
+     ],
+     [
+      724.5,
+      702,
+      74.03
+     ],
+     [
+      726.5,
+      702,
+      74.09
+     ],
+     [
+      728.5,
+      702,
+      74.2
+     ],
+     [
+      730.5,
+      702,
+      74.38
+     ],
+     [
+      732.5,
+      702,
+      74.54
+     ],
+     [
+      734.5,
+      702,
+      74.67
+     ],
+     [
+      736.5,
+      702,
+      74.77
+     ],
+     [
+      738.5,
+      702,
+      74.88
+     ],
+     [
+      740.5,
+      702,
+      74.99
+     ],
+     [
+      742.5,
+      702,
+      75.06
+     ],
+     [
+      744.5,
+      702,
+      75.19
+     ],
+     [
+      746.5,
+      702,
+      75.35
+     ],
+     [
+      748.5,
+      702,
+      75.52
+     ],
+     [
+      750.5,
+      702,
+      75.73
+     ],
+     [
+      752.5,
+      702,
+      75.84
+     ],
+     [
+      754.5,
+      702.75,
+      75.89
+     ],
+     [
+      756.5,
+      704.5,
+      76.09
+     ],
+     [
+      758.5,
+      705.75,
+      76.22
+     ],
+     [
+      760.5,
+      706,
+      76.18
+     ],
+     [
+      762.5,
+      706,
+      76.18
+     ],
+     [
+      764.5,
+      706,
+      76.26
+     ],
+     [
+      766.5,
+      706,
+      76.31
+     ],
+     [
+      768.5,
+      706,
+      76.35
+     ],
+     [
+      770.5,
+      706,
+      76.39
+     ],
+     [
+      772.5,
+      706,
+      76.38
+     ],
+     [
+      774.5,
+      706,
+      76.36
+     ],
+     [
+      776.5,
+      706,
+      76.33
+     ],
+     [
+      778.5,
+      706,
+      76.29
+     ],
+     [
+      780.5,
+      706,
+      76.26
+     ],
+     [
+      782.5,
+      706,
+      76.33
+     ],
+     [
+      784.5,
+      706,
+      76.44
+     ],
+     [
+      786.5,
+      706,
+      76.51
+     ],
+     [
+      788.5,
+      706,
+      76.54
+     ],
+     [
+      790.5,
+      706,
+      76.54
+     ],
+     [
+      792.5,
+      706,
+      76.58
+     ],
+     [
+      794.5,
+      706,
+      76.64
+     ],
+     [
+      796.5,
+      706,
+      76.74
+     ],
+     [
+      798.5,
+      706,
+      76.86
+     ],
+     [
+      800.5,
+      706,
+      76.95
+     ],
+     [
+      802.5,
+      706,
+      76.96
+     ],
+     [
+      804.5,
+      706,
+      76.96
+     ],
+     [
+      806.5,
+      706,
+      77.01
+     ],
+     [
+      808.5,
+      706,
+      77.05
+     ],
+     [
+      810.5,
+      706,
+      77.02
+     ],
+     [
+      812.5,
+      706,
+      77.01
+     ],
+     [
+      814.5,
+      706,
+      77.05
+     ],
+     [
+      816.5,
+      706,
+      77.13
+     ],
+     [
+      818.5,
+      706,
+      77.17
+     ],
+     [
+      820.5,
+      706,
+      77.2
+     ],
+     [
+      822.5,
+      706.75,
+      77.29
+     ],
+     [
+      824.5,
+      708.5,
+      77.2
+     ],
+     [
+      826.5,
+      709.75,
+      77.03
+     ],
+     [
+      828.5,
+      710,
+      76.94
+     ],
+     [
+      830.5,
+      710,
+      76.81
+     ],
+     [
+      832.5,
+      710,
+      76.66
+     ],
+     [
+      834.5,
+      710,
+      76.59
+     ],
+     [
+      836.5,
+      710,
+      76.57
+     ],
+     [
+      838.5,
+      710,
+      76.54
+     ],
+     [
+      840.5,
+      710,
+      76.45
+     ],
+     [
+      842.5,
+      710,
+      76.35
+     ],
+     [
+      844.5,
+      710,
+      76.28
+     ],
+     [
+      846.5,
+      710,
+      76.13
+     ],
+     [
+      848.5,
+      710,
+      75.9
+     ],
+     [
+      850.5,
+      710,
+      75.7
+     ],
+     [
+      852.5,
+      710,
+      75.59
+     ],
+     [
+      854.5,
+      710,
+      75.53
+     ],
+     [
+      856.5,
+      710,
+      75.42
+     ],
+     [
+      858.5,
+      710,
+      75.25
+     ],
+     [
+      860.5,
+      710,
+      75.1
+     ],
+     [
+      862.5,
+      710,
+      75.04
+     ],
+     [
+      864.5,
+      710,
+      74.93
+     ],
+     [
+      866.5,
+      710,
+      74.8
+     ],
+     [
+      868.5,
+      710,
+      74.67
+     ],
+     [
+      870.5,
+      710,
+      74.51
+     ],
+     [
+      872.5,
+      710,
+      74.32
+     ],
+     [
+      874.5,
+      710,
+      74.15
+     ],
+     [
+      876.5,
+      710,
+      74.05
+     ],
+     [
+      878.5,
+      710,
+      74.11
+     ],
+     [
+      880.5,
+      710,
+      74.25
+     ],
+     [
+      882.5,
+      710,
+      74.38
+     ],
+     [
+      884.5,
+      710,
+      74.41
+     ],
+     [
+      886.5,
+      710,
+      74.38
+     ],
+     [
+      888.5,
+      710,
+      74.32
+     ],
+     [
+      890.5,
+      710,
+      74.26
+     ],
+     [
+      892.5,
+      710,
+      74.22
+     ],
+     [
+      894.5,
+      710,
+      74.22
+     ],
+     [
+      896.5,
+      710,
+      74.25
+     ],
+     [
+      898.5,
+      710,
+      74.29
+     ],
+     [
+      900.5,
+      710,
+      74.35
+     ],
+     [
+      902.5,
+      710,
+      74.38
+     ],
+     [
+      904.5,
+      710,
+      74.35
+     ],
+     [
+      906.5,
+      710,
+      74.34
+     ],
+     [
+      908.5,
+      710,
+      74.36
+     ],
+     [
+      910.5,
+      710,
+      74.33
+     ],
+     [
+      912.5,
+      710,
+      74.14
+     ],
+     [
+      914.5,
+      710,
+      73.87
+     ],
+     [
+      916.5,
+      710,
+      73.65
+     ],
+     [
+      918.5,
+      710,
+      73.46
+     ],
+     [
+      920.5,
+      710,
+      73.22
+     ],
+     [
+      922.5,
+      710,
+      72.96
+     ],
+     [
+      924.5,
+      710,
+      72.78
+     ],
+     [
+      926.5,
+      710,
+      72.62
+     ],
+     [
+      928.5,
+      710,
+      72.48
+     ],
+     [
+      930.5,
+      710,
+      72.38
+     ],
+     [
+      932.5,
+      710,
+      72.32
+     ],
+     [
+      934.5,
+      710,
+      72.26
+     ],
+     [
+      936.5,
+      710,
+      72.19
+     ],
+     [
+      938.5,
+      710,
+      72.1
+     ],
+     [
+      940.5,
+      710,
+      71.99
+     ],
+     [
+      942.5,
+      710,
+      71.9
+     ],
+     [
+      944.5,
+      710,
+      71.82
+     ],
+     [
+      946.5,
+      710,
+      71.77
+     ],
+     [
+      948.5,
+      710,
+      71.75
+     ],
+     [
+      950.5,
+      710,
+      71.74
+     ],
+     [
+      952.5,
+      710,
+      71.8
+     ],
+     [
+      954.5,
+      710,
+      71.85
+     ],
+     [
+      956.5,
+      710,
+      71.88
+     ],
+     [
+      958.5,
+      710,
+      71.95
+     ],
+     [
+      960.5,
+      710,
+      72.04
+     ],
+     [
+      962.5,
+      710,
+      72.14
+     ],
+     [
+      964.5,
+      710,
+      72.14
+     ],
+     [
+      966.5,
+      710,
+      72.08
+     ],
+     [
+      968.5,
+      710,
+      71.97
+     ],
+     [
+      970.5,
+      710,
+      71.83
+     ],
+     [
+      972.5,
+      710,
+      71.82
+     ],
+     [
+      974.5,
+      710,
+      71.87
+     ],
+     [
+      976.5,
+      710,
+      71.85
+     ],
+     [
+      978.5,
+      710,
+      71.82
+     ],
+     [
+      980.5,
+      710,
+      71.85
+     ],
+     [
+      982.5,
+      710,
+      71.93
+     ],
+     [
+      984.5,
+      710,
+      72.09
+     ],
+     [
+      986.5,
+      710,
+      72.25
+     ],
+     [
+      988.5,
+      710,
+      72.37
+     ],
+     [
+      990.5,
+      710,
+      72.4
+     ],
+     [
+      992.5,
+      710,
+      72.48
+     ],
+     [
+      994.5,
+      710,
+      72.6
+     ],
+     [
+      996.5,
+      710,
+      72.73
+     ],
+     [
+      998.5,
+      710,
+      72.81
+     ],
+     [
+      1000.5,
+      710,
+      72.87
+     ],
+     [
+      1002.5,
+      710,
+      72.96
+     ],
+     [
+      1004.5,
+      710,
+      73.14
+     ],
+     [
+      1006.5,
+      710,
+      73.35
+     ],
+     [
+      1008.5,
+      710,
+      73.45
+     ],
+     [
+      1010.5,
+      710,
+      73.52
+     ],
+     [
+      1012.5,
+      710,
+      73.66
+     ],
+     [
+      1014.5,
+      710,
+      73.88
+     ],
+     [
+      1016.5,
+      710,
+      74.17
+     ],
+     [
+      1018.5,
+      710,
+      74.41
+     ],
+     [
+      1020.5,
+      710,
+      74.59
+     ],
+     [
+      1022.5,
+      710,
+      74.69
+     ],
+     [
+      1024.5,
+      710,
+      74.7
+     ],
+     [
+      1026.5,
+      710,
+      74.64
+     ],
+     [
+      1028.5,
+      710,
+      74.64
+     ],
+     [
+      1030.5,
+      710,
+      74.72
+     ],
+     [
+      1032.5,
+      710,
+      74.77
+     ],
+     [
+      1034.5,
+      710,
+      74.8
+     ],
+     [
+      1036.5,
+      710,
+      74.8
+     ],
+     [
+      1038.5,
+      710,
+      74.85
+     ],
+     [
+      1040.5,
+      710,
+      74.93
+     ],
+     [
+      1042.5,
+      710,
+      74.99
+     ],
+     [
+      1044.5,
+      710,
+      74.97
+     ],
+     [
+      1046.5,
+      710,
+      74.96
+     ],
+     [
+      1048.5,
+      710,
+      74.91
+     ],
+     [
+      1050.5,
+      710,
+      74.81
+     ],
+     [
+      1052.5,
+      710,
+      74.77
+     ],
+     [
+      1054.5,
+      710,
+      74.77
+     ],
+     [
+      1056.5,
+      710,
+      74.77
+     ],
+     [
+      1058.5,
+      710,
+      74.77
+     ],
+     [
+      1060.5,
+      710,
+      74.78
+     ],
+     [
+      1062.5,
+      710,
+      74.88
+     ],
+     [
+      1064.5,
+      710,
+      75.09
+     ],
+     [
+      1066.5,
+      710,
+      75.35
+     ],
+     [
+      1068.5,
+      710,
+      75.6
+     ],
+     [
+      1070.5,
+      710,
+      75.81
+     ],
+     [
+      1072.5,
+      710,
+      76.04
+     ],
+     [
+      1074.5,
+      710,
+      76.25
+     ],
+     [
+      1076.5,
+      710,
+      76.33
+     ],
+     [
+      1078.5,
+      710,
+      76.3
+     ],
+     [
+      1080.5,
+      710,
+      76.26
+     ],
+     [
+      1082.5,
+      710,
+      76.21
+     ],
+     [
+      1084.5,
+      710,
+      76.19
+     ],
+     [
+      1086.5,
+      710,
+      76.21
+     ],
+     [
+      1088.5,
+      710,
+      76.28
+     ],
+     [
+      1090.5,
+      710,
+      76.25
+     ],
+     [
+      1092.5,
+      710,
+      76.1
+     ],
+     [
+      1093.75,
+      710,
+      76.1
+     ],
+     [
+      1094,
+      710,
+      76.1
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_farm_brackwater_1",
+   "x": 1382,
+   "z": 826,
+   "yaw": 0,
+   "data": {
+    "from": "farm_brackwater_1",
+    "to": "town:Brackwater",
+    "width": 2.2,
+    "pts": [
+     [
+      1382,
+      826,
+      73.09
+     ],
+     [
+      1381.25,
+      826,
+      73.12
+     ],
+     [
+      1379.5,
+      826,
+      73.17
+     ],
+     [
+      1377.5,
+      826,
+      73.17
+     ],
+     [
+      1375.5,
+      826,
+      73.17
+     ],
+     [
+      1373.5,
+      826,
+      73.31
+     ],
+     [
+      1371.5,
+      826,
+      73.51
+     ],
+     [
+      1369.5,
+      826,
+      73.72
+     ],
+     [
+      1367.5,
+      826,
+      73.96
+     ],
+     [
+      1365.5,
+      826,
+      74.19
+     ],
+     [
+      1363.5,
+      826,
+      74.41
+     ],
+     [
+      1361.5,
+      826,
+      74.58
+     ],
+     [
+      1359.5,
+      826,
+      74.77
+     ],
+     [
+      1357.5,
+      826,
+      74.99
+     ],
+     [
+      1355.5,
+      826,
+      75.19
+     ],
+     [
+      1353.5,
+      826,
+      75.37
+     ],
+     [
+      1351.5,
+      826,
+      75.57
+     ],
+     [
+      1349.5,
+      826,
+      75.77
+     ],
+     [
+      1347.5,
+      826,
+      75.95
+     ],
+     [
+      1345.5,
+      826,
+      76.14
+     ],
+     [
+      1343.5,
+      826,
+      76.33
+     ],
+     [
+      1341.5,
+      826.75,
+      76.54
+     ],
+     [
+      1339.5,
+      828.5,
+      76.75
+     ],
+     [
+      1337.5,
+      830.5,
+      76.93
+     ],
+     [
+      1335.5,
+      832.5,
+      77.24
+     ],
+     [
+      1333.5,
+      834.5,
+      77.62
+     ],
+     [
+      1331.5,
+      836.5,
+      78.05
+     ],
+     [
+      1329.5,
+      837.75,
+      78.45
+     ],
+     [
+      1327.5,
+      838,
+      78.75
+     ],
+     [
+      1325.5,
+      838,
+      79.02
+     ],
+     [
+      1323.5,
+      838,
+      79.2
+     ],
+     [
+      1321.5,
+      838,
+      79.3
+     ],
+     [
+      1319.5,
+      838,
+      79.31
+     ],
+     [
+      1317.5,
+      838,
+      79.29
+     ],
+     [
+      1315.5,
+      838,
+      79.26
+     ],
+     [
+      1313.5,
+      838,
+      79.14
+     ],
+     [
+      1311.5,
+      838,
+      79.01
+     ],
+     [
+      1309.5,
+      838,
+      78.9
+     ],
+     [
+      1307.5,
+      838,
+      78.72
+     ],
+     [
+      1305.5,
+      838,
+      78.55
+     ],
+     [
+      1303.5,
+      838,
+      78.5
+     ],
+     [
+      1301.5,
+      838,
+      78.46
+     ],
+     [
+      1299.5,
+      838,
+      78.38
+     ],
+     [
+      1297.5,
+      838,
+      78.35
+     ],
+     [
+      1295.5,
+      838,
+      78.33
+     ],
+     [
+      1293.5,
+      838,
+      78.44
+     ],
+     [
+      1291.5,
+      838,
+      78.64
+     ],
+     [
+      1289.5,
+      838,
+      78.82
+     ],
+     [
+      1287.5,
+      838,
+      79.02
+     ],
+     [
+      1285.5,
+      838,
+      79.2
+     ],
+     [
+      1283.5,
+      838,
+      79.3
+     ],
+     [
+      1281.5,
+      838,
+      79.37
+     ],
+     [
+      1279.5,
+      838,
+      79.46
+     ],
+     [
+      1277.5,
+      838,
+      79.56
+     ],
+     [
+      1275.5,
+      838,
+      79.69
+     ],
+     [
+      1273.5,
+      838,
+      79.75
+     ],
+     [
+      1271.5,
+      838,
+      79.73
+     ],
+     [
+      1269.5,
+      838,
+      79.74
+     ],
+     [
+      1267.5,
+      838,
+      79.78
+     ],
+     [
+      1265.5,
+      838,
+      79.73
+     ],
+     [
+      1263.5,
+      838,
+      79.66
+     ],
+     [
+      1261.5,
+      838.75,
+      79.69
+     ],
+     [
+      1259.5,
+      840.5,
+      79.81
+     ],
+     [
+      1257.5,
+      841.75,
+      79.83
+     ],
+     [
+      1255.5,
+      842,
+      79.88
+     ],
+     [
+      1253.5,
+      842,
+      79.9
+     ],
+     [
+      1251.5,
+      842,
+      79.89
+     ],
+     [
+      1249.5,
+      842,
+      79.88
+     ],
+     [
+      1247.5,
+      842,
+      79.91
+     ],
+     [
+      1245.5,
+      842,
+      79.96
+     ],
+     [
+      1243.5,
+      842,
+      79.96
+     ],
+     [
+      1241.5,
+      842,
+      79.97
+     ],
+     [
+      1239.5,
+      842,
+      80.02
+     ],
+     [
+      1237.5,
+      842,
+      80.04
+     ],
+     [
+      1235.5,
+      842,
+      80.06
+     ],
+     [
+      1233.5,
+      842,
+      80.13
+     ],
+     [
+      1231.5,
+      842,
+      80.23
+     ],
+     [
+      1229.5,
+      842,
+      80.25
+     ],
+     [
+      1227.5,
+      842,
+      80.25
+     ],
+     [
+      1225.5,
+      842.75,
+      80.28
+     ],
+     [
+      1223.5,
+      844.5,
+      80.32
+     ],
+     [
+      1222.25,
+      845.75,
+      80.36
+     ],
+     [
+      1222,
+      846,
+      80.36
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_cave_brackwater_0",
+   "x": 1218,
+   "z": 1506,
+   "yaw": 0,
+   "data": {
+    "from": "cave_brackwater_0",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      1218,
+      1506,
+      92.97
+     ],
+     [
+      1217.25,
+      1506.75,
+      92.99
+     ],
+     [
+      1215.5,
+      1508.5,
+      93.58
+     ],
+     [
+      1213.5,
+      1509.75,
+      95.02
+     ],
+     [
+      1211.5,
+      1510,
+      95.38
+     ],
+     [
+      1209.5,
+      1510.75,
+      95.78
+     ],
+     [
+      1207.5,
+      1512.5,
+      96.77
+     ],
+     [
+      1205.5,
+      1514.5,
+      98.14
+     ],
+     [
+      1203.5,
+      1516.5,
+      99.49
+     ],
+     [
+      1201.5,
+      1517.75,
+      100.41
+     ],
+     [
+      1199.5,
+      1518,
+      100.77
+     ],
+     [
+      1197.5,
+      1518,
+      100.99
+     ],
+     [
+      1195.5,
+      1518,
+      101.15
+     ],
+     [
+      1193.5,
+      1518,
+      101.27
+     ],
+     [
+      1191.5,
+      1518,
+      101.38
+     ],
+     [
+      1189.5,
+      1518,
+      101.45
+     ],
+     [
+      1187.5,
+      1518,
+      101.45
+     ],
+     [
+      1185.5,
+      1517.25,
+      101.27
+     ],
+     [
+      1183.5,
+      1515.5,
+      100.93
+     ],
+     [
+      1181.5,
+      1514.25,
+      100.84
+     ],
+     [
+      1179.5,
+      1514,
+      100.89
+     ],
+     [
+      1177.5,
+      1514,
+      100.9
+     ],
+     [
+      1175.5,
+      1514,
+      100.93
+     ],
+     [
+      1173.5,
+      1513.25,
+      100.98
+     ],
+     [
+      1171.5,
+      1511.5,
+      101.11
+     ],
+     [
+      1169.5,
+      1509.5,
+      101.16
+     ],
+     [
+      1167.5,
+      1507.5,
+      101.22
+     ],
+     [
+      1165.5,
+      1505.5,
+      101.25
+     ],
+     [
+      1163.5,
+      1503.5,
+      101.25
+     ],
+     [
+      1161.5,
+      1501.5,
+      101.11
+     ],
+     [
+      1159.5,
+      1499.5,
+      100.8
+     ],
+     [
+      1157.5,
+      1497.5,
+      100.42
+     ],
+     [
+      1155.5,
+      1495.5,
+      100.16
+     ],
+     [
+      1153.5,
+      1493.5,
+      99.79
+     ],
+     [
+      1151.5,
+      1491.5,
+      99.3
+     ],
+     [
+      1149.5,
+      1489.5,
+      98.97
+     ],
+     [
+      1147.5,
+      1487.5,
+      98.71
+     ],
+     [
+      1146.25,
+      1485.5,
+      98.47
+     ],
+     [
+      1146,
+      1483.5,
+      98.22
+     ],
+     [
+      1146,
+      1481.5,
+      97.96
+     ],
+     [
+      1146,
+      1479.5,
+      97.74
+     ],
+     [
+      1146,
+      1477.5,
+      97.57
+     ],
+     [
+      1146,
+      1475.5,
+      97.37
+     ],
+     [
+      1146,
+      1473.5,
+      97.14
+     ],
+     [
+      1146,
+      1471.5,
+      96.97
+     ],
+     [
+      1146,
+      1469.5,
+      96.82
+     ],
+     [
+      1146,
+      1467.5,
+      96.65
+     ],
+     [
+      1146,
+      1465.5,
+      96.39
+     ],
+     [
+      1146,
+      1463.5,
+      96.13
+     ],
+     [
+      1146,
+      1461.5,
+      95.86
+     ],
+     [
+      1146,
+      1459.5,
+      95.58
+     ],
+     [
+      1145.25,
+      1457.5,
+      95.25
+     ],
+     [
+      1143.5,
+      1455.5,
+      94.79
+     ],
+     [
+      1142.25,
+      1453.5,
+      94.41
+     ],
+     [
+      1142,
+      1451.5,
+      94.1
+     ],
+     [
+      1142,
+      1449.5,
+      93.71
+     ],
+     [
+      1142,
+      1447.5,
+      93.3
+     ],
+     [
+      1142,
+      1445.5,
+      93.02
+     ],
+     [
+      1142,
+      1443.5,
+      92.84
+     ],
+     [
+      1141.25,
+      1441.5,
+      92.62
+     ],
+     [
+      1139.5,
+      1439.5,
+      92.21
+     ],
+     [
+      1138.25,
+      1437.5,
+      91.9
+     ],
+     [
+      1138,
+      1435.5,
+      91.66
+     ],
+     [
+      1138,
+      1433.5,
+      91.51
+     ],
+     [
+      1138,
+      1431.5,
+      91.34
+     ],
+     [
+      1138,
+      1429.5,
+      91.2
+     ],
+     [
+      1138,
+      1427.5,
+      91.05
+     ],
+     [
+      1138,
+      1425.5,
+      90.87
+     ],
+     [
+      1138,
+      1423.5,
+      90.68
+     ],
+     [
+      1137.25,
+      1421.5,
+      90.3
+     ],
+     [
+      1135.5,
+      1419.5,
+      89.76
+     ],
+     [
+      1133.5,
+      1417.5,
+      89.41
+     ],
+     [
+      1131.5,
+      1415.5,
+      88.99
+     ],
+     [
+      1130.25,
+      1413.5,
+      88.7
+     ],
+     [
+      1130,
+      1411.5,
+      88.6
+     ],
+     [
+      1130,
+      1409.5,
+      88.61
+     ],
+     [
+      1130,
+      1407.5,
+      88.65
+     ],
+     [
+      1130,
+      1405.5,
+      88.63
+     ],
+     [
+      1130,
+      1403.5,
+      88.57
+     ],
+     [
+      1129.25,
+      1401.5,
+      88.56
+     ],
+     [
+      1127.5,
+      1399.5,
+      88.47
+     ],
+     [
+      1125.5,
+      1397.5,
+      88.24
+     ],
+     [
+      1123.5,
+      1395.5,
+      87.89
+     ],
+     [
+      1121.5,
+      1393.5,
+      87.48
+     ],
+     [
+      1119.5,
+      1391.5,
+      87.05
+     ],
+     [
+      1117.5,
+      1389.5,
+      86.77
+     ],
+     [
+      1115.5,
+      1387.5,
+      86.53
+     ],
+     [
+      1113.5,
+      1385.5,
+      86.32
+     ],
+     [
+      1111.5,
+      1383.5,
+      86.07
+     ],
+     [
+      1109.5,
+      1381.5,
+      85.67
+     ],
+     [
+      1107.5,
+      1379.5,
+      85.26
+     ],
+     [
+      1105.5,
+      1377.5,
+      84.89
+     ],
+     [
+      1103.5,
+      1375.5,
+      84.66
+     ],
+     [
+      1101.5,
+      1373.5,
+      84.45
+     ],
+     [
+      1099.5,
+      1371.5,
+      84.26
+     ],
+     [
+      1097.5,
+      1369.5,
+      84.02
+     ],
+     [
+      1095.5,
+      1367.5,
+      83.93
+     ],
+     [
+      1093.5,
+      1365.5,
+      83.99
+     ],
+     [
+      1091.5,
+      1363.5,
+      84
+     ],
+     [
+      1089.5,
+      1361.5,
+      84.04
+     ],
+     [
+      1087.5,
+      1359.5,
+      84.11
+     ],
+     [
+      1086.25,
+      1357.5,
+      84.07
+     ],
+     [
+      1086,
+      1355.5,
+      84.06
+     ],
+     [
+      1085.25,
+      1353.5,
+      83.95
+     ],
+     [
+      1083.5,
+      1351.5,
+      83.78
+     ],
+     [
+      1082.25,
+      1349.5,
+      83.57
+     ],
+     [
+      1082,
+      1347.5,
+      83.36
+     ],
+     [
+      1081.25,
+      1345.5,
+      83.18
+     ],
+     [
+      1079.5,
+      1343.5,
+      83.07
+     ],
+     [
+      1078.25,
+      1341.5,
+      83.03
+     ],
+     [
+      1078,
+      1339.5,
+      82.99
+     ],
+     [
+      1078,
+      1337.5,
+      82.97
+     ],
+     [
+      1078,
+      1335.5,
+      82.94
+     ],
+     [
+      1077.25,
+      1333.5,
+      82.94
+     ],
+     [
+      1075.5,
+      1331.5,
+      83.1
+     ],
+     [
+      1073.5,
+      1329.5,
+      83.39
+     ],
+     [
+      1071.5,
+      1327.5,
+      83.52
+     ],
+     [
+      1069.5,
+      1325.5,
+      83.44
+     ],
+     [
+      1067.5,
+      1323.5,
+      83.29
+     ],
+     [
+      1065.5,
+      1321.5,
+      83.36
+     ],
+     [
+      1063.5,
+      1319.5,
+      83.47
+     ],
+     [
+      1061.5,
+      1317.5,
+      83.58
+     ],
+     [
+      1059.5,
+      1315.5,
+      83.78
+     ],
+     [
+      1057.5,
+      1313.5,
+      83.81
+     ],
+     [
+      1055.5,
+      1311.5,
+      83.84
+     ],
+     [
+      1053.5,
+      1309.5,
+      83.93
+     ],
+     [
+      1051.5,
+      1307.5,
+      84.07
+     ],
+     [
+      1049.5,
+      1305.5,
+      84.12
+     ],
+     [
+      1047.5,
+      1303.5,
+      84.04
+     ],
+     [
+      1045.5,
+      1301.5,
+      83.94
+     ],
+     [
+      1043.5,
+      1299.5,
+      84
+     ],
+     [
+      1041.5,
+      1297.5,
+      84.2
+     ],
+     [
+      1039.5,
+      1295.5,
+      84.36
+     ],
+     [
+      1037.5,
+      1293.5,
+      84.45
+     ],
+     [
+      1035.5,
+      1291.5,
+      84.59
+     ],
+     [
+      1033.5,
+      1289.5,
+      84.77
+     ],
+     [
+      1031.5,
+      1287.5,
+      84.94
+     ],
+     [
+      1029.5,
+      1285.5,
+      85.08
+     ],
+     [
+      1027.5,
+      1283.5,
+      85.35
+     ],
+     [
+      1025.5,
+      1281.5,
+      85.47
+     ],
+     [
+      1023.5,
+      1279.5,
+      85.46
+     ],
+     [
+      1022.25,
+      1277.5,
+      85.62
+     ],
+     [
+      1022,
+      1275.5,
+      85.88
+     ],
+     [
+      1022,
+      1273.5,
+      86.12
+     ],
+     [
+      1022,
+      1271.5,
+      86.28
+     ],
+     [
+      1021.25,
+      1269.5,
+      86.38
+     ],
+     [
+      1019.5,
+      1267.5,
+      86.38
+     ],
+     [
+      1017.5,
+      1265.5,
+      86.43
+     ],
+     [
+      1015.5,
+      1263.5,
+      86.35
+     ],
+     [
+      1013.5,
+      1261.5,
+      86.3
+     ],
+     [
+      1011.5,
+      1259.5,
+      86.32
+     ],
+     [
+      1009.5,
+      1257.5,
+      86.29
+     ],
+     [
+      1007.5,
+      1255.5,
+      86.22
+     ],
+     [
+      1005.5,
+      1253.5,
+      86.15
+     ],
+     [
+      1003.5,
+      1251.5,
+      86.05
+     ],
+     [
+      1001.5,
+      1249.5,
+      85.98
+     ],
+     [
+      999.5,
+      1247.5,
+      85.88
+     ],
+     [
+      997.5,
+      1245.5,
+      85.77
+     ],
+     [
+      995.5,
+      1243.5,
+      85.59
+     ],
+     [
+      993.5,
+      1241.5,
+      85.46
+     ],
+     [
+      991.5,
+      1239.5,
+      85.28
+     ],
+     [
+      990.25,
+      1237.5,
+      85.17
+     ],
+     [
+      990,
+      1235.5,
+      85.1
+     ],
+     [
+      990,
+      1233.5,
+      85.01
+     ],
+     [
+      990,
+      1231.5,
+      84.91
+     ],
+     [
+      990,
+      1229.5,
+      84.82
+     ],
+     [
+      990,
+      1227.5,
+      84.79
+     ],
+     [
+      990,
+      1225.5,
+      84.74
+     ],
+     [
+      990,
+      1223.5,
+      84.62
+     ],
+     [
+      989.25,
+      1221.5,
+      84.47
+     ],
+     [
+      987.5,
+      1219.5,
+      84.26
+     ],
+     [
+      985.5,
+      1217.5,
+      84.03
+     ],
+     [
+      983.5,
+      1215.5,
+      83.84
+     ],
+     [
+      982.25,
+      1213.5,
+      83.73
+     ],
+     [
+      982,
+      1211.5,
+      83.65
+     ],
+     [
+      982,
+      1209.5,
+      83.6
+     ],
+     [
+      982,
+      1207.5,
+      83.59
+     ],
+     [
+      982,
+      1205.5,
+      83.63
+     ],
+     [
+      982,
+      1203.5,
+      83.7
+     ],
+     [
+      982,
+      1201.5,
+      83.73
+     ],
+     [
+      982,
+      1199.5,
+      83.77
+     ],
+     [
+      982,
+      1197.5,
+      83.83
+     ],
+     [
+      982,
+      1195.5,
+      83.88
+     ],
+     [
+      982,
+      1193.5,
+      83.91
+     ],
+     [
+      982,
+      1191.5,
+      83.91
+     ],
+     [
+      981.25,
+      1189.5,
+      83.8
+     ],
+     [
+      979.5,
+      1187.5,
+      83.54
+     ],
+     [
+      978.25,
+      1185.5,
+      83.35
+     ],
+     [
+      978,
+      1183.5,
+      83.29
+     ],
+     [
+      978,
+      1181.5,
+      83.18
+     ],
+     [
+      978,
+      1179.5,
+      83.07
+     ],
+     [
+      977.25,
+      1177.5,
+      82.85
+     ],
+     [
+      975.5,
+      1175.5,
+      82.36
+     ],
+     [
+      974.25,
+      1173.5,
+      82.15
+     ],
+     [
+      974,
+      1171.5,
+      82.15
+     ],
+     [
+      974,
+      1169.5,
+      82.11
+     ],
+     [
+      974,
+      1167.5,
+      82.04
+     ],
+     [
+      974,
+      1165.5,
+      81.99
+     ],
+     [
+      974,
+      1163.5,
+      81.88
+     ],
+     [
+      973.25,
+      1161.5,
+      81.59
+     ],
+     [
+      971.5,
+      1159.5,
+      81.29
+     ],
+     [
+      970.25,
+      1157.5,
+      81.02
+     ],
+     [
+      970,
+      1155.5,
+      80.77
+     ],
+     [
+      970,
+      1153.5,
+      80.42
+     ],
+     [
+      970,
+      1151.5,
+      80.11
+     ],
+     [
+      970,
+      1149.5,
+      79.92
+     ],
+     [
+      970,
+      1147.5,
+      79.76
+     ],
+     [
+      969.25,
+      1145.5,
+      79.51
+     ],
+     [
+      967.5,
+      1143.5,
+      79.2
+     ],
+     [
+      966.25,
+      1141.5,
+      78.9
+     ],
+     [
+      966,
+      1139.5,
+      78.62
+     ],
+     [
+      966,
+      1137.5,
+      78.35
+     ],
+     [
+      966,
+      1135.5,
+      78.04
+     ],
+     [
+      966,
+      1133.5,
+      77.65
+     ],
+     [
+      966,
+      1131.5,
+      77.22
+     ],
+     [
+      965.25,
+      1129.5,
+      76.8
+     ],
+     [
+      963.5,
+      1127.5,
+      76.33
+     ],
+     [
+      961.5,
+      1125.5,
+      75.85
+     ],
+     [
+      959.5,
+      1123.5,
+      75.33
+     ],
+     [
+      958.25,
+      1121.5,
+      75.03
+     ],
+     [
+      958,
+      1119.5,
+      74.8
+     ],
+     [
+      958,
+      1118.25,
+      74.68
+     ],
+     [
+      958,
+      1118,
+      74.65
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_ws_z13_01_eelwick",
+   "x": 1222,
+   "z": 402,
+   "yaw": 0,
+   "data": {
+    "from": "ws_z13_01_eelwick",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      1222,
+      402,
+      59.31
+     ],
+     [
+      1221.25,
+      402,
+      59.18
+     ],
+     [
+      1219.5,
+      402,
+      58.89
+     ],
+     [
+      1217.5,
+      402,
+      58.61
+     ],
+     [
+      1215.5,
+      402,
+      58.48
+     ],
+     [
+      1214.25,
+      402,
+      58.43
+     ],
+     [
+      1214,
+      402,
+      58.42
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_ws_z13_01_door",
+   "x": 1074,
+   "z": 1054,
+   "yaw": 0,
+   "data": {
+    "from": "ws_z13_01_door",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      1074,
+      1054,
+      76.3
+     ],
+     [
+      1073.25,
+      1053.25,
+      76.22
+     ],
+     [
+      1071.5,
+      1051.5,
+      75.98
+     ],
+     [
+      1069.5,
+      1050.25,
+      75.8
+     ],
+     [
+      1067.5,
+      1050,
+      75.72
+     ],
+     [
+      1066.25,
+      1050,
+      75.65
+     ],
+     [
+      1066,
+      1050,
+      75.64
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "town_wall",
+   "id": "brackwater_wall",
+   "x": 1136,
+   "z": 870,
+   "yaw": 0,
+   "data": {
+    "town": "brackwater",
+    "name": "Brackwater",
+    "settlement": "town",
+    "style": "curtain",
+    "material": "stone",
+    "tier": "wall",
+    "h": 4.4,
+    "thick": 1.2,
+    "tint": "#a29c90",
+    "radius": 62.64,
+    "solid": true,
+    "runs": [
+     [
+      [
+       1123.13,
+       808.69,
+       79.75
+      ],
+      [
+       1141.31,
+       807.58,
+       80.33
+      ],
+      [
+       1159.04,
+       811.75,
+       80.46
+      ],
+      [
+       1174.83,
+       820.84,
+       80.75
+      ],
+      [
+       1187.33,
+       834.1,
+       80.84
+      ],
+      [
+       1195.49,
+       850.38,
+       80.73
+      ],
+      [
+       1198.62,
+       868.33,
+       80.48
+      ],
+      [
+       1196.45,
+       886.42,
+       80.26
+      ],
+      [
+       1189.17,
+       903.12,
+       80.06
+      ],
+      [
+       1177.39,
+       917.02,
+       80.17
+      ],
+      [
+       1162.11,
+       926.94,
+       80.57
+      ],
+      [
+       1144.63,
+       932.05,
+       80.66
+      ],
+      [
+       1126.41,
+       931.9,
+       80.6
+      ],
+      [
+       1109,
+       926.53,
+       80.41
+      ],
+      [
+       1093.88,
+       916.37,
+       80.13
+      ],
+      [
+       1082.32,
+       902.29,
+       79.97
+      ],
+      [
+       1075.3,
+       885.48,
+       79.6
+      ],
+      [
+       1073.41,
+       867.36,
+       79.34
+      ],
+      [
+       1076.82,
+       849.46,
+       79.1
+      ],
+      [
+       1085.23,
+       833.3,
+       78.99
+      ],
+      [
+       1097.94,
+       820.25,
+       78.97
+      ],
+      [
+       1113.86,
+       811.4,
+       79.49
+      ]
+     ]
+    ],
+    "towers": [
+     {
+      "x": 1125.98,
+      "z": 808.16,
+      "h": 79.92,
+      "yaw": -2.9809
+     },
+     {
+      "x": 1111.17,
+      "z": 812.49,
+      "h": 79.4,
+      "yaw": -2.7341
+     },
+     {
+      "x": 1164.59,
+      "z": 814.26,
+      "h": 80.52,
+      "yaw": 2.6676
+     },
+     {
+      "x": 1193.3,
+      "z": 844.7,
+      "h": 80.79,
+      "yaw": 1.9866
+     },
+     {
+      "x": 1196.45,
+      "z": 886.42,
+      "h": 80.26,
+      "yaw": 1.3056
+     },
+     {
+      "x": 1172.63,
+      "z": 920.82,
+      "h": 80.37,
+      "yaw": 0.6246
+     },
+     {
+      "x": 1132.47,
+      "z": 932.54,
+      "h": 80.65,
+      "yaw": -0.0564
+     },
+     {
+      "x": 1093.88,
+      "z": 916.37,
+      "h": 80.13,
+      "yaw": -0.7374
+     },
+     {
+      "x": 1074.08,
+      "z": 879.51,
+      "h": 79.52,
+      "yaw": -1.4184
+     },
+     {
+      "x": 1081.91,
+      "z": 838.41,
+      "h": 79.01,
+      "yaw": -2.0994
+     }
+    ],
+    "gates": [
+     {
+      "id": "brackwater_gate_0",
+      "x": 1118.44,
+      "z": 809.87,
+      "h": 79.56,
+      "yaw": -2.9292,
+      "out": [
+       -0.2108,
+       -0.9775
+      ],
+      "wallYaw": -2.8575,
+      "open": 6.46,
+      "width": 6.2,
+      "pass": 6.2,
+      "slant": 0.072,
+      "kind": "gatehouse",
+      "way": "brackwater_street_41",
+      "wayKind": "road",
+      "road": "road_link_brackwater",
+      "ways": [
+       "brackwater_street_41"
+      ],
+      "led": [],
+      "ends": [
+       [
+        1113.86,
+        811.4
+       ],
+       [
+        1123.13,
+        808.69
+       ]
+      ],
+      "main": {
+       "street": "brackwater_street_41",
+       "width": 5,
+       "pts": [
+        [
+         1118.44,
+         809.87
+        ],
+        [
+         1128.5,
+         856.5
+        ],
+        [
+         1139.37,
+         868.87
+        ]
+       ],
+       "metres": 64.17
+      },
+      "approaches": [
+       {
+        "way": "road_link_brackwater",
+        "width": 3.5,
+        "pts": [
+         [
+          1117.63,
+          806.46
+         ],
+         [
+          1117.1,
+          804.64
+         ],
+         [
+          1116.58,
+          802.83
+         ],
+         [
+          1116.05,
+          801.01
+         ],
+         [
+          1115.53,
+          799.2
+         ],
+         [
+          1115,
+          797.38
+         ],
+         [
+          1114.45,
+          795.49
+         ],
+         [
+          1113.91,
+          793.61
+         ],
+         [
+          1113.36,
+          791.72
+         ],
+         [
+          1112.82,
+          789.83
+         ],
+         [
+          1112.27,
+          787.95
+         ],
+         [
+          1111.73,
+          786.06
+         ],
+         [
+          1111.18,
+          784.18
+         ],
+         [
+          1110.64,
+          782.29
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "openings": []
+   }
+  },
+  {
+   "kind": "town_wall",
+   "id": "eelwick_wall",
+   "x": 1164,
+   "z": 427,
+   "yaw": 0,
+   "data": {
+    "town": "eelwick",
+    "name": "Eelwick",
+    "settlement": "hamlet",
+    "style": "fence",
+    "material": "rail",
+    "tier": "low",
+    "h": 1.25,
+    "thick": 0.3,
+    "tint": "#8a6c50",
+    "radius": 34.25,
+    "solid": true,
+    "runs": [
+     [
+      [
+       1195.42,
+       440.62,
+       57.7
+      ],
+      [
+       1190.21,
+       449.05,
+       57.54
+      ],
+      [
+       1182.81,
+       455.62,
+       57.73
+      ],
+      [
+       1173.83,
+       459.81,
+       57.92
+      ],
+      [
+       1164.04,
+       461.25,
+       57.87
+      ],
+      [
+       1154.23,
+       459.83,
+       57.92
+      ],
+      [
+       1145.25,
+       455.66,
+       57.91
+      ],
+      [
+       1137.83,
+       449.1,
+       57.67
+      ],
+      [
+       1132.6,
+       440.69,
+       57.43
+      ],
+      [
+       1130,
+       431.13,
+       57.29
+      ],
+      [
+       1130.24,
+       421.23,
+       57.25
+      ],
+      [
+       1133.3,
+       411.82,
+       57.2
+      ],
+      [
+       1138.93,
+       403.67,
+       57.12
+      ],
+      [
+       1146.65,
+       397.47,
+       57.1
+      ],
+      [
+       1155.83,
+       393.74,
+       57.08
+      ],
+      [
+       1165.68,
+       392.79,
+       57.11
+      ],
+      [
+       1175.4,
+       394.7,
+       57.16
+      ],
+      [
+       1184.16,
+       399.31,
+       57.12
+      ],
+      [
+       1191.24,
+       406.24,
+       57.18
+      ],
+      [
+       1196.04,
+       414.9,
+       57.43
+      ],
+      [
+       1198.16,
+       424.58,
+       57.65
+      ],
+      [
+       1197.43,
+       434.45,
+       57.78
+      ]
+     ]
+    ],
+    "towers": [],
+    "gates": [
+     {
+      "id": "eelwick_gate_0",
+      "x": 1196.57,
+      "z": 437.59,
+      "h": 57.74,
+      "yaw": 1.2566,
+      "out": [
+       0.951,
+       0.3091
+      ],
+      "wallYaw": 1.2566,
+      "open": 4.2,
+      "width": 4.2,
+      "pass": 4.2,
+      "slant": 0,
+      "kind": "posts",
+      "way": null,
+      "wayKind": "path",
+      "road": null,
+      "ways": [
+       null
+      ],
+      "led": [],
+      "ends": [
+       [
+        1197.43,
+        434.45
+       ],
+       [
+        1195.42,
+        440.62
+       ]
+      ],
+      "main": null,
+      "approaches": []
+     }
+    ],
+    "openings": []
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "brackwater_graveyard",
+   "x": 1132,
+   "z": 738,
+   "yaw": -2.9155,
+   "data": {
+    "piece": "graveyard",
+    "name": "Brackwater Graveyard",
+    "town": "Brackwater",
+    "auto": true,
+    "r": 20.81,
+    "poly": [
+     [
+      1124.12,
+      757.26
+     ],
+     [
+      1116.49,
+      724.12
+     ],
+     [
+      1139.88,
+      718.74
+     ],
+     [
+      1147.51,
+      751.88
+     ]
+    ],
+    "w": 34,
+    "d": 24,
+    "angle": -1.7969,
+    "gate": {
+     "x": 1120.31,
+     "z": 740.69,
+     "width": 3.2,
+     "yaw": 1.7969
+    },
+    "graves": [
+     [
+      1125.68,
+      754.75,
+      -1.352,
+      "headstone"
+     ],
+     [
+      1128.32,
+      754.14,
+      -1.315,
+      "cross"
+     ],
+     [
+      1131.09,
+      753.29,
+      -1.325,
+      "headstone"
+     ],
+     [
+      1133.59,
+      752.87,
+      -1.34,
+      "cross"
+     ],
+     [
+      1136.39,
+      752.14,
+      -1.357,
+      "tomb"
+     ],
+     [
+      1139,
+      751.67,
+      -1.326,
+      "cross"
+     ],
+     [
+      1144.25,
+      750.33,
+      -1.383,
+      "headstone"
+     ],
+     [
+      1125.48,
+      752.94,
+      -1.368,
+      "headstone"
+     ],
+     [
+      1128.13,
+      752.33,
+      -1.358,
+      "tomb"
+     ],
+     [
+      1130.67,
+      751.92,
+      -1.379,
+      "cross"
+     ],
+     [
+      1133.3,
+      751.2,
+      -1.374,
+      "tomb"
+     ],
+     [
+      1135.89,
+      750.6,
+      -1.361,
+      "cross"
+     ],
+     [
+      1138.58,
+      749.91,
+      -1.374,
+      "slab"
+     ],
+     [
+      1141.15,
+      749.32,
+      -1.327,
+      "headstone"
+     ],
+     [
+      1143.9,
+      748.8,
+      -1.362,
+      "headstone"
+     ],
+     [
+      1125.13,
+      751.5,
+      -1.362,
+      "cross"
+     ],
+     [
+      1127.56,
+      750.87,
+      -1.376,
+      "cross"
+     ],
+     [
+      1133.06,
+      749.78,
+      -1.344,
+      "cross"
+     ],
+     [
+      1135.58,
+      749.08,
+      -1.37,
+      "headstone"
+     ],
+     [
+      1138.31,
+      748.45,
+      -1.324,
+      "cross"
+     ],
+     [
+      1140.76,
+      747.91,
+      -1.321,
+      "slab"
+     ],
+     [
+      1143.52,
+      747.3,
+      -1.328,
+      "headstone"
+     ],
+     [
+      1124.75,
+      749.95,
+      -1.342,
+      "mound"
+     ],
+     [
+      1127.28,
+      749.43,
+      -1.371,
+      "mound"
+     ],
+     [
+      1129.91,
+      748.79,
+      -1.362,
+      "headstone"
+     ],
+     [
+      1135.2,
+      747.4,
+      -1.344,
+      "cross"
+     ],
+     [
+      1137.74,
+      746.93,
+      -1.315,
+      "headstone"
+     ],
+     [
+      1140.59,
+      746.26,
+      -1.326,
+      "cross"
+     ],
+     [
+      1143.13,
+      745.69,
+      -1.367,
+      "slab"
+     ],
+     [
+      1124.36,
+      748.39,
+      -1.329,
+      "headstone"
+     ],
+     [
+      1126.85,
+      747.76,
+      -1.365,
+      "headstone"
+     ],
+     [
+      1129.68,
+      747.23,
+      -1.363,
+      "headstone"
+     ],
+     [
+      1132.26,
+      746.51,
+      -1.358,
+      "headstone"
+     ],
+     [
+      1134.9,
+      745.95,
+      -1.324,
+      "headstone"
+     ],
+     [
+      1137.53,
+      745.24,
+      -1.365,
+      "cross"
+     ],
+     [
+      1140.15,
+      744.63,
+      -1.371,
+      "slab"
+     ],
+     [
+      1142.67,
+      744.14,
+      -1.327,
+      "slab"
+     ],
+     [
+      1123.93,
+      746.74,
+      -1.351,
+      "slab"
+     ],
+     [
+      1126.66,
+      746.13,
+      -1.336,
+      "headstone"
+     ],
+     [
+      1129.14,
+      745.7,
+      -1.372,
+      "tomb"
+     ],
+     [
+      1132,
+      745.07,
+      -1.313,
+      "headstone"
+     ],
+     [
+      1134.6,
+      744.3,
+      -1.383,
+      "mound"
+     ],
+     [
+      1137.17,
+      743.74,
+      -1.319,
+      "slab"
+     ],
+     [
+      1139.65,
+      743.13,
+      -1.374,
+      "headstone"
+     ],
+     [
+      1142.43,
+      742.46,
+      -1.331,
+      "headstone"
+     ],
+     [
+      1126.12,
+      744.56,
+      -1.31,
+      "cross"
+     ],
+     [
+      1128.88,
+      744.06,
+      -1.364,
+      "cross"
+     ],
+     [
+      1131.57,
+      743.45,
+      -1.365,
+      "slab"
+     ],
+     [
+      1134.16,
+      742.89,
+      -1.324,
+      "headstone"
+     ],
+     [
+      1136.89,
+      742.27,
+      -1.356,
+      "tomb"
+     ],
+     [
+      1123.21,
+      743.64,
+      -1.324,
+      "cross"
+     ],
+     [
+      1125.85,
+      743.13,
+      -1.35,
+      "mound"
+     ],
+     [
+      1128.51,
+      742.45,
+      -1.341,
+      "tomb"
+     ],
+     [
+      1133.69,
+      741.35,
+      -1.379,
+      "mound"
+     ],
+     [
+      1121.84,
+      737.41,
+      -1.338,
+      "cross"
+     ],
+     [
+      1124.58,
+      736.92,
+      -1.311,
+      "slab"
+     ],
+     [
+      1127.11,
+      736.26,
+      -1.365,
+      "cross"
+     ],
+     [
+      1129.63,
+      735.6,
+      -1.336,
+      "tomb"
+     ],
+     [
+      1132.43,
+      735.13,
+      -1.33,
+      "mound"
+     ],
+     [
+      1121.47,
+      735.86,
+      -1.306,
+      "tomb"
+     ],
+     [
+      1124.12,
+      735.28,
+      -1.317,
+      "mound"
+     ],
+     [
+      1129.31,
+      734.09,
+      -1.32,
+      "cross"
+     ],
+     [
+      1132,
+      733.56,
+      -1.317,
+      "headstone"
+     ],
+     [
+      1134.55,
+      732.9,
+      -1.377,
+      "tomb"
+     ],
+     [
+      1123.68,
+      733.71,
+      -1.327,
+      "mound"
+     ],
+     [
+      1126.48,
+      733.21,
+      -1.32,
+      "mound"
+     ],
+     [
+      1129.1,
+      732.44,
+      -1.314,
+      "cross"
+     ],
+     [
+      1131.62,
+      731.96,
+      -1.367,
+      "cross"
+     ],
+     [
+      1134.25,
+      731.27,
+      -1.356,
+      "mound"
+     ],
+     [
+      1136.99,
+      730.71,
+      -1.349,
+      "cross"
+     ],
+     [
+      1139.47,
+      730.06,
+      -1.32,
+      "mound"
+     ],
+     [
+      1120.81,
+      732.65,
+      -1.36,
+      "mound"
+     ],
+     [
+      1123.48,
+      732.23,
+      -1.335,
+      "cross"
+     ],
+     [
+      1126.08,
+      731.52,
+      -1.369,
+      "headstone"
+     ],
+     [
+      1128.65,
+      731.1,
+      -1.355,
+      "cross"
+     ],
+     [
+      1134,
+      729.72,
+      -1.352,
+      "headstone"
+     ],
+     [
+      1136.56,
+      729.11,
+      -1.344,
+      "headstone"
+     ],
+     [
+      1139.27,
+      728.63,
+      -1.357,
+      "mound"
+     ],
+     [
+      1122.91,
+      730.52,
+      -1.317,
+      "cross"
+     ],
+     [
+      1125.71,
+      729.88,
+      -1.368,
+      "headstone"
+     ],
+     [
+      1128.38,
+      729.34,
+      -1.339,
+      "slab"
+     ],
+     [
+      1130.97,
+      728.88,
+      -1.36,
+      "headstone"
+     ],
+     [
+      1133.62,
+      728.12,
+      -1.365,
+      "tomb"
+     ],
+     [
+      1138.86,
+      727.11,
+      -1.336,
+      "cross"
+     ],
+     [
+      1120.17,
+      729.77,
+      -1.325,
+      "cross"
+     ],
+     [
+      1122.67,
+      728.94,
+      -1.318,
+      "headstone"
+     ],
+     [
+      1125.2,
+      728.45,
+      -1.309,
+      "slab"
+     ],
+     [
+      1128.01,
+      727.84,
+      -1.311,
+      "mound"
+     ],
+     [
+      1130.51,
+      727.26,
+      -1.321,
+      "mound"
+     ],
+     [
+      1133.18,
+      726.53,
+      -1.353,
+      "cross"
+     ],
+     [
+      1135.74,
+      726.15,
+      -1.34,
+      "cross"
+     ],
+     [
+      1119.66,
+      728.12,
+      -1.335,
+      "headstone"
+     ],
+     [
+      1122.24,
+      727.65,
+      -1.324,
+      "slab"
+     ],
+     [
+      1125.01,
+      726.79,
+      -1.371,
+      "headstone"
+     ],
+     [
+      1127.68,
+      726.36,
+      -1.323,
+      "headstone"
+     ],
+     [
+      1130.11,
+      725.64,
+      -1.362,
+      "mound"
+     ],
+     [
+      1135.49,
+      724.57,
+      -1.325,
+      "mound"
+     ],
+     [
+      1119.4,
+      726.51,
+      -1.313,
+      "mound"
+     ],
+     [
+      1122.02,
+      725.91,
+      -1.32,
+      "headstone"
+     ],
+     [
+      1124.51,
+      725.23,
+      -1.365,
+      "cross"
+     ],
+     [
+      1127.23,
+      724.82,
+      -1.378,
+      "headstone"
+     ],
+     [
+      1129.9,
+      724.08,
+      -1.318,
+      "tomb"
+     ],
+     [
+      1132.51,
+      723.56,
+      -1.305,
+      "cross"
+     ],
+     [
+      1135.1,
+      722.97,
+      -1.308,
+      "tomb"
+     ],
+     [
+      1137.74,
+      722.19,
+      -1.351,
+      "mound"
+     ]
+    ],
+    "graveStyles": [
+     "headstone",
+     "cross",
+     "slab",
+     "mound",
+     "tomb"
+    ],
+    "level": 79,
+    "slots": [
+     {
+      "kind": "gravedigger",
+      "x": 1120.31,
+      "z": 740.69,
+      "r": 1.5,
+      "yaw": 1.7969
+     }
+    ]
+   }
+  },
+  {
+   "kind": "wall",
+   "id": "brackwater_graveyard_wall_0",
+   "x": 1120.34,
+   "z": 739.04,
+   "yaw": 0,
+   "data": {
+    "setPiece": "brackwater_graveyard",
+    "h": 0.95,
+    "material": "drystone",
+    "pts": [
+     [
+      1120.34,
+      739.04,
+      79
+     ],
+     [
+      1116.97,
+      724.42,
+      79
+     ],
+     [
+      1139.58,
+      719.22,
+      79
+     ],
+     [
+      1147.03,
+      751.58,
+      78.99
+     ],
+     [
+      1124.42,
+      756.78,
+      79
+     ],
+     [
+      1121.05,
+      742.16,
+      79
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "set_building",
+   "id": "brackwater_graveyard_bldg_0",
+   "x": 1139.46,
+   "z": 736.28,
+   "yaw": -1.3447,
+   "data": {
+    "setPiece": "brackwater_graveyard",
+    "piece": "graveyard",
+    "want": "chapel",
+    "w": 7.5,
+    "d": 5.5,
+    "angle": -1.7969,
+    "front": 2.9155,
+    "culture": "halfling",
+    "label": "Chapel",
+    "lit": false,
+    "ground": 79
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "eelwick_graveyard",
+   "x": 1192,
+   "z": 343,
+   "yaw": 2.8966,
+   "data": {
+    "piece": "graveyard",
+    "name": "Eelwick Graveyard",
+    "town": "Eelwick",
+    "auto": true,
+    "r": 12.5,
+    "poly": [
+     [
+      1182.3,
+      350.88
+     ],
+     [
+      1187.15,
+      331.48
+     ],
+     [
+      1201.7,
+      335.12
+     ],
+     [
+      1196.85,
+      354.52
+     ]
+    ],
+    "w": 20,
+    "d": 15,
+    "angle": -1.3258,
+    "gate": {
+     "x": 1199.28,
+     "z": 344.82,
+     "width": 3.2,
+     "yaw": -1.8158
+    },
+    "graves": [
+     [
+      1184.96,
+      349.36,
+      1.363,
+      "headstone"
+     ],
+     [
+      1187.66,
+      349.89,
+      1.354,
+      "headstone"
+     ],
+     [
+      1192.75,
+      351.26,
+      1.307,
+      "cross"
+     ],
+     [
+      1187.91,
+      348.34,
+      1.328,
+      "headstone"
+     ],
+     [
+      1193.16,
+      349.58,
+      1.324,
+      "cross"
+     ],
+     [
+      1185.69,
+      346.05,
+      1.294,
+      "mound"
+     ],
+     [
+      1188.22,
+      346.9,
+      1.305,
+      "cross"
+     ],
+     [
+      1190.95,
+      347.44,
+      1.325,
+      "headstone"
+     ],
+     [
+      1193.71,
+      348.14,
+      1.31,
+      "headstone"
+     ],
+     [
+      1186.09,
+      344.49,
+      1.325,
+      "tomb"
+     ],
+     [
+      1191.39,
+      346.02,
+      1.316,
+      "slab"
+     ],
+     [
+      1187.76,
+      338.41,
+      1.296,
+      "cross"
+     ],
+     [
+      1190.33,
+      339.12,
+      1.358,
+      "headstone"
+     ],
+     [
+      1195.64,
+      340.46,
+      1.334,
+      "slab"
+     ],
+     [
+      1193.39,
+      338.25,
+      1.332,
+      "headstone"
+     ],
+     [
+      1196.04,
+      338.73,
+      1.305,
+      "headstone"
+     ],
+     [
+      1188.57,
+      335.36,
+      1.336,
+      "cross"
+     ],
+     [
+      1191.11,
+      335.88,
+      1.318,
+      "cross"
+     ],
+     [
+      1193.68,
+      336.63,
+      1.354,
+      "cross"
+     ],
+     [
+      1196.24,
+      337.14,
+      1.34,
+      "tomb"
+     ]
+    ],
+    "graveStyles": [
+     "headstone",
+     "cross",
+     "slab",
+     "mound",
+     "tomb"
+    ],
+    "level": 55.85,
+    "slots": [
+     {
+      "kind": "gravedigger",
+      "x": 1199.28,
+      "z": 344.82,
+      "r": 1.5,
+      "yaw": -1.8158
+     }
+    ]
+   }
+  },
+  {
+   "kind": "wall",
+   "id": "eelwick_graveyard_wall_0",
+   "x": 1198.5,
+   "z": 346.27,
+   "yaw": 0,
+   "data": {
+    "setPiece": "eelwick_graveyard",
+    "h": 0.95,
+    "material": "drystone",
+    "pts": [
+     [
+      1198.5,
+      346.27,
+      55.85
+     ],
+     [
+      1196.56,
+      354.04,
+      55.84
+     ],
+     [
+      1182.78,
+      350.59,
+      55.84
+     ],
+     [
+      1187.44,
+      331.96,
+      55.84
+     ],
+     [
+      1201.22,
+      335.41,
+      55.85
+     ],
+     [
+      1199.28,
+      343.17,
+      55.85
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "brack_farm",
+   "x": 912,
+   "z": 1116,
+   "yaw": -1.0845,
+   "data": {
+    "piece": "farm",
+    "name": "Brackwater Farm",
+    "town": "Brackwater",
+    "r": 21.3,
+    "poly": [
+     [
+      932.27,
+      1122.25
+     ],
+     [
+      905.75,
+      1136.27
+     ],
+     [
+      891.73,
+      1109.75
+     ],
+     [
+      918.25,
+      1095.73
+     ]
+    ],
+    "w": 30,
+    "d": 30,
+    "angle": 2.6553,
+    "fields": 6,
+    "slots": [
+     {
+      "kind": "farmstead",
+      "x": 912,
+      "z": 1116,
+      "r": 15,
+      "yaw": 0
+     },
+     {
+      "kind": "farmer",
+      "x": 924.93,
+      "z": 1115.95,
+      "r": 1,
+      "yaw": -1.0845
+     }
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "brack_farm_field_0",
+   "x": 961.51,
+   "z": 1089.83,
+   "yaw": -1.0845,
+   "data": {
+    "piece": "farm",
+    "name": "Brackwater Farm",
+    "town": "Brackwater",
+    "setPiece": "brack_farm",
+    "crop": "crop",
+    "grows": "turnips",
+    "poly": [
+     [
+      991.09,
+      1092.29
+     ],
+     [
+      946.88,
+      1115.66
+     ],
+     [
+      931.93,
+      1087.37
+     ],
+     [
+      976.13,
+      1064
+     ]
+    ],
+    "w": 50,
+    "d": 32,
+    "angle": 2.6553,
+    "furrowAngle": 2.6553,
+    "boundary": "hedge",
+    "gate": {
+     "x": 939.41,
+     "z": 1101.51,
+     "width": 4,
+     "yaw": 2.0571
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "brack_farm_field_0_hedge_0",
+   "x": 939.18,
+   "z": 1099.37,
+   "yaw": 0,
+   "data": {
+    "setPiece": "brack_farm",
+    "h": 1.6,
+    "pts": [
+     [
+      939.18,
+      1099.37,
+      73.54
+     ],
+     [
+      933.01,
+      1087.7,
+      73.66
+     ],
+     [
+      975.8,
+      1065.08,
+      75.04
+     ],
+     [
+      990.01,
+      1091.96,
+      75.32
+     ],
+     [
+      947.22,
+      1114.58,
+      73.68
+     ],
+     [
+      941.05,
+      1102.91,
+      73.54
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "brack_farm_field_1",
+   "x": 862.49,
+   "z": 1142.17,
+   "yaw": -1.0845,
+   "data": {
+    "piece": "farm",
+    "name": "Brackwater Farm",
+    "town": "Brackwater",
+    "setPiece": "brack_farm",
+    "crop": "crop",
+    "grows": "cabbages",
+    "poly": [
+     [
+      892.07,
+      1144.63
+     ],
+     [
+      847.87,
+      1168
+     ],
+     [
+      832.91,
+      1139.71
+     ],
+     [
+      877.12,
+      1116.34
+     ]
+    ],
+    "w": 50,
+    "d": 32,
+    "angle": 2.6553,
+    "furrowAngle": 2.6553,
+    "boundary": "hedge",
+    "gate": {
+     "x": 884.59,
+     "z": 1130.49,
+     "width": 4,
+     "yaw": -1.0845
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "brack_farm_field_1_hedge_0",
+   "x": 884.82,
+   "z": 1132.63,
+   "yaw": 0,
+   "data": {
+    "setPiece": "brack_farm",
+    "h": 1.6,
+    "pts": [
+     [
+      884.82,
+      1132.63,
+      73.77
+     ],
+     [
+      890.99,
+      1144.3,
+      73.26
+     ],
+     [
+      848.2,
+      1166.92,
+      74.03
+     ],
+     [
+      833.99,
+      1140.04,
+      75.26
+     ],
+     [
+      876.78,
+      1117.42,
+      74.45
+     ],
+     [
+      882.95,
+      1129.09,
+      73.91
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "brack_farm_field_2",
+   "x": 954.8,
+   "z": 1050.39,
+   "yaw": -2.6553,
+   "data": {
+    "piece": "farm",
+    "name": "Brackwater Farm",
+    "town": "Brackwater",
+    "setPiece": "brack_farm",
+    "crop": "pasture",
+    "grows": "sheep",
+    "poly": [
+     [
+      972.66,
+      1059.05
+     ],
+     [
+      951.89,
+      1070.03
+     ],
+     [
+      936.93,
+      1041.74
+     ],
+     [
+      957.71,
+      1030.75
+     ]
+    ],
+    "w": 23.5,
+    "d": 32,
+    "angle": 2.6553,
+    "furrowAngle": 4.2261,
+    "boundary": "fence",
+    "gate": {
+     "x": 944.41,
+     "z": 1055.88,
+     "width": 3,
+     "yaw": 2.0571
+    }
+   }
+  },
+  {
+   "kind": "fence",
+   "id": "brack_farm_field_2_fence_0",
+   "x": 944.42,
+   "z": 1054.18,
+   "yaw": 0,
+   "data": {
+    "setPiece": "brack_farm",
+    "h": 1.1,
+    "pts": [
+     [
+      944.42,
+      1054.18,
+      75.1
+     ],
+     [
+      938.01,
+      1042.07,
+      75.38
+     ],
+     [
+      957.38,
+      1031.84,
+      74.78
+     ],
+     [
+      971.58,
+      1058.71,
+      74.43
+     ],
+     [
+      952.22,
+      1068.95,
+      74.79
+     ],
+     [
+      945.82,
+      1056.84,
+      75.05
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "brack_farm_field_3",
+   "x": 990.32,
+   "z": 1117.58,
+   "yaw": -2.6553,
+   "data": {
+    "piece": "farm",
+    "name": "Brackwater Farm",
+    "town": "Brackwater",
+    "setPiece": "brack_farm",
+    "crop": "pasture",
+    "grows": "cattle",
+    "poly": [
+     [
+      1008.18,
+      1126.23
+     ],
+     [
+      987.41,
+      1137.22
+     ],
+     [
+      972.45,
+      1108.93
+     ],
+     [
+      993.23,
+      1097.94
+     ]
+    ],
+    "w": 23.5,
+    "d": 32,
+    "angle": 2.6553,
+    "furrowAngle": 4.2261,
+    "boundary": "fence",
+    "gate": {
+     "x": 979.93,
+     "z": 1123.07,
+     "width": 3,
+     "yaw": 2.0571
+    }
+   }
+  },
+  {
+   "kind": "fence",
+   "id": "brack_farm_field_3_fence_0",
+   "x": 979.94,
+   "z": 1121.37,
+   "yaw": 0,
+   "data": {
+    "setPiece": "brack_farm",
+    "h": 1.1,
+    "pts": [
+     [
+      979.94,
+      1121.37,
+      76.48
+     ],
+     [
+      973.53,
+      1109.26,
+      75
+     ],
+     [
+      992.9,
+      1099.03,
+      75.72
+     ],
+     [
+      1007.1,
+      1125.9,
+      79.07
+     ],
+     [
+      987.74,
+      1136.14,
+      78.6
+     ],
+     [
+      981.34,
+      1124.02,
+      76.86
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "brack_farm_field_4",
+   "x": 891.3,
+   "z": 1169.92,
+   "yaw": -2.6553,
+   "data": {
+    "piece": "farm",
+    "name": "Brackwater Farm",
+    "town": "Brackwater",
+    "setPiece": "brack_farm",
+    "crop": "pasture",
+    "grows": "sheep",
+    "poly": [
+     [
+      909.17,
+      1178.58
+     ],
+     [
+      888.39,
+      1189.56
+     ],
+     [
+      873.44,
+      1161.27
+     ],
+     [
+      894.21,
+      1150.29
+     ]
+    ],
+    "w": 23.5,
+    "d": 32,
+    "angle": 2.6553,
+    "furrowAngle": 4.2261,
+    "boundary": "fence",
+    "gate": {
+     "x": 901.69,
+     "z": 1164.43,
+     "width": 3,
+     "yaw": -1.0845
+    }
+   }
+  },
+  {
+   "kind": "fence",
+   "id": "brack_farm_field_4_fence_0",
+   "x": 901.68,
+   "z": 1166.13,
+   "yaw": 0,
+   "data": {
+    "setPiece": "brack_farm",
+    "h": 1.1,
+    "pts": [
+     [
+      901.68,
+      1166.13,
+      73.88
+     ],
+     [
+      908.09,
+      1178.24,
+      73.94
+     ],
+     [
+      888.73,
+      1188.48,
+      74.1
+     ],
+     [
+      874.52,
+      1161.6,
+      74.29
+     ],
+     [
+      893.88,
+      1151.37,
+      73.83
+     ],
+     [
+      900.28,
+      1163.48,
+      73.86
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "brack_farm_field_5",
+   "x": 855.78,
+   "z": 1102.74,
+   "yaw": -2.6553,
+   "data": {
+    "piece": "farm",
+    "name": "Brackwater Farm",
+    "town": "Brackwater",
+    "setPiece": "brack_farm",
+    "crop": "crop",
+    "grows": "barley",
+    "poly": [
+     [
+      873.65,
+      1111.39
+     ],
+     [
+      852.87,
+      1122.37
+     ],
+     [
+      837.92,
+      1094.08
+     ],
+     [
+      858.69,
+      1083.1
+     ]
+    ],
+    "w": 23.5,
+    "d": 32,
+    "angle": 2.6553,
+    "furrowAngle": 4.2261,
+    "boundary": "hedge",
+    "gate": {
+     "x": 866.17,
+     "z": 1097.24,
+     "width": 4,
+     "yaw": -1.0845
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "brack_farm_field_5_hedge_0",
+   "x": 866.4,
+   "z": 1099.39,
+   "yaw": 0,
+   "data": {
+    "setPiece": "brack_farm",
+    "h": 1.6,
+    "pts": [
+     [
+      866.4,
+      1099.39,
+      75.08
+     ],
+     [
+      872.57,
+      1111.06,
+      75.17
+     ],
+     [
+      853.21,
+      1121.29,
+      75.38
+     ],
+     [
+      839,
+      1094.42,
+      74.95
+     ],
+     [
+      858.36,
+      1084.18,
+      74.87
+     ],
+     [
+      864.53,
+      1095.85,
+      75.03
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "set_building",
+   "id": "brack_farm_bldg_0",
+   "x": 919.45,
+   "z": 1118.85,
+   "yaw": 2.0571,
+   "data": {
+    "setPiece": "brack_farm",
+    "piece": "farm",
+    "want": "house",
+    "w": 10,
+    "d": 7,
+    "angle": 2.6553,
+    "front": 5.7969,
+    "culture": "halfling",
+    "label": null,
+    "lit": false,
+    "ground": 73.32
+   }
+  },
+  {
+   "kind": "set_building",
+   "id": "brack_farm_bldg_1",
+   "x": 907.79,
+   "z": 1122.47,
+   "yaw": 2.0571,
+   "data": {
+    "setPiece": "brack_farm",
+    "piece": "farm",
+    "want": "granary",
+    "w": 9,
+    "d": 12,
+    "angle": 2.6553,
+    "front": 5.7969,
+    "culture": "halfling",
+    "label": null,
+    "lit": false,
+    "ground": 73.32
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "eel_orchard",
+   "x": 1348,
+   "z": 464,
+   "yaw": 2.7828,
+   "data": {
+    "piece": "orchard",
+    "name": "Eelwick Orchard",
+    "town": "Eelwick",
+    "r": 34.41,
+    "poly": [
+     [
+      1319.44,
+      483.19
+     ],
+     [
+      1339.1,
+      430.76
+     ],
+     [
+      1376.56,
+      444.81
+     ],
+     [
+      1356.9,
+      497.24
+     ]
+    ],
+    "w": 56,
+    "d": 40,
+    "angle": -1.212,
+    "gate": {
+     "x": 1329.27,
+     "z": 456.98,
+     "width": 3,
+     "yaw": 1.212
+    },
+    "fruit": "pear",
+    "trees": 37,
+    "slots": [
+     {
+      "kind": "picker",
+      "x": 1329.27,
+      "z": 456.98,
+      "r": 1.5,
+      "yaw": 1.212
+     }
+    ]
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "eel_orchard_hedge_0",
+   "x": 1330.36,
+   "z": 455.78,
+   "yaw": 0,
+   "data": {
+    "setPiece": "eel_orchard",
+    "h": 1.5,
+    "pts": [
+     [
+      1330.36,
+      455.78,
+      60.36
+     ],
+     [
+      1339.46,
+      431.53,
+      61.22
+     ],
+     [
+      1375.79,
+      445.16,
+      60.94
+     ],
+     [
+      1356.54,
+      496.47,
+      59.61
+     ],
+     [
+      1320.21,
+      482.84,
+      59.74
+     ],
+     [
+      1329.31,
+      458.59,
+      60.29
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "set_building",
+   "id": "eel_orchard_bldg_0",
+   "x": 1334.19,
+   "z": 452.41,
+   "yaw": -1.9296,
+   "data": {
+    "setPiece": "eel_orchard",
+    "piece": "orchard",
+    "want": "hut",
+    "w": 5,
+    "d": 4,
+    "angle": -1.212,
+    "front": 3.5004,
+    "culture": "halfling",
+    "label": null,
+    "lit": false,
+    "ground": 60.47
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "brack_fold",
+   "x": 672,
+   "z": 704,
+   "yaw": 0,
+   "data": {
+    "piece": "sheepfold",
+    "name": "Marsh Fold",
+    "town": "Brackwater",
+    "r": 9,
+    "gate": {
+     "x": 680.79,
+     "z": 702.08,
+     "width": 5.6621980910901195,
+     "yaw": -1.3553
+    },
+    "slots": [
+     {
+      "kind": "shepherd",
+      "x": 682.74,
+      "z": 701.65,
+      "r": 1.5,
+      "yaw": -1.3553
+     },
+     {
+      "kind": "flock",
+      "x": 672,
+      "z": 704,
+      "r": 6.3,
+      "yaw": 0
+     }
+    ]
+   }
+  },
+  {
+   "kind": "wall",
+   "id": "brack_fold_wall_0",
+   "x": 680.95,
+   "z": 704.94,
+   "yaw": 0,
+   "data": {
+    "setPiece": "brack_fold",
+    "h": 1,
+    "material": "drystone",
+    "pts": [
+     [
+      680.95,
+      704.94,
+      75.78
+     ],
+     [
+      680.34,
+      707.39,
+      75.78
+     ],
+     [
+      679.06,
+      709.58,
+      75.77
+     ],
+     [
+      677.23,
+      711.33,
+      75.77
+     ],
+     [
+      674.98,
+      712.49,
+      75.79
+     ],
+     [
+      672.5,
+      712.99,
+      75.83
+     ],
+     [
+      669.98,
+      712.77,
+      75.84
+     ],
+     [
+      667.62,
+      711.86,
+      75.81
+     ],
+     [
+      665.6,
+      710.33,
+      75.81
+     ],
+     [
+      664.09,
+      708.3,
+      75.83
+     ],
+     [
+      663.21,
+      705.92,
+      75.81
+     ],
+     [
+      663.02,
+      703.4,
+      75.8
+     ],
+     [
+      663.54,
+      700.92,
+      75.8
+     ],
+     [
+      664.73,
+      698.69,
+      75.82
+     ],
+     [
+      666.5,
+      696.88,
+      75.84
+     ],
+     [
+      668.7,
+      695.63,
+      75.87
+     ],
+     [
+      671.16,
+      695.04,
+      75.9
+     ],
+     [
+      673.69,
+      695.16,
+      75.9
+     ],
+     [
+      676.08,
+      695.98,
+      75.87
+     ],
+     [
+      678.16,
+      697.43,
+      75.89
+     ],
+     [
+      679.74,
+      699.41,
+      75.85
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "brack_copse",
+   "x": 1528,
+   "z": 1536,
+   "yaw": 0,
+   "data": {
+    "piece": "copse",
+    "name": "Withy Copse",
+    "town": "Brackwater",
+    "r": 30,
+    "trees": 108,
+    "slots": []
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "brackwater_belt",
+   "x": 1136,
+   "z": 870,
+   "yaw": 0,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Brackwater",
+    "auto": true,
+    "r": 210,
+    "fields": 10,
+    "slots": []
+   }
+  },
+  {
+   "kind": "field",
+   "id": "brackwater_belt_field_0",
+   "x": 1022.52,
+   "z": 880.89,
+   "yaw": -3.0459,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Brackwater",
+    "auto": true,
+    "setPiece": "brackwater_belt",
+    "crop": "pasture",
+    "grows": "sheep",
+    "poly": [
+     [
+      1011.78,
+      905.03
+     ],
+     [
+      1007.38,
+      859.24
+     ],
+     [
+      1033.26,
+      856.76
+     ],
+     [
+      1037.66,
+      902.55
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 4.6167,
+    "furrowAngle": 4.6167,
+    "boundary": "fence",
+    "gate": {
+     "x": 1035.46,
+     "z": 879.65,
+     "width": 3,
+     "yaw": -1.4751
+    }
+   }
+  },
+  {
+   "kind": "fence",
+   "id": "brackwater_belt_field_0_fence_0",
+   "x": 1034.81,
+   "z": 881.22,
+   "yaw": 0,
+   "data": {
+    "setPiece": "brackwater_belt",
+    "h": 1.1,
+    "pts": [
+     [
+      1034.81,
+      881.22,
+      78.58
+     ],
+     [
+      1036.79,
+      901.83,
+      78.97
+     ],
+     [
+      1012.5,
+      904.16,
+      76.85
+     ],
+     [
+      1008.26,
+      859.96,
+      75.9
+     ],
+     [
+      1032.54,
+      857.63,
+      78.14
+     ],
+     [
+      1034.52,
+      878.23,
+      78.55
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "brackwater_belt_field_1",
+   "x": 1062.57,
+   "z": 782.8,
+   "yaw": 2.2707,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Brackwater",
+    "auto": true,
+    "setPiece": "brackwater_belt",
+    "crop": "field",
+    "grows": "tilled",
+    "poly": [
+     [
+      1036.6,
+      787.67
+     ],
+     [
+      1071.79,
+      758.04
+     ],
+     [
+      1088.54,
+      777.93
+     ],
+     [
+      1053.35,
+      807.56
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 5.5833,
+    "furrowAngle": 5.5833,
+    "boundary": "none"
+   }
+  },
+  {
+   "kind": "field",
+   "id": "brackwater_belt_field_2",
+   "x": 1213.72,
+   "z": 786.6,
+   "yaw": 0.8207,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Brackwater",
+    "auto": true,
+    "setPiece": "brackwater_belt",
+    "crop": "pasture",
+    "grows": "sheep",
+    "poly": [
+     [
+      1205.75,
+      761.41
+     ],
+     [
+      1239.41,
+      792.76
+     ],
+     [
+      1221.68,
+      811.79
+     ],
+     [
+      1188.03,
+      780.43
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 7.0333,
+    "furrowAngle": 7.0333,
+    "boundary": "fence",
+    "gate": {
+     "x": 1204.85,
+     "z": 796.11,
+     "width": 3,
+     "yaw": 2.3915
+    }
+   }
+  },
+  {
+   "kind": "fence",
+   "id": "brackwater_belt_field_2_fence_0",
+   "x": 1204.3,
+   "z": 794.5,
+   "yaw": 0,
+   "data": {
+    "setPiece": "brackwater_belt",
+    "h": 1.1,
+    "pts": [
+     [
+      1204.3,
+      794.5,
+      80.24
+     ],
+     [
+      1189.16,
+      780.39,
+      80.49
+     ],
+     [
+      1205.79,
+      762.54,
+      77.56
+     ],
+     [
+      1238.27,
+      792.8,
+      77.12
+     ],
+     [
+      1221.64,
+      810.66,
+      79.89
+     ],
+     [
+      1206.5,
+      796.54,
+      80.16
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "brackwater_belt_field_3",
+   "x": 1248.79,
+   "z": 886.58,
+   "yaw": -0.146,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Brackwater",
+    "auto": true,
+    "setPiece": "brackwater_belt",
+    "crop": "crop",
+    "grows": "barley",
+    "poly": [
+     [
+      1264.99,
+      865.72
+     ],
+     [
+      1258.3,
+      911.23
+     ],
+     [
+      1232.58,
+      907.44
+     ],
+     [
+      1239.27,
+      861.93
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 7.9999,
+    "furrowAngle": 7.9999,
+    "boundary": "none"
+   }
+  },
+  {
+   "kind": "field",
+   "id": "brackwater_belt_field_4",
+   "x": 1186.43,
+   "z": 972.24,
+   "yaw": -1.1126,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Brackwater",
+    "auto": true,
+    "setPiece": "brackwater_belt",
+    "crop": "field",
+    "grows": "tilled",
+    "poly": [
+     [
+      1212.8,
+      973.73
+     ],
+     [
+      1171.55,
+      994.07
+     ],
+     [
+      1160.05,
+      970.76
+     ],
+     [
+      1201.3,
+      950.41
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 8.9666,
+    "furrowAngle": 8.9666,
+    "boundary": "hedge",
+    "gate": {
+     "x": 1180.68,
+     "z": 960.58,
+     "width": 4,
+     "yaw": 0.4582
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "brackwater_belt_field_4_hedge_0",
+   "x": 1182.82,
+   "z": 960.41,
+   "yaw": 0,
+   "data": {
+    "setPiece": "brackwater_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      1182.82,
+      960.41,
+      79.65
+     ],
+     [
+      1200.94,
+      951.48,
+      79.55
+     ],
+     [
+      1211.73,
+      973.36,
+      78.14
+     ],
+     [
+      1171.91,
+      993,
+      78.38
+     ],
+     [
+      1161.12,
+      971.12,
+      79.74
+     ],
+     [
+      1179.24,
+      962.18,
+      79.68
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "brackwater_belt_field_5",
+   "x": 988.68,
+   "z": 884.14,
+   "yaw": -3.0459,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Brackwater",
+    "auto": true,
+    "setPiece": "brackwater_belt",
+    "crop": "crop",
+    "grows": "turnips",
+    "poly": [
+     [
+      977.93,
+      908.28
+     ],
+     [
+      973.54,
+      862.49
+     ],
+     [
+      999.42,
+      860.01
+     ],
+     [
+      1003.82,
+      905.8
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 4.6167,
+    "furrowAngle": 4.6167,
+    "boundary": "hedge",
+    "gate": {
+     "x": 1001.62,
+     "z": 882.9,
+     "width": 4,
+     "yaw": -1.4751
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "brackwater_belt_field_5_hedge_0",
+   "x": 1001.01,
+   "z": 884.97,
+   "yaw": 0,
+   "data": {
+    "setPiece": "brackwater_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      1001.01,
+      884.97,
+      76.35
+     ],
+     [
+      1002.94,
+      905.08,
+      76.87
+     ],
+     [
+      978.65,
+      907.41,
+      76.11
+     ],
+     [
+      974.41,
+      863.21,
+      75.16
+     ],
+     [
+      998.7,
+      860.88,
+      75.91
+     ],
+     [
+      1000.63,
+      880.99,
+      76.31
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "brackwater_belt_field_6",
+   "x": 993.52,
+   "z": 829.97,
+   "yaw": 2.8677,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Brackwater",
+    "auto": true,
+    "setPiece": "brackwater_belt",
+    "crop": "pasture",
+    "grows": "cattle",
+    "poly": [
+     [
+      974.78,
+      848.59
+     ],
+     [
+      987.22,
+      804.31
+     ],
+     [
+      1012.25,
+      811.34
+     ],
+     [
+      999.81,
+      855.63
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 4.9863,
+    "furrowAngle": 4.9863,
+    "boundary": "fence",
+    "gate": {
+     "x": 1006.03,
+     "z": 833.48,
+     "width": 3,
+     "yaw": -1.8447
+    }
+   }
+  },
+  {
+   "kind": "fence",
+   "id": "brackwater_belt_field_6_fence_0",
+   "x": 1004.86,
+   "z": 834.71,
+   "yaw": 0,
+   "data": {
+    "setPiece": "brackwater_belt",
+    "h": 1.1,
+    "pts": [
+     [
+      1004.86,
+      834.71,
+      75.42
+     ],
+     [
+      999.26,
+      854.64,
+      76.36
+     ],
+     [
+      975.77,
+      848.04,
+      75.34
+     ],
+     [
+      987.78,
+      805.3,
+      72.82
+     ],
+     [
+      1011.27,
+      811.9,
+      74.07
+     ],
+     [
+      1005.67,
+      831.82,
+      75.24
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "brackwater_belt_field_7",
+   "x": 1057.67,
+   "z": 744.43,
+   "yaw": 2.1285,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Brackwater",
+    "auto": true,
+    "setPiece": "brackwater_belt",
+    "crop": "field",
+    "grows": "tilled",
+    "poly": [
+     [
+      1031.28,
+      745.57
+     ],
+     [
+      1070.31,
+      721.22
+     ],
+     [
+      1084.07,
+      743.28
+     ],
+     [
+      1045.04,
+      767.63
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 5.7255,
+    "furrowAngle": 5.7255,
+    "boundary": "none"
+   }
+  },
+  {
+   "kind": "field",
+   "id": "brackwater_belt_field_8",
+   "x": 1213.5,
+   "z": 743.91,
+   "yaw": 1.0197,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Brackwater",
+    "auto": true,
+    "setPiece": "brackwater_belt",
+    "crop": "crop",
+    "grows": "cabbages",
+    "poly": [
+     [
+      1200.71,
+      720.79
+     ],
+     [
+      1239.9,
+      744.88
+     ],
+     [
+      1226.28,
+      767.03
+     ],
+     [
+      1187.09,
+      742.94
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 6.8343,
+    "furrowAngle": 6.8343,
+    "boundary": "none"
+   }
+  },
+  {
+   "kind": "field",
+   "id": "brackwater_belt_field_9",
+   "x": 1253.81,
+   "z": 780.42,
+   "yaw": 0.6501,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Brackwater",
+    "auto": true,
+    "setPiece": "brackwater_belt",
+    "crop": "crop",
+    "grows": "flax",
+    "poly": [
+     [
+      1250.24,
+      754.24
+     ],
+     [
+      1278.08,
+      790.86
+     ],
+     [
+      1257.38,
+      806.6
+     ],
+     [
+      1229.54,
+      769.98
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 7.2039,
+    "furrowAngle": 7.2039,
+    "boundary": "hedge",
+    "gate": {
+     "x": 1243.46,
+     "z": 788.29,
+     "width": 4,
+     "yaw": 2.2209
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "brackwater_belt_field_9_hedge_0",
+   "x": 1242.89,
+   "z": 786.21,
+   "yaw": 0,
+   "data": {
+    "setPiece": "brackwater_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      1242.89,
+      786.21,
+      76.99
+     ],
+     [
+      1230.66,
+      770.13,
+      76.35
+     ],
+     [
+      1250.09,
+      755.36,
+      75.36
+     ],
+     [
+      1276.96,
+      790.71,
+      76.87
+     ],
+     [
+      1257.54,
+      805.48,
+      77.91
+     ],
+     [
+      1245.31,
+      789.4,
+      77.14
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "eelwick_belt",
+   "x": 1164,
+   "z": 427,
+   "yaw": 0,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Eelwick",
+    "auto": true,
+    "r": 160,
+    "fields": 5,
+    "slots": []
+   }
+  },
+  {
+   "kind": "field",
+   "id": "eelwick_belt_field_0",
+   "x": 1107.62,
+   "z": 457.28,
+   "yaw": -2.6487,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Eelwick",
+    "auto": true,
+    "setPiece": "eelwick_belt",
+    "crop": "crop",
+    "grows": "cabbages",
+    "poly": [
+     [
+      1107.05,
+      483.7
+     ],
+     [
+      1085.28,
+      443.17
+     ],
+     [
+      1108.19,
+      430.87
+     ],
+     [
+      1129.95,
+      471.39
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 4.2195,
+    "furrowAngle": 4.2195,
+    "boundary": "hedge",
+    "gate": {
+     "x": 1119.07,
+     "z": 451.13,
+     "width": 4,
+     "yaw": -1.0779
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "eelwick_belt_field_0_hedge_0",
+   "x": 1119.31,
+   "z": 453.27,
+   "yaw": 0,
+   "data": {
+    "setPiece": "eelwick_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      1119.31,
+      453.27,
+      57.81
+     ],
+     [
+      1128.87,
+      471.07,
+      58.58
+     ],
+     [
+      1107.37,
+      482.61,
+      60.37
+     ],
+     [
+      1086.37,
+      443.5,
+      58.63
+     ],
+     [
+      1107.86,
+      431.95,
+      57
+     ],
+     [
+      1117.42,
+      449.75,
+      57.65
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "eelwick_belt_field_1",
+   "x": 1147.02,
+   "z": 365.29,
+   "yaw": 1.8393,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Eelwick",
+    "auto": true,
+    "setPiece": "eelwick_belt",
+    "crop": "field",
+    "grows": "tilled",
+    "poly": [
+     [
+      1121.4,
+      358.86
+     ],
+     [
+      1165.75,
+      346.66
+     ],
+     [
+      1172.65,
+      371.73
+     ],
+     [
+      1128.3,
+      383.93
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 6.0147,
+    "furrowAngle": 6.0147,
+    "boundary": "none"
+   }
+  },
+  {
+   "kind": "field",
+   "id": "eelwick_belt_field_2",
+   "x": 1097.09,
+   "z": 498.6,
+   "yaw": -2.3223,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Eelwick",
+    "auto": true,
+    "setPiece": "eelwick_belt",
+    "crop": "field",
+    "grows": "tilled",
+    "poly": [
+     [
+      1105.02,
+      523.81
+     ],
+     [
+      1071.41,
+      492.4
+     ],
+     [
+      1089.16,
+      473.4
+     ],
+     [
+      1122.77,
+      504.81
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 3.8931,
+    "furrowAngle": 3.8931,
+    "boundary": "hedge",
+    "gate": {
+     "x": 1105.97,
+     "z": 489.11,
+     "width": 4,
+     "yaw": -0.7515
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "eelwick_belt_field_2_hedge_0",
+   "x": 1106.88,
+   "z": 491.06,
+   "yaw": 0,
+   "data": {
+    "setPiece": "eelwick_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      1106.88,
+      491.06,
+      60.84
+     ],
+     [
+      1121.64,
+      504.85,
+      61.07
+     ],
+     [
+      1104.98,
+      522.68,
+      62.19
+     ],
+     [
+      1072.54,
+      492.36,
+      61.83
+     ],
+     [
+      1089.2,
+      474.53,
+      60.52
+     ],
+     [
+      1103.96,
+      488.32,
+      60.78
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "eelwick_belt_field_3",
+   "x": 1071.07,
+   "z": 395.88,
+   "yaw": 2.8185,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Eelwick",
+    "auto": true,
+    "setPiece": "eelwick_belt",
+    "crop": "field",
+    "grows": "tilled",
+    "poly": [
+     [
+      1051.44,
+      413.56
+     ],
+     [
+      1066.05,
+      369.95
+     ],
+     [
+      1090.7,
+      378.2
+     ],
+     [
+      1076.1,
+      421.82
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 5.0355,
+    "furrowAngle": 5.0355,
+    "boundary": "none"
+   }
+  },
+  {
+   "kind": "field",
+   "id": "eelwick_belt_field_4",
+   "x": 1261.93,
+   "z": 430.68,
+   "yaw": -0.0375,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Eelwick",
+    "auto": true,
+    "setPiece": "eelwick_belt",
+    "crop": "crop",
+    "grows": "wheat",
+    "poly": [
+     [
+      1275.78,
+      408.18
+     ],
+     [
+      1274.06,
+      454.15
+     ],
+     [
+      1248.08,
+      453.17
+     ],
+     [
+      1249.8,
+      407.2
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 7.8915,
+    "furrowAngle": 7.8915,
+    "boundary": "hedge",
+    "gate": {
+     "x": 1248.94,
+     "z": 430.19,
+     "width": 4,
+     "yaw": 1.5333
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "eelwick_belt_field_4_hedge_0",
+   "x": 1249.81,
+   "z": 428.22,
+   "yaw": 0,
+   "data": {
+    "setPiece": "eelwick_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      1249.81,
+      428.22,
+      62.08
+     ],
+     [
+      1250.57,
+      408.03,
+      63.58
+     ],
+     [
+      1274.96,
+      408.95,
+      64.75
+     ],
+     [
+      1273.29,
+      453.32,
+      61.13
+     ],
+     [
+      1248.91,
+      452.4,
+      60.16
+     ],
+     [
+      1249.66,
+      432.22,
+      61.78
+     ]
+    ]
    }
   }
  ]

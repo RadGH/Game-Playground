@@ -1,0 +1,41 @@
+{
+ "_doc": "Stream E. Where each free-standing set piece (data/vignettes/setpieces.json, not bound to a stream B piece) was placed, zone metres. tools/place-vignettes.mjs keeps a set piece on its old spot while that spot is still fair, so a B re-bake (which levels and clears the ground under our discs) never makes it move. Delete an entry to let the placer choose again.",
+ "pins": {
+  "sp_drill_field": {
+   "zone": "z12_02",
+   "x": 363,
+   "z": 1468,
+   "yaw": 2.75
+  },
+  "sp_kind_mother_shrine": {
+   "zone": "z12_02",
+   "x": 679,
+   "z": 1987,
+   "yaw": 0.39
+  },
+  "sp_coldharrow_ruins": {
+   "zone": "z12_02",
+   "x": 1330,
+   "z": 1956,
+   "yaw": -3.14
+  },
+  "sp_tench_pool": {
+   "zone": "z12_02",
+   "x": 100,
+   "z": 1794,
+   "yaw": 3.93
+  },
+  "sp_pail_and_plough": {
+   "zone": "z12_02",
+   "x": 663,
+   "z": 1856,
+   "yaw": 0.79
+  },
+  "sp_gristles_hollow": {
+   "zone": "z12_02",
+   "x": 1985,
+   "z": 840,
+   "yaw": 4.8
+  }
+ }
+}

@@ -37,11 +37,21 @@ export class Entity {
     this.dirty = new Array(BANDS).fill(F.FULL);
     this.infoVer = 1;
     this.removed = false;
+    this.st = null;                 // status ids others draw (play-test 2, Q8): the room keeps it in step with the rules
+    this.mount = null;              // the mount a player rides (Q16), on `info.mount`
+    this.speedMul = 1;              // movement speed factor while mounted (stepMove's state.speedMul)
   }
   mark(bits) { const d = this.dirty; for (let b = 0; b < BANDS; b++) d[b] |= bits; }
 
-  moveTo(x, z, y) {
+  /**
+   * Move. A DEAD body does not move (play-test 1, P8: corpses — and a fallen player — were seen sliding along the
+   * ground while lying down): anything that pushes a corpse (a knock, a follower's leash, a chase step the rules
+   * left queued) is dropped here, at the one door every move goes through. `force` is for the server itself
+   * (a teleport of a body, e.g. into a graveyard); a respawn revives first and then moves.
+   */
+  moveTo(x, z, y, force = false) {
     if (!Number.isFinite(x) || !Number.isFinite(z)) return;
+    if (this.dead && !force) return;
     const bd = this.room.bounds;
     x = Math.min(bd.maxX, Math.max(bd.minX, x));
     z = Math.min(bd.maxZ, Math.max(bd.minZ, z));
@@ -62,6 +72,7 @@ export class Entity {
   setMax(hpMax, mpMax = this.mpMax) {
     hpMax = Math.max(1, Math.round(hpMax)); mpMax = Math.max(0, Math.round(mpMax));
     if (hpMax !== this.hpMax) { this.hpMax = hpMax; this.hp = Math.min(this.hp, hpMax); this.mark(F.HP); this.infoVer++; }
+    if (mpMax !== this.mpMax && this.kind === 'player') this.infoVer++;     // R6+: info.mpMax
     this.mpMax = mpMax; this.mp = Math.min(this.mp, mpMax);
   }
   /** Play an animation. One-shots (attack, cast, bite, hit…) hold for their duration: loop() waits. */
@@ -102,28 +113,69 @@ export class Entity {
   revive(hpFrac = 1) {
     this.dead = false;
     this.setState(STATE.dead, false);
+    this.setState(STATE.combat, false);
     this.setHp(Math.max(1, Math.round(this.hpMax * hpFrac)));
     this.mp = this.mpMax;
     this.anim('idle');
     this.mark(F.FULL);
   }
+  /** `info()` as a JSON string, cached until the description changes (infoVer): a crowd gets the same text. */
+  infoJSON() {
+    if (this._infoStr === undefined || this._infoStrVer !== this.infoVer) { this._infoStr = JSON.stringify(this.info()); this._infoStrVer = this.infoVer; }
+    return this._infoStr;
+  }
   /** The description clients get in `info`. */
   info() {
     const o = { id: this.id, kind: this.kind, name: this.name, level: this.level, hpMax: this.hpMax, team: this.team };
-    if (this.kind === 'player') { o.cls = this.cls; if (this.look) o.look = this.look; }
+    if (this.kind === 'player') {
+      o.cls = this.cls; if (this.look) o.look = this.look;
+      if (this.gear) o.gear = this.gear;                       // gear: what is worn, to draw (P22; trimmed by the wearer's prefs, Q22)
+      if (this.gearOff) o.gearOff = 1;
+      if (this.mount) o.mount = this.mount;                    // riding (Q16)
+      if (this.mpMax > 0) o.mpMax = this.mpMax;                // R6+: mana bar maximum (the current value comes in `mp` events)
+      if (this.sitting) o.sit = 1;                             // S20: sitting down to eat / drink (anim 'sit' too)
+      if (this.eating) o.eat = this.eating;                    // S20 (D-world): 'food' | 'drink' while the meal runs
+      if (this.fishing) o.fishing = this.fishing;
+      if (this.working) o.working = this.working;              // W9 (P-core): at a node / a station — {prof, anim, node?|at?}
+      if (this.form) o.form = this.form;                       // play-test 6 U16: the creature a shape-shifted druid is drawn as (C's shape object)              // T25: a line out — {x, z, tug?} where the bobber floats
+    }
     else if (this.type) o.type = this.type;
     if (this.rank !== 'normal') o.rank = this.rank;
+    if (this.aff && this.aff.length) { o.aff = this.aff; o.mods = this.aff.map(a => a.id); }   // S4: modifiers [{id, name, aura?}]; `mods` = ids (D-UI reads it)
+    if (this.sc && this.sc !== 1) o.sc = this.sc;              // S4: body scale (champions/rares are bigger; a Giant much bigger)
+    if (this.ward) o.ward = this.ward;                         // play-test 6 U8: a boss's ward while it holds {max, ms, until}
+    if (this.st && this.st.length) o.st = this.st;             // statuses everyone draws (Q8)
     if ((this.kind === 'object' || this.kind === 'npc') && this.data) {
       const d = this.data;
       if (d.hidden) { o.hidden = 1; if (d.hint) o.hint = d.hint; }
       if (d.lore) o.lore = d.lore;
       if (d.npc && d.npc.role) o.role = d.npc.role;
+      if (d.title) o.title = d.title;                          // S19: the line above an NPC's name ('Weaponsmith', 'Unbinder — resets talents & perks'); W27: only for NPCs placed for the player
+      if (d.cart) { o.vehicle = d.cart.vehicle || 'ox_cart'; o.cart = d.cart.stop; o.yaw = Math.round(this.yaw * 1000) / 1000; }      // W5: a parked ox cart (and which stop it is)
+      else if (d.traveller && d.traveller.cart && d.traveller.vehicle && d.npc && d.npc.role === 'carter') o.vehicle = d.traveller.vehicle;      // W5: a carter on the road leads an ox cart
+      if (d.guard) { o.guard = 1; if (d.guard.rank) o.rank2 = d.guard.rank; }      // W1: a town guard (fights for the town)
+      if (d.filler) o.filler = 1;                              // W27: a filler body (townsfolk, woodcutter, guard) — a name, no title
       if (this.kind === 'npc') o.type = this.type;
       const key = d.key || (d.chest && d.chest.key);
       if (key) o.key = key;
       if (d.r) o.r = d.r;
       if (d.state) o.state = d.state;
       if (d.rules) o.rules = 1;
+      if (d.look) o.look = d.look;                             // R7: how an arena object is dressed ('chained')
+      if (d.tether != null) o.tether = d.tether;               // R7: the entity a chain runs to from this object
+      if (d.banner) o.banner = d.banner;                       // a cleared dungeon's door: {by, party, at}
+      if (d.trace) o.trace = d.trace;                          // grave {who, level, by, at, until} / campfire {who, at, until}
+      if (d.waystone) o.waystone = d.waystone.key;
+      if (d.site) o.site = d.site;                             // fort / farm / hook marker: {kind, template, friendly, blurb}
+      if (d.treasure) o.treasure = { chain: d.treasure.chain, step: d.treasure.step, of: d.treasure.of, cache: d.treasure.cache || undefined };
+      if (d.shimmer) o.shimmer = d.shimmer;
+      if (d.floor) o.floor = d.floor;                          // play-test 6 (U14): which dungeon floor it stands on (1 = top)
+      if (d.dir) o.portal = d.dir;                             // 'down' | 'up' | 'out' on stairs, lifts, the way in and the way out
+      if (d.leave) o.leave = 1;                                // U10: the way you came in (leaves the dungeon; not the exit portal)
+      if (d.lift) o.lift = { here: d.lift.here, floors: d.lift.to.map(t => t.floor) };
+      if (d.pool) o.pool = { tier: d.pool.tier, minSkill: d.pool.minSkill, left: d.pool.left, water: d.pool.water, ...(d.pool.shelf ? { shelf: true } : {}), ...(d.pool.always ? { always: 1 } : {}), ...(d.pool.town ? { town: d.pool.town } : {}) };   // T25: a fish pool
+      if (d.node) o.node = d.node;                             // W9 (P-core): a gathering node {prof, kind, tier, minSkill, look}
+      if (d.office) o.office = d.office;                       // a service NPC's own building (Q10): {kind, plot, x, z, yaw, lit}                    // a hidden cache glints within this many metres for someone who has every clue
     }
     return o;
   }

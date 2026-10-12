@@ -68,8 +68,9 @@
     { "name": "Vespers", "abilities": ["bone_scythe", "grave_bell", "dirge"] },
     { "name": "The Procession", "at": 0.65, "say": "Rise, brothers. We have guests at the altar.",
       "abilities": ["bone_scythe", "snuff", "procession"],
-      "onEnter": [ { "shield": true }, { "adds": { "type": "barrow_hound", "count": 2, "radius": 8, "at": "home" } },
-        { "say": "A ward of grey light closes around the Abbot. Light all four candle stands!", "style": "warn" } ] },
+      "ward": {"seconds": 20, "pool": 0.1, "break": "objects", "need": 4, "what": "brazier", "say": "A ward of grey light closes around the Abbot. Light all four candle stands! It fails by itself in 20 seconds.", "fade": "The ward fails by itself. No opening this time."},
+      "onEnter": [ { "shield": { "seconds": 20, "pool": 0.1 } }, { "adds": { "type": "barrow_hound", "count": 2, "radius": 8, "at": "home" } },
+        { "say": "A ward of grey light closes around the Abbot. Light all four candle stands! It fails by itself in 20 seconds.", "style": "warn" } ] },
     { "name": "Unhallowed", "newBar": { "hp": 0.55 }, "say": "You put out my light. Then I shall put out yours.",
       "abilities": ["bone_scythe", "rite_of_ash", "spiral", "candlelight"],
       "onEnter": [ { "ability": "cave_in" } ] }

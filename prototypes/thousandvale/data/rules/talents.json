@@ -1,0 +1,936 @@
+{
+  "_doc": "Thousandvale's per-skill talent trees (stream C, js/rules/talents.js; owner guide docs/talents.md). Play-test 1 P6: every node must change HOW a skill works \u2014 a new shape, a new behaviour, a combo, a trigger \u2014 never a plain percentage. The trees start from Farhold's own (data/skills.json `talents`: 4 tiers x 2 bespoke nodes + one shared library node, tiers open at 3/8/18/28) and this file says what Thousandvale changes: `plainLibs` are library nodes that are only numbers (dropped); `libShapes` says which shapes a library node actually works on in js/rules/cast-skills.js (a node that would do nothing on this skill is dropped too); `substitutes` gives a dropped tier a working rule node instead, first one the skill does not already offer; `replace` rewrites the 59 bespoke nodes Farhold wrote as plain numbers (a wider arc, a longer range, a form's stat line) as rule nodes. tests/C/talents.test.mjs fails if any node in any tree is a plain number or does nothing on its skill.",
+  "tierLevels": [
+    3,
+    8,
+    18,
+    28
+  ],
+  "plainLibs": [
+    "wide",
+    "quick",
+    "heavy",
+    "overload",
+    "crescendo",
+    "deepen"
+  ],
+  "libShapes": {
+    "fan": [
+      "bolt"
+    ],
+    "pierce": [
+      "bolt"
+    ],
+    "seeking": [
+      "bolt"
+    ],
+    "chain": [
+      "bolt"
+    ],
+    "cascade": [
+      "bolt"
+    ],
+    "burst": [
+      "bolt",
+      "melee"
+    ],
+    "linger": [
+      "ground",
+      "around"
+    ],
+    "conflagration": [
+      "ground",
+      "around"
+    ],
+    "shatter": "damage",
+    "drain": "damage",
+    "cauterise": "damage",
+    "hunger": "damage",
+    "brand": "damage",
+    "unmaking": "damage",
+    "wellspring": "damage",
+    "echo": "any",
+    "bulwark": "any",
+    "aegis": "any"
+  },
+  "substitutes": {
+    "1": {
+      "bolt": [
+        "fan",
+        "pierce",
+        "seeking"
+      ],
+      "damage": [
+        "brand",
+        "shatter",
+        "cauterise"
+      ],
+      "any": [
+        "echo"
+      ]
+    },
+    "2": {
+      "bolt": [
+        "burst",
+        "chain",
+        "linger"
+      ],
+      "ground": [
+        "linger",
+        "shatter"
+      ],
+      "around": [
+        "linger",
+        "shatter"
+      ],
+      "damage": [
+        "shatter",
+        "brand",
+        "hunger"
+      ],
+      "any": [
+        "bulwark"
+      ]
+    },
+    "3": {
+      "damage": [
+        "cauterise",
+        "hunger",
+        "echo",
+        "brand"
+      ],
+      "any": [
+        "echo",
+        "bulwark"
+      ]
+    },
+    "4": {
+      "bolt": [
+        "cascade",
+        "unmaking",
+        "wellspring"
+      ],
+      "ground": [
+        "conflagration",
+        "unmaking"
+      ],
+      "around": [
+        "conflagration",
+        "unmaking"
+      ],
+      "damage": [
+        "unmaking",
+        "wellspring",
+        "aegis"
+      ],
+      "any": [
+        "aegis"
+      ]
+    }
+  },
+  "replace": {
+  "storm_beam:1:held_storm": {"id": "building_storm", "name": "Building Storm", "fx": "charge", "mod": {"channel": {"seconds": 2.2, "every": 0.4, "moveK": 1, "grow": 0.2}, "mul": {"mult": 0.7}}},
+    "mend:1:quick_mend": {
+      "id": "mending_wave",
+      "name": "Mending Wave",
+      "fx": "burst",
+      "mod": {
+        "burst": {
+          "radius": 8,
+          "heal": 0.12
+        }
+      }
+    },
+    "call_wolf:1:fast_call": {
+      "id": "pack_ambush",
+      "name": "Pack Ambush",
+      "fx": "leap",
+      "mod": {
+        "command": {
+          "order": "pounce",
+          "seconds": 4
+        }
+      }
+    },
+    "call_spirit:1:quick_waking": {
+      "id": "waking_roar",
+      "name": "Waking Roar",
+      "fx": "tag",
+      "mod": {
+        "burst": {
+          "radius": 6,
+          "statuses": [
+            {
+              "id": "weaken",
+              "seconds": 5
+            }
+          ]
+        }
+      }
+    },
+    "mending_post:4:long_post": {
+      "id": "post_warden",
+      "name": "Post Warden",
+      "fx": "summon",
+      "mod": {
+        "summon": {
+          "def": "spirit_bear",
+          "name": "Post Warden",
+          "count": 1,
+          "temporary": true,
+          "lifetime": 12
+        }
+      }
+    },
+    "great_post:1:short_rite": {
+      "id": "thunder_call",
+      "name": "Thunder Call",
+      "fx": "burst",
+      "mod": {
+        "burst": {
+          "radius": 12,
+          "mult": 0.8,
+          "element": "lightning",
+          "knock": {
+            "push": 2
+          }
+        }
+      }
+    },
+    "tumbling_shot:4:spiteful_tumble": {
+      "id": "spite_blast",
+      "name": "Spite Blast",
+      "fx": "burst",
+      "mod": {
+        "when": {
+          "resourceAtLeast": [
+            "grudge",
+            3
+          ]
+        },
+        "burst": {
+          "radius": 5,
+          "mult": 1,
+          "knock": {
+            "push": 3
+          }
+        }
+      }
+    },
+    "sunder:1:splitting_swing": {
+      "id": "echoing_split",
+      "name": "Echoing Split",
+      "fx": "echo",
+      "mod": {
+        "again": {
+          "delay": 0.6,
+          "mult": 0.5
+        }
+      }
+    },
+    "flamethrower:1:far_breath": {
+      "id": "clinging_flame",
+      "name": "Clinging Flame",
+      "fx": "zone",
+      "mod": {
+        "pool": {
+          "seconds": 4,
+          "radius": 3,
+          "power": 0.3,
+          "element": "fire",
+          "status": "burn",
+          "at": "ahead"
+        }
+      }
+    },
+    "shade_cut:1:reaching_shade": {
+      "id": "shade_pull",
+      "name": "Shade Pull",
+      "fx": "pull",
+      "mod": {
+        "pullIn": {
+          "metres": 3
+        }
+      }
+    },
+    "grandeur:1:grand_lunge": {
+      "id": "grand_stagger",
+      "name": "Grand Stagger",
+      "fx": "knock",
+      "mod": {
+        "knock": {
+          "push": 2.5,
+          "stagger": 0.6
+        }
+      }
+    },
+    "exploit_gap:1:sweep_the_gap": {
+      "id": "gap_slayer",
+      "name": "Gap Slayer",
+      "fx": "burst",
+      "mod": {
+        "onKill": {
+          "burst": {
+            "radius": 4,
+            "mult": 0.7
+          }
+        }
+      }
+    },
+    "aimed_shot:1:snap_draw": {
+      "id": "ricochet_draw",
+      "name": "Ricochet Draw",
+      "fx": "chain",
+      "mod": {
+        "ricochet": {
+          "bounces": 2,
+          "range": 10,
+          "keep": 0.6
+        }
+      }
+    },
+    "gnawing_dark:1:long_hunger": {
+      "id": "hungry_split",
+      "name": "Hungry Split",
+      "fx": "split",
+      "mod": {
+        "split": {
+          "shards": 2,
+          "range": 8,
+          "keep": 0.5,
+          "when": "kill"
+        }
+      }
+    },
+    "ice_lance:1:long_spear": {
+      "id": "frozen_path",
+      "name": "Frozen Path",
+      "fx": "tag",
+      "mod": {
+        "statuses": [
+          {
+            "id": "chill",
+            "seconds": 4
+          }
+        ]
+      }
+    },
+    "storm_beam:1:wide_beam": {
+      "id": "arc_lash",
+      "name": "Arc Lash",
+      "fx": "knock",
+      "mod": {
+        "knock": {
+          "push": 2,
+          "interrupt": true
+        }
+      }
+    },
+    "drain:1:wide_draught": {
+      "id": "thirsting_draught",
+      "name": "Thirsting Draught",
+      "fx": "drain",
+      "mod": {
+        "onKill": {
+          "heal": 0.06,
+          "mana": 0.06
+        }
+      }
+    },
+    "groundbreaker:1:long_fault": {
+      "id": "rift_aftershock",
+      "name": "Aftershock",
+      "fx": "echo",
+      "mod": {
+        "again": {
+          "delay": 1,
+          "mult": 0.5
+        }
+      }
+    },
+    "sunlance:1:wide_lance": {
+      "id": "dazzling_lance",
+      "name": "Dazzling Lance",
+      "fx": "tag",
+      "mod": {
+        "statuses": [
+          {
+            "id": "weaken",
+            "seconds": 5
+          }
+        ]
+      }
+    },
+    "pinning_thrust:1:long_thrust": {
+      "id": "dragging_thrust",
+      "name": "Dragging Thrust",
+      "fx": "pull",
+      "mod": {
+        "pullIn": {
+          "metres": 3
+        }
+      }
+    },
+    "mountain_fist:1:long_fist": {
+      "id": "rolling_fist",
+      "name": "Rolling Fist",
+      "fx": "echo",
+      "mod": {
+        "again": {
+          "delay": 0.8,
+          "mult": 0.5
+        }
+      }
+    },
+    "mana_rend:1:wide_rend": {
+      "id": "rending_silence",
+      "name": "Rending Silence",
+      "fx": "tag",
+      "mod": {
+        "statuses": [
+          {
+            "id": "silence",
+            "seconds": 3
+          }
+        ]
+      }
+    },
+    "chain_hook:1:long_chain": {
+      "id": "hook_and_hold",
+      "name": "Hook and Hold",
+      "fx": "tag",
+      "mod": {
+        "statuses": [
+          {
+            "id": "root",
+            "seconds": 2
+          }
+        ]
+      }
+    },
+    "blizzard:1:wide_whiteout": {
+      "id": "freezing_whiteout",
+      "name": "Freezing Whiteout",
+      "fx": "tag",
+      "mod": {
+        "statuses": [
+          {
+            "id": "root",
+            "seconds": 1.5
+          }
+        ]
+      }
+    },
+    "judgement:1:wide_light": {
+      "id": "drawn_to_judgement",
+      "name": "Drawn to Judgement",
+      "fx": "pull",
+      "mod": {
+        "pullIn": {
+          "metres": 3,
+          "to": "impact"
+        }
+      }
+    },
+    "prophecy:1:swift_fate": {
+      "id": "echoed_fate",
+      "name": "Echoed Fate",
+      "fx": "echo",
+      "mod": {
+        "again": {
+          "delay": 2,
+          "mult": 0.5
+        }
+      }
+    },
+    "prophecy:1:grand_fate": {
+      "id": "fated_doom",
+      "name": "Fated Doom",
+      "fx": "tag",
+      "mod": {
+        "statuses": [
+          {
+            "id": "marked",
+            "seconds": 6
+          }
+        ]
+      }
+    },
+    "pitch_bomb:3:short_fuse": {
+      "id": "chain_ignition",
+      "name": "Chain Ignition",
+      "fx": "burst",
+      "mod": {
+        "onKill": {
+          "burst": {
+            "radius": 4,
+            "mult": 0.6
+          }
+        }
+      }
+    },
+    "stillfrost:1:wide_stillness": {
+      "id": "frost_snare",
+      "name": "Frost Snare",
+      "fx": "tag",
+      "mod": {
+        "statuses": [
+          {
+            "id": "root",
+            "seconds": 2
+          }
+        ]
+      }
+    },
+    "entropy_field:1:wide_entropy": {
+      "id": "collapsing_field",
+      "name": "Collapsing Field",
+      "fx": "pull",
+      "mod": {
+        "pullIn": {
+          "metres": 2,
+          "to": "impact"
+        }
+      }
+    },
+    "drowse:1:wide_drowse": {
+      "id": "second_lullaby",
+      "name": "Second Lullaby",
+      "fx": "echo",
+      "mod": {
+        "again": {
+          "delay": 3
+        }
+      }
+    },
+    "flask_grenade:4:big_flask": {
+      "id": "second_flask",
+      "name": "Second Flask",
+      "fx": "echo",
+      "mod": {
+        "again": {
+          "delay": 0.7,
+          "mult": 0.6
+        }
+      }
+    },
+    "corpse_pyre:1:bone_shrapnel": {
+      "id": "spreading_pyre",
+      "name": "Spreading Pyre",
+      "fx": "chain",
+      "mod": {
+        "onKill": {
+          "burst": {
+            "radius": 4,
+            "mult": 0.6
+          }
+        }
+      }
+    },
+    "great_anvil:1:fast_fall": {
+      "id": "dazing_anvil",
+      "name": "Dazing Anvil",
+      "fx": "tag",
+      "mod": {
+        "statuses": [
+          {
+            "id": "weaken",
+            "seconds": 6
+          }
+        ]
+      }
+    },
+    "dawn_prayer:1:wide_prayer": {
+      "id": "cleansing_dawn",
+      "name": "Cleansing Dawn",
+      "fx": "ward",
+      "mod": {
+        "cleanse": {
+          "count": 1,
+          "pets": true
+        }
+      }
+    },
+    "dread_hymn:1:wide_hymn": {
+      "id": "drawing_hymn",
+      "name": "Drawing Hymn",
+      "fx": "pull",
+      "mod": {
+        "pullIn": {
+          "metres": 2
+        }
+      }
+    },
+    "turn_aside:1:wide_turning": {
+      "id": "turning_ward",
+      "name": "Turning Ward",
+      "fx": "ward",
+      "mod": {
+        "selfBuff": {
+          "name": "Turned Aside",
+          "seconds": 4,
+          "resist": 0.2
+        }
+      }
+    },
+    "grand_finale:1:focused_finale": {
+      "id": "encore_finale",
+      "name": "Encore",
+      "fx": "echo",
+      "mod": {
+        "again": {
+          "delay": 1.5,
+          "mult": 0.5
+        }
+      }
+    },
+    "purging_rite:1:narrow_rite": {
+      "id": "purging_pull",
+      "name": "Purging Pull",
+      "fx": "pull",
+      "mod": {
+        "pullIn": {
+          "metres": 3
+        }
+      }
+    },
+    "bolt_step:1:long_step": {
+      "id": "return_step",
+      "name": "Return Step",
+      "fx": "echo",
+      "mod": {
+        "again": {
+          "delay": 0.8,
+          "mult": 0.6
+        }
+      }
+    },
+    "quicken:1:brief_hour": {
+      "id": "quickening_pulse",
+      "name": "Quickening Pulse",
+      "fx": "charge",
+      "mod": {
+        "empowerNext": {
+          "count": 2,
+          "free": true,
+          "seconds": 6
+        }
+      }
+    },
+    "briarback_shape:1:oakhide": {
+      "id": "bark_burst",
+      "name": "Bark Burst",
+      "fx": "burst",
+      "mod": {
+        "set": {
+          "form.onEnter": {
+            "shape": "around",
+            "radius": 4,
+            "mult": 0.8,
+            "knock": {
+              "push": 2
+            }
+          }
+        }
+      }
+    },
+    "briarback_shape:2:splinter_hide": {
+      "id": "splinter_bite",
+      "name": "Splinter Bite",
+      "fx": "tag",
+      "mod": {
+        "set": {
+          "form.petBuff": {
+            "name": "Splinters",
+            "biteStatus": "bleed"
+          }
+        }
+      }
+    },
+    "fenrunner_shape:1:long_stride": {
+      "id": "running_start",
+      "name": "Running Start",
+      "fx": "leap",
+      "mod": {
+        "set": {
+          "form.onEnter": {
+            "shape": "self",
+            "selfBuff": {
+              "name": "Running Start",
+              "seconds": 3,
+              "hastePct": 0.4
+            }
+          }
+        }
+      }
+    },
+    "sporecap_shape:1:creeping_cap": {
+      "id": "spore_mire",
+      "name": "Spore Mire",
+      "fx": "zone",
+      "mod": {
+        "set": {
+          "form.onEnter.shape": "self",
+          "form.onEnter.pool": {
+            "seconds": 6,
+            "radius": 5,
+            "slow": 0.4,
+            "power": 0.15,
+            "element": "poison"
+          }
+        }
+      }
+    },
+    "sporecap_shape:1:deep_mycelium": {
+      "id": "mycelium_bond",
+      "name": "Mycelium Bond",
+      "fx": "link",
+      "mod": {
+        "set": {
+          "form.petBuff": {
+            "name": "Mycelium Bond",
+            "healPerSecond": 0.02
+          }
+        }
+      }
+    },
+    "sporecap_shape:3:spore_mana": {
+      "id": "sapping_spores",
+      "name": "Sapping Spores",
+      "fx": "tag",
+      "mod": {
+        "set": {
+          "form.basic.statuses": [
+            {
+              "id": "weaken",
+              "seconds": 4
+            }
+          ]
+        }
+      }
+    },
+    "sporecap_shape:4:final_bloom": {
+      "id": "rooting_bloom",
+      "name": "Rooting Bloom",
+      "fx": "burst",
+      "mod": {
+        "set": {
+          "form.onExit": {
+            "shape": "self",
+            "burst": {
+              "radius": 8,
+              "statuses": [
+                {
+                  "id": "root",
+                  "seconds": 2
+                }
+              ],
+              "heal": 0.15
+            }
+          }
+        }
+      }
+    },
+    "duelist_stance:4:fluid_footwork": {
+      "id": "fluid_footwork_tv",
+      "name": "Fluid Footwork",
+      "fx": "ward",
+      "mod": {
+        "set": {
+          "form.onEnter": {
+            "shape": "self",
+            "selfBuff": {
+              "name": "Fluid Footwork",
+              "seconds": 1,
+              "untargetable": true
+            }
+          }
+        }
+      }
+    },
+    "wyrm_temper:3:quick_temper": {
+      "id": "wyrms_roar",
+      "name": "Wyrm's Roar",
+      "fx": "knock",
+      "mod": {
+        "set": {
+          "form.onEnter": {
+            "shape": "around",
+            "radius": 4,
+            "mult": 0.7,
+            "knock": {
+              "push": 2
+            }
+          }
+        }
+      }
+    },
+    "ballad_of_valour:1:marching_verse": {
+      "id": "clearing_verse",
+      "name": "Clearing Verse",
+      "fx": "ward",
+      "mod": {
+        "set": {
+          "form.onEnter": {
+            "shape": "self",
+            "cleanse": {
+              "count": 1,
+              "pets": true
+            }
+          }
+        }
+      }
+    },
+    "ballad_of_valour:2:steel_chorus": {
+      "id": "closing_chorus",
+      "name": "Closing Chorus",
+      "fx": "ward",
+      "mod": {
+        "set": {
+          "form.onExit": {
+            "shape": "self",
+            "barrier": {
+              "share": 0.1,
+              "seconds": 5,
+              "pets": true
+            }
+          }
+        }
+      }
+    },
+    "ballad_of_valour:2:steady_breath": {
+      "id": "daunting_verse",
+      "name": "Daunting Verse",
+      "fx": "tag",
+      "mod": {
+        "set": {
+          "form.aura.debuff": {
+            "id": "weaken",
+            "dealLess": 0.1,
+            "name": "Daunted"
+          }
+        }
+      }
+    },
+    "ballad_of_valour:3:champions_verse": {
+      "id": "champions_verse_tv",
+      "name": "Champion's Verse",
+      "fx": "charge",
+      "mod": {
+        "set": {
+          "form.onEnter": {
+            "shape": "self",
+            "selfBuff": {
+              "name": "Champion's Verse",
+              "seconds": 5,
+              "damage": 0.25,
+              "pets": true
+            }
+          }
+        }
+      }
+    },
+    "song_of_ruin:1:bitter_verse": {
+      "id": "dread_opening",
+      "name": "Dread Opening",
+      "fx": "tag",
+      "mod": {
+        "set": {
+          "form.onEnter": {
+            "shape": "self",
+            "burst": {
+              "radius": 10,
+              "statuses": [
+                {
+                  "id": "fear",
+                  "seconds": 1.5
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "song_of_ruin:2:dark_shelter": {
+      "id": "dark_shelter_tv",
+      "name": "Dark Shelter",
+      "fx": "ward",
+      "mod": {
+        "set": {
+          "form.petBuff": {
+            "name": "Dark Shelter",
+            "resist": 0.15
+          }
+        }
+      }
+    },
+    "song_of_ruin:4:requiem": {
+      "id": "requiem_tv",
+      "name": "Requiem",
+      "fx": "burst",
+      "mod": {
+        "set": {
+          "form.onExit": {
+            "shape": "around",
+            "radius": 10,
+            "mult": 2,
+            "element": "shadow",
+            "statuses": [
+              {
+                "id": "curse",
+                "seconds": 6
+              }
+            ]
+          }
+        }
+      }
+    },
+    "air_of_mending:1:close_harmony": {
+      "id": "harmonic_ward",
+      "name": "Harmonic Ward",
+      "fx": "ward",
+      "mod": {
+        "set": {
+          "form.onEnter": {
+            "shape": "self",
+            "barrier": {
+              "share": 0.08,
+              "seconds": 6,
+              "pets": true
+            }
+          }
+        }
+      }
+    },
+    "air_of_mending:3:calm_breath": {
+      "id": "calming_air",
+      "name": "Calming Air",
+      "fx": "tag",
+      "mod": {
+        "set": {
+          "form.aura.debuff": {
+            "id": "weaken",
+            "dealLess": 0.1,
+            "name": "Calmed"
+          }
+        }
+      }
+    },
+    "air_of_mending:4:warm_air": {
+      "id": "warm_air_tv",
+      "name": "Warm Air",
+      "fx": "burst",
+      "mod": {
+        "set": {
+          "form.onExit": {
+            "shape": "self",
+            "burst": {
+              "radius": 10,
+              "heal": 0.2
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "name": "z11_04",
+  "name": "Last Lantern (z11_04)",
   "zone": "z11_04",
   "sheet": {
     "sheet": "torbor_downs",
@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 2,
-  "inputHash": "bdad0477",
+  "bakeVersion": 4,
+  "inputHash": "454aaea1",
   "waterKinds": [
     "none",
     "sea",
@@ -33,7 +33,7 @@
       "height": 224,
       "method": "pangea",
       "seaLevel": 0.2,
-      "inputHash": "9803699e"
+      "inputHash": "9805a835"
     },
     "zone": {
       "zx": 11,
@@ -55,68 +55,145 @@
       "z": 960
     },
     {
+      "type": "settlement",
+      "kind": "town",
+      "name": "Last Lantern",
+      "x": 890,
+      "z": 1305,
+      "ask": true,
+      "askR": 70,
+      "hub": true,
+      "radius": 90
+    },
+    {
+      "type": "settlement",
+      "kind": "hamlet",
+      "name": "Thornwick",
+      "x": 1772,
+      "z": 1900,
+      "ask": true,
+      "askR": 40,
+      "radius": 46
+    },
+    {
       "type": "dungeon",
       "id": "door_1",
       "name": "Barrow entrance",
-      "x": 1164,
-      "z": 898,
-      "yaw": 1.481
+      "x": 994,
+      "z": 1171,
+      "yaw": -0.431,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "world_grimtallow",
       "x": 1161,
       "z": 1305,
-      "r": 100
+      "r": 100,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_blackthorn_scar",
-      "x": 871,
-      "z": 1071,
-      "r": 40
+      "x": 877,
+      "z": 1098,
+      "r": 40,
+      "pinned": true
     }
   ],
   "spawn": {
-    "x": 1024,
-    "z": 1024
+    "x": 890,
+    "z": 1309
   },
+  "bridges": [],
   "summary": {
     "zone": "z11_04",
     "province": "Petbeck Basin",
-    "inputHash": "bdad0477",
+    "inputHash": "454aaea1",
     "rivers": 0,
     "wetShare": 0,
     "unwalkableShare": 0.113,
-    "towns": [],
-    "roads": 2,
+    "towns": [
+      {
+        "name": "Last Lantern",
+        "kind": "town",
+        "hub": true,
+        "at": [
+          890,
+          1305
+        ],
+        "radius": 90,
+        "movedFrom": null,
+        "culture": "halfling",
+        "plots": 21,
+        "streets": 44,
+        "links": 1,
+        "overlaps": 0,
+        "highStreets": 1,
+        "w6": {
+          "plotsBefore": 21,
+          "plots": 21,
+          "kept": 21,
+          "removed": []
+        }
+      },
+      {
+        "name": "Thornwick",
+        "kind": "hamlet",
+        "hub": false,
+        "at": [
+          1772,
+          1900
+        ],
+        "radius": 46,
+        "movedFrom": null,
+        "culture": "halfling",
+        "plots": 8,
+        "streets": 41,
+        "links": 0,
+        "overlaps": 0,
+        "highStreets": 0,
+        "w6": {
+          "plotsBefore": 8,
+          "plots": 8,
+          "kept": 8,
+          "removed": []
+        }
+      }
+    ],
+    "roads": 3,
     "bridges": 0,
-    "scatter": 12184,
+    "paths": 14,
+    "pathMetres": 2153,
+    "scatter": 13773,
     "scatterKinds": {
-      "rock_large": 3393,
-      "rock_small": 4773,
-      "tree_conifer": 2062,
-      "bush": 863,
-      "boulder": 1091,
-      "tree_broadleaf": 2
+      "rock_large": 3482,
+      "rock_small": 4905,
+      "tree_conifer": 2229,
+      "boulder": 1086,
+      "bush": 1257,
+      "tree_broadleaf": 34,
+      "hedge": 780
     },
     "sites": [
       "lair dungeon The Black Filfit 1344 960",
-      "dungeon door_1 Barrow entrance 1164 898  1.481",
+      "settlement(HUB) town Last Lantern 890 1305 90",
+      "settlement hamlet Thornwick 1772 1900 46",
+      "dungeon door_1 Barrow entrance 994 1171  -0.431",
       "event world_grimtallow  1161 1305 100",
-      "event event_blackthorn_scar  871 1071 40"
+      "event event_blackthorn_scar  877 1098 40"
     ],
     "spawn": {
-      "x": 1024,
-      "z": 1024
+      "x": 890,
+      "z": 1309
     },
-    "placements": 6,
-    "vignettesAvoided": 0
+    "placements": 176,
+    "vignettesAvoided": 668
   },
   "files": {
-    "terrain.bin": 6305574,
-    "nav.bin": 1050717,
-    "scatter.bin": 97556,
-    "placements.json": 28228
+    "terrain.bin": 641191,
+    "nav.bin": 52927,
+    "scatter.bin": 110268,
+    "placements.json": 167978
   }
 }

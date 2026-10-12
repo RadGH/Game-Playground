@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Thousandvale — interface gallery</title>
+<meta name="description" content="Every screen and menu of Thousandvale — the game's real interface modules on recorded data — in desktop, phone and controller frames.">
+<link rel="stylesheet" href="css/ui-gallery.css">
+</head>
+<body>
+<header class="g-top">
+  <h1>Thousandvale <span>interface gallery</span></h1>
+  <div class="g-seg" id="g-devices" role="tablist" aria-label="Frame"></div>
+  <div class="g-seg" id="g-layout" role="tablist" aria-label="Layout"></div>
+  <div class="g-seg" id="g-variant" role="tablist" aria-label="Variant"></div>
+  <div class="g-seg" id="g-glyphs" role="tablist" aria-label="Controller buttons"></div>
+  <label class="g-check" id="g-safe-wrap"><input type="checkbox" id="g-safe"> Outline the safe area</label>
+  <span class="g-grow"></span>
+  <a class="g-link" id="g-alone" target="_blank" rel="noopener">Open this frame on its own</a>
+</header>
+<div class="g-main">
+  <nav class="g-list" aria-label="Scenes">
+    <input id="g-find" type="search" placeholder="Find a scene…" aria-label="Find a scene">
+    <div id="g-scenes"></div>
+  </nav>
+  <main class="g-stage" id="g-stage">
+    <div class="g-frame" id="g-frame"><iframe id="g-iframe" title="The scene" allow="gamepad"></iframe></div>
+    <p class="g-under" id="g-under"></p>
+  </main>
+  <aside class="g-notes" aria-label="Notes">
+    <h2 id="n-title"></h2>
+    <p class="n-tied">This is not a drawing. The frame runs the game’s own interface code on recorded data — when the game’s interface changes, this changes with it.</p>
+    <div id="n-notes"></div>
+    <h3>What you are looking at</h3>
+    <ul id="n-modules"></ul>
+    <h3>Link to this view</h3>
+    <p><input id="n-link" readonly aria-label="Link to this view"></p>
+    <div id="n-errors"></div>
+    <h3>About the frames</h3>
+    <p class="n-small"><b>Desktop</b> and <b>Laptop</b> are the game as it is today. <b>iPhone 15 Pro</b>: “Today” is the same code on a phone-sized screen; “Proposed” switches on the phone layout (a real stylesheet and touch layer that the game itself keeps off until you approve it). <b>Controller</b>: the desktop interface as a gamepad player sees it — this part is live in the game now.</p>
+    <p class="n-small">Everything in a frame can be clicked. Requests that change things (wear, buy, accept) are sent to a recording and go nowhere.</p>
+  </aside>
+</div>
+<script type="module" src="js/client/gallery/gallery.js"></script>
+</body>
+</html>

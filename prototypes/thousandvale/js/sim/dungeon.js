@@ -77,7 +77,7 @@ export function planDungeon(seed, { floors = 2, level = 3, family = 'crypt' } = 
     const mb = fl.rooms.find(r => r.kind === 'miniboss');
     if (!lastFloor) { const p = fl.at(mb); floor.stairsDown = { x: p.x + 3, z: p.z }; }
     if (f > 0) floor.stairsUp = { x: first.x - 3, z: first.z };
-    if (f === 0) floor.exit = { x: first.x, z: first.z - 4 };
+    if (f === 0) floor.door = { x: first.x, z: first.z - 4 };          // U10: the way you came in (not the exit portal)
     if (lastFloor) {
       const rw = fl.at(fl.rooms.find(r => r.kind === 'reward'));
       floor.chest = { x: rw.x, z: rw.z };
@@ -144,6 +144,7 @@ export function describeDungeon(plan, terrain = null) {
       index: f.index, origin: f.origin, w: f.w, h: f.h, tiles: rleTiles(f.tiles),
       rooms: f.rooms.map(r => ({ i: r.i, j: r.j, w: r.w, h: r.h, kind: r.kind })),
       gate: f.gate ? { i: f.gate.i, j: f.gate.j, w: f.gate.w, h: f.gate.h, open: terrain ? terrain.gateOpen(f.index) : false } : undefined,
+      river: f.river || undefined,          // cave_river: a polyline in metres the client draws as water (stream E)
     })),
   };
 }
@@ -156,13 +157,27 @@ export function dungeonRoomSpec(plan, { exitTo, type = 'wolf' } = {}) {
   const camps = [], objects = [];
   for (const f of plan.floors) {
     for (const p of f.packs) camps.push({ type: p.type || type, level: p.level, x: p.x, z: p.z, count: p.count, radius: p.radius || 4, respawnMs: Infinity, rank: p.rank, encounter: p.encounter || null });
-    if (f.stairsDown) objects.push({ type: 'stairs', name: 'Stairs down', x: f.stairsDown.x, z: f.stairsDown.z, portal: { to: 'here', x: plan.floors[f.index + 1].entry.x, z: plan.floors[f.index + 1].entry.z } });
-    if (f.stairsUp) objects.push({ type: 'stairs', name: 'Stairs up', x: f.stairsUp.x, z: f.stairsUp.z, portal: { to: 'here', x: plan.floors[f.index - 1].stairsDown.x - 3, z: plan.floors[f.index - 1].stairsDown.z } });
-    if (f.shortcutUp) objects.push({ type: 'stairs', name: 'Shortcut up', x: f.shortcutUp.x, z: f.shortcutUp.z, portal: { to: 'here', x: f.shortcutUp.to.x + 2, z: f.shortcutUp.to.z + 2 } });
-    if (f.exit) objects.push({ type: 'exit', name: 'Way out', x: f.exit.x, z: f.exit.z, portal: { to: exitTo.room, x: exitTo.x, z: exitTo.z } });
-    if (f.chest) objects.push({ type: 'chest', name: 'Reward chest', x: f.chest.x, z: f.chest.z, chest: { tier: 'reward', level: plan.level + 2 * f.index + 2, key: 'reward' } });
-    if (f.gate) objects.push({ type: 'gate', name: 'Iron gate', x: f.gate.x, z: f.gate.z, key: 'f' + f.index + '-gate', state: 'closed', gate: { floor: f.index } });
-    if (f.lever) objects.push({ type: 'lever', name: 'Lever', x: f.lever.x, z: f.lever.z, key: 'f' + f.index + '-lever', state: 'idle', lever: { floor: f.index } });
+    // PLAY-TEST 6 (U10, U12; stream E's plan fields — every one optional, the stand-in plan has none):
+    //   landing   where you arrive on a floor and where you get up after dying on it (else its entry)
+    //   door      floor 1's "way you came in": leaves the dungeon, but is NOT the exit portal (that stands after the last boss)
+    //   lift      the stair up: every floor above, each with its landing (else `stairsUp` = the one floor above)
+    const fl = f.index + 1, last = f.index === plan.floors.length - 1;
+    const landingOf = g => g.landing || g.entry;
+    if (f.stairsDown) { const to = landingOf(plan.floors[f.index + 1]); objects.push({ type: 'stairs', name: 'Stairs down', x: f.stairsDown.x, z: f.stairsDown.z, floor: fl, dir: 'down', portal: { to: 'here', x: to.x, z: to.z } }); }
+    const liftAt = f.lift || f.stairsUp || null;
+    if (liftAt && f.index > 0) {
+      const to = (f.lift && Array.isArray(f.lift.to) && f.lift.to.length ? f.lift.to : plan.floors.slice(0, f.index).reverse().map(g => ({ floor: g.index, x: landingOf(g).x, z: landingOf(g).z, label: g.label || null, name: g.name || null })))
+        .map(t => ({ floor: (t.floor | 0) + 1, x: t.x, z: t.z, label: t.label || 'Floor ' + ((t.floor | 0) + 1), name: t.name || ((t.floor | 0) === 0 ? 'the entrance' : null) }));
+      objects.push({ type: 'lift', name: 'Stairs up', x: liftAt.x, z: liftAt.z, floor: fl, dir: 'up', lift: { here: fl, to } });
+    }
+    if (f.shortcutUp && !f.lift) objects.push({ type: 'stairs', name: 'Shortcut up', x: f.shortcutUp.x, z: f.shortcutUp.z, floor: fl, dir: 'up', portal: { to: 'here', x: f.shortcutUp.to.x + 2, z: f.shortcutUp.to.z + 2 } });
+    // the way out: ONLY behind the last boss. An `exit` on any earlier floor (older plans put one at the entrance) is the door you came in by.
+    const door = f.door || (f.exit && !last ? f.exit : null);
+    if (door) objects.push({ type: 'door', name: door.name || 'The way you came in', x: door.x, z: door.z, floor: fl, dir: 'out', leave: true, portal: { to: exitTo.room, x: exitTo.x, z: exitTo.z } });
+    if (f.exit && last) objects.push({ type: 'exit', name: 'Way out', x: f.exit.x, z: f.exit.z, floor: fl, dir: 'out', portal: { to: exitTo.room, x: exitTo.x, z: exitTo.z } });
+    if (f.chest) objects.push({ type: 'chest', name: 'Reward chest', x: f.chest.x, z: f.chest.z, floor: fl, chest: { tier: 'reward', level: plan.level + 2 * f.index + 2, key: 'reward' } });
+    if (f.gate) objects.push({ type: 'gate', name: 'Iron gate', x: f.gate.x, z: f.gate.z, floor: fl, key: 'f' + f.index + '-gate', state: 'closed', gate: { floor: f.index } });
+    if (f.lever) objects.push({ type: 'lever', name: 'Lever', x: f.lever.x, z: f.lever.z, floor: fl, key: 'f' + f.index + '-lever', state: 'idle', lever: { floor: f.index } });
     // arena props (`f.props`) are NOT spawned here: the encounter engine (stream C) spawns the real arena
     // objects when the fight starts; E's props are for the viewer and the client's dressing.
   }

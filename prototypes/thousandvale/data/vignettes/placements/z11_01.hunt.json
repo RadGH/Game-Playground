@@ -1,0 +1,55 @@
+{
+ "_doc": "Stream E (play-test 3 R2). Extra monster camps near the start for world zone z11_01: solos and pairs (a third roaming a small loop) wherever the level ramp is <= 3.5 — tools/content-living.mjs fillHunting. Same record shape as the main placements file (type camp, stray/roam, hunt: true); js/sim/content.js merges them. Not read by stream B's bake (monsters need no cleared ground).",
+ "zone": "z11_01",
+ "eid": "hollin_pass",
+ "terrainHash": "6a42e50c",
+ "stats": {
+  "targets": 147,
+  "added": 2,
+  "stray": 2,
+  "roamer": 0,
+  "covered": 0.619
+ },
+ "placements": [
+  {
+   "type": "camp",
+   "id": "hunt_hollin_pass_1",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1987,
+   "z": 2007,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_hollin_pass_2",
+   "monster": "stone_sentinel",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1592,
+   "z": 2012,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  }
+ ]
+}

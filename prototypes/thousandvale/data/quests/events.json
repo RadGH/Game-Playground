@@ -1,5 +1,5 @@
 {
-  "_doc": "Stream E (M2). The event director's list (PLAN §5.2). `director` = the realm rules (ONE big event at a time, sized to who is online and in band, announced 10 minutes ahead, waystone travel to it free while it runs). `realm` = the big events, each on a schedule or a trigger; the province world boss Grimtallow is a fixed-time scheduled event. `zone` = the per-zone event bosses, each running on its own in every zone copy at stream B's event arena (`site` = the arena id in data/zones/<world zone>/placements.json): two waves from the zone's camp mix, then the boss (an encounter script id in data/encounters/). Everyone within autoEnrolMetres joins a temporary event group (PLAN §5.3). Times are real minutes; reward xp = share of a level's XP, gold = multiple of a kill's gold (data/quests/README.md).",
+  "_doc": "Stream E (M2). The event director's list (PLAN §5.2). `director` = the realm rules (ONE big event at a time, sized to who is online and in band, announced 10 minutes ahead, waystone travel to it free while it runs). `realm` = the big events, each on a schedule or a trigger; the province world boss Grimtallow is a fixed-time scheduled event. `zone` = the per-zone event bosses, each running on its own in every zone copy at stream B's event arena (`site` = the arena id in data/zones/<world zone>/placements.json): two waves from the zone's camp mix, then the boss (an encounter script id in data/encounters/). Everyone within autoEnrolMetres joins a temporary event group (PLAN §5.3). Times are real minutes; reward xp = share of a level's XP, gold = multiple of a kill's gold (data/quests/README.md). Every event carries a `blurb` (one or two sentences for the map and the event card: what happens and what to do). Play-test 3 R3: nothing waits on a real-time clock except the world boss's fixed schedule; events start when someone comes near (director.startOn 'near', director.zone), after a short countdown shown as a real number, and are sized for fewer than 5 players. INFO (play-test 5 T12, tools/content-events.mjs): every realm and zone event carries `info` = { name, what (one sentence), objective { kind, text, count, unit } (count = what the server counts: stages = waves + the boss), durationSec (the hard limit: at 0 the event FAILS), onSuccess / onFail (the result line), rewardText (a preview composed from `reward`) }. Never edit `info` by hand: change the words in the tool and re-run it.",
   "director": {
     "oneRealmEventAtATime": true,
     "announceMinutes": 10,
@@ -9,19 +9,52 @@
     ],
     "freeWaystoneTravel": true,
     "gapMinutes": [
-      40,
-      80
+      10,
+      20
     ],
     "inBandLevels": 3,
     "size": {
-      "healthPerPlayer": 0.12,
-      "addWavePerPlayers": 6,
+      "healthPerPlayer": 0.35,
+      "addWavePerPlayers": 2,
       "minPlayers": 1,
-      "capPlayers": 60,
-      "note": "Boss health x (1 + healthPerPlayer x (enrolled - 1)), one extra add per addWavePerPlayers enrolled; soak/stack needs come from the encounter script's own `party` note."
+      "capPlayers": 5,
+      "note": "Play-test 3 R3 — fewer than 5 players at a time: boss health x (1 + healthPerPlayer x (enrolled - 1)) up to capPlayers 5 (x2.4 for five), one extra add per addWavePerPlayers enrolled (two for five)."
     },
-    "pick": "Of the events whose minOnline is met and whose cooldown is over, the scheduled one due soonest wins; otherwise weighted by `weight`. An event whose zone has fewer than minInBand characters in band is skipped.",
-    "credit": "By contribution (damage, healing, soaks); loot is personal."
+    "pick": "Play-test 3 R3 — the owner: 'events should activate when a player goes nearby, not wait in real time; fewer than 5 people will play at a time'. startOn 'near': a realm event starts when a player in its band comes within its radius + nearMetres (and its cooldown is over, and nothing else is running, and nearGapMinutes have passed since the last one), after a countdownSeconds countdown sent as a real time. A FIXED-schedule event (the world boss) is still announced announceMinutes ahead with its real start time (`at`), and also starts on demand when someone in band walks up and it has been quiet quietMinutes. Weighted events never start on their own.",
+    "credit": "By contribution (damage, healing, soaks); loot is personal.",
+    "startOn": "near",
+    "nearMetres": 60,
+    "countdownSeconds": 15,
+    "nearGapMinutes": 3,
+    "zone": {
+      "startOn": "near",
+      "nearMetres": 50,
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ],
+      "_doc": "Play-test 3 R3 (stream A js/sim/province.js zoneEventsTick): a zone event waits at its arena, armed, until a player comes within the arena radius + nearMetres; then a countdown of countdownSeconds (sent as a real time, `zoneEvent {kind:'soon', at, inMs}`), then the waves. Everyone walking away during the countdown calls it off. After it ends it rests cooldownMinutes (the map shows when it is ready again: `kind:'cooldown', at`). No real-time schedule."
+    },
+    "newcomer": {
+      "underLevel": 3,
+      "firstMinutes": 10,
+      "_doc": "W1 (owner feedback 8): a NEWCOMER is a character under `underLevel` OR one with less than `firstMinutes` of played time. An event with `startOn.clearOfNewcomersM` may not start, nor run its countdown, while a newcomer stands within that many metres of its centre (the settlement for a town event, the arena for a zone event); a countdown already running is called off. tools/content-towns.mjs writes the distances."
+    },
+    "raid": {
+      "rules": "data/provinces/guards.json raid",
+      "firstTarget": "guard",
+      "neverFirstTarget": "newcomer",
+      "enterBy": "gate",
+      "_doc": "W1: a town raid comes in through the gates listed on the event (`raid.gates`), fights the town guards first, and never opens on a newcomer. The numbers and the guards' lines are in data/provinces/guards.json."
+    },
+    "chest": {
+      "opensOn": "won",
+      "lockedBy": "nothing",
+      "lootSec": 120,
+      "forEveryone": "who took part",
+      "_doc": "W24 (owner feedback 8, report #45): a chest an event leaves (`reward.chest`) is open from the moment the event is won — no kill order, no leftover monster and no missing add can keep it shut — and it stays until everyone who took part has looted it or `lootSec` seconds have passed. The result line (\"Won\") is only shown once the chest can be opened. Road-event chests follow the same rule: data/provinces/road-events.json `rules.chest`."
+    }
   },
   "realm": [
     {
@@ -35,10 +68,14 @@
         "type": "fixed",
         "everyHours": 3,
         "atMinute": 30,
-        "also": "on demand when >= 12 characters in band are online and none ran in the last 90 minutes"
+        "also": "on demand when >= 1 character in band walks up to its arena and none ran in the last 60 minutes",
+        "onDemand": {
+          "minInBand": 1,
+          "quietMinutes": 60
+        }
       },
       "minOnline": 1,
-      "minInBand": 8,
+      "minInBand": 1,
       "durationMinutes": 20,
       "level": 10,
       "weight": 0,
@@ -69,6 +106,29 @@
             "chance": 0.05
           }
         }
+      },
+      "blurb": "A siege-engine husk of thorn and bone wakes in its arena at the heart of Blackthorn Scar. The whole province is called to bring it down; stay out of the red.",
+      "where": "Blackthorn Scar: in the mountains, about 200 m east of Last Lantern",
+      "map": [
+        {
+          "zone": "z11_04",
+          "x": 23689,
+          "z": 9497
+        }
+      ],
+      "info": {
+        "name": "Grimtallow, the Siege-Husk",
+        "what": "A siege-husk of thorn and bone has risen in its arena in the Blackthorn Scar.",
+        "objective": {
+          "kind": "boss",
+          "text": "Bring down Grimtallow, the Siege-Husk",
+          "count": 1,
+          "unit": "boss"
+        },
+        "durationSec": 1200,
+        "onSuccess": "Grimtallow is down, and the Scar is only ordinarily dangerous again.",
+        "onFail": "Grimtallow sinks back into the thorns, undefeated.",
+        "rewardText": "An epic item for everyone who takes part, a small chance of a legendary one on your first kill of the day, gold and more than a level of experience"
       }
     },
     {
@@ -81,12 +141,12 @@
       },
       "schedule": {
         "type": "weighted",
-        "cooldownMinutes": 120
+        "cooldownMinutes": 60
       },
-      "minOnline": 4,
-      "minInBand": 4,
+      "minOnline": 1,
+      "minInBand": 1,
       "durationMinutes": 12,
-      "level": 4,
+      "level": 3,
       "weight": 3,
       "waves": [
         {
@@ -95,7 +155,8 @@
             6,
             10
           ],
-          "level": 3
+          "level": 2,
+          "levelAuthored": 3
         },
         {
           "type": "brigand_archer",
@@ -103,7 +164,8 @@
             4,
             6
           ],
-          "level": 4
+          "level": 3,
+          "levelAuthored": 4
         },
         {
           "type": "brigand_captain",
@@ -111,14 +173,19 @@
             1,
             1
           ],
-          "level": 5,
-          "rank": "elite"
+          "level": 3,
+          "rank": "elite",
+          "levelAuthored": 5
         }
       ],
       "announce": [
         "Smoke over Torborhold! Raiders are at the gates.",
         "The guards of Torborhold are falling back to the square."
       ],
+      "monster": "brigand_captain",
+      "encounter": "ev_harl_vesk",
+      "bossName": "Harl Vesk, the Raider Captain",
+      "_bossNote": "S24 (play-test 4): the raid ends with its captain — before this the runner fell back to a WOLF named after the event",
       "reward": {
         "xp": 0.8,
         "gold": 20,
@@ -127,7 +194,72 @@
           "slot": "any"
         }
       },
-      "note": "The first-hour scene (PLAN §5.6) is this event run privately in the starter copy; the realm version is bigger and public."
+      "note": "The first-hour scene (PLAN §5.6) is this event run privately in the starter copy; the realm version is bigger and public.",
+      "blurb": "Raiders storm Torborhold's gates. Hold the town against the waves, then break their captain.",
+      "where": "The Torbor Fields: at the edge of Torborhold",
+      "map": [
+        {
+          "zone": "z12_02",
+          "x": 25168,
+          "z": 5360
+        }
+      ],
+      "levelAuthored": 4,
+      "startOn": {
+        "minLevel": 3,
+        "_doc": "Torborhold is where new characters start: the raid comes only when someone of level 3+ is in town.",
+        "clearOfNewcomersM": 223
+      },
+      "info": {
+        "name": "Raiders at Torborhold",
+        "what": "Raiders are storming the gates of Torborhold.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Break the three raider waves, then defeat Harl Vesk, the Raider Captain",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 720,
+        "onSuccess": "The raiders are broken and Torborhold still has its gates.",
+        "onFail": "The raiders take what they came for and ride off with it.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      },
+      "raid": {
+        "gates": [
+          {
+            "id": "torborhold_gate_0",
+            "x": 531.4,
+            "z": 1281.1,
+            "out": [
+              -1,
+              0.024
+            ],
+            "main": true
+          },
+          {
+            "id": "torborhold_gate_1",
+            "x": 592.4,
+            "z": 1201.1,
+            "out": [
+              0.688,
+              -0.726
+            ],
+            "main": false
+          },
+          {
+            "id": "torborhold_gate_2",
+            "x": 634.5,
+            "z": 1217.6,
+            "out": [
+              0.632,
+              -0.775
+            ],
+            "main": false
+          }
+        ],
+        "guards": 9,
+        "zone": "z12_02"
+      }
     },
     {
       "id": "siege_halsbridge",
@@ -139,10 +271,10 @@
       },
       "schedule": {
         "type": "weighted",
-        "cooldownMinutes": 180
+        "cooldownMinutes": 90
       },
-      "minOnline": 10,
-      "minInBand": 6,
+      "minOnline": 1,
+      "minInBand": 1,
       "durationMinutes": 18,
       "level": 5,
       "weight": 2,
@@ -153,7 +285,8 @@
             10,
             16
           ],
-          "level": 4
+          "level": 4,
+          "levelAuthored": 4
         },
         {
           "type": "sky_cultist",
@@ -161,7 +294,8 @@
             4,
             8
           ],
-          "level": 5
+          "level": 5,
+          "levelAuthored": 5
         },
         {
           "type": "cult_zealot",
@@ -169,7 +303,8 @@
             3,
             5
           ],
-          "level": 5
+          "level": 5,
+          "levelAuthored": 5
         }
       ],
       "boss": "boss_castellan_odrun",
@@ -185,6 +320,69 @@
           "slot": "any",
           "chance": 0.25
         }
+      },
+      "blurb": "A warband marches on Halsbridge. Man the walls, cut down the raiders and cultists, then face Castellan Odrun.",
+      "where": "Torbor Cross: at the edge of Halsbridge",
+      "map": [
+        {
+          "zone": "z13_02",
+          "x": 28320,
+          "z": 5280
+        }
+      ],
+      "levelAuthored": 5,
+      "info": {
+        "name": "The Red Banner at Halsbridge",
+        "what": "A warband under a red banner is marching on Halsbridge.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Cut down the three warband waves, then defeat Castellan Odrun",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 1080,
+        "onSuccess": "The red banner is down and Halsbridge holds.",
+        "onFail": "The warband sacks the market and marches off before anyone can stop it.",
+        "rewardText": "A rare item or better for everyone who takes part, a chance of an epic one, gold and about a level of experience"
+      },
+      "startOn": {
+        "clearOfNewcomersM": 242
+      },
+      "raid": {
+        "gates": [
+          {
+            "id": "halsbridge_gate_0",
+            "x": 1755.5,
+            "z": 1240.4,
+            "out": [
+              0.541,
+              0.841
+            ],
+            "main": false
+          },
+          {
+            "id": "halsbridge_gate_1",
+            "x": 1697,
+            "z": 1266,
+            "out": [
+              0.005,
+              1
+            ],
+            "main": true
+          },
+          {
+            "id": "halsbridge_gate_2",
+            "x": 1670,
+            "z": 1106.2,
+            "out": [
+              -0.535,
+              -0.845
+            ],
+            "main": false
+          }
+        ],
+        "guards": 10,
+        "zone": "z13_02"
       }
     },
     {
@@ -200,10 +398,10 @@
       "monster": "mire_drake",
       "schedule": {
         "type": "weighted",
-        "cooldownMinutes": 150
+        "cooldownMinutes": 90
       },
-      "minOnline": 6,
-      "minInBand": 4,
+      "minOnline": 1,
+      "minInBand": 1,
       "durationMinutes": 15,
       "level": 8,
       "weight": 2,
@@ -219,6 +417,44 @@
           "tier": "rare",
           "slot": "any"
         }
+      },
+      "blurb": "A mire drake flies its route across four zones. Follow it, and fight it where it lands.",
+      "where": "over Brackwater Fen, Torbor Cross, Millbrook Vale, The Redcliff Frontier",
+      "map": [
+        {
+          "zone": "z13_01",
+          "x": 27650,
+          "z": 3029
+        },
+        {
+          "zone": "z13_02",
+          "x": 27984,
+          "z": 5200
+        },
+        {
+          "zone": "z13_03",
+          "x": 27408,
+          "z": 7480
+        },
+        {
+          "zone": "z14_03",
+          "x": 29365,
+          "z": 7099
+        }
+      ],
+      "info": {
+        "name": "Drake on the Wing",
+        "what": "A mire drake is flying its route across four zones and landing to feed.",
+        "objective": {
+          "kind": "boss",
+          "text": "Kill the mire drake at one of its landings",
+          "count": 1,
+          "unit": "boss"
+        },
+        "durationSec": 900,
+        "onSuccess": "The drake is dead, and the herds can stop looking up.",
+        "onFail": "The drake finishes its meal and flies home, fat and unbothered.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and about a level of experience"
       }
     }
   ],
@@ -230,15 +466,8 @@
       "kind": "avalanche",
       "site": "event_hollin_pass",
       "announce": "An avalanche has torn open the hillside above the pass, and the thing it uncovered is getting up.",
-      "every": {
-        "minutes": [
-          35,
-          55
-        ]
-      },
-      "warnMinutes": 2,
       "durationMinutes": 10,
-      "level": 8,
+      "level": 7,
       "waves": [
         {
           "type": "frost_stalker",
@@ -246,8 +475,9 @@
             3,
             5
           ],
-          "level": 7,
-          "at": "arena edge"
+          "level": 6,
+          "at": "arena edge",
+          "levelAuthored": 7
         },
         {
           "type": "crag_hyena",
@@ -255,8 +485,9 @@
             4,
             6
           ],
-          "level": 8,
-          "at": "arena edge"
+          "level": 7,
+          "at": "arena edge",
+          "levelAuthored": 8
         },
         {
           "type": "ironback_beetle",
@@ -264,8 +495,9 @@
             5,
             7
           ],
-          "level": 8,
-          "at": "arena edge"
+          "level": 7,
+          "at": "arena edge",
+          "levelAuthored": 8
         }
       ],
       "boss": "mb_chained_saint",
@@ -278,6 +510,38 @@
           "slot": "any"
         },
         "chest": "event_cache"
+      },
+      "blurb": "An avalanche above the pass has uncovered something chained in the snow. Fight off the stalkers, hyenas and beetles, then the thing itself.",
+      "where": "Hollin Pass: in the open grass, about 300 m south-west of Hollin Toll",
+      "map": [
+        {
+          "zone": "z11_01",
+          "x": 23915,
+          "z": 2829
+        }
+      ],
+      "levelAuthored": 8,
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ],
+      "info": {
+        "name": "The Stone in the Snow",
+        "what": "An avalanche above the pass has uncovered something chained in the snow.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Clear the three waves from the slope, then defeat the Chained Saint",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "The thing in the snow lies still, and the pass is quiet.",
+        "onFail": "The snow slides again and buries it all, for now.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      },
+      "startOn": {
+        "clearOfNewcomersM": 220
       }
     },
     {
@@ -287,13 +551,6 @@
       "kind": "the_ruin_wakes",
       "site": "event_ashcombe",
       "announce": "Lights in the old counting house, at noon. The Warden of the ruin is walking its wall again.",
-      "every": {
-        "minutes": [
-          35,
-          55
-        ]
-      },
-      "warnMinutes": 2,
       "durationMinutes": 10,
       "level": 6,
       "waves": [
@@ -304,7 +561,8 @@
             5
           ],
           "level": 5,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 5
         },
         {
           "type": "barrow_hound",
@@ -313,7 +571,8 @@
             6
           ],
           "level": 6,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 6
         },
         {
           "type": "sporecap_walker",
@@ -322,7 +581,8 @@
             7
           ],
           "level": 6,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 6
         }
       ],
       "boss": "barrow_warden",
@@ -335,6 +595,38 @@
           "slot": "any"
         },
         "chest": "event_cache"
+      },
+      "blurb": "The Warden of the ruin walks the old counting-house wall again. Beat back the scavengers, hounds and walkers, then lay the Warden down.",
+      "where": "The Ashcombe Ruins: in the open grass, about 100 m north-west of Ashcombe",
+      "map": [
+        {
+          "zone": "z12_01",
+          "x": 25792,
+          "z": 3224
+        }
+      ],
+      "levelAuthored": 6,
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ],
+      "info": {
+        "name": "The Ruin Wakes",
+        "what": "The Warden of the ruin is walking the old counting-house wall again.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Beat back the three waves of scavengers, then lay the Barrow Warden down",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "The Warden lies down, and the ruin goes back to being a ruin.",
+        "onFail": "The Warden finishes its rounds and returns below, unpaid.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      },
+      "startOn": {
+        "clearOfNewcomersM": 220
       }
     },
     {
@@ -344,13 +636,6 @@
       "kind": "drowning_bell",
       "site": "event_brackwater",
       "announce": "A bell rings under the fen, and the reeds lean toward it. Somebody has to stop the ringer.",
-      "every": {
-        "minutes": [
-          35,
-          55
-        ]
-      },
-      "warnMinutes": 2,
       "durationMinutes": 10,
       "level": 7,
       "waves": [
@@ -361,7 +646,8 @@
             5
           ],
           "level": 6,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 6
         },
         {
           "type": "bog_slime",
@@ -370,7 +656,8 @@
             6
           ],
           "level": 7,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 7
         },
         {
           "type": "fen_croaker",
@@ -379,7 +666,8 @@
             7
           ],
           "level": 7,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 7
         }
       ],
       "boss": "mb_bell_ringer",
@@ -392,6 +680,38 @@
           "slot": "any"
         },
         "chest": "event_cache"
+      },
+      "blurb": "A bell rings under the fen and the reeds lean toward it. Cut through the serpents, slimes and croakers, then stop the ringer.",
+      "where": "Brackwater Fen: in the open grass, about 50 m south-west of Brackwater",
+      "map": [
+        {
+          "zone": "z13_01",
+          "x": 27650,
+          "z": 3029
+        }
+      ],
+      "levelAuthored": 7,
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ],
+      "info": {
+        "name": "The Drowning Bell",
+        "what": "A bell is ringing under the fen and everything in the reeds is coming to it.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Cut through the three waves from the reeds, then stop the Bell Ringer",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "The bell is silent, and the fen is merely damp.",
+        "onFail": "The bell rings itself out and sinks, to ring another day.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      },
+      "startOn": {
+        "clearOfNewcomersM": 220
       }
     },
     {
@@ -401,13 +721,6 @@
       "kind": "the_wreckers_night",
       "site": "event_saltmouth",
       "announce": "False lights on the headland. The wreckers are out, and their sergeant is counting the take.",
-      "every": {
-        "minutes": [
-          35,
-          55
-        ]
-      },
-      "warnMinutes": 2,
       "durationMinutes": 10,
       "level": 8,
       "waves": [
@@ -418,7 +731,8 @@
             5
           ],
           "level": 7,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 7
         },
         {
           "type": "dune_centipede",
@@ -427,7 +741,8 @@
             6
           ],
           "level": 8,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 8
         },
         {
           "type": "reed_serpent",
@@ -436,7 +751,8 @@
             7
           ],
           "level": 8,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 8
         }
       ],
       "boss": "mb_sergeant_wark",
@@ -449,6 +765,38 @@
           "slot": "any"
         },
         "chest": "event_cache"
+      },
+      "blurb": "Wreckers light false lamps on the headland. Clear the wreckers and the beach crawlers, then take their sergeant.",
+      "where": "Saltmouth: in the open grass, about 150 m north of Saltmouth",
+      "map": [
+        {
+          "zone": "z14_01",
+          "x": 29516,
+          "z": 3420
+        }
+      ],
+      "levelAuthored": 8,
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ],
+      "info": {
+        "name": "The Wreckers' Night",
+        "what": "Wreckers are lighting false lamps on the headland to bring a ship onto the rocks.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Clear the three waves on the beach, then defeat Sergeant Wark",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "The false lamps are out and the ship sails past.",
+        "onFail": "The lamps do their work, and the wreckers go home rich.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      },
+      "startOn": {
+        "clearOfNewcomersM": 220
       }
     },
     {
@@ -458,13 +806,6 @@
       "kind": "the_collapse",
       "site": "event_delvers_hill",
       "announce": "The old workings have fallen in, and something big came up through the hole with the dust.",
-      "every": {
-        "minutes": [
-          35,
-          55
-        ]
-      },
-      "warnMinutes": 2,
       "durationMinutes": 10,
       "level": 6,
       "waves": [
@@ -475,7 +816,8 @@
             5
           ],
           "level": 5,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 5
         },
         {
           "type": "cairn_rat",
@@ -484,7 +826,8 @@
             6
           ],
           "level": 6,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 6
         },
         {
           "type": "shale_warden",
@@ -493,7 +836,8 @@
             7
           ],
           "level": 6,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 6
         }
       ],
       "boss": "mb_rustjaw",
@@ -506,6 +850,38 @@
           "slot": "any"
         },
         "chest": "event_cache"
+      },
+      "blurb": "The old workings have caved in and something big climbed out. Beat back the beetles and rats, then the thing itself.",
+      "where": "Delvers' Hill: in the woods, about 200 m north of Ashhaven",
+      "map": [
+        {
+          "zone": "z11_02",
+          "x": 23216,
+          "z": 4832
+        }
+      ],
+      "levelAuthored": 6,
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ],
+      "info": {
+        "name": "The Collapse",
+        "what": "The old workings have caved in and something big has climbed out.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Beat back the three waves from the hole, then kill Rustjaw",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "Rustjaw is dead, and the hole is only a hole.",
+        "onFail": "The thing digs itself back under the hill.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      },
+      "startOn": {
+        "clearOfNewcomersM": 220
       }
     },
     {
@@ -515,13 +891,6 @@
       "kind": "harvest_festival",
       "site": "event_grandmother_skein",
       "announce": "Silk over the barley, thick as rope. The thing under the old sinkhole is awake.",
-      "every": {
-        "minutes": [
-          35,
-          55
-        ]
-      },
-      "warnMinutes": 2,
       "durationMinutes": 10,
       "level": 4,
       "waves": [
@@ -532,7 +901,8 @@
             5
           ],
           "level": 2,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 2
         },
         {
           "type": "thicket_boar",
@@ -541,7 +911,8 @@
             6
           ],
           "level": 3,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 3
         },
         {
           "type": "road_brigand",
@@ -550,7 +921,8 @@
             7
           ],
           "level": 4,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 4
         }
       ],
       "boss": "event_grandmother_skein",
@@ -563,6 +935,38 @@
           "slot": "any"
         },
         "chest": "event_cache"
+      },
+      "blurb": "The great spider under Mawehaven's sinkhole is awake. Clear the beasts and brigands drawn to the field, burn her egg sacs, then kill her.",
+      "where": "The Torbor Fields: in the woods, about 50 m east of Mawehaven",
+      "map": [
+        {
+          "zone": "z12_02",
+          "x": 24933,
+          "z": 6040
+        }
+      ],
+      "levelAuthored": 4,
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ],
+      "info": {
+        "name": "Grandmother Skein",
+        "what": "The great spider under the sinkhole has woken and the field is filling with beasts.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Clear the three waves drawn to the field, then kill Grandmother Skein",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "Grandmother Skein is dead, and the barley is safe to stand in.",
+        "onFail": "Grandmother Skein goes back down the hole to wait.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      },
+      "startOn": {
+        "clearOfNewcomersM": 220
       }
     },
     {
@@ -572,13 +976,6 @@
       "kind": "riot_in_the_market",
       "site": "event_torbor_cross",
       "announce": "A drummer in a sky-blue hood is whipping the market crowd into a mob. Stop the drum, stop the riot.",
-      "every": {
-        "minutes": [
-          35,
-          55
-        ]
-      },
-      "warnMinutes": 2,
       "durationMinutes": 10,
       "level": 5,
       "waves": [
@@ -589,7 +986,8 @@
             5
           ],
           "level": 4,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 4
         },
         {
           "type": "moor_hound",
@@ -598,7 +996,8 @@
             6
           ],
           "level": 5,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 5
         },
         {
           "type": "brigand_archer",
@@ -607,7 +1006,8 @@
             7
           ],
           "level": 5,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 5
         }
       ],
       "boss": "mb_drummer_ossa",
@@ -620,6 +1020,38 @@
           "slot": "any"
         },
         "chest": "event_cache"
+      },
+      "blurb": "A drummer is whipping the Halsbridge market into a mob. Put down the rioters and their dogs, then stop the drum.",
+      "where": "Torbor Cross: in the woods, about 200 m east of Mirestead",
+      "map": [
+        {
+          "zone": "z13_02",
+          "x": 27984,
+          "z": 5200
+        }
+      ],
+      "levelAuthored": 5,
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ],
+      "info": {
+        "name": "Riot in the Market",
+        "what": "A drummer is whipping the Halsbridge market into a mob.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Put down the three waves of rioters, then stop Drummer Ossa",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "The drum is broken and the market finds its manners again.",
+        "onFail": "The mob tires itself out and takes the stalls home with it.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      },
+      "startOn": {
+        "clearOfNewcomersM": 220
       }
     },
     {
@@ -629,13 +1061,6 @@
       "kind": "the_serpent_surfaces",
       "site": "event_gullwick",
       "announce": "The lake goes still, then very not still. Sluicegrip has come up for the ferry boats.",
-      "every": {
-        "minutes": [
-          35,
-          55
-        ]
-      },
-      "warnMinutes": 2,
       "durationMinutes": 10,
       "level": 7,
       "waves": [
@@ -646,7 +1071,8 @@
             5
           ],
           "level": 6,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 6
         },
         {
           "type": "fen_croaker",
@@ -655,7 +1081,8 @@
             6
           ],
           "level": 7,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 7
         },
         {
           "type": "dusk_flitter",
@@ -664,7 +1091,8 @@
             7
           ],
           "level": 7,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 7
         }
       ],
       "boss": "mb_sluicegrip",
@@ -677,6 +1105,38 @@
           "slot": "any"
         },
         "chest": "event_cache"
+      },
+      "blurb": "Sluicegrip has surfaced for the ferry boats. Fight off the serpents, croakers and flitters, then the beast.",
+      "where": "The Gullwick Lakes: in the woods, about 350 m south-west of Gullwick",
+      "map": [
+        {
+          "zone": "z14_02",
+          "x": 29944,
+          "z": 4784
+        }
+      ],
+      "levelAuthored": 7,
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ],
+      "info": {
+        "name": "The Serpent Surfaces",
+        "what": "Sluicegrip has surfaced beside the ferry and the boats cannot cross.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Fight off the three waves from the water, then kill Sluicegrip",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "Sluicegrip sinks for good, and the ferry runs again.",
+        "onFail": "Sluicegrip eats a boat and goes back under.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      },
+      "startOn": {
+        "clearOfNewcomersM": 220
       }
     },
     {
@@ -686,15 +1146,8 @@
       "kind": "the_great_hunt",
       "site": "event_wychwood",
       "announce": "Horns in the forest — but nobody in Wychwood owns a horn. The pack is hunting, and its leader wants company.",
-      "every": {
-        "minutes": [
-          35,
-          55
-        ]
-      },
-      "warnMinutes": 2,
       "durationMinutes": 10,
-      "level": 7,
+      "level": 6,
       "waves": [
         {
           "type": "veil_spider",
@@ -702,8 +1155,9 @@
             3,
             5
           ],
-          "level": 6,
-          "at": "arena edge"
+          "level": 5,
+          "at": "arena edge",
+          "levelAuthored": 6
         },
         {
           "type": "gallows_owl",
@@ -711,8 +1165,9 @@
             4,
             6
           ],
-          "level": 7,
-          "at": "arena edge"
+          "level": 6,
+          "at": "arena edge",
+          "levelAuthored": 7
         },
         {
           "type": "moor_hound",
@@ -720,8 +1175,9 @@
             5,
             7
           ],
-          "level": 7,
-          "at": "arena edge"
+          "level": 6,
+          "at": "arena edge",
+          "levelAuthored": 7
         }
       ],
       "boss": "packleader",
@@ -734,6 +1190,38 @@
           "slot": "any"
         },
         "chest": "event_cache"
+      },
+      "blurb": "Something is hunting through Wychwood with a pack at its heels. Survive the spiders, owls and hounds, then face the pack leader.",
+      "where": "Wychwood: in the open grass, about 100 m south of Hermit's Rest",
+      "map": [
+        {
+          "zone": "z11_03",
+          "x": 23640,
+          "z": 6936
+        }
+      ],
+      "levelAuthored": 7,
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ],
+      "info": {
+        "name": "The Great Hunt",
+        "what": "Something is hunting through Wychwood with a pack at its heels.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Survive the three waves of the hunt, then kill the pack leader",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "The pack leader is dead, and the hunt is over.",
+        "onFail": "The hunt passes through and on, and takes its kills with it.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      },
+      "startOn": {
+        "clearOfNewcomersM": 220
       }
     },
     {
@@ -743,13 +1231,6 @@
       "kind": "the_procession",
       "site": "event_saint_orrins_rise",
       "announce": "The pilgrims' procession is on the road, and something with wings is following it.",
-      "every": {
-        "minutes": [
-          35,
-          55
-        ]
-      },
-      "warnMinutes": 2,
       "durationMinutes": 10,
       "level": 5,
       "waves": [
@@ -760,7 +1241,8 @@
             5
           ],
           "level": 4,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 4
         },
         {
           "type": "gallows_owl",
@@ -769,7 +1251,8 @@
             6
           ],
           "level": 5,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 5
         },
         {
           "type": "sky_cultist",
@@ -778,7 +1261,8 @@
             7
           ],
           "level": 5,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 5
         }
       ],
       "boss": "mb_gallowmother",
@@ -791,6 +1275,38 @@
           "slot": "any"
         },
         "chest": "event_cache"
+      },
+      "blurb": "Something winged follows the pilgrims' procession. Guard the road from hounds, owls and cultists, then kill the Gallowmother.",
+      "where": "Saint Orrin's Rise: in the open grass, about 200 m south of Orrinsford",
+      "map": [
+        {
+          "zone": "z12_03",
+          "x": 24903,
+          "z": 7016
+        }
+      ],
+      "levelAuthored": 5,
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ],
+      "info": {
+        "name": "The Procession",
+        "what": "Something winged is following the pilgrims up the hill road.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Guard the road through three waves, then kill the Gallowmother",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "The Gallowmother is down and the procession reaches the top.",
+        "onFail": "The pilgrims scatter, and the Gallowmother takes the slowest.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      },
+      "startOn": {
+        "clearOfNewcomersM": 220
       }
     },
     {
@@ -800,13 +1316,6 @@
       "kind": "harvest_festival",
       "site": "event_millbrook",
       "announce": "Bunting, cider, pies — and a harvest cart with far too many teeth.",
-      "every": {
-        "minutes": [
-          35,
-          55
-        ]
-      },
-      "warnMinutes": 2,
       "durationMinutes": 10,
       "level": 6,
       "waves": [
@@ -817,7 +1326,8 @@
             5
           ],
           "level": 4,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 4
         },
         {
           "type": "carrion_moth",
@@ -826,7 +1336,8 @@
             6
           ],
           "level": 5,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 5
         },
         {
           "type": "road_brigand",
@@ -835,7 +1346,8 @@
             7
           ],
           "level": 6,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 6
         }
       ],
       "boss": "boss_hungry_cart",
@@ -848,6 +1360,38 @@
           "slot": "any"
         },
         "chest": "event_cache"
+      },
+      "blurb": "A harvest cart with far too many teeth crashes the festival. Clear the boars, moths and brigands, then stop the cart.",
+      "where": "Millbrook Vale: in the open grass, about 250 m north-east of Millbrook",
+      "map": [
+        {
+          "zone": "z13_03",
+          "x": 27408,
+          "z": 7480
+        }
+      ],
+      "levelAuthored": 6,
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ],
+      "info": {
+        "name": "Harvest Festival",
+        "what": "A harvest cart with far too many teeth has crashed the festival.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Clear the three waves from the green, then stop the Hungry Cart",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "The cart is firewood, and the festival carries on.",
+        "onFail": "The cart eats the pies and rolls off into the dark.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      },
+      "startOn": {
+        "clearOfNewcomersM": 220
       }
     },
     {
@@ -857,13 +1401,6 @@
       "kind": "siege_at_the_fort",
       "site": "event_redcliff",
       "announce": "Raiders are at Redcliff Fort with fire and ladders, and a spitting imp to light the gate.",
-      "every": {
-        "minutes": [
-          35,
-          55
-        ]
-      },
-      "warnMinutes": 2,
       "durationMinutes": 10,
       "level": 8,
       "waves": [
@@ -874,7 +1411,8 @@
             5
           ],
           "level": 7,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 7
         },
         {
           "type": "road_brigand",
@@ -883,7 +1421,8 @@
             6
           ],
           "level": 8,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 8
         },
         {
           "type": "crag_hyena",
@@ -892,7 +1431,8 @@
             7
           ],
           "level": 8,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 8
         }
       ],
       "boss": "mb_spit_imp",
@@ -905,6 +1445,38 @@
           "slot": "any"
         },
         "chest": "event_cache"
+      },
+      "blurb": "Raiders bring fire and ladders to Redcliff Fort. Throw back imps, raiders and hyenas, then kill the imp lighting the gate.",
+      "where": "The Redcliff Frontier: in the woods, about 250 m east of Redcliff",
+      "map": [
+        {
+          "zone": "z14_03",
+          "x": 29365,
+          "z": 7099
+        }
+      ],
+      "levelAuthored": 8,
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ],
+      "info": {
+        "name": "Siege at the Fort",
+        "what": "Raiders have brought fire and ladders to the walls of Redcliff Fort.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Throw back the three waves at the wall, then kill the imp lighting the gate",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "The gate is scorched but standing, and the raiders are gone.",
+        "onFail": "The gate burns, and the raiders help themselves.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      },
+      "startOn": {
+        "clearOfNewcomersM": 220
       }
     },
     {
@@ -914,13 +1486,6 @@
       "kind": "warband_raid",
       "site": "event_blackthorn_scar",
       "announce": "The thorn wall moves. A warband's briar-giant is walking through it, and the raiders walk behind.",
-      "every": {
-        "minutes": [
-          35,
-          55
-        ]
-      },
-      "warnMinutes": 2,
       "durationMinutes": 10,
       "level": 10,
       "waves": [
@@ -931,7 +1496,8 @@
             5
           ],
           "level": 8,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 8
         },
         {
           "type": "ossuary_crawler",
@@ -940,7 +1506,8 @@
             6
           ],
           "level": 9,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 9
         },
         {
           "type": "cinder_imp",
@@ -949,7 +1516,8 @@
             7
           ],
           "level": 10,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 10
         }
       ],
       "boss": "briar_colossus",
@@ -962,6 +1530,38 @@
           "slot": "any"
         },
         "chest": "event_cache"
+      },
+      "blurb": "A briar-giant walks through the thorn wall with a warband behind it. Break the raiders, then fell the colossus.",
+      "where": "Blackthorn Scar: in the mountains, about 100 m north of Last Lantern",
+      "map": [
+        {
+          "zone": "z11_04",
+          "x": 23405,
+          "z": 9290
+        }
+      ],
+      "levelAuthored": 10,
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ],
+      "info": {
+        "name": "Warband Raid",
+        "what": "A briar-giant has walked through the thorn wall with a warband behind it.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Break the three warband waves, then fell the Briar Colossus",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "The colossus is down, and the thorn wall closes over the gap.",
+        "onFail": "The warband marches on through the breach.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      },
+      "startOn": {
+        "clearOfNewcomersM": 220
       }
     },
     {
@@ -971,13 +1571,6 @@
       "kind": "the_serpent_surfaces",
       "site": "event_coldwater",
       "announce": "Coldwater Mere churns. Old Murkfin has come up out of the silt, hungry.",
-      "every": {
-        "minutes": [
-          35,
-          55
-        ]
-      },
-      "warnMinutes": 2,
       "durationMinutes": 10,
       "level": 7,
       "waves": [
@@ -988,7 +1581,8 @@
             5
           ],
           "level": 6,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 6
         },
         {
           "type": "reed_serpent",
@@ -997,7 +1591,8 @@
             6
           ],
           "level": 7,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 7
         },
         {
           "type": "marsh_wisp",
@@ -1006,7 +1601,8 @@
             7
           ],
           "level": 7,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 7
         }
       ],
       "boss": "mb_old_murkfin",
@@ -1019,6 +1615,35 @@
           "slot": "any"
         },
         "chest": "event_cache"
+      },
+      "blurb": "Old Murkfin has come up out of the silt. Fight off the slimes, serpents and wisps, then the fish itself.",
+      "where": "Coldwater Mere: in the mountains, about 500 m west of Coldwater",
+      "map": [
+        {
+          "zone": "z12_04",
+          "x": 25479,
+          "z": 9982
+        }
+      ],
+      "levelAuthored": 7,
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ],
+      "info": {
+        "name": "The Serpent Surfaces",
+        "what": "Old Murkfin has come up out of the silt and the shallows are boiling.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Fight off the three waves from the mere, then kill Old Murkfin",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "Old Murkfin floats belly up, and the mere is still.",
+        "onFail": "Old Murkfin slides back into the silt.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
       }
     },
     {
@@ -1028,13 +1653,6 @@
       "kind": "siege_at_the_fort",
       "site": "event_gorse_march",
       "announce": "The Red Banner has come for Gorsehold Redoubt. Hask himself is leading the ladders.",
-      "every": {
-        "minutes": [
-          35,
-          55
-        ]
-      },
-      "warnMinutes": 2,
       "durationMinutes": 10,
       "level": 8,
       "waves": [
@@ -1045,7 +1663,8 @@
             5
           ],
           "level": 7,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 7
         },
         {
           "type": "crag_hyena",
@@ -1054,7 +1673,8 @@
             6
           ],
           "level": 8,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 8
         },
         {
           "type": "brigand_archer",
@@ -1063,7 +1683,8 @@
             7
           ],
           "level": 8,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 8
         }
       ],
       "boss": "boss_warlord_hask",
@@ -1076,6 +1697,38 @@
           "slot": "any"
         },
         "chest": "event_cache"
+      },
+      "blurb": "Warlord Hask leads the ladders against Gorsehold Redoubt. Hold the walls against imps, hyenas and archers, then face Hask.",
+      "where": "The Gorse March: in the badlands, about 200 m north-west of Gorsehold",
+      "map": [
+        {
+          "zone": "z13_04",
+          "x": 27950,
+          "z": 9347
+        }
+      ],
+      "levelAuthored": 8,
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ],
+      "info": {
+        "name": "Siege at the Fort",
+        "what": "Warlord Hask is leading the ladders against Gorsehold Redoubt.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Hold the walls through three waves, then defeat Warlord Hask",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "Hask is beaten, and the redoubt keeps its flag.",
+        "onFail": "The redoubt falls, and Hask puts his own flag on it.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      },
+      "startOn": {
+        "clearOfNewcomersM": 220
       }
     },
     {
@@ -1085,13 +1738,6 @@
       "kind": "the_great_hunt",
       "site": "event_sunken_wolds",
       "announce": "Something grey is hunting the hunters of the Wolds. It leaves the boots.",
-      "every": {
-        "minutes": [
-          35,
-          55
-        ]
-      },
-      "warnMinutes": 2,
       "durationMinutes": 10,
       "level": 10,
       "waves": [
@@ -1102,7 +1748,8 @@
             5
           ],
           "level": 8,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 8
         },
         {
           "type": "sporecap_walker",
@@ -1111,7 +1758,8 @@
             6
           ],
           "level": 9,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 9
         },
         {
           "type": "silt_lurker",
@@ -1120,7 +1768,8 @@
             7
           ],
           "level": 10,
-          "at": "arena edge"
+          "at": "arena edge",
+          "levelAuthored": 10
         }
       ],
       "boss": "mb_greycoat",
@@ -1133,6 +1782,38 @@
           "slot": "any"
         },
         "chest": "event_cache"
+      },
+      "blurb": "Something grey hunts the hunters of the Wolds. Survive the stalkers, walkers and lurkers, then track it down.",
+      "where": "The Sunken Wolds: in the dry grass, about 50 m west of Lowmoor",
+      "map": [
+        {
+          "zone": "z14_04",
+          "x": 29740,
+          "z": 9199
+        }
+      ],
+      "levelAuthored": 10,
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ],
+      "info": {
+        "name": "The Great Hunt",
+        "what": "Something grey is hunting the hunters of the Wolds.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Survive the three waves it drives ahead of it, then kill Greycoat",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "Greycoat is dead, and the hunters go back to hunting.",
+        "onFail": "Greycoat loses interest and pads off into the mist.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      },
+      "startOn": {
+        "clearOfNewcomersM": 220
       }
     }
   ]

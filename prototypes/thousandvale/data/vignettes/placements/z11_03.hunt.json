@@ -1,0 +1,1151 @@
+{
+ "_doc": "Stream E (play-test 3 R2). Extra monster camps near the start for world zone z11_03: solos and pairs (a third roaming a small loop) wherever the level ramp is <= 3.5 — tools/content-living.mjs fillHunting. Same record shape as the main placements file (type camp, stray/roam, hunt: true); js/sim/content.js merges them. Not read by stream B's bake (monsters need no cleared ground).",
+ "zone": "z11_03",
+ "eid": "wychwood",
+ "terrainHash": "a23813e6",
+ "stats": {
+  "targets": 8590,
+  "added": 46,
+  "stray": 34,
+  "roamer": 12,
+  "covered": 0.996
+ },
+ "placements": [
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_1",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 2003,
+   "z": 759,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_2",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1808,
+   "z": 289,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1831,
+     312
+    ],
+    [
+     1788,
+     312
+    ],
+    [
+     1784,
+     269
+    ],
+    [
+     1826,
+     254
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_3",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1420,
+   "z": 338,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_4",
+   "monster": "dread_stag",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 2009,
+   "z": 568,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_5",
+   "monster": "dread_stag",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1608,
+   "z": 513,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1588,
+     541
+    ],
+    [
+     1572,
+     483
+    ],
+    [
+     1641,
+     487
+    ],
+    [
+     1629,
+     547
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_6",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 2008,
+   "z": 864,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_7",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1275,
+   "z": 39,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_8",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1628,
+   "z": 164,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_9",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1904,
+   "z": 771,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1859,
+     755
+    ],
+    [
+     1912,
+     736
+    ],
+    [
+     1936,
+     770
+    ],
+    [
+     1906,
+     811
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_10",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 2008,
+   "z": 664,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1981,
+     702
+    ],
+    [
+     1954,
+     629
+    ],
+    [
+     2047,
+     632
+    ],
+    [
+     2047,
+     695
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_11",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1171,
+   "z": 168,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_12",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1944,
+   "z": 494,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_13",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1880,
+   "z": 392,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_14",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1792,
+   "z": 840,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1765,
+     832
+    ],
+    [
+     1807,
+     807
+    ],
+    [
+     1833,
+     856
+    ],
+    [
+     1770,
+     878
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_15",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1411,
+   "z": 474,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_16",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1540,
+   "z": 154,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_17",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 2018,
+   "z": 187,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_18",
+   "monster": "ridge_griffin",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1388,
+   "z": 40,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_19",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1704,
+   "z": 209,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1714,
+     275
+    ],
+    [
+     1650,
+     214
+    ],
+    [
+     1688,
+     158
+    ],
+    [
+     1773,
+     188
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_20",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1347,
+   "z": 539,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_21",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1227,
+   "z": 110,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_22",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1544,
+   "z": 41,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_23",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1347,
+   "z": 363,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1332,
+     329
+    ],
+    [
+     1394,
+     345
+    ],
+    [
+     1378,
+     414
+    ],
+    [
+     1297,
+     373
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_24",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1903,
+   "z": 340,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1931,
+     326
+    ],
+    [
+     1935,
+     380
+    ],
+    [
+     1859,
+     363
+    ],
+    [
+     1878,
+     304
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_25",
+   "monster": "dread_stag",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1558,
+   "z": 734,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_26",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1155,
+   "z": 284,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_27",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1671,
+   "z": 415,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_28",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1896,
+   "z": 40,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_29",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1536,
+   "z": 370,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_30",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1824,
+   "z": 624,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_31",
+   "monster": "ridge_griffin",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1687,
+   "z": 746,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_32",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1448,
+   "z": 403,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_33",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1528,
+   "z": 584,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_34",
+   "monster": "dread_stag",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1700,
+   "z": 50,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1646,
+     49
+    ],
+    [
+     1688,
+     13
+    ],
+    [
+     1745,
+     43
+    ],
+    [
+     1709,
+     105
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_35",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1944,
+   "z": 552,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1922,
+     513
+    ],
+    [
+     1983,
+     529
+    ],
+    [
+     1982,
+     591
+    ],
+    [
+     1902,
+     581
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_36",
+   "monster": "dread_stag",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1992,
+   "z": 929,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_37",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1421,
+   "z": 116,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_38",
+   "monster": "dread_stag",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1113,
+   "z": 127,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_39",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1838,
+   "z": 201,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1784,
+     212
+    ],
+    [
+     1820,
+     150
+    ],
+    [
+     1888,
+     171
+    ],
+    [
+     1850,
+     242
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_40",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1816,
+   "z": 424,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_41",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1736,
+   "z": 352,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1795,
+     336
+    ],
+    [
+     1759,
+     381
+    ],
+    [
+     1693,
+     383
+    ],
+    [
+     1714,
+     316
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_42",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1998,
+   "z": 251,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_43",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1700,
+   "z": 703,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_44",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1209,
+   "z": 38,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_45",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1453,
+   "z": 284,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_wychwood_46",
+   "monster": "ridge_griffin",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1600,
+   "z": 424,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  }
+ ]
+}

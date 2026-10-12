@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 2,
-  "inputHash": "c9413658",
+  "bakeVersion": 4,
+  "inputHash": "0ba48d02",
   "waterKinds": [
     "none",
     "sea",
@@ -33,7 +33,7 @@
       "height": 224,
       "method": "pangea",
       "seaLevel": 0.2,
-      "inputHash": "9803699e"
+      "inputHash": "9805a835"
     },
     "zone": {
       "zx": 12,
@@ -73,9 +73,10 @@
     {
       "type": "settlement",
       "kind": "hamlet",
-      "name": "Pohelrow",
+      "name": "Mawehaven",
       "x": 256,
       "z": 1920,
+      "wfName": "Pohelrow",
       "radius": 40,
       "movedFrom": {
         "x": 64,
@@ -85,9 +86,10 @@
     {
       "type": "settlement",
       "kind": "hamlet",
-      "name": "Ashford",
+      "name": "Wamonhold",
       "x": 1344,
       "z": 1568,
+      "wfName": "Ashford",
       "radius": 46,
       "movedFrom": {
         "x": 1344,
@@ -97,16 +99,25 @@
     {
       "type": "crossing",
       "kind": "ford",
-      "name": "Mipider Ford",
-      "x": 64,
-      "z": 1984
+      "name": "Fitockpi Ford",
+      "x": 48,
+      "z": 1857,
+      "wfName": "Mipider Ford",
+      "snappedFrom": {
+        "x": 64,
+        "z": 1984
+      }
     },
     {
       "type": "crossing",
       "kind": "ford",
       "name": "Milhot Ford",
-      "x": 1344,
-      "z": 1472
+      "x": 1334,
+      "z": 1427,
+      "snappedFrom": {
+        "x": 1344,
+        "z": 1472
+      }
     },
     {
       "type": "dungeon",
@@ -114,34 +125,111 @@
       "name": "Barrow entrance",
       "x": 354,
       "z": 1292,
-      "yaw": 1.185
+      "yaw": 1.185,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_grandmother_skein",
       "x": 357,
       "z": 1944,
-      "r": 40
+      "r": 40,
+      "pinned": true
     },
     {
       "type": "camp",
       "id": "elite_hobb_gallowsby",
-      "x": 75,
-      "z": 1973,
-      "r": 25
+      "x": 72,
+      "z": 1879,
+      "r": 25,
+      "pinned": true
     }
   ],
   "spawn": {
     "x": 588,
     "z": 1264
   },
+  "bridges": [
+    {
+      "a": [
+        426.34,
+        1990.88
+      ],
+      "b": [
+        440.37,
+        1996.18
+      ],
+      "h": 217.951,
+      "w": 4.58
+    },
+    {
+      "a": [
+        590.45,
+        1614.45
+      ],
+      "b": [
+        580.11,
+        1604.11
+      ],
+      "h": 186.656,
+      "w": 4.5
+    },
+    {
+      "a": [
+        455.96,
+        1453.23
+      ],
+      "b": [
+        451.45,
+        1437.81
+      ],
+      "h": 185.977,
+      "w": 5.3
+    },
+    {
+      "a": [
+        1344,
+        1419.5
+      ],
+      "b": [
+        1344,
+        1433.5
+      ],
+      "h": 127.761,
+      "w": 4.5
+    },
+    {
+      "a": [
+        64,
+        1838.5
+      ],
+      "b": [
+        64,
+        1855.5
+      ],
+      "h": 222.432,
+      "w": 4.5
+    },
+    {
+      "a": [
+        196.33,
+        1755.03
+      ],
+      "b": [
+        190.55,
+        1739.04
+      ],
+      "h": 216.524,
+      "w": 4.5
+    }
+  ],
   "summary": {
     "zone": "z12_02",
     "province": "Petbeck Basin",
-    "inputHash": "c9413658",
+    "inputHash": "0ba48d02",
     "rivers": 2,
-    "wetShare": 0.006,
-    "unwalkableShare": 0.037,
+    "wetShare": 0.005,
+    "unwalkableShare": 0.034,
     "towns": [
       {
         "name": "Torborhold",
@@ -157,13 +245,20 @@
           "z": 1216
         },
         "culture": "halfling",
-        "plots": 28,
-        "streets": 79,
+        "plots": 29,
+        "streets": 75,
         "links": 3,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 3,
+        "w6": {
+          "plotsBefore": 27,
+          "plots": 29,
+          "kept": 27,
+          "removed": []
+        }
       },
       {
-        "name": "Pohelrow",
+        "name": "Mawehaven",
         "kind": "hamlet",
         "hub": false,
         "at": [
@@ -176,13 +271,26 @@
           "z": 1984
         },
         "culture": "halfling",
-        "plots": 8,
+        "plots": 7,
         "streets": 29,
-        "links": 0,
-        "overlaps": 0
+        "links": 1,
+        "overlaps": 0,
+        "highStreets": 1,
+        "w6": {
+          "plotsBefore": 8,
+          "plots": 7,
+          "kept": 7,
+          "removed": [
+            {
+              "plot": 6,
+              "want": "house",
+              "office": false
+            }
+          ]
+        }
       },
       {
-        "name": "Ashford",
+        "name": "Wamonhold",
         "kind": "hamlet",
         "hub": false,
         "at": [
@@ -198,43 +306,54 @@
         "plots": 9,
         "streets": 44,
         "links": 1,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 1,
+        "w6": {
+          "plotsBefore": 9,
+          "plots": 9,
+          "kept": 9,
+          "removed": []
+        }
       }
     ],
-    "roads": 11,
-    "bridges": 5,
-    "scatter": 14019,
+    "roads": 13,
+    "bridges": 6,
+    "paths": 25,
+    "pathMetres": 2904,
+    "scatter": 18723,
     "scatterKinds": {
-      "rock_small": 1288,
-      "rock_large": 732,
-      "bush": 4001,
-      "tree_broadleaf": 7523,
-      "boulder": 89,
-      "tree_conifer": 146,
-      "reed": 225,
-      "tree_dead": 15
+      "bush": 5776,
+      "rock_large": 1068,
+      "rock_small": 1964,
+      "tree_broadleaf": 7935,
+      "boulder": 107,
+      "tree_conifer": 186,
+      "reed": 297,
+      "tree_dead": 16,
+      "hedge": 1314,
+      "tree_fruit": 60
     },
     "sites": [
       "settlement(HUB) town Torborhold 592 1264 90",
-      "settlement hamlet Pohelrow 256 1920 40",
-      "settlement hamlet Ashford 1344 1568 46",
-      "crossing ford Mipider Ford 64 1984",
-      "crossing ford Milhot Ford 1344 1472",
+      "settlement hamlet Mawehaven 256 1920 40",
+      "settlement hamlet Wamonhold 1344 1568 46",
+      "crossing ford Fitockpi Ford 48 1857",
+      "crossing ford Milhot Ford 1334 1427",
       "dungeon door_1 Barrow entrance 354 1292  1.185",
       "event event_grandmother_skein  357 1944 40",
-      "camp elite_hobb_gallowsby  75 1973 25"
+      "camp elite_hobb_gallowsby  72 1879 25"
     ],
     "spawn": {
       "x": 588,
       "z": 1264
     },
-    "placements": 224,
-    "vignettesAvoided": 0
+    "placements": 365,
+    "vignettesAvoided": 676
   },
   "files": {
-    "terrain.bin": 6306074,
-    "nav.bin": 1050717,
-    "scatter.bin": 112236,
-    "placements.json": 92082
+    "terrain.bin": 605250,
+    "nav.bin": 42276,
+    "scatter.bin": 149868,
+    "placements.json": 288592
   }
 }

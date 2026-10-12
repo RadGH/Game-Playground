@@ -3,6 +3,7 @@
 // IS the fog colour (so distant hills melt into the sky instead of ending at a grey wall).
 
 import * as THREE from 'three';
+import { skyAt, carriedLight, DUNGEON_AMBIENT } from './daynight.js';
 
 export function createScene(canvas, { quality = 'high' } = {}) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance', preserveDrawingBuffer: false });
@@ -14,14 +15,18 @@ export function createScene(canvas, { quality = 'high' } = {}) {
   renderer.shadowMap.type = THREE.PCFShadowMap;
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 2400);
+  // far enough for the horizon (the whole world from the macro bake, ~36 km across); near pulled out a little
+  // so the depth buffer still separates a boot from the ground at 200 m.
+  const camera = new THREE.PerspectiveCamera(55, 1, 0.25, 22000);
 
   const SKY = { zenith: new THREE.Color('#3f6fb3'), horizon: new THREE.Color('#c9d9e6'), ground: new THREE.Color('#6d7a6a') };
-  scene.fog = new THREE.Fog(SKY.horizon.clone(), 140, 900);
+  scene.fog = new THREE.Fog(SKY.horizon.clone(), 220, 7000);
   scene.background = SKY.horizon.clone();
 
   // Sky dome: a big inside-out sphere with a gradient and a soft sun glow. Not affected by fog.
   const sunDir = new THREE.Vector3(-0.45, 0.62, -0.64).normalize();
+  const keyDir = sunDir.clone(), moonDir = new THREE.Vector3(0.4, 0.6, 0.3).normalize();
+  let mood = 'outdoor', lastSky = null;
   const skyMat = new THREE.ShaderMaterial({
     side: THREE.BackSide, depthWrite: false, fog: false,
     uniforms: { uZenith: { value: SKY.zenith }, uHorizon: { value: SKY.horizon }, uGround: { value: SKY.ground }, uSun: { value: sunDir } },
@@ -54,6 +59,17 @@ export function createScene(canvas, { quality = 'high' } = {}) {
   }
   scene.add(clouds);
 
+  // Stars and a moon for the night (fade in with skyAt().stars). Fixed to the camera like the dome.
+  const starGeo = new THREE.BufferGeometry();
+  { const p = []; let sd = 7; const r = () => ((sd = (sd * 16807) % 2147483647) / 2147483647);
+    for (let i = 0; i < 900; i++) { const u = r() * 2 - 1, a = r() * Math.PI * 2, y = Math.abs(u) * 0.95 + 0.05, h = Math.sqrt(1 - y * y); p.push(Math.cos(a) * h * 1800, y * 1800, Math.sin(a) * h * 1800); }
+    starGeo.setAttribute('position', new THREE.Float32BufferAttribute(p, 3)); }
+  const starMat = new THREE.PointsMaterial({ color: '#dfe8ff', size: 1.6, sizeAttenuation: false, transparent: true, opacity: 0, depthWrite: false, fog: false });
+  const stars = new THREE.Points(starGeo, starMat); stars.frustumCulled = false; stars.renderOrder = -9; stars.visible = false;
+  scene.add(stars);
+  const moon = new THREE.Sprite(new THREE.SpriteMaterial({ map: makeMoonSprite(), color: '#e8eeff', transparent: true, depthWrite: false, fog: false, opacity: 0 }));
+  moon.scale.set(110, 110, 1); moon.renderOrder = -8; moon.visible = false; scene.add(moon);
+
   const hemi = new THREE.HemisphereLight('#d6e6ff', '#6b5f48', 1.15);
   scene.add(hemi);
   const sun = new THREE.DirectionalLight('#fff1d8', 2.6);
@@ -69,8 +85,10 @@ export function createScene(canvas, { quality = 'high' } = {}) {
     const texel = (S * 2) / sun.shadow.mapSize.x;
     const cx = Math.round(p.x / texel) * texel, cz = Math.round(p.z / texel) * texel;
     sun.target.position.set(cx, p.y, cz);
-    sun.position.set(cx + sunDir.x * 140, p.y + sunDir.y * 140, cz + sunDir.z * 140);
+    sun.position.set(cx + keyDir.x * 140, p.y + keyDir.y * 140, cz + keyDir.z * 140);
     sky.position.set(p.x, 0, p.z);
+    stars.position.set(p.x, 0, p.z);
+    moon.position.set(p.x + moonDir.x * 1700, moonDir.y * 1700, p.z + moonDir.z * 1700);
     lantern.position.set(p.x, p.y + 2.4, p.z);
     clouds.position.set(p.x * 0.9, 0, p.z * 0.9);
   }
@@ -81,24 +99,69 @@ export function createScene(canvas, { quality = 'high' } = {}) {
     camera.aspect = w / h; camera.updateProjectionMatrix();
   }
   window.addEventListener('resize', resize);
+  // Safari's toolbars can resize the canvas without a window resize event.
+  new ResizeObserver(resize).observe(canvas);
+  window.visualViewport?.addEventListener('resize', resize);
   resize();
 
   /** 'outdoor' (sky, sun, long fog) or 'dungeon' (no sky, dim cold fill, close dark fog). */
-  function setMood(mood) {
+  function setMood(m, { fog = '#06050a', bright = false } = {}) {
+    mood = m;
     const dark = mood === 'dungeon';
     sky.visible = clouds.visible = !dark;
-    scene.background = dark ? new THREE.Color('#06050a') : SKY.horizon.clone();
-    scene.fog.color.set(dark ? '#06050a' : SKY.horizon);
-    scene.fog.near = dark ? 10 : 140; scene.fog.far = dark ? 48 : 900;
-    hemi.intensity = dark ? 0.62 : 1.15; hemi.color.set(dark ? '#8f9cc0' : '#d6e6ff'); hemi.groundColor.set(dark ? '#2a2018' : '#6b5f48');
-    sun.intensity = dark ? 0.25 : 2.6;
-    lantern.visible = dark;
+    scene.background = dark ? new THREE.Color(fog) : SKY.horizon.clone();
+    scene.fog.color.set(dark ? fog : SKY.horizon);
+    // play-test 8 (W22): a dungeon is never pitch black — a floor of ambient light under every look, fog pushed back
+    scene.fog.near = dark ? (bright ? DUNGEON_AMBIENT.fogNearBright : DUNGEON_AMBIENT.fogNear) : 140; scene.fog.far = dark ? (bright ? DUNGEON_AMBIENT.fogFarBright : DUNGEON_AMBIENT.fogFar) : 900;
+    hemi.intensity = dark ? (bright ? DUNGEON_AMBIENT.hemiBright : DUNGEON_AMBIENT.hemi) * ambientK : 1.15; hemi.color.set(dark ? '#9aa6c8' : '#d6e6ff'); hemi.groundColor.set(dark ? '#3a2e24' : '#6b5f48');
+    sun.intensity = dark ? 0.35 : 2.6;
+    // never toggle a light's visibility (every lit material would recompile: the P1/P10 freeze) — dim it instead
+    moodBright = bright; applyCarry();
+    stars.visible = moon.visible = false;
+    if (!dark && lastSky) applySky(lastSky);
   }
-  // The light you carry underground: warm, close, follows you (placed in follow()).
-  const lantern = new THREE.PointLight('#ffc98a', 9, 13, 1.6);
-  lantern.visible = false; scene.add(lantern);
 
-  return { renderer, scene, camera, sun, hemi, sunDir, follow, resize, setMood, render: () => renderer.render(scene, camera) };
+  /** Time of day (0 = midnight, 0.5 = noon; the realm clock): sun or moon, sky, fog, light, stars. */
+  function setTimeOfDay(t) {
+    const k = skyAt(t);
+    lastSky = k;
+    if (mood === 'outdoor') applySky(k);
+    return k;
+  }
+  const _c = new THREE.Color();
+  function applySky(k) {
+    SKY.zenith.setRGB(...k.zenith); SKY.horizon.setRGB(...k.horizon); SKY.ground.setRGB(...k.ground);
+    scene.fog.color.copy(SKY.horizon); scene.background = SKY.horizon.clone();
+    scene.fog.near = k.fogNear; scene.fog.far = k.fogFar;
+    sunDir.set(...k.sun); keyDir.set(...k.keyDir);
+    moonDir.set(-k.sun[0], Math.max(0.25, -k.sun[1]), -k.sun[2]).normalize();
+    skyMat.uniforms.uSun.value.copy(k.night > 0.6 ? moonDir : sunDir);
+    sun.color.setRGB(...k.keyColor); sun.intensity = k.keyIntensity;
+    hemi.color.setRGB(...k.hemiSky); hemi.groundColor.setRGB(...k.hemiGround); hemi.intensity = k.hemiIntensity;
+    renderer.toneMappingExposure = k.exposure;
+    starMat.opacity = k.stars * 0.9; stars.visible = k.stars > 0.02;
+    moon.visible = k.night > 0.2; moon.material.opacity = Math.min(1, k.night * 1.3);
+    for (const c of clouds.children) c.material.color.copy(_c.setRGB(...k.horizon).lerp(new THREE.Color('#ffffff'), 0.55));
+  }
+  // The light everyone carries (W22): warm, follows you (placed in follow()); underground always, outdoors as night falls.
+  // ONE PointLight that is always in the scene and only ever dimmed — adding, removing or hiding a light recompiles every lit material.
+  const lantern = new THREE.PointLight('#ffc98a', 9, 13, 1.6);
+  lantern.intensity = 0; scene.add(lantern);
+  let moodBright = false, carryRange = null, carryNight = 0, carryDungeon = null, ambientK = 1;
+  function applyCarry() {
+    const c = carriedLight({ mood, night: carryNight, range: carryRange, bright: moodBright, dungeonRange: carryDungeon });
+    lantern.intensity = c.intensity; lantern.distance = c.distance; lantern.decay = c.decay;
+    return c;
+  }
+  /** W22: how dark it is (0..1) and the rules' light radius in metres (null = the client's own). */
+  function setCarryLight({ night = carryNight, range = carryRange, dungeonRange = carryDungeon, dungeonAmbient = null } = {}) {
+    carryNight = night; carryRange = range; carryDungeon = dungeonRange;
+    // C's `dungeonAmbient` (0.4 of daylight) is what our floor was tuned at: a different number scales the floor with it
+    if (Number.isFinite(dungeonAmbient) && dungeonAmbient > 0) { ambientK = Math.max(0.6, Math.min(2, dungeonAmbient / 0.4)); if (mood === 'dungeon') hemi.intensity = (moodBright ? DUNGEON_AMBIENT.hemiBright : DUNGEON_AMBIENT.hemi) * ambientK; }
+    return applyCarry();
+  }
+
+  return { renderer, scene, camera, sun, hemi, sunDir, follow, resize, setMood, setTimeOfDay, setCarryLight, get carry() { return { intensity: lantern.intensity, distance: lantern.distance, hemi: hemi.intensity, fogNear: scene.fog.near, fogFar: scene.fog.far }; }, get sky() { return lastSky; }, render: () => renderer.render(scene, camera) };
 }
 
 function makeCloudSprite() {
@@ -110,5 +173,15 @@ function makeCloudSprite() {
     grd.addColorStop(0, 'rgba(255,255,255,0.55)'); grd.addColorStop(1, 'rgba(255,255,255,0)');
     g.fillStyle = grd; g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
   }
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+
+function makeMoonSprite() {
+  const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d');
+  const grd = g.createRadialGradient(64, 64, 10, 64, 64, 64);
+  grd.addColorStop(0, 'rgba(255,255,255,1)'); grd.addColorStop(0.36, 'rgba(240,244,255,1)'); grd.addColorStop(0.42, 'rgba(200,215,255,0.35)'); grd.addColorStop(1, 'rgba(160,180,255,0)');
+  g.fillStyle = grd; g.fillRect(0, 0, 128, 128);
+  g.fillStyle = 'rgba(170,180,205,0.45)';
+  for (const [x, y, r] of [[54, 56, 7], [72, 70, 5], [66, 48, 4], [50, 74, 3]]) { g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill(); }
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
 }

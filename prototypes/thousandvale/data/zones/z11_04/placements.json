@@ -1,7 +1,7 @@
 {
- "_doc": "Stream B zone placements (tools/bake-zone.mjs). Zone metres; yaw = atan2(dx, dz), the way the thing faces. kinds: settlement (data.radius, hub, planned), town_square, street (data.pts, width, cls), building (a proctown plot: data.w along `angle` (local +x = (cos angle, sin angle)), data.d across, want; yaw faces the nearest drawn street, data.streetGap = metres from the front to it), town_wall, road (data.pts [[x,z,h]], width, cls, spur), bridge (yaw along the road, span, deck height), dungeon_door, event_site, camp_site, landmark/dungeon/pass/crossing (World Forge nodes).",
+ "_doc": "Stream B zone placements (tools/bake-zone.mjs). Zone metres; yaw = atan2(dx, dz), the way the thing faces. kinds: settlement (data.radius, hub, planned), town_square, street (data.pts, width, cls), building (a proctown plot: data.w along `angle` (local +x = (cos angle, sin angle)), data.d across, want; yaw faces the nearest drawn street, data.streetGap = metres from the front to it), town_wall (play-test 4: every planned settlement; data.style/material/tier/h/thick/tint/radius, runs [[[x,z,h]…]…] open polylines between openings, towers [{x,z,h,yaw}], gates [{id,x,z,h,yaw = the way OUT along the road,out:[dx,dz],width,pass,kind gatehouse|posts|gap,way,ways,led,ends,approaches}], openings [{kind water|keep,ends,grate}] — SOLID in nav.bin except the gates; tools/lib/zone-walls.mjs), road (data.pts [[x,z,h]], width, cls, spur), bridge (yaw along the road, span, deck height), dungeon_door, event_site, camp_site, landmark/dungeon/pass/crossing (World Forge nodes).",
  "zone": "z11_04",
- "terrainHash": "bdad0477",
+ "terrainHash": "454aaea1",
  "placements": [
   {
    "kind": "lair",
@@ -15,11 +15,41 @@
    }
   },
   {
+   "kind": "settlement",
+   "id": "last_lantern",
+   "x": 890,
+   "z": 1305,
+   "yaw": 0,
+   "data": {
+    "kind": "town",
+    "name": "Last Lantern",
+    "radius": 90,
+    "hub": true,
+    "planned": true,
+    "ask": true
+   }
+  },
+  {
+   "kind": "settlement",
+   "id": "thornwick",
+   "x": 1772,
+   "z": 1900,
+   "yaw": 0,
+   "data": {
+    "kind": "hamlet",
+    "name": "Thornwick",
+    "radius": 46,
+    "hub": false,
+    "planned": true,
+    "ask": true
+   }
+  },
+  {
    "kind": "dungeon_door",
    "id": "door_1",
-   "x": 1164,
-   "z": 898,
-   "yaw": 1.481,
+   "x": 994,
+   "z": 1171,
+   "yaw": -0.431,
    "data": {
     "name": "Barrow entrance"
    }
@@ -37,11 +67,2777 @@
   {
    "kind": "event_site",
    "id": "event_blackthorn_scar",
-   "x": 871,
-   "z": 1071,
+   "x": 877,
+   "z": 1098,
    "yaw": 0,
    "data": {
     "r": 40
+   }
+  },
+  {
+   "kind": "town_square",
+   "id": "last_lantern_square",
+   "x": 879.19,
+   "z": 1300.36,
+   "yaw": 0,
+   "data": {
+    "r": 6.96,
+    "town": "last_lantern",
+    "culture": "halfling",
+    "stalls": [
+     [
+      888.81,
+      1304.43
+     ],
+     [
+      875.8,
+      1287.34
+     ],
+     [
+      886.63,
+      1293.02
+     ],
+     [
+      882.76,
+      1287.39
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_0",
+   "x": 942.6,
+   "z": 1288.93,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      942.6,
+      1288.93
+     ],
+     [
+      894.65,
+      1280.54
+     ],
+     [
+      846.96,
+      1270.76
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_1",
+   "x": 911.38,
+   "z": 1254.51,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      911.38,
+      1254.51
+     ],
+     [
+      910.18,
+      1265.57
+     ],
+     [
+      908.11,
+      1276.5
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_2",
+   "x": 926.53,
+   "z": 1263.88,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      926.53,
+      1263.88
+     ],
+     [
+      925.43,
+      1267.5
+     ],
+     [
+      923.14,
+      1276.7
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_3",
+   "x": 934.28,
+   "z": 1272.38,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      934.28,
+      1272.38
+     ],
+     [
+      933.35,
+      1271.91
+     ],
+     [
+      927.54,
+      1269.34
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_4",
+   "x": 924.94,
+   "z": 1262.83,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      924.94,
+      1262.83
+     ],
+     [
+      920.29,
+      1262.07
+     ],
+     [
+      915.77,
+      1260.77
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_5",
+   "x": 882.26,
+   "z": 1252.23,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      882.26,
+      1252.23
+     ],
+     [
+      881.49,
+      1261.11
+     ],
+     [
+      881.38,
+      1270.03
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_6",
+   "x": 892.15,
+   "z": 1254.05,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      892.15,
+      1254.05
+     ],
+     [
+      892.58,
+      1261.7
+     ],
+     [
+      893.98,
+      1269.23
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_7",
+   "x": 901.25,
+   "z": 1263.22,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      901.25,
+      1263.22
+     ],
+     [
+      898.11,
+      1263.67
+     ],
+     [
+      894.96,
+      1263.98
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_8",
+   "x": 891.8,
+   "z": 1264.49,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      891.8,
+      1264.49
+     ],
+     [
+      888.4,
+      1264.94
+     ],
+     [
+      884.98,
+      1265.31
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_9",
+   "x": 873.1,
+   "z": 1252.66,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      873.1,
+      1252.66
+     ],
+     [
+      872.3,
+      1260.85
+     ],
+     [
+      871.44,
+      1269.17
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_10",
+   "x": 879.78,
+   "z": 1259.85,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      879.78,
+      1259.85
+     ],
+     [
+      876.67,
+      1259.56
+     ],
+     [
+      873.57,
+      1259.23
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_11",
+   "x": 871.12,
+   "z": 1261.17,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      871.12,
+      1261.17
+     ],
+     [
+      864.24,
+      1260.87
+     ],
+     [
+      858.44,
+      1259.95
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_12",
+   "x": 897.24,
+   "z": 1291.48,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      897.24,
+      1291.48
+     ],
+     [
+      887.44,
+      1321.2
+     ],
+     [
+      874.78,
+      1349.82
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_13",
+   "x": 924.01,
+   "z": 1341.53,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      924.01,
+      1341.53
+     ],
+     [
+      906.59,
+      1338.41
+     ],
+     [
+      889.56,
+      1333.56
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_14",
+   "x": 921.35,
+   "z": 1309.28,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      921.35,
+      1309.28
+     ],
+     [
+      915.96,
+      1321.96
+     ],
+     [
+      910.38,
+      1334.57
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_15",
+   "x": 926.6,
+   "z": 1321.24,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      926.6,
+      1321.24
+     ],
+     [
+      922.67,
+      1319.77
+     ],
+     [
+      918.91,
+      1317.9
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_16",
+   "x": 921.38,
+   "z": 1333.25,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      921.38,
+      1333.25
+     ],
+     [
+      917.62,
+      1331.41
+     ],
+     [
+      913.7,
+      1329.92
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_17",
+   "x": 914.59,
+   "z": 1321.88,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      914.59,
+      1321.88
+     ],
+     [
+      905.54,
+      1318.62
+     ],
+     [
+      896.97,
+      1314.24
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_18",
+   "x": 909.28,
+   "z": 1304.04,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      909.28,
+      1304.04
+     ],
+     [
+      906.93,
+      1309.86
+     ],
+     [
+      904.29,
+      1315.55
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_19",
+   "x": 904.35,
+   "z": 1319.3,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      904.35,
+      1319.3
+     ],
+     [
+      902.1,
+      1324.65
+     ],
+     [
+      899.73,
+      1329.95
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_20",
+   "x": 908.53,
+   "z": 1340.52,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      908.53,
+      1340.52
+     ],
+     [
+      906.95,
+      1347.61
+     ],
+     [
+      905.8,
+      1354.78
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_21",
+   "x": 918.74,
+   "z": 1351.9,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      918.74,
+      1351.9
+     ],
+     [
+      914.12,
+      1351.17
+     ],
+     [
+      908.11,
+      1349.81
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_22",
+   "x": 900.43,
+   "z": 1338.97,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      900.43,
+      1338.97
+     ],
+     [
+      899.24,
+      1346.14
+     ],
+     [
+      897.7,
+      1353.23
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_23",
+   "x": 905.5,
+   "z": 1349.33,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      905.5,
+      1349.33
+     ],
+     [
+      902.72,
+      1348.82
+     ],
+     [
+      899.96,
+      1348.27
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_24",
+   "x": 898.14,
+   "z": 1344.16,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      898.14,
+      1344.16
+     ],
+     [
+      893.49,
+      1343.38
+     ],
+     [
+      888.89,
+      1342.39
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_25",
+   "x": 884.01,
+   "z": 1312.74,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      884.01,
+      1312.74
+     ],
+     [
+      867.71,
+      1305.17
+     ],
+     [
+      851.6,
+      1297.19
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_26",
+   "x": 877.9,
+   "z": 1290.86,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      877.9,
+      1290.86
+     ],
+     [
+      873.57,
+      1296.32
+     ],
+     [
+      869.78,
+      1302.16
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_27",
+   "x": 859.25,
+   "z": 1303.54,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      859.25,
+      1303.54
+     ],
+     [
+      851.96,
+      1318.48
+     ],
+     [
+      846.21,
+      1334.09
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_28",
+   "x": 877.53,
+   "z": 1323.92,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      877.53,
+      1323.92
+     ],
+     [
+      867.14,
+      1319.13
+     ],
+     [
+      856.49,
+      1314.94
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_29",
+   "x": 874.96,
+   "z": 1310.24,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      874.96,
+      1310.24
+     ],
+     [
+      872.79,
+      1314.83
+     ],
+     [
+      870.98,
+      1319.57
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_30",
+   "x": 866.55,
+   "z": 1320.78,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      866.55,
+      1320.78
+     ],
+     [
+      863,
+      1330.26
+     ],
+     [
+      858.61,
+      1339.38
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_31",
+   "x": 873.53,
+   "z": 1333.29,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      873.53,
+      1333.29
+     ],
+     [
+      869.1,
+      1331.22
+     ],
+     [
+      864.54,
+      1329.45
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_32",
+   "x": 859.59,
+   "z": 1333.15,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      859.59,
+      1333.15
+     ],
+     [
+      854.96,
+      1331.26
+     ],
+     [
+      850.39,
+      1329.23
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_33",
+   "x": 848.37,
+   "z": 1324.1,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      848.37,
+      1324.1
+     ],
+     [
+      844.88,
+      1322.51
+     ],
+     [
+      841.32,
+      1321.1
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_34",
+   "x": 851.59,
+   "z": 1316.56,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      851.59,
+      1316.56
+     ],
+     [
+      847.98,
+      1315.26
+     ],
+     [
+      844.54,
+      1313.56
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_35",
+   "x": 868.68,
+   "z": 1366.4,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      868.68,
+      1366.4
+     ],
+     [
+      885.5,
+      1311
+     ],
+     [
+      881.95,
+      1306.74
+     ]
+    ],
+    "high": true,
+    "to": "square",
+    "road": "road_link_last_lantern"
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_36",
+   "x": 867.71,
+   "z": 1305.17,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      867.71,
+      1305.17
+     ],
+     [
+      869.78,
+      1302.16
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_37",
+   "x": 894.65,
+   "z": 1280.54,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      894.65,
+      1280.54
+     ],
+     [
+      897.24,
+      1291.48
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_38",
+   "x": 871.44,
+   "z": 1269.17,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      871.44,
+      1269.17
+     ],
+     [
+      870.14,
+      1275.51
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_39",
+   "x": 884.98,
+   "z": 1265.31,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      884.98,
+      1265.31
+     ],
+     [
+      881.44,
+      1265.27
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_40",
+   "x": 896.97,
+   "z": 1314.24,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      896.97,
+      1314.24
+     ],
+     [
+      890.45,
+      1312.09
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_41",
+   "x": 908.11,
+   "z": 1276.5,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      908.11,
+      1276.5
+     ],
+     [
+      907.02,
+      1282.7
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_42",
+   "x": 906.59,
+   "z": 1338.41,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      906.59,
+      1338.41
+     ],
+     [
+      910.38,
+      1334.57
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "last_lantern_street_43",
+   "x": 915.77,
+   "z": 1260.77,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      915.77,
+      1260.77
+     ],
+     [
+      910.76,
+      1260.22
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_0",
+   "x": 918.79,
+   "z": 1268.75,
+   "yaw": 2.9204,
+   "data": {
+    "town": "last_lantern",
+    "want": "house",
+    "district": "residential",
+    "w": 10.29,
+    "d": 8.2,
+    "angle": 1.792,
+    "front": 4.9335,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_1",
+   "x": 897.43,
+   "z": 1257.96,
+   "yaw": 0.1199,
+   "data": {
+    "town": "last_lantern",
+    "want": "house",
+    "district": "residential",
+    "w": 7.83,
+    "d": 5.14,
+    "angle": 1.4509,
+    "front": 1.4509,
+    "streetGap": -0.27
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_2",
+   "x": 887.71,
+   "z": 1259.21,
+   "yaw": 0.1199,
+   "data": {
+    "town": "last_lantern",
+    "want": "house",
+    "district": "residential",
+    "w": 7.99,
+    "d": 5.67,
+    "angle": 1.4509,
+    "front": 1.4509,
+    "streetGap": -0.33
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_3",
+   "x": 876.11,
+   "z": 1265.12,
+   "yaw": 3.0415,
+   "data": {
+    "town": "last_lantern",
+    "want": "armoury",
+    "district": "residential",
+    "w": 7.78,
+    "d": 5.04,
+    "angle": 1.6709,
+    "front": 4.8125,
+    "streetGap": -0.4,
+    "office": "armoury",
+    "role": "armourer",
+    "lit": true,
+    "label": "Armourer"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_4",
+   "x": 866.93,
+   "z": 1265.48,
+   "yaw": 1.4707,
+   "data": {
+    "town": "last_lantern",
+    "want": "bowyer",
+    "district": "residential",
+    "w": 5.24,
+    "d": 6.28,
+    "angle": 1.6709,
+    "front": 6.3833,
+    "streetGap": -0.37,
+    "office": "bowyer",
+    "role": "bowyer",
+    "lit": true,
+    "label": "Bowyer"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_5",
+   "x": 860.68,
+   "z": 1264.85,
+   "yaw": 3.0415,
+   "data": {
+    "town": "last_lantern",
+    "want": "house",
+    "district": "residential",
+    "w": 5.24,
+    "d": 6.28,
+    "angle": 1.6709,
+    "front": 4.8125,
+    "streetGap": -0.22
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_6",
+   "x": 924.78,
+   "z": 1314.89,
+   "yaw": -1.98,
+   "data": {
+    "town": "last_lantern",
+    "want": "house",
+    "district": "residential",
+    "w": 6.37,
+    "d": 7.17,
+    "angle": 1.98,
+    "front": 3.5508,
+    "streetGap": -0.33
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_7",
+   "x": 920.14,
+   "z": 1325.59,
+   "yaw": -0.4092,
+   "data": {
+    "town": "last_lantern",
+    "want": "house",
+    "district": "residential",
+    "w": 9.29,
+    "d": 7.17,
+    "angle": 1.98,
+    "front": 1.98,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_8",
+   "x": 912.85,
+   "z": 1312.43,
+   "yaw": -1.98,
+   "data": {
+    "town": "last_lantern",
+    "want": "study",
+    "district": "residential",
+    "w": 11.35,
+    "d": 9.51,
+    "angle": 1.98,
+    "front": 3.5508,
+    "streetGap": -0.4,
+    "office": "study",
+    "role": "unbinder",
+    "lit": false,
+    "label": "Unbinder's Study"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_9",
+   "x": 907.35,
+   "z": 1326.93,
+   "yaw": -1.98,
+   "data": {
+    "town": "last_lantern",
+    "want": "apothecary",
+    "district": "residential",
+    "w": 10.41,
+    "d": 8.06,
+    "angle": 1.98,
+    "front": 3.5508,
+    "streetGap": -0.4,
+    "office": "apothecary",
+    "role": "apothecary",
+    "lit": true,
+    "label": "Apothecary"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_10",
+   "x": 897.48,
+   "z": 1322.65,
+   "yaw": 1.1616,
+   "data": {
+    "town": "last_lantern",
+    "want": "stable",
+    "district": "craft",
+    "w": 10.41,
+    "d": 6.43,
+    "angle": 1.98,
+    "front": 6.6924,
+    "streetGap": -0.29,
+    "office": "stable",
+    "role": "stablehand",
+    "lit": true,
+    "label": "Stables"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_11",
+   "x": 915.14,
+   "z": 1345.81,
+   "yaw": -1.76,
+   "data": {
+    "town": "last_lantern",
+    "want": "house",
+    "district": "residential",
+    "w": 6.7,
+    "d": 11.12,
+    "angle": 1.76,
+    "front": 3.3308,
+    "streetGap": -0.05
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_12",
+   "x": 892.55,
+   "z": 1348.28,
+   "yaw": 2.9524,
+   "data": {
+    "town": "last_lantern",
+    "want": "house",
+    "district": "residential",
+    "w": 6.59,
+    "d": 8.22,
+    "angle": 1.76,
+    "front": 4.9016,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_13",
+   "x": 867.02,
+   "z": 1291.61,
+   "yaw": 0.9474,
+   "data": {
+    "town": "last_lantern",
+    "want": "hall",
+    "district": "civic",
+    "w": 12.71,
+    "d": 12.74,
+    "angle": 2.1942,
+    "front": 6.9066,
+    "streetGap": -0.4,
+    "office": "hall",
+    "role": "elder",
+    "lit": false,
+    "label": "Town Hall"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_14",
+   "x": 877.12,
+   "z": 1316.68,
+   "yaw": -0.4034,
+   "data": {
+    "town": "last_lantern",
+    "want": "inn",
+    "district": "civic",
+    "w": 8.94,
+    "d": 5.25,
+    "angle": 1.9742,
+    "front": 1.9742,
+    "streetGap": -0.17,
+    "office": "inn",
+    "role": "innkeeper",
+    "lit": true,
+    "label": "Inn"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_15",
+   "x": 865.41,
+   "z": 1311.68,
+   "yaw": 1.1674,
+   "data": {
+    "town": "last_lantern",
+    "want": "forge",
+    "district": "civic",
+    "w": 8.94,
+    "d": 12.66,
+    "angle": 1.9742,
+    "front": 6.6866,
+    "streetGap": -0.4,
+    "office": "forge",
+    "role": "smith",
+    "lit": true,
+    "label": "Smithy"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_16",
+   "x": 871,
+   "z": 1326.76,
+   "yaw": -0.4034,
+   "data": {
+    "town": "last_lantern",
+    "want": "shop",
+    "district": "craft",
+    "w": 6.3,
+    "d": 8.58,
+    "angle": 1.9742,
+    "front": 1.9742,
+    "streetGap": -0.4,
+    "office": "shop",
+    "role": "merchant",
+    "lit": true,
+    "label": "General Goods"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_17",
+   "x": 866.54,
+   "z": 1337.22,
+   "yaw": -1.9742,
+   "data": {
+    "town": "last_lantern",
+    "want": "house",
+    "district": "residential",
+    "w": 9,
+    "d": 8.58,
+    "angle": 1.9742,
+    "front": 3.545,
+    "streetGap": -0.18
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_18",
+   "x": 857.99,
+   "z": 1324.16,
+   "yaw": -0.4034,
+   "data": {
+    "town": "last_lantern",
+    "want": "barber",
+    "district": "craft",
+    "w": 11.73,
+    "d": 8.8,
+    "angle": 1.9742,
+    "front": 1.9742,
+    "streetGap": -0.24,
+    "office": "barber",
+    "role": "barber",
+    "lit": true,
+    "label": "Barber"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_19",
+   "x": 852.49,
+   "z": 1304.69,
+   "yaw": 1.1674,
+   "data": {
+    "town": "last_lantern",
+    "want": "temple",
+    "district": "craft",
+    "w": 6.24,
+    "d": 6.46,
+    "angle": 1.9742,
+    "front": 6.6866,
+    "streetGap": 0.25,
+    "office": "temple",
+    "role": "healer",
+    "lit": false,
+    "label": "Temple"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "last_lantern_plot_20",
+   "x": 850.04,
+   "z": 1310.43,
+   "yaw": 1.1674,
+   "data": {
+    "town": "last_lantern",
+    "want": "counting_house",
+    "district": "craft",
+    "w": 6.24,
+    "d": 6.46,
+    "angle": 1.9742,
+    "front": 6.6866,
+    "streetGap": -0.07,
+    "office": "counting_house",
+    "role": "broker",
+    "lit": false,
+    "label": "Counting House"
+   }
+  },
+  {
+   "kind": "town_square",
+   "id": "thornwick_square",
+   "x": 1768.49,
+   "z": 1899.95,
+   "yaw": 0,
+   "data": {
+    "r": 4.13,
+    "town": "thornwick",
+    "culture": "halfling",
+    "stalls": [
+     [
+      1772.74,
+      1905.57
+     ],
+     [
+      1763.33,
+      1893.12
+     ],
+     [
+      1765.74,
+      1906.44
+     ],
+     [
+      1778.22,
+      1897.42
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_0",
+   "x": 1746.53,
+   "z": 1927.8,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      1746.53,
+      1927.8
+     ],
+     [
+      1778.59,
+      1911.77
+     ],
+     [
+      1809.01,
+      1892.81
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_1",
+   "x": 1790.08,
+   "z": 1928.84,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      1790.08,
+      1928.84
+     ],
+     [
+      1787.94,
+      1922.46
+     ],
+     [
+      1785.74,
+      1916.11
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_2",
+   "x": 1778.88,
+   "z": 1931.9,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1778.88,
+      1931.9
+     ],
+     [
+      1776.94,
+      1926.07
+     ],
+     [
+      1774.32,
+      1920.51
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_3",
+   "x": 1765.85,
+   "z": 1932.56,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1765.85,
+      1932.56
+     ],
+     [
+      1770.44,
+      1930.14
+     ],
+     [
+      1774.77,
+      1927.31
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_4",
+   "x": 1773.1,
+   "z": 1933.2,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1773.1,
+      1933.2
+     ],
+     [
+      1772.35,
+      1931.96
+     ],
+     [
+      1771.64,
+      1930.71
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_5",
+   "x": 1769.14,
+   "z": 1929.07,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1769.14,
+      1929.07
+     ],
+     [
+      1767.77,
+      1926.88
+     ],
+     [
+      1766.52,
+      1924.62
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_6",
+   "x": 1778.13,
+   "z": 1925.01,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1778.13,
+      1925.01
+     ],
+     [
+      1781.51,
+      1924.08
+     ],
+     [
+      1784.78,
+      1922.86
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_7",
+   "x": 1801.71,
+   "z": 1923.21,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1801.71,
+      1923.21
+     ],
+     [
+      1801.17,
+      1918.47
+     ],
+     [
+      1800.03,
+      1913.06
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_8",
+   "x": 1791.03,
+   "z": 1919.95,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1791.03,
+      1919.95
+     ],
+     [
+      1795.1,
+      1919.23
+     ],
+     [
+      1799.06,
+      1918.06
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_9",
+   "x": 1764.2,
+   "z": 1911.96,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      1764.2,
+      1911.96
+     ],
+     [
+      1754.17,
+      1893.17
+     ],
+     [
+      1742.58,
+      1876.43
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_10",
+   "x": 1734.31,
+   "z": 1900.73,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1734.31,
+      1900.73
+     ],
+     [
+      1739.39,
+      1896.73
+     ],
+     [
+      1744.44,
+      1891.8
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_11",
+   "x": 1743.19,
+   "z": 1910.5,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1743.19,
+      1910.5
+     ],
+     [
+      1748.25,
+      1907.82
+     ],
+     [
+      1753.02,
+      1904.66
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_12",
+   "x": 1751.05,
+   "z": 1911.11,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1751.05,
+      1911.11
+     ],
+     [
+      1750.25,
+      1909.74
+     ],
+     [
+      1749.43,
+      1908.39
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_13",
+   "x": 1748.01,
+   "z": 1906.04,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1748.01,
+      1906.04
+     ],
+     [
+      1745.67,
+      1901.81
+     ],
+     [
+      1743.08,
+      1897.73
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_14",
+   "x": 1739.75,
+   "z": 1893.53,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1739.75,
+      1893.53
+     ],
+     [
+      1736.7,
+      1890.54
+     ],
+     [
+      1735.79,
+      1889.5
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_15",
+   "x": 1784.59,
+   "z": 1898.26,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1784.59,
+      1898.26
+     ],
+     [
+      1774.04,
+      1880.97
+     ],
+     [
+      1765.26,
+      1862.91
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_16",
+   "x": 1758.69,
+   "z": 1892.55,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1758.69,
+      1892.55
+     ],
+     [
+      1765.59,
+      1887.81
+     ],
+     [
+      1772.68,
+      1883.35
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_17",
+   "x": 1775.16,
+   "z": 1899.96,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1775.16,
+      1899.96
+     ],
+     [
+      1771.04,
+      1894.31
+     ],
+     [
+      1767.48,
+      1888.28
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_18",
+   "x": 1762.32,
+   "z": 1898.07,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1762.32,
+      1898.07
+     ],
+     [
+      1765.87,
+      1895.96
+     ],
+     [
+      1769.22,
+      1893.54
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_19",
+   "x": 1773.89,
+   "z": 1895.41,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1773.89,
+      1895.41
+     ],
+     [
+      1776.31,
+      1893.98
+     ],
+     [
+      1778.58,
+      1892.32
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_20",
+   "x": 1754.53,
+   "z": 1886.22,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1754.53,
+      1886.22
+     ],
+     [
+      1761.64,
+      1881.8
+     ],
+     [
+      1768.52,
+      1877.02
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_21",
+   "x": 1766.05,
+   "z": 1886.19,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1766.05,
+      1886.19
+     ],
+     [
+      1764.75,
+      1884.06
+     ],
+     [
+      1763.31,
+      1882.02
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_22",
+   "x": 1760.06,
+   "z": 1881.01,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1760.06,
+      1881.01
+     ],
+     [
+      1757.07,
+      1876.63
+     ],
+     [
+      1754.23,
+      1872.15
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_23",
+   "x": 1751.19,
+   "z": 1881.15,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1751.19,
+      1881.15
+     ],
+     [
+      1753.8,
+      1879.38
+     ],
+     [
+      1756.45,
+      1877.69
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_24",
+   "x": 1757.07,
+   "z": 1874.29,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1757.07,
+      1874.29
+     ],
+     [
+      1760.49,
+      1872.15
+     ],
+     [
+      1763.81,
+      1869.85
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_25",
+   "x": 1777.36,
+   "z": 1875.52,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1777.36,
+      1875.52
+     ],
+     [
+      1785,
+      1873.07
+     ],
+     [
+      1792.35,
+      1869.86
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_26",
+   "x": 1782.02,
+   "z": 1887.85,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1782.02,
+      1887.85
+     ],
+     [
+      1789.6,
+      1885.24
+     ],
+     [
+      1797.01,
+      1882.19
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_27",
+   "x": 1789.21,
+   "z": 1890.37,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1789.21,
+      1890.37
+     ],
+     [
+      1788.62,
+      1888.69
+     ],
+     [
+      1787.95,
+      1887.04
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_28",
+   "x": 1790.31,
+   "z": 1883.29,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1790.31,
+      1883.29
+     ],
+     [
+      1788.28,
+      1878.53
+     ],
+     [
+      1786.65,
+      1873.62
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_29",
+   "x": 1780.17,
+   "z": 1882.95,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1780.17,
+      1882.95
+     ],
+     [
+      1783.94,
+      1881.54
+     ],
+     [
+      1787.69,
+      1880.1
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_30",
+   "x": 1790.51,
+   "z": 1880.08,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1790.51,
+      1880.08
+     ],
+     [
+      1792.95,
+      1878.99
+     ],
+     [
+      1795.5,
+      1878.2
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_31",
+   "x": 1783.39,
+   "z": 1871.63,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1783.39,
+      1871.63
+     ],
+     [
+      1780.96,
+      1865.94
+     ],
+     [
+      1780.04,
+      1863.17
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_32",
+   "x": 1774.89,
+   "z": 1868.98,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1774.89,
+      1868.98
+     ],
+     [
+      1777.54,
+      1867.99
+     ],
+     [
+      1780.18,
+      1866.98
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_33",
+   "x": 1782.87,
+   "z": 1866.41,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1782.87,
+      1866.41
+     ],
+     [
+      1786.35,
+      1865.14
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_34",
+   "x": 1782.02,
+   "z": 1887.85,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1782.02,
+      1887.85
+     ],
+     [
+      1779.27,
+      1889.53
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_35",
+   "x": 1754.17,
+   "z": 1893.17,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1754.17,
+      1893.17
+     ],
+     [
+      1758.69,
+      1892.55
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_36",
+   "x": 1753.02,
+   "z": 1904.66,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1753.02,
+      1904.66
+     ],
+     [
+      1758.69,
+      1901.64
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_37",
+   "x": 1739.39,
+   "z": 1896.73,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1739.39,
+      1896.73
+     ],
+     [
+      1743.08,
+      1897.73
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_38",
+   "x": 1778.59,
+   "z": 1911.77,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1778.59,
+      1911.77
+     ],
+     [
+      1775.16,
+      1899.96
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_39",
+   "x": 1774.32,
+   "z": 1920.51,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1774.32,
+      1920.51
+     ],
+     [
+      1771.68,
+      1915.23
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "thornwick_street_40",
+   "x": 1791.03,
+   "z": 1919.95,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1791.03,
+      1919.95
+     ],
+     [
+      1787.49,
+      1921.17
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "building",
+   "id": "thornwick_plot_0",
+   "x": 1742.25,
+   "z": 1903.84,
+   "yaw": 2.1061,
+   "data": {
+    "town": "thornwick",
+    "want": "house",
+    "district": "residential",
+    "w": 8.47,
+    "d": 3.97,
+    "angle": 4.177,
+    "front": 5.7478,
+    "streetGap": -0.11
+   }
+  },
+  {
+   "kind": "building",
+   "id": "thornwick_plot_1",
+   "x": 1773.29,
+   "z": 1889.39,
+   "yaw": -2.5601,
+   "data": {
+    "town": "thornwick",
+    "want": "inn",
+    "district": "civic",
+    "w": 7.04,
+    "d": 4.42,
+    "angle": 4.1309,
+    "front": 4.1309,
+    "streetGap": -0.18,
+    "office": "inn",
+    "role": "innkeeper",
+    "lit": true,
+    "label": "Inn"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "thornwick_plot_2",
+   "x": 1760.15,
+   "z": 1887.08,
+   "yaw": 0.5815,
+   "data": {
+    "town": "thornwick",
+    "want": "shop",
+    "district": "craft",
+    "w": 3.8,
+    "d": 7.25,
+    "angle": 4.1309,
+    "front": 7.2725,
+    "streetGap": -0.32,
+    "office": "shop",
+    "role": "merchant",
+    "lit": true,
+    "label": "General Goods"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "thornwick_plot_3",
+   "x": 1768.14,
+   "z": 1881.83,
+   "yaw": -0.9893,
+   "data": {
+    "town": "thornwick",
+    "want": "hut",
+    "district": "craft",
+    "w": 3.8,
+    "d": 4.71,
+    "angle": 4.1309,
+    "front": 8.8433,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "thornwick_plot_4",
+   "x": 1751.9,
+   "z": 1876.5,
+   "yaw": 0.5815,
+   "data": {
+    "town": "thornwick",
+    "want": "house",
+    "district": "residential",
+    "w": 3.5,
+    "d": 5.09,
+    "angle": 4.1309,
+    "front": 7.2725,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "thornwick_plot_5",
+   "x": 1762.76,
+   "z": 1875.6,
+   "yaw": -2.5601,
+   "data": {
+    "town": "thornwick",
+    "want": "mill",
+    "district": "residential",
+    "w": 4.87,
+    "d": 6.87,
+    "angle": 4.1309,
+    "front": 4.1309,
+    "streetGap": -0.4,
+    "office": "mill",
+    "role": "miller",
+    "lit": false,
+    "label": "Mill"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "thornwick_plot_6",
+   "x": 1782.6,
+   "z": 1878,
+   "yaw": 0.3615,
+   "data": {
+    "town": "thornwick",
+    "want": "granary",
+    "district": "residential",
+    "w": 4.12,
+    "d": 6.84,
+    "angle": 4.3509,
+    "front": 7.4925,
+    "streetGap": -0.38,
+    "office": "granary",
+    "role": "farmer",
+    "lit": false,
+    "label": "Granary"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "thornwick_plot_7",
+   "x": 1791.47,
+   "z": 1875.09,
+   "yaw": 0.3615,
+   "data": {
+    "town": "thornwick",
+    "want": "house",
+    "district": "residential",
+    "w": 4.95,
+    "d": 4.14,
+    "angle": 4.3509,
+    "front": 7.4925,
+    "streetGap": -0.4
    }
   },
   {
@@ -2630,6 +5426,8389 @@
       254.8
      ]
     ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_link_last_lantern",
+   "x": 860.48,
+   "z": 1390.02,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      860.48,
+      1390.02,
+      1080.09
+     ],
+     [
+      857.38,
+      1398.94,
+      1079.72
+     ],
+     [
+      851.03,
+      1419.2,
+      1078.7
+     ],
+     [
+      845.59,
+      1438.86,
+      1077.6
+     ],
+     [
+      841.06,
+      1457.91,
+      1076.71
+     ],
+     [
+      837.44,
+      1476.34,
+      1075.86
+     ],
+     [
+      834.72,
+      1494.17,
+      1075.32
+     ],
+     [
+      832.91,
+      1511.39,
+      1074.96
+     ],
+     [
+      832,
+      1528,
+      1074.67
+     ],
+     [
+      832,
+      1544,
+      1074.45
+     ],
+     [
+      832,
+      1560,
+      1074.27
+     ],
+     [
+      832,
+      1576,
+      1074.05
+     ],
+     [
+      832,
+      1592,
+      1073.74
+     ],
+     [
+      832,
+      1608,
+      1073.3
+     ],
+     [
+      832,
+      1624,
+      1072.74
+     ],
+     [
+      832,
+      1640,
+      1072.34
+     ],
+     [
+      832,
+      1656,
+      1072.16
+     ],
+     [
+      832,
+      1672,
+      1072.08
+     ],
+     [
+      832,
+      1688,
+      1072.52
+     ],
+     [
+      832,
+      1704,
+      1073.24
+     ],
+     [
+      832,
+      1720,
+      1074.29
+     ],
+     [
+      832,
+      1736,
+      1075.28
+     ],
+     [
+      832,
+      1752,
+      1075.93
+     ],
+     [
+      832,
+      1768,
+      1076.2
+     ],
+     [
+      832,
+      1784,
+      1075.96
+     ],
+     [
+      832,
+      1800,
+      1074.71
+     ],
+     [
+      834,
+      1816,
+      1072.7
+     ],
+     [
+      838,
+      1832,
+      1069.77
+     ],
+     [
+      844,
+      1848,
+      1066.51
+     ],
+     [
+      852,
+      1864,
+      1063.22
+     ],
+     [
+      862,
+      1880,
+      1060.17
+     ],
+     [
+      874,
+      1896,
+      1057.44
+     ],
+     [
+      888,
+      1912,
+      1055.36
+     ],
+     [
+      904,
+      1928,
+      1053.8
+     ],
+     [
+      920,
+      1942,
+      1052.67
+     ],
+     [
+      936,
+      1954,
+      1051.83
+     ],
+     [
+      952,
+      1964,
+      1051.13
+     ],
+     [
+      968,
+      1972,
+      1050.26
+     ],
+     [
+      984,
+      1978,
+      1049.45
+     ],
+     [
+      1000,
+      1982,
+      1048.62
+     ],
+     [
+      1016,
+      1984,
+      1047.91
+     ],
+     [
+      1032,
+      1984,
+      1047.39
+     ],
+     [
+      1048,
+      1984,
+      1047.15
+     ],
+     [
+      1064,
+      1984,
+      1047.12
+     ],
+     [
+      1080,
+      1984,
+      1047.12
+     ],
+     [
+      1096,
+      1984,
+      1046.94
+     ],
+     [
+      1112,
+      1984,
+      1046.84
+     ],
+     [
+      1128,
+      1984,
+      1046.55
+     ],
+     [
+      1144,
+      1984,
+      1046.08
+     ],
+     [
+      1160,
+      1984,
+      1045.28
+     ],
+     [
+      1176,
+      1986,
+      1044.26
+     ],
+     [
+      1192,
+      1990,
+      1043.44
+     ],
+     [
+      1208,
+      1996,
+      1042.57
+     ],
+     [
+      1224,
+      2004,
+      1041.44
+     ],
+     [
+      1240,
+      2014,
+      1040.26
+     ],
+     [
+      1256,
+      2026,
+      1039.49
+     ],
+     [
+      1272,
+      2040,
+      1038.88
+     ],
+     [
+      1288,
+      2056,
+      1038.23
+     ],
+     [
+      1304,
+      2072,
+      1037.25
+     ],
+     [
+      1320,
+      2088,
+      1036.16
+     ],
+     [
+      1336,
+      2104,
+      1034.95
+     ],
+     [
+      1352,
+      2120,
+      1033.79
+     ],
+     [
+      1368,
+      2136,
+      1032.18
+     ],
+     [
+      1384,
+      2152,
+      1030.7
+     ],
+     [
+      1400,
+      2168,
+      1029.5
+     ],
+     [
+      1416,
+      2184,
+      1028.75
+     ],
+     [
+      1432.88,
+      2198,
+      1028.35
+     ],
+     [
+      1450.63,
+      2210,
+      1028.33
+     ],
+     [
+      1469.25,
+      2220,
+      1028.26
+     ],
+     [
+      1488.75,
+      2228,
+      1028.33
+     ],
+     [
+      1509.13,
+      2234,
+      1028.24
+     ],
+     [
+      1530.38,
+      2238,
+      1028.01
+     ],
+     [
+      1552.5,
+      2240,
+      1027.66
+     ],
+     [
+      1575.5,
+      2240,
+      1027.37
+     ],
+     [
+      1595.63,
+      2240,
+      1026.85
+     ],
+     [
+      1612.88,
+      2240,
+      1026.35
+     ],
+     [
+      1627.25,
+      2240,
+      1025.97
+     ],
+     [
+      1638.75,
+      2240,
+      1025.66
+     ],
+     [
+      1647.38,
+      2240,
+      1025.53
+     ],
+     [
+      1653.13,
+      2240,
+      1025.35
+     ],
+     [
+      1656,
+      2240,
+      1024.88
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_door_1",
+   "x": 990,
+   "z": 1178,
+   "yaw": 0,
+   "data": {
+    "from": "door_1",
+    "to": "town:Last Lantern",
+    "width": 2.2,
+    "pts": [
+     [
+      990,
+      1178,
+      1107.35
+     ],
+     [
+      989.25,
+      1178.75,
+      1107.17
+     ],
+     [
+      987.5,
+      1180.5,
+      1106.7
+     ],
+     [
+      985.5,
+      1182.5,
+      1106.1
+     ],
+     [
+      983.5,
+      1184.5,
+      1105.61
+     ],
+     [
+      981.5,
+      1186.5,
+      1105.15
+     ],
+     [
+      979.5,
+      1188.5,
+      1104.72
+     ],
+     [
+      977.5,
+      1190.5,
+      1104.42
+     ],
+     [
+      975.5,
+      1192.5,
+      1104.17
+     ],
+     [
+      973.5,
+      1194.5,
+      1103.93
+     ],
+     [
+      971.5,
+      1196.5,
+      1103.55
+     ],
+     [
+      970.25,
+      1198.5,
+      1103.18
+     ],
+     [
+      970,
+      1200.5,
+      1102.97
+     ],
+     [
+      969.25,
+      1202.5,
+      1102.6
+     ],
+     [
+      967.5,
+      1204.5,
+      1101.87
+     ],
+     [
+      965.5,
+      1206.5,
+      1100.86
+     ],
+     [
+      963.5,
+      1208.5,
+      1099.73
+     ],
+     [
+      961.5,
+      1210.5,
+      1098.52
+     ],
+     [
+      959.5,
+      1212.5,
+      1097.02
+     ],
+     [
+      957.5,
+      1214.5,
+      1095.38
+     ],
+     [
+      955.5,
+      1216.5,
+      1093.78
+     ],
+     [
+      953.5,
+      1218.5,
+      1092.33
+     ],
+     [
+      951.5,
+      1220.5,
+      1091.07
+     ],
+     [
+      949.5,
+      1222.5,
+      1089.83
+     ],
+     [
+      947.5,
+      1224.5,
+      1088.7
+     ],
+     [
+      945.5,
+      1226.5,
+      1087.79
+     ],
+     [
+      943.5,
+      1228.5,
+      1087.2
+     ],
+     [
+      941.5,
+      1229.75,
+      1086.94
+     ],
+     [
+      939.5,
+      1230,
+      1086.84
+     ],
+     [
+      938.25,
+      1230,
+      1086.8
+     ],
+     [
+      938,
+      1230,
+      1086.8
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_world_grimtallow",
+   "x": 1062,
+   "z": 1306,
+   "yaw": 0,
+   "data": {
+    "from": "world_grimtallow",
+    "to": "town:Last Lantern",
+    "width": 2.2,
+    "pts": [
+     [
+      1062,
+      1306,
+      1088.27
+     ],
+     [
+      1061.25,
+      1305.25,
+      1088.57
+     ],
+     [
+      1059.5,
+      1303.5,
+      1089.11
+     ],
+     [
+      1057.5,
+      1301.5,
+      1089.64
+     ],
+     [
+      1055.5,
+      1299.5,
+      1090.2
+     ],
+     [
+      1053.5,
+      1298.25,
+      1090.49
+     ],
+     [
+      1051.5,
+      1298,
+      1090.54
+     ],
+     [
+      1049.5,
+      1298,
+      1090.63
+     ],
+     [
+      1047.5,
+      1298,
+      1090.62
+     ],
+     [
+      1045.5,
+      1298,
+      1090.49
+     ],
+     [
+      1043.5,
+      1298,
+      1090.42
+     ],
+     [
+      1041.5,
+      1298,
+      1090.42
+     ],
+     [
+      1039.5,
+      1298,
+      1090.41
+     ],
+     [
+      1037.5,
+      1298,
+      1090.35
+     ],
+     [
+      1035.5,
+      1298,
+      1090.28
+     ],
+     [
+      1033.5,
+      1298,
+      1090.19
+     ],
+     [
+      1031.5,
+      1298,
+      1090.11
+     ],
+     [
+      1029.5,
+      1298,
+      1090.16
+     ],
+     [
+      1027.5,
+      1298,
+      1090.24
+     ],
+     [
+      1025.5,
+      1298,
+      1090.2
+     ],
+     [
+      1023.5,
+      1298,
+      1090.17
+     ],
+     [
+      1021.5,
+      1298,
+      1090.21
+     ],
+     [
+      1019.5,
+      1298,
+      1090.14
+     ],
+     [
+      1017.5,
+      1298,
+      1089.92
+     ],
+     [
+      1015.5,
+      1298,
+      1089.65
+     ],
+     [
+      1013.5,
+      1298,
+      1089.34
+     ],
+     [
+      1011.5,
+      1298,
+      1088.94
+     ],
+     [
+      1009.5,
+      1298,
+      1088.49
+     ],
+     [
+      1007.5,
+      1298,
+      1088.07
+     ],
+     [
+      1005.5,
+      1298,
+      1087.72
+     ],
+     [
+      1003.5,
+      1298,
+      1087.35
+     ],
+     [
+      1001.5,
+      1298,
+      1086.88
+     ],
+     [
+      999.5,
+      1298,
+      1086.46
+     ],
+     [
+      997.5,
+      1298,
+      1086.15
+     ],
+     [
+      995.5,
+      1298,
+      1085.88
+     ],
+     [
+      993.5,
+      1298,
+      1085.61
+     ],
+     [
+      991.5,
+      1298,
+      1085.38
+     ],
+     [
+      989.5,
+      1298,
+      1085.18
+     ],
+     [
+      987.5,
+      1298,
+      1084.98
+     ],
+     [
+      985.5,
+      1298,
+      1084.82
+     ],
+     [
+      983.5,
+      1298,
+      1084.68
+     ],
+     [
+      981.5,
+      1298,
+      1084.57
+     ],
+     [
+      979.5,
+      1298,
+      1084.5
+     ],
+     [
+      978.25,
+      1298,
+      1084.48
+     ],
+     [
+      978,
+      1298,
+      1084.48
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_event_blackthorn_scar",
+   "x": 878,
+   "z": 1138,
+   "yaw": 0,
+   "data": {
+    "from": "event_blackthorn_scar",
+    "to": "town:Last Lantern",
+    "width": 2.2,
+    "pts": [
+     [
+      878,
+      1138,
+      1103.9
+     ],
+     [
+      878,
+      1138.75,
+      1103.74
+     ],
+     [
+      878,
+      1140.5,
+      1103.37
+     ],
+     [
+      878.75,
+      1142.5,
+      1102.9
+     ],
+     [
+      880.5,
+      1144.5,
+      1102.3
+     ],
+     [
+      882.5,
+      1146.5,
+      1101.8
+     ],
+     [
+      884.5,
+      1148.5,
+      1101.54
+     ],
+     [
+      886.5,
+      1150.5,
+      1101.25
+     ],
+     [
+      888.5,
+      1152.5,
+      1101.1
+     ],
+     [
+      889.75,
+      1154.5,
+      1100.98
+     ],
+     [
+      890,
+      1156.5,
+      1100.94
+     ],
+     [
+      890.75,
+      1158.5,
+      1100.95
+     ],
+     [
+      892.5,
+      1160.5,
+      1100.89
+     ],
+     [
+      894.5,
+      1162.5,
+      1100.73
+     ],
+     [
+      896.5,
+      1164.5,
+      1100.47
+     ],
+     [
+      897.75,
+      1166.5,
+      1100.1
+     ],
+     [
+      898,
+      1168.5,
+      1099.84
+     ],
+     [
+      898.75,
+      1170.5,
+      1099.65
+     ],
+     [
+      900.5,
+      1172.5,
+      1099.34
+     ],
+     [
+      902.5,
+      1174.5,
+      1098.72
+     ],
+     [
+      904.5,
+      1176.5,
+      1098.07
+     ],
+     [
+      905.75,
+      1178.5,
+      1097.45
+     ],
+     [
+      906,
+      1180.5,
+      1096.96
+     ],
+     [
+      906,
+      1182.5,
+      1096.44
+     ],
+     [
+      906,
+      1184.5,
+      1095.89
+     ],
+     [
+      906,
+      1186.5,
+      1095.28
+     ],
+     [
+      906,
+      1188.5,
+      1094.6
+     ],
+     [
+      906,
+      1190.5,
+      1093.81
+     ],
+     [
+      906,
+      1192.5,
+      1092.98
+     ],
+     [
+      906,
+      1194.5,
+      1092.22
+     ],
+     [
+      906,
+      1196.5,
+      1091.51
+     ],
+     [
+      906,
+      1198.5,
+      1090.75
+     ],
+     [
+      906,
+      1200.5,
+      1089.97
+     ],
+     [
+      906,
+      1202.5,
+      1089.23
+     ],
+     [
+      906,
+      1204.5,
+      1088.56
+     ],
+     [
+      906,
+      1206.5,
+      1087.96
+     ],
+     [
+      906,
+      1208.5,
+      1087.41
+     ],
+     [
+      906,
+      1210.5,
+      1087.01
+     ],
+     [
+      906,
+      1212.5,
+      1086.71
+     ],
+     [
+      906,
+      1214.5,
+      1086.51
+     ],
+     [
+      906,
+      1216.5,
+      1086.4
+     ],
+     [
+      906,
+      1217.75,
+      1086.37
+     ],
+     [
+      906,
+      1218,
+      1086.36
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_last_lantern_graveyard",
+   "x": 822,
+   "z": 1486,
+   "yaw": 0,
+   "data": {
+    "from": "last_lantern_graveyard",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      822,
+      1486,
+      1073.84
+     ],
+     [
+      822.75,
+      1486.75,
+      1073.92
+     ],
+     [
+      824.5,
+      1488.5,
+      1074.18
+     ],
+     [
+      826.5,
+      1490.5,
+      1074.4
+     ],
+     [
+      828.5,
+      1492.5,
+      1074.65
+     ],
+     [
+      830.5,
+      1493.75,
+      1074.99
+     ],
+     [
+      832.5,
+      1494,
+      1075.24
+     ],
+     [
+      833.75,
+      1494,
+      1075.28
+     ],
+     [
+      834,
+      1494,
+      1075.29
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_thornwick_graveyard",
+   "x": 1850,
+   "z": 1854,
+   "yaw": 0,
+   "data": {
+    "from": "thornwick_graveyard",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      1850,
+      1854,
+      1053.05
+     ],
+     [
+      1850.75,
+      1854.75,
+      1052.91
+     ],
+     [
+      1852.5,
+      1856.5,
+      1052.58
+     ],
+     [
+      1854.5,
+      1858.5,
+      1052.24
+     ],
+     [
+      1856.5,
+      1860.5,
+      1051.92
+     ],
+     [
+      1858.5,
+      1862.5,
+      1051.78
+     ],
+     [
+      1860.5,
+      1864.5,
+      1051.53
+     ],
+     [
+      1862.5,
+      1865.75,
+      1051.42
+     ],
+     [
+      1864.5,
+      1866,
+      1051.56
+     ],
+     [
+      1866.5,
+      1866.75,
+      1051.64
+     ],
+     [
+      1868.5,
+      1868.5,
+      1051.09
+     ],
+     [
+      1869.75,
+      1869.75,
+      1050.67
+     ],
+     [
+      1870,
+      1870,
+      1050.61
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_fort_blackthorn_scar_0",
+   "x": 826,
+   "z": 1802,
+   "yaw": 0,
+   "data": {
+    "from": "fort_blackthorn_scar_0",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      826,
+      1802,
+      1075.92
+     ],
+     [
+      826.75,
+      1802,
+      1075.73
+     ],
+     [
+      828.5,
+      1802,
+      1075.22
+     ],
+     [
+      830.5,
+      1802,
+      1074.66
+     ],
+     [
+      832.5,
+      1802,
+      1074.59
+     ],
+     [
+      833.75,
+      1802,
+      1074.59
+     ],
+     [
+      834,
+      1802,
+      1074.59
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_farm_blackthorn_scar_0",
+   "x": 1026,
+   "z": 1270,
+   "yaw": 0,
+   "data": {
+    "from": "farm_blackthorn_scar_0",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      1026,
+      1270,
+      1093.38
+     ],
+     [
+      1026,
+      1270.75,
+      1093.25
+     ],
+     [
+      1026,
+      1272.5,
+      1093.01
+     ],
+     [
+      1026,
+      1274.5,
+      1092.91
+     ],
+     [
+      1026,
+      1276.5,
+      1092.79
+     ],
+     [
+      1026,
+      1278.5,
+      1092.62
+     ],
+     [
+      1026,
+      1280.5,
+      1092.41
+     ],
+     [
+      1026,
+      1282.5,
+      1092.25
+     ],
+     [
+      1026,
+      1284.5,
+      1092.12
+     ],
+     [
+      1026,
+      1286.5,
+      1091.91
+     ],
+     [
+      1026,
+      1288.5,
+      1091.63
+     ],
+     [
+      1026,
+      1290.5,
+      1091.37
+     ],
+     [
+      1026,
+      1292.5,
+      1091.12
+     ],
+     [
+      1026,
+      1294.5,
+      1090.86
+     ],
+     [
+      1026,
+      1296.5,
+      1090.52
+     ],
+     [
+      1026,
+      1297.75,
+      1090.27
+     ],
+     [
+      1026,
+      1298,
+      1090.22
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_farm_blackthorn_scar_1",
+   "x": 1706,
+   "z": 1934,
+   "yaw": 0,
+   "data": {
+    "from": "farm_blackthorn_scar_1",
+    "to": "town:Thornwick",
+    "width": 2.2,
+    "pts": [
+     [
+      1706,
+      1934,
+      1041.51
+     ],
+     [
+      1706.75,
+      1933.25,
+      1041.77
+     ],
+     [
+      1708.5,
+      1931.5,
+      1042.38
+     ],
+     [
+      1710.5,
+      1929.5,
+      1043.03
+     ],
+     [
+      1712.5,
+      1927.5,
+      1043.57
+     ],
+     [
+      1714.5,
+      1925.5,
+      1044.16
+     ],
+     [
+      1716.5,
+      1923.5,
+      1044.72
+     ],
+     [
+      1718.5,
+      1921.5,
+      1045.12
+     ],
+     [
+      1720.5,
+      1919.5,
+      1045.4
+     ],
+     [
+      1722.5,
+      1918.25,
+      1045.61
+     ],
+     [
+      1724.5,
+      1918,
+      1045.73
+     ],
+     [
+      1726.5,
+      1918,
+      1045.79
+     ],
+     [
+      1728.5,
+      1918,
+      1045.88
+     ],
+     [
+      1729.75,
+      1918,
+      1045.94
+     ],
+     [
+      1730,
+      1918,
+      1045.95
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_farm_blackthorn_scar_2",
+   "x": 726,
+   "z": 1402,
+   "yaw": 0,
+   "data": {
+    "from": "farm_blackthorn_scar_2",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      726,
+      1402,
+      1070.65
+     ],
+     [
+      726.75,
+      1402,
+      1070.67
+     ],
+     [
+      728.5,
+      1402,
+      1070.71
+     ],
+     [
+      730.5,
+      1402,
+      1070.73
+     ],
+     [
+      732.5,
+      1402,
+      1070.76
+     ],
+     [
+      734.5,
+      1402,
+      1070.89
+     ],
+     [
+      736.5,
+      1402,
+      1071.02
+     ],
+     [
+      738.5,
+      1402.75,
+      1071.1
+     ],
+     [
+      740.5,
+      1404.5,
+      1071.21
+     ],
+     [
+      742.5,
+      1406.5,
+      1071.32
+     ],
+     [
+      744.5,
+      1408.5,
+      1071.4
+     ],
+     [
+      746.5,
+      1409.75,
+      1071.57
+     ],
+     [
+      748.5,
+      1410,
+      1071.64
+     ],
+     [
+      750.5,
+      1410,
+      1071.69
+     ],
+     [
+      752.5,
+      1410,
+      1071.79
+     ],
+     [
+      754.5,
+      1410,
+      1071.83
+     ],
+     [
+      756.5,
+      1410,
+      1071.81
+     ],
+     [
+      758.5,
+      1410,
+      1071.87
+     ],
+     [
+      760.5,
+      1410,
+      1072
+     ],
+     [
+      762.5,
+      1410.75,
+      1072.16
+     ],
+     [
+      764.5,
+      1412.5,
+      1072.35
+     ],
+     [
+      766.5,
+      1414.5,
+      1072.58
+     ],
+     [
+      768.5,
+      1416.5,
+      1072.75
+     ],
+     [
+      770.5,
+      1418.5,
+      1072.97
+     ],
+     [
+      772.5,
+      1420.5,
+      1073.2
+     ],
+     [
+      774.5,
+      1422.5,
+      1073.34
+     ],
+     [
+      776.5,
+      1424.5,
+      1073.48
+     ],
+     [
+      778.5,
+      1426.5,
+      1073.5
+     ],
+     [
+      780.5,
+      1428.5,
+      1073.47
+     ],
+     [
+      782.5,
+      1430.5,
+      1073.58
+     ],
+     [
+      784.5,
+      1432.5,
+      1073.73
+     ],
+     [
+      786.5,
+      1434.5,
+      1073.98
+     ],
+     [
+      788.5,
+      1436.5,
+      1074.18
+     ],
+     [
+      790.5,
+      1437.75,
+      1074.36
+     ],
+     [
+      792.5,
+      1438,
+      1074.48
+     ],
+     [
+      794.5,
+      1438,
+      1074.66
+     ],
+     [
+      796.5,
+      1438,
+      1074.95
+     ],
+     [
+      798.5,
+      1438,
+      1075.18
+     ],
+     [
+      800.5,
+      1438,
+      1075.34
+     ],
+     [
+      802.5,
+      1438,
+      1075.54
+     ],
+     [
+      804.5,
+      1438,
+      1075.74
+     ],
+     [
+      806.5,
+      1438,
+      1075.91
+     ],
+     [
+      808.5,
+      1438,
+      1076.08
+     ],
+     [
+      810.5,
+      1438,
+      1076.24
+     ],
+     [
+      812.5,
+      1438,
+      1076.36
+     ],
+     [
+      814.5,
+      1438,
+      1076.46
+     ],
+     [
+      816.5,
+      1438,
+      1076.5
+     ],
+     [
+      818.5,
+      1438,
+      1076.5
+     ],
+     [
+      820.5,
+      1438,
+      1076.45
+     ],
+     [
+      822.5,
+      1438,
+      1076.37
+     ],
+     [
+      824.5,
+      1438,
+      1076.36
+     ],
+     [
+      826.5,
+      1438,
+      1076.49
+     ],
+     [
+      828.5,
+      1438,
+      1076.66
+     ],
+     [
+      830.5,
+      1438,
+      1076.77
+     ],
+     [
+      832.5,
+      1438,
+      1076.79
+     ],
+     [
+      834.5,
+      1438,
+      1076.79
+     ],
+     [
+      836.5,
+      1438,
+      1076.79
+     ],
+     [
+      838.5,
+      1438,
+      1076.79
+     ],
+     [
+      840.5,
+      1438,
+      1076.9
+     ],
+     [
+      842.5,
+      1438,
+      1077.32
+     ],
+     [
+      844.5,
+      1438,
+      1077.58
+     ],
+     [
+      845.75,
+      1438,
+      1077.6
+     ],
+     [
+      846,
+      1438,
+      1077.61
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_farm_blackthorn_scar_3",
+   "x": 1898,
+   "z": 1870,
+   "yaw": 0,
+   "data": {
+    "from": "farm_blackthorn_scar_3",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      1898,
+      1870,
+      1052.24
+     ],
+     [
+      1898,
+      1869.25,
+      1052.28
+     ],
+     [
+      1898,
+      1867.5,
+      1052.4
+     ],
+     [
+      1897.25,
+      1865.5,
+      1052.67
+     ],
+     [
+      1895.5,
+      1863.5,
+      1052.88
+     ],
+     [
+      1894.25,
+      1862.25,
+      1052.83
+     ],
+     [
+      1894,
+      1862,
+      1052.82
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_farm_blackthorn_scar_4",
+   "x": 814,
+   "z": 1134,
+   "yaw": 0,
+   "data": {
+    "from": "farm_blackthorn_scar_4",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      814,
+      1134,
+      1099.55
+     ],
+     [
+      814.75,
+      1134,
+      1099.61
+     ],
+     [
+      816.5,
+      1134,
+      1099.76
+     ],
+     [
+      818.5,
+      1134,
+      1100.01
+     ],
+     [
+      820.5,
+      1134,
+      1100.2
+     ],
+     [
+      822.5,
+      1134,
+      1100.36
+     ],
+     [
+      824.5,
+      1134,
+      1100.6
+     ],
+     [
+      826.5,
+      1134,
+      1100.97
+     ],
+     [
+      828.5,
+      1134,
+      1101.31
+     ],
+     [
+      830.5,
+      1134,
+      1101.6
+     ],
+     [
+      832.5,
+      1134,
+      1101.92
+     ],
+     [
+      834.5,
+      1133.25,
+      1102.47
+     ],
+     [
+      836.5,
+      1131.5,
+      1103.24
+     ],
+     [
+      838.5,
+      1130.25,
+      1103.89
+     ],
+     [
+      840.5,
+      1130,
+      1104.22
+     ],
+     [
+      842.5,
+      1130,
+      1104.45
+     ],
+     [
+      844.5,
+      1130,
+      1104.68
+     ],
+     [
+      846.5,
+      1130,
+      1104.92
+     ],
+     [
+      848.5,
+      1130,
+      1105.14
+     ],
+     [
+      850.5,
+      1130,
+      1105.32
+     ],
+     [
+      852.5,
+      1130,
+      1105.37
+     ],
+     [
+      854.5,
+      1130,
+      1105.36
+     ],
+     [
+      856.5,
+      1130,
+      1105.41
+     ],
+     [
+      858.5,
+      1130,
+      1105.51
+     ],
+     [
+      860.5,
+      1130,
+      1105.58
+     ],
+     [
+      862.5,
+      1130,
+      1105.65
+     ],
+     [
+      864.5,
+      1130,
+      1105.66
+     ],
+     [
+      866.5,
+      1130,
+      1105.63
+     ],
+     [
+      868.5,
+      1130,
+      1105.6
+     ],
+     [
+      870.5,
+      1130.75,
+      1105.47
+     ],
+     [
+      872.5,
+      1132.5,
+      1105.1
+     ],
+     [
+      874.5,
+      1134.5,
+      1104.74
+     ],
+     [
+      876.5,
+      1136.5,
+      1104.3
+     ],
+     [
+      877.75,
+      1137.75,
+      1103.96
+     ],
+     [
+      878,
+      1138,
+      1103.9
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_cave_blackthorn_scar_1",
+   "x": 478,
+   "z": 294,
+   "yaw": 0,
+   "data": {
+    "from": "cave_blackthorn_scar_1",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      478,
+      294,
+      878.81
+     ],
+     [
+      477.25,
+      294,
+      878.98
+     ],
+     [
+      475.5,
+      294,
+      879.39
+     ],
+     [
+      473.5,
+      294.75,
+      879.63
+     ],
+     [
+      471.5,
+      296.5,
+      879.65
+     ],
+     [
+      469.5,
+      297.75,
+      879.8
+     ],
+     [
+      467.5,
+      298,
+      880.32
+     ],
+     [
+      465.5,
+      298,
+      881.2
+     ],
+     [
+      463.5,
+      298,
+      882.08
+     ],
+     [
+      461.5,
+      298.75,
+      882.33
+     ],
+     [
+      459.5,
+      300.5,
+      881.9
+     ],
+     [
+      457.5,
+      302.5,
+      881.31
+     ],
+     [
+      455.5,
+      304.5,
+      880.74
+     ],
+     [
+      453.5,
+      306.5,
+      879.84
+     ],
+     [
+      451.5,
+      308.5,
+      878.47
+     ],
+     [
+      450.25,
+      310.5,
+      877.37
+     ],
+     [
+      450,
+      312.5,
+      876.43
+     ],
+     [
+      450,
+      314.5,
+      875.15
+     ],
+     [
+      450,
+      316.5,
+      873.52
+     ],
+     [
+      450,
+      318.5,
+      871.98
+     ],
+     [
+      450,
+      320.5,
+      870.52
+     ],
+     [
+      450,
+      322.5,
+      869.11
+     ],
+     [
+      450,
+      324.5,
+      867.96
+     ],
+     [
+      450,
+      326.5,
+      867.04
+     ],
+     [
+      450,
+      328.5,
+      866.18
+     ],
+     [
+      450,
+      330.5,
+      865.09
+     ],
+     [
+      450,
+      332.5,
+      863.63
+     ],
+     [
+      450,
+      334.5,
+      862.09
+     ],
+     [
+      450,
+      336.5,
+      860.74
+     ],
+     [
+      450,
+      338.5,
+      859.9
+     ],
+     [
+      450,
+      340.5,
+      859.38
+     ],
+     [
+      450.75,
+      342.5,
+      858.49
+     ],
+     [
+      452.5,
+      344.5,
+      856.98
+     ],
+     [
+      453.75,
+      346.5,
+      856.14
+     ],
+     [
+      454,
+      348.5,
+      855.65
+     ],
+     [
+      454,
+      350.5,
+      855.32
+     ],
+     [
+      454,
+      352.5,
+      855.03
+     ],
+     [
+      454.75,
+      354.5,
+      854.76
+     ],
+     [
+      456.5,
+      356.5,
+      853.93
+     ],
+     [
+      457.75,
+      358.5,
+      852.77
+     ],
+     [
+      458,
+      360.5,
+      852.18
+     ],
+     [
+      458,
+      362.5,
+      851.72
+     ],
+     [
+      458,
+      364.5,
+      851.12
+     ],
+     [
+      458.75,
+      366.5,
+      850.62
+     ],
+     [
+      460.5,
+      368.5,
+      850.09
+     ],
+     [
+      461.75,
+      370.5,
+      849.64
+     ],
+     [
+      462,
+      372.5,
+      849.47
+     ],
+     [
+      462,
+      374.5,
+      849.32
+     ],
+     [
+      462,
+      376.5,
+      849.4
+     ],
+     [
+      462,
+      378.5,
+      849.71
+     ],
+     [
+      462,
+      380.5,
+      849.92
+     ],
+     [
+      462,
+      382.5,
+      849.98
+     ],
+     [
+      462,
+      384.5,
+      849.91
+     ],
+     [
+      461.25,
+      386.5,
+      849.89
+     ],
+     [
+      459.5,
+      388.5,
+      850.18
+     ],
+     [
+      458.25,
+      390.5,
+      850.41
+     ],
+     [
+      458,
+      392.5,
+      850.43
+     ],
+     [
+      457.25,
+      394.5,
+      850.45
+     ],
+     [
+      455.5,
+      396.5,
+      850.45
+     ],
+     [
+      454.25,
+      398.5,
+      850.35
+     ],
+     [
+      454,
+      400.5,
+      850.16
+     ],
+     [
+      453.25,
+      402.5,
+      850.34
+     ],
+     [
+      451.5,
+      404.5,
+      850.82
+     ],
+     [
+      450.25,
+      406.5,
+      850.98
+     ],
+     [
+      450,
+      408.5,
+      850.88
+     ],
+     [
+      450,
+      410.5,
+      850.73
+     ],
+     [
+      450,
+      412.5,
+      850.53
+     ],
+     [
+      449.25,
+      414.5,
+      850.57
+     ],
+     [
+      447.5,
+      416.5,
+      851.16
+     ],
+     [
+      445.5,
+      418.5,
+      851.97
+     ],
+     [
+      443.5,
+      420.5,
+      852.53
+     ],
+     [
+      442.25,
+      422.5,
+      852.69
+     ],
+     [
+      442,
+      424.5,
+      852.74
+     ],
+     [
+      442,
+      426.5,
+      852.91
+     ],
+     [
+      442,
+      428.5,
+      853.21
+     ],
+     [
+      442,
+      430.5,
+      853.37
+     ],
+     [
+      442,
+      432.5,
+      853.2
+     ],
+     [
+      441.25,
+      434.5,
+      853.58
+     ],
+     [
+      439.5,
+      436.5,
+      854.87
+     ],
+     [
+      438.25,
+      438.5,
+      855.77
+     ],
+     [
+      438,
+      440.5,
+      855.93
+     ],
+     [
+      437.25,
+      442.5,
+      856.55
+     ],
+     [
+      435.5,
+      444.5,
+      857.66
+     ],
+     [
+      434.25,
+      446.5,
+      858.54
+     ],
+     [
+      434,
+      448.5,
+      858.85
+     ],
+     [
+      434,
+      450.5,
+      858.85
+     ],
+     [
+      434,
+      452.5,
+      858.74
+     ],
+     [
+      434,
+      454.5,
+      858.9
+     ],
+     [
+      434,
+      456.5,
+      859.09
+     ],
+     [
+      433.25,
+      458.5,
+      859.36
+     ],
+     [
+      431.5,
+      460.5,
+      860.25
+     ],
+     [
+      429.5,
+      462.5,
+      861.56
+     ],
+     [
+      427.5,
+      464.5,
+      862.57
+     ],
+     [
+      426.25,
+      466.5,
+      863.33
+     ],
+     [
+      426,
+      468.5,
+      864.06
+     ],
+     [
+      426,
+      470.5,
+      864.7
+     ],
+     [
+      426,
+      472.5,
+      865.38
+     ],
+     [
+      426,
+      474.5,
+      866.12
+     ],
+     [
+      426,
+      476.5,
+      866.74
+     ],
+     [
+      425.25,
+      478.5,
+      867.59
+     ],
+     [
+      423.5,
+      480.5,
+      868.88
+     ],
+     [
+      422.25,
+      482.5,
+      869.72
+     ],
+     [
+      422,
+      484.5,
+      870.14
+     ],
+     [
+      422,
+      486.5,
+      870.46
+     ],
+     [
+      422,
+      488.5,
+      870.78
+     ],
+     [
+      422,
+      490.5,
+      871.32
+     ],
+     [
+      422,
+      492.5,
+      872.15
+     ],
+     [
+      422,
+      494.5,
+      873.12
+     ],
+     [
+      422,
+      496.5,
+      874.04
+     ],
+     [
+      422,
+      498.5,
+      875.11
+     ],
+     [
+      422,
+      500.5,
+      876.42
+     ],
+     [
+      422,
+      502.5,
+      877.58
+     ],
+     [
+      422,
+      504.5,
+      878.53
+     ],
+     [
+      422,
+      506.5,
+      879.64
+     ],
+     [
+      422,
+      508.5,
+      880.68
+     ],
+     [
+      422.75,
+      510.5,
+      881.44
+     ],
+     [
+      424.5,
+      512.5,
+      882.41
+     ],
+     [
+      426.5,
+      514.5,
+      883.4
+     ],
+     [
+      428.5,
+      516.5,
+      884.27
+     ],
+     [
+      429.75,
+      518.5,
+      885.14
+     ],
+     [
+      430,
+      520.5,
+      885.95
+     ],
+     [
+      430.75,
+      522.5,
+      886.8
+     ],
+     [
+      432.5,
+      524.5,
+      887.51
+     ],
+     [
+      433.75,
+      526.5,
+      888.04
+     ],
+     [
+      434,
+      528.5,
+      888.43
+     ],
+     [
+      434,
+      530.5,
+      888.39
+     ],
+     [
+      434,
+      532.5,
+      888.29
+     ],
+     [
+      434.75,
+      534.5,
+      888.52
+     ],
+     [
+      436.5,
+      536.5,
+      888.88
+     ],
+     [
+      438.5,
+      538.5,
+      888.9
+     ],
+     [
+      440.5,
+      540.5,
+      888.54
+     ],
+     [
+      441.75,
+      542.5,
+      888.28
+     ],
+     [
+      442,
+      544.5,
+      888.37
+     ],
+     [
+      442.75,
+      546.5,
+      888.56
+     ],
+     [
+      444.5,
+      548.5,
+      889.03
+     ],
+     [
+      446.5,
+      550.5,
+      889.58
+     ],
+     [
+      448.5,
+      552.5,
+      889.43
+     ],
+     [
+      450.5,
+      554.5,
+      889
+     ],
+     [
+      452.5,
+      556.5,
+      887.93
+     ],
+     [
+      453.75,
+      558.5,
+      886.87
+     ],
+     [
+      454,
+      560.5,
+      886.49
+     ],
+     [
+      454.75,
+      562.5,
+      886
+     ],
+     [
+      456.5,
+      564.5,
+      885.04
+     ],
+     [
+      458.5,
+      566.5,
+      884.07
+     ],
+     [
+      460.5,
+      568.5,
+      883.4
+     ],
+     [
+      461.75,
+      570.5,
+      883.05
+     ],
+     [
+      462,
+      572.5,
+      883.13
+     ],
+     [
+      462,
+      574.5,
+      883.3
+     ],
+     [
+      462,
+      576.5,
+      883.51
+     ],
+     [
+      462,
+      578.5,
+      883.62
+     ],
+     [
+      462,
+      580.5,
+      883.66
+     ],
+     [
+      462,
+      582.5,
+      883.85
+     ],
+     [
+      462,
+      584.5,
+      884.27
+     ],
+     [
+      462,
+      586.5,
+      884.91
+     ],
+     [
+      462,
+      588.5,
+      885.49
+     ],
+     [
+      462,
+      590.5,
+      885.86
+     ],
+     [
+      462,
+      592.5,
+      886.11
+     ],
+     [
+      461.25,
+      594.5,
+      886.55
+     ],
+     [
+      459.5,
+      596.5,
+      887.4
+     ],
+     [
+      458.25,
+      598.5,
+      888.31
+     ],
+     [
+      458,
+      600.5,
+      889.07
+     ],
+     [
+      458,
+      602.5,
+      889.8
+     ],
+     [
+      458,
+      604.5,
+      890.29
+     ],
+     [
+      457.25,
+      606.5,
+      891.02
+     ],
+     [
+      455.5,
+      608.5,
+      892.1
+     ],
+     [
+      454.25,
+      610.5,
+      892.86
+     ],
+     [
+      454,
+      612.5,
+      893.24
+     ],
+     [
+      454,
+      614.5,
+      893.45
+     ],
+     [
+      454,
+      616.5,
+      893.56
+     ],
+     [
+      454,
+      618.5,
+      893.68
+     ],
+     [
+      454,
+      620.5,
+      893.94
+     ],
+     [
+      454,
+      622.5,
+      894.3
+     ],
+     [
+      454,
+      624.5,
+      894.75
+     ],
+     [
+      454,
+      626.5,
+      895.33
+     ],
+     [
+      454,
+      628.5,
+      896.02
+     ],
+     [
+      454,
+      630.5,
+      896.65
+     ],
+     [
+      454,
+      632.5,
+      897.17
+     ],
+     [
+      454,
+      634.5,
+      897.63
+     ],
+     [
+      454,
+      636.5,
+      898.01
+     ],
+     [
+      454,
+      638.5,
+      898.33
+     ],
+     [
+      454,
+      640.5,
+      898.49
+     ],
+     [
+      454,
+      642.5,
+      898.6
+     ],
+     [
+      454,
+      644.5,
+      898.78
+     ],
+     [
+      454,
+      646.5,
+      898.82
+     ],
+     [
+      454,
+      648.5,
+      898.75
+     ],
+     [
+      454,
+      650.5,
+      898.72
+     ],
+     [
+      454,
+      652.5,
+      898.78
+     ],
+     [
+      454,
+      654.5,
+      899
+     ],
+     [
+      454,
+      656.5,
+      899.25
+     ],
+     [
+      454,
+      658.5,
+      899.39
+     ],
+     [
+      454,
+      660.5,
+      899.67
+     ],
+     [
+      454,
+      662.5,
+      900.14
+     ],
+     [
+      454,
+      664.5,
+      900.82
+     ],
+     [
+      454,
+      666.5,
+      901.46
+     ],
+     [
+      454,
+      668.5,
+      901.78
+     ],
+     [
+      454,
+      670.5,
+      901.97
+     ],
+     [
+      454,
+      672.5,
+      902.22
+     ],
+     [
+      454.75,
+      674.5,
+      902.54
+     ],
+     [
+      456.5,
+      676.5,
+      903.11
+     ],
+     [
+      457.75,
+      678.5,
+      903.82
+     ],
+     [
+      458,
+      680.5,
+      904.41
+     ],
+     [
+      458.75,
+      682.5,
+      904.96
+     ],
+     [
+      460.5,
+      684.5,
+      905.69
+     ],
+     [
+      461.75,
+      686.5,
+      906.53
+     ],
+     [
+      462,
+      688.5,
+      907.15
+     ],
+     [
+      462,
+      690.5,
+      907.79
+     ],
+     [
+      462,
+      692.5,
+      908.46
+     ],
+     [
+      462,
+      694.5,
+      909.12
+     ],
+     [
+      462,
+      696.5,
+      909.72
+     ],
+     [
+      462,
+      698.5,
+      910.23
+     ],
+     [
+      462,
+      700.5,
+      910.86
+     ],
+     [
+      462,
+      702.5,
+      911.66
+     ],
+     [
+      462,
+      704.5,
+      912.5
+     ],
+     [
+      462,
+      706.5,
+      913.3
+     ],
+     [
+      462,
+      708.5,
+      914.04
+     ],
+     [
+      462,
+      710.5,
+      914.59
+     ],
+     [
+      462,
+      712.5,
+      914.93
+     ],
+     [
+      462.75,
+      714.5,
+      915.26
+     ],
+     [
+      464.5,
+      716.5,
+      916.12
+     ],
+     [
+      465.75,
+      718.5,
+      916.97
+     ],
+     [
+      466,
+      720.5,
+      917.51
+     ],
+     [
+      466,
+      722.5,
+      917.97
+     ],
+     [
+      466,
+      724.5,
+      918.39
+     ],
+     [
+      466,
+      726.5,
+      918.79
+     ],
+     [
+      466,
+      728.5,
+      919.28
+     ],
+     [
+      466,
+      730.5,
+      919.9
+     ],
+     [
+      466,
+      732.5,
+      920.63
+     ],
+     [
+      466,
+      734.5,
+      921.35
+     ],
+     [
+      466,
+      736.5,
+      922.01
+     ],
+     [
+      466,
+      738.5,
+      922.72
+     ],
+     [
+      466,
+      740.5,
+      923.43
+     ],
+     [
+      466,
+      742.5,
+      924
+     ],
+     [
+      466,
+      744.5,
+      924.57
+     ],
+     [
+      466.75,
+      746.5,
+      925.29
+     ],
+     [
+      468.5,
+      748.5,
+      926.06
+     ],
+     [
+      469.75,
+      750.5,
+      926.88
+     ],
+     [
+      470,
+      752.5,
+      927.46
+     ],
+     [
+      470.75,
+      754.5,
+      928.15
+     ],
+     [
+      472.5,
+      756.5,
+      929.28
+     ],
+     [
+      473.75,
+      758.5,
+      930.46
+     ],
+     [
+      474,
+      760.5,
+      931.41
+     ],
+     [
+      474,
+      762.5,
+      932.57
+     ],
+     [
+      474,
+      764.5,
+      933.81
+     ],
+     [
+      474,
+      766.5,
+      934.88
+     ],
+     [
+      474,
+      768.5,
+      935.97
+     ],
+     [
+      474,
+      770.5,
+      937.08
+     ],
+     [
+      474,
+      772.5,
+      938.04
+     ],
+     [
+      474.75,
+      774.5,
+      938.87
+     ],
+     [
+      476.5,
+      776.5,
+      940.15
+     ],
+     [
+      477.75,
+      778.5,
+      941.17
+     ],
+     [
+      478,
+      780.5,
+      941.86
+     ],
+     [
+      478,
+      782.5,
+      942.6
+     ],
+     [
+      478,
+      784.5,
+      943.46
+     ],
+     [
+      478,
+      786.5,
+      944.43
+     ],
+     [
+      478,
+      788.5,
+      945.57
+     ],
+     [
+      478,
+      790.5,
+      946.82
+     ],
+     [
+      478,
+      792.5,
+      948.16
+     ],
+     [
+      478,
+      794.5,
+      949.66
+     ],
+     [
+      478,
+      796.5,
+      951.14
+     ],
+     [
+      478,
+      798.5,
+      952.59
+     ],
+     [
+      478,
+      800.5,
+      954.27
+     ],
+     [
+      478,
+      802.5,
+      956.03
+     ],
+     [
+      478,
+      804.5,
+      957.59
+     ],
+     [
+      478,
+      806.5,
+      959.07
+     ],
+     [
+      478,
+      808.5,
+      960.65
+     ],
+     [
+      478,
+      810.5,
+      962.21
+     ],
+     [
+      478,
+      812.5,
+      963.38
+     ],
+     [
+      478,
+      814.5,
+      963.91
+     ],
+     [
+      478,
+      816.5,
+      964.32
+     ],
+     [
+      478,
+      818.5,
+      964.92
+     ],
+     [
+      478,
+      820.5,
+      965.78
+     ],
+     [
+      477.25,
+      822.5,
+      966.81
+     ],
+     [
+      475.5,
+      824.5,
+      967.77
+     ],
+     [
+      473.5,
+      826.5,
+      968.4
+     ],
+     [
+      471.5,
+      828.5,
+      969.09
+     ],
+     [
+      469.5,
+      830.5,
+      969.95
+     ],
+     [
+      467.5,
+      832.5,
+      970.56
+     ],
+     [
+      465.5,
+      834.5,
+      970.89
+     ],
+     [
+      463.5,
+      836.5,
+      970.91
+     ],
+     [
+      461.5,
+      838.5,
+      971.14
+     ],
+     [
+      459.5,
+      840.5,
+      971.78
+     ],
+     [
+      457.5,
+      842.5,
+      972.65
+     ],
+     [
+      455.5,
+      844.5,
+      973.57
+     ],
+     [
+      454.25,
+      846.5,
+      974.67
+     ],
+     [
+      454,
+      848.5,
+      975.5
+     ],
+     [
+      453.25,
+      850.5,
+      976.14
+     ],
+     [
+      451.5,
+      852.5,
+      976.95
+     ],
+     [
+      449.5,
+      853.75,
+      977.54
+     ],
+     [
+      447.5,
+      854,
+      977.91
+     ],
+     [
+      445.5,
+      854.75,
+      978.41
+     ],
+     [
+      443.5,
+      856.5,
+      979.29
+     ],
+     [
+      441.5,
+      858.5,
+      980.73
+     ],
+     [
+      439.5,
+      860.5,
+      982.42
+     ],
+     [
+      437.5,
+      862.5,
+      984.32
+     ],
+     [
+      435.5,
+      864.5,
+      986.65
+     ],
+     [
+      434.25,
+      866.5,
+      988.49
+     ],
+     [
+      434,
+      868.5,
+      989.58
+     ],
+     [
+      434,
+      870.5,
+      990.8
+     ],
+     [
+      434,
+      872.5,
+      992.29
+     ],
+     [
+      433.25,
+      874.5,
+      993.84
+     ],
+     [
+      431.5,
+      876.5,
+      995.54
+     ],
+     [
+      429.5,
+      878.5,
+      997.22
+     ],
+     [
+      427.5,
+      880.5,
+      998.91
+     ],
+     [
+      425.5,
+      882.5,
+      1000.8
+     ],
+     [
+      423.5,
+      884.5,
+      1002.83
+     ],
+     [
+      422.25,
+      886.5,
+      1004.52
+     ],
+     [
+      422,
+      888.5,
+      1005.78
+     ],
+     [
+      421.25,
+      890.5,
+      1007.33
+     ],
+     [
+      419.5,
+      892.5,
+      1009.55
+     ],
+     [
+      417.5,
+      894.5,
+      1011.97
+     ],
+     [
+      415.5,
+      896.5,
+      1014.37
+     ],
+     [
+      414.25,
+      898.5,
+      1016.21
+     ],
+     [
+      414,
+      900.5,
+      1017.53
+     ],
+     [
+      413.25,
+      902.5,
+      1018.97
+     ],
+     [
+      411.5,
+      904.5,
+      1020.63
+     ],
+     [
+      409.5,
+      906.5,
+      1022.67
+     ],
+     [
+      407.5,
+      908.5,
+      1024.7
+     ],
+     [
+      405.5,
+      910.5,
+      1026.93
+     ],
+     [
+      403.5,
+      912.5,
+      1029.25
+     ],
+     [
+      401.5,
+      913.75,
+      1031.03
+     ],
+     [
+      399.5,
+      914,
+      1032.18
+     ],
+     [
+      397.5,
+      914.75,
+      1033.68
+     ],
+     [
+      395.5,
+      916.5,
+      1035.63
+     ],
+     [
+      393.5,
+      918.5,
+      1037.4
+     ],
+     [
+      391.5,
+      920.5,
+      1039.16
+     ],
+     [
+      389.5,
+      922.5,
+      1040.95
+     ],
+     [
+      387.5,
+      924.5,
+      1042.89
+     ],
+     [
+      385.5,
+      926.5,
+      1044.82
+     ],
+     [
+      383.5,
+      928.5,
+      1046.44
+     ],
+     [
+      382.25,
+      930.5,
+      1047.73
+     ],
+     [
+      382,
+      932.5,
+      1048.58
+     ],
+     [
+      381.25,
+      934.5,
+      1049.31
+     ],
+     [
+      379.5,
+      936.5,
+      1050.22
+     ],
+     [
+      378.25,
+      938.5,
+      1051.16
+     ],
+     [
+      378,
+      940.5,
+      1051.77
+     ],
+     [
+      378,
+      942.5,
+      1052.35
+     ],
+     [
+      378,
+      944.5,
+      1053.03
+     ],
+     [
+      378,
+      946.5,
+      1053.75
+     ],
+     [
+      378,
+      948.5,
+      1054.5
+     ],
+     [
+      377.25,
+      950.5,
+      1055.47
+     ],
+     [
+      375.5,
+      952.5,
+      1056.77
+     ],
+     [
+      373.5,
+      954.5,
+      1058.12
+     ],
+     [
+      371.5,
+      956.5,
+      1059.23
+     ],
+     [
+      370.25,
+      958.5,
+      1060.15
+     ],
+     [
+      370,
+      960.5,
+      1060.94
+     ],
+     [
+      370,
+      962.5,
+      1061.88
+     ],
+     [
+      370,
+      964.5,
+      1062.83
+     ],
+     [
+      370,
+      966.5,
+      1063.75
+     ],
+     [
+      370,
+      968.5,
+      1064.81
+     ],
+     [
+      370,
+      970.5,
+      1065.86
+     ],
+     [
+      370,
+      972.5,
+      1066.74
+     ],
+     [
+      370,
+      974.5,
+      1067.63
+     ],
+     [
+      370,
+      976.5,
+      1068.63
+     ],
+     [
+      370,
+      978.5,
+      1069.59
+     ],
+     [
+      370,
+      980.5,
+      1070.44
+     ],
+     [
+      370,
+      982.5,
+      1071.18
+     ],
+     [
+      370,
+      984.5,
+      1071.8
+     ],
+     [
+      370,
+      986.5,
+      1072.48
+     ],
+     [
+      370,
+      988.5,
+      1073.2
+     ],
+     [
+      370,
+      990.5,
+      1073.94
+     ],
+     [
+      370,
+      992.5,
+      1074.82
+     ],
+     [
+      370.75,
+      994.5,
+      1075.7
+     ],
+     [
+      372.5,
+      996.5,
+      1076.76
+     ],
+     [
+      374.5,
+      998.5,
+      1077.73
+     ],
+     [
+      376.5,
+      1000.5,
+      1078.54
+     ],
+     [
+      378.5,
+      1002.5,
+      1079.44
+     ],
+     [
+      380.5,
+      1004.5,
+      1080.25
+     ],
+     [
+      381.75,
+      1006.5,
+      1080.82
+     ],
+     [
+      382,
+      1008.5,
+      1081.27
+     ],
+     [
+      382.75,
+      1010.5,
+      1081.79
+     ],
+     [
+      384.5,
+      1012.5,
+      1082.47
+     ],
+     [
+      385.75,
+      1014.5,
+      1082.99
+     ],
+     [
+      386,
+      1016.5,
+      1083.46
+     ],
+     [
+      386,
+      1018.5,
+      1084.08
+     ],
+     [
+      386,
+      1020.5,
+      1084.81
+     ],
+     [
+      386,
+      1022.5,
+      1085.53
+     ],
+     [
+      386,
+      1024.5,
+      1086.14
+     ],
+     [
+      386.75,
+      1026.5,
+      1086.79
+     ],
+     [
+      388.5,
+      1028.5,
+      1087.57
+     ],
+     [
+      389.75,
+      1030.5,
+      1088.21
+     ],
+     [
+      390,
+      1032.5,
+      1088.64
+     ],
+     [
+      390.75,
+      1034.5,
+      1089.1
+     ],
+     [
+      392.5,
+      1036.5,
+      1089.59
+     ],
+     [
+      393.75,
+      1038.5,
+      1090.2
+     ],
+     [
+      394,
+      1040.5,
+      1090.55
+     ],
+     [
+      394,
+      1042.5,
+      1090.6
+     ],
+     [
+      394,
+      1044.5,
+      1090.7
+     ],
+     [
+      394,
+      1046.5,
+      1091.06
+     ],
+     [
+      394,
+      1048.5,
+      1091.5
+     ],
+     [
+      394,
+      1050.5,
+      1091.9
+     ],
+     [
+      394,
+      1052.5,
+      1092.37
+     ],
+     [
+      394,
+      1054.5,
+      1092.84
+     ],
+     [
+      394,
+      1056.5,
+      1093.28
+     ],
+     [
+      394.75,
+      1058.5,
+      1093.94
+     ],
+     [
+      396.5,
+      1060.5,
+      1094.89
+     ],
+     [
+      397.75,
+      1062.5,
+      1095.9
+     ],
+     [
+      398,
+      1064.5,
+      1096.55
+     ],
+     [
+      398.75,
+      1066.5,
+      1097.23
+     ],
+     [
+      400.5,
+      1068.5,
+      1098.21
+     ],
+     [
+      402.5,
+      1070.5,
+      1099.34
+     ],
+     [
+      404.5,
+      1072.5,
+      1100.57
+     ],
+     [
+      406.5,
+      1074.5,
+      1101.8
+     ],
+     [
+      408.5,
+      1076.5,
+      1103.01
+     ],
+     [
+      410.5,
+      1078.5,
+      1104.17
+     ],
+     [
+      412.5,
+      1080.5,
+      1105.26
+     ],
+     [
+      414.5,
+      1082.5,
+      1105.96
+     ],
+     [
+      416.5,
+      1084.5,
+      1106.43
+     ],
+     [
+      418.5,
+      1086.5,
+      1106.9
+     ],
+     [
+      420.5,
+      1088.5,
+      1107.08
+     ],
+     [
+      422.5,
+      1090.5,
+      1107.24
+     ],
+     [
+      424.5,
+      1092.5,
+      1107.4
+     ],
+     [
+      426.5,
+      1094.5,
+      1107.7
+     ],
+     [
+      428.5,
+      1096.5,
+      1107.92
+     ],
+     [
+      430.5,
+      1098.5,
+      1107.98
+     ],
+     [
+      432.5,
+      1100.5,
+      1108.11
+     ],
+     [
+      434.5,
+      1102.5,
+      1108.5
+     ],
+     [
+      436.5,
+      1104.5,
+      1108.84
+     ],
+     [
+      438.5,
+      1106.5,
+      1109.17
+     ],
+     [
+      440.5,
+      1108.5,
+      1109.44
+     ],
+     [
+      441.75,
+      1110.5,
+      1109.5
+     ],
+     [
+      442,
+      1112.5,
+      1109.48
+     ],
+     [
+      442,
+      1114.5,
+      1109.5
+     ],
+     [
+      442,
+      1116.5,
+      1109.52
+     ],
+     [
+      442.75,
+      1118.5,
+      1109.62
+     ],
+     [
+      444.5,
+      1120.5,
+      1109.85
+     ],
+     [
+      446.5,
+      1122.5,
+      1110.07
+     ],
+     [
+      448.5,
+      1124.5,
+      1110.23
+     ],
+     [
+      450.5,
+      1126.5,
+      1110.24
+     ],
+     [
+      452.5,
+      1128.5,
+      1110.34
+     ],
+     [
+      454.5,
+      1130.5,
+      1110.52
+     ],
+     [
+      456.5,
+      1132.5,
+      1110.76
+     ],
+     [
+      458.5,
+      1134.5,
+      1110.88
+     ],
+     [
+      460.5,
+      1136.5,
+      1110.84
+     ],
+     [
+      462.5,
+      1138.5,
+      1110.84
+     ],
+     [
+      464.5,
+      1140.5,
+      1111.08
+     ],
+     [
+      466.5,
+      1142.5,
+      1111.25
+     ],
+     [
+      468.5,
+      1144.5,
+      1111.43
+     ],
+     [
+      470.5,
+      1145.75,
+      1111.64
+     ],
+     [
+      472.5,
+      1146,
+      1111.81
+     ],
+     [
+      474.5,
+      1146,
+      1112.06
+     ],
+     [
+      476.5,
+      1146,
+      1112.43
+     ],
+     [
+      478.5,
+      1146,
+      1112.8
+     ],
+     [
+      480.5,
+      1146,
+      1113.11
+     ],
+     [
+      482.5,
+      1146,
+      1113.31
+     ],
+     [
+      484.5,
+      1146,
+      1113.48
+     ],
+     [
+      486.5,
+      1146,
+      1113.66
+     ],
+     [
+      488.5,
+      1146,
+      1113.86
+     ],
+     [
+      490.5,
+      1146,
+      1114.05
+     ],
+     [
+      492.5,
+      1146,
+      1114.3
+     ],
+     [
+      494.5,
+      1146,
+      1114.57
+     ],
+     [
+      496.5,
+      1146,
+      1114.77
+     ],
+     [
+      498.5,
+      1146,
+      1114.9
+     ],
+     [
+      500.5,
+      1146,
+      1115.06
+     ],
+     [
+      502.5,
+      1146,
+      1115.17
+     ],
+     [
+      504.5,
+      1146,
+      1115.22
+     ],
+     [
+      506.5,
+      1146,
+      1115.27
+     ],
+     [
+      508.5,
+      1146,
+      1115.28
+     ],
+     [
+      510.5,
+      1146,
+      1115.34
+     ],
+     [
+      512.5,
+      1146,
+      1115.38
+     ],
+     [
+      514.5,
+      1146,
+      1115.37
+     ],
+     [
+      516.5,
+      1146,
+      1115.29
+     ],
+     [
+      518.5,
+      1146,
+      1115.17
+     ],
+     [
+      520.5,
+      1146,
+      1115.16
+     ],
+     [
+      522.5,
+      1146,
+      1115.19
+     ],
+     [
+      524.5,
+      1146,
+      1115.24
+     ],
+     [
+      526.5,
+      1146,
+      1115.19
+     ],
+     [
+      528.5,
+      1146,
+      1115.01
+     ],
+     [
+      530.5,
+      1146,
+      1114.8
+     ],
+     [
+      532.5,
+      1146,
+      1114.56
+     ],
+     [
+      534.5,
+      1146,
+      1114.26
+     ],
+     [
+      536.5,
+      1146,
+      1113.96
+     ],
+     [
+      538.5,
+      1146,
+      1113.73
+     ],
+     [
+      540.5,
+      1146,
+      1113.48
+     ],
+     [
+      542.5,
+      1146,
+      1113.17
+     ],
+     [
+      544.5,
+      1146,
+      1112.78
+     ],
+     [
+      546.5,
+      1146,
+      1112.35
+     ],
+     [
+      548.5,
+      1146,
+      1111.93
+     ],
+     [
+      550.5,
+      1146,
+      1111.6
+     ],
+     [
+      552.5,
+      1146,
+      1111.3
+     ],
+     [
+      554.5,
+      1146,
+      1110.97
+     ],
+     [
+      556.5,
+      1146,
+      1110.62
+     ],
+     [
+      558.5,
+      1146,
+      1110.41
+     ],
+     [
+      560.5,
+      1146,
+      1110.37
+     ],
+     [
+      562.5,
+      1146,
+      1110.35
+     ],
+     [
+      564.5,
+      1146,
+      1110.27
+     ],
+     [
+      566.5,
+      1146,
+      1110.09
+     ],
+     [
+      568.5,
+      1146,
+      1109.92
+     ],
+     [
+      570.5,
+      1146,
+      1109.72
+     ],
+     [
+      572.5,
+      1146,
+      1109.44
+     ],
+     [
+      574.5,
+      1146,
+      1109.13
+     ],
+     [
+      576.5,
+      1146,
+      1108.96
+     ],
+     [
+      578.5,
+      1146,
+      1108.79
+     ],
+     [
+      580.5,
+      1146,
+      1108.61
+     ],
+     [
+      582.5,
+      1146,
+      1108.39
+     ],
+     [
+      584.5,
+      1146,
+      1108.11
+     ],
+     [
+      586.5,
+      1146.75,
+      1107.74
+     ],
+     [
+      588.5,
+      1148.5,
+      1107.14
+     ],
+     [
+      590.5,
+      1150.5,
+      1106.31
+     ],
+     [
+      592.5,
+      1152.5,
+      1105.45
+     ],
+     [
+      594.5,
+      1153.75,
+      1104.79
+     ],
+     [
+      596.5,
+      1154,
+      1104.33
+     ],
+     [
+      598.5,
+      1154.75,
+      1103.8
+     ],
+     [
+      600.5,
+      1156.5,
+      1102.85
+     ],
+     [
+      602.5,
+      1157.75,
+      1102
+     ],
+     [
+      604.5,
+      1158,
+      1101.5
+     ],
+     [
+      606.5,
+      1158,
+      1101.03
+     ],
+     [
+      608.5,
+      1158,
+      1100.58
+     ],
+     [
+      610.5,
+      1158,
+      1100.2
+     ],
+     [
+      612.5,
+      1158,
+      1099.84
+     ],
+     [
+      614.5,
+      1158,
+      1099.34
+     ],
+     [
+      616.5,
+      1158,
+      1098.75
+     ],
+     [
+      618.5,
+      1158,
+      1098.24
+     ],
+     [
+      620.5,
+      1158,
+      1097.87
+     ],
+     [
+      622.5,
+      1158,
+      1097.52
+     ],
+     [
+      624.5,
+      1158,
+      1097.18
+     ],
+     [
+      626.5,
+      1158,
+      1096.89
+     ],
+     [
+      628.5,
+      1158,
+      1096.65
+     ],
+     [
+      630.5,
+      1158.75,
+      1096.39
+     ],
+     [
+      632.5,
+      1160.5,
+      1095.94
+     ],
+     [
+      634.5,
+      1161.75,
+      1095.47
+     ],
+     [
+      636.5,
+      1162,
+      1095.12
+     ],
+     [
+      638.5,
+      1162,
+      1094.84
+     ],
+     [
+      640.5,
+      1162,
+      1094.68
+     ],
+     [
+      642.5,
+      1162,
+      1094.56
+     ],
+     [
+      644.5,
+      1162,
+      1094.43
+     ],
+     [
+      646.5,
+      1162,
+      1094.35
+     ],
+     [
+      648.5,
+      1162,
+      1094.28
+     ],
+     [
+      650.5,
+      1162,
+      1094.19
+     ],
+     [
+      652.5,
+      1162,
+      1094.18
+     ],
+     [
+      654.5,
+      1162,
+      1094.12
+     ],
+     [
+      656.5,
+      1162,
+      1093.94
+     ],
+     [
+      658.5,
+      1162,
+      1093.77
+     ],
+     [
+      660.5,
+      1162,
+      1093.74
+     ],
+     [
+      662.5,
+      1162,
+      1093.79
+     ],
+     [
+      664.5,
+      1162,
+      1093.8
+     ],
+     [
+      666.5,
+      1162,
+      1093.75
+     ],
+     [
+      668.5,
+      1162,
+      1093.74
+     ],
+     [
+      670.5,
+      1162,
+      1093.78
+     ],
+     [
+      672.5,
+      1162,
+      1093.77
+     ],
+     [
+      674.5,
+      1162,
+      1093.69
+     ],
+     [
+      676.5,
+      1162,
+      1093.53
+     ],
+     [
+      678.5,
+      1162,
+      1093.36
+     ],
+     [
+      680.5,
+      1162,
+      1093.28
+     ],
+     [
+      682.5,
+      1162,
+      1093.23
+     ],
+     [
+      684.5,
+      1162,
+      1093.08
+     ],
+     [
+      686.5,
+      1162,
+      1092.94
+     ],
+     [
+      688.5,
+      1162,
+      1092.77
+     ],
+     [
+      690.5,
+      1162,
+      1092.55
+     ],
+     [
+      692.5,
+      1162,
+      1092.42
+     ],
+     [
+      694.5,
+      1162,
+      1092.44
+     ],
+     [
+      696.5,
+      1162,
+      1092.5
+     ],
+     [
+      698.5,
+      1162,
+      1092.57
+     ],
+     [
+      700.5,
+      1162,
+      1092.58
+     ],
+     [
+      702.5,
+      1161.25,
+      1092.54
+     ],
+     [
+      704.5,
+      1159.5,
+      1092.58
+     ],
+     [
+      706.5,
+      1157.5,
+      1092.79
+     ],
+     [
+      708.5,
+      1155.5,
+      1093.08
+     ],
+     [
+      710.5,
+      1153.5,
+      1093.24
+     ],
+     [
+      712.5,
+      1151.5,
+      1093.26
+     ],
+     [
+      714.5,
+      1150.25,
+      1093.27
+     ],
+     [
+      716.5,
+      1150,
+      1093.31
+     ],
+     [
+      718.5,
+      1150,
+      1093.36
+     ],
+     [
+      720.5,
+      1150,
+      1093.38
+     ],
+     [
+      722.5,
+      1149.25,
+      1093.47
+     ],
+     [
+      724.5,
+      1147.5,
+      1093.59
+     ],
+     [
+      726.5,
+      1146.25,
+      1093.61
+     ],
+     [
+      728.5,
+      1146,
+      1093.6
+     ],
+     [
+      730.5,
+      1146,
+      1093.66
+     ],
+     [
+      732.5,
+      1146,
+      1093.74
+     ],
+     [
+      734.5,
+      1146,
+      1093.81
+     ],
+     [
+      736.5,
+      1146,
+      1093.93
+     ],
+     [
+      738.5,
+      1146,
+      1094.01
+     ],
+     [
+      740.5,
+      1146,
+      1093.96
+     ],
+     [
+      742.5,
+      1146,
+      1093.91
+     ],
+     [
+      744.5,
+      1146,
+      1093.99
+     ],
+     [
+      746.5,
+      1146,
+      1094.12
+     ],
+     [
+      748.5,
+      1146,
+      1094.23
+     ],
+     [
+      750.5,
+      1146,
+      1094.39
+     ],
+     [
+      752.5,
+      1146,
+      1094.63
+     ],
+     [
+      754.5,
+      1146,
+      1094.88
+     ],
+     [
+      756.5,
+      1146,
+      1095.1
+     ],
+     [
+      758.5,
+      1146,
+      1095.36
+     ],
+     [
+      760.5,
+      1146,
+      1095.65
+     ],
+     [
+      762.5,
+      1146,
+      1095.86
+     ],
+     [
+      764.5,
+      1146,
+      1095.94
+     ],
+     [
+      766.5,
+      1146,
+      1096.02
+     ],
+     [
+      768.5,
+      1146,
+      1096.19
+     ],
+     [
+      770.5,
+      1146,
+      1096.4
+     ],
+     [
+      772.5,
+      1146,
+      1096.55
+     ],
+     [
+      774.5,
+      1146,
+      1096.71
+     ],
+     [
+      776.5,
+      1146,
+      1096.81
+     ],
+     [
+      778.5,
+      1146,
+      1096.85
+     ],
+     [
+      780.5,
+      1146,
+      1096.95
+     ],
+     [
+      782.5,
+      1146,
+      1097.12
+     ],
+     [
+      784.5,
+      1146,
+      1097.38
+     ],
+     [
+      786.5,
+      1146,
+      1097.7
+     ],
+     [
+      788.5,
+      1146,
+      1097.9
+     ],
+     [
+      790.5,
+      1146,
+      1097.99
+     ],
+     [
+      792.5,
+      1146,
+      1097.97
+     ],
+     [
+      794.5,
+      1146,
+      1097.95
+     ],
+     [
+      796.5,
+      1146,
+      1098.02
+     ],
+     [
+      798.5,
+      1146,
+      1098.04
+     ],
+     [
+      800.5,
+      1146,
+      1098.02
+     ],
+     [
+      802.5,
+      1145.25,
+      1098.07
+     ],
+     [
+      804.5,
+      1143.5,
+      1098.2
+     ],
+     [
+      806.5,
+      1141.5,
+      1098.49
+     ],
+     [
+      808.5,
+      1139.5,
+      1098.88
+     ],
+     [
+      810.5,
+      1137.5,
+      1099.16
+     ],
+     [
+      812.5,
+      1135.5,
+      1099.36
+     ],
+     [
+      813.75,
+      1134.25,
+      1099.52
+     ],
+     [
+      814,
+      1134,
+      1099.55
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_ws_z11_04_door",
+   "x": 986,
+   "z": 1170,
+   "yaw": 0,
+   "data": {
+    "from": "ws_z11_04_door",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      986,
+      1170,
+      1109.03
+     ],
+     [
+      986,
+      1170.75,
+      1108.74
+     ],
+     [
+      986,
+      1172.5,
+      1108.1
+     ],
+     [
+      986.75,
+      1174.5,
+      1107.65
+     ],
+     [
+      988.5,
+      1176.5,
+      1107.49
+     ],
+     [
+      989.75,
+      1177.75,
+      1107.38
+     ],
+     [
+      990,
+      1178,
+      1107.35
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_ws_z11_04_worldboss",
+   "x": 1266,
+   "z": 1262,
+   "yaw": 0,
+   "data": {
+    "from": "ws_z11_04_worldboss",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      1266,
+      1262,
+      1100.42
+     ],
+     [
+      1265.25,
+      1262,
+      1100.18
+     ],
+     [
+      1263.5,
+      1262,
+      1099.6
+     ],
+     [
+      1261.5,
+      1262,
+      1098.89
+     ],
+     [
+      1259.5,
+      1262,
+      1098.25
+     ],
+     [
+      1257.5,
+      1262,
+      1097.68
+     ],
+     [
+      1255.5,
+      1262,
+      1097.16
+     ],
+     [
+      1253.5,
+      1262,
+      1096.66
+     ],
+     [
+      1251.5,
+      1262,
+      1096.26
+     ],
+     [
+      1249.5,
+      1262.75,
+      1095.91
+     ],
+     [
+      1247.5,
+      1264.5,
+      1095.52
+     ],
+     [
+      1245.5,
+      1265.75,
+      1095.3
+     ],
+     [
+      1243.5,
+      1266,
+      1095.07
+     ],
+     [
+      1241.5,
+      1266,
+      1094.77
+     ],
+     [
+      1239.5,
+      1266,
+      1094.54
+     ],
+     [
+      1237.5,
+      1266,
+      1094.28
+     ],
+     [
+      1235.5,
+      1266,
+      1093.95
+     ],
+     [
+      1233.5,
+      1266,
+      1093.7
+     ],
+     [
+      1231.5,
+      1266,
+      1093.49
+     ],
+     [
+      1229.5,
+      1266,
+      1093.26
+     ],
+     [
+      1227.5,
+      1266,
+      1093.04
+     ],
+     [
+      1225.5,
+      1266,
+      1092.83
+     ],
+     [
+      1223.5,
+      1266,
+      1092.62
+     ],
+     [
+      1221.5,
+      1266,
+      1092.36
+     ],
+     [
+      1219.5,
+      1266,
+      1092.09
+     ],
+     [
+      1217.5,
+      1266,
+      1091.83
+     ],
+     [
+      1215.5,
+      1266,
+      1091.6
+     ],
+     [
+      1213.5,
+      1266,
+      1091.46
+     ],
+     [
+      1211.5,
+      1266,
+      1091.34
+     ],
+     [
+      1209.5,
+      1266,
+      1091.21
+     ],
+     [
+      1207.5,
+      1266,
+      1091.14
+     ],
+     [
+      1205.5,
+      1266,
+      1091.07
+     ],
+     [
+      1203.5,
+      1266,
+      1090.88
+     ],
+     [
+      1201.5,
+      1266,
+      1090.66
+     ],
+     [
+      1199.5,
+      1266,
+      1090.46
+     ],
+     [
+      1197.5,
+      1266,
+      1090.25
+     ],
+     [
+      1195.5,
+      1266,
+      1090.06
+     ],
+     [
+      1193.5,
+      1266,
+      1089.9
+     ],
+     [
+      1191.5,
+      1266,
+      1089.78
+     ],
+     [
+      1189.5,
+      1266,
+      1089.66
+     ],
+     [
+      1187.5,
+      1266,
+      1089.5
+     ],
+     [
+      1185.5,
+      1266.75,
+      1089.28
+     ],
+     [
+      1183.5,
+      1268.5,
+      1088.99
+     ],
+     [
+      1181.5,
+      1270.5,
+      1088.59
+     ],
+     [
+      1179.5,
+      1272.5,
+      1088.27
+     ],
+     [
+      1177.5,
+      1273.75,
+      1088.12
+     ],
+     [
+      1175.5,
+      1274,
+      1088.02
+     ],
+     [
+      1173.5,
+      1274,
+      1087.91
+     ],
+     [
+      1171.5,
+      1274,
+      1087.73
+     ],
+     [
+      1169.5,
+      1274,
+      1087.54
+     ],
+     [
+      1167.5,
+      1274,
+      1087.41
+     ],
+     [
+      1165.5,
+      1274,
+      1087.31
+     ],
+     [
+      1163.5,
+      1274,
+      1087.3
+     ],
+     [
+      1161.5,
+      1274,
+      1087.34
+     ],
+     [
+      1159.5,
+      1274,
+      1087.33
+     ],
+     [
+      1157.5,
+      1274,
+      1087.36
+     ],
+     [
+      1155.5,
+      1274,
+      1087.42
+     ],
+     [
+      1153.5,
+      1274,
+      1087.46
+     ],
+     [
+      1151.5,
+      1274,
+      1087.46
+     ],
+     [
+      1149.5,
+      1274,
+      1087.48
+     ],
+     [
+      1147.5,
+      1274,
+      1087.54
+     ],
+     [
+      1145.5,
+      1274,
+      1087.59
+     ],
+     [
+      1143.5,
+      1274,
+      1087.51
+     ],
+     [
+      1141.5,
+      1274,
+      1087.47
+     ],
+     [
+      1139.5,
+      1274,
+      1087.49
+     ],
+     [
+      1137.5,
+      1274.75,
+      1087.42
+     ],
+     [
+      1135.5,
+      1276.5,
+      1087.16
+     ],
+     [
+      1133.5,
+      1278.5,
+      1086.85
+     ],
+     [
+      1131.5,
+      1280.5,
+      1086.52
+     ],
+     [
+      1129.5,
+      1282.5,
+      1086.27
+     ],
+     [
+      1127.5,
+      1284.5,
+      1086.12
+     ],
+     [
+      1125.5,
+      1286.5,
+      1085.99
+     ],
+     [
+      1123.5,
+      1288.5,
+      1085.89
+     ],
+     [
+      1121.5,
+      1289.75,
+      1085.77
+     ],
+     [
+      1119.5,
+      1290,
+      1085.72
+     ],
+     [
+      1117.5,
+      1290,
+      1085.7
+     ],
+     [
+      1115.5,
+      1290,
+      1085.72
+     ],
+     [
+      1113.5,
+      1290,
+      1085.73
+     ],
+     [
+      1111.5,
+      1290,
+      1085.79
+     ],
+     [
+      1109.5,
+      1290,
+      1085.93
+     ],
+     [
+      1107.5,
+      1290,
+      1086.08
+     ],
+     [
+      1105.5,
+      1290,
+      1086.24
+     ],
+     [
+      1103.5,
+      1290,
+      1086.41
+     ],
+     [
+      1101.5,
+      1290.75,
+      1086.45
+     ],
+     [
+      1099.5,
+      1292.5,
+      1086.4
+     ],
+     [
+      1097.5,
+      1293.75,
+      1086.38
+     ],
+     [
+      1095.5,
+      1294,
+      1086.55
+     ],
+     [
+      1093.5,
+      1294,
+      1086.85
+     ],
+     [
+      1091.5,
+      1294,
+      1087.17
+     ],
+     [
+      1089.5,
+      1294,
+      1087.37
+     ],
+     [
+      1087.5,
+      1294,
+      1087.46
+     ],
+     [
+      1085.5,
+      1294,
+      1087.54
+     ],
+     [
+      1083.5,
+      1294,
+      1087.62
+     ],
+     [
+      1081.5,
+      1294,
+      1087.77
+     ],
+     [
+      1079.5,
+      1294,
+      1088.01
+     ],
+     [
+      1077.5,
+      1294,
+      1088.33
+     ],
+     [
+      1075.5,
+      1294,
+      1088.63
+     ],
+     [
+      1073.5,
+      1294.75,
+      1088.84
+     ],
+     [
+      1071.5,
+      1296.5,
+      1088.91
+     ],
+     [
+      1069.5,
+      1298.5,
+      1088.75
+     ],
+     [
+      1067.5,
+      1300.5,
+      1088.64
+     ],
+     [
+      1065.5,
+      1302.5,
+      1088.66
+     ],
+     [
+      1063.5,
+      1304.5,
+      1088.51
+     ],
+     [
+      1062.25,
+      1305.75,
+      1088.31
+     ],
+     [
+      1062,
+      1306,
+      1088.27
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "town_wall",
+   "id": "last_lantern_wall",
+   "x": 890,
+   "z": 1305,
+   "yaw": 0,
+   "data": {
+    "town": "last_lantern",
+    "name": "Last Lantern",
+    "settlement": "town",
+    "style": "stockade",
+    "material": "palisade",
+    "tier": "wall",
+    "h": 4.5,
+    "thick": 0.8,
+    "tint": "#8a6a48",
+    "radius": 61.19,
+    "solid": true,
+    "runs": [
+     [
+      [
+       865.53,
+       1361.08,
+       1083.16
+      ],
+      [
+       853.53,
+       1354.13,
+       1082.91
+      ],
+      [
+       843.4,
+       1344.65,
+       1082.87
+      ],
+      [
+       835.67,
+       1333.14,
+       1082.66
+      ],
+      [
+       830.72,
+       1320.18,
+       1082.44
+      ],
+      [
+       828.83,
+       1306.44,
+       1082.18
+      ],
+      [
+       830.08,
+       1292.62,
+       1082.29
+      ],
+      [
+       834.4,
+       1279.44,
+       1082.55
+      ],
+      [
+       841.59,
+       1267.58,
+       1083.29
+      ],
+      [
+       851.26,
+       1257.64,
+       1083.99
+      ],
+      [
+       862.92,
+       1250.13,
+       1084.42
+      ],
+      [
+       875.98,
+       1245.44,
+       1084.73
+      ],
+      [
+       889.75,
+       1243.81,
+       1084.88
+      ],
+      [
+       903.54,
+       1245.33,
+       1085.04
+      ],
+      [
+       916.63,
+       1249.91,
+       1085.27
+      ],
+      [
+       928.35,
+       1257.32,
+       1085.03
+      ],
+      [
+       938.11,
+       1267.19,
+       1084.76
+      ],
+      [
+       945.39,
+       1278.99,
+       1084.29
+      ],
+      [
+       949.82,
+       1292.14,
+       1083.86
+      ],
+      [
+       951.18,
+       1305.94,
+       1083.36
+      ],
+      [
+       949.4,
+       1319.69,
+       1082.88
+      ],
+      [
+       944.56,
+       1332.69,
+       1082.9
+      ],
+      [
+       936.92,
+       1344.27,
+       1082.72
+      ],
+      [
+       926.87,
+       1353.83,
+       1082.34
+      ],
+      [
+       914.93,
+       1360.88,
+       1082.3
+      ],
+      [
+       901.7,
+       1365.06,
+       1082.36
+      ],
+      [
+       887.87,
+       1366.15,
+       1082.94
+      ],
+      [
+       874.16,
+       1364.1,
+       1083.23
+      ]
+     ]
+    ],
+    "towers": [
+     {
+      "x": 862.9,
+      "z": 1359.86,
+      "h": 1083.08,
+      "yaw": -0.4588
+     },
+     {
+      "x": 876.97,
+      "z": 1364.79,
+      "h": 1083.22,
+      "yaw": -0.2145
+     },
+     {
+      "x": 833.47,
+      "z": 1328.41,
+      "h": 1082.54,
+      "yaw": -1.1782
+     },
+     {
+      "x": 833.04,
+      "z": 1282.64,
+      "h": 1082.54,
+      "yaw": -1.9449
+     },
+     {
+      "x": 864.49,
+      "z": 1249.38,
+      "h": 1084.44,
+      "yaw": -2.7116
+     },
+     {
+      "x": 910.21,
+      "z": 1247.25,
+      "h": 1085.25,
+      "yaw": 2.8049
+     },
+     {
+      "x": 944.62,
+      "z": 1277.43,
+      "h": 1084.37,
+      "yaw": 2.0382
+     },
+     {
+      "x": 948.47,
+      "z": 1323.04,
+      "h": 1082.78,
+      "yaw": 1.2715
+     },
+     {
+      "x": 919.59,
+      "z": 1358.56,
+      "h": 1082.22,
+      "yaw": 0.5048
+     }
+    ],
+    "gates": [
+     {
+      "id": "last_lantern_gate_0",
+      "x": 869.79,
+      "z": 1362.75,
+      "h": 1083.22,
+      "yaw": -0.2948,
+      "out": [
+       -0.2905,
+       0.9569
+      ],
+      "wallYaw": -0.3367,
+      "open": 6.35,
+      "width": 6.2,
+      "pass": 6.2,
+      "slant": 0.042,
+      "kind": "gatehouse",
+      "way": "last_lantern_street_35",
+      "wayKind": "road",
+      "road": "road_link_last_lantern",
+      "ways": [
+       "last_lantern_street_35"
+      ],
+      "led": [],
+      "ends": [
+       [
+        874.16,
+        1364.1
+       ],
+       [
+        865.53,
+        1361.08
+       ]
+      ],
+      "main": {
+       "street": "last_lantern_street_35",
+       "width": 5,
+       "pts": [
+        [
+         869.79,
+         1362.75
+        ],
+        [
+         885.5,
+         1311
+        ],
+        [
+         881.95,
+         1306.74
+        ]
+       ],
+       "metres": 59.63
+      },
+      "approaches": [
+       {
+        "way": "road_link_last_lantern",
+        "width": 3.5,
+        "pts": [
+         [
+          868.43,
+          1367.1
+         ],
+         [
+          867.8,
+          1368.93
+         ],
+         [
+          867.17,
+          1370.76
+         ],
+         [
+          866.53,
+          1372.58
+         ],
+         [
+          865.9,
+          1374.41
+         ],
+         [
+          865.26,
+          1376.23
+         ],
+         [
+          864.63,
+          1378.06
+         ],
+         [
+          864.03,
+          1379.8
+         ],
+         [
+          863.42,
+          1381.54
+         ],
+         [
+          862.82,
+          1383.28
+         ],
+         [
+          862.21,
+          1385.02
+         ],
+         [
+          861.61,
+          1386.76
+         ],
+         [
+          861.01,
+          1388.5
+         ],
+         [
+          860.4,
+          1390.24
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "openings": []
+   }
+  },
+  {
+   "kind": "town_wall",
+   "id": "thornwick_wall",
+   "x": 1772,
+   "z": 1900,
+   "yaw": 0,
+   "data": {
+    "town": "thornwick",
+    "name": "Thornwick",
+    "settlement": "hamlet",
+    "style": "barricade",
+    "material": "barricade",
+    "tier": "low",
+    "h": 2,
+    "thick": 1.6,
+    "tint": "#7d6448",
+    "radius": 43.6,
+    "solid": true,
+    "runs": [
+     [
+      [
+       1730.19,
+       1912.35,
+       1046.16
+      ],
+      [
+       1728.48,
+       1902.67,
+       1046.5
+      ],
+      [
+       1728.99,
+       1892.84,
+       1046.81
+      ],
+      [
+       1731.69,
+       1883.38,
+       1047.05
+      ],
+      [
+       1736.44,
+       1874.77,
+       1047.17
+      ],
+      [
+       1743,
+       1867.44,
+       1047.35
+      ],
+      [
+       1751.04,
+       1861.77,
+       1047.4
+      ],
+      [
+       1760.14,
+       1858.04,
+       1047.39
+      ],
+      [
+       1769.85,
+       1856.45,
+       1047.58
+      ],
+      [
+       1779.66,
+       1857.08,
+       1047.85
+      ],
+      [
+       1789.09,
+       1859.89,
+       1048.07
+      ],
+      [
+       1797.65,
+       1864.74,
+       1048.25
+      ],
+      [
+       1804.9,
+       1871.39,
+       1048.22
+      ],
+      [
+       1810.47,
+       1879.49,
+       1047.95
+      ],
+      [
+       1814.09,
+       1888.64,
+       1047.49
+      ],
+      [
+       1815.57,
+       1898.36,
+       1046.95
+      ],
+      [
+       1814.83,
+       1908.17,
+       1046.55
+      ],
+      [
+       1811.91,
+       1917.56,
+       1046.39
+      ],
+      [
+       1806.95,
+       1926.06,
+       1046.34
+      ],
+      [
+       1800.22,
+       1933.23,
+       1046.16
+      ],
+      [
+       1792.05,
+       1938.71,
+       1046.1
+      ],
+      [
+       1782.87,
+       1942.22,
+       1046.02
+      ],
+      [
+       1773.12,
+       1943.59,
+       1046.04
+      ],
+      [
+       1763.33,
+       1942.73,
+       1046.04
+      ],
+      [
+       1753.97,
+       1939.7,
+       1045.87
+      ],
+      [
+       1745.53,
+       1934.64,
+       1045.82
+      ],
+      [
+       1738.44,
+       1927.83,
+       1045.92
+      ],
+      [
+       1733.05,
+       1919.6,
+       1045.94
+      ]
+     ]
+    ],
+    "towers": [],
+    "gates": [
+     {
+      "id": "thornwick_gate_0",
+      "x": 1731.46,
+      "z": 1916.04,
+      "h": 1046.02,
+      "yaw": -1.1941,
+      "out": [
+       -0.9299,
+       0.3679
+      ],
+      "wallYaw": -1.1941,
+      "open": 4.2,
+      "width": 4.2,
+      "pass": 4.2,
+      "slant": 0,
+      "kind": "posts",
+      "way": null,
+      "wayKind": "path",
+      "road": null,
+      "ways": [
+       null
+      ],
+      "led": [],
+      "ends": [
+       [
+        1733.05,
+        1919.6
+       ],
+       [
+        1730.19,
+        1912.35
+       ]
+      ],
+      "main": null,
+      "approaches": []
+     }
+    ],
+    "openings": []
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "last_lantern_graveyard",
+   "x": 806,
+   "z": 1485,
+   "yaw": -0.1514,
+   "data": {
+    "piece": "graveyard",
+    "name": "Last Lantern Graveyard",
+    "town": "Last Lantern",
+    "auto": true,
+    "r": 20.81,
+    "poly": [
+     [
+      820.43,
+      1470
+     ],
+     [
+      815.3,
+      1503.62
+     ],
+     [
+      791.57,
+      1500
+     ],
+     [
+      796.7,
+      1466.38
+     ]
+    ],
+    "w": 34,
+    "d": 24,
+    "angle": 1.7222,
+    "gate": {
+     "x": 817.86,
+     "z": 1486.81,
+     "width": 3.2,
+     "yaw": -1.7222
+    },
+    "graves": [
+     [
+      817.96,
+      1471.78,
+      1.393,
+      "tomb"
+     ],
+     [
+      812.6,
+      1471.07,
+      1.387,
+      "cross"
+     ],
+     [
+      809.81,
+      1470.51,
+      1.389,
+      "cross"
+     ],
+     [
+      804.55,
+      1469.75,
+      1.448,
+      "headstone"
+     ],
+     [
+      801.96,
+      1469.42,
+      1.385,
+      "headstone"
+     ],
+     [
+      799.13,
+      1469,
+      1.416,
+      "headstone"
+     ],
+     [
+      817.69,
+      1473.39,
+      1.446,
+      "headstone"
+     ],
+     [
+      814.92,
+      1473.04,
+      1.412,
+      "slab"
+     ],
+     [
+      809.7,
+      1472.23,
+      1.42,
+      "headstone"
+     ],
+     [
+      806.9,
+      1471.79,
+      1.39,
+      "cross"
+     ],
+     [
+      804.22,
+      1471.43,
+      1.452,
+      "headstone"
+     ],
+     [
+      801.64,
+      1470.95,
+      1.452,
+      "cross"
+     ],
+     [
+      799.01,
+      1470.51,
+      1.388,
+      "cross"
+     ],
+     [
+      817.44,
+      1474.95,
+      1.401,
+      "slab"
+     ],
+     [
+      814.81,
+      1474.53,
+      1.385,
+      "mound"
+     ],
+     [
+      811.99,
+      1474.13,
+      1.401,
+      "mound"
+     ],
+     [
+      809.33,
+      1473.65,
+      1.383,
+      "slab"
+     ],
+     [
+      801.47,
+      1472.5,
+      1.447,
+      "headstone"
+     ],
+     [
+      798.82,
+      1472.13,
+      1.454,
+      "slab"
+     ],
+     [
+      817.26,
+      1476.66,
+      1.403,
+      "headstone"
+     ],
+     [
+      814.6,
+      1476.32,
+      1.404,
+      "cross"
+     ],
+     [
+      809.08,
+      1475.31,
+      1.402,
+      "cross"
+     ],
+     [
+      806.5,
+      1475.02,
+      1.438,
+      "tomb"
+     ],
+     [
+      803.75,
+      1474.64,
+      1.394,
+      "tomb"
+     ],
+     [
+      798.48,
+      1473.66,
+      1.454,
+      "headstone"
+     ],
+     [
+      816.92,
+      1478.07,
+      1.438,
+      "mound"
+     ],
+     [
+      811.58,
+      1477.42,
+      1.436,
+      "tomb"
+     ],
+     [
+      808.91,
+      1476.84,
+      1.444,
+      "headstone"
+     ],
+     [
+      806.2,
+      1476.53,
+      1.454,
+      "tomb"
+     ],
+     [
+      803.49,
+      1476.09,
+      1.441,
+      "mound"
+     ],
+     [
+      800.91,
+      1475.65,
+      1.392,
+      "headstone"
+     ],
+     [
+      798.32,
+      1475.35,
+      1.443,
+      "mound"
+     ],
+     [
+      816.6,
+      1479.7,
+      1.454,
+      "headstone"
+     ],
+     [
+      813.94,
+      1479.32,
+      1.395,
+      "headstone"
+     ],
+     [
+      811.4,
+      1478.98,
+      1.393,
+      "mound"
+     ],
+     [
+      808.6,
+      1478.44,
+      1.398,
+      "mound"
+     ],
+     [
+      805.95,
+      1478.21,
+      1.381,
+      "slab"
+     ],
+     [
+      803.28,
+      1477.83,
+      1.398,
+      "slab"
+     ],
+     [
+      800.65,
+      1477.18,
+      1.409,
+      "mound"
+     ],
+     [
+      797.97,
+      1476.95,
+      1.459,
+      "cross"
+     ],
+     [
+      816.5,
+      1481.42,
+      1.444,
+      "headstone"
+     ],
+     [
+      813.73,
+      1480.96,
+      1.438,
+      "headstone"
+     ],
+     [
+      808.58,
+      1480.02,
+      1.399,
+      "tomb"
+     ],
+     [
+      805.87,
+      1479.63,
+      1.42,
+      "slab"
+     ],
+     [
+      803.02,
+      1479.4,
+      1.401,
+      "cross"
+     ],
+     [
+      797.93,
+      1478.38,
+      1.391,
+      "headstone"
+     ],
+     [
+      816.26,
+      1482.92,
+      1.451,
+      "cross"
+     ],
+     [
+      810.95,
+      1482.23,
+      1.417,
+      "tomb"
+     ],
+     [
+      808.14,
+      1481.75,
+      1.402,
+      "cross"
+     ],
+     [
+      805.45,
+      1481.2,
+      1.437,
+      "mound"
+     ],
+     [
+      809.83,
+      1488.44,
+      1.406,
+      "cross"
+     ],
+     [
+      807.24,
+      1488,
+      1.399,
+      "slab"
+     ],
+     [
+      815.08,
+      1490.79,
+      1.447,
+      "tomb"
+     ],
+     [
+      812.38,
+      1490.52,
+      1.402,
+      "cross"
+     ],
+     [
+      807.02,
+      1489.49,
+      1.433,
+      "headstone"
+     ],
+     [
+      804.35,
+      1489.12,
+      1.434,
+      "cross"
+     ],
+     [
+      814.85,
+      1492.32,
+      1.44,
+      "headstone"
+     ],
+     [
+      809.45,
+      1491.53,
+      1.459,
+      "headstone"
+     ],
+     [
+      796.15,
+      1489.63,
+      1.383,
+      "headstone"
+     ],
+     [
+      814.6,
+      1494.02,
+      1.398,
+      "headstone"
+     ],
+     [
+      811.95,
+      1493.55,
+      1.399,
+      "mound"
+     ],
+     [
+      809.15,
+      1493.19,
+      1.456,
+      "mound"
+     ],
+     [
+      806.52,
+      1492.75,
+      1.393,
+      "cross"
+     ],
+     [
+      803.85,
+      1492.36,
+      1.448,
+      "mound"
+     ],
+     [
+      801.24,
+      1491.91,
+      1.379,
+      "mound"
+     ],
+     [
+      798.42,
+      1491.59,
+      1.384,
+      "headstone"
+     ],
+     [
+      795.96,
+      1491.23,
+      1.456,
+      "tomb"
+     ],
+     [
+      814.22,
+      1495.59,
+      1.386,
+      "headstone"
+     ],
+     [
+      811.73,
+      1495.1,
+      1.403,
+      "slab"
+     ],
+     [
+      809.05,
+      1494.88,
+      1.426,
+      "slab"
+     ],
+     [
+      803.5,
+      1493.92,
+      1.418,
+      "headstone"
+     ],
+     [
+      801.01,
+      1493.49,
+      1.4,
+      "headstone"
+     ],
+     [
+      795.54,
+      1492.68,
+      1.424,
+      "slab"
+     ],
+     [
+      813.96,
+      1497.02,
+      1.455,
+      "headstone"
+     ],
+     [
+      811.41,
+      1496.68,
+      1.448,
+      "tomb"
+     ],
+     [
+      808.64,
+      1496.39,
+      1.393,
+      "headstone"
+     ],
+     [
+      806.13,
+      1496.04,
+      1.387,
+      "tomb"
+     ],
+     [
+      803.34,
+      1495.64,
+      1.418,
+      "tomb"
+     ],
+     [
+      800.64,
+      1495.05,
+      1.41,
+      "slab"
+     ],
+     [
+      798.11,
+      1494.76,
+      1.433,
+      "headstone"
+     ],
+     [
+      813.82,
+      1498.75,
+      1.435,
+      "headstone"
+     ],
+     [
+      811.25,
+      1498.24,
+      1.381,
+      "mound"
+     ],
+     [
+      805.81,
+      1497.53,
+      1.406,
+      "headstone"
+     ],
+     [
+      803.21,
+      1497.17,
+      1.454,
+      "cross"
+     ],
+     [
+      800.56,
+      1496.79,
+      1.407,
+      "cross"
+     ],
+     [
+      797.9,
+      1496.22,
+      1.406,
+      "cross"
+     ],
+     [
+      795.15,
+      1495.97,
+      1.417,
+      "headstone"
+     ],
+     [
+      813.7,
+      1500.28,
+      1.441,
+      "headstone"
+     ],
+     [
+      810.82,
+      1499.95,
+      1.452,
+      "cross"
+     ],
+     [
+      808.23,
+      1499.5,
+      1.409,
+      "mound"
+     ],
+     [
+      805.46,
+      1499.09,
+      1.397,
+      "tomb"
+     ],
+     [
+      800.23,
+      1498.39,
+      1.414,
+      "headstone"
+     ],
+     [
+      797.52,
+      1497.75,
+      1.408,
+      "headstone"
+     ],
+     [
+      794.8,
+      1497.4,
+      1.434,
+      "cross"
+     ]
+    ],
+    "graveStyles": [
+     "headstone",
+     "cross",
+     "slab",
+     "mound",
+     "tomb"
+    ],
+    "level": 1073.65,
+    "slots": [
+     {
+      "kind": "gravedigger",
+      "x": 817.86,
+      "z": 1486.81,
+      "r": 1.5,
+      "yaw": -1.7222
+     }
+    ]
+   }
+  },
+  {
+   "kind": "wall",
+   "id": "last_lantern_graveyard_wall_0",
+   "x": 817.23,
+   "z": 1488.33,
+   "yaw": 0,
+   "data": {
+    "setPiece": "last_lantern_graveyard",
+    "h": 0.95,
+    "material": "drystone",
+    "pts": [
+     [
+      817.23,
+      1488.33,
+      1073.66
+     ],
+     [
+      814.96,
+      1503.16,
+      1073.66
+     ],
+     [
+      792.03,
+      1499.66,
+      1073.66
+     ],
+     [
+      797.04,
+      1466.84,
+      1073.66
+     ],
+     [
+      819.97,
+      1470.34,
+      1073.66
+     ],
+     [
+      817.71,
+      1485.17,
+      1073.66
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "set_building",
+   "id": "last_lantern_graveyard_bldg_0",
+   "x": 798.44,
+   "z": 1483.85,
+   "yaw": 1.4194,
+   "data": {
+    "setPiece": "last_lantern_graveyard",
+    "piece": "graveyard",
+    "want": "chapel",
+    "w": 7.5,
+    "d": 5.5,
+    "angle": 1.7222,
+    "front": 6.4346,
+    "culture": "halfling",
+    "label": "Chapel",
+    "lit": false,
+    "ground": 1073.66
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "thornwick_graveyard",
+   "x": 1840,
+   "z": 1848,
+   "yaw": 2.6012,
+   "data": {
+    "piece": "graveyard",
+    "name": "Thornwick Graveyard",
+    "town": "Thornwick",
+    "auto": true,
+    "r": 12.5,
+    "poly": [
+     [
+      1828.42,
+      1852.72
+     ],
+     [
+      1838.71,
+      1835.57
+     ],
+     [
+      1851.58,
+      1843.28
+     ],
+     [
+      1841.29,
+      1860.43
+     ]
+    ],
+    "w": 20,
+    "d": 15,
+    "angle": -1.0304,
+    "gate": {
+     "x": 1846.43,
+     "z": 1851.86,
+     "width": 3.2,
+     "yaw": -2.1112
+    },
+    "graves": [
+     [
+      1831.37,
+      1852.03,
+      0.998,
+      "cross"
+     ],
+     [
+      1833.63,
+      1853.34,
+      0.999,
+      "headstone"
+     ],
+     [
+      1832.36,
+      1850.58,
+      1.005,
+      "mound"
+     ],
+     [
+      1834.55,
+      1851.93,
+      1.057,
+      "cross"
+     ],
+     [
+      1836.85,
+      1853.46,
+      1.011,
+      "headstone"
+     ],
+     [
+      1839.14,
+      1854.65,
+      1.022,
+      "mound"
+     ],
+     [
+      1833.09,
+      1849.19,
+      1.036,
+      "cross"
+     ],
+     [
+      1835.4,
+      1850.64,
+      1.018,
+      "headstone"
+     ],
+     [
+      1837.65,
+      1851.98,
+      1.001,
+      "slab"
+     ],
+     [
+      1840.06,
+      1853.41,
+      1.037,
+      "mound"
+     ],
+     [
+      1833.88,
+      1847.86,
+      1.051,
+      "tomb"
+     ],
+     [
+      1836.33,
+      1849.29,
+      0.998,
+      "headstone"
+     ],
+     [
+      1838.64,
+      1850.63,
+      1.035,
+      "tomb"
+     ],
+     [
+      1840.83,
+      1852.02,
+      0.996,
+      "headstone"
+     ],
+     [
+      1837.12,
+      1842.42,
+      1.035,
+      "slab"
+     ],
+     [
+      1841.87,
+      1845.2,
+      0.991,
+      "headstone"
+     ],
+     [
+      1844.09,
+      1846.44,
+      1.024,
+      "slab"
+     ],
+     [
+      1838,
+      1841.03,
+      1.019,
+      "mound"
+     ],
+     [
+      1840.24,
+      1842.44,
+      0.999,
+      "headstone"
+     ],
+     [
+      1842.64,
+      1843.74,
+      1.069,
+      "headstone"
+     ],
+     [
+      1838.77,
+      1839.57,
+      1.037,
+      "headstone"
+     ],
+     [
+      1841.1,
+      1841.06,
+      1.063,
+      "headstone"
+     ],
+     [
+      1843.58,
+      1842.45,
+      1.014,
+      "mound"
+     ]
+    ],
+    "graveStyles": [
+     "headstone",
+     "cross",
+     "slab",
+     "mound",
+     "tomb"
+    ],
+    "level": 1053.25,
+    "slots": [
+     {
+      "kind": "gravedigger",
+      "x": 1846.43,
+      "z": 1851.86,
+      "r": 1.5,
+      "yaw": -2.1112
+     }
+    ]
+   }
+  },
+  {
+   "kind": "wall",
+   "id": "thornwick_graveyard_wall_0",
+   "x": 1845.27,
+   "z": 1853.02,
+   "yaw": 0,
+   "data": {
+    "setPiece": "thornwick_graveyard",
+    "h": 0.95,
+    "material": "drystone",
+    "pts": [
+     [
+      1845.27,
+      1853.02,
+      1053.25
+     ],
+     [
+      1841.15,
+      1859.88,
+      1053.24
+     ],
+     [
+      1828.97,
+      1852.58,
+      1053.24
+     ],
+     [
+      1838.85,
+      1836.12,
+      1053.25
+     ],
+     [
+      1851.03,
+      1843.42,
+      1053.28
+     ],
+     [
+      1846.91,
+      1850.28,
+      1053.25
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "last_lantern_belt",
+   "x": 890,
+   "z": 1305,
+   "yaw": 0,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Last Lantern",
+    "auto": true,
+    "r": 210,
+    "fields": 10,
+    "slots": []
+   }
+  },
+  {
+   "kind": "field",
+   "id": "last_lantern_belt_field_0",
+   "x": 776.29,
+   "z": 1296.81,
+   "yaw": 3.0697,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Last Lantern",
+    "auto": true,
+    "setPiece": "last_lantern_belt",
+    "crop": "field",
+    "grows": "tilled",
+    "poly": [
+     [
+      761.68,
+      1318.82
+     ],
+     [
+      764.98,
+      1272.94
+     ],
+     [
+      790.91,
+      1274.81
+     ],
+     [
+      787.61,
+      1320.69
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 4.7843,
+    "furrowAngle": 4.7843,
+    "boundary": "hedge",
+    "gate": {
+     "x": 789.26,
+     "z": 1297.75,
+     "width": 4,
+     "yaw": -1.6427
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "last_lantern_belt_field_0_hedge_0",
+   "x": 788.32,
+   "z": 1299.69,
+   "yaw": 0,
+   "data": {
+    "setPiece": "last_lantern_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      788.32,
+      1299.69,
+      1080
+     ],
+     [
+      786.87,
+      1319.83,
+      1079.56
+     ],
+     [
+      762.53,
+      1318.08,
+      1074.65
+     ],
+     [
+      765.72,
+      1273.8,
+      1075.65
+     ],
+     [
+      790.06,
+      1275.55,
+      1080.45
+     ],
+     [
+      788.61,
+      1295.7,
+      1080.05
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "last_lantern_belt_field_1",
+   "x": 998.44,
+   "z": 1340.16,
+   "yaw": -0.3135,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Last Lantern",
+    "auto": true,
+    "setPiece": "last_lantern_belt",
+    "crop": "crop",
+    "grows": "oats",
+    "poly": [
+     [
+      1017.9,
+      1322.29
+     ],
+     [
+      1003.72,
+      1366.05
+     ],
+     [
+      978.98,
+      1358.03
+     ],
+     [
+      993.17,
+      1314.27
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 8.1675,
+    "furrowAngle": 8.1675,
+    "boundary": "hedge",
+    "gate": {
+     "x": 986.08,
+     "z": 1336.15,
+     "width": 4,
+     "yaw": 1.2573
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "last_lantern_belt_field_1_hedge_0",
+   "x": 987.45,
+   "z": 1334.49,
+   "yaw": 0,
+   "data": {
+    "setPiece": "last_lantern_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      987.45,
+      1334.49,
+      1082.71
+     ],
+     [
+      993.68,
+      1315.28,
+      1084.04
+     ],
+     [
+      1016.89,
+      1322.8,
+      1083.15
+     ],
+     [
+      1003.2,
+      1365.04,
+      1079.79
+     ],
+     [
+      979.99,
+      1357.51,
+      1081.21
+     ],
+     [
+      986.22,
+      1338.3,
+      1082.45
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "last_lantern_belt_field_2",
+   "x": 922.67,
+   "z": 1414.22,
+   "yaw": -1.2802,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Last Lantern",
+    "auto": true,
+    "setPiece": "last_lantern_belt",
+    "crop": "crop",
+    "grows": "flax",
+    "poly": [
+     [
+      948.43,
+      1420.08
+     ],
+     [
+      904.36,
+      1433.26
+     ],
+     [
+      896.91,
+      1408.36
+     ],
+     [
+      940.98,
+      1395.17
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 9.1342,
+    "furrowAngle": 9.1342,
+    "boundary": "hedge",
+    "gate": {
+     "x": 918.94,
+     "z": 1401.76,
+     "width": 4,
+     "yaw": 0.2906
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "last_lantern_belt_field_2_hedge_0",
+   "x": 921.09,
+   "z": 1401.96,
+   "yaw": 0,
+   "data": {
+    "setPiece": "last_lantern_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      921.09,
+      1401.96,
+      1081.61
+     ],
+     [
+      940.44,
+      1396.17,
+      1081.25
+     ],
+     [
+      947.43,
+      1419.55,
+      1078.33
+     ],
+     [
+      904.89,
+      1432.27,
+      1079.3
+     ],
+     [
+      897.9,
+      1408.89,
+      1081.89
+     ],
+     [
+      917.26,
+      1403.1,
+      1081.65
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "last_lantern_belt_field_3",
+   "x": 754.35,
+   "z": 1364.19,
+   "yaw": -2.7301,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Last Lantern",
+    "auto": true,
+    "setPiece": "last_lantern_belt",
+    "crop": "pasture",
+    "grows": "cattle",
+    "poly": [
+     [
+      751.64,
+      1390.47
+     ],
+     [
+      733.24,
+      1348.31
+     ],
+     [
+      757.07,
+      1337.91
+     ],
+     [
+      775.47,
+      1380.07
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 4.3009,
+    "furrowAngle": 4.3009,
+    "boundary": "fence",
+    "gate": {
+     "x": 766.27,
+     "z": 1358.99,
+     "width": 3,
+     "yaw": -1.1593
+    }
+   }
+  },
+  {
+   "kind": "fence",
+   "id": "last_lantern_belt_field_3_fence_0",
+   "x": 766.13,
+   "z": 1360.69,
+   "yaw": 0,
+   "data": {
+    "setPiece": "last_lantern_belt",
+    "h": 1.1,
+    "pts": [
+     [
+      766.13,
+      1360.69,
+      1073.63
+     ],
+     [
+      774.41,
+      1379.66,
+      1073.62
+     ],
+     [
+      752.05,
+      1389.42,
+      1072.78
+     ],
+     [
+      734.29,
+      1348.72,
+      1073.07
+     ],
+     [
+      756.66,
+      1338.97,
+      1073.57
+     ],
+     [
+      764.93,
+      1357.94,
+      1073.63
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "last_lantern_belt_field_4",
+   "x": 742.13,
+   "z": 1311.19,
+   "yaw": -3.0997,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Last Lantern",
+    "auto": true,
+    "setPiece": "last_lantern_belt",
+    "crop": "field",
+    "grows": "tilled",
+    "poly": [
+     [
+      730.1,
+      1334.72
+     ],
+     [
+      728.18,
+      1288.76
+     ],
+     [
+      754.16,
+      1287.67
+     ],
+     [
+      756.08,
+      1333.63
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 4.6705,
+    "furrowAngle": 4.6705,
+    "boundary": "hedge",
+    "gate": {
+     "x": 755.12,
+     "z": 1310.65,
+     "width": 4,
+     "yaw": -1.5289
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "last_lantern_belt_field_4_hedge_0",
+   "x": 754.4,
+   "z": 1312.68,
+   "yaw": 0,
+   "data": {
+    "setPiece": "last_lantern_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      754.4,
+      1312.68,
+      1074.74
+     ],
+     [
+      755.25,
+      1332.86,
+      1073.65
+     ],
+     [
+      730.87,
+      1333.88,
+      1074.68
+     ],
+     [
+      729.01,
+      1289.52,
+      1076.86
+     ],
+     [
+      753.39,
+      1288.5,
+      1075.89
+     ],
+     [
+      754.24,
+      1308.68,
+      1074.96
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "last_lantern_belt_field_5",
+   "x": 749.88,
+   "z": 1257.36,
+   "yaw": 2.8139,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Last Lantern",
+    "auto": true,
+    "setPiece": "last_lantern_belt",
+    "crop": "field",
+    "grows": "tilled",
+    "poly": [
+     [
+      730.17,
+      1274.95
+     ],
+     [
+      744.97,
+      1231.4
+     ],
+     [
+      769.59,
+      1239.77
+     ],
+     [
+      754.78,
+      1283.32
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 5.0401,
+    "furrowAngle": 5.0401,
+    "boundary": "hedge",
+    "gate": {
+     "x": 762.19,
+     "z": 1261.54,
+     "width": 4,
+     "yaw": -1.8985
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "last_lantern_belt_field_5_hedge_0",
+   "x": 760.78,
+   "z": 1263.18,
+   "yaw": 0,
+   "data": {
+    "setPiece": "last_lantern_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      760.78,
+      1263.18,
+      1079.21
+     ],
+     [
+      754.28,
+      1282.3,
+      1076.13
+     ],
+     [
+      731.18,
+      1274.45,
+      1077.49
+     ],
+     [
+      745.47,
+      1232.41,
+      1084.31
+     ],
+     [
+      768.57,
+      1240.27,
+      1083.63
+     ],
+     [
+      762.07,
+      1259.39,
+      1079.92
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "last_lantern_belt_field_6",
+   "x": 776.55,
+   "z": 1209.96,
+   "yaw": 2.4443,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Last Lantern",
+    "auto": true,
+    "setPiece": "last_lantern_belt",
+    "crop": "pasture",
+    "grows": "cattle",
+    "poly": [
+     [
+      751.81,
+      1219.24
+     ],
+     [
+      781.36,
+      1183.98
+     ],
+     [
+      801.29,
+      1200.67
+     ],
+     [
+      771.75,
+      1235.94
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 5.4097,
+    "furrowAngle": 5.4097,
+    "boundary": "fence",
+    "gate": {
+     "x": 786.52,
+     "z": 1218.31,
+     "width": 3,
+     "yaw": -2.2681
+    }
+   }
+  },
+  {
+   "kind": "fence",
+   "id": "last_lantern_belt_field_6_fence_0",
+   "x": 784.94,
+   "z": 1218.94,
+   "yaw": 0,
+   "data": {
+    "setPiece": "last_lantern_belt",
+    "h": 1.1,
+    "pts": [
+     [
+      784.94,
+      1218.94,
+      1089.84
+     ],
+     [
+      771.65,
+      1234.81,
+      1086.43
+     ],
+     [
+      752.94,
+      1219.14,
+      1086.24
+     ],
+     [
+      781.45,
+      1185.11,
+      1093.46
+     ],
+     [
+      800.16,
+      1200.77,
+      1093.54
+     ],
+     [
+      786.87,
+      1216.64,
+      1090.35
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "last_lantern_belt_field_7",
+   "x": 1018.98,
+   "z": 1377.58,
+   "yaw": -0.5125,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Last Lantern",
+    "auto": true,
+    "setPiece": "last_lantern_belt",
+    "crop": "crop",
+    "grows": "oats",
+    "poly": [
+     [
+      1041.59,
+      1363.91
+     ],
+     [
+      1019.03,
+      1404
+     ],
+     [
+      996.37,
+      1391.25
+     ],
+     [
+      1018.93,
+      1351.16
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 8.3665,
+    "furrowAngle": 8.3665,
+    "boundary": "hedge",
+    "gate": {
+     "x": 1007.65,
+     "z": 1371.2,
+     "width": 4,
+     "yaw": 1.0583
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "last_lantern_belt_field_7_hedge_0",
+   "x": 1009.33,
+   "z": 1369.85,
+   "yaw": 0,
+   "data": {
+    "setPiece": "last_lantern_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      1009.33,
+      1369.85,
+      1077.92
+     ],
+     [
+      1019.24,
+      1352.25,
+      1079.13
+     ],
+     [
+      1040.5,
+      1364.21,
+      1077.11
+     ],
+     [
+      1018.73,
+      1402.91,
+      1074.76
+     ],
+     [
+      997.46,
+      1390.94,
+      1076.66
+     ],
+     [
+      1007.37,
+      1373.34,
+      1077.69
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "last_lantern_belt_field_8",
+   "x": 936.42,
+   "z": 1445.53,
+   "yaw": -1.2517,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Last Lantern",
+    "auto": true,
+    "setPiece": "last_lantern_belt",
+    "crop": "pasture",
+    "grows": "sheep",
+    "poly": [
+     [
+      962.34,
+      1450.66
+     ],
+     [
+      918.66,
+      1465.09
+     ],
+     [
+      910.51,
+      1440.4
+     ],
+     [
+      954.19,
+      1425.97
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 9.1057,
+    "furrowAngle": 9.1057,
+    "boundary": "fence",
+    "gate": {
+     "x": 932.35,
+     "z": 1433.19,
+     "width": 3,
+     "yaw": 0.3191
+    }
+   }
+  },
+  {
+   "kind": "fence",
+   "id": "last_lantern_belt_field_8_fence_0",
+   "x": 934.02,
+   "z": 1433.48,
+   "yaw": 0,
+   "data": {
+    "setPiece": "last_lantern_belt",
+    "h": 1.1,
+    "pts": [
+     [
+      934.02,
+      1433.48,
+      1077.74
+     ],
+     [
+      953.68,
+      1426.98,
+      1076.72
+     ],
+     [
+      961.33,
+      1450.15,
+      1076.19
+     ],
+     [
+      919.17,
+      1464.08,
+      1078.13
+     ],
+     [
+      911.52,
+      1440.91,
+      1078.72
+     ],
+     [
+      931.17,
+      1434.42,
+      1077.86
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "last_lantern_belt_field_9",
+   "x": 784.89,
+   "z": 1409.2,
+   "yaw": -2.3605,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Last Lantern",
+    "auto": true,
+    "setPiece": "last_lantern_belt",
+    "crop": "field",
+    "grows": "tilled",
+    "poly": [
+     [
+      791.86,
+      1434.68
+     ],
+     [
+      759.47,
+      1402.02
+     ],
+     [
+      777.93,
+      1383.71
+     ],
+     [
+      810.32,
+      1416.38
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 10.2145,
+    "furrowAngle": 10.2145,
+    "boundary": "none"
+   }
+  },
+  {
+   "kind": "set_piece",
+   "id": "thornwick_belt",
+   "x": 1772,
+   "z": 1900,
+   "yaw": 0,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Thornwick",
+    "auto": true,
+    "r": 166,
+    "fields": 5,
+    "slots": []
+   }
+  },
+  {
+   "kind": "field",
+   "id": "thornwick_belt_field_0",
+   "x": 1707.71,
+   "z": 1872.31,
+   "yaw": 2.7349,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Thornwick",
+    "auto": true,
+    "setPiece": "thornwick_belt",
+    "crop": "crop",
+    "grows": "wheat",
+    "poly": [
+     [
+      1686.67,
+      1888.29
+     ],
+     [
+      1704.87,
+      1846.04
+     ],
+     [
+      1728.75,
+      1856.33
+     ],
+     [
+      1710.55,
+      1898.58
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 11.4023,
+    "furrowAngle": 11.4023,
+    "boundary": "hedge",
+    "gate": {
+     "x": 1719.65,
+     "z": 1877.45,
+     "width": 4,
+     "yaw": -1.9775
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "thornwick_belt_field_0_hedge_0",
+   "x": 1718.12,
+   "z": 1878.97,
+   "yaw": 0,
+   "data": {
+    "setPiece": "thornwick_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      1718.12,
+      1878.97,
+      1047.67
+     ],
+     [
+      1710.13,
+      1897.52,
+      1046
+     ],
+     [
+      1687.72,
+      1887.87,
+      1047.99
+     ],
+     [
+      1705.29,
+      1847.09,
+      1051.7
+     ],
+     [
+      1727.7,
+      1856.75,
+      1049.73
+     ],
+     [
+      1719.71,
+      1875.3,
+      1048.01
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "thornwick_belt_field_1",
+   "x": 1799.69,
+   "z": 1835.71,
+   "yaw": 1.1641,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Thornwick",
+    "auto": true,
+    "setPiece": "thornwick_belt",
+    "crop": "crop",
+    "grows": "barley",
+    "poly": [
+     [
+      1783.71,
+      1814.67
+     ],
+     [
+      1825.96,
+      1832.87
+     ],
+     [
+      1815.67,
+      1856.75
+     ],
+     [
+      1773.42,
+      1838.55
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 12.9731,
+    "furrowAngle": 12.9731,
+    "boundary": "hedge",
+    "gate": {
+     "x": 1794.55,
+     "z": 1847.65,
+     "width": 4,
+     "yaw": 2.7349
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "thornwick_belt_field_1_hedge_0",
+   "x": 1793.03,
+   "z": 1846.12,
+   "yaw": 0,
+   "data": {
+    "setPiece": "thornwick_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      1793.03,
+      1846.12,
+      1049.58
+     ],
+     [
+      1774.48,
+      1838.13,
+      1048.83
+     ],
+     [
+      1784.13,
+      1815.72,
+      1051.46
+     ],
+     [
+      1824.91,
+      1833.29,
+      1053.61
+     ],
+     [
+      1815.25,
+      1855.7,
+      1050.83
+     ],
+     [
+      1796.7,
+      1847.71,
+      1049.8
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "thornwick_belt_field_2",
+   "x": 1669.09,
+   "z": 1884.98,
+   "yaw": 2.9967,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Thornwick",
+    "auto": true,
+    "setPiece": "thornwick_belt",
+    "crop": "crop",
+    "grows": "turnips",
+    "poly": [
+     [
+      1652.91,
+      1905.86
+     ],
+     [
+      1659.55,
+      1860.35
+     ],
+     [
+      1685.27,
+      1864.1
+     ],
+     [
+      1678.63,
+      1909.62
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 11.1405,
+    "furrowAngle": 11.1405,
+    "boundary": "hedge",
+    "gate": {
+     "x": 1681.95,
+     "z": 1886.86,
+     "width": 4,
+     "yaw": -1.7157
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "thornwick_belt_field_2_hedge_0",
+   "x": 1680.87,
+   "z": 1888.72,
+   "yaw": 0,
+   "data": {
+    "setPiece": "thornwick_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      1680.87,
+      1888.72,
+      1047.57
+     ],
+     [
+      1677.96,
+      1908.71,
+      1044.67
+     ],
+     [
+      1653.81,
+      1905.19,
+      1045.86
+     ],
+     [
+      1660.22,
+      1861.25,
+      1051.61
+     ],
+     [
+      1684.37,
+      1864.78,
+      1050.77
+     ],
+     [
+      1681.45,
+      1884.77,
+      1048.08
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "thornwick_belt_field_3",
+   "x": 1733.55,
+   "z": 1803.37,
+   "yaw": 1.9495,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Thornwick",
+    "auto": true,
+    "setPiece": "thornwick_belt",
+    "crop": "field",
+    "grows": "tilled",
+    "poly": [
+     [
+      1707.37,
+      1799.79
+     ],
+     [
+      1750.11,
+      1782.79
+     ],
+     [
+      1759.73,
+      1806.94
+     ],
+     [
+      1716.99,
+      1823.95
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 12.1877,
+    "furrowAngle": 12.1877,
+    "boundary": "hedge",
+    "gate": {
+     "x": 1738.36,
+     "z": 1815.45,
+     "width": 4,
+     "yaw": -2.7629
+    }
+   }
+  },
+  {
+   "kind": "hedge",
+   "id": "thornwick_belt_field_3_hedge_0",
+   "x": 1736.2,
+   "z": 1815.44,
+   "yaw": 0,
+   "data": {
+    "setPiece": "thornwick_belt",
+    "h": 1.6,
+    "pts": [
+     [
+      1736.2,
+      1815.44,
+      1051.26
+     ],
+     [
+      1717.43,
+      1822.91,
+      1051.46
+     ],
+     [
+      1708.41,
+      1800.24,
+      1053.28
+     ],
+     [
+      1749.67,
+      1783.83,
+      1052.78
+     ],
+     [
+      1758.69,
+      1806.5,
+      1051.1
+     ],
+     [
+      1739.92,
+      1813.96,
+      1051.26
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "field",
+   "id": "thornwick_belt_field_4",
+   "x": 1638.28,
+   "z": 1865.91,
+   "yaw": 2.892,
+   "data": {
+    "piece": "belt",
+    "name": null,
+    "town": "Thornwick",
+    "auto": true,
+    "setPiece": "thornwick_belt",
+    "crop": "field",
+    "grows": "tilled",
+    "poly": [
+     [
+      1620,
+      1884.98
+     ],
+     [
+      1631.36,
+      1840.41
+     ],
+     [
+      1656.56,
+      1846.83
+     ],
+     [
+      1645.19,
+      1891.41
+     ]
+    ],
+    "w": 46,
+    "d": 26,
+    "angle": 11.2452,
+    "furrowAngle": 11.2452,
+    "boundary": "none"
    }
   }
  ]

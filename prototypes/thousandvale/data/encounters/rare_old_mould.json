@@ -2,6 +2,7 @@
   "id": "rare_old_mould",
   "name": "Old Mould",
   "tier": "rare",
+  "secret": true,
   "zone": "millbrook",
   "body": "sporecap_walker",
   "place": "grew in the flooded cellar of Millbrook's old granary and has started walking about the fields at night",

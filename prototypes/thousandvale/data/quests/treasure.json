@@ -34,7 +34,8 @@
         "shimmer": 15,
         "tier": "uncommon",
         "hint": "Upstream of the ford, a boulder like a curled-up dog."
-      }
+      },
+      "blurb": "Aled hid the flock money somewhere in the Torbor Fields before he died; his note is the first clue."
     },
     {
       "id": "the_abbots_tithe",
@@ -70,7 +71,8 @@
         "shimmer": 15,
         "tier": "uncommon",
         "hint": "Below the arrow on the abbey wall."
-      }
+      },
+      "blurb": "A dead brother of Saint Orrin's hid the abbey tithe; the graveyard in Orrinsford starts the trail."
     },
     {
       "id": "the_provosts_purse",
@@ -106,7 +108,8 @@
         "shimmer": 15,
         "tier": "uncommon",
         "hint": "A loose stepping stone below the mill."
-      }
+      },
+      "blurb": "An old provost of Halsbridge hid his purse near a mill; a tavern drunk knows where to start."
     },
     {
       "id": "three_wheels_hoard",
@@ -142,7 +145,8 @@
         "shimmer": 15,
         "tier": "uncommon",
         "hint": "Roots of the crooked oak."
-      }
+      },
+      "blurb": "A torn map in the oldest mill of Millbrook points to a hoard by a crooked oak."
     },
     {
       "id": "ashcombe_reliquary",
@@ -185,7 +189,8 @@
         "shimmer": 15,
         "tier": "rare",
         "hint": "A niche in the scree above the fort."
-      }
+      },
+      "blurb": "A duellist's reliquary, hidden from the Ashcombe ruins up into Hollin Pass."
     },
     {
       "id": "grandads_teeth",
@@ -219,7 +224,8 @@
         "shimmer": 15,
         "tier": "uncommon",
         "hint": "Under the last lamp post."
-      }
+      },
+      "blurb": "Old Pike's grandad hid a second cache on Delvers' Hill; the dry well is only the start."
     },
     {
       "id": "the_eel_queens_crown",
@@ -253,7 +259,8 @@
         "shimmer": 15,
         "tier": "uncommon",
         "hint": "The creaky top step of Reedwall Tower."
-      }
+      },
+      "blurb": "A tin crown an eel queen hid from the taxman, somewhere in Brackwater Fen."
     },
     {
       "id": "smugglers_ledger",
@@ -296,7 +303,8 @@
         "shimmer": 15,
         "tier": "rare",
         "hint": "Mud under the third stilt."
-      }
+      },
+      "blurb": "Half a smuggler's map from Saltmouth leads to a ledger hidden in the Gullwick Lakes."
     },
     {
       "id": "the_ferrymans_fee",
@@ -330,7 +338,8 @@
         "shimmer": 15,
         "tier": "uncommon",
         "hint": "On the islet across the water."
-      }
+      },
+      "blurb": "The old ferryman of Gullwick never spent a copper; his savings are by the shrine somewhere."
     },
     {
       "id": "the_hermits_secret",
@@ -364,7 +373,8 @@
         "shimmer": 15,
         "tier": "uncommon",
         "hint": "Beneath the marked root."
-      }
+      },
+      "blurb": "The hermit of Wychwood buried his past where nobody sane goes."
     },
     {
       "id": "the_widows_dowry",
@@ -409,7 +419,8 @@
         "shimmer": 15,
         "tier": "rare",
         "hint": "The bank below the bastion's postern."
-      }
+      },
+      "blurb": "A widow's dowry sent from the Gorse March north into the Sunken Wolds, and never claimed."
     },
     {
       "id": "the_red_paymaster",
@@ -454,7 +465,8 @@
         "shimmer": 15,
         "tier": "rare",
         "hint": "In the gorse behind the keep."
-      }
+      },
+      "blurb": "The raiders' pay chest, moved from the Redcliff frontier toward Millbrook Vale."
     },
     {
       "id": "lantern_oil",
@@ -490,7 +502,8 @@
         "shimmer": 15,
         "tier": "rare",
         "hint": "Inside the ring of thorns."
-      }
+      },
+      "blurb": "The cult's offerings, hidden where the thorns grow in a ring in Blackthorn Scar."
     },
     {
       "id": "hollin_toll_box",
@@ -526,7 +539,8 @@
         "shimmer": 15,
         "tier": "uncommon",
         "hint": "The goatless ledge."
-      }
+      },
+      "blurb": "An honest-ish tollkeeper's box, hidden high in Hollin Pass."
     },
     {
       "id": "mere_bottom",
@@ -562,7 +576,8 @@
         "shimmer": 15,
         "tier": "uncommon",
         "hint": "Off the end of the jetty when the water's low."
-      }
+      },
+      "blurb": "A fortune in a sack dropped off a jetty in Coldwater Mere."
     },
     {
       "id": "the_mossy_bastion_vault",
@@ -598,7 +613,8 @@
         "shimmer": 15,
         "tier": "rare",
         "hint": "Among the giant mushrooms."
-      }
+      },
+      "blurb": "A vault under the Mossy Bastion in the Sunken Wolds, and a key somewhere else."
     }
   ]
 }

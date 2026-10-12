@@ -2,6 +2,7 @@
   "id": "rare_gravel_jack",
   "name": "Gravel Jack",
   "tier": "rare",
+  "secret": true,
   "zone": "ashcombe",
   "body": "hoard_mimic",
   "place": "sits in the ruined counting house of Ashcombe pretending to be a strongbox",

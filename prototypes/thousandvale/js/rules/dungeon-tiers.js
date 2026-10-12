@@ -10,12 +10,12 @@
 //   { family, familyName, look, name, level, seed, cell: 2,
 //     floors: [ { index, origin:{x,z}, w, h, tiles: Uint8Array(w*h) /* 1 floor, 0 wall, j*w+i */,
 //                 rooms: [ { i, j, w, h, kind, id, x, z } ],      // kind: entry|fight|key|miniboss|boss|reward|arrival
-//                 entry:{x,z}, stairsDown?, stairsUp?, exit?, chest?,  // metres (protocol)
+//                 entry:{x,z}, stairsDown?, stairsUp?, exit?, chest?,  // metres (protocol). `exit` = ONLY on the last floor, behind the boss
+//                 door?: {x,z,name} (floor 0: the way you came in), label, name, landing:{x,z}, lift?: {x,z,to:[{floor,label,name,x,z}]}   // play-test 6 U10/U12
 //                 packs: [ { x, z, count, rank, level, radius, type, room, encounter? } ],
 //                 level,                                             // this floor's monster level (+2 a floor)
 //                 lever?:   { x, z, room },                          // in the key room; opens `gate`
 //                 gate?:    { i, j, w, h, x, z },                    // tiles that start CLOSED (still 1 in tiles[])
-//                 shortcutUp?: { x, z, to: { floor: 0, x, z } },     // floors > 0: a quick way back to the top
 //                 props:    [ { id, type, name, x, z, room, r?, encounter } ] } ] }  // arena objects (only with opts.arenas)
 //
 // A gate's tiles are floor (1) in `tiles`, so a server that ignores gates still has a walkable dungeon;
@@ -292,6 +292,28 @@ function mineFloor(rng, kinds) {
   path.forEach((p, k) => { if (p[0] >= x0 + 3 && p[0] <= x1 - 3 && rowJ.some(rj => Math.abs(rj - p[1]) <= 1)) flat.push(k); });
   for (let k = 0; k < n; k++) {
     const kind = want[k];
+    // play-test 6 U10: the reward room (chest + the way out) opens off the BOSS room, never off the shaft — a gallery
+    // of its own on the shaft could be walked into past the boss's door without ever fighting it
+    if (kind === 'reward') {
+      const boss = rooms.find(r => r.kind === 'boss');
+      const w = 8, h = 8, j = boss.side > 0 ? boss.j + boss.h - h : boss.j;
+      let placed = null;
+      for (const dir of (rng() < 0.5 ? [1, -1] : [-1, 1])) {
+        const room = { w, h, j, i: dir > 0 ? boss.i + boss.w + 3 : boss.i - 3 - w, kind, at: boss.at, side: 0, off: boss };
+        if (room.i < 2 || room.i + w > W - 2 || boss.side === 0) continue;
+        if (rooms.some(o => o !== boss && overlaps(o, room, 2))) continue;
+        const own = rowJ.findIndex(rj => Math.abs(rj - boss.at[1]) <= 2);
+        if (reserved.some((b, bi) => bi !== own && overlaps(b, room, 1))) continue;
+        placed = room;
+        g.rect(room);
+        g.hLine(dir > 0 ? boss.i + boss.w - 1 : boss.i, dir > 0 ? room.i : room.i + w - 1, j + (h >> 1), 1);
+        break;
+      }
+      // no room beside it: an alcove carved INTO the far end of the boss room's own band, past the boss
+      if (!placed) { placed = { w: 6, h: 4, i: boss.i + ((boss.w - 6) >> 1), j: boss.side > 0 ? boss.j + boss.h - 4 : boss.j, kind, at: boss.at, side: 0, off: boss }; g.rect(placed); }
+      rooms.push(placed);
+      continue;
+    }
     const big = kind === 'boss' ? 14 : kind === 'miniboss' ? 12 : 0;
     // target index along the shaft: first gallery at the very start, last at the very end
     const t = n === 1 ? 0 : k / (n - 1);
@@ -670,7 +692,10 @@ function arenaProps(room, objects, floorIndex, roomCentre, encId) {
  *        each boss/mini-boss room lists its arena objects as `props` (the encounter engine spawns the
  *        real objects itself — props are for the viewer, the client's dressing and the tests).
  */
-export function planDungeon(seed, { floors = 2, level = 3, family = 'crypt_spiral', encounters = null, arenas = null, set = null } = {}) {
+// play-test 3 R2: `floorStep` (levels per floor down, default 2), `eliteStep` (an elite / mini-boss over its floor, default
+// 1) and `bossStep` (the last boss over its floor, default 2) — the starter dungeon (the Ploughman's Crypt behind the
+// "Barrow entrance" near Torborhold) runs 1/0/1 so a level-2 party meets a level-2 mini-boss, not a level-4 one.
+export function planDungeon(seed, { floors = 2, level = 3, family = 'crypt_spiral', encounters = null, arenas = null, set = null, floorStep = 2, eliteStep = 1, bossStep = 2 } = {}) {
   floors = Math.max(1, Math.min(4, floors | 0));
   const key = familyFor(family);
   const fam = FAMILIES[key];
@@ -714,7 +739,7 @@ export function planDungeon(seed, { floors = 2, level = 3, family = 'crypt_spira
     widthSoFar += grid.w * CELL + GAP;
     const at = r => ({ x: origin.x + (r.i + r.w / 2) * CELL, z: origin.z + (r.j + r.h / 2) * CELL });
     rooms.forEach((r, k) => { r.id = k; const p = at(r); r.x = p.x; r.z = p.z; });
-    const lv = level + 2 * f;
+    const lv = level + floorStep * f;
     const startRoom = rooms.find(r => r.kind === start);
     const sp = at(startRoom);
     const floor = {
@@ -732,16 +757,16 @@ export function planDungeon(seed, { floors = 2, level = 3, family = 'crypt_spira
       if (r.kind === 'fight' || r.kind === 'key') {
         floor.packs.push({ x: p.x, z: p.z, count: 3 + rng.int(2), rank: 'normal', level: lv, radius, type: rng.pick(fam.roster.normal), room: r.id });
         if (!eliteGiven && r.kind === 'fight' && rng() < 0.5) {
-          floor.packs.push({ x: p.x + 2, z: p.z + 2, count: 1, rank: 'elite', level: lv + 1, radius: 1, type: fam.roster.elite, room: r.id });
+          floor.packs.push({ x: p.x + 2, z: p.z + 2, count: 1, rank: 'elite', level: lv + eliteStep, radius: 1, type: fam.roster.elite, room: r.id });
           eliteGiven = true;
         }
       } else if (r.kind === 'miniboss') {
         const mb = mbs[f % mbs.length];
-        floor.packs.push({ x: p.x, z: p.z, count: 1, rank: 'elite', level: lv + 1, radius: 1, type: mb.type, room: r.id, encounter: mb.id });
+        floor.packs.push({ x: p.x, z: p.z, count: 1, rank: 'elite', level: lv + eliteStep, radius: 1, type: mb.type, room: r.id, encounter: mb.id });
         out.encounters.miniboss.push(mb.id);
         floor.props.push(...arenaProps(r, arenas?.[mb.id], f, p, mb.id));
       } else if (r.kind === 'boss') {
-        floor.packs.push({ x: p.x, z: p.z, count: 1, rank: 'boss', level: lv + 2, radius: 1, type: enc.boss.type, room: r.id, encounter: enc.boss.id });
+        floor.packs.push({ x: p.x, z: p.z, count: 1, rank: 'boss', level: lv + bossStep, radius: 1, type: enc.boss.type, room: r.id, encounter: enc.boss.id });
         out.encounters.boss = enc.boss.id;
         floor.props.push(...arenaProps(r, arenas?.[enc.boss.id], f, p, enc.boss.id));
       }
@@ -749,8 +774,21 @@ export function planDungeon(seed, { floors = 2, level = 3, family = 'crypt_spira
     // objects
     const mbRoom = rooms.find(r => r.kind === 'miniboss');
     if (!last) { const p = at(mbRoom); floor.stairsDown = { x: p.x + 3, z: p.z }; }
-    if (f > 0) floor.stairsUp = { x: sp.x - 3, z: sp.z };
-    if (f === 0) floor.exit = { x: sp.x, z: sp.z - 4 };
+    // play-test 6 U10 ("why does this dungeon have a return portal before another boss area"): the `exit` — the way
+    // out — exists ONLY behind the last boss. What stands by the entrance of floor 1 is the DOOR you came in by: a
+    // different thing with a different name (a crypt is a ring, so the last fight room is beside the entrance and its
+    // old "Way out" portal read as the end of the dungeon with the mini-boss still ahead).
+    if (f === 0) floor.door = { x: sp.x, z: sp.z - 4, name: 'The way you came in' };
+    // U12 ("start on the floor you died on; going up should ask which level, like a lift"): `landing` = where you
+    // stand when you arrive on this floor from below or by the lift, and where you get up after dying on it;
+    // `lift` (floors > 0, at the stairs up) lists every floor above, nearest first.
+    floor.label = 'Floor ' + (f + 1);
+    floor.name = floorName(key, f, floors);
+    floor.landing = f === 0 ? { x: sp.x, z: sp.z } : { x: sp.x + 2, z: sp.z + 2 };
+    if (f > 0) {
+      floor.stairsUp = { x: sp.x - 3, z: sp.z };
+      floor.lift = { x: sp.x - 3, z: sp.z, to: out.floors.slice().reverse().map(g => ({ floor: g.index, label: g.label, name: g.name, x: g.landing.x, z: g.landing.z })) };
+    }
     if (last) {
       const rw = at(rooms.find(r => r.kind === 'reward'));
       floor.chest = { x: rw.x, z: rw.z };
@@ -760,10 +798,26 @@ export function planDungeon(seed, { floors = 2, level = 3, family = 'crypt_spira
     const kp = at(kr);
     floor.lever = { x: kp.x, z: kp.z + 2 * CELL, room: kr.id };
     floor.gate = { ...gate, x: origin.x + (gate.i + gate.w / 2) * CELL, z: origin.z + (gate.j + gate.h / 2) * CELL };
-    if (f > 0) { const p = at(mbRoom); floor.shortcutUp = { x: p.x - 3, z: p.z + 3, to: { floor: 0, x: out.floors[0].entry.x, z: out.floors[0].entry.z } }; }
+    // (the old `shortcutUp` stood in the mini-boss room, before the boss: the lift at the stairs does its job — U10 / U12)
     out.floors.push(floor);
   }
   return out;
+}
+
+/** What each floor of a family is called, top to bottom (a tower climbs: its "first floor" is the bottom). The LAST floor always takes the last name. */
+export const FLOOR_NAMES = {
+  crypt_spiral: ['The Upper Graves', 'The Bone Walk', 'The Low Cloister', 'The Sealed Vault'],
+  mine_descent: ['The Top Workings', 'The Second Ladder', 'The Wet Seam', 'The Deep Face'],
+  flooded_cistern: ['The Dry Galleries', 'The Sluice Rooms', 'The Standing Water', 'The Drowned Floor'],
+  fortress_keep: ['The Gate Ward', 'The Barracks', 'The Armoury Stair', 'The Great Hall'],
+  cave_river: ['The Mouth', 'The Dripping Run', 'The Black Water', 'The Lowest Pool'],
+  tower_climb: ['The Undercroft', 'The Winding Stair', 'The Bell Loft', 'The Crown Room'],
+  barrow_maze: ['The Outer Passages', 'The Turning Ways', 'The Inner Ring', 'The King\'s Chamber'],
+  sunken_temple: ['The Fallen Porch', 'The Flooded Nave', 'The Silent Cells', 'The Sanctum'],
+};
+export function floorName(family, f, floors) {
+  const list = FLOOR_NAMES[family] || FLOOR_NAMES.crypt_spiral;
+  return f === floors - 1 ? list[list.length - 1] : list[Math.min(f, list.length - 2)] + (f >= list.length - 1 ? ' ' + (f + 1) : '');
 }
 
 function hash(s) { let h = 0x811c9dc5; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return h >>> 0; }
@@ -803,7 +857,7 @@ export function flood(floor, from, { gateShut = false, cell = CELL } = {}) {
 /** Every metre point a floor names (for reachability checks): [label, {x,z}]. */
 export function floorPoints(floor) {
   const pts = [['entry', floor.entry]];
-  for (const k of ['stairsDown', 'stairsUp', 'exit', 'chest', 'lever', 'shortcutUp']) if (floor[k]) pts.push([k, floor[k]]);
+  for (const k of ['stairsDown', 'stairsUp', 'exit', 'door', 'landing', 'lift', 'chest', 'lever']) if (floor[k]) pts.push([k, floor[k]]);
   floor.rooms.forEach(r => pts.push([`room ${r.id} (${r.kind})`, { x: r.x, z: r.z }]));
   floor.packs.forEach((p, k) => pts.push([`pack ${k} (${p.rank})`, p]));
   floor.props.forEach(p => pts.push([`prop ${p.id}`, p]));

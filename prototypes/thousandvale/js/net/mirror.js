@@ -7,6 +7,14 @@
 //   m.ents  Map id -> { id, info, kind, x, y, z, yaw, hp (0..1), anim, animSeq, state, target, samples, seenTick }
 //   m.sample(id, tMs) -> { x, y, z, yaw } interpolated at server time tMs (clamped to the samples held)
 //   m.on('enter' | 'leave' | 'anim', fn)
+//
+// HEIGHT (play-test 1, P9): the server sends `y` on every FULL record but on a position delta only while the
+// entity is airborne or swimming. A grounded entity's y is therefore NOT kept here (`y` stays undefined) and
+// the renderer stands it on its own ground reader — the one it draws (B's terrain + bridge decks, or the
+// dungeon floor). Keeping the FULL record's y made a monster that walked downhill float, and one that walked
+// uphill sink, until it crossed into the next AOI cell and a new FULL record came.
+
+const LIFTED = 8 | 16;     // STATE.airborne | STATE.swimming (js/net/protocol.js)
 
 export function createMirror({ tickMs = 50, keep = 10 } = {}) {
   const ents = new Map(), infos = new Map();
@@ -35,10 +43,11 @@ export function createMirror({ tickMs = 50, keep = 10 } = {}) {
           if (isNew) fire('enter', e);
         } else if (!e) continue;       // a delta for an id we never got in full: ignore
         if (r.x !== undefined) { e.x = r.x; e.z = r.z; }
-        if (r.y !== undefined) e.y = r.y;
+        if (r.state !== undefined) e.state = r.state;
+        if (e.state & LIFTED) { if (r.y !== undefined) e.y = r.y; }
+        else e.y = undefined;            // grounded: the client's own ground (see HEIGHT above)
         if (r.yaw !== undefined) e.yaw = r.yaw;
         if (r.hp !== undefined) e.hp = r.hp;
-        if (r.state !== undefined) e.state = r.state;
         if (r.target !== undefined) e.target = r.target;
         if (r.anim !== undefined && (r.anim !== e.anim || r.animSeq !== e.animSeq)) { e.anim = r.anim; e.animSeq = r.animSeq; fire('anim', e); }
         e.seenTick = s.tick;

@@ -1,0 +1,1455 @@
+{
+ "_doc": "Stream E (play-test 3 R2). Extra monster camps near the start for world zone z13_02: solos and pairs (a third roaming a small loop) wherever the level ramp is <= 3.5 — tools/content-living.mjs fillHunting. Same record shape as the main placements file (type camp, stray/roam, hunt: true); js/sim/content.js merges them. Not read by stream B's bake (monsters need no cleared ground).",
+ "zone": "z13_02",
+ "eid": "torbor_cross",
+ "terrainHash": "b3a20e5d",
+ "stats": {
+  "targets": 12023,
+  "added": 54,
+  "stray": 34,
+  "roamer": 20,
+  "covered": 0.999
+ },
+ "placements": [
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_1",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 65,
+   "z": 55,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_2",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 39,
+   "z": 432,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_3",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 296,
+   "z": 696,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_4",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 423,
+   "z": 1817,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_5",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 63,
+   "z": 1057,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_6",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 552,
+   "z": 1448,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_7",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 152,
+   "z": 448,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_8",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 170,
+   "z": 133,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     123,
+     122
+    ],
+    [
+     184,
+     92
+    ],
+    [
+     212,
+     142
+    ],
+    [
+     156,
+     164
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_9",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 33,
+   "z": 1498,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_10",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 336,
+   "z": 590,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_11",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 184,
+   "z": 688,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_12",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 40,
+   "z": 784,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_13",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 54,
+   "z": 502,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_14",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 499,
+   "z": 1241,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     465,
+     1237
+    ],
+    [
+     496,
+     1207
+    ],
+    [
+     524,
+     1236
+    ],
+    [
+     506,
+     1267
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_15",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 255,
+   "z": 783,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_16",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 455,
+   "z": 1465,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     430,
+     1424
+    ],
+    [
+     493,
+     1442
+    ],
+    [
+     470,
+     1525
+    ],
+    [
+     401,
+     1483
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_17",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 370,
+   "z": 741,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     398,
+     694
+    ],
+    [
+     407,
+     770
+    ],
+    [
+     336,
+     771
+    ],
+    [
+     330,
+     716
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_18",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 428,
+   "z": 608,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     464,
+     623
+    ],
+    [
+     401,
+     646
+    ],
+    [
+     399,
+     588
+    ],
+    [
+     452,
+     562
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_19",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 248,
+   "z": 621,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_20",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 560,
+   "z": 1336,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_21",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 156,
+   "z": 1051,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_22",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 394,
+   "z": 1744,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_23",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 51,
+   "z": 152,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_24",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 117,
+   "z": 378,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_25",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 360,
+   "z": 940,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_26",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 367,
+   "z": 1333,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_27",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 560,
+   "z": 1152,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_28",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 277,
+   "z": 534,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     220,
+     539
+    ],
+    [
+     260,
+     490
+    ],
+    [
+     326,
+     511
+    ],
+    [
+     280,
+     589
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_29",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 40,
+   "z": 574,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     3,
+     568
+    ],
+    [
+     43,
+     519
+    ],
+    [
+     75,
+     575
+    ],
+    [
+     26,
+     613
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_30",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 104,
+   "z": 1124,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_31",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 416,
+   "z": 847,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     475,
+     845
+    ],
+    [
+     419,
+     891
+    ],
+    [
+     352,
+     861
+    ],
+    [
+     421,
+     805
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_32",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 383,
+   "z": 2002,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_33",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 349,
+   "z": 1832,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_34",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 49,
+   "z": 343,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_35",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 220,
+   "z": 411,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     278,
+     398
+    ],
+    [
+     226,
+     471
+    ],
+    [
+     151,
+     419
+    ],
+    [
+     214,
+     342
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_36",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 165,
+   "z": 271,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_37",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 473,
+   "z": 1865,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     441,
+     1903
+    ],
+    [
+     443,
+     1795
+    ],
+    [
+     539,
+     1831
+    ],
+    [
+     513,
+     1902
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_38",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 76,
+   "z": 1740,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     64,
+     1771
+    ],
+    [
+     56,
+     1721
+    ],
+    [
+     90,
+     1711
+    ],
+    [
+     106,
+     1752
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_39",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 49,
+   "z": 972,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_40",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 135,
+   "z": 733,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     142,
+     778
+    ],
+    [
+     100,
+     735
+    ],
+    [
+     129,
+     697
+    ],
+    [
+     163,
+     735
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_41",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 148,
+   "z": 32,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_42",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 120,
+   "z": 519,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     101,
+     538
+    ],
+    [
+     106,
+     487
+    ],
+    [
+     140,
+     496
+    ],
+    [
+     135,
+     541
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_43",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 101,
+   "z": 974,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     155,
+     941
+    ],
+    [
+     116,
+     1030
+    ],
+    [
+     42,
+     999
+    ],
+    [
+     90,
+     920
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_44",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 64,
+   "z": 1240,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_45",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 98,
+   "z": 1810,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_46",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 253,
+   "z": 1657,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_47",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 246,
+   "z": 1293,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_48",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 552,
+   "z": 1040,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     530,
+     1007
+    ],
+    [
+     605,
+     1006
+    ],
+    [
+     595,
+     1080
+    ],
+    [
+     507,
+     1082
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_49",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 405,
+   "z": 1266,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     353,
+     1253
+    ],
+    [
+     402,
+     1219
+    ],
+    [
+     466,
+     1289
+    ],
+    [
+     384,
+     1320
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_50",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 399,
+   "z": 1097,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     405,
+     1057
+    ],
+    [
+     453,
+     1121
+    ],
+    [
+     390,
+     1153
+    ],
+    [
+     339,
+     1082
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_51",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 200,
+   "z": 1896,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     136,
+     1866
+    ],
+    [
+     210,
+     1828
+    ],
+    [
+     255,
+     1904
+    ],
+    [
+     195,
+     1946
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_52",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 175,
+   "z": 623,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_53",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 496,
+   "z": 736,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     445,
+     773
+    ],
+    [
+     462,
+     697
+    ],
+    [
+     564,
+     703
+    ],
+    [
+     533,
+     781
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_torbor_cross_54",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 275,
+   "z": 960,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     228,
+     916
+    ],
+    [
+     307,
+     934
+    ],
+    [
+     319,
+     986
+    ],
+    [
+     246,
+     993
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  }
+ ]
+}

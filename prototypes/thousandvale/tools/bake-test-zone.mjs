@@ -25,7 +25,8 @@ import { fileURLToPath } from 'node:url';
 import { generateWorld } from '../../../worldgen/js/world.js';
 import { BIOMES } from '../../../worldgen/js/biomes.js';
 import { makeNoise2D, fbm, ridged, subSeed, hashStr, clamp, smoothstep } from '../../../worldgen/js/noise.js';
-import { FORMAT_MAGIC, FORMAT_VERSION, createTerrain } from '../js/rules/terrain-read.js';
+import { FORMAT_MAGIC, FORMAT_VERSION, createTerrain, predictHeights } from '../js/rules/terrain-read.js';
+import { deflateRawSync } from 'node:zlib';
 import { addZoneSites } from './lib/zone-sites.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -309,24 +310,26 @@ function findSpawn(t, target) {
   return best || { x: target.x, z: target.z };
 }
 
-/** Serialise to the terrain.bin format (see terrain-read.js). */
-export function encodeTerrain({ meta, height, waterTop, waterKind, biome }) {
+/** Serialise to the terrain.bin format, file version 2 (deflated; see terrain-read.js). `{ plain: true }` writes version 1. */
+export function encodeTerrain({ meta, height, waterTop, waterKind, biome }, { plain = false } = {}) {
   const json = new TextEncoder().encode(JSON.stringify(meta));
   const N = meta.size * meta.size;
   let off = 12 + json.length; off = (off + 3) & ~3;
-  const total = off + N * 2 * 2 + N * 2;
-  const out = new Uint8Array(total);
+  const layers = new Uint8Array(N * 6);
+  const lv = new DataView(layers.buffer);
+  const h = plain ? height : predictHeights(height, meta.size);
+  for (let k = 0; k < N; k++) lv.setUint16(k * 2, h[k], true);
+  for (let k = 0; k < N; k++) lv.setUint16(N * 2 + k * 2, waterTop[k], true);
+  layers.set(waterKind, N * 4); layers.set(biome, N * 5);
+  const body = plain ? layers : deflateRawSync(layers, { level: 9 });
+  const out = new Uint8Array(off + (plain ? 0 : 4) + body.length);
   const dv = new DataView(out.buffer);
   for (let k = 0; k < 4; k++) out[k] = FORMAT_MAGIC.charCodeAt(k);
-  dv.setUint32(4, FORMAT_VERSION, true);
+  dv.setUint32(4, plain ? 1 : 2, true);
   dv.setUint32(8, json.length, true);
   out.set(json, 12);
-  for (let k = 0; k < N; k++) dv.setUint16(off + k * 2, height[k], true);
-  off += N * 2;
-  for (let k = 0; k < N; k++) dv.setUint16(off + k * 2, waterTop[k], true);
-  off += N * 2;
-  out.set(waterKind, off); off += N;
-  out.set(biome, off);
+  if (!plain) { dv.setUint32(off, body.length, true); off += 4; }
+  out.set(body, off);
   return out;
 }
 
@@ -357,7 +360,8 @@ if (isMain) {
   const bytes = encodeTerrain(b);
   const file = join(OUT_DIR, 'terrain.bin');
   if (process.argv.includes('--check')) {
-    const same = existsSync(file) && Buffer.compare(readFileSync(file), Buffer.from(bytes)) === 0;
+    const { sameLayerFile } = await import('./lib/zone-layers.mjs');
+    const same = existsSync(file) && sameLayerFile('terrain.bin', readFileSync(file), bytes);
     console.log(same ? 'terrain.bin is up to date' : 'terrain.bin is STALE — re-run without --check');
     process.exit(same ? 0 : 1);
   }

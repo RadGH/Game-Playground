@@ -17,7 +17,7 @@
       "actions": [ { "adds": { "type": "moor_hound", "count": 2, "radius": 7 } } ] },
     "frenzy_ring": { "id": "frenzy_ring", "name": "Whirling Frenzy", "every": [12, 15], "first": 2, "cast": 1.0,
       "say": "{boss} spins — get inside its reach!",
-      "telegraphs": [ { "shape": "donut", "at": "self", "r": 11, "r2": 3, "wind": 1.6, "damage": 2.2 } ] }
+      "telegraphs": [ { "shape": "donut", "at": "self", "r": 11, "r2": 4, "wind": 1.6, "damage": 2.2 } ] }
   },
   "phases": [
     { "name": "Hunting", "abilities": ["pounce", "rend", "howl"] },

@@ -1,0 +1,472 @@
+{
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z14_02, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "zone": "z14_02",
+ "terrainHash": "b8a99ae8",
+ "placements": [
+  {
+   "type": "camp",
+   "id": "quest_serpents_at_the_ferry_0_0",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 648,
+   "z": 568,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "serpents_at_the_ferry",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_croaking_at_dawn_0_0",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    7,
+    7
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1744,
+   "z": 248,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "croaking_at_dawn",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z14_02_1",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 474,
+   "z": 888,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "gilded"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z14_02_2",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 952,
+   "z": 1972,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "ironclad"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z14_02_3",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1073,
+   "z": 898,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "venomous"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "npc",
+   "id": "angler_gullwick",
+   "name": "Josey Fourlakes",
+   "role": "angler",
+   "at": "Gullwick",
+   "x": 1428,
+   "z": 416,
+   "yaw": -0.39,
+   "angler": true,
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "npc",
+   "id": "carter_gullwick",
+   "name": "Alder Rookwood",
+   "role": "carter",
+   "at": "Gullwick",
+   "x": 1520,
+   "z": 426,
+   "yaw": -1.81,
+   "cart": "cart_gullwick",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_gullwick",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Gullwick",
+   "carter": "carter_gullwick",
+   "x": 1522,
+   "z": 426,
+   "yaw": -0.067,
+   "radius": 2.2
+  },
+  {
+   "type": "npc",
+   "id": "carter_ferry_hythe",
+   "name": "Emmot Sallow",
+   "role": "carter",
+   "at": "Ferry Hythe",
+   "x": 426,
+   "z": 632,
+   "yaw": 1.723,
+   "cart": "cart_ferry_hythe",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_ferry_hythe",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Ferry Hythe",
+   "carter": "carter_ferry_hythe",
+   "x": 424,
+   "z": 632,
+   "yaw": 0.216,
+   "radius": 2.2
+  },
+  {
+   "type": "npc",
+   "id": "carter_wyrmrow",
+   "name": "Rhosyn Cattermole",
+   "role": "carter",
+   "at": "Wyrmrow",
+   "x": 886,
+   "z": 1918,
+   "yaw": 2.19,
+   "cart": "cart_wyrmrow",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_wyrmrow",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Wyrmrow",
+   "carter": "carter_wyrmrow",
+   "x": 884,
+   "z": 1920,
+   "yaw": 0.785,
+   "radius": 2.2
+  },
+  {
+   "type": "npc",
+   "id": "carter_mirekeep",
+   "name": "Alder Brackenridge",
+   "role": "carter",
+   "at": "Mirekeep",
+   "x": 954,
+   "z": 1256,
+   "yaw": -0.252,
+   "cart": "cart_mirekeep",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_mirekeep",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Mirekeep",
+   "carter": "carter_mirekeep",
+   "x": 954,
+   "z": 1254,
+   "yaw": -1.569,
+   "radius": 2.2
+  },
+  {
+   "type": "guard",
+   "id": "guard_gullwick_0",
+   "name": "Gullwick Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Gullwick",
+   "post": "gate",
+   "gate": "gullwick_gate_0",
+   "x": 1510,
+   "z": 410,
+   "yaw": 0.112,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_gullwick_1",
+   "name": "Gullwick Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Gullwick",
+   "post": "gate",
+   "gate": "gullwick_gate_0",
+   "x": 1520,
+   "z": 408,
+   "yaw": 0.112,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_gullwick_2",
+   "name": "Gullwick Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Gullwick",
+   "post": "gate",
+   "gate": "gullwick_gate_1",
+   "x": 1482,
+   "z": 392,
+   "yaw": -1.562,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_gullwick_3",
+   "name": "Gullwick Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Gullwick",
+   "post": "gate",
+   "gate": "gullwick_gate_1",
+   "x": 1482,
+   "z": 400,
+   "yaw": -1.562,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_gullwick_4",
+   "name": "Gullwick Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Gullwick",
+   "post": "gate",
+   "gate": "gullwick_gate_2",
+   "x": 1476,
+   "z": 318,
+   "yaw": -3.108,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_gullwick_5",
+   "name": "Gullwick Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Gullwick",
+   "post": "gate",
+   "gate": "gullwick_gate_2",
+   "x": 1468,
+   "z": 318,
+   "yaw": -3.108,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_gullwick_6",
+   "name": "Sergeant Brookes",
+   "role": "guard",
+   "rank": "sergeant",
+   "tier": "town",
+   "town": "Gullwick",
+   "post": "square",
+   "x": 1522,
+   "z": 372,
+   "yaw": -2.543,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_gullwick_7",
+   "name": "Gullwick Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Gullwick",
+   "post": "square",
+   "x": 1522,
+   "z": 362,
+   "yaw": -0.648,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_gullwick_8",
+   "name": "Gullwick Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Gullwick",
+   "post": "square",
+   "x": 1510,
+   "z": 368,
+   "yaw": 1.72,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_ferry_hythe_0",
+   "name": "Ferry Hythe Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "village",
+   "town": "Ferry Hythe",
+   "post": "gate",
+   "gate": "ferry_hythe_gate_0",
+   "x": 424,
+   "z": 616,
+   "yaw": 0.154,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_ferry_hythe_1",
+   "name": "Ferry Hythe Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "village",
+   "town": "Ferry Hythe",
+   "post": "square",
+   "x": 414,
+   "z": 562,
+   "yaw": -0.412,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_wyrmrow_0",
+   "name": "Wyrmrow Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "village",
+   "town": "Wyrmrow",
+   "post": "gate",
+   "gate": "wyrmrow_gate_0",
+   "x": 876,
+   "z": 1906,
+   "yaw": 0.795,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_wyrmrow_1",
+   "name": "Wyrmrow Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "village",
+   "town": "Wyrmrow",
+   "post": "gate",
+   "gate": "wyrmrow_gate_1",
+   "x": 864,
+   "z": 1832,
+   "yaw": 2.608,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_wyrmrow_2",
+   "name": "Wyrmrow Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "village",
+   "town": "Wyrmrow",
+   "post": "square",
+   "x": 834,
+   "z": 1864,
+   "yaw": 1.77,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_mirekeep_0",
+   "name": "Mirekeep Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "hamlet",
+   "town": "Mirekeep",
+   "post": "gate",
+   "gate": "mirekeep_gate_0",
+   "x": 968,
+   "z": 1254,
+   "yaw": -1.569,
+   "titled": false
+  }
+ ]
+}

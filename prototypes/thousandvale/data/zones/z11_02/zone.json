@@ -1,5 +1,5 @@
 {
-  "name": "Fengate (z11_02)",
+  "name": "Copperdell (z11_02)",
   "zone": "z11_02",
   "sheet": {
     "sheet": "torbor_downs",
@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 2,
-  "inputHash": "e8887525",
+  "bakeVersion": 4,
+  "inputHash": "36526177",
   "waterKinds": [
     "none",
     "sea",
@@ -33,7 +33,7 @@
       "height": 224,
       "method": "pangea",
       "seaLevel": 0.2,
-      "inputHash": "9803699e"
+      "inputHash": "9805a835"
     },
     "zone": {
       "zx": 11,
@@ -67,9 +67,10 @@
     {
       "type": "settlement",
       "kind": "city",
-      "name": "Fengate",
+      "name": "Copperdell",
       "x": 352,
       "z": 448,
+      "wfName": "Fengate",
       "hub": true,
       "radius": 140,
       "movedFrom": {
@@ -80,9 +81,10 @@
     {
       "type": "settlement",
       "kind": "village",
-      "name": "Miminhold",
+      "name": "Pickaxe Row",
       "x": 1008,
       "z": 1664,
+      "wfName": "Miminhold",
       "radius": 65,
       "movedFrom": {
         "x": 1088,
@@ -121,30 +123,58 @@
       "name": "Barrow entrance",
       "x": 146,
       "z": 490,
-      "yaw": -3.593
+      "yaw": -3.593,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_delvers_hill",
       "x": 688,
       "z": 736,
-      "r": 40
+      "r": 40,
+      "pinned": true
     }
   ],
   "spawn": {
     "x": 348,
     "z": 444
   },
+  "bridges": [
+    {
+      "a": [
+        1204.37,
+        1844.37
+      ],
+      "b": [
+        1214.01,
+        1854.01
+      ],
+      "h": 225.419,
+      "w": 4.5
+    },
+    {
+      "a": [
+        1920.13,
+        2047.87
+      ],
+      "b": [
+        1941.17,
+        2028.48
+      ],
+      "h": 227.851,
+      "w": 5.4
+    }
+  ],
   "summary": {
     "zone": "z11_02",
     "province": "Petbeck Basin",
-    "inputHash": "e8887525",
+    "inputHash": "36526177",
     "rivers": 4,
-    "wetShare": 0.011,
-    "unwalkableShare": 0.091,
+    "wetShare": 0.01,
+    "unwalkableShare": 0.088,
     "towns": [
       {
-        "name": "Fengate",
+        "name": "Copperdell",
         "kind": "city",
         "hub": true,
         "at": [
@@ -160,10 +190,17 @@
         "plots": 31,
         "streets": 71,
         "links": 1,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 1,
+        "w6": {
+          "plotsBefore": 31,
+          "plots": 31,
+          "kept": 31,
+          "removed": []
+        }
       },
       {
-        "name": "Miminhold",
+        "name": "Pickaxe Row",
         "kind": "village",
         "hub": false,
         "at": [
@@ -177,9 +214,16 @@
         },
         "culture": "halfling",
         "plots": 14,
-        "streets": 55,
+        "streets": 54,
         "links": 1,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 1,
+        "w6": {
+          "plotsBefore": 14,
+          "plots": 14,
+          "kept": 14,
+          "removed": []
+        }
       },
       {
         "name": "Ashhaven",
@@ -198,25 +242,36 @@
         "plots": 11,
         "streets": 36,
         "links": 1,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 1,
+        "w6": {
+          "plotsBefore": 11,
+          "plots": 11,
+          "kept": 11,
+          "removed": []
+        }
       }
     ],
     "roads": 12,
     "bridges": 2,
-    "scatter": 19577,
+    "paths": 14,
+    "pathMetres": 2945,
+    "scatter": 22563,
     "scatterKinds": {
-      "tree_broadleaf": 8359,
-      "tree_conifer": 3468,
-      "bush": 4069,
-      "rock_large": 1188,
-      "boulder": 73,
-      "rock_small": 1310,
-      "reed": 1048,
-      "tree_dead": 62
+      "tree_broadleaf": 8430,
+      "tree_conifer": 3417,
+      "bush": 5178,
+      "rock_large": 1356,
+      "boulder": 91,
+      "rock_small": 1719,
+      "reed": 1072,
+      "tree_dead": 61,
+      "hedge": 1204,
+      "tree_fruit": 35
     },
     "sites": [
-      "settlement(HUB) city Fengate 352 448 140",
-      "settlement village Miminhold 1008 1664 65",
+      "settlement(HUB) city Copperdell 352 448 140",
+      "settlement village Pickaxe Row 1008 1664 65",
       "settlement hamlet Ashhaven 768 944 46",
       "landmark ancientwood Old Bitbilwood 1856 1088",
       "landmark ancientwood Old Medewood 832 320",
@@ -227,13 +282,13 @@
       "x": 348,
       "z": 444
     },
-    "placements": 244,
-    "vignettesAvoided": 0
+    "placements": 346,
+    "vignettesAvoided": 598
   },
   "files": {
-    "terrain.bin": 6306074,
-    "nav.bin": 1050717,
-    "scatter.bin": 156700,
-    "placements.json": 103701
+    "terrain.bin": 626178,
+    "nav.bin": 51612,
+    "scatter.bin": 180588,
+    "placements.json": 265980
   }
 }

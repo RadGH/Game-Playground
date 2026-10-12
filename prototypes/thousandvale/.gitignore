@@ -1,1 +1,5 @@
 .data/
+ops/tunnel/named/build/
+ops/load/results/
+ops/load/dist/
+ops/vps/target.env

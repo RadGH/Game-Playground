@@ -272,7 +272,7 @@ export function buildFace(a, rig, c) {
   // The mouth sits under the nose, and under the moustache when there is one — never behind it.
   const mouthY = Math.min(noseBottom - (hasMoustache ? 0.06 : 0.035), 0.1) - THREE.MathUtils.clamp((a.mouth.y || 0) * 0.025, -0.02, 0.03);
   const mouthW = 0.062 * THREE.MathUtils.clamp(a.mouth.scale || 1, 0.5, 1.8);
-  const beardColour = hair, stubble = mix(skin, hair, 0.22);
+  const beardColour = (a.facialHair && a.facialHair.color) || hair, stubble = mix(skin, beardColour, 0.22);   // a beard's own colour when the avatar sets one (Thousandvale's editor), else the hair's
   const aroundMouth = (x, y) => !(Math.abs(x) < mouthW + 0.02 && y > mouthY - 0.035 && y < mouthY + 0.03);
   // Everything below the mouth follows one jaw line: up the sideburn at the edge of the face, down
   // round the cheek, and under the lower lip in the middle.

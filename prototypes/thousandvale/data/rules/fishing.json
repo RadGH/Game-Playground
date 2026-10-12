@@ -1,0 +1,171 @@
+{
+  "_doc": "Stream C (play-test 5, T25 ANGLING) — the NUMBERS of the angling loop, read by js/rules/fishing.js. No fish, junk, legends, recipes or rods live here: those are stream E's data/provinces/angling.json and are handed to createFishing(numbers, content). `wait`: seconds from the bobber landing to the bite (always clamped to min..max; bait/rod `wait` are fractions added to 1, a pool multiplies by poolMult). `bite`: the window to press, ms, growing a little with skill. `kinds`: the share of casts that are a monster / crate / junk / legend — the rest are fish; junk falls from junk.at0 to junk.at100 with skill and is multiplied by junk.poolMult in a pool; crate is used only when E's file has no crates.chance. `rarity`: weights by source (open water, pool tier 1/2/3); `skillShift` multiplies a rarity's weight by 1 + skill/divisor. `pools`: skill gate, catches before it is fished out, how much sooner it bites. `tug`: per rarity — ms long, band (share of the bar that is safe), need (share of the time the marker must stay in it), pull (how hard the fish drags), speed, jitter; skill widens the band by up to bandPerSkill at 100 and a rod's bonus.band multiplies it, capped at bandMax. `heft`: size in cm from which a catch is heavy / huge. `size`: frac = u^k with k from at0 to at100 (lower k = bigger fish); price = base x (priceMin + priceSpan x frac). `xp`: per catch by rarity, + perFishSkill x the fish's own skill requirement, first of a species adds firstMult x base, a personal best adds `best`. `level`: xp to go from level L to L+1 = a + b L + c L^2, levels 1..max.",
+  "wait": {
+    "min": 2,
+    "max": 9,
+    "poolMult": 0.8
+  },
+  "bite": {
+    "at0": 1400,
+    "at100": 1700
+  },
+  "kinds": {
+    "monster": 0.03,
+    "crate": 0.04,
+    "junk": {
+      "at0": 0.18,
+      "at100": 0.05,
+      "poolMult": 0.5
+    },
+    "legend": {
+      "open": 0.012,
+      "pool": 0.04,
+      "size": [
+        90,
+        160
+      ],
+      "price": 900
+    }
+  },
+  "rarity": {
+    "open": {
+      "common": 70,
+      "uncommon": 24,
+      "rare": 5,
+      "epic": 1
+    },
+    "pool1": {
+      "common": 55,
+      "uncommon": 32,
+      "rare": 11,
+      "epic": 2
+    },
+    "pool2": {
+      "common": 42,
+      "uncommon": 36,
+      "rare": 17,
+      "epic": 5
+    },
+    "pool3": {
+      "common": 30,
+      "uncommon": 36,
+      "rare": 24,
+      "epic": 10
+    },
+    "skillShift": {
+      "uncommon": 200,
+      "rare": 100,
+      "epic": 80
+    }
+  },
+  "pools": {
+    "1": {
+      "minSkill": 1,
+      "catches": [
+        4,
+        6
+      ],
+      "rareBoost": 1
+    },
+    "2": {
+      "minSkill": 25,
+      "catches": [
+        4,
+        6
+      ],
+      "rareBoost": 1.25
+    },
+    "3": {
+      "minSkill": 50,
+      "catches": [
+        4,
+        6
+      ],
+      "rareBoost": 1.5
+    }
+  },
+  "tug": {
+    "common": {
+      "ms": 3000,
+      "band": 0.4,
+      "need": 0.5,
+      "pull": 0.25,
+      "speed": 0.8,
+      "jitter": 0.15
+    },
+    "uncommon": {
+      "ms": 3800,
+      "band": 0.32,
+      "need": 0.56,
+      "pull": 0.4,
+      "speed": 1.0,
+      "jitter": 0.25
+    },
+    "rare": {
+      "ms": 4800,
+      "band": 0.24,
+      "need": 0.63,
+      "pull": 0.6,
+      "speed": 1.25,
+      "jitter": 0.4
+    },
+    "epic": {
+      "ms": 5600,
+      "band": 0.18,
+      "need": 0.68,
+      "pull": 0.8,
+      "speed": 1.5,
+      "jitter": 0.55
+    },
+    "legend": {
+      "ms": 6000,
+      "band": 0.15,
+      "need": 0.7,
+      "pull": 0.9,
+      "speed": 1.6,
+      "jitter": 0.6
+    },
+    "bandPerSkill": 0.25,
+    "bandMax": 0.5
+  },
+  "heft": {
+    "heavy": 40,
+    "huge": 90
+  },
+  "size": {
+    "kAt0": 1.8,
+    "kAt100": 1.2,
+    "priceMin": 0.7,
+    "priceSpan": 0.8
+  },
+  "xp": {
+    "common": 10,
+    "uncommon": 18,
+    "rare": 34,
+    "epic": 70,
+    "legend": 250,
+    "junk": 3,
+    "crate": 12,
+    "monster": 8,
+    "firstMult": 0.6,
+    "best": 3,
+    "perFishSkill": 0.4
+  },
+  "level": {
+    "max": 100,
+    "a": 12,
+    "b": 6,
+    "c": 0.35
+  },
+  "value": {
+    "mult": 1.22,
+    "perBand": 0.005,
+    "rarity": {
+      "common": 0.9,
+      "uncommon": 1.0,
+      "rare": 1.1,
+      "epic": 1.2
+    },
+    "_doc": "owner feedback 7 (V2): a catch's gold = the species' own price (E's angling.json: its worth relative to other fish) x the size curve x rarity x mult x (1 + perBand x (zone level - 1)). Common fish are worth little, the prized few a lot, and the same water pays more in a higher zone. TUNED by stream E (economy lead, tools/sim-economy.mjs): mult 1.22, perBand 0.005 (it was 1 and 0.1), rarity factors nearly flat (0.9 / 1 / 1.1 / 1.2; they were 0.6 / 0.9 / 1.6 / 2.5). The spread between rarities is in E's species prices (angling.json: common 1-3, uncommon 10-20, rare 28-40, epic 80-180) and higher zones already hold the better species, so a second rarity factor and a steep zone factor on top made tier-3 pools pay three times questing."
+  }
+}

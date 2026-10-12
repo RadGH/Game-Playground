@@ -1,0 +1,989 @@
+{
+ "_doc": "Stream C (owner feedback 10, Y32): classes that exist ONLY in Thousandvale, injected in memory at engine boot by js/rules/tv-skills.js `installTvClasses` (Farhold's classes.json and skills.json are shared with live games and are never written). `classes` = whole class rows in Farhold's classes.json shape (plus `tv: true`, `outfit` = the class-outfit id D-world dresses it with, `resourceName` = its signature resource). `skills` = its skill rows in Farhold's skills.json shape, each with a four-tier talent tree (2 bespoke nodes + one shared library node a tier, every node a rule); a row's `tv.sky` = { proj, fallMs } makes each of its ground strikes a star that FALLS: the rules send fx `skyfall` (to, r, ms, proj) `fallMs` before the strike so the client can draw it coming down. The Starcaller's signature is the resource `starlight` (Farhold's own resource mechanic: 5 at most): Star Dart and Scattered Stars gain 1 for each enemy hit, Called Star / Star Field / Heavens' Barrage spend all of it (`perPoint.mult` more damage a point) and change at five (`atMax`). Projectile kinds are named in data/rules/projectiles.json (`star` for the two thrown skills, `skystar` for what falls). Kits are in data/rules/starter-kits.json, the themed armour in data/rules/armour-tiers.json.",
+ "classes": [
+  {
+   "id": "starcaller",
+   "name": "Starcaller",
+   "role": "Arcane Star Caster",
+   "hook": "Throws golden stars, calls bigger ones down from the sky and lays fields of them on the ground. Stars that land fill your Constellation.",
+   "primaryAttr": "INT",
+   "armorTier": "cloth",
+   "weapons": [
+    "wand",
+    "staff",
+    "tome"
+   ],
+   "starter": "wand",
+   "startingArmour": [
+    "cloth_chest",
+    "cloth_helm"
+   ],
+   "shield": false,
+   "skills": [
+    "star_dart",
+    "star_volley",
+    "called_star",
+    "star_field",
+    "wheeling_stars",
+    "sky_barrage"
+   ],
+   "look": {
+    "body": {
+     "height": 0.5,
+     "width": 0.45,
+     "headSize": 0.5,
+     "skin": "#e8c39a"
+    },
+    "headShape": "oval",
+    "hair": {
+     "id": "wavy",
+     "color": "#2a2440"
+    },
+    "eyes": {
+     "id": "round",
+     "color": "#c9a23a"
+    },
+    "brows": {
+     "id": "straight"
+    },
+    "nose": {
+     "id": "small"
+    },
+    "mouth": {
+     "id": "neutral",
+     "color": "#b5484d"
+    },
+    "ears": {
+     "id": "normal"
+    },
+    "facialHair": {
+     "id": "none"
+    },
+    "top": {
+     "id": "trim_robe",
+     "color": "#1c1f4a",
+     "color2": "#e6c14a"
+    },
+    "bottom": {
+     "id": "pants",
+     "color": "#161838"
+    },
+    "shoes": {
+     "id": "slippers",
+     "color": "#2a2440"
+    },
+    "accessory": {
+     "id": "none"
+    },
+    "hat": {
+     "id": "hood",
+     "color": "#1c1f4a"
+    },
+    "extras": {
+     "id": "none"
+    },
+    "cape": {
+     "id": "none"
+    },
+    "held": {
+     "id": "staff_orb",
+     "color": "#e6c14a"
+    },
+    "offhand": {
+     "id": "none"
+    },
+    "decor": {
+     "id": "scroll_case",
+     "color": "#8a6a3a"
+    }
+   },
+   "sample": "Sabel Thorne",
+   "signature": "Constellation: Star Dart and Scattered Stars gain 1 Starlight for each enemy they hit (it holds 5); Called Star, Star Field and Heavens' Barrage spend it all for more damage, and do more still at five.",
+   "tv": true,
+   "outfit": "starcaller",
+   "resource": "mana",
+   "resourceName": "Starlight"
+  }
+ ],
+ "skills": {
+  "star_dart": {
+   "name": "Star Dart",
+   "shape": "bolt",
+   "element": "arcane",
+   "mult": 1.1,
+   "range": 34,
+   "splash": 1.4,
+   "cooldown": 2.5,
+   "mp": 5,
+   "resource": {
+    "id": "starlight",
+    "gain": 1,
+    "gainPer": "hit"
+   },
+   "talents": {
+    "1": {
+     "lib": "seeking",
+     "nodes": [
+      {
+       "id": "twin_darts",
+       "name": "Twin Darts",
+       "fx": "fan",
+       "mod": {
+        "add": {
+         "projectiles": 1
+        },
+        "set": {
+         "spread": 0.2
+        },
+        "mul": {
+         "mult": 0.65
+        }
+       }
+      },
+      {
+       "id": "guiding_light",
+       "name": "Guiding Light",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "marked",
+          "takeMore": 0.1,
+          "seconds": 4
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "chain",
+     "nodes": [
+      {
+       "id": "splinter_light",
+       "name": "Splinter Light",
+       "fx": "fan",
+       "mod": {
+        "split": {
+         "shards": 3,
+         "range": 6,
+         "keep": 0.4
+        }
+       }
+      },
+      {
+       "id": "dazzle",
+       "name": "Dazzle",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "weaken",
+          "dealLess": 0.15,
+          "seconds": 3
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "cauterise",
+     "nodes": [
+      {
+       "id": "bright_return",
+       "name": "Bright Return",
+       "fx": "drain",
+       "mod": {
+        "onKill": {
+         "mana": 0.04
+        }
+       }
+      },
+      {
+       "id": "glimmer",
+       "name": "Glimmer",
+       "fx": "drain",
+       "mod": {
+        "onHit": {
+         "mana": 1
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "cascade",
+     "nodes": [
+      {
+       "id": "dart_pair",
+       "name": "Dart Pair",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      },
+      {
+       "id": "gathered_light",
+       "name": "Gathered Light",
+       "fx": "charge",
+       "mod": {
+        "resource": {
+         "gain": 2
+        },
+        "mul": {
+         "cooldown": 1.4
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "star_volley": {
+   "name": "Scattered Stars",
+   "shape": "bolt",
+   "element": "arcane",
+   "mult": 0.6,
+   "range": 30,
+   "splash": 1.4,
+   "projectiles": 3,
+   "spread": 0.24,
+   "cooldown": 7,
+   "mp": 12,
+   "resource": {
+    "id": "starlight",
+    "gain": 1,
+    "gainPer": "hit"
+   },
+   "talents": {
+    "1": {
+     "lib": "seeking",
+     "nodes": [
+      {
+       "id": "five_stars",
+       "name": "Five Stars",
+       "fx": "fan",
+       "mod": {
+        "add": {
+         "projectiles": 2
+        },
+        "mul": {
+         "mult": 0.7
+        }
+       }
+      },
+      {
+       "id": "tight_cluster",
+       "name": "Tight Cluster",
+       "fx": "knock",
+       "mod": {
+        "set": {
+         "spread": 0.05
+        },
+        "knock": {
+         "stagger": 0.5
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "chain",
+     "nodes": [
+      {
+       "id": "glitter",
+       "name": "Glitter",
+       "fx": "zone",
+       "mod": {
+        "pool": {
+         "seconds": 4,
+         "radius": 2.5,
+         "power": 0.2,
+         "element": "arcane"
+        }
+       }
+      },
+      {
+       "id": "blinding_light",
+       "name": "Blinding Light",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "weaken",
+          "dealLess": 0.2,
+          "seconds": 3
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "cauterise",
+     "nodes": [
+      {
+       "id": "star_shield",
+       "name": "Star Shield",
+       "fx": "ward",
+       "mod": {
+        "barrier": {
+         "share": 0.1,
+         "seconds": 5
+        }
+       }
+      },
+      {
+       "id": "quick_hands",
+       "name": "Quick Hands",
+       "fx": "charge",
+       "mod": {
+        "cutCooldown": {
+         "skill": "star_dart",
+         "seconds": 1,
+         "per": "hit",
+         "orSelf": 0.5
+        }
+       },
+       "requires": "star_dart"
+      }
+     ]
+    },
+    "4": {
+     "lib": "cascade",
+     "nodes": [
+      {
+       "id": "second_volley",
+       "name": "Second Volley",
+       "fx": "echo",
+       "mod": {
+        "again": {
+         "delay": 0.5,
+         "mult": 0.5
+        }
+       }
+      },
+      {
+       "id": "stored_volley",
+       "name": "Stored Volley",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "called_star": {
+   "name": "Called Star",
+   "shape": "ground",
+   "element": "arcane",
+   "mult": 2.1,
+   "range": 30,
+   "radius": 5,
+   "delay": 1,
+   "cooldown": 10,
+   "mp": 18,
+   "knock": {
+    "stagger": 0.6
+   },
+   "resource": {
+    "id": "starlight",
+    "spend": "all",
+    "perPoint": {
+     "mult": 0.1
+    },
+    "atMax": {
+     "set": {
+      "radius": 8
+     }
+    }
+   },
+   "tv": {
+    "sky": {
+     "proj": "skystar",
+     "fallMs": 1000
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "star_crater",
+       "name": "Star Crater",
+       "fx": "zone",
+       "mod": {
+        "pool": {
+         "seconds": 5,
+         "radius": 5,
+         "power": 0.2,
+         "element": "arcane"
+        }
+       }
+      },
+      {
+       "id": "gravity_well",
+       "name": "Gravity Well",
+       "fx": "pull",
+       "mod": {
+        "pullIn": {
+         "metres": 2,
+         "to": "impact"
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "pinning_light",
+       "name": "Pinning Light",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "root",
+          "seconds": 2
+         }
+        ]
+       }
+      },
+      {
+       "id": "splitting_star",
+       "name": "Splitting Star",
+       "fx": "wide",
+       "mod": {
+        "repeats": {
+         "count": 3,
+         "every": 0.3,
+         "scatter": true
+        },
+        "mul": {
+         "mult": 0.45
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "star_debt",
+       "name": "Star Debt",
+       "fx": "charge",
+       "mod": {
+        "onKill": {
+         "refund": 0.5
+        }
+       }
+      },
+      {
+       "id": "laid_bare",
+       "name": "Laid Bare",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "marked",
+          "takeMore": 0.2,
+          "seconds": 6
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "cascade",
+     "nodes": [
+      {
+       "id": "twin_call",
+       "name": "Twin Call",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      },
+      {
+       "id": "aftershock",
+       "name": "Aftershock",
+       "fx": "echo",
+       "mod": {
+        "again": {
+         "delay": 1.5,
+         "mult": 0.5
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "star_field": {
+   "name": "Star Field",
+   "shape": "ground",
+   "element": "arcane",
+   "mult": 0.8,
+   "range": 28,
+   "radius": 6,
+   "cooldown": 16,
+   "mp": 22,
+   "place": {
+    "kind": "zone",
+    "seconds": 8,
+    "radius": 6,
+    "every": 1,
+    "strike": {
+     "mult": 0.25,
+     "targets": 6
+    }
+   },
+   "resource": {
+    "id": "starlight",
+    "spend": "all",
+    "perPoint": {
+     "mult": 0.1
+    },
+    "atMax": {
+     "place": {
+      "kind": "zone",
+      "seconds": 12,
+      "radius": 6,
+      "every": 1,
+      "strike": {
+       "mult": 0.25,
+       "targets": 6
+      }
+     }
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "drifting_field",
+       "name": "Drifting Field",
+       "fx": "zone",
+       "mod": {
+        "set": {
+         "shape": "around"
+        },
+        "place": {
+         "follow": "self"
+        }
+       }
+      },
+      {
+       "id": "hush_field",
+       "name": "Hush Field",
+       "fx": "tag",
+       "mod": {
+        "place": {
+         "debuff": "weaken"
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "kind_stars",
+       "name": "Kind Stars",
+       "fx": "ward",
+       "mod": {
+        "place": {
+         "heal": 0.02
+        }
+       }
+      },
+      {
+       "id": "drawing_field",
+       "name": "Drawing Field",
+       "fx": "pull",
+       "mod": {
+        "place": {
+         "pull": 1
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "bulwark",
+     "nodes": [
+      {
+       "id": "field_ward",
+       "name": "Field Ward",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Field Ward",
+         "seconds": 8,
+         "resist": 0.2
+        }
+       }
+      },
+      {
+       "id": "closing_burst",
+       "name": "Closing Burst",
+       "fx": "detonate",
+       "mod": {
+        "place": {
+         "onExpire": {
+          "radius": 6,
+          "mult": 1
+         }
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "aegis",
+     "nodes": [
+      {
+       "id": "second_field",
+       "name": "Second Field",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      },
+      {
+       "id": "falling_field",
+       "name": "Falling Field",
+       "fx": "wide",
+       "mod": {
+        "repeats": {
+         "count": 4,
+         "every": 0.5,
+         "scatter": true
+        },
+        "mul": {
+         "mult": 0.5
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "wheeling_stars": {
+   "name": "Wheeling Stars",
+   "shape": "self",
+   "element": "arcane",
+   "mult": 0.15,
+   "cooldown": 24,
+   "mp": 20,
+   "orbs": {
+    "count": 3,
+    "seconds": 12,
+    "every": 1.2,
+    "radius": 8
+   },
+   "ward": {
+    "charges": 2,
+    "cap": 0.15,
+    "seconds": 12
+   },
+   "talents": {
+    "1": {
+     "lib": "quick",
+     "nodes": [
+      {
+       "id": "star_burst",
+       "name": "Star Burst",
+       "fx": "wide",
+       "mod": {
+        "burst": {
+         "radius": 5,
+         "mult": 0.8,
+         "element": "arcane"
+        }
+       }
+      },
+      {
+       "id": "lingering_light",
+       "name": "Lingering Light",
+       "fx": "zone",
+       "mod": {
+        "pool": {
+         "seconds": 4,
+         "radius": 3,
+         "power": 0.3,
+         "element": "arcane"
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "mirror_stars",
+       "name": "Mirror Stars",
+       "fx": "counter",
+       "mod": {
+        "selfBuff": {
+         "name": "Mirror Stars",
+         "seconds": 12,
+         "reflect": 0.2
+        }
+       }
+      },
+      {
+       "id": "light_step",
+       "name": "Light Step",
+       "fx": "quick",
+       "mod": {
+        "selfBuff": {
+         "name": "Light Step",
+         "seconds": 4,
+         "movePct": 0.3
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "charged_stars",
+       "name": "Charged Stars",
+       "fx": "charge",
+       "mod": {
+        "empowerNext": {
+         "count": 2,
+         "mult": 0.4,
+         "seconds": 12
+        }
+       }
+      },
+      {
+       "id": "star_mantle",
+       "name": "Star Mantle",
+       "fx": "ward",
+       "mod": {
+        "barrier": {
+         "share": 0.15,
+         "seconds": 8
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "loosed_stars",
+       "name": "Loosed Stars",
+       "fx": "detonate",
+       "mod": {
+        "recast": {
+         "window": 12,
+         "then": {
+          "shape": "around",
+          "radius": 8,
+          "mult": 1.2,
+          "element": "arcane"
+         },
+         "say": "loose the stars as an 8 m ring of arcane force for 120% weapon damage"
+        }
+       }
+      },
+      {
+       "id": "turning_sky",
+       "name": "Turning Sky",
+       "fx": "charge",
+       "mod": {
+        "selfBuff": {
+         "name": "Turning Sky",
+         "seconds": 12,
+         "cdRate": 1.2
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "sky_barrage": {
+   "name": "Heavens' Barrage",
+   "shape": "ground",
+   "element": "arcane",
+   "mult": 0.42,
+   "range": 30,
+   "radius": 9,
+   "repeats": {
+    "count": 10,
+    "every": 0.4,
+    "scatter": true
+   },
+   "cooldown": 30,
+   "mp": 34,
+   "resource": {
+    "id": "starlight",
+    "spend": "all",
+    "perPoint": {
+     "mult": 0.08
+    },
+    "atMax": {
+     "set": {
+      "radius": 11
+     }
+    }
+   },
+   "tv": {
+    "sky": {
+     "proj": "skystar",
+     "fallMs": 350
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": "wide",
+     "nodes": [
+      {
+       "id": "around_me",
+       "name": "Around Me",
+       "fx": "zone",
+       "mod": {
+        "set": {
+         "shape": "around"
+        }
+       }
+      },
+      {
+       "id": "narrow_sky",
+       "name": "Narrow Sky",
+       "fx": "pull",
+       "mod": {
+        "set": {
+         "radius": 4
+        },
+        "repeats": {
+         "scatter": false
+        },
+        "pullIn": {
+         "metres": 1,
+         "to": "impact"
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "deepen",
+     "nodes": [
+      {
+       "id": "heavy_stars",
+       "name": "Heavy Stars",
+       "fx": "knock",
+       "mod": {
+        "knock": {
+         "stagger": 0.4
+        }
+       }
+      },
+      {
+       "id": "revealing_light",
+       "name": "Revealing Light",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "marked",
+          "takeMore": 0.15,
+          "seconds": 4
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "calm_eye",
+       "name": "Calm Eye",
+       "fx": "ward",
+       "mod": {
+        "selfBuff": {
+         "name": "Calm Eye",
+         "seconds": 6,
+         "resist": 0.2
+        }
+       }
+      },
+      {
+       "id": "star_tithe",
+       "name": "Star Tithe",
+       "fx": "charge",
+       "mod": {
+        "cutCooldown": {
+         "skill": "star_dart",
+         "seconds": 0.5,
+         "per": "hit",
+         "orSelf": 0.3
+        }
+       },
+       "requires": "star_dart"
+      }
+     ]
+    },
+    "4": {
+     "lib": "conflagration",
+     "nodes": [
+      {
+       "id": "falling_wake",
+       "name": "Falling Wake",
+       "fx": "wide",
+       "mod": {
+        "onKill": {
+         "burst": {
+          "radius": 4,
+          "mult": 0.8
+         }
+        }
+       }
+      },
+      {
+       "id": "hunting_stars",
+       "name": "Hunting Stars",
+       "fx": "seek",
+       "mod": {
+        "repeats": {
+         "target": "lowest"
+        },
+        "mul": {
+         "mult": 0.85
+        }
+       }
+      }
+     ]
+    }
+   }
+  }
+ }
+}

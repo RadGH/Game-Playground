@@ -1,5 +1,5 @@
 {
-  "name": "Wolfkeep (z12_03)",
+  "name": "Orrinsford (z12_03)",
   "zone": "z12_03",
   "sheet": {
     "sheet": "torbor_downs",
@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 2,
-  "inputHash": "c5264009",
+  "bakeVersion": 4,
+  "inputHash": "a6a668c3",
   "waterKinds": [
     "none",
     "sea",
@@ -33,7 +33,7 @@
       "height": 224,
       "method": "pangea",
       "seaLevel": 0.2,
-      "inputHash": "9803699e"
+      "inputHash": "9805a835"
     },
     "zone": {
       "zx": 12,
@@ -62,12 +62,14 @@
   "sites": [
     {
       "type": "settlement",
-      "kind": "village",
-      "name": "Wolfkeep",
+      "kind": "town",
+      "name": "Orrinsford",
       "x": 336,
       "z": 576,
+      "wfName": "Wolfkeep",
+      "grownFrom": "village",
       "hub": true,
-      "radius": 65,
+      "radius": 90,
       "movedFrom": {
         "x": 320,
         "z": 576
@@ -76,9 +78,10 @@
     {
       "type": "settlement",
       "kind": "hamlet",
-      "name": "Duskhaven",
+      "name": "Pilgrim's Halt",
       "x": 672,
       "z": 240,
+      "wfName": "Duskhaven",
       "radius": 46,
       "movedFrom": {
         "x": 704,
@@ -96,8 +99,12 @@
       "type": "crossing",
       "kind": "ford",
       "name": "Tethen Ford",
-      "x": 320,
-      "z": 576
+      "x": 313,
+      "z": 571,
+      "snappedFrom": {
+        "x": 320,
+        "z": 576
+      }
     },
     {
       "type": "dungeon",
@@ -105,49 +112,112 @@
       "name": "Barrow entrance",
       "x": 350,
       "z": 735,
-      "yaw": -2.692
+      "yaw": -2.692,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_saint_orrins_rise",
       "x": 327,
       "z": 872,
-      "r": 40
+      "r": 40,
+      "pinned": true
     }
   ],
   "spawn": {
-    "x": 352,
-    "z": 572
+    "x": 340,
+    "z": 580
   },
+  "bridges": [
+    {
+      "a": [
+        358.7,
+        412.4
+      ],
+      "b": [
+        338.43,
+        443.13
+      ],
+      "h": 247.356,
+      "w": 6.23
+    },
+    {
+      "a": [
+        340.15,
+        583.14
+      ],
+      "b": [
+        332.33,
+        594.75
+      ],
+      "h": 254.716,
+      "w": 6
+    },
+    {
+      "a": [
+        304.05,
+        570.51
+      ],
+      "b": [
+        318.84,
+        568.05
+      ],
+      "h": 254.716,
+      "w": 6
+    }
+  ],
   "summary": {
     "zone": "z12_03",
     "province": "Petbeck Basin",
-    "inputHash": "c5264009",
+    "inputHash": "a6a668c3",
     "rivers": 3,
-    "wetShare": 0.002,
+    "wetShare": 0.001,
     "unwalkableShare": 0.114,
     "towns": [
       {
-        "name": "Wolfkeep",
-        "kind": "village",
+        "name": "Orrinsford",
+        "kind": "town",
         "hub": true,
         "at": [
           336,
           576
         ],
-        "radius": 65,
+        "radius": 90,
         "movedFrom": {
           "x": 320,
           "z": 576
         },
         "culture": "halfling",
-        "plots": 15,
-        "streets": 48,
-        "links": 1,
-        "overlaps": 0
+        "plots": 26,
+        "streets": 84,
+        "links": 2,
+        "overlaps": 0,
+        "highStreets": 2,
+        "w6": {
+          "plotsBefore": 29,
+          "plots": 26,
+          "kept": 26,
+          "removed": [
+            {
+              "plot": 1,
+              "want": "hut",
+              "office": false
+            },
+            {
+              "plot": 6,
+              "want": "hut",
+              "office": false
+            },
+            {
+              "plot": 10,
+              "want": "hut",
+              "office": false
+            }
+          ]
+        }
       },
       {
-        "name": "Duskhaven",
+        "name": "Pilgrim's Halt",
         "kind": "hamlet",
         "hub": false,
         "at": [
@@ -161,44 +231,55 @@
         },
         "culture": "halfling",
         "plots": 12,
-        "streets": 39,
+        "streets": 38,
         "links": 1,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 1,
+        "w6": {
+          "plotsBefore": 12,
+          "plots": 12,
+          "kept": 12,
+          "removed": []
+        }
       }
     ],
     "roads": 10,
-    "bridges": 1,
-    "scatter": 12279,
+    "bridges": 3,
+    "paths": 11,
+    "pathMetres": 1993,
+    "scatter": 16390,
     "scatterKinds": {
-      "bush": 3412,
-      "tree_broadleaf": 3395,
-      "rock_small": 2084,
-      "rock_large": 1903,
-      "reed": 231,
+      "bush": 5141,
+      "tree_broadleaf": 3574,
+      "rock_small": 2798,
+      "rock_large": 2341,
+      "reed": 219,
       "tree_dead": 21,
-      "boulder": 259,
-      "tree_conifer": 968,
-      "tree_acacia": 6
+      "boulder": 299,
+      "tree_conifer": 1203,
+      "tree_acacia": 25,
+      "hedge": 732,
+      "tree_fruit": 37
     },
     "sites": [
-      "settlement(HUB) village Wolfkeep 336 576 65",
-      "settlement hamlet Duskhaven 672 240 46",
+      "settlement(HUB) town Orrinsford 336 576 90",
+      "settlement hamlet Pilgrim's Halt 672 240 46",
       "landmark ancientwood The Heme Heartwood 448 1472",
-      "crossing ford Tethen Ford 320 576",
+      "crossing ford Tethen Ford 313 571",
       "dungeon door_1 Barrow entrance 350 735  -2.692",
       "event event_saint_orrins_rise  327 872 40"
     ],
     "spawn": {
-      "x": 352,
-      "z": 572
+      "x": 340,
+      "z": 580
     },
-    "placements": 133,
-    "vignettesAvoided": 0
+    "placements": 238,
+    "vignettesAvoided": 646
   },
   "files": {
-    "terrain.bin": 6305926,
-    "nav.bin": 1050717,
-    "scatter.bin": 98316,
-    "placements.json": 84269
+    "terrain.bin": 684393,
+    "nav.bin": 50899,
+    "scatter.bin": 131204,
+    "placements.json": 207284
   }
 }

@@ -19,6 +19,22 @@ import {
   groundAt, wetAt, cliffStep,
 } from './farhold.js';
 import { makeRng } from './rng.js';
+import { pathfinderFor, clearLine } from './pathfind.js';
+
+/**
+ * Play-test 1 P11 — "pets darted to a corner attacking something through the wall; leash-teleport
+ * loop". On a terrain that can block (a baked zone with nav.bin, a dungeon's walls) a follower now:
+ *   * only picks a target it or its owner can SEE (a straight line on the planner's grid) and that
+ *     it can REACH (a planned path that gets there; a target it cannot reach is skipped for UNREACH s);
+ *   * walks round walls on the same planner the monsters use (js/rules/pathfind.js), engaging,
+ *     following and regrouping alike, and a ranged follower only shoots along a clear line;
+ *   * never snaps to its owner because a step would be wet — it waits, the planner goes round;
+ *   * teleports to its owner only as a LAST RESORT: further than FAR m and making no progress
+ *     toward the owner for STUCK s, or further than LOST m (the owner used a waystone).
+ * A flat terrain (Farhold, the parity fixtures) has no planner, so all of this is skipped and the
+ * brain is Farhold's, bit for bit.
+ */
+export const FOLLOW_PATH = { FAR: 45, STUCK: 6, LOST: 220, UNREACH: 5 };
 
 /** pets.js CLASS_PETS lives on each class row (`classDef.pet`); this is the fallback for a missing one. */
 export const DEFAULT_CAP = 6;
@@ -135,7 +151,7 @@ export function attachFollowers(room, { rng = null, spawnEntity = null, despawnE
   F.adopt = admitUnit;
 
   /** pets.js `summon`, synchronous. */
-  F.summon = (defId, owner, { count = 1, at = null, origin = 'summon', name = null, temporary = false, lifetime = 0, decoy = null, burstOnExpire = null, hpShare = null, look = null, heal = null, taunt = 0 } = {}) => {
+  F.summon = (defId, owner, { count = 1, at = null, origin = 'summon', name = null, temporary = false, lifetime = 0, decoy = null, burstOnExpire = null, hpShare = null, look = null, heal = null, taunt = 0, gate = true, backfill = null } = {}) => {
     const def = byId[defId];
     const made = [];
     made.refused = null;
@@ -143,7 +159,7 @@ export function attachFollowers(room, { rng = null, spawnEntity = null, despawnE
     for (let i = 0; i < count; i++) {
       if (temporary) {
         if (listOf(owner).filter(p => p.temporary).length >= TEMP_CAP) { made.refused = 'Too many summoned things at once.'; break; }
-      } else {
+      } else if (gate) {
         const allow = admitted(owner, defId, { origin, name: name || def.name });
         if (!allow.ok) { made.refused = allow.why; break; }
       }
@@ -171,6 +187,8 @@ export function attachFollowers(room, { rng = null, spawnEntity = null, despawnE
       unit.hover = def.flying ? 1.3 + rngPets() * 0.5 : 0;
       unit.bob = rngPets() * Math.PI * 2;
       unit.slot = listOf(owner).length;
+      // a Callboard seat-filler (index.js backfill): outside the follower-slot gate, stays in its room
+      if (backfill) unit.backfill = { ...backfill };
       admitUnit(unit);
       made.push(unit);
     }
@@ -201,6 +219,13 @@ export function attachFollowers(room, { rng = null, spawnEntity = null, despawnE
 
   F.tick = (dt, hooks = {}) => {
     const followAt = cfg.follow ?? 4.5;
+    const pf = pathfinderFor(field);
+    if (pf) pf.beginTick(field.clock);
+    const blk = pf?.blk || null;
+    const now = field.clock;
+    const sees = (ax, az, bx, bz) => !blk || clearLine(blk, ax, az, bx, bz);
+    const unreachable = (p, e) => (p.unreach?.get(e.id) ?? -Infinity) > now;
+    F._sees = blk ? sees : null;
     for (const owner of field.players) {
       const book = bookOf(owner);
       const at = owner;
@@ -211,7 +236,7 @@ export function attachFollowers(room, { rng = null, spawnEntity = null, despawnE
         if (book.fallen[i].left > 0) continue;
         const back = book.fallen.splice(i, 1)[0];
         if (owner.dead) { book.fallen.push({ ...back, left: 1 }); continue; }
-        const made = F.summon(back.defId, owner, { count: 1, at, origin: back.origin, name: back.name });
+        const made = F.summon(back.defId, owner, { count: 1, at, origin: back.origin, name: back.name, gate: !back.backfill, backfill: back.backfill || null });
         if (made[0]) hooks.onReturned?.(made[0]);
       }
       const pets = book.list;
@@ -221,7 +246,7 @@ export function attachFollowers(room, { rng = null, spawnEntity = null, despawnE
           p.dying += dt;
           if (p.dying > 2.2) {
             dropUnit(p);
-            if (!p.temporary) book.fallen.push({ defId: p.defId, left: cfg.reviveSeconds ?? 14, origin: p.origin || 'summon', name: p.name || null });
+            if (!p.temporary) book.fallen.push({ defId: p.defId, left: cfg.reviveSeconds ?? 14, origin: p.origin || 'summon', name: p.name || null, backfill: p.backfill || null });
             hooks.onFallen?.(p);
           }
           continue;
@@ -247,7 +272,25 @@ export function attachFollowers(room, { rng = null, spawnEntity = null, despawnE
           if (hurt > 0 && p.hp <= 0) { F.fall(p); continue; }
         }
         const toOwner = Math.hypot(at.x - p.x, at.z - p.z);
-        if (toOwner > leash * 2.5) {
+        if (pf) {
+          // P11: the last resort — far away AND stuck (no progress toward the owner), or truly lost
+          // progress = what is left to walk: along the planned path when the follower is coming back on
+          // one that reaches the owner (it may lead AWAY first, round a wall), else the straight line
+          const onPath = p.state !== 'engage' && p.path?.reached && p.path.left != null;
+          const left = onPath ? p.path.left + Math.hypot(at.x - p.path.gx, at.z - p.path.gz) : toOwner;
+          const rg = p.regroup || (p.regroup = { best: left, at: now, onPath });
+          if (rg.onPath !== onPath || left < rg.best - 1 || toOwner < FOLLOW_PATH.FAR) { rg.best = left; rg.at = now; rg.onPath = onPath; }
+          if (toOwner > FOLLOW_PATH.LOST || (toOwner > FOLLOW_PATH.FAR && now - rg.at > FOLLOW_PATH.STUCK)) {
+            const a = rngPets() * Math.PI * 2;
+            p.x = at.x + Math.cos(a) * 2; p.z = at.z + Math.sin(a) * 2;
+            if (blk && blk.fine(p.x, p.z)) { p.x = at.x; p.z = at.z; }
+            p.y = T() ? groundAt(T(), p.x, p.z, at.y ?? Infinity) : 0;
+            p.target = null; p.path = null; p.los = null;
+            rg.best = 2; rg.at = now;
+            field.emit({ t: 'move', id: p.id, x: p.x, z: p.z, why: 'regroup' });
+            continue;
+          }
+        } else if (toOwner > leash * 2.5) {
           const a = rngPets() * Math.PI * 2;
           p.x = at.x + Math.cos(a) * 3; p.z = at.z + Math.sin(a) * 3;
           p.y = T() ? groundAt(T(), p.x, p.z, at.y ?? Infinity) : 0;
@@ -259,13 +302,22 @@ export function attachFollowers(room, { rng = null, spawnEntity = null, despawnE
         if (p.decoy || p.statuses?.stasis) { p.anim = 'idle'; continue; }
         let target = p.target;
         if (target && (target.removed || target.dying != null || Math.hypot(target.x - at.x, target.z - at.z) > leash * 1.4)) target = null;
+        if (target && pf && unreachable(p, target)) target = null;
         if (selfHurt || ownerHurt || !target) {
           const fromX = selfHurt ? p.x : at.x, fromZ = selfHurt ? p.z : at.z;
           let best = null, bestD = selfHurt || ownerHurt ? Math.max(engageAt, leash) : engageAt;
-          for (const e of field.monsters) {
-            if (e.dying != null || e.removed) continue;
-            const d = Math.hypot(e.x - fromX, e.z - fromZ);
-            if (d < bestD) { bestD = d; best = e; }
+          if (!pf) {
+            // (the field's monster index: a province holds ~1,300 monsters)
+            field.eachMonsterNear(fromX, fromZ, bestD, (e, d) => { if (d < bestD) { bestD = d; best = e; } });
+          } else {
+            // P11: nearest first, the first one the follower or its owner can SEE and it can still reach
+            const cand = [];
+            field.eachMonsterNear(fromX, fromZ, bestD, (e, d) => { if (!unreachable(p, e)) cand.push([d, e]); });
+            cand.sort((a, b) => a[0] - b[0]);
+            for (let k = 0; k < cand.length && k < 8; k++) {
+              const e = cand[k][1];
+              if (sees(p.x, p.z, e.x, e.z) || sees(at.x, at.z, e.x, e.z)) { best = e; break; }
+            }
           }
           if (best || !target) target = best;
         }
@@ -288,14 +340,27 @@ export function attachFollowers(room, { rng = null, spawnEntity = null, despawnE
         } else {
           const a = (p.slot / Math.max(1, pets.length)) * Math.PI * 2;
           goalX = at.x + Math.cos(a) * 2.6; goalZ = at.z + Math.sin(a) * 2.6;
+          // P11: a follow spot inside a wall is no spot — stand by the owner instead
+          if (blk && blk.fine(goalX, goalZ)) { goalX = at.x; goalZ = at.z; }
           close = 1.2;
         }
         const dx = goalX - p.x, dz = goalZ - p.z;
         const dist = Math.hypot(dx, dz);
-        if (dist > close) {
-          p.facing = Math.atan2(dx, dz);
+        // P11: a ranged follower in range but with a wall in the way walks until it has a clear line
+        const blind = !!(pf && p.state === 'engage' && target && p.ranged && dist <= close && !sees(p.x, p.z, target.x, target.z));
+        if (dist > close || blind) {
+          let way = null;
+          if (pf) {
+            way = pf.steer(p, goalX, goalZ);
+            // a target the planner cannot reach is dropped for a while (no darting at a wall)
+            if (p.state === 'engage' && target && p.pathFailAt === now && !(p.path?.reached)) {
+              (p.unreach || (p.unreach = new Map())).set(target.id, now + FOLLOW_PATH.UNREACH);
+              p.target = null;
+            }
+          }
+          p.facing = way ? Math.atan2(way.x - p.x, way.z - p.z) : Math.atan2(dx, dz);
           speed = Math.max(p.speed, sprint) * (p.state === 'return' || toOwner > 12 ? 1.2 : 1);
-        } else if (p.state === 'engage' && target && p.swingTimer <= 0) {
+        } else if (p.state === 'engage' && target && p.swingTimer <= 0 && (!pf || p.ranged || sees(p.x, p.z, target.x, target.z))) {
           p.facing = Math.atan2(target.x - p.x, target.z - p.z);
           p.swingTimer = p.attackEvery;
           p.anim = 'attack';
@@ -316,7 +381,14 @@ export function attachFollowers(room, { rng = null, spawnEntity = null, despawnE
           const nz = p.z + Math.cos(p.facing) * speed * dt;
           let [cx, cz] = T()?.clampToWorld ? T().clampToWorld(nx, nz) : [nx, nz];
           if (!p.hover && T()) [cx, cz] = cliffStep(T(), p, cx, cz, dt, { feet: p.y }, [0, 0]);
-          if (!(T() && wetAt(T(), cx, cz, p.y))) { p.x = cx; p.z = cz; } else { p.x = at.x; p.z = at.z; }
+          if (pf) {
+            // P11: slide along a wall, never through it (as monster-ai.js does); a wet step waits
+            const B = T()?.blocked;
+            if (!p.hover && B && B(cx, cz) && !B(p.x, p.z)) {
+              if (!B(cx, p.z)) cz = p.z; else if (!B(p.x, cz)) cx = p.x; else { cx = p.x; cz = p.z; p.stuckAt = now; }
+            }
+            if (!(T() && wetAt(T(), cx, cz, p.y))) { p.x = cx; p.z = cz; } else p.stuckAt = now;
+          } else if (!(T() && wetAt(T(), cx, cz, p.y))) { p.x = cx; p.z = cz; } else { p.x = at.x; p.z = at.z; }
         }
         p.y = T() ? groundAt(T(), p.x, p.z, p.y) : 0;
         if (p.swingTimer <= 0 || p.state !== 'engage') p.anim = speed > p.speed ? 'run' : speed > 0 ? 'walk' : 'idle';
@@ -332,6 +404,7 @@ export function attachFollowers(room, { rng = null, spawnEntity = null, despawnE
     if (!(amount > 0)) return;
     target.playerDamage = (target.playerDamage || 0) + amount;
     const owner = p.owner;
+    if (owner?.id != null) target.lastHitBy = owner.id;
     if (owner?.id != null) (target.damageBy || (target.damageBy = new Map())).set(owner.id, (target.damageBy.get(owner.id) || 0) + amount);
   }
   F.creditFor = creditFor;
@@ -352,6 +425,21 @@ export function attachFollowers(room, { rng = null, spawnEntity = null, despawnE
     if (spec) applyStatus(target, type, spec, Math.max(1, (p.dmg[1] || 4) * 0.5));
   }
 
+  /** The party member (player) in 30 m with the lowest health share; the owner when nobody is hurt. */
+  function partyPatient(p) {
+    const owner = p.owner;
+    const party = owner?.partyId ?? null;
+    let best = owner, bestK = owner && owner.maxHp ? owner.hp / owner.maxHp : 1;
+    if (party == null) return owner;
+    for (const pl of field.players) {
+      if (pl === owner || pl.dead || pl.partyId !== party || !(pl.maxHp > 0)) continue;
+      if (Math.hypot(pl.x - p.x, pl.z - p.z) > 30) continue;
+      const k = pl.hp / pl.maxHp;
+      if (k < bestK) { bestK = k; best = pl; }
+    }
+    return best;
+  }
+
   /** pets.js `castAbility` — one spell a frame */
   function castAbility(p, target, hooks = {}) {
     for (const ab of p.abilities) {
@@ -359,7 +447,8 @@ export function attachFollowers(room, { rng = null, spawnEntity = null, despawnE
       const pureHeal = isPureHeal(ab);
       if (!pureHeal && !target) continue;
       if (pureHeal) {
-        const owner = p.owner;
+        // a Callboard healer looks after the whole party (the most hurt member in 30 m), not only its owner
+        const owner = p.backfill ? partyPatient(p) : p.owner;
         if (!owner || owner.hp == null) continue;
         if (!(owner.hp < (owner.maxHp || 0) * 0.92)) continue;
         const amount = Math.max(1, Math.round((owner.maxHp || 0) * (ab.heal || 0.1)));
@@ -372,6 +461,7 @@ export function attachFollowers(room, { rng = null, spawnEntity = null, despawnE
       }
       const reach = ab.range || (p.ranged?.range ?? 0) || Math.max(p.reach || 2.4, 4);
       if (Math.hypot(target.x - p.x, target.z - p.z) > reach) continue;
+      if (F._sees && !F._sees(p.x, p.z, target.x, target.z)) continue;      // P11: never through a wall
       ab.ready = ab.cooldown || 10;
       p.facing = Math.atan2(target.x - p.x, target.z - p.z);
       p.anim = 'attack';
@@ -417,6 +507,8 @@ export function attachFollowers(room, { rng = null, spawnEntity = null, despawnE
     }
     return n;
   };
+  /** How many of `owner`'s followers lie fallen (play-test 5 T4: the cleric's revive has work with only followers down). */
+  F.fallen = owner => bookOf(owner).fallen.length;
   F.reviveAll = (owner, share = 0.5) => {
     const book = bookOf(owner);
     const back = book.fallen.splice(0, book.fallen.length);
@@ -447,7 +539,14 @@ export function attachFollowers(room, { rng = null, spawnEntity = null, despawnE
     return k;
   };
   /** Take an owner's followers out of this room (handoff / logout); they keep their sheets. */
-  F.release = owner => { for (const p of [...listOf(owner)]) { field.detach(p); despawnEntity?.(p); } return listOf(owner); };
+  F.release = owner => {
+    const book = bookOf(owner);
+    // Callboard seat-fillers belong to the dungeon: they are dismissed, never carried out
+    for (const p of [...book.list]) if (p.backfill) dropUnit(p);
+    book.fallen = book.fallen.filter(f => !f.backfill);
+    for (const p of [...book.list]) { field.detach(p); despawnEntity?.(p); }
+    return book.list;
+  };
   /** Bring an owner's followers into this room (after a handoff). */
   F.receive = owner => {
     const book = bookOf(owner);

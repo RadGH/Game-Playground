@@ -6,25 +6,82 @@
       "name": "Commander Hild Barrowman",
       "role": "guard",
       "at": "Redcliff Fort",
-      "greeting": "Redcliff holds. Barely. Ask again tomorrow."
+      "greeting": "Redcliff holds. Barely. Ask again tomorrow.",
+      "titled": true
     },
     "farmer_wat": {
       "name": "Wat of Cinder Farm",
       "role": "farmer",
       "at": "Cinder Farm",
-      "greeting": "They burned the barn twice. I've stopped building barns. I've started building grudges."
+      "greeting": "They burned the barn twice. I've stopped building barns. I've started building grudges.",
+      "titled": true
     },
     "quartermaster_pike": {
       "name": "Quartermaster Pike",
       "role": "trader",
       "at": "Redcliff",
-      "greeting": "Arrows, bandages, and coffins. Two of those sell well."
+      "greeting": "Arrows, bandages, and coffins. Two of those sell well.",
+      "titled": true
     },
     "scout_orla": {
       "name": "Scout Tamsin",
       "role": "scout",
       "at": "cult_cellar",
-      "greeting": "Shh. Smugglers. And worse than smugglers. Cultists. Who smuggle."
+      "greeting": "Shh. Smugglers. And worse than smugglers. Cultists. Who smuggle.",
+      "titled": true
+    },
+    "angler_redcliff": {
+      "name": "Corwen Claywater",
+      "role": "angler",
+      "at": "Redcliff",
+      "greeting": "The river runs red here. It is only the clay. Mostly it is the clay. See the ripples, just west of where I'm standing? That's the town pool. It never fishes out.",
+      "placedBy": "content-pools",
+      "titled": true
+    },
+    "carter_redcliff": {
+      "name": "Nell Applegarth",
+      "role": "carter",
+      "at": "Redcliff",
+      "greeting": "Where to? The ox knows every road in the Downs, and takes most of them slowly.",
+      "cart": "cart_redcliff",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_cinder_farm": {
+      "name": "Alder Harl",
+      "role": "carter",
+      "at": "Cinder Farm",
+      "greeting": "Walking is free. Riding is nearly free, and you arrive with your legs.",
+      "cart": "cart_cinder_farm",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_ravenhaven": {
+      "name": "Cadoc Dunstable",
+      "role": "carter",
+      "at": "Ravenhaven",
+      "greeting": "Climb up. Mind the turnips. A few coins and you are in another town before your boots notice.",
+      "cart": "cart_ravenhaven",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_minfenrow": {
+      "name": "Kitt Sallow",
+      "role": "carter",
+      "at": "Minfenrow",
+      "greeting": "Longroad Carters. We go everywhere there is a gate, and we are never late, because we never say when.",
+      "cart": "cart_minfenrow",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_bipetwatch": {
+      "name": "Orla Pennock",
+      "role": "carter",
+      "at": "Bipetwatch",
+      "greeting": "Longroad Carters. We go everywhere there is a gate, and we are never late, because we never say when.",
+      "cart": "cart_bipetwatch",
+      "placedBy": "content-towns",
+      "titled": true
     }
   },
   "quests": [
@@ -40,25 +97,27 @@
           "kind": "kill",
           "type": "cinder_imp",
           "count": 6,
-          "where": "the burning farms",
-          "text": "Cinder imps"
+          "where": "the burning farms of the frontier",
+          "text": "Kill 6 cinder imps at the farms"
         },
         {
           "kind": "kill",
           "type": "road_brigand",
           "count": 6,
-          "where": "the raiders' camps",
-          "text": "Raiders"
+          "where": "the raiders' camps near Redcliff Fort",
+          "text": "Kill 6 raiders at their camps"
         }
       ],
       "done": "The farms will rebuild. The raiders came from Blackthorn Scar. That's where this ends.",
       "reward": {
         "xp": 0.6,
         "gold": 12,
-        "item": {
-          "tier": "uncommon",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "uncommon"
+          }
+        ]
       },
       "next": "into_the_scar"
     },
@@ -74,13 +133,19 @@
           "type": "crag_hyena",
           "count": 6,
           "where": "around Cinder Farm",
-          "text": "Crag hyenas"
+          "text": "Kill 6 crag hyenas at Cinder Farm"
         }
       ],
       "done": "Thank you. I'll name a barn after you. When I build one.",
       "reward": {
         "xp": 0.4,
-        "gold": 7
+        "gold": 7,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       }
     },
     {
@@ -94,7 +159,8 @@
           "kind": "deliver",
           "item": "Crate of bandages",
           "npc": "commander_hild",
-          "text": "Bring the bandages to Commander Hild"
+          "text": "Bring the bandages to Commander Hild",
+          "where": "Commander Hild, at Redcliff Fort"
         }
       ],
       "done": "Clean bandages! Somebody hug the quartermaster. Not me.",
@@ -113,14 +179,15 @@
         {
           "kind": "visit",
           "vignette": "cult_cellar",
-          "text": "Find the smugglers' cellar"
+          "text": "Find the Cloud-Shouters' Cellar",
+          "where": "The Cloud-Shouters' Cellar, under the burned farm"
         },
         {
           "kind": "kill",
           "type": "sky_cultist",
           "count": 5,
-          "where": "around the cellar",
-          "text": "Sky cultists"
+          "where": "around The Cloud-Shouters' Cellar",
+          "text": "Kill 5 sky cultists at the cellar"
         }
       ],
       "done": "Fewer shouting people. The clouds thank you.",
@@ -144,14 +211,16 @@
         {
           "kind": "clear",
           "dungeon": "door",
-          "text": "Take the upper halls",
-          "floor": 1
+          "text": "Take the upper halls of Redcliff Bastion",
+          "floor": 1,
+          "where": "Redcliff Bastion, the dungeon door on the frontier"
         },
         {
           "kind": "clear",
           "dungeon": "door",
-          "text": "Defeat the keep's warlord",
-          "boss": true
+          "text": "Defeat the bastion's warlord",
+          "boss": true,
+          "where": "the bottom of Redcliff Bastion"
         }
       ],
       "done": "The cliffs are ours again. Somebody fetch the flag.",
@@ -175,7 +244,8 @@
           "kind": "killRare",
           "zone": "redcliff",
           "slot": 0,
-          "text": "The frontier's rare slain"
+          "text": "Hunt down Redfang",
+          "where": "roams the Redcliff Frontier"
         }
       ],
       "done": "Good news, then. Excellent.",

@@ -104,11 +104,24 @@ export function nearestWater(t, x, z, r) {
  *  - event / camp sites asked for by name: [{ type, id, near:{x,z} | nearSite:'<site name>', r }]
  * avoid: extra discs to keep clear (vignettes etc.)
  */
-export function addZoneSites(t, sites, { asks = [], avoid = [], doorName, town: hubTown = null } = {}) {
+export function addZoneSites(t, sites, { asks = [], avoid = [], doorName, town: hubTown = null, pins = {} } = {}) {
   for (const s of sites) if (s.type === 'settlement' && !Number.isFinite(s.radius)) s.radius = TOWN_RADIUS[s.kind] || 50;
   const rank = { capital: 0, city: 1, town: 2, village: 3, hamlet: 4 };
   const town = hubTown || sites.filter(s => s.type === 'settlement').sort((a, b) => (rank[a.kind] ?? 9) - (rank[b.kind] ?? 9))[0];
   const keep = [...avoid, ...sites.filter(s => s.type === 'settlement').map(s => ({ x: s.x, z: s.z, r: s.radius }))];
+  // a pinned site (data/world/site-pins.json) stays where stream E placed around it, as long as no settlement covers it
+  const towns = sites.filter(s => s.type === 'settlement');
+  const pinOk = (p, r) => p && towns.every(s => Math.hypot(s.x - p.x, s.z - p.z) >= s.radius + r + 10) && t.inBounds(p.x, p.z);
+  const doorPin = pins.door_1;
+  if (!sites.some(s => s.type === 'dungeon' && s.id) && pinOk(doorPin, 20)) {
+    sites.push({ type: 'dungeon', id: 'door_1', name: doorName, x: doorPin.x, z: doorPin.z, yaw: doorPin.yaw, pinned: true });
+    keep.push({ x: doorPin.x, z: doorPin.z, r: 30 });
+  }
+  for (const ask of asks) {
+    const p = pins[ask.id];
+    if (sites.some(s => s.type === ask.type && s.id === ask.id) || !pinOk(p, ask.r)) continue;
+    const site = { type: ask.type, id: ask.id, x: p.x, z: p.z, r: ask.r, pinned: true }; sites.push(site); keep.push(site);
+  }
   if (!sites.some(s => s.type === 'dungeon' && s.id)) {
     // near the hub town; a zone with no town gets it by World Forge's own dungeon/lair mark, else near the middle;
     // widen the ring if it is crowded or rough

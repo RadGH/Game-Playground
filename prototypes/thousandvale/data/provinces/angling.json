@@ -1,0 +1,2325 @@
+{
+ "_doc": "Stream E (play-test 5, T25 ANGLING) — the TEXT content of angling: what there is to catch, cook, buy and who teaches it. The numbers of the loop (bite wait, tug difficulty, skill gain, table weights by rarity) are stream C's (js/rules/fishing.js + data/rules/fishing.json); pool positions are data/provinces/angling-pools.json; the quests are data/quests/angling.json. `fish[]`: id, name, desc, water (river | lake | marsh | coast — marsh = fresh water in a marsh/fen biome), bands [lo, hi] = the zone LEVELS it lives in (a zone offers a fish when the zone's band overlaps), time (any | day | night | dawn | dusk), rarity (common | uncommon | rare | epic), size [minCm, maxCm], price (gold a merchant pays), skill (angling skill needed), pool: true = only from a fish pool. `junk[]`: worthless catches. `legends[]`: one named fish per zone (zone = sheet zone id): landing it gives the `trophy` item and the `title` ('<name> <title>'). `pullBack[]`: 'something pulls back' — a monster `type` (Farhold bestiary id) climbs out, by water kind and zone band. `crates`: the chance of a sunken crate and the T9 crate it is. `meals{}`: same shape as data/provinces/shops.json goodsCatalog (the existing food + buff code eats them). `recipes[]`: cooked at a campfire or inn hearth; needs = [{fish: id, count}] or [{tag: any | river | lake | marsh | coast | <rarity>, count}]; skill = angling skill needed to know it. `tools[]`: rods (a Tool item, no weapon slot; bonus.band = wider tug band, bonus.wait = shorter bite wait). `bait[]`: optional consumables. `anglers[]`: one per town; they sell `sells`, buy fish and give angler jobs (data/quests/jobs.json frames with a `fish` slot). `skill.ranks`: rank name from each skill value up. OWNER FEEDBACK 7 (V2): `price` is a species' worth RELATIVE to other fish, deliberately spread wide — common 1-4, uncommon 6-14, rare 30-60, epic 150-300 — and a legend carries its own `price` (500 + 20 x its skill). Stream C's fishing.json `value` turns it into gold (rarity factor x mult x the zone-level factor); tools/sim-economy.mjs measures the hour.",
+ "fish": [
+  {
+   "id": "silver_perch",
+   "name": "Silver Perch",
+   "desc": "Bites at anything shiny, including its own reflection.",
+   "water": [
+    "river",
+    "lake"
+   ],
+   "bands": [
+    1,
+    10
+   ],
+   "time": "any",
+   "rarity": "common",
+   "size": [
+    12,
+    28
+   ],
+   "price": 2,
+   "skill": 0
+  },
+  {
+   "id": "mudlip_gudgeon",
+   "name": "Mudlip Gudgeon",
+   "desc": "A small brown opinion on the state of the riverbed.",
+   "water": [
+    "river"
+   ],
+   "bands": [
+    1,
+    5
+   ],
+   "time": "any",
+   "rarity": "common",
+   "size": [
+    8,
+    16
+   ],
+   "price": 2,
+   "skill": 0
+  },
+  {
+   "id": "ford_dace",
+   "name": "Ford Dace",
+   "desc": "Lives where carts cross and has seen every wheel in the province.",
+   "water": [
+    "river"
+   ],
+   "bands": [
+    1,
+    10
+   ],
+   "time": "any",
+   "rarity": "common",
+   "size": [
+    10,
+    22
+   ],
+   "price": 1,
+   "skill": 0
+  },
+  {
+   "id": "millrace_chub",
+   "name": "Millrace Chub",
+   "desc": "Fat from stolen grain. The miller wants a word.",
+   "water": [
+    "river"
+   ],
+   "bands": [
+    1,
+    10
+   ],
+   "time": "any",
+   "rarity": "common",
+   "size": [
+    18,
+    40
+   ],
+   "price": 2,
+   "skill": 0
+  },
+  {
+   "id": "redfin_roach",
+   "name": "Redfin Roach",
+   "desc": "Common as mud and twice as easy to cook.",
+   "water": [
+    "river",
+    "lake"
+   ],
+   "bands": [
+    1,
+    10
+   ],
+   "time": "any",
+   "rarity": "common",
+   "size": [
+    12,
+    30
+   ],
+   "price": 2,
+   "skill": 0
+  },
+  {
+   "id": "tollbridge_pike",
+   "name": "Tollbridge Pike",
+   "desc": "Waits under bridges and charges whatever it can swallow.",
+   "water": [
+    "river"
+   ],
+   "bands": [
+    2,
+    8
+   ],
+   "time": "any",
+   "rarity": "uncommon",
+   "size": [
+    45,
+    95
+   ],
+   "price": 16,
+   "skill": 10
+  },
+  {
+   "id": "dawn_grayling",
+   "name": "Dawn Grayling",
+   "desc": "Rises with the mist and is gone by breakfast.",
+   "water": [
+    "river"
+   ],
+   "bands": [
+    1,
+    7
+   ],
+   "time": "dawn",
+   "rarity": "uncommon",
+   "size": [
+    25,
+    45
+   ],
+   "price": 14,
+   "skill": 5
+  },
+  {
+   "id": "copper_barbel",
+   "name": "Copper Barbel",
+   "desc": "Whiskered, heavy and stubborn. Pulls like a debt.",
+   "water": [
+    "river"
+   ],
+   "bands": [
+    3,
+    8
+   ],
+   "time": "any",
+   "rarity": "uncommon",
+   "size": [
+    35,
+    75
+   ],
+   "price": 19,
+   "skill": 20
+  },
+  {
+   "id": "lantern_eel",
+   "name": "Lantern Eel",
+   "desc": "Glows faintly. Tastes of nothing you can prove.",
+   "water": [
+    "river",
+    "marsh"
+   ],
+   "bands": [
+    2,
+    8
+   ],
+   "time": "night",
+   "rarity": "uncommon",
+   "size": [
+    40,
+    90
+   ],
+   "price": 17,
+   "skill": 15
+  },
+  {
+   "id": "brook_speckle",
+   "name": "Brook Speckle",
+   "desc": "A small trout with a great many freckles and no patience.",
+   "water": [
+    "river"
+   ],
+   "bands": [
+    1,
+    10
+   ],
+   "time": "day",
+   "rarity": "common",
+   "size": [
+    15,
+    32
+   ],
+   "price": 1,
+   "skill": 0
+  },
+  {
+   "id": "weir_salmon",
+   "name": "Weir Salmon",
+   "desc": "Has jumped every weir in Torbor Downs and resents all of them.",
+   "water": [
+    "river"
+   ],
+   "bands": [
+    5,
+    10
+   ],
+   "time": "any",
+   "rarity": "rare",
+   "size": [
+    60,
+    110
+   ],
+   "price": 33,
+   "skill": 40,
+   "pool": true
+  },
+  {
+   "id": "pilgrim_trout",
+   "name": "Pilgrim Trout",
+   "desc": "Swims upstream to Saint Orrin's every year. Nobody knows what it prays for.",
+   "water": [
+    "river"
+   ],
+   "bands": [
+    2,
+    7
+   ],
+   "time": "dusk",
+   "rarity": "rare",
+   "size": [
+    35,
+    70
+   ],
+   "price": 28,
+   "skill": 20,
+   "pool": true
+  },
+  {
+   "id": "reeves_sturgeon",
+   "name": "Reeve's Sturgeon",
+   "desc": "By old law it belongs to the reeve. By older law, to whoever lands it.",
+   "water": [
+    "river"
+   ],
+   "bands": [
+    6,
+    10
+   ],
+   "time": "any",
+   "rarity": "epic",
+   "size": [
+    120,
+    240
+   ],
+   "price": 113,
+   "skill": 70,
+   "pool": true
+  },
+  {
+   "id": "pond_bream",
+   "name": "Pond Bream",
+   "desc": "Flat, calm and entirely without ambition.",
+   "water": [
+    "lake"
+   ],
+   "bands": [
+    1,
+    10
+   ],
+   "time": "any",
+   "rarity": "common",
+   "size": [
+    18,
+    40
+   ],
+   "price": 2,
+   "skill": 0
+  },
+  {
+   "id": "greenback_carp",
+   "name": "Greenback Carp",
+   "desc": "Older than most hamlets and not shy about it.",
+   "water": [
+    "lake"
+   ],
+   "bands": [
+    1,
+    10
+   ],
+   "time": "any",
+   "rarity": "common",
+   "size": [
+    30,
+    70
+   ],
+   "price": 2,
+   "skill": 0
+  },
+  {
+   "id": "reed_rudd",
+   "name": "Reed Rudd",
+   "desc": "Hides in the reeds. Badly.",
+   "water": [
+    "lake",
+    "marsh"
+   ],
+   "bands": [
+    1,
+    10
+   ],
+   "time": "any",
+   "rarity": "common",
+   "size": [
+    10,
+    26
+   ],
+   "price": 2,
+   "skill": 0
+  },
+  {
+   "id": "stone_loach",
+   "name": "Stone Loach",
+   "desc": "Looks like a pebble. Fights like one too.",
+   "water": [
+    "lake",
+    "river"
+   ],
+   "bands": [
+    1,
+    5
+   ],
+   "time": "any",
+   "rarity": "common",
+   "size": [
+    6,
+    14
+   ],
+   "price": 3,
+   "skill": 0
+  },
+  {
+   "id": "moon_tench",
+   "name": "Moon Tench",
+   "desc": "Slick, green and only awake when you would rather not be.",
+   "water": [
+    "lake"
+   ],
+   "bands": [
+    2,
+    8
+   ],
+   "time": "night",
+   "rarity": "uncommon",
+   "size": [
+    25,
+    55
+   ],
+   "price": 15,
+   "skill": 10
+  },
+  {
+   "id": "gullwick_whitefish",
+   "name": "Gullwick Whitefish",
+   "desc": "The lakes' daily bread. The gulls agree.",
+   "water": [
+    "lake"
+   ],
+   "bands": [
+    4,
+    8
+   ],
+   "time": "any",
+   "rarity": "common",
+   "size": [
+    25,
+    50
+   ],
+   "price": 4,
+   "skill": 15
+  },
+  {
+   "id": "glass_minnow",
+   "name": "Glass Minnow",
+   "desc": "You can see its lunch. It can see yours.",
+   "water": [
+    "lake"
+   ],
+   "bands": [
+    1,
+    6
+   ],
+   "time": "day",
+   "rarity": "common",
+   "size": [
+    4,
+    9
+   ],
+   "price": 1,
+   "skill": 0
+  },
+  {
+   "id": "mere_zander",
+   "name": "Mere Zander",
+   "desc": "All teeth and bad temper, wrapped in a nice fillet.",
+   "water": [
+    "lake"
+   ],
+   "bands": [
+    4,
+    9
+   ],
+   "time": "dusk",
+   "rarity": "uncommon",
+   "size": [
+    40,
+    85
+   ],
+   "price": 22,
+   "skill": 25
+  },
+  {
+   "id": "deepwater_char",
+   "name": "Deepwater Char",
+   "desc": "Comes up from the cold dark for one reason: your bait.",
+   "water": [
+    "lake"
+   ],
+   "bands": [
+    5,
+    10
+   ],
+   "time": "any",
+   "rarity": "rare",
+   "size": [
+    35,
+    70
+   ],
+   "price": 35,
+   "skill": 45,
+   "pool": true
+  },
+  {
+   "id": "pale_carp",
+   "name": "Pale Carp",
+   "desc": "White as a sheet. The monks say it is a sign. They say that about everything.",
+   "water": [
+    "lake"
+   ],
+   "bands": [
+    3,
+    9
+   ],
+   "time": "night",
+   "rarity": "rare",
+   "size": [
+    45,
+    90
+   ],
+   "price": 30,
+   "skill": 20
+  },
+  {
+   "id": "coldwater_lamprey",
+   "name": "Coldwater Lamprey",
+   "desc": "Not a fish you catch so much as one you detach.",
+   "water": [
+    "lake"
+   ],
+   "bands": [
+    5,
+    10
+   ],
+   "time": "any",
+   "rarity": "uncommon",
+   "size": [
+    30,
+    60
+   ],
+   "price": 23,
+   "skill": 30
+  },
+  {
+   "id": "crowned_pike",
+   "name": "Crowned Pike",
+   "desc": "Wears a ridge of bony knobs and rules its bay like a bad baron.",
+   "water": [
+    "lake"
+   ],
+   "bands": [
+    6,
+    10
+   ],
+   "time": "dawn",
+   "rarity": "epic",
+   "size": [
+    90,
+    160
+   ],
+   "price": 147,
+   "skill": 75,
+   "pool": true
+  },
+  {
+   "id": "bog_bullhead",
+   "name": "Bog Bullhead",
+   "desc": "All head. The rest is an afterthought.",
+   "water": [
+    "marsh"
+   ],
+   "bands": [
+    1,
+    10
+   ],
+   "time": "any",
+   "rarity": "common",
+   "size": [
+    10,
+    24
+   ],
+   "price": 1,
+   "skill": 0
+  },
+  {
+   "id": "fen_stickleback",
+   "name": "Fen Stickleback",
+   "desc": "Three spines and a grudge.",
+   "water": [
+    "marsh"
+   ],
+   "bands": [
+    1,
+    10
+   ],
+   "time": "any",
+   "rarity": "common",
+   "size": [
+    4,
+    8
+   ],
+   "price": 1,
+   "skill": 0
+  },
+  {
+   "id": "mire_mudskipper",
+   "name": "Mire Mudskipper",
+   "desc": "Technically a fish. It has heard the arguments.",
+   "water": [
+    "marsh"
+   ],
+   "bands": [
+    1,
+    10
+   ],
+   "time": "day",
+   "rarity": "common",
+   "size": [
+    8,
+    18
+   ],
+   "price": 2,
+   "skill": 0
+  },
+  {
+   "id": "black_weatherfish",
+   "name": "Black Weatherfish",
+   "desc": "Wriggles before rain. Wriggles after rain. A poor forecaster.",
+   "water": [
+    "marsh"
+   ],
+   "bands": [
+    2,
+    10
+   ],
+   "time": "any",
+   "rarity": "common",
+   "size": [
+    15,
+    30
+   ],
+   "price": 4,
+   "skill": 5
+  },
+  {
+   "id": "brackwater_eel",
+   "name": "Brackwater Eel",
+   "desc": "The fen's main export, after damp.",
+   "water": [
+    "marsh"
+   ],
+   "bands": [
+    3,
+    8
+   ],
+   "time": "any",
+   "rarity": "uncommon",
+   "size": [
+    50,
+    100
+   ],
+   "price": 18,
+   "skill": 15
+  },
+  {
+   "id": "wisp_gar",
+   "name": "Wisp Gar",
+   "desc": "Follows marsh lights around at night. Nobody has asked why.",
+   "water": [
+    "marsh"
+   ],
+   "bands": [
+    3,
+    8
+   ],
+   "time": "night",
+   "rarity": "uncommon",
+   "size": [
+    40,
+    80
+   ],
+   "price": 21,
+   "skill": 25
+  },
+  {
+   "id": "sedge_snakehead",
+   "name": "Sedge Snakehead",
+   "desc": "Breathes air, crosses fields and has opinions about ducks.",
+   "water": [
+    "marsh"
+   ],
+   "bands": [
+    4,
+    9
+   ],
+   "time": "any",
+   "rarity": "uncommon",
+   "size": [
+    35,
+    75
+   ],
+   "price": 22,
+   "skill": 30
+  },
+  {
+   "id": "peat_catfish",
+   "name": "Peat Catfish",
+   "desc": "Brown water, brown fish, brown stew. Delicious.",
+   "water": [
+    "marsh"
+   ],
+   "bands": [
+    2,
+    8
+   ],
+   "time": "dusk",
+   "rarity": "uncommon",
+   "size": [
+    40,
+    95
+   ],
+   "price": 16,
+   "skill": 10
+  },
+  {
+   "id": "sunkenlight_angler",
+   "name": "Sunkenlight Angler",
+   "desc": "Carries its own lamp, which is more than most fen travellers do.",
+   "water": [
+    "marsh"
+   ],
+   "bands": [
+    3,
+    10
+   ],
+   "time": "night",
+   "rarity": "rare",
+   "size": [
+    25,
+    55
+   ],
+   "price": 37,
+   "skill": 20,
+   "pool": true
+  },
+  {
+   "id": "greywhisker_wels",
+   "name": "Greywhisker Wels",
+   "desc": "A catfish the size of a calf. Something has been feeding it.",
+   "water": [
+    "marsh"
+   ],
+   "bands": [
+    5,
+    10
+   ],
+   "time": "any",
+   "rarity": "rare",
+   "size": [
+    110,
+    200
+   ],
+   "price": 38,
+   "skill": 50,
+   "pool": true
+  },
+  {
+   "id": "oldmud_lungfish",
+   "name": "Oldmud Lungfish",
+   "desc": "Sleeps through droughts and wakes up angry. Has seen four of them.",
+   "water": [
+    "marsh"
+   ],
+   "bands": [
+    6,
+    10
+   ],
+   "time": "any",
+   "rarity": "epic",
+   "size": [
+    80,
+    150
+   ],
+   "price": 80,
+   "skill": 70
+  },
+  {
+   "id": "harbour_sprat",
+   "name": "Harbour Sprat",
+   "desc": "Comes by the thousand. You will catch one.",
+   "water": [
+    "coast"
+   ],
+   "bands": [
+    1,
+    10
+   ],
+   "time": "any",
+   "rarity": "common",
+   "size": [
+    6,
+    12
+   ],
+   "price": 2,
+   "skill": 0
+  },
+  {
+   "id": "sand_dab",
+   "name": "Sand Dab",
+   "desc": "Flat on purpose.",
+   "water": [
+    "coast"
+   ],
+   "bands": [
+    1,
+    10
+   ],
+   "time": "any",
+   "rarity": "common",
+   "size": [
+    15,
+    30
+   ],
+   "price": 2,
+   "skill": 0
+  },
+  {
+   "id": "saltmouth_herring",
+   "name": "Saltmouth Herring",
+   "desc": "Smoked, salted, pickled or fresh. The town does little else.",
+   "water": [
+    "coast"
+   ],
+   "bands": [
+    4,
+    10
+   ],
+   "time": "any",
+   "rarity": "common",
+   "size": [
+    20,
+    35
+   ],
+   "price": 4,
+   "skill": 10
+  },
+  {
+   "id": "tide_mullet",
+   "name": "Tide Mullet",
+   "desc": "Arrives with the tide and leaves with your bait.",
+   "water": [
+    "coast"
+   ],
+   "bands": [
+    1,
+    10
+   ],
+   "time": "any",
+   "rarity": "common",
+   "size": [
+    25,
+    55
+   ],
+   "price": 3,
+   "skill": 5
+  },
+  {
+   "id": "rock_wrasse",
+   "name": "Rock Wrasse",
+   "desc": "Bright as a painted door and about as easy to get out of the rocks.",
+   "water": [
+    "coast"
+   ],
+   "bands": [
+    3,
+    8
+   ],
+   "time": "day",
+   "rarity": "uncommon",
+   "size": [
+    20,
+    45
+   ],
+   "price": 19,
+   "skill": 15
+  },
+  {
+   "id": "grey_gurnard",
+   "name": "Grey Gurnard",
+   "desc": "Grunts when landed. So would you.",
+   "water": [
+    "coast"
+   ],
+   "bands": [
+    4,
+    9
+   ],
+   "time": "any",
+   "rarity": "uncommon",
+   "size": [
+    25,
+    45
+   ],
+   "price": 20,
+   "skill": 20
+  },
+  {
+   "id": "wreckers_conger",
+   "name": "Wreckers' Conger",
+   "desc": "Lives in sunk hulls and guards cargo it has no use for.",
+   "water": [
+    "coast"
+   ],
+   "bands": [
+    6,
+    10
+   ],
+   "time": "night",
+   "rarity": "uncommon",
+   "size": [
+    90,
+    180
+   ],
+   "price": 20,
+   "skill": 35
+  },
+  {
+   "id": "storm_bass",
+   "name": "Storm Bass",
+   "desc": "Feeds in the surf when sensible people are indoors.",
+   "water": [
+    "coast"
+   ],
+   "bands": [
+    3,
+    10
+   ],
+   "time": "dusk",
+   "rarity": "rare",
+   "size": [
+    45,
+    90
+   ],
+   "price": 31,
+   "skill": 20,
+   "pool": true
+  },
+  {
+   "id": "moonscale_ray",
+   "name": "Moonscale Ray",
+   "desc": "Glides in on bright nights. Handle from the polite end.",
+   "water": [
+    "coast"
+   ],
+   "bands": [
+    6,
+    10
+   ],
+   "time": "night",
+   "rarity": "rare",
+   "size": [
+    60,
+    120
+   ],
+   "price": 40,
+   "skill": 50
+  },
+  {
+   "id": "longbill_spearfish",
+   "name": "Longbill Spearfish",
+   "desc": "Every captain in Saltmouth has nearly caught one. Ask them. At length.",
+   "water": [
+    "coast"
+   ],
+   "bands": [
+    7,
+    10
+   ],
+   "time": "day",
+   "rarity": "epic",
+   "size": [
+    150,
+    280
+   ],
+   "price": 180,
+   "skill": 80,
+   "pool": true
+  },
+  {
+   "id": "foldside_tench",
+   "name": "Foldside Tench",
+   "desc": "Fat, slow and fond of the sheep-wash. The first fish most Torbor children land.",
+   "water": [
+    "river",
+    "lake"
+   ],
+   "bands": [
+    1,
+    5
+   ],
+   "time": "any",
+   "rarity": "uncommon",
+   "size": [
+    18,
+    34
+   ],
+   "price": 3,
+   "skill": 0
+  },
+  {
+   "id": "sheepwash_trout",
+   "name": "Sheepwash Trout",
+   "desc": "Lies under the fold bridge and judges every bait on its merits.",
+   "water": [
+    "river"
+   ],
+   "bands": [
+    1,
+    5
+   ],
+   "time": "day",
+   "rarity": "uncommon",
+   "size": [
+    20,
+    40
+   ],
+   "price": 3,
+   "skill": 2
+  },
+  {
+   "id": "sedge_pickerel",
+   "name": "Sedge Pickerel",
+   "desc": "A pike in miniature with a pike's opinion of itself.",
+   "water": [
+    "marsh",
+    "lake"
+   ],
+   "bands": [
+    1,
+    6
+   ],
+   "time": "any",
+   "rarity": "uncommon",
+   "size": [
+    16,
+    36
+   ],
+   "price": 3,
+   "skill": 0
+  },
+  {
+   "id": "quay_whiting",
+   "name": "Quay Whiting",
+   "desc": "Shoals under the fish stalls, living on what the gulls drop.",
+   "water": [
+    "coast"
+   ],
+   "bands": [
+    1,
+    6
+   ],
+   "time": "any",
+   "rarity": "uncommon",
+   "size": [
+    18,
+    38
+   ],
+   "price": 3,
+   "skill": 0
+  },
+  {
+   "id": "torbor_goldscale",
+   "name": "Torbor Goldscale",
+   "desc": "Every scale a new coin. Innkeepers pay for it before it is cooked, so it can be seen on the plate.",
+   "water": [
+    "river",
+    "lake"
+   ],
+   "bands": [
+    1,
+    5
+   ],
+   "time": "any",
+   "rarity": "epic",
+   "size": [
+    24,
+    46
+   ],
+   "price": 50,
+   "skill": 1,
+   "pool": true
+  },
+  {
+   "id": "highforce_trout",
+   "name": "Highforce Trout",
+   "desc": "Holds station under the falls and takes whatever the white water brings.",
+   "water": [
+    "river"
+   ],
+   "bands": [
+    11,
+    20
+   ],
+   "time": "any",
+   "rarity": "common",
+   "size": [
+    22,
+    44
+   ],
+   "price": 5,
+   "skill": 40
+  },
+  {
+   "id": "ironback_barbel",
+   "name": "Ironback Barbel",
+   "desc": "Plated like a gauntlet and about as easy to turn.",
+   "water": [
+    "river"
+   ],
+   "bands": [
+    11,
+    20
+   ],
+   "time": "dusk",
+   "rarity": "uncommon",
+   "size": [
+    40,
+    80
+   ],
+   "price": 28,
+   "skill": 50
+  },
+  {
+   "id": "kingsrun_salmon",
+   "name": "Kingsrun Salmon",
+   "desc": "Runs the high rivers once a year and was once reserved for one table.",
+   "water": [
+    "river"
+   ],
+   "bands": [
+    13,
+    20
+   ],
+   "time": "dawn",
+   "rarity": "rare",
+   "size": [
+    60,
+    110
+   ],
+   "price": 54,
+   "skill": 65
+  },
+  {
+   "id": "tarn_whitefish",
+   "name": "Tarn Whitefish",
+   "desc": "Pale as the snowmelt it lives in, and nearly as cold to hold.",
+   "water": [
+    "lake"
+   ],
+   "bands": [
+    11,
+    20
+   ],
+   "time": "any",
+   "rarity": "common",
+   "size": [
+    20,
+    40
+   ],
+   "price": 5,
+   "skill": 40
+  },
+  {
+   "id": "deepmere_pike",
+   "name": "Deepmere Pike",
+   "desc": "Old enough to have outlived the boat that first hooked it.",
+   "water": [
+    "lake"
+   ],
+   "bands": [
+    11,
+    20
+   ],
+   "time": "any",
+   "rarity": "uncommon",
+   "size": [
+    60,
+    120
+   ],
+   "price": 28,
+   "skill": 55
+  },
+  {
+   "id": "starless_char",
+   "name": "Starless Char",
+   "desc": "Black above, black below; anglers find it by the hole it leaves in the reflections.",
+   "water": [
+    "lake"
+   ],
+   "bands": [
+    15,
+    20
+   ],
+   "time": "night",
+   "rarity": "epic",
+   "size": [
+    50,
+    95
+   ],
+   "price": 232,
+   "skill": 80,
+   "pool": true
+  },
+  {
+   "id": "blackwater_bowfin",
+   "name": "Blackwater Bowfin",
+   "desc": "Breathes air when the bog runs out of anything better.",
+   "water": [
+    "marsh"
+   ],
+   "bands": [
+    11,
+    20
+   ],
+   "time": "any",
+   "rarity": "common",
+   "size": [
+    30,
+    60
+   ],
+   "price": 5,
+   "skill": 40
+  },
+  {
+   "id": "fenlord_catfish",
+   "name": "Fenlord Catfish",
+   "desc": "Rules a mile of drowned ditch and takes tribute in ducklings.",
+   "water": [
+    "marsh"
+   ],
+   "bands": [
+    12,
+    20
+   ],
+   "time": "night",
+   "rarity": "rare",
+   "size": [
+    80,
+    150
+   ],
+   "price": 54,
+   "skill": 65
+  },
+  {
+   "id": "shoal_mackerel",
+   "name": "Shoal Mackerel",
+   "desc": "Comes in thousands or not at all.",
+   "water": [
+    "coast"
+   ],
+   "bands": [
+    11,
+    20
+   ],
+   "time": "day",
+   "rarity": "common",
+   "size": [
+    24,
+    40
+   ],
+   "price": 5,
+   "skill": 40
+  },
+  {
+   "id": "greatfin_tunny",
+   "name": "Greatfin Tunny",
+   "desc": "Fast enough to be somewhere else before the float settles.",
+   "water": [
+    "coast"
+   ],
+   "bands": [
+    11,
+    20
+   ],
+   "time": "any",
+   "rarity": "uncommon",
+   "size": [
+    70,
+    140
+   ],
+   "price": 28,
+   "skill": 55
+  },
+  {
+   "id": "abyss_halibut",
+   "name": "Abyss Halibut",
+   "desc": "A flat acre of muscle from where the charts stop. Both eyes are on you.",
+   "water": [
+    "coast"
+   ],
+   "bands": [
+    16,
+    20
+   ],
+   "time": "any",
+   "rarity": "epic",
+   "size": [
+    110,
+    190
+   ],
+   "price": 232,
+   "skill": 85,
+   "pool": true
+  }
+ ],
+ "junk": [
+  {
+   "id": "old_boot",
+   "name": "Old Boot",
+   "desc": "Left foot. The right one is still out there.",
+   "price": 0
+  },
+  {
+   "id": "waterlogged_hat",
+   "name": "Waterlogged Hat",
+   "desc": "Somebody was having a worse day than you.",
+   "price": 0
+  },
+  {
+   "id": "bent_horseshoe",
+   "name": "Bent Horseshoe",
+   "desc": "Unlucky for the horse, mildly lucky for you.",
+   "price": 3
+  },
+  {
+   "id": "rusty_bucket",
+   "name": "Rusty Bucket",
+   "desc": "Holds almost no water, which is how it ended up down there.",
+   "price": 3
+  },
+  {
+   "id": "tangle_of_line",
+   "name": "Tangle of Line",
+   "desc": "Another angler's whole afternoon.",
+   "price": 0
+  },
+  {
+   "id": "cart_wheel_spoke",
+   "name": "Cart Wheel Spoke",
+   "desc": "The Carter would like it back. The Carter can whistle.",
+   "price": 0
+  },
+  {
+   "id": "soggy_ledger",
+   "name": "Soggy Ledger",
+   "desc": "Every page reads the same now: blue.",
+   "price": 3
+  },
+  {
+   "id": "cracked_jug",
+   "name": "Cracked Jug",
+   "desc": "Still smells of trail ale. So does the fish that lived in it.",
+   "price": 3
+  },
+  {
+   "id": "river_weed",
+   "name": "Clump of River Weed",
+   "desc": "Fought harder than most perch.",
+   "price": 0
+  },
+  {
+   "id": "lost_bobber",
+   "name": "Somebody's Lost Bobber",
+   "desc": "Painted with care, lost with swearing.",
+   "price": 3
+  },
+  {
+   "id": "toll_token",
+   "name": "Bent Toll Token",
+   "desc": "Good for one crossing of a bridge that fell down years ago.",
+   "price": 6
+  },
+  {
+   "id": "chewed_oar",
+   "name": "Chewed Oar Blade",
+   "desc": "Tooth marks the width of your hand. Best not to think about it.",
+   "price": 3
+  }
+ ],
+ "legends": [
+  {
+   "id": "legend_old_ploughshare",
+   "name": "Old Ploughshare",
+   "desc": "A carp as long as a harrow, seen in the Torbor every spring since the bridge was wood.",
+   "zone": "test",
+   "water": "river",
+   "time": "dawn",
+   "skill": 15,
+   "title": "the Patient",
+   "trophy": {
+    "name": "Old Ploughshare's Scale",
+    "desc": "A scale the size of a saucer. It still smells of the Torbor."
+   },
+   "price": 2400
+  },
+  {
+   "id": "legend_the_penitent",
+   "name": "The Penitent",
+   "desc": "A white trout that circles the pilgrims' ford and has never once taken a blessed bait.",
+   "zone": "saint_orrins_rise",
+   "water": "river",
+   "time": "dusk",
+   "skill": 20,
+   "title": "the Unblessed",
+   "trophy": {
+    "name": "The Penitent's Fin",
+    "desc": "Pale as candle wax. The Prior asked you not to hang it in the yard."
+   },
+   "price": 2700
+  },
+  {
+   "id": "legend_copperjaw",
+   "name": "Copperjaw",
+   "desc": "A barbel that has swallowed so many miners' hooks its mouth has gone green.",
+   "zone": "delvers_hill",
+   "water": "river",
+   "time": "any",
+   "skill": 25,
+   "title": "Hook-Taker",
+   "trophy": {
+    "name": "Copperjaw's Hoard",
+    "desc": "Thirty-one hooks, two lures and a spoon, all from one fish."
+   },
+   "price": 3000
+  },
+  {
+   "id": "legend_mossback",
+   "name": "Mossback",
+   "desc": "A pike so old that things grow on it. Some of the things have names.",
+   "zone": "wychwood",
+   "water": "lake",
+   "time": "night",
+   "skill": 30,
+   "title": "of the Deep Wood",
+   "trophy": {
+    "name": "Mossback's Jaw",
+    "desc": "More teeth than a fish needs and a small fern."
+   },
+   "price": 3300
+  },
+  {
+   "id": "legend_the_millers_debt",
+   "name": "The Miller's Debt",
+   "desc": "The chub that broke three wheels at Millbrook. The miller keeps a list.",
+   "zone": "millbrook",
+   "water": "river",
+   "time": "day",
+   "skill": 30,
+   "title": "Wheelbreaker",
+   "trophy": {
+    "name": "The Miller's Receipt",
+    "desc": "A signed note: \"Paid in full. One fish.\""
+   },
+   "price": 3300
+  },
+  {
+   "id": "legend_tollkeeper",
+   "name": "The Tollkeeper",
+   "desc": "A pike under Halsbridge that takes one duck a day and considers it fair.",
+   "zone": "torbor_cross",
+   "water": "river",
+   "time": "dusk",
+   "skill": 35,
+   "title": "the Bridge-Warden",
+   "trophy": {
+    "name": "The Tollkeeper's Tooth",
+    "desc": "Long as a finger. The ducks sent their thanks."
+   },
+   "price": 3600
+  },
+  {
+   "id": "legend_cistern_pale",
+   "name": "The Cistern Pale",
+   "desc": "A blind white eel from the flooded cellars of Ashcombe. It finds you by the sound of your heart.",
+   "zone": "ashcombe",
+   "water": "lake",
+   "time": "night",
+   "skill": 40,
+   "title": "Cellar-Fisher",
+   "trophy": {
+    "name": "A Blind Eel's Lamp",
+    "desc": "It never had eyes. This is the old lantern it lived in."
+   },
+   "price": 3900
+  },
+  {
+   "id": "legend_snowmelt",
+   "name": "Snowmelt",
+   "desc": "A char that comes down with the thaw, cold enough to numb the hand that lifts it.",
+   "zone": "hollin_pass",
+   "water": "river",
+   "time": "dawn",
+   "skill": 45,
+   "title": "the Frostbitten",
+   "trophy": {
+    "name": "Snowmelt's Ice",
+    "desc": "A lump of ice from its belly that has not melted yet."
+   },
+   "price": 4200
+  },
+  {
+   "id": "legend_grandfather_mud",
+   "name": "Grandfather Mud",
+   "desc": "A lungfish older than Brackwater. The fen folk leave it bread and do not say why.",
+   "zone": "brackwater",
+   "water": "marsh",
+   "time": "any",
+   "skill": 50,
+   "title": "Fen-Friend",
+   "trophy": {
+    "name": "Grandfather's Whisker",
+    "desc": "As long as your arm and still twitching a little."
+   },
+   "price": 4500
+  },
+  {
+   "id": "legend_the_fifth_lake",
+   "name": "The Fifth Lake",
+   "desc": "There are four Gullwick lakes. The fishers say the fifth one swims.",
+   "zone": "gullwick",
+   "water": "lake",
+   "time": "dusk",
+   "skill": 55,
+   "title": "Lake-Lander",
+   "trophy": {
+    "name": "Chart of the Fifth Lake",
+    "desc": "A fisher's chart with one lake drawn in and crossed out, many times."
+   },
+   "price": 4800
+  },
+  {
+   "id": "legend_bellmouth",
+   "name": "Bellmouth",
+   "desc": "A zander that swallowed the Coldwater chapel bell. On still nights it tolls.",
+   "zone": "coldwater",
+   "water": "lake",
+   "time": "night",
+   "skill": 55,
+   "title": "the Bell-Ringer",
+   "trophy": {
+    "name": "The Coldwater Clapper",
+    "desc": "The clapper of a small bell, polished by years of stomach."
+   },
+   "price": 4800
+  },
+  {
+   "id": "legend_the_harbourmaster",
+   "name": "The Harbourmaster",
+   "desc": "A conger that has sunk two skiffs and inspects every hull that comes in.",
+   "zone": "saltmouth",
+   "water": "coast",
+   "time": "night",
+   "skill": 60,
+   "title": "Skiff-Saver",
+   "trophy": {
+    "name": "The Harbourmaster's Seal",
+    "desc": "A brass harbour seal it had no business owning."
+   },
+   "price": 5100
+  },
+  {
+   "id": "legend_red_runner",
+   "name": "The Red Runner",
+   "desc": "A salmon stained by the cliff clay. It has outrun every net on the frontier.",
+   "zone": "redcliff",
+   "water": "river",
+   "time": "day",
+   "skill": 60,
+   "title": "the Outrunner",
+   "trophy": {
+    "name": "Red Runner's Tail",
+    "desc": "Still stained red. The colour does not wash out."
+   },
+   "price": 5100
+  },
+  {
+   "id": "legend_deserters_supper",
+   "name": "Deserter's Supper",
+   "desc": "A barbel grown fat on rations thrown in the river by men leaving in a hurry.",
+   "zone": "gorse_march",
+   "water": "river",
+   "time": "dusk",
+   "skill": 65,
+   "title": "Ration-Thief",
+   "trophy": {
+    "name": "A Full Mess Tin",
+    "desc": "Recovered from the fish, lid on, contents best left alone."
+   },
+   "price": 5400
+  },
+  {
+   "id": "legend_thornbelly",
+   "name": "Thornbelly",
+   "desc": "Something the blight got into. The Scar has no water left, so it went downhill to the Coldwater meres, and it is not sorry.",
+   "zone": "blackthorn_scar",
+   "water": "lake",
+   "time": "night",
+   "skill": 75,
+   "title": "the Unspoiled",
+   "trophy": {
+    "name": "Thornbelly's Spine",
+    "desc": "A ridge of black thorns. Do not hang it over the bed."
+   },
+   "foundIn": "coldwater",
+   "price": 6000
+  },
+  {
+   "id": "legend_steeplejack",
+   "name": "Steeplejack",
+   "desc": "A sturgeon that lives in the nave of a drowned church and is exactly as long as its aisle.",
+   "zone": "sunken_wolds",
+   "water": "lake",
+   "time": "dawn",
+   "skill": 80,
+   "title": "of the Sunken Wolds",
+   "trophy": {
+    "name": "Steeplejack's Plate",
+    "desc": "One armour plate from its back. It makes a decent buckler."
+   },
+   "price": 6300
+  }
+ ],
+ "pullBack": [
+  {
+   "water": "river",
+   "type": "reed_serpent",
+   "bands": [
+    1,
+    10
+   ],
+   "say": "Something pulls back. It is coming up the bank."
+  },
+  {
+   "water": "lake",
+   "type": "silt_lurker",
+   "bands": [
+    3,
+    10
+   ],
+   "say": "The line goes slack, then the water stands up."
+  },
+  {
+   "water": "lake",
+   "type": "fen_croaker",
+   "bands": [
+    1,
+    4
+   ],
+   "say": "Your catch has legs, a temper and friends."
+  },
+  {
+   "water": "marsh",
+   "type": "bog_slime",
+   "bands": [
+    1,
+    6
+   ],
+   "say": "You have hooked the pond itself."
+  },
+  {
+   "water": "marsh",
+   "type": "mire_drake",
+   "bands": [
+    7,
+    10
+   ],
+   "say": "That was not a log."
+  },
+  {
+   "water": "marsh",
+   "type": "fen_croaker",
+   "bands": [
+    1,
+    10
+   ],
+   "say": "Your catch has legs, a temper and friends."
+  },
+  {
+   "water": "coast",
+   "type": "silt_lurker",
+   "bands": [
+    1,
+    10
+   ],
+   "say": "The line goes slack, then the surf stands up."
+  },
+  {
+   "water": "coast",
+   "type": "reed_serpent",
+   "bands": [
+    1,
+    10
+   ],
+   "say": "Something pulls back. It is coming up the beach."
+  }
+ ],
+ "crates": {
+  "chance": 0.04,
+  "crate": {
+   "slot": "any",
+   "min": "uncommon"
+  },
+  "say": "The hook snags on something square. A sunken crate!"
+ },
+ "meals": {
+  "charred_fish_on_a_stick": {
+   "name": "Fish on a Stick",
+   "desc": "Any fish, any stick, any fire. Eat out of combat to recover health over 20 seconds.",
+   "use": {
+    "type": "food",
+    "regen": 0.05,
+    "seconds": 20
+   }
+  },
+  "fried_perch": {
+   "name": "Pan-Fried Perch",
+   "desc": "Crisp skin, a few bones. Eat out of combat: recover health over 20 seconds, then +3% health for 30 minutes.",
+   "use": {
+    "type": "food",
+    "regen": 0.05,
+    "seconds": 20,
+    "buff": {
+     "stat": "hpPct",
+     "amount": 0.03,
+     "minutes": 30
+    }
+   }
+  },
+  "river_chowder": {
+   "name": "Riverbank Chowder",
+   "desc": "Three kinds of fish and a potato that floated past. Recover health over 20 seconds, then +5% health for 30 minutes.",
+   "use": {
+    "type": "food",
+    "regen": 0.06,
+    "seconds": 20,
+    "buff": {
+     "stat": "hpPct",
+     "amount": 0.05,
+     "minutes": 30
+    }
+   }
+  },
+  "smoked_eel": {
+   "name": "Smoked Eel",
+   "desc": "Chewy, smoky and stays with you. Recover health over 20 seconds, then +4% armour for 30 minutes.",
+   "use": {
+    "type": "food",
+    "regen": 0.05,
+    "seconds": 20,
+    "buff": {
+     "stat": "armorPct",
+     "amount": 0.04,
+     "minutes": 30
+    }
+   }
+  },
+  "pike_steaks": {
+   "name": "Pike Steaks",
+   "desc": "Mostly bone, and the rest makes up for it. Recover health over 20 seconds, then +3% damage for 30 minutes.",
+   "use": {
+    "type": "food",
+    "regen": 0.05,
+    "seconds": 20,
+    "buff": {
+     "stat": "dmgPct",
+     "amount": 0.03,
+     "minutes": 30
+    }
+   }
+  },
+  "fen_stew": {
+   "name": "Brown Fen Stew",
+   "desc": "Do not ask what is in it. It is fish. Recover health over 20 seconds, then +6% health for 30 minutes.",
+   "use": {
+    "type": "food",
+    "regen": 0.06,
+    "seconds": 20,
+    "buff": {
+     "stat": "hpPct",
+     "amount": 0.06,
+     "minutes": 30
+    }
+   }
+  },
+  "herring_pie": {
+   "name": "Saltmouth Herring Pie",
+   "desc": "The heads look out of the crust. They are not judging you. Recover health over 20 seconds, then +5% armour for 45 minutes.",
+   "use": {
+    "type": "food",
+    "regen": 0.06,
+    "seconds": 20,
+    "buff": {
+     "stat": "armorPct",
+     "amount": 0.05,
+     "minutes": 45
+    }
+   }
+  },
+  "archers_fishcakes": {
+   "name": "Archer's Fishcakes",
+   "desc": "Light enough to shoot straight after. Recover health over 20 seconds, then +4% ranged damage for 30 minutes.",
+   "use": {
+    "type": "food",
+    "regen": 0.05,
+    "seconds": 20,
+    "buff": {
+     "stat": "rangedPct",
+     "amount": 0.04,
+     "minutes": 30
+    }
+   }
+  },
+  "pilgrims_supper": {
+   "name": "Pilgrim's Supper",
+   "desc": "Trout baked in a blessing and a lot of butter. Recover health over 20 seconds, then +6% damage to the undead for 30 minutes.",
+   "use": {
+    "type": "food",
+    "regen": 0.06,
+    "seconds": 20,
+    "buff": {
+     "stat": "vsUndeadPct",
+     "amount": 0.06,
+     "minutes": 30
+    }
+   }
+  },
+  "anglers_feast": {
+   "name": "Angler's Feast",
+   "desc": "A rare fish done properly. Recover health over 20 seconds, then +4% damage for 60 minutes.",
+   "use": {
+    "type": "food",
+    "regen": 0.08,
+    "seconds": 20,
+    "buff": {
+     "stat": "dmgPct",
+     "amount": 0.04,
+     "minutes": 60
+    }
+   }
+  },
+  "legends_broth": {
+   "name": "Broth of the One That Did Not Get Away",
+   "desc": "Made from a fish people will not believe you caught. Recover health over 20 seconds, then +8% health for 60 minutes.",
+   "use": {
+    "type": "food",
+    "regen": 0.08,
+    "seconds": 20,
+    "buff": {
+     "stat": "hpPct",
+     "amount": 0.08,
+     "minutes": 60
+    }
+   }
+  },
+  "riders_kedgeree": {
+   "name": "Rider's Kedgeree",
+   "desc": "Eaten in the saddle by people in a hurry. Recover health over 20 seconds, then +10% mount speed for 30 minutes.",
+   "use": {
+    "type": "food",
+    "regen": 0.05,
+    "seconds": 20,
+    "buff": {
+     "stat": "mountSpeedPct",
+     "amount": 0.1,
+     "minutes": 30
+    }
+   }
+  }
+ },
+ "recipes": [
+  {
+   "id": "cook_fish_on_a_stick",
+   "name": "Fish on a Stick",
+   "desc": "Hold it over the fire until it stops looking at you.",
+   "needs": [
+    {
+     "tag": "any",
+     "count": 1
+    }
+   ],
+   "makes": "charred_fish_on_a_stick",
+   "skill": 0
+  },
+  {
+   "id": "cook_fried_perch",
+   "name": "Pan-Fried Perch",
+   "desc": "Two perch, one pan.",
+   "needs": [
+    {
+     "fish": "silver_perch",
+     "count": 2
+    }
+   ],
+   "makes": "fried_perch",
+   "skill": 5
+  },
+  {
+   "id": "cook_river_chowder",
+   "name": "Riverbank Chowder",
+   "desc": "Three river fish, whatever they are.",
+   "needs": [
+    {
+     "tag": "river",
+     "count": 3
+    }
+   ],
+   "makes": "river_chowder",
+   "skill": 15
+  },
+  {
+   "id": "cook_smoked_eel",
+   "name": "Smoked Eel",
+   "desc": "Hang an eel in the smoke and find something else to do.",
+   "needs": [
+    {
+     "fish": "brackwater_eel",
+     "count": 1
+    }
+   ],
+   "makes": "smoked_eel",
+   "skill": 20
+  },
+  {
+   "id": "cook_pike_steaks",
+   "name": "Pike Steaks",
+   "desc": "One pike feeds a party, if the party is patient with bones.",
+   "needs": [
+    {
+     "fish": "tollbridge_pike",
+     "count": 1
+    }
+   ],
+   "makes": "pike_steaks",
+   "skill": 20
+  },
+  {
+   "id": "cook_fen_stew",
+   "name": "Brown Fen Stew",
+   "desc": "Three marsh fish, boiled until brown.",
+   "needs": [
+    {
+     "tag": "marsh",
+     "count": 3
+    }
+   ],
+   "makes": "fen_stew",
+   "skill": 30
+  },
+  {
+   "id": "cook_herring_pie",
+   "name": "Saltmouth Herring Pie",
+   "desc": "Four herring, heads up.",
+   "needs": [
+    {
+     "fish": "saltmouth_herring",
+     "count": 4
+    }
+   ],
+   "makes": "herring_pie",
+   "skill": 30
+  },
+  {
+   "id": "cook_archers_fishcakes",
+   "name": "Archer's Fishcakes",
+   "desc": "Two lake fish, mashed and fried.",
+   "needs": [
+    {
+     "tag": "lake",
+     "count": 2
+    }
+   ],
+   "makes": "archers_fishcakes",
+   "skill": 25
+  },
+  {
+   "id": "cook_pilgrims_supper",
+   "name": "Pilgrim's Supper",
+   "desc": "One Pilgrim Trout. It would have wanted this. Probably.",
+   "needs": [
+    {
+     "fish": "pilgrim_trout",
+     "count": 1
+    }
+   ],
+   "makes": "pilgrims_supper",
+   "skill": 35
+  },
+  {
+   "id": "cook_riders_kedgeree",
+   "name": "Rider's Kedgeree",
+   "desc": "Two coast fish and yesterday's rations.",
+   "needs": [
+    {
+     "tag": "coast",
+     "count": 2
+    }
+   ],
+   "makes": "riders_kedgeree",
+   "skill": 25
+  },
+  {
+   "id": "cook_anglers_feast",
+   "name": "Angler's Feast",
+   "desc": "Any rare fish, and the good pan.",
+   "needs": [
+    {
+     "tag": "rare",
+     "count": 1
+    }
+   ],
+   "makes": "anglers_feast",
+   "skill": 50
+  },
+  {
+   "id": "cook_legends_broth",
+   "name": "Broth of the One That Did Not Get Away",
+   "desc": "Any epic fish. Do not rush it.",
+   "needs": [
+    {
+     "tag": "epic",
+     "count": 1
+    }
+   ],
+   "makes": "legends_broth",
+   "skill": 70
+  }
+ ],
+ "tools": [
+  {
+   "id": "angling_rod",
+   "name": "Hazel Rod",
+   "desc": "A hazel switch, a length of line and a hook. A Tool: it takes no weapon slot. Lets you fish any water.",
+   "price": 12,
+   "minSkill": 0,
+   "bonus": {}
+  },
+  {
+   "id": "ash_rod",
+   "name": "Whippy Ash Rod",
+   "desc": "Longer, springier and far too good for gudgeon. The tug band is 15% wider.",
+   "price": 1350,
+   "minSkill": 25,
+   "bonus": {
+    "band": 0.15
+   }
+  },
+  {
+   "id": "river_wardens_rod",
+   "name": "River Warden's Rod",
+   "desc": "Split cane with a brass reel. The tug band is 25% wider and bites come 20% sooner.",
+   "price": 7200,
+   "minSkill": 50,
+   "bonus": {
+    "band": 0.25,
+    "wait": -0.2
+   }
+  }
+ ],
+ "bait": [
+  {
+   "id": "bait_worms",
+   "name": "Tin of Worms",
+   "desc": "Ten worms. Bites come 25% sooner for the next ten casts.",
+   "price": 9,
+   "effect": {
+    "wait": -0.25,
+    "casts": 10
+   }
+  },
+  {
+   "id": "bait_bread_paste",
+   "name": "Bread Paste",
+   "desc": "Common fish cannot resist it; rare fish can. Ten casts with fewer junk catches.",
+   "price": 15,
+   "effect": {
+    "junk": -0.5,
+    "casts": 10
+   }
+  },
+  {
+   "id": "bait_bright_lure",
+   "name": "Bright Tin Lure",
+   "desc": "Flashes like a perch's dream. Ten casts with a better chance at uncommon and rare fish.",
+   "price": 60,
+   "effect": {
+    "rarity": 0.25,
+    "casts": 10
+   }
+  }
+ ],
+ "anglers": [
+  {
+   "id": "angler_torborhold",
+   "name": "Tam Sedgeley",
+   "town": "Torborhold",
+   "zone": "test",
+   "greeting": "Ever held a rod? No? Good. No bad habits to fix.",
+   "sells": [
+    "angling_rod",
+    "bait_worms",
+    "bait_bread_paste",
+    "ash_rod",
+    "bait_bright_lure"
+   ],
+   "buysFish": true,
+   "quest": "angle_first_cast"
+  },
+  {
+   "id": "angler_orrinsford",
+   "name": "Sister Brindle",
+   "town": "Orrinsford",
+   "zone": "saint_orrins_rise",
+   "greeting": "The Prior calls it idleness. I call it contemplation with a hook in it.",
+   "sells": [
+    "angling_rod",
+    "bait_worms",
+    "bait_bread_paste",
+    "ash_rod",
+    "bait_bright_lure"
+   ],
+   "buysFish": true
+  },
+  {
+   "id": "angler_copperdell",
+   "name": "Dunmer Slagfoot",
+   "town": "Copperdell",
+   "zone": "delvers_hill",
+   "greeting": "Twelve hours underground, then I come up here and stare at water. Do not talk to me about ore.",
+   "sells": [
+    "angling_rod",
+    "bait_worms",
+    "bait_bread_paste",
+    "ash_rod",
+    "bait_bright_lure"
+   ],
+   "buysFish": true
+  },
+  {
+   "id": "angler_ashcombe",
+   "name": "Old Nettie Cray",
+   "town": "Ashcombe",
+   "zone": "ashcombe",
+   "greeting": "The cellars flooded forty years back. The fishing has never been better.",
+   "sells": [
+    "angling_rod",
+    "bait_worms",
+    "bait_bread_paste",
+    "ash_rod",
+    "bait_bright_lure"
+   ],
+   "buysFish": true
+  },
+  {
+   "id": "angler_halsbridge",
+   "name": "Perrin Underarch",
+   "town": "Halsbridge",
+   "zone": "torbor_cross",
+   "greeting": "Best spot in the province is right under the bridge. The pike thinks so too.",
+   "sells": [
+    "angling_rod",
+    "bait_worms",
+    "bait_bread_paste",
+    "ash_rod",
+    "bait_bright_lure",
+    "river_wardens_rod"
+   ],
+   "buysFish": true
+  },
+  {
+   "id": "angler_hermits_rest",
+   "name": "Quiet Oswin",
+   "town": "Hermit's Rest",
+   "zone": "wychwood",
+   "greeting": "...Shh. You will scare them. Fine. What do you want?",
+   "sells": [
+    "angling_rod",
+    "bait_worms",
+    "bait_bread_paste",
+    "ash_rod",
+    "bait_bright_lure"
+   ],
+   "buysFish": true
+  },
+  {
+   "id": "angler_hollin_toll",
+   "name": "Greta Icewell",
+   "town": "Hollin Toll",
+   "zone": "hollin_pass",
+   "greeting": "Cut a hole, drop a line, do not fall in. That is the whole craft up here.",
+   "sells": [
+    "angling_rod",
+    "bait_worms",
+    "bait_bread_paste",
+    "ash_rod",
+    "bait_bright_lure"
+   ],
+   "buysFish": true
+  },
+  {
+   "id": "angler_brackwater",
+   "name": "Mog Eelwright",
+   "town": "Brackwater",
+   "zone": "brackwater",
+   "greeting": "If it wriggles, I sell it. If it does not, give it a minute.",
+   "sells": [
+    "angling_rod",
+    "bait_worms",
+    "bait_bread_paste",
+    "ash_rod",
+    "bait_bright_lure",
+    "river_wardens_rod"
+   ],
+   "buysFish": true
+  },
+  {
+   "id": "angler_saltmouth",
+   "name": "Skipper Hale Tarrow",
+   "town": "Saltmouth",
+   "zone": "saltmouth",
+   "greeting": "Rivers! Ponds! Hah. Come back when you have been pulled off a harbour wall.",
+   "sells": [
+    "angling_rod",
+    "bait_worms",
+    "bait_bread_paste",
+    "ash_rod",
+    "bait_bright_lure",
+    "river_wardens_rod"
+   ],
+   "buysFish": true
+  },
+  {
+   "id": "angler_gullwick",
+   "name": "Josey Fourlakes",
+   "town": "Gullwick",
+   "zone": "gullwick",
+   "greeting": "Four lakes, and I have a favourite stone on each. No, I will not say which.",
+   "sells": [
+    "angling_rod",
+    "bait_worms",
+    "bait_bread_paste",
+    "ash_rod",
+    "bait_bright_lure",
+    "river_wardens_rod"
+   ],
+   "buysFish": true
+  },
+  {
+   "id": "angler_redcliff",
+   "name": "Corwen Claywater",
+   "town": "Redcliff",
+   "zone": "redcliff",
+   "greeting": "The river runs red here. It is only the clay. Mostly it is the clay.",
+   "sells": [
+    "angling_rod",
+    "bait_worms",
+    "bait_bread_paste",
+    "ash_rod",
+    "bait_bright_lure"
+   ],
+   "buysFish": true
+  },
+  {
+   "id": "angler_last_lantern",
+   "name": "Wick Thornaby",
+   "town": "Last Lantern",
+   "zone": "blackthorn_scar",
+   "greeting": "Throw back anything with thorns. Throw back anything that asks you to.",
+   "sells": [
+    "angling_rod",
+    "bait_worms",
+    "bait_bread_paste",
+    "ash_rod",
+    "bait_bright_lure",
+    "river_wardens_rod"
+   ],
+   "buysFish": true
+  },
+  {
+   "id": "angler_millbrook",
+   "name": "Jed Weirside",
+   "town": "Millbrook",
+   "zone": "millbrook",
+   "greeting": "The miller says the chub are his. The chub and I disagree.",
+   "sells": [
+    "angling_rod",
+    "bait_worms",
+    "bait_bread_paste",
+    "ash_rod",
+    "bait_bright_lure"
+   ],
+   "buysFish": true
+  },
+  {
+   "id": "angler_coldwater",
+   "name": "Marta Stillmere",
+   "town": "Coldwater",
+   "zone": "coldwater",
+   "greeting": "Hear that bell? There is no bell. Lovely evening for it, though.",
+   "sells": [
+    "angling_rod",
+    "bait_worms",
+    "bait_bread_paste",
+    "ash_rod",
+    "bait_bright_lure",
+    "river_wardens_rod"
+   ],
+   "buysFish": true
+  },
+  {
+   "id": "angler_gorsehold",
+   "name": "Corporal Finch Loach",
+   "town": "Gorsehold",
+   "zone": "gorse_march",
+   "greeting": "Sentry duty by the river, they said. Nobody said I could not bring a rod.",
+   "sells": [
+    "angling_rod",
+    "bait_worms",
+    "bait_bread_paste",
+    "ash_rod",
+    "bait_bright_lure"
+   ],
+   "buysFish": true
+  },
+  {
+   "id": "angler_lowmoor",
+   "name": "Ysmay Drownfield",
+   "town": "Lowmoor",
+   "zone": "sunken_wolds",
+   "greeting": "My grandmother's house is under that water. The perch keep it tidy.",
+   "sells": [
+    "angling_rod",
+    "bait_worms",
+    "bait_bread_paste",
+    "ash_rod",
+    "bait_bright_lure",
+    "river_wardens_rod"
+   ],
+   "buysFish": true
+  }
+ ],
+ "skill": {
+  "max": 100,
+  "ranks": [
+   {
+    "from": 0,
+    "name": "Dabbler"
+   },
+   {
+    "from": 20,
+    "name": "Bank Sitter"
+   },
+   {
+    "from": 40,
+    "name": "Line Hand"
+   },
+   {
+    "from": 60,
+    "name": "River Reader"
+   },
+   {
+    "from": 80,
+    "name": "Master Angler"
+   }
+  ]
+ }
+}

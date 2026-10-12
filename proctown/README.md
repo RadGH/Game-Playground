@@ -151,6 +151,74 @@ building is its walls, roof, eaves, door and chimney and nothing else, which is 
 the parts. `features.js` caps the box mesh at 9,000, which covers one capital at full detail and
 three more at distance inside the 2.6 km feature radius.
 
+## Set-piece kit (propkit.js)
+
+Play-test 2 (Thousandvale Q18/Q19) asked for bespoke places near a game's start: graveyards, farmland,
+orchards, mills, shrines, ruins, a lumber camp, an inn yard. `js/propkit.js` is the model kit for everything
+that stands AROUND the buildings in such a place. It works exactly like the building kit: **pure** (no
+Three.js, no DOM), every model is a list of the eight unit shapes in `MESHES`, so a game instances a whole
+zone's props in at most eight draw calls (plus one small group per turning part). Gallery: `propkit.html`
+(group picker, seed, night toggle; `?group=farm`, `?night=1`, `?lite=1` for smaller shadows).
+
+```js
+import { propModel, cropField, fenceLine, PROP_MODEL_IDS, PROP_MODEL_INFO, PROP_GROUPS, CROPS, CROP_IDS, FENCE_LINE_KINDS } from './js/propkit.js';
+const m = propModel('windmill', { seed: 7 });   // null for an unknown id
+// { id, parts, spin, fires, glows, solid, radius }
+cropField({ w: 12, d: 20, crop: 'wheat', seed: 3 });            // -> parts
+fenceLine([[0, 0], [10, 0], [10, 8]], { kind: 'iron', seed: 2 }); // -> parts (wooden | iron | stone | hedge)
+```
+
+**Part format.** `{ mesh, x, y, z, w, h, d, yaw, rx, rz, colour, tag? }` in local metres, +z = the model's
+front, `y` = the bottom of the part (unit shapes have their origin at the centre of their base). The part's
+matrix is `T(x, y, z) * Ry(yaw) * Rx(rx) * Rz(rz) * S(w, h, d)` — Three.js `new Euler(rx, yaw, rz, 'YXZ')`:
+yaw about y first, then the pitch `rx` about the part's own x, then the roll `rz` about its own z, all about
+the part's origin. The game then turns the whole model by its placement yaw about the model origin.
+
+- `spin: [{ x, y, z, axis: 'x'|'z', speed, parts }]` — parts relative to a pivot that turns about the model's
+  own x or z at `speed` rad/s (the water wheel, the windmill's sails, a cog).
+- `fires: [{ x, y, z, s }]` flame points; `glows: [{ x, y, z, color }]` small lights (the inn-sign lantern,
+  the sigil slab's violet at night). Hand these to your light pool — the kit never makes a light itself.
+- `solid: { r, h } | null` a footprint for the camera / collision on big things; `radius` how far it reaches.
+- The same id + seed is the same model (lean, lichen, which headstone shape, size jitter ≤ 10 %).
+- `PROP_MODEL_INFO[id] = { label, group, desc }`.
+
+**Crops** (`CROPS`, `cropField`): rows run front to back over furrow ridges. wheat, barley, rye, oats, flax
+(strips broken into clumps — a field reads as a mass), corn/maize (stalks with leaves and a tassel), turnip,
+beet, cabbage, lettuce (leafy domes, roots showing), pumpkin, squash (vine strip with fruit), potato, carrot,
+onion (low tufts), beans, peas (pole tepees), vineyard/grapes (posts, wire, leafy hedge, clusters), hops (tall
+poles and twine), fallow/ploughed (furrows only). An unknown crop is a generic green row crop. The planting
+step stretches until the field fits `CROP_PART_CAP` (600) parts, so a big field is clumps, not stalks.
+
+**Models by group** (88):
+- **graveyard**: `gravestone`, `gravestone_leaning`, `tomb_chest`, `iron_fence`, `iron_gate`, `lychgate`, `crypt_door`, `mausoleum`, `grave_cross`, `celtic_cross`, `grave_obelisk`, `grave_mound`, `open_grave`, `bell_frame`
+- **farm**: `scarecrow`, `haystack`, `hay_bale_round`, `hay_bale_square`, `haycart`, `sheaf_stook`, `beehive`, `barn`, `water_trough`, `well`, `chicken_coop`, `pig_sty`, `goat_shed`, `compost_heap`, `pumpkin_pile`, `wooden_fence`, `stone_wall`
+- **orchard**: `cider_press`, `apple_tree`, `pear_tree`, `plum_tree`, `cherry_tree`, `orchard_ladder`, `fruit_crate`
+- **mill**: `windmill`, `watermill_wheel`, `millstone`, `sluice_gate`, `gear_housing`
+- **shrine**: `standing_stone`, `altar_stone`, `shrine_statue`, `offering_bowl`, `prayer_cairn`, `wayside_shrine`, `sigil_slab`
+- **ruins**: `broken_tower`, `collapsed_stair`, `ruined_wall`, `ruined_arch`, `fallen_column`, `rubble_heap`
+- **lumber**: `saw_pit`, `log_stack`, `tree_stump`, `axe_block`, `felled_log`, `plank_stack`, `timber_sled`, `lumber_tent`, `grindstone`
+- **hunt**: `hunters_tent`, `skinning_frame`, `trophy_post`, `smoking_rack`, `bone_heap`, `den_mouth`
+- **fishing**: `jetty`, `rowboat`, `fish_trap`, `rod_rack`
+- **inn**: `inn_sign`, `hitching_post`, `bench`, `picnic_table`, `notice_post`, `lantern_post`
+- **misc**: `campfire`, `cauldron_tripod`, `wagon_wheel_leaning`
+- **training**: `training_dummy`, `archery_butt`, `weapon_rack`, `sand_pit`
+
+Every named model in Thousandvale's `data/vignettes/setpieces.json` exists here (a test reads the file).
+
+**Drawing it in Three.js** — `js/propkit-three.js` (imports nothing; pass your `THREE`):
+
+```js
+import { unitGeometry, partMatrix, placeModel, instanceParts } from './js/propkit-three.js';
+const placed = [];
+for (const p of placements) placed.push(...placeModel(THREE, propModel(p.id, { seed: p.seed }).parts, p.x, groundY, p.z, p.yaw));
+for (const mesh of instanceParts(THREE, placed, material)) scene.add(mesh);   // one InstancedMesh per kind
+// spin groups: a THREE.Group at the pivot holding instanceParts(THREE, s.parts, material); rotate it per frame
+```
+
+Tests: `node --test proctown/tests/propkit.test.js` (every model builds from MESHES with finite positive sizes
+and hex colours, deterministic per seed, nothing deeper than 0.6 m, E's model ids all exist, crop fields stay in
+their plot and under the cap, fence lines follow their points).
+
 ## The plan page
 
 | Control | What it is for |
@@ -191,6 +259,16 @@ const plan = planTown({ seed: 7, size: 4, culture: 'human' });
 `planTown` also takes `links: [[x, z], …]` — **where the world's roads arrive**, in the town's own
 coordinates. Farhold works these out by walking the inter-town route's own polyline looking for the
 step from outside the ring to inside (`roadLinksFor` in `js/features.js`).
+
+**Opt-in office list (`trades`, added 2026-10-05 for Thousandvale).** `planTown({ …, trades: { list,
+share, pick, minArea } })` replaces `WANT_ORDER` with the caller's own list: each entry (`'forge'` or
+`{ want, from, minArea }`) gets ONE plot of its own, in priority order, never shared; `share` caps offices
+at that fraction of the plots (default 1/3); `pick: 'square'` puts them nearest the square (each at least
+`minArea` m², default 24) instead of biggest-first. Assigned plots carry `office: true`. Without `trades`
+every town is byte-identical to before (a test holds it), so Farhold and Bannerline are untouched. Thousandvale
+uses it to give every NPC role its own building (`prototypes/thousandvale/data/world/town-offices.json`); the
+new wants (shop, temple, barber, counting_house, study, armoury, bowyer, tailor, apothecary, provisioner,
+jeweller) have shapes in `data/cultures.json` `wantBases`. `assignTrades(out, trades, size)` is exported.
 
 Everything is deterministic from `seed` alone, so a town is the same town every visit and **nothing
 has to be stored**. A bug report that names a seed is reproducible.
@@ -272,3 +350,92 @@ in: terrain-aware streets, and plot-fill (yards, pens, woodpiles —
 the kit does the clutter that touches a building, but the empty half of a big plot is still empty).
 From §3: level-of-detail past the two tiers `features.js` has, signage glyphs, smoke by day and
 window light at night.
+
+## Office dressing (offices.js)
+
+`js/offices.js` dresses a service building so you can find the smith without reading a map (Thousandvale play-test 2,
+Q10: "each NPC needs their own office; each NPC structure a distinct look; active lights where they should attract the
+player"). Pure, same frame and unit shapes as `partsFor()` (origin at the plot centre, +z = the street/door side,
+`y` = the bottom of a part, tilts `rx`/`rz` applied after `yaw`, Euler order 'YXZ').
+
+```js
+import { officeDressing, officeKindFor, OFFICE_KINDS } from './js/offices.js';
+const desc = describeBuilding({ plot, culture, seed, want: 'forge' });
+const d = officeDressing(officeKindFor('smith'), desc, { lit: true, seed });
+// d.parts  unit shapes (tag 'lamp' = lantern glass: draw it with a material that glows at night)
+// d.lights [{x,y,z,color,strong}] lanterns / the forge hearth — only when lit
+// d.fires  [{x,y,z,s}] flames;  d.spin [{x,y,z,axis,speed,parts}] mill sails (parts relative to the hub)
+// d.signs  hanging picture signs;  d.fascia {x,y,z,w,h} the name board over the door (a game writes the label on it)
+```
+
+23 trades (`OFFICE_KINDS`, each with a label, a sign emblem and whether it is a lit shop): forge (open shed, hearth with
+fire, anvil, quench trough, tool rack), shop / provisioner / market (striped awning, goods table, crates, market stalls),
+inn (tankard sign, two lanterns, benches, barrels, a hitch), stable (paddock, hay, trough, saddle on the rail), barber
+(striped pole), armoury, bowyer, tailor, apothecary, jeweller, temple / chapel / shrine (steps, sun disc, candles,
+statue — unlit), hall (banners, steps, flagpole — unlit), counting house, study, mill (turning sails), granary /
+warehouse, barracks / watchpost. `officeKindFor()` takes a want, an office name or an NPC role (`smith` -> forge,
+`elder` -> hall, `unbinder` -> study; `house`/`hut` -> null: a home is never dressed or lit).
+Tests: `node --test proctown/tests/offices.test.js`. Thousandvale draws it in `js/client/town-view.js` (lit glass +
+light-pool lanterns on shops only) and writes every label into one canvas atlas (`js/client/sign-text.js`, one draw
+call per town).
+
+## Opt-in edge pieces: barricade, gate leaves, posts, grates (Thousandvale play-test 4)
+
+`js/buildkit.js` adds pieces outside `WALL_KINDS` / `FENCE_KINDS` so Farhold's per-kind meshes are unchanged:
+`EXTRA_WALL_KINDS = ['barricade']` (`wallKitParts('barricade', 'wall' | 'tower' | 'gatehouse')` — leaning stakes over a log rail,
+outside = local +X), `gateLeafParts(kind, thick, len)` (one leaf hinged at its origin along +X: `door` planks + iron bands, `rail`
+field gate, `frise` a cheval de frise built at length `len`), `gatePostParts(kind, width)` (posts / stake bundles / hedge piers
+outside the passage) and `grateParts(width, h)` (an iron water grate with piers). Parts may carry `rx`/`rz` tilts (Euler 'YXZ').
+Thousandvale's `js/client/walls-view.js` shows how to lay them on a baked ring (pieces stretched to fit each straight, gatehouse
+widened to the road, leaves swung inward).
+
+## Opt-in: taller buildings (`tune`) and wide gatehouses (Thousandvale play-test 5)
+
+Both are OPT-IN. Without them the kit's output is byte-identical (`tests/buildtune.test.js` compares every part), so
+Farhold's towns do not change.
+
+**`describeBuilding({ ..., tune })`** — make the same building taller without moving it. The plot, the door's side and
+the yaw are untouched; only heights and the size INSIDE the plot change. No extra random draws.
+
+| knob | what it does |
+|---|---|
+| `storeyHeight: [lo, hi]` | metres a storey, replacing `knobs.storeyHeight` x the culture's `storeyScale` |
+| `doorHeight`, `doorWidth: [lo, hi]` | replace the knobs of the same name |
+| `minStoreys: n` | at least n storeys, whatever the base says (a hovel is `[1, 1]`) |
+| `sink: k` | multiplies how far a dug-in base sinks; `0` stands it on the ground. A burrow's door otherwise starts 48% of a storey under the grass |
+| `fill: 0..1` | the footprint takes at least this share of the plot each way, past the base's own max size and ratio |
+| `minPitch: p` | the roof is at least this steep, as far as its roof type allows |
+| `roofBias: {type: k}` | multiplies the culture's weight for a roof type |
+| `windowScale: k` | multiplies window size |
+
+Why: Thousandvale's character is 1.75 m; a halfling storey is 2.0-2.5 m and its door 1.75-2.2 m, so the owner's verdict
+was "too short/squat". `prototypes/thousandvale/js/client/building-tune.js` holds that game's numbers.
+
+**`gatehouseParts(kind, open)`** — a gatehouse whose clear opening is `open` metres instead of 4.2. The jambs keep their
+size and move apart; only what spans the passage (lintel, wall walk, rib arch) grows. `open` 4.2 is the kit piece. Use it
+when a gate has to stand in the wall's line while a road crosses at a slant: the opening along the wall is
+`pass / cos(slant) + 2 x 1.7 x tan(slant)`. Scaling `wallKitParts(kind, 'gatehouse')` along x fattens the jambs instead.
+
+**Office name board** (`offices.js`): on a front of two storeys or more the board sits clear over the door
+(`door.h + 0.28`); a one-storey front still tucks it under the eave.
+
+## High streets (opt-in, 2026-10-08)
+
+`planTown({ highStreets: { to: 'square', width, clear, keep, avoid, join, attempt } })` — added for Thousandvale, whose
+players reported that a town gate "just leads you right into buildings instead of having a main road". `linkRoads` joins a
+road to wherever the network comes closest, which on a plan of alleys is an alley three metres inside the wall. With this
+option each link is carried as ONE main street from the edge of town to the edge of the square.
+
+| option | meaning |
+|---|---|
+| `width` | metres (default the main class's 5) |
+| `clear` | kerb kept free of plots either side, on top of the width |
+| `keep` | plots `{cx, cz, w, d, angle}` that must survive: the street aims off-centre at the square, or is threaded round them (`threadWay`, a lattice search with the corners cut), or narrows (never under `narrowest`, 3.2 m); only if no way exists does it go through |
+| `avoid` | discs `{x, z, r}` already standing that the street passes beside |
+| `join` | (default on) a link close beside a street already laid forks off it instead of running parallel |
+| `attempt` | 0..6: use exactly that retry attempt of `planTown` (a caller matching a plan it already has) |
+
+Streets carry `high: true`, `highway: true`, `link`, `to: 'square' | 'street'`, `joins`, `clear`. With the option, the
+retry floor is judged on `plan.plotsCut` (plots before the high streets took any) so the same attempt wins as without.
+**Without the option nothing runs and every plan is byte-identical** (`tests/highstreets.test.js`, and Farhold's town
+tests). Thousandvale's use: `prototypes/thousandvale/docs/world.md` §13.

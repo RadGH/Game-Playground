@@ -33,7 +33,7 @@ export function createBossUi({ actors, serverNow, toast } = {}) {
     el.ticks.innerHTML = '';
     for (const p of B.phases) {
       if (!(p.at > 0 && p.at < 1)) continue;
-      const i = document.createElement('i'); i.style.left = (p.at * 100).toFixed(1) + '%'; i.title = p.name || ''; el.ticks.appendChild(i);
+      const i = document.createElement('i'); i.style.left = (p.at * 100).toFixed(1) + '%'; i.dataset.tip = p.name || ''; el.ticks.appendChild(i);
     }
     el.bars.innerHTML = '';
     if (B.bars > 1) for (let k = 1; k <= B.bars; k++) { const pip = document.createElement('b'); pip.className = k < B.bar ? 'done' : k === B.bar ? 'now' : ''; el.bars.appendChild(pip); }
@@ -85,6 +85,11 @@ export function createBossUi({ actors, serverNow, toast } = {}) {
         const c = { name: ev.name || ev.ab, start: now, end: now + (ev.ms || 1000), int: !!ev.int, ab: ev.ab };
         casts.set(ev.id, c);
         plateCast(ev.id, c);
+        // R4: the warning stays readable for the WHOLE wind-up — the line the caster just said (sent at the cast's start)
+        // is held until the cast goes off; a boss cast with nothing said names the attack itself
+        const ms = (ev.ms || 1000) + 700;
+        if (lastSay.id === ev.id && performance.now() - lastSay.at < 500) holdCallout(ms);
+        else if (ev.id === B.id) { callout(`${c.name}!`, 'cast', B.name); holdCallout(ms); }
         break;
       }
       case 'castX': {
@@ -98,23 +103,99 @@ export function createBossUi({ actors, serverNow, toast } = {}) {
         if (ev.hard) { B.enraged = true; el.root.classList.add('enraged'); callout(`${ev.id === B.id ? B.name : actors.get(ev.id)?.name || B.name} is enraged!`, 'enrage'); setAura(ev.id); }
         else if (ev.soft) { B.soft = ev.soft; el.enrage.dataset.soft = ev.soft; }
         break;
+      case 'fx':      // encounter fx (C's encounter.js): a boss shield phase (Grimtallow's "wall of blight")
+        // play-test 6 U8 (C): `on:true` starts a ward (ms, pool), an update each second carries hp / max / left and NO `on`, `on:false` ends it (why)
+        if (ev.kind === 'shield') { const on = 'on' in ev ? !!ev.on : true; wardBar(ev, on); shield(ev.id, on, on && ev.ms == null && ev.left != null ? { ...ev, ms: ev.left } : ev); }
+        break;
       case 'say': {
         const who = ev.id === B.id ? B.name : actors.get(ev.id)?.name;
         callout(ev.text, ev.style || 'yell', who);
+        lastSay.id = ev.id; lastSay.at = performance.now();
         break;
       }
     }
   }
 
+  // --- shield phases: the bar turns to a barrier and says how to break it; a blue shell on the boss --------
+  let shell = null;
+  // play-test 6 (U8: "the ward seemed permanent"): a ward now has a LIFE (`ms`) and says how to break it (`text`, `have` /
+  // `need`). The shell on the boss thins and flickers faster as its time runs out, a ring on the ground drains like a
+  // clock, and the boss frame counts the seconds down.
+  let wardRing = null, wardGeoAt = 0;
+  const ward = { end: 0, ms: 0, need: 0, have: 0 };
+  /** Share of a ward's life left, 0..1 (1 when it has no timer). Pure — exported for tests as wardLeft. */
+  const leftOf = (now = performance.now()) => (ward.ms > 0 ? Math.max(0, Math.min(1, (ward.end - now) / ward.ms)) : 1);
+  function dropWard() {
+    for (const m of [shell, wardRing]) if (m) { m.parent?.remove(m); m.geometry.dispose(); m.material.dispose(); }
+    shell = null; wardRing = null;
+  }
+  // U8 (D-UI): the ward's own bar on the boss frame — how much of it is left to break, and the seconds until it fades
+  const W = { el: null, hp: 0, max: 0, end: 0, name: '' };
+  function wardBar(ev, on) {
+    if (!W.el) { W.el = document.createElement('div'); W.el.className = 'boss-ward'; W.el.hidden = true; W.el.innerHTML = '<i></i><span></span>'; el.root.querySelector('.boss-bar')?.after(W.el); }
+    if (!on) {
+      W.el.hidden = true; W.end = 0;
+      const why = { broken: 'The ward shatters!', expired: 'The ward fades.', script: 'The ward falls!', reset: '' }[ev?.why];
+      if (why && toast?.chat) toast.chat(`${B.name || 'The boss'}: ${why.toLowerCase().replace(/[!.]$/, '')}.`, 'event');
+      return;
+    }
+    if (Number.isFinite(ev.pool)) { W.max = ev.pool; W.hp = ev.pool; }
+    if (Number.isFinite(ev.max)) W.max = ev.max;
+    if (Number.isFinite(ev.hp)) W.hp = ev.hp;
+    const left = Number.isFinite(ev.left) ? ev.left : Number.isFinite(ev.ms) ? ev.ms : Number.isFinite(ev.until) ? ev.until - Date.now() : null;
+    if (left != null) W.end = performance.now() + Math.max(0, left);
+    if (ev.name) W.name = ev.name;
+    W.el.hidden = false; paintWard();
+  }
+  function paintWard() {
+    if (!W.el || W.el.hidden) return;
+    const secs = W.end ? Math.max(0, Math.ceil((W.end - performance.now()) / 1000)) : null;
+    const f = W.max > 0 ? Math.max(0, Math.min(1, W.hp / W.max)) : 1;
+    W.el.firstChild.style.width = (f * 100).toFixed(1) + '%';
+    const n = v => Math.max(0, Math.round(v)).toLocaleString();
+    W.el.lastChild.textContent = `${W.name || 'Ward'}${W.max > 0 ? ` ${n(W.hp)} / ${n(W.max)}` : ''}${secs != null ? ` · fades in ${secs} s` : ''} — break it, or wait it out`;
+  }
+  function shield(id, on, ev = null) {
+    if (B.id !== id && !actors.get(id)) return;
+    if (B.id !== id) { const a = actors.get(id); B.name = a.name; el.name.textContent = a.name; el.title.textContent = ''; B.phases = []; show(id); }
+    // a ward told to us another way (info.ward for someone who walked in late): the bar follows it too
+    if (on && ev && (ev.ms || ev.total) && (!W.el || W.el.hidden)) wardBar({ ms: ev.ms, max: ev.max, hp: ev.hp, name: ev.name }, true);
+    else if (!on && W.el && !W.el.hidden) wardBar(ev, false);
+    const was = B.shielded;
+    B.shielded = on;
+    el.root.classList.toggle('shielded', on);
+    if (on) {
+      const ms = Number(ev?.ms) > 0 ? Number(ev.ms) : 0;
+      if (ms && (!was || !ward.ms)) { ward.ms = Number(ev?.total) > ms ? Number(ev.total) : ms; ward.end = performance.now() + ms; }
+      else if (!ms && !was) { ward.ms = 0; ward.end = 0; }
+      ward.need = ev?.need | 0; ward.have = ev?.have | 0;
+      if (!was) callout(ev?.text || `${B.name} is shielded — the barrier must fall first`, 'warn');
+    } else if (was) callout(ev?.why === 'faded' ? `${B.name}'s ward gutters out.` : `${B.name}'s shield breaks!`, 'phase');
+    const a = actors.get(id);
+    if (!on || !a) { dropWard(); return; }
+    if (shell && shell.parent === a.group) return;                 // the same ward, told again (a brazier lit): keep the drawing
+    dropWard();
+    const R = Math.max(1.2, a.height * 0.75);
+    shell = new THREE.Mesh(new THREE.SphereGeometry(1, 24, 16), new THREE.MeshBasicMaterial({ color: 0x7fd0ff, transparent: true, opacity: 0.22, depthWrite: false, blending: THREE.AdditiveBlending }));
+    shell.scale.setScalar(R); shell.position.y = a.height * 0.5;
+    a.group.add(shell);
+    wardRing = new THREE.Mesh(new THREE.RingGeometry(R * 1.25, R * 1.5, 48), new THREE.MeshBasicMaterial({ color: 0x9fe0ff, transparent: true, opacity: 0.85, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending }));
+    wardRing.rotation.x = -Math.PI / 2; wardRing.position.y = 0.08; wardRing.userData.R = R; wardRing.renderOrder = 2;
+    a.group.add(wardRing);
+  }
+
   // --- call-out banners ---------------------------------------------------------------------------
   let calloutTimer = 0;
-  function callout(text, style = 'yell', who = null) {
+  const lastSay = { id: null, at: 0 };
+  /** Keep the current call-out up for at least `ms` more (R4: a 3 s wind-up keeps its warning for 3 s, not 2.8 s at most). */
+  function holdCallout(ms) { clearTimeout(calloutTimer); calloutTimer = setTimeout(() => el.callout.classList.remove('show'), Math.max(2800, ms)); }
+  function callout(text, style = 'yell', who = null, quiet = false) {
     if (!text) return;
     el.callout.className = 'callout show ' + style;
     el.callout.textContent = text;
     clearTimeout(calloutTimer);
     calloutTimer = setTimeout(() => el.callout.classList.remove('show'), style === 'warn' || style === 'enrage' ? 3600 : 2800);
-    toast?.chat?.(who ? `${who}: ${text}` : text, style === 'emote' ? 'emote' : 'yell');
+    if (!quiet) toast?.chat?.(who ? `${who}: ${text}` : text, style === 'emote' ? 'emote' : 'yell');
   }
 
   // --- nameplate cast bars --------------------------------------------------------------------------
@@ -186,7 +267,22 @@ export function createBossUi({ actors, serverNow, toast } = {}) {
       if (done) { if (c.bar) c.bar.hidden = true; if (id === B.id) el.cast.hidden = true; casts.delete(id); }
     }
     if (aura) aura.material.opacity = 0.65 + Math.sin(wall / 120) * 0.3;
+    if (shell) {
+      const k = leftOf(wall);
+      // thinner and more urgent as it runs down; the ground ring is the clock (redrawn ten times a second)
+      shell.material.opacity = (0.1 + 0.16 * k) + Math.sin(wall / (120 + 220 * k)) * 0.06;
+      if (wardRing && ward.ms > 0 && wall - wardGeoAt > 100) {
+        wardGeoAt = wall; const R = wardRing.userData.R;
+        wardRing.geometry.dispose(); wardRing.geometry = new THREE.RingGeometry(R * 1.25, R * 1.5, 48, 1, Math.PI / 2, Math.max(0.02, Math.PI * 2 * k));
+        wardRing.material.color.setHex(k < 0.25 ? 0xffd070 : 0x9fe0ff);
+      }
+    }
+    paintWard();
+    if (B.shielded && B.id != null) {
+      const secs = ward.ms > 0 ? Math.ceil(Math.max(0, ward.end - wall) / 1000) : null;
+      el.pct.textContent = secs != null ? `Warded ${secs}s${ward.need ? ` · ${ward.have}/${ward.need}` : ''}` : 'Shielded';
+    }
   }
 
-  return { onEvent, update, callout, castOf: id => casts.get(id), get bossId() { return B.id; }, clear() { casts.clear(); el.root.hidden = true; B.id = null; setAura(null); } };
+  return { onEvent, update, callout, castOf: id => casts.get(id), get bossId() { return B.id; }, clear() { casts.clear(); el.root.hidden = true; B.id = null; setAura(null); dropWard(); B.shielded = false; el.root.classList.remove('shielded'); }, shield, wardLeft: leftOf, get ward() { return { ...ward, shielded: !!B.shielded, shell: !!shell, ring: !!wardRing }; } };
 }

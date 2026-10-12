@@ -6,19 +6,48 @@
       "name": "Warden Oswy",
       "role": "guard",
       "at": "Mere Tower",
-      "greeting": "Coldwater by name. Coldwater by nature. Coldwater down your boots."
+      "greeting": "Coldwater by name. Coldwater by nature. Coldwater down your boots.",
+      "titled": true
     },
     "elder_wenna": {
       "name": "Elder Wenna",
       "role": "elder",
       "at": "Coldwater",
-      "greeting": "Come in, warm up. Not too warm; the house is made of reeds."
+      "greeting": "Come in, warm up. Not too warm; the house is made of reeds.",
+      "titled": true
     },
     "netherby_fisher": {
       "name": "Pike of Netherby",
       "role": "fisher",
       "at": "Netherby",
-      "greeting": "Netherby's the last village before the mere gets deep. And odd."
+      "greeting": "Netherby's the last village before the mere gets deep. And odd.",
+      "titled": true
+    },
+    "angler_coldwater": {
+      "name": "Marta Stillmere",
+      "role": "angler",
+      "at": "Coldwater",
+      "greeting": "Hear that bell? There is no bell. Lovely evening for it, though. See the ripples, just south-west of where I'm standing? That's the town pool. It never fishes out.",
+      "placedBy": "content-pools",
+      "titled": true
+    },
+    "carter_coldwater": {
+      "name": "Fenna Furlong",
+      "role": "carter",
+      "at": "Coldwater",
+      "greeting": "Where to? The ox knows every road in the Downs, and takes most of them slowly.",
+      "cart": "cart_coldwater",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_netherby": {
+      "name": "Alys Ashby",
+      "role": "carter",
+      "at": "Netherby",
+      "greeting": "Name a town. If it has a gate, I have been stuck outside it.",
+      "cart": "cart_netherby",
+      "placedBy": "content-towns",
+      "titled": true
     }
   },
   "quests": [
@@ -33,18 +62,20 @@
           "kind": "kill",
           "type": "bog_slime",
           "count": 6,
-          "where": "the peat cuttings",
-          "text": "Bog slimes"
+          "where": "the peat cuttings by Coldwater",
+          "text": "Kill 6 bog slimes in the peat cuttings"
         }
       ],
       "done": "Lunch is safe. Peat is cut. Hooray for lunch.",
       "reward": {
         "xp": 0.4,
         "gold": 7,
-        "item": {
-          "tier": "common",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "uncommon"
+          }
+        ]
       }
     },
     {
@@ -58,8 +89,8 @@
           "kind": "kill",
           "type": "reed_serpent",
           "count": 7,
-          "where": "around Netherby",
-          "text": "Reed serpents"
+          "where": "the reeds around Netherby",
+          "text": "Kill 7 reed serpents"
         }
       ],
       "done": "Boots empty. Life good.",
@@ -79,8 +110,8 @@
           "kind": "kill",
           "type": "marsh_wisp",
           "count": 5,
-          "where": "along the mere shore",
-          "text": "Marsh wisps"
+          "where": "the mere shore below Mere Tower",
+          "text": "Kill 5 marsh wisps on the shore"
         }
       ],
       "done": "One true light again. Mine.",
@@ -101,14 +132,20 @@
           "kind": "kill",
           "type": "fen_croaker",
           "count": 6,
-          "where": "around the village well",
-          "text": "Fen croakers"
+          "where": "around Coldwater's village well",
+          "text": "Kill 6 fen croakers by the well"
         }
       ],
       "done": "Fresh water! Tastes of nothing! Wonderful!",
       "reward": {
         "xp": 0.35,
-        "gold": 6
+        "gold": 6,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       }
     },
     {
@@ -122,14 +159,16 @@
         {
           "kind": "clear",
           "dungeon": "door",
-          "text": "Reach the lower halls",
-          "floor": 1
+          "text": "Reach the lower halls of the Mere-Sunk Sanctum",
+          "floor": 1,
+          "where": "The Mere-Sunk Sanctum, the dungeon door in Coldwater Mere"
         },
         {
           "kind": "clear",
           "dungeon": "door",
-          "text": "Defeat the temple's keeper",
-          "boss": true
+          "text": "Defeat the sanctum's keeper",
+          "boss": true,
+          "where": "the bottom of the Mere-Sunk Sanctum"
         }
       ],
       "done": "The temple's quiet. The mere seems warmer. Slightly.",
@@ -153,7 +192,8 @@
           "kind": "killRare",
           "zone": "coldwater",
           "slot": 0,
-          "text": "The mere's rare slain"
+          "text": "Hunt down Old Coldmouth",
+          "where": "roams the deep mere of Coldwater"
         }
       ],
       "done": "It's not waiting any more. Neither am I — drinks are on Netherby.",

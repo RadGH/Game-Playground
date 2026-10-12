@@ -1,0 +1,437 @@
+// Thousandvale — its own GEAR, applied to the shared item table in memory (play-test 5: T17, T23). Pure.
+//
+//   T17 "New weapon affix that converts the weapon's physical damage to another element — uncommon, never on wands
+//        etc. that already convert."
+//   T23 "A whole NEW type of item for every slot and archetype … all mapped to in-game items."
+//
+// emberveil/data/items.json is shared with two live games, so nothing is written there. At engine boot
+// (js/rules/engine.js, `tvGear` on — off for the parity fixtures) this module:
+//   * adds the bases data/rules/gear-tv.json names (cloth gloves, cloth shoes — the table had no cloth hands/feet);
+//   * turns every NEW row of stream F's avatar-3d/data/gear-catalog.json into an item base (absent or half-written
+//     file = nothing injected, never an error), and puts each into the loot pool at its `minLevel`;
+//   * wraps `rpg.loot.generate` so an item made from a catalog base carries `g5` (its model id) and the element /
+//     caster style the row asked for;
+//   * gives `finishItem`, which every drop passes through (js/rules/loot-pool.js): the conversion affix, then the
+//     caster stamp (js/rules/caster-forms.js).
+
+import { attuneWeapon, EFFECTS } from './farhold.js';
+import { familyOf } from './loot-pool.js';
+import { stampCaster } from './caster-forms.js';
+
+const clone = o => JSON.parse(JSON.stringify(o));
+const hash01 = text => { let h = 2166136261; for (let i = 0; i < text.length; i++) { h ^= text.charCodeAt(i); h = Math.imul(h, 16777619); } return ((h >>> 0) % 100000) / 100000; };
+const pickBy = (list, key) => list[Math.min(list.length - 1, Math.floor(hash01(key) * list.length))];
+
+/** The catalog rows worth an item base: new, with a base id, of a kind the game wears. */
+/** Thousandvale's own equipment slots (Farhold's slot list has neither): a cloak or backpack, and a belt. */
+export const TV_SLOTS = Object.freeze(['back', 'waist']);
+export const EXTRA_SLOTS = Object.freeze(['back', 'waist']);
+
+// ---------------------------------------------------------------------------------------------- W22: no light items
+/**
+ * Owner feedback 8 (W22): "REMOVE light items from the game — I never meant to add those." Everything that is, makes or
+ * improves a carried light leaves the item table (in memory; the shared file is never written): bases worn in the
+ * `light` slot, uniques of type `light`, the affixes that only roll on a light, and `light` from every other affix's
+ * slot list. Returns what it removed. Run after Farhold's uniques are installed.
+ */
+export function removeLights(items) {
+  const out = { bases: [], uniques: [], affixes: [] };
+  if (!items) return out;
+  for (const t of ['armorBases', 'weaponBases']) for (const [k, b] of Object.entries(items[t] || {})) if (b && (b.slot === 'light' || b.type === 'light')) { delete items[t][k]; out.bases.push(k); }
+  if (Array.isArray(items.uniques)) {
+    const keep = [];
+    for (const u of items.uniques) { if (u && (u.type === 'light' || u.slot === 'light')) out.uniques.push(u.id); else keep.push(u); }
+    items.uniques.length = 0; items.uniques.push(...keep);
+  }
+  const lists = Array.isArray(items.affixes) ? [items.affixes] : Object.values(items.affixes || {}).filter(Array.isArray);
+  for (const list of lists) {
+    for (let i = list.length - 1; i >= 0; i--) {
+      const a = list[i];
+      if (!a || typeof a !== 'object') continue;
+      const only = Array.isArray(a.onlySlots) ? a.onlySlots : null;
+      if (/^cond_light(?!ning)/.test(a.stat || '') || (only && only.length && only.every(s => s === 'light'))) { out.affixes.push(a.id); list.splice(i, 1); continue; }
+      if (only && only.includes('light')) a.onlySlots = only.filter(s => s !== 'light');
+    }
+  }
+  return out;
+}
+/**
+ * Farhold's `tool` and `mount` UNIQUES (Prospector's Pride, Quickhand Pick, Brambleback …) fit no slot in Thousandvale —
+ * a mount here is a collectible, a tool is the professions' — yet they dropped (about 1 drop in 7,000). Out of the
+ * table, in memory. Returns the ids removed.
+ */
+export const SLOTLESS_TYPES = Object.freeze(['tool', 'mount']);
+export function removeSlotless(items) {
+  const out = [];
+  if (!items || !Array.isArray(items.uniques)) return out;
+  const keep = [];
+  for (const u of items.uniques) { if (u && (SLOTLESS_TYPES.includes(u.type) || SLOTLESS_TYPES.includes(u.slot))) out.push(u.id); else keep.push(u); }
+  items.uniques.length = 0; items.uniques.push(...keep);
+  // …and the properties that only ever roll ON a tool or a mount (surefoot, longwind, keen edge, thrifty …)
+  for (const list of Object.values(items.affixes || {}).filter(Array.isArray)) {
+    for (let i = list.length - 1; i >= 0; i--) {
+      const a = list[i], only = Array.isArray(a?.onlySlots) ? a.onlySlots : null;
+      if (!only) continue;
+      if (only.length && only.every(s => SLOTLESS_TYPES.includes(s))) { out.push('affix:' + a.id); list.splice(i, 1); }
+      else if (only.some(s => SLOTLESS_TYPES.includes(s))) a.onlySlots = only.filter(s => !SLOTLESS_TYPES.includes(s));
+    }
+  }
+  return out;
+}
+
+/**
+ * Round 9, the dead-data rule: lines that NOTHING in Thousandvale reads are taken off the items that carry them, in
+ * memory (the item stays; the shared items.json is never written). tests/C/dead-data.test.mjs finds them by putting
+ * every reachable line on a real character in a real fight (tests/C/effect-audit.mjs).
+ *   powers  (INERT_POWERS)  — off the uniques and sets that carried them
+ *   stats   (INERT_STATS)   — off the bases' built-in lines
+ * Returns `{ uniques: [id], sets: [id], bases: [key] }`.
+ */
+/**
+ * The lead's ruling on what the strip left thin: each of the three sets gets a full-set power that fits its NAME and
+ * uses something Thousandvale really has, and each of the three uniques one line of the same family. These are
+ * Thousandvale's own powers, added to the effect registry in memory (`installTvPowers`); every one has a reader and a
+ * knob test in tests/C/dead-data.test.mjs. Numbers are a set bonus, not a build.
+ */
+export const TV_POWERS = Object.freeze({
+  // Roadwarden's Vigil / Roadsong — the rules cannot see road tiles, so: out of a fight (on foot and mounted: the
+  // server moves you by the sheet's movePct, capped at +30% on foot)
+  tv_road_pace: { pct: 10, text: '+10% move speed, on foot and mounted, while nothing is fighting you.' },
+  // Forager's Covenant / Thistlewarden — js/rules/professions.js gatherYield reads rules.gatherBonus
+  tv_forager_hand: { chance: 0.15, text: 'Mining, logging, foraging and skinning have a 15% chance to give one more of the main material.' },
+  // Ragpicker's Fortune — kill gold through the sheet's gold find; js/rules/crates.js openCrate reads the luck
+  tv_ragpicker_luck: { goldFind: 15, crate: 0.1, text: '+15% gold from kills, and a crate you open has a 10% chance to hold an item one rarity better.' },
+});
+/** which dead power becomes which, per item (the rest of the item is untouched) */
+export const INERT_SWAP = Object.freeze({
+  sets: { roadwardens_vigil: 'tv_road_pace', foragers_covenant: 'tv_forager_hand', ragpickers_fortune: 'tv_ragpicker_luck' },
+  uniques: { thistlewarden: 'tv_forager_hand', roadsong: 'tv_road_pace' },
+  /** The Long Watch keeps the night: a fixed line instead of a power ("+20% armour after dark", Farhold's own cond_nightWard) */
+  uniqueLines: { the_long_watch: { stat: 'cond_nightWard', value: 0.2 } },
+});
+const OWNED_SWAP = Object.freeze({ forage_feast: 'tv_forager_hand', road_cache: 'tv_road_pace' });
+export function installTvPowers(EFFECTS, items) {
+  const P = TV_POWERS;
+  const put = (id, spec) => { EFFECTS['legendary:' + id] = { id: 'legendary:' + id, desc: () => P[id].text, tv: true, ...spec }; if (items) (items.legendaryEffects ||= {})[id] = P[id].text; };
+  put('tv_road_pace', { derive: (v, d, unit) => { if (!unit._fighting) d.movePct = (d.movePct || 0) + P.tv_road_pace.pct; } });
+  put('tv_forager_hand', { gatherExtra: () => P.tv_forager_hand.chance });
+  put('tv_ragpicker_luck', { derive: (v, d) => { d.goldFind = (d.goldFind || 0) + P.tv_ragpicker_luck.goldFind; }, crateLuck: () => P.tv_ragpicker_luck.crate });
+}
+export const INERT_STATS = Object.freeze([]);        // (none today: `cond_guardBond` — "town guards deal more damage while you are with them" — is WIRED to Thousandvale's own town guards, js/rules/guards.js)
+export function stripInert(items) {
+  const out = { uniques: [], sets: [], bases: [] };
+  if (!items) return out;
+  for (const u of items.uniques || []) if (u && INERT_POWERS.includes(u.legendaryEffect)) {
+    if (INERT_SWAP.uniques[u.id]) u.legendaryEffect = INERT_SWAP.uniques[u.id]; else delete u.legendaryEffect;
+    const line = INERT_SWAP.uniqueLines[u.id];
+    if (line && !(u.fixedAffixes || []).some(f => f.stat === line.stat)) (u.fixedAffixes ||= []).push({ ...line });
+    out.uniques.push(u.id);
+  }
+  for (const s of items.sets || []) {
+    let hit = false;
+    if (INERT_POWERS.includes(s.legendaryEffect)) { if (INERT_SWAP.sets[s.id]) s.legendaryEffect = INERT_SWAP.sets[s.id]; else delete s.legendaryEffect; hit = true; }
+    for (const [at, id] of Object.entries(s.thresholdPowers || {})) if (INERT_POWERS.includes(id)) { delete s.thresholdPowers[at]; hit = true; }
+    if (hit) out.sets.push(s.id);
+  }
+  for (const t of ['weaponBases', 'armorBases']) for (const [k, b] of Object.entries(items[t] || {})) {
+    if (!Array.isArray(b.intrinsic) || !b.intrinsic.some(f => INERT_STATS.includes(f.stat))) continue;
+    b.intrinsic = b.intrinsic.filter(f => !INERT_STATS.includes(f.stat));
+    out.bases.push(k);
+  }
+  return out;
+}
+/** An item a player already owns: the same lines come off it as it is loaded (it keeps everything else). */
+export function stripInertItem(item) {
+  if (!item || typeof item !== 'object' || !Array.isArray(item.affixes)) return item;
+  // an owned unique whose dead power has a replacement gets the replacement (by the unique's id), else loses the line
+  // (only a UNIQUE carries a power on the item itself — a set's is on the set — so the dead power names its replacement)
+  const swap = item.isUnique !== false ? OWNED_SWAP[item.legendaryEffectId] || null : null;
+  if (swap) { item.legendaryEffectId = swap; for (const a of item.affixes) if (a && a.id === 'legendary_effect') { a.legendaryId = swap; a.descriptor = TV_POWERS[swap].text; } item.inertStripped = true; return item; }
+  if (item.legendaryEffectId === 'no_night_raids' && !item.affixes.some(a => a && a.stat === 'cond_nightWard')) item.affixes.push({ id: 'fixed_cond_nightWard', name: 'Night Watch', ...INERT_SWAP.uniqueLines.the_long_watch });      // The Long Watch
+  if (INERT_POWERS.includes(item.legendaryEffectId)) { delete item.legendaryEffectId; }
+  // (a unique whose power was stripped is still generated with an empty power line by the shared loot code: that goes too)
+  const keep = item.affixes.filter(a => !(a && ((a.id === 'legendary_effect' && (!a.legendaryId || INERT_POWERS.includes(a.legendaryId))) || INERT_STATS.includes(a.stat))));
+  if (keep.length !== item.affixes.length) { item.affixes = keep; item.inertStripped = true; }
+  return item;
+}
+/**
+ * Round 9 (Tempering -> Promote): legendary powers whose hook NOTHING in Thousandvale reads — Farhold's travel layer
+ * (scrap from kills, caches on new ground, night spawns) and `movePct` (the server moves a player at one speed; until it
+ * reads the sheet a "+18% move speed" power does nothing). A promoted item must never be handed one of these.
+ * tests/C/promote.test.mjs runs every other promotable power in a real fight and fails if a hook never fires.
+ */
+export const INERT_POWERS = Object.freeze(['forage_feast', 'road_cache', 'no_night_raids', 'prospector', 'quick_hands']);
+export const powerRunsHere = id => !INERT_POWERS.includes(id);
+/** Is this a light a player may still own from before W22 (a worn lantern / torch of any base, or the torch consumable)? */
+export function isLightItem(item, cfg = null) {
+  if (!item || typeof item !== 'object') return false;
+  const L = cfg?.lights || LIGHTS_DEFAULT;
+  if (item.slot === 'light' || item.type === 'light') return true;
+  if (item.use && item.use.type === 'light') return true;
+  const ids = [item.baseKey, item.catalogBase, item.baseItemId, item.g5].filter(Boolean);
+  if (ids.some(id => L.legacy.includes(id))) return true;
+  if ((item.kind === 'good' || item.source === 'good') && L.goods.includes(item.id)) return true;
+  return (item.affixes || []).some(a => /^cond_light(?!ning)/.test(a?.stat || ''));
+}
+const LIGHTS_DEFAULT = Object.freeze({ legacy: ['hand_lantern', 'pitch_torch', 'g5_cresset', 'g5_hexlantern'], goods: ['torch_bundle', 'torch', 'torches', 'lantern'], refund: { slot: 0.6, good: 15 } });
+/**
+ * What a removed light is paid back at: its full LIST price (never the sell price — the owner took it away, the
+ * player loses nothing). `listPrice(item)` = the gear formula's price (js/rules/economy.js). A stack pays per item.
+ */
+export function lightRefund(item, cfg = null, listPrice = null) {
+  if (!isLightItem(item, cfg)) return 0;
+  const R = cfg?.lights?.refund || LIGHTS_DEFAULT.refund;
+  const count = Math.max(1, (item.count | 0) || 1);
+  if (item.use || item.kind === 'good' || item.kind === 'potion') return Math.max(1, Math.round(Number.isFinite(item.price) && item.price > 0 ? item.price : R.good)) * count;
+  const list = listPrice ? listPrice(item) : 0;
+  return Math.max(R.good, Math.round(list * (R.slot ?? 0.6))) * count;
+}
+
+// ---------------------------------------------------------------------------------------------- W19: backpacks
+/** Bag slots an item gives when worn on the back (0 = not a backpack). */
+export const bagBonusOf = item => (item && typeof item === 'object' && item.slot === 'back' && item.bagSlots > 0 ? Math.min(24, item.bagSlots | 0) : 0);
+/**
+ * A backpack as it leaves `generate`: its bag slots on the item, FEWER rolled properties than a cloak of that rarity
+ * (`packs.affixCap`), the name without the words of the properties it gave up, the model it draws.
+ */
+export function finishPack(item, base, cfg) {
+  if (!item || !base?.pack) return item;
+  const P = cfg?.packs || {};
+  const cap = P.affixCap?.[item.rarity] ?? 1;
+  const rolled = (item.affixes || []).filter(a => !a.baseIntrinsic && !a.intrinsic);
+  let name = item.name || base.name;
+  for (const a of rolled.slice(cap)) {
+    item.affixes.splice(item.affixes.indexOf(a), 1);
+    if (a.name && name.startsWith(a.name + ' ')) name = name.slice(a.name.length + 1);
+    else if (a.name && name.endsWith(' ' + a.name)) name = name.slice(0, -a.name.length - 1);
+  }
+  item.name = name;
+  item.pack = true;
+  item.bagSlots = base.bagSlots | 0;
+  item.bagText = `+${item.bagSlots} bag slots`;
+  const g5 = (item.rarity === 'rare' || item.rarity === 'legendary') && P.rareLook ? P.rareLook : base.packLook;
+  if (g5) { item.g5 = g5; item.look = { ...(item.look || {}), g5 }; }
+  return item;
+}
+
+export function catalogRows(catalog) {
+  const rows = Array.isArray(catalog) ? catalog : Array.isArray(catalog?.rows) ? catalog.rows : Array.isArray(catalog?.items) ? catalog.items : [];
+  return rows.filter(r => r && typeof r === 'object' && (r.new || r.round === 5) && typeof (r.base || r.id) === 'string');
+}
+
+/**
+ * One catalog row -> `{ key, table: 'weaponBases' | 'armorBases', base }`, or `{ skip: reason }`.
+ * The numbers are always those of an existing plain base (so balance cannot drift from a model file); the row
+ * supplies the name, the first level, the model id and, for casters, the element and style its shape suggests.
+ */
+export function baseFromRow(items, cfg, row) {
+  const C = cfg?.catalog || {};
+  const key = row.base || row.id;
+  const kind = row.kind;
+  const stamp = (tpl, extra = {}) => ({
+    ...clone(tpl), name: row.name || tpl.name, g5: row.id, look: { g5: row.id }, tvCatalog: true,
+    ...(Number.isFinite(row.minLevel) && row.minLevel > 1 ? { minLevel: row.minLevel } : {}), ...extra,
+  });
+  if (kind === 'weapon' || (kind === 'offhand' && row.type === 'orb')) {          // owner feedback 10 (Y16): an off-hand BOOK model is a grimoire (a focus); a tome is a main-hand weapon
+    const from = (kind === 'offhand' ? C.offhand : C.weapon)?.[row.type];
+    const tpl = from && items.weaponBases?.[from];
+    if (!tpl) return { skip: `no weapon base for type "${row.type}"` };
+    const extra = { tvFrom: from };
+    const el = row.element ? C.elements?.[row.element] : null;
+    if (el && tpl.weaponCategory === 'magic') extra.attune = el;
+    if (row.form && tpl.weaponCategory === 'magic') {
+      if (tpl.subtype === 'wand' && C.forms?.[row.form]) extra.castStyle = pickBy(C.forms[row.form], key);
+      else if (tpl.subtype === 'staff' && !tpl.statScaling?.includes('str')) {
+        if (C.staffStyles?.[row.form]) extra.castStyle = C.staffStyles[row.form];
+        else if (C.staffSpells?.[row.form]) {
+          extra.staffSpell = C.staffSpells[row.form];
+          if (row.form === 'fork' && !extra.attune) extra.attune = 'lightning';     // the forking staff spell (Arc Lash) is lightning's
+        }
+      }
+    }
+    return { key, table: 'weaponBases', base: stamp(tpl, extra) };
+  }
+  if (kind === 'armour' || kind === 'armor') {
+    const slot = row.gameSlot;
+    const tier = C.armour?.[row.archetype];
+    const from = tier === 'cloth' && C.clothPiece?.[slot] ? C.clothPiece[slot] : (tier && C.piece?.[slot] ? `${tier}_${C.piece[slot]}` : null);
+    const tpl = from && items.armorBases?.[from];
+    if (!tpl) return { skip: `no armour base for ${row.archetype} ${slot}` };
+    return { key, table: 'armorBases', base: stamp(tpl, { tvFrom: from }) };
+  }
+  if (kind === 'offhand' || kind === 'accessory') {
+    let from = (kind === 'offhand' ? C.offhand : C.accessory)?.[row.type];
+    // a focus copies the one whose rider fits its shape; a shield the one its `shield:<shape>` tag names
+    if (kind === 'offhand' && row.type === 'focus' && row.form && C.focusByForm?.[row.form]) from = C.focusByForm[row.form];
+    if (kind === 'offhand' && row.type === 'shield') {
+      const shape = (row.tags || []).map(t => /^shield:(.+)$/.exec(String(t))?.[1]).find(Boolean);
+      if (shape && C.shields?.[shape] && items.armorBases?.[C.shields[shape]]) from = C.shields[shape];
+    }
+    const tpl = from && items.armorBases?.[from];
+    if (!tpl) return { skip: `no ${kind} base for type "${row.type}"` };
+    return { key, table: 'armorBases', base: stamp(tpl, { tvFrom: from }) };
+  }
+  return { skip: `kind "${kind}" is not worn as gear` };
+}
+
+/**
+ * Add Thousandvale's bases and the catalog's to `items` (in memory). Idempotent. Returns a report:
+ * `{ added: [key], catalog: [key], skipped: [{id, why}] }`.
+ */
+export function installTvGear(items, cfg, catalog = null) {
+  const report = { added: [], catalog: [], skipped: [] };
+  if (!items || !cfg || items._tvGear) return report;
+  items._tvGear = true;
+  report.lights = removeLights(items);          // owner feedback 8 (W22), before anything is added or pooled
+  report.slotless = removeSlotless(items);      // Farhold's tool / mount uniques: no slot here
+  installTvPowers(EFFECTS, items);              // Thousandvale's own three powers (the replacements below point at them)
+  report.inert = stripInert(items);             // round 9: power / property lines nothing here reads
+  for (const [key, base] of Object.entries(cfg.bases?.armor || {})) if (!items.armorBases[key]) { items.armorBases[key] = { ...clone(base), tv: true }; report.added.push(key); }
+  for (const [key, base] of Object.entries(cfg.bases?.weapon || {})) if (!items.weaponBases[key]) { items.weaponBases[key] = { ...clone(base), tv: true }; report.added.push(key); }
+  let rows = [];
+  try { rows = catalogRows(catalog); } catch { rows = []; }
+  for (const row of rows) {
+    let made;
+    try { made = baseFromRow(items, cfg, row); } catch (err) { made = { skip: String(err?.message || err) }; }
+    if (!made || made.skip) { report.skipped.push({ id: row.id, why: made?.skip || 'unreadable' }); continue; }
+    if (items.weaponBases[made.key] || items.armorBases[made.key]) { report.skipped.push({ id: row.id, why: `base "${made.key}" already exists` }); continue; }
+    items[made.table][made.key] = made.base;
+    report.catalog.push(made.key);
+  }
+  return report;
+}
+
+/** Put the new bases into the loot pool (a built pool from js/rules/loot-pool.js) at their first level. */
+export function poolTvGear(pool, items, cfg, report) {
+  if (!pool) return 0;
+  let n = 0;
+  for (const [id, f] of Object.entries(cfg?.families || {})) if (!pool.families[id]) pool.families[id] = { id, group: f.group, w: f.w ?? 1, bases: [] };
+  const add = (key, fam, from) => {
+    const f = pool.families[fam];
+    if (!f || f.bases.some(b => b.key === key)) return;
+    f.bases.push({ key, from: from || 1 });
+    n++;
+  };
+  for (const [key, [fam, from]] of Object.entries(cfg?.pool || {})) if (items.armorBases[key] || items.weaponBases[key]) add(key, fam, from);
+  for (const key of report?.catalog || []) {
+    const base = items.weaponBases[key] || items.armorBases[key];
+    const fam = familyOf(items, base.tvFrom || key) || familyOf(items, key);
+    if (fam) add(key, fam, base.minLevel || 1);
+  }
+  return n;
+}
+
+/**
+ * Owner feedback 6 (U6): "Shields show 0.2% chance to block". The shared item table writes a shield's BUILT-IN block as
+ * a fraction (0.2 = one hit in five); Farhold restates the rollable block affix in percent at load (its affixes.js) but
+ * not this built-in line, and the sheet reads the stat as percent — so the card said 0.2% and the shield really gave
+ * +0.2%. Thousandvale writes it as the percent it was always meant to be (20). Safe to run more than once: a value
+ * above 1 is already a percent. `UNIT_FIXES` is the whole list; tests/C/playtest6 sweeps every stat for another.
+ */
+export const UNIT_FIXES = Object.freeze({ block_chance: { ids: ['base_block_chance'], scale: 100, max: 1 } });
+export function fixUnits(item) {
+  for (const a of item?.affixes || []) {
+    const f = UNIT_FIXES[a.stat];
+    if (f && f.ids.includes(a.id) && a.value > 0 && a.value <= f.max) a.value = Math.round(a.value * f.scale);
+  }
+  return item;
+}
+
+/** T17: may this weapon take a conversion? Physical, magic or rare, not already branded. */
+export function canConvert(cfg, items, item) {
+  const c = cfg?.convert;
+  if (!c || !item || item.type !== 'weapon') return false;
+  if (item.weaponCategory === 'magic' || item.castElement) return false;        // wands, staves, sceptres, orbs, tomes: already an element
+  if (item.isUnique || item.setId || !(c.rarities || ['magic', 'rare']).includes(item.rarity)) return false;
+  if (item.brand || item.converted) return false;
+  if ((item.affixes || []).some(a => /^cond_brand/.test(a.stat || ''))) return false;
+  const base = items?.weaponBases?.[item.baseKey];
+  if ((base?.intrinsic || []).some(f => /^cond_brand/.test(f.stat || ''))) return false;
+  return true;
+}
+
+/** T17: put the conversion for `element` on `item` (replacing one rolled property, so the item is not simply richer). */
+export function convertWeapon(cfg, item, element, value) {
+  const def = cfg?.convert?.affixes?.[element];
+  if (!def) return item;
+  const rolled = (item.affixes || []).map((a, i) => ({ a, i })).filter(x => !x.a.baseIntrinsic && !x.a.intrinsic);
+  const affix = { id: def.id, name: def.name, stat: def.stat, value: +(+value).toFixed(2), element, extended: true, tvConvert: true };
+  if (rolled.length) item.affixes.splice(rolled[rolled.length - 1].i, 1, affix); else (item.affixes || (item.affixes = [])).push(affix);
+  item.brand = element;
+  item.converted = true;
+  // the name says it, and loses the word of the property it gave up
+  const lost = rolled.length ? rolled[rolled.length - 1].a.name : null;
+  let name = item.name || item.baseName || '';
+  if (lost && name.startsWith(lost + ' ')) name = name.slice(lost.length + 1);
+  else if (lost && name.endsWith(' ' + lost)) name = name.slice(0, -lost.length - 1);
+  item.name = `${def.name} ${name}`;
+  item.convertText = convertText(def, affix.value, element);
+  return item;
+}
+/** The conversion's card line: Farhold's own sentence for the brand stat (its registry is what applies it). */
+export function convertText(def, value, element) {
+  try { const t = EFFECTS['affix:' + def.stat]?.desc?.(value); if (t) return t; } catch { /* fall through */ }
+  return `Every hit deals ${element} damage instead of physical; +${Math.round(value * 100)}% ${element} damage`;
+}
+
+/**
+ * Wire it into an engine: the generate wrapper (catalog fields onto the item), `engine.finishItem(item, {rng,
+ * fresh})` and `engine.makeItem({base, rarity, level, rng})`.
+ */
+export function attachTvGear(engine, cfg) {
+  const rpg = engine.rpg, items = engine.items;
+  const loot = rpg.loot;
+  if (!loot._tvGear) {
+    loot._tvGear = true;
+    const gen = loot.generate;
+    loot.generate = function tvGenerate(baseKey, rarity, quality, opts) {
+      const item = gen.call(this, baseKey, rarity, quality, opts);
+      fixUnits(item);
+      const base = item && (items.weaponBases[baseKey] || items.armorBases[baseKey]);
+      if (item && base?.pack) finishPack(item, base, engine.tvGear);            // W19
+      if (item && base?.g5) {
+        item.g5 = base.g5;
+        // the item answers as its TEMPLATE base to every rule that asks by key (a quarterstaff is a pole, a rapier
+        // fences, a reliquary siphons); what it LOOKS like and what it is called are the catalog row's
+        item.catalogBase = baseKey;
+        if (base.tvFrom) item.baseKey = base.tvFrom;
+        if (base.attune && !item.attune) item.attune = base.attune;           // attuneWeapon honours `attune`
+        if (base.castStyle) item.castStyle = base.castStyle;
+        if (base.staffSpell) item.staffSpell = base.staffSpell;
+      }
+      return item;
+    };
+  }
+  if (!loot._tvUnique && typeof loot.generateUnique === 'function') {
+    loot._tvUnique = true;
+    const genU = loot.generateUnique;
+    loot.generateUnique = function tvUnique(...a) { return stripInertItem(genU.apply(this, a)); };      // round 9: no empty / dead power line on a unique
+  }
+  engine.tvGear = cfg || null;
+  /** Every new item passes through here once: T17 conversion (drops only), then the caster stamp. */
+  engine.finishItem = (item, { rng = null, fresh = true, convert = true } = {}) => {
+    if (!item || typeof item !== 'object') return item;
+    fixUnits(item);                       // an old save's shield (block 0.2) is corrected as it is loaded
+    stripInertItem(item);                 // round 9: a line nothing here reads comes off an item already owned
+    if (item.pack && item.bagSlots > 0 && !item.bagText) item.bagText = `+${item.bagSlots} bag slots`;
+    const c = engine.tvGear?.convert;
+    if (convert && fresh && rng && c && canConvert(engine.tvGear, items, item) && rng() < (c.chance ?? 0)) {
+      const els = Object.keys(c.affixes || {});
+      const el = els[Math.floor(rng() * els.length) % els.length];
+      const [lo, hi] = c.value || [0.04, 0.1];
+      convertWeapon(engine.tvGear, item, el, lo + rng() * (hi - lo));
+    }
+    stampCaster(engine, item, { fresh: fresh && !item.isUnique && !item.setId && !item.starter });
+    return item;
+  };
+  /** One item of a named base (E: shop stock, quest rewards; a kit; a test). */
+  engine.makeItem = ({ base, rarity = 'normal', level = 1, rng = null, quality = null } = {}) => {
+    if (!base || !(items.weaponBases[base] || items.armorBases[base])) return null;       // (W22: a light base is no longer in the table)
+    const r = rng || rpg.rng;
+    rpg.lastDropLevel = level;
+    const item = attuneWeapon(loot.generate(base, rarity, quality || rpg.qualityFor(level), { rng: r }));
+    if (item && item.dropLevel == null) item.dropLevel = level;
+    return engine.finishItem(item, { rng: r, fresh: true, convert: false });
+  };
+  return engine;
+}

@@ -2,6 +2,7 @@
   "id": "rare_waterstrider_tolla",
   "name": "Tolla Longlegs",
   "tier": "rare",
+  "secret": true,
   "zone": "gullwick",
   "body": "veil_spider",
   "place": "skates across the shallows of the Gullwick Lakes faster than a boat",

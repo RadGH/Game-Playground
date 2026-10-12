@@ -1,5 +1,5 @@
 {
-  "name": "Wehackkeep (z11_03)",
+  "name": "Hermit's Rest (z11_03)",
   "zone": "z11_03",
   "sheet": {
     "sheet": "torbor_downs",
@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 2,
-  "inputHash": "af932954",
+  "bakeVersion": 4,
+  "inputHash": "a23813e6",
   "waterKinds": [
     "none",
     "sea",
@@ -33,7 +33,7 @@
       "height": 224,
       "method": "pangea",
       "seaLevel": 0.2,
-      "inputHash": "9803699e"
+      "inputHash": "9805a835"
     },
     "zone": {
       "zx": 11,
@@ -63,9 +63,10 @@
     {
       "type": "settlement",
       "kind": "city",
-      "name": "Wehackkeep",
+      "name": "Hermit's Rest",
       "x": 1104,
       "z": 560,
+      "wfName": "Wehackkeep",
       "hub": true,
       "radius": 140,
       "movedFrom": {
@@ -76,9 +77,10 @@
     {
       "type": "settlement",
       "kind": "village",
-      "name": "Weephaven",
+      "name": "Charcoal Burners",
       "x": 256,
       "z": 224,
+      "wfName": "Weephaven",
       "radius": 65,
       "movedFrom": {
         "x": 192,
@@ -108,15 +110,23 @@
       "type": "crossing",
       "kind": "ford",
       "name": "Wiwat Ford",
-      "x": 1344,
-      "z": 192
+      "x": 1286,
+      "z": 218,
+      "snappedFrom": {
+        "x": 1344,
+        "z": 192
+      }
     },
     {
       "type": "crossing",
       "kind": "ford",
       "name": "Fahibeck Ford",
-      "x": 1088,
-      "z": 832
+      "x": 1042,
+      "z": 772,
+      "snappedFrom": {
+        "x": 1088,
+        "z": 832
+      }
     },
     {
       "type": "dungeon",
@@ -124,30 +134,82 @@
       "name": "Barrow entrance",
       "x": 873,
       "z": 718,
-      "yaw": 2.73
+      "yaw": 2.73,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_wychwood",
       "x": 1112,
       "z": 792,
-      "r": 40
+      "r": 40,
+      "pinned": true
     }
   ],
   "spawn": {
     "x": 1100,
     "z": 560
   },
+  "bridges": [
+    {
+      "a": [
+        1344,
+        61.5
+      ],
+      "b": [
+        1344,
+        78.5
+      ],
+      "h": 220.413,
+      "w": 4.5
+    },
+    {
+      "a": [
+        1088,
+        700.5
+      ],
+      "b": [
+        1088,
+        721.5
+      ],
+      "h": 264.876,
+      "w": 4.5
+    },
+    {
+      "a": [
+        1920.13,
+        -0.13
+      ],
+      "b": [
+        1941.17,
+        -19.52
+      ],
+      "h": 227.851,
+      "w": 5.4
+    },
+    {
+      "a": [
+        1283.28,
+        231.99
+      ],
+      "b": [
+        1297.17,
+        230.29
+      ],
+      "h": 231.684,
+      "w": 4.31
+    }
+  ],
   "summary": {
     "zone": "z11_03",
     "province": "Petbeck Basin",
-    "inputHash": "af932954",
+    "inputHash": "a23813e6",
     "rivers": 3,
-    "wetShare": 0.007,
-    "unwalkableShare": 0.186,
+    "wetShare": 0.006,
+    "unwalkableShare": 0.184,
     "towns": [
       {
-        "name": "Wehackkeep",
+        "name": "Hermit's Rest",
         "kind": "city",
         "hub": true,
         "at": [
@@ -160,13 +222,26 @@
           "z": 832
         },
         "culture": "halfling",
-        "plots": 41,
-        "streets": 113,
-        "links": 3,
-        "overlaps": 0
+        "plots": 40,
+        "streets": 111,
+        "links": 2,
+        "overlaps": 0,
+        "highStreets": 2,
+        "w6": {
+          "plotsBefore": 41,
+          "plots": 40,
+          "kept": 40,
+          "removed": [
+            {
+              "plot": 12,
+              "want": "hut",
+              "office": false
+            }
+          ]
+        }
       },
       {
-        "name": "Weephaven",
+        "name": "Charcoal Burners",
         "kind": "village",
         "hub": false,
         "at": [
@@ -179,10 +254,38 @@
           "z": 192
         },
         "culture": "halfling",
-        "plots": 27,
-        "streets": 74,
-        "links": 3,
-        "overlaps": 0
+        "plots": 24,
+        "streets": 71,
+        "links": 2,
+        "overlaps": 0,
+        "highStreets": 2,
+        "w6": {
+          "plotsBefore": 27,
+          "plots": 24,
+          "kept": 23,
+          "removed": [
+            {
+              "plot": 0,
+              "want": "house",
+              "office": false
+            },
+            {
+              "plot": 8,
+              "want": "hut",
+              "office": false
+            },
+            {
+              "plot": 23,
+              "want": "house",
+              "office": false
+            },
+            {
+              "plot": 24,
+              "want": "house",
+              "office": false
+            }
+          ]
+        }
       },
       {
         "name": "Wildhaven",
@@ -198,31 +301,47 @@
           "z": 192
         },
         "culture": "halfling",
-        "plots": 10,
-        "streets": 41,
+        "plots": 9,
+        "streets": 40,
         "links": 2,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 2,
+        "w6": {
+          "plotsBefore": 10,
+          "plots": 9,
+          "kept": 9,
+          "removed": [
+            {
+              "plot": 2,
+              "want": "house",
+              "office": false
+            }
+          ]
+        }
       }
     ],
     "roads": 12,
     "bridges": 3,
-    "scatter": 11701,
+    "paths": 11,
+    "pathMetres": 982,
+    "scatter": 15434,
     "scatterKinds": {
-      "bush": 3155,
-      "tree_broadleaf": 4753,
-      "rock_small": 1756,
-      "rock_large": 1328,
-      "boulder": 250,
-      "tree_conifer": 446,
-      "tree_acacia": 13
+      "rock_small": 2298,
+      "bush": 4690,
+      "tree_broadleaf": 4958,
+      "rock_large": 1567,
+      "boulder": 270,
+      "tree_conifer": 578,
+      "tree_acacia": 23,
+      "hedge": 1050
     },
     "sites": [
-      "settlement(HUB) city Wehackkeep 1104 560 140",
-      "settlement village Weephaven 256 224 65",
+      "settlement(HUB) city Hermit's Rest 1104 560 140",
+      "settlement village Charcoal Burners 256 224 65",
       "settlement hamlet Wildhaven 1280 224 46",
       "lair dungeon The Fifar Undercroft 192 1344",
-      "crossing ford Wiwat Ford 1344 192",
-      "crossing ford Fahibeck Ford 1088 832",
+      "crossing ford Wiwat Ford 1286 218",
+      "crossing ford Fahibeck Ford 1042 772",
       "dungeon door_1 Barrow entrance 873 718  2.73",
       "event event_wychwood  1112 792 40"
     ],
@@ -230,13 +349,13 @@
       "x": 1100,
       "z": 560
     },
-    "placements": 337,
-    "vignettesAvoided": 0
+    "placements": 397,
+    "vignettesAvoided": 558
   },
   "files": {
-    "terrain.bin": 6306098,
-    "nav.bin": 1050717,
-    "scatter.bin": 93692,
-    "placements.json": 153125
+    "terrain.bin": 689751,
+    "nav.bin": 49694,
+    "scatter.bin": 123556,
+    "placements.json": 256054
   }
 }

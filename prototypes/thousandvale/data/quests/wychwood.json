@@ -6,25 +6,64 @@
       "name": "The Hermit of Wychwood",
       "role": "hermit",
       "at": "Hermit's Rest",
-      "greeting": "I came here to be alone. Then everyone else came here too."
+      "greeting": "I came here to be alone. Then everyone else came here too.",
+      "titled": true
     },
     "collier_nan": {
       "name": "Collier Nan",
       "role": "trader",
       "at": "Charcoal Burners",
-      "greeting": "Charcoal, kindling, and spiders. The spiders are free."
+      "greeting": "Charcoal, kindling, and spiders. The spiders are free.",
+      "titled": true
     },
     "warden_emrys": {
       "name": "Warden Emrys",
       "role": "guard",
       "at": "the Antler Stockade",
-      "greeting": "The stockade's antlers are decorative. The arrows are not."
+      "greeting": "The stockade's antlers are decorative. The arrows are not.",
+      "titled": true
     },
     "lost_hunter": {
       "name": "Hob the hunter",
       "role": "hunter",
       "at": "hunters_hide",
-      "greeting": "Lost my bow, lost my dog, lost my way. Found a lot of boar."
+      "greeting": "Lost my bow, lost my dog, lost my way. Found a lot of boar.",
+      "titled": true
+    },
+    "angler_hermits_rest": {
+      "name": "Quiet Oswin",
+      "role": "angler",
+      "at": "Hermit's Rest",
+      "greeting": "...Shh. You will scare them. Fine. What do you want? See the ripples, just east of where I'm standing? That's the town pool. It never fishes out.",
+      "placedBy": "content-pools",
+      "titled": true
+    },
+    "carter_hermit_s_rest": {
+      "name": "Bartle Kettleby",
+      "role": "carter",
+      "at": "Hermit's Rest",
+      "greeting": "Climb up. Mind the turnips. A few coins and you are in another town before your boots notice.",
+      "cart": "cart_hermit_s_rest",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_charcoal_burners": {
+      "name": "Bryn Quarrie",
+      "role": "carter",
+      "at": "Charcoal Burners",
+      "greeting": "Name a town. If it has a gate, I have been stuck outside it.",
+      "cart": "cart_charcoal_burners",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_wildhaven": {
+      "name": "Emrys Kettleby",
+      "role": "carter",
+      "at": "Wildhaven",
+      "greeting": "The ox is called Thunder. It is a joke. Where are we going?",
+      "cart": "cart_wildhaven",
+      "placedBy": "content-towns",
+      "titled": true
     }
   },
   "quests": [
@@ -40,23 +79,26 @@
           "kind": "kill",
           "type": "veil_spider",
           "count": 8,
-          "where": "the forest road",
-          "text": "Spiders"
+          "where": "the forest road through Wychwood",
+          "text": "Kill 8 spiders on the forest road"
         },
         {
           "kind": "visit",
           "site": "the Antler Stockade",
-          "text": "Reach the Antler Stockade"
+          "text": "Reach the Antler Stockade",
+          "where": "the Antler Stockade, in Wychwood"
         }
       ],
       "done": "The road's open. Next stop: Redcliff, where the trouble has a flag.",
       "reward": {
         "xp": 0.5,
         "gold": 10,
-        "item": {
-          "tier": "uncommon",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "uncommon"
+          }
+        ]
       },
       "next": "flags_over_redcliff"
     },
@@ -71,14 +113,20 @@
           "kind": "kill",
           "type": "veil_spider",
           "count": 5,
-          "where": "the charcoal kilns",
-          "text": "Spiders at the kilns"
+          "where": "the charcoal kilns by Charcoal Burners",
+          "text": "Kill 5 spiders at the kilns"
         }
       ],
       "done": "Kilns clear! I'll sell you charcoal at a discount. A very small one.",
       "reward": {
         "xp": 0.4,
-        "gold": 6
+        "gold": 6,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       }
     },
     {
@@ -93,7 +141,7 @@
           "type": "gallows_owl",
           "count": 6,
           "where": "around Hermit's Rest",
-          "text": "Gallows owls"
+          "text": "Kill 6 gallows owls"
         }
       ],
       "done": "Silence. Thank you. Please leave. Kindly.",
@@ -112,14 +160,15 @@
         {
           "kind": "visit",
           "vignette": "hunters_hide",
-          "text": "Search the boar wallow"
+          "text": "Search the Hunter's Hide for the bow",
+          "where": "The Hunter's Hide, in Wychwood"
         },
         {
           "kind": "kill",
           "type": "moor_hound",
           "count": 5,
-          "where": "near the wallow",
-          "text": "Hounds (not Biscuit)"
+          "where": "near The Hunter's Hide",
+          "text": "Kill 5 moor hounds (not Biscuit)"
         }
       ],
       "done": "My bow! And there's Biscuit, he's been home all along. Embarrassing.",
@@ -143,14 +192,16 @@
         {
           "kind": "clear",
           "dungeon": "door",
-          "text": "Reach the inner rings",
-          "floor": 1
+          "text": "Reach the inner Rootbound Barrows",
+          "floor": 1,
+          "where": "The Rootbound Barrows, the dungeon door in Wychwood"
         },
         {
           "kind": "clear",
           "dungeon": "door",
-          "text": "Defeat the barrow's keeper",
-          "boss": true
+          "text": "Defeat the barrows' keeper",
+          "boss": true,
+          "where": "the bottom of the Rootbound Barrows"
         }
       ],
       "done": "The digging has stopped. Now I can hear my thoughts. They're quite boring.",
@@ -174,7 +225,8 @@
           "kind": "killRare",
           "zone": "wychwood",
           "slot": 0,
-          "text": "Wychwood's rare slain"
+          "text": "Hunt down the Antlered Shade",
+          "where": "roams the deep wood of Wychwood"
         }
       ],
       "done": "He's down. He's never going back up. Thank you.",

@@ -37,7 +37,7 @@ echo "== publishing $SHORT ($(git log -1 --format=%s "$SHA"))"
 
 # The client imports from these playground folders (server/static.js ALLOW); everything else stays out.
 ALLOW=(prototypes/thousandvale prototypes/farhold prototypes/emberveil prototypes/bannerline shared avatar-3d avatar-2d vendor
-       assets worldgen proctown items namegen lingo conversations voice-lab sfx meters library/data universe highdef-3d)
+       assets worldgen proctown items namegen lingo conversations voice-lab sfx meters library/data universe highdef-3d icons)
 PRESENT=(); for p in "${ALLOW[@]}"; do git cat-file -e "$SHA:$p" 2>/dev/null && PRESENT+=("$p"); done
 
 TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
@@ -59,7 +59,7 @@ if [[ "${TV_SKIP_TESTS:-0}" == 1 ]]; then
   [[ $BUILD_ONLY == 1 ]] || { echo "TV_SKIP_TESTS is only for --build-only (testing this script)"; exit 2; }
   echo "   SKIPPED (TV_SKIP_TESTS=1, --build-only)"; TESTS=""
 else
-TESTS=$(cd "$TMP/prototypes/thousandvale" && ls tests/*/*.test.js 2>/dev/null | grep -v -E '^tests/load/|/bots[0-9]+\.test\.js$' || true)
+TESTS=$(cd "$TMP/prototypes/thousandvale" && ls tests/*/*.test.js tests/*/*.test.mjs 2>/dev/null | grep -v -E '^tests/(load|e2e)/|/bots[0-9]+\.test\.js$' || true)
 if [[ -n "$TESTS" ]]; then
   (cd "$TMP/prototypes/thousandvale" && node --test --test-concurrency=4 $TESTS > "$TMP/test.log" 2>&1) \
     || { grep -E '^not ok|# (pass|fail)' "$TMP/test.log" | head -20; echo "refusing: unit tests fail at $SHORT (full log: rerun them)"; exit 1; }
@@ -108,6 +108,8 @@ LEAK=$(grep -rIl -E 'PGPASSWORD=[A-Za-z0-9]{8}|BEGIN (RSA|OPENSSH|EC|DSA) PRIVAT
 [[ -z "$LEAK" ]] || { echo "refusing: possible secret in $LEAK"; rm -rf "$REL"; exit 1; }
 for d in server ops tests docs tools; do [[ ! -e "$REL/public/prototypes/thousandvale/$d" ]] || { echo "refusing: public/ holds $d/"; rm -rf "$REL"; exit 1; }; done
 [[ -z "$(find "$REL/public" -name '.*' -o -name node_modules | head -1)" ]] || { echo "refusing: dotfiles or node_modules in public/"; rm -rf "$REL"; exit 1; }
+# extracted files keep the publisher's own group (not the setgid one), so hand the tree to the service group first
+chgrp -R thousandvale "$REL" 2>/dev/null || [[ -n "${TV_SRV:-}" ]] || { echo "refusing: cannot give the release to group thousandvale (log out and back in after setup-stable.sh added you to it)"; rm -rf "$REL"; exit 1; }
 chmod -R u=rwX,g=rX,o= "$REL"
 echo "   app $(du -sh "$REL/app" | cut -f1), public $(find "$REL/public" -type f | wc -l) files"
 

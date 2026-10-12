@@ -1,11 +1,11 @@
 {
- "_doc": "Stream E. Content placements for world zone z11_03 (E zone 'wychwood', Wychwood) — tools/place-vignettes.mjs against stream B's bake (terrain af932954). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
+ "_doc": "Stream E. Content placements for world zone z11_03 (E zone 'wychwood', Wychwood) — tools/place-vignettes.mjs against stream B's bake (terrain a23813e6). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
  "zone": "z11_03",
  "sheetZone": "wychwood",
  "province": "torbor_downs",
- "terrainHash": "af932954",
+ "terrainHash": "a23813e6",
  "band": [
-  5,
+  2,
   7
  ],
  "archetype": "wilds",
@@ -46,10 +46,39 @@
    "gap": 30,
    "slope": 26
   },
+  "wayside": {
+   "townGap": 20,
+   "gap": 12,
+   "slope": 34,
+   "edge": 24
+  },
   "settlement": {
    "townGap": 300,
    "gap": 60,
    "slope": 10
+  },
+  "curio": {
+   "townGap": 30,
+   "gap": 10,
+   "slope": 26,
+   "edge": 30
+  },
+  "stray": {
+   "townGap": 70,
+   "gap": 16,
+   "slope": 26,
+   "edge": 30
+  },
+  "folk": {
+   "townGap": 30,
+   "gap": 12,
+   "slope": 24,
+   "edge": 30
+  },
+  "setpiece": {
+   "townGap": 20,
+   "gap": 25,
+   "slope": 20
   }
  },
  "mainWalkableShare": 0.766,
@@ -61,7 +90,7 @@
    "z": 560,
    "r": 140,
    "source": "bake",
-   "bakeId": "wehackkeep"
+   "bakeId": "hermit_s_rest"
   },
   {
    "name": "Charcoal Burners",
@@ -70,7 +99,7 @@
    "z": 224,
    "r": 65,
    "source": "bake",
-   "bakeId": "weephaven"
+   "bakeId": "charcoal_burners"
   },
   {
    "name": "Wildhaven",
@@ -103,6 +132,125 @@
  "problems": [],
  "placements": [
   {
+   "type": "folk",
+   "id": "hermit_s_rest_graveyard_slot0",
+   "in": "hermit_s_rest_graveyard",
+   "slotOf": "hermit_s_rest_graveyard",
+   "role": "sexton",
+   "name": null,
+   "work": "dig",
+   "chatter": [
+    "role.sexton",
+    "role.gravedigger"
+   ],
+   "x": 1032,
+   "z": 388,
+   "yaw": 0,
+   "path": [
+    [
+     1032,
+     388
+    ],
+    [
+     1034.5,
+     389
+    ],
+    [
+     1033,
+     390.5
+    ]
+   ]
+  },
+  {
+   "type": "folk",
+   "id": "charcoal_burners_graveyard_slot0",
+   "in": "charcoal_burners_graveyard",
+   "slotOf": "charcoal_burners_graveyard",
+   "role": "sexton",
+   "name": null,
+   "work": "dig",
+   "chatter": [
+    "role.sexton",
+    "role.gravedigger"
+   ],
+   "x": 388,
+   "z": 243,
+   "yaw": 0,
+   "path": [
+    [
+     388,
+     243
+    ],
+    [
+     390.5,
+     244
+    ],
+    [
+     389,
+     245.5
+    ]
+   ]
+  },
+  {
+   "type": "folk",
+   "id": "wildhaven_graveyard_slot0",
+   "in": "wildhaven_graveyard",
+   "slotOf": "wildhaven_graveyard",
+   "role": "sexton",
+   "name": null,
+   "work": "dig",
+   "chatter": [
+    "role.sexton",
+    "role.gravedigger"
+   ],
+   "x": 1207.3,
+   "z": 186.7,
+   "yaw": 0,
+   "path": [
+    [
+     1207.3,
+     186.7
+    ],
+    [
+     1209.8,
+     187.7
+    ],
+    [
+     1208.3,
+     189.2
+    ]
+   ]
+  },
+  {
+   "type": "folk",
+   "id": "wild_fold_slot0",
+   "in": "wild_fold",
+   "slotOf": "wild_fold",
+   "role": "shepherd",
+   "name": null,
+   "work": "tend",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 1435.7,
+   "z": 490.1,
+   "yaw": 0,
+   "path": [
+    [
+     1435.7,
+     490.1
+    ],
+    [
+     1438.2,
+     491.1
+    ],
+    [
+     1436.7,
+     492.6
+    ]
+   ]
+  },
+  {
    "type": "fort",
    "id": "fort_wychwood_0",
    "name": "the Antler Stockade",
@@ -112,7 +260,7 @@
    "z": 221,
    "yaw": -1.96,
    "radius": 24,
-   "level": 5
+   "level": 3
   },
   {
    "type": "farm",
@@ -121,11 +269,11 @@
    "template": "sheep",
    "flavour": null,
    "settlement": "Hermit's Rest",
-   "x": 1213,
-   "z": 719,
-   "yaw": -1.57,
+   "x": 887,
+   "z": 638,
+   "yaw": 1.18,
    "radius": 24,
-   "level": 5
+   "level": 4
   },
   {
    "type": "farm",
@@ -134,27 +282,27 @@
    "template": "sheep",
    "flavour": null,
    "settlement": "Charcoal Burners",
-   "x": 273,
-   "z": 358,
-   "yaw": -2.75,
+   "x": 201,
+   "z": 108,
+   "yaw": 0.39,
    "radius": 24,
-   "level": 5
+   "level": 4
   },
   {
    "type": "cave",
    "id": "cave_wychwood_0",
-   "name": "Spider hollow",
-   "template": "spider_hollow",
+   "name": "Beast den",
+   "template": "beast_den",
    "plan": {
     "family": "cave_river",
     "floors": 1,
-    "level": 6
+    "level": 5
    },
-   "x": 990,
-   "z": 1793,
-   "yaw": -3.14,
+   "x": 1239,
+   "z": 1444,
+   "yaw": -2.36,
    "radius": 10,
-   "level": 6
+   "level": 5
   },
   {
    "type": "cave",
@@ -164,37 +312,21 @@
    "plan": {
     "family": "cave_river",
     "floors": 1,
-    "level": 6
+    "level": 7
    },
-   "x": 1629,
-   "z": 1223,
+   "x": 127,
+   "z": 1558,
    "yaw": 1.96,
    "radius": 10,
-   "level": 6
-  },
-  {
-   "type": "cave",
-   "id": "cave_wychwood_2",
-   "name": "Beast den",
-   "template": "beast_den",
-   "plan": {
-    "family": "cave_river",
-    "floors": 1,
-    "level": 6
-   },
-   "x": 699,
-   "z": 1276,
-   "yaw": 2.75,
-   "radius": 10,
-   "level": 6
+   "level": 7
   },
   {
    "type": "hook",
    "id": "the_great_hollow_oak",
    "name": "The Hollow Oak of Wychwood",
    "kind": "bespoke",
-   "x": 939,
-   "z": 101,
+   "x": 922,
+   "z": 75,
    "yaw": 0,
    "radius": 20,
    "where": "best fit for: a forest clearing",
@@ -202,123 +334,143 @@
   },
   {
    "type": "vignette",
-   "id": "beekeeper_hives",
-   "name": "The Angry Hives",
-   "x": 1903,
-   "z": 1762,
-   "yaw": 6.09,
-   "radius": 10,
-   "biome": "grassland",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
    "id": "broken_caravan_survivor",
    "name": "The Last Wagon",
-   "x": 1986,
-   "z": 662,
-   "yaw": 2.75,
+   "x": 1895,
+   "z": 1382,
+   "yaw": 0.24,
    "radius": 15,
-   "biome": "grassland",
+   "biome": "shrubland",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 4,
+   "levelCap": 5
   },
   {
    "type": "vignette",
    "id": "drowned_belfry",
    "name": "The Drowned Belfry",
-   "x": 763,
-   "z": 532,
-   "yaw": 5.93,
+   "x": 1333,
+   "z": 628,
+   "yaw": 4.87,
    "radius": 11,
    "biome": "temperateForest",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 3,
+   "levelCap": 4
   },
   {
    "type": "vignette",
    "id": "fen_witch_hut",
    "name": "Old Mabry's Stilt Hut",
-   "x": 1445,
-   "z": 1817,
-   "yaw": 2.63,
+   "x": 1966,
+   "z": 701,
+   "yaw": 5.09,
    "radius": 12,
    "biome": "grassland",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 3,
+   "levelCap": 4
   },
   {
    "type": "vignette",
-   "id": "giants_cookfire",
-   "name": "The Giant's Cookfire",
-   "x": 299,
-   "z": 1935,
-   "yaw": 0.05,
-   "radius": 14,
-   "biome": "mountains",
+   "id": "frozen_tarn",
+   "name": "The Frozen Tarn",
+   "x": 1943,
+   "z": 1984,
+   "yaw": 3.8,
+   "radius": 13,
+   "biome": "hills",
    "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "goblin_market_stones",
-   "name": "The Moonlight Stones",
-   "x": 1195,
-   "z": 1194,
-   "yaw": 1.05,
-   "radius": 10,
-   "biome": "grassland",
-   "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 5,
+   "levelCap": 6
   },
   {
    "type": "vignette",
    "id": "hunters_hide",
    "name": "The Hunter's Hide",
-   "x": 1979,
-   "z": 261,
-   "yaw": 5.58,
+   "x": 797,
+   "z": 1878,
+   "yaw": 6.09,
    "radius": 13,
-   "biome": "temperateForest",
+   "biome": "hills",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 5,
+   "levelCap": 6
   },
   {
    "type": "vignette",
    "id": "lone_archer_post",
    "name": "The Reed Hide",
-   "x": 1251,
-   "z": 345,
-   "yaw": 0.67,
+   "x": 463,
+   "z": 514,
+   "yaw": 0.61,
    "radius": 9,
    "biome": "temperateForest",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 4,
+   "levelCap": 5
   },
   {
    "type": "vignette",
-   "id": "warband_totem",
-   "name": "The Warband Totem",
-   "x": 1594,
-   "z": 816,
-   "yaw": 5.08,
-   "radius": 11,
+   "id": "stone_circle_hum",
+   "name": "The Humming Stones",
+   "x": 744,
+   "z": 1170,
+   "yaw": 5.57,
+   "radius": 12,
+   "biome": "hills",
+   "biomeFits": true,
+   "level": 1,
+   "levelBase": 5,
+   "levelCap": 6
+  },
+  {
+   "type": "vignette",
+   "id": "sunken_stair",
+   "name": "The Stair to Nowhere",
+   "x": 1400,
+   "z": 1952,
+   "yaw": 3.68,
+   "radius": 10,
+   "biome": "hills",
+   "biomeFits": true,
+   "level": 1,
+   "levelBase": 5,
+   "levelCap": 6
+  },
+  {
+   "type": "vignette",
+   "id": "wardens_cairn",
+   "name": "The Warden's Cairn",
+   "x": 1602,
+   "z": 1044,
+   "yaw": 3.09,
+   "radius": 10,
    "biome": "grassland",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 3,
+   "levelCap": 4
   },
   {
    "type": "vignette",
    "id": "witch_stump",
    "name": "The Wishing Stump",
-   "x": 1969,
-   "z": 1352,
-   "yaw": 6.19,
+   "x": 1984,
+   "z": 153,
+   "yaw": 1.27,
    "radius": 10,
-   "biome": "shrubland",
+   "biome": "temperateForest",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 2,
+   "levelCap": 3
   },
   {
    "type": "camp",
@@ -326,15 +478,15 @@
    "monster": "veil_spider",
    "with": null,
    "level": [
-    5,
-    7
+    3,
+    4
    ],
    "count": [
     2,
     4
    ],
-   "x": 1881,
-   "z": 70,
+   "x": 1099,
+   "z": 260,
    "yaw": 0,
    "radius": 10
   },
@@ -344,15 +496,15 @@
    "monster": "veil_spider",
    "with": null,
    "level": [
-    5,
-    7
+    4,
+    5
    ],
    "count": [
     2,
     4
    ],
-   "x": 490,
-   "z": 170,
+   "x": 499,
+   "z": 192,
    "yaw": 0,
    "radius": 10
   },
@@ -362,15 +514,15 @@
    "monster": "gallows_owl",
    "with": null,
    "level": [
-    6,
-    7
+    4,
+    5
    ],
    "count": [
     2,
     4
    ],
-   "x": 902,
-   "z": 959,
+   "x": 1114,
+   "z": 996,
    "yaw": 0,
    "radius": 10
   },
@@ -380,15 +532,15 @@
    "monster": "gallows_owl",
    "with": null,
    "level": [
-    6,
-    7
+    4,
+    5
    ],
    "count": [
     2,
     4
    ],
-   "x": 1507,
-   "z": 524,
+   "x": 806,
+   "z": 891,
    "yaw": 0,
    "radius": 10
   },
@@ -398,15 +550,15 @@
    "monster": "moor_hound",
    "with": null,
    "level": [
-    5,
+    6,
     7
    ],
    "count": [
     2,
     4
    ],
-   "x": 1911,
-   "z": 980,
+   "x": 338,
+   "z": 1958,
    "yaw": 0,
    "radius": 10
   },
@@ -417,14 +569,14 @@
    "with": null,
    "level": [
     5,
-    7
+    6
    ],
    "count": [
     2,
     4
    ],
-   "x": 83,
-   "z": 72,
+   "x": 1081,
+   "z": 1945,
    "yaw": 0,
    "radius": 10
   },
@@ -434,15 +586,15 @@
    "monster": "thicket_boar",
    "with": null,
    "level": [
-    6,
-    7
+    4,
+    5
    ],
    "count": [
     2,
     4
    ],
-   "x": 738,
-   "z": 268,
+   "x": 274,
+   "z": 488,
    "yaw": 0,
    "radius": 10
   },
@@ -452,15 +604,15 @@
    "monster": "thicket_boar",
    "with": null,
    "level": [
-    6,
-    7
+    4,
+    5
    ],
    "count": [
     2,
     4
    ],
-   "x": 502,
-   "z": 613,
+   "x": 704,
+   "z": 450,
    "yaw": 0,
    "radius": 10
   },
@@ -470,15 +622,15 @@
    "monster": "frost_stalker",
    "with": null,
    "level": [
-    5,
-    7
+    4,
+    5
    ],
    "count": [
     2,
     4
    ],
-   "x": 1419,
-   "z": 71,
+   "x": 478,
+   "z": 340,
    "yaw": 0,
    "radius": 10
   },
@@ -488,15 +640,15 @@
    "monster": "frost_stalker",
    "with": null,
    "level": [
-    5,
-    7
+    4,
+    5
    ],
    "count": [
     2,
     4
    ],
-   "x": 531,
-   "z": 381,
+   "x": 617,
+   "z": 593,
    "yaw": 0,
    "radius": 10
   },
@@ -513,8 +665,8 @@
     2,
     4
    ],
-   "x": 1171,
-   "z": 79,
+   "x": 68,
+   "z": 1923,
    "yaw": 0,
    "radius": 10
   },
@@ -524,15 +676,15 @@
    "monster": "crag_hyena",
    "with": null,
    "level": [
-    6,
-    7
+    4,
+    5
    ],
    "count": [
     2,
     4
    ],
-   "x": 743,
-   "z": 74,
+   "x": 712,
+   "z": 217,
    "yaw": 0,
    "radius": 10
   },
@@ -542,15 +694,15 @@
    "monster": "dread_stag",
    "with": null,
    "level": [
-    5,
-    7
+    4,
+    5
    ],
    "count": [
     1,
     2
    ],
-   "x": 1712,
-   "z": 93,
+   "x": 575,
+   "z": 443,
    "yaw": 0,
    "radius": 10
   },
@@ -560,15 +712,15 @@
    "monster": "dread_stag",
    "with": null,
    "level": [
-    5,
-    7
+    4,
+    5
    ],
    "count": [
     1,
     2
    ],
-   "x": 1433,
-   "z": 334,
+   "x": 517,
+   "z": 613,
    "yaw": 0,
    "radius": 10
   },
@@ -578,15 +730,15 @@
    "monster": "ridge_griffin",
    "with": null,
    "level": [
-    6,
-    7
+    5,
+    6
    ],
    "count": [
     1,
     2
    ],
-   "x": 1083,
-   "z": 265,
+   "x": 623,
+   "z": 1483,
    "yaw": 0,
    "radius": 10
   },
@@ -596,15 +748,15 @@
    "monster": "ridge_griffin",
    "with": null,
    "level": [
-    6,
-    7
+    4,
+    5
    ],
    "count": [
     1,
     2
    ],
-   "x": 363,
-   "z": 492,
+   "x": 396,
+   "z": 441,
    "yaw": 0,
    "radius": 10
   },
@@ -613,81 +765,81 @@
    "id": "rare_antlered_shade",
    "slot": 0,
    "name": "The Antlered Shade",
-   "x": 706,
-   "z": 415,
+   "x": 1076,
+   "z": 69,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     624,
-     370
+     1081,
+     188
     ],
     [
-     737,
-     353
+     1002,
+     102
     ],
     [
-     783,
-     402
+     1015,
+     22
     ],
     [
-     748,
-     475
+     1125,
+     11
     ],
     [
-     634,
-     465
+     1151,
+     68
     ]
    ],
    "respawnMin": [
     20,
     60
    ],
-   "level": 7
+   "level": 5
   },
   {
    "type": "rare",
    "id": "rare_charcoal_tom",
    "slot": 1,
    "name": "Charcoal Tom",
-   "x": 607,
-   "z": 503,
+   "x": 1775,
+   "z": 99,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     585,
-     423
+     1813,
+     32
     ],
     [
-     668,
-     446
+     1846,
+     122
     ],
     [
-     687,
-     596
+     1775,
+     159
     ],
     [
-     569,
-     580
+     1729,
+     122
     ],
     [
-     480,
-     479
+     1740,
+     70
     ]
    ],
    "respawnMin": [
     20,
     60
    ],
-   "level": 7
+   "level": 4
   },
   {
    "type": "waystone",
    "id": "ws_z11_03_hermit_s_rest",
    "name": "Hermit's Rest",
-   "x": 1096.7,
-   "z": 406.5,
+   "x": 1108.6,
+   "z": 551.9,
    "yaw": 0,
    "settlement": "Hermit's Rest",
    "radius": 1
@@ -696,8 +848,8 @@
    "type": "waystone",
    "id": "ws_z11_03_charcoal_burners",
    "name": "Charcoal Burners",
-   "x": 335.6,
-   "z": 182.7,
+   "x": 221.4,
+   "z": 146,
    "yaw": 0,
    "settlement": "Charcoal Burners",
    "radius": 1
@@ -706,8 +858,8 @@
    "type": "waystone",
    "id": "ws_z11_03_wildhaven",
    "name": "Wildhaven",
-   "x": 1336.4,
-   "z": 181.4,
+   "x": 1334.5,
+   "z": 214.3,
    "yaw": 0,
    "settlement": "Wildhaven",
    "radius": 1
@@ -715,12 +867,31 @@
   {
    "type": "waystone",
    "id": "ws_z11_03_door",
-   "name": "Barrow entrance",
-   "x": 832.1,
-   "z": 728,
+   "name": "The Rootbound Barrows",
+   "x": 883.1,
+   "z": 718.2,
    "yaw": 0,
    "door": "door_1",
    "radius": 1
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_door",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 844,
+   "z": 693,
+   "yaw": 0,
+   "radius": 6,
+   "doorGuard": true
   },
   {
    "type": "npc",
@@ -728,9 +899,10 @@
    "name": "The Hermit of Wychwood",
    "role": "hermit",
    "at": "Hermit's Rest",
-   "x": 1102.2,
-   "z": 551,
-   "yaw": 5.04,
+   "x": 1148.9,
+   "z": 532.8,
+   "yaw": 4.957,
+   "office": "hermit_s_rest_plot_28",
    "radius": 1
   },
   {
@@ -739,9 +911,9 @@
    "name": "Collier Nan",
    "role": "trader",
    "at": "Charcoal Burners",
-   "x": 251.2,
-   "z": 226.1,
-   "yaw": 5.92,
+   "x": 248.8,
+   "z": 224.2,
+   "yaw": 4.25,
    "radius": 1
   },
   {
@@ -750,9 +922,9 @@
    "name": "Warden Emrys",
    "role": "guard",
    "at": "the Antler Stockade",
-   "x": 1587,
-   "z": 221.6,
-   "yaw": 2.15,
+   "x": 1583,
+   "z": 220.4,
+   "yaw": 2.59,
    "radius": 1
   },
   {
@@ -761,9 +933,9 @@
    "name": "Hob the hunter",
    "role": "hunter",
    "at": "hunters_hide",
-   "x": 1977.2,
-   "z": 259.1,
-   "yaw": 0.92,
+   "x": 799.4,
+   "z": 1878.7,
+   "yaw": 0.9,
    "radius": 1
   },
   {
@@ -774,8 +946,8 @@
    "clue": "note",
    "how": null,
    "shimmer": null,
-   "x": 1212.7,
-   "z": 656.1,
+   "x": 1055.4,
+   "z": 423.4,
    "yaw": 0,
    "where": "edge of Hermit's Rest",
    "radius": 1
@@ -788,8 +960,8 @@
    "clue": "carved_arrow",
    "how": null,
    "shimmer": null,
-   "x": 1982,
-   "z": 261.8,
+   "x": 799.7,
+   "z": 1876.7,
    "yaw": 0,
    "where": "vignette hunters_hide",
    "radius": 1
@@ -802,12 +974,7758 @@
    "clue": null,
    "how": "dig",
    "shimmer": 15,
-   "x": 1797,
-   "z": 174,
+   "x": 763,
+   "z": 73,
    "yaw": 0,
    "where": "secluded",
    "radius": 1
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_wychwood_0",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 403,
+   "z": 1021,
+   "yaw": 5.45,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f1",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1228,
+   "z": 979,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_wychwood_2",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 1575,
+   "z": 1616,
+   "yaw": 4.71,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f3",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1292,
+   "z": 1138,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_wychwood_4",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 939,
+   "z": 1579,
+   "yaw": 4.7,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f5",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1640,
+   "z": 728,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "sheep_pen_wychwood_6",
+   "kind": "sheep_pen",
+   "name": "Sheep Pen",
+   "x": 1928,
+   "z": 1056,
+   "yaw": 2.65,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f7",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1444,
+   "z": 1233,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_tree_wychwood_8",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 1844,
+   "z": 424,
+   "yaw": 0.92,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f9",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1851,
+   "z": 1700,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_wychwood_10",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 387,
+   "z": 1674,
+   "yaw": 1.21,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f11",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1635,
+   "z": 1232,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_wychwood_12",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1012,
+   "z": 1273,
+   "yaw": 5.46,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f13",
+   "monster": "dread_stag",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1315,
+   "z": 1722,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_wychwood_14",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 1641,
+   "z": 1860,
+   "yaw": 2.04,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f15",
+   "monster": "ridge_griffin",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 571,
+   "z": 1256,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_wychwood_16",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 41,
+   "z": 545,
+   "yaw": 2.79,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f17",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1747,
+   "z": 1397,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "toll_stone_wychwood_18",
+   "kind": "toll_stone",
+   "name": "Old Toll Stone",
+   "x": 1431,
+   "z": 849,
+   "yaw": 3,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_wychwood_19",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 575,
+   "z": 1687,
+   "yaw": 1.23,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_wychwood_20",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1812,
+   "z": 876,
+   "yaw": 3.47,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f21",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 875,
+   "z": 1439,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "stone_trough_wychwood_22",
+   "kind": "stone_trough",
+   "name": "Stone Trough",
+   "x": 608,
+   "z": 972,
+   "yaw": 0.35,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f23",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1967,
+   "z": 1785,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_wychwood_24",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1651,
+   "z": 504,
+   "yaw": 0.44,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_wychwood_25",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 201,
+   "z": 1738,
+   "yaw": 3.42,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_wychwood_26",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1472,
+   "z": 1444,
+   "yaw": 3.3,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f27",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 932,
+   "z": 1088,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_wychwood_28",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 992,
+   "z": 1783,
+   "yaw": 3.21,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f29",
+   "monster": "dread_stag",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 726,
+   "z": 1605,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_tree_wychwood_30",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 43,
+   "z": 349,
+   "yaw": 0.89,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f31",
+   "monster": "ridge_griffin",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 667,
+   "z": 761,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cart_ruts_wreck_wychwood_32",
+   "kind": "cart_ruts_wreck",
+   "name": "Abandoned Cart",
+   "x": 1804,
+   "z": 604,
+   "yaw": 0.58,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f33",
+   "monster": "dread_stag",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 884,
+   "z": 284,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_wychwood_34",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 1824,
+   "z": 1208,
+   "yaw": 3.46,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f35",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1488,
+   "z": 1776,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_wychwood_36",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 498,
+   "z": 1903,
+   "yaw": 3.25,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_f37",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1831,
+   "z": 1548,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_1",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 1504,
+   "z": 40,
+   "yaw": 4.97,
+   "radius": 4,
+   "levelBase": 2
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s1",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 2000,
+   "z": 312,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_2",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 2000,
+   "z": 472,
+   "yaw": 3.56,
+   "radius": 6,
+   "levelBase": 2
+  },
+  {
+   "type": "wayside",
+   "id": "cart_ruts_wreck_wychwood_d1",
+   "kind": "cart_ruts_wreck",
+   "name": "Abandoned Cart",
+   "x": 1968,
+   "z": 864,
+   "yaw": 2.53,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_3",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1760,
+   "z": 1032,
+   "yaw": 3.51,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "roam_wychwood_1",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1976,
+   "z": 1216,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1963,
+     1252
+    ],
+    [
+     1939,
+     1204
+    ],
+    [
+     1982,
+     1163
+    ],
+    [
+     2033,
+     1236
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_wychwood_d2",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1065,
+   "z": 1612,
+   "yaw": 1.63,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_4",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 32,
+   "z": 1687,
+   "yaw": 3.91,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_wychwood_1",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 1238,
+   "z": 1880,
+   "yaw": 2.84,
+   "radius": 6,
+   "path": [
+    [
+     1244,
+     1905
+    ],
+    [
+     1215,
+     1879
+    ],
+    [
+     1257,
+     1867
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_5",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 2008,
+   "z": 1552,
+   "yaw": 0.79,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s2",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1782,
+   "z": 2009,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cart_ruts_wreck_wychwood_d3",
+   "kind": "cart_ruts_wreck",
+   "name": "Abandoned Cart",
+   "x": 1440,
+   "z": 1000,
+   "yaw": 4.84,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_6",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 1203,
+   "z": 1286,
+   "yaw": 1.25,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s3",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 608,
+   "z": 40,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_7",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 402,
+   "z": 40,
+   "yaw": 2.13,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_wychwood_d4",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1014,
+   "z": 1461,
+   "yaw": 3.48,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_8",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 726,
+   "z": 1306,
+   "yaw": 1.71,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_wychwood_d5",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 919,
+   "z": 2009,
+   "yaw": 4.31,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s4",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1562,
+   "z": 2007,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_wychwood_d6",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 715,
+   "z": 2012,
+   "yaw": 1.14,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_9",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1385,
+   "z": 1554,
+   "yaw": 5.31,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_10",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1656,
+   "z": 888,
+   "yaw": 4.77,
+   "radius": 3,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s5",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1496,
+   "z": 648,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_wychwood_d7",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 36,
+   "z": 183,
+   "yaw": 5.64,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_11",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1704,
+   "z": 352,
+   "yaw": 3.12,
+   "radius": 5,
+   "levelBase": 2
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_wychwood_d8",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 640,
+   "z": 1819,
+   "yaw": 2.04,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s6",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1816,
+   "z": 1856,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_12",
+   "recipe": "cu_horse_bones",
+   "name": "Horse Bones",
+   "kind": "remains",
+   "x": 1110,
+   "z": 1160,
+   "yaw": 4.19,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "wayside_well_wychwood_d9",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 1218,
+   "z": 1598,
+   "yaw": 3.34,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_13",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1697,
+   "z": 1719,
+   "yaw": 4.9,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s7",
+   "monster": "dread_stag",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1617,
+   "z": 1472,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_14",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1559,
+   "z": 383,
+   "yaw": 0.77,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_15",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 62,
+   "z": 44,
+   "yaw": 3.37,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s8",
+   "monster": "ridge_griffin",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 895,
+   "z": 1248,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_16",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 195,
+   "z": 1977,
+   "yaw": 3.94,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_wychwood_d10",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1857,
+   "z": 278,
+   "yaw": 0.76,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_17",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1360,
+   "z": 1359,
+   "yaw": 4.45,
+   "radius": 7,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_18",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 617,
+   "z": 1087,
+   "yaw": 3.85,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_19",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 355,
+   "z": 1573,
+   "yaw": 0.89,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_20",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 744,
+   "z": 1024,
+   "yaw": 3.69,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_wychwood_d11",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 787,
+   "z": 1761,
+   "yaw": 4.12,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_wychwood_d12",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 144,
+   "z": 589,
+   "yaw": 0.2,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s9",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1784,
+   "z": 744,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_wychwood_d13",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 1297,
+   "z": 857,
+   "yaw": 3.86,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_21",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1544,
+   "z": 1336,
+   "yaw": 0.66,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_22",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 450,
+   "z": 1752,
+   "yaw": 5.62,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_23",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 616,
+   "z": 318,
+   "yaw": 2.04,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_wychwood_2",
+   "monster": "ridge_griffin",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 752,
+   "z": 575,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     780,
+     566
+    ],
+    [
+     763,
+     605
+    ],
+    [
+     721,
+     581
+    ],
+    [
+     753,
+     545
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_24",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 834,
+   "z": 408,
+   "yaw": 5.33,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_wychwood_d14",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1704,
+   "z": 1592,
+   "yaw": 4.01,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "hay_rick_wychwood_d15",
+   "kind": "hay_rick",
+   "name": "Hay Rick",
+   "x": 1134,
+   "z": 1358,
+   "yaw": 3.35,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_wychwood_d16",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 244,
+   "z": 1858,
+   "yaw": 4.95,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_wychwood_2",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 1537,
+   "z": 921,
+   "yaw": 4.05,
+   "radius": 6,
+   "path": [
+    [
+     1584,
+     957
+    ],
+    [
+     1492,
+     936
+    ],
+    [
+     1556,
+     886
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_25",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1928,
+   "z": 577,
+   "yaw": 0.28,
+   "radius": 4,
+   "levelBase": 2
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_wychwood_d17",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 39,
+   "z": 1464,
+   "yaw": 5.08,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "beehive_row_wychwood_d18",
+   "kind": "beehive_row",
+   "name": "Beehive Row",
+   "x": 1487,
+   "z": 1112,
+   "yaw": 1.15,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_wychwood_d19",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 223,
+   "z": 1617,
+   "yaw": 0,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_wychwood_d20",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 94,
+   "z": 1792,
+   "yaw": 0.47,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s10",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 858,
+   "z": 1662,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_26",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1520,
+   "z": 769,
+   "yaw": 6.22,
+   "radius": 7,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_wychwood_d21",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1457,
+   "z": 1657,
+   "yaw": 4.88,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_27",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 1399,
+   "z": 736,
+   "yaw": 5.34,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_wychwood_d22",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1156,
+   "z": 1521,
+   "yaw": 5.38,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_28",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1936,
+   "z": 38,
+   "yaw": 5.21,
+   "radius": 4,
+   "levelBase": 2
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s11",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1616,
+   "z": 80,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_29",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 1377,
+   "z": 1831,
+   "yaw": 2.12,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_wychwood_d23",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1512,
+   "z": 1896,
+   "yaw": 0.19,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_30",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1719,
+   "z": 1142,
+   "yaw": 4.9,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "roam_wychwood_3",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 824,
+   "z": 168,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     849,
+     195
+    ],
+    [
+     806,
+     204
+    ],
+    [
+     789,
+     136
+    ],
+    [
+     842,
+     140
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s12",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1688,
+   "z": 616,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_31",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1984,
+   "z": 1663,
+   "yaw": 0.37,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_wychwood_d24",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 459,
+   "z": 2004,
+   "yaw": 3.13,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_32",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 1183,
+   "z": 2006,
+   "yaw": 4.78,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s13",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1455,
+   "z": 144,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_wychwood_d25",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 680,
+   "z": 880,
+   "yaw": 0.47,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_33",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 744,
+   "z": 335,
+   "yaw": 5.28,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s14",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 2007,
+   "z": 1438,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_34",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 106,
+   "z": 450,
+   "yaw": 2.46,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_wychwood_4",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1672,
+   "z": 1968,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1693,
+     1918
+    ],
+    [
+     1723,
+     2012
+    ],
+    [
+     1654,
+     2019
+    ],
+    [
+     1611,
+     1932
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_35",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 2008,
+   "z": 975,
+   "yaw": 5.3,
+   "radius": 5,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_wychwood_d26",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 784,
+   "z": 1497,
+   "yaw": 2.1,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s15",
+   "monster": "dread_stag",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1328,
+   "z": 448,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_36",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1297,
+   "z": 2008,
+   "yaw": 6.05,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_wychwood_3",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 1545,
+   "z": 536,
+   "yaw": 4.05,
+   "radius": 6,
+   "path": [
+    [
+     1534,
+     517
+    ],
+    [
+     1575,
+     533
+    ],
+    [
+     1532,
+     552
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_37",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 637,
+   "z": 1393,
+   "yaw": 3.83,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s16",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 516,
+   "z": 1029,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_wychwood_d27",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1312,
+   "z": 1257,
+   "yaw": 4.2,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_38",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 870,
+   "z": 990,
+   "yaw": 2.9,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_39",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 965,
+   "z": 1931,
+   "yaw": 0.86,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s17",
+   "monster": "dread_stag",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1760,
+   "z": 496,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_wychwood_d28",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 566,
+   "z": 691,
+   "yaw": 5.82,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "mushroom_ring_wychwood_d29",
+   "kind": "mushroom_ring",
+   "name": "Mushroom Ring",
+   "x": 616,
+   "z": 150,
+   "yaw": 4.85,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_40",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1896,
+   "z": 952,
+   "yaw": 0.98,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s18",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1338,
+   "z": 1031,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_41",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 1744,
+   "z": 1280,
+   "yaw": 5.47,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_42",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 674,
+   "z": 1933,
+   "yaw": 0.1,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s19",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 967,
+   "z": 209,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_43",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1885,
+   "z": 793,
+   "yaw": 5.91,
+   "radius": 6,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_tree_wychwood_d30",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 1593,
+   "z": 1728,
+   "yaw": 3.28,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_44",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 504,
+   "z": 86,
+   "yaw": 4.49,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_45",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 888,
+   "z": 1808,
+   "yaw": 3.76,
+   "radius": 7,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s20",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1191,
+   "z": 1089,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_46",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 776,
+   "z": 784,
+   "yaw": 5.08,
+   "radius": 7,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_wychwood_4",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 2008,
+   "z": 1888,
+   "yaw": 4.24,
+   "radius": 6,
+   "path": [
+    [
+     1992,
+     1909
+    ],
+    [
+     1998,
+     1865
+    ],
+    [
+     2036,
+     1886
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_47",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 894,
+   "z": 823,
+   "yaw": 5.61,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s21",
+   "monster": "ridge_griffin",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1648,
+   "z": 1344,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "sheep_pen_wychwood_d31",
+   "kind": "sheep_pen",
+   "name": "Sheep Pen",
+   "x": 1495,
+   "z": 1544,
+   "yaw": 1.78,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_48",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 1710,
+   "z": 249,
+   "yaw": 1.24,
+   "radius": 3,
+   "levelBase": 2
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_wychwood_d32",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 305,
+   "z": 1722,
+   "yaw": 5.63,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_49",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 1210,
+   "z": 1789,
+   "yaw": 1.49,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "toll_stone_wychwood_d33",
+   "kind": "toll_stone",
+   "name": "Old Toll Stone",
+   "x": 817,
+   "z": 1992,
+   "yaw": 4.77,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_50",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 823,
+   "z": 1086,
+   "yaw": 2.38,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_wychwood_d34",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 1831,
+   "z": 1104,
+   "yaw": 1.12,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_51",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 961,
+   "z": 1191,
+   "yaw": 3.25,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_wychwood_5",
+   "role": "beekeeper",
+   "name": "Beekeeper",
+   "work": "gather",
+   "chatter": [
+    "role.beekeeper"
+   ],
+   "x": 1039,
+   "z": 1090,
+   "yaw": 6.02,
+   "radius": 6,
+   "path": [
+    [
+     1049,
+     1087
+    ],
+    [
+     1035,
+     1100
+    ],
+    [
+     1031,
+     1082
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_52",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1368,
+   "z": 928,
+   "yaw": 2.32,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_wychwood_d35",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 135,
+   "z": 1681,
+   "yaw": 1.44,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cart_ruts_wreck_wychwood_d36",
+   "kind": "cart_ruts_wreck",
+   "name": "Abandoned Cart",
+   "x": 302,
+   "z": 48,
+   "yaw": 5.12,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_53",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 102,
+   "z": 268,
+   "yaw": 2.79,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_wychwood_5",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1921,
+   "z": 1497,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1868,
+     1542
+    ],
+    [
+     1878,
+     1446
+    ],
+    [
+     2006,
+     1452
+    ],
+    [
+     1973,
+     1581
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_54",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 1354,
+   "z": 1430,
+   "yaw": 3.27,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_55",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 1720,
+   "z": 1495,
+   "yaw": 2.04,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_wychwood_d37",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1247,
+   "z": 39,
+   "yaw": 0.83,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_56",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 410,
+   "z": 135,
+   "yaw": 0.43,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s22",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1865,
+   "z": 682,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_wychwood_d38",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 359,
+   "z": 612,
+   "yaw": 6.03,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_57",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1585,
+   "z": 1146,
+   "yaw": 2.31,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_wychwood_d39",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 980,
+   "z": 1397,
+   "yaw": 4.43,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_58",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1936,
+   "z": 392,
+   "yaw": 3.79,
+   "radius": 3,
+   "levelBase": 2
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_wychwood_d40",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1728,
+   "z": 1808,
+   "yaw": 4.62,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_wychwood_d41",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1130,
+   "z": 1238,
+   "yaw": 4.52,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_wychwood_6",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1391,
+   "z": 1126,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1442,
+     1144
+    ],
+    [
+     1350,
+     1174
+    ],
+    [
+     1355,
+     1107
+    ],
+    [
+     1406,
+     1082
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s23",
+   "monster": "dread_stag",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1705,
+   "z": 808,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_59",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1735,
+   "z": 938,
+   "yaw": 1.95,
+   "radius": 6,
+   "levelBase": 3
+  },
+  {
+   "type": "folk",
+   "id": "folk_wychwood_6",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 1308,
+   "z": 1606,
+   "yaw": 0.14,
+   "radius": 6,
+   "path": [
+    [
+     1297,
+     1596
+    ],
+    [
+     1326,
+     1602
+    ],
+    [
+     1302,
+     1622
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_60",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 658,
+   "z": 1165,
+   "yaw": 3.2,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s24",
+   "monster": "ridge_griffin",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1592,
+   "z": 632,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_wychwood_d42",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 234,
+   "z": 1533,
+   "yaw": 2.56,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_61",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 151,
+   "z": 1873,
+   "yaw": 1.86,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_tree_wychwood_d43",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 707,
+   "z": 1383,
+   "yaw": 1.79,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_62",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1856,
+   "z": 520,
+   "yaw": 5.48,
+   "radius": 6,
+   "levelBase": 2
+  },
+  {
+   "type": "camp",
+   "id": "roam_wychwood_7",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1208,
+   "z": 1192,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1249,
+     1204
+    ],
+    [
+     1187,
+     1251
+    ],
+    [
+     1150,
+     1170
+    ],
+    [
+     1227,
+     1145
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_63",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 2008,
+   "z": 1336,
+   "yaw": 1.11,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_wychwood_d44",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1142,
+   "z": 1867,
+   "yaw": 5.78,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_64",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 818,
+   "z": 1252,
+   "yaw": 3.81,
+   "radius": 7,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_wychwood_d45",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 649,
+   "z": 1727,
+   "yaw": 2.99,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_wychwood_7",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 1784,
+   "z": 1632,
+   "yaw": 0.07,
+   "radius": 6,
+   "path": [
+    [
+     1757,
+     1619
+    ],
+    [
+     1817,
+     1615
+    ],
+    [
+     1780,
+     1655
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_wychwood_d46",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1534,
+   "z": 1227,
+   "yaw": 1.61,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_65",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 1839,
+   "z": 1296,
+   "yaw": 1.05,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s25",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1456,
+   "z": 1352,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_wychwood_d47",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1263,
+   "z": 1353,
+   "yaw": 5.01,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_66",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 744,
+   "z": 698,
+   "yaw": 3.58,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_wychwood_8",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1208,
+   "z": 872,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1179,
+     915
+    ],
+    [
+     1157,
+     851
+    ],
+    [
+     1222,
+     832
+    ],
+    [
+     1259,
+     896
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s26",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1936,
+   "z": 240,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_wychwood_d48",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1249,
+   "z": 1683,
+   "yaw": 1.22,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_wychwood_d49",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1848,
+   "z": 1944,
+   "yaw": 1.95,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_67",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 112,
+   "z": 2008,
+   "yaw": 5.15,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s27",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1424,
+   "z": 583,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_68",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 1800,
+   "z": 344,
+   "yaw": 4.64,
+   "radius": 5,
+   "levelBase": 2
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_69",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1009,
+   "z": 2007,
+   "yaw": 1.95,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s28",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 585,
+   "z": 234,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_70",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 1472,
+   "z": 390,
+   "yaw": 2.79,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_wychwood_d50",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1640,
+   "z": 416,
+   "yaw": 1.66,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_71",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 69,
+   "z": 1596,
+   "yaw": 2.86,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_72",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 1270,
+   "z": 376,
+   "yaw": 4.55,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_73",
+   "recipe": "cu_honey_tree",
+   "name": "Honey Tree",
+   "kind": "forage",
+   "x": 196,
+   "z": 485,
+   "yaw": 2.18,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_74",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 884,
+   "z": 1161,
+   "yaw": 3.3,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_wychwood_8",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 2008,
+   "z": 616,
+   "yaw": 3.82,
+   "radius": 6,
+   "path": [
+    [
+     1970,
+     655
+    ],
+    [
+     2008,
+     552
+    ],
+    [
+     2048,
+     639
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_75",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1408,
+   "z": 1725,
+   "yaw": 2.08,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s29",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 840,
+   "z": 496,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "stone_trough_wychwood_d51",
+   "kind": "stone_trough",
+   "name": "Stone Trough",
+   "x": 1904,
+   "z": 1880,
+   "yaw": 1.34,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s30",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1520,
+   "z": 303,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_76",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 1470,
+   "z": 2008,
+   "yaw": 5.6,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_wychwood_9",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1625,
+   "z": 321,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1575,
+     311
+    ],
+    [
+     1654,
+     280
+    ],
+    [
+     1669,
+     339
+    ],
+    [
+     1613,
+     362
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_77",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1307,
+   "z": 1520,
+   "yaw": 5.26,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "toll_stone_wychwood_d52",
+   "kind": "toll_stone",
+   "name": "Old Toll Stone",
+   "x": 880,
+   "z": 1929,
+   "yaw": 3.95,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_wychwood_d53",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 737,
+   "z": 1684,
+   "yaw": 0.2,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_78",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 2008,
+   "z": 784,
+   "yaw": 2.66,
+   "radius": 3,
+   "levelBase": 3
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_79",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 696,
+   "z": 120,
+   "yaw": 3.79,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s31",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 373,
+   "z": 352,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_wychwood_d54",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 904,
+   "z": 912,
+   "yaw": 5.36,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_80",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 400,
+   "z": 1762,
+   "yaw": 2.21,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_wychwood_10",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1008,
+   "z": 288,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1001,
+     324
+    ],
+    [
+     957,
+     293
+    ],
+    [
+     1017,
+     239
+    ],
+    [
+     1058,
+     291
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_81",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 1049,
+   "z": 1550,
+   "yaw": 5.27,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_82",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 426,
+   "z": 1926,
+   "yaw": 3.52,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "wayside_well_wychwood_d55",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 1600,
+   "z": 808,
+   "yaw": 4.73,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_83",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 1569,
+   "z": 1816,
+   "yaw": 6.17,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s32",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 94,
+   "z": 120,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_84",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1319,
+   "z": 776,
+   "yaw": 2.37,
+   "radius": 6,
+   "levelBase": 3
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_85",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 664,
+   "z": 670,
+   "yaw": 1.04,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_wychwood_d56",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 497,
+   "z": 1218,
+   "yaw": 0.52,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_86",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 296,
+   "z": 1650,
+   "yaw": 0.88,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_wychwood_d57",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1159,
+   "z": 1448,
+   "yaw": 1.05,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_87",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 912,
+   "z": 369,
+   "yaw": 4.74,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_88",
+   "recipe": "cu_tinkers_halt",
+   "name": "Tinker's Halt",
+   "kind": "camp",
+   "x": 2010,
+   "z": 1081,
+   "yaw": 4.97,
+   "radius": 6,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_wychwood_d58",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 975,
+   "z": 1626,
+   "yaw": 5.75,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_89",
+   "recipe": "cu_spring_altar",
+   "name": "Spring Altar",
+   "kind": "shrine",
+   "x": 548,
+   "z": 527,
+   "yaw": 2.76,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_wychwood_9",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 1546,
+   "z": 126,
+   "yaw": 4.83,
+   "radius": 6,
+   "path": [
+    [
+     1522,
+     169
+    ],
+    [
+     1529,
+     68
+    ],
+    [
+     1608,
+     146
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_90",
+   "recipe": "cu_empty_gallows_post",
+   "name": "Weathered Post",
+   "kind": "lore",
+   "x": 1816,
+   "z": 968,
+   "yaw": 3.02,
+   "radius": 3,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s33",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1880,
+   "z": 1792,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_wychwood_d59",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 635,
+   "z": 1314,
+   "yaw": 3.78,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_91",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 729,
+   "z": 935,
+   "yaw": 3.12,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s34",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1673,
+   "z": 992,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_92",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1649,
+   "z": 1656,
+   "yaw": 0.28,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_wychwood_d60",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 746,
+   "z": 1812,
+   "yaw": 0.16,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_93",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 488,
+   "z": 432,
+   "yaw": 2.5,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "beehive_row_wychwood_d61",
+   "kind": "beehive_row",
+   "name": "Beehive Row",
+   "x": 1520,
+   "z": 1016,
+   "yaw": 3.32,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s35",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1553,
+   "z": 1415,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_94",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1903,
+   "z": 1630,
+   "yaw": 2.8,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_95",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 630,
+   "z": 1665,
+   "yaw": 6.17,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_96",
+   "recipe": "cu_spring_altar",
+   "name": "Spring Altar",
+   "kind": "shrine",
+   "x": 1424,
+   "z": 40,
+   "yaw": 0.23,
+   "radius": 5,
+   "levelBase": 2
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s36",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1777,
+   "z": 1745,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_wychwood_d62",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1633,
+   "z": 1561,
+   "yaw": 3.75,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_97",
+   "recipe": "cu_fishing_rock",
+   "name": "Fishing Rock",
+   "kind": "fishing",
+   "x": 831,
+   "z": 42,
+   "yaw": 3.58,
+   "radius": 5,
+   "levelBase": 3
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_98",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 684,
+   "z": 1443,
+   "yaw": 4.19,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s37",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 2011,
+   "z": 74,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_99",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 967,
+   "z": 1502,
+   "yaw": 4.41,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_wychwood_d63",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 640,
+   "z": 512,
+   "yaw": 2.98,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_100",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 1920,
+   "z": 472,
+   "yaw": 4.23,
+   "radius": 6,
+   "levelBase": 2
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s38",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 695,
+   "z": 39,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_wychwood_d64",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 819,
+   "z": 1598,
+   "yaw": 2.32,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_101",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 703,
+   "z": 1095,
+   "yaw": 2.39,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_102",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 302,
+   "z": 2007,
+   "yaw": 3.32,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_103",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 640,
+   "z": 390,
+   "yaw": 0.15,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_wychwood_d65",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1688,
+   "z": 1072,
+   "yaw": 4.96,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_104",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 120,
+   "z": 368,
+   "yaw": 3.05,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_wychwood_11",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 664,
+   "z": 1024,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     631,
+     1008
+    ],
+    [
+     680,
+     981
+    ],
+    [
+     711,
+     1033
+    ],
+    [
+     655,
+     1055
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s39",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1751,
+   "z": 415,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_105",
+   "recipe": "cu_spring_altar",
+   "name": "Spring Altar",
+   "kind": "shrine",
+   "x": 1328,
+   "z": 1913,
+   "yaw": 4.04,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_wychwood_10",
+   "role": "beekeeper",
+   "name": "Beekeeper",
+   "work": "gather",
+   "chatter": [
+    "role.beekeeper"
+   ],
+   "x": 1648,
+   "z": 1783,
+   "yaw": 3.18,
+   "radius": 6,
+   "path": [
+    [
+     1651,
+     1773
+    ],
+    [
+     1653,
+     1792
+    ],
+    [
+     1638,
+     1782
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_106",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1790,
+   "z": 239,
+   "yaw": 5.75,
+   "radius": 4,
+   "levelBase": 2
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s40",
+   "monster": "ridge_griffin",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1887,
+   "z": 872,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_wychwood_d66",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1802,
+   "z": 1469,
+   "yaw": 2.49,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_107",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1865,
+   "z": 200,
+   "yaw": 2.7,
+   "radius": 4,
+   "levelBase": 2
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s41",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1752,
+   "z": 664,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_108",
+   "recipe": "cu_honey_tree",
+   "name": "Honey Tree",
+   "kind": "forage",
+   "x": 1376,
+   "z": 151,
+   "yaw": 4.65,
+   "radius": 5,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_wychwood_d67",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 1050,
+   "z": 1217,
+   "yaw": 5.12,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_wychwood_d68",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 473,
+   "z": 1684,
+   "yaw": 1.23,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "woodpile_stack_wychwood_d69",
+   "kind": "woodpile_stack",
+   "name": "Woodpile",
+   "x": 311,
+   "z": 539,
+   "yaw": 2.32,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s42",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1856,
+   "z": 1034,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_109",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1904,
+   "z": 1127,
+   "yaw": 1.11,
+   "radius": 6,
+   "levelBase": 3
+  },
+  {
+   "type": "folk",
+   "id": "folk_wychwood_11",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 1923,
+   "z": 320,
+   "yaw": 5.45,
+   "radius": 6,
+   "path": [
+    [
+     1946,
+     289
+    ],
+    [
+     1939,
+     345
+    ],
+    [
+     1892,
+     322
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_110",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1780,
+   "z": 1928,
+   "yaw": 3.37,
+   "radius": 7,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s43",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1527,
+   "z": 1679,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_wychwood_d70",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1673,
+   "z": 202,
+   "yaw": 5.36,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lonely_pier_wychwood_d71",
+   "kind": "lonely_pier",
+   "name": "Bridge Pier",
+   "x": 1448,
+   "z": 1856,
+   "yaw": 5.23,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_111",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1264,
+   "z": 1057,
+   "yaw": 4.9,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_112",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 136,
+   "z": 40,
+   "yaw": 3.48,
+   "radius": 7,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s44",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 40,
+   "z": 1847,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_113",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 433,
+   "z": 602,
+   "yaw": 1.38,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "wayside_well_wychwood_d72",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 1416,
+   "z": 664,
+   "yaw": 0.1,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_114",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1119,
+   "z": 339,
+   "yaw": 1.14,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s45",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1407,
+   "z": 1478,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_115",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1293,
+   "z": 1800,
+   "yaw": 1.16,
+   "radius": 7,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_116",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 257,
+   "z": 1933,
+   "yaw": 3.95,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_117",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1559,
+   "z": 703,
+   "yaw": 1.14,
+   "radius": 6,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_wychwood_d73",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 800,
+   "z": 288,
+   "yaw": 5.15,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_118",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 1384,
+   "z": 1656,
+   "yaw": 1.63,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_wychwood_12",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 2009,
+   "z": 392,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1995,
+     343
+    ],
+    [
+     2048,
+     364
+    ],
+    [
+     2028,
+     442
+    ],
+    [
+     1977,
+     408
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_wychwood_d74",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1073,
+   "z": 1267,
+   "yaw": 4.15,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_119",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1712,
+   "z": 1216,
+   "yaw": 1.57,
+   "radius": 7,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_wychwood_12",
+   "role": "woodcutter",
+   "name": "Woodcutter",
+   "work": "chop",
+   "chatter": [
+    "role.woodcutter"
+   ],
+   "x": 119,
+   "z": 192,
+   "yaw": 0.48,
+   "radius": 6,
+   "path": [
+    [
+     97,
+     204
+    ],
+    [
+     116,
+     171
+    ],
+    [
+     139,
+     204
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_120",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 1253,
+   "z": 111,
+   "yaw": 6.07,
+   "radius": 3,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s46",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 553,
+   "z": 373,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_wychwood_d75",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 41,
+   "z": 2002,
+   "yaw": 4.95,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_121",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1163,
+   "z": 1933,
+   "yaw": 1.52,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s47",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 944,
+   "z": 1008,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_122",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1404,
+   "z": 1283,
+   "yaw": 5.74,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_wychwood_13",
+   "monster": "ridge_griffin",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1928,
+   "z": 1712,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1907,
+     1757
+    ],
+    [
+     1861,
+     1688
+    ],
+    [
+     1949,
+     1660
+    ],
+    [
+     1965,
+     1736
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_123",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1305,
+   "z": 960,
+   "yaw": 5.08,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "cart_ruts_wreck_wychwood_d76",
+   "kind": "cart_ruts_wreck",
+   "name": "Abandoned Cart",
+   "x": 336,
+   "z": 112,
+   "yaw": 3.82,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_wychwood_d77",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1237,
+   "z": 1531,
+   "yaw": 0.28,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_124",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 118,
+   "z": 537,
+   "yaw": 2.55,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "folk",
+   "id": "folk_wychwood_13",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 1673,
+   "z": 1417,
+   "yaw": 2.47,
+   "radius": 6,
+   "path": [
+    [
+     1704,
+     1434
+    ],
+    [
+     1648,
+     1424
+    ],
+    [
+     1677,
+     1388
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_125",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 520,
+   "z": 272,
+   "yaw": 1.92,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s48",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 799,
+   "z": 969,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_wychwood_d78",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 178,
+   "z": 1803,
+   "yaw": 1.5,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_126",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 746,
+   "z": 1931,
+   "yaw": 3.73,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_wychwood_14",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 681,
+   "z": 289,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     767,
+     248
+    ],
+    [
+     700,
+     378
+    ],
+    [
+     625,
+     318
+    ],
+    [
+     656,
+     193
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s49",
+   "monster": "dread_stag",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1568,
+   "z": 1536,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_127",
+   "recipe": "cu_hollow_stump",
+   "name": "Hollow Stump",
+   "kind": "cache",
+   "x": 1400,
+   "z": 415,
+   "yaw": 3.79,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_wychwood_d79",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 673,
+   "z": 1272,
+   "yaw": 0.57,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_128",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1577,
+   "z": 456,
+   "yaw": 4.59,
+   "radius": 6,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s50",
+   "monster": "ridge_griffin",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1920,
+   "z": 112,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_129",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1368,
+   "z": 521,
+   "yaw": 0.81,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_wychwood_d80",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 635,
+   "z": 858,
+   "yaw": 2.08,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_wychwood_d81",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 599,
+   "z": 727,
+   "yaw": 0.61,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "toll_stone_wychwood_d82",
+   "kind": "toll_stone",
+   "name": "Old Toll Stone",
+   "x": 1744,
+   "z": 568,
+   "yaw": 3.06,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_130",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 711,
+   "z": 1871,
+   "yaw": 3.38,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_131",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 2008,
+   "z": 224,
+   "yaw": 5.32,
+   "radius": 4,
+   "levelBase": 2
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s51",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 42,
+   "z": 421,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_132",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1817,
+   "z": 1369,
+   "yaw": 0.44,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_wychwood_14",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 1914,
+   "z": 1304,
+   "yaw": 1.69,
+   "radius": 6,
+   "path": [
+    [
+     1879,
+     1315
+    ],
+    [
+     1920,
+     1281
+    ],
+    [
+     1931,
+     1328
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_wychwood_d83",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 700,
+   "z": 1779,
+   "yaw": 4.43,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s52",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 288,
+   "z": 1904,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "sheep_pen_wychwood_d84",
+   "kind": "sheep_pen",
+   "name": "Sheep Pen",
+   "x": 1120,
+   "z": 1071,
+   "yaw": 2.44,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_133",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 740,
+   "z": 849,
+   "yaw": 1.82,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_wychwood_15",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1448,
+   "z": 784,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1486,
+     809
+    ],
+    [
+     1420,
+     814
+    ],
+    [
+     1400,
+     751
+    ],
+    [
+     1474,
+     744
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_134",
+   "recipe": "cu_spring_altar",
+   "name": "Spring Altar",
+   "kind": "shrine",
+   "x": 912,
+   "z": 160,
+   "yaw": 4.7,
+   "radius": 5,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_wychwood_d85",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1200,
+   "z": 1376,
+   "yaw": 1.34,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s53",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1497,
+   "z": 1288,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_135",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 1816,
+   "z": 807,
+   "yaw": 6.27,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "folk",
+   "id": "folk_wychwood_15",
+   "role": "woodcutter",
+   "name": "Woodcutter",
+   "work": "chop",
+   "chatter": [
+    "role.woodcutter"
+   ],
+   "x": 777,
+   "z": 465,
+   "yaw": 6.25,
+   "radius": 6,
+   "path": [
+    [
+     786,
+     489
+    ],
+    [
+     757,
+     458
+    ],
+    [
+     791,
+     452
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_136",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 49,
+   "z": 1540,
+   "yaw": 3.98,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_wychwood_d86",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 601,
+   "z": 1326,
+   "yaw": 5.65,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_wychwood_d87",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 391,
+   "z": 2006,
+   "yaw": 1.8,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_137",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 888,
+   "z": 1480,
+   "yaw": 3.28,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_wychwood_16",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1864,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1847,
+     2047
+    ],
+    [
+     1828,
+     1980
+    ],
+    [
+     1884,
+     1969
+    ],
+    [
+     1907,
+     2024
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s54",
+   "monster": "dread_stag",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 568,
+   "z": 104,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_138",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 1713,
+   "z": 737,
+   "yaw": 1.04,
+   "radius": 3,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_wychwood_d88",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 1135,
+   "z": 145,
+   "yaw": 4.03,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s55",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1504,
+   "z": 448,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_139",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 797,
+   "z": 1153,
+   "yaw": 4.45,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_140",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 1785,
+   "z": 1152,
+   "yaw": 4.44,
+   "radius": 5,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s56",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1486,
+   "z": 233,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_141",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 1450,
+   "z": 1580,
+   "yaw": 3.5,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "cottage_corner_wychwood_d89",
+   "kind": "cottage_corner",
+   "name": "Ruined Cottage",
+   "x": 1656,
+   "z": 1160,
+   "yaw": 5.78,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_142",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 41,
+   "z": 1749,
+   "yaw": 4.72,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_wychwood_17",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 147,
+   "z": 1943,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     209,
+     1948
+    ],
+    [
+     124,
+     1998
+    ],
+    [
+     63,
+     1901
+    ],
+    [
+     149,
+     1883
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_143",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 31,
+   "z": 253,
+   "yaw": 2.02,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_144",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 1672,
+   "z": 40,
+   "yaw": 3.21,
+   "radius": 6,
+   "levelBase": 2
+  },
+  {
+   "type": "folk",
+   "id": "folk_wychwood_16",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 1632,
+   "z": 576,
+   "yaw": 2.08,
+   "radius": 6,
+   "path": [
+    [
+     1610,
+     510
+    ],
+    [
+     1681,
+     572
+    ],
+    [
+     1601,
+     638
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_145",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1415,
+   "z": 1415,
+   "yaw": 2.18,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s57",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1529,
+   "z": 1480,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_wychwood_d90",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 607,
+   "z": 1767,
+   "yaw": 3.95,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_146",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 160,
+   "z": 313,
+   "yaw": 0.99,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s58",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1193,
+   "z": 360,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_147",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1745,
+   "z": 872,
+   "yaw": 2.48,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "roam_wychwood_18",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1592,
+   "z": 1288,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1599,
+     1330
+    ],
+    [
+     1541,
+     1293
+    ],
+    [
+     1577,
+     1235
+    ],
+    [
+     1635,
+     1274
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_148",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1695,
+   "z": 455,
+   "yaw": 5.38,
+   "radius": 6,
+   "levelBase": 2
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_wychwood_d91",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 1240,
+   "z": 1976,
+   "yaw": 0.63,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s59",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1111,
+   "z": 2010,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_wychwood_17",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 1753,
+   "z": 295,
+   "yaw": 4.9,
+   "radius": 6,
+   "path": [
+    [
+     1725,
+     317
+    ],
+    [
+     1752,
+     253
+    ],
+    [
+     1806,
+     319
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_149",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 1871,
+   "z": 608,
+   "yaw": 1.63,
+   "radius": 5,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s60",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1367,
+   "z": 864,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_wychwood_d92",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 739,
+   "z": 1220,
+   "yaw": 4.45,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_150",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1744,
+   "z": 1872,
+   "yaw": 2.44,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_wychwood_19",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 848,
+   "z": 344,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     803,
+     337
+    ],
+    [
+     867,
+     284
+    ],
+    [
+     892,
+     366
+    ],
+    [
+     832,
+     381
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s61",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1512,
+   "z": 1608,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_151",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1344,
+   "z": 704,
+   "yaw": 0.68,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "cottage_corner_wychwood_d93",
+   "kind": "cottage_corner",
+   "name": "Ruined Cottage",
+   "x": 1960,
+   "z": 928,
+   "yaw": 5.44,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_152",
+   "recipe": "cu_horse_bones",
+   "name": "Horse Bones",
+   "kind": "remains",
+   "x": 1760,
+   "z": 1544,
+   "yaw": 4.43,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s62",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 806,
+   "z": 1675,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_wychwood_d94",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 134,
+   "z": 1739,
+   "yaw": 5.54,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_153",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 372,
+   "z": 1921,
+   "yaw": 0.32,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s63",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 751,
+   "z": 1537,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_wychwood_d95",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 889,
+   "z": 1902,
+   "yaw": 2.57,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_wychwood_d96",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1360,
+   "z": 2008,
+   "yaw": 3.12,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_154",
+   "recipe": "cu_tinkers_halt",
+   "name": "Tinker's Halt",
+   "kind": "camp",
+   "x": 1505,
+   "z": 1962,
+   "yaw": 3.75,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_wychwood_20",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1943,
+   "z": 992,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1865,
+     1022
+    ],
+    [
+     1918,
+     928
+    ],
+    [
+     2031,
+     983
+    ],
+    [
+     1958,
+     1071
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s64",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1544,
+   "z": 1079,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_wychwood_d97",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 497,
+   "z": 2016,
+   "yaw": 1.82,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_wychwood_d98",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1863,
+   "z": 44,
+   "yaw": 4.18,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_wychwood_18",
+   "role": "hermit",
+   "name": "Hermit",
+   "work": "sit",
+   "chatter": [
+    "role.hermit"
+   ],
+   "x": 1944,
+   "z": 768,
+   "yaw": 5.43,
+   "radius": 6,
+   "path": [
+    [
+     1951,
+     778
+    ],
+    [
+     1936,
+     770
+    ],
+    [
+     1947,
+     761
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_155",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 896,
+   "z": 433,
+   "yaw": 1.59,
+   "radius": 6,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s65",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1176,
+   "z": 1024,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_wychwood_d99",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1968,
+   "z": 1384,
+   "yaw": 3.13,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s66",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 879,
+   "z": 1621,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_156",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 856,
+   "z": 560,
+   "yaw": 1.23,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_wychwood_21",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 841,
+   "z": 776,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     801,
+     796
+    ],
+    [
+     836,
+     717
+    ],
+    [
+     899,
+     760
+    ],
+    [
+     857,
+     826
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_157",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 943,
+   "z": 866,
+   "yaw": 0.48,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_wychwood_d100",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1318,
+   "z": 1412,
+   "yaw": 1.83,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s67",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 434,
+   "z": 194,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_158",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 462,
+   "z": 41,
+   "yaw": 5.95,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s68",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1411,
+   "z": 177,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_wychwood_19",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 1722,
+   "z": 1333,
+   "yaw": 2.94,
+   "radius": 6,
+   "path": [
+    [
+     1718,
+     1260
+    ],
+    [
+     1793,
+     1363
+    ],
+    [
+     1672,
+     1379
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_159",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1520,
+   "z": 1167,
+   "yaw": 2.72,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s69",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1433,
+   "z": 912,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_wychwood_d101",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1265,
+   "z": 440,
+   "yaw": 1.42,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_160",
+   "recipe": "cu_boundary_cross",
+   "name": "Boundary Cross",
+   "kind": "marker",
+   "x": 1296,
+   "z": 504,
+   "yaw": 3.42,
+   "radius": 3,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "roam_wychwood_22",
+   "monster": "dread_stag",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1761,
+   "z": 1096,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1737,
+     1066
+    ],
+    [
+     1792,
+     1073
+    ],
+    [
+     1791,
+     1137
+    ],
+    [
+     1723,
+     1122
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_161",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 1993,
+   "z": 2010,
+   "yaw": 3.7,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_162",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 768,
+   "z": 392,
+   "yaw": 2.08,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_wychwood_d102",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 952,
+   "z": 800,
+   "yaw": 2.49,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_163",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 543,
+   "z": 40,
+   "yaw": 4.75,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s70",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1919,
+   "z": 176,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_164",
+   "recipe": "cu_honey_tree",
+   "name": "Honey Tree",
+   "kind": "forage",
+   "x": 1687,
+   "z": 678,
+   "yaw": 0.21,
+   "radius": 5,
+   "levelBase": 3
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_165",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1423,
+   "z": 1792,
+   "yaw": 4.35,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s71",
+   "monster": "ridge_griffin",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 54,
+   "z": 500,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_wychwood_d103",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 214,
+   "z": 1669,
+   "yaw": 4.04,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "woodpile_stack_wychwood_d104",
+   "kind": "woodpile_stack",
+   "name": "Woodpile",
+   "x": 1015,
+   "z": 166,
+   "yaw": 0.33,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_166",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 482,
+   "z": 1011,
+   "yaw": 5.77,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_wychwood_23",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 822,
+   "z": 1806,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     837,
+     1853
+    ],
+    [
+     780,
+     1837
+    ],
+    [
+     777,
+     1750
+    ],
+    [
+     873,
+     1791
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s72",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1465,
+   "z": 1057,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_wychwood_d105",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 390,
+   "z": 1615,
+   "yaw": 0.48,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_wychwood_20",
+   "role": "pilgrim_resting",
+   "name": "Resting pilgrim",
+   "work": "pray",
+   "chatter": [
+    "role.pilgrim"
+   ],
+   "x": 1352,
+   "z": 1775,
+   "yaw": 3.21,
+   "radius": 6,
+   "path": [
+    [
+     1349,
+     1775
+    ],
+    [
+     1354,
+     1770
+    ],
+    [
+     1355,
+     1779
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_167",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1848,
+   "z": 745,
+   "yaw": 1.3,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_wychwood_d106",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1159,
+   "z": 1294,
+   "yaw": 4.32,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_wychwood_d107",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1879,
+   "z": 1231,
+   "yaw": 4.28,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_168",
+   "recipe": "cu_honey_tree",
+   "name": "Honey Tree",
+   "kind": "forage",
+   "x": 463,
+   "z": 257,
+   "yaw": 5.04,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s73",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1332,
+   "z": 110,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_wychwood_d108",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 670,
+   "z": 1475,
+   "yaw": 2.34,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_wychwood_24",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 641,
+   "z": 96,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     692,
+     83
+    ],
+    [
+     661,
+     135
+    ],
+    [
+     593,
+     119
+    ],
+    [
+     629,
+     52
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_169",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 1488,
+   "z": 872,
+   "yaw": 2.54,
+   "radius": 6,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_wychwood_d109",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 320,
+   "z": 424,
+   "yaw": 3.96,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s74",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1026,
+   "z": 1145,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_170",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 1629,
+   "z": 1105,
+   "yaw": 0.07,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_wychwood_21",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 1312,
+   "z": 1319,
+   "yaw": 3.73,
+   "radius": 6,
+   "path": [
+    [
+     1294,
+     1313
+    ],
+    [
+     1327,
+     1300
+    ],
+    [
+     1323,
+     1335
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_171",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 944,
+   "z": 1448,
+   "yaw": 0.29,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s75",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1575,
+   "z": 1879,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_wychwood_d110",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1326,
+   "z": 384,
+   "yaw": 5.54,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_172",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1450,
+   "z": 1920,
+   "yaw": 3.9,
+   "radius": 6,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_wychwood_25",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1800,
+   "z": 544,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1733,
+     510
+    ],
+    [
+     1846,
+     483
+    ],
+    [
+     1874,
+     573
+    ],
+    [
+     1759,
+     590
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_173",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 893,
+   "z": 1053,
+   "yaw": 0.57,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_174",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 242,
+   "z": 40,
+   "yaw": 0.54,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_wychwood_d111",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 629,
+   "z": 918,
+   "yaw": 5.7,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_wychwood_d112",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 218,
+   "z": 1805,
+   "yaw": 4.82,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_175",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1712,
+   "z": 1664,
+   "yaw": 1.95,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_176",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1391,
+   "z": 1887,
+   "yaw": 3.68,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_wychwood_d113",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 933,
+   "z": 1242,
+   "yaw": 4.19,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_177",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1400,
+   "z": 96,
+   "yaw": 4.68,
+   "radius": 4,
+   "levelBase": 2
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_wychwood_d114",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1664,
+   "z": 120,
+   "yaw": 4.14,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_178",
+   "recipe": "cu_empty_gallows_post",
+   "name": "Weathered Post",
+   "kind": "lore",
+   "x": 1663,
+   "z": 1513,
+   "yaw": 4.88,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_179",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 1144,
+   "z": 208,
+   "yaw": 2.74,
+   "radius": 3,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s76",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1032,
+   "z": 1935,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_180",
+   "recipe": "cu_fishing_rock",
+   "name": "Fishing Rock",
+   "kind": "fishing",
+   "x": 422,
+   "z": 372,
+   "yaw": 1.09,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_wychwood_22",
+   "role": "hermit",
+   "name": "Hermit",
+   "work": "sit",
+   "chatter": [
+    "role.hermit"
+   ],
+   "x": 792,
+   "z": 664,
+   "yaw": 0.14,
+   "radius": 6,
+   "path": [
+    [
+     804,
+     669
+    ],
+    [
+     785,
+     671
+    ],
+    [
+     784,
+     652
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_181",
+   "recipe": "cu_boundary_cross",
+   "name": "Boundary Cross",
+   "kind": "marker",
+   "x": 1944,
+   "z": 1440,
+   "yaw": 5.8,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_wychwood_d115",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 682,
+   "z": 1636,
+   "yaw": 5.21,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_wychwood_d116",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 904,
+   "z": 223,
+   "yaw": 4.51,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_182",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1382,
+   "z": 985,
+   "yaw": 5.21,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_183",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1816,
+   "z": 1792,
+   "yaw": 0.37,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "roam_wychwood_26",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    4,
+    5
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 561,
+   "z": 177,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     582,
+     132
+    ],
+    [
+     604,
+     197
+    ],
+    [
+     538,
+     217
+    ],
+    [
+     519,
+     167
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_184",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 788,
+   "z": 1047,
+   "yaw": 2.07,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_wychwood_d117",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1263,
+   "z": 1760,
+   "yaw": 1.42,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s77",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1472,
+   "z": 1712,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_185",
+   "recipe": "cu_hollow_stump",
+   "name": "Hollow Stump",
+   "kind": "cache",
+   "x": 640,
+   "z": 448,
+   "yaw": 0.21,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_wychwood_23",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 584,
+   "z": 1027,
+   "yaw": 2.03,
+   "radius": 6,
+   "path": [
+    [
+     573,
+     1001
+    ],
+    [
+     607,
+     1026
+    ],
+    [
+     575,
+     1055
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_186",
+   "recipe": "cu_honey_tree",
+   "name": "Honey Tree",
+   "kind": "forage",
+   "x": 767,
+   "z": 1104,
+   "yaw": 1.83,
+   "radius": 5,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s78",
+   "monster": "dread_stag",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1848,
+   "z": 920,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "hay_rick_wychwood_d118",
+   "kind": "hay_rick",
+   "name": "Hay Rick",
+   "x": 1369,
+   "z": 1233,
+   "yaw": 1.78,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_187",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 1505,
+   "z": 1840,
+   "yaw": 1.87,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "camp",
+   "id": "roam_wychwood_27",
+   "monster": "ridge_griffin",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1320,
+   "z": 1855,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1345,
+     1880
+    ],
+    [
+     1272,
+     1878
+    ],
+    [
+     1284,
+     1821
+    ],
+    [
+     1358,
+     1834
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s79",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1471,
+   "z": 544,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_188",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 720,
+   "z": 649,
+   "yaw": 3.59,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_wychwood_d119",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1256,
+   "z": 1264,
+   "yaw": 4.41,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_189",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 1455,
+   "z": 336,
+   "yaw": 1.1,
+   "radius": 4,
+   "levelBase": 3
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s80",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 992,
+   "z": 1560,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_190",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1856,
+   "z": 1160,
+   "yaw": 1.3,
+   "radius": 6,
+   "levelBase": 3
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_191",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1192,
+   "z": 113,
+   "yaw": 3.98,
+   "radius": 3,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_wychwood_d120",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1011,
+   "z": 1398,
+   "yaw": 0.75,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_192",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1545,
+   "z": 824,
+   "yaw": 1.03,
+   "radius": 6,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_wychwood_d121",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 695,
+   "z": 833,
+   "yaw": 3.64,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_193",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 1952,
+   "z": 520,
+   "yaw": 4.84,
+   "radius": 4,
+   "levelBase": 2
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_194",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 189,
+   "z": 1569,
+   "yaw": 2.34,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s81",
+   "monster": "ridge_griffin",
+   "with": null,
+   "level": [
+    2,
+    3
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1465,
+   "z": 81,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_195",
+   "recipe": "cu_tinkers_halt",
+   "name": "Tinker's Halt",
+   "kind": "camp",
+   "x": 280,
+   "z": 104,
+   "yaw": 1.95,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "folk",
+   "id": "folk_wychwood_24",
+   "role": "woodcutter",
+   "name": "Woodcutter",
+   "work": "chop",
+   "chatter": [
+    "role.woodcutter"
+   ],
+   "x": 695,
+   "z": 520,
+   "yaw": 0.69,
+   "radius": 6,
+   "path": [
+    [
+     698,
+     507
+    ],
+    [
+     707,
+     524
+    ],
+    [
+     683,
+     525
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_196",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 464,
+   "z": 129,
+   "yaw": 4.15,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_wychwood_d122",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 612,
+   "z": 1523,
+   "yaw": 5.1,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_wychwood_d123",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 941,
+   "z": 1813,
+   "yaw": 3.26,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_197",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 848,
+   "z": 935,
+   "yaw": 4.65,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s82",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    5,
+    6
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 834,
+   "z": 1941,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_198",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 691,
+   "z": 1887,
+   "yaw": 3.58,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_199",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 145,
+   "z": 432,
+   "yaw": 4.52,
+   "radius": 5,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_200",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 1000,
+   "z": 1032,
+   "yaw": 1.01,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "beehive_row_wychwood_d124",
+   "kind": "beehive_row",
+   "name": "Beehive Row",
+   "x": 425,
+   "z": 312,
+   "yaw": 3.25,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_201",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 1182,
+   "z": 1821,
+   "yaw": 5.2,
+   "radius": 3,
+   "levelBase": 5
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_wychwood_d125",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 248,
+   "z": 1990,
+   "yaw": 2.53,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_wychwood_25",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 740,
+   "z": 759,
+   "yaw": 1.46,
+   "radius": 6,
+   "path": [
+    [
+     727,
+     740
+    ],
+    [
+     756,
+     760
+    ],
+    [
+     731,
+     781
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_202",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 1790,
+   "z": 1254,
+   "yaw": 0.37,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_wychwood_d126",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1056,
+   "z": 1517,
+   "yaw": 0.79,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_wychwood_d127",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 368,
+   "z": 167,
+   "yaw": 5.76,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_203",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1856,
+   "z": 368,
+   "yaw": 1.78,
+   "radius": 7,
+   "levelBase": 2
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_204",
+   "recipe": "cu_pine_resin",
+   "name": "Weeping Pine",
+   "kind": "forage",
+   "x": 71,
+   "z": 1731,
+   "yaw": 5.51,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s83",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1259,
+   "z": 349,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_205",
+   "recipe": "cu_boundary_cross",
+   "name": "Boundary Cross",
+   "kind": "marker",
+   "x": 731,
+   "z": 159,
+   "yaw": 1.37,
+   "radius": 3,
+   "levelBase": 3
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_wychwood_d128",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 112,
+   "z": 1633,
+   "yaw": 2.26,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_206",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1592,
+   "z": 1673,
+   "yaw": 2.21,
+   "radius": 6,
+   "levelBase": 4
+  },
+  {
+   "type": "camp",
+   "id": "camp_wychwood_s84",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1912,
+   "z": 649,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
   }
  ],
- "features": []
+ "features": [],
+ "density": {
+  "target": 50,
+  "roadTarget": 45,
+  "added": {
+   "curio": 206,
+   "wayside": 128,
+   "stray": 84,
+   "roamer": 27,
+   "folk": 25
+  },
+  "openShareCovered": 0.999,
+  "roadShareCovered": 1
+ },
+ "levels": [
+  2,
+  7
+ ]
 }

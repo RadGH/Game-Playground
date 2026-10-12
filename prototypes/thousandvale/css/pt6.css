@@ -1,0 +1,34 @@
+/* Thousandvale — play-test 6 interface (stream D-UI): stacks, badges that mean "unseen", the ward bar, the lift, locked keys. */
+
+/* U5: a stack's count on its cell */
+.islot { position: relative; }
+.islot .stack { position: absolute; right: 2px; bottom: 1px; min-width: 14px; padding: 0 3px; border-radius: 7px; background: rgba(10, 8, 6, 0.85); color: #fff; font: 700 11px/15px var(--sans); text-align: center; text-shadow: 0 1px 1px #000; pointer-events: none; }
+.inv-doll .islot .stack { bottom: 13px; }
+.sr-stack { color: var(--ink-faint); font-size: 12px; }
+
+/* U1: a red badge is NEWS (unseen). Points waiting to be spent are a to-do: a quiet gold number, not an alarm. */
+#menu-skills b, #menu-perks b { background: #5b4220; color: var(--gold-hi); border: 1px solid var(--gold); line-height: 15px; }
+
+/* U7: the bag's stat lines are the Character menu's rows */
+.doll-stats span i { font-style: normal; color: var(--ink-faint); }
+
+/* U8: the ward on the boss frame — what is left to break, and when it fades */
+.boss-ward { position: relative; height: 16px; margin-top: 3px; border: 1px solid #8fd0ff; border-radius: 4px; overflow: hidden; background: rgba(10, 30, 46, 0.8); }
+.boss-ward[hidden] { display: none; }
+.boss-ward i { position: absolute; left: 0; top: 0; bottom: 0; background: linear-gradient(90deg, #2f7fae, #8fd0ff); transition: width 0.4s; }
+.boss-ward span { position: relative; display: block; text-align: center; font-size: 11.5px; line-height: 14px; color: #fff; text-shadow: 0 1px 2px #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 6px; }
+
+/* U11: a locked key says when it opens */
+.slot .lockat { position: absolute; left: 0; right: 0; bottom: 2px; text-align: center; font: 700 10px/1 var(--sans); color: #ffb0a2; text-shadow: 0 1px 2px #000; pointer-events: none; }
+.slot .lockat:empty { display: none; }
+
+/* U16/U18: the shape you are in, under your name */
+.uf-form { display: block; margin: -3px 0 3px; font-style: normal; font-size: 11.5px; color: #9fe08a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.uf-form[hidden] { display: none; }
+
+/* U12: which floor? */
+.tv-lift { position: absolute; left: 50%; top: 30%; transform: translateX(-50%); z-index: 60; width: min(320px, calc(100vw - 32px)); padding: 14px 16px; display: flex; flex-direction: column; gap: 7px;
+  background: var(--panel-solid); border: 1px solid var(--edge-strong); border-radius: 12px; box-shadow: var(--shadow); pointer-events: auto; text-align: center; }
+.tv-lift[hidden] { display: none; }
+.tv-lift strong { font-family: var(--serif); font-size: 18px; color: var(--gold-hi); } .tv-lift p { margin: 0 0 4px; color: var(--ink-dim); }
+.tv-lift button { width: 100%; padding: 9px 12px; } .tv-lift button.ghost.small { width: auto; align-self: center; padding: 4px 12px; margin-top: 4px; }

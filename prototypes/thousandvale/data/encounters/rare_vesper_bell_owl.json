@@ -2,6 +2,7 @@
   "id": "rare_vesper_bell_owl",
   "name": "Vesper",
   "tier": "rare",
+  "secret": true,
   "zone": "saint_orrins_rise",
   "body": "gallows_owl",
   "place": "nests in the abbey bell tower and swoops on anyone climbing the Rise at evening",

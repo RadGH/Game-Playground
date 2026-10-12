@@ -1,0 +1,269 @@
+{
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z13_04, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "zone": "z13_04",
+ "terrainHash": "e8ce72cb",
+ "placements": [
+  {
+   "type": "camp",
+   "id": "quest_burnt_barns_0_0",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    7
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1479,
+   "z": 158,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "burnt_barns",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_burnt_barns_0_1",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    7
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1479,
+   "z": 158,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "burnt_barns",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_hyenas_in_the_gorse_0_0",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    8,
+    8
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 2009,
+   "z": 999,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "hyenas_in_the_gorse",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_hyenas_in_the_gorse_0_1",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    8,
+    8
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 2009,
+   "z": 999,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "hyenas_in_the_gorse",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z13_04_1",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    6,
+    6
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1576,
+   "z": 232,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "packleader"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "npc",
+   "id": "angler_gorsehold",
+   "name": "Corporal Finch Loach",
+   "role": "angler",
+   "at": "Gorsehold",
+   "x": 1788,
+   "z": 1540,
+   "yaw": 1.57,
+   "angler": true,
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "npc",
+   "id": "carter_gorsehold",
+   "name": "Petronel Rookwood",
+   "role": "carter",
+   "at": "Gorsehold",
+   "x": 1632,
+   "z": 1262,
+   "yaw": 3.11,
+   "cart": "cart_gorsehold",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_gorsehold",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Gorsehold",
+   "carter": "carter_gorsehold",
+   "x": 1634,
+   "z": 1264,
+   "yaw": 1.972,
+   "radius": 2.2
+  },
+  {
+   "type": "npc",
+   "id": "carter_burnt_barns",
+   "name": "Tibbot Ashby",
+   "role": "carter",
+   "at": "Burnt Barns",
+   "x": 1636,
+   "z": 386,
+   "yaw": -0.203,
+   "cart": "cart_burnt_barns",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_burnt_barns",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Burnt Barns",
+   "carter": "carter_burnt_barns",
+   "x": 1638,
+   "z": 384,
+   "yaw": 1.027,
+   "radius": 2.2
+  },
+  {
+   "type": "guard",
+   "id": "guard_gorsehold_0",
+   "name": "Gorsehold Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Gorsehold",
+   "post": "gate",
+   "gate": "gorsehold_gate_0",
+   "x": 1614,
+   "z": 1262,
+   "yaw": 1.139,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_gorsehold_1",
+   "name": "Gorsehold Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Gorsehold",
+   "post": "gate",
+   "gate": "gorsehold_gate_0",
+   "x": 1618,
+   "z": 1252,
+   "yaw": 1.139,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_gorsehold_2",
+   "name": "Sergeant Reed",
+   "role": "guard",
+   "rank": "sergeant",
+   "tier": "town",
+   "town": "Gorsehold",
+   "post": "square",
+   "x": 1556,
+   "z": 1284,
+   "yaw": 1.087,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_gorsehold_3",
+   "name": "Gorsehold Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Gorsehold",
+   "post": "square",
+   "x": 1564,
+   "z": 1296,
+   "yaw": -2.942,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_gorsehold_4",
+   "name": "Gorsehold Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Gorsehold",
+   "post": "square",
+   "x": 1570,
+   "z": 1284,
+   "yaw": -1.171,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_burnt_barns_0",
+   "name": "Burnt Barns Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "hamlet",
+   "town": "Burnt Barns",
+   "post": "gate",
+   "gate": "burnt_barns_gate_0",
+   "x": 1620,
+   "z": 386,
+   "yaw": 0.972,
+   "titled": false
+  }
+ ]
+}

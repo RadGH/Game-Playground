@@ -62,7 +62,10 @@
     "rare_vesper_bell_owl.json",
     "rare_waterstrider_tolla.json",
     "rare_wynn_two_strings.json",
-    "world_grimtallow.json"
+    "world_grimtallow.json",
+    "mb_old_gristle.json",
+    "ev_harl_vesk.json",
+    "plain_boss.json"
   ],
   "specials": [
     "specials.json",
@@ -72,7 +75,8 @@
     "boss": {
       "instance": "barrow_warden",
       "wilds": "briar_colossus",
-      "any": "barrow_warden"
+      "town": "plain_boss",
+      "any": "plain_boss"
     },
     "elite": {
       "any": "packleader"

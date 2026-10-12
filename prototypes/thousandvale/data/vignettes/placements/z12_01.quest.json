@@ -1,0 +1,389 @@
+{
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z12_01, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "zone": "z12_01",
+ "terrainHash": "89c56ef1",
+ "placements": [
+  {
+   "type": "camp",
+   "id": "quest_bones_in_the_dust_0_0",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1376,
+   "z": 1722,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "bones_in_the_dust",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_spore_season_0_0",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 812,
+   "z": 540,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "spore_season",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z12_01_1",
+   "monster": "ossuary_crawler",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1182,
+   "z": 1015,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "vicious"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z12_01_2",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 879,
+   "z": 600,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "giant"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z12_01_3",
+   "monster": "shale_warden",
+   "with": null,
+   "level": [
+    6,
+    6
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 272,
+   "z": 480,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "frostbound"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "npc",
+   "id": "angler_ashcombe",
+   "name": "Old Nettie Cray",
+   "role": "angler",
+   "at": "Ashcombe",
+   "x": 1416,
+   "z": 1044,
+   "yaw": -1.57,
+   "angler": true,
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "npc",
+   "id": "carter_ashcombe",
+   "name": "Jankin Furlong",
+   "role": "carter",
+   "at": "Ashcombe",
+   "x": 1492,
+   "z": 1378,
+   "yaw": 3.005,
+   "cart": "cart_ashcombe",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_ashcombe",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Ashcombe",
+   "carter": "carter_ashcombe",
+   "x": 1490,
+   "z": 1380,
+   "yaw": 1.08,
+   "radius": 2.2
+  },
+  {
+   "type": "npc",
+   "id": "carter_kettle_cross",
+   "name": "Dickon Thatcher",
+   "role": "carter",
+   "at": "Kettle Cross",
+   "x": 888,
+   "z": 804,
+   "yaw": -2.348,
+   "cart": "cart_kettle_cross",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_kettle_cross",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Kettle Cross",
+   "carter": "carter_kettle_cross",
+   "x": 890,
+   "z": 806,
+   "yaw": -0.785,
+   "radius": 2.2
+  },
+  {
+   "type": "guard",
+   "id": "guard_ashcombe_0",
+   "name": "Ashcombe Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Ashcombe",
+   "post": "gate",
+   "gate": "ashcombe_gate_0",
+   "x": 1476,
+   "z": 1370,
+   "yaw": 1.085,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_ashcombe_1",
+   "name": "Ashcombe Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Ashcombe",
+   "post": "gate",
+   "gate": "ashcombe_gate_0",
+   "x": 1480,
+   "z": 1362,
+   "yaw": 1.085,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_ashcombe_2",
+   "name": "Ashcombe Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Ashcombe",
+   "post": "gate",
+   "gate": "ashcombe_gate_1",
+   "x": 1348,
+   "z": 1276,
+   "yaw": -2.087,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_ashcombe_3",
+   "name": "Ashcombe Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Ashcombe",
+   "post": "gate",
+   "gate": "ashcombe_gate_1",
+   "x": 1344,
+   "z": 1284,
+   "yaw": -2.087,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_ashcombe_4",
+   "name": "Ashcombe Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Ashcombe",
+   "post": "gate",
+   "gate": "ashcombe_gate_2",
+   "x": 1374,
+   "z": 1258,
+   "yaw": -2.745,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_ashcombe_5",
+   "name": "Ashcombe Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Ashcombe",
+   "post": "gate",
+   "gate": "ashcombe_gate_2",
+   "x": 1366,
+   "z": 1260,
+   "yaw": -2.745,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_ashcombe_6",
+   "name": "Ashcombe Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Ashcombe",
+   "post": "gate",
+   "gate": "ashcombe_gate_3",
+   "x": 1398,
+   "z": 1252,
+   "yaw": 2.559,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_ashcombe_7",
+   "name": "Ashcombe Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Ashcombe",
+   "post": "gate",
+   "gate": "ashcombe_gate_3",
+   "x": 1390,
+   "z": 1248,
+   "yaw": 2.559,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_ashcombe_8",
+   "name": "Sergeant Longacre",
+   "role": "guard",
+   "rank": "sergeant",
+   "tier": "city",
+   "town": "Ashcombe",
+   "post": "square",
+   "x": 1402,
+   "z": 1344,
+   "yaw": 3.002,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_ashcombe_9",
+   "name": "Ashcombe Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Ashcombe",
+   "post": "square",
+   "x": 1410,
+   "z": 1338,
+   "yaw": -1.619,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_ashcombe_10",
+   "name": "Ashcombe Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Ashcombe",
+   "post": "square",
+   "x": 1404,
+   "z": 1330,
+   "yaw": -0.144,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_ashcombe_11",
+   "name": "Ashcombe Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Ashcombe",
+   "post": "square",
+   "x": 1396,
+   "z": 1336,
+   "yaw": 1.334,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_kettle_cross_0",
+   "name": "Kettle Cross Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "hamlet",
+   "town": "Kettle Cross",
+   "post": "gate",
+   "gate": "kettle_cross_gate_0",
+   "x": 894,
+   "z": 788,
+   "yaw": -0.785,
+   "titled": false
+  }
+ ]
+}

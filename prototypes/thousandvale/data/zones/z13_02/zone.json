@@ -1,5 +1,5 @@
 {
-  "name": "Sablegate (z13_02)",
+  "name": "Halsbridge (z13_02)",
   "zone": "z13_02",
   "sheet": {
     "sheet": "torbor_downs",
@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 2,
-  "inputHash": "224b638b",
+  "bakeVersion": 4,
+  "inputHash": "b3a20e5d",
   "waterKinds": [
     "none",
     "sea",
@@ -33,7 +33,7 @@
       "height": 224,
       "method": "pangea",
       "seaLevel": 0.2,
-      "inputHash": "9803699e"
+      "inputHash": "9805a835"
     },
     "zone": {
       "zx": 13,
@@ -59,9 +59,10 @@
     {
       "type": "settlement",
       "kind": "city",
-      "name": "Sablegate",
+      "name": "Halsbridge",
       "x": 1696,
       "z": 1184,
+      "wfName": "Sablegate",
       "hub": true,
       "radius": 140,
       "movedFrom": {
@@ -72,9 +73,10 @@
     {
       "type": "settlement",
       "kind": "town",
-      "name": "Tetatcross",
+      "name": "Mill End",
       "x": 208,
       "z": 1456,
+      "wfName": "Tetatcross",
       "radius": 90,
       "movedFrom": {
         "x": 64,
@@ -109,8 +111,12 @@
       "type": "crossing",
       "kind": "bridge",
       "name": "Mobon Bridge",
-      "x": 1728,
-      "z": 1344
+      "x": 1715,
+      "z": 1346,
+      "snappedFrom": {
+        "x": 1728,
+        "z": 1344
+      }
     },
     {
       "type": "dungeon",
@@ -118,30 +124,94 @@
       "name": "Barrow entrance",
       "x": 1593,
       "z": 1344,
-      "yaw": 2.429
+      "yaw": 2.429,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_torbor_cross",
       "x": 1360,
       "z": 1104,
-      "r": 40
+      "r": 40,
+      "pinned": true
     }
   ],
   "spawn": {
     "x": 1696,
     "z": 1180
   },
+  "bridges": [
+    {
+      "a": [
+        608.48,
+        1353.93
+      ],
+      "b": [
+        608,
+        1336.5
+      ],
+      "h": 64.724,
+      "w": 5.36
+    },
+    {
+      "a": [
+        1221.08,
+        1221.08
+      ],
+      "b": [
+        1230.72,
+        1230.72
+      ],
+      "h": 54.619,
+      "w": 4.5
+    },
+    {
+      "a": [
+        1699.5,
+        1344
+      ],
+      "b": [
+        1726.5,
+        1344
+      ],
+      "h": 53.137,
+      "w": 4.5
+    },
+    {
+      "a": [
+        1728,
+        1374.5
+      ],
+      "b": [
+        1728,
+        1345.5
+      ],
+      "h": 53.137,
+      "w": 4.5
+    },
+    {
+      "a": [
+        1697.62,
+        1313.5
+      ],
+      "b": [
+        1697.98,
+        1342.5
+      ],
+      "h": 53.137,
+      "w": 4.5
+    }
+  ],
   "summary": {
     "zone": "z13_02",
     "province": "Petbeck Basin",
-    "inputHash": "224b638b",
+    "inputHash": "b3a20e5d",
     "rivers": 2,
-    "wetShare": 0.007,
-    "unwalkableShare": 0.004,
+    "wetShare": 0.006,
+    "unwalkableShare": 0.001,
     "towns": [
       {
-        "name": "Sablegate",
+        "name": "Halsbridge",
         "kind": "city",
         "hub": true,
         "at": [
@@ -154,13 +224,26 @@
           "z": 1344
         },
         "culture": "halfling",
-        "plots": 32,
-        "streets": 87,
+        "plots": 31,
+        "streets": 85,
         "links": 1,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 1,
+        "w6": {
+          "plotsBefore": 32,
+          "plots": 31,
+          "kept": 31,
+          "removed": [
+            {
+              "plot": 16,
+              "want": "house",
+              "office": false
+            }
+          ]
+        }
       },
       {
-        "name": "Tetatcross",
+        "name": "Mill End",
         "kind": "town",
         "hub": false,
         "at": [
@@ -176,7 +259,14 @@
         "plots": 21,
         "streets": 50,
         "links": 1,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 1,
+        "w6": {
+          "plotsBefore": 21,
+          "plots": 21,
+          "kept": 21,
+          "removed": []
+        }
       },
       {
         "name": "Lower Mossgate",
@@ -192,10 +282,23 @@
           "z": 1600
         },
         "culture": "halfling",
-        "plots": 9,
-        "streets": 27,
+        "plots": 8,
+        "streets": 25,
         "links": 2,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 2,
+        "w6": {
+          "plotsBefore": 9,
+          "plots": 8,
+          "kept": 8,
+          "removed": [
+            {
+              "plot": 7,
+              "want": "house",
+              "office": false
+            }
+          ]
+        }
       },
       {
         "name": "Mirestead",
@@ -212,28 +315,41 @@
         },
         "culture": "halfling",
         "plots": 8,
-        "streets": 28,
+        "streets": 27,
         "links": 1,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 1,
+        "w6": {
+          "plotsBefore": 8,
+          "plots": 8,
+          "kept": 8,
+          "removed": []
+        }
       }
     ],
     "roads": 15,
     "bridges": 5,
-    "scatter": 13003,
+    "paths": 18,
+    "pathMetres": 1973,
+    "scatter": 18225,
     "scatterKinds": {
-      "bush": 4048,
-      "tree_broadleaf": 7687,
-      "rock_small": 1005,
-      "rock_large": 127,
-      "reed": 125,
-      "tree_dead": 11
+      "tree_broadleaf": 8062,
+      "rock_large": 354,
+      "rock_small": 1788,
+      "bush": 6049,
+      "reed": 207,
+      "tree_dead": 11,
+      "tree_conifer": 11,
+      "hedge": 1662,
+      "tree_fruit": 72,
+      "boulder": 9
     },
     "sites": [
-      "settlement(HUB) city Sablegate 1696 1184 140",
-      "settlement town Tetatcross 208 1456 90",
+      "settlement(HUB) city Halsbridge 1696 1184 140",
+      "settlement town Mill End 208 1456 90",
       "settlement hamlet Lower Mossgate 704 1552 46",
       "settlement hamlet Mirestead 1136 1072 46",
-      "crossing bridge Mobon Bridge 1728 1344",
+      "crossing bridge Mobon Bridge 1715 1346",
       "dungeon door_1 Barrow entrance 1593 1344  2.429",
       "event event_torbor_cross  1360 1104 40"
     ],
@@ -241,13 +357,13 @@
       "x": 1696,
       "z": 1180
     },
-    "placements": 294,
-    "vignettesAvoided": 0
+    "placements": 427,
+    "vignettesAvoided": 612
   },
   "files": {
-    "terrain.bin": 6306062,
-    "nav.bin": 1050717,
-    "scatter.bin": 104108,
-    "placements.json": 125160
+    "terrain.bin": 496737,
+    "nav.bin": 31303,
+    "scatter.bin": 145884,
+    "placements.json": 289229
   }
 }

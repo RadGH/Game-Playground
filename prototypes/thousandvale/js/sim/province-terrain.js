@@ -2,9 +2,9 @@
 // Stitches stream B's per-zone bakes (zone-local metres 0..2048) into world metres (zone (zx, zy) covers
 // x in [zx*2048, zx*2048 + 2048]), so walking between zones is seamless. Pure.
 //
-//   const t = createProvinceTerrain({ key, zones: [{ key, zx, zy, reader }] })
+//   const t = createProvinceTerrain({ key, zones: [{ key, zx, zy, reader, nav? }] })
 //   t.heightAt / t.walkable / t.bounds / t.spawn / t.reader (a composite reader: heightAt, normalAt, slopeAt,
-//   waterAt, biomeAt, walkable, clamp, sample, meta.sites in world metres with `zone` set) / t.zones
+//   waterAt, biomeAt, walkable, clamp, sample, meta.sites in world metres with `zone` set) / t.zones / t.nav (stitched nav.bin)
 // Points in no listed zone (sea, another province) are not walkable; their height is the nearest zone edge.
 
 export const ZONE_METRES = 2048;
@@ -38,6 +38,13 @@ export function createProvinceTerrain({ key, zones, zoneMetres = ZONE_METRES, st
   };
   const heightAt = call('heightAt', 0);
   const walkable = (x, z) => { const q = zoneAt(x, z); return !!q && q.reader.walkable(x - q.ox, z - q.oz); };
+  // the water layer (P2/P25): waterAt for everyone; B's moveAt/passable/deckAt/groundAt when the zone reader has
+  // them (js/rules/terrain-read.js, 2026-10-05). Off every zone: 'out' / not passable.
+  const has = name => zones.every(q => typeof q.reader[name] === 'function');
+  const NO_WATER = { kind: 'none', surface: NaN, depth: 0 };
+  const waterAt = (x, z) => { const q = zoneAt(x, z); return q ? q.reader.waterAt(x - q.ox, z - q.oz) : NO_WATER; };
+  const moveAt = has('moveAt') ? (x, z) => { const q = zoneAt(x, z); return q ? q.reader.moveAt(x - q.ox, z - q.oz) : 'out'; } : null;
+  const passable = has('passable') ? (x, z) => { const q = zoneAt(x, z); return !!q && q.reader.passable(x - q.ox, z - q.oz); } : null;
   const sites = [];
   for (const q of zones) for (const s of (q.reader.meta && q.reader.meta.sites) || []) sites.push({ ...s, x: s.x + q.ox, z: s.z + q.oz, zone: q.key });
   const hub = sites.find(s => s.type === 'settlement' && s.hub && s.zone === starter) || sites.find(s => s.type === 'settlement' && s.hub) || sites.find(s => s.type === 'settlement');
@@ -50,7 +57,9 @@ export function createProvinceTerrain({ key, zones, zoneMetres = ZONE_METRES, st
     heightAt,
     normalAt: call('normalAt', [0, 1, 0]),
     slopeAt: call('slopeAt', 0),
-    waterAt: call('waterAt', { kind: 'none', surface: NaN, depth: 0 }),
+    waterAt,
+    ...(moveAt ? { moveAt } : {}), ...(passable ? { passable } : {}),
+    ...(has('deckAt') ? { deckAt: call('deckAt', NaN) } : {}), ...(has('groundAt') ? { groundAt: call('groundAt', 0) } : {}),
     biomeAt: call('biomeAt', 0),
     sample: (x, z) => { const q = zoneAt(x, z) || nearest(x, z); const s = q.reader.sample(x - q.ox, z - q.oz); return { ...s, x, z, zone: q.key }; },
     walkable,
@@ -58,8 +67,14 @@ export function createProvinceTerrain({ key, zones, zoneMetres = ZONE_METRES, st
     clamp: (x, z) => [Math.min(maxX, Math.max(minX, Number.isFinite(x) ? x : minX)), Math.min(maxZ, Math.max(minZ, Number.isFinite(z) ? z : minZ))],
     zoneAt: (x, z) => { const q = zoneAt(x, z); return q ? q.key : null; },
   };
+  // nav.bin stitched the same way (stream C reads `terrain.nav.passable`); a zone without one is open ground
+  const nav = zones.some(q => q.nav) ? {
+    passable: (x, z) => { const q = zoneAt(x, z); return !!q && (!q.nav || q.nav.passable(x - q.ox, z - q.oz)); },
+    // play-test 4 (B's town walls): the raw bits at a point (0 = open ground where a zone has no nav) — js/sim/movement.js
+    at: (x, z) => { const q = zoneAt(x, z); return q && q.nav && q.nav.at ? q.nav.at(x - q.ox, z - q.oz) : 0; },
+  } : null;
   return {
-    key: null, kind: 'province', province: key, reader, heightAt, walkable, bounds,
+    key: null, kind: 'province', province: key, reader, heightAt, walkable, waterAt, ...(moveAt ? { moveAt } : {}), ...(passable ? { passable } : {}), bounds, nav,
     size: Math.max(maxX - minX, maxZ - minZ), origin: { x: minX, z: minZ }, spawn,
     zones: zones.map(q => ({ key: q.key, zx: q.zx, zy: q.zy, bounds: q.bounds })),
   };

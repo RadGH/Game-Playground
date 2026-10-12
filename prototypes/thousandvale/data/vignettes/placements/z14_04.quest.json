@@ -1,0 +1,249 @@
+{
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z14_04, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "zone": "z14_04",
+ "terrainHash": "63302176",
+ "placements": [
+  {
+   "type": "camp",
+   "id": "quest_stalkers_in_the_moss_0_0",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    8,
+    8
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1201,
+   "z": 281,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "stalkers_in_the_moss",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_the_lurker_below_0_0",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    8,
+    8
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1167,
+   "z": 82,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "the_lurker_below",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_not_a_chest_0_0",
+   "monster": "hoard_mimic",
+   "with": null,
+   "level": [
+    9,
+    9
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1103,
+   "z": 135,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "not_a_chest",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z14_04_1",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    9,
+    9
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1372,
+   "z": 129,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "fiery"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "npc",
+   "id": "angler_lowmoor",
+   "name": "Ysmay Drownfield",
+   "role": "angler",
+   "at": "Lowmoor",
+   "x": 1088,
+   "z": 848,
+   "yaw": -1.96,
+   "angler": true,
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "npc",
+   "id": "carter_lowmoor",
+   "name": "Ganna Fenwick",
+   "role": "carter",
+   "at": "Lowmoor",
+   "x": 1212,
+   "z": 952,
+   "yaw": 1.712,
+   "cart": "cart_lowmoor",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_lowmoor",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Lowmoor",
+   "carter": "carter_lowmoor",
+   "x": 1210,
+   "z": 952,
+   "yaw": -3.124,
+   "radius": 2.2
+  },
+  {
+   "type": "npc",
+   "id": "carter_deepdene",
+   "name": "Lambert Sallow",
+   "role": "carter",
+   "at": "Deepdene",
+   "x": 1350,
+   "z": 336,
+   "yaw": -1.679,
+   "cart": "cart_deepdene",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_deepdene",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Deepdene",
+   "carter": "carter_deepdene",
+   "x": 1352,
+   "z": 336,
+   "yaw": -0.016,
+   "radius": 2.2
+  },
+  {
+   "type": "guard",
+   "id": "guard_lowmoor_0",
+   "name": "Lowmoor Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Lowmoor",
+   "post": "gate",
+   "gate": "lowmoor_gate_0",
+   "x": 1220,
+   "z": 968,
+   "yaw": 2.905,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_lowmoor_1",
+   "name": "Lowmoor Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Lowmoor",
+   "post": "gate",
+   "gate": "lowmoor_gate_0",
+   "x": 1210,
+   "z": 966,
+   "yaw": 2.905,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_lowmoor_2",
+   "name": "Sergeant Underhill",
+   "role": "guard",
+   "rank": "sergeant",
+   "tier": "town",
+   "town": "Lowmoor",
+   "post": "square",
+   "x": 1224,
+   "z": 1014,
+   "yaw": -2.472,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_lowmoor_3",
+   "name": "Lowmoor Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Lowmoor",
+   "post": "square",
+   "x": 1224,
+   "z": 1004,
+   "yaw": -0.562,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_lowmoor_4",
+   "name": "Lowmoor Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Lowmoor",
+   "post": "square",
+   "x": 1214,
+   "z": 1012,
+   "yaw": 1.929,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_deepdene_0",
+   "name": "Deepdene Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "hamlet",
+   "town": "Deepdene",
+   "post": "gate",
+   "gate": "deepdene_gate_0",
+   "x": 1342,
+   "z": 320,
+   "yaw": 0.051,
+   "titled": false
+  }
+ ]
+}

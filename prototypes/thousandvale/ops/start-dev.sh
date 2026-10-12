@@ -3,7 +3,8 @@
 # Runs the live working tree: node server/main.mjs --port 8491 --db pg.
 # Used by the systemd user unit (ops/thousandvale-dev.service) and fine to run by hand:
 #   prototypes/thousandvale/ops/start-dev.sh            # foreground
-#   PORT=8495 DB=memory prototypes/thousandvale/ops/start-dev.sh
+#   PORT=8495 DB=memory prototypes/thousandvale/ops/start-dev.sh   # memory = one process (--procs needs pg)
+#   PROCS=0 prototypes/thousandvale/ops/start-dev.sh               # stage 1 (one process); default PROCS=1
 # Database settings come from ~/.config/thousandvale/dev.env (written by ops/postgres-setup.sh, mode 600).
 set -euo pipefail
 
@@ -34,4 +35,7 @@ MAIN="$GAME/server/main.mjs"
 if [[ ! -f "$MAIN" ]]; then echo "start-dev: $MAIN not found (stream A's server has not landed)" >&2; exit 1; fi
 
 cd "$GAME"
-exec "$NODE" "$MAIN" --port "$PORT" --host "$HOST" --db "$DB"
+# stage 2 shape (PLAN §15.8): gateway + PROCS province processes; it needs Postgres (every process shares the database)
+PROCS="${PROCS:-1}"
+EXTRA=(); [[ "$DB" == "pg" && "$PROCS" != 0 ]] && EXTRA=(--procs "$PROCS")
+exec "$NODE" "$MAIN" --port "$PORT" --host "$HOST" --db "$DB" "${EXTRA[@]}"

@@ -1,0 +1,25 @@
+{
+  "_doc": "Stream C/E (play-test 4 S4): champions and rares in the wilds. Every ordinary monster a WILDS camp spawns (not a named rare, an encounter, an escort or a dungeon body) rolls a rank: `chance.rare` then `chance.champion`, from `chance.minLevel` up. A champion carries one modifier, a rare two and a name of its own (Farhold's ranks: balance.ranks hp/dmg/armour/xp/gold and better loot — dropBonus +1/+2, dropRarity x1.5/x2.2 — plus data/enemies.json's 22 modifiers). Thousandvale adds `extra` modifiers (same fields as Farhold's: prefix, hp, dmg, armor, speed, scale, onHit, aura, fx; `escort` = how many of its own kind follow it), a size floor per rank (`size`, so a champion is visibly bigger even with no `giant` roll), and `abilities`: a telegraphed special per modifier (docs/encounters.md specials format) added to the monster's own family specials, so a Fiery wolf throws fire as well as biting. `rareNames` builds a rare's own name: '<given> the <epithet>'. Rares and champions come with an `aff` list and a `sc` (scale) on their entity info for the client.",
+  "chance": { "champion": 0.05, "rare": 0.06, "minLevel": 2, "_minLevel": "play-test 5 T10 ('I still haven't seen one'): champion 0.09 -> 0.05 (E's 62 roadside champions are placed on top), rare 0.025 -> 0.06, and from level 2 instead of 4 — a level-1 monster never rolls (the very first fights stay plain), and a camp E marks `noRank` never rolls (measured through the real spawn path in tests/C/playtest5-loot: before 0% at levels 1-3 and 2.7% rare / 9% champion from 4; after 6% rare / 5% champion from level 2)" },
+  "size": { "champion": 1.25, "rare": 1.45 },
+  "extra": [
+    { "id": "packleader", "name": "Pack-leader", "prefix": "Pack-leader", "hp": 1.5, "dmg": 1.15, "scale": 1.2, "escort": 3, "aura": "#e0b050" }
+  ],
+  "abilities": {
+    "fiery": [ { "id": "aff_flame_ring", "name": "Flame Ring", "every": [10, 14], "range": 6, "say": "{boss} bursts into flame — get clear!", "telegraphs": [ { "shape": "ring", "at": "self", "r": 6.5, "r2": 1.8, "wind": 1.6, "damage": 1.3, "element": "fire", "status": "burn" } ] } ],
+    "scorched": [ { "id": "aff_cinders", "name": "Cinder Scatter", "every": [11, 15], "range": 16, "telegraphs": [ { "shape": "circle", "at": "target", "r": 3.2, "wind": 1.5, "damage": 1.1, "element": "fire", "status": "burn" } ] } ],
+    "frostbound": [ { "id": "aff_frost_nova", "name": "Frost Nova", "every": [12, 16], "range": 6, "say": "{boss} draws the cold in —", "telegraphs": [ { "shape": "circle", "at": "self", "r": 6, "wind": 1.7, "damage": 1.0, "element": "frost", "status": "chill" } ] } ],
+    "rimed": [ { "id": "aff_ice_shard", "name": "Ice Shard", "every": [10, 14], "range": 18, "telegraphs": [ { "shape": "line", "at": "self", "len": 16, "w": 2, "wind": 1.4, "damage": 1.1, "element": "frost", "status": "chill" } ] } ],
+    "stormlash": [ { "id": "aff_arc_lash", "name": "Arc Lash", "every": [9, 13], "range": 14, "telegraphs": [ { "shape": "line", "at": "self", "len": 14, "w": 2.2, "wind": 1.3, "damage": 1.3, "element": "lightning", "status": "shock" } ] } ],
+    "venomous": [ { "id": "aff_venom_spit", "name": "Venom Spit", "every": [10, 14], "range": 16, "telegraphs": [ { "shape": "circle", "at": "target", "r": 3.4, "wind": 1.5, "damage": 0.9, "element": "poison", "status": "poison" } ] } ],
+    "graveborn": [ { "id": "aff_grave_hand", "name": "Grave Hand", "every": [11, 15], "range": 18, "telegraphs": [ { "shape": "circle", "at": "target", "r": 3, "wind": 1.5, "damage": 1.0, "element": "shadow", "status": "curse" } ] } ],
+    "giant": [ { "id": "aff_ground_slam", "name": "Ground Slam", "every": [12, 16], "range": 7, "cast": 0.6, "say": "{boss} rears up to slam the ground!", "telegraphs": [ { "shape": "circle", "at": "self", "r": 7.5, "wind": 1.9, "damage": 1.9, "knock": 5 } ] } ],
+    "bramblehide": [ { "id": "aff_briar_burst", "name": "Briar Burst", "every": [12, 16], "range": 5, "telegraphs": [ { "shape": "circle", "at": "self", "r": 5, "wind": 1.5, "damage": 1.0, "status": "root" } ] } ],
+    "hollowed": [ { "id": "aff_rend", "name": "Rend", "every": [9, 12], "range": 4, "telegraphs": [ { "shape": "cone", "at": "self", "r": 4.5, "arc": 1.6, "wind": 1.2, "damage": 1.4, "status": "bleed" } ] } ],
+    "packleader": [ { "id": "aff_pack_charge", "name": "Pack Charge", "every": [12, 16], "range": 16, "minRange": 5, "cast": 0.5, "say": "{boss} howls the pack on!", "telegraphs": [ { "shape": "line", "at": "self", "len": 14, "w": 3, "wind": 1.5, "damage": 1.5, "knock": 3 } ] } ]
+  },
+  "rareNames": {
+    "given": ["Grisk", "Moll", "Hobb", "Tarrow", "Venn", "Ludd", "Skarra", "Brack", "Orla", "Thane", "Wick", "Corra", "Dunn", "Fessick", "Holloway", "Ivo", "Jutt", "Kessel", "Marl", "Nettle", "Pell", "Quill", "Rook", "Sorrel", "Tamsin", "Ulric", "Wenna", "Yarrow"],
+    "epithet": ["Gnawer", "Unbroken", "Old", "Red-Eyed", "Patient", "Crooked", "Hungry", "Quiet", "Tall", "Scarred", "Grey", "Restless", "Thrice-Burned", "Lame", "Laughing", "Cold", "Sly", "Heavy", "Long-Toothed", "Stray"]
+  }
+}

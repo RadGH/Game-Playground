@@ -1,0 +1,441 @@
+{
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z11_02, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "zone": "z11_02",
+ "terrainHash": "36526177",
+ "placements": [
+  {
+   "type": "camp",
+   "id": "quest_lamp_oil_0_0",
+   "monster": "ash_wisp",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 967,
+   "z": 1833,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "lamp_oil",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_rats_in_the_lift_0_0",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1440,
+   "z": 1518,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "rats_in_the_lift",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z11_02_1",
+   "monster": "shale_warden",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 2005,
+   "z": 2006,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "gilded"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z11_02_2",
+   "monster": "ash_wisp",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 897,
+   "z": 1361,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "ironclad"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z11_02_3",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 787,
+   "z": 1862,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "thorned"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z11_02_4",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 528,
+   "z": 928,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "giant"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z11_02_5",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 208,
+   "z": 760,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "venomous"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "npc",
+   "id": "angler_copperdell",
+   "name": "Dunmer Slagfoot",
+   "role": "angler",
+   "at": "Copperdell",
+   "x": 276,
+   "z": 420,
+   "yaw": -0.39,
+   "angler": true,
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "npc",
+   "id": "carter_copperdell",
+   "name": "Tobin Cattermole",
+   "role": "carter",
+   "at": "Copperdell",
+   "x": 276,
+   "z": 506,
+   "yaw": -2.678,
+   "cart": "cart_copperdell",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_copperdell",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Copperdell",
+   "carter": "carter_copperdell",
+   "x": 278,
+   "z": 508,
+   "yaw": -0.984,
+   "radius": 2.2
+  },
+  {
+   "type": "npc",
+   "id": "carter_pickaxe_row",
+   "name": "Wystan Furlong",
+   "role": "carter",
+   "at": "Pickaxe Row",
+   "x": 962,
+   "z": 1704,
+   "yaw": -2.718,
+   "cart": "cart_pickaxe_row",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_pickaxe_row",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Pickaxe Row",
+   "carter": "carter_pickaxe_row",
+   "x": 964,
+   "z": 1706,
+   "yaw": -0.929,
+   "radius": 2.2
+  },
+  {
+   "type": "npc",
+   "id": "carter_ashhaven",
+   "name": "Hew Greenhill",
+   "role": "carter",
+   "at": "Ashhaven",
+   "x": 734,
+   "z": 986,
+   "yaw": -2.166,
+   "cart": "cart_ashhaven",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_ashhaven",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Ashhaven",
+   "carter": "carter_ashhaven",
+   "x": 736,
+   "z": 988,
+   "yaw": -0.697,
+   "radius": 2.2
+  },
+  {
+   "type": "guard",
+   "id": "guard_copperdell_0",
+   "name": "Copperdell Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Copperdell",
+   "post": "gate",
+   "gate": "copperdell_gate_0",
+   "x": 284,
+   "z": 488,
+   "yaw": -0.896,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_copperdell_1",
+   "name": "Copperdell Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Copperdell",
+   "post": "gate",
+   "gate": "copperdell_gate_0",
+   "x": 290,
+   "z": 494,
+   "yaw": -0.896,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_copperdell_2",
+   "name": "Copperdell Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Copperdell",
+   "post": "gate",
+   "gate": "copperdell_gate_1",
+   "x": 432,
+   "z": 444,
+   "yaw": 1.773,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_copperdell_3",
+   "name": "Copperdell Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Copperdell",
+   "post": "gate",
+   "gate": "copperdell_gate_1",
+   "x": 430,
+   "z": 436,
+   "yaw": 1.773,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_copperdell_4",
+   "name": "Sergeant Wainwright",
+   "role": "guard",
+   "rank": "sergeant",
+   "tier": "city",
+   "town": "Copperdell",
+   "post": "square",
+   "x": 360,
+   "z": 432,
+   "yaw": -1.184,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_copperdell_5",
+   "name": "Copperdell Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Copperdell",
+   "post": "square",
+   "x": 350,
+   "z": 428,
+   "yaw": 0.547,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_copperdell_6",
+   "name": "Copperdell Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Copperdell",
+   "post": "square",
+   "x": 346,
+   "z": 438,
+   "yaw": 1.989,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_copperdell_7",
+   "name": "Copperdell Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Copperdell",
+   "post": "square",
+   "x": 358,
+   "z": 442,
+   "yaw": -2.647,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_pickaxe_row_0",
+   "name": "Pickaxe Row Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "village",
+   "town": "Pickaxe Row",
+   "post": "gate",
+   "gate": "pickaxe_row_gate_0",
+   "x": 966,
+   "z": 1674,
+   "yaw": -1.253,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_pickaxe_row_1",
+   "name": "Pickaxe Row Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "village",
+   "town": "Pickaxe Row",
+   "post": "square",
+   "x": 1010,
+   "z": 1660,
+   "yaw": 1.026,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_ashhaven_0",
+   "name": "Ashhaven Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "hamlet",
+   "town": "Ashhaven",
+   "post": "gate",
+   "gate": "ashhaven_gate_0",
+   "x": 736,
+   "z": 968,
+   "yaw": -0.697,
+   "titled": false
+  }
+ ]
+}

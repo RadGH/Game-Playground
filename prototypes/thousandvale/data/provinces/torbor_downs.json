@@ -50,7 +50,7 @@
       ],
       "archetype": "pass",
       "band": [
-        6,
+        3,
         8
       ],
       "biomes": [
@@ -64,6 +64,7 @@
       ],
       "fort": "Hollin Toll Fort",
       "dungeon": {
+        "name": "The Windlass Spire",
         "family": "tower_climb",
         "floors": 3,
         "level": 6
@@ -181,7 +182,7 @@
       ],
       "archetype": "ruinfield",
       "band": [
-        4,
+        3,
         6
       ],
       "biomes": [
@@ -195,6 +196,7 @@
       ],
       "fort": "the Broken Keep",
       "dungeon": {
+        "name": "Harrowgate Keep",
         "family": "fortress_keep",
         "floors": 2,
         "level": 4
@@ -301,7 +303,7 @@
       ],
       "archetype": "marsh",
       "band": [
-        5,
+        4,
         7
       ],
       "biomes": [
@@ -315,6 +317,7 @@
       ],
       "fort": "Reedwall Tower",
       "dungeon": {
+        "name": "The Drowned Chancel",
         "family": "sunken_temple",
         "floors": 3,
         "level": 5
@@ -422,6 +425,7 @@
       ],
       "fort": "Saltmouth Battery",
       "dungeon": {
+        "name": "The Brine Cisterns",
         "family": "flooded_cistern",
         "floors": 3,
         "level": 6
@@ -539,7 +543,7 @@
       ],
       "archetype": "mine_country",
       "band": [
-        4,
+        2,
         6
       ],
       "biomes": [
@@ -553,6 +557,7 @@
       ],
       "fort": "the Old Headframe Fort",
       "dungeon": {
+        "name": "Old Copperdeep",
         "family": "mine_descent",
         "floors": 2,
         "level": 4
@@ -636,6 +641,18 @@
             4
           ],
           "where": "the wilds of Delvers' Hill"
+        },
+        {
+          "type": "ash_wisp",
+          "level": [
+            4,
+            6
+          ],
+          "count": [
+            2,
+            3
+          ],
+          "where": "the old workings"
         }
       ]
     },
@@ -653,9 +670,14 @@
       ],
       "hook": "the_singing_ford",
       "dungeon": {
+        "name": "The Ploughman's Crypt",
         "family": "crypt_spiral",
         "floors": 2,
-        "level": 3
+        "level": 2,
+        "floorStep": 1,
+        "eliteStep": 0,
+        "bossStep": 1,
+        "_doc": "Play-test 3 R2: the starter dungeon behind the Barrow entrance near Torborhold is a level-2 dungeon. Floor 1: packs and mini-boss at level 2; floor 2: level 3, the last boss level 4 (it was 3 / mini-boss 4 / floor 2 at 5 / boss 7)."
       },
       "eventBoss": "event_grandmother_skein",
       "elite": "elite_hobb_gallowsby",
@@ -772,6 +794,7 @@
       ],
       "fort": "Halsbridge Gatehouse",
       "dungeon": {
+        "name": "The Undercross Drains",
         "family": "flooded_cistern",
         "floors": 2,
         "level": 3
@@ -879,6 +902,7 @@
       ],
       "fort": "Stilt Fort",
       "dungeon": {
+        "name": "The Gullwick Throat",
         "family": "cave_river",
         "floors": 3,
         "level": 5
@@ -984,7 +1008,7 @@
       ],
       "archetype": "wilds",
       "band": [
-        5,
+        2,
         7
       ],
       "biomes": [
@@ -997,6 +1021,7 @@
       ],
       "fort": "the Antler Stockade",
       "dungeon": {
+        "name": "The Rootbound Barrows",
         "family": "barrow_maze",
         "floors": 3,
         "level": 5
@@ -1114,7 +1139,7 @@
       ],
       "archetype": "holy_ground",
       "band": [
-        3,
+        2,
         5
       ],
       "biomes": [
@@ -1127,6 +1152,7 @@
       ],
       "fort": "the Abbey Wall",
       "dungeon": {
+        "name": "Saint Orrin's Ossuary",
         "family": "crypt_spiral",
         "floors": 2,
         "level": 3
@@ -1234,6 +1260,7 @@
       ],
       "fort": "Millbrook Keep",
       "dungeon": {
+        "name": "The Millrace Workings",
         "family": "mine_descent",
         "floors": 2,
         "level": 3
@@ -1365,6 +1392,7 @@
       ],
       "fort": "Redcliff Fort",
       "dungeon": {
+        "name": "Redcliff Bastion",
         "family": "fortress_keep",
         "floors": 3,
         "level": 6
@@ -1470,7 +1498,7 @@
       ],
       "archetype": "blight",
       "band": [
-        7,
+        6,
         10
       ],
       "biomes": [
@@ -1484,6 +1512,7 @@
       ],
       "fort": "the Warband Stockade",
       "dungeon": {
+        "name": "The Blackthorn Warrens",
         "family": "barrow_maze",
         "floors": 3,
         "level": 7
@@ -1591,6 +1620,7 @@
       ],
       "fort": "Mere Tower",
       "dungeon": {
+        "name": "The Mere-Sunk Sanctum",
         "family": "sunken_temple",
         "floors": 3,
         "level": 5
@@ -1698,6 +1728,7 @@
       ],
       "fort": "Gorsehold Redoubt",
       "dungeon": {
+        "name": "The Signal Stair",
         "family": "tower_climb",
         "floors": 3,
         "level": 6
@@ -1805,6 +1836,7 @@
       ],
       "fort": "the Mossy Bastion",
       "dungeon": {
+        "name": "The Weeping Caverns",
         "family": "cave_river",
         "floors": 3,
         "level": 7

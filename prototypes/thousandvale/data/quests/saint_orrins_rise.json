@@ -6,25 +6,55 @@
       "name": "Prior Wendel",
       "role": "elder",
       "at": "Orrinsford",
-      "greeting": "Welcome, pilgrim. Please wipe your feet. Not on the saint."
+      "greeting": "Welcome, pilgrim. Please wipe your feet. Not on the saint.",
+      "titled": true
     },
     "sister_hild": {
       "name": "Sister Hild",
       "role": "healer",
       "at": "Pilgrim's Halt",
-      "greeting": "You look like someone who walks into graveyards on purpose."
+      "greeting": "You look like someone who walks into graveyards on purpose.",
+      "titled": true
     },
     "brother_tobin": {
       "name": "Brother Tobin",
       "role": "guard",
       "at": "the Abbey Wall",
-      "greeting": "I am the abbey's entire guard. I also do the bread."
+      "greeting": "I am the abbey's entire guard. I also do the bread.",
+      "titled": true
     },
     "pilgrim_nell": {
       "name": "Nell the pilgrim",
       "role": "pilgrim",
       "at": "drowned_shrine",
-      "greeting": "I came to pray. The shrine had other plans and also frogs."
+      "greeting": "I came to pray. The shrine had other plans and also frogs.",
+      "titled": true
+    },
+    "angler_orrinsford": {
+      "name": "Sister Brindle",
+      "role": "angler",
+      "at": "Orrinsford",
+      "greeting": "The Prior calls it idleness. I call it contemplation with a hook in it. See the ripples, just west of where I'm standing? That's the town pool. It never fishes out.",
+      "placedBy": "content-pools",
+      "titled": true
+    },
+    "carter_orrinsford": {
+      "name": "Gervase Sallow",
+      "role": "carter",
+      "at": "Orrinsford",
+      "greeting": "The ox is called Thunder. It is a joke. Where are we going?",
+      "cart": "cart_orrinsford",
+      "placedBy": "content-towns",
+      "titled": true
+    },
+    "carter_pilgrim_s_halt": {
+      "name": "Wat Quarrie",
+      "role": "carter",
+      "at": "Pilgrim's Halt",
+      "greeting": "The ox is called Thunder. It is a joke. Where are we going?",
+      "cart": "cart_pilgrim_s_halt",
+      "placedBy": "content-towns",
+      "titled": true
     }
   },
   "quests": [
@@ -40,18 +70,20 @@
           "kind": "kill",
           "type": "barrow_hound",
           "count": 6,
-          "where": "the old cloister garth",
-          "text": "Barrow hounds laid back down"
+          "where": "the old cloister garth by the Abbey Wall",
+          "text": "Lay 6 barrow hounds back down"
         }
       ],
       "done": "Thank you. Morning prayers are once again a living-only affair.",
       "reward": {
         "xp": 0.4,
         "gold": 6,
-        "item": {
-          "tier": "common",
-          "slot": "any"
-        }
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "uncommon"
+          }
+        ]
       },
       "next": "bells_for_halsbridge"
     },
@@ -66,14 +98,20 @@
           "kind": "kill",
           "type": "gallows_owl",
           "count": 5,
-          "where": "around the abbey",
-          "text": "Gallows owls driven off"
+          "where": "around the abbey on Saint Orrin's Rise",
+          "text": "Drive off 5 gallows owls"
         }
       ],
       "done": "The bell rings clean. My ears thank you; my head thanks you more.",
       "reward": {
         "xp": 0.35,
-        "gold": 5
+        "gold": 5,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
       }
     },
     {
@@ -89,7 +127,8 @@
           "count": 6,
           "from": "cairn_rat",
           "chance": 0.6,
-          "text": "Candle stubs recovered"
+          "text": "Collect 6 candle stubs from cairn rats",
+          "where": "cairn rats around Pilgrim's Halt"
         }
       ],
       "done": "Slightly chewed. The saint won't mind. The saint has seen worse.",
@@ -108,12 +147,14 @@
         {
           "kind": "visit",
           "vignette": "drowned_shrine",
-          "text": "Search the drowned shrine"
+          "text": "Search the Drowned Shrine for the beads",
+          "where": "The Drowned Shrine, on Saint Orrin's Rise"
         },
         {
           "kind": "talk",
           "npc": "abbot_wendel",
-          "text": "Tell Prior Wendel that Nell lives"
+          "text": "Tell Prior Wendel that Nell lives",
+          "where": "Prior Wendel, in Orrinsford"
         }
       ],
       "done": "Not dead! Excellent. That saves a great deal of paperwork.",
@@ -133,19 +174,21 @@
         {
           "kind": "clear",
           "dungeon": "door",
-          "text": "Reach the lower crypt",
-          "floor": 1
+          "text": "Reach the lower crypt of Saint Orrin's Ossuary",
+          "floor": 1,
+          "where": "Saint Orrin's Ossuary, the dungeon door on the Rise"
         },
         {
           "kind": "clear",
           "dungeon": "door",
           "text": "Defeat what waits at the bottom",
-          "boss": true
+          "boss": true,
+          "where": "the bottom of Saint Orrin's Ossuary"
         }
       ],
       "done": "The saint rests. And so, for the first time this month, do I.",
       "reward": {
-        "xp": 1.0,
+        "xp": 1,
         "gold": 40,
         "item": {
           "tier": "rare",
@@ -164,7 +207,8 @@
           "kind": "killRare",
           "zone": "saint_orrins_rise",
           "slot": 0,
-          "text": "The Rise's rare beast slain"
+          "text": "Hunt down Brother Penance",
+          "where": "roams Saint Orrin's Rise"
         }
       ],
       "done": "Ah, wonderful. Now they'll talk about you instead. Still not the saint.",

@@ -1,0 +1,6 @@
+{
+  "_doc": "One-off refunds (stream A, play-test 4 S3). Applied ONCE per character per `key` when it next logs in (char.flags.refunds[key] records it), so this file is safe to keep and re-deploy. `char` = the database character id, `name` must match too (so a different database with the same ids gives nothing). Evidence for shop-r4: the dev economy_log hour 2026-10-05 20:00 band 0 shows 5 shop sinks of 15 g each (75 g) against 1 item handed out — the shared-stock bug (grant() marked the cached row's item `_granted`, so every later buy of that row gave nothing). Stormy (account 772) holds the one item that landed.",
+  "list": [
+    { "key": "shop-r4", "char": 1454, "name": "Stormy", "gold": 60, "msg": "The apothecary found 60 gold of yours in the till: four purchases you paid for and never received. Sorry about that." }
+  ]
+}

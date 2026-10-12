@@ -1,5 +1,5 @@
 {
-  "name": "z13_01",
+  "name": "Brackwater (z13_01)",
   "zone": "z13_01",
   "sheet": {
     "sheet": "torbor_downs",
@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 2,
-  "inputHash": "3c176bbc",
+  "bakeVersion": 4,
+  "inputHash": "f3d4195e",
   "waterKinds": [
     "none",
     "sea",
@@ -33,7 +33,7 @@
       "height": 224,
       "method": "pangea",
       "seaLevel": 0.2,
-      "inputHash": "9803699e"
+      "inputHash": "9805a835"
     },
     "zone": {
       "zx": 13,
@@ -48,56 +48,273 @@
   "rivers": [],
   "sites": [
     {
+      "type": "settlement",
+      "kind": "town",
+      "name": "Brackwater",
+      "x": 1136,
+      "z": 870,
+      "ask": true,
+      "askR": 70,
+      "hub": true,
+      "radius": 90
+    },
+    {
+      "type": "settlement",
+      "kind": "hamlet",
+      "name": "Eelwick",
+      "x": 1164,
+      "z": 427,
+      "ask": true,
+      "askR": 40,
+      "radius": 40
+    },
+    {
       "type": "dungeon",
       "id": "door_1",
       "name": "Barrow entrance",
-      "x": 946,
-      "z": 1186,
-      "yaw": -2.398
+      "x": 1061,
+      "z": 1066,
+      "yaw": -3.247,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_brackwater",
-      "x": 1024,
-      "z": 1024,
-      "r": 40
+      "x": 1026,
+      "z": 981,
+      "r": 40,
+      "pinned": true
     }
   ],
   "spawn": {
-    "x": 1024,
-    "z": 1024
+    "x": 1136,
+    "z": 878
+  },
+  "bridges": [],
+  "theme": {
+    "kind": "marsh",
+    "lakes": [
+      {
+        "name": "the Black Mere",
+        "kind": "mere",
+        "x": 1439,
+        "z": 1151,
+        "r": 90,
+        "level": 75.29
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1688,
+        "z": 1165,
+        "r": 23,
+        "level": 84.3
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1281,
+        "z": 1344,
+        "r": 22,
+        "level": 83.11
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1062,
+        "z": 1200,
+        "r": 37,
+        "level": 84.72
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1461,
+        "z": 783,
+        "r": 38,
+        "level": 68.74
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1540,
+        "z": 981,
+        "r": 27,
+        "level": 75.89
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1667,
+        "z": 1328,
+        "r": 37,
+        "level": 83.98
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1271,
+        "z": 1004,
+        "r": 18,
+        "level": 77.21
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1226,
+        "z": 1171,
+        "r": 21,
+        "level": 82.6
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1520,
+        "z": 1337,
+        "r": 21,
+        "level": 80
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1144,
+        "z": 1046,
+        "r": 19,
+        "level": 78.62
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1384,
+        "z": 1503,
+        "r": 34,
+        "level": 85.26
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1536,
+        "z": 1463,
+        "r": 18,
+        "level": 84.53
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1209,
+        "z": 1471,
+        "r": 39,
+        "level": 93.35
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1719,
+        "z": 908,
+        "r": 22,
+        "level": 75.61
+      }
+    ],
+    "fen": {
+      "x": 1439,
+      "z": 1151,
+      "r": 430
+    }
   },
   "summary": {
     "zone": "z13_01",
     "province": "Petbeck Basin",
-    "inputHash": "3c176bbc",
+    "inputHash": "f3d4195e",
     "rivers": 0,
-    "wetShare": 0,
-    "unwalkableShare": 0,
-    "towns": [],
-    "roads": 0,
+    "wetShare": 0.014,
+    "unwalkableShare": 0.003,
+    "towns": [
+      {
+        "name": "Brackwater",
+        "kind": "town",
+        "hub": true,
+        "at": [
+          1136,
+          870
+        ],
+        "radius": 90,
+        "movedFrom": null,
+        "culture": "halfling",
+        "plots": 20,
+        "streets": 54,
+        "links": 1,
+        "overlaps": 0,
+        "highStreets": 1,
+        "w6": {
+          "plotsBefore": 21,
+          "plots": 20,
+          "kept": 20,
+          "removed": [
+            {
+              "plot": 9,
+              "want": "house",
+              "office": false
+            }
+          ]
+        }
+      },
+      {
+        "name": "Eelwick",
+        "kind": "hamlet",
+        "hub": false,
+        "at": [
+          1164,
+          427
+        ],
+        "radius": 40,
+        "movedFrom": null,
+        "culture": "halfling",
+        "plots": 9,
+        "streets": 24,
+        "links": 0,
+        "overlaps": 0,
+        "highStreets": 0,
+        "w6": {
+          "plotsBefore": 9,
+          "plots": 9,
+          "kept": 9,
+          "removed": []
+        }
+      }
+    ],
+    "roads": 1,
     "bridges": 0,
-    "scatter": 5273,
+    "paths": 11,
+    "pathMetres": 1586,
+    "scatter": 11885,
     "scatterKinds": {
-      "rock_small": 987,
-      "bush": 2912,
-      "tree_broadleaf": 1374
+      "bush": 5358,
+      "rock_small": 1838,
+      "tree_broadleaf": 2215,
+      "rock_large": 299,
+      "reed": 1214,
+      "tree_dead": 103,
+      "tree_conifer": 5,
+      "hedge": 816,
+      "tree_fruit": 37
     },
     "sites": [
-      "dungeon door_1 Barrow entrance 946 1186  -2.398",
-      "event event_brackwater  1024 1024 40"
+      "settlement(HUB) town Brackwater 1136 870 90",
+      "settlement hamlet Eelwick 1164 427 40",
+      "dungeon door_1 Barrow entrance 1061 1066  -3.247",
+      "event event_brackwater  1026 981 40"
     ],
     "spawn": {
-      "x": 1024,
-      "z": 1024
+      "x": 1136,
+      "z": 878
     },
-    "placements": 2,
-    "vignettesAvoided": 0
+    "placements": 195,
+    "vignettesAvoided": 654
   },
   "files": {
-    "terrain.bin": 6305426,
-    "nav.bin": 1050717,
-    "scatter.bin": 42268,
-    "placements.json": 944
+    "terrain.bin": 479030,
+    "nav.bin": 13866,
+    "scatter.bin": 95164,
+    "placements.json": 132918
   }
 }

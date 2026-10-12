@@ -41,7 +41,8 @@
     { "name": "The Roost", "at": 0.45, "say": "The Gallowmother flaps up to her roost. Her owlets answer!",
       "shieldWhileAdds": true, "shieldDown": "The last owlet falls — the Gallowmother drops from her perch, furious!",
       "abilities": ["owlet_swoop", "hoot"],
-      "onEnter": [ { "shield": true }, { "adds": { "type": "gallows_owl", "count": 3, "radius": 7 } } ] },
+      "ward": {"seconds": 15, "pool": 0.08, "break": "adds", "need": 3, "what": "gallows_owl", "say": "Kill the three gallows owls to break the ward. It fails by itself in 15 seconds.", "fade": "The ward fails by itself. No opening this time."},
+      "onEnter": [ { "shield": { "seconds": 15, "pool": 0.08 } }, { "say": "Kill the three gallows owls to break the ward. It fails by itself in 15 seconds.", "style": "warn", "ward": true }, { "adds": { "type": "gallows_owl", "count": 3, "radius": 7 } } ] },
     { "name": "Grounded", "at": 0.3, "say": "Feathers everywhere. She will not fly again.", "abilities": ["talons", "dive", "feather_storm", "hoot"],
       "onEnter": [ { "modifier": { "id": "grounded_fury", "dmg": 1.2, "exact": true } } ] }
   ]

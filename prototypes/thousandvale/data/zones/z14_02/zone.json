@@ -1,5 +1,5 @@
 {
-  "name": "Tideford (z14_02)",
+  "name": "Gullwick (z14_02)",
   "zone": "z14_02",
   "sheet": {
     "sheet": "torbor_downs",
@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 2,
-  "inputHash": "3b6a7e1e",
+  "bakeVersion": 4,
+  "inputHash": "b8a99ae8",
   "waterKinds": [
     "none",
     "sea",
@@ -33,7 +33,7 @@
       "height": 224,
       "method": "pangea",
       "seaLevel": 0.2,
-      "inputHash": "9803699e"
+      "inputHash": "9805a835"
     },
     "zone": {
       "zx": 14,
@@ -71,9 +71,10 @@
     {
       "type": "settlement",
       "kind": "town",
-      "name": "Tideford",
+      "name": "Gullwick",
       "x": 1520,
       "z": 352,
+      "wfName": "Tideford",
       "hub": true,
       "radius": 90,
       "movedFrom": {
@@ -84,9 +85,10 @@
     {
       "type": "settlement",
       "kind": "village",
-      "name": "Glimrow",
+      "name": "Ferry Hythe",
       "x": 416,
       "z": 560,
+      "wfName": "Glimrow",
       "radius": 65,
       "movedFrom": {
         "x": 448,
@@ -128,8 +130,12 @@
       "type": "crossing",
       "kind": "ford",
       "name": "Wihot Ford",
-      "x": 1472,
-      "z": 448
+      "x": 1465,
+      "z": 464,
+      "snappedFrom": {
+        "x": 1472,
+        "z": 448
+      }
     },
     {
       "type": "dungeon",
@@ -137,30 +143,70 @@
       "name": "Barrow entrance",
       "x": 1623,
       "z": 475,
-      "yaw": -2.777
+      "yaw": -2.777,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_gullwick",
       "x": 1272,
       "z": 688,
-      "r": 40
+      "r": 40,
+      "pinned": true
     }
   ],
   "spawn": {
     "x": 1512,
     "z": 352
   },
+  "bridges": [
+    {
+      "a": [
+        467.78,
+        839.55
+      ],
+      "b": [
+        454.21,
+        808.55
+      ],
+      "h": 41.11,
+      "w": 6.24
+    },
+    {
+      "a": [
+        1021.3,
+        1026.7
+      ],
+      "b": [
+        1043.52,
+        1002.83
+      ],
+      "h": 41.11,
+      "w": 5.57
+    },
+    {
+      "a": [
+        1441.5,
+        448
+      ],
+      "b": [
+        1459.5,
+        448
+      ],
+      "h": 40.34,
+      "w": 4.5
+    }
+  ],
   "summary": {
     "zone": "z14_02",
     "province": "Petbeck Basin",
-    "inputHash": "3b6a7e1e",
+    "inputHash": "b8a99ae8",
     "rivers": 5,
     "wetShare": 0.023,
-    "unwalkableShare": 0.018,
+    "unwalkableShare": 0.013,
     "towns": [
       {
-        "name": "Tideford",
+        "name": "Gullwick",
         "kind": "town",
         "hub": true,
         "at": [
@@ -173,13 +219,26 @@
           "z": 448
         },
         "culture": "halfling",
-        "plots": 25,
-        "streets": 72,
+        "plots": 24,
+        "streets": 69,
         "links": 3,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 3,
+        "w6": {
+          "plotsBefore": 25,
+          "plots": 24,
+          "kept": 24,
+          "removed": [
+            {
+              "plot": 1,
+              "want": "house",
+              "office": false
+            }
+          ]
+        }
       },
       {
-        "name": "Glimrow",
+        "name": "Ferry Hythe",
         "kind": "village",
         "hub": false,
         "at": [
@@ -194,8 +253,15 @@
         "culture": "halfling",
         "plots": 14,
         "streets": 48,
-        "links": 0,
-        "overlaps": 0
+        "links": 1,
+        "overlaps": 0,
+        "highStreets": 1,
+        "w6": {
+          "plotsBefore": 14,
+          "plots": 14,
+          "kept": 14,
+          "removed": []
+        }
       },
       {
         "name": "Wyrmrow",
@@ -211,10 +277,28 @@
           "z": 1856
         },
         "culture": "halfling",
-        "plots": 16,
-        "streets": 46,
+        "plots": 14,
+        "streets": 43,
         "links": 2,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 2,
+        "w6": {
+          "plotsBefore": 16,
+          "plots": 14,
+          "kept": 14,
+          "removed": [
+            {
+              "plot": 1,
+              "want": "house",
+              "office": false
+            },
+            {
+              "plot": 2,
+              "want": "house",
+              "office": false
+            }
+          ]
+        }
       },
       {
         "name": "Mirekeep",
@@ -231,31 +315,41 @@
         },
         "culture": "halfling",
         "plots": 9,
-        "streets": 21,
+        "streets": 20,
         "links": 1,
-        "overlaps": 0
+        "overlaps": 0,
+        "highStreets": 1,
+        "w6": {
+          "plotsBefore": 9,
+          "plots": 9,
+          "kept": 9,
+          "removed": []
+        }
       }
     ],
-    "roads": 11,
+    "roads": 12,
     "bridges": 3,
-    "scatter": 20012,
+    "paths": 10,
+    "pathMetres": 643,
+    "scatter": 22295,
     "scatterKinds": {
-      "bush": 4513,
-      "tree_conifer": 1493,
-      "rock_small": 924,
-      "tree_broadleaf": 9453,
-      "rock_large": 189,
-      "reed": 3205,
-      "tree_dead": 234,
-      "boulder": 1
+      "rock_small": 1373,
+      "tree_broadleaf": 9627,
+      "bush": 5643,
+      "tree_conifer": 1405,
+      "rock_large": 329,
+      "tree_dead": 231,
+      "reed": 3140,
+      "boulder": 1,
+      "hedge": 546
     },
     "sites": [
-      "settlement(HUB) town Tideford 1520 352 90",
-      "settlement village Glimrow 416 560 65",
+      "settlement(HUB) town Gullwick 1520 352 90",
+      "settlement village Ferry Hythe 416 560 65",
       "settlement village Wyrmrow 848 1872 65",
       "settlement hamlet Mirekeep 1008 1264 46",
       "landmark ancientwood Old Docktockwood 1984 1088",
-      "crossing ford Wihot Ford 1472 448",
+      "crossing ford Wihot Ford 1465 464",
       "dungeon door_1 Barrow entrance 1623 475  -2.777",
       "event event_gullwick  1272 688 40"
     ],
@@ -263,13 +357,13 @@
       "x": 1512,
       "z": 352
     },
-    "placements": 278,
-    "vignettesAvoided": 0
+    "placements": 344,
+    "vignettesAvoided": 660
   },
   "files": {
-    "terrain.bin": 6306218,
-    "nav.bin": 1050717,
-    "scatter.bin": 160180,
-    "placements.json": 106816
+    "terrain.bin": 508794,
+    "nav.bin": 38248,
+    "scatter.bin": 178444,
+    "placements.json": 204563
   }
 }

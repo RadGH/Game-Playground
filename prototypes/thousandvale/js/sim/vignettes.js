@@ -15,7 +15,13 @@
 // local +z axis points along (sin yaw, cos yaw)) and moved to the placement's (x, z). vignettePoint() is
 // the one formula; the client must use the same.
 
+/** Footprint radius (m) of a vignette prop, for keeping monsters out of it. */
+export const PROP_R = { default: 1.3, well: 1.6, ruined_wall: 2.2, wall: 2.2, cart: 2, wagon: 2.4, tent: 2.4, hut: 3, shack: 3, barrel: 0.9, crate: 0.9 };
+
 export function vignettePoint(pl, lx, lz) {
+  // a set piece BOUND onto one of stream B's ground pieces is shrunk to fit it (E: `scale` 0.4-1, play-test 2 Q18)
+  const k = pl.scale > 0 ? pl.scale : 1;
+  lx *= k; lz *= k;
   const c = Math.cos(pl.yaw || 0), s = Math.sin(pl.yaw || 0);
   return { x: pl.x + lx * c + lz * s, z: pl.z - lx * s + lz * c };
 }
@@ -24,10 +30,10 @@ export function vignetteContent(placements, recipes, { band = [1, 6], respawnMs 
   const byId = new Map(recipes.map(r => [r.id, r]));
   const camps = [], objects = [];
   for (const pl of placements || []) {
-    const v = byId.get(pl.id);
+    const v = byId.get(pl.recipe || pl.id);      // a curio names its recipe (data/vignettes/curios.json)
     if (!v) continue;
     const key = 'vig:' + pl.id;
-    objects.push({ type: 'vignette', name: v.name, x: pl.x, z: pl.z, key, r: v.radius || pl.radius || 10, lore: v.lore || null });
+    objects.push({ type: 'vignette', name: v.name, x: pl.x, z: pl.z, key, r: (v.radius || pl.radius || 10) * (pl.scale > 0 && !pl.radius ? pl.scale : 1), lore: v.lore || null });
     (v.objects || []).forEach((o, i) => {
       const p = vignettePoint(pl, o.x || 0, o.z || 0);
       const okey = `${key}:${i}`;
@@ -36,12 +42,16 @@ export function vignetteContent(placements, recipes, { band = [1, 6], respawnMs 
       else if (o.type === 'chest') {
         const after = o.after ? (v.objects || []).findIndex(x => x.name === o.after) : -1;
         objects.push({ type: 'chest', name: o.name, x: p.x, z: p.z, key: okey, hidden: !!o.hidden, hint: o.hint || null,
-          chest: { key: okey, tier: o.tier || 'common', level: band[0] + (pl.level || 1), after: after >= 0 ? `${key}:${after}` : null, afterName: o.after || null } });
+          chest: { key: okey, tier: o.tier || 'common', level: (pl.levelBase ?? band[0]) + (pl.level || 1), after: after >= 0 ? `${key}:${after}` : null, afterName: o.after || null } });
       } else if (o.type === 'use') objects.push({ type: 'use', name: o.name, x: p.x, z: p.z, key: okey, use: { text: o.text || '', gives: o.gives || null, cost: o.cost || null, buff: o.buff || null } });
     });
+    // props a monster must not stand inside (P28: slimes spawned in the pump house's well and barrel — half
+    // buried in a model, unclickable behind it). Ground decals (kind 'ground') are walked on.
+    const avoid = (v.props || []).filter(q => q.kind !== 'ground').map(q => ({ ...vignettePoint(pl, q.x || 0, q.z || 0), r: PROP_R[q.id] || PROP_R.default }));
     for (const m of v.monsters || []) {
       const p = vignettePoint(pl, m.x || 0, m.z || 0);
-      camps.push({ type: m.type, level: band[0] + (m.level || 0), x: p.x, z: p.z, count: m.count || 1, radius: m.radius || 5, respawnMs, vignette: pl.id });
+      // P26: the level of the SPOT (E's ramp from the capital: levelBase, capped at levelCap) and countCap near the start
+      camps.push({ type: m.type, level: Math.max(1, Math.min(pl.levelCap ?? 99, (pl.levelBase ?? band[0]) + (m.level || 0))), x: p.x, z: p.z, count: Math.min(m.count || 1, pl.countCap ?? 99), radius: (m.radius || 5) * (pl.scale > 0 ? pl.scale : 1), respawnMs, vignette: pl.id, ...(avoid.length ? { avoid } : {}) });
     }
   }
   return { camps, objects };

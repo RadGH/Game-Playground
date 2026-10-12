@@ -605,7 +605,7 @@
     }
   },
   "wantBases": {
-    "note": "A trade building leans toward a shape that suits it, but only from what its culture already builds \u2014 so an inn in a dwarf hold is a dwarf building with a sign on it, not a human one.",
+    "note": "A trade building leans toward a shape that suits it, but only from what its culture already builds — so an inn in a dwarf hold is a dwarf building with a sign on it, not a human one.",
     "hall": [
       "hall",
       "crosswing",
@@ -690,6 +690,92 @@
       "hide_tent",
       "burrow"
     ],
+    "shop": [
+      "jettied",
+      "row",
+      "ell",
+      "square",
+      "long",
+      "bazaar_block",
+      "stacked",
+      "bower"
+    ],
+    "temple": [
+      "hall",
+      "spire",
+      "crosswing",
+      "round",
+      "canopy",
+      "tomb_row",
+      "long"
+    ],
+    "barber": [
+      "row",
+      "ell",
+      "hovel",
+      "square",
+      "bower",
+      "stacked"
+    ],
+    "counting_house": [
+      "tower_house",
+      "square",
+      "stacked",
+      "ell",
+      "blockhouse",
+      "courtyard"
+    ],
+    "study": [
+      "tower_house",
+      "spire",
+      "round",
+      "stilted",
+      "burrow",
+      "square"
+    ],
+    "armoury": [
+      "blockhouse",
+      "long",
+      "war_hall",
+      "delve",
+      "square"
+    ],
+    "bowyer": [
+      "long",
+      "row",
+      "ell",
+      "bower",
+      "hovel"
+    ],
+    "tailor": [
+      "jettied",
+      "row",
+      "ell",
+      "stacked",
+      "bower"
+    ],
+    "apothecary": [
+      "round",
+      "ell",
+      "row",
+      "stilted",
+      "burrow",
+      "tower_house"
+    ],
+    "provisioner": [
+      "long",
+      "square",
+      "row",
+      "ell",
+      "courtyard"
+    ],
+    "jeweller": [
+      "tower_house",
+      "stacked",
+      "jettied",
+      "square",
+      "courtyard"
+    ],
     "house": [],
     "hut": []
   },
@@ -714,7 +800,18 @@
       "watchpost": 0.4,
       "shrine": 0.6,
       "house": 0.4,
-      "hut": 0.2
+      "hut": 0.2,
+      "shop": 0.62,
+      "temple": 0.85,
+      "barber": 0.5,
+      "counting_house": 0.8,
+      "study": 0.7,
+      "armoury": 0.62,
+      "bowyer": 0.5,
+      "tailor": 0.55,
+      "apothecary": 0.55,
+      "provisioner": 0.5,
+      "jeweller": 0.8
     },
     "jitter": 0.18
   }

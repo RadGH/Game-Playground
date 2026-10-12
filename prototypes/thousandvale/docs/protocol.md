@@ -1,6 +1,6 @@
 # Thousandvale — network protocol and room interface (stream A)
 
-**Status:** v2 for M1.5 (rooms, parties, loot, encounter events, journal, trade, human check), 2026-10-04 (v1 = M0). Owner: stream A (`js/net/**` ★, `js/sim/**`, `server/**`).
+**Status:** v4 for M3 (claimed accounts, chat channels, friends, guilds, mail, the Callboard, reports — §16), 2026-10-05. v3 for M2 (provinces, waystones, the realm event, open groups, traces, day/night, NPC schedules, gateway + province processes), 2026-10-04 (v2 = M1/M1.5: rooms, parties, loot, encounter events, journal, trade, human check; v1 = M0). Owner: stream A (`js/net/**` ★, `js/sim/**`, `server/**`).
 The machine-readable copy of every table on this page is `js/net/protocol.js`; if this page and that file
 disagree, the file wins and this page is a bug. Changes go through stream A (`docs/requests.md`).
 
@@ -16,7 +16,7 @@ Readers:
 
 | Constant | Value | Where |
 |---|---|---|
-| `PROTOCOL_VERSION` | `2` | `js/net/protocol.js`. Bumped on any wire change. A client with another value is refused with `refuse {code:'version'}` → the client shows "A new version is out — reload". |
+| `PROTOCOL_VERSION` | `8` | `js/net/protocol.js`. Bumped on any wire change. A client with another value is refused with `refuse {code:'version'}` → the client shows "A new version is out — reload". |
 | `BUILD` | string | The server's build id (dev: `dev`; published copies: the git hash). A client whose `build` differs is refused with `code:'build'` → "reload". The client is always served by the same server as its socket (PLAN §10.1). |
 | `SNAP_VERSION` | `1` | First byte after the type byte of every binary snapshot. |
 | `TICK_MS` | `50` | Simulation 20 Hz (PLAN §8.3). |
@@ -103,8 +103,8 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `create` | gw | `name:str:24, cls:str:32, look?:obj` | 1 / 3 | New character (`cls` = a Farhold class id; `look` = Chibi 2 avatar JSON, ≤ 4 KB). Names: 2–16 letters/spaces/'-, unique per realm, banned-name filter. |
 | `play` | gw | `char:int, join?:str:8` | 1 / 3 | Ask for a ticket. `join` = a party code from a "join my party" link: you join that party and appear next to its leader (§11). A bad code answers `err {code:'noCode'}` and you enter normally. |
 | `party` | gw | `op:str:8, name?:str:24, code?:str:8, char?:int` | 2 / 10 | Party op (§11): `invite {name}`, `accept {char: partyId}`, `decline {char: partyId}`, `join {code}`, `code` (make a party if you have none; the answer `partyState` carries the code), `leave`, `kick {char}`, `lead {char}`. |
-| `chat` | gw | `ch:str:8, text:str:200` | 1 / 5 | Channel chat. M1: `ch:'party'`. Later `zone`, `guild`, … |
-| `ignore` | gw | `name:str:24, on:bool` | 1 / 5 | Ignore (on) / unignore (off) an online character by name; you stop seeing their say and party chat. Answer: `ignored`. Saved. |
+| `chat` | gw | `ch:str:8, text:str:200, to?:str:24` | 1 / 5 | Channel chat (§16.2): `party`, `guild`, `zone`, `trade`, `world`, or `w` = a whisper to the character named `to`. `zone`/`trade`/`world` and whispers to strangers need a claimed account at level 5+. |
+| `ignore` | gw | `name:str:24, on:bool` | 1 / 5 | Ignore (on) / unignore (off) a character by name (online or not, v4); you stop seeing them on every channel, and their whispers, guild invites and mail are refused. Answer: `ignored`. Saved, up to 100. |
 | `ping` | both | `c:num` | 2 / 4 | Clock sync, every 2 s. |
 | `enter` | p | `ticket:str:256` | 1 / 3 | Join the world. |
 | `in` | p | `s:int, dt:num, mx:num, mz:num, yaw:num, b:int` | 40 / 60 | One movement input. `s` = sequence (client counts up from 1), `dt` = ms of movement this input covers (0–100, clamped), `mx,mz` = world-space move direction, length ≤ 1 (longer is normalised), `yaw` = facing in radians, `b` = button bits (`IN_SPRINT` 1, `IN_JUMP` 2). Send one per client sim step (20 Hz). |
@@ -113,31 +113,67 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `say` | p | `text:str:200` | 1 / 5 | Say chat, heard within 40 m. |
 | `respawn` | p | — | 1 / 2 | Get up after dying: in the wilds or town you wake in the town (a `joined` handoff, `via:'respawn'`); in a dungeon, at its entrance. |
 | `use` | p | `id:id` | 4 / 8 | Use an object within 4 m: a portal/door (dungeon entrance), stairs, an exit, a chest. Answer `used {id, ok, why?, kind?}`; a move arrives as a `joined` handoff. |
-| `item` | p | `op:str:8, uid:str:40, slot?:str:16` | 5 / 10 | `equip {uid, slot?}` (slot defaults to the item's own), `unequip {uid, slot?}`, `destroy {uid}`. The uid must be in YOUR bag (or worn, for unequip). Answers `bag` + `equip`, or `err {code:'item'|'bagFull'}`. |
+| `item` | p | `op:str:8, uid:str:40, slot?:str:16` | 5 / 10 | `equip {uid, slot?}` (slot defaults to the item's own), `unequip {uid, slot?}`, `destroy {uid}`, `use {uid | 'id:<item id>'}` (potions + food, §18.10 -> `itemR`). The uid must be in YOUR bag (or worn, for unequip). Answers `bag` + `equip`, or `err {code:'item'|'bagFull'}`. |
 | `travel` | p | `to:str:48` | 1 / 3 | Travel: a waystone `key` you have discovered (stand at any waystone; a gold fare by distance; not in combat or a dungeon), or `'event'` = free travel to the live realm event (§16). Answer `travelR`; the move is a `joined` handoff (or a `relocate` to another process). |
 | `trace` | p | `kind:str:16` | 1 / 2 | Leave a trace: `campfire` (10 min, one per player, wilds only). Graves appear by themselves where a player dies (1 h). |
+| `quest` | p | `op:str:8, id:str:120, npc?:id` | 2 / 6 | Quests and jobs (§15.9): `accept {id, npc}` / `turnin {id, npc}` standing within 6 m of the giver (`npc` = its entity id), `abandon {id}`. Answer `questR`; the log comes as `quests`. |
 | `trade` | p | `op:str:8, id?:int, items?:uids, gold?:int` | 5 / 10 | The trade window (§13): `ask {id: entity}` (within 10 m) → they get `tradeAsk`; `accept {id: trade}`; `offer {id, items:[≤12 uids], gold}` (unlocks both); `lock {id}`; `confirm {id}` (both locked); `cancel`. Both confirmed → one all-or-nothing store write; `tradeState` throughout, `trade:null` + `done` at the end. |
 | `leave` | both | — | 1 / 2 | Log out cleanly (save now). |
+| `account` | gw | `op:str:8, user?:str:24, pass?:str:128, old?:str:128, email?:str:120, code?:str:16, human?:str:2048` | 0.5 / 4 | Accounts (§16.1): `claim {user, pass, email?, human?}`, `login {user, pass}` (instead of `guest`/`auth`), `logout`, `password {old, pass}`, `resetAsk {user}`, `reset {user, code, pass}`, `info`. Answer `accountR` (a good `login` answers `authed`). |
+| `friend` | gw | `op:str:8, name?:str:24, char?:int` | 1 / 5 | Friends (§16.3): `add {name}` (online or not), `remove {name}`, `list`. Answer `friends`. |
+| `guild` | gw | `op:str:8, name?:str:24, char?:int, id?:int, text?:str:200` | 1 / 5 | Guilds (§16.4): `create {name}`, `invite {name}`, `accept {id}`, `decline {id}`, `leave`, `kick {char}`, `promote {char}`, `demote {char}`, `lead {char}`, `motd {text}`, `roster`, `disband`. Answers `guildR` + `guildState`. |
+| `callboard` | gw | `op:str:8, dungeon?:str:64, role?:str:8, id?:int` | 1 / 5 | The Callboard (§16.6): `list`, `join {dungeon: key \| 'any', role: 'tank'\|'healer'\|'dps'}`, `leave`, `accept {id}`, `decline {id}`. Answers `callboard {state}`. |
+| `report` | gw | `name:str:24, why:str:16, text?:str:200` | 0.1 / 3 | Report a player (`why`: spam, abuse, cheat, name, other). Answer `reportR`. |
+| `mail` | p | `op:str:8, id?:int, to?:str:24, subject?:str:60, body?:str:500, items?:uids, gold?:int` | 2 / 8 | Mail (§16.5): `list`, `read {id}`, `send {to, subject, body, items, gold}`, `take {id}`, `return {id}`, `delete {id}`. Answers `mailR`, `mailList`, `mailOpen`. |
+| `talent` | p | `op:str:8, skill?:str:48, tier?:int, node?:str:48` | 3 / 10 | Talents (§17.2): `pick {skill, tier, node}`, `clear {skill}`. Answer `talentR`; the bar comes as `you {bar}`, the build as `you {talents, perks, perkPoints}`. |
+| `perk` | p | `op:str:8, id?:str:64` | 3 / 10 | The perk forest (§17.2): `take {id}`, `refund {id}`, `reset`. Answer `perkR`. |
+| `map` | p | `op:str:8` | 1 / 3 | The world map (§17.3): `get` -> `mapData`. |
+| `loot` | p | `op:str:8, id?:id, uid?:str:40, roll?:int, choice?:str:8` | 8 / 16 | Corpse loot (§18.1): `open {id}`, `take {id, uid}` (uid `'gold'` = the gold), `all {id}`, `close {id}`; party roll `roll {roll, choice: need\|greed\|skip}`. |
+| `shop` | p | `op:str:8, npc:id, id?:str:48, uid?:str:40` | 4 / 10 | Shops (§18.2): `open`, `buy {id}` (a stock row), `sell {uid}`, `back {uid}` (buy back). Answer `shopView` / `shopR`. |
+| `mount` | p | `op:str:8, id?:str:32` | 1 / 3 | Mounts (§18.3): `summon {id?}` (default: your fastest), `off`. Answer `mountR` + `you {mount, speedMul}`. |
+| `barber` | p | `npc:id, look:obj` | 0.5 / 3 | A new look at a barber (§18.4), costs `BARBER_COST` gold. Answer `lookR`. |
+| `pref` | p | `k:str:16, v:bool` | 2 / 6 | Display prefs everyone sees (§18.5): `showGear`, `showHelm`. Answer `you {prefs}`. |
+| `follow` | p | `id:id` | 2 / 4 | May I follow this one? (§18.6) Answer `followR`. Following is client movement. |
+| `inspect` | p | `id:id` | 2 / 6 | What another player wears (§18.6, D-UI's right-click menu). Answer `inspectR`. |
+| `bind` | p | `npc:id` | 1 / 3 | An innkeeper in a town: make this town home (§18.11). Answer `bindR`. |
+| `settings` | gw | `op:str:8, data?:obj` | 1 / 4 | Account settings (§18.7): `get`, `set {data:{tradeFriendsOnly}}`. Answer `settings {data}`. |
+| `look` | gw | `char:int, look:obj` | 0.5 / 3 | Title screen "Customize Appearance" (§18.4): a look for a character not in the world. Answer `lookR`. |
+| `kits` | gw | `cls:str:32` | 10 / 40 | Play-test 5 (§21.2): the starter kits of a class (stream C's `kitsFor`). Answer `kitsR`. `create` gains `kit?:obj` = `{armour, weapons}` ids. |
+| `revive` | p | `op:str:8, id?:int` | 2 / 4 | §21.3: answer a `reviveAsk` — `accept` or `decline`. Answer `reviveR`. |
+| `sheet` | p | — | 2 / 4 | §21.6: ask for the character sheet again. Answer `sheet`. |
+| `feedback` | both | `kind:str:16, text:str:2000, ctx?:obj` | 0.2 / 5 | §21.7: a suggestion or a bug report (`ctx` = the client's own context). Answer `feedbackR`. |
+| `admin` | both | `op:str:16, id?:int, state?:str:16, kind?:str:16, limit?:int, before?:int, note?:str:500` | 2 / 10 | §21.9: admin accounts only — `reports` (list) / `report` (set a state). Answers `adminReports`, `adminR`. |
+| `emote` | p | `id:str:16` | 0.7 / 3 | §26: wave / sit / dance / cheer / bow / point. Answers `emoteR`; those in view get the event `emote`. |
+| `track` | gw | `char:int, off?:bool` | 2 / 8 | §26: follow where a party member / mutual friend is. Answers `trackR`, then `whereabouts` at 1 Hz. |
+| `delete` | gw | `char:int, name:str:24` | 0.5 / 3 | §25.1: delete a character (the typed name confirms it). Answers `deleted`, then `charList`. |
+| `feedbackMine` | both | `limit?:int, before?:int` | 1 / 5 | §24.1: my own reports (`feedback {op:'mine'}` is the same call). Answer `feedbackMine`. |
+| `cart` | p | `op:str:8, id:id, to?:str:48, token?:bool` | 2 / 4 | §24.5: ox-cart travel — `list` / `go`. Answers `cartList`, `cartR`, `cartRide`. |
+| `meter` | p | `on:bool` | 1 / 4 | §24.6: the damage meter's hit feed on / off. Answers `meterR`, then `hits`. |
+| `fish` | p | `op:str:8, aim?:vec2, held?:num, score?:num, holds?:nums` | 4 / 8 | §21.10 angling: `cast`, `hook`, `land`, `stop`. Answers `fishR`, `fishBite`, `fishTug`, `fishCatch`. |
+| `cook` | p | `op?:str:8, id?:str:64, n?:int` | 2 / 6 | §21.10: no `id` = list (`cookList`), with `id` = cook it at a fire (`cookR`). |
+| `prof` | p | `op:str:8, id:str:16, npc:id` | 2 / 6 | §25 professions: `learn` a profession from the trainer `npc`, or buy its basic `tool` again. Answers `profR`. |
+| `gather` | p | `op:str:8, id?:id, inputs?:nums` | 4 / 8 | §25: `start` (a node or a skinnable corpse; no `id` = the nearest node in reach), `done` (the mini-game's raw inputs), `stop`. Answers `gatherR`, `gatherDone`. |
+| `craft` | p | `op?:str:8, id?:str:48, npc?:id, base?:str:48, n?:int, uid?:str:40, index?:int, element?:str:16, inputs?:nums` | 4 / 10 | §25: `list`, `start`, `done`, `stop`, `quote` (tempering). Answers `craftList`, `craftR`, `craftDone`, `craftQuote`. |
 
 ### 3.2 Server → client
 
 | `t` | Fields | Meaning |
 |---|---|---|
-| `welcome` | `v, build, server, tickMs, time, human?:{provider:'turnstile', siteKey}` | Handshake OK. With `human`, show the Turnstile widget (that site key) and send its token in `guest {human}`. |
+| `welcome` | `v, build, server, tickMs, time, clock:{epoch, dayMs, now}, human?:{provider:'turnstile', siteKey}` | Handshake OK. `clock` = the realm day/night clock (§15.6). With `human`, show the Turnstile widget (that site key) and send its token in `guest {human}`. |
 | `refuse` | `code, msg` | Handshake refused (`version`, `build`, `full`, `banned`); socket closes. |
 | `authed` | `account:int, token?:str, claimed:bool` | `token` only on `guest` (store it). |
 | `charList` | `chars:[{id, name, cls, level, room}]` | |
 | `created` | `char:{id, name, cls, level, room}` | |
 | `ticket` | `path, ticket, room` | Open `path` and send `enter {ticket}`. |
 | `pong` | `c, s, k` | `c` echoed, `s` = server room clock ms, `k` = tick. |
-| `joined` | `room:{id, name, kind, size, q, origin:{x,z}, terrain, spawn:{x,z}, area?, town?, dungeon?}, you:{id, char, name, cls, level, xp, xpNext, gold, x, y, z, yaw, hp, hpMax, mp, mpMax, bag, equipment, ignore, opened}, tickMs, tick, time, handoff?:{from, via}` | In the world — and again on every room change (`handoff` set; same socket; clear the entity mirror, keep the ground mesh when `terrain` is unchanged; §10). `kind`: `town` / `wilds` / `instance`. `area` (town) and `town` (wilds) = the town circle `{x, z, r, name}`. `dungeon` = the layout to draw (§10.3). `opened` = chest keys this character already emptied. `you.id` = my local entity id. `q` = metres per snapshot position unit (§4). `terrain` = the zone key for `data/zones/<terrain>/terrain.bin` (stream B), or `null` for the stand-in field (`js/sim/terrain.js` `standInTerrain(seed)`). |
+| `joined` | `room:{id, name, kind, size, q, origin:{x,z}, terrain, spawn:{x,z}, area?, town?, dungeon?}, you:{id, char, name, cls, level, xp, xpNext, gold, x, y, z, yaw, hp, hpMax, mp, mpMax, bag, equipment, ignore, opened}, tickMs, tick, time, handoff?:{from, via}` | In the world — and again on every room change (`handoff` set; same socket; clear the entity mirror, keep the ground mesh when `terrain` is unchanged; §10). `kind`: `town` / `wilds` / `instance`. `area` (town) and `town` (wilds) = the town circle `{x, z, r, name}`. `dungeon` = the layout to draw (§10.3). `opened` = chest keys this character already emptied. `you.id` = my local entity id. `q` = metres per snapshot position unit (§4). `terrain` = the zone key for `data/zones/<terrain>/terrain.bin` (stream B), or `null` for the stand-in field (`js/sim/terrain.js` `standInTerrain(seed)`) — **or `null` with `room.zones` set: a whole province (§15.1), draw each zone's bake at its world offset**. v3 adds `room.province, zones, towns, waystones, horizon, clock` and `you.waystones`, plus `event` (the live realm event, if any) — §15. `you.bar` = the skill bar (§15.10; absent under the stand-in rules). |
 | `info` | `ents:[{id, kind, name, level, hpMax, team, cls?, look?, type?}]` | Descriptions for ids that are about to appear (sent before the first snapshot that mentions them) or whose description changed (level-up, gear look). `kind`: `player`/`monster`/`npc`/`object`. Players carry `cls` + `look`; monsters carry `type` (monster type id, e.g. `wolf`). |
 | `ev` | `k:int, e:[event…]` | This tick's events near me (§6). |
-| `you` | any subset of `joined.you` | My own sheet changed (xp, level, gold, maxima). |
+| `you` | any subset of `joined.you` | My own sheet changed (xp, level, gold, maxima). `you.bar` comes again after a level-up, a form/stance change or a talent pick (§15.10). |
 | `chat` | `ch, from, name, text` | `ch`: `say` (province socket; `from` = local entity id) or `party` (gateway socket; `from` = char id). |
 | `castR` | `slot, ok:false, why, text?` | A cast was refused: `cooldown`, `range`, `mana`, `dead`, `target`, `unknown`; `text` = the rules' sentence to show ("Slot 6 opens at level 18"). |
 | `targetR` | `id, ok:false, why` | A `target` was refused (`target`: gone or not targetable; `range`). |
-| `used` | `id, ok, why?, msg?, kind?` | Answer to `use` (`why`: `far`, `unknown`, `opened`, `dead`). |
+| `used` | `id, ok, why?, msg?, kind?, offers?, ready?` | Answer to `use` (`why`: `far`, `unknown`, `opened`, `dead`, `locked`, `gold`). Using an NPC or a vignette object also carries `offers` (quest views it gives you, same shape as `quests.active`) and `ready` (quest ids you can turn in here). Kinds and extras: `npc {says, role}`, `note {text}`, `use {text, buff}`, `waystone {key, name, fresh, known}`, `clue {text, chain, chainName, step, of, found, fresh, hint?}`, `cache {chain}`, `campfire`/`grave` {trace}. |
 | `bag` | `add:[item…], remove:[uid…], gold` | My bag changed (loot, chest, equip swap, destroy); `gold` = new total. |
 | `equip` | `slot, item\|null, equipment` | Worn gear changed; `equipment` = the whole worn set. |
 | `partyState` | `party:{id, leader, code, members:[{char, name, cls, level, online}]}\|null` | (gateway) My party changed; `null` = no party. `code` → the join link `?join=CODE`. |
@@ -146,14 +182,85 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `ignored` | `list:[{id, name}]` | (gateway) My ignore list. |
 | `relocate` | `path, ticket` | (game socket) You are moving to a province another process holds: open `path`, send `enter {ticket}`; the old socket closes. client.js does it (`joined` follows with `handoff.via:'relocate'`). |
 | `groupHint` | `key, with:[{char, name}]` | (gateway) You and others are fighting the same monster: "Group up?" — `party {op:'group', code: key}` (the first click makes the party, the rest join it). |
-| `realm` | `kind:'eventSoon'\|'eventStart'\|'eventEnd', ev:{id, uid, name, province, x, z, r, level, kind}, at?, won?` | (gateway, everyone) The realm event: announced ahead (`at` = wall ms it starts), started (free travel: `travel {to:'event'}`), ended. |
-| `eventFrame` | `uid, name, boss, hp, players` | (game socket, 1 Hz) You are in the realm event's arena: the temporary event group's frame (no invite needed). |
+| `realm` | `kind:'eventSoon'\|'eventStart'\|'eventEnd', ev:{id, uid, name, province, x, z, r, level, kind}, at?, won?, text?` | (gateway, everyone) The realm event: announced ahead (`at` = wall ms it starts; `eventSoon` comes again as a reminder at 5 and 1 min), started (free travel: `travel {to:'event'}`), ended. `text` = the announcement line to show (stream E's words). |
+| `eventFrame` | `uid, id, name, kind, x, z, r, phase, wave, waves, boss, hp, players` | (game socket, 1 Hz) You are near an event's arena (the realm event or your copy's zone event): the temporary event group's frame, no invite needed. `phase`: `warn`/`waves`/`boss`; `wave` of `waves`; `boss` = its entity id once it is up (0 before), `hp` 0..1; `players` = enrolled. |
+| `zoneEvent` | `kind:'soon'\|'start'\|'end', ev:{uid, id, name, kind, x, z, r, …}, text?, at?, won?` | (game socket) Your zone's own event (every copy runs its own, PLAN §5.2): announced to everyone in the zone (`soon` with `at` = wall ms it starts, or straight to `start`), and `end` (`won`). Walk within ~60 m of the arena to join. |
 | `zone` | `zone, name, band, deeds:{rares, bosses, elites, deaths, visitors}, heat:[[x, z, n]…]` | You walked into a zone: what happened here this hour, and where people walk (footprints). |
 | `travelR` | `ok, why?, msg?, cost?, to?` | Answer to `travel` (`why`: `undiscovered`, `far`, `gold`, `combat`, `instance`, `noEvent`, `dead`, `unknown`). |
+| `quests` | `active:[{id, name, level, zone, giver, text, done, group, step, steps:[{text, n, of, done}], ready, job, reward:{xp, gold, item}, story}], done:[ids]` | (game socket) My quest log, whole, whenever it changes (also in `joined.you.quests`). `ready` = every step done: take it back to the giver. `reward.xp` = share of a level. |
+| `questR` | `op, id, ok, why?, msg?, reward?:{xp, gold, items}, next?` | Answer to `quest` (`why`: `far`, `unknown`, `giver`, `locked`, `done`, `have`, `full`, `notDone`). `next` = the quest this one unlocks (story chain). |
 | `tradeAsk` | `trade, from, name` | Someone (entity `from`) wants to trade: answer `trade {op:'accept', id: trade}` or `cancel`. |
 | `tradeState` | `trade:{id, state, you:{char, name, id, items, gold, locked, confirmed}, them:{…}}\|null, done?, why?` | The trade window; `trade:null` = closed (`done:true` = it went through, else `why`: `cancelled`, `tradeFar`, `tradeFailed`, `bagFull`, `gone`). |
 | `err` | `code, msg` | Request failed (`auth`, `name`, `cls`, `full`, `ticket`, `state`, `party`, `partyFull`, `noCode`, `notFound`, `muted`, `item`, `bagFull`). `msg` is plain language. |
-| `kick` | `code, msg` | About to close: `elsewhere` (logged in from another tab), `abuse`, `restart`, `idle`. |
+| `kick` | `code, msg` | About to close: `elsewhere` (logged in from another tab), `abuse`, `restart`, `idle`, `banned`, `loggedOut` (v4). |
+| `accountR` | `op, ok, why?, msg?, username?, claimed?` | (gateway) Answer to `account` (§16.1). `why`: `user`, `pass`, `email`, `claimed`, `human`, `auth`, `tooManyLogins`, `claimFirst`, `state`. |
+| `friends` | `list:[{char, name, cls, level, online, zone}]` | (gateway) My whole friend list (on entering the world and after every change). |
+| `friendState` | `char, name, cls, level, online, zone` | (gateway) One friend came online, went offline, levelled or changed zone. |
+| `guildState` | `guild:{id, name, motd, ranks:[4 names], members:[{char, name, cls, level, rank, online, zone}]}\|null, joined?, left?, kicked?, disbanded?` | (gateway) My guild, whole, after any change; `null` = no guild. Rank 0 = leader … 3 = recruit. |
+| `guildInvite` | `guild, name, from, ms` | (gateway) An invitation (answer `guild {op:'accept'\|'decline', id: guild}` within `ms`). |
+| `guildR` | `op, ok, why?, msg?` | (gateway) Answer to a guild op. |
+| `callboard` | `state:'list'\|'queued'\|'pop'\|'ready'\|'formed'\|'left', …` | (gateway) The Callboard (§16.6). |
+| `reportR` | `ok, msg` | (gateway) The report was filed. |
+| `mailNew` | `unread` | (gateway) You have mail (on entering the world when there is unread mail, and when a letter arrives or comes back). |
+| `mailList` | `mail:[{id, from, fromChar, subject, kind, sentAt, expiresAt, read, taken, gold, items:[{uid, name, rarity, slot}]}], unread` | (game socket) Your letters, newest first (up to 50). |
+| `mailOpen` | `mail:{…as mailList…, body, items:[full items]}` | (game socket) One letter, read (it is now marked read). |
+| `mailR` | `op, ok, why?, msg?, id?, to?, cost?, items?, gold?` | (game socket) Answer to a mail op. `why`: `gate`, `town`, `busy`, `items`, `gold`, `item`, `trade`, `slow`, `notFound`, `self`, `ignored`, `failed`, `missing`, `empty`, `bagFull`, `holds`. |
+| `muted` | `until, by, msg` | (gateway) You were muted (or unmuted) until wall ms `until`; `by`: `admin` or `auto` (reports). |
+| `talentR` | `op, ok, why?, msg?, skill, picks?` | Answer to `talent` (`why`: `notReady` (the rules have no talents yet), `dead`, `combat`, or the rules' own). |
+| `perkR` | `op, ok, why?, msg?, id, perks?, left?` | Answer to `perk` (`why`: `notReady`, `dead`, `combat`, or the rules' own; `left` = perk points left). |
+| `mapData` | `province, name, bounds, zones, places, events, waystones, horizon` | (game socket) The map (§17.3): zones with name + level band, towns always, places you found, events now. |
+| `discover` | `zone?, places` | (game socket) You found a zone / places (§17.3); also merged into `joined.you.seen` by client.js. |
+| `lootable` | `id, on, free?` | (game) A corpse has loot for you (sparkle) / no longer has (§18.1). `free` = items everyone skipped in a roll. |
+| `lootWin` | `id, name?, items?, gold?, free?, closed?` | (game) The loot window's contents for you; `closed:true` when it is empty or gone. |
+| `lootR` | `op, ok, why?, msg?` | (game) Answer to `loot` when refused (`far`, `gone`, `bagFull`, `roll`, `dead`, `busy`), or a roll accepted. |
+| `lootRoll` | `roll, corpse, item, ms, members` | (game) Need / Greed / Skip for a party item (§18.1); 30 s, silence = skip. |
+| `lootRolled` | `roll, corpse, item, rolls, winner` | (game) A roll's result: every choice + number; the winner's item arrives as `bag`. |
+| `shopView` | `npc, name, role, title, stock, buyback, sell, sellRate` | (game) A shop (§18.2): `stock [{id, item, price, mount?, level?}]`, `buyback [{uid, item, price}]`, `sell [{uid, price}]` = what each bag item fetches. |
+| `shopR` | `op, ok, why?, msg?, cost?` | (game) Answer to `shop` (`gold`, `far`, `bagFull`, `item`, `level`, `noShop`, `dead`). |
+| `mountR` | `op, ok, why?, msg?, id?` | (game) Answer to `mount` (`combat`, `swim`, `indoors`, `none`, `dead`). |
+| `lookR` | `ok, look?, cost?, char?, why?, msg?` | Answer to `barber` (game) or `look` (gw); `look` = the cleaned look as stored. |
+| `followR` | `id, ok, name?, why?, msg?` | (game) Answer to `follow` (`hostile`, `far`, `gone`, `dead`, `self`, `target`). |
+| `bindR` | `ok, town?, room?, why?, msg?` | (game) Answer to `bind`. |
+| `itemR` | `op, ok, uid, id?, why?, msg?, cd?` | (game) Answer to `item {op:'use'}` (§18.10): `cooldown` (`cd` ms left), `combat`, `full`, `notYet`, `dead`, `item`. |
+| `inspectR` | `id, ok, name?, cls?, clsName?, level?, look?, equipment?, why?, msg?` | (game) Answer to `inspect` (within 40 m). |
+| `settings` | `data` | (gw) The account's settings (after `chars`, and after `settings set`). |
+| `kitsR` | `cls, kits, ok` | (gw) Play-test 5 (§21.2): `kits = {cls, armour:[{id, name, blurb, items}], weapons:[{id, name, blurb, items}]}` or null. |
+| `reviveAsk` | `id, from, fromId, skill, skillId, hpPct, ms, until, note?` | (game) §21.3: someone offers to raise you. Answer with `revive`. |
+| `reviveR` | `op, id, ok, why?, msg?, name?, hpPct?` | (game) §21.3: to the fallen (`accept`/`decline`/`expired`) and to the caster (`done`/`declined`/`expired`). |
+| `sheet` | `core, advanced, abilities, angling, gold, bag, bagMax, basic?` | (game) §21.6: the character sheet (stream C's rows + A's part). |
+| `eventTrack` | `uid, id, name, kind, realm, state, what, objective, stage, leftMs, endsAt, reward, inside, credited, …` | (game) §21.5: the 1 Hz event tracker. |
+| `eventDone` | `uid, id, name, result, why?, credited, xp, gold, items, onBody?, text, story?` | (game) §21.5: how an event ended, for everyone who was there. |
+| `eventAt` | `uid, id?, realm?` | (game) §21.5: the event whose area you stand in (`uid:null` = none). |
+| `feedbackR` | `ok, id?, first?, why?, msg` | (both) §21.7: answer to `feedback`. |
+| `emoteR` | `id, ok, why?, msg?` | §26: answer to `emote`. |
+| `eventSync` | `live, realm, at` | §26: every event running for you now — drop any other from the HUD. |
+| `trackR` | `ok, char, why?, msg?, tracking?` | (gw) §26: answer to `track`. |
+| `whereabouts` | `l` | (gw) §26: rows `[char, name, province, zoneName, town, x, z, roomKind, level, cls]` for those you track. |
+| `deleted` | `ok, char, name?, freeAt?, returned?, why?, msg?` | (gw) §25.1: answer to `delete`. |
+| `adminOnline` | `ok, at, count, accounts, list` | (both) §25.2: who is in the world (admin accounts). |
+| `feedbackMine` | `ok, list, more, why?` | (both) §24.1: the account's own reports. |
+| `questMarks` | `marks, full?` | §24.3: per-player quest markers over NPCs. |
+| `hits` | `l` | §24.6: the damage meter's rows (only while `meter {on:true}`). |
+| `meterR` | `on` | §24.6: answer to `meter`. |
+| `cartList` | `id, from, name, stops, gold, tokens` | §24.5: where this cart goes and what it costs. |
+| `cartR` | `op, ok, to, fare?, why?, msg?` | §24.5: answer to `cart` (`op:'go'`), and the arrival (`op:'arrive'`). |
+| `cartRide` | `to, from, ms, fare` | §24.5: the ride has begun (the client's presentation). |
+| `adminReports` | `list, counts` | (both) §21.9: feedback reports for an admin. |
+| `adminR` | `op, ok, id?, state?, why?, msg?, counts?` | (both) §21.9: answer to an admin change (or a refusal: `forbidden`). |
+| `fishR` | `ok, state, at?, water?, pool?, why?, msg?` | (game) §21.10: a cast accepted (`state:'wait'`) / refused, or the line coming in (`state:'idle', why`). |
+| `fishBite` | `ms` | (game) §21.10: a bite — answer `fish {op:'hook'}` within `ms`. |
+| `fishTug` | `ms, band, need, pull, speed, jitter, seed, heft, rarity, hint` | (game) §21.10: the tension game to play in the browser. |
+| `fishCatch` | `ok, lost?, kind, item?, items?, species?, size?, record?, first?, skill, pool?, title?, monster?, msg?` | (game) §21.10: what came out of the water. |
+| `cookList` | `ok, fire, level, recipes` | (game) §21.10: recipes, what each needs and whether you can cook it here. |
+| `cookR` | `ok, id, item?, items?, n?, why?, msg?` | (game) §21.10: answer to `cook {id}`. |
+| `profR` | `op, ok, id, why?, msg?, tool?` | (game) §25: a profession learned / a tool bought, or why not. |
+| `gatherR` | `ok, state, id?, prof?, node?, game?, tool?, why?, msg?, need?` | (game) §25: a gathering mini-game to play (`state:'play'`) / refused / ended (`state:'idle', why`). |
+| `gatherDone` | `ok, id, prof, quality, score, marks, flags, items, got, xp, skill, key?, reopenMs, msg` | (game) §25: the result the SERVER worked out from your inputs. |
+| `skinnable` | `id, on, tier?, minSkill?, name?` | (game) §25.2: a corpse you may skin (or may no longer). |
+| `craftList` | `ok, station, level, recipes` | (game) §25.3: what can be made here (or anywhere, greyed, with no station in reach). |
+| `craftR` | `ok, state, id, game?, n?, cost?, why?, msg?, need?` | (game) §25.3: a crafting / tempering mini-game to play, a refusal, or the work ended. |
+| `craftDone` | `ok, id, prof, quality, score, marks, flags, items, got, item?, was?, now?, xp, skill, msg` | (game) §25.3: what was made (or why nothing was). |
+| `craftQuote` | `ok, id, uid, can, why?, code?, needs, gold, skill?, text` | (game) §25.3: what a tempering work would do to an item, and its cost. |
 
 ---
 
@@ -236,7 +343,7 @@ room routes it to clients whose view covers `(x, z)`, or only to `to` (a local i
 
 | `type` | Fields | Meaning |
 |---|---|---|
-| `cast` | `s, slot, skill, aim?, target?` | `s` started a skill (client plays the wind-up for others; my own already played). |
+| `cast` | `s, slot, skill, aim?, target?` (+ basic attacks: `wk, wt, el, wind, reach, arc…`, §19.1) | `s` started a skill (client plays the wind-up for others; my own already played). |
 | `hit` | `s, d, n, crit?, el?, kind:'dmg'|'heal'|'absorb', skill?` | `n` = amount (whole number). `el` = element. |
 | `miss` | `s, d, why:'dodge'|'block'|'immune'|'evade'` | |
 | `die` | `d, by?` | `d` died (corpse stays until it leaves the view). |
@@ -246,6 +353,8 @@ room routes it to clients whose view covers `(x, z)`, or only to `to` (a local i
 | `open` | `d` | I opened chest `d` (to me only). |
 | `tele` | `id, s, ab, k, ms, shape, x, z, yaw?, r?, r2?, arc?, len?, w?, el?, follow?` | A telegraph (encounters.md §7): `id` = telegraph id, `s` = caster entity, `ab` = ability, `k` = kind (harm/safe/stack/soak), lands at `k_batch * tickMs + ms` on the room clock; shapes `circle ring donut cone line cross` (`yaw` 0 = +z); `follow` = the entity id it rides. |
 | `teleR` | `id, hits?:[entity ids], x?` | The telegraph resolved (flash + remove); `x:1` = cancelled (fade, no burst). |
+| `emote` | `id, e, ms?, end?` | Round 10 (Y5): entity `id` plays emote `e` (`wave | sit | dance | cheer | bow | point`); `ms` = how long (the mount call's wave), `end:1` = a looping one stopped. |
+| `teleM` | `id, x, z` | Round 10 (C, Y12): a telegraph anchored on its caster MOVED with it (the caster was knocked back) — same `id` as its `tele`; move the drawn shape. `teleR.why` may now be `interrupted` by a knock. |
 | `castbar` | `id, ab, name, ms, int?` | Monster `id` started a cast (`int:1` = interruptible). |
 | `castX` | `id, ab, why` | The cast broke (`interrupt`, `stun`, `phase`, `reset`). |
 | `phase` | `id, n, name?, bar, hpMax?, reset?` | A boss phase turned; `hpMax` = a new health bar. |
@@ -263,6 +372,7 @@ props the encounter scripts own (`info.rules:1`; `use` on them goes to `rules.us
 `info` may carry `key` (a stable id from the plan or script, e.g. `f1-pillar-3`), `r` (radius) and `state`.
 | `aggro` | `s, d` | A monster picked a target (red flash on the nameplate). |
 | `fx` | `id, x, z, …` | Any one-off visual (telegraphs: `shape`, `r`, `ms`). |
+| `mp` | `id, n, max` | A player's mana (play-test 3 R6+): at most 2 Hz, only when the whole number changed — target / party mana bars (§19.2). |
 
 ---
 
@@ -384,8 +494,8 @@ Teams: players `team = 1`, hostile monsters `team = 2`, friendly NPCs `team = 1`
 `/p/0`, `/status`, `/status.html`, `/healthz`. Options (header of main.mjs): `--port`, `--host`, `--db pg|json|memory`,
 `--db-file`, `--env dev|stable` (a pg database must end in `_<env>`: dev and stable never share one), `--public <dir>`
 (serve only a published copy, stream H), `--process <name>` (lease owner prefix), `--save-every`, `--journal-ms`,
-`--linger`, `--terrain <zone>`, `--rules auto|v0`, `--build`. Environment (an env file outside the repo,
-`server/env.example`): `PG*`/`DATABASE_URL`, `TV_TURNSTILE_SECRET`, `TV_TURNSTILE_SITEKEY`, `TV_ENV`. Stage 1 = one process.
+`--linger`, `--province <keys>` (default `torbor_downs`; a single zone key works too), `--terrain <zone>`, `--procs N` (stage 2, §15.8), `--event-first/-announce/-every <ms>`, `--rules auto|v0`, `--build`. Environment (an env file outside the repo,
+`server/env.example`): `PG*`/`DATABASE_URL`, `TV_TURNSTILE_SECRET`, `TV_TURNSTILE_SITEKEY`, `TV_ENV`. Stage 1 = one process; stage 2 = gateway + N province processes (§15.8).
 
 ### 8.2 Tick
 Fixed 20 Hz loop with drift correction (each tick is scheduled for `start + k*50 ms`; late ticks run
@@ -540,3 +650,802 @@ if it fails. New accounts are limited to 20 per network per hour (`err {code:'to
 `js/net/client.js` takes `connect({ human })` = a token or `async ({siteKey}) => token` (the client renders the widget).
 Cloudflare's public test keys are in `server/env.example` (site key `1x00000000000000000000AA` passes, token
 `XXXX.DUMMY.TOKEN.XXXX`); the real pair lives only in the env file outside the repo.
+
+
+## 15. One province (M2, PLAN §5, §8.1–8.2) — protocol v3
+
+### 15.1 A province is one room over many zones
+A province copy (`<province>/wilds:<n>`) is ONE room over all its zones (Torbor Downs: 16 zones, world zones
+x 11–14, y 1–4, each 2,048 m). Coordinates are **world metres**: zone `zXX_YY` covers x ∈ [XX·2048, XX·2048 + 2048],
+z ∈ [YY·2048, …]. Walking between zones is seamless (no handoff, no mirroring); the AOI grid is sparse, so the
+8 × 8 km room costs only the cells somebody stands in. `joined.room` for a province room:
+
+| Field | Meaning |
+|---|---|
+| `terrain` | `null` (there is no single bake) |
+| `province` | province key (`torbor_downs`) |
+| `zones` | `[{key, bounds:{minX, minZ, maxX, maxZ}}]` — load `data/zones/<key>/terrain.bin` (zone-local metres) and draw it at `(bounds.minX, bounds.minZ)`; `js/sim/province-terrain.js` `createProvinceTerrain({key, zones:[{key, zx, zy, reader}]})` stitches readers the way the server does (heights, walkable, water, biome, sites in world metres) — use it for prediction so client and server agree. |
+| `towns` | every hub town circle `[{x, z, r, name}]` (each is its own room) ; `town` = the starter hub |
+| `waystones` | `[{key, name, x, z}]` this province's waystones (§15.2) |
+| `horizon` | `{world:'data/world/world.json', macro:'data/world/macro.bin', province}` — stream B's world bake for the far horizon (mountains/sea beyond the province) |
+| `clock` | `{epoch, dayMs}` (§15.6) |
+
+**Dormant camps:** a province copy has ~1,300 monsters on paper; only camps with a player within 200 m exist. A camp
+out of reach for 30 s whose members are calm (alive, full health, not fighting) is parked — removed with its warband
+escort — and spawns again as it was when someone comes near (respawn timers keep running meanwhile). The client just
+sees monsters appear at the edge of view as always.
+
+Rooms: towns `<province>/town:<i>` (one per hub settlement, **never copied**, shared by every copy; the starter
+zone's hub — Torborhold — is `town:0`, where new characters and respawns begin; you wake in the nearest town),
+copies `<province>/wilds:<n>` (a new copy opens at `copyCap`: **150 in a starter province** (band starting at 1),
+300 elsewhere), instances `<province>/i:<n>`. The `zone` message (§3.2) arrives whenever you cross into another
+zone: its name, level band, this hour's deeds and the footprint heat (§15.5).
+
+### 15.2 Waystones and travel
+One waystone in every town square and one beside every dungeon door (objects `type:'waystone'`, `info.waystone`
+= its key). **Use** one (`use {id}`, within 4 m) to discover it: `used {kind:'waystone', key, name, fresh, known:[keys]}`
+(saved; `joined.you.waystones` lists what you know). **Travel** (`travel {to: key}`) only while standing at a
+waystone, not in combat or a dungeon, to a waystone you have discovered, for a gold fare
+`2 + round(metres / 400)` (+4,000 m' worth across provinces) → `travelR {ok, cost}` then a `joined` handoff
+(`via:'waystone'`), or a `relocate` when the target province lives in another process.
+
+### 15.3 The realm event (PLAN §5.2)
+The gateway's director runs one big event at a time (the province's world boss — Grimtallow at Blackthorn Scar —
+or zone event sites), picked by how many online players sit in its band, sized to them
+(`hp ×(1 + 0.55·(n−1))`, `floor(n/8)` adds, ≤ 12), announced realm-wide `announceMs` ahead (10 min):
+`realm {kind:'eventSoon', ev, at}` → `realm {kind:'eventStart', ev}` → `realm {kind:'eventEnd', ev, won, why}`
+(gateway socket, everyone). While it runs, `travel {to:'event'}` is **free from anywhere** (not in combat or a
+dungeon) and drops you on the arena's edge. Anyone in the arena gets `eventFrame` (1 Hz, game socket) — the
+temporary event group, no invite. `joined.event` = the live event when you (re)join. Server flags for demos
+and tests: `--event-first <ms> --event-announce <ms> --event-every <ms>`. Credit by contribution and loot stay
+the rules' (stream C, `data.event` + `data.scale` on the boss).
+
+**Picking and sizing** come from stream E's `data/quests/events.json` `director`: an event needs `minOnline` players online
+and its cooldown over; a fixed-schedule one (Grimtallow: every 3 h at :30) wins when due within the announce window;
+otherwise one is drawn by `weight` among events with ≥ `minInBand` characters within 3 levels of it; 40–80 min between
+events. Size: boss health × (1 + 0.12·(n−1)), one extra add per 6 players. Kinds: `worldboss` (the boss at its arena),
+`town_attack` / `warband_siege` (waves from the edge of the town or settlement, then a boss if named — a hub town's own
+room hosts it), `flyover` (the drake lands at each listed zone's arena for 3 min; killed on any landing = won).
+**Zone events** (`events.json` `zone`, one per zone): every copy runs its own, every 35–55 min, only while somebody is
+in that zone: `zoneEvent soon/start` to the zone → 2–3 waves from the arena edge → the scripted boss → `zoneEvent end`.
+The zone's `eventBoss` is no longer a camp that stands there all the time. Rewards (both kinds, everyone enrolled who
+is alive at the end): xp = `reward.xp` × one level's worth at the event's level, `reward.gold`, an item of
+`reward.item.tier` (rolled by the rules, `chance` if given) — through the normal `bag`/`you`/`ev xp` messages.
+
+### 15.4 Open groups (PLAN §5.3)
+Two or more players (not already in one party) damaging the same monster within 40 m of it in 10 s each get
+`groupHint {key, with:[{char, name}]}` once (gateway socket). One click = `party {op:'group', code: key}`: the first
+click makes a party, the next ones join it (`partyState` as usual; `err {code:'party'}` if the hint has expired, 60 s).
+
+### 15.5 Traces (PLAN §5.4)
+Objects other players can see and `use` (answer `used {kind, ...trace}`; `info.trace` carries the same data):
+- **grave** `{who, level, by, at, until}` where a player died outside a dungeon; fades after 1 h (≤ 200 per room);
+- **campfire** `{who, at, until}` — `trace {kind:'campfire'}` in the wilds lights one beside you (10 min, one per player);
+- **door banner** — a dungeon door whose instance boss died carries `info.banner = {by, party, at}` in every copy
+  ("cleared by Aldra's party, 4 minutes ago");
+- **zone deeds + footprints** — `zone {deeds:{rares, bosses, elites, deaths, visitors}, heat:[[x, z, n]…]}`
+  (this hour; heat = 32 m cells people walked, top 200).
+
+### 15.6 Day and night, NPC schedules
+`welcome.clock` / `joined.room.clock` = `{epoch, dayMs, now?}`: time of day = `((wallNow − epoch) mod dayMs) / dayMs`
+(0 = midnight, 0.5 = noon; a day is 2 real hours). Night is `t < 0.22 or t > 0.8`. `js/net/client.js`
+`net.timeOfDay()` does the sum with the server's clock skew. Town folk (`npc` objects with `info.role`: smith,
+merchant, elder, innkeeper, healer, unbinder, broker) walk to their stalls by day and to the inn by night (they
+move in the snapshot like anyone else; innkeeper, healer and unbinder stay put).
+
+### 15.7 Vignettes as room content
+Stream E's vignettes (`data/vignettes/*.json` recipes + `data/vignettes/placements/<zone>.json`, zone metres, moved
+to world metres by the server) become: a `vignette` marker object (`info.key`, `info.r`, `info.lore` — show the lore
+line when you walk in), its `note` / `npc` / `chest` (per character; `hidden` + `hint`; `after` = opens only once
+the named object was used) / `use` objects, and its monsters as a camp. `js/sim/vignettes.js` `vignettePoint()` is
+the one rotation formula (props are the client's to draw from the same files).
+
+Also: `wayside` markers (E's roadside dressing, `info.lore` + `info.site.template` = the kind in
+`data/vignettes/wayside.json`; draw its props), hooks from the placement files' `features[]` (`info.site.feature`, and
+`info.site.pts` for a line such as the Thorn Wall, world metres), filler camps (ordinary camps). A hostile fort's garrison
+follows the zone's archetype (blight → the blight crew, ruinfield / holy ground → the dead, else its usual crew).
+
+### 15.8 Processes (stage 2)
+`server/main.mjs --procs N --db pg`: this process is the **gateway** (static files, `/gw`, `/status`); it forks N
+province processes (`server/province-proc.mjs`, provinces dealt round-robin). A `/p/<n>` upgrade is accepted by
+the gateway and the raw socket handed to child n (fd passing), which does the WebSocket handshake and owns the
+socket — no game traffic goes through the gateway. Gateway ↔ children talk over the IPC channel (the bus messages
+listed in `js/sim/gateway.js`). The ticket names the path (`ticket {path:'/p/<n>'}`); crossing to a province in
+another process is `relocate {path, ticket}` (save, release the lease, new ticket, new socket — client.js does
+it). A child that dies is restarted (its players reconnect by themselves). `--procs 0` (default) = stage 1, one
+process, same code (`js/sim/world.js` `createWorld`); tests build stage 2 in one context with `createRealm`.
+
+### 15.9 Quests and radiant jobs
+`js/sim/quests.js` runs stream E's `data/quests/<zone>.json` (story and zone quests, 90 in Torbor Downs),
+`province.json` (the story chain, through each quest's `next`) and `jobs.json` (radiant job frames). Givers: quest NPCs
+(E's `npc` placements, `info.role`), vignette objects for quests that `startsFrom` one, and job boards — any NPC whose
+role is elder, sergeant, captain, quartermaster, tollkeeper, broker or innkeeper offers up to 4 jobs bound to what is
+in its zone right now (refreshed every 20 min; a frame waits 60 min after you finish it). `use` an NPC → `used.offers`
+/ `used.ready`; `quest {op:'accept'|'turnin', id, npc}` within 6 m. Steps run in order: kill (shared credit: the killer,
+anyone who hit it in the last 30 s, and their party within 60 m), killOne / killRare (an encounter id; realm and zone
+event credit counts), collect (a quest-only count, not a bag item), visit / escort (walk into the place), use (a vignette
+object), talk / deliver (an NPC), clear (reach floor N of the zone's dungeon, or kill its boss; a cave's boss).
+Rewards on turn-in: xp = `reward.xp` × one level's worth at the quest's level, gold = `reward.gold` × one kill's gold at
+that level (3 + level), an item of `reward.item.tier`. Saved per character (`quests` in SAVE_FIELDS).
+
+### 15.10 The skill bar (`you.bar`)
+`joined.you.bar` = `[{slot 1..6, id, name, desc, cd (ms), mp, level, locked, empty, shape, element, ally, group, charges, form}]`
+— C's `rules.bar(e)` (Farhold's live bar; js/rules/README.md). `ally: true` = send `cast {slot, target}` with a friendly
+target (or yourself); `group: true` = reaches the party by itself. The whole bar comes again as `you {bar}` after a
+level-up, a form or stance change (the rules' `fx {kind:'form'}` event), or a talent pick (`room.barChanged(e)`), sent
+once after that tick — it formats text, so it is never built per tick. Absent when the rules have no `bar` (stand-in rules).
+
+---
+
+## 16. Public play (M3, PLAN §5.5, §9.1, §9.4, §11, §13) — protocol v4
+
+Everything here is ADDED; nothing in v3 changed shape except `chat {to?}`, `welcome {privacy, accounts}` and the
+new kick codes. Server files: `js/sim/accounts.js`, `chat.js`, `chatfilter.js`, `friends.js`, `guilds.js`,
+`callboard.js` (gateway), `js/sim/mail.js` (province), `server/passwords.js`, `server/admin.mjs`,
+`server/db/schema-v3.sql`, `server/db/pg-social.js`, `js/sim/store-memory-m3.js`. Client calls: `js/net/client.js`
+(§9 header lists them: `accountOp`, `login`, `claim`, `logout`, `chat`, `whisper`, `friend`, `guild`, `callboard`,
+`report`, `mail`; events arrive under their message type).
+
+### 16.1 Accounts
+- A guest is still made with no questions; its 256-bit token lives in the browser, only the SHA-256 on the server.
+- **Claim** (`account {op:'claim', user, pass, email?, human?}`): username 3–20 of `A-Z a-z 0-9 . _ -` (unique,
+  case-insensitive, passes the name filter), password 8–128, email optional (used only by the reset stub). The
+  password is hashed with **scrypt** (N=2^15, r=8, p=1, salted, `scrypt$N$r$p$salt$hash`) off the game thread. With
+  Turnstile on (`welcome.human`), send its token as `human`, like `guest`. Answer `accountR {op:'claim', ok, username}`.
+- **Login** from any browser: `connect({ login: {user, pass} })` (or `account {op:'login'}` before `guest`/`auth`). A
+  good login answers `authed {account, token, claimed:true, username}` with a NEW session token — store it like the
+  guest token. A wrong one answers `accountR {op:'login', ok:false, why:'auth'}` and makes no guest.
+- **Limits**: 5 wrong passwords on one username in 15 min, or 10 from one address in 10 min → `tooManyLogins` (the
+  right password waits too). The `account` message itself is 0.5/s, burst 4.
+- **Logout** (`account {op:'logout'}`, claimed accounts only — a guest gets `claimFirst`): that browser's token is
+  deleted; the character is kicked from the world (`kick {code:'loggedOut'}`); `net.logout()` clears the stored token.
+- **Password** `{op:'password', old, pass}` and **reset** `{op:'resetAsk', user}` → (the one-hour code shows on the
+  ADMIN page; no email is sent; the answer never says whether the username exists) → `{op:'reset', user, code, pass}`.
+  Both end every other session.
+- **Bans** (admin): a banned account gets `refuse {code:'banned'}` at `auth`/`login`; a banned address (stored as a
+  salted hash) is refused at `hello`.
+
+### 16.2 Chat channels
+| `ch` | Who hears it | Who may talk |
+|---|---|---|
+| `say` (province socket, `say {text}`) | within 40 m | anyone |
+| `party` | the party | members |
+| `guild` | guild members online | members (guests too) |
+| `zone` | everyone online in the same zone of the province (`chat.zone` = the zone key) | claimed + level 5 |
+| `trade` | everyone online (5 s slow mode) | claimed + level 5 |
+| `world` | everyone online (10 s slow mode) | claimed + level 5 |
+| `w` (needs `to`) | that one character; the sender gets a copy with `echo:true, to:<name>` | claimed + level 5, OR anyone to their party / guild / friends, OR answering someone who whispered them in the last 10 min |
+| `system` (server only) | everyone | the admin page's announcements |
+Refusals: `err {code:'chatGate'|'slow'|'muted'|'ignored'|'notFound'|'party'|'guild'}`. Every line passes the filter
+hook (masks a short word list; a server can pass its own) and is logged for 30 days. `report {name, why, text?}` files
+a report with the reported player's last 20 lines; three different claimed accounts reporting one player within 10
+minutes mute them for 10 minutes (`muted {until, by:'auto'}`).
+
+### 16.3 Friends
+Per character, up to 100, offline names allowed. `friends {list}` on entering the world and after a change;
+`friendState {char, online, level, zone, …}` when a friend comes online, goes offline, levels or changes zone.
+
+### 16.4 Guilds
+Saved. Ranks 0 Leader, 1 Officer, 2 Member, 3 Recruit (names in `guild.ranks`). Founding: claimed account, level 5,
+not in a guild, a name of 3–24 letters/spaces/'- that passes the filter, **10 gold** (taken by the province, a sink).
+Officers invite, kick lower ranks, set the MOTD and move ranks below their own; the leader names officers, hands on
+the lead (`lead {char}`) and disbands. The leader leaves only after handing on the lead (or disbands when alone).
+Invites last 2 minutes. `guildState` (whole) after every change; `guildState {guild:null, kicked|disbanded}` when you
+are out.
+
+### 16.5 Mail
+- On the province socket. **List / read anywhere; send / take in a town.** Letters carry text (subject 60, body
+  500), up to **6 items** and gold; **postage 1 gold** (a sink). Sending needs a claimed account at level 5; anyone
+  can receive. To any character by name — your own others too — unless they ignore you.
+- Sending moves the items and gold out of your pack and into escrow in ONE transaction with your saved character;
+  taking moves them into the receiver's pack in one transaction (an item keeps its uid; a uid can never be in two
+  letters). Not while trading; not with a full bag.
+- Untaken letters go back to the sender after **30 days** (`kind:'return'`, they never expire); `return {id}` sends
+  one back now. `delete` only once nothing is left in it. `mailNew {unread}` arrives on the gateway socket.
+
+### 16.6 The Callboard
+The in-world group finder (opens at level 8). `callboard {op:'list'}` → `{state:'list', minLevel, dungeons:[{key, name,
+level, band, province, fits, waiting}], queued}`. `join {dungeon: key | 'any', role}`; a party is queued by its leader,
+whole (`queued`/`list.queued` carry `since` = WALL ms you joined and `waitedMs`). A group = 1 tank, 1 healer, 3 damage able to do the same dungeon → `{state:'pop', id, dungeon, ms:30000,
+members:[{char, name, level, role}], backfill}`; everyone `accept {id}` (`{state:'ready', ready:[chars]}`) →
+`{state:'formed', party, dungeon}`: one party, and every member is moved INTO that dungeon's instance (a normal
+`joined` handoff, `via:'callboard'`). A decline/timeout: `{state:'left', why}` for the decliner, `{state:'queued',
+again:true}` for the rest (they keep their place). After 5 minutes a queue pops with whoever fits and `backfill:n`
+followers fill the seats (the instance asks the rules: `rules.backfill(entity, n, {roles})` with the members' queued
+roles, stream C; when that member leaves the instance the seats go with them and the next member in brings a fresh set).
+Dungeon names come from E's sheets (`dungeon.name`) — the Callboard, the door and the instance say the same thing.
+
+### 16.7 The world boss (realm event)
+Grimtallow (`world_grimtallow`, Blackthorn Scar) runs as the director's realm event (§15.3): every 3 h at :30, or on
+demand when 12+ characters in its band are online and it has been quiet 90 min (kept in `world_state`, so a restart
+does not replay it). Sometimes it breaks out to a neighbouring arena: `realm.ev.roamed = true` and the text says
+where. Credit is by contribution (damage to its monsters, healing someone in the fight, a killing blow); a fallen
+contributor is still paid, an idle onlooker is not. A **World cache** chest appears in the arena for 10 minutes that
+only contributors can open (once a day each); the first kill of the day rolls one extra reward (`char.daily`).
+
+### 16.8 Server side of the public link (PLAN §11)
+`/privacy.json` (what is stored and for how long). In `--public` mode: security headers on every answer, a loopback
+peer is NOT trusted (the tunnel arrives over loopback; each visitor counts by its `CF-Connecting-IP`, believed only
+from loopback), nobody skips the per-address limits. The admin page is `server/admin.mjs` on 127.0.0.1 only (8492
+stable / 8493 dev), token in `TV_ADMIN_TOKEN` or `<state>/admin-token`.
+
+### 16.9 Arrivals under load, test hooks
+- A login storm queues: a loaded character is placed by the tick (`JOINS_MAX_PER_TICK` 4, and only while that tick has
+  used < `JOIN_BUDGET_MS` 8 ms; one always goes), so 300 logins in 4 s cost a few ms a tick instead of one long stall.
+  `/status` → `joinQueue`. The combat core is warmed at boot for every class (`warmMs`). A room change reuses the last
+  `you.bar` (it only changes on level-up / form / talent, which arrive as `you {bar}`); a relocation recomputes it.
+- `js/net/client.js`: `net.accountsOn` (= `welcome.accounts`), `net.privacy` (= `welcome.privacy`).
+- `--dev-hooks <port>` (server/main.mjs, TEST ONLY; refused with `--env stable`, `--public` or `--procs`): 127.0.0.1 HTTP
+  `GET /who`, `POST /level {name, level}`, `POST /give {name, gold, items}`, `POST /event {id, announceMs}`
+  (`server/dev-hooks.mjs`).
+
+
+## 17. Play-test 1 (2026-10-05) — protocol v5
+
+### 17.1 Water, the ground, bodies (P2, P8, P9, P25)
+- **Swimming.** `stepMove` (js/sim/movement.js, shared with the client predictor) asks how a body moves at a point: stream B's
+  `terrain.moveAt` (`out | steep | walk | wade | swim`) or the same answer from `walkable` + `waterAt` (same thresholds:
+  `WADE_DEPTH` 1.1 m, `DRY_FOOT_DEPTH` 0.25 m). Deep water is swum, never a wall (the "invisible wall" in shallow streams was a
+  middle deeper than 1.1 m): `MOVE.swim` 2.7 m/s (3.6 with SPRINT), floating at surface − `MOVE.swimSink` (1.1 m), no jumping;
+  wading is `MOVE.wade` (×0.8) of a run. The server sets `STATE.swimming` (16; anim `swim`), sends `y` while it is set, refuses
+  `cast` with `castR {why:'swimming', text}`, and calls `rules.onSwim(e, on)` if the rules have it. **The predictor's terrain must
+  carry `waterAt` (and `moveAt` when it has one)** or prediction disagrees at every stream.
+- **Heights.** The server stands every body on `terrain.heightAt` — stream B's reader, which includes bridge decks
+  (`meta.bridges`) — and dungeon floors at 0. **The mirror keeps `y` only for airborne/swimming entities**; a grounded entity's
+  `y` is `undefined` and the client stands it on its own ground (the FULL record's `y` used to go stale until the next AOI cell:
+  monsters floated downhill and sank uphill).
+- **Bodies.** A dead entity cannot move (`Entity.moveTo` ignores it unless the server forces a teleport); a respawn revives first;
+  `revive` clears the combat flag.
+
+### 17.2 Talents and the perk forest (P6)
+`talent {op, skill, tier, node}` / `perk {op, id}` go to the rules: `rules.talent(e, op, {skill, tier, node})`, `rules.perk(e, op,
+{id})` -> `{ ok, why?, text?, picks? | perks?, left? }`. On ok the server saves `char.build = rules.saveBuild(e)` (SAVE_FIELDS
+`build`, journaled), refreshes the skill bar (`you {bar}` after the tick) and sends `you {talents, perks, perkPoints, hpMax,
+mpMax}` (`rules.build(e)`). `joined.you` and the level-up `you` patch carry the build view too. Talents and refund/reset are
+refused while fighting or dead; without the rules' functions the answer is `why:'notReady'`.
+
+### 17.3 The map and discovery (P3, P27)
+Every province lists its places (towns, waystones, dungeon doors, caves, forts, farms, vignettes, hooks, zone event sites). A
+character discovers a zone by entering it and a place by coming within its radius + 30 m (`DISCOVER_PAD`); discoveries are saved
+(`seen: {zones, places}`, SAVE_FIELDS) and pushed as `discover {zone?, places:[place]}`. `map {op:'get'}` -> `mapData`:
+`zones:[{key, name, band, bounds, archetype, discovered}]` (every zone and its level band from the start), `places:[{key, kind,
+name, x, z, r, zone, level?, hostile?, discovered?}]` (towns always, the rest once found), `events:[{uid, id, name, x, z, r, phase,
+level, zoneName, realm?}]` (the realm event, and zone events of your copy), `waystones` (keys you know), `horizon`. Using a waystone
+also discovers it. `zoneEvent.ev` already carries `x, z, r` for a marker.
+
+### 17.4 The living roads (P19)
+js/sim/travellers.js runs stream E's data/provinces/travellers.json + `<province>-routes.json` + data/names/chatter.json in every
+wilds copy: groups (caravans, patrols, pilgrims, couriers…) always advance along town-to-town routes; their crew exists as room
+entities only near a player (kind `npc`, team 1, friendly, talkable; `info.role` = the crew role, `data.traveller {kind, group,
+name, from, to, beast, cart}` server-side). E's `folk` placements (people working one spot) walk a small loop and work. Barks are
+ordinary `say` events (`style: 'bark'`) chosen by E's weights (recent deeds of the zone, a live zone event, the world boss, phase
+of day, role, road position, archetype) with every `{token}` filled — a line with a token nobody can fill is skipped. Not run yet
+(simplified on purpose): travellers do not fight (`fights` is ignored; monsters never target them — no combat unit), and the
+wayside stop is a random pause.
+
+### 17.5 Quests explain themselves (P17)
+Quest views gain per step `kind`, `at: {x, z, r, name?}` (where it happens: the camp, the place, the NPC, the door) and E's
+`where` line; per quest `turnIn: {x, z, r, name?}`, `giverName`, `zoneName`. Kills, event wins, clears and uses from the last
+15 minutes (`RECENT_Q_MS`) are replayed into a quest when you accept it — `questR {credited: true, quest}`.
+
+### 17.6 Starting kit and worn gear (P22)
+A new character keeps its class weapon (+ off-hand) and nothing else (`char.kitV` = 1 once applied; never re-applied). Every
+player's `info` carries `gear: {slot: {base, sub?, rarity, unique?}}`, refreshed on equip/unequip and room change — draw armour from
+it (plain clothes where a slot is empty). Worn items always have a `uid` (the rules' kit items had none and could not be taken off).
+
+### 17.7 Travel without the freeze (P10)
+Waystone and event travel answer `travelR {ok, cost, to, at: {x, z}, province, delayMs}` FIRST and move you `delayMs`
+(`TRAVEL_PRELOAD_MS`, 1500) later, so the client can stream the destination behind a fade. Interrupted (death, a fight, logging off)
+-> `travelR {ok:false, why:'interrupted'}` and the fare back. Server-side room changes measure 0.1–1 ms (instance creation 5–25 ms);
+a 2–3 s freeze is client-side loading.
+
+### 17.8 Waystones (P14)
+No generated door waystone within 90 m of one already standing; waystones closer than 60 m merge (the placed one wins; a character
+who found the merged one keeps the kept one — `waystoneAliases`); a door's stone is named after its dungeon.
+
+## 18. Play-test 2 (2026-10-05) — protocol v6
+
+### 18.1 Loot stays on the corpse; party rolls (Q3, Q4)
+A kill's items AND gold no longer go straight to the bag: `room.award` hands them to `js/sim/corpses.js` (`hooks.holdKill`) and
+they wait on the monster's body, each player's share personal. You get `lootable {id, on:true}` (id = the corpse's entity id).
+`loot {op:'open', id}` within 6 m (`LOOT_RANGE`) -> `lootWin {id, name, items:[item], gold, free?}`; `take {id, uid}` (uid `'gold'`
+for the gold), `all {id}` -> `bag` + a fresh `lootWin` (or `{closed:true}`) + `lootable {on:false}` when nothing is left for you.
+The body stays past its normal despawn while loot is on it (`hooks.keepBody`), at most `CORPSE_MS` (5 min) after the kill.
+**Party rolls.** The leader sets `party {op:'loot', code:'magic'|'rare'|'legendary'}` (default `rare`; `partyState.party.lootMin`).
+An item at/above it from a member's kill goes to a roll among the members in the same room within 60 m (`ROLL_R`; one member
+alone keeps it as a personal share): `lootRoll {roll, corpse, item, ms, members}`; `loot {op:'roll', roll, choice}`; after all
+answered or 30 s (`ROLL_MS`, silence = skip) everyone gets `lootRolled {roll, item, rolls:[{char,name,choice,n}], winner}`.
+Highest Need wins, else highest Greed (1-100 each). All skip -> the item lies on the corpse in `free` for ANYONE
+(`lootable {on:true, free:true}` to players within 40 m).
+
+### 18.2 Shops (Q9, Q11)
+A town NPC trades the shop KIND its office names (stream E's `data/provinces/offices.json` `shop`, carried as `npc.shop`; else
+its role's kind) from E's `data/provinces/shops.json` (`js/sim/shops.js`; stand-ins `general`, `weaponsmith`, `stable` without
+the file). `used {kind:'npc'}` says `shop:true, shopKind` for a trader (and `barber:true, free` for a barber). `shop {op:'open',
+npc}` within 6 m -> `shopView {npc, name, role, kind, title, says, services, categories, stock, buyback, sell, sellRate}`.
+`stock` rows: `{id, cat, label, item, price, level?, mount?}` — gear `categories` rolled by the rules at the buyer's level
+(never above the town's `levelCap`, rarity weights capped at `pricing.rarityCap`), per NPC per 3-level bracket, restocked every
+`restockMinutes`; `goods` (potions, Thousandvale goods as bag items `{kind:'potion'|'good', id, name, desc, use?}`, Farhold gear;
+a mount id in `goods` is a mount row). Every stock item also carries `uid: 'stock:<id>'` and `price`. Prices: the rules' price
+(Farhold rpg.price) × (1 + `perItemLevel` × (item level − 1)) × the town's `priceMult`. `buy {id}` (or `uid`), `sell {uid}` pays
+`sellFactor` (25 %), `back {uid}` buys back the last 12 sold this session for what they fetched. Aliases: `list` = open,
+`buyback` = back; `repair` is refused (Farhold items never wear out). Items in an open trade cannot be sold.
+### 18.3 Mounts (Q16)
+`char.mounts` (SAVE_FIELDS) = owned ids — Farhold's mount bases, the ids E's stable sells: `trail_horse` (1.4×), `pony`
+(1.5×), `courser` (1.75×), `dray` (1.65×) (`js/sim/mounts.js`; each with a `calm`). The Trail Horse is given free at level 5
+(`you {mounts, mountNew}`) and sold from level 1; the stable master sells the rest. WHEN you ride is stream C's
+`js/rules/mount.js`: `mount {op:'summon', id?}` -> `mountR {ok, casting:1500}` + a `castbar` event; standing still for 1.5 s
+(a 0.6 m step or a hit breaks it: `mountR {why:'interrupted'}` + `castX`) sets `entity.mount` (`info.mount`, everyone draws
+the rider) and `entity.speedMul` (`mountSpeedMul`, on-land speeds in `stepMove` via `state.speedMul`; the client predicts with
+`you.speedMul`). Refused (`mountRefusal`) while fighting (in combat, or a hit given/taken in the last 5 s), swimming, dead,
+indoors, or for 3 s after being thrown. Casting or attacking, swimming, dying, a respawn and entering a dungeon dismount you;
+a damaging enemy hit throws you unless the mount's calm holds (`dismounts('hit')` — DoT ticks, heals, absorbed hits never do).
+`you {mount:null, speedMul:1, dismount: why}`. `joined.you` carries `mounts`, `mount`, `speedMul`.
+### 18.4 Looks (Q20, Q21)
+`js/sim/looks.js cleanLook(raw, stored)` cleans every look a client sends (create, the title screen, the barber):
+`{v:1, race, seed, avatar?}` where `avatar` is avatar-2d JSON — part ids checked against avatar-2d's catalog (unknown -> the slot
+is dropped, the default shows), colours `#rrggbb`, numbers clamped, held/off-hand parts dropped, ≤ 4 KB. A look with an
+`avatar` is stored as `custom: {…avatar parts}` (D-UI's name; `avatar` is read as the same) — it overrides the class default. Title screen: gw `look {char, look}`
+(refused while the character is in the world) -> `lookR {char, ok, look}`; `charList` rows carry `look`. In the world:
+`barber {npc, look}` at a `barber` NPC -> `lookR {ok, look, cost}`, and everyone gets the new `info.look`. Price (E's
+`barber.services.appearance`): each part changed at its list price (hair, hair colour, beard, eyes, face, skin, body; a new race =
+everything), capped at `everything`, × (1 + 0.05 × (level − 1)); the first change a character makes is free (`char.flags`).
+
+### 18.5 Display prefs (Q22)
+`pref {k:'showGear'|'showHelm', v}` (saved, `char.prefs`) trims `info.gear` for EVERYONE: no head piece, or no worn gear at all
+(weapons stay) with `info.gearOff:1`. `joined.you.prefs`.
+
+### 18.6 Follow (Q2)
+`follow {id}` -> `followR {id, ok, name}`; refused for monsters / other teams (`hostile`), objects, the dead, >40 m. The client
+does the following.
+
+### 18.7 Settings, trade requests from friends only (Q14, Q15)
+Account settings live in the world-state table under `settings:<account>` (both stores): gw `settings {op:'get'|'set', data}`
+-> `settings {data:{tradeFriendsOnly}}` (also sent after every `chars`). The gateway pushes `{k:'social', char, friends:[ids],
+tradeFriendsOnly}` to the province holding a character (on play, on a friend-list change, on a settings change, on a move to
+another process); `trade {op:'ask'}` to someone whose account has `tradeFriendsOnly` and who has not friended you is refused
+with `err {code:'trade', msg}`. The trade flow itself is §M1.5: `trade ask {id: entity}` -> `tradeAsk {trade, from, name}` ->
+`trade accept {id: trade}` / `cancel`.
+
+### 18.8 Statuses everyone sees (Q8), offices (Q10), class names (Q25), ring slots (Q12), casting refusals (Q1)
+- `info.st = [status ids]` on every entity, kept in step with the rules (rechecked on every `fx status`, on a death, on a
+  revive/respawn, and once a second while any is showing). A death and a revive clear it AND emit `fx {kind:'status', on:false}`
+  for each status, so a client drawing auras from events drops them too.
+- Each service NPC (`schedules.js` OFFICES) has its own building, staffed day and night: `info.office = {kind, plot, want, x, z,
+  yaw, w, d, lit}` (`plot` = B's building id it took over; `lit` = draw a lamp — shops yes, the elder/healer/unbinder no).
+  Everybody else gets a slot of their own where they gather (no two NPCs on one spot at any hour).
+- `charList.chars[i].clsName` and `joined.you.clsName` (Farhold's class name).
+- `item {op:'equip', uid}` with no slot or the item's own slot lets the rules choose (free ring hand, free off hand); `ring1` /
+  `ring2` / `offhand` are exact. `equip.slot` reports where it went.
+- `castR` refusals: at most one per slot and reason per 2 s (`CAST_REFUSAL_MS`); `why` is camelCase (`notDrawn`), with `text`,
+  `need` (seconds of draw) and `wait` when the rules give them.
+
+- `joined.you.reach` / `you {reach}` (after equip): the basic attack's range in metres (the rules' `attackRange(e)`, else the
+  main-hand swing plan's `range`: bows ~38 m); null = melee. `inspect {id}` -> `inspectR {name, cls, clsName, level, look,
+  equipment}`. Party rows and friend rows carry `look` (portraits).
+- Party loot, C's one-drop-per-corpse rule: the room gives the rules `host.partyLoot(members, items, corpse, partyId)`; a party
+  that tagged a kill gets ONE drop, rolled once by C. Items under the line go to a PARTY PILE on the corpse (any member takes
+  them; `lootWin.items` rows with `shared:true`), items at/above go to Need / Greed / Skip. Ranking + winner are C's
+  `js/rules/loot-rules.js` (`locksForRoll`, `rollWinner`; thresholds magic | rare | legendary | unique, `epic` = legendary).
+- Town NPCs: where E's `offices.json` lists a town, ITS offices are the working NPCs (one body per office; a quest NPC who keeps
+  one gains its role/shop and stands at its door), schedules.json then only adds townsfolk and guards.
+
+### 18.9 Quests (Q27, Q28)
+Quest fields the runtime reads: `auto: true` (given to every character on entering the world), `cls` / `classes` (id or [ids]:
+only that class is offered it), `requires` ([ids], all done), `minLevel`, a quest file's `include` (E's start.json, classes.json,
+setpieces.json merged into zone `test`), `order: 'any'` (every step counts on its own; the log row carries `order:'any'` and each step
+its own `n`/`done`), `autoComplete` (paid when done, no turn-in: `questR {op:'turnin', auto:true}`), `reward.unlock`
+('companion' | 'companion2' | 'talents1', C's `rules.unlock`), `reward.perks: n` (C's `unlock('perk', {source: quest id})`); step `visit {town:'<settlement>'}` = reach that town.
+
+### 18.10 Potions and food (the lead's call after play-test 2)
+`item {op:'use', uid}` — `uid` = a bag item, or `'id:<item id>'` for a hotbar slot (the first such item; the hotbar itself is
+client-side). A consumable is a bag item with `kind:'potion'|'good'` (`js/sim/consumables.js`). Potions (healing, greater
+healing, mana, group tonic = the party within 30 m, antidote = cleanse) work in a fight and share ONE cooldown (`POTION_CD_MS`
+30 s, `you {potionCd}`); a heal restores the listed amount or a share of max, whichever is more, and is emitted as `hit {kind:
+'heal', ab:'potion'}`. Food / drink (`use.type`) are out of combat only: `regen` × max per second for `seconds` (`you {regen:
+{kind, ms}}`, then `you {regen:null}`); a fight or a hit ends the meal. Buff goods, torches, recall charms and revives answer
+`why:'notYet'` and stay in the bag. Success: `itemR {ok, id, cd?}` + `bag {remove}`. Effects go through C's `rules.restore(e,
+{hp, mp})` and `rules.cleanse(e, ids)` (js/rules/index.js, minimal hooks A added for C to own).
+
+### 18.11 Home inn, recall, buff items (C's follow-up)
+`used {kind:'npc', role:'innkeeper'}` in a town carries `bind: true, bound`; `bind {npc}` within 6 m saves `char.bind` (that town's
+room id, SAVE_FIELDS) -> `bindR {ok, town}`. A respawn in the wilds wakes you there when it is in the same province, else the
+nearest town; the recall charm (C's `rules.useItem`, a 5 s channel) goes there too. Buff goods, torches, poultices, recall charms
+and revive flasks are C's `rules.useItem` (consumables.js kind `rules`); a torch bundle keeps its charges on the bag item
+(`item.left`, journaled). The room host has `isNight()` (the realm clock). Riding speed = the mount's × (1 +
+`rules.itemBuffs(e).mountSpeedPct`) (oats), rechecked once a second (`you {speedMul}` on a change).
+
+
+## 19. Play-test 3 (2026-10-05) — still protocol v6 (every change is additive)
+
+### 19.1 Basic attacks you can draw (R5)
+Every basic attack of every weapon (melee, bows/crossbows/javelins, wands, staves incl. charged forms) sends:
+- `ev cast {s, slot:0, skill:'basic', wk, wt, el, two?, hand?, step?, wind?, every?, clip?, reach?, arc?, strike?}` at the START of the
+  swing. `wk` = how it attacks: `melee` | `arrow` | `bolt` (wand) | `staff`. `wt` = the weapon type (items.json `subtype`: sword, sword2h,
+  axe, axe2h, hammer, mace, dagger, spear, polearm, staff, wand, scepter, orb, tome, bow, crossbow, javelin; `fist` bare-handed).
+  `el` = the weapon's element (`physical` included). `wind` = ms until the hit lands; a melee swing carries `reach` (m) and `arc` (rad).
+  A bow on auto-attack sends `clip:'draw'` first, then `clip:'shoot'`.
+- the attack itself when it happens:
+  - melee: `ev fx {kind:'attack', id, wk:'melee', wt, el, shape:'swing', hand, step, x, z, yaw, reach, arc, strike?}` (the moment it lands);
+  - staff: `ev fx {kind:'attack', id, wk:'staff', wt, el, shape, spell?, charged?, x, z, yaw, r?, reach?, arc?}` — `shape` = what the
+    spell really is: `nova` (r round the caster), `cone` / `wave` (reach + arc), `jet` (charged cone), `dome` (charged nova), `wall`
+    (charged, plus `fx pool`), `bolt` / `mortar` / `storm` (plus the `fx bolt` below);
+  - wand / staff bolt: `ev fx {kind:'bolt', id, element, from, to, ms, basic:1, wk, wt, el}`; bow: `ev fx {kind:'arrow', id, element, from, to, ms, basic:1, wk:'arrow', wt, el}`.
+- every hit that lands: `ev fx {kind:'impact', id: target, src: attacker, el?, crit, killed, strike?}`.
+
+### 19.2 Other players' mana (R6+)
+- `info.mpMax` on players (0 = no mana bar). `ev mp {id, n, max}` — a player's mana, at most twice a second, only when the whole
+  number changed (health stays in the snapshot). Your own mana is still in `you`.
+- `partyFrames.m` rows grow two columns: `[char, hp, hpMax, room, x, z, dead, online, id, mp, mpMax]`.
+
+### 19.3 Events start when someone comes near (R3)
+- **Zone events** wait armed at their arena. A living player within `r + 50` m starts a countdown:
+  `zoneEvent {kind:'soon', ev, at, inMs, text}` (`at` = wall-clock ms it starts; `inMs` = 15000). Then `kind:'start'` and the waves.
+  Everyone walking away (2.5x the trigger) calls it off: `kind:'end', called:'off'`. After a run: `kind:'end', won, next, inMs`
+  (`next` = wall ms it is ready again; it rests 3-5 min). `kind:'states', zone, list:[{id, name, x, z, r, level, state, at?, near}]`
+  on every change, and the `zone` message carries the same list as `events`. `state`: `ready` (comes alive when you come near —
+  `near` = the trigger radius), `soon` (countdown, `at`), `live`, `cooldown` (`at` = ready again).
+- **Realm events** (E's `director.startOn: 'near'`): a weighted event never starts on a clock; a province process sends the
+  gateway `eventNear {id, levels}` (who stands within `r + 60` m), and the director starts it after a 15 s countdown when nothing
+  else runs, it is off cooldown, 3 min have passed since the last one and someone there is in band and at least its
+  `startOn.minLevel` (the Torborhold raid: level 3). `realm {kind:'eventSoon', ev, at, inMs, text}` — `at` is always a real time.
+  The world boss keeps its fixed schedule (announced 10 min ahead with its real `at`) and also starts early when someone in
+  band walks up after 60 quiet minutes.
+
+### 19.4 Arena objects match their call-outs (R7)
+Rules-spawned arena objects may carry `info.look` (how to dress it — `'chained'`: a pillar with a shackle ring) and `info.tether`
+(an entity id: draw a chain from this object to it; drop the chain when the object's `state` is `broken`). The Chained Saint's
+four pillars use both. Every call-out that tells you to hide behind / get into / light / pull something names an object that is
+on the floor or a zone the client draws (tests/E/playtest3.test.js).
+
+## 20. Play-test 4 (2026-10-05) — still protocol v6 (additive)
+
+### 20.1 Shops (S3)
+A stock row is only a real named item or a mount (`js/sim/shops.js` `isProduct`); a category is a filter. A buy hands out a
+COPY of the cached row (the cached stock is shared by everyone in that town copy). A buy that lands nothing: `shopR {ok:false,
+why:'item', refund}` and the gold back. One-off refunds: data/provinces/refunds.json, paid once per character per key.
+
+### 20.2 Loot (S12, S23) and containers (S5)
+`loot {op:'open', id, near?}` -> `lootWin {id, name, items:[item + corpse], gold, free?, group:[{id, name, n, gold}], corpses:[ids]}`
+over every body within `LOOT_NEAR_M` 8 m that holds something for you (`near:false` = that body only). `take {id, uid}` finds the
+item on any body of the open window; `all {id}` empties them all. `lootable {id, on, n, best, free?}` per viewer. Any entity can
+hold loot (`corpses.holdFor` / `freeOn`): a treasure chest opens in the same window.
+
+### 20.3 Waystones (S8)
+`waystone {op:'learned', key, name, how, known}` — `how`: start (the starting town's stone, always known), town (entering a
+town room), near (within 15 m).
+
+### 20.4 Champions, rares, announced mini-bosses (S4)
+Monster info: `rank` champion|rare, `aff [{id, name, aura?}]`, `sc` (scale). `bossNear {list:[{id, name, x, z, level, enc, r}]}`
+and `rareNear {id, key, name, x, z, level, rank, r}` for encounters whose file has `announce {r}`; `secret: true` ones never.
+
+### 20.5 Quests turn in remotely (S10)
+A finished quest without `needsGiver` pays at once: `questR {op:'turnin', id, auto:true, remote:true, ok, reward, next?, name,
+done?}`. `quest {op:'turnin', id}` (no npc) hands in a finished one. Quest views: `remote:true` | `needsGiver:true, remote:false`.
+
+### 20.6 Eating sits you down (S20)
+ANIMS gains `sit` (index 18). `itemR {sit:true}`, `you {regen:{kind, ms, sit:true}}` … `you {regen:null, why}`; `info.sit:1`.
+`item {op:'stand'}` (uid optional now) stands you up; movement or a jump does too (room hook `standUp`), as do a cast, a hit, a fight.
+
+### 20.7 Mount call channel (S21)
+`ev fx {kind:'channel', id, ab:'mount', name, ms}` start; `fx {kind:'channel', id, ab:'mount', name, end:'done'|'broken', why?}`
+end; `castX {ab:'mount', why:'done'}` too; `mountR {casting, until}`.
+
+### 20.8 Event rewards (S24)
+Personal per contributor: `eventDone {uid, id, name, xp, gold, items:[{name, rarity}], onBody?, text}` + a system chat line.
+At least one rare-or-better each (on the boss's body as your share when the body is there), xp/gold x `lengthFactor(minutes)`
+(1 to 2.5), gold x (1 + 0.15 x (level - 1)), a world boss x2 and an extra item.
+
+## 21. Play-test 5 (2026-10-06) — protocol v7 (every change is additive; the bump only makes an old cached client reload)
+
+Source: `agent/mmo/round-playtest5.md` T3–T25. New modules: `js/sim/crates.js`, `sysmail.js`, `feedback.js`, `angling.js`; schema v5.
+
+### 21.1 Healing an ally (T3)
+Nothing new on the wire. `target {id}` takes a friendly player or pet (anything but an object, within 60 m); `cast {slot, target}`
+hands the id to the rules; stream C's healers put a direct heal on key 1 or 2 (`bar[].ally`, `bar[].who`, `bar[].targets`).
+`partyFrames` rows carry the member's entity id (`id`, 0 in another room).
+
+### 21.2 Starter kits (T5)
+`kits {cls}` → `kitsR {cls, kits}` (stream C's `kitsFor(cls)`: three armour sets, several weapon packs, real item objects).
+`create {name, cls, look?, kit?: {armour, weapons}}`: ids are checked against the class's kits — an unknown one answers
+`err {code:'kit'}`; no `kit` at all = the old default (class weapon, plain clothes). The choice is saved on the blob (`kit`) and
+worn ONCE on the first entry (`kitV` 2): `rules.applyKit(e, {armour, weapons})` when the rules have it, else each kit item through
+`rules.equip` (a pack's second weapon into the off hand). `joined.you.kit` echoes it.
+
+### 21.3 Reviving a player (T4)
+Stream C's revive skills call `host.offerRevive(caster, target, spec)` (`spec = {skill, name, hpPct, mpPct?, ms?, note?, style?,
+apply?}`; `{ok}` or `why: 'alive'|'notPlayer'|'gone'|'busy'`). The fallen player gets **`reviveAsk {id, from (caster name), fromId,
+skill (name), skillId, hpPct, ms, until (wall ms), note?}`** and answers **`revive {op:'accept'|'decline', id}`** →
+`reviveR {op, id, ok, why?}`. Accept: the body stands up WHERE IT LIES with `hpPct` of its health, `rules.revived(e, {...spec, by})`
+runs (C adds the heal over time / shield / weakness), everyone near gets `ev fx {kind:'revive', id, by, skill, name}`, the caster
+`reviveR {op:'done', id, name, target}`. Declined / run out (`ms`, default 60 s, 5–120): the caster hears `declined` / `expired`.
+`respawn` (release to town) turns an open offer down. A reconnect while an offer is open gets the `reviveAsk` again.
+
+### 21.4 Crates and gift boxes (T9, T20)
+An item with `kind:'crate'` + `crate {slot, minRarity, min, forClass, maxLevel?}` — or `kind:'gift'` + `gift {minRarity, level?}` —
+opens with `item {op:'use'|'open', uid}`: `bag {remove:[box], add:[items]}` and `itemR {op:'use', ok, opened: {item, items, from:
+'crate'|'gift', name}}` (also `crateR {ok, uid, item, items, from}`). The roll is `rules.openCrate(e, item)`; without it
+`js/sim/crates.js` re-rolls `rollLoot` until the rarity (and the slot) is met. Level: the opener's, never above `maxLevel`.
+Quests: `reward.crates: [{slot, min, forClass?}]` → one crate item each at turn-in (`maxLevel` = quest level + 3);
+`questR.reward.crates = [{name, rarity, desc}]`; quest views carry `reward.crates [{slot, min}]`, `reward.goods`, `reward.text`.
+
+### 21.5 Events say what they are, and end (T11, T12)
+The bug: a wave stood on a ring 32–40 m round the arena and waited to be found (monsters notice a player at ~26 m), so "I killed the
+wolves and nothing happened". A wave now lands 16–24 m from the players in the arena, from one side, with a path to them, and
+stragglers are re-aimed every second (`js/sim/events.js`). A waves-only event is won when its last wave is down (it used to spawn
+a stand-in boss). Every event ENDS: `won`, or `lost` with `why` — `time` (its `durationMs`), `left` / `wiped` (nobody alive in reach
+for 60 s, zone events), `fled` (the boss is gone).
+- **`eventTrack`** — 1 Hz to everyone enrolled in or within hearing of a live or counting-down event (zone events, the realm event,
+  road events): `{uid, id, name, kind, realm, state:'soon'|'live'|'offer', what, text, goal?, objective:{kind:'wait'|'kill'|'boss'|
+  'open'|'rescue'|'deliver'|'escort'|'defend', text, n, of, hp?}, stage:{n, of, name}, wave, waves, hp, players, startsAt? (soon),
+  leftMs, endsAt (wall ms), reward:{xp, gold, items:[text], text}, rewardText, x, z, r, level, inside, inRange (= inside), credited,
+  enrolled, dist}`.
+- **`eventDone`** — to everyone enrolled or in hearing, win or lose: `{uid, id, name, result:'success'|'fail', won, why?, credited,
+  xp, gold, items:[{name, rarity}], onBody?, text, story?}` + one system chat line. `text` = "Event complete: +237 XP, +17 gold — …",
+  "Event complete: <name>. You did not take part…" or "Event failed: <name> — time ran out. <E's onFail>".
+- **`eventAt {uid|null, id?, realm?}`** when you walk into / out of an event's area (radius + 15 m); `joined.you.eventAt`.
+  `travel {to:'event'}` when you already stand in it: `travelR {ok:false, why:'here'}`.
+- `zoneEvent {kind:'end'}` gains `result`, `why`, `text`; `ev` views gain `what`, `goal`, `objective`, `stage`, `leftMs`.
+- A contributor who had left the room when an event was won gets the gold and the item by LETTER (§21.8).
+- Road events (`js/sim/roadevents.js`): the same `eventTrack` / `eventDone`; a road quest someone took on runs out after E's
+  `info.durationSec` (the quest is given up for them, `why:'time'`).
+- E's `info` block on every event (`what`, `objective`, `durationSec`, `onSuccess`, `onFail`, `rewardText`) fills the text.
+
+### 21.6 The sheet, the reach, two two-handers (T18, T14, T7)
+- **`sheet {core, advanced, abilities, …}`** = `rules.sheet(e)` (stream C's estimator; rows `{id, label, value, unit, tip}`) +
+  `{gold, bag, bagMax, angling}`. Sent after the join and after every equip / unequip / level / talent / perk / form change, and on
+  `sheet {}`. Queued, 2 a tick. Until the rules have `sheet`, A sends its own numbers marked `basic: true`.
+- `you {reach, attackRange}` rides on every `you {bar}` (a form, a stance, a weapon swap, a talent) as well as on equip.
+- `item {op:'equip', uid, slot:'offhand'}` is passed to the rules untouched; every equip answers **`itemR {op:'equip', uid, slot,
+  ok, why?, msg?}`** (a refusal carries the rules' sentence; `err {code:'item'}` is still sent). `joined.you.dual2h` / `you {dual2h}`
+  = the Doubled Grasp perk is owned.
+
+### 21.7 Feedback (T19)
+**`feedback {kind:'suggestion'|'bug', text, ctx?}`** on either socket → **`feedbackR {ok, id?, first?, why?, msg}`**
+(`why`: `kind`, `empty`, `slow`, `failed`). Limits: one every 2 s and 1000 an hour per account (play-test 6 U2; they were 20 s and 12); `text` ≤ 2000 characters; `ctx` is
+cleaned (`js/sim/feedback.js` `sanitize`: plain JSON, depth 4, strings ≤ 500, `logs` ≤ 60 lines of ≤ 300, ≤ 6 kB — trimmed, never
+refused). The server adds its own context: account, character, room, zone, position, health, target, nearby counts, running
+events, quests in the log, tick, protocol, build, time. Stored in the `feedback` table (schema v5) / the memory store AND
+appended to `<state>/feedback-<env>.jsonl` (`.data/` in the tree for dev, `/var/lib/thousandvale/` for stable; `--feedback-file`).
+
+### 21.8 System mail (T20)
+`js/sim/sysmail.js` — ONE call: `mailTo({to: charId | name, subject, body, from?, items?, gold?, gift?: {minRarity, level?},
+crate?: {slot, min}})` → `{ok, id}`. `province.mailTo`, `gateway.mailTo`, `gateway.admin.mailTo`. A system letter
+(`mail.kind === 'system'`) is taken ANYWHERE (a player's letter still in a town) and cannot be returned.
+`mailR {op:'take', ok:false, why:'bagFull', need, free}`. The first feedback of each character posts "Thank you" with a Gift Box
+(`gift {minRarity:'rare'}`), opened like a crate.
+
+### 21.9 Admins (T21)
+`accounts.admin` is set ONLY by `node tools/make-admin.mjs <username>` (never by a client). `authed.admin`, `accountR {op:'info'}.admin`
+and `joined.you.admin` tell the client. **`admin {op:'reports', state?, kind?, limit?, before?}`** → **`adminReports {list:[{id, at,
+kind, text, state, account, char, name, cls, level, client, ctx, server, note, stateAt, stateBy}], counts}`** (no `state` = all but
+trashed); **`admin {op:'report', id, state:'new'|'approved'|'declined'|'trashed', note?}`** → `adminR {ok, id, state, counts}`.
+The flag is read from the store on every call. Anyone else: `adminR {ok:false, why:'forbidden'}`. The admin page (127.0.0.1) has
+a **feedback** tab with the same list and buttons (`/api/feedback`, `/api/feedback-state`).
+`node tools/feedback-report.mjs [--env dev|stable] [--state …] [--kind …] [--since …]` prints every report as Markdown.
+
+### 21.10 Angling (T25)
+Rules: stream C's `js/rules/fishing.js` over `data/rules/fishing.json`; content: stream E's `data/provinces/angling.json` and
+`angling-pools.json`. Server: `js/sim/angling.js`.
+- **`fish {op:'cast', aim?}`** (or using a rod from the bag) → `fishR {ok, state:'wait', at, water, pool?, tier?, left?, rod}` or
+  `{ok:false, state:'idle', why:'noRod'|'noWater'|'far'|'combat'|'swim'|'dead'|'skill'|'bagFull'|'notReady', msg, need?}`.
+  No `aim`: a pool within 24 m, else the first water along where you face.
+- 2–9 s later **`fishBite {ms}`**; **`fish {op:'hook'}`** → too soon `fishR {ok:false, why:'early'}`, too late `why:'late'`, else the
+  roll: junk straight in, a monster (`fishCatch {kind:'monster', monster, monsterId}` — it climbs out beside you), anything else
+  **`fishTug {ms, band, need, pull, speed, jitter, seed, heft, rarity, hint}`** (played in the browser).
+- **`fish {op:'land', held}`** (`held` 0..1 = the share of the tug the marker stayed in the band; a tug answered early only counts
+  the part played) → **`fishCatch {ok, kind:'fish'|'junk'|'crate'|'legend', item, items, species:{id, name, rarity, legend?}, size,
+  first?, best?, record?, xp, skill:{level, xp, next, up?}, pool?:{id, left}, title?, msg?}`** or `{ok:false, lost:true, msg}`.
+- `fish {op:'stop'}`; a step of more than 2 m, a hit, a cast, swimming, dying or a room change reel in: `fishR {state:'idle', why}`.
+- Everyone near: `ev fx {kind:'fish', id, phase:'cast'|'bite'|'tug'|'landed'|'catch'|'lost'|'monster'|'end', x, z, rarity?, heft?}`,
+  `info.fishing = {x, z, tug?}`, ANIMS `fish` (19) and `reel` (20).
+- Pools: objects `type:'fishpool'`, `info.pool = {tier, minSkill, left, water}`; `meta.<zone>.live` open per copy, a fished-out one
+  goes (`fx {kind:'pool', phase:'gone'}`) and another listed spot opens 30–90 s later. The `start` pool never runs out.
+- Saved `angling = {xp, level, casts, catches:{[species]:{n, best, zone, zones}}, legends, titles, bait}`; `joined.you.angling` /
+  `you {angling}` add `next`, `rank`, `max`. Bait (`use.type:'bait'`) is used from the bag and lasts its `casts`.
+- Cooking: `used {…, cook:true}` on a campfire or an innkeeper; **`cook {}`** → `cookList {fire, level, recipes:[{id, name, desc,
+  skill, can, why?, needs:[{id, name, n, have}], makes:{id, name, text}}]}`; **`cook {id, n?}`** within 6 m of a fire (9 m of an
+  innkeeper) → `cookR {ok, item, items, n, msg}`. Meals are E's food goods (the S20 meal code eats them).
+- Quests: step kinds `catch {count, fish?, pool?, rarity?}` and `cook {count, meal?}`; `grant: [{good, count}]` on accept and
+  `reward.goods`; job frames with `giverRole:'angler'`. Fish, junk and trophies sell for their own `price`.
+
+## 22. Owner feedback 6 (2026-10-07) — still protocol v7 (additive)
+
+### 22.1 Telegraphs end with their caster (U3)
+The END of a telegraph (`teleR`) is delivered to everyone who could see the telegraph itself. It used to be routed like any event,
+by its `x` / `z` — but `teleR.x` is the "cancelled" flag (`x: 1`) and it has no place of its own, so a cancel was "at x = 1" and
+reached nobody: a dead or interrupted caster's zone stayed drawn. The room now remembers where each live `tele {id, s}` is and
+routes its `teleR` there. On top of the rules' own cancels the room ends every telegraph still running the moment its source
+dies or is removed: `teleR {id, x: 1, why: 'dead'|'gone'}`; a monster's ground pool gets `fx {kind:'pool', id, x, z, end: 1, why}`.
+A `tele` marked `after: 1` (meant to land after its caster's death) is left alone.
+
+### 22.2 Stacks (U5)
+A consumable is one bag item with `count` (1..`stackMax`, default 20): potions, and goods that are used up (food, drink, buffs,
+torches, cures, recall charms, bait, cooked meals). Never rods, parcels, crates, gifts, fish, junk, trophies or gear
+(`js/sim/consumables.js` `stackable`, `stackKey` = kind + id). Granted, looted, bought, quest-given, cooked, mailed and traded ones
+join a stack with room. A stack that changes is sent as `bag {remove:[uid], add:[the same item, same uid, new count]}`. Using
+one takes one off. `shop sell` sells the whole stack (`shopView.sell[] = {uid, price (the stack), each, count}`); mail and trade
+move a stack as one item; a login brings an old save's loose potions together. Splitting a stack is not built.
+Potion numbers may come from `shops.json` `potions` (`{id: {pct, amount}, cooldownSec}`); `potionDrops {chance: {rank: p}, table:
+[[minLevel, id]…]}` adds a potion to a kill's loot.
+
+### 22.3 Results are sentences (U9)
+`eventDone` gains `got` ("You got 237 experience, 26 gold and Savage Battleaxe." / "You did not take part, so there is no share this
+time." / "No reward this time.") and always carries `story`; `realm {kind:'eventEnd'}` gains `result: 'success'|'fail'` and `text`.
+
+### 22.4 Dungeons: the way out, the floor you died on, the lift (U10, U12, U14)
+- `type:'exit'` ("Way out") stands only on the last floor, behind the boss. The way you came in is `type:'door'` ("The way you
+  came in", `info.leave: 1`): it leaves the dungeon but is not the exit portal. No "Shortcut up".
+- `respawn` in an instance: you get up at the landing of the floor you died on (`you {floor, respawned:'floor'}`).
+- The stair up is `type:'lift'` (`info.lift = {here, floors:[…]}`). One floor above: `use {id}` takes you to its landing. Two or
+  more: `used {id, ok, kind:'lift', name, here, choices:[{to:'f:<n>', floor, label, name}]}` and the client sends `use {id, to}`;
+  a second plain `use {id}` within 4 s takes the floor just above. `use` gains `to?:str:16`.
+- Every dungeon object carries `info.floor` (1 = top) and stairs / lifts / doors / exits `info.portal: 'down'|'up'|'out'`.
+  OBJ_TYPES gains `door`, `lift`, `fishpool`.
+
+### 22.5 Small things
+- U2: feedback limits are 2 s apart and 1000 an hour.
+- U1: `mailNew {unread}` is re-sent on the game socket after `mail read`, `take` and `delete`.
+- U11: healing a party member in an instance needs no new message (`target {id}`, `cast {slot, target}`; `partyFrames` rows carry
+  the entity id). What refused it was the heal key's unlock level (stream C's data).
+- `info.form` (U16): stream C's shape object while a druid is in a shape. `info.ward` (U8): `{max, ms, until (room ms), name?}`
+  while a boss's ward holds.
+- `node tools/feedback-state.mjs <ids…> --state approved|declined|trashed|new [--env stable]`.
+
+## 23. Owner feedback 7 (2026-10-07) — still protocol v7
+
+- **The feedback letter (V1):** at level 3 (or the next login when already past it) a character that has never sent feedback gets one
+  system letter (`js/sim/feedback.js` `NUDGE`). Saved once: `char.flags.feedbackNudge`.
+- **The economy knobs (V2):** `js/sim/economy-knobs.js` — every gold number the server applies (quest, road, chest, treasure, event,
+  fare, postage, guild fee, sell-back and shop fallbacks, barber, overflow, meal value, mount prices) read from stream E's
+  `data/provinces/economy.json` (E's key names; defaults = the old numbers). `--` nothing on the wire changes.
+- **Fish pools (V3):** `liveShare` 0.6 of a zone's listed spots are open per copy; every town with a spot within 600 m keeps a
+  never-empty tier-1 pool (`info.pool.always: 1`, `info.pool.town`); spots near a town's edge are in both rooms; a cast at a pool
+  above your skill lands beside it as open water (`fishR.note`).
+
+### 23.1 D-UI's asks (owner feedback 7)
+- **Stacks:** `item {op:'split', uid, n}` -> `itemR {op:'split', ok, uid, made (the new stack's uid), count, n}` + `bag {remove:[uid], add:[both]}`;
+  `item {op:'merge', uid, onto}` -> `itemR {op:'merge', ok, onto, count, moved, left}` + `bag`. A split-off stack carries `apart: 1` and is
+  not swept back together (by loot, by a login) until it is merged or changes hands. Refusals: `count`, `bagFull`, `item`, `full`.
+- **Kits:** `kits {cls}` is answered in ANY state after `hello` (signed in or not), 40 at once: `kitsR {cls, ok, kits}` with every set and
+  pack carrying its real item objects — or `{ok:false, kits:null, why:'none'|'noItems'|'failed'}`. Never sets with empty `items`.
+- **Friends unseen:** `friends {list, unseen:[{char, name, kind:'added'|'addedYou', at}], unseenCount}` (a fresh row also has `unseen: true`);
+  `friendNew {char, name, kind:'addedYou'}` to someone who was just added; `friend {op:'seen', char?}` clears one or all. Kept in world state
+  (`friendsUnseen:<char>`), so the badge survives a reload.
+
+## 24. Owner feedback 8 (2026-10-08) — protocol v8 (every change additive; the bump makes a cached client reload)
+
+### 24.1 Feedback: completed, my reports, replies (W28, W29, W7)
+- `FEEDBACK_STATES` gains `completed`. `admin {op:'report', id, state:'completed', note}`: the note IS the changelog line the sender reads
+  (stored as `done`, apart from the admin's own `note`). `adminR {ok, id, state, done?, counts}`; `counts.completed`; rows carry `done, doneAt, ref`.
+- `feedbackMine {limit?, before?}` (or `feedback {op:'mine'}`) -> `feedbackMine {ok, list:[{id, at, kind, text, name, state, note, noteAt, adminNote, done, doneAt, ref}], more}`:
+  the ACCOUNT's reports, newest first, 50 a page. `state`: `new | approved | declined | completed | closed` (trashed reads closed). `note` = what to
+  print (completion text when completed, else the admin's note). A guest: `{ok:false, why:'guest', list:[]}`.
+- `feedback {kind, text, ctx?, ref?}`: `ref` = one of your own reports -> a NEW report whose text starts `#<ref> ` and whose row keeps `ref`
+  (`feedbackR {why:'ref'}` otherwise). `feedbackR` gains `state` and `ref`. An admin's own report arrives `approved`.
+
+### 24.2 The account, not the character (W11)
+- `joined.you.acct = {claimed, level, admin, username}`; `you {acct}` when it changes. `level` = the account's highest character. Public chat,
+  whispers to strangers, sending mail and founding a guild need a claimed account whose `acct.level` >= 5 — whatever the level of the character
+  you play. Refusals: guest -> `gate` / `chatGate` "needs a claimed account…"; claimed but no level-5 character -> `mailR {why:'level'}` /
+  `chatGate` "opens when one of your characters reaches level 5".
+
+### 24.3 Quest marks (W12)
+- `questMarks {marks: {<entity id>: 'offer'|'turnin'|'active'|'later'|'job'|null}, full?}` — `full: true` = the whole map for the room (after every
+  `joined`); otherwise a patch (null = remove). offer = gold "!", turnin = gold "?", active = grey "?", later = grey "!", job = repeatable work only
+  (dim, or nothing). Never in `info` (it is per player).
+
+### 24.4 Titles, mounts, bags, lights (W27, W26, W19, W22)
+- `info.title` only on NPCs placed for the player; filler folk and guards send `info.filler: 1` and no title. `info.guard: 1` on a town guard.
+- `mount {op:'summon'}` -> `mountR {ok, id, casting, until, stand: true}`: the server holds you still for the call (movement in `in` is ignored);
+  only a hit, death, deep water or being moved 3 m breaks it. `mount {op:'cancel'}` -> `mountR {ok, why:'cancelled'}`.
+- `you.bagMax` (joined, `sheet.bagMax`, and `you {bagMax, bagBase}` on a change) = base 40 + the worn pack's `bagSlots`. Taking a pack off / wearing a
+  smaller one over a too-full bag: `itemR {op, ok:false, why:'bagSlots', need, msg}`.
+- Lights: removed from the bag at entry (and within 5 s when one arrives later) and paid back; a system chat line + a letter say so.
+  `you.lightRange` / `you.light` = C's `LIGHT`.
+
+### 24.5 Ox carts (W5)
+- `use` a parked cart (`info.type:'cart'`, `info.vehicle:'ox_cart'`, `info.cart:<stop id>`) -> `used {kind:'cart'}` + `cartList`; `use` a carter NPC ->
+  the normal `used {kind:'npc'}` and `cartList` one tick later; `cart {op:'list', id}` asks again. A carter on the road has `info.vehicle`.
+- `cartList {id, from, name, stops:[{id, name, fare, m, s, hops?, kind?, zone?, locked?, why?, msg?}], gold, tokens, says?, roaming?}` nearest first.
+- `cart {op:'go', id, to, token?}` -> `cartR {op:'go', ok, to, name, fare, token?, ms}` | `{ok:false, why:'gold'|'far'|'fight'|'dead'|'same'|'stop'|'busy'|'level', msg}`;
+  then `cartRide {to:{id, name, x, z, province}, from:{id, name}, ms, fare, m}`; you are held for `ms`; then the transfer (`joined`, handoff via `cart`)
+  and `cartR {op:'arrive', ok:true, to, name}`. Called off by death / leaving: `cartR {op:'arrive', ok:false, why:'interrupted'}` and the fare back.
+  A `cart_token` good pays one fare when you cannot (or `token:true`). Quest step `{kind:'ride', to, from?}` is credited on arrival.
+
+### 24.6 Damage meter feed (W21)
+- `meter {on}` -> `meterR {on}`. While on, 4 Hz: `hits {l: [[src, tgt, n, flags, sk, el, over, abs], …]}` — every landed hit / heal / miss whose
+  source or target is you, a party member or one of their pets (same room). flags: 1 heal, 2 crit, 4 miss, 8 killing blow, 16 blocked, 32 dot tick,
+  64 dodged. `sk` = ability id (`dot` for a tick). `over` / `abs` are 0 until the rules' hit event carries them.
+
+### 24.7 Events (W24, W1)
+- Road chests: `used {ok:false, why:'guarded', left, keepers, msg}`; an opened chest stays 120 s or until everyone who took part has looted;
+  `eventTrack.leftMs` counts that down; `eventDone` for a chest carries `got` (and `posted: true` when your share went to the post). A chest
+  opens only in its own loot window.
+- Newcomers (under level 3 or under 10 minutes played): events with `startOn.clearOfNewcomersM` do not start near them; in a town with an
+  event live they are healed every second (a guard says why, once).
+
+## 25. Professions (round 8, W9; stream P-core) — protocol v8, additive
+
+Ten professions, skill 1-100 each: `mining` `logging` `foraging` `skinning` `angling` (gathering) and `smithing` `outfitting` `alchemy` `cooking` `tempering`
+(making). The rules are `js/rules/professions.js` (+ `professions-games.js`, `professions-temper.js`) over `data/rules/professions.json`; the server is
+`js/sim/professions.js`; the content (`data/provinces/professions.json`, `professions-nodes.json`, `data/quests/professions.json`) is made by
+`tools/content-professions.mjs`. Angling and the fish `cook` of §21.10 are unchanged; they only appear in the list (and the old `cook` now teaches Cooking).
+
+### 25.1 What you are told
+`joined.you.professions`, `you {professions}` after any change, and `sheet.professions`:
+`{ list: [{ id, name, kind: 'gather'|'make', known, level, xp, next, rank, max, tool: {id, name, tier}|null }] }` — ten rows, the order above. `angling` and
+`cooking` are known from the start; the rest are learned from a trainer.
+
+### 25.2 Nodes are per player
+A node is a room object: `info { type: 'node', name, key: 'node:<id>', r, node: { prof, kind, tier, minSkill, look: { model, size, tint, n, v }, starter? } }`
+(`look.model`: `boulder` | `tree` | `herb` | `mushroom` | `fibre`). One entity for everyone; it is SPENT only for the character who worked it — `key` is in
+`you.opened` (join) and `gatherDone { key, reopenMs }` says when it is back (6-10 minutes; 2 for the starter boulders by Torborhold's gate). A wilds copy holds
+every node of its zones; a town's room also holds the ones within 160 m of its edge. **Skinning** has no node: a beast that dies with your kill credit while you
+know Skinning sends `skinnable { id, on: true, tier, minSkill, name }` (`{ id, on: false }` once skinned or gone); the corpse lies up to a minute for you.
+
+### 25.3 The loop
+- `prof {op:'learn', id, npc}` -> `profR {op, ok, id, why?, msg?, tool?}`. A trainer = an NPC whose role is in `data/rules/professions.json` `roles` (`used.prof =
+  { trains, stations, known, toolPrice, taught? }` says so when you talk to one). Learning a gathering trade hands over its basic tool once; `op:'tool'` buys it again.
+  The prospector by Torborhold's gate teaches at the first word (`used.prof.taught`).
+- `gather {op:'start', id?}` -> `gatherR {ok, state:'play', id, prof, node:{kind, tier, name}, game, tool?}` — you are held still (`e.held = 'work'`) — or
+  `{ok:false, state:'idle', why, msg, need?}` (`far` `spent` `skill` `tool` `notLearned` `notYours` `unknown` `combat` `dead` `swim` `busy` `bagFull`).
+- `gather {op:'done', id, inputs}` -> `gatherDone {ok, id, prof, quality, score, marks, flags, items, got:[{id, name, n, icon, tint, rarity, bonus?}], xp, skill:{level, xp, next, up?}, key, reopenMs, msg}`.
+  A `fail` gives nothing and does not spend the node. `gather {op:'stop'}`, a hit, being moved more than 2 m, swimming, dying or leaving end it: `gatherR {state:'idle', why}`.
+- `craft {op:'list', npc?}` -> `craftList {ok, station:{kinds, name, npc, fire?}|null, level:{prof: n}, recipes:[row]}`; a station = within 9 m of an NPC whose role
+  has `stations`, or (cooking) a fire. Row: `{id, prof, tier, skill, name, desc, kind: 'material'|'tool'|'gear'|'potion'|'good'|'temper', can, why?, code?, needs:[{id, name, n, have}], gold, makes, bases?, level?, levels?, game, elements?}`.
+- `craft {op:'start', id, npc?, base?, n?, uid?, index?, element?}` -> `craftR {ok, state:'play', id, game, n?, cost:{needs, gold}}`; `craft {op:'done', id, inputs}` ->
+  `craftDone {ok, id, prof, quality, score, marks, flags, items, got, item?, was?, now?, xp, skill, msg}` and a fresh `craftList`. Materials and gold are taken at `done`.
+  A failed game uses nothing — except tempering, where a miss spends the materials and the fee and the item is never changed.
+- `craft {op:'quote', id, uid, index?, element?}` -> `craftQuote {ok, id, uid, can, why?, code?, needs, gold, skill, text}` (tempering: `temper_quality`,
+  `temper_promote`, `temper_reweave`, `temper_brand`, on a gear item in the BAG).
+- Everyone near: `ev fx {kind:'gather'|'craft', id, phase:'start'|'done'|'fail'|'end', prof, node?|at?, quality?}`; `info.working = {prof, anim, node?|at?}`; anims `mine` `chop` `gather` `skin` `craft`.
+
+### 25.4 The mini-games
+`game = {type, seed, ms, steps, …pattern}`; `inputs` = flat `[t0, v0, t1, v1, …]` (at most 32 pairs), `t` = ms since the game appeared. The server scores them with
+`scoreGame(game, inputs)` after `checkInputs` (strictly rising times inside `ms`, the answer not earlier than its own last input could have been played (350 ms grace)
+nor later than `ms + 4 s`, presses closer than 90 ms dropped). No score is ever sent by a client. Types: `strike` mining, `rhythm` logging, `pick` foraging,
+`trace` skinning, `forge` smithing, `stitch` outfitting, `pour` alchemy and cooking (one stage), `gauge` tempering. Marks 2 / 1 / 0 per step; quality
+`perfect` >= 0.9, `fine` >= 0.65, `good` >= 0.4, `poor` >= 0.2, else `fail`. Pattern fields per type: docs/requests.md "Round 8 contracts — P-core".
+
+### 25.5 Items and saving
+Material: `{kind:'material', id, name, desc, tier, prof, icon, tint, rarity, price, value, count, stackMax: 50}` (stacks; sells at `price` each). Tool:
+`{kind:'good', tool:true, id, use:{type:'tool', prof, tier, ease, extra}}` (no slot; using it starts on the nearest node). Crafted gear: the rules' item +
+`crafted: true`, `maker`. Saved on the character: `professions = {known:[ids], xp:{id: n}, made:{recipe: n}, tools:{prof: 1}}` (SAVE_FIELDS; journal `set`),
+and spent nodes in the existing `opened` table. Quest step kinds: `gather {prof?, mat?}`, `craft {prof?, recipe?}`, `learn {prof}`.
+
+## 25. Owner feedback 9 (2026-10-08) — still protocol v8 (additive)
+
+### 25.1 Deleting a character; the limit (X6)
+- `charList {chars, limit}` and `authed {charLimit}`: how many characters an account may hold (20; `--char-limit` / `TV_CHAR_LIMIT`). `create` past it: `err {code:'full', msg}`.
+- `delete {char, name}` (gateway) -> `deleted {ok:true, char, name, freeAt, returned}` + a fresh `charList`, or `{ok:false, why, msg}` with `why` =
+  `name` (typed name wrong) | `online` (in the world) | `lease` (left it seconds ago) | `missing` | `slow` (one every 5 s) | `failed`.
+  Letters from players that still hold items / gold go back to their senders (`returned`); other post, friend rows and the guild row go;
+  the name is reserved until `freeAt` (`create` -> `err {code:'name', msg:'…kept for a day…'}`).
+
+### 25.2 Online list and the message of the day (X1)
+- `admin {op:'online'}` -> `adminOnline {ok, at, count, accounts, list:[{char, name, level, cls, clsName, province, zone, zoneName, town, room, roomKind, where, account, username, claimed, admin}]}`
+  by name; non-admins get `adminR {ok:false, why:'forbidden'}`. Over the province socket: this process's players (`partial: true`).
+- On every `play`: `chat {ch:'system', name:'The Vale', text, motd:true, online, day}` (+ one per `lines` entry of data/ops/motd.json).
+
+### 25.3 Small things (X4, X7)
+- Barber: `used {barber:true, free, priceMult}`; `economy.json barber.mult` 0 = free.
+- `eventTrack` / `zoneEvent.ev` / `realm.ev` views gain `gate {id, x, z}` while a raid wave that came in by a gate is up.
+- `mapData.places[]` town rows gain `marks: [{name, role, x, z, q}]` (quest marks for your character).
+- Feedback rows: `server.env`, `server.server`; admin list rows `env`.
+
+### 25.6 Promote to legendary (round 9, X5)
+`temper_promote` on a RARE item needs a **Sovereign Core** (`material` `sovereign_core`): `craftQuote` carries `to: 'legendary'` and a `needs` row `{id:'sovereign_core', n:1, have, kept:true}`
+(`kept` = not spent when the gauge is missed); `craftDone` on success carries `to: 'legendary'`, `item` and `now` (the `legendary_effect` affix: `legendaryId`, `descriptor`); on a miss
+`kept: ['sovereign_core']`. The list row has `legendary: {material:{id, name}, skill}`. The core drops only from a world boss (25% per credited player) and a won event of level 8+ (5%):
+`data/rules/professions.json` `temper.legendary`.
+
+## 26. Owner feedback 10 (2026-10-08) — still protocol v8 (additive)
+- **Party (Y37):** every `partyState` carries `me` (the client lib puts it on `party.me`); it is sent again (`rejoin: true`) once the character is in the world after a login or reconnect. `partyFrames` never repeats a character.
+- **Events (Y11):** `eventSync {live:[uid…], realm, at}` after every `joined`, after a travel to a dead event, and every 15 s. `travelR {ok:false, why:'noEvent', gone:true, msg}`.
+- **Emotes (Y5):** `emote {id}` -> `emoteR`; event `emote {id:<entity>, e, ms?, end?}`. `sit` sets `info.sit`; `dance` ends by itself after 20 s, on a step, an action or a fight (`end:1`). A mount call emits `emote {e:'wave', ms}`.
+- **Tracking (Y36):** `track {char}` / `{char, off:true}` / `{char:0}` -> `trackR {ok, tracking}` | `why: notFriend | offline | hidden | full | self`; `whereabouts {l}` at 1 Hz. Setting `shareLocation` (default true).
+- **Changelog (Y30):** `GET /changelog.json`; `charList.changelog {latest, seen, first?}` (ids are the file's own strings, newest first); `settings {op:'set', data:{changelogSeen:<id>}}` (a known id, never backwards).
+- **Targets (Y8):** `targetR {ok:false, why:'empty'}` for a dead monster holding nothing for you.
+- **Angling (Y15):** `you.angling.learned`; `fishR {why:'unlearned'}`; an angler's `used {taught:'angling'}`.
+- **Classes (Y32):** `starcaller` is a valid `create.cls`. Event `teleM {id, x, z}` (C).

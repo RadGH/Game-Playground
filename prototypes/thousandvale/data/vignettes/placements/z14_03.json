@@ -1,9 +1,9 @@
 {
- "_doc": "Stream E. Content placements for world zone z14_03 (E zone 'redcliff', The Redcliff Frontier) — tools/place-vignettes.mjs against stream B's bake (terrain 8e298447). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
+ "_doc": "Stream E. Content placements for world zone z14_03 (E zone 'redcliff', The Redcliff Frontier) — tools/place-vignettes.mjs against stream B's bake (terrain 106d6a71). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
  "zone": "z14_03",
  "sheetZone": "redcliff",
  "province": "torbor_downs",
- "terrainHash": "8e298447",
+ "terrainHash": "106d6a71",
  "band": [
   6,
   8
@@ -46,22 +46,51 @@
    "gap": 30,
    "slope": 26
   },
+  "wayside": {
+   "townGap": 20,
+   "gap": 12,
+   "slope": 34,
+   "edge": 24
+  },
   "settlement": {
    "townGap": 300,
    "gap": 60,
    "slope": 10
+  },
+  "curio": {
+   "townGap": 30,
+   "gap": 10,
+   "slope": 26,
+   "edge": 30
+  },
+  "stray": {
+   "townGap": 70,
+   "gap": 16,
+   "slope": 26,
+   "edge": 30
+  },
+  "folk": {
+   "townGap": 30,
+   "gap": 12,
+   "slope": 24,
+   "edge": 30
+  },
+  "setpiece": {
+   "townGap": 20,
+   "gap": 25,
+   "slope": 20
   }
  },
- "mainWalkableShare": 0.973,
+ "mainWalkableShare": 0.976,
  "settlements": [
   {
    "name": "Redcliff",
-   "kind": "village",
-   "x": 416,
-   "z": 880,
-   "r": 65,
+   "kind": "town",
+   "x": 384,
+   "z": 864,
+   "r": 90,
    "source": "bake",
-   "bakeId": "hollowcross"
+   "bakeId": "redcliff"
   },
   {
    "name": "Cinder Farm",
@@ -70,7 +99,7 @@
    "z": 1712,
    "r": 65,
    "source": "bake",
-   "bakeId": "bolwathold"
+   "bakeId": "cinder_farm"
   },
   {
    "name": "Ravenhaven",
@@ -104,8 +133,8 @@
   {
    "id": "door_1",
    "kind": "dungeon_door",
-   "x": 556,
-   "z": 1008,
+   "x": 555,
+   "z": 1018,
    "reachable": true,
    "openShare": 1
   },
@@ -113,7 +142,7 @@
    "id": "event_redcliff",
    "kind": "event_site",
    "x": 693,
-   "z": 969,
+   "z": 955,
    "reachable": true,
    "openShare": 1
   }
@@ -121,16 +150,166 @@
  "problems": [],
  "placements": [
   {
+   "type": "folk",
+   "id": "redcliff_graveyard_slot0",
+   "in": "redcliff_graveyard",
+   "slotOf": "redcliff_graveyard",
+   "role": "sexton",
+   "name": null,
+   "work": "dig",
+   "chatter": [
+    "role.sexton",
+    "role.gravedigger"
+   ],
+   "x": 311.2,
+   "z": 968.2,
+   "yaw": 0,
+   "path": [
+    [
+     311.2,
+     968.2
+    ],
+    [
+     313.7,
+     969.2
+    ],
+    [
+     312.2,
+     970.7
+    ]
+   ]
+  },
+  {
+   "type": "folk",
+   "id": "cinder_farm_graveyard_slot0",
+   "in": "cinder_farm_graveyard",
+   "slotOf": "cinder_farm_graveyard",
+   "role": "sexton",
+   "name": null,
+   "work": "dig",
+   "chatter": [
+    "role.sexton",
+    "role.gravedigger"
+   ],
+   "x": 1197,
+   "z": 1612,
+   "yaw": 0,
+   "path": [
+    [
+     1197,
+     1612
+    ],
+    [
+     1199.5,
+     1613
+    ],
+    [
+     1198,
+     1614.5
+    ]
+   ]
+  },
+  {
+   "type": "folk",
+   "id": "ravenhaven_graveyard_slot0",
+   "in": "ravenhaven_graveyard",
+   "slotOf": "ravenhaven_graveyard",
+   "role": "sexton",
+   "name": null,
+   "work": "dig",
+   "chatter": [
+    "role.sexton",
+    "role.gravedigger"
+   ],
+   "x": 153.3,
+   "z": 310.7,
+   "yaw": 0,
+   "path": [
+    [
+     153.3,
+     310.7
+    ],
+    [
+     155.8,
+     311.7
+    ],
+    [
+     154.3,
+     313.2
+    ]
+   ]
+  },
+  {
+   "type": "folk",
+   "id": "minfenrow_graveyard_slot0",
+   "in": "minfenrow_graveyard",
+   "slotOf": "minfenrow_graveyard",
+   "role": "sexton",
+   "name": null,
+   "work": "dig",
+   "chatter": [
+    "role.sexton",
+    "role.gravedigger"
+   ],
+   "x": 1028,
+   "z": 1075.5,
+   "yaw": 0,
+   "path": [
+    [
+     1028,
+     1075.5
+    ],
+    [
+     1030.5,
+     1076.5
+    ],
+    [
+     1029,
+     1078
+    ]
+   ]
+  },
+  {
+   "type": "folk",
+   "id": "bipetwatch_graveyard_slot0",
+   "in": "bipetwatch_graveyard",
+   "slotOf": "bipetwatch_graveyard",
+   "role": "sexton",
+   "name": null,
+   "work": "dig",
+   "chatter": [
+    "role.sexton",
+    "role.gravedigger"
+   ],
+   "x": 276,
+   "z": 1492.5,
+   "yaw": 0,
+   "path": [
+    [
+     276,
+     1492.5
+    ],
+    [
+     278.5,
+     1493.5
+    ],
+    [
+     277,
+     1495
+    ]
+   ]
+  },
+  {
    "type": "fort",
    "id": "fort_redcliff_0",
    "name": "Redcliff Fort",
    "template": "palisade_fort",
    "friendly": true,
-   "x": 1464,
-   "z": 1527,
-   "yaw": -1.57,
+   "x": 1846,
+   "z": 1006,
+   "yaw": 0.79,
    "radius": 24,
-   "level": 6
+   "level": 8
   },
   {
    "type": "fort",
@@ -138,11 +317,11 @@
    "name": "Redcliff Outpost",
    "template": "palisade_fort",
    "friendly": true,
-   "x": 257,
-   "z": 724,
-   "yaw": -1.96,
+   "x": 686,
+   "z": 1112,
+   "yaw": 1.18,
    "radius": 24,
-   "level": 6
+   "level": 7
   },
   {
    "type": "farm",
@@ -151,36 +330,36 @@
    "template": "arable",
    "flavour": null,
    "settlement": "Redcliff",
-   "x": 275,
-   "z": 1325,
-   "yaw": 0.39,
+   "x": 200,
+   "z": 754,
+   "yaw": -3.14,
    "radius": 22,
    "level": 6
   },
   {
    "type": "farm",
    "id": "farm_redcliff_1",
-   "name": "Cinder Farm Sheepfold",
-   "template": "sheep",
+   "name": "Cinder Farm Farm",
+   "template": "arable",
    "flavour": null,
    "settlement": "Cinder Farm",
-   "x": 1122,
-   "z": 1789,
-   "yaw": 2.36,
-   "radius": 24,
-   "level": 6
+   "x": 1098,
+   "z": 1672,
+   "yaw": 1.18,
+   "radius": 22,
+   "level": 7
   },
   {
    "type": "farm",
    "id": "farm_redcliff_2",
-   "name": "Burned Ravenhaven Sheepfold",
-   "template": "sheep",
+   "name": "Burned Ravenhaven Farm",
+   "template": "arable",
    "flavour": "burned",
    "settlement": "Ravenhaven",
-   "x": 82,
-   "z": 133,
-   "yaw": -0.39,
-   "radius": 24,
+   "x": 97,
+   "z": 121,
+   "yaw": 0,
+   "radius": 22,
    "level": 6
   },
   {
@@ -190,24 +369,11 @@
    "template": "arable",
    "flavour": "burned",
    "settlement": "Minfenrow",
-   "x": 1155,
-   "z": 1008,
-   "yaw": -0.39,
+   "x": 1246,
+   "z": 1067,
+   "yaw": -1.57,
    "radius": 22,
-   "level": 6
-  },
-  {
-   "type": "farm",
-   "id": "farm_redcliff_4",
-   "name": "Burned Bipetwatch Farm",
-   "template": "arable",
-   "flavour": "burned",
-   "settlement": "Bipetwatch",
-   "x": 477,
-   "z": 985,
-   "yaw": -2.75,
-   "radius": 22,
-   "level": 6
+   "level": 7
   },
   {
    "type": "cave",
@@ -219,25 +385,9 @@
     "floors": 1,
     "level": 7
    },
-   "x": 642,
-   "z": 301,
-   "yaw": -1.57,
-   "radius": 10,
-   "level": 7
-  },
-  {
-   "type": "cave",
-   "id": "cave_redcliff_1",
-   "name": "Smugglers' cave",
-   "template": "smugglers_cave",
-   "plan": {
-    "family": "flooded_cistern",
-    "floors": 1,
-    "level": 7
-   },
-   "x": 551,
-   "z": 228,
-   "yaw": -1.57,
+   "x": 629,
+   "z": 292,
+   "yaw": -2.36,
    "radius": 10,
    "level": 7
   },
@@ -246,8 +396,8 @@
    "id": "the_red_cliff_face",
    "name": "The Carved Cliff",
    "kind": "compositional",
-   "x": 559,
-   "z": 408,
+   "x": 581,
+   "z": 455,
    "yaw": 0,
    "radius": 20,
    "where": "best fit for: a cliff beside a road",
@@ -255,123 +405,143 @@
   },
   {
    "type": "vignette",
-   "id": "blighted_orchard",
-   "name": "The Grey Orchard",
-   "x": 1478,
-   "z": 238,
-   "yaw": 2.26,
-   "radius": 13,
-   "biome": "grassland",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "bone_pit",
-   "name": "The Bone Pit",
-   "x": 240,
-   "z": 1946,
-   "yaw": 0.84,
+   "id": "ash_wisp_crater",
+   "name": "The Smoking Crater",
+   "x": 217,
+   "z": 1861,
+   "yaw": 2.24,
    "radius": 12,
    "biome": "savanna",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 6,
+   "levelCap": 7
+  },
+  {
+   "type": "vignette",
+   "id": "blighted_orchard",
+   "name": "The Grey Orchard",
+   "x": 1702,
+   "z": 1907,
+   "yaw": 0.97,
+   "radius": 13,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1,
+   "levelBase": 7,
+   "levelCap": 8
+  },
+  {
+   "type": "vignette",
+   "id": "charcoal_clamps",
+   "name": "The Charcoal Burners",
+   "x": 93,
+   "z": 1303,
+   "yaw": 1.9,
+   "radius": 12,
+   "biome": "temperateForest",
+   "biomeFits": true,
+   "level": 1,
+   "levelBase": 6,
+   "levelCap": 7
   },
   {
    "type": "vignette",
    "id": "cult_cellar",
    "name": "The Cloud-Shouters' Cellar",
-   "x": 1940,
-   "z": 1110,
-   "yaw": 4.85,
+   "x": 1935,
+   "z": 66,
+   "yaw": 1.46,
    "radius": 13,
    "biome": "grassland",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 7,
+   "levelCap": 8
   },
   {
    "type": "vignette",
-   "id": "cultist_altar",
-   "name": "The Sky Altar",
-   "x": 1963,
-   "z": 1874,
-   "yaw": 3.35,
-   "radius": 13,
-   "biome": "grassland",
+   "id": "drift_mine_entry",
+   "name": "The Drift Entry",
+   "x": 713,
+   "z": 1957,
+   "yaw": 6.05,
+   "radius": 10,
+   "biome": "savanna",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 7,
+   "levelCap": 8
   },
   {
    "type": "vignette",
    "id": "heretic_stake",
    "name": "The Heretic's Stake",
-   "x": 1968,
-   "z": 504,
-   "yaw": 5.02,
+   "x": 1298,
+   "z": 295,
+   "yaw": 0.15,
    "radius": 10,
    "biome": "grassland",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 7,
+   "levelCap": 8
   },
   {
    "type": "vignette",
-   "id": "miners_shrine",
-   "name": "The Miners' Lamp Shrine",
-   "x": 1530,
-   "z": 727,
-   "yaw": 5.01,
-   "radius": 8,
+   "id": "plague_pit_cairn",
+   "name": "The Lime Cairn",
+   "x": 1576,
+   "z": 1434,
+   "yaw": 5.32,
+   "radius": 10,
    "biome": "grassland",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 7,
+   "levelCap": 8
   },
   {
    "type": "vignette",
-   "id": "old_battlefield",
-   "name": "The Old Battlefield",
-   "x": 1064,
-   "z": 508,
-   "yaw": 0.74,
+   "id": "siege_camp_leftovers",
+   "name": "The Abandoned Siege Camp",
+   "x": 1732,
+   "z": 540,
+   "yaw": 4.91,
    "radius": 15,
    "biome": "grassland",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 7,
+   "levelCap": 8
   },
   {
    "type": "vignette",
-   "id": "smugglers_beacon",
-   "name": "The False Beacon",
-   "x": 631,
-   "z": 1669,
-   "yaw": 5.39,
-   "radius": 11,
-   "biome": "savanna",
-   "biomeFits": true,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "smugglers_cove",
-   "name": "Smugglers' Cove",
-   "x": 814,
-   "z": 1253,
-   "yaw": 2.12,
-   "radius": 12,
-   "biome": "temperateForest",
-   "biomeFits": false,
-   "level": 1
-  },
-  {
-   "type": "vignette",
-   "id": "wardens_cairn",
-   "name": "The Warden's Cairn",
-   "x": 1070,
-   "z": 66,
-   "yaw": 0.77,
+   "id": "slag_heap_shrine",
+   "name": "The Slag Saint",
+   "x": 1012,
+   "z": 673,
+   "yaw": 0.66,
    "radius": 10,
    "biome": "grassland",
    "biomeFits": true,
-   "level": 1
+   "level": 1,
+   "levelBase": 6,
+   "levelCap": 7
+  },
+  {
+   "type": "vignette",
+   "id": "warband_totem",
+   "name": "The Warband Totem",
+   "x": 1983,
+   "z": 1593,
+   "yaw": 2.58,
+   "radius": 11,
+   "biome": "grassland",
+   "biomeFits": true,
+   "level": 1,
+   "levelBase": 7,
+   "levelCap": 8
   },
   {
    "type": "camp",
@@ -380,14 +550,14 @@
    "with": null,
    "level": [
     6,
-    8
+    7
    ],
    "count": [
     2,
     4
    ],
-   "x": 1891,
-   "z": 100,
+   "x": 536,
+   "z": 1518,
    "yaw": 0,
    "radius": 10
   },
@@ -398,14 +568,14 @@
    "with": null,
    "level": [
     6,
-    8
+    7
    ],
    "count": [
     2,
     4
    ],
-   "x": 1560,
-   "z": 1977,
+   "x": 982,
+   "z": 79,
    "yaw": 0,
    "radius": 10
   },
@@ -422,8 +592,8 @@
     2,
     4
    ],
-   "x": 1919,
-   "z": 1487,
+   "x": 1392,
+   "z": 1817,
    "yaw": 0,
    "radius": 10
   },
@@ -440,8 +610,8 @@
     2,
     4
    ],
-   "x": 1528,
-   "z": 1099,
+   "x": 1479,
+   "z": 798,
    "yaw": 0,
    "radius": 10
   },
@@ -451,15 +621,15 @@
    "monster": "crag_hyena",
    "with": null,
    "level": [
-    6,
+    7,
     8
    ],
    "count": [
     2,
     4
    ],
-   "x": 1143,
-   "z": 1393,
+   "x": 1094,
+   "z": 1349,
    "yaw": 0,
    "radius": 10
   },
@@ -469,15 +639,15 @@
    "monster": "crag_hyena",
    "with": null,
    "level": [
-    6,
+    7,
     8
    ],
    "count": [
     2,
     4
    ],
-   "x": 923,
-   "z": 1566,
+   "x": 1105,
+   "z": 1975,
    "yaw": 0,
    "radius": 10
   },
@@ -494,8 +664,8 @@
     2,
     4
    ],
-   "x": 830,
-   "z": 1985,
+   "x": 1575,
+   "z": 99,
    "yaw": 0,
    "radius": 10
   },
@@ -512,8 +682,8 @@
     2,
     4
    ],
-   "x": 746,
-   "z": 706,
+   "x": 1962,
+   "z": 360,
    "yaw": 0,
    "radius": 10
   },
@@ -524,14 +694,14 @@
    "with": null,
    "level": [
     6,
-    8
+    7
    ],
    "count": [
     2,
     4
    ],
-   "x": 351,
-   "z": 678,
+   "x": 375,
+   "z": 1101,
    "yaw": 0,
    "radius": 10
   },
@@ -542,14 +712,14 @@
    "with": null,
    "level": [
     6,
-    8
+    7
    ],
    "count": [
     2,
     4
    ],
-   "x": 63,
-   "z": 1023,
+   "x": 670,
+   "z": 772,
    "yaw": 0,
    "radius": 10
   },
@@ -559,15 +729,15 @@
    "monster": "brigand_captain",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     1,
     2
    ],
-   "x": 402,
-   "z": 679,
+   "x": 295,
+   "z": 472,
    "yaw": 0,
    "radius": 10
   },
@@ -577,15 +747,15 @@
    "monster": "brigand_captain",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     1,
     2
    ],
-   "x": 789,
-   "z": 964,
+   "x": 113,
+   "z": 1014,
    "yaw": 0,
    "radius": 10
   },
@@ -596,14 +766,14 @@
    "with": null,
    "level": [
     6,
-    8
+    7
    ],
    "count": [
     2,
     4
    ],
-   "x": 546,
-   "z": 1221,
+   "x": 272,
+   "z": 1066,
    "yaw": 0,
    "radius": 10
   },
@@ -614,14 +784,14 @@
    "with": null,
    "level": [
     6,
-    8
+    7
    ],
    "count": [
     2,
     4
    ],
-   "x": 285,
-   "z": 1086,
+   "x": 458,
+   "z": 649,
    "yaw": 0,
    "radius": 10
   },
@@ -630,30 +800,30 @@
    "id": "rare_redfang",
    "slot": 0,
    "name": "Redfang",
-   "x": 142,
-   "z": 447,
+   "x": 524,
+   "z": 408,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     84,
-     499
+     554,
+     366
     ],
     [
-     50,
+     568,
      417
     ],
     [
-     163,
-     377
+     539,
+     460
     ],
     [
-     214,
-     401
+     477,
+     422
     ],
     [
-     198,
-     537
+     469,
+     366
     ]
    ],
    "respawnMin": [
@@ -667,30 +837,30 @@
    "id": "rare_wynn_two_strings",
    "slot": 1,
    "name": "Wynn Two-Strings",
-   "x": 702,
-   "z": 456,
+   "x": 905,
+   "z": 937,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     718,
-     364
+     826,
+     877
     ],
     [
-     787,
-     468
+     964,
+     884
     ],
     [
-     739,
-     550
+     991,
+     937
     ],
     [
-     647,
-     492
+     925,
+     1040
     ],
     [
-     663,
-     396
+     827,
+     981
     ]
    ],
    "respawnMin": [
@@ -703,8 +873,8 @@
    "type": "waystone",
    "id": "ws_z14_03_redcliff",
    "name": "Redcliff",
-   "x": 505.2,
-   "z": 877.3,
+   "x": 374.6,
+   "z": 868.8,
    "yaw": 0,
    "settlement": "Redcliff",
    "radius": 1
@@ -713,8 +883,8 @@
    "type": "waystone",
    "id": "ws_z14_03_cinder_farm",
    "name": "Cinder Farm",
-   "x": 1207,
-   "z": 1620.5,
+   "x": 1136.6,
+   "z": 1694.4,
    "yaw": 0,
    "settlement": "Cinder Farm",
    "radius": 1
@@ -723,8 +893,8 @@
    "type": "waystone",
    "id": "ws_z14_03_ravenhaven",
    "name": "Ravenhaven",
-   "x": 56.5,
-   "z": 224.8,
+   "x": 56.1,
+   "z": 218.7,
    "yaw": 0,
    "settlement": "Ravenhaven",
    "radius": 1
@@ -733,8 +903,8 @@
    "type": "waystone",
    "id": "ws_z14_03_minfenrow",
    "name": "Minfenrow",
-   "x": 1036.5,
-   "z": 1080.4,
+   "x": 1048.1,
+   "z": 1095.8,
    "yaw": 0,
    "settlement": "Minfenrow",
    "radius": 1
@@ -743,8 +913,8 @@
    "type": "waystone",
    "id": "ws_z14_03_bipetwatch",
    "name": "Bipetwatch",
-   "x": 276.5,
-   "z": 1479.5,
+   "x": 260.4,
+   "z": 1464.5,
    "yaw": 0,
    "settlement": "Bipetwatch",
    "radius": 1
@@ -752,12 +922,31 @@
   {
    "type": "waystone",
    "id": "ws_z14_03_door",
-   "name": "Barrow entrance",
-   "x": 590.7,
-   "z": 984.2,
+   "name": "Redcliff Bastion",
+   "x": 545,
+   "z": 1019.1,
    "yaw": 0,
    "door": "door_1",
    "radius": 1
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_door",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 517,
+   "z": 1013,
+   "yaw": 0,
+   "radius": 6,
+   "doorGuard": true
   },
   {
    "type": "npc",
@@ -765,9 +954,9 @@
    "name": "Commander Hild Barrowman",
    "role": "guard",
    "at": "Redcliff Fort",
-   "x": 1466.1,
-   "z": 1526.5,
-   "yaw": 4.81,
+   "x": 1846.2,
+   "z": 1003.9,
+   "yaw": 1.18,
    "radius": 1
   },
   {
@@ -776,9 +965,9 @@
    "name": "Wat of Cinder Farm",
    "role": "farmer",
    "at": "Cinder Farm",
-   "x": 1214.3,
-   "z": 1708.3,
-   "yaw": 4.83,
+   "x": 1214.7,
+   "z": 1711.2,
+   "yaw": 4.26,
    "radius": 1
   },
   {
@@ -787,9 +976,10 @@
    "name": "Quartermaster Pike",
    "role": "trader",
    "at": "Redcliff",
-   "x": 409.1,
-   "z": 890.6,
-   "yaw": 6.09,
+   "x": 412,
+   "z": 839.8,
+   "yaw": 3.216,
+   "office": "redcliff_plot_7",
    "radius": 1
   },
   {
@@ -798,9 +988,9 @@
    "name": "Scout Tamsin",
    "role": "scout",
    "at": "cult_cellar",
-   "x": 1942.1,
-   "z": 1111.4,
-   "yaw": 2.69,
+   "x": 1936.3,
+   "z": 63.8,
+   "yaw": 4.62,
    "radius": 1
   },
   {
@@ -811,8 +1001,8 @@
    "clue": "note",
    "how": null,
    "shimmer": null,
-   "x": 1465.4,
-   "z": 1525.5,
+   "x": 1847.9,
+   "z": 1005.4,
    "yaw": 0,
    "where": "fort Redcliff Fort",
    "radius": 1
@@ -825,12 +1015,9498 @@
    "clue": "carved_arrow",
    "how": null,
    "shimmer": null,
-   "x": 1158.3,
-   "z": 1672,
+   "x": 1226.1,
+   "z": 1781.6,
    "yaw": 0,
    "where": "edge of Cinder Farm",
    "radius": 1
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_redcliff_0",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 2004,
+   "z": 2022,
+   "yaw": 5.67,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_f1",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1987,
+   "z": 715,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "stone_trough_redcliff_2",
+   "kind": "stone_trough",
+   "name": "Stone Trough",
+   "x": 2008,
+   "z": 1276,
+   "yaw": 3.89,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_f3",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 941,
+   "z": 384,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "stone_trough_redcliff_4",
+   "kind": "stone_trough",
+   "name": "Stone Trough",
+   "x": 1556,
+   "z": 1120,
+   "yaw": 5.53,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_f5",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 839,
+   "z": 1497,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_redcliff_6",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1271,
+   "z": 584,
+   "yaw": 1.15,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_f7",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 485,
+   "z": 1794,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_redcliff_8",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1352,
+   "z": 1312,
+   "yaw": 0.01,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_f9",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 413,
+   "z": 175,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lonely_pier_redcliff_10",
+   "kind": "lonely_pier",
+   "name": "Bridge Pier",
+   "x": 1728,
+   "z": 1644,
+   "yaw": 2.98,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_f11",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1535,
+   "z": 359,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "toll_stone_redcliff_12",
+   "kind": "toll_stone",
+   "name": "Old Toll Stone",
+   "x": 1760,
+   "z": 1248,
+   "yaw": 5.73,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_f13",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 856,
+   "z": 1756,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "mushroom_ring_redcliff_14",
+   "kind": "mushroom_ring",
+   "name": "Mushroom Ring",
+   "x": 616,
+   "z": 37,
+   "yaw": 0.47,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_f15",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1212,
+   "z": 812,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_redcliff_16",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 800,
+   "z": 575,
+   "yaw": 0.46,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_f17",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1728,
+   "z": 792,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_redcliff_18",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 1916,
+   "z": 1816,
+   "yaw": 2,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_f19",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1748,
+   "z": 276,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_redcliff_20",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1220,
+   "z": 87,
+   "yaw": 3.72,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_f21",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1500,
+   "z": 576,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_redcliff_22",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1480,
+   "z": 1624,
+   "yaw": 3.1,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_f23",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1808,
+   "z": 1453,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_redcliff_24",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 148,
+   "z": 1660,
+   "yaw": 0.06,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_f25",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 532,
+   "z": 1292,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "scarecrow_redcliff_26",
+   "kind": "scarecrow",
+   "name": "Scarecrow",
+   "x": 1508,
+   "z": 1996,
+   "yaw": 3.96,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_f27",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 512,
+   "z": 1988,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "woodpile_stack_redcliff_28",
+   "kind": "woodpile_stack",
+   "name": "Woodpile",
+   "x": 665,
+   "z": 1688,
+   "yaw": 1.67,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_f29",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1198,
+   "z": 1281,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "beehive_row_redcliff_30",
+   "kind": "beehive_row",
+   "name": "Beehive Row",
+   "x": 792,
+   "z": 152,
+   "yaw": 5.14,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_f31",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1100,
+   "z": 248,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_redcliff_32",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 86,
+   "z": 436,
+   "yaw": 6.18,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_f33",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1112,
+   "z": 480,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_redcliff_34",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 720,
+   "z": 1340,
+   "yaw": 1.35,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_f35",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1384,
+   "z": 60,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_redcliff_36",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 912,
+   "z": 1940,
+   "yaw": 4.02,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_f37",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 60,
+   "z": 1498,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_redcliff_38",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1309,
+   "z": 1989,
+   "yaw": 3.12,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_f39",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1643,
+   "z": 960,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "wayside_well_redcliff_40",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 1424,
+   "z": 976,
+   "yaw": 1.28,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_f41",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 340,
+   "z": 1664,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_redcliff_42",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 24,
+   "z": 1840,
+   "yaw": 4.48,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_f43",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1340,
+   "z": 1501,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_redcliff_44",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1932,
+   "z": 544,
+   "yaw": 2.23,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_f45",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 270,
+   "z": 60,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_redcliff_46",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 2008,
+   "z": 900,
+   "yaw": 2.9,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_f47",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1423,
+   "z": 1546,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_1",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1736,
+   "z": 40,
+   "yaw": 2.15,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s1",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1504,
+   "z": 1272,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_2",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1968,
+   "z": 1432,
+   "yaw": 2.23,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "sand_shrine_redcliff_d1",
+   "kind": "sand_shrine",
+   "name": "Wind Shrine",
+   "x": 40,
+   "z": 1992,
+   "yaw": 0.5,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_3",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 38,
+   "z": 591,
+   "yaw": 3.01,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_4",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 352,
+   "z": 2008,
+   "yaw": 5.61,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s2",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1552,
+   "z": 1776,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_5",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 2008,
+   "z": 1120,
+   "yaw": 3.51,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "folk",
+   "id": "folk_redcliff_1",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 1000,
+   "z": 1504,
+   "yaw": 4.13,
+   "radius": 6,
+   "path": [
+    [
+     969,
+     1538
+    ],
+    [
+     1000,
+     1458
+    ],
+    [
+     1041,
+     1519
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_6",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 40,
+   "z": 856,
+   "yaw": 1.11,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s3",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1849,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "scarecrow_redcliff_d2",
+   "kind": "scarecrow",
+   "name": "Scarecrow",
+   "x": 1383,
+   "z": 448,
+   "yaw": 2.17,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_7",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1448,
+   "z": 217,
+   "yaw": 5.63,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s4",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 791,
+   "z": 313,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_8",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 896,
+   "z": 1336,
+   "yaw": 4.96,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_1",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1399,
+   "z": 1152,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1444,
+     1196
+    ],
+    [
+     1306,
+     1185
+    ],
+    [
+     1351,
+     1077
+    ],
+    [
+     1475,
+     1122
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_9",
+   "recipe": "cu_charcoal_mound",
+   "name": "Charcoal Clamp",
+   "kind": "camp",
+   "x": 857,
+   "z": 720,
+   "yaw": 1.04,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "lonely_pier_redcliff_d3",
+   "kind": "lonely_pier",
+   "name": "Bridge Pier",
+   "x": 632,
+   "z": 616,
+   "yaw": 2.48,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s5",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1830,
+   "z": 672,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_10",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 1624,
+   "z": 671,
+   "yaw": 0.94,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "folk",
+   "id": "folk_redcliff_2",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 2008,
+   "z": 210,
+   "yaw": 0.52,
+   "radius": 6,
+   "path": [
+    [
+     1971,
+     226
+    ],
+    [
+     2007,
+     177
+    ],
+    [
+     2031,
+     227
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_11",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 38,
+   "z": 1151,
+   "yaw": 6.07,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s6",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1344,
+   "z": 719,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_redcliff_d4",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 195,
+   "z": 595,
+   "yaw": 3.76,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_redcliff_d5",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1704,
+   "z": 1105,
+   "yaw": 3.38,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_12",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 928,
+   "z": 226,
+   "yaw": 5.16,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_2",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 688,
+   "z": 1535,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     703,
+     1610
+    ],
+    [
+     613,
+     1549
+    ],
+    [
+     671,
+     1456
+    ],
+    [
+     772,
+     1534
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s7",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1880,
+   "z": 824,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_13",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 944,
+   "z": 537,
+   "yaw": 3.14,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_redcliff_d6",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 632,
+   "z": 1832,
+   "yaw": 4.23,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_14",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1825,
+   "z": 417,
+   "yaw": 3.91,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s8",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 184,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_redcliff_d7",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1226,
+   "z": 1423,
+   "yaw": 3.33,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_15",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1160,
+   "z": 672,
+   "yaw": 6.16,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_16",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 472,
+   "z": 41,
+   "yaw": 5.49,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s9",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 184,
+   "z": 1183,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_17",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1880,
+   "z": 1176,
+   "yaw": 2.49,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_redcliff_d8",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1872,
+   "z": 1308,
+   "yaw": 0.17,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lonely_pier_redcliff_d9",
+   "kind": "lonely_pier",
+   "name": "Bridge Pier",
+   "x": 1862,
+   "z": 1678,
+   "yaw": 0.14,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_18",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 1671,
+   "z": 400,
+   "yaw": 0.77,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_3",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1608,
+   "z": 1576,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1586,
+     1656
+    ],
+    [
+     1514,
+     1547
+    ],
+    [
+     1617,
+     1478
+    ],
+    [
+     1674,
+     1586
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s10",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1248,
+   "z": 432,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_19",
+   "recipe": "cu_blight_pool",
+   "name": "Blight Pool",
+   "kind": "hazard",
+   "x": 560,
+   "z": 168,
+   "yaw": 2.07,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_redcliff_3",
+   "role": "scarecrow_maker",
+   "name": "Scarecrow maker",
+   "work": "gather",
+   "chatter": [
+    "role.scarecrow_maker"
+   ],
+   "x": 1344,
+   "z": 864,
+   "yaw": 1.36,
+   "radius": 6,
+   "path": [
+    [
+     1359,
+     866
+    ],
+    [
+     1336,
+     877
+    ],
+    [
+     1336,
+     844
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_20",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 360,
+   "z": 1872,
+   "yaw": 3.13,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s11",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1817,
+   "z": 154,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_redcliff_d10",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 512,
+   "z": 1152,
+   "yaw": 3.96,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_21",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 479,
+   "z": 1650,
+   "yaw": 2.21,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s12",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1768,
+   "z": 1776,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_22",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1608,
+   "z": 240,
+   "yaw": 0.61,
+   "radius": 7,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_4",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1640,
+   "z": 1304,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1605,
+     1293
+    ],
+    [
+     1650,
+     1253
+    ],
+    [
+     1683,
+     1307
+    ],
+    [
+     1614,
+     1348
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_23",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1072,
+   "z": 800,
+   "yaw": 0.66,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "cottage_corner_redcliff_d11",
+   "kind": "cottage_corner",
+   "name": "Ruined Cottage",
+   "x": 761,
+   "z": 448,
+   "yaw": 2.12,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s13",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1440,
+   "z": 1408,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_24",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 47,
+   "z": 720,
+   "yaw": 5.5,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_redcliff_4",
+   "role": "woodcutter",
+   "name": "Woodcutter",
+   "work": "chop",
+   "chatter": [
+    "role.woodcutter"
+   ],
+   "x": 1002,
+   "z": 1860,
+   "yaw": 3,
+   "radius": 6,
+   "path": [
+    [
+     989,
+     1857
+    ],
+    [
+     1008,
+     1853
+    ],
+    [
+     1003,
+     1870
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_25",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 2008,
+   "z": 1728,
+   "yaw": 4.43,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s14",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 984,
+   "z": 1241,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cart_ruts_wreck_redcliff_d12",
+   "kind": "cart_ruts_wreck",
+   "name": "Abandoned Cart",
+   "x": 856,
+   "z": 39,
+   "yaw": 4.35,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_26",
+   "recipe": "cu_fishing_rock",
+   "name": "Fishing Rock",
+   "kind": "fishing",
+   "x": 872,
+   "z": 1624,
+   "yaw": 3.67,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_5",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 416,
+   "z": 1231,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     410,
+     1264
+    ],
+    [
+     368,
+     1203
+    ],
+    [
+     434,
+     1198
+    ],
+    [
+     457,
+     1238
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s15",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1104,
+   "z": 40,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_27",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 2008,
+   "z": 1896,
+   "yaw": 5.32,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_redcliff_d13",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 1313,
+   "z": 169,
+   "yaw": 6.18,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_28",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1600,
+   "z": 840,
+   "yaw": 5.08,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s16",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 344,
+   "z": 591,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_29",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 40,
+   "z": 1720,
+   "yaw": 4.2,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_30",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1600,
+   "z": 497,
+   "yaw": 2.14,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s17",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 759,
+   "z": 1840,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_31",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 736,
+   "z": 38,
+   "yaw": 2.32,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_redcliff_d14",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 1574,
+   "z": 1895,
+   "yaw": 2.42,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_32",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 480,
+   "z": 1408,
+   "yaw": 5.95,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_6",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 241,
+   "z": 1736,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     326,
+     1701
+    ],
+    [
+     270,
+     1802
+    ],
+    [
+     174,
+     1752
+    ],
+    [
+     226,
+     1643
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s18",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1696,
+   "z": 153,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_33",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 649,
+   "z": 1248,
+   "yaw": 5.71,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_redcliff_5",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 1622,
+   "z": 2007,
+   "yaw": 1.06,
+   "radius": 6,
+   "path": [
+    [
+     1603,
+     2048
+    ],
+    [
+     1592,
+     1969
+    ],
+    [
+     1659,
+     1991
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_34",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1417,
+   "z": 330,
+   "yaw": 4.22,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s19",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1152,
+   "z": 360,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_redcliff_d15",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1864,
+   "z": 1560,
+   "yaw": 2.6,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_35",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 1827,
+   "z": 1890,
+   "yaw": 0.68,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s20",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1385,
+   "z": 607,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_36",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 736,
+   "z": 673,
+   "yaw": 4.06,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_7",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 671,
+   "z": 135,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     630,
+     146
+    ],
+    [
+     666,
+     99
+    ],
+    [
+     714,
+     133
+    ],
+    [
+     674,
+     171
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_37",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1406,
+   "z": 1935,
+   "yaw": 1.77,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_tree_redcliff_d16",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 1752,
+   "z": 914,
+   "yaw": 4.38,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s21",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 373,
+   "z": 285,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_38",
+   "recipe": "cu_hollow_stump",
+   "name": "Hollow Stump",
+   "kind": "cache",
+   "x": 963,
+   "z": 1693,
+   "yaw": 5.21,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "folk",
+   "id": "folk_redcliff_6",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 1530,
+   "z": 928,
+   "yaw": 0.64,
+   "radius": 6,
+   "path": [
+    [
+     1507,
+     903
+    ],
+    [
+     1572,
+     919
+    ],
+    [
+     1516,
+     955
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_39",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 824,
+   "z": 2008,
+   "yaw": 5,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s22",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1864,
+   "z": 295,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_redcliff_d17",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1977,
+   "z": 1008,
+   "yaw": 1.13,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_40",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 1208,
+   "z": 200,
+   "yaw": 2.73,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_8",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 170,
+   "z": 1545,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     171,
+     1585
+    ],
+    [
+     134,
+     1553
+    ],
+    [
+     159,
+     1498
+    ],
+    [
+     213,
+     1536
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s23",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 492,
+   "z": 256,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_41",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 2010,
+   "z": 464,
+   "yaw": 4.9,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_redcliff_d18",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 192,
+   "z": 424,
+   "yaw": 4.88,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_42",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 110,
+   "z": 1912,
+   "yaw": 5.86,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s24",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1664,
+   "z": 1736,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_43",
+   "recipe": "cu_fishing_rock",
+   "name": "Fishing Rock",
+   "kind": "fishing",
+   "x": 456,
+   "z": 536,
+   "yaw": 4.21,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_44",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1512,
+   "z": 689,
+   "yaw": 4.5,
+   "radius": 7,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s25",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1487,
+   "z": 462,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_45",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1088,
+   "z": 592,
+   "yaw": 3.08,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_redcliff_d19",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 1248,
+   "z": 944,
+   "yaw": 2.93,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_46",
+   "recipe": "cu_dune_idol",
+   "name": "Dune Idol",
+   "kind": "shrine",
+   "x": 992,
+   "z": 2008,
+   "yaw": 1.61,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_9",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1152,
+   "z": 1496,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1133,
+     1426
+    ],
+    [
+     1207,
+     1497
+    ],
+    [
+     1147,
+     1565
+    ],
+    [
+     1077,
+     1499
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s26",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 40,
+   "z": 1608,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_47",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 952,
+   "z": 775,
+   "yaw": 3.53,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_redcliff_7",
+   "role": "scarecrow_maker",
+   "name": "Scarecrow maker",
+   "work": "gather",
+   "chatter": [
+    "role.scarecrow_maker"
+   ],
+   "x": 1216,
+   "z": 1944,
+   "yaw": 4.7,
+   "radius": 6,
+   "path": [
+    [
+     1225,
+     1932
+    ],
+    [
+     1225,
+     1957
+    ],
+    [
+     1201,
+     1941
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_48",
+   "recipe": "cu_spring_altar",
+   "name": "Spring Altar",
+   "kind": "shrine",
+   "x": 687,
+   "z": 527,
+   "yaw": 6.17,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s27",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 867,
+   "z": 472,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_redcliff_d20",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 595,
+   "z": 1385,
+   "yaw": 0.73,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_49",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 1704,
+   "z": 1417,
+   "yaw": 3.08,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s28",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1456,
+   "z": 1728,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_50",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 808,
+   "z": 1390,
+   "yaw": 5.68,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_10",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 568,
+   "z": 1719,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     556,
+     1797
+    ],
+    [
+     500,
+     1696
+    ],
+    [
+     596,
+     1632
+    ],
+    [
+     651,
+     1723
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_51",
+   "recipe": "cu_honey_tree",
+   "name": "Honey Tree",
+   "kind": "forage",
+   "x": 1072,
+   "z": 144,
+   "yaw": 2.43,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s29",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 143,
+   "z": 506,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_redcliff_d21",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 886,
+   "z": 124,
+   "yaw": 5.13,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_redcliff_d22",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 1048,
+   "z": 392,
+   "yaw": 0.51,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s30",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 608,
+   "z": 1938,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_52",
+   "recipe": "cu_bog_hole",
+   "name": "Sucking Mire",
+   "kind": "hazard",
+   "x": 377,
+   "z": 73,
+   "yaw": 4.79,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_53",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 778,
+   "z": 782,
+   "yaw": 0.46,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_54",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 768,
+   "z": 1696,
+   "yaw": 3.14,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s31",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 2010,
+   "z": 609,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_redcliff_d23",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 912,
+   "z": 632,
+   "yaw": 4.5,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_55",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 128,
+   "z": 904,
+   "yaw": 4.05,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_56",
+   "recipe": "cu_charcoal_mound",
+   "name": "Charcoal Clamp",
+   "kind": "camp",
+   "x": 809,
+   "z": 1288,
+   "yaw": 5.69,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s32",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 456,
+   "z": 1896,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_57",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 999,
+   "z": 294,
+   "yaw": 2.42,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "cart_ruts_wreck_redcliff_d24",
+   "kind": "cart_ruts_wreck",
+   "name": "Abandoned Cart",
+   "x": 1726,
+   "z": 657,
+   "yaw": 5.51,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_58",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 584,
+   "z": 703,
+   "yaw": 2.18,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s33",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1490,
+   "z": 41,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_59",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 799,
+   "z": 1080,
+   "yaw": 3.77,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_60",
+   "recipe": "cu_tinkers_halt",
+   "name": "Tinker's Halt",
+   "kind": "camp",
+   "x": 40,
+   "z": 343,
+   "yaw": 4.9,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s34",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1784,
+   "z": 1352,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_61",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 120,
+   "z": 656,
+   "yaw": 2.09,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_redcliff_d25",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 274,
+   "z": 1952,
+   "yaw": 4.69,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_62",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1800,
+   "z": 1119,
+   "yaw": 4.31,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_11",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1920,
+   "z": 1936,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1961,
+     2008
+    ],
+    [
+     1827,
+     1961
+    ],
+    [
+     1900,
+     1874
+    ],
+    [
+     1992,
+     1875
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s35",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 992,
+   "z": 1344,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_63",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1840,
+   "z": 520,
+   "yaw": 0.48,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "folk",
+   "id": "folk_redcliff_8",
+   "role": "scarecrow_maker",
+   "name": "Scarecrow maker",
+   "work": "gather",
+   "chatter": [
+    "role.scarecrow_maker"
+   ],
+   "x": 1831,
+   "z": 41,
+   "yaw": 5.23,
+   "radius": 6,
+   "path": [
+    [
+     1816,
+     55
+    ],
+    [
+     1825,
+     22
+    ],
+    [
+     1847,
+     48
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_64",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1769,
+   "z": 1553,
+   "yaw": 0.37,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s36",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 544,
+   "z": 576,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_redcliff_d26",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 40,
+   "z": 1392,
+   "yaw": 3.91,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_65",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1478,
+   "z": 1871,
+   "yaw": 4.05,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s37",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 744,
+   "z": 1216,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_66",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1321,
+   "z": 1401,
+   "yaw": 1.95,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_12",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 311,
+   "z": 367,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     327,
+     458
+    ],
+    [
+     228,
+     381
+    ],
+    [
+     266,
+     304
+    ],
+    [
+     404,
+     355
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_67",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 856,
+   "z": 1864,
+   "yaw": 4.88,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_redcliff_d27",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 1174,
+   "z": 560,
+   "yaw": 3.15,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s38",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1256,
+   "z": 680,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_68",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 384,
+   "z": 1785,
+   "yaw": 6.02,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_redcliff_9",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 1728,
+   "z": 1016,
+   "yaw": 5.13,
+   "radius": 6,
+   "path": [
+    [
+     1751,
+     977
+    ],
+    [
+     1754,
+     1046
+    ],
+    [
+     1678,
+     1038
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_69",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 440,
+   "z": 1560,
+   "yaw": 2.57,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s39",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1920,
+   "z": 449,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_redcliff_d28",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 960,
+   "z": 1144,
+   "yaw": 2.85,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_70",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 1128,
+   "z": 872,
+   "yaw": 0.56,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_13",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1920,
+   "z": 639,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1955,
+     610
+    ],
+    [
+     1942,
+     689
+    ],
+    [
+     1876,
+     669
+    ],
+    [
+     1875,
+     602
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s40",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 176,
+   "z": 1087,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_71",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 278,
+   "z": 1168,
+   "yaw": 5.17,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_redcliff_d29",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1919,
+   "z": 1088,
+   "yaw": 4.79,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_72",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1575,
+   "z": 1032,
+   "yaw": 4.25,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s41",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 176,
+   "z": 40,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_73",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1015,
+   "z": 480,
+   "yaw": 2.28,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_74",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1312,
+   "z": 504,
+   "yaw": 0.77,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s42",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 41,
+   "z": 950,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_75",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 1912,
+   "z": 912,
+   "yaw": 3.75,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_redcliff_d30",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1330,
+   "z": 984,
+   "yaw": 3.61,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_76",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 911,
+   "z": 1424,
+   "yaw": 1.61,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_14",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1455,
+   "z": 128,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1499,
+     214
+    ],
+    [
+     1396,
+     141
+    ],
+    [
+     1448,
+     61
+    ],
+    [
+     1536,
+     117
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s43",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 2008,
+   "z": 808,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_77",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 1630,
+   "z": 1823,
+   "yaw": 5.11,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "folk",
+   "id": "folk_redcliff_10",
+   "role": "charcoal_burner",
+   "name": "Charcoal burner",
+   "work": "watch",
+   "chatter": [
+    "role.charcoal_burner"
+   ],
+   "x": 192,
+   "z": 1280,
+   "yaw": 2.74,
+   "radius": 6,
+   "path": [
+    [
+     206,
+     1272
+    ],
+    [
+     195,
+     1295
+    ],
+    [
+     175,
+     1276
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_78",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 744,
+   "z": 232,
+   "yaw": 1.72,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s44",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 840,
+   "z": 232,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_redcliff_d31",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 112,
+   "z": 1824,
+   "yaw": 6.24,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_79",
+   "recipe": "cu_honey_tree",
+   "name": "Honey Tree",
+   "kind": "forage",
+   "x": 712,
+   "z": 360,
+   "yaw": 5.11,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s45",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1647,
+   "z": 40,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_80",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 1640,
+   "z": 576,
+   "yaw": 1.61,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_15",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1583,
+   "z": 752,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1518,
+     733
+    ],
+    [
+     1604,
+     698
+    ],
+    [
+     1634,
+     771
+    ],
+    [
+     1579,
+     811
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_81",
+   "recipe": "cu_empty_gallows_post",
+   "name": "Weathered Post",
+   "kind": "lore",
+   "x": 1952,
+   "z": 1344,
+   "yaw": 4.41,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "wayside_well_redcliff_d32",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 1567,
+   "z": 1207,
+   "yaw": 0.37,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s46",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1624,
+   "z": 328,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_82",
+   "recipe": "cu_hollow_stump",
+   "name": "Hollow Stump",
+   "kind": "cache",
+   "x": 599,
+   "z": 1176,
+   "yaw": 1.73,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_redcliff_11",
+   "role": "woodcutter",
+   "name": "Woodcutter",
+   "work": "chop",
+   "chatter": [
+    "role.woodcutter"
+   ],
+   "x": 848,
+   "z": 383,
+   "yaw": 4.04,
+   "radius": 6,
+   "path": [
+    [
+     838,
+     376
+    ],
+    [
+     859,
+     374
+    ],
+    [
+     847,
+     391
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_83",
+   "recipe": "cu_empty_gallows_post",
+   "name": "Weathered Post",
+   "kind": "lore",
+   "x": 1217,
+   "z": 1184,
+   "yaw": 0.75,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s47",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1753,
+   "z": 368,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_redcliff_d33",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 1968,
+   "z": 1200,
+   "yaw": 2.6,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_84",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1520,
+   "z": 1360,
+   "yaw": 0.77,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_16",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 105,
+   "z": 791,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     76,
+     848
+    ],
+    [
+     67,
+     759
+    ],
+    [
+     132,
+     738
+    ],
+    [
+     138,
+     814
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s48",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1816,
+   "z": 760,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_85",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 578,
+   "z": 920,
+   "yaw": 2.99,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_redcliff_d34",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1896,
+   "z": 1477,
+   "yaw": 0.12,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_86",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1913,
+   "z": 160,
+   "yaw": 2.31,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s49",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 800,
+   "z": 1928,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_87",
+   "recipe": "cu_desert_melon",
+   "name": "Bitter Melons",
+   "kind": "forage",
+   "x": 1752,
+   "z": 2009,
+   "yaw": 2.06,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_88",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 1328,
+   "z": 384,
+   "yaw": 4.77,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s50",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1641,
+   "z": 1159,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_89",
+   "recipe": "cu_boundary_cross",
+   "name": "Boundary Cross",
+   "kind": "marker",
+   "x": 1881,
+   "z": 1391,
+   "yaw": 0.41,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_redcliff_d35",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1207,
+   "z": 289,
+   "yaw": 2.28,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_90",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1296,
+   "z": 40,
+   "yaw": 3.6,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_91",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 944,
+   "z": 1776,
+   "yaw": 5.03,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s51",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1007,
+   "z": 201,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_92",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 1423,
+   "z": 528,
+   "yaw": 3.88,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "folk",
+   "id": "folk_redcliff_12",
+   "role": "charcoal_burner",
+   "name": "Charcoal burner",
+   "work": "watch",
+   "chatter": [
+    "role.charcoal_burner"
+   ],
+   "x": 464,
+   "z": 1080,
+   "yaw": 1.89,
+   "radius": 6,
+   "path": [
+    [
+     467,
+     1089
+    ],
+    [
+     452,
+     1080
+    ],
+    [
+     469,
+     1074
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_93",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 264,
+   "z": 640,
+   "yaw": 3.22,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s52",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1008,
+   "z": 1616,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cottage_corner_redcliff_d36",
+   "kind": "cottage_corner",
+   "name": "Ruined Cottage",
+   "x": 40,
+   "z": 504,
+   "yaw": 0.2,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_94",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1368,
+   "z": 239,
+   "yaw": 3.68,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s53",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1432,
+   "z": 720,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_95",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 42,
+   "z": 1064,
+   "yaw": 0.68,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_96",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 1073,
+   "z": 1256,
+   "yaw": 3.53,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_97",
+   "recipe": "cu_eel_trap",
+   "name": "Eel Trap",
+   "kind": "fishing",
+   "x": 541,
+   "z": 79,
+   "yaw": 1.48,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_redcliff_d37",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1271,
+   "z": 1328,
+   "yaw": 4.7,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s54",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1086,
+   "z": 720,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_98",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 1432,
+   "z": 1320,
+   "yaw": 4.09,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "folk",
+   "id": "folk_redcliff_13",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 1680,
+   "z": 871,
+   "yaw": 0.4,
+   "radius": 6,
+   "path": [
+    [
+     1656,
+     875
+    ],
+    [
+     1688,
+     849
+    ],
+    [
+     1691,
+     892
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_99",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 96,
+   "z": 1207,
+   "yaw": 0.21,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s55",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1855,
+   "z": 1761,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_redcliff_d38",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1944,
+   "z": 1672,
+   "yaw": 1.57,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_100",
+   "recipe": "cu_charcoal_mound",
+   "name": "Charcoal Clamp",
+   "kind": "camp",
+   "x": 41,
+   "z": 40,
+   "yaw": 2.3,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_17",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1151,
+   "z": 128,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1172,
+     64
+    ],
+    [
+     1235,
+     150
+    ],
+    [
+     1111,
+     190
+    ],
+    [
+     1075,
+     76
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s56",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1496,
+   "z": 1040,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_101",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 2008,
+   "z": 1504,
+   "yaw": 6.06,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_redcliff_d39",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 632,
+   "z": 856,
+   "yaw": 2.31,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_102",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 305,
+   "z": 1585,
+   "yaw": 3.04,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s57",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1832,
+   "z": 896,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_103",
+   "recipe": "cu_boundary_cross",
+   "name": "Boundary Cross",
+   "kind": "marker",
+   "x": 896,
+   "z": 1257,
+   "yaw": 2.81,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_104",
+   "recipe": "cu_desert_melon",
+   "name": "Bitter Melons",
+   "kind": "forage",
+   "x": 414,
+   "z": 1708,
+   "yaw": 1.76,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s58",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 545,
+   "z": 1882,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_105",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 264,
+   "z": 552,
+   "yaw": 3.93,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_redcliff_d40",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 118,
+   "z": 1415,
+   "yaw": 5.69,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_106",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1007,
+   "z": 585,
+   "yaw": 4.51,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_18",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1704,
+   "z": 1504,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1709,
+     1547
+    ],
+    [
+     1654,
+     1519
+    ],
+    [
+     1692,
+     1460
+    ],
+    [
+     1750,
+     1496
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s59",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 792,
+   "z": 1616,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_107",
+   "recipe": "cu_honey_tree",
+   "name": "Honey Tree",
+   "kind": "forage",
+   "x": 872,
+   "z": 799,
+   "yaw": 2.98,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_redcliff_14",
+   "role": "scarecrow_maker",
+   "name": "Scarecrow maker",
+   "work": "gather",
+   "chatter": [
+    "role.scarecrow_maker"
+   ],
+   "x": 1328,
+   "z": 1912,
+   "yaw": 1.99,
+   "radius": 6,
+   "path": [
+    [
+     1329,
+     1900
+    ],
+    [
+     1338,
+     1920
+    ],
+    [
+     1316,
+     1913
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_108",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 904,
+   "z": 304,
+   "yaw": 4.83,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s60",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 584,
+   "z": 1096,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_redcliff_d41",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 424,
+   "z": 1975,
+   "yaw": 4.11,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_109",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 721,
+   "z": 839,
+   "yaw": 5.61,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s61",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 720,
+   "z": 1768,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_110",
+   "recipe": "cu_drowned_saint",
+   "name": "Drowned Saint",
+   "kind": "shrine",
+   "x": 488,
+   "z": 136,
+   "yaw": 6,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_19",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1736,
+   "z": 448,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1760,
+     372
+    ],
+    [
+     1804,
+     461
+    ],
+    [
+     1712,
+     509
+    ],
+    [
+     1679,
+     425
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_111",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 448,
+   "z": 1336,
+   "yaw": 4.7,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_redcliff_d42",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 752,
+   "z": 1447,
+   "yaw": 0.22,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s62",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 336,
+   "z": 145,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_112",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1735,
+   "z": 1177,
+   "yaw": 2.06,
+   "radius": 7,
+   "levelBase": 7
+  },
+  {
+   "type": "folk",
+   "id": "folk_redcliff_15",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 1375,
+   "z": 1237,
+   "yaw": 4.19,
+   "radius": 6,
+   "path": [
+    [
+     1408,
+     1246
+    ],
+    [
+     1351,
+     1265
+    ],
+    [
+     1366,
+     1196
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_113",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 1080,
+   "z": 1897,
+   "yaw": 6.26,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s63",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 649,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_redcliff_d43",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 1047,
+   "z": 880,
+   "yaw": 2.67,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_redcliff_d44",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1929,
+   "z": 1256,
+   "yaw": 1.8,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_114",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1288,
+   "z": 776,
+   "yaw": 5.84,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_20",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 712,
+   "z": 600,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     700,
+     548
+    ],
+    [
+     747,
+     592
+    ],
+    [
+     718,
+     634
+    ],
+    [
+     673,
+     609
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s64",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 826,
+   "z": 647,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_115",
+   "recipe": "cu_bog_hole",
+   "name": "Sucking Mire",
+   "kind": "hazard",
+   "x": 365,
+   "z": 666,
+   "yaw": 5.56,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_redcliff_d45",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 1432,
+   "z": 2008,
+   "yaw": 3.97,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_116",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 1784,
+   "z": 1696,
+   "yaw": 2.47,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s65",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1482,
+   "z": 1466,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_117",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1808,
+   "z": 1624,
+   "yaw": 2.64,
+   "radius": 7,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_118",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1231,
+   "z": 512,
+   "yaw": 3.05,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s66",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1840,
+   "z": 1240,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_119",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1177,
+   "z": 1360,
+   "yaw": 6.06,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_tree_redcliff_d46",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 1584,
+   "z": 424,
+   "yaw": 3.5,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_120",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 1782,
+   "z": 610,
+   "yaw": 2.61,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_21",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1817,
+   "z": 232,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1764,
+     190
+    ],
+    [
+     1845,
+     202
+    ],
+    [
+     1865,
+     279
+    ],
+    [
+     1787,
+     270
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s67",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 208,
+   "z": 1015,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_121",
+   "recipe": "cu_fishing_rock",
+   "name": "Fishing Rock",
+   "kind": "fishing",
+   "x": 466,
+   "z": 1483,
+   "yaw": 2.4,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_redcliff_16",
+   "role": "scarecrow_maker",
+   "name": "Scarecrow maker",
+   "work": "gather",
+   "chatter": [
+    "role.scarecrow_maker"
+   ],
+   "x": 687,
+   "z": 1880,
+   "yaw": 5.88,
+   "radius": 6,
+   "path": [
+    [
+     701,
+     1870
+    ],
+    [
+     692,
+     1895
+    ],
+    [
+     671,
+     1872
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_122",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1440,
+   "z": 400,
+   "yaw": 1.65,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s68",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 872,
+   "z": 552,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_redcliff_d47",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 656,
+   "z": 688,
+   "yaw": 5.74,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_123",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 1161,
+   "z": 752,
+   "yaw": 2.47,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s69",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1399,
+   "z": 791,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_124",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 872,
+   "z": 1096,
+   "yaw": 2.81,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_22",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1704,
+   "z": 1823,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1743,
+     1794
+    ],
+    [
+     1738,
+     1862
+    ],
+    [
+     1670,
+     1849
+    ],
+    [
+     1687,
+     1794
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_125",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1408,
+   "z": 1624,
+   "yaw": 1.73,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_redcliff_d48",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 648,
+   "z": 1328,
+   "yaw": 5.21,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s70",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 103,
+   "z": 1119,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_126",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1568,
+   "z": 615,
+   "yaw": 1.8,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "folk",
+   "id": "folk_redcliff_17",
+   "role": "woodcutter",
+   "name": "Woodcutter",
+   "work": "chop",
+   "chatter": [
+    "role.woodcutter"
+   ],
+   "x": 391,
+   "z": 1024,
+   "yaw": 1.24,
+   "radius": 6,
+   "path": [
+    [
+     400,
+     1037
+    ],
+    [
+     369,
+     1025
+    ],
+    [
+     404,
+     1006
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_127",
+   "recipe": "cu_hollow_stump",
+   "name": "Hollow Stump",
+   "kind": "cache",
+   "x": 935,
+   "z": 703,
+   "yaw": 2.5,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s71",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1488,
+   "z": 296,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "beehive_row_redcliff_d49",
+   "kind": "beehive_row",
+   "name": "Beehive Row",
+   "x": 112,
+   "z": 576,
+   "yaw": 2.79,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_128",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1432,
+   "z": 888,
+   "yaw": 5.91,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_23",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1272,
+   "z": 1256,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1223,
+     1227
+    ],
+    [
+     1313,
+     1211
+    ],
+    [
+     1320,
+     1288
+    ],
+    [
+     1248,
+     1315
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s72",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 616,
+   "z": 546,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_129",
+   "recipe": "cu_desert_melon",
+   "name": "Bitter Melons",
+   "kind": "forage",
+   "x": 112,
+   "z": 1984,
+   "yaw": 4,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_redcliff_d50",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 591,
+   "z": 1463,
+   "yaw": 5.79,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_130",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 1936,
+   "z": 1744,
+   "yaw": 3.02,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s73",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 408,
+   "z": 1624,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_131",
+   "recipe": "cu_samphire",
+   "name": "Samphire Flats",
+   "kind": "forage",
+   "x": 567,
+   "z": 240,
+   "yaw": 5.46,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_132",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 1455,
+   "z": 640,
+   "yaw": 2.71,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s74",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 688,
+   "z": 440,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_133",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1529,
+   "z": 1703,
+   "yaw": 5.99,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "cart_ruts_wreck_redcliff_d51",
+   "kind": "cart_ruts_wreck",
+   "name": "Abandoned Cart",
+   "x": 1071,
+   "z": 320,
+   "yaw": 1.07,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_134",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 1240,
+   "z": 351,
+   "yaw": 3.82,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_24",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1992,
+   "z": 1800,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1941,
+     1845
+    ],
+    [
+     1950,
+     1753
+    ],
+    [
+     2038,
+     1758
+    ],
+    [
+     2025,
+     1878
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s75",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1199,
+   "z": 888,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_135",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 944,
+   "z": 463,
+   "yaw": 3.65,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_redcliff_18",
+   "role": "beekeeper",
+   "name": "Beekeeper",
+   "work": "gather",
+   "chatter": [
+    "role.beekeeper"
+   ],
+   "x": 1880,
+   "z": 368,
+   "yaw": 2.74,
+   "radius": 6,
+   "path": [
+    [
+     1875,
+     366
+    ],
+    [
+     1886,
+     364
+    ],
+    [
+     1881,
+     377
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_136",
+   "recipe": "cu_blight_pool",
+   "name": "Blight Pool",
+   "kind": "hazard",
+   "x": 381,
+   "z": 533,
+   "yaw": 6.1,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s76",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 39,
+   "z": 1919,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "scarecrow_redcliff_d52",
+   "kind": "scarecrow",
+   "name": "Scarecrow",
+   "x": 1920,
+   "z": 759,
+   "yaw": 2.48,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_137",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1688,
+   "z": 719,
+   "yaw": 0.84,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s77",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1424,
+   "z": 1064,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_138",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 186,
+   "z": 672,
+   "yaw": 1.17,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_25",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 792,
+   "z": 81,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     734,
+     111
+    ],
+    [
+     787,
+     31
+    ],
+    [
+     845,
+     72
+    ],
+    [
+     797,
+     153
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_139",
+   "recipe": "cu_honey_tree",
+   "name": "Honey Tree",
+   "kind": "forage",
+   "x": 2008,
+   "z": 96,
+   "yaw": 0.81,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "hay_rick_redcliff_d53",
+   "kind": "hay_rick",
+   "name": "Hay Rick",
+   "x": 895,
+   "z": 2008,
+   "yaw": 1.21,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s78",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 216,
+   "z": 496,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_140",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 952,
+   "z": 153,
+   "yaw": 2.03,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_redcliff_19",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 1624,
+   "z": 169,
+   "yaw": 1.26,
+   "radius": 6,
+   "path": [
+    [
+     1617,
+     188
+    ],
+    [
+     1614,
+     155
+    ],
+    [
+     1639,
+     166
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_141",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1792,
+   "z": 832,
+   "yaw": 2.19,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s79",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 2000,
+   "z": 536,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "wayside_well_redcliff_d54",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 1677,
+   "z": 233,
+   "yaw": 1.67,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_redcliff_d55",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 758,
+   "z": 1159,
+   "yaw": 3.39,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_142",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1474,
+   "z": 1798,
+   "yaw": 1.07,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_26",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 519,
+   "z": 1592,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     489,
+     1542
+    ],
+    [
+     582,
+     1563
+    ],
+    [
+     554,
+     1639
+    ],
+    [
+     457,
+     1636
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s80",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1626,
+   "z": 1089,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_143",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 199,
+   "z": 1935,
+   "yaw": 0.06,
+   "radius": 7,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "wayside_well_redcliff_d56",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 1321,
+   "z": 639,
+   "yaw": 5.75,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_144",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 1952,
+   "z": 856,
+   "yaw": 3.01,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s81",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1905,
+   "z": 1616,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_145",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 2010,
+   "z": 296,
+   "yaw": 4.89,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_146",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 633,
+   "z": 1040,
+   "yaw": 4.66,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s82",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1272,
+   "z": 224,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_redcliff_d57",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1371,
+   "z": 1591,
+   "yaw": 3.29,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_147",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1176,
+   "z": 440,
+   "yaw": 0.63,
+   "radius": 7,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_redcliff_d58",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 536,
+   "z": 648,
+   "yaw": 4.05,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_148",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 40,
+   "z": 1248,
+   "yaw": 4.31,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_27",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1760,
+   "z": 104,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1703,
+     125
+    ],
+    [
+     1745,
+     43
+    ],
+    [
+     1828,
+     102
+    ],
+    [
+     1765,
+     202
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s83",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 536,
+   "z": 1216,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_149",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 1943,
+   "z": 1528,
+   "yaw": 4.04,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "folk",
+   "id": "folk_redcliff_20",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 1017,
+   "z": 751,
+   "yaw": 5.39,
+   "radius": 6,
+   "path": [
+    [
+     1027,
+     732
+    ],
+    [
+     1026,
+     764
+    ],
+    [
+     994,
+     751
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_150",
+   "recipe": "cu_bog_hole",
+   "name": "Sucking Mire",
+   "kind": "hazard",
+   "x": 703,
+   "z": 288,
+   "yaw": 3.6,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s84",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1040,
+   "z": 1942,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_redcliff_d59",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1408,
+   "z": 1472,
+   "yaw": 3.61,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_151",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1072,
+   "z": 1584,
+   "yaw": 3.35,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s85",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 352,
+   "z": 216,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_152",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 295,
+   "z": 1232,
+   "yaw": 2.77,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_28",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1936,
+   "z": 288,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1986,
+     238
+    ],
+    [
+     1975,
+     334
+    ],
+    [
+     1900,
+     354
+    ],
+    [
+     1872,
+     241
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_153",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 896,
+   "z": 1688,
+   "yaw": 4.01,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_redcliff_d60",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 920,
+   "z": 1840,
+   "yaw": 6.22,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s86",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1021,
+   "z": 1774,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_154",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 296,
+   "z": 1888,
+   "yaw": 3.23,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_redcliff_21",
+   "role": "scarecrow_maker",
+   "name": "Scarecrow maker",
+   "work": "gather",
+   "chatter": [
+    "role.scarecrow_maker"
+   ],
+   "x": 347,
+   "z": 1934,
+   "yaw": 4.02,
+   "radius": 6,
+   "path": [
+    [
+     356,
+     1949
+    ],
+    [
+     332,
+     1933
+    ],
+    [
+     353,
+     1917
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_155",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 912,
+   "z": 1497,
+   "yaw": 0.65,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s87",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1175,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_redcliff_d61",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1042,
+   "z": 1399,
+   "yaw": 5.05,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_156",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1656,
+   "z": 1664,
+   "yaw": 0.4,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_29",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 104,
+   "z": 1744,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     64,
+     1719
+    ],
+    [
+     131,
+     1691
+    ],
+    [
+     155,
+     1765
+    ],
+    [
+     82,
+     1797
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s88",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 800,
+   "z": 504,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_157",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 935,
+   "z": 1600,
+   "yaw": 5.68,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_redcliff_d62",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1824,
+   "z": 1824,
+   "yaw": 2.85,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_158",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1207,
+   "z": 625,
+   "yaw": 6.21,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s89",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1536,
+   "z": 511,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_159",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 1272,
+   "z": 1471,
+   "yaw": 4.55,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_160",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1696,
+   "z": 328,
+   "yaw": 0.17,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s90",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1024,
+   "z": 1185,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_161",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 136,
+   "z": 392,
+   "yaw": 2.69,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "sheep_pen_redcliff_d63",
+   "kind": "sheep_pen",
+   "name": "Sheep Pen",
+   "x": 2006,
+   "z": 1375,
+   "yaw": 1.39,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_162",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 40,
+   "z": 656,
+   "yaw": 2.54,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_30",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1320,
+   "z": 105,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1243,
+     106
+    ],
+    [
+     1315,
+     10
+    ],
+    [
+     1414,
+     98
+    ],
+    [
+     1329,
+     168
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s91",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1264,
+   "z": 862,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_163",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 1560,
+   "z": 288,
+   "yaw": 0.91,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "folk",
+   "id": "folk_redcliff_22",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 1760,
+   "z": 720,
+   "yaw": 5.51,
+   "radius": 6,
+   "path": [
+    [
+     1722,
+     727
+    ],
+    [
+     1780,
+     683
+    ],
+    [
+     1782,
+     735
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_164",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1384,
+   "z": 1368,
+   "yaw": 2.06,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s92",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 416,
+   "z": 591,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_tree_redcliff_d64",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 1056,
+   "z": 537,
+   "yaw": 4.19,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_165",
+   "recipe": "cu_buried_crock",
+   "name": "Buried Crock",
+   "kind": "cache",
+   "x": 159,
+   "z": 960,
+   "yaw": 5.9,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s93",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 832,
+   "z": 1681,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_166",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1512,
+   "z": 1928,
+   "yaw": 4.82,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_31",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1136,
+   "z": 1240,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1144,
+     1176
+    ],
+    [
+     1220,
+     1250
+    ],
+    [
+     1128,
+     1294
+    ],
+    [
+     1058,
+     1251
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_167",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 600,
+   "z": 768,
+   "yaw": 2.01,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_redcliff_d65",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 768,
+   "z": 1025,
+   "yaw": 3.58,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s94",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 416,
+   "z": 1841,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_168",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 880,
+   "z": 1560,
+   "yaw": 2.52,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "folk",
+   "id": "folk_redcliff_23",
+   "role": "woodcutter",
+   "name": "Woodcutter",
+   "work": "chop",
+   "chatter": [
+    "role.woodcutter"
+   ],
+   "x": 792,
+   "z": 712,
+   "yaw": 4.74,
+   "radius": 6,
+   "path": [
+    [
+     773,
+     711
+    ],
+    [
+     800,
+     701
+    ],
+    [
+     800,
+     728
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_169",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1333,
+   "z": 1778,
+   "yaw": 1.01,
+   "radius": 7,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s95",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1072,
+   "z": 1824,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_redcliff_d66",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 760,
+   "z": 2008,
+   "yaw": 3.85,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_170",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 921,
+   "z": 48,
+   "yaw": 3.89,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_171",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1368,
+   "z": 2008,
+   "yaw": 0.88,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s96",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 144,
+   "z": 1353,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_172",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1856,
+   "z": 1088,
+   "yaw": 0.16,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_redcliff_d67",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 896,
+   "z": 864,
+   "yaw": 3.45,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_173",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1225,
+   "z": 745,
+   "yaw": 5.83,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s97",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1362,
+   "z": 544,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_174",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 1382,
+   "z": 928,
+   "yaw": 2.64,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_175",
+   "recipe": "cu_hollow_stump",
+   "name": "Hollow Stump",
+   "kind": "cache",
+   "x": 944,
+   "z": 1299,
+   "yaw": 1.49,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s98",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 520,
+   "z": 1360,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_176",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 528,
+   "z": 1449,
+   "yaw": 4.89,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_redcliff_d68",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 927,
+   "z": 1200,
+   "yaw": 0.07,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_177",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1146,
+   "z": 1903,
+   "yaw": 4.27,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_32",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1801,
+   "z": 1184,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1739,
+     1163
+    ],
+    [
+     1828,
+     1144
+    ],
+    [
+     1848,
+     1210
+    ],
+    [
+     1780,
+     1236
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s99",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 992,
+   "z": 823,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_178",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 433,
+   "z": 104,
+   "yaw": 2.93,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_redcliff_24",
+   "role": "woodcutter",
+   "name": "Woodcutter",
+   "work": "chop",
+   "chatter": [
+    "role.woodcutter"
+   ],
+   "x": 600,
+   "z": 1288,
+   "yaw": 4.03,
+   "radius": 6,
+   "path": [
+    [
+     611,
+     1276
+    ],
+    [
+     604,
+     1308
+    ],
+    [
+     578,
+     1283
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_179",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 706,
+   "z": 1279,
+   "yaw": 2.79,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s100",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 631,
+   "z": 224,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_redcliff_d69",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 2008,
+   "z": 1664,
+   "yaw": 1.52,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_180",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1536,
+   "z": 1839,
+   "yaw": 5.32,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s101",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 232,
+   "z": 1128,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_181",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 440,
+   "z": 296,
+   "yaw": 1.37,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_33",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1599,
+   "z": 1720,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1577,
+     1692
+    ],
+    [
+     1622,
+     1697
+    ],
+    [
+     1640,
+     1754
+    ],
+    [
+     1575,
+     1754
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_182",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 587,
+   "z": 2000,
+   "yaw": 3.99,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "cottage_corner_redcliff_d70",
+   "kind": "cottage_corner",
+   "name": "Ruined Cottage",
+   "x": 1206,
+   "z": 993,
+   "yaw": 3.38,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s102",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1512,
+   "z": 1176,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_183",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 1640,
+   "z": 1409,
+   "yaw": 6.21,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "folk",
+   "id": "folk_redcliff_25",
+   "role": "beekeeper",
+   "name": "Beekeeper",
+   "work": "gather",
+   "chatter": [
+    "role.beekeeper"
+   ],
+   "x": 2008,
+   "z": 1960,
+   "yaw": 5.1,
+   "radius": 6,
+   "path": [
+    [
+     2001,
+     1961
+    ],
+    [
+     2010,
+     1953
+    ],
+    [
+     2014,
+     1965
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_184",
+   "recipe": "cu_spring_altar",
+   "name": "Spring Altar",
+   "kind": "shrine",
+   "x": 688,
+   "z": 1392,
+   "yaw": 3.58,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s103",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 792,
+   "z": 1776,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "woodpile_stack_redcliff_d71",
+   "kind": "woodpile_stack",
+   "name": "Woodpile",
+   "x": 104,
+   "z": 40,
+   "yaw": 2.93,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_185",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 1944,
+   "z": 1144,
+   "yaw": 0.47,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_186",
+   "recipe": "cu_boundary_cross",
+   "name": "Boundary Cross",
+   "kind": "marker",
+   "x": 425,
+   "z": 1432,
+   "yaw": 1.41,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s104",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1729,
+   "z": 1720,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_187",
+   "recipe": "cu_tinkers_halt",
+   "name": "Tinker's Halt",
+   "kind": "camp",
+   "x": 1098,
+   "z": 658,
+   "yaw": 4.52,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_redcliff_d72",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 508,
+   "z": 909,
+   "yaw": 2.2,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_redcliff_d73",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 536,
+   "z": 304,
+   "yaw": 4.77,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_188",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 380,
+   "z": 1567,
+   "yaw": 2.88,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s105",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 104,
+   "z": 1616,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_189",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 1135,
+   "z": 810,
+   "yaw": 3.86,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_190",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 976,
+   "z": 1936,
+   "yaw": 0,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s106",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1768,
+   "z": 1928,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_191",
+   "recipe": "cu_honey_tree",
+   "name": "Honey Tree",
+   "kind": "forage",
+   "x": 681,
+   "z": 1193,
+   "yaw": 3.67,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_redcliff_d74",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 601,
+   "z": 1000,
+   "yaw": 5.97,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "drying_rack_camp_redcliff_d75",
+   "kind": "drying_rack_camp",
+   "name": "Hunter's Rack",
+   "x": 247,
+   "z": 2008,
+   "yaw": 4.67,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_192",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 769,
+   "z": 385,
+   "yaw": 3.86,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_34",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1920,
+   "z": 976,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1898,
+     1021
+    ],
+    [
+     1858,
+     948
+    ],
+    [
+     1946,
+     929
+    ],
+    [
+     1976,
+     1001
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s107",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1545,
+   "z": 1608,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_193",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1303,
+   "z": 1121,
+   "yaw": 6,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "folk",
+   "id": "folk_redcliff_26",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 1552,
+   "z": 1496,
+   "yaw": 4.53,
+   "radius": 6,
+   "path": [
+    [
+     1571,
+     1468
+    ],
+    [
+     1584,
+     1532
+    ],
+    [
+     1506,
+     1500
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_194",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1632,
+   "z": 1910,
+   "yaw": 1.89,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_redcliff_d76",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 846,
+   "z": 165,
+   "yaw": 1.2,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s108",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 857,
+   "z": 1041,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "toll_stone_redcliff_d77",
+   "kind": "toll_stone",
+   "name": "Old Toll Stone",
+   "x": 1722,
+   "z": 1358,
+   "yaw": 0.67,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_195",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 1816,
+   "z": 336,
+   "yaw": 6.14,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s109",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1144,
+   "z": 295,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_196",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 848,
+   "z": 1432,
+   "yaw": 0.73,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_197",
+   "recipe": "cu_boundary_cross",
+   "name": "Boundary Cross",
+   "kind": "marker",
+   "x": 1392,
+   "z": 1752,
+   "yaw": 0.53,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_198",
+   "recipe": "cu_horse_bones",
+   "name": "Horse Bones",
+   "kind": "remains",
+   "x": 1697,
+   "z": 600,
+   "yaw": 3.57,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_redcliff_d78",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 785,
+   "z": 929,
+   "yaw": 1.41,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s110",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 184,
+   "z": 880,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_199",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 1978,
+   "z": 1070,
+   "yaw": 5.84,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "folk",
+   "id": "folk_redcliff_27",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 856,
+   "z": 1960,
+   "yaw": 5.02,
+   "radius": 6,
+   "path": [
+    [
+     905,
+     1931
+    ],
+    [
+     869,
+     2001
+    ],
+    [
+     802,
+     1950
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_200",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 992,
+   "z": 424,
+   "yaw": 4.04,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s111",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 328,
+   "z": 1768,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cottage_corner_redcliff_d79",
+   "kind": "cottage_corner",
+   "name": "Ruined Cottage",
+   "x": 1104,
+   "z": 418,
+   "yaw": 1.94,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_201",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1392,
+   "z": 671,
+   "yaw": 6.23,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_35",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1422,
+   "z": 272,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1437,
+     351
+    ],
+    [
+     1330,
+     259
+    ],
+    [
+     1424,
+     192
+    ],
+    [
+     1517,
+     287
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s112",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 417,
+   "z": 240,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_202",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 616,
+   "z": 1777,
+   "yaw": 2.12,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_redcliff_d80",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 1024,
+   "z": 1696,
+   "yaw": 4.91,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_203",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 150,
+   "z": 1872,
+   "yaw": 3.45,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s113",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1360,
+   "z": 320,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_204",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1057,
+   "z": 943,
+   "yaw": 1.72,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_205",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1832,
+   "z": 1513,
+   "yaw": 0.12,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s114",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1853,
+   "z": 1371,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s115",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 441,
+   "z": 471,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_206",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1552,
+   "z": 40,
+   "yaw": 0.54,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "dolmen_redcliff_d81",
+   "kind": "dolmen",
+   "name": "Dolmen",
+   "x": 1584,
+   "z": 552,
+   "yaw": 5.72,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_207",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 544,
+   "z": 744,
+   "yaw": 3.56,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_36",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 240,
+   "z": 1216,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     245,
+     1308
+    ],
+    [
+     154,
+     1235
+    ],
+    [
+     221,
+     1159
+    ],
+    [
+     304,
+     1193
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s116",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 496,
+   "z": 193,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_208",
+   "recipe": "cu_heron_nest",
+   "name": "Heron Rookery",
+   "kind": "nest",
+   "x": 511,
+   "z": 520,
+   "yaw": 3.36,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_redcliff_28",
+   "role": "scarecrow_maker",
+   "name": "Scarecrow maker",
+   "work": "gather",
+   "chatter": [
+    "role.scarecrow_maker"
+   ],
+   "x": 1416,
+   "z": 1680,
+   "yaw": 1.33,
+   "radius": 6,
+   "path": [
+    [
+     1413,
+     1690
+    ],
+    [
+     1410,
+     1669
+    ],
+    [
+     1429,
+     1678
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_209",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1551,
+   "z": 175,
+   "yaw": 1.01,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s117",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1743,
+   "z": 1306,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_redcliff_d82",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 2008,
+   "z": 408,
+   "yaw": 2.08,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_210",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1375,
+   "z": 1016,
+   "yaw": 4.44,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s118",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1808,
+   "z": 1296,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_211",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 969,
+   "z": 1398,
+   "yaw": 0.27,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_redcliff_d83",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1206,
+   "z": 1555,
+   "yaw": 2.16,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_37",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1760,
+   "z": 1408,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1704,
+     1457
+    ],
+    [
+     1701,
+     1359
+    ],
+    [
+     1801,
+     1374
+    ],
+    [
+     1814,
+     1456
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_212",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1961,
+   "z": 128,
+   "yaw": 4.48,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_redcliff_d84",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 1000,
+   "z": 360,
+   "yaw": 3.63,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s119",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1145,
+   "z": 610,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_213",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 1320,
+   "z": 448,
+   "yaw": 5.6,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "folk",
+   "id": "folk_redcliff_29",
+   "role": "woodcutter",
+   "name": "Woodcutter",
+   "work": "chop",
+   "chatter": [
+    "role.woodcutter"
+   ],
+   "x": 838,
+   "z": 1346,
+   "yaw": 6.08,
+   "radius": 6,
+   "path": [
+    [
+     851,
+     1357
+    ],
+    [
+     819,
+     1353
+    ],
+    [
+     842,
+     1330
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_214",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 1009,
+   "z": 136,
+   "yaw": 4,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_redcliff_d85",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 211,
+   "z": 1482,
+   "yaw": 1.92,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_redcliff_d86",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 413,
+   "z": 1395,
+   "yaw": 5.41,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s120",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1120,
+   "z": 543,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "wayside_well_redcliff_d87",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 1304,
+   "z": 928,
+   "yaw": 4.06,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_215",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 1159,
+   "z": 232,
+   "yaw": 0.19,
+   "radius": 3,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_38",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 681,
+   "z": 40,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     719,
+     78
+    ],
+    [
+     661,
+     73
+    ],
+    [
+     642,
+     22
+    ],
+    [
+     715,
+     0
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s121",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 318,
+   "z": 537,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_216",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 702,
+   "z": 720,
+   "yaw": 4.31,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_redcliff_d88",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1655,
+   "z": 487,
+   "yaw": 1.74,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_217",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 1464,
+   "z": 1961,
+   "yaw": 3.52,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s122",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1256,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_218",
+   "recipe": "cu_honey_tree",
+   "name": "Honey Tree",
+   "kind": "forage",
+   "x": 1176,
+   "z": 504,
+   "yaw": 0.73,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_219",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1999,
+   "z": 41,
+   "yaw": 5.69,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_redcliff_d89",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 979,
+   "z": 1106,
+   "yaw": 3,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s123",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 848,
+   "z": 296,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_220",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 951,
+   "z": 984,
+   "yaw": 0.59,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "cottage_corner_redcliff_d90",
+   "kind": "cottage_corner",
+   "name": "Ruined Cottage",
+   "x": 1263,
+   "z": 1384,
+   "yaw": 3.76,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_221",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 248,
+   "z": 1584,
+   "yaw": 1.34,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_39",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 326,
+   "z": 36,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     286,
+     5
+    ],
+    [
+     386,
+     1
+    ],
+    [
+     368,
+     103
+    ],
+    [
+     277,
+     66
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s124",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1366,
+   "z": 1432,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_redcliff_d91",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 74,
+   "z": 391,
+   "yaw": 4.26,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_222",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1872,
+   "z": 727,
+   "yaw": 2.55,
+   "radius": 7,
+   "levelBase": 7
+  },
+  {
+   "type": "folk",
+   "id": "folk_redcliff_30",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 480,
+   "z": 592,
+   "yaw": 0.54,
+   "radius": 6,
+   "path": [
+    [
+     499,
+     617
+    ],
+    [
+     451,
+     586
+    ],
+    [
+     497,
+     572
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_223",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 528,
+   "z": 1072,
+   "yaw": 4.37,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s125",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 777,
+   "z": 840,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "mushroom_ring_redcliff_d92",
+   "kind": "mushroom_ring",
+   "name": "Mushroom Ring",
+   "x": 744,
+   "z": 1392,
+   "yaw": 4.52,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_224",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1048,
+   "z": 2008,
+   "yaw": 1.79,
+   "radius": 4,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s126",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1648,
+   "z": 105,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_225",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 1529,
+   "z": 849,
+   "yaw": 2.89,
+   "radius": 3,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_40",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 215,
+   "z": 89,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     176,
+     18
+    ],
+    [
+     282,
+     58
+    ],
+    [
+     242,
+     142
+    ],
+    [
+     154,
+     135
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_226",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 192,
+   "z": 1697,
+   "yaw": 5.89,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_redcliff_d93",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1895,
+   "z": 505,
+   "yaw": 3.64,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s127",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1392,
+   "z": 1882,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_redcliff_d94",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 108,
+   "z": 1462,
+   "yaw": 3.34,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_227",
+   "recipe": "cu_charcoal_mound",
+   "name": "Charcoal Clamp",
+   "kind": "camp",
+   "x": 720,
+   "z": 1671,
+   "yaw": 4.4,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "folk",
+   "id": "folk_redcliff_31",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 432,
+   "z": 1136,
+   "yaw": 5.26,
+   "radius": 6,
+   "path": [
+    [
+     416,
+     1145
+    ],
+    [
+     438,
+     1121
+    ],
+    [
+     447,
+     1146
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_228",
+   "recipe": "cu_tinkers_halt",
+   "name": "Tinker's Halt",
+   "kind": "camp",
+   "x": 1384,
+   "z": 376,
+   "yaw": 3.48,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s128",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1440,
+   "z": 584,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_tree_redcliff_d95",
+   "kind": "fallen_tree",
+   "name": "Fallen Tree",
+   "x": 40,
+   "z": 1336,
+   "yaw": 0.07,
+   "radius": 6,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_229",
+   "recipe": "cu_lovers_stone",
+   "name": "Lovers' Stone",
+   "kind": "lore",
+   "x": 47,
+   "z": 1008,
+   "yaw": 5.72,
+   "radius": 4,
+   "levelBase": 6
+  },
+  {
+   "type": "camp",
+   "id": "roam_redcliff_41",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 344,
+   "z": 1265,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     356,
+     1300
+    ],
+    [
+     307,
+     1292
+    ],
+    [
+     313,
+     1230
+    ],
+    [
+     376,
+     1247
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s129",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 600,
+   "z": 96,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_230",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1512,
+   "z": 1416,
+   "yaw": 2.58,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_redcliff_d96",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 319,
+   "z": 1834,
+   "yaw": 1.56,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_231",
+   "recipe": "cu_tinkers_halt",
+   "name": "Tinker's Halt",
+   "kind": "camp",
+   "x": 1585,
+   "z": 975,
+   "yaw": 1.34,
+   "radius": 6,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s130",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    6,
+    7
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 652,
+   "z": 494,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_232",
+   "recipe": "cu_oak_of_oaths",
+   "name": "Oath Oak",
+   "kind": "shrine",
+   "x": 969,
+   "z": 632,
+   "yaw": 5.38,
+   "radius": 6,
+   "levelBase": 6
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_233",
+   "recipe": "cu_honey_tree",
+   "name": "Honey Tree",
+   "kind": "forage",
+   "x": 824,
+   "z": 1561,
+   "yaw": 5.47,
+   "radius": 5,
+   "levelBase": 7
+  },
+  {
+   "type": "camp",
+   "id": "camp_redcliff_s131",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    7,
+    8
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1888,
+   "z": 110,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_redcliff_234",
+   "recipe": "cu_dune_idol",
+   "name": "Dune Idol",
+   "kind": "shrine",
+   "x": 432,
+   "z": 1760,
+   "yaw": 3.61,
+   "radius": 5,
+   "levelBase": 6
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_redcliff_d97",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 145,
+   "z": 448,
+   "yaw": 0.69,
+   "radius": 3,
+   "filler": true
   }
  ],
- "features": []
+ "features": [],
+ "density": {
+  "target": 50,
+  "roadTarget": 45,
+  "added": {
+   "curio": 234,
+   "wayside": 97,
+   "stray": 131,
+   "roamer": 41,
+   "folk": 31
+  },
+  "openShareCovered": 1,
+  "roadShareCovered": 1
+ },
+ "levels": [
+  6,
+  8
+ ]
 }

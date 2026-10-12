@@ -1,0 +1,666 @@
+{
+  "_doc": "Stream E (play-test 2, Q18). Quests and quest NPCs of the set pieces near Torborhold (data/vignettes/setpieces.json). A PART of zone `test` (the Torbor Fields): merged into data/quests/test.json via its `include` list. NPC `at` = a set piece id (the placer stands them inside it). Same quest format as data/quests/README.md.",
+  "zone": "test",
+  "part": "setpieces",
+  "npcs": {
+    "corporal_jenk": {
+      "name": "Corporal Jenk",
+      "role": "guard",
+      "at": "sp_drill_field",
+      "greeting": "Sergeant says I'm to keep the dummies in good repair. I say the dummies started it.",
+      "titled": true
+    },
+    "hesketh_brannock": {
+      "name": "Hesketh Brannock",
+      "role": "farmer",
+      "at": "sp_brannock_fields",
+      "greeting": "Mind the wheat. Mind the turnips. Mind the scarecrow, he's had a hard week.",
+      "titled": true
+    },
+    "ada_orchard": {
+      "name": "Ada of the Orchard",
+      "role": "orchardist",
+      "at": "sp_brannock_fields",
+      "greeting": "The apples are early, the bees are cross and the cider is nearly a crime. Lovely season.",
+      "titled": true
+    },
+    "hob_turnwater": {
+      "name": "Miller Hob Turnwater",
+      "role": "miller",
+      "at": "sp_turnwater_mill",
+      "greeting": "If you hear squeaking, it's the wheel. If you hear squeaking and chewing, it's not.",
+      "titled": true
+    },
+    "abel_fenn": {
+      "name": "Sexton Abel Fenn",
+      "role": "sexton",
+      "at": "sp_saint_hulda_yard",
+      "greeting": "Come to visit someone? Everybody here is in. Nobody's going anywhere. Usually.",
+      "titled": true
+    },
+    "kit_greyfletch": {
+      "name": "Kit Greyfletch",
+      "role": "hunter",
+      "at": "sp_greyfletch_camp",
+      "greeting": "Uncle Oswy does the big hunts. I do the tally board. One day the tally board will do me.",
+      "titled": true
+    },
+    "bettony": {
+      "name": "Bettony the herb-woman",
+      "role": "herbalist",
+      "at": "sp_nine_maidens",
+      "greeting": "Step round the mushrooms, dear. They hold grudges against feet.",
+      "titled": true
+    },
+    "pilgrim_orla": {
+      "name": "Orla the pilgrim",
+      "role": "pilgrim",
+      "at": "sp_kind_mother_shrine",
+      "greeting": "I walked here barefoot from Mill End. In hindsight, a mistake.",
+      "titled": true
+    },
+    "warden_maddoc": {
+      "name": "Warden Maddoc",
+      "role": "guard",
+      "at": "sp_coldharrow_ruins",
+      "greeting": "Coldharrow was a fine house once. Now it's a fine place to get stabbed.",
+      "titled": true
+    },
+    "edda_ashby": {
+      "name": "Foreman Edda Ashby",
+      "role": "foreman",
+      "at": "sp_ashby_lumber_camp",
+      "greeting": "Every tree we fell, the forest sends something to complain about it.",
+      "titled": true
+    },
+    "old_wat": {
+      "name": "Old Wat the fisher",
+      "role": "fisher",
+      "at": "sp_tench_pool",
+      "greeting": "Forty years at this pool. The croakers have been here a fortnight and they think they own it.",
+      "titled": true
+    },
+    "drover_gil": {
+      "name": "Gil the drover",
+      "role": "drover",
+      "at": "sp_pail_and_plough",
+      "greeting": "Have you seen an ox? Big, brown, looks disappointed in you? That's Duchess.",
+      "titled": true
+    }
+  },
+  "quests": [
+    {
+      "id": "practice_makes_bruises",
+      "name": "Practice Makes Bruises",
+      "level": 1,
+      "giver": "corporal_jenk",
+      "offer": "New in town? The Sergeant won't look at anyone who hasn't been round the yard. Hit the dummy, put three in the butts, walk the sand. Then you're one of us. Mostly.",
+      "steps": [
+        {
+          "kind": "use",
+          "vignette": "sp_drill_field",
+          "object": "Straw dummy",
+          "text": "Thrash the straw dummy",
+          "where": "Torbor Drill Field, just outside Torborhold"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_drill_field",
+          "object": "Archery butts",
+          "text": "Shoot at the archery butts",
+          "where": "the far end of Torbor Drill Field"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_drill_field",
+          "object": "Sand pit",
+          "text": "Walk the sparring ring",
+          "where": "the sand pit at Torbor Drill Field"
+        }
+      ],
+      "done": "Not bad. The dummy will need a new head, but not bad.",
+      "reward": {
+        "xp": 0.3,
+        "gold": 8,
+        "crates": [
+          {
+            "slot": "chest",
+            "min": "common"
+          }
+        ]
+      }
+    },
+    {
+      "id": "scarecrow_duty",
+      "name": "Scarecrow Duty",
+      "level": 1,
+      "giver": "hesketh_brannock",
+      "offer": "Two boars come out of the hedge every evening and dig my turnips like they're paid to. The scarecrow does nothing. Help him out.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "thicket_boar",
+          "count": 4,
+          "near": "sp_brannock_fields",
+          "text": "Kill 4 thicket boars around Brannock Fields",
+          "where": "the turnip patch and hedges of Brannock Fields"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_brannock_fields",
+          "object": "Scarecrow",
+          "text": "Tell the scarecrow it's over",
+          "where": "the scarecrow in the wheat at Brannock Fields"
+        }
+      ],
+      "done": "There. He looks taller already. Take this, and some turnips, they're only a little bitten.",
+      "reward": {
+        "xp": 0.35,
+        "gold": 10,
+        "crates": [
+          {
+            "slot": "feet",
+            "min": "common"
+          }
+        ]
+      }
+    },
+    {
+      "id": "cider_for_the_watch",
+      "name": "Cider for the Watch",
+      "level": 1,
+      "giver": "ada_orchard",
+      "offer": "The reeve in Torborhold pays for cider in favours, and I'm owed a few. Press me a jug and carry it to Reeve Corwin. Don't drink it on the way. Well. Not much of it.",
+      "steps": [
+        {
+          "kind": "use",
+          "vignette": "sp_brannock_fields",
+          "object": "Cider press",
+          "text": "Press a jug of cider",
+          "where": "the cider press in the orchard at Brannock Fields"
+        },
+        {
+          "kind": "talk",
+          "npc": "reeve_corwin",
+          "text": "Bring the cider to Reeve Corwin",
+          "where": "Reeve Corwin, in Torborhold"
+        }
+      ],
+      "done": "The reeve said thank you? Out loud? Gods, it's strong this year.",
+      "reward": {
+        "xp": 0.3,
+        "gold": 8,
+        "crates": [
+          {
+            "slot": "hands",
+            "min": "common"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rats_in_the_grist",
+      "name": "Rats in the Grist",
+      "level": 2,
+      "giver": "hob_turnwater",
+      "offer": "The rats in my grain store have grown bold. One sat on the scales and looked at me. Thin them out before they start charging rent.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "cairn_rat",
+          "count": 6,
+          "near": "sp_turnwater_mill",
+          "text": "Kill 6 cairn rats at Turnwater Mill",
+          "where": "the grain store behind Turnwater Mill"
+        }
+      ],
+      "done": "Quiet. Lovely, chewing-free quiet. Here, for your trouble.",
+      "reward": {
+        "xp": 0.35,
+        "gold": 9,
+        "crates": [
+          {
+            "slot": "head",
+            "min": "common"
+          }
+        ]
+      },
+      "next": "open_the_race"
+    },
+    {
+      "id": "open_the_race",
+      "name": "Open the Race",
+      "level": 2,
+      "giver": "hob_turnwater",
+      "offer": "Now the rats are gone I can hear the wheel properly, and it sounds wrong. Open the sluice full and look at the gearing while it runs. I'm too old to climb.",
+      "steps": [
+        {
+          "kind": "use",
+          "vignette": "sp_turnwater_mill",
+          "object": "Sluice lever",
+          "text": "Open the sluice",
+          "where": "the sluice on the mill race at Turnwater Mill"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_turnwater_mill",
+          "object": "Gear housing",
+          "text": "Look over the gearing",
+          "where": "the gear housing inside Turnwater Mill"
+        },
+        {
+          "kind": "talk",
+          "npc": "hob_turnwater",
+          "text": "Tell Hob what you saw",
+          "where": "Miller Hob at Turnwater Mill"
+        }
+      ],
+      "done": "New oak teeth? I never put those in. Somebody's been mending my mill at night. Should I be grateful or afraid?",
+      "reward": {
+        "xp": 0.4,
+        "gold": 10,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "common"
+          }
+        ]
+      }
+    },
+    {
+      "id": "diggers_in_the_yard",
+      "name": "Diggers in the Yard",
+      "level": 2,
+      "giver": "abel_fenn",
+      "offer": "Barrow hounds. They dig for what's buried and they are not fussy about whose it is. Drive them off before Mrs Thatcher's husband ends up in the hedge again.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "barrow_hound",
+          "count": 4,
+          "near": "sp_saint_hulda_yard",
+          "text": "Kill 4 barrow hounds in Saint Hulda's Yard",
+          "where": "among the graves of Saint Hulda's Yard"
+        }
+      ],
+      "done": "Everyone is back where they belong. Thank you. They can't say it, so I will.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 9,
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "common"
+          }
+        ]
+      },
+      "next": "ring_for_the_dead"
+    },
+    {
+      "id": "ring_for_the_dead",
+      "name": "Ring for the Dead",
+      "level": 3,
+      "giver": "abel_fenn",
+      "offer": "The hounds came for a reason. Something under the yard calls them. Old custom: ring the bell, knock at the ossuary, and bring me a pinch of the dust they carry. Then we'll know what wakes.",
+      "steps": [
+        {
+          "kind": "collect",
+          "item": "Grave dust",
+          "count": 3,
+          "from": "barrow_hound",
+          "chance": 0.6,
+          "text": "Gather 3 pinches of grave dust from barrow hounds",
+          "where": "barrow hounds in and around Saint Hulda's Yard"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_saint_hulda_yard",
+          "object": "Sexton's bell",
+          "text": "Ring the sexton's bell",
+          "where": "the bell frame by the lychgate of Saint Hulda's Yard"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_saint_hulda_yard",
+          "object": "Ossuary door",
+          "text": "Knock at the ossuary door",
+          "where": "the ossuary at the back of Saint Hulda's Yard"
+        },
+        {
+          "kind": "talk",
+          "npc": "abel_fenn",
+          "text": "Bring the dust to Sexton Abel Fenn",
+          "where": "Sexton Abel Fenn in Saint Hulda's Yard"
+        }
+      ],
+      "done": "The dust is warm. Dust should not be warm. I'm going to need a bigger spade, and a priest.",
+      "reward": {
+        "xp": 0.5,
+        "gold": 10,
+        "crates": [
+          {
+            "slot": "ring",
+            "min": "uncommon"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tallies_for_the_board",
+      "name": "Tallies for the Board",
+      "level": 3,
+      "giver": "kit_greyfletch",
+      "offer": "The moor hounds have been bold since Gristle took the packs. Uncle wants six more on the board before he'll take anyone after the big one. Go on — I'll chalk them up.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "moor_hound",
+          "count": 6,
+          "text": "Kill 6 moor hounds",
+          "where": "the open grass between Torborhold and Greyfletch Camp"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_greyfletch_camp",
+          "object": "Tally board",
+          "text": "Chalk your kills on the tally board",
+          "where": "the tally board at Greyfletch Camp"
+        }
+      ],
+      "done": "Six! In your own column and everything. Uncle will pretend he isn't impressed.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 8,
+        "crates": [
+          {
+            "slot": "offhand",
+            "min": "common"
+          }
+        ]
+      }
+    },
+    {
+      "id": "the_fairy_ring",
+      "name": "The Fairy Ring",
+      "level": 3,
+      "giver": "bettony",
+      "offer": "The croakers down at Tench Pool carry spawn that the stones like. Don't ask me how I know. Bring me some, walk round the mushrooms — round, mind — and pour it on the altar.",
+      "steps": [
+        {
+          "kind": "collect",
+          "item": "Croaker spawn",
+          "count": 4,
+          "from": "fen_croaker",
+          "chance": 0.6,
+          "text": "Gather 4 croaker spawn from fen croakers",
+          "where": "fen croakers in the reeds at Tench Pool"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_nine_maidens",
+          "object": "Ring of mushrooms",
+          "text": "Walk round the ring of mushrooms",
+          "where": "the fairy ring inside the Nine Maidens"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_nine_maidens",
+          "object": "Altar stone",
+          "text": "Pour the spawn on the altar stone",
+          "where": "the altar at the centre of the Nine Maidens"
+        }
+      ],
+      "done": "There — did you feel them shift? No? Good. You're not supposed to. Here's a little something from the stones.",
+      "reward": {
+        "xp": 0.45,
+        "gold": 9,
+        "crates": [
+          {
+            "slot": "neck",
+            "min": "uncommon"
+          }
+        ]
+      }
+    },
+    {
+      "id": "stones_for_the_mother",
+      "name": "Stones for the Mother",
+      "level": 2,
+      "giver": "pilgrim_orla",
+      "offer": "Brigands robbed the shrine — took the painted prayer stones, thinking they were worth something. They're not, except to everyone who painted one. Get them back?",
+      "steps": [
+        {
+          "kind": "collect",
+          "item": "Painted prayer stone",
+          "count": 4,
+          "from": "road_brigand",
+          "chance": 0.5,
+          "text": "Take back 4 painted prayer stones from road brigands",
+          "where": "road brigands along the roads and at Coldharrow Ruins"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_kind_mother_shrine",
+          "object": "Prayer stones",
+          "text": "Return the stones to the cairns",
+          "where": "the prayer cairns at the Shrine of the Kind Mother"
+        }
+      ],
+      "done": "Every one back where it was. \"Let him come back\" — that's mine. Thank you.",
+      "reward": {
+        "xp": 0.35,
+        "gold": 8,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "common"
+          }
+        ]
+      }
+    },
+    {
+      "id": "squatters_at_coldharrow",
+      "name": "Squatters at Coldharrow",
+      "level": 4,
+      "giver": "warden_maddoc",
+      "offer": "Brigands have made a camp in the east wing. Bold, burning the furniture of a house that already burned. Clear them out.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "road_brigand",
+          "count": 6,
+          "near": "sp_coldharrow_ruins",
+          "text": "Kill 6 road brigands at Coldharrow Ruins",
+          "where": "the brigands' fire on the east side of Coldharrow Ruins"
+        }
+      ],
+      "done": "Gone. For now. They always come back to a roof, and this place doesn't even have one.",
+      "reward": {
+        "xp": 0.45,
+        "gold": 10,
+        "crates": [
+          {
+            "slot": "chest",
+            "min": "uncommon"
+          }
+        ]
+      },
+      "next": "the_coldharrow_fire"
+    },
+    {
+      "id": "the_coldharrow_fire",
+      "name": "The Coldharrow Fire",
+      "level": 5,
+      "giver": "warden_maddoc",
+      "offer": "Thirty years and nobody knows how the fire started. I have a guess. Climb what's left of the stair, then look at the circle in the hall — don't stand in it — and tell me I'm wrong.",
+      "steps": [
+        {
+          "kind": "use",
+          "vignette": "sp_coldharrow_ruins",
+          "object": "Collapsed stair",
+          "text": "Climb the collapsed stair",
+          "where": "the broken stair against the tower at Coldharrow Ruins"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_coldharrow_ruins",
+          "object": "Cracked sigil",
+          "text": "Look at the cracked circle in the hall",
+          "where": "the old hall floor at Coldharrow Ruins"
+        },
+        {
+          "kind": "talk",
+          "npc": "warden_maddoc",
+          "text": "Tell Warden Maddoc what you found",
+          "where": "Warden Maddoc at Coldharrow Ruins"
+        }
+      ],
+      "done": "From the inside, then. The daughter. I knew it. And she's still about, they say. Keep your shadow close.",
+      "reward": {
+        "xp": 0.55,
+        "gold": 14,
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "uncommon"
+          }
+        ]
+      }
+    },
+    {
+      "id": "bats_in_the_timber",
+      "name": "Bats in the Timber",
+      "level": 3,
+      "giver": "edda_ashby",
+      "offer": "Dusk flitters roost in the log stacks and come out screaming whenever we start sawing. My cutters won't work the last hour of light. Sort it.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "dusk_flitter",
+          "count": 5,
+          "near": "sp_ashby_lumber_camp",
+          "text": "Kill 5 dusk flitters at Ashby's Lumber Camp",
+          "where": "the log stacks at Ashby's Lumber Camp"
+        }
+      ],
+      "done": "Quiet stacks. My lads will work till dark now, whether they like it or not.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 8,
+        "crates": [
+          {
+            "slot": "hands",
+            "min": "common"
+          }
+        ]
+      },
+      "next": "the_missing_saw"
+    },
+    {
+      "id": "the_missing_saw",
+      "name": "The Missing Saw",
+      "level": 3,
+      "giver": "edda_ashby",
+      "offer": "Our good two-man saw went to Old Wat at Tench Pool to cut new jetty planks, and it never came back. Fetch it, and give the pit a proper run so I know it's still true.",
+      "steps": [
+        {
+          "kind": "talk",
+          "npc": "old_wat",
+          "text": "Ask Old Wat for the saw",
+          "where": "Old Wat at Tench Pool"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_ashby_lumber_camp",
+          "object": "Saw pit",
+          "text": "Work the saw pit with the returned saw",
+          "where": "the saw pit at Ashby's Lumber Camp"
+        }
+      ],
+      "done": "Still sings. Wat's a thief, but he's a careful thief.",
+      "reward": {
+        "xp": 0.35,
+        "gold": 7,
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "common"
+          }
+        ]
+      }
+    },
+    {
+      "id": "croakers_in_the_keepnet",
+      "name": "Croakers in the Keepnet",
+      "level": 2,
+      "giver": "old_wat",
+      "offer": "Croakers. In the reeds, in my traps, in my keepnet. One of them ate a tench bigger than my arm and then looked at me like I owed it the other half.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "fen_croaker",
+          "count": 6,
+          "near": "sp_tench_pool",
+          "text": "Kill 6 fen croakers at Tench Pool",
+          "where": "the reeds round Tench Pool"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_tench_pool",
+          "object": "Fish traps",
+          "text": "Reset the fish traps",
+          "where": "the fish traps on the bank at Tench Pool"
+        }
+      ],
+      "done": "Peace on the water. I may even catch something. Here — and don't tell Edda I still have her saw.",
+      "reward": {
+        "xp": 0.35,
+        "gold": 8,
+        "crates": [
+          {
+            "slot": "legs",
+            "min": "common"
+          }
+        ]
+      }
+    },
+    {
+      "id": "who_moved_duchess",
+      "name": "Who Moved Duchess?",
+      "level": 2,
+      "giver": "drover_gil",
+      "offer": "Duchess wandered off in the night. Big brown ox, deep sense of grievance. Last I heard she was eating someone's wheat. Find her, and find whose wheat.",
+      "steps": [
+        {
+          "kind": "visit",
+          "vignette": "sp_brannock_fields",
+          "text": "Look for Duchess at Brannock Fields",
+          "where": "Brannock Fields, north of the inn toward Torborhold"
+        },
+        {
+          "kind": "talk",
+          "npc": "hesketh_brannock",
+          "text": "Ask Hesketh Brannock about the ox",
+          "where": "Hesketh Brannock at Brannock Fields"
+        },
+        {
+          "kind": "talk",
+          "npc": "drover_gil",
+          "text": "Tell Gil where Duchess is",
+          "where": "Gil the drover at the Pail and Plough"
+        }
+      ],
+      "done": "Eating the wheat AND sleeping in the barn? That's my girl. I'll pay Hesketh for the wheat. Mostly.",
+      "reward": {
+        "xp": 0.35,
+        "gold": 8,
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "common"
+          }
+        ]
+      }
+    }
+  ]
+}

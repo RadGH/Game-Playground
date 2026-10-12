@@ -1,0 +1,249 @@
+{
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z13_01, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "zone": "z13_01",
+ "terrainHash": "f3d4195e",
+ "placements": [
+  {
+   "type": "camp",
+   "id": "quest_eels_and_omens_0_0",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1081,
+   "z": 1099,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "eels_and_omens",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_slime_jars_1_0",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    6,
+    6
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 79,
+   "z": 445,
+   "yaw": 0,
+   "radius": 5,
+   "quest": "slime_jars",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_frog_chorus_0_0",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    6
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1048,
+   "z": 320,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "frog_chorus",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z13_01_1",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    6,
+    6
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1104,
+   "z": 655,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "stormlash"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "npc",
+   "id": "angler_brackwater",
+   "name": "Mog Eelwright",
+   "role": "angler",
+   "at": "Brackwater",
+   "x": 1136,
+   "z": 1024,
+   "yaw": 1.18,
+   "angler": true,
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "npc",
+   "id": "carter_brackwater",
+   "name": "Garrick Kettleby",
+   "role": "carter",
+   "at": "Brackwater",
+   "x": 1120,
+   "z": 796,
+   "yaw": -1.302,
+   "cart": "cart_brackwater",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_brackwater",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Brackwater",
+   "carter": "carter_brackwater",
+   "x": 1122,
+   "z": 796,
+   "yaw": -2.858,
+   "radius": 2.2
+  },
+  {
+   "type": "npc",
+   "id": "carter_eelwick",
+   "name": "Dickon Pike",
+   "role": "carter",
+   "at": "Eelwick",
+   "x": 1208,
+   "z": 446,
+   "yaw": 2.709,
+   "cart": "cart_eelwick",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_eelwick",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Eelwick",
+   "carter": "carter_eelwick",
+   "x": 1208,
+   "z": 448,
+   "yaw": 1.257,
+   "radius": 2.2
+  },
+  {
+   "type": "guard",
+   "id": "guard_brackwater_0",
+   "name": "Brackwater Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Brackwater",
+   "post": "gate",
+   "gate": "brackwater_gate_0",
+   "x": 1124,
+   "z": 812,
+   "yaw": -2.929,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_brackwater_1",
+   "name": "Brackwater Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Brackwater",
+   "post": "gate",
+   "gate": "brackwater_gate_0",
+   "x": 1114,
+   "z": 814,
+   "yaw": -2.929,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_brackwater_2",
+   "name": "Sergeant Pennock",
+   "role": "guard",
+   "rank": "sergeant",
+   "tier": "town",
+   "town": "Brackwater",
+   "post": "square",
+   "x": 1136,
+   "z": 870,
+   "yaw": 1.262,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_brackwater_3",
+   "name": "Brackwater Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Brackwater",
+   "post": "square",
+   "x": 1142,
+   "z": 878,
+   "yaw": 3.037,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_brackwater_4",
+   "name": "Brackwater Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Brackwater",
+   "post": "square",
+   "x": 1148,
+   "z": 870,
+   "yaw": -1.197,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_eelwick_0",
+   "name": "Eelwick Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "hamlet",
+   "town": "Eelwick",
+   "post": "gate",
+   "gate": "eelwick_gate_0",
+   "x": 1192,
+   "z": 440,
+   "yaw": 1.257,
+   "titled": false
+  }
+ ]
+}

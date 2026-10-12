@@ -1,0 +1,744 @@
+{
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z13_03, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "zone": "z13_03",
+ "terrainHash": "13703724",
+ "placements": [
+  {
+   "type": "camp",
+   "id": "quest_millbrook_wheels_0_0",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 321,
+   "z": 1679,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "millbrook_wheels",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_moth_eaten_0_0",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1521,
+   "z": 1342,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "moth_eaten",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_the_tinkers_tools_0_0",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 2008,
+   "z": 1928,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "the_tinkers_tools",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z13_03_1",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    3,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 496,
+   "z": 200,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "packleader"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z13_03_2",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 381,
+   "z": 742,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "stormlash"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z13_03_3",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 973,
+   "z": 40,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "thorned"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z13_03_4",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 429,
+   "z": 1188,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "fiery"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z13_03_5",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 340,
+   "z": 1465,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "vicious"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z13_03_6",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1496,
+   "z": 216,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "gilded"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z13_03_7",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1680,
+   "z": 448,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "frostbound"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z13_03_8",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1648,
+   "z": 1496,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "ironclad"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z13_03_9",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    6,
+    6
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1632,
+   "z": 1879,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "giant"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "npc",
+   "id": "angler_millbrook",
+   "name": "Jed Weirside",
+   "role": "angler",
+   "at": "Millbrook",
+   "x": 100,
+   "z": 1304,
+   "yaw": -1.57,
+   "angler": true,
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "npc",
+   "id": "carter_millbrook",
+   "name": "Dowsabel Kettleby",
+   "role": "carter",
+   "at": "Millbrook",
+   "x": 480,
+   "z": 1576,
+   "yaw": -0.683,
+   "cart": "cart_millbrook",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_millbrook",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Millbrook",
+   "carter": "carter_millbrook",
+   "x": 482,
+   "z": 1574,
+   "yaw": -2.356,
+   "radius": 2.2
+  },
+  {
+   "type": "npc",
+   "id": "carter_three_wheels",
+   "name": "Emmot Ladd",
+   "role": "carter",
+   "at": "Three Wheels",
+   "x": 1706,
+   "z": 1310,
+   "yaw": 2.356,
+   "cart": "cart_three_wheels",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_three_wheels",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Three Wheels",
+   "carter": "carter_three_wheels",
+   "x": 1704,
+   "z": 1312,
+   "yaw": 0.662,
+   "radius": 2.2
+  },
+  {
+   "type": "npc",
+   "id": "carter_stormrow",
+   "name": "Cressy Ashby",
+   "role": "carter",
+   "at": "Stormrow",
+   "x": 1012,
+   "z": 134,
+   "yaw": -0.072,
+   "cart": "cart_stormrow",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_stormrow",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Stormrow",
+   "carter": "carter_stormrow",
+   "x": 1012,
+   "z": 132,
+   "yaw": -1.648,
+   "radius": 2.2
+  },
+  {
+   "type": "npc",
+   "id": "carter_ravencross",
+   "name": "Kenric Hayward",
+   "role": "carter",
+   "at": "Ravencross",
+   "x": 452,
+   "z": 488,
+   "yaw": -1.571,
+   "cart": "cart_ravencross",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_ravencross",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Ravencross",
+   "carter": "carter_ravencross",
+   "x": 454,
+   "z": 488,
+   "yaw": 0,
+   "radius": 2.2
+  },
+  {
+   "type": "npc",
+   "id": "carter_wildmere",
+   "name": "Tegan Coombe",
+   "role": "carter",
+   "at": "Wildmere",
+   "x": 1644,
+   "z": 540,
+   "yaw": -2.19,
+   "cart": "cart_wildmere",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_wildmere",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Wildmere",
+   "carter": "carter_wildmere",
+   "x": 1646,
+   "z": 542,
+   "yaw": 2.356,
+   "radius": 2.2
+  },
+  {
+   "type": "guard",
+   "id": "guard_millbrook_0",
+   "name": "Millbrook Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Millbrook",
+   "post": "gate",
+   "gate": "millbrook_gate_2",
+   "x": 492,
+   "z": 1588,
+   "yaw": -2.173,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_millbrook_1",
+   "name": "Millbrook Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Millbrook",
+   "post": "gate",
+   "gate": "millbrook_gate_2",
+   "x": 486,
+   "z": 1596,
+   "yaw": -2.173,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_millbrook_2",
+   "name": "Millbrook Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Millbrook",
+   "post": "gate",
+   "gate": "millbrook_gate_0",
+   "x": 604,
+   "z": 1698,
+   "yaw": 1.015,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_millbrook_3",
+   "name": "Millbrook Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Millbrook",
+   "post": "gate",
+   "gate": "millbrook_gate_0",
+   "x": 610,
+   "z": 1692,
+   "yaw": 1.015,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_millbrook_4",
+   "name": "Millbrook Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Millbrook",
+   "post": "gate",
+   "gate": "millbrook_gate_1",
+   "x": 480,
+   "z": 1602,
+   "yaw": -2.234,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_millbrook_5",
+   "name": "Millbrook Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Millbrook",
+   "post": "gate",
+   "gate": "millbrook_gate_1",
+   "x": 476,
+   "z": 1608,
+   "yaw": -2.234,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_millbrook_6",
+   "name": "Sergeant Kettleby",
+   "role": "guard",
+   "rank": "sergeant",
+   "tier": "city",
+   "town": "Millbrook",
+   "post": "square",
+   "x": 564,
+   "z": 1634,
+   "yaw": -1.859,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_millbrook_7",
+   "name": "Millbrook Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Millbrook",
+   "post": "square",
+   "x": 558,
+   "z": 1626,
+   "yaw": -0.387,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_millbrook_8",
+   "name": "Millbrook Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Millbrook",
+   "post": "square",
+   "x": 548,
+   "z": 1628,
+   "yaw": 1.141,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_millbrook_9",
+   "name": "Millbrook Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "city",
+   "town": "Millbrook",
+   "post": "square",
+   "x": 552,
+   "z": 1638,
+   "yaw": 2.616,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_three_wheels_0",
+   "name": "Three Wheels Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Three Wheels",
+   "post": "gate",
+   "gate": "three_wheels_gate_0",
+   "x": 1696,
+   "z": 1294,
+   "yaw": 0.429,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_three_wheels_1",
+   "name": "Three Wheels Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Three Wheels",
+   "post": "gate",
+   "gate": "three_wheels_gate_0",
+   "x": 1704,
+   "z": 1290,
+   "yaw": 0.429,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_three_wheels_2",
+   "name": "Sergeant Brookes",
+   "role": "guard",
+   "rank": "sergeant",
+   "tier": "town",
+   "town": "Three Wheels",
+   "post": "square",
+   "x": 1656,
+   "z": 1238,
+   "yaw": 1.69,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_three_wheels_3",
+   "name": "Three Wheels Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Three Wheels",
+   "post": "square",
+   "x": 1664,
+   "z": 1242,
+   "yaw": -2.648,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_three_wheels_4",
+   "name": "Three Wheels Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Three Wheels",
+   "post": "square",
+   "x": 1664,
+   "z": 1232,
+   "yaw": -0.439,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_stormrow_0",
+   "name": "Stormrow Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "village",
+   "town": "Stormrow",
+   "post": "gate",
+   "gate": "stormrow_gate_0",
+   "x": 1028,
+   "z": 136,
+   "yaw": -1.56,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_stormrow_1",
+   "name": "Stormrow Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "village",
+   "town": "Stormrow",
+   "post": "square",
+   "x": 1066,
+   "z": 134,
+   "yaw": -0.002,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_ravencross_0",
+   "name": "Ravencross Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "hamlet",
+   "town": "Ravencross",
+   "post": "gate",
+   "gate": "ravencross_gate_0",
+   "x": 442,
+   "z": 472,
+   "yaw": 0.315,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_wildmere_0",
+   "name": "Wildmere Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "hamlet",
+   "town": "Wildmere",
+   "post": "gate",
+   "gate": "wildmere_gate_0",
+   "x": 1632,
+   "z": 552,
+   "yaw": 2.515,
+   "titled": false
+  }
+ ]
+}

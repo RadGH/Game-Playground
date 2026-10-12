@@ -5,9 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Thousandvale</title>
 <meta name="description" content="Thousandvale — a shared open world. Click the link, make a character, and you are standing next to your friends.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap">
+<link rel="stylesheet" href="css/fonts/fonts.css">
 <link rel="stylesheet" href="css/client.css">
+<link rel="stylesheet" href="css/world.css">
+<link rel="stylesheet" href="css/social.css">
+<link rel="stylesheet" href="css/inventory.css">
+<link rel="stylesheet" href="css/talents.css">
+<link rel="stylesheet" href="css/world-fx.css">
+<link rel="stylesheet" href="../../shared/tooltip.css">
+<link rel="stylesheet" href="css/map.css">
+<link rel="stylesheet" href="css/pt2.css">
+<link rel="stylesheet" href="css/pt5.css">
+<link rel="stylesheet" href="css/pt6.css">
+<link rel="stylesheet" href="css/pt7.css">
+<link rel="stylesheet" href="css/pt8.css">
+<link rel="stylesheet" href="css/pt9.css">
+<link rel="stylesheet" href="css/pt10.css">
 <script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/" } }</script>
 </head>
 <body>
@@ -23,7 +36,7 @@
     <div class="uf-body">
       <div class="uf-name" id="self-name">—</div>
       <div class="bar hp"><i id="self-hp-fill"></i><b id="self-hp-lag"></b><span id="self-hp-text">0 / 0</span></div>
-      <div class="bar xp" title="Experience"><i id="self-xp-fill"></i><span id="self-xp-text"></span></div>
+      <div class="bar mp" id="self-mp" data-tip="Mana"><i id="self-mp-fill"></i><span id="self-mp-text"></span></div>
     </div>
   </section>
 
@@ -32,15 +45,12 @@
     <div class="uf-body">
       <div class="uf-name" id="target-name">—</div>
       <div class="bar hp"><i id="target-hp-fill"></i><b id="target-hp-lag"></b><span id="target-hp-text"></span></div>
+      <div class="bar mp" id="target-mp" hidden><i id="target-mp-fill"></i><span id="target-mp-text"></span></div>
       <div class="uf-sub" id="target-sub"></div>
     </div>
   </section>
 
   <section class="partyframes" id="party" aria-label="Party" hidden></section>
-  <div class="party-tools">
-    <button class="pill-btn" id="party-btn" title="Party: invite, copy the join link (P)">Party</button>
-    <button class="pill-btn" id="bag-btn" title="Bag and gear (B)">Bag <b id="bag-count"></b></button>
-  </div>
   <div class="party-menu" id="party-menu" hidden>
     <h3>Party</h3>
     <p class="party-help" id="party-help">Anyone who opens your join link lands in your party, right next to you.</p>
@@ -58,6 +68,7 @@
   </section>
   <div class="callout" id="callout" aria-live="assertive"></div>
   <div class="vignette" id="vignette"></div>
+  <div class="travel-veil" id="travel-veil" hidden><span class="tr-text">Travelling…</span></div>
   <div class="interact" id="interact" hidden><kbd>E</kbd><span></span></div>
 
   <aside class="bag" id="bag" hidden aria-label="Bag">
@@ -71,7 +82,7 @@
   <div class="zone-banner" id="zone-banner"><small>You enter</small><strong id="zone-name">Greyfang Vale</strong></div>
   <div class="toasts" id="toasts" aria-live="polite"></div>
 
-  <div class="conn" id="conn" title="Connection"><i class="dot"></i><span id="conn-text">Connecting…</span></div>
+  <div class="conn" id="conn" data-tip="Connection"><i class="dot"></i><span id="conn-text">Connecting…</span></div>
 
   <section class="chat" id="chat" aria-label="Chat">
     <div class="chat-log" id="chat-log" role="log" aria-live="polite"></div>
@@ -83,22 +94,6 @@
 
   <nav class="actionbar" id="actionbar" aria-label="Action bar"></nav>
 
-  <aside class="help" id="help">
-    <button class="help-toggle" id="help-toggle" title="Controls">?</button>
-    <dl>
-      <dt>WASD</dt><dd>Move</dd>
-      <dt>Shift</dt><dd>Sprint</dd>
-      <dt>Space</dt><dd>Jump</dd>
-      <dt>Drag</dt><dd>Turn the camera</dd>
-      <dt>Click</dt><dd>Select / walk there</dd>
-      <dt>Right-click</dt><dd>Attack an enemy</dd>
-      <dt>Tab</dt><dd>Next enemy</dd>
-      <dt>1 / F</dt><dd>Strike</dd>
-      <dt>E</dt><dd>Use / open</dd>
-      <dt>B · P</dt><dd>Bag · Party</dd>
-      <dt>Enter</dt><dd>Chat (/p party)</dd>
-    </dl>
-  </aside>
 
   <div class="death" id="death" hidden>
     <h2>You have fallen</h2>
@@ -113,12 +108,27 @@
     <h1>Thousandvale</h1>
     <p>A thousand valleys. One world. Everyone in it.</p>
   </header>
-  <form id="login" class="card" autocomplete="off">
+  <div class="card-tabs" role="tablist" aria-label="How to play">
+    <button type="button" role="tab" id="tab-new" aria-selected="true">Play</button>
+    <button type="button" role="tab" id="tab-login" aria-selected="false">Log in</button>
+  </div>
+  <section id="front" class="card front" aria-label="Your characters">
+    <p class="front-state busy" id="front-state" aria-live="polite">Finding your characters…</p>
+    <div class="field mychars" id="mychars" hidden>
+      <span class="label">Your characters</span>
+      <p class="signed" id="front-who"></p>
+      <div class="chips char-list" id="char-chips"></div>
+    </div>
+    <button type="button" class="primary" id="new-char" hidden>Create character</button>
+    <p class="tiny" hidden>Click a character to play. Your characters are kept on this browser until you claim the account.</p>
+  </section>
+  <form id="login" class="card" autocomplete="off" hidden>
+    <p class="step-title"><button type="button" class="linkish" id="back-front" hidden>‹ Your characters</button><b>New character</b><span>Step 1 of 2 — name, people, calling</span></p>
     <div class="field">
       <label for="name">Name</label>
       <div class="row">
         <input id="name" maxlength="16" placeholder="Your name" required>
-        <button type="button" class="ghost icon" id="reroll" title="New face">&#9861;</button>
+        <button type="button" class="ghost icon" id="reroll" data-tip="New face">&#9861;</button>
       </div>
     </div>
     <div class="field">
@@ -129,11 +139,29 @@
       <span class="label">Calling</span>
       <div class="chips classes" id="classes" role="radiogroup" aria-label="Calling"></div>
       <select id="class-more" aria-label="More callings"></select>
+      <div class="class-card" id="class-card" aria-live="polite" hidden></div>
     </div>
+    <div class="human-check" id="human-check" hidden></div>
     <p class="note" id="login-note"></p>
-    <button type="submit" class="primary" id="enter">Enter the world</button>
-    <p class="tiny" id="build-tag"></p>
+    <button type="submit" class="primary" id="enter">Next: appearance</button>
+    <p class="tiny">No sign-up: you play as a guest. Claim the account later to keep it.</p>
   </form>
+  <form id="signin" class="card" autocomplete="on" hidden>
+    <p class="signed" id="signin-who"></p>
+    <div class="field">
+      <label for="signin-user">Username</label>
+      <input id="signin-user" class="text" maxlength="20" autocomplete="username" required>
+    </div>
+    <div class="field">
+      <label for="signin-pass">Password</label>
+      <input id="signin-pass" class="text" type="password" maxlength="128" autocomplete="current-password" required>
+    </div>
+    <p class="note" id="signin-note"></p>
+    <button type="submit" class="primary" id="signin-go">Log in</button>
+    <p class="tiny"><button type="button" class="linkish" id="signin-forgot">Forgot your password?</button></p>
+    <div class="reset" id="reset" hidden></div>
+  </form>
+  <nav class="title-foot"><button type="button" class="linkish cl-open" id="title-changelog">What's new</button><a href="public/privacy.html" target="_blank" rel="noopener">Privacy</a><span id="build-tag"></span></nav>
   <div class="loading" id="loading"><i></i><span id="loading-text">Waking the valley…</span></div>
 </main>
 

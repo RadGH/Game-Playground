@@ -1,18 +1,15 @@
-// Party frames, the party menu (invite by name, copy the join link, leave), invite pop-ups, and the chat
-// commands. Everything goes through stream A's client (`net.partyOp`, `net.partyChat`, `net.ignore`,
-// `net.joinLink()`; protocol §11). DOM only.
-//
-// Chat commands:  /p text  party chat      /s text  say (the default)     /invite Name     /leave
-//                 /ignore Name   /unignore Name     /link  copy the join link     /help
+// Party frames, the party menu (invite by name, copy the join link, leave) and invite pop-ups. Everything goes
+// through stream A's client (`net.partyOp`, `net.joinLink()`; protocol §11). DOM only. Chat channels and the
+// slash commands moved to chat.js at M3 (it calls invite / copyLink here).
 
 const $ = id => document.getElementById(id);
 const CLASS_NAME = id => String(id || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
+import { partyRows } from './ui/pt10-core.js';
 export function createSocial({ net: getNet, hud, actors, onTarget, myChar }) {
   const el = {
     frames: $('party'), btn: $('party-btn'), menu: $('party-menu'), name: $('invite-name'), go: $('invite-go'), link: $('join-link'), copy: $('join-copy'),
     leave: $('party-leave'), close: $('party-close'), help: $('party-help'), pop: $('invite-pop'), popText: $('invite-text'), yes: $('invite-yes'), no: $('invite-no'),
-    chatCh: $('chat-ch'),
   };
   let party = null, frames = new Map(), pendingInvite = null, wantLink = false;
   const net = () => getNet();
@@ -20,6 +17,7 @@ export function createSocial({ net: getNet, hud, actors, onTarget, myChar }) {
   // --- party menu ---------------------------------------------------------------------------------
   function toggleMenu(open = el.menu.hidden) {
     el.menu.hidden = !open;
+    el.btn.classList.toggle('on', open);
     if (open) { refreshLink(); el.name.focus(); }
   }
   el.btn.onclick = () => toggleMenu();
@@ -61,23 +59,28 @@ export function createSocial({ net: getNet, hud, actors, onTarget, myChar }) {
 
   // --- frames -------------------------------------------------------------------------------------
   function render() {
-    const me = myChar();
-    const others = party ? party.members.filter(m => m.char !== me) : [];
+    // play-test 10 (Y37): one row per member and never yourself — also right after a reconnect (ui/pt10-core.js partyRows)
+    const others = party ? partyRows(party, { me: myChar(), name: net()?.joined?.you?.name ?? null }).others : [];
     el.frames.hidden = !others.length;
-    el.btn.textContent = party ? `Party (${party.members.length})` : 'Party';
+    // (play-test 6 U1: the Party button's badge is NEWS only — unseen mail / friends, ui/unseen.js — never the size of your party)
     const keep = new Set();
     for (const m of others) {
       keep.add(m.char);
       let f = frames.get(m.char);
       if (!f) {
         const root = document.createElement('div'); root.className = 'pmember';
-        root.innerHTML = '<div class="pm-icon"></div><div class="pm-body"><div class="pm-name"></div><div class="bar hp"><i></i></div><div class="pm-where"></div></div>';
-        root.onclick = () => { const fr = frames.get(m.char); if (fr?.id != null) onTarget?.(fr.id); };
+        root.innerHTML = '<div class="pm-icon"></div><div class="pm-body"><div class="pm-name"></div><div class="bar hp"><i></i></div><div class="bar mp" hidden><i></i><span></span></div><div class="pm-where"></div></div>';
+        // T3 (play-test 5): a click targets them — your heals and wards then go to them; say so when they are out of reach
+        root.onclick = () => { const fr = frames.get(m.char); if (fr?.id) onTarget?.(fr.id); else hud.toast(`${fr?.member?.name || m.name} is too far away to target.`, 'warn'); };
+        root.dataset.tip = 'Click to target — your heals and wards go to your target';
         el.frames.appendChild(root);
-        f = { root, icon: root.querySelector('.pm-icon'), name: root.querySelector('.pm-name'), bar: root.querySelector('.bar i'), where: root.querySelector('.pm-where') };
+        f = { root, icon: root.querySelector('.pm-icon'), name: root.querySelector('.pm-name'), bar: root.querySelector('.bar.hp i'), mp: root.querySelector('.bar.mp'), where: root.querySelector('.pm-where') };
         frames.set(m.char, f);
       }
-      f.icon.textContent = (m.name[0] || '?').toUpperCase();
+      // play-test 2 Q13: the member's portrait (ui/portraits.js, static + cached) instead of a letter
+      const pic = api.portraitFor?.(m);
+      if (pic) { if (f.icon.dataset.pic !== pic) { f.icon.dataset.pic = pic; f.icon.textContent = ''; f.icon.style.backgroundImage = `url("${pic}")`; f.icon.classList.add('pic'); } }
+      else if (!f.icon.dataset.pic) f.icon.textContent = (m.name[0] || '?').toUpperCase();
       f.name.innerHTML = '';
       f.name.append(document.createTextNode(m.name));
       const sm = document.createElement('small'); sm.textContent = `${m.level} ${CLASS_NAME(m.cls)}`; f.name.append(sm);
@@ -93,6 +96,11 @@ export function createSocial({ net: getNet, hud, actors, onTarget, myChar }) {
     for (const r of list) {
       const f = frames.get(r.char); if (!f) continue;
       f.bar.style.width = (r.hpMax ? Math.max(0, r.hp / r.hpMax) * 100 : 0).toFixed(1) + '%';
+      // R6: mana when the server sends it on party frames (mp / mpMax)
+      const live = r.id != null && actors?.get?.(r.id);
+      if (!(r.mpMax > 0) && live?.mpMax > 0) { r.mp = live.mp; r.mpMax = live.mpMax; }   // in view: the mp events fill in
+      if (f.mp) { const has = r.mpMax > 0; f.mp.hidden = !has; if (has) { f.mp.querySelector('i').style.width = (Math.max(0, r.mp / r.mpMax) * 100).toFixed(1) + '%'; f.mp.dataset.tip = `Mana: ${Math.round(r.mp)} / ${Math.round(r.mpMax)}`; } }
+      const ac = r.id != null && actors?.get?.(r.id); if (ac && r.mpMax > 0) { ac.mp = r.mp; ac.mpMax = r.mpMax; }
       f.root.classList.toggle('dead', r.dead);
       f.root.classList.toggle('offline', !r.online);
       const away = r.room !== myRoom;
@@ -121,32 +129,9 @@ export function createSocial({ net: getNet, hud, actors, onTarget, myChar }) {
     });
     n.on('partyFrames', onFrames);
     n.on('ignored', list => hud.chat(list.length ? `Ignoring: ${list.map(i => i.name).join(', ')}` : 'Your ignore list is empty.', 'system'));
-    n.on('err', e => { if (['party', 'partyFull', 'noCode', 'notFound', 'muted'].includes(e.code)) hud.toast(e.msg || e.code, 'warn'); });
+    n.on('err', e => { if (['party', 'partyFull', 'noCode'].includes(e.code)) hud.toast(e.msg || e.code, 'warn'); });
   }
 
-  /** A line typed into the chat box. Returns true when it was handled. */
-  function command(text) {
-    const n = net(); if (!n) return false;
-    const m = /^\/(\w+)\s*(.*)$/.exec(text);
-    if (!m) { if (channel === 'party') n.partyChat(text); else n.say(text); return true; }
-    const [, cmd, rest] = m;
-    switch (cmd.toLowerCase()) {
-      case 'p': case 'party': if (rest) n.partyChat(rest); else setChannel('party'); return true;
-      case 's': case 'say': if (rest) n.say(rest); else setChannel('say'); return true;
-      case 'invite': case 'inv': invite(rest); return true;
-      case 'leave': n.partyOp('leave'); return true;
-      case 'kick': { const mm = party?.members.find(x => x.name.toLowerCase() === rest.toLowerCase()); if (mm) n.partyOp('kick', { char: mm.char }); return true; }
-      case 'lead': { const mm = party?.members.find(x => x.name.toLowerCase() === rest.toLowerCase()); if (mm) n.partyOp('lead', { char: mm.char }); return true; }
-      case 'ignore': if (rest) n.ignore(rest, true); return true;
-      case 'unignore': if (rest) n.ignore(rest, false); return true;
-      case 'link': copyLink(); return true;
-      case 'help': hud.chat('/p party chat · /s say · /invite Name · /leave · /kick Name · /lead Name · /ignore Name · /unignore Name · /link', 'system'); return true;
-    }
-    hud.chat(`Unknown command /${cmd}. Type /help.`, 'system');
-    return true;
-  }
-  let channel = 'say';
-  function setChannel(ch) { channel = ch; el.chatCh.textContent = ch === 'party' ? 'Party' : 'Say'; el.chatCh.classList.toggle('party', ch === 'party'); }
-
-  return { wire, command, toggleMenu, render, get party() { return party; } };
+  const api = { wire, invite, copyLink, toggleMenu, render, portraitFor: null, get party() { return party; } };
+  return api;
 }

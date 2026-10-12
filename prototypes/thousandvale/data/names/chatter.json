@@ -1,0 +1,888 @@
+{
+ "_doc": "Stream E (play-test 1, P19). What people on the roads and in the wilds say: about the time of day, the weather, and what has happened lately (kills, the world boss, deaths, events). Stream A picks and fills a line (a bark) when a player comes near a traveller or folk NPC (data/provinces/travellers.json says which pools each role uses). `pools` = line lists by id; `{token}` = filled from `tokens` below. A line may only be used when EVERY token in it is known for this speaker right now — a line with a missing token is skipped, so every pool also holds token-free lines (except the recent.* / worldboss.* pools, which are only chosen when their context exists). `rules` = how a speaker chooses. Original lines; checked against the banned-name list by tests/E. Play-test 2 (Q18): `place.<set piece id>` pools (said by folk and visitors at that set piece) and the set-piece roles (farmer, orchard_keeper, miller, sexton, foreman, innkeeper, stablehand, trainer).",
+ "tokens": {
+  "name": "the speaker's display name",
+  "from": "the town the traveller's route started at",
+  "dest": "the town the traveller is walking to",
+  "town": "the nearest town to the speaker",
+  "zone": "a zone name (world boss roaming: the zone it marches on)",
+  "weather": "the current weather word in this zone (clear, cloud, rain, fog, storm, snow)",
+  "rare": "a named rare killed in this zone in the last hour (deeds)",
+  "player": "a player's name: the killer / party leader / top contributor / name on a grave",
+  "party": "party size (a number)",
+  "boss": "a boss or elite name",
+  "place": "a dungeon or event place name",
+  "event": "a zone event's name",
+  "worldboss": "the province world boss's name",
+  "minutes": "minutes until (soon) or since",
+  "count": "a number: deaths this hour, visitors this hour, world boss contributors"
+ },
+ "rules": {
+  "weights": {
+   "recent": 0.4,
+   "weather": 0.15,
+   "phase": 0.15,
+   "role": 0.2,
+   "archetype": 0.1
+  },
+  "weightsNote": "recent = the recent.* / worldboss.* pool that fits what happened (only when there is such context; its weight goes to role otherwise). weather = weather.<current>. phase = phase.<dawn|day|dusk|night> (schedules.json clock phases; 'late' counts as night). role = the speaker's role pools from travellers.json `chatter` (incl. road.*). archetype = archetype.<zone archetype>. greet is used for the first bark a speaker gives a given player.",
+  "recentPriority": [
+   "worldboss.up",
+   "worldboss.roaming",
+   "worldboss.soon",
+   "recent.zone_event",
+   "worldboss.down",
+   "recent.boss_killed",
+   "recent.rare_killed",
+   "recent.elite_killed",
+   "recent.dungeon_cleared",
+   "recent.zone_event_won",
+   "recent.grave",
+   "recent.deaths",
+   "recent.busy",
+   "recent.quiet"
+  ],
+  "recentNote": "Of the recent pools whose context exists, take the first in recentPriority 60% of the time, else any of them. recent.deaths needs count >= 3, recent.busy count >= 5, recent.quiet = no visitors in the zone this hour but the listener.",
+  "road": "road.leaving within 150 m of the route start, road.arriving within 250 m of the destination, road.onroute between, road.danger when a hostile monster is within 60 m of the route ahead.",
+  "noRepeat": "Never the same line twice in a row per speaker; keep the last 6 lines per speaker and skip them.",
+  "bark": "A bark when a player comes within 8 m; at most one bark per speaker per 60 s, at most one per player per 20 s across all speakers.",
+  "pairs": "Two travellers walking together may trade a line + a reply from `reply` (the second speaker, 1.5-3 s later), at most once a minute per group.",
+  "tokens": "A line with any token this speaker cannot fill is skipped; if a whole pool is skipped, fall back to role, then phase."
+ },
+ "pools": {
+  "greet": [
+   "Morning. Or whatever it is.",
+   "Mind how you go.",
+   "Oh good, someone with a sword.",
+   "Don't mind me, I'm just passing.",
+   "You look like you know where you're going. Lucky you.",
+   "Safe roads. Ha. Listen to me.",
+   "Hello, stranger. Stay a stranger, it's healthier.",
+   "Another one with a sword. The road's getting crowded.",
+   "Evening, morning, whichever. I've stopped keeping track.",
+   "If you're selling something, I've no money. If you're buying, I've no goods."
+  ],
+  "phase.dawn": [
+   "Cold enough to crack teeth this early.",
+   "Up before the birds. The birds are smarter.",
+   "Best part of the day. Nothing's bitten me yet.",
+   "First light. Everything with teeth goes to bed about now. Mostly.",
+   "Fog's still in the hollows. Give it an hour.",
+   "Dawn. The hour of regret and porridge.",
+   "My knees know it's morning before I do.",
+   "I like the road at dawn. Quiet. Wet. Quiet."
+  ],
+  "phase.day": [
+   "Long day ahead. Long road too.",
+   "Sun's up, so the brigands are too.",
+   "Midday. Halfway to somewhere.",
+   "Good walking weather, if you like walking. I don't.",
+   "Bright enough to see what's coming. That's the trouble with it.",
+   "Hot work, this. Hot, dull work.",
+   "Nothing worse than a road at noon with no shade.",
+   "If I keep this pace I'll be there by supper. I won't keep this pace."
+  ],
+  "phase.dusk": [
+   "Getting dark. I'd want a roof soon if I were you.",
+   "Light's going. So am I.",
+   "Dusk. The hounds start singing about now.",
+   "I hate this hour. Everything looks like something.",
+   "Last of the sun. Make it count.",
+   "Lamps'll be lit in town. I can almost smell the stew.",
+   "Sun's down behind the hills. Walk faster.",
+   "The shadows get long and so does the road."
+  ],
+  "phase.night": [
+   "You shouldn't be out here in the dark. Neither should I.",
+   "Keep your voice down. Things listen at night.",
+   "Night road. Nobody sensible walks a night road.",
+   "Can't see my own boots. Hope they're still there.",
+   "There's eyes in that hedge. There's always eyes in that hedge.",
+   "I'd light a torch but then they'd see me.",
+   "Stars are out. Lovely. Terrifying, but lovely.",
+   "If I don't make the next town, tell them I tried."
+  ],
+  "weather.clear": [
+   "Not a cloud. Something's wrong.",
+   "Clear skies. You can see trouble a mile off.",
+   "Fine weather. The farmers will find a way to complain about it.",
+   "Blue sky all the way to the hills.",
+   "Lovely day for it. For what, I couldn't tell you.",
+   "Dry roads. My boots thank the sky.",
+   "Sun on the fields. Even the crows look cheerful.",
+   "Clear as a bell. A bell nobody's ringing, thankfully."
+  ],
+  "weather.cloud": [
+   "Clouds coming in. Could go either way.",
+   "Grey again. The sky's sulking.",
+   "Overcast. My favourite. Nobody squints.",
+   "Clouds low enough to touch.",
+   "Looks like rain. Looked like rain yesterday too.",
+   "Dull sky, dull road, dull company. Present company excepted.",
+   "Not raining yet. Yet.",
+   "Flat grey sky. Like walking under a lid."
+  ],
+  "weather.rain": [
+   "Wet to the bone and two leagues to go.",
+   "Rain. Of course. Why wouldn't it.",
+   "The road's turned to soup.",
+   "Good for the turnips, they tell me. I'm not a turnip.",
+   "My pack weighs twice what it did this morning.",
+   "Rain keeps the bandits indoors. Small mercies.",
+   "Every puddle on this road has my name on it.",
+   "If it rains any harder the fish will start walking."
+  ],
+  "weather.fog": [
+   "Can't see ten paces. Stay close.",
+   "Fog. Things come out of it. Mind that.",
+   "I heard something in the fog. Then I heard it stop.",
+   "Thick as porridge out there.",
+   "Follow the ruts. Don't follow the lights.",
+   "Fog's settled in the low ground. Don't go down there.",
+   "You could walk past your own mother in this.",
+   "Damp, grey and quiet. The quiet's the bad part."
+  ],
+  "weather.storm": [
+   "Storm's coming. Get somewhere with walls.",
+   "That's thunder. That's thunder getting closer.",
+   "Lightning hit a tree back there. Split it like kindling.",
+   "Wind nearly took my hat. And the head under it.",
+   "Don't stand under anything tall. Or be tall.",
+   "Sky's gone black at midday. Nothing good happens under that.",
+   "Every dog in the county is howling.",
+   "Storm like this, even the monsters stay home."
+  ],
+  "weather.snow": [
+   "Snow. My feet have stopped talking to me.",
+   "Tracks in the snow. Big ones. Fresh ones.",
+   "Pretty, isn't it? Pretty cold.",
+   "Can't tell the road from the field under this.",
+   "Snowing again. The pass'll be shut by evening.",
+   "Everything's white and quiet. Too quiet.",
+   "If you find a frozen courier, that's not me. Yet.",
+   "My breath's freezing in my beard."
+  ],
+  "recent.rare_killed": [
+   "Heard {rare} is dead. {player} did it. Bought a round, too.",
+   "{rare}'s gone. Somebody called {player} put it in the ground.",
+   "They say {player} killed {rare}. I'll believe it when I see the head.",
+   "No more {rare}. I can take the short way home again.",
+   "{player} brought down {rare} this very hour. Folk are talking of nothing else.",
+   "Did you hear? {rare}. Dead. Finally.",
+   "{rare} won't be bothering anyone. Ask {player}, they were there.",
+   "I saw {player} dragging something back. Said it was {rare}. Smelled like it.",
+   "Somebody finally dealt with {rare}. My cousin owes me a coin.",
+   "{rare} dead, and the road's quieter for it. For about a day."
+  ],
+  "recent.elite_killed": [
+   "{player} beat {boss}. Folk are saying it louder every time they tell it.",
+   "{boss} is down. {player}, they say. Never heard of them before today.",
+   "Heard {boss} finally met someone tougher. {player}, that was.",
+   "{boss}'s lot are leaderless now. That makes them angrier, not nicer.",
+   "Somebody saw off {boss}. I'd buy them a drink if I had a coin.",
+   "{player} and {boss}. Only one walked away.",
+   "They're singing about {player} and {boss} already. Badly.",
+   "{boss} is done. The toll's free this week, I hear.",
+   "{boss}? Dead as a doornail. {player}'s work.",
+   "No more {boss}. Now what will the guards complain about?"
+  ],
+  "recent.boss_killed": [
+   "{player} and {party} others went down into {place} and came back. That's the strange bit.",
+   "{boss} is dead, down in {place}. {player}'s lot did it.",
+   "Heard {party} went into {place} and finished {boss}. All {party} came out, too.",
+   "{place} is quiet tonight. {boss} won't be climbing out of it.",
+   "{player} came up out of {place} with {boss}'s gear. Wouldn't let me touch it.",
+   "They cleared {place}. {boss} and all. Took {party} of them.",
+   "Somebody finally shut {boss} up. Down in {place}, they say.",
+   "{player} led {party} into {place}. Came back muddy and rich.",
+   "{boss} is gone. The ground near {place} feels lighter.",
+   "Did you hear about {place}? {boss}. Gone. {player}'s party."
+  ],
+  "recent.dungeon_cleared": [
+   "{place} was cleared today. There's a banner on the door and everything.",
+   "{player} cleared {place}. Left the door open, the oaf.",
+   "Somebody went through {place} like a broom. {player}, I think.",
+   "{place}'s empty, they say. For now. These places fill up again.",
+   "Saw {player} coming out of {place}, grinning.",
+   "{place} cleared out. The rats will move back in by Tuesday.",
+   "{player}'s name is chalked on the {place} door. Bragging, I call it.",
+   "{place} is done. I might go and have a look. I won't.",
+   "They say {place} is safe now. They said that last time.",
+   "{player} came out of {place} carrying more than they went in with."
+  ],
+  "recent.deaths": [
+   "{count} buried this hour, round here. Watch yourself.",
+   "That's {count} gone today in these parts. The gravedigger's whistling.",
+   "{count} dead this hour. Whatever's out there is hungry.",
+   "Lost {count} round here already. I'm walking in the middle of the road.",
+   "The crows are fat. {count} reasons why.",
+   "{count} brave fools down this hour. Don't make it {count} and one.",
+   "Heard {count} folk didn't come back today.",
+   "{count} graves fresh. Bad hour for it.",
+   "It's been a hard hour. {count} hard hours, for some.",
+   "Somebody's counting the dead. {count}, last I heard."
+  ],
+  "recent.busy": [
+   "Busy round here. {count} adventurers through today, easy.",
+   "{count} sword-swingers this hour. The wolves are hiding for once.",
+   "Never seen the road so full. {count} of you lot at least.",
+   "{count} strangers through already. Good for the inn.",
+   "Crowded today. Can't swing a cat. Not that I'd swing a cat.",
+   "With {count} of you about, I might actually get home.",
+   "{count} heroes this hour. Somebody should charge a toll.",
+   "All these adventurers. {count}! The boars are terrified.",
+   "Busy, busy. {count} folk in armour and not one of them buys turnips.",
+   "The inn's full. {count} of your sort, drinking like it's free."
+  ],
+  "recent.quiet": [
+   "Quiet today. Nobody about. I don't like it.",
+   "Not a soul on the road. Just me and whatever's in the hedge.",
+   "Empty roads. Either it's safe or it's very much not.",
+   "You're the first face I've seen all day.",
+   "So quiet you can hear the grass grow.",
+   "Nobody about. Even the brigands took a day off.",
+   "Lonely road today.",
+   "Haven't seen another traveller since dawn.",
+   "Quiet as a crypt. And I'd know.",
+   "Nobody's been through. The tracks are all old."
+  ],
+  "recent.zone_event": [
+   "{event}! Right now! Everybody with a blade is heading that way.",
+   "Haven't you heard? {event}. Go on, they need hands.",
+   "{event} is happening, and I'm walking the other way.",
+   "There's a {event} on. You can hear it from here.",
+   "{event}. If you're any good with that sword, now's the time.",
+   "Bells ringing for {event}. Run toward it, not like me.",
+   "They're shouting about {event} back there.",
+   "{event}! Gods, again?",
+   "If you want glory, {event}'s where it is. If you want supper, come with me.",
+   "{event} going on. I saw the smoke."
+  ],
+  "recent.zone_event_won": [
+   "{event}'s over. We won, apparently.",
+   "Heard {event} went our way. Drinks are cheap tonight.",
+   "{event} is done with. Folk are cheering in town.",
+   "We beat {event}. Well, somebody did. I was hiding.",
+   "{event} finished. Nobody I know died. Good day.",
+   "That {event} business is settled. For now.",
+   "Somebody saw off {event}. I'd shake their hand.",
+   "{event}'s won. The town's acting like it was their idea.",
+   "After {event}, the road feels safer. Feels.",
+   "Over and done, {event}. Now back to normal misery."
+  ],
+  "recent.grave": [
+   "There's a fresh grave back there. {player}, it says. Poor soul.",
+   "Someone's dug a marker for {player}. Not deep, mind.",
+   "{player} fell near here. Mind where you step.",
+   "Saw a grave with {player} on it. Hope they're up and about again.",
+   "{player}'s grave. Short life or short fight, couldn't say.",
+   "Fresh earth and a name. {player}. Somebody should leave flowers.",
+   "That grave's for {player}. They'll be back, your sort always are.",
+   "Passed {player}'s grave. Left a pebble. Seemed right.",
+   "Did you know {player}? There's a grave with their name on it.",
+   "{player} rests back there. Or sulks. Hard to tell with your lot."
+  ],
+  "worldboss.soon": [
+   "{worldboss} wakes in {minutes} minutes. Folk are packing.",
+   "They say {worldboss} rises in {minutes}. I'll be indoors.",
+   "{minutes} minutes till {worldboss}. Sharpen something.",
+   "Waystones to the Scar are free, they say. {worldboss} in {minutes} minutes.",
+   "You feel that? {worldboss}. {minutes} minutes, maybe less.",
+   "{worldboss} is stirring. {minutes} minutes and it's walking.",
+   "The ground hums. {worldboss} comes in {minutes}.",
+   "Every fool with a sword is off to fight {worldboss} in {minutes} minutes. Go on, then.",
+   "{minutes} minutes. Then {worldboss}. Then a lot of graves.",
+   "Heard the bell? {worldboss}, {minutes} minutes."
+  ],
+  "worldboss.up": [
+   "It's up. The big one. Everybody's running one way and I'm running the other.",
+   "The siege-husk is walking. Can you hear it?",
+   "That's the world boss, that shaking. Go and help, or go and hide.",
+   "It's risen. The whole Scar's on fire with it.",
+   "Every waystone's busy. It's up, the big ugly thing.",
+   "Something huge is awake out east. Smell that?",
+   "They need every blade. I have a spoon. I'm not going.",
+   "The big one's up. The birds have all gone quiet.",
+   "It's walking. Somebody should stop it. Somebody else.",
+   "You'll want to be at the Scar right now, if you're the brave sort."
+  ],
+  "worldboss.down": [
+   "{player} landed the killing blow, they say, and {count} others stood with them.",
+   "The big one's down! {count} of them took it, {player} at the front.",
+   "{count} fighters and {player} brought it down. Drinks on the town.",
+   "Heard {player} was first in and last out. {count} with them.",
+   "It's dead. {count} heroes and one {player} saw to it.",
+   "{player}'s the name on everyone's lips. And {count} others nobody can name.",
+   "Down it went. {count} of them. Took most of the afternoon.",
+   "{player} and {count} more. Songs already.",
+   "The Scar's quiet. {player}'s lot, all {count} of them.",
+   "It fell. {count} people say they hit it. {player} actually did."
+  ],
+  "worldboss.roaming": [
+   "{worldboss} broke out of the Scar! It's heading for {zone}.",
+   "They say {worldboss} is marching on {zone}. Poor {zone}.",
+   "{worldboss}'s loose and walking toward {zone}.",
+   "Keep clear of {zone}. {worldboss} is on its way.",
+   "{worldboss} in {zone}. Haven't seen that in years.",
+   "Everyone in {zone} is packing. {worldboss}'s coming.",
+   "{worldboss} out of its hole and off to {zone}, the brute.",
+   "Heard {worldboss} smashed a fence on its way to {zone}.",
+   "The big husk is roaming. {zone}'s turn tonight.",
+   "If you're going to {zone}, don't. {worldboss}."
+  ],
+  "road.leaving": [
+   "Off to {dest}. Long way.",
+   "{dest} by nightfall, if the road's kind.",
+   "Heading for {dest}. Wish me boring luck.",
+   "Bound for {dest}. Don't follow me, I'm slow.",
+   "Got business in {dest}. Unpleasant business.",
+   "{dest}, then home, then never again.",
+   "On my way to {dest}. Again.",
+   "I hear {dest} has a decent inn. I'll judge for myself."
+  ],
+  "road.onroute": [
+   "Left {from} at dawn, bound for {dest}.",
+   "{from} to {dest}. Every week. Every blessed week.",
+   "Halfway from {from} to {dest}, I reckon.",
+   "Is this the road to {dest}? I came from {from}, so it had better be.",
+   "Coming from {from}. They send their regards. They don't, but it's polite.",
+   "{from} was dull. Let's hope {dest} is duller.",
+   "Walked from {from} with a stone in my boot the whole way to {dest}.",
+   "Nothing in {from} worth staying for. Off to {dest}."
+  ],
+  "road.arriving": [
+   "Nearly at {dest}. I can smell the bakery.",
+   "{dest} at last. My feet are filing a complaint.",
+   "Is that {dest}? Gods be thanked.",
+   "Almost in {dest}. First stop, a bench.",
+   "{dest}'s walls! Never been so glad to see walls.",
+   "Here's {dest}. Not much, but it's got a roof.",
+   "{dest}. I'll sleep for a week.",
+   "Made it to {dest} with all my fingers. Good trip."
+  ],
+  "road.danger": [
+   "Something on the road ahead. Teeth, mostly.",
+   "Don't go that way. Not alone.",
+   "Hounds by the ford. Lots of them.",
+   "Brigands up ahead, sitting on the verge like they own it.",
+   "Saw shapes in the ditch. Walked faster.",
+   "There's a pack sniffing round the bend. Mind it.",
+   "Road's not safe past the next hill.",
+   "Something big crossed the road ahead. I let it."
+  ],
+  "reply": [
+   "Mm.",
+   "Don't start.",
+   "If you say so.",
+   "Here we go again.",
+   "You said that yesterday.",
+   "Keep walking.",
+   "I'm not arguing about this again.",
+   "Fair.",
+   "Quiet, someone's listening.",
+   "That's not how I heard it.",
+   "Ha. No.",
+   "Couldn't agree more. Couldn't agree less, either.",
+   "Your mother said the same.",
+   "Is that so.",
+   "Hush.",
+   "Every day with you.",
+   "And whose fault is that?",
+   "We'll see."
+  ],
+  "role.merchant": [
+   "Fine goods, fair prices, unfair roads.",
+   "Buy low, sell high, don't get stabbed. Three rules.",
+   "Every toll on this road takes a bite. Soon there'll be nothing left to bite.",
+   "I'd sell you something but it's all spoken for. And overpriced.",
+   "Wool to the river, salt to the hills, debts everywhere.",
+   "My ledger and I are not on speaking terms.",
+   "If anyone asks, I'm carrying turnips. Only turnips.",
+   "Profit's a lovely word. I hear it's lovely."
+  ],
+  "role.caravan_guard": [
+   "Eyes front. I'm paid to be suspicious.",
+   "Keep your hands where I can see them, friend.",
+   "Six days guarding barrels. Barrels.",
+   "If it comes to it, I run toward the trouble. Slowly.",
+   "The pay's bad but the boredom's excellent.",
+   "Last brigand who tried us is still picking splinters out.",
+   "Don't touch the cart. The cart has feelings.",
+   "Nothing's happened all week. I'm starting to take it personally."
+  ],
+  "role.porter": [
+   "My back's got a back.",
+   "Carried this pack from one end of the county to the other.",
+   "They pay me by the mile, not by the stone. Unfair.",
+   "Don't ask what's in the box. I don't know. I don't want to.",
+   "One more hill and I'll lie down in it.",
+   "Lift with the knees, they say. My knees say otherwise."
+  ],
+  "role.guard_patrol": [
+   "Road's clear as far as the bridge.",
+   "Report anything with teeth to the watch house.",
+   "Keep moving, citizen. Nothing to see. Yet.",
+   "We walk it so you don't have to worry. Worry anyway.",
+   "Third patrol today. My feet hate this road.",
+   "Saw hounds at the tree line. We'll swing back for them.",
+   "If you see Hobb's lot, don't be a hero. Fetch us.",
+   "On patrol. Which means walking, mostly."
+  ],
+  "role.pilgrim": [
+   "Every stone on the road is a prayer. My feet are very devout.",
+   "The saint walked this road barefoot. I'm beginning to think the saint was mad.",
+   "Walk with us a while? We sing. Badly.",
+   "The shrine's three days on. Or a lifetime. Depends who you ask.",
+   "I gave up shoes for the pilgrimage. I regret it in every toe.",
+   "Blessings on you, stranger. That's free. The candles aren't.",
+   "We pray at every crossroads. It's slow going.",
+   "The bells at the Rise. You'll hear them before you see them."
+  ],
+  "role.hunter": [
+   "Boar tracks by the stream. Big ones.",
+   "Quiet, you'll scare the supper.",
+   "Hounds have gone bold this year. Too bold.",
+   "Wind's wrong for stalking. Might as well walk.",
+   "Three days, two rabbits and a cold. Good hunting.",
+   "Never chase a boar into a thicket. I have the scars to prove it.",
+   "There's something in the wood that isn't deer. Keep out of it.",
+   "Fresh spoor. We'll eat tonight."
+  ],
+  "role.courier": [
+   "Can't stop. Letters.",
+   "Urgent. Everything's urgent. Nothing's ever urgent.",
+   "If this reaches them in time, someone gets married. Or sued.",
+   "Out of my way, friend, the reeve wants this yesterday.",
+   "Two horses lamed this month. The road eats horses.",
+   "Sealed letters. Don't ask. I can't read anyway.",
+   "Faster than the post and twice as rude.",
+   "Back by sundown, or they dock my pay."
+  ],
+  "role.drover": [
+   "Hup! Hup, you lazy beasts!",
+   "Mind the cattle, they mind nothing.",
+   "Taking them to market. They don't know. Don't tell them.",
+   "This one's called Bessie. That one's called Bessie too. I'm not imaginative.",
+   "Lost two to the hounds last week. Keep 'em close now.",
+   "Dust, flies and cows. My whole life.",
+   "If they bolt, they bolt into the river. Every time.",
+   "Slow going. Cattle don't hurry for anybody."
+  ],
+  "role.minstrel": [
+   "Want a song? It's about you. It's not flattering.",
+   "We've a new verse about the brigands. They didn't like it either.",
+   "Three towns, three suppers, no applause.",
+   "Tune's in my head and my lute's out of tune.",
+   "Heard any good deaths lately? Need new material.",
+   "We play weddings, funerals and anything in between.",
+   "Every tavern wants the same song. I hate that song.",
+   "Our drummer left. We're still finding the rhythm."
+  ],
+  "role.tinker": [
+   "Pots mended, knives sharpened, gossip sold.",
+   "Bring me anything broken. I'll make it differently broken.",
+   "The mule bites. I don't. Usually.",
+   "Got a pan with a hole? I've got a hole with a pan.",
+   "Old iron, old rope, old news. All cheap.",
+   "I've mended half the kettles in this county. The other half are mine.",
+   "Need a lock fixed? Need one opened? Different prices.",
+   "Every road's my road, every hedge my bed."
+  ],
+  "role.refugee": [
+   "We're not going back. There's nothing to go back to.",
+   "They burned the barns. Then the houses. Then we stopped watching.",
+   "Is there work in town? Any work?",
+   "Keep the little one away from the ditch, please.",
+   "We had a farm. Now we have a cart.",
+   "If you see the folk who did it, you'll know them by the smell of smoke.",
+   "Somebody said the town takes people in. Somebody says a lot.",
+   "We walk at night when we must. We must, mostly."
+  ],
+  "role.woodcarter": [
+   "Logs for the town. Town burns them. I fetch more. Circle of life.",
+   "This ox has been on this road longer than me.",
+   "Watch the load, it shifts on the hills.",
+   "Every winter the town wants twice the wood.",
+   "Oak for the smith, ash for the fletcher, pine for whoever complains least.",
+   "Slow and steady. Mostly slow."
+  ],
+  "role.tax_collector": [
+   "Don't look at me like that. I don't make the rates.",
+   "Everybody's poor when they see me coming.",
+   "The reeve wants his share, and his share's grown.",
+   "I have guards because people love me so much.",
+   "A tenth of everything. A tenth of nothing is still nothing, I suppose.",
+   "Smile. Taxes pay for the road you're walking on. Some of it."
+  ],
+  "role.gravedigger": [
+   "Busy season. It's always busy season.",
+   "Six feet, always six. Folk don't come in other sizes.",
+   "Your lot keep me in boots, you adventurers.",
+   "Quiet trade, mine. My customers don't complain.",
+   "Got a shovel and a cart and a lot of patience.",
+   "Most of them come back, your sort. Wastes my good digging."
+  ],
+  "role.woodcutter": [
+   "Timber! No? Just practising.",
+   "Good straight oak. Shame to cut it. Shame not to.",
+   "Mind the falling bits.",
+   "Axe needs sharpening. So does my temper.",
+   "The forest takes back everything I cut, given a year.",
+   "Something chewed my sawhorse last night. Something big.",
+   "Ten trees by dusk or no supper.",
+   "Never cut the old ones. They hold grudges."
+  ],
+  "role.shepherd": [
+   "Lost three to the hounds. Don't you be the fourth.",
+   "Every sheep has a name. Every name is Dolly.",
+   "Seen a stray ewe? Big, stupid, black face?",
+   "Up the hill, down the hill, up the hill.",
+   "My dog does the work. I do the worrying.",
+   "Wolves at night, flies by day, wool at shearing. That's the life.",
+   "They follow me because they don't know better. Like most followers.",
+   "Don't wave your arms, you'll start a stampede. A slow one."
+  ],
+  "role.herbalist": [
+   "Feverfew, yarrow, and something I'm not naming.",
+   "Don't eat the red ones. Or the white ones. Ask before you eat anything.",
+   "This patch cures headaches. That patch causes them.",
+   "The best herbs grow where nobody walks. Like here.",
+   "Bryn in town pays well for moss. Odd woman.",
+   "Mind your feet, you're standing on supper.",
+   "Sorrel by the stream, nettle by the wall, mandrake nowhere you'd want.",
+   "Three hours for a basket. Worth every sting."
+  ],
+  "role.prospector": [
+   "Copper. Or rust. Hard to tell till you bite it.",
+   "There's a seam in this hill. I can feel it in my teeth.",
+   "Dug a hole. Found a smaller hole.",
+   "One more shaft and I'm rich. That's what I said last shaft.",
+   "Don't stand there, the bank's loose.",
+   "The old miners left the best bits. They always do.",
+   "Shiny! No. Mica. It's always mica.",
+   "Rock's got secrets. I've got a pick."
+  ],
+  "role.charcoal_burner": [
+   "Keep the mound smouldering, not burning. That's the whole trick.",
+   "I smell of smoke. Everybody says so. Nobody visits.",
+   "Three days to burn a stack. Three days of not sleeping.",
+   "The smith buys every sack I make.",
+   "If the mound bursts, run.",
+   "Black hands, black lungs, black humour."
+  ],
+  "role.hermit": [
+   "Go away. Oh, you're already going. Good.",
+   "I came out here for the quiet. You're not quiet.",
+   "The trees talk, if you're patient. They're mostly rude.",
+   "Want wisdom? Don't go in that cave. There. Free.",
+   "I used to live in town. Then I met the people.",
+   "Sit if you like. Don't speak.",
+   "Seen things out here. Things that don't happen in town.",
+   "The stars are better company. They stay where they're put."
+  ],
+  "role.fisher": [
+   "Nothing biting but the midges.",
+   "There's a big one in there. There's always a big one in there.",
+   "Lost my best net to something with more teeth than a fish ought.",
+   "Quiet, you'll scare them.",
+   "Good water this. Too good. Something else fishes it too.",
+   "A bucket of eels by noon, or I go home in shame.",
+   "My nephew fell in last week. We found him. Mostly the hat.",
+   "Patience is a fisher's only tool. Patience and worms."
+  ],
+  "role.poacher": [
+   "You didn't see me.",
+   "Those are the reeve's rabbits? Didn't have his name on them.",
+   "Snares, not traps. There's a difference. Legally.",
+   "Keep walking, friend, and I'll keep not seeing you too.",
+   "The lord's deer are my deer when the lord's asleep.",
+   "I'm a hunter. With fewer permissions."
+  ],
+  "role.surveyor": [
+   "Two hundred paces to the stone. No, two hundred and three.",
+   "The old maps put a river here. Rivers move, apparently.",
+   "Don't trip on the line.",
+   "Somebody's moved the boundary stone again. Every year.",
+   "The reeve wants a new road. Wants. Hah.",
+   "Measuring the county, one argument at a time."
+  ],
+  "role.scarecrow_maker": [
+   "This one's called Gerald. Gerald frightens crows and children.",
+   "Straw, sackcloth, and a turnip head. Art.",
+   "The crows have learned to sit on them. Clever birds.",
+   "I make them scarier every year. The crows get braver every year.",
+   "Need a scarecrow? I do custom faces. Even yours.",
+   "One of mine walked off last spring. I don't talk about it."
+  ],
+  "role.beekeeper": [
+   "Calm voices. They don't like shouting.",
+   "Honey's good this year. Stings are better.",
+   "Don't swat. They hold grudges.",
+   "The hives hum louder before a storm. They're humming now.",
+   "Best mead in the county starts right here.",
+   "I've been stung so often I'm half bee."
+  ],
+  "archetype.heartland": [
+   "Turnips again this year. Turnips forever.",
+   "Good soil round here. Too good. Everybody wants it.",
+   "The mill wheel's been squeaking for a month.",
+   "Harvest coming in. Hounds coming in after it.",
+   "Farms, fields, fences. Nothing ever happens. Except when it does.",
+   "Somebody's sheep are in somebody else's barley again."
+  ],
+  "archetype.marsh": [
+   "Stay on the boards. The bog keeps what it takes.",
+   "Lights over the water at night. Don't follow them.",
+   "The fen smells like old soup and older secrets.",
+   "Everything's damp. My bones are damp. My thoughts are damp.",
+   "Croakers singing. Means rain, or means they're hungry.",
+   "I've lost two boots to the mud this year."
+  ],
+  "archetype.crown_ring": [
+   "The city's grand, if you like being robbed politely.",
+   "Banners on every tower. Taxes on every banner.",
+   "The crown pays for the roads. The roads pay for the crown.",
+   "Busy streets, busy guards, busy pickpockets.",
+   "In the city, everyone knows your business before you do.",
+   "Market day. Bring coin, hide coin."
+  ],
+  "archetype.frontier": [
+   "Edge of the map, this. Past here it's anybody's.",
+   "Forts keep falling down. Nobody keeps building them up.",
+   "Out here, the law's whoever has the biggest stick.",
+   "Cinder imps in the scrub. Don't ask me where they come from.",
+   "Hard country. Hard people. Hard bread.",
+   "The fort sends patrols when it feels like it."
+  ],
+  "archetype.wilds": [
+   "The wood's older than the road. It knows it, too.",
+   "Off the path, nobody finds you. Nobody.",
+   "Antlers in the thicket. Big antlers. Too big.",
+   "Every tree looks like the last tree.",
+   "The wilds don't care who you are. Good for them.",
+   "Owls watching. They always watch."
+  ],
+  "archetype.ruinfield": [
+   "Old stones everywhere. Old dead under them.",
+   "Somebody built a kingdom here. Somebody else knocked it down.",
+   "Don't dig. Every hole's a grave round here.",
+   "The ruins hum at night. I don't go near them.",
+   "Good stone for walls, if you don't mind ghosts.",
+   "Barrow hounds sleep in the old cellars."
+  ],
+  "archetype.lakeland": [
+   "Lake's calm today. Don't trust it.",
+   "Fish for breakfast, fish for supper, fish in my dreams.",
+   "Something big surfaced out there last week.",
+   "The water's so clear you can see the bottom. And what's on it.",
+   "Boats go out, mostly come back.",
+   "Mist on the lake at dawn. Prettiest thing you'll fear."
+  ],
+  "archetype.pass": [
+   "The pass shuts with the first snow. Get through or wait till spring.",
+   "Mind the scree. It moves when you don't.",
+   "Griffins up on the crags. They like horses. To eat.",
+   "Thin air up here. Thin tempers too.",
+   "Every switchback's a little prayer.",
+   "Avalanche last month. They're still digging out the toll house."
+  ],
+  "archetype.blight": [
+   "The ground's sick. Don't let it touch you.",
+   "Nothing grows right here any more.",
+   "The warband burns what it can't carry.",
+   "Ash on the wind again.",
+   "Even the crows have left.",
+   "Smells like burnt hair and bad decisions."
+  ],
+  "archetype.holy_ground": [
+   "Bells at the Rise every hour. You stop hearing them. Then you can't sleep without them.",
+   "Holy ground, they say. The dead don't seem to know it.",
+   "Pilgrims everywhere. Pickpockets dressed as pilgrims, too.",
+   "Don't spit near the shrine. They fine you.",
+   "The saint's bones are in the abbey. Most of them.",
+   "Candles cost double here. Holiness isn't cheap."
+  ],
+  "archetype.mine_country": [
+   "Hear that rumble? Another shaft gone.",
+   "Dust in the bread, dust in the beer.",
+   "The old workings go deeper than anybody's maps.",
+   "Miners' bell means somebody's trapped. It rings a lot.",
+   "Rich hills. Poor folk.",
+   "Something lives in the deep shafts. The rats left."
+  ],
+  "archetype.coast": [
+   "Salt in everything. Even the honey.",
+   "Wreckers on the headland. False lights.",
+   "The tide takes what it likes.",
+   "Gulls'll have your lunch before you've unwrapped it.",
+   "Fog off the sea every evening, regular as rent.",
+   "Smugglers' coves all along here. Not that I'd know."
+  ],
+  "place.sp_drill_field": [
+   "Mind the dummies. They hit back if you lean on them.",
+   "Dawn drill, every day. The Sergeant's idea of mercy is a short lunch.",
+   "Somebody put a helmet on the third dummy. Now he looks like he outranks us.",
+   "Sand in the boots means you've been working. Sand in the teeth means you've been learning.",
+   "Every arrow in that fence is somebody's first."
+  ],
+  "place.sp_brannock_fields": [
+   "Good soil here. Too good. Things grow that nobody planted.",
+   "The scarecrow faces a different way every morning. Nobody moves him. Nobody admits it.",
+   "Boars in the turnips again. They know the hedge better than we do.",
+   "Apples first, cider second, regret third. Brannock way.",
+   "Watch the bees. They're in a mood about the weather."
+  ],
+  "place.sp_turnwater_mill": [
+   "The wheel never stops. Not for floods, not for funerals.",
+   "Flour in your hair by noon, rats in your dreams by night.",
+   "Somebody mends the gearing at night. Hob says he doesn't. Hob sleeps very well.",
+   "Hear the stones? That's the sound of bread being argued into existence."
+  ],
+  "place.sp_saint_hulda_yard": [
+   "Keep to the path. The grass between graves is for the residents.",
+   "The bell rings itself on still nights. Not loud. Just enough.",
+   "New grave by the wall. Nobody's died that I know of.",
+   "Saint Hulda kept the dead tidy. We try to keep up the standard.",
+   "The hounds dig for bones. They're not the only ones."
+  ],
+  "place.sp_greyfletch_camp": [
+   "If it walks, we've tallied it. If it walks funny, we've tallied it twice.",
+   "Old Gristle took Bess the sheepdog. Uncle Oswy's been sharpening ever since.",
+   "Smoke keeps the flies off the meat and the meat off the flies.",
+   "Never hunt alone. The tally board has a column for that.",
+   "Bring a hide, get a drink. Bring Gristle's hide, get the barrel."
+  ],
+  "place.sp_gristles_hollow": [
+   "Smells like wet dog and old murder.",
+   "Every bone here was somebody's supper. Don't be the next course.",
+   "That den is warm. Something big just left it. Or didn't.",
+   "Quiet. The hounds are listening for him to wake."
+  ],
+  "place.sp_nine_maidens": [
+   "Count them. Then count again. Never the same number twice, they say.",
+   "The wind goes round the ring the wrong way.",
+   "Don't step in the mushroom ring. Step round it. You know this.",
+   "Nine girls danced on a holy day and the stones caught them. That's the polite version.",
+   "The altar holds rain that never dries."
+  ],
+  "place.sp_kind_mother_shrine": [
+   "Leave a coin. She doesn't need it, but you'll feel better.",
+   "Her hands are warm. Always. Even in frost.",
+   "Every pebble in those cairns is a wish. Some of them are rude.",
+   "Pilgrims sit here and say nothing for an hour. It's the best hour they get."
+  ],
+  "place.sp_coldharrow_ruins": [
+   "The fire was thirty years ago. The stones still smell of it.",
+   "Don't stand in the circle in the hall. Your shadow comes back late.",
+   "Brigands sleep here because nobody else will.",
+   "The Coldharrow girl survived the fire. Some say she lit it.",
+   "Old money under the old hearth, if you believe drunks."
+  ],
+  "place.sp_ashby_lumber_camp": [
+   "Timber! No. Wait. Not yet. Never mind.",
+   "Every tree we drop, the forest sends something to argue about it.",
+   "Mind the stumps after dark. They trip you on purpose.",
+   "Sawdust in the stew again. Adds body, says the foreman.",
+   "The flitters come out at the last hour of light. So we stop at the second-last."
+  ],
+  "place.sp_tench_pool": [
+   "Forty years fishing this pool and the croakers turn up like they paid for the place.",
+   "Deep water, flat calm. Something down there is thinking.",
+   "Sit on the jetty a while. The pool makes people quiet.",
+   "Big tench in here. Bigger than you'd credit. Hungrier too."
+  ],
+  "place.sp_pail_and_plough": [
+   "Halfway to Orrinsford, halfway home. Have a drink either way.",
+   "Ale's brown, stew's brown, the dog is brown. Consistent house.",
+   "Read the notice post. There's a bounty on that big hound.",
+   "Marra hears everything on this road. Buy a bowl and she might share.",
+   "Dice in the corner, songs by the hearth, fights by the door."
+  ],
+  "role.farmer": [
+   "Rain for the wheat, sun for the hay, and the two of them never agree.",
+   "Every boar in the county knows where my turnips are.",
+   "Up before the sun. The sun is a lazy layabout.",
+   "The soil's good this year. Suspiciously good.",
+   "You want work? There's always work. There's never pay, but there's work.",
+   "I talk to the scarecrow. He's the only one who listens.",
+   "Mud to the knees and glad of it."
+  ],
+  "role.orchard_keeper": [
+   "Apples don't fall far from the tree. Unless the boars get them.",
+   "The bees have opinions about everyone. Mostly bad ones.",
+   "Good cider takes a year. Bad cider takes a week and a strong stomach.",
+   "Never climb a pear tree in a skirt. Lesson learned.",
+   "Windfalls for the pigs, the best for the press, the worms for the birds.",
+   "An orchard is just a forest that's been taught manners."
+  ],
+  "role.miller": [
+   "The wheel keeps turning. So do I. Slower, these days.",
+   "Flour gets everywhere. I've been white since I was twelve.",
+   "Rats eat the grain, cats eat the rats, the cats eat better than me.",
+   "Never trust a miller with clean hands.",
+   "Grind fine for bread, coarse for porridge, and never on a feast day.",
+   "Water's high this week. Good for the wheel, bad for the cellar."
+  ],
+  "role.sexton": [
+   "Somebody has to keep them tucked in.",
+   "I ring the bell for the dead. Sometimes they ring it back.",
+   "Grass on the graves, weeds on the path, and always one more hole to dig.",
+   "Quiet neighbours, mostly. I've lived beside worse.",
+   "Mind where you step. Everybody here was somebody.",
+   "I know every name in this yard. Some of them know mine.",
+   "A good grave is square. A bad one is a story."
+  ],
+  "role.foreman": [
+   "Wood doesn't cut itself. I've asked.",
+   "Keep your axe sharp and your feet sharper.",
+   "Every tree has a way it wants to fall. Learn it or wear it.",
+   "Dawn to dusk. Not a minute past. Not after what happened.",
+   "I pay by the log. I dock by the finger.",
+   "Somebody's been nicking the good wedges again."
+  ],
+  "role.innkeeper": [
+   "Stool's free, stew's not.",
+   "Rooms are clean. The beds are honest. The fleas are local.",
+   "Everyone passes through a crossroads eventually. Most of them owe me.",
+   "I hear every rumour on this road. Half of them I started.",
+   "Wipe your boots. We've had enough mud from heroes.",
+   "Last orders are when I say. I haven't said yet.",
+   "Drink up, it's a long way to anywhere."
+  ],
+  "role.stablehand": [
+   "Horses are honest. They kick you to your face.",
+   "Hay, water, shovel, repeat.",
+   "That bay mare bites. That grey one bites harder. Pick a horse.",
+   "Leave your mount with me and you'll get it back. Mostly fed.",
+   "Duchess the ox is not a horse. Tell her that, I dare you.",
+   "Smells like money in here, if money smelled of horse."
+  ],
+  "role.trainer": [
+   "Again. And this time like you mean it.",
+   "Talent is nice. Practice is better. Bruises are the receipt.",
+   "I've trained better than you. I've also trained worse. Mostly worse.",
+   "Come back when you've bled a bit. Then we'll talk.",
+   "Learn the first lesson well and the rest will find you.",
+   "Everyone wants the big tricks. Nobody wants to learn to stand.",
+   "Watch your feet. Your feet lose more fights than your hands."
+  ],
+  "role.carter": [
+   "Slow and sure. Mostly sure.",
+   "The ox knows the way. I am only here to take the fares.",
+   "Every gate in the Downs, and never once on time.",
+   "You can walk it in an hour or ride it sitting down. I know which I would pick.",
+   "Mind the wheel. It has opinions about feet.",
+   "Raining again. The ox does not care, so neither do I.",
+   "A cart, an ox, a road. Nobody ever robbed a turnip cart twice.",
+   "Flag me down any time. The ox likes an excuse to stop."
+  ],
+  "role.guard": [
+   "Gate is open. Keep your blade sheathed inside.",
+   "Quiet watch. I like a quiet watch.",
+   "If the bell rings, get behind us.",
+   "Raiders try the road every few weeks. They have not got past this gate yet.",
+   "New here? The Elder is in the hall on the square.",
+   "Move along. Kindly."
+  ]
+ }
+}

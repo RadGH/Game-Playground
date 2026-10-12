@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thousandvale privacy</title>
+<link rel="stylesheet" href="privacy.css">
+</head>
+<body>
+<main>
+  <h1>Thousandvale — what we keep about you</h1>
+  <p class="lede">A small test game run by one person on one computer. This page says, in plain words, what is stored, for how long, and how to have it removed. Last changed 2026-10-06.</p>
+
+  <div class="box">
+    <p><strong>Short version:</strong> no sign-up, no real name, no payment, no ads, no tracking. You get a random sign-in key that stays in your browser. We keep your characters and your progress, chat for 30 days (so reports can be checked), and backups for 14 days. If you <em>claim</em> your account we also keep your username, a scrambled copy of your password and, only if you type one, an email address.</p>
+  </div>
+
+  <h2>What is stored</h2>
+  <!-- Keep in step with server/privacy.json (served at /privacy.json): every "stored" entry there has a row here
+       with the same data-privacy value. tests/H/privacy.test.js checks it. -->
+  <table>
+    <tr><th>What</th><th>Why, and how long</th></tr>
+    <tr data-privacy="Account key"><td>A random sign-in key (guest token)</td><td>A random 256-bit key kept in <em>your</em> browser's local storage so you are signed in next time. The server stores only its SHA-256 fingerprint (hash), never the key itself, so a leaked database cannot be used to sign in. A guest account keeps it for good (that is how a guest gets back in); a claimed account drops it when you log out on that browser. Clearing your browser data loses a guest account unless you claimed it.</td></tr>
+    <tr data-privacy="Username and password (claimed accounts only)"><td>Username and password (only if you claim your account)</td><td>The username you pick, and the password stored only as a slow, salted <em>scrypt</em> hash; nobody can read it back, and it is never logged. If you forget it, the game's keeper gives you a reset code in game. Kept until the account is deleted.</td></tr>
+    <tr data-privacy="Email (optional)"><td>Email (optional, claimed accounts only)</td><td>Only if you type one when claiming. It is used for nothing except helping you get back in when you forget your password; the game sends no email by itself. Kept until the account is deleted.</td></tr>
+    <tr data-privacy="Characters"><td>Characters</td><td>Name, class, look, level, experience, gold, where you stood, gear, bag, quests and other progress. Kept until the account is deleted.</td></tr>
+    <tr data-privacy="Save journal"><td>Save journal</td><td>Small records of item and gold changes, written every couple of seconds so a crash loses almost nothing. Cleared each time your character is fully saved (within minutes).</td></tr>
+    <tr data-privacy="Account times"><td>Account times</td><td>When the account was made and last signed in.</td></tr>
+    <tr data-privacy="Chat"><td>Chat</td><td>Every line said on any channel (say, party, guild, zone, trade, world, whispers), with who said it and when. Logged for <strong>30 days</strong> so a report can be checked, then deleted automatically.</td></tr>
+    <tr data-privacy="Friends, ignore list, guild, mail"><td>Friends, ignore list, guild, mail</td><td>What you set up in game, including items and gold sent by mail while they wait to be taken. Kept until you change it or the account is deleted. Mail you <em>sent</em> stays with the person who got it.</td></tr>
+    <tr data-privacy="Reports"><td>Reports</td><td>When someone reports a player: who reported whom, the reason, and the reported player's last chat lines (up to 20), so the keeper can check it. Kept until the report is dealt with and cleared.</td></tr>
+    <tr data-privacy="Feedback"><td>Feedback</td><td>When you send a suggestion or a bug report from the Feedback button: what you wrote, your account and character (name, class, level), where the character was standing, and the last lines of the game's own log in your browser (up to 60), so a bug can be found. The game's admins read these reports. Kept until an admin clears it.</td></tr>
+    <tr data-privacy="Network address"><td>Bans</td><td>A ban stores the account and a <em>salted</em> one-way hash of the internet address, never the address itself. Kept for the length of the ban.</td></tr>
+    <tr data-privacy="Game statistics"><td>Game totals</td><td>Hourly totals of gold and items entering and leaving the game, by level band. No names; kept for balancing.</td></tr>
+    <tr data-privacy="Server logs"><td>Server logs</td><td>Technical messages (start, stop, errors, logins counted, admin actions), without passwords, keys or chat text. Kept a few weeks by the operating system, never shared.</td></tr>
+  </table>
+
+  <h2>Your internet address</h2>
+  <p>The server sees your internet address (IP) while you are connected and uses it, in memory only, to limit how many connections and new accounts one address can make. It is not written to the database (a ban keeps only a salted hash, above). Server logs may contain it; the machine keeps logs for a limited time and they are never shared.</p>
+  <p>The link reaches this computer through <strong>Cloudflare</strong>, which therefore also sees your address and the pages you load, under <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare's privacy policy</a>. If a human check (Cloudflare Turnstile) is switched on, it runs Cloudflare's script when a new account is made. The game's lettering is served from this computer, not from a font company.</p>
+
+  <h2>Backups</h2>
+  <p>The database is copied every hour (copies kept 48 hours) and once a day (copies kept 14 days). A nightly copy may also be stored with a cloud storage company (Amazon S3 or Cloudflare R2), encrypted, and deleted after 14 days. So anything deleted from the game is gone from every copy within <strong>14 days</strong>.</p>
+
+  <h2>What we never do</h2>
+  <ul>
+    <li>Sell or share your data.</li>
+    <li>Ask for a real name, a birthday, a phone number or payment. (An email is only ever optional, when you claim an account.)</li>
+    <li>Use cookies, ads, analytics or tracking pixels.</li>
+  </ul>
+
+  <h2>Your choices</h2>
+  <ul>
+    <li>Play as a guest and nothing about you beyond the game itself is kept.</li>
+    <li>Claim with a username only — the email is optional.</li>
+    <li>Have your account and everything in it deleted (below).</li>
+  </ul>
+
+  <h2>Deleting your account</h2>
+  <p>Ask the game's keeper (whisper them in game) or the person who sent you the link, and say your character's name. The account, its characters, mail, friends and guild membership are deleted within 7 days; your chat lines go with them (or age out after 30 days); backups age out within 14 days.</p>
+
+  <h2>Children</h2>
+  <p>This test is not meant for children under 13. If you think a child has made an account, ask for it to be deleted as above.</p>
+
+  <p class="small">Thousandvale is an independent project by Radley Sustaire. This note will change if the game changes; the date at the top says when it last did.</p>
+</main>
+</body>
+</html>

@@ -1,0 +1,90 @@
+/* Thousandvale — the character window (paper doll + bag) and item cards (play-test P7, P15, P16). Uses the
+   tokens from client.css. */
+
+/* ---------------------------------------------------------------- the window */
+.bag.inv { z-index: 36; width: min(780px, calc(100vw - 100px)); max-height: calc(100vh - 110px); overflow: hidden; display: flex; flex-direction: column; padding: 12px 14px; }
+.bag.inv header { flex: 0 0 auto; }
+.inv-sub { color: var(--ink-faint); font-size: 13px; }
+.inv-body { display: grid; grid-template-columns: 300px 1fr; gap: 14px; min-height: 0; flex: 1 1 auto; }
+
+/* paper doll: two columns of slots round a figure, hands underneath */
+.inv-doll { display: grid; grid-template-columns: 62px 1fr 62px; grid-template-rows: auto auto; gap: 8px 6px; align-content: start;
+  padding: 10px; border: 1px solid var(--edge); border-radius: 10px; background: radial-gradient(ellipse at 50% 40%, rgba(217, 178, 106, 0.08), rgba(0, 0, 0, 0.25) 70%); }
+.doll-col { display: flex; flex-direction: column; gap: 8px; }
+.doll-figure { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: space-between; color: rgba(217, 178, 106, 0.14); min-height: 280px; }
+.doll-figure svg { width: 100%; max-width: 120px; flex: 1; }
+.doll-stats { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 13px; color: var(--ink-dim); pointer-events: auto; }
+.doll-stats b { font-family: var(--serif); color: var(--gold-hi); font-size: 14px; letter-spacing: 0.05em; }
+.doll-stats .dim { color: var(--ink-faint); font-style: italic; }
+.doll-bottom { grid-column: 1 / -1; display: flex; justify-content: center; gap: 10px; }
+.doll-bottom .islot { width: 62px; }
+
+/* the bag */
+.inv-bag { display: flex; flex-direction: column; min-height: 0; }
+.inv-tools { flex: 0 0 auto; display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+.inv-filters { display: flex; flex-wrap: wrap; gap: 4px; }
+.inv-filters .chip { padding: 3px 9px; font-size: 13px; }
+.inv-tools .row { display: flex; gap: 6px; }
+.inv-tools input, .inv-tools select { background: rgba(0, 0, 0, 0.45); border: 1px solid var(--edge); border-radius: 6px; padding: 5px 8px; color: var(--ink); font-size: 13px; outline: none; }
+.inv-tools input { flex: 1 1 auto; width: auto; min-width: 0; }
+.inv-tools select { flex: 0 0 132px; width: 132px; }
+.inv-tools input:focus, .inv-tools select:focus { border-color: var(--gold); }
+.bag.inv .bag-grid { flex: 1 1 auto; overflow-y: auto; align-content: start; grid-auto-rows: max-content; align-items: start; grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); gap: 5px; padding-right: 3px; }
+.bag.inv .bag-hint { flex: 0 0 auto; line-height: 1.5; }
+
+/* ---------------------------------------------------------------- a slot */
+.islot img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.7)); }
+.islot.pending .glyph { opacity: 0.6; }
+.islot .slotglyph { font-size: 20px; color: rgba(217, 178, 106, 0.22); line-height: 1; margin-top: -8px; }
+.inv-doll .islot { padding: 4px 4px 12px; }
+.inv-doll .islot img { height: calc(100% + 4px); }
+.islot.r-normal { border-color: #8a8a8a; color: #ddd; }
+.islot.r-epic { border-color: #b46aff; color: #d8a8ff; box-shadow: inset 0 0 9px rgba(180, 110, 255, 0.4); }
+.islot .req { position: absolute; top: 1px; left: 2px; font: 800 11px/1 var(--sans); padding: 1px 3px; border-radius: 3px; }
+.islot .req.no { background: #8c1f15; color: #ffd9d2; }
+.islot.toohigh img { filter: grayscale(0.6) brightness(0.7); }
+.islot .up { position: absolute; top: 1px; right: 3px; font-size: 11px; color: var(--good); text-shadow: 0 0 4px #000; }
+.islot.drop { outline: 2px dashed var(--gold-hi); outline-offset: 1px; }
+.islot[draggable='true'] { cursor: grab; }
+
+/* ---------------------------------------------------------------- the item card (shared tooltip) */
+.tipbox .itemtip { min-width: 230px; max-width: 300px; }
+.itemtip .ic-head { display: flex; gap: 9px; align-items: center; margin-bottom: 4px; }
+.itemtip .ic-icon { width: 46px; height: 46px; border: 1px solid #555; border-radius: 6px; background: radial-gradient(circle at 40% 35%, #2e261c, #120e0a 80%); flex: 0 0 auto; }
+.itemtip .ic-name { font-family: var(--serif); font-size: 15px; font-weight: 700; line-height: 1.2; }
+.itemtip .ic-kind, .itemtip .ic-dim { color: var(--tip-muted, #a99a83); font-size: 12px; }
+.itemtip .ic-req { font-size: 12.5px; margin: 2px 0 4px; color: var(--tip-muted, #a99a83); }
+.itemtip .req-ok { color: #e8dcc4; } .itemtip .req-cut { color: #8fd0ff; } .itemtip .req-no { color: #ff7a66; font-weight: 700; }
+.itemtip .ic-req i { color: #ff9a85; font-style: normal; }
+.itemtip .ic-base { margin: 2px 0; } .itemtip .ic-base b { color: #fff; }
+.itemtip .ic-affixes { list-style: none; margin: 4px 0; padding: 0; color: #9fd0ff; }
+.itemtip .ic-affixes li::before { content: '• '; color: rgba(159, 208, 255, 0.5); }
+.itemtip .ic-cond { color: #c4b4ff; } .itemtip .ic-built { color: #e8dcc4; } .itemtip .ic-built i { color: var(--tip-muted, #a99a83); }
+.itemtip .ic-legend { color: #ffb36a; }
+.itemtip .ic-lore { font-style: italic; color: #b8a888; margin-top: 4px; }
+.itemtip .ic-compare { margin-top: 6px; padding-top: 5px; border-top: 1px solid rgba(109, 83, 38, 0.6); font-size: 12.5px; }
+.itemtip .up { color: #8fe08a; font-weight: 700; } .itemtip .down { color: #ff7a66; font-weight: 700; }
+.itemtip .ic-shift { color: var(--tip-muted, #a99a83); font-size: 11.5px; margin-top: 3px; }
+.itemtip .ic-value { color: #ffd56a; font-size: 12px; margin-top: 4px; }
+.itemtip .r-normal, .itemtip .r-common { color: #eee; } .itemtip .r-magic, .itemtip .r-uncommon { color: #8fb4ff; } .itemtip .r-rare { color: #ffe17a; }
+.itemtip .r-epic { color: #d8a8ff; } .itemtip .r-legendary, .itemtip .r-unique { color: #ffb36a; } .itemtip .r-set { color: #8ff0a0; }
+.itemtip .ic-icon.r-magic { border-color: #4f86ff; } .itemtip .ic-icon.r-rare { border-color: #e6c23a; } .itemtip .ic-icon.r-legendary, .itemtip .ic-icon.r-unique { border-color: #ff8a2a; }
+
+/* mail squares get pictures too */
+.ml-items .islot img, .ml-pick .islot img { width: 100%; height: 100%; object-fit: contain; }
+
+/* ---------------------------------------------------------------- narrow screens: the doll above the bag */
+@media (max-width: 760px) {
+  .bag.inv { left: 8px; right: 8px; width: auto; top: 56px; max-height: calc(100vh - 120px); padding: 10px; }
+  .inv-body { grid-template-columns: 1fr; overflow-y: auto; }
+  .inv-doll { grid-template-columns: repeat(5, 1fr); grid-template-rows: none; gap: 6px; padding: 8px; }
+  .doll-figure { display: none; }
+  .doll-col, .doll-bottom { display: contents; }
+  .doll-bottom .islot { width: auto; }
+  .inv-bag { display: block; }
+  .bag.inv .bag-grid { overflow: visible; grid-template-columns: repeat(auto-fill, minmax(46px, 1fr)); }
+  .bag.inv .bag-hint { font-size: 11px; }
+}
+
+.inv-doll .islot .slotname { text-shadow: 0 1px 2px #000, 0 0 4px #000; }
+.islot.empty { margin: 0; font-style: normal; }   /* social.css .empty is a paragraph style (10px margins) */

@@ -1,0 +1,44 @@
+# Thousandvale on a VPS — Caddy in front of the game (stream H, docs/HOSTING.md).
+# Installed by ops/vps/bootstrap.sh to /etc/caddy/Caddyfile with @DOMAIN@ and @EMAIL@ filled in.
+# Edit this template, not the copy on the server, and re-run the bootstrap (safe to run more than once).
+#
+# What it does:
+#   - gets and renews a free Let's Encrypt certificate for @DOMAIN@ on its own (needs ports 80 + 443 open and the
+#     DNS A record pointing here); http:// is redirected to https:// automatically
+#   - hands everything to the game on 127.0.0.1:8490, WebSockets included (Caddy passes the upgrade through as-is)
+#   - tells the game who the visitor really is. The game believes a visitor address ONLY from a loopback peer and ONLY
+#     in the CF-Connecting-IP header (it was written for a local Cloudflare tunnel). Caddy is that loopback peer, so
+#     it SETS that header to the real address — replacing anything the visitor sent, so it cannot be forged. That is
+#     what makes "4 connections per address" and "new guests per address per hour" work behind the proxy.
+{
+	email @EMAIL@
+	# the admin API stays on the box (default localhost:2019); never expose it
+}
+
+@DOMAIN@ {
+	encode zstd gzip
+
+	# One day of HSTS to start; raise to a year once the address is settled.
+	header Strict-Transport-Security "max-age=86400"
+
+	# The game's admin page lives on its own port (127.0.0.1:8492) and is reached only through an SSH tunnel.
+	respond /admin* 404
+
+	reverse_proxy 127.0.0.1:8490 {
+		header_up CF-Connecting-IP {remote_host}
+		header_up X-Real-IP {remote_host}
+		# X-Forwarded-For / -Proto / -Host are added by Caddy on its own
+	}
+
+	log {
+		output file /var/log/caddy/thousandvale.log {
+			roll_size 20MiB
+			roll_keep 5
+		}
+	}
+}
+
+# Anything that reaches this box by its bare IP or another name gets nothing.
+:80 {
+	respond 404
+}

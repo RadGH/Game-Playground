@@ -1,0 +1,305 @@
+{
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z14_01, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "zone": "z14_01",
+ "terrainHash": "2d4e6443",
+ "placements": [
+  {
+   "type": "camp",
+   "id": "quest_crabs_and_cutthroats_0_0",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    7,
+    7
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 823,
+   "z": 1825,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "crabs_and_cutthroats",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_gull_steps_0_0",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    6
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 404,
+   "z": 1233,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "gull_steps",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_the_respectable_importer_0_0",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    7,
+    7
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1323,
+   "z": 1909,
+   "yaw": 0,
+   "radius": 4,
+   "quest": "the_respectable_importer",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z14_01_1",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    7,
+    7
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 618,
+   "z": 1535,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "stormlash"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z14_01_2",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    7,
+    7
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 904,
+   "z": 1880,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "thorned"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z14_01_3",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    6,
+    6
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1200,
+   "z": 2009,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "giant"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "npc",
+   "id": "angler_saltmouth",
+   "name": "Skipper Hale Tarrow",
+   "role": "angler",
+   "at": "Saltmouth",
+   "x": 800,
+   "z": 1296,
+   "yaw": -2.75,
+   "angler": true,
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "npc",
+   "id": "carter_saltmouth",
+   "name": "Edda Dunstable",
+   "role": "carter",
+   "at": "Saltmouth",
+   "x": 818,
+   "z": 1658,
+   "yaw": 0.615,
+   "cart": "cart_saltmouth",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_saltmouth",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Saltmouth",
+   "carter": "carter_saltmouth",
+   "x": 816,
+   "z": 1656,
+   "yaw": -0.894,
+   "radius": 2.2
+  },
+  {
+   "type": "npc",
+   "id": "carter_gull_steps",
+   "name": "Dickon Fallowfield",
+   "role": "carter",
+   "at": "Gull Steps",
+   "x": 332,
+   "z": 1296,
+   "yaw": 2.976,
+   "cart": "cart_gull_steps",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_gull_steps",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Gull Steps",
+   "carter": "carter_gull_steps",
+   "x": 330,
+   "z": 1298,
+   "yaw": 1.128,
+   "radius": 2.2
+  },
+  {
+   "type": "guard",
+   "id": "guard_saltmouth_0",
+   "name": "Saltmouth Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Saltmouth",
+   "post": "gate",
+   "gate": "saltmouth_gate_0",
+   "x": 832,
+   "z": 1650,
+   "yaw": -0.848,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_saltmouth_1",
+   "name": "Saltmouth Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Saltmouth",
+   "post": "gate",
+   "gate": "saltmouth_gate_0",
+   "x": 838,
+   "z": 1656,
+   "yaw": -0.848,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_saltmouth_2",
+   "name": "Sergeant Coombe",
+   "role": "guard",
+   "rank": "sergeant",
+   "tier": "town",
+   "town": "Saltmouth",
+   "post": "square",
+   "x": 880,
+   "z": 1602,
+   "yaw": 1.356,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_saltmouth_3",
+   "name": "Saltmouth Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Saltmouth",
+   "post": "square",
+   "x": 890,
+   "z": 1612,
+   "yaw": -3.012,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_saltmouth_4",
+   "name": "Saltmouth Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Saltmouth",
+   "post": "square",
+   "x": 896,
+   "z": 1598,
+   "yaw": -0.87,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_gull_steps_0",
+   "name": "Gull Steps Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "hamlet",
+   "town": "Gull Steps",
+   "post": "gate",
+   "gate": "gull_steps_gate_0",
+   "x": 316,
+   "z": 1282,
+   "yaw": 0.651,
+   "titled": false
+  }
+ ]
+}

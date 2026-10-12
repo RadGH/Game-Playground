@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Armory — every wearable and holdable model</title>
+<link rel="stylesheet" href="../shared/style.css">
+<link rel="stylesheet" href="../shared/tooltip.css">
+<link rel="stylesheet" href="armory.css">
+<script type="importmap">{ "imports": { "three": "../vendor/three/three.module.js", "three/addons/": "../vendor/three/addons/" } }</script>
+</head>
+<body>
+<header class="topbar">
+  <a href="../" class="muted">← Playground</a>
+  <h1>Armory</h1>
+  <span id="count" class="muted small" role="status">Loading…</span>
+  <span class="spacer"></span>
+  <button type="button" id="filters-toggle" class="small">Filters</button>
+  <button type="button" id="flags-copy" class="small" data-tip="Copy the flagged models as JSON, ready to paste to Claude.">Copy flags</button>
+  <button type="button" id="flags-export" class="small" data-tip="Download the flagged models as armory-flags.json.">Export flags (<span id="flag-count">0</span>)</button>
+</header>
+<p id="origin" class="origin small muted"></p>
+
+<div class="armory">
+  <aside class="filters-col" aria-label="Filters">
+    <input type="text" id="search" placeholder="Search: sword, g5_, plate, file name…" aria-label="Search models">
+    <label class="sortrow small">Sort
+      <select id="sort"><option value="slot">Slot, then type</option><option value="name">Name</option><option value="file">Source file</option><option value="new">New first</option></select>
+    </label>
+    <div id="filters"></div>
+  </aside>
+
+  <main id="grid" class="grid" aria-label="Models"></main>
+
+  <section id="detail" class="detail" aria-label="Model detail" hidden>
+    <div class="d-head">
+      <div class="d-title">
+        <h2 id="d-name"></h2>
+        <code id="d-id"></code>
+      </div>
+      <div class="d-nav">
+        <span id="d-pos" class="muted small"></span>
+        <button type="button" id="d-prev" class="small" aria-label="Previous model" data-tip="Previous (left arrow)">‹</button>
+        <button type="button" id="d-next" class="small" aria-label="Next model" data-tip="Next (right arrow)">›</button>
+        <button type="button" id="d-link" class="small" data-tip="Copy a link that opens this model with these settings.">Copy link</button>
+        <button type="button" id="d-close" class="small" aria-label="Close" data-tip="Close (Esc)">✕</button>
+      </div>
+      <div id="d-badges" class="d-badges"></div>
+    </div>
+
+    <div id="stage" class="stage"><span id="stage-msg" class="stage-msg"></span><span class="stage-hint">drag to turn · scroll to zoom · right-drag to pan</span></div>
+
+    <div class="controls">
+      <div id="hands" class="crow segs"></div>
+      <div class="crow">
+        <label>Animation <select id="anim"></select></label>
+        <button type="button" id="anim-replay" class="small" data-tip="Play the animation again from the start.">Replay</button>
+        <button type="button" id="anim-next" class="small" data-tip="Step to the next attack animation.">Next attack</button>
+        <label class="check"><input type="checkbox" id="anim-loop" checked> repeat</label>
+        <label>Speed <select id="speed"><option value="1">1×</option><option value="0.5">½×</option><option value="0.25">¼×</option><option value="0.15">slowest</option><option value="0">paused</option></select></label>
+      </div>
+      <div class="crow">
+        <label>Race <select id="race"></select></label>
+        <label>Height <select id="height"></select></label>
+        <label>Build <select id="build"></select></label>
+        <label>Hair <select id="hair"></select></label>
+        <label id="quality-row" data-tip="Rarity detail a weapon earns: gems, ferrules and a brighter edge.">Quality <select id="quality"><option value="0">0 plain</option><option value="1">1 magic</option><option value="2">2 rare</option><option value="3">3 legendary</option></select></label>
+      </div>
+      <div class="crow">
+        <span class="lbl">View</span>
+        <button type="button" class="small" data-cam="body">Whole body</button>
+        <button type="button" class="small" data-cam="item">This piece</button>
+        <button type="button" class="small" data-cam="handR">Right hand</button>
+        <button type="button" class="small" data-cam="handL">Left hand</button>
+        <button type="button" class="small" data-cam="side">Side</button>
+        <button type="button" class="small" data-cam="back">Back</button>
+        <button type="button" class="small tog" id="t-alone" data-tip="Hide the body and show only this piece, in its rest pose.">Piece alone</button>
+        <button type="button" class="small tog" id="t-wire" data-tip="Show the piece's triangles.">Wireframe</button>
+        <button type="button" class="small tog" id="t-spin">Turntable</button>
+      </div>
+    </div>
+
+    <div id="hold" class="block" hidden></div>
+    <div class="block"><h3>Model details</h3><div id="stats"></div></div>
+    <div id="items" class="block"></div>
+    <div id="icon" class="block"></div>
+    <div class="block flagbox">
+      <h3>Flag</h3>
+      <p class="small muted">A note for Claude about this model — what looks wrong, what you want instead. Kept in this browser; use Export flags to hand the list over.</p>
+      <textarea id="flag-note" placeholder="e.g. blade too thick, grip sits in front of the hand, off-hand copy is sideways…" aria-label="Flag note"></textarea>
+      <div class="crow"><button type="button" id="flag-btn" class="primary">Flag this model</button><button type="button" id="unflag-btn" hidden>Remove flag</button><span id="flag-state" class="muted small"></span></div>
+    </div>
+  </section>
+</div>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

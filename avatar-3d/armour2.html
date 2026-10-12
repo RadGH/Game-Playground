@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tier-2 Armour | Avatar 3D</title>
+  <link rel="stylesheet" href="armour2.css">
+  <script type="importmap">{ "imports": { "three": "../vendor/three/three.module.js", "three/addons/": "../vendor/three/addons/" } }</script>
+</head>
+<body>
+  <header>
+    <a href="./">Avatar 3D</a> / <h1>Tier-2 class armour</h1>
+    <nav>
+      <a href="?view=pairs">Tier 1 vs tier 2</a>
+      <a href="?view=pairs&amp;back=1">Backs</a>
+      <a href="?view=emblems">Emblems</a>
+      <a href="?view=kits">Kits</a>
+    </nav>
+    <span id="state" role="status">Building…</span>
+  </header>
+  <div id="stage"><div id="labels"></div></div>
+  <p class="note">Each pair: the class's tier-1 outfit (avatar-3d/data/class-outfits.json, or the plain look where a class has none) and its tier-2 outfit (data/class-outfits-t2.json): a t2 kit (pauldrons / mantle / harness / vestments / wild mantle) and an emblem on chest and back. Drag to turn.</p>
+  <script type="module" src="js/armour2-app.js"></script>
+</body>
+</html>

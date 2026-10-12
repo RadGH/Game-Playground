@@ -1,0 +1,3 @@
+/* Mounts 3D gallery (mounts.html): only what avatar-3d.css does not already give the page. */
+.gait-chips .chip.on { outline: 1px solid var(--accent, #e0b060); }
+.mount-note { margin: 4px 0 0; }

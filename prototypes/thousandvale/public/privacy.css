@@ -1,0 +1,25 @@
+/* Thousandvale privacy note — standalone, no web fonts (this page loads nothing from anyone else). */
+:root {
+  --ink: #f3ead8; --ink-dim: #c7b99b; --gold: #d9b26a; --edge: rgba(217, 178, 106, 0.38);
+  --bg: #0d0b09; --panel: #16120e;
+}
+* { box-sizing: border-box; }
+html { background: var(--bg); }
+body { margin: 0; padding: 32px 16px 64px; background: var(--bg); color: var(--ink); font: 16px/1.6 Georgia, 'Times New Roman', serif; }
+main { max-width: 720px; margin: 0 auto; }
+h1 { color: var(--gold); font-size: 1.9rem; letter-spacing: 0.04em; margin: 0 0 4px; font-weight: normal; }
+h2 { color: var(--gold); font-size: 1.15rem; margin: 32px 0 8px; font-weight: normal; border-bottom: 1px solid var(--edge); padding-bottom: 4px; }
+p, li { color: var(--ink); }
+.lede { color: var(--ink-dim); margin-top: 0; }
+table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 0.95rem; }
+th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--edge); }
+th { color: var(--ink-dim); font-weight: normal; }
+td:first-child { width: 34%; }
+.box { background: var(--panel); border: 1px solid var(--edge); border-radius: 6px; padding: 12px 16px; }
+a { color: var(--gold); }
+.small { color: var(--ink-dim); font-size: 0.9rem; }
+@media (max-width: 560px) {
+  body { padding: 20px 16px 48px; font-size: 15px; }
+  td:first-child { width: 40%; }
+  th, td { padding: 6px 6px; }
+}

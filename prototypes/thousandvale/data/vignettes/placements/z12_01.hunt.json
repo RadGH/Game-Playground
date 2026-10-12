@@ -1,0 +1,783 @@
+{
+ "_doc": "Stream E (play-test 3 R2). Extra monster camps near the start for world zone z12_01: solos and pairs (a third roaming a small loop) wherever the level ramp is <= 3.5 — tools/content-living.mjs fillHunting. Same record shape as the main placements file (type camp, stray/roam, hunt: true); js/sim/content.js merges them. Not read by stream B's bake (monsters need no cleared ground).",
+ "zone": "z12_01",
+ "eid": "ashcombe",
+ "terrainHash": "89c56ef1",
+ "stats": {
+  "targets": 5040,
+  "added": 33,
+  "stray": 27,
+  "roamer": 6,
+  "covered": 0.861
+ },
+ "placements": [
+  {
+   "type": "camp",
+   "id": "hunt_ashcombe_1",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 419,
+   "z": 1682,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_ashcombe_2",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 997,
+   "z": 1987,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1045,
+     1983
+    ],
+    [
+     1017,
+     2027
+    ],
+    [
+     966,
+     1989
+    ],
+    [
+     977,
+     1950
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_ashcombe_3",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1415,
+   "z": 2011,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_ashcombe_4",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1192,
+   "z": 1888,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1202,
+     1924
+    ],
+    [
+     1169,
+     1892
+    ],
+    [
+     1182,
+     1863
+    ],
+    [
+     1215,
+     1877
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_ashcombe_5",
+   "monster": "shale_warden",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 803,
+   "z": 1960,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_ashcombe_6",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 522,
+   "z": 1982,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_ashcombe_7",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1262,
+   "z": 2005,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_ashcombe_8",
+   "monster": "cursed_knight",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 519,
+   "z": 1663,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_ashcombe_9",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 205,
+   "z": 1803,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_ashcombe_10",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 900,
+   "z": 1769,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_ashcombe_11",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 667,
+   "z": 1838,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_ashcombe_12",
+   "monster": "cursed_knight",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 569,
+   "z": 1711,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_ashcombe_13",
+   "monster": "shale_warden",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 855,
+   "z": 1681,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_ashcombe_14",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1198,
+   "z": 1785,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_ashcombe_15",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1493,
+   "z": 1976,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1510,
+     2022
+    ],
+    [
+     1449,
+     1986
+    ],
+    [
+     1482,
+     1930
+    ],
+    [
+     1529,
+     1963
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_ashcombe_16",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 827,
+   "z": 1906,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_ashcombe_17",
+   "monster": "cursed_knight",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 370,
+   "z": 1943,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_ashcombe_18",
+   "monster": "ossuary_crawler",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1112,
+   "z": 1950,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_ashcombe_19",
+   "monster": "ossuary_crawler",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 324,
+   "z": 1970,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_ashcombe_20",
+   "monster": "shale_warden",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1335,
+   "z": 2007,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_ashcombe_21",
+   "monster": "ossuary_crawler",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 849,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_ashcombe_22",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 999,
+   "z": 1822,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_ashcombe_23",
+   "monster": "shale_warden",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1286,
+   "z": 1928,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1255,
+     1917
+    ],
+    [
+     1298,
+     1902
+    ],
+    [
+     1312,
+     1934
+    ],
+    [
+     1274,
+     1959
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_ashcombe_24",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 742,
+   "z": 1926,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_ashcombe_25",
+   "monster": "cursed_knight",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 466,
+   "z": 1963,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     463,
+     1917
+    ],
+    [
+     516,
+     1983
+    ],
+    [
+     446,
+     2016
+    ],
+    [
+     421,
+     1958
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_ashcombe_26",
+   "monster": "cursed_knight",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 86,
+   "z": 1742,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_ashcombe_27",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1103,
+   "z": 1874,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_ashcombe_28",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 649,
+   "z": 1677,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_ashcombe_29",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1419,
+   "z": 1894,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_ashcombe_30",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 205,
+   "z": 1705,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_ashcombe_31",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 943,
+   "z": 1906,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_ashcombe_32",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 493,
+   "z": 1713,
+   "yaw": 0,
+   "radius": 6,
+   "stray": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "hunt_ashcombe_33",
+   "monster": "shale_warden",
+   "with": null,
+   "level": [
+    3,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1136,
+   "z": 1771,
+   "yaw": 0,
+   "radius": 6,
+   "path": [
+    [
+     1133,
+     1828
+    ],
+    [
+     1077,
+     1775
+    ],
+    [
+     1142,
+     1718
+    ],
+    [
+     1210,
+     1773
+    ]
+   ],
+   "roam": true,
+   "hunt": true
+  }
+ ]
+}

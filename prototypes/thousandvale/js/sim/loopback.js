@@ -34,7 +34,7 @@ export function createLoopbackServer({ clock = createVirtualClock(), latencyMs =
   }
 
   let nextId = 1;
-  function connect(path) {
+  function connect(path, { ip = '127.0.0.1' } = {}) {
     const id = nextId++;
     const sock = {
       _state: 0, path,
@@ -60,7 +60,7 @@ export function createLoopbackServer({ clock = createVirtualClock(), latencyMs =
     };
     let handler = null;
     const conn = {
-      ip: '127.0.0.1',
+      ip,
       send(d) {
         if (sock._state !== OPEN) return;
         const c = copy(d);

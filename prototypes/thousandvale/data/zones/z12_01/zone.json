@@ -1,5 +1,5 @@
 {
-  "name": "Tifeckgate (z12_01)",
+  "name": "Ashcombe (z12_01)",
   "zone": "z12_01",
   "sheet": {
     "sheet": "torbor_downs",
@@ -17,8 +17,8 @@
   },
   "heightMin": -240,
   "heightMax": 1660,
-  "bakeVersion": 2,
-  "inputHash": "078188c7",
+  "bakeVersion": 4,
+  "inputHash": "89c56ef1",
   "waterKinds": [
     "none",
     "sea",
@@ -33,7 +33,7 @@
       "height": 224,
       "method": "pangea",
       "seaLevel": 0.2,
-      "inputHash": "9803699e"
+      "inputHash": "9805a835"
     },
     "zone": {
       "zx": 12,
@@ -55,9 +55,10 @@
     {
       "type": "settlement",
       "kind": "city",
-      "name": "Tifeckgate",
+      "name": "Ashcombe",
       "x": 1408,
       "z": 1328,
+      "wfName": "Tifeckgate",
       "hub": true,
       "radius": 140,
       "movedFrom": {
@@ -73,35 +74,48 @@
       "z": 192
     },
     {
+      "type": "settlement",
+      "kind": "hamlet",
+      "name": "Kettle Cross",
+      "x": 933,
+      "z": 773,
+      "ask": true,
+      "askR": 40,
+      "radius": 46
+    },
+    {
       "type": "dungeon",
       "id": "door_1",
       "name": "Barrow entrance",
       "x": 1566,
       "z": 1434,
-      "yaw": -1.96
+      "yaw": -1.96,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_ashcombe",
       "x": 1216,
       "z": 1176,
-      "r": 40
+      "r": 40,
+      "pinned": true
     }
   ],
   "spawn": {
     "x": 1412,
     "z": 1336
   },
+  "bridges": [],
   "summary": {
     "zone": "z12_01",
     "province": "Petbeck Basin",
-    "inputHash": "078188c7",
+    "inputHash": "89c56ef1",
     "rivers": 1,
     "wetShare": 0.003,
-    "unwalkableShare": 0.037,
+    "unwalkableShare": 0.035,
     "towns": [
       {
-        "name": "Tifeckgate",
+        "name": "Ashcombe",
         "kind": "city",
         "hub": true,
         "at": [
@@ -116,24 +130,60 @@
         "culture": "halfling",
         "plots": 29,
         "streets": 65,
-        "links": 1,
-        "overlaps": 0
+        "links": 2,
+        "overlaps": 0,
+        "highStreets": 2,
+        "w6": {
+          "plotsBefore": 29,
+          "plots": 29,
+          "kept": 29,
+          "removed": []
+        }
+      },
+      {
+        "name": "Kettle Cross",
+        "kind": "hamlet",
+        "hub": false,
+        "at": [
+          933,
+          773
+        ],
+        "radius": 46,
+        "movedFrom": null,
+        "culture": "halfling",
+        "plots": 15,
+        "streets": 33,
+        "links": 0,
+        "overlaps": 0,
+        "highStreets": 0,
+        "w6": {
+          "plotsBefore": 15,
+          "plots": 15,
+          "kept": 15,
+          "removed": []
+        }
       }
     ],
-    "roads": 4,
+    "roads": 5,
     "bridges": 0,
-    "scatter": 10563,
+    "paths": 13,
+    "pathMetres": 2071,
+    "scatter": 15702,
     "scatterKinds": {
-      "bush": 2758,
-      "tree_conifer": 5069,
-      "tree_broadleaf": 1057,
-      "rock_small": 1224,
-      "rock_large": 421,
-      "boulder": 34
+      "rock_small": 1944,
+      "bush": 4785,
+      "tree_conifer": 4906,
+      "tree_broadleaf": 1891,
+      "rock_large": 732,
+      "boulder": 43,
+      "hedge": 1284,
+      "tree_fruit": 36,
+      "reed": 81
     },
     "sites": [
-      "settlement(HUB) city Tifeckgate 1408 1328 140",
+      "settlement(HUB) city Ashcombe 1408 1328 140",
       "landmark ancientwood The Elder Fibafer 704 192",
+      "settlement hamlet Kettle Cross 933 773 46",
       "dungeon door_1 Barrow entrance 1566 1434  -1.96",
       "event event_ashcombe  1216 1176 40"
     ],
@@ -141,13 +191,13 @@
       "x": 1412,
       "z": 1336
     },
-    "placements": 104,
-    "vignettesAvoided": 0
+    "placements": 256,
+    "vignettesAvoided": 620
   },
   "files": {
-    "terrain.bin": 6305674,
-    "nav.bin": 1050717,
-    "scatter.bin": 84588,
-    "placements.json": 50313
+    "terrain.bin": 552313,
+    "nav.bin": 32766,
+    "scatter.bin": 125700,
+    "placements.json": 195971
   }
 }

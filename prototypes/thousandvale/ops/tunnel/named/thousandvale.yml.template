@@ -1,0 +1,17 @@
+# Thousandvale NAMED tunnel config (stream H, PLAN §11.3). Rendered by ops/tunnel/named/setup-named.sh into
+# /etc/cloudflared/thousandvale.yml (root, 0644 — no secret in here; the credentials come in through systemd LoadCredential).
+# Deliberately NOT named config.yml, so a quick tunnel never picks it up.
+#
+# ONE route: the game's hostname -> the STABLE server on 127.0.0.1:8490. Everything else -> 404.
+# Never add 8400/8401 (serve.py accepts file-writing POSTs), 8491 (dev), 8492 (admin), 5432, 22.
+# Do NOT set originRequest.httpHostHeader: the game's WebSocket Origin check compares Origin with Host.
+tunnel: @TUNNEL_ID@
+credentials-file: /run/credentials/thousandvale-tunnel.service/tunnel.json
+no-autoupdate: true
+metrics: 127.0.0.1:20242
+ingress:
+  - hostname: @HOSTNAME@
+    service: http://127.0.0.1:8490
+    originRequest:
+      connectTimeout: 10s
+  - service: http_status:404

@@ -72,6 +72,9 @@
       "summary": "Sound effects with four interchangeable makers (our own synthesizer, a CC0 sample pack, a hybrid of the two, and chiptune) over one catalog of 164 logical ids: spells, statuses, melee, deaths, loot, interface, ambience. Every clip is measured and levelled, so nothing is too quiet or too loud.",
       "status": "done", "date": "2026-09-13", "tags": ["audio", "web-audio", "loudness"] },
 
+    { "id": "icons", "group": "systems", "title": "Icon Library", "href": "icons/", "folder": "icons",
+      "summary": "186 spell icons for all 31 Thousandvale classes, drawn in Starcaller’s gold-on-midnight style. Browse names, descriptions and categories; filter by class or five-class batch, preview small sizes and download SVGs.",
+      "status": "done", "date": "2026-10-11", "isNew": true, "tags": ["icons", "svg", "spells", "library"] },
     { "id": "items", "group": "systems", "title": "Item Vault", "href": "items/", "folder": "items",
       "summary": "Tagged catalog of about 340 items (weapons, armour, vessels, regalia, lore, tools, instruments, food) with race affinities and exclusives, plus a loot roller: material, quality, enchantment, artifact name, value and lore. For how an item LOOKS in 3D, see the Armory.",
       "status": "done", "date": "2026-09-10", "tags": ["items", "loot"] },

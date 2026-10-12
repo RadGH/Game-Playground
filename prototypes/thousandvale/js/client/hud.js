@@ -120,7 +120,7 @@ export function createHud({ onSlot, onChatSubmit, onChatFocus, onRise } = {}) {
         s.b.classList.toggle('empty', !sk);
         s.b.classList.toggle('locked', !!sk?.locked);
         s.b.classList.toggle('ally', !!sk?.ally);
-        // play-test 10 (Y32): a skill with a picture shows it (ui/skill-icons.js); the rest keep their two initials
+        // Shared spell pictures for every class; future unknown skills keep their initials.
         if (s.face) { const ico = sk ? skillIconSvg(sk.id, 40) : null; s.face.classList.toggle('has-ico', !!ico); if (ico) { if (s.face.dataset.ico !== sk.id) { s.face.innerHTML = ico; s.face.dataset.ico = sk.id; } } else { delete s.face.dataset.ico; s.face.textContent = sk ? initials(sk.name) : ''; } }
         // play-test 6 U11: a locked key says WHEN it opens, on the key itself ("my heal did nothing" was a level-3 skill at level 2)
         if (s.lockat) s.lockat.textContent = sk?.locked ? `Lv ${sk.level}` : '';

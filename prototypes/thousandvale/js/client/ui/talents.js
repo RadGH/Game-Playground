@@ -117,11 +117,11 @@ export function createTalentsUi({ net: getNet, hud, me }) {
       h('div.tvt-cols', {}, list, s ? detail(s, level) : h('p.empty', {}, 'No skills yet.')),
     );
   }
-  /** Y32: the skill's picture when it has one (ui/skill-icons.js). */
+  /** The same shared picture as the action bar and Icon Library. */
   function icoSpan(id) { const svg = skillIconSvg(id, 26); if (!svg) return null; const e = h('span.tvt-ico'); e.innerHTML = svg; return e; }
   function skillTipHtml(s) {
     const facts = [s.mp ? `${s.mp} mana` : '', s.cd ? `${(s.cd / 1000).toFixed(s.cd % 1000 ? 1 : 0)} s cooldown` : '', s.element && s.element !== 'physical' ? s.element : ''].filter(Boolean).join(' · ');
-    return `<div class="tip-title">${esc(s.name)}</div><div class="${s.unlocked ? 'good' : 'bad'}">${s.unlocked ? 'Unlocked' : `Unlocks at level ${s.level}`}</div>${facts ? `<div class="tip-sub">${esc(facts)}</div>` : ''}${s.targets ? `<div class="tip-who">Affects: ${esc(s.targets)}</div>` : ''}${s.desc ? `<hr><div>${esc(s.desc)}</div>` : ''}`;
+    return `<div class="tip-title">${skillIconSvg(s.id, 26) || ''}${esc(s.name)}</div><div class="${s.unlocked ? 'good' : 'bad'}">${s.unlocked ? 'Unlocked' : `Unlocks at level ${s.level}`}</div>${facts ? `<div class="tip-sub">${esc(facts)}</div>` : ''}${s.targets ? `<div class="tip-who">Affects: ${esc(s.targets)}</div>` : ''}${s.desc ? `<hr><div>${esc(s.desc)}</div>` : ''}`;
   }
   function detail(s, level) {
     const tree = S.src.tree(s.id);
@@ -131,7 +131,7 @@ export function createTalentsUi({ net: getNet, hud, me }) {
     for (const t of st.tiers) { const sg = mine.find(x => x.tier === t.tier); if (!sg) continue; t.staged = true; for (const n of t.nodes) n.state = n.id === sg.node ? 'staged' : 'open'; }
     const facts = [s.mp ? `${s.mp} mana` : null, s.cd ? `${(s.cd / 1000).toFixed(s.cd % 1000 ? 1 : 0)} s cooldown` : null, s.element && s.element !== 'physical' ? s.element : null].filter(Boolean);
     return h('section.tvt-detail', { 'aria-label': s.name },
-      h('header.tvt-dhead', {}, h('h4', {}, s.name), h('span.tvt-state' + (s.unlocked ? '.ok' : ''), {}, s.unlocked ? `Key ${s.slot}` : `Unlocks at level ${s.level}`)),
+      h('header.tvt-dhead', {}, h('h4', {}, icoSpan(s.id), s.name), h('span.tvt-state' + (s.unlocked ? '.ok' : ''), {}, s.unlocked ? `Key ${s.slot}` : `Unlocks at level ${s.level}`)),
       facts.length ? h('p.tvt-facts', {}, facts.join(' · ')) : null,
       s.targets ? h('p.tvt-facts.tvt-who', {}, `Affects: ${s.targets}`) : null,
       h('p.tvt-desc', {}, s.desc || ''),

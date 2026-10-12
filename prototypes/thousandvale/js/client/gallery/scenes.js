@@ -280,7 +280,7 @@ export const NO_SCREEN = {
   'js/client/ui/svg-portrait.js': 'a helper of portraits.js — seen wherever a portrait is (Title — your characters, the HUD frames)',
   'js/client/ui/portrait-mode.js': 'a rule of portraits.js: where the live 3D portrait may be used (play-test 10, Y33) — no markup',
   'js/client/ui/keep-scroll.js': 'keeps every list\'s scroll position through a redraw (Y27) — no markup of its own; tests/D/pt10.spec.js exercises it',
-  'js/client/ui/skill-icons.js': 'SVG strings for skill faces (Y32) — seen on the action bar and in the Skills window when the class has them',
+  'js/client/ui/skill-icons.js': 'Shared Icon Library: 186 spell pictures for every class, on the action bar and in the Skills window',
   'js/client/ui/class-res.js': 'the class resource pips on your frame (Y32) — drawn only when the server reports a resource; see docs/requests.md',
 };
 

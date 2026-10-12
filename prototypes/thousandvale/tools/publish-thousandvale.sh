@@ -37,7 +37,7 @@ echo "== publishing $SHORT ($(git log -1 --format=%s "$SHA"))"
 
 # The client imports from these playground folders (server/static.js ALLOW); everything else stays out.
 ALLOW=(prototypes/thousandvale prototypes/farhold prototypes/emberveil prototypes/bannerline shared avatar-3d avatar-2d vendor
-       assets worldgen proctown items namegen lingo conversations voice-lab sfx meters library/data universe highdef-3d)
+       assets worldgen proctown items namegen lingo conversations voice-lab sfx meters library/data universe highdef-3d icons)
 PRESENT=(); for p in "${ALLOW[@]}"; do git cat-file -e "$SHA:$p" 2>/dev/null && PRESENT+=("$p"); done
 
 TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT

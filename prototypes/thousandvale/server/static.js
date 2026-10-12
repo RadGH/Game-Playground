@@ -11,7 +11,7 @@ import { gzipSync } from 'node:zlib';
 export const ALLOW = Object.freeze([
   'prototypes/thousandvale', 'prototypes/farhold', 'prototypes/emberveil', 'prototypes/bannerline',
   'shared', 'avatar-3d', 'avatar-2d', 'vendor', 'assets', 'worldgen', 'proctown', 'items', 'namegen',
-  'lingo', 'conversations', 'voice-lab', 'sfx', 'meters', 'library/data', 'universe', 'highdef-3d',
+  'lingo', 'conversations', 'voice-lab', 'sfx', 'meters', 'library/data', 'universe', 'highdef-3d', 'icons',
 ]);
 /** Paths inside the allow-list that are still refused. */
 export const DENY = Object.freeze([

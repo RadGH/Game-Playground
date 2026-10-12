@@ -274,8 +274,8 @@ test('Y32: the Starcaller has a card in creation and a picture for each of its s
   const ids = Array.isArray(sc.skills) ? sc.skills.map(s => (typeof s === 'string' ? s : s.id)) : [];
   assert.equal(ids.length, 6);
   for (const id of ids) { const svg = skillIconSvg(id); assert.ok(svg && svg.startsWith('<svg') && svg.includes('#e6c14a') && svg.includes('#1c1f4a'), `${id}: a gold-on-midnight picture`); assert.doesNotMatch(svg, /NaN|undefined/); }
-  assert.deepEqual(skillIconIds().sort(), [...ids].sort());
-  assert.equal(skillIconSvg('whirlwind'), null, 'a skill with no picture keeps its initials');
+  assert.ok(ids.every(id => skillIconIds().includes(id)), 'the original six remain in the shared library');
+  assert.equal(skillIconSvg('unknown_future_skill'), null, 'a skill with no picture keeps its initials');
   assert.match(src('js/client/hud.js'), /skillIconSvg\(sk\.id, 40\)/);
   assert.match(src('js/client/main.js'), /drawClassCard\(\$\('class-card'\)/);
 });

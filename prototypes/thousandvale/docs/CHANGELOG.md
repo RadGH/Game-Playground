@@ -1200,3 +1200,8 @@ New: `js/client/ui/pt9-core.js` (pure), `js/client/ui/online-window.js`, `css/pt
 - Finished phone/desktop control integration: tools excluded from potion slots, stale rod assignments repaired, Attack releases movement and stays available outside reach, phone map toolbar wraps, canvas follows element/visual viewport size.
 - Connected saved title equipment and live class resources to both storage implementations and the game protocol.
 - Rebuilt profession content with silver ore at 26 gold; gathering-income gate passes without changing its thresholds. Fixed browser test parsing and synthetic friend tracking.
+
+## 2026-10-12 — profession lesson details
+- Bram Delver's dialog confirms Mining was learned and names the gathering tool. Mining stays accessible on repeat visits, with skill, tool and gathering instructions in the trainer window.
+- Other teachers keep their profession details available after learning; unknown trades still offer the normal free lesson and tool.
+- Validation: 21 profession client/server/content checks and both desktop/phone trainer-dialog browser cases passed. The regression covers automatic Mining lessons, repeat visits, duplicate status prevention and learning Foraging through the UI.

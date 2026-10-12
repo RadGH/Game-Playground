@@ -2,6 +2,15 @@
  "_doc": "Player-facing changelog, newest first. The lead appends an entry at each publish (from the feedback reports' Completed notes). `id` is stable; the client remembers the last id a player has seen and highlights newer ones. Plain language, no internal names.",
  "entries": [
   {
+   "id": "2026-10-11-prospector",
+   "date": "2026-10-11",
+   "title": "Clearer profession lessons",
+   "items": [
+    "The prospector now clearly confirms that you have learned Mining and received a pick. His Mining button stays available on later visits, with your skill, tool and mining instructions.",
+    "Other profession teachers also show whether you already know their trades and keep their training details available."
+   ]
+  },
+  {
    "id": "2026-10-11-trainers",
    "date": "2026-10-11",
    "title": "Profession trainers in every major town",

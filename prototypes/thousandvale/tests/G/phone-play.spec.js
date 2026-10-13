@@ -150,7 +150,7 @@ test('3. target a monster, fight it with the attack and skill buttons, loot the 
 
 test('3b. Y35: a second tap switches auto-attack off (hammering the button does not); moving keeps it on; Y1: an activity starting lets go of the stick', async () => {
   test.setTimeout(240000);
-  const near = async () => page.evaluate(() => { const y = tv.state().you; return tv.state().ents.filter(e => e.kind === 'monster' && !e.dead && !/dummy/i.test(thousandvale.S.mirror.infos.get(e.id)?.type || thousandvale.S.mirror.infos.get(e.id)?.name || '')).map(e => ({ ...e, d: Math.hypot(e.x - y.x, e.z - y.z) })).sort((p, q) => p.d - q.d)[0] || null; });
+  const near = async () => page.evaluate(() => { const y = tv.state().you; return tv.state().ents.filter(e => e.kind === 'monster' && !e.dead).map(e => ({ ...e, d: Math.hypot(e.x - y.x, e.z - y.z) })).sort((p, q) => Number(!!thousandvale.S.mirror.infos.get(q.id)?.dummy) - Number(!!thousandvale.S.mirror.infos.get(p.id)?.dummy) || p.d - q.d)[0] || null; });
   const attack = page.locator('#actionbar > .slot').first();
   const auto = () => page.evaluate(() => thousandvale.controls.auto != null);
   await page.evaluate(() => { for (const x of document.querySelectorAll('.tv-panel:not([hidden]) .tvp-x')) x.click(); thousandvale.controls.stopAuto(); });
@@ -161,7 +161,7 @@ test('3b. Y35: a second tap switches auto-attack off (hammering the button does 
     await expect.poll(auto).toBe(true);
     // hammering (the owner's old habit): presses closer together than 0.6 s all mean "attack". Sent from inside the page —
     // a software renderer can take a second to deliver one tap, which would make these calm presses, not fast ones.
-    const hammered = await page.evaluate(async () => { const b = document.querySelector('#actionbar > .slot'), seen = []; thousandvale.S.attackTapAt = performance.now(); for (let i = 0; i < 5; i++) { b.click(); seen.push(thousandvale.controls.auto != null); await new Promise(r => setTimeout(r, 90)); } return seen; });
+    const hammered = await page.evaluate(() => { const b = document.querySelector('#actionbar > .slot'), seen = []; thousandvale.S.attackTapAt = performance.now(); for (let i = 0; i < 5; i++) { b.click(); seen.push(thousandvale.controls.auto != null); } return seen; });
     expect(hammered, 'five fast presses: never switched off').toEqual([true, true, true, true, true]);
     await page.waitForTimeout(800);
     // the stick moves you by hand: the attack stays on (report #45), only the walk toward the enemy ends

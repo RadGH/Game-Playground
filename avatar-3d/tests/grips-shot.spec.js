@@ -4,7 +4,7 @@
 // hand is ever left un-aimed, blade/wand ready pitches). Thousandvale asked for it; Farhold, Emberveil and
 // Bannerline got it too. This draws the cases that change — a dagger user and a dual wielder — with the looks and
 // the clips each of those games really plays, a few moments through the swing, into
-// test-results/grips-<game>.png. Look at them after any change to carry(), aim() or fistGrip().
+// test-results/grips-<game>.png (GRIP_SHOTS=<dir> to keep them: the next Playwright run empties test-results). Look at them after any change to carry(), aim() or fistGrip().
 //
 //   cd ~/claude/playground && flock /tmp/claude-1000/farhold-pw.lock npx playwright test avatar-3d/tests/grips-shot.spec.js
 import { test, expect } from '@playwright/test';
@@ -45,7 +45,7 @@ for (const [game, rows] of Object.entries(GAMES)) {
       const W = 210, H = 270, MOMENTS = [0.18, 0.32];
       const cols = Math.max(...rows.map(r => r.clips.length)) * MOMENTS.length;
       const sheet = document.createElement('canvas'); sheet.width = cols * W; sheet.height = rows.length * H;
-      document.body.innerHTML = ''; document.body.style.cssText = 'margin:0;background:#111'; document.body.appendChild(sheet);
+      sheet.id = 'grip-sheet'; sheet.style.cssText = 'position:absolute;left:0;top:0;z-index:99999'; document.body.appendChild(sheet);   // over the host page, which keeps running
       const g = sheet.getContext('2d'); g.font = '12px sans-serif';
       const r = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
       r.setSize(W, H);
@@ -71,7 +71,7 @@ for (const [game, rows] of Object.entries(GAMES)) {
       return n;
     }, rows);
     await page.waitForTimeout(300);
-    await page.locator('canvas').first().screenshot({ path: `test-results/grips-${game}.png` });
+    await page.locator('#grip-sheet').screenshot({ path: `${process.env.GRIP_SHOTS || "test-results"}/grips-${game}.png` });
     expect(errors, errors.join('\n')).toEqual([]);
     expect(made).toBeGreaterThan(0);
   });

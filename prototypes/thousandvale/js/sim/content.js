@@ -135,7 +135,7 @@ export async function loadProvinceContent(readJson, readBytes, provinceId, { par
   const cartsData = await opt('data/provinces/carts.json');
   const wk = (wd && wd.kinds) || {};
   if (shops && wd && wd.shops) shops.kinds = { ...(shops.kinds || {}), ...wd.shops };      // the pedlar's pack sells like any shop
-  const travel = tv && rt ? { kinds: { ...(tv.kinds || {}), ...wk }, rules: { ...(tv.rules || {}), ...((wd && wd.rules) || {}) }, folkKinds: tv.folk || {},
+  const travel = tv && rt ? { kinds: { ...(tv.kinds || {}), ...wk }, rules: { ...(tv.rules || {}), ...((wd && wd.rules) || {}) }, folkKinds: tv.folk || {}, fighters: tv.fighters || null,
     routes: [...(rt.routes || []).map(r => (Array.isArray(r.kinds) && Object.keys(wk).length ? { ...r, kinds: [...r.kinds, ...Object.keys(wk).filter(k => !r.kinds.includes(k))] } : r)),
       // X7 (owner feedback 9, E's note): a guaranteed cart on the road — each carts.json `roaming.runs[]` is a route of its own over the same road
       // that carries ONLY its `only` kinds (no wanderer kinds appended), so there is always one to flag down

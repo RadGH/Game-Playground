@@ -300,6 +300,24 @@
    "z": 1282,
    "yaw": 0.651,
    "titled": false
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_saltmouth_0",
+   "name": "Training Dummy",
+   "town": "Saltmouth",
+   "x": 904.5,
+   "z": 1611.2,
+   "yaw": -2.007
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_saltmouth_1",
+   "name": "Training Dummy",
+   "town": "Saltmouth",
+   "x": 905.5,
+   "z": 1608.8,
+   "yaw": -1.856
   }
  ]
 }

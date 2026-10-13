@@ -36,6 +36,14 @@ export const PROF_OF_GAME = { strike: 'mining', rhythm: 'logging', pick: 'foragi
 /** The words on the result card when the data file is not loaded yet (data/rules/professions.json `quality.name` wins). */
 export const QUALITY_WORD = { fail: 'Failed', poor: 'Poor', good: 'Good', fine: 'Fine', perfect: 'Perfect' };
 export const MIN_GAP_MS = 90, MAX_PAIRS = 32;
+/**
+ * Wrap-up (report #57: "Skinning still does not wait for your mouse to enter the area to start on desktop"): while a game
+ * waits in its READY state, does a pointer that merely MOVES begin it? Only the skinning trace, only a mouse (a finger
+ * begins by touching), and only once the mouse is on the knife — `dist` = pixels from the knife's point on the canvas.
+ * Every other game is begun by a press; none of them begins by itself any more (prof-minigame.js READY_MAX_MS).
+ */
+export const READY_HOVER_PX = 34;
+export const hoverBegins = (type, pointerType, dist) => type === 'trace' && pointerType === 'mouse' && Number.isFinite(dist) && dist <= READY_HOVER_PX;
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 
 /** What each game listens to: 'tap' (the work button), 'sides' (left / right), 'slots' (pick one of several places), 'aim' (a height), 'hold' (hold = up), 'second' (the other button). */

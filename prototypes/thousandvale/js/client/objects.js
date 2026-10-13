@@ -12,13 +12,14 @@ import * as THREE from 'three';
 import { buildProp, buildRock } from '../../../../highdef-3d/js/kit/rocks.js';
 import { makeGlowTexture } from './decor.js';
 import { LIGHTS } from './lightpool.js';
+import { usePropKind } from '../sim/vignettes.js';
 
 const REACH = 4;
 const KINDS = {
   portal:  { prop: 'ruined_arch', glow: '#8f7dff', label: o => `Enter ${o.name || 'the dungeon'}`, use: true, scale: 1.2 },
   stairs:  { prop: 'stone_step', glow: '#ffd38a', label: o => o.name || 'Take the stairs', use: true, stack: 3 },
   exit:    { prop: 'ruined_arch', glow: '#7fe0a0', label: o => o.name || 'Leave the dungeon', use: true },
-  chest:   { prop: 'crate', glow: '#ffcf4a', label: o => (o.opened ? 'Empty' : `Open ${o.name || 'the chest'}`), use: o => !o.opened, tint: '#c99a3a', scale: 1.25 },
+  chest:   { prop: o => (o.look === 'stump' ? null : 'crate'),   /* a road-event chest is dressed by its `look` (chestDress) */ glow: '#ffcf4a', label: o => (o.opened ? 'Empty' : `Open ${o.name || 'the chest'}`), use: o => !o.opened, tint: '#c99a3a', scale: 1.25 },
   // play-test 6 (U10/U12): the way you came in is a DOORWAY with daylight in it (no portal swirl), the stair up is a flight of steps
   door:     { prop: null, glow: null, label: o => o.name || 'The way you came in', use: true, doorway: true },
   entrance: { prop: null, glow: null, label: o => o.name || 'Dungeon entrance', use: true, doorway: true },
@@ -36,7 +37,7 @@ const KINDS = {
   // M2: the living world
   waystone: { prop: 'rune_stone', glow: '#7fd7ff', label: () => 'Touch the waystone', use: true, scale: 1.35, light: '#7fd7ff' },
   note:    { prop: 'stone_marker', glow: '#f3e3b0', label: o => `Read: ${o.name || 'a note'}`, use: true, scale: 0.8 },
-  use:     { prop: o => (/well/i.test(o.name || '') ? 'well' : /shrine|altar|statue|idol|stone|cairn/i.test(o.name || '') ? 'rune_stone' : /fire|hearth|brazier/i.test(o.name || '') ? 'fire_ring' : 'stone_step'), glow: '#c9a8ff', label: o => o.name || 'Use', use: true },
+  use:     { prop: o => (o.bare ? null : usePropKind(o.name))   /* #63: `bare` = the place already draws it (two wells on top of each other) */, glow: '#c9a8ff', label: o => o.name || 'Use', use: true },
   grave:   { prop: 'stone_marker', glow: null, label: o => `${o.name || 'A grave'}`, use: true, tint: '#8a8780', mound: true },
   campfire: { prop: 'campfire', glow: '#ffae5c', label: o => o.name || 'A campfire', use: true, fire: true },
   npc:     { prop: null, glow: null, label: o => `Talk to ${o.name || 'them'}`, use: true, invisible: true },
@@ -65,6 +66,35 @@ export function chainLinks(a, b, n = LINKS) {
   for (let i = 0; i < n; i++) { const t = (i + 0.5) / n; out.push({ x: a.x + dx * t, y: a.y + dy * t - Math.sin(Math.PI * t) * sag, z: a.z + dz * t, len }); }
   return out;
 }
+/**
+ * Wrap-up (#59's siblings): what a road-event chest is, by the `look` its record names (data/provinces/road-events.json).
+ * Every one of them used to be the same crate — the "Wrecked Cart" had no cart, the "Hollow Stump Hoard" no stump.
+ * CHEST_LOOKS lists, per look, kit props `[id, x, y, z, rotX, rotY, rotZ, scale]` and plain shapes; a look not listed
+ * here (chest_iron, chest_small) is honestly a box. Exported for tests.
+ */
+export const CHEST_LOOKS = {
+  cart_wreck: { props: [['cart_wheel', 1.25, 0.12, 0.5, Math.PI / 2, 0.4, 0, 1.2], ['cart_wheel', -1.05, 0.0, -0.35, 0, 0.3, 0.35, 1.2], ['fence_rail', 0.2, 0.25, 1.15, 0, 1.2, 0.18, 1], ['fence_rail', -0.4, 0.1, -1.15, 0, 1.75, -0.1, 1], ['crate', 0.85, 0, -0.75, 0, 0.7, 0, 0.7]],
+    shapes: [{ box: [2.3, 0.1, 1.3], at: [0, 0.42, 0.1], rot: [0.05, 0.2, 0.42], colour: '#6e553d' }] },
+  cache_dug: { sink: 0.3, shapes: [{ ball: [1, 0.3, 0.8], at: [1.0, 0, 0.35], colour: '#4a3d2e' }, { ball: [0.7, 0.22, 0.6], at: [-0.85, 0, -0.5], colour: '#54452f' }, { disc: 1.25, at: [0, 0.03, 0], colour: '#3b3024' },
+    { box: [0.07, 1.0, 0.07], at: [1.15, 0.5, -0.5], rot: [0.25, 0, -0.3], colour: '#6e553d' }, { box: [0.3, 0.34, 0.03], at: [1.3, 0.12, -0.62], rot: [0.25, 0, -0.3], colour: '#7c8088' }] },
+  stump: { shapes: [{ cyl: [0.62, 0.78, 0.85, 9], at: [0, 0.42, 0], colour: '#5a4632' }, { cyl: [0.5, 0.5, 0.04, 9], at: [0, 0.85, 0], colour: '#2a2018' }, { box: [0.9, 0.16, 0.2], at: [0.75, 0.08, 0.2], rot: [0, 0.5, 0], colour: '#5a4632' },
+    { box: [0.7, 0.14, 0.18], at: [-0.6, 0.07, -0.5], rot: [0, -0.9, 0], colour: '#4e3c2a' }, { ball: [0.2, 0.14, 0.2], at: [0.1, 0.9, 0.05], colour: '#b08a3a' }] },
+  packs: { sink: 0.2, shapes: [{ ball: [0.5, 0.3, 0.36], at: [0.95, 0.26, 0.3], rot: [0, 0.4, 0.15], colour: '#7a5a3a' }, { ball: [0.46, 0.28, 0.34], at: [-0.9, 0.24, -0.25], rot: [0, -0.7, -0.1], colour: '#6b4e32' },
+    { ball: [0.34, 0.24, 0.3], at: [0.2, 0.2, 1.05], colour: '#b59a62' }, { box: [1.7, 0.03, 0.12], at: [0.05, 0.05, 0.05], rot: [0, 0.35, 0], colour: '#3a2a1c' }, { box: [0.5, 0.04, 0.4], at: [-0.5, 0.03, 0.9], rot: [0, 0.9, 0], colour: '#8a2f2a' }] },
+};
+const dressMats = new Map();
+function chestDress(look, root, geo, mat) {
+  const L = CHEST_LOOKS[look]; if (!L) return;
+  if (L.sink) for (const m of root.children) m.position.y -= L.sink;                    // the box sits IN the hole / under the bags
+  const put = (m, at, rot) => { m.position.set(at[0], at[1], at[2]); if (rot) m.rotation.set(rot[0], rot[1], rot[2]); m.castShadow = m.receiveShadow = true; root.add(m); };
+  for (const [id, x, y, z, rx, ry, rz, sc] of L.props || []) { const g = geo(id); if (!g) continue; const m = new THREE.Mesh(g, mat); m.scale.setScalar(sc || 1); put(m, [x, y, z], [rx, ry, rz]); }
+  for (const sh of L.shapes || []) {
+    if (!dressMats.has(sh.colour)) dressMats.set(sh.colour, new THREE.MeshStandardMaterial({ color: sh.colour, roughness: 0.95, flatShading: true }));
+    const g = sh.box ? new THREE.BoxGeometry(...sh.box) : sh.cyl ? new THREE.CylinderGeometry(...sh.cyl) : sh.disc ? new THREE.CircleGeometry(sh.disc, 14).rotateX(-Math.PI / 2) : new THREE.SphereGeometry(1, 8, 5).scale(...sh.ball);
+    put(new THREE.Mesh(g, dressMats.get(sh.colour)), sh.at, sh.rot);
+  }
+}
+
 export function createObjects(scene, { heightAt = () => 0, onUse, onNear = null, labelLayer = null, camera = null, posOf = () => null } = {}) {
   const items = new Map();       // id -> object
   const group = new THREE.Group(); group.name = 'objects'; scene.add(group);
@@ -111,6 +141,7 @@ export function createObjects(scene, { heightAt = () => 0, onUse, onNear = null,
       const disc = new THREE.Mesh(new THREE.CircleGeometry(o.r || 3, 40), new THREE.MeshBasicMaterial({ color: K.glow, transparent: true, opacity: 0.45, depthWrite: false }));
       disc.rotation.x = -Math.PI / 2; disc.position.y = 0.06; root.add(disc);
     }
+    if (o.type === 'chest' && o.look) chestDress(o.look, root, geo, mat);
     if (K.glow) {
       const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: K.glow, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.7 }));
       s.position.y = o.type === 'portal' || o.type === 'exit' ? 1.8 : 0.9; s.scale.setScalar(o.type === 'portal' ? 4.2 : 2.2);

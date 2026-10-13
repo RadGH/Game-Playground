@@ -156,10 +156,14 @@ export function createProfessions(numbers = {}, content = null) {
     const row = sk.types && sk.types[type];
     if (!row) return null;
     const t = tierForLevel(level);
-    const hide = (classes.hide || [])[t.tier - 1];
+    const hide = (classes.hide || [])[Math.max(0, t.tier - 1 - (row.worn | 0))];      // (worn: the long dead give a hide one grade lower)
     if (!hide) return null;
     return { prof: 'skinning', kind: 'corpse', tier: t.tier, name: row.name || type, gives: [{ id: hide, n: 0.5 }, ...(sk.meat && !row.noMeat ? [{ id: sk.meat, n: 0.34 }] : [])], bonus: row.bonus || sk.bonus || null };
   }
+
+  /** Why a dead monster of `type` cannot be skinned, as one plain sentence — or null when it can (or the type is unknown). */
+  const skinNone = type => { const sk = C.skins || {}; return (sk.types && sk.types[type]) ? null : (sk.none && sk.none[type]) || null; };      // the row: { name, why, person? }
+  const skinRefusal = type => { const row = skinNone(type); return row ? row.why : null; };
 
   // ---- making ----
   const recipe = id => recipeById.get(id) || null;
@@ -244,7 +248,7 @@ export function createProfessions(numbers = {}, content = null) {
     N, C, list: defs, def: id => defById.get(id) || null, tiers, tier, tierForSkill, tierForLevel, maxLevel: S.max,
     levelOf, xpAt, next, rank, gain, ease,
     materials, material, item, tools, tool, toolItem, isTool, bestTool, goodItem, classes,
-    nodeKinds, nodeKind, canGather, gatherGame, gatherYield, xpFor, respawnMs, skinOf, toolWord,
+    nodeKinds, nodeKind, canGather, gatherGame, gatherYield, xpFor, respawnMs, skinOf, skinRefusal, skinNone, toolWord,
     recipes, recipe, countsOf, feeOf, gearLevel, basesFor, canCraft, craftGame, rarityFor, craftResult, recipeView, gameFor,
     qualityOf: score => qualityOf(score, Q.min), qualityName: q => Q.name[q] || q,
     roles: N.roles || {}, roleOf: role => (N.roles && N.roles[role] && typeof N.roles[role] === 'object' ? N.roles[role] : null),

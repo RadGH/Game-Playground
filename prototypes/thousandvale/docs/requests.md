@@ -4537,3 +4537,12 @@ _Round 10 — G status (2026-10-08, LANDED; where it differs from the text above
 Closed the remaining integration asks: potion slots exclude tools and repair saved rod assignments; Attack stays available outside reach and releases every movement device before chasing; phone map controls wrap; canvas resize follows its element and visual viewport. Character lists now send saved gear from both stores; joined and change-only updates send class resources, including the empty pool before the first hit. Fixed the duplicate `at` declaration in the profession browser test and isolated synthetic friend tracking from real server refusals. Silver ore price 24 -> 26, with generated content rebuilt; the gathering-income gate passes unchanged.
 
 Validation before publish: 1,348 unit tests passed, 8 skipped; the added server integration and save-field checks pass (10), and PostgreSQL store checks pass (3). Publish runs the full unit and syntax gates again from the committed release.
+
+## Wrap-up — economy (Y31) status — 2026-10-13 -> C, A, P, lead
+
+Landed; `docs/economy/README.md` has the before/after tables and the reasons.
+* **C:** `prices.json` `gear.base` 45 -> 8.5, `perLevel` 144 -> 28.5, `rarity.rare` 11 -> 10.7, `sellFactor` 0.012 -> 0.06. `income.lifetime` is now one row per level 1-31, written by `node tools/sim-economy.mjs --write-income`; row 9 is still exactly 3,445, so `tests/C/playtest10` holds and the Unbinder is 515 at level 9. Above level 9 the table is lower than your placeholder (level 20: 16,420 against 19,400), so the Unbinder there is 2,465 against 2,910. `tests/C/playtest7.test.mjs` "V2 ratios" now multiplies its kill hour by `ASSUME.real.pace` (imported from the sim) — the bands were for an ideal hour.
+* **A:** no code change. `economy.json` `sell.factor` 0.06, `fare` 3 + metres / 200, `mounts` 400 / 1,800 / 5,300 / 9,000; `shops.json` goods to a third (roles regenerated).
+* **P:** gathering at level 9 earns 42-47% of questing in the sim (skill 41 is still tier-2 nodes; your test checks 1 / 5 / 10 / 20). Not touched.
+* `ASSUME.real` in the sim is the only statement of "a real hour"; `questHour(level)` in the rules is still a level's worth of gold, not an hour's.
+

@@ -471,7 +471,8 @@
     "class_chronomancer",
     "class_enchanter",
     "class_stormcaller",
-    "class_pyromancer"
+    "class_pyromancer",
+    "class_starcaller"
    ],
    "takes": [
     "class_mage",
@@ -479,7 +480,8 @@
     "class_chronomancer",
     "class_enchanter",
     "class_stormcaller",
-    "class_pyromancer"
+    "class_pyromancer",
+    "class_starcaller"
    ],
    "mustTake": [
     "class_sorcerer",
@@ -495,7 +497,8 @@
     "chronomancer",
     "enchanter",
     "stormcaller",
-    "pyromancer"
+    "pyromancer",
+    "starcaller"
    ],
    "offers": true,
    "titled": true

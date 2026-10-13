@@ -739,6 +739,51 @@
    "z": 552,
    "yaw": 2.515,
    "titled": false
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_millbrook_0",
+   "name": "Training Dummy",
+   "town": "Millbrook",
+   "x": 554.4,
+   "z": 1645.2,
+   "yaw": 3.044
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_millbrook_1",
+   "name": "Training Dummy",
+   "town": "Millbrook",
+   "x": 557,
+   "z": 1645,
+   "yaw": -3.048
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_millbrook_2",
+   "name": "Training Dummy",
+   "town": "Millbrook",
+   "x": 559.6,
+   "z": 1644.8,
+   "yaw": -2.858
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_three_wheels_0",
+   "name": "Training Dummy",
+   "town": "Three Wheels",
+   "x": 1678,
+   "z": 1238.3,
+   "yaw": -1.629
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_three_wheels_1",
+   "name": "Training Dummy",
+   "town": "Three Wheels",
+   "x": 1678,
+   "z": 1235.7,
+   "yaw": -1.472
   }
  ]
 }

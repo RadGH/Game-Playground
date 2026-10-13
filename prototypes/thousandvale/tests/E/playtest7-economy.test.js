@@ -11,28 +11,54 @@ const root = new URL('../../', import.meta.url);
 const J = p => JSON.parse(readFileSync(new URL(p, root), 'utf8'));
 const ECO = J('data/provinces/economy.json'), T = ECO.targets, PRICES = J('data/rules/prices.json'), ANG = J('data/provinces/angling.json');
 const LEVELS = [1, 5, 10, 20];
-const R = await simulate({ levels: LEVELS, hours: 240 });
+// Y31 (owner feedback 10): the price ladder is pinned in MINUTES OF REAL PLAY at REAL (economy.json targets.realLevels)
+const REAL = T.realLevels;
+const R = await simulate({ levels: [...new Set([...LEVELS, ...REAL])].sort((a, b) => a - b), hours: 240 });
+const real = L => at(L).real;
 const at = L => R.levels[L], Q = L => at(L).activities.questing.gold;
 const within = (v, [lo, hi]) => v >= lo && v <= hi;
 /** An hour of questing at any level (between the simulated ones: a straight line). */
 const qAt = lvl => { const ls = LEVELS; if (lvl <= ls[0]) return Q(ls[0]); for (let i = 1; i < ls.length; i++) if (lvl <= ls[i]) { const a = ls[i - 1], b = ls[i]; return Q(a) + (Q(b) - Q(a)) * (lvl - a) / (b - a); } return Q(ls[ls.length - 1]); };
 
-test('V2: an hour of ordinary play buys one uncommon shop piece of your level and a few potions — and not three pieces', () => {
-  for (const L of LEVELS) {
-    const u = at(L).prices.gear.magic.buy, potion = at(L).prices.healingPotion;
-    assert.ok(Q(L) >= u + T.potionsWithTheUpgrade * potion, `level ${L}: an hour (${Q(L)}) does not cover an uncommon piece (${u}) and ${T.potionsWithTheUpgrade} potions`);
-    assert.ok(within(u / Q(L), T.uncommonHours), `level ${L}: an uncommon piece is ${(u / Q(L)).toFixed(2)} hours`);
-    assert.ok(Q(L) < 3 * u, `level ${L}: an hour buys three uncommon pieces`);
+test('Y31: the sim reproduces the owner\'s own play — gold in total at level 9 — and the income table every price reads IS the sim\'s', async () => {
+  const { lifetimeGold } = await import('../../js/rules/economy.js');
+  const O = T.ownerPoint, sim = R.real.levels[O.level].sim.lifetime;
+  assert.ok(Math.abs(sim / O.gold - 1) <= O.tolerance, `the sim counts ${sim} gold in total at level ${O.level}; the owner's character had ${O.gold}`);
+  assert.equal(lifetimeGold(PRICES, O.level), O.gold, 'the measured point is a row of prices.json income.lifetime');
+  // "a few hours": level 9 is an afternoon, not an hour and not a week
+  assert.ok(R.real.hoursTo[O.level] >= 2.5 && R.real.hoursTo[O.level] <= 6, `level ${O.level} after ${R.real.hoursTo[O.level]} hours of real play`);
+  // one model, not two: at every level the table and the sim's own count agree (node tools/sim-economy.mjs --write-income makes it so)
+  let prev = -1;
+  for (const [L, v] of Object.entries(R.real.levels)) {
+    assert.ok(v.table.lifetime > prev, `level ${L}: the table climbs`); prev = v.table.lifetime;
+    if (+L >= 3) assert.ok(Math.abs(v.table.lifetime / v.sim.lifetime - 1) <= 0.08, `level ${L}: the table says ${v.table.lifetime}, the sim ${v.sim.lifetime} — run node tools/sim-economy.mjs --write-income`);
+  }
+  // what one level brings never shrinks by much from the level before (a price read off it must not jump about)
+  for (let L = 2; L < REAL[REAL.length - 1]; L++) assert.ok(R.real.levels[L + 1].table.goldPerHour >= 0.8 * R.real.levels[L].table.goldPerHour, `level ${L + 1}: income per hour falls off a step`);
+});
+
+test('Y31: a character affords an uncommon shop piece of its level about every 20-30 minutes of real play, at every level — with potions to spare', () => {
+  for (const L of REAL) {
+    const m = real(L).minutes, hour = real(L).goldPerHour, u = at(L).prices.gear.magic.buy, potion = at(L).prices.healingPotion;
+    assert.ok(within(m.uncommon, T.uncommonMinutes), `level ${L}: an uncommon piece (${u} gold) is ${m.uncommon} minutes of play at ${hour} gold an hour`);
+    assert.ok(m.healingPotion <= T.potionMinutesMax, `level ${L}: a healing potion is ${m.healingPotion} minutes of play`);
+    assert.ok(hour >= u + T.potionsWithTheUpgrade * potion, `level ${L}: an hour (${hour}) does not cover an uncommon piece (${u}) and ${T.potionsWithTheUpgrade} potions`);
+    assert.ok(hour >= 2 * u, `level ${L}: an hour of play buys two uncommon pieces`);
   }
 });
 
-test('V2: a rare is several hours; the ladder climbs — plain < uncommon < rare < legendary, and every rung costs more at a higher level', () => {
+test('Y31: a rare is 1.5-2 hours of real play; the ladder climbs; a merchant pays a fair share and selling loot is never the main income', () => {
   let prev = null;
-  for (const L of LEVELS) {
-    const g = at(L).prices.gear;
-    assert.ok(within(g.rare.buy / Q(L), T.rareHours), `level ${L}: a rare piece is ${(g.rare.buy / Q(L)).toFixed(1)} hours`);
+  for (const L of REAL) {
+    const g = at(L).prices.gear, m = real(L).minutes;
+    assert.ok(within(m.rare, T.rareMinutes), `level ${L}: a rare piece (${g.rare.buy} gold) is ${m.rare} minutes of play`);
     assert.ok(g.normal.buy < g.magic.buy && g.magic.buy < g.rare.buy && g.rare.buy < g.legendary.buy, `level ${L}: ladder`);
-    for (const r of ['normal', 'magic', 'rare']) { assert.ok(g[r].sell < g[r].buy * 0.5 && g[r].sell >= 1, `level ${L} ${r}: sells for ${g[r].sell} of ${g[r].buy}`); if (prev) assert.ok(g[r].buy > prev[r].buy, `${r} costs more at level ${L}`); }
+    assert.ok(m.legendary > 2 * m.rare, `level ${L}: a legendary is worth more than two rares`);
+    for (const r of ['normal', 'magic', 'rare']) {
+      assert.ok(g[r].sell >= 1 && (g[r].sell + 1) / g[r].buy >= T.sellBack[0] && g[r].sell / g[r].buy <= T.sellBack[1], `level ${L} ${r}: sells for ${g[r].sell} of ${g[r].buy}`);
+      if (prev) assert.ok(g[r].buy > prev[r].buy, `${r} costs more at level ${L}`);
+    }
+    assert.ok(real(L).soldShare <= T.soldShareMax, `level ${L}: sold loot is ${Math.round(real(L).soldShare * 100)}% of an hour's gold`);
     prev = g;
   }
 });
@@ -85,19 +111,20 @@ test('V2: one table for "one kill" — economy.json unit is stream C\'s kill for
   for (let L = 2; L <= 20; L++) assert.ok(Math.round(PRICES.kill.base + PRICES.kill.perLevel * L) > Math.round(PRICES.kill.base + PRICES.kill.perLevel * (L - 1)), 'level ' + L);
 });
 
-test('V2: nothing in a shop is trivially cheap or out of reach for ever — every fixed-price row costs at least one kill and at most twenty hours at the level it opens', () => {
+test('V2: nothing in a shop is trivially cheap or out of reach for ever — every fixed-price row costs at least one kill and at most a long evening of play at the level it opens', () => {
   const bad = [];
   for (const r of R.shopRows) {
     const kill = PRICES.kill.base + PRICES.kill.perLevel * r.level;
     if (r.price < kill) bad.push(`${r.kind} ${r.id}: ${r.price} gold is less than one level-${r.level} kill`);
-    if (r.price > T.shopRowHoursMax * qAt(r.level)) bad.push(`${r.kind} ${r.id}: ${r.price} gold is ${(r.price / qAt(r.level)).toFixed(0)} hours at level ${r.level}`);
+    const hours = r.price / R.real.levels[r.level].table.goldPerHour;      // Y31: hours of REAL play
+    if (hours > T.shopRowHoursMax) bad.push(`${r.kind} ${r.id}: ${r.price} gold is ${hours.toFixed(0)} hours of play at level ${r.level}`);
   }
   assert.deepEqual(bad, []);
   assert.ok(R.shopRows.length >= 50);
   // the stable's shelf and economy.json say the same price for every mount (the shelf is what the server charges)
   for (const m of ECO.mounts) { const g = J('data/provinces/shops.json').kinds.stable.goods.find(x => x.id === m.id); assert.ok(g && g.price === m.price && g.minLevel === m.level, m.id + ': stable shelf and economy.json disagree'); }
-  // a mount is a goal, not an afterthought: one to four hours at the level it opens
-  for (const m of R.shopRows.filter(r => r.kind === 'stable' && /horse|pony|courser|dray/.test(r.id))) assert.ok(within(m.price / qAt(m.level), [0.8, 5]), `${m.id}: ${(m.price / qAt(m.level)).toFixed(1)} hours`);
+  // a mount is a goal, not an afterthought: one to four hours of REAL play at the level it opens (Y31)
+  for (const m of R.shopRows.filter(r => r.kind === 'stable' && /horse|pony|courser|dray/.test(r.id))) { const h = m.price / R.real.levels[m.level].table.goldPerHour; assert.ok(within(h, T.mountHours), `${m.id}: ${h.toFixed(1)} hours of play at level ${m.level}`); }
 });
 
 // ------------------------------------------------------------------------------------------------ V3: pools in plain sight

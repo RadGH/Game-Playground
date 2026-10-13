@@ -42,7 +42,24 @@ export function anonAccountOp(op, args, { mode = 'ws', url, build = 'dev', timeo
  * @param o.onPick     (char) => void                   play this character
  * @param o.onLoggedOut () => void
  */
-export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onPick, onLoggedOut, onTitleStep = null }) {
+/** The sentence that offers a browser's guest characters to the account just signed in to (report S#66). */
+export function guestOfferText(chars) {
+  const nice = c => `${c.name} (level ${c.level || 1} ${String(c.cls || 'adventurer').replace(/_/g, ' ')})`;
+  const names = chars.map(nice), list = names.length > 1 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names[0];
+  return chars.length === 1 ? `This browser has a guest character that is not on your account: ${list}. Move it to your account?`
+    : `This browser has ${chars.length} guest characters that are not on your account: ${list}. Move them to your account?`;
+}
+/** What to say after the move: who came across, and who stayed and why. */
+export function guestMovedText(r) {
+  const moved = r.moved || [], left = r.left || [], names = l => l.map(c => c.name).join(', ');
+  const online = left.filter(c => c.why === 'online'), full = left.filter(c => c.why === 'full');
+  return [moved.length ? `${names(moved)} ${moved.length === 1 ? 'is' : 'are'} on your account now.` : '',
+    online.length ? `${names(online)} ${online.length === 1 ? 'is' : 'are'} still in the world — try again in a minute.` : '',
+    full.length ? `${names(full)} did not fit: your account is at its character limit.` : ''].filter(Boolean).join(' ') || 'There was nothing to move.';
+}
+
+/** @param o.guestKey  { get(), clear() } the guest key this browser held before a sign-in (main.js sets it aside) */
+export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onPick, onLoggedOut, onTitleStep = null, guestKey = null }) {
   const net = () => getNet();
   const T = {
     tabNew: $('tab-new'), tabLogin: $('tab-login'), newForm: $('login'), signin: $('signin'), user: $('signin-user'), pass: $('signin-pass'),
@@ -149,6 +166,38 @@ export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onPick, 
     input.focus();
   }
 
+  // ---- wrap-up (report S#66): this browser's guest characters are offered to the account you signed in to ----
+  const guestAsked = new WeakSet();
+  function offerGuests() {
+    const n = net(), key = guestKey?.get();
+    if (!n || !n.claimed || !key || guestAsked.has(n) || typeof n.accountOp !== 'function') return;
+    guestAsked.add(n);
+    const off = n.on('accountR', r => {
+      if (r.op !== 'peek') return; off();
+      if (!r.ok) return;
+      if (!r.chars || !r.chars.length) { guestKey.clear(); return; }       // nothing on that key (or it is gone): forget it
+      T.mine.querySelector('.guest-offer')?.remove();
+      const note = h('p.note', { 'aria-live': 'polite' });
+      const yes = h('button.primary', { type: 'button', dataset: { act: 'adopt' } }, r.chars.length === 1 ? 'Move it' : 'Move them');
+      const box = h('div.guest-offer', { role: 'group', 'aria-label': 'Guest characters in this browser' }, h('p', {}, guestOfferText(r.chars)),
+        h('div.row', {}, yes, h('button.ghost', { type: 'button', dataset: { act: 'later' }, onclick: () => box.remove() }, 'Not now')), note);
+      yes.onclick = () => {
+        yes.disabled = true; yes.textContent = 'Moving…';
+        const offA = n.on('accountR', a => {
+          if (a.op !== 'adopt') return; offA();
+          if (!a.ok) { note.textContent = a.msg || 'That did not work.'; yes.disabled = false; yes.textContent = 'Try again'; return; }
+          const said = guestMovedText(a);
+          if (!(a.left || []).length) { guestKey.clear(); box.remove(); const ln = $('front')?.querySelector('.char-said'); if (ln) ln.textContent = said; }
+          else { note.textContent = said; yes.disabled = false; yes.textContent = 'Try again'; }
+          n.refreshChars?.();
+        });
+        n.accountOp('adopt', { guest: key });
+      };
+      T.mine.hidden = false; T.mine.prepend(box);
+    });
+    n.accountOp('peek', { guest: key });
+  }
+
   /** Your characters on this account (title screen), clickable. */
   function showChars(chars, username = null) {
     const list = chars || [];
@@ -159,6 +208,7 @@ export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onPick, 
     // play-test 2 Q25: the calling's real name ("Ranger"); Q13: the character's portrait (ui/portraits.js) when ready
     const nice = c => c.clsName || String(c.cls || '').replace(/_/g, ' ').replace(/\b\w/g, x => x.toUpperCase()) || 'Adventurer';
     listen(net());
+    offerGuests();
     // X6: one row a character — the chip plays it, Delete asks for its name; the list scrolls (css/pt9.css) once it is long
     T.chips.replaceChildren(...list.map(c => {
       const pic = api.portraitFor?.(c);

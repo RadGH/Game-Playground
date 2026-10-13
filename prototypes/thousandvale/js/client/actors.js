@@ -19,6 +19,8 @@ import * as THREE from 'three';
 import { createChibi2Character } from '../../../../avatar-3d/js/chibi2.js';
 import { createCreature, randomCreature } from '../../../../avatar-3d/js/creatures.js';
 import { compactCreature } from '../../../../avatar-3d/js/mesh-merge.js';
+import { bodyKindFor } from './body-kind.js';
+import { createDummyBody } from './dummy-model.js';          // #61: a training dummy is a built object, not an animal
 import { avatarFor, bodyTypeFor, loadMonsterLooks } from './looks.js';
 import { normalizeAvatar } from '../../../../avatar-2d/js/render.js';
 import { perf, compileBeforeShow } from './perf.js';
@@ -194,7 +196,11 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
         const look = looks[a.creature?.type] || null;
         a.flying = !!look?.flying;
         const big = a.sc ? Math.max(0.5, Math.min(3, a.sc)) : rankScale(a.rank, a.mods);      // S4: rares and champions stand out by size (a giant much more)
-        if (look?.avatar) {
+        const kindOfBody = bodyKindFor(a.creature?.type, look);
+        if (kindOfBody === 'dummy') {
+          // #61: a post, a sack and a target board (it had no looks row, and an unknown creature type is a wolf)
+          body = createDummyBody(); a.fixed = true; a.flying = false;
+        } else if (look?.avatar) {
           // A humanoid monster (brigand, cultist, knight): a Chibi 2 body, scaled up when it is an elite or boss.
           body = await createChibi2Character(normalizeAvatar(look.avatar), { anims: CHIBI_ANIMS });
           a.humanoid = true;
@@ -204,7 +210,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
           body = await createCreature(look?.creature ? spec : creatureFor(spec), { detail: a.rank === 'boss' ? 1 : 0.8 });
         }
         // One draw call per moving part instead of one per eye and toe (Farhold R27 M8).
-        try { compactCreature(body); } catch (e) { console.warn('[actors] compact failed', e); }
+        if (!body.isProp) try { compactCreature(body); } catch (e) { console.warn('[actors] compact failed', e); }
       } else {
         body = await createChibi2Character(await avatarFor(a.look), { anims: CHIBI_ANIMS });
       }
@@ -595,9 +601,10 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
     const src = actors.get(fromId);
     if (src && amount > 0) {
       const dx = a.pos.x - src.pos.x, dz = a.pos.z - src.pos.z, d = Math.hypot(dx, dz) || 1;
-      a.recoil.set(dx / d * 0.28, 0, dz / d * 0.28);
+      if (a.fixed) a.body?.hit?.(dx, dz, a.yaw, amount);            // #61: a thing on a post rocks where it stands
+      else a.recoil.set(dx / d * 0.28, 0, dz / d * 0.28);
     }
-    a.punch = amount > 0 ? 1 : 0.3;
+    a.punch = a.fixed ? 0 : amount > 0 ? 1 : 0.3;
     a.lastCombat = performance.now();
     if (!a.dead && amount > 0 && a.kind === 'player' && (!a.oneShot || a.oneShot === 'hit')) { a.oneShot = 'hit'; a.oneShotUntil = performance.now() + 380; }
   }

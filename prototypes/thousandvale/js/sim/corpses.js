@@ -183,6 +183,10 @@ export function createCorpses({ now, newUid, rng = Math.random, partyOf, online,
     const list = w.keys.map(k => bodies.get(k)).filter(b => b && !b.e.removed && lootableFor(c, b));
     if (!list.length) return null;
     const main = list.find(b => b.e.id === w.main) || list[0];
+    // wrap-up (report #58): the window is now led by THIS body — `sendWin`'s closing word must name the id the client
+    // was last sent. It used to name the body first clicked; with that one emptied first the client (which follows the
+    // id of the last window it drew) ignored the close, kept the last row on screen, and the next E met a body that was gone.
+    w.main = main.e.id;
     const parts = list.map(b => { const v = view(b, c); return { id: b.e.id, name: b.name, items: v.items.map(it => ({ ...it, corpse: b.e.id })), gold: v.gold, free: (v.free || []).map(it => ({ ...it, corpse: b.e.id })) }; });
     const v = { t: 'lootWin', id: main.e.id, name: list.length > 1 ? main.name + ' and ' + (list.length - 1) + ' more' : main.name, items: parts.flatMap(p => p.items), gold: parts.reduce((a, p) => a + (p.gold || 0), 0), group: parts.map(p => ({ id: p.id, name: p.name, n: p.items.length + p.free.length, gold: p.gold })), corpses: parts.map(p => p.id) };
     const free = parts.flatMap(p => p.free);
@@ -269,7 +273,9 @@ export function createCorpses({ now, newUid, rng = Math.random, partyOf, online,
   function findInGroup(o, b, uid) {
     const c = o.char.id, w = windows.get(c);
     const has = x => { const s = x.shares.get(c); return (s && s.items.some(i => i.uid === uid)) || (x.pileFor.has(c) && x.pile.some(i => i.uid === uid)) || x.free.some(i => i.uid === uid); };
-    if (uid === 'gold' || has(b) || !w) return b;
+    // #58: the window's gold is the SUM over its bodies; a gold take names only the leading one — pay from whichever still holds some
+    if (uid === 'gold') { const gold = x => (x.shares.get(c)?.gold || 0) > 0; if (gold(b) || !w) return b; for (const k of w.keys) { const x = bodies.get(k); if (x && x.room === o.room && !x.e.removed && gold(x)) return x; } return b; }
+    if (has(b) || !w) return b;
     for (const k of w.keys) { const x = bodies.get(k); if (x && x.room === o.room && !x.e.removed && has(x) && Math.hypot(x.e.x - o.entity.x, x.e.z - o.entity.z) <= LOOT_NEAR_M + 1) return x; }
     return b;
   }
@@ -312,6 +318,7 @@ export function createCorpses({ now, newUid, rng = Math.random, partyOf, online,
     if (!lootableFor(c, b) && !(m.op !== 'open' && inGroup && groupView(c))) return R({ ok: false, why: 'gone', msg: 'There is nothing on it for you.' });
     if (o.frozen) return R({ ok: false, why: 'busy', msg: 'Busy, try again in a moment.' });
     const near = m.near !== false;
+    const hadWin = !!w0 && near;
     if (m.op === 'open' || (m.op === 'all' && !inGroup)) {
       // S12: one window over every body near you that holds something for you
       closeWin(c);
@@ -327,6 +334,9 @@ export function createCorpses({ now, newUid, rng = Math.random, partyOf, online,
       if (why) return R({ ok: false, why, msg: why === 'bagFull' ? 'Your bag is full.' : 'That is not there any more.' });
       b.watchers.add(c);
       after(o, b);
+      // the gold row is one row for the whole window: one take empties it on every body
+      if (uid === 'gold' && inGroup) for (let x = findInGroup(o, b, uid), n = 0; n < 40 && x !== b && (x.shares.get(c)?.gold || 0) > 0; x = findInGroup(o, b, uid), n++) { takeOne(o, x, 'gold'); x.watchers.add(c); after(o, x); }
+      if (hadWin && b.e.kind !== 'object') nextNear(o);
       return null;
     }
     // all: the gold, then every item that fits — from every body of the window (S12)
@@ -343,7 +353,29 @@ export function createCorpses({ now, newUid, rng = Math.random, partyOf, online,
     for (const x of list) if (bodies.get(x.key) === x) after(o, x);
     if (w) sendWin(c);
     if (full) R({ ok: false, why: 'bagFull', msg: 'Your bag is full.' });
+    else if (near && b.e.kind !== 'object') nextNear(o);
     return null;
+  }
+  /**
+   * #58: the window just emptied and closed — if another body within reach holds something for this player (one that fell
+   * after the window opened, or lay outside it), the window moves on to THAT body instead of leaving them to press again.
+   * Never a container: a chest opens only when it is opened (W24).
+   */
+  function nextNear(o) {
+    const c = o.char.id, e = o.entity;
+    if (windows.has(c) || !o.conn || !e) return false;
+    let best = null, bd = LOOT_RANGE + 0.5;
+    for (const b of bodies.values()) {
+      if (b.room !== o.room || b.e.removed || b.e.kind === 'object' || !lootableFor(c, b)) continue;
+      const d = Math.hypot(b.e.x - e.x, b.e.z - e.z);
+      if (d <= bd) { bd = d; best = b; }
+    }
+    if (!best) return false;
+    const group = nearBodies(o, best);
+    windows.set(c, { room: o.room, keys: group.map(x => x.key), main: best.e.id });
+    for (const x of group) x.watchers.add(c);
+    o.conn.sendJSON(groupView(c));
+    return true;
   }
 
   function tick() {

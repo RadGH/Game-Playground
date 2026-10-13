@@ -9,7 +9,9 @@
 //   import { shelfFor, shelveCatalog } from './content-gear.mjs'     (tests/E/playtest5-gear.test.js)
 //
 // WHICH SHELF (shelfFor): by what the thing is, the same split the shops already have —
-//   wands, staves, quarterstaves, sceptres, orbs, tomes (weapons)   -> apothecary / weapon
+//   wands, staves, quarterstaves, sceptres, tomes (weapons)         -> apothecary / weapon
+//   ORBS -> tailor / other, with the foci (round 10: an orb is an OFF-HAND implement — js/rules/hands.js handOf -> 'off' —
+//           although the item table files it as a weapon; it is never on a weapon shelf, the market stall's included)
 //   bows, crossbows, javelins                                        -> bowyer / weapon      quivers -> bowyer / other
 //   every other weapon                                               -> weaponsmith / weapon
 //   shields                                                          -> weaponsmith / armor + armourer / other
@@ -33,7 +35,8 @@ const ROOT = new URL('../', import.meta.url);
 const SHOPS = new URL('data/provinces/shops.json', ROOT);
 export const CATALOG = new URL('../../avatar-3d/data/gear-catalog.json', ROOT);
 export const START_CAP = 6;                 // Torborhold's levelCap
-const CASTER = new Set(['wand', 'staff', 'quarterstaff', 'scepter', 'sceptre', 'orb', 'tome']);
+const CASTER = new Set(['wand', 'staff', 'quarterstaff', 'scepter', 'sceptre', 'tome']);
+const ORB = new Set(['orb']);
 const RANGED = new Set(['bow', 'shortbow', 'crossbow', 'javelin']);
 const hash = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
 
@@ -41,6 +44,7 @@ const hash = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^
 export function shelfFor(row) {
   const t = row.type, slot = row.gameSlot;
   if (row.kind === 'weapon') {
+    if (ORB.has(t)) return [['tailor', 'other']];                    // held in the off hand, never swung: it sits with the foci
     const main = CASTER.has(t) ? ['apothecary', 'weapon'] : RANGED.has(t) ? ['bowyer', 'weapon'] : ['weaponsmith', 'weapon'];
     return hash(row.base) % 3 === 0 ? [main, ['market', 'weapon']] : [main];
   }

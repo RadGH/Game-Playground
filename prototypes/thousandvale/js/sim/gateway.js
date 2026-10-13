@@ -678,7 +678,7 @@ export function createGateway(opts) {
   }
 
   // ---- M3 services ----
-  const accounts = createAccounts({ store, hasher, verifyHuman, wallNow, log, filter: chatFilter, sendAll, kickChar, counters, trustIps: unlimitedIps });
+  const accounts = createAccounts({ store, hasher, verifyHuman, wallNow, log, filter: chatFilter, sendAll, kickChar, counters, trustIps: unlimitedIps, charLimit: CHAR_LIMIT });
   const friends = createFriends({ store, presence, gwByChar, log, wallNow, onList: (c, ids) => pushSocial(c, { friends: ids }) });
   const guilds = createGuilds({ store, presence, gwByChar, wallNow, filter: chatFilter, charge, log, counters, opts: guildOpts });
   const chat = createChat({ store, presence, gwByChar, parties, guilds, friends, wallNow, filter: chatFilter, log, counters, mute, opts: chatOpts });

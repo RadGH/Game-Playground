@@ -53,15 +53,40 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
   const trainerIds = new Set((content.trainers || []).map(t => t.id));      // the trainers of this system teach at the first word
   const reply = (o, t, x) => { if (o.conn) o.conn.sendJSON({ t, ...x }); };
   let engine = opts.engine || null, engineAsked = false;
-  /** Tempering and the extra-property roll need stream C's engine; it is fetched once, the first time a station is opened. */
+  /**
+   * Tempering and the extra-property roll need stream C's engine and the temper rules. Wrap-up (Y13, "The forge is still
+   * warming up" for ever): both used to be asked for ONCE, on the first order — a load that failed left `engineAsked` true
+   * and the forge refused everybody until a restart. Now both are asked for as soon as this system sees its first room
+   * (`ensureNodes`, i.e. at server start), a failed load is asked for again (at most every RETRY_MS), and `forgeWhy()`
+   * says which of the three things is actually the matter.
+   */
+  const RETRY_MS = 3000;
+  let engineErr = null, engineTriedAt = -Infinity, temperErr = null, temperAsked = false, temperTriedAt = -Infinity;
   function wantEngine(room) {
     if (engine || engineAsked || !room || !room.rules || !room.rules.makeItem) return;
-    engineAsked = true;
+    if (engineErr && now() - engineTriedAt < RETRY_MS) return;
+    engineAsked = true; engineTriedAt = now();
     const get = loadEngine || (() => import('../rules/index.js').then(m => m.rulesEngine()));
-    Promise.resolve().then(get).then(e => { engine = e || null; }).catch(err => { log('professions: no engine', err && err.message); });
+    Promise.resolve().then(get).then(e => { engine = e || null; engineErr = engine ? null : 'the item rules came back empty'; engineAsked = !!engine; })
+      .catch(err => { engineErr = (err && err.message) || 'the item rules did not load'; engineAsked = false; log('professions: no engine', engineErr); });
   }
-  let temperKit = null;
-  function wantTemper() { if (!temperKit) import('../rules/professions-temper.js').then(m => { temperKit = m; }).catch(err => log('professions: temper rules', err && err.message)); }
+  let temperKit = opts.temperKit || null;
+  function wantTemper() {
+    if (temperKit || temperAsked) return;
+    if (temperErr && now() - temperTriedAt < RETRY_MS) return;
+    temperAsked = true; temperTriedAt = now();
+    const get = opts.loadTemper || (() => import('../rules/professions-temper.js'));
+    Promise.resolve().then(get).then(m => { temperKit = m || null; temperErr = temperKit ? null : 'the tempering rules came back empty'; temperAsked = !!temperKit; })
+      .catch(err => { temperErr = (err && err.message) || 'the tempering rules did not load'; temperAsked = false; log('professions: temper rules', temperErr); });
+  }
+  /** Why the forge cannot take a tempering order right now, in plain words (null = it can). Asks again for whatever is missing. */
+  function forgeWhy(room) {
+    if (engine && temperKit) return null;
+    wantEngine(room); wantTemper();
+    if (!engine && !(room && room.rules && room.rules.makeItem)) return 'Tempering cannot be done in this place. Try a forge in one of the towns.';
+    if ((!engine && engineErr) || (!temperKit && temperErr)) return 'The forge is out of order: the server could not load its tempering rules. It keeps trying — please send a report if this lasts.';
+    return 'The forge is still warming up. Try again in a moment.';
+  }
 
   // ---- the saved record ----
   function stateOf(ch) {
@@ -86,7 +111,7 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
     return { nodes, list: PROFESSIONS.map(id => {
       const d = P.def(id);
       const tl = d.kind === 'gather' && id !== 'angling' ? P.bestTool(ch.bag, id) : null;
-      if (id === 'angling') { const a = anglingView(ch); return { id, name: d.name, kind: d.kind, known: true, level: a.level || 1, xp: a.xp || 0, next: a.next ?? null, rank: a.rank || P.rank(a.level || 1), max: a.max || 100, tool: null }; }
+      if (id === 'angling') { const a = anglingView(ch); return { id, name: d.name, kind: d.kind, known: a.learned !== false, level: a.level || 1, xp: a.xp || 0, next: a.next ?? null, rank: a.rank || P.rank(a.level || 1), max: a.max || 100, tool: null }; }
       const xp = (s.xp || {})[id] || 0, level = P.levelOf(xp);
       return { id, name: d.name, kind: d.kind, known: knows(ch, id), level, xp, next: P.next(level, xp), rank: P.rank(level), max: P.maxLevel, tool: tl ? { id: tl.id, name: tl.name, tier: tl.tier } : null };
     }) };
@@ -118,6 +143,7 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
   }
   /** Put a room's nodes and trainers in, the first time anyone could see them. */
   function ensureNodes(room) {
+    if (P) { wantEngine(room); wantTemper(); }            // Y13: the forge's rules are loaded at start, not on the first order
     if (!P || seen.has(room.id) || (room.kind !== 'wilds' && room.kind !== 'town')) return;
     seen.add(room.id);
     const pv = provOf(room);
@@ -141,7 +167,7 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
       if (room.kind === 'town' ? inTown !== ti : inTown >= 0) continue;
       if (!(pv.L.zones || []).some(q => q.key === tr.zone)) continue;
       room.spawn({ kind: 'npc', type: 'npc', name: tr.name, x: tr.x, z: tr.z, yaw: tr.yaw || 0, team: 1, state: STATE.friendly,
-        data: { key: 'npc:' + tr.id, titled: true, title: tr.title ? `${tr.title} — teaches ${(P.roleOf(tr.role) || { trains: [] }).trains.map(id => P.def(id).name.toLowerCase()).join(', ')}` : null,
+        data: { key: 'npc:' + tr.id, titled: true, title: tr.title || null,      // wrap-up (report #62): the plain title — no "— teaches mining"; the trade button in his dialog says what he teaches
           npc: { id: tr.id, role: tr.role, says: tr.greeting ? [tr.greeting] : [], quest: null, quests: [], teachOnTalk: true } } });
     }
     counters.profNodes = (counters.profNodes || 0) + n;
@@ -234,7 +260,7 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
     } else if (target.kind === 'monster' && target.dead) {
       skin = o.skins && o.skins.get(target.id);
       node = P.skinOf(target.type, target.level || 1);
-      if (!node) return gatherRefuse(o, 'unknown', 'There is nothing on that to skin.');
+      if (!node) return gatherRefuse(o, 'noHide', P.skinRefusal(target.type) || 'There is nothing on that to skin.');      // (report #26: say WHY)
       if (!skin || skin.ent !== target) return gatherRefuse(o, 'notYours', 'You can only skin a beast you helped kill.');
       if (Math.hypot(target.x - e.x, target.z - e.z) > (G.skinReach || 4) + 0.5) return gatherRefuse(o, 'far', 'Too far away.');
     } else return gatherRefuse(o, 'unknown', 'You cannot gather that.');
@@ -300,7 +326,18 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
   function onKill(room, dead, who) {
     if (!P || !dead || !who || !who.length) return;
     const sk = P.skinOf(dead.type, dead.level || 1);
-    if (!sk) return;
+    if (!sk) {
+      // report #26 ("why can't I skin barrow hounds"): a skinner is TOLD why a creature has no hide — once per kind of
+      // monster per session in the log, and again whenever they put the knife to one (useItem below). People are obvious.
+      const row = P.skinNone(dead.type), why = row && !row.person && row.why;
+      if (!why) return;
+      for (const o of who) {
+        if (!o || !o.char || !knows(o.char, 'skinning')) continue;
+        (o.noSkins ||= new Map()).set(dead.id, { ent: dead, at: now(), why });
+        if (!(o.noSkinTold ||= new Set()).has(dead.type)) { o.noSkinTold.add(dead.type); reply(o, 'chat', { ch: 'system', from: 0, name: 'Skinning', text: `${dead.name || 'That'}: ${why}` }); }
+      }
+      return;
+    }
     const t = P.tier(sk.tier);
     for (const o of who) {
       if (!o || !o.char || !knows(o.char, 'skinning')) continue;
@@ -371,7 +408,7 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
   /** Everything a tempering order needs, checked: `{ ok, item, cost, chk }` or `{ ok:false, why, text }`. */
   function temperOrder(o, m, st) {
     const ch = o.char;
-    if (!engine || !temperKit) { wantEngine(o.room); wantTemper(); return { ok: false, why: 'notReady', text: 'The forge is still warming up. Try again in a moment.' }; }
+    { const why = forgeWhy(o.room); if (why) return { ok: false, why: 'notReady', text: why }; }
     if (!P.temper.ops[m.id]) return { ok: false, why: 'recipe', text: 'No such work.' };
     if (!knows(ch, 'tempering')) return { ok: false, why: 'notLearned', text: 'You have not learned Tempering. A smith teaches it.' };
     if (!st || !st.kinds.includes('tempering')) return { ok: false, why: 'station', text: `You need ${P.N.stationNames.tempering}: ${P.N.stationHint.tempering}.` };
@@ -595,14 +632,20 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
     R({ ok: true, tool: toolIt, gold: price });
   }
   /** What an NPC's `used` reply gains: `{ prof: { trains, stations, known, price } }` (and a trainer placed by this system teaches on the first word). */
-  function npcExtra(o, obj) {
+  function npcExtra(o, obj, { taught: taughtElsewhere = null } = {}) {
     if (!P || !obj || !obj.data || !obj.data.npc) return {};
     const row = P.roleOf(obj.data.npc.role);
     if (!row) return {};
     const ch = o.char;
-    let taught = null;
+    // wrap-up (report #56): the angler is a trainer like the others. Angling used to be filtered out of `trains`, which left
+    // his list empty and the client with no trade button to show. It is taught by the province's own `use` (Y15, with the
+    // rod) — passed in as `taughtElsewhere` — and "known" for it is the angling record's `learned`, not the `start` flag.
+    let taught = taughtElsewhere && taughtElsewhere.length ? taughtElsewhere.filter(id => (row.trains || []).includes(id)) : null;
+    if (taught && !taught.length) taught = null;
+    if (taught) tell(o);                                   // the Professions list's Angling row turns to "known" at once
+    const has = id => (id === 'angling' ? anglingView(ch).learned !== false : knows(ch, id));
     if (obj.data.npc.teachOnTalk || trainerIds.has(obj.data.npc.id)) for (const id of row.trains || []) if (!knows(ch, id)) { teach(o, id); (taught ||= []).push(id); }
-    return { prof: { trains: (row.trains || []).filter(id => id !== 'angling'), stations: row.stations || [], known: (row.trains || []).filter(id => knows(ch, id)), toolPrice: P.N.toolPrice || 12, ...(taught ? { taught } : {}) } };
+    return { prof: { trains: (row.trains || []).slice(), stations: row.stations || [], known: (row.trains || []).filter(has), toolPrice: P.N.toolPrice || 12, ...(taught ? { taught } : {}) } };
   }
   /** A gathering tool used from the bag = start on the nearest node of its trade. Returns true when `item` was a tool. */
   function useItem(o, item, idx, R) {
@@ -613,7 +656,9 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
       let best = null, bd = (G.skinReach || 4) + 0.5;
       if (o.skins) for (const [id, s] of o.skins) { if (s.ent.removed) continue; const d = Math.hypot(s.ent.x - e.x, s.ent.z - e.z); if (d <= bd) { bd = d; best = id; } }
       R({ ok: true, id: item.id, gather: true });
-      if (best == null) gatherRefuse(o, 'far', 'Nothing to skin in reach. Stand by a beast you killed.'); else gatherStart(o, { id: best });
+      let none = null;      // (a fresh kill in reach that has no hide: say why, not "nothing in reach")
+      if (best == null && o.noSkins) for (const s of o.noSkins.values()) if (!s.ent.removed && Math.hypot(s.ent.x - e.x, s.ent.z - e.z) <= (G.skinReach || 4) + 0.5) none = s;
+      if (best == null) gatherRefuse(o, none ? 'noHide' : 'far', none ? none.why : 'Nothing to skin in reach. Stand by a beast you killed.'); else gatherStart(o, { id: best });
       return true;
     }
     R({ ok: true, id: item.id, gather: true });
@@ -663,12 +708,13 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
   /** 1 Hz housekeeping: forget corpses that are gone. */
   function sweep() {
     for (const o of online.values()) {
+      if (o.noSkins && o.noSkins.size) { const t = now(); for (const [id, s] of o.noSkins) if (s.ent.removed || t - s.at > (G.skinKeepMs || 60000)) o.noSkins.delete(id); }
       if (!o.skins || !o.skins.size) continue;
       const t = now();
       for (const [id, s] of o.skins) if (s.ent.removed || t - s.at > (G.skinKeepMs || 60000) || (s.ent.room && o.room !== s.ent.room)) { o.skins.delete(id); reply(o, 'skinnable', { id, on: false }); }
     }
   }
 
-  return { P, prof, gather, craft, tick, sweep, keepBody, stop, view, ensureNodes, npcExtra, useItem, onKill, onEvent, eventDrop, teach, stationNear, nodeNear, nodesIn, working, knows, levelOf, stateOf,
+  return { P, prof, gather, craft, tick, sweep, keepBody, stop, view, ensureNodes, npcExtra, forgeWhy, useItem, onKill, onEvent, eventDrop, teach, stationNear, nodeNear, nodesIn, working, knows, levelOf, stateOf,
     get engine() { return engine; }, setEngine(e) { engine = e; }, ready: () => !!P };
 }

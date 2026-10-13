@@ -16,7 +16,7 @@
 import { createPanel, h } from '../ui-panel.js';
 import { Meter } from '../../../../../meters/js/meter.js';
 import { renderMeter, METER_CSS } from '../../../../../meters/js/meter-ui.js';
-import { meterRecord, hitRowFromEvent, createFightClock, meterOurs, HIT_FLAGS } from './pt8-core.js';
+import { meterRecord, hitRowFromEvent, createFightClock, meterOurs, meterToggle, HIT_FLAGS } from './pt8-core.js';
 
 /** The experiment's meter, with the game's one rule on top: only OUR side has bars under "done" (and healing / absorbs). */
 class PartyMeter extends Meter {
@@ -115,6 +115,7 @@ export function createMeterWindow({ net, hud, actors, selfId, bar, settings }) {
   queueMicrotask(() => { if (settings?.get?.('meter')) setOn(true); });
 
   return { panel, wire, tick, setOn, feed, reset, meter, HIT_FLAGS,
-    toggle() { const on = !S.on; if (settings?.set) settings.set('meter', on); else setOn(on); return on; },
+    // #67: closed with the X it is still counting — /meter then brings the window back instead of switching the meter off
+    toggle() { const act = meterToggle({ on: S.on, open: panel.isOpen }); if (act === 'show') { panel.open(); return true; } const on = act === 'on'; if (settings?.set) settings.set('meter', on); else setOn(on); return on; },
     get state() { const rows = meter.fights.length ? meter.report(S.state.mode, S.state.scope) : []; return { on: S.on, open: panel.isOpen, server: S.srv, records: S.records, fights: meter.fights.length, label: meter.fight()?.label || '', mode: S.state.mode, rows: rows.map(r => ({ id: r.id, name: r.name, total: r.total, dps: r.dps, hits: r.hits })) }; } };
 }

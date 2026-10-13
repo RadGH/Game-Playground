@@ -9,6 +9,8 @@
 //   node tools/sim-economy.mjs --curve         THE LEVEL CURVE (owner feedback 8, W4): kills and minutes to gain each level 1-10 by
 //                                              killing alone and by questing, and how much of a questing hour's experience is hand-ins.
 //                                              `--curve --set=progression.xp.killEarly.mult=0` = the same before stream C raised kill experience
+//   node tools/sim-economy.mjs --income        the rows of prices.json income.lifetime the sim would write;  --write-income  writes them
+//                                              (Y31: ONE income table. Run it after any change that moves what a kill, a quest or a sold drop pays.)
 //   node tools/sim-economy.mjs --set=prices.kill.perLevel=0.5 --set=fishing.value.mult=0.6     WHAT-IF: try a knob without editing data
 //
 // NOTHING HERE IS A COPY OF A RULE. Every number comes out of the module the game runs:
@@ -19,7 +21,7 @@
 //   a dungeon                   js/rules/dungeon-tiers.js planDungeon
 //   crates                      js/rules/crates.js openCrate
 // What IS assumed is how a person spends an hour — and it is all in ASSUME, in one place, in plain words.
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { loadRulesData } from '../js/rules/data.js';
@@ -30,7 +32,7 @@ import { flatTerrain } from '../js/rules/terrain-flat.js';
 import { spawnMonster } from '../js/rules/monster-ai.js';
 import { planDungeon } from '../js/rules/dungeon-tiers.js';
 import { openCrate, makeCrate } from '../js/rules/crates.js';
-import { killGold as ruleKillGold, itemPrice as ruleItemPrice, sellPrice as ruleSellPrice } from '../js/rules/economy.js';
+import { killGold as ruleKillGold, itemPrice as ruleItemPrice, sellPrice as ruleSellPrice, lifetimeGold as ruleLifetimeGold, retrainPrice as ruleRetrainPrice } from '../js/rules/economy.js';
 import { createShops } from '../js/sim/shops.js';
 import { createMountBook } from '../js/sim/mounts.js';
 import { xpForLevel } from '../js/rules/farhold.js';
@@ -51,6 +53,16 @@ export const ASSUME = Object.freeze({
     // how well a person holds the marker in the band: the share of the tug they manage, a bell curve
     hold: { base: 0.42, perBand: 1.0, perSkill: 0.0025, sd: 0.13 } },
   sellEverything: true,                           // gold per hour counts drops, crates and fish SOLD to a merchant
+  // REAL PLAY (owner feedback 10, Y31). The hours above are IDEAL hours: nobody reads a quest, looks for the giver, walks
+  // back to town, sorts a bag, dies or stops to look at the view. The owner's own character had 3,445 gold in total at
+  // level 9 after a few hours; the ideal hours above reach level 9 in under an hour and a half. So a REAL hour is:
+  //   pace         the share of an ideal questing hour a person actually gets through
+  //   gather       the share of real play spent gathering or fishing instead (gold, no combat experience) ...
+  //   gatherValue  ... which earns this share of what questing would have (the professions' rule is 70-100%)
+  // `pace` sets how long a level takes (it cannot change the gold a level brings: gold and experience slow down together);
+  // `gather` sets how much gold a level brings. Both are fitted: gather to the owner's 3,445 at level 9 (prices.json
+  // income.lifetime, the ONE income table), pace to "a few hours" = about three and a half.
+  real: { pace: 0.38, gather: 0.16, gatherValue: 0.85 },
 });
 
 const rarityUp = { common: 'normal', uncommon: 'magic', rare: 'rare', epic: 'legendary' };
@@ -73,6 +85,9 @@ function reader(before) {
 export async function simulate({ before = false, levels = [1, 5, 10, 20], hours = 240, seed = 7, set = null } = {}) {
   const R = reader(before);
   const data = await loadRulesData(async u => R.url(u));
+  // `before` is the PRICES as committed. What a level of play brings is a measurement, not a price: the before table reads the same
+  // income table as the after one (the working tree's), so the two differ only by what things cost.
+  if (before && data.prices) { try { const now = JSON.parse(readFileSync(new URL('data/rules/prices.json', ROOT), 'utf8')).income; if (now) data.prices.income = now; } catch { /* no table yet */ } }
   // WHAT-IF: `set` = { 'prices.kill.perLevel': 0.5, 'fishing.value.mult': 0.6, 'angling.crates.chance': 0.03, 'economy.quest.goldBase': 4, 'shops.…': … }
   // changes a number in memory only (the first word names the file), so a knob can be tried before anyone edits data.
   const econData = R.opt('data/provinces/economy.json') || R.opt('data/rules/economy.json') || {};
@@ -129,10 +144,12 @@ export async function simulate({ before = false, levels = [1, 5, 10, 20], hours 
   const questFiles = ['start', 'test', 'setpieces', 'angling', 'province', ...Object.keys(sheet.zones).filter(z => z !== 'test')];
   const quests = questFiles.flatMap(f => { const d = R.opt(`data/quests/${f}.json`); return (d && d.quests) || []; }).filter(q => q.reward && !q.classes);
   // the province's quests stop at level 9: above that, the shape of its top band (levels 6+) at the higher level's unit
-  const TOP = Math.max(...quests.map(q => q.level || 1));
-  const questsAt = L => { if (L > TOP) return quests.filter(x => (x.level || 1) >= 6); let q = quests.filter(x => Math.abs((x.level || 1) - L) <= 1); for (let d = 2; q.length < 12 && d < 30; d++) q = quests.filter(x => Math.abs((x.level || 1) - L) <= d); return q; };
+  // Y31: and FROM level 6 too. The province has 12 quests of level 8-10 and most are its dungeon and story steps, so the
+  // "median purse" of a level-9 hour was a dungeon's (the level-9 hour read 9,789 gold, between 2,450 at level 5 and 8,349 at level 15).
+  const TOP_BAND = 6;
+  const questsAt = L => { if (L >= TOP_BAND) return quests.filter(x => (x.level || 1) >= TOP_BAND); let q = quests.filter(x => Math.abs((x.level || 1) - L) <= 1); for (let d = 2; q.length < 12 && d < 30; d++) q = quests.filter(x => Math.abs((x.level || 1) - L) <= d); return q; };
 
-  const out = { before, assume: A, economy: E, levels: {}, fish: null, shopRows: [] };
+  const out = { before, assume: A, economy: E, targets: econData.targets || {}, levels: {}, fish: null, shopRows: [] };
   const mountsTable = (() => { try { return createMountBook(R.opt('data/provinces/mounts.json')).forSale({ mounts: [] }).map(r => ({ id: r.mount.id || r.id, price: r.price, level: r.level })); } catch { return null; } })();
 
   // ---- THE LEVEL CURVE (W4): experience, measured the same way as gold — the game's own tables, ASSUME's hour
@@ -149,7 +166,8 @@ export async function simulate({ before = false, levels = [1, 5, 10, 20], hours 
   }
   const questXpMult = (engine.xpMult ? engine.xpMult('quest') : 1) * (Number.isFinite((econData.quest || {}).xpMult) ? econData.quest.xpMult : 1);
   out.curve = {};
-  for (let L = 1; L <= 10; L++) {
+  const CURVE_TOP = Math.max(10, ...levels);
+  for (let L = 1; L <= CURVE_TOP; L++) {
     const span = Math.max(1, xpForLevel(L + 1, engine.levelCap) - xpForLevel(L, engine.levelCap));
     const kx = killXp(L);
     const shares = questsAt(L).map(q => q.reward.xp || 0);
@@ -162,21 +180,51 @@ export async function simulate({ before = false, levels = [1, 5, 10, 20], hours 
       minutesQuesting: +(span / hourQuest * 60).toFixed(1), handInShare: +(A.quest.perHour * questXp / hourQuest).toFixed(2), questingOverKilling: +(hourQuest / hourKill).toFixed(2) };
   }
 
-  for (const L of levels) {
-    const K = killAvg(L);
-    const perKill = K.gold + K.loot;
-    const act = {};
-    // 1. killing
-    act.killing = { gold: Math.round(A.grind.killsPerHour * perKill), parts: { coin: Math.round(A.grind.killsPerHour * K.gold), soldDrops: Math.round(A.grind.killsPerHour * K.loot) }, note: `${A.grind.killsPerHour} kills, ${K.gold.toFixed(1)} gold + ${K.loot.toFixed(1)} of sold drops each` };
-    // 2. questing
+  // ---- an IDEAL hour of questing at a level (cached: the real-play table below needs it at every level, not only the printed ones)
+  const killCache = new Map(), crateCache = new Map(), questCache = new Map();
+  const killsAt = L => { if (!killCache.has(L)) killCache.set(L, killAvg(L)); return killCache.get(L); };
+  const crateSellAt = L => { if (!crateCache.has(L)) crateCache.set(L, crateValue(L)); return crateCache.get(L); };
+  function questingHour(L) {
+    if (questCache.has(L)) return questCache.get(L);
+    const K = killsAt(L), perKill = K.gold + K.loot;
     // an hour of questing is three ordinary quests and one notable one (a dungeon, a rare, a story step): the MEDIAN purse
     // three times and the 90th-percentile purse once — the mean would let one world-boss quest speak for the hour
     const qs = questsAt(L), mults = qs.map(q => q.reward.gold || 0);
     const unitGold = (3 * questGold(pct(mults, 0.5), L) + questGold(pct(mults, 0.9), L)) / 4;
     const crates = mean(qs.map(q => (q.reward.crates || []).length + (q.reward.item ? 1 : 0)));
-    const crateSell = crateValue(L);
-    act.questing = { gold: Math.round(A.quest.perHour * (unitGold + crates * crateSell) + A.quest.killsPerHour * perKill),
+    const crateSell = crateSellAt(L);
+    const sold = A.quest.perHour * crates * crateSell + A.quest.killsPerHour * K.loot;
+    const r = { gold: Math.round(A.quest.perHour * (unitGold + crates * crateSell) + A.quest.killsPerHour * perKill), sold: Math.round(sold),
       parts: { purses: Math.round(A.quest.perHour * unitGold), soldCrates: Math.round(A.quest.perHour * crates * crateSell), kills: Math.round(A.quest.killsPerHour * perKill) }, note: `${A.quest.perHour} quests (${unitGold.toFixed(0)} gold each, ${crates.toFixed(2)} crates), ${A.quest.killsPerHour} kills` };
+    questCache.set(L, r); return r;
+  }
+
+  // ---- REAL PLAY (Y31): what a level takes and brings when a person plays it, against the ONE income table (prices.json income.lifetime)
+  const RL = A.real, xpPace = RL.pace * (1 - RL.gather), goldPace = RL.pace * (1 - RL.gather + RL.gather * RL.gatherValue);
+  const lifetime = L => (PR ? ruleLifetimeGold(PR, L) : 0);
+  out.real = { assume: RL, levels: {}, hoursTo: {} };
+  { let simTotal = 0, hours = 0;
+    for (let L = 1; L <= CURVE_TOP; L++) {
+      const q = questingHour(L), minutes = out.curve[L].minutesQuesting / xpPace, perHour = goldPace * q.gold;
+      const tableGain = lifetime(L + 1) - lifetime(L);
+      out.real.levels[L] = { minutesToLevel: +minutes.toFixed(1), hoursSoFar: +hours.toFixed(2),
+        sim: { goldPerHour: Math.round(perHour), goldThisLevel: Math.round(perHour * minutes / 60), lifetime: Math.round(simTotal), soldShare: +(q.sold / Math.max(1, q.gold)).toFixed(3) },
+        table: { lifetime: Math.round(lifetime(L)), goldThisLevel: Math.round(tableGain), goldPerHour: Math.round(tableGain / (minutes / 60)) } };
+      out.real.hoursTo[L] = +hours.toFixed(2);
+      simTotal += perHour * minutes / 60; hours += minutes / 60;
+    }
+    out.real.simLifetimeAtTop = Math.round(simTotal);
+  }
+
+  for (const L of levels) {
+    const K = killsAt(L);
+    const perKill = K.gold + K.loot;
+    const act = {};
+    // 1. killing
+    act.killing = { gold: Math.round(A.grind.killsPerHour * perKill), parts: { coin: Math.round(A.grind.killsPerHour * K.gold), soldDrops: Math.round(A.grind.killsPerHour * K.loot) }, note: `${A.grind.killsPerHour} kills, ${K.gold.toFixed(1)} gold + ${K.loot.toFixed(1)} of sold drops each` };
+    // 2. questing
+    act.questing = questingHour(L);
+    const crateSell = crateSellAt(L);
     // 3. events
     const zoneEv = events.zone, zr = mean(zoneEv.map(ev => eventGold((ev.reward || {}).gold || 0, L, A.events.minutes, false)));
     const rareSell = gearPrice(L, 'rare', 30).sell;
@@ -206,11 +254,19 @@ export async function simulate({ before = false, levels = [1, 5, 10, 20], hours 
     const good = (kind, id) => { const g = ((SHOPS.kinds[kind] || {}).goods || []).find(x => x.id === id); return g ? g.price : null; };
     const retrain = engine.balance.retrain || {};
     const tv = (engine.progression && engine.progression.retrain) || retrain;
-    const rt = k => (tv[k] ? Math.round((tv[k].one || 0) + (tv[k].perLevel || 0) * L) : null);
+    // the Unbinder's own price call (stream C, Y14: a share of income.lifetime); the old per-level table only where a build has no such knob
+    const rt = (k, scope = 'one') => (PR && ruleRetrainPrice(PR, k, scope, L)) ?? (tv[k] ? Math.round((tv[k].one || 0) + (tv[k].perLevel || 0) * L) : null);
     out.levels[L] = { activities: act, perKill: { gold: +K.gold.toFixed(2), soldDrops: +K.loot.toFixed(2), special: +K.special.toFixed(3) }, unit: questGold(1, L),
       prices: { gear, healingPotion: good('general', 'healing_potion'), greaterHealing: good('apothecary', 'greater_healing'), manaPotion: good('general', 'mana_potion'), rations: good('general', 'travel_rations'), stew: good('inn', 'hearty_stew') ?? good('provisioner', 'hearty_stew'),
         mount: (() => { const list = mountsTable || []; const m = list.filter(x => (x.level || 1) <= L && x.price > 0).sort((a, b) => b.price - a.price)[0]; return m ? { id: m.id, price: m.price } : null; })(),
-        unbindTalent: rt('talent'), unbindPerk: rt('perk'), fare2km: travelFare(2000), fare8km: travelFare(8000), rod: good('angler', 'angling_rod'), betterRod: good('angler', 'ash_rod'), bait: good('angler', 'bait_worms') } };
+        unbindTalent: rt('talent'), unbindPerk: rt('perk'), unbindAll: rt('talent', 'all'), fare2km: travelFare(2000), fare8km: travelFare(8000), rod: good('angler', 'angling_rod'), betterRod: good('angler', 'ash_rod'), bait: good('angler', 'bait_worms') } };
+    // Y31: the same ladder in MINUTES OF REAL PLAY. The income is the table's (what a level brings) over the time the level takes.
+    const rr = out.real.levels[L], hourly = rr.table.goldPerHour || rr.sim.goldPerHour, mins = g => (g == null ? null : +(g / Math.max(1, hourly) * 60).toFixed(1));
+    const P = out.levels[L].prices;
+    out.levels[L].real = { goldPerHour: hourly, simGoldPerHour: rr.sim.goldPerHour, minutesToLevel: rr.minutesToLevel, hoursSoFar: rr.hoursSoFar, lifetime: rr.table.lifetime, simLifetime: rr.sim.lifetime, soldShare: rr.sim.soldShare,
+      activities: Object.fromEntries(Object.entries(act).map(([k, v]) => [k, Math.round(v.gold * RL.pace)])),
+      minutes: { plain: mins(gear.normal.buy), uncommon: mins(gear.magic.buy), rare: mins(gear.rare.buy), legendary: mins(gear.legendary.buy), healingPotion: mins(P.healingPotion), greaterHealing: mins(P.greaterHealing), mount: mins(P.mount && P.mount.price), fare2km: mins(P.fare2km), fare8km: mins(P.fare8km), rod: mins(P.rod), betterRod: mins(P.betterRod) },
+      sellBack: { uncommon: +(gear.magic.sell / Math.max(1, gear.magic.buy)).toFixed(3), rare: +(gear.rare.sell / Math.max(1, gear.rare.buy)).toFixed(3) } };
   }
 
   // ---- every fixed-price shop row, for the "nothing unaffordable forever, nothing trivially cheap" rule
@@ -310,7 +366,46 @@ export function print(r) {
   lines.push('one kill pays     ' + Ls.map(L => pad(r.levels[L].perKill.gold + '+' + r.levels[L].perKill.soldDrops, 11)).join('') + '      (coin + sold drops)');
   if (r.fish) { const f = r.fish; lines.push(''); lines.push(`FISH  ${f.n} species: ` + Object.entries(f.byRarity).map(([k, v]) => `${k} ${v.min}-${v.max} g (${v.n})`).join(', ') + `; legends ${f.legend.min}-${f.legend.max} g; sunken crate ${(100 * (f.crateChance || 0)).toFixed(1)}% of casts`);
     lines.push('fishing an hour:  ' + Ls.map(L => { const p = r.levels[L].activities.fishing.perHour || {}; return `L${L}: ${p.fish} fish, ${p.crates} crates, ${p.legends} legends, ${p.pools} pools`; }).join(' | ')); }
+  return lines.join('\n') + '\n\n' + printReal(r);
+}
+
+/** Y31: the same economy in REAL play — what a level takes and brings, and how long a person plays to afford each thing. */
+export function printReal(r) {
+  const Ls = Object.keys(r.levels).map(Number), A = r.real.assume, lines = [], R = L => r.levels[L].real;
+  const row = (name, f) => lines.push(name.padEnd(30) + Ls.map(L => pad(f(L) ?? '-', 10)).join(''));
+  const hm = m => (m == null ? null : m >= 180 ? (m / 60).toFixed(1) + ' h' : m >= 10 ? Math.round(m) + ' min' : m.toFixed(1) + ' min');
+  lines.push(`REAL PLAY — ${r.before ? 'BEFORE (data as committed in git)' : 'working tree'} — a real hour gets through ${Math.round(A.pace * 100)}% of an ideal questing hour, ${Math.round(A.gather * 100)}% of play is gathering or fishing (ASSUME.real)`);
+  lines.push(`the income is data/rules/prices.json income.lifetime; the sim's own count of gold in total at level 9 is ${r.real.levels[9] ? r.real.levels[9].sim.lifetime : '-'} (the owner's character: 3,445), reached after ${r.real.hoursTo[9] ?? '-'} hours`);
+  lines.push(''.padEnd(30) + Ls.map(L => pad('level ' + L, 10)).join(''));
+  row('minutes to gain the level', L => Math.round(R(L).minutesToLevel)); row('hours played to get here', L => R(L).hoursSoFar.toFixed(1));
+  row('gold earned in total', L => R(L).lifetime); row('  the sim\'s own count', L => R(L).simLifetime);
+  row('GOLD PER REAL HOUR', L => R(L).goldPerHour);
+  for (const a of ['questing', 'killing', 'events', 'dungeon', 'fishing']) row('  all ' + a, L => R(L).activities[a]);
+  for (const a of [...new Set((r.professions || []).filter(x => !x.error && !x.addOn && !/\+/.test(x.activity)).map(x => x.activity))]) row('  all ' + a, L => { const x = r.professions.find(y => y.activity === a && y.level === L); return x ? Math.round(x.goldPerHour * A.pace) : null; });
+  row('  sold loot, share of income', L => Math.round(R(L).soldShare * 100) + '%');
+  lines.push('PRICE' + ''.padEnd(25) + Ls.map(L => pad('level ' + L, 10)).join(''));
+  const P = L => r.levels[L].prices;
+  row('uncommon piece', L => P(L).gear.magic.buy); row('rare piece', L => P(L).gear.rare.buy); row('legendary piece (worth)', L => P(L).gear.legendary.buy);
+  row('  an uncommon sells for', L => `${P(L).gear.magic.sell} (${(R(L).sellBack.uncommon * 100).toFixed(1)}%)`); row('  a rare sells for', L => `${P(L).gear.rare.sell} (${(R(L).sellBack.rare * 100).toFixed(1)}%)`);
+  row('healing potion', L => P(L).healingPotion); row('best mount you may ride', L => P(L).mount && P(L).mount.price); row('waystone, 2 km', L => P(L).fare2km);
+  row('Unbinder, all talents back', L => P(L).unbindAll);
+  lines.push('PLAY TO AFFORD IT' + ''.padEnd(13) + Ls.map(L => pad('level ' + L, 10)).join(''));
+  for (const [name, k] of [['uncommon piece', 'uncommon'], ['rare piece', 'rare'], ['legendary piece', 'legendary'], ['healing potion', 'healingPotion'], ['greater healing potion', 'greaterHealing'], ['best mount you may ride', 'mount'], ['waystone, 2 km', 'fare2km'], ['waystone, 8 km', 'fare8km'], ['ash rod', 'betterRod']]) row(name, L => hm(R(L).minutes[k]));
   return lines.join('\n');
+}
+
+/**
+ * Y31: the rows of prices.json `income.lifetime` — [level, gold earned in total on reaching it] for every level the sim
+ * walked, from its own real-play count, scaled so the measured point is exact (`point` = economy.json targets.ownerPoint).
+ * `scale` says how far the sim's own count was from the point: outside the tolerance the model no longer fits and nothing is written.
+ */
+export function incomeRows(r, point = { level: 9, gold: 3445, tolerance: 0.15 }) {
+  const at = r.real.levels[point.level];
+  if (!at || !(at.sim.lifetime > 0)) throw new Error('the sim did not walk to level ' + point.level);
+  const scale = point.gold / at.sim.lifetime, rows = [];
+  for (const [L, v] of Object.entries(r.real.levels)) rows.push([+L, +L === point.level ? point.gold : +L === 1 ? 0 : Math.round(v.sim.lifetime * scale / 5) * 5]);
+  rows.push([rows.length + 1, Math.round((r.real.simLifetimeAtTop) * scale / 5) * 5]);
+  return { rows, scale: +scale.toFixed(4), fits: Math.abs(scale - 1) <= (point.tolerance ?? 0.15) };
 }
 
 /** The level curve as a table (W4). */
@@ -349,7 +444,18 @@ export function printExtra(rows) {
 if (import.meta.url === `file://${process.argv[1]}`) {
   const arg = k => { const a = process.argv.find(x => x.startsWith('--' + k + '=')); return a ? a.split('=')[1] : null; };
   const set = Object.fromEntries(process.argv.filter(x => x.startsWith('--set=')).map(x => { const [k, v] = x.slice(6).split('='); return [k, JSON.parse(v)]; }));
-  const r = await simulate({ set, before: process.argv.includes('--before'), levels: arg('levels') ? arg('levels').split(',').map(Number) : undefined, hours: arg('hours') ? +arg('hours') : undefined });
+  const writeIncome = process.argv.includes('--write-income'), showIncome = writeIncome || process.argv.includes('--income');
+  const r = await simulate({ set, before: process.argv.includes('--before'), levels: arg('levels') ? arg('levels').split(',').map(Number) : showIncome ? [1, 5, 9, 15, 20, 30] : undefined, hours: arg('hours') ? +arg('hours') : showIncome ? 20 : undefined });
+  if (showIncome) {
+    const point = (r.targets || {}).ownerPoint || undefined, inc = incomeRows(r, point), text = '[' + inc.rows.map(x => `[${x[0]}, ${x[1]}]`).join(', ') + ']';
+    console.log(`income.lifetime from the sim (its own count was x${(1 / inc.scale).toFixed(3)} of the measured point${inc.fits ? '' : ' — OUTSIDE the tolerance, not written'}):\n` + text);
+    if (writeIncome && inc.fits) {
+      const f = new URL('data/rules/prices.json', ROOT), src = readFileSync(f, 'utf8'), next = src.replace(/("lifetime":\s*)\[\[[^"]*\]\]/, (m, a) => a + text);
+      if (next === src && !src.includes(text)) { console.error('could not find income.lifetime in prices.json'); process.exit(1); }
+      JSON.parse(next); writeFileSync(f, next); console.log('written to data/rules/prices.json');
+    }
+    process.exit(inc.fits ? 0 : 1);
+  }
   r.professions = await extraRows(r);
   console.log(process.argv.includes('--json') ? JSON.stringify(r, null, 1) : process.argv.includes('--curve') ? printCurve(r) : print(r) + printExtra(r.professions));
   process.exit(0);

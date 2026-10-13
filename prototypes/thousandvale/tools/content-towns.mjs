@@ -79,7 +79,7 @@ export function settlements() {
     const F = zoneFacts(wid);
     const names = Object.fromEntries((readJ(`data/vignettes/placements/${wid}.json`).settlements || []).map(s => [s.bakeId, s.name]));
     const walls = Object.fromEntries(F.placements.filter(p => p.kind === 'town_wall').map(p => [p.data.town, p.data]));
-    const squares = Object.fromEntries(F.placements.filter(p => p.kind === 'town_square').map(p => [p.data.town, { x: p.x, z: p.z, r: p.data.r || 4 }]));
+    const squares = Object.fromEntries(F.placements.filter(p => p.kind === 'town_square').map(p => [p.data.town, { x: p.x, z: p.z, r: p.data.r || 4, stalls: p.data.stalls || [] }]));
     for (const s of F.placements.filter(p => p.kind === 'settlement')) {
       const w = walls[s.id];
       out.push({ wid, eid, F, id: s.id, name: names[s.id] || s.data.name, kind: s.data.kind, x: s.x, z: s.z, r: s.data.radius, hub: !!s.data.hub,
@@ -126,6 +126,81 @@ export function guardPosts(S, names) {
     }
   }
   return { posts, gates, problems };
+}
+
+/**
+ * TRAINING DUMMIES (report #29, wrap-up 2026-10-13): "training dummies in some towns, including the first town".
+ * Every walled town and city gets a short row of them (DUMMIES.n) in the open ground nearest its square. A dummy never
+ * stands on a street, in a building or its yard, in the square itself, against the wall, on a market stall, a guard's
+ * post, a waystone or where one of the town's people stands — each of those is tested for every dummy of the row, and
+ * the nav grid is asked for standing room round it (the same grid the walkers use), so nothing can be planted in a
+ * well or a doorway. The row faces the square. `others` = every other thing with a place in the zone (zone metres).
+ */
+export const DUMMIES = Object.freeze({ n: { city: 3, town: 2 }, gap: 2.6, clear: 1.5, street: 1.6, building: 1.4, square: 3.5, wall: 5, thing: 3, search: 46, lattice: 1 });
+export function dummyPosts(S, others = {}) {
+  const dummies = [], problems = [];
+  for (const s of S) {
+    const n = DUMMIES.n[s.kind];
+    if (!n) continue;
+    const F = s.F, P0 = F.placements;
+    const streets = P0.filter(p => p.kind === 'street' && p.data && p.data.town === s.id && Array.isArray(p.data.pts)).map(p => ({ pts: p.data.pts, w: p.data.width || 4 }));
+    for (const g of s.gates) if (g.main && Array.isArray(g.main.pts)) streets.push({ pts: g.main.pts, w: g.main.width || 5 });
+    const buildings = P0.filter(p => (p.kind === 'building' || p.kind === 'set_building') && p.data && Math.hypot(p.x - s.x, p.z - s.z) < (s.r || 90) + 30).map(p => ({ x: p.x, z: p.z, r: Math.hypot(p.data.w || 6, p.data.d || 6) / 2 }));
+    const things = [...(others[s.wid] || []), ...(s.square.stalls || []).map(([x, z]) => ({ x, z, r: 1.5 }))].filter(t => Math.hypot(t.x - s.x, t.z - s.z) < (s.r || 90) + 30);
+    const wallR = s.wall && s.wall.radius ? s.wall.radius : (s.r || 60);
+    const ok = (x, z) => {
+      if (!F.room(x, z, DUMMIES.clear, { road: false })) return false;
+      if (Math.hypot(x - s.x, z - s.z) > wallR - DUMMIES.wall) return false;
+      if (Math.hypot(x - s.square.x, z - s.square.z) < s.square.r + DUMMIES.square) return false;
+      for (const st of streets) for (let i = 1; i < st.pts.length; i++) if (segDist(x, z, st.pts[i - 1], st.pts[i]) < st.w / 2 + DUMMIES.street) return false;
+      for (const b of buildings) if (Math.hypot(x - b.x, z - b.z) < b.r + DUMMIES.building) return false;
+      for (const t of things) if (Math.hypot(x - t.x, z - t.z) < (t.r || 1) + DUMMIES.thing) return false;
+      return true;
+    };
+    // the whole row must fit: its middle at a lattice point, the row square-on to the line from the square
+    const rowAt = (cx, cz) => {
+      const dx = s.square.x - cx, dz = s.square.z - cz, l = Math.hypot(dx, dz) || 1, px = -dz / l, pz = dx / l, row = [];
+      for (let k = 0; k < n; k++) { const o = (k - (n - 1) / 2) * DUMMIES.gap, x = r1(cx + px * o), z = r1(cz + pz * o); if (!ok(x, z)) return null; row.push({ x, z, yaw: yawTo(x, z, s.square.x, s.square.z) }); }
+      return row;
+    };
+    let best = null;
+    // the first town already had two stand-ins (js/sim/province.js ensureDummies: the first two walkable spots on a
+    // spiral 16-22 m round the town's middle). They stay where players found them when they pass every test above.
+    if (s.name === others.startTown) {
+      const row = [];
+      for (let k = 0; k < 24 && row.length < 2; k++) { const a = k * 0.9 + 0.4, dd = 16 + (k % 3) * 3, x = s.x + Math.cos(a) * dd, z = s.z + Math.sin(a) * dd; if (F.stand(x, z) && !row.some(q => Math.hypot(q.x - x, q.z - z) < 4)) row.push({ x: r1(x), z: r1(z), yaw: +(a + Math.PI).toFixed(3) }); }
+      if (row.length === 2 && row.every(q => ok(q.x, q.z))) best = { d: r1(Math.hypot(row[0].x - s.square.x, row[0].z - s.square.z)), row, kept: true };
+      else (others.note || (() => {}))(`${s.id}: the two stand-in dummies were NOT kept (${row.map(q => `${q.x},${q.z} ${ok(q.x, q.z) ? 'fine' : 'blocked'}`).join('; ')})`);
+    }
+    if (!best) for (let dz = -DUMMIES.search; dz <= DUMMIES.search; dz += DUMMIES.lattice) for (let dx = -DUMMIES.search; dx <= DUMMIES.search; dx += DUMMIES.lattice) {
+      const cx = Math.round(s.square.x) + dx, cz = Math.round(s.square.z) + dz, d = Math.hypot(cx - s.square.x, cz - s.square.z);
+      if (d > DUMMIES.search || (best && d >= best.d)) continue;
+      const row = rowAt(cx, cz);
+      if (row) best = { d, row };
+    }
+    if (!best) { problems.push(`${s.id}: no open ground for training dummies within ${DUMMIES.search} m of the square`); continue; }
+    best.row.forEach((q, k) => dummies.push({ id: `dummy_${s.id}_${k}`, name: 'Training Dummy', town: s.name, settlement: s.id, zone: s.wid, tier: s.kind, x: q.x, z: q.z, yaw: q.yaw, fromSquare: r1(best.d), ...(best.kept ? { kept: true } : {}) }));
+  }
+  return { dummies, problems };
+}
+
+/** Everything else that has a place in a zone and must not have a dummy planted on it (zone metres): guards, carts, quest and office NPCs, waystones, the people of the town. */
+export function standingThings(S, g, c) {
+  const out = {};
+  const add = (wid, x, z, r = 1) => { if (Number.isFinite(x) && Number.isFinite(z)) (out[wid] ||= []).push({ x, z, r }); };
+  for (const p of g.posts) add(p.zone, p.x, p.z, 1);
+  for (const st of c.stops) { add(st.zone, st.carter.x, st.carter.z, 1); add(st.zone, st.cart.x, st.cart.z, 2.2); }
+  for (const wid of new Set(S.map(s => s.wid))) {
+    for (const f of [`${wid}.json`, `${wid}.quest.json`, `${wid}.hunt.json`]) {
+      if (!existsSync(P(`data/vignettes/placements/${f}`))) continue;
+      for (const p of readJ(`data/vignettes/placements/${f}`).placements || []) if (p.type !== 'dummy' && p.type !== 'camp' && p.type !== 'guard' && p.type !== 'cart') { add(wid, p.x, p.z, p.radius || 1); for (const q of p.path || []) add(wid, q[0], q[1], 0.5); }
+    }
+  }
+  const off = existsSync(P('data/provinces/offices.json')) ? readJ('data/provinces/offices.json') : null;
+  for (const t of Object.values((off && off.towns) || {})) for (const o of t.offices || []) { if (o.door) add(t.zone, o.door.x, o.door.z, 1.5); }
+  // the waystone the server itself puts 6 m off a town's middle when the placer set none there
+  for (const s of S) add(s.wid, s.x + 6, s.z + 6, 1);
+  return out;
 }
 
 export function cartStops(S, names, routes) {
@@ -278,7 +353,12 @@ function build() {
   const S = settlements();
   const g = guardPosts(S, names), c = cartStops(S, names, routes);
   const t = cartTable(c.stops, routes, m => cartFare(econ, m));
-  return { S, g, c, t };
+  const sheet = readJ(`data/provinces/${PROV}.json`);
+  const things = standingThings(S, g, c);
+  Object.defineProperty(things, 'startTown', { value: sheet.zones[sheet.grid.start].town, enumerable: false });
+  Object.defineProperty(things, 'note', { value: t => console.log('NOTE ' + t), enumerable: false });
+  const d = dummyPosts(S, things);
+  return { S, g, c, t, d };
 }
 
 /** Write `gen` over the generated keys of a file, keeping every hand-written key. */
@@ -292,9 +372,9 @@ function put(file, gen) {
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const { S, g, c, t } = build();
+  const { S, g, c, t, d } = build();
   const changed = [
-    put('data/provinces/guards.json', { made: 'tools/content-towns.mjs — posts, gates and problems are generated; edit rules / ranks / hold by hand', gates: g.gates, posts: g.posts, problems: g.problems }),
+    put('data/provinces/guards.json', { made: 'tools/content-towns.mjs — posts, gates and problems are generated; edit rules / ranks / hold by hand', gates: g.gates, posts: g.posts, dummies: d.dummies, problems: [...g.problems, ...d.problems] }),
     put('data/provinces/carts.json', { made: 'tools/content-towns.mjs — stops, links, fares and problems are generated; edit rules / roaming by hand', stops: c.stops, links: t.links, fares: t.fares, problems: c.problems }),
   ];
   // W5: the carters join their zone's quest file (stream A gives a quest NPC a body, a greeting and its quests)
@@ -317,6 +397,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   for (const p of g.posts) { const s = S.find(x => x.name === p.town); (byKind[s.kind] ||= { towns: new Set(), n: 0 }).towns.add(p.town); byKind[s.kind].n++; }
   console.log(`settlements ${S.length}; guard posts ${g.posts.length} (${Object.entries(byKind).map(([k, v]) => `${k} ${v.n} in ${v.towns.size}`).join(', ')}); gates ${g.gates.length}`);
   console.log(`cart stops ${c.stops.length}; links ${t.links.length}; longest ride ${Math.max(...Object.values(t.fares).flat().map(f => f.metres))} m = ${Math.max(...Object.values(t.fares).flat().map(f => f.gold))} gold`);
-  for (const p of [...g.problems, ...c.problems]) console.log('PROBLEM ' + p);
+  console.log(`training dummies ${d.dummies.length} in ${new Set(d.dummies.map(x => x.town)).size} towns (${d.dummies.filter((x, i, a) => a.findIndex(y => y.town === x.town) === i).map(x => `${x.town} ${x.fromSquare} m`).join(', ')})`);
+  for (const p of [...g.problems, ...d.problems, ...c.problems]) console.log('PROBLEM ' + p);
   if (CHECK && changed.some(Boolean)) { console.error('content-towns: files are stale — run node tools/content-towns.mjs'); process.exit(1); }
 }

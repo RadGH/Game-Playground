@@ -18,6 +18,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { parseTerrain, parseNav, NAV } from '../js/rules/terrain-read.js';
 import { provinceComponents } from './content-place.mjs';
+import { CREATURE_TYPES } from '../../../avatar-3d/js/creature-types.js';
 
 const ROOT = new URL('../', import.meta.url);
 const P = f => new URL(f, ROOT);
@@ -50,6 +51,28 @@ const TREE = ['Ash', 'Oak', 'Yew', 'Ironbark', 'Heartwood'];
 export const RAW_PRICE = { ore: [2, 6, 26, 38, 64], gem: [5, 14, 36, 70, 120], log: [2, 9, 30, 50, 80], herb: [2, 7, 32, 48, 78], mushroom: [2, 7, 32, 48, 78], fibre: [2, 7, 32, 48, 78],
   hide: [1, 4, 8, 14, 24], resin: [3], meat: [1], fang: [1] };
 const REFINE_MARKUP = 1.15;      // a refined good sells for its inputs x this (the mini-game's labour)
+
+/**
+ * SKINNING (wrap-up 2026-10-13, report #26 "why can't I skin barrow hounds"): what decides it is the BODY, not the
+ * family. A monster drawn as an animal (a four-legged, many-legged, winged or crawling creature body) has a hide,
+ * whatever family the bestiary files it under — a Barrow Hound is `family: undead` and is still a dog. The ones with no
+ * hide get a plain sentence saying why (`skins.none`), which the server answers with when a skinner tries.
+ *   worn   the long dead: the hide comes off one grade lower than the monster's level would give, and no meat
+ *   noMeat dragonkin and anything unnatural: nobody eats that
+ */
+const HIDE_PLANS = new Set(['quad', 'spider', 'bat', 'snake', 'fowl']);
+const NO_HIDE_FAMILY = { construct: 'Stone and metal all the way through. There is no hide on it.', elemental: 'Nothing is left of it to skin.', fiend: 'It burns away to ash before a knife can touch it.' };
+const NO_HIDE_TYPE = { slime: 'A slime has no hide to take.', mushroom: 'It is fungus, not flesh. There is no hide on it.', wraith: 'A spirit leaves no body to skin.', horror: 'Whatever that was, it has no hide a knife can lift.', mimic: 'Wood, brass and teeth. There is no hide on it.' };
+const NO_HIDE_ID = { ossuary_crawler: 'It is bone all the way through. There is no hide on it.' };
+export function skinRule(d) {
+  if (d.kind !== 'beast' || !d.look || !d.look.creature) return { ok: false, person: true, why: 'People are not skinned.' };
+  const type = d.look.creature.type, plan = (CREATURE_TYPES[type] || {}).plan;
+  if (NO_HIDE_ID[d.id]) return { ok: false, why: NO_HIDE_ID[d.id] };
+  if (NO_HIDE_FAMILY[d.family]) return { ok: false, why: NO_HIDE_FAMILY[d.family] };
+  if (NO_HIDE_TYPE[type]) return { ok: false, why: NO_HIDE_TYPE[type] };
+  if (!HIDE_PLANS.has(plan)) return { ok: false, why: 'There is no hide on it.' };
+  return { ok: true, worn: d.family === 'undead', noMeat: d.family === 'undead' || d.family === 'dragonkin' || (d.family === 'aberration' && d.id !== 'dread_stag') };
+}
 
 function buildContent(numbers, engine, shops) {
   const materials = {}, nodeKinds = {}, recipes = [], goods = {};
@@ -176,8 +199,13 @@ function buildContent(numbers, engine, shops) {
 
   // ---- skinning: which monsters have a hide ----
   const en = Array.isArray(engine.bestiary.enemies) ? engine.bestiary.enemies : Object.values(engine.bestiary.enemies || {});
-  const skins = { meat: 'game_meat', bonus: 'beast_fang', types: {} };
-  for (const d of en) if (d.family === 'beast' || d.family === 'dragonkin' || d.id === 'dread_stag') skins.types[d.id] = { name: d.name, ...(d.family === 'dragonkin' ? { noMeat: true } : {}) };
+  const skins = { meat: 'game_meat', bonus: 'beast_fang', types: {}, none: {} };
+  const bosses = Array.isArray(engine.bestiary.bosses) ? engine.bestiary.bosses : [];
+  for (const d of [...en, ...bosses]) {
+    const s = skinRule(d);
+    if (s.ok) skins.types[d.id] = { name: d.name, ...(s.noMeat ? { noMeat: true } : {}), ...(s.worn ? { worn: 1 } : {}) };
+    else skins.none[d.id] = { name: d.name, why: s.why, ...(s.person ? { person: 1 } : {}) };
+  }
 
   // ---- job frames (giverRole: only that kind of NPC offers it) ----
   const job = (id, role, goal, title, text, gold = 4) => ({ id: 'prof_' + id, scope: 'zone', weight: 4, giverRole: role, needs: [], title, text, goal, reward: { xp: 0.2, gold }, where: 'anywhere in {zone.name}' });
@@ -405,7 +433,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   let changed = 0;
   const total = Object.values(zones).reduce((a, l) => a + l.length, 0);
   changed += write('data/provinces/professions.json', JSON.stringify({
-    _doc: 'Stream P-core (round 8, W9 Professions) — MADE by tools/content-professions.mjs; do not edit by hand (edit the tables in the tool and run it). materials: every stackable material (price = what a merchant pays for one). classes: the material of each tier 1-5 by what it is (metal, leather, cloth, wood, gem, herb, mushroom, fibre, ore, hide, resin). nodeKinds: what a node gives and how it looks (look.model boulder | tree | herb | mushroom | fibre). tools. recipes (kind material | tool | gear | potion | good; a gear recipe lists the real bases of C\'s catalog you may pick). goods: the consumables recipes make, as bag items. skins: which monsters a skinner can skin. trainers: NPCs this system places (world metres). jobs: job frames appended to the job board.',
+    _doc: 'Stream P-core (round 8, W9 Professions) — MADE by tools/content-professions.mjs; do not edit by hand (edit the tables in the tool and run it). materials: every stackable material (price = what a merchant pays for one). classes: the material of each tier 1-5 by what it is (metal, leather, cloth, wood, gem, herb, mushroom, fibre, ore, hide, resin). nodeKinds: what a node gives and how it looks (look.model boulder | tree | herb | mushroom | fibre). tools. recipes (kind material | tool | gear | potion | good; a gear recipe lists the real bases of C\'s catalog you may pick). goods: the consumables recipes make, as bag items. skins: which monsters a skinner can skin (types; worn = the hide is one grade lower) and, for the rest, the sentence that says why not (none). trainers: NPCs this system places (world metres). jobs: job frames appended to the job board.',
     ...content }, null, 1) + '\n');
   changed += write('data/provinces/professions-nodes.json', JSON.stringify({
     _doc: 'Stream P-core (round 8, W9) — MADE by tools/content-professions.mjs from the CURRENT bake; do not edit by hand. zones.<world zone> = every gathering node of that zone, WORLD metres: id, k = node kind (data/provinces/professions.json nodeKinds), v = look variant 0-3, s = 1 for a starter node by Torborhold\'s gate (back in 2 minutes). Nodes are per player: the same entity for everyone, spent only for the one who worked it.',
@@ -413,7 +441,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   if (quests) changed += write('data/quests/professions.json', JSON.stringify(quests, null, 2) + '\n');
   for (const [wid, m] of Object.entries(meta)) console.log(`${wid} ${m.sheet.padEnd(18)} band ${m.band.join('-').padEnd(5)} mining ${String(m.mining).padStart(2)} logging ${String(m.logging).padStart(2)} foraging ${String(m.foraging).padStart(2)}  tiers ${m.tiers.join('/')}  roadside ${m.roadside}`);
   for (const t of content.trainers) console.log(`trainer ${t.id} at ${t.x}, ${t.z} (${t.gate}); starter boulders ${t.starters.length}`);
-  console.log(`materials ${Object.keys(content.materials).length}, node kinds ${Object.keys(content.nodeKinds).length}, tools ${content.tools.length}, recipes ${content.recipes.length} (${['smithing', 'outfitting', 'alchemy', 'cooking'].map(p => p + ' ' + content.recipes.filter(r => r.prof === p).length).join(', ')}), skins ${Object.keys(content.skins.types).length}; nodes ${total}; ${changed} file(s) ${CHECK ? 'would change' : 'written'}`);
+  console.log(`materials ${Object.keys(content.materials).length}, node kinds ${Object.keys(content.nodeKinds).length}, tools ${content.tools.length}, recipes ${content.recipes.length} (${['smithing', 'outfitting', 'alchemy', 'cooking'].map(p => p + ' ' + content.recipes.filter(r => r.prof === p).length).join(', ')}), skins ${Object.keys(content.skins.types).length} (no hide: ${Object.keys(content.skins.none).length}); nodes ${total}; ${changed} file(s) ${CHECK ? 'would change' : 'written'}`);
   if (problems.length) { console.log('PROBLEMS:\n  ' + problems.join('\n  ')); process.exit(2); }
   if (CHECK && changed) process.exit(1);
 }

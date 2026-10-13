@@ -79,6 +79,18 @@ const hook = http.createServer(async (req, res) => {
       W.grant(o, { items, gold: Math.max(0, b.gold | 0), reason: 'test' });
       return send(200, { ok: true, items: items.length });
     }
+    if (req.url === '/roadevent') {      // wrap-up (#59): start a road event of a kind (and, when asked, of one record) beside this player; `open` frees a caged captive
+      if (b.open != null) { const ev = hook.events && hook.events.get(b.open); if (!ev) return send(404, { ok: false }); for (const m of ev.guards || []) if (!m.removed) ev.room.remove(m); if (ev.npc.data.held) { ev.npc.data.held.open = true; ev.npc.infoVer++; } ev.npc.loop('idle'); return send(200, { ok: true }); }
+      hook.events ||= new Map();
+      for (let k = 0; k < 80; k++) {
+        const ev = W.roadEvents.spawnFor(o, b.kind || 'rescue');
+        if (!ev) continue;
+        if (!b.id || (ev.spec && ev.spec.id === b.id)) { hook.events.set(ev.id, ev); if (b.calm) for (const m of ev.guards || []) if (!m.removed) ev.room.remove(m);   /* calm: a picture of the cage, not a fight */ const at = ev.npc || ev.chest; return send(200, { ok: true, ev: ev.id, npc: ev.npc ? ev.npc.id : null, obj: at ? at.id : null, x: at ? at.x : null, z: at ? at.z : null, guards: (ev.guards || []).length, name: ev.name, room: o.room.kind }); }
+        for (const e of ev.ents || []) if (!e.removed) ev.room.remove(e);
+        for (const m of ev.guards || []) if (!m.removed) ev.room.remove(m);
+      }
+      return send(200, { ok: false, why: 'no such event came up' });
+    }
     send(404, { ok: false });
   } catch (err) { send(500, { ok: false, err: String(err && err.message) }); }
 });

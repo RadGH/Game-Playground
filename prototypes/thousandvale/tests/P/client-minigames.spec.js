@@ -112,7 +112,7 @@ test('keys do not leak to the game while a mini-game is up; Esc gives up and not
 });
 
 // Y19 (G2, report #21 "I do not know where to put the mouse before it begins"): every game waits for the player.
-test('Y19: a mini-game opens READY — nothing moves and no key leaks until the first key / click / touch, which is not an input of the game; it begins by itself in the end', async ({ browser }) => {
+test('Y19: a mini-game opens READY — nothing moves and no key leaks until the first key / click / touch, which is not an input of the game; left alone it is put away, never started', async ({ browser }) => {
   test.setTimeout(120000);
   const ctx = await browser.newContext({ viewport: { width: 393, height: 852 }, hasTouch: true });
   const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
@@ -145,10 +145,39 @@ test('Y19: a mini-game opens READY — nothing moves and no key leaks until the 
   await page.waitForFunction(() => window.tvprof.mini.state.state === 'play');
   expect(await page.evaluate(() => window.tvprof.mini.run.result().inputs.length), 'the press that began it is not an input').toBe(0);
   await page.keyboard.press('Escape'); expect(await done).toBeNull();
-  // nobody touches anything: it begins by itself (the wait is given short here; the game's own is READY_MAX_MS)
+  // nobody touches anything: it is PUT AWAY, never started (wrap-up, report #57; the wait is given short here, the game's own is READY_MAX_MS)
+  await page.evaluate(() => { window.__states = []; });
   done = page.evaluate(() => window.tvprof.demo('mining', { seed: 5, readyMs: 700 }));
   await page.waitForFunction(() => window.tvprof.mini.state.state === 'ready');
-  await page.waitForFunction(() => window.tvprof.mini.state.state === 'play', null, { timeout: 4000 });
+  await expect(page.locator('.prof-ready small')).toContainText(/Waiting for you/);
+  expect(await done, 'nobody began it: no result').toBeNull();
+  await expect(page.locator('.tv-prof')).toBeHidden();
+  expect(await page.evaluate(() => window.__states), 'it never played').toEqual(['ready', 'idle']);
+  expect(errors, errors.join('\n')).toEqual([]);
+  await ctx.close();
+});
+
+// Wrap-up, report #57 ("Skinning still does not wait for your mouse to enter the area to start on desktop").
+test('#57: on a desktop, skinning waits until the MOUSE is on the knife — moving it elsewhere starts nothing, reaching the knife starts the cut with no click', async ({ browser }) => {
+  test.setTimeout(120000);
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  const page = await ctx.newPage(); const errors = []; page.on('pageerror', e => errors.push(e.message));
+  await page.goto(`${BASE}ui-gallery-frame.html?scene=hud`);
+  await page.waitForFunction(() => document.documentElement.dataset.ready === '1', null, { timeout: 60000 });
+  const done = page.evaluate(() => window.tvprof.demo('skinning', { seed: 4 }));
+  await page.waitForFunction(() => window.tvprof.mini.state.state === 'ready');
+  await expect(page.locator('.prof-ready')).toContainText(/mouse on the knife/i);
+  const c = await page.locator('.prof-canvas').boundingBox();
+  const knife = await page.evaluate(() => window.tvprof.mini.pointFor(window.tvprof.mini.run.view().y));
+  // across the hide, well away from the knife: nothing begins, and it is still waiting long after the old 6 s start
+  await page.mouse.move(c.x + c.width * 0.8, c.y + c.height * (knife.y - c.y > c.height / 2 ? 0.15 : 0.85), { steps: 6 });
+  await page.waitForTimeout(6600);
+  expect(await page.evaluate(() => ({ s: window.tvprof.mini.state.state, t: window.tvprof.mini.state.t })), 'still waiting, the clock has not moved').toEqual({ s: 'ready', t: 0 });
+  await page.screenshot({ path: 'prototypes/thousandvale/tests/P/shots/wrap-57-skinning-ready.png' });
+  // onto the knife: it begins by itself, and the knife is where the mouse is
+  await page.mouse.move(knife.x, knife.y, { steps: 8 });
+  await page.waitForFunction(() => window.tvprof.mini.state.state === 'play', null, { timeout: 3000 });
+  await expect(page.locator('.prof-ready')).toHaveCount(0);
   await page.keyboard.press('Escape'); expect(await done).toBeNull();
   expect(errors, errors.join('\n')).toEqual([]);
   await ctx.close();

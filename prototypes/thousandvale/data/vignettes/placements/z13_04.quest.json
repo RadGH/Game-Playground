@@ -264,6 +264,24 @@
    "z": 386,
    "yaw": 0.972,
    "titled": false
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_gorsehold_0",
+   "name": "Training Dummy",
+   "town": "Gorsehold",
+   "x": 1557.7,
+   "z": 1329.9,
+   "yaw": 3.035
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_gorsehold_1",
+   "name": "Training Dummy",
+   "town": "Gorsehold",
+   "x": 1560.3,
+   "z": 1330.1,
+   "yaw": 3.096
   }
  ]
 }

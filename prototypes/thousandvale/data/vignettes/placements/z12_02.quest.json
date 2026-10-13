@@ -863,6 +863,24 @@
    "z": 1538,
    "yaw": 2.468,
    "titled": false
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_torborhold_0",
+   "name": "Training Dummy",
+   "town": "Torborhold",
+   "x": 557.5,
+   "z": 1287.8,
+   "yaw": 1.912
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_torborhold_1",
+   "name": "Training Dummy",
+   "town": "Torborhold",
+   "x": 558.5,
+   "z": 1290.2,
+   "yaw": 2.019
   }
  ]
 }

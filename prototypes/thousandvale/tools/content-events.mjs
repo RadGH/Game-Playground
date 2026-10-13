@@ -74,8 +74,9 @@ const TEXT = {
     'The strongbox is yours now.', 'Whoever buried the cache came back for it.'],
   smugglers_stash: ['Smugglers are sitting on an iron-bound chest just off the road.', 'Defeat the smugglers, then open their stash',
     'The smugglers are out of business and their stash is open.', 'The smugglers pack up and move the stash.'],
-  fallen_pack_mule: ['A pack mule lies dead in the grass, and what killed it is still close by.', 'Kill what ate the mule, then search the saddlebags',
-    'The saddlebags are yours, and the mule is avenged.', 'The scavengers drag the saddlebags away.'],
+  // (wrap-up 2026-10-13: it used to promise a dead mule in the grass, and nothing draws one — the bags are what is there)
+  fallen_pack_mule: ['Saddlebags lie spilled in the grass where a pack mule bolted, and what chased it is still close by.', 'Kill what chased the mule off, then search the saddlebags',
+    'The saddlebags are yours, and the mule is probably still running.', 'The scavengers drag the saddlebags away.'],
   hollow_stump: ['A dry stump by the road has a poacher\'s savings stuffed inside it.', 'Search the hollow stump',
     'The poacher will have to start saving again.', 'The poacher came back and emptied the stump.'],
   toll_strongbox: ['The stolen Hollin toll box sits prised open here, with the thieves still beside it.', 'Defeat the thieves, then open the toll strongbox',

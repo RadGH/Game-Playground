@@ -244,6 +244,24 @@
    "z": 320,
    "yaw": 0.051,
    "titled": false
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_lowmoor_0",
+   "name": "Training Dummy",
+   "town": "Lowmoor",
+   "x": 1221.7,
+   "z": 1021.3,
+   "yaw": -3.039
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_lowmoor_1",
+   "name": "Training Dummy",
+   "town": "Lowmoor",
+   "x": 1224.3,
+   "z": 1020.7,
+   "yaw": -2.812
   }
  ]
 }

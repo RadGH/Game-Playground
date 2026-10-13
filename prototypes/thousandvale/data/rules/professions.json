@@ -32,7 +32,7 @@
   },
   "ease": { "perSkill": 0.025, "_doc": "ease = (skill - the work's skill) x perSkill + the tool's own ease, 0..1; it widens every 'good' window by up to +50%" },
   "gather": {
-    "reach": 4.5, "driftM": 2, "graceMs": 350, "lateMs": 10000, "minGapMs": 90,
+    "reach": 4.5, "driftM": 2, "graceMs": 350, "lateMs": 30000, "minGapMs": 90,
     "respawnMin": [6, 10], "starterRespawnMin": 2, "skinReach": 4, "skinKeepMs": 60000,
     "xpPerTier": 10, "greyAfter": 40, "greyMult": 0.25,
     "townBorderM": 160

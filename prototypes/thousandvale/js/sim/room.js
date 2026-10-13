@@ -651,7 +651,7 @@ export function createRoom(opts) {
       data: { portal: o.portal || null, chest: o.chest || null, gate: o.gate || null, lever: o.lever || null, rules: !!o.rules, key: o.key || null, r: o.r || null, state: o.state || null, room: o.room ?? null,
         note: o.note || null, use: o.use || null, npc: o.npc || null, hidden: !!o.hidden, hint: o.hint || null, lore: o.lore || null, waystone: o.waystone || null, schedule: o.schedule || null,
         treasure: o.treasure || null, site: o.site || null, shimmer: o.shimmer || null, office: o.office || null,
-        /* play-test 6: dungeon floors, the lift, the way in */ ...(o.lift ? { lift: o.lift } : {}), ...(o.floor ? { floor: o.floor } : {}), ...(o.dir ? { dir: o.dir } : {}), ...(o.leave ? { leave: true } : {}), ...(npc && o.title ? { title: o.title } : {}), ...(o.cart ? { cart: o.cart } : {}), ...(o.guard ? { guard: o.guard } : {}), ...(o.fighter ? { fighter: o.fighter } : {}) } });
+        /* play-test 6: dungeon floors, the lift, the way in */ ...(o.lift ? { lift: o.lift } : {}), ...(o.floor ? { floor: o.floor } : {}), ...(o.dir ? { dir: o.dir } : {}), ...(o.leave ? { leave: true } : {}), ...(npc && o.title ? { title: o.title } : {}), ...(o.cart ? { cart: o.cart } : {}), ...(o.guard ? { guard: o.guard } : {}), ...(o.fighter ? { fighter: o.fighter } : {}), ...(o.bare ? { bare: true } : {}) } });
   }
   /** Change an object's state (lit, used, broken, open…): late joiners see it in `info`, everyone near gets `obj`. */
   room.objState = function (o, state, extra = {}) {

@@ -503,6 +503,33 @@
    "z": 200,
    "yaw": 2.344,
    "titled": false
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_hermit_s_rest_0",
+   "name": "Training Dummy",
+   "town": "Hermit's Rest",
+   "x": 1093.3,
+   "z": 559,
+   "yaw": 2.051
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_hermit_s_rest_1",
+   "name": "Training Dummy",
+   "town": "Hermit's Rest",
+   "x": 1095,
+   "z": 561,
+   "yaw": 2.273
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_hermit_s_rest_2",
+   "name": "Training Dummy",
+   "town": "Hermit's Rest",
+   "x": 1096.7,
+   "z": 563,
+   "yaw": 2.496
   }
  ]
 }

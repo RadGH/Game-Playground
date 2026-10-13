@@ -19,7 +19,7 @@
 import { CODES } from '../net/protocol.js';
 import { sha256Hex, randomHex } from './sha256.js';
 
-export const ACCOUNT_OPS = Object.freeze(['claim', 'login', 'logout', 'password', 'resetAsk', 'reset', 'info']);
+export const ACCOUNT_OPS = Object.freeze(['claim', 'login', 'logout', 'password', 'resetAsk', 'reset', 'info', 'peek', 'adopt']);
 export const LOGIN_LIMITS = Object.freeze({
   ipFails: 10, ipWindowMs: 10 * 60000,          // failed logins from one address
   userFails: 5, userWindowMs: 15 * 60000,       // failed logins on one username
@@ -52,7 +52,7 @@ export function createLimiter(now) {
   };
 }
 
-export function createAccounts({ store, hasher = null, verifyHuman = null, wallNow, log = () => {}, filter = null, sendAll = () => {}, kickChar = () => {}, counters = {}, trustIps = [] }) {
+export function createAccounts({ store, hasher = null, verifyHuman = null, wallNow, log = () => {}, filter = null, sendAll = () => {}, kickChar = () => {}, counters = {}, trustIps = [], charLimit = 20 }) {
   const limiter = createLimiter(wallNow);
   const L = LOGIN_LIMITS;
   const resetLog = [];             // { at, username, email, code, until } for the admin page (last 50)
@@ -116,6 +116,21 @@ export function createAccounts({ store, hasher = null, verifyHuman = null, wallN
           const a = await store.accountInfo(info.account);
           return signedIn(s, info.account, token, a ? a.username : username, !!(a && a.admin));
         } catch (err) { s.state = 'anon'; log('login failed', err && err.message); return fail(s, op, 'auth', 'Login is not working right now.'); }
+      }
+      // Wrap-up (report S#66): "when you sign in, if any browser-based characters are not assigned, ask to claim them".
+      // The browser keeps the guest key it had before the sign-in; `peek` lists that guest's characters, `adopt` moves
+      // them onto the signed-in account. Only an UNCLAIMED account's characters can be taken, and only with its key.
+      case 'peek': case 'adopt': {
+        if (s.state !== 'authed') return 'order';
+        if (!s.claimed) return fail(s, op, 'claimFirst');
+        if (!store.moveChars) return fail(s, op, 'state', 'Characters cannot be moved on this server.');
+        const g = typeof m.guest === 'string' && m.guest ? await store.authToken(m.guest) : null;
+        if (!g || g.claimed || g.account === s.account) return reply(s, op, { ok: true, chars: [], moved: [], left: [] });
+        if (op === 'peek') return reply(s, op, { ok: true, chars: (await store.listChars(g.account)).map(c => ({ id: c.id, name: c.name, cls: c.cls, level: c.level })) });
+        const r = await store.moveChars(g.account, s.account, { limit: charLimit, nowMs: wallNow() });
+        if (r.err) return fail(s, op, 'state', 'Those characters could not be moved.');
+        log('guest characters adopted', { from: g.account, to: s.account, moved: r.moved.length, left: r.left.length });
+        return reply(s, op, { ok: true, moved: r.moved, left: r.left });
       }
       case 'logout': {
         if (s.state !== 'authed') return 'order';

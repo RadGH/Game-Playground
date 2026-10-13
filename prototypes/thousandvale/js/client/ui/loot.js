@@ -21,21 +21,21 @@ import { onIcon, iconsActive } from './item-icons.js';
 import { ROLL_CHOICES, rollLeft, rollLines } from './pt2-core.js';
 import { hideTip } from './tips.js';
 import { rarityOf } from './inv-core.js';
-import { lootRows, lootStep } from './pt8-core.js';
+import { lootRows, lootStep, lootCloses, lootGoldBody } from './pt8-core.js';
 
 const LOOT_RANGE = 6;
 
 export function createLoot({ net, hud, actors, me }) {
   const lootable = new Map();          // corpse id -> best rarity in it for me (S23: the marker's colour)
-  const W = { id: null, data: null, sel: 0, rows: [] };
-  const panel = createPanel({ id: 'loot', title: 'Loot', width: 300, cls: 'loot-panel', onClose: () => { if (W.id != null) send2.loot(net(), 'close', { id: W.id }); W.id = null; W.data = null; iconsActive(false, 'loot'); } });
+  const W = { id: null, data: null, sel: 0, rows: [], seen: new Set() };      // seen: every id this window was drawn under (#58)
+  const panel = createPanel({ id: 'loot', title: 'Loot', width: 300, cls: 'loot-panel', onClose: () => { if (W.id != null) send2.loot(net(), 'close', { id: W.id }); W.id = null; W.data = null; W.seen.clear(); iconsActive(false, 'loot'); } });
 
   // ---- the window ----
   function open(id) {
     const a = actors.get(id), m = me();
     if (!a || !m) return false;
     if (Math.hypot(a.pos.x - m.x, a.pos.z - m.z) > LOOT_RANGE + 0.5) { hud.toast('Too far away to loot.', 'warn'); return true; }
-    W.id = id; W.data = null; W.sel = 0;
+    W.id = id; W.data = null; W.sel = 0; W.seen = new Set([id]);
     send2.loot(net(), 'open', { id });
     panel.setTitle(a.name || 'Loot', 'Searching…');
     panel.fill(h('p.dim', {}, 'Searching the body…'));
@@ -88,7 +88,7 @@ export function createLoot({ net, hud, actors, me }) {
   }, true);
   // a controller's "other action" (X) on anything in the window takes everything
   panel.root.addEventListener('contextmenu', e => { if (W.data && e.target.closest?.('.loot-row')) { e.preventDefault(); takeAll(); } });
-  function take(uid, from = null) { if (W.id == null) return; hideTip(); send2.loot(net(), 'take', uid === 'gold' ? { id: W.id, uid: 'gold' } : { id: from ?? W.id, uid }); }
+  function take(uid, from = null) { if (W.id == null) return; hideTip(); send2.loot(net(), 'take', uid === 'gold' ? { id: lootGoldBody(W.data, W.id), uid: 'gold' } : { id: from ?? W.id, uid }); }
   function takeAll() { if (W.id == null) return; hideTip(); send2.loot(net(), 'all', { id: W.id }); }
   onIcon(() => { if (panel.isOpen && W.data) { clearTimeout(draw.t); draw.t = setTimeout(draw, 80); } });
 
@@ -165,14 +165,15 @@ export function createLoot({ net, hud, actors, me }) {
   function wire(n) {
     n.on('lootable', m => { if (m.on === false) lootable.delete(m.id); else lootable.set(m.id, m.best || m.rarity || 'normal'); markPlate(m.id); });
     n.on('lootWin', m => {
-      if (m.closed) { lootable.delete(m.id); markPlate(m.id); if (W.id === m.id) { W.id = null; panel.close(); } return; }
+      // #58: the window follows whichever body leads it, so a close may name an id it was drawn under earlier
+      if (m.closed) { lootable.delete(m.id); markPlate(m.id); if (lootCloses(W.id, W.seen, m.id)) { W.id = null; panel.close(); } return; }
       // S5/S12: a chest's loot, or several bodies looted at once, can arrive without us asking for that exact id
-      if (W.id !== m.id) { if (!(m.chest || m.group || (m.corpses && m.corpses.length > 1))) return; W.id = m.id; iconsActive(true, 'loot'); panel.open(); }
-      W.data = m; draw();
+      if (W.id !== m.id) { if (!(m.chest || m.group || (m.corpses && m.corpses.length > 1))) return; if (W.id == null) W.seen = new Set(); W.id = m.id; iconsActive(true, 'loot'); panel.open(); }
+      W.seen.add(m.id); W.data = m; draw();
       if (!(m.items || []).length && !(m.free || []).length && !(m.gold > 0)) lootable.delete(m.id);
     });
     // S5: a chest (an object) opened with E answers used {kind:'chest', loot:true}; its lootWin follows — same window
-    n.on('used', u => { if (u && u.ok && u.loot && u.id != null) { W.id = u.id; W.data = null; panel.setTitle(u.name || 'A chest', 'Opening…'); panel.fill(h('p.dim', {}, 'Opening…')); iconsActive(true, 'loot'); panel.open(); } });
+    n.on('used', u => { if (u && u.ok && u.loot && u.id != null) { W.id = u.id; W.data = null; W.seen = new Set([u.id]); panel.setTitle(u.name || 'A chest', 'Opening…'); panel.fill(h('p.dim', {}, 'Opening…')); iconsActive(true, 'loot'); panel.open(); } });
     n.on('lootR', r => { if (r.ok === false) hud.toast(r.msg || ({ far: 'Too far away.', gone: 'It is gone.', bagFull: 'Your bag is full.', roll: 'That is up for a party roll.' }[r.why]) || 'You cannot loot that.', 'warn'); });
     n.on('lootRoll', onRoll);
     n.on('lootRolled', onRolled);

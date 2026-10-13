@@ -152,7 +152,7 @@ export function createRoadEvents({ data = null, wanderers = null, online, corpse
       if (kind === 'rescue') spawnGuards(room, L, ev, irange(spec.guards || [2, 2]));
       tok.guards = guardWord(ev);
       ev.npc = room.spawn({ kind: 'npc', type: 'npc', name: ev.name, x: at.x, z: at.z, yaw: rng() * 6.283, team: 1, state: 128,
-        data: { key, road: { ev: ev.id, kind, captive: kind === 'rescue' || undefined }, npc: { role: spec.role || 'traveller', says: [fill(spec.say, tok)], title: kind === 'rescue' ? 'Captive' : kind === 'escort' ? 'Needs an escort' : 'Needs a hand' } } });
+        data: { key, road: { ev: ev.id, kind, captive: kind === 'rescue' || undefined }, ...(kind === 'rescue' && spec.held ? { held: { kind: spec.held, x: +at.x.toFixed(2), z: +at.z.toFixed(2) } } : {}) /* #59: what holds them, drawn by the client (a cage) */, npc: { role: spec.role || 'traveller', says: [fill(spec.say, tok)], title: kind === 'rescue' ? 'Captive' : kind === 'escort' ? 'Needs an escort' : 'Needs a hand' } } });
       ev.tok = tok;
       ev.ents.push(ev.npc);
       if (kind === 'rescue') ev.npc.loop('sit');
@@ -308,6 +308,7 @@ export function createRoadEvents({ data = null, wanderers = null, online, corpse
     ev.freed = true;
     ev.follow = by.char.id; ev.lastWith = now(); ev.walked = 0; ev.ambushes = R.maxAmbush; ev.last = { x: ev.npc.x, z: ev.npc.z };
     ev.npc.loop('idle');
+    if (ev.npc.data && ev.npc.data.held) { ev.npc.data.held.open = true; ev.npc.infoVer++; }      // #59: someone who arrives later sees the cage already open
     ev.room.emit({ type: 'say', id: ev.npc.id, text: 'Free! Get me out of here — ' + (ev.town ? ev.town.name : 'home') + ', quick.', style: 'bark' });
     for (const o of onQuest(ev)) progress(o, ev, 'freed');
   }

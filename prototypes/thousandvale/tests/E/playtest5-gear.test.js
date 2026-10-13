@@ -12,7 +12,15 @@ const row = (o) => ({ new: true, minLevel: 1, ...o, base: o.base || o.id });
 
 test('T15/T23: every kind of new thing has a shelf — casters at the apothecary, foci at the tailor, armour by weight', () => {
   const shelf = r => shelfFor(row(r)).map(x => x.join('/'));
-  for (const t of ['wand', 'staff', 'quarterstaff', 'scepter', 'orb', 'tome']) assert.ok(shelf({ id: 'g5_x_' + t, kind: 'weapon', type: t }).includes('apothecary/weapon'), t);
+  for (const t of ['wand', 'staff', 'quarterstaff', 'scepter', 'tome']) assert.ok(shelf({ id: 'g5_x_' + t, kind: 'weapon', type: t }).includes('apothecary/weapon'), t);
+  // round 10: an orb is an off-hand implement even though the item table calls it a weapon — it is shelved with the foci and on NO weapon shelf
+  for (const id of ['g5_x_orb', 'g5_a_orb', 'g5_b_orb', 'g5_c_orb']) assert.deepEqual(shelf({ id, kind: 'weapon', type: 'orb' }), ['tailor/other'], id);
+  { const S = SHOPS(), cat = JSON.parse(readFileSync(new URL('../../avatar-3d/data/gear-catalog.json', root), 'utf8'));
+    const orbs = new Set(['orb', ...(Array.isArray(cat) ? cat : cat.rows || []).filter(r => r.kind === 'weapon' && r.type === 'orb').map(r => r.base || r.id)]);
+    assert.ok(orbs.size >= 2, 'the catalog has orbs to check');
+    const isOrb = b => orbs.has(b);
+    for (const [k, kind] of Object.entries(S.kinds)) for (const [c, cat] of Object.entries(kind.categories || {})) if (c === 'weapon') assert.deepEqual(cat.bases.filter(isOrb), [], `${k}/${c} sells an orb as a weapon`);
+    assert.ok(S.kinds.tailor.categories.other.bases.includes('orb'), 'the plain orb is with the caster\'s off-hand things'); }
   for (const t of ['bow', 'crossbow', 'javelin']) assert.ok(shelf({ id: 'g5_x_' + t, kind: 'weapon', type: t }).includes('bowyer/weapon'), t);
   for (const t of ['sword', 'dagger', 'axe', 'axe2h', 'sword2h', 'mace', 'hammer', 'hammer2h', 'spear', 'polearm']) assert.ok(shelf({ id: 'g5_x_' + t, kind: 'weapon', type: t }).includes('weaponsmith/weapon'), t);
   for (const t of ['tome', 'orb', 'relic', 'idol', 'ward', 'totem']) assert.deepEqual(shelf({ id: 'g5_f_' + t, kind: 'offhand', type: t }), ['tailor/other'], t);

@@ -1,8 +1,8 @@
 {
   "_doc": "Stream C (owner feedback 7, V2: 'overhaul the gold rewards and item pricing'). The gold FORMULAS the rules own; js/rules/economy.js reads every number from here and tools/sim-economy.mjs (stream E) measures the result. `gear`: an item's list price = (base + perLevel x the level it was made at) x slot x rarity x extras; a merchant pays `sellFactor` of that. `kill`: what a monster pays = (base + perLevel x level) x its own weight (its Farhold `gold` / goldRef, clamped to weight[0..1]) x rank. `goldFind`: the stat multiplies KILL gold only, once, capped. Before this file a kill's gold grew exponentially with level (a level-20 brigand paid 163 gold while the average level-20 drop was priced 65), an item's price ignored its level and its slot, and quests paid less than two kills. Owner feedback 8 (W19): a backpack's price is multiplied by 1 + bagSlot x its bag slots. Owner feedback 10 (Y14, Y31): `income` is THE one statement of what a character really earns — `lifetime` = [level, gold earned in total by the time that level is reached] (the owner's play: 3,445 gold by level 9; the other rows are that point carried along the kill-gold curve until stream E's re-fitted tools/sim-economy.mjs replaces the table). Everything priced 'in income' reads it through js/rules/economy.js `lifetimeGold(level)` (straight lines between rows): today the Unbinder; E's sim is to read and write the same table, so there is one income table and not two.",
   "gear": {
-    "base": 45,
-    "perLevel": 144,
+    "base": 8.5,
+    "perLevel": 28.5,
     "min": 5,
     "slot": {
       "weapon": 1.2,
@@ -22,13 +22,13 @@
     "rarity": {
       "normal": 1,
       "magic": 2.5,
-      "rare": 11,
+      "rare": 10.7,
       "legendary": 30
     },
     "unique": 1.5,
     "set": 1.25,
     "tier2": 1.1,
-    "sellFactor": 0.012,
+    "sellFactor": 0.06,
     "bagSlot": 0.15
   },
   "kill": {
@@ -50,6 +50,7 @@
     "cap": 100
   },
   "_tuned": "Owner feedback 7 V2, tuned by stream E (economy lead) with tools/sim-economy.mjs after C landed the formulas. Kill: 2 + 1 x level -> 4 + 1 x level, weight 0.6-1.8 -> 0.7-1.4, rank 3 / 6 / 15 -> 2.5 / 5 / 12. Gear: 45 + 42 x level -> 45 + 144 x level, sellFactor 0.04 -> 0.012. Why: with the real rank rolls (one spawn in five is a champion or a rare) and real drops (0.45 items a kill, worth two uncommon pieces on average) the first numbers paid 4.5 uncommon pieces per hour of killing at level 10; these pay about one. The whole scale is three times the first draft's so that whole-gold rounding still tells level 1 from level 2 and a 1-gold fish is small change. Only numbers changed; tests/C/playtest7 pins the rules.",
-  "income": {"_doc": "[level, gold earned in total by a character who has just reached that level]. One table; stream E owns the numbers (re-fit tools/sim-economy.mjs to it, or replace it from the sim). Row 9 is the owner's own play (report #36).", "lifetime": [[1, 0], [2, 55], [3, 215], [4, 485], [5, 860], [6, 1345], [7, 1940], [8, 2640], [9, 3445], [10, 4360], [12, 6500], [15, 10500], [20, 19400], [25, 31000], [30, 45000], [40, 82000], [50, 129000]]},
+  "_tuned10": "Owner feedback 10 (Y31: 'the gold costs are too high now, gear is unaffordable'), stream E with tools/sim-economy.mjs re-fitted to REAL play (ASSUME.real; the owner's 3,445 gold in total at level 9). Gear 45 + 144 x level -> 8.5 + 28.5 x level (a fifth): an uncommon piece is 20-30 minutes of real play at every level, where it was 1.5-5 hours. rare 11 -> 10.7: a rare is 1.5-2 hours. sellFactor 0.012 -> 0.06: five times the share of a price a fifth the size, so a sold drop pays the same gold as before and nobody's income moves; at 0.10 sold loot was 30-46% of an hour and killing out-earned questing by a third at the top, at 0.15 it was 39-56% and by a half. `income.lifetime` is now WRITTEN by `node tools/sim-economy.mjs --write-income` (row 9 pinned to 3,445; the tool refuses if its own model is more than 15% from that).",
+  "income": {"_doc": "[level, gold earned in total by a character who has just reached that level]. One table; stream E owns the numbers (re-fit tools/sim-economy.mjs to it, or replace it from the sim). Row 9 is the owner's own play (report #36).", "lifetime": [[1, 0], [2, 150], [3, 390], [4, 730], [5, 1075], [6, 1505], [7, 2065], [8, 2735], [9, 3445], [10, 4225], [11, 5080], [12, 6070], [13, 7070], [14, 8215], [15, 9420], [16, 10690], [17, 12075], [18, 13410], [19, 14910], [20, 16420], [21, 17950], [22, 19530], [23, 21230], [24, 22835], [25, 24525], [26, 26255], [27, 27990], [28, 29905], [29, 31835], [30, 33665], [31, 35195]]},
  "retrain": {"_doc": "Owner feedback 10 (Y14, report #36: 'level 9, 3,445 gold collected in total; resetting costs 9,780 — about 500 would be reasonable'). The Unbinder is priced as a SHARE of `income.lifetime` at the character's level: `allShare` = everything of one kind taken back (0.15 -> 517 gold at level 9), `oneShare` = one talent / perk / spell taken back (about 1.2% -> 41 gold at level 9: a few minutes of play). `min` = the least it ever costs (a level-1 character has earned nothing yet). Rounded to 5 gold. It replaces the round-7 'minutes of a questing hour' rule, whose hour (730 + 520 a level) was the sim's and three times what a player really earns.", "allShare": 0.15, "oneShare": {"talent": 0.012, "perk": 0.014, "spell": 0.016}, "min": {"one": 5, "all": 25}}
 }

@@ -244,6 +244,24 @@
    "z": 440,
    "yaw": 1.257,
    "titled": false
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_brackwater_0",
+   "name": "Training Dummy",
+   "town": "Brackwater",
+   "x": 1153.4,
+   "z": 870.2,
+   "yaw": -1.395
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_brackwater_1",
+   "name": "Training Dummy",
+   "town": "Brackwater",
+   "x": 1152.6,
+   "z": 867.8,
+   "yaw": -1.163
   }
  ]
 }

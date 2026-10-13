@@ -9,6 +9,7 @@ const J = file => JSON.parse(readFileSync(new URL(file, ROOT), 'utf8'));
 const bram = J('data/provinces/professions.json').trainers.find(t => t.id === 'prospector_torborhold');
 const town = Object.values(J('data/provinces/offices.json').towns).find(t => t.name === 'Torborhold');
 const forager = town.offices.find(o => o.role === 'forager');
+const angler = J('data/provinces/angling-pools.json').anglers[0];
 const [, zx, zz] = /^z(\d+)_(\d+)$/.exec(town.zone).map(Number);
 const freePort = () => new Promise(resolve => {
   const s = createServer();
@@ -52,6 +53,11 @@ for (const [layout, viewport] of [['desktop', { width: 1280, height: 800 }], ['p
       const dialog = page.locator('.tv-dialog');
       await talk('prospector', bram.x, bram.z);
       await expect(dialog.locator('.prof-dlg-status')).toContainText('You have learned Mining.');
+      // wrap-up (report #62): his title is the plain one, and the trade button sits beside whatever quests he offers
+      await expect.poll(() => page.evaluate(() => [...thousandvale.actors.actors.values()].find(a => a.role === 'prospector').npcTitle)).toBe('Prospector');
+      const quests = await dialog.locator('[data-accept], [data-turnin]').count();
+      expect(quests, 'the prospector has a quest for a newcomer (the case in the report)').toBeGreaterThan(0);
+      await expect(dialog.getByRole('button', { name: 'Mining', exact: true })).toBeVisible();
       await expect(dialog.locator('.prof-dlg-status')).toContainText("Prospector's Pick is in your bag.");
       await dialog.getByRole('button', { name: 'Mining', exact: true }).click();
       const trainer = page.locator('#panel-trainer');
@@ -76,6 +82,23 @@ for (const [layout, viewport] of [['desktop', { width: 1280, height: 800 }], ['p
       await expect(trainer).toContainText('You know this');
       await expect(trainer.locator('[data-learn="foraging"]')).toHaveCount(0);
       expect(await page.evaluate(() => tvprof.state.list.find(p => p.id === 'foraging')?.tool?.name)).toBeTruthy();
+      await trainer.getByRole('button', { name: 'Close', exact: true }).click();
+
+      // wrap-up (report #56): the angler has the same trades door as every other teacher — first visit and after
+      await talk('angler', angler.x, angler.z);
+      await expect(dialog.locator('.prof-dlg-status')).toContainText('You have learned Angling.');
+      await page.evaluate(() => thousandvale.worldUi.closeDialog());
+      await talk('angler', angler.x, angler.z);
+      await expect(dialog.locator('.prof-dlg-status')).toContainText('Angling is already learned.');
+      await dialog.getByRole('button', { name: 'Angling', exact: true }).click();
+      await expect(trainer).toBeVisible();
+      await expect(trainer).toContainText('Angling');
+      await expect(trainer).toContainText('You know this');
+      await expect(trainer.locator('[data-learn="angling"]')).toHaveCount(0);
+      const tb = await trainer.boundingBox();
+      expect(tb.x >= 0 && tb.x + tb.width <= viewport.width + 1, 'the trainer window fits the screen').toBe(true);
+      await page.screenshot({ path: `prototypes/thousandvale/tests/P/shots/wrap-56-angler-${layout}.png` });
+      expect(await page.evaluate(() => tvprof.state.list.find(p => p.id === 'angling')?.known), 'the Professions list agrees').toBe(true);
       expect(errors).toEqual([]);
     } finally { await context.close(); }
   });

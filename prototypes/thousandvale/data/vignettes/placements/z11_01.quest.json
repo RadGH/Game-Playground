@@ -410,6 +410,24 @@
    "z": 840,
    "yaw": 3.068,
    "titled": false
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_hollin_toll_0",
+   "name": "Training Dummy",
+   "town": "Hollin Toll",
+   "x": 1721.1,
+   "z": 548.3,
+   "yaw": 0.467
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_hollin_toll_1",
+   "name": "Training Dummy",
+   "town": "Hollin Toll",
+   "x": 1718.9,
+   "z": 549.7,
+   "yaw": 0.645
   }
  ]
 }

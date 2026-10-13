@@ -45,8 +45,15 @@ export function polyline(pts) {
   return { pts: P, length, at };
 }
 
-export function createTravellers({ room, travel, folk = [], rng = Math.random, context = () => ({}), isNight = () => false, phase = () => 'day', now = () => room.now(), log = () => {} }) {
+export function createTravellers({ room, travel, folk = [], rng = Math.random, context = () => ({}), isNight = () => false, phase = () => 'day', now = () => room.now(), log = () => {}, fighterLevel = () => null }) {
   const T = travel || {};
+  // report #18 (Y21): who fights what comes near while a player watches — travellers.json `fighters` (an armed crew
+  // member; a wayside worker whose role is listed). The rules (js/rules/guards.js, a 'wanderer') own a fighter's feet
+  // while its fight lasts: `fightingNow(e)` is asked before anybody is walked on.
+  const FIGHT = T.fighters || null;
+  const fightRoles = new Set((FIGHT && FIGHT.roles) || []);
+  const fighterData = (x, z) => { const lv = fighterLevel(x, z); return { fighter: lv ? { level: lv } : true }; };
+  const fightingNow = e => !!(e && !e.removed && e.data && e.data.fighter && room.rules && room.rules.npcFighting && room.rules.npcFighting(e));
   const R = T.rules || {};
   const kinds = T.kinds || {};
   const chatter = T.chatter || { pools: {}, rules: {} };
@@ -117,7 +124,8 @@ export function createTravellers({ room, travel, folk = [], rng = Math.random, c
       const wand = lead && (k.shop || k.offers || k.curious) ? { kind: g.kind, ...(k.offers ? { offers: k.offers } : {}), ...(k.curious ? { curious: true } : {}), ...(k.shop ? { shop: k.shop } : {}) } : null;
       c.e = room.spawn({ kind: 'npc', type: 'npc', name: c.name, x: p.x, z: p.z, yaw: p.yaw, team: 1, state: 128,
         data: { key: 'trav:' + g.id + ':' + i, npc: { role: c.role, ...(typeof c.titled === 'boolean' ? { titled: c.titled || !!wand } : {}), says: k.blurb ? [k.blurb] : [], traveller: g.kind, ...(wand && k.shop ? { shop: k.shop } : {}), ...(wand ? { title: k.name || null } : {}) },
-          traveller: { kind: g.kind, group: g.id, name: k.name || g.kind, from: endName(g, -1), to: endName(g, 1), beast: k.beast || null, cart: !!k.cart, ...(k.vehicle ? { vehicle: k.vehicle } : {}), armed: c.armed || undefined }, ...(wand ? { wanderer: wand } : {}) } });
+          traveller: { kind: g.kind, group: g.id, name: k.name || g.kind, from: endName(g, -1), to: endName(g, 1), beast: k.beast || null, cart: !!k.cart, ...(k.vehicle ? { vehicle: k.vehicle } : {}), armed: c.armed || undefined }, ...(wand ? { wanderer: wand } : {}),
+          ...(FIGHT && ((FIGHT.crew === 'armed' && c.armed) || fightRoles.has(c.role)) ? fighterData(p.x, p.z) : {}) } });
     });
     g.live = true; counters.materialised++;
   }
@@ -153,6 +161,8 @@ export function createTravellers({ room, travel, folk = [], rng = Math.random, c
       if (Math.abs(g.s - end) < 0.5) {
         if (!g.waitUntil) { g.waitUntil = t + (range((R.waitAtTownMinutes || [2, 6]).map(m => m * 60), 180)) * 1000; counters.arrived++; }
         if (t >= g.waitUntil && near > 80) { park(g); groups.splice(gi, 1); replace(g.route); continue; }
+      } else if (g.live && g.crew.some(c => fightingNow(c.e))) {
+        g.pauseUntil = t + 1500;             // Y21: the group waits for its fighters (a caravan does not walk off from its guards)
       } else if (kinds[g.kind] && kinds[g.kind].stopNear && g.live && crewNear(g, all, kinds[g.kind].stopNear)) {
         g.pauseUntil = t + 2500;             // S9: a wanderer stands still while someone is at their elbow (shop / talk range holds)
       } else if (t >= g.pauseUntil) {
@@ -165,7 +175,7 @@ export function createTravellers({ room, travel, folk = [], rng = Math.random, c
       if (!g.live) continue;
       const walking = t >= g.pauseUntil && !(Math.abs(g.s - end) < 0.5);
       g.crew.forEach((c, i) => {
-        if (!c.e || c.e.removed) return;
+        if (!c.e || c.e.removed || fightingNow(c.e)) return;
         const p = slot(g, i);
         c.e.moveTo(p.x, p.z);
         c.e.face(p.yaw);
@@ -276,9 +286,10 @@ export function createTravellers({ room, travel, folk = [], rng = Math.random, c
       let near = Infinity;
       for (let k = 0; k < ps.length; k++) { const p = ps[k], dx = p.x - f.x, dz = p.z - f.z; if (dx > R || dx < -R || dz > R || dz < -R) continue; const d = Math.hypot(dx, dz); if (d < near) near = d; }
       if (near === Infinity && !f.e) continue;
-      if (near <= MATERIAL_R && !f.e) f.e = room.spawn({ kind: 'npc', type: 'npc', name: f.name || 'Villager', x: f.path[0][0] ?? f.x, z: f.path[0][1] ?? f.z, team: 1, state: 128, data: { npc: { role: f.role, says: [] }, folk: { role: f.role, work: f.work || null } } });
+      if (near <= MATERIAL_R && !f.e) f.e = room.spawn({ kind: 'npc', type: 'npc', name: f.name || 'Villager', x: f.path[0][0] ?? f.x, z: f.path[0][1] ?? f.z, team: 1, state: 128, data: { npc: { role: f.role, says: [] }, folk: { role: f.role, work: f.work || null }, ...(fightRoles.has(f.role) ? fighterData(f.x, f.z) : {}) } });
       else if (near > MATERIAL_R + 60 && f.e) { room.remove(f.e); f.e = null; }
       if (!f.e) continue;
+      if (fightingNow(f.e)) continue;      // Y21: the rules walk a fighter until its fight is over
       if (t < f.workUntil) { f.e.loop('interact'); }
       else {
         f.s = (f.s + 1.0 * dtMs / 1000) % f.line.length;

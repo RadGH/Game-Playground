@@ -47,6 +47,14 @@ function affixText(a) {
   return `${a.name || title(a.stat || a.id)}${v !== '' ? ` ${v > 0 ? '+' : ''}${shown}` : ''}`;
 }
 
+// wrap-up (report #60): a property line that names a status ("Hits leave Cursed.") gets that status explained at the bottom
+// of the card — C's js/rules/status-text.js writes the sentence from the status row's own numbers (Farhold's skills.json).
+let statusNotes = null, statusTable = null;
+import('../../rules/status-text.js').then(m => { if (typeof m.statusNotes === 'function') statusNotes = m.statusNotes; }).catch(() => {});
+import('../skillbar.js').then(m => m.loadSkillData?.()).then(d => { if (d?.statuses) statusTable = d.statuses; }).catch(() => {});
+/** For tests and the gallery: hand the card its status table and writer without waiting for the two loads above. */
+export function setStatusText(notes, table) { statusNotes = notes; statusTable = table; }
+
 let ctx = { equipment: () => ({}), level: () => 1, vitals: () => null };
 /** More context for the cards (play-test 6: your health and mana, so a potion says what it restores for YOU). */
 export function setCardContext(c = {}) { ctx = { ...ctx, ...c }; }
@@ -110,13 +118,16 @@ export function itemCardHtml(item, { worn = false, level = null, equipment = nul
   }
   if (item.desc && !item.lore && !(potionSaid && /restores?\s+\d/i.test(item.desc))) b.push(`<div class="ic-dim">${esc(item.desc)}</div>`);
   // T15 / T17 (C): what a caster weapon's attack IS, what a focus adds, what a converted weapon deals — written from the numbers
-  for (const k of ['attackText', 'focusText', 'convertText']) if (item[k]) b.push(`<div class="ic-attack">${esc(who(item[k]))}</div>`);
+  const said = [];                              // every PROPERTY line (never the name or the lore): what the status notes read
+  for (const k of ['attackText', 'focusText', 'convertText']) if (item[k]) { said.push(item[k]); b.push(`<div class="ic-attack">${esc(who(item[k]))}</div>`); }
   if (item.weaponHeadline) b.push(`<div class="ic-dim">${esc(item.weaponHeadline)}</div>`);
   const rolled = (item.affixes || []).filter(a => !a.baseIntrinsic), built = (item.affixes || []).filter(a => a.baseIntrinsic);
   if (rolled.length || built.length) {
-    b.push('<ul class="ic-affixes">' + rolled.map(a => `<li class="${a.id === 'legendary_effect' ? 'ic-legend' : String(a.stat).startsWith('cond_') ? 'ic-cond' : ''}">${esc(affixText(a))}</li>`).join('')
-      + built.map(a => `<li class="ic-built">${esc(affixText(a))} <i>(built in)</i></li>`).join('') + '</ul>');
+    const lines = [...rolled, ...built].map(affixText); said.push(...lines);
+    b.push('<ul class="ic-affixes">' + rolled.map((a, i) => `<li class="${a.id === 'legendary_effect' ? 'ic-legend' : String(a.stat).startsWith('cond_') ? 'ic-cond' : ''}">${esc(lines[i])}</li>`).join('')
+      + built.map((a, i) => `<li class="ic-built">${esc(lines[rolled.length + i])} <i>(built in)</i></li>`).join('') + '</ul>');
   }
+  if (item.uniquePower || item.power?.text) said.push(item.power?.text || item.uniquePower);
   if (item.uniquePower || item.power?.text) b.push(`<div class="ic-legend">${esc(who(item.power?.text || item.uniquePower))}</div>`);
   if (item.lore) b.push(`<div class="ic-lore">${esc(item.lore)}</div>`);
   if (slot && !worn) {
@@ -133,6 +144,11 @@ export function itemCardHtml(item, { worn = false, level = null, equipment = nul
       if (was.length || lose.length) b.push(`<div class="ic-dim">You would lose: ${esc([...was, ...lose].join(' · '))}</div>`);
     } else b.push(`<div class="ic-dim">Nothing worn in ${esc(SLOT_NAME[c.slot] || c.slot)} — a free upgrade.</div>`);
     if (altSlotOf(item)) b.push(`<div class="ic-shift">${alt ? 'Comparing the other slot.' : 'Hold <kbd>Shift</kbd> to compare the other slot.'}</div>`);
+  }
+  // #60: how each status named above works — one line a status, under everything else the card says
+  if (statusNotes && statusTable && said.length) {
+    let notes = []; try { notes = statusNotes(said, statusTable) || []; } catch { notes = []; }
+    if (notes.length) b.push('<div class="ic-status">' + notes.map(t => { const i = t.indexOf(':'); return `<div><b>${esc(t.slice(0, i))}</b>${esc(t.slice(i))}</div>`; }).join('') + '</div>');
   }
   if (item.value) b.push(`<div class="ic-value">Worth ${esc(item.value)} gold</div>`);
   return `<div class="itemtip">${b.join('')}</div>`;

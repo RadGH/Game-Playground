@@ -503,6 +503,24 @@
    "z": 1428,
    "yaw": 1.591,
    "titled": false
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_redcliff_0",
+   "name": "Training Dummy",
+   "town": "Redcliff",
+   "x": 375.2,
+   "z": 854.6,
+   "yaw": 0.265
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_redcliff_1",
+   "name": "Training Dummy",
+   "town": "Redcliff",
+   "x": 372.8,
+   "z": 855.4,
+   "yaw": 0.418
   }
  ]
 }

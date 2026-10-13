@@ -136,6 +136,26 @@ export function memoryM3(d, { now, changed, sha256Hex, randomHex, packChar, prun
       return { ok: true };
     },
 
+    /**
+     * moveChars(from, to, { limit, ids = null, nowMs }) -> { moved: [brief], left: [{ id, name, why: 'online' | 'full' }] } | { err: 'missing' | 'same' }
+     * Wrap-up (report S#66): characters change account — a guest's characters adopted by the account the player signed
+     * in to (js/sim/accounts.js 'adopt'), or the keeper's tools/move-char.mjs. A character somebody is playing stays
+     * (its lease is live); so does anything past the target's character limit. Nothing else about a character changes.
+     */
+    async moveChars(from, to, { limit = Infinity, ids = null, nowMs = now() } = {}) {
+      if (!d.accounts[from] || !d.accounts[to]) return { err: 'missing' };
+      if (from === to) return { err: 'same' };
+      let have = Object.values(d.chars).filter(r => r.account === to).length;
+      const moved = [], left = [];
+      for (const r of Object.values(d.chars).filter(r => r.account === from && (!ids || ids.includes(r.id))).sort((a, b) => a.id - b.id)) {
+        if (r.lease_owner && r.lease_until > nowMs) { left.push({ id: r.id, name: r.cols.name, why: 'online' }); continue; }
+        if (have >= limit) { left.push({ id: r.id, name: r.cols.name, why: 'full' }); continue; }
+        r.account = to; have++; moved.push(brief(r));
+      }
+      if (moved.length) changed();
+      return { moved, left };
+    },
+
     // ---- friends ----
     async listFriends(char) { return (d.friends[char] || []).map(id => d.chars[id]).filter(Boolean).map(brief); },
     async addFriend(char, friend, max = FRIENDS_MAX) {

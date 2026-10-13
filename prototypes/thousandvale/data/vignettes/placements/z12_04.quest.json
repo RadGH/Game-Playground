@@ -308,6 +308,24 @@
    "z": 770,
    "yaw": -0.238,
    "titled": false
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_coldwater_0",
+   "name": "Training Dummy",
+   "town": "Coldwater",
+   "x": 1467,
+   "z": 1840.8,
+   "yaw": -2.539
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_coldwater_1",
+   "name": "Training Dummy",
+   "town": "Coldwater",
+   "x": 1469,
+   "z": 1839.2,
+   "yaw": -2.347
   }
  ]
 }

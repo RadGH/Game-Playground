@@ -79,7 +79,9 @@ test('first meeting: Bram by the gate teaches Mining at the first word and hands
   // told to the client
   const list = a.joined.you.professions.list;
   assert.deepEqual(list.map(p => p.id), ['mining', 'logging', 'foraging', 'skinning', 'angling', 'smithing', 'outfitting', 'alchemy', 'cooking', 'tempering']);
-  assert.ok(list.find(p => p.id === 'angling').known && list.find(p => p.id === 'cooking').known && !list.find(p => p.id === 'logging').known, 'angling and cooking from the start');
+  assert.ok(list.find(p => p.id === 'cooking').known && !list.find(p => p.id === 'logging').known, 'cooking from the start');
+  // wrap-up: Angling is learned from an angler (Y15) — the list says "known" only when the angling record does
+  assert.equal(list.find(p => p.id === 'angling').known, P.angling.learned(o.char), 'angling follows the angling record');
   const sheet = on(a, 'sheet'); a.sheet(); await until(clock, () => sheet.length, 3000);
   const mining = sheet[0].professions.list.find(p => p.id === 'mining');
   assert.ok(mining.known && mining.level === 1 && mining.rank === 'Novice' && mining.tool && mining.tool.id === pick.id, JSON.stringify(mining));

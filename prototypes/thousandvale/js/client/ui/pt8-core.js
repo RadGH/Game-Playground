@@ -13,6 +13,18 @@ export function lootRows(d) {
   return rows;
 }
 /** Arrow keys: the selection stops at the ends (it does not wrap — holding Down lands on the last row). */
+/**
+ * Wrap-up (report #58): does a `lootWin {id, closed}` close the open window? The window spans several bodies and is led by
+ * whichever still holds something, so its id MOVES as bodies empty; `seen` is every id this window has been drawn under.
+ * Comparing with the current id alone left the window open on its last row when the server named an earlier leader.
+ */
+export const lootCloses = (openId, seen, closedId) => openId != null && (openId === closedId || !!seen?.has?.(closedId));
+/** The body a gold take should name: the leading one if it holds gold, else the first of the group that does. */
+export function lootGoldBody(d, openId) {
+  const g = d?.group || [];
+  if (!g.length || g.some(p => p.id === openId && p.gold > 0)) return openId;
+  return g.find(p => p.gold > 0)?.id ?? openId;
+}
 export const lootStep = (sel, n, d) => (n <= 0 ? 0 : Math.max(0, Math.min(n - 1, (sel | 0) + d)));
 
 // ------------------------------------------------------------------------------------- W29 / W28: reports and their notes
@@ -257,6 +269,16 @@ export function npcTitle(info, name = '') {
   if (!t || t === name || /^(local|townsfolk|villager)$/i.test(t)) return '';
   return String(t);
 }
+
+/**
+ * What /meter (or any on/off switch for the meter) should do, from the TWO facts the window has: is it counting (`on`),
+ * and is its window showing (`open`). Wrap-up, report #67: the window's X hides it and leaves it counting, so a toggle
+ * that looked only at `on` switched the meter OFF on the first /meter and back on with the second.
+ *   counting, hidden  -> 'show'  (nothing is switched; the window comes back)
+ *   counting, showing -> 'off'
+ *   not counting      -> 'on'
+ */
+export const meterToggle = ({ on = false, open = false } = {}) => (!on ? 'on' : open ? 'off' : 'show');
 
 // ------------------------------------------------------------------------------------------- W21: the damage meter
 export const HIT_FLAGS = { heal: 1, crit: 2, miss: 4, kill: 8, blocked: 16, dot: 32, dodged: 64 };

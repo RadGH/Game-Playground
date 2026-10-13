@@ -4,6 +4,7 @@
 // The RULES are pinned here (orderings, ratios, who applies a factor), never the numbers: data/rules/prices.json and
 // data/rules/fishing.json `value` are knobs stream E's tools/sim-economy.mjs tunes with us.
 
+import { ASSUME } from '../../tools/sim-economy.mjs';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -115,7 +116,7 @@ test('V2 parity: a parity engine keeps Farhold\'s own gold (the formula is Thous
   assert.equal(pe.prices, null);
 });
 
-test('V2 ratios: an hour of killing buys about one uncommon piece of your level; a rare piece is hours of play', () => {
+test('V2 ratios (Y31: in real play): killing alone buys an uncommon piece of your level in under an hour and a half; a rare piece is hours of play', () => {
   const rng = makeRng(31);
   for (const L of LEVELS) {
     let sell = 0, n = 0;
@@ -127,8 +128,12 @@ test('V2 ratios: an hour of killing buys about one uncommon piece of your level;
     const rankMean = rolls ? 1 + (C.champion || 0) * ((P.kill.rank.champion || 1) - 1) + (C.rare || 0) * ((P.kill.rank.rare || 1) - 1) : 1;
     const hour = 80 * killGold(L) * rankMean + 80 * dropRate * (sell / n) * (rolls ? 1.4 : 1);
     const magic = priceOf(mk('heavy_chest', 'magic', L)), rare = priceOf(mk('sword', 'rare', L));
-    assert.ok(magic / hour > 0.3 && magic / hour < 1.5, `L${L}: an uncommon chest is ${(magic / hour).toFixed(2)} hours of killing`);
-    assert.ok(rare / hour > 2 && rare / hour < 8, `L${L}: a rare sword is ${(rare / hour).toFixed(1)} hours`);
+    // Y31 (owner feedback 10): the ladder is priced in REAL play — a person gets through `pace` of this ideal hour (tools/sim-economy.mjs
+    // ASSUME.real; tests/E/playtest7-economy pins the exact bands against the income table). By killing alone: an uncommon piece is
+    // between ten minutes and an hour and a half, a rare a good deal more than one sitting and never a week.
+    const realHour = hour * ASSUME.real.pace;
+    assert.ok(magic / realHour > 1 / 6 && magic / realHour < 1.5, `L${L}: an uncommon chest is ${(magic / realHour).toFixed(2)} hours of killing`);
+    assert.ok(rare / realHour > 1 && rare / realHour < 6, `L${L}: a rare sword is ${(rare / realHour).toFixed(1)} hours`);
     assert.ok(80 * dropRate * (sell / n) < 3 * 80 * killGold(L) * rankMean, `L${L}: selling drops does not dwarf the gold monsters carry`);
   }
 });

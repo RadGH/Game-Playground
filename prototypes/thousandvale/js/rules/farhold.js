@@ -22,7 +22,7 @@ export {
 export {
   createSkillBar, applyStatus, tickStatuses, slowOf, buffsOf, outgoingFrom, incomingFrom,
   STATUS_POWER_SHARE, ELEMENT_STATUS, effectiveMult, setStatusFx, setStatusPulse, setStatusExpire,
-  describeSkill,
+  describeSkill, TICK_EVERY,
 } from '../../../farhold/js/skills.js';
 
 export {

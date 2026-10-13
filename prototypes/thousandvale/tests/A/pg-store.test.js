@@ -85,3 +85,30 @@ test('pg store: guest, characters, leases, fencing, versions', { skip: !HAVE_PG 
     await st.close();
   }
 });
+
+// wrap-up (report S#66): characters change account in Postgres as they do in memory (tests/A/wrap-adopt.test.js)
+test('pg store: moveChars leaves a played character and whatever is past the limit', { skip: !HAVE_PG && 'no PG* environment' }, async () => {
+  const { createPgStore } = await import('../../server/db/pg-store.js');
+  const st = createPgStore();
+  await st.init();
+  const made = [];
+  try {
+    const g = await st.createGuest('MoveFrom'), t = await st.createGuest('MoveTo');
+    made.push(g.account, t.account);
+    const nm = () => 'Pgmove ' + Array.from({ length: 6 }, () => 'abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 26)]).join('');
+    const a = (await st.createChar(g.account, { name: nm(), cls: 'mage' })).char, b = (await st.createChar(g.account, { name: nm(), cls: 'mage' })).char, c = (await st.createChar(g.account, { name: nm(), cls: 'mage' })).char;
+    await st.takeChar(g.account, a.id, 'ptest:move', 30000);
+    const r = await st.moveChars(g.account, t.account, { limit: 1 });
+    assert.deepEqual([r.moved.map(m => m.id), r.left.map(l => [l.id, l.why])], [[b.id], [[a.id, 'online'], [c.id, 'full']]]);
+    assert.deepEqual((await st.listChars(t.account)).map(x => x.id), [b.id]);
+    await st.clearLeases('ptest:');
+    const one = await st.moveChars(g.account, t.account, { ids: [c.id] });
+    assert.deepEqual([one.moved.map(m => m.id), one.left], [[c.id], []]);
+    assert.deepEqual((await st.listChars(g.account)).map(x => x.id), [a.id]);
+    assert.deepEqual(await st.moveChars(g.account, g.account), { err: 'same' });
+    assert.deepEqual(await st.moveChars(g.account, 2147483000), { err: 'missing' });
+  } finally {
+    for (const id of made) await st.pool.query('DELETE FROM accounts WHERE id = $1', [id]);
+    await st.close();
+  }
+});

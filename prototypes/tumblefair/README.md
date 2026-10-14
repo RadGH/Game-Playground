@@ -41,6 +41,8 @@ lobby -> [ board -> vote -> intro -> game -> results ] x rounds -> final -> lobb
   everyone +2, a free ribbon), Hall of Mirrors (swap places), the gate (+5 each lap). After everyone has moved, a
   minigame. Final order: ribbons, then tickets.
 - **Minigame Marathon:** no board — vote, play, repeat; 4/3/2/1 points.
+- **The Fair Never Closes** (endless): marathon scoring with no set length; difficulty steps easy → normal → hard every 3 games, and after every 3 the players vote to keep going or finish (a tie keeps it open; 30 games at most).
+- **Teams** (any mode, 2 or 4 players): Red & Green against Blue & Pink (seat % 2); team totals on the bar, results and final; your team's place is your place.
 - **Vote:** a shortlist of 3 (unplayed games first, never the one just played), tie broken by the room's seeded
   random numbers. Only games whose player range fits the seated count are offered.
 - **Awards:** a game only returns an order (ties allowed) or a co-op success; the room converts it — board: 10/6/3/1
@@ -88,6 +90,9 @@ lobby -> [ board -> vote -> intro -> game -> results ] x rounds -> final -> lobb
 | `draw-the-disaster` | screen | a private prompt (`data/prompts.json`, 135), 45 s drawing on your phone, anonymous gallery vote (not your own), a rule-based judge's ribbon (+1) breaks 2-player ties; avatar portraits on every card |
 | `memory-heist` | screen | study a vault of 9-16 treasures, then 5 quick questions; speed scores more |
 | `circuit-scramble` | screen, co-op | everyone turns only their own tiles to connect the battery to the bulbs; 6 boards, clear the goal together |
+| `laser-limbo` | arena | beams sweep a round stage: A hops the low ones, hold B to duck the high ones (slower); one touch and you're out; last one standing |
+| `cannonball-catch` | arena, co-op | stand in the landing ring to catch (A = dive); big balls need two catchers; misses cost the castle hearts; 4 waves |
+| `balloon-stampede` | arena | pop your colour (+1) and gold (+3); someone else's colour gives them the point; A = dash/barge; solo adds grey decoys |
 | `caption-clash` | screen | one silly picture for everyone (`data/scenes.json`, 42 scenes drawn from SVG props in `kit.js`); 40 s to write a caption (80 letters, cleaned; "Give me a starter" offers 3 openers), anonymous vote (not your own), points = votes + one judge's ribbon by a printed rule (shortest / most same-letter words / most words; tie = finished first) |
 | `pattern-impostor` | screen | 6 rounds of 6-9 SVG tiles (shape x colour x size x pattern x count) that all follow a rule but one; first right tap 5/3/2/1, a wrong tap locks you out; rounds 5-6 are pairing rules; every puzzle checked for a second answer |
 | `coinstorm` | screen | 5 rounds: split 10 coins between Piggy Bank (keep), Windmill (x2 unless yours is the biggest pile) and Storm Cloud (x3 or 0, forecast shown); everyone reveals together; solo plays against "the Gust" |

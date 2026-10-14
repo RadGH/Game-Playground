@@ -2,7 +2,11 @@
 // data/live-links.json (public URLs of games that run on their own server). Adding an experiment is one row
 // in the JSON — see the `about` line at the top of that file for the fields.
 //
-// Pure helpers (filterEntries, serverUrl, onPublicSite, statusLabel) are exported so tests/experiments.test.js
+// A third file, data/served-by.json, says who is serving the page. It is empty on the static servers (8400,
+// GitHub Pages); the Thousandvale game server answers it itself (server/static.js `hostInfo`), which is how
+// the page knows that the game is on this same address and which links that server will not hand out.
+//
+// Pure helpers (filterEntries, serverUrl, onPublicSite, statusLabel, forHost, sameHost) are exported so tests/experiments.test.js
 // can check them without a browser.
 import { el } from '../shared/ui.js';
 
@@ -23,6 +27,31 @@ export function serverUrl(server, hostname) {
   if (!server || !hostname || onPublicSite(hostname)) return null;
   const host = hostname.includes(':') && !hostname.startsWith('[') ? `[${hostname}]` : hostname;   // bare IPv6
   return `http://${host}:${server.port}/${String(server.path || '').replace(/^\/+/, '')}`;
+}
+
+/**
+ * The entries as this host can show them. `host` is data/served-by.json: `{ game, path, unavailable }`.
+ * The game the host runs gets an ordinary same-address page link in place of its "on this network" button,
+ * and anything the host cannot serve is left out (a whole card when it is the card's page, else the button).
+ */
+export function forHost(entries, host) {
+  if (!host || (!host.game && !host.unavailable?.length)) return entries;
+  const gone = new Set(host.unavailable || []);
+  const out = [];
+  for (const e of entries) {
+    const x = { ...e };
+    if (host.game && x.id === host.game && x.server) { x.href = String(host.path || x.server.path).replace(/^\/+/, ''); delete x.server; }
+    if (x.href && gone.has(x.href)) continue;
+    if (x.links) x.links = x.links.filter(l => !gone.has(l.href));
+    if (gone.has(x.readme || (x.folder ? x.folder + '/README.md' : ''))) x.noReadme = true;
+    out.push(x);
+  }
+  return out;
+}
+
+/** Is this link's address the one the page is already on? (A "Live link" to yourself is not worth a button.) */
+export function sameHost(url, hostname) {
+  try { return new URL(url).hostname.toLowerCase() === String(hostname || '').toLowerCase(); } catch { return false; }
 }
 
 /** Entries matching the search text (every word must appear somewhere) and the status chip. */
@@ -52,11 +81,11 @@ function card(e, live, hostname) {
     if (url) actions.append(el('a', { class: 'btn primary', href: url, text: 'Play on this network', 'data-role': 'network', 'data-tip': `The stable game server on this machine, port ${e.server.port}. Works for anyone on the same network.` }));
   }
   const link = e.live && live?.[e.live];
-  if (link?.url) {
+  if (link?.url && !sameHost(link.url, hostname)) {
     actions.append(el('a', { class: 'btn live', href: link.url, target: '_blank', rel: 'noopener', text: 'Live link', 'data-role': 'live', 'data-tip': [link.note, link.updated ? 'Checked ' + link.updated : ''].filter(Boolean).join('. ') }));
   }
   for (const l of e.links || []) actions.append(el('a', { class: 'btn', href: l.href, text: l.label }));
-  const readme = e.readme || (e.folder ? e.folder + '/README.md' : null);
+  const readme = e.noReadme ? null : e.readme || (e.folder ? e.folder + '/README.md' : null);
   if (readme) actions.append(el('a', { class: 'btn quiet', href: readme, text: e.readme ? 'Docs' : 'README', 'data-tip': 'How it works and how to reuse it (plain text).' }));
 
   return el('article', { class: 'panel xcard' + (e.status === 'deprecated' ? ' is-deprecated' : ''), id: 'card-' + e.id, 'data-id': e.id, 'data-status': e.status },
@@ -69,10 +98,12 @@ function card(e, live, hostname) {
 }
 
 export async function mount(root, { hostname = location.hostname } = {}) {
-  const [data, live] = await Promise.all([
+  const [data, live, host] = await Promise.all([
     fetch(new URL('../data/experiments.json', import.meta.url)).then(r => r.json()),
     fetch(new URL('../data/live-links.json', import.meta.url)).then(r => r.json()).catch(() => ({})),
+    fetch(new URL('../data/served-by.json', import.meta.url)).then(r => r.json()).catch(() => ({})),
   ]);
+  data.entries = forHost(data.entries, host);
   const state = { q: '', status: 'all' };
   try { const h = new URLSearchParams(location.hash.slice(1)); state.q = h.get('q') || ''; state.status = h.get('status') || 'all'; } catch { /* no hash */ }
 
@@ -107,7 +138,7 @@ export async function mount(root, { hostname = location.hostname } = {}) {
   }
   search.addEventListener('input', () => { state.q = search.value; draw(); });
   draw();
-  return { data, live, state, draw };
+  return { data, live, host, state, draw };
 }
 
 if (typeof document !== 'undefined' && document.getElementById('home')) {

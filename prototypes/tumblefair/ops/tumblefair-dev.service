@@ -1,0 +1,13 @@
+# Tumblefair DEV server: the live working tree on port 8483 (LAN only — never tunnel this one). User unit.
+# Installed by ops/install.sh. Restart after changing anything under server/, js/sim/, js/shared/ or a game's sim.js:
+#   systemctl --user restart tumblefair-dev
+[Unit]
+Description=Tumblefair dev server (working tree) on :8483
+After=network-online.target
+[Service]
+Type=simple
+ExecStart=%h/claude/playground/prototypes/tumblefair/ops/start.sh dev
+Restart=on-failure
+RestartSec=2
+[Install]
+WantedBy=default.target

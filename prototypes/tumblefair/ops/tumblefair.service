@@ -1,0 +1,12 @@
+# Tumblefair STABLE server: the published copy (tools/publish-tumblefair.sh) on port 8480. User unit.
+# This is the one to hand people, and the only one the public tunnel points at.
+[Unit]
+Description=Tumblefair stable server (published copy) on :8480
+After=network-online.target
+[Service]
+Type=simple
+ExecStart=%h/claude/playground/prototypes/tumblefair/ops/start.sh stable
+Restart=on-failure
+RestartSec=2
+[Install]
+WantedBy=default.target

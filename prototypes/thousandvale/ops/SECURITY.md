@@ -41,6 +41,13 @@ Legend: `[ ]` not done · `[~]` designed / partly in place · `[x]` verified (wr
 - [ ] Never pointed at the playground root. **Never** put `tools/serve.py` (8400/8401) behind the tunnel —
       it accepts POSTs that write files (`/api/library/sync`, `/api/inbox/*`).
 - [~] Dev (8491) serves allow-listed top folders of the playground (protocol.md §8.5) — LAN only.
+- [x] 2026-10-13: the public copy is the playground as a browser sees it (home page at `/`, every linked
+  experiment and prototype), not only the game. Same rule as before — a copy built from a commit through an
+  allow-list — with the lists in ONE place (`server/static.js`), read by the publish script at that commit.
+  Refused everywhere by name: `server/ ops/ tools/ tests/ research/ test-results/ node_modules/`, dotfiles,
+  package files, `library/synced/`, Thousandvale's `docs/`. Gate 3 of the publish script re-checks the built
+  copy by hand (also: no symlinks, nothing outside the allow-list); `tests/H/public-lists.test.js`;
+  `tools/check-public-pages.mjs <address>` probes a running server.
 
 ## 3. Tunnel, one route (PLAN §11.3)
 

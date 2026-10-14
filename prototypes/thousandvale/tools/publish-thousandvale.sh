@@ -14,8 +14,12 @@
 #   /srv/thousandvale/releases/<sha>-<time>/
 #     app/      what the server RUNS: the allow-listed playground folders + prototypes/thousandvale (with server/,
 #               js/, data/) + the server's node_modules (pg, ws). Never served.
-#     public/   what the server SERVES (A's --public): the same client folders minus server/, ops/, tests/,
-#               docs/, tools/, research/, node_modules, package files, dotfiles. Hard links into app/ (no 2nd copy).
+#     public/   what the server SERVES (A's --public): the PLAYGROUND as a browser sees it — the home page at
+#               the root and every experiment and prototype it links — minus every server/, ops/, tests/, tools/,
+#               research/ folder, Thousandvale's docs/, library/synced, node_modules, package files, dotfiles.
+#               Hard links into app/ (no 2nd copy).
+# The lists live in ONE place, server/static.js (ALLOW, DENY, PRIVATE_DIRS, PRIVATE_FILES): this script reads
+# them from the commit it is publishing, so the dev server (8491) and the published copy cannot drift apart.
 #     BUILD     the commit hash; the server's --build and the client's stamped build agree, so an old tab reloads.
 #   /srv/thousandvale/current -> releases/<the live one>   (switched in one rename; the previous one is kept for
 #                                                          rollback, the oldest beyond 3 are pruned)
@@ -35,12 +39,24 @@ PORT="${TV_PORT:-8490}"
 SHA="$(git rev-parse --verify "$REF^{commit}")"; SHORT="${SHA:0:12}"
 echo "== publishing $SHORT ($(git log -1 --format=%s "$SHA"))"
 
-# The client imports from these playground folders (server/static.js ALLOW); everything else stays out.
-ALLOW=(prototypes/thousandvale prototypes/farhold prototypes/emberveil prototypes/bannerline shared avatar-3d avatar-2d vendor
-       assets worldgen proctown items namegen lingo conversations voice-lab sfx meters library/data universe highdef-3d icons)
-PRESENT=(); for p in "${ALLOW[@]}"; do git cat-file -e "$SHA:$p" 2>/dev/null && PRESENT+=("$p"); done
+# What a browser may load is decided by server/static.js AT THAT COMMIT — no second list here.
+TMP="$(mktemp -d)"; LISTS="$(mktemp -d)"; trap 'rm -rf "$TMP" "$LISTS"' EXIT
+git show "$SHA:prototypes/thousandvale/server/static.js" > "$LISTS/static.mjs"
+list() { node --input-type=module -e "const m = await import('file://$LISTS/static.mjs'); const l = m['$1']; if (!Array.isArray(l) || !l.length) { console.error('server/static.js exports no $1 list'); process.exit(1); } console.log(l.join('\n'));"; }
+mapfile -t ALLOW < <(list ALLOW); mapfile -t DENY < <(list DENY)
+mapfile -t PRIVATE_DIRS < <(list PRIVATE_DIRS); mapfile -t PRIVATE_FILES < <(list PRIVATE_FILES)
+mapfile -t BROWSER_CODE < <(list BROWSER_CODE)     # folders named like a private one that hold page scripts
+[[ ${#ALLOW[@]} -gt 0 && ${#DENY[@]} -gt 0 && ${#PRIVATE_DIRS[@]} -gt 0 && ${#PRIVATE_FILES[@]} -gt 0 ]] || { echo "refusing: could not read the lists from server/static.js at $SHORT"; exit 1; }
+# Only what git holds as a real folder or file: a symlink (prototypes/tinyrts points at another repo) or a
+# folder nobody has committed yet is skipped, not an error.
+PRESENT=(); for p in "${ALLOW[@]}"; do
+  case "$(git cat-file -t "$SHA:$p" 2>/dev/null || true)" in
+    tree) PRESENT+=("$p") ;;
+    blob) [[ "$(git ls-tree "$SHA" -- "$p" | cut -c1-6)" == 120000 ]] && echo "   skipping $p (a symlink)" || PRESENT+=("$p") ;;
+    *) echo "   skipping $p (not in $SHORT)" ;;
+  esac
+done
 
-TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
 git archive "$SHA" -- "${PRESENT[@]}" | tar -x -C "$TMP"
 
 # ---- gate 1: every module parses (a half-written import is what takes a page down) ----
@@ -78,15 +94,15 @@ cp -a "$TMP"/. "$REL/app/"
 cp -a "$GAME_DIR/node_modules" "$REL/app/prototypes/thousandvale/node_modules"
 echo "$SHORT" > "$REL/BUILD"
 
-# public/: hard-linked subset of app/ — client files only
+# public/: hard-linked subset of app/ — client files only (real files: `-type f` leaves every symlink behind)
 mkdir -p "$REL/public"
-(cd "$REL/app" && find . -type f \
-  -not -path '*/node_modules/*' -not -path '*/.*' \
-  -not -path './prototypes/thousandvale/server/*' -not -path './prototypes/thousandvale/ops/*' \
-  -not -path './prototypes/thousandvale/docs/*' -not -path './prototypes/thousandvale/tools/*' \
-  -not -path '*/tests/*' -not -path '*/research/*' -not -path '*/tools/*' \
-  -not -name 'package.json' -not -name 'package-lock.json' -not -name '*.env' -not -name 'env.example' \
-  -print0) | (cd "$REL/app" && cpio -0 -pdl --quiet "$REL/public")
+SKIP=(-not -path '*/.*' -not -name '*.env')
+for d in "${DENY[@]}"; do SKIP+=(-not -path "./$d/*" -not -path "./$d"); done
+for f in "${PRIVATE_FILES[@]}"; do SKIP+=(-not -name "$f"); done
+# a private folder name anywhere in the path, unless the file sits in one of the few excepted page-script folders
+PRIV=(); for d in "${PRIVATE_DIRS[@]}"; do PRIV+=(-not -path "*/$d/*"); done
+KEEP=(); KEEPDIRS=(); for d in "${BROWSER_CODE[@]}"; do KEEP+=(-o -path "./$d/*"); KEEPDIRS+=(-not -path "$REL/public/$d"); done
+(cd "$REL/app" && find . -type f "${SKIP[@]}" \( \( "${PRIV[@]}" \) "${KEEP[@]}" \) -print0) | (cd "$REL/app" && cpio -0 -pdl --quiet "$REL/public")
 
 # stamp the client with the build so the handshake matches the server's --build
 STAMPED=0
@@ -106,8 +122,26 @@ fi
 echo "== gate: public copy contents"
 LEAK=$(grep -rIl -E 'PGPASSWORD=[A-Za-z0-9]{8}|BEGIN (RSA|OPENSSH|EC|DSA) PRIVATE KEY|TV_TURNSTILE_SECRET=0x[0-9A-Za-z]{20}' "$REL/public" "$REL/app" 2>/dev/null | grep -v '/node_modules/' || true)
 [[ -z "$LEAK" ]] || { echo "refusing: possible secret in $LEAK"; rm -rf "$REL"; exit 1; }
-for d in server ops tests docs tools; do [[ ! -e "$REL/public/prototypes/thousandvale/$d" ]] || { echo "refusing: public/ holds $d/"; rm -rf "$REL"; exit 1; }; done
-[[ -z "$(find "$REL/public" -name '.*' -o -name node_modules | head -1)" ]] || { echo "refusing: dotfiles or node_modules in public/"; rm -rf "$REL"; exit 1; }
+refuse() { echo "refusing: $1"; rm -rf "$REL"; exit 1; }
+# written out by hand ON PURPOSE (not read from static.js): if someone empties a list there, this still stops it
+for d in server ops tests docs tools research; do [[ ! -e "$REL/public/prototypes/thousandvale/$d" ]] || refuse "public/ holds prototypes/thousandvale/$d/"; done
+BADDIR="$(find "$REL/public" \( -name '.*' -o -name node_modules -o -name server -o -name ops -o -name tools -o -name tests -o -name research -o -name test-results -o -name synced -o -name secrets \) "${KEEPDIRS[@]}" -print | head -5)"
+[[ -z "$BADDIR" ]] || refuse "public/ holds a private folder or dotfile: $BADDIR"
+[[ ${#BROWSER_CODE[@]} -le 3 ]] || refuse "server/static.js excepts ${#BROWSER_CODE[@]} folders from the private names; that list is meant to stay tiny"
+for d in "${BROWSER_CODE[@]}"; do [[ "$d" == prototypes/*/js/* && "$d" != prototypes/thousandvale/* && "$d" != *..* ]] || refuse "BROWSER_CODE may only name a page-script folder inside another prototype's js/, not $d"; done
+BADFILE="$(find "$REL/public" \( -name 'package.json' -o -name 'package-lock.json' -o -name '*.env' -o -name 'env.example' -o -name '*.pem' -o -name '*.key' -o -name 'CLAUDE.md' -o -name '*.py' -o -name '*.sh' \) -print | head -5)"
+[[ -z "$BADFILE" ]] || refuse "public/ holds a file that is not for a browser: $BADFILE"
+[[ -z "$(find "$REL/public" -type l -print -quit)" ]] || refuse "public/ holds a symlink"
+# everything at the top of public/ must be something the allow-list named
+for top in "$REL/public"/*; do t="$(basename "$top")"; ok=0
+  for a in "${ALLOW[@]}"; do [[ "$a" == "$t" || "$a" == "$t"/* ]] && ok=1; done
+  [[ $ok == 1 ]] || refuse "public/ holds $t, which the allow-list does not name"; done
+for top in "$REL/public/prototypes"/*; do t="prototypes/$(basename "$top")"; ok=0
+  for a in "${ALLOW[@]}"; do [[ "$a" == "$t" ]] && ok=1; done
+  [[ $ok == 1 ]] || refuse "public/ holds $t, which the allow-list does not name"; done
+# and the things the owner opens must be there: the home page, its list, the game, and the file Emberveil needs
+for f in index.html js/home.js css/home.css data/experiments.json shared/style.css prototypes/thousandvale/index.html prototypes/emberveil/index.html library/js/make.js; do
+  [[ -s "$REL/public/$f" ]] || refuse "public/ is missing $f"; done
 # extracted files keep the publisher's own group (not the setgid one), so hand the tree to the service group first
 chgrp -R thousandvale "$REL" 2>/dev/null || [[ -n "${TV_SRV:-}" ]] || { echo "refusing: cannot give the release to group thousandvale (log out and back in after setup-stable.sh added you to it)"; rm -rf "$REL"; exit 1; }
 chmod -R u=rwX,g=rX,o= "$REL"

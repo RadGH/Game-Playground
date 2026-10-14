@@ -123,10 +123,39 @@ throw-away Postgres, LAN only, for the 300-bot run in `ops/load/README.md`) — 
 Off-machine backups: `thousandvale-offsite.timer` (nightly, skips until the owner's bucket is in `/etc/thousandvale/offsite.env`).
 
 Give the owner `http://<LAN-IP>:8490/` for the stable build once it is published, and `http://<LAN-IP>:8491/` for work in progress.
+
+**What 8490 / 8491 / the public link serve (2026-10-13).** `/` is the playground home page — the same page
+8400 shows — and every experiment and prototype it links loads from the same address, so the public link is
+one address to browse and share everything from. Thousandvale is at `prototypes/thousandvale/` as before.
+
+* **One list, in `prototypes/thousandvale/server/static.js`**: `ALLOW` (the folders and root files a browser
+  may load), `DENY`, `PRIVATE_DIRS` (a folder named `server`, `ops`, `tools`, `tests`, `research`,
+  `test-results` or `node_modules` is refused wherever it sits), `PRIVATE_FILES` (package files, `env.example`)
+  and `BROWSER_CODE` (the one exception: Bannerline keeps page scripts in `js/tools/`). Dev applies them to the
+  working tree; `publish-thousandvale.sh` reads the same lists from the commit it is publishing and builds
+  the public copy from them. **A new experiment or prototype folder needs one line in `ALLOW`** —
+  `tests/H/public-lists.test.js` fails until it has one, and the publish refuses on that test.
+* **Still never served**: dotfiles, `node_modules`, any `tools/` (so no `serve.py`), `tests/`, `research/`,
+  `server/`, `ops/`, `library/synced/`, Thousandvale's `docs/`, package files, `CLAUDE.md`, the root `docs/`
+  and `tests/`. The publish script's "public copy contents" gate checks all of that by name, by hand, plus:
+  no symlinks, nothing at the top of the copy the allow-list did not name.
+* **Tiny RTS is not there.** `prototypes/tinyrts` is a symlink to another repo and a published copy cannot
+  hold it. The server tells the home page what it cannot serve (`data/served-by.json`, answered by the server
+  itself — the committed file is `{}` for 8400 and GitHub Pages), and the page leaves that card out, along
+  with Thousandvale's Docs button (its plan is private). On the game server the Thousandvale card is an
+  ordinary link to `prototypes/thousandvale/` on the same address instead of "Play on this network".
+* **Pages that write files do not write here.** The library's "Sync to Claude" and the language debug
+  "submit" post to `tools/serve.py`; the game server answers 405 to any POST. Use 8400/8401 for those.
+* **Check it**: `node prototypes/thousandvale/tools/check-public-pages.mjs [address]` (default 8491) asks for
+  every card's page, its scripts and stylesheets and what they import, lists anything that is not found,
+  and confirms a list of private paths is refused. Run it against 8491 before publishing and against 8490
+  and the live link after. No browser needed.
 The rules that matter (full list: `prototypes/thousandvale/ops/SECURITY.md`):
 
 * **Never** put `tools/serve.py`, 8400 or 8401 (or 8491, 8492, 8495) behind a tunnel — serve.py accepts POSTs that write files.
-* The public server serves only its published folder, never the playground root.
+* The public server serves only its published folder, never the playground root **folder on disk**. Since
+  2026-10-13 that published folder is a browser's view of the playground (next section) — still a copy built
+  from a commit through an allow-list, never the working tree.
 * **The dev unit does not reload code.** After stream A changes `server/` or `js/sim`/`js/net`, run
   `systemctl --user restart thousandvale-dev` — a protocol bump makes the old process refuse every new client
   ("refused" in the page). The tests start their own server on a free port, so they never hit a stale one.

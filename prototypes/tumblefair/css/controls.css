@@ -1,0 +1,15 @@
+/* The thumb stick and the round buttons shown during an arena minigame on a touch screen (js/client/controls.js).
+   Sizes and placement follow Thousandvale's phone layout: safe-area aware, 44 px minimum, nothing selectable. */
+#controls { position: fixed; inset: 0; pointer-events: none; z-index: 30; display: none; }
+#controls.on { display: block; }
+.ph-stickzone { position: absolute; left: 0; bottom: 0; width: 50%; height: 62%; pointer-events: auto; touch-action: none; }
+.ph-stick { position: fixed; left: calc(var(--sl) + 92px); top: calc(100% - var(--sb) - 100px); width: 0; height: 0; opacity: .5; transition: opacity .15s; }
+.ph-stick.on { opacity: 1; }
+.ph-ring { position: absolute; left: -62px; top: -62px; width: 124px; height: 124px; border-radius: 50%; background: rgba(8, 28, 34, .45); border: 3px solid rgba(255, 255, 255, .55); box-sizing: border-box; }
+.ph-thumb { position: absolute; left: -27px; top: -27px; width: 54px; height: 54px; border-radius: 50%; background: #fff; box-shadow: 0 3px 0 rgba(0, 0, 0, .35); }
+.ph-btn { position: absolute; pointer-events: auto; touch-action: none; border-radius: 50%; border: 4px solid #0d2228; color: #0d2228; font: 800 15px/1 var(--font); box-shadow: 0 5px 0 #0d2228; }
+.ph-btn.down { transform: translateY(4px); box-shadow: 0 1px 0 #0d2228; }
+.ph-a { right: calc(var(--sr) + 26px); bottom: calc(var(--sb) + 44px); width: 96px; height: 96px; background: var(--sun); font-size: 17px; }
+.ph-b { right: calc(var(--sr) + 132px); bottom: calc(var(--sb) + 24px); width: 72px; height: 72px; background: #fff; }
+.key-hint { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); padding: 6px 12px; border-radius: 999px; background: rgba(8, 28, 34, .7); color: #dff; font: 600 13px/1.2 var(--font); white-space: nowrap; }
+.key-hint kbd { display: inline-block; min-width: 18px; padding: 2px 5px; margin: 0 1px; border-radius: 5px; background: #fff; color: #12323a; font: 700 12px/1.2 var(--font); text-align: center; }

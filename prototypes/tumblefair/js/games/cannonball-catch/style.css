@@ -1,0 +1,16 @@
+/* Cannonball Catch: the team strip under the score bar (castle hearts, catches toward the goal, wave), the wave /
+   end banner, and the "x2" tag on a big ball's ring. */
+.game-cannonball-catch .cc-hud { position: absolute; top: calc(var(--st) + 58px); left: 50%; transform: translateX(-50%); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center;
+  max-width: calc(100% - 16px); padding: 4px 12px; border-radius: 999px; background: rgba(255, 248, 231, .94); border: 3px solid var(--ink); box-shadow: 0 3px 0 var(--ink); font: 800 15px/1.2 var(--font); white-space: nowrap; }
+.cc-hud b { font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: .5px; opacity: .75; }
+.cc-hud em { font-style: normal; font-weight: 900; }
+.cc-hearts { font-style: normal; color: #ff3b5c; font-size: 18px; letter-spacing: 1px; -webkit-text-stroke: .6px var(--ink); }
+.cc-hud.low .cc-hearts { animation: cc-throb .6s infinite; display: inline-block; }
+@keyframes cc-throb { 50% { transform: scale(1.18); } }
+.cc-wave { background: var(--ink); color: #fff; border-radius: 999px; padding: 0 8px; font-size: 13px; }
+.game-cannonball-catch .cc-banner { position: absolute; left: 50%; top: 38%; transform: translate(-50%, -50%) scale(.6); opacity: 0; pointer-events: none;
+  font: 900 clamp(34px, 9vw, 64px)/1 var(--font); color: var(--sun); -webkit-text-stroke: 2.5px var(--ink); paint-order: stroke fill; text-shadow: 0 5px 0 var(--ink); white-space: nowrap; transition: transform .25s, opacity .25s; }
+.cc-banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.cc-banner.good { color: #8ff07a; } .cc-banner.bad { color: #ff7a7a; }
+.tag.cc-big { background: #ff3b3b; font-size: 15px; font-weight: 900; padding: 0 8px; }
+@media (max-width: 520px) { .game-cannonball-catch .cc-hud { top: calc(var(--st) + 52px); gap: 6px; font-size: 14px; padding: 3px 10px; } .cc-hud b { font-size: 10px; } .cc-hearts { font-size: 16px; } }

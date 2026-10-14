@@ -3,5 +3,10 @@
     "url": "https://fundamentals-denver-awarded-steal.trycloudflare.com/",
     "note": "Cloudflare quick tunnel — the address changes when the tunnel restarts",
     "updated": "2026-10-12"
+  },
+  "tumblefair": {
+    "url": "https://seems-glen-produces-occasional.trycloudflare.com/",
+    "note": "Cloudflare quick tunnel to Tumblefair's stable server (:8480) — the address changes when the tunnel restarts (prototypes/tumblefair/ops/install.sh --url)",
+    "updated": "2026-10-13"
   }
 }

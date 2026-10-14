@@ -1,0 +1,84 @@
+/* Coinstorm — a windy hilltop under a big sky: three spot cards, gold coins, the sky darkens or brightens on the reveal. */
+.game-coinstorm { pointer-events: auto; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: calc(var(--st) + 10px) calc(var(--sr) + 10px) calc(var(--sb) + 48px) calc(var(--sl) + 10px); background: linear-gradient(#5fb6e8, #a9dcf2 55%, #7cc06a 55.2%, #4f9a45); transition: background .6s; }
+.game-coinstorm.storm { background: linear-gradient(#3b4658, #6b7788 55%, #4f7a4a 55.2%, #33603a); }
+.game-coinstorm.sun { background: linear-gradient(#ffcf5a, #fff1b8 55%, #8fd27a 55.2%, #5aa84f); }
+.game-coinstorm > * { flex: none; }
+.cn-top { display: flex; gap: 12px; align-items: center; justify-content: center; color: #fff; font: 900 22px/1.1 var(--font); -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; text-align: center; }
+.cn-head { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; justify-content: center; }
+.cn-round { color: #fff; font-weight: 900; text-transform: uppercase; letter-spacing: .5px; font-size: 14px; text-shadow: 0 2px 0 var(--ink); }
+.cn-fc { display: inline-flex; align-items: center; gap: 6px; background: var(--paper); border: 3px solid var(--ink); border-radius: 999px; padding: 3px 10px; box-shadow: 0 3px 0 var(--ink); font-size: 14px; }
+.cn-fcsun { color: #b07a00; } .cn-fcstorm { color: #3b4658; }
+.cn-bar { width: 70px; height: 12px; border-radius: 6px; background: #5c6670; border: 2px solid var(--ink); overflow: hidden; display: block; }
+.cn-bar u { display: block; height: 100%; background: var(--sun); transition: width .4s; }
+.cn-past { display: inline-flex; gap: 3px; }
+.cn-past i { font-style: normal; font-size: 11px; font-weight: 900; border: 2px solid var(--ink); border-radius: 8px; padding: 0 5px; }
+.cn-past .sunny { background: var(--sun); } .cn-past .stormy { background: #5c6670; color: #fff; }
+.game-coinstorm[data-phase=end] .cn-fc { display: none; }
+
+/* ---- the three spots: stacked rows on an upright phone ---- */
+.cn-spots { display: grid; gap: 8px; width: min(100%, 560px); }
+.cn-spot { position: relative; display: grid; grid-template-columns: 72px 1fr auto; grid-template-areas: 'art txt txt' 'coins coins ctl' 'piles piles piles' 'out out out'; align-items: center; gap: 2px 10px;
+  background: var(--paper); border: 4px solid var(--ink); border-radius: 16px; padding: 6px 10px; box-shadow: 0 5px 0 var(--ink); }
+.cn-mill { background: #eaf6ff; } .cn-cloud { background: #eef0f6; }
+.cn-art { grid-area: art; } .cn-art svg { width: 72px; height: 58px; display: block; }
+.cn-txt { grid-area: txt; display: grid; line-height: 1.15; } .cn-txt b { font: 900 18px/1.1 var(--font); } .cn-rule { font-size: 13px; color: #47606a; }
+.cn-ctl { grid-area: ctl; display: flex; align-items: center; gap: 6px; }
+.cn-short { display: none; font-size: 13px; font-weight: 800; color: #47606a; }
+.cn-n { min-width: 1.6em; text-align: center; font: 900 30px/1 var(--font); }
+.cn-pm { width: 48px; height: 48px; border-radius: 14px; border: 3px solid var(--ink); background: var(--sun); font: 900 28px/1 var(--font); box-shadow: 0 3px 0 var(--ink); padding: 0; }
+.cn-pm:disabled { opacity: .35; }
+.cn-coins { grid-area: coins; display: flex; gap: 3px; min-height: 0; flex-wrap: wrap; }
+.cn-coins i { width: 16px; height: 16px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff3a0, #f5b800 60%, #c98a00); border: 2px solid var(--ink); }
+.cn-piles { grid-area: piles; display: flex; gap: 6px; flex-wrap: wrap; }
+.cn-piles:empty, .cn-coins:empty, .cn-out:empty { display: none; }
+.cn-pile { display: inline-flex; align-items: center; gap: 4px; background: #fff; border: 3px solid var(--ink); border-radius: 999px; padding: 2px 8px 2px 2px; font-size: 15px; }
+.cn-pile em { font-style: normal; font-size: 12px; font-weight: 800; color: #1d8a37; }
+.cn-pile.lost { background: #ffd8d8; } .cn-pile.lost em { color: #c22; } .cn-pile.lost b { text-decoration: line-through; }
+.cn-empty { font-style: normal; font-size: 13px; color: #7a8a90; }
+.cn-face { width: 30px; height: 30px; border-radius: 50%; border: 3px solid var(--seat); background: var(--seat); overflow: hidden; display: block; flex: none; }
+.cn-face img { width: 100%; height: 100%; display: block; }
+.cn-gust { --seat: #9fb6c2; display: grid; place-items: center; font-style: normal; font-weight: 900; }
+.cn-out { grid-area: out; margin: 2px 0 0; font: 900 17px/1.1 var(--font); }
+.cn-out.good { color: #1d8a37; } .cn-out.bad { color: #c22; } .cn-out.mixed { color: #b06000; }
+
+/* what shows when */
+.game-coinstorm:is(.watching, [data-phase=reveal], [data-phase=end], [data-phase=ready]) .cn-ctl, .game-coinstorm:is(.watching, [data-phase=reveal], [data-phase=end], [data-phase=ready]) .cn-coins { display: none; }
+.game-coinstorm:is(.watching, [data-phase=reveal], [data-phase=end], [data-phase=ready]) .cn-spot { grid-template-areas: 'art txt' 'piles piles' 'out out'; grid-template-columns: 72px 1fr; }
+.cn-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; width: min(100%, 560px); }
+.game-coinstorm:not([data-phase=pick]) .cn-actions, .game-coinstorm.watching .cn-actions { display: none; }
+.cn-quick { min-height: 44px; border: 3px solid var(--ink); border-radius: 12px; background: #fff; font-weight: 800; padding: 4px 12px; box-shadow: 0 3px 0 var(--ink); }
+.cn-lock { flex: 1 1 100%; background: var(--mint); color: #fff; -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; }
+.cn-lock.on { background: #fff; color: var(--ink); -webkit-text-stroke: 0; font-size: 17px; }
+.is-locked .cn-spot { opacity: .8; }
+.game-coinstorm[data-phase=end] .cn-spots { display: none; }
+
+/* animation: the windmill turns, the sun hides until sunshine, the bolt shows in a storm */
+.cn-blades { animation: cn-turn 3s linear infinite; }
+@keyframes cn-turn { to { transform: rotate(360deg); } }
+.cn-bolt { opacity: 0; } .storm .cn-bolt { opacity: 1; animation: cn-flash .3s 3; }
+.cn-sun { opacity: .35; } .sun .cn-sun { opacity: 1; animation: bob .6s 3; } .storm .cn-sun { opacity: 0; }
+@keyframes cn-flash { 50% { opacity: .2; } }
+
+.cn-players { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.cn-players .chip .sc { font-style: normal; font-weight: 900; background: #ffe9a8; border-radius: 8px; padding: 0 6px; }
+.cn-players .chip .sc::after { content: ' coins'; font-weight: 600; font-size: 11px; }
+.cn-players .chip.in { outline: 4px solid var(--mint); }
+.cn-players .delta { font-size: 13px; } .cn-players .delta:empty { display: none; } .cn-players .delta.good { color: #1d8a37; } .cn-players .delta.bad { color: #c22; }
+.cn-note { margin: 0; color: #fff; text-align: center; min-height: 1.3em; font-size: 15px; font-weight: 700; text-shadow: 0 2px 0 var(--ink); max-width: 560px; }
+.game-coinstorm[data-phase=end] .cn-players { margin-top: 12vh; }
+.game-coinstorm[data-phase=end] .cn-players .chip { font-size: 20px; } .game-coinstorm[data-phase=end] .cn-players .chip .face { width: 52px; height: 52px; }
+
+/* landscape phones and TVs: the three spots side by side */
+@media (min-aspect-ratio: 1/1) {
+  .cn-spots { grid-template-columns: repeat(3, minmax(0, 1fr)); width: min(100%, 1180px); align-items: stretch; }
+  .cn-spot, .game-coinstorm:is(.watching, [data-phase=reveal], [data-phase=end], [data-phase=ready]) .cn-spot { grid-template-columns: 1fr; grid-template-areas: 'art' 'txt' 'ctl' 'coins' 'piles' 'out'; justify-items: center; text-align: center; align-content: start; }
+  .cn-art svg { width: min(110px, 14vh); height: auto; }
+  .cn-coins, .cn-piles { justify-content: center; }
+  .cn-actions { width: min(100%, 1180px); }
+  .cn-lock { flex: 0 1 320px; }
+  .watching .cn-txt b { font-size: 26px; } .watching .cn-rule { font-size: 17px; }
+  .watching .cn-face { width: 40px; height: 40px; } .watching .cn-pile { font-size: 20px; }
+}
+@media (min-aspect-ratio: 1/1) and (max-height: 500px) { .cn-rule { display: none; } .cn-short { display: block; } .cn-art svg { width: 64px; } }
+.game-coinstorm.watching[data-phase=end] .cn-players .chip { font-size: 30px; } .game-coinstorm.watching[data-phase=end] .cn-players .chip .face { width: 80px; height: 80px; }

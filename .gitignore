@@ -15,3 +15,6 @@ tools/scratch/
 tools/certs/
 prototypes/thousandvale/js/client/gallery/fixtures/.wire.json
 prototypes/thousandvale/tests/G/shots/
+
+# CPU profiles from perf hunts
+*.cpuprofile

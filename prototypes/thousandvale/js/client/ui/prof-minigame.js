@@ -19,13 +19,16 @@
 //
 // TIME — Y19 (G2, report #21: "I do not know where to put the mouse before it begins"): every game opens in a READY
 // state — the picture at time 0 and "Tap to begin" over it. The clock starts at the first work key, click or touch (that
-// press is NOT an input of the game), or by itself after READY_MAX_MS; the server started its own clock when it sent the
-// game, which is why its `lateMs` allowance (data/rules/professions.json) is longer than this wait. From then on every
+// press is NOT an input of the game) — and, in the skinning trace with a mouse, the moment the mouse is ON THE KNIFE
+// (wrap-up, report #57: no click needed; prof-games.js `hoverBegins`). It NEVER starts by itself: a game nobody begins
+// within READY_MAX_MS is put away, nothing lost (it used to start at 6 s whether or not the player had found the knife).
+// The server started its own clock when it sent the game, which is why its `lateMs` allowance
+// (data/rules/professions.json) is longer than this wait. From then on every
 // input is stamped with the moment it was made, not the moment a frame was drawn: at 10 frames a second a press still
 // lands where it was pressed. The picture is one <canvas>, redrawn each frame.
 
 import { h } from '../ui-panel.js';
-import { createRun, HOW, GAME_INPUT, QUALITY_WORD, PROF_OF_GAME } from './prof-games.js';
+import { createRun, HOW, GAME_INPUT, QUALITY_WORD, PROF_OF_GAME, hoverBegins } from './prof-games.js';
 import { drawGame, hitTest, pointFor } from './prof-draw.js';
 import { padLayers, PAD_INDEX } from '../input/bindings.js';
 import { profIcon, PROF_NAME } from './prof-icons.js';
@@ -33,10 +36,10 @@ import { profIcon, PROF_NAME } from './prof-icons.js';
 const WORK = new Set(['Space', 'KeyE', 'Enter', 'NumpadEnter', 'KeyF']);
 const LEFT = new Set(['KeyA', 'ArrowLeft']), RIGHT = new Set(['KeyD', 'ArrowRight']), UP = new Set(['KeyW', 'ArrowUp']);
 const PASS = /^(F\d+|Tab|Meta|OS|Control|Alt|Shift|CapsLock|PrintScreen)/;          // keys the browser keeps
-/** Y19 (G2): how long a game waits for the player before it starts by itself (the server allows lateMs = 10 s). */
-export const READY_MAX_MS = 6000;
+/** Y19 (G2) / #57: how long a game waits for the player; after it the game is PUT AWAY, never started (the server allows lateMs = 30 s). */
+export const READY_MAX_MS = 25000;
 const READY_HOW = {
-  keyboard: { trace: 'Put the mouse on the knife, then click — or press Space — to begin.', any: 'Press Space (or click) when you are ready.' },
+  keyboard: { trace: 'Put the mouse on the knife to begin (or press Space).', any: 'Press Space (or click) when you are ready.' },
   pad: { trace: 'Press the work button when you are ready.', any: 'Press the work button when you are ready.' },
   touch: { trace: 'Put your finger on the knife to begin.', any: 'Tap when you are ready.' },
 };
@@ -117,7 +120,15 @@ export function createMinigame({ sound = null, words = () => QUALITY_WORD, paren
 
   function pointer(e) {
     // Y19 (G2): ready — the first touch / click starts the clock; in the trace game it also puts the knife under the finger
-    if (waiting()) { if (e.type !== 'pointerdown') return; e.preventDefault(); begin(); if (S.run.type !== 'trace') return; }
+    if (waiting()) {
+      if (e.type !== 'pointerdown') {
+        // #57: a mouse that reaches the knife begins the cut — no click, and the knife is already under it
+        const c = S.canvas.getBoundingClientRect(), [kx, ky] = pointFor(S.run, S.w, S.h, null, S.run.view().y);
+        const mx = (e.clientX - c.left) * (S.w / c.width), my = (e.clientY - c.top) * (S.h / c.height);
+        if (!hoverBegins(S.run.type, e.pointerType, Math.hypot(mx - kx, my - ky))) return;
+        begin();
+      } else { e.preventDefault(); begin(); if (S.run.type !== 'trace') return; }
+    }
     if (!playing()) return;
     const r = S.canvas.getBoundingClientRect(), x = (e.clientX - r.left) * (S.w / r.width), y = (e.clientY - r.top) * (S.h / r.height);
     const hit = hitTest(S.run, S.w, S.h, x, y);
@@ -190,7 +201,7 @@ export function createMinigame({ sound = null, words = () => QUALITY_WORD, paren
       h('p.prof-how', {}, ...howNodes(HOW[type][dev] || HOW[type].keyboard)),
       h('div.prof-stage', {}, S.canvas,
         // Y19 (G2): the ready card — nothing moves until the player says so (or READY_MAX_MS pass)
-        h('div.prof-ready', { role: 'status' }, h('strong', {}, dev === 'touch' ? 'Tap to begin' : 'Ready?'), h('span', {}, (READY_HOW[dev] || READY_HOW.keyboard)[type === 'trace' ? 'trace' : 'any']), S.readyLeft = h('small', {}, `Begins by itself in ${Math.round(READY_MAX_MS / 1000)} s`))),
+        h('div.prof-ready', { role: 'status' }, h('strong', {}, dev === 'touch' ? 'Tap to begin' : 'Ready?'), h('span', {}, (READY_HOW[dev] || READY_HOW.keyboard)[type === 'trace' ? 'trace' : 'any']), S.readyLeft = h('small', {}, ''))),
       h('div.prof-time', {}, S.time));
     for (const ev of ['pointerdown', 'pointermove']) S.canvas.addEventListener(ev, pointer);
     S.canvas.addEventListener('contextmenu', e => e.preventDefault());
@@ -200,11 +211,13 @@ export function createMinigame({ sound = null, words = () => QUALITY_WORD, paren
     size(); say('ready'); draw();
     cancelAnimationFrame(S.raf); S.raf = requestAnimationFrame(frame);
     clearTimeout(S.dog);
-    // Y19 (G2): wait for the player — but not for ever (the server's clock is already running)
+    // Y19 (G2): wait for the player — but not for ever (the server's clock is already running). #57: when the wait runs
+    // out the game is put away (nothing is lost); it is never started for a player who has not said they are ready.
     const wait = Number.isFinite(opts.readyMs) ? opts.readyMs : READY_MAX_MS, shownAt = performance.now();
     clearTimeout(S.readyT); clearInterval(S.readyTick);
+    const left = () => { const n = Math.max(0, Math.ceil((wait - (performance.now() - shownAt)) / 1000)); if (S.readyLeft) S.readyLeft.textContent = `Waiting for you — put away in ${n} s`; };
     if (wait <= 0) begin();
-    else { S.readyT = setTimeout(begin, wait); S.readyTick = setInterval(() => { const left = Math.max(0, Math.ceil((wait - (performance.now() - shownAt)) / 1000)); if (S.readyLeft) S.readyLeft.textContent = `Begins by itself in ${left} s`; }, 250); }
+    else { left(); S.readyT = setTimeout(() => { if (waiting()) cancel(); }, wait); S.readyTick = setInterval(left, 250); }
     return new Promise(res => { S.resolve = res; });
   }
   function finish() {

@@ -286,6 +286,25 @@ export function pgM3({ pool, q, realm, SAVE_SQL, saveParams }) {
         [JSON.stringify(rows.map(r => ({ at: r.at, ch: r.ch, from_char: r.from ?? null, from_name: r.name ?? null, to_key: r.to == null ? null : String(r.to), text: r.text })))]);
     },
     async pruneChat(beforeMs) { const r = await q('DELETE FROM chat_log WHERE at < $1', [ms(beforeMs)]); return r.rowCount; },
+    // ---- wrap-up (report S#66): characters change account (js/sim/store-memory-m3.js moveChars has the contract) ----
+    async moveChars(from, to, { limit = 1e9, ids = null } = {}) {
+      if (from === to) return { err: 'same' };
+      return tx(async c => {
+        const acc = await c.query('SELECT id FROM accounts WHERE id = ANY($1::bigint[]) ORDER BY id FOR UPDATE', [[from, to]]);
+        if (acc.rows.length < 2) return { err: 'missing' };
+        const n = await c.query('SELECT count(*)::int AS n FROM characters WHERE account_id = $1 AND realm = $2', [to, realm]);
+        const rows = await c.query(`SELECT id, name, cls, level, room, (lease_owner IS NOT NULL AND lease_until IS NOT NULL AND lease_until > now()) AS held
+          FROM characters WHERE account_id = $1 AND realm = $2 AND ($3::bigint[] IS NULL OR id = ANY($3::bigint[])) ORDER BY id FOR UPDATE`, [from, realm, ids]);
+        let have = n.rows[0].n; const moved = [], left = [];
+        for (const r of rows.rows) {
+          if (r.held) { left.push({ id: r.id, name: r.name, why: 'online' }); continue; }
+          if (have >= limit) { left.push({ id: r.id, name: r.name, why: 'full' }); continue; }
+          have++; moved.push({ id: r.id, name: r.name, cls: r.cls, level: r.level, room: r.room });
+        }
+        if (moved.length) await c.query('UPDATE characters SET account_id = $1 WHERE id = ANY($2::bigint[])', [to, moved.map(m => m.id)]);
+        return { moved, left };
+      });
+    },
     // ---- owner feedback 9: delete a character (X6, schema v7 tombstones), who signed in lately (X1) ----
     async deleteChar(account, id, { nowMs = Date.now(), reserveMs = 86400000 } = {}) {
       return tx(async c => {

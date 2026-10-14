@@ -262,49 +262,49 @@
         {
           "id": "healing_potion",
           "source": "potion",
-          "price": 30,
+          "price": 10,
           "minLevel": 1
         },
         {
           "id": "mana_potion",
           "source": "potion",
-          "price": 30,
+          "price": 10,
           "minLevel": 1
         },
         {
           "id": "antidote",
           "source": "potion",
-          "price": 21,
+          "price": 7,
           "minLevel": 1
         },
         {
           "id": "travel_rations",
           "source": "good",
-          "price": 9,
+          "price": 5,
           "minLevel": 1
         },
         {
           "id": "trail_ale",
           "source": "good",
-          "price": 9,
+          "price": 5,
           "minLevel": 1
         },
         {
           "id": "recall_charm",
           "source": "good",
-          "price": 75,
+          "price": 25,
           "minLevel": 1
         },
         {
           "id": "lucky_horseshoe",
           "source": "good",
-          "price": 9,
+          "price": 5,
           "minLevel": 1
         },
         {
           "id": "sling_satchel",
           "source": "gear",
-          "price": 180,
+          "price": 60,
           "minLevel": 1
         }
       ],
@@ -407,13 +407,13 @@
         {
           "id": "dye_pot",
           "source": "good",
-          "price": 15,
+          "price": 5,
           "minLevel": 1
         },
         {
           "id": "travel_rations",
           "source": "good",
-          "price": 9,
+          "price": 5,
           "minLevel": 1
         }
       ],
@@ -515,13 +515,13 @@
         {
           "id": "whetstone",
           "source": "good",
-          "price": 12,
+          "price": 5,
           "minLevel": 1
         },
         {
           "id": "armour_oil",
           "source": "good",
-          "price": 12,
+          "price": 5,
           "minLevel": 1
         }
       ],
@@ -644,7 +644,7 @@
         {
           "id": "armour_oil",
           "source": "good",
-          "price": 12,
+          "price": 5,
           "minLevel": 1
         }
       ],
@@ -709,13 +709,13 @@
         {
           "id": "quiver",
           "source": "gear",
-          "price": 180,
+          "price": 60,
           "minLevel": 1
         },
         {
           "id": "fletching_kit",
           "source": "good",
-          "price": 15,
+          "price": 5,
           "minLevel": 1
         }
       ],
@@ -737,7 +737,6 @@
             "wand",
             "staff",
             "scepter",
-            "orb",
             "tome",
             "quarterstaff",
             "g5_staff_spire",
@@ -746,7 +745,6 @@
             "g5_codex",
             "g5_staff_horn",
             "g5_wand_bell",
-            "g5_armillary",
             "g5_crownsceptre",
             "g5_staff_halo",
             "g5_wand_hoop",
@@ -757,7 +755,7 @@
             "g5_staff_aegis",
             "g5_wand_ward"
           ],
-          "count": 12,
+          "count": 11,
           "rarity": {
             "normal": 0.5,
             "magic": 0.42,
@@ -771,7 +769,6 @@
             "g5_codex",
             "g5_staff_horn",
             "g5_wand_bell",
-            "g5_armillary",
             "g5_crownsceptre",
             "g5_staff_halo",
             "g5_wand_hoop",
@@ -796,49 +793,49 @@
         {
           "id": "healing_potion",
           "source": "potion",
-          "price": 27,
+          "price": 9,
           "minLevel": 1
         },
         {
           "id": "greater_healing",
           "source": "potion",
-          "price": 108,
+          "price": 36,
           "minLevel": 5
         },
         {
           "id": "mana_potion",
           "source": "potion",
-          "price": 27,
+          "price": 9,
           "minLevel": 1
         },
         {
           "id": "antidote",
           "source": "potion",
-          "price": 18,
+          "price": 6,
           "minLevel": 1
         },
         {
           "id": "herb_poultice",
           "source": "good",
-          "price": 15,
+          "price": 5,
           "minLevel": 1
         },
         {
           "id": "group_tonic",
           "source": "potion",
-          "price": 360,
+          "price": 120,
           "minLevel": 10
         },
         {
           "id": "revival_flask",
           "source": "potion",
-          "price": 270,
+          "price": 90,
           "minLevel": 5
         },
         {
           "id": "silver_dust",
           "source": "good",
-          "price": 24,
+          "price": 8,
           "minLevel": 3
         }
       ],
@@ -933,14 +930,16 @@
             "seer_orb",
             "reliquary",
             "effigy",
+            "orb",
             "g5_folio",
+            "g5_armillary",
             "g5_starglass",
             "g5_thurible",
             "g5_sigilplate",
             "g5_antlerrod",
             "g5_seeingmask"
           ],
-          "count": 8,
+          "count": 9,
           "rarity": {
             "normal": 0.5,
             "magic": 0.42,
@@ -949,6 +948,7 @@
           "countBase": 6,
           "catalog": [
             "g5_folio",
+            "g5_armillary",
             "g5_starglass",
             "g5_thurible",
             "g5_sigilplate",
@@ -965,25 +965,25 @@
         {
           "id": "dye_pot",
           "source": "good",
-          "price": 18,
+          "price": 6,
           "minLevel": 1
         },
         {
           "id": "sling_satchel",
           "source": "gear",
-          "price": 180,
+          "price": 60,
           "minLevel": 1
         },
         {
           "id": "trail_rucksack",
           "source": "gear",
-          "price": 2400,
+          "price": 800,
           "minLevel": 10
         },
         {
           "id": "expedition_pack",
           "source": "gear",
-          "price": 6500,
+          "price": 2170,
           "minLevel": 20
         }
       ],
@@ -1039,38 +1039,38 @@
         {
           "id": "trail_horse",
           "source": "gear",
-          "price": 750,
+          "price": 400,
           "minLevel": 1,
           "note": "the owner wants to try a mount (play-test 2, Q16): the plain horse is sold from level 1, ahead of PLAN §6.5's mount-at-10 ladder"
         },
         {
           "id": "pony",
           "source": "gear",
-          "price": 4200,
+          "price": 1800,
           "minLevel": 5
         },
         {
           "id": "courser",
           "source": "gear",
-          "price": 16500,
+          "price": 5300,
           "minLevel": 10
         },
         {
           "id": "dray",
           "source": "gear",
-          "price": 33000,
+          "price": 9000,
           "minLevel": 15
         },
         {
           "id": "oat_sack",
           "source": "good",
-          "price": 9,
+          "price": 5,
           "minLevel": 1
         },
         {
           "id": "saddle_bags",
           "source": "good",
-          "price": 135,
+          "price": 45,
           "minLevel": 1
         }
       ],
@@ -1096,25 +1096,25 @@
         {
           "id": "travel_rations",
           "source": "good",
-          "price": 9,
+          "price": 5,
           "minLevel": 1
         },
         {
           "id": "trail_ale",
           "source": "good",
-          "price": 9,
+          "price": 5,
           "minLevel": 1
         },
         {
           "id": "hearty_stew",
           "source": "good",
-          "price": 27,
+          "price": 9,
           "minLevel": 1
         },
         {
           "id": "healing_potion",
           "source": "potion",
-          "price": 30,
+          "price": 10,
           "minLevel": 1
         }
       ],
@@ -1139,43 +1139,43 @@
         {
           "id": "travel_rations",
           "source": "good",
-          "price": 9,
+          "price": 5,
           "minLevel": 1
         },
         {
           "id": "trail_ale",
           "source": "good",
-          "price": 9,
+          "price": 5,
           "minLevel": 1
         },
         {
           "id": "recall_charm",
           "source": "good",
-          "price": 75,
+          "price": 25,
           "minLevel": 1
         },
         {
           "id": "oat_sack",
           "source": "good",
-          "price": 9,
+          "price": 5,
           "minLevel": 1
         },
         {
           "id": "saddle_bags",
           "source": "good",
-          "price": 135,
+          "price": 45,
           "minLevel": 1
         },
         {
           "id": "herb_poultice",
           "source": "good",
-          "price": 15,
+          "price": 5,
           "minLevel": 1
         },
         {
           "id": "lucky_horseshoe",
           "source": "good",
-          "price": 9,
+          "price": 5,
           "minLevel": 1
         }
       ],
@@ -1264,31 +1264,31 @@
         {
           "id": "healing_potion",
           "source": "potion",
-          "price": 30,
+          "price": 10,
           "minLevel": 1
         },
         {
           "id": "greater_healing",
           "source": "potion",
-          "price": 108,
+          "price": 36,
           "minLevel": 5
         },
         {
           "id": "mana_potion",
           "source": "potion",
-          "price": 30,
+          "price": 10,
           "minLevel": 1
         },
         {
           "id": "herb_poultice",
           "source": "good",
-          "price": 15,
+          "price": 5,
           "minLevel": 1
         },
         {
           "id": "antidote",
           "source": "potion",
-          "price": 21,
+          "price": 7,
           "minLevel": 1
         }
       ],
@@ -1312,39 +1312,39 @@
         {
           "id": "angling_rod",
           "source": "good",
-          "price": 12,
+          "price": 5,
           "minLevel": 1
         },
         {
           "id": "ash_rod",
           "source": "good",
-          "price": 1350,
+          "price": 450,
           "minLevel": 1,
           "minSkill": 25
         },
         {
           "id": "river_wardens_rod",
           "source": "good",
-          "price": 7200,
+          "price": 2400,
           "minLevel": 1,
           "minSkill": 50
         },
         {
           "id": "bait_worms",
           "source": "good",
-          "price": 9,
+          "price": 5,
           "minLevel": 1
         },
         {
           "id": "bait_bread_paste",
           "source": "good",
-          "price": 15,
+          "price": 5,
           "minLevel": 1
         },
         {
           "id": "bait_bright_lure",
           "source": "good",
-          "price": 60,
+          "price": 20,
           "minLevel": 1
         }
       ],
@@ -1410,7 +1410,7 @@
             {
               "id": "silver_dust",
               "source": "good",
-              "price": 18,
+              "price": 6,
               "minLevel": 1
             }
           ]
@@ -1588,7 +1588,7 @@
             {
               "id": "antidote",
               "source": "potion",
-              "price": 12,
+              "price": 5,
               "minLevel": 1
             }
           ]
@@ -1699,7 +1699,7 @@
             {
               "id": "hearty_stew",
               "source": "good",
-              "price": 27,
+              "price": 9,
               "minLevel": 1
             }
           ]
@@ -1823,49 +1823,49 @@
         {
           "id": "healing_potion",
           "source": "potion",
-          "price": 30,
+          "price": 10,
           "minLevel": 1
         },
         {
           "id": "mana_potion",
           "source": "potion",
-          "price": 30,
+          "price": 10,
           "minLevel": 1
         },
         {
           "id": "antidote",
           "source": "potion",
-          "price": 21,
+          "price": 7,
           "minLevel": 1
         },
         {
           "id": "travel_rations",
           "source": "good",
-          "price": 9,
+          "price": 5,
           "minLevel": 1
         },
         {
           "id": "trail_ale",
           "source": "good",
-          "price": 9,
+          "price": 5,
           "minLevel": 1
         },
         {
           "id": "recall_charm",
           "source": "good",
-          "price": 75,
+          "price": 25,
           "minLevel": 1
         },
         {
           "id": "lucky_horseshoe",
           "source": "good",
-          "price": 9,
+          "price": 5,
           "minLevel": 1
         },
         {
           "id": "sling_satchel",
           "source": "gear",
-          "price": 180,
+          "price": 60,
           "minLevel": 1
         }
       ]
@@ -1962,13 +1962,13 @@
         {
           "id": "dye_pot",
           "source": "good",
-          "price": 15,
+          "price": 5,
           "minLevel": 1
         },
         {
           "id": "travel_rations",
           "source": "good",
-          "price": 9,
+          "price": 5,
           "minLevel": 1
         }
       ]
@@ -2095,13 +2095,13 @@
         {
           "id": "whetstone",
           "source": "good",
-          "price": 12,
+          "price": 5,
           "minLevel": 1
         },
         {
           "id": "armour_oil",
           "source": "good",
-          "price": 12,
+          "price": 5,
           "minLevel": 1
         }
       ],
@@ -2234,7 +2234,7 @@
         {
           "id": "armour_oil",
           "source": "good",
-          "price": 12,
+          "price": 5,
           "minLevel": 1
         }
       ]
@@ -2311,13 +2311,13 @@
         {
           "id": "quiver",
           "source": "gear",
-          "price": 180,
+          "price": 60,
           "minLevel": 1
         },
         {
           "id": "fletching_kit",
           "source": "good",
-          "price": 15,
+          "price": 5,
           "minLevel": 1
         }
       ]
@@ -2338,11 +2338,6 @@
         },
         {
           "base": "scepter",
-          "rarity": "normal",
-          "cat": "Staves, wands & rods"
-        },
-        {
-          "base": "orb",
           "rarity": "normal",
           "cat": "Staves, wands & rods"
         },
@@ -2394,49 +2389,49 @@
         {
           "id": "healing_potion",
           "source": "potion",
-          "price": 27,
+          "price": 9,
           "minLevel": 1
         },
         {
           "id": "greater_healing",
           "source": "potion",
-          "price": 108,
+          "price": 36,
           "minLevel": 5
         },
         {
           "id": "mana_potion",
           "source": "potion",
-          "price": 27,
+          "price": 9,
           "minLevel": 1
         },
         {
           "id": "antidote",
           "source": "potion",
-          "price": 18,
+          "price": 6,
           "minLevel": 1
         },
         {
           "id": "herb_poultice",
           "source": "good",
-          "price": 15,
+          "price": 5,
           "minLevel": 1
         },
         {
           "id": "group_tonic",
           "source": "potion",
-          "price": 360,
+          "price": 120,
           "minLevel": 10
         },
         {
           "id": "revival_flask",
           "source": "potion",
-          "price": 270,
+          "price": 90,
           "minLevel": 5
         },
         {
           "id": "silver_dust",
           "source": "good",
-          "price": 24,
+          "price": 8,
           "minLevel": 3
         }
       ]
@@ -2571,12 +2566,17 @@
           "cat": "Caster's off hand"
         },
         {
+          "base": "orb",
+          "rarity": "magic",
+          "cat": "Caster's off hand"
+        },
+        {
           "base": "g5_folio",
           "rarity": "magic",
           "cat": "Caster's off hand"
         },
         {
-          "base": "g5_starglass",
+          "base": "g5_armillary",
           "rarity": "rare",
           "cat": "Caster's off hand"
         }
@@ -2588,25 +2588,25 @@
         {
           "id": "dye_pot",
           "source": "good",
-          "price": 18,
+          "price": 6,
           "minLevel": 1
         },
         {
           "id": "sling_satchel",
           "source": "gear",
-          "price": 180,
+          "price": 60,
           "minLevel": 1
         },
         {
           "id": "trail_rucksack",
           "source": "gear",
-          "price": 2400,
+          "price": 800,
           "minLevel": 10
         },
         {
           "id": "expedition_pack",
           "source": "gear",
-          "price": 6500,
+          "price": 2170,
           "minLevel": 20
         }
       ]
@@ -2676,38 +2676,38 @@
         {
           "id": "trail_horse",
           "source": "gear",
-          "price": 750,
+          "price": 400,
           "minLevel": 1,
           "note": "the owner wants to try a mount (play-test 2, Q16): the plain horse is sold from level 1, ahead of PLAN §6.5's mount-at-10 ladder"
         },
         {
           "id": "pony",
           "source": "gear",
-          "price": 4200,
+          "price": 1800,
           "minLevel": 5
         },
         {
           "id": "courser",
           "source": "gear",
-          "price": 16500,
+          "price": 5300,
           "minLevel": 10
         },
         {
           "id": "dray",
           "source": "gear",
-          "price": 33000,
+          "price": 9000,
           "minLevel": 15
         },
         {
           "id": "oat_sack",
           "source": "good",
-          "price": 9,
+          "price": 5,
           "minLevel": 1
         },
         {
           "id": "saddle_bags",
           "source": "good",
-          "price": 135,
+          "price": 45,
           "minLevel": 1
         }
       ],
@@ -2730,25 +2730,25 @@
         {
           "id": "travel_rations",
           "source": "good",
-          "price": 9,
+          "price": 5,
           "minLevel": 1
         },
         {
           "id": "trail_ale",
           "source": "good",
-          "price": 9,
+          "price": 5,
           "minLevel": 1
         },
         {
           "id": "hearty_stew",
           "source": "good",
-          "price": 27,
+          "price": 9,
           "minLevel": 1
         },
         {
           "id": "healing_potion",
           "source": "potion",
-          "price": 30,
+          "price": 10,
           "minLevel": 1
         }
       ],
@@ -2770,43 +2770,43 @@
         {
           "id": "travel_rations",
           "source": "good",
-          "price": 9,
+          "price": 5,
           "minLevel": 1
         },
         {
           "id": "trail_ale",
           "source": "good",
-          "price": 9,
+          "price": 5,
           "minLevel": 1
         },
         {
           "id": "recall_charm",
           "source": "good",
-          "price": 75,
+          "price": 25,
           "minLevel": 1
         },
         {
           "id": "oat_sack",
           "source": "good",
-          "price": 9,
+          "price": 5,
           "minLevel": 1
         },
         {
           "id": "saddle_bags",
           "source": "good",
-          "price": 135,
+          "price": 45,
           "minLevel": 1
         },
         {
           "id": "herb_poultice",
           "source": "good",
-          "price": 15,
+          "price": 5,
           "minLevel": 1
         },
         {
           "id": "lucky_horseshoe",
           "source": "good",
-          "price": 9,
+          "price": 5,
           "minLevel": 1
         }
       ]
@@ -2822,31 +2822,31 @@
         {
           "id": "healing_potion",
           "source": "potion",
-          "price": 30,
+          "price": 10,
           "minLevel": 1
         },
         {
           "id": "greater_healing",
           "source": "potion",
-          "price": 108,
+          "price": 36,
           "minLevel": 5
         },
         {
           "id": "mana_potion",
           "source": "potion",
-          "price": 30,
+          "price": 10,
           "minLevel": 1
         },
         {
           "id": "herb_poultice",
           "source": "good",
-          "price": 15,
+          "price": 5,
           "minLevel": 1
         },
         {
           "id": "antidote",
           "source": "potion",
-          "price": 21,
+          "price": 7,
           "minLevel": 1
         }
       ],
@@ -2868,39 +2868,39 @@
         {
           "id": "angling_rod",
           "source": "good",
-          "price": 12,
+          "price": 5,
           "minLevel": 1
         },
         {
           "id": "ash_rod",
           "source": "good",
-          "price": 1350,
+          "price": 450,
           "minLevel": 1,
           "minSkill": 25
         },
         {
           "id": "river_wardens_rod",
           "source": "good",
-          "price": 7200,
+          "price": 2400,
           "minLevel": 1,
           "minSkill": 50
         },
         {
           "id": "bait_worms",
           "source": "good",
-          "price": 9,
+          "price": 5,
           "minLevel": 1
         },
         {
           "id": "bait_bread_paste",
           "source": "good",
-          "price": 15,
+          "price": 5,
           "minLevel": 1
         },
         {
           "id": "bait_bright_lure",
           "source": "good",
-          "price": 60,
+          "price": 20,
           "minLevel": 1
         }
       ]

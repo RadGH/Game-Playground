@@ -338,7 +338,7 @@ to a Chibi 2 swing for the held weapon. Append new names at the end; never reord
 ## 6. Events (`ev`)
 
 `ev {k, e:[…]}` carries one tick's events near me. Every event is an object with `type` plus fields; the
-room routes it to clients whose view covers `(x, z)`, or only to `to` (a local id) when set. The room fills
+room routes it to clients whose view covers `(x, z)`, or only to `to` (a local id) when set. (Not on `fx`: there `to` is what a shot, link or falling star is aimed at and the event goes to everyone in view — only `fx npcThanks` is personal; `js/sim/room.js` `personalTo`, 2026-10-13.) The room fills
 `x,z` from `d`/`s` if the emitter leaves them out. Stream C emits these through `host.event()` (§7).
 
 | `type` | Fields | Meaning |
@@ -1449,3 +1449,16 @@ and spent nodes in the existing `opened` table. Quest step kinds: `gather {prof?
 - **Targets (Y8):** `targetR {ok:false, why:'empty'}` for a dead monster holding nothing for you.
 - **Angling (Y15):** `you.angling.learned`; `fishR {why:'unlearned'}`; an angler's `used {taught:'angling'}`.
 - **Classes (Y32):** `starcaller` is a valid `create.cls`. Event `teleM {id, x, z}` (C).
+
+## 25. Wrap-up (2026-10-13) — still protocol 8
+
+- **Guest characters (report S#66):** `account {op:'peek', guest:<the guest key this browser held before the sign-in>}` -> `accountR {op:'peek', ok, chars:[{id, name, cls, level}]}`; `account {op:'adopt', guest}` -> `accountR {op:'adopt', ok, moved:[{id, name, cls, level, room}], left:[{id, name, why:'online'|'full'}]}`. Both need a CLAIMED, signed-in socket (`why:'claimFirst'` otherwise). A key that is unknown, belongs to a claimed account, or is your own answers with empty lists — never an error, so a key cannot be probed. The client keeps the key in `localStorage` under `<token key>.guest` (js/client/main.js `loginFromTitle`), asks `peek` once per connection when the title's character list is drawn, and forgets the key when nothing is left on it. Store: `moveChars(from, to, {limit, ids?, nowMs})` in both stores; the keeper's `tools/move-char.mjs <name> --to <username>` uses the same function.
+
+## Wrap-up 2026-10-13 (world) — two optional `info` fields
+
+| Field | On | Meaning |
+|---|---|---|
+| `bare: 1` | a `use` object | The place it belongs to already draws this thing as a prop (the inn's well). The client draws the ring, glow and prompt and NO stand-in model. From `js/sim/vignettes.js` `useIsDrawn()`. |
+| `held: { kind: 'cage', x, z, open? }` | a road-event captive (NPC) | What holds them and where it stands (`data/provinces/road-events.json` `rescue[].held`). `open` is set, and the info re-sent, when they are freed. Drawn by `js/client/held-view.js`. |
+
+No version bump: both are additive and an older client ignores them.

@@ -57,6 +57,79 @@ const GRAVE_MODEL = { headstone: ['gravestone', 'gravestone', 'gravestone', 'gra
 const CROP = { cabbages: 'cabbage', turnips: 'turnip', beets: 'beet', carrots: 'carrot', onions: 'onion', potatoes: 'potato', pumpkins: 'pumpkin', tilled: 'fallow', field: 'fallow', grapes: 'vineyard', peas: 'peas', beans: 'beans' };
 const hashStr = s => { let h = 2166136261; for (const ch of String(s)) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; };
 
+/**
+ * Owner feedback 10, Y2 (report #42): "The wood/dirt slats on a farm patch do not follow the terrain — half buried, half
+ * floating." proctown's `cropField` is drawn for flat ground: each row's strip of soil is ONE box the whole length of
+ * the plot (14 to 40 m), and a part is stood on the ground at its own middle — so on a slope one end of every strip was
+ * under the hill and the other in the air. The field is draped instead, in two steps:
+ *
+ *   drapeLong(parts)       (planning, pure) a long, low, level box becomes pieces of about `seg` metres, each marked `drape`
+ *   drapePose(part, ground) (drawing) a marked part is laid on the ground under it: its height from both of its ends and
+ *                           its middle, pitched along its length and rolled across its width to the slope it lies on
+ *
+ * Patches of standing stalks (`sheaf`, up to a few metres long) are marked too, so a stand of wheat leans with its hill
+ * rather than hanging off it. Same instanced meshes as before: a 20 x 14 m plot goes from 33 soil boxes to about 230.
+ */
+export const DRAPE_SEG = 2;
+export function drapeLong(list, seg = DRAPE_SEG) {
+  const out = [];
+  for (const q of list || []) {
+    if (q.mesh === 'sheaf' && !q.rx && !q.rz) { out.push({ ...q, drape: 1 }); continue; }
+    if (q.mesh !== 'box' || q.rx || q.rz || q.h > 0.6 || Math.max(q.d, q.w) <= seg * 1.3) { out.push(q); continue; }
+    const alongX = q.w > q.d, L = alongX ? q.w : q.d, yaw = (q.yaw || 0) + (alongX ? Math.PI / 2 : 0);
+    const n = Math.min(48, Math.ceil(L / seg)), len = L / n, sn = Math.sin(yaw), cs = Math.cos(yaw);
+    const run = ++drapeRun;
+    for (let i = 0; i < n; i++) { const t = -L / 2 + (i + 0.5) * len; out.push({ ...q, x: q.x + sn * t, z: q.z + cs * t, w: alongX ? q.d : q.w, d: len, yaw, drape: 1, run }); }
+  }
+  return out;
+}
+let drapeRun = 0;
+/**
+ * The cost side of Y2: cutting every strip into two-metre pieces took one busy farm zone from 7,000 soil boxes to 26,000
+ * (+220,000 triangles), nearly all of them on ground that is level or evenly sloped — where one tipped box does the
+ * same job. So, once the real ground is known (drawing), neighbouring pieces of one strip are JOINED again for as long
+ * as the ground under the joined run stays within `tol` metres of the straight line between its two ends. A strip on a
+ * flat or evenly sloping field is one box again; only a strip over a hump or a hollow stays in pieces. Pure.
+ */
+export function drapeJoin(list, ground, tol = 0.07) {
+  const out = [];
+  for (let i = 0; i < list.length;) {
+    const a = list[i];
+    if (!a.drape || !a.run) { out.push(a); i++; continue; }
+    let j = i; while (j + 1 < list.length && list[j + 1].run === a.run) j++;
+    for (let s = i; s <= j;) {                                 // greedy: the longest run from s that still lies straight
+      const yaw = list[s].yaw || 0, sn = Math.sin(yaw), cs = Math.cos(yaw), hd = list[s].d / 2;
+      const x0 = list[s].x - sn * hd, z0 = list[s].z - cs * hd, g0 = ground(x0, z0);
+      let e = s;
+      for (let k = s + 1; k <= j; k++) {
+        const x1 = list[k].x + sn * hd, z1 = list[k].z + cs * hd, g1 = ground(x1, z1), n = (k - s + 1) * 2;
+        let straight = Number.isFinite(g0) && Number.isFinite(g1);
+        for (let m = 1; straight && m < n; m++) { const t = m / n, g = ground(x0 + (x1 - x0) * t, z0 + (z1 - z0) * t); if (!(Math.abs(g - (g0 + (g1 - g0) * t)) <= tol)) straight = false; }
+        if (!straight) break;
+        e = k;
+      }
+      if (e === s) out.push(list[s]);
+      else { const f = list[s], l = list[e]; out.push({ ...f, x: (f.x + l.x) / 2, z: (f.z + l.z) / 2, d: f.d * (e - s + 1) }); }
+      s = e + 1;
+    }
+    i = j + 1;
+  }
+  return out;
+}
+/**
+ * Lay one part on the ground it covers. `ground(x, z)` = height. -> { g (ground height to stand it on), rx, rz, d (its
+ * length along the slope, with a finger of overlap so pieces meet) }. A part's local +z runs to (sin yaw, cos yaw) and
+ * its +x to (cos yaw, -sin yaw); the instance turns YXZ, so +rx drops the +z end and +rz lifts the +x side.
+ */
+export function drapePose(q, ground) {
+  const yaw = q.yaw || 0, sn = Math.sin(yaw), cs = Math.cos(yaw), hd = q.d / 2, hw = q.w / 2;
+  const g0 = ground(q.x - sn * hd, q.z - cs * hd), g1 = ground(q.x + sn * hd, q.z + cs * hd), gm = ground(q.x, q.z);
+  const gl = ground(q.x - cs * hw, q.z + sn * hw), gr = ground(q.x + cs * hw, q.z - sn * hw);
+  const ok = [g0, g1, gm, gl, gr].every(Number.isFinite);
+  if (!ok) return { g: Number.isFinite(gm) ? gm : 0, rx: 0, rz: 0, d: q.d };
+  return { g: ((g0 + g1) / 2 + gm) / 2, rx: -Math.atan2(g1 - g0, q.d), rz: Math.atan2(gr - gl, q.w), d: Math.hypot(q.d, g1 - g0) + (q.mesh === 'sheaf' ? 0 : 0.05) };
+}
+
 /** A model's parts: proctown's set-piece kit first, E's primitive fallback for an id the kit lacks. Pure. */
 export function modelParts(id, seed, fallback = null) {
   let m = null;
@@ -127,6 +200,7 @@ export function planSetPieces({ placements = [], vignettes = [] } = {}, { recipe
     const crop = CROP[d.grows] || d.grows || 'fallow';
     let list = [];
     try { list = KIT.cropField ? KIT.cropField({ w: d.w || 20, d: d.d || 14, crop, seed: hashStr(rec.id) }) : []; } catch { list = []; }
+    list = drapeLong(list);                                   // Y2: soil strips in short pieces that follow the ground
     // the plot's local +x runs along proctown's angle a: (cos a, sin a); yaw for our turn is the angle that sends
     // local +z to (sin yaw, cos yaw) — +x then goes to (cos yaw, -sin yaw), so yaw = -a
     const T = put(null, x, z, -(d.angle || 0));
@@ -213,6 +287,7 @@ export function planSetPieces({ placements = [], vignettes = [] } = {}, { recipe
     for (const f of rec.fields || []) {
       const w = at(f.x || 0, f.z || 0);
       let list = []; try { list = KIT.cropField ? KIT.cropField({ w: (f.w || 10) * k, d: (f.d || 8) * k, crop: CROP[f.crop] || f.crop || 'fallow', seed: seed + 3 }) : []; } catch {}
+      list = drapeLong(list);                                 // Y2
       const T = put(null, w.x, w.z, yaw + (f.yaw || 0)); for (const q of list) parts.push(T(q));
     }
     for (const b of rec.buildings || []) {
@@ -247,6 +322,9 @@ export async function createSetPieceView(T, { placements = [], vignetteFile = nu
   const meshes = [], disposers = [];
   const _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _e = new THREE.Euler(), _v = new THREE.Vector3(), _s = new THREE.Vector3(), col = new THREE.Color();
   const groundOf = (x, z) => T.heightAt(x, z);
+  // Y2: a draped part (a piece of a soil strip, a patch of stalks) lies on the slope under it; anything else stands at its own point.
+  // A soil piece is also sunk a hand deeper and made that much taller, so no underside ever shows where the ground curves.
+  const laid = q => { if (!q.drape) return { q, g: groundOf(q.x, q.z) }; const p = drapePose(q, groundOf), sink = q.mesh === 'sheaf' ? 0 : 0.07; return { q: { ...q, y: q.y - sink, h: q.h + sink, d: p.d, rx: p.rx, rz: p.rz }, g: p.g }; };
   // set_buildings: proctown bodies (+ office dressing on a chapel/mill/inn/stable), in the building's own frame
   const solids = plan.solids.map(s => { const g = groundOf(s.x, s.z); return { x: s.x, z: s.z, r: s.r, bottom: g - 1, top: g + s.h }; });
   const abs = [];      // parts already in absolute height (buildings)
@@ -277,7 +355,7 @@ export async function createSetPieceView(T, { placements = [], vignetteFile = nu
   const byField = new Map();
   byMesh.sheaf = [];                                           // (a stalk patch with no field record: drawn with the zone)
   const fieldIds = new Set((plan.cropFields || []).map(f => f.fid));
-  for (const q of plan.parts) { if (q.mesh === 'sheaf' && q.fid && fieldIds.has(q.fid)) { if (!byField.has(q.fid)) byField.set(q.fid, []); byField.get(q.fid).push({ q, g: groundOf(q.x, q.z) }); } else (byMesh[q.mesh] || byMesh.box).push({ q, g: groundOf(q.x, q.z) }); }
+  for (const q of drapeJoin(plan.parts, groundOf)) { if (q.mesh === 'sheaf' && q.fid && fieldIds.has(q.fid)) { if (!byField.has(q.fid)) byField.set(q.fid, []); byField.get(q.fid).push(laid(q)); } else (byMesh[q.mesh] || byMesh.box).push(laid(q)); }
   const crops = [];
   for (const f of plan.cropFields || []) {
     const list = byField.get(f.fid); if (!list?.length) continue;
@@ -287,7 +365,9 @@ export async function createSetPieceView(T, { placements = [], vignetteFile = nu
     // the far stand-in: one low slab in the crop's colour over the plot (a sown field from a distance, never bare earth)
     const g0 = groundOf(f.x, f.z);
     const far = new THREE.Mesh(unitGeometry('box'), kitMat.clone()); far.material.color.set(f.colour || '#c9a84a');
-    far.position.set(f.x, g0 + 0.05, f.z); far.rotation.y = f.yaw; far.scale.set(Math.max(1, f.w - 0.4), Math.max(0.3, f.h * 0.72), Math.max(1, f.d - 0.4)); far.receiveShadow = true; far.name = 'sp-crop-far';
+    // Y2: the slab is tipped to the plot's own slope (level, it was half under a hillside field and half over it)
+    const fp = drapePose({ x: f.x, z: f.z, yaw: f.yaw, w: f.w, d: f.d }, groundOf);
+    far.position.set(f.x, Math.min(g0, fp.g) + 0.05, f.z); far.rotation.set(fp.rx, f.yaw, fp.rz, 'YXZ'); far.scale.set(Math.max(1, f.w - 0.4), Math.max(0.3, f.h * 0.72), Math.max(1, f.d - 0.4)); far.receiveShadow = true; far.name = 'sp-crop-far';
     group.add(far); disposers.push(() => far.material.dispose());
     crops.push({ m, far, x: f.x, z: f.z, r: Math.hypot(f.w, f.d) / 2 });
     await budget.slice();

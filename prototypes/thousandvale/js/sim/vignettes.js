@@ -26,6 +26,27 @@ export function vignettePoint(pl, lx, lz) {
   return { x: pl.x + lx * c + lz * s, z: pl.z - lx * s + lz * c };
 }
 
+/**
+ * The stand-in model a `use` object is drawn as, from its name (js/client/objects.js draws it). One table, here, so the
+ * sim can ask the same question the client does.
+ */
+export function usePropKind(name) {
+  const n = name || '';
+  return /well/i.test(n) ? 'well' : /shrine|altar|statue|idol|stone|cairn/i.test(n) ? 'rune_stone' : /fire|hearth|brazier/i.test(n) ? 'fire_ring' : 'stone_step';
+}
+/** How close (recipe metres) a recipe's own prop must be for a `use` object to count as "that thing", and not draw a second one. */
+export const USE_OWN_PROP_R = 2.5;
+/**
+ * Report #63 ("there are two wells on top of each other"): a recipe that draws a well as a PROP and also has a `use`
+ * object called "Well" beside it got two wells, because the client gives every `use` object a stand-in model by name.
+ * True when the recipe already draws that same kind of thing within USE_OWN_PROP_R — the object is then `bare` (ring,
+ * glow and prompt, no model of its own).
+ */
+export function useIsDrawn(recipe, o) {
+  const kind = usePropKind(o.name);
+  return [...(recipe.props || []), ...(recipe.models || [])].some(q => q.kind !== 'ground' && q.id === kind && Math.hypot((q.x || 0) - (o.x || 0), (q.z || 0) - (o.z || 0)) <= USE_OWN_PROP_R);
+}
+
 export function vignetteContent(placements, recipes, { band = [1, 6], respawnMs = 5 * 60000 } = {}) {
   const byId = new Map(recipes.map(r => [r.id, r]));
   const camps = [], objects = [];
@@ -43,7 +64,7 @@ export function vignetteContent(placements, recipes, { band = [1, 6], respawnMs 
         const after = o.after ? (v.objects || []).findIndex(x => x.name === o.after) : -1;
         objects.push({ type: 'chest', name: o.name, x: p.x, z: p.z, key: okey, hidden: !!o.hidden, hint: o.hint || null,
           chest: { key: okey, tier: o.tier || 'common', level: (pl.levelBase ?? band[0]) + (pl.level || 1), after: after >= 0 ? `${key}:${after}` : null, afterName: o.after || null } });
-      } else if (o.type === 'use') objects.push({ type: 'use', name: o.name, x: p.x, z: p.z, key: okey, use: { text: o.text || '', gives: o.gives || null, cost: o.cost || null, buff: o.buff || null } });
+      } else if (o.type === 'use') objects.push({ type: 'use', name: o.name, x: p.x, z: p.z, key: okey, use: { text: o.text || '', gives: o.gives || null, cost: o.cost || null, buff: o.buff || null }, ...(useIsDrawn(v, o) ? { bare: true } : {}) });
     });
     // props a monster must not stand inside (P28: slimes spawned in the pump house's well and barrel — half
     // buried in a model, unclickable behind it). Ground decals (kind 'ground') are walked on.

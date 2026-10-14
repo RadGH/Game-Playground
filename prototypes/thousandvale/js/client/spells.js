@@ -19,10 +19,12 @@ import { SpellFx } from '../../../../avatar-3d/js/spellfx.js';
 import { Assets } from '../../../../assets/js/assets.js';
 import { skillLook, statusLook, elementOf } from './spell-looks.js';
 import { perf } from './perf.js';
+import { createBeams } from './beam-fx.js';                       // Y20: a held, pulsing beam (Storm Beam)
+import { carriedBy, zoneDrawMs, carryOffset } from './zone-follow.js';   // Y25: zones that ride their owner
 
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
 
-export function createSpells(scene, { camera, renderer = null, actors, groundY = () => 0, skillOf = () => null, quality = 'high', lights = null, shots = null } = {}) {
+export function createSpells(scene, { camera, renderer = null, actors, groundY = () => 0, skillOf = () => null, quality = 'high', lights = null, shots = null, stars = null } = {}) {
   const fx = new SpellFx(scene, { camera, scale: 1.15, maxParticles: quality === 'low' ? 120 : 260, maxLive: quality === 'low' ? 20 : 40 });
   let ready = false;
   Assets.open(new URL('../../../../assets/', import.meta.url).href)
@@ -41,22 +43,48 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
     const before = new Set(fx.live);
     draw();
     const entries = fx.live.filter(e => !before.has(e));
-    if (entries.length) zones.set(key ?? 'z' + (++zoneSeq), { src: src ?? null, entries, until: performance.now() + ms + 2500 });
+    let rec = null;
+    if (entries.length) zones.set(key ?? 'z' + (++zoneSeq), rec = { src: src ?? null, entries, until: performance.now() + ms + 2500 });
     if (zones.size > 60) for (const [k, z] of zones) if (z.until < performance.now()) zones.delete(k);
+    return rec;
+  }
+  // Y25: a zone that rides somebody (`fx place {follow: <entity id>}`): everything it drew is shifted, every frame, by
+  // how far that body has moved from the spot it was cast on (its effects are built in world coordinates round that spot)
+  let carried = 0;
+  function carry(rec, id, c) { if (!rec || id == null) return; rec.follow = { id, base: { x: c.x, y: groundY(c.x, c.z), z: c.z } }; carried++; stats.carried = (stats.carried || 0) + 1; }
+  function moveCarried() {
+    if (!carried) return;
+    let n = 0;
+    for (const [k, z] of zones) {
+      if (!z.follow) continue;
+      if (z.entries.every(e => e.ended)) { zones.delete(k); continue; }
+      n++;
+      const a = actorAt(z.follow.id); if (!a) continue;          // out of sight: it stays where it was last seen
+      const o = carryOffset(z.follow.base, a.pos, groundY);
+      for (const e of z.entries) {
+        if (e.ended || !e.obj) continue;
+        e.obj.position.set(o.x, o.y, o.z);
+        if (e.lightPos) { if (!e.lightBase) e.lightBase = e.lightPos.clone(); e.lightPos.set(e.lightBase.x + o.x, e.lightBase.y + o.y, e.lightBase.z + o.z); }   // its glow goes with it
+      }
+    }
+    carried = n;
   }
   function endZone(key) { const z = zones.get(key); if (!z) return 0; for (const e of z.entries) { try { fx._end(e); } catch {} } zones.delete(key); stats.zonesEnded = (stats.zonesEnded || 0) + 1; return 1; }
   /** U3: every ground zone a body laid down ends with it (its death arrives before the server's own clean-up does). */
-  function ownerGone(src) { let n = 0; if (src == null) return n; for (const [k, z] of [...zones]) if (z.src === src) n += endZone(k); return n; }
+  function ownerGone(src) { let n = 0; if (src == null) return n; beams.drop(src); for (const [k, z] of [...zones]) if (z.src === src) n += endZone(k); return n; }
   let seenSpellFx = false, seenImpacts = false;   // C's richer events, once seen, replace the client's own guesses
   const stats = { casts: 0, projectiles: 0, impacts: 0, areas: 0, statuses: 0, unknown: 0 };
 
   const actorAt = id => (id != null ? actors.get(id) : null);
+  const beams = createBeams(scene, { camera, actors, groundY });
   const chest = a => V(a.pos.x, a.pos.y + Math.max(0.5, a.height * 0.6), a.pos.z);
   const feet = (x, z) => V(x, groundY(x, z) + 0.05, z);
   const pointOf = p => (p && typeof p === 'object' ? feet(p.x, p.z).add(V(0, 1, 0)) : null);
   /** Where a `to` field points: an entity id (its chest, now) or a point (a metre above the ground there). */
   const target = to => { if (to == null) return null; if (typeof to === 'object') return pointOf(to); const a = actorAt(to); return a ? chest(a) : null; };
   const g = p => groundY(p.x, p.z);
+  // Y32: the Starcaller's gold stars (star-fx.js) are handed every event first, with these so a star leaves the same hand as any shot
+  const starCtx = { target, chest, hand: a => shots?.handOf?.(a) || null };
 
   function impactAt(p, element, { scale = 1, crit = false } = {}) {
     if (!p) return;
@@ -116,6 +144,7 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
   function onCast(ev) {
     const L = lookOf(ev.skill);
     const a = actorAt(ev.s);
+    if (stars?.onCast(ev, a, starCtx)) { stats.casts++; return; }       // Y32: a gold glint, not the arcane flash
     if (!L || !a) { if (ev.skill && ev.skill !== 'basic' && !L) stats.unknown++; return; }
     stats.casts++;
     const el = L.element, hand = chest(a);
@@ -159,6 +188,7 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
   /** `fx {kind, …}` from the rules. */
   function onFx(ev) {
     const a = actorAt(ev.id);
+    if (stars?.onFx(ev, a, starCtx)) { stats.stars = (stats.stars || 0) + 1; return; }       // Y32: thrown stars, falling stars, star-rune zones, wheeling stars
     const el = elementOf(ev.element || ev.el || (ev.kind === 'arrow' || ev.kind === 'shot' ? 'physical' : 'arcane'));
     switch (ev.kind) {
       case 'bolt': case 'arrow': case 'shot': case 'thrown': {
@@ -168,7 +198,9 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
         if (shots) {
           const to0 = target(ev.to); if (!to0) break;
           const follow = typeof ev.to !== 'object' && ev.to != null ? () => target(ev.to) : null;
-          const n = L?.travel?.count || 1, hop = ev.hop || ev.fromId != null || ev.fork;
+          // (wrap-up: the rules send ONE event for each projectile of a volley, so one body per event — drawing the look's
+          // whole count for each would be nine arrows for a three-arrow shot. Only the client's own demo sends one for all.)
+          const n = ev.demo ? (L?.travel?.count || 1) : 1, hop = ev.hop || ev.fromId != null || ev.fork;
           const start = hop && ev.from ? V(ev.from.x, g(ev.from) + 1.1, ev.from.z) : !a && ev.from ? V(ev.from.x, g(ev.from) + 1.1, ev.from.z) : null;
           for (let k = 0; k < n; k++) {
             const off = n > 1 ? (k / (n - 1) - 0.5) * 1.6 : 0;
@@ -197,12 +229,14 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
       case 'pool': case 'place': {
         const c = { x: ev.x, z: ev.z }; if (c.x == null) break;
         const L = { element: el, area: { kind: el === 'ice' || el === 'lightning' ? 'storm' : 'vortex', r: ev.r || 3 } };
-        const ms = Math.min(6000, (ev.seconds || 2) * 1000);
-        trackZone(ev.obj ?? ev.zone ?? null, ev.id ?? ev.s ?? null, ms, () => area(L, c, 0, { lingerMs: ms }));
+        const rides = carriedBy(ev), ms = zoneDrawMs(ev);                    // Y25: `follow` = the body it rides
+        const rec = trackZone(ev.obj ?? ev.zone ?? null, ev.id ?? ev.s ?? null, ms, () => area(L, c, 0, { lingerMs: ms }));
+        if (rides != null) carry(rec, rides, c);
         if (ev.obj != null) lingering.set(ev.obj, performance.now() + ms);
         break;
       }
       case 'unplace': lingering.delete(ev.obj); endZone(ev.obj); break;
+      case 'beam': case 'beamPulse': case 'beamEnd': beams.onFx(ev); break;       // Y20: one held beam, a flare per pulse (beam-fx.js)
       // A (round 6): a zone the rules announced, and its end the moment its caster dies or is interrupted
       case 'zone': {
         if (ev.end) { endZone(ev.id); endZone(ev.obj); lingering.delete(ev.obj ?? ev.id); break; }
@@ -219,6 +253,7 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
       case 'impact': {
         if (!a) break;
         if (ev.el || ev.ab) seenImpacts = true;           // C sends one per landed hit (with el/ab): onHit stops doubling it
+        if (stars?.onImpact(ev, a, chest(a))) break;       // Y32: a star skill's hit is a gold starburst
         const L = lookOf(ev.ab);
         impactAt(chest(a), ev.el || ev.element ? elementOf(ev.el || ev.element) : L ? L.element : 'physical', { crit: !!ev.crit, scale: (ev.killed ? 1.2 : 0.8) * (L ? L.scale : 1) });
         break;
@@ -226,6 +261,7 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
       case 'spell': {
         // C's per-cast description (exact place, radius, line, delay): the ground part of the look is drawn from it
         seenSpellFx = true;
+        if (ev.shape === 'beam' && beams.aim(ev)) break;      // Y20: a pulse of a held beam — the beam itself shows it
         const L0 = lookOf(ev.ab) || { element: elementOf(ev.el), area: null, shape: ev.shape };
         const L = { ...L0, element: ev.el ? elementOf(ev.el) : L0.element };
         if (!L.area && ['ground', 'around', 'melee'].includes(ev.shape)) L.area = { kind: ev.shape === 'melee' ? 'slash' : ev.shape === 'around' ? 'ring' : 'burst', r: ev.r || 3 };
@@ -242,7 +278,7 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
         break;
       }
       case 'status': {
-        if (!a) break;
+        if (!a || (a.dead && ev.on !== false)) break;         // Y3: nothing new is drawn on a corpse (the killing blow's own stun arrives after the death)
         const s = statusLook(ev.status) || String(ev.status || '');
         if (!s) break;
         stats.statuses++;
@@ -289,7 +325,7 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
     const aim = t ? { x: t.pos.x, z: t.pos.z } : { x: a.pos.x + Math.sin(a.yaw) * 6, z: a.pos.z + Math.cos(a.yaw) * 6 };
     onEvent({ type: 'cast', s: casterId, skill: skillId, aim, target: targetId });
     const ms = Math.max(120, Math.hypot(aim.x - a.pos.x, aim.z - a.pos.z) / 30 * 1000);
-    if (L.travel?.kind === 'projectile') onEvent({ type: 'fx', kind: 'bolt', id: casterId, skill: skillId, element: L.element, from: { x: a.pos.x, z: a.pos.z }, to: t ? targetId : aim, ms });
+    if (L.travel?.kind === 'projectile') onEvent({ type: 'fx', kind: 'bolt', demo: 1, id: casterId, skill: skillId, element: L.element, from: { x: a.pos.x, z: a.pos.z }, to: t ? targetId : aim, ms });
     if (t && L.shape !== 'self' && L.shape !== 'summon') setTimeout(() => {
       onEvent({ type: 'hit', s: casterId, d: targetId, n: 10, el: L.element !== 'physical' ? L.element : undefined, kind: 'dmg', skill: L.shape });
       if (L.status) { onEvent({ type: 'fx', kind: 'status', id: targetId, status: L.status, on: true }); setTimeout(() => onEvent({ type: 'fx', kind: 'status', id: targetId, status: L.status, on: false }), 3000); }
@@ -298,10 +334,11 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
   }
 
   return {
-    ownerGone, endZone, zones,
+    ownerGone, endZone, zones, beams,
     fx, onEvent, lookOf, stats, demo, get ready() { return ready; },
     update(dt) {
       fx.update(dt);
+      moveCarried(); beams.update(dt);
       if (lights) lights.setTransient(fx.lights(3));
     },
     /** Remove a body's auras (it left, died or changed room). */

@@ -19,11 +19,15 @@ import * as THREE from 'three';
 import { createChibi2Character } from '../../../../avatar-3d/js/chibi2.js';
 import { createCreature, randomCreature } from '../../../../avatar-3d/js/creatures.js';
 import { compactCreature } from '../../../../avatar-3d/js/mesh-merge.js';
+import { bodyKindFor } from './body-kind.js';
+import { createDummyBody } from './dummy-model.js';          // #61: a training dummy is a built object, not an animal
 import { avatarFor, bodyTypeFor, loadMonsterLooks } from './looks.js';
 import { normalizeAvatar } from '../../../../avatar-2d/js/render.js';
 import { perf, compileBeforeShow } from './perf.js';
 import { createMount, seatRider, mountSpecFor, CHIBI2_MOUNT_ANIMS } from '../../../../avatar-3d/js/mounts.js';
 import { CHIBI2_DUAL_ANIMS, CHIBI2_ANGLE_ANIMS, CHIBI2_REVIVE_ANIMS, CHIBI2_DUAL_SECONDS, dualAttackFor, dualAttackByCount } from '../../../../avatar-3d/js/chibi2-motion-dual.js';
+import { CHIBI2_CLIP_SECONDS } from '../../../../avatar-3d/js/chibi2-motion.js';
+import { choosePick, pickable, NEAR } from './pick-rule.js';      // Y8: live beats corpse; an emptied corpse is not there to click
 import { CHIBI2_PROF_ANIMS } from '../../../../avatar-3d/js/chibi2-motion-prof.js';   // W9 (P-client): work loops — mine, chop, stoop-and-pick, skin, hammer, stitch, stir   // play-test 5: T6 dual-wield strikes, T25 angling, T4 standing back up
 
 /** A creature spec from what the server sent: `{ type, size?, seed, colors? }` — colour varied by seed within its family. */
@@ -47,7 +51,15 @@ export function rankScale(rank, mods = null) {
 export const modKey = m => (m && typeof m === 'object' ? `${m.id || ''} ${m.name || ''}` : String(m || '')).toLowerCase();
 export const isLeader = mods => Array.isArray(mods) && mods.some(m => /leader|alpha|chief|warlord|pack/.test(modKey(m)));
 const RANK_COLOUR = { rare: '#ffd040', champion: '#5aa0ff', elite: '#c0c0c0' };
-const CHIBI_ANIMS = ['idle', 'ready', 'walk', 'run', 'attack', 'cast', 'hit', 'guard', 'wave', 'talk', 'jump', 'dead', 'swim', 'sitGround', 'drink', ...CHIBI2_MOUNT_ANIMS, ...CHIBI2_DUAL_ANIMS, ...CHIBI2_ANGLE_ANIMS, ...CHIBI2_REVIVE_ANIMS, ...CHIBI2_PROF_ANIMS];   // sitGround/drink: eating and drinking (S20)   // swim: P25; ride/rideGallop: Q16
+/**
+ * Y5 (owner feedback 10): the clip for each emote id the server sends (`emote {id, e}`), and which of them hold until
+ * told to stop (`end: 1`), a step or an action. Pure — exported for tests.
+ */
+export const EMOTE_CLIP = Object.freeze({ wave: 'wave', cheer: 'cheer', bow: 'bowGreet', point: 'point', sit: 'sitGround', dance: 'dance' });
+export const EMOTE_HOLD = Object.freeze(new Set(['sit', 'dance']));
+/** How long a one-off emote plays, in ms: the server's `ms` when it sends one (a wave while the horse comes), else the clip's own length. */
+export function emoteMs(e, ms = null) { const clip = EMOTE_CLIP[e]; if (!clip) return 0; return ms > 0 ? Math.round(ms) : Math.round((CHIBI2_CLIP_SECONDS[clip] || 1.6) * 1000); }
+const CHIBI_ANIMS = ['idle', 'ready', 'walk', 'run', 'attack', 'cast', 'hit', 'guard', 'wave', 'talk', 'jump', 'dead', 'swim', 'sitGround', 'drink', 'cheer', 'bowGreet', 'point', 'dance', ...CHIBI2_MOUNT_ANIMS, ...CHIBI2_DUAL_ANIMS, ...CHIBI2_ANGLE_ANIMS, ...CHIBI2_REVIVE_ANIMS, ...CHIBI2_PROF_ANIMS];   // sitGround/drink: eating and drinking (S20)   // swim: P25; ride/rideGallop: Q16
 
 /** Clips that are a strike: asked for again = a new swing, so they restart (T6: the dual-wield strikes too). */
 const STRIKES = new Set(['attack', 'hit', ...CHIBI2_DUAL_ANIMS, 'fishCast', 'fishShow', 'standUp']);
@@ -194,7 +206,11 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
         const look = looks[a.creature?.type] || null;
         a.flying = !!look?.flying;
         const big = a.sc ? Math.max(0.5, Math.min(3, a.sc)) : rankScale(a.rank, a.mods);      // S4: rares and champions stand out by size (a giant much more)
-        if (look?.avatar) {
+        const kindOfBody = bodyKindFor(a.creature?.type, look);
+        if (kindOfBody === 'dummy') {
+          // #61: a post, a sack and a target board (it had no looks row, and an unknown creature type is a wolf)
+          body = createDummyBody(); a.fixed = true; a.flying = false;
+        } else if (look?.avatar) {
           // A humanoid monster (brigand, cultist, knight): a Chibi 2 body, scaled up when it is an elite or boss.
           body = await createChibi2Character(normalizeAvatar(look.avatar), { anims: CHIBI_ANIMS });
           a.humanoid = true;
@@ -204,7 +220,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
           body = await createCreature(look?.creature ? spec : creatureFor(spec), { detail: a.rank === 'boss' ? 1 : 0.8 });
         }
         // One draw call per moving part instead of one per eye and toe (Farhold R27 M8).
-        try { compactCreature(body); } catch (e) { console.warn('[actors] compact failed', e); }
+        if (!body.isProp) try { compactCreature(body); } catch (e) { console.warn('[actors] compact failed', e); }
       } else {
         body = await createChibi2Character(await avatarFor(a.look), { anims: CHIBI_ANIMS });
       }
@@ -495,6 +511,10 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
       if (a.swim || a.ripples) ripple(a, now);
 
       // Animation.
+      // Y5: an emote ends the moment its owner walks, rides, swims or dies (the server says so too, a beat later)
+      if (a.emote && (a.dead || a.mount || a.swim || (a.speed > 0.6 && now - (a.emoteAt || 0) > 250))) a.emote = null;
+      if (a.emoteShot && (a.oneShot !== a.emoteShot || now >= a.oneShotUntil)) a.emoteShot = null;
+      else if (a.emoteShot && a.speed > 0.6 && now - (a.emoteAt || 0) > 250) { a.oneShot = null; a.emoteShot = null; }
       let want;
       if (a.dead) want = 'dead';
       else if (a.mount) want = a.mount.riderClip;
@@ -502,6 +522,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
       else if (a.swim && !a.shape && (a.kind === 'player' || a.humanoid || a.kind === 'npc')) want = 'swim';      // P25
       else if (a.oneShot === 'standUp' && now < a.oneShotUntil && a.speed > 0.6) { a.oneShot = null; want = 'walk'; }   // T4: walking off cuts the getting-up short
       else if (a.oneShot && now < a.oneShotUntil) want = a.oneShot;
+      else if (a.emote && person(a)) want = a.emote;                                                             // Y5: sitting, dancing
       else if (a.fishing && a.speed <= 0.4 && person(a)) want = a.fishing === 'tug' ? 'fishReel' : 'fishWait';   // T25: a line in the water
       else if (a.working && a.speed <= 0.4 && person(a)) want = a.working;   // W9 (P-client): at a node or a station (prof-view.js names the clip)
       else {
@@ -519,7 +540,9 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
       }
       // far: drawn by the instanced crowd, no mixer at all
       const far = a.lod === 'far' && !a.self && a.id !== 'preview';
-      a.group.visible = !far;
+      // Y3: a corpse that has finished sinking away is GONE — and so is whatever rides its group (a stun's circling stars
+      // stood in the air for the ten seconds until the server took the body away)
+      a.group.visible = !far && !(a.dead && a.kind === 'monster' && a.fade <= 0.02);
       if (far) {
         // far people are one instanced crowd; far beasts (past 120 m) are simply not drawn
         if ((a.kind === 'player' || a.kind === 'npc') && !a.pet && farN < FAR_CAP && a.fade > 0.05) {
@@ -571,6 +594,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
     const t = actors.get(targetId), now = performance.now();
     if (t && !a.self) a.yaw = Math.atan2(t.pos.x - a.pos.x, t.pos.z - a.pos.z);
     a.lastCombat = now;
+    a.emote = null; a.emoteShot = null;                      // Y5: a swing ends a sit, a dance or a wave
     if (now - (a.swingAt || 0) < 280 && !o?.force) return;
     const people = person(a);
     if (o?.hand === 'off') a.offSeen = true;
@@ -590,14 +614,31 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
   function setFishing(id, state) { const a = actors.get(id); if (a) a.fishing = state || null; }
   /** W9 (P-client): a work loop (`profMine` … `profStir`, avatar-3d chibi2-motion-prof.js) or null. Moving shows the walk; a swing or dying ends it. */
   function setWorking(id, clip) { const a = actors.get(id); if (a) a.working = clip || null; }
+  /**
+   * Y5: an emote on this body. wave / cheer / bow / point play once (`ms` = the server's length, e.g. the wave while a
+   * mount is called); sit and dance hold until `end`, a step, a swing or a death. A beast shape has no such clips.
+   */
+  function playEmote(id, e, { ms = null, end = false } = {}) {
+    const a = actors.get(id); if (!a) return false;
+    const clip = EMOTE_CLIP[e];
+    if (end) { if (!clip || a.emote === clip) a.emote = null; if (a.emoteShot && (!clip || a.emoteShot === clip)) { a.oneShot = null; a.emoteShot = null; } return true; }
+    if (!clip || a.dead || !person(a)) return false;
+    a.emoteAt = performance.now();
+    if (EMOTE_HOLD.has(e)) { a.emote = clip; a.oneShot = null; a.emoteShot = null; a.fishing = null; return true; }
+    a.emote = null;
+    if (!playClip(id, clip, emoteMs(e, ms))) return false;
+    a.emoteShot = clip;
+    return true;
+  }
   function playHit(id, fromId, amount) {
     const a = actors.get(id); if (!a) return;
     const src = actors.get(fromId);
     if (src && amount > 0) {
       const dx = a.pos.x - src.pos.x, dz = a.pos.z - src.pos.z, d = Math.hypot(dx, dz) || 1;
-      a.recoil.set(dx / d * 0.28, 0, dz / d * 0.28);
+      if (a.fixed) a.body?.hit?.(dx, dz, a.yaw, amount);            // #61: a thing on a post rocks where it stands
+      else a.recoil.set(dx / d * 0.28, 0, dz / d * 0.28);
     }
-    a.punch = amount > 0 ? 1 : 0.3;
+    a.punch = a.fixed ? 0 : amount > 0 ? 1 : 0.3;
     a.lastCombat = performance.now();
     if (!a.dead && amount > 0 && a.kind === 'player' && (!a.oneShot || a.oneShot === 'hit')) { a.oneShot = 'hit'; a.oneShotUntil = performance.now() + 380; }
   }
@@ -607,7 +648,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
     if (a.rankMark) a.rankMark.visible = !dead; if (a.pole) a.pole.visible = !dead;
     if (a.dead === dead && (dead ? a.deathAt : true)) { refreshPlate(a); return; }
     a.dead = dead;
-    if (dead) { a.hp = 0; a.deathAt = performance.now(); a.oneShot = null; a.fishing = null; a.deadPos = { x: a.pos.x, z: a.pos.z }; }
+    if (dead) { a.hp = 0; a.deathAt = performance.now(); a.oneShot = null; a.fishing = null; a.emote = null; a.emoteShot = null; a.deadPos = { x: a.pos.x, z: a.pos.z }; }
     else {
       // standing back up: drop the corpse pose at once (a crossfade from 'dead' reads as being dragged upright)
       // T4: a person gets up — off the ground, onto a knee, upright (`standUp` starts in the corpse's own pose, so there
@@ -625,21 +666,26 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
   const _ray = new THREE.Raycaster(), _p = new THREE.Vector3(), _c = new THREE.Vector3();
   function pickAt(ndc, { exclude = null } = {}) {
     _ray.setFromCamera(ndc, camera);
-    let best = null, bestT = Infinity;
+    // Y8 (pick-rule.js): an emptied corpse is not there to click; a live body beats a corpse; a live enemy just beside
+    // the cursor beats the corpse under it
+    const cands = [];
     for (const a of actors.values()) {
-      if (a.id === exclude || a.fade < 0.3) continue;
+      if (a.id === exclude || a.fade < 0.3 || !pickable(a)) continue;
       const r = a.pickR || (a.kind === 'monster' ? 0.9 : 0.6);
       const top = a.pickTop || a.height;
       // Closest approach between the ray and the actor's vertical segment (feet to head, four samples).
+      let miss = Infinity, at = Infinity;
       for (let k = 0; k <= 3; k++) {
         _c.set(a.group.position.x, a.group.position.y + Math.max(0.25, top * (0.12 + k * 0.28)), a.group.position.z);
         const t = _p.subVectors(_c, _ray.ray.origin).dot(_ray.ray.direction);
         if (t < 0) continue;
-        const d = _ray.ray.at(t, _p).distanceTo(_c);
-        if (d < r && t < bestT) { bestT = t; best = a; }
+        const d = _ray.ray.at(t, _p).distanceTo(_c) / r;
+        // on the body: the nearest sample along the ray counts (as before); off it: the closest miss
+        if (d < 1 ? (miss >= 1 || t < at) : (miss >= 1 && d < miss)) { miss = d; at = t; }
       }
+      if (miss < NEAR) cands.push({ a, t: at, miss });
     }
-    return best;
+    return choosePick(cands);
   }
 
   /** P22: dress a player in a new look (gear changed). Keeps the body and its clips; swaps the parts. */
@@ -667,5 +713,5 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
     p.root.classList.toggle('self-plate', !!a.self);
   }
 
-  return { actors, lodStats, setShape, setMount, setEating, add, remove, rekey, say, update, setLook, playAttack, playClip, setFishing, setWorking, playHit, setDead, setHp, pickAt, get: id => actors.get(id), refreshPlate };
+  return { actors, lodStats, setShape, setMount, setEating, add, remove, rekey, say, update, setLook, playAttack, playClip, playEmote, setFishing, setWorking, playHit, setDead, setHp, pickAt, get: id => actors.get(id), refreshPlate };
 }

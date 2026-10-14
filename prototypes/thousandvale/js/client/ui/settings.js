@@ -31,6 +31,7 @@ export function createSettings({ net, hud, help, onLogout, onGear }) {
     S = cleanSettings({ ...S, [k]: v }); save(); apply();
     if (send) {
       if (k === 'tradeFriends') send2.settings(net(), 'set', { tradeFriendsOnly: !!S.tradeFriends });
+      if (k === 'shareLocation') send2.settings(net(), 'set', { shareLocation: !!S.shareLocation });      // Y36: the server had the switch, the window did not
       if (k === 'showGear' || k === 'showHelm') { send2.pref(net(), k, S[k]); onGear?.(); }
     }
     for (const fn of subs) { try { fn(k, S[k]); } catch {} }
@@ -68,6 +69,8 @@ export function createSettings({ net, hud, help, onLogout, onGear }) {
     if (tab === 'game') body = [
       h('h4', {}, 'Trading'),
       check('tradeFriends', 'Only allow trade requests from friends', 'Strangers who ask to trade are turned away without asking you.'),
+      h('h4', {}, 'Friends'),
+      check('shareLocation', 'Let friends see where I am', 'On: a friend can track you on their map and minimap. Off: they are told you are not sharing. Party members always see each other.'),
       h('h4', {}, 'Your character'),
       check('showGear', 'Show equipment', 'Off: you are drawn in plain clothes (weapons stay in your hands). Everyone sees the choice.'),
       check('showHelm', 'Show helm', 'Off: your helm or hat is hidden, so your face shows. Everyone sees the choice.'),
@@ -88,12 +91,13 @@ export function createSettings({ net, hud, help, onLogout, onGear }) {
     ];
     else body = bindingsTab({ redraw: draw });   // T27: generated from js/client/input/bindings.js (SHORTCUTS is built from the same table)
     panel.setTitle('Settings', 'Saved as you change them');
-    panel.fill(tabs, h('div.set-body', {}, ...body), h('div.row.end', {}, h('button.ghost.small', { type: 'button', onclick: () => { S = { ...SETTINGS_DEFAULTS }; save(); apply(); draw(); for (const k of ['tradeFriends', 'showGear', 'showHelm']) set(k, S[k]); } }, 'Defaults'), h('button.primary.small', { type: 'button', onclick: () => panel.close() }, 'Done')));
+    panel.fill(tabs, h('div.set-body', {}, ...body), h('div.row.end', {}, h('button.ghost.small', { type: 'button', onclick: () => { S = { ...SETTINGS_DEFAULTS }; save(); apply(); draw(); for (const k of ['tradeFriends', 'showGear', 'showHelm', 'shareLocation']) set(k, S[k]); } }, 'Defaults'), h('button.primary.small', { type: 'button', onclick: () => panel.close() }, 'Done')));
   }
 
   function wire(n) {
     // the server's copy wins for the account-wide one; the per-character prefs come in `joined.you.prefs`
     n.on('settings', m => { if (m?.data && typeof m.data.tradeFriendsOnly === 'boolean' && m.data.tradeFriendsOnly !== S.tradeFriends) { S.tradeFriends = m.data.tradeFriendsOnly; save(); if (panel.isOpen) draw(); } });
+    n.on('settings', m => { if (m?.data && typeof m.data.shareLocation === 'boolean' && m.data.shareLocation !== S.shareLocation) { S.shareLocation = m.data.shareLocation; save(); if (panel.isOpen) draw(); } });
     n.on('joined', j => {
       const p = j.you?.prefs;
       // this browser's choice is what the player last set: tell the server if it differs

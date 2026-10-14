@@ -62,3 +62,9 @@ html[data-layout="phone"] .char-row .char-del, html[data-layout="phone"] .on-sor
 html[data-layout="phone"] .on-table td { padding: 10px 6px; }
 @media (max-width: 520px) { .on-cls, .on-table th:nth-child(4) { display: none; } .on-acct { display: block; margin-left: 0; } }
 html[data-layout="phone"] .char-delete input { min-height: var(--tap, 44px); }
+
+/* wrap-up (report S#66): the title offers this browser's guest characters to the account you signed in to */
+.guest-offer { margin: 0 0 10px; padding: 10px 12px; border: 1px solid var(--gold, #c9a14a); border-radius: 8px; background: rgba(201, 161, 74, 0.08); }
+.guest-offer p { margin: 0 0 8px; font-size: 13px; line-height: 1.4; }
+.guest-offer .row { display: flex; gap: 8px; flex-wrap: wrap; }
+.guest-offer .note { margin: 6px 0 0; }

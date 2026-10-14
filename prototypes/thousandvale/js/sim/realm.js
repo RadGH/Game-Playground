@@ -171,6 +171,24 @@ export function dedupeWaystones(waystones, doors = []) {
   return aliases;
 }
 
+/** The level a wilderness fighter stands at: the floor of the band of the zone it is in, plus `over`. */
+export function fighterLevelAt(zoneList, x, z, over = 0) {
+  for (const q of zoneList || []) if (q.bounds && x >= q.bounds.minX && x < q.bounds.maxX && z >= q.bounds.minZ && z < q.bounds.maxZ) { const b = q.sheet && q.sheet.band; return Math.max(1, ((Array.isArray(b) ? b[0] : 1) || 1) + over); }
+  const b = zoneList && zoneList[0] && zoneList[0].sheet && zoneList[0].sheet.band;
+  return Math.max(1, ((Array.isArray(b) ? b[0] : 1) || 1) + over);
+}
+/** Mark the NPC objects whose role fights (travellers.json `fighters`). An object that already says `fighter` keeps its own. Returns how many. */
+export function markFighters(objects, fighters, zoneList) {
+  const roles = new Set((fighters && fighters.roles) || []);
+  if (!roles.size) return 0;
+  let n = 0;
+  for (const o of objects) {
+    if (o.type !== 'npc' || o.fighter || !o.npc || !roles.has(o.npc.role)) continue;
+    o.fighter = { level: fighterLevelAt(zoneList, o.x, o.z, +fighters.levelOver || 0) }; n++;
+  }
+  return n;
+}
+
 export function buildLayout({ key, name = null, terrain, zones = [], encounterInfo = {}, copyCap = 300, vignetteContent = null, townRadius = null, starter = null, rares = null, jobs = null, schedules = null, horizon = null, travel = null, marks = null, shops = null, mounts = null, offices = null, extra = null }) {
   const allSites = terrain.reader?.meta?.sites || [];
   const multi = zones.length > 1 || allSites.some(s => s.zone);
@@ -250,6 +268,10 @@ export function buildLayout({ key, name = null, terrain, zones = [], encounterIn
   const townObjects = towns.map(() => []);
   const wildObjects = [];
   for (const o of objects) { const ti = townAt(o); if (ti >= 0) townObjects[ti].push(o); else wildObjects.push(o); }
+  // report #18 (wrap-up 2026-10-13, Y21): the rules could make a wilderness NPC fight since round 10 and no NPC in any
+  // data file was marked. travellers.json `fighters.roles` names who does; every NPC out in the wilds with one of
+  // those roles gets `fighter: { level }` (the floor of its zone's band), which room.js passes on as `data.fighter`.
+  markFighters(wildObjects, travel && travel.fighters, zoneList);
   const zoneOf = (x, zz) => {
     for (const q of zoneList) if (q.bounds && x >= q.bounds.minX && x < q.bounds.maxX && zz >= q.bounds.minZ && zz < q.bounds.maxZ) return q.key;
     return zoneList[0].key;

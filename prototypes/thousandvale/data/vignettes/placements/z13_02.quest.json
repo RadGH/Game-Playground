@@ -579,6 +579,51 @@
    "z": 1088,
    "yaw": -1.36,
    "titled": false
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_halsbridge_0",
+   "name": "Training Dummy",
+   "town": "Halsbridge",
+   "x": 1708.5,
+   "z": 1183.6,
+   "yaw": -1.607
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_halsbridge_1",
+   "name": "Training Dummy",
+   "town": "Halsbridge",
+   "x": 1708,
+   "z": 1181,
+   "yaw": -1.382
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_halsbridge_2",
+   "name": "Training Dummy",
+   "town": "Halsbridge",
+   "x": 1707.5,
+   "z": 1178.4,
+   "yaw": -1.157
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_mill_end_0",
+   "name": "Training Dummy",
+   "town": "Mill End",
+   "x": 194.1,
+   "z": 1447.4,
+   "yaw": 0.401
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_mill_end_1",
+   "name": "Training Dummy",
+   "town": "Mill End",
+   "x": 191.9,
+   "z": 1448.6,
+   "yaw": 0.614
   }
  ]
 }

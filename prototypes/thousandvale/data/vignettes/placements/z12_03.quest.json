@@ -366,6 +366,24 @@
    "z": 214,
    "yaw": -2.347,
    "titled": false
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_orrinsford_0",
+   "name": "Training Dummy",
+   "town": "Orrinsford",
+   "x": 343,
+   "z": 567.3,
+   "yaw": -1.683
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_orrinsford_1",
+   "name": "Training Dummy",
+   "town": "Orrinsford",
+   "x": 343,
+   "z": 564.7,
+   "yaw": -1.462
   }
  ]
 }

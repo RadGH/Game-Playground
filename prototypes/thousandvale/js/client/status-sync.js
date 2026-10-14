@@ -99,7 +99,9 @@ export function createStatusSync({ actors, fx, infoOf = () => null, selfDead = (
         if (a.id === 'preview') continue;
         const info = infoOf(a.id);
         const dead = a.dead || (a.id === me && selfDead());
-        if (dead) { if (a.auras?.drawn.size) clear(a); continue; }
+        // Y3 (report #30): ask the effects what is really on the body, not only our own book — an aura drawn on a corpse
+        // by an event that arrived after the death (the killing blow's own stun) was in no book and so was never cleared
+        if (dead) { if (a.auras?.drawn.size || (a.group && fx.statusesOn?.(a.group).length)) clear(a); continue; }
         if (!info && !a.auras) continue;
         const want = wantedAuras(info?.st, false);
         for (const k of modAuras(info?.aff || info?.mods || info?.affixes)) want.add(k);     // S4: a burning rare burns all the time

@@ -275,7 +275,8 @@ export function createProvince(opts) {
     const { pv, n } = r.meta.roads; r.meta.roads = null;
     let ts = (seed * 2246822519 + n * 3266489917) >>> 0;
     const trng = () => { ts = (ts + 0x6D2B79F5) >>> 0; let x = ts; x = Math.imul(x ^ (x >>> 15), x | 1); x ^= x + Math.imul(x ^ (x >>> 7), x | 61); return ((x ^ (x >>> 14)) >>> 0) / 4294967296; };
-    try { r.travellers = createTravellers({ room: r, travel: pv.L.travel, folk: pv.L.folk || [], rng: trng, context: (x, z) => chatterContext(pv, r, x, z), isNight: () => isNight(), phase: () => dayPhase(), log }); }
+    try { r.travellers = createTravellers({ room: r, travel: pv.L.travel, folk: pv.L.folk || [], rng: trng, context: (x, z) => chatterContext(pv, r, x, z), isNight: () => isNight(), phase: () => dayPhase(), log,
+      fighterLevel: (x, z) => Math.max(1, guardLevelAt(pv.L, { x, z }) + (+(pv.L.travel && pv.L.travel.fighters && pv.L.travel.fighters.levelOver) || 0)) }); }      // Y21 (report #18): an armed traveller fights at its zone's level
     catch (err) { log('travellers failed', err && err.stack); }
   }
 
@@ -830,7 +831,7 @@ export function createProvince(opts) {
     if (d.chest) return openChest(o, obj);
     if (d.note) return s.sendJSON({ t: 'used', id, ok: true, kind: 'note', name: obj.name, text: d.note.text, quest: d.note.quest || undefined, ...questOffer(o, obj) });
     if (d.npc) return s.sendJSON({ t: 'used', id, ok: true, kind: 'npc', ...(taught ? { taught } : {}), ...(road ? { road } : {}), ...(d.wanderer ? { wanderer: d.wanderer } : {}), name: obj.name, says: d.npc.says, quest: d.npc.quest || undefined, role: d.npc.role || undefined,
-      ...(shops.kindOf(obj) ? { shop: true, shopKind: shops.kindOf(obj) } : {}), ...(d.npc.role === 'barber' ? { barber: true, free: barberFree() || !(o.char.flags && o.char.flags.barberUsed), ...(barberFree() ? { priceMult: 0 } : { priceMult: economy().barber.mult }) } : {}), ...(d.npc.role === 'unbinder' ? { unbinder: true, unbind: unbinderOffer(o) } : {}), ...(d.npc.role === 'innkeeper' && o.room.kind === 'town' ? { bind: true, bound: o.char.bind === o.room.id } : {}), ...(angling.isFire(obj) ? { cook: true } : {}), ...angling.npcExtra(o, obj), ...professions.npcExtra(o, obj) /* W9 (P-core) */,
+      ...(shops.kindOf(obj) ? { shop: true, shopKind: shops.kindOf(obj) } : {}), ...(d.npc.role === 'barber' ? { barber: true, free: barberFree() || !(o.char.flags && o.char.flags.barberUsed), ...(barberFree() ? { priceMult: 0 } : { priceMult: economy().barber.mult }) } : {}), ...(d.npc.role === 'unbinder' ? { unbinder: true, unbind: unbinderOffer(o) } : {}), ...(d.npc.role === 'innkeeper' && o.room.kind === 'town' ? { bind: true, bound: o.char.bind === o.room.id } : {}), ...(angling.isFire(obj) ? { cook: true } : {}), ...angling.npcExtra(o, obj), ...professions.npcExtra(o, obj, taught ? { taught: [taught] } : undefined) /* W9 (P-core); #56: what the angler just taught */,
       ...(d.npc.service ? { service: d.npc.service } : {}), ...questOffer(o, obj) });
     if (d.use) return useThing(o, obj);
     if (d.trace) return s.sendJSON({ t: 'used', id, ok: true, kind: d.trace.kind, ...d.trace, ...(d.trace.kind === 'campfire' ? { cook: true } : {}) });   // T25: a fire to cook at

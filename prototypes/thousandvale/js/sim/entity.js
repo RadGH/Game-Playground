@@ -149,6 +149,8 @@ export class Entity {
       const d = this.data;
       if (d.hidden) { o.hidden = 1; if (d.hint) o.hint = d.hint; }
       if (d.lore) o.lore = d.lore;
+      if (d.held) o.held = d.held;                             // #59: a road-event captive's cage {kind, x, z, open?}
+      if (d.bare) o.bare = 1;                                  // #63: the place already draws this thing as a prop — the client adds no model of its own
       if (d.npc && d.npc.role) o.role = d.npc.role;
       if (d.title) o.title = d.title;                          // S19: the line above an NPC's name ('Weaponsmith', 'Unbinder — resets talents & perks'); W27: only for NPCs placed for the player
       if (d.cart) { o.vehicle = d.cart.vehicle || 'ox_cart'; o.cart = d.cart.stop; o.yaw = Math.round(this.yaw * 1000) / 1000; }      // W5: a parked ox cart (and which stop it is)

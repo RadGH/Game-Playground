@@ -1,5 +1,5 @@
 {
- "_doc": "Stream P-core (round 8, W9 Professions) — MADE by tools/content-professions.mjs; do not edit by hand (edit the tables in the tool and run it). materials: every stackable material (price = what a merchant pays for one). classes: the material of each tier 1-5 by what it is (metal, leather, cloth, wood, gem, herb, mushroom, fibre, ore, hide, resin). nodeKinds: what a node gives and how it looks (look.model boulder | tree | herb | mushroom | fibre). tools. recipes (kind material | tool | gear | potion | good; a gear recipe lists the real bases of C's catalog you may pick). goods: the consumables recipes make, as bag items. skins: which monsters a skinner can skin. trainers: NPCs this system places (world metres). jobs: job frames appended to the job board.",
+ "_doc": "Stream P-core (round 8, W9 Professions) — MADE by tools/content-professions.mjs; do not edit by hand (edit the tables in the tool and run it). materials: every stackable material (price = what a merchant pays for one). classes: the material of each tier 1-5 by what it is (metal, leather, cloth, wood, gem, herb, mushroom, fibre, ore, hide, resin). nodeKinds: what a node gives and how it looks (look.model boulder | tree | herb | mushroom | fibre). tools. recipes (kind material | tool | gear | potion | good; a gear recipe lists the real bases of C's catalog you may pick). goods: the consumables recipes make, as bag items. skins: which monsters a skinner can skin (types; worn = the hide is one grade lower) and, for the rest, the sentence that says why not (none). trainers: NPCs this system places (world metres). jobs: job frames appended to the job board.",
  "materials": {
   "copper_ore": {
    "id": "copper_ore",
@@ -8752,6 +8752,11 @@
    "carrion_moth": {
     "name": "Carrion Moth"
    },
+   "barrow_hound": {
+    "name": "Barrow Hound",
+    "noMeat": true,
+    "worn": 1
+   },
    "ironback_beetle": {
     "name": "Ironback Beetle"
    },
@@ -8780,9 +8785,322 @@
    "dread_stag": {
     "name": "Dread Stag"
    },
+   "waste_wyrm": {
+    "name": "Waste Wyrm",
+    "noMeat": true
+   },
+   "pale_courser": {
+    "name": "Pale Courser",
+    "noMeat": true,
+    "worn": 1
+   },
    "rime_wyrm": {
     "name": "Rime Wyrm",
     "noMeat": true
+   },
+   "thornmother": {
+    "name": "Thornmother"
+   },
+   "kirrath_cinderwyrm": {
+    "name": "Kirrath, the Cinder Wyrm",
+    "noMeat": true
+   }
+  },
+  "none": {
+   "bog_slime": {
+    "name": "Bog Slime",
+    "why": "A slime has no hide to take."
+   },
+   "marsh_wisp": {
+    "name": "Marsh Wisp",
+    "why": "Nothing is left of it to skin."
+   },
+   "road_brigand": {
+    "name": "Road Brigand",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "brigand_archer": {
+    "name": "Brigand Archer",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "brigand_captain": {
+    "name": "Brigand Captain",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "ash_wisp": {
+    "name": "Ash Wisp",
+    "why": "Nothing is left of it to skin."
+   },
+   "sporecap_walker": {
+    "name": "Sporecap Walker",
+    "why": "It is fungus, not flesh. There is no hide on it."
+   },
+   "cinder_imp": {
+    "name": "Cinder Imp",
+    "why": "It burns away to ash before a knife can touch it."
+   },
+   "ossuary_crawler": {
+    "name": "Ossuary Crawler",
+    "why": "It is bone all the way through. There is no hide on it."
+   },
+   "shale_warden": {
+    "name": "Shale Warden",
+    "why": "Stone and metal all the way through. There is no hide on it."
+   },
+   "glass_shard": {
+    "name": "Glass Shard",
+    "why": "Nothing is left of it to skin."
+   },
+   "sky_cultist": {
+    "name": "Sky Cultist",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "cult_zealot": {
+    "name": "Cult Zealot",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "hollow_wraith": {
+    "name": "Hollow Wraith",
+    "why": "A spirit leaves no body to skin."
+   },
+   "stone_sentinel": {
+    "name": "Stone Sentinel",
+    "why": "Stone and metal all the way through. There is no hide on it."
+   },
+   "ember_revenant": {
+    "name": "Ember Revenant",
+    "why": "Nothing is left of it to skin."
+   },
+   "rift_horror": {
+    "name": "Rift Horror",
+    "why": "Whatever that was, it has no hide a knife can lift."
+   },
+   "iron_marshal": {
+    "name": "Iron Marshal",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "veiled_blade": {
+    "name": "Veiled Blade",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "storm_pyre": {
+    "name": "Storm Pyre",
+    "why": "Nothing is left of it to skin."
+   },
+   "husk_titan": {
+    "name": "Husk Titan",
+    "why": "Stone and metal all the way through. There is no hide on it."
+   },
+   "abyssal_prism": {
+    "name": "Abyssal Prism",
+    "why": "Nothing is left of it to skin."
+   },
+   "cursed_knight": {
+    "name": "Cursed Knight",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "hoard_mimic": {
+    "name": "Hoard Mimic",
+    "why": "Wood, brass and teeth. There is no hide on it."
+   },
+   "sootwick_basher": {
+    "name": "Sootwick Basher",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "sootwick_knifer": {
+    "name": "Sootwick Knifer",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "sootwick_slinger": {
+    "name": "Sootwick Slinger",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "sootwick_hexer": {
+    "name": "Sootwick Hexer",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "sootwick_ringleader": {
+    "name": "Sootwick Ringleader",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "sootwick_bearer": {
+    "name": "Sootwick Flag-Runner",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "ashtusk_brute": {
+    "name": "Ashtusk Brute",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "ashtusk_raider": {
+    "name": "Ashtusk Raider",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "ashtusk_spearthrower": {
+    "name": "Ashtusk Spearthrower",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "ashtusk_bonecaller": {
+    "name": "Ashtusk Bonecaller",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "ashtusk_warchief": {
+    "name": "Ashtusk Warchief",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "ashtusk_bearer": {
+    "name": "Ashtusk Standard-Bearer",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "thornmane_mauler": {
+    "name": "Thornmane Mauler",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "thornmane_prowler": {
+    "name": "Thornmane Prowler",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "thornmane_tracker": {
+    "name": "Thornmane Tracker",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "thornmane_moonseer": {
+    "name": "Thornmane Moonseer",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "thornmane_packlord": {
+    "name": "Thornmane Packlord",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "thornmane_bearer": {
+    "name": "Thornmane Totem-Bearer",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "unburied_bonesoldier": {
+    "name": "Unburied Bonesoldier",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "unburied_gravecreeper": {
+    "name": "Unburied Gravecreeper",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "unburied_deadeye": {
+    "name": "Unburied Deadeye",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "unburied_mournweaver": {
+    "name": "Unburied Mournweaver",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "unburied_deathmarshal": {
+    "name": "Unburied Deathmarshal",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "unburied_bearer": {
+    "name": "Unburied Colour-Sergeant",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "stonehide_smasher": {
+    "name": "Stonehide Smasher",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "stonehide_stalker": {
+    "name": "Stonehide Stalker",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "stonehide_hurler": {
+    "name": "Stonehide Hurler",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "stonehide_frostsayer": {
+    "name": "Stonehide Frostsayer",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "stonehide_mountainlord": {
+    "name": "Stonehide Mountainlord",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "stonehide_bearer": {
+    "name": "Stonehide Stone-Herald",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "warden_first_hollow": {
+    "name": "The Warden of the First Hollow",
+    "why": "Stone and metal all the way through. There is no hide on it."
+   },
+   "gilded_maw": {
+    "name": "The Gilded Maw",
+    "why": "Wood, brass and teeth. There is no hide on it."
+   },
+   "ashen_choir": {
+    "name": "The Ashen Choir",
+    "why": "Nothing is left of it to skin."
+   },
+   "the_long_dark": {
+    "name": "The Long Dark",
+    "why": "Whatever that was, it has no hide a knife can lift."
+   },
+   "sootwick_gutterking": {
+    "name": "Sootwick Gutterking",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "ashtusk_overchief": {
+    "name": "Ashtusk Overchief",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "thornmane_greatfang": {
+    "name": "Thornmane Greatfang",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "unburied_gravemarshal": {
+    "name": "Unburied Gravemarshal",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "stonehide_peakking": {
+    "name": "Stonehide Peak-King",
+    "why": "People are not skinned.",
+    "person": 1
    }
   }
  },

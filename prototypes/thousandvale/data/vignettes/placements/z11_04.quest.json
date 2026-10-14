@@ -156,6 +156,24 @@
    "z": 1912,
    "yaw": -1.194,
    "titled": false
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_last_lantern_0",
+   "name": "Training Dummy",
+   "town": "Last Lantern",
+   "x": 892.6,
+   "z": 1294.1,
+   "yaw": -1.134
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_last_lantern_1",
+   "name": "Training Dummy",
+   "town": "Last Lantern",
+   "x": 891.4,
+   "z": 1291.9,
+   "yaw": -0.965
   }
  ]
 }

@@ -15,7 +15,7 @@ import { applyCustom, customKey, lookCustom } from './ui/appearance-core.js';   
 export const PLAYABLE_RACES = ['human', 'elf', 'dwarf', 'halfling'];
 export const RACE_NAMES = Object.fromEntries(PLAYABLE_RACES.map(r => [r, CHIBI2_RACES[r]?.name?.replace(/^Chibi 2 /, '') || r]));
 
-let presets = null, outfits = null, bases = null, outfits2 = null, armourThemes = null, gearCatalog = null;
+let presets = null, outfits = null, bases = null, outfits2 = null, armourThemes = null, gearCatalog = null, tvOutfits = null;
 export async function loadLookData() {
   if (!presets) presets = fetch(new URL('../../../../avatar-2d/data/presets.json', import.meta.url)).then(r => r.json());
   if (!outfits) outfits = loadClassOutfits();
@@ -30,8 +30,11 @@ export async function loadLookData() {
   if (!outfits2) outfits2 = loadClassOutfits2();
   if (!armourThemes) armourThemes = fetch(new URL('../../data/rules/armour-tiers.json', import.meta.url)).then(r => (r.ok ? r.json() : {})).then(d => d.themes || {}).catch(() => ({}));
   if (!gearCatalog) gearCatalog = Promise.resolve().then(() => loadGearCatalog()).catch(() => null);      // absent = the older tables draw everything
-  const [p, o, b, o2, th, gc] = await Promise.all([presets, outfits, bases, outfits2, armourThemes, gearCatalog]);
-  loaded = { presets: p, outfits: o, bases: b, outfits2: o2, themes: th, catalog: gc };
+  // wrap-up (Y32): outfits of Thousandvale-only classes (the Starcaller). The shared avatar-3d tables are Farhold's and
+  // Emberveil's too and are not written; data/class-outfits-tv.json is laid over them here, in memory.
+  if (!tvOutfits) tvOutfits = fetch(new URL('../../data/class-outfits-tv.json', import.meta.url)).then(r => (r.ok ? r.json() : {})).catch(() => ({}));
+  const [p, o, b, o2, th, gc, tv] = await Promise.all([presets, outfits, bases, outfits2, armourThemes, gearCatalog, tvOutfits]);
+  loaded = { presets: p, outfits: { ...o, ...(tv.classes || {}) }, bases: b, outfits2: { ...o2, ...(tv.tier2 || {}) }, themes: th, catalog: gc, wear: tv.wear || {} };
   return loaded;
 }
 
@@ -43,7 +46,7 @@ export async function loadLookData() {
 let loaded = null;
 export function gearOpts(cls = null) {
   const L = loaded || {};
-  return { baseOf: k => L.bases?.[k] || null, tier2: (cls && L.outfits2?.[cls]) || null, themes: L.themes || null, catalog: L.catalog || null };
+  return { baseOf: k => L.bases?.[k] || null, tier2: (cls && L.outfits2?.[cls]) || null, themes: L.themes || null, catalog: L.catalog || null, classWear: (cls && L.wear?.[cls]) || null };
 }
 export const lookDataReady = () => !!loaded;
 

@@ -1,5 +1,5 @@
 {
-  "_doc": "Stream E (play-test 2, Q28). A low-level class quest for each of the 30 classes, merged into zone 'test' (the Torbor Fields) via test.json `include`. `npcs` are the class trainers (role 'trainer', `trains` = class ids; `at` = a set piece id from data/vignettes/setpieces.json, or Torborhold with an `office` kind resolved by data/provinces/offices.json). A quest with `classes` is offered only to those classes. Rewards: `item` {tier, slot, base (items.json base key), name (bespoke)}; `unlock: 'companion'` (rules.unlock: the class companion now instead of level 10) for the 13 companion classes; `perks: 1` (one extra perk-forest point) for the other 17. `rewardText` = the player-facing summary. S10 (play-test 4): `needsGiver: true` on the quests whose trainer hands you a companion — those are turned in in person; every other quest pays itself where you finish it (remote turn-in).",
+  "_doc": "Stream E (play-test 2, Q28). A low-level class quest for each of the 30 Farhold classes and (wrap-up 2026-10-13) Thousandvale's own Starcaller, merged into zone 'test' (the Torbor Fields) via test.json `include`. `npcs` are the class trainers (role 'trainer', `trains` = class ids; `at` = a set piece id from data/vignettes/setpieces.json, or Torborhold with an `office` kind resolved by data/provinces/offices.json). A quest with `classes` is offered only to those classes. Rewards: `item` {tier, slot, base (items.json base key), name (bespoke)}; `unlock: 'companion'` (rules.unlock: the class companion now instead of level 10) for the 13 companion classes; `perks: 1` (one extra perk-forest point) for the other 17. `rewardText` = the player-facing summary. S10 (play-test 4): `needsGiver: true` on the quests whose trainer hands you a companion — those are turned in in person; every other quest pays itself where you finish it (remote turn-in).",
   "zone": "test",
   "part": "classes",
   "npcs": {
@@ -50,7 +50,8 @@
         "chronomancer",
         "enchanter",
         "stormcaller",
-        "pyromancer"
+        "pyromancer",
+        "starcaller"
       ],
       "at": "Torborhold",
       "office": "house",
@@ -58,7 +59,8 @@
       "says": [
         "The scorch marks are load-bearing, leave them.",
         "Magic is just arithmetic that shouts.",
-        "If my eyebrows grow back, I'll have won."
+        "If my eyebrows grow back, I'll have won.",
+        "If one more star lands in my cabbages, I am sending the bill to the sky."
       ],
       "titled": true
     },
@@ -1016,6 +1018,59 @@
         "pyromancer"
       ],
       "needsGiver": true
+    },
+    {
+      "id": "class_starcaller",
+      "name": "Nine Stones, Nine Stars",
+      "level": 3,
+      "giver": "trainer_arcane",
+      "offer": "The old folk stood nine stones in a ring to mark where the stars come down. You throw stars for a living, so go and check. Sight the evening star over the heel stone, then fill your Constellation on the dusk flitters at Ashby's lumber camp.",
+      "steps": [
+        {
+          "kind": "use",
+          "vignette": "sp_nine_maidens",
+          "object": "Heel stone",
+          "text": "Sight the evening star over the heel stone at the Nine Maidens",
+          "where": "The Nine Maidens, a ring of standing stones on the hill"
+        },
+        {
+          "kind": "kill",
+          "type": "dusk_flitter",
+          "count": 6,
+          "near": "sp_ashby_lumber_camp",
+          "text": "Bring down 6 dusk flitters with thrown stars",
+          "where": "Ashby's Lumber Camp, at the edge of the woods"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_nine_maidens",
+          "object": "Altar stone",
+          "text": "Chalk where your stars fell on the altar stone",
+          "where": "The Nine Maidens, a ring of standing stones on the hill"
+        }
+      ],
+      "done": "Six flitters, and the altar stone still in one piece? Then you were aiming. A wand that points at the sky when nobody is holding it, and a perk point.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "weapon",
+          "base": "wand",
+          "name": "Wand of the Ninth Star"
+        },
+        "perks": 1,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
+      },
+      "rewardText": "A rare wand, Wand of the Ninth Star, and one extra perk-forest point.",
+      "classes": [
+        "starcaller"
+      ]
     },
     {
       "id": "class_rogue",

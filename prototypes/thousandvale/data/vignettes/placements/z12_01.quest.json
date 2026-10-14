@@ -384,6 +384,33 @@
    "z": 788,
    "yaw": -0.785,
    "titled": false
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_ashcombe_0",
+   "name": "Training Dummy",
+   "town": "Ashcombe",
+   "x": 1415,
+   "z": 1326.6,
+   "yaw": -0.831
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_ashcombe_1",
+   "name": "Training Dummy",
+   "town": "Ashcombe",
+   "x": 1413,
+   "z": 1325,
+   "yaw": -0.674
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_ashcombe_2",
+   "name": "Training Dummy",
+   "town": "Ashcombe",
+   "x": 1411,
+   "z": 1323.4,
+   "yaw": -0.517
   }
  ]
 }

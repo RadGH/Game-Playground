@@ -1,0 +1,140 @@
+THE ECONOMY — BEFORE (data as committed in git) — gold per hour, everything sold
+activity          level 1    level 5    level 9   level 15   level 20   level 30
+questing              727       2471       4896       8061      10227      15447
+killing               424       2206       4123       8172      10353      17320
+events                644       2302       4013       6995       9058      13886
+dungeon              2018       3972       5435      11535      11137      21756
+fishing               673       1697       3397       5694       8870      10198
+fishing p10-p90   579-778  1394-2012  3101-3774  5206-6181 7540-10292 8615-12012
+legend (once a zone)    not yet    not yet    not yet    not yet 6899g/1.8h 7214g/1.8h
+fishing / questing       93%        69%        69%        71%        87%        66%
+
+where it comes from
+  L1  killing   coin 340, soldDrops 84  (85 kills, 4.0 gold + 1.0 of sold drops each)
+  L1  questing  purses 542, soldCrates 25, kills 160  (4 quests (136 gold each, 1.05 crates), 32 kills)
+  L1  events    zoneEvents 125, soldRares 65, roadEvents 329, kills 125  (2.5 zone events (50 gold + a rare each), 5 road events)
+  L1  dungeon   coin 844, soldDrops 429, chest 745  (1.77 runs an hour (34 min each, 40 bodies))
+  L1  fishing   fish 534, sunkenCrates 49, junk 38, pulledUp 52  (skill 3, The Torbor Fields, 22 pools open to you (best tier 1), 17 s walk between pools)
+  L5  killing   coin 1290, soldDrops 916  (85 kills, 15.2 gold + 10.8 of sold drops each)
+  L5  questing  purses 1554, soldCrates 87, kills 831  (4 quests (389 gold each, 0.79 crates), 32 kills)
+  L5  events    zoneEvents 630, soldRares 265, roadEvents 758, kills 649  (2.5 zone events (252 gold + a rare each), 5 road events)
+  L5  dungeon   coin 1513, soldDrops 913, chest 1546  (1.72 runs an hour (35 min each, 43 bodies))
+  L5  fishing   fish 1344, sunkenCrates 219, junk 28, pulledUp 106  (skill 28, The Gullwick Lakes, 33 pools open to you (best tier 2), 19 s walk between pools)
+  L9  killing   coin 1948, soldDrops 2175  (85 kills, 22.9 gold + 25.6 of sold drops each)
+  L9  questing  purses 3194, soldCrates 150, kills 1552  (4 quests (799 gold each, 0.77 crates), 32 kills)
+  L9  events    zoneEvents 1135, soldRares 473, roadEvents 1193, kills 1213  (2.5 zone events (454 gold + a rare each), 5 road events)
+  L9  dungeon   coin 1775, soldDrops 1186, chest 2474  (1.79 runs an hour (33 min each, 39 bodies))
+  L9  fishing   fish 2783, sunkenCrates 398, junk 25, pulledUp 191  (skill 39, The Sunken Wolds, 29 pools open to you (best tier 2), 19 s walk between pools)
+  L15 killing   coin 2803, soldDrops 5369  (85 kills, 33.0 gold + 63.2 of sold drops each)
+  L15 questing  purses 4670, soldCrates 315, kills 3076  (4 quests (1168 gold each, 0.77 crates), 32 kills)
+  L15 events    zoneEvents 1890, soldRares 850, roadEvents 1852, kills 2404  (2.5 zone events (756 gold + a rare each), 5 road events)
+  L15 dungeon   coin 2696, soldDrops 5074, chest 3765  (1.79 runs an hour (33 min each, 39 bodies))
+  L15 fishing   fish 4769, sunkenCrates 902, junk 22, pulledUp 0  (skill 63, The Sunken Wolds, 37 pools open to you (best tier 3), 19 s walk between pools)
+  L20 killing   coin 3612, soldDrops 6740  (85 kills, 42.5 gold + 79.3 of sold drops each)
+  L20 questing  purses 5898, soldCrates 431, kills 3897  (4 quests (1475 gold each, 0.77 crates), 32 kills)
+  L20 events    zoneEvents 2520, soldRares 1090, roadEvents 2403, kills 3045  (2.5 zone events (1008 gold + a rare each), 5 road events)
+  L20 dungeon   coin 2968, soldDrops 3107, chest 5063  (1.88 runs an hour (32 min each, 35 bodies))
+  L20 fishing   fish 7626, sunkenCrates 1226, junk 18, pulledUp 0  (skill 80, The Sunken Wolds, 37 pools open to you (best tier 3), 19 s walk between pools)
+  L30 killing   coin 5269, soldDrops 12050  (85 kills, 62.0 gold + 141.8 of sold drops each)
+  L30 questing  purses 8355, soldCrates 572, kills 6520  (4 quests (2089 gold each, 0.77 crates), 32 kills)
+  L30 events    zoneEvents 3780, soldRares 1540, roadEvents 3472, kills 5094  (2.5 zone events (1512 gold + a rare each), 5 road events)
+  L30 dungeon   coin 4751, soldDrops 10163, chest 6842  (1.75 runs an hour (34 min each, 41 bodies))
+  L30 fishing   fish 8567, sunkenCrates 1618, junk 13, pulledUp 0  (skill 95, The Sunken Wolds, 37 pools open to you (best tier 3), 19 s walk between pools)
+
+PRICES                level 1    level 5    level 9   level 15   level 20   level 30      hours of questing to buy (same columns)
+plain gear                212        803       1440       2423       3350       4963         0.29   0.32   0.29   0.30   0.33   0.32
+uncommon gear             506       2080       3512       6137       8278      12493         0.70   0.84   0.72   0.76   0.81   0.81
+rare gear                2207       9344      16014      27398      36507      54575         3.04   3.78   3.27   3.40   3.57   3.53
+legendary (worth)        8207      30476      56691      87235     117366     184891        11.29  12.33  11.58  10.82  11.48  11.97
+  sells: uncommon           6         24         42         73         99        149         0.01   0.01   0.01   0.01   0.01   0.01
+  sells: rare              26        112        192        328        438        654         0.04   0.05   0.04   0.04   0.04   0.04
+healing potion             30         30         30         30         30         30         0.04   0.01   0.01   0.00   0.00   0.00
+greater healing           108        108        108        108        108        108         0.15   0.04   0.02   0.01   0.01   0.01
+travel rations              9          9          9          9          9          9         0.01   0.00   0.00   0.00   0.00   0.00
+hearty stew                27         27         27         27         27         27         0.04   0.01   0.01   0.00   0.00   0.00
+best mount                750       4200       4200      33000      33000      33000         1.03   1.70   0.86   4.09   3.23   2.14
+unbind a talent             5         15         40        115        195        405         0.01   0.01   0.01   0.01   0.02   0.03
+unbind a perk               5         15         50        130        230        470         0.01   0.01   0.01   0.02   0.02   0.03
+waystone 2 km              21         21         21         21         21         21         0.03   0.01   0.00   0.00   0.00   0.00
+waystone 8 km              65         65         65         65         65         65         0.09   0.03   0.01   0.01   0.01   0.00
+hazel rod                  12         12         12         12         12         12         0.02   0.00   0.00   0.00   0.00   0.00
+ash rod                  1350       1350       1350       1350       1350       1350         1.86   0.55   0.28   0.17   0.13   0.09
+one kill pays          4+0.9915.18+10.7722.92+25.5832.98+63.16  42.5+79.361.99+141.77      (coin + sold drops)
+
+FISH  62 species: common 1-5 g (24), uncommon 3-28 g (21), rare 28-54 g (10), epic 50-232 g (7); legends 2400-6300 g; sunken crate 4.0% of casts
+fishing an hour:  L1: 168.23 fish, 8.24 crates, 0 legends, 39.54 pools | L5: 168.42 fish, 7.94 crates, 0 legends, 38.78 pools | L9: 173.22 fish, 8.15 crates, 0 legends, 39.35 pools | L15: 203.4 fish, 8.82 crates, 0 legends, 45.18 pools | L20: 202.56 fish, 8.75 crates, 0.57 legends, 44.83 pools | L30: 204.57 fish, 8.7 crates, 0.57 legends, 44.69 pools
+
+REAL PLAY — BEFORE (data as committed in git) — a real hour gets through 38% of an ideal questing hour, 16% of play is gathering or fishing (ASSUME.real)
+the income is data/rules/prices.json income.lifetime; the sim's own count of gold in total at level 9 is 3423 (the owner's character: 3,445), reached after 4.09 hours
+                                 level 1   level 5   level 9  level 15  level 20  level 30
+minutes to gain the level             33        28        26        25        24        16
+hours played to get here             0.0       2.3       4.1       6.6       8.7      12.4
+gold earned in total                   0      1075      3445      9420     16420     33665
+  the sim's own count                  0      1069      3423      9375     16349     33545
+GOLD PER REAL HOUR                   271       925      1822      3003      3806      5746
+  all questing                       276       939      1860      3063      3886      5870
+  all killing                        161       838      1567      3105      3934      6582
+  all events                         245       875      1525      2658      3442      5277
+  all dungeon                        767      1509      2065      4383      4232      8267
+  all fishing                        256       645      1291      2164      3371      3875
+  all mining                         228       748       772      2029      3043      5231
+  all logging                        241       683       876      1789      3081      4946
+  all foraging                       238       812       806      2398      3554      5689
+  sold loot, share of income          8%       18%       20%       29%       29%       33%
+PRICE                            level 1   level 5   level 9  level 15  level 20  level 30
+uncommon piece                       506      2080      3512      6137      8278     12493
+rare piece                          2207      9344     16014     27398     36507     54575
+legendary piece (worth)             8207     30476     56691     87235    117366    184891
+  an uncommon sells for         6 (1.2%) 24 (1.2%) 42 (1.2%) 73 (1.2%) 99 (1.2%)149 (1.2%)
+  a rare sells for             26 (1.2%)112 (1.2%)192 (1.2%)328 (1.2%)438 (1.2%)654 (1.2%)
+healing potion                        30        30        30        30        30        30
+best mount you may ride              750      4200      4200     33000     33000     33000
+waystone, 2 km                        21        21        21        21        21        21
+Unbinder, all talents back            25       160       515      1415      2465      5050
+PLAY TO AFFORD IT                level 1   level 5   level 9  level 15  level 20  level 30
+uncommon piece                   112 min   135 min   116 min   123 min   131 min   131 min
+rare piece                         8.1 h    10.1 h     8.8 h     9.1 h     9.6 h     9.5 h
+legendary piece                   30.3 h    32.9 h    31.1 h    29.1 h    30.8 h    32.2 h
+healing potion                   6.6 min   1.9 min   1.0 min   0.6 min   0.5 min   0.3 min
+greater healing potion            24 min   7.0 min   3.6 min   2.2 min   1.7 min   1.1 min
+best mount you may ride          166 min     4.5 h   138 min    11.0 h     8.7 h     5.7 h
+waystone, 2 km                   4.6 min   1.4 min   0.7 min   0.4 min   0.3 min   0.2 min
+waystone, 8 km                    14 min   4.2 min   2.1 min   1.3 min   1.0 min   0.7 min
+ash rod                            5.0 h    88 min    45 min    27 min    21 min    14 min
+PROFESSIONS (tools/sim-professions.mjs) — gold per hour and its share of an hour of questing at that level (the rule: 70-100%)
+  L1  mining                     601    83%  skill 3, Saint Orrin's Rise: 51 nodes, 101 an hour (143 m apart), 5.9 gold each
+  L1  logging                    634    87%  skill 3, Saint Orrin's Rise: 45 nodes, 97 an hour (144 m apart), 6.6 gold each
+  L1  foraging                   627    86%  skill 3, Saint Orrin's Rise: 54 nodes, 104 an hour (132 m apart), 6.0 gold each
+  L1  mining + smithing          709    98%  mining as above, then Bronze Bar (4 gold of 1 Copper Ore + 1 Tin Ore -> 5), 13 batches, 2 min at the station
+  L1  foraging + outfitting      677    93%  foraging as above, then Bolt of Linen (4 gold of 2 Flax -> 5), 5 batches, 1 min at the station
+  L1  skinning (add-on)          131    18%  skill 3: 53 beasts skinned, 2.5 gold each (tier 1 hide); costs 11% of the hour's kills. Added to hunting, not an hour of its own
+  L5  mining                    1969    80%  skill 28, Blackthorn Scar: 45 nodes, 132 an hour (105 m apart), 14.9 gold each
+  L5  logging                   1797    73%  skill 28, Blackthorn Scar: 39 nodes, 91 an hour (156 m apart), 19.8 gold each
+  L5  foraging                  2137    86%  skill 28, Blackthorn Scar: 45 nodes, 119 an hour (113 m apart), 18.0 gold each
+  L5  mining + smithing         2183    88%  mining as above, then Iron Bar (12 gold of 2 Iron Ore -> 14), 14 batches, 2 min at the station
+  L5  foraging + outfitting     2231    90%  foraging as above, then Bolt of Canvas (14 gold of 2 Hemp -> 16), 5 batches, 1 min at the station
+  L5  skinning (add-on)          120     5%  skill 28: 53 beasts skinned, 2.3 gold each (tier 1 hide); costs 11% of the hour's kills. Added to hunting, not an hour of its own
+  L9  mining                    2032    42%  skill 41, Blackthorn Scar: 45 nodes, 132 an hour (105 m apart), 15.4 gold each
+  L9  logging                   2306    47%  skill 41, The Sunken Wolds: 39 nodes, 129 an hour (102 m apart), 17.8 gold each
+  L9  foraging                  2120    43%  skill 41, Blackthorn Scar: 45 nodes, 118 an hour (113 m apart), 18.0 gold each
+  L9  mining + smithing         2251    46%  mining as above, then Iron Bar (12 gold of 2 Iron Ore -> 14), 14 batches, 2 min at the station
+  L9  foraging + outfitting     2203    45%  foraging as above, then Bolt of Canvas (14 gold of 2 Hemp -> 16), 5 batches, 1 min at the station
+  L9  skinning (add-on)          289     6%  skill 41: 53 beasts skinned, 5.4 gold each (tier 2 hide); costs 11% of the hour's kills. Added to hunting, not an hour of its own
+  L15 mining                    5339    66%  skill 66, Saltmouth: 64 nodes, 133 an hour (105 m apart), 40.2 gold each — PROJECTED: no tier-3 nodes in this province yet
+  L15 logging                   4709    58%  skill 66, Brackwater Fen: 56 nodes, 115 an hour (118 m apart), 40.9 gold each — PROJECTED: no tier-3 nodes in this province yet
+  L15 foraging                  6311    78%  skill 66, Saltmouth: 66 nodes, 115 an hour (116 m apart), 55.1 gold each — PROJECTED: no tier-3 nodes in this province yet
+  L15 mining + smithing         5943    74%  mining as above, then Silversteel Bar (58 gold of 2 Silver Ore + 1 Iron Ore -> 67), 8 batches, 1 min at the station
+  L15 foraging + outfitting     6618    82%  foraging as above, then Bolt of Silk (64 gold of 2 Silkweed -> 74), 3 batches, 0 min at the station
+  L15 skinning (add-on)          278     3%  skill 66: 53 beasts skinned, 5.2 gold each (tier 2 hide); costs 11% of the hour's kills. Added to hunting, not an hour of its own
+  L20 mining                    8009    78%  skill 80, Saltmouth: 64 nodes, 133 an hour (105 m apart), 60.3 gold each — PROJECTED: no tier-4 nodes in this province yet
+  L20 logging                   8109    79%  skill 80, Brackwater Fen: 56 nodes, 115 an hour (118 m apart), 70.5 gold each — PROJECTED: no tier-4 nodes in this province yet
+  L20 foraging                  9352    91%  skill 80, Saltmouth: 66 nodes, 115 an hour (116 m apart), 81.3 gold each — PROJECTED: no tier-4 nodes in this province yet
+  L20 mining + smithing         8826    86%  mining as above, then Blackiron Bar (76 gold of 2 Blackiron Ore -> 87), 9 batches, 1 min at the station
+  L20 foraging + outfitting     9795    96%  foraging as above, then Bolt of Moonweave (96 gold of 2 Moonflax -> 110), 3 batches, 0 min at the station
+  L20 skinning (add-on)          493     5%  skill 80: 53 beasts skinned, 9.3 gold each (tier 3 hide); costs 11% of the hour's kills. Added to hunting, not an hour of its own
+  L30 mining                   13765    89%  skill 100, Saltmouth: 64 nodes, 133 an hour (105 m apart), 103.6 gold each — PROJECTED: no tier-5 nodes in this province yet
+  L30 logging                  13017    84%  skill 100, Brackwater Fen: 56 nodes, 115 an hour (118 m apart), 113.2 gold each — PROJECTED: no tier-5 nodes in this province yet
+  L30 foraging                 14971    97%  skill 100, Saltmouth: 66 nodes, 115 an hour (116 m apart), 130.4 gold each — PROJECTED: no tier-5 nodes in this province yet
+  L30 mining + smithing        15203    98%  mining as above, then Sunsteel Bar (128 gold of 2 Sunsteel Ore -> 147), 9 batches, 1 min at the station
+  L30 foraging + outfitting    15685   102%  foraging as above, then Bolt of Sunsilk (156 gold of 2 Sunsilk -> 179), 3 batches, 0 min at the station
+  L30 skinning (add-on)          825     5%  skill 100: 53 beasts skinned, 15.5 gold each (tier 4 hide); costs 11% of the hour's kills. Added to hunting, not an hour of its own

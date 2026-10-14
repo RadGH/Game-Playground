@@ -140,6 +140,8 @@ export function createProf({ net, hud, bag = null, sheet = null, journal = null,
         const row = rowOf(id), has = known.has(id), needsTool = row?.kind === 'gather' && id !== 'angling', blurb = (S.numbers?.professions || []).find(p => p.id === id)?.blurb;
         return h('li.tr-row', { style: `--pt:${PROF_TINT[id]}` }, h('i.pk-ico', {}, profIcon(id, 22)),
           h('div.tr-main', {}, h('b', {}, PROF_NAME[id] || id), has ? h('small', {}, row ? `You know this — ${row.rank || ''} ${row.level}` : 'You know this.') : blurb ? h('small', {}, blurb) : null,
+            has && blurb ? h('small', {}, blurb) : null,
+            has && needsTool && row?.tool ? h('small', {}, `${row.tool.name} is in your bag.`) : null,
             has && needsTool && row && !row.tool ? h('small.pc-why', {}, 'You have no tool for it in your bag.') : null),
           !has ? h('button.primary.small', { type: 'button', disabled: T.busy === id, dataset: { learn: id }, onclick: () => { T.busy = id; send('prof', 'learn', { id, npc: T.npc }); drawTrainer(); } }, 'Learn')
             : needsTool && row && !row.tool ? h('button.ghost.small', { type: 'button', disabled: T.busy === id, dataset: { tool: id }, onclick: () => { T.busy = id; send('prof', 'tool', { id, npc: T.npc }); drawTrainer(); } }, `Buy the tool (${fmt(T.prof.toolPrice || 0, { decimals: 0 })} gold)`) : null);
@@ -152,10 +154,10 @@ export function createProf({ net, hud, bag = null, sheet = null, journal = null,
     if (!u || !u.ok || !u.prof) return;
     T.npc = u.id ?? u.npc ?? null; T.name = u.name || u.who || 'Trades'; T.prof = u.prof; T.busy = null; S.lastNpc = T.npc;
     for (const id of u.prof.taught || []) hud.toast(`You have learned ${PROF_NAME[id] || id}.`, 'good');
-    // nothing left to do here (he taught it as he spoke, you have the tool, he has no station): no window at all
+    // Auto-teaching must remain visible after the toast fades. Keep the skill and tool details
+    // available on every visit, even when the player already knows everything this NPC teaches.
     const known = new Set([...(u.prof.known || []), ...(u.prof.taught || [])]);
-    const todo = (u.prof.trains || []).some(id => !known.has(id) || (rowOf(id)?.kind === 'gather' && id !== 'angling' && rowOf(id) && !rowOf(id).tool && !(u.prof.taught || []).includes(id)));
-    if (!todo && !(u.prof.stations || []).length) return;
+    if (!(u.prof.trains || []).length && !(u.prof.stations || []).length) return;
     // the craftsman's own dialog (quests, his shop) is usually up as well: put our doors IN it rather than a window over it.
     // The dialog is drawn by another handler of this same message — give it a moment before deciding it is not coming.
     const expectDialog = !!(u.says || u.offers || u.shop || u.kind === 'npc'), t0 = performance.now();
@@ -164,11 +166,19 @@ export function createProf({ net, hud, bag = null, sheet = null, journal = null,
       const dlg = [...document.querySelectorAll('.tv-dialog')].find(d => !d.hidden && d.getClientRects().length), foot = dlg?.querySelector('footer');
       if (!foot) { if (expectDialog && performance.now() - t0 < 700) { setTimeout(place, 60); return; } api.showTrainer(); return; }
       foot.querySelectorAll('.prof-dlg').forEach(b => b.remove());
+      dlg.querySelectorAll('.prof-dlg-status').forEach(p => p.remove());
+      const status = h('div.prof-dlg-status', {}, ...(u.prof.trains || []).map(id => {
+        const name = PROF_NAME[id] || id, row = rowOf(id);
+        const text = (u.prof.taught || []).includes(id) ? `You have learned ${name}.`
+          : known.has(id) ? `${name} is already learned.` : `Teaches ${name} for free.`;
+        return h('p', {}, h('b', {}, text), row?.tool ? ` ${row.tool.name} is in your bag.` : '');
+      }));
+      dlg.querySelector('.body')?.prepend(status);
       const add = (text, fn) => { const b = h('button.ghost.prof-dlg', { type: 'button', onclick: () => { dlg.hidden = true; fn(); } }, text); foot.prepend(b); };
       const st = [...new Set((u.prof.stations || []).map(id => (id === 'tempering' ? 'smithing' : id)))];
       for (const id of st.reverse()) add(`Use ${STATION_WORD[id] || 'the station'}`, () => craft.open({ npc: T.npc, tab: id }));
       const fresh = (u.prof.trains || []).filter(id => !known.has(id));
-      if (todo) add(fresh.length ? `Learn: ${fresh.map(id => PROF_NAME[id]).join(', ')}` : 'Trades', () => api.showTrainer());
+      if ((u.prof.trains || []).length) add(fresh.length ? `Learn: ${fresh.map(id => PROF_NAME[id]).join(', ')}` : (u.prof.trains || []).map(id => PROF_NAME[id] || id).join(', '), () => api.showTrainer());
     };
     setTimeout(place, 60);
   }

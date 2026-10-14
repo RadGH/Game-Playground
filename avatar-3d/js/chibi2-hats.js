@@ -225,9 +225,18 @@ export function buildExtraHat(a, c) {
     }
     case 'chain_coif': {
       // a mail hood: round the whole head and neck with the face left open, and a mantle on the shoulders
-      const g = new THREE.SphereGeometry(1, 16, 10, Math.PI / 2 + 0.95, Math.PI * 2 - 1.9, 0, 2.3);
-      head(g, darkSteel, { position: [0, 0.3, -0.02], scale: [0.39, 0.38, 0.34], metal: true });
-      for (let k = 0; k < 4; k++) head(new THREE.TorusGeometry(0.37 - k * 0.03, 0.006, 3, 20, Math.PI * 2 - 1.9), tone(darkSteel, 0.7), { position: [0, 0.48 - k * 0.1, -0.02], rotation: [Math.PI / 2, 0, Math.PI / 2 + 0.95], scale: [1, 0.9, 1], metal: true });
+      // 2026-10-13: the face opening used to be one wedge cut out of the sphere ALL THE WAY TO THE POLE, so the hood was
+      // open from the chin to the top of the head ("you can see through it at the top front"). It is two pieces now: a
+      // closed crown down to the brow, and the wedge only from the brow down. The mail bands sit ON the hood (the old
+      // radii put the top one in the air as a halo and the other three inside the shell where nobody saw them;
+      // the arc is turned in the geometry, because a z rotation in `head` also turned the axis the squash is on).
+      const BROW = 1.08, GAP = 1.9, R = [0.39, 0.38, 0.34], CY = 0.3;        // BROW: polar angle of the opening's top edge (y ~0.47)
+      head(new THREE.SphereGeometry(1, 16, 5, 0, Math.PI * 2, 0, BROW + 0.04), darkSteel, { position: [0, CY, -0.02], scale: R, metal: true });
+      head(new THREE.SphereGeometry(1, 16, 7, Math.PI / 2 + GAP / 2, Math.PI * 2 - GAP, BROW, 2.3 - BROW), darkSteel, { position: [0, CY, -0.02], scale: R, metal: true });
+      const at = y => R[0] * Math.sqrt(Math.max(0, 1 - ((y - CY) / R[1]) ** 2)) + 0.003;
+      const yBrow = CY + R[1] * Math.cos(BROW + 0.04);
+      head(new THREE.TorusGeometry(at(yBrow), 0.008, 3, 24), tone(darkSteel, 0.7), { position: [0, yBrow, -0.02], rotation: [Math.PI / 2, 0, 0], scale: [1, R[2] / R[0], 1], metal: true });
+      for (let k = 0; k < 4; k++) { const y = 0.42 - k * 0.1; head(new THREE.TorusGeometry(at(y), 0.006, 3, 20, Math.PI * 2 - GAP).rotateZ(Math.PI / 2 + GAP / 2), tone(darkSteel, 0.7), { position: [0, y, -0.02], rotation: [Math.PI / 2, 0, 0], scale: [1, R[2] / R[0], 1], metal: true }); }
       add(profile([[0.27 * T, 0.24 * W, 0.17 * W, -0.01], [0.33 * T, 0.16 * W, 0.13 * W, -0.012], [0.4 * T, 0.1, 0.09, -0.015]], 14), 'chest', darkSteel, { metal: true });
       return;
     }

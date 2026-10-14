@@ -15,6 +15,23 @@
   "pairs": "Two of a crew walking within 4 m may trade a line and a reply (chatter.json `reply`) when a player is within 12 m, at most once a minute per group.",
   "stop": "A group pauses 5-20 s at a wayside, curio or crossing it passes (look about, sit, drink) — makes the road feel walked, not conveyed."
  },
+ "fighters": {
+  "_doc": "Report #18 (wrap-up 2026-10-13): who in the wilds FIGHTS the monsters beside them while a player is near (js/rules/guards.js 'wanderer': nothing happens with nobody watching; they never die, they sit down and get up again; helping one earns thanks by economy.json npcThanks). `roles` = a placed NPC, a set-piece or wayside worker, a fort's garrison or a village's own guard with one of these roles fights (js/sim/realm.js marks the placed ones, js/sim/travellers.js the wayside ones). `crew` 'armed' = a traveller on the road fights when its crew row says `armed: true` (caravan guards, road patrols, a collector's escort, hunting parties). Everyone else — traders, farmers, pilgrims, children, shepherds — stays out of it. Each fights at the level of the zone it stands in (the floor of its band + `levelOver`).",
+  "roles": [
+   "guard",
+   "sergeant",
+   "captain",
+   "caravan_guard",
+   "guard_patrol",
+   "scout",
+   "hunter",
+   "hunter_lone",
+   "poacher",
+   "smuggler"
+  ],
+  "crew": "armed",
+  "levelOver": 0
+ },
  "kinds": {
   "merchant_caravan": {
    "name": "Merchant caravan",

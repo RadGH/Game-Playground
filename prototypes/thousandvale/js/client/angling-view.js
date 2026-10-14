@@ -31,6 +31,15 @@ import { ROD_MOUNT, CATCH_MOUNT } from '../../../../avatar-3d/js/chibi2-motion-d
 export const ROD_LENGTH = 1.5;                      // bone units (about 1.9 m on a human)
 export const RARITY_TINT = { common: '#c8d2d6', junk: '#8a7a62', uncommon: '#6ad07a', magic: '#6ad07a', rare: '#5aa0ff', epic: '#c080ff', legendary: '#ffb040', legend: '#ffb040', crate: '#c99a3a' };
 export const POOL_TINT = { 1: '#cfeaff', 2: '#7fe6d8', 3: '#ffd870' };
+/**
+ * Owner feedback 10, Y4 (report #54): "Fishing spots do not need the floating diamond + light beam; ripples are enough.
+ * Keep a special marker only for a higher-rarity pool." A pool's rarity is its `tier` (`info.pool.tier`, and `tier` in
+ * the `fishPools` list): 1 "Fish pool", 2 "Busy fish pool", 3 "Deep fish pool" — the one that holds the rare fish.
+ * Only the top tier keeps the shaft and the diamond, in that tier's own colour; every pool keeps its ripples (tinted by
+ * tier) and its jumping fish. Pure — exported for tests. -> null, or { colour }.
+ */
+export const POOL_MARKER_TIER = 3;
+export function poolMarker(tier) { const t = tier | 0; return t >= POOL_MARKER_TIER ? { colour: POOL_TINT[t] || POOL_TINT[3] } : null; }
 const PHASES = new Set(['cast', 'wait', 'bite', 'tug', 'catch', 'lost', 'end', 'idle']);
 /** What a phase means for the pieces. Pure — exported for tests. */
 export function phasePlan(phase) {
@@ -242,14 +251,25 @@ export function createAngling(scene, { actors = null, forms = null, spellFx = nu
       p = { id, x: at.x, z: at.z, tier: info?.tier || 1, shelf: !!info?.shelf, rings: [], fish: null, period: jumpPeriod(id), t: 0, y: surface(at.x, at.z), jump: -1, jumpYaw: 0 };
       const tint = POOL_TINT[p.tier] || POOL_TINT[1];
       for (let i = 0; i < 3; i++) { const m = new THREE.Mesh(ringGeo, ringMat()); m.material.color.set(tint); m.position.set(p.x, p.y + 0.04, p.z); m.renderOrder = 2; m.frustumCulled = false; scene.add(m); p.rings.push(m); }
-      p.glint = new THREE.Mesh(glintGeo, ringMat()); p.glint.material.color.set(tint); p.glint.renderOrder = 2; p.glint.frustumCulled = false; scene.add(p.glint);
-      p.spark = new THREE.Mesh(sparkGeo, ringMat()); p.spark.material.color.set('#ffffff'); p.spark.renderOrder = 3; p.spark.frustumCulled = false; scene.add(p.spark);
+      setMarker(p);                                        // Y4: only a top-tier pool has a shaft and a diamond
       p.fish = new THREE.Mesh(fishGeo, solid()); p.fish.visible = false; p.fish.scale.setScalar((1.6 + p.tier * 0.3) * (p.shelf ? 0.6 : 1));        // E: a `shelf` pool is ankle-deep — a small fish, a low hop p.fish.material.color.set(tint).lerp(new THREE.Color('#ffffff'), 0.5); scene.add(p.fish);
       if (info?.id != null && !String(id).startsWith('spot:')) { p.spot = info.id; real.add(String(info.id)); if (pools.has('spot:' + info.id)) removePool('spot:' + info.id); }
       pools.set(id, p); stats.pools = pools.size;
     }
     if (at && Number.isFinite(at.x)) { p.x = at.x; p.z = at.z; p.y = surface(p.x, p.z); }
-    if (info?.tier && info.tier !== p.tier) { p.tier = info.tier; for (const m of p.rings) m.material.color.set(POOL_TINT[p.tier] || POOL_TINT[1]); }
+    if (info?.tier && info.tier !== p.tier) { p.tier = info.tier; for (const m of p.rings) m.material.color.set(POOL_TINT[p.tier] || POOL_TINT[1]); setMarker(p); }
+  }
+  /** Y4: give a pool its far-off marker, or take it away, by its tier (poolMarker). */
+  function setMarker(p) {
+    const want = poolMarker(p.tier);
+    if (!want) {
+      if (p.glint) { scene.remove(p.glint); p.glint.material.dispose(); p.glint = null; }
+      if (p.spark) { scene.remove(p.spark); p.spark.material.dispose(); p.spark = null; }
+      return;
+    }
+    if (!p.glint) { p.glint = new THREE.Mesh(glintGeo, ringMat()); p.glint.renderOrder = 2; p.glint.frustumCulled = false; p.glint.visible = false; scene.add(p.glint); }
+    if (!p.spark) { p.spark = new THREE.Mesh(sparkGeo, ringMat()); p.spark.renderOrder = 3; p.spark.frustumCulled = false; p.spark.visible = false; scene.add(p.spark); }
+    p.glint.material.color.set(want.colour); p.spark.material.color.set(want.colour).lerp(new THREE.Color('#ffffff'), 0.45);
   }
   /**
    * V3: pools the server has only LISTED (open, but further than it sends entities — `fishPools {open: [{id, x, z, tier, shelf}]}`),
@@ -271,16 +291,16 @@ export function createAngling(scene, { actors = null, forms = null, spellFx = nu
     if (p.spot != null) real.delete(String(p.spot));
     if (fished) splash(p.x, p.z, 2.4);
     for (const m of p.rings) { scene.remove(m); m.material.dispose(); }
-    scene.remove(p.glint); p.glint.material.dispose(); scene.remove(p.spark); p.spark.material.dispose();
+    if (p.glint) { scene.remove(p.glint); p.glint.material.dispose(); } if (p.spark) { scene.remove(p.spark); p.spark.material.dispose(); }
     scene.remove(p.fish); p.fish.material.dispose();
     pools.delete(id); stats.pools = pools.size;
   }
   function updatePool(p, dt, now) {
     const cp = camera?.position, d = cp ? Math.hypot(p.x - cp.x, p.z - cp.z) : 0, on = d < 600;      // (the server sends a pool from 150 m; `setKnown` pools are further)
     for (const m of p.rings) m.visible = on;
-    p.glint.visible = on && d > 9; p.spark.visible = p.glint.visible;
+    if (p.glint) { p.glint.visible = on && d > 9; p.spark.visible = p.glint.visible; }
     if (!on) { p.fish.visible = false; return; }
-    if (p.glint.visible) {
+    if (p.glint?.visible) {
       // from the road: a pale shaft standing on the pool and a twinkle at its head, both growing with distance so they
       // hold about the same size on screen from 40 m to the edge of sight (150 m), day or night (additive, so the dark helps)
       const far = Math.min(1, 0.35 + (d - 9) / 25), grow = 1 + Math.max(0, d - 40) / 45, H = (p.shelf ? 3 : 5) * grow;

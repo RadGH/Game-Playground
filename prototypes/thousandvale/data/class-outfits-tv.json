@@ -1,0 +1,39 @@
+{
+ "_doc": "Class outfits for classes that exist ONLY in Thousandvale (wrap-up 2026-10-13, Y32: the Starcaller). The shared tables avatar-3d/data/class-outfits.json and class-outfits-t2.json belong to Farhold and Emberveil as well and are not written (a test there counts thirty tier-2 rows); js/client/looks.js lays THIS file over them in memory. Same shapes as the shared files: `classes` = the tier-1 outfit (the title preview and the creation card: hat, top, bottom, shoes, cape, decor, held, offhand), `tier2` = the tier-2 outfit (avatar-3d/js/class-outfits.js tier2Dress: themed and high-level armour takes its trim, emblem and decor kit from it). `wear` is Thousandvale's own: in the world a character wears exactly its gear (gear-look.js), and `wear[cls].cloth` says how THIS class's plain cloth pieces are cut and coloured (part by part: head -> hat, chest -> top, legs -> bottom, feet -> shoes) so a Starcaller in its starter robes is midnight and gold rather than the grey every cloth robe is. The worn head piece is a HOOD (the item is called a Hood, and a thing must look like its name — W25); the pointed hat is the portrait's. Only cloth pieces change, and only for that class; an item with its own model (item.look.worn) keeps it. Every part id is one the shared avatar-2d normaliser knows; `emblem` is a chibi2-armour2.js emblem (the star).",
+ "classes": {
+  "starcaller": {
+   "hat": { "id": "wizard", "color": "#1c1f4a", "color2": "#e6c14a", "emblem": "star", "emblemColor": "#ffd75a" },
+   "top": { "id": "trim_robe", "color": "#1c1f4a", "color2": "#e6c14a", "emblem": "star", "emblemColor": "#ffd75a" },
+   "bottom": { "id": "pants", "color": "#161838" },
+   "shoes": { "id": "slippers", "color": "#2a2440" },
+   "cape": { "id": "shoulder_cape", "color": "#262a66" },
+   "decor": { "id": "rune_bracers", "color": "#e6c14a" },
+   "held": { "id": "staff_orb", "color": "#e6c14a" },
+   "offhand": { "id": "none" }
+  }
+ },
+ "tier2": {
+  "starcaller": {
+   "theme": "rune",
+   "set": "Zenith-Thread Robes",
+   "hat": { "id": "wizard", "color": "#1c1f4a", "color2": "#e6c14a", "emblem": "star", "emblemColor": "#ffe89a" },
+   "top": { "id": "high_collar_robe", "color": "#1c1f4a", "color2": "#e6c14a", "emblem": "star", "emblemColor": "#ffe89a" },
+   "bottom": { "id": "pants", "color": "#161838" },
+   "shoes": { "id": "slippers", "color": "#2a2440" },
+   "cape": { "id": "none" },
+   "decor": { "id": "t2_mantle", "color": "#262a66", "color2": "#e6c14a" },
+   "held": { "id": "staff_crystal", "color": "#e6c14a" },
+   "offhand": { "id": "none", "color": "#8a8f98" }
+  }
+ },
+ "wear": {
+  "starcaller": {
+   "cloth": {
+    "hat": { "id": "hood", "color": "#1c1f4a", "color2": "#e6c14a", "emblem": "star", "emblemColor": "#ffd75a" },
+    "top": { "id": "trim_robe", "color": "#1c1f4a", "color2": "#e6c14a", "emblem": "star", "emblemColor": "#ffd75a" },
+    "bottom": { "id": "pants", "color": "#161838" },
+    "shoes": { "id": "slippers", "color": "#2a2440" }
+   }
+  }
+ }
+}

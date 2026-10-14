@@ -313,8 +313,10 @@ export function connect(opts = {}) {
   const pick = (o, a, keys) => { for (const k of keys) if (a[k] !== undefined && a[k] !== null) o[k] = a[k]; return o; };
   /** account('claim', {user, pass, email?, human?}) | ('login', {user, pass}) | ('logout') | ('password', {old, pass})
    *  | ('resetAsk', {user}) | ('reset', {user, code, pass}) | ('info'). Answer: 'accountR' (login answers with 'authed'). */
-  net.accountOp = (op, a = {}) => sendJ(gw, pick({ t: 'account', op }, a, ['user', 'pass', 'old', 'email', 'code', 'human']));
+  net.accountOp = (op, a = {}) => sendJ(gw, pick({ t: 'account', op }, a, ['user', 'pass', 'old', 'email', 'code', 'human', 'guest']));
   net.claim = (user, pass, email) => net.accountOp('claim', { user, pass, email });
+  /** Ask for the account's character list again ('chars' event) — after guest characters were adopted (report S#66). */
+  net.refreshChars = () => sendJ(gw, { t: 'chars' });
   net.login = (user, pass) => net.accountOp('login', { user, pass });
   /** Revoke this browser's token and stop (claimed accounts only; the server refuses a guest). */
   net.logout = () => { sendJ(gw, { t: 'account', op: 'logout' }); tokenStore.set(null); };

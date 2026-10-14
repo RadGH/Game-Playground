@@ -436,6 +436,33 @@
    "z": 968,
    "yaw": -0.697,
    "titled": false
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_copperdell_0",
+   "name": "Training Dummy",
+   "town": "Copperdell",
+   "x": 349.4,
+   "z": 447.6,
+   "yaw": 2.809
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_copperdell_1",
+   "name": "Training Dummy",
+   "town": "Copperdell",
+   "x": 352,
+   "z": 448,
+   "yaw": 2.999
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_copperdell_2",
+   "name": "Training Dummy",
+   "town": "Copperdell",
+   "x": 354.6,
+   "z": 448.4,
+   "yaw": -3.094
   }
  ]
 }

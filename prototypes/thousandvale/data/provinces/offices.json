@@ -2419,7 +2419,8 @@
       "chronomancer",
       "enchanter",
       "stormcaller",
-      "pyromancer"
+      "pyromancer",
+      "starcaller"
      ],
      "service": [
       "class quest",

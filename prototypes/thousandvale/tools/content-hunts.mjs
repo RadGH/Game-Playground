@@ -152,7 +152,14 @@ async function main() {
     (added[g.zone] ||= []).push({ type: 'guard', id: g.id, name: g.name, role: 'guard', rank: g.rank, tier: g.tier, town: g.town, post: g.post, ...(g.gate ? { gate: g.gate } : {}), x: g.x, z: g.z, yaw: g.yaw, titled: false });
     guards++;
   }
-  console.log(`carters + carts: ${carts}; guard posts: ${guards}`);
+  // 1e. wrap-up 2026-10-13 (report #29): the training dummies tools/content-towns.mjs placed in every town and city
+  // (guards.json `dummies`, zone metres). Row type `dummy`: js/sim/placements.js -> L.dummies -> province ensureDummies.
+  let dummies = 0;
+  if (existsSync(P('data/provinces/guards.json'))) for (const d of readJ('data/provinces/guards.json').dummies || []) {
+    (added[d.zone] ||= []).push({ type: 'dummy', id: d.id, name: d.name, town: d.town, x: d.x, z: d.z, yaw: d.yaw });
+    dummies++;
+  }
+  console.log(`carters + carts: ${carts}; guard posts: ${guards}; training dummies: ${dummies}`);
   for (const wid of Object.keys(mains)) writeFileSync(P(`data/vignettes/placements/${wid}.quest.json`), JSON.stringify({
     _doc: `Stream E (play-test 4 S14). Copies of camps already standing in world zone ${wid}, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at ${NEED_CAP}). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.`,
     zone: wid, terrainHash: mains[wid].terrainHash, placements: added[wid] || [] }, null, 1) + '\n');

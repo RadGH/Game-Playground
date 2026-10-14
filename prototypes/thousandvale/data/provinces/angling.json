@@ -1989,7 +1989,7 @@
    "id": "angling_rod",
    "name": "Hazel Rod",
    "desc": "A hazel switch, a length of line and a hook. A Tool: it takes no weapon slot. Lets you fish any water.",
-   "price": 12,
+   "price": 5,
    "minSkill": 0,
    "bonus": {}
   },
@@ -1997,7 +1997,7 @@
    "id": "ash_rod",
    "name": "Whippy Ash Rod",
    "desc": "Longer, springier and far too good for gudgeon. The tug band is 15% wider.",
-   "price": 1350,
+   "price": 450,
    "minSkill": 25,
    "bonus": {
     "band": 0.15
@@ -2007,7 +2007,7 @@
    "id": "river_wardens_rod",
    "name": "River Warden's Rod",
    "desc": "Split cane with a brass reel. The tug band is 25% wider and bites come 20% sooner.",
-   "price": 7200,
+   "price": 2400,
    "minSkill": 50,
    "bonus": {
     "band": 0.25,
@@ -2020,7 +2020,7 @@
    "id": "bait_worms",
    "name": "Tin of Worms",
    "desc": "Ten worms. Bites come 25% sooner for the next ten casts.",
-   "price": 9,
+   "price": 5,
    "effect": {
     "wait": -0.25,
     "casts": 10
@@ -2030,7 +2030,7 @@
    "id": "bait_bread_paste",
    "name": "Bread Paste",
    "desc": "Common fish cannot resist it; rare fish can. Ten casts with fewer junk catches.",
-   "price": 15,
+   "price": 5,
    "effect": {
     "junk": -0.5,
     "casts": 10
@@ -2040,7 +2040,7 @@
    "id": "bait_bright_lure",
    "name": "Bright Tin Lure",
    "desc": "Flashes like a perch's dream. Ten casts with a better chance at uncommon and rare fish.",
-   "price": 60,
+   "price": 20,
    "effect": {
     "rarity": 0.25,
     "casts": 10

@@ -1,0 +1,5 @@
+/* Laser Limbo: the HOP / DUCK label that rides on each beam's post. Shape of the arrow + word + colour, never colour alone. */
+.tag.ll-tag { font-size: 13px; padding: 1px 8px; letter-spacing: .5px; border-width: 2px; }
+.tag.ll-low { background: #ff8a1a; }
+.tag.ll-high { background: #b14dff; }
+@media (max-width: 520px) { .tag.ll-tag { font-size: 12px; padding: 0 6px; } }

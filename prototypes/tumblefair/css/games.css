@@ -1,7 +1,7 @@
 /* What minigame views share on screen (the score bar, the clock) and each DOM-drawn game's own layout.
    One section per game id; a game's root is `.game.game-<id>`. */
 .game { position: absolute; inset: 0; pointer-events: none; }
-.scorebar { position: absolute; top: calc(var(--st) + 6px); left: 6px; right: 6px; display: flex; gap: 6px; justify-content: center; align-items: center; flex-wrap: wrap; }
+.scorebar { position: absolute; top: calc(var(--st) + 6px); left: 6px; right: 42px;   /* 42: the ! button */ display: flex; gap: 6px; justify-content: center; align-items: center; flex-wrap: wrap; }
 .scorebar .chip { font-size: 14px; } .scorebar .sc { font-style: normal; font-weight: 900; min-width: 1.6em; text-align: right; }
 .scorebar .chip.lead { background: var(--sun); } .scorebar .chip.out { opacity: .4; text-decoration: line-through; }
 .clock { background: var(--ink); color: #fff; border-radius: 12px; padding: 4px 12px; font: 900 20px/1.1 var(--font); min-width: 54px; text-align: center; }

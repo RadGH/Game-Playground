@@ -65,6 +65,16 @@ export const UI_BOTS = {
   'memory-heist': P => { const g = P.last.s?.g, k = P.last.phase; if (g?.phase === 'q' && g.q && k && k.mhQ !== g.qi) { k.mhQ = g.qi; P.send({ t: 'act', a: 'ans', d: (P.pid + g.qi) % g.q.opts.length }); } },
   // works out a rotation for every tile where all wire ends meet (a small backtracking search), then turns its own
   // tiles towards it a few times a second
+  // writes a caption (a short one, then submits), then votes for the next caption along that is not its own
+  'caption-clash': P => {
+    const g = P.last.s?.g, k = P.last.phase, me = P.last.gp?.d; if (!g || !k || !me?.starters) return;
+    if (g.phase === 'write' && !k.ccWrote) { k.ccWrote = true; P.send({ t: 'act', a: 'cap', d: `${me.starters[0]} bot ${P.pid}` }); P.send({ t: 'act', a: 'done', d: true }); }
+    if (g.phase === 'vote' && !k.ccVoted && me.mine != null && g.caps.length > 1) { k.ccVoted = true; P.send({ t: 'act', a: 'vote', d: (me.mine + 1) % g.caps.length }); }
+  },
+  // taps one tile per round (not always the right one)
+  'pattern-impostor': P => { const g = P.last.s?.g, k = P.last.phase; if (g?.phase === 'play' && g.items && k && k.piR !== g.round) { k.piR = g.round; P.send({ t: 'act', a: 'tap', d: (P.pid * 3 + g.round) % g.items.split(',').length }); } },
+  // a different split each round, then locks in
+  'coinstorm': P => { const g = P.last.s?.g, k = P.last.phase; if (g?.phase === 'pick' && k && k.cnR !== g.round) { k.cnR = g.round; const m = (P.pid + g.round) % 5, c = g.f >= 50 ? 3 : 0; P.send({ t: 'act', a: 'set', d: [10 - m - c, m, c] }); P.send({ t: 'act', a: 'lock', d: true }); } },
   'circuit-scramble': P => {
     const g = P.last.s?.g; if (g?.phase !== 'play' || !g.o) return;
     P.csTick = (P.csTick || 0) + 1; if (P.csTick % 3) return;

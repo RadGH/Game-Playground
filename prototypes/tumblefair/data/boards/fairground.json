@@ -1,0 +1,314 @@
+{
+ "id": "fairground",
+ "title": "The Fairground Loop",
+ "backdrop": "board-fairground",
+ "size": 40,
+ "start": "s0",
+ "about": "Starter board. Walk the loop, pick up tickets, buy prize ribbons at the two booths. The shortcut through the middle saves eight spaces and has two puddles and the jackpot on it.",
+ "types": {
+  "start": {
+   "name": "Front Gate",
+   "icon": "gate",
+   "text": "Pass the gate: +5 tickets."
+  },
+  "ticket": {
+   "name": "Ticket Stand",
+   "icon": "ticket",
+   "text": "+3 tickets."
+  },
+  "pit": {
+   "name": "Mud Puddle",
+   "icon": "puddle",
+   "text": "Lose 3 tickets."
+  },
+  "chance": {
+   "name": "Wheel of Whatever",
+   "icon": "wheel",
+   "text": "Spin for a surprise."
+  },
+  "booth": {
+   "name": "Prize Booth",
+   "icon": "ribbon",
+   "text": "Pass by with 10 tickets to buy a ribbon."
+  },
+  "mirror": {
+   "name": "Hall of Mirrors",
+   "icon": "mirror",
+   "text": "Swap places with another player."
+  },
+  "jackpot": {
+   "name": "Jackpot",
+   "icon": "star",
+   "text": "+8 tickets."
+  },
+  "fork": {
+   "name": "Crossroads",
+   "icon": "fork",
+   "text": "Choose your way."
+  },
+  "join": {
+   "name": "Ticket Stand",
+   "icon": "ticket",
+   "text": "+3 tickets."
+  }
+ },
+ "spaces": [
+  {
+   "id": "s0",
+   "type": "start",
+   "x": 0,
+   "z": 11.5,
+   "next": [
+    "s1"
+   ]
+  },
+  {
+   "id": "s1",
+   "type": "ticket",
+   "x": -5.86,
+   "z": 11.22,
+   "next": [
+    "s2"
+   ]
+  },
+  {
+   "id": "s2",
+   "type": "chance",
+   "x": -9.41,
+   "z": 10.37,
+   "next": [
+    "s3"
+   ]
+  },
+  {
+   "id": "s3",
+   "type": "ticket",
+   "x": -12.08,
+   "z": 8.96,
+   "next": [
+    "s4"
+   ]
+  },
+  {
+   "id": "s4",
+   "type": "fork",
+   "x": -13.98,
+   "z": 6.98,
+   "next": [
+    "s5",
+    "c0"
+   ],
+   "labels": [
+    "The long way",
+    "The shortcut"
+   ]
+  },
+  {
+   "id": "s5",
+   "type": "pit",
+   "x": -15.12,
+   "z": 4.35,
+   "next": [
+    "s6"
+   ]
+  },
+  {
+   "id": "s6",
+   "type": "ticket",
+   "x": -15.5,
+   "z": 0,
+   "next": [
+    "s7"
+   ]
+  },
+  {
+   "id": "s7",
+   "type": "booth",
+   "x": -15.12,
+   "z": -4.35,
+   "next": [
+    "s8"
+   ]
+  },
+  {
+   "id": "s8",
+   "type": "ticket",
+   "x": -13.98,
+   "z": -6.98,
+   "next": [
+    "s9"
+   ]
+  },
+  {
+   "id": "s9",
+   "type": "chance",
+   "x": -12.08,
+   "z": -8.96,
+   "next": [
+    "s10"
+   ]
+  },
+  {
+   "id": "s10",
+   "type": "pit",
+   "x": -9.41,
+   "z": -10.37,
+   "next": [
+    "s11"
+   ]
+  },
+  {
+   "id": "s11",
+   "type": "ticket",
+   "x": -5.86,
+   "z": -11.22,
+   "next": [
+    "s12"
+   ]
+  },
+  {
+   "id": "s12",
+   "type": "mirror",
+   "x": 0,
+   "z": -11.5,
+   "next": [
+    "s13"
+   ]
+  },
+  {
+   "id": "s13",
+   "type": "ticket",
+   "x": 5.86,
+   "z": -11.22,
+   "next": [
+    "s14"
+   ]
+  },
+  {
+   "id": "s14",
+   "type": "chance",
+   "x": 9.41,
+   "z": -10.37,
+   "next": [
+    "s15"
+   ]
+  },
+  {
+   "id": "s15",
+   "type": "ticket",
+   "x": 12.08,
+   "z": -8.96,
+   "next": [
+    "s16"
+   ]
+  },
+  {
+   "id": "s16",
+   "type": "join",
+   "x": 13.98,
+   "z": -6.98,
+   "next": [
+    "s17"
+   ]
+  },
+  {
+   "id": "s17",
+   "type": "pit",
+   "x": 15.12,
+   "z": -4.35,
+   "next": [
+    "s18"
+   ]
+  },
+  {
+   "id": "s18",
+   "type": "ticket",
+   "x": 15.5,
+   "z": 0,
+   "next": [
+    "s19"
+   ]
+  },
+  {
+   "id": "s19",
+   "type": "booth",
+   "x": 15.12,
+   "z": 4.35,
+   "next": [
+    "s20"
+   ]
+  },
+  {
+   "id": "s20",
+   "type": "chance",
+   "x": 13.98,
+   "z": 6.98,
+   "next": [
+    "s21"
+   ]
+  },
+  {
+   "id": "s21",
+   "type": "ticket",
+   "x": 12.08,
+   "z": 8.96,
+   "next": [
+    "s22"
+   ]
+  },
+  {
+   "id": "s22",
+   "type": "pit",
+   "x": 9.41,
+   "z": 10.37,
+   "next": [
+    "s23"
+   ]
+  },
+  {
+   "id": "s23",
+   "type": "ticket",
+   "x": 5.86,
+   "z": 11.22,
+   "next": [
+    "s0"
+   ]
+  },
+  {
+   "id": "c0",
+   "type": "pit",
+   "x": -8.39,
+   "z": 5.07,
+   "next": [
+    "c1"
+   ]
+  },
+  {
+   "id": "c1",
+   "type": "chance",
+   "x": -2.8,
+   "z": 2.82,
+   "next": [
+    "c2"
+   ]
+  },
+  {
+   "id": "c2",
+   "type": "jackpot",
+   "x": 2.8,
+   "z": 0.03,
+   "next": [
+    "c3"
+   ]
+  },
+  {
+   "id": "c3",
+   "type": "pit",
+   "x": 8.39,
+   "z": -3.31,
+   "next": [
+    "s16"
+   ]
+  }
+ ]
+}

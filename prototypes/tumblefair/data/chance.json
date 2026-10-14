@@ -1,0 +1,15 @@
+{
+  "about": "The Wheel of Whatever: what a chance space can do. `w` is the weight. `do` is read by js/sim/board.js (CHANCE_DO); `{p}` is the player who landed, `{o}` another player picked at random.",
+  "events": [
+    { "id": "found", "w": 5, "do": "tickets", "n": 5, "text": "{p} found a roll of tickets under the bench. +5 tickets!" },
+    { "id": "spill", "w": 4, "do": "tickets", "n": -4, "text": "{p} dropped their popcorn AND their tickets. -4 tickets." },
+    { "id": "share", "w": 3, "do": "all", "n": 2, "text": "Free samples! Everyone gets 2 tickets." },
+    { "id": "pickpocket", "w": 3, "do": "steal", "n": 3, "text": "{p} wins the ring toss and {o} pays up. {p} takes 3 tickets from {o}." },
+    { "id": "generous", "w": 2, "do": "give", "n": 3, "text": "{p} feels generous and hands {o} 3 tickets." },
+    { "id": "tailwind", "w": 3, "do": "move", "n": 3, "text": "The crowd sweeps {p} along. Forward 3 spaces!" },
+    { "id": "wrongway", "w": 2, "do": "move", "n": -2, "text": "{p} took a wrong turn at the candy floss. Back 2 spaces." },
+    { "id": "mirror", "w": 2, "do": "swap", "text": "A magician's trick! {p} and {o} swap places." },
+    { "id": "leader", "w": 2, "do": "robin", "n": 4, "text": "The ticket inspector checks whoever has the most. They hand 4 tickets to {p}." },
+    { "id": "ribbon", "w": 1, "do": "ribbon", "text": "Grand prize! {p} wins a ribbon outright!" }
+  ]
+}

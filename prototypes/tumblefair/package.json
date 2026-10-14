@@ -1,0 +1,14 @@
+{
+  "name": "tumblefair",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Tumblefair: a couch party game for 2-4 players on their phones (authoritative Node + WebSocket server).",
+  "scripts": {
+    "start": "node server/main.mjs",
+    "test": "node --test tests/*.test.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

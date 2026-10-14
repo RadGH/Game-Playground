@@ -1,0 +1,180 @@
+{
+ "about": "Costumes bought with coins. A costume is only clothes: it never changes how you play. `outfit` is a key of avatar-3d/data/class-outfits.json (worn without the things it carries); null = the look's own clothes. price 0 = everyone owns it.",
+ "items": [
+  {
+   "id": "cos_none",
+   "kind": "costume",
+   "outfit": null,
+   "name": "Come As You Are",
+   "price": 0
+  },
+  {
+   "id": "cos_ranger",
+   "kind": "costume",
+   "outfit": "ranger",
+   "name": "Scout Leader",
+   "price": 0
+  },
+  {
+   "id": "cos_mage",
+   "kind": "costume",
+   "outfit": "mage",
+   "name": "Stage Magician",
+   "price": 0
+  },
+  {
+   "id": "cos_monk",
+   "kind": "costume",
+   "outfit": "monk",
+   "name": "Tumbler",
+   "price": 0
+  },
+  {
+   "id": "cos_rogue",
+   "kind": "costume",
+   "outfit": "rogue",
+   "name": "Pickpocket",
+   "price": 40
+  },
+  {
+   "id": "cos_cleric",
+   "kind": "costume",
+   "outfit": "cleric",
+   "name": "Fortune Reader",
+   "price": 40
+  },
+  {
+   "id": "cos_druid",
+   "kind": "costume",
+   "outfit": "druid",
+   "name": "Petting Zoo Keeper",
+   "price": 40
+  },
+  {
+   "id": "cos_tinker",
+   "kind": "costume",
+   "outfit": "tinker",
+   "name": "Ride Mechanic",
+   "price": 60
+  },
+  {
+   "id": "cos_fighter",
+   "kind": "costume",
+   "outfit": "fighter",
+   "name": "Strongman",
+   "price": 60
+  },
+  {
+   "id": "cos_warrior",
+   "kind": "costume",
+   "outfit": "warrior",
+   "name": "Arm Wrestler",
+   "price": 60
+  },
+  {
+   "id": "cos_priest",
+   "kind": "costume",
+   "outfit": "priest",
+   "name": "Ringmaster",
+   "price": 80
+  },
+  {
+   "id": "cos_enchanter",
+   "kind": "costume",
+   "outfit": "enchanter",
+   "name": "Hypnotist",
+   "price": 80
+  },
+  {
+   "id": "cos_oracle",
+   "kind": "costume",
+   "outfit": "oracle",
+   "name": "Crystal Gazer",
+   "price": 80
+  },
+  {
+   "id": "cos_shaman",
+   "kind": "costume",
+   "outfit": "shaman",
+   "name": "Mask Carver",
+   "price": 80
+  },
+  {
+   "id": "cos_tactician",
+   "kind": "costume",
+   "outfit": "tactician",
+   "name": "Chess Hustler",
+   "price": 100
+  },
+  {
+   "id": "cos_runesmith",
+   "kind": "costume",
+   "outfit": "runesmith",
+   "name": "Bell Ringer",
+   "price": 100
+  },
+  {
+   "id": "cos_pyromancer",
+   "kind": "costume",
+   "outfit": "pyromancer",
+   "name": "Fire Eater",
+   "price": 120
+  },
+  {
+   "id": "cos_stormcaller",
+   "kind": "costume",
+   "outfit": "stormcaller",
+   "name": "Weather Vane",
+   "price": 120
+  },
+  {
+   "id": "cos_chronomancer",
+   "kind": "costume",
+   "outfit": "chronomancer",
+   "name": "Clock Winder",
+   "price": 120
+  },
+  {
+   "id": "cos_sorcerer",
+   "kind": "costume",
+   "outfit": "sorcerer",
+   "name": "Midnight Act",
+   "price": 140
+  },
+  {
+   "id": "cos_warlock",
+   "kind": "costume",
+   "outfit": "warlock",
+   "name": "Ghost Train Driver",
+   "price": 140
+  },
+  {
+   "id": "cos_necromancer",
+   "kind": "costume",
+   "outfit": "necromancer",
+   "name": "Haunted House Host",
+   "price": 140
+  },
+  {
+   "id": "cos_paladin",
+   "kind": "costume",
+   "outfit": "paladin",
+   "name": "Parade Marshal",
+   "price": 180
+  },
+  {
+   "id": "cos_knight",
+   "kind": "costume",
+   "outfit": "knight",
+   "name": "Tin Soldier",
+   "price": 180
+  },
+  {
+   "id": "cos_dragon_knight",
+   "kind": "costume",
+   "outfit": "dragon_knight",
+   "name": "Dragon Float",
+   "price": 220
+  }
+ ]
+}

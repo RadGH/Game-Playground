@@ -1,0 +1,311 @@
+// Tumblefair in the browser: one page for every device. A phone that joins is a player (it sees the game AND holds
+// the controls); a TV or laptop can join as "the big screen" (it only watches). This file owns the screens — title,
+// lobby, board, vote, minigame intro, results, final — and hands the 3D work to stage / lineup / boardview / play.
+import { connect } from './net.js';
+import { createStage } from './stage.js';
+import { createControls, isTouch } from './controls.js';
+import { createLineup } from './lineup.js';
+import { createBoardView, SPACE_LOOK } from './boardview.js';
+import { createPlay } from './play.js';
+import { loadAvatarData, portrait, costumes, RACES, RACE_NAMES } from './avatars.js';
+import { qrSvg, joinUrl } from './qr.js';
+import { h, esc } from './gamehud.js';
+import { createEditor } from './editor.js';
+import { createSounds } from './sounds.js';
+import { SEATS, cleanCode, CODE_LENGTH } from '../shared/protocol.js';
+import { GAMES, gameIds } from '../games/index.js';
+
+const $ = s => document.querySelector(s);
+const screen = $('#screen'), hud = $('#hud'), toasts = $('#toasts');
+const ART = new URL('../../assets/art/', import.meta.url).href;
+const q = new URLSearchParams(location.search);
+const S = { me: null, room: null, phase: null, pm: null, play: null, playP: null, board: null, boardP: null, modal: null, ends: 0, bd: { tickets: {}, ribbons: {}, pid: null, ask: null, rolled: null }, votes: {}, skips: [], asDisplay: q.get('display') === '1', err: '' };
+
+await loadAvatarData();
+const stage = createStage($('#view'));
+const controls = createControls($('#controls'));
+const lineup = createLineup(stage);
+const sfx = createSounds();
+const net = connect();
+const boardDef = await (await fetch(new URL('../../data/boards/fairground.json', import.meta.url))).json();
+window.tumblefair = { S, net, stage, lineup, controls, GAMES };                       // for tests and the console
+
+// ------------------------------------------------------------------ helpers
+const members = () => S.room?.members || [];
+const mine = () => members().find(m => m.pid === S.room?.you) || null;
+const seatOf = m => (m?.seat != null ? SEATS[m.seat] : null);
+const isHost = () => S.room && S.room.host === S.room.you;
+const seated = () => members().filter(m => m.seat != null).sort((a, b) => a.seat - b.seat);
+const left = () => Math.max(0, Math.ceil((S.ends - performance.now()) / 1000));
+function toast(text, cls = '') { const e = h('div', 'toast ' + cls); e.textContent = text; toasts.append(e); setTimeout(() => e.classList.add('out'), 2600); setTimeout(() => e.remove(), 3100); }
+const face = m => `<i class="face">${m?.look ? `<img src="${portrait(m)}" alt="">` : ''}</i>`;
+const chipOf = (m, extra = '') => { const s = seatOf(m); return `<span class="chip${m.pid === S.room?.you ? ' me' : ''}${m.on === false ? ' off' : ''}" data-pid="${m.pid}" ${s ? `data-shape="${s.shape}" style="--seat:${s.color};--seat-dark:${s.dark}"` : ''}>${face(m)}<b class="nm">${esc(m.name)}</b>${extra}</span>`; };
+const ICON = {
+  ticket: '<svg class="ic" viewBox="0 0 24 24"><path fill="currentColor" d="M3 7h18v3a2 2 0 0 0 0 4v3H3v-3a2 2 0 0 0 0-4z"/></svg>',
+  ribbon: '<svg class="ic" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a7 7 0 0 1 4.5 12.4L18 22l-6-3-6 3 1.5-7.600A7 7 0 0 1 12 2z"/></svg>',
+  coin: '<svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><circle cx="12" cy="12" r="6.5" fill="none" stroke="rgba(0,0,0,.35)" stroke-width="2"/></svg>',
+};
+function setScreen(cls, html) { screen.className = cls; screen.innerHTML = html; }
+function safeFor(kind) {
+  const portraitMode = innerHeight > innerWidth;
+  stage.setSafe(kind === 'arena' ? { top: 0.13, bottom: isTouch() ? (portraitMode ? 0.3 : 0.06) : 0.09, left: 0.03, right: 0.03 }
+    : kind === 'board' ? { top: 0.14, bottom: 0.2, left: 0.03, right: 0.03 }
+    : kind === 'lobby' ? (portraitMode ? { top: 0.1, bottom: 0.62, left: 0.04, right: 0.04 } : { top: 0.16, bottom: 0.12, left: 0.04, right: 0.5 })
+    : { top: 0.1, bottom: 0.5, left: 0.04, right: 0.04 });
+}
+addEventListener('resize', () => safeFor(S.safeKind || 'title'));
+const setSafe = kind => { S.safeKind = kind; safeFor(kind); };
+
+// ------------------------------------------------------------------ title
+function showTitle() {
+  S.phase = null; hud.innerHTML = ''; setSafe('title');
+  lineup.show(true);
+  if (S.me) lineup.sync([{ pid: 0, seat: 0, name: S.me.name, look: S.me.look, costume: S.me.costume }], { labels: false });
+  const code = cleanCode(q.get('code') || '') || '';
+  setScreen('title', `
+    <img class="logo" src="${ART}logo.webp" alt="Tumblefair" onerror="this.replaceWith(Object.assign(document.createElement('h1'),{className:'logo-text',textContent:'TUMBLEFAIR'}))">
+    <div class="panel title-panel">
+      <label class="field"><span>Your name</span><input id="name" maxlength="14" autocomplete="off" autocapitalize="words" spellcheck="false" value="${esc(S.me?.name || '')}"></label>
+      <div class="row"><button class="btn" data-act="edit">Change look</button><button class="btn" data-act="shop">Costumes <span class="coins">${ICON.coin}${S.me?.coins ?? 0}</span></button></div>
+      <button class="btn big primary" data-act="host">Host a game</button>
+      <div class="join-row"><input id="code" maxlength="${CODE_LENGTH}" placeholder="CODE" autocomplete="off" autocapitalize="characters" spellcheck="false" value="${code}"><button class="btn big" data-act="join">Join</button></div>
+      <label class="check"><input type="checkbox" id="as-display" ${S.asDisplay ? 'checked' : ''}> This is the big screen (watch only)</label>
+      <p class="err">${esc(S.err)}</p>
+    </div>
+    <p class="foot">2–4 players · everyone joins on their own phone · <span class="net">${net.status === 'online' ? '' : 'connecting…'}</span></p>`);
+}
+function saveName() { const n = $('#name')?.value.trim(); if (n && n !== S.me?.name) net.send({ t: 'profile', name: n }); }
+
+// ------------------------------------------------------------------ lobby
+async function showLobby() {
+  setSafe('lobby'); hud.innerHTML = '';
+  lineup.show(true); lineup.setPoses({});
+  lineup.sync(seated(), { me: S.room.you });
+  const r = S.room, host = isHost(), me = mine(), n = seated().length;
+  const modes = { board: ['The Fairground Loop', 'Roll dice round the board, buy ribbons, play a minigame every round.'], marathon: ['Minigame Marathon', 'No board. Vote, play, repeat. Most points wins.'] };
+  setScreen('lobby', `
+    <div class="panel lobby-code">
+      <div class="qr" id="qr"></div>
+      <div><span class="lbl">Join at <b>${esc(location.host)}</b> with code</span><div class="code">${r.code}</div><button class="btn small" data-act="copy">Copy invite link</button></div>
+    </div>
+    <div class="panel lobby-main">
+      <h2>Players <small>${n} of 4</small></h2>
+      <div class="members">${members().filter(m => !m.display).map(m => chipOf(m, `${m.pid === r.host ? '<em class="tagh">host</em>' : ''}${m.wait ? '<em class="tagh">waiting</em>' : ''}${host && m.pid !== r.you ? `<button class="x" data-act="kick" data-pid="${m.pid}" title="Remove">×</button>` : ''}`)).join('')}
+        ${members().some(m => m.display) ? `<span class="chip tv">Big screen connected</span>` : ''}</div>
+      ${me?.display ? '<p class="note">This screen is watching. Players join on their phones.</p>' : `<div class="row"><button class="btn" data-act="edit">Change look</button><button class="btn" data-act="shop">Costumes <span class="coins">${ICON.coin}${S.me?.coins ?? 0}</span></button></div>`}
+      <h2>Game</h2>
+      <div class="modes">${Object.entries(modes).map(([id, [t, d]]) => `<button class="mode${r.opts.mode === id ? ' on' : ''}" data-act="opt" data-key="mode" data-value="${id}" ${host ? '' : 'disabled'}><b>${t}</b><span>${d}</span></button>`).join('')}</div>
+      <div class="row opts"><span>Rounds</span>${[3, 4, 5, 6].map(v => `<button class="pill${r.opts.rounds === v ? ' on' : ''}" data-act="opt" data-key="rounds" data-num="${v}" ${host ? '' : 'disabled'}>${v}</button>`).join('')}
+        <span class="est">about ${Math.round(r.opts.rounds * (r.opts.mode === 'board' ? 2.6 : 1.6))} min</span></div>
+      ${host ? `<button class="btn big primary" data-act="start">${n < 2 ? 'Start (solo practice)' : 'Start the game'}</button>` : `<p class="note">${me?.wait ? 'The seats are full. You will join when one frees up.' : 'Waiting for the host to start…'}</p>`}
+      <button class="btn small ghost" data-act="leave">Leave</button>
+    </div>`);
+  qrSvg(joinUrl(r.code)).then(svg => { const e = $('#qr'); if (e) e.innerHTML = svg; }).catch(() => {});
+}
+
+// ------------------------------------------------------------------ match HUD (scores along the top)
+function drawHud() {
+  const r = S.room; if (!r?.match || S.phase === 'game' || S.phase === 'intro' || S.phase === 'lobby') { hud.innerHTML = ''; return; }
+  const board = r.match.mode === 'board';
+  hud.innerHTML = `<div class="match-bar"><span class="round">Round ${r.match.round}/${r.match.rounds}</span>${seated().map(m => chipOf(m, board
+    ? `<em class="sc tk">${ICON.ticket}${S.bd.tickets[m.pid] ?? 0}</em><em class="sc rb">${ICON.ribbon}${S.bd.ribbons[m.pid] ?? 0}</em>` : `<em class="sc">${r.match.points[m.pid] ?? 0} pts</em>`)).join('')}</div>`;
+  if (board && S.bd.pid != null) hud.querySelector(`[data-pid="${S.bd.pid}"]`)?.classList.add('turn');
+}
+
+// ------------------------------------------------------------------ board
+async function ensureBoard() {
+  if (!S.board && !S.boardP) S.boardP = createBoardView({ stage, def: boardDef, members, me: S.room.you, assetBase: ART }).then(b => { S.board = b; S.boardP = null; if (S.room?.match?.board) b.sync(S.room.match.board); return b; });
+  return S.board || S.boardP;
+}
+function dropBoard() { S.board?.dispose(); S.board = null; }
+function showBoard() {
+  setSafe('board'); lineup.show(false);
+  const b = S.bd, turn = members().find(m => m.pid === b.pid), my = b.pid === S.room.you;
+  let body = '';
+  if (b.ask && my) body = `<div class="panel ask"><h3>${b.ask.kind === 'booth' ? 'Prize Booth' : 'Crossroads'}</h3><div class="row">${b.ask.options.map((o, i) => `<button class="btn big${i === 0 ? ' primary' : ''}" data-act="choose" data-i="${i}">${esc(o)}</button>`).join('')}</div></div>`;
+  else if (b.ask) body = `<div class="banner">${esc(turn?.name || '')} is deciding…</div>`;
+  else if (b.sub === 'roll' && my) body = `<button class="btn huge primary roll" data-act="roll">ROLL!</button>`;
+  else if (b.sub === 'roll') body = `<div class="banner">${esc(turn?.name || '')}'s turn</div>`;
+  setScreen('board', `${b.rolled ? `<div class="die" data-n="${b.rolled}">${b.rolled}</div>` : ''}${b.text ? `<div class="banner fx">${esc(b.text)}</div>` : ''}<div class="board-foot">${body}</div>`);
+  drawHud();
+}
+function onBoard(ev) {
+  const b = S.bd;
+  S.board?.event(ev);
+  if (ev.ev === 'turn') { b.pid = ev.pid; b.sub = 'roll'; b.ask = null; b.rolled = null; b.text = ''; if (ev.pid === S.room?.you) { sfx('turn'); navigator.vibrate?.(60); } }
+  if (ev.ev === 'rolled') { b.sub = 'move'; b.rolled = ev.n; sfx('dice'); }
+  if (ev.ev === 'step') { b.tickets[ev.pid] = ev.tickets; setTimeout(() => { S.bd.rolled = null; if (S.phase === 'board') showBoard(); }, 600); if (ev.lap) toast(`${members().find(m => m.pid === ev.pid)?.name || ''} passes the gate: +5 tickets`); }
+  if (ev.ev === 'ask') { b.ask = { kind: ev.kind, options: ev.options }; b.sub = 'ask'; }
+  if (ev.ev === 'chose') { b.ask = null; b.sub = 'move'; }
+  if (ev.ev === 'fx') {
+    if (ev.tickets && typeof ev.tickets === 'object') Object.assign(b.tickets, ev.tickets); else if (ev.tickets != null) b.tickets[ev.pid] = ev.tickets;
+    if (ev.ribbons && typeof ev.ribbons === 'object') Object.assign(b.ribbons, ev.ribbons); else if (ev.ribbons != null) b.ribbons[ev.pid] = ev.ribbons;
+    b.text = ev.text || ''; b.sub = 'fx';
+    if (ev.text) sfx(ev.kind === 'ribbon' ? 'win' : (ev.d ?? 0) < 0 || ev.kind === 'pit' ? 'bad' : 'good');
+  }
+  if (S.phase === 'board') showBoard();
+}
+
+// ------------------------------------------------------------------ vote / intro / results / final
+function card(id, extra = '') { const m = GAMES[id].meta; return `<span class="gcard"><img src="${ART}${m.card}.webp" alt="" onerror="this.style.visibility='hidden'"><b>${esc(m.title)}</b><span>${esc(m.blurb)}</span>${extra}</span>`; }
+function showVote() {
+  setSafe('title'); const pm = S.pm, me = mine(), can = me?.seat != null;
+  setScreen('vote', `<h1 class="shout">Vote for the next game!</h1>
+    <div class="vote-cards">${pm.options.map((id, i) => `<button class="vote-card${S.votes[S.room.you] === i ? ' mine' : ''}${S.voted === i ? ' won' : ''}" data-act="vote" data-i="${i}" ${can ? '' : 'disabled'}>${card(id, `<u class="who">${Object.entries(S.votes).filter(([, v]) => v === i).map(([pid]) => { const m = members().find(x => x.pid === +pid); return m ? `<i class="dot" style="background:${seatOf(m)?.color}"></i>` : ''; }).join('')}</u>`)}</button>`).join('')}</div>
+    <p class="note">${can ? 'Tap a card.' : 'Watching.'} <b class="count">${left()}</b></p>`);
+  drawHud();
+}
+function showIntro() {
+  const pm = S.pm, m = GAMES[pm.game].meta, me = mine(), can = me?.seat != null && pm.players.some(p => p.pid === me.pid);
+  const ctl = m.kind === 'arena' ? (isTouch() ? `Left thumb: move.${m.controls?.a ? ` Big button: ${m.controls.a}.` : ''}${m.controls?.b ? ` Small button: ${m.controls.b}.` : ''}` : `WASD or arrows: move.${m.controls?.a ? ` Space: ${m.controls.a}.` : ''}${m.controls?.b ? ` E: ${m.controls.b}.` : ''}`) : 'Tap your choices on this screen.';
+  setScreen('intro', `<div class="panel intro-card"><img src="${ART}${m.card}.webp" alt="" onerror="this.remove()">
+    <h1 class="shout">${esc(m.title)}</h1><p class="blurb">${esc(m.blurb)}</p>
+    <ul>${m.how.map(l => `<li>${esc(l)}</li>`).join('')}</ul><p class="ctl">${esc(ctl)}</p>
+    ${can ? `<button class="btn big primary" data-act="skip">${S.skips.includes(me.pid) ? 'Ready ✓' : "I'm ready"}</button>` : '<p class="note">Watching this one.</p>'}
+    <p class="note">Starts in <b class="count">${left()}</b> · ${S.skips.length}/${pm.players.length} ready</p></div>`);
+  hud.innerHTML = '';
+}
+function showResults() {
+  const pm = S.pm, m = GAMES[pm.game].meta, me = mine();
+  let place = 0; const rows = [];
+  for (const g of pm.result.order) { for (const pid of g) { const mem = members().find(x => x.pid === pid); if (mem) rows.push(`<li class="p${place + 1}"><span class="pl">${pm.result.coop ? '' : ['1st', '2nd', '3rd', '4th'][place]}</span>${chipOf(mem)}<span class="score">${pm.result.scores?.[pid] ?? ''} ${esc(pm.result.unit || '')}</span><span class="award">+${pm.award[pid] ?? 0} ${ICON[pm.unit === 'tickets' ? 'ticket' : 'ribbon']}${pm.unit}</span></li>`); } place += g.length; }
+  setScreen('results', `<div class="panel results-card"><h1 class="shout">${esc(m.title)}</h1>
+    ${pm.result.coop ? `<p class="blurb">${pm.result.coop.success ? 'You did it together!' : 'So close. Better luck next time!'}</p>` : ''}
+    <ol class="places">${rows.join('')}</ol>
+    ${me?.seat != null ? `<button class="btn big primary" data-act="skip">${S.skips.includes(me.pid) ? 'Ready ✓' : 'Continue'}</button>` : ''}<p class="note">Next in <b class="count">${left()}</b></p></div>`);
+  drawHud();
+}
+function showFinal() {
+  const pm = S.pm, me = mine(); setSafe('lobby'); dropBoard();
+  lineup.show(true);
+  const order = pm.standings.map(r => members().find(m => m.pid === r.pid)).filter(Boolean);
+  lineup.sync(order, { me: S.room.you }).then(() => lineup.setPoses(Object.fromEntries(pm.standings.map(r => [r.pid, r.place === 1 ? 'cheer' : r.place === pm.standings.length && pm.standings.length > 2 ? 'sitGround' : 'clap']))));
+  const win = pm.standings.filter(r => r.place === 1).map(r => members().find(m => m.pid === r.pid)?.name).filter(Boolean);
+  setScreen('final', `<div class="panel final-card"><h1 class="shout">${pm.standings.length > 1 ? `${esc(win.join(' & '))} win${win.length > 1 ? '' : 's'}!` : 'Nice run!'}</h1>
+    <ol class="places">${pm.standings.map(r => { const mem = members().find(m => m.pid === r.pid); return mem ? `<li class="p${r.place}"><span class="pl">${['1st', '2nd', '3rd', '4th'][r.place - 1]}</span>${chipOf(mem)}<span class="score">${pm.mode === 'board' ? `${ICON.ribbon}${r.ribbons} ${ICON.ticket}${r.tickets}` : `${r.points} pts`}</span><span class="award">+${pm.payout[r.pid] ?? 0} ${ICON.coin}coins</span></li>` : ''; }).join('')}</ol>
+    <p class="note">Coins buy costumes. They never help you win.</p>
+    ${me?.seat != null ? `<button class="btn big primary" data-act="skip">${S.skips.includes(me.pid) ? 'Ready ✓' : 'Back to the lobby'}</button>` : ''}<p class="note">Lobby in <b class="count">${left()}</b></p></div>`);
+  hud.innerHTML = ''; sfx('win');
+}
+
+// ------------------------------------------------------------------ phases
+function dropPlay() { const p = S.play; S.play = null; S.playP = null; p?.dispose(); $('#game-ui').innerHTML = ''; controls.set(null); }
+async function onPhase(pm) {
+  const prev = S.phase;
+  S.pm = pm; S.phase = pm.phase; S.ends = performance.now() + (pm.ms || 0); S.skips = [];
+  document.body.dataset.phase = pm.phase;
+  if (pm.phase !== 'game' && pm.phase !== 'results' && pm.phase !== 'intro') dropPlay();
+  switch (pm.phase) {
+    case 'lobby': dropBoard(); S.bd = { tickets: {}, ribbons: {}, pid: null, ask: null, rolled: null }; showLobby(); break;
+    case 'board': await ensureBoard(); if (S.phase !== 'board') return; S.board.show?.(); showBoard(); break;
+    case 'vote': S.votes = pm.votes || {}; S.voted = null; lineup.show(false); if (S.room.match.mode === 'board') await ensureBoard(); showVote(); sfx('open'); break;
+    case 'intro': {
+      dropPlay(); dropBoard(); lineup.show(false); setSafe(GAMES[pm.game].meta.kind === 'arena' ? 'arena' : 'title');
+      S.playP = createPlay({ stage, net, controls, intro: pm, members, me: mine()?.seat != null ? S.room.you : null, uiRoot: $('#game-ui'), sfx });
+      const mine2 = S.playP;
+      if (!pm.resume) showIntro();
+      const play = await mine2;
+      if (S.playP !== mine2) { play.dispose(); return; }
+      S.play = play;
+      if (S.phase === 'game') { setScreen('playing', ''); play.start(); }
+      break;
+    }
+    case 'game': setScreen('playing', ''); hud.innerHTML = ''; if (S.play) S.play.start(); sfx('go'); break;
+    case 'results': controls.set(null); showResults(); sfx('open'); break;
+    case 'final': showFinal(); break;
+  }
+  if (prev !== pm.phase) drawHud();
+}
+
+// ------------------------------------------------------------------ network
+net.on('status', s => { document.body.dataset.net = s; const e = $('.foot .net'); if (e) e.textContent = s === 'online' ? '' : 'connecting…'; });
+const onWelcome = m => { S.me = m; if (!S.room) { showTitle(); const code = cleanCode(q.get('code') || ''); if (code && !S.tried) { S.tried = true; net.join(code, S.asDisplay); } } };
+net.on('welcome', onWelcome);
+if (net.me) onWelcome(net.me);                      // the hello was answered while the page was still loading its data
+net.on('me', () => { S.me = net.me; if (!S.room) showTitle(); else if (S.phase === 'lobby') showLobby(); S.modal?.refresh?.(); });
+net.on('wallet', () => { S.me = net.me; });
+net.on('room', r => {
+  const first = !S.room; S.room = r;
+  if (r.match?.board) { Object.assign(S.bd.tickets, r.match.board.tickets); Object.assign(S.bd.ribbons, r.match.board.ribbons); S.bd.pid = r.match.board.pid; S.bd.sub = S.bd.sub || r.match.board.sub; if (r.match.board.ask && !S.bd.ask) S.bd.ask = r.match.board.ask; S.board?.sync(r.match.board); }
+  if (first) { history.replaceState(null, '', `?code=${r.code}${S.asDisplay ? '&display=1' : ''}`); if (r.phase === 'lobby') onPhase({ phase: 'lobby' }); }
+  else if (r.phase === 'lobby' && S.phase === 'lobby') showLobby();
+  else drawHud();
+});
+net.on('phase', onPhase);
+net.on('left', () => { S.room = null; dropPlay(); dropBoard(); history.replaceState(null, '', location.pathname); showTitle(); });
+net.on('kicked', () => { S.room = null; dropPlay(); dropBoard(); S.err = 'The host removed you from the room.'; showTitle(); });
+net.on('err', m => { if (!S.room) { S.err = m.msg; showTitle(); } else toast(m.msg, 'bad'); });
+net.on('bd', onBoard);
+net.on('votes', m => { S.votes = m.votes; if (S.phase === 'vote') showVote(); });
+net.on('voted', m => { S.voted = m.pick; if (S.phase === 'vote') showVote(); sfx('good'); });
+net.on('skips', m => { S.skips = m.pids; if (S.phase === 'intro') showIntro(); else if (S.phase === 'results') showResults(); });
+net.on('s', m => S.play?.snap(m));
+net.on('ge', m => S.play?.event(m));
+net.on('gp', m => { if (S.play) S.play.priv(m.d); else S.playP?.then(p => p.priv(m.d)); });
+net.on('emote', m => lineup.play(m.pid, m.e, 1500));
+
+// ------------------------------------------------------------------ taps
+screen.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b || b.disabled) return;
+  sfx.unlock(); sfx('tap');
+  const act = b.dataset.act;
+  switch (act) {
+    case 'host': saveName(); S.err = ''; S.asDisplay = false; net.create(); break;
+    case 'join': { saveName(); const code = cleanCode($('#code').value); if (!code) { S.err = `The code is ${CODE_LENGTH} letters.`; showTitle(); break; } S.err = ''; S.asDisplay = $('#as-display').checked; net.join(code, S.asDisplay); break; }
+    case 'leave': net.leave(); break;
+    case 'copy': navigator.clipboard?.writeText(joinUrl(S.room.code)).then(() => toast('Invite link copied'), () => toast(joinUrl(S.room.code))) ?? toast(joinUrl(S.room.code)); break;
+    case 'opt': net.send({ t: 'opt', key: b.dataset.key, value: b.dataset.num ? +b.dataset.num : b.dataset.value }); break;
+    case 'start': net.send({ t: 'start' }); break;
+    case 'kick': net.send({ t: 'kick', pid: +b.dataset.pid }); break;
+    case 'roll': net.send({ t: 'roll' }); S.bd.sub = 'move'; showBoard(); break;
+    case 'choose': net.send({ t: 'choose', i: +b.dataset.i }); S.bd.ask = null; showBoard(); break;
+    case 'vote': net.send({ t: 'vote', i: +b.dataset.i }); break;
+    case 'skip': net.send({ t: 'skip' }); break;
+    case 'edit': saveName(); openEditor(); break;
+    case 'shop': saveName(); openShop(); break;
+  }
+});
+screen.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.id === 'code') $('[data-act="join"]')?.click(); if (e.key === 'Enter' && e.target.id === 'name') e.target.blur(); });
+screen.addEventListener('change', e => { if (e.target.id === 'name') saveName(); });
+addEventListener('pointerdown', () => sfx.unlock(), { once: true });
+
+// ------------------------------------------------------------------ look editor and costume shop (modals)
+function closeModal() { S.modal?.el.remove(); S.modal = null; }
+function openEditor() {
+  closeModal();
+  const ed = createEditor({ look: S.me.look, races: RACES, raceNames: RACE_NAMES, onChange: look => net.send({ t: 'profile', look }), onClose: closeModal });
+  document.body.append(ed.el); S.modal = ed;
+}
+function openShop() {
+  closeModal();
+  const el = h('div', 'modal shop');
+  const draw = () => {
+    el.innerHTML = `<div class="panel"><h2>Costumes <span class="coins">${ICON.coin}${S.me.coins}</span></h2><p class="note">Costumes are only for show. Win coins by finishing matches.</p>
+      <div class="costumes">${costumes().map(c => { const own = S.me.owned.includes(c.id), on = S.me.costume === c.id; return `<button class="costume${on ? ' on' : ''}${own ? ' own' : ''}" data-id="${c.id}" ${!own && S.me.coins < c.price ? 'data-poor="1"' : ''}><img src="${portrait({ look: S.me.look, costume: c.id })}" alt=""><b>${esc(c.name)}</b><span>${on ? 'Wearing' : own ? 'Wear' : `${ICON.coin}${c.price}`}</span></button>`; }).join('')}</div>
+      <button class="btn big" data-close="1">Done</button></div>`;
+  };
+  el.addEventListener('click', e => {
+    if (e.target.closest('[data-close]') || e.target === el) return closeModal();
+    const b = e.target.closest('.costume'); if (!b) return;
+    const c = costumes().find(x => x.id === b.dataset.id);
+    if (S.me.owned.includes(c.id)) net.send({ t: 'equip', id: c.id });
+    else if (S.me.coins >= c.price) { if (confirm(`Buy ${c.name} for ${c.price} coins?`)) { net.send({ t: 'buy', id: c.id }); net.send({ t: 'equip', id: c.id }); } }
+    else toast(`${c.name} costs ${c.price} coins. You have ${S.me.coins}.`, 'bad');
+  });
+  draw(); document.body.append(el); S.modal = { el, refresh: draw };
+}
+
+// ------------------------------------------------------------------ the frame loop
+let lastT = performance.now(), lastCount = -1;
+function frame(t) {
+  const dt = Math.min(0.1, (t - lastT) / 1000); lastT = t;
+  lineup.frame(dt); S.board?.frame(dt); S.play?.frame(dt);
+  stage.render(dt);
+  const c = left(); if (c !== lastCount) { lastCount = c; for (const e of document.querySelectorAll('.count')) e.textContent = c; }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+$('#boot').remove();
+// iOS ignores user-scalable=no: stop pinch and double-tap zoom ourselves (same as Thousandvale's phone layout)
+for (const ev of ['gesturestart', 'gesturechange']) document.addEventListener(ev, e => e.preventDefault());
+let lastTouch = 0; document.addEventListener('touchend', e => { const n = Date.now(); if (n - lastTouch < 320 && !e.target.closest('input, textarea')) e.preventDefault(); lastTouch = n; }, { passive: false });

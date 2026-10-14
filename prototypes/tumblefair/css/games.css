@@ -30,3 +30,10 @@
 .tt-players .chip.in { outline: 4px solid var(--mint); } .tt-players .delta { font-size: 13px; } .delta.bad { color: #c22; } .delta.good { color: #1d8a37; }
 .tt-note { margin: 0; color: #fff; min-height: 1.3em; text-align: center; }
 .game-trapdoor-treasury[data-phase=reveal] .tt-chest, .game-trapdoor-treasury[data-phase=reveal] .tt-bank, .game-trapdoor-treasury.watching .tt-chest, .game-trapdoor-treasury.watching .tt-bank { pointer-events: none; }
+
+/* ---- Snowball Showdown ---- */
+.scorebar .sb-lives { font-style: normal; color: #ff4d6d; font-size: 13px; letter-spacing: -1px; margin: 0 2px; -webkit-text-stroke: .5px var(--ink); }
+
+/* ---- Stack Attack ---- */
+.tag.sa-height { font-size: 16px; padding: 1px 10px; }
+.tag.sa-height span::after { content: ' high'; font-size: 11px; font-weight: 600; }

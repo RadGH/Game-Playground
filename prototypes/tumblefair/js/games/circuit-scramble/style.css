@@ -1,0 +1,35 @@
+/* Circuit Scramble — a fairground workshop: blueprint-blue board, chunky tiles in each player's colour, yellow power. */
+.game-circuit-scramble { pointer-events: auto; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: calc(var(--st) + 10px) 12px calc(var(--sb) + 14px); background: linear-gradient(rgba(255, 255, 255, .06) 1px, transparent 1px) 0 0 / 24px 24px, linear-gradient(90deg, rgba(255, 255, 255, .06) 1px, transparent 1px) 0 0 / 24px 24px, linear-gradient(#1f4e79, #0f2a44); }
+.game-circuit-scramble > * { flex: none; }
+.cs-top { display: flex; gap: 12px; align-items: center; justify-content: center; color: #fff; font: 900 22px/1.1 var(--font); -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; }
+.cs-goal { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center; color: #fff; font-size: 15px; }
+.cs-pips { display: flex; gap: 4px; }
+.cs-pips i { width: 18px; height: 18px; border-radius: 50%; border: 3px solid var(--ink); background: #3b5878; display: block; }
+.cs-pips i.goal { box-shadow: 0 0 0 3px #fff; } .cs-pips i.done { background: var(--sun); }
+.cs-boardwrap { position: relative; }
+.cs-board { --cell: min(calc((100vw - 40px) / var(--w)), calc((100dvh - 260px) / var(--h)), 108px); display: grid; grid-template-columns: repeat(var(--w), var(--cell)); grid-auto-rows: var(--cell); gap: 3px; padding: 8px; background: #0b1d30; border: 5px solid var(--ink); border-radius: 18px; box-shadow: 0 7px 0 var(--ink); }
+.cs-t { position: relative; padding: 0; border: 3px solid var(--ink); border-radius: 10px; background: color-mix(in srgb, var(--seat, #6b7b8c) 30%, #233a52); cursor: default; min-width: 0; min-height: 0; }
+.cs-t svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.cs-t .w { transform-origin: 50px 50px; transition: transform .16s ease-out; }
+.cs-t .under { fill: none; stroke: var(--ink); stroke-width: 26; stroke-linecap: round; }
+.cs-t .over { fill: none; stroke: #6d7f90; stroke-width: 14; stroke-linecap: round; transition: stroke .2s; }
+.cs-t.on .over { stroke: var(--sun); }
+.cs-t .knob { fill: #6d7f90; stroke: var(--ink); stroke-width: 4; } .cs-t.on .knob { fill: var(--sun); }
+.cs-t .own { fill: var(--seat); stroke: var(--ink); stroke-width: 2; }
+.cs-t.mine { background: color-mix(in srgb, var(--seat) 70%, #fff); cursor: pointer; box-shadow: inset 0 -5px 0 var(--seat-dark, rgba(0, 0, 0, .3)); }
+.cs-t.mine:active { transform: scale(.94); }
+.game-circuit-scramble:not(.watching) .cs-t:not(.mine):not(.fixed) { opacity: .72; }
+.cs-t.fixed { background: #e7e1d2; }
+.cs-t .bat rect { fill: #2fbf57; stroke: var(--ink); stroke-width: 4; } .cs-t .bat .bolt { fill: var(--sun); stroke: var(--ink); stroke-width: 2.5; }
+.cs-t .bulb circle { fill: #c9d3dc; stroke: var(--ink); stroke-width: 4; } .cs-t .bulb rect { fill: #8a96a2; stroke: var(--ink); stroke-width: 4; }
+.cs-t .bulb .fil { fill: none; stroke: #6d7f90; stroke-width: 3; }
+.cs-t.bulb.on circle { fill: #fff27a; filter: drop-shadow(0 0 10px #ffd23f); } .cs-t.bulb.on .fil { stroke: #ff9a1f; }
+.cs-banner { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(.6); opacity: 0; pointer-events: none; font: 900 clamp(30px, 8vw, 60px)/1 var(--font); color: var(--sun); -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; text-shadow: 0 5px 0 var(--ink); white-space: nowrap; transition: transform .25s, opacity .25s; }
+.game-circuit-scramble[data-phase=clear] .cs-banner { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(-4deg); }
+.game-circuit-scramble[data-phase=clear] .cs-board { filter: brightness(1.15); }
+.cs-players { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.cs-players .chip.me { background: #fff3b8; outline: 4px solid var(--sun); }
+.cs-mark { width: 22px; height: 22px; display: block; } .cs-mark svg { width: 100%; height: 100%; fill: var(--seat); stroke: var(--ink); stroke-width: 2; }
+.cs-note { margin: 0; color: #fff; text-align: center; min-height: 1.3em; font-size: 15px; max-width: 640px; }
+@media (min-aspect-ratio: 1/1) { .cs-board { --cell: min(calc((100vw - 40px) / var(--w)), calc((100dvh - 230px) / var(--h)), 120px); } }

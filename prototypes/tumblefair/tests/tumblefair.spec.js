@@ -5,7 +5,7 @@
 import { test, expect } from '@playwright/test';
 import { spawn } from 'node:child_process';
 import { createServer } from 'node:net';
-import { mkdtempSync, mkdirSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, readFileSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -13,7 +13,7 @@ import { fileURLToPath } from 'node:url';
 const HERE = dirname(fileURLToPath(import.meta.url)), SHOTS = join(HERE, 'shots');
 mkdirSync(SHOTS, { recursive: true });
 test.describe.configure({ mode: 'serial' });
-let srv, port, browser, host, phones = [];
+let srv, port, browser, host, phones = [], dataDir;
 const free = () => new Promise(res => { const s = createServer(); s.listen(0, () => { const p = s.address().port; s.close(() => res(p)); }); });
 const errors = [];
 async function page(mobile) {
@@ -28,7 +28,7 @@ const S = (p, f, a) => p.evaluate(f, a);
 
 test.beforeAll(async ({ browser: b }) => {
   browser = b; port = await free();
-  srv = spawn(process.execPath, [join(HERE, '..', 'server', 'main.mjs'), '--port', String(port), '--host', '127.0.0.1', '--data', mkdtempSync(join(tmpdir(), 'tf-spec-'))], { stdio: 'ignore' });
+  srv = spawn(process.execPath, [join(HERE, '..', 'server', 'main.mjs'), '--port', String(port), '--host', '127.0.0.1', '--data', (dataDir = mkdtempSync(join(tmpdir(), 'tf-spec-')))], { stdio: 'ignore' });
   for (let i = 0; i < 50; i++) { try { if ((await fetch(`http://127.0.0.1:${port}/healthz`)).ok) break; } catch { /* starting */ } await new Promise(r => setTimeout(r, 200)); }
 });
 test.afterAll(() => srv?.kill());
@@ -51,7 +51,7 @@ test('lobby: two phones join by code, seats in colour order, QR drawn', async ()
   await host.waitForFunction(() => tumblefair.S.room?.code);
   const code = await S(host, () => tumblefair.S.room.code);
   expect(code).toMatch(/^[A-HJ-NP-Z]{4}$/);
-  for (let i = 0; i < 2; i++) { const p = await page(true); await p.goto(url('code=' + code)); await p.waitForFunction(() => tumblefair.S.room, null, { timeout: 60000 }); phones.push(p); }
+  for (let i = 0; i < 2; i++) { const p = await page(true); await p.goto(url('code=' + code)); await p.waitForFunction(() => window.tumblefair?.S.room, null, { timeout: 60000 }); phones.push(p); }
   await expect.poll(() => S(host, () => tumblefair.S.room.members.map(m => m.seat).join(','))).toBe('0,1,2');
   await expect(host.locator('.lobby-main .chip')).toHaveCount(3);
   await expect(host.locator('#qr svg')).toBeVisible();
@@ -113,5 +113,23 @@ test('arena: Paint Panic — your character moves the moment you press, the serv
   await host.waitForFunction(() => tumblefair.S.phase === 'results', null, { timeout: 90000 });
   await expect(host.locator('.results-card .places li')).toHaveCount(3);
   await host.screenshot({ path: join(SHOTS, 'spec-paint-results.png') });
+  expect(errors).toEqual([]);
+});
+
+test('the ! button sends a bug report with a picture of the game and the debug details', async () => {
+  test.setTimeout(60000);
+  const phone = phones[0];
+  await phone.click('.fb-btn');
+  await expect(phone.locator('.fb-modal img')).toBeVisible();
+  await phone.fill('#fb-text', 'The pads look sideways on my phone');
+  await phone.click('#fb-send');
+  await expect(phone.locator('.fb-modal')).toContainText('Thank you');
+  const rec = JSON.parse(readFileSync(join(dataDir, 'feedback', '1.json'), 'utf8'));
+  expect(rec.text).toBe('The pads look sideways on my phone');
+  expect(rec.debug.room.code).toMatch(/^[A-Z]{4}$/);
+  expect(rec.debug.screen.w).toBe(393);
+  expect(rec.debug.log.length).toBeGreaterThan(0);
+  expect(existsSync(join(dataDir, 'feedback', rec.shot)), 'the picture was saved').toBe(true);
+  await phone.screenshot({ path: join(SHOTS, 'spec-feedback.png') });
   expect(errors).toEqual([]);
 });

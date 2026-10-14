@@ -55,5 +55,38 @@ export function world({ seed = 7 } = {}) {
 /** Presses that make sense in each non-arena game, so bots can finish them. One entry per game id. */
 export const UI_BOTS = {
   'trapdoor-treasury': P => { const g = P.last.s?.g; if (g?.phase === 'pick' && P.pickedRound !== g.round) { P.pickedRound = g.round; P.send({ t: 'act', a: 'pick', d: g.round % 3 === 0 ? 'bank' : (P.pid + g.round) % 3 }); } },
+  // draws three lines and says done, then votes for the next picture along that is not its own
+  'draw-the-disaster': P => {
+    const g = P.last.s?.g, k = P.last.phase, me = P.last.gp?.d; if (!g?.judge || !k) return;
+    if (g.phase === 'draw' && !k.ddDrew) { k.ddDrew = true; for (let s = 1; s <= 3; s++) P.send({ t: 'act', a: 'ink', d: { s, c: (P.pid + s) % 8, w: s & 1, p: [0, 1, 2, 3].map(i => ((P.pid * 37 + s * 50 + i * 20) & 255).toString(16).padStart(2, '0') + ((s * 60 + i * 15) & 255).toString(16).padStart(2, '0')).join('') } }); P.send({ t: 'act', a: 'done', d: true }); }
+    if (g.phase === 'vote' && !k.ddVoted && me?.mine != null) { k.ddVoted = true; const n = P.room.members.filter(m => m.seat != null).length; P.send({ t: 'act', a: 'vote', d: n === 2 && P.pid % 2 ? 'both' : (me.mine + 1) % n }); }
+  },
+  // answers each question once, not always right
+  'memory-heist': P => { const g = P.last.s?.g, k = P.last.phase; if (g?.phase === 'q' && g.q && k && k.mhQ !== g.qi) { k.mhQ = g.qi; P.send({ t: 'act', a: 'ans', d: (P.pid + g.qi) % g.q.opts.length }); } },
+  // works out a rotation for every tile where all wire ends meet (a small backtracking search), then turns its own
+  // tiles towards it a few times a second
+  'circuit-scramble': P => {
+    const g = P.last.s?.g; if (g?.phase !== 'play' || !g.o) return;
+    P.csTick = (P.csTick || 0) + 1; if (P.csTick % 3) return;
+    const key = g.stage + g.t; if (P.csKey !== key) { P.csKey = key; P.csPlan = solveWires(g); }
+    const seat = String(P.room.members.find(m => m.pid === P.pid)?.seat);
+    const i = [...g.o].findIndex((o, j) => o === seat && P.csPlan && +g.r[j] !== P.csPlan[j]);
+    if (i >= 0) P.send({ t: 'act', a: 'rot', d: i });
+  },
 };
+/** Test-bot helper: turns (0-3) for every Circuit Scramble tile so every wire end meets another and none leaves the board. */
+function solveWires(g) {
+  const w = g.w, h = g.h, base = [...g.t].map(c => parseInt(c, 16)), fixed = [...g.o].map(o => o === '-');
+  const turn = (m, r) => { for (let k = 0; k < r; k++) m = ((m << 1) | (m >> 3)) & 15; return m; };
+  const rot = new Array(w * h).fill(0), m = new Array(w * h).fill(0);
+  const fits = i => { const x = i % w, y = (i / w) | 0, v = m[i];
+    if ((y === 0 && v & 1) || (x === w - 1 && v & 2) || (y === h - 1 && v & 4) || (x === 0 && v & 8)) return false;
+    if (y > 0 && !!(v & 1) !== !!(m[i - w] & 4)) return false;
+    if (x > 0 && !!(v & 8) !== !!(m[i - 1] & 2)) return false;
+    return true; };
+  const go = i => { if (i === w * h) return true;
+    for (const r of fixed[i] ? [0] : [0, 1, 2, 3]) { rot[i] = r; m[i] = turn(base[i], r); if (fits(i) && go(i + 1)) return true; }
+    return false; };
+  return go(0) ? rot : null;
+}
 export const withBots = P => { P.botAct = (p, meta) => UI_BOTS[meta.id]?.(p); return P; };

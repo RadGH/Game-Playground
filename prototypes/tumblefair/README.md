@@ -82,8 +82,22 @@ lobby -> [ board -> vote -> intro -> game -> results ] x rounds -> final -> lobb
 |---|---|---|
 | `paint-panic` | arena | walk to paint the floor your colour; paint buckets splat a circle; most tiles in 45 s |
 | `trapdoor-treasury` | screen | 6 rounds: pick a chest (bigger = shakier floor) or BANK; a trapdoor empties your sack; banked gold counts |
+| `meteor-dash` | arena | hex island over lava; meteors (1.2 s warning ring) knock you back and break tiles, the edge crumbles; A = hop; last one standing |
+| `snowball-showdown` | arena | slippery ice ring; A = throw, B = shove-dash; 3 lives, KO credit within 3 s; solo = snowman targets |
+| `stack-attack` | arena | carry blocks to your corner pad (gold = 2), grab on a rival's pad steals their top block, B = shove makes a carrier drop; tallest tower |
+| `draw-the-disaster` | screen | a private prompt (`data/prompts.json`, 135), 45 s drawing on your phone, anonymous gallery vote (not your own), a rule-based judge's ribbon (+1) breaks 2-player ties; avatar portraits on every card |
+| `memory-heist` | screen | study a vault of 9-16 treasures, then 5 quick questions; speed scores more |
+| `circuit-scramble` | screen, co-op | everyone turns only their own tiles to connect the battery to the bulbs; 6 boards, clear the goal together |
 
-(More are added by `docs/MINIGAMES.md`; the list above is updated as each lands.)
+Known gap: a phone that reconnects mid-drawing sees a blank canvas (its strokes are kept on the server and appear in the gallery).
+
+## Bug reports and suggestions
+
+The round **!** button (top right; bottom centre during a minigame) opens a form: Bug or Suggestion, a text box, and a
+picture of the 3D view (on by default). It posts to `POST /feedback` (`server/feedback.mjs`: 1.5 MB, 12 an hour per
+address) with debug details — screen, recent phases, room and players, the minigame's last state, network, screen size,
+device and the page's last errors. Read them with `node tools/feedback-report.mjs --env stable` (markdown),
+`--html <file>` (with pictures), `--mark 3,4 --state done --note "…"`. Stored in `~/.local/share/tumblefair/<env>/feedback/`.
 
 ## What worked / what didn't
 

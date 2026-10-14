@@ -1,0 +1,51 @@
+/* Memory Heist — a night-time bank vault: steel-blue walls, a round door that swings away, treasures on velvet. */
+.game-memory-heist { pointer-events: auto; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding: calc(var(--st) + 10px) 12px calc(var(--sb) + 14px); background: radial-gradient(circle at 50% 35%, #3b4f6b, #141c2b 75%); }
+.game-memory-heist > * { flex: none; }
+.mh-top { display: flex; gap: 12px; align-items: center; justify-content: center; color: #fff; font: 900 22px/1.1 var(--font); -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; text-align: center; }
+.mh-stage { width: min(100%, 860px); display: grid; justify-items: center; }
+.mh-note { margin: 0; color: #fff; text-align: center; min-height: 1.3em; font-size: 16px; }
+.mh-players { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.mh-players .chip .sc { font-style: normal; font-weight: 900; background: #ffe9a8; border-radius: 8px; padding: 0 6px; }
+.mh-players .chip.in { outline: 4px solid var(--mint); } .mh-players .chip.me { background: #fff3b8; }
+.mh-players .delta { font-size: 13px; } .mh-players .delta.good { color: #1d8a37; } .mh-players .delta.bad { color: #c22; }
+
+/* ---- the vault ---- */
+.mh-vault { position: relative; display: none; width: min(100%, calc((100dvh - 230px) * var(--ar, 1.1)), 760px); padding: 12px; background: #5a6577; border: 6px solid var(--ink); border-radius: 22px; box-shadow: inset 0 0 0 6px #8996a8, 0 8px 0 var(--ink); }
+.game-memory-heist:is([data-phase=study], [data-phase=end]) .mh-vault { display: block; }
+.mh-grid { display: grid; grid-template-columns: repeat(var(--w), 1fr); gap: 8px; }
+.mh-cell { aspect-ratio: 1; background: radial-gradient(circle at 50% 40%, #a8333f, #5d1520); border: 3px solid var(--ink); border-radius: 12px; display: grid; grid-template-rows: 1fr auto; justify-items: center; align-items: center; padding: 4px; animation: mh-pop .35s backwards var(--d); }
+.mh-cell .mh-ic { width: 78%; height: 100%; max-height: 100%; }
+.mh-cell span { color: #fff; font-size: clamp(10px, 2.6vw, 15px); line-height: 1; font-weight: 800; text-shadow: 0 1px 0 #000; }
+@keyframes mh-pop { from { transform: scale(.4); opacity: 0; } }
+.mh-door { position: absolute; inset: -6px; border-radius: 22px; background: radial-gradient(circle, #9aa7b8 0 18%, #6c7a8e 19% 40%, #8996a8 41% 100%); border: 6px solid var(--ink); display: grid; place-items: center; pointer-events: none; transform-origin: left center; animation: mh-open .8s .1s forwards; }
+.mh-door b { font: 900 30px/1 var(--font); color: #2b3546; letter-spacing: 6px; }
+.mh-door i { position: absolute; width: 34%; aspect-ratio: 1; border-radius: 50%; border: 10px dotted #2b3546; animation: spin 0.8s linear; }
+@keyframes mh-open { to { transform: perspective(900px) rotateY(-100deg); opacity: 0; } }
+@keyframes spin { to { transform: rotate(270deg); } }
+.game-memory-heist[data-phase=end] .mh-door { display: none; }
+
+/* ---- the question ---- */
+.mh-quiz { display: none; width: 100%; text-align: center; }
+.game-memory-heist:is([data-phase=q], [data-phase=ans]) .mh-quiz { display: block; }
+.mh-qn { margin: 0; color: var(--sun); font-weight: 800; letter-spacing: 1px; text-transform: uppercase; font-size: 14px; }
+.mh-q { margin: 6px auto 14px; background: var(--paper); border: 4px solid var(--ink); border-radius: 18px; padding: 12px 16px; box-shadow: 0 5px 0 var(--ink); font: 900 clamp(20px, 5vw, 34px)/1.15 var(--font); max-width: 760px; }
+.mh-opts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; width: 100%; max-width: 760px; margin: 0 auto; }
+.mh-opt { position: relative; min-height: 96px; border: 4px solid var(--ink); border-radius: 18px; background: #fff; box-shadow: 0 5px 0 var(--ink); display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 8px; padding: 8px 12px; text-align: left; font: 900 clamp(17px, 4.4vw, 26px)/1.1 var(--font); cursor: pointer; }
+.mh-opt .mh-ic { width: 56px; height: 56px; }
+.mh-opt .sw { width: 50px; height: 50px; border-radius: 50%; border: 4px solid var(--ink); display: block; }
+.mh-opt .num { grid-column: 1 / -1; justify-self: center; font: 900 46px/1 var(--font); font-style: normal; }
+.mh-opt .who { position: absolute; right: 8px; bottom: -14px; display: flex; gap: 2px; text-decoration: none; }
+.mh-opt.mine { background: var(--sun); transform: translateY(2px); box-shadow: 0 3px 0 var(--ink); }
+.mh-opt.right { background: var(--mint); color: #fff; -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; animation: bob .5s 2; }
+.mh-opt.wrong { background: var(--pop); color: #fff; animation: shake .4s; }
+.game-memory-heist[data-phase=ans] .mh-opt:not(.right):not(.wrong) { opacity: .55; }
+.game-memory-heist:is([data-phase=ans], .watching) .mh-opt { pointer-events: none; }
+.vface { width: 30px; height: 30px; border-radius: 50%; border: 3px solid var(--seat); background: var(--seat); overflow: hidden; display: block; box-shadow: 0 0 0 2px var(--ink); }
+.vface img { width: 100%; height: 100%; display: block; }
+
+@media (min-aspect-ratio: 1/1) {
+  .mh-opt { min-height: 110px; }
+  .watching .mh-players .chip, .mh-players .chip { font-size: 18px; }
+}
+@media (max-width: 380px) { .mh-opt { min-height: 80px; } .mh-opt .mh-ic { width: 44px; height: 44px; } }

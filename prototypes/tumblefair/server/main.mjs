@@ -13,6 +13,7 @@ import { WebSocketServer } from 'ws';
 import { createStaticHandler } from './static.js';
 import { createHub } from '../js/sim/hub.js';
 import { createProfiles } from '../js/sim/profiles.js';
+import { createFeedback } from './feedback.mjs';
 import { MAX_FRAME, TICK_MS } from '../js/shared/protocol.js';
 import { cleanLook } from '../../thousandvale/js/sim/looks.js';
 
@@ -30,12 +31,15 @@ const profiles = createProfiles({ initial, cosmetics: data.cosmetics, cleanLook,
   persist: all => { const tmp = profileFile + '.tmp'; writeFileSync(tmp, JSON.stringify(all)); renameSync(tmp, profileFile); } });
 const hub = createHub({ data, profiles, build, log: (what, d) => console.log(new Date().toISOString(), what, JSON.stringify(d)) });
 
+const feedback = createFeedback(dataDir, { build });
+const ipOf = req => { const peer = req.socket.remoteAddress || '', loop = /^(127\.0\.0\.1|::1|::ffff:127\.0\.0\.1)$/.test(peer); return loop && req.headers['cf-connecting-ip'] ? String(req.headers['cf-connecting-ip']) : peer; };
 const serveStatic = createStaticHandler(publicDir ? resolve(publicDir) : PLAY, { allowAll: !!publicDir });
 const started = Date.now();
 const server = http.createServer((req, res) => {
   const path = req.url.split('?')[0];
   if (path === '/healthz') { res.writeHead(200, { 'Content-Type': 'text/plain' }); res.end('ok'); return; }
   if (path === '/status') { res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); res.end(JSON.stringify({ server: 'tumblefair', build, uptime: Math.round((Date.now() - started) / 1000), ...hub.status() })); return; }
+  if (path === '/feedback' && req.method === 'POST') { feedback.handle(req, ipOf(req), (code, body) => { res.writeHead(code, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(body)); }); return; }
   if (req.method !== 'GET' && req.method !== 'HEAD') { res.writeHead(405); res.end(); return; }
   if (!serveStatic(req, res)) { res.writeHead(404, { 'Content-Type': 'text/plain' }); res.end('not found'); }
 });

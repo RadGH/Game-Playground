@@ -1,0 +1,89 @@
+/* Draw the Disaster — a sunny art-fair tent: striped awning top, white paper canvas, chunky paint-pot buttons. */
+.game-draw-the-disaster { pointer-events: auto; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding: calc(var(--st) + 10px) 12px calc(var(--sb) + 14px); background: repeating-linear-gradient(90deg, #ff6b6b 0 40px, #ffe3b0 40px 80px) top / 100% 18px no-repeat, linear-gradient(#2b5d8a, #173a5c); }
+.game-draw-the-disaster > * { flex: none; }
+.dd-top { display: flex; gap: 12px; align-items: center; justify-content: center; margin-top: 12px; color: #fff; font: 900 22px/1.1 var(--font); text-align: center; -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; }
+.dd-draw, .dd-wait, .dd-gallery { display: none; width: 100%; }
+.game-draw-the-disaster[data-phase=draw]:not(.watching) .dd-draw { display: grid; }
+.game-draw-the-disaster[data-phase=draw].watching .dd-wait { display: flex; }
+.game-draw-the-disaster:not([data-phase=draw]) .dd-gallery { display: block; }
+.game-draw-the-disaster:not([data-phase]) .dd-draw { display: none; }
+.dd-note { margin: 0; color: #fff; text-align: center; min-height: 1.3em; max-width: 720px; font-size: 15px; }
+
+/* ---- drawing: prompt, square page, tools ---- */
+.dd-draw { justify-items: center; gap: 10px; grid-template-columns: 1fr; max-width: 560px; }
+.dd-prompt { margin: 0; background: var(--paper); border: 4px solid var(--ink); border-radius: 16px; padding: 6px 14px; text-align: center; box-shadow: 0 4px 0 var(--ink); font-size: 20px; line-height: 1.15; }
+.dd-prompt small { display: block; font-size: 12px; color: #6a5a3a; text-transform: uppercase; letter-spacing: 1px; }
+.dd-pad { position: relative; width: min(100%, calc(100dvh - 380px)); min-width: 220px; aspect-ratio: 1; border: 5px solid var(--ink); border-radius: 14px; background: #fff; box-shadow: 0 6px 0 var(--ink); overflow: hidden; }
+.dd-pad canvas { width: 100%; height: 100%; display: block; touch-action: none; cursor: crosshair; }
+.dd-full { position: absolute; left: 50%; top: 8px; transform: translateX(-50%); background: var(--pop); color: #fff; font-style: normal; font-weight: 900; padding: 2px 10px; border-radius: 10px; display: none; }
+.dd-full.on { display: block; }
+.is-done .dd-pad canvas { opacity: .75; cursor: default; }
+.dd-tools { display: grid; gap: 8px; width: 100%; justify-items: center; }
+.dd-swatches { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.dd-sw { width: 44px; height: 44px; border-radius: 50%; border: 3px solid var(--ink); background: var(--c); box-shadow: 0 3px 0 var(--ink); padding: 0; position: relative; }
+.dd-sw.rubber { background: repeating-linear-gradient(45deg, #fff 0 6px, #ffd0dd 6px 12px); }
+.dd-sw.on { transform: translateY(-4px) scale(1.12); outline: 4px solid #fff; outline-offset: 1px; }
+.dd-sw.on i::after { content: ''; position: absolute; inset: 13px; border-radius: 50%; background: #fff; border: 2px solid var(--ink); }
+.dd-brushes { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.dd-brushes button { min-height: 44px; min-width: 64px; border: 3px solid var(--ink); border-radius: 12px; background: #fff; font-weight: 800; box-shadow: 0 3px 0 var(--ink); display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; }
+.dd-br i { display: inline-block; width: var(--w); height: var(--w); border-radius: 50%; background: var(--ink); }
+.dd-br.on { background: var(--sun); }
+.dd-clear { color: #b3261e; }
+.dd-done { width: min(100%, 320px); background: var(--mint); }
+.dd-done.on { background: #fff; font-size: 16px; }
+
+/* landscape phones and big screens: page on the left, tools on the right */
+@media (min-aspect-ratio: 1/1) {
+  .dd-draw { max-width: 1000px; grid-template-columns: auto minmax(220px, 340px); grid-template-rows: auto 1fr; align-items: start; column-gap: 18px; }
+  .dd-prompt { grid-column: 1 / -1; }
+  .dd-pad { width: calc(100dvh - 190px); max-width: 60vw; }
+  .dd-tools { align-content: start; }
+}
+
+/* ---- watch-only screen while everyone draws ---- */
+.dd-wait { flex-direction: column; align-items: center; gap: 26px; margin-top: 16vh; }
+.dd-wait .shout { font-size: clamp(28px, 5vw, 56px); }
+.dd-artists { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+.dd-artists .chip { font-size: 22px; padding-right: 18px; }
+.dd-artists .chip .face { width: 64px; height: 64px; }
+.dd-artists .st { font-style: normal; font-size: 15px; background: #ffe9a8; border-radius: 8px; padding: 1px 8px; }
+.dd-artists .chip.in .st { background: var(--mint); color: #fff; }
+
+/* ---- gallery and reveal ---- */
+.dd-ghead { margin: 0 0 6px; color: #fff; text-align: center; min-height: 1.2em; font-size: 18px; }
+.dd-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; width: min(100%, 1240px); margin: 0 auto; }
+.dd-cards.n1 { grid-template-columns: minmax(0, 420px); justify-content: center; }
+.dd-card { position: relative; display: grid; gap: 4px; justify-items: center; align-content: start; padding: 8px 8px 10px; background: var(--paper); border: 4px solid var(--ink); border-radius: 16px; box-shadow: 0 5px 0 var(--ink); text-align: center; cursor: pointer; }
+.dd-frame { position: relative; width: 100%; aspect-ratio: 1; border: 3px solid var(--ink); border-radius: 8px; overflow: hidden; background: #fff; display: block; }
+.dd-frame canvas { width: 100%; height: 100%; display: block; }
+.dd-empty { position: absolute; inset: 0; display: grid; place-items: center; font-style: normal; color: #9aa; font-size: 15px; }
+.dd-pr { font-size: 14px; line-height: 1.15; font-weight: 800; }
+.dd-by:empty, .dd-vt:empty, .dd-pts:empty { display: none; }
+.dd-by .chip { font-size: 13px; } .dd-by .you { font-style: normal; font-size: 11px; background: var(--ink); color: #fff; border-radius: 6px; padding: 0 5px; }
+.dd-vt { display: flex; gap: 3px; flex-wrap: wrap; justify-content: center; min-height: 30px; align-items: center; }
+.dd-vt em { font-style: normal; font-size: 12px; color: #7a6a4a; }
+.vface { width: 30px; height: 30px; border-radius: 50%; border: 3px solid var(--seat); background: var(--seat); overflow: hidden; display: block; box-shadow: 0 0 0 2px var(--ink); }
+.vface img { width: 100%; height: 100%; display: block; }
+.dd-pts { position: absolute; top: -10px; right: -8px; background: var(--sun); border: 3px solid var(--ink); border-radius: 999px; padding: 2px 10px; font-size: 20px; }
+.dd-ribbon { display: none; position: absolute; left: -4px; top: 10px; background: #2f7ff0; color: #fff; font-style: normal; font-size: 12px; font-weight: 900; padding: 2px 10px 2px 8px; border-radius: 0 10px 10px 0; border: 2px solid var(--ink); transform: rotate(-4deg); }
+.dd-card.ribbon .dd-ribbon { display: block; }
+.dd-card.mine { cursor: default; background: #e9e1cf; }
+.dd-card.mine::after { content: 'Yours'; position: absolute; top: 12px; right: 12px; background: var(--ink); color: #fff; font-size: 12px; padding: 1px 8px; border-radius: 8px; }
+.dd-card.blank { cursor: default; }
+.game-draw-the-disaster[data-phase=reveal] .dd-card.mine::after { display: none; }
+.game-draw-the-disaster[data-phase=vote]:not(.watching) .dd-card.picked:not(.mine) { background: var(--sun); outline: 5px solid #fff; transform: translateY(-3px); }
+.game-draw-the-disaster[data-phase=vote]:not(.watching) .dd-card.picked:not(.mine)::before { content: 'My vote'; position: absolute; z-index: 1; bottom: -12px; background: var(--mint); color: #fff; border: 3px solid var(--ink); border-radius: 10px; padding: 0 10px; font-size: 14px; }
+.game-draw-the-disaster:is([data-phase=reveal], .watching) .dd-card, .game-draw-the-disaster:is([data-phase=reveal], .watching) .dd-both { pointer-events: none; }
+.dd-both { display: block; margin: 14px auto 0; width: min(100%, 360px); background: var(--sky); }
+.dd-both.picked { background: var(--sun); outline: 5px solid #fff; }
+.game-draw-the-disaster[data-phase=reveal] .dd-both { display: none; }
+
+/* a wide screen shows every picture in one row */
+@media (min-aspect-ratio: 1/1) {
+  .dd-cards { grid-template-columns: repeat(var(--cols, 4), minmax(0, max(150px, calc(100dvh - 300px)))); justify-content: center; }
+  .dd-cards.n2 { --cols: 2; } .dd-cards.n3 { --cols: 3; }
+  .dd-cards.n1 { grid-template-columns: minmax(0, max(160px, calc(100dvh - 260px))); }
+  .dd-pr { font-size: clamp(14px, 1.6vw, 22px); }
+  .watching .dd-vt .vface { width: 40px; height: 40px; }
+}

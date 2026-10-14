@@ -12,6 +12,7 @@ import { qrSvg, joinUrl } from './qr.js';
 import { h, esc } from './gamehud.js';
 import { createEditor } from './editor.js';
 import { createSounds } from './sounds.js';
+import { installFeedback } from './feedback.js';
 import { SEATS, cleanCode, CODE_LENGTH } from '../shared/protocol.js';
 import { GAMES, gameIds } from '../games/index.js';
 
@@ -28,7 +29,8 @@ const lineup = createLineup(stage);
 const sfx = createSounds();
 const net = connect();
 const boardDef = await (await fetch(new URL('../../data/boards/fairground.json', import.meta.url))).json();
-window.tumblefair = { S, net, stage, lineup, controls, GAMES };                       // for tests and the console
+window.tumblefair = { S, net, stage, lineup, controls, GAMES };
+installFeedback({ stage, net, getS: () => S });                       // for tests and the console
 
 // ------------------------------------------------------------------ helpers
 const members = () => S.room?.members || [];
@@ -168,7 +170,7 @@ function showIntro() {
 function showResults() {
   const pm = S.pm, m = GAMES[pm.game].meta, me = mine();
   let place = 0; const rows = [];
-  for (const g of pm.result.order) { for (const pid of g) { const mem = members().find(x => x.pid === pid); if (mem) rows.push(`<li class="p${place + 1}"><span class="pl">${pm.result.coop ? '' : ['1st', '2nd', '3rd', '4th'][place]}</span>${chipOf(mem)}<span class="score">${pm.result.scores?.[pid] ?? ''} ${esc(pm.result.unit || '')}</span><span class="award">+${pm.award[pid] ?? 0} ${pm.unit === 'tickets' ? ICON.ticket : ''}${pm.unit}</span></li>`); } place += g.length; }
+  for (const g of pm.result.order) { for (const pid of g) { const mem = members().find(x => x.pid === pid); if (mem) rows.push(`<li class="p${place + 1}"><span class="pl">${pm.result.coop ? '' : ['1st', '2nd', '3rd', '4th'][place]}</span>${chipOf(mem)}<span class="score">${pm.result.scores?.[pid] ?? ''} ${esc(pm.result.scores?.[pid] === 1 ? String(pm.result.unit || '').replace(/s$/, '') : pm.result.unit || '')}</span><span class="award">+${pm.award[pid] ?? 0} ${pm.unit === 'tickets' ? ICON.ticket : ''}${pm.unit}</span></li>`); } place += g.length; }
   setScreen('results', `<div class="panel results-card"><h1 class="shout">${esc(m.title)}</h1>
     ${pm.result.coop ? `<p class="blurb">${pm.result.coop.success ? 'You did it together!' : 'So close. Better luck next time!'}</p>` : ''}
     <ol class="places">${rows.join('')}</ol>

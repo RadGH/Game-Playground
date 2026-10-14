@@ -4,8 +4,14 @@
 // To add a game: write the two files, add one line here, add a card picture. Nothing else knows the list.
 import * as paintPanic from './paint-panic/sim.js';
 import * as trapdoorTreasury from './trapdoor-treasury/sim.js';
+import * as meteorDash from './meteor-dash/sim.js';
+import * as snowballShowdown from './snowball-showdown/sim.js';
+import * as stackAttack from './stack-attack/sim.js';
+import * as drawTheDisaster from './draw-the-disaster/sim.js';
+import * as memoryHeist from './memory-heist/sim.js';
+import * as circuitScramble from './circuit-scramble/sim.js';
 
-export const GAMES = Object.freeze(Object.fromEntries([paintPanic, trapdoorTreasury].map(g => [g.meta.id, g])));
+export const GAMES = Object.freeze(Object.fromEntries([paintPanic, trapdoorTreasury, meteorDash, snowballShowdown, stackAttack, drawTheDisaster, memoryHeist, circuitScramble].map(g => [g.meta.id, g])));
 export const gameIds = () => Object.keys(GAMES);
 export const metaOf = id => GAMES[id]?.meta || null;
 export const loadView = id => import(`./${id}/view.js`);

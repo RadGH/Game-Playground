@@ -28,7 +28,7 @@ export async function createBoardView({ stage, def, members, me, assetBase }) {
   }
   // pads
   const padGeo = new THREE.CylinderGeometry(1.05, 1.15, 0.3, 28), topGeo = new THREE.CircleGeometry(0.98, 28).rotateX(-Math.PI / 2);
-  const topTex = new Map();
+  const topTex = new Map(), tops = [];
   for (const s of def.spaces) {
     const L = SPACE_LOOK[s.type] || SPACE_LOOK.ticket;
     const pad = new THREE.Mesh(padGeo, new THREE.MeshStandardMaterial({ color: '#12222a', roughness: 0.7 })); pad.position.set(s.x, 0.15, s.z); pad.castShadow = pad.receiveShadow = true; group.add(pad);
@@ -37,7 +37,7 @@ export async function createBoardView({ stage, def, members, me, assetBase }) {
       g.fillStyle = 'rgba(255,255,255,.28)'; g.beginPath(); g.arc(w / 2, w / 2, w * 0.42, 0, 7); g.fill();
       g.fillStyle = '#12222a'; g.font = `900 ${L.label.length > 1 ? 62 : 78}px system-ui, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.label, w / 2, w / 2 + 4);
     }));
-    const top = new THREE.Mesh(topGeo, new THREE.MeshStandardMaterial({ map: topTex.get(s.type), roughness: 0.6 })); top.material.userData.shared = false; top.position.set(s.x, 0.31, s.z); top.receiveShadow = true; group.add(top);
+    const top = new THREE.Mesh(topGeo, new THREE.MeshStandardMaterial({ map: topTex.get(s.type), roughness: 0.6 })); top.material.userData.shared = false; top.position.set(s.x, 0.31, s.z); top.receiveShadow = true; group.add(top); tops.push(top);
   }
   // tokens
   const actors = new Map(), tags = new Map(), at = new Map(), queue = [];
@@ -62,7 +62,7 @@ export async function createBoardView({ stage, def, members, me, assetBase }) {
   function look(pid, wide = false) {
     focus = pid; const id = at.get(pid); const s = id && byId.get(id);
     // a tall phone looks along the board's long side, so the loop fills the screen instead of a strip across it
-    const yaw = innerHeight > innerWidth * 1.15 ? 90 : 0;
+    const yaw = 0;   // never turned: a tall phone turning the camera 90 degrees put every pad label sideways (owner, iPhone 17 Pro)
     if (wide || !s) stage.setView({ cx: 0, cz: 0, hw: def.size * 0.44, hd: def.size * 0.34, pitch: 58, tall: 2, yaw });
     else stage.setView({ cx: s.x * 0.75, cz: s.z * 0.75, hw: yaw ? 7 : 9.5, hd: yaw ? 9.5 : 7, pitch: 52, tall: 3, yaw });
   }

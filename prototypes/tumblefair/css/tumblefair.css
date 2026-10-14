@@ -155,3 +155,11 @@ body[data-phase=game] .fb-btn { top: auto; bottom: calc(var(--sb) + 8px); right:
 .fb-modal textarea { width: 100%; border: 3px solid var(--ink); border-radius: 12px; padding: 8px 10px; font: 600 16px/1.3 var(--font); resize: vertical; user-select: text; -webkit-user-select: text; }
 .fb-modal .pill input { display: none; } .fb-modal .pill { cursor: pointer; }
 .fb-shot { flex-wrap: wrap; } .fb-shot img { width: 100%; max-height: 22vh; object-fit: contain; border-radius: 8px; border: 2px solid var(--ink); background: var(--bg); }
+
+/* ---- modes: endless "keep going?" card, teams ---- */
+.modes { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.continue-card { display: grid; gap: 10px; justify-items: center; text-align: center; width: min(100%, 460px); }
+.continue-card .btn.mine { outline: 5px solid var(--mint); } .continue-card small { font-weight: 600; }
+.team { display: inline-block; padding: 2px 10px; border-radius: 999px; border: 3px solid var(--ink); font-size: 14px; white-space: nowrap; color: #fff; text-shadow: 0 1px 0 rgba(0, 0, 0, .5); }
+.team.t0 { background: linear-gradient(90deg, #ff4d4d 50%, #3ecf5a 50%); } .team.t1 { background: linear-gradient(90deg, #3d8bff 50%, #f04fd8 50%); }
+.match-bar .teams { display: flex; gap: 4px; } .team-line { margin: 0; display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }

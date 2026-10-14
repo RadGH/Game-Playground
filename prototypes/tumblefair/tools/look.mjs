@@ -29,9 +29,11 @@ if (until !== 'title') {
   const code = await host.evaluate(() => tumblefair.S.room.code);
   for (let i = 1; i < N; i++) { const p = await open(i, URL0 + '?code=' + code); await p.waitForFunction(() => window.tumblefair.S.room, null, { timeout: 20000 }); }
   await host.waitForTimeout(2500);
+  if (process.argv.includes('--teams')) await host.evaluate(() => { tumblefair.net.send({ t: 'opt', key: 'teams', value: true }); tumblefair.net.send({ t: 'opt', key: 'mode', value: 'endless' }); });
+  await host.waitForTimeout(800);
   if (until === 'lobby') { for (const [i, p] of pages.entries()) await p.screenshot({ path: `${OUT}look-${tag}-p${i}.png` }); }
   else {
-    await host.evaluate(([m, pl]) => { tumblefair.net.send({ t: 'opt', key: 'mode', value: m }); if (pl) tumblefair.net.send({ t: 'opt', key: 'pool', value: pl.split(',') }); tumblefair.net.send({ t: 'opt', key: 'rounds', value: 2 }); }, [mode, pool]);
+    await host.evaluate(([m, pl]) => { tumblefair.net.send({ t: 'opt', key: 'mode', value: m }); if (pl) tumblefair.net.send({ t: 'opt', key: 'pool', value: pl.split(',') }); if (location.search.includes('teams')) tumblefair.net.send({ t: 'opt', key: 'teams', value: true }); tumblefair.net.send({ t: 'opt', key: 'rounds', value: 2 }); }, [mode, pool]);
     await host.click('[data-act=start]');
     const t0 = Date.now();
     while (Date.now() - t0 < 240000) {

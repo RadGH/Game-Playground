@@ -130,3 +130,40 @@ test('every game declares what the room and the vote need', () => {
     assert.equal(typeof create, 'function');
   }
 });
+
+test('endless: a keep-going vote every 3 minigames, it gets harder, and "finish" ends it with a final', () => {
+  const { w, host, all } = party(2, { seed: 77 });
+  host.send({ t: 'opt', key: 'mode', value: 'endless' });
+  for (const p of all) p.continueVote = 0;
+  // the bots vote "keep" (0) at the first ask and "finish" (1) at the second
+  const asks = [];
+  for (const p of all) { const act = p.act; p.act = () => { if (p.phase === 'continue' && p.askedFor !== p.last.phase) { p.askedFor = p.last.phase; asks.push(p.last.phase.round); p.send({ t: 'vote', i: asks.length > all.length ? 1 : 0 }); return; } act(); }; }
+  host.send({ t: 'start' });
+  assert.equal(host.room.match.rounds, null, 'no fixed number of rounds');
+  assert.ok(w.run(30 * 60 * 1000, () => host.got.some(m => m.t === 'phase' && m.phase === 'final')), `reached the final (stuck in ${host.phase})`);
+  const intros = host.got.filter(m => m.t === 'phase' && m.phase === 'intro');
+  assert.equal(intros.length, 6, 'kept going once, then stopped after six games');
+  assert.deepEqual(intros.map(i => i.difficulty), ['easy', 'easy', 'easy', 'normal', 'normal', 'normal']);
+  assert.deepEqual(host.got.filter(m => m.t === 'phase' && m.phase === 'continue').map(m => m.round), [3, 6]);
+  assert.equal(host.last.phase.standings.length, 2);
+});
+
+test('teams: red + green against blue + pink; your team\'s place is yours; three players cannot start teams', () => {
+  const three = party(3);
+  three.host.send({ t: 'opt', key: 'teams', value: true });
+  three.host.send({ t: 'start' });
+  assert.equal(three.host.last.err.code, 'teams'); assert.equal(three.host.phase, 'lobby');
+  const { w, host, all } = party(4, { seed: 31 });
+  host.send({ t: 'opt', key: 'teams', value: true }); host.send({ t: 'opt', key: 'mode', value: 'marathon' }); host.send({ t: 'opt', key: 'rounds', value: 2 });
+  host.send({ t: 'start' });
+  assert.ok(w.run(20 * 60 * 1000, () => host.got.some(m => m.t === 'phase' && m.phase === 'final')));
+  const res = host.got.find(m => m.t === 'phase' && m.phase === 'results');
+  assert.equal(res.teams.length, 2);
+  const f = host.last.phase, [a, b] = [f.teams.find(t => t.team === 0), f.teams.find(t => t.team === 1)];
+  assert.deepEqual(a.pids.map(pid => host.room.members.find(m => m.pid === pid).seat).sort(), [0, 2]);
+  assert.deepEqual(b.pids.map(pid => host.room.members.find(m => m.pid === pid).seat).sort(), [1, 3]);
+  const pts = t => t.pids.reduce((n, pid) => n + f.standings.find(r => r.pid === pid).points, 0);
+  assert.equal(a.points, pts(a)); assert.equal(b.points, pts(b));
+  for (const r of f.standings) assert.equal(r.place, f.teams.find(t => t.pids.includes(r.pid)).place);
+  for (const p of all) assert.ok(p.me.coins >= 10);
+});

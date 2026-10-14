@@ -84,7 +84,7 @@ async function showLobby() {
   lineup.show(true); lineup.setPoses({});
   lineup.sync(seated(), { me: S.room.you });
   const r = S.room, host = isHost(), me = mine(), n = seated().length;
-  const modes = { board: ['The Fairground Loop', 'Roll dice round the board, buy ribbons, play a minigame every round.'], marathon: ['Minigame Marathon', 'No board. Vote, play, repeat. Most points wins.'] };
+  const modes = { board: ['The Fairground Loop', 'Roll dice round the board, buy ribbons, play a minigame every round.'], marathon: ['Minigame Marathon', 'No board. Vote, play, repeat. Most points wins.'], endless: ['The Fair Never Closes', 'Keep playing, harder and harder. Every 3 games you vote to go on or finish.'] };
   setScreen('lobby', `
     <div class="panel lobby-code">
       <div class="qr" id="qr"></div>
@@ -97,8 +97,10 @@ async function showLobby() {
       ${me?.display ? '<p class="note">This screen is watching. Players join on their phones.</p>' : `<div class="row"><button class="btn" data-act="edit">Change look</button><button class="btn" data-act="shop">Costumes <span class="coins">${ICON.coin}${S.me?.coins ?? 0}</span></button></div>`}
       <h2>Game</h2>
       <div class="modes">${Object.entries(modes).map(([id, [t, d]]) => `<button class="mode${r.opts.mode === id ? ' on' : ''}" data-act="opt" data-key="mode" data-value="${id}" ${host ? '' : 'disabled'}><b>${t}</b><span>${d}</span></button>`).join('')}</div>
-      <div class="row opts"><span>Rounds</span>${[3, 4, 5, 6].map(v => `<button class="pill${r.opts.rounds === v ? ' on' : ''}" data-act="opt" data-key="rounds" data-num="${v}" ${host ? '' : 'disabled'}>${v}</button>`).join('')}
-        <span class="est">about ${Math.round(r.opts.rounds * (r.opts.mode === 'board' ? 2.6 : 1.6))} min</span></div>
+      ${r.opts.mode === 'endless' ? '' : `<div class="row opts"><span>Rounds</span>${[3, 4, 5, 6].map(v => `<button class="pill${r.opts.rounds === v ? ' on' : ''}" data-act="opt" data-key="rounds" data-num="${v}" ${host ? '' : 'disabled'}>${v}</button>`).join('')}
+        <span class="est">about ${Math.round(r.opts.rounds * (r.opts.mode === 'board' ? 2.6 : 1.6))} min</span></div>`}
+      <div class="row opts"><span>Play as</span><button class="pill${!r.opts.teams ? ' on' : ''}" data-act="opt" data-key="teams" data-bool="0" ${host ? '' : 'disabled'}>Everyone for themselves</button><button class="pill${r.opts.teams ? ' on' : ''}" data-act="opt" data-key="teams" data-bool="1" ${host ? '' : 'disabled'}>Teams</button>
+        ${r.opts.teams ? `<span class="est">${n === 3 ? 'Teams need 2 or 4 players' : 'Red &amp; Green vs Blue &amp; Pink'}</span>` : ''}</div>
       ${host ? `<button class="btn big primary" data-act="start">${n < 2 ? 'Start (solo practice)' : 'Start the game'}</button>` : `<p class="note">${me?.wait ? 'The seats are full. You will join when one frees up.' : 'Waiting for the host to start…'}</p>`}
       <button class="btn small ghost" data-act="leave">Leave</button>
     </div>`);
@@ -109,7 +111,8 @@ async function showLobby() {
 function drawHud() {
   const r = S.room; if (!r?.match || S.phase === 'game' || S.phase === 'intro' || S.phase === 'lobby') { hud.innerHTML = ''; return; }
   const board = r.match.mode === 'board';
-  hud.innerHTML = `<div class="match-bar"><span class="round">Round ${r.match.round}/${r.match.rounds}</span>${seated().map(m => chipOf(m, board
+  const teams = S.teams ? `<span class="teams">${S.teams.map(t => `<b class="team t${t.team}">${esc(t.name)}: ${board ? `${t.ribbons} ribbons` : `${t.points} pts`}</b>`).join('')}</span>` : '';
+  hud.innerHTML = `<div class="match-bar"><span class="round">Round ${r.match.round}${r.match.rounds ? '/' + r.match.rounds : ''}</span>${teams}${seated().map(m => chipOf(m, board
     ? `<em class="sc tk">${ICON.ticket}${S.bd.tickets[m.pid] ?? 0}</em><em class="sc rb">${ICON.ribbon}${S.bd.ribbons[m.pid] ?? 0}</em>` : `<em class="sc">${r.match.points[m.pid] ?? 0} pts</em>`)).join('')}</div>`;
   if (board && S.bd.pid != null) hud.querySelector(`[data-pid="${S.bd.pid}"]`)?.classList.add('turn');
 }
@@ -157,12 +160,21 @@ function showVote() {
     <p class="note">${can ? 'Tap a card.' : 'Watching.'} <b class="count">${left()}</b></p>`);
   drawHud();
 }
+function showContinue() {
+  setSafe('title'); const me = mine(), can = me?.seat != null, mineV = S.votes[S.room.you];
+  const count = i => Object.values(S.votes).filter(v => v === i).length;
+  setScreen('vote', `<h1 class="shout">Keep the fair open?</h1>
+    <div class="panel continue-card"><p class="blurb">${S.room.match.round} games played. The next ones are ${S.room.match.round >= 6 ? 'hard' : 'trickier'}.</p>
+      <div class="row">${['Keep playing!', 'Finish now'].map((t, i) => `<button class="btn big${i === 0 ? ' primary' : ''}${mineV === i ? ' mine' : ''}" data-act="vote" data-i="${i}" ${can ? '' : 'disabled'}>${t} <small>(${count(i)})</small></button>`).join('')}</div>
+      <p class="note">A tie keeps it open. <b class="count">${left()}</b></p></div>`);
+  drawHud();
+}
 function showIntro() {
   const pm = S.pm, m = GAMES[pm.game].meta, me = mine(), can = me?.seat != null && pm.players.some(p => p.pid === me.pid);
   const ctl = m.kind === 'arena' ? (isTouch() ? `Left thumb: move.${m.controls?.a ? ` Big button: ${m.controls.a}.` : ''}${m.controls?.b ? ` Small button: ${m.controls.b}.` : ''}` : `WASD or arrows: move.${m.controls?.a ? ` Space: ${m.controls.a}.` : ''}${m.controls?.b ? ` E: ${m.controls.b}.` : ''}`) : 'Tap your choices on this screen.';
   setScreen('intro', `<div class="panel intro-card"><img src="${ART}${m.card}.webp" alt="" onerror="this.remove()">
     <h1 class="shout">${esc(m.title)}</h1><p class="blurb">${esc(m.blurb)}</p>
-    <ul>${m.how.map(l => `<li>${esc(l)}</li>`).join('')}</ul><p class="ctl">${esc(ctl)}</p>
+    <ul>${m.how.map(l => `<li>${esc(l)}</li>`).join('')}</ul><p class="ctl">${esc(ctl)}</p>${pm.difficulty && S.room.match?.mode === 'endless' ? `<p class="note">Difficulty: <b>${esc(pm.difficulty)}</b></p>` : ''}
     ${can ? `<button class="btn big primary" data-act="skip">${S.skips.includes(me.pid) ? 'Ready ✓' : "I'm ready"}</button>` : '<p class="note">Watching this one.</p>'}
     <p class="note">Starts in <b class="count">${left()}</b> · ${S.skips.length}/${pm.players.length} ready</p></div>`);
   hud.innerHTML = '';
@@ -174,6 +186,7 @@ function showResults() {
   setScreen('results', `<div class="panel results-card"><h1 class="shout">${esc(m.title)}</h1>
     ${pm.result.coop ? `<p class="blurb">${pm.result.coop.success ? 'You did it together!' : 'So close. Better luck next time!'}</p>` : ''}
     <ol class="places">${rows.join('')}</ol>
+    ${pm.teams ? `<p class="team-line">${pm.teams.map(t => `<b class="team t${t.team}">${esc(t.name)} ${pm.unit === 'tickets' ? t.tickets + ' tickets' : t.points + ' pts'}</b>`).join(' ')}</p>` : ''}
     ${me?.seat != null ? `<button class="btn big primary" data-act="skip">${S.skips.includes(me.pid) ? 'Ready ✓' : 'Continue'}</button>` : ''}<p class="note">Next in <b class="count">${left()}</b></p></div>`);
   drawHud();
 }
@@ -183,7 +196,10 @@ function showFinal() {
   const order = pm.standings.map(r => members().find(m => m.pid === r.pid)).filter(Boolean);
   lineup.sync(order, { me: S.room.you }).then(() => lineup.setPoses(Object.fromEntries(pm.standings.map(r => [r.pid, r.place === 1 ? 'cheer' : r.place === pm.standings.length && pm.standings.length > 2 ? 'sitGround' : 'clap']))));
   const win = pm.standings.filter(r => r.place === 1).map(r => members().find(m => m.pid === r.pid)?.name).filter(Boolean);
-  setScreen('final', `<div class="panel final-card"><h1 class="shout">${pm.standings.length > 1 ? `${esc(win.join(' & '))} win${win.length > 1 ? '' : 's'}!` : 'Nice run!'}</h1>
+  const teamWin = pm.teams && pm.teams.filter(t => t.place === 1);
+  const head = teamWin ? (teamWin.length > 1 ? "It's a draw!" : `Team ${teamWin[0].name} wins!`) : pm.standings.length > 1 ? `${win.join(' & ')} win${win.length > 1 ? '' : 's'}!` : 'Nice run!';
+  setScreen('final', `<div class="panel final-card"><h1 class="shout">${esc(head)}</h1>
+    ${pm.teams ? `<p class="team-line">${pm.teams.map(t => `<b class="team t${t.team}">${esc(t.name)} ${pm.mode === 'board' ? `${t.ribbons} ribbons · ${t.tickets} tickets` : `${t.points} pts`}</b>`).join(' ')}</p>` : ''}
     <ol class="places">${pm.standings.map(r => { const mem = members().find(m => m.pid === r.pid); return mem ? `<li class="p${r.place}"><span class="pl">${['1st', '2nd', '3rd', '4th'][r.place - 1]}</span>${chipOf(mem)}<span class="score">${pm.mode === 'board' ? `${ICON.ribbon}${r.ribbons} ${ICON.ticket}${r.tickets}` : `${r.points} pts`}</span><span class="award">+${pm.payout[r.pid] ?? 0} ${ICON.coin}coins</span></li>` : ''; }).join('')}</ol>
     <p class="note">Coins buy costumes. They never help you win.</p>
     ${me?.seat != null ? `<button class="btn big primary" data-act="skip">${S.skips.includes(me.pid) ? 'Ready ✓' : 'Back to the lobby'}</button>` : ''}<p class="note">Lobby in <b class="count">${left()}</b></p></div>`);
@@ -199,8 +215,9 @@ async function onPhase(pm) {
   document.body.dataset.phase = pm.phase;
   if (pm.phase !== 'game' && pm.phase !== 'results' && pm.phase !== 'intro') dropPlay();
   switch (pm.phase) {
-    case 'lobby': dropBoard(); S.bd = { tickets: {}, ribbons: {}, pid: null, ask: null, rolled: null }; showLobby(); break;
+    case 'lobby': S.teams = null; dropBoard(); S.bd = { tickets: {}, ribbons: {}, pid: null, ask: null, rolled: null }; showLobby(); break;
     case 'board': await ensureBoard(); if (S.phase !== 'board') return; S.board.show?.(); showBoard(); break;
+    case 'continue': S.votes = pm.votes || {}; lineup.show(false); showContinue(); sfx('open'); break;
     case 'vote': S.votes = pm.votes || {}; S.voted = null; lineup.show(false); if (S.room.match.mode === 'board') await ensureBoard(); showVote(); sfx('open'); break;
     case 'intro': {
       dropPlay(); dropBoard(); lineup.show(false); setSafe(GAMES[pm.game].meta.kind === 'arena' ? 'arena' : 'title');
@@ -214,7 +231,7 @@ async function onPhase(pm) {
       break;
     }
     case 'game': setScreen('playing', ''); hud.innerHTML = ''; if (S.play) S.play.start(); sfx('go'); break;
-    case 'results': controls.set(null); showResults(); sfx('open'); break;
+    case 'results': controls.set(null); S.teams = pm.teams || null; showResults(); sfx('open'); break;
     case 'final': showFinal(); break;
   }
   if (prev !== pm.phase) drawHud();
@@ -239,7 +256,7 @@ net.on('left', () => { S.room = null; dropPlay(); dropBoard(); history.replaceSt
 net.on('kicked', () => { S.room = null; dropPlay(); dropBoard(); S.err = 'The host removed you from the room.'; showTitle(); });
 net.on('err', m => { if (!S.room) { S.err = m.msg; showTitle(); } else toast(m.msg, 'bad'); });
 net.on('bd', onBoard);
-net.on('votes', m => { S.votes = m.votes; if (S.phase === 'vote') showVote(); });
+net.on('votes', m => { S.votes = m.votes; if (S.phase === 'vote') showVote(); else if (S.phase === 'continue') showContinue(); });
 net.on('voted', m => { S.voted = m.pick; if (S.phase === 'vote') showVote(); sfx('good'); });
 net.on('skips', m => { S.skips = m.pids; if (S.phase === 'intro') showIntro(); else if (S.phase === 'results') showResults(); });
 net.on('s', m => S.play?.snap(m));
@@ -257,7 +274,7 @@ screen.addEventListener('click', e => {
     case 'join': { saveName(); const code = cleanCode($('#code').value); if (!code) { S.err = `The code is ${CODE_LENGTH} letters.`; showTitle(); break; } S.err = ''; S.asDisplay = $('#as-display').checked; net.join(code, S.asDisplay); break; }
     case 'leave': net.leave(); break;
     case 'copy': navigator.clipboard?.writeText(joinUrl(S.room.code)).then(() => toast('Invite link copied'), () => toast(joinUrl(S.room.code))) ?? toast(joinUrl(S.room.code)); break;
-    case 'opt': net.send({ t: 'opt', key: b.dataset.key, value: b.dataset.num ? +b.dataset.num : b.dataset.value }); break;
+    case 'opt': net.send({ t: 'opt', key: b.dataset.key, value: b.dataset.num ? +b.dataset.num : b.dataset.bool ? b.dataset.bool === '1' : b.dataset.value }); break;
     case 'start': net.send({ t: 'start' }); break;
     case 'kick': net.send({ t: 'kick', pid: +b.dataset.pid }); break;
     case 'roll': net.send({ t: 'roll' }); S.bd.sub = 'move'; showBoard(); break;

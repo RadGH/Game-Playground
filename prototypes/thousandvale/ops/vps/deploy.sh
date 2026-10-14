@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SUPERSEDED 2026-10-14: production runs on the RGS droplet, deployed from ~/claude/rads-game-server (see ~/claude/docs/rgs.md).
 # =====================================================================================================
 # Thousandvale — ship a PUBLISHED release from this VM to the VPS and restart it (stream H, docs/HOSTING.md).
 # Runs on the VM as radgh. No sudo here; on the VPS it uses the tvdeploy account (key only), which may restart

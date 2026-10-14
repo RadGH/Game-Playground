@@ -1,5 +1,10 @@
 # Thousandvale — moving the server to a VPS (your own domain, no Cloudflare)
 
+> **Superseded 2026-10-14.** Thousandvale is hosted on the RGS droplet at https://thousandvale.games.radgh.com/, set up
+> from the `~/claude/rads-game-server` repo (Caddy + Postgres + its own copy of the service unit), not by `ops/vps/`.
+> How to deploy: `~/claude/docs/rgs.md`. This page is kept for the reasoning (provider choice, Caddy, limits).
+
+
 Stream H, 2026-10-05. Owner items **P29** (domain) and **P30** (move it off the VM, start small, at most ~5 players at once).
 
 **Short version:** today the game runs on this Ubuntu VM on your Windows PC (LAN only, port 8490). Rent a small

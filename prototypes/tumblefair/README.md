@@ -122,3 +122,17 @@ device and the page's last errors. Read them with `node tools/feedback-report.mj
 `npm test` here (node): `tests/room.test.js` plays whole matches with bot phones for 1–4 players in both modes,
 reconnects, late joiners, host handover, the shop, input cleaning; one test file per minigame. Browser checks:
 `tools/look.mjs` (screenshots) and `tests/tumblefair.spec.js` (Playwright, run from the playground root under the lock).
+
+## Not built yet (parked 2026-10-13 when the owner said "wrap up")
+
+From the design document, deliberately left for a later round:
+- **Main modes:** the RPG one-shot (story grammar, callbacks to who did what), branching paths. (Board, Marathon,
+  Endless and Teams are built.)
+- **Host settings in the lobby:** choosing the minigame pool (the server already accepts `opt pool`), vote shortlist
+  size and difficulty are not on the lobby screen yet; only mode, rounds and teams are.
+- **Accessibility options:** low motion, adjustable timers, larger text.
+- **Accounts:** a player is a token in that browser's storage; a new phone or a cleared browser starts fresh (coins
+  and costumes included). No account linking yet.
+- **Bots** to fill empty seats for one- or two-player groups.
+- **More boards** (one starter board), seasonal costumes, achievements.
+- Tuning after real play: Cannonball Catch's difficulty, Meteor Dash's pace, ticket and coin amounts.

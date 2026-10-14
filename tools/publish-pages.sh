@@ -97,3 +97,9 @@ unset GIT_INDEX_FILE
 if [ "$PUSH" = 1 ]; then
   git push --progress "$REMOTE" gh-pages
 fi
+
+# games.radgh.com serves Farhold, Emberveil 2 and Thousandvale from this same gh-pages branch (~/claude/docs/rgs.md).
+if [ "$PUSH" = 1 ]; then
+  echo "== gh-pages pushed. To update games.radgh.com too (production — only when Radley asks):"
+  echo "   cd ~/claude/rads-game-server && tools/deploy.sh update playground     # + 'update thousandvale' for a Thousandvale release"
+fi

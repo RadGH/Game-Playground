@@ -126,6 +126,7 @@ export function create({ rng, players }) {
       if (phase === 'reveal') { g.reveal = reveal; g.scores = { ...points }; }
       return g;
     },
+    restore: pid => ({ strokes: art[pid].map(s => s.slice()), sid: lastId[pid] }),     // a phone that comes back mid-drawing gets its picture back
     priv: pid => ({ prompt: prompt[pid], mine: order ? order.indexOf(pid) : null, vote: votes[pid] ?? null, done: done.has(pid), n: art[pid].length, full: used(pid) >= MAX_POINTS }),
     get over() { return over; },
     result() {

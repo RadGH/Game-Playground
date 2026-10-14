@@ -66,7 +66,7 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
     if (phase === 'lobby') return;
     if (phase === 'game' && game) { send(m, { ...game.introMsg, phase: 'intro', ms: 0, init: game.inst.init(), b: bodiesOf(game.inst), resume: true }); }
     if (lastPhaseMsg) send(m, { ...lastPhaseMsg, ms: until ? Math.max(0, until - now()) : 0, ...(phase === 'vote' || phase === 'continue' ? { votes: vote?.votes || {} } : {}) });
-    if (phase === 'game' && game?.inst.priv && m.seat != null) send(m, { t: 'gp', d: game.inst.priv(m.pid) });
+    if (phase === 'game' && game?.inst.priv && m.seat != null) send(m, { t: 'gp', d: { ...game.inst.priv(m.pid), ...(game.inst.restore?.(m.pid) || {}) } });   // restore: what a returning phone had made (its drawing)
   }
   function disconnect(m) { if (!members.has(m.pid)) return; m.connected = false; m.send = null; m.goneAt = now(); m.queue.length = 0; if (m.display || m.seat == null) return remove(m); syncRoom(); pickHost(); }
   function remove(m) {

@@ -45,6 +45,7 @@ The object `create` returns:
 | `act(pid, a, d)` | ui games (arena games may use it too) | a tap from a player: `a` a short string, `d` a small value (≤400 chars or a small object). Validate everything. |
 | `step(dt)` | every 50 ms (dt = 0.05) | the game's clock: spawn things, resolve hits, count down. |
 | `state()` | after every step | the public, changing state, as small as you can (it is sent 20×/s for arena games; for ui games only when it changes). Include `left` (whole seconds) if you show a clock. |
+| `restore(pid)` | optional | extra private data sent ONCE to a phone that reconnects mid-game, merged into its `priv` (Draw the Disaster sends the strokes drawn so far, so the canvas is not blank). |
 | `priv(pid)` | optional | what only that player may see (their own drawing prompt, their own pick). Sent to that player when it changes. |
 | `events` | optional array | push one-off things (`{ e: 'splat', x, z }`); the room sends and empties it each step. `{ to: pid, ... }` = just that player. |
 | `over` | getter | true when the game has finished early (last one standing, all chests opened…). |

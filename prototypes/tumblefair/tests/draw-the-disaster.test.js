@@ -139,3 +139,12 @@ test('state stays small and only changes when something happens', () => {
   for (const p of [1, 2, 3, 4]) g.act(p, 'ink', { s: 1, c: 1, w: 0, p: line(0, 0, 255, 255, 400) });
   assert.ok(JSON.stringify(g.state()).length < 200);
 });
+
+test('a phone that comes back mid-drawing is handed its strokes and its last stroke id', async () => {
+  const g = create({ seed: 1, rng: makeRng(9), players: [{ pid: 1, seat: 0, name: 'A' }, { pid: 2, seat: 1, name: 'B' }], difficulty: 'normal' });
+  g.act(1, 'ink', { s: 1, c: 0, w: 0, p: '10101111' });
+  g.act(1, 'ink', { s: 2, c: 2, w: 1, p: '20202121' });
+  const r = g.restore(1);
+  assert.equal(r.strokes.length, 2); assert.equal(r.sid, 2);
+  assert.deepEqual(g.restore(2).strokes, []);
+});

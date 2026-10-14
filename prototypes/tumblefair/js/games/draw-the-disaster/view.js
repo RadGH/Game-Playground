@@ -147,6 +147,7 @@ export function createView(ctx) {
 
   return {
     priv(d) {
+      if (d.strokes && !strokes.length && phase === 'draw' && !cur) { strokes = d.strokes.map(s => s.slice()); sid = Math.max(sid, d.sid ?? 0); redraw(); }   // back after a drop: your drawing so far
       $('.dd-prompt b').textContent = d.prompt || '';
       mine = d.mine; myVote = d.vote;
       if (d.done !== done) { done = d.done; paintTools(); }

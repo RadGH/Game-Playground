@@ -5,8 +5,9 @@
 > database `thousandvale_stable` on the droplet). To ship a change there: publish stable here
 > (`tools/publish-thousandvale.sh` for the LAN server, then the playground's `tools/publish-stable.sh` +
 > `tools/publish-pages.sh`), then `cd ~/claude/rads-game-server && tools/deploy.sh update thousandvale`.
-> Full map: `~/claude/docs/rgs.md`. The quick tunnel below still points at THIS VM's stable server — a second, separate
-> world with its own players' data; the droplet is the one to give out. `ops/vps/` and `docs/HOSTING.md` are the older
+> Full map: `~/claude/docs/rgs.md`. The quick tunnel described below was STOPPED on 2026-10-14 (unit
+> `thousandvale-quick-tunnel` inactive; the home page's Live link now points at the droplet). The VM's stable server on
+> 8490 still runs for LAN testing — its database is separate from the droplet's. `ops/vps/` and `docs/HOSTING.md` are the older
 > plan and are not what production runs (the droplet's setup lives in the rads-game-server repo).
 
 The owner paused Thousandvale to build another game. This page is the hand-over: where things stand, how to pick

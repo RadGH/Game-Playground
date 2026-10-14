@@ -1,8 +1,8 @@
 {
   "thousandvale": {
-    "url": "https://fundamentals-denver-awarded-steal.trycloudflare.com/",
-    "note": "Cloudflare quick tunnel — the address changes when the tunnel restarts",
-    "updated": "2026-10-12"
+    "url": "https://thousandvale.games.radgh.com/",
+    "note": "Hosted on games.radgh.com (our own server)",
+    "updated": "2026-10-14"
   },
   "tumblefair": {
     "url": "https://seems-glen-produces-occasional.trycloudflare.com/",

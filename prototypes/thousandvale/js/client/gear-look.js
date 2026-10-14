@@ -14,6 +14,7 @@
 //   gearKey(equipment)               -> a short string that changes only when the drawn look would
 
 import { isTier2Item, tier2Dress } from '../../../../avatar-3d/js/class-outfits.js';   // S18 tier-2 armour
+import { classWearLook } from './star-looks.js';     // Y32: a Thousandvale-only class's own cut of its cloth (data/class-outfits-tv.json `wear`)
 
 /** No armour: plain shorts and a shirt, foot wraps, empty hands. */
 export const PLAIN = {
@@ -226,8 +227,8 @@ export function applyG5(out, eq, catalog) {
 const raw = (equipment, slot) => (equipment?.[slot] && typeof equipment[slot] === 'object') ? equipment[slot] : null;
 
 /** The parts to put on a body for a worn set (`slot -> item`, full items or the compact info.gear form). */
-export function gearLook(equipment = {}, { baseOf = () => null, tierOf = null, tier2 = null, themes = null, catalog = null } = {}) {
-  const out = JSON.parse(JSON.stringify(PLAIN));
+export function gearLook(equipment = {}, { baseOf = () => null, tierOf = null, tier2 = null, themes = null, catalog = null, classWear = null } = {}) {
+  let out = JSON.parse(JSON.stringify(PLAIN));
   const lookup = tierOf ? (k => ({ tier: tierOf(k) })) : baseOf;
   const eq = {};
   for (const [slot, it] of Object.entries(equipment || {})) eq[slot] = normItem(it, lookup);
@@ -238,6 +239,8 @@ export function gearLook(equipment = {}, { baseOf = () => null, tierOf = null, t
     const id = ARMOUR_BY_BASE[item.baseKey] || ARMOUR_LOOK[slot][tier] || ARMOUR_LOOK[slot].medium;
     out[part] = { id, color: rarityTint(item) || MODEL_COLOUR[id] || TIER_COLOUR[tier] || '#6a6a6a' };
   }
+  // wrap-up (Y32): the wearer's class cuts its plain cloth its own way (a Starcaller's robe is midnight and gold); opt-in, cloth only
+  if (classWear) out = classWearLook(out, classWear, slot => (eq[slot] && !eq[slot].look?.worn?.id ? (eq[slot].tier || (slot === 'chest' ? 'medium' : 'light')) : null));
   // a helmet-less chest piece keeps the plain shorts unless legs are worn; plate over shorts reads oddly, so a
   // heavy chest with no legs gets plain trousers
   if (eq.chest && !eq.legs && /plate|scale/.test(out.top.id)) out.bottom = { id: 'pants', color: '#4a4038' };

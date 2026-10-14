@@ -46,6 +46,7 @@ export function createRoom(opts) {
   const streams = new Map();
   const despawns = [];             // { at, e }
   let tick = 0, nextId = 1, events = [], uidN = 0;
+  const PERSONAL_FX = new Set(['npcThanks']);     // the only `fx` whose `to` is a recipient (see personalTo)
   const awake = new Uint32Array(grid.count);   // == awakeGen when awake this tick
   let awakeGen = 1;              // (the array starts at 0: nothing is awake before the first refresh)
   const stats = { rulesErrors: 0, lastRulesError: '', spawned: 0 };
@@ -541,12 +542,13 @@ export function createRoom(opts) {
         for (let i = 0; i < events.length; i++) {
           const ev = events[i];
           const at = ev._at || ev;
-          const mine = ev.to !== undefined ? ev.to === me.id : (Math.abs(at.x - me.x) <= R && Math.abs(at.z - me.z) <= R);
-          if (mine) { evIdx[n++] = i; if (ev.to !== undefined) personal = true; } else all = false;
+          const own = personalTo(ev);
+          const mine = own ? ev.to === me.id : (Math.abs(at.x - me.x) <= R && Math.abs(at.z - me.z) <= R);
+          if (mine) { evIdx[n++] = i; if (own) personal = true; } else all = false;
         }
         if (n) {
           let str;
-          if (personal) { const out = []; for (let k = 0; k < n; k++) { const ev = events[evIdx[k]]; out.push(ev.to !== undefined ? stripTo(ev) : ev); } str = JSON.stringify({ t: 'ev', k: tick, e: out }); }
+          if (personal) { const out = []; for (let k = 0; k < n; k++) { const ev = events[evIdx[k]]; out.push(personalTo(ev) ? stripTo(ev) : ev); } str = JSON.stringify({ t: 'ev', k: tick, e: out }); }
           else {
             let key = all ? '*' : ''; if (!all) for (let k = 0; k < n; k++) key += evIdx[k] + ',';
             str = evCache.get(key);
@@ -643,6 +645,16 @@ export function createRoom(opts) {
     // bands nobody looked at keep accumulating; a FULL record goes out when someone starts looking
   }
   function stripTo(ev) { const o = { ...ev }; delete o.to; return o; }
+  /**
+   * Wrap-up 2026-10-13 (found drawing the Starcaller's stars): `to` on an event means "deliver this to that one player"
+   * (xp, loot, open, an NPC's thanks). But the rules' `fx` events use `to` for what a shot, a chain, a link or a falling
+   * star is AIMED at — an entity id or a point — and those are for everybody in view. They were being filtered as
+   * personal as well: a bolt thrown at a monster reached nobody, a monster's arrow reached only its victim with the
+   * target stripped off (so it could not be drawn), and a `skyfall` reached nobody. No projectile of any class had ever
+   * crossed the wire; the client drew a stand-in for basic attacks only (weapon-fx.js `pendingShots`). An `fx` is personal
+   * only when its kind is listed here.
+   */
+  function personalTo(ev) { return ev.to !== undefined && (ev.type !== 'fx' || PERSONAL_FX.has(ev.kind)); }
 
   // objects: portals, stairs, exits, chests, gates, levers, arena props (team 0: nobody fights them)
   for (const o of objects) {

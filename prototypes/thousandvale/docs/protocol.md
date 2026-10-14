@@ -338,7 +338,7 @@ to a Chibi 2 swing for the held weapon. Append new names at the end; never reord
 ## 6. Events (`ev`)
 
 `ev {k, e:[…]}` carries one tick's events near me. Every event is an object with `type` plus fields; the
-room routes it to clients whose view covers `(x, z)`, or only to `to` (a local id) when set. The room fills
+room routes it to clients whose view covers `(x, z)`, or only to `to` (a local id) when set. (Not on `fx`: there `to` is what a shot, link or falling star is aimed at and the event goes to everyone in view — only `fx npcThanks` is personal; `js/sim/room.js` `personalTo`, 2026-10-13.) The room fills
 `x,z` from `d`/`s` if the emitter leaves them out. Stream C emits these through `host.event()` (§7).
 
 | `type` | Fields | Meaning |

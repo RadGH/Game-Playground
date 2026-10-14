@@ -5,6 +5,7 @@
 //
 //   tele  {id, s, ab, k, ms, el?, follow?, shape, x, z, yaw?, r?, r2?, arc?, len?, w?}   place + fill
 //   teleR {id, hits?:[ids], x?}                                                           land (or x: cancelled)
+//   teleM {id, x, z}                                                                      its caster was knocked: the shape goes with it (Y12)
 //
 // How a shape reads (the owner asked for "readable and pretty"):
 //   * a dark tinted floor so the whole danger area is visible from the first frame,
@@ -133,12 +134,26 @@ export function createTelegraphs(scene, { heightAt = () => 0, serverNow, posOf, 
     // play-test 6 (U3): cancelled = the caster died or was interrupted. The drawing goes AT ONCE (it used to fade for
     // 300 ms, and a shape still on the ground reads as still dangerous), with no landing flash.
     if (ev.x) { remove(ev.id); return; }
+    if (t.goal) { t.x = t.goal.x; t.z = t.goal.z; t.goal = null; place(t, true); }     // Y12: it lands where the rules had it
     t.state = 'land'; t.endAt = performance.now() + 420;
     t.mesh.material.uniforms.uProg.value = 1;
     const hitMe = (ev.hits || []).includes(selfId());
     if (onHitMe && hitMe) onHitMe(t);
     t.landed = { hitMe, at: performance.now() };
     return t;
+  }
+  /**
+   * Y12 (owner feedback 10, report #44): the caster was knocked back mid wind-up and the rules moved the danger area
+   * with it — `teleM {id, x, z}`, once a tick while the knock lasts. The drawing moved nowhere, so the warning lay in
+   * one place and the blow landed in another. `t.goal` is where the rules say the shape IS (what "am I standing in it?"
+   * asks at once); the drawn shape glides there over a few frames, like the body it belongs to.
+   */
+  function move(ev) {
+    const t = live.get(ev.id);
+    if (!t || t.state !== 'live' || !Number.isFinite(ev.x) || !Number.isFinite(ev.z)) return false;
+    t.goal = { x: ev.x, z: ev.z };
+    if (Number.isFinite(ev.yaw)) t.yaw = ev.yaw;
+    return true;
   }
   function remove(id) { const t = live.get(id); if (!t) return; group.remove(t.mesh); t.mesh.geometry.dispose(); t.mesh.material.dispose(); live.delete(id); }
   /**
@@ -157,13 +172,18 @@ export function createTelegraphs(scene, { heightAt = () => 0, serverNow, posOf, 
       u.uTime.value += dt;
       if (t.follow != null && t.state === 'live') {
         const p = posOf(t.follow);
-        if (p) { t.x = p.x; t.z = p.z; if (p.yaw != null && (t.shape === 'cone' || t.shape === 'line')) t.yaw = p.yaw; }
+        if (p) { t.x = p.x; t.z = p.z; t.goal = null; if (p.yaw != null && (t.shape === 'cone' || t.shape === 'line')) t.yaw = p.yaw; }
       }
-      place(t);
+      if (t.goal && t.state === 'live') {          // Y12: glide to where the knock put it (about 80 ms behind, like the body)
+        const dx = t.goal.x - t.x, dz = t.goal.z - t.z, d = Math.hypot(dx, dz), k = d < 0.03 ? 1 : Math.min(1, dt * 18);
+        t.x += dx * k; t.z += dz * k; t.dirty = true;
+        if (k === 1) t.goal = null;
+      }
+      place(t, !!t.dirty); t.dirty = false;
       if (t.state === 'live') {
         u.uProg.value = Math.max(0, Math.min(1, (now - t.start) / (t.land - t.start)));
         u.uFade.value = Math.min(1, (wall - t.born) / 120);
-        const mine = me && insideShape(t, me.x, me.z);
+        const mine = me && insideShape(t.goal ? { ...t, x: t.goal.x, z: t.goal.z } : t, me.x, me.z);   // (asked of where the rules have it, not of the glide)
         u.uMine.value = mine ? 1 : 0;
         if (mine) mineAny = true;
         // A shape the server never resolved (a lost packet): retire it a second after it should have landed.
@@ -183,7 +203,7 @@ export function createTelegraphs(scene, { heightAt = () => 0, serverNow, posOf, 
 
   return {
     dropSource, get count() { return live.size; },
-    add, resolve, remove, clear, update, live,
+    add, resolve, move, remove, clear, update, live,
     setGround(f) { ground = f; for (const t of live.values()) place(t, true); },
     get standingInDanger() { return mineAny; },
   };

@@ -1,118 +1,147 @@
 {
- "_doc": "Player-facing changelog, newest first. The lead appends an entry at each publish (from the feedback reports' Completed notes). `id` is stable; the client remembers the last id a player has seen and highlights newer ones. Plain language, no internal names.",
- "entries": [
-  {
-   "id": "2026-10-11-prospector",
-   "date": "2026-10-11",
-   "title": "Clearer profession lessons",
-   "items": [
-    "The prospector now clearly confirms that you have learned Mining and received a pick. His Mining button stays available on later visits, with your skill, tool and mining instructions.",
-    "Other profession teachers also show whether you already know their trades and keep their training details available."
-   ]
-  },
-  {
-   "id": "2026-10-11-trainers",
-   "date": "2026-10-11",
-   "title": "Profession trainers in every major town",
-   "items": [
-    "Every major town now has dedicated Mining, Logging, Foraging and Skinning trainers, alongside its crafting teachers. Lessons and your first gathering tool are free.",
-    "Search the map for a profession, such as mining or foraging, to find its teachers. Gathering trainers also have their own map filters.",
-    "Bram Delver now appears on the map as a Mining trainer at Torborhold's main gate."
-   ]
-  },
-  {
-   "id": "2026-10-10",
-   "date": "2026-10-10",
-   "title": "Better phone controls, steady auto-attack and party tracking",
-   "items": [
-    "Tap Attack to pick an enemy, move into reach and keep attacking. Tap again to stop; moving by hand keeps auto-attack on.",
-    "Phones now have named Fish and Mount buttons, useful button labels, and a guide to the controls. Fishing rods no longer occupy potion slots.",
-    "Profession mini-games wait for your first input before starting, or begin after six seconds. Starting an activity releases held movement.",
-    "Party members off screen have direction arrows. Hold a party portrait to track someone.",
-    "The map controls wrap on phones, and the game view follows changes to the size of the screen.",
-    "Saved characters show their equipped gear on the title screen. Class resources such as Starlight now update on your character frame.",
-    "Fixed scrolling lists and update notices covering the game. Silver ore sells for slightly more to keep mining income in line with other activities."
-   ]
-  },
-  {
-   "id": "2026-10-08",
-   "date": "2026-10-08",
-   "title": "Professions, phone play, guards and thirty fixes from your reports",
-   "items": [
-    "Added ten professions: mine ore boulders, fell marked trees, forage and skin, then smelt, forge, stitch, brew, cook and temper at the town's trade buildings — each a quick mini-game. Start with Bram Delver just inside Torborhold's main gate.",
-    "Phone support: on a phone the game now switches to a touch layout by itself — thumb stick, skill arcs, a quick wheel and full-screen menus. Controllers work too.",
-    "Town guards now stand at every gate and square and fight raiders first, and no raid or nearby event starts while a character under level 3 or in their first ten minutes is there.",
-    "Enemy archers and casters now fire arrows and bolts you can see flying from them, and the damage lands when the shot does.",
-    "Horses were rebuilt with an arched neck, a proper head with small set-in eyes, real ears and jointed legs; all mounts use the new body.",
-    "Monsters in the first levels give half again as much experience, and quest hand-ins were raised to match.",
-    "Ox carts by each town's main gate take you to any other town for a small fare; a carter in Orrinsford gives your first ride free.",
-    "Every town's gates now open onto a proper main street that runs clear to the town square — Torborhold's three gates included.",
-    "A report sent by an admin is approved automatically.",
-    "In the loot window, E takes the selected item and F takes everything.",
-    "Unread mail now shows only the yellow dot on the Party button.",
-    "The account was linked; the refusal was a level-5 rule applied to the new character. It now looks at your highest character and says exactly what is missing.",
-    "Quest givers show a gold \"!\" and hand-ins a gold \"?\" above their heads and on the map (grey when not yet available).",
-    "You can hide an event with the crossed-eye button on its card and bring it back from the line under the events or the map's Events list.",
-    "Firebolt and every other bolt, arrow and thrown attack now travels to its target and deals its damage on arrival.",
-    "The map opens where you left it, and a filter and search box find stables, anglers, trainers and other services, ringing the towns that have them.",
-    "The minimap's own \"click for the map\" tooltip is gone, so pin tooltips are no longer covered.",
-    "Quest zones on the map and minimap light up under the pointer and show the quest and its objective.",
-    "Distant hills and mountains are now covered in trees up to the tree line.",
-    "Backpacks can be worn on the back instead of a cloak: fewer bonuses, but 4, 6 or 8 extra bag slots. The tailor sells them.",
-    "You now run by default; hold Shift to walk, and Num Lock toggles auto-run.",
-    "A damage meter is available under Settings → Game → \"Damage meter\" (off by default; /meter also toggles it).",
-    "Lanterns and torches are removed and refunded in gold; everyone carries a wider light and dungeons have ambient light.",
-    "Starting equipment is now 4–6 clearly different choices per class, each labelled with how it plays, and the three armour sets give different bonuses.",
-    "Event chests stay until everyone has looted or two minutes pass, are locked only by their own named keepers, and can no longer be emptied by looting a nearby corpse.",
-    "An item's icon is now drawn from the same model your character wears; the War Helm looks like a war helm in both places.",
-    "Calling your mount makes you stand still until it arrives (press again to cancel), then you carry on the way you were going.",
-    "Only NPCs who offer a shop, service or quest show a title above their name.",
-    "Feedback has a \"My reports\" tab showing each report's state and how it was resolved, and you can reply to a report."
-   ]
-  },
-  {
-   "id": "2026-10-07",
-   "date": "2026-10-07",
-   "title": "Your first bug reports, an economy overhaul and more fishing",
-   "items": [
-    "Starting equipment now offers 4–6 clearly different packs per class; every pack fills both hands or is a two-hander, and shield classes always have a weapon-and-shield pack.",
-    "The minimap now shows enemies, people, doors, stairs and chests in your line of sight, in dungeons too.",
-    "The +6 armour perk was applied but the tooltip was stale; damage reduction is armour ÷ (100 + armour), shown to one decimal, and the perk is now +10.",
-    "Dying in a dungeon puts you back at the start of the floor you died on, and the stair up lets you pick a floor when there is more than one above.",
-    "Healers could not heal at levels 1–2 because the heal unlocked at level 3; every healing class now has its direct heal from level 1, and clicking a party frame targets that member.",
-    "A dungeon now has exactly one way out, behind the last boss; the door by the entrance is labelled \"The way you came in\".",
-    "Druids have a wolf form, Moonpelt Shape, with a Wolf Pack talent that calls two wolf companions.",
-    "Event result cards no longer print \"null\"; every result now carries a real sentence.",
-    "The raid boss at Torborhold had borrowed a dungeon boss's script, including a ward only braziers could break; he now has his own script with no ward.",
-    "Every boss ward now has a stated duration, breaks under enough damage, and shows a bar with the time left.",
-    "The bag window's armour and damage now come from the same numbers as the Character menu.",
-    "Shields really did give 0.2% block; they now give 20% and say so, and existing shields were corrected.",
-    "Potions and other consumables stack up to 20; Shift-click splits a stack and dropping one on another joins them.",
-    "That was an oat field drawn as pale boxes; grain is now drawn as standing stalks.",
-    "Danger zones and telegraphs now end the moment their caster dies or is interrupted.",
-    "Healing potions now restore 50% of your health (greater: 80%) on a 20-second cooldown, and drop from monsters.",
-    "Shapeshift skills now change your character's model into the shape.",
-    "Gold and prices were reworked: an hour of play buys about one uncommon upgrade, a rare takes a few hours, and fishing is a real way to earn — with prized fish, legend fish and sunken crates.",
-    "385 fishing pools now sit along rivers, lakes and the coast, with one near almost every town.",
-    "Characters who reach level 3 get a letter inviting feedback; your first report earns a gift."
-   ]
-  },
-  {
-   "id": "2026-10-06",
-   "date": "2026-10-06",
-   "title": "Angling, starting equipment, revives and a new look at events",
-   "items": [
-    "Angling: cast a line at any water, tug the catch in, fill a catch journal and cook at a campfire.",
-    "A starting-equipment step in character creation: pick an armour set and a weapon pack.",
-    "Events now say what is happening, what to do, how long is left and what you earn — and they end properly.",
-    "Rare and champion monsters are far more common.",
-    "Priest, cleric, druid, paladin, necromancer and shaman each have their own revive; every healing class has a direct heal on key 1 or 2.",
-    "A Character menu (V) with stats and ability damage that sits beside the bag.",
-    "A Feedback button: send a suggestion or a bug report from inside the game.",
-    "66 new pieces of gear, new wand, staff and focus attack styles, and dual-wield attack animations.",
-    "Perk and talent picks are staged with Undo, Redo and Accept — nothing is spent until you accept.",
-    "Town buildings are taller, gates sit properly in their walls, and fences face the right way."
-   ]
-  }
- ]
+  "_doc": "Player-facing changelog, newest first. The lead appends an entry at each publish (from the feedback reports' Completed notes). `id` is stable; the client remembers the last id a player has seen and highlights newer ones. Plain language, no internal names.",
+  "entries": [
+    {
+      "id": "2026-10-13",
+      "date": "2026-10-13",
+      "title": "Cheaper gear, Starcaller, emotes and the last of your reports",
+      "items": [
+        "Gear in shops costs about a fifth of what it did: expect to afford an uncommon piece every 20 to 30 minutes of play and a rare every hour and a half to two hours.",
+        "Potions, food, rods, bait, backpacks, mounts and waystone travel are all cheaper; a healing potion is 10 gold and the first horse is 400. Merchants pay 6% of an item's price instead of 1.2%, so a sold drop is worth about the same gold as before.",
+        "New class: the Starcaller, an arcane caster in midnight-blue robes with gold trim. Golden stars fly from your hand, bigger ones streak down from the sky and land with a ring of light, Star Field is a glowing star rune on the ground, and your Starlight circles your head as small gold motes. It has its own class quest, \"Nine Stones, Nine Stars\".",
+        "Spell bolts and arrows are now visible in flight for everyone nearby, from every class and every monster. Before, most of them were never sent to other players.",
+        "Hands have rules now: \"Main hand\" and \"Off hand\" items fit only that hand, \"One-hand\" fits either. Wands and tomes are the casters' attacking weapons; orbs are off-hand tools that change your basic attack. Weapons show their attacks per second.",
+        "/wave, /sit, /dance, /cheer, /bow and /point play on your character for everyone who can see you, and you wave while calling your mount.",
+        "Storm Beam is a constant crackling beam that flares with each pulse. Blessed Earth with Moving Light (and other carried zones) visibly follows you.",
+        "When an enemy is knocked back mid wind-up its warning area moves with it, and an interrupted attack's warning disappears at once. Enemies in dungeons can no longer hit you through walls.",
+        "A looted corpse can no longer be clicked or Tab-targeted, and a live enemy always wins over a corpse under your cursor. Stun stars no longer hang over a dead enemy.",
+        "Looting several bodies that lie together no longer leaves the loot window stuck open: it closes when everything is taken, or moves on to the next body in reach.",
+        "Enemies take 90 to 150 seconds to come back, and never within a minute where their killer is standing.",
+        "Every town and city has training dummies near its square, and they are proper straw dummies on a post now, not dogs.",
+        "Guards, scouts, hunters, road patrols and caravan guards out in the wilds fight monsters that come near them while you are close by. Help one win and they thank you, sometimes with gold and rarely with an item.",
+        "You can skin anything with an animal's body, including Barrow Hounds and the beast bosses. When a monster cannot be skinned the game says why.",
+        "Trade mini-games wait for you: skinning starts when your mouse reaches the knife, and nothing starts by itself. The forge no longer says it is \"warming up\".",
+        "The angler has the same trades button and trainer window as every other teacher. The prospector's title is just \"Prospector\".",
+        "When an item mentions a status such as Cursed, Burning or Poisoned, the bottom of its card explains what that status does.",
+        "Signing in on a browser that holds guest characters now offers to move them onto your account.",
+        "Settings has a new switch, \"Let friends see where I am\". Typing /meter after closing the damage meter brings it straight back.",
+        "Ordinary fishing pools show only ripples; only deep pools keep the gold light marker. Farm plot rows follow the slope of the ground.",
+        "The Caged Scout sits in a real cage whose door swings open when you free them. The chain coif covers the top of your head. The Pail and Plough has one well again.",
+        "Resetting talents or perks at the Unbinder costs a share of what a character of your level really earns (about 500 gold at level 9)."
+      ]
+    },
+    {
+      "id": "2026-10-11-prospector",
+      "date": "2026-10-11",
+      "title": "Clearer profession lessons",
+      "items": [
+        "The prospector now clearly confirms that you have learned Mining and received a pick. His Mining button stays available on later visits, with your skill, tool and mining instructions.",
+        "Other profession teachers also show whether you already know their trades and keep their training details available."
+      ]
+    },
+    {
+      "id": "2026-10-11-trainers",
+      "date": "2026-10-11",
+      "title": "Profession trainers in every major town",
+      "items": [
+        "Every major town now has dedicated Mining, Logging, Foraging and Skinning trainers, alongside its crafting teachers. Lessons and your first gathering tool are free.",
+        "Search the map for a profession, such as mining or foraging, to find its teachers. Gathering trainers also have their own map filters.",
+        "Bram Delver now appears on the map as a Mining trainer at Torborhold's main gate."
+      ]
+    },
+    {
+      "id": "2026-10-10",
+      "date": "2026-10-10",
+      "title": "Better phone controls, steady auto-attack and party tracking",
+      "items": [
+        "Tap Attack to pick an enemy, move into reach and keep attacking. Tap again to stop; moving by hand keeps auto-attack on.",
+        "Phones now have named Fish and Mount buttons, useful button labels, and a guide to the controls. Fishing rods no longer occupy potion slots.",
+        "Profession mini-games wait for your first input before starting, or begin after six seconds. Starting an activity releases held movement.",
+        "Party members off screen have direction arrows. Hold a party portrait to track someone.",
+        "The map controls wrap on phones, and the game view follows changes to the size of the screen.",
+        "Saved characters show their equipped gear on the title screen. Class resources such as Starlight now update on your character frame.",
+        "Fixed scrolling lists and update notices covering the game. Silver ore sells for slightly more to keep mining income in line with other activities."
+      ]
+    },
+    {
+      "id": "2026-10-08",
+      "date": "2026-10-08",
+      "title": "Professions, phone play, guards and thirty fixes from your reports",
+      "items": [
+        "Added ten professions: mine ore boulders, fell marked trees, forage and skin, then smelt, forge, stitch, brew, cook and temper at the town's trade buildings — each a quick mini-game. Start with Bram Delver just inside Torborhold's main gate.",
+        "Phone support: on a phone the game now switches to a touch layout by itself — thumb stick, skill arcs, a quick wheel and full-screen menus. Controllers work too.",
+        "Town guards now stand at every gate and square and fight raiders first, and no raid or nearby event starts while a character under level 3 or in their first ten minutes is there.",
+        "Enemy archers and casters now fire arrows and bolts you can see flying from them, and the damage lands when the shot does.",
+        "Horses were rebuilt with an arched neck, a proper head with small set-in eyes, real ears and jointed legs; all mounts use the new body.",
+        "Monsters in the first levels give half again as much experience, and quest hand-ins were raised to match.",
+        "Ox carts by each town's main gate take you to any other town for a small fare; a carter in Orrinsford gives your first ride free.",
+        "Every town's gates now open onto a proper main street that runs clear to the town square — Torborhold's three gates included.",
+        "A report sent by an admin is approved automatically.",
+        "In the loot window, E takes the selected item and F takes everything.",
+        "Unread mail now shows only the yellow dot on the Party button.",
+        "The account was linked; the refusal was a level-5 rule applied to the new character. It now looks at your highest character and says exactly what is missing.",
+        "Quest givers show a gold \"!\" and hand-ins a gold \"?\" above their heads and on the map (grey when not yet available).",
+        "You can hide an event with the crossed-eye button on its card and bring it back from the line under the events or the map's Events list.",
+        "Firebolt and every other bolt, arrow and thrown attack now travels to its target and deals its damage on arrival.",
+        "The map opens where you left it, and a filter and search box find stables, anglers, trainers and other services, ringing the towns that have them.",
+        "The minimap's own \"click for the map\" tooltip is gone, so pin tooltips are no longer covered.",
+        "Quest zones on the map and minimap light up under the pointer and show the quest and its objective.",
+        "Distant hills and mountains are now covered in trees up to the tree line.",
+        "Backpacks can be worn on the back instead of a cloak: fewer bonuses, but 4, 6 or 8 extra bag slots. The tailor sells them.",
+        "You now run by default; hold Shift to walk, and Num Lock toggles auto-run.",
+        "A damage meter is available under Settings → Game → \"Damage meter\" (off by default; /meter also toggles it).",
+        "Lanterns and torches are removed and refunded in gold; everyone carries a wider light and dungeons have ambient light.",
+        "Starting equipment is now 4–6 clearly different choices per class, each labelled with how it plays, and the three armour sets give different bonuses.",
+        "Event chests stay until everyone has looted or two minutes pass, are locked only by their own named keepers, and can no longer be emptied by looting a nearby corpse.",
+        "An item's icon is now drawn from the same model your character wears; the War Helm looks like a war helm in both places.",
+        "Calling your mount makes you stand still until it arrives (press again to cancel), then you carry on the way you were going.",
+        "Only NPCs who offer a shop, service or quest show a title above their name.",
+        "Feedback has a \"My reports\" tab showing each report's state and how it was resolved, and you can reply to a report."
+      ]
+    },
+    {
+      "id": "2026-10-07",
+      "date": "2026-10-07",
+      "title": "Your first bug reports, an economy overhaul and more fishing",
+      "items": [
+        "Starting equipment now offers 4–6 clearly different packs per class; every pack fills both hands or is a two-hander, and shield classes always have a weapon-and-shield pack.",
+        "The minimap now shows enemies, people, doors, stairs and chests in your line of sight, in dungeons too.",
+        "The +6 armour perk was applied but the tooltip was stale; damage reduction is armour ÷ (100 + armour), shown to one decimal, and the perk is now +10.",
+        "Dying in a dungeon puts you back at the start of the floor you died on, and the stair up lets you pick a floor when there is more than one above.",
+        "Healers could not heal at levels 1–2 because the heal unlocked at level 3; every healing class now has its direct heal from level 1, and clicking a party frame targets that member.",
+        "A dungeon now has exactly one way out, behind the last boss; the door by the entrance is labelled \"The way you came in\".",
+        "Druids have a wolf form, Moonpelt Shape, with a Wolf Pack talent that calls two wolf companions.",
+        "Event result cards no longer print \"null\"; every result now carries a real sentence.",
+        "The raid boss at Torborhold had borrowed a dungeon boss's script, including a ward only braziers could break; he now has his own script with no ward.",
+        "Every boss ward now has a stated duration, breaks under enough damage, and shows a bar with the time left.",
+        "The bag window's armour and damage now come from the same numbers as the Character menu.",
+        "Shields really did give 0.2% block; they now give 20% and say so, and existing shields were corrected.",
+        "Potions and other consumables stack up to 20; Shift-click splits a stack and dropping one on another joins them.",
+        "That was an oat field drawn as pale boxes; grain is now drawn as standing stalks.",
+        "Danger zones and telegraphs now end the moment their caster dies or is interrupted.",
+        "Healing potions now restore 50% of your health (greater: 80%) on a 20-second cooldown, and drop from monsters.",
+        "Shapeshift skills now change your character's model into the shape.",
+        "Gold and prices were reworked: an hour of play buys about one uncommon upgrade, a rare takes a few hours, and fishing is a real way to earn — with prized fish, legend fish and sunken crates.",
+        "385 fishing pools now sit along rivers, lakes and the coast, with one near almost every town.",
+        "Characters who reach level 3 get a letter inviting feedback; your first report earns a gift."
+      ]
+    },
+    {
+      "id": "2026-10-06",
+      "date": "2026-10-06",
+      "title": "Angling, starting equipment, revives and a new look at events",
+      "items": [
+        "Angling: cast a line at any water, tug the catch in, fill a catch journal and cook at a campfire.",
+        "A starting-equipment step in character creation: pick an armour set and a weapon pack.",
+        "Events now say what is happening, what to do, how long is left and what you earn — and they end properly.",
+        "Rare and champion monsters are far more common.",
+        "Priest, cleric, druid, paladin, necromancer and shaman each have their own revive; every healing class has a direct heal on key 1 or 2.",
+        "A Character menu (V) with stats and ability damage that sits beside the bag.",
+        "A Feedback button: send a suggestion or a bug report from inside the game.",
+        "66 new pieces of gear, new wand, staff and focus attack styles, and dual-wield attack animations.",
+        "Perk and talent picks are staged with Undo, Redo and Accept — nothing is spent until you accept.",
+        "Town buildings are taller, gates sit properly in their walls, and fences face the right way."
+      ]
+    }
+  ]
 }

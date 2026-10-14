@@ -41,6 +41,10 @@ function guardedChest(R, o, min = 2) {
 function slay(world, o, m) {
   world.roadEvents.noteHit(o, m);
   m.kill(o.entity);
+  // (wrap-up 2026-10-13: killed at the ENTITY, the rules' own unit lived on and kept swinging — `devSetLevel` raises the
+  // entity's level, not the unit's 94 health — so whether the player was alive to open the chest was a matter of which
+  // tick a hit landed on, and any change to the room's dice turned this file red. A slain keeper does not bite.)
+  if (m.r && m.r.unit) m.r.unit.dmg = [0, 0];
   world.corpses.holdFor(o.room, m, o.char.id, { gold: 3, items: [{ name: 'Rat tail', rarity: 'normal', value: 1 }] });
 }
 

@@ -1024,7 +1024,7 @@
       "name": "Nine Stones, Nine Stars",
       "level": 3,
       "giver": "trainer_arcane",
-      "offer": "The old folk stood nine stones in a ring to mark where the stars come down. Nobody believed them. You throw stars for a living now, so go and check. Sight the evening star over the heel stone, then practise on something that flies. Every star that lands fills your Constellation, and Ashby's lumber camp is thick with dusk flitters.",
+      "offer": "The old folk stood nine stones in a ring to mark where the stars come down. You throw stars for a living, so go and check. Sight the evening star over the heel stone, then fill your Constellation on the dusk flitters at Ashby's lumber camp.",
       "steps": [
         {
           "kind": "use",
@@ -1049,7 +1049,7 @@
           "where": "The Nine Maidens, a ring of standing stones on the hill"
         }
       ],
-      "done": "Six flitters, and the altar stone is still in one piece? Then you were aiming. The old folk were right about the stones, which is annoying. A wand that points at the sky when nobody is holding it, and a perk point.",
+      "done": "Six flitters, and the altar stone still in one piece? Then you were aiming. A wand that points at the sky when nobody is holding it, and a perk point.",
       "reward": {
         "xp": 0.6,
         "gold": 12,

@@ -26,7 +26,7 @@ const root = new URL('../../', import.meta.url);
 const J = p => JSON.parse(readFileSync(new URL(p, root), 'utf8'));
 /** the banned-name list of tests/E/content.test.js (read from its source, so importing it does not run its tests here) */
 const BANNED = (() => { const src = readFileSync(new URL('tests/E/content.test.js', root), 'utf8'); const a = src.indexOf('export const BANNED = ['), b = src.indexOf('];', a); return JSON.parse(src.slice(a + 21, b + 1).replace(/'/g, '"').replace(/\s+/g, ' ')); })();
-const CLASSES = J('../farhold/data/classes.json').classes;
+const CLASSES = [...J('../farhold/data/classes.json').classes, ...J('data/rules/classes-tv.json').classes];      // + Thousandvale's own (the Starcaller, wrap-up 2026-10-13)
 const PETS = new Set(['necromancer', 'druid', 'shaman', 'warlock', 'pyromancer', 'stormcaller', 'tinker', 'ranger', 'demon_hunter', 'sorcerer', 'oracle', 'enchanter', 'priest']);
 const ITEMS = J('../emberveil/data/items.json');
 // play-test 5 T23: stream C injects every NEW row of stream F's gear catalog as an item base in memory (js/rules/gear-catalog.js)
@@ -56,7 +56,7 @@ const SP_OF = new Map(SETP.vignettes.map(v => [v.id, v]));
 
 // ------------------------------------------------------------------------------------------------- Q28
 
-test('Q28: every one of the 30 classes has exactly one low-level class quest, from a trainer who teaches it', () => {
+test('Q28: every class (Farhold\'s 30 and the Starcaller) has exactly one low-level class quest, from a trainer who teaches it', () => {
   for (const c of CLASSES) {
     const clsOf = q => { const c = q.cls ?? q.classes; return c == null ? [] : Array.isArray(c) ? c : [c]; };
     const qs = [...ALLQ.values()].filter(q => clsOf(q).includes(c.id));
@@ -70,7 +70,8 @@ test('Q28: every one of the 30 classes has exactly one low-level class quest, fr
     assert.ok(q.offer && q.done && q.rewardText, `${c.id}: story text`);
     assert.ok(q.steps.length >= 2 && q.steps.every(s => s.text && s.where), `${c.id}: steps say what and where`);
   }
-  assert.equal(CLASSQ.quests.length, 30);
+  assert.equal(CLASSQ.quests.length, CLASSES.length);
+  assert.equal(CLASSES.length, 31);
 });
 
 test('Q28: a reward that matters — a named rare the class can use, plus the companion now (13 classes) or a perk point (17)', () => {

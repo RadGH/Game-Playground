@@ -10,7 +10,7 @@
 //
 //   projectileKind(ev, { held })  -> { model, element, glow, arc, spin, scale, tail }
 //
-//   model   'arrow' | 'quarrel' | 'javelin' | 'knife' | 'axe' | 'stone' | 'firebolt' | 'orb' | 'shard' | 'spark'
+//   model   'arrow' | 'quarrel' | 'javelin' | 'knife' | 'axe' | 'stone' | 'firebolt' | 'orb' | 'shard' | 'spark' | 'star' (Y32, star-fx.js)
 //   glow    true = drawn with the bright (additive) material in the element's colour; false = a solid object
 //   arc     how high the path bows, as a share of the distance (an arrow lobs a little, a bolt of magic flies flat)
 //   spin    turns per second end over end (a thrown knife tumbles; an arrow does not)
@@ -42,6 +42,8 @@ const GLOW = {
   shard: { glow: true, arc: 0, spin: 0, scale: 1, tail: 1.2 },
   spark: { glow: true, arc: 0, spin: 0, scale: 1, tail: 2.4 },
 };
+/** Y32: a golden star (drawn by star-fx.js, in the class's gold rather than its element's violet). `gold` = do not tint it by element. */
+export const STAR = Object.freeze({ glow: true, gold: true, arc: 0, spin: 1.2, scale: 1, tail: 2 });
 const GLOW_BY_ELEMENT = { fire: 'firebolt', ice: 'shard', lightning: 'spark', shadow: 'orb', holy: 'orb', nature: 'orb', arcane: 'orb', poison: 'orb', bleed: 'shard', true: 'orb', physical: 'orb' };
 
 /** What a held model id / weapon type throws or looses. */
@@ -68,6 +70,9 @@ export function projectileKind(ev = {}, { held = null } = {}) {
   const wt = byWeapon(ev.wt) || byWeapon(ev.weapon);
   const hand = byWeapon(held);
   let model = null;
+  // 0. owner feedback 10 (Y32): the Starcaller's thrown star. It is not one of the pooled bodies below — star-fx.js draws
+  //    it (spells.js hands a star shot there first) — but this is still the one place that says WHICH body flies.
+  if (proj === 'star' || proj === 'skystar') return { model: 'star', element: 'arcane', ...STAR };
   // 1. the rules said what it is
   if (proj === 'arrow') model = wt === 'quarrel' || hand === 'quarrel' ? 'quarrel' : wt === 'javelin' ? 'javelin' : 'arrow';
   else if (proj === 'quarrel') model = 'quarrel';

@@ -34,6 +34,7 @@ import { connect, localTokenStore } from '../net/client.js';
 import { createMirror } from '../net/mirror.js';
 import { ANIMS, STATE, KIND_NAMES, TICK_MS, cleanName } from '../net/protocol.js';
 import { tabNext, tabOrder } from '../net/tab.js';
+import { tabPick } from './pick-rule.js';
 import { createTelegraphs } from './telegraphs.js';
 import { createBossUi } from './boss.js';
 import { createObjects } from './objects.js';
@@ -59,6 +60,8 @@ import { LIGHTS } from './lightpool.js';
 import { createTransition, isJump } from './transition.js';
 import { createSpells } from './spells.js';
 import { createProjectiles } from './projectiles.js';   // play-test 8 (W2/W14)
+import { createStarFx } from './star-fx.js';             // Y32: the Starcaller's gold stars
+import { moteCount } from './star-looks.js';
 import { createMoveMarker } from './move-marker.js';       // play-test 9 (X2): the marker where click-to-move is heading
 import { createHeld } from './held-view.js';
 import { createCarts } from './carts-view.js';             // play-test 8 (W5): ox carts — parked, on the road, and the ride
@@ -133,7 +136,9 @@ const tele = createTelegraphs(scene, {
 let SKILLS = null; loadSkillData().then(d => { SKILLS = d?.skills || null; window.__skillClasses = d?.classes || {}; }).catch(() => {});
 // play-test 8 (W2/W14): every ranged attack is a body in the air — arrows, quarrels, knives, stones, firebolts (pooled, warmed at boot)
 const shots = createProjectiles(scene, { actors, groundY: (x, z) => groundY(x, z), night: () => S.night || 0 });
-const spells = createSpells(scene, { camera, renderer: view.renderer, actors, quality, lights: LIGHTS, shots, groundY: (x, z) => groundY(x, z), skillOf: id => SKILLS?.[id] || null });
+// Y32 (wrap-up): the Starcaller's thrown and falling stars, star-rune zones and Constellation motes (pooled, warmed at boot)
+const stars = createStarFx(scene, { camera, actors, quality, groundY: (x, z) => groundY(x, z) });
+const spells = createSpells(scene, { camera, renderer: view.renderer, actors, quality, lights: LIGHTS, shots, stars, groundY: (x, z) => groundY(x, z), skillOf: id => SKILLS?.[id] || null });
 // R5: every weapon's basic attack drawn (swing crescents, staff spells, shot flashes)
 const weaponFx = createWeaponFx(scene, { shots, spellFx: spells.fx, actors, groundY: (x, z) => groundY(x, z), targetOf: id => (id === S.selfId ? S.target : null) });
 // play-test 5: a look per caster attack form + the sceptre's elemental swing (T15/T16), each class's revive (T4), angling (T25)
@@ -577,7 +582,7 @@ function wireNet(net) {
     if ('regen' in patch) actors.setEating(S.selfId, patch.regen ? patch.regen.kind || 'food' : null);   // S20
     if (patch.mountNew) hud.toast('You have a mount! Press H to ride.', 'good');
   });
-  net.on('lootable', m => lootMarks.set(m.id, m.on !== false, m.best || m.rarity || (m.free ? 'magic' : null)));
+  net.on('lootable', m => { lootMarks.set(m.id, m.on !== false, m.best || m.rarity || (m.free ? 'magic' : null)); if (m.on === false && S.target === m.id && actors.get(m.id)?.dead) setTarget(null); });   // Y8: an emptied corpse is let go of
   net.on('lootWin', m => { if (m.closed) lootMarks.set(m.id, false); });
   net.on('mountR', r => {
     if (!r.ok && r.msg) hud.toast(r.msg, 'warn');
@@ -871,7 +876,7 @@ function onEvent(ev) {
     }
     case 'die': {
       actors.setDead(ev.d, true); statusSync.dead(ev.d);
-      tele.dropSource(ev.d); spells.ownerGone(ev.d); shots.drop(ev.d);          // (W2: a shot still in the air from the dead lands on nobody — C cancels its hit)          // play-test 6 (U3): what the dead were casting is gone with them, at once
+      tele.dropSource(ev.d); spells.ownerGone(ev.d); shots.drop(ev.d); stars.ownerGone(ev.d);          // (W2: a shot still in the air from the dead lands on nobody — C cancels its hit)          // play-test 6 (U3): what the dead were casting is gone with them, at once
       const a = actors.get(ev.d), by = actors.get(ev.by);
       if (ev.d === me) { setSelfDead(true); hud.chat(by ? `You were slain by ${by.name}.` : 'You have fallen.', 'bad'); }
       else if (a && ev.by === me) hud.chat(`You have slain ${a.name}.`, 'combat');
@@ -898,6 +903,8 @@ function onEvent(ev) {
       break;
     case 'open': objects.markOpened(ev.d); break;
     case 'tele': tele.add(ev, (S.evTick ?? 0) * TICK_MS); break;
+    case 'teleM': tele.move(ev); break;                                   // Y12: knocked back mid wind-up — the warning goes with the caster
+    case 'emote': actors.playEmote(ev.id, ev.e, { ms: ev.ms, end: !!ev.end }); break;   // Y5: /wave /sit /dance /cheer /bow /point, and the wave while a mount comes
     case 'teleR': {
       const t = tele.resolve(ev);
       if (t && !ev.x) {
@@ -906,7 +913,7 @@ function onEvent(ev) {
       }
       break;
     }
-    case 'boss': case 'phase': case 'castbar': case 'castX': case 'enrage': case 'say': case 'fx': if (ev.type === 'fx' && ev.kind === 'form' && (ev.group || 'shape') === 'shape') actors.setShape(ev.id, ev.on === false ? null : shapeOfForm(ev)); if (ev.type === 'castX' && ev.id != null) tele.dropSource(ev.id); boss.onEvent(ev); break;   // U3: an interrupted cast takes its telegraph with it
+    case 'boss': case 'phase': case 'castbar': case 'castX': case 'enrage': case 'say': case 'fx': if (ev.type === 'fx' && ev.kind === 'interrupt' && ev.id != null) { tele.dropSource(ev.id); const ia = actors.get(ev.id); if (ia) fx.number({ x: ia.pos.x, y: ia.pos.y + ia.height + 0.3, z: ia.pos.z }, 'Interrupted', 'miss'); }   /* Y12 */ if (ev.type === 'fx' && ev.kind === 'form' && (ev.group || 'shape') === 'shape') actors.setShape(ev.id, ev.on === false ? null : shapeOfForm(ev)); if (ev.type === 'castX' && ev.id != null) tele.dropSource(ev.id); boss.onEvent(ev); break;   // U3: an interrupted cast takes its telegraph with it
     case 'obj': objects.onObj(ev); break;
     case 'aggro':
       if (ev.d === me) { const a = actors.get(ev.s); if (a) fx.number({ x: a.pos.x, y: a.pos.y + a.height + 0.3, z: a.pos.z }, '!', 'in'); }
@@ -975,7 +982,9 @@ function retargetAfterKill() {
 function cycleTarget(anyWay = false) {   // anyWay (the phone's Target button): enemies behind the camera count too — there is no quick way to turn it with a thumb mid-fight
   if (S.selfId == null) return;
   const p = S.predictor.pos;
-  const id = tabNext(S.mirror, { id: S.selfId, x: p.x, z: p.z, yaw: controls.cam.yaw }, S.target || 0, { range: 40, facing: controls.cam.yaw, arc: anyWay ? Math.PI * 2 : Math.PI * 0.9 });
+  const order = tabOrder(S.mirror, { id: S.selfId, x: p.x, z: p.z, yaw: controls.cam.yaw }, { range: 40, facing: controls.cam.yaw, arc: anyWay ? Math.PI * 2 : Math.PI * 0.9 });
+  // Y8: Tab never stops on a corpse (the body on screen may be dead a moment before the snapshot says so)
+  const id = tabPick(order, S.target || 0, i => !!actors.get(i)?.dead);
   if (!id) { hud.toast('No enemies nearby.', 'warn'); return; }
   setTarget(id);
 }
@@ -1251,6 +1260,8 @@ function frame(now) {
   }
   fx.update(dt);
   spells.update(dt);
+  if (S.selfId != null) stars.setMotes(S.selfId, S.self.dead ? 0 : moteCount(ui10.classRes.state));   // Y32: your Starlight, as motes round your head
+  stars.update(dt);
   statusSync.update();
   weaponFx.update(dt); formFx.update(dt); angling.update(dt); profView.update(dt); shots.update(dt);
   lootMarks.update(dt); questMarks.update(dt); carts.update(dt, elapsed); held.update(dt, id => actors.get(id)?.pos || null); moveMark.update(dt);
@@ -1294,7 +1305,7 @@ Promise.all([titleWorld(), loadLookData(), loadMonsterLooks()]).then(() => {
   S.warm = { done: false };
   import('./scatter-view.js').then(m => m.prewarmScatter({ quality })).catch(() => {})
     .then(() => Promise.all([import('./warmup.js'), loadMonsterLooks()]))
-    .then(([m, looks]) => m.warmBodies({ scene, renderer: view.renderer, camera, monsterLooks: looks, extras: [shots.sample(), moveMark.sample(), questMarks.sample(), weaponFx.sample(), lootMarks.sample(), formFx.sample(), angling.sample(), profView.sample(), cropSample()], extraTypes: ['wolf', 'boar', 'crocodile', 'mushroom', 'bear', 'cow'] }))
+    .then(([m, looks]) => m.warmBodies({ scene, renderer: view.renderer, camera, monsterLooks: looks, extras: [shots.sample(), moveMark.sample(), questMarks.sample(), weaponFx.sample(), lootMarks.sample(), formFx.sample(), spells.beams.sample(), angling.sample(), profView.sample(), cropSample(), stars.sample()], extraTypes: ['wolf', 'boar', 'crocodile', 'mushroom', 'bear', 'cow'] }))
     .then(r => carts.prewarm().then(() => r, () => r))                     // W5: one ox cart built and compiled before anybody meets one
     .then(r => { S.warm = { done: true, ...r }; }, e => { S.warm = { done: true, error: e?.message }; });
 });
@@ -1499,4 +1510,4 @@ const tv = {
   },
 };
 window.tv = tv;
-window.thousandvale = { held, ui10, tracking: () => ui10.tracking(), titleFront: () => titleFront, moveMark, prof, profView, shots, questMarks, carts, input, formFx, reviveFx, angling, lootMarks, weaponFx, statusSync, S, W, D, WS, view, actors, spells, LIGHTS, travel, camera, controls, hud, fx, tv, tele, boss, objects, social, bag, worldUi, footprints, chat, friends, guild, mail, callboard, account, ui, ui2, ui5, ui8 };
+window.thousandvale = { stars, onEvent, held, ui10, tracking: () => ui10.tracking(), titleFront: () => titleFront, moveMark, prof, profView, shots, questMarks, carts, input, formFx, reviveFx, angling, lootMarks, weaponFx, statusSync, S, W, D, WS, view, actors, spells, LIGHTS, travel, camera, controls, hud, fx, tv, tele, boss, objects, social, bag, worldUi, footprints, chat, friends, guild, mail, callboard, account, ui, ui2, ui5, ui8 };

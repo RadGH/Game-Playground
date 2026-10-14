@@ -54,14 +54,15 @@ const kills = q => q.steps.filter(s => s.kind === 'kill' && s.type);
 
 test('Q28: thirty class quests, one per class, each offered to its own class at a low level', () => {
   const classes = new Set(Object.keys(engine.skillData.classes || {}));
-  assert.equal(QUESTS.length, 30);
+  assert.equal(QUESTS.length, classes.size);      // (30 of Farhold's + Thousandvale's own Starcaller, wrap-up 2026-10-13)
+  assert.equal(classes.size, 31);
   const seen = new Set();
   for (const q of QUESTS) {
     for (const c of q.classes) { assert.ok(classes.has(c), `${q.id}: ${c} is a class`); seen.add(c); }
     assert.ok(q.level >= 1 && q.level <= 6, `${q.id}: level ${q.level}`);
     for (const s of kills(q)) assert.ok(engine.bestiary?.[s.type] || engine.enemyById?.(s.type) || engine.data?.enemies?.[s.type] || true, s.type);
   }
-  assert.equal(seen.size, 30, 'every class has one');
+  assert.equal(seen.size, classes.size, 'every class has one');
 });
 
 test('Q28: every class-quest reward is something the rules can pay', () => {

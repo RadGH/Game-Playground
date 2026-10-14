@@ -5,7 +5,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { filterEntries, serverUrl, onPublicSite, STATUS } from '../js/home.js';
+import { filterEntries, serverUrl, onPublicSite, forHost, sameHost, STATUS } from '../js/home.js';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 const read = p => JSON.parse(readFileSync(join(ROOT, p), 'utf8'));
@@ -88,4 +88,19 @@ test('search and status filters', () => {
   assert.ok(filterEntries(all, { status: 'deprecated' }).some(e => e.id === 'avatar-3d'), 'a partly deprecated card shows under Deprecated');
   assert.ok(filterEntries(all, { status: 'playable' }).every(e => e.status === 'playable'));
   assert.equal(filterEntries(all, { q: 'zzzz-no-such-thing' }).length, 0);
+});
+
+test('served by the game server: the Thousandvale card is a same-address page link, and links the host cannot serve are left out', () => {
+  assert.deepEqual(read('data/served-by.json'), {}, 'the committed file is empty: only the game server fills it in');
+  assert.equal(forHost(data.entries, {}), data.entries, 'an empty answer changes nothing (8400, GitHub Pages)');
+  const host = { game: 'thousandvale', path: 'prototypes/thousandvale/', unavailable: ['prototypes/tinyrts/', 'prototypes/tinyrts/README.md', 'prototypes/thousandvale/docs/PLAN.md', 'avatar-3d/armour2.html'] };
+  const shown = forHost(data.entries, host);
+  const tv = shown.find(e => e.id === 'thousandvale');
+  assert.equal(tv.href, 'prototypes/thousandvale/'); assert.equal(tv.server, undefined); assert.equal(tv.noReadme, true);
+  assert.ok(!shown.some(e => e.id === 'tinyrts'), 'a card whose page cannot be served is not drawn');
+  assert.ok(!shown.find(e => e.id === 'avatar-3d').links.some(l => l.href === 'avatar-3d/armour2.html'));
+  assert.equal(shown.length, data.entries.length - 1);
+  for (const e of shown) assert.ok(!String(e.href || '').startsWith('/'), `${e.id}: a path starting with / breaks under /Game-Playground/`);
+  assert.ok(data.entries.find(e => e.id === 'thousandvale').server, 'forHost works on copies');
+  assert.ok(sameHost(live.thousandvale.url, new URL(live.thousandvale.url).hostname) && !sameHost(live.thousandvale.url, '192.168.1.34'));
 });

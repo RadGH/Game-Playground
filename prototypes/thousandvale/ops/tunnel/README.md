@@ -18,7 +18,7 @@ Stopping the tunnel kills the public link at once; the game keeps running on the
 
 ## What is exposed — and what never is
 
-Exactly one origin: `http://127.0.0.1:8490`, the stable server, which serves only the published allow-listed copy in
+Exactly one origin: `http://127.0.0.1:8490`, the stable server, which serves only the published allow-listed copy (since 2026-10-13: the playground home page and its pages as well as the game) in
 `/srv/thousandvale/current/public` and runs as Linux user `thousandvale` (cannot read /home, so not `~/claude/secrets`).
 Never: 8400/8401 (`tools/serve.py` accepts file-writing POSTs), 8491 (dev), 8492 (admin), 5432 (Postgres), 22 (SSH),
 8495 (load server). `check-public.sh` verifies this from the config and with live probes.

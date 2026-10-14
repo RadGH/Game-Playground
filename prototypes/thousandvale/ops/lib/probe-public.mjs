@@ -49,9 +49,9 @@ function sock(headers = {}, { base = BASE, path = '/gw', send = null, holdMs = 0
   });
 }
 
-// ---- 1. the server serves the game and nothing else ----
+// ---- 1. the server serves the playground pages and the game, and nothing else ----
 const root = await raw('GET', '/');
-rec(root.status === 302 || root.status === 200, 'GET / answers', `HTTP ${root.status}`);
+rec(root.status === 200 && /<title>Playground/.test(root.body), 'GET / is the playground home page', `HTTP ${root.status}`);
 const game = await raw('GET', '/prototypes/thousandvale/');
 rec(game.status === 200, 'the game page is served', `HTTP ${game.status}`);
 const priv = await raw('GET', '/prototypes/thousandvale/public/privacy.html');
@@ -61,7 +61,9 @@ const MUST_404 = [
   '/prototypes/thousandvale/ops/stable.env.template', '/prototypes/thousandvale/docs/PLAN.md', '/prototypes/thousandvale/tests/H/offsite.test.js',
   '/prototypes/thousandvale/tools/bot-client.mjs', '/prototypes/thousandvale/package.json', '/prototypes/thousandvale/node_modules/pg/package.json',
   '/prototypes/thousandvale/.data/dev-store.json', '/.git/config', '/.git/HEAD', '/.gitignore', '/CLAUDE.md', '/tools/serve.py',
-  '/library/synced/library.json', '/prototypes/farhold/tests/', '/../../etc/passwd', '/prototypes/../../../etc/passwd',
+  '/library/synced/library.json', '/prototypes/farhold/tests/', '/prototypes/farhold/tools/', '/prototypes/farhold/research/review-round10.md',
+  '/library/tests/library.spec.js', '/items/tools/build-items.py', '/prototypes/tumblefair/server/', '/prototypes/tumblefair/package.json',
+  '/package.json', '/README.md', '/serve.sh', '/docs/research-voices.md', '/tests/experiments.test.js', '/prototypes/tinyrts/', '/../../etc/passwd', '/prototypes/../../../etc/passwd',
   '/..%2f..%2f..%2fetc%2fpasswd', '/%2e%2e/%2e%2e/%2e%2e/etc/passwd', '/prototypes/thousandvale/%2e%2e/%2e%2e/%2e%2e/CLAUDE.md',
   '/prototypes/thousandvale/server%2fmain.mjs', '/prototypes/thousandvale/%00.html', '/home/radgh/claude/secrets/',
   '/admin', '/admin/', '/api/players', '/prototypes/thousandvale/server/admin.mjs', '/prototypes/thousandvale/server/privacy.json',

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { icons, classes, iconSvg, iconIds, iconInfo, filterIcons } from '../js/catalog.js';
 import { skillIconSvg, skillIconIds } from '../../prototypes/thousandvale/js/client/ui/skill-icons.js';
-import { resolveStatic } from '../../prototypes/thousandvale/server/static.js';
+import { resolveStatic, ALLOW } from '../../prototypes/thousandvale/server/static.js';
 const root = new URL('../../', import.meta.url);
 const json = p => JSON.parse(readFileSync(new URL(p,root),'utf8'));
 const far = json('prototypes/farhold/data/skills.json'), tv = json('prototypes/thousandvale/data/rules/classes-tv.json');
@@ -61,5 +61,6 @@ test('Thousandvale can serve the library and its release includes the dependency
   for(const path of ['/icons/index.html','/icons/js/catalog.js','/icons/data/batch-06.js']) assert.ok(resolveStatic('/tmp/playground',path));
   assert.equal(resolveStatic('/tmp/playground','/icons/../private.env'),null);
   const publisher=readFileSync(new URL('prototypes/thousandvale/tools/publish-thousandvale.sh',root),'utf8');
-  assert.match(publisher,/ALLOW=\([^)]*\bicons\b/s);
+  // the release is built from server/static.js's own ALLOW list (one list, read at the commit being published)
+  assert.ok(ALLOW.includes('icons')); assert.match(publisher,/< <\(list ALLOW\)/);
 });

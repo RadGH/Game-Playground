@@ -1,5 +1,14 @@
 # Thousandvale is on hold (2026-10-13)
 
+
+> **Public home since 2026-10-14: https://thousandvale.games.radgh.com/** on the RGS droplet (production; its own
+> database `thousandvale_stable` on the droplet). To ship a change there: publish stable here
+> (`tools/publish-thousandvale.sh` for the LAN server, then the playground's `tools/publish-stable.sh` +
+> `tools/publish-pages.sh`), then `cd ~/claude/rads-game-server && tools/deploy.sh update thousandvale`.
+> Full map: `~/claude/docs/rgs.md`. The quick tunnel below still points at THIS VM's stable server — a second, separate
+> world with its own players' data; the droplet is the one to give out. `ops/vps/` and `docs/HOSTING.md` are the older
+> plan and are not what production runs (the droplet's setup lives in the rads-game-server repo).
+
 The owner paused Thousandvale to build another game. This page is the hand-over: where things stand, how to pick
 it up again, and everything that was deliberately **parked** rather than built. Nothing on the parked list is
 forgotten — bring it up when the game is resumed.

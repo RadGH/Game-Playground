@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SUPERSEDED 2026-10-14: production runs on the RGS droplet, deployed from ~/claude/rads-game-server (see ~/claude/docs/rgs.md).
 # =====================================================================================================
 # Thousandvale — set up a fresh Ubuntu 24.04 VPS from this VM, in one command (stream H, docs/HOSTING.md).
 # Runs on the VM as radgh. Uploads ops/vps/bootstrap.sh + the unit files and backup scripts it needs, then runs it

@@ -168,7 +168,7 @@ function showIntro() {
 function showResults() {
   const pm = S.pm, m = GAMES[pm.game].meta, me = mine();
   let place = 0; const rows = [];
-  for (const g of pm.result.order) { for (const pid of g) { const mem = members().find(x => x.pid === pid); if (mem) rows.push(`<li class="p${place + 1}"><span class="pl">${pm.result.coop ? '' : ['1st', '2nd', '3rd', '4th'][place]}</span>${chipOf(mem)}<span class="score">${pm.result.scores?.[pid] ?? ''} ${esc(pm.result.unit || '')}</span><span class="award">+${pm.award[pid] ?? 0} ${ICON[pm.unit === 'tickets' ? 'ticket' : 'ribbon']}${pm.unit}</span></li>`); } place += g.length; }
+  for (const g of pm.result.order) { for (const pid of g) { const mem = members().find(x => x.pid === pid); if (mem) rows.push(`<li class="p${place + 1}"><span class="pl">${pm.result.coop ? '' : ['1st', '2nd', '3rd', '4th'][place]}</span>${chipOf(mem)}<span class="score">${pm.result.scores?.[pid] ?? ''} ${esc(pm.result.unit || '')}</span><span class="award">+${pm.award[pid] ?? 0} ${pm.unit === 'tickets' ? ICON.ticket : ''}${pm.unit}</span></li>`); } place += g.length; }
   setScreen('results', `<div class="panel results-card"><h1 class="shout">${esc(m.title)}</h1>
     ${pm.result.coop ? `<p class="blurb">${pm.result.coop.success ? 'You did it together!' : 'So close. Better luck next time!'}</p>` : ''}
     <ol class="places">${rows.join('')}</ol>
@@ -192,6 +192,7 @@ function showFinal() {
 function dropPlay() { const p = S.play; S.play = null; S.playP = null; p?.dispose(); $('#game-ui').innerHTML = ''; controls.set(null); }
 async function onPhase(pm) {
   const prev = S.phase;
+  S.log = [...(S.log || []).slice(-30), `${Math.round(performance.now())} ${pm.phase}${pm.game ? ' ' + pm.game : ''}${pm.resume ? ' resume' : ''}`];   // recent phases, for tests and bug reports
   S.pm = pm; S.phase = pm.phase; S.ends = performance.now() + (pm.ms || 0); S.skips = [];
   document.body.dataset.phase = pm.phase;
   if (pm.phase !== 'game' && pm.phase !== 'results' && pm.phase !== 'intro') dropPlay();

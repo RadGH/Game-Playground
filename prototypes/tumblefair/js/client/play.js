@@ -101,5 +101,5 @@ export async function createPlay({ stage, net, controls, intro, members, me, uiR
     for (const a of actors.values()) a.dispose();
     stage.clear(group); group.removeFromParent(); ui.remove();
   }
-  return { meta, start, snap, frame, dispose, event: ev => view.event?.(ev), priv: d => view.priv?.(d), get state() { return lastG; }, players, DT };
+  return { meta, start, snap, frame, dispose, actor: pid => actors.get(pid) || null, event: ev => view.event?.(ev), priv: d => view.priv?.(d), get state() { return lastG; }, players, DT };
 }

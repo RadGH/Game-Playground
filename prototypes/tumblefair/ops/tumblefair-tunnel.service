@@ -1,0 +1,14 @@
+# Tumblefair public link: a Cloudflare QUICK tunnel (https://<words>.trycloudflare.com, no account) to the STABLE
+# server only (127.0.0.1:8480, the published copy). Its address changes every time this unit restarts; ops/install.sh
+# --url prints it and tools/update-live-link.sh records it. Metrics on 20242 (Thousandvale's tunnel has 20241).
+# KILL SWITCH: systemctl --user stop tumblefair-tunnel
+[Unit]
+Description=Tumblefair quick tunnel (trycloudflare) -> 127.0.0.1:8480
+After=network-online.target tumblefair.service
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/cloudflared tunnel --no-autoupdate --metrics 127.0.0.1:20242 --url http://127.0.0.1:8480
+Restart=on-failure
+RestartSec=5
+[Install]
+WantedBy=default.target

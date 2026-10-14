@@ -92,6 +92,10 @@
       "status": "deprecated", "date": "2026-09-10", "tags": ["integration"],
       "deprecated": "Still works, but it draws its characters with the original procedural Chibi body, which Chibi 2 replaced. Kept as the reference for wiring avatar + voice + speech together." },
 
+    { "id": "tumblefair", "group": "prototypes", "title": "Tumblefair", "folder": "prototypes/tumblefair",
+      "summary": "A couch party game for 2 to 4 players on their phones: scan the code, pick a look, then roll dice round a fairground board, vote for a minigame, play it and buy prize ribbons with your tickets. Running, throwing and painting games use your 3D character; drawing and quiz games show your face in the screens. A TV can join as the big screen. Own game server, so: this network, or the public link.",
+      "status": "playable", "statusNote": "party game, own server", "date": "2026-10-13", "isNew": true, "tags": ["party", "multiplayer", "phone", "3d", "minigames"],
+      "server": { "port": 8480, "path": "prototypes/tumblefair/" }, "live": "tumblefair" },
     { "id": "thousandvale", "group": "prototypes", "title": "Thousandvale", "folder": "prototypes/thousandvale",
       "summary": "An online RPG in one huge walkable world, shared by everyone on the server: Farhold's 30 classes, skills, talents and loot in a province of big zones with towns, farms, forts, dungeons, rares, zone events and hidden treasure. Parties, guilds, trading, mail and friends. It runs on its own game server, so it has two ways in: over this network, or by the public link.",
       "status": "playable", "statusNote": "online, own server", "date": "2026-10-06", "isNew": true, "tags": ["online", "rpg", "multiplayer", "3d", "loot"],

@@ -4,7 +4,7 @@
   "tier": "boss",
   "body": "slagborn_chief",
   "place": "dungeon glass_tomb (Tomb of the Glass Kings, Glasswind Strand, level 14-17): the end boss in the First King's Vault",
-  "_doc": "The first king of the island, buried in a coat of fused sand and woken by thieves. P1 \"The Court\": a crowned sword cone, a ring of sand-glass blades he throws around himself, and Sun Through Glass — four glass pillars in the vault are the only shade. P2 at 60% \"The Sealed Court\": he seals himself in glass; light the three grave lamps to break it while his glass guards fight. P3 new bar \"Shattered Crown\": his crown breaks — shards rain all over (scatter), a spreading shard on each player, and a crowned slam that throws everyone back.",
+  "_doc": "The first king of the island, buried in a coat of fused sand and woken by thieves. P1 \"The Court\": a crowned sword cone, a ring of sand-glass blades he throws around himself, and Sun Through Glass — four glass pillars in the vault are the only shade. P2 at 60% \"The Sealed Court\": he seals himself in glass; light the three grave lamps to break it while his glass guards fight. P3 new bar \"Shattered Crown\": his crown breaks — shards rain all over (scatter), a spreading shard on each player, and a crowned slam that throws everyone back. OWNER #51 (2026-10-15): the phase that refilled the health bar is removed; the health bar is the whole fight.",
   "party": "Solo: very hard. 2-3: one tank, one lamp runner. 5: as designed — the pillars crack, so share them.",
   "hpMult": 4,
   "arena": {
@@ -167,70 +167,6 @@
           "status": "marked"
         }
       ]
-    },
-    "shard_rain": {
-      "id": "shard_rain",
-      "name": "Crown Shards",
-      "every": [
-        10,
-        12
-      ],
-      "first": 2,
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "scatter",
-          "spread": 13,
-          "r": 2.6,
-          "count": 5,
-          "delay": 0.25,
-          "wind": 1.4,
-          "damage": 1.3,
-          "status": "bleed"
-        }
-      ]
-    },
-    "splinter": {
-      "id": "splinter",
-      "name": "Splinters",
-      "every": [
-        14,
-        17
-      ],
-      "first": 5,
-      "say": "A splinter of crown sticks in each of you — spread out!",
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "each",
-          "r": 3,
-          "follow": true,
-          "wind": 2,
-          "damage": 1.4,
-          "status": "bleed"
-        }
-      ]
-    },
-    "crown_slam": {
-      "id": "crown_slam",
-      "name": "Crowned Slam",
-      "every": [
-        17,
-        20
-      ],
-      "first": 8,
-      "cast": 1,
-      "say": "He lifts both fists — get away from him!",
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "self",
-          "r": 7,
-          "wind": 1.7,
-          "damage": 2.4,
-          "knock": 5
-        }
-      ]
     }
   },
   "phases": [
@@ -287,19 +223,6 @@
         "fade": "The glass round the king cracks by itself.",
         "pool": 0.1
       }
-    },
-    {
-      "name": "Shattered Crown",
-      "newBar": {
-        "hp": 0.55
-      },
-      "say": "His crown splits in two. \"Then I will rule in pieces.\"",
-      "abilities": [
-        "crown_sword",
-        "shard_rain",
-        "splinter",
-        "crown_slam"
-      ]
     }
   ],
   "triggers": [

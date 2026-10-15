@@ -4,7 +4,7 @@
   "tier": "boss",
   "body": "brigand_captain",
   "place": "dungeon fortress_keep set B: the end boss on the keep's top floor, the war room (28 m)",
-  "_doc": "Stream E (M2). The brigand warlord who took the keep and calls himself its lord. A loud, clever fighter. P1 \"Command\": a cleaver for the tank, a shield charge, and BANNERS — he plants red banners that buff him while he stands near one (pools with boss actions); break them by luring his charge (charge breaks objects). P2 at 60% \"Siege\": he holes up behind a shield wall with his lieutenants; the war-room has three SIGNAL FIRES (braziers) — light them and the keep's old garrison bell knocks his shield wall down. P3 new bar \"The Red Banner Falls\": a burning floor, ballista volleys at random players, a soak on the war table, his bodyguard returns, and a hard interrupt on his \"Rally\" heal.",
+  "_doc": "Stream E (M2). The brigand warlord who took the keep and calls himself its lord. A loud, clever fighter. P1 \"Command\": a cleaver for the tank, a shield charge, and BANNERS — he plants red banners that buff him while he stands near one (pools with boss actions); break them by luring his charge (charge breaks objects). P2 at 60% \"Siege\": he holes up behind a shield wall with his lieutenants; the war-room has three SIGNAL FIRES (braziers) — light them and the keep's old garrison bell knocks his shield wall down. P3 new bar \"The Red Banner Falls\": a burning floor, ballista volleys at random players, a soak on the war table, his bodyguard returns, and a hard interrupt on his \"Rally\" heal. OWNER #51 (2026-10-15): the phase that refilled the health bar is removed; the health bar is the whole fight.",
   "party": "Solo: very hard; with a follower OK. 2-3: one handles signal fires + soak. 5: as designed. M5: lieutenants +1 per player, soak need 2 at 5 players, health x1.8.",
   "hpMult": 4,
   "arena": {
@@ -264,121 +264,6 @@
           "damage": 1.6
         }
       ]
-    },
-    "burning_floor": {
-      "id": "burning_floor",
-      "name": "Torch the Room",
-      "every": [
-        18,
-        22
-      ],
-      "first": 3,
-      "cast": 0.8,
-      "say": "He kicks a torch into the rushes!",
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "scatter",
-          "r": 3,
-          "count": 4,
-          "delay": 0.25,
-          "spread": 12,
-          "element": "fire",
-          "leave": {
-            "type": "pool",
-            "name": "Burning rushes",
-            "r": 2.6,
-            "every": 1,
-            "seconds": 30,
-            "damage": 0.3,
-            "status": "burn"
-          },
-          "wind": 1.6,
-          "damage": 1.3
-        }
-      ]
-    },
-    "table_soak": {
-      "id": "table_soak",
-      "name": "Seize the Map",
-      "every": [
-        24,
-        28
-      ],
-      "first": 10,
-      "cast": 1,
-      "say": "\"The map! Get me the map!\" — someone stand at the war table!",
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "object",
-          "object": "cracked_floor",
-          "r": 2.8,
-          "kind": "soak",
-          "need": 1,
-          "fail": 2.0,
-          "failSay": "Hask grabs the war map and rallies the whole keep against you!",
-          "wind": 5,
-          "damage": 0.6
-        }
-      ]
-    },
-    "rally": {
-      "id": "rally",
-      "name": "Rally",
-      "every": [
-        22,
-        26
-      ],
-      "first": 14,
-      "cast": 3,
-      "interrupt": true,
-      "below": 0.9,
-      "say": "He shouts a rally — interrupt him before he heals!",
-      "onInterrupt": [
-        {
-          "say": "\"Rally! RAL—\" He chokes on it.",
-          "style": "emote"
-        }
-      ],
-      "actions": [
-        {
-          "heal": 0.1
-        }
-      ]
-    },
-    "last_cross": {
-      "id": "last_cross",
-      "name": "Red Banner Sweep",
-      "every": [
-        16,
-        19
-      ],
-      "first": 8,
-      "cast": 0.8,
-      "say": "He sweeps the banner pole round — dodge the cross, then the next!",
-      "telegraphs": [
-        {
-          "shape": "cross",
-          "at": "self",
-          "r": 14,
-          "w": 2.6,
-          "yaw": "facing",
-          "wind": 1.6,
-          "damage": 1.9
-        },
-        {
-          "shape": "cross",
-          "at": "self",
-          "r": 14,
-          "w": 2.6,
-          "yaw": "facing",
-          "rotate": 0.785,
-          "after": 1.4,
-          "wind": 1.6,
-          "damage": 1.9
-        }
-      ]
     }
   },
   "phases": [
@@ -430,20 +315,6 @@
         "fade": "The ward fails by itself. No opening this time.",
         "pool": 0.1
       }
-    },
-    {
-      "name": "The Red Banner Falls",
-      "newBar": {
-        "hp": 0.55
-      },
-      "say": "\"You want my keep? Come and TAKE IT.\"",
-      "abilities": [
-        "cleaver",
-        "burning_floor",
-        "table_soak",
-        "rally",
-        "last_cross"
-      ]
     }
   ],
   "triggers": [

@@ -31,8 +31,10 @@ import { siegeOf } from './warband.js';
 import { afterHurt as perkAfterHurt } from './perk-rules.js';
 
 export const AI = {
-  LEASH_METRES: 40,
-  LEASH_SECONDS: 8,
+  // owner #5 (2026-10-15): "increase the reset range of mobs by like 200-300% … just attacking with my wand is too far
+  // away that enemies reset": 40 m -> 120 m from home (x3), and 8 s -> 20 s chasing with nothing landing either way
+  LEASH_METRES: 120,
+  LEASH_SECONDS: 20,
   THINK_RADIUS: 200,
   /** a body that has fallen is removed this long after (actors.js: 2.4 s) */
   CORPSE_SECONDS: 2.4,
@@ -48,6 +50,29 @@ const hashPhase = id => { const t = String(id); let h = 7; for (let i = 0; i < t
 // --------------------------------------------------------------------------- spawning
 
 /**
+ * Owner #61 (2026-10-15): "a rare at level 12 with 5,361 health against my 327 … several minutes … the only reason I can
+ * kill these is that I am ranged and can kite". Farhold multiplies a rank's health and damage by its modifiers with no
+ * ceiling (a rare is x4.5 health, and two modifiers can take that past x14). On a Thousandvale engine
+ * (`engine.affixes.cfg.ranks`, data/rules/affixes.json) a champion's and a rare's health and damage are worked out
+ * again: the rank's own multiplier times its modifiers', held under a cap. Bosses are not touched (their scripts own
+ * their health). Rewards (xp, gold, drops) keep the rank's numbers.
+ */
+export function retuneRank(engine, unit, rank, modifiers = []) {
+  if (!engine?.combatCfg) return unit;                  // a parity engine keeps Farhold's ranks
+  const T = engine?.affixes?.cfg?.ranks?.[rank];
+  const R = engine?.balance?.ranks?.[rank];
+  if (!T || !R || !unit) return unit;
+  const modHp = modifiers.reduce((k, m) => k * (m.hp ?? 1), 1), modDmg = modifiers.reduce((k, m) => k * (m.dmg ?? 1), 1);
+  const was = { hp: (R.hp ?? 1) * modHp, dmg: (R.dmg ?? 1) * modDmg };
+  const now = { hp: Math.min(T.capHp ?? Infinity, (T.hp ?? R.hp ?? 1) * modHp), dmg: Math.min(T.capDmg ?? Infinity, (T.dmg ?? R.dmg ?? 1) * modDmg) };
+  const kh = now.hp / Math.max(1e-6, was.hp), kd = now.dmg / Math.max(1e-6, was.dmg);
+  if (kh !== 1) { unit.maxHp = Math.max(1, Math.round(unit.maxHp * kh)); unit.hp = unit.maxHp; }
+  if (kd !== 1 && Array.isArray(unit.dmg)) unit.dmg = unit.dmg.map(v => Math.max(1, Math.round(v * kd)));
+  unit.rankTuned = { hp: Math.round(now.hp * 100) / 100, dmg: Math.round(now.dmg * 100) / 100 };
+  return unit;
+}
+
+/**
  * Put a monster down: Farhold's `rpg.makeEnemy` + the fields `EnemyField.add` (actors.js line
  * ~500) sets, in the same rng order (makeEnemy, facing, hover if flying, bob).
  */
@@ -55,6 +80,7 @@ export function spawnMonster(field, def, level, x, z, { rank = 'normal', modifie
   const r = rng || field.room.streams.get('spawn');
   const unit = field.rpg.makeEnemy(def, level, r, { rank: boss && rank === 'normal' ? 'boss' : rank, modifiers, name });
   if (id != null) unit.id = id;
+  if (!boss) retuneRank(field.room?.engine, unit, rank, modifiers);      // owner #61: a champion / rare is a fight, not minutes of kiting
   unit.goldBase = def.gold ?? null;          // owner feedback 7: its own coin weight for js/rules/economy.js killGold
   unit.x = x; unit.z = z; unit.y = field.terrain ? groundAt(field.terrain, x, z) : 0;
   unit.state = 'wander'; unit.wanderTimer = 0; unit.swingTimer = 0; unit.hitFlash = 0;
@@ -480,7 +506,7 @@ export function tickMonsters(field, dtAll, hooks = {}) {
       const idle = field.clock - (Math.max(e.lastCombatAt ?? -Infinity, e.struckAt ?? -Infinity, e.pathingAt ?? -Infinity));
       const tgt = e.targetId != null ? field.get(e.targetId) : null;
       const close = tgt && Math.hypot(tgt.x - e.x, tgt.z - e.z) <= (e.reach || 2.4) + 1;
-      if (fromHome > AI.LEASH_METRES || (idle > AI.LEASH_SECONDS && !close)) { resetMonster(field, e); continue; }
+      if (fromHome > (e.leashM || AI.LEASH_METRES) || (idle > (e.leashS || AI.LEASH_SECONDS) && !close)) { resetMonster(field, e); continue; }      // [World, round 11 #5] an event's own leash
     }
 
     if (e.stagger > 0) {

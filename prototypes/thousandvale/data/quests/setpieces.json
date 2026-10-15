@@ -47,7 +47,7 @@
     },
     "bettony": {
       "name": "Bettony the herb-woman",
-      "role": "herbalist",
+      "role": "wise_woman",
       "at": "sp_nine_maidens",
       "greeting": "Step round the mushrooms, dear. They hold grudges against feet.",
       "titled": true

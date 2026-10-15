@@ -919,11 +919,82 @@ export function castSkillPlan(combat, ch, slot, intent = {}) {
   const plan = ch.skills.use(slot);
   if (!plan.ok) return { ok: false, why: plan.why };
   plan.tv = row?.tv || null;                 // Thousandvale-only row fields (a touch heal's reach)
+  gateResource(plan, ch);
+  applyPoints(plan);                         // round 11 (Star Blade): what each Starlight spent adds besides damage
   // the perk forest's Weave: a different skill than the last, inside the window, gives its mana back
   const back = weaveRefund(ch, plan.skill?.id, plan.paidWith === 'mana' ? plan.spent : 0, combat.room.clock.now());
   if (back > 0) ch.mp = Math.min(ch.maxMp, ch.mp + back);
   if (!hasFollowers && REFUSED_KINDS[plan.kind]) return { ok: false, why: REFUSED_KINDS[plan.kind] };
   return castPlan(combat, ch, plan, { intent, slot });
+}
+
+/**
+ * Owner #1 (2026-10-15): "the Starcaller should only gain Starlight starting at level 6 — before that they can't spend
+ * it". A row's `resource.fromLevel` holds its GAIN back until the caster reaches that level (spending is untouched: the
+ * spenders open at 6 and later). The plan's own copy and the hit rules' copy (skillmech `castRulesFrom`) both go to 0.
+ */
+export function gateResource(plan, ch) {
+  const r = plan?.resource || plan?.rules?.resource;
+  const from = r?.fromLevel;
+  if (!(from > 1) || (ch?.level || 1) >= from) return plan;
+  if (plan.resource?.gain) plan.resource = { ...plan.resource, gain: 0 };
+  if (plan.rules?.resource?.gain) plan.rules = { ...plan.rules, resource: { ...plan.rules.resource, gain: 0 } };
+  return plan;
+}
+
+/**
+ * Round 11 (owner #53 / #56, the Star Blade): "the Star Blade could use the same Starlight mechanic as the Starcaller, but
+ * obviously it would apply to spells differently". Farhold's resource spend only knows `perPoint.mult` (more damage); a
+ * row's `tv.points` says what each point spent adds to the rest of the skill (Thousandvale-only, card text in
+ * js/rules/wording.js `tvSentences`):
+ *   barrier   + this share of maximum health on the skill's barrier, a point
+ *   answer    x(1 + this) on the counter's answering strike, a point
+ *   hold      + these seconds on every root the skill lays, a point
+ *   atMax.stun  spending a full pool (5): the answers (a counter) or the skill's own hits stun this many seconds
+ * `plan.pointsSpent` is what Farhold's bar spent (js/skills.js). Pure on the plan; returns it.
+ */
+export const POINTS_FULL = 5;
+export function applyPoints(plan) {
+  const pts = plan?.tv?.points, n = plan?.pointsSpent || 0;
+  if (!pts || !(n > 0)) return plan;
+  if (pts.barrier && plan.barrier && typeof plan.barrier === 'object') plan.barrier = { ...plan.barrier, share: (plan.barrier.share ?? 0.2) + pts.barrier * n };
+  if (pts.answer && plan.counter?.answer) plan.counter = { ...plan.counter, answer: { ...plan.counter.answer, mult: (plan.counter.answer.mult ?? 1) * (1 + pts.answer * n) } };
+  const longer = list => (Array.isArray(list) ? list.map(s => (s && typeof s === 'object' && s.id === 'root' ? { ...s, seconds: (s.seconds ?? 2) + pts.hold * n } : s)) : list);
+  if (pts.hold) {
+    plan.statuses = longer(plan.statuses);
+    if (plan.rules?.statuses) plan.rules = { ...plan.rules, statuses: longer(plan.rules.statuses) };
+  }
+  const stun = pts.atMax?.stun;
+  if (stun && n >= POINTS_FULL) {
+    const harder = k => ({ ...(k && typeof k === 'object' ? k : {}), stagger: Math.max(k?.stagger || 0, stun) });
+    if (plan.counter?.answer) plan.counter = { ...plan.counter, answer: { ...plan.counter.answer, knock: harder(plan.counter.answer.knock) } };
+    else {
+      plan.knock = harder(plan.knock);
+      if (plan.rules?.knock) plan.rules = { ...plan.rules, knock: harder(plan.rules.knock) };
+    }
+  }
+  plan.pointsApplied = n;
+  return plan;
+}
+
+/**
+ * Round 11 (the Star Blade): a resource that also fills when you are HIT — a slotted row's `tv.hurtGain`
+ * `{ id, n, every, fromLevel }`. At most once every `every` seconds (a crowd must not fill it in one tick), never below
+ * `fromLevel`. Called from the room's hurt hook below. Returns what was gained.
+ */
+export function hurtGain(unit, now) {
+  if (!unit?.skills?.slots) return 0;
+  let got = 0;
+  for (const s of unit.skills.slots) {
+    const g = s?.tv?.hurtGain;
+    if (!g || (unit.level || 1) < (g.fromLevel || 1) || (s.unlockAt && (unit.level || 1) < s.unlockAt)) continue;
+    const m = unit.mech || (unit.mech = { res: {} });
+    const at = (m.hurtGainAt || (m.hurtGainAt = {}));
+    if (at[g.id] != null && now - at[g.id] < (g.every ?? 1)) continue;
+    at[g.id] = now;
+    got += gainResource(unit, g.id, g.n ?? 1);
+  }
+  return got;
 }
 
 /** How far a skill reaches from the caster, by shape (P23). Null = no reach to check. */
@@ -1902,6 +1973,8 @@ export function installSkillRuntime(combat) {
         }
       });
     }
+    // round 11 (Star Blade): a hit taken fills a `tv.hurtGain` resource (Farhold's `gainPer: 'hurt'`, one a second at most)
+    if (owner && result.amount > 0) hurtGain(owner, combat.room.clock.now());
     // main.js onEnemyStrike: a frost nova off the hit, a barrier that bursts, thorns that kill (js/uniques.js)
     if (owner) rt.withCaster(owner, () => rt.afterDamaged(owner, result, attacker));
     // a temporary summon that dies bursts; a struck decoy answers its attacker (skillrun.js onHurt)

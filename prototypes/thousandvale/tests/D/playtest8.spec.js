@@ -227,6 +227,7 @@ test('W26: the mount call holds you still (moving does not break it), a second p
   await hook('/teleport', { name: NAME, x: HOME.x + 30, z: HOME.z + 40 });
   const lv = await hook('/level', { name: NAME, level: 5 });
   expect(lv.ok).toBe(true);
+  expect((await hook('/mounts', { name: NAME, mounts: ['trail_horse'] })).ok, 'round 11 (#16): the horse is bought, not given — the hook hands one over').toBe(true);
   await page.waitForTimeout(5000);
   const at = () => page.evaluate(() => ({ x: tv.state().you.x, z: tv.state().you.z, held: thousandvale.controls.held, mount: thousandvale.S.self.mount || null, call: !!thousandvale.S.mountCall }));
   // 1. call, then cancel with a second press

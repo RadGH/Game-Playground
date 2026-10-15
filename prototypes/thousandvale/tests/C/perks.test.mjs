@@ -83,8 +83,9 @@ test('the cards: stat lines are written from the numbers; a keystone line quotes
   for (const n of F.nodes) {
     if (n.kind === 'hub') continue;
     if (!n.ruleId) {
-      const [[k, v]] = Object.entries(n.grants);
-      if (n.desc !== statText(k, v)) bad.push(n.id);
+      // owner #2: a node may grant several stats (what one Dexterity point was); the card says each of them
+      const want = Object.entries(n.grants).map(([k, v]) => statText(k, v)).join(', ');
+      if (n.desc !== want) bad.push(n.id);
       continue;
     }
     const text = `${n.desc} ${n.cost || ''}`;

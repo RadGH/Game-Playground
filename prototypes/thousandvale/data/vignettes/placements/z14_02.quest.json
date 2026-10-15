@@ -1,5 +1,5 @@
 {
- "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z14_02, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z14_02, added where a kill / collect quest's area held fewer of its monster than the step needs (round 11: max(count + 4, 2 x count) — two players at once; they come back in 1-1.5 minutes). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
  "zone": "z14_02",
  "terrainHash": "b8a99ae8",
  "placements": [
@@ -13,15 +13,67 @@
     5
    ],
    "count": [
-    1,
-    1
+    3,
+    3
    ],
    "x": 648,
    "z": 568,
    "yaw": 0,
    "radius": 8,
    "quest": "serpents_at_the_ferry",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_serpents_at_the_ferry_0_1",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 635,
+   "z": 580,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "serpents_at_the_ferry",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_serpents_at_the_ferry_0_2",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 650,
+   "z": 544,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "serpents_at_the_ferry",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",
@@ -33,15 +85,211 @@
     7
    ],
    "count": [
-    2,
-    2
+    3,
+    3
    ],
    "x": 1744,
    "z": 248,
    "yaw": 0,
    "radius": 8,
    "quest": "croaking_at_dawn",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_croaking_at_dawn_0_1",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    7,
+    7
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1731,
+   "z": 260,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "croaking_at_dawn",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_croaking_at_dawn_0_2",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    7,
+    7
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1746,
+   "z": 224,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "croaking_at_dawn",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_croaking_at_dawn_0_3",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    7,
+    7
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1751,
+   "z": 258,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "croaking_at_dawn",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_croaking_at_dawn_0_4",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    7,
+    7
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1726,
+   "z": 245,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "croaking_at_dawn",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_wobbly_fort_0_0",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    6,
+    6
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1183,
+   "z": 535,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "wobbly_fort",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_wobbly_fort_0_1",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    7,
+    7
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1254,
+   "z": 516,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "wobbly_fort",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_wobbly_fort_0_2",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    7,
+    7
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1136,
+   "z": 472,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "wobbly_fort",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_wobbly_fort_0_3",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    6,
+    6
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1190,
+   "z": 545,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "wobbly_fort",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",

@@ -58,7 +58,7 @@ export function createGamepad({ api, focus, radial, osk, run }) {
       case 'B': document.activeElement?.blur?.();   // the game ignores keys while a text box, list or checkbox has the focus
         if (!title) keyTap('Escape'); else document.querySelector('#back-front:not([hidden]), .tv-panel:not([hidden]) [data-act="back"]')?.click(); break;
       case 'X': focus.alt(); break;
-      case 'Y': focus.details(); break;
+      case 'Y': (focus.cardOrAlt || focus.details)(); break;      // round 11 (#28): the card, then the other-slot compare
       case 'LB': focus.tab(-1); break;
       case 'RB': focus.tab(1); break;
       case 'LT': focus.zoom(-1); break;

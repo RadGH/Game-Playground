@@ -28,10 +28,11 @@ const n = v => {
 };
 const pc = v => `${n(Math.round(v * 1000) / 10)}%`;                // a fraction as a percent
 export const STAT_TEXT = {
-  str: v => `${sgn(v)}${n(v)} Strength (heavy weapon damage)`,
-  dex: v => `${sgn(v)}${n(v)} Dexterity (ranged and light weapon damage)`,
-  int: v => `${sgn(v)}${n(v)} Intellect (+${n(v * 2)} mana, wand and staff damage)`,
-  con: v => `${sgn(v)}${n(v)} Constitution (+${n(v * 4)} maximum health)`,
+  // owner #2 (2026-10-15): no attributes — what Strength / Dexterity / Intellect gave a weapon is a share of its family
+  // (js/rules/attributes.js); Constitution is plain health
+  heavyPct: v => `${sgn(v)}${n(v)}% damage with heavy weapons`,
+  lightPct: v => `${sgn(v)}${n(v)}% damage with light weapons and bows`,
+  magicPct: v => `${sgn(v)}${n(v)}% damage with wands, staves, sceptres and tomes`,
   maxHp: v => `${sgn(v)}${n(v)} maximum health`,
   maxMp: v => `${sgn(v)}${n(v)} maximum mana`,
   armor: v => `${sgn(v)}${n(v)} armour`,
@@ -72,7 +73,8 @@ export const STAT_TEXT = {
 };
 /** Farhold `derived` keys that Thousandvale reads, and where (the forest may grant only these + TV_STAT_READERS). */
 export const FARHOLD_STAT_READERS = Object.freeze({
-  str: 'rpg.derive', dex: 'rpg.derive', int: 'rpg.derive', con: 'rpg.derive', maxHp: 'rpg.derive', maxMp: 'rpg.derive',
+  heavyPct: 'js/rules/attributes.js (rpg.derive wrapper)', lightPct: 'js/rules/attributes.js (rpg.derive wrapper)', magicPct: 'js/rules/attributes.js (rpg.derive wrapper)',
+  maxHp: 'rpg.derive', maxMp: 'rpg.derive',
   armor: 'rpg.strike', armorPct: 'rpg.derive', magicResist: 'rpg.strike', damageFlat: 'rpg.derive', damagePct: 'rpg.derive',
   critChance: 'rpg.strike', critDamage: 'rpg.strike', dodge: 'rpg.strike', haste: 'rpg.derive (swing clock)',
   spellPower: 'rpg.strike', cooldownReduction: 'skills.js cooldownFor', skillCostPct: 'skills.js costFor',
@@ -95,8 +97,11 @@ const KEY_STAGGER = 0.8;
 export const ARM_MARGIN = 0.02;
 
 /** Lay the forest out from data/rules/perks.json. */
-export function buildTvForest(data) {
+export function buildTvForest(data, { vars = {} } = {}) {
   const D = data || {};
+  // owner #17 (2026-10-15): a card may name numbers that live elsewhere ({companionMain} …) — filled here from the
+  // engine's own data, so the card and the rule cannot disagree
+  const fill = s => (typeof s === 'string' ? s.replace(/\{(\w+)\}/g, (m, k) => (vars[k] != null ? String(vars[k]) : m)) : s);
   const arms = D.arms || [];
   const rules = D.rules || {};
   const rings = D.rings || [];
@@ -108,15 +113,21 @@ export function buildTvForest(data) {
   const ruleNode = (id, extra) => {
     const r = rules[id];
     if (!r) throw new Error(`perk forest: unknown rule ${id}`);
-    const desc = r.desc || grantsText(r.grants);
+    const desc = fill(r.desc) || grantsText(r.grants);
     return {
-      ...extra, kind: r.kind === 'keystone' ? 'keystone' : 'talent', name: r.name, desc, cost: r.cost || null,
+      ...extra, kind: r.kind === 'keystone' ? 'keystone' : 'talent', name: r.name, desc, cost: fill(r.cost) || null,
       grants: { ...(r.grants || {}) }, flag: r.flag || null, power: r.power || null, when: r.when || null,
       whenGrants: r.whenGrants || null, ruleId: id,
       ...(r.kind === 'keystone' ? { keystoneId: id } : { talentId: id }),
     };
   };
-  const statNode = ([key, value], extra) => ({ ...extra, name: statText(key, value), desc: statText(key, value), grants: { [key]: value } });
+  // an entry is [key, value] or [key, value, { more grants }] (one node that grants several — owner #2's Dexterity was
+  // weapon damage AND critical chance AND dodge)
+  const statNode = ([key, value, more], extra) => {
+    const grants = { [key]: value, ...(more && typeof more === 'object' ? more : {}) };
+    const text = grantsText(grants);
+    return { ...extra, name: statText(key, value), desc: text, grants };
+  };
 
   const start = add({ id: 'start', kind: 'hub', name: 'Where you began', x: 0, y: 0, arm: null, ring: 0, grants: {},
     desc: 'The middle of the forest. This node costs 0 points and grants nothing — every arm starts here, and 1 point moves you one node along whichever arm you pick.' });
@@ -234,8 +245,8 @@ const FLAG_STYLE = Object.freeze({
   bloodScent: 'dot', contagion: 'dot', overflow: 'spell', bloodMagic: 'spell', weave: 'spell', mindWard: 'spell',
 });
 const STAT_TAG = Object.freeze({
-  spellPower: 'spell', int: 'spell', maxMp: 'spell', mpRegen: 'spell', skillCostPct: 'spell', dotPct: 'dot', petDamagePct: 'pet', followerSlots: 'pet',
-  healPower: 'heal', str: 'melee', areaPct: 'melee', dex: 'agile', arrowsPerShot: 'ranged', dodge: 'agile', haste: 'agile', blockChance: 'tank', blockPower: 'tank', armorPct: 'tank',
+  spellPower: 'spell', magicPct: 'spell', maxMp: 'spell', mpRegen: 'spell', skillCostPct: 'spell', dotPct: 'dot', petDamagePct: 'pet', followerSlots: 'pet',
+  healPower: 'heal', heavyPct: 'melee', areaPct: 'melee', lightPct: 'agile', arrowsPerShot: 'ranged', dodge: 'agile', haste: 'agile', blockChance: 'tank', blockPower: 'tank', armorPct: 'tank',
   armor: 'tank', resistAll: 'tank', shockPct: 'lightning',
 });
 export function perkTags(node) {

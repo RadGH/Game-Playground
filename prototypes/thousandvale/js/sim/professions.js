@@ -41,10 +41,26 @@ export const CRAFT_OPS = Object.freeze(['list', 'start', 'done', 'stop', 'cancel
 
 const hash01 = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0) / 4294967296; };
 
+/**
+ * Round 11 (live #14: "[Skinning]: sporecap_walker: It is fungus, not flesh"): the name a PLAYER reads for a monster. A
+ * plain monster's entity carries its type as its name (js/sim/entity.js), so a code id must never be printed as it is:
+ * the skin tables' own name wins, then a real name, then the id turned into words ("sporecap_walker" -> "Sporecap Walker").
+ */
+export const wordsOf = id => String(id || '').replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim().replace(/\b\w/g, c => c.toUpperCase());
+export function displayName(e, tables = null) {
+  if (!e) return 'That';
+  const t = e.type, own = tables && t && ((tables.types && tables.types[t] && tables.types[t].name) || (tables.none && tables.none[t] && tables.none[t].name));
+  if (own) return own;
+  const n = e.name && String(e.name);
+  if (n && n !== t && !/^[a-z0-9]+(_[a-z0-9]+)+$/.test(n)) return n;
+  return wordsOf(n || t) || 'That';
+}
+
 const dedupeById = list => { const seen = new Set(); return list.filter(x => x && !seen.has(x.id) && seen.add(x.id)); };
 export function createProfessions({ layouts, online, provOf, grant, journal, questEvent = () => {}, now, wallNow = () => Date.now(), log = () => {}, counters = {},
-  fighting = () => false, dismount = () => {}, endMeal = () => {}, stopFishing = () => {}, wantSheet = () => {}, bagCap = () => 120, isFire = () => false, anglingView = () => ({ level: 1, xp: 0, next: null }),
-  spend = (o, gold) => { o.char.gold -= gold; }, potionText = null, tradeHolds = () => false, loadEngine = null, opts = {} }) {
+  fighting = () => false, dismount = () => {}, endMeal = () => {}, stopFishing = () => {}, wantSheet = () => {}, bagCap = () => 120, bagFull = null /* round 11 UI: per bag tab */, isFire = () => false, anglingView = () => ({ level: 1, xp: 0, next: null }),
+  spend = (o, gold) => { o.char.gold -= gold; }, potionText = null, tradeHolds = () => false, loadEngine = null,
+  rodItem = () => null, hasRod = () => true /* round 11 (#11): the province's angling rod, for grantAll */, opts = {} }) {
   const first = layouts[0] || {};
   const D = first.professions || null;               // { numbers, content, nodes }
   const P = D && D.numbers ? createRules(D.numbers, D.content || {}) : null;
@@ -101,7 +117,10 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
     return s;
   }
   const peek = ch => (ch.professions && typeof ch.professions === 'object' ? ch.professions : { known: [], xp: {}, made: {}, tools: {} });
-  const knows = (ch, id) => { const d = P && P.def(id); return !!d && (!!d.start || (peek(ch).known || []).includes(id)); };
+  // round 11 (live #11: "Let's just start all characters with all professions"): every character knows all ten trades —
+  // a new one from the start, an old one the moment this code sees it. The saved `known` list is kept (and filled by
+  // grantAll) only so an older server reading the save agrees.
+  const knows = (ch, id) => !!(P && P.def(id));
   const levelOf = (ch, id) => (id === 'angling' ? (anglingView(ch).level || 1) : P ? P.levelOf((peek(ch).xp || {})[id] || 0) : 1);
   /** What the client gets as `you.professions` (never creates the record). */
   function view(ch) {
@@ -270,7 +289,7 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
     const prof = node.prof, skill = levelOf(ch, prof), tool = P.bestTool(ch.bag, prof);
     const can = P.canGather({ known: knows(ch, prof), skill, node, tool });
     if (!can.ok) return gatherRefuse(o, can.why, can.text, can.need ? { need: can.need } : {});
-    if ((ch.bag || []).length >= bagCap(o)) {
+    if (bagFull ? bagFull(o, { kind: 'material' }) : (ch.bag || []).length >= bagCap(o)) {
       // a full bag still takes what tops up a stack already in it
       const ids = (Array.isArray(node.gives) ? node.gives : [{ id: node.gives }]).map(g => g.id);
       if (!ids.every(id => (ch.bag || []).some(it => it.kind === 'material' && it.id === id && (it.count || 1) < 46))) return gatherRefuse(o, 'bagFull', 'Your bag is full.');
@@ -279,7 +298,7 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
     const game = P.gatherGame({ prof, tier: node.tier, skill, tool, seed });
     begin(o, { kind: 'gather', prof, game, target, node, key, skin, tool, skill });
     counters.gatherStarts = (counters.gatherStarts || 0) + 1;
-    reply(o, 'gatherR', { ok: true, state: 'play', id: target.id, prof, node: { kind: node.id || 'corpse', tier: node.tier, name: node.name }, game, ...(tool ? { tool: tool.id } : {}) });
+    reply(o, 'gatherR', { ok: true, state: 'play', id: target.id, prof, node: { kind: node.id || 'corpse', tier: node.tier, name: skin ? displayName(target, P.C.skins) : node.name }, game, ...(tool ? { tool: tool.id } : {}) });
   }
   function gatherDone(o, m) {
     const w = o.work, ch = o.char, e = o.entity;
@@ -297,7 +316,8 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
     const rng = () => w.room.host.random('prof');
     const yields = P.gatherYield({ node: w.node, quality: r.quality, rng, tool: w.tool, extra: w.room.rules && w.room.rules.gatherBonus ? +w.room.rules.gatherBonus(o.entity) || 0 : 0 });      // (stream C, round 9: Forager's Covenant)
     const items = yields.map(y => P.item(y.id, y.n)).filter(Boolean);
-    const got = yields.map(y => gotRow(P.item(y.id, 1), y.n, !!y.bonus));
+    const got = yields.map(y => ({ ...gotRow(P.item(y.id, 1), y.n, !!y.bonus), ...(y.find ? { find: true } : {}) }));      // round 11 (#9): the high-score find is marked
+    const high = P.highScore(r.quality);
     const xp = P.xpFor({ tier: w.node.tier, quality: r.quality, skill: w.skill });
     const g = addXp(o, w.prof, xp);
     let reopenMs = 0;
@@ -313,10 +333,10 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
     const added = grant(o, { items, gold: 0, reason: 'gather' }) || [];
     counters.gathered = (counters.gathered || 0) + 1;
     counters['gather_' + w.prof] = (counters['gather_' + w.prof] || 0) + 1;
-    reply(o, 'gatherDone', { ...base, ok: true, items: added, got, xp, skill: skillView(g), reopenMs,
-      msg: `${P.qualityName(r.quality)} work: ${got.map(x => x.n + ' ' + x.name).join(', ')}.` });
+    reply(o, 'gatherDone', { ...base, ok: true, items: added, got, xp, skill: skillView(g), reopenMs, ...(high ? { highScore: true } : {}),
+      msg: `${P.qualityName(r.quality)} work${high ? ' — a high score: half as much again, and a find' : ''}: ${got.map(x => x.n + ' ' + x.name).join(', ')}.` });
     tell(o);
-    for (const y of yields) if (!y.bonus) for (let k = 0; k < y.n; k++) questEvent(o, { kind: 'gather', prof: w.prof, mat: y.id, tier: w.node.tier, x: e.x, z: e.z });
+    for (const y of yields) if (!y.bonus && !y.find) for (let k = 0; k < y.n; k++) questEvent(o, { kind: 'gather', prof: w.prof, mat: y.id, tier: w.node.tier, x: e.x, z: e.z });
   }
   function gather(o, m) {
     if (!GATHER_OPS.includes(m.op)) return 'op';
@@ -337,7 +357,7 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
       for (const o of who) {
         if (!o || !o.char || !knows(o.char, 'skinning')) continue;
         (o.noSkins ||= new Map()).set(dead.id, { ent: dead, at: now(), why });
-        if (!(o.noSkinTold ||= new Set()).has(dead.type)) { o.noSkinTold.add(dead.type); reply(o, 'chat', { ch: 'system', from: 0, name: 'Skinning', text: `${dead.name || 'That'}: ${why}` }); }
+        if (!(o.noSkinTold ||= new Set()).has(dead.type)) { o.noSkinTold.add(dead.type); reply(o, 'chat', { ch: 'system', from: 0, name: 'Skinning', text: `${displayName(dead, P.C.skins)}: ${why}` }); }
       }
       return;
     }
@@ -345,7 +365,7 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
     for (const o of who) {
       if (!o || !o.char || !knows(o.char, 'skinning')) continue;
       (o.skins ||= new Map()).set(dead.id, { ent: dead, at: now() });
-      reply(o, 'skinnable', { id: dead.id, on: true, tier: sk.tier, minSkill: t.minSkill, name: sk.name });
+      reply(o, 'skinnable', { id: dead.id, on: true, tier: sk.tier, minSkill: t.minSkill, name: displayName({ type: dead.type, name: sk.name }, P.C.skins) });
     }
   }
 
@@ -459,7 +479,7 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
     const needs = (rc.needs || []).map(nd => ({ ...nd, n: nd.n * n }));
     const can = P.canCraft({ ...rc, needs }, { known: knows(ch, rc.prof), skill, counts: P.countsOf(ch.bag), gold: ch.gold || 0, fee, station: st ? st.kinds : [], level: ch.level || 1, base: m.base || null });
     if (!can.ok) return craftRefuse(o, m.id, can.why, can.text, can.need ? { need: can.need } : {});
-    if ((rc.kind === 'gear' || rc.kind === 'tool') && (ch.bag || []).length >= bagCap(o)) return craftRefuse(o, m.id, 'bagFull', 'Your bag is full.');
+    if ((rc.kind === 'gear' || rc.kind === 'tool') && (bagFull ? bagFull(o, rc.kind === 'tool' ? { kind: 'good', tool: true } : { type: 'weapon' }) : (ch.bag || []).length >= bagCap(o))) return craftRefuse(o, m.id, 'bagFull', 'Your bag is full.');
     if (rc.kind === 'gear') wantEngine(room);
     const game = P.craftGame(rc, { skill, seed });
     begin(o, { kind: 'craft', prof: rc.prof, game, station: st.ent, rc, n, fee, needs, base: m.base || null, skill });
@@ -581,6 +601,36 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
     if (o.work && o.work.kind === 'craft') stop(o, 'stopped'); else reply(o, 'craftR', { ok: true, state: 'idle' });
   }
 
+  /**
+   * Round 11 (live #11): every character knows all ten trades and holds the basic tool of each gathering trade and a
+   * fishing rod. Called on every join (js/sim/province.js `joined`): a tool is handed over ONCE per trade (`tools[prof]`,
+   * saved) — one that was sold or thrown away is not given back (the trainers sell them, as before). Returns the items given.
+   */
+  function grantAll(o) {
+    if (!P || !o || !o.char) return [];
+    const ch = o.char, s = stateOf(ch), give = [];
+    let changed = false;
+    for (const id of PROFESSIONS) if (!s.known.includes(id)) { s.known.push(id); changed = true; }
+    for (const [prof, tid] of Object.entries(content.starterTools || {})) {
+      if (s.tools[prof]) continue;
+      s.tools[prof] = 1; changed = true;
+      if ((ch.bag || []).some(it => P.isTool(it, prof))) continue;
+      const it = P.toolItem(tid); if (it) give.push(it);
+    }
+    if (!s.tools.angling) {
+      s.tools.angling = 1; changed = true;
+      if (!hasRod(ch)) { const rod = rodItem(o); if (rod) give.push(rod); }
+    }
+    if (changed) saved(o);
+    if (give.length) {
+      const added = grant(o, { items: give, gold: 0, reason: 'trainer' }) || [];
+      counters.profKits = (counters.profKits || 0) + 1;
+      reply(o, 'chat', { ch: 'system', from: 0, name: 'Professions', text: `You know all ten trades. In your bag (they take no slot): ${(added.length ? added : give).map(it => it.name).join(', ')}.` });
+      tell(o);
+    }
+    return give;
+  }
+
   // ---- trainers ----
   function teach(o, id, quiet = false) {
     const ch = o.char, d = P.def(id), s = stateOf(ch);
@@ -628,7 +678,7 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
     if ((ch.bag || []).some(it => P.isTool(it, m.id))) return R({ ok: false, why: 'known', msg: 'You already have one.' });
     const price = P.N.toolPrice || 12;
     if ((ch.gold || 0) < price) return R({ ok: false, why: 'gold', msg: `That costs ${price} gold.` });
-    if ((ch.bag || []).length >= bagCap(o)) return R({ ok: false, why: 'bagFull', msg: 'Your bag is full.' });
+    if (bagFull ? bagFull(o, { kind: 'good', tool: true }) : (ch.bag || []).length >= bagCap(o)) return R({ ok: false, why: 'bagFull', msg: 'Your bag is full.' });
     spend(o, price, 'tool');
     const toolIt = (grant(o, { items: [P.toolItem(tid)], gold: 0, reason: 'trainer' }) || [])[0] || null;
     tell(o);
@@ -648,6 +698,9 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
     if (taught) tell(o);                                   // the Professions list's Angling row turns to "known" at once
     const has = id => (id === 'angling' ? anglingView(ch).learned !== false : knows(ch, id));
     if (obj.data.npc.teachOnTalk || trainerIds.has(obj.data.npc.id)) for (const id of row.trains || []) if (!knows(ch, id)) { teach(o, id); (taught ||= []).push(id); }
+    // round 11 (#11): nobody has a trade to learn any more — a quest step "talk to the smith about Smithing" (kind `learn`)
+    // is done by talking to anyone who trains that trade
+    for (const id of row.trains || []) questEvent(o, { kind: 'learn', prof: id, x: o.entity.x, z: o.entity.z });
     return { prof: { trains: (row.trains || []).slice(), stations: row.stations || [], known: (row.trains || []).filter(has), toolPrice: P.N.toolPrice || 12, ...(taught ? { taught } : {}) } };
   }
   /** A gathering tool used from the bag = start on the nearest node of its trade. Returns true when `item` was a tool. */
@@ -718,6 +771,6 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
     }
   }
 
-  return { P, prof, gather, craft, tick, sweep, keepBody, stop, view, ensureNodes, npcExtra, forgeWhy, useItem, onKill, onEvent, eventDrop, teach, stationNear, nodeNear, nodesIn, working, knows, levelOf, stateOf,
+  return { P, prof, gather, craft, tick, sweep, keepBody, stop, view, ensureNodes, npcExtra, grantAll, forgeWhy, useItem, onKill, onEvent, eventDrop, teach, stationNear, nodeNear, nodesIn, working, knows, levelOf, stateOf,
     get engine() { return engine; }, setEngine(e) { engine = e; }, ready: () => !!P };
 }

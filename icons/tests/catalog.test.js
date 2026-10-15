@@ -35,10 +35,12 @@ test('the 30 new classes were drawn in six batches of five, retaining the six St
   }
   const original=filterIcons({batch:0}); assert.equal(original.length,6);
   assert.ok(original.every(i=>i.classId==='starcaller'));
+  const blade=filterIcons({batch:7}); assert.equal(blade.length,6);   // play-test 11: the Star Blade, the Starcaller's partner
+  assert.ok(blade.every(i=>i.classId==='starblade'));
 });
 
 test('search matches metadata and combines class, category and batch filters', () => {
-  assert.equal(filterIcons().length,186);
+  assert.equal(filterIcons().length,192);   // 180 + the Starcaller's 6 + the Star Blade's 6 (play-test 11, batch 7)
   assert.deepEqual(filterIcons({q:'GNawing dark'}).map(i=>i.id),['gnawing_dark']);
   assert.ok(filterIcons({q:'hungry teeth'}).some(i=>i.id==='gnawing_dark'));
   assert.equal(filterIcons({classId:'starcaller',category:'stars'}).length,6);

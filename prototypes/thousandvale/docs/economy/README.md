@@ -268,3 +268,13 @@ Killing at level 10 moved from 5,230 to about 6,000 gold an hour (a backpack sel
 - **Quests against kills (W4)** — `quest.xpMult` 1.5. `node tools/sim-economy.mjs --curve` prints kills and minutes to each level 1-10 by killing alone and by questing: `curve-before.txt` (before stream C raised kill experience), `curve-kills-only.txt` (C's change alone: questing was slower than killing up to level 6), `curve-after.txt` (now). Rule in economy.json `targets.questXp`.
 - **Guards** — `raid-guards.txt` (`node tools/sim-raid.mjs`).
 - **Professions** — the simulator prints `tools/sim-professions.mjs` `extraRows()` rows under the main table when that file exists.
+
+## Round 11 (owner #15 / #16, 2026-10-15)
+- **Bought goods sell back for half** (`economy.json` `sell.goods` 0.5 -> `server.shop.goodsSellFactor`): a good carries the shop's `shopPrice` and paid 1 gold back before ("saddle bags for 45 g sell for 1 g"). It makes no gold — buying and selling back always loses half — so the income tables above do not move. Dropped goods with no shop price still sell for 1.
+- **Gear sell-back stays at 6%.** A run with `--set=prices.gear.sellFactor=0.08` (`node tools/sim-economy.mjs --levels=1,5,9,15,20,30 --set=prices.gear.sellFactor=0.08`) puts sold drops at 33 of a kill's 56 gold at level 9 and 185 of 247 at level 30, and killing (21,028 an hour) out-earns questing (17,006) at level 30 — the direction the 10% / 15% runs above warned about. The owner's "raise the sell values" is answered by the goods rule; gear needs kill loot re-tuned first (ON-HOLD "Sell-back is 6%").
+- **The Trail Horse costs 120 gold** at level 1 (it was 400) and nobody is given one any more; `tests/E/playtest7-economy.test.js` holds it under an hour of level-1 play instead of the 1-4 hour mount rule. The Moor Pony (1,800, level 5) and up keep that rule.
+
+## Round 11 — the Market (owner #25, 2026-10-15)
+- **Sink:** the listing fee, 20% of the shop sell value of the lot (min 1 gold), econ reason `marketFee`; not refunded on cancel. Gold that changes hands between players is neither faucet nor sink.
+- **Faucet removed:** the bag-overflow gold (`economy.bag.overflowPerItem`, reason `overflow`) no longer pays while the post exists — overflow items are mailed instead (counter `bagPosted`).
+- Knobs live in `js/sim/market-rules.js` `MARKET` (feePct, cap 20, perHour 30, priceMax 10M, lastsMs 30 days); tests override them through `marketOpts`.

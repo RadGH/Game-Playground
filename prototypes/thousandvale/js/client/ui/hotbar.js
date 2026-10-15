@@ -60,7 +60,7 @@ export function createHotbar({ net, hud, bag, me }) {
       return id;
     });
     for (const it of bag.state.bag) {
-      if (!isConsumable(it) || ids.includes(kindOf(it))) continue;
+      if (!isConsumable(it) || ids.includes(kindOf(it)) || it.keep || (it.use && (it.use.type === 'recall' || it.use.type === 'bag'))) continue;      // round 11: the recall charm and saddle bags never take a potion key on their own (drag them there if you like)
       const free = ids.indexOf(null); if (free < 0) break;
       ids[free] = kindOf(it); changed = true;
     }

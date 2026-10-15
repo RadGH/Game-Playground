@@ -124,7 +124,8 @@ test('evil mail: not yours, replayed uids, bad gold, guests, outside town, while
   b.mail('list'); await until(clock, () => list);
   const id = list.mail[0].id;
   const fill = ob.char.bag.length;
-  for (let i = fill; i < 120; i++) ob.char.bag.push({ name: 'Pebble', uid: 'pebble' + i });
+  // round 11 (#11): the bag is tabs — Equipment and Items each hold the size, so fill both
+  for (let i = 0; i < 120; i++) ob.char.bag.push({ name: 'Pebble', uid: 'pebble' + i }, { name: 'Blade', uid: 'blade' + i, type: 'weapon', slot: 'weapon' });
   const takeOnce = async () => { const n = rb.length; b.mail('take', { id }); await until(clock, () => rb.length > n); return rb.at(-1); };
   r = await takeOnce(); assert.equal(r.why, 'bagFull');
   ob.char.bag.length = fill;

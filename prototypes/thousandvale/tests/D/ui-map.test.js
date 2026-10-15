@@ -172,7 +172,7 @@ test('windows: M = map, J = journal, mail + Group Finder are Party-menu tabs; ev
   assert.equal(PANEL_KEYS.KeyM, 'map');
   assert.equal(PANEL_KEYS.KeyJ, 'journal');
   assert.ok(!Object.values(PANEL_KEYS).includes('mail') && !Object.values(PANEL_KEYS).includes('callboard'));
-  assert.deepEqual(HUB_TABS.map(t => t.id), ['party', 'friends', 'guild', 'mail', 'callboard']);
+  assert.deepEqual(HUB_TABS.map(t => t.id), ['party', 'friends', 'guild', 'mail', 'market', 'callboard']);      // round 11 (#25): the Market tab
   assert.equal(HUB_TABS.find(t => t.id === 'callboard').label, 'Group Finder');
   const listed = SHORTCUTS.flatMap(g => g.keys.map(k => k[0]));
   for (const code of Object.keys(PANEL_KEYS)) assert.ok(listed.includes(code.replace('Key', '')), `${code} in the help`);

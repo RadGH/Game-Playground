@@ -11,7 +11,8 @@ const skills = JSON.parse(readFileSync(new URL('../../../farhold/data/skills.jso
 
 test('every one of the 180 class skills has a signature, and the Starcaller keeps its own stars', () => {
   const classes = Object.keys(skills.classes);
-  assert.deepEqual([...SIG_CLASSES].sort(), [...classes].sort(), 'a style for each of the 30 classes');
+  // + play-test 11's Star Blade (Thousandvale-only, data/rules/classes-tv.json); the Starcaller keeps star-fx.js
+  assert.deepEqual([...SIG_CLASSES].sort(), [...classes, 'starblade'].sort(), 'a style for each of the 30 classes and the Star Blade');
   let n = 0;
   for (const c of classes) for (const id of skills.classes[c]) {
     const L = sigLook(c, id, skills.skills[id]);
@@ -70,4 +71,17 @@ test('Spell effects setting: four levels, saved and cleaned; Reduced keeps yours
   assert.equal(drawFor('reduced', mine, f, { signature: true }), 'thin');
   assert.equal(drawFor('reduced', other, f, { signature: true }), 'none');
   assert.equal(drawFor('off', mine, f, { signature: true }), 'none');
+});
+
+test('play-test 11: the Star Blade has its own signature — star steel and gold, six skills that differ, nobody else\'s shapes', () => {
+  const tv = JSON.parse(readFileSync(new URL('../../data/rules/classes-tv.json', import.meta.url), 'utf8'));
+  const ids = tv.classes.find(c => c.id === 'starblade').skills;
+  const looks = ids.map(id => sigLook('starblade', id, tv.skills[id]));
+  for (const [i, L] of looks.entries()) { assert.ok(L, ids[i]); assert.ok(L.travel || L.ground || L.impact || L.cast, `${ids[i]} draws something`); }
+  assert.equal(new Set(looks.map(L => JSON.stringify([L.shape, L.motif.head, L.size, L.dir, L.cast?.n, L.ground?.r, L.impact?.n]))).size, 6, 'six different');
+  assert.equal(looks[0].travel.kind, 'arc', 'Starcut sweeps like a blade'); assert.equal(looks[3].travel.kind, 'path', 'Comet Rush streaks along its path');
+  assert.ok(looks[1].cast && looks[1].ground?.at === 'self', 'Star Aegis blooms round the Blade');
+  assert.equal(looks[0].palette.accent, '#e6c14a', 'the Starcaller\'s gold as the accent — one family');
+  const others = Object.keys(skills.classes).map(c => sigLook(c, skills.classes[c][0], skills.skills[skills.classes[c][0]]));
+  assert.ok(others.every(L => L.motif.glyph !== looks[0].motif.glyph && L.palette.glow !== looks[0].palette.glow), 'shapes and glow are its own');
 });

@@ -22,7 +22,7 @@ const isCaster = c => c.primaryAttr === 'INT' && (c.weapons || []).some(w => w =
 const maxTier = c => Math.max(TIER.indexOf(c.armorTier), ...(c.startingArmour || []).filter(k => KIT_ARMOUR_BASES.includes(k)).map(tierOf));
 
 test('every class has 3 armour sets and 3-6 weapon packs, built only from bases that exist', () => {
-  assert.equal(engine.classes.length, 31);      // Farhold's thirty and Thousandvale's own Starcaller (owner feedback 10, Y32)
+  assert.equal(engine.classes.length, 32);      // Farhold's thirty and Thousandvale's own Starcaller (owner feedback 10, Y32) and Star Blade (round 11, #53)
   assert.deepEqual(Object.keys(json.classes).sort(), engine.classes.map(c => c.id).sort());
   const bad = [];
   for (const c of engine.classes) {

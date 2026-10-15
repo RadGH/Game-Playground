@@ -30,7 +30,7 @@ const STAT_NAME = {
   damagePct: '% damage', damageFlat: ' damage per hit', maxHp: ' health', maxMp: ' mana', armor: ' armour', armorPct: '% armour', critChance: '% critical chance',
   critDamage: '% critical damage', haste: '% attack speed', dodge: '% dodge', spellPower: ' spell damage', magicResist: ' magic resistance', movePct: '% move speed',
   cooldownReduction: '% faster cooldowns', hpRegen: ' health a second', mpRegen: ' mana a second', blockChance: '% block', lifeSteal: '% life steal', areaPct: '% area',
-  petDamagePct: '% companion damage', magicFind: '% magic find', goldFind: '% gold find', xpFind: '% experience', str: ' Strength', dex: ' Dexterity', int: ' Intellect', con: ' Constitution',
+  petDamagePct: '% companion damage', magicFind: '% magic find', goldFind: '% gold find', xpFind: '% experience', str: ' Strength', dex: ' Dexterity', int: ' Intellect', con: ' Constitution', heavyPct: '% heavy weapon damage', lightPct: '% light weapon damage', magicPct: '% magic weapon damage', /* round 11 (C, Z2) */
 };
 
 /**

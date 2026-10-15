@@ -18,8 +18,10 @@ const read = f => readFileSync(join(ROOT, f), 'utf8');
 test('Y34: water in reach is the SERVER\'s rule — same numbers, same fan', () => {
   const sim = read('js/sim/angling.js');
   for (const [k, v] of Object.entries(CAST)) assert.match(sim, new RegExp(`${k}: ${String(v).replace('.', '\\.')}\\b`), `js/sim/angling.js still says ${k}: ${v}`);
-  const turns = /for \(const turn of \[([^\]]+)\]\)/.exec(sim)[1].replace(/Math\.PI/g, String(Math.PI)).split(',').map(Number);
-  assert.deepEqual(turns, [...CAST_TURNS]);
+  // round 11 (stream P, live #12): the server no longer fans out for open water — a line goes only into a fish pool within
+  // poolUseM — so the client's fan (which only lights the phone's Fish button) is no longer the server's rule
+  assert.ok(!/for \(const turn of \[/.test(sim) && /poolUseM: 16/.test(sim), 'casting is pool-only on the server');
+  void CAST_TURNS;
   // a river 10 m ahead (z > 10): in reach facing it, in reach facing away (the fan reaches behind), not in reach 30 m back
   const river = (x, z) => (z > 10 ? { depth: 1, kind: 'river' } : { depth: 0, kind: 'none' });
   assert.ok(waterInReach({ x: 0, z: 0, yaw: 0 }, river));

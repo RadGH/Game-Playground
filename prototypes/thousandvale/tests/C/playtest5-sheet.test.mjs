@@ -38,7 +38,9 @@ test('T18: the stat rows are the derived sheet, in D-UI\'s row shape', () => {
   assert.equal(v('maxHp'), Math.round(u.maxHp)); assert.equal(v('maxMp'), Math.round(u.maxMp));
   assert.equal(v('damageMin'), Math.round(d.damage[0])); assert.equal(v('damageMax'), Math.round(d.damage[1]));
   assert.equal(v('armor'), Math.round(d.armor)); assert.equal(v('critChance'), Math.round(d.critChance * 10) / 10);
-  assert.equal(v('str'), d.str);
+  // owner #2: no attribute rows; the weapon's family share and the melee guard instead
+  assert.equal(core.some(r => ['str', 'dex', 'int', 'con'].includes(r.id)), false);
+  assert.equal(v('familyPct'), d.familyPct); assert.equal(v('weaponGuard'), d.weaponGuard);
   assert.ok(core.find(r => r.id === 'aps').value > 0);      // owner feedback 10 (Y26): attacks per second replaced the "attack interval" row
   assert.match(core.find(r => r.id === 'armor').tip, new RegExp(`reduced by ${Math.round(d.armor / (100 + d.armor) * 100)}%`), 'the armour tip is the code\'s own formula');
   assert.ok(adv.some(r => r.id === 'magicFind'), 'advanced: the uncommon stats');
@@ -98,7 +100,7 @@ test('T18: the measured basic attack agrees with a real fight in a real room', (
     let dealt = 0;
     const ev0 = w.room.host.event;
     w.room.host.event = ev => { if (ev.type === 'hit' && ev.d === m.id && ev.s === me.id && ev.kind === 'dmg') dealt += ev.n; /* your own hits: the sheet leaves followers out */ return ev0(ev); };
-    for (let i = 0; i < T * 20; i++) { w.room.intent(me, { t: 'cast', slot: 0, target: m.id, aim: { x: m.x, z: m.z } }); mu.hp = mu.maxHp; mu.x = m0.x; mu.z = m0.z; mu.push = null; mu.stagger = 0; w.room.step(); }   // the dummy never moves (a knock would carry it out of reach)
+    for (let i = 0; i < T * 20; i++) { w.room.intent(me, { t: 'cast', slot: 0, target: m.id, aim: { x: m.x, z: m.z } }); mu.hp = mu.maxHp; mu.x = m0.x; mu.z = m0.z; mu.push = null; mu.stagger = 0; mu.facing = Math.atan2(u.x - mu.x, u.z - mu.z); w.room.step(); }   // the dummy never moves (a knock would carry it out of reach) and faces you, as the sheet's does (round 11)
     const real = dealt / T;
     assert.ok(real > 0, `${cls}: the fight did damage`);
     assert.ok(Math.abs(sheet - real) / real < 0.3, `${cls}: sheet ${sheet.toFixed(1)} vs real fight ${real.toFixed(1)} damage a second`);

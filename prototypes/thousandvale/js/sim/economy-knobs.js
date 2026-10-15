@@ -26,7 +26,7 @@ export const ECONOMY_DEFAULTS = Object.freeze({
   cart: { base: 3, metresPerGold: 250, minGold: 4 },         // W5: an ox-cart ride (E's economy.json `cart`); cheaper than a waystone over the same road
   mail: { postage: 1 },
   guild: { fee: 10 },
-  shop: { sellFactor: 0.25, perItemLevel: 0.12, fallbackPrice: 15, rarityPrice: { normal: 1, common: 1, magic: 2, uncommon: 2, rare: 4, legendary: 10, set: 10, unique: 20 }, crateSell: 1, buyback: 12, restockMinutes: 30, fishFactor: 1 },
+  shop: { sellFactor: 0.25, perItemLevel: 0.12, fallbackPrice: 15, rarityPrice: { normal: 1, common: 1, magic: 2, uncommon: 2, rare: 4, legendary: 10, set: 10, unique: 20 }, crateSell: 1, goodsSellFactor: 0.5 /* round 11 #15: a bought good sells back for half */, buyback: 12, restockMinutes: 30, fishFactor: 1 },
   mounts: {},                                                 // mount id -> { price, level } (E's `mounts` list): overrides the mount table
   barber: { hair: 5, hairColour: 4, beard: 4, eyes: 6, face: 10, skin: 12, body: 20, everything: 40, perLevel: 0.05, mult: 1 },      // mult (owner feedback 9, X4): x every barber price — 0 = the barber is free
   bag: { overflowPerItem: 1, base: 40 },                      // base = bag slots without a backpack (W19; a pack adds its own, BAG_MAX 120 is the ceiling)                                // a drop that does not fit pays its value, at least this
@@ -76,7 +76,7 @@ function parse(data) {
   if (isObj(d.event) && d.event.perLevel !== undefined) put('event', { goldPerLevel: d.event.perLevel });
   if (isObj(d.roadChest)) put('road', { chest: { base: d.roadChest.base ?? ECONOMY_DEFAULTS.road.chest.base, perLevel: d.roadChest.perLevel ?? ECONOMY_DEFAULTS.road.chest.perLevel, randPerLevel: d.roadChest.spread ?? d.roadChest.randPerLevel ?? ECONOMY_DEFAULTS.road.chest.randPerLevel } });
   if (isObj(d.fare)) put('travel', d.fare);
-  if (isObj(d.sell)) put('shop', { sellFactor: d.sell.factor, fishFactor: d.sell.fish });
+  if (isObj(d.sell)) put('shop', { sellFactor: d.sell.factor, fishFactor: d.sell.fish, goodsSellFactor: d.sell.goods });
   if (Array.isArray(d.mounts)) o.mounts = Object.fromEntries(d.mounts.filter(m => m && typeof m.id === 'string').map(m => [m.id, { ...(Number.isFinite(m.price) ? { price: m.price } : {}), ...(Number.isFinite(m.level) ? { level: m.level } : {}) }]));
   return merge(ECONOMY_DEFAULTS, o);
 }

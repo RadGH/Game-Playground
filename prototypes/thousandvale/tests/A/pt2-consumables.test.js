@@ -107,7 +107,8 @@ test('C\'s asks: an innkeeper binds a home (saved; respawn goes there); the room
   world.transfer(o2, o2.room, { x: o2.entity.x, z: o2.entity.z }, 'test');
   o2.entity.mount = 'trail_horse'; o2.entity.speedMul = 1.4;
   await run(clock, 1200);
-  assert.ok(Math.abs(o2.entity.speedMul - 1.4 * 1.1) < 1e-6, 'oats: ' + o2.entity.speedMul + ' (was ' + base + ')');
+  const horse = world.mountBook ? world.mountBook.get('trail_horse').speed : 1.4;      // round 11: the horse's own speed (1.35 since #44)
+  assert.ok(Math.abs(o2.entity.speedMul - horse * 1.1) < 1e-6, 'oats: ' + o2.entity.speedMul + ' (was ' + base + ')');
   // W22 (round 8): torches left the game — the rules refuse to light one, in a sentence. A charged good still counts down
   // and its count still survives a reload (a whetstone bundle stands in for the old torch bundle).
   world.grant(o2, { items: [{ kind: 'good', id: 'torch_bundle', name: 'Bundle of torches', use: { type: 'light', minutes: 10, charges: 6 } }], gold: 0, reason: 'test' }); await run(clock, 200);

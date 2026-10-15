@@ -1,8 +1,152 @@
 {
- "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z11_10, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z11_10, added where a kill / collect quest's area held fewer of its monster than the step needs (round 11: max(count + 4, 2 x count) — two players at once; they come back in 1-1.5 minutes). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
  "zone": "z11_10",
  "terrainHash": "70a02eb6",
  "placements": [
+  {
+   "type": "camp",
+   "id": "quest_pw_raider_trails_0_0",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    15,
+    15
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1132,
+   "z": 1373,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "pw_raider_trails",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_pw_raider_trails_0_1",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    14,
+    14
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1147,
+   "z": 1427,
+   "yaw": 0,
+   "radius": 7,
+   "quest": "pw_raider_trails",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_pw_raider_trails_0_2",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    15,
+    15
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1134,
+   "z": 1349,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "pw_raider_trails",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_pw_raider_trails_0_3",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    14,
+    14
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1154,
+   "z": 1437,
+   "yaw": 0,
+   "radius": 7,
+   "quest": "pw_raider_trails",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_pw_golem_on_the_pipe_0_0",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    15,
+    15
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1111,
+   "z": 568,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "pw_golem_on_the_pipe",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_pw_golem_on_the_pipe_0_1",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    14,
+    14
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1111,
+   "z": 481,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "pw_golem_on_the_pipe",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
   {
    "type": "npc",
    "id": "angler_lastwell",

@@ -1988,7 +1988,7 @@
    "type": "folk",
    "id": "folk_gullwick_2",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -4071,7 +4071,7 @@
    "type": "folk",
    "id": "folk_gullwick_8",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -9321,7 +9321,7 @@
    "type": "folk",
    "id": "folk_gullwick_26",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"

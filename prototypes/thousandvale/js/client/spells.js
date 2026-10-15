@@ -21,7 +21,9 @@ import { skillLook, statusLook, elementOf } from './spell-looks.js';
 import { perf } from './perf.js';
 import { createBeams } from './beam-fx.js';                       // Y20: a held, pulsing beam (Storm Beam)
 import { carriedBy, zoneDrawMs, carryOffset } from './zone-follow.js';   // Y25: zones that ride their owner
-import { drawFor, FX_DEFAULT } from './fx-level.js';                // 2026-10-14: Settings → Graphics → Spell effects
+import { drawFor, FX_DEFAULT } from './fx-level.js';
+import { fanSide } from './projectile-kinds.js';
+import { starTint } from './star-looks.js';                         // round 11: the Star Blade's arcane drawn gold                    // Z39: a fan's bolts each fly their own side                // 2026-10-14: Settings → Graphics → Spell effects
 
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
 
@@ -151,7 +153,7 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
     if (stars?.onCast(ev, a, starCtx)) { stats.casts++; return; }       // Y32: a gold glint, not the arcane flash
     if (!L || !a) { if (ev.skill && ev.skill !== 'basic' && !L) stats.unknown++; return; }
     stats.casts++;
-    const el = L.element, hand = chest(a);
+    const el = starTint(L.element, { cls: a.look?.cls, skill: ev.skill }), hand = chest(a);
     const aim = ev.aim ? { x: ev.aim.x, z: ev.aim.z } : (ev.target != null && actorAt(ev.target) ? actorAt(ev.target).pos : { x: a.pos.x + Math.sin(a.yaw) * 4, z: a.pos.z + Math.cos(a.yaw) * 4 });
     const yaw = Math.atan2(aim.x - a.pos.x, aim.z - a.pos.z);
     const ground = g(a.pos);
@@ -193,7 +195,7 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
   function onFx(ev) {
     const a = actorAt(ev.id);
     if (stars?.onFx(ev, a, starCtx)) { stats.stars = (stats.stars || 0) + 1; return; }       // Y32: thrown stars, falling stars, star-rune zones, wheeling stars
-    const el = elementOf(ev.element || ev.el || (ev.kind === 'arrow' || ev.kind === 'shot' ? 'physical' : 'arcane'));
+    const el = starTint(elementOf(ev.element || ev.el || (ev.kind === 'arrow' || ev.kind === 'shot' ? 'physical' : 'arcane')), { cls: a?.look?.cls, skill: ev.skill || ev.ab });   // round 11: a Star Blade's arcane is gold, not violet
     switch (ev.kind) {
       case 'bolt': case 'arrow': case 'shot': case 'thrown': {
         const L = lookOf(ev.skill);
@@ -211,7 +213,7 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
             const off = n > 1 ? (k / (n - 1) - 0.5) * 1.6 : 0;
             const end = off ? to0.clone().add(V(Math.cos(off * 2) * off, 0, Math.sin(off * 2) * off)) : to0;
             stats.projectiles++;
-            shots.fire(ev, { to: end, follow: off ? null : follow, from: start, ms: ev.ms, onLand: p => {
+            shots.fire(ev, { to: end, follow: off ? null : follow, from: start, ms: ev.ms, spread: fanSide(ev), onLand: p => {
               if (ev.miss || hush) return;
               impactAt(p, el, { scale: L ? L.scale : ev.kind === 'bolt' ? 0.8 : 0.6 });
               if (L?.area?.kind === 'burst') area(L, p, 0);
@@ -261,7 +263,7 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
         if (ev.el || ev.ab) seenImpacts = true;           // C sends one per landed hit (with el/ab): onHit stops doubling it
         if (stars?.onImpact(ev, a, chest(a))) break;       // Y32: a star skill's hit is a gold starburst
         const L = lookOf(ev.ab);
-        impactAt(chest(a), ev.el || ev.element ? elementOf(ev.el || ev.element) : L ? L.element : 'physical', { crit: !!ev.crit, scale: (ev.killed ? 1.2 : 0.8) * (L ? L.scale : 1) });
+        impactAt(chest(a), starTint(ev.el || ev.element ? elementOf(ev.el || ev.element) : L ? L.element : 'physical', { cls: actorAt(ev.s)?.look?.cls, skill: ev.ab }), { crit: !!ev.crit, scale: (ev.killed ? 1.2 : 0.8) * (L ? L.scale : 1) });
         break;
       }
       case 'spell': {
@@ -269,7 +271,7 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
         seenSpellFx = true;
         if (ev.shape === 'beam' && beams.aim(ev)) break;      // Y20: a pulse of a held beam — the beam itself shows it
         const L0 = lookOf(ev.ab) || { element: elementOf(ev.el), area: null, shape: ev.shape };
-        const L = { ...L0, element: ev.el ? elementOf(ev.el) : L0.element };
+        const L = { ...L0, element: starTint(ev.el ? elementOf(ev.el) : L0.element, { cls: a?.look?.cls, skill: ev.ab }) };
         if (!L.area && ['ground', 'around', 'melee'].includes(ev.shape)) L.area = { kind: ev.shape === 'melee' ? 'slash' : ev.shape === 'around' ? 'ring' : 'burst', r: ev.r || 3 };
         if (!L.area) break;
         const ar = { ...L.area, r: ev.r || ev.reach || L.area.r, arc: ev.arc || L.area.arc, len: ev.line?.len || L.area.len, repeats: ev.n || L.area.repeats };

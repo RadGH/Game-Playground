@@ -1,0 +1,225 @@
+[
+  {
+    "id": "ref",
+    "title": "Target \u2014 the Codex reference sheet",
+    "how": "Codex image generation: front, side and (added) back views of the mage in one art style. Every step is judged against this.",
+    "shots": [
+      [
+        "shots/step1/reference.png",
+        "Codex reference (front + side)"
+      ],
+      [
+        "ref/mage-back.jpg",
+        "Codex back view"
+      ]
+    ]
+  },
+  {
+    "id": "step0",
+    "title": "Step 0 \u2014 Chibi 2 today (baseline)",
+    "how": "Today's system: a Chibi 2 human dressed in the closest pieces it has (trim robe, boots, full beard), shot from the same angles. Page: avatar-3d/chibi4/baseline.html?who=mage&view=front.",
+    "shots": [
+      [
+        "shots/step0/body.png",
+        "front \u00b7 three-quarter \u00b7 back"
+      ],
+      [
+        "shots/step0/face.png",
+        "face close-up"
+      ],
+      [
+        "shots/step0/game-distance.png",
+        "Thousandvale camera distance"
+      ]
+    ],
+    "score": [
+      [
+        "Face",
+        "2/5 \u2014 doll face: giant eyes, ball nose, flat drawn mouth"
+      ],
+      [
+        "Proportions",
+        "1/5 \u2014 about 2.5 heads tall"
+      ],
+      [
+        "Clipping",
+        "3/5 \u2014 fine standing; the known robe/feet clipping when running"
+      ],
+      [
+        "Feet vs robe",
+        "2/5 \u2014 feet poke through the robe on the run (the reason for this experiment)"
+      ],
+      [
+        "Fits Thousandvale",
+        "what the game uses today"
+      ],
+      [
+        "Modular",
+        "5/5 \u2014 any part, any colour, any class"
+      ],
+      [
+        "Cost",
+        "2 meshes per character, tiny load"
+      ],
+      [
+        "Repeatable",
+        "5/5 \u2014 all code"
+      ]
+    ]
+  },
+  {
+    "id": "step1",
+    "title": "Step 1 \u2014 Blender MCP, built by eye in the owner's Blender",
+    "how": "The outline of the reference picture is measured every centimetre of height (front picture = width, side picture = depth); the body, robe, neck and head are one surface built through those measurements, the nose pushed out to the side outline. Sleeves and hands are tubes along the arm line in the picture. The three Codex pictures are then projected onto the model from their own directions and blended by which way the surface faces \u2014 so the face, beard, trim and belt are the reference's own paint. Script: avatar-3d/chibi4/tools/blender/step1_mage.py. Saved as Documents/chibi4_step1_mage.blend on the owner's PC.",
+    "shots": [
+      [
+        "shots/step1/body.png",
+        "front \u00b7 three-quarter \u00b7 back"
+      ],
+      [
+        "shots/step1/face.png",
+        "face close-up"
+      ],
+      [
+        "shots/step1/game-distance.png",
+        "Thousandvale camera distance"
+      ]
+    ],
+    "score": [
+      [
+        "Face",
+        "4/5 \u2014 reads as the reference's face; the jaw-to-neck is one smooth column"
+      ],
+      [
+        "Proportions",
+        "5/5 \u2014 measured from the reference (about 6.5 heads)"
+      ],
+      [
+        "Clipping",
+        "n/a \u2014 one surface, no separate clothes yet"
+      ],
+      [
+        "Feet vs robe",
+        "not tested \u2014 no skeleton or animation yet"
+      ],
+      [
+        "Fits Thousandvale",
+        "to judge in game (step 7)"
+      ],
+      [
+        "Modular",
+        "1/5 \u2014 one baked character, nothing swaps"
+      ],
+      [
+        "Cost",
+        "8,192 faces before smoothing; 7 meshes; 3 projected pictures (a single baked texture at export)"
+      ],
+      [
+        "Repeatable",
+        "4/5 \u2014 a script; needs a reference sheet per character"
+      ]
+    ],
+    "notes": [
+      "Why the doubles: each picture is projected straight through the model, so the front picture also lands on surfaces it could not see (the side of the head, the body behind the arms), and two pictures overlap at 45\u00b0. Fix to try in step 2: paint each spot only from a picture that actually sees it (a visibility test per pixel), then bake to one texture.",
+      "The sleeve cuffs and hands are separate tubes that only overlap \u2014 not joined.",
+      "Flat top of the head (the cap), rough boot toes, flat palms.",
+      "The painting only exists where the pictures saw something: under the arms and under the chin are smeared.",
+      "No skeleton yet \u2014 so no run test. That comes with steps 6\u20137."
+    ],
+    "review": "Owner (2026-10-15): looks a lot better than Chibi 3, but the textures are obviously bad \u2014 a duplicate face, a duplicate pair of arms; the sleeves near the hands may not be fully connected. Not sure this result would be usable."
+  },
+  {
+    "id": "step2",
+    "title": "Step 2 \u2014 headless Blender on the VM: same build as a script, painted only where each picture sees, baked to one texture",
+    "how": "Blender 5.2.2 installed on the VM (~/opt/blender), runs with no window: `blender -b -P avatar-3d/chibi4/tools/blender/step2_mage.py` builds, paints, bakes and exports in 31 seconds. Fixes from your step-1 review: each picture paints a spot only if its camera can see it (a ray test) and the studio grey behind the figure counts as unseen \u2014 so no doubled face or arms; spots no picture sees (20% of the surface: under arms, under chin, tops of shoulders) are filled from their neighbours; sleeves end in a cuff that turns in and closes round the wrist; rounded crown. One 2048 texture, exported as a GLB (shots/step2/mage.glb, 4.3 MB, 32,920 faces).",
+    "shots": [
+      [
+        "shots/step2/body.png",
+        "front \u00b7 three-quarter \u00b7 back \u00b7 side"
+      ],
+      [
+        "shots/step2/face.png",
+        "face close-up"
+      ],
+      [
+        "shots/step2/game-distance.png",
+        "Thousandvale camera distance"
+      ],
+      [
+        "shots/step2/mage-baked.png",
+        "the one baked texture"
+      ]
+    ],
+    "score": [
+      [
+        "Face",
+        "4/5 \u2014 front and profile are the reference's face; a soft blend band on the cheek where front meets side"
+      ],
+      [
+        "Proportions",
+        "5/5 \u2014 measured from the reference"
+      ],
+      [
+        "Clipping",
+        "n/a \u2014 still one surface"
+      ],
+      [
+        "Feet vs robe",
+        "not tested \u2014 no skeleton yet"
+      ],
+      [
+        "Fits Thousandvale",
+        "to judge in game (step 7)"
+      ],
+      [
+        "Modular",
+        "1/5 \u2014 still one baked character"
+      ],
+      [
+        "Cost",
+        "32,920 faces (too many for a crowd \u2014 a game version needs ~5\u20138k), 1 mesh, 1 texture, 4.3 MB"
+      ],
+      [
+        "Repeatable",
+        "5/5 \u2014 one command, no window, same result every time"
+      ]
+    ],
+    "notes": [
+      "Doubled face and arms: gone (compare the three-quarter views).",
+      "Smudges remain where no picture could see \u2014 tops of the shoulders and the collar sides look blurred. More reference angles (a three-quarter and a top view from Codex) would cover those.",
+      "Hands and boot toes are still rough shapes; the method paints well but its shapes are only as good as an outline can give.",
+      "Conclusion so far: picture-projection makes a convincing single statue quickly, but it is not a modular system \u2014 every outfit would be a new character. That is what steps 3\u20137 address."
+    ]
+  },
+  {
+    "id": "step3",
+    "title": "Step 3 \u2014 MakeHuman / MPFB2 base body",
+    "pending": true
+  },
+  {
+    "id": "step4",
+    "title": "Step 4 \u2014 Codex reference sheets + painted textures on the best base",
+    "pending": true
+  },
+  {
+    "id": "step5",
+    "title": "Step 5 \u2014 hide the body under clothes; hair and hats fitted to one head",
+    "pending": true
+  },
+  {
+    "id": "step6",
+    "title": "Step 6 \u2014 skirt bones follow both thighs; shorter robe stride; feet-vs-hem test",
+    "pending": true
+  },
+  {
+    "id": "step7",
+    "title": "Step 7 \u2014 swap-in runtime: one merged mesh, distance versions, Chibi 2 API, ?renderer=chibi4",
+    "pending": true
+  },
+  {
+    "id": "step8",
+    "title": "Step 8 \u2014 Tripo3D (tripo3d.ai): an AI image-to-3D model from the Codex reference",
+    "pending": true,
+    "how": "The owner's friend built his game's humanoids with Tripo3D. Feed it the Codex reference, then rig and clean it in Blender. Needs a Tripo account/API key from the owner (the Blender MCP add-on's Tripo hook is Premium only)."
+  }
+]

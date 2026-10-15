@@ -134,6 +134,7 @@ test('Q16: at level 5 both players ride, everyone sees the rider, and you get do
   test.setTimeout(240000);
   await hook('/level', { name: 'Wren', level: 5 });
   await hook('/level', { name: 'Brannoc', level: 5 });
+  for (const name of ['Wren', 'Brannoc']) await hook('/mounts', { name, mounts: ['trail_horse'] });      // round 11 (#16): bought, not given
   await page.waitForTimeout(1500);
   await page.evaluate(() => tv.mount());
   bot.mount('summon');

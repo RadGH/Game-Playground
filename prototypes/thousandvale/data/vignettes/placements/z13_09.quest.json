@@ -1,8 +1,176 @@
 {
- "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z13_09, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z13_09, added where a kill / collect quest's area held fewer of its monster than the step needs (round 11: max(count + 4, 2 x count) — two players at once; they come back in 1-1.5 minutes). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
  "zone": "z13_09",
  "terrainHash": "669bc5b6",
  "placements": [
+  {
+   "type": "camp",
+   "id": "quest_sb_sold_by_the_sack_0_0",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    13,
+    13
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 75,
+   "z": 1271,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "sb_sold_by_the_sack",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_sb_sold_by_the_sack_0_1",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    13,
+    13
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 136,
+   "z": 1224,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "sb_sold_by_the_sack",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_sb_sold_by_the_sack_0_2",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    13,
+    13
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 77,
+   "z": 1247,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "sb_sold_by_the_sack",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_sb_spitting_season_0_0",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    13,
+    13
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 85,
+   "z": 1494,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "sb_spitting_season",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_sb_spitting_season_0_1",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    13,
+    13
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 72,
+   "z": 1506,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "sb_spitting_season",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_sb_spitting_season_0_2",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    13,
+    13
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 87,
+   "z": 1470,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "sb_spitting_season",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_sb_spitting_season_0_3",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    13,
+    13
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 92,
+   "z": 1504,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "sb_spitting_season",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
   {
    "type": "camp",
    "id": "quest_sb_crust_king_0_0",
@@ -13,15 +181,43 @@
     12
    ],
    "count": [
-    1,
-    1
+    3,
+    3
    ],
    "x": 456,
    "z": 1392,
    "yaw": 0,
    "radius": 8,
    "quest": "sb_crust_king",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_sb_crust_king_0_1",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    12,
+    12
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 443,
+   "z": 1404,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "sb_crust_king",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "npc",

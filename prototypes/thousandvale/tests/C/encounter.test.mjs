@@ -93,7 +93,7 @@ test('ordinary monsters get telegraphed specials by family, and rank makes them 
   assert.ok(RANK_SCALE.champion.dmg > RANK_SCALE.normal.dmg);
 });
 
-test('PHASES: the Barrow Warden changes phase at 70%, raises its ward, and its second health bar replaces death', async () => {
+test('PHASES: the Barrow Warden changes phase at 70%, raises its ward, and its one health bar is the whole fight (owner #51)', async () => {
   const s = await arena({ players: 2, at: [[0, -3], [2, -3]] });
   const boss = spawn(s, 'barrow_hound', 10, 0, 0, { boss: true });
   s.step(3);
@@ -102,7 +102,7 @@ test('PHASES: the Barrow Warden changes phase at 70%, raises its ward, and its s
   assert.equal(st.phase, 0);
   assert.ok(s.events().some(e => e.t === 'say'), 'a pull line');
   const be = s.events().find(e => e.t === 'boss');
-  assert.ok(be && be.bars === 2 && be.phases.length === 3 && be.enrageMs === 360000 && be.arena.r === 26, 'a boss event describes the bar');
+  assert.ok(be && be.bars === 1 && be.phases.length === 2 && be.enrageMs === 360000 && be.arena.r === 26, 'a boss event describes the bar');
   assert.ok(s.enc.objects.size >= 6, 'pillars, braziers and the lever stand in the arena');
   boss.hp = Math.round(boss.maxHp * 0.71); s.step(2);
   assert.equal(st.phase, 0, 'not yet at 71%');
@@ -121,16 +121,10 @@ test('PHASES: the Barrow Warden changes phase at 70%, raises its ward, and its s
   s.step(2);
   assert.equal(boss.barrier, 0, 'the ward broke');
   assert.ok(boss.statuses?.vulnerable, 'exposed');
-  // the killing blow on the first bar starts the second
-  const bar1 = boss.maxHp;
+  // owner #51: the killing blow is the real death — no second bar, no heal back to full
   s.room.run(() => { boss.hp = 0; s.room.field.kill(boss); });
-  assert.ok(boss.dying == null, 'it did not die');
-  assert.equal(st.phase, 2);
-  assert.equal(st.bar, 1);
-  assert.ok(boss.hp === boss.maxHp && boss.maxHp < bar1, 'a new, shorter bar');
-  assert.ok(s.events().some(e => e.t === 'phase' && e.n === 2 && e.hpMax === boss.maxHp));
-  s.room.run(() => { boss.hp = 0; s.room.field.kill(boss); });
-  assert.equal(boss.dying, 0, 'the last bar is the real death');
+  assert.equal(boss.dying, 0, 'the bar is real: at zero it dies');
+  assert.equal(st.bar, 0);
   assert.ok(s.events().some(e => e.t === 'boss' && e.end === 1 && e.won === true));
 });
 

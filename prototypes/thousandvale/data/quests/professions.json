@@ -1,5 +1,5 @@
 {
-  "_doc": "Stream P-core (round 8, W9 Professions) — MADE by tools/content-professions.mjs (the marks follow the bake); edit the text in the tool. The first meeting: Bram Delver, a prospector just inside Torborhold's main gate, teaches Mining the moment you speak to him (and hands over a pick); his chain walks you to the copper, the smith's forge and the tempering gauge. Step kinds gather / craft / learn are js/sim/quests.js (W9).",
+  "_doc": "Stream P-core (round 8, W9 Professions) — MADE by tools/content-professions.mjs (the marks follow the bake); edit the text in the tool. The first meeting: Bram Delver, a prospector just inside Torborhold's main gate, sends you to the copper (every character knows all ten trades since round 11 and starts with the tools; a `learn` step completes on TALKING to a trainer of that trade); his chain walks you to the copper, the smith's forge and the tempering gauge. Step kinds gather / craft / learn are js/sim/quests.js (W9).",
   "zone": "test",
   "part": "professions",
   "npcs": {
@@ -68,12 +68,12 @@
       "requires": [
         "prof_three_good_swings"
       ],
-      "offer": "Copper alone bends like a spoon. Smelt it with tin and you have bronze. The grey boulders are tin. Take three of each to Garrow at the smithy, ask him to teach you Smithing, and use his fire: three bars, then hammer yourself a blade. Strike while the bar glows in the band. Too cold? Back in the fire.",
+      "offer": "Copper alone bends like a spoon. Smelt it with tin and you have bronze. The grey boulders are tin. Take three of each to Garrow at the smithy, tell him I sent you, and use his fire: three bars, then hammer yourself a blade. Strike while the bar glows in the band. Too cold? Back in the fire.",
       "steps": [
         {
           "kind": "learn",
           "prof": "smithing",
-          "text": "Ask the smith to teach you Smithing",
+          "text": "Talk to Garrow, the smith, about Smithing",
           "where": "the smithy in Torborhold",
           "at": {
             "x": 25160.7,
@@ -143,12 +143,12 @@
       "requires": [
         "prof_bronze_not_copper"
       ],
-      "offer": "One more trick. A smith can TEMPER a thing you already own: better quality, a new property, never a ruined blade. Ask Garrow to teach you Tempering, put your new blade in your bag, and stop the gauge inside the band. It costs two bars and a little coin. Miss, and you lose the bars. Never the blade.",
+      "offer": "One more trick. A smith can TEMPER a thing you already own: better quality, a new property, never a ruined blade. Have a word with Garrow about Tempering, put your new blade in your bag, and stop the gauge inside the band. It costs two bars and a little coin. Miss, and you lose the bars. Never the blade.",
       "steps": [
         {
           "kind": "learn",
           "prof": "tempering",
-          "text": "Ask the smith to teach you Tempering",
+          "text": "Talk to Garrow, the smith, about Tempering",
           "where": "the smithy in Torborhold",
           "at": {
             "x": 25160.7,
@@ -183,7 +183,7 @@
           }
         }
       ],
-      "done": "There. Now you know the whole road: dig it, smelt it, forge it, temper it. The tailor, the bowyer and the apothecary teach the other trades, and every one of them pays.",
+      "done": "There. Now you know the whole road: dig it, smelt it, forge it, temper it. The tailor, the bowyer and the apothecary keep the workplaces of the other trades, and every one of them pays.",
       "reward": {
         "xp": 0.5,
         "gold": 18,

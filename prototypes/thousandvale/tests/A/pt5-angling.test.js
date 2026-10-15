@@ -73,9 +73,13 @@ test('T25 the loop: no rod = refused; E\'s first quest hands over the rod; cast,
   P.devSetLevel(o.char.id, 20);
   P.transfer(o, room, { x: s.shore.x, z: s.shore.z }, 'test');
   await run(clock, 1200);
-  // never taught and no rod yet (round 10, Y15: Angling is learned from an angler — the quest's rod, or an angler's lesson, teaches it)
-  let r = await castOnce(a, clock);
-  assert.ok(r.refused && r.refused.why === 'unlearned', JSON.stringify(r.refused));
+  // round 11 (stream P, live #11): every character knows Angling and has a rod from the moment they join
+  assert.ok(P.angling.learned(o.char) && o.char.bag.some(P.angling.isRod), 'a rod from the start');
+  // round 11 (live #12): only a fish pool takes a line — open water a little way along the bank is refused
+  { const fr0 = on(a, 'fishR'); P.transfer(o, room, { x: s.shore.x + 60, z: s.shore.z + 60 }, 'test'); await run(clock, 600);
+    if (!P.angling.poolsIn.get(o.room.id) || ![...P.angling.poolsIn.get(o.room.id).values()].some(p => Math.hypot(p.x - o.entity.x, p.z - o.entity.z) < 20)) {
+      a.fish('cast'); await until(clock, () => fr0.length, 2000); assert.equal(fr0[0].why, 'noPool', JSON.stringify(fr0[0])); }
+    P.transfer(o, room, { x: s.shore.x, z: s.shore.z }, 'test'); await run(clock, 600); }
   // Tam Sedgeley's first quest: accept -> the rod is in the bag (E's `grant`)
   const tam = [...P.rooms.values()].flatMap(rm => [...rm.objects.values()].map(e => ({ e, rm }))).find(x => x.e.data && x.e.data.npc && x.e.data.npc.id === 'angler_torborhold');
   let questing = false;
@@ -157,7 +161,7 @@ test('T25 the loop: no rod = refused; E\'s first quest hands over the rod; cast,
   a.close(); await srv.stop();
 });
 
-test('T25 pools drain and move; open water works too; a fish sells for its own price', async () => {
+test('T25 pools drain and move; open water does NOT take a line (round 11, live #12); a fish sells for its own price', async () => {
   const { srv, clock, world } = await realServer({ roadEvents: false, anglingOpts: { poolRespawnMs: [1000, 1000] } });
   const P = world.province, L = world.layouts[0];
   const copy = P.copies[0];
@@ -188,10 +192,22 @@ test('T25 pools drain and move; open water works too; a fish sells for its own p
   assert.ok(pool.removed, 'the fished-out pool is gone');
   const openAfter = [...copy.objects.values()].filter(e => e.type === 'fishpool' && e.data.pool.zone === zone).length;
   assert.equal(openAfter, openBefore, 'another spot of the zone opened in its place');
-  // open water: the same bank, no pool now -> the cast still lands in water (aim at where the pool was)
+  // open water: the same bank, no pool now -> refused (round 11: you fish only at a fishing spot)
   const x = await castOnce(a, clock, { held: 1, aim: { x: pool.x, z: pool.z } });
-  assert.ok(!x.refused, 'any water works: ' + JSON.stringify(x.refused));
-  assert.ok(!x.cast.pool && x.cast.water, 'open water, of a kind: ' + JSON.stringify(x.cast));
+  assert.ok(x.refused && x.refused.why === 'noPool', 'open water is refused: ' + JSON.stringify(x.refused || x.cast));
+  // …and E on a pool means THAT pool, from its bank (the `pool` field), never one 16 m+ away
+  const other = [...copy.objects.values()].find(e => e.type === 'fishpool' && !e.removed && e.data.pool.shore && (e.data.pool.always || e.data.pool.left > 0));
+  if (other) {
+    P.transfer(o, copy, { x: other.data.pool.shore.x, z: other.data.pool.shore.z }, 'test'); await run(clock, 600);
+    const fr = on(a, 'fishR'); a.fish('cast', { pool: other.id }); await until(clock, () => fr.length, 2000);
+    assert.ok(fr[0].ok && fr[0].pool === other.id, 'E on a pool fishes that pool: ' + JSON.stringify(fr[0]));
+    a.fish('stop'); await run(clock, 300);
+    P.transfer(o, copy, { x: other.x + 40, z: other.z + 40 }, 'test'); await run(clock, 600);
+    const fr2 = on(a, 'fishR'); a.fish('cast', { pool: other.id }); await until(clock, () => fr2.length, 2000);
+    assert.equal(fr2[0].why, 'noPool', 'too far from it');
+    P.transfer(o, copy, { x: sh.x, z: sh.z }, 'test'); await run(clock, 600);
+  }
+  // (there is still a fish in the bag to sell from the pool above)
   // selling: E's price, scaled by size by C — never the gear formula
   const fish = o.char.bag.find(i => i.kind === 'fish');
   assert.ok(fish && Number.isFinite(fish.price));

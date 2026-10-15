@@ -640,7 +640,7 @@ test('Y21 (report #18): a wilderness NPC fights the monsters beside it while a p
   s.w.steps(20);
   s.w.R.room.run(() => { s.npc.r.unit.hp = Math.round(s.npc.r.unit.maxHp * 0.2); });
   s.w.steps(2);
-  floor = 0.1;
+  floor = 0.3;          // (it was under the 35% line once — that is the save; round 11's slower attacks make the fight longer, so it is kept off the floor)
   kill(); s.w.steps(Math.ceil(engine.combatCfg.wanderer.quietSec / 0.05) + 20);
   assert.equal(hooks.length, 1); assert.equal(hooks[0].kind, 'saved');
   // town guards are untouched by it: a wanderer is nobody's gate guard
@@ -655,7 +655,7 @@ test('Y32: the Starcaller is a whole class — injected (Farhold\'s files untouc
   const farholdSkills = JSON.parse(readFileSync(new URL('../../../farhold/data/skills.json', import.meta.url), 'utf8'));
   assert.equal(farholdClasses.classes.some(c => c.id === 'starcaller'), false, 'the shared class file is not written');
   const cls = engine.classById('starcaller');
-  assert.ok(cls && cls.tv, 'it is in the engine'); assert.equal(cls.armorTier, 'cloth'); assert.equal(cls.primaryAttr, 'INT');
+  assert.ok(cls && cls.tv, 'it is in the engine'); assert.equal(cls.armorTier, 'cloth'); assert.equal(cls.primaryAttr, 'INT'); assert.equal(cls.weaponFamily, 'magic');      // owner #2: the card shows the weapon family
   const ids = engine.skillData.classes.starcaller;
   assert.equal(ids.length, 6);
   for (const id of ids) {

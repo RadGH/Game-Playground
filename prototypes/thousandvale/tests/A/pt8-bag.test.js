@@ -10,6 +10,7 @@ import { makeClient } from './helpers.js';
 import { memoryTokenStore } from '../../js/net/client.js';
 import { economy } from '../../js/sim/economy-knobs.js';
 import { BAG_MAX } from '../../js/sim/province.js';
+import { tabCounts } from '../../js/sim/bag-tabs.js';
 
 const box = (c, types) => { const b = []; for (const t of types) c.on(t, m => b.push({ ...m, t })); return b; };
 const junk = n => Array.from({ length: n }, (_, i) => ({ name: 'Pebble ' + i, rarity: 'normal', kind: 'junk', value: 1 }));
@@ -32,28 +33,32 @@ test('W19: capacity = base + the pack\'s slots; the pack will not come off while
   a.item('equip', mine(pack).uid); await run(clock, 300);
   assert.equal(got.filter(m => m.t === 'itemR').at(-1).ok, true, JSON.stringify(got.filter(m => m.t === 'itemR').at(-1)));
   assert.equal(got.filter(m => m.t === 'you' && m.bagMax).at(-1).bagMax, base + pack.bagSlots, 'the client is told the new size');
-  // fill the bag to the brim (the satchel is one of the things in it)
-  world.grant(o, { items: junk(base + pack.bagSlots - o.char.bag.length), gold: 0, reason: 'test' }); await run(clock, 100);
-  assert.equal(o.char.bag.length, base + pack.bagSlots, 'every slot used');
+  // fill the Items tab to the brim (round 11, #11: Equipment and Items are counted on their own; the satchel is in Equipment)
+  const items = () => tabCounts(o.char.bag).items;
+  world.grant(o, { items: junk(base + pack.bagSlots - items()), gold: 0, reason: 'test' }); await run(clock, 100);
+  assert.equal(items(), base + pack.bagSlots, 'every Items square used');
   const g0 = o.char.gold;
   world.grant(o, { items: junk(1), gold: 0, reason: 'test' }); await run(clock, 100);
-  assert.equal(o.char.bag.length, base + pack.bagSlots, 'one more does not fit');
-  assert.ok(o.char.gold > g0, 'and is paid in gold instead (the old rule)');
-  // take the pack off: refused, with the number
+  assert.equal(items(), base + pack.bagSlots, 'one more does not fit');
+  // round 11 (Market stream, owner #25): it is posted to you, never turned into gold
+  assert.equal(o.char.gold, g0, 'not paid in gold any more');
+  assert.ok(world.counters.bagPosted >= 1, 'it went to the post');
+  // take the pack off: refused, with the number (the pack itself goes into Equipment, which has room)
   const eqUid = (() => { const u = e.r && e.r.unit && e.r.unit.equipment && e.r.unit.equipment.back; return u ? u.uid : (o.char.equipment.back || {}).uid; })();
   a.item('unequip', eqUid, 'back'); await run(clock, 300);
   let r = got.filter(m => m.t === 'itemR').at(-1);
-  assert.equal(r.ok, false); assert.equal(r.why, 'bagSlots'); assert.equal(r.need, pack.bagSlots + 1, 'the pack itself needs a slot too');
-  assert.match(r.msg, new RegExp('^Empty ' + (pack.bagSlots + 1) + ' more bag slots first'));
+  assert.equal(r.ok, false); assert.equal(r.why, 'bagSlots'); assert.equal(r.need, pack.bagSlots, 'the Items tab is over by the pack\'s squares');
+  assert.match(r.msg, new RegExp('^Empty ' + pack.bagSlots + ' more bag slot'));
   // swap to the SMALLER pack: refused by the difference
   a.item('equip', mine(small).uid); await run(clock, 300);
   r = got.filter(m => m.t === 'itemR').at(-1);
   assert.equal(r.ok, false); assert.equal(r.why, 'bagSlots'); assert.equal(r.need, pack.bagSlots - small.bagSlots);
   // empty enough, and it comes off
-  for (let k = 0; k < pack.bagSlots + 1; k++) { const it = o.char.bag.find(i => i.kind === 'junk'); a.item('destroy', it.uid); await run(clock, 250); }
-  assert.equal(o.char.bag.length, base - 1);
+  for (let k = 0; k < pack.bagSlots; k++) { const it = o.char.bag.find(i => i.kind === 'junk'); a.item('destroy', it.uid); await run(clock, 250); }
+  assert.equal(items(), base);
+  const gear0 = tabCounts(o.char.bag).gear;
   a.item('unequip', eqUid, 'back'); await run(clock, 300);
-  assert.equal(o.char.bag.length, base, 'the pack is in the bag, which is exactly full');
+  assert.equal(tabCounts(o.char.bag).gear, gear0 + 1, 'the pack is in the bag; Items is exactly full');
   assert.equal(got.filter(m => m.t === 'you' && m.bagMax).at(-1).bagMax, base);
   a.close(); await srv.stop();
 });

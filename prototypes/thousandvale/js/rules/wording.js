@@ -132,6 +132,7 @@ export function whoKey(text) {
 
 const pct = v => `${Math.round(v * 100)}%`;
 const secs = v => `${+(+v).toFixed(1)}s`;
+const resName = id => String(id || 'resource').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
 /**
  * The sentences for a row's Thousandvale-only block (`row.tv`), written from its numbers. `statuses` = the
@@ -170,11 +171,37 @@ export function tvSentences(row, statuses = {}) {
   return out;
 }
 
+/**
+ * Round 11 (the Star Blade): Starlight spent on more than damage, and Starlight from hits taken (js/rules/cast-skills.js
+ * applyPoints / hurtGain). These follow the generated text (they qualify its "Spends all your Starlight").
+ */
+export function tvAfterSentences(row) {
+  const out = [];
+  const pts = row?.tv?.points;
+  if (pts) {
+    const res = resName(row?.resource?.id);
+    const bits = [];
+    if (pts.barrier) bits.push(`adds ${pct(pts.barrier)} of maximum health to the barrier`);
+    if (pts.answer) bits.push(`makes each answering strike ${pct(pts.answer)} stronger`);
+    if (pts.hold) bits.push(`holds the root ${secs(pts.hold)} longer`);
+    if (bits.length) out.push(`Each ${res} spent ${bits.length > 1 ? `${bits.slice(0, -1).join(', ')} and ${bits[bits.length - 1]}` : bits[0]}.`);
+    if (pts.atMax?.stun) out.push(`Spending 5: ${row.counter?.answer ? 'the answering strikes also stun' : 'it also stuns what it hits'} for ${secs(pts.atMax.stun)}.`);
+  }
+  const hg = row?.tv?.hurtGain;
+  if (hg) out.push(`${hg.fromLevel > 1 ? `From level ${hg.fromLevel}, every` : 'Every'} hit you take gains ${hg.n ?? 1} ${resName(hg.id)} (once every ${secs(hg.every ?? 1)} at most).`);
+  return out;
+}
+
 /** A whole Thousandvale card for a skill row: Farhold's generated text, audience restated, TV sentences added, key appended. */
 export function cardText(row, text, { statuses = {}, key = true } = {}) {
   const tv = tvSentences(row, statuses);
   let body = whoText(text, row);
+  // owner #1: a resource that only builds from a level says so where the card says what it gains
+  const from = row?.resource?.fromLevel;
+  if (from > 1) body = body.replace(/\bGains ([\d.]+) ([A-Z][\w ]*?) (for each|when)/, (m, n, name, per) => `From level ${from}, gains ${n} ${name} ${per}`);
   if (tv.length) body = `${tv.join(' ')} ${body}`.trim();
+  const after = tvAfterSentences(row);
+  if (after.length) body = `${body} ${after.join(' ')}`.trim();
   const k = key ? whoKey(body) : '';
   return k ? `${body} ${k}` : body;
 }

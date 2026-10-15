@@ -33,7 +33,7 @@ test.beforeAll(async () => {
 test.afterAll(() => server?.kill('SIGTERM'));
 
 for (const [layout, viewport] of [['desktop', { width: 1280, height: 800 }], ['phone', { width: 393, height: 852 }]]) {
-  test(`${layout}: the prospector shows Mining learned and keeps its details accessible on repeat visits`, async ({ browser }) => {
+  test(`${layout}: (round 11: every trade is known from the start) the prospector shows your Mining and keeps its details accessible on repeat visits`, async ({ browser }) => {
     test.setTimeout(150000);
     const context = await browser.newContext({ viewport, hasTouch: layout === 'phone', isMobile: layout === 'phone' });
     try {
@@ -52,14 +52,14 @@ for (const [layout, viewport] of [['desktop', { width: 1280, height: 800 }], ['p
       };
       const dialog = page.locator('.tv-dialog');
       await talk('prospector', bram.x, bram.z);
-      await expect(dialog.locator('.prof-dlg-status')).toContainText('You have learned Mining.');
+      await expect(dialog.locator('.prof-dlg-status')).toContainText('Mining: Novice 1.');
       // wrap-up (report #62): his title is the plain one, and the trade button sits beside whatever quests he offers
       await expect.poll(() => page.evaluate(() => [...thousandvale.actors.actors.values()].find(a => a.role === 'prospector').npcTitle)).toBe('Prospector');
       const quests = await dialog.locator('[data-accept], [data-turnin]').count();
       expect(quests, 'the prospector has a quest for a newcomer (the case in the report)').toBeGreaterThan(0);
-      await expect(dialog.getByRole('button', { name: 'Mining', exact: true })).toBeVisible();
+      await expect(dialog.getByRole('button', { name: 'Trades: Mining', exact: true })).toBeVisible();
       await expect(dialog.locator('.prof-dlg-status')).toContainText("Prospector's Pick is in your bag.");
-      await dialog.getByRole('button', { name: 'Mining', exact: true }).click();
+      await dialog.getByRole('button', { name: 'Trades: Mining', exact: true }).click();
       const trainer = page.locator('#panel-trainer');
       await expect(trainer).toBeVisible();
       await expect(trainer).toContainText('You know this');
@@ -69,16 +69,16 @@ for (const [layout, viewport] of [['desktop', { width: 1280, height: 800 }], ['p
       await trainer.getByRole('button', { name: 'Close', exact: true }).click();
 
       await talk('prospector', bram.x, bram.z);
-      await expect(dialog.locator('.prof-dlg-status')).toContainText('Mining is already learned.');
-      await expect(dialog.getByRole('button', { name: 'Mining', exact: true })).toBeVisible();
+      await expect(dialog.locator('.prof-dlg-status')).toContainText('Mining: Novice 1.');
+      await expect(dialog.getByRole('button', { name: 'Trades: Mining', exact: true })).toBeVisible();
       await expect(dialog.locator('.prof-dlg-status')).toHaveCount(1);
       await page.evaluate(() => thousandvale.worldUi.closeDialog());
 
-      // A normal teacher still offers a real Learn button and grants the skill and tool through the UI.
+      // round 11 (live #11): a gathering teacher has nothing to teach — your skill and your sickle are shown, no Learn button
       await talk('forager', forager.door.x + zx * 2048, forager.door.z + zz * 2048);
-      await expect(dialog.locator('.prof-dlg-status')).toContainText('Teaches Foraging for free.');
-      await dialog.getByRole('button', { name: 'Learn: Foraging', exact: true }).click();
-      await trainer.locator('[data-learn="foraging"]').click();
+      await expect(dialog.locator('.prof-dlg-status')).toContainText('Foraging: Novice 1.');
+      await expect(dialog.getByRole('button', { name: /^Learn/ })).toHaveCount(0);
+      await dialog.getByRole('button', { name: 'Trades: Foraging', exact: true }).click();
       await expect(trainer).toContainText('You know this');
       await expect(trainer.locator('[data-learn="foraging"]')).toHaveCount(0);
       expect(await page.evaluate(() => tvprof.state.list.find(p => p.id === 'foraging')?.tool?.name)).toBeTruthy();
@@ -86,11 +86,11 @@ for (const [layout, viewport] of [['desktop', { width: 1280, height: 800 }], ['p
 
       // wrap-up (report #56): the angler has the same trades door as every other teacher — first visit and after
       await talk('angler', angler.x, angler.z);
-      await expect(dialog.locator('.prof-dlg-status')).toContainText('You have learned Angling.');
+      await expect(dialog.locator('.prof-dlg-status')).toContainText(/Angling: \w+ 1\./);
       await page.evaluate(() => thousandvale.worldUi.closeDialog());
       await talk('angler', angler.x, angler.z);
-      await expect(dialog.locator('.prof-dlg-status')).toContainText('Angling is already learned.');
-      await dialog.getByRole('button', { name: 'Angling', exact: true }).click();
+      await expect(dialog.locator('.prof-dlg-status')).toContainText(/Angling: \w+ 1\./);
+      await dialog.getByRole('button', { name: 'Trades: Angling', exact: true }).click();
       await expect(trainer).toBeVisible();
       await expect(trainer).toContainText('Angling');
       await expect(trainer).toContainText('You know this');

@@ -27,8 +27,19 @@
 //           mailReturn(char, id, nowMs) -> { to } | false ; mailDelete(char, id) -> bool
 //           mailExpire(nowMs) -> [{ to, returned }]    expired player mail goes back to its sender (returned mail keeps)
 //           escrow() -> { items, gold }   (conservation checks)
+// MARKET    (round 11, owner #25; js/sim/market-rules.js has the rules and the letters) — every move all or nothing:
+//           marketList({ ch, fence }, { seller, sellerName, item, price, fee, cap, listedAt, expiresAt }) -> { id } | { err: 'cap' } | false
+//           marketBrowse(filter, nowMs) -> { list: [row], total }   filter = browseFilter(); rows carry the full item
+//           marketMine(char) -> [row] ; marketGet(id) -> row | null ; marketCount(char) -> n
+//           marketBuy({ ch, fence }, id, { buyer, buyerName, price, nowMs }) -> { ok, seller, item, buyerMail, sellerMail }
+//                     | { err: 'gone' | 'own' | 'changed' } | false     (buyer blob + listing out + two letters)
+//           marketCancel(char, id, nowMs) -> { ok, item, mail } | { err: 'gone' }   (the item back by mail)
+//           marketExpire(nowMs) -> [{ to, id }]                                       (expired listings back by mail)
+//           row = { id, seller, sellerChar, item, price, fee, count, tab, sub, rarity, lvl, listedAt, expiresAt }
 // OTHER     addReport(r) ; listReports(limit) ; handleReport(id, nowMs) ; logChat(rows) ; pruneChat(beforeMs)
 //           getWorld(key) ; setWorld(key, value) ; economyReport(sinceMs) -> rows
+
+import { describe, matches, sortRows, letter, MARKET } from './market-rules.js';
 
 export const FRIENDS_MAX = 100, GUILD_MAX = 500;
 const RANKS = ['Leader', 'Officer', 'Member', 'Recruit'];
@@ -41,7 +52,8 @@ export function memoryM3(d, { now, changed, sha256Hex, randomHex, packChar, prun
   d.guilds ||= {}; d.nextGuild ||= 1;
   d.members ||= {};          // char -> { guild, rank, joined }
   d.mail ||= {}; d.nextMail ||= 1;
-  d.items ||= {};            // uid -> { mail, item }
+  d.items ||= {};            // uid -> { mail, item } | { listing, item }   (the escrow table: a uid is in ONE place)
+  d.listings ||= {}; d.nextListing ||= 1;      // round 11: the market
   d.reports ||= []; d.nextReport ||= 1;
   d.chatLog ||= [];
   d.world ||= {};
@@ -270,6 +282,62 @@ export function memoryM3(d, { now, changed, sha256Hex, randomHex, packChar, prun
       return { items: Object.keys(d.items).length, gold, uids: Object.keys(d.items) };
     },
 
+
+    // ---- the market (round 11, owner #25) ----
+    async marketList({ ch, fence }, x) {
+      const it = x.item;
+      if (!it || !it.uid || d.items[it.uid]) return false;                      // already in escrow somewhere
+      if (!okSave(ch, fence)) return false;
+      if (Object.values(d.listings).filter(l => l.sellerChar === x.seller).length >= (x.cap ?? MARKET.cap)) return { err: 'cap' };
+      writeSave(ch);
+      const id = d.nextListing++;
+      d.listings[id] = { id, sellerChar: x.seller, seller: x.sellerName, uid: it.uid, price: x.price, fee: x.fee || 0, listedAt: x.listedAt ?? now(), expiresAt: x.expiresAt, ...describe(it) };
+      d.items[it.uid] = { listing: id, item: copy(it) };
+      changed();
+      return { id };
+    },
+    async marketBrowse(f, nowMs = now()) {
+      const all = sortRows(Object.values(d.listings).filter(l => matches(l, f, nowMs)), f.sort);
+      const per = f.per || MARKET.per;
+      return { list: all.slice(f.page * per, f.page * per + per).map(listingRow), total: all.length };
+    },
+    async marketMine(char) { return Object.values(d.listings).filter(l => l.sellerChar === char).sort((a, b) => b.listedAt - a.listedAt || b.id - a.id).map(listingRow); },
+    async marketGet(id) { const l = d.listings[id]; return l ? listingRow(l) : null; },
+    async marketCount(char) { return Object.values(d.listings).filter(l => l.sellerChar === char).length; },
+    async marketBuy({ ch, fence }, id, { buyer, buyerName, price, nowMs = now() }) {
+      const l = d.listings[id];
+      if (!l || l.expiresAt <= nowMs) return { err: 'gone' };
+      if (l.sellerChar === buyer) return { err: 'own' };
+      if (l.price !== price) return { err: 'changed' };
+      const esc = d.items[l.uid];
+      if (!esc || esc.listing !== id) return false;
+      if (!okSave(ch, fence) || !d.chars[buyer]) return false;
+      writeSave(ch);
+      const item = copy(esc.item);
+      const lb = letter('bought', { name: item.name, count: l.count, price: l.price });
+      const buyerMail = postMarket(buyer, lb, 0, nowMs);
+      esc.mail = buyerMail; delete esc.listing;
+      const ls = letter('sold', { name: item.name, count: l.count, price: l.price, buyer: buyerName });
+      const sellerMail = d.chars[l.sellerChar] ? postMarket(l.sellerChar, ls, l.price, nowMs) : null;
+      delete d.listings[id];
+      changed();
+      return { ok: true, seller: l.sellerChar, item, buyerMail, sellerMail };
+    },
+    async marketCancel(char, id, nowMs = now()) {
+      const l = d.listings[id];
+      if (!l || l.sellerChar !== char) return { err: 'gone' };
+      return backToSeller(l, 'cancelled', nowMs);
+    },
+    async marketExpire(nowMs = now()) {
+      const out = [];
+      for (const l of Object.values(d.listings)) {
+        if (l.expiresAt > nowMs) continue;
+        const r = backToSeller(l, 'expired', nowMs);
+        if (r && r.ok) out.push({ to: l.sellerChar, id: l.id });
+      }
+      return out;
+    },
+
     // ---- feedback (play-test 5, T19/T21) + admin accounts ----
     // addFeedback(row) -> { id, first }   first = this character's first report (it earns the thank-you letter, once)
     // listFeedback({ state, kind, limit, before, hideTrashed }) newest first ; feedbackCounts() ; setFeedbackState(id, state, { by, at, note })
@@ -331,6 +399,7 @@ export function memoryM3(d, { now, changed, sha256Hex, randomHex, packChar, prun
         delete d.mail[m.id];
       }
       for (const m of Object.values(d.mail)) if (m.fromChar === id) m.fromChar = null;        // letters it SENT stay, unsigned (FK: SET NULL)
+      for (const l of Object.values(d.listings)) if (l.sellerChar === id) { const x = d.items[l.uid]; if (x && x.listing === l.id) delete d.items[l.uid]; delete d.listings[l.id]; }      // its market listings go with it (CASCADE)
       delete d.friends[id];
       for (const k of Object.keys(d.friends)) d.friends[k] = d.friends[k].filter(f => f !== id);
       let guild = null;
@@ -361,6 +430,28 @@ export function memoryM3(d, { now, changed, sha256Hex, randomHex, packChar, prun
     async economyReport(sinceMs = 0) { return Object.values(d.economy || {}).filter(r => Date.parse(r.hour) >= sinceMs).map(copy).sort((a, b) => a.hour < b.hour ? 1 : -1); },
   };
 
+  /** Round 11 (market): a listing as the stores hand it out — the full item, for the card. */
+  function listingRow(l) {
+    const esc = d.items[l.uid];
+    return { id: l.id, seller: l.seller, sellerChar: l.sellerChar, item: esc ? copy(esc.item) : null, price: l.price, fee: l.fee, count: l.count, tab: l.tab, sub: l.sub, rarity: l.rarity, lvl: l.lvl, listedAt: l.listedAt, expiresAt: l.expiresAt };
+  }
+  /** A market letter (kind 'market': taken anywhere, keeps until taken). Returns its id. */
+  function postMarket(to, words, gold, nowMs) {
+    const id = d.nextMail++;
+    d.mail[id] = { id, to, fromChar: null, fromName: MARKET.from, subject: words.subject, body: words.body, gold: gold || 0, kind: 'market', sentAt: nowMs, expiresAt: null, readAt: 0, takenAt: 0 };
+    return id;
+  }
+  /** A listing goes back to its seller by mail (cancelled or expired). */
+  function backToSeller(l, kind, nowMs) {
+    const esc = d.items[l.uid];
+    if (!d.chars[l.sellerChar]) { if (esc && esc.listing === l.id) delete d.items[l.uid]; delete d.listings[l.id]; changed(); return { err: 'gone' }; }
+    const item = esc ? copy(esc.item) : null;
+    const mail = postMarket(l.sellerChar, letter(kind, { name: item ? item.name : 'item', count: l.count }), 0, nowMs);
+    if (esc) { esc.mail = mail; delete esc.listing; }
+    delete d.listings[l.id];
+    changed();
+    return { ok: true, item, mail };
+  }
   /** Send a letter back to whoever sent it: a new 'return' letter that keeps forever, the same escrow rows. */
   function returnOne(m, nowMs) {
     const id = d.nextMail++;

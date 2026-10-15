@@ -1,5 +1,5 @@
 {
- "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z14_04, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z14_04, added where a kill / collect quest's area held fewer of its monster than the step needs (round 11: max(count + 4, 2 x count) — two players at once; they come back in 1-1.5 minutes). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
  "zone": "z14_04",
  "terrainHash": "63302176",
  "placements": [
@@ -13,15 +13,163 @@
     8
    ],
    "count": [
-    2,
-    2
+    3,
+    3
    ],
    "x": 1201,
    "z": 281,
    "yaw": 0,
    "radius": 8,
    "quest": "stalkers_in_the_moss",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_stalkers_in_the_moss_0_1",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    8,
+    8
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1188,
+   "z": 293,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "stalkers_in_the_moss",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_stalkers_in_the_moss_0_2",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    8,
+    8
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1203,
+   "z": 257,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "stalkers_in_the_moss",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_stalkers_in_the_moss_0_3",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    8,
+    8
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1208,
+   "z": 291,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "stalkers_in_the_moss",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_mushroom_men_0_0",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    9,
+    9
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1181,
+   "z": 1426,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "mushroom_men",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_mushroom_men_0_1",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    9,
+    9
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1168,
+   "z": 1438,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "mushroom_men",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_mushroom_men_0_2",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    9,
+    9
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1183,
+   "z": 1402,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "mushroom_men",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",
@@ -33,15 +181,67 @@
     8
    ],
    "count": [
-    2,
-    2
+    3,
+    3
    ],
    "x": 1167,
    "z": 82,
    "yaw": 0,
    "radius": 8,
    "quest": "the_lurker_below",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_the_lurker_below_0_1",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    8,
+    8
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1154,
+   "z": 94,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "the_lurker_below",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_the_lurker_below_0_2",
+   "monster": "silt_lurker",
+   "with": null,
+   "level": [
+    8,
+    8
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1169,
+   "z": 58,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "the_lurker_below",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",
@@ -53,15 +253,43 @@
     9
    ],
    "count": [
-    2,
-    2
+    3,
+    3
    ],
    "x": 1103,
    "z": 135,
    "yaw": 0,
    "radius": 8,
    "quest": "not_a_chest",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_not_a_chest_0_1",
+   "monster": "hoard_mimic",
+   "with": null,
+   "level": [
+    9,
+    9
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1090,
+   "z": 147,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "not_a_chest",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",

@@ -68,7 +68,10 @@ export function createShops({ data = null, mounts = null, now = () => Date.now()
   // T25 (play-test 5): a fish, junk, a trophy or a cooked meal sells for its OWN price (E's `price` = what a merchant pays;
   // C scales it by the fish's size) — never the gear formula. Junk is worth nothing (selling it just gets rid of it).
   const ownPrice = item => item && (item.kind === 'fish' || item.kind === 'junk' || item.kind === 'trophy' || item.kind === 'material' /* W9 (P-core) */) && Number.isFinite(item.price);
-  const sellPrice = (item, rules) => (ownPrice(item) ? Math.max(0, Math.round(item.price * (item.kind === 'fish' ? ES.fishFactor : 1))) : item && (item.kind === 'crate' || item.kind === 'gift') ? ES.crateSell : rules && rules.sellPrice ? Math.max(1, +rules.sellPrice(item) || 1) : Math.max(1, Math.floor(price(item, rules) * pricing.sellFactor)));   // V2: what a merchant pays for gear is the rules' one function when it exists
+  // round 11 (#15 "saddle bags for 45 g sell for 1 g"): a BOUGHT good (it carries the shop's `shopPrice`, no own price) sells
+  // back for `goodsSellFactor` (0.5) of what the shops ask. Buying and selling it back always loses gold, so this creates none.
+  const goodsBack = item => item && !ownPrice(item) && item.kind !== 'crate' && item.kind !== 'gift' && (item.kind === 'good' || item.kind === 'potion') && Number.isFinite(item.shopPrice) && item.shopPrice > 0;
+  const sellPrice = (item, rules) => (goodsBack(item) ? Math.max(1, Math.floor(item.shopPrice * (ES.goodsSellFactor ?? 0.5))) : ownPrice(item) ? Math.max(0, Math.round(item.price * (item.kind === 'fish' ? ES.fishFactor : 1))) : item && (item.kind === 'crate' || item.kind === 'gift') ? ES.crateSell : rules && rules.sellPrice ? Math.max(1, +rules.sellPrice(item) || 1) : Math.max(1, Math.floor(price(item, rules) * pricing.sellFactor)));   // V2: what a merchant pays for gear is the rules' one function when it exists
   /** A goods-catalog item by id (E's quest `grant` / `reward.goods`: a rod, a tin of worms), or null. */
   const goodOf = id => (catalog[id] ? good({ id, source: 'good' }, null) : null);
   /** A potion item by id (play-test 6 U17: potion drops), named from the engine's potion table when the rules have one. */
@@ -142,7 +145,13 @@ export function createShops({ data = null, mounts = null, now = () => Date.now()
       rows.push(...c.stock);
     }
     const goods = [...(k.goods || []), ...(((town && town.stock && town.stock[kindId]) || {}).extraGoods || [])];
+    // round 11 (#3): the recall charm is sold only to someone who has none; (#15) saddle bags only to someone who has not fitted a pair
+    const bag = ch.bag || [];
+    const hasRecall = bag.some(it => it && it.use && it.use.type === 'recall');
     goods.forEach((g, i) => {
+      const cu = g.source === 'good' && catalog[g.id] && catalog[g.id].use;
+      if (cu && cu.type === 'recall' && hasRecall) return;
+      if (cu && cu.type === 'bag' && ch.saddle) return;
       if (g.source === 'gear' && mounts && mounts.get(g.id)) { const r = mounts.row(ch, g.id, g.price, g.minLevel); if (r) rows.push({ ...r, cat: 'mounts', label: 'Mounts' }); return; }
       if (g.source === 'gear') { const it = rules ? makeOne(rules, e, { base: g.id, rarity: 'normal', level: lvl }) : null; if (it) { const item = JSON.parse(JSON.stringify(it)); delete item.uid; rows.push({ id: 'g' + i, cat: 'goods', label: 'Goods', item: { ...item, shopPrice: g.price }, price: g.price, level: g.minLevel || 1 }); } return; }
       const pr = Math.max(1, Math.round((g.price || 1) * ((town && town.priceMult) || 1)));

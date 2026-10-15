@@ -62,14 +62,19 @@ export function createCharacter(engine, { id, classId = 'warrior', level = 1, na
  * takes the sentence from the cache (drift-guarded: tests/C/drift.test.mjs "skills.js fill").
  */
 const DESC = new Map();
+/** Owner #37 (2026-10-15): every skill's damage share x this (combat.json `skills.damage`; 1 = Farhold's, a parity engine). */
+export const skillPower = engine => { const k = engine?.combatCfg?.skills?.damage; return Number.isFinite(k) && k > 0 ? k : 1; };
 function describedSlot(engine, id, unlockAt) {
-  const key = `${id}|${unlockAt}`;
+  const K = skillPower(engine);
+  const key = `${id}|${unlockAt}|${K}`;
   let d = DESC.get(key);
   if (!d) {
     const data = engine.skillData;
+    // the card's damage share is the one the cast really uses (the row's own share x the skill power)
+    const row = K !== 1 && data.skills[id]?.mult ? { ...data.skills[id], mult: data.skills[id].mult * K } : data.skills[id];
     d = {
-      desc: describeSkill(data.skills[id], data.statuses || {}, { unlockAt, skills: data.skills }),
-      descShort: describeSkill(data.skills[id], data.statuses || {}, { cost: false, unlockAt, skills: data.skills }),
+      desc: describeSkill(row, data.statuses || {}, { unlockAt, skills: data.skills }),
+      descShort: describeSkill(row, data.statuses || {}, { cost: false, unlockAt, skills: data.skills }),
     };
     DESC.set(key, d);
   }
@@ -85,7 +90,30 @@ export function buildSkillBar(engine, ch, rpgView) {
   const bar = createSkillBar({ data: barData(engine), player: ch, rpg: rpgView, canSummon: (petId, sl) => ch.canSummon?.(petId, sl) ?? { ok: true } });
   fillSlots(engine, bar, engine.skillData.classes?.[ch.classId] || engine.skillData.classes?.ranger || [], ch.classId);
   bar.relearn = (ids = null) => { fillSlots(engine, bar, ids || engine.skillData.classes?.[ch.classId] || [], ch.classId); return bar.slots.map(sl => sl.id); };
+  // owner #37 (2026-10-15): "make all skills significantly more powerful". Every plan the bar hands out — a slot's cast,
+  // a recast's second part, a finale, a shape's burst — carries the skill power on its damage share. `plan.mult` is the
+  // share every hit is struck at and what every sub-strike (zones, traps, pools, repeats) is scaled by (cast-skills
+  // scaleOf = mult / baseMult); `plan.damage` is what a burn or poison it lays is a share of. A barrier sized from the
+  // damage keeps its size; heals, summons and basic attacks are not touched.
+  const K = skillPower(engine);
+  if (K !== 1) {
+    const use = bar.use, planFor = bar.planFor;
+    bar.use = (...a) => empowerPlan(use(...a), K);
+    if (typeof planFor === 'function') bar.planFor = (...a) => empowerPlan(planFor(...a), K);
+  }
   return bar;
+}
+/** Put the skill power on one plan (once). */
+export function empowerPlan(plan, K) {
+  if (!plan || !plan.ok || plan.tvPower || !(K > 0) || K === 1) return plan;
+  if (plan.mult) plan.mult *= K;
+  if (plan.damage) plan.damage = Math.max(1, Math.round(plan.damage * K));
+  // [Star Blade, round 11] only the NUMBER form (a share of the damage dealt) is sized from damage; an object barrier
+  // ({ share, seconds } of maximum health) is not — `{} / 2` made it NaN and every such barrier silently vanished
+  if (typeof plan.barrier === 'number') plan.barrier /= K;
+  if (plan.rules && plan.rules.scale) plan.rules = { ...plan.rules, scale: plan.rules.scale * K };
+  plan.tvPower = K;
+  return plan;
 }
 /** skills.js `fill(ids)`, with the descriptions from the cache. */
 export function fillSlots(engine, bar, ids, classId = null) {

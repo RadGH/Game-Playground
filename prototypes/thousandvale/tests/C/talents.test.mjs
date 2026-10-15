@@ -39,8 +39,8 @@ test('every node of every tree changes how the skill works — no plain numbers,
     }
   }
   // play-test 5 (T4): five revive skills were added to the table (the five they replace stay in it, off every bar)
-  assert.equal(Object.keys(rows).length, 195);    // + three direct heals (paladin, bard, oracle) + the Starcaller's six (owner feedback 10, Y32)
-  assert.equal(new Set(Object.values(engine.skillData.classes).flat()).size, 186, 'thirty-one classes (Farhold\'s thirty and the Starcaller), six skills each, none shared');
+  assert.equal(Object.keys(rows).length, 201);    // + three direct heals (paladin, bard, oracle) + the Starcaller's six (owner feedback 10, Y32) + the Star Blade's six (round 11, #53)
+  assert.equal(new Set(Object.values(engine.skillData.classes).flat()).size, 192, 'thirty-two classes (Farhold\'s thirty, the Starcaller and the Star Blade), six skills each, none shared');
   assert.deepEqual(plain, [], 'nodes that are only a number');
   assert.deepEqual(inert, [], 'library nodes that do nothing on this skill');
   assert.deepEqual(thin, [], 'every tier offers a choice of at least two');

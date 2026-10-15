@@ -71,7 +71,7 @@ test('Q28: every class (Farhold\'s 30 and the Starcaller) has exactly one low-le
     assert.ok(q.steps.length >= 2 && q.steps.every(s => s.text && s.where), `${c.id}: steps say what and where`);
   }
   assert.equal(CLASSQ.quests.length, CLASSES.length);
-  assert.equal(CLASSES.length, 31);
+  assert.equal(CLASSES.length, 32);      // + the Star Blade (round 11, #53)
 });
 
 test('Q28: a reward that matters — a named rare the class can use, plus the companion now (13 classes) or a perk point (17)', () => {

@@ -78,7 +78,7 @@ export function crateFamilies(cfg, engine, slot, classDef) {
     const subs = new Set([...(classDef.weapons || []), baseSubtype(engine, classDef.starter)]);
     if (subs.has('bow')) return O.bow || all;
     if (classDef.shield) return O.shield || all;
-    if (classDef.primaryAttr === 'INT') return O.INT || all;
+    if (classDef.primaryAttr === 'INT' || classDef.weaponFamily === 'magic') return O.INT || all;      // owner #2: the class row's attribute became its weapon family
     return O.else || all;
   }
   return all;

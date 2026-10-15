@@ -3520,7 +3520,7 @@
    "type": "folk",
    "id": "folk_ashcombe_6",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -5103,7 +5103,7 @@
    "type": "folk",
    "id": "folk_ashcombe_12",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -6473,7 +6473,7 @@
    "type": "folk",
    "id": "folk_ashcombe_17",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -7679,7 +7679,7 @@
    "type": "folk",
    "id": "folk_ashcombe_21",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -8743,7 +8743,7 @@
    "type": "folk",
    "id": "folk_ashcombe_25",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -10051,7 +10051,7 @@
    "type": "folk",
    "id": "folk_ashcombe_30",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"

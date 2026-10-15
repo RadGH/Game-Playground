@@ -23,7 +23,7 @@
 //   stars.update(dt)    stars.sample()    stars.stats
 
 import * as THREE from 'three';
-import { flightMs } from './projectile-kinds.js';
+import { flightMs, fanBow, fanSide } from './projectile-kinds.js';
 import { STAR_GOLD, STAR_SHOT, skyfallPlan, skyAt, moteSeat, isStarShot, isStarSkill, starZone, starOrbs } from './star-looks.js';
 
 const TAU = Math.PI * 2;
@@ -252,7 +252,7 @@ export function createStarFx(scene, { camera, actors = null, groundY = () => 0, 
     if (!from || !to) return false;
     if (shots.length >= 40) shots.shift();
     const dist = from.distanceTo(to);
-    const it = { from: from.clone(), to: to.clone(), follow, onLand, t: 0, ms: flightMs({ ...ev, ms: ms ?? ev.ms }, dist, 'star'), src: ev.id ?? null, big: ev.big ? 1.4 : 1, born: 0, trail: 0, turn: Math.random() * TAU, pos: from.clone() };
+    const it = { from: from.clone(), to: to.clone(), follow, onLand, t: 0, ms: flightMs({ ...ev, ms: ms ?? ev.ms }, dist, 'star'), src: ev.id ?? null, big: ev.big ? 1.4 : 1, born: 0, trail: 0, turn: Math.random() * TAU, pos: from.clone(), side: fanSide(ev), dist };
     it.born = clock();
     shots.push(it);
     stats.shots++; stats.lastShot = { ms: Math.round(it.ms), dist: +dist.toFixed(2), from: [+from.x.toFixed(2), +from.y.toFixed(2), +from.z.toFixed(2)] };
@@ -420,6 +420,7 @@ export function createStarFx(scene, { camera, actors = null, groundY = () => 0, 
       const k = Math.min(1, it.t / it.ms);
       if (it.follow) { const p = it.follow(); if (p) it.to.lerp(p, Math.min(1, 0.25 + k)); }       // it homes, like every shot
       it.pos.lerpVectors(it.from, it.to, k);
+      if (it.side) { const b = fanBow(k, it.dist, it.side), dx = it.to.x - it.from.x, dz = it.to.z - it.from.z, l = Math.hypot(dx, dz) || 1; it.pos.x += dz / l * b; it.pos.z -= dx / l * b; }   // Z39: a fan's stars fly apart
       it.turn += dt * STAR_SHOT.spin;
       const size = STAR_SHOT.size * it.big;
       starAt(it.pos.x, it.pos.y, it.pos.z, size, it.turn, STAR_SHOT.halo);

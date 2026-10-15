@@ -109,14 +109,26 @@ test('gathering: who may work a node, what it gives by quality, a fail gives not
   assert.ok(P.canGather({ known: true, skill: 1, node: copper, tool: {} }).ok);
   assert.deepEqual(P.gatherYield({ node: copper, quality: 'fail' }), []);
   const n = q => P.gatherYield({ node: copper, quality: q, rng: () => 0.99 })[0].n;
-  assert.deepEqual(['poor', 'good', 'fine', 'perfect'].map(n), [1, 2, 2, 3]);
+  // round 11 (live #9): a HIGH score (fine / perfect) is half as much again, rounded up — and always one uncommon-or-better find
+  const base = { poor: numbers.quality.yield.poor, good: numbers.quality.yield.good, fine: numbers.quality.yield.fine, perfect: numbers.quality.yield.perfect };
+  for (const q of ['poor', 'good', 'fine', 'perfect']) assert.equal(n(q), P.highScore(q) ? Math.ceil(base[q] * 1.5) : base[q], q);
+  assert.ok(P.highScore('fine') && P.highScore('perfect') && !P.highScore('good') && !P.highScore('poor'));
+  for (const kind of ['copper', 'iron', 'ash', 'oak', 'meadowmint', 'flax', 'field_mushroom', 'sunsteel', 'heartwood']) for (const q of ['fine', 'perfect']) {
+    const y = P.gatherYield({ node: P.nodeKind(kind), quality: q, rng: () => 0.99 }), f = y.filter(x => x.find);
+    assert.equal(f.length, 1, `${kind} ${q}: one find`);
+    assert.ok(['magic', 'rare', 'legendary'].includes(P.item(f[0].id).rarity), `${kind}: the find ${f[0].id} is uncommon or better (${P.item(f[0].id).rarity})`);
+    assert.ok(y[0].n >= Math.ceil(base[q] * 1.5), `${kind} ${q}: at least +50%`);
+  }
+  for (const q of ['poor', 'good']) assert.ok(!P.gatherYield({ node: copper, quality: q, rng: () => 0.99 }).some(x => x.find), 'no find without a high score');
+  const sk = P.skinOf('moor_hound', 3), skHigh = P.gatherYield({ node: sk, quality: 'fine', rng: () => 0.99 });
+  assert.ok(skHigh.some(x => x.find && P.item(x.id).rarity === 'magic'), 'skinning has a find too');
   const bonus = P.gatherYield({ node: copper, quality: 'perfect', rng: () => 0 });
-  assert.ok(bonus.some(y => y.bonus && y.id === 'rough_quartz'), 'a clean strike can shake a gem loose');
+  assert.ok(bonus.some(y => y.id === 'rough_quartz' && y.n === 2 && y.find), 'a clean strike can shake a gem loose — on a high score, beside the find (one row of 2)');
+  assert.ok(P.gatherYield({ node: copper, quality: 'good', rng: () => 0 }).some(y => y.bonus && y.id === 'rough_quartz'), 'the plain bonus gem on a good strike');
   assert.ok(P.xpFor({ tier: 1, quality: 'perfect', skill: 1 }) > P.xpFor({ tier: 1, quality: 'poor', skill: 1 }));
   assert.ok(P.xpFor({ tier: 1, quality: 'good', skill: 60 }) < P.xpFor({ tier: 1, quality: 'good', skill: 20 }), 'tier-1 work 40+ levels under you');
   assert.equal(P.respawnMs({ starter: true }), 120000);
   const ms = P.respawnMs(copper, 0.5); assert.ok(ms >= 6 * 60000 && ms <= 10 * 60000);
-  const sk = P.skinOf('moor_hound', 3);
   assert.ok(sk && sk.prof === 'skinning' && sk.tier === 1 && sk.gives[0].id === 'light_hide');
   assert.equal(P.skinOf('road_brigand', 3), null, 'people are not skinned');
   const it = P.item('copper_ore', 3);
@@ -149,11 +161,17 @@ test('crafted gear is semi-random inside a band: level under yours and under the
   assert.equal(P.canCraft(rc, { known: false }).why, 'notLearned');
   assert.equal(P.canCraft(rc, { skill: 1, counts: { bronze_bar: 3 }, gold: 99, station: ['smithing'], level: 1, base: 'longsword' }).why, 'base', 'a level-6 pattern is not for a level-1 smith');
   assert.equal(P.craftResult(rc, { quality: 'fail' }).gear, null);
-  const rng = seeded(11), seen = { normal: 0, magic: 0, rare: 0 };
-  for (let i = 0; i < 4000; i++) { const g = P.craftResult(rc, { quality: 'perfect', skill: 100, level: 50, rng }).gear; seen[g.rarity]++; assert.ok(g.level <= 10 && !(g.extraAffix && g.rarity === 'rare')); }
-  assert.deepEqual(Object.keys(seen).sort(), ['magic', 'normal', 'rare'], 'never legendary');
-  assert.ok(seen.rare > 0 && seen.rare < 4000 * 0.3 && seen.magic > seen.rare);
-  for (let i = 0; i < 500; i++) assert.equal(P.craftResult(rc, { quality: 'poor', skill: 100, level: 50, rng }).gear.rarity, 'normal', 'rough work is plain');
+  // round 11 (live #58): made gear is NEVER plain — magic, with a good chance at rare that grows with the work and the skill
+  const rng = seeded(11), share = (q, skill) => { const seen = { normal: 0, magic: 0, rare: 0 }; for (let i = 0; i < 4000; i++) { const g = P.craftResult(rc, { quality: q, skill, level: 50, rng }).gear; assert.ok(seen[g.rarity] != null, 'never legendary: ' + g.rarity); seen[g.rarity]++; assert.ok(g.level <= 10 && !(g.extraAffix && g.rarity === 'rare')); } return seen; };
+  const R = numbers.craft.rarity;
+  for (const q of ['poor', 'good', 'fine', 'perfect']) {
+    const s0 = share(q, 1);
+    assert.equal(s0.normal, 0, `${q}: crafted gear is magic or better`);
+    assert.ok(Math.abs(s0.rare / 4000 - R.rare[q]) < 0.03, `${q}: rare ${s0.rare / 4000} vs ${R.rare[q]}`);
+  }
+  assert.ok(R.rare.good >= 0.2 && R.rare.perfect >= 0.4, 'a GOOD chance at rare');
+  const top = share('perfect', 100);
+  assert.ok(top.rare / 4000 > share('perfect', 1).rare / 4000 + 0.08 && top.normal === 0, 'skill past the recipe raises the rare chance');
 });
 
 test('crafted gear is never strictly better than a same-level dungeon rare', () => {
@@ -221,4 +239,20 @@ test('tempering: quality up as far as skill allows, promote needs a core past ra
   const c1 = temperCost(P, engine, 'temper_quality', mk('magic', 4), priceOf(mk('magic', 4))), c2 = temperCost(P, engine, 'temper_quality', mk('magic', 12), 5000);
   assert.deepEqual(c1.needs, [{ id: 'bronze_bar', n: 2 }]); assert.equal(c1.skill, 1); assert.ok(c1.gold >= 1);
   assert.equal(c2.needs[0].id, 'iron_bar'); assert.equal(c2.skill, 25); assert.equal(c2.gold, 100);
+});
+
+test('round 11 (live #10): every profession earns three times the experience it did — gathering, making, refining and angling', async () => {
+  // the round-8 pace, rebuilt from today's file with the per-tier numbers divided back down, against the real thing
+  const old = JSON.parse(JSON.stringify(numbers)); old.gather.xpPerTier = numbers.gather.xpPerTier / 3; old.craft.xpPerTier = numbers.craft.xpPerTier / 3;
+  const P0 = createProfessions(old, content);
+  for (const kind of ['gather', 'craft', 'refine']) for (const t of [1, 2, 3, 5]) for (const q of ['poor', 'good', 'perfect']) {
+    const a = P.xpFor({ tier: t, quality: q, skill: 1, kind }), b = P0.xpFor({ tier: t, quality: q, skill: 1, kind });
+    assert.ok(Math.abs(a - 3 * b) <= 0.15, `${kind} t${t} ${q}: ${a} vs 3 x ${b}`);
+  }
+  assert.equal(numbers.gather.xpPerTier, 30); assert.equal(numbers.craft.xpPerTier, 36);
+  const { createFishing } = await import('../../js/rules/fishing.js');
+  const fishN = J('data/rules/fishing.json'), fishC = J('data/provinces/angling.json');
+  const F = createFishing(fishN, fishC), F0 = createFishing({ ...fishN, xp: { ...fishN.xp, mult: 1 } }, fishC);
+  for (const c of [{ kind: 'fish', rarity: 'common', skill: 5 }, { kind: 'fish', rarity: 'rare', skill: 30 }, { kind: 'junk' }, { kind: 'crate' }])
+    for (const o of [{}, { first: true }, { best: true }]) assert.ok(Math.abs(F.xp(c, o) - 3 * F0.xp(c, o)) <= 1, `angling ${c.kind}/${c.rarity}: ${F.xp(c, o)} vs 3 x ${F0.xp(c, o)}`);
 });

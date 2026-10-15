@@ -4,7 +4,7 @@
   "tier": "boss",
   "body": "shale_warden",
   "place": "dungeon mine_descent: the boss cavern of the last floor (28 m square)",
-  "_doc": "Stream E. A stone-and-iron overseer built to keep the ninth shift working; it never stopped. P1 'Shift Start': pick swings for the tank, ore tossed at random players (each lump stays as cover), three drill lines, and a Shift Whistle you hide from behind the four timber props. P2 at 60% 'Blasting': it locks down in an iron shell and the shift rats pour in; light the three blasting fuses to crack the shell (it tries to stamp them out — interrupt it). P3 is a new health bar 'Overtime': the cracked floor caves into pits, the props must be HELD (stand on the soak circles at each standing prop or the roof falls on everyone), a three-player stack, a grinding spiral. Hard enrage at 5.5 minutes. The winch lever drops the ore bucket on it once.",
+  "_doc": "Stream E. A stone-and-iron overseer built to keep the ninth shift working; it never stopped. P1 'Shift Start': pick swings for the tank, ore tossed at random players (each lump stays as cover), three drill lines, and a Shift Whistle you hide from behind the four timber props. P2 at 60% 'Blasting': it locks down in an iron shell and the shift rats pour in; light the three blasting fuses to crack the shell (it tries to stamp them out — interrupt it). P3 is a new health bar 'Overtime': the cracked floor caves into pits, the props must be HELD (stand on the soak circles at each standing prop or the roof falls on everyone), a three-player stack, a grinding spiral. Hard enrage at 5.5 minutes. The winch lever drops the ore bucket on it once. OWNER #51 (2026-10-15): the phase that refilled the health bar is removed; the health bar is the whole fight.",
   "party": "Solo: hold-the-props soaks (one per standing prop) cannot be covered — survivable fails only. 2-3: playable, some fails. 5: intended. M5 scaling: soaks = min(standing props, party); shift bell stack need = min(3, party); shift rats by party.",
   "hpMult": 4,
   "arena": {
@@ -52,16 +52,7 @@
       "say": "The cracked rock gives way!",
       "telegraphs": [ { "shape": "circle", "at": "object", "object": "cracked_floor", "r": 3, "wind": 2.2, "damage": 2.2,
         "leave": { "type": "pool", "name": "Open shaft", "r": 2.6, "every": 1, "seconds": 9999, "damage": 0.4 } } ],
-      "actions": [ { "remove": "cracked_floor" } ] },
-    "hold_props": { "id": "hold_props", "name": "Hold the Props", "every": [24, 28], "first": 10, "cast": 1,
-      "say": "The roof groans — someone hold every prop that still stands!",
-      "telegraphs": [ { "shape": "circle", "at": "object", "object": "pillar", "r": 2.6, "wind": 6, "kind": "soak", "need": 1, "damage": 0.6, "fail": 1.0, "failSay": "A prop slips — rock rains down on everyone!" } ] },
-    "shift_bell": { "id": "shift_bell", "name": "Shift Bell", "every": [20, 24], "first": 5, "cast": 1,
-      "say": "{target} is ringing the bell — share the load, three of you!",
-      "telegraphs": [ { "shape": "circle", "at": "random", "r": 3, "kind": "stack", "need": 3, "wind": 4, "damage": 3.2, "follow": true } ] },
-    "grinding_wheel": { "id": "grinding_wheel", "name": "Grinding Wheel", "every": [17, 20], "first": 15, "cast": 0.8,
-      "say": "Old Ninth spins up its grinding wheel!",
-      "telegraphs": [ { "shape": "line", "at": "self", "len": 15, "w": 2.6, "count": 8, "rotate": 0.785, "delay": 0.3, "wind": 1.2, "damage": 1.7, "yaw": "random" } ] }
+      "actions": [ { "remove": "cracked_floor" } ] }
   },
   "phases": [
     { "name": "Shift Start", "abilities": ["pick", "ore_toss", "drill_lines", "whistle"] },
@@ -69,10 +60,7 @@
       "abilities": ["stamp_fuses", "shift_rats", "ore_toss"],
       "ward": {"seconds": 20, "pool": 0.1, "break": "objects", "need": 3, "what": "brazier", "say": "Old Ninth locks into an iron shell. Light all three blasting fuses! It fails by itself in 20 seconds.", "fade": "The ward fails by itself. No opening this time."},
       "onEnter": [ { "shield": { "seconds": 20, "pool": 0.1 } }, { "adds": { "type": "cairn_rat", "count": 4, "radius": 8, "at": "home" } },
-        { "say": "Old Ninth locks into an iron shell. Light all three blasting fuses! It fails by itself in 20 seconds.", "style": "warn" } ] },
-    { "name": "Overtime", "newBar": { "hp": 0.5 }, "say": "OVERTIME. NOBODY LEAVES UNTIL THE SEAM IS CLEARED.",
-      "abilities": ["pick", "hold_props", "shift_bell", "grinding_wheel"],
-      "onEnter": [ { "ability": "cave_in" } ] }
+        { "say": "Old Ninth locks into an iron shell. Light all three blasting fuses! It fails by itself in 20 seconds.", "style": "warn" }, { "ability": "cave_in" } ] }
   ],
   "triggers": [
     { "when": { "lit": 3, "phase": 1 }, "do": [ { "shield": false }, { "hurt": 0.08 }, { "stun": 4 }, { "vuln": { "takeMore": 0.4, "seconds": 10, "name": "Shell Cracked" } },

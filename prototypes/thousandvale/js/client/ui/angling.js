@@ -18,7 +18,7 @@ import { uiIconSvg } from '../../../../../icons/js/game-icons.js';
 import { tugParams, tugStart, tugStep, tugHeld, tugTension, cookRows, rarityWord, rarityClass, anglingText } from './pt5-core.js';
 import { fmt } from '../../../../../shared/format.js';
 
-const WHY = { noRod: 'You need a fishing rod. The angler by the water has one for you.', noWater: 'Face some water first — a river, a lake, the shore.', far: 'Too far from the water.', combat: 'Not while you are fighting.', busy: 'You are busy.', swim: 'Not while you are swimming.', dead: 'You are dead.', skill: 'This pool needs a better angler.', notReady: 'The fish are not biting yet.', early: 'Too soon — you pulled before the bite.', late: 'Too late — it spat the hook.' };
+const WHY = { noPool: 'You can only fish at a fishing spot — rippling water with fish jumping. Stand on its bank and press E.', noRod: 'You need a fishing rod. The angler by the water has one for you.', noWater: 'Face some water first — a river, a lake, the shore.', far: 'Too far from the water.', combat: 'Not while you are fighting.', busy: 'You are busy.', swim: 'Not while you are swimming.', dead: 'You are dead.', skill: 'This pool needs a better angler.', notReady: 'The fish are not biting yet.', early: 'Too soon — you pulled before the bite.', late: 'Too late — it spat the hook.' };
 export const isRod = it => !!it && (it.tool === 'rod' || it.kind === 'rod' || /(^|_)rod($|_)|angling_rod|fishing/i.test(`${it.id || ''} ${it.baseKey || ''}`) || /\b(fishing|angling) rod\b/i.test(it.name || ''));
 
 export function createAngling({ net, hud, bag, reveal = null, typing = () => false }) {
@@ -30,7 +30,9 @@ export function createAngling({ net, hud, bag, reveal = null, typing = () => fal
   const btn = h('button.slot.fish-btn', { type: 'button', hidden: true, dataset: { tip: 'Cast a line (X). Face the water first.' }, 'aria-label': 'Cast a line' },
     h('span.key', {}, 'X'), h('span.fish-glyph', { 'aria-hidden': 'true' }), h('small.fish-cap', {}, 'Cast a line'));
   btn.querySelector('.fish-glyph').innerHTML = uiIconSvg('cast_line', 30, { medallion: true });       // 2026-10-14: the icon library's picture
-  document.getElementById('actionbar')?.append(btn);
+  // round 11 (P, live #12): the action-bar fishing button is gone — you fish by pressing E at a fish pool (objects.js
+  // KINDS.fishpool); its slot is the UI stream's Mount button (Z28). The element is kept off the page so the code below that
+  // labels it stays harmless.
   btn.addEventListener('click', () => castOrStop());
 
   // D-world hears only the agreed names: the moment between the press and the tug still reads 'bite', the wait for the answer 'tug'
@@ -39,20 +41,20 @@ export function createAngling({ net, hud, bag, reveal = null, typing = () => fal
   const send = (op, a = {}) => { const n = net(); if (!n) return; if (typeof n.fish === 'function') n.fish(op, a); else n._raw?.('game', JSON.stringify({ t: 'fish', op, ...a })); };
 
   function idle() { cancelAnimationFrame(S.raf); S.tug = null; S.holding = false; root.hidden = true; root.replaceChildren(); say('idle'); }
-  function castOrStop() {
+  function castOrStop(pool = null) {
     if (S.state === 'bite') return hook();
     if (S.state === 'tug') return;
     if (S.state === 'wait' || S.state === 'cast') { send('stop'); idle(); hud.toast('You reel in.', 'info'); return; }
     say('cast');
     root.hidden = false;
     root.replaceChildren(h('div.fish-pill', {}, h('i.fish-dot'), 'Casting…'));
-    send('cast');
-    clearTimeout(S.castT); S.castT = setTimeout(() => { if (S.state === 'cast') { idle(); hud.toast('Nothing to cast into here.', 'warn'); } }, 5000);
+    send('cast', pool != null ? { pool } : {});
+    clearTimeout(S.castT); S.castT = setTimeout(() => { if (S.state === 'cast') { idle(); hud.toast(WHY.noPool, 'warn'); } }, 5000);
   }
   function waiting() {
     say('wait');
     root.hidden = false;
-    root.replaceChildren(h('div.fish-pill', {}, h('i.fish-dot.bob'), 'Waiting for a bite…', h('small', {}, 'X reels in · walking away ends it')));
+    root.replaceChildren(h('div.fish-pill', {}, h('i.fish-dot.bob'), 'Waiting for a bite…', h('small', {}, 'E reels in · walking away ends it')));
   }
   function bite(ms = 1500) {
     S.biteMs = Math.max(400, ms); S.biteUntil = performance.now() + S.biteMs;
@@ -145,10 +147,9 @@ export function createAngling({ net, hud, bag, reveal = null, typing = () => fal
   // ---- keys ----
   window.addEventListener('keydown', e => {
     if (typing() || (document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) || e.ctrlKey || e.metaKey || e.altKey) return;
-    if (S.state === 'bite' && (e.code === 'Space' || e.code === 'KeyE' || e.code === 'KeyX')) { e.preventDefault(); e.stopImmediatePropagation(); if (!e.repeat) hook(); return; }
+    if (S.state === 'bite' && (e.code === 'Space' || e.code === 'KeyE')) { e.preventDefault(); e.stopImmediatePropagation(); if (!e.repeat) hook(); return; }
     if (S.state === 'tug' && e.code === 'Space') { e.preventDefault(); e.stopImmediatePropagation(); S.holding = true; root.firstChild?.classList.add('holding'); return; }
-    if (e.code === 'KeyX' && !e.repeat && net()?.joined && (S.hasRod || S.state !== 'idle')) { e.preventDefault(); castOrStop(); }
-    else if (e.code === 'KeyX' && !e.repeat && net()?.joined) hud.toast(WHY.noRod, 'warn');
+    // round 11 (live #12 / #29): X no longer casts — fishing is E at a fish pool, and X is the UI stream's Mount key
   }, true);
   window.addEventListener('keyup', e => { if (e.code === 'Space' && S.state === 'tug') { S.holding = false; root.firstChild?.classList.remove('holding'); e.stopImmediatePropagation(); } }, true);
   window.addEventListener('blur', () => { S.holding = false; });

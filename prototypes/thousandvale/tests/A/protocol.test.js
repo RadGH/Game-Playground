@@ -21,6 +21,7 @@ const GOOD = {
   emote: { id: 'wave' }, track: { char: 12 }, delete: { char: 7, name: 'Aldra' }, feedbackMine: { limit: 20, before: 90 }, cart: { op: 'go', id: 12, to: 'cart_torborhold' }, ship: { op: 'go', id: 12, to: 'port_vharl', party: true }, meter: { on: true },
   admin: { op: 'report', id: 4, state: 'approved', note: 'good one' }, fish: { op: 'land', held: 0.7 }, cook: { id: 'cook_fish_on_a_stick', n: 2 },
   prof: { op: 'learn', id: 'mining', npc: 9 }, gather: { op: 'done', id: 12, inputs: [410, 0, 980, 0, 1630, 0] }, craft: { op: 'start', id: 'blades_1', npc: 9, base: 'dagger' },   // W9 (P-core)
+  market: { op: 'sell', uid: 'p0-abc', price: 250 },      // round 11 (Market, #25)
 };
 
 test('every client message type has a valid example and the example passes', () => {

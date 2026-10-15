@@ -81,6 +81,7 @@ test('S21: calling a mount sends channel start (ms) and end done / broken for th
   const a = await joinAs(srv, clock, 'Caller');
   const o = rec(W, a);
   o.room.award(o.entity, { xp: xpFor(5), reason: 'quest' }); await run(clock, 200);
+  o.char.mounts = ['trail_horse'];      // round 11 (#16): bought, not given
   W.transfer(o, W.copies[0], { x: W.gate.x + 30, z: W.gate.z }, 'test'); await run(clock, 300);
   const ch = () => a.evs.filter(x => x.type === 'fx' && x.kind === 'channel' && x.id === o.entity.id && x.ab === 'mount');
   const got = box(a, ['mountR']);

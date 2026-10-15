@@ -55,7 +55,7 @@ const kills = q => q.steps.filter(s => s.kind === 'kill' && s.type);
 test('Q28: thirty class quests, one per class, each offered to its own class at a low level', () => {
   const classes = new Set(Object.keys(engine.skillData.classes || {}));
   assert.equal(QUESTS.length, classes.size);      // (30 of Farhold's + Thousandvale's own Starcaller, wrap-up 2026-10-13)
-  assert.equal(classes.size, 31);
+  assert.equal(classes.size, 32);              // + the Star Blade (round 11, #53)
   const seen = new Set();
   for (const q of QUESTS) {
     for (const c of q.classes) { assert.ok(classes.has(c), `${q.id}: ${c} is a class`); seen.add(c); }

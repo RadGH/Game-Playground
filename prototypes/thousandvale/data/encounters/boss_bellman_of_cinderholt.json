@@ -4,7 +4,7 @@
   "tier": "boss",
   "body": "pumice_golem",
   "place": "dungeon buried_town (Under Cinderholt, Ashfall Hollow, level 16-19): the end boss at the foot of the buried bell tower",
-  "_doc": "When the ash came down on the first Cinderholt the bell-ringer rang until it buried him; the ash set round him into stone and he is still ringing. P1 \"The Warning Bell\": a bell-rope lash, the toll — a soak on a random player that needs three or everyone is hurt — and ashfall from the tower. P2 at 60% \"Ashfall\": ash pours down over the whole square; the only cover is the three half-buried houses (rubble you hide behind; it wears down). Pull the bell rope lever when the bell is tolling to break his cast. P3 new bar \"The Last Ring\": he rips the bell down and swings it — a turning sweep, a ring of falling ash, and a stack.",
+  "_doc": "When the ash came down on the first Cinderholt the bell-ringer rang until it buried him; the ash set round him into stone and he is still ringing. P1 \"The Warning Bell\": a bell-rope lash, the toll — a soak on a random player that needs three or everyone is hurt — and ashfall from the tower. P2 at 60% \"Ashfall\": ash pours down over the whole square; the only cover is the three half-buried houses (rubble you hide behind; it wears down). Pull the bell rope lever when the bell is tolling to break his cast. P3 new bar \"The Last Ring\": he rips the bell down and swings it — a turning sweep, a ring of falling ash, and a stack. OWNER #51 (2026-10-15): the phase that refilled the health bar is removed; the health bar is the whole fight.",
   "party": "Solo: very hard — the soak needs a follower. 2-3: everyone soaks. 5: as designed.",
   "hpMult": 4,
   "arena": {
@@ -163,76 +163,6 @@
           "status": "weaken"
         }
       ]
-    },
-    "bell_sweep": {
-      "id": "bell_sweep",
-      "name": "Bell Sweep",
-      "every": [
-        13,
-        16
-      ],
-      "first": 4,
-      "cast": 0.6,
-      "say": "He swings the bell round on its chain!",
-      "telegraphs": [
-        {
-          "shape": "cone",
-          "at": "self",
-          "r": 9,
-          "arc": 1.4,
-          "count": 3,
-          "rotate": 1.4,
-          "delay": 0.5,
-          "wind": 1.3,
-          "damage": 1.9,
-          "knock": 3
-        }
-      ]
-    },
-    "ash_ring": {
-      "id": "ash_ring",
-      "name": "Falling Ash Ring",
-      "every": [
-        15,
-        18
-      ],
-      "first": 7,
-      "cast": 0.8,
-      "say": "Ash falls in a ring around him — in close or far out!",
-      "telegraphs": [
-        {
-          "shape": "ring",
-          "at": "self",
-          "r": 11,
-          "r2": 4,
-          "wind": 1.7,
-          "damage": 2,
-          "status": "weaken"
-        }
-      ]
-    },
-    "last_stack": {
-      "id": "last_stack",
-      "name": "Under the Bell",
-      "every": [
-        20,
-        24
-      ],
-      "first": 9,
-      "cast": 1,
-      "say": "{target} is under the falling bell — all of you, stand with them!",
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "random",
-          "r": 3.2,
-          "kind": "stack",
-          "need": 3,
-          "follow": true,
-          "wind": 4,
-          "damage": 3.2
-        }
-      ]
     }
   },
   "phases": [
@@ -253,19 +183,6 @@
         "ash_cloud",
         "ashfall",
         "toll"
-      ]
-    },
-    {
-      "name": "The Last Ring",
-      "newBar": {
-        "hp": 0.55
-      },
-      "say": "The Bellman tears the bell out of the tower and swings it like a flail.",
-      "abilities": [
-        "rope_lash",
-        "bell_sweep",
-        "ash_ring",
-        "last_stack"
       ]
     }
   ],

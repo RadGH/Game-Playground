@@ -1859,5 +1859,65 @@ export const metadata = {
       "arcane",
       "ground"
     ]
+  },
+  "starcut": {
+    "name": "Starcut",
+    "classId": "starblade",
+    "className": "Star Blade",
+    "categories": [
+      "spell",
+      "arcane",
+      "melee"
+    ]
+  },
+  "star_aegis": {
+    "name": "Star Aegis",
+    "classId": "starblade",
+    "className": "Star Blade",
+    "categories": [
+      "spell",
+      "arcane",
+      "self"
+    ]
+  },
+  "star_tether": {
+    "name": "Star Tether",
+    "classId": "starblade",
+    "className": "Star Blade",
+    "categories": [
+      "spell",
+      "arcane",
+      "around"
+    ]
+  },
+  "comet_rush": {
+    "name": "Comet Rush",
+    "classId": "starblade",
+    "className": "Star Blade",
+    "categories": [
+      "spell",
+      "arcane",
+      "dash"
+    ]
+  },
+  "binding_stars": {
+    "name": "Binding Stars",
+    "classId": "starblade",
+    "className": "Star Blade",
+    "categories": [
+      "spell",
+      "arcane",
+      "around"
+    ]
+  },
+  "collapsing_star": {
+    "name": "Collapsing Star",
+    "classId": "starblade",
+    "className": "Star Blade",
+    "categories": [
+      "spell",
+      "arcane",
+      "around"
+    ]
   }
 };

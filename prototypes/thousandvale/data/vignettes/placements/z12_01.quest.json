@@ -1,8 +1,104 @@
 {
- "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z12_01, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z12_01, added where a kill / collect quest's area held fewer of its monster than the step needs (round 11: max(count + 4, 2 x count) — two players at once; they come back in 1-1.5 minutes). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
  "zone": "z12_01",
  "terrainHash": "89c56ef1",
  "placements": [
+  {
+   "type": "camp",
+   "id": "quest_the_broken_keep_0_0",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 376,
+   "z": 723,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "the_broken_keep",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_the_broken_keep_0_1",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 363,
+   "z": 735,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "the_broken_keep",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_the_broken_keep_0_2",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 378,
+   "z": 699,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "the_broken_keep",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_the_broken_keep_0_3",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 383,
+   "z": 733,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "the_broken_keep",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
   {
    "type": "camp",
    "id": "quest_bones_in_the_dust_0_0",
@@ -13,15 +109,91 @@
     4
    ],
    "count": [
-    2,
-    2
+    3,
+    3
    ],
    "x": 1376,
    "z": 1722,
    "yaw": 0,
    "radius": 8,
    "quest": "bones_in_the_dust",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_bones_in_the_dust_0_1",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1363,
+   "z": 1734,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "bones_in_the_dust",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_bones_in_the_dust_0_2",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1378,
+   "z": 1698,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "bones_in_the_dust",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_bones_in_the_dust_0_3",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1383,
+   "z": 1732,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "bones_in_the_dust",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",
@@ -33,15 +205,115 @@
     4
    ],
    "count": [
-    1,
-    1
+    3,
+    3
    ],
    "x": 812,
    "z": 540,
    "yaw": 0,
    "radius": 8,
    "quest": "spore_season",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_spore_season_0_1",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 799,
+   "z": 552,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "spore_season",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_spore_season_0_2",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 814,
+   "z": 516,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "spore_season",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_a_duellists_purse_1_0",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1957,
+   "z": 1381,
+   "yaw": 0,
+   "radius": 4,
+   "quest": "a_duellists_purse",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_a_duellists_purse_1_1",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1944,
+   "z": 1393,
+   "yaw": 0,
+   "radius": 4,
+   "quest": "a_duellists_purse",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",

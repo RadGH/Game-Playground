@@ -32,7 +32,10 @@ import { createShipTravel } from './ui/ship-travel.js';
 
 /** The voyage's own numbers. */
 export const VOYAGE = Object.freeze({
-  castOffSec: 2.2, rampUpSec: 6.5, rampDownSec: 7.5, comeAlongSec: 2.6, slowMps: 6, alongMps: 4,
+  castOffSec: 2.2, slowMps: 4, alongMps: 3.5,
+  departRate: 0.55,         // Z49: leaving, metres a second for every metre from the berth
+  arriveRate: 0.3,          // Z49: arriving, metres a second for every metre still to go — the shore grows at ONE steady rate
+  flowMaxMps: 32,           // Z49: the water runs past at the ship's real speed up to this (past it, the land is far off and waves would streak)
   visualMps: 11,            // how fast the WATER moves past (the ship's real speed under sail), whatever the compression
   seaRadius: 5200, seaFadeFrom: 3900, seaLift: 1.1,
   fogNear: 1800, fogFar: 21000,
@@ -45,32 +48,37 @@ const lerp = (a, b, t) => a + (b - a) * t;
 const angDelta = (a, b) => Math.atan2(Math.sin(b - a), Math.cos(b - a));
 
 /**
- * Pure: the distance along the route at time t for a route of L metres sailed in T seconds — cast off slowly, run fast
- * in the middle, slow right down as she comes alongside. -> { at(t) -> metres, speed(t) -> m/s, vMax }.
+ * Pure: the distance along the route at time t for a route of L metres sailed in T seconds. -> { at(t) -> metres,
+ * speed(t) -> m/s, vMax }.
+ *
+ * Play-test 11 (Z49, live #50: "when you are arriving the land zooms in very quickly and the water starts moving
+ * opposite to the land … it's like the boat's about to crash into shore"). The old profile ran at full compressed speed
+ * (hundreds of metres a second) until a fixed few seconds from the end, so the coast came on like a wall and then the
+ * ship stood on its brakes. Now the speed is set by DISTANCE: leaving, it grows with the distance from the berth
+ * (`departRate`); arriving, it is `arriveRate` x the distance still to go (+ a walking pace), so the far shore grows on
+ * screen at one steady rate — a slow dolly in, never a lunge — and the last hundred metres are at a ship's own speed.
+ * vMax (the open-sea middle, out where the land is a smudge) is whatever makes the voyage last T.
  */
 export function voyageProfile(L, T, V = VOYAGE) {
-  T = Math.max(6, T);
-  const a = Math.min(V.castOffSec, T * 0.1), b = a + Math.min(V.rampUpSec, T * 0.2), d = T - Math.min(V.comeAlongSec, T * 0.08), c = d - Math.min(V.rampDownSec, T * 0.2);
-  // v(t) = fixed(t) + vMax * unit(t): integrate both, then pick vMax so the whole is L
-  const vf = (t, vm) => {
-    if (t < a) return V.slowMps * smooth(t / a);
-    if (t < b) return lerp(V.slowMps, vm, smooth((t - a) / (b - a)));
-    if (t < c) return vm;
-    if (t < d) return lerp(vm, V.alongMps, smooth((t - c) / (d - c)));
-    return V.alongMps * (1 - smooth((t - d) / (T - d)));
+  T = Math.max(6, T); L = Math.max(1, L);
+  const rate = (vm, k) => (s, t) => {
+    const dep = (V.slowMps + V.departRate * k * s) * (0.15 + 0.85 * smooth(t / V.castOffSec));
+    const arr = V.alongMps + V.arriveRate * k * Math.max(0, L - s);
+    return Math.max(0.3, Math.min(vm, dep, arr));
   };
-  const N = 600, dt = T / N;
-  const integ = vm => { let s = 0; for (let i = 0; i < N; i++) s += vf((i + 0.5) * dt, vm) * dt; return s; };
-  const s0 = integ(0), s1 = integ(1) - s0;
-  const vMax = Math.max(V.slowMps, (L - s0) / Math.max(1e-6, s1));
-  const table = new Float32Array(N + 1);
-  for (let i = 0; i < N; i++) table[i + 1] = table[i] + vf((i + 0.5) * dt, vMax) * dt;
-  const k = L / (table[N] || 1);           // exact end
-  return {
-    vMax, T,
-    at(t) { if (t <= 0) return 0; if (t >= T) return L; const f = t / dt, i = Math.floor(f); return (table[i] + (table[i + 1] - table[i]) * (f - i)) * k; },
-    speed: t => vf(Math.max(0, Math.min(T, t)), vMax) * k,
-  };
+  const N = 1200, dt = T / N;
+  const run = (vm, k) => { let s = 0; const tab = new Float32Array(N + 1); for (let i = 0; i < N; i++) { const t = (i + 0.5) * dt; s = Math.min(L, s + rate(vm, k)(s, t) * dt); tab[i + 1] = s; } return tab; };
+  // the gentlest rates that still get there: k grows only when even an unlimited middle cannot cover L in T
+  let k = 1, tab = run(1e9, k);
+  while (tab[N] < L * 0.999 && k < 64) { k *= 1.25; tab = run(1e9, k); }
+  // vMax: the slowest open-sea speed that still arrives (bisection)
+  let lo = V.slowMps, hi = 1e6;
+  for (let it = 0; it < 50; it++) { const mid = (lo + hi) / 2; if (run(mid, k)[N] >= L * 0.999) hi = mid; else lo = mid; }
+  const vMax = hi;
+  tab = run(vMax, k);
+  const sc = L / (tab[N] || 1);           // exact end
+  const at = t => { if (t <= 0) return 0; if (t >= T) return L; const f = t / dt, i = Math.floor(f); return (tab[i] + (tab[i + 1] - tab[i]) * (f - i)) * sc; };
+  return { vMax, T, k, at, speed: t => { t = Math.max(0, Math.min(T, t)); return rate(vMax, k)(at(t), t) * sc; } };
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -721,7 +729,9 @@ export function createShipVoyage(scene, { view, camera, actors, travel, hud, con
     V.yaw += angDelta(V.yaw, yaw) * Math.min(1, dt * 3.5 + (V.yaw === yaw ? 1 : 0));
     if (t < 0.05) V.yaw = yaw;
     const sail = smooth(t / 4) * (1 - smooth((t - V.T + 2) / 2));
-    V.run += dt * VOYAGE.visualMps * Math.max(0.15, sail);
+    // Z49: the water runs past at the ship's OWN speed (it used to run at a fixed 11 m/s while the land rushed past at
+    // hundreds — the sea seemed to flow the wrong way); capped where the land is far off and waves would streak
+    V.run += dt * Math.min(VOYAGE.flowMaxMps, Math.max(VOYAGE.visualMps * 0.3, V.profile.speed(t))) * Math.max(0.15, sail);
     const g = V.ship.group;
     g.position.set(V.x, VOYAGE.seaLift + 0.3 * Math.sin(t * 1.05) - 0.15, V.z);
     g.rotation.set(0.022 * Math.sin(t * 1.27 + 1), V.yaw, 0.045 * Math.sin(t * 0.83) + 0.05 * sail, 'YXZ');

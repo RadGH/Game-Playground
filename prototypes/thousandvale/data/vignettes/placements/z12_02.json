@@ -1671,7 +1671,8 @@
     "enchanter",
     "stormcaller",
     "pyromancer",
-    "starcaller"
+    "starcaller",
+    "starblade"
    ],
    "radius": 1
   },
@@ -1879,7 +1880,7 @@
    "type": "npc",
    "id": "bettony",
    "name": "Bettony the herb-woman",
-   "role": "herbalist",
+   "role": "wise_woman",
    "at": "sp_nine_maidens",
    "x": 1519.2,
    "z": 525.9,
@@ -2712,7 +2713,7 @@
    "type": "folk",
    "id": "folk_test_1",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -3179,7 +3180,7 @@
    "type": "folk",
    "id": "folk_test_3",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -3724,7 +3725,7 @@
    "type": "folk",
    "id": "folk_test_5",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -4644,7 +4645,7 @@
    "type": "folk",
    "id": "folk_test_8",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -6807,7 +6808,7 @@
    "type": "folk",
    "id": "folk_test_15",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -7143,7 +7144,7 @@
    "type": "folk",
    "id": "folk_test_16",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -8712,7 +8713,7 @@
    "type": "folk",
    "id": "folk_test_21",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -9731,7 +9732,7 @@
    "type": "folk",
    "id": "folk_test_24",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -10220,7 +10221,7 @@
    "type": "folk",
    "id": "folk_test_26",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"

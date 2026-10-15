@@ -10,7 +10,7 @@
     "level": 15,
     "respawnMs": 1800000
   },
-  "_doc": "Expansion 1 (Vharlen). The ZONE EVENT BOSS for Glasswind Strand: the herald of the Glass Kings walks out of the tomb to proclaim a king who has been dead for three hundred years. P1 'The Proclamation': a staff cone, decrees cut in three lines, and the Proclamation itself — a blast across the whole ruin; hide behind a glass obelisk. P2 at 55% 'The Glass Court': the herald stands behind a ward of light while the court gathers — TURN ALL THREE SUN MIRRORS onto it (use them) to shatter the ward. P3, a new health bar 'Shattered Herald': shards ride every player, a kneel-together stack, a get-in-close ring and a turning cross. Soft enrage from 4 minutes, hard at 7.",
+  "_doc": "Expansion 1 (Vharlen). The ZONE EVENT BOSS for Glasswind Strand: the herald of the Glass Kings walks out of the tomb to proclaim a king who has been dead for three hundred years. P1 'The Proclamation': a staff cone, decrees cut in three lines, and the Proclamation itself — a blast across the whole ruin; hide behind a glass obelisk. P2 at 55% 'The Glass Court': the herald stands behind a ward of light while the court gathers — TURN ALL THREE SUN MIRRORS onto it (use them) to shatter the ward. P3, a new health bar 'Shattered Herald': shards ride every player, a kneel-together stack, a get-in-close ring and a turning cross. Soft enrage from 4 minutes, hard at 7. OWNER #51 (2026-10-15): the phase that refilled the health bar is removed; the health bar is the whole fight.",
   "party": "Zone event, everyone nearby joins. Solo: not intended (three mirrors under adds, a stack that needs 3). 3-5: playable. 10+: intended. M5 scaling: health and court adds by players enrolled; stack need = clamp(players/4, 2, 5).",
   "hpMult": 3,
   "arena": {
@@ -207,100 +207,6 @@
           }
         }
       ]
-    },
-    "shards": {
-      "id": "shards",
-      "name": "Riding Shards",
-      "every": [
-        15,
-        18
-      ],
-      "first": 4,
-      "cast": 0.6,
-      "say": "Shards of the Herald fly at everyone — spread out!",
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "each",
-          "r": 3,
-          "wind": 2.4,
-          "damage": 1.4,
-          "follow": true,
-          "status": "bleed"
-        }
-      ]
-    },
-    "kneel": {
-      "id": "kneel",
-      "name": "Kneel",
-      "every": [
-        20,
-        24
-      ],
-      "first": 7,
-      "cast": 1,
-      "say": "{target} must kneel to the king — three of you kneel together to share it!",
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "random",
-          "r": 3.6,
-          "wind": 4,
-          "damage": 3,
-          "kind": "stack",
-          "need": 3,
-          "follow": true,
-          "element": "holy"
-        }
-      ]
-    },
-    "halo": {
-      "id": "halo",
-      "name": "Breaking Halo",
-      "every": [
-        16,
-        19
-      ],
-      "first": 11,
-      "cast": 1,
-      "say": "His halo breaks outward — get in close!",
-      "telegraphs": [
-        {
-          "shape": "donut",
-          "at": "self",
-          "r": 18,
-          "r2": 4,
-          "wind": 1.9,
-          "damage": 2.2,
-          "element": "holy"
-        }
-      ]
-    },
-    "turning_cross": {
-      "id": "turning_cross",
-      "name": "Turning Cross",
-      "every": [
-        15,
-        18
-      ],
-      "first": 14,
-      "cast": 0.6,
-      "say": "A cross of light — then it turns!",
-      "telegraphs": [
-        {
-          "shape": "cross",
-          "at": "self",
-          "r": 24,
-          "w": 3,
-          "wind": 1.6,
-          "damage": 2,
-          "count": 2,
-          "delay": 1.4,
-          "rotate": 0.785,
-          "yaw": "random",
-          "element": "holy"
-        }
-      ]
     }
   },
   "phases": [
@@ -357,20 +263,6 @@
           "say": "The Herald stands behind a ward of light. Turn all three sun mirrors onto it! It fails by itself in 25 seconds.",
           "style": "warn"
         }
-      ]
-    },
-    {
-      "name": "Shattered Herald",
-      "newBar": {
-        "hp": 0.5
-      },
-      "say": "The mirrors! The king will hear of this!",
-      "abilities": [
-        "staff",
-        "shards",
-        "kneel",
-        "halo",
-        "turning_cross"
       ]
     }
   ],

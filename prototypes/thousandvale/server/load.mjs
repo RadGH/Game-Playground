@@ -4,6 +4,7 @@
 import { readFileSync, existsSync, appendFileSync, mkdirSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, resolve, join } from 'node:path';
+import { randomBytes } from 'node:crypto';
 import { loadZoneTerrain, standInTerrain } from '../js/sim/terrain.js';
 import { createMemoryStore } from '../js/sim/store-memory.js';
 import { loadZoneContent, loadProvinceContent } from '../js/sim/content.js';
@@ -164,4 +165,14 @@ export function starterOf(keys, game = GAME) {
     if (!Array.isArray(s.band) || s.band[0] <= 1) return k;
   }
   return (keys || [])[0] || null;
+}
+
+/**
+ * Round 11 (World, live #6): a fresh seed for this run's dice — every room's combat, loot and rank rolls mix it in
+ * (js/sim/province.js `runSeed`), so a restart never replays the same drops. `TV_RUN_SEED=<n>` pins it (debugging).
+ */
+export function runSeedFrom(env = process.env) {
+  const pinned = Number(env.TV_RUN_SEED);
+  if (Number.isFinite(pinned) && pinned > 0) return pinned >>> 0;
+  return (randomBytes(4).readUInt32LE(0) >>> 0) || 1;
 }

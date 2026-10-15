@@ -32,18 +32,20 @@ test('every major town has dedicated gathering teachers standing on clear ground
   }
 });
 
-test('players can learn every trade from the spawned teachers in every major town', async t => {
+test('round 11 (live #11): every trade is known from the start; the spawned teachers in every major town still offer their trade and sell its tool again', async t => {
   const S = await realServer({ roadEvents: false, travellers: false });
   const a = await joinReal(S.srv, S.clock, 'Townapprentice');
   t.after(async () => { a.close(); await S.srv.stop(); });
   const P = S.world.province, o = rec(S.world, a), clock = S.clock;
-  const used = [], learned = [];
-  a.on('used', m => used.push(m)); a.on('profR', m => learned.push(m));
+  const used = [], bought = [];
+  a.on('used', m => used.push(m)); a.on('profR', m => bought.push(m));
   const majorNames = new Set(Object.values(offices.towns).map(t => t.name));
   const towns = [...P.rooms.values()].filter(r => r.kind === 'town' && majorNames.has(r.name));
   assert.equal(towns.length, Object.keys(offices.towns).length);
+  for (const id of numbers.professions.map(p => p.id)) assert.ok(P.professions.knows(o.char, id), id + ' known from the start');
+  for (const p of numbers.professions.filter(p => p.tool && p.id !== 'angling')) assert.ok(o.char.bag.some(i => i.tool && i.use?.prof === p.id), `${p.name}: starting tool`);
   for (const town of towns) {
-    o.char.professions = {}; o.char.bag = []; o.char.gold = 0;
+    o.char.professions = {}; o.char.bag = []; o.char.gold = 1000;
     P.professions.ensureNodes(town);
     const npcs = [...town.objects.values()].filter(e => e.data?.npc);
     for (const p of numbers.professions.filter(p => !p.start)) {
@@ -54,15 +56,13 @@ test('players can learn every trade from the spawned teachers in every major tow
       await run(clock, 600);
       used.length = 0;
       a.use(teacher.id); await until(clock, () => used.length, 2000);
-      assert.ok(used[0].ok && used[0].prof?.trains.includes(p.id), `${town.name}: ${p.name} offered when spoken to`);
-      if (!P.professions.knows(o.char, p.id)) {
-        learned.length = 0;
-        a.prof('learn', { id: p.id, npc: teacher.id }); await until(clock, () => learned.length, 2000);
-        assert.ok(learned[0].ok, `${town.name}: ${p.name} lesson succeeds: ${JSON.stringify(learned[0])}`);
+      assert.ok(used[0].ok && used[0].prof?.trains.includes(p.id) && used[0].prof.known.includes(p.id), `${town.name}: ${p.name} offered when spoken to`);
+      assert.ok(P.professions.knows(o.char, p.id), `${town.name}: ${p.name} known`);
+      if (p.tool && !o.char.bag.some(i => i.tool && i.use?.prof === p.id)) {
+        bought.length = 0;
+        a.prof('tool', { id: p.id, npc: teacher.id }); await until(clock, () => bought.length, 2000);
+        assert.ok(bought[0].ok && o.char.bag.some(i => i.tool && i.use?.prof === p.id), `${town.name}: ${p.name} tool sold again: ${JSON.stringify(bought[0])}`);
       }
-      assert.ok(P.professions.knows(o.char, p.id), `${town.name}: ${p.name} learned`);
-      if (p.tool) assert.ok(o.char.bag.some(i => i.tool && i.use?.prof === p.id), `${town.name}: ${p.name} starter tool granted`);
     }
-    assert.equal(o.char.gold, 0, `${town.name}: lessons are free`);
   }
 });

@@ -4,7 +4,7 @@
 // recipes, rods and pool spots are stream E's (data/provinces/angling.json, angling-pools.json). This file runs the loop
 // for real players, keeps the pools, saves the skill and the catch journal, cooks, and tells everyone near what they see.
 //
-//   cast   `fish {op:'cast', aim?}`  a rod in the bag, standing by water (or a pool) -> `fishR {ok, state:'wait', at, water, pool?}`
+//   cast   `fish {op:'cast', pool?, aim?}`  a rod in the bag, standing by a fish POOL (round 11: only a pool) -> `fishR {ok, state:'wait', at, water, pool?}` | `{ok:false, why:'noPool'}`
 //   bite   2-9 s later               `fishBite {ms}`  (the window to answer)
 //   hook   `fish {op:'hook'}`        too soon / too late -> `fishR {ok:false, why:'early'|'late'}`; else the ROLL:
 //            junk comes straight in, a monster climbs out, anything else is a tug -> `fishTug {ms, band, need, pull, speed, jitter, seed, heft, rarity}`
@@ -15,7 +15,8 @@
 //
 // POOLS are room objects (`type:'fishpool'`, `info.pool = {tier, minSkill, left, water}`): `meta.<zone>.live` of E's listed
 // spots are open at once per copy; a pool is fished out after C's `catches` and another listed spot opens a little later.
-// A cast that lands within POOL_R of one fishes the pool (better tables, shorter wait). Any other water works too.
+// A cast that lands within POOL_R of one fishes the pool (better tables, shorter wait). Round 11 (live #12): ONLY a pool
+// takes a line — you stand within `poolUseM` of one (E on it) — open water no longer does.
 //
 // SAVED on the character (`angling`): { xp, level, casts, catches: { species: { n, best, zone, zones } }, legends, titles, bait }.
 // COOKING: `cook {}` -> `cookList {fire, recipes}`; `cook {id, n?}` at a fire (a campfire, an inn's hearth = its innkeeper)
@@ -35,6 +36,7 @@ export const ANGLING = Object.freeze({
   autoMin: 3, autoMax: 16,          // with no aim: the first water this far along where you face
   minDepth: 0.25,                   // water at least this deep takes a hook
   poolR: 7,                         // a bobber this close to a pool's middle fishes the pool
+  poolUseM: 16,                     // round 11 (P, live #12): you fish ONLY at a pool — standing this close to its middle or its shore point (E on it)
   driftM: 2,                        // a step further than this from where you cast reels the line in
   graceMs: 350,                     // latency allowance on the bite window and the tug
   tugLateMs: 5000,                  // a tug not answered this long after it should have ended is lost
@@ -63,7 +65,7 @@ export function joinAnglingContent(list) {
 }
 
 export function createAngling({ layouts, online, provOf, grant, journal, questEvent = () => {}, consume, now, wallNow = () => Date.now(), log = () => {}, counters = {},
-  safeRules = () => undefined, dayPhase = () => 'day', fighting = () => false, dismount = () => {}, endMeal = () => {}, wantSheet = () => {}, bagMax = 120, setTimeoutTicks = (fn) => fn(), opts = {} }) {
+  safeRules = () => undefined, dayPhase = () => 'day', fighting = () => false, dismount = () => {}, endMeal = () => {}, wantSheet = () => {}, bagMax = 120, bagFull = null, setTimeoutTicks = (fn) => fn(), opts = {} }) {
   const R = { ...ANGLING, ...opts };
   const first = layouts[0] || {};
   const D = first.angling || null;                     // { numbers, content, pools }
@@ -102,10 +104,9 @@ export function createAngling({ layouts, online, provOf, grant, journal, questEv
    * fished, earned angling experience or owns a rod already knows it (existing anglers keep it); everyone else is taught
    * by an angler (the province's `use` on a `role:'angler'` NPC, or P-core's trainer path) — free, with the starting rod.
    */
-  function learned(ch) {
-    const a = ch.angling && typeof ch.angling === 'object' ? ch.angling : null;
-    return !!(a && (a.learned || a.xp > 0 || (a.casts | 0) > 0 || (a.catches && Object.keys(a.catches).length))) || (ch.bag || []).some(isRod);
-  }
+  // round 11 (stream P, live #11: "start all characters with all professions"): everyone knows Angling — the rod is handed
+  // over on join by js/sim/professions.js grantAll. (The old rule: a character who had fished or owned a rod knew it.)
+  function learned(ch) { return !!ch; }
   function learn(o) {
     const a = stateOf(o.char);
     if (a.learned) return false;
@@ -224,6 +225,18 @@ export function createAngling({ layouts, online, provOf, grant, journal, questEv
     for (const e of m.values()) { if (e.removed) continue; const d = Math.hypot(e.x - x, e.z - z); if (d <= bd) { bd = d; best = e; } }
     return best;
   }
+  const poolLive = e => !!e && !e.removed && !!e.data && !!e.data.pool && (e.data.pool.always || (e.data.pool.left | 0) > 0);
+  /** How far an angler at (x, z) is from a pool: its middle, or the shore point E's data gives it (pools lie off the bank). */
+  const poolDist = (e, x, z) => { const sh = e.data.pool.shore; return Math.min(Math.hypot(e.x - x, e.z - z), sh && Number.isFinite(sh.x) ? Math.hypot(sh.x - x, sh.z - z) : Infinity); };
+  /** Round 11 (live #12): the live pool an angler standing at (x, z) may fish — `id` = the one they pressed E on — or null. */
+  function poolInReach(room, x, z, id = null) {
+    const m = poolsIn.get(room.id);
+    if (!m) return null;
+    if (id != null) { const e = room.entities && room.entities.get ? room.entities.get(id) : [...m.values()].find(q => q.id === id); return e && e.type === 'fishpool' && poolLive(e) && poolDist(e, x, z) <= R.poolUseM ? e : null; }
+    let best = null, bd = R.poolUseM;
+    for (const e of m.values()) { if (!poolLive(e)) continue; const d = poolDist(e, x, z); if (d <= bd) { bd = d; best = e; } }
+    return best;
+  }
   /** One catch out of a pool: at 0 it closes and another listed spot of its zone opens after a while. */
   function drain(room, pool) {
     const p = pool.data.pool;
@@ -259,27 +272,29 @@ export function createAngling({ layouts, online, provOf, grant, journal, questEv
     if (o.room && e && !e.removed) o.room.emit({ type: 'fx', kind: 'fish', id: e.id, phase: why === 'catch' ? 'catch' : why === 'lost' ? 'lost' : 'end', x: f.at.x, z: f.at.z });
     if (!quiet) fishR(o, { ok: true, state: 'idle', why });
   }
-  function castAt(o, aim) {
+  const NO_POOL = 'You can only fish at a fishing spot: rippling water with fish jumping. Stand on its bank and press E.';
+  function castAt(o, aim, poolId = null) {
     const e = o.entity, room = o.room;
-    const pick = (x, z) => { const p = poolNear(room, x, z); if (p) return { x: p.x, z: p.z, pool: p }; const w = waterAt(room, x, z); return w ? { x, z, w } : null; };
+    // round 11 (live #12: "you can no longer arbitrarily fish UNLESS there is a fishing node"): the line goes into a POOL
+    // you stand by — the one you pressed E on, else the nearest in reach. Open water no longer takes a hook.
+    if (poolId != null || !aim) {
+      const p = poolInReach(room, e.x, e.z, poolId);
+      if (p) return { x: p.x, z: p.z, pool: p, w: waterAt(room, p.x, p.z) || { kind: p.data.pool.water || 'river', depth: 1 } };
+      return { why: 'noPool', msg: poolId != null ? 'That fishing spot is too far away (or fished out). Walk up to its bank.' : NO_POOL };
+    }
+    const pick = (x, z) => { const p = poolNear(room, x, z); return p && poolLive(p) && poolDist(p, e.x, e.z) <= R.poolUseM ? { x: p.x, z: p.z, pool: p } : null; };
     if (aim && Number.isFinite(aim.x) && Number.isFinite(aim.z)) {
       const d = Math.hypot(aim.x - e.x, aim.z - e.z);
       if (d > R.castMax + R.poolR) return { why: 'far', msg: 'That is too far to cast.' };
       let hit = pick(aim.x, aim.z);
       // a click just off the water's edge: the nearest water within 3 m of it
       for (let k = 0; !hit && k < 16; k++) { const a = k / 8 * Math.PI, r = k < 8 ? 1.5 : 3; hit = pick(aim.x + Math.cos(a) * r, aim.z + Math.sin(a) * r); }
-      if (!hit) return { why: 'noWater', msg: 'Cast into water.' };
+      if (!hit) return { why: 'noPool', msg: NO_POOL };
       if (Math.hypot(hit.x - e.x, hit.z - e.z) > R.castMax) return { why: 'far', msg: 'That is too far to cast.' };
       return hit;
     }
-    // no aim: a pool in reach in front of you, else the first water along where you face (then a sweep to both sides)
-    const near = poolNear(room, e.x, e.z, R.castMax);
-    if (near) return { x: near.x, z: near.z, pool: near };
-    for (const turn of [0, 0.35, -0.35, 0.7, -0.7, 1.1, -1.1, 1.6, -1.6, 2.4, -2.4, Math.PI]) {
-      const yaw = (e.yaw || 0) + turn, sx = Math.sin(yaw), sz = Math.cos(yaw);
-      for (let d = R.autoMin; d <= R.autoMax; d += 1) { const hit = pick(e.x + sx * d, e.z + sz * d); if (hit) return hit; }
-    }
-    return { why: 'noWater', msg: 'There is no water in reach. Stand at the water\'s edge and face it.' };
+    const p = poolInReach(room, e.x, e.z);      // an aim that is not a point: as with none
+    return p ? { x: p.x, z: p.z, pool: p, w: waterAt(room, p.x, p.z) || { kind: p.data.pool.water || 'river', depth: 1 } } : { why: 'noPool', msg: NO_POOL };
   }
   function cast(o, m) {
     const e = o.entity, ch = o.char, room = o.room;
@@ -293,10 +308,10 @@ export function createAngling({ layouts, online, provOf, grant, journal, questEv
     if (!A.learned) { A.learned = true; saved(o); }
     const rod = rodOf(ch, A.level);
     if (!rod) return refuse(o, 'noRod', 'You need a fishing rod. An angler by the water sells them.');
-    if ((ch.bag || []).length >= (typeof bagMax === 'function' ? bagMax(o) : bagMax)) return refuse(o, 'bagFull', 'Your bag is full.');
+    if (bagFull ? bagFull(o, { kind: 'fish' }) : (ch.bag || []).length >= (typeof bagMax === 'function' ? bagMax(o) : bagMax)) return refuse(o, 'bagFull', 'Your bag is full.');      // round 11: a fish goes in Items
     ensurePools(room);
     if (o.fishing) stop(o, 'recast', true);
-    const hit = castAt(o, m.aim);
+    const hit = castAt(o, m.aim, m.pool ?? null);
     if (hit.why) return refuse(o, hit.why, hit.msg);
     let pool = hit.pool || null, pd = pool ? pool.data.pool : null, note = null;
     let ok = F.canFish({ skill: A.level, pool: pd ? { tier: pd.tier } : null, rod });

@@ -5282,7 +5282,7 @@
    "type": "folk",
    "id": "folk_redcliff_13",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -6919,7 +6919,7 @@
    "type": "folk",
    "id": "folk_redcliff_19",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -7279,7 +7279,7 @@
    "type": "folk",
    "id": "folk_redcliff_20",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -7821,7 +7821,7 @@
    "type": "folk",
    "id": "folk_redcliff_22",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -10021,7 +10021,7 @@
    "type": "folk",
    "id": "folk_redcliff_30",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -10236,7 +10236,7 @@
    "type": "folk",
    "id": "folk_redcliff_31",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"

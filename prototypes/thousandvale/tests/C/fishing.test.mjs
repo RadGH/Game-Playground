@@ -164,9 +164,10 @@ test('the level curve: 1..100, monotonic, gain() reports level-ups', () => {
   assert.ok(F.xp({ kind: 'junk' }) > 0 && F.xp({ kind: 'junk' }) < F.xp({ kind: 'fish', rarity: 'common' }));
 });
 
-test('a newcomer who lands 30 catches around Torborhold is about level 10; 100 is a long road', withE, () => {
-  const levels = [];
-  for (const seed of [1, 2, 3, 4, 5, 6]) {
+test('a newcomer who lands 30 catches around Torborhold is about level 10 at the round-8 pace, and well past it at the x3 pace (round 11, live #10); 100 is a long road', withE, () => {
+  // round 11 (stream P): every profession earns three times the experience — `xp.mult` in data/rules/fishing.json. The
+  // round-8 pace is the same file at mult 1; the real one must climb faster for the same catches.
+  const at = (F, seeds = [1, 2, 3, 4, 5, 6]) => seeds.map(seed => {
     const rng = makeRng(seed);
     const st = { xp: 0 }, seen = new Set(), best = {};
     let landed = 0, guard = 0;
@@ -179,9 +180,13 @@ test('a newcomer who lands 30 catches around Torborhold is about level 10; 100 i
       st.xp = F.gain(st, F.xp(c, { first, best: pb })).xp;
       landed++;
     }
-    levels.push(F.levelOf(st.xp));
-  }
-  for (const L of levels) assert.ok(L >= 8 && L <= 12, `levels after 30 catches: ${levels}`);
+    return F.levelOf(st.xp);
+  });
+  const F1 = createFishing({ ...numbers, xp: { ...numbers.xp, mult: 1 } }, content);
+  const old = at(F1), now = at(F);
+  for (const L of old) assert.ok(L >= 8 && L <= 12, `round-8 pace, levels after 30 catches: ${old}`);
+  assert.ok((numbers.xp.mult || 1) === 3, 'every catch is worth three times its table value');
+  for (let i = 0; i < now.length; i++) assert.ok(now[i] > old[i] + 2, `x3 climbs faster: ${now} vs ${old}`);
   // the road to 100: at 40 xp a catch it is thousands of catches, but finite
   const total = F.next(99);
   assert.ok(total / 40 > 1500 && total / 40 < 8000, `${total} xp to 100`);

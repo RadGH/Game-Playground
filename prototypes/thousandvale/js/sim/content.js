@@ -7,6 +7,9 @@
 // Used by createWorld({ zoneSheet: content.sheet, encounterInfo: content.encounterInfo }).
 
 import { provinceData, namesPath, HOME_PROVINCE } from './province-files.js';
+import { refineNav } from '../rules/nav-refine.js';            // [D-world #38]
+import { growForest, clearOf } from '../rules/forest.js';       // [D-world #26] the woods the client draws
+import { parseScatter } from '../rules/terrain-read.js';         // [D-world #38]
 
 export const PROVINCE_FILES = ['data/provinces/torbor_downs.json'];      // the single-zone loader's sheets (loadZoneContent); a whole province reads data/provinces/<id>.json
 export const VIGNETTE_FILES = ['data/vignettes/m1.json', 'data/vignettes/m2.json', 'data/vignettes/m2b.json', 'data/vignettes/curios.json', 'data/vignettes/setpieces.json',
@@ -90,12 +93,14 @@ export async function loadProvinceContent(readJson, readBytes, provinceId, { par
     const [, zx, zy] = /^z(\d+)_(\d+)$/.exec(wid).map(Number);
     let nav = null;     // B's nav.bin (trees, rocks, buildings, deep water): monsters step round them (stream C)
     if (parseNav) { try { nav = parseNav(await readBytes(`data/zones/${wid}/nav.bin`)); } catch { /* not baked */ } }
-    parts.push({ key: wid, zx, zy, reader, nav });
-    let vignettes = null;
+    const part = { key: wid, zx, zy, reader, nav };
+    parts.push(part);
+    let vignettes = null, vigRaw = [];      // [D-world #26] vigRaw: the zone's own vignette placements (zone metres) the woods keep off
     for (const f of [`data/vignettes/placements/${wid}.json`, `data/vignettes/placements/${eid}.json`]) {
       try {
         const pl = await readJson(f);
         if (pl.terrainHash && reader.meta.inputHash && pl.terrainHash !== reader.meta.inputHash) { log(`vignettes ${f}: made for another bake (${pl.terrainHash} vs ${reader.meta.inputHash}), skipped`); continue; }
+        vigRaw = pl.placements || [];
         // placements are in zone metres: move them into world metres
         const ox = zx * 2048, oz = zy * 2048;
         // placements[] + features[] (hooks that ARE a bake feature: a ford, a settlement, a `pts` line)
@@ -113,6 +118,9 @@ export async function loadProvinceContent(readJson, readBytes, provinceId, { par
     // the zone's quest file (data/quests/<E zone id>.json) and its placements: the quest runtime reads both
     // B's town plans (building plots by `want`, the squares): where the town folk work and sleep (schedules.json)
     const bp = await opt(`data/zones/${wid}/placements.json`);
+    // [D-world #38 / #26] round colliders for trees and rocks (js/rules/nav-refine.js) over the woods the client draws
+    // (js/rules/forest.js, kept off the bake's set pieces and the vignettes) — the client wraps the same files the same way
+    if (nav) { try { part.nav = refineNav(nav, growForest(parseScatter(await readBytes(`data/zones/${wid}/scatter.bin`)), nav, { ox: zx * 2048, oz: zy * 2048, clear: clearOf((bp && bp.placements) || [], vigRaw) })); } catch { /* no scatter: the grid answers */ } }
     const plan = { settlements: [], buildings: [], squares: [] };
     for (const p of (bp && bp.placements) || []) {
       const wx = p.x + zx * 2048, wz = p.z + zy * 2048, d = p.data || {};

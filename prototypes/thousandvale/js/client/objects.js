@@ -43,7 +43,9 @@ const KINDS = {
   npc:     { prop: null, glow: null, label: o => `Talk to ${o.name || 'them'}`, use: true, invisible: true },
   vignette: { prop: null, glow: null, label: () => null, use: false, invisible: true },
   cart:    { prop: null, glow: null, label: o => (o.name && !/^cart$/i.test(o.name) ? `Ask about a ride: ${o.name}` : 'Ask about a ride on the ox cart'), use: true, invisible: true },   // W5: drawn by carts-view.js
-  fishpool: { prop: null, glow: null, label: () => null, use: false, invisible: true },
+  // round 11 (P, live #12): a fish pool is the ONLY place to fish — E on it casts (drawn on the water by angling-view.js). Its
+  // own `reach`: a pool lies off the bank, so the prompt shows from the shore (the server allows 16 m; this is 12 + r/2)
+  fishpool: { prop: null, glow: null, label: () => 'Fish here', use: true, invisible: true, reach: 12 },
   // W9 (P-client): gathering nodes and skinnable corpses — drawn by prof-view.js, which also sets `verb` and `spent`; E starts the mini-game (main.js onUse)
   node:     { prop: null, glow: null, label: o => (o.spent ? null : `${o.verb || 'Gather'} ${o.name || 'this'}`), use: o => !o.spent, invisible: true },
   skin:     { prop: null, glow: null, label: o => `Skin ${o.name || 'the beast'}`, use: true, invisible: true },        // T25: drawn on the water by angling-view.js
@@ -252,7 +254,7 @@ export function createObjects(scene, { heightAt = () => 0, onUse, onNear = null,
         }
       }
       if (o.arm) o.arm.rotation.z += ((o.state === 'used' ? -0.6 : 0.6) - o.arm.rotation.z) * Math.min(1, dt * 8);
-      if (me && can) { const d = Math.hypot(o.x - me.x, o.z - me.z) - (o.r || 1) * 0.5; if (d < REACH && d < bd) { bd = d; best = o; } }
+      if (me && can) { const d = Math.hypot(o.x - me.x, o.z - me.z) - (o.r || 1) * 0.5; if (d < (K.reach || REACH) && d < bd) { bd = d; best = o; } }      // (round 11: a kind may carry its own reach — the fish pool)
     }
     focus = best;
     if (labelLayer && camera) drawLabels();

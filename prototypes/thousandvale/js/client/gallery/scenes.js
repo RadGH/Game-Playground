@@ -17,6 +17,25 @@
 import { PROF_SCENES } from './prof-scenes.js';      // W9 (P-client): the profession scenes live beside this file
 
 const U = 'js/client/ui/';
+
+/** Round 11 (Market, owner #25): a recorded Market — six listings (two of them yours) and a fee quote for every bag item. */
+const marketFill = ['run', async G => {
+  const now = Date.now(), day = 86400000;
+  const it = (uid, name, rarity, extra) => ({ uid, name, rarity, ...extra });
+  const list = [
+    { id: 41, seller: 'Brannoc', item: it('mk-1', 'Copper Ore', 'normal', { kind: 'material', id: 'copper_ore', count: 20 }), price: 30, count: 20, listedAt: now - 2 * day, expiresAt: now + 28 * day },
+    { id: 42, seller: 'Ysolde', item: it('mk-2', 'Wolfhide Gloves', 'magic', { type: 'armor', slot: 'hands', level: 6, armor: 9 }), price: 95, count: 1, listedAt: now - day, expiresAt: now + 29 * day },
+    { id: 43, seller: 'Tamsin Reed', item: it('mk-3', 'Gullwick Longsword', 'rare', { type: 'weapon', slot: 'weapon', base: 'longsword', level: 8, dmg: [11, 18] }), price: 420, count: 1, listedAt: now - 3 * 3600000, expiresAt: now + 30 * day - 3 * 3600000 },
+    { id: 44, seller: 'Odo Fenn', item: it('mk-4', 'Healing Potion', 'normal', { kind: 'potion', id: 'healing_potion', count: 5 }), price: 60, count: 5, listedAt: now - 5 * day, expiresAt: now + 25 * day },
+    { id: 45, seller: 'You', mine: true, item: it('mk-5', 'Ashwood Staff', 'magic', { type: 'weapon', slot: 'weapon', base: 'staff', level: 5 }), price: 150, fee: 4, count: 1, listedAt: now - 6 * day, expiresAt: now + 24 * day },
+    { id: 46, seller: 'You', mine: true, item: it('mk-6', 'Iron Ore', 'normal', { kind: 'material', id: 'iron_ore', count: 12 }), price: 48, fee: 1, count: 12, listedAt: now - 20 * day, expiresAt: now + 10 * day },
+  ];
+  const bag = (G.bag?.state?.bag || []).filter(i => !i.noSell && !i.keep && i.kind !== 'crate' && i.kind !== 'gift' && !i.quest);
+  G.fake.push('game', { t: 'marketList', list, total: list.length, page: 0, per: 30, q: '', tab: '', sub: '', sort: 'cheap' });
+  G.fake.push('game', { t: 'marketMine', list: list.filter(x => x.mine), cap: 20, feePct: 20, priceMax: 10000000, lastsMs: 30 * day, canSell: null,
+    quotes: bag.map((x, i) => { const sell = 3 + (i * 7) % 40; return { uid: x.uid, sell, fee: Math.max(1, Math.ceil(sell * 0.2)) }; }) });
+  await new Promise(r => setTimeout(r, 200));
+}];
 const chat = [['chat', [
   { text: 'Anyone for the Barrow? Need a tank.', cls: 'say', from: 'Sella' },
   { text: 'I can tank it. Two minutes — selling junk first.', cls: 'party', from: 'Aldra' },
@@ -110,6 +129,7 @@ export const SCENES = [
     notes: { all: 'The character window: the paper doll on the left (what you wear), the bag on the right with filters, search and sort. The 3D item icons are drawn by the game’s icon renderer.',
       phone: 'Proposed: the bag is a full-screen sheet. Upright: what you wear is a strip of squares on top, the bag is a grid of 58 px squares below. On its side: worn gear left, bag right. The tab bar (bottom upright, a rail on the left on its side) moves between Bag · Character · Skills · Perks · Map · Journal · Social with one tap.\nWhy a rail on its side: the screen is only 372 px tall there and a bottom bar would cost 15% of it; the left edge next to the island is dead space anyway.',
       pad: 'The ring moves square to square; A wears, X opens the item’s menu, Y shows its card; LB / RB change the filter.' } },
+  { id: 'bag-tabs', expect: '#bag:not([hidden]) #inv-tabs .chip.tab', group: 'Character', title: 'Bag tabs (Equipment / Items / Other), the Mount slot, the Mount button', notes: { all: 'Round 11 (#11, #44, #29): three tabs counted on their own (Other never fills); the Mount slot lists your mounts to swap, with a compare card; the action bar carries a Mount button where the fishing button was.', pad: 'A focused square shows its card at once; Y on it compares the other hand / ring.' }, modules: [U + 'pt11.js', U + 'pt11-core.js'], steps: [['panel', 'bag'], ['icons']] },
   { id: 'bag-character', expect: '#panel-sheet:not([hidden]) .sh-row', group: 'Character', title: 'Character menu beside the bag', modules: [U + 'char-sheet.js', U + 'pt5-core.js'], steps: [['panel', 'bag'], ['panel', 'sheet'], ['icons']],
     notes: { all: 'T18: the Character menu (health, armour, damage per ability, angling skill) docks beside the bag. The numbers are the server’s own sheet, recorded.',
       phone: 'No room for two windows side by side: Character is its own tab next to Bag — one tap swaps them.' } },
@@ -182,6 +202,9 @@ export const SCENES = [
   { id: 'title-calling', expect: '#class-card:not([hidden]) .cc-sig', group: 'Start', title: 'Title — the calling\'s card (Starcaller)', stage: 'title', step: 'new', modules: [U + 'class-card.js', 'index.html'],
     steps: [['wait', 900], ['run', async () => { const m = document.getElementById('class-more'); m.value = 'starcaller'; m.dispatchEvent(new Event('change')); }], ['wait', 200]],
     notes: { all: 'Y32: under the callings, a card for the one picked — its role, what it wears and runs on, its hook and its signature mechanic, in the class data\'s own words. Shown: the Starcaller, the calling that exists only in Thousandvale.', phone: 'The card is part of the scrolling form.' } },
+  { id: 'title-calling-starblade', expect: '#class-card:not([hidden]) .cc-emblem', group: 'Start', title: 'Title — the calling\'s card (Star Blade)', stage: 'title', step: 'new', modules: [U + 'class-card.js', 'index.html'],
+    steps: [['wait', 900], ['run', async () => { const m = document.getElementById('class-more'); m.value = 'starblade'; m.dispatchEvent(new Event('change')); }], ['wait', 200]],
+    notes: { all: 'Play-test 11 (#53): the Star Blade, the Starcaller\'s melee partner — plate, swords, Starlight spent on a star shield that strikes back and on holding a crowd. The emblem at the top right is the calling\'s own ground sigil (every calling has one).', phone: 'The card is part of the scrolling form.' } },
   { id: 'changelog', expect: '.tv-changelog:not([hidden]) .cl-entry', group: 'Start', title: 'Changelog — what is new', stage: 'title', step: 'front', modules: [U + 'changelog.js', U + 'pt10.js', U + 'pt10-core.js'],
     steps: [['wait', 900], ['run', async () => { window.tvui10.changelog.open(); }], ['wait', 600]],
     notes: { all: 'Y30: every update, newest first; the ones you have not read are marked New. Opened from "What\'s new" on the title, the pause menu, or the popup that appears on the title after an update.', phone: 'A full-screen sheet that scrolls.', pad: 'B closes it; the right stick scrolls.' } },
@@ -206,6 +229,10 @@ export const SCENES = [
     notes: { all: 'The guild tab (this character is in none: found one, or wait for an invite).' } },
   { id: 'mail', expect: '#panel-partyhub:not([hidden]) .ml-row', group: 'Social', title: 'Mail with a gift', modules: ['js/client/mail.js', U + 'reveal.js'], steps: [['hub', 'mail'], ['play', 'mail-gift'], ['wait', 300]],
     notes: { all: 'T20: a letter with a gift box attached — taking it unwraps it. Two older letters under it.', phone: 'List above, letter below; “Take” is a full-width 48 px button.' } },
+  { id: 'market', expect: '#panel-partyhub:not([hidden]) .mk-row', group: 'Social', title: 'Market: browse', modules: [U + 'market.js'], steps: [['hub', 'market'], marketFill, ['icons']],
+    notes: { all: 'Round 11 (#25): the player market in the party window — search, Equipment / Materials and items, a slot or kind, a sort; each row is the item (card on hover), the seller, the days left and the price (the price each for a stack). Your own rows say Yours.', phone: 'The bars wrap; every row and its Buy button is thumb-sized.', pad: 'The ring on a row shows the item card; A presses Buy.' } },
+  { id: 'market-sell', expect: '#panel-partyhub:not([hidden]) .mk-form', group: 'Social', title: 'Market: sell', modules: [U + 'market.js'], steps: [['hub', 'market'], marketFill, ['click', '.mk-view[data-view="sell"]'], ['click', '.mk-grid .islot'], ['icons']],
+    notes: { all: 'Round 11 (#25): pick a bag item, ask a price; the fee (20% of what a shop pays, the server\'s quote) is shown before you confirm. Kept things, quest items and boxes never appear here.' } },
   { id: 'callboard', expect: '#panel-partyhub:not([hidden])', group: 'Social', title: 'Group Finder', modules: ['js/client/callboard.js'], steps: [['hub', 'callboard']],
     notes: { all: 'Queue for a dungeon as tank, healer or damage.' } },
   { id: 'chat', expect: '#chat-log p', group: 'Social', title: 'Chat', modules: ['js/client/chat.js'], steps: [...chat, ['focus', '#chat-input']],

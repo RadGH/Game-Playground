@@ -1,8 +1,248 @@
 {
- "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z12_09, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z12_09, added where a kill / collect quest's area held fewer of its monster than the step needs (round 11: max(count + 4, 2 x count) — two players at once; they come back in 1-1.5 minutes). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
  "zone": "z12_09",
  "terrainHash": "de552a99",
  "placements": [
+  {
+   "type": "camp",
+   "id": "quest_sw_prowler_season_0_0",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    12,
+    12
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1056,
+   "z": 1479,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "sw_prowler_season",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_sw_prowler_season_0_1",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    11,
+    11
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 969,
+   "z": 1495,
+   "yaw": 0,
+   "radius": 7,
+   "quest": "sw_prowler_season",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_sw_prowler_season_0_2",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    12,
+    12
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1058,
+   "z": 1455,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "sw_prowler_season",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_sw_spit_in_the_springs_0_0",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    11
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 935,
+   "z": 1516,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "sw_spit_in_the_springs",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_sw_spit_in_the_springs_0_1",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    11
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 932,
+   "z": 1441,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "sw_spit_in_the_springs",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_sw_spit_in_the_springs_0_2",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    11
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 937,
+   "z": 1492,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "sw_spit_in_the_springs",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_sw_steam_in_a_jar_0_0",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    12,
+    12
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 784,
+   "z": 1232,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "sw_steam_in_a_jar",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_sw_steam_in_a_jar_0_1",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    11,
+    11
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 870,
+   "z": 1233,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "sw_steam_in_a_jar",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_sw_canopy_widow_0_0",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    12,
+    12
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1216,
+   "z": 985,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "sw_canopy_widow",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_sw_canopy_widow_0_1",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    12,
+    12
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1147,
+   "z": 972,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "sw_canopy_widow",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
   {
    "type": "camp",
    "id": "champ_z12_09_1",

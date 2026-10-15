@@ -303,6 +303,7 @@ test('6c. Y34: Fish and Mount are buttons of their own with their names on; Fish
   test.setTimeout(300000);
   await page.evaluate(() => { for (let i = 0; i < 4; i++) for (const x of document.querySelectorAll('.tv-panel:not([hidden]) .tvp-x, #bag:not([hidden]) #bag-close')) x.click(); thousandvale.controls.stopAuto(); thousandvale.input.run('targetClear'); }); await page.waitForTimeout(400);
   // Mount: there, named, one tap sends the call; the name becomes what the next tap will do
+  await hook('/mounts', { name: NAME, mounts: ['trail_horse'] }); await page.waitForTimeout(300);      // round 11 (#16): bought, not given
   const mount = page.locator('.ph-mount');
   await expect(mount).toBeVisible(); await expect(mount.locator('small')).toHaveText('Mount');
   await page.evaluate(() => { window.__mount = []; const n = thousandvale.S.net, f = n.mount.bind(n); n.mount = op => { window.__mount.push(op); return f(op); }; });

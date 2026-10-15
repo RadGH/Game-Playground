@@ -1,8 +1,176 @@
 {
- "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z11_04, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z11_04, added where a kill / collect quest's area held fewer of its monster than the step needs (round 11: max(count + 4, 2 x count) — two players at once; they come back in 1-1.5 minutes). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
  "zone": "z11_04",
  "terrainHash": "454aaea1",
  "placements": [
+  {
+   "type": "camp",
+   "id": "quest_into_the_scar_0_0",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    9,
+    9
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 446,
+   "z": 823,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "into_the_scar",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_into_the_scar_0_1",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    9,
+    9
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 433,
+   "z": 835,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "into_the_scar",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_into_the_scar_0_2",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    9,
+    9
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 448,
+   "z": 799,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "into_the_scar",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_into_the_scar_1_0",
+   "monster": "ossuary_crawler",
+   "with": null,
+   "level": [
+    9,
+    9
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1239,
+   "z": 1448,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "into_the_scar",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_baking_club_0_0",
+   "monster": "cult_zealot",
+   "with": null,
+   "level": [
+    9,
+    9
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1376,
+   "z": 1872,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "baking_club",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_crawlers_in_the_pits_0_0",
+   "monster": "ossuary_crawler",
+   "with": null,
+   "level": [
+    9,
+    9
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1239,
+   "z": 1448,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "crawlers_in_the_pits",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_crawlers_in_the_pits_0_1",
+   "monster": "ossuary_crawler",
+   "with": null,
+   "level": [
+    9,
+    9
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1223,
+   "z": 1512,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "crawlers_in_the_pits",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
   {
    "type": "npc",
    "id": "angler_last_lantern",

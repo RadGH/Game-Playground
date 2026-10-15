@@ -25,6 +25,8 @@
       "shape": "bolt",
       "range": 34,
       "w": 2,
+      "mult": 0.45,
+      "_mult": "owner #40 (2026-10-15): the three bolts really fly now, each with its own hit (only one did) — 45% each, so all three on one target is 135% (Farhold's 55% was for the one that flew)",
       "text": "three {el} bolts in a fan"
     },
     "chain": {
@@ -251,5 +253,9 @@
     "siphon": "projectile"
   },
   "tomePace": 1.5,
-  "tomeDamage": 1.75
+  "tomeDamage": 1.75,
+  "named": {
+    "_doc": "Owner #40 (2026-10-15): an item by its NAME is always this element and wand style (made, and an owned copy put right as it loads). The Starcaller's class-chain wand is arcane like the class, and throws three stars in a fan.",
+    "Wand of the Ninth Star": { "attune": "arcane", "castStyle": "fan" }
+  }
 }

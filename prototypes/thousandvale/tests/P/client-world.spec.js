@@ -177,6 +177,7 @@ test('the smith has a forge and a tempering bench beside him; his dialog opens t
   // the ore in the bag
   await page.keyboard.press('KeyB');
   const ore = page.locator('#bag-grid .islot:not(.empty)').filter({ has: page.locator(':scope') }).first();
+  await page.locator('#inv-tabs [data-tab="items"]').click();      // round 11 (UI, #11): materials live in the Items tab
   const uid = await page.evaluate(() => thousandvale.bag.state.bag.find(i => i.kind === 'material')?.uid);
   await page.locator(`#bag-grid .islot[data-tip-item="${uid}"]`).hover();
   await expect(page.locator('#tipbox')).toContainText(/Crafting material/i, { timeout: 5000 });
@@ -286,7 +287,7 @@ async function makeFlowSteps(pg, name, how, at) {
   const ore = { copper: await count('copper_ore'), tin: await count('tin_ore') };
   expect(ore.copper, `mined ${mined} boulders: ${JSON.stringify(await pg.evaluate(() => window.__flow.gather))}`).toBeGreaterThanOrEqual(5);
   expect(ore.tin).toBeGreaterThanOrEqual(5);
-  // 3. the smith: learn Smithing and Tempering from his dialog's own button, then "Use the forge"
+  // 3. the smith: "Use the forge" (round 11: every trade is already known)
   at('3. the smith');
   await hook('/teleport', { name, x: HOME.x, z: HOME.z });
   await until(() => [...thousandvale.actors.actors.values()].some(a => a.role === 'smith'));
@@ -294,14 +295,13 @@ async function makeFlowSteps(pg, name, how, at) {
   await hook('/teleport', { name, x: smithAt.x + 1.6, z: smithAt.z + 1.2 });
   await pg.waitForTimeout(1500);
   const talk = () => pg.evaluate(() => { const a = [...thousandvale.actors.actors.values()].find(x => x.role === 'smith'); thousandvale.S.net.use(a.id); });
-  await talk();
-  await pg.locator('.tv-dialog .prof-dlg', { hasText: /Learn/ }).waitFor({ timeout: 15000 });
-  await act('.tv-dialog .prof-dlg:has-text("Learn")');
-  for (const id of ['smithing', 'tempering']) { await act(`#panel-trainer [data-learn="${id}"]`); await until(i => tvprof.state.list.find(x => x.id === i)?.known, id, 15000); }
-  await pg.evaluate(() => tvprof.trainer.close());
+  // round 11 (live #11): Smithing and Tempering are known from the start — no Learn button, straight to the forge
+  for (const id of ['smithing', 'tempering']) await until(i => tvprof.state.list.find(x => x.id === i)?.known, id, 15000);
   await talk();
   await pg.locator('.tv-dialog .prof-dlg', { hasText: 'Use the forge' }).waitFor({ timeout: 15000 });
-  await act('.tv-dialog .prof-dlg:has-text("Use the forge")');
+  await pg.evaluate(() => tvprof.trainer?.close?.());      // (on a slow first dialog the Trades window comes up as well and covers it)
+  // (a live world event's tracker card in the right column can lie over the dialog's footer on a 1280-wide screen: the button is pressed itself)
+  await pg.evaluate(() => [...document.querySelectorAll('.tv-dialog .prof-dlg')].find(b => /Use the forge/.test(b.textContent)).click());
   await pg.locator('#panel-craft [data-make="smelt_bronze_bar"]').waitFor({ timeout: 15000 });
   // 4. smelt: a batch of five, ONE mini-game
   at('4. smelt');

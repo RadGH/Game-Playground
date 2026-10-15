@@ -247,8 +247,11 @@ test('W21: Settings -> "Damage meter", default OFF, and the window asks the serv
   assert.equal(SETTINGS_DEFAULTS.meter, false); assert.equal(cleanSettings({ meter: true }).meter, true); assert.equal(cleanSettings({ meter: 'yes' }).meter, false);
   assert.match(src('js/client/ui/settings.js'), /check\('meter', 'Damage meter'/);
   const mw = src('js/client/ui/meter-window.js');
-  assert.match(mw, /meters\/js\/meter\.js/); assert.match(mw, /meters\/js\/meter-ui\.js/); assert.match(mw, /n\.meter\(on\)/); assert.match(mw, /n\.on\('hits'/);
-  assert.match(mw, /n\.on\('joined', \(\) => \{[^\n]*meter\(true\)/, 're-asked after every join (A: the flag does not survive a reconnect)');
+  assert.match(mw, /meters\/js\/meter\.js/); assert.match(mw, /meters\/js\/meter-ui\.js/); assert.match(mw, /n\.on\('hits'/);
+  // round 11 (owner #18): the setting shows / hides the WINDOW; the feed is asked for on every join whether or not it is on
+  // (tests/D/pt11.test.js pins the recording side) — A: the flag does not survive a reconnect, so every join asks again
+  assert.match(mw, /n\.meter\(true\)/); assert.doesNotMatch(mw, /n\.meter\(false\)|n\.meter\(on\)/, 'nothing ever asks the server to stop');
+  assert.match(mw, /n\.on\('joined', \(\) => \{[^\n]*record\(\)/, 're-asked after every join');
 });
 
 // ------------------------------------------------------------------------------------------------------------ W5

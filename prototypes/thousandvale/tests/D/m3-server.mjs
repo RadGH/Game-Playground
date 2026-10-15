@@ -74,6 +74,7 @@ const hook = http.createServer(async (req, res) => {
       const c = o.room.clients.get(e.id); if (c) c.selfDirty = true;
       return send(200, { ok: true, x: e.x, z: e.z, room: o.room.kind });
     }
+    if (req.url === '/mounts') { o.char.mounts = (b.mounts || []).slice(0, 12); if (o.conn) o.conn.sendJSON({ t: 'you', mounts: W.mountBook ? W.mountBook.owned(o.char) : o.char.mounts.map(id => ({ id, name: id })) }); return send(200, { ok: true, mounts: o.char.mounts }); }   // round 11 (#16): nobody is given a horse — a spec hands one over
     if (req.url === '/kill') { const e = o.entity; e.setHp(0); e.kill(null); return send(200, { ok: true, dead: !!e.dead }); }   // P8 spec
     if (req.url === '/grant') { W.grant(o, { items: (b.items || []).slice(0, 40), gold: 0, reason: 'test' }); return send(200, { ok: true }); }   // 2026-10-14: exact item objects (the icon spec)
     if (req.url === '/give') {

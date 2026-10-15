@@ -65,7 +65,7 @@ export function createUi2(o) {
   }
 
   // ---- Q3 / Q4
-  const loot = createLoot({ net, hud, actors, me });
+  const loot = createLoot({ net, hud, actors, me, controls });      // round 11 (#8): Loot on a far body walks there
   // ---- Q11
   const shop = createShop({ net, hud, actors, me, bag });
   // ---- Q14
@@ -161,7 +161,9 @@ export function createUi2(o) {
   worldUi.npcButtons = u => {
     const out = [];
     const role = String(u.role || '').toLowerCase();
-    if (u.shop || SHOP_ROLES.has(role)) out.push({ text: role === 'stablehand' || role.startsWith('stable') ? 'See the mounts' : 'Browse wares', primary: true, on: () => { shop.open(u.id, u.name); } });
+    // [World, round 11 #32] the server says whether there is anything to buy (`used.shop`); a role name alone (a herb-woman, a
+    // quartermaster) no longer draws a "Browse wares" button onto an empty shop. A reply with no server word at all keeps the old guess.
+    if (u.shop || (u.shop === undefined && u.kind !== 'npc' && SHOP_ROLES.has(role))) out.push({ text: role === 'stablehand' || role.startsWith('stable') ? 'See the mounts' : 'Browse wares', primary: true, on: () => { shop.open(u.id, u.name); } });
     // S11: the Unbinder's counter — reset talents / perks for gold (the server's prices)
     if (u.unbinder && u.unbind) {
       const b = u.unbind, n = net();

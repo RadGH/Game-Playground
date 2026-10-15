@@ -150,11 +150,12 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `cart` | p | `op:str:8, id:id, to?:str:48, token?:bool` | 2 / 4 | §24.5: ox-cart travel — `list` / `go`. Answers `cartList`, `cartR`, `cartRide`. |
 | `ship` | p | `op:str:8, id?:id, to?:str:48, party?:bool` | 2 / 4 | Expansion 1 §6: the voyage — `list` / `go` (the Harbourmaster `id`, the far harbour `to`, `party` boards party members close by) / `skip` (after 5 s). Answers `shipList`, `shipR`, `shipSail` (js/sim/ships.js). |
 | `meter` | p | `on:bool` | 1 / 4 | §24.6: the damage meter's hit feed on / off. Answers `meterR`, then `hits`. |
-| `fish` | p | `op:str:8, aim?:vec2, held?:num, score?:num, holds?:nums` | 4 / 8 | §21.10 angling: `cast`, `hook`, `land`, `stop`. Answers `fishR`, `fishBite`, `fishTug`, `fishCatch`. |
+| `fish` | p | `op:str:8, aim?:vec2, held?:num, score?:num, holds?:nums, pool?:id` | 4 / 8 | §21.10 angling: `cast`, `hook`, `land`, `stop`. Answers `fishR`, `fishBite`, `fishTug`, `fishCatch`. Round 11: a cast lands ONLY in a fish pool within 16 m (`pool` = the one E was pressed on); else `fishR {ok:false, why:'noPool'}`. |
 | `cook` | p | `op?:str:8, id?:str:64, n?:int` | 2 / 6 | §21.10: no `id` = list (`cookList`), with `id` = cook it at a fire (`cookR`). |
 | `prof` | p | `op:str:8, id:str:16, npc:id` | 2 / 6 | §25 professions: `learn` a profession from the trainer `npc`, or buy its basic `tool` again. Answers `profR`. |
 | `gather` | p | `op:str:8, id?:id, inputs?:nums` | 4 / 8 | §25: `start` (a node or a skinnable corpse; no `id` = the nearest node in reach), `done` (the mini-game's raw inputs), `stop`. Answers `gatherR`, `gatherDone`. |
 | `craft` | p | `op?:str:8, id?:str:48, npc?:id, base?:str:48, n?:int, uid?:str:40, index?:int, element?:str:16, inputs?:nums` | 4 / 10 | §25: `list`, `start`, `done`, `stop`, `quote` (tempering). Answers `craftList`, `craftR`, `craftDone`, `craftQuote`. |
+| `market` | p | `op:str:8, q?:str:40, tab?:str:8, slot?:str:16, sort?:str:8, page?:int, uid?:str:40, price?:int, id?:int` | 2 / 8 | Round 11 — Market: `browse` (q, tab gear/items, slot = the sub-category, sort cheap/dear/each/new, page), `mine`, `sell {uid, price}`, `buy {id, price}`, `cancel {id}`. Answers `marketList`, `marketMine`, `marketR`. |
 
 ### 3.2 Server → client
 
@@ -174,7 +175,7 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `chat` | `ch, from, name, text` | `ch`: `say` (province socket; `from` = local entity id) or `party` (gateway socket; `from` = char id). |
 | `castR` | `slot, ok:false, why, text?` | A cast was refused: `cooldown`, `range`, `mana`, `dead`, `target`, `unknown`; `text` = the rules' sentence to show ("Slot 6 opens at level 18"). |
 | `targetR` | `id, ok:false, why` | A `target` was refused (`target`: gone or not targetable; `range`). |
-| `used` | `id, ok, why?, msg?, kind?, offers?, ready?` | Answer to `use` (`why`: `far`, `unknown`, `opened`, `dead`, `locked`, `gold`). Using an NPC or a vignette object also carries `offers` (quest views it gives you, same shape as `quests.active`) and `ready` (quest ids you can turn in here). Kinds and extras: `npc {says, role}`, `note {text}`, `use {text, buff}`, `waystone {key, name, fresh, known}`, `clue {text, chain, chainName, step, of, found, fresh, hint?}`, `cache {chain}`, `campfire`/`grave` {trace}. |
+| `used` | `id, ok, why?, msg?, kind?, offers?, ready?` | Answer to `use` (`why`: `far`, `unknown`, `opened`, `dead`, `locked`, `gold`). Using an NPC or a vignette object also carries `offers` (quest views it gives you, same shape as `quests.active`) and `ready` (quest ids you can turn in here). Kinds and extras: `npc {says, role}`, `note {text}`, `use {text, buff?: {id, name, text, seconds}}` (round 11: `buff.text` is the sentence to show), `waystone {key, name, fresh, known}`, `clue {text, chain, chainName, step, of, found, fresh, hint?}`, `cache {chain}`, `campfire`/`grave` {trace}. |
 | `bag` | `add:[item…], remove:[uid…], gold` | My bag changed (loot, chest, equip swap, destroy); `gold` = new total. |
 | `equip` | `slot, item\|null, equipment` | Worn gear changed; `equipment` = the whole worn set. |
 | `partyState` | `party:{id, leader, code, members:[{char, name, cls, level, online}]}\|null` | (gateway) My party changed; `null` = no party. `code` → the join link `?join=CODE`. |
@@ -205,6 +206,9 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `mailNew` | `unread` | (gateway) You have mail (on entering the world when there is unread mail, and when a letter arrives or comes back). |
 | `mailList` | `mail:[{id, from, fromChar, subject, kind, sentAt, expiresAt, read, taken, gold, items:[{uid, name, rarity, slot}]}], unread` | (game socket) Your letters, newest first (up to 50). |
 | `mailOpen` | `mail:{…as mailList…, body, items:[full items]}` | (game socket) One letter, read (it is now marked read). |
+| `marketList` | `list, total, page, per, q, tab, sub, sort` | (game socket) Round 11 — Market: one browse page. A row: `{ id, seller, item, price, count, listedAt, expiresAt, mine? }` (`item` is the full item, for the card). |
+| `marketMine` | `list, cap, feePct, quotes, priceMax, lastsMs, canSell` | (game socket) Round 11 — Market: my listings (rows as above, with `fee`), the cap (20), the fee share (20), a quote `{uid, sell, fee}` for every bag item that may be listed, and `canSell` = null or the words that say why you may not list yet. |
+| `marketR` | `op, ok, why?, msg?, id?, fee?, price?, name?` | (game socket) Round 11 — Market: the answer to `sell` / `buy` / `cancel`. `why`: `gate`, `busy`, `price`, `item`, `keep`, `trade`, `slow`, `gold`, `cap`, `gone`, `own`, `changed`, `failed`. |
 | `mailR` | `op, ok, why?, msg?, id?, to?, cost?, items?, gold?` | (game socket) Answer to a mail op. `why`: `gate`, `town`, `busy`, `items`, `gold`, `item`, `trade`, `slow`, `notFound`, `self`, `ignored`, `failed`, `missing`, `empty`, `bagFull`, `holds`. |
 | `muted` | `until, by, msg` | (gateway) You were muted (or unmuted) until wall ms `until`; `by`: `admin` or `auto` (reports). |
 | `talentR` | `op, ok, why?, msg?, skill, picks?` | Answer to `talent` (`why`: `notReady` (the rules have no talents yet), `dead`, `combat`, or the rules' own). |
@@ -245,7 +249,7 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `meterR` | `on` | §24.6: answer to `meter`. |
 | `cartList` | `id, from, name, stops, gold, tokens` | §24.5: where this cart goes and what it costs. |
 | `cartR` | `op, ok, to, fare?, why?, msg?` | §24.5: answer to `cart` (`op:'go'`), and the arrival (`op:'arrive'`). |
-| `cartRide` | `to, from, ms, fare` | §24.5: the ride has begun (the client's presentation). |
+| `cartRide` | `to, from, ms, fare, path?` | §24.5: the ride has begun (the client's presentation). Round 11 (World): `path` = [[x, z], …] world metres, the first ~160 m out along the road. |
 | `shipList` | `id, from, name, master, says, sailings, gold, log` | Expansion 1 §6: the sailings from this harbour (fare, seconds at sea, the far land's levels, why not). |
 | `shipR` | `op, ok, to, name?, fare?, crew?, left?, why?, msg?, first?, log?` | Expansion 1 §6: answer to `ship` (`go` / `skip`), and the arrival (`op:'arrive'`, said before the move). |
 | `shipSail` | `from, to, ship, ms, skipMs, fare, path, crew, berth, volcano` | Expansion 1 §6: the voyage has begun — the sea route (world metres) the client draws the ship along. |
@@ -1482,3 +1486,27 @@ No version bump: both are additive and an older client ignores them.
 | `fx {kind:'spring'}` | `{ id, warmMs }` | You climbed out of a hot spring warmed: the buff row's Steam-warmed countdown. |
 | `hit` with `skill: 'lava_vent'` / `'geyser'` | `s: null` | Hazard damage has no source. |
 | statuses | `steam_soaked`, `item:steamed` | On `info.st` like any status: Steam-soaked (in a spring), Steam-warmed (+5% max health, 10 min; saved with the build as an item buff, `source: 'spring'`). |
+
+## Round 11 — stream UI (2026-10-15) — still protocol 8 (additive)
+
+| What | Shape | Notes |
+|---|---|---|
+| bag tabs | none on the wire | `js/sim/bag-tabs.js` `tabOf(item)` -> `gear` / `items` / `other`, worked out from the item (nothing stored, no save migration). Equipment and Items EACH hold `you.bagMax`; Other (`noSell`, quest items, crates / gift boxes, cart tokens, the recall charm) never fills. Every server "is the bag full" check asks by the item (`bagFull(o, item)`), so `bagFull` / `need` / `free` refusals now mean "full in that tab". |
+| recall charm | bag item `{ id: 'recall_charm', kind: 'good', use: { type: 'recall' }, noSell: true, noDrop: true, keep: true, count: 1 }` | Given on join when missing; an old stack becomes one, spares paid back at half the shop price (a system line). `item {op:'destroy'}` on it -> `itemR {op:'destroy', ok:false, why:'keep'}` + `err`. `shop {op:'sell'}` -> `shopR {ok:false, why:'keep'}`; it is not in `shopView.sell`. Trade offer -> `err {code:'item'}`; mail send -> `mailR {why:'keep'}`. `item {op:'use'}` starts the 5 s channel and never uses it up. A shop lists any `use.type:'recall'` good only to a character holding none. |
+| `mount {op:'pick', id}` | -> `mountR {op:'pick', ok, id?}` + `you { mounts, mountPick }` | Puts an owned mount in the Mount slot (saved `char.mountPick`). `summon` with no id rides it (else the fastest). Riding a different one: you change horses on the spot. |
+| `joined.you.mountPick`, `joined.you.saddle` | `mountPick: id \| null`, `saddle: { id, name, slots } \| null` | Also in `you {…}` when they change. `you.saddle` (number) rides with `bagMax` in `you { bagMax, bagBase, saddle }`. |
+| saddle bags | `item {op:'use'}` on a good whose `use.type === 'bag'` | Fitted for good: it leaves the bag, `char.saddle` is saved, `itemR {op:'use', ok:true, msg}`, `bag {remove}`, `you {saddle}`, `you {bagMax}` (when you own a mount). A second pair: `itemR {ok:false, why:'known'}`. A bag holding saddle bags at login is fitted silently. Shops stop listing `use.type:'bag'` goods once fitted. |
+| mounts | `mounts[]` rows carry `price` (and `desc` when the data has one) | Nobody is given a mount (the level-5 grant is gone); `mountR {why:'none'}` says the stable sells one. |
+| sell-back of goods | `shopView.sell[].price` | A good bought in a shop (it carries `shopPrice`, no own `price`) sells for `economy.json sell.goods` (0.5) of what the shops ask, at least 1. Gear is unchanged (`sell.factor`, 6%). |
+| damage meter | `meter {on:true}` sent on every join | The client records from login whether or not the window was ever opened; the setting only shows / hides the window. |
+
+## Round 11 — stream World (2026-10-15) — still protocol 8 (additive)
+- `cartRide.path?` — `[[x, z], …]` (world metres, ≤ ~160 m): the way the cart leaves, along the road toward the destination (js/sim/carts.js `departPath`). Absent: roll straight as before.
+- `used {kind:'use'}.buff` is now `{ id, name, text, seconds }` (a real shrine blessing, js/rules/blessings.js) — `text` is the exact sentence ("Light-footed: 10% faster on foot for 4 minutes."); absent when nothing was given. The status `bless:<word>` rides `info.st` like any status.
+- No new messages. Server-only: per-run dice (`runSeed`), event reach/leash/crowd scaling, looted-body stay, bark gate, quest marks for carts.
+
+## Round 11 — stream Market (2026-10-15, owner report #25) — still protocol 8 (additive)
+- **`market {op}`** on the game socket (rate 2/s, burst 8), ops in `MARKET_OPS`: `browse {q?, tab?: 'gear'|'items', slot?: sub-category (gear: weapon offhand head chest legs hands feet back waist necklace ring; items: material fish consumable tool goods), sort?: 'cheap'|'dear'|'each'|'new', page?}` -> `marketList`; `mine` -> `marketMine`; `sell {uid, price}`, `buy {id, price}`, `cancel {id}` -> `marketR` (then a fresh `marketMine` after sell / cancel). Rows carry the full item for the card.
+- Rules (js/sim/market-rules.js, read by server, both stores and the client): fee = 20% of the shop sell value of the whole lot, at least 1 gold, paid when listed, never refunded; price 1 .. 10,000,000; 20 listings per character; 30 new listings an hour; 30 days. Listing needs a claimed account at account level 5; kept / Other-tab / in-trade items are refused.
+- Delivery is by mail, **new mail kind `market`** (`from: 'The Market'`): taken anywhere, never expires, cannot be returned. Buy = one transaction (buyer blob + listing out + a "Bought:" letter with the item + a "Sold:" letter with the gold); cancel / expiry = one transaction (listing out + a "Taken off the Market:" / "Unsold:" letter with the item). The buyer and seller hear `mailNew`.
+- **Full bags:** `used {ok:false, why:'bagFull', msg}` for a chest or treasure cache whose rolled contents do not fit (it stays shut); crate `itemR` and mail `mailR` `bagFull` messages name the tab ("No room in your Equipment tab. Make room for 1 more thing, then take it. Everything stays in the letter."). A reward that does not fit its tab is posted as a system letter "Your bag was full" plus a `chat` system line — never turned into gold.

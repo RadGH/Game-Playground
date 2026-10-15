@@ -52,8 +52,8 @@ export function coreRows(engine, u) {
   const hands = weaponHands(u);
   const rows = [
     { id: 'level', label: 'Level', value: u.level || 1, unit: '', tip: 'Your level.' },
-    { id: 'maxHp', label: 'Health', value: Math.round(u.maxHp || d.maxHp || 0), unit: '', tip: 'Your maximum health: your level, Constitution and gear.' },
-    { id: 'maxMp', label: 'Mana', value: Math.round(u.maxMp || d.maxMp || 0), unit: '', tip: 'Your maximum mana: your level, Intelligence and gear.' },
+    { id: 'maxHp', label: 'Health', value: Math.round(u.maxHp || d.maxHp || 0), unit: '', tip: 'Your maximum health: your level, your gear and your perks.' },
+    { id: 'maxMp', label: 'Mana', value: Math.round(u.maxMp || d.maxMp || 0), unit: '', tip: 'Your maximum mana: your level, your gear and your perks.' },
     { id: 'damageMin', label: 'Weapon damage (low)', value: Math.round(dmg[0]), unit: '', tip: 'The lowest a basic hit rolls before the target\'s armour. Every ability\'s "weapon damage" is a share of this roll.' },
     { id: 'damageMax', label: 'Weapon damage (high)', value: Math.round(dmg[1]), unit: '', tip: 'The highest a basic hit rolls before the target\'s armour.' },
     ...(hands.dual && d.offDamage && !hands.off?.noAttack ? [{ id: 'offDamage', label: 'Off-hand damage (high)', value: Math.round(d.offDamage[1]), unit: '', tip: 'Your off hand swings on its own clock; its hits deal 60% of this roll.' }] : []),
@@ -72,7 +72,13 @@ export function coreRows(engine, u) {
     { id: 'mpRegen', label: 'Mana regeneration', value: r1(d.mpRegen || 0), unit: '/s', tip: 'Mana restored every second. Out of a fight you also regain 2% of your mana a second.' },
     { id: 'moveSpeed', label: 'Move speed', value: r2(d.moveSpeed || 0), unit: 'm/s', tip: 'How fast you run on foot.' },
   ];
-  for (const k of ['str', 'dex', 'int', 'con']) rows.push({ id: k, label: ATTR[k], value: Math.round(d[k] ?? u.attrs?.[k] ?? 0), unit: '', tip: ATTR_TIP[k] });
+  // owner #2 (2026-10-15): no attribute rows. What the weapon's family adds, and (owner #61) what a melee weapon guards.
+  if (d.familyPct != null) {
+    const fam = FAMILY_WORD[d.family] || 'weapon';
+    const extra = Math.round((d.familyPct || 0) - (engine.combatCfg?.families?.[d.family]?.damagePct ?? 0));
+    rows.push({ id: 'familyPct', label: 'Weapon damage bonus', value: r1(d.familyPct), unit: '%', tip: `Your ${fam} adds this much to its damage, and so to every ability that is a share of its damage.${extra > 0 ? ` ${extra}% of it comes from gear and perks that raise ${fam} damage.` : ''}` });
+  }
+  if (d.weaponGuard != null) rows.push({ id: 'weaponGuard', label: 'Melee guard', value: r1(d.weaponGuard || 0), unit: '%', tip: d.weaponGuard ? `A melee weapon in your main hand takes ${r1(d.weaponGuard)}% off every hit you take (two-handed melee weapons guard more than one-handed ones).` : 'Hold a melee weapon in your main hand and it takes a share off every hit you take. Bows, wands, staves and tomes do not guard.' });
   return rows;
 }
 /** Y26: the "Attacks per second" rows (main hand; the off hand too when it holds a weapon that attacks). */
@@ -89,18 +95,17 @@ function apsRows(engine, u) {
 }
 /** The share of a physical hit armour takes off, in percent to one decimal — Farhold rpg.strike: `amount *= 100 / (100 + armour)`. */
 export const armorReduction = armor => Math.round(Math.max(0, armor) / (100 + Math.max(0, armor)) * 1000) / 10;
-const ATTR = { str: 'Strength', dex: 'Dexterity', int: 'Intelligence', con: 'Constitution' };
-const ATTR_TIP = {
-  str: 'Raises the damage of weapons that scale with Strength.', dex: 'Raises the damage of weapons that scale with Dexterity, and your dodge.',
-  int: 'Raises the damage of weapons that scale with Intelligence, and your mana.', con: 'Raises your maximum health.',
-};
+const FAMILY_WORD = { heavy: 'heavy weapon', light: 'light weapon', magic: 'magic weapon' };
 
 /** The "advanced details" rows: the uncommon stats, only the ones that are not zero (plus a few always shown). */
 export function advancedRows(engine, u) {
   const d = u.derived || {};
   const spec = [
     ['magicResist', 'Magic resistance', '', 'Reduces magical hits on you the way armour reduces physical ones.', 1, true],
-    ['resistAll', 'All damage resisted', '%', 'Taken off every hit on you.', 1, false],
+    ['resistAll', 'All damage resisted', '%', 'Taken off every hit on you (your melee guard is part of it).', 1, false],
+    ['heavyPct', 'Heavy weapon damage', '%', 'Added to the damage of heavy weapons (gear and perks).', 1, false],
+    ['lightPct', 'Light weapon damage', '%', 'Added to the damage of light weapons and bows (gear and perks).', 1, false],
+    ['magicPct', 'Magic weapon damage', '%', 'Added to the damage of wands, staves, sceptres and tomes (gear and perks).', 1, false],
     ['blockChance', 'Block chance', '%', 'The chance a hit on you is blocked.', 1, false],
     ['blockPower', 'Block power', '', 'How much a block takes off the hit.', 1, false],
     ['maxBarrier', 'Barrier', '', 'A shield of this much damage from your off-hand focus; it regenerates out of a fight.', 1, false],
@@ -124,9 +129,9 @@ export function advancedRows(engine, u) {
     ['arrowDamage', 'Arrow damage', '', 'Added to bow shots (a quiver).', 1, false],
     ['arrowsPerShot', 'Arrows per shot', '', 'How many arrows a shot looses.', 1, false],
     ['echoChance', 'Echo chance', '%', 'The chance a skill casts a second time at half strength.', 100, false],
-    ['magicFind', 'Magic find', '%', 'Better odds of a rarer drop.', 1, true],
-    ['goldFind', 'Gold find', '%', 'More gold from kills.', 1, true],
-    ['xpFind', 'Experience gained', '%', 'More experience from kills.', 1, false],
+    ['magicFind', 'Magic find', '%', FIND_TIPS.magicFind, 1, true],
+    ['goldFind', 'Gold find', '%', FIND_TIPS.goldFind, 1, true],
+    ['xpFind', 'Experience gained', '%', FIND_TIPS.xpFind, 1, true],
     ['threatPct', 'Threat', '%', 'How much more (or less) your damage draws monsters to you.', 1, false],
     ['stealth', 'Stealth', '%', 'Monsters notice you from closer.', 1, false],
     ['movePct', 'Move speed bonus', '%', 'Added to your run speed.', 1, false],
@@ -134,12 +139,27 @@ export function advancedRows(engine, u) {
   ];
   const rows = [];
   for (const [id, label, unit, tip, k, always] of spec) {
-    const v = d[id];
+    const v = d[id] ?? (FIND_TIPS[id] ? 0 : undefined);
     if (!Number.isFinite(v) || (!always && !v) || (id === 'arrowsPerShot' && v <= 1)) continue;
-    rows.push({ id, label, value: r1(v * k), unit, tip });
+    rows.push({ id, label, value: r1(v * k), unit, tip: typeof tip === 'function' ? tip(v, engine) : tip });
   }
   return rows;
 }
+
+/**
+ * Owner #36 (2026-10-15): "explain if it works for kills, chests, rewards, etc." — each sentence says what the code does
+ * with the stat, and where it does not reach. Read from: magic find — js/rules/cast.js onKill (`rpg.rollDrops`, a party's
+ * pile at everyone's average), index.js rollLoot (chests, treasure, events, road rewards, rolled quest rewards) and
+ * openCrate (reward boxes), Farhold rpg.rarityFor (the lift multiplies the magic / rare / legendary chances, never the
+ * chance of a drop); gold find — cast.js onKill through economy.js goldFound (capped by prices.json goldFind.cap) and
+ * `foundGold` on an item power's kill gold; experience — cast.js onKill (`award x (1 + xpFind)`), kills only.
+ */
+const FIND_TIPS = {
+  magicFind: (v = 0) => `Raises the chance that an item rolled for you comes out magic, rare or legendary: ${v ? `your +${r1(v)}% makes each of those chances ${r2(1 + v / 100)} times as likely` : '+50% would make each of those chances 1.5 times as likely'}. It never makes more items drop. It counts on: what monsters drop for you (in a party sharing a kill, the average of everyone who fought), chests, buried treasure, event and roadside rewards, quest rewards that are rolled for you, and reward boxes when you open them. It does not touch shop stock, named quest items, crafting, gathering or fishing.`,
+  goldFind: (v = 0, engine = null) => { const cap = engine?.prices?.goldFind?.cap ?? 100; return `More gold from kills: +${r1(v)}% on the gold each monster you help kill pays you${v > cap ? ` (only the first +${cap}% counts)` : ` (up to +${cap}% counts)`}, and on gold an item power pays on a kill. It does not change gold from chests, treasure, quests or events, or what shops pay you.`; },
+  xpFind: (v = 0) => `More experience from kills: +${r1(v)}% on the experience each kill pays you. Quests, events, discoveries and professions pay the same as without it.`,
+};
+export { FIND_TIPS };
 
 // ------------------------------------------------------------------------------------------------ measuring
 
@@ -179,6 +199,9 @@ function arena(engine, u, dist, seed) {
 function stepArena(a, dt, tally) {
   a.room.run(() => { a.room.clock.advance(dt); a.room.combat.tick(dt); });
   a.dummy.x = 0; a.dummy.z = a.dummy.home[1]; a.dummy.push = null; a.dummy.stagger = 0;      // it never moves
+  // …and it faces you, as anything you are fighting does. The dagger's back-stab rule reads the target's facing (see
+  // js/rules/field.js), so a dummy left at a random facing made a dagger's number depend on the dice (round 11)
+  a.dummy.facing = Math.atan2(a.me.x - a.dummy.x, a.me.z - a.dummy.z);
   for (const ev of a.field.drain()) {
     if (ev.t === 'hit' && ev.dst === a.dummy.id && ev.amt > 0) { tally.damage += ev.amt; tally.hits.push(ev.amt); }
     else if (ev.t === 'dot' && ev.id === a.dummy.id && ev.amt > 0) tally.damage += ev.amt;

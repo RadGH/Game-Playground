@@ -79,8 +79,11 @@ export const SKIN_HIDE = { ashback_salamander: 'salamander_hide' };
  * What a merchant pays for ONE raw piece, by tier 1-5 — the knob tools/sim-professions.mjs is tuned with (the rule: an
  * hour of gathering = 70-100% of an hour of questing at the level that tier is worked at; tests/P/economy.test.js).
  */
-export const RAW_PRICE = { ore: [2, 6, 26, 38, 64], gem: [5, 14, 36, 70, 120], log: [2, 9, 30, 50, 80], herb: [2, 7, 32, 48, 78], mushroom: [2, 7, 32, 48, 78], fibre: [2, 7, 32, 48, 78],
-  hide: [1, 4, 8, 14, 24], resin: [3], meat: [1], fang: [1] };
+// Round 11 (live #9): a high score (fine or perfect — what a decent player gets most of the time) now brings half as much
+// again AND one uncommon find, so each piece sells for less to keep the hour where the rule wants it: you carry home more
+// to craft with, not more coin. (Round 8: ore 2/6/26/38/64, gem 5/14/36/70/120, log 2/9/30/50/80, herb 2/7/32/48/78, hide 1/4/8/14/24.)
+export const RAW_PRICE = { ore: [1, 4, 15, 24, 40], gem: [2, 5, 20, 44, 75], log: [1, 6, 19, 38, 60], herb: [1, 4, 20, 36, 58], mushroom: [1, 4, 20, 36, 58], fibre: [1, 4, 20, 36, 58],
+  hide: [1, 2, 4, 8, 14], resin: [1], meat: [1], fang: [1], find: [2] };
 const REFINE_MARKUP = 1.15;      // a refined good sells for its inputs x this (the mini-game's labour)
 
 /**
@@ -135,6 +138,12 @@ function buildContent(numbers, engine, shops) {
   mat('game_meat', 'Game Meat', 1, 'skinning', 'meat', '#b8504a', 'meat', 'Fresh meat from a beast. Cook it at any fire.');
   materials.sovereign_core = { id: 'sovereign_core', name: 'Sovereign Core', desc: 'The hot heart of something that should not have been killed. Only world bosses and the hardest events leave one. A master temperer can promote a rare item to legendary with it.', tier: 5, prof: 'tempering', icon: 'core', tint: '#ffd24a', rarity: 'legendary', price: 1 };      // X5 (round 9)
   mat('beast_fang', 'Beast Fang', 1, 'skinning', 'trophy', '#efe6d2', 'fang', 'A good fang, taken with a careful cut. It sells.');
+  // round 11 (live #9): a high score at a gathering mini-game always brings ONE uncommon-or-better material
+  // (data/rules/professions.json gather.highScore.finds): the mining find is the tier's gem, these two are logging's and foraging's
+  mat('golden_resin', 'Golden Resin', 2, 'logging', 'resin', '#f2b632', 'find', 'A bead of clear golden sap that only a perfect cut lets out. Merchants and temperers pay well for it.');
+  mat('wild_honeycomb', 'Wild Honeycomb', 2, 'foraging', 'resin', '#e8a830', 'find', 'A slab of wild comb found only by a careful hand. Sweet, rare, and worth good coin.');
+  for (const id of [...GEM.slice(0, 4).map(g => g[0]), 'beast_fang', 'golden_resin', 'wild_honeycomb']) materials[id].rarity = 'magic';
+  materials[GEM[4][0]].rarity = 'rare';
   // Vharlen (Expansion 1 §4.5): the island's own materials and the nodes that give them
   for (const [id, name, tier, prof, icon, tint, , price, desc] of VHARL_MATERIALS) materials[id] = { id, name, desc, tier, prof, icon, tint, price, island: 'vharlen' };
   for (const [id, prof, tier, name, gives, bonus, look] of VHARL_NODES) nodeKinds[id] = { id, prof, tier, name, gives, bonus, look: { ...look } };
@@ -284,7 +293,7 @@ function buildQuests(trainer, smith) {
   const forge = smith ? { x: smith.x, z: smith.z, r: 9, name: smith.name } : null;
   const me = { x: trainer.x, z: trainer.z, r: 5, name: trainer.name };
   return {
-    _doc: 'Stream P-core (round 8, W9 Professions) — MADE by tools/content-professions.mjs (the marks follow the bake); edit the text in the tool. The first meeting: Bram Delver, a prospector just inside Torborhold\'s main gate, teaches Mining the moment you speak to him (and hands over a pick); his chain walks you to the copper, the smith\'s forge and the tempering gauge. Step kinds gather / craft / learn are js/sim/quests.js (W9).',
+    _doc: 'Stream P-core (round 8, W9 Professions) — MADE by tools/content-professions.mjs (the marks follow the bake); edit the text in the tool. The first meeting: Bram Delver, a prospector just inside Torborhold\'s main gate, sends you to the copper (every character knows all ten trades since round 11 and starts with the tools; a `learn` step completes on TALKING to a trainer of that trade); his chain walks you to the copper, the smith\'s forge and the tempering gauge. Step kinds gather / craft / learn are js/sim/quests.js (W9).',
     zone: 'test', part: 'professions',
     npcs: { [trainer.id]: { name: trainer.name, role: trainer.role, at: trainer.town, greeting: trainer.greeting, placedBy: 'content-professions', titled: true } },
     quests: [
@@ -298,9 +307,9 @@ function buildQuests(trainer, smith) {
         reward: { xp: 0.4, gold: 8, crates: [{ slot: 'weapon', min: 'uncommon' }] },
         rewardText: 'The Prospector\'s Pick is yours to keep, with a crate from the last fellow who never came back for it.', next: 'prof_bronze_not_copper' },
       { id: 'prof_bronze_not_copper', name: 'Bronze, Not Copper', level: 1, giver: trainer.id, requires: ['prof_three_good_swings'],
-        offer: 'Copper alone bends like a spoon. Smelt it with tin and you have bronze. The grey boulders are tin. Take three of each to Garrow at the smithy, ask him to teach you Smithing, and use his fire: three bars, then hammer yourself a blade. Strike while the bar glows in the band. Too cold? Back in the fire.',
+        offer: 'Copper alone bends like a spoon. Smelt it with tin and you have bronze. The grey boulders are tin. Take three of each to Garrow at the smithy, tell him I sent you, and use his fire: three bars, then hammer yourself a blade. Strike while the bar glows in the band. Too cold? Back in the fire.',
         steps: [
-          { kind: 'learn', prof: 'smithing', text: 'Ask the smith to teach you Smithing', where: 'the smithy in Torborhold', ...(forge ? { at: forge } : {}) },
+          { kind: 'learn', prof: 'smithing', text: 'Talk to Garrow, the smith, about Smithing', where: 'the smithy in Torborhold', ...(forge ? { at: forge } : {}) },
           { kind: 'craft', recipe: 'smelt_bronze_bar', count: 3, text: 'Smelt 3 Bronze Bars at the forge (1 Copper Ore + 1 Tin Ore each)', where: 'the smithy in Torborhold', ...(forge ? { at: forge } : {}) },
           { kind: 'craft', recipe: 'blades', count: 1, text: 'Forge a bronze blade (3 Bronze Bars)', where: 'the smithy in Torborhold', ...(forge ? { at: forge } : {}) },
           { kind: 'talk', npc: trainer.id, text: 'Show Bram your blade', where: 'Bram Delver, just inside Torborhold\'s main gate', at: me },
@@ -308,13 +317,13 @@ function buildQuests(trainer, smith) {
         done: 'You made that? With those hands? Well. It will not win prizes, but it is yours, and the next one will be better: the steadier your hammer, the better the blade comes out.',
         reward: { xp: 0.5, gold: 14, crates: [{ slot: 'armor', min: 'uncommon' }] }, rewardText: 'Coin for the ore you burned, a crate of armour, and Bram\'s grudging respect.', next: 'prof_an_edge_on_it' },
       { id: 'prof_an_edge_on_it', name: 'An Edge on It', level: 2, giver: trainer.id, requires: ['prof_bronze_not_copper'],
-        offer: 'One more trick. A smith can TEMPER a thing you already own: better quality, a new property, never a ruined blade. Ask Garrow to teach you Tempering, put your new blade in your bag, and stop the gauge inside the band. It costs two bars and a little coin. Miss, and you lose the bars. Never the blade.',
+        offer: 'One more trick. A smith can TEMPER a thing you already own: better quality, a new property, never a ruined blade. Have a word with Garrow about Tempering, put your new blade in your bag, and stop the gauge inside the band. It costs two bars and a little coin. Miss, and you lose the bars. Never the blade.',
         steps: [
-          { kind: 'learn', prof: 'tempering', text: 'Ask the smith to teach you Tempering', where: 'the smithy in Torborhold', ...(forge ? { at: forge } : {}) },
+          { kind: 'learn', prof: 'tempering', text: 'Talk to Garrow, the smith, about Tempering', where: 'the smithy in Torborhold', ...(forge ? { at: forge } : {}) },
           { kind: 'craft', prof: 'tempering', count: 1, text: 'Temper any weapon or armour piece from your bag', where: 'the smithy in Torborhold', ...(forge ? { at: forge } : {}) },
           { kind: 'talk', npc: trainer.id, text: 'Tell Bram how it went', where: 'Bram Delver, just inside Torborhold\'s main gate', at: me },
         ],
-        done: 'There. Now you know the whole road: dig it, smelt it, forge it, temper it. The tailor, the bowyer and the apothecary teach the other trades, and every one of them pays.',
+        done: 'There. Now you know the whole road: dig it, smelt it, forge it, temper it. The tailor, the bowyer and the apothecary keep the workplaces of the other trades, and every one of them pays.',
         reward: { xp: 0.5, gold: 18, crates: [{ slot: 'weapon', min: 'uncommon' }] }, rewardText: 'A crate with a weapon in it, to practise your tempering on.' },
     ],
   };
@@ -346,6 +355,14 @@ const lineDist = (pts, x, z) => { let d = 1e9; for (let i = 0; i + 1 < pts.lengt
 
 /** Tier shares of a zone by the top of its level band. */
 export const tierMix = hi => (hi <= 4 ? [0.92, 0.08, 0] : hi <= 5 ? [0.8, 0.2, 0] : hi <= 8 ? [0.45, 0.55, 0] : [0.15, 0.55, 0.3]);
+
+/**
+ * Round 11 (live #24: "I have NEVER seen a log I can chop down. They all require level 25"): a marked tree of tier 2 and
+ * up (Oak, Logging 25) grows only in a zone whose level band STARTS at LOG_TIER2_FROM or above; in every other zone every
+ * marked tree is tier 1 (Ash, Logging 1). Torbor Downs' starting zones (bands from 1-4) are all Ash now.
+ */
+export const LOG_TIER2_FROM = 5;
+export const logMix = band => (band[0] >= LOG_TIER2_FROM ? tierMix(band[1]) : [1, 0, 0]);
 
 /** A province sheet's own tier shares (`gathering.mix`: [band top, shares of tiers 1-5]) -> five shares, or null (the home rule). */
 export const sheetMix = (gathering, hi) => { const rows = (gathering && gathering.mix) || []; const r = rows.find(x => hi <= x[0]) || rows[rows.length - 1]; return r ? r[1] : null; };
@@ -385,7 +402,7 @@ function placeZone(F, { eid, band, reach, baked, vig, content, gathering = null 
   const far = (c, prof) => placed.every(p => { const d = Math.hypot(p.x - c.x, p.z - c.z); return d >= PLACE.gapAny && (p.prof !== prof || d >= PLACE.gapSame); });
   // a group = one family of node (ore, timber, herb, mushroom, fibre). Its spots are taken best-first; then the group's
   // tiers are dealt out in the zone's exact shares, the better tiers to the spots further from a road.
-  const take = (prof, sc, n, kindOf) => {
+  const take = (prof, sc, n, kindOf, mx = mix) => {
     const order = cands.map(c => ({ c, s: sc(c) })).filter(o => o.s > 0).sort((a, b) => b.s - a.s);
     const got = [];
     for (const { c } of order) { if (got.length >= n) break; if (!far(c, prof)) continue; const p = { x: c.x, z: c.z, prof, kind: null, dRoad: c.dRoad, j: c.j }; placed.push(p); got.push(p); }
@@ -395,14 +412,14 @@ function placeZone(F, { eid, band, reach, baked, vig, content, gathering = null 
       ranked.forEach((p, r) => { const from = ranked.length - r; const t = (cuts.find(([, n]) => from <= n) || [1])[0]; p.kind = kindOf(p, t); });
       return;
     }
-    const n3 = Math.round(ranked.length * mix[2]), n2 = Math.round(ranked.length * mix[1]);
+    const n3 = Math.round(ranked.length * mx[2]), n2 = Math.round(ranked.length * mx[1]);
     ranked.forEach((p, r) => { const t = r >= ranked.length - n3 ? 3 : r >= ranked.length - n3 - n2 ? 2 : 1; p.kind = kindOf(p, t); });
   };
   const i = t => t - 1;
   // a province sheet's `gathering.kinds[family][tier]` replaces the home kind of that tier (several: picked by the spot's hash)
   const own = (fam, t, c, home) => { const l = gathering && gathering.kinds && gathering.kinds[fam] && gathering.kinds[fam][t]; return l && l.length ? l[Math.floor(h01(fam + c.x + ':' + c.z) * l.length)] : home; };
   take('mining', score.mining, PLACE.perZone.mining, (c, t) => own('mining', t, c, t === 1 ? (h01('tin' + c.x + ':' + c.z) < 0.42 ? 'tin' : 'copper') : ORE[i(t)][0].replace('_ore', '')));
-  take('logging', score.logging, PLACE.perZone.logging, (c, t) => own('logging', t, c, LOG[i(t)][0].replace('_log', '')));
+  take('logging', score.logging, PLACE.perZone.logging, (c, t) => own('logging', t, c, LOG[i(t)][0].replace('_log', '')), logMix(band));
   const third = Math.round(PLACE.perZone.foraging / 3);
   take('foraging', score.herb, third, (c, t) => own('herb', t, c, HERB[i(t)][0]));
   take('foraging', score.mushroom, third, (c, t) => own('mushroom', t, c, SHROOM[i(t)][0]));
@@ -430,7 +447,7 @@ export function buildAll(prov = PROV) {
       const [, zx, zy] = /^z(\d+)_(\d+)$/.exec(wid).map(Number), ox = zx * ZM, oz = zy * ZM;
       const F = zoneFacts(wid), reach = reachOf(eid);
       const baked = readJ(`data/zones/${wid}/placements.json`).placements || [];
-      const vig = [`${wid}.json`, `${wid}.quest.json`, `${wid}.hunt.json`].flatMap(f => ((opt(`data/vignettes/placements/${f}`) || {}).placements || [])).filter(p => !p.trainer);      // (not the trainers this tool itself places)
+      const vig = [`${wid}.json`, `${wid}.quest.json`, `${wid}.hunt.json`].flatMap(f => ((opt(`data/vignettes/placements/${f}`) || {}).placements || [])).filter(p => !p.trainer && !(p.type === 'camp' && p.quest));      // (not the trainers this tool itself places; [World, round 11] nor content-hunts' quest camps — they are spawn spots that come and go with the quest rules, and must never move a node or its id)
       const Z = placeZone(F, { eid, band: zs.band, reach, baked, vig, content, gathering: sheet.gathering || null });
       // Torborhold: copper (and a tin) within sight of the gate road, and the prospector just inside the gate
       if (eid === se && home) {      // (the home province's start town only: a later province's newcomers already know the trade)

@@ -219,6 +219,7 @@ export function createUi5(o) {
     sight: () => sightList.map(m => ({ id: m.id, kind: m.kind, name: m.name })), lift: m => liftAsk(m),
     reveal: (item, from) => reveal.show(item, { from }), kits: k => kits.useKits(k), openSheet: (on = true) => sheet.panel.toggle(on), feedback: kind => feedback.open(kind),
     reports: () => feedback.reports.panel.open(), cook: u => angling.openCook(u), catchTab: () => journal?.showTab?.('catch'), fish: angling._test,
+    angling,      // round 11 (P): specs press "E at a fish pool" through angling.castOrStop(poolId)
   };
   return api;
 }

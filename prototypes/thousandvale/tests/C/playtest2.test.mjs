@@ -19,6 +19,7 @@ import { lootTier, locksForRoll, splitLoot, rollWinner, normalizeThreshold, LOOT
 import { MOUNT_RULES, mountRefusal, mountSpeedMul, dismounts } from '../../js/rules/mount.js';
 import { makeRng } from '../../js/rules/rng.js';
 import { attuneWeapon } from '../../js/rules/farhold.js';
+import { basicPace } from '../../js/rules/combat-cfg.js';
 
 const engine = rulesEngine();
 
@@ -82,9 +83,10 @@ test('Q1: a bow on auto-attack draws to full and looses on its own — about one
   m.r.unit.maxHp = m.r.unit.hp = 99999; m.r.unit.speed = 0; m.r.unit.attackEvery = 999;
   for (let k = 0; k < 20 * 10; k++) { room.intent(me, { t: 'cast', slot: 0, target: m.id }); room.step(); }
   const shots = events.filter(e => e.type === 'cast' && e.s === me.id && e.clip === 'shoot').length;
-  const cycle = plan.draw.full + (plan.afterShot ?? 0.12);
+  // owner #37 (2026-10-15): every basic attack's clock is `basicPace` times as long (combat.json; 1 without the knobs)
+  const cycle = (plan.draw.full + (plan.afterShot ?? 0.12)) * basicPace(rulesEngine());
   const expect = 10 / cycle;
-  assert.ok(Math.abs(shots - expect) <= 2, `${shots} shots in 10 s, expected ~${expect.toFixed(1)} (draw ${plan.draw.full} s + nock)`);
+  assert.ok(Math.abs(shots - expect) <= 2, `${shots} shots in 10 s, expected ~${expect.toFixed(1)} (draw ${plan.draw.full} s + nock, at the basic-attack pace)`);
   const draws = events.filter(e => e.type === 'cast' && e.s === me.id && e.clip === 'draw');
   assert.ok(draws.length >= shots - 1, 'every shot was drawn first (the client plays the draw)');
 });

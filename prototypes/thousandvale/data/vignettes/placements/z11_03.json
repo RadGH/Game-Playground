@@ -2745,7 +2745,7 @@
    "type": "folk",
    "id": "folk_wychwood_3",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -3032,7 +3032,7 @@
    "type": "folk",
    "id": "folk_wychwood_4",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -3496,7 +3496,7 @@
    "type": "folk",
    "id": "folk_wychwood_6",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -7631,7 +7631,7 @@
    "type": "folk",
    "id": "folk_wychwood_21",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -8086,7 +8086,7 @@
    "type": "folk",
    "id": "folk_wychwood_23",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -8554,7 +8554,7 @@
    "type": "folk",
    "id": "folk_wychwood_25",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"

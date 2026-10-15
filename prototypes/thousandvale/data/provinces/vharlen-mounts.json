@@ -1,0 +1,48 @@
+{
+ "_doc": "World stream, round 11 (owner live #48: 'Add 2 new reptile-based mounts available for purchase at the new island'). Vharlen's own mounts, ADDED to the default table (`extends: true`, js/sim/province.js mergeMounts): a mount you own rides on every island, but only Vharlen's stables sell these. Price / level are re-read from economy.json `mounts[]`; a dearer mount is a faster one (tests/A/pt11-ui.test.js, tests/E/round11-world.test.js). Bodies: avatar-3d/js/mount-types.js MOUNT_TYPES `ash_strider` (the drake frame, no wings) and `slag_basker` (the crocodile frame).",
+ "extends": true,
+ "mounts": [
+  {
+   "id": "ash_strider",
+   "name": "Ash Strider",
+   "desc": "A long-legged rock lizard bred on the ash roads. Quick on hot ground and not much bothered by anything.",
+   "province": "vharlen",
+   "speed": 1.6,
+   "calm": 0.25,
+   "level": 10,
+   "price": 3600,
+   "look": {
+    "creature": {
+     "type": "drake",
+     "size": 1.5,
+     "colors": {
+      "body": "#5a4a42",
+      "belly": "#c89a5a",
+      "accent": "#d0562a"
+     }
+    }
+   }
+  },
+  {
+   "id": "slag_basker",
+   "name": "Slag Basker",
+   "desc": "A broad, armoured lizard that sleeps on warm slag and walks through anything. Slow to start, very hard to throw.",
+   "province": "vharlen",
+   "speed": 1.78,
+   "calm": 0.55,
+   "level": 15,
+   "price": 7000,
+   "look": {
+    "creature": {
+     "type": "crocodile",
+     "size": 1.6,
+     "colors": {
+      "body": "#3a3634",
+      "belly": "#8a7a5a",
+      "accent": "#e07a2a"
+     }
+    }
+   }
+  }
+ ]
+}

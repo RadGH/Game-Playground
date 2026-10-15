@@ -41,6 +41,7 @@ export function createProfessions(numbers = {}, content = null) {
   const tiers = list(N.tiers).length ? list(N.tiers) : [{ tier: 1, minSkill: 1, levels: [1, 10] }];
   const Q = { min: {}, yield: { fail: 0, poor: 1, good: 2, fine: 3, perfect: 3 }, bonusChance: {}, xp: { fail: 0, poor: 0.5, good: 1, fine: 1.25, perfect: 1.5 }, name: {}, ...(N.quality || {}) };
   const G = { reach: 4.5, xpPerTier: 10, greyAfter: 40, greyMult: 0.25, respawnMin: [6, 10], starterRespawnMin: 2, ...(N.gather || {}) };
+  const HS = { from: ['fine', 'perfect'], mult: 1.5, finds: {}, ...((N.gather && N.gather.highScore) || {}) };      // round 11 (live #9)
   const K = { xpPerTier: 12, refineXp: 0.5, levelLag: 1, feeShare: 0.06, batchMax: 10, rarity: {}, ...(N.craft || {}) };
   const materials = C.materials || {}, nodeKinds = C.nodeKinds || {}, classes = C.classes || {}, goods = C.goods || {};
   const tools = list(C.tools), recipes = list(C.recipes);
@@ -133,15 +134,23 @@ export function createProfessions(numbers = {}, content = null) {
     const out = [];
     const n = Q.yield[quality] || 0;
     if (!n || !node) return out;
+    const high = highScore(quality);
     const main = Array.isArray(node.gives) ? node.gives : [{ id: node.gives, n: 1 }];
     for (const g of main) {
-      const k = Math.max(1, Math.round(n * (g.n || 1))) + (tl && tl.extra && rng() < tl.extra ? 1 : 0)
+      let k = Math.max(1, Math.round(n * (g.n || 1))) + (tl && tl.extra && rng() < tl.extra ? 1 : 0)
         + (extra > 0 && g === main[0] && rng() < extra ? 1 : 0);      // (stream C, round 9) gear: Forager's Covenant — `extra` = rules.gatherBonus(e), one more of the MAIN material
+      if (high) k = Math.ceil(k * (HS.mult || 1.5));                   // round 11 (live #9): a high score is at least half as much again
       if (materials[g.id]) out.push({ id: g.id, n: k });
     }
     if (node.bonus && materials[node.bonus] && rng() < (Q.bonusChance[quality] || 0)) out.push({ id: node.bonus, n: 1, bonus: true });
+    const f = high ? findFor(node.prof, node.tier) : null;
+    if (f) { const same = out.find(y => y.id === f && y.bonus); if (same) { same.n += 1; same.find = true; delete same.bonus; } else out.push({ id: f, n: 1, find: true }); }      // (the same gem as the bonus: one row of 2)                       // … and ONE uncommon-or-better material, every time
     return out;
   }
+  /** Round 11 (live #9): is this quality a "high score" (data `gather.highScore.from`)? */
+  function highScore(quality) { return list(HS.from).includes(quality); }
+  /** The high-score find of a profession at a tier (data `gather.highScore.finds[prof][tier-1]`, the last one past its end), or null. */
+  function findFor(prof, t = 1) { const l = list((HS.finds || {})[prof]); if (!l.length) return null; const id = l[clamp((t | 0) - 1, 0, l.length - 1)]; return materials[id] ? id : null; }
   /** Skill xp for one piece of work. `kind`: 'gather' | 'craft' | 'refine'. */
   function xpFor({ tier: t = 1, quality = 'good', skill = 1, kind = 'gather', mult = 1 }) {
     const per = kind === 'gather' ? G.xpPerTier : K.xpPerTier * (kind === 'refine' ? K.refineXp : 1);
@@ -203,8 +212,9 @@ export function createProfessions(numbers = {}, content = null) {
     const R = K.rarity || {};
     const sur = clamp(skill - need, 0, R.maxSurplus ?? 30);
     const pr = ((R.rare || {})[quality] || 0), pm = ((R.magic || {})[quality] || 0);
-    const rare = pr > 0 ? pr + sur * ((R.perSkill || {}).rare || 0) : 0;
-    const magic = pm > 0 ? pm + sur * ((R.perSkill || {}).magic || 0) : 0;
+    const rare = Math.min(1, pr > 0 ? pr + sur * ((R.perSkill || {}).rare || 0) : 0);
+    // round 11 (live #58): `floor: 'magic'` — made gear is never plain; what is not rare is magic
+    const magic = R.floor === 'magic' ? 1 : pm > 0 ? pm + sur * ((R.perSkill || {}).magic || 0) : 0;
     const x = rng();
     return x < rare ? 'rare' : x < rare + magic ? 'magic' : 'normal';
   }
@@ -248,7 +258,7 @@ export function createProfessions(numbers = {}, content = null) {
     N, C, list: defs, def: id => defById.get(id) || null, tiers, tier, tierForSkill, tierForLevel, maxLevel: S.max,
     levelOf, xpAt, next, rank, gain, ease,
     materials, material, item, tools, tool, toolItem, isTool, bestTool, goodItem, classes,
-    nodeKinds, nodeKind, canGather, gatherGame, gatherYield, xpFor, respawnMs, skinOf, skinRefusal, skinNone, toolWord,
+    nodeKinds, nodeKind, canGather, gatherGame, gatherYield, highScore, findFor, highScoreNumbers: HS, xpFor, respawnMs, skinOf, skinRefusal, skinNone, toolWord,
     recipes, recipe, countsOf, feeOf, gearLevel, basesFor, canCraft, craftGame, rarityFor, craftResult, recipeView, gameFor,
     qualityOf: score => qualityOf(score, Q.min), qualityName: q => Q.name[q] || q,
     roles: N.roles || {}, roleOf: role => (N.roles && N.roles[role] && typeof N.roles[role] === 'object' ? N.roles[role] : null),

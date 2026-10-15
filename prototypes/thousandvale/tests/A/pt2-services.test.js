@@ -104,8 +104,9 @@ test('Q16: a mount at level 5; summon, faster, off when you cast or get hit; ref
   a.mount('summon'); await run(clock, 200);
   assert.equal(got.find(x => x.t === 'mountR').why, 'none', 'no mount at level 1');
   o.room.award(o.entity, { xp: xpFor(5), reason: 'quest' }); await run(clock, 200);
-  assert.ok(o.char.mounts.includes('trail_horse'), 'the first mount at level 5');
-  assert.ok(got.some(x => x.t === 'you' && x.mountNew === 'trail_horse'));
+  // round 11 (owner #16): nobody is GIVEN a horse any more — the stable sells a cheap one (tests/A/pt11-ui.test.js buys it)
+  assert.ok(!(o.char.mounts || []).includes('trail_horse'), 'no free mount at level 5');
+  o.char.mounts = ['trail_horse'];
   for (const c of [a, b]) W.transfer(rec(W, c), W.copies[0], { x: W.gate.x + 30, z: W.gate.z + (c === b ? 3 : 0) }, 'test');
   await run(clock, 300);
   // calling a mount is a 1.5 s cast (C's rules). W26 (round 8, report #47): the call HOLDS you still — walking keys do not

@@ -1,8 +1,80 @@
 {
- "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z13_11, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z13_11, added where a kill / collect quest's area held fewer of its monster than the step needs (round 11: max(count + 4, 2 x count) — two players at once; they come back in 1-1.5 minutes). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
  "zone": "z13_11",
  "terrainHash": "a6d6efa9",
  "placements": [
+  {
+   "type": "camp",
+   "id": "quest_ff_mud_in_the_channels_0_0",
+   "monster": "mudback_lurker",
+   "with": null,
+   "level": [
+    13,
+    13
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 855,
+   "z": 759,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "ff_mud_in_the_channels",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_ff_mud_in_the_channels_0_1",
+   "monster": "mudback_lurker",
+   "with": null,
+   "level": [
+    13,
+    13
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 857,
+   "z": 678,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "ff_mud_in_the_channels",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_ff_mud_in_the_channels_0_2",
+   "monster": "mudback_lurker",
+   "with": null,
+   "level": [
+    13,
+    13
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 857,
+   "z": 735,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "ff_mud_in_the_channels",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
   {
    "type": "camp",
    "id": "quest_ff_the_fen_breathes_wrong_0_0",
@@ -13,15 +85,115 @@
     14
    ],
    "count": [
-    1,
-    1
+    3,
+    3
    ],
    "x": 173,
    "z": 647,
    "yaw": 0,
    "radius": 8,
    "quest": "ff_the_fen_breathes_wrong",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_ff_the_fen_breathes_wrong_0_1",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    14,
+    14
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 160,
+   "z": 659,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "ff_the_fen_breathes_wrong",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_ff_the_fen_breathes_wrong_0_2",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    14,
+    14
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 175,
+   "z": 623,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "ff_the_fen_breathes_wrong",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_ff_the_fen_breathes_wrong_0_3",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    14,
+    14
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 180,
+   "z": 657,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "ff_the_fen_breathes_wrong",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_ff_the_fen_breathes_wrong_0_4",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    14,
+    14
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 155,
+   "z": 644,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "ff_the_fen_breathes_wrong",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",

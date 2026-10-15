@@ -53,7 +53,8 @@ test('content rules: bodies exist, statuses exist, adds exist, every phase has a
     if (!(d.phases.length >= 2 && d.phases.length <= (d.tier === 'world' ? 4 : 3))) bad.push(`${f}: ${d.phases.length} phases`);
     if (!d.say?.pull || !d.say?.death) bad.push(`${f}: pull/death lines`);
     if (['boss', 'event', 'miniboss', 'world'].includes(d.tier) && !d.enrage) bad.push(`${f}: no enrage`);
-    if (['boss', 'event', 'world'].includes(d.tier) && !d.phases.some(p => p.newBar)) bad.push(`${f}: a boss needs a new health bar phase`);
+    // owner #51 (2026-10-15): "simply remove their last phase. Their health bar should be real" — no phase refills the bar
+    if (d.phases.some(p => p.newBar)) bad.push(`${f}: a phase refills the health bar (owner #51: the bar is real)`);
     for (const [k, ab] of Object.entries(d.abilities)) {
       for (const [i, t] of (ab.telegraphs || []).entries()) {
         tele(`${f} ${k}[${i}]`, t);
@@ -147,7 +148,8 @@ for (const [f, d] of MINE) {
     assert.equal(boss.dying, 0, 'the last bar is the real death');
     const used = tele();
     const total = new Set(Object.values(d.abilities).filter(a => a.telegraphs).map(a => a.id));
-    assert.ok(used.size >= Math.min(4, total.size), `${used.size} of ${total.size} telegraphed abilities seen in the fight`);
+    // owner #51 took each boss's last (full-bar) phase away, so a kit is smaller: three different telegraphs in the walk
+    assert.ok(used.size >= Math.min(3, total.size), `${used.size} of ${total.size} telegraphed abilities seen in the fight: ${[...used].join(",")}`);
   });
 }
 
@@ -163,13 +165,9 @@ test('levers and the floor: one-shot levers hurt and stun, a cave-in leaves pits
   assert.deepEqual(s.room.run(() => s.enc.use(s.ps[1], winch.id)), { ok: true });
   assert.ok(boss.hp < hp && boss.stagger > 0, 'the bucket hurt and stunned it');
   assert.equal(s.room.run(() => s.enc.use(s.ps[1], winch.id)).ok, false, 'only once');
-  // overtime: the cracked floor caves in and leaves pits that stay
+  // blasting (owner #51 took the full-bar Overtime phase away; the cave-in now opens phase 2): pits that stay
   boss.hp = Math.floor(boss.maxHp * 0.5); s.step(3);
-  st.shield && s.room.run(() => { for (const a of st.adds) { a.hp = 0; s.room.field.kill(a); } });
-  for (const o of [...s.enc.objects.values()]) if (o.type === 'brazier') { s.ps[0].x = o.x; s.ps[0].z = o.z; s.room.run(() => s.enc.use(s.ps[0], o.id)); }
-  s.step(3);
-  s.room.run(() => { boss.hp = 0; s.room.field.kill(boss); });
-  assert.equal(st.phase, 2);
+  assert.equal(st.phase, 1);
   s.step(20 * 4);
   const pits = [...s.enc.objects.values()].filter(o => o.type === 'pool' && o.spec.name === 'Open shaft');
   assert.equal(pits.length, 3, 'three pits where the cracked rock was');

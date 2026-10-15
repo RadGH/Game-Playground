@@ -49,8 +49,8 @@ export function createProf({ net, hud, bag = null, sheet = null, journal = null,
   const drawers = [];
   function redraw() { try { sheet?.refresh?.(); } catch { /* not open */ } try { journal?.redraw?.(); } catch { /* not built yet */ } }
   function mount(sh = sheet, jr = journal) {
-    if (sh?.addSection && !mount.sheet) { mount.sheet = sh; sheet = sh; drawers.push(sh.addSection('professions', 'Professions', () => professionRows(S.list, { numbers: S.numbers, content: S.content, compact: true }), { tip: 'Ten trades. Every character can learn them all. The journal has the full page.' })); }
-    if (jr?.addTab && !mount.journal) { mount.journal = jr; journal = jr; drawers.push(jr.addTab('professions', 'Professions', () => [h('p.tiny-left', {}, 'Ten trades, and every character can learn them all. Gathering is done out in the world; making at a craftsman’s building in town. Each piece of work is a few seconds of skill — how well you play it decides how good the result is.'), ...professionRows(S.list, { numbers: S.numbers, content: S.content, onOpen: id => craft.open({ tab: id }) })])); }
+    if (sh?.addSection && !mount.sheet) { mount.sheet = sh; sheet = sh; drawers.push(sh.addSection('professions', 'Professions', () => professionRows(S.list, { numbers: S.numbers, content: S.content, compact: true }), { tip: 'Ten trades. Every character knows all of them from the start. The journal has the full page.' })); }
+    if (jr?.addTab && !mount.journal) { mount.journal = jr; journal = jr; drawers.push(jr.addTab('professions', 'Professions', () => [h('p.tiny-left', {}, 'Ten trades, and every character knows all of them from the start. Gathering is done out in the world; making at a craftsman’s building in town. Each piece of work is a few seconds of skill — how well you play it decides how good the result is.'), ...professionRows(S.list, { numbers: S.numbers, content: S.content, onOpen: id => craft.open({ tab: id }) })])); }
   }
   mount();
 
@@ -75,7 +75,7 @@ export function createProf({ net, hud, bag = null, sheet = null, journal = null,
     if (mini.isOpen && mini.run && !mini.run.done) { mini.cancel(); const t = m.why in STOPPED ? STOPPED[m.why] : m.msg; if (t) hud.toast(t, 'info'); }
     S.work = null; craft.setBusy(false);
   }
-  const gotItems = m => (m.got || []).map(g => ({ name: g.name, count: g.n, rarity: g.rarity && g.rarity !== 'normal' ? g.rarity : null, tint: g.tint, bonus: !!g.bonus }));
+  const gotItems = m => (m.got || []).map(g => ({ name: g.name, count: g.n, rarity: g.rarity && g.rarity !== 'normal' ? g.rarity : null, tint: g.tint, bonus: !!g.bonus, tag: g.find ? 'find' : null }));      // round 11 (#9): the high-score find is labelled
   function skillLines(m, prof) {
     const out = [], s = m.skill;
     if (s?.up) out.push(`${PROF_NAME[prof] || 'Skill'} is now ${s.level}`);
@@ -96,7 +96,7 @@ export function createProf({ net, hud, bag = null, sheet = null, journal = null,
     S.work = null; craft.setBusy(false);
     if (m.key && m.ok && m.reopenMs > 0) { S.opened.set(m.key, Date.now() + m.reopenMs); S.view?.setSpent(m.key, Date.now() + m.reopenMs); }
     const items = gotItems(m);
-    mini.showResult({ quality: m.quality, items, lines: skillLines(m, m.prof), note: m.ok ? (m.reopenMs > 0 ? `Back in about ${Math.max(1, Math.round(m.reopenMs / 60000))} min` : null) : (m.msg || 'Nothing. It is still there: try again.'), stay: m.ok ? 3200 : 2600 });
+    mini.showResult({ quality: m.quality, title: m.highScore ? 'High score: half as much again, and a find' : null, items, lines: skillLines(m, m.prof), note: m.ok ? (m.reopenMs > 0 ? `Back in about ${Math.max(1, Math.round(m.reopenMs / 60000))} min` : null) : (m.msg || 'Nothing. It is still there: try again.'), stay: m.ok ? 3200 : 2600 });
     if (m.ok && items.length) hud.chat?.(`${words()[m.quality] || ''} work: ${items.map(i => `${i.count} ${i.name}`).join(', ')}.`, 'loot');
     if (m.skill?.up) hud.toast(`${PROF_NAME[m.prof]} ${m.skill.level}`, 'good');
   }
@@ -132,7 +132,7 @@ export function createProf({ net, hud, bag = null, sheet = null, journal = null,
   const trainer = createPanel({ id: 'trainer', title: 'Trades', width: 360, cls: 'trade-panel' });
   function drawTrainer() {
     if (!trainer.isOpen || !T.prof) return;
-    trainer.setTitle(T.name || 'Trades', 'Teaches for nothing');
+    trainer.setTitle(T.name || 'Trades', 'Your trades and tools');      // round 11 (#11): everyone knows every trade — no "Learn" any more
     const known = new Set([...(T.prof.known || []), ...S.list.filter(r => r.known).map(r => r.id)]);
     const stations = (T.prof.stations || []).filter(id => id !== 'cooking' || true);
     trainer.fill(
@@ -169,16 +169,15 @@ export function createProf({ net, hud, bag = null, sheet = null, journal = null,
       dlg.querySelectorAll('.prof-dlg-status').forEach(p => p.remove());
       const status = h('div.prof-dlg-status', {}, ...(u.prof.trains || []).map(id => {
         const name = PROF_NAME[id] || id, row = rowOf(id);
-        const text = (u.prof.taught || []).includes(id) ? `You have learned ${name}.`
-          : known.has(id) ? `${name} is already learned.` : `Teaches ${name} for free.`;
-        return h('p', {}, h('b', {}, text), row?.tool ? ` ${row.tool.name} is in your bag.` : '');
+        const text = row ? `${name}: ${row.rank || 'skill'} ${row.level}.` : `${name}.`;      // round 11 (#11): every trade is known; say where you stand in it
+        return h('p', {}, h('b', {}, text), row?.tool ? ` ${row.tool.name} is in your bag.` : row?.kind === 'gather' && id !== 'angling' ? ' No tool for it in your bag — they sell one.' : '');
       }));
       dlg.querySelector('.body')?.prepend(status);
       const add = (text, fn) => { const b = h('button.ghost.prof-dlg', { type: 'button', onclick: () => { dlg.hidden = true; fn(); } }, text); foot.prepend(b); };
       const st = [...new Set((u.prof.stations || []).map(id => (id === 'tempering' ? 'smithing' : id)))];
       for (const id of st.reverse()) add(`Use ${STATION_WORD[id] || 'the station'}`, () => craft.open({ npc: T.npc, tab: id }));
       const fresh = (u.prof.trains || []).filter(id => !known.has(id));
-      if ((u.prof.trains || []).length) add(fresh.length ? `Learn: ${fresh.map(id => PROF_NAME[id]).join(', ')}` : (u.prof.trains || []).map(id => PROF_NAME[id] || id).join(', '), () => api.showTrainer());
+      if ((u.prof.trains || []).length) add(fresh.length ? `Learn: ${fresh.map(id => PROF_NAME[id]).join(', ')}` : `Trades: ${(u.prof.trains || []).map(id => PROF_NAME[id] || id).join(', ')}`, () => api.showTrainer());
     };
     setTimeout(place, 60);
   }

@@ -19,7 +19,7 @@ import {
   OFFHAND_DAMAGE, strikeAt, attuneWeapon,
 } from './farhold.js';
 import { isOrb, isTome, stampHand } from './hands.js';
-import { attackRate, weaponAps, apsText, movingPace } from './combat-cfg.js';
+import { attackRate, weaponAps, apsText, movingPace, basicPace } from './combat-cfg.js';
 
 const FARHOLD_TO_STYLE = { plain: 'bolt', burst: 'burst', split: 'fan', chain: 'chain', seeking: 'seeking', heavy: 'heavy' };
 /** fireBolt's own chain falloff when a plan names none (js/rules/cast-skills.js). */
@@ -58,6 +58,44 @@ export function buildCasterForms(cfg) {
     rangeSlack: cfg.rangeSlack ?? 1.5,
     offhandBolt: cfg.offhandBolt ?? OFFHAND_DAMAGE,
     tomeDamage: cfg.tomeDamage ?? 1,
+    named: cfg.named || {},
+  };
+}
+
+/**
+ * Owner #40 (2026-10-15): a reward that is a particular wand ("Wand of the Ninth Star", the Starcaller's chain: arcane,
+ * three stars in a fan) is made — and an owned copy is put right — with that element and that style, not whatever the
+ * dice gave the base. `spec` = `{ attune, castStyle }`; anything already right is left alone. Returns the item.
+ */
+export function restyleCaster(engine, item, { attune = null, castStyle = null, keepName = false } = {}) {
+  if (!item || item.type !== 'weapon') return item;
+  let changed = false;
+  if (attune && item.castElement && item.castElement !== attune) {
+    const was = item.castName;
+    item.affixes = (item.affixes || []).filter(a => a.stat !== 'castElement');
+    item.castElement = null; item.castStatus = null; item.castName = null; item.attune = attune;
+    if (was && typeof item.name === 'string' && item.name.startsWith(was + ' ')) item.name = item.name.slice(was.length + 1);
+    const name = item.name;
+    attuneWeapon(item);
+    if (keepName) item.name = name;            // a named reward keeps its own name ("Arc Wand of the Ninth Star" is not it)
+    changed = true;
+  }
+  const forms = engine?.casterForms;
+  if (castStyle && forms?.styles?.[castStyle] && item.castStyle !== castStyle) { item.castStyle = castStyle; changed = true; }
+  if (changed && forms) stampCaster(engine, item, { fresh: false });
+  return item;
+}
+/** Every item passes `engine.finishItem`: a NAMED item (caster-forms.json `named`) is held to its element and style. */
+export function installNamedCasters(engine) {
+  if (!engine?.finishItem || engine._namedCasters) return;
+  engine._namedCasters = true;
+  const finish = engine.finishItem;
+  engine.finishItem = (item, opts) => {
+    const out = finish(item, opts);
+    const it = out || item;
+    const spec = it && typeof it.name === 'string' ? engine.casterForms?.named?.[it.name] : null;
+    if (spec) restyleCaster(engine, it, { ...spec, keepName: true });
+    return out;
   };
 }
 
@@ -193,7 +231,7 @@ export function stampCaster(engine, item, { fresh = false } = {}) {
     if (isOrb(item)) item.weaponTags = ['Off hand', ...(item.weaponTags || []).filter(t => t !== 'Melee' && t !== 'Ranged' && t !== 'Off hand' && t !== 'One-handed')];
   }
   if (item.type === 'weapon' && engine.combatCfg) {
-    const aps = weaponAps(item, { style: isTome(item) ? forms.styles[item.castStyle] : null });
+    const aps = weaponAps(item, { style: isTome(item) ? forms.styles[item.castStyle] : null, pace: basicPace(engine) });
     if (aps) { item.aps = aps; item.apsText = apsText(aps); } else { delete item.aps; delete item.apsText; }
   }
   return item;

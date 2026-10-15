@@ -30,23 +30,26 @@ import { JOURNAL_FLUSH_MS } from './journal.js';
 import { createTrades, TRADE_OPS, TRADE_RANGE } from './trade.js';
 import { planDungeon as planTiers } from '../rules/dungeon-tiers.js';     // stream E's generator (js/sim/dungeon.js keeps the stand-in)
 import { caveDungeon } from './placements.js';
+import { createBarkGate } from './barks.js';      // round 11 (World, #52)
 import { createEventRunner, eventReward, rewardPreview, ABANDON_MS } from './events.js';
 import { eventScale } from './director.js';
 import { createQuestBook } from './quests.js';
 import { townFolk, blockAt } from './schedules.js';
 import { createMail } from './mail.js';
+import { createMarket } from './market.js';      // round 11 (Market, owner #25)
 import { createTravellers } from './travellers.js';
 import { createCorpses } from './corpses.js';
 import { createRoadEvents } from './roadevents.js';
 import { createShops, SHOP_RANGE } from './shops.js';
 import { configureNpcNames } from './npc-names.js';
 import { createMountBook, DEFAULT_MOUNTS } from './mounts.js';
+import { tabOf, tabCounts, fitsIn, isKept, sellable } from './bag-tabs.js';      // round 11 (#11): Equipment / Items / Other, each counted on its own
 import { createCarts } from './carts.js';
 import { createShips, placeHarbours } from './ships.js';      // [V] Expansion 1 §6: the voyage between the continents
 import { cleanLook } from './looks.js';
 import { effectOf as effectOfRaw, potionAmount, potionCdMs, potionText, GROUP_R as TONIC_R, stackable, stackKey, stackMaxOf, countOf } from './consumables.js';
 import { isCrate, crateItem, openCrate } from './crates.js';
-import { createSystemMail } from './sysmail.js';
+import { createSystemMail, SYSMAIL } from './sysmail.js';
 import { createFeedback, NUDGE } from './feedback.js';
 import { createAngling } from './angling.js';
 import { createHazards } from './hazards.js';      // [S] Expansion 1 §4
@@ -89,6 +92,9 @@ const RARE = new Set(['rare', 'unique', 'legendary', 'set']);
  */
 export function mergeMounts(tables) {
   const has = t => t && Array.isArray(t.mounts) && t.mounts.length;
+  // round 11 (World, live #48): a province table marked `extends: true` ADDS to the default mounts (Vharlen's two lizards),
+  // so a realm that loads that province alone still sells the Trail Horse its stables list
+  tables = (tables || []).map(t => (has(t) && t.extends ? { ...t, mounts: [...DEFAULT_MOUNTS, ...t.mounts.filter(m => m && !DEFAULT_MOUNTS.some(d => d.id === m.id))] } : t));
   const extra = tables.slice(1).filter(has);
   if (!extra.length) return tables[0] || null;
   const base = has(tables[0]) ? tables[0] : { mounts: DEFAULT_MOUNTS };
@@ -106,7 +112,7 @@ export function createProvince(opts) {
     planDungeon = planTiers, filterText = t => t, chestResetMs = 30 * 60000,
     clock: realmClock = { epoch: wallNow(), dayMs: 2 * 3600000 }, travelFare = null,
     zoneEventFirstMs = null, zoneEventGapMs = null,        // tests: when the first / next zone event of a copy starts
-    mailOpts = {}, chatFilter = null,
+    mailOpts = {}, chatFilter = null, runSeed = 0,
   } = opts;
   // V2 (owner feedback 7): every gold number the server applies comes from data/rules/economy.json `server` (js/sim/economy-knobs.js)
   if (opts.economy !== undefined || (layouts[0] && layouts[0].economy)) configureEconomy(opts.economy || layouts[0].economy);
@@ -142,6 +148,13 @@ export function createProvince(opts) {
   const rooms = new Map();
   const P = new Map();           // layout key -> { L, towns: [room], copies: [room], instances: Map, events }
   let instanceN = 0, seedN = 0;
+  /**
+   * Round 11 (World, live #6: "the same giant bog slime spawned at the same spot after a restart and dropped the IDENTICAL
+   * item"). Every room's dice (combat, loot, rank and affix rolls, spawn spots, events) start from its seed; with one fixed
+   * seed every restart replayed the same rolls. `runSeed` (the server passes a fresh one per start) is mixed into each
+   * ROOM's seed. 0 = the old fixed seeds (tests). The world, placements, dungeon plans and quest/job generation keep `seed`.
+   */
+  const roomSeed = (base, id) => { if (!runSeed) return base; let h = (Math.imul(runSeed >>> 0, 2654435761) ^ (base >>> 0)) >>> 0; for (const ch of String(id)) h = Math.imul(h ^ ch.charCodeAt(0), 16777619) >>> 0; return h || 1; };
   const roomHooks = {
     log,
     standUp: (e, why) => { const o = e.char ? online.get(e.char.id) : null; if (o && o.entity === e) endMeal(o, why); },   // S20
@@ -180,7 +193,7 @@ export function createProvince(opts) {
     P.set(L.key, pv);
     L.towns.forEach((t, i) => {
       const r = createRoom({
-        id: `${L.key}/town:${i}`, name: t.name, kind: 'town', terrain: L.terrain, seed, createRules, hooks: roomHooks, encounterInfo,
+        id: `${L.key}/town:${i}`, name: t.name, kind: 'town', terrain: L.terrain, seed: roomSeed(seed, `${L.key}/town:${i}`), createRules, hooks: roomHooks, encounterInfo,
         area: { x: t.x, z: t.z, r: t.r }, gridArea: { x: t.x, z: t.z, r: t.r + 40 }, spawn: { x: t.x, z: t.z }, camps: [],
         objects: [...townObjects(L, t, i)], meta: { province: L.key, town: i },
         describeExtra: describeFor(L),
@@ -287,7 +300,7 @@ export function createProvince(opts) {
     const L = pv.L;
     const n = pv.copies.length ? Math.max(...pv.copies.map(c => c.meta.n)) + 1 : 1;
     const r = createRoom({
-      id: `${L.key}/wilds:${n}`, name: L.name, kind: 'wilds', terrain: L.terrain, seed, createRules, hooks: roomHooks, encounterInfo,
+      id: `${L.key}/wilds:${n}`, name: L.name, kind: 'wilds', terrain: L.terrain, seed: roomSeed(seed, `${L.key}/wilds:${n}`), createRules, hooks: roomHooks, encounterInfo,
       camps: L.camps, spawn: L.gate, dormantCamps: (L.zones || []).length > 1,   // a whole province: only camps near players exist
       safeZones: L.towns.map(t => ({ x: t.x, z: t.z, r: t.r })), meta: { n, emptySince: 0, province: L.key },
       objects: [
@@ -351,7 +364,7 @@ export function createProvince(opts) {
     const dterr = dungeonTerrain(plan);
     const spec = dungeonRoomSpec(plan, { exitTo: { room: 'wilds', x: d.x + 3, z: d.z + 3 } });
     const r = createRoom({
-      id: `${pv.L.key}/i:${n}`, name: (d.kind !== 'cave' && ds.name) || plan.name || 'The Barrow', kind: 'instance', terrain: dterr, seed: dseed, createRules, hooks: roomHooks, encounterInfo,
+      id: `${pv.L.key}/i:${n}`, name: (d.kind !== 'cave' && ds.name) || plan.name || 'The Barrow', kind: 'instance', terrain: dterr, seed: roomSeed(dseed, `${pv.L.key}/i:${n}`), createRules, hooks: roomHooks, encounterInfo,
       camps: spec.camps, objects: spec.objects, spawn: plan.floors[0].entry,
       meta: { key, party: partyId, allowed: new Set(allowed), emptySince: 0, plan, made: now(), province: pv.L.key, door: doorIdx },
       describeExtra: { get dungeon() { return describeDungeon(plan, dterr); }, clock: realmClock },
@@ -478,6 +491,7 @@ export function createProvince(opts) {
       case 'trace': return trace(o, m.kind);
       case 'quest': return questOp(o, m);
       case 'mail': return mail.op(o, m).then(why => { if (typeof why === 'string') bad(s, why); });
+      case 'market': return market.op(o, m).then(why => { if (typeof why === 'string') bad(s, why); });      // round 11 (Market, #25)
       case 'talent': return talentOp(o, m);
       case 'perk': return perkOp(o, m);
       case 'map': return m.op === 'get' ? s.sendJSON(mapData(o)) : bad(s, 'op');
@@ -560,6 +574,7 @@ export function createProvince(opts) {
     online.set(ch.id, o);
     o.entity = place.room.addPlayer(ch, client, place.at);
     startingKit(o);
+    keepsakes(o);                             // round 11 (#3 / #15): one recall charm for everyone; saddle bags bought before are fitted
     if (opts.refreshItem) for (const it of ch.bag || []) { try { opts.refreshItem(it); } catch { /* an item the rules do not know stays as it is */ } }      // Y16 (C): old bag items carry today's words (hand, a tome's attack, attacks per second)
     lightSweep(o);                            // W22: lanterns and torches left the game — what the bag holds is paid back
     restack(o, false);                        // U5: an old save's loose potions become stacks before the first `joined`
@@ -664,7 +679,7 @@ export function createProvince(opts) {
         seen: ch.seen || { zones: [], places: [] },
         opened: Object.keys(ch.opened || {}).filter(k => ch.opened[k] > t),
         // play-test 2
-        reach: attackReach(o), attackRange: attackReach(o), mounts: mountBook.owned(ch), mount: o.mount || null, speedMul: (e.speedMul = speedOf(o)), moveMul: footMul(o), prefs: prefsOf(ch), look: ch.look || null, clsName: clsNameOf(ch.cls),
+        reach: attackReach(o), attackRange: attackReach(o), mounts: mountBook.owned(ch), mountPick: ch.mountPick || null, saddle: ch.saddle || null, mount: o.mount || null, speedMul: (e.speedMul = speedOf(o)), moveMul: footMul(o), prefs: prefsOf(ch), look: ch.look || null, clsName: clsNameOf(ch.cls),
         // play-test 5
         bagMax: bagCap(o), bagBase: bagBase(), angling: angling.view(ch), professions: professions.view(ch) /* W9 (P-core) */, acct: acctOf(o), ...(rules.LIGHT && rules.LIGHT.radius ? { lightRange: rules.LIGHT.radius, light: rules.LIGHT } : {}), ...(o.admin ? { admin: true } : {}), ...(ch.kit ? { kit: ch.kit } : {}), ...(o.eventAtKey ? { eventAt: o.eventAtKey } : {}),
       },
@@ -679,6 +694,7 @@ export function createProvince(opts) {
     if (handoff) msg.handoff = handoff;
     if (liveEvent) msg.event = eventView(liveEvent);
     s.sendJSON(msg);
+    professions.grantAll(o);            // round 11 (P, live #11): all ten trades, the gathering tools and a rod (once each)
     if (o.reviveAsk && e.dead && o.reviveAsk.until > now()) s.sendJSON(reviveAskMsg(o.reviveAsk));   // a reconnect while an offer is open
     if (!handoff || handoff.via === 'relocate') wantSheet(o);      // T18: the sheet follows the join (queued, not inside this tick's budget)
     o.joinedOnce = true;
@@ -974,8 +990,10 @@ export function createProvince(opts) {
     if (cost) { ch.gold -= cost; journal(o, 'gold', { d: -cost }); econ.add('sink', 'offering', { gold: cost }, ch.level); s.sendJSON({ t: 'bag', add: [], remove: [], gold: ch.gold }); }
     ch.opened[key] = t + chestResetMs;
     journal(o, 'opened', { key, until: ch.opened[key] });
-    if (u.buff && o.room.rules.buff) safeRules(o.room, 'buff', o.entity, u.buff);
-    s.sendJSON({ t: 'used', id: obj.id, ok: true, kind: 'use', name: obj.name, text: u.text, buff: u.buff || undefined });
+    // round 11 (World, live #47): a shrine's blessing is real now (js/rules/blessings.js) and the dialog says exactly what it
+    // does — `buff = { id, name, text, seconds }`; with no rules behind it nothing is claimed
+    const bl = u.buff && o.room.rules.buff ? safeRules(o.room, 'buff', o.entity, u.buff) : null;
+    s.sendJSON({ t: 'used', id: obj.id, ok: true, kind: 'use', name: obj.name, text: u.text, buff: bl && bl.ok ? { id: bl.id, name: bl.name, text: bl.text, seconds: bl.seconds } : undefined });
     const gold = (u.gives && u.gives.gold) || 0;
     if (gold) grant(o, { items: [], gold, reason: 'vignette', from: obj });
   }
@@ -993,10 +1011,12 @@ export function createProvince(opts) {
     }
     if (rec.done) return s.sendJSON({ t: 'used', id: obj.id, ok: false, why: 'opened', msg: 'You already dug this up.' });
     if (rec.found.length < t.step) return s.sendJSON({ t: 'used', id: obj.id, ok: false, why: 'locked', msg: 'Nothing here you can find yet. Follow the clues.', chain: t.chain, found: rec.found, of: t.step });
-    rec.done = wallNow();
-    journal(o, 'set', { k: 'treasure', v: ch.treasure }); o.dirty = true;
     const lvl = t.level || o.entity.level;
     const items = (o.room.rules.rollLoot ? safeRules(o.room, 'rollLoot', o.entity, { level: lvl, tier: t.tier }) : null) || [];
+    // round 11 (owner #25): a cache's contents are random — check the room BEFORE it opens; it stays shut until there is space
+    if (items.length && !bagFits(o, items)) return s.sendJSON({ t: 'used', id: obj.id, ok: false, why: 'bagFull', msg: roomWords(o, items, 'open it') });
+    rec.done = wallNow();
+    journal(o, 'set', { k: 'treasure', v: ch.treasure }); o.dirty = true;
     s.sendJSON({ t: 'used', id: obj.id, ok: true, kind: 'cache', chain: t.chain, chainName: t.chainName });
     o.room.emit({ type: 'open', to: o.entity.id, d: obj.id, x: obj.x, z: obj.z });
     grant(o, { items, gold: treasureGold(lvl), reason: 'treasure', goldAdded: false, from: obj });
@@ -1013,6 +1033,8 @@ export function createProvince(opts) {
     if (c.after && !((ch.opened[objKey(o, c.after)] || 0) > t)) return s.sendJSON({ t: 'used', id: obj.id, ok: false, why: 'locked', msg: (c.afterName ? 'Try the ' + c.afterName.toLowerCase() + ' first.' : 'It will not open yet.') });
     const lvl = c.level || e.level;
     const items = (o.room.rules.rollLoot ? safeRules(o.room, 'rollLoot', e, { level: lvl, tier: c.tier }) : null) || [];
+    // round 11 (owner #25): a chest's contents are random — check the room BEFORE it opens; it stays shut (and its timer unstarted) until there is space
+    if (items.length && !bagFits(o, items)) return s.sendJSON({ t: 'used', id: obj.id, ok: false, why: 'bagFull', msg: roomWords(o, items, 'open it') });
     const gold = chestGold(lvl);
     ch.gold = (ch.gold || 0) + gold;
     ch.opened[key] = t + (c.onceMs || (o.room.kind === 'instance' ? 24 * 3600000 : chestResetMs));
@@ -1148,7 +1170,7 @@ export function createProvince(opts) {
       liveEvent = ev;
       if (realmRun) realmRun.run.stop();
       const room = roomForPoint(pv, ev);
-      realmRun = { room, run: createEventRunner({ room, ev: { ...ev, warnMs: 0 }, rng: () => room.host.random('event'), info: encounterInfo }) };
+      realmRun = { room, run: createEventRunner({ room, ev: { ...ev, warnMs: 0 }, rng: () => room.host.random('event'), info: encounterInfo, size: opts.eventSize || null }) };
       realmRun.run.contrib = new Map();
       realmRun.run.step();
     }
@@ -1455,7 +1477,7 @@ export function createProvince(opts) {
             zoneWait.delete(key);
             const n = Math.max(1, players.filter(c => dist(c) <= Math.max(def.enrol || 60, (def.r || 40) * 1.2) + 30).length);
             const ev = { ...def, warnMs: 0, uid: def.id + ':' + room.id + ':' + t, scale: eventScale(n, opts.eventSize), abandonMs: opts.eventAbandonMs ?? ABANDON_MS };
-            const run = createEventRunner({ room, ev, rng: () => room.host.random('event'), info: encounterInfo });
+            const run = createEventRunner({ room, ev, rng: () => room.host.random('event'), info: encounterInfo, size: opts.eventSize || null });
             run.contrib = new Map();
             zoneRuns.set(key, { run, room, def });
             run.step();
@@ -1510,8 +1532,32 @@ export function createProvince(opts) {
     if (!d || d.hour !== hour) { d = { hour, rares: 0, bosses: 0, elites: 0, deaths: 0, visitors: new Set(), heat: new Map(), last: {} }; deeds.set(zone, d); }
     return d;
   }
+  /**
+   * Round 11 (World, live #5: "this should apply to most group activities"): a wilds RARE or BOSS (not an event's — the
+   * event runner sizes those) grows when more players set about it: health x (1 + RARE_CROWD_PER x (k-1)) for k distinct
+   * players who have hit it (capped at RARE_CROWD_CAP), share of health kept, never shrinks. A dungeon's bosses are a party's
+   * fight already and are left as they are.
+   */
+  const RARE_CROWD_PER = 0.5, RARE_CROWD_CAP = 10;
+  function crowdOnRare(ev, r) {
+    if (ev.type !== 'hit' || ev.kind !== 'dmg' || r.kind !== 'wilds') return;
+    const dst = r.entities.get(ev.d), src = r.entities.get(ev.s);
+    if (!dst || dst.kind !== 'monster' || dst.dead || (dst.rank !== 'rare' && dst.rank !== 'boss') || (dst.data && dst.data.event != null)) return;
+    if (!src || src.kind !== 'player' || !src.char) return;
+    const set = (dst._tappers ||= new Set());
+    if (set.has(src.char.id)) return;
+    const before = Math.min(RARE_CROWD_CAP, Math.max(1, set.size));
+    set.add(src.char.id);
+    const after = Math.min(RARE_CROWD_CAP, set.size);
+    if (after <= before) return;
+    const k = (1 + RARE_CROWD_PER * (after - 1)) / (1 + RARE_CROWD_PER * (before - 1));
+    const u = dst.r && dst.r.unit;
+    if (u && Number.isFinite(u.maxHp)) { u.maxHp = Math.round(u.maxHp * k); u.hp = Math.round(u.hp * k); dst.setMax(u.maxHp, 0); dst.setHp(u.hp); }
+    else { const frac = dst.hp / Math.max(1, dst.hpMax); dst.setMax(Math.round(dst.hpMax * k), 0); dst.setHp(Math.max(1, Math.round(dst.hpMax * frac))); }
+  }
   function observe(ev, r) {
     if (meterOn.size && (ev.type === 'hit' || ev.type === 'miss')) meterFeed(ev, r);
+    if (ev.type === 'hit') crowdOnRare(ev, r);
     if (ev.type === 'hit' || ev.type === 'die') contribute(ev, r);
     if ((ev.type === 'hit' && ev.kind === 'dmg' && (ev.n || 0) > 0) || ev.type === 'die') {      // Q16: a hit (unless the mount keeps calm) or a death unhorses you
       const d = r.entities.get(ev.d);
@@ -1747,8 +1793,13 @@ export function createProvince(opts) {
     const t = now();
     if (t - (barkAt.get(n) || -1e9) < 90000) return;
     if (!r.host.near(n.x, n.z, 6, x => x.kind === 'player').length) return;
+    // round 11 (World, live #52): one bark at a time per town (per 150 m of a wilds copy), never the same line twice in a row
+    const gates = (r._barkGates ||= new Map()), gk = r.kind === 'town' ? 'town' : Math.floor(n.x / 150) + ':' + Math.floor(n.z / 150);
+    let gate = gates.get(gk); if (!gate) { gate = createBarkGate(); gates.set(gk, gate); }
+    const text = gate.pick(pool, t, () => r.host.random('bark'));
+    if (!text) return;
     barkAt.set(n, t);
-    r.emit({ type: 'say', id: n.id, text: pool[Math.floor(r.host.random('bark') * pool.length)], style: 'bark' });
+    r.emit({ type: 'say', id: n.id, text, style: 'bark' });
   }
 
 
@@ -1774,7 +1825,7 @@ export function createProvince(opts) {
     const c = room._qm;
     if (c && c.n === room.objects.size && c.book === b) return c.list;
     const list = [];
-    for (const x of room.objects.values()) { const d = x.data || {}; if (x.removed || !(d.npc || d.note || d.use)) continue; if ((d.road && d.road.kind !== 'chest') || d.wanderer || b.marks(giverOf(x))) list.push(x); }
+    for (const x of room.objects.values()) { const d = x.data || {}; if (x.removed || !(d.npc || d.note || d.use)) continue; if ((d.road && d.road.kind !== 'chest') || (d.wanderer && d.wanderer.offers === 'deliver') || b.marks(giverOf(x))) list.push(x); }
     room._qm = { n: room.objects.size, book: b, list };
     return list;
   }
@@ -1786,7 +1837,7 @@ export function createProvince(opts) {
       const d = x.data || {};
       let m = b.mark(o.char, giverOf(x));
       if (!m && d.road && d.road.kind !== 'chest') { const ev = roadOf(o).events.get(d.road.ev); if (ev && !ev.acceptedAt && !ev.done && !ev.freed) m = 'offer'; }
-      if (!m && d.wanderer && d.wanderer.offers) m = 'offer';
+      if (!m && d.wanderer && d.wanderer.offers === 'deliver') m = 'offer';      // round 11 (World, live #49): a cart for hire (offers 'cart') is travel, not a quest — no "!"
       if (m) now2[x.id] = m;
     }
     for (const [id, m] of Object.entries(now2)) if (was[id] !== m) diff[id] = m;
@@ -1910,7 +1961,7 @@ export function createProvince(opts) {
     const ri = r.reward.item, ilv = Math.max(lv, e.level || 1);
     let items = [];
     if (ri && ri.base) {
-      let it = rules.makeItem ? safeRules(o.room, 'makeItem', e, { base: ri.base, rarity: ri.tier || 'rare', level: ilv }) : null;
+      let it = rules.makeItem ? safeRules(o.room, 'makeItem', e, { base: ri.base, rarity: ri.tier || 'rare', level: ilv, name: ri.name, attune: ri.attune, castStyle: ri.castStyle }) : null;      // [C, owner #40] name / element / wand style
       const eng = !it && rules.room && rules.room.engine;
       if (!it && eng && eng.rpg) { try { it = eng.rpg.rollDrop({ level: ilv, rng: rules.room.streams.get('loot'), chance: 1, bases: [ri.base], rarityBoost: 0, floor: ri.tier === 'normal' ? null : (ri.tier || 'rare') }); } catch (err) { log('quest item', err && err.message); } }
       if (it) { it = JSON.parse(JSON.stringify(it)); if (ri.name) it.name = ri.name; items = [it]; }
@@ -2086,12 +2137,14 @@ export function createProvince(opts) {
     }
     ch.bag ||= [];
     if (gold && !goldAdded) ch.gold = (ch.gold || 0) + gold;
-    const added = [], grown = [];
+    const added = [], grown = [], posted = [];
     let overflow = 0, urgent = false;
     for (const it of items) {
       if (!it || typeof it !== 'object' || it._granted) continue;
       it._granted = true;
       const item = JSON.parse(JSON.stringify(it)); delete item._granted;
+      // round 11 (#3): a recall charm is kept for good and you only ever hold one — a second one (a quest reward) is not added
+      if (item.use && item.use.type === 'recall') { if (ch.bag.some(x => x && x.use && x.use.type === 'recall')) continue; item.noSell = true; item.noDrop = true; item.keep = true; item.count = 1; delete item.shopPrice; }
       // U5 (play-test 6): a consumable joins a stack of its kind that has room; only what is left over takes a new slot
       if (stackable(item)) {
         let n = countOf(item);
@@ -2109,10 +2162,13 @@ export function createProvince(opts) {
       if (item.kind === 'potion') { const t = potionText(item, { hpMax: o.entity.hpMax, mpMax: o.entity.mpMax }, potionTable); if (t) { item.desc = t.desc; if (t.restore) item.restore = t.restore; } }
       if (item.uid) item.ruid = item.uid;
       item.uid = newUid();
-      if (ch.bag.length >= bagCap(o)) { overflow += Math.max(economy().bag.overflowPerItem, Math.round(item.value || 1)) * countOf(item); continue; }
+      // round 11 (Market stream, owner #25: "the item should not disappear"): what does not fit its bag tab goes to the POST,
+      // never into gold — only a server with no post at all still pays the old overflow gold
+      if (bagFull(o, item)) { if (store.mailSystem) posted.push(item); else overflow += Math.max(economy().bag.overflowPerItem, Math.round(item.value || 1)) * countOf(item); continue; }
       ch.bag.push(item); added.push(item);
       if (RARE.has(item.rarity)) urgent = true;
     }
+    if (posted.length) postOverflow(o, posted, reason);
     if (overflow) ch.gold = (ch.gold || 0) + overflow;
     if (gold || overflow) journal(o, 'gold', { d: gold + overflow });
     for (const st of grown) { journal(o, 'bagDel', { uid: st.uid }); journal(o, 'bagAdd', { item: st }); }
@@ -2129,6 +2185,21 @@ export function createProvince(opts) {
     if (got.length || gold) o.room.emit({ type: 'loot', to: o.entity.id, d: from ? from.id : o.entity.id, items: got.map(i => ({ uid: i.uid, name: i.name, rarity: i.rarity })), gold: gold || undefined });
     if (urgent) saveNow(o);
     return got;
+  }
+  /**
+   * Round 11 (Market stream, owner #25): items a reward gave that did not fit their bag tab go to the post — one system
+   * letter per eight (taken anywhere) — and a chat line says so. Nothing a reward gives disappears.
+   */
+  function postOverflow(o, items, reason) {
+    const ch = o.char;
+    counters.bagPosted = (counters.bagPosted || 0) + items.length;
+    const names = items.map(i => (countOf(i) > 1 ? countOf(i) + ' x ' : '') + (i.name || 'an item')).join(', ');
+    for (let k = 0; k < items.length; k += SYSMAIL.items) {
+      const part = items.slice(k, k + SYSMAIL.items);
+      Promise.resolve(sysmail.mailTo({ to: ch.id, subject: 'Your bag was full', from: 'The Vale', body: 'Your bag had no room, so this was sent here instead (' + (reason || 'a reward') + '). Make room in your bag, then take it.', items: part }))
+        .then(r => { if (!r || !r.ok) log('bag overflow post failed', ch.id, r && r.why); }, err => log('bag overflow post', err && err.message));
+    }
+    if (o.conn) o.conn.sendJSON({ t: 'chat', ch: 'system', from: 0, name: 'The Vale', text: 'Your bag is full: ' + names + (items.length === 1 ? ' was' : ' were') + ' sent to your mailbox. Make room, then take ' + (items.length === 1 ? 'it' : 'them') + ' from your mail.' });
   }
   /**
    * U5: bring loose consumables of the same kind together (an old save, a letter or a trade that arrived as its own item).
@@ -2187,7 +2258,7 @@ export function createProvince(opts) {
     if (m.op === 'split') {
       const n = m.n | 0;
       if (n < 1 || n >= countOf(src)) return R({ ok: false, why: 'count', msg: 'Split off at least one and leave at least one.' });
-      if (ch.bag.length >= bagCap(o)) return R({ ok: false, why: 'bagFull', msg: CODES.bagFull });
+      if (bagFull(o, src)) return R({ ok: false, why: 'bagFull', msg: CODES.bagFull });
       const made = { ...JSON.parse(JSON.stringify(src)), uid: newUid(), count: n, apart: 1 };
       delete made.left; delete made.ruid;
       src.count = countOf(src) - n;
@@ -2364,6 +2435,7 @@ export function createProvince(opts) {
     if (isCrate(item)) return openCrateOp(o, idx, R);         // T9 / T20: a crate or a gift box
     if (angling.useItem(o, item, idx, R)) return;             // T25: a rod casts, bait goes on the hook
     if (professions.useItem(o, item, idx, R)) return;         // W9 (P-core): a gathering tool works the nearest node
+    if (item.use && item.use.type === 'bag') return fitSaddle(o, idx, R);      // round 11 (#15): saddle bags go on your mounts for good
     const ef = effectOf(item);
     if (!ef) return R({ ok: false, why: 'item', id: item.id, msg: 'You cannot use that.' });
     if (ef.kind === 'none') return R({ ok: false, why: 'notYet', id: item.id, msg: (item.name || 'That') + ' does nothing yet. Keep it — it will.' });
@@ -2376,7 +2448,7 @@ export function createProvince(opts) {
       const uid = item.uid;
       const res = safeRules(o.room, 'useItem', e, ef.use, {
         name: item.name, itemId: item.id, target: e.target || null,
-        done: () => { if (!recall(o)) return; const i = ch.bag.findIndex(x => x.uid === uid); if (i >= 0) consume(o, i); },
+        done: () => { if (!recall(o)) return; if (isKept(item)) return; const i = ch.bag.findIndex(x => x.uid === uid); if (i >= 0) consume(o, i); },      // round 11 (#41): the recall charm is never used up
       }) || { ok: false, why: 'item' };
       if (!res.ok) return R({ ok: false, why: res.why || 'item', id: item.id, msg: res.text || 'Nothing happens.' });
       if (res.consume) {
@@ -2432,7 +2504,7 @@ export function createProvince(opts) {
     if (e.dead) return R({ ok: false, why: 'dead', id: item.id, msg: 'You are dead.' });
     if (o.frozen) return R({ ok: false, why: 'busy', id: item.id, msg: CODES.busy });
     const got = openCrate(o.room.rules, e, item, { safe: (fn, ...a) => safeRules(o.room, fn, ...a) });
-    if (ch.bag.length - 1 + got.length > bagCap(o)) return R({ ok: false, why: 'bagFull', id: item.id, msg: CODES.bagFull, need: got.length, free: Math.max(0, bagCap(o) - ch.bag.length + 1) });
+    if (!bagFits(o, got, [item])) { const t = tabOf(got[0] || item); return R({ ok: false, why: 'bagFull', id: item.id, msg: roomWords(o, got, 'open it', [item]), need: got.length, free: Math.max(0, bagCap(o) - tabCounts(ch.bag)[t] + (tabOf(item) === t ? 1 : 0)) }); }
     const from = item.kind === 'gift' || item.gift ? 'gift' : 'crate';
     consume(o, idx);
     const added = grant(o, { items: got, gold: 0, reason: from }) || [];
@@ -2513,6 +2585,7 @@ export function createProvince(opts) {
     const bagIdx = ch.bag.findIndex(i => i.uid === m.uid);
     if (m.op === 'destroy') {
       if (bagIdx < 0) return s.err('item');
+      if (isKept(ch.bag[bagIdx])) { s.sendJSON({ t: 'itemR', op: 'destroy', uid: m.uid, ok: false, why: 'keep', msg: 'You cannot throw that away.' }); return s.err('item', 'You cannot throw that away.'); }      // round 11 (#3)
       const [it] = ch.bag.splice(bagIdx, 1);
       journal(o, 'bagDel', { uid: it.uid });
       econ.add('sink', 'destroy', { items: 1 }, ch.level);
@@ -2565,7 +2638,7 @@ export function createProvince(opts) {
       // W19: the pack cannot come off while its extra slots hold things — say why and how many
       const packNo = packRefusal(o, slot, null);
       if (packNo) { s.sendJSON({ t: 'itemR', op: 'unequip', uid: m.uid, slot, ok: false, why: 'bagSlots', need: packNo.need, msg: packNo.msg }); return s.err('item', packNo.msg); }
-      if (ch.bag.length >= bagCap(o)) return s.err('bagFull');
+      if (bagFull(o, ch.equipment[slot] || eq[slot])) return s.err('bagFull');
       let item;
       if (rules.unequip) { const r = safeRules(o.room, 'unequip', e, slot); if (!r || !r.ok) return s.err('item', (r && r.text) || 'Not now.'); item = r.item; }
       else { item = ch.equipment[slot]; delete ch.equipment[slot]; }
@@ -2582,7 +2655,7 @@ export function createProvince(opts) {
   }
 
   // ---- play-test 2: corpse loot (Q3/Q4), shops (Q11), mounts (Q16), barber (Q20), prefs (Q22), follow (Q2) ----
-  const corpses = createCorpses({ now, newUid, rng: () => (first.towns[0] || first.copies[0]).host.random('roll'), partyOf: c => partyOf.get(c) || null, online, grant: (o, a) => grant(o, a), log, counters, bagMax: o => bagCap(o) });
+  const corpses = createCorpses({ now, newUid, rng: () => (first.towns[0] || first.copies[0]).host.random('roll'), partyOf: c => partyOf.get(c) || null, online, grant: (o, a) => grant(o, a), log, counters, bagMax: o => bagCap(o), bagFull: (o, it) => bagFull(o, it) });
   // S5/S9 (play-test 4): treasure chests, deliveries, escorts and rescues dropped near players; errand runners' letters
   // Expansion 1 (stream P): road events, ox carts and shops are each PROVINCE's own (its road-events / carts / shops data);
   // `first`'s are the old single-province ones and the fallback for a room that belongs to no province
@@ -2619,6 +2692,60 @@ export function createProvince(opts) {
     journal(o, 'set', { k: 'mounts', v: o.char.mounts }); o.dirty = true;
     if (!quiet && o.conn) o.conn.sendJSON({ t: 'you', mounts: mountBook.owned(o.char), mountNew: mountBook.starter.id });
   }
+  /**
+   * Round 11 (owner #3 / #41): every character carries ONE recall charm — reusable, no cooldown, never sold, dropped, traded
+   * or posted (`noSell`, `noDrop`, `keep`; it lives in the bag's Other tab). Given here when missing (new characters and old
+   * saves alike); a save holding several (they used to be one-use and sold in stacks) keeps one and is paid half the shop
+   * price for each extra. Owner #15: saddle bags bought before they did anything are fitted now (see fitSaddle).
+   */
+  function keepsakes(o) {
+    const ch = o.char; ch.bag ||= [];
+    const isRecall = it => it && it.use && it.use.type === 'recall';
+    const held = ch.bag.filter(isRecall);
+    let refund = 0;
+    const keepFlags = it => { it.noSell = true; it.noDrop = true; it.keep = true; delete it.shopPrice; };
+    if (!held.length) {
+      const base = shops.goodOf('recall_charm');
+      if (base) { const it = { ...base, uid: newUid(), count: 1 }; keepFlags(it); ch.bag.push(it); journal(o, 'bagAdd', { item: it }); o.dirty = true; }
+    } else {
+      const [first, ...rest] = held;
+      const each = Math.max(1, Math.floor(goodsPriceOf(first.id) * (economy().shop.goodsSellFactor ?? 0.5)));
+      const changed = !first.keep || countOf(first) > 1;
+      refund += (countOf(first) - 1) * each;
+      if (changed) { journal(o, 'bagDel', { uid: first.uid }); first.count = 1; keepFlags(first); journal(o, 'bagAdd', { item: first }); }
+      for (const it of rest) { refund += countOf(it) * each; ch.bag.splice(ch.bag.indexOf(it), 1); journal(o, 'bagDel', { uid: it.uid }); }
+      if (changed || rest.length) o.dirty = true;
+    }
+    if (refund > 0) {
+      ch.gold = (ch.gold || 0) + refund; journal(o, 'gold', { d: refund }); econ.add('faucet', 'recallRefund', { gold: refund }, ch.level || 1);
+      o.handsNote = (o.handsNote ? o.handsNote + ' ' : '') + 'Your recall charm never breaks now, so the spare ones were bought back for ' + refund + ' gold.';
+    }
+    if (!ch.saddle) { const i = ch.bag.findIndex(it => it && it.use && it.use.type === 'bag'); if (i >= 0) fitSaddle(o, i, null); }
+  }
+  /** The goods price a shop asks for `id` (the first stock row that names it), for refunds; 0 when nobody sells it. */
+  function goodsPriceOf(id) {
+    for (const pv of P.values()) for (const k of Object.values((pv.shops && pv.shops.kinds) || {})) for (const g of (k && k.goods) || []) if (g && g.id === id && g.price > 0) return g.price;
+    return 0;
+  }
+  /** Round 11 (owner #15): fit saddle bags to your mounts — they leave the bag and add `use.slots` squares to the Equipment
+   *  and Items tabs while you own any mount. `R` = the itemR reply (null when fitted silently at login). */
+  function fitSaddle(o, idx, R) {
+    const ch = o.char, item = ch.bag[idx];
+    if (ch.saddle) { if (R) R({ ok: false, why: 'known', id: item.id, msg: 'Your mounts already carry saddle bags. Sell these back for half what they cost.' }); return; }
+    const slots = Math.max(0, Math.round(+(item.use && item.use.slots) || 12));
+    if (countOf(item) > 1) { item.count = countOf(item) - 1; journal(o, 'bagDel', { uid: item.uid }); journal(o, 'bagAdd', { item }); }
+    else { ch.bag.splice(idx, 1); journal(o, 'bagDel', { uid: item.uid }); }
+    ch.saddle = { id: item.id, name: item.name || 'Saddle bags', slots };
+    journal(o, 'set', { k: 'saddle', v: ch.saddle }); o.dirty = true;
+    const has = (ch.mounts || []).length > 0;
+    const text = 'You fit the ' + ch.saddle.name.toLowerCase() + ' to your mounts: ' + slots + ' more squares in your Equipment and Items tabs' + (has ? '.' : ' once you own a mount.');
+    if (R) {
+      if (o.conn) { o.conn.sendJSON({ t: 'bag', add: countOf(item) >= 1 && ch.bag.includes(item) ? [item] : [], remove: [item.uid], gold: ch.gold }); o.conn.sendJSON({ t: 'you', saddle: ch.saddle }); }
+      bagCapTell(o);
+      R({ ok: true, id: item.id, msg: text });
+      if (o.conn) o.conn.sendJSON({ t: 'chat', ch: 'system', from: 0, name: 'The Vale', text });
+    } else o.handsNote = (o.handsNote ? o.handsNote + ' ' : '') + text;
+  }
   function applyMount(o) {
     const e = o.entity, def = mountBook.get(o.mount);
     if (!def) { o.mount = null; return; }
@@ -2648,8 +2775,16 @@ export function createProvince(opts) {
       if (m.op === 'off' && o.mount) dismount(o, 'asked');
       return R({ ok: true, ...(was ? { why: 'cancelled' } : {}) });
     }
+    if (m.op === 'pick') {      // round 11 (#44): put an owned mount in the Mount slot (summon rides it from now on)
+      const want = m.id ? mountBook.get(String(m.id)) : null;
+      if (!want || !(o.char.mounts || []).includes(want.id)) return R({ ok: false, why: 'none', msg: 'You do not own that mount.' });
+      o.char.mountPick = want.id; journal(o, 'set', { k: 'mountPick', v: want.id }); o.dirty = true;
+      if (o.mount && o.mount !== want.id && o.entity.mount) { o.mount = want.id; applyMount(o); }      // riding: change horses on the spot
+      R({ ok: true, id: want.id });
+      return s.sendJSON({ t: 'you', mounts: mountBook.owned(o.char), mountPick: want.id });
+    }
     const def = m.id ? mountBook.get(m.id) : mountBook.best(o.char);
-    if (!def || !(o.char.mounts || []).includes(def.id)) return R({ ok: false, why: 'none', msg: (o.char.level || 1) < 5 ? 'You get your first mount at level 5. A stablehand sells others.' : 'You do not own that mount. A stablehand sells them.' });
+    if (!def || !(o.char.mounts || []).includes(def.id)) return R({ ok: false, why: 'none', msg: (o.char.mounts || []).length ? 'You do not own that mount. A stablehand sells them.' : 'You have no mount yet. A stablehand sells them — the Trail Horse is cheap.' });
     const why = mountRefusal({ dead: e.dead, swimming: !!(e.state & STATE.swimming), fighting: fighting(o, e), roomKind: o.room.kind, now: now() / 1000, thrownAt: o.thrownAt != null ? o.thrownAt / 1000 : null, casting: !!o.mountCast });
     if (why) return R({ ok: false, why: e.dead ? 'dead' : (e.state & STATE.swimming) ? 'swim' : o.room.kind === 'instance' ? 'indoors' : fighting(o, e) ? 'combat' : 'busy', msg: why });
     const ms = Math.round(MOUNT_RULES.castSeconds * 1000);
@@ -2695,7 +2830,7 @@ export function createProvince(opts) {
       categories: sh && sh.categories ? Object.fromEntries(Object.entries(sh.categories).map(([k, v]) => [k, v.label || k])) : undefined,
       stock: stock.map(r => { if (!r.item) return r; const t = r.item.kind === 'potion' ? potionText(r.item, { hpMax: o.entity.hpMax, mpMax: o.entity.mpMax }, potionTable) : null; return { ...r, item: { ...r.item, _granted: undefined, uid: 'stock:' + r.id, price: r.price, ...(t ? { desc: t.desc, restore: t.restore || undefined } : {}) } }; }), sellRate: shops.pricing.sellFactor,
       buyback: (o.buyback || []).map(b => ({ uid: b.item.uid, item: b.item, price: b.price })),
-      sell: (o.char.bag || []).map(it => { const each = shops.sellPrice(it, rules), n = countOf(it); return n > 1 ? { uid: it.uid, price: each * n, each, count: n } : { uid: it.uid, price: each }; }) };
+      sell: (o.char.bag || []).filter(sellable).map(it => { const each = shops.sellPrice(it, rules), n = countOf(it); return n > 1 ? { uid: it.uid, price: each * n, each, count: n } : { uid: it.uid, price: each }; }) };
   }
   function shopOp(o, m) {
     const s = o.conn, ch = o.char, e = o.entity;
@@ -2719,7 +2854,7 @@ export function createProvince(opts) {
       if (!row) return R({ ok: false, why: 'item', msg: 'That is not for sale here any more.' });
       if (row.level && (ch.level || 1) < row.level) return R({ ok: false, why: 'level', msg: 'You need to be level ' + row.level + ' for that.' });
       if ((ch.gold || 0) < row.price) return R({ ok: false, why: 'gold', msg: 'That costs ' + row.price + ' gold.', cost: row.price });
-      if (!row.mount && ch.bag.length >= bagCap(o)) return R({ ok: false, why: 'bagFull', msg: CODES.bagFull });
+      if (!row.mount && bagFull(o, row.item)) return R({ ok: false, why: 'bagFull', msg: CODES.bagFull });
       ch.gold -= row.price; journal(o, 'gold', { d: -row.price }); econ.add('sink', 'shop', { gold: row.price }, ch.level || 1);
       if (row.mount) {
         ch.mounts ||= [];
@@ -2727,6 +2862,7 @@ export function createProvince(opts) {
         journal(o, 'set', { k: 'mounts', v: ch.mounts }); o.dirty = true;
         s.sendJSON({ t: 'bag', add: [], remove: [], gold: ch.gold });
         s.sendJSON({ t: 'you', mounts: mountBook.owned(ch), mountNew: row.mount.id });
+        bagCapTell(o);      // round 11 (#15): the first mount wakes fitted saddle bags
         saveNow(o);
       } else {
         // S3 (play-test 4): the stock row's item is SHARED (one cached stock per shop per level bracket) — grant() marks
@@ -2749,6 +2885,7 @@ export function createProvince(opts) {
       const i = ch.bag.findIndex(it => it.uid === m.uid);
       if (i < 0) return R({ ok: false, why: 'item', msg: CODES.item });
       if (trades.offered(ch.id, m.uid)) return R({ ok: false, why: 'item', msg: 'That item is in your trade window.' });
+      if (!sellable(ch.bag[i])) return R({ ok: false, why: 'keep', msg: 'No merchant will take that.' });      // round 11 (#3 / #42): what lives in Other is not sold
       const [it] = ch.bag.splice(i, 1);
       const price = shopsOf(o).sellPrice(it, rules) * countOf(it);          // U5: a stack sells whole
       ch.gold = (ch.gold || 0) + price;
@@ -2767,7 +2904,7 @@ export function createProvince(opts) {
     if (k < 0) return R({ ok: false, why: 'item', msg: 'That is gone.' });
     const b = o.buyback[k];
     if ((ch.gold || 0) < b.price) return R({ ok: false, why: 'gold', msg: 'That costs ' + b.price + ' gold.', cost: b.price });
-    if (ch.bag.length >= bagCap(o)) return R({ ok: false, why: 'bagFull', msg: CODES.bagFull });
+    if (bagFull(o, b.item)) return R({ ok: false, why: 'bagFull', msg: CODES.bagFull });
     o.buyback.splice(k, 1);
     ch.gold -= b.price; ch.bag.push(b.item);
     journal(o, 'gold', { d: -b.price }); journal(o, 'bagAdd', { item: b.item });
@@ -2878,7 +3015,9 @@ export function createProvince(opts) {
    */
   const MOVE_MUL = Object.freeze([0.5, 1.3]);
   function footMul(o) {
-    const u = o.entity && o.entity.r && o.entity.r.unit, pct = u && u.derived ? +u.derived.movePct : 0;
+    const u = o.entity && o.entity.r && o.entity.r.unit;
+    const bless = o.room && o.room.rules && o.room.rules.blessMove ? +o.room.rules.blessMove(o.entity) || 0 : 0;      // round 11 (World, #47): a shrine's Light-footed
+    const pct = (u && u.derived ? +u.derived.movePct || 0 : 0) + bless * 100;
     return Number.isFinite(pct) && pct ? Math.max(MOVE_MUL[0], Math.min(MOVE_MUL[1], 1 + pct / 100)) : 1;
   }
   function speedOf(o) { const f = footMul(o); if (o.mount && o.entity.mount) { const def = mountBook.get(o.mount); return def ? f * mountSpeed(o, def) : f; } return f; }
@@ -3002,6 +3141,7 @@ export function createProvince(opts) {
         if (gold < 0 || gold > (o.char.gold || 0)) return s.err('trade', 'You do not have that much gold.');
         const bag = new Set((o.char.bag || []).map(i => i.uid));
         if (!items.every(u => bag.has(u))) return s.err('item');
+        if ((o.char.bag || []).some(i => items.includes(i.uid) && isKept(i))) return s.err('item', 'You cannot trade that away.');      // round 11 (#3)
         if (t && items.some(u => { const other = trades.of(me); return other && other !== t && trades.offered(me, u); })) return s.err('item');
         r = trades.offer(me, m.id ?? -1, { items, gold });
         break;
@@ -3027,7 +3167,7 @@ export function createProvince(opts) {
     };
     const ia = take(a, t.a), ib = take(b, t.b);
     if (!ia || !ib) return fail('tradeFailed');
-    if ((a.char.bag.length - ia.length + ib.length) > bagCap(a) || (b.char.bag.length - ib.length + ia.length) > bagCap(b)) return fail('bagFull');
+    if (!bagFits(a, ib, ia) || !bagFits(b, ia, ib)) return fail('bagFull');      // round 11: per tab
     t.committing = true;
     a.frozen = b.frozen = true; a.saving = b.saving = true;
     syncChar(a); syncChar(b);
@@ -3063,7 +3203,10 @@ export function createProvince(opts) {
   }
   const tickTimers = [];
   function setTimeoutTicks(fn, n) { tickTimers.push({ at: ticks + n, fn }); }
-  const mail = createMail({ store, online, journal, syncChar: o => syncChar(o), econ, trades, send, setTimeoutTicks, wallNow, filter: chatFilter, log, counters, BAG_MAX: o => bagCap(o), saveNow: o => saveNow(o), opts: mailOpts, restack: o => restack(o) });
+  const mail = createMail({ store, online, journal, syncChar: o => syncChar(o), econ, trades, send, setTimeoutTicks, wallNow, filter: chatFilter, log, counters, BAG_MAX: o => bagCap(o), bagFits: (o, items) => bagFits(o, items), roomWords: (o, items, act) => roomWords(o, items, act), saveNow: o => saveNow(o), opts: mailOpts, restack: o => restack(o), refreshItem: opts.refreshItem || null });
+  // round 11 (Market, owner #25): the player market — js/sim/market.js; a shop's sell value prices the listing fee
+  const market = createMarket({ store, online, syncChar: o => syncChar(o), econ, trades, send, wallNow, log, counters, saveNow: o => saveNow(o), refreshItem: opts.refreshItem || null, opts: opts.marketOpts || {},
+    sellValue: (o, it) => shopsOf(o).sellPrice(it, o.room.rules) });
 
   // ---- play-test 5: system mail (T20), feedback + admins (T19/T21), revives (T4), the character sheet (T18) ----
   /** The ONE mail API (js/sim/sysmail.js): `mailTo({ to, subject, body, items?, gold?, gift?, crate? })` — events, quests, anything. */
@@ -3072,14 +3215,15 @@ export function createProvince(opts) {
   // W9 (P-core) — professions (js/sim/professions.js over js/rules/professions*.js and data/provinces/professions*.json)
   const professions = createProfessions({ layouts, online, provOf: r => provOf(r), grant: (o, a) => grant(o, a), journal: (o, k, p) => journal(o, k, p), questEvent: (o, ev) => questEvent(o, ev),
     now, wallNow, log, counters, fighting: (o, e) => fighting(o, e), dismount: (o, why) => dismount(o, why), endMeal: (o, why) => endMeal(o, why), stopFishing: (o, why) => angling.stop(o, why),
-    wantSheet: o => wantSheet(o), bagCap: o => bagCap(o), isFire: obj => angling.isFire(obj), anglingView: ch => angling.view(ch), tradeHolds: (c, uid) => trades.offered(c, uid),
+    wantSheet: o => wantSheet(o), bagCap: o => bagCap(o), bagFull: (o, it) => bagFull(o, it), isFire: obj => angling.isFire(obj), anglingView: ch => angling.view(ch), tradeHolds: (c, uid) => trades.offered(c, uid),
     spend: (o, gold, reason) => { o.char.gold -= gold; journal(o, 'gold', { d: -gold }); econ.add('sink', reason || 'craft', { gold }, o.char.level || 1); if (o.conn) o.conn.sendJSON({ t: 'bag', add: [], remove: [], gold: o.char.gold }); o.dirty = true; },
-    potionText: (it, o) => potionText(it, { hpMax: o.entity.hpMax, mpMax: o.entity.mpMax }, potionTable), opts: opts.professionOpts || {} });
+    potionText: (it, o) => potionText(it, { hpMax: o.entity.hpMax, mpMax: o.entity.mpMax }, potionTable),
+    rodItem: o => shopsOf(o).goodOf('angling_rod'), hasRod: ch => (ch.bag || []).some(angling.isRod) /* round 11 (P, #11): everyone gets a rod once */, opts: opts.professionOpts || {} });
   // T25 — angling (js/sim/angling.js over C's js/rules/fishing.js and E's data/provinces/angling*.json)
   const hazards = createHazards({ provinces: () => [...P.values()].map(pv => ({ key: pv.L.key, L: pv.L })), online, now, log });      // [S] Expansion 1 §4: Vharlen's springs, geysers, lava vents
   const angling = createAngling({ layouts, online, provOf: r => provOf(r), grant: (o, a) => grant(o, a), journal: (o, k, p) => journal(o, k, p), questEvent: (o, ev) => questEvent(o, ev),
     consume: (o, i) => consume(o, i), now, wallNow, log, counters, safeRules: (r, fn, ...a) => safeRules(r, fn, ...a), dayPhase: () => dayPhase(), fighting: (o, e) => fighting(o, e),
-    dismount: (o, why) => dismount(o, why), endMeal: (o, why) => endMeal(o, why), wantSheet: o => wantSheet(o), bagMax: o => bagCap(o), setTimeoutTicks: (fn, n) => setTimeoutTicks(fn, n), opts: opts.anglingOpts || {} });
+    dismount: (o, why) => dismount(o, why), endMeal: (o, why) => endMeal(o, why), wantSheet: o => wantSheet(o), bagMax: o => bagCap(o), bagFull: (o, it) => bagFull(o, it), setTimeoutTicks: (fn, n) => setTimeoutTicks(fn, n), opts: opts.anglingOpts || {} });
   /**
    * W21 (owner feedback 8, report #42 "DPS meters — a settings option, default off"). The client's own events carry only what
    * is drawn; the meter wants one exact record per landed hit / heal / miss for YOU and YOUR PARTY (and their pets). Sent only
@@ -3178,16 +3322,34 @@ export function createProvince(opts) {
     if (r && r.bagBonus && o.entity) { const n = safeRules(o.room, 'bagBonus', o.entity); if (Number.isFinite(n)) return Math.max(0, n); }
     return packSlots(equipView(o).back);
   }
-  const bagCap = o => Math.min(BAG_MAX, bagBase() + bagBonus(o));
-  function bagCapTell(o) { const c = bagCap(o); if (o.bagCapSent !== c) { o.bagCapSent = c; if (o.conn) o.conn.sendJSON({ t: 'you', bagMax: c, bagBase: bagBase() }); } }
+  // round 11 (#15): fitted saddle bags add their squares while you own any mount
+  const saddleSlots = o => (o.char && o.char.saddle && (o.char.mounts || []).length ? Math.max(0, Math.round(+o.char.saddle.slots || 0)) : 0);
+  const bagCap = o => Math.min(BAG_MAX, bagBase() + bagBonus(o) + saddleSlots(o));
+  /** Round 11 (#11): the bag is three tabs. Equipment and Items each hold `bagCap(o)`; Other never fills. */
+  const bagFull = (o, item) => !fitsIn(o.char.bag || [], bagCap(o), [item]);
+  const bagFits = (o, items, leaving = []) => fitsIn(o.char.bag || [], bagCap(o), items, leaving);
+  /** Round 11 (owner #25): the words for "no room" — which tab is full and how many squares to clear before you can `act`. */
+  function roomWords(o, items, act = 'take it', leaving = []) {
+    const cap = bagCap(o), n = tabCounts(o.char.bag || []);
+    for (const it of leaving || []) n[tabOf(it)]--;
+    for (const t of ['gear', 'items']) {
+      const need = (items || []).filter(it => tabOf(it) === t).length;
+      const free = Math.max(0, cap - n[t]);
+      if (need > free) { const k = need - free; return 'No room in your ' + (t === 'gear' ? 'Equipment' : 'Items') + ' tab. Make room for ' + k + ' more ' + (k === 1 ? 'thing' : 'things') + ', then ' + act + '.'; }
+    }
+    return CODES.bagFull;
+  }
+  function bagCapTell(o) { const c = bagCap(o); if (o.bagCapSent !== c) { o.bagCapSent = c; if (o.conn) o.conn.sendJSON({ t: 'you', bagMax: c, bagBase: bagBase(), saddle: saddleSlots(o) }); } }
   /** Would wearing `incoming` in `slot` (null = taking it off) leave more in the bag than it can hold? -> { need, msg } | null */
   function packRefusal(o, slot, incoming) {
     if (slot !== 'back') return null;
     const worn = equipView(o).back;
     const had = packSlots(worn), will = packSlots(incoming);
     if (had <= will) return null;
-    const count = (o.char.bag || []).length + (worn ? 1 : 0) - (incoming ? 1 : 0);      // the old one goes INTO the bag, the new one leaves it
-    const cap = Math.min(BAG_MAX, bagBase() + will);
+    // round 11: only the Equipment tab holds packs; the fuller of Equipment / Items is what the smaller pack must hold
+    const tc = tabCounts(o.char.bag || []);
+    const count = Math.max(tc.gear + (worn ? 1 : 0) - (incoming ? 1 : 0), tc.items);      // the old one goes INTO the bag, the new one leaves it
+    const cap = Math.min(BAG_MAX, bagBase() + will + saddleSlots(o));
     if (count <= cap) return null;
     const need = count - cap;
     return { need, msg: 'Empty ' + need + ' more bag slot' + (need === 1 ? '' : 's') + ' first — the pack\'s extra room is holding things.' };
@@ -3200,7 +3362,7 @@ export function createProvince(opts) {
    */
   function handsMoved(o, items) {
     const ch = o.char, kept = [], posted = [];
-    for (const raw of items) { if (!raw || typeof raw !== 'object') continue; const it = { ...raw, uid: raw.uid || newUid() }; if ((ch.bag || []).length < bagCap(o)) { ch.bag.push(it); journal(o, 'bagAdd', { item: it }); kept.push(it); } else posted.push(it); }
+    for (const raw of items) { if (!raw || typeof raw !== 'object') continue; const it = { ...raw, uid: raw.uid || newUid() }; if (!bagFull(o, it)) { ch.bag.push(it); journal(o, 'bagAdd', { item: it }); kept.push(it); } else posted.push(it); }
     if (!kept.length && !posted.length) return;
     journalGear(o); o.dirty = true; counters.handsMoved = (counters.handsMoved || 0) + kept.length + posted.length;
     const names = [...kept, ...posted].map(i => i.name).join(', ');
@@ -3681,7 +3843,7 @@ export function createProvince(opts) {
     accept, step, init, shutdown, status, rooms, P, online, partyOf, econ, tickStats, owner, counters, trades,
     room: copies[0], townRoom, copies, instances, town, door, gate,
     saveNow, logout, transfer, moveTo, grant, corpses, roadEvents, mute, flushEconomy, newUid, flushJournal, timeOfDay, devSetLevel,
-    carts, ships, shops, meterOn, bagCap, isNewcomer, NEWCOMER, realmEvents, liveEventNow: () => liveEvent, mailTo: a => sysmail.mailTo(a), offerRevive, angling, professions, feedback, zoneRuns, kitCache, sheetOf, restack,
+    carts, ships, shops, meterOn, bagCap, bagFull, keepsakesForTest: o => keepsakes(o), mountBook, isNewcomer, NEWCOMER, realmEvents, liveEventNow: () => liveEvent, mailTo: a => sysmail.mailTo(a), offerRevive, angling, professions, feedback, zoneRuns, kitCache, sheetOf, restack,
     chatterContext: (r, x, z) => chatterContext(provOf(r), r, x, z),
     hazards,      // [S]
     get liveEvent() { return liveEvent; },

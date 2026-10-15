@@ -1,8 +1,80 @@
 {
- "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z13_10, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z13_10, added where a kill / collect quest's area held fewer of its monster than the step needs (round 11: max(count + 4, 2 x count) — two players at once; they come back in 1-1.5 minutes). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
  "zone": "z13_10",
  "terrainHash": "3fd22ea0",
  "placements": [
+  {
+   "type": "camp",
+   "id": "quest_bs_fresh_off_the_saltwren_0_0",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    11,
+    11
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1320,
+   "z": 832,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "bs_fresh_off_the_saltwren",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_bs_fresh_off_the_saltwren_0_1",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    11,
+    11
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1287,
+   "z": 866,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "bs_fresh_off_the_saltwren",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_bs_fresh_off_the_saltwren_0_2",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    11,
+    11
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1257,
+   "z": 803,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "bs_fresh_off_the_saltwren",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
   {
    "type": "camp",
    "id": "quest_bs_fresh_off_the_saltwren_1_0",
@@ -21,7 +93,59 @@
    "yaw": 0,
    "radius": 7,
    "quest": "bs_fresh_off_the_saltwren",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_bs_fresh_off_the_saltwren_1_1",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    10,
+    10
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1358,
+   "z": 739,
+   "yaw": 0,
+   "radius": 7,
+   "quest": "bs_fresh_off_the_saltwren",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_bs_fresh_off_the_saltwren_1_2",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    10,
+    10
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1373,
+   "z": 703,
+   "yaw": 0,
+   "radius": 7,
+   "quest": "bs_fresh_off_the_saltwren",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",
@@ -41,7 +165,11 @@
    "yaw": 0,
    "radius": 8,
    "quest": "bs_crawlers_in_the_nets",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",
@@ -53,15 +181,163 @@
     11
    ],
    "count": [
-    1,
-    1
+    2,
+    2
    ],
-   "x": 1287,
-   "z": 968,
+   "x": 1274,
+   "z": 980,
    "yaw": 0,
    "radius": 8,
    "quest": "bs_crawlers_in_the_nets",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_bs_crawlers_in_the_nets_0_2",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    11
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1289,
+   "z": 944,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "bs_crawlers_in_the_nets",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_bs_crawlers_in_the_nets_0_3",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    11
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1294,
+   "z": 978,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "bs_crawlers_in_the_nets",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_bs_crawlers_in_the_nets_0_4",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    11
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1269,
+   "z": 965,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "bs_crawlers_in_the_nets",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_bs_crawlers_in_the_nets_0_5",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    11
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1307,
+   "z": 955,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "bs_crawlers_in_the_nets",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_bs_crawlers_in_the_nets_0_6",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    11
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1284,
+   "z": 980,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "bs_crawlers_in_the_nets",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_bs_crawlers_in_the_nets_0_7",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    11
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1279,
+   "z": 952,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "bs_crawlers_in_the_nets",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",

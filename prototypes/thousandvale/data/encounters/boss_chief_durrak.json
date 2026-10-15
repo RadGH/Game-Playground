@@ -4,7 +4,7 @@
   "tier": "boss",
   "body": "slagborn_chief",
   "place": "dungeon kiln_forge set B (The Slag Heaps, Kiln Ridge, level 17-20): the end boss in the great forge",
-  "_doc": "The Slagborn war-chief of Kiln Ridge, who forges the gangs' weapons himself. P1 \"At the Anvil\": a hammer cone, a red-hot brand he presses on the tank (stacks; swap at 3), and sparks off the anvil. Two slag-cooling pillars: his Forge Blast (hide behind one) cracks them. P2 at 60% \"Call the Smiths\": his smiths come running (a shield that holds while they live) while molten iron is poured from the crucible in lines. P3 new bar \"Quenched in Anger\": he plunges into the quench tank and comes out steaming — steam on each player, a three-player stack, and a hammer slam that knocks far.",
+  "_doc": "The Slagborn war-chief of Kiln Ridge, who forges the gangs' weapons himself. P1 \"At the Anvil\": a hammer cone, a red-hot brand he presses on the tank (stacks; swap at 3), and sparks off the anvil. Two slag-cooling pillars: his Forge Blast (hide behind one) cracks them. P2 at 60% \"Call the Smiths\": his smiths come running (a shield that holds while they live) while molten iron is poured from the crucible in lines. P3 new bar \"Quenched in Anger\": he plunges into the quench tank and comes out steaming — steam on each player, a three-player stack, and a hammer slam that knocks far. OWNER #51 (2026-10-15): the phase that refilled the health bar is removed; the health bar is the whole fight.",
   "party": "Solo: hard — the brand needs a tank swap or a follower. 2-3: two tanks if you can. 5: as designed.",
   "hpMult": 4,
   "arena": {
@@ -181,72 +181,6 @@
           "element": "fire"
         }
       ]
-    },
-    "steam": {
-      "id": "steam",
-      "name": "Steaming",
-      "every": [
-        13,
-        15
-      ],
-      "first": 3,
-      "say": "Steam boils off him onto each of you — spread out!",
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "each",
-          "r": 3,
-          "follow": true,
-          "wind": 2,
-          "damage": 1.4,
-          "element": "fire",
-          "status": "seared"
-        }
-      ]
-    },
-    "stack": {
-      "id": "stack",
-      "name": "Hold the Anvil",
-      "every": [
-        20,
-        24
-      ],
-      "first": 7,
-      "cast": 1,
-      "say": "He brings the hammer down on {target} — stand together and take it!",
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "random",
-          "r": 3.2,
-          "kind": "stack",
-          "need": 3,
-          "follow": true,
-          "wind": 4,
-          "damage": 3.2
-        }
-      ]
-    },
-    "slam": {
-      "id": "slam",
-      "name": "Quench Slam",
-      "every": [
-        16,
-        19
-      ],
-      "first": 9,
-      "cast": 1,
-      "say": "He lifts the hammer high — get back!",
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "self",
-          "r": 7,
-          "wind": 1.7,
-          "damage": 2.4,
-          "knock": 6
-        }
-      ]
     }
   },
   "phases": [
@@ -307,19 +241,6 @@
         "say": "Durrak hides behind his smiths. Kill the three smiths to break his ward! It fails by itself in 20 seconds.",
         "fade": "The ward fails by itself. No opening this time."
       }
-    },
-    {
-      "name": "Quenched in Anger",
-      "newBar": {
-        "hp": 0.55
-      },
-      "say": "Durrak plunges into the quench tank and comes out wreathed in steam.",
-      "abilities": [
-        "hammer",
-        "steam",
-        "stack",
-        "slam"
-      ]
     }
   ],
   "triggers": [

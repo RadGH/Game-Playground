@@ -2420,7 +2420,8 @@
       "enchanter",
       "stormcaller",
       "pyromancer",
-      "starcaller"
+      "starcaller",
+      "starblade"
      ],
      "service": [
       "class quest",
@@ -6896,7 +6897,7 @@
   {
    "npc": "bettony",
    "name": "Bettony the herb-woman",
-   "role": "herbalist",
+   "role": "wise_woman",
    "setpiece": "sp_nine_maidens",
    "titled": true
   },

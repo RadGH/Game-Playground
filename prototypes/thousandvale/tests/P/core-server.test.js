@@ -65,29 +65,31 @@ test('protocol: prof / gather / craft are in the table with bounded fields; five
   assert.ok(validate({ t: 'craft', op: 'start', id: 'x'.repeat(60) }, 'p'));
 });
 
-test('first meeting: Bram by the gate teaches Mining at the first word and hands over a pick; the chain starts; the sheet lists ten trades', async () => {
+test('first meeting (round 11, live #11): every character knows all ten trades from the start with a pick, hatchet, knife, sickle and rod; Bram\'s chain starts; the sheet lists ten trades', async () => {
   const S = await withMiner('Firstpick');
   const { a, o, bram, used, clock, P } = S;
   const u = used[0];
-  assert.ok(u.ok && u.role === 'prospector' && u.prof && u.prof.trains.includes('mining') && u.prof.taught.includes('mining'), JSON.stringify(u.prof));
+  assert.ok(u.ok && u.role === 'prospector' && u.prof && u.prof.trains.includes('mining') && !u.prof.taught && u.prof.known.includes('mining'), JSON.stringify(u.prof));
+  for (const prof of ['mining', 'logging', 'skinning', 'foraging']) assert.equal(o.char.bag.filter(i => i.tool && i.use.prof === prof).length, 1, prof + ' tool from the start');
+  assert.ok(o.char.bag.some(P.angling.isRod), 'and a rod');
   assert.ok(u.offers.some(q => q.id === 'prof_three_good_swings'), 'he offers the first quest');
   const info = a.mirror.infos.get(bram.e.id);
   assert.match(info.title, /Prospector/); assert.equal(info.name, 'Bram Delver');
-  const pick = o.char.bag.find(i => i.tool);
+  const pick = o.char.bag.find(i => i.tool && i.use.prof === 'mining');
   assert.ok(pick && pick.use.type === 'tool' && pick.use.prof === 'mining' && pick.kind === 'good' && !pick.slot, 'a pick: a tool, no weapon slot — ' + JSON.stringify(pick));
-  assert.deepEqual(o.char.professions.known, ['mining']);
+  assert.deepEqual(o.char.professions.known.slice().sort(), ['alchemy', 'angling', 'cooking', 'foraging', 'logging', 'mining', 'outfitting', 'skinning', 'smithing', 'tempering']);
   // told to the client
   const list = a.joined.you.professions.list;
   assert.deepEqual(list.map(p => p.id), ['mining', 'logging', 'foraging', 'skinning', 'angling', 'smithing', 'outfitting', 'alchemy', 'cooking', 'tempering']);
-  assert.ok(list.find(p => p.id === 'cooking').known && !list.find(p => p.id === 'logging').known, 'cooking from the start');
-  // wrap-up: Angling is learned from an angler (Y15) — the list says "known" only when the angling record does
-  assert.equal(list.find(p => p.id === 'angling').known, P.angling.learned(o.char), 'angling follows the angling record');
+  assert.ok(list.every(p => p.known), 'all ten known');
   const sheet = on(a, 'sheet'); a.sheet(); await until(clock, () => sheet.length, 3000);
   const mining = sheet[0].professions.list.find(p => p.id === 'mining');
   assert.ok(mining.known && mining.level === 1 && mining.rank === 'Novice' && mining.tool && mining.tool.id === pick.id, JSON.stringify(mining));
   // a second word teaches nothing twice and gives no second pick
   used.length = 0; a.use(bram.e.id); await until(clock, () => used.length, 2000);
-  assert.ok(!used[0].prof.taught && o.char.bag.filter(i => i.tool).length === 1);
+  assert.ok(!used[0].prof.taught && o.char.bag.filter(i => i.tool && i.use.prof === 'mining').length === 1);
+  // a re-join gives no second kit
+  const tools = o.char.bag.filter(i => i.tool).length; P.professions.grantAll(o); assert.equal(o.char.bag.filter(i => i.tool).length, tools);
   // lost your pick? he sells another
   const pr = on(a, 'profR');
   a.prof('tool', { id: 'mining', npc: bram.e.id }); await until(clock, () => pr.length, 2000);
@@ -123,8 +125,10 @@ test('mining: boulders by the gate road; three timed strikes; ore in the bag, sk
   a.gather('done', { id: node.id, inputs: inp }); await until(clock, () => gD.length, 2000);
   const d = gD[0];
   assert.ok(d.ok && d.quality === 'perfect' && d.score === 1 && d.marks.join() === '2,2,2' && d.xp > 0 && d.reopenMs === 120000 && d.key === keys[0], JSON.stringify(d));
-  assert.ok(d.got[0].n === 3 && d.got[0].id === 'copper_ore' && d.items.length >= 1 && d.items[0].kind === 'material', JSON.stringify(d.got));
-  assert.equal(count(o, 'copper_ore'), 3);
+  // round 11 (live #9): a perfect play is a HIGH score — 3 x 1.5 rounded up, and one uncommon find (copper's gem)
+  assert.ok(d.got[0].n === 5 && d.got[0].id === 'copper_ore' && d.items.length >= 1 && d.items[0].kind === 'material' && d.highScore, JSON.stringify(d.got));
+  assert.ok(d.got.some(x => x.find && x.id === 'rough_quartz' && x.rarity === 'magic'), 'the find: ' + JSON.stringify(d.got));
+  assert.equal(count(o, 'copper_ore'), 5);
   assert.equal(o.entity.held, null); assert.ok(!o.entity.working);
   await run(clock, 200);
   assert.ok(fx.includes('start') && fx.includes('done'), 'others see it: ' + fx);
@@ -186,11 +190,11 @@ test('you can fail, and nothing a client sends can fake a result: early answers,
   const far = await standBy(S, keys[2], 30);
   r = await mine(S, far); assert.equal(r.refused.why, 'far');
   const near = await standBy(S, keys[2]);
-  const pick = o.char.bag.findIndex(i => i.tool); const [took] = o.char.bag.splice(pick, 1);
+  const pick = o.char.bag.findIndex(i => i.tool && i.use.prof === 'mining'); const [took] = o.char.bag.splice(pick, 1);
   r = await mine(S, near); assert.equal(r.refused.why, 'tool'); assert.match(r.refused.msg, /pick/);
   o.char.bag.push(took);
-  o.char.professions.known = [];
-  r = await mine(S, near); assert.equal(r.refused.why, 'notLearned');
+  o.char.professions.known = [];      // round 11: an empty saved list no longer matters — every trade is known
+  r = await mine(S, near); assert.ok(r.done && r.done.ok, 'known whatever the save says');
   S.a.close(); await S.srv.stop();
 });
 
@@ -215,7 +219,7 @@ test('work ends cleanly: stop, a hit, a room change — and a tool used from the
   // the pick, used from the bag: the nearest boulder
   await standBy(S, keys[0], 2);
   gR.length = 0; const ir = on(a, 'itemR');
-  a.useItem(o.char.bag.find(i => i.tool).uid); await until(clock, () => gR.length, 2000);
+  a.useItem(o.char.bag.find(i => i.tool && i.use.prof === 'mining').uid); await until(clock, () => gR.length, 2000);
   assert.ok(ir[0] && ir[0].ok && gR[0].ok && gR[0].id === node.id && gR[0].prof === 'mining', JSON.stringify([ir[0], gR[0]]));
   // nothing was lost by any of it
   assert.equal(count(o, 'copper_ore'), 0); assert.ok(!(o.char.opened || {})[keys[0]]);
@@ -227,12 +231,9 @@ test('skinning: a beast you killed can be skinned (not a brigand, not someone el
   const { a, o, clock, P, W } = S;
   const sk = on(a, 'skinnable');      // (inside the town wall: nothing wanders up and bites mid-cut)
   const kill = (type, by = o.entity) => { const m = o.room.spawn({ kind: 'monster', type, level: 2, x: o.entity.x + 2, z: o.entity.z, team: 2 }); m.kill(by); o.room.host.despawn(m, 8000); return m; };
-  // not learned: no offer
+  // round 11: everyone is a skinner with a knife from the start
+  assert.ok(o.char.bag.some(i => i.tool && i.use.prof === 'skinning'), 'the starting knife');
   let m = kill('moor_hound'); await run(clock, 300);
-  assert.equal(sk.length, 0, 'no skinning, no prompt');
-  W.teach(o, 'skinning');
-  assert.ok(o.char.bag.some(i => i.tool && i.use.prof === 'skinning'), 'the trainer\'s knife');
-  m = kill('moor_hound'); await run(clock, 300);
   assert.ok(sk.length === 1 && sk[0].id === m.id && sk[0].on && sk[0].tier === 1 && sk[0].minSkill === 1, JSON.stringify(sk));
   const man = kill('road_brigand'); await run(clock, 300);
   assert.equal(sk.length, 1, 'people are not skinned');
@@ -261,15 +262,14 @@ test('the forge: learn Smithing, smelt bronze, forge a blade you chose, temper i
   P.transfer(o, town, { x: smith.x + 1.5, z: smith.z }, 'test'); await run(clock, 900);
   const used = on(a, 'used'); a.use(smith.id); await until(clock, () => used.length, 2000);
   assert.deepEqual(used[0].prof.trains, ['mining', 'smithing', 'tempering']); assert.deepEqual(used[0].prof.stations, ['smithing', 'tempering']);
-  // not learned yet
+  // round 11: already known — a "learn" is answered "known"; a smith still does not deal in alchemy
   P.grant(o, { items: [W.P.item('copper_ore', 5), W.P.item('tin_ore', 5)], reason: 'test' }); o.char.gold = 300; await run(clock, 200);
-  let r = await make(S, smith, 'smelt_bronze_bar');
-  assert.equal(r.refused.why, 'notLearned');
+  let r;
   const pr = on(a, 'profR');
   a.prof('learn', { id: 'smithing', npc: smith.id }); a.prof('learn', { id: 'tempering', npc: smith.id }); await until(clock, () => pr.length >= 2, 2000);
-  assert.ok(pr[0].ok && pr[1].ok);
+  assert.ok(!pr[0].ok && pr[0].why === 'known' && pr[1].why === 'known');
   a.prof('learn', { id: 'alchemy', npc: smith.id }); await until(clock, () => pr.length >= 3, 2000);
-  assert.ok(!pr[2].ok, 'a smith does not teach alchemy');
+  assert.ok(!pr[2].ok && pr[2].why === 'unknown', 'a smith does not teach alchemy');
   // the list
   const cL = on(a, 'craftList');
   a.craft('list', { npc: smith.id }); await until(clock, () => cL.length, 2000);
@@ -294,7 +294,7 @@ test('the forge: learn Smithing, smelt bronze, forge a blade you chose, temper i
   assert.equal(r.refused.why, 'base', 'a pattern above your level');
   r = await make(S, smith, 'blades_1', { base: 'dagger' });
   const blade = o.char.bag.find(i => i.crafted);
-  assert.ok(r.done.ok && blade && blade.baseKey === 'dagger' && blade.maker === 'Smithy' && blade.dropLevel === 1 && ['normal', 'magic', 'rare'].includes(blade.rarity) && blade.uid, JSON.stringify(r.done).slice(0, 300));
+  assert.ok(r.done.ok && blade && blade.baseKey === 'dagger' && blade.maker === 'Smithy' && blade.dropLevel === 1 && ['magic', 'rare'].includes(blade.rarity) && blade.uid, JSON.stringify(r.done).slice(0, 300));      // round 11 (#58): never plain
   assert.equal(count(o, 'bronze_bar'), bars - 3); assert.equal(o.char.gold, gold - r.start.cost.gold);
   assert.ok(o.char.professions.made.blades_1 === 1 && W.levelOf(o.char, 'smithing') >= 2);
   // away from the forge: no
@@ -380,8 +380,8 @@ test('the second quest walks the forge; the smith\'s job board offers profession
   assert.ok(qr[0].ok, JSON.stringify(qr[0]).slice(0, 200));
   const smith = [...bram.rm.objects.values()].find(e => e.data && e.data.npc && e.data.npc.role === 'smith');
   P.transfer(o, bram.rm, { x: smith.x + 1.5, z: smith.z }, 'test'); await run(clock, 900);
-  const pr = on(a, 'profR'); a.prof('learn', { id: 'smithing', npc: smith.id }); await until(clock, () => pr.length, 2000);
-  assert.equal(o.char.quests.active.prof_bronze_not_copper.step, 1, 'learning Smithing is step one');
+  const u2 = on(a, 'used'); a.use(smith.id); await until(clock, () => u2.length, 2000);
+  assert.equal(o.char.quests.active.prof_bronze_not_copper.step, 1, 'talking to the smith about Smithing is step one (round 11: everyone already knows it)');
   P.grant(o, { items: [W.P.item('copper_ore', 3), W.P.item('tin_ore', 3)], reason: 'test' }); o.char.gold += 100; await run(clock, 200);
   await make(S, smith, 'smelt_bronze_bar', { n: 3 });
   assert.equal(o.char.quests.active.prof_bronze_not_copper.step, 2, 'three bars is step two');
@@ -395,7 +395,7 @@ test('the second quest walks the forge; the smith\'s job board offers profession
   const spentKey = starterKeys(S)[0];
   await P.saveNow(o); await P.flushJournal();
   const saved = loadAll(store).find(c => c.id === o.char.id);
-  assert.deepEqual(saved.professions.known.sort(), ['mining', 'smithing']);
+  assert.equal(saved.professions.known.length, 10, 'all ten trades in the save');
   assert.ok(saved.professions.xp.mining > 0 && saved.professions.xp.smithing > 0 && saved.professions.made.blades_1 === 1 && saved.professions.tools.mining === 1);
   assert.ok(saved.opened[spentKey] > 0, 'the spent boulder is remembered');
   assert.ok(saved.bag.some(i => i.crafted && i.maker === 'Keeper') && saved.bag.some(i => i.tool) && saved.bag.some(i => i.kind === 'material' && i.count >= 1), 'bag: ' + saved.bag.map(i => i.name).join());

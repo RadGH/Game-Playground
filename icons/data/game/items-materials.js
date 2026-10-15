@@ -403,4 +403,20 @@ add('salamander_hide', 'Salamander Hide', '#2a2224', 'A stretched black salamand
   L('M24 13L26 21M17 25L12 26M45 26L51 25M23 45L17 49M40 45L47 49', '#817a78', 2.2) +
   C(23, 32, 1.5, '#666368') + C(39, 34, 1.6, '#666368') + C(25, 40, 1.3, '#8c7670') + C(37, 22, 1.3, '#8c7670'));
 
+// Round 11 (Thousandvale stream P, live #9): the "high score" finds of logging and foraging — uncommon materials.
+add('golden_resin', 'Golden Resin', '#f2b632', 'One big clear teardrop of golden sap with a trapped bubble and a bright glint, on a sliver of bark.', c =>
+  P('M10 50L30 44L54 49L50 55L14 57Z', '#7a5a3a') + L('M16 52L28 49M36 50L48 52', '#4e3624', 1.6) +
+  P('M32 6Q36 18 46 28Q54 38 48 47Q41 55 30 54Q18 53 15 43Q12 33 21 24Q29 16 32 6Z', c.m) +
+  P('M32 6Q36 18 46 28Q54 38 48 47Q44 51 38 52Q47 41 41 30Q35 20 32 6Z', c.s, 'none') +
+  P('M22 30Q27 22 31 16Q29 27 25 35Q21 41 22 30Z', c.h, 'none') +
+  C(36, 40, 3.2, c.l, c.h, 1.2) + C(29, 46, 1.6, c.l) + shine(24, 26, '#fffbe6', 4.5));
+add('wild_honeycomb', 'Wild Honeycomb', '#e8a830', 'A broken slab of wild honeycomb, its six-sided cells brimming, with one fat drip of honey.', c =>
+  P('M8 22L20 12L44 10L56 20L54 42L40 52L16 50L8 38Z', c.s) +
+  L('M14 20L20 16L26 20L26 27L20 31L14 27ZM26 20L32 16L38 20L38 27L32 31L26 27ZM38 20L44 16L50 20L50 27L44 31L38 27Z', mix('#e8a830', '#241b22', .62), 1.6) +
+  L('M20 31L26 35L26 42L20 46L14 42L14 35ZM32 31L38 35L38 42L32 46L26 42L26 35ZM44 31L50 35L50 42L44 46L38 42L38 35Z', mix('#e8a830', '#241b22', .62), 1.6) +
+  P('M16 21L20 18L24 21L24 26L20 29L16 26Z', c.h, 'none') + P('M28 21L32 18L36 21L36 26L32 29L28 26Z', c.m, 'none') +
+  P('M40 21L44 18L48 21L48 26L44 29L40 26Z', c.h, 'none') + P('M28 36L32 33L36 36L36 41L32 44L28 41Z', c.h, 'none') +
+  P('M40 36L44 33L48 36L48 41L44 44L40 41Z', c.m, 'none') + P('M16 36L20 33L24 36L24 41L20 44L16 41Z', c.m, 'none') +
+  P('M42 50Q44 55 43 58Q41 62 38 59Q37 55 39 51Z', c.m) + shine(22, 22, c.l, 3) + shine(45, 36, c.l, 2.5));
+
 export default items;

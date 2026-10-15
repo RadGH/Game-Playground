@@ -502,4 +502,29 @@ export default {
       + circle(13.2, 23, 1.1, N) + circle(18.8, 23, 1.1, N)
       + shape('M13 3 Q16 0 19 3 V6 Q16 10 13 6 Z', P),
   },
+  // Thousandvale round 11 (owner live #46): the marks floated over people who take you somewhere.
+  travel_ship: {
+    name: 'Sails from here',
+    description: 'A small gold-hulled sailing ship with two pale sails rides blue waves.',
+    art: mark('M16 3 V20', D, 2)
+      + shape('M17 4 Q27 10 17 18 Z', P)
+      + shape('M15 6 Q8 11 15 17 Z', P)
+      + path('M16 3 L22 4.5 L16 6 Z', RED)
+      + shape('M2 19 H30 L25 26 Q16 28.5 7 26 Z')
+      + mark('M6 22 H26', N, 1.3)
+      + mark('M2 29 Q5 27 8 29 Q11 31 14 29 Q17 27 20 29 Q23 31 26 29 Q28 28 30 29', BLUE, 1.7),
+  },
+  travel_cart: {
+    name: 'Rides from here',
+    description: 'A covered gold cart with a pale canvas hood rolls on two spoked wheels.',
+    art: shape('M5 13 Q14 2 24 13 Z', P)
+      + mark('M9 12 Q14 6 20 12', N, 1.2)
+      + shape('M3 13 H26 L24 21 H5 Z')
+      + mark('M24 18 L30 16', G, 2.2)
+      + circle(10, 23, 5, D) + ring(10, 23, 4, G, 1.8)
+      + mark('M10 19.5 V26.5 M6.5 23 H13.5', G, 1.3)
+      + circle(10, 23, 1.2, P)
+      + circle(21, 23, 4, D) + ring(21, 23, 3.1, G, 1.6)
+      + mark('M21 20.3 V25.7 M18.3 23 H23.7', G, 1.2),
+  },
 };

@@ -14,6 +14,7 @@ import { iconFor, onIcon, iconsActive } from './item-icons.js';
 import { rememberItems, nameOf } from './item-card.js';
 import { rarityOf, slotOf, SLOT_NAME, RARITY_NAME } from './inv-core.js';
 import { isCrate, isGift, crateLines, itemFacts, rarityClass } from './pt5-core.js';
+import { freeIn } from '../../sim/bag-tabs.js';      // round 11 (Market stream, owner #25): room is checked BEFORE a box opens
 
 export function createReveal({ net, hud, bag }) {
   const root = h('div.tv-reveal', { hidden: true, role: 'dialog', 'aria-label': 'Opening' });
@@ -84,6 +85,10 @@ export function createReveal({ net, hud, bag }) {
   function open(item) {
     if (!isCrate(item)) return false;
     if (S.waiting || S.shown) return true;
+    // round 11 (owner #25): a crate / gift box holds a piece of equipment — with no free square in Equipment it stays shut
+    // (the server says the same; this answers at once, before the box even rattles)
+    const have = bag?.state?.bag, max = bag?.max;
+    if (Array.isArray(have) && max > 0 && freeIn(have, max, 'gear') < 1) { hud.toast(`No room in your Equipment tab. Make room for 1 more thing, then open the ${isGift(item) ? 'gift' : 'crate'} — it waits in your bag.`, 'warn'); return true; }
     rattle(item);
     const n = net();
     if (typeof n?.useItem === 'function') n.useItem(item.uid); else n?.item?.('use', item.uid);

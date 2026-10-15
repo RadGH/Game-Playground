@@ -5,7 +5,7 @@ const option = (value, label) => { const o = el('option', '', label); o.value = 
 const tags = list => { const row = el('span','tags'); row.append(...list.map(t => el('span','tag',t))); return row; };
 for (const c of classes) $('class').append(option(c.id, c.name));
 for (const c of categories) $('category').append(option(c,c));
-for (const n of [...new Set(icons.map(i => i.batch))].filter(Boolean).sort()) $('batch').append(option(n, `Batch ${n} · five classes`));
+for (const n of [...new Set(icons.map(i => i.batch))].filter(Boolean).sort((a, b) => a - b)) $('batch').append(option(n, n === 7 ? 'Batch 7 · Star Blade' : `Batch ${n} · five classes`));   // play-test 11: batch 7 is one class
 $('total').textContent = `${icons.length} icons · ${classes.length} classes`;
 const params = new URLSearchParams(location.search);
 for (const [id,key] of [['search','q'],['class','class'],['category','category'],['batch','batch']]) if (params.has(key)) $(id).value = params.get(key);

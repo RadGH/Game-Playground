@@ -2,7 +2,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { prepareGrid, buildChunk, chunkCounts, treeCover, patchNoise, hash2, TREE_COVER, TREE_LINE, TREE_SLOPE, TREE_SPIRES, CANOPY } from '../../js/client/horizon-grid.js';
+import { prepareGrid, buildChunk, chunkCounts, treeCover, patchNoise, hash2, TREE_COVER, TREE_LINE, TREE_SLOPE, TREE_SPIRES, CANOPY, SPIRE } from '../../js/client/horizon-grid.js';
+// play-test 11 (Z25): a spire is now a two-tier six-sided conifer — SPIRE.verts (14) vertices, SPIRE.tris (12) triangles,
+// the crown's apex last (vertex 13); the triangle budgets below were raised with it (owner: 'their low model is bad')
+const SV = SPIRE.verts, ST = SPIRE.tris, APEX = SPIRE.verts - 1;
 
 const buf = readFileSync(new URL('../../data/world/horizon.bin', import.meta.url));
 const g = prepareGrid(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength));
@@ -58,25 +61,25 @@ test('W18: tree shapes — only on the nearest ring, inside the budget, on the g
   const med = buildChunk(g, ci, cj, 64, 1, null, { spires: TREE_SPIRES.medium }), low = buildChunk(g, ci, cj, 64, 1, null, { spires: TREE_SPIRES.low }), far = buildChunk(g, ci, cj, 64, 2, null, { spires: TREE_SPIRES.high });
   assert.ok(med.spires <= TREE_SPIRES.medium * 1.05 && med.spires <= hi.spires); assert.equal(low.spires, 0, 'Low: the tint only'); assert.equal(far.spires, 0, 'stride 2 and beyond: the tint only');
   assert.equal(TREE_SPIRES.low, 0);
-  assert.equal(hi.tris, buildChunk(g, ci, cj, 64, 1, null, { trees: false }).tris + hi.spires * 4, 'four triangles a spire');
+  assert.equal(hi.tris, buildChunk(g, ci, cj, 64, 1, null, { trees: false }).tris + hi.spires * ST, 'twelve triangles a spire');
   // each spire: an apex 9-18 m over four feet that stand in the ground, inside the chunk
-  const V = hi.pos.length / 3, first = V - hi.spires * 5;
+  const V = hi.pos.length / 3, first = V - hi.spires * SV;
   for (let s = 0; s < hi.spires; s += 7) {
-    const o = (first + s * 5) * 3, apexY = hi.pos[o + 4 * 3 + 1], footY = hi.pos[o + 1];
+    const o = (first + s * SV) * 3, apexY = hi.pos[o + APEX * 3 + 1], footY = hi.pos[o + 1];
     assert.ok(apexY - footY > 9 && apexY - footY < 21, `height ${(apexY - footY).toFixed(1)}`);
-    assert.ok(hi.pos[o + 12] >= hi.bounds.minX - 1 && hi.pos[o + 12] <= hi.bounds.maxX + 1 && hi.pos[o + 14] >= hi.bounds.minZ - 1 && hi.pos[o + 14] <= hi.bounds.maxZ + 1);
+    assert.ok(hi.pos[o + APEX * 3] >= hi.bounds.minX - 1 && hi.pos[o + APEX * 3] <= hi.bounds.maxX + 1 && hi.pos[o + APEX * 3 + 2] >= hi.bounds.minZ - 1 && hi.pos[o + APEX * 3 + 2] <= hi.bounds.maxZ + 1);
     assert.ok(apexY < TREE_LINE.to + 60, 'none above the tree line');
   }
   // a loaded zone over half the chunk: no spire stands in it
   const b = hi.bounds, hole = { minX: b.minX, minZ: b.minZ, maxX: (b.minX + b.maxX) / 2, maxZ: b.maxZ };
   const cut = buildChunk(g, ci, cj, 64, 1, [hole], { spires: TREE_SPIRES.high });
-  const V2 = cut.pos.length / 3, f2 = V2 - cut.spires * 5;
-  for (let s = 0; s < cut.spires; s++) assert.ok(cut.pos[(f2 + s * 5 + 4) * 3] > hole.maxX - 1, 'a spire under the real ground');
+  const V2 = cut.pos.length / 3, f2 = V2 - cut.spires * SV;
+  for (let s = 0; s < cut.spires; s++) assert.ok(cut.pos[(f2 + s * SV + APEX) * 3] > hole.maxX - 1, 'a spire under the real ground');
   assert.ok(cut.spires < hi.spires);
   // the whole ring round the starter town stays inside the triangle budget (about a third of it is in view at once)
   let ring = 0; const ti = Math.floor(25183 / 2048), tj = Math.floor(5388 / 2048);
   for (let a = -2; a <= 2; a++) for (let c2 = -2; c2 <= 2; c2++) if (a || c2) ring += buildChunk(g, ti + a, tj + c2, 64, 1, null, { spires: TREE_SPIRES.high }).spires;
-  assert.ok(ring * 4 / 3 < 60000, `${Math.round(ring * 4 / 3)} tree triangles in view on High`);
+  assert.ok(ring * ST / 3 < 130000, `${Math.round(ring * ST / 3)} tree triangles in view on High`);      // (round 8: 60k at 4 a spire; 120k measured with the two-tier tree)
 });
 
 test('W18: built off the main thread, with the horizon\'s own material (no new mesh, no new shader), and a switch to turn it off', () => {
@@ -92,15 +95,15 @@ test('W18: inside loaded zones the bare Mountains slopes get a canopy of their o
   const ci = 11, cj = 3, rect = { minX: ci * 2048, minZ: cj * 2048, maxX: (ci + 1) * 2048, maxZ: (cj + 1) * 2048 };     // the range west of Torborhold
   const c = buildCanopy(g, ci, cj, 64, [rect], { spires: CANOPY_SPIRES.high });
   assert.ok(c && c.spires > 1200, `${c?.spires} canopy spires on the range's own zone`);
-  assert.ok(c.spires <= CANOPY_SPIRES.high); assert.equal(c.tris, c.spires * 4); assert.equal(c.pos.length, c.spires * 15);
-  for (let s = 0; s < c.spires; s += 5) { const x = c.pos[(s * 5 + 4) * 3], z = c.pos[(s * 5 + 4) * 3 + 2]; assert.ok(x > rect.minX && x < rect.maxX && z > rect.minZ && z < rect.maxZ, 'under the loaded zone'); }
+  assert.ok(c.spires <= CANOPY_SPIRES.high); assert.equal(c.tris, c.spires * ST); assert.equal(c.pos.length, c.spires * SV * 3); assert.equal(c.roots.length, c.spires * 5, 'a root per spire (near-trees.js)');
+  for (let s = 0; s < c.spires; s += 5) { const x = c.pos[(s * SV + APEX) * 3], z = c.pos[(s * SV + APEX) * 3 + 2]; assert.ok(x > rect.minX && x < rect.maxX && z > rect.minZ && z < rect.maxZ, 'under the loaded zone'); }
   assert.equal(buildCanopy(g, ci, cj, 64, [], { spires: 3600 }), null, 'no loaded zone: nothing (the horizon chunk has its own)');
   assert.equal(buildCanopy(g, ci, cj, 64, [rect], { spires: CANOPY_SPIRES.low }), null, 'Low: none');
   assert.deepEqual(CANOPY_BIOMES, ['mountains'], 'only the biome the bake leaves bare — hills and forests already have real trees');
   // half the zone loaded: only that half is dressed
   const half = buildCanopy(g, ci, cj, 64, [{ ...rect, maxX: rect.minX + 1024 }], { spires: CANOPY_SPIRES.high });
-  if (half) for (let s = 0; s < half.spires; s++) assert.ok(half.pos[(s * 5 + 4) * 3] < rect.minX + 1024 + 1);
+  if (half) for (let s = 0; s < half.spires; s++) assert.ok(half.pos[(s * SV + APEX) * 3] < rect.minX + 1024 + 1);
   // the whole 3 x 3 round the starter town: a few thousand triangles
   let n = 0; for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) { const r = { minX: (12 + a) * 2048, minZ: (2 + b) * 2048, maxX: (13 + a) * 2048, maxZ: (3 + b) * 2048 }; n += buildCanopy(g, 12 + a, 2 + b, 64, [r], { spires: CANOPY_SPIRES.high })?.spires || 0; }
-  assert.ok(n > 2000 && n * 4 < 60000, `${n} spires, ${n * 4} triangles`);
+  assert.ok(n > 2000 && n * ST < 100000, `${n} spires, ${n * ST} triangles`);      // (92k measured; the nearest few hundred are real kit trees instead)
 });

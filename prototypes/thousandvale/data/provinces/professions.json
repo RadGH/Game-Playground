@@ -9,7 +9,7 @@
    "prof": "mining",
    "icon": "ore",
    "tint": "#b87333",
-   "price": 2
+   "price": 1
   },
   "rough_quartz": {
    "id": "rough_quartz",
@@ -19,7 +19,8 @@
    "prof": "mining",
    "icon": "gem",
    "tint": "#e8eef4",
-   "price": 5
+   "price": 2,
+   "rarity": "magic"
   },
   "ash_log": {
    "id": "ash_log",
@@ -29,7 +30,7 @@
    "prof": "logging",
    "icon": "log",
    "tint": "#c9b48a",
-   "price": 2
+   "price": 1
   },
   "meadowmint": {
    "id": "meadowmint",
@@ -39,7 +40,7 @@
    "prof": "foraging",
    "icon": "herb",
    "tint": "#7fc98a",
-   "price": 2
+   "price": 1
   },
   "field_mushroom": {
    "id": "field_mushroom",
@@ -49,7 +50,7 @@
    "prof": "foraging",
    "icon": "mushroom",
    "tint": "#e6dccb",
-   "price": 2
+   "price": 1
   },
   "flax": {
    "id": "flax",
@@ -59,7 +60,7 @@
    "prof": "foraging",
    "icon": "fibre",
    "tint": "#8fb6e0",
-   "price": 2
+   "price": 1
   },
   "light_hide": {
    "id": "light_hide",
@@ -79,7 +80,7 @@
    "prof": "mining",
    "icon": "ore",
    "tint": "#8a8f98",
-   "price": 6
+   "price": 4
   },
   "garnet": {
    "id": "garnet",
@@ -89,7 +90,8 @@
    "prof": "mining",
    "icon": "gem",
    "tint": "#a8243a",
-   "price": 14
+   "price": 5,
+   "rarity": "magic"
   },
   "oak_log": {
    "id": "oak_log",
@@ -99,7 +101,7 @@
    "prof": "logging",
    "icon": "log",
    "tint": "#9a7446",
-   "price": 9
+   "price": 6
   },
   "feverleaf": {
    "id": "feverleaf",
@@ -109,7 +111,7 @@
    "prof": "foraging",
    "icon": "herb",
    "tint": "#d8c24a",
-   "price": 7
+   "price": 4
   },
   "amber_cap": {
    "id": "amber_cap",
@@ -119,7 +121,7 @@
    "prof": "foraging",
    "icon": "mushroom",
    "tint": "#d98a2b",
-   "price": 7
+   "price": 4
   },
   "hemp": {
    "id": "hemp",
@@ -129,7 +131,7 @@
    "prof": "foraging",
    "icon": "fibre",
    "tint": "#8aa35a",
-   "price": 7
+   "price": 4
   },
   "thick_hide": {
    "id": "thick_hide",
@@ -139,7 +141,7 @@
    "prof": "skinning",
    "icon": "hide",
    "tint": "#8c6a44",
-   "price": 4
+   "price": 2
   },
   "silver_ore": {
    "id": "silver_ore",
@@ -149,7 +151,7 @@
    "prof": "mining",
    "icon": "ore",
    "tint": "#d5dbe3",
-   "price": 26
+   "price": 15
   },
   "amethyst": {
    "id": "amethyst",
@@ -159,7 +161,8 @@
    "prof": "mining",
    "icon": "gem",
    "tint": "#8e5cc8",
-   "price": 36
+   "price": 20,
+   "rarity": "magic"
   },
   "yew_log": {
    "id": "yew_log",
@@ -169,7 +172,7 @@
    "prof": "logging",
    "icon": "log",
    "tint": "#b0623a",
-   "price": 30
+   "price": 19
   },
   "moonpetal": {
    "id": "moonpetal",
@@ -179,7 +182,7 @@
    "prof": "foraging",
    "icon": "herb",
    "tint": "#c9d4f2",
-   "price": 32
+   "price": 20
   },
   "ghost_morel": {
    "id": "ghost_morel",
@@ -189,7 +192,7 @@
    "prof": "foraging",
    "icon": "mushroom",
    "tint": "#cfd6d2",
-   "price": 32
+   "price": 20
   },
   "silkweed": {
    "id": "silkweed",
@@ -199,7 +202,7 @@
    "prof": "foraging",
    "icon": "fibre",
    "tint": "#f0e6f4",
-   "price": 32
+   "price": 20
   },
   "rugged_hide": {
    "id": "rugged_hide",
@@ -209,7 +212,7 @@
    "prof": "skinning",
    "icon": "hide",
    "tint": "#6e5236",
-   "price": 8
+   "price": 4
   },
   "blackiron_ore": {
    "id": "blackiron_ore",
@@ -219,7 +222,7 @@
    "prof": "mining",
    "icon": "ore",
    "tint": "#3b3f4a",
-   "price": 38
+   "price": 24
   },
   "sapphire": {
    "id": "sapphire",
@@ -229,7 +232,8 @@
    "prof": "mining",
    "icon": "gem",
    "tint": "#2f6fd6",
-   "price": 70
+   "price": 44,
+   "rarity": "magic"
   },
   "ironbark_log": {
    "id": "ironbark_log",
@@ -239,7 +243,7 @@
    "prof": "logging",
    "icon": "log",
    "tint": "#5e5348",
-   "price": 50
+   "price": 38
   },
   "frostbloom": {
    "id": "frostbloom",
@@ -249,7 +253,7 @@
    "prof": "foraging",
    "icon": "herb",
    "tint": "#9fe0ee",
-   "price": 48
+   "price": 36
   },
   "king_bolete": {
    "id": "king_bolete",
@@ -259,7 +263,7 @@
    "prof": "foraging",
    "icon": "mushroom",
    "tint": "#8a5a34",
-   "price": 48
+   "price": 36
   },
   "moonflax": {
    "id": "moonflax",
@@ -269,7 +273,7 @@
    "prof": "foraging",
    "icon": "fibre",
    "tint": "#b8c4f0",
-   "price": 48
+   "price": 36
   },
   "heavy_hide": {
    "id": "heavy_hide",
@@ -279,7 +283,7 @@
    "prof": "skinning",
    "icon": "hide",
    "tint": "#57402a",
-   "price": 14
+   "price": 8
   },
   "sunsteel_ore": {
    "id": "sunsteel_ore",
@@ -289,7 +293,7 @@
    "prof": "mining",
    "icon": "ore",
    "tint": "#f0c040",
-   "price": 64
+   "price": 40
   },
   "star_opal": {
    "id": "star_opal",
@@ -299,7 +303,8 @@
    "prof": "mining",
    "icon": "gem",
    "tint": "#bfe8e0",
-   "price": 120
+   "price": 75,
+   "rarity": "rare"
   },
   "heartwood_log": {
    "id": "heartwood_log",
@@ -309,7 +314,7 @@
    "prof": "logging",
    "icon": "log",
    "tint": "#7a2f2a",
-   "price": 80
+   "price": 60
   },
   "sunroot": {
    "id": "sunroot",
@@ -319,7 +324,7 @@
    "prof": "foraging",
    "icon": "herb",
    "tint": "#f0a030",
-   "price": 78
+   "price": 58
   },
   "starcap": {
    "id": "starcap",
@@ -329,7 +334,7 @@
    "prof": "foraging",
    "icon": "mushroom",
    "tint": "#7a6fe0",
-   "price": 78
+   "price": 58
   },
   "sunsilk": {
    "id": "sunsilk",
@@ -339,7 +344,7 @@
    "prof": "foraging",
    "icon": "fibre",
    "tint": "#f6dc8a",
-   "price": 78
+   "price": 58
   },
   "drake_hide": {
    "id": "drake_hide",
@@ -349,7 +354,7 @@
    "prof": "skinning",
    "icon": "hide",
    "tint": "#4c7a5a",
-   "price": 24
+   "price": 14
   },
   "tin_ore": {
    "id": "tin_ore",
@@ -359,7 +364,7 @@
    "prof": "mining",
    "icon": "ore",
    "tint": "#c9ccd2",
-   "price": 2
+   "price": 1
   },
   "pine_resin": {
    "id": "pine_resin",
@@ -369,7 +374,7 @@
    "prof": "logging",
    "icon": "resin",
    "tint": "#d9a441",
-   "price": 3
+   "price": 1
   },
   "game_meat": {
    "id": "game_meat",
@@ -400,7 +405,30 @@
    "prof": "skinning",
    "icon": "trophy",
    "tint": "#efe6d2",
-   "price": 1
+   "price": 1,
+   "rarity": "magic"
+  },
+  "golden_resin": {
+   "id": "golden_resin",
+   "name": "Golden Resin",
+   "desc": "A bead of clear golden sap that only a perfect cut lets out. Merchants and temperers pay well for it.",
+   "tier": 2,
+   "prof": "logging",
+   "icon": "resin",
+   "tint": "#f2b632",
+   "price": 2,
+   "rarity": "magic"
+  },
+  "wild_honeycomb": {
+   "id": "wild_honeycomb",
+   "name": "Wild Honeycomb",
+   "desc": "A slab of wild comb found only by a careful hand. Sweet, rare, and worth good coin.",
+   "tier": 2,
+   "prof": "foraging",
+   "icon": "resin",
+   "tint": "#e8a830",
+   "price": 2,
+   "rarity": "magic"
   },
   "obsidian_ore": {
    "id": "obsidian_ore",
@@ -476,7 +504,7 @@
    "prof": "smithing",
    "icon": "bar",
    "tint": "#c08a4a",
-   "price": 5,
+   "price": 3,
    "made": true
   },
   "light_leather": {
@@ -498,7 +526,7 @@
    "prof": "outfitting",
    "icon": "cloth",
    "tint": "#e4dcc8",
-   "price": 5,
+   "price": 3,
    "made": true
   },
   "iron_bar": {
@@ -509,7 +537,7 @@
    "prof": "smithing",
    "icon": "bar",
    "tint": "#9aa0aa",
-   "price": 14,
+   "price": 9,
    "made": true
   },
   "thick_leather": {
@@ -520,7 +548,7 @@
    "prof": "outfitting",
    "icon": "leather",
    "tint": "#9c764c",
-   "price": 9,
+   "price": 5,
    "made": true
   },
   "canvas_bolt": {
@@ -531,7 +559,7 @@
    "prof": "outfitting",
    "icon": "cloth",
    "tint": "#b9ad8a",
-   "price": 16,
+   "price": 9,
    "made": true
   },
   "silversteel_bar": {
@@ -542,7 +570,7 @@
    "prof": "smithing",
    "icon": "bar",
    "tint": "#dfe6ee",
-   "price": 67,
+   "price": 39,
    "made": true
   },
   "rugged_leather": {
@@ -553,7 +581,7 @@
    "prof": "outfitting",
    "icon": "leather",
    "tint": "#7c5c3c",
-   "price": 18,
+   "price": 9,
    "made": true
   },
   "silk_bolt": {
@@ -564,7 +592,7 @@
    "prof": "outfitting",
    "icon": "cloth",
    "tint": "#f2e8f6",
-   "price": 74,
+   "price": 46,
    "made": true
   },
   "blackiron_bar": {
@@ -575,7 +603,7 @@
    "prof": "smithing",
    "icon": "bar",
    "tint": "#4a4f5c",
-   "price": 87,
+   "price": 55,
    "made": true
   },
   "heavy_leather": {
@@ -586,7 +614,7 @@
    "prof": "outfitting",
    "icon": "leather",
    "tint": "#624830",
-   "price": 32,
+   "price": 18,
    "made": true
   },
   "moonweave_bolt": {
@@ -597,7 +625,7 @@
    "prof": "outfitting",
    "icon": "cloth",
    "tint": "#c2ccf4",
-   "price": 110,
+   "price": 83,
    "made": true
   },
   "sunsteel_bar": {
@@ -608,7 +636,7 @@
    "prof": "smithing",
    "icon": "bar",
    "tint": "#f4cf5a",
-   "price": 147,
+   "price": 92,
    "made": true
   },
   "drake_leather": {
@@ -619,7 +647,7 @@
    "prof": "outfitting",
    "icon": "leather",
    "tint": "#588a66",
-   "price": 55,
+   "price": 32,
    "made": true
   },
   "sunsilk_bolt": {
@@ -630,7 +658,7 @@
    "prof": "outfitting",
    "icon": "cloth",
    "tint": "#f8e29a",
-   "price": 179,
+   "price": 133,
    "made": true
   }
  },
@@ -1169,7 +1197,7 @@
    "tier": 2,
    "ease": 0.2,
    "extra": 0.1,
-   "price": 61,
+   "price": 40,
    "desc": "A better pick: the timing windows are 10% wider and one node in 10 gives an extra piece. Takes no slot; the best one in your bag is used."
   },
   {
@@ -1180,7 +1208,7 @@
    "tier": 3,
    "ease": 0.4,
    "extra": 0.2,
-   "price": 277,
+   "price": 163,
    "desc": "A better pick: the timing windows are 20% wider and one node in 5 gives an extra piece. Takes no slot; the best one in your bag is used."
   },
   {
@@ -1202,7 +1230,7 @@
    "tier": 2,
    "ease": 0.2,
    "extra": 0.1,
-   "price": 61,
+   "price": 40,
    "desc": "A better hatchet: the timing windows are 10% wider and one node in 10 gives an extra piece. Takes no slot; the best one in your bag is used."
   },
   {
@@ -1213,7 +1241,7 @@
    "tier": 3,
    "ease": 0.4,
    "extra": 0.2,
-   "price": 277,
+   "price": 163,
    "desc": "A better hatchet: the timing windows are 20% wider and one node in 5 gives an extra piece. Takes no slot; the best one in your bag is used."
   },
   {
@@ -1235,7 +1263,7 @@
    "tier": 2,
    "ease": 0.2,
    "extra": 0.1,
-   "price": 61,
+   "price": 40,
    "desc": "A better skinning knife: the timing windows are 10% wider and one node in 10 gives an extra piece. Takes no slot; the best one in your bag is used."
   },
   {
@@ -1246,7 +1274,7 @@
    "tier": 3,
    "ease": 0.4,
    "extra": 0.2,
-   "price": 277,
+   "price": 163,
    "desc": "A better skinning knife: the timing windows are 20% wider and one node in 5 gives an extra piece. Takes no slot; the best one in your bag is used."
   },
   {
@@ -1268,7 +1296,7 @@
    "tier": 2,
    "ease": 0.2,
    "extra": 0.1,
-   "price": 61,
+   "price": 40,
    "desc": "A better sickle: the timing windows are 10% wider and one node in 10 gives an extra piece. Takes no slot; the best one in your bag is used."
   },
   {
@@ -1279,7 +1307,7 @@
    "tier": 3,
    "ease": 0.4,
    "extra": 0.2,
-   "price": 277,
+   "price": 163,
    "desc": "A better sickle: the timing windows are 20% wider and one node in 5 gives an extra piece. Takes no slot; the best one in your bag is used."
   }
  ],

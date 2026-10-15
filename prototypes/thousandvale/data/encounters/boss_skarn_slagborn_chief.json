@@ -4,7 +4,7 @@
   "tier": "boss",
   "body": "slagborn_chief",
   "place": "dungeon caldera_deep (The Throat, The Caldera, level 18-22): the end boss at the bottom of the Throat",
-  "_doc": "The chief of every Slagborn gang on the island, who went down the Throat to bargain with the fire itself and came back up part of it. P1 \"Chief's Due\": a great axe cone, a war-cry that calls a raider, and magma bursting out of four vents in the floor in turn. Two basalt dams (rocks) hold back the magma channel: break one and the flood runs past HIM (stun, takes more) — once each. P2 at 60% \"The Fire Answers\": he raises a ward of living fire; light the three Rim Shrine lamps the old pilgrims left down here to break it, while magma rings roll out from the vents. P3 new bar \"Heart of the Throat\": the Throat erupts — safe only next to a vent that has gone quiet (the vents), spreads on each player, a stack, and his axe now trails fire.",
+  "_doc": "The chief of every Slagborn gang on the island, who went down the Throat to bargain with the fire itself and came back up part of it. P1 \"Chief's Due\": a great axe cone, a war-cry that calls a raider, and magma bursting out of four vents in the floor in turn. Two basalt dams (rocks) hold back the magma channel: break one and the flood runs past HIM (stun, takes more) — once each. P2 at 60% \"The Fire Answers\": he raises a ward of living fire; light the three Rim Shrine lamps the old pilgrims left down here to break it, while magma rings roll out from the vents. P3 new bar \"Heart of the Throat\": the Throat erupts — safe only next to a vent that has gone quiet (the vents), spreads on each player, a stack, and his axe now trails fire. OWNER #51 (2026-10-15): the phase that refilled the health bar is removed; the health bar is the whole fight.",
   "party": "Solo: very hard. 2-3: one lamp runner, a tank. 5: as designed.",
   "hpMult": 4.2,
   "arena": {
@@ -258,75 +258,6 @@
           "status": "burn"
         }
       ]
-    },
-    "eruption": {
-      "id": "eruption",
-      "name": "Eruption",
-      "every": [
-        24,
-        28
-      ],
-      "first": 10,
-      "cast": 1.5,
-      "say": "THE THROAT ERUPTS — get beside a vent, where the pressure is spent!",
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "object",
-          "object": "vent",
-          "r": 3.5,
-          "kind": "safe",
-          "wind": 3.5,
-          "damage": 2.8,
-          "element": "fire"
-        }
-      ]
-    },
-    "spreads": {
-      "id": "spreads",
-      "name": "Sparks of the Throat",
-      "every": [
-        13,
-        15
-      ],
-      "first": 3,
-      "say": "Fire clings to each of you — spread out!",
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "each",
-          "r": 3,
-          "follow": true,
-          "wind": 2,
-          "damage": 1.5,
-          "element": "fire",
-          "status": "burn"
-        }
-      ]
-    },
-    "stack": {
-      "id": "stack",
-      "name": "Chief's Judgement",
-      "every": [
-        20,
-        24
-      ],
-      "first": 7,
-      "cast": 1,
-      "say": "Skarn marks {target} for his axe — stand with them!",
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "random",
-          "r": 3.2,
-          "kind": "stack",
-          "need": 3,
-          "follow": true,
-          "wind": 4,
-          "damage": 3.2,
-          "element": "fire"
-        }
-      ]
     }
   },
   "phases": [
@@ -377,19 +308,6 @@
         "fade": "The fire ward gutters out by itself.",
         "pool": 0.1
       }
-    },
-    {
-      "name": "Heart of the Throat",
-      "newBar": {
-        "hp": 0.6
-      },
-      "say": "\"Then take it ALL.\"",
-      "abilities": [
-        "axe",
-        "eruption",
-        "spreads",
-        "stack"
-      ]
     }
   ],
   "triggers": [

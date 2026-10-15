@@ -4,7 +4,7 @@
   "tier": "boss",
   "body": "slagborn_firecaller",
   "place": "dungeon sulphur_mine (The Yellow Pits, Sulphur Bight, level 13-16): the end boss in the Firecaller's Pit",
-  "_doc": "The Slagborn firecaller who lights the sulphur seams to drive the diggers deeper. P1 \"Lighting the Seams\": firebolts at the tank, a fire cone, and SEAM FIRE — the four yellow seams in the walls flare all at once (stay away from them); two water barrels (levers, repeatable) put out the burning ground she leaves. P2 at 60% \"Choking Pit\": the pit fills with yellow smoke; she drops soaks of burning sulphur that need two players each, and a long cast you must interrupt (Call the Diggers) or she gets two raiders. P3 new bar \"The Pit Burns\": the floor is alight except a few safe circles, she chains fire between players (spread) and her seams burn on a short timer.",
+  "_doc": "The Slagborn firecaller who lights the sulphur seams to drive the diggers deeper. P1 \"Lighting the Seams\": firebolts at the tank, a fire cone, and SEAM FIRE — the four yellow seams in the walls flare all at once (stay away from them); two water barrels (levers, repeatable) put out the burning ground she leaves. P2 at 60% \"Choking Pit\": the pit fills with yellow smoke; she drops soaks of burning sulphur that need two players each, and a long cast you must interrupt (Call the Diggers) or she gets two raiders. P3 new bar \"The Pit Burns\": the floor is alight except a few safe circles, she chains fire between players (spread) and her seams burn on a short timer. OWNER #51 (2026-10-15): the phase that refilled the health bar is removed; the health bar is the whole fight.",
   "party": "Solo: hard — interrupt the call, skip the soaks only if you must. 2-3: one on the barrels. 5: as designed.",
   "hpMult": 3.9,
   "arena": {
@@ -254,81 +254,6 @@
           "element": "poison"
         }
       ]
-    },
-    "pit_burns": {
-      "id": "pit_burns",
-      "name": "The Pit Burns",
-      "every": [
-        24,
-        28
-      ],
-      "first": 10,
-      "cast": 1.5,
-      "say": "The whole floor catches — get into a clear circle!",
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "home",
-          "offset": [
-            6,
-            0
-          ],
-          "r": 3,
-          "kind": "safe",
-          "wind": 3.5,
-          "damage": 2.6,
-          "element": "fire"
-        },
-        {
-          "shape": "circle",
-          "at": "home",
-          "offset": [
-            -6,
-            0
-          ],
-          "r": 3,
-          "kind": "safe",
-          "wind": 3.5,
-          "damage": 2.6,
-          "element": "fire"
-        },
-        {
-          "shape": "circle",
-          "at": "home",
-          "offset": [
-            0,
-            7
-          ],
-          "r": 3,
-          "kind": "safe",
-          "wind": 3.5,
-          "damage": 2.6,
-          "element": "fire"
-        }
-      ]
-    },
-    "fire_chain": {
-      "id": "fire_chain",
-      "name": "Fire Chain",
-      "every": [
-        13,
-        16
-      ],
-      "first": 4,
-      "cast": 0.6,
-      "say": "Fire leaps between you — spread out!",
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "each",
-          "r": 3,
-          "follow": true,
-          "wind": 2,
-          "damage": 1.4,
-          "element": "fire",
-          "status": "burn"
-        }
-      ]
     }
   },
   "phases": [
@@ -349,19 +274,6 @@
         "sulphur_soak",
         "call_diggers",
         "smoke"
-      ]
-    },
-    {
-      "name": "The Pit Burns",
-      "newBar": {
-        "hp": 0.55
-      },
-      "say": "Ushka throws her torch on the floor. \"Then we all burn.\"",
-      "abilities": [
-        "flame_cone",
-        "pit_burns",
-        "fire_chain",
-        "seam_fire"
       ]
     }
   ]

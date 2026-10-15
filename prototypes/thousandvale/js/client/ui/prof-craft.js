@@ -35,7 +35,7 @@ export function gearChances(numbers, surplus = 0) {
   const sur = Math.max(0, Math.min(R.maxSurplus ?? 30, surplus)), names = numbers.quality?.name || {};
   return ['good', 'fine', 'perfect'].map(q => {
     const m = R.magic?.[q] || 0, r = R.rare?.[q] || 0;
-    const rare = r > 0 ? r + sur * (R.perSkill?.rare || 0) : 0, magic = m > 0 ? m + sur * (R.perSkill?.magic || 0) : 0;
+    const rare = r > 0 ? r + sur * (R.perSkill?.rare || 0) : 0, magic = R.floor === 'magic' ? 1 : m > 0 ? m + sur * (R.perSkill?.magic || 0) : 0;      // round 11 (#58): made gear is never plain
     return { quality: q, word: names[q] || q, magic: Math.min(1 - Math.min(1, rare), magic), rare: Math.min(1, rare) };
   }).filter(x => x.magic > 0 || x.rare > 0);
 }
@@ -78,6 +78,12 @@ export function createCraftWindow({ net, hud, bag, numbers = () => null, onMake,
   const needChips = needs => h('span.pc-needs', {}, ...(needs || []).map(n => h('span.' + ((n.have ?? 0) >= n.n ? 'ok' : 'lack') + (n.kept ? '.kept' : ''), n.kept ? { dataset: { tip: `${n.name} is needed for this work, and you keep it if the gauge is missed.` } } : {}, ITEM_ART[n.id] ? h('img.pc-pic', { src: itemIconUrl(n.id), alt: '' }) : null, `${fmt(n.have ?? 0, { decimals: 0 })}/${fmt(n.n, { decimals: 0 })} ${n.name}`, n.kept ? h('em', {}, 'kept on a miss') : null)));
   const feeNode = gold => (gold > 0 ? h('span.pc-fee', {}, `${fmt(gold, { decimals: 0 })} gold`) : null);
 
+  /**
+   * Round 11 (live #58: "selected longsword … it gave me a dagger"): the base is read from the choice AT THE MOMENT Make is
+   * pressed. The button used to carry the base worked out when the row was drawn, and changing the "As" select did not
+   * redraw the row — so every gear recipe was made as its FIRST base, whatever was picked.
+   */
+  function chosenBase(r) { const ok = (r.bases || []).filter(b => b.can !== false); return S.base[r.id] && ok.some(b => b.key === S.base[r.id]) ? S.base[r.id] : ok[0]?.key; }
   function recipeRow(r) {
     const N = numbers(), myLevel = S.list?.level?.[r.prof] || 1;
     const bases = (r.bases || []).filter(b => b.can !== false), baseKey = S.base[r.id] && bases.some(b => b.key === S.base[r.id]) ? S.base[r.id] : bases[0]?.key;
@@ -89,13 +95,13 @@ export function createCraftWindow({ net, hud, bag, numbers = () => null, onMake,
         h('div.pc-top', {}, h('b', {}, r.name), h('span.pc-kind', {}, `${KIND_WORD[r.kind] || 'Item'} · tier ${r.tier || 1}`), r.kind === 'gear' && r.level ? h('span.pc-kind', {}, `item level ${r.level}`) : null),
         r.kind !== 'gear' && r.makes ? h('small', {}, `Makes ${makes}${r.makes.text ? ' — ' + r.makes.text : ''}`) : r.desc ? h('small', {}, r.desc) : null,
         r.kind === 'gear' && (r.bases || []).length > 1 ? h('label.pc-base', {}, 'As ',
-          h('select', { onchange: e => { S.base[r.id] = e.target.value; } }, ...(r.bases || []).map(b => h('option', { value: b.key, selected: b.key === baseKey, disabled: b.can === false }, b.name + (b.can === false ? ' (not yet)' : ''))))) : null,
+          h('select', { onchange: e => { S.base[r.id] = e.target.value; } /* round 11 (#58): read again when Make is pressed */ }, ...(r.bases || []).map(b => h('option', { value: b.key, selected: b.key === baseKey, disabled: b.can === false }, b.name + (b.can === false ? ' (not yet)' : ''))))) : null,
         chances.length ? h('small.pc-band', { dataset: { tip: 'How well you play the mini-game decides this. Every skill point past the recipe adds a little.' } },
           'Better work, better gear: ', chances.map(c => `${c.word} ${pct(c.magic)} ${RARITY_NAME.magic.toLowerCase()}${c.rare > 0 ? ', ' + pct(c.rare) + ' ' + RARITY_NAME.rare.toLowerCase() : ''}`).join(' · ')) : null,
         h('div.pc-cost', {}, needChips(r.needs), feeNode(r.gold)),
         r.why ? h('small.pc-why', {}, r.why) : null),
       h('div.pc-btns', {},
-        h('button.primary.pc-make', { type: 'button', disabled: !r.can || S.busy, dataset: { make: r.id }, onclick: () => { if (S.busy) return; onMake?.(r, { base: baseKey, npc: S.npc }); } }, verbOf(r.prof)),
+        h('button.primary.pc-make', { type: 'button', disabled: !r.can || S.busy, dataset: { make: r.id }, onclick: () => { if (S.busy) return; onMake?.(r, { base: chosenBase(r), npc: S.npc }); } }, verbOf(r.prof)),
         // a batch: as many as your materials and gold allow (the server's cap), for ONE mini-game — how well you play it counts for all of them
         times > 1 ? h('button.ghost.pc-batch', { type: 'button', disabled: !r.can || S.busy, dataset: { batch: r.id, n: times, tip: `Make ${times} in one go. One mini-game decides the quality of all of them.` }, onclick: () => { if (S.busy) return; onMake?.(r, { n: times, npc: S.npc }); } }, `× ${times}`) : null));
   }

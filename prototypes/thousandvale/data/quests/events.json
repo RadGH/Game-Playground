@@ -18,6 +18,11 @@
       "addWavePerPlayers": 2,
       "minPlayers": 1,
       "capPlayers": 5,
+      "wavePerPlayer": 0.5,
+      "waveHealthPerPlayer": 0.15,
+      "bossHealthPerPlayer": 0.6,
+      "crowdCapPlayers": 20,
+      "round11": "Owner live #5 (2026-10-15): events scale with who is THERE when each wave / the boss appears (js/sim/events.js crowdScale; n = living players within the event's reach, max(autoEnrolMetres, r x 2.5, 150 m)): wave head-count x (1 + wavePerPlayer x (n-1)), wave health x (1 + waveHealthPerPlayer x (n-1)), boss health x (1 + bossHealthPerPlayer x (n-1)) and the boss grows if more arrive mid-fight. Event monsters follow 300 m / 60 s before they give up. The older healthPerPlayer / addWavePerPlayers / capPlayers lines are the director's start-time floor.",
       "note": "Play-test 3 R3 — fewer than 5 players at a time: boss health x (1 + healthPerPlayer x (enrolled - 1)) up to capPlayers 5 (x2.4 for five), one extra add per addWavePerPlayers enrolled (two for five)."
     },
     "pick": "Play-test 3 R3 — the owner: 'events should activate when a player goes nearby, not wait in real time; fewer than 5 people will play at a time'. startOn 'near': a realm event starts when a player in its band comes within its radius + nearMetres (and its cooldown is over, and nothing else is running, and nearGapMinutes have passed since the last one), after a countdownSeconds countdown sent as a real time. A FIXED-schedule event (the world boss) is still announced announceMinutes ahead with its real start time (`at`), and also starts on demand when someone in band walks up and it has been quiet quietMinutes. Weighted events never start on their own.",

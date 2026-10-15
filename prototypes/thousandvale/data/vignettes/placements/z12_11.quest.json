@@ -1,8 +1,224 @@
 {
- "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z12_11, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z12_11, added where a kill / collect quest's area held fewer of its monster than the step needs (round 11: max(count + 4, 2 x count) — two players at once; they come back in 1-1.5 minutes). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
  "zone": "z12_11",
  "terrainHash": "84bc7a26",
  "placements": [
+  {
+   "type": "camp",
+   "id": "quest_ah_digging_out_0_0",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    15,
+    15
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1225,
+   "z": 792,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "ah_digging_out",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_ah_digging_out_0_1",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    15,
+    15
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1168,
+   "z": 804,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "ah_digging_out",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_ah_digging_out_0_2",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    15,
+    15
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1228,
+   "z": 769,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "ah_digging_out",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_ah_digging_out_0_3",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    15,
+    15
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1175,
+   "z": 813,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "ah_digging_out",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_ah_what_the_ash_recalls_0_0",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    16,
+    16
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 907,
+   "z": 837,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "ah_what_the_ash_recalls",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_ah_what_the_ash_recalls_0_1",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    16,
+    16
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 894,
+   "z": 849,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "ah_what_the_ash_recalls",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_ah_what_the_ash_recalls_0_2",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    16,
+    16
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 909,
+   "z": 813,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "ah_what_the_ash_recalls",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_ah_the_ashen_reeve_0_0",
+   "monster": "obsidian_warden",
+   "with": null,
+   "level": [
+    16,
+    16
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 779,
+   "z": 691,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "ah_the_ashen_reeve",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_ah_the_ashen_reeve_0_1",
+   "monster": "obsidian_warden",
+   "with": null,
+   "level": [
+    16,
+    16
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 766,
+   "z": 703,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "ah_the_ashen_reeve",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
   {
    "type": "camp",
    "id": "champ_z12_11_1",

@@ -3716,7 +3716,7 @@
    "type": "folk",
    "id": "folk_torbor_cross_8",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -6442,7 +6442,7 @@
    "type": "folk",
    "id": "folk_torbor_cross_18",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -6970,7 +6970,7 @@
    "type": "folk",
    "id": "folk_torbor_cross_20",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -7523,7 +7523,7 @@
    "type": "folk",
    "id": "folk_torbor_cross_22",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -7861,7 +7861,7 @@
    "type": "folk",
    "id": "folk_torbor_cross_23",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -8414,7 +8414,7 @@
    "type": "folk",
    "id": "folk_torbor_cross_25",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -9204,7 +9204,7 @@
    "type": "folk",
    "id": "folk_torbor_cross_28",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -9787,7 +9787,7 @@
    "type": "folk",
    "id": "folk_torbor_cross_30",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"

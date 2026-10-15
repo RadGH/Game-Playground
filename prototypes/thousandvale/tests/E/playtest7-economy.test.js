@@ -122,9 +122,13 @@ test('V2: nothing in a shop is trivially cheap or out of reach for ever — ever
   assert.deepEqual(bad, []);
   assert.ok(R.shopRows.length >= 50);
   // the stable's shelf and economy.json say the same price for every mount (the shelf is what the server charges)
-  for (const m of ECO.mounts) { const g = J('data/provinces/shops.json').kinds.stable.goods.find(x => x.id === m.id); assert.ok(g && g.price === m.price && g.minLevel === m.level, m.id + ': stable shelf and economy.json disagree'); }
+  // round 11 (World, owner #48): Vharlen's two lizards are on Vharlen's shelf only (data/provinces/vharlen-mounts.json)
+  const isleOnly = new Set((J('data/provinces/vharlen-mounts.json').mounts || []).map(m => m.id));
+  for (const m of ECO.mounts) { const g = J(isleOnly.has(m.id) ? 'data/provinces/vharlen-shops.json' : 'data/provinces/shops.json').kinds.stable.goods.find(x => x.id === m.id); assert.ok(g && g.price === m.price && g.minLevel === m.level, m.id + ': stable shelf and economy.json disagree'); }
   // a mount is a goal, not an afterthought: one to four hours of REAL play at the level it opens (Y31)
-  for (const m of R.shopRows.filter(r => r.kind === 'stable' && /horse|pony|courser|dray/.test(r.id))) { const h = m.price / R.real.levels[m.level].table.goldPerHour; assert.ok(within(h, T.mountHours), `${m.id}: ${h.toFixed(1)} hours of play at level ${m.level}`); }
+  // round 11 (owner #16, 2026-10-15): the Trail Horse is the CHEAP first mount on purpose ("sell the basic trail horse for cheap
+  // compared to whatever the lowest cost horse is") — it is held under an hour instead; every other mount keeps the 1-4 hour rule
+  for (const m of R.shopRows.filter(r => r.kind === 'stable' && /horse|pony|courser|dray/.test(r.id))) { const h = m.price / R.real.levels[m.level].table.goldPerHour; if (m.id === 'trail_horse') { assert.ok(h > 0.05 && h < 1, `trail_horse: ${h.toFixed(2)} hours — cheap, not free`); continue; } assert.ok(within(h, T.mountHours), `${m.id}: ${h.toFixed(1)} hours of play at level ${m.level}`); }
 });
 
 // ------------------------------------------------------------------------------------------------ V3: pools in plain sight

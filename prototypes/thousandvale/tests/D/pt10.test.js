@@ -267,7 +267,7 @@ test('Y32: the Starcaller has a card in creation and a picture for each of its s
   const tv = json('data/rules/classes-tv.json'), sc = tv.classes.find(c => c.id === 'starcaller');
   assert.ok(sc, 'the class row');
   const L = classCardLines(sc);
-  assert.equal(L.name, 'Starcaller'); assert.equal(L.role, 'Arcane Star Caster'); assert.deepEqual(L.facts, ['Cloth', 'Intelligence', 'Mana']);
+  assert.equal(L.name, 'Starcaller'); assert.equal(L.role, 'Arcane Star Caster'); assert.deepEqual(L.facts, ['Cloth', 'Magic weapons', 'Mana']);      // round 11 (C, Z2): the weapon family, not an attribute
   assert.match(L.hook, /golden stars/); assert.match(L.signature, /^Constellation:/);
   assert.equal(classCardLines({ id: 'warrior', name: 'Warrior', role: 'Frontline Tank', armorTier: 'heavy', primaryAttr: 'STR', signature: 'stronger in a crowd' }).signature, 'Signature: stronger in a crowd.');
   assert.equal(classCardLines(null), null);

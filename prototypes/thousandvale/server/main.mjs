@@ -51,7 +51,7 @@ import { MAX_FRAME, PROTOCOL_VERSION } from '../js/net/protocol.js';
 import { createStaticHandler } from './static.js';
 import { statusPage } from './status-page.js';
 import { turnstileFromEnv } from './turnstile.js';
-import { GAME, PLAYGROUND, log, loadRules, makeStore, loadClasses, loadClassNames, loadLayouts, defaultProvinces, starterOf, feedbackSink, loadEconomy, loadMotd, loadChangelog } from './load.mjs';
+import { GAME, PLAYGROUND, log, loadRules, makeStore, loadClasses, loadClassNames, loadLayouts, defaultProvinces, starterOf, feedbackSink, loadEconomy, loadMotd, loadChangelog, runSeedFrom } from './load.mjs';
 import { wireSocket, startPinger } from './ws-conn.mjs';
 import { hashPassword, verifyPassword } from './passwords.js';
 import { createChatFilter } from '../js/sim/chatfilter.js';
@@ -129,6 +129,7 @@ export async function startServer(o) {
   const publicMode = !!o.publicDir;
   const chatFilter = createChatFilter();
   const common = {
+    runSeed: runSeedFrom(),      // round 11 (World, live #6): a restart rolls new dice (js/sim/province.js runSeed)
     store, build: o.build, classes, classNames: loadClassNames(), now, log, verifyHuman, humanSiteKey, directorOpts: o.director,
     hasher: { hashPassword, verifyPassword }, mailer: mailerFromEnv(process.env, { log }), chatFilter, ipSalt: process.env.TV_IP_SALT || 'thousandvale-' + env,
     // public: nobody skips the per-address limits but the addresses named with --unlimited-ip

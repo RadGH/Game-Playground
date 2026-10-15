@@ -154,17 +154,17 @@ test('Y8 + Y5 + Y15 + Y11 on the stand-in world: empty corpses, emotes, learning
   oa().lastHitAt = clock.now();
   a.emote('dance'); await until(clock, () => er.length >= 5);
   assert.equal(er[4].why, 'combat');
-  // Y15: never fished, no rod -> not learned; cast refused; the angler teaches (and hands over a rod when the shop data has one)
-  assert.equal(a.joined.you.angling.learned, false);
-  const fr = on(a, 'fishR'), used = on(a, 'used'), you = on(a, 'you');
+  // Y15 -> round 11 (stream P, live #11 / #12): every character knows Angling from the start (a rod is handed over on
+  // join when the shop data has one); there is nothing left for the angler to teach; and away from a fish pool a cast is
+  // refused because there is no fishing spot, never because the trade is unknown
+  assert.equal(a.joined.you.angling.learned, true);
+  const fr = on(a, 'fishR'), used = on(a, 'used');
   a.fish('cast'); await until(clock, () => fr.length);
-  if (fr[0].why !== 'notReady') { assert.equal(fr[0].why, 'unlearned'); assert.match(fr[0].msg, /Learn Angling from an angler/); }
+  if (fr[0].why !== 'notReady') { assert.ok(fr[0].why !== 'unlearned', JSON.stringify(fr[0])); assert.ok(['noRod', 'noPool'].includes(fr[0].why), JSON.stringify(fr[0])); }
   const angler = r.spawn({ kind: 'npc', type: 'npc', name: 'Tam Sedgeley', x: e.x + 1, z: e.z + 1, team: 1, data: { npc: { role: 'angler', says: [] }, key: 'test:angler' } });
   a.use(angler.id); await until(clock, () => used.length);
-  assert.equal(used[0].taught, 'angling');
-  assert.equal(oa().char.angling.learned, true); assert.ok(you.some(y => y.angling && y.angling.learned === true), 'the client hears it');
-  a.use(angler.id); await until(clock, () => used.length >= 2);
-  assert.ok(!used[1].taught, 'taught once');
+  assert.ok(!used[0].taught, 'nothing to teach');
+  assert.equal(oa().char.angling == null || oa().char.angling.learned !== false, true);
   a.close(); b.close(); await srv.stop();
 });
 

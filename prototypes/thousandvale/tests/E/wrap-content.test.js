@@ -282,7 +282,7 @@ test('Y32: the Starcaller has a class quest shaped like the other thirty, from t
   const qs = CLASSQ.quests.filter(q => (q.classes || []).includes('starcaller'));
   assert.equal(qs.length, 1);
   const q = qs[0], like = CLASSQ.quests.find(x => x.id === 'class_mage'), others = CLASSQ.quests.filter(x => x !== q);
-  assert.equal(CLASSQ.quests.length, 31);
+  assert.equal(CLASSQ.quests.length, 32);      // + the Star Blade (round 11, #53)
   assert.deepEqual(Object.keys(q).sort(), Object.keys(like).sort(), 'the same fields as a caster class with no companion');
   assert.deepEqual(q.classes, ['starcaller']);
   assert.ok(q.level >= 1 && q.level <= 5);
@@ -297,7 +297,8 @@ test('Y32: the Starcaller has a class quest shaped like the other thirty, from t
   for (const s of q.steps) {
     assert.ok(s.text && s.where, 'what and where');
     if (s.kind === 'use') assert.ok(SP.get(s.vignette).objects.some(o => o.type === 'use' && o.name === s.object), `${s.vignette} has "${s.object}"`);
-    else if (s.kind === 'kill') { assert.ok(best.some(e => e.id === s.type)); assert.ok(SP.get(s.near).monsters.some(m => (m.type || m.monster) === s.type), `${s.type} lives at ${s.near}`); }
+    // round 11 (World, owner #31): the kill step moved next to the stones — the set piece's own monsters, or a live hunting area of them within 160 m
+    else if (s.kind === 'kill') { assert.ok(best.some(e => e.id === s.type)); const sp = SP.get(s.near), areas = J('data/quests/marks/torbor_downs-hunts.json').types[s.type] || [], at = J('data/quests/marks/torbor_downs.json').quests[q.id].steps[q.steps.indexOf(s) - 1]; assert.ok(sp.monsters.some(m => (m.type || m.monster) === s.type) || areas.some(h => Math.hypot(h.x - at.x, h.z - at.z) < 160), `${s.type} lives at ${s.near}`); }
     else assert.fail('step kind ' + s.kind);
     assert.ok(others.some(x => x.steps.some(y => y.where === s.where)), 'the place is named as the other quests name it');
   }

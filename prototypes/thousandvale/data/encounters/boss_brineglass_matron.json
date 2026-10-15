@@ -4,7 +4,7 @@
   "tier": "boss",
   "body": "obsidian_warden",
   "place": "dungeon lava_tube set A (The Brineglass Tubes, Blackstrand, level 11-13): the end boss where the tube meets the sea",
-  "_doc": "A warden of sea-glass that the old islanders set to keep the tide out of the tubes; now it keeps everyone out. P1 \"Tide Gate\": a glass hammer cone, shards thrown at random players, and the TIDE — sea water rushes in from one side as a sweep of lines; four cooling vents in the floor hiss steam (stand in one and burn), but if you lure the Matron onto a vent the steam cracks her glass (stun + takes more, once per vent). P2 at 60% \"Saltglass Ward\": she seals herself in salt-glass; light the three tide lamps to break it (or it fades by itself). P3 new bar \"Molten Heart\": the glass splits and her core shows — the floor around her heats in a ring (stand close or far), a three-player soak of falling glass, and a spreading spray of droplets.",
+  "_doc": "A warden of sea-glass that the old islanders set to keep the tide out of the tubes; now it keeps everyone out. P1 \"Tide Gate\": a glass hammer cone, shards thrown at random players, and the TIDE — sea water rushes in from one side as a sweep of lines; four cooling vents in the floor hiss steam (stand in one and burn), but if you lure the Matron onto a vent the steam cracks her glass (stun + takes more, once per vent). P2 at 60% \"Saltglass Ward\": she seals herself in salt-glass; light the three tide lamps to break it (or it fades by itself). P3 new bar \"Molten Heart\": the glass splits and her core shows — the floor around her heats in a ring (stand close or far), a three-player soak of falling glass, and a spreading spray of droplets. OWNER #51 (2026-10-15): the phase that refilled the health bar is removed; the health bar is the whole fight.",
   "party": "Solo: hard; use the vents, skip nothing. 2-3: the tank drags her onto vents; one runs the lamps. 5: as designed — the soak needs three.",
   "hpMult": 3.8,
   "arena": {
@@ -300,72 +300,6 @@
           "status": "weaken"
         }
       ]
-    },
-    "molten_ring": {
-      "id": "molten_ring",
-      "name": "Molten Ring",
-      "every": [
-        16,
-        19
-      ],
-      "first": 5,
-      "cast": 1,
-      "say": "The floor around her glows — hug her or get far away!",
-      "telegraphs": [
-        {
-          "shape": "ring",
-          "at": "self",
-          "r": 11,
-          "r2": 3.5,
-          "wind": 1.8,
-          "damage": 2.2,
-          "element": "fire",
-          "status": "burn"
-        }
-      ]
-    },
-    "glassfall": {
-      "id": "glassfall",
-      "name": "Glassfall",
-      "every": [
-        20,
-        24
-      ],
-      "first": 8,
-      "cast": 1,
-      "say": "The roof glass breaks over {target} — three of you, catch it together!",
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "random",
-          "r": 3,
-          "kind": "soak",
-          "need": 3,
-          "fail": 2,
-          "wind": 3,
-          "damage": 1.4
-        }
-      ]
-    },
-    "droplets": {
-      "id": "droplets",
-      "name": "Glass Droplets",
-      "every": [
-        11,
-        13
-      ],
-      "first": 2,
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "each",
-          "r": 2.6,
-          "follow": true,
-          "wind": 2,
-          "damage": 1.3,
-          "element": "fire"
-        }
-      ]
     }
   },
   "phases": [
@@ -415,19 +349,6 @@
         "fade": "The salt-glass flakes away by itself.",
         "pool": 0.1
       }
-    },
-    {
-      "name": "Molten Heart",
-      "newBar": {
-        "hp": 0.55
-      },
-      "say": "Her glass splits — and the heart inside is still molten.",
-      "abilities": [
-        "glass_hammer",
-        "molten_ring",
-        "glassfall",
-        "droplets"
-      ]
     }
   ],
   "triggers": [

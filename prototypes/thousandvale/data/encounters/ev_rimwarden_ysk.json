@@ -10,7 +10,7 @@
     "level": 20,
     "respawnMs": 1800000
   },
-  "_doc": "Expansion 1 (Vharlen). The ZONE EVENT BOSS for the Caldera: Ysk, a vast glasswing the rim keepers raised to guard the crater, gone wild since they left. P1 'The Watch': talons (cone), a gale of glass down three lines, and the Rim Shriek — a blast round the whole rim; hide behind a rim stone. P2 at 55% 'The Flock': she hangs in the air behind a ward of wingbeats while her flock dives — KILL THE GLASSWINGS to drop it — and glass rains that leaves shards. P3, a new health bar 'Grounded': a wingbeat that throws, a stand-together stack, and eight lines of shards spiralling out. Soft enrage from 4 minutes, hard at 7.",
+  "_doc": "Expansion 1 (Vharlen). The ZONE EVENT BOSS for the Caldera: Ysk, a vast glasswing the rim keepers raised to guard the crater, gone wild since they left. P1 'The Watch': talons (cone), a gale of glass down three lines, and the Rim Shriek — a blast round the whole rim; hide behind a rim stone. P2 at 55% 'The Flock': she hangs in the air behind a ward of wingbeats while her flock dives — KILL THE GLASSWINGS to drop it — and glass rains that leaves shards. P3, a new health bar 'Grounded': a wingbeat that throws, a stand-together stack, and eight lines of shards spiralling out. Soft enrage from 4 minutes, hard at 7. OWNER #51 (2026-10-15): the phase that refilled the health bar is removed; the health bar is the whole fight.",
   "party": "Zone event, everyone nearby joins. Solo: not intended (the flock and a stack of 3). 3-5: playable. 10+: intended. M5 scaling: health and flock by players enrolled; stack need = clamp(players/4, 2, 5).",
   "hpMult": 3.2,
   "arena": {
@@ -196,76 +196,6 @@
           }
         }
       ]
-    },
-    "wingbeat": {
-      "id": "wingbeat",
-      "name": "Grounded Wingbeat",
-      "every": [
-        14,
-        17
-      ],
-      "first": 4,
-      "cast": 0.8,
-      "say": "Ysk beats her broken wings — get clear!",
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "self",
-          "r": 10,
-          "wind": 1.8,
-          "damage": 2,
-          "knock": 7
-        }
-      ]
-    },
-    "rim_stack": {
-      "id": "rim_stack",
-      "name": "Pinned",
-      "every": [
-        20,
-        24
-      ],
-      "first": 7,
-      "cast": 1,
-      "say": "Ysk pins {target} to the rock — three of you stand with them!",
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "random",
-          "r": 3.6,
-          "wind": 4,
-          "damage": 3,
-          "kind": "stack",
-          "need": 3,
-          "follow": true
-        }
-      ]
-    },
-    "spiral": {
-      "id": "spiral",
-      "name": "Spiral Shards",
-      "every": [
-        16,
-        19
-      ],
-      "first": 11,
-      "cast": 0.8,
-      "say": "Shards spiral out from her!",
-      "telegraphs": [
-        {
-          "shape": "line",
-          "at": "self",
-          "len": 36,
-          "w": 3,
-          "wind": 1.5,
-          "damage": 2,
-          "count": 8,
-          "rotate": 0.785,
-          "delay": 0.3,
-          "yaw": "random",
-          "status": "bleed"
-        }
-      ]
     }
   },
   "phases": [
@@ -317,19 +247,6 @@
         "say": "Ysk hangs behind a ward of beating wings. Kill her three flock birds to drop it! It fails by itself in 25 seconds.",
         "fade": "The ward fails by itself. No opening this time."
       }
-    },
-    {
-      "name": "Grounded",
-      "newBar": {
-        "hp": 0.5
-      },
-      "say": "Ysk crashes onto the rim, one wing cracked, and keeps fighting.",
-      "abilities": [
-        "talons",
-        "wingbeat",
-        "rim_stack",
-        "spiral"
-      ]
     }
   ],
   "triggers": [

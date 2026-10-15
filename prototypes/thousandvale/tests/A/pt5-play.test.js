@@ -4,6 +4,7 @@
 //   T9  a quest's crate reward lands in the bag and opens            T14 `you.reach` follows the weapon in hand
 //   T18 the character sheet arrives after the join and after every equip
 import test from 'node:test';
+import { tabOf } from '../../js/sim/bag-tabs.js';
 import { economy } from '../../js/sim/economy-knobs.js';
 import assert from 'node:assert/strict';
 import { rarityRank, slotFits, crateItem, openCrate } from '../../js/sim/crates.js';
@@ -42,7 +43,7 @@ test('T5: the kit screen\'s data (kits), a picked kit is validated at create and
   assert.deepEqual(c.joined.you.kit, { armour: armour.id, weapons: pack.id });
   const o = rec(world, c);
   assert.equal(o.char.kitV, 2);
-  assert.equal((o.char.bag || []).length, 0, 'nothing dumped in the bag');
+  assert.equal((o.char.bag || []).filter(i => tabOf(i) === 'gear').length, 0, 'nothing dumped in the bag');      // (round 11: the recall charm and the starting tools are there, none of them gear)
   // others draw it
   assert.ok(o.entity.gear && o.entity.gear.weapon && Object.keys(o.entity.gear).length >= 3, 'gear on info: ' + JSON.stringify(o.entity.gear));
   // no kit at all = the old default (class weapon, plain clothes)

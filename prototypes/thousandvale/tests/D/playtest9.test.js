@@ -52,6 +52,6 @@ test('X2: wired — follows controls.moveGoal (so keys, stick, auto-run, attack 
   assert.match(main, /moveMark\.update\(dt\)/);
   assert.match(main, /net\.on\('eventTrack', gatePing\)/); assert.match(main, /m\?\.gate \|\| m\?\.ev\?\.gate/);
   // every input that takes over clears the goal in controls.js
-  assert.match(c, /ArrowRight'\]\.includes\(k\)\) \{ moveGoal = null/); assert.match(c, /analog\.mz\)\) \{[^}]*moveGoal = null/); assert.match(c, /if \(d < 0\.5\) moveGoal = null/);
+  assert.match(c, /ArrowRight'\]\.includes\(k\)\) \{ moveGoal = null/); assert.match(c, /analog\.mz\)\) \{[^}]*moveGoal = null/); assert.match(c, /Math\.hypot\(moveGoal\.x - self\.x, moveGoal\.z - self\.z\) < 0\.5\) moveGoal = null/);   // (round 11 Z38: the goal ends at the CLICKED spot, whatever waypoint it is walking to)
   assert.equal((src('js/client/move-marker.js').match(/new THREE\.Mesh\w+Material\(/g) || []).length, 1);
 });

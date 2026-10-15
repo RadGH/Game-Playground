@@ -43,7 +43,7 @@
     },
     "recall_charm": {
       "name": "Recall charm",
-      "desc": "Snap it to walk out of the wilds to your bound inn after 5 seconds of standing still. One use.",
+      "desc": "Snap it to walk out of the wilds to your bound inn after 5 seconds of standing still. It never breaks and has no cooldown; you cannot sell or lose it.",
       "use": {
         "type": "recall",
         "cast": 5
@@ -117,7 +117,7 @@
     },
     "saddle_bags": {
       "name": "Saddle bags",
-      "desc": "Twelve more bag slots while you own a mount. Kept on the mount.",
+      "desc": "Use it to fit it to your mounts for good: twelve more squares in your Equipment and Items tabs while you own a mount.",
       "use": {
         "type": "bag",
         "slots": 12,
@@ -1039,9 +1039,9 @@
         {
           "id": "trail_horse",
           "source": "gear",
-          "price": 400,
+          "price": 120,
           "minLevel": 1,
-          "note": "the owner wants to try a mount (play-test 2, Q16): the plain horse is sold from level 1, ahead of PLAN §6.5's mount-at-10 ladder"
+          "note": "round 11 (owner #16): nobody is given a horse any more; the plain Trail Horse is the cheap first mount (120 g, the Moor Pony is 1,800 g at level 5)"
         },
         {
           "id": "pony",
@@ -2676,9 +2676,9 @@
         {
           "id": "trail_horse",
           "source": "gear",
-          "price": 400,
+          "price": 120,
           "minLevel": 1,
-          "note": "the owner wants to try a mount (play-test 2, Q16): the plain horse is sold from level 1, ahead of PLAN §6.5's mount-at-10 ladder"
+          "note": "round 11 (owner #16): nobody is given a horse any more; the plain Trail Horse is the cheap first mount (120 g, the Moor Pony is 1,800 g at level 5)"
         },
         {
           "id": "pony",

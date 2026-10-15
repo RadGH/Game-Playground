@@ -472,7 +472,8 @@
     "class_enchanter",
     "class_stormcaller",
     "class_pyromancer",
-    "class_starcaller"
+    "class_starcaller",
+    "class_starblade"
    ],
    "takes": [
     "class_mage",
@@ -481,7 +482,8 @@
     "class_enchanter",
     "class_stormcaller",
     "class_pyromancer",
-    "class_starcaller"
+    "class_starcaller",
+    "class_starblade"
    ],
    "mustTake": [
     "class_sorcerer",
@@ -498,7 +500,8 @@
     "enchanter",
     "stormcaller",
     "pyromancer",
-    "starcaller"
+    "starcaller",
+    "starblade"
    ],
    "offers": true,
    "titled": true
@@ -2091,7 +2094,7 @@
   },
   "bettony": {
    "name": "Bettony the herb-woman",
-   "role": "herbalist",
+   "role": "wise_woman",
    "zone": "z12_02",
    "sheet": "test",
    "at": "sp_nine_maidens",
@@ -2394,9 +2397,7 @@
     "bones_for_bryn"
    ],
    "mustTake": [],
-   "talks": [
-    "class_cleric"
-   ],
+   "talks": [],
    "jobs": false,
    "offers": true,
    "titled": true
@@ -2416,11 +2417,7 @@
     "the_old_sow"
    ],
    "mustTake": [],
-   "talks": [
-    "class_tactician",
-    "class_enchanter",
-    "class_bard"
-   ],
+   "talks": [],
    "jobs": false,
    "offers": true,
    "titled": true

@@ -5,8 +5,9 @@ import batch04 from '../data/batch-04.js';
 import batch05 from '../data/batch-05.js';
 import batch06 from '../data/batch-06.js';
 import { starcaller } from '../data/starcaller.js';
+import starblade from '../data/starblade.js';   // batch 7 (play-test 11): the Star Blade
 
-export const icons = Object.freeze([...batch01, ...batch02, ...batch03, ...batch04, ...batch05, ...batch06, ...starcaller]);
+export const icons = Object.freeze([...batch01, ...batch02, ...batch03, ...batch04, ...batch05, ...batch06, ...starcaller, ...starblade]);
 const byId = new Map(icons.map(icon => [icon.id, icon]));
 if (byId.size !== icons.length) throw new Error('Duplicate icon IDs');
 export const iconInfo = id => byId.get(id) || null;

@@ -7,14 +7,38 @@
 //   const list = await loadCallings();              // [{ id, name, role, hook, signature, armorTier, primaryAttr, … }]
 //   drawClassCard(el, list.find(c => c.id === id)); // pure rule: classCardLines (node-tested)
 
+import { CLASS_MOTIFS, classPalette, motifSvg } from '../../../../../icons/js/motifs.js';
+import { iconSvg } from '../../../../../icons/js/catalog.js';
+
+/**
+ * Play-test 11 (the Star Blade, owner #53 "all distinct artwork"): the calling's EMBLEM on its card — its ground sigil
+ * from the effect shapes (icons/data/game/fx-motifs.js, `<class>.c`) in its own glow colour; a calling with no effect
+ * shapes (the Starcaller keeps its own stars) shows its first skill's picture. Pure string; '' when there is nothing.
+ */
+export function classEmblemSvg(c, size = 44) {
+  if (!c?.id) return '';
+  const glyph = CLASS_MOTIFS[c.id]?.[2];
+  if (glyph) {
+    const pal = classPalette(c.id) || {};
+    return String(motifSvg(glyph, size) || '').replace(/#fff\b/g, pal.glow || '#e6c14a').replace('<svg ', '<svg aria-hidden="true" ');
+  }
+  const first = (c.skills || [])[0];
+  return (first && iconSvg(first, size)) || '';
+}
+
 const ARMOUR = { cloth: 'Cloth', light: 'Light armour', medium: 'Medium armour', heavy: 'Heavy armour' };
 const ATTR = { STR: 'Strength', DEX: 'Dexterity', INT: 'Intelligence' };
+// round 11 (C, Z2 / owner #2): no attributes any more — the card names the weapon family the calling fights with
+const FAMILY = { heavy: 'Heavy weapons', light: 'Light weapons', magic: 'Magic weapons' };
 const cap = s => String(s || '').replace(/^\w/, c => c.toUpperCase());
 
 /** What the card says, as plain strings (no DOM). */
 export function classCardLines(c) {
   if (!c) return null;
-  const facts = [ARMOUR[c.armorTier] || cap(c.armorTier), ATTR[c.primaryAttr] || c.primaryAttr, cap(c.resource || 'mana')].filter(Boolean);
+  // [C] the card reads Farhold's classes.json straight, whose rows carry `primaryAttr` and no `weaponFamily`: the same
+  // mapping the rules use (js/rules/attributes.js) — STR heavy, DEX light, INT magic
+  const fam = c.weaponFamily || { STR: 'heavy', DEX: 'light', INT: 'magic' }[c.primaryAttr] || null;
+  const facts = [ARMOUR[c.armorTier] || cap(c.armorTier), FAMILY[fam] || (fam ? cap(fam) + ' weapons' : null), cap(c.resource || 'mana')].filter(Boolean);
   // a signature is either a sentence ("Constellation: Star Dart … gains 1 Starlight …") or a few words ("stronger in a crowd")
   const sig = String(c.signature || '').trim();
   return { name: c.name || cap(c.id), role: c.role || '', facts, hook: c.hook || '', signature: sig ? (/[.:]/.test(sig) ? sig : `Signature: ${sig}.`) : '', mechanic: c.resourceName || '' };
@@ -39,7 +63,9 @@ export function drawClassCard(el, c) {
   if (!L) { el.replaceChildren(); return; }
   const mk = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; e.textContent = text; return e; };
   el.dataset.cls = c.id;
+  const emblem = document.createElement('span'); emblem.className = 'cc-emblem'; emblem.innerHTML = classEmblemSvg(c);   // trusted authored SVG
   el.replaceChildren(
+    ...(emblem.innerHTML ? [emblem] : []),
     mk('strong', 'cc-name', L.name), mk('span', 'cc-role', L.role),
     mk('p', 'cc-facts', L.facts.join(' · ')),
     ...(L.hook ? [mk('p', 'cc-hook', L.hook)] : []),

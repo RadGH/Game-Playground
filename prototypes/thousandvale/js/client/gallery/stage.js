@@ -20,6 +20,7 @@ import { createChat } from '../chat.js';
 import { createFriends } from '../friends.js';
 import { createGuild } from '../guild.js';
 import { createMail } from '../mail.js';
+import { createMarket } from '../ui/market.js';      // round 11 (#25)
 import { createCallboard } from '../callboard.js';
 import { createAccount } from '../account.js';
 import { createHelp } from '../help.js';
@@ -31,6 +32,7 @@ import { createUi2 } from '../ui/pt2.js';
 import { createUi5 } from '../ui/pt5.js';
 import { createUi8 } from '../ui/pt8.js';
 import { createUi10 } from '../ui/pt10.js';
+import { createUi11 } from '../ui/pt11.js';
 import { createProf } from '../ui/prof.js';          // W9 (P-client): professions — mini-games, crafting, the Professions list
 import { profStep } from './prof-scenes.js';
 import { loadSkillData, barFromData, barFromServer, initials } from '../skillbar.js';
@@ -112,13 +114,14 @@ hud.focusChat = prefill => chat.focus(prefill);
 const friends = createFriends({ net: () => S.net, hud, chat, social });
 const guild = createGuild({ net: () => S.net, hud, chat, me });
 const mail = createMail({ net: () => S.net, hud, bag, me, inTown: () => S.room?.kind === 'town' });
+const market = createMarket({ net: () => S.net, hud, bag, me });
 const callboard = createCallboard({ net: () => S.net, hud, me });
 const account = createAccount({ net: () => S.net, hud, me, netOpts: () => ({ mode: 'ws', build: 'gallery' }),
   onLogin: async () => S.net?.chars || [], onPick: () => hud.toast('In the game this character walks into the world.', 'info'), onLoggedOut: () => {} });
 const help = createHelp();
 loadZoneNames();
 const worldMe = () => (S.selfId != null && S.phase === 'world' ? { id: S.selfId, x: S.pos.x, z: S.pos.z, yaw: S.yaw, level: S.self.level, name: S.self.name, cls: S.self.cls, dead: S.self.dead, char: S.net?.joined?.you?.char ?? null } : null);
-const ui = createUiSuite({ net: () => S.net, hud, room: () => S.room, actors, objects, worldUi, social, chat, panels: { friends: friends.panel, guild: guild.panel, mail: mail.panel, callboard: callboard.panel }, me: worldMe });
+const ui = createUiSuite({ net: () => S.net, hud, room: () => S.room, actors, objects, worldUi, social, chat, panels: { friends: friends.panel, guild: guild.panel, mail: mail.panel, market: market.panel, callboard: callboard.panel }, me: worldMe });
 const ui2 = createUi2({ net: () => S.net, atlas: ui.atlas, hud, actors, controls, chat, social, friends, bag, help, account, objects, worldUi, renderer: softRenderer, scene: null,
   me: worldMe, self: () => S.self, targetId: () => S.target, setTarget: id => setTarget(id), infoOf: id => S.mirror.infos.get(id) || null,
   avatarFor, createBody: async () => { throw new Error('the gallery draws no 3D bodies'); }, defaultLook, races: PLAYABLE_RACES, raceNames: RACE_NAMES,
@@ -130,6 +133,8 @@ const ui5 = createUi5({ net: () => S.net, hud, bag, mail, worldUi, journal: ui.j
   targetId: () => S.target, setTarget: id => setTarget(id), stats: () => ({ fps: 60 }), zoneName: () => $('zone-name')?.textContent || null,
   ensureNet: async () => { const n = startNet(); await n.ready; return n; }, onKitPreview: () => {}, onKitBack: () => title?.toAppearance(), onKitCreate: () => hud.toast('In the game this creates the character and walks into the world.', 'info') });
 const ui8 = createUi8({ net: () => S.net, hud, actors, worldUi, feedback: ui5.feedback, atlas: ui.atlas, settings: ui2.settings, selfId: () => S.selfId, bar: () => S.bar });
+const ui11 = createUi11({ net: () => S.net, hud, me, mount: () => {}, mounted: () => false, calling: () => null });
+window.tvui11 = ui11;
 const ui10 = createUi10({ net: () => S.net, hud, actors, atlas: ui.atlas, me, pos: () => S.pos, worldMap: ui.worldMap, settings: ui2.settings, camYaw: () => S.yaw || 0, room: () => S.room });
 friends.tracker = ui10;
 const prof = createProf({ net: () => S.net, hud, bag, sheet: ui5.sheet, journal: ui.journal });   // W9 (P-client)
@@ -290,14 +295,14 @@ function wireNet(net) {
   chat.wire(net); friends.wire(net); guild.wire(net); mail.wire(net); callboard.wire(net); account.wire(net);
   bag.wire(net);
   ui5.wire(net);
-  ui8.wire(net); ui10.wire(net);
+  ui8.wire(net); ui10.wire(net); ui11.wire(net);
   prof.wire(net);   // W9 (P-client)
   ui.wire(net);
   worldUi.wire(net);
   ui2.wire(net);
 }
 /** A request the recording has no answer for (buy, wear, accept…): say so, so a tap in the gallery never looks dead. */
-const QUIET = new Set(['pref', 'settings', 'trace', 'follow', 'loot', 'fish', 'sheet', 'map', 'mail', 'friend', 'guild', 'callboard', 'cook', 'kits', 'account', 'inspect', 'party', 'chat', 'say', 'admin']);
+const QUIET = new Set(['pref', 'settings', 'trace', 'follow', 'loot', 'fish', 'sheet', 'map', 'mail', 'market', 'friend', 'guild', 'callboard', 'cook', 'kits', 'account', 'inspect', 'party', 'chat', 'say', 'admin']);
 const fake = createFakeServer(GX.session, GX.moments, { world: !TITLE, onUnanswered: (w, m) => { if (api?.ready && !QUIET.has(m.t)) hud.toast(`The gallery plays a recording: “${[m.t, m.op].filter(Boolean).join(' ')}” was sent and nothing changes here.`, 'info'); } });
 const nearest = f => [...actors.actors.values()].filter(f).sort((a, b) => Math.hypot(a.pos.x - S.pos.x, a.pos.z - S.pos.z) - Math.hypot(b.pos.x - S.pos.x, b.pos.z - S.pos.z))[0] || null;
 /** The @tokens of fixtures/moments.json and of scene steps. */
@@ -328,7 +333,7 @@ function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min(0.1, (now - last) / 1000); last = now;
   if (S.phase === 'world') {
-    worldUi.tick(S.tod); ui.tick(dt); ui2.tick(dt); ui5.tick(dt); ui8.tick(dt); ui10.tick(dt); boss.update(dt);
+    worldUi.tick(S.tod); ui.tick(dt); ui2.tick(dt); ui5.tick(dt); ui8.tick(dt); ui10.tick(dt); ui11.tick(dt); boss.update(dt);
     hud.death(S.self.dead ? Math.max(0, (S.self.riseIn ?? 2.5) - (now - S.self.deadAt) / 1000) : null);
     const tgt = S.target != null ? actors.get(S.target) : null;
     if (tgt) { hud.setTarget(tgt); hud.usable(0, !tgt.dead && tgt.hostile); } else hud.usable(0, false);

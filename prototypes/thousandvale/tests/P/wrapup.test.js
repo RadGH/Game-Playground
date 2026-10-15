@@ -63,9 +63,8 @@ test('#56 / #62: the angler lists Angling like any other teacher, before and aft
     let u = used[0];
     assert.ok(u.ok && u.prof, `${an.town}: the angler answers with a trades block`);
     assert.deepEqual(u.prof.trains, ['angling'], `${an.town}: Angling is in the list the trade button is built from`);
-    assert.deepEqual(u.prof.taught, ['angling'], `${an.town}: a newcomer is told what was just taught`);
-    assert.deepEqual(u.prof.known, ['angling']);
-    assert.ok(o.char.bag.some(P.angling.isRod), 'with the rod');
+    assert.equal(u.prof.taught, undefined, `${an.town}: round 11 — nothing left to teach`);
+    assert.deepEqual(u.prof.known, ['angling']); assert.ok(P.angling.learned(o.char), 'everyone knows Angling');
     used.length = 0; a.use(at.e.id); await until(clock, () => used.length, 2000);
     u = used[0];
     assert.deepEqual(u.prof.trains, ['angling'], `${an.town}: still listed once it is known`);

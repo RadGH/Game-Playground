@@ -156,28 +156,39 @@ function trace(ctx, run, v, w, h) {
   // the line to cut: a bright dashed line inside a soft band as wide as the knife may wander
   ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
   ctx.beginPath(); for (let i = 0; i <= N; i++) { const u = i / N; ctx[i ? 'lineTo' : 'moveTo'](X(u), Y(v.line(u))); }
-  ctx.strokeStyle = 'rgba(255,241,200,0.22)'; ctx.lineWidth = v.band * 2 * (y1 - y0); ctx.stroke();
-  ctx.setLineDash([7, 6]); ctx.strokeStyle = '#fff1c8'; ctx.lineWidth = 2.5; ctx.stroke(); ctx.setLineDash([]);
+  ctx.strokeStyle = 'rgba(143,240,160,0.18)'; ctx.lineWidth = v.band * 2 * (y1 - y0); ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,225,122,0.30)'; ctx.lineWidth = Math.max(3, v.perfect * 2 * (y1 - y0)); ctx.stroke();      // round 11 (#7): the PERFECT strip, gold, right on the line
+  ctx.setLineDash([7, 6]); ctx.strokeStyle = '#fff1c8'; ctx.lineWidth = 2; ctx.stroke(); ctx.setLineDash([]);
   // what is cut already
   if (v.u > 0) { ctx.beginPath(); const M = Math.max(2, Math.round(N * v.u)); for (let i = 0; i <= M; i++) { const u = (i / M) * v.u; ctx[i ? 'lineTo' : 'moveTo'](X(u), Y(v.line(u))); } ctx.strokeStyle = '#5a1f1a'; ctx.lineWidth = 4; ctx.stroke(); }
   ctx.restore();
   // each scored point of the cut
   for (let k = 0; k < v.samples; k++) { const u = (k + 0.5) / v.steps; ctx.beginPath(); ctx.arc(X(u), Y(v.line(u)), 4.5, 0, TAU); ctx.fillStyle = GRADE(v.marks[k]); ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,0.6)'; ctx.lineWidth = 1; ctx.stroke(); }
-  // the knife
-  const kx = X(v.u), ky = Y(v.y), ok = Math.abs(v.y - v.line(v.u)) <= v.band;
-  ctx.save(); ctx.translate(kx, ky); ctx.shadowColor = ok ? GOOD : BAD; ctx.shadowBlur = 14;
-  ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-7, -22); ctx.quadraticCurveTo(2, -30, 8, -20); ctx.closePath(); ctx.fillStyle = '#fff'; ctx.fill(); ctx.strokeStyle = '#111'; ctx.lineWidth = 1.5; ctx.stroke();
-  ctx.shadowBlur = 0; ctx.fillStyle = '#6a4a2a'; ctx.fillRect(-2, -38, 8, 14); ctx.strokeRect(-2, -38, 8, 14);
-  ctx.beginPath(); ctx.arc(0, 0, 5, 0, TAU); ctx.fillStyle = ok ? GOOD : BAD; ctx.fill(); ctx.stroke(); ctx.restore();
-  // how well it is going
+  // the knife. Round 11 (live #7: "on the dotted line I get a yellow mark; I have to hold it 5 px above"): the point that is
+  // scored is the CENTRE of the ring at the knife's tip — it is drawn as a hollow ring with a dot, exactly where the
+  // pointer is (the system cursor is hidden while you cut, css/prof.css), and the ring takes the colour the mark WILL
+  // take: gold = perfect (on the line), green = good (in the band), red = off. Gold is the best colour everywhere in the
+  // mini-games — the score bar below used to show gold-ish amber for a middling cut, which read as "yellow = worse".
+  const kx = X(v.u), ky = Y(v.y), off = Math.abs(v.y - v.line(v.u)), grade = off <= v.perfect ? 2 : off <= v.band ? 1 : 0, rc = GRADE(grade);
+  ctx.save(); ctx.translate(kx, ky); ctx.shadowColor = rc; ctx.shadowBlur = 14;
+  ctx.beginPath(); ctx.moveTo(1, -7); ctx.lineTo(-7, -26); ctx.quadraticCurveTo(2, -34, 9, -24); ctx.closePath(); ctx.fillStyle = '#fff'; ctx.fill(); ctx.strokeStyle = '#111'; ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.shadowBlur = 0; ctx.fillStyle = '#6a4a2a'; ctx.fillRect(-2, -42, 8, 14); ctx.strokeRect(-2, -42, 8, 14);
+  ctx.beginPath(); ctx.arc(0, 0, 6.5, 0, TAU); ctx.strokeStyle = 'rgba(0,0,0,0.75)'; ctx.lineWidth = 4.5; ctx.stroke(); ctx.strokeStyle = rc; ctx.lineWidth = 2.5; ctx.stroke();
+  ctx.beginPath(); ctx.arc(0, 0, 1.8, 0, TAU); ctx.fillStyle = rc; ctx.fill(); ctx.restore();
+  // what the colours mean, once, in the corner
+  ctx.font = FONT; ctx.textAlign = 'left'; let lx = x0;
+  for (const [c, t] of [[GOLD, 'on the line'], [GOOD, 'close'], [BAD, 'off']]) { ctx.beginPath(); ctx.arc(lx + 4, 10, 4, 0, TAU); ctx.fillStyle = c; ctx.fill(); ctx.fillStyle = DIM; ctx.fillText(t, lx + 11, 14); lx += 18 + ctx.measureText(t).width + 8; }
+  // how well it is going (gold = perfect so far, green = good, amber = fair, red = poor)
   const sum = v.marks.reduce((a, b) => a + b, 0), sc = v.samples ? sum / (2 * v.samples) : 1, mw = w - 60;
   rr(ctx, 30, h - 14, mw, 7, 3.5); ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fill();
-  if (sc > 0.02) { rr(ctx, 30, h - 14, mw * sc, 7, 3.5); ctx.fillStyle = sc >= 0.65 ? GOOD : sc >= 0.4 ? '#e8c06a' : BAD; ctx.fill(); }
+  if (sc > 0.02) { rr(ctx, 30, h - 14, mw * sc, 7, 3.5); ctx.fillStyle = sc >= 0.9 ? GOLD : sc >= 0.65 ? GOOD : sc >= 0.4 ? '#c98a4a' : BAD; ctx.fill(); }
 }
 
 // ------------------------------------------------------------------------------------------------ smithing
 const FORGE = (w, h) => ({ gx: w - 58, gw: 34, fireW: Math.max(78, w * 0.27) });
-function forge(ctx, run, v, w, h) {
+function forge(ctx, run, v, w, h, o = {}) {
+  // round 11 (live #57: "I don't know what button to press to put it back in"): the keys are written ON the picture too
+  const K = o.keys || null, cap = k => (K && K[k] ? ` (${K[k]})` : '');
   const { gx, gw, fireW } = FORGE(w, h), gy = 14, gh = h - 46, HY = q => gy + gh * (1 - clamp(q));
   // the gauge: heat falling through the band
   rr(ctx, gx, gy, gw, gh, 8); const hg = ctx.createLinearGradient(0, gy, 0, gy + gh); hg.addColorStop(0, '#6a5234'); hg.addColorStop(1, '#17120e'); ctx.fillStyle = hg; ctx.fill(); ctx.strokeStyle = 'rgba(217,178,106,0.45)'; ctx.lineWidth = 1; ctx.stroke();
@@ -195,7 +206,7 @@ function forge(ctx, run, v, w, h) {
   rr(ctx, fx + 8, fy + fh * 0.32, fireW - 30, fh * 0.58, 8); ctx.fillStyle = '#120c08'; ctx.fill();
   const fcx = fx + (fireW - 14) / 2, fby = fy + fh * 0.88;
   for (let i = 0; i < 5; i++) { const fl = (v.inFire ? 26 : 15) + 10 * Math.abs(Math.sin(v.t * 0.009 + i * 1.7)), x = fcx + (i - 2) * ((fireW - 44) / 5); ctx.beginPath(); ctx.moveTo(x - 6, fby); ctx.quadraticCurveTo(x + 6, fby - fl * 0.5, x, fby - fl); ctx.quadraticCurveTo(x - 9, fby - fl * 0.4, x - 6, fby); ctx.fillStyle = i % 2 ? '#ffb04a' : '#ff7a30'; ctx.fill(); }
-  label(ctx, v.inFire ? 'HEATING…' : 'FIRE', fcx, fy + fh + 15, cold ? GOLD : FAINT);
+  label(ctx, v.inFire ? 'HEATING…' : K ? `FIRE${cap('right')}` : 'FIRE — tap', fcx, fy + fh + 15, cold ? GOLD : FAINT);
   // the anvil and the bar on it (or the bar in the fire)
   const ax = (fireW + gx - 22) / 2, ay = h * 0.62;
   ctx.fillStyle = '#3a3d44'; ctx.beginPath(); ctx.moveTo(ax - 52, ay); ctx.lineTo(ax + 40, ay); ctx.lineTo(ax + 64, ay + 9); ctx.lineTo(ax + 40, ay + 18); ctx.lineTo(ax + 16, ay + 18); ctx.lineTo(ax + 11, ay + 36); ctx.lineTo(ax + 30, ay + 48); ctx.lineTo(ax - 38, ay + 48); ctx.lineTo(ax - 19, ay + 36); ctx.lineTo(ax - 24, ay + 18); ctx.lineTo(ax - 52, ay + 18); ctx.closePath(); ctx.fill(); ctx.strokeStyle = '#15171a'; ctx.lineWidth = 2; ctx.stroke();
@@ -210,8 +221,9 @@ function forge(ctx, run, v, w, h) {
     ctx.save(); ctx.translate(ax + 6, ay - 12); ctx.rotate(down ? 0.05 : -0.5 - 0.5 * up);
     ctx.fillStyle = '#6a4a2a'; ctx.fillRect(-3, -58, 7, 52); ctx.fillStyle = '#c8ccd6'; rr(ctx, -19, -16, 38, 18, 3); ctx.fill(); ctx.strokeStyle = '#111'; ctx.lineWidth = 1.5; ctx.stroke(); ctx.restore();
     if (t < 0.35) burst(ctx, ax + 4, ay - 8, t / 0.35, v.note.mark > 0 ? GRADE(v.note.mark) : '#9aa2ac', v.note.mark >= 2 ? 13 : 8, v.note.mark >= 2 ? 40 : 26);
-    if (cold && !v.done) label(ctx, 'Too cold — back in the fire', ax, ay - 70, DIM);
+    if (cold && !v.done) label(ctx, K ? `Too cold — put it back in the fire${cap('right')}` : 'Too cold — tap the fire', ax, ay - 70, GOLD);
     else if (v.heat > v.band[1] && !v.done) label(ctx, 'Too hot — wait', ax, ay - 70, DIM);
+    else if (!v.done) label(ctx, K ? `Hammer${cap('work')}` : 'Tap the anvil to hammer', ax, ay - 70, DIM);
   }
   pips(ctx, v.marks, i => i < v.blows, ax, h - 12);
 }

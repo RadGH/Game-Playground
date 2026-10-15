@@ -159,6 +159,7 @@ soft('T9: a crate says what it opens into and its lowest rarity; opening it ratt
   await page.evaluate(c => tvui5.fake('bag', { add: [c], remove: [], gold: 12 }), crate);
   await page.keyboard.press('KeyB');
   await expect(page.locator('#bag')).toBeVisible();
+  await page.locator('#inv-tabs [data-tab="other"]').click();      // round 11 (#11): reward boxes live in the Other tab
   const cell = page.locator('#bag-grid [data-tip-item="crate-1"]');
   await cell.hover();
   await expect(page.locator('#tipbox .ic-crate')).toBeVisible({ timeout: 5000 });
@@ -190,6 +191,7 @@ soft('T9: a crate says what it opens into and its lowest rarity; opening it ratt
   await page.evaluate(() => tvui5.fake('itemR', { op: 'use', uid: 'crate-2', ok: false, why: 'bagFull' }));
   await expect(page.locator('.tv-reveal')).toBeHidden();
   await expect(page.locator('#toasts')).toContainText('bag is full');
+  await page.locator('#inv-tabs [data-tab="gear"]').click();       // (back to Equipment for the screens after this one)
   await page.keyboard.press('KeyB');
 });
 
@@ -290,7 +292,11 @@ soft('T18: the Character menu sits beside the bag; equipping something moves the
   await expect(page.locator('#panel-sheet [data-id="crit"] .sh-value')).toHaveText('5%');
   await expect(page.locator('#panel-sheet [data-id="ab:basic"] .sh-value')).toHaveText('4.58 / s');
   await expect(page.locator('#panel-sheet [data-id="ab:mend"]')).toContainText('It heals');
-  await expect(page.locator('#panel-sheet .sh-angling')).toContainText('Angling 3 / 100');
+  // round 11 (stream P): Angling is one of the ten trades every character knows — when the Professions block is on the sheet
+  // (W9) it carries Angling and the old lone angling row steps aside; without it the row says "Angling 3 / 100"
+  await page.evaluate(() => tvui5.fake('you', { professions: { list: [{ id: 'angling', name: 'Angling', kind: 'gather', known: true, level: 3, xp: 12, next: 40, rank: 'Novice', max: 100, tool: null }] } }));
+  if (await page.locator('#panel-sheet .sh-angling').count()) await expect(page.locator('#panel-sheet .sh-angling')).toContainText('Angling 3 / 100');
+  else await expect(page.locator('#panel-sheet')).toContainText(/Angling/);
   // Advanced is a switch
   const adv = page.locator('#panel-sheet [data-act="advanced"]');
   if (await adv.isChecked()) await adv.uncheck();
@@ -328,7 +334,7 @@ soft('T7: a second two-hander goes in the off hand with Doubled Grasp — and th
   const gs = { uid: 'gs-1', name: 'Old Greatsword', type: 'weapon', subtype: 'greatsword', twoHanded: true, dmg: [6, 11], rarity: 'common', levelReq: 1 };
   const maul = { uid: 'maul-1', name: 'Quarry Maul', type: 'weapon', subtype: 'warhammer', twoHanded: true, dmg: [7, 12], rarity: 'common', levelReq: 1 };
   await page.evaluate(([a, b]) => { const y = thousandvale.S.net.joined.you; y.dual2h = false; if (Array.isArray(y.perks)) y.perks = y.perks.filter(p => !String(p).includes('doubled_grasp')); tvui5.fake('equip', { equipment: { weapon: a } }); tvui5.fake('bag', { add: [b], remove: [], gold: 12 }); }, [gs, maul]);
-  await page.keyboard.press('KeyB');
+  await page.evaluate(() => { thousandvale.bag.toggle(true); document.querySelector('#inv-tabs [data-tab="gear"]')?.click(); });      // (open, whatever the screen before left it in; round 11: Equipment tab)
   await expect(page.locator('#doll-bottom [data-slot="offhand"]')).toHaveAttribute('data-tip', /needs both hands.*Doubled Grasp/);
   await sent();
   await page.locator('#bag-grid [data-tip-item="maul-1"]').click({ modifiers: ['Shift'] });
@@ -443,10 +449,17 @@ soft('T20: a letter shows what it holds; taking needs bag room and says so; a gi
   await expect(page.locator('#tipbox .ic-crate')).toContainText('Rare at the least', { timeout: 5000 });
   await shot('t20-mail-gift');
   // a full bag: said before the click, with the numbers
-  await page.evaluate(() => { window.__max = thousandvale.bag.max; tv.fake('you', { bagMax: thousandvale.bag.state.bag.length }); thousandvale.mail.draw(); });      // play-test 8: the bag's size is the server's `you {bagMax}` (40 + a pack)
+  // round 11 (#11): a gift box lives in the bag's Other tab, which never fills — a full Equipment / Items tab does not stop it
+  await page.evaluate(() => { window.__max = thousandvale.bag.max; tv.fake('you', { bagMax: 0 }); thousandvale.mail.draw(); });
+  await expect(page.locator('#panel-mail [data-act="take"]')).toBeEnabled();
+  // a letter holding GEAR into a full Equipment tab: said before the click, with the numbers
+  await page.evaluate(l => { tvui5.fake('mailOpen', { mail: { ...l, read: true, items: [{ uid: 'mg-1', name: 'Plain Cap', slot: 'head', type: 'armor', rarity: 'normal' }] } }); }, letter);
+  await page.evaluate(() => tvui5.fake('bag', { add: [{ uid: 'mg-0', name: 'Old Cap', slot: 'head', type: 'armor', rarity: 'normal' }], remove: [], gold: 12 }));
+  await page.evaluate(() => { const gear = thousandvale.bag.state.bag.filter(i => !i.kind && (i.slot || i.type === 'weapon')).length; tv.fake('you', { bagMax: gear }); thousandvale.mail.draw(); });
   await expect(page.locator('#panel-mail .ml-room')).toContainText('Your bag is full. Make room for 1 item first.');
   await expect(page.locator('#panel-mail [data-act="take"]')).toBeDisabled();
   await shot('t20-mail-bag-full');
+  await page.evaluate(l => tvui5.fake('mailOpen', { mail: { ...l, read: true } }), letter);
   await page.evaluate(() => { tv.fake('you', { bagMax: window.__max }); thousandvale.mail.draw(); });
   // take: the mail message goes out; the gift lands in the bag and is unwrapped at once
   await sent();
@@ -473,16 +486,16 @@ soft('T20: a letter shows what it holds; taking needs bag room and says so; a gi
 
 soft('T25: angling — cast, the bite prompt, the tension tug (keyboard and pointer), the catch; the Catch tab; cooking', async () => {
   test.setTimeout(480000);
-  // no rod: X says where to get one
-  await expect(page.locator('.fish-btn')).toBeHidden();
-  await page.keyboard.press('KeyX');
-  await expect(page.locator('#toasts')).toContainText('You need a fishing rod');
+  // round 11 (stream P, live #12): there is no fishing button and X does not cast — E at a fish pool does (objects.js
+  // KINDS.fishpool -> angling.castOrStop(poolId)); everyone has a rod from the start
+  await expect(page.locator('.fish-btn')).toHaveCount(0);
   const rod = { uid: 'rod-1', id: 'angling_rod', kind: 'tool', tool: 'rod', name: 'Willow Rod', rarity: 'common' };
   await page.evaluate(r => tvui5.fake('bag', { add: [r], remove: [], gold: 12 }), rod);
-  await expect(page.locator('.fish-btn')).toBeVisible();
   await sent();
   await page.keyboard.press('KeyX');
-  expect((await sent()).find(m => m.t === 'fish')).toMatchObject({ op: 'cast' });
+  expect((await sent()).find(m => m.t === 'fish'), 'X no longer casts').toBeUndefined();
+  await page.evaluate(() => tvui5.angling.castOrStop(4242));
+  expect((await sent()).find(m => m.t === 'fish')).toMatchObject({ op: 'cast', pool: 4242 });
   await page.evaluate(() => tvui5.fake('fishR', { ok: true, state: 'wait', at: { x: 0, z: 0 }, water: 'river' }));
   await expect(page.locator('.tv-fish .fish-pill')).toContainText('Waiting for a bite');
   // the bite: a prompt with a shrinking ring; Space hooks it
@@ -576,10 +589,12 @@ soft('T25: angling — cast, the bite prompt, the tension tug (keyboard and poin
   await clean(page, 'cooking');
   await page.evaluate(() => thousandvale.ui5.angling.cook.close());
   // the fish item card
-  await page.keyboard.press('KeyB');
+  await page.evaluate(() => thousandvale.bag.toggle(true));
+  await page.locator('#inv-tabs [data-tab="items"]').click();      // round 11 (#11): fish are in the Items tab
   await page.locator('#bag-grid [data-tip-item="fish-2"]').hover();
   await expect(page.locator('#tipbox')).toContainText('24.5 cm', { timeout: 5000 });
-  await page.keyboard.press('KeyB');
+  await page.locator('#inv-tabs [data-tab="gear"]').click();
+  await page.evaluate(() => thousandvale.bag.toggle(false));
 });
 
 soft('T3 + T4: a targeted ally gets your heals (the note says who); a fallen player is offered a raise and answers it', async () => {

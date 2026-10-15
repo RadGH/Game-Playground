@@ -23,7 +23,11 @@ import { createSiteView } from './site-view.js';
 import { createSetPieceView } from './setpiece-view.js';
 import { createWallsView } from './walls-view.js';   // play-test 4 S7 (stream B): town perimeters + gates
 import { perf, nextFrame } from './perf.js';
-import { parseNav } from '../rules/terrain-read.js';   // play-test 4: walls + houses block prediction like the server (stepMove reads terrain.nav.at)
+import { parseNav } from '../rules/terrain-read.js';
+import { refineNav } from '../rules/nav-refine.js';       // Z37: trees and rocks block as circles the size of their models
+import { growForest, clearOf } from '../rules/forest.js';   // Z25: forests with giants
+/** `?forest=0`: the bake's sprinkle only (a before / after look and perf check; the server still grows its woods). */
+const NO_FOREST = typeof location !== 'undefined' && new URLSearchParams(location.search).get('forest') === '0';   // play-test 4: walls + houses block prediction like the server (stepMove reads terrain.nav.at)
 
 /** Bounds for a zone key when the server sent none: `zXX_YY` in world metres, anything else zone-local. */
 export function zoneBounds(key, worldMetres = true) {
@@ -89,6 +93,17 @@ export function createWorldStream(scene, { quality = 'high', horizon: hz0 = null
       let end = perf.begin('zone:ground');
       T.zoneKey = q.key;
       const L = { key: q.key, T, bounds: { ...T.bounds }, views: [], extras, ready: false, nav, ox: q.bounds.minX, oz: q.bounds.minZ };
+      // Z25 (live #26): woods grown out of the bake's sprinkle — giants and new neighbours (js/rules/forest.js), then
+      // Z37 (live #38): round colliders for trees and rocks (nav-refine.js). The server grows and wraps the same files the
+      // same way. Each in its own frame (~25 + ~35 ms for a full zone); until then the grid answers, as it always did, and
+      // the scatter view waits for the grown woods (L.woods).
+      L.woods = !extras?.scatter ? Promise.resolve() : nextFrame().then(() => {
+        // the same keep-clear list as the server (js/sim/content.js): the bake's placements + the vignettes it accepted
+        const vigOk = !extras.vignetteHash || !base.reader || extras.vignetteHash === base.reader.meta.inputHash;
+        if (!NO_FOREST) extras.scatter = perf.span('zone:forest', () => growForest(extras.scatter, nav, { ox: q.bounds.minX, oz: q.bounds.minZ, clear: clearOf(extras.placements, vigOk ? extras.vignettes : []) }));
+        if (!nav) return;
+        return nextFrame().then(() => { if (loaded.get(q.key) === L) L.nav = perf.span('zone:navRefine', () => refineNav(nav, extras.scatter)); });
+      });
       const biomeColors = base.reader ? Object.fromEntries(base.reader.biomes.map(b => [b.key, b.color])) : null;
       const ground = createTerrainView(T, { quality, textureSize: quality === 'low' ? 256 : 512, biomeColors, clearings: opts.clearingsFor ? opts.clearingsFor(T, extras) : [] });
       scene.add(ground.group); L.views.push(ground); L.ground = ground;
@@ -107,7 +122,7 @@ export function createWorldStream(scene, { quality = 'high', horizon: hz0 = null
       try {
         await nextFrame();
         if (extras.placements.length) { end = perf.begin('zone:town'); const town = createTownView(T, extras.placements, { quality }); end(); if (loaded.get(q.key) !== L) { town.dispose?.(); return L; } if (!(await show(town))) return L; L.views.push(town); L.town = town; for (const o of offices.values()) town.claimOffice(o); await nextFrame(); }
-        if (extras.scatter) { end = perf.begin('zone:scatter'); const sc = await createScatterView(T, extras.scatter, { quality, avoid: L.town ? L.town.clearings : [] }); end(); if (loaded.get(q.key) !== L) { sc.dispose?.(); return L; } sc.refresh?.(lastPos); if (!(await show(sc))) return L; L.views.push(sc); L.scatter = sc; await nextFrame(); }
+        if (extras.scatter) { await L.woods; end = perf.begin('zone:scatter'); const sc = await createScatterView(T, extras.scatter, { quality, avoid: L.town ? L.town.clearings : [] }); end(); if (loaded.get(q.key) !== L) { sc.dispose?.(); return L; } sc.refresh?.(lastPos); if (!(await show(sc))) return L; L.views.push(sc); L.scatter = sc; await nextFrame(); }
         else if (opts.fallbackDecor) { const d = await opts.fallbackDecor(T, L); if (d && loaded.get(q.key) === L) { scene.add(d.group); L.views.push(d); } }
         const vigOk = !extras.vignetteHash || !base.reader || extras.vignetteHash === base.reader.meta.inputHash;   // made for another bake: the server skips them too
         if (vigOk && extras.vignetteFile) { end = perf.begin('zone:sites'); const sv = await createSiteView(T, extras.vignetteFile, { quality }); end(); if (sv && loaded.get(q.key) === L) { if (!(await show(sv))) return L; L.views.push(sv); L.sites = sv; } else sv?.dispose?.(); }

@@ -643,7 +643,7 @@ test('T7: Doubled Grasp — a second two-hander is refused without it, goes on w
   m.r.unit.maxHp = m.r.unit.hp = 1e6;
   const from = w2.events.length;
   assert.ok(w2.room.intent(again, { t: 'cast', slot: 0, target: m.id, aim: { x: m.x, z: m.z } }).ok);
-  w2.steps(30);
+  w2.steps(60);          // round 11 (owner #37): basic attacks are 1.5x slower, so the off hand's wind-up lands later
   const casts = w2.events.slice(from).filter(e => e.type === 'cast' && e.slot === 0);
   assert.ok(casts.some(e => !e.hand && e.two === 1), 'the main two-hander swung');
   assert.ok(casts.some(e => e.hand === 'off' && e.two === 1), 'and the off-hand two-hander swung');

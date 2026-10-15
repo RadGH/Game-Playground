@@ -4,7 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createVirtualClock } from '../../js/net/clock.js';
 import { makeServer, joinAs, run, until } from './helpers.js';
-import { ROLL_MS } from '../../js/sim/corpses.js';
+import { ROLL_MS, LOOTED_STAY_MS } from '../../js/sim/corpses.js';
 
 const rec = (W, c) => W.online.get(c.joined.you.char);
 /** A monster next to `c` in its room, killed, with `items` and `gold` awarded to `c` as the rules do it. */
@@ -50,7 +50,10 @@ test('Q3: a kill\'s items and gold wait on the corpse; open / take / all; the bo
   assert.equal(o.char.bag.length, bag0 + 2); assert.equal(o.char.gold, gold0 + 7);
   assert.ok(box.some(x => x.t === 'lootWin' && x.id === m.id && x.closed), 'window closes when empty');
   assert.ok(box.some(x => x.t === 'lootable' && x.id === m.id && x.on === false), 'sparkle off');
-  await run(clock, 11000, 100);
+  // round 11 (World, owner #19): an emptied body lies on a little (untargetable — nothing is on it for anyone), then goes
+  await run(clock, 6000, 100);
+  assert.ok(o.room.entities.get(m.id) === m, 'an emptied body lies on a moment');
+  await run(clock, LOOTED_STAY_MS, 100);
   assert.ok(!o.room.entities.has(m.id) || o.room.entities.get(m.id) !== m, 'an empty body goes');
   a.close(); await srv.stop();
 });

@@ -133,8 +133,9 @@ export function createProfView(scene, { actors = null, objects = null, camera = 
   // ---- skinning: a prompt on the corpse, and a small knife-coloured glint over it -------------------------------
   function setSkinnable(id, on, info = {}) {
     const key = 'skin:' + id;
-    if (!on) { if (skins.delete(id)) objects?.remove?.(key); return; }
+    if (!on) { if (skins.delete(id)) objects?.remove?.(key); const g = actors?.get(id); if (g) g.skinMark = false; return; }
     const a = actors?.get(id); skins.set(id, { name: info.name || a?.name || 'the beast', x: a?.pos.x, z: a?.pos.z });
+    if (a) a.skinMark = true;      // [World #19] the body stays drawn while it can be skinned (actors.js fade) — never clickable (pick-rule emptyCorpse)
     if (a) objects?.upsert?.({ id: key, type: 'skin', corpse: id, name: info.name || a.name, x: a.pos.x, z: a.pos.z, r: 1.6, source: 'prof' });
   }
 

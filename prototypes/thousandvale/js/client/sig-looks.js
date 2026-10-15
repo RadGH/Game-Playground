@@ -11,7 +11,8 @@
 //
 //   sigLook(cls, skillId, sk) -> { cls, palette, motif: {head, shard, glyph}, style, cast, travel, impact, ground } | null
 //
-// The Starcaller is not here: it has its own whole effect set (star-looks.js / star-fx.js).
+// The Starcaller is not here: it has its own whole effect set (star-looks.js / star-fx.js). Its partner the Star Blade
+// (play-test 11) IS here: star-steel shapes and the gold accent, from icons/data/game/fx-motifs.js like every class.
 
 import { CLASS_MOTIFS, classPalette } from '../../../../icons/js/motifs.js';
 import { hashId } from './spell-looks.js';
@@ -62,6 +63,9 @@ export const CLASS_STYLE = Object.freeze({
   tinker:       { head: { spin: 10, wobble: 'tumble', size: 0.6, trail: 14, arc: 1.4 }, trail: { drift: [0, 0, 0], gravity: 6, life: 0.7 }, burst: { n: 14, speed: 4.5, up: 4.5, gravity: 14, life: 1.0 }, glyph: { spin: 1.4, orbit: 5, rise: 0 }, cast: 'orbit' },
   priest:       { head: { spin: 1.2, wobble: 'sine', size: 0.7, trail: 20 }, trail: { drift: [0, 1.0, 0], life: 0.8 }, burst: { n: 12, speed: 2.6, up: 2, gravity: -0.8, life: 1.0, ring: true }, glyph: { spin: 0.5, orbit: 6, rise: 14 }, cast: 'fall' },
   enchanter:    { head: { spin: 1, wobble: 'sine', size: 0.62, trail: 24 }, trail: { drift: [0, 0.7, 0], gravity: -0.2, life: 1.2 }, burst: { n: 14, speed: 2.4, up: 2, gravity: -0.5, life: 1.3 }, glyph: { spin: 0.6, orbit: 8, rise: 16 }, cast: 'orbit' },
+  // play-test 11 (owner #53): the Star Blade — star steel that sweeps and snaps: a straight fast point, shards that ring
+  // out flat and drop, a sworn-star sigil that turns slowly with its studs circling it, stars drawn IN round the caster
+  starblade:    { head: { spin: 0, size: 0.78, trail: 30 }, trail: { drift: [0, 0.5, 0], gravity: 0.5, life: 0.4 }, burst: { n: 15, speed: 5.5, up: 1.6, gravity: 5, life: 0.55, ring: true }, glyph: { spin: 0.5, orbit: 4, rise: 12 }, cast: 'orbit' },
 });
 
 /** Shapes a skill can have -> which parts of the signature it draws. */

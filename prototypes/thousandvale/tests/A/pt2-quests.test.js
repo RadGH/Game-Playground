@@ -70,7 +70,7 @@ test('Q27 end to end: a new character enters the world holding the auto quest', 
   // stream E's real starting chain (data/quests/start.json, included by test.json) and its 30 class quests are loaded
   assert.ok(a.joined.you.quests.active.some(q => q.id === 'start_two_good_legs'), 'E\'s starting quest is given');
   const book = world.P.values().next().value.book;
-  assert.equal([...book.defs.values()].filter(d => d.classes || d.cls).length, 31, 'the 31 class quests (30 + the Starcaller, wrap-up 2026-10-13)');
+  assert.equal([...book.defs.values()].filter(d => d.classes || d.cls).length, 32, 'the 32 class quests (30 + the Starcaller, wrap-up 2026-10-13, + the Star Blade, round 11)');
   a.close(); await srv.stop();
   z.quests.quests = z.quests.quests.filter(q => q.id !== 'start_road');
   void run;

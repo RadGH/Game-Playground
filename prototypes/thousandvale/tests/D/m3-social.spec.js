@@ -90,6 +90,45 @@ test('title screen: guest / log in tabs, privacy link, local fonts', async ({ br
   await ctx.close();
 });
 
+test('title screen: "Create an account" on the Log in tab makes a claimed account you can log in with elsewhere (owner 2026-10-15)', async ({ browser }) => {
+  const user = 'maker' + Math.random().toString(36).slice(2, 7);
+  const ctx = await browser.newContext({ viewport: { width: 1180, height: 720 } });
+  const page = await ctx.newPage();
+  await page.addLocatorHandler(page.locator('.tv-changelog:not([hidden]) .cl-x'), async x => { await x.click(); });
+  await page.goto(`${base}?quality=low`);
+  await page.waitForSelector('#loading.done', { timeout: 60000 });
+  await page.click('#tab-login');
+  await page.click('#signin-create');
+  const box = page.locator('#create');
+  await expect(box).toBeVisible();
+  await box.locator('input[autocomplete="username"]').fill(user);
+  await box.locator('input[autocomplete="new-password"]').nth(0).fill('makerpass1');
+  await box.locator('input[autocomplete="new-password"]').nth(1).fill('makerpass2');
+  await box.locator('button.primary').click();
+  await expect(box.locator('.note')).toContainText(/match/i);                       // the two passwords differ
+  await box.locator('input[autocomplete="new-password"]').nth(1).fill('makerpass1');
+  await page.screenshot({ path: join(SHOTS, 'm3-title-create.png') });
+  await box.locator('button.primary').click();
+  await expect(page.locator('#front')).toBeVisible({ timeout: 20000 });           // straight to "your characters"
+  await expect(page.locator('#new-char')).toBeVisible();
+  expect(await page.evaluate(() => ({ claimed: thousandvale.S.net?.claimed, username: thousandvale.S.net?.username }))).toEqual({ claimed: true, username: user });
+  await page.screenshot({ path: join(SHOTS, 'm3-title-created.png') });
+  await ctx.close();
+  // a different browser logs in with it
+  const ctx2 = await browser.newContext({ viewport: { width: 1180, height: 720 } });
+  const p2 = await ctx2.newPage();
+  await p2.addLocatorHandler(p2.locator('.tv-changelog:not([hidden]) .cl-x'), async x => { await x.click(); });
+  await p2.goto(`${base}?quality=low`);
+  await p2.waitForSelector('#loading.done', { timeout: 60000 });
+  await p2.click('#tab-login');
+  await p2.fill('#signin-user', user);
+  await p2.fill('#signin-pass', 'makerpass1');
+  await p2.click('#signin-go');
+  await expect(p2.locator('#front')).toBeVisible({ timeout: 20000 });
+  expect(await p2.evaluate(() => thousandvale.S.net?.username)).toBe(user);
+  await ctx2.close();
+});
+
 test('two players: claim, friends, whisper, guild invite + guild chat, mail an item and take it', async ({ browser }) => {
   test.setTimeout(900000)      /* two browsers on one software GPU: the steps pass, the old 7 minutes ran out before the last of them */;
   const A = await join_(browser, 'Alda');

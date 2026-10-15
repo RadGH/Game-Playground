@@ -40,16 +40,18 @@ import { createCorpses } from './corpses.js';
 import { createRoadEvents } from './roadevents.js';
 import { createShops, SHOP_RANGE } from './shops.js';
 import { configureNpcNames } from './npc-names.js';
-import { createMountBook } from './mounts.js';
+import { createMountBook, DEFAULT_MOUNTS } from './mounts.js';
 import { createCarts } from './carts.js';
+import { createShips, placeHarbours } from './ships.js';      // [V] Expansion 1 §6: the voyage between the continents
 import { cleanLook } from './looks.js';
 import { effectOf as effectOfRaw, potionAmount, potionCdMs, potionText, GROUP_R as TONIC_R, stackable, stackKey, stackMaxOf, countOf } from './consumables.js';
 import { isCrate, crateItem, openCrate } from './crates.js';
 import { createSystemMail } from './sysmail.js';
 import { createFeedback, NUDGE } from './feedback.js';
 import { createAngling } from './angling.js';
+import { createHazards } from './hazards.js';      // [S] Expansion 1 §4
 import { createProfessions } from './professions.js';      // W9 (P-core)
-import { configureEconomy, economy, chestGold, treasureGold, eventGold, travelFare as fareOf, cartFare } from './economy-knobs.js';
+import { configureEconomy, economy, chestGold, treasureGold, eventGold, travelFare as fareOf, cartFare, withEconomy, clearProvinceEconomies } from './economy-knobs.js';
 import { mountRefusal, mountSpeedMul, dismounts, MOUNT_RULES } from '../rules/mount.js';   // stream C's riding rules (when, how fast, what throws you)
 
 const LEASE_MS = 30000, HEARTBEAT_MS = 10000, TICKET_WAIT_MS = 3000;
@@ -65,7 +67,8 @@ export const GROUP_R = 40;               // open groups: players hitting the sam
 export const GRAVE_MS = 3600000, CAMPFIRE_MS = 30 * 60000, BANNER_MS = 30 * 60000, MAX_TRACES = { grave: 40, campfire: 20 };
 export const HEAT_CELL = 8;              // footprints: steps counted per 8 m cell per hour (traces.json footprints)
 export const UNBINDER_M = 8;               // P6: talents/perks are undone standing by an Unbinder
-export const TRAVEL_PRELOAD_MS = 1500;     // P10: waystone / event travel tells the client where first, moves this much later
+export const TRAVEL_PRELOAD_MS = 1500;
+export const SEA_MSG = 'That is across the sea. The waystones do not reach so far — take a ship from a harbour.';      // Expansion 1 §6     // P10: waystone / event travel tells the client where first, moves this much later
 export const DISCOVER_PAD = 30;            // P3: a place is found within its radius + this many metres
 export const KIT_VERSION = 2;              // P22: 1 = class weapon + off-hand only; play-test 5 T5: 2 = the kit picked at creation (when one was)
 export const KIT_KEEP = new Set(['weapon', 'offhand', 'mainhand', 'offHand']);
@@ -80,6 +83,20 @@ export const SHEETS_PER_TICK = 2;         // T18: character sheets worked out pe
 export const SHEET_BUDGET_MS = 6;         // …and only while this tick has used less than this (C's estimator casts every ability at a dummy)
 const RARE = new Set(['rare', 'unique', 'legendary', 'set']);
 
+/**
+ * Expansion 1: one mount book for the whole realm (a mount you own rides on every island) — the first province's table
+ * (or the built-in one), then the mounts any other province adds. A single province: its own table, untouched.
+ */
+export function mergeMounts(tables) {
+  const has = t => t && Array.isArray(t.mounts) && t.mounts.length;
+  const extra = tables.slice(1).filter(has);
+  if (!extra.length) return tables[0] || null;
+  const base = has(tables[0]) ? tables[0] : { mounts: DEFAULT_MOUNTS };
+  const seen = new Set(), mounts = [];
+  for (const t of [base, ...extra]) for (const m of t.mounts) if (m && m.id && !seen.has(m.id)) { seen.add(m.id); mounts.push(m); }
+  return { ...base, mounts };
+}
+
 export function createProvince(opts) {
   const {
     proc = 0, layouts, store, bus = null, seed = 1, createRules = rulesV0,
@@ -93,6 +110,10 @@ export function createProvince(opts) {
   } = opts;
   // V2 (owner feedback 7): every gold number the server applies comes from data/rules/economy.json `server` (js/sim/economy-knobs.js)
   if (opts.economy !== undefined || (layouts[0] && layouts[0].economy)) configureEconomy(opts.economy || layouts[0].economy);
+  // Expansion 1 (stream P): a second province with numbers of its own (data/provinces/<prov>-economy.json laid over the
+  // shared file) runs its rooms and its players' messages with them (economy-knobs withEconomy); same numbers = nothing registered
+  clearProvinceEconomies();
+  { const realmEcon = JSON.stringify(opts.economy || (layouts[0] && layouts[0].economy) || null); for (const L of layouts.slice(1)) if (L.economy && JSON.stringify(L.economy) !== realmEcon) configureEconomy(L.economy, L.key); }
   const owner = processName + ':' + randomHex(4);
   const bootNonce = randomHex(4);
   let uidN = 0;
@@ -152,6 +173,8 @@ export function createProvince(opts) {
 
   // S19 (play-test 4): titles above NPC names + real names for job-only placeholders (stream E's data/names/titles.json)
   configureNpcNames({ givers: (layouts[0] && layouts[0].givers) || null, titles: (layouts[0] && layouts[0].titles) || null, names: (layouts[0] && ((layouts[0].travel && layouts[0].travel.names) || layouts[0].names)) || null });
+  for (const L of layouts.slice(1)) configureNpcNames({ province: L.key, givers: L.givers || null, names: (L.travel && L.travel.names) || L.names || null });      // Expansion 1: each province's own name pool
+  for (const L of layouts) placeHarbours(L);      // [V] each harbour's Harbourmaster into the town it stands in (ships.js)
   for (const L of layouts) {
     const pv = { L, towns: [], copies: [], instances: new Map() };
     P.set(L.key, pv);
@@ -167,10 +190,19 @@ export function createProvince(opts) {
     makeCopy(pv);
   }
   const first = P.values().next().value;
+  // Expansion 1: new characters begin in the starter province (its sheet's band starts at 1 — content.js), whatever order the layouts came in
+  const starterPv = [...P.values()].find(q => q.L.starterProvince !== false) || first;      // a test zone (no sheet) counts as a starter, as it always did
+  /** The continent a province is on (province-map `continent`, else itself); null = a test zone, which crosses to anything. */
+  const continents = new Map(layouts.filter(L => L.continent).map(L => [L.key, L.continent]));
+  const continentOf = key => continents.get(key) || null;
+  /** Expansion 1 §6: two provinces on different islands — only a ship goes between them (waystones and free event travel never cross the sea). */
+  const acrossSea = (a, b) => { const ca = continentOf(a), cb = continentOf(b); return !!(ca && cb && ca !== cb); };
   // the quest runtime per province (js/sim/quests.js over stream E's data/quests/**)
   let qSeed = (seed * 2654435761) >>> 0;
   const qRng = () => { qSeed = (qSeed + 0x6D2B79F5) >>> 0; let t = qSeed; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
-  for (const pv of P.values()) pv.book = createQuestBook({ layout: pv.L, zones: pv.L.zones || [], rares: pv.L.rares || {}, jobs: pv.L.jobs || null, rng: qRng, now: wallNow, isNight: () => isNight(), angling: (pv.L.angling && pv.L.angling.content) || null });
+  // Expansion 1: a quest taken in another province still shows (and keeps its steps) while you are away from it (peerDef)
+  const peerDef = id => { for (const q of P.values()) { const d = q.book && q.book.defs.get(id); if (d) return d; } return null; };
+  for (const pv of P.values()) pv.book = createQuestBook({ layout: pv.L, zones: pv.L.zones || [], rares: pv.L.rares || {}, jobs: pv.L.jobs || null, rng: qRng, now: wallNow, isNight: () => isNight(), angling: (pv.L.angling && pv.L.angling.content) || null, peerDef: P.size > 1 ? peerDef : null });
   /** back-compat for single-zone tests: the first province's first town / copy */
   const townRoom = first.towns[0], copies = first.copies, instances = first.instances;
   const town = first.L.towns[0], door = first.L.doors[0], gate = first.L.gate;
@@ -275,7 +307,7 @@ export function createProvince(opts) {
     const { pv, n } = r.meta.roads; r.meta.roads = null;
     let ts = (seed * 2246822519 + n * 3266489917) >>> 0;
     const trng = () => { ts = (ts + 0x6D2B79F5) >>> 0; let x = ts; x = Math.imul(x ^ (x >>> 15), x | 1); x ^= x + Math.imul(x ^ (x >>> 7), x | 61); return ((x ^ (x >>> 14)) >>> 0) / 4294967296; };
-    try { r.travellers = createTravellers({ room: r, travel: pv.L.travel, folk: pv.L.folk || [], rng: trng, context: (x, z) => chatterContext(pv, r, x, z), isNight: () => isNight(), phase: () => dayPhase(), log,
+    try { r.travellers = createTravellers({ room: r, travel: pv.L.travel, folk: pv.L.folk || [], rng: trng, context: (x, z) => chatterContext(pv, r, x, z), isNight: () => isNight(), phase: () => dayPhase(pv), log,
       fighterLevel: (x, z) => Math.max(1, guardLevelAt(pv.L, { x, z }) + (+(pv.L.travel && pv.L.travel.fighters && pv.L.travel.fighters.levelOver) || 0)) }); }      // Y21 (report #18): an armed traveller fights at its zone's level
     catch (err) { log('travellers failed', err && err.stack); }
   }
@@ -359,7 +391,7 @@ export function createProvince(opts) {
       case 'callboard': return callboardEnter(m);
       case 'relocated': return relocated(m);
       case 'event': return onEvent(m);
-      case 'waystones': remoteWaystones = m.list; return;
+      case 'waystones': remoteWaystones = m.list; for (const w of m.list || []) if (w && w.province && w.continent && !continents.has(w.province)) continents.set(w.province, w.continent); return;
       case 'social': social.set(m.char, { friends: new Set(m.friends || []), tradeFriendsOnly: !!m.tradeFriendsOnly }); return;
     }
   });
@@ -377,7 +409,13 @@ export function createProvince(opts) {
     s.state = 'await';
     s.sendJSON({ t: 'welcome', v: PROTOCOL_VERSION, build: opts.build || 'dev', server: 'thousandvale', tickMs: TICK_MS, time: ticks * TICK_MS, clock: { ...realmClock, now: wallNow() } });
   }
+  /** Expansion 1: a player's message runs with their province's economy numbers (economy-knobs withEconomy). */
   function onMessage(s, m) {
+    if (P.size < 2) return onMessageIn(s, m);
+    const o = s.charId != null ? online.get(s.charId) : null;
+    return withEconomy(o && o.room && o.room.meta ? o.room.meta.province : null, () => onMessageIn(s, m));
+  }
+  function onMessageIn(s, m) {
     switch (m.t) {
       case 'hello': return s.state === 'hello' ? hello(s, m) : bad(s, 'order');
       case 'ping': return s.sendJSON({ t: 'pong', c: m.c, s: ticks * TICK_MS, k: ticks });
@@ -450,13 +488,14 @@ export function createProvince(opts) {
       case 'barber': return barberOp(o, m);
       case 'pref': return prefOp(o, m);
       case 'emote': return emoteOp(o, m);
+      case 'ship': return ships.op(o, m, id => o.room.entities.get(id));      // [V] the voyage (ships.js)
       case 'cart': {      // W5: ox-cart travel
         const near = o.room.entities.get(m.id);
-        if (!near || near.removed || !carts.stopFor(near)) return s.sendJSON({ t: 'cartR', op: m.op, ok: false, why: 'stop', msg: 'There is no cart here.' });
-        if (m.op === 'go') return void carts.go(o, m, near);
+        if (!near || near.removed || !cartsOf(o).stopFor(near)) return s.sendJSON({ t: 'cartR', op: m.op, ok: false, why: 'stop', msg: 'There is no cart here.' });
+        if (m.op === 'go') return void cartsOf(o).go(o, m, near);
         if (m.op !== 'list') return bad(s, 'op');
-        if (Math.hypot(near.x - e.x, near.z - e.z) > carts.reachOf(near) + 0.5) return s.sendJSON({ t: 'cartR', op: 'list', ok: false, why: 'far', msg: 'Walk over to the cart first.' });
-        return s.sendJSON(carts.list(o, near));
+        if (Math.hypot(near.x - e.x, near.z - e.z) > cartsOf(o).reachOf(near) + 0.5) return s.sendJSON({ t: 'cartR', op: 'list', ok: false, why: 'far', msg: 'Walk over to the cart first.' });
+        return s.sendJSON(cartsOf(o).list(o, near));
       }
       case 'meter': { o.meter = !!m.on; if (o.meter) meterOn.add(o); else { meterOn.delete(o); o.hitRows = null; } return s.sendJSON({ t: 'meterR', on: o.meter }); }      // W21
       case 'follow': return followOp(o, m);
@@ -566,8 +605,8 @@ export function createProvince(opts) {
       return { room: roomAt(pv, tk.at, ch), at: { x: tk.at.x, z: tk.at.z } };
     }
     const rid = String(ch.room || '');
-    const [prov, rest] = rid.includes('/') ? rid.split('/') : [first.L.key, rid];
-    const pv = P.get(prov) || first;
+    const [prov, rest] = rid.includes('/') ? rid.split('/') : [starterPv.L.key, rid];
+    const pv = P.get(prov) || starterPv;
     const at = Number.isFinite(ch.x) ? { x: ch.x, z: ch.z } : null;
     if (rest.startsWith('town')) { const r = rooms.get(rid); return { room: r || pv.towns[0], at: r ? at : null }; }
     if (rest.startsWith('i:')) {
@@ -654,7 +693,7 @@ export function createProvince(opts) {
   function zoneNameOf(o) { const pv = provOf(o.room); if (!pv) return null; const z = o.zone || (pv.L.zoneOf && o.entity ? pv.L.zoneOf(o.entity.x, o.entity.z) : null); const zs = (pv.L.zones || []).find(q => q.key === z); return (zs && zs.sheet && zs.sheet.name) || pv.L.name || null; }
   function presence(o) {
     const zn = zoneNameOf(o), town = o.room.kind === 'town' ? o.room.name : null;
-    send({ k: 'presence', where: town || (o.room.kind === 'instance' ? (o.room.name || 'a dungeon') + ' (dungeon)' : zn) || null, zoneName: zn, town, roomKind: o.room.kind, char: o.char.id, name: o.char.name, cls: o.char.cls, level: o.char.level, room: o.room.id, province: provOf(o.room).L.key, zone: o.zone || null, online: !!o.conn, ignore: o.char.ignore || [], mutedUntil: o.char.mutedUntil || 0, account: o.char.account, look: o.char.look || null });
+    send({ k: 'presence', where: town || (o.room.kind === 'instance' ? (o.room.name || 'a dungeon') + ' (dungeon)' : zn) || null, zoneName: zn, town, roomKind: o.room.kind, char: o.char.id, name: o.char.name, cls: o.char.cls, level: o.char.level, room: o.room.id, province: provOf(o.room).L.key, ...(provOf(o.room).L.continent ? { continent: provOf(o.room).L.continent } : {}), zone: o.zone || null, online: !!o.conn, ignore: o.char.ignore || [], mutedUntil: o.char.mutedUntil || 0, account: o.char.account, look: o.char.look || null });
   }
   const watched = new Set();       // Y36: characters whose position the gateway asked for (`watch`): tracked by a party member or a mutual friend
   function sendFrames() {
@@ -765,6 +804,7 @@ export function createProvince(opts) {
     const pv = provOf(o.room);
     if (!pv || !pv.towns.length) return false;
     let best = o.char.bind ? rooms.get(o.char.bind) : null;
+    if (best && provOf(best) !== pv) best = null;                 // Expansion 1: your inn is on the other island — the charm cannot cross the sea
     if (!best || !best.area) {
       let bd = Infinity; best = pv.towns[0];
       pv.L.towns.forEach((t, i) => { const d = Math.hypot(t.x - e.x, t.z - e.z); if (d < bd) { bd = d; best = pv.towns[i]; } });
@@ -818,20 +858,21 @@ export function createProvince(opts) {
     if (d.lift) return liftUse(o, obj, to);              // U12: the stair up asks which floor
     if (d.waystone) return discover(o, obj);
     if (d.treasure) return treasureUse(o, obj);
-    if (d.road && roadEvents.use(o, obj)) return;                          // S5: a road event's chest / captive
+    if (d.road && roadOf(o).use(o, obj)) return;                          // S5: a road event's chest / captive
     // W5 (round 8): an ox cart — the parked cart itself answers with the route list; a carter answers as an NPC and the list follows
     // Y15 (round 10): Angling is learned from an angler — free, with the starting rod (existing anglers already know it)
     let taught = null;
-    if (d.npc && d.npc.role === 'angler' && !angling.learned(o.char)) { angling.learn(o); taught = 'angling'; const rod = shops.goodOf('angling_rod'); if (rod && !(o.char.bag || []).some(angling.isRod)) grant(o, { items: [rod], gold: 0, reason: 'taught', from: obj }); s.sendJSON({ t: 'chat', ch: 'system', from: 0, name: obj.name, text: obj.name + ' shows you how to fish. You have learned Angling' + (rod ? ' and been handed a rod' : '') + '.' }); }
-    const cartStop = carts.stopFor(obj);
-    if (cartStop && !d.npc) { s.sendJSON({ t: 'used', id, ok: true, kind: 'cart', name: obj.name, cart: cartStop.id }); const l = carts.list(o, obj); if (l) s.sendJSON(l); return; }
-    if (cartStop) setTimeoutTicks(() => { if (o.conn && online.get(o.char.id) === o) { const l = carts.list(o, obj); if (l && !obj.removed) o.conn.sendJSON(l); } }, 1);
+    if (d.npc && d.npc.role === 'angler' && !angling.learned(o.char)) { angling.learn(o); taught = 'angling'; const rod = shopsOf(o).goodOf('angling_rod'); if (rod && !(o.char.bag || []).some(angling.isRod)) grant(o, { items: [rod], gold: 0, reason: 'taught', from: obj }); s.sendJSON({ t: 'chat', ch: 'system', from: 0, name: obj.name, text: obj.name + ' shows you how to fish. You have learned Angling' + (rod ? ' and been handed a rod' : '') + '.' }); }
+    ships.onUse(o, obj);      // [V] a Harbourmaster: the sailing list follows the hello
+    const cartStop = cartsOf(o).stopFor(obj);
+    if (cartStop && !d.npc) { s.sendJSON({ t: 'used', id, ok: true, kind: 'cart', name: obj.name, cart: cartStop.id }); const l = cartsOf(o).list(o, obj); if (l) s.sendJSON(l); return; }
+    if (cartStop) setTimeoutTicks(() => { if (o.conn && online.get(o.char.id) === o) { const l = cartsOf(o).list(o, obj); if (l && !obj.removed) o.conn.sendJSON(l); } }, 1);
     if (d.note || d.npc || d.use || d.chest) questTouch(o, obj);          // talk / use steps, and what this one offers
-    const road = d.npc ? roadEvents.talk(o, obj) : null;                   // S5/S9: a delivery handed over; a wanderer's lore + tip
+    const road = d.npc ? roadOf(o).talk(o, obj) : null;                   // S5/S9: a delivery handed over; a wanderer's lore + tip
     if (d.chest) return openChest(o, obj);
     if (d.note) return s.sendJSON({ t: 'used', id, ok: true, kind: 'note', name: obj.name, text: d.note.text, quest: d.note.quest || undefined, ...questOffer(o, obj) });
     if (d.npc) return s.sendJSON({ t: 'used', id, ok: true, kind: 'npc', ...(taught ? { taught } : {}), ...(road ? { road } : {}), ...(d.wanderer ? { wanderer: d.wanderer } : {}), name: obj.name, says: d.npc.says, quest: d.npc.quest || undefined, role: d.npc.role || undefined,
-      ...(shops.kindOf(obj) ? { shop: true, shopKind: shops.kindOf(obj) } : {}), ...(d.npc.role === 'barber' ? { barber: true, free: barberFree() || !(o.char.flags && o.char.flags.barberUsed), ...(barberFree() ? { priceMult: 0 } : { priceMult: economy().barber.mult }) } : {}), ...(d.npc.role === 'unbinder' ? { unbinder: true, unbind: unbinderOffer(o) } : {}), ...(d.npc.role === 'innkeeper' && o.room.kind === 'town' ? { bind: true, bound: o.char.bind === o.room.id } : {}), ...(angling.isFire(obj) ? { cook: true } : {}), ...angling.npcExtra(o, obj), ...professions.npcExtra(o, obj, taught ? { taught: [taught] } : undefined) /* W9 (P-core); #56: what the angler just taught */,
+      ...(shopsOf(o).kindOf(obj) ? { shop: true, shopKind: shopsOf(o).kindOf(obj) } : {}), ...(d.npc.role === 'barber' ? { barber: true, free: barberFree() || !(o.char.flags && o.char.flags.barberUsed), ...(barberFree() ? { priceMult: 0 } : { priceMult: economy().barber.mult }) } : {}), ...(d.npc.role === 'unbinder' ? { unbinder: true, unbind: unbinderOffer(o) } : {}), ...(d.npc.role === 'innkeeper' && o.room.kind === 'town' ? { bind: true, bound: o.char.bind === o.room.id } : {}), ...(angling.isFire(obj) ? { cook: true } : {}), ...angling.npcExtra(o, obj), ...professions.npcExtra(o, obj, taught ? { taught: [taught] } : undefined) /* W9 (P-core); #56: what the angler just taught */,
       ...(d.npc.service ? { service: d.npc.service } : {}), ...questOffer(o, obj) });
     if (d.use) return useThing(o, obj);
     if (d.trace) return s.sendJSON({ t: 'used', id, ok: true, kind: d.trace.kind, ...d.trace, ...(d.trace.kind === 'campfire' ? { cook: true } : {}) });   // T25: a fire to cook at
@@ -996,7 +1037,7 @@ export function createProvince(opts) {
     }
     if (changed) ch.waystones = out;
   }
-  function allWaystones() { const out = []; for (const pv of P.values()) for (const w of pv.L.waystones) out.push({ ...w, province: pv.L.key }); return out; }
+  function allWaystones() { const out = []; for (const pv of P.values()) for (const w of pv.L.waystones) out.push({ ...w, province: pv.L.key, ...(pv.L.continent ? { continent: pv.L.continent } : {}) }); return out; }
   function discover(o, obj) {
     const ch = o.char, w = obj.data.waystone;
     ch.waystones ||= [];
@@ -1023,7 +1064,7 @@ export function createProvince(opts) {
   function homeWaystone() {
     let pv = null;
     for (const q of P.values()) if (q.L.sheet && Array.isArray(q.L.sheet.band) && q.L.sheet.band[0] <= 1) { pv = q; break; }
-    pv ||= first;
+    pv ||= starterPv;
     return pv.L.waystones.find(w => w.town === 0) || null;
   }
   function waystonesNear(o, pv) {
@@ -1047,6 +1088,7 @@ export function createProvince(opts) {
       if (!liveEvent) { s.sendJSON({ t: 'travelR', ok: false, why: 'noEvent', gone: true, to: 'event', msg: 'That event is over.' }); return eventSync(o); }      // Y11: `gone` = remove the row; the list of what IS running follows
       // T11: already standing in it — nothing to travel to
       if (provOf(o.room) && provOf(o.room).L.key === liveEvent.province && Math.hypot(e.x - liveEvent.x, e.z - liveEvent.z) <= (liveEvent.r || 50) + 15) return s.sendJSON({ t: 'travelR', ok: false, why: 'here', msg: 'You are already there.' });
+      if (acrossSea(provOf(o.room).L.key, liveEvent.province)) return s.sendJSON({ t: 'travelR', ok: false, why: 'sea', to: 'event', msg: SEA_MSG });      // Expansion 1: the waystones do not cross the sea
       counters.travels++;
       const a = (ch.id % 12) / 12 * Math.PI * 2;
       const at = { x: liveEvent.x + Math.cos(a) * (liveEvent.r || 50) * 0.8, z: liveEvent.z + Math.sin(a) * (liveEvent.r || 50) * 0.8 };
@@ -1058,6 +1100,7 @@ export function createProvince(opts) {
     if (!(ch.waystones || []).includes(to)) return s.sendJSON({ t: 'travelR', ok: false, why: 'undiscovered', msg: 'You have not found that waystone yet.' });
     const near = (ch.waystones || []).length && [...o.room.objects.values()].some(x => x.data && x.data.waystone && Math.hypot(x.x - e.x, x.z - e.z) < 6);
     if (!near) return s.sendJSON({ t: 'travelR', ok: false, why: 'far', msg: 'Stand at a waystone to travel.' });
+    if (acrossSea(provOf(o.room).L.key, w.province)) return s.sendJSON({ t: 'travelR', ok: false, why: 'sea', to, msg: SEA_MSG });      // Expansion 1: another island — by ship only
     const far = w.province !== provOf(o.room).L.key, dist = Math.hypot(w.x - e.x, w.z - e.z);
     const cost = travelFare ? travelFare(dist + (far ? economy().travel.crossProvinceMetres : 0)) : fareOf(dist, far);
     if (cost > (ch.gold || 0)) return s.sendJSON({ t: 'travelR', ok: false, why: 'gold', cost, msg: 'The fare is ' + cost + ' gold.' });
@@ -1344,7 +1387,7 @@ export function createProvince(opts) {
       o.eventAtKey = k;
       if (o.conn) o.conn.sendJSON(h ? { t: 'eventAt', uid: h.key, id: h.id, realm: h.realm } : { t: 'eventAt', uid: null });
     }
-    roadEvents.track && roadEvents.track();
+    for (const pv of P.values()) if (pv.roadEvents && pv.roadEvents.track) pv.roadEvents.track();
   }
   /**
    * Play-test 3 R3 — "events should activate when a player goes nearby, not wait in real time" (fewer than 5 players at
@@ -1479,7 +1522,7 @@ export function createProvince(opts) {
       }
       // your own hits count as fighting too (C: "you hit something in the last 5 s")
       const src = ev.type === 'hit' ? r.entities.get(ev.s) : null;
-      if (src && src.kind === 'player' && src.char && d && d.kind === 'monster') { const os = online.get(src.char.id); if (os) { os.lastHitAt = now(); if (d.data && d.data.roadEvent != null) roadEvents.noteHit(os, d); } }      // W24: hitting a chest's keeper is taking part
+      if (src && src.kind === 'player' && src.char && d && d.kind === 'monster') { const os = online.get(src.char.id); if (os) { os.lastHitAt = now(); if (d.data && d.data.roadEvent != null) roadOf(os).noteHit(os, d); } }      // W24: hitting a chest's keeper is taking part
     }
     if (ev.type === 'hit' && ev.kind === 'dmg') {
       const src = r.entities.get(ev.s), dst = r.entities.get(ev.d);
@@ -1585,7 +1628,9 @@ export function createProvince(opts) {
    * event that spilled through the gate) is kept on their feet by the town's guards — healed to full every second and told
    * once why ("Stay behind us, friend. We have the gate."). They can still fight; they cannot be killed by a raid.
    */
-  const GUARD_SAY = ((layouts[0] && layouts[0].guards && layouts[0].guards.raid && layouts[0].guards.raid.say && layouts[0].guards.raid.say.newcomer) || ['Stay behind us, friend. We have the gate.']);
+  const sayOf = L => (L && L.guards && L.guards.raid && L.guards.raid.say && L.guards.raid.say.newcomer) || null;
+  const GUARD_SAY = sayOf(layouts[0]) || ['Stay behind us, friend. We have the gate.'];
+  const guardSayIn = r => { const pv = provOf(r); return (pv && pv !== first && sayOf(pv.L)) || GUARD_SAY; };      // Expansion 1: each province's own guards' words
   function newcomerWard(o) {
     const r = o.room, e = o.entity;
     if (r.rules.newcomer) safeRules(r, 'newcomer', e, isNewcomer(o));      // W1 (stream C, with the lead's leave): a newcomer draws a quarter of the threat and is never a raider's opening target
@@ -1596,7 +1641,7 @@ export function createProvince(opts) {
     if (!o.warded) {
       o.warded = true; counters.newcomersWarded = (counters.newcomersWarded || 0) + 1;
       const g = [...r.objects.values()].filter(x => x.data && x.data.guard).sort((a, b) => Math.hypot(a.x - e.x, a.z - e.z) - Math.hypot(b.x - e.x, b.z - e.z))[0];
-      const line = GUARD_SAY[(o.char.id | 0) % GUARD_SAY.length];
+      const says = guardSayIn(r), line = says[(o.char.id | 0) % says.length];
       if (g) r.emit({ type: 'say', id: g.id, text: line, style: 'bark' });
       if (o.conn) o.conn.sendJSON({ t: 'chat', ch: 'system', from: 0, name: g ? g.name : 'Town Guard', text: line + ' (The town guard keeps new arrivals on their feet during a raid.)' });
     }
@@ -1638,8 +1683,8 @@ export function createProvince(opts) {
   const PHASES = { dawn: 0.2, day: 0.27, dusk: 0.75, night: 0.82, late: 0.95 };
   const barkAt = new Map();
   /** dawn | day | dusk | night | late — the schedules' clock phases (chatter `phase.*`). */
-  function dayPhase() {
-    const t = timeOfDay(), ph = (first.L.schedules && first.L.schedules.clock && first.L.schedules.clock.phases) || PHASES;
+  function dayPhase(pv = first) {
+    const t = timeOfDay(), ph = (pv.L.schedules && pv.L.schedules.clock && pv.L.schedules.clock.phases) || PHASES;
     let cur = 'night';
     for (const [k, v] of Object.entries(ph).sort((a, b) => a[1] - b[1])) if (t >= v) cur = k;
     return t < (ph.dawn ?? 0.2) ? 'night' : cur;
@@ -1673,11 +1718,12 @@ export function createProvince(opts) {
     }
   }
   function npcTick(dtMs) {
-    const t = timeOfDay(), night = isNight(), phases = (first.L.schedules && first.L.schedules.clock.phases) || PHASES;
+    const t = timeOfDay(), night = isNight(), phases0 = (first.L.schedules && first.L.schedules.clock.phases) || PHASES;
     // S11 (play-test 4): the village and hamlet folk in the wilds copies keep their day too (a cached list per copy —
     // a copy holds thousands of objects and only these move)
     const sched = r => r.kind === 'town' ? r.objects.values() : (r._sched ||= [...r.objects.values()].filter(n => n.kind === 'npc' && n.data && n.data.schedule && n.data.schedule.blocks));
     for (const pv of P.values()) for (const r of [...pv.towns, ...pv.copies]) {
+      const phases = pv === first ? phases0 : ((pv.L.schedules && pv.L.schedules.clock && pv.L.schedules.clock.phases) || phases0);      // Expansion 1: a province's own clock phases
       for (const n of sched(r)) {
         if (n.removed) continue;
         if (n.r && n.r.unit && n.r.unit.guard) continue;
@@ -1739,7 +1785,7 @@ export function createProvince(opts) {
       if (x.removed) continue;
       const d = x.data || {};
       let m = b.mark(o.char, giverOf(x));
-      if (!m && d.road && d.road.kind !== 'chest') { const ev = roadEvents.events.get(d.road.ev); if (ev && !ev.acceptedAt && !ev.done && !ev.freed) m = 'offer'; }
+      if (!m && d.road && d.road.kind !== 'chest') { const ev = roadOf(o).events.get(d.road.ev); if (ev && !ev.acceptedAt && !ev.done && !ev.freed) m = 'offer'; }
       if (!m && d.wanderer && d.wanderer.offers) m = 'offer';
       if (m) now2[x.id] = m;
     }
@@ -1774,7 +1820,7 @@ export function createProvince(opts) {
   function questOffer(o, obj) {
     const b = bookOf(o), g = giverOf(obj);
     const offers = b.offers(o.char, g), ready = b.ready(o.char, g);
-    offers.push(...roadEvents.offers(o, obj));          // S5/S9: road-event NPCs and errand runners (job-shaped, pay themselves)
+    offers.push(...roadOf(o).offers(o, obj));          // S5/S9: road-event NPCs and errand runners (job-shaped, pay themselves)
     if (offers.length) o.dirty = true;                    // job boards remember what they offered
     return offers.length || ready.length ? { offers, ready } : {};
   }
@@ -1832,7 +1878,7 @@ export function createProvince(opts) {
           r.quest = b.view(ch).active.find(q => q.id === m.id) || r.quest;
         }
         questSaved(o); sendQuests(o); if (g.npcId) questEvent(o, { kind: 'talk', npcId: g.npcId, x: g.x, z: g.z });
-        roadEvents.accepted(o, m.id, near.o);             // S5: the parcel into the bag / the escort starts
+        roadOf(o).accepted(o, m.id, near.o);             // S5: the parcel into the bag / the escort starts
         questGoods(o, (b.defs.get(m.id) || {}).grant, near.o, 'quest');     // T25 (E): `grant: [{good, count}]` handed over on accept (the rod)
       }
       return reply(r);
@@ -1846,7 +1892,7 @@ export function createProvince(opts) {
     const items = [];
     for (const g of [].concat(list || []).slice(0, 6)) {
       const id = g && (g.good || g.id);
-      const it = id ? shops.goodOf(id) : null;
+      const it = id ? shopsOf(o).goodOf(id) : null;
       if (!it) continue;
       for (let k = 0; k < Math.max(1, Math.min(10, g.count | 0 || 1)); k++) items.push({ ...it });
     }
@@ -2092,8 +2138,11 @@ export function createProvince(opts) {
    * U17 (play-test 6, stream E's shops.json `potionDrops: { chance: {normal, champion, rare, elite, boss}, table: [[minLevel, id]…] }`):
    * a kill may leave a potion beside its usual loot — the best table row the monster's level reaches, by its rank's chance.
    */
-  const potionDrops = (layouts[0] && layouts[0].shops && layouts[0].shops.potionDrops) || opts.potionDrops || null;
+  const potionDrops0 = (layouts[0] && layouts[0].shops && layouts[0].shops.potionDrops) || opts.potionDrops || null;
+  /** Expansion 1: a province's own shops.json `potionDrops` (a level 10-20 island drops stronger potions), else the first one's. */
+  const potionDropsIn = r => { const pv = provOf(r); return (pv && pv !== first && pv.L.shops && pv.L.shops.potionDrops) || potionDrops0; };
   function potionDrop(e, from, a, r) {
+    const potionDrops = potionDropsIn(r);
     if (!potionDrops || !from || from.kind !== 'monster') return a;
     const ch = potionDrops.chance || {}, p = ch[from.rank] ?? ch.normal ?? 0;
     if (!(p > 0) || r.host.random('potion') >= p) return a;
@@ -2102,7 +2151,7 @@ export function createProvince(opts) {
     const top = Math.max(...rows.map(row => row[0]));
     const pick = rows.filter(row => row[0] === top || row[0] <= 1);
     const id = pick[Math.floor(r.host.random('potion') * pick.length)][1];
-    const it = shops.potionOf(id, r.rules);
+    const it = shopsOf(r).potionOf(id, r.rules);
     counters.potionDrops = (counters.potionDrops || 0) + 1;
     return it ? { ...a, items: [...(a.items || []), it] } : a;
   }
@@ -2192,8 +2241,14 @@ export function createProvince(opts) {
    * S3 (play-test 4): one-off refunds from data/provinces/refunds.json, each paid ONCE per character per `key`
    * (char.flags.refunds). Matched on the database id AND the name, so another database never pays out by accident.
    */
+  /** Refunds are per CHARACTER, wherever they log in: every province's list, once each (`key`). */
+  function refundList() {
+    const out = [], seen = new Set();
+    for (const pv of P.values()) for (const r of (pv.L.refunds && pv.L.refunds.list) || []) { const k = r && r.key ? r.key + '|' + r.char : null; if (k && seen.has(k)) continue; if (k) seen.add(k); out.push(r); }
+    return out.length ? out : opts.refunds || [];
+  }
   function applyRefunds(o) {
-    const list = (first.L.refunds && first.L.refunds.list) || opts.refunds || [];
+    const list = refundList();
     const ch = o.char;
     for (const r of list) {
       if (!r || String(r.char) !== String(ch.id) || (r.name && r.name !== ch.name)) continue;
@@ -2529,15 +2584,31 @@ export function createProvince(opts) {
   // ---- play-test 2: corpse loot (Q3/Q4), shops (Q11), mounts (Q16), barber (Q20), prefs (Q22), follow (Q2) ----
   const corpses = createCorpses({ now, newUid, rng: () => (first.towns[0] || first.copies[0]).host.random('roll'), partyOf: c => partyOf.get(c) || null, online, grant: (o, a) => grant(o, a), log, counters, bagMax: o => bagCap(o) });
   // S5/S9 (play-test 4): treasure chests, deliveries, escorts and rescues dropped near players; errand runners' letters
-  const roadEvents = createRoadEvents({ data: first.L.treasure || null, wanderers: first.L.wanderers || null, online, corpses, grant: (o, a) => grant(o, a),
-    questEvent: (o, ev) => questEvent(o, ev), bookOf: o => bookOf(o), provOf: r => provOf(r), now, wallNow, rng: () => (first.towns[0] || first.copies[0]).host.random('road'), log, counters,
-    journal: (o, k, p) => journal(o, k, p), questSaved: o => questSaved(o), sendQuests: o => sendQuests(o), partyOf: c => partyOf.get(c) || null, mailTo: a => sysmail.mailTo(a), enabled: opts.roadEvents !== false });
-  // W5 (owner feedback 8): ox-cart fast travel between towns (js/sim/carts.js over E's data/provinces/carts.json)
-  const carts = createCarts({ data: first.L.carts || opts.cartData || null, layouts, online, journal: (o, k, p) => journal(o, k, p), econ, setTimeoutTicks: (fn, n) => setTimeoutTicks(fn, n),
-    moveTo: (o, p, at, via) => moveTo(o, p, at, via), questEvent: (o, ev) => questEvent(o, ev), fighting: (o, e) => fighting(o, e), dismount: (o, why) => { if (o.mount) dismount(o, why); endMountCast(o); },
-    consume: (o, i) => consume(o, i), tickMs: TICK_MS, log, counters, cartFare });
-  const mountBook = createMountBook(first.L.mounts || opts.mountData || null);
-  const shops = createShops({ data: first.L.shops || opts.shopData || null, mounts: mountBook, now: wallNow, log, rng: () => (first.towns[0] || first.copies[0]).host.random('shop') });
+  // Expansion 1 (stream P): road events, ox carts and shops are each PROVINCE's own (its road-events / carts / shops data);
+  // `first`'s are the old single-province ones and the fallback for a room that belongs to no province
+  const rngOf = (pv, k) => () => (pv.towns[0] || pv.copies[0]).host.random(k);
+  const ownsProvince = pv => o => (provOf(o.room) || first) === pv;
+  for (const pv of P.values()) {
+    const L = pv.L, home = pv === first;
+    pv.roadEvents = createRoadEvents({ data: L.treasure || null, wanderers: L.wanderers || null, online, corpses, grant: (o, a) => grant(o, a),
+      questEvent: (o, ev) => questEvent(o, ev), bookOf: o => bookOf(o), provOf: r => provOf(r), now, wallNow, rng: rngOf(pv, 'road'), log, counters,
+      journal: (o, k, p) => journal(o, k, p), questSaved: o => questSaved(o), sendQuests: o => sendQuests(o), partyOf: c => partyOf.get(c) || null, mailTo: a => sysmail.mailTo(a), enabled: opts.roadEvents !== false,
+      ...(P.size > 1 ? { owns: ownsProvince(pv) } : {}) });
+    // W5 (owner feedback 8): ox-cart fast travel between towns (js/sim/carts.js over E's data/provinces/carts.json) — a cart never leaves its island
+    pv.carts = withEconomy(L.key, () => createCarts({ data: L.carts || (home ? opts.cartData : null) || null, layouts: [L], online, journal: (o, k, p) => journal(o, k, p), econ, setTimeoutTicks: (fn, n) => setTimeoutTicks(fn, n),
+      moveTo: (o, p, at, via) => moveTo(o, p, at, via), questEvent: (o, ev) => questEvent(o, ev), fighting: (o, e) => fighting(o, e), dismount: (o, why) => { if (o.mount) dismount(o, why); endMountCast(o); },
+      consume: (o, i) => consume(o, i), tickMs: TICK_MS, log, counters, cartFare: m => withEconomy(L.key, () => cartFare(m)) }));
+  }
+  // [V] Expansion 1 §6: the voyage (js/sim/ships.js over data/provinces/ships.json); a harbour whose province is not loaded in this realm is "not sailing yet"
+  const ships = createShips({ data: (layouts.find(L => L.ships) || {}).ships || opts.shipData || null, online, journal: (o, k, p) => journal(o, k, p), econ, setTimeoutTicks: (fn, n) => setTimeoutTicks(fn, n), moveTo: (o, p, at, via) => moveTo(o, p, at, via),
+    questEvent: (o, ev) => questEvent(o, ev), fighting: (o, e) => fighting(o, e), dismount: (o, why) => { if (o.mount) dismount(o, why); endMountCast(o); }, provinceLoaded: k => P.has(k) || (opts.realmProvinces || []).includes(k), partyOf: c => partyOf.get(c) || null, tickMs: TICK_MS, log, counters, wallNow });
+  // a mount you own rides on every island: one book, every province's mounts in it (the first province's table first)
+  const mountBook = createMountBook(mergeMounts(layouts.map(L => L.mounts)) || opts.mountData || null);
+  for (const pv of P.values()) pv.shops = withEconomy(pv.L.key, () => createShops({ data: pv.L.shops || (pv === first ? opts.shopData : null) || null, mounts: mountBook, now: wallNow, log, rng: rngOf(pv, 'shop') }));
+  const roadEvents = first.roadEvents, carts = first.carts, shops = first.shops;      // the realm-wide reads (the barber's price list, a goods catalog lookup)
+  /** The province record a player (or a room) belongs to. */
+  const pvOf = x => (x && x.room ? provOf(x.room) : x && x.meta ? provOf(x) : null) || first;
+  const shopsOf = x => pvOf(x).shops, cartsOf = x => pvOf(x).carts, roadOf = x => pvOf(x).roadEvents;
   const social = new Map();        // char id -> { friends: Set, tradeFriendsOnly } (the gateway keeps it current, Q15)
   const clsNameOf = cls => (opts.classNames && opts.classNames[cls]) || String(cls || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
   const prefsOf = ch => ({ showGear: !(ch.prefs && ch.prefs.showGear === false), showHelm: !(ch.prefs && ch.prefs.showHelm === false) });
@@ -2609,12 +2680,13 @@ export function createProvince(opts) {
   function shopNpc(o, npcId) {
     const r = o.room.objectNear(o.entity, npcId, SHOP_RANGE);
     if (r.why) return { why: r.why, msg: r.why === 'far' ? 'Walk over to them first.' : 'Who?' };
-    const kind = shops.kindOf(r.o);
+    const kind = shopsOf(o).kindOf(r.o);
     if (!kind) return { why: 'noShop', msg: (r.o.name || 'They') + ' has nothing to sell.' };
     return { npc: r.o, role: (r.o.data.npc && r.o.data.npc.role) || null, kind };
   }
   const townNameOf = o => (o.room.kind === 'town' ? o.room.name : null);
   function shopView(o, npc, role) {
+    const shops = shopsOf(o);
     const kind = shops.kindOf(npc), sh = shops.shopOf(kind);
     const stock = shops.stock(npc, o.entity, o.room.rules, townNameOf(o));
     o.shopAt = { npc: npc.id, room: o.room.id, stock };
@@ -2642,7 +2714,7 @@ export function createProvince(opts) {
     ch.bag ||= [];
     if (op === 'open') return s.sendJSON(shopView(o, npc, role));
     if (op === 'buy') {
-      const stock = o.shopAt && o.shopAt.npc === npc.id && o.shopAt.room === o.room.id ? o.shopAt.stock : shops.stock(npc, e, rules, townNameOf(o));
+      const stock = o.shopAt && o.shopAt.npc === npc.id && o.shopAt.room === o.room.id ? o.shopAt.stock : shopsOf(o).stock(npc, e, rules, townNameOf(o));
       const row = stock.find(x => x.id === m.id);
       if (!row) return R({ ok: false, why: 'item', msg: 'That is not for sale here any more.' });
       if (row.level && (ch.level || 1) < row.level) return R({ ok: false, why: 'level', msg: 'You need to be level ' + row.level + ' for that.' });
@@ -2678,12 +2750,12 @@ export function createProvince(opts) {
       if (i < 0) return R({ ok: false, why: 'item', msg: CODES.item });
       if (trades.offered(ch.id, m.uid)) return R({ ok: false, why: 'item', msg: 'That item is in your trade window.' });
       const [it] = ch.bag.splice(i, 1);
-      const price = shops.sellPrice(it, rules) * countOf(it);          // U5: a stack sells whole
+      const price = shopsOf(o).sellPrice(it, rules) * countOf(it);          // U5: a stack sells whole
       ch.gold = (ch.gold || 0) + price;
       journal(o, 'bagDel', { uid: it.uid }); journal(o, 'gold', { d: price });
       econ.add('faucet', 'sell', { gold: price }, ch.level || 1); econ.add('sink', 'sell', { items: 1 }, ch.level || 1);
       o.buyback ||= []; o.buyback.push({ item: it, price });
-      while (o.buyback.length > (shops.pricing.buyback || 12)) o.buyback.shift();
+      while (o.buyback.length > (shopsOf(o).pricing.buyback || 12)) o.buyback.shift();
       o.dirty = true;
       s.sendJSON({ t: 'bag', add: [], remove: [it.uid], gold: ch.gold });
       R({ ok: true, uid: it.uid, gold: price });
@@ -3004,6 +3076,7 @@ export function createProvince(opts) {
     spend: (o, gold, reason) => { o.char.gold -= gold; journal(o, 'gold', { d: -gold }); econ.add('sink', reason || 'craft', { gold }, o.char.level || 1); if (o.conn) o.conn.sendJSON({ t: 'bag', add: [], remove: [], gold: o.char.gold }); o.dirty = true; },
     potionText: (it, o) => potionText(it, { hpMax: o.entity.hpMax, mpMax: o.entity.mpMax }, potionTable), opts: opts.professionOpts || {} });
   // T25 — angling (js/sim/angling.js over C's js/rules/fishing.js and E's data/provinces/angling*.json)
+  const hazards = createHazards({ provinces: () => [...P.values()].map(pv => ({ key: pv.L.key, L: pv.L })), online, now, log });      // [S] Expansion 1 §4: Vharlen's springs, geysers, lava vents
   const angling = createAngling({ layouts, online, provOf: r => provOf(r), grant: (o, a) => grant(o, a), journal: (o, k, p) => journal(o, k, p), questEvent: (o, ev) => questEvent(o, ev),
     consume: (o, i) => consume(o, i), now, wallNow, log, counters, safeRules: (r, fn, ...a) => safeRules(r, fn, ...a), dayPhase: () => dayPhase(), fighting: (o, e) => fighting(o, e),
     dismount: (o, why) => dismount(o, why), endMeal: (o, why) => endMeal(o, why), wantSheet: o => wantSheet(o), bagMax: o => bagCap(o), setTimeoutTicks: (fn, n) => setTimeoutTicks(fn, n), opts: opts.anglingOpts || {} });
@@ -3147,7 +3220,7 @@ export function createProvince(opts) {
     const live = [];
     if (liveEvent && liveEvent.uid) live.push(liveEvent.uid);
     for (const z of zoneRuns.values()) if (z.room === o.room || o.room.kind === 'town') { const v = z.run.view(); if (v.uid && provOf(z.room) === provOf(o.room)) live.push(v.uid); }
-    for (const ev of roadEvents.events.values()) if (!ev.virtual && ev.room === o.room) live.push('road:' + ev.room.id + ':' + ev.id);
+    for (const ev of roadOf(o).events.values()) if (!ev.virtual && ev.room === o.room) live.push('road:' + ev.room.id + ':' + ev.id);
     o.conn.sendJSON({ t: 'eventSync', live: [...new Set(live)], realm: liveEvent ? liveEvent.uid || null : null, at: wallNow() });
   }
   /**
@@ -3434,7 +3507,8 @@ export function createProvince(opts) {
   function step() {
     const t0 = perfNow();
     ticks++;
-    for (const r of rooms.values()) r.step();
+    if (P.size < 2) for (const r of rooms.values()) r.step();
+    else for (const r of rooms.values()) withEconomy(r.meta && r.meta.province, () => r.step());      // Expansion 1: each room with its province's numbers
     if (ticks % 5 === 0) checkEdges();
     if (edgeQueue.size) drainEdges();
     if (joining.size) drainJoins(t0);
@@ -3446,12 +3520,13 @@ export function createProvince(opts) {
     if (ticks % 100 === 37) for (const o of online.values()) if (o.conn && o.entity && !o.frozen && !o.saving && !o.mailBusy) lightSweep(o, true);      // W22: a light that arrived by post or trade after the entry sweep
     if (meterOn.size && ticks % 5 === 3) meterTick();      // W21: the meter's hit feed, 4 Hz, only for those who asked
     if (ticks % 20 === 11) questMarksTick();      // W12: quest marks over NPCs, per player
-    if (ticks % 20 === 13) roadEvents.tick();     // S5: random road events near lone players
-    if (ticks % 4 === 3) roadEvents.move(TICK_MS * 4);
+    if (ticks % 20 === 13) for (const pv of P.values()) withEconomy(pv.L.key, () => pv.roadEvents.tick());     // S5: random road events near lone players (Expansion 1: each province's own)
+    if (ticks % 4 === 3) for (const pv of P.values()) pv.roadEvents.move(TICK_MS * 4);
     if (ticks % 20 === 11) { foodTick(); reviveSweep(); }
     if (ticks % 5 === 2) { mountSpeedTick(); emoteTick(); }
     if (ticks % 300 === 151) for (const o of online.values()) eventSync(o);      // Y11: every 15 s      // move speed (boots, buffs, shapes, the mount): 4 Hz
     angling.tick();
+    hazards.tick();      // [S]
     professions.tick(); if (ticks % 20 === 15) professions.sweep();      // W9 (P-core)
     for (const o of online.values()) if (o.mountCast) mountCastTick(o);
     if (ticks % 4 === 1) npcTick(TICK_MS * 4);
@@ -3527,7 +3602,7 @@ export function createProvince(opts) {
     if (typeof opts.kitsFor === 'function') for (const cls of (opts.classes || [])) { try { const k = await opts.kitsFor(cls); if (k && typeof k === 'object') kitCache.set(cls, k); } catch (err) { log('kitsFor failed for ' + cls, err && err.message); } }
     const n = await store.clearLeases(processName + ':');
     if (n) log(`cleared ${n} stale lease(s) from a previous run of ${processName}`);
-    send({ k: 'hello', proc, provinces: [...P.keys()], waystones: allWaystones().map(w => ({ key: w.key, name: w.name, x: w.x, z: w.z, province: w.province })), doors: callboardDoors() });
+    send({ k: 'hello', proc, provinces: [...P.keys()], waystones: allWaystones().map(w => ({ key: w.key, name: w.name, x: w.x, z: w.z, province: w.province, ...(w.continent ? { continent: w.continent } : {}) })), doors: callboardDoors() });
   }
   /** TEST-ONLY (server/dev-hooks.mjs, `--dev-hooks`): set a character's level everywhere it is read. */
   function devSetLevel(charId, level) {
@@ -3550,7 +3625,7 @@ export function createProvince(opts) {
       const fam = ds.family || (ds.families && ds.families[0]) || null;
       const kind = fam ? fam.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : (d.name || 'Dungeon');
       const where = d.sheet && d.sheet.name;
-      out.push({ key: pv.L.key + ':' + i, province: pv.L.key, door: i, zone: d.zone || null, name: ds.name || (where ? where + ': ' + kind : (d.name || 'Dungeon')), level: lvl, band, floors: ds.floors || 2 });
+      out.push({ key: pv.L.key + ':' + i, province: pv.L.key, door: i, zone: d.zone || null, name: ds.name || (where ? where + ': ' + kind : (d.name || 'Dungeon')), level: lvl, band, floors: ds.floors || 2, ...(pv.L.continent ? { continent: pv.L.continent } : {}) });
     });
     return out;
   }
@@ -3606,8 +3681,9 @@ export function createProvince(opts) {
     accept, step, init, shutdown, status, rooms, P, online, partyOf, econ, tickStats, owner, counters, trades,
     room: copies[0], townRoom, copies, instances, town, door, gate,
     saveNow, logout, transfer, moveTo, grant, corpses, roadEvents, mute, flushEconomy, newUid, flushJournal, timeOfDay, devSetLevel,
-    carts, shops, meterOn, bagCap, isNewcomer, NEWCOMER, realmEvents, liveEventNow: () => liveEvent, mailTo: a => sysmail.mailTo(a), offerRevive, angling, professions, feedback, zoneRuns, kitCache, sheetOf, restack,
+    carts, ships, shops, meterOn, bagCap, isNewcomer, NEWCOMER, realmEvents, liveEventNow: () => liveEvent, mailTo: a => sysmail.mailTo(a), offerRevive, angling, professions, feedback, zoneRuns, kitCache, sheetOf, restack,
     chatterContext: (r, x, z) => chatterContext(provOf(r), r, x, z),
+    hazards,      // [S]
     get liveEvent() { return liveEvent; },
   };
 }

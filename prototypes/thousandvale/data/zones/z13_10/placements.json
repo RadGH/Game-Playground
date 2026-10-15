@@ -1,0 +1,9400 @@
+{
+ "_doc": "Stream B zone placements (tools/bake-zone.mjs). Zone metres; yaw = atan2(dx, dz), the way the thing faces. kinds: settlement (data.radius, hub, planned), town_square, street (data.pts, width, cls), building (a proctown plot: data.w along `angle` (local +x = (cos angle, sin angle)), data.d across, want; yaw faces the nearest drawn street, data.streetGap = metres from the front to it), town_wall (play-test 4: every planned settlement; data.style/material/tier/h/thick/tint/radius, runs [[[x,z,h]…]…] open polylines between openings, towers [{x,z,h,yaw}], gates [{id,x,z,h,yaw = the way OUT along the road,out:[dx,dz],width,pass,kind gatehouse|posts|gap,way,ways,led,ends,approaches}], openings [{kind water|keep,ends,grate}] — SOLID in nav.bin except the gates; tools/lib/zone-walls.mjs), road (data.pts [[x,z,h]], width, cls, spur), bridge (yaw along the road, span, deck height), dungeon_door, event_site, camp_site, landmark/dungeon/pass/crossing (World Forge nodes).",
+ "zone": "z13_10",
+ "terrainHash": "3fd22ea0",
+ "placements": [
+  {
+   "kind": "settlement",
+   "id": "port_vharl",
+   "x": 1126,
+   "z": 914,
+   "yaw": 0,
+   "data": {
+    "kind": "town",
+    "name": "Port Vharl",
+    "radius": 90,
+    "hub": true,
+    "planned": true
+   }
+  },
+  {
+   "kind": "dungeon_door",
+   "id": "door_1",
+   "x": 930,
+   "z": 813,
+   "yaw": 1.114,
+   "data": {
+    "name": "Cave mouth"
+   }
+  },
+  {
+   "kind": "event_site",
+   "id": "event_blackstrand",
+   "x": 1046,
+   "z": 1043,
+   "yaw": 0,
+   "data": {
+    "r": 40
+   }
+  },
+  {
+   "kind": "harbour",
+   "id": "harbour_port_vharl",
+   "x": 1505,
+   "z": 914,
+   "yaw": 1.5708,
+   "data": {
+    "town": "port_vharl",
+    "deep": [
+     1531,
+     914
+    ]
+   }
+  },
+  {
+   "kind": "town_square",
+   "id": "port_vharl_square",
+   "x": 1139.71,
+   "z": 913.5,
+   "yaw": 0,
+   "data": {
+    "r": 4.72,
+    "town": "port_vharl",
+    "culture": "vharl",
+    "stalls": [
+     [
+      1132.96,
+      917.34
+     ],
+     [
+      1144.49,
+      907.38
+     ],
+     [
+      1149.38,
+      923.31
+     ],
+     [
+      1141.23,
+      925.67
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_0",
+   "x": 1164.74,
+   "z": 953.04,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      1164.74,
+      953.04
+     ],
+     [
+      1123.69,
+      916.96
+     ],
+     [
+      1078.62,
+      886.07
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_1",
+   "x": 1148.54,
+   "z": 866.47,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      1148.54,
+      866.47
+     ],
+     [
+      1135.18,
+      887.79
+     ],
+     [
+      1120.19,
+      907.99
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_2",
+   "x": 1168.78,
+   "z": 882.56,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1168.78,
+      882.56
+     ],
+     [
+      1157.34,
+      903.14
+     ],
+     [
+      1144.72,
+      923.01
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_3",
+   "x": 1178.86,
+   "z": 920.86,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1178.86,
+      920.86
+     ],
+     [
+      1168.66,
+      913.39
+     ],
+     [
+      1158.1,
+      906.45
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_4",
+   "x": 1177.62,
+   "z": 895.01,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1177.62,
+      895.01
+     ],
+     [
+      1173.01,
+      901.04
+     ],
+     [
+      1166.87,
+      910.81
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_5",
+   "x": 1179.57,
+   "z": 901.55,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1179.57,
+      901.55
+     ],
+     [
+      1176.62,
+      899.62
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_6",
+   "x": 1180.05,
+   "z": 903.81,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1180.05,
+      903.81
+     ],
+     [
+      1176.09,
+      909.02
+     ],
+     [
+      1172.49,
+      914.71
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_7",
+   "x": 1180.97,
+   "z": 915.66,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1180.97,
+      915.66
+     ],
+     [
+      1178.96,
+      914.26
+     ],
+     [
+      1175.94,
+      912.18
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_8",
+   "x": 1175.03,
+   "z": 908.61,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1175.03,
+      908.61
+     ],
+     [
+      1173.51,
+      907.46
+     ],
+     [
+      1171.9,
+      906.43
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_9",
+   "x": 1174.43,
+   "z": 897.06,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1174.43,
+      897.06
+     ],
+     [
+      1171.04,
+      894.88
+     ],
+     [
+      1167.81,
+      892.46
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_10",
+   "x": 1168.17,
+   "z": 906.08,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1168.17,
+      906.08
+     ],
+     [
+      1164.98,
+      903.61
+     ],
+     [
+      1161.54,
+      901.49
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_11",
+   "x": 1165.02,
+   "z": 912.98,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1165.02,
+      912.98
+     ],
+     [
+      1160.34,
+      919.68
+     ],
+     [
+      1155.7,
+      926.41
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_12",
+   "x": 1172.89,
+   "z": 929.45,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1172.89,
+      929.45
+     ],
+     [
+      1166.99,
+      925.04
+     ],
+     [
+      1160.78,
+      921.05
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_13",
+   "x": 1173.26,
+   "z": 918.7,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1173.26,
+      918.7
+     ],
+     [
+      1171.06,
+      921.85
+     ],
+     [
+      1168.88,
+      925.01
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_14",
+   "x": 1166.14,
+   "z": 926.43,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1166.14,
+      926.43
+     ],
+     [
+      1164.54,
+      928.93
+     ],
+     [
+      1162.76,
+      931.31
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_15",
+   "x": 1158.44,
+   "z": 920.49,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1158.44,
+      920.49
+     ],
+     [
+      1155.05,
+      918.11
+     ],
+     [
+      1151.63,
+      915.77
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_16",
+   "x": 1149.73,
+   "z": 907.36,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1149.73,
+      907.36
+     ],
+     [
+      1142.43,
+      901.86
+     ],
+     [
+      1134.72,
+      896.94
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_17",
+   "x": 1155.39,
+   "z": 899.19,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1155.39,
+      899.19
+     ],
+     [
+      1148.09,
+      893.7
+     ],
+     [
+      1140.39,
+      888.78
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_18",
+   "x": 1157.41,
+   "z": 879.47,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1157.41,
+      879.47
+     ],
+     [
+      1152.86,
+      885.99
+     ],
+     [
+      1148.35,
+      892.54
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_19",
+   "x": 1161.9,
+   "z": 889.81,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1161.9,
+      889.81
+     ],
+     [
+      1158.31,
+      887.57
+     ],
+     [
+      1154.96,
+      884.99
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_20",
+   "x": 1152.93,
+   "z": 883.95,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1152.93,
+      883.95
+     ],
+     [
+      1149.88,
+      881.72
+     ],
+     [
+      1146.73,
+      879.65
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_21",
+   "x": 1149.14,
+   "z": 896.62,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1149.14,
+      896.62
+     ],
+     [
+      1147.22,
+      899.56
+     ],
+     [
+      1145.13,
+      902.39
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_22",
+   "x": 1140.04,
+   "z": 902.41,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1140.04,
+      902.41
+     ],
+     [
+      1136.8,
+      907.49
+     ],
+     [
+      1133.18,
+      912.3
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_23",
+   "x": 1145.8,
+   "z": 913.02,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1145.8,
+      913.02
+     ],
+     [
+      1141.9,
+      910.35
+     ],
+     [
+      1138.04,
+      907.63
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_24",
+   "x": 1134.27,
+   "z": 908.4,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1134.27,
+      908.4
+     ],
+     [
+      1131.76,
+      906.62
+     ],
+     [
+      1129.21,
+      904.89
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_25",
+   "x": 1133.27,
+   "z": 881.32,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1133.27,
+      881.32
+     ],
+     [
+      1118.4,
+      873.17
+     ],
+     [
+      1104.15,
+      864
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_26",
+   "x": 1131.61,
+   "z": 859.29,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1131.61,
+      859.29
+     ],
+     [
+      1128.45,
+      865.64
+     ],
+     [
+      1124.04,
+      873.01
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_27",
+   "x": 1137.14,
+   "z": 872.88,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1137.14,
+      872.88
+     ],
+     [
+      1132.83,
+      870.33
+     ],
+     [
+      1128.37,
+      868.08
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_28",
+   "x": 1120.57,
+   "z": 859.27,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1120.57,
+      859.27
+     ],
+     [
+      1119.74,
+      860.88
+     ],
+     [
+      1115.44,
+      868.31
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_29",
+   "x": 1125.56,
+   "z": 867.25,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1125.56,
+      867.25
+     ],
+     [
+      1122.5,
+      865.48
+     ],
+     [
+      1119.36,
+      863.86
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_30",
+   "x": 1118.54,
+   "z": 859.92,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1118.54,
+      859.92
+     ],
+     [
+      1117.98,
+      859.59
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_31",
+   "x": 1118.45,
+   "z": 875.1,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1118.45,
+      875.1
+     ],
+     [
+      1112.41,
+      885.22
+     ],
+     [
+      1107.15,
+      895.77
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_32",
+   "x": 1124.31,
+   "z": 895.02,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1124.31,
+      895.02
+     ],
+     [
+      1118.58,
+      891.78
+     ],
+     [
+      1112.77,
+      888.71
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_33",
+   "x": 1129.31,
+   "z": 885.88,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1129.31,
+      885.88
+     ],
+     [
+      1123.73,
+      882.38
+     ],
+     [
+      1117.77,
+      879.57
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_34",
+   "x": 1127.86,
+   "z": 880.24,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1127.86,
+      880.24
+     ],
+     [
+      1127.2,
+      881.45
+     ],
+     [
+      1126.54,
+      882.66
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_35",
+   "x": 1122.65,
+   "z": 883.94,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1122.65,
+      883.94
+     ],
+     [
+      1120.96,
+      887.42
+     ],
+     [
+      1118.94,
+      890.73
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_36",
+   "x": 1116.04,
+   "z": 891.85,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1116.04,
+      891.85
+     ],
+     [
+      1114.17,
+      895.22
+     ],
+     [
+      1112.35,
+      898.61
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_37",
+   "x": 1113.4,
+   "z": 881.13,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1113.4,
+      881.13
+     ],
+     [
+      1106.5,
+      877.01
+     ],
+     [
+      1099.3,
+      873.42
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_38",
+   "x": 1110.11,
+   "z": 870.54,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1110.11,
+      870.54
+     ],
+     [
+      1108.5,
+      873.25
+     ],
+     [
+      1107.08,
+      876.08
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_39",
+   "x": 1103.54,
+   "z": 877.34,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1103.54,
+      877.34
+     ],
+     [
+      1100.23,
+      883.76
+     ],
+     [
+      1096.61,
+      890.01
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_40",
+   "x": 1109.37,
+   "z": 888.5,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1109.37,
+      888.5
+     ],
+     [
+      1105.31,
+      886.34
+     ],
+     [
+      1101.3,
+      884.09
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_41",
+   "x": 1097.71,
+   "z": 885.34,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1097.71,
+      885.34
+     ],
+     [
+      1095.82,
+      884.3
+     ],
+     [
+      1093.92,
+      883.27
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_42",
+   "x": 1107.37,
+   "z": 920.3,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      1107.37,
+      920.3
+     ],
+     [
+      1096.61,
+      934.94
+     ],
+     [
+      1086.89,
+      950.3
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_43",
+   "x": 1128.86,
+   "z": 935.34,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1128.86,
+      935.34
+     ],
+     [
+      1117.95,
+      949.45
+     ],
+     [
+      1108.38,
+      964.5
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_44",
+   "x": 1145.33,
+   "z": 963.35,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1145.33,
+      963.35
+     ],
+     [
+      1134.19,
+      955.69
+     ],
+     [
+      1122.43,
+      949.01
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_45",
+   "x": 1145.15,
+   "z": 947.78,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1145.15,
+      947.78
+     ],
+     [
+      1141.96,
+      952.52
+     ],
+     [
+      1139.09,
+      957.46
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_46",
+   "x": 1134.69,
+   "z": 941.22,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1134.69,
+      941.22
+     ],
+     [
+      1131.37,
+      945.88
+     ],
+     [
+      1128.62,
+      950.9
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_47",
+   "x": 1129.46,
+   "z": 955.39,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1129.46,
+      955.39
+     ],
+     [
+      1124.9,
+      963.59
+     ],
+     [
+      1121.25,
+      968.79
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_48",
+   "x": 1133.27,
+   "z": 968.52,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1133.27,
+      968.52
+     ],
+     [
+      1132.78,
+      968.23
+     ],
+     [
+      1126.09,
+      963.77
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_49",
+   "x": 1138.45,
+   "z": 961.03,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1138.45,
+      961.03
+     ],
+     [
+      1136.46,
+      964.24
+     ],
+     [
+      1134.43,
+      967.43
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_50",
+   "x": 1124.35,
+   "z": 960.55,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1124.35,
+      960.55
+     ],
+     [
+      1121.18,
+      958.31
+     ],
+     [
+      1117.78,
+      956.43
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_51",
+   "x": 1116.11,
+   "z": 948.75,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1116.11,
+      948.75
+     ],
+     [
+      1107.89,
+      943.4
+     ],
+     [
+      1099.49,
+      938.34
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_52",
+   "x": 1118.06,
+   "z": 929.43,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1118.06,
+      929.43
+     ],
+     [
+      1114.06,
+      936.45
+     ],
+     [
+      1109.49,
+      943.11
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_53",
+   "x": 1121.82,
+   "z": 939.64,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1121.82,
+      939.64
+     ],
+     [
+      1118.8,
+      937.71
+     ],
+     [
+      1115.75,
+      935.84
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_54",
+   "x": 1111.71,
+   "z": 936.84,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1111.71,
+      936.84
+     ],
+     [
+      1107.69,
+      934.25
+     ],
+     [
+      1103.61,
+      931.76
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_55",
+   "x": 1105.25,
+   "z": 943.44,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1105.25,
+      943.44
+     ],
+     [
+      1101.74,
+      949.58
+     ],
+     [
+      1097.74,
+      955.42
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_56",
+   "x": 1111.85,
+   "z": 955.56,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1111.85,
+      955.56
+     ],
+     [
+      1107.43,
+      952.61
+     ],
+     [
+      1102.84,
+      949.91
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_57",
+   "x": 1099.5,
+   "z": 949.99,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1099.5,
+      949.99
+     ],
+     [
+      1096.97,
+      948.19
+     ],
+     [
+      1094.25,
+      946.7
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_58",
+   "x": 1091.9,
+   "z": 938.46,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1091.9,
+      938.46
+     ],
+     [
+      1076.94,
+      929.31
+     ],
+     [
+      1072.22,
+      925.54
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_59",
+   "x": 1085.82,
+   "z": 906.17,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1085.82,
+      906.17
+     ],
+     [
+      1079.41,
+      913.87
+     ],
+     [
+      1073.81,
+      922.18
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_60",
+   "x": 1096.95,
+   "z": 914.53,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1096.95,
+      914.53
+     ],
+     [
+      1091,
+      922.57
+     ],
+     [
+      1084.94,
+      930.53
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_61",
+   "x": 1097.85,
+   "z": 928.42,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1097.85,
+      928.42
+     ],
+     [
+      1094.6,
+      926.18
+     ],
+     [
+      1091.54,
+      923.68
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_62",
+   "x": 1087.99,
+   "z": 924.53,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1087.99,
+      924.53
+     ],
+     [
+      1083.33,
+      921.46
+     ],
+     [
+      1079.08,
+      917.85
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_63",
+   "x": 1093.49,
+   "z": 917.21,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1093.49,
+      917.21
+     ],
+     [
+      1088.94,
+      913.98
+     ],
+     [
+      1084.58,
+      910.52
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_64",
+   "x": 1079.28,
+   "z": 912.2,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1079.28,
+      912.2
+     ],
+     [
+      1075.86,
+      909.53
+     ],
+     [
+      1072.34,
+      907
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_65",
+   "x": 1072.97,
+   "z": 928.33,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1072.97,
+      928.33
+     ],
+     [
+      1072.92,
+      928.41
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_66",
+   "x": 1079.5,
+   "z": 933.23,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1079.5,
+      933.23
+     ],
+     [
+      1076.69,
+      936.99
+     ],
+     [
+      1076.28,
+      937.52
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_67",
+   "x": 1120,
+   "z": 849.28,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      1120,
+      849.28
+     ],
+     [
+      1127.5,
+      905
+     ],
+     [
+      1133.5,
+      911
+     ],
+     [
+      1135.55,
+      911.29
+     ]
+    ],
+    "high": true,
+    "to": "square",
+    "road": "road_v_ring_0"
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_68",
+   "x": 1104,
+   "z": 975.16,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      1104,
+      975.16
+     ],
+     [
+      1138.89,
+      918.15
+     ]
+    ],
+    "high": true,
+    "to": "square",
+    "road": "road_v_ring_7"
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_69",
+   "x": 1138.89,
+   "z": 918.15,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1138.89,
+      918.15
+     ],
+     [
+      1145.24,
+      922.19
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_70",
+   "x": 1123.69,
+   "z": 916.96,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1123.69,
+      916.96
+     ],
+     [
+      1120.19,
+      907.99
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "port_vharl_street_71",
+   "x": 1096.61,
+   "z": 934.94,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1096.61,
+      934.94
+     ],
+     [
+      1099.49,
+      938.34
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "building",
+   "id": "port_vharl_plot_0",
+   "x": 1168.01,
+   "z": 899.24,
+   "yaw": -0.6066,
+   "data": {
+    "town": "port_vharl",
+    "want": "counting_house",
+    "district": "craft",
+    "w": 7.23,
+    "d": 6.86,
+    "angle": 2.1774,
+    "front": 2.1774,
+    "streetGap": -0.4,
+    "office": "counting_house",
+    "role": "broker",
+    "lit": false,
+    "label": "Counting House"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "port_vharl_plot_1",
+   "x": 1166.95,
+   "z": 919,
+   "yaw": 0.9642,
+   "data": {
+    "town": "port_vharl",
+    "want": "stable",
+    "district": "craft",
+    "w": 6.48,
+    "d": 6.6,
+    "angle": 2.1774,
+    "front": 6.8898,
+    "streetGap": -0.4,
+    "office": "stable",
+    "role": "stablehand",
+    "lit": true,
+    "label": "Stables"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "port_vharl_plot_2",
+   "x": 1167.93,
+   "z": 931.28,
+   "yaw": -2.1774,
+   "data": {
+    "town": "port_vharl",
+    "want": "hut",
+    "district": "craft",
+    "w": 4.73,
+    "d": 4.86,
+    "angle": 2.1774,
+    "front": 3.7482,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "port_vharl_plot_3",
+   "x": 1160.89,
+   "z": 926.4,
+   "yaw": -2.1774,
+   "data": {
+    "town": "port_vharl",
+    "want": "hut",
+    "district": "craft",
+    "w": 4.73,
+    "d": 5.07,
+    "angle": 2.1774,
+    "front": 3.7482,
+    "streetGap": -0.37
+   }
+  },
+  {
+   "kind": "building",
+   "id": "port_vharl_plot_4",
+   "x": 1158.18,
+   "z": 913.59,
+   "yaw": -0.6066,
+   "data": {
+    "town": "port_vharl",
+    "want": "inn",
+    "district": "civic",
+    "w": 7.59,
+    "d": 7.08,
+    "angle": 2.1774,
+    "front": 2.1774,
+    "streetGap": -0.4,
+    "office": "inn",
+    "role": "innkeeper",
+    "lit": true,
+    "label": "Inn"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "port_vharl_plot_5",
+   "x": 1155.22,
+   "z": 892.03,
+   "yaw": 2.5349,
+   "data": {
+    "town": "port_vharl",
+    "want": "shop",
+    "district": "craft",
+    "w": 7.47,
+    "d": 7.25,
+    "angle": 2.1774,
+    "front": 5.319,
+    "streetGap": -0.4,
+    "office": "shop",
+    "role": "merchant",
+    "lit": true,
+    "label": "General Goods"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "port_vharl_plot_6",
+   "x": 1146.73,
+   "z": 886.26,
+   "yaw": 0.9642,
+   "data": {
+    "town": "port_vharl",
+    "want": "barber",
+    "district": "craft",
+    "w": 7.27,
+    "d": 6.35,
+    "angle": 2.1774,
+    "front": 6.8898,
+    "streetGap": -0.39,
+    "office": "barber",
+    "role": "barber",
+    "lit": true,
+    "label": "Barber"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "port_vharl_plot_7",
+   "x": 1141.85,
+   "z": 895.84,
+   "yaw": -0.6066,
+   "data": {
+    "town": "port_vharl",
+    "want": "forge",
+    "district": "civic",
+    "w": 5.83,
+    "d": 9.25,
+    "angle": 2.1774,
+    "front": 2.1774,
+    "streetGap": -0.25,
+    "office": "forge",
+    "role": "smith",
+    "lit": true,
+    "label": "Smithy"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "port_vharl_plot_8",
+   "x": 1134.4,
+   "z": 902.81,
+   "yaw": -0.6066,
+   "data": {
+    "town": "port_vharl",
+    "want": "hall",
+    "district": "civic",
+    "w": 5.88,
+    "d": 4.96,
+    "angle": 2.1774,
+    "front": 2.1774,
+    "streetGap": -0.4,
+    "office": "hall",
+    "role": "elder",
+    "lit": false,
+    "label": "Town Hall"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "port_vharl_plot_9",
+   "x": 1118.54,
+   "z": 897.61,
+   "yaw": -2.0711,
+   "data": {
+    "town": "port_vharl",
+    "want": "temple",
+    "district": "craft",
+    "w": 6.5,
+    "d": 6.45,
+    "angle": 2.0711,
+    "front": 3.6419,
+    "streetGap": -0.35,
+    "office": "temple",
+    "role": "healer",
+    "lit": false,
+    "label": "Temple"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "port_vharl_plot_10",
+   "x": 1112.62,
+   "z": 875.51,
+   "yaw": -0.5003,
+   "data": {
+    "town": "port_vharl",
+    "want": "house",
+    "district": "residential",
+    "w": 5.11,
+    "d": 5.55,
+    "angle": 2.0711,
+    "front": 2.0711,
+    "streetGap": -0.22
+   }
+  },
+  {
+   "kind": "building",
+   "id": "port_vharl_plot_11",
+   "x": 1104.51,
+   "z": 871.07,
+   "yaw": 1.0705,
+   "data": {
+    "town": "port_vharl",
+    "want": "house",
+    "district": "residential",
+    "w": 5.11,
+    "d": 5.68,
+    "angle": 2.0711,
+    "front": 6.7835,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "port_vharl_plot_12",
+   "x": 1107.29,
+   "z": 882.72,
+   "yaw": 1.0705,
+   "data": {
+    "town": "port_vharl",
+    "want": "market",
+    "district": "residential",
+    "w": 4.65,
+    "d": 7.99,
+    "angle": 2.0711,
+    "front": 6.7835,
+    "streetGap": -0.39,
+    "office": "market",
+    "role": "trader",
+    "lit": true,
+    "label": "Market"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "port_vharl_plot_13",
+   "x": 1103.27,
+   "z": 890.07,
+   "yaw": 2.6413,
+   "data": {
+    "town": "port_vharl",
+    "want": "provisioner",
+    "district": "residential",
+    "w": 5.09,
+    "d": 7.99,
+    "angle": 2.0711,
+    "front": 5.2127,
+    "streetGap": -0.4,
+    "office": "provisioner",
+    "role": "provisioner",
+    "lit": true,
+    "label": "Provisioner"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "port_vharl_plot_14",
+   "x": 1146.24,
+   "z": 955.2,
+   "yaw": -2.1306,
+   "data": {
+    "town": "port_vharl",
+    "want": "bowyer",
+    "district": "residential",
+    "w": 10.22,
+    "d": 5.93,
+    "angle": 2.1306,
+    "front": 3.7014,
+    "streetGap": -0.02,
+    "office": "bowyer",
+    "role": "bowyer",
+    "lit": true,
+    "label": "Bowyer"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "port_vharl_plot_15",
+   "x": 1136.95,
+   "z": 949.38,
+   "yaw": 1.011,
+   "data": {
+    "town": "port_vharl",
+    "want": "armoury",
+    "district": "residential",
+    "w": 10.22,
+    "d": 8.43,
+    "angle": 2.1306,
+    "front": 6.843,
+    "streetGap": -0.4,
+    "office": "armoury",
+    "role": "armourer",
+    "lit": true,
+    "label": "Armourer"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "port_vharl_plot_16",
+   "x": 1132.14,
+   "z": 961.53,
+   "yaw": 1.011,
+   "data": {
+    "town": "port_vharl",
+    "want": "house",
+    "district": "residential",
+    "w": 6.36,
+    "d": 6.69,
+    "angle": 2.1306,
+    "front": 6.843,
+    "streetGap": -0.35
+   }
+  },
+  {
+   "kind": "building",
+   "id": "port_vharl_plot_18",
+   "x": 1115.97,
+   "z": 942.24,
+   "yaw": 2.5818,
+   "data": {
+    "town": "port_vharl",
+    "want": "apothecary",
+    "district": "residential",
+    "w": 7.15,
+    "d": 5.97,
+    "angle": 2.1306,
+    "front": 5.2722,
+    "streetGap": -0.33,
+    "office": "apothecary",
+    "role": "apothecary",
+    "lit": true,
+    "label": "Apothecary"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "port_vharl_plot_19",
+   "x": 1110.53,
+   "z": 929.72,
+   "yaw": -0.5598,
+   "data": {
+    "town": "port_vharl",
+    "want": "study",
+    "district": "craft",
+    "w": 7.29,
+    "d": 8.37,
+    "angle": 2.1306,
+    "front": 2.1306,
+    "streetGap": -0.4,
+    "office": "study",
+    "role": "unbinder",
+    "lit": false,
+    "label": "Unbinder's Study"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "port_vharl_plot_20",
+   "x": 1105.06,
+   "z": 956.39,
+   "yaw": -2.1306,
+   "data": {
+    "town": "port_vharl",
+    "want": "house",
+    "district": "residential",
+    "w": 4.93,
+    "d": 9.44,
+    "angle": 2.1306,
+    "front": 3.7014,
+    "streetGap": -0.23
+   }
+  },
+  {
+   "kind": "building",
+   "id": "port_vharl_plot_21",
+   "x": 1099.5,
+   "z": 944.15,
+   "yaw": -0.5598,
+   "data": {
+    "town": "port_vharl",
+    "want": "house",
+    "district": "residential",
+    "w": 6.12,
+    "d": 4.99,
+    "angle": 2.1306,
+    "front": 2.1306,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "port_vharl_plot_22",
+   "x": 1098.25,
+   "z": 921.32,
+   "yaw": -2.2146,
+   "data": {
+    "town": "port_vharl",
+    "want": "tailor",
+    "district": "residential",
+    "w": 8.11,
+    "d": 6.7,
+    "angle": 2.2146,
+    "front": 3.7854,
+    "streetGap": -0.37,
+    "office": "tailor",
+    "role": "tailor",
+    "lit": true,
+    "label": "Tailor"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "port_vharl_plot_23",
+   "x": 1091.49,
+   "z": 930.33,
+   "yaw": 2.4978,
+   "data": {
+    "town": "port_vharl",
+    "want": "house",
+    "district": "residential",
+    "w": 6.98,
+    "d": 6.7,
+    "angle": 2.2146,
+    "front": 5.3562,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "port_vharl_plot_24",
+   "x": 1086.34,
+   "z": 917.46,
+   "yaw": 2.4978,
+   "data": {
+    "town": "port_vharl",
+    "want": "house",
+    "district": "residential",
+    "w": 5.28,
+    "d": 9.94,
+    "angle": 2.2146,
+    "front": 5.3562,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "port_vharl_plot_25",
+   "x": 1078.79,
+   "z": 905.63,
+   "yaw": -0.6438,
+   "data": {
+    "town": "port_vharl",
+    "want": "house",
+    "district": "residential",
+    "w": 6.36,
+    "d": 7.47,
+    "angle": 2.2146,
+    "front": 2.2146,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_v_ring_0",
+   "x": 1120,
+   "z": 824.2,
+   "yaw": 0,
+   "data": {
+    "cls": "road",
+    "width": 6,
+    "spur": false,
+    "pts": [
+     [
+      1120,
+      824.2,
+      7.23
+     ],
+     [
+      1120,
+      818.83,
+      7.23
+     ],
+     [
+      1120,
+      810.83,
+      7.23
+     ],
+     [
+      1120,
+      802.83,
+      7.23
+     ],
+     [
+      1120,
+      794.83,
+      7.23
+     ],
+     [
+      1120,
+      786.83,
+      7.23
+     ],
+     [
+      1120,
+      778.83,
+      7.23
+     ],
+     [
+      1120,
+      770.83,
+      7.23
+     ],
+     [
+      1120,
+      762.83,
+      7.23
+     ],
+     [
+      1120,
+      754.83,
+      7.24
+     ],
+     [
+      1120,
+      746.83,
+      7.25
+     ],
+     [
+      1119.22,
+      738.91,
+      7.29
+     ],
+     [
+      1115.43,
+      731.91,
+      7.35
+     ],
+     [
+      1110.09,
+      725.96,
+      7.44
+     ],
+     [
+      1105.67,
+      719.33,
+      7.55
+     ],
+     [
+      1104,
+      711.59,
+      7.69
+     ],
+     [
+      1101.96,
+      703.93,
+      7.85
+     ],
+     [
+      1097.36,
+      697.41,
+      8.02
+     ],
+     [
+      1091.73,
+      691.73,
+      8.19
+     ],
+     [
+      1086.08,
+      686.08,
+      8.36
+     ],
+     [
+      1080.42,
+      680.42,
+      8.52
+     ],
+     [
+      1074.76,
+      674.76,
+      8.66
+     ],
+     [
+      1069.11,
+      669.11,
+      8.8
+     ],
+     [
+      1063.45,
+      663.45,
+      8.91
+     ],
+     [
+      1057.79,
+      657.79,
+      9.02
+     ],
+     [
+      1052.13,
+      652.13,
+      9.1
+     ],
+     [
+      1046.48,
+      646.48,
+      9.15
+     ],
+     [
+      1040.82,
+      640.82,
+      9.18
+     ],
+     [
+      1035.16,
+      635.16,
+      9.2
+     ],
+     [
+      1029.51,
+      629.51,
+      9.23
+     ],
+     [
+      1023.85,
+      623.85,
+      9.25
+     ],
+     [
+      1018.19,
+      618.19,
+      9.28
+     ],
+     [
+      1012.54,
+      612.54,
+      9.32
+     ],
+     [
+      1006.88,
+      606.88,
+      9.38
+     ],
+     [
+      1001.22,
+      601.22,
+      9.47
+     ],
+     [
+      995.93,
+      595.24,
+      9.56
+     ],
+     [
+      992.52,
+      588.06,
+      9.66
+     ],
+     [
+      992,
+      580.11,
+      9.75
+     ],
+     [
+      992,
+      572.11,
+      9.85
+     ],
+     [
+      991.54,
+      564.15,
+      9.96
+     ],
+     [
+      988.2,
+      556.93,
+      10.05
+     ],
+     [
+      982.93,
+      550.93,
+      10.14
+     ],
+     [
+      977.27,
+      545.27,
+      10.21
+     ],
+     [
+      971.62,
+      539.62,
+      10.28
+     ],
+     [
+      965.96,
+      533.96,
+      10.35
+     ],
+     [
+      960.3,
+      528.3,
+      10.43
+     ],
+     [
+      954.65,
+      522.65,
+      10.52
+     ],
+     [
+      948.99,
+      516.99,
+      10.62
+     ],
+     [
+      943.33,
+      511.33,
+      10.73
+     ],
+     [
+      937.68,
+      505.68,
+      10.85
+     ],
+     [
+      932.02,
+      500.02,
+      10.97
+     ],
+     [
+      926.36,
+      494.36,
+      11.12
+     ],
+     [
+      920.71,
+      488.71,
+      11.3
+     ],
+     [
+      915.05,
+      483.05,
+      11.51
+     ],
+     [
+      909.39,
+      477.39,
+      11.75
+     ],
+     [
+      903.74,
+      471.74,
+      12.01
+     ],
+     [
+      898.08,
+      466.08,
+      12.27
+     ],
+     [
+      892.42,
+      460.42,
+      12.52
+     ],
+     [
+      886.78,
+      454.75,
+      12.73
+     ],
+     [
+      882.13,
+      448.27,
+      12.9
+     ],
+     [
+      880,
+      440.63,
+      13.03
+     ],
+     [
+      880,
+      432.63,
+      13.12
+     ],
+     [
+      880,
+      424.63,
+      13.19
+     ],
+     [
+      880,
+      416.63,
+      13.29
+     ],
+     [
+      880,
+      408.63,
+      13.41
+     ],
+     [
+      880,
+      400.63,
+      13.56
+     ],
+     [
+      880,
+      392.63,
+      13.7
+     ],
+     [
+      880,
+      384.63,
+      13.85
+     ],
+     [
+      880,
+      376.63,
+      14
+     ],
+     [
+      880,
+      368.63,
+      14.14
+     ],
+     [
+      880,
+      360.63,
+      14.28
+     ],
+     [
+      880,
+      352.63,
+      14.4
+     ],
+     [
+      880,
+      344.63,
+      14.51
+     ],
+     [
+      878.43,
+      336.86,
+      14.62
+     ],
+     [
+      874.05,
+      330.2,
+      14.71
+     ],
+     [
+      868.47,
+      324.47,
+      14.8
+     ],
+     [
+      862.82,
+      318.82,
+      14.88
+     ],
+     [
+      857.16,
+      313.16,
+      14.94
+     ],
+     [
+      851.5,
+      307.5,
+      14.99
+     ],
+     [
+      845.85,
+      301.85,
+      15.04
+     ],
+     [
+      840.19,
+      296.19,
+      15.09
+     ],
+     [
+      834.53,
+      290.53,
+      15.16
+     ],
+     [
+      828.87,
+      284.87,
+      15.25
+     ],
+     [
+      823.22,
+      279.22,
+      15.35
+     ],
+     [
+      817.56,
+      273.56,
+      15.46
+     ],
+     [
+      811.9,
+      267.9,
+      15.56
+     ],
+     [
+      806.25,
+      262.25,
+      15.66
+     ],
+     [
+      800.59,
+      256.59,
+      15.75
+     ],
+     [
+      794.93,
+      250.93,
+      15.83
+     ],
+     [
+      789.28,
+      245.28,
+      15.88
+     ],
+     [
+      783.62,
+      239.62,
+      15.91
+     ],
+     [
+      777.96,
+      233.96,
+      15.92
+     ],
+     [
+      772.31,
+      228.31,
+      15.91
+     ],
+     [
+      766.65,
+      222.65,
+      15.89
+     ],
+     [
+      760.99,
+      216.99,
+      15.87
+     ],
+     [
+      755.34,
+      211.34,
+      15.84
+     ],
+     [
+      749.68,
+      205.68,
+      15.81
+     ],
+     [
+      744.02,
+      200.02,
+      15.79
+     ],
+     [
+      738.36,
+      194.36,
+      15.78
+     ],
+     [
+      732.71,
+      188.71,
+      15.8
+     ],
+     [
+      727.05,
+      183.05,
+      15.84
+     ],
+     [
+      721.39,
+      177.39,
+      15.89
+     ],
+     [
+      715.74,
+      171.74,
+      15.95
+     ],
+     [
+      710.08,
+      166.08,
+      16.02
+     ],
+     [
+      704.42,
+      160.42,
+      16.11
+     ],
+     [
+      698.77,
+      154.77,
+      16.2
+     ],
+     [
+      693.24,
+      148.99,
+      16.31
+     ],
+     [
+      689.18,
+      142.14,
+      16.42
+     ],
+     [
+      687.91,
+      134.3,
+      16.54
+     ],
+     [
+      685.36,
+      126.78,
+      16.66
+     ],
+     [
+      680.48,
+      120.48,
+      16.79
+     ],
+     [
+      674.82,
+      114.82,
+      16.93
+     ],
+     [
+      669.16,
+      109.16,
+      17.07
+     ],
+     [
+      663.5,
+      103.5,
+      17.21
+     ],
+     [
+      658.62,
+      97.19,
+      17.36
+     ],
+     [
+      656.08,
+      89.67,
+      17.51
+     ],
+     [
+      656,
+      81.68,
+      17.68
+     ],
+     [
+      656,
+      73.68,
+      17.84
+     ],
+     [
+      656,
+      65.68,
+      17.99
+     ],
+     [
+      656,
+      57.68,
+      18.13
+     ],
+     [
+      656,
+      49.68,
+      18.26
+     ],
+     [
+      656,
+      41.68,
+      18.38
+     ],
+     [
+      656,
+      33.68,
+      18.5
+     ],
+     [
+      656,
+      25.68,
+      18.63
+     ],
+     [
+      656,
+      17.68,
+      18.75
+     ],
+     [
+      656,
+      9.68,
+      18.88
+     ],
+     [
+      656,
+      1.68,
+      19
+     ],
+     [
+      656,
+      -6.32,
+      19.11
+     ],
+     [
+      656,
+      -14.32,
+      19.19
+     ],
+     [
+      656,
+      -22.32,
+      19.25
+     ],
+     [
+      656,
+      -30.32,
+      19.27
+     ],
+     [
+      656,
+      -38.32,
+      19.27
+     ],
+     [
+      656,
+      -46.32,
+      19.27
+     ],
+     [
+      656,
+      -54.32,
+      19.27
+     ],
+     [
+      656,
+      -62.32,
+      19.29
+     ],
+     [
+      656,
+      -70.32,
+      19.31
+     ],
+     [
+      656,
+      -78.32,
+      19.38
+     ],
+     [
+      656,
+      -86.32,
+      19.48
+     ],
+     [
+      654.81,
+      -94.16,
+      19.62
+     ],
+     [
+      650.74,
+      -101.01,
+      19.77
+     ],
+     [
+      645.21,
+      -106.79,
+      19.93
+     ],
+     [
+      639.56,
+      -112.44,
+      20.12
+     ],
+     [
+      633.9,
+      -118.1,
+      20.3
+     ],
+     [
+      628.5,
+      -123.99,
+      20.45
+     ],
+     [
+      624.75,
+      -131.01,
+      20.57
+     ],
+     [
+      624,
+      -138.93,
+      20.65
+     ],
+     [
+      624,
+      -146.93,
+      20.71
+     ],
+     [
+      624,
+      -154.93,
+      20.73
+     ],
+     [
+      624,
+      -162.93,
+      20.74
+     ],
+     [
+      624,
+      -170.93,
+      20.77
+     ],
+     [
+      624,
+      -178.93,
+      20.84
+     ],
+     [
+      623.76,
+      -186.92,
+      20.94
+     ],
+     [
+      620.71,
+      -194.26,
+      21.05
+     ],
+     [
+      615.61,
+      -200.39,
+      21.19
+     ],
+     [
+      609.95,
+      -206.05,
+      21.35
+     ],
+     [
+      604.29,
+      -211.71,
+      21.54
+     ],
+     [
+      598.64,
+      -217.36,
+      21.72
+     ],
+     [
+      592.98,
+      -223.02,
+      21.88
+     ],
+     [
+      587.32,
+      -228.68,
+      22.02
+     ],
+     [
+      581.67,
+      -234.33,
+      22.16
+     ],
+     [
+      576.01,
+      -239.99,
+      22.29
+     ],
+     [
+      570.35,
+      -245.65,
+      22.39
+     ],
+     [
+      564.89,
+      -251.48,
+      22.47
+     ],
+     [
+      560.97,
+      -258.41,
+      22.55
+     ],
+     [
+      560,
+      -266.29,
+      22.62
+     ],
+     [
+      560,
+      -274.29,
+      22.68
+     ],
+     [
+      559.84,
+      -282.28,
+      22.74
+     ],
+     [
+      557.05,
+      -289.72,
+      22.79
+     ],
+     [
+      552.06,
+      -295.94,
+      22.85
+     ],
+     [
+      546.4,
+      -301.6,
+      22.92
+     ],
+     [
+      540.75,
+      -307.25,
+      23
+     ],
+     [
+      535.09,
+      -312.91,
+      23.08
+     ],
+     [
+      529.43,
+      -318.57,
+      23.15
+     ],
+     [
+      523.78,
+      -324.22,
+      23.22
+     ],
+     [
+      518.18,
+      -329.94,
+      23.28
+     ],
+     [
+      513.73,
+      -336.55,
+      23.33
+     ],
+     [
+      512,
+      -344.28,
+      23.37
+     ],
+     [
+      512,
+      -352.28,
+      23.39
+     ],
+     [
+      512,
+      -360.28,
+      23.4
+     ],
+     [
+      512,
+      -368.28,
+      23.4
+     ],
+     [
+      512,
+      -376.28,
+      23.4
+     ],
+     [
+      512,
+      -384.28,
+      23.4
+     ],
+     [
+      512,
+      -392.28,
+      23.4
+     ],
+     [
+      512,
+      -400.28,
+      23.4
+     ],
+     [
+      512,
+      -408.28,
+      23.4
+     ],
+     [
+      512,
+      -416.28,
+      23.4
+     ],
+     [
+      512,
+      -424.28,
+      23.4
+     ],
+     [
+      512,
+      -432.28,
+      23.4
+     ],
+     [
+      512,
+      -440.28,
+      23.4
+     ],
+     [
+      512.5,
+      -448.26,
+      23.4
+     ],
+     [
+      513.81,
+      -456.15,
+      23.4
+     ],
+     [
+      515.55,
+      -463.96,
+      23.4
+     ],
+     [
+      516,
+      -466,
+      23.4
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_v_ring_7",
+   "x": 536,
+   "z": 2504,
+   "yaw": 0,
+   "data": {
+    "cls": "road",
+    "width": 6,
+    "spur": false,
+    "pts": [
+     [
+      536,
+      2504,
+      2.2
+     ],
+     [
+      541.48,
+      2498.19,
+      2.2
+     ],
+     [
+      543.89,
+      2490.65,
+      2.2
+     ],
+     [
+      544.84,
+      2482.75,
+      2.2
+     ],
+     [
+      548.67,
+      2475.77,
+      2.2
+     ],
+     [
+      554.1,
+      2469.9,
+      2.2
+     ],
+     [
+      559.76,
+      2464.24,
+      2.2
+     ],
+     [
+      565.41,
+      2458.59,
+      2.2
+     ],
+     [
+      571.07,
+      2452.93,
+      2.2
+     ],
+     [
+      576.73,
+      2447.27,
+      2.2
+     ],
+     [
+      582.38,
+      2441.62,
+      2.2
+     ],
+     [
+      587.73,
+      2435.69,
+      2.2
+     ],
+     [
+      591.35,
+      2428.6,
+      2.2
+     ],
+     [
+      592.33,
+      2420.69,
+      2.2
+     ],
+     [
+      595.5,
+      2413.4,
+      2.21
+     ],
+     [
+      600.67,
+      2407.33,
+      2.21
+     ],
+     [
+      606.33,
+      2401.67,
+      2.21
+     ],
+     [
+      611.99,
+      2396.01,
+      2.2
+     ],
+     [
+      617.64,
+      2390.36,
+      2.19
+     ],
+     [
+      623.3,
+      2384.7,
+      2.17
+     ],
+     [
+      628.96,
+      2379.04,
+      2.14
+     ],
+     [
+      634.5,
+      2373.28,
+      2.11
+     ],
+     [
+      638.69,
+      2366.5,
+      2.1
+     ],
+     [
+      640.04,
+      2358.68,
+      2.1
+     ],
+     [
+      642.44,
+      2351.12,
+      2.12
+     ],
+     [
+      647.25,
+      2344.75,
+      2.14
+     ],
+     [
+      652.45,
+      2338.69,
+      2.16
+     ],
+     [
+      655.65,
+      2331.41,
+      2.2
+     ],
+     [
+      656,
+      2323.44,
+      2.24
+     ],
+     [
+      656,
+      2315.44,
+      2.28
+     ],
+     [
+      656,
+      2307.44,
+      2.32
+     ],
+     [
+      656,
+      2299.44,
+      2.34
+     ],
+     [
+      656,
+      2291.44,
+      2.36
+     ],
+     [
+      656,
+      2283.44,
+      2.38
+     ],
+     [
+      656.62,
+      2275.5,
+      2.39
+     ],
+     [
+      660.2,
+      2268.4,
+      2.4
+     ],
+     [
+      665.54,
+      2262.46,
+      2.4
+     ],
+     [
+      671.2,
+      2256.8,
+      2.38
+     ],
+     [
+      676.86,
+      2251.14,
+      2.36
+     ],
+     [
+      682.41,
+      2245.39,
+      2.35
+     ],
+     [
+      686.64,
+      2238.64,
+      2.36
+     ],
+     [
+      688,
+      2230.83,
+      2.39
+     ],
+     [
+      688,
+      2222.83,
+      2.41
+     ],
+     [
+      688.02,
+      2214.83,
+      2.43
+     ],
+     [
+      690.38,
+      2207.25,
+      2.47
+     ],
+     [
+      695.15,
+      2200.85,
+      2.53
+     ],
+     [
+      700.37,
+      2194.81,
+      2.6
+     ],
+     [
+      703.61,
+      2187.55,
+      2.66
+     ],
+     [
+      704.59,
+      2179.64,
+      2.73
+     ],
+     [
+      708.11,
+      2172.51,
+      2.8
+     ],
+     [
+      713.41,
+      2166.53,
+      2.88
+     ],
+     [
+      717.99,
+      2160.01,
+      2.95
+     ],
+     [
+      720,
+      2152.34,
+      3.02
+     ],
+     [
+      720,
+      2144.34,
+      3.08
+     ],
+     [
+      720,
+      2136.34,
+      3.15
+     ],
+     [
+      720,
+      2128.34,
+      3.21
+     ],
+     [
+      720,
+      2120.34,
+      3.28
+     ],
+     [
+      720,
+      2112.34,
+      3.36
+     ],
+     [
+      720,
+      2104.34,
+      3.44
+     ],
+     [
+      720,
+      2096.34,
+      3.5
+     ],
+     [
+      720,
+      2088.34,
+      3.56
+     ],
+     [
+      720,
+      2080.34,
+      3.61
+     ],
+     [
+      720,
+      2072.34,
+      3.67
+     ],
+     [
+      720,
+      2064.34,
+      3.72
+     ],
+     [
+      720,
+      2056.34,
+      3.77
+     ],
+     [
+      720,
+      2048.34,
+      3.83
+     ],
+     [
+      720,
+      2040.34,
+      3.91
+     ],
+     [
+      720,
+      2032.34,
+      4.01
+     ],
+     [
+      720,
+      2024.34,
+      4.11
+     ],
+     [
+      720,
+      2016.34,
+      4.23
+     ],
+     [
+      720,
+      2008.34,
+      4.34
+     ],
+     [
+      721.7,
+      2000.6,
+      4.44
+     ],
+     [
+      726.14,
+      1993.98,
+      4.54
+     ],
+     [
+      731.73,
+      1988.27,
+      4.63
+     ],
+     [
+      737.39,
+      1982.61,
+      4.71
+     ],
+     [
+      743.05,
+      1976.95,
+      4.78
+     ],
+     [
+      748.29,
+      1970.93,
+      4.84
+     ],
+     [
+      751.58,
+      1963.69,
+      4.88
+     ],
+     [
+      752,
+      1955.73,
+      4.92
+     ],
+     [
+      752,
+      1947.73,
+      4.96
+     ],
+     [
+      752,
+      1939.73,
+      5.01
+     ],
+     [
+      752,
+      1931.73,
+      5.05
+     ],
+     [
+      752,
+      1923.73,
+      5.11
+     ],
+     [
+      752,
+      1915.73,
+      5.15
+     ],
+     [
+      752,
+      1907.73,
+      5.19
+     ],
+     [
+      752,
+      1899.73,
+      5.21
+     ],
+     [
+      752.55,
+      1891.78,
+      5.22
+     ],
+     [
+      756.03,
+      1884.63,
+      5.22
+     ],
+     [
+      761.34,
+      1878.66,
+      5.22
+     ],
+     [
+      766.99,
+      1873.01,
+      5.23
+     ],
+     [
+      772.65,
+      1867.35,
+      5.25
+     ],
+     [
+      778.31,
+      1861.69,
+      5.31
+     ],
+     [
+      783.96,
+      1856.04,
+      5.38
+     ],
+     [
+      789.62,
+      1850.38,
+      5.46
+     ],
+     [
+      795.28,
+      1844.72,
+      5.56
+     ],
+     [
+      800.94,
+      1839.06,
+      5.67
+     ],
+     [
+      806.59,
+      1833.41,
+      5.78
+     ],
+     [
+      811.91,
+      1827.45,
+      5.88
+     ],
+     [
+      815.42,
+      1820.31,
+      6
+     ],
+     [
+      816,
+      1812.37,
+      6.11
+     ],
+     [
+      816,
+      1804.37,
+      6.23
+     ],
+     [
+      816.4,
+      1796.4,
+      6.34
+     ],
+     [
+      819.66,
+      1789.15,
+      6.44
+     ],
+     [
+      824.88,
+      1783.12,
+      6.53
+     ],
+     [
+      830.54,
+      1777.46,
+      6.59
+     ],
+     [
+      836.2,
+      1771.8,
+      6.64
+     ],
+     [
+      841.85,
+      1766.15,
+      6.66
+     ],
+     [
+      847.51,
+      1760.49,
+      6.65
+     ],
+     [
+      853.17,
+      1754.83,
+      6.62
+     ],
+     [
+      858.82,
+      1749.18,
+      6.58
+     ],
+     [
+      864.48,
+      1743.52,
+      6.55
+     ],
+     [
+      870.14,
+      1737.86,
+      6.51
+     ],
+     [
+      875.8,
+      1732.2,
+      6.47
+     ],
+     [
+      881.45,
+      1726.55,
+      6.44
+     ],
+     [
+      887.11,
+      1720.89,
+      6.42
+     ],
+     [
+      892.34,
+      1714.86,
+      6.41
+     ],
+     [
+      895.6,
+      1707.61,
+      6.41
+     ],
+     [
+      896.58,
+      1699.69,
+      6.41
+     ],
+     [
+      900.08,
+      1692.56,
+      6.41
+     ],
+     [
+      905.4,
+      1686.6,
+      6.39
+     ],
+     [
+      911.06,
+      1680.94,
+      6.37
+     ],
+     [
+      916.71,
+      1675.29,
+      6.34
+     ],
+     [
+      922.37,
+      1669.63,
+      6.31
+     ],
+     [
+      928.03,
+      1663.97,
+      6.27
+     ],
+     [
+      933.69,
+      1658.31,
+      6.22
+     ],
+     [
+      939.34,
+      1652.66,
+      6.18
+     ],
+     [
+      945,
+      1647,
+      6.13
+     ],
+     [
+      950.66,
+      1641.34,
+      6.1
+     ],
+     [
+      956.31,
+      1635.69,
+      6.09
+     ],
+     [
+      961.97,
+      1630.03,
+      6.08
+     ],
+     [
+      967.63,
+      1624.37,
+      6.06
+     ],
+     [
+      973.28,
+      1618.72,
+      6.03
+     ],
+     [
+      978.94,
+      1613.06,
+      6
+     ],
+     [
+      984.6,
+      1607.4,
+      5.97
+     ],
+     [
+      990.25,
+      1601.75,
+      5.93
+     ],
+     [
+      995.91,
+      1596.09,
+      5.88
+     ],
+     [
+      1001.57,
+      1590.43,
+      5.84
+     ],
+     [
+      1007.22,
+      1584.78,
+      5.8
+     ],
+     [
+      1012.88,
+      1579.12,
+      5.78
+     ],
+     [
+      1018.43,
+      1573.36,
+      5.76
+     ],
+     [
+      1022.65,
+      1566.6,
+      5.75
+     ],
+     [
+      1024.03,
+      1558.79,
+      5.74
+     ],
+     [
+      1026.39,
+      1551.21,
+      5.74
+     ],
+     [
+      1031.17,
+      1544.83,
+      5.74
+     ],
+     [
+      1036.39,
+      1538.78,
+      5.75
+     ],
+     [
+      1039.62,
+      1531.52,
+      5.76
+     ],
+     [
+      1040,
+      1523.55,
+      5.78
+     ],
+     [
+      1040,
+      1515.55,
+      5.8
+     ],
+     [
+      1040,
+      1507.55,
+      5.82
+     ],
+     [
+      1040,
+      1499.55,
+      5.85
+     ],
+     [
+      1040,
+      1491.55,
+      5.88
+     ],
+     [
+      1040,
+      1483.55,
+      5.91
+     ],
+     [
+      1040,
+      1475.55,
+      5.93
+     ],
+     [
+      1040,
+      1467.55,
+      5.95
+     ],
+     [
+      1040,
+      1459.55,
+      5.95
+     ],
+     [
+      1040,
+      1451.55,
+      5.94
+     ],
+     [
+      1040,
+      1443.55,
+      5.93
+     ],
+     [
+      1040,
+      1435.55,
+      5.92
+     ],
+     [
+      1040,
+      1427.55,
+      5.91
+     ],
+     [
+      1040,
+      1419.55,
+      5.9
+     ],
+     [
+      1040,
+      1411.55,
+      5.91
+     ],
+     [
+      1040,
+      1403.55,
+      5.93
+     ],
+     [
+      1040,
+      1395.55,
+      5.96
+     ],
+     [
+      1040,
+      1387.55,
+      5.99
+     ],
+     [
+      1040,
+      1379.55,
+      6.02
+     ],
+     [
+      1040,
+      1371.55,
+      6.05
+     ],
+     [
+      1040,
+      1363.55,
+      6.08
+     ],
+     [
+      1040,
+      1355.55,
+      6.11
+     ],
+     [
+      1040,
+      1347.55,
+      6.14
+     ],
+     [
+      1040,
+      1339.55,
+      6.15
+     ],
+     [
+      1040.6,
+      1331.61,
+      6.17
+     ],
+     [
+      1044.14,
+      1324.49,
+      6.18
+     ],
+     [
+      1049.43,
+      1318.51,
+      6.19
+     ],
+     [
+      1054.01,
+      1311.98,
+      6.2
+     ],
+     [
+      1056,
+      1304.31,
+      6.22
+     ],
+     [
+      1057.71,
+      1296.57,
+      6.23
+     ],
+     [
+      1062.16,
+      1289.96,
+      6.25
+     ],
+     [
+      1067.76,
+      1284.24,
+      6.28
+     ],
+     [
+      1073.41,
+      1278.59,
+      6.3
+     ],
+     [
+      1079.07,
+      1272.93,
+      6.32
+     ],
+     [
+      1084.31,
+      1266.9,
+      6.35
+     ],
+     [
+      1087.59,
+      1259.66,
+      6.39
+     ],
+     [
+      1088,
+      1251.69,
+      6.44
+     ],
+     [
+      1088,
+      1243.69,
+      6.5
+     ],
+     [
+      1088,
+      1235.69,
+      6.57
+     ],
+     [
+      1088,
+      1227.69,
+      6.66
+     ],
+     [
+      1088.56,
+      1219.75,
+      6.76
+     ],
+     [
+      1092.05,
+      1212.6,
+      6.85
+     ],
+     [
+      1097.34,
+      1206.61,
+      6.93
+     ],
+     [
+      1101.95,
+      1200.11,
+      6.98
+     ],
+     [
+      1104,
+      1192.45,
+      7.01
+     ],
+     [
+      1104,
+      1184.45,
+      7.01
+     ],
+     [
+      1104,
+      1176.45,
+      6.99
+     ],
+     [
+      1104,
+      1168.45,
+      6.95
+     ],
+     [
+      1104,
+      1160.45,
+      6.91
+     ],
+     [
+      1104,
+      1152.45,
+      6.88
+     ],
+     [
+      1104,
+      1144.45,
+      6.87
+     ],
+     [
+      1104,
+      1136.45,
+      6.88
+     ],
+     [
+      1104,
+      1128.45,
+      6.92
+     ],
+     [
+      1104,
+      1120.45,
+      6.98
+     ],
+     [
+      1104,
+      1112.45,
+      7.04
+     ],
+     [
+      1104,
+      1104.45,
+      7.1
+     ],
+     [
+      1104,
+      1096.45,
+      7.15
+     ],
+     [
+      1104,
+      1088.45,
+      7.19
+     ],
+     [
+      1104,
+      1080.45,
+      7.22
+     ],
+     [
+      1104,
+      1072.45,
+      7.23
+     ],
+     [
+      1104,
+      1064.45,
+      7.23
+     ],
+     [
+      1104,
+      1056.45,
+      7.23
+     ],
+     [
+      1104,
+      1048.45,
+      7.23
+     ],
+     [
+      1104,
+      1040.45,
+      7.23
+     ],
+     [
+      1104,
+      1032.45,
+      7.23
+     ],
+     [
+      1104,
+      1024.45,
+      7.23
+     ],
+     [
+      1104,
+      1016.45,
+      7.23
+     ],
+     [
+      1104,
+      1008.45,
+      7.23
+     ],
+     [
+      1104,
+      1001.27,
+      7.23
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_v_rim_0",
+   "x": 1120,
+   "z": 824.2,
+   "yaw": 0,
+   "data": {
+    "cls": "trail",
+    "width": 3.5,
+    "spur": false,
+    "pts": [
+     [
+      1120,
+      824.2,
+      7.23
+     ],
+     [
+      1120,
+      818.83,
+      7.23
+     ],
+     [
+      1120,
+      810.83,
+      7.23
+     ],
+     [
+      1120,
+      802.83,
+      7.23
+     ],
+     [
+      1120,
+      794.83,
+      7.23
+     ],
+     [
+      1120,
+      786.83,
+      7.23
+     ],
+     [
+      1120,
+      778.83,
+      7.23
+     ],
+     [
+      1120,
+      770.83,
+      7.23
+     ],
+     [
+      1120,
+      762.83,
+      7.23
+     ],
+     [
+      1120,
+      754.83,
+      7.24
+     ],
+     [
+      1120,
+      746.83,
+      7.25
+     ],
+     [
+      1119.22,
+      738.91,
+      7.29
+     ],
+     [
+      1115.43,
+      731.91,
+      7.35
+     ],
+     [
+      1110.09,
+      725.96,
+      7.44
+     ],
+     [
+      1105.67,
+      719.33,
+      7.55
+     ],
+     [
+      1104,
+      711.59,
+      7.69
+     ],
+     [
+      1101.96,
+      703.93,
+      7.85
+     ],
+     [
+      1097.36,
+      697.41,
+      8.02
+     ],
+     [
+      1091.73,
+      691.73,
+      8.19
+     ],
+     [
+      1086.08,
+      686.08,
+      8.36
+     ],
+     [
+      1080.42,
+      680.42,
+      8.52
+     ],
+     [
+      1074.76,
+      674.76,
+      8.66
+     ],
+     [
+      1069.11,
+      669.11,
+      8.8
+     ],
+     [
+      1063.45,
+      663.45,
+      8.91
+     ],
+     [
+      1057.79,
+      657.79,
+      9.02
+     ],
+     [
+      1052.13,
+      652.13,
+      9.1
+     ],
+     [
+      1046.48,
+      646.48,
+      9.15
+     ],
+     [
+      1040.82,
+      640.82,
+      9.18
+     ],
+     [
+      1035.16,
+      635.16,
+      9.2
+     ],
+     [
+      1029.51,
+      629.51,
+      9.23
+     ],
+     [
+      1023.85,
+      623.85,
+      9.25
+     ],
+     [
+      1018.19,
+      618.19,
+      9.28
+     ],
+     [
+      1012.54,
+      612.54,
+      9.32
+     ],
+     [
+      1006.88,
+      606.88,
+      9.38
+     ],
+     [
+      1001.22,
+      601.22,
+      9.47
+     ],
+     [
+      995.93,
+      595.24,
+      9.56
+     ],
+     [
+      992.52,
+      588.06,
+      9.66
+     ],
+     [
+      992,
+      580.11,
+      9.75
+     ],
+     [
+      992,
+      572.11,
+      9.85
+     ],
+     [
+      991.54,
+      564.15,
+      9.96
+     ],
+     [
+      988.2,
+      556.93,
+      10.05
+     ],
+     [
+      982.93,
+      550.93,
+      10.14
+     ],
+     [
+      977.27,
+      545.27,
+      10.21
+     ],
+     [
+      971.62,
+      539.62,
+      10.28
+     ],
+     [
+      965.96,
+      533.96,
+      10.35
+     ],
+     [
+      960.3,
+      528.3,
+      10.43
+     ],
+     [
+      954.65,
+      522.65,
+      10.52
+     ],
+     [
+      948.99,
+      516.99,
+      10.62
+     ],
+     [
+      943.33,
+      511.33,
+      10.73
+     ],
+     [
+      937.68,
+      505.68,
+      10.85
+     ],
+     [
+      932.02,
+      500.02,
+      10.97
+     ],
+     [
+      926.36,
+      494.36,
+      11.12
+     ],
+     [
+      920.71,
+      488.71,
+      11.3
+     ],
+     [
+      915.05,
+      483.05,
+      11.51
+     ],
+     [
+      909.39,
+      477.39,
+      11.75
+     ],
+     [
+      903.74,
+      471.74,
+      12.01
+     ],
+     [
+      898.08,
+      466.08,
+      12.28
+     ],
+     [
+      892.42,
+      460.42,
+      12.58
+     ],
+     [
+      886.75,
+      454.78,
+      12.9
+     ],
+     [
+      880.27,
+      450.13,
+      13.21
+     ],
+     [
+      872.63,
+      448,
+      13.51
+     ],
+     [
+      864.63,
+      448,
+      13.78
+     ],
+     [
+      856.63,
+      448,
+      14.06
+     ],
+     [
+      848.63,
+      448,
+      14.35
+     ],
+     [
+      840.63,
+      448,
+      14.64
+     ],
+     [
+      832.63,
+      448,
+      14.91
+     ],
+     [
+      824.63,
+      448,
+      15.15
+     ],
+     [
+      816.63,
+      448,
+      15.38
+     ],
+     [
+      808.63,
+      448,
+      15.59
+     ],
+     [
+      800.63,
+      448,
+      15.79
+     ],
+     [
+      792.63,
+      448,
+      15.98
+     ],
+     [
+      784.63,
+      448,
+      16.18
+     ],
+     [
+      776.63,
+      448,
+      16.38
+     ],
+     [
+      768.63,
+      448,
+      16.59
+     ],
+     [
+      760.63,
+      448,
+      16.82
+     ],
+     [
+      752.63,
+      448,
+      17.07
+     ],
+     [
+      744.63,
+      448,
+      17.32
+     ],
+     [
+      736.63,
+      448,
+      17.58
+     ],
+     [
+      728.63,
+      448,
+      17.83
+     ],
+     [
+      720.63,
+      448,
+      18.07
+     ],
+     [
+      712.63,
+      448,
+      18.31
+     ],
+     [
+      704.63,
+      448,
+      18.56
+     ],
+     [
+      696.63,
+      448,
+      18.83
+     ],
+     [
+      688.63,
+      448,
+      19.13
+     ],
+     [
+      680.63,
+      448,
+      19.46
+     ],
+     [
+      672.63,
+      448,
+      19.81
+     ],
+     [
+      664.63,
+      448,
+      20.17
+     ],
+     [
+      656.63,
+      448,
+      20.53
+     ],
+     [
+      648.63,
+      448,
+      20.88
+     ],
+     [
+      640.63,
+      448,
+      21.23
+     ],
+     [
+      632.63,
+      448,
+      21.58
+     ],
+     [
+      624.63,
+      448,
+      21.95
+     ],
+     [
+      616.63,
+      448,
+      22.36
+     ],
+     [
+      608.63,
+      448,
+      22.83
+     ],
+     [
+      600.63,
+      448,
+      23.36
+     ],
+     [
+      592.63,
+      448,
+      23.95
+     ],
+     [
+      584.63,
+      448,
+      24.58
+     ],
+     [
+      576.63,
+      448,
+      25.24
+     ],
+     [
+      568.63,
+      448,
+      25.92
+     ],
+     [
+      560.63,
+      448,
+      26.61
+     ],
+     [
+      552.63,
+      448,
+      27.29
+     ],
+     [
+      544.63,
+      448,
+      27.95
+     ],
+     [
+      536.63,
+      448,
+      28.6
+     ],
+     [
+      528.63,
+      448,
+      29.24
+     ],
+     [
+      520.63,
+      448,
+      29.88
+     ],
+     [
+      512.63,
+      448,
+      30.5
+     ],
+     [
+      504.63,
+      448,
+      31.1
+     ],
+     [
+      496.63,
+      448,
+      31.7
+     ],
+     [
+      488.63,
+      448,
+      32.28
+     ],
+     [
+      480.63,
+      448,
+      32.86
+     ],
+     [
+      472.63,
+      448,
+      33.43
+     ],
+     [
+      464.63,
+      448,
+      33.99
+     ],
+     [
+      456.63,
+      448,
+      34.55
+     ],
+     [
+      448.63,
+      448,
+      35.13
+     ],
+     [
+      440.63,
+      448,
+      35.74
+     ],
+     [
+      432.63,
+      448,
+      36.38
+     ],
+     [
+      424.63,
+      448,
+      37.07
+     ],
+     [
+      416.63,
+      448,
+      37.8
+     ],
+     [
+      408.63,
+      448,
+      38.58
+     ],
+     [
+      400.63,
+      448,
+      39.4
+     ],
+     [
+      392.63,
+      448,
+      40.28
+     ],
+     [
+      384.63,
+      448,
+      41.21
+     ],
+     [
+      376.63,
+      448,
+      42.18
+     ],
+     [
+      368.63,
+      448,
+      43.16
+     ],
+     [
+      360.63,
+      448,
+      44.15
+     ],
+     [
+      352.86,
+      446.43,
+      45.14
+     ],
+     [
+      346.2,
+      442.05,
+      46.1
+     ],
+     [
+      340.7,
+      436.27,
+      47.03
+     ],
+     [
+      336.86,
+      429.29,
+      47.99
+     ],
+     [
+      336,
+      421.39,
+      49.04
+     ],
+     [
+      336,
+      413.39,
+      50.22
+     ],
+     [
+      336,
+      405.39,
+      51.27
+     ],
+     [
+      336,
+      397.39,
+      52.22
+     ],
+     [
+      336,
+      389.39,
+      53.12
+     ],
+     [
+      336,
+      381.39,
+      53.99
+     ],
+     [
+      336,
+      373.39,
+      54.81
+     ],
+     [
+      336,
+      365.39,
+      55.56
+     ],
+     [
+      336,
+      357.39,
+      56.24
+     ],
+     [
+      336,
+      349.39,
+      57.11
+     ],
+     [
+      336,
+      341.39,
+      58.13
+     ],
+     [
+      336,
+      333.39,
+      59.28
+     ],
+     [
+      336,
+      325.39,
+      60.42
+     ],
+     [
+      336,
+      317.39,
+      61.51
+     ],
+     [
+      336,
+      309.39,
+      62.53
+     ],
+     [
+      336,
+      301.39,
+      63.51
+     ],
+     [
+      336,
+      293.39,
+      64.24
+     ],
+     [
+      336,
+      285.39,
+      64.79
+     ],
+     [
+      336,
+      277.39,
+      65.22
+     ],
+     [
+      336,
+      269.39,
+      65.68
+     ],
+     [
+      336,
+      261.39,
+      66.22
+     ],
+     [
+      336,
+      253.39,
+      66.8
+     ],
+     [
+      336,
+      245.39,
+      67.41
+     ],
+     [
+      336,
+      237.39,
+      68.31
+     ],
+     [
+      336,
+      229.39,
+      69.46
+     ],
+     [
+      336,
+      221.39,
+      70.73
+     ],
+     [
+      335.71,
+      213.42,
+      72.16
+     ],
+     [
+      329.29,
+      214.75,
+      73.73
+     ],
+     [
+      323.12,
+      219.75,
+      75.35
+     ],
+     [
+      319.87,
+      214.22,
+      77
+     ],
+     [
+      313.91,
+      214.22,
+      78.55
+     ],
+     [
+      307.86,
+      219.42,
+      79.96
+     ],
+     [
+      304,
+      215.02,
+      81.39
+     ],
+     [
+      304,
+      207.02,
+      82.7
+     ],
+     [
+      304,
+      199.02,
+      83.91
+     ],
+     [
+      298.53,
+      197.69,
+      85.09
+     ],
+     [
+      292.54,
+      202.97,
+      86.19
+     ],
+     [
+      288,
+      199.84,
+      87.39
+     ],
+     [
+      283.19,
+      197.21,
+      88.82
+     ],
+     [
+      277.35,
+      202.65,
+      90.04
+     ],
+     [
+      271.69,
+      208.31,
+      91.25
+     ],
+     [
+      266.03,
+      213.97,
+      92.46
+     ],
+     [
+      260.16,
+      219.38,
+      93.67
+     ],
+     [
+      253.17,
+      223.19,
+      94.89
+     ],
+     [
+      245.26,
+      224,
+      96.15
+     ],
+     [
+      237.26,
+      224,
+      97.34
+     ],
+     [
+      229.27,
+      224.25,
+      98.79
+     ],
+     [
+      224.18,
+      229.73,
+      100.24
+     ],
+     [
+      222.55,
+      237.42,
+      101.66
+     ],
+     [
+      215.31,
+      240,
+      103.1
+     ],
+     [
+      208.75,
+      243.76,
+      104.58
+     ],
+     [
+      207.59,
+      251.63,
+      106.03
+     ],
+     [
+      204.33,
+      258.88,
+      107.48
+     ],
+     [
+      199.09,
+      264.91,
+      108.97
+     ],
+     [
+      193.44,
+      270.56,
+      110.17
+     ],
+     [
+      187.78,
+      276.22,
+      111.16
+     ],
+     [
+      182.12,
+      281.88,
+      111.95
+     ],
+     [
+      176.47,
+      287.53,
+      112.63
+     ],
+     [
+      170.81,
+      293.19,
+      113.33
+     ],
+     [
+      165.15,
+      298.85,
+      113.69
+     ],
+     [
+      159.5,
+      304.5,
+      113.77
+     ],
+     [
+      153.84,
+      310.16,
+      114.16
+     ],
+     [
+      148.18,
+      315.82,
+      114.84
+     ],
+     [
+      142.52,
+      321.48,
+      115.78
+     ],
+     [
+      136.87,
+      327.13,
+      116.94
+     ],
+     [
+      131.21,
+      332.79,
+      117.84
+     ],
+     [
+      125.55,
+      338.45,
+      118.88
+     ],
+     [
+      119.9,
+      344.1,
+      120.11
+     ],
+     [
+      114.92,
+      350.33,
+      121.43
+     ],
+     [
+      112.15,
+      357.78,
+      122.57
+     ],
+     [
+      112,
+      365.77,
+      123.47
+     ],
+     [
+      112,
+      373.77,
+      124.16
+     ],
+     [
+      112,
+      381.77,
+      125.03
+     ],
+     [
+      112,
+      389.77,
+      125.97
+     ],
+     [
+      111.01,
+      397.64,
+      126.94
+     ],
+     [
+      107.08,
+      404.57,
+      128.03
+     ],
+     [
+      101.61,
+      410.39,
+      129.56
+     ],
+     [
+      95.95,
+      416.05,
+      130.75
+     ],
+     [
+      90.29,
+      421.71,
+      131.76
+     ],
+     [
+      84.84,
+      427.55,
+      132.67
+     ],
+     [
+      80.94,
+      434.49,
+      133.56
+     ],
+     [
+      79.83,
+      442.37,
+      134.35
+     ],
+     [
+      77.01,
+      449.79,
+      134.91
+     ],
+     [
+      72,
+      456,
+      135
+     ],
+     [
+      65.79,
+      461.01,
+      135.47
+     ],
+     [
+      58.37,
+      463.83,
+      136.16
+     ],
+     [
+      50.38,
+      464,
+      136.95
+     ],
+     [
+      42.38,
+      464,
+      137.77
+     ],
+     [
+      34.38,
+      464,
+      138.59
+     ],
+     [
+      26.38,
+      464,
+      139.5
+     ],
+     [
+      18.38,
+      464,
+      140.64
+     ],
+     [
+      10.38,
+      464,
+      141.98
+     ],
+     [
+      2.38,
+      464,
+      143.52
+     ],
+     [
+      -5.62,
+      464,
+      145.19
+     ],
+     [
+      -13.62,
+      464,
+      146.99
+     ],
+     [
+      -21.62,
+      464,
+      148.9
+     ],
+     [
+      -29.62,
+      464,
+      150.68
+     ],
+     [
+      -37.62,
+      464,
+      152.21
+     ],
+     [
+      -45.51,
+      463.06,
+      153.51
+     ],
+     [
+      -52.45,
+      459.16,
+      154.6
+     ],
+     [
+      -58.29,
+      453.71,
+      155.54
+     ],
+     [
+      -63.95,
+      448.05,
+      156.36
+     ],
+     [
+      -69.61,
+      442.39,
+      157.12
+     ],
+     [
+      -75.26,
+      436.74,
+      158
+     ],
+     [
+      -80.92,
+      431.08,
+      159.08
+     ],
+     [
+      -86.58,
+      425.42,
+      160.29
+     ],
+     [
+      -92.23,
+      419.77,
+      161.57
+     ],
+     [
+      -97.89,
+      414.11,
+      162.91
+     ],
+     [
+      -103.55,
+      408.45,
+      164.28
+     ],
+     [
+      -109.2,
+      402.8,
+      165.85
+     ],
+     [
+      -114.86,
+      397.14,
+      167.6
+     ],
+     [
+      -120.52,
+      391.48,
+      169.47
+     ],
+     [
+      -127.22,
+      388.48,
+      171.48
+     ],
+     [
+      -129.32,
+      395.88,
+      173.63
+     ],
+     [
+      -135.94,
+      392.06,
+      175.89
+     ],
+     [
+      -142.54,
+      388.03,
+      178.18
+     ],
+     [
+      -144.69,
+      395.38,
+      180.38
+     ],
+     [
+      -151.36,
+      392.64,
+      182.47
+     ],
+     [
+      -157.73,
+      388,
+      184.39
+     ],
+     [
+      -160.33,
+      394.65,
+      186.12
+     ],
+     [
+      -166.77,
+      393.2,
+      187.68
+     ],
+     [
+      -172.44,
+      387.56,
+      189.16
+     ],
+     [
+      -178.1,
+      381.9,
+      190.58
+     ],
+     [
+      -183.76,
+      376.24,
+      191.88
+     ],
+     [
+      -190.29,
+      372,
+      193.14
+     ],
+     [
+      -192,
+      379.25,
+      194.57
+     ],
+     [
+      -192,
+      387.25,
+      196.17
+     ],
+     [
+      -192,
+      395.25,
+      197.81
+     ],
+     [
+      -192,
+      403.25,
+      199.26
+     ],
+     [
+      -191.69,
+      411.22,
+      200.57
+     ],
+     [
+      -188.55,
+      418.52,
+      201.76
+     ],
+     [
+      -183.39,
+      424.61,
+      202.78
+     ],
+     [
+      -177.73,
+      430.27,
+      203.85
+     ],
+     [
+      -172.07,
+      435.93,
+      205.04
+     ],
+     [
+      -166.46,
+      441.63,
+      206.16
+     ],
+     [
+      -165.85,
+      447.81,
+      207.5
+     ],
+     [
+      -171.89,
+      450.77,
+      209.22
+     ],
+     [
+      -166.99,
+      457.01,
+      211.02
+     ],
+     [
+      -165.08,
+      463.54,
+      212.81
+     ],
+     [
+      -172,
+      465.97,
+      214.34
+     ],
+     [
+      -167.57,
+      472.43,
+      215.49
+     ],
+     [
+      -161.91,
+      478.09,
+      216.56
+     ],
+     [
+      -156.26,
+      483.74,
+      217.42
+     ],
+     [
+      -150.6,
+      489.4,
+      217.91
+     ],
+     [
+      -144.94,
+      495.06,
+      218.37
+     ],
+     [
+      -139.29,
+      500.71,
+      218.94
+     ],
+     [
+      -133.63,
+      506.37,
+      219.73
+     ],
+     [
+      -127.97,
+      512.03,
+      221.01
+     ],
+     [
+      -122.32,
+      517.68,
+      222.56
+     ],
+     [
+      -116.94,
+      523.59,
+      224.4
+     ],
+     [
+      -120.32,
+      528,
+      226.53
+     ],
+     [
+      -128.32,
+      528,
+      228.9
+     ],
+     [
+      -136.32,
+      528,
+      231.64
+     ],
+     [
+      -144.32,
+      528,
+      234.47
+     ],
+     [
+      -152.32,
+      528,
+      237.3
+     ],
+     [
+      -154.71,
+      532.94,
+      240.09
+     ],
+     [
+      -149.4,
+      538.91,
+      242.88
+     ],
+     [
+      -151.5,
+      544,
+      245.85
+     ],
+     [
+      -159.5,
+      544,
+      248.82
+     ],
+     [
+      -167.5,
+      544,
+      251.8
+     ],
+     [
+      -171.16,
+      548.26,
+      254.89
+     ],
+     [
+      -165.91,
+      554.27,
+      257.81
+     ],
+     [
+      -166.69,
+      559.95,
+      260.83
+     ],
+     [
+      -171.58,
+      563.56,
+      263.92
+     ],
+     [
+      -166.39,
+      569.61,
+      266.87
+     ],
+     [
+      -160.74,
+      575.26,
+      269.81
+     ],
+     [
+      -155.08,
+      580.92,
+      272.47
+     ],
+     [
+      -149.42,
+      586.58,
+      274.86
+     ],
+     [
+      -143.76,
+      592.24,
+      277.03
+     ],
+     [
+      -138.11,
+      597.89,
+      279.01
+     ],
+     [
+      -132.45,
+      603.55,
+      280.89
+     ],
+     [
+      -126.79,
+      609.21,
+      282.75
+     ],
+     [
+      -121.14,
+      614.86,
+      284.4
+     ],
+     [
+      -115.48,
+      620.52,
+      286.12
+     ],
+     [
+      -109.82,
+      626.18,
+      288.15
+     ],
+     [
+      -104.17,
+      631.83,
+      290.11
+     ],
+     [
+      -100,
+      638.4,
+      292.19
+     ],
+     [
+      -107.36,
+      640,
+      294.45
+     ],
+     [
+      -115.36,
+      640,
+      296.56
+     ],
+     [
+      -123.25,
+      640.62,
+      298.73
+     ],
+     [
+      -120.74,
+      647.26,
+      300.78
+     ],
+     [
+      -115.55,
+      653.32,
+      302.6
+     ],
+     [
+      -112.35,
+      660.6,
+      304.61
+     ],
+     [
+      -112,
+      668.57,
+      306.71
+     ],
+     [
+      -112,
+      676.57,
+      308.83
+     ],
+     [
+      -113.53,
+      684,
+      311.13
+     ],
+     [
+      -120.11,
+      679.89,
+      313.71
+     ],
+     [
+      -126.74,
+      676.16,
+      316.08
+     ],
+     [
+      -128.84,
+      683.56,
+      318.68
+     ],
+     [
+      -135.54,
+      680.46,
+      321.33
+     ],
+     [
+      -141.98,
+      676,
+      323.68
+     ],
+     [
+      -144,
+      682.94,
+      325.6
+     ],
+     [
+      -144,
+      690.94,
+      327.28
+     ],
+     [
+      -144,
+      698.94,
+      328.73
+     ],
+     [
+      -144,
+      706.94,
+      330.49
+     ],
+     [
+      -144,
+      714.94,
+      332.16
+     ],
+     [
+      -144,
+      722.94,
+      333.74
+     ],
+     [
+      -144,
+      730.94,
+      335.32
+     ],
+     [
+      -144,
+      738.94,
+      336.84
+     ],
+     [
+      -144,
+      746.94,
+      338.19
+     ],
+     [
+      -144,
+      754.94,
+      339.25
+     ],
+     [
+      -144,
+      762.94,
+      339.91
+     ],
+     [
+      -144,
+      770.94,
+      340.06
+     ],
+     [
+      -144,
+      778.94,
+      339.8
+     ],
+     [
+      -144,
+      786.94,
+      339.31
+     ],
+     [
+      -144,
+      794.94,
+      338.6
+     ],
+     [
+      -144,
+      802.94,
+      337.75
+     ],
+     [
+      -144,
+      810.94,
+      336.89
+     ],
+     [
+      -144,
+      818.94,
+      336.11
+     ],
+     [
+      -144,
+      826.94,
+      335.53
+     ],
+     [
+      -144,
+      834.94,
+      335.25
+     ],
+     [
+      -144,
+      842.94,
+      335.23
+     ],
+     [
+      -144,
+      850.94,
+      335.54
+     ],
+     [
+      -144,
+      858.94,
+      336.16
+     ],
+     [
+      -144,
+      866.94,
+      336.97
+     ],
+     [
+      -144,
+      874.94,
+      337.81
+     ],
+     [
+      -144,
+      882.94,
+      338.5
+     ],
+     [
+      -144,
+      890.94,
+      338.93
+     ],
+     [
+      -144,
+      898.94,
+      339.12
+     ],
+     [
+      -144,
+      906.94,
+      339.06
+     ],
+     [
+      -144,
+      914.94,
+      338.76
+     ],
+     [
+      -144,
+      922.94,
+      338.31
+     ],
+     [
+      -144,
+      930.94,
+      337.83
+     ],
+     [
+      -144,
+      938.94,
+      337.46
+     ],
+     [
+      -144,
+      946.94,
+      337.34
+     ],
+     [
+      -144,
+      954.94,
+      337.59
+     ],
+     [
+      -144,
+      962.94,
+      338.28
+     ],
+     [
+      -144,
+      970.94,
+      339.43
+     ],
+     [
+      -144,
+      978.94,
+      341.01
+     ],
+     [
+      -144,
+      986.94,
+      342.96
+     ],
+     [
+      -144,
+      994.94,
+      345.27
+     ],
+     [
+      -144,
+      1002.94,
+      348.07
+     ],
+     [
+      -144,
+      1010.94,
+      351.08
+     ],
+     [
+      -144.44,
+      1018.87,
+      354.31
+     ],
+     [
+      -150.96,
+      1017.04,
+      357.72
+     ],
+     [
+      -157.18,
+      1012.13,
+      361.06
+     ],
+     [
+      -160.18,
+      1018.1,
+      364.49
+     ],
+     [
+      -166.34,
+      1017.57,
+      367.92
+     ],
+     [
+      -172.43,
+      1012.43,
+      370.97
+     ],
+     [
+      -176.05,
+      1017.3,
+      373.94
+     ],
+     [
+      -181.72,
+      1018.1,
+      376.57
+     ],
+     [
+      -187.73,
+      1012.85,
+      378.87
+     ],
+     [
+      -192,
+      1016.49,
+      381.09
+     ],
+     [
+      -192,
+      1024.49,
+      383.09
+     ],
+     [
+      -192,
+      1032.49,
+      384.87
+     ],
+     [
+      -192,
+      1040.49,
+      386.58
+     ],
+     [
+      -192,
+      1048.49,
+      388.1
+     ],
+     [
+      -192,
+      1056.49,
+      389.54
+     ],
+     [
+      -192,
+      1064.49,
+      390.88
+     ],
+     [
+      -192,
+      1072.49,
+      392.04
+     ],
+     [
+      -192,
+      1080.49,
+      392.97
+     ],
+     [
+      -194.07,
+      1088.14,
+      393.67
+     ],
+     [
+      -198.68,
+      1094.64,
+      394.17
+     ],
+     [
+      -204.32,
+      1100.32,
+      394.5
+     ],
+     [
+      -209.97,
+      1105.97,
+      394.69
+     ],
+     [
+      -215.63,
+      1111.63,
+      394.77
+     ],
+     [
+      -221.29,
+      1117.29,
+      394.78
+     ],
+     [
+      -226.95,
+      1122.95,
+      394.78
+     ],
+     [
+      -232.6,
+      1128.6,
+      394.78
+     ],
+     [
+      -238.34,
+      1134.18,
+      394.78
+     ],
+     [
+      -244.23,
+      1139.59,
+      394.78
+     ],
+     [
+      -250.29,
+      1144.82,
+      394.78
+     ],
+     [
+      -254,
+      1148,
+      394.78
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_door_1",
+   "x": 938,
+   "z": 818,
+   "yaw": 0,
+   "data": {
+    "from": "door_1",
+    "to": "town:Port Vharl",
+    "width": 2.2,
+    "pts": [
+     [
+      938,
+      818,
+      8.43
+     ],
+     [
+      938.75,
+      818,
+      8.39
+     ],
+     [
+      940.5,
+      818,
+      8.3
+     ],
+     [
+      942.5,
+      818,
+      8.2
+     ],
+     [
+      944.5,
+      818,
+      8.09
+     ],
+     [
+      946.5,
+      818,
+      8.01
+     ],
+     [
+      948.5,
+      818,
+      7.92
+     ],
+     [
+      950.5,
+      818,
+      7.84
+     ],
+     [
+      952.5,
+      818,
+      7.77
+     ],
+     [
+      954.5,
+      818,
+      7.69
+     ],
+     [
+      956.5,
+      818,
+      7.63
+     ],
+     [
+      958.5,
+      818,
+      7.55
+     ],
+     [
+      960.5,
+      818,
+      7.5
+     ],
+     [
+      962.5,
+      818,
+      7.46
+     ],
+     [
+      964.5,
+      818,
+      7.4
+     ],
+     [
+      966.5,
+      818.75,
+      7.35
+     ],
+     [
+      968.5,
+      820.5,
+      7.3
+     ],
+     [
+      970.5,
+      821.75,
+      7.27
+     ],
+     [
+      972.5,
+      822,
+      7.24
+     ],
+     [
+      974.5,
+      822.75,
+      7.24
+     ],
+     [
+      976.5,
+      824.5,
+      7.24
+     ],
+     [
+      978.5,
+      826.5,
+      7.24
+     ],
+     [
+      980.5,
+      828.5,
+      7.24
+     ],
+     [
+      982.5,
+      830.5,
+      7.24
+     ],
+     [
+      984.5,
+      832.5,
+      7.24
+     ],
+     [
+      986.5,
+      834.5,
+      7.24
+     ],
+     [
+      988.5,
+      836.5,
+      7.24
+     ],
+     [
+      990.5,
+      837.75,
+      7.24
+     ],
+     [
+      992.5,
+      838,
+      7.24
+     ],
+     [
+      994.5,
+      838,
+      7.24
+     ],
+     [
+      996.5,
+      838,
+      7.24
+     ],
+     [
+      998.5,
+      838.75,
+      7.24
+     ],
+     [
+      1000.5,
+      840.5,
+      7.24
+     ],
+     [
+      1002.5,
+      842.5,
+      7.24
+     ],
+     [
+      1004.5,
+      844.5,
+      7.24
+     ],
+     [
+      1006.5,
+      846.5,
+      7.24
+     ],
+     [
+      1008.5,
+      848.5,
+      7.24
+     ],
+     [
+      1010.5,
+      850.5,
+      7.24
+     ],
+     [
+      1012.5,
+      852.5,
+      7.24
+     ],
+     [
+      1014.5,
+      854.5,
+      7.24
+     ],
+     [
+      1016.5,
+      856.5,
+      7.24
+     ],
+     [
+      1018.5,
+      858.5,
+      7.24
+     ],
+     [
+      1020.5,
+      860.5,
+      7.24
+     ],
+     [
+      1022.5,
+      862.5,
+      7.24
+     ],
+     [
+      1024.5,
+      864.5,
+      7.24
+     ],
+     [
+      1026.5,
+      866.5,
+      7.24
+     ],
+     [
+      1028.5,
+      868.5,
+      7.24
+     ],
+     [
+      1030.5,
+      870.5,
+      7.24
+     ],
+     [
+      1032.5,
+      872.5,
+      7.24
+     ],
+     [
+      1034.5,
+      874.5,
+      7.24
+     ],
+     [
+      1036.5,
+      876.5,
+      7.24
+     ],
+     [
+      1038.5,
+      878.5,
+      7.24
+     ],
+     [
+      1040.5,
+      880.5,
+      7.24
+     ],
+     [
+      1041.75,
+      881.75,
+      7.24
+     ],
+     [
+      1042,
+      882,
+      7.24
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_event_blackstrand",
+   "x": 1082,
+   "z": 1058,
+   "yaw": 0,
+   "data": {
+    "from": "event_blackstrand",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      1082,
+      1058,
+      7.24
+     ],
+     [
+      1082.75,
+      1058,
+      7.24
+     ],
+     [
+      1084.5,
+      1058,
+      7.24
+     ],
+     [
+      1086.5,
+      1058,
+      7.24
+     ],
+     [
+      1088.5,
+      1058,
+      7.24
+     ],
+     [
+      1090.5,
+      1058,
+      7.24
+     ],
+     [
+      1092.5,
+      1058,
+      7.24
+     ],
+     [
+      1094.5,
+      1058,
+      7.24
+     ],
+     [
+      1096.5,
+      1058,
+      7.24
+     ],
+     [
+      1098.5,
+      1058,
+      7.24
+     ],
+     [
+      1100.5,
+      1058,
+      7.24
+     ],
+     [
+      1101.75,
+      1058,
+      7.24
+     ],
+     [
+      1102,
+      1058,
+      7.24
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_fort_blackstrand_0",
+   "x": 830,
+   "z": 414,
+   "yaw": 0,
+   "data": {
+    "from": "fort_blackstrand_0",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      830,
+      414,
+      15.39
+     ],
+     [
+      830.75,
+      414,
+      15.37
+     ],
+     [
+      832.5,
+      414,
+      15.32
+     ],
+     [
+      834.5,
+      414,
+      15.26
+     ],
+     [
+      836.5,
+      414,
+      15.2
+     ],
+     [
+      838.5,
+      414,
+      15.14
+     ],
+     [
+      840.5,
+      414,
+      15.05
+     ],
+     [
+      842.5,
+      414,
+      14.96
+     ],
+     [
+      844.5,
+      414,
+      14.88
+     ],
+     [
+      846.5,
+      414,
+      14.78
+     ],
+     [
+      848.5,
+      414,
+      14.67
+     ],
+     [
+      850.5,
+      414,
+      14.58
+     ],
+     [
+      852.5,
+      414,
+      14.47
+     ],
+     [
+      854.5,
+      414,
+      14.38
+     ],
+     [
+      856.5,
+      414,
+      14.26
+     ],
+     [
+      858.5,
+      414,
+      14.15
+     ],
+     [
+      860.5,
+      414,
+      14.06
+     ],
+     [
+      862.5,
+      414,
+      13.95
+     ],
+     [
+      864.5,
+      414,
+      13.86
+     ],
+     [
+      866.5,
+      414,
+      13.75
+     ],
+     [
+      868.5,
+      414,
+      13.67
+     ],
+     [
+      870.5,
+      414,
+      13.6
+     ],
+     [
+      872.5,
+      414,
+      13.51
+     ],
+     [
+      874.5,
+      414,
+      13.42
+     ],
+     [
+      876.5,
+      414,
+      13.33
+     ],
+     [
+      877.75,
+      414,
+      13.33
+     ],
+     [
+      878,
+      414,
+      13.33
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_farm_blackstrand_0",
+   "x": 1198,
+   "z": 998,
+   "yaw": 0,
+   "data": {
+    "from": "farm_blackstrand_0",
+    "to": "town:Port Vharl",
+    "width": 2.2,
+    "pts": [
+     [
+      1198,
+      998,
+      7.24
+     ],
+     [
+      1197.25,
+      997.25,
+      7.24
+     ],
+     [
+      1195.5,
+      995.5,
+      7.24
+     ],
+     [
+      1193.5,
+      993.5,
+      7.24
+     ],
+     [
+      1191.5,
+      991.5,
+      7.24
+     ],
+     [
+      1189.5,
+      989.5,
+      7.24
+     ],
+     [
+      1187.5,
+      987.5,
+      7.24
+     ],
+     [
+      1185.5,
+      985.5,
+      7.24
+     ],
+     [
+      1183.5,
+      983.5,
+      7.24
+     ],
+     [
+      1182.25,
+      982.25,
+      7.24
+     ],
+     [
+      1182,
+      982,
+      7.24
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_farm_blackstrand_1",
+   "x": 1406,
+   "z": 498,
+   "yaw": 0,
+   "data": {
+    "from": "farm_blackstrand_1",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      1406,
+      498,
+      1.74
+     ],
+     [
+      1405.25,
+      498,
+      1.76
+     ],
+     [
+      1403.5,
+      498,
+      1.8
+     ],
+     [
+      1401.5,
+      498.75,
+      1.84
+     ],
+     [
+      1399.5,
+      500.5,
+      1.89
+     ],
+     [
+      1397.5,
+      502.5,
+      1.92
+     ],
+     [
+      1395.5,
+      504.5,
+      1.98
+     ],
+     [
+      1393.5,
+      506.5,
+      2
+     ],
+     [
+      1391.5,
+      508.5,
+      2.03
+     ],
+     [
+      1389.5,
+      510.5,
+      2.06
+     ],
+     [
+      1387.5,
+      512.5,
+      2.08
+     ],
+     [
+      1385.5,
+      514.5,
+      2.09
+     ],
+     [
+      1383.5,
+      516.5,
+      2.11
+     ],
+     [
+      1381.5,
+      518.5,
+      2.11
+     ],
+     [
+      1379.5,
+      520.5,
+      2.11
+     ],
+     [
+      1377.5,
+      522.5,
+      2.11
+     ],
+     [
+      1375.5,
+      524.5,
+      2.11
+     ],
+     [
+      1373.5,
+      526.5,
+      2.11
+     ],
+     [
+      1371.5,
+      528.5,
+      2.12
+     ],
+     [
+      1369.5,
+      530.5,
+      2.15
+     ],
+     [
+      1367.5,
+      532.5,
+      2.17
+     ],
+     [
+      1365.5,
+      534.5,
+      2.18
+     ],
+     [
+      1363.5,
+      536.5,
+      2.21
+     ],
+     [
+      1361.5,
+      538.5,
+      2.24
+     ],
+     [
+      1359.5,
+      540.5,
+      2.29
+     ],
+     [
+      1357.5,
+      542.5,
+      2.32
+     ],
+     [
+      1355.5,
+      544.5,
+      2.36
+     ],
+     [
+      1353.5,
+      546.5,
+      2.41
+     ],
+     [
+      1351.5,
+      548.5,
+      2.45
+     ],
+     [
+      1349.5,
+      550.5,
+      2.5
+     ],
+     [
+      1347.5,
+      552.5,
+      2.56
+     ],
+     [
+      1345.5,
+      554.5,
+      2.62
+     ],
+     [
+      1343.5,
+      556.5,
+      2.68
+     ],
+     [
+      1341.5,
+      557.75,
+      2.74
+     ],
+     [
+      1339.5,
+      558,
+      2.79
+     ],
+     [
+      1337.5,
+      558,
+      2.82
+     ],
+     [
+      1335.5,
+      558,
+      2.87
+     ],
+     [
+      1333.5,
+      558.75,
+      2.91
+     ],
+     [
+      1331.5,
+      560.5,
+      2.98
+     ],
+     [
+      1329.5,
+      562.5,
+      3.06
+     ],
+     [
+      1327.5,
+      564.5,
+      3.11
+     ],
+     [
+      1325.5,
+      566.5,
+      3.17
+     ],
+     [
+      1323.5,
+      568.5,
+      3.23
+     ],
+     [
+      1321.5,
+      569.75,
+      3.29
+     ],
+     [
+      1319.5,
+      570,
+      3.34
+     ],
+     [
+      1317.5,
+      570.75,
+      3.38
+     ],
+     [
+      1315.5,
+      572.5,
+      3.43
+     ],
+     [
+      1313.5,
+      574.5,
+      3.49
+     ],
+     [
+      1311.5,
+      576.5,
+      3.54
+     ],
+     [
+      1309.5,
+      578.5,
+      3.58
+     ],
+     [
+      1307.5,
+      580.5,
+      3.63
+     ],
+     [
+      1305.5,
+      582.5,
+      3.66
+     ],
+     [
+      1303.5,
+      584.5,
+      3.72
+     ],
+     [
+      1301.5,
+      586.5,
+      3.74
+     ],
+     [
+      1299.5,
+      588.5,
+      3.77
+     ],
+     [
+      1297.5,
+      590.5,
+      3.8
+     ],
+     [
+      1295.5,
+      592.5,
+      3.82
+     ],
+     [
+      1293.5,
+      594.5,
+      3.82
+     ],
+     [
+      1291.5,
+      596.5,
+      3.82
+     ],
+     [
+      1289.5,
+      598.5,
+      3.82
+     ],
+     [
+      1287.5,
+      600.5,
+      3.82
+     ],
+     [
+      1285.5,
+      602.5,
+      3.83
+     ],
+     [
+      1283.5,
+      604.5,
+      3.87
+     ],
+     [
+      1281.5,
+      606.5,
+      3.93
+     ],
+     [
+      1279.5,
+      608.5,
+      4.03
+     ],
+     [
+      1277.5,
+      610.5,
+      4.14
+     ],
+     [
+      1275.5,
+      612.5,
+      4.26
+     ],
+     [
+      1273.5,
+      614.5,
+      4.38
+     ],
+     [
+      1271.5,
+      616.5,
+      4.53
+     ],
+     [
+      1269.5,
+      618.5,
+      4.66
+     ],
+     [
+      1267.5,
+      620.5,
+      4.74
+     ],
+     [
+      1265.5,
+      622.5,
+      4.82
+     ],
+     [
+      1263.5,
+      624.5,
+      4.87
+     ],
+     [
+      1261.5,
+      626.5,
+      4.87
+     ],
+     [
+      1259.5,
+      628.5,
+      4.87
+     ],
+     [
+      1257.5,
+      630.5,
+      4.87
+     ],
+     [
+      1255.5,
+      632.5,
+      4.87
+     ],
+     [
+      1253.5,
+      634.5,
+      4.87
+     ],
+     [
+      1251.5,
+      636.5,
+      4.87
+     ],
+     [
+      1249.5,
+      638.5,
+      4.87
+     ],
+     [
+      1247.5,
+      640.5,
+      4.87
+     ],
+     [
+      1245.5,
+      642.5,
+      4.87
+     ],
+     [
+      1243.5,
+      644.5,
+      4.9
+     ],
+     [
+      1241.5,
+      646.5,
+      4.9
+     ],
+     [
+      1239.5,
+      648.5,
+      4.9
+     ],
+     [
+      1237.5,
+      650.5,
+      4.93
+     ],
+     [
+      1235.5,
+      652.5,
+      4.93
+     ],
+     [
+      1233.5,
+      654.5,
+      4.95
+     ],
+     [
+      1231.5,
+      656.5,
+      4.96
+     ],
+     [
+      1229.5,
+      658.5,
+      4.98
+     ],
+     [
+      1227.5,
+      660.5,
+      4.99
+     ],
+     [
+      1225.5,
+      662.5,
+      5.01
+     ],
+     [
+      1223.5,
+      664.5,
+      5.01
+     ],
+     [
+      1221.5,
+      666.5,
+      5.02
+     ],
+     [
+      1219.5,
+      668.5,
+      5.04
+     ],
+     [
+      1217.5,
+      670.5,
+      5.05
+     ],
+     [
+      1215.5,
+      672.5,
+      5.09
+     ],
+     [
+      1213.5,
+      674.5,
+      5.14
+     ],
+     [
+      1211.5,
+      676.5,
+      5.2
+     ],
+     [
+      1209.5,
+      678.5,
+      5.26
+     ],
+     [
+      1207.5,
+      680.5,
+      5.32
+     ],
+     [
+      1205.5,
+      682.5,
+      5.41
+     ],
+     [
+      1203.5,
+      684.5,
+      5.5
+     ],
+     [
+      1201.5,
+      686.5,
+      5.59
+     ],
+     [
+      1199.5,
+      688.5,
+      5.69
+     ],
+     [
+      1197.5,
+      690.5,
+      5.84
+     ],
+     [
+      1195.5,
+      692.5,
+      6.03
+     ],
+     [
+      1193.5,
+      694.5,
+      6.29
+     ],
+     [
+      1191.5,
+      696.5,
+      6.52
+     ],
+     [
+      1189.5,
+      697.75,
+      6.71
+     ],
+     [
+      1187.5,
+      698,
+      6.82
+     ],
+     [
+      1185.5,
+      698,
+      6.88
+     ],
+     [
+      1183.5,
+      698,
+      6.93
+     ],
+     [
+      1181.5,
+      698.75,
+      6.94
+     ],
+     [
+      1179.5,
+      700.5,
+      6.99
+     ],
+     [
+      1177.5,
+      702.5,
+      7.03
+     ],
+     [
+      1175.5,
+      704.5,
+      7.08
+     ],
+     [
+      1173.5,
+      706.5,
+      7.11
+     ],
+     [
+      1171.5,
+      708.5,
+      7.14
+     ],
+     [
+      1169.5,
+      710.5,
+      7.17
+     ],
+     [
+      1167.5,
+      712.5,
+      7.19
+     ],
+     [
+      1165.5,
+      714.5,
+      7.22
+     ],
+     [
+      1163.5,
+      716.5,
+      7.22
+     ],
+     [
+      1161.5,
+      718.5,
+      7.24
+     ],
+     [
+      1159.5,
+      720.5,
+      7.24
+     ],
+     [
+      1157.5,
+      722.5,
+      7.24
+     ],
+     [
+      1155.5,
+      724.5,
+      7.24
+     ],
+     [
+      1153.5,
+      725.75,
+      7.24
+     ],
+     [
+      1151.5,
+      726,
+      7.24
+     ],
+     [
+      1149.5,
+      726.75,
+      7.24
+     ],
+     [
+      1147.5,
+      728.5,
+      7.24
+     ],
+     [
+      1145.5,
+      729.75,
+      7.24
+     ],
+     [
+      1143.5,
+      730,
+      7.24
+     ],
+     [
+      1141.5,
+      730,
+      7.24
+     ],
+     [
+      1139.5,
+      730,
+      7.24
+     ],
+     [
+      1137.5,
+      730,
+      7.24
+     ],
+     [
+      1135.5,
+      730,
+      7.24
+     ],
+     [
+      1133.5,
+      730,
+      7.24
+     ],
+     [
+      1131.5,
+      730,
+      7.24
+     ],
+     [
+      1129.5,
+      730.75,
+      7.24
+     ],
+     [
+      1127.5,
+      732.5,
+      7.24
+     ],
+     [
+      1125.5,
+      734.5,
+      7.24
+     ],
+     [
+      1123.5,
+      736.5,
+      7.25
+     ],
+     [
+      1122.25,
+      737.75,
+      7.27
+     ],
+     [
+      1122,
+      738,
+      7.27
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_cave_blackstrand_0",
+   "x": 174,
+   "z": 462,
+   "yaw": 0,
+   "data": {
+    "from": "cave_blackstrand_0",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      174,
+      462,
+      115.21
+     ],
+     [
+      173.25,
+      461.25,
+      115.55
+     ],
+     [
+      171.5,
+      459.5,
+      116.3
+     ],
+     [
+      169.5,
+      458.25,
+      117.2
+     ],
+     [
+      167.5,
+      458,
+      118.17
+     ],
+     [
+      165.5,
+      458,
+      119.23
+     ],
+     [
+      163.5,
+      458,
+      120.34
+     ],
+     [
+      161.5,
+      457.25,
+      121.48
+     ],
+     [
+      159.5,
+      455.5,
+      122.57
+     ],
+     [
+      157.5,
+      454.25,
+      123
+     ],
+     [
+      155.5,
+      454,
+      123.26
+     ],
+     [
+      153.5,
+      454,
+      123.6
+     ],
+     [
+      151.5,
+      454,
+      123.98
+     ],
+     [
+      149.5,
+      453.25,
+      124.33
+     ],
+     [
+      147.5,
+      451.5,
+      124.63
+     ],
+     [
+      145.5,
+      450.25,
+      125.03
+     ],
+     [
+      143.5,
+      450,
+      125.55
+     ],
+     [
+      141.5,
+      450,
+      126.08
+     ],
+     [
+      139.5,
+      450,
+      126.66
+     ],
+     [
+      137.5,
+      450,
+      127.21
+     ],
+     [
+      135.5,
+      450,
+      127.76
+     ],
+     [
+      133.5,
+      450,
+      128.31
+     ],
+     [
+      131.5,
+      450,
+      128.85
+     ],
+     [
+      129.5,
+      450,
+      129.37
+     ],
+     [
+      127.5,
+      450,
+      129.9
+     ],
+     [
+      125.5,
+      450,
+      130.41
+     ],
+     [
+      123.5,
+      450,
+      130.9
+     ],
+     [
+      121.5,
+      450,
+      131.39
+     ],
+     [
+      119.5,
+      450,
+      131.85
+     ],
+     [
+      117.5,
+      450,
+      132.31
+     ],
+     [
+      115.5,
+      450,
+      132.74
+     ],
+     [
+      113.5,
+      450,
+      133.17
+     ],
+     [
+      111.5,
+      450,
+      133.57
+     ],
+     [
+      109.5,
+      449.25,
+      133.9
+     ],
+     [
+      107.5,
+      447.5,
+      134.18
+     ],
+     [
+      105.5,
+      446.25,
+      134.44
+     ],
+     [
+      103.5,
+      446,
+      134.64
+     ],
+     [
+      101.5,
+      445.25,
+      134.79
+     ],
+     [
+      99.5,
+      443.5,
+      134.89
+     ],
+     [
+      97.5,
+      442.25,
+      134.94
+     ],
+     [
+      95.5,
+      442,
+      134.9
+     ],
+     [
+      93.5,
+      442,
+      134.81
+     ],
+     [
+      91.5,
+      442,
+      134.68
+     ],
+     [
+      89.5,
+      442,
+      134.51
+     ],
+     [
+      87.5,
+      442,
+      134.32
+     ],
+     [
+      85.5,
+      441.25,
+      134.13
+     ],
+     [
+      83.5,
+      439.5,
+      134
+     ],
+     [
+      82.25,
+      438.25,
+      133.91
+     ],
+     [
+      82,
+      438,
+      133.88
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_cave_blackstrand_1",
+   "x": 426,
+   "z": 1866,
+   "yaw": 0,
+   "data": {
+    "from": "cave_blackstrand_1",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      426,
+      1866,
+      3.22
+     ],
+     [
+      426.75,
+      1866,
+      3.22
+     ],
+     [
+      428.5,
+      1866,
+      3.22
+     ],
+     [
+      430.5,
+      1866,
+      3.22
+     ],
+     [
+      432.5,
+      1866,
+      3.22
+     ],
+     [
+      434.5,
+      1866,
+      3.22
+     ],
+     [
+      436.5,
+      1866,
+      3.21
+     ],
+     [
+      438.5,
+      1866,
+      3.19
+     ],
+     [
+      440.5,
+      1866,
+      3.18
+     ],
+     [
+      442.5,
+      1866,
+      3.15
+     ],
+     [
+      444.5,
+      1866,
+      3.13
+     ],
+     [
+      446.5,
+      1866,
+      3.12
+     ],
+     [
+      448.5,
+      1866,
+      3.1
+     ],
+     [
+      450.5,
+      1866,
+      3.09
+     ],
+     [
+      452.5,
+      1866,
+      3.07
+     ],
+     [
+      454.5,
+      1866,
+      3.07
+     ],
+     [
+      456.5,
+      1866,
+      3.07
+     ],
+     [
+      458.5,
+      1866,
+      3.07
+     ],
+     [
+      460.5,
+      1866,
+      3.07
+     ],
+     [
+      462.5,
+      1866.75,
+      3.08
+     ],
+     [
+      464.5,
+      1868.5,
+      3.11
+     ],
+     [
+      466.5,
+      1869.75,
+      3.1
+     ],
+     [
+      468.5,
+      1870,
+      3.1
+     ],
+     [
+      470.5,
+      1870.75,
+      3.11
+     ],
+     [
+      472.5,
+      1872.5,
+      3.13
+     ],
+     [
+      474.5,
+      1873.75,
+      3.12
+     ],
+     [
+      476.5,
+      1874,
+      3.12
+     ],
+     [
+      478.5,
+      1874,
+      3.1
+     ],
+     [
+      480.5,
+      1874,
+      3.1
+     ],
+     [
+      482.5,
+      1874.75,
+      3.1
+     ],
+     [
+      484.5,
+      1876.5,
+      3.07
+     ],
+     [
+      486.5,
+      1877.75,
+      3.07
+     ],
+     [
+      488.5,
+      1878,
+      3.07
+     ],
+     [
+      490.5,
+      1878,
+      3.07
+     ],
+     [
+      492.5,
+      1878,
+      3.07
+     ],
+     [
+      494.5,
+      1878,
+      3.07
+     ],
+     [
+      496.5,
+      1878,
+      3.07
+     ],
+     [
+      498.5,
+      1878,
+      3.07
+     ],
+     [
+      500.5,
+      1878,
+      3.07
+     ],
+     [
+      502.5,
+      1878,
+      3.07
+     ],
+     [
+      504.5,
+      1878,
+      3.07
+     ],
+     [
+      506.5,
+      1878,
+      3.07
+     ],
+     [
+      508.5,
+      1878,
+      3.07
+     ],
+     [
+      510.5,
+      1878,
+      3.07
+     ],
+     [
+      512.5,
+      1878,
+      3.07
+     ],
+     [
+      514.5,
+      1878,
+      3.07
+     ],
+     [
+      516.5,
+      1878,
+      3.06
+     ],
+     [
+      518.5,
+      1878.75,
+      3.04
+     ],
+     [
+      520.5,
+      1880.5,
+      3.03
+     ],
+     [
+      522.5,
+      1881.75,
+      3.01
+     ],
+     [
+      524.5,
+      1882,
+      3
+     ],
+     [
+      526.5,
+      1882,
+      2.98
+     ],
+     [
+      528.5,
+      1882,
+      2.98
+     ],
+     [
+      530.5,
+      1882,
+      2.95
+     ],
+     [
+      532.5,
+      1882,
+      2.95
+     ],
+     [
+      534.5,
+      1882,
+      2.95
+     ],
+     [
+      536.5,
+      1882,
+      2.93
+     ],
+     [
+      538.5,
+      1882,
+      2.92
+     ],
+     [
+      540.5,
+      1882,
+      2.9
+     ],
+     [
+      542.5,
+      1882,
+      2.89
+     ],
+     [
+      544.5,
+      1882,
+      2.86
+     ],
+     [
+      546.5,
+      1882,
+      2.83
+     ],
+     [
+      548.5,
+      1882,
+      2.8
+     ],
+     [
+      550.5,
+      1882,
+      2.77
+     ],
+     [
+      552.5,
+      1882,
+      2.74
+     ],
+     [
+      554.5,
+      1882,
+      2.72
+     ],
+     [
+      556.5,
+      1882,
+      2.72
+     ],
+     [
+      558.5,
+      1882,
+      2.72
+     ],
+     [
+      560.5,
+      1882,
+      2.72
+     ],
+     [
+      562.5,
+      1882,
+      2.73
+     ],
+     [
+      564.5,
+      1882,
+      2.76
+     ],
+     [
+      566.5,
+      1882,
+      2.79
+     ],
+     [
+      568.5,
+      1882,
+      2.82
+     ],
+     [
+      570.5,
+      1882,
+      2.85
+     ],
+     [
+      572.5,
+      1882,
+      2.87
+     ],
+     [
+      574.5,
+      1882,
+      2.9
+     ],
+     [
+      576.5,
+      1882,
+      2.9
+     ],
+     [
+      578.5,
+      1882,
+      2.9
+     ],
+     [
+      580.5,
+      1882,
+      2.89
+     ],
+     [
+      582.5,
+      1882,
+      2.87
+     ],
+     [
+      584.5,
+      1882,
+      2.86
+     ],
+     [
+      586.5,
+      1882.75,
+      2.84
+     ],
+     [
+      588.5,
+      1884.5,
+      2.83
+     ],
+     [
+      590.5,
+      1886.5,
+      2.83
+     ],
+     [
+      592.5,
+      1888.5,
+      2.85
+     ],
+     [
+      594.5,
+      1889.75,
+      2.86
+     ],
+     [
+      596.5,
+      1890,
+      2.87
+     ],
+     [
+      598.5,
+      1890.75,
+      2.87
+     ],
+     [
+      600.5,
+      1892.5,
+      2.9
+     ],
+     [
+      602.5,
+      1893.75,
+      2.92
+     ],
+     [
+      604.5,
+      1894,
+      2.93
+     ],
+     [
+      606.5,
+      1894,
+      2.93
+     ],
+     [
+      608.5,
+      1894,
+      2.95
+     ],
+     [
+      610.5,
+      1894,
+      2.95
+     ],
+     [
+      612.5,
+      1894,
+      2.96
+     ],
+     [
+      614.5,
+      1894,
+      2.99
+     ],
+     [
+      616.5,
+      1894,
+      3.02
+     ],
+     [
+      618.5,
+      1894,
+      3.05
+     ],
+     [
+      620.5,
+      1894,
+      3.08
+     ],
+     [
+      622.5,
+      1894,
+      3.11
+     ],
+     [
+      624.5,
+      1894,
+      3.14
+     ],
+     [
+      626.5,
+      1894,
+      3.16
+     ],
+     [
+      628.5,
+      1894,
+      3.19
+     ],
+     [
+      630.5,
+      1894,
+      3.23
+     ],
+     [
+      632.5,
+      1894,
+      3.28
+     ],
+     [
+      634.5,
+      1894,
+      3.31
+     ],
+     [
+      636.5,
+      1894,
+      3.35
+     ],
+     [
+      638.5,
+      1894,
+      3.4
+     ],
+     [
+      640.5,
+      1894,
+      3.45
+     ],
+     [
+      642.5,
+      1894,
+      3.49
+     ],
+     [
+      644.5,
+      1894,
+      3.54
+     ],
+     [
+      646.5,
+      1894,
+      3.57
+     ],
+     [
+      648.5,
+      1894,
+      3.6
+     ],
+     [
+      650.5,
+      1894,
+      3.63
+     ],
+     [
+      652.5,
+      1894,
+      3.66
+     ],
+     [
+      654.5,
+      1894,
+      3.68
+     ],
+     [
+      656.5,
+      1894,
+      3.69
+     ],
+     [
+      658.5,
+      1894,
+      3.71
+     ],
+     [
+      660.5,
+      1894,
+      3.72
+     ],
+     [
+      662.5,
+      1894,
+      3.74
+     ],
+     [
+      664.5,
+      1894,
+      3.74
+     ],
+     [
+      666.5,
+      1894,
+      3.77
+     ],
+     [
+      668.5,
+      1894,
+      3.77
+     ],
+     [
+      670.5,
+      1894,
+      3.76
+     ],
+     [
+      672.5,
+      1894,
+      3.74
+     ],
+     [
+      674.5,
+      1894,
+      3.74
+     ],
+     [
+      676.5,
+      1894,
+      3.74
+     ],
+     [
+      678.5,
+      1894,
+      3.74
+     ],
+     [
+      680.5,
+      1894,
+      3.77
+     ],
+     [
+      682.5,
+      1894,
+      3.8
+     ],
+     [
+      684.5,
+      1894,
+      3.83
+     ],
+     [
+      686.5,
+      1894,
+      3.87
+     ],
+     [
+      688.5,
+      1894,
+      3.92
+     ],
+     [
+      690.5,
+      1894,
+      3.95
+     ],
+     [
+      692.5,
+      1894,
+      4.01
+     ],
+     [
+      694.5,
+      1894,
+      4.06
+     ],
+     [
+      696.5,
+      1894,
+      4.09
+     ],
+     [
+      698.5,
+      1894,
+      4.12
+     ],
+     [
+      700.5,
+      1894,
+      4.15
+     ],
+     [
+      702.5,
+      1894,
+      4.18
+     ],
+     [
+      704.5,
+      1894,
+      4.21
+     ],
+     [
+      706.5,
+      1894,
+      4.24
+     ],
+     [
+      708.5,
+      1894,
+      4.27
+     ],
+     [
+      710.5,
+      1894,
+      4.3
+     ],
+     [
+      712.5,
+      1894,
+      4.32
+     ],
+     [
+      714.5,
+      1894,
+      4.36
+     ],
+     [
+      716.5,
+      1894,
+      4.42
+     ],
+     [
+      718.5,
+      1894,
+      4.48
+     ],
+     [
+      720.5,
+      1894,
+      4.53
+     ],
+     [
+      722.5,
+      1894,
+      4.56
+     ],
+     [
+      724.5,
+      1894,
+      4.62
+     ],
+     [
+      726.5,
+      1894,
+      4.68
+     ],
+     [
+      728.5,
+      1894,
+      4.73
+     ],
+     [
+      730.5,
+      1894,
+      4.77
+     ],
+     [
+      732.5,
+      1894,
+      4.82
+     ],
+     [
+      734.5,
+      1894,
+      4.85
+     ],
+     [
+      736.5,
+      1894,
+      4.91
+     ],
+     [
+      738.5,
+      1894,
+      4.96
+     ],
+     [
+      740.5,
+      1894,
+      5
+     ],
+     [
+      742.5,
+      1894,
+      5.05
+     ],
+     [
+      744.5,
+      1894,
+      5.09
+     ],
+     [
+      746.5,
+      1894,
+      5.14
+     ],
+     [
+      748.5,
+      1894,
+      5.19
+     ],
+     [
+      749.75,
+      1894,
+      5.21
+     ],
+     [
+      750,
+      1894,
+      5.22
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "town_wall",
+   "id": "port_vharl_wall",
+   "x": 1126,
+   "z": 914,
+   "yaw": 0,
+   "data": {
+    "town": "port_vharl",
+    "name": "Port Vharl",
+    "settlement": "town",
+    "style": "curtain",
+    "material": "stone",
+    "tier": "wall",
+    "h": 4.4,
+    "thick": 1.2,
+    "tint": "#a29c90",
+    "radius": 60.72,
+    "solid": true,
+    "runs": [
+     [
+      [
+       1101.49,
+       969.56,
+       7.24
+      ],
+      [
+       1086.89,
+       960.45,
+       7.24
+      ],
+      [
+       1075.43,
+       947.62,
+       7.24
+      ],
+      [
+       1068.03,
+       932.1,
+       7.24
+      ],
+      [
+       1065.29,
+       915.12,
+       7.24
+      ],
+      [
+       1067.41,
+       898.05,
+       7.24
+      ],
+      [
+       1074.23,
+       882.26,
+       7.24
+      ],
+      [
+       1085.21,
+       869.02,
+       7.24
+      ],
+      [
+       1099.45,
+       859.38,
+       7.24
+      ],
+      [
+       1115.83,
+       854.13,
+       7.24
+      ]
+     ],
+     [
+      [
+       1125.34,
+       853.28,
+       7.24
+      ],
+      [
+       1143.83,
+       855.95,
+       7.24
+      ],
+      [
+       1160.64,
+       864.12,
+       7.24
+      ],
+      [
+       1174.16,
+       877.02,
+       7.24
+      ],
+      [
+       1183.13,
+       893.41,
+       7.24
+      ],
+      [
+       1186.68,
+       911.76,
+       7.24
+      ],
+      [
+       1184.49,
+       930.31,
+       7.24
+      ],
+      [
+       1176.76,
+       947.32,
+       7.24
+      ],
+      [
+       1164.23,
+       961.18,
+       7.24
+      ],
+      [
+       1148.07,
+       970.57,
+       7.24
+      ],
+      [
+       1129.83,
+       974.6,
+       7.24
+      ],
+      [
+       1111.22,
+       972.9,
+       7.24
+      ]
+     ]
+    ],
+    "towers": [
+     {
+      "x": 1098.86,
+      "z": 968.32,
+      "h": 7.24,
+      "yaw": -0.4633
+     },
+     {
+      "x": 1112.99,
+      "z": 854.69,
+      "h": 7.24,
+      "yaw": -2.9256
+     },
+     {
+      "x": 1073.18,
+      "z": 943.95,
+      "h": 7.24,
+      "yaw": -1.055
+     },
+     {
+      "x": 1065.74,
+      "z": 906.51,
+      "h": 7.24,
+      "yaw": -1.6945
+     },
+     {
+      "x": 1082.12,
+      "z": 872.03,
+      "h": 7.24,
+      "yaw": -2.3339
+     },
+     {
+      "x": 1128.24,
+      "z": 853.32,
+      "h": 7.24,
+      "yaw": 3.1047
+     },
+     {
+      "x": 1114.05,
+      "z": 973.54,
+      "h": 7.24,
+      "yaw": -0.1981
+     },
+     {
+      "x": 1163.65,
+      "z": 866.36,
+      "h": 7.24,
+      "yaw": 2.4728
+     },
+     {
+      "x": 1185.23,
+      "z": 900.61,
+      "h": 7.24,
+      "yaw": 1.7931
+     },
+     {
+      "x": 1180.48,
+      "z": 940.81,
+      "h": 7.24,
+      "yaw": 1.1135
+     },
+     {
+      "x": 1151.52,
+      "z": 969.1,
+      "h": 7.24,
+      "yaw": 0.4338
+     }
+    ],
+    "gates": [
+     {
+      "id": "port_vharl_gate_0",
+      "x": 1106.28,
+      "z": 971.43,
+      "h": 7.24,
+      "yaw": -0.5492,
+      "out": [
+       -0.522,
+       0.8529
+      ],
+      "wallYaw": -0.3307,
+      "open": 7.11,
+      "width": 6.2,
+      "pass": 6.2,
+      "slant": 0.219,
+      "kind": "gatehouse",
+      "way": "port_vharl_street_68",
+      "wayKind": "road",
+      "road": "road_v_ring_7",
+      "ways": [
+       "port_vharl_street_68"
+      ],
+      "led": [],
+      "ends": [
+       [
+        1111.22,
+        972.9
+       ],
+       [
+        1101.49,
+        969.56
+       ]
+      ],
+      "main": {
+       "street": "port_vharl_street_68",
+       "width": 5,
+       "pts": [
+        [
+         1106.28,
+         971.43
+        ],
+        [
+         1138.89,
+         918.15
+        ]
+       ],
+       "metres": 62.47
+      },
+      "approaches": [
+       {
+        "way": "road_v_ring_7",
+        "width": 6,
+        "pts": [
+         [
+          1104,
+          1002.45
+         ],
+         [
+          1104,
+          1000.45
+         ],
+         [
+          1104,
+          998.45
+         ],
+         [
+          1104,
+          996.45
+         ],
+         [
+          1104,
+          994.45
+         ],
+         [
+          1104,
+          992.45
+         ],
+         [
+          1104,
+          990.45
+         ],
+         [
+          1104,
+          988.45
+         ],
+         [
+          1104,
+          986.45
+         ],
+         [
+          1104,
+          984.45
+         ],
+         [
+          1104,
+          982.45
+         ],
+         [
+          1104,
+          980.45
+         ],
+         [
+          1104,
+          978.45
+         ],
+         [
+          1104,
+          976.45
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "port_vharl_gate_1",
+      "x": 1120.57,
+      "z": 853.52,
+      "h": 7.24,
+      "yaw": -3.0078,
+      "out": [
+       -0.1334,
+       -0.9911
+      ],
+      "wallYaw": -3.0521,
+      "open": 6.36,
+      "width": 6.2,
+      "pass": 6.2,
+      "slant": 0.044,
+      "kind": "gatehouse",
+      "way": "port_vharl_street_67",
+      "wayKind": "road",
+      "road": "road_v_ring_0",
+      "ways": [
+       "port_vharl_street_67",
+       "road_v_rim_0"
+      ],
+      "led": [
+       "road_v_rim_0"
+      ],
+      "ends": [
+       [
+        1115.83,
+        854.13
+       ],
+       [
+        1125.34,
+        853.28
+       ]
+      ],
+      "main": {
+       "street": "port_vharl_street_67",
+       "width": 5,
+       "pts": [
+        [
+         1120.57,
+         853.52
+        ],
+        [
+         1127.5,
+         905
+        ],
+        [
+         1133.5,
+         911
+        ],
+        [
+         1135.55,
+         911.29
+        ]
+       ],
+       "metres": 62.5
+      },
+      "approaches": [
+       {
+        "way": "road_v_ring_0",
+        "width": 6,
+        "pts": [
+         [
+          1120,
+          848.83
+         ],
+         [
+          1120,
+          846.83
+         ],
+         [
+          1120,
+          844.83
+         ],
+         [
+          1120,
+          842.83
+         ],
+         [
+          1120,
+          840.83
+         ],
+         [
+          1120,
+          838.83
+         ],
+         [
+          1120,
+          836.83
+         ],
+         [
+          1120,
+          834.83
+         ],
+         [
+          1120,
+          832.83
+         ],
+         [
+          1120,
+          830.83
+         ],
+         [
+          1120,
+          828.83
+         ],
+         [
+          1120,
+          826.83
+         ],
+         [
+          1120,
+          824.83
+         ],
+         [
+          1120,
+          822.83
+         ]
+        ]
+       },
+       {
+        "way": "road_v_rim_0",
+        "width": 3.5,
+        "led": true,
+        "pts": [
+         [
+          1120,
+          822.83
+         ],
+         [
+          1120,
+          824.83
+         ],
+         [
+          1120,
+          826.83
+         ],
+         [
+          1120,
+          828.83
+         ],
+         [
+          1120,
+          830.83
+         ],
+         [
+          1120,
+          832.83
+         ],
+         [
+          1120,
+          834.83
+         ],
+         [
+          1120,
+          836.83
+         ],
+         [
+          1120,
+          838.83
+         ],
+         [
+          1120,
+          840.83
+         ],
+         [
+          1120,
+          842.83
+         ],
+         [
+          1120,
+          842.83
+         ],
+         [
+          1119.92,
+          844.41
+         ],
+         [
+          1119.85,
+          845.99
+         ],
+         [
+          1119.77,
+          847.57
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "openings": []
+   }
+  }
+ ]
+}

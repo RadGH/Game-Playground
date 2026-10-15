@@ -61,7 +61,7 @@ export function encodeClientSnap({ tick, ack = 0, self = null, vitals = null, de
   w.reset();
   w.u8(1); w.u8(SNAP_VERSION);
   w.u32(tick); w.u32(ack);
-  w.u8((self ? 1 : 0) | (vitals ? 2 : 0) | (dead ? 4 : 0));
+  w.u8((self ? 1 : 0) | (vitals ? 2 : 0) | (dead ? 4 : 0) | (self && self.glide ? 8 : 0));      // [S] 8 = gliding after a geyser throw (movement.js `glide`)
   if (self) { w.f32(self.x); w.f32(self.y); w.f32(self.z); w.f32(self.vy || 0); }
   if (vitals) { w.u32(Math.max(0, Math.round(vitals.hp))); w.u32(Math.round(vitals.hpMax)); w.u32(Math.max(0, Math.round(vitals.mp))); w.u32(Math.round(vitals.mpMax)); }
   const nLeft = Math.min(left.length, 0xFFFF);
@@ -94,6 +94,7 @@ export function decodeSnap(bytes, q, origin = null) {
   if (sm & 1) out.self = { x: f32(), y: f32(), z: f32(), vy: f32() };
   if (sm & 2) out.vitals = { hp: u32(), hpMax: u32(), mp: u32(), mpMax: u32() };
   out.dead = !!(sm & 4);
+  if (out.self && (sm & 8)) out.self.glide = true;      // [S]
   const nl = u16();
   for (let i = 0; i < nl; i++) out.left.push(u16());
   while (o < b.byteLength) {

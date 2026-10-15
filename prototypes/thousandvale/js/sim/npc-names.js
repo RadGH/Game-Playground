@@ -9,7 +9,8 @@
 //     guard keeps the same name across restarts and copies. Quest NPCs (`npc.id`) are never renamed — quest text names them.
 //
 //   configureNpcNames({ titles, names })      once per server, from the province's data (both optional)
-//   npcIdentity(spec) -> { name, title }       spec = a room.spawn spec ({ name, x, z, data: { npc, key, title? } })
+//   configureNpcNames({ names, givers, province })   Expansion 1: a second province's own name pool and givers
+//   npcIdentity(spec, province?) -> { name, title }   spec = a room.spawn spec ({ name, x, z, data: { npc, key, title? } })
 
 const DEFAULT_TITLES = { shops: {}, roles: {}, placeholders: ['townsfolk', 'villager', 'npc'], fallback: 'Local' };
 const DEFAULT_NAMES = { given: { f: ['Maud', 'Tamsin', 'Edda', 'Orla'], m: ['Corwin', 'Aled', 'Tobin', 'Wat'] }, family: ['Ashby', 'Harl', 'Reed', 'Pike'] };
@@ -17,13 +18,17 @@ const DEFAULT_NAMES = { given: { f: ['Maud', 'Tamsin', 'Edda', 'Orla'], m: ['Cor
 const RANKS = new Set(['sergeant', 'captain', 'castellan', 'quartermaster', 'reeve', 'elder', 'foreman']);
 
 let T = DEFAULT_TITLES, N = DEFAULT_NAMES, placeholders = new Set(DEFAULT_TITLES.placeholders), G = {};
+const own = new Map();          // Expansion 1: province -> { N, G } (its own names and quest givers); titles are the realm's
 
-export function configureNpcNames({ titles = null, names = null, givers = null } = {}) {
+export function configureNpcNames({ titles = null, names = null, givers = null, province = null } = {}) {
+  if (province) { own.set(province, { N: names && names.given && names.family ? names : N, G: (givers && givers.npcs) || {} }); return; }
+  own.clear();
   G = (givers && givers.npcs) || {};
   if (titles) { T = { ...DEFAULT_TITLES, ...titles }; placeholders = new Set((T.placeholders || []).map(s => String(s).toLowerCase())); }
   if (names && names.given && names.family) N = names;
 }
 
+const NAMES = () => N, GIVERS = () => G;
 const hash = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
 const cap = s => String(s || '').replace(/^\w/, c => c.toUpperCase());
 
@@ -37,8 +42,9 @@ export function isPlaceholderName(name, role = null) {
   return !!title && n === title;
 }
 
-/** A person's name for a nameless NPC, the same every time for the same `seed`. */
-export function personName(seed, role = null) {
+/** A person's name for a nameless NPC, the same every time for the same `seed` (from `province`'s pool when it has one). */
+export function personName(seed, role = null, province = null) {
+  const N = (province && own.get(province) && own.get(province).N) || NAMES();
   const h = hash(String(seed));
   const fam = N.family[(h >>> 9) % N.family.length];
   if (role && RANKS.has(role)) return cap(role) + ' ' + fam;
@@ -75,7 +81,8 @@ export function titleFor(npc, name, explicit = null) {
  * `roles[role]` -> `default`. Without E's block (an old data set, a test world) the same rule is applied from what the
  * spec says: a quest NPC, a shop, a service, an office or an offer shows a title; nobody else does.
  */
-export function isTitled(spec) {
+export function isTitled(spec, province = null) {
+  const G = (province && own.get(province) && own.get(province).G) || GIVERS();
   const d = (spec && spec.data) || {}, npc = d.npc || {};
   if (typeof d.titled === 'boolean') return d.titled;
   if (typeof npc.titled === 'boolean') return npc.titled;
@@ -96,14 +103,14 @@ export function isTitled(spec) {
 }
 
 /** { name, title, titled } for a spawn spec. `title` is null for filler folk (W27): they keep their real name and show nothing above it. */
-export function npcIdentity(spec) {
+export function npcIdentity(spec, province = null) {
   const d = (spec && spec.data) || {};
   const npc = d.npc || (d.folk ? { role: d.folk.role } : null) || {};
   let name = spec.name;
   if (!npc.id && isPlaceholderName(name, npc.role)) {
     const seed = d.key || (d.traveller ? 'tr:' + d.traveller.group + ':' + (spec.name || '') + ':' + Math.round(spec.x || 0) : null) || `${npc.role || 'npc'}:${Math.round((spec.x || 0) * 2)}:${Math.round((spec.z || 0) * 2)}`;
-    name = personName(seed, npc.role);
+    name = personName(seed, npc.role, province);
   }
-  const titled = isTitled(spec);
+  const titled = isTitled(spec, province);
   return { name, title: titled ? titleFor(npc, name, d.title || null) : null, titled };
 }

@@ -22,7 +22,7 @@
 // Coordinates: zone metres, origin at the zone's north-west corner (x, z ∈ [0, 2048]);
 // meta.source.worldOrigin is where that corner sits in world metres. yaw = atan2(dx, dz).
 
-import { writeFileSync, readFileSync, mkdirSync, existsSync } from 'node:fs';
+import { writeFileSync, readFileSync, mkdirSync, existsSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { BIOMES } from '../../../worldgen/js/biomes.js';
@@ -38,6 +38,7 @@ import { layPaths } from './lib/zone-paths.mjs';
 import { planTownWalls, wallNav, wallPlacements, WALL_DEFAULTS } from './lib/zone-walls.mjs';
 import { HIGH_STREET_WIDTH } from './lib/gate-street-checks.mjs';
 import { STALL_R } from '../js/client/town-square.js';
+import { VHARLEN, VHARL_BIOME_NAMES, islandRoads } from './lib/vharlen.mjs';
 import { SET_SURFACES, specsFor, layLanes, resolveSetPieces, prepareEPieces, carvePonds, paintSetPieces, setPieceScatter, setPieceKeepOff, setPiecePlacements, setPieceNav } from './lib/zone-setpieces.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -57,7 +58,11 @@ const SKIRT_BURY = 0.15;
 /** Proctown size by settlement kind. */
 /** W6: the plots stream E has already put somebody in (data/provinces/offices.json — shops, and the houses trainers keep): a main street goes round them. */
 const E_PLOTS = new Set();
-try { for (const t of Object.values(JSON.parse(readFileSync(join(HERE, '..', 'data', 'provinces', 'offices.json'), 'utf8')).towns || {})) for (const o of t.offices || []) if (o.plot) E_PLOTS.add(o.plot); } catch { /* no offices yet */ }
+// (one file per province since the multi-province split: Torbor's offices.json, then data/provinces/<province>-offices.json —
+// plot ids carry their town's slug, so the union never mixes two towns up)
+for (const f of ['offices.json', ...readdirSync(join(HERE, '..', 'data', 'provinces')).filter(f => f.endsWith('-offices.json')).sort()]) {
+  try { for (const t of Object.values(JSON.parse(readFileSync(join(HERE, '..', 'data', 'provinces', f), 'utf8')).towns || {})) for (const o of t.offices || []) if (o.plot) E_PLOTS.add(o.plot); } catch { /* no offices yet */ }
+}
 /** W6: how far past the ring of plots a road hands over to its high street, and how close two roads may arrive and still get a street each. */
 const LINK_OUT = 10, LINK_APART = 20, LINK_CHORD = 45;
 const TOWN_SIZE = { hamlet: 1, village: 2, town: 3, city: 4, capital: 5 };
@@ -78,7 +83,9 @@ function asksFor(id, sites, W) {
     const eid = Object.entries(pm.map || {}).find(([, z]) => z === id)?.[0];
     if (!eid) continue;
     let sheet = null; try { sheet = JSON.parse(readFileSync(join(HERE, '..', 'data', 'provinces', `${sheetId}.json`), 'utf8')); } catch { /* no sheet */ }
-    if (sheet?.worldBoss?.zone === eid) asks.push({ type: 'event', id: sheet.worldBoss.id, near: { x: 1024, z: 1024 }, r: 100 });
+    // (a province map entry may name its world boss before stream E/C have written the sheet: Vharlen's Ossathra)
+    const boss = sheet?.worldBoss || pm.worldBoss || null;
+    if (boss?.zone === eid) asks.push({ type: 'event', id: boss.id, near: { x: 1024, z: 1024 }, r: 100 });
     if (id !== W.starter?.zone) asks.push({ type: 'event', id: `event_${eid}`, near: hub ? { x: (hub.x + 1024) / 2, z: (hub.z + 1024) / 2 } : { x: 1024, z: 1024 }, r: 40 });
   }
   if (id === W.starter?.zone && hub) {
@@ -164,6 +171,10 @@ export function bakeZone(id, opts = {}) {
   const wxOf = gi => ox + (gi - AP) * STEP, wzOf = gj => oz + (gj - AP) * STEP;
   const gIdx = (x, z) => (clamp(Math.round(z / STEP), -AP, SIZE - 1 + AP) + AP) * G + clamp(Math.round(x / STEP), -AP, SIZE - 1 + AP) + AP;   // zone metres → apron grid
   const province = W.provinces.find(p => p.id === zone.province) || null;
+  // an expansion island (tools/lib/vharlen.mjs): its own ground, waters, biomes, settlements and roads — World Forge's
+  // nodes, rivers, lakes and roads in the block were drawn for the old mainland and are left out
+  const isl = ref.islandAt(ox + 1024, oz + 1024);
+  const pmEntry = Object.values(PROVINCE_MAP.provinces || {}).find(pm => Object.values(pm.map || {}).includes(id)) || null;
 
   // 1. base ground at world coordinates
   const ground = new Float32Array(NG);
@@ -178,6 +189,12 @@ export function bakeZone(id, opts = {}) {
   const lakeField = new Float32Array(m.width * m.height); for (let q = 0; q < lakeField.length; q++) lakeField[q] = m.water[q] === 2 ? 1 : 0;
   for (let j = 0; j < G; j++) for (let i = 0; i < G; i++) {
     const k = j * G + i, wx = wxOf(i), wz = wzOf(j);
+    if (isl) {
+      if (ground[k] < 0) { waterTop[k] = 0; waterKind[k] = 1; continue; }
+      const w = isl.waterAt(wx, wz, ground[k]);
+      if (w) { ground[k] = w.ground; if (w.top === w.top) { waterTop[k] = w.top; waterKind[k] = 2; } }
+      continue;
+    }
     const mi = clamp(Math.round(wz / M), 0, m.height - 1) * m.width + clamp(Math.round(wx / M), 0, m.width - 1);
     if (m.water[mi] === 1 || ground[k] < 0) { waterTop[k] = 0; waterKind[k] = 1; continue; }
     const cx = Math.round(wx / M), cz = Math.round(wz / M);
@@ -198,19 +215,22 @@ export function bakeZone(id, opts = {}) {
   const rank = { capital: 0, city: 1, town: 2, village: 3, hamlet: 4 };
   // World Forge's own `dungeon` nodes (kind dungeon/lair) become `lair` marks: `type:'dungeon'` is reserved for the
   // door record the server reads ({id, x, z, yaw}); a lair mark anchors the door in a zone with no town
-  const sites = W.nodes.filter(n => n.zone === id).map(n => ({ nodeId: n.id, type: n.type === 'dungeon' ? 'lair' : n.type, kind: n.kind, name: n.name, size: n.size, x: n.x - ox, z: n.z - oz, ...(n.starter ? { starter: true } : {}) }));
+  const sites = isl ? VHARLEN.settlements.filter(s => s.zone === id).map(s => ({ type: 'settlement', kind: s.kind, name: s.name, x: s.x - ox, z: s.z - oz }))
+    : W.nodes.filter(n => n.zone === id).map(n => ({ nodeId: n.id, type: n.type === 'dungeon' ? 'lair' : n.type, kind: n.kind, name: n.name, size: n.size, x: n.x - ox, z: n.z - oz, ...(n.starter ? { starter: true } : {}) }));
   // stream E's names (impose like Torborhold), the settlements E's sheet needs where World Forge put none, and the
   // zone's sheet town grown to a town if World Forge made it smaller
   const PL = placesFor(id);
   if (PL) {
     for (const s of sites) { const nn = PL.rename[slug(s.name)]; if (nn) { s.wfName = s.name; s.name = nn; } }
     for (const a of PL.asks) sites.push({ type: 'settlement', kind: a.kind, name: a.name, x: a.x, z: a.z, ask: true, askR: a.r });
-    for (const s of sites) if (s.type === 'settlement' && PL.town && s.name === PL.town && (rank[s.kind] ?? 9) > rank.town) { s.grownFrom = s.kind; s.kind = 'town'; }
+    // (not on an expansion island: there every settlement already has the size its zone was designed with, tools/lib/vharlen.mjs)
+    if (!isl) for (const s of sites) if (s.type === 'settlement' && PL.town && s.name === PL.town && (rank[s.kind] ?? 9) > rank.town) { s.grownFrom = s.kind; s.kind = 'town'; }
   }
   // a ford marks where a road meets the river: snap it onto the nearest river point (World Forge's node is a cell centre)
+  const WRIVERS = isl ? [] : W.rivers;
   for (const s of sites.filter(s => s.type === 'crossing')) {
     let best = null, bestD = 300;
-    for (const r of W.rivers) for (const p of r.pts) {
+    for (const r of WRIVERS) for (const p of r.pts) {
       const x = p[0] - ox, z = p[1] - oz; if (x < 40 || z < 40 || x > ZM - 40 || z > ZM - 40) continue;
       const d = Math.hypot(x - s.x, z - s.z); if (d < bestD) { bestD = d; best = [x, z]; }
     }
@@ -249,7 +269,7 @@ export function bakeZone(id, opts = {}) {
 
   // 4. roads: the world polylines (graded heights) + a spur from each moved settlement to the network
   const pad = 80, x0 = ox - pad, z0 = oz - pad, x1 = ox + ZM + pad, z1 = oz + ZM + pad;
-  const roads = W.roads.filter(r => !(r.bbox[2] < x0 || r.bbox[0] > x1 || r.bbox[3] < z0 || r.bbox[1] > z1))
+  const roads = (isl ? islandRoads(isl) : W.roads).filter(r => !(r.bbox[2] < x0 || r.bbox[0] > x1 || r.bbox[3] < z0 || r.bbox[1] > z1))
     .map(r => ({ id: `road_${r.id}`, worldId: r.id, cls: r.class, width: r.width, pts: r.pts.map(([x, z, h]) => [x - ox, z - oz, h]) }));
   for (const s of placed) {
     if (!s.movedFrom) continue;
@@ -273,6 +293,7 @@ export function bakeZone(id, opts = {}) {
   // 4a. set-piece lanes (play-test 2, Q18): authored farm lanes, graded like a spur, so a crossroads (and the inn at it)
   // and the farm gates have real roads. A lane that `joins` a town starts in it and becomes one of its high streets.
   const SPECS = specsFor(id, { authored: SET_PIECES, places: PL ? { setPieces: PL.setPieces, lanes: PL.lanes } : null });
+  if (isl) SPECS.auto = false;            // no field belts or chapel graveyards on the Burning Isle (they are Torbor Downs' farms)
   const lanes = SPECS.lanes.length ? layLanes({ lanes: SPECS.lanes, roads, ground, gIdx, ZM, edge: SPUR_EDGE }) : [];
   roads.push(...lanes);
   // grade: ease the ground toward the road's height across its width + a shoulder (never inside a town)
@@ -314,7 +335,7 @@ export function bakeZone(id, opts = {}) {
       if (Number.isNaN(waterTop[k])) ground[k] += (mean + (ground[k] - mean) * 0.15 - ground[k]) * w;
     }
     const size = TOWN_SIZE[s.kind] || 2, tx = s.x, tz = s.z;
-    const culture = cultureFor({ race: province?.race || 'human', biome: zone.biomes ? Object.keys(zone.biomes)[0] : '' });
+    const culture = pmEntry?.culture || cultureFor({ race: province?.race || 'human', biome: zone.biomes ? Object.keys(zone.biomes)[0] : '' });
     const townRoads = roads.filter(r => !r.spur || r.id === `spur_${slug(s.name)}` || r.joins === s.name);
     const linksBefore = radius => townRoads.flatMap(r => ringCrossings(r.pts, tx, tz, radius)).map(([x, z]) => [x, z]);
     // W6 (play-test 8, report #27 "it just leads you right into buildings instead of having a main road"): ONE link for
@@ -368,7 +389,7 @@ export function bakeZone(id, opts = {}) {
 
   // 5b. set pieces (play-test 2, Q18): fitted to the ground and the ground prepared, BEFORE the rivers are carved (a river
   // still owns its bed). tools/lib/zone-setpieces.mjs; data/world/set-pieces.json + stream E's places `setPieces`.
-  const riversNear = W.rivers.filter(r => !(r.bbox[2] < ox - 200 || r.bbox[0] > ox + ZM + 200 || r.bbox[3] < oz - 200 || r.bbox[1] > oz + ZM + 200)).map(r => ({ id: r.id, pts: r.pts.map(([x, z, h, c]) => [x - ox, z - oz, h, c]) }));
+  const riversNear = WRIVERS.filter(r => !(r.bbox[2] < ox - 200 || r.bbox[0] > ox + ZM + 200 || r.bbox[3] < oz - 200 || r.bbox[1] > oz + ZM + 200)).map(r => ({ id: r.id, pts: r.pts.map(([x, z, h, c]) => [x - ox, z - oz, h, c]) }));
   const pinDiscs = Object.entries(SITE_PINS[id] || {}).map(([k, p]) => ({ x: p.x, z: p.z, r: k.startsWith('door') ? 30 : k === 'world_grimtallow' ? 110 : 50 }));
   const SP = resolveSetPieces({ id, ZM, STEP, G, AP, ground, gIdx, waterTop, roadMask, rivers: riversNear, roads, plans, specs: SPECS, pins: pinDiscs,
     riverReach: cls => RIVER_WIDTH[cls] / 2 + 10 + cls * 6 + 4 });
@@ -391,7 +412,7 @@ export function bakeZone(id, opts = {}) {
   const BANK = 3, BANK_LIP = 0.4;
   const riversUsed = [];
   const nOver = new Float32Array(NG).fill(Infinity), nD = new Float32Array(NG), nSurf = new Float32Array(NG), nCls = new Uint8Array(NG);
-  for (const r of W.rivers) {
+  for (const r of WRIVERS) {
     const rx0 = ox - AP * STEP - 80, rz0 = oz - AP * STEP - 80, rx1 = ox + ZM + AP * STEP + 80, rz1 = oz + ZM + AP * STEP + 80;
     if (r.bbox[2] < rx0 || r.bbox[0] > rx1 || r.bbox[3] < rz0 || r.bbox[1] > rz1) continue;
     const pts = r.pts; let used = false;
@@ -439,7 +460,7 @@ export function bakeZone(id, opts = {}) {
     const lo = -AP * STEP - 4, hi = ZM + AP * STEP + 4;
     // a world road is not drawn inside a town (the town's streets carry it), so neither is its bridge
     const inPlaced = (x, z) => placed.some(s => Math.hypot(s.x - x, s.z - z) < s.radius + 4);
-    for (const wb of W.bridges) {
+    for (const wb of isl ? [] : W.bridges) {
       const road = roads.find(r => r.worldId === wb.road); if (!road) continue;
       if (inPlaced(wb.x - ox, wb.z - oz)) continue;
       const reach = wb.ramp + wb.width + 6;
@@ -448,7 +469,7 @@ export function bakeZone(id, opts = {}) {
       const loc = p => ({ ...p, x: p.x - ox, z: p.z - oz, a: [p.a[0] - ox, p.a[1] - oz], b: [p.b[0] - ox, p.b[1] - oz] });
       bridgesHere.push({ ...wb, id: null, x: wb.x - ox, z: wb.z - oz, a: [ax, az], b: [bx, bz], pieces: wb.pieces?.map(loc), pts: road.pts, roadId: road.id });
     }
-    const riversLocal = W.rivers.map(r => ({ id: r.id, bbox: [r.bbox[0] - ox, r.bbox[1] - oz, r.bbox[2] - ox, r.bbox[3] - oz], pts: r.pts.map(([x, z, h, c]) => [x - ox, z - oz, h, c]) }));
+    const riversLocal = WRIVERS.map(r => ({ id: r.id, bbox: [r.bbox[0] - ox, r.bbox[1] - oz, r.bbox[2] - ox, r.bbox[3] - oz], pts: r.pts.map(([x, z, h, c]) => [x - ox, z - oz, h, c]) }));
     // zone-local lines (always well inside the zone): spur roads, and the streets of every town a river runs through
     const local = [...roads.filter(r => r.spur).map(r => ({ id: r.id, pts: r.pts, width: r.width })),
       ...plans.flatMap(pl => pl.streets.map((st, i) => ({ id: `${slug(pl.town.name)}_street_${i}`, street: true, width: st.width, pts: st.pts.map(([x, z]) => [pl.origin.x + x, pl.origin.z + z, 0]) })))];
@@ -533,7 +554,7 @@ export function bakeZone(id, opts = {}) {
   const FEN_NOISE = makeNoise2D(hashStr('fen:' + id));
   for (let j = 0; j < SIZE; j++) for (let i = 0; i < SIZE; i++) {
     const gi = i + AP, gj = j + AP, k = gj * G + gi;
-    let b = m.biome[ref.warpedIndex(wxOf(gi), wzOf(gj))];
+    let b = isl ? isl.biomeAt(wxOf(gi), wzOf(gj)) : m.biome[ref.warpedIndex(wxOf(gi), wzOf(gj))];
     if (waterKind[k] && waterTop[k] > ground[k]) b = waterKind[k] === 1 ? COAST : LAKE;
     else if (b < 4 || b === 25) b = BEACH;
     else if (theme && !roadMask[k] && theme.beach.some(bb => shoreDistance(bb.lake, i * STEP, j * STEP) < bb.band)) b = BEACH;
@@ -577,6 +598,8 @@ export function bakeZone(id, opts = {}) {
     bridges: bridgesHere.flatMap(b => (b.pieces || [b]).map(p => ({ a: [r2(p.a[0]), r2(p.a[1])], b: [r2(p.b[0]), r2(p.b[1])], h: b.deck, w: p.width })))
       .filter(d => Math.max(d.a[0], d.b[0]) > -d.w && Math.min(d.a[0], d.b[0]) < ZM + d.w && Math.max(d.a[1], d.b[1]) > -d.w && Math.min(d.a[1], d.b[1]) < ZM + d.w),
     ...(cliff ? { cliff } : {}),
+    // the island's own look (js/client/terrain-view.js, scatter-view.js) and what its biome ids are called there
+    ...(isl ? { palette: 'vharl', continent: 'vharlen', biomeNames: VHARL_BIOME_NAMES, pools: islandPools(ox, oz) } : {}),
     ...(theme ? { theme: { kind: THEMES[id].theme, lakes: theme.lakes.map(l => ({ name: l.name, kind: l.kind, x: l.x, z: l.z, r: l.r, level: l.level })), fen: theme.fen } } : {}),
   };
   meta.inputHash = (hashStr(JSON.stringify({ id, w: W.inputHash, ZONE_BAKE_VERSION, FORMAT_VERSION, hub: opts.hub || null })) >>> 0).toString(16).padStart(8, '0');
@@ -585,9 +608,24 @@ export function bakeZone(id, opts = {}) {
   // 10. sites other streams use (door, event/camp arenas) — clear of towns, roads and E's vignettes
   const avoid = vignettes.map(v => ({ x: v.x, z: v.z, r: v.radius || 12 }));
   const pieceDiscs = pieces.filter(p => p.kind !== 'belt').map(p => ({ x: p.x, z: p.z, r: p.r + 6 })).concat(pieces.flatMap(p => (p.kind === 'belt' ? p.fields : []).map(f => ({ x: f.R.cx, z: f.R.cz, r: Math.hypot(f.R.w, f.R.d) / 2 + 4 }))));
-  addZoneSites(terrain, meta.sites, { asks: asksFor(id, meta.sites, W), avoid: [...avoid, ...pieceDiscs], doorName: 'Barrow entrance', town: meta.sites.find(s => s.hub), pins: SITE_PINS[id] || {} });
+  const poolDiscs = (meta.pools || []).map(p => ({ x: p.x, z: p.z, r: p.r + 12 }));
+  addZoneSites(terrain, meta.sites, { asks: asksFor(id, meta.sites, W), avoid: [...avoid, ...pieceDiscs, ...poolDiscs], doorName: isl ? 'Cave mouth' : 'Barrow entrance', town: meta.sites.find(s => s.hub), pins: SITE_PINS[id] || {} });
   const hubSite = meta.sites.find(s => s.hub);
   meta.spawn = hubSite ? spawnNear(terrain, hubSite) : { x: 1024, z: 1024 };
+  // a harbour town (Vharlen's Port Vharl, docs/EXPANSION-1.md §6): where its shore meets the sea, walked out from the
+  // town along `bearing` — `x, z` the waterline, `deep` the first point 3 m deep (where a pier can end), yaw = out to sea
+  if (isl) for (const S of VHARLEN.settlements.filter(q => q.zone === id && q.harbour)) {
+    const town = meta.sites.find(q => q.type === 'settlement' && q.name === S.name); if (!town) continue;
+    const dx = Math.cos(S.harbour.bearing), dz = Math.sin(S.harbour.bearing);
+    let shore = null, deep = null;
+    for (let d = town.radius; d < 900; d += 1) {
+      const x = town.x + dx * d, z = town.z + dz * d; if (!terrain.inBounds(x, z)) break;
+      const w = terrain.waterAt(x, z);
+      if (!shore && w.kind === 'sea') shore = [r2(x), r2(z)];
+      if (shore && w.depth >= 3) { deep = [r2(x), r2(z)]; break; }
+    }
+    if (shore) meta.sites.push({ type: 'harbour', id: `harbour_${slug(S.name)}`, town: slug(S.name), x: shore[0], z: shore[1], yaw: +Math.atan2(dx, dz).toFixed(4), deep });
+  }
 
   // 11. bridges from the world bake (zone-local copies), placements, scatter, nav
   const bridges = bridgesHere.filter(b => b.x >= 0 && b.x < ZM && b.z >= 0 && b.z < ZM).map((b, i) => ({ ...b, pts: undefined, id: `bridge_${String(b.road).replace(/^spur_/, 's_')}_${b.river}_${i}` }));
@@ -629,7 +667,7 @@ export function bakeZone(id, opts = {}) {
         const o = j * SIZE + i, x = i * STEP, z = j * STEP; if (biome[o] !== ROAD_SURFACE_ID || Math.hypot(x - w.cx, z - w.cz) > lim) continue;
         if (w.gates.some(g => Math.hypot(g.x - x, g.z - z) < g.open / 2 - 0.2)) continue;
         if (keep.some(q => { const xs = q.pts; if (Math.abs(xs[0][0] - x) > 400) return false; return polyDist(q.pts, x, z)[0] <= q.width / 2 + 0.3; })) continue;
-        const b0 = m.biome[ref.warpedIndex(wxOf(i + AP), wzOf(j + AP))];
+        const b0 = isl ? isl.biomeAt(wxOf(i + AP), wzOf(j + AP)) : m.biome[ref.warpedIndex(wxOf(i + AP), wzOf(j + AP))];
         biome[o] = b0 < 4 || b0 === 25 ? 4 : b0;
       }
   }
@@ -637,10 +675,11 @@ export function bakeZone(id, opts = {}) {
   const keepClear = [
     ...placed.map(s => ({ x: s.x, z: s.z, r: s.radius + 6 })),
     ...meta.sites.filter(s => s.type === 'dungeon').map(s => ({ x: s.x, z: s.z, r: 14 })),
+    ...meta.sites.filter(s => s.type === 'harbour').map(s => ({ x: s.x, z: s.z, r: 30 })),
     ...meta.sites.filter(s => s.type === 'event' || s.type === 'camp').map(s => ({ x: s.x, z: s.z, r: s.r })),
-    ...avoid,
+    ...avoid, ...poolDiscs,
   ];
-  const scatter = scatterFor(W, zone, terrain, biome, keepClear, keepOff);
+  const scatter = scatterFor(W, zone, terrain, biome, keepClear, keepOff, isl ? VHARL_SCATTER : SCATTER_TABLE);
   const roadAtSample = (x, z) => biome[clamp(Math.round(z / STEP), 0, SIZE - 1) * SIZE + clamp(Math.round(x / STEP), 0, SIZE - 1)] === ROAD_SURFACE_ID;
   scatter.push(...setPieceScatter(pieces, { isWet: (x, z) => terrain.waterAt(x, z).kind !== 'none', onRoad: roadAtSample }));
   // decks for every world bridge whose span reaches into this zone (one on the edge is stamped by both zones)
@@ -674,7 +713,27 @@ const SCATTER_TABLE = {
   blighted: [[3, 0.12], [4, 0.03]], ashPlain: [[3, 0.03], [5, 0.02]], veiledHills: [[3, 0.05], [6, 0.02]],
   hallowed: [[0, 0.22], [4, 0.1]], glimmerwaste: [[5, 0.03], [6, 0.02]], volcanic: [[6, 0.03], [7, 0.01]],
 };
-const TREE_KINDS = new Set([0, 1, 2, 3]);
+/**
+ * Vharlen, the Burning Isle (docs/EXPANSION-1.md §2): the same biome ids, its own things standing on them (terrain-read
+ * SCATTER_KINDS 11–17: tree fern, ironpalm, charred tree, basalt columns, obsidian, steam vent, sulphur crust). Keys are
+ * the World Forge ids the island uses (tools/lib/vharlen.mjs VHARL_BIOME_NAMES says what they are there).
+ */
+export const VHARL_SCATTER = {
+  beach: [[15, 0.006], [5, 0.01], [12, 0.004]],
+  rainforest: [[11, 0.3], [12, 0.12], [4, 0.1], [16, 0.002]],
+  shrubland: [[11, 0.06], [4, 0.14], [12, 0.02], [5, 0.01]],
+  savanna: [[4, 0.05], [12, 0.025], [5, 0.012]],
+  desert: [[17, 0.05], [16, 0.006], [5, 0.01]],
+  badlands: [[14, 0.03], [5, 0.03], [15, 0.006]],
+  marsh: [[8, 0.12], [16, 0.01], [13, 0.01], [11, 0.02]],
+  volcanic: [[15, 0.008], [14, 0.006], [5, 0.02], [16, 0.002]],
+  blighted: [[13, 0.12], [5, 0.02]],
+  ashPlain: [[13, 0.012], [5, 0.025], [15, 0.004]],
+  glimmerwaste: [[15, 0.02], [5, 0.01]],
+  mountains: [[14, 0.02], [15, 0.008]],
+};
+VHARL_SCATTER.steepRock = 14;             // a tree that would stand on a cliff becomes a basalt column cluster
+const TREE_KINDS = new Set([0, 1, 2, 3, 11, 12, 13]);
 const SC = 6;   // scatter cell, metres (world-aligned)
 
 /** Hash of world cell coordinates → 0..1 (salted). */
@@ -684,7 +743,7 @@ function h01(cx, cz, salt) {
   return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
 }
 
-function scatterFor(W, zone, t, biome, keepClear, keepOff = () => false) {
+function scatterFor(W, zone, t, biome, keepClear, keepOff = () => false, TABLE = SCATTER_TABLE) {
   const ox = zone.origin.x, oz = zone.origin.z;
   const grove = makeNoise2D(subSeed(W.seed, 'thousandvale-groves'));
   const keys = t.biomes.map(b => b.key);
@@ -695,7 +754,7 @@ function scatterFor(W, zone, t, biome, keepClear, keepOff = () => false) {
     const x = wx - ox, z = wz - oz;
     if (x < 0 || z < 0 || x >= ZM || z >= ZM) continue;          // half-open: an edge point belongs to one zone
     const i = Math.round(x / 2), j = Math.round(z / 2), b = biome[j * SIZE + i];
-    const table = SCATTER_TABLE[keys[b]];
+    const table = TABLE[keys[b]];
     if (!table) continue;                                          // water, road
     const roll = h01(cx, cz, 3);
     const groveF = smoothstep(0.35, 0.7, fbm(grove, wx / 140, wz / 140, { octaves: 3 })) * 2;
@@ -704,7 +763,7 @@ function scatterFor(W, zone, t, biome, keepClear, keepOff = () => false) {
     if (kind < 0) continue;
     if (t.waterAt(x, z).kind !== 'none') continue;
     const slope = t.slopeAt(x, z);
-    if (TREE_KINDS.has(kind) && slope > 32) kind = 6;              // too steep for a tree: a rock instead
+    if (TREE_KINDS.has(kind) && slope > 32) kind = TABLE.steepRock ?? 6;   // too steep for a tree: a rock instead
     if (slope > 50) continue;
     if (keepClear.some(c => Math.hypot(c.x - x, c.z - z) < c.r) || keepOff(x, z)) continue;
     // keep a clear verge beside roads/streets (2 m round the trunk)
@@ -797,6 +856,12 @@ function spawnNear(t, s) {
   return best || { x: s.x, z: s.z };
 }
 
+/** Vharlen's standing water inside one zone (zone metres): the crater lake and the pools (tools/lib/vharlen.mjs). */
+function islandPools(ox, oz) {
+  const { ref } = loadWorld(), isl = ref.islandAt(ox + 1024, oz + 1024);
+  return isl.pools().filter(p => p.x >= ox && p.x < ox + ZM && p.z >= oz && p.z < oz + ZM).map(p => ({ ...p, x: r2(p.x - ox), z: r2(p.z - oz) }));
+}
+
 /** proctown angle (direction (cos a, sin a) in x/z) → protocol yaw (atan2(dx, dz)). */
 const yawOf = a => +Math.atan2(Math.cos(a), Math.sin(a)).toFixed(4);
 const r2 = v => Math.round(v * 100) / 100;
@@ -809,9 +874,12 @@ export function placementsFor(meta, plans, roads = [], bridges = [], paths = [])
     if (s.type === 'settlement') out.push({ kind: 'settlement', id: slug(s.name), x: r2(s.x), z: r2(s.z), yaw: 0, data: { kind: s.kind, name: s.name, radius: s.radius ?? TOWN_RADIUS[s.kind] ?? 40, hub: !!s.hub, planned: !s.unplanned, ...(s.wfName ? { wfName: s.wfName } : {}), ...(s.ask ? { ask: true } : {}) } });
     else if (s.type === 'dungeon') out.push({ kind: 'dungeon_door', id: s.id, x: s.x, z: s.z, yaw: s.yaw, data: { name: s.name } });
     else if (s.type === 'event' || s.type === 'camp') out.push({ kind: s.type + '_site', id: s.id, x: s.x, z: s.z, yaw: 0, data: { r: s.r } });
+    else if (s.type === 'harbour') out.push({ kind: 'harbour', id: s.id, x: s.x, z: s.z, yaw: s.yaw, data: { town: s.town, deep: s.deep } });
     else out.push({ kind: s.type, id: slug(s.name || s.kind), x: r2(s.x), z: r2(s.z), yaw: 0, data: { kind: s.kind, name: s.name } });
   }
   (meta.theme?.lakes || []).forEach((l, i) => out.push({ kind: 'lake', id: l.name ? slug(l.name) : `pool_${i}`, x: l.x, z: l.z, yaw: 0, data: { r: l.r, level: l.level, kind: l.kind, name: l.name } }));
+  // Vharlen's standing water: the crater lake, hot springs, acid pools (data.kind; stream C sites its specialties on them)
+  for (const p of meta.pools || []) out.push({ kind: 'lake', id: p.id, x: p.x, z: p.z, yaw: 0, data: { r: p.r, level: p.level, kind: p.kind, name: p.name || null } });
   if (meta.theme?.fen) out.push({ kind: 'fen', id: 'fen', x: meta.theme.fen.x, z: meta.theme.fen.z, yaw: 0, data: { r: meta.theme.fen.r } });
   for (const plan of plans) {
     const { x: tx, z: tz } = plan.origin, town = slug(plan.town.name);

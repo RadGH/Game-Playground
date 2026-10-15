@@ -1,0 +1,422 @@
+{
+  "id": "boss_skarn_slagborn_chief",
+  "name": "Skarn, Chief of All the Slagborn",
+  "tier": "boss",
+  "body": "slagborn_chief",
+  "place": "dungeon caldera_deep (The Throat, The Caldera, level 18-22): the end boss at the bottom of the Throat",
+  "_doc": "The chief of every Slagborn gang on the island, who went down the Throat to bargain with the fire itself and came back up part of it. P1 \"Chief's Due\": a great axe cone, a war-cry that calls a raider, and magma bursting out of four vents in the floor in turn. Two basalt dams (rocks) hold back the magma channel: break one and the flood runs past HIM (stun, takes more) — once each. P2 at 60% \"The Fire Answers\": he raises a ward of living fire; light the three Rim Shrine lamps the old pilgrims left down here to break it, while magma rings roll out from the vents. P3 new bar \"Heart of the Throat\": the Throat erupts — safe only next to a vent that has gone quiet (the vents), spreads on each player, a stack, and his axe now trails fire.",
+  "party": "Solo: very hard. 2-3: one lamp runner, a tank. 5: as designed.",
+  "hpMult": 4.2,
+  "arena": {
+    "radius": 16,
+    "objects": [
+      {
+        "id": "vent",
+        "type": "pool",
+        "name": "Magma vent",
+        "x": -9,
+        "z": -9,
+        "r": 1.4,
+        "every": 1,
+        "damage": 0.35,
+        "status": "burn",
+        "element": "fire"
+      },
+      {
+        "id": "vent",
+        "type": "pool",
+        "name": "Magma vent",
+        "x": 9,
+        "z": -9,
+        "r": 1.4,
+        "every": 1,
+        "damage": 0.35,
+        "status": "burn",
+        "element": "fire"
+      },
+      {
+        "id": "vent",
+        "type": "pool",
+        "name": "Magma vent",
+        "x": 9,
+        "z": 9,
+        "r": 1.4,
+        "every": 1,
+        "damage": 0.35,
+        "status": "burn",
+        "element": "fire"
+      },
+      {
+        "id": "vent",
+        "type": "pool",
+        "name": "Magma vent",
+        "x": -9,
+        "z": 9,
+        "r": 1.4,
+        "every": 1,
+        "damage": 0.35,
+        "status": "burn",
+        "element": "fire"
+      },
+      {
+        "id": "dam_w",
+        "type": "rock",
+        "name": "Basalt dam",
+        "x": -12,
+        "z": 0,
+        "r": 1.5,
+        "hp": 3,
+        "onBreak": [
+          {
+            "say": "The dam bursts — magma floods past Skarn!",
+            "style": "warn"
+          },
+          {
+            "stun": 3
+          },
+          {
+            "vuln": {
+              "takeMore": 0.3,
+              "seconds": 10,
+              "name": "Caught in the Flood"
+            }
+          }
+        ]
+      },
+      {
+        "id": "dam_e",
+        "type": "rock",
+        "name": "Basalt dam",
+        "x": 12,
+        "z": 0,
+        "r": 1.5,
+        "hp": 3,
+        "onBreak": [
+          {
+            "say": "The dam bursts — magma floods past Skarn!",
+            "style": "warn"
+          },
+          {
+            "stun": 3
+          },
+          {
+            "vuln": {
+              "takeMore": 0.3,
+              "seconds": 10,
+              "name": "Caught in the Flood"
+            }
+          }
+        ]
+      },
+      {
+        "id": "lamp_n",
+        "type": "brazier",
+        "name": "Pilgrim lamp",
+        "x": 0,
+        "z": -12
+      },
+      {
+        "id": "lamp_sw",
+        "type": "brazier",
+        "name": "Pilgrim lamp",
+        "x": -7,
+        "z": 11
+      },
+      {
+        "id": "lamp_se",
+        "type": "brazier",
+        "name": "Pilgrim lamp",
+        "x": 7,
+        "z": 11
+      }
+    ]
+  },
+  "say": {
+    "pull": [
+      "\"You came all the way down here? The fire said someone would.\"",
+      "Skarn lifts his axe. Magma runs down the blade and does not cool.",
+      "\"The island belongs to the Slagborn. The fire told me so.\""
+    ],
+    "death": "Skarn falls to his knees. \"The fire... lied.\" The magma in his axe goes black.",
+    "reset": "\"Go back up. Tell them what you saw.\" Skarn turns back to the fire."
+  },
+  "enrage": {
+    "seconds": 360,
+    "damage": 3,
+    "say": "\"THE THROAT OPENS FOR ME!\"",
+    "soft": {
+      "from": 280,
+      "every": 15,
+      "add": 0.08,
+      "say": "The heat rises from below."
+    }
+  },
+  "abilities": {
+    "axe": {
+      "id": "axe",
+      "name": "Chief's Axe",
+      "every": [
+        6,
+        8
+      ],
+      "range": 7,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 7,
+          "arc": 1.5,
+          "wind": 1.1,
+          "damage": 2
+        }
+      ]
+    },
+    "war_cry": {
+      "id": "war_cry",
+      "name": "War-Cry",
+      "every": [
+        22,
+        26
+      ],
+      "first": 9,
+      "say": "Skarn roars and a raider answers from the ledges!",
+      "actions": [
+        {
+          "adds": {
+            "type": "slagborn_raider",
+            "count": 1,
+            "radius": 8,
+            "at": "home"
+          }
+        }
+      ]
+    },
+    "vent_burst": {
+      "id": "vent_burst",
+      "name": "Vent Burst",
+      "every": [
+        12,
+        15
+      ],
+      "first": 4,
+      "cast": 0.6,
+      "say": "The magma vents are about to burst!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "object",
+          "object": "vent",
+          "r": 4.5,
+          "wind": 1.6,
+          "damage": 1.9,
+          "element": "fire",
+          "status": "seared"
+        }
+      ]
+    },
+    "magma_rings": {
+      "id": "magma_rings",
+      "name": "Magma Rings",
+      "every": [
+        12,
+        15
+      ],
+      "first": 3,
+      "cast": 0.6,
+      "say": "Magma rolls out from the vents in rings!",
+      "telegraphs": [
+        {
+          "shape": "ring",
+          "at": "object",
+          "object": "vent",
+          "r": 7,
+          "r2": 3.5,
+          "wind": 1.5,
+          "damage": 1.6,
+          "element": "fire"
+        }
+      ]
+    },
+    "fire_lash": {
+      "id": "fire_lash",
+      "name": "Fire Lash",
+      "every": [
+        9,
+        11
+      ],
+      "first": 2,
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "random",
+          "len": 14,
+          "w": 2,
+          "count": 2,
+          "wind": 1.3,
+          "damage": 1.4,
+          "element": "fire",
+          "status": "burn"
+        }
+      ]
+    },
+    "eruption": {
+      "id": "eruption",
+      "name": "Eruption",
+      "every": [
+        24,
+        28
+      ],
+      "first": 10,
+      "cast": 1.5,
+      "say": "THE THROAT ERUPTS — get beside a vent, where the pressure is spent!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "object",
+          "object": "vent",
+          "r": 3.5,
+          "kind": "safe",
+          "wind": 3.5,
+          "damage": 2.8,
+          "element": "fire"
+        }
+      ]
+    },
+    "spreads": {
+      "id": "spreads",
+      "name": "Sparks of the Throat",
+      "every": [
+        13,
+        15
+      ],
+      "first": 3,
+      "say": "Fire clings to each of you — spread out!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "each",
+          "r": 3,
+          "follow": true,
+          "wind": 2,
+          "damage": 1.5,
+          "element": "fire",
+          "status": "burn"
+        }
+      ]
+    },
+    "stack": {
+      "id": "stack",
+      "name": "Chief's Judgement",
+      "every": [
+        20,
+        24
+      ],
+      "first": 7,
+      "cast": 1,
+      "say": "Skarn marks {target} for his axe — stand with them!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3.2,
+          "kind": "stack",
+          "need": 3,
+          "follow": true,
+          "wind": 4,
+          "damage": 3.2,
+          "element": "fire"
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Chief's Due",
+      "abilities": [
+        "axe",
+        "vent_burst",
+        "fire_lash",
+        "war_cry"
+      ]
+    },
+    {
+      "name": "The Fire Answers",
+      "at": 0.6,
+      "say": "\"Fire! Answer me!\"",
+      "abilities": [
+        "axe",
+        "magma_rings",
+        "fire_lash"
+      ],
+      "onEnter": [
+        {
+          "shield": {
+            "seconds": 20,
+            "pool": 0.1
+          }
+        },
+        {
+          "adds": {
+            "type": "vent_wisp",
+            "count": 2,
+            "radius": 8,
+            "at": "home"
+          }
+        },
+        {
+          "say": "A ward of living fire wraps Skarn. Light the three pilgrim lamps! It fails by itself in 20 seconds.",
+          "style": "warn"
+        }
+      ],
+      "ward": {
+        "seconds": 20,
+        "break": "objects",
+        "need": 3,
+        "what": "brazier",
+        "say": "A ward of living fire wraps Skarn. Light the three pilgrim lamps! It fails by itself in 20 seconds.",
+        "fade": "The fire ward gutters out by itself.",
+        "pool": 0.1
+      }
+    },
+    {
+      "name": "Heart of the Throat",
+      "newBar": {
+        "hp": 0.6
+      },
+      "say": "\"Then take it ALL.\"",
+      "abilities": [
+        "axe",
+        "eruption",
+        "spreads",
+        "stack"
+      ]
+    }
+  ],
+  "triggers": [
+    {
+      "when": {
+        "lit": 3,
+        "phase": 1
+      },
+      "do": [
+        {
+          "shield": false
+        },
+        {
+          "stun": 3
+        },
+        {
+          "vuln": {
+            "takeMore": 0.4,
+            "seconds": 10,
+            "name": "Ward Broken"
+          }
+        },
+        {
+          "say": "The pilgrim lamps burn clean and white — Skarn's fire ward tears apart!",
+          "style": "warn"
+        }
+      ]
+    }
+  ]
+}

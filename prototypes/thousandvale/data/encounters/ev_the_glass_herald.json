@@ -1,0 +1,415 @@
+{
+  "id": "ev_the_glass_herald",
+  "name": "The Glass Herald",
+  "tier": "event",
+  "zone": "glasswind_strand",
+  "level": 15,
+  "body": "obsidian_warden",
+  "place": {
+    "rank": "boss",
+    "level": 15,
+    "respawnMs": 1800000
+  },
+  "_doc": "Expansion 1 (Vharlen). The ZONE EVENT BOSS for Glasswind Strand: the herald of the Glass Kings walks out of the tomb to proclaim a king who has been dead for three hundred years. P1 'The Proclamation': a staff cone, decrees cut in three lines, and the Proclamation itself — a blast across the whole ruin; hide behind a glass obelisk. P2 at 55% 'The Glass Court': the herald stands behind a ward of light while the court gathers — TURN ALL THREE SUN MIRRORS onto it (use them) to shatter the ward. P3, a new health bar 'Shattered Herald': shards ride every player, a kneel-together stack, a get-in-close ring and a turning cross. Soft enrage from 4 minutes, hard at 7.",
+  "party": "Zone event, everyone nearby joins. Solo: not intended (three mirrors under adds, a stack that needs 3). 3-5: playable. 10+: intended. M5 scaling: health and court adds by players enrolled; stack need = clamp(players/4, 2, 5).",
+  "hpMult": 3,
+  "arena": {
+    "radius": 38,
+    "objects": [
+      {
+        "id": "obelisk_n",
+        "type": "pillar",
+        "name": "Glass obelisk",
+        "x": 0,
+        "z": -13,
+        "r": 1.6,
+        "hp": 2
+      },
+      {
+        "id": "obelisk_e",
+        "type": "pillar",
+        "name": "Glass obelisk",
+        "x": 13,
+        "z": 4,
+        "r": 1.6,
+        "hp": 2
+      },
+      {
+        "id": "obelisk_w",
+        "type": "pillar",
+        "name": "Glass obelisk",
+        "x": -13,
+        "z": 4,
+        "r": 1.6,
+        "hp": 2
+      },
+      {
+        "id": "mirror_a",
+        "type": "brazier",
+        "name": "Sun mirror",
+        "x": 0,
+        "z": 26
+      },
+      {
+        "id": "mirror_b",
+        "type": "brazier",
+        "name": "Sun mirror",
+        "x": -23,
+        "z": -14
+      },
+      {
+        "id": "mirror_c",
+        "type": "brazier",
+        "name": "Sun mirror",
+        "x": 23,
+        "z": -14
+      }
+    ]
+  },
+  "say": {
+    "pull": [
+      "HEAR ME. THE GLASS KING RETURNS. KNEEL.",
+      "A tall figure of clear glass walks out of the tomb, ringing a bell.",
+      "By order of the Glass King, this strand is closed to the living."
+    ],
+    "death": "The Glass Herald rings his bell once more. It cracks. So does he.",
+    "reset": "The Glass Herald walks back into the tomb, still proclaiming."
+  },
+  "enrage": {
+    "seconds": 420,
+    "damage": 3,
+    "say": "THE KING HAS LOST HIS PATIENCE. KNEEL OR SHATTER.",
+    "soft": {
+      "from": 240,
+      "every": 15,
+      "add": 0.08,
+      "say": "The light through the Herald grows harsher."
+    }
+  },
+  "abilities": {
+    "staff": {
+      "id": "staff",
+      "name": "Herald's Staff",
+      "every": [
+        7,
+        9
+      ],
+      "first": 2,
+      "range": 7,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 6,
+          "arc": 1.5,
+          "wind": 1.1,
+          "damage": 1.8
+        }
+      ]
+    },
+    "decree": {
+      "id": "decree",
+      "name": "Glass Decree",
+      "every": [
+        13,
+        16
+      ],
+      "first": 4,
+      "cast": 0.6,
+      "say": "The Herald reads a decree — three lines of cutting light!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 26,
+          "w": 3,
+          "wind": 1.5,
+          "damage": 1.8,
+          "count": 3,
+          "rotate": 0.5,
+          "yaw": "facing",
+          "element": "holy"
+        }
+      ]
+    },
+    "proclaim": {
+      "id": "proclaim",
+      "name": "The Proclamation",
+      "every": [
+        26,
+        30
+      ],
+      "first": 10,
+      "cast": 3,
+      "say": "HEAR THE PROCLAMATION! Get behind a glass obelisk!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 38,
+          "wind": 0.6,
+          "damage": 2.6,
+          "los": true,
+          "status": "silence",
+          "element": "holy"
+        }
+      ]
+    },
+    "court": {
+      "id": "court",
+      "name": "The Court Gathers",
+      "every": [
+        20,
+        24
+      ],
+      "first": 4,
+      "say": "More of the court crawls out of the glass!",
+      "actions": [
+        {
+          "adds": {
+            "type": "scoria_crawler",
+            "count": 2,
+            "radius": 14,
+            "at": "home"
+          }
+        }
+      ]
+    },
+    "glass_rain": {
+      "id": "glass_rain",
+      "name": "Glass Rain",
+      "every": [
+        12,
+        15
+      ],
+      "first": 3,
+      "cast": 0.6,
+      "say": "Glass rains down — and the shards stay where they fall!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "r": 3.5,
+          "wind": 1.6,
+          "damage": 1.1,
+          "spread": 26,
+          "count": 6,
+          "delay": 0.2,
+          "status": "bleed",
+          "leave": {
+            "type": "pool",
+            "name": "Glass shards",
+            "r": 3,
+            "every": 1,
+            "seconds": 20,
+            "damage": 0.2,
+            "status": "bleed"
+          }
+        }
+      ]
+    },
+    "shards": {
+      "id": "shards",
+      "name": "Riding Shards",
+      "every": [
+        15,
+        18
+      ],
+      "first": 4,
+      "cast": 0.6,
+      "say": "Shards of the Herald fly at everyone — spread out!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "each",
+          "r": 3,
+          "wind": 2.4,
+          "damage": 1.4,
+          "follow": true,
+          "status": "bleed"
+        }
+      ]
+    },
+    "kneel": {
+      "id": "kneel",
+      "name": "Kneel",
+      "every": [
+        20,
+        24
+      ],
+      "first": 7,
+      "cast": 1,
+      "say": "{target} must kneel to the king — three of you kneel together to share it!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3.6,
+          "wind": 4,
+          "damage": 3,
+          "kind": "stack",
+          "need": 3,
+          "follow": true,
+          "element": "holy"
+        }
+      ]
+    },
+    "halo": {
+      "id": "halo",
+      "name": "Breaking Halo",
+      "every": [
+        16,
+        19
+      ],
+      "first": 11,
+      "cast": 1,
+      "say": "His halo breaks outward — get in close!",
+      "telegraphs": [
+        {
+          "shape": "donut",
+          "at": "self",
+          "r": 18,
+          "r2": 4,
+          "wind": 1.9,
+          "damage": 2.2,
+          "element": "holy"
+        }
+      ]
+    },
+    "turning_cross": {
+      "id": "turning_cross",
+      "name": "Turning Cross",
+      "every": [
+        15,
+        18
+      ],
+      "first": 14,
+      "cast": 0.6,
+      "say": "A cross of light — then it turns!",
+      "telegraphs": [
+        {
+          "shape": "cross",
+          "at": "self",
+          "r": 24,
+          "w": 3,
+          "wind": 1.6,
+          "damage": 2,
+          "count": 2,
+          "delay": 1.4,
+          "rotate": 0.785,
+          "yaw": "random",
+          "element": "holy"
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "The Proclamation",
+      "abilities": [
+        "staff",
+        "decree",
+        "proclaim"
+      ]
+    },
+    {
+      "name": "The Glass Court",
+      "at": 0.55,
+      "say": "THE COURT WILL ATTEND. ALL OF IT.",
+      "abilities": [
+        "staff",
+        "court",
+        "glass_rain"
+      ],
+      "ward": {
+        "seconds": 25,
+        "pool": 0.1,
+        "break": "objects",
+        "need": 3,
+        "what": "brazier",
+        "say": "The Herald stands behind a ward of light. Turn all three sun mirrors onto it! It fails by itself in 25 seconds.",
+        "fade": "The ward fails by itself. No opening this time."
+      },
+      "onEnter": [
+        {
+          "shield": {
+            "seconds": 25,
+            "pool": 0.1
+          }
+        },
+        {
+          "adds": {
+            "type": "glasswing",
+            "count": 2,
+            "radius": 14,
+            "at": "home"
+          }
+        },
+        {
+          "adds": {
+            "type": "scoria_crawler",
+            "count": 2,
+            "radius": 12,
+            "at": "home"
+          }
+        },
+        {
+          "say": "The Herald stands behind a ward of light. Turn all three sun mirrors onto it! It fails by itself in 25 seconds.",
+          "style": "warn"
+        }
+      ]
+    },
+    {
+      "name": "Shattered Herald",
+      "newBar": {
+        "hp": 0.5
+      },
+      "say": "The mirrors! The king will hear of this!",
+      "abilities": [
+        "staff",
+        "shards",
+        "kneel",
+        "halo",
+        "turning_cross"
+      ]
+    }
+  ],
+  "triggers": [
+    {
+      "when": {
+        "lit": 3,
+        "phase": 1
+      },
+      "do": [
+        {
+          "shield": false
+        },
+        {
+          "stun": 4
+        },
+        {
+          "vuln": {
+            "takeMore": 0.4,
+            "seconds": 12,
+            "name": "Sun-struck"
+          }
+        },
+        {
+          "say": "Three beams of sunlight meet on the Herald. His ward cracks like a window!",
+          "style": "warn"
+        }
+      ]
+    },
+    {
+      "when": {
+        "broken": 3
+      },
+      "do": [
+        {
+          "say": "Every obelisk is shattered. Nothing left to hide behind!",
+          "style": "warn"
+        }
+      ]
+    }
+  ]
+}

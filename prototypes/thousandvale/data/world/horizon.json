@@ -1,8 +1,8 @@
 {
  "_doc": "Stream B far-horizon manifest (tools/bake-horizon.mjs). Reader: js/rules/horizon-read.js; the server sends horizonRef(manifest, zoneId) in `joined`.",
  "file": "data/world/horizon.bin",
- "bytes": 1503205,
- "hash": "e55d697d",
+ "bytes": 959414,
+ "hash": "55ac9d17",
  "step": 32,
  "width": 1153,
  "height": 897,
@@ -23,6 +23,15 @@
   "z11_04",
   "z12_04",
   "z13_04",
-  "z14_04"
+  "z14_04",
+  "z11_09",
+  "z12_09",
+  "z13_09",
+  "z11_10",
+  "z12_10",
+  "z13_10",
+  "z11_11",
+  "z12_11",
+  "z13_11"
  ]
 }

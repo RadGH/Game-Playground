@@ -1,0 +1,17 @@
+{
+ "_doc": "Stream C (Expansion 1). Name pools for Vharlen, the Burning Isle — the Vharl, island folk who live on a volcano. Their style is NOT Torbor's rustic English: short given names with doubled consonants and open -a/-u endings (Tavi, Kesk, Oskel), and a HEARTH name for a family — the house a person was born under, two hard syllables (Keshvar, Ormakku, Thallu). Titles are trades of the island (net-mender, steam-wife, rim-keeper). Read by the server's NPC namer (js/sim/npc-names.js), tools/content-offices.mjs and the quest writers. Original; checked by tests/C/vharlen-content.test.js against the banned list.",
+ "culture": "vharl",
+ "style": "Given name + hearth name: 'Tavi Keshvar', 'Oskel Thallu'. Old folk drop the hearth and take a title: 'Steam-wife Ninu', 'Old Varr'. Raiders of the Slagborn give themselves one hard name and an ash-word: 'Skarra Ashkeel', 'Thrane Cinderhand'.",
+ "given": {
+  "f": ["Tavi", "Ninu", "Ashka", "Velu", "Oru", "Hekka", "Sarrai", "Imma", "Kesh", "Lunna", "Thessa", "Yaru", "Bekka", "Miru", "Rhaska", "Zelle", "Anu", "Corra", "Dessa", "Iolu", "Kaia", "Maeru", "Nessk", "Pirra", "Sennu", "Tullu", "Vessa", "Wenu", "Yssa", "Halla", "Ekka", "Fennu", "Ghessa", "Ilra", "Jassu", "Kirra", "Lekka", "Mossa", "Nairu", "Oskka"],
+  "m": ["Haro", "Kesk", "Oskel", "Tamu", "Varr", "Bekko", "Drask", "Eiru", "Gethu", "Ilko", "Jorro", "Kaddu", "Lorr", "Matu", "Nakk", "Pekku", "Raku", "Sorr", "Tekk", "Vosk", "Wakku", "Yorr", "Zennu", "Arrik", "Benno", "Corrik", "Dakku", "Essu", "Ferro", "Gakk", "Hessu", "Ivvo", "Joku", "Kalvu", "Lekko", "Murro", "Nevvu", "Orsk", "Pakku", "Rennu"]
+ },
+ "family": ["Keshvar", "Ormakku", "Thallu", "Vennaru", "Hokkara", "Sulvenn", "Draskar", "Imbaru", "Rhovek", "Tukkari", "Askaru", "Bhelvar", "Morrakk", "Nuvaru", "Esskar", "Karrovu", "Lhessu", "Pakkari", "Sarrvek", "Tovaru", "Uskel", "Vakkatu", "Yorrvenn", "Zhakku", "Arvessu", "Dhorru", "Gennvar", "Hulkaru", "Ivvessk", "Jakkora", "Kelvu", "Mhorrak", "Nesskaru", "Orvakk", "Rukkesh", "Skelvaru", "Thakkun", "Ulvessa", "Vhorrun", "Wekkaru"],
+ "titles": ["the net-mender", "the steam-wife", "the rim-keeper", "the ash-reader", "the tide-caller", "the stilt-builder", "the glass-cutter", "the kiln-hand", "the pit-boss", "Old", "Hearth-elder", "Mother"],
+ "rareEpithets": ["Blackbelly", "Glassback", "the Scalded", "Sulphurtongue", "Old Cinders", "Steamhide", "the Unburnt", "Slagtooth", "Ashfoot", "Mudmouth"],
+ "slagborn": {
+  "_doc": "The raiders name themselves: one hard name + an ash-word (for elites, rares and event bosses of the Slagborn).",
+  "names": ["Skarra", "Thrane", "Hetter", "Vosk", "Drekka", "Ulgar", "Kesska", "Morrow", "Brakk", "Ysk"],
+  "ashWords": ["Ashkeel", "Cinderhand", "Slagjaw", "Pumicefist", "Smokeborn", "Scorchmouth", "Blackglass", "Ashcrown"]
+ }
+}

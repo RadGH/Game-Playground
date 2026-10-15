@@ -1,0 +1,4 @@
+{
+ "_doc": "Stream E. Where each free-standing set piece (data/vignettes/setpieces.json, not bound to a stream B piece) was placed, zone metres. tools/place-vignettes.mjs keeps a set piece on its old spot while that spot is still fair, so a B re-bake (which levels and clears the ground under our discs) never makes it move. Delete an entry to let the placer choose again.",
+ "pins": {}
+}

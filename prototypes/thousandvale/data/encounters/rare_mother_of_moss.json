@@ -1,0 +1,156 @@
+{
+  "id": "rare_mother_of_moss",
+  "name": "Mother of Moss",
+  "tier": "rare",
+  "secret": true,
+  "zone": "steamwood",
+  "level": 13,
+  "body": "ashback_salamander",
+  "place": "sleeps in a rocky stream bed in the Steamwood; a salamander so old a whole garden of moss grows on its back",
+  "_doc": "Expansion 1 (Vharlen). An ancient salamander wearing a garden. It shakes spore clouds out of its moss that hang in the air and slow you, and sweeps its tail in a circle. At half health the moss splits and crawlers tumble out of it, and it sighs a long wide cone of steam.",
+  "party": {
+    "solo": "Solo-able at 13; kill the crawlers or kite them.",
+    "small": "Right for 2-3.",
+    "full": "Easy.",
+    "m5": "M5 adds health per extra player and one more copy of the spread/scatter shapes for parties of 4-5; mechanics stay the same."
+  },
+  "hpMult": 2,
+  "arena": {
+    "radius": 24
+  },
+  "say": {
+    "pull": [
+      "A mossy hill in the stream bed opens one eye.",
+      "The ferns on the bank stand up. They are on its back."
+    ],
+    "death": "The Mother of Moss lays her head in the stream. The moss on her back keeps growing.",
+    "reset": "The Mother of Moss settles back into the warm water."
+  },
+  "abilities": {
+    "bite": {
+      "id": "bite",
+      "name": "Slow Bite",
+      "every": [
+        7,
+        9
+      ],
+      "first": 2,
+      "range": 9,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 6,
+          "arc": 1.3,
+          "wind": 1,
+          "damage": 1.7
+        }
+      ]
+    },
+    "spores": {
+      "id": "spores",
+      "name": "Spore Shake",
+      "every": [
+        12,
+        15
+      ],
+      "first": 4,
+      "say": "She shakes her back. Clouds of spores drift down.",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "r": 3,
+          "wind": 1.5,
+          "damage": 0.9,
+          "spread": 12,
+          "count": 4,
+          "delay": 0.2,
+          "element": "nature",
+          "leave": {
+            "type": "pool",
+            "name": "Spore cloud",
+            "r": 2.8,
+            "every": 1,
+            "seconds": 14,
+            "damage": 0.15,
+            "status": "lethargic",
+            "element": "nature"
+          }
+        }
+      ]
+    },
+    "tail": {
+      "id": "tail",
+      "name": "Tail Sweep",
+      "every": [
+        11,
+        14
+      ],
+      "first": 5,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 5.5,
+          "wind": 1.3,
+          "damage": 1.5,
+          "knock": 3
+        }
+      ]
+    },
+    "sigh": {
+      "id": "sigh",
+      "name": "Steam Sigh",
+      "every": [
+        14,
+        17
+      ],
+      "first": 2,
+      "cast": 0.6,
+      "say": "She takes a long breath — get behind her!",
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 9,
+          "arc": 2.2,
+          "wind": 1.6,
+          "damage": 1.8,
+          "element": "fire",
+          "status": "seared"
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Sleepy",
+      "abilities": [
+        "bite",
+        "spores",
+        "tail"
+      ]
+    },
+    {
+      "name": "The Moss Splits",
+      "at": 0.5,
+      "say": "Her moss splits open and things crawl out of it!",
+      "abilities": [
+        "bite",
+        "sigh",
+        "spores",
+        "tail"
+      ],
+      "onEnter": [
+        {
+          "adds": {
+            "type": "scoria_crawler",
+            "count": 2,
+            "radius": 6
+          }
+        }
+      ]
+    }
+  ]
+}

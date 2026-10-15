@@ -1,0 +1,343 @@
+{
+  "id": "boss_orrvald_glass_king",
+  "name": "Orrvald, First of the Glass Kings",
+  "tier": "boss",
+  "body": "slagborn_chief",
+  "place": "dungeon glass_tomb (Tomb of the Glass Kings, Glasswind Strand, level 14-17): the end boss in the First King's Vault",
+  "_doc": "The first king of the island, buried in a coat of fused sand and woken by thieves. P1 \"The Court\": a crowned sword cone, a ring of sand-glass blades he throws around himself, and Sun Through Glass — four glass pillars in the vault are the only shade. P2 at 60% \"The Sealed Court\": he seals himself in glass; light the three grave lamps to break it while his glass guards fight. P3 new bar \"Shattered Crown\": his crown breaks — shards rain all over (scatter), a spreading shard on each player, and a crowned slam that throws everyone back.",
+  "party": "Solo: very hard. 2-3: one tank, one lamp runner. 5: as designed — the pillars crack, so share them.",
+  "hpMult": 4,
+  "arena": {
+    "radius": 16,
+    "objects": [
+      {
+        "id": "pillar_a",
+        "type": "pillar",
+        "name": "Glass pillar",
+        "x": -7,
+        "z": -7,
+        "r": 1.3,
+        "hp": 3
+      },
+      {
+        "id": "pillar_b",
+        "type": "pillar",
+        "name": "Glass pillar",
+        "x": 7,
+        "z": -7,
+        "r": 1.3,
+        "hp": 3
+      },
+      {
+        "id": "pillar_c",
+        "type": "pillar",
+        "name": "Glass pillar",
+        "x": 7,
+        "z": 7,
+        "r": 1.3,
+        "hp": 3
+      },
+      {
+        "id": "pillar_d",
+        "type": "pillar",
+        "name": "Glass pillar",
+        "x": -7,
+        "z": 7,
+        "r": 1.3,
+        "hp": 3
+      },
+      {
+        "id": "lamp_n",
+        "type": "brazier",
+        "name": "Grave lamp",
+        "x": 0,
+        "z": -11
+      },
+      {
+        "id": "lamp_e",
+        "type": "brazier",
+        "name": "Grave lamp",
+        "x": 11,
+        "z": 0
+      },
+      {
+        "id": "lamp_w",
+        "type": "brazier",
+        "name": "Grave lamp",
+        "x": -11,
+        "z": 0
+      }
+    ]
+  },
+  "say": {
+    "pull": [
+      "\"Who opens the king's door without knocking?\"",
+      "Sand runs off Orrvald like water as he stands. \"I was the first. I will be the last.\"",
+      "\"Kneel. Or be buried.\""
+    ],
+    "death": "Orrvald's glass coat falls away in pieces, and there is only dry bone inside.",
+    "reset": "Orrvald lies back down on his slab. \"Wake me again, and see.\""
+  },
+  "enrage": {
+    "seconds": 340,
+    "damage": 3,
+    "say": "\"THE SUN IS MINE.\""
+  },
+  "abilities": {
+    "crown_sword": {
+      "id": "crown_sword",
+      "name": "Crowned Sword",
+      "every": [
+        6,
+        8
+      ],
+      "range": 7,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 6.5,
+          "arc": 1.5,
+          "wind": 1.1,
+          "damage": 1.9
+        }
+      ]
+    },
+    "blade_ring": {
+      "id": "blade_ring",
+      "name": "Sand-glass Blades",
+      "every": [
+        12,
+        15
+      ],
+      "first": 4,
+      "cast": 0.6,
+      "say": "Blades of glass spin out around him!",
+      "telegraphs": [
+        {
+          "shape": "ring",
+          "at": "self",
+          "r": 9,
+          "r2": 4,
+          "wind": 1.5,
+          "damage": 1.6,
+          "status": "bleed"
+        }
+      ]
+    },
+    "sun_glass": {
+      "id": "sun_glass",
+      "name": "Sun Through Glass",
+      "every": [
+        18,
+        22
+      ],
+      "first": 7,
+      "cast": 1.3,
+      "say": "The vault fills with burning light — hide behind a pillar!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 18,
+          "wind": 2.2,
+          "damage": 2.6,
+          "element": "fire",
+          "los": true,
+          "status": "seared"
+        }
+      ]
+    },
+    "decree": {
+      "id": "decree",
+      "name": "Royal Decree",
+      "every": [
+        10,
+        12
+      ],
+      "first": 2,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "count": 2,
+          "r": 2.6,
+          "wind": 1.3,
+          "damage": 1.3,
+          "status": "marked"
+        }
+      ]
+    },
+    "shard_rain": {
+      "id": "shard_rain",
+      "name": "Crown Shards",
+      "every": [
+        10,
+        12
+      ],
+      "first": 2,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "spread": 13,
+          "r": 2.6,
+          "count": 5,
+          "delay": 0.25,
+          "wind": 1.4,
+          "damage": 1.3,
+          "status": "bleed"
+        }
+      ]
+    },
+    "splinter": {
+      "id": "splinter",
+      "name": "Splinters",
+      "every": [
+        14,
+        17
+      ],
+      "first": 5,
+      "say": "A splinter of crown sticks in each of you — spread out!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "each",
+          "r": 3,
+          "follow": true,
+          "wind": 2,
+          "damage": 1.4,
+          "status": "bleed"
+        }
+      ]
+    },
+    "crown_slam": {
+      "id": "crown_slam",
+      "name": "Crowned Slam",
+      "every": [
+        17,
+        20
+      ],
+      "first": 8,
+      "cast": 1,
+      "say": "He lifts both fists — get away from him!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 7,
+          "wind": 1.7,
+          "damage": 2.4,
+          "knock": 5
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "The Court",
+      "abilities": [
+        "crown_sword",
+        "blade_ring",
+        "sun_glass"
+      ]
+    },
+    {
+      "name": "The Sealed Court",
+      "at": 0.6,
+      "say": "\"Guards!\"",
+      "abilities": [
+        "crown_sword",
+        "decree"
+      ],
+      "onEnter": [
+        {
+          "shield": {
+            "seconds": 20,
+            "pool": 0.1
+          }
+        },
+        {
+          "adds": {
+            "type": "obsidian_warden",
+            "count": 1,
+            "radius": 8,
+            "at": "home"
+          }
+        },
+        {
+          "adds": {
+            "type": "glasswing",
+            "count": 1,
+            "radius": 8,
+            "at": "home"
+          }
+        },
+        {
+          "say": "Orrvald seals himself in glass. Light all three grave lamps! It fails by itself in 20 seconds.",
+          "style": "warn"
+        }
+      ],
+      "ward": {
+        "seconds": 20,
+        "break": "objects",
+        "need": 3,
+        "what": "brazier",
+        "say": "Orrvald seals himself in glass. Light all three grave lamps! It fails by itself in 20 seconds.",
+        "fade": "The glass round the king cracks by itself.",
+        "pool": 0.1
+      }
+    },
+    {
+      "name": "Shattered Crown",
+      "newBar": {
+        "hp": 0.55
+      },
+      "say": "His crown splits in two. \"Then I will rule in pieces.\"",
+      "abilities": [
+        "crown_sword",
+        "shard_rain",
+        "splinter",
+        "crown_slam"
+      ]
+    }
+  ],
+  "triggers": [
+    {
+      "when": {
+        "lit": 3,
+        "phase": 1
+      },
+      "do": [
+        {
+          "shield": false
+        },
+        {
+          "stun": 3
+        },
+        {
+          "vuln": {
+            "takeMore": 0.4,
+            "seconds": 10,
+            "name": "Seal Broken"
+          }
+        },
+        {
+          "say": "Three grave lamps burn! The king's glass shatters!",
+          "style": "warn"
+        }
+      ]
+    },
+    {
+      "when": {
+        "broken": 4
+      },
+      "do": [
+        {
+          "say": "The last pillar falls. The sun has the whole vault now.",
+          "style": "warn"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,226 @@
+{
+  "_doc": "Stream C (Expansion 1). Quests for zone 'glasswind_strand' on Vharlen, the Burning Isle. Format: data/quests/README.md. Rewards: xp = share of a level's XP at the quest level, gold = multiple of a kill's gold; item.tier rolls at your level. `killRare` {zone, slot} names the zone's rare by slot (data/provinces/rares.json). Story-chain quests carry `story: n` (data/quests/vharlen-province.json).",
+  "zone": "glasswind_strand",
+  "npcs": {
+    "old_jorro": {
+      "name": "Old Jorro",
+      "role": "elder",
+      "at": "Shardhaven",
+      "greeting": "The Glass Kings built all this, and the Mother melted it. A lesson about kings. Also about mothers.",
+      "titled": true
+    },
+    "glass_cutter_lunna": {
+      "name": "Glass-cutter Lunna",
+      "role": "smith",
+      "at": "Shardhaven",
+      "greeting": "Everything on this beach is a blade if you hold it wrong. Hold it right and it is a window.",
+      "titled": true
+    },
+    "tide_caller_dessa": {
+      "name": "Tide-caller Dessa",
+      "role": "guard",
+      "at": "Shardhaven",
+      "greeting": "I call the tides. They do not come. But I know when they will, and that is nearly the same.",
+      "titled": true
+    },
+    "angler_shardhaven": {
+      "name": "Lorr Imbaru",
+      "role": "angler",
+      "at": "Shardhaven",
+      "greeting": "Mind the beach. It cuts. The fish do not mind it. See the ripples, just west of where I'm standing? That's the town pool. It never fishes out.",
+      "placedBy": "content-pools",
+      "titled": true
+    },
+    "carter_shardhaven": {
+      "name": "Ilko Rukkesh",
+      "role": "carter",
+      "at": "Shardhaven",
+      "greeting": "Out of Shardhaven by cart is the only way to leave without ash in your boots. Pick a town.",
+      "cart": "cart_shardhaven",
+      "placedBy": "content-towns",
+      "titled": true
+    }
+  },
+  "quests": [
+    {
+      "id": "gw_glass_in_the_sand",
+      "name": "Glass in the Sand",
+      "level": 13,
+      "giver": "glass_cutter_lunna",
+      "offer": "The scoria crawlers grind the old glass on the beach into dust. Good glass, the Kings' glass. Every pane they chew is a pane I cannot sell.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "scoria_crawler",
+          "count": 8,
+          "where": "the glass beach",
+          "text": "Kill 8 scoria crawlers on the glass beach"
+        }
+      ],
+      "done": "The beach glitters again. Watch your feet.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 12,
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "uncommon"
+          }
+        ]
+      }
+    },
+    {
+      "id": "gw_the_wreckers",
+      "name": "The Wreckers",
+      "level": 14,
+      "giver": "tide_caller_dessa",
+      "offer": "The Slagborn light fires on the dunes at night so ships think they are near the harbour. They are not near the harbour. They are near the rocks. Put the fires out, and the people lighting them.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "slagborn_raider",
+          "count": 6,
+          "where": "the wreckers' camp",
+          "text": "Kill 6 Slagborn raiders at the wreckers' camp"
+        },
+        {
+          "kind": "kill",
+          "type": "slagborn_firecaller",
+          "count": 2,
+          "where": "the wreckers' camp",
+          "text": "Kill 2 Slagborn firecallers lighting the false fires"
+        }
+      ],
+      "done": "No fires on the dunes tonight. A ship will come in safe and never know why.",
+      "reward": {
+        "xp": 0.45,
+        "gold": 14,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
+      }
+    },
+    {
+      "id": "gw_crown_feathers",
+      "name": "Crown Feathers",
+      "level": 14,
+      "giver": "old_jorro",
+      "offer": "The Glass Kings wore crowns of glasswing feathers. I would like one. Not for a crown. For pointing at people.",
+      "steps": [
+        {
+          "kind": "collect",
+          "item": "Glasswing feather",
+          "count": 4,
+          "from": "glasswing",
+          "chance": 0.5,
+          "where": "the obsidian dunes",
+          "text": "Gather 4 glasswing feathers on the obsidian dunes"
+        }
+      ],
+      "done": "Splendid. Now when I point at you, you will know I mean it.",
+      "reward": {
+        "xp": 0.45,
+        "gold": 16
+      }
+    },
+    {
+      "id": "gw_the_glazier",
+      "name": "The Glazier",
+      "level": 14,
+      "giver": "glass_cutter_lunna",
+      "offer": "Someone out in the ruins has been setting glass back into the old windows. Very neatly. With the bones of whoever came to look. That is the Glazier.",
+      "steps": [
+        {
+          "kind": "killRare",
+          "zone": "glasswind_strand",
+          "slot": 1,
+          "text": "Hunt down the Glazier",
+          "where": "the ruins of the Glass Kings on Glasswind Strand"
+        }
+      ],
+      "done": "Nice work, on both sides. I will take the windows down myself.",
+      "reward": {
+        "xp": 0.65,
+        "gold": 30,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "gw_tomb_of_the_glass_kings",
+      "name": "Tomb of the Glass Kings",
+      "level": 15,
+      "giver": "old_jorro",
+      "group": "a party of 3-5",
+      "offer": "The Glass Kings went into the ground when the Mother melted their city. They took their glass with them. Something down there is still polishing it. Go and see who. Take friends who do not mind their own reflection.",
+      "steps": [
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "floor": 1,
+          "text": "Enter the Tomb of the Glass Kings",
+          "where": "Tomb of the Glass Kings, the dungeon door in Glasswind Strand"
+        },
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "boss": true,
+          "text": "Defeat what rules at the bottom of the tomb",
+          "where": "the bottom of Tomb of the Glass Kings"
+        }
+      ],
+      "done": "The last king, dusted. Splendid. I will put it in the town history in very large letters.",
+      "reward": {
+        "xp": 1.2,
+        "gold": 55,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "gw_mirror_knight",
+      "name": "The Mirror Knight",
+      "level": 15,
+      "giver": "tide_caller_dessa",
+      "offer": "In the Kings' ruins walks a knight in polished glass. Look at him and you see yourself, and while you are looking, he hits you. The Mirror Knight. Do not admire your hair.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "obsidian_warden",
+          "count": 3,
+          "where": "the glass king's ruins",
+          "text": "Kill 3 obsidian wardens in the ruins"
+        },
+        {
+          "kind": "killOne",
+          "encounter": "elite_mirror_knight",
+          "where": "the glass king's ruins",
+          "text": "Defeat the Mirror Knight",
+          "at": {
+            "x": 23840,
+            "z": 19844,
+            "r": 45,
+            "name": "The Mirror Knight"
+          }
+        }
+      ],
+      "done": "Broken glass is seven years of bad luck. A broken knight is a good night's sleep. Lastwell sends word the raider trails are busy; it is a walk south through the ash.",
+      "reward": {
+        "xp": 0.8,
+        "gold": 34,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      },
+      "next": "pw_raider_trails"
+    }
+  ]
+}

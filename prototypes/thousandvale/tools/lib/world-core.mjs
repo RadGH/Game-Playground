@@ -12,6 +12,7 @@
 //              lakes (with levels), roads — everything a zone bake needs besides the macro layers.
 
 import { makeNoise2D, fbm, ridged, subSeed, clamp } from '../../../../worldgen/js/noise.js';
+import { makeVolcanic } from './vharlen.mjs';
 
 export const MACRO_MAGIC = 'TVWM';
 export const MACRO_VERSION = 1;
@@ -27,6 +28,33 @@ export const WORLD = {
   zoneCells: 16, macroMetres: 128,                          // a zone = 16 × 128 m = 2,048 m
   landMetres: 1400, seaMetres: 160,
 };
+
+/**
+ * Continents (2026-10-14, owner: "update the currently built world to be its own continent, ignoring the extra map
+ * area that is still locked", then an expansion reached across the sea). The pangea macro is still the source of the
+ * ground, but only INSIDE a continent: everywhere else the land sinks to the sea, so the far horizon and the world map
+ * show islands, not a locked mainland.
+ *
+ *   kind 'block'   the land inside the zone rectangle is left EXACTLY as it was (every baked Torbor Downs zone stays
+ *                  bit-for-bit valid); outside it the ground falls to the sea over `fall` metres, with a coastline
+ *                  that wanders `wander` metres so it never reads as a rectangle.
+ *   kind 'island'  the coast is INSIDE the rectangle: a noisy round island of radius `radius` (fraction of the half
+ *                  side) centred in the block, beaches you can walk on, deep sea out to the block's edge.
+ *                  `profile` names a terrain shaping applied inside (expansion terrain; see continentProfile).
+ * `ids` are the zone columns/rows in world zones (block = [zx, zy] of the top-left zone, size = [w, h]).
+ */
+export const CONTINENTS = [
+  { id: 'torbor', province: 'torbor_downs', kind: 'block', block: [11, 1], size: [4, 4], fall: 1100, wander: 1000, depth: 70 },
+  { id: 'vharlen', province: 'vharlen', kind: 'island', block: [11, 9], size: [3, 3], radius: 0.8, fall: 520, wander: 240, depth: 90, profile: 'volcanic' },
+];
+const ZM = 2048;
+/** The rectangle of a continent in world metres. */
+export const continentRect = c => ({ x0: c.block[0] * ZM, z0: c.block[1] * ZM, x1: (c.block[0] + c.size[0]) * ZM, z1: (c.block[1] + c.size[1]) * ZM });
+/** Which continent's rectangle holds this world point (null = open sea). */
+export function continentAt(wx, wz) {
+  for (const c of CONTINENTS) { const r = continentRect(c); if (wx >= r.x0 && wx < r.x1 && wz >= r.z0 && wz < r.z1) return c; }
+  return null;
+}
 
 /** World-fixed height quantisation, so a u16 means the same metres in every zone (edges match to the bit). */
 export function heightRange(world = WORLD) {
@@ -98,7 +126,9 @@ export function makeRefiner(m) {
   const nA = makeNoise2D(subSeed(seed, 'a')), nB = makeNoise2D(subSeed(seed, 'b')), nC = makeNoise2D(subSeed(seed, 'c'));
   const nWX = makeNoise2D(subSeed(seed, 'wx')), nWZ = makeNoise2D(subSeed(seed, 'wz'));
   const metres = e => (e >= 0.5 ? (e - 0.5) * 2 * m.landMetres : (e - 0.5) * 2 * m.seaMetres);
-  function baseGround(wx, wz) {
+  const nCoast = makeNoise2D(subSeed(seed, 'coast'));
+  /** The pangea ground with no continent applied (what every Torbor Downs zone was baked from). */
+  function mainland(wx, wz) {
     const fx = wx / M, fy = wz / M;
     const base = metres(bicubic(m, m.elevation, fx, fy));
     const rel = clamp(bicubic(m, m.slope, fx, fy), 0, 1);
@@ -106,6 +136,58 @@ export function makeRefiner(m) {
     const ridge = ridged(nB, wx / 900, wz / 900, { octaves: 3 }) * rel * 60;
     const fine = (fbm(nC, wx / 38, wz / 38, { octaves: 3 }) - 0.5) * (1.2 + rel * 5);
     return base + hills + ridge + fine;
+  }
+  const smooth = t => (t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t));
+  /**
+   * How far "out to sea" a point is for one continent, in metres past its coastline (<= 0 = on the land). The
+   * coastline wanders by low-frequency noise, so the edge of a block or the rim of an island is never a clean line.
+   */
+  function seaward(c, wx, wz) {
+    const r = continentRect(c);
+    const wander = (fbm(nCoast, wx / 1700, wz / 1700, { octaves: 3 }) - 0.5) * 2 * c.wander;
+    if (c.kind === 'island') {
+      const cx = (r.x0 + r.x1) / 2, cz = (r.z0 + r.z1) / 2, half = Math.min(r.x1 - r.x0, r.z1 - r.z0) / 2;
+      return Math.hypot(wx - cx, wz - cz) - half * c.radius + wander;
+    }
+    const dx = Math.max(r.x0 - wx, 0, wx - r.x1), dz = Math.max(r.z0 - wz, 0, wz - r.z1);
+    const d = Math.hypot(dx, dz);
+    if (d <= 0) return -1;                                      // a block's own land is never touched
+    // headlands and bays: the coast stands out from the block by 0..wander metres (broad, low-frequency), with a
+    // second, finer wobble so a headland's own shore is not smooth
+    const reach = smooth((fbm(nCoast, wx / 3200 + 7.1, wz / 3200 - 3.3, { octaves: 2 }) - 0.32) * 2.2) * c.wander;
+    return d - reach - Math.abs(wander) * 0.35;
+  }
+  /** The ground with the continents applied: land inside them, sea floor everywhere else. */
+  function baseGround(wx, wz) {
+    let best = Infinity, near = null;
+    for (const c of CONTINENTS) { const s = seaward(c, wx, wz); if (s < best) { best = s; near = c; } }
+    const c = continentAt(wx, wz);
+    let h = c && c.profile ? continentProfile(c, wx, wz, mainland(wx, wz)) : mainland(wx, wz);
+    if (best <= 0 && !(near.kind === 'island')) return h;      // inside a block: exactly the old ground
+    const t = smooth(best / near.fall);
+    if (best <= 0) return h;
+    const floor = -near.depth - 30 * smooth((best - near.fall) / 4000) + (fbm(nC, wx / 600, wz / 600, { octaves: 2 }) - 0.5) * 12;
+    // the land slopes into the water: a high edge (Torbor Downs' southern mountains) becomes sea cliffs
+    return h + (floor - h) * t;
+  }
+  /**
+   * Terrain shaping inside an 'island' continent, before the coast falls away (expansion terrain).
+   * 'volcanic' = Vharlen, the Burning Isle (tools/lib/vharlen.mjs, docs/EXPANSION-1.md §2–§3). Within 100 m of the block's
+   * edge (open sea by then) it hands back to the old ground, so the sea floor is continuous across the edge.
+   */
+  const profiles = {};
+  function profileOf(c) {
+    if (!(c.id in profiles)) {
+      profiles[c.id] = c.profile === 'volcanic' ? makeVolcanic({ seed: m.seed, seaward: (x, z) => seaward(c, x, z) }) : null;
+      if (profiles[c.id]) profiles[c.id].ground = baseGround;     // with the coast's fall to the sea (roads, pools)
+    }
+    return profiles[c.id];
+  }
+  function continentProfile(c, wx, wz, ground) {
+    const P = profileOf(c); if (!P) return ground;
+    const h = P.height(wx, wz), r = continentRect(c);
+    const edge = Math.min(wx - r.x0, r.x1 - wx, wz - r.z0, r.z1 - wz);
+    return h + (ground - h) * (1 - smooth(edge / 100));
   }
   /** A warped macro index: biome borders wander instead of following 128 m squares. */
   function warpedIndex(wx, wz) {
@@ -117,7 +199,7 @@ export function makeRefiner(m) {
   function meander(x, z) {
     return [(fbm(nWX, x / 300, z / 300, { octaves: 2 }) - 0.5) * 50, (fbm(nWZ, x / 300, z / 300, { octaves: 2 }) - 0.5) * 50];
   }
-  return { baseGround, warpedIndex, meander, metres };
+  return { baseGround, mainland, warpedIndex, meander, metres, seaward, profileOf, islandAt: (wx, wz) => { const c = continentAt(wx, wz); return c && c.profile ? profileOf(c) : null; } };
 }
 
 export const RIVER_WIDTH = [0, 7, 14, 24];

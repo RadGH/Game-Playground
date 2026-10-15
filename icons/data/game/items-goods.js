@@ -1057,4 +1057,218 @@ export default {
       + p('M24 18 H40 V23 H24Z', '#c1c8b4')
       + l('M25 30 L23 42', '#f6e9d2', 3) + l('M24 48 L27 50', '#e6cbc5', 2.3),
   },
+
+  // Vharlen crafts: knapped glass, sulphur oil and the harvest of the steam jungle.
+  obsidian_edge: {
+    name: 'Obsidian Edge',
+    description: 'A long knapped volcanic-glass blade sliver beside a small grey sharpening stone, with curved flake scars and a razor-white edge.',
+    art: p('M29 43 L46 34 L57 41 L56 50 L40 58 L28 51Z', '#6f716b')
+      + p('M29 43 L46 34 L57 41 L40 50Z', '#aaa99b')
+      + l('M35 43 L45 38 M41 46 L50 41', '#d1c7b1', 2)
+      + p('M9 49 L14 33 L18 31 L20 23 L25 21 L29 14 L45 6 L40 23 L36 27 L34 34 L29 36 L26 43 L17 55Z', '#26232f')
+      + p('M13 48 L24 29 L40 12 L31 32 L17 52Z', '#66677b', 'none')
+      + l('M15 44 L24 29 L39 13', '#e4e0d8', 2.5)
+      + l('M33 23 Q26 24 28 30 M28 32 Q21 34 23 39 M21 42 Q16 43 18 48', '#9b93a2', 1.8)
+      + p('M8 55 L12 51 L16 56 L11 58Z', '#555160', ink, 1.5),
+  },
+  brimstone_oil: {
+    name: 'Brimstone Oil',
+    description: 'A broad-shouldered stoppered flask of yellow-brown sulphur oil with an ochre neck binding and a heavy amber base.',
+    art: p('M25 12 H38 V24 L50 30 L52 49 Q49 57 32 57 Q15 57 12 49 L14 30 L25 24Z', '#a8a381')
+      + p('M18 34 Q32 38 46 33 L48 48 Q43 54 32 54 Q20 54 16 48Z', '#b38d27')
+      + p('M35 36 L46 35 L48 48 Q42 54 30 53 L27 50 Q40 46 35 36Z', '#795321', 'none')
+      + e(32, 34, 14, 3, '#e2ca4d', 'none')
+      + p('M25 7 L38 7 L37 17 H27Z', '#574633') + l('M28 10 H34', '#aa8b58', 2)
+      + p('M23 19 H40 V25 Q32 28 23 25Z', '#cbb14a') + l('M26 21 L37 23', '#f7e38a', 2)
+      + l('M20 31 L18 40 M21 48 L25 50', '#f9eab3', 2.8) + e(33, 43, 3, 4, '#d4b33c', 'none'),
+  },
+  cinderbloom_draught: {
+    name: 'Cinderbloom Draught',
+    description: 'An elegant long-necked flask of orange-red draught, glowing around an ember core, with a curled cinderbloom petal tied to its neck.',
+    art: p('M23 9 H34 L33 29 Q45 34 44 46 Q43 56 29 58 Q15 57 14 47 Q13 35 24 29Z', '#94868b')
+      + p('M20 36 Q29 40 38 35 Q49 53 29 54 Q9 53 20 36Z', '#d7492b')
+      + p('M23 40 Q28 37 35 40 Q39 47 31 51 Q22 53 20 46Z', '#ff983b', 'none')
+      + p('M26 41 Q32 38 33 44 Q32 49 26 49 Q23 45 26 41Z', '#ffe49a', 'none')
+      + p('M23 6 H34 L32 16 H25Z', '#55413b') + p('M22 19 H35 V24 H22Z', '#afa395')
+      + l('M26 27 V31 M20 39 L18 45', '#ffedcc', 2.5)
+      + l('M34 21 Q48 18 48 30', '#bca883', 2)
+      + p('M48 26 Q60 31 52 43 Q49 48 43 48 Q49 40 43 35 Q39 29 48 26Z', '#d94b2b')
+      + p('M48 30 Q54 35 48 42 Q50 35 45 33Z', '#ffbb53', 'none'),
+  },
+  steamcap_broth: {
+    name: 'Steamcap Broth',
+    description: 'A deep basalt bowl of pale mushroom broth with sliced steamcaps, a warm ivory rim and curling steam.',
+    art: l('M19 22 C11 16 25 13 18 7 M33 19 C25 13 39 10 33 6 M46 23 Q40 18 46 13', '#cbd4c1', 2.5)
+      + p('M9 34 H55 Q52 54 34 57 Q15 55 9 34Z', '#515655')
+      + p('M35 37 H54 Q50 53 34 56 L26 53 Q41 47 35 37Z', '#303b3c', 'none')
+      + e(32, 33, 24, 9, '#b0b5a3') + e(32, 33, 20, 6.5, '#ded9b7')
+      + e(32, 35, 16, 3, '#f0e4c3', 'none')
+      + p('M17 31 Q18 21 26 22 Q34 22 35 31 L29 32 L29 37 H24 V32Z', '#f5edcf', '#827c69', 1.7)
+      + p('M37 32 Q35 24 42 24 Q49 24 50 31 L45 32 L45 36 L41 36 L41 32Z', '#c5cab6', '#777b69', 1.6)
+      + l('M21 29 L30 29 M39 30 L46 29', '#a6a18a', 1.6)
+      + l('M16 43 Q20 50 27 51', '#929b8c', 2.8),
+  },
+
+  // Vharlen shop goods use island materials and their own silhouettes.
+  smoked_reef_fish: {
+    name: 'Smoked reef fish',
+    description: 'A butterflied reef fish, salted and smoked copper-orange over ironpalm, with two open fillets and a charred forked tail.',
+    art: p('M29 44 L21 58 L32 53 L43 58 L36 43Z', '#876148')
+      + p('M27 17 Q23 11 29 7 Q36 5 40 12 L38 17 Q52 20 49 32 Q48 43 35 49 L31 45 Q15 44 13 32 Q12 19 27 17Z', '#5a4034')
+      + p('M28 20 Q17 21 17 31 Q18 39 29 44 L30 34Z', '#ce8850')
+      + p('M35 20 Q46 21 45 31 Q44 39 35 44 L33 34Z', '#e6a76c')
+      + l('M20 25 L28 28 M20 32 L29 35 M25 39 L29 40 M36 27 L43 24 M35 34 L43 31 M35 40 L40 37', '#824d33', 2)
+      + l('M31 18 L32 47', '#f0d29b', 3) + l('M20 23 L23 21 M40 22 L43 25', '#ffd9a0', 2.3)
+      + c(33, 12, 2.1, '#d8b480', ink, 1.2) + c(33.5, 12, .9, '#302923', 'none')
+      + l('M28 54 L30 50 M36 51 L38 54', '#c49a67', 1.8),
+  },
+  palm_toddy: {
+    name: 'Gourd of palm toddy',
+    description: 'A round-bellied palm-toddy gourd with a narrow upper bulb, a wood stopper and a woven coir carrying sling.',
+    art: l('M39 18 Q56 22 53 40 Q52 48 45 49', ink, 5) + l('M39 18 Q56 22 53 40 Q52 48 45 49', '#b69459', 2.5)
+      + p('M27 12 Q17 13 20 23 Q24 29 18 32 Q8 37 11 48 Q15 59 31 58 Q48 57 49 45 Q50 36 40 31 Q35 28 39 22 Q43 12 34 11Z', '#9c9b51')
+      + p('M34 17 Q39 23 33 29 Q34 35 41 37 Q49 50 33 55 L26 55 Q39 46 31 34 Q27 28 32 23Z', '#666a3b', 'none')
+      + p('M26 7 L35 7 L34 16 L27 17Z', '#725034') + l('M28 10 L32 10', '#c6a266', 2)
+      + l('M18 36 Q12 45 20 50 M24 18 L24 22', '#ddd18b', 3)
+      + l('M18 33 Q17 47 29 57 M39 33 Q42 46 30 57 M12 43 Q29 53 48 43 M18 34 Q30 39 40 33', '#c2a46b', 2.5)
+      + e(30, 31, 7, 2, 'none', '#b89860', 2.2),
+  },
+  rim_recall_token: {
+    name: "Rim Keeper's token",
+    description: 'A broad snapped chip of banded basalt, with pale ash strata crossing its dark face and a fresh broken edge.',
+    art: p('M9 22 L35 8 L51 17 L56 43 L39 56 L15 49 L7 34Z', '#48474b')
+      + p('M9 22 L35 8 L43 20 L17 36 L7 34Z', '#797778')
+      + p('M17 36 L43 20 L51 17 L56 43 L39 56 L15 49Z', '#34373d')
+      + p('M12 26 L37 12 L40 16 L14 31Z M18 38 L49 22 L50 27 L19 43Z M22 48 L52 33 L53 38 L31 51Z', '#aca59a', 'none')
+      + p('M43 20 L51 17 L56 43 L39 56 L42 45 L50 39 L46 34 L49 27Z', '#64676b')
+      + l('M45 24 L48 21 M45 45 L51 41', '#cbc3ae', 2) + l('M12 21 L32 11', '#bdb8a9', 2),
+  },
+  pumice_whetstone: {
+    name: 'Pumice whetstone',
+    description: 'A light-grey porous pumice rubbing stone with an irregular rounded edge, broad worn face and deep dark air pockets.',
+    art: p('M8 29 L13 21 L18 19 L20 14 L33 10 L40 15 L46 15 L53 24 L56 35 L52 39 L49 49 L36 52 L25 56 L12 47 L6 37Z', '#92908c')
+      + p('M8 29 L13 21 L18 19 L20 14 L33 10 L40 15 L46 15 L53 24 L49 32 L36 37 L24 45 L10 40Z', '#b6b1a9')
+      + p('M24 45 L36 37 L49 32 L55 29 L56 35 L52 39 L49 49 L36 52 L25 56Z', '#666c6b')
+      + p('M16 27 L20 24 L23 27 L21 30 L17 30Z M29 20 L33 18 L36 20 L33 23 L30 23Z M33 31 L37 28 L41 31 L38 34 L34 34Z', '#666a65', '#d3cbb9', 1.6)
+      + e(23, 38, 2.5, 2, '#7b7e78', 'none') + e(44, 23, 2.2, 1.8, '#7b7e78', 'none')
+      + e(37, 45, 3, 2, '#414f4e', 'none') + e(14, 35, 1.6, 1.4, '#7b7e78', 'none')
+      + l('M20 18 L31 14 M29 50 L33 48', '#ddd3bf', 2.3),
+  },
+  salamander_grease: {
+    name: 'Salamander-fat grease',
+    description: 'An open charcoal crock of glossy amber salamander fat, with a paddle lifting a thick curl of grease.',
+    art: p('M11 31 H48 L47 48 Q45 57 29 57 Q13 56 11 48Z', '#4f5049')
+      + p('M34 33 H48 L47 48 Q44 55 29 56 L25 52 Q38 45 34 33Z', '#303936', 'none')
+      + e(29, 31, 19, 8, '#929180') + e(29, 31, 15, 5, '#b67435')
+      + p('M17 31 Q19 23 29 26 Q40 18 42 27 Q46 34 33 35 Q24 38 17 31Z', '#dbab54', ink, 1.6)
+      + l('M23 30 Q27 25 33 29 Q38 33 29 33', '#ffe1a0', 2.5)
+      + p('M41 32 L36 25 L48 9 Q51 5 54 9 L56 12 L46 29Z', '#906e45')
+      + p('M38 26 L44 23 L47 28 L44 35 L40 38 L39 33Z', '#e5be73', '#825027', 1.6)
+      + l('M43 23 L51 12 M17 41 L18 47 L23 50', '#c4b28b', 2.3),
+  },
+  obsidian_dust: {
+    name: 'Pinch of obsidian dust',
+    description: 'A split bamboo scoop filled with crushed black glass, tipped beside a sharp glittering spill of obsidian powder.',
+    art: p('M9 21 L32 9 Q38 7 43 15 L41 31 Q39 36 32 38 L21 44 Q11 43 9 34Z', '#7f714e')
+      + p('M9 21 L32 9 Q38 7 43 15 L20 29 Q11 29 9 21Z', '#c9b688')
+      + p('M14 22 L32 13 Q35 11 38 16 L21 25 Q17 26 14 22Z', '#32313d')
+      + p('M20 29 L43 15 L41 31 Q40 35 33 38 L21 44Z', '#a19468')
+      + l('M24 31 L38 24 M24 37 L36 30', '#dfcea0', 2)
+      + p('M12 51 L23 46 L29 43 L33 37 L40 41 L45 40 L49 47 L57 52 L50 57 L18 56 L8 54Z', '#353440')
+      + p('M18 51 L25 47 L30 51Z M29 46 L33 41 L36 47Z M39 46 L43 47 L39 51Z M46 50 L51 52 L43 53Z', '#777889', 'none')
+      + l('M22 49 L25 48 M32 45 L33 43 M46 51 L49 52', '#d9d4d1', 1.8)
+      + c(18, 53, 1.3, '#a19aaa', 'none') + c(29, 54, 1.4, '#ada5b1', 'none') + c(36, 52, 1.2, '#bcb4bf', 'none')
+      + p('M16 48 L19 45 L21 49Z M50 43 L54 45 L51 48Z', '#8b8694', ink, 1.4),
+  },
+  glasshead_fletching: {
+    name: 'Glass-head fletching',
+    description: 'Two finished cane arrows with knapped black-glass heads, ash-white flights and red fibre bindings.',
+    art: l('M12 55 L40 17 M29 56 L51 24', ink, 5) + l('M12 55 L40 17 M29 56 L51 24', '#b6a374', 2.6)
+      + p('M32 22 L47 6 L44 27 L39 23 L34 27Z', '#34303f')
+      + p('M36 21 L45 10 L40 23Z', '#aba4b4', 'none')
+      + p('M44 27 L57 15 L55 35 L50 30 L46 33Z', '#242730')
+      + l('M48 26 L54 20', '#d3cdd0', 2)
+      + p('M12 47 L8 36 L16 38 L23 32 L23 42 L16 52Z', '#cac8b7')
+      + p('M31 48 L29 37 L36 39 L42 33 L41 44 L34 53Z', '#939d98')
+      + l('M11 40 L15 45 L20 38 M32 41 L34 46 L39 40', '#5f6967', 1.8)
+      + l('M34 29 L38 32 M45 35 L49 38 M12 50 L16 53 M30 51 L34 54', '#d56b43', 3),
+  },
+  cinderbloom_poultice: {
+    name: 'Cinderbloom poultice',
+    description: 'An open ash-grey dressing on a folded jungle leaf, spread with red mashed cinderbloom and one glowing orange petal.',
+    art: p('M8 40 Q7 16 30 12 Q48 10 57 28 L48 53 L25 58Z', '#596d50')
+      + l('M14 44 L49 21 M24 35 L20 23 M35 28 L44 36', '#9fa575', 2)
+      + p('M12 29 L37 18 L52 31 L45 51 L24 55 L10 44Z', '#a9aaa0')
+      + p('M12 29 L29 38 L52 31 L37 18Z', '#d9d3bb')
+      + p('M21 30 Q25 22 34 26 Q42 23 44 32 L41 39 L30 43 L21 38 L18 34Z', '#bb4931', '#773b30', 1.6)
+      + p('M25 30 L31 28 L33 32 L39 30 L40 35 L32 39 L25 36Z', '#f08042', 'none')
+      + p('M43 25 Q40 12 52 10 Q49 17 55 20 Q55 27 43 31Z', '#e55c2d')
+      + l('M47 18 L47 26', '#ffc166', 2.5)
+      + p('M10 44 L29 46 L45 51 L24 55Z', '#c6c6b3') + l('M17 47 L26 50', '#ece4ce', 2),
+  },
+  ochre_dye: {
+    name: 'Pot of red-ochre dye',
+    description: 'A squat black earthenware pigment pot with a wide mouth of rusty red ochre and a stained palm-fibre brush.',
+    art: p('M9 33 L45 29 L50 43 Q49 55 29 57 Q9 56 8 45Z', '#4e4945')
+      + p('M33 34 L45 31 L50 43 Q48 53 30 55 L24 52Z', '#303739', 'none')
+      + e(27, 32, 19, 8, '#8c8773') + e(27, 32, 15, 5, '#b95232')
+      + p('M15 32 Q25 29 35 32 L37 38 L33 42 L28 40 L26 47 Q20 50 18 45 L19 36Z', '#c76c3e', '#6f3b2d', 1.6)
+      + l('M23 37 L23 42', '#f4ae68', 2.3)
+      + p('M37 27 L47 8 L53 11 L43 31Z', '#a68d59')
+      + p('M37 25 L45 29 L45 37 L41 35 L39 39 L36 35 L32 35Z', '#dc8c51')
+      + l('M37 28 L41 30 M35 32 L40 34 M17 51 L23 53', '#ecc293', 2),
+  },
+  ironpalm_pack: {
+    name: 'Ironpalm-fibre saddle pack',
+    description: 'A single tall saddle pannier woven from dark ironpalm fibre, with broad green lashings, a rolled flap and a sturdy carrying loop.',
+    art: l('M22 19 Q17 5 33 6 Q46 7 44 20', ink, 6) + l('M22 19 Q17 5 33 6 Q46 7 44 20', '#9d8e60', 3)
+      + p('M12 20 L39 14 L53 23 L50 52 L24 58 L12 49Z', '#7b714b')
+      + p('M39 17 L53 23 L50 52 L40 54Z', '#4b5038')
+      + p('M12 20 L25 27 L53 23 L39 14Z', '#b1a16c')
+      + l('M16 31 L37 27 M16 38 L38 34 M16 45 L38 41 M20 52 L37 48 M21 29 L25 53 M30 28 L33 51', '#c2b17a', 2.3)
+      + l('M44 29 L49 27 M44 37 L49 35 M43 45 L48 43', '#8e8a5d', 2)
+      + p('M15 20 Q25 13 41 15 L49 21 L47 29 L25 35 L15 29Z', '#969763')
+      + l('M19 23 L25 28 L43 23', '#d6c697', 2.5)
+      + p('M28 27 L35 25 L36 46 L29 48Z', '#466553') + p('M27 35 L37 33 L38 40 L28 42Z', '#b3a076')
+      + l('M32 35 L33 40', '#e6d5a1', 2),
+  },
+  cane_seed_sack: {
+    name: 'Sack of toasted cane-seed',
+    description: 'A squat dark woven seed sack laid on its side, with a loose red tie, toasted seeds spilling out and a feathery cane seed head.',
+    art: l('M45 41 L47 12', '#9b8d52', 2.8)
+      + p('M47 7 L44 12 L38 12 L41 18 L36 21 L42 25 L41 32 L47 29 L52 32 L52 24 L57 21 L52 17 L54 12 L49 13Z', '#bb8652')
+      + l('M46 14 L47 27 M41 17 L46 20 M51 20 L48 23', '#e1bf83', 1.8)
+      + p('M9 24 Q21 15 34 24 L44 38 L40 49 L24 57 L10 50 L6 38Z', '#68735a')
+      + p('M28 25 L35 26 L44 38 L40 49 L24 57 L17 53 Q31 44 28 25Z', '#414e42', 'none')
+      + l('M12 29 L20 25 M11 37 L26 29 M12 45 L28 36 M17 30 L23 43 M23 27 L30 37', '#9fa582', 2)
+      + p('M36 36 L48 36 L52 45 L43 52 L34 47Z', '#929578') + e(43, 43, 7, 4, '#3b4034')
+      + l('M34 36 L36 47 M34 39 Q28 32 28 38 L34 41 L28 47', '#c87648', 2.8)
+      + e(43, 44, 2.5, 1.7, '#bd9251', 'none') + e(49, 50, 3, 2, '#d3ae68', ink, 1.3)
+      + e(41, 56, 3, 1.8, '#b88549', ink, 1.3) + e(55, 55, 2.5, 1.7, '#d3ae68', ink, 1.3),
+  },
+  obsidian_charm: {
+    name: 'Obsidian charm',
+    description: 'A smooth asymmetric black-glass chip suspended from a simple knotted palm cord, with one sweeping mirror reflection.',
+    art: l('M26 30 C10 17 13 7 30 7 C49 7 52 17 37 31', ink, 5)
+      + l('M26 30 C10 17 13 7 30 7 C49 7 52 17 37 31', '#bba475', 2.5)
+      + p('M29 27 L44 32 L49 44 L37 57 L19 50 L16 38Z', '#272731')
+      + p('M29 27 L32 40 L19 50 L16 38Z', '#696773', 'none')
+      + p('M32 40 L44 32 L49 44 L37 57Z', '#41414f', 'none')
+      + p('M29 30 L27 39 L21 44 L23 36Z', '#d0c6ca', 'none')
+      + l('M36 52 L44 44', '#83838f', 2.2)
+      + l('M27 26 L34 29 L31 33 L26 29Z M31 29 L37 26', '#d0b784', 2.4),
+  },
+  haulers_token: {
+    name: "Hauler's token",
+    description: 'A thick red-clay token with soft square corners, a pressed relief of a loaded handcart and a pale chipped lower edge.',
+    art: p('M14 12 Q32 7 49 14 L54 43 Q52 52 43 55 L15 53 Q8 51 8 43 L9 21Z', '#8f4c36')
+      + p('M14 9 Q32 6 47 11 L51 40 Q51 48 42 51 L15 49 Q8 47 8 40 L9 18Z', '#bd7955')
+      + p('M17 16 L40 15 L44 22 L44 41 L18 44 L14 38 L14 23Z', '#a06043', '#e2a77b', 2)
+      + p('M18 28 L35 26 L37 34 L22 36Z', '#d49a6a', '#6f4432', 1.7)
+      + p('M21 27 L20 21 L27 20 L29 27Z M29 26 L28 19 L35 19 L36 26Z', '#d49a6a', '#6f4432', 1.6)
+      + l('M36 29 L42 25 M23 35 L38 33', '#653d2e', 2.2)
+      + c(24, 38, 3.2, '#dca577', '#714330', 1.7) + c(36, 36, 3.2, '#dca577', '#714330', 1.7)
+      + p('M31 50 L35 45 L42 50 L39 53Z', '#dfbc96', ink, 1.4)
+      + l('M13 19 L15 13 L25 12', '#edba8b', 2.3),
+  },
 };

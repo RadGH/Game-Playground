@@ -1,0 +1,185 @@
+{
+  "name": "Port Vharl (z13_10)",
+  "zone": "z13_10",
+  "sheet": {
+    "sheet": "vharlen",
+    "zone": "blackstrand"
+  },
+  "province": {
+    "id": 0,
+    "name": "Feafeast Highlands"
+  },
+  "size": 1025,
+  "step": 2,
+  "origin": {
+    "x": 0,
+    "z": 0
+  },
+  "heightMin": -240,
+  "heightMax": 1660,
+  "bakeVersion": 4,
+  "inputHash": "3fd22ea0",
+  "waterKinds": [
+    "none",
+    "sea",
+    "lake",
+    "river"
+  ],
+  "source": {
+    "tool": "tools/bake-zone.mjs",
+    "world": {
+      "seed": 1001,
+      "width": 288,
+      "height": 224,
+      "method": "pangea",
+      "seaLevel": 0.2,
+      "inputHash": "9805a835"
+    },
+    "zone": {
+      "zx": 13,
+      "zy": 10
+    },
+    "worldOrigin": {
+      "x": 26624,
+      "z": 20480
+    },
+    "zoneMetres": 2048
+  },
+  "rivers": [],
+  "sites": [
+    {
+      "type": "settlement",
+      "kind": "town",
+      "name": "Port Vharl",
+      "x": 1126,
+      "z": 914,
+      "hub": true,
+      "radius": 90
+    },
+    {
+      "type": "dungeon",
+      "id": "door_1",
+      "name": "Cave mouth",
+      "x": 930,
+      "z": 813,
+      "yaw": 1.114,
+      "pinned": true
+    },
+    {
+      "type": "event",
+      "id": "event_blackstrand",
+      "x": 1046,
+      "z": 1043,
+      "r": 40,
+      "pinned": true
+    },
+    {
+      "type": "harbour",
+      "id": "harbour_port_vharl",
+      "town": "port_vharl",
+      "x": 1505,
+      "z": 914,
+      "yaw": 1.5708,
+      "deep": [
+        1531,
+        914
+      ]
+    }
+  ],
+  "spawn": {
+    "x": 1126,
+    "z": 914
+  },
+  "bridges": [],
+  "palette": "vharl",
+  "continent": "vharlen",
+  "biomeNames": {
+    "beach": "Black Sand",
+    "rainforest": "Steam Jungle",
+    "shrubland": "Fern Scrub",
+    "savanna": "Tussock",
+    "desert": "Sulphur Flats",
+    "badlands": "Basalt Highland",
+    "marsh": "Mud Fen",
+    "volcanic": "Scoria Slopes",
+    "blighted": "Charred Wood",
+    "ashPlain": "Pumice Waste",
+    "glimmerwaste": "Obsidian Dunes",
+    "mountains": "Basalt Cliffs"
+  },
+  "pools": [],
+  "summary": {
+    "zone": "z13_10",
+    "province": "Feafeast Highlands",
+    "inputHash": "3fd22ea0",
+    "rivers": 0,
+    "wetShare": 0.318,
+    "unwalkableShare": 0.314,
+    "towns": [
+      {
+        "name": "Port Vharl",
+        "kind": "town",
+        "hub": true,
+        "at": [
+          1126,
+          914
+        ],
+        "radius": 90,
+        "movedFrom": null,
+        "culture": "vharl",
+        "plots": 25,
+        "streets": 72,
+        "links": 2,
+        "overlaps": 0,
+        "highStreets": 2,
+        "w6": {
+          "plotsBefore": 26,
+          "plots": 25,
+          "kept": 25,
+          "removed": [
+            {
+              "plot": 17,
+              "want": "house",
+              "office": false
+            }
+          ]
+        }
+      }
+    ],
+    "roads": 3,
+    "bridges": 0,
+    "paths": 7,
+    "pathMetres": 1033,
+    "scatter": 15622,
+    "scatterKinds": {
+      "rock_small": 519,
+      "sulphur_crust": 417,
+      "tree_fern": 5690,
+      "bush": 4999,
+      "ironpalm": 2519,
+      "steam_vent": 152,
+      "obsidian": 59,
+      "basalt_columns": 238,
+      "reed": 957,
+      "tree_charred": 72
+    },
+    "sites": [
+      "settlement(HUB) town Port Vharl 1126 914 90",
+      "dungeon door_1 Cave mouth 930 813  1.114",
+      "event event_blackstrand  1046 1043 40",
+      "harbour harbour_port_vharl  1505 914  1.5708"
+    ],
+    "spawn": {
+      "x": 1126,
+      "z": 914
+    },
+    "placements": 113,
+    "vignettesAvoided": 484
+  },
+  "files": {
+    "terrain.bin": 266882,
+    "nav.bin": 26447,
+    "scatter.bin": 125060,
+    "placements.json": 111919
+  }
+}

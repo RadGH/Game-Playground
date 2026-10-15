@@ -97,7 +97,7 @@ export function placementContent(placements, { recipes = [], sites = null, hooks
         marker('fort', { site: { kind: 'fort', template: p.template || null, friendly: !!friendly, blurb: t.blurb || null } });
         const g = t.garrison || {};
         if (friendly) ring(g.npcs, p, h).forEach(n => objects.push({ type: 'npc', name: roleName(n.role), x: n.x, z: n.z, key: `npc:${p.id}:${n.k}`, npc: { role: n.role, says: [], site: p.id } }));
-        else if (p.template === 'warband_stockade' || t.warband) {
+        else if ((p.template === 'warband_stockade' && t.warband !== false) || t.warband) {      // (`warband: false`: a province's own hostile camp with its own garrison — Vharlen's Slagborn fire-camps)
           // a warband camp: ONE row with the leader type; the rules (stream C) bring its escort + standard-bearer
           camped = true;
           const lvl = p.level || band[0] + 1;

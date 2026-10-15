@@ -18,11 +18,14 @@ import { loadLayouts } from '../server/load.mjs';
 import { createQuestBook, NEAR_M } from '../js/sim/quests.js';
 import { huntAreas } from '../js/sim/hunts.js';
 import { startLine } from './content-rares.mjs';
+import { provinceArg, provinceDataSync, requireProvince } from './content-lib.mjs';
 
 const ROOT = new URL('../', import.meta.url);
-const PROV = 'torbor_downs';
+const PROV = provinceArg(process.argv);     // --province=<id> (default torbor_downs)
 const P = f => new URL(f, ROOT);
 const readJ = f => JSON.parse(readFileSync(P(f), 'utf8'));
+/** This province's copy of a per-province data file (js/sim/province-files.js), or null. */
+const data = thing => provinceDataSync(readJ, PROV, thing);
 export const NEED_CAP = 4;
 
 const quiet = async fn => { const q = console.log; console.log = () => {}; try { return await fn(); } finally { console.log = q; } };
@@ -87,6 +90,7 @@ export function roadsideChampions(L, routes, cfg = CHAMP, startLine = null) {
 }
 
 async function main() {
+  requireProvince(process.argv, { need: [p => `data/provinces/${p}-routes.json`, p => `data/quests/marks/${p}.json`] });
   const wids = (await quiet(() => loadLayouts([PROV]))).layouts[0].zones.map(z => z.key).filter(w => /^z\d+_\d+$/.test(w));
   // 1. start from no quest camps
   const mains = {};
@@ -130,32 +134,32 @@ async function main() {
   // 1c. play-test 5 T25: the town anglers stand on the bank (tools/content-pools.mjs chose the spots from B's water);
   // an npc record like the placer's own, so the server gives them a body, their greeting, their quests and their shop
   let anglers = [];
-  if (existsSync(P('data/provinces/angling-pools.json'))) anglers = readJ('data/provinces/angling-pools.json').anglers || [];
+  anglers = (data('angling-pools') || {}).anglers || [];
   // owner feedback 8 (W12 / W27): `quests` = how many quests the NPC hands out (data/quests/marks/givers.json) and `titled`
-  const givers = existsSync(P('data/quests/marks/givers.json')) ? (readJ('data/quests/marks/givers.json').npcs || {}) : {};
+  const givers = (data('givers') || {}).npcs || {};
   const mark = id => ({ quests: givers[id] ? givers[id].gives.length : 0, titled: givers[id] ? !!givers[id].titled : true });
   for (const a of anglers) { const o = zoneOffset(a.zone); (added[a.zone] ||= []).push({ type: 'npc', id: a.id, name: a.name, role: 'angler', at: a.town, x: a.x - o.ox, z: a.z - o.oz, yaw: a.yaw, angler: true, ...mark(a.id) }); }
   // 1c'. round 8 W9 (P-core): the profession trainers tools/content-professions.mjs placed (data/provinces/professions.json
   // `trainers`, world metres) get a body the same way — an npc row, so quests, marks and titles treat them like any quest NPC
-  const profTrainers = existsSync(P('data/provinces/professions.json')) ? (readJ('data/provinces/professions.json').trainers || []) : [];
+  const profTrainers = (data('professions') || {}).trainers || [];
   for (const a of profTrainers) { const o = zoneOffset(a.zone); (added[a.zone] ||= []).push({ type: 'npc', id: a.id, name: a.name, role: a.role, at: a.town, x: +(a.x - o.ox).toFixed(1), z: +(a.z - o.oz).toFixed(1), yaw: a.yaw, trainer: true, ...mark(a.id) }); }
   // 1d. owner feedback 8 — W5: the carter and the parked ox cart outside every town's main gate (data/provinces/carts.json
   // `stops`, tools/content-towns.mjs; already zone metres); W1: the town guards at their posts (data/provinces/guards.json
   // `posts`). New row types `cart` and `guard`: stream A spawns them, B's bake never sees this file.
   let carts = 0, guards = 0;
-  if (existsSync(P('data/provinces/carts.json'))) for (const s of readJ('data/provinces/carts.json').stops || []) {
+  for (const s of (data('carts') || {}).stops || []) {
     (added[s.zone] ||= []).push({ type: 'npc', id: s.carter.id, name: s.carter.name, role: 'carter', at: s.town, x: s.carter.x, z: s.carter.z, yaw: s.carter.yaw, cart: s.id, placedBy: 'content-towns', ...mark(s.carter.id) });
     added[s.zone].push({ type: 'cart', id: s.cart.id, name: 'Longroad Cart', model: s.cart.model, vehicle: s.cart.model, town: s.town, carter: s.carter.id, x: s.cart.x, z: s.cart.z, yaw: s.cart.yaw, radius: 2.2 });
     carts++;
   }
-  if (existsSync(P('data/provinces/guards.json'))) for (const g of readJ('data/provinces/guards.json').posts || []) {
+  for (const g of (data('guards') || {}).posts || []) {
     (added[g.zone] ||= []).push({ type: 'guard', id: g.id, name: g.name, role: 'guard', rank: g.rank, tier: g.tier, town: g.town, post: g.post, ...(g.gate ? { gate: g.gate } : {}), x: g.x, z: g.z, yaw: g.yaw, titled: false });
     guards++;
   }
   // 1e. wrap-up 2026-10-13 (report #29): the training dummies tools/content-towns.mjs placed in every town and city
   // (guards.json `dummies`, zone metres). Row type `dummy`: js/sim/placements.js -> L.dummies -> province ensureDummies.
   let dummies = 0;
-  if (existsSync(P('data/provinces/guards.json'))) for (const d of readJ('data/provinces/guards.json').dummies || []) {
+  for (const d of (data('guards') || {}).dummies || []) {
     (added[d.zone] ||= []).push({ type: 'dummy', id: d.id, name: d.name, town: d.town, x: d.x, z: d.z, yaw: d.yaw });
     dummies++;
   }
@@ -183,8 +187,8 @@ async function main() {
     });
   }
   // 3c-pre. owner feedback 8 (W5): marks for quests given by a carter and for `ride` steps (the cart stop you ride TO)
-  if (existsSync(P('data/provinces/carts.json'))) {
-    const stops = readJ('data/provinces/carts.json').stops || [];
+  if (data('carts')) {
+    const stops = data('carts').stops || [];
     const at = s => { const o = zoneOffset(s.zone); return { zone: s.zone, x: Math.round(s.carter.x + o.ox), z: Math.round(s.carter.z + o.oz), r: 6 }; };
     for (const d of book.defs.values()) {
       const giverStop = stops.find(s => s.carter.id === d.giver);
@@ -196,8 +200,8 @@ async function main() {
     }
   }
   // 3b. play-test 5 T25: marks for the angling quests (the placer knows neither the anglers nor `catch` / `cook` steps)
-  if (existsSync(P('data/provinces/angling-pools.json')) && existsSync(P('data/quests/angling.json'))) {
-    const AP = readJ('data/provinces/angling-pools.json'), AQ = readJ('data/quests/angling.json');
+  if (data('angling-pools') && existsSync(P('data/quests/angling.json'))) {
+    const AP = data('angling-pools'), AQ = readJ('data/quests/angling.json');
     const who = id => { const a = (AP.anglers || []).find(x => x.id === id); return a ? { zone: a.zone, x: a.x, z: a.z, r: 6 } : null; };
     const pools = Object.entries(AP.zones).flatMap(([zone, l]) => l.map(p => ({ ...p, zone })));
     const fires = Object.entries(mains).flatMap(([wid, m]) => { const o = zoneOffset(wid); return m.placements.filter(p => p.type === 'npc' && p.role === 'innkeeper').map(p => ({ zone: wid, x: Math.round(p.x + o.ox), z: Math.round(p.z + o.oz), r: 12 })); });

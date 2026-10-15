@@ -5,8 +5,9 @@
 
 import { h } from '../ui-panel.js';
 
-const GLYPH = { whetted: '⚔', oiled: '◈', silvered: '✧', fletched: '➶', well_fed: '♨', oats: '♞', torch: '🔥' };
-const NICE = id => String(id).replace(/^item:/, '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+const GLYPH = { whetted: '⚔', oiled: '◈', silvered: '✧', fletched: '➶', well_fed: '♨', oats: '♞', torch: '🔥', steamed: '♨', steam_soaked: '♒' };      // [S] the hot springs' two
+const NAMES = { 'item:steamed': 'Steam-warmed (+5% max health)', steam_soaked: 'Steam-soaked (fast health and mana)' };      // [S]
+const NICE = id => NAMES[id] || String(id).replace(/^item:/, '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
 export function createBuffs({ me, infoOf, net = null }) {
   const root = document.getElementById('hud');
@@ -16,6 +17,7 @@ export function createBuffs({ me, infoOf, net = null }) {
   root?.appendChild(bar);
   const C = { at: 0, ms: 0, on: false, endAt: 0 };
   function onFx(ev) {
+    if (ev.kind === 'spring' && ev.warmMs && ev.id === me()?.id) { until.set('item:steamed', performance.now() + ev.warmMs); return; }      // [S] Steam-warmed's ten minutes
     if (ev.kind !== 'channel' || ev.id !== me()?.id) return;
     if (ev.end) {
       C.on = false; bar.classList.toggle('broken', ev.end === 'broken'); bar.classList.toggle('done', ev.end === 'done');

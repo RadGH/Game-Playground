@@ -1,0 +1,171 @@
+{
+  "name": "Cinderholt (z12_11)",
+  "zone": "z12_11",
+  "sheet": {
+    "sheet": "vharlen",
+    "zone": "ashfall_hollow"
+  },
+  "province": {
+    "id": 0,
+    "name": "Feafeast Highlands"
+  },
+  "size": 1025,
+  "step": 2,
+  "origin": {
+    "x": 0,
+    "z": 0
+  },
+  "heightMin": -240,
+  "heightMax": 1660,
+  "bakeVersion": 4,
+  "inputHash": "84bc7a26",
+  "waterKinds": [
+    "none",
+    "sea",
+    "lake",
+    "river"
+  ],
+  "source": {
+    "tool": "tools/bake-zone.mjs",
+    "world": {
+      "seed": 1001,
+      "width": 288,
+      "height": 224,
+      "method": "pangea",
+      "seaLevel": 0.2,
+      "inputHash": "9805a835"
+    },
+    "zone": {
+      "zx": 12,
+      "zy": 11
+    },
+    "worldOrigin": {
+      "x": 24576,
+      "z": 22528
+    },
+    "zoneMetres": 2048
+  },
+  "rivers": [],
+  "sites": [
+    {
+      "type": "settlement",
+      "kind": "village",
+      "name": "Cinderholt",
+      "x": 1084,
+      "z": 736,
+      "hub": true,
+      "radius": 65
+    },
+    {
+      "type": "dungeon",
+      "id": "door_1",
+      "name": "Cave mouth",
+      "x": 1149,
+      "z": 601,
+      "yaw": -0.382,
+      "pinned": true
+    },
+    {
+      "type": "event",
+      "id": "event_ashfall_hollow",
+      "x": 1054,
+      "z": 880,
+      "r": 40,
+      "pinned": true
+    }
+  ],
+  "spawn": {
+    "x": 1084,
+    "z": 736
+  },
+  "bridges": [],
+  "palette": "vharl",
+  "continent": "vharlen",
+  "biomeNames": {
+    "beach": "Black Sand",
+    "rainforest": "Steam Jungle",
+    "shrubland": "Fern Scrub",
+    "savanna": "Tussock",
+    "desert": "Sulphur Flats",
+    "badlands": "Basalt Highland",
+    "marsh": "Mud Fen",
+    "volcanic": "Scoria Slopes",
+    "blighted": "Charred Wood",
+    "ashPlain": "Pumice Waste",
+    "glimmerwaste": "Obsidian Dunes",
+    "mountains": "Basalt Cliffs"
+  },
+  "pools": [],
+  "summary": {
+    "zone": "z12_11",
+    "province": "Feafeast Highlands",
+    "inputHash": "84bc7a26",
+    "rivers": 0,
+    "wetShare": 0.305,
+    "unwalkableShare": 0.302,
+    "towns": [
+      {
+        "name": "Cinderholt",
+        "kind": "village",
+        "hub": true,
+        "at": [
+          1084,
+          736
+        ],
+        "radius": 65,
+        "movedFrom": null,
+        "culture": "vharl",
+        "plots": 22,
+        "streets": 85,
+        "links": 2,
+        "overlaps": 0,
+        "highStreets": 2,
+        "w6": {
+          "plotsBefore": 23,
+          "plots": 22,
+          "kept": 22,
+          "removed": [
+            {
+              "plot": 6,
+              "want": "house",
+              "office": false
+            }
+          ]
+        }
+      }
+    ],
+    "roads": 2,
+    "bridges": 0,
+    "paths": 7,
+    "pathMetres": 285,
+    "scatter": 7168,
+    "scatterKinds": {
+      "basalt_columns": 460,
+      "rock_small": 1296,
+      "steam_vent": 156,
+      "tree_fern": 322,
+      "tree_charred": 2677,
+      "reed": 1932,
+      "obsidian": 153,
+      "bush": 151,
+      "ironpalm": 21
+    },
+    "sites": [
+      "settlement(HUB) village Cinderholt 1084 736 65",
+      "dungeon door_1 Cave mouth 1149 601  -0.382",
+      "event event_ashfall_hollow  1054 880 40"
+    ],
+    "spawn": {
+      "x": 1084,
+      "z": 736
+    },
+    "placements": 121,
+    "vignettesAvoided": 495
+  },
+  "files": {
+    "terrain.bin": 304836,
+    "nav.bin": 19618,
+    "scatter.bin": 57428,
+    "placements.json": 77472
+  }
+}

@@ -374,16 +374,25 @@ export function levelField({ sheet, hub, ZM = 2048, metresPerLevel = GRADIENT.me
     const dMax = Math.max(...[[x0, z0], [x1, z0], [x0, z1], [x1, z1]].map(([a, b]) => Math.hypot(a - hub.x, b - hub.z)));
     zr[eid] = { x0, z0, dMin, dMax, band: z.band };
   }
-  const dist = (eid, x, z) => Math.hypot(zr[eid].x0 + x - hub.x, zr[eid].z0 + z - hub.z);
+  const real = (eid, x, z) => Math.hypot(zr[eid].x0 + x - hub.x, zr[eid].z0 + z - hub.z);
+  // Expansion 1: the ramp starts at the start zone's own floor (Torbor Downs: 1; Vharlen, which you reach at level 10+: 10)
+  const sz = sheet.grid && sheet.zones[sheet.grid.start];
+  const start = Math.max(GRADIENT.startLevel, (sz && Array.isArray(sz.band) ? sz.band[0] : GRADIENT.startLevel));
+  // a sheet's own `levels` block (Vharlen: a small island whose hardest zone is in the middle, next to the landing):
+  // `metresPerLevel` for its own ramp, `bandFloor: true` = never below a zone's own band, however close to the hub
+  const own = sheet.levels || {}, mpl = own.metresPerLevel || metresPerLevel;
   const raw = (eid, d) => {
     const r = zr[eid], t = Math.min(1, Math.max(0, (d - r.dMin) / Math.max(1, r.dMax - r.dMin)));
     const zone = r.band[0] + (r.band[1] - r.band[0]) * t;
-    return Math.max(GRADIENT.startLevel, Math.min(zone, GRADIENT.startLevel + d / metresPerLevel));
+    return Math.max(own.bandFloor ? Math.max(start, r.band[0]) : start, Math.min(zone, start + d / mpl));
   };
+  // `dist` feeds the NEWCOMER rules (solos and pairs by the start hub, no escorts inside 900 m: capCount, countCapAt). A
+  // province whose start is above level 1 has no newcomers, so every spot counts as far from them.
+  const dist = start <= GRADIENT.startLevel ? real : () => Infinity;
   return {
-    hub, metresPerLevel,
+    hub, metresPerLevel, start,
     dist,
-    at: (eid, x, z) => raw(eid, dist(eid, x, z)),
+    at: (eid, x, z) => raw(eid, real(eid, x, z)),
     span: eid => [Math.max(1, Math.floor(raw(eid, zr[eid].dMin))), zr[eid].band[1]],
   };
 }

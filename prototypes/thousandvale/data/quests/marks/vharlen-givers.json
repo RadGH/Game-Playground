@@ -1,0 +1,832 @@
+{
+ "_doc": "Stream E (owner feedback 8, W12 \"show quest markers (! and ?) above NPCs\" + W27). MADE by tools/content-givers.mjs; do not edit. `npcs.<quest NPC id>` = { name, role, zone (world zone), sheet (E zone id), at, gives: quests this NPC hands out (`giver`), takes: quests it can take back (the same ones: js/sim/quests.js gives()), mustTake: the ones that can ONLY be handed in to it (`needsGiver`; every other quest also pays itself when its last step is done), talks: quests with a talk / deliver step AT this NPC (a \"?\" while that step is the one you are on), jobs: it offers radiant jobs (its role is one of JOB_ROLES — always something to ask), trains: class ids for a trainer, offers: it has anything for the player at all, titled: W27 }. `objects.<vignette>/<object>` = quests started from a thing in the world (`startsFrom`). Stream A decides per player which mark to send: \"!\" when one of `gives` (or a job) is available to that character now, \"?\" when one of `takes` is finished or the current step of one of `talks` is here, grey when it has one for later.",
+ "province": "vharlen",
+ "jobRoles": [
+  "elder",
+  "sergeant",
+  "captain",
+  "quartermaster",
+  "tollkeeper",
+  "broker",
+  "innkeeper",
+  "angler",
+  "smith",
+  "apothecary",
+  "tailor",
+  "bowyer",
+  "prospector"
+ ],
+ "npcs": {
+  "ash_reader_kirra": {
+   "name": "Ash-reader Kirra",
+   "role": "elder",
+   "zone": "z12_11",
+   "sheet": "ashfall_hollow",
+   "at": "Cinderholt",
+   "gives": [
+    "ah_what_the_ash_recalls",
+    "ah_under_cinderholt"
+   ],
+   "takes": [
+    "ah_what_the_ash_recalls",
+    "ah_under_cinderholt"
+   ],
+   "mustTake": [],
+   "talks": [
+    "ah_what_the_ash_recalls"
+   ],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "gakk_nuvaru": {
+   "name": "Gakk Nuvaru",
+   "role": "resident",
+   "zone": "z12_11",
+   "sheet": "ashfall_hollow",
+   "at": "Cinderholt",
+   "gives": [
+    "ah_digging_out",
+    "ah_the_cellar_queen"
+   ],
+   "takes": [
+    "ah_digging_out",
+    "ah_the_cellar_queen"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "benno_lhessu": {
+   "name": "Benno Lhessu",
+   "role": "innkeeper",
+   "zone": "z12_11",
+   "sheet": "ashfall_hollow",
+   "at": "Cinderholt",
+   "gives": [
+    "ah_the_ashen_reeve",
+    "ah_the_buried_mayor"
+   ],
+   "takes": [
+    "ah_the_ashen_reeve",
+    "ah_the_buried_mayor"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "angler_cinderholt": {
+   "name": "Gethu Rhovek",
+   "role": "angler",
+   "zone": "z12_11",
+   "sheet": "ashfall_hollow",
+   "at": "Cinderholt",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "carter_cinderholt": {
+   "name": "Ilko Zhakku",
+   "role": "carter",
+   "zone": "z12_11",
+   "sheet": "ashfall_hollow",
+   "at": "Cinderholt",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "hearth_elder_tavi": {
+   "name": "Hearth-elder Tavi Keshvar",
+   "role": "elder",
+   "zone": "z13_10",
+   "sheet": "blackstrand",
+   "at": "Port Vharl",
+   "gives": [
+    "bs_fresh_off_the_saltwren",
+    "bs_brineglass_tubes"
+   ],
+   "takes": [
+    "bs_fresh_off_the_saltwren",
+    "bs_brineglass_tubes"
+   ],
+   "mustTake": [],
+   "talks": [
+    "bs_fresh_off_the_saltwren"
+   ],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "harbour_warden_kesk": {
+   "name": "Kesk Ormakku",
+   "role": "guard",
+   "zone": "z13_10",
+   "sheet": "blackstrand",
+   "at": "Port Vharl",
+   "gives": [
+    "bs_hetter_slagjaw",
+    "bs_skarra_ashkeel"
+   ],
+   "takes": [
+    "bs_hetter_slagjaw",
+    "bs_skarra_ashkeel"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "net_mender_bekka": {
+   "name": "Net-mender Bekka",
+   "role": "fisher",
+   "zone": "z13_10",
+   "sheet": "blackstrand",
+   "at": "Port Vharl",
+   "gives": [
+    "bs_crawlers_in_the_nets",
+    "bs_tidecoal"
+   ],
+   "takes": [
+    "bs_crawlers_in_the_nets",
+    "bs_tidecoal"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "angler_port_vharl": {
+   "name": "Nessk Thallu",
+   "role": "angler",
+   "zone": "z13_10",
+   "sheet": "blackstrand",
+   "at": "Port Vharl",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "carter_port_vharl": {
+   "name": "Rhaska Ormakku",
+   "role": "carter",
+   "zone": "z13_10",
+   "sheet": "blackstrand",
+   "at": "Port Vharl",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "mother_imma": {
+   "name": "Mother Imma",
+   "role": "elder",
+   "zone": "z13_11",
+   "sheet": "fumarole_fen",
+   "at": "Stiltreach",
+   "gives": [
+    "ff_the_fen_breathes_wrong",
+    "ff_drowned_vent"
+   ],
+   "takes": [
+    "ff_the_fen_breathes_wrong",
+    "ff_drowned_vent"
+   ],
+   "mustTake": [],
+   "talks": [
+    "ff_the_fen_breathes_wrong"
+   ],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "stilt_builder_oskel": {
+   "name": "Stilt-builder Oskel",
+   "role": "resident",
+   "zone": "z13_11",
+   "sheet": "fumarole_fen",
+   "at": "Stiltreach",
+   "gives": [
+    "ff_mud_in_the_channels",
+    "ff_old_mudlord"
+   ],
+   "takes": [
+    "ff_mud_in_the_channels",
+    "ff_old_mudlord"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "fennu_draskar": {
+   "name": "Fennu Draskar",
+   "role": "fisher",
+   "zone": "z13_11",
+   "sheet": "fumarole_fen",
+   "at": "Stiltreach",
+   "gives": [
+    "ff_bubblejaw",
+    "ff_the_fen_breath"
+   ],
+   "takes": [
+    "ff_bubblejaw",
+    "ff_the_fen_breath"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "angler_stiltreach": {
+   "name": "Pirra Nuvaru",
+   "role": "angler",
+   "zone": "z13_11",
+   "sheet": "fumarole_fen",
+   "at": "Stiltreach",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "carter_stiltreach": {
+   "name": "Velu Karrovu",
+   "role": "carter",
+   "zone": "z13_11",
+   "sheet": "fumarole_fen",
+   "at": "Stiltreach",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "old_jorro": {
+   "name": "Old Jorro",
+   "role": "elder",
+   "zone": "z11_09",
+   "sheet": "glasswind_strand",
+   "at": "Shardhaven",
+   "gives": [
+    "gw_crown_feathers",
+    "gw_tomb_of_the_glass_kings"
+   ],
+   "takes": [
+    "gw_crown_feathers",
+    "gw_tomb_of_the_glass_kings"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "glass_cutter_lunna": {
+   "name": "Glass-cutter Lunna",
+   "role": "smith",
+   "zone": "z11_09",
+   "sheet": "glasswind_strand",
+   "at": "Shardhaven",
+   "gives": [
+    "gw_glass_in_the_sand",
+    "gw_the_glazier"
+   ],
+   "takes": [
+    "gw_glass_in_the_sand",
+    "gw_the_glazier"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "tide_caller_dessa": {
+   "name": "Tide-caller Dessa",
+   "role": "guard",
+   "zone": "z11_09",
+   "sheet": "glasswind_strand",
+   "at": "Shardhaven",
+   "gives": [
+    "gw_the_wreckers",
+    "gw_mirror_knight"
+   ],
+   "takes": [
+    "gw_the_wreckers",
+    "gw_mirror_knight"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "angler_shardhaven": {
+   "name": "Lorr Imbaru",
+   "role": "angler",
+   "zone": "z11_09",
+   "sheet": "glasswind_strand",
+   "at": "Shardhaven",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "carter_shardhaven": {
+   "name": "Ilko Rukkesh",
+   "role": "carter",
+   "zone": "z11_09",
+   "sheet": "glasswind_strand",
+   "at": "Shardhaven",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "old_rhaska": {
+   "name": "Old Rhaska",
+   "role": "elder",
+   "zone": "z11_11",
+   "sheet": "kiln_ridge",
+   "at": "Kilnhold",
+   "gives": [
+    "kr_the_basalt_tyrant",
+    "kr_the_old_kilns"
+   ],
+   "takes": [
+    "kr_the_basalt_tyrant",
+    "kr_the_old_kilns"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "kiln_hand_tekk": {
+   "name": "Kiln-hand Tekk",
+   "role": "smith",
+   "zone": "z11_11",
+   "sheet": "kiln_ridge",
+   "at": "Kilnhold",
+   "gives": [
+    "kr_warm_ledges",
+    "kr_quarry_quills",
+    "kr_the_kilnmaster"
+   ],
+   "takes": [
+    "kr_warm_ledges",
+    "kr_quarry_quills",
+    "kr_the_kilnmaster"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "vosk_karrovu": {
+   "name": "Vosk Karrovu",
+   "role": "guard",
+   "zone": "z11_11",
+   "sheet": "kiln_ridge",
+   "at": "Kilnhold",
+   "gives": [
+    "kr_the_basalt_steps"
+   ],
+   "takes": [
+    "kr_the_basalt_steps"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "angler_kilnhold": {
+   "name": "Halla Tovaru",
+   "role": "angler",
+   "zone": "z11_11",
+   "sheet": "kiln_ridge",
+   "at": "Kilnhold",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "carter_kilnhold": {
+   "name": "Ashka Askaru",
+   "role": "carter",
+   "zone": "z11_11",
+   "sheet": "kiln_ridge",
+   "at": "Kilnhold",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "hearth_elder_halla": {
+   "name": "Hearth-elder Halla Morrakk",
+   "role": "elder",
+   "zone": "z11_10",
+   "sheet": "pumice_wastes",
+   "at": "Lastwell",
+   "gives": [
+    "pw_the_tally_man",
+    "pw_the_dry_wells"
+   ],
+   "takes": [
+    "pw_the_tally_man",
+    "pw_the_dry_wells"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "haro_draskar": {
+   "name": "Haro Draskar",
+   "role": "guard",
+   "zone": "z11_10",
+   "sheet": "pumice_wastes",
+   "at": "Lastwell",
+   "gives": [
+    "pw_raider_trails",
+    "pw_ash_reaver",
+    "pw_warlord_thrane"
+   ],
+   "takes": [
+    "pw_raider_trails",
+    "pw_ash_reaver",
+    "pw_warlord_thrane"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "matu_tukkari": {
+   "name": "Matu Tukkari",
+   "role": "innkeeper",
+   "zone": "z11_10",
+   "sheet": "pumice_wastes",
+   "at": "Lastwell",
+   "gives": [
+    "pw_golem_on_the_pipe"
+   ],
+   "takes": [
+    "pw_golem_on_the_pipe"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "angler_lastwell": {
+   "name": "Kirra Askaru",
+   "role": "angler",
+   "zone": "z11_10",
+   "sheet": "pumice_wastes",
+   "at": "Lastwell",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "carter_lastwell": {
+   "name": "Matu Imbaru",
+   "role": "carter",
+   "zone": "z11_10",
+   "sheet": "pumice_wastes",
+   "at": "Lastwell",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "old_varr": {
+   "name": "Old Varr",
+   "role": "elder",
+   "zone": "z12_09",
+   "sheet": "steamwood",
+   "at": "Mistfall",
+   "gives": [
+    "sw_prowler_season",
+    "sw_hissing_grotto"
+   ],
+   "takes": [
+    "sw_prowler_season",
+    "sw_hissing_grotto"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "steam_wife_ninu": {
+   "name": "Steam-wife Ninu",
+   "role": "healer",
+   "zone": "z12_09",
+   "sheet": "steamwood",
+   "at": "Mistfall",
+   "gives": [
+    "sw_spit_in_the_springs",
+    "sw_mother_of_moss"
+   ],
+   "takes": [
+    "sw_spit_in_the_springs",
+    "sw_mother_of_moss"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "corra_sulvenn": {
+   "name": "Corra Sulvenn",
+   "role": "trader",
+   "zone": "z12_09",
+   "sheet": "steamwood",
+   "at": "Mistfall",
+   "gives": [
+    "sw_steam_in_a_jar",
+    "sw_canopy_widow"
+   ],
+   "takes": [
+    "sw_steam_in_a_jar",
+    "sw_canopy_widow"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "angler_mistfall": {
+   "name": "Oru Keshvar",
+   "role": "angler",
+   "zone": "z12_09",
+   "sheet": "steamwood",
+   "at": "Mistfall",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "carter_mistfall": {
+   "name": "Orsk Yorrvenn",
+   "role": "carter",
+   "zone": "z12_09",
+   "sheet": "steamwood",
+   "at": "Mistfall",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "mother_sarrai": {
+   "name": "Mother Sarrai",
+   "role": "elder",
+   "zone": "z13_09",
+   "sheet": "sulphur_bight",
+   "at": "Yellowpan",
+   "gives": [
+    "sb_spitting_season",
+    "sb_yellow_pits"
+   ],
+   "takes": [
+    "sb_spitting_season",
+    "sb_yellow_pits"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "pit_boss_drask": {
+   "name": "Pit-boss Drask",
+   "role": "merchant",
+   "zone": "z13_09",
+   "sheet": "sulphur_bight",
+   "at": "Yellowpan",
+   "gives": [
+    "sb_sold_by_the_sack",
+    "sb_the_assayer"
+   ],
+   "takes": [
+    "sb_sold_by_the_sack",
+    "sb_the_assayer"
+   ],
+   "mustTake": [],
+   "talks": [
+    "sb_sold_by_the_sack"
+   ],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "ilko_rhovek": {
+   "name": "Ilko Rhovek",
+   "role": "guard",
+   "zone": "z13_09",
+   "sheet": "sulphur_bight",
+   "at": "Yellowpan",
+   "gives": [
+    "sb_crust_king",
+    "sb_old_yellowback"
+   ],
+   "takes": [
+    "sb_crust_king",
+    "sb_old_yellowback"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "angler_yellowpan": {
+   "name": "Tekk Sulvenn",
+   "role": "angler",
+   "zone": "z13_09",
+   "sheet": "sulphur_bight",
+   "at": "Yellowpan",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "carter_yellowpan": {
+   "name": "Yssa Jakkora",
+   "role": "carter",
+   "zone": "z13_09",
+   "sheet": "sulphur_bight",
+   "at": "Yellowpan",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  },
+  "mother_anu": {
+   "name": "Mother Anu",
+   "role": "elder",
+   "zone": "z12_10",
+   "sheet": "the_caldera",
+   "at": "Rim Shrine",
+   "gives": [
+    "cd_the_rim_holds",
+    "cd_the_caldera_wyrm",
+    "cd_the_throat"
+   ],
+   "takes": [
+    "cd_the_rim_holds",
+    "cd_the_caldera_wyrm",
+    "cd_the_throat"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "rim_keeper_orsk": {
+   "name": "Rim-keeper Orsk Vhorrun",
+   "role": "guard",
+   "zone": "z12_10",
+   "sheet": "the_caldera",
+   "at": "Rim Shrine",
+   "gives": [
+    "cd_crater_guard",
+    "cd_the_last_keeper"
+   ],
+   "takes": [
+    "cd_crater_guard",
+    "cd_the_last_keeper"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "iolu_skelvaru": {
+   "name": "Iolu Skelvaru",
+   "role": "healer",
+   "zone": "z12_10",
+   "sheet": "the_caldera",
+   "at": "Rim Shrine",
+   "gives": [
+    "cd_lake_shore"
+   ],
+   "takes": [
+    "cd_lake_shore"
+   ],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "titled": true
+  },
+  "angler_rim_shrine": {
+   "name": "Rim-keeper Essu",
+   "role": "angler",
+   "zone": "z12_10",
+   "sheet": "the_caldera",
+   "at": "Rim Shrine",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": true,
+   "offers": true,
+   "titled": true
+  },
+  "carter_rim_shrine": {
+   "name": "Ferro Hulkaru",
+   "role": "carter",
+   "zone": "z12_10",
+   "sheet": "the_caldera",
+   "at": "Rim Shrine",
+   "gives": [],
+   "takes": [],
+   "mustTake": [],
+   "talks": [],
+   "jobs": false,
+   "offers": true,
+   "service": "cart",
+   "titled": true
+  }
+ },
+ "objects": {},
+ "missing": []
+}

@@ -1,0 +1,118 @@
+{
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z12_09, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "zone": "z12_09",
+ "terrainHash": "de552a99",
+ "placements": [
+  {
+   "type": "camp",
+   "id": "champ_z12_09_1",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    11,
+    11
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 807,
+   "z": 1304,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "stormlash"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z12_09_2",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    13,
+    13
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 459,
+   "z": 1393,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "ironclad"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "npc",
+   "id": "angler_mistfall",
+   "name": "Oru Keshvar",
+   "role": "angler",
+   "at": "Mistfall",
+   "x": 1444,
+   "z": 1116,
+   "yaw": 1.57,
+   "angler": true,
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "npc",
+   "id": "carter_mistfall",
+   "name": "Orsk Yorrvenn",
+   "role": "carter",
+   "at": "Mistfall",
+   "x": 1214,
+   "z": 1338,
+   "yaw": -0.077,
+   "cart": "cart_mistfall",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_mistfall",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Mistfall",
+   "carter": "carter_mistfall",
+   "x": 1214,
+   "z": 1336,
+   "yaw": 1.571,
+   "radius": 2.2
+  },
+  {
+   "type": "guard",
+   "id": "guard_mistfall_0",
+   "name": "Mistfall Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "hamlet",
+   "town": "Mistfall",
+   "post": "gate",
+   "gate": "mistfall_gate_0",
+   "x": 1196,
+   "z": 1344,
+   "yaw": 1.288,
+   "titled": false
+  }
+ ]
+}

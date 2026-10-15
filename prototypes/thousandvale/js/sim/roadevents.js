@@ -31,7 +31,7 @@ export const ROAD_DEFAULTS = Object.freeze({ firstSec: [45, 90], gapSec: [150, 3
   chest: { lootSec: 120, keeperM: 45 } });
 import { roadKillGold as KILL_GOLD, roadChestGold } from './economy-knobs.js';       // V2: data/rules/economy.json server.road
 
-export function createRoadEvents({ data = null, wanderers = null, online, corpses, grant, questEvent, bookOf, provOf, now, wallNow, rng = Math.random, log = () => {}, counters = {}, journal = () => {}, questSaved = () => {}, sendQuests = () => {}, partyOf = () => null, mailTo = null, enabled = true }) {
+export function createRoadEvents({ data = null, wanderers = null, online, corpses, grant, questEvent, bookOf, provOf, now, wallNow, rng = Math.random, log = () => {}, counters = {}, journal = () => {}, questSaved = () => {}, sendQuests = () => {}, partyOf = () => null, mailTo = null, enabled = true, owns = null }) {      // owns(o): Expansion 1 — one runner per province, each only for its own players
   const D = data || {};
   const R = { ...ROAD_DEFAULTS, ...(D.rules || {}) };
   const CH = { ...ROAD_DEFAULTS.chest, ...((D.rules && typeof D.rules.chest === 'object' && D.rules.chest) || {}) };
@@ -406,6 +406,7 @@ export function createRoadEvents({ data = null, wanderers = null, online, corpse
     // new events near lone players in the wilds
     if (enabled) for (const o of online.values()) {
       if (!o.conn || !o.entity || o.entity.dead || !o.room || o.room.kind !== 'wilds') continue;
+      if (owns && !owns(o)) continue;
       if (!o.roadNextAt) { o.roadNextAt = t + range(R.firstSec, 60) * 1000; continue; }
       if (t < o.roadNextAt) continue;
       o.roadNextAt = t + range(R.gapSec, 200) * 1000;

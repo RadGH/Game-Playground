@@ -1,0 +1,816 @@
+{
+ "_doc": "Stream E (owner feedback 8, W1: \"the starting town is being raided … I died before I had a chance to do anything. Where are the town guards?\"). TOWN GUARDS. `rules` = what a guard is; `ranks` = the sergeant in the square; `hold` = the tuning rule the numbers serve (tests/E/playtest8-guards.test.js checks it with tools/sim-raid.mjs — `node tools/sim-raid.mjs` prints the table); `posts` = where each one stands (zone metres, made by tools/content-towns.mjs from stream B town walls: two just inside every gate facing out, the rest on the rim of the square; tools/content-hunts.mjs copies them into <zone>.quest.json as `type: guard` rows, which is what the server spawns); `gates` = every gate of every settlement (where a raid wave comes in). A guard has a NAME (\"Torborhold Guard\", \"Sergeant Kettleby\") and NO title (W27: `titled: false`).",
+ "rules": {
+  "reference": "road_brigand",
+  "levelOver": 2,
+  "hpMult": 4,
+  "dmgMult": 0.2,
+  "armor": 6,
+  "respawnSec": 75,
+  "leashM": 45,
+  "reachM": 2.6,
+  "look": "town_guard",
+  "weapon": "spear",
+  "shield": true,
+  "fights": [
+   "event",
+   "attacker"
+  ],
+  "attackable": false,
+  "healsOutOfCombatSec": 8,
+  "_doc": "A guard is built on the body of `reference` at (the raid or the town band floor level + levelOver): health x hpMult, hit x dmgMult, + `armor`. It fights only `fights`: monsters that belong to an EVENT (a raid wave, a zone event that spills in) and anything that has hit a player or a guard inside the town ring; it never starts a fight with wildlife outside. Players cannot attack it. It never walks more than leashM from its post and walks back when the fight is over, healing to full healsOutOfCombatSec later. One that falls kneels where it fell and gets up after respawnSec at full health (nobody dies for good). vsBossMult: a guard hit on the raid CAPTAIN (the event boss) is multiplied by this — the guards hold the waves, the captain is the players to break (his armour turns their spears).",
+  "vsBossMult": 0.02
+ },
+ "ranks": {
+  "guard": {
+   "name": "{town} Guard"
+  },
+  "sergeant": {
+   "name": "Sergeant {family}",
+   "hpMult": 1.5,
+   "dmgMult": 1.25,
+   "rally": {
+    "everySec": 20,
+    "healShare": 0.15,
+    "withinM": 14,
+    "say": [
+     "Hold the line!",
+     "On me! Shields up!",
+     "Not one step back!"
+    ]
+   }
+  }
+ },
+ "raid": {
+  "firstTarget": "guard",
+  "neverFirstTarget": "newcomer",
+  "enterBy": "gate",
+  "newcomerThreatMult": 0.25,
+  "spawnOutM": [
+   35,
+   55
+  ],
+  "say": {
+   "start": [
+    "To the gates! Raiders on the road!",
+    "Bar the square! Everyone behind us!"
+   ],
+   "newcomer": [
+    "Stay behind us, friend. We have the gate."
+   ],
+   "won": [
+    "Gate holds. Somebody fetch the sergeant a drink."
+   ],
+   "hardPressed": [
+    "We cannot hold them alone! Any blade that can stand, to the gate!"
+   ]
+  },
+  "_doc": "How a town raid meets the guards (stream A runs it). A wave appears spawnOutM metres OUTSIDE a gate (the event names its gates: events.json `raid.gates`), walks in through it and takes the nearest GUARD as its first target; a newcomer (events.json director.newcomer) is never a wave first target and draws newcomerThreatMult of the threat while any guard stands. The guards call out `say` lines (hardPressed when fewer than half stand)."
+ },
+ "hold": {
+  "wave1": {
+   "guardsAlone": "win",
+   "minStandingShare": 0.6
+  },
+  "wholeRaid": {
+   "guardsAlone": "lose",
+   "withPlayers": [
+    2,
+    "win"
+   ],
+   "underLimitShare": 0.9
+  },
+  "_doc": "THE RULE. The posted guards ALONE clear the first wave with at least minStandingShare of them still on their feet; alone they do NOT finish the whole raid inside its time limit; with withPlayers[0] players of the raid level (basic attacks only, no skills) they do, in under underLimitShare of the limit. So a newcomer can stand behind them and live, and anyone who can fight is needed."
+ },
+ "tiers": {
+  "_doc": "STRENGTH BY TOWN SIZE (for stream C rules.spawnGuard and stream A): every post carries `tier` = its settlement kind. A guard of a tier is the `rules` body with health x hpMult and hit x dmgMult from here (on top of rules.hpMult / dmgMult and the rank), at the town level + levelOver. A hamlet has one tired watchman; a city garrison is drilled.",
+  "hamlet": {
+   "hpMult": 0.7,
+   "dmgMult": 0.8,
+   "levelOver": 0,
+   "name": "watchman"
+  },
+  "village": {
+   "hpMult": 0.85,
+   "dmgMult": 0.9,
+   "levelOver": 1,
+   "name": "village watch"
+  },
+  "town": {
+   "hpMult": 1,
+   "dmgMult": 1,
+   "levelOver": 2,
+   "name": "town guard"
+  },
+  "city": {
+   "hpMult": 1.25,
+   "dmgMult": 1.15,
+   "levelOver": 3,
+   "name": "city garrison"
+  }
+ },
+ "made": "tools/content-towns.mjs — posts, gates and problems are generated; edit rules / ranks / hold by hand",
+ "gates": [
+  {
+   "id": "port_vharl_gate_0",
+   "town": "Port Vharl",
+   "zone": "z13_10",
+   "x": 1106.3,
+   "z": 971.4,
+   "out": [
+    -0.522,
+    0.853
+   ],
+   "width": 7.11,
+   "kind": "gatehouse",
+   "main": false
+  },
+  {
+   "id": "port_vharl_gate_1",
+   "town": "Port Vharl",
+   "zone": "z13_10",
+   "x": 1120.6,
+   "z": 853.5,
+   "out": [
+    -0.133,
+    -0.991
+   ],
+   "width": 6.36,
+   "kind": "gatehouse",
+   "main": true
+  },
+  {
+   "id": "mistfall_gate_0",
+   "town": "Mistfall",
+   "zone": "z12_09",
+   "x": 1201.4,
+   "z": 1342.6,
+   "out": [
+    0.96,
+    0.28
+   ],
+   "width": 6.27,
+   "kind": "posts",
+   "main": true
+  },
+  {
+   "id": "mistfall_gate_1",
+   "town": "Mistfall",
+   "zone": "z12_09",
+   "x": 1144.6,
+   "z": 1304.4,
+   "out": [
+    -0.729,
+    -0.684
+   ],
+   "width": 5.56,
+   "kind": "posts",
+   "main": false
+  },
+  {
+   "id": "yellowpan_gate_0",
+   "town": "Yellowpan",
+   "zone": "z13_09",
+   "x": 511.7,
+   "z": 1629.3,
+   "out": [
+    0.062,
+    0.998
+   ],
+   "width": 5.98,
+   "kind": "gatehouse",
+   "main": true
+  },
+  {
+   "id": "yellowpan_gate_1",
+   "town": "Yellowpan",
+   "zone": "z13_09",
+   "x": 468.6,
+   "z": 1584.4,
+   "out": [
+    -0.997,
+    -0.084
+   ],
+   "width": 5.91,
+   "kind": "gatehouse",
+   "main": false
+  },
+  {
+   "id": "stiltreach_gate_0",
+   "town": "Stiltreach",
+   "zone": "z13_11",
+   "x": 481.8,
+   "z": 594,
+   "out": [
+    1,
+    0
+   ],
+   "width": 4.21,
+   "kind": "posts",
+   "main": false
+  },
+  {
+   "id": "stiltreach_gate_1",
+   "town": "Stiltreach",
+   "zone": "z13_11",
+   "x": 402.8,
+   "z": 562.5,
+   "out": [
+    -0.855,
+    -0.519
+   ],
+   "width": 4.86,
+   "kind": "posts",
+   "main": true
+  },
+  {
+   "id": "stiltreach_gate_2",
+   "town": "Stiltreach",
+   "zone": "z13_11",
+   "x": 461.4,
+   "z": 546.8,
+   "out": [
+    0.307,
+    -0.952
+   ],
+   "width": 5.55,
+   "kind": "posts",
+   "main": false
+  },
+  {
+   "id": "shardhaven_gate_0",
+   "town": "Shardhaven",
+   "zone": "z11_09",
+   "x": 1568.7,
+   "z": 1606.8,
+   "out": [
+    -0.177,
+    0.984
+   ],
+   "width": 5.07,
+   "kind": "posts",
+   "main": true
+  },
+  {
+   "id": "shardhaven_gate_1",
+   "town": "Shardhaven",
+   "zone": "z11_09",
+   "x": 1606.7,
+   "z": 1568.6,
+   "out": [
+    0.989,
+    -0.145
+   ],
+   "width": 4.95,
+   "kind": "posts",
+   "main": false
+  },
+  {
+   "id": "lastwell_gate_0",
+   "town": "Lastwell",
+   "zone": "z11_10",
+   "x": 1307.9,
+   "z": 1204.9,
+   "out": [
+    0.702,
+    0.713
+   ],
+   "width": 13.16,
+   "kind": "gatehouse",
+   "main": true
+  },
+  {
+   "id": "lastwell_gate_1",
+   "town": "Lastwell",
+   "zone": "z11_10",
+   "x": 1311.4,
+   "z": 1083,
+   "out": [
+    0.156,
+    -0.988
+   ],
+   "width": 6.86,
+   "kind": "gatehouse",
+   "main": false
+  },
+  {
+   "id": "cinderholt_gate_0",
+   "town": "Cinderholt",
+   "zone": "z12_11",
+   "x": 1131.9,
+   "z": 736.1,
+   "out": [
+    1,
+    -0.031
+   ],
+   "width": 5.5,
+   "kind": "posts",
+   "main": true
+  },
+  {
+   "id": "cinderholt_gate_1",
+   "town": "Cinderholt",
+   "zone": "z12_11",
+   "x": 1051.9,
+   "z": 771.6,
+   "out": [
+    -0.635,
+    0.772
+   ],
+   "width": 5.54,
+   "kind": "posts",
+   "main": false
+  },
+  {
+   "id": "kilnhold_gate_0",
+   "town": "Kilnhold",
+   "zone": "z11_11",
+   "x": 1600.9,
+   "z": 513.7,
+   "out": [
+    0.794,
+    0.608
+   ],
+   "width": 6.51,
+   "kind": "gatehouse",
+   "main": true
+  },
+  {
+   "id": "kilnhold_gate_1",
+   "town": "Kilnhold",
+   "zone": "z11_11",
+   "x": 1569.8,
+   "z": 428.6,
+   "out": [
+    -0.373,
+    -0.928
+   ],
+   "width": 6.9,
+   "kind": "gatehouse",
+   "main": false
+  },
+  {
+   "id": "rim_shrine_gate_0",
+   "town": "Rim Shrine",
+   "zone": "z12_10",
+   "x": 1819,
+   "z": 1124.5,
+   "out": [
+    0.76,
+    -0.65
+   ],
+   "width": 4.95,
+   "kind": "posts",
+   "main": true
+  }
+ ],
+ "posts": [
+  {
+   "id": "guard_port_vharl_0",
+   "town": "Port Vharl",
+   "settlement": "port_vharl",
+   "zone": "z13_10",
+   "tier": "town",
+   "post": "gate",
+   "gate": "port_vharl_gate_1",
+   "rank": "guard",
+   "name": "Port Vharl Guard",
+   "yaw": -3.008,
+   "titled": false,
+   "x": 1126,
+   "z": 856
+  },
+  {
+   "id": "guard_port_vharl_1",
+   "town": "Port Vharl",
+   "settlement": "port_vharl",
+   "zone": "z13_10",
+   "tier": "town",
+   "post": "gate",
+   "gate": "port_vharl_gate_1",
+   "rank": "guard",
+   "name": "Port Vharl Guard",
+   "yaw": -3.008,
+   "titled": false,
+   "x": 1116,
+   "z": 858
+  },
+  {
+   "id": "guard_port_vharl_2",
+   "town": "Port Vharl",
+   "settlement": "port_vharl",
+   "zone": "z13_10",
+   "tier": "town",
+   "post": "gate",
+   "gate": "port_vharl_gate_0",
+   "rank": "guard",
+   "name": "Port Vharl Guard",
+   "yaw": -0.549,
+   "titled": false,
+   "x": 1104,
+   "z": 966
+  },
+  {
+   "id": "guard_port_vharl_3",
+   "town": "Port Vharl",
+   "settlement": "port_vharl",
+   "zone": "z13_10",
+   "tier": "town",
+   "post": "gate",
+   "gate": "port_vharl_gate_0",
+   "rank": "guard",
+   "name": "Port Vharl Guard",
+   "yaw": -0.549,
+   "titled": false,
+   "x": 1112,
+   "z": 970
+  },
+  {
+   "id": "guard_port_vharl_4",
+   "town": "Port Vharl",
+   "settlement": "port_vharl",
+   "zone": "z13_10",
+   "tier": "town",
+   "post": "square",
+   "rank": "sergeant",
+   "name": "Sergeant Tukkari",
+   "yaw": -0.039,
+   "titled": false,
+   "x": 1140,
+   "z": 906
+  },
+  {
+   "id": "guard_port_vharl_5",
+   "town": "Port Vharl",
+   "settlement": "port_vharl",
+   "zone": "z13_10",
+   "tier": "town",
+   "post": "square",
+   "rank": "guard",
+   "name": "Port Vharl Guard",
+   "yaw": 1.983,
+   "titled": false,
+   "x": 1134,
+   "z": 916
+  },
+  {
+   "id": "guard_port_vharl_6",
+   "town": "Port Vharl",
+   "settlement": "port_vharl",
+   "zone": "z13_10",
+   "tier": "town",
+   "post": "square",
+   "rank": "guard",
+   "name": "Port Vharl Guard",
+   "yaw": -2.192,
+   "titled": false,
+   "x": 1146,
+   "z": 918
+  },
+  {
+   "id": "guard_mistfall_0",
+   "town": "Mistfall",
+   "settlement": "mistfall",
+   "zone": "z12_09",
+   "tier": "hamlet",
+   "post": "gate",
+   "gate": "mistfall_gate_0",
+   "rank": "guard",
+   "name": "Mistfall Guard",
+   "yaw": 1.288,
+   "titled": false,
+   "x": 1196,
+   "z": 1344
+  },
+  {
+   "id": "guard_yellowpan_0",
+   "town": "Yellowpan",
+   "settlement": "yellowpan",
+   "zone": "z13_09",
+   "tier": "village",
+   "post": "gate",
+   "gate": "yellowpan_gate_0",
+   "rank": "guard",
+   "name": "Yellowpan Guard",
+   "yaw": 0.062,
+   "titled": false,
+   "x": 508,
+   "z": 1626
+  },
+  {
+   "id": "guard_yellowpan_1",
+   "town": "Yellowpan",
+   "settlement": "yellowpan",
+   "zone": "z13_09",
+   "tier": "village",
+   "post": "gate",
+   "gate": "yellowpan_gate_1",
+   "rank": "guard",
+   "name": "Yellowpan Guard",
+   "yaw": -1.655,
+   "titled": false,
+   "x": 472,
+   "z": 1580
+  },
+  {
+   "id": "guard_yellowpan_2",
+   "town": "Yellowpan",
+   "settlement": "yellowpan",
+   "zone": "z13_09",
+   "tier": "village",
+   "post": "square",
+   "rank": "guard",
+   "name": "Yellowpan Guard",
+   "yaw": -1.401,
+   "titled": false,
+   "x": 530,
+   "z": 1588
+  },
+  {
+   "id": "guard_stiltreach_0",
+   "town": "Stiltreach",
+   "settlement": "stiltreach",
+   "zone": "z13_11",
+   "tier": "hamlet",
+   "post": "gate",
+   "gate": "stiltreach_gate_1",
+   "rank": "guard",
+   "name": "Stiltreach Guard",
+   "yaw": -2.117,
+   "titled": false,
+   "x": 408,
+   "z": 562
+  },
+  {
+   "id": "guard_shardhaven_0",
+   "town": "Shardhaven",
+   "settlement": "shardhaven",
+   "zone": "z11_09",
+   "tier": "hamlet",
+   "post": "gate",
+   "gate": "shardhaven_gate_0",
+   "rank": "guard",
+   "name": "Shardhaven Guard",
+   "yaw": -0.178,
+   "titled": false,
+   "x": 1566,
+   "z": 1602
+  },
+  {
+   "id": "guard_lastwell_0",
+   "town": "Lastwell",
+   "settlement": "lastwell",
+   "zone": "z11_10",
+   "tier": "town",
+   "post": "gate",
+   "gate": "lastwell_gate_0",
+   "rank": "guard",
+   "name": "Lastwell Guard",
+   "yaw": 0.777,
+   "titled": false,
+   "x": 1302,
+   "z": 1206
+  },
+  {
+   "id": "guard_lastwell_1",
+   "town": "Lastwell",
+   "settlement": "lastwell",
+   "zone": "z11_10",
+   "tier": "town",
+   "post": "gate",
+   "gate": "lastwell_gate_0",
+   "rank": "guard",
+   "name": "Lastwell Guard",
+   "yaw": 0.777,
+   "titled": false,
+   "x": 1308,
+   "z": 1200
+  },
+  {
+   "id": "guard_lastwell_2",
+   "town": "Lastwell",
+   "settlement": "lastwell",
+   "zone": "z11_10",
+   "tier": "town",
+   "post": "gate",
+   "gate": "lastwell_gate_1",
+   "rank": "guard",
+   "name": "Lastwell Guard",
+   "yaw": 2.985,
+   "titled": false,
+   "x": 1316,
+   "z": 1088
+  },
+  {
+   "id": "guard_lastwell_3",
+   "town": "Lastwell",
+   "settlement": "lastwell",
+   "zone": "z11_10",
+   "tier": "town",
+   "post": "gate",
+   "gate": "lastwell_gate_1",
+   "rank": "guard",
+   "name": "Lastwell Guard",
+   "yaw": 2.985,
+   "titled": false,
+   "x": 1306,
+   "z": 1086
+  },
+  {
+   "id": "guard_lastwell_4",
+   "town": "Lastwell",
+   "settlement": "lastwell",
+   "zone": "z11_10",
+   "tier": "town",
+   "post": "square",
+   "rank": "sergeant",
+   "name": "Sergeant Draskar",
+   "yaw": 2.88,
+   "titled": false,
+   "x": 1306,
+   "z": 1152
+  },
+  {
+   "id": "guard_lastwell_5",
+   "town": "Lastwell",
+   "settlement": "lastwell",
+   "zone": "z11_10",
+   "tier": "town",
+   "post": "square",
+   "rank": "guard",
+   "name": "Lastwell Guard",
+   "yaw": -1.059,
+   "titled": false,
+   "x": 1312,
+   "z": 1144
+  },
+  {
+   "id": "guard_lastwell_6",
+   "town": "Lastwell",
+   "settlement": "lastwell",
+   "zone": "z11_10",
+   "tier": "town",
+   "post": "square",
+   "rank": "guard",
+   "name": "Lastwell Guard",
+   "yaw": 1.134,
+   "titled": false,
+   "x": 1302,
+   "z": 1144
+  },
+  {
+   "id": "guard_cinderholt_0",
+   "town": "Cinderholt",
+   "settlement": "cinderholt",
+   "zone": "z12_11",
+   "tier": "village",
+   "post": "gate",
+   "gate": "cinderholt_gate_0",
+   "rank": "guard",
+   "name": "Cinderholt Guard",
+   "yaw": 1.602,
+   "titled": false,
+   "x": 1128,
+   "z": 740
+  },
+  {
+   "id": "guard_cinderholt_1",
+   "town": "Cinderholt",
+   "settlement": "cinderholt",
+   "zone": "z12_11",
+   "tier": "village",
+   "post": "gate",
+   "gate": "cinderholt_gate_1",
+   "rank": "guard",
+   "name": "Cinderholt Guard",
+   "yaw": -0.689,
+   "titled": false,
+   "x": 1052,
+   "z": 766
+  },
+  {
+   "id": "guard_cinderholt_2",
+   "town": "Cinderholt",
+   "settlement": "cinderholt",
+   "zone": "z12_11",
+   "tier": "village",
+   "post": "square",
+   "rank": "guard",
+   "name": "Cinderholt Guard",
+   "yaw": 0.15,
+   "titled": false,
+   "x": 1080,
+   "z": 732
+  },
+  {
+   "id": "guard_kilnhold_0",
+   "town": "Kilnhold",
+   "settlement": "kilnhold",
+   "zone": "z11_11",
+   "tier": "village",
+   "post": "gate",
+   "gate": "kilnhold_gate_0",
+   "rank": "guard",
+   "name": "Kilnhold Guard",
+   "yaw": 0.917,
+   "titled": false,
+   "x": 1596,
+   "z": 514
+  },
+  {
+   "id": "guard_kilnhold_1",
+   "town": "Kilnhold",
+   "settlement": "kilnhold",
+   "zone": "z11_11",
+   "tier": "village",
+   "post": "gate",
+   "gate": "kilnhold_gate_1",
+   "rank": "guard",
+   "name": "Kilnhold Guard",
+   "yaw": -2.759,
+   "titled": false,
+   "x": 1574,
+   "z": 430
+  },
+  {
+   "id": "guard_kilnhold_2",
+   "town": "Kilnhold",
+   "settlement": "kilnhold",
+   "zone": "z11_11",
+   "tier": "village",
+   "post": "square",
+   "rank": "guard",
+   "name": "Kilnhold Guard",
+   "yaw": 1.03,
+   "titled": false,
+   "x": 1570,
+   "z": 476
+  },
+  {
+   "id": "guard_rim_shrine_0",
+   "town": "Rim Shrine",
+   "settlement": "rim_shrine",
+   "zone": "z12_10",
+   "tier": "hamlet",
+   "post": "gate",
+   "gate": "rim_shrine_gate_0",
+   "rank": "guard",
+   "name": "Rim Shrine Guard",
+   "yaw": 2.278,
+   "titled": false,
+   "x": 1818,
+   "z": 1130
+  }
+ ],
+ "dummies": [
+  {
+   "id": "dummy_port_vharl_0",
+   "name": "Training Dummy",
+   "town": "Port Vharl",
+   "settlement": "port_vharl",
+   "zone": "z13_10",
+   "tier": "town",
+   "x": 1152.8,
+   "z": 904,
+   "yaw": -0.943,
+   "fromSquare": 16.2
+  },
+  {
+   "id": "dummy_port_vharl_1",
+   "name": "Training Dummy",
+   "town": "Port Vharl",
+   "settlement": "port_vharl",
+   "zone": "z13_10",
+   "tier": "town",
+   "x": 1151.2,
+   "z": 902,
+   "yaw": -0.785,
+   "fromSquare": 16.2
+  },
+  {
+   "id": "dummy_lastwell_0",
+   "name": "Training Dummy",
+   "town": "Lastwell",
+   "settlement": "lastwell",
+   "zone": "z11_10",
+   "tier": "town",
+   "x": 1295.6,
+   "z": 1138.8,
+   "yaw": 0.992,
+   "fromSquare": 14.1
+  },
+  {
+   "id": "dummy_lastwell_1",
+   "name": "Training Dummy",
+   "town": "Lastwell",
+   "settlement": "lastwell",
+   "zone": "z11_10",
+   "tier": "town",
+   "x": 1294.4,
+   "z": 1141.2,
+   "yaw": 1.182,
+   "fromSquare": 14.1
+  }
+ ],
+ "problems": []
+}

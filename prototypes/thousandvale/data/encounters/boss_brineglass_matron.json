@@ -1,0 +1,460 @@
+{
+  "id": "boss_brineglass_matron",
+  "name": "The Brineglass Matron",
+  "tier": "boss",
+  "body": "obsidian_warden",
+  "place": "dungeon lava_tube set A (The Brineglass Tubes, Blackstrand, level 11-13): the end boss where the tube meets the sea",
+  "_doc": "A warden of sea-glass that the old islanders set to keep the tide out of the tubes; now it keeps everyone out. P1 \"Tide Gate\": a glass hammer cone, shards thrown at random players, and the TIDE — sea water rushes in from one side as a sweep of lines; four cooling vents in the floor hiss steam (stand in one and burn), but if you lure the Matron onto a vent the steam cracks her glass (stun + takes more, once per vent). P2 at 60% \"Saltglass Ward\": she seals herself in salt-glass; light the three tide lamps to break it (or it fades by itself). P3 new bar \"Molten Heart\": the glass splits and her core shows — the floor around her heats in a ring (stand close or far), a three-player soak of falling glass, and a spreading spray of droplets.",
+  "party": "Solo: hard; use the vents, skip nothing. 2-3: the tank drags her onto vents; one runs the lamps. 5: as designed — the soak needs three.",
+  "hpMult": 3.8,
+  "arena": {
+    "radius": 16,
+    "objects": [
+      {
+        "id": "vent_ne",
+        "type": "pool",
+        "name": "Cooling vent",
+        "x": 8,
+        "z": -8,
+        "r": 1.6,
+        "every": 1,
+        "damage": 0.25,
+        "status": "seared",
+        "element": "fire",
+        "boss": [
+          {
+            "say": "Steam bursts through her glass — the Matron cracks!",
+            "style": "warn"
+          },
+          {
+            "stun": 3
+          },
+          {
+            "vuln": {
+              "takeMore": 0.3,
+              "seconds": 10,
+              "name": "Steam-Cracked"
+            }
+          },
+          {
+            "remove": "vent_ne"
+          }
+        ]
+      },
+      {
+        "id": "vent_nw",
+        "type": "pool",
+        "name": "Cooling vent",
+        "x": -8,
+        "z": -8,
+        "r": 1.6,
+        "every": 1,
+        "damage": 0.25,
+        "status": "seared",
+        "element": "fire",
+        "boss": [
+          {
+            "say": "Steam bursts through her glass — the Matron cracks!",
+            "style": "warn"
+          },
+          {
+            "stun": 3
+          },
+          {
+            "vuln": {
+              "takeMore": 0.3,
+              "seconds": 10,
+              "name": "Steam-Cracked"
+            }
+          },
+          {
+            "remove": "vent_nw"
+          }
+        ]
+      },
+      {
+        "id": "vent_se",
+        "type": "pool",
+        "name": "Cooling vent",
+        "x": 8,
+        "z": 8,
+        "r": 1.6,
+        "every": 1,
+        "damage": 0.25,
+        "status": "seared",
+        "element": "fire",
+        "boss": [
+          {
+            "say": "Steam bursts through her glass — the Matron cracks!",
+            "style": "warn"
+          },
+          {
+            "stun": 3
+          },
+          {
+            "vuln": {
+              "takeMore": 0.3,
+              "seconds": 10,
+              "name": "Steam-Cracked"
+            }
+          },
+          {
+            "remove": "vent_se"
+          }
+        ]
+      },
+      {
+        "id": "vent_sw",
+        "type": "pool",
+        "name": "Cooling vent",
+        "x": -8,
+        "z": 8,
+        "r": 1.6,
+        "every": 1,
+        "damage": 0.25,
+        "status": "seared",
+        "element": "fire",
+        "boss": [
+          {
+            "say": "Steam bursts through her glass — the Matron cracks!",
+            "style": "warn"
+          },
+          {
+            "stun": 3
+          },
+          {
+            "vuln": {
+              "takeMore": 0.3,
+              "seconds": 10,
+              "name": "Steam-Cracked"
+            }
+          },
+          {
+            "remove": "vent_sw"
+          }
+        ]
+      },
+      {
+        "id": "lamp_n",
+        "type": "brazier",
+        "name": "Tide lamp",
+        "x": 0,
+        "z": -11
+      },
+      {
+        "id": "lamp_e",
+        "type": "brazier",
+        "name": "Tide lamp",
+        "x": 11,
+        "z": 0
+      },
+      {
+        "id": "lamp_w",
+        "type": "brazier",
+        "name": "Tide lamp",
+        "x": -11,
+        "z": 0
+      }
+    ]
+  },
+  "say": {
+    "pull": [
+      "The tide stays out. So do you.",
+      "Glass grinds on glass as the Matron turns. \"Shut the gate.\"",
+      "Salt on the wind. Salt in the wound."
+    ],
+    "death": "The Brineglass Matron cracks from crown to heel, and the sea comes in quietly behind her.",
+    "reset": "The Matron goes back to the tide gate and stands, listening to the sea."
+  },
+  "enrage": {
+    "seconds": 330,
+    "damage": 3,
+    "say": "THE SEA IS SHUT OUT. FOREVER.",
+    "soft": {
+      "from": 260,
+      "every": 15,
+      "add": 0.08,
+      "say": "The Matron glows hotter."
+    }
+  },
+  "abilities": {
+    "glass_hammer": {
+      "id": "glass_hammer",
+      "name": "Glass Hammer",
+      "every": [
+        6,
+        8
+      ],
+      "range": 7,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 6.5,
+          "arc": 1.5,
+          "wind": 1.1,
+          "damage": 1.9
+        }
+      ]
+    },
+    "shard_throw": {
+      "id": "shard_throw",
+      "name": "Shard Throw",
+      "every": [
+        9,
+        12
+      ],
+      "first": 3,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "count": 2,
+          "r": 2.5,
+          "delay": 0.3,
+          "wind": 1.3,
+          "damage": 1.3,
+          "status": "bleed"
+        }
+      ]
+    },
+    "tide": {
+      "id": "tide",
+      "name": "The Tide Comes In",
+      "every": [
+        18,
+        22
+      ],
+      "first": 7,
+      "cast": 1,
+      "say": "The tide rushes in from the sea side — get out of the water lines!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "home",
+          "offset": [
+            -14,
+            -9
+          ],
+          "yaw": 0,
+          "len": 28,
+          "w": 4,
+          "wind": 1.6,
+          "damage": 1.7,
+          "element": "ice",
+          "status": "chill",
+          "knock": 3
+        },
+        {
+          "shape": "line",
+          "at": "home",
+          "offset": [
+            -14,
+            0
+          ],
+          "yaw": 0,
+          "len": 28,
+          "w": 4,
+          "wind": 2.1,
+          "damage": 1.7,
+          "element": "ice",
+          "status": "chill",
+          "knock": 3
+        },
+        {
+          "shape": "line",
+          "at": "home",
+          "offset": [
+            -14,
+            9
+          ],
+          "yaw": 0,
+          "len": 28,
+          "w": 4,
+          "wind": 2.6,
+          "damage": 1.7,
+          "element": "ice",
+          "status": "chill",
+          "knock": 3
+        }
+      ]
+    },
+    "salt_spray": {
+      "id": "salt_spray",
+      "name": "Salt Spray",
+      "every": [
+        12,
+        15
+      ],
+      "first": 4,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "spread": 12,
+          "r": 2.6,
+          "count": 4,
+          "delay": 0.25,
+          "wind": 1.4,
+          "damage": 1.2,
+          "status": "weaken"
+        }
+      ]
+    },
+    "molten_ring": {
+      "id": "molten_ring",
+      "name": "Molten Ring",
+      "every": [
+        16,
+        19
+      ],
+      "first": 5,
+      "cast": 1,
+      "say": "The floor around her glows — hug her or get far away!",
+      "telegraphs": [
+        {
+          "shape": "ring",
+          "at": "self",
+          "r": 11,
+          "r2": 3.5,
+          "wind": 1.8,
+          "damage": 2.2,
+          "element": "fire",
+          "status": "burn"
+        }
+      ]
+    },
+    "glassfall": {
+      "id": "glassfall",
+      "name": "Glassfall",
+      "every": [
+        20,
+        24
+      ],
+      "first": 8,
+      "cast": 1,
+      "say": "The roof glass breaks over {target} — three of you, catch it together!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3,
+          "kind": "soak",
+          "need": 3,
+          "fail": 2,
+          "wind": 3,
+          "damage": 1.4
+        }
+      ]
+    },
+    "droplets": {
+      "id": "droplets",
+      "name": "Glass Droplets",
+      "every": [
+        11,
+        13
+      ],
+      "first": 2,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "each",
+          "r": 2.6,
+          "follow": true,
+          "wind": 2,
+          "damage": 1.3,
+          "element": "fire"
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Tide Gate",
+      "abilities": [
+        "glass_hammer",
+        "shard_throw",
+        "tide"
+      ]
+    },
+    {
+      "name": "Saltglass Ward",
+      "at": 0.6,
+      "say": "Salt-glass grows over her like frost. Light the three tide lamps!",
+      "abilities": [
+        "glass_hammer",
+        "salt_spray",
+        "shard_throw"
+      ],
+      "onEnter": [
+        {
+          "shield": {
+            "seconds": 20,
+            "pool": 0.1
+          }
+        },
+        {
+          "adds": {
+            "type": "scoria_crawler",
+            "count": 2,
+            "radius": 8,
+            "at": "home"
+          }
+        },
+        {
+          "say": "A shell of salt-glass seals the Matron. Light all three tide lamps! It fails by itself in 20 seconds.",
+          "style": "warn"
+        }
+      ],
+      "ward": {
+        "seconds": 20,
+        "break": "objects",
+        "need": 3,
+        "what": "brazier",
+        "say": "A shell of salt-glass seals the Matron. Light all three tide lamps! It fails by itself in 20 seconds.",
+        "fade": "The salt-glass flakes away by itself.",
+        "pool": 0.1
+      }
+    },
+    {
+      "name": "Molten Heart",
+      "newBar": {
+        "hp": 0.55
+      },
+      "say": "Her glass splits — and the heart inside is still molten.",
+      "abilities": [
+        "glass_hammer",
+        "molten_ring",
+        "glassfall",
+        "droplets"
+      ]
+    }
+  ],
+  "triggers": [
+    {
+      "when": {
+        "lit": 3,
+        "phase": 1
+      },
+      "do": [
+        {
+          "shield": false
+        },
+        {
+          "stun": 3
+        },
+        {
+          "vuln": {
+            "takeMore": 0.4,
+            "seconds": 10,
+            "name": "Ward Broken"
+          }
+        },
+        {
+          "say": "Three lamps burn! The salt-glass shatters off her!",
+          "style": "warn"
+        }
+      ]
+    }
+  ]
+}

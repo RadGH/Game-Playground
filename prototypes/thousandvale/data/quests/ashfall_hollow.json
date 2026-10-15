@@ -1,0 +1,239 @@
+{
+  "_doc": "Stream C (Expansion 1). Quests for zone 'ashfall_hollow' on Vharlen, the Burning Isle. Format: data/quests/README.md. Rewards: xp = share of a level's XP at the quest level, gold = multiple of a kill's gold; item.tier rolls at your level. `killRare` {zone, slot} names the zone's rare by slot (data/provinces/rares.json). Story-chain quests carry `story: n` (data/quests/vharlen-province.json).",
+  "zone": "ashfall_hollow",
+  "npcs": {
+    "ash_reader_kirra": {
+      "name": "Ash-reader Kirra",
+      "role": "elder",
+      "at": "Cinderholt",
+      "greeting": "I read the ash the way you read a letter. This valley is one long, angry letter.",
+      "titled": true
+    },
+    "gakk_nuvaru": {
+      "name": "Gakk Nuvaru",
+      "role": "resident",
+      "at": "Cinderholt",
+      "greeting": "I dig my front door out every morning. It builds character. And arms.",
+      "titled": true
+    },
+    "benno_lhessu": {
+      "name": "Benno Lhessu",
+      "role": "innkeeper",
+      "at": "Cinderholt",
+      "greeting": "Welcome to the inn. Mind the stairs, the inn is the cellar now. Was the roof, once.",
+      "titled": true
+    },
+    "angler_cinderholt": {
+      "name": "Gethu Rhovek",
+      "role": "angler",
+      "at": "Cinderholt",
+      "greeting": "The water's grey with ash. The fish are grey with ash. I am grey with ash. See the ripples, just east of where I'm standing? That's the town pool. It never fishes out.",
+      "placedBy": "content-pools",
+      "titled": true
+    },
+    "carter_cinderholt": {
+      "name": "Ilko Zhakku",
+      "role": "carter",
+      "at": "Cinderholt",
+      "greeting": "Walking is free. Riding is nearly free, and you arrive with your feet unboiled.",
+      "cart": "cart_cinderholt",
+      "placedBy": "content-towns",
+      "titled": true
+    }
+  },
+  "quests": [
+    {
+      "id": "ah_digging_out",
+      "name": "Digging Out",
+      "level": 15,
+      "giver": "gakk_nuvaru",
+      "offer": "I finally dug my cellar out. It was already occupied. Crawlers, all through the buried cellars, all very comfortable.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "scoria_crawler",
+          "count": 8,
+          "where": "the buried cellars",
+          "text": "Kill 8 scoria crawlers in the buried cellars"
+        }
+      ],
+      "done": "My cellar! Full of ash, but mine. I am going to sit in it.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 13,
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "uncommon"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ah_what_the_ash_recalls",
+      "name": "What the Ash Recalls",
+      "level": 16,
+      "giver": "ash_reader_kirra",
+      "story": 4,
+      "offer": "Stiltreach sent you with that cake? Put it down, it is warm. The last time the Mother erupted, the Slagborn's grandmothers had been feeding her for a year. Cinderholt is what she gave back. Their firecallers are in our streets again, reading the old rite off our buried walls.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "slagborn_firecaller",
+          "count": 6,
+          "where": "the half-buried streets",
+          "text": "Kill 6 Slagborn firecallers in the buried streets"
+        },
+        {
+          "kind": "collect",
+          "item": "Rubbing of the old rite",
+          "count": 3,
+          "from": "slagborn_firecaller",
+          "chance": 0.5,
+          "where": "the half-buried streets",
+          "text": "Take 3 rubbings of the old rite from the firecallers"
+        },
+        {
+          "kind": "talk",
+          "npc": "ash_reader_kirra",
+          "where": "Cinderholt",
+          "text": "Bring the rubbings to Ash-reader Kirra in Cinderholt"
+        }
+      ],
+      "done": "The rite does not end in a valley. It ends at the crater lake, at Rim Shrine. They mean to wake what sleeps in the water, and let it empty the island for them. Go up. The Rim-keepers will need every hand.",
+      "reward": {
+        "xp": 0.8,
+        "gold": 20,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
+      },
+      "next": "cd_the_rim_holds"
+    },
+    {
+      "id": "ah_the_ashen_reeve",
+      "name": "The Ashen Reeve",
+      "level": 16,
+      "giver": "benno_lhessu",
+      "offer": "Before the ash came, Cinderholt had a reeve who collected the rents. He still does. From the dead, and from me. The Ashen Reeve walks the old square at dusk with his book.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "obsidian_warden",
+          "count": 3,
+          "where": "the old square",
+          "text": "Kill 3 obsidian wardens in the old square"
+        },
+        {
+          "kind": "killOne",
+          "encounter": "elite_ashen_reeve",
+          "where": "the old square",
+          "text": "Defeat the Ashen Reeve",
+          "at": {
+            "x": 25860,
+            "z": 23004,
+            "r": 45,
+            "name": "The Ashen Reeve"
+          }
+        }
+      ],
+      "done": "Rent paid in full, forever. I will burn the book. It is already mostly burned, but I will finish it.",
+      "reward": {
+        "xp": 0.75,
+        "gold": 32,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "ah_the_cellar_queen",
+      "name": "The Cellar Queen",
+      "level": 16,
+      "giver": "gakk_nuvaru",
+      "offer": "Under the cellars there are more cellars, and the Cellar Queen holds court in the deepest one. Everyone who digs too far ends up at her table.",
+      "steps": [
+        {
+          "kind": "killRare",
+          "zone": "ashfall_hollow",
+          "slot": 0,
+          "text": "Hunt down the Cellar Queen",
+          "where": "the deepest cellars of Ashfall Hollow"
+        }
+      ],
+      "done": "No more court. I can dig in peace. Slowly. With great care.",
+      "reward": {
+        "xp": 0.65,
+        "gold": 32,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "ah_under_cinderholt",
+      "name": "Under Cinderholt",
+      "level": 16,
+      "giver": "ash_reader_kirra",
+      "group": "a party of 3-5",
+      "offer": "Most of the old town is still down there under the ash: streets, houses, a hall, all of it. Something keeps the lamps lit. Take a party and find out who pays for the oil.",
+      "steps": [
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "floor": 1,
+          "text": "Go down into the buried town Under Cinderholt",
+          "where": "Under Cinderholt, the dungeon door in Ashfall Hollow"
+        },
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "boss": true,
+          "text": "Defeat what keeps the old town lit",
+          "where": "the bottom of Under Cinderholt"
+        }
+      ],
+      "done": "Dark, at last, and the dead can rest in it. The crater lake shore is where you go when you want harder work.",
+      "reward": {
+        "xp": 1.2,
+        "gold": 58,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        }
+      },
+      "next": "cd_lake_shore"
+    },
+    {
+      "id": "ah_the_buried_mayor",
+      "name": "The Buried Mayor",
+      "level": 17,
+      "giver": "benno_lhessu",
+      "offer": "Every so often the ash in the square heaves and the old mayor climbs out to give a speech. Nobody wants the speech. When the bell starts, come and help us cut it short.",
+      "steps": [
+        {
+          "kind": "killOne",
+          "encounter": "ev_the_buried_mayor",
+          "credit": "event",
+          "where": "the old square of Cinderholt, when the bell rings (zone event)",
+          "text": "Defeat the Buried Mayor when he rises"
+        }
+      ],
+      "done": "Shortest speech he ever gave. The kiln folk on the ridge to the west pay well, if your arms still work.",
+      "reward": {
+        "xp": 0.85,
+        "gold": 40,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      },
+      "next": "kr_warm_ledges"
+    }
+  ]
+}

@@ -36,6 +36,16 @@ export function createMapFind({ atlas, me, onChange = () => {}, onShow = () => {
     S.loading = (async () => {
       const model = atlas.model || await atlas.src.model().catch(() => null);
       const [offices, carts, townServices, professions, professionContent] = await Promise.all([j('provinces/offices.json'), j('provinces/carts.json'), j('provinces/town-services.json'), j('rules/professions.json'), j('provinces/professions.json')]);
+      // Expansion 1 (stream P): every other province keeps its own copies beside Torbor's (data/provinces/<id>-offices.json …,
+      // js/sim/province-files.js); their towns, stops and trainers join the search
+      const others = Object.keys((await j('world/province-map.json'))?.provinces || {}).filter(id => id !== 'torbor_downs');
+      for (const id of others) {
+        const [o2, c2, t2, p2] = await Promise.all(['offices', 'carts', 'town-services', 'professions'].map(f => j(`provinces/${id}-${f}.json`)));
+        if (o2?.towns && offices) offices.towns = { ...(offices.towns || {}), ...o2.towns };
+        if (c2?.stops && carts) carts.stops = [...(carts.stops || []), ...c2.stops];
+        if (t2?.towns && townServices) townServices.towns = { ...(townServices.towns || {}), ...t2.towns };
+        if (p2?.trainers && professionContent) professionContent.trainers = [...(professionContent.trainers || []), ...p2.trainers];
+      }
       const towns = (model?.pois || []).filter(p => TOWN_KINDS.has(p.kind)).map(p => ({ name: p.name, x: p.x, z: p.z, r: p.r || 90 }));
       const npcs = [...(model?.npcs || new Map()).entries()].map(([id, n]) => ({ id, ...n }));
       for (const trainer of professionContent?.trainers || []) {

@@ -1,0 +1,333 @@
+{
+ "_doc": "Vharlen's own wanderers (Expansion 1), laid over data/provinces/wanderers.json key by key (js/sim/province-files.js). Same shapes and fields as the home file (read its _doc): `stopNear`, `shop` (a kind in `shops` here, merged into the shop kinds), `offers: deliver` (the island road-events `deliver` texts, data/provinces/vharlen-road-events.json), `curious` (a `lore` line and once a `tip`), `offers: cart` + `vehicle: ox_cart` (the cart model the client has) with crew role `carter` = the island's cart for hire, `ash_hauler`, which data/provinces/vharlen-carts.json `roaming` names. A `tip` good is an id of data/provinces/vharlen-shops.json goodsCatalog.",
+ "rules": {
+  "perRouteKm": 1.25
+ },
+ "kinds": {
+  "strand_pedlar": {
+   "night": true,
+   "name": "Strand Pedlar",
+   "weight": 4,
+   "speedMps": 1.2,
+   "stopNear": 8,
+   "shop": "isle_pedlar",
+   "blurb": "Floats, hooks, beads and blades, all off the back of one patient mule.",
+   "beast": "mule",
+   "crew": [
+    {
+     "role": "strand_pedlar",
+     "count": [
+      1,
+      1
+     ],
+     "name": "{first} the Pedlar",
+     "armed": false,
+     "titled": true
+    }
+   ],
+   "chatter": [
+    "role.strand_pedlar",
+    "road.isle_onroute"
+   ]
+  },
+  "wreck_picker": {
+   "name": "Wreck-Picker's Barrow",
+   "weight": 2,
+   "speedMps": 1.1,
+   "stopNear": 8,
+   "shop": "isle_pedlar",
+   "cart": true,
+   "beast": "none",
+   "blurb": "Whatever the last storm put on the beach, now for sale.",
+   "crew": [
+    {
+     "role": "wreck_picker",
+     "count": [
+      1,
+      1
+     ],
+     "name": "{first} {family}, Wreck-Picker",
+     "armed": false,
+     "titled": true
+    }
+   ],
+   "chatter": [
+    "role.wreck_picker",
+    "road.isle_onroute"
+   ]
+  },
+  "bundle_runner": {
+   "night": true,
+   "name": "Bundle Runner",
+   "weight": 3,
+   "speedMps": 1.5,
+   "stopNear": 7,
+   "offers": "deliver",
+   "beast": "none",
+   "blurb": "Council bundles, hamlet letters, and sandals worn to string.",
+   "crew": [
+    {
+     "role": "bundle_runner",
+     "count": [
+      1,
+      1
+     ],
+     "name": "{first}, Runner",
+     "armed": false,
+     "titled": true
+    }
+   ],
+   "chatter": [
+    "role.bundle_runner",
+    "road.isle_onroute"
+   ]
+  },
+  "fen_mother": {
+   "name": "Fen Mother",
+   "weight": 2,
+   "speedMps": 1.2,
+   "stopNear": 7,
+   "offers": "deliver",
+   "beast": "none",
+   "blurb": "Sending word ahead to a child who moved to town.",
+   "crew": [
+    {
+     "role": "fen_mother",
+     "count": [
+      1,
+      1
+     ],
+     "name": "{first} {family}",
+     "armed": false,
+     "titled": true
+    }
+   ],
+   "chatter": [
+    "role.fen_mother",
+    "road.isle_onroute"
+   ]
+  },
+  "tale_teller": {
+   "name": "Tale-Teller",
+   "weight": 2,
+   "speedMps": 1.1,
+   "stopNear": 7,
+   "curious": true,
+   "beast": "none",
+   "blurb": "Knows a story for every cairn on this road, and a different one on the way back.",
+   "crew": [
+    {
+     "role": "tale_teller",
+     "count": [
+      1,
+      1
+     ],
+     "name": "{first} the Tale-Teller",
+     "armed": false,
+     "titled": true
+    }
+   ],
+   "chatter": [
+    "role.tale_teller",
+    "road.isle_onroute"
+   ]
+  },
+  "rim_scholar": {
+   "name": "Rim Keeper Scholar",
+   "weight": 2,
+   "speedMps": 1,
+   "stopNear": 7,
+   "curious": true,
+   "beast": "none",
+   "blurb": "Measuring the ash layers with a knotted cord and a great deal of patience.",
+   "crew": [
+    {
+     "role": "rim_scholar",
+     "count": [
+      1,
+      1
+     ],
+     "name": "Keeper {first}, Scholar",
+     "armed": false,
+     "titled": true
+    }
+   ],
+   "chatter": [
+    "role.rim_scholar",
+    "road.isle_onroute"
+   ]
+  },
+  "harbour_veteran": {
+   "night": true,
+   "name": "Old Harbour Guard",
+   "weight": 1,
+   "speedMps": 1,
+   "stopNear": 7,
+   "curious": true,
+   "beast": "none",
+   "blurb": "Walks the roads he once kept the raiders off, out of habit.",
+   "crew": [
+    {
+     "role": "harbour_veteran",
+     "count": [
+      1,
+      1
+     ],
+     "name": "Old {first}",
+     "armed": true,
+     "titled": true
+    }
+   ],
+   "chatter": [
+    "role.harbour_veteran",
+    "road.isle_danger"
+   ]
+  },
+  "ash_hauler": {
+   "night": true,
+   "name": "Ash-Road Hauler",
+   "weight": 3,
+   "speedMps": 1.15,
+   "stopNear": 12,
+   "offers": "cart",
+   "cart": true,
+   "vehicle": "ox_cart",
+   "beast": "none",
+   "minRouteM": 900,
+   "blurb": "A cart for hire on the island roads. It will take you to the next town, or any town, for a few coins.",
+   "crew": [
+    {
+     "role": "carter",
+     "count": [
+      1,
+      1
+     ],
+     "name": "{first} {family}",
+     "armed": false,
+     "titled": true
+    }
+   ],
+   "chatter": [
+    "role.ash_hauler",
+    "road.isle_onroute"
+   ]
+  }
+ },
+ "shops": {
+  "isle_pedlar": {
+   "name": "Strand Pedlar's Basket",
+   "role": "strand_pedlar",
+   "says": "Have a rummage. Touch the glass, not the blades.",
+   "sign": "pack",
+   "categories": {
+    "weapon": {
+     "label": "Blades & spears",
+     "bases": [
+      "dagger",
+      "battleaxe",
+      "iron_mace",
+      "spear",
+      "shortbow",
+      "wand",
+      "javelin",
+      "staff",
+      "hammer"
+     ],
+     "count": 4,
+     "rarity": {
+      "normal": 0.6,
+      "magic": 0.4
+     }
+    },
+    "armor": {
+     "label": "Salvaged gear",
+     "bases": [
+      "light_chest",
+      "light_boots",
+      "cloth_helm",
+      "light_gauntlets",
+      "buckler",
+      "cloth_legs"
+     ],
+     "count": 3,
+     "rarity": {
+      "normal": 0.7,
+      "magic": 0.3
+     }
+    },
+    "other": {
+     "label": "Beads & charms",
+     "bases": [
+      "ring",
+      "necklace"
+     ],
+     "count": 2,
+     "rarity": {
+      "normal": 0.5,
+      "magic": 0.5
+     }
+    }
+   },
+   "goods": [
+    {
+     "id": "healing_potion",
+     "source": "potion",
+     "price": 10,
+     "minLevel": 1
+    },
+    {
+     "id": "smoked_reef_fish",
+     "source": "good",
+     "price": 3,
+     "minLevel": 1
+    },
+    {
+     "id": "palm_toddy",
+     "source": "good",
+     "price": 3,
+     "minLevel": 1
+    },
+    {
+     "id": "pumice_whetstone",
+     "source": "good",
+     "price": 5,
+     "minLevel": 1
+    }
+   ]
+  }
+ },
+ "lore": [
+  "They say the Glass Kings poured their palace out of the mountain while it was still hot, and it set before they could change their minds.",
+  "Never whistle near a vent. The vents whistle back, and they are louder.",
+  "The bowls at the Rim Shrine are never empty. Nobody has ever seen who fills them.",
+  "A salamander that sits still in the open is either very old or waiting for you. Either way, go round.",
+  "Port Vharl is the second harbour. The first one is under the black sand, roofs and all.",
+  "The Slagborn say the mountain spoke to their first chief. Most hearths say it was the fumes.",
+  "Toss a glass bead into the caldera lake and the mountain owes you one. It has never once paid.",
+  "My grandmother swore the lava tubes run under the sea all the way to the mainland."
+ ],
+ "tips": [
+  {
+   "kind": "gold",
+   "amount": [
+    3,
+    8
+   ],
+   "say": "Here, for listening to an old fool. Buy yourself something cool to drink."
+  },
+  {
+   "kind": "good",
+   "id": "smoked_reef_fish",
+   "say": "Take this. The road is long and the steam-cooks charge double."
+  },
+  {
+   "kind": "good",
+   "id": "palm_toddy",
+   "say": "A swallow for the road. Don't tell the tapper where you got it."
+  },
+  {
+   "kind": "rumour",
+   "say": "Word is there's something nasty nesting near {place}. Worth a look, if you're the sort."
+  }
+ ]
+}

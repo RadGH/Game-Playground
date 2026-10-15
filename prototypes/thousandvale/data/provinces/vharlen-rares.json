@@ -1,0 +1,39 @@
+{
+  "_doc": "Expansion 1 (Vharlen). The two named rares of every zone in Vharlen (data/provinces/vharlen.json, same order as its zones). Laid over data/provinces/rares.json for Vharlen. Each id is a script in data/encounters/<id>.json with tier \"rare\" and secret true. PLAN §3.4: 20-60 min respawn per copy, roaming paths, called out in zone chat.",
+  "blackstrand": [
+    "rare_tidecoal",
+    "rare_old_blister"
+  ],
+  "steamwood": [
+    "rare_greenjaw",
+    "rare_mother_of_moss"
+  ],
+  "sulphur_bight": [
+    "rare_brimbelly",
+    "rare_the_assayer"
+  ],
+  "fumarole_fen": [
+    "rare_bubblejaw",
+    "rare_old_wellen"
+  ],
+  "glasswind_strand": [
+    "rare_shardmother",
+    "rare_the_glazier"
+  ],
+  "pumice_wastes": [
+    "rare_ashcoat",
+    "rare_the_tally_man"
+  ],
+  "ashfall_hollow": [
+    "rare_cellar_queen",
+    "rare_ashfather"
+  ],
+  "kiln_ridge": [
+    "rare_slagjaw",
+    "rare_the_kilnmaster"
+  ],
+  "the_caldera": [
+    "rare_mountainheart",
+    "rare_the_last_keeper"
+  ]
+}

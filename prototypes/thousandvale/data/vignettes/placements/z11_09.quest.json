@@ -1,0 +1,110 @@
+{
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z11_09, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "zone": "z11_09",
+ "terrainHash": "1e622a94",
+ "placements": [
+  {
+   "type": "camp",
+   "id": "quest_gw_crown_feathers_0_0",
+   "monster": "glasswing",
+   "with": null,
+   "level": [
+    13,
+    13
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1671,
+   "z": 1408,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "gw_crown_feathers",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z11_09_1",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    13
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1908,
+   "z": 1464,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "venomous"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "npc",
+   "id": "angler_shardhaven",
+   "name": "Lorr Imbaru",
+   "role": "angler",
+   "at": "Shardhaven",
+   "x": 1292,
+   "z": 1476,
+   "yaw": -1.57,
+   "angler": true,
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "npc",
+   "id": "carter_shardhaven",
+   "name": "Ilko Rukkesh",
+   "role": "carter",
+   "at": "Shardhaven",
+   "x": 1562,
+   "z": 1620,
+   "yaw": 1.659,
+   "cart": "cart_shardhaven",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_shardhaven",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Shardhaven",
+   "carter": "carter_shardhaven",
+   "x": 1560,
+   "z": 1620,
+   "yaw": 0,
+   "radius": 2.2
+  },
+  {
+   "type": "guard",
+   "id": "guard_shardhaven_0",
+   "name": "Shardhaven Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "hamlet",
+   "town": "Shardhaven",
+   "post": "gate",
+   "gate": "shardhaven_gate_0",
+   "x": 1566,
+   "z": 1602,
+   "yaw": -0.178,
+   "titled": false
+  }
+ ]
+}

@@ -1,0 +1,338 @@
+{
+  "id": "boss_chief_durrak",
+  "name": "Chief Durrak Brandhand",
+  "tier": "boss",
+  "body": "slagborn_chief",
+  "place": "dungeon kiln_forge set B (The Slag Heaps, Kiln Ridge, level 17-20): the end boss in the great forge",
+  "_doc": "The Slagborn war-chief of Kiln Ridge, who forges the gangs' weapons himself. P1 \"At the Anvil\": a hammer cone, a red-hot brand he presses on the tank (stacks; swap at 3), and sparks off the anvil. Two slag-cooling pillars: his Forge Blast (hide behind one) cracks them. P2 at 60% \"Call the Smiths\": his smiths come running (a shield that holds while they live) while molten iron is poured from the crucible in lines. P3 new bar \"Quenched in Anger\": he plunges into the quench tank and comes out steaming — steam on each player, a three-player stack, and a hammer slam that knocks far.",
+  "party": "Solo: hard — the brand needs a tank swap or a follower. 2-3: two tanks if you can. 5: as designed.",
+  "hpMult": 4,
+  "arena": {
+    "radius": 16,
+    "objects": [
+      {
+        "id": "cooler_a",
+        "type": "pillar",
+        "name": "Slag cooler",
+        "x": -7,
+        "z": 4,
+        "r": 1.5,
+        "hp": 3
+      },
+      {
+        "id": "cooler_b",
+        "type": "pillar",
+        "name": "Slag cooler",
+        "x": 7,
+        "z": 4,
+        "r": 1.5,
+        "hp": 3
+      }
+    ]
+  },
+  "say": {
+    "pull": [
+      "\"New steel for the anvil.\"",
+      "Durrak sets down a blade, picks up a hammer. \"Hold them still, I want to see the temper.\"",
+      "\"Every Slagborn blade on this ridge, I made. Every one.\""
+    ],
+    "death": "Durrak drops his hammer on the anvil. It rings for a long time.",
+    "reset": "\"Back to work.\" Durrak picks up the blade he was finishing."
+  },
+  "enrage": {
+    "seconds": 340,
+    "damage": 3,
+    "say": "\"ENOUGH. Into the fire with all of you!\""
+  },
+  "abilities": {
+    "hammer": {
+      "id": "hammer",
+      "name": "Forge Hammer",
+      "every": [
+        6,
+        8
+      ],
+      "range": 7,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 6.5,
+          "arc": 1.4,
+          "wind": 1.1,
+          "damage": 1.9
+        }
+      ]
+    },
+    "brand": {
+      "id": "brand",
+      "name": "Red-Hot Brand",
+      "every": [
+        9,
+        11
+      ],
+      "first": 4,
+      "range": 5,
+      "melee": {
+        "damage": 1.1
+      },
+      "stackOn": {
+        "id": "chiefs_brand",
+        "name": "Chief's Brand",
+        "takeMore": 0.12,
+        "max": 6,
+        "seconds": 18,
+        "swapAt": 3,
+        "say": "{target} is branded deep — swap!"
+      }
+    },
+    "sparks": {
+      "id": "sparks",
+      "name": "Anvil Sparks",
+      "every": [
+        10,
+        12
+      ],
+      "first": 2,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "count": 3,
+          "delay": 0.25,
+          "r": 2.4,
+          "wind": 1.3,
+          "damage": 1.2,
+          "element": "fire",
+          "status": "burn"
+        }
+      ]
+    },
+    "forge_blast": {
+      "id": "forge_blast",
+      "name": "Forge Blast",
+      "every": [
+        18,
+        21
+      ],
+      "first": 7,
+      "cast": 1.3,
+      "say": "The forge roars open — get behind a slag cooler!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 18,
+          "wind": 2.2,
+          "damage": 2.6,
+          "element": "fire",
+          "los": true,
+          "status": "seared"
+        }
+      ]
+    },
+    "pour": {
+      "id": "pour",
+      "name": "Pour the Crucible",
+      "every": [
+        11,
+        14
+      ],
+      "first": 3,
+      "cast": 0.6,
+      "say": "Molten iron pours across the floor!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "home",
+          "offset": [
+            -14,
+            -5
+          ],
+          "yaw": 0,
+          "len": 28,
+          "w": 3,
+          "wind": 1.5,
+          "damage": 1.7,
+          "element": "fire",
+          "leave": {
+            "type": "pool",
+            "name": "Molten iron",
+            "r": 2.5,
+            "every": 1,
+            "seconds": 10,
+            "damage": 0.3,
+            "status": "burn",
+            "element": "fire"
+          }
+        },
+        {
+          "shape": "line",
+          "at": "home",
+          "offset": [
+            -14,
+            6
+          ],
+          "yaw": 0,
+          "len": 28,
+          "w": 3,
+          "wind": 2.1,
+          "damage": 1.7,
+          "element": "fire"
+        }
+      ]
+    },
+    "steam": {
+      "id": "steam",
+      "name": "Steaming",
+      "every": [
+        13,
+        15
+      ],
+      "first": 3,
+      "say": "Steam boils off him onto each of you — spread out!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "each",
+          "r": 3,
+          "follow": true,
+          "wind": 2,
+          "damage": 1.4,
+          "element": "fire",
+          "status": "seared"
+        }
+      ]
+    },
+    "stack": {
+      "id": "stack",
+      "name": "Hold the Anvil",
+      "every": [
+        20,
+        24
+      ],
+      "first": 7,
+      "cast": 1,
+      "say": "He brings the hammer down on {target} — stand together and take it!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3.2,
+          "kind": "stack",
+          "need": 3,
+          "follow": true,
+          "wind": 4,
+          "damage": 3.2
+        }
+      ]
+    },
+    "slam": {
+      "id": "slam",
+      "name": "Quench Slam",
+      "every": [
+        16,
+        19
+      ],
+      "first": 9,
+      "cast": 1,
+      "say": "He lifts the hammer high — get back!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 7,
+          "wind": 1.7,
+          "damage": 2.4,
+          "knock": 6
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "At the Anvil",
+      "abilities": [
+        "hammer",
+        "brand",
+        "sparks",
+        "forge_blast"
+      ]
+    },
+    {
+      "name": "Call the Smiths",
+      "at": 0.6,
+      "say": "\"Smiths! To the forge!\"",
+      "abilities": [
+        "hammer",
+        "pour",
+        "sparks"
+      ],
+      "shieldWhileAdds": true,
+      "shieldDown": "The last smith falls — Durrak has to fight his own battles now!",
+      "onEnter": [
+        {
+          "shield": {
+            "seconds": 20,
+            "pool": 0.1
+          }
+        },
+        {
+          "adds": {
+            "type": "slagborn_raider",
+            "count": 2,
+            "radius": 8,
+            "at": "home"
+          }
+        },
+        {
+          "adds": {
+            "type": "slagborn_firecaller",
+            "count": 1,
+            "radius": 8,
+            "at": "home"
+          }
+        },
+        {
+          "say": "Durrak hides behind his smiths. Kill the three smiths to break his ward! It fails by itself in 20 seconds.",
+          "style": "warn"
+        }
+      ],
+      "ward": {
+        "seconds": 20,
+        "pool": 0.1,
+        "break": "adds",
+        "need": 3,
+        "what": "slagborn_raider",
+        "say": "Durrak hides behind his smiths. Kill the three smiths to break his ward! It fails by itself in 20 seconds.",
+        "fade": "The ward fails by itself. No opening this time."
+      }
+    },
+    {
+      "name": "Quenched in Anger",
+      "newBar": {
+        "hp": 0.55
+      },
+      "say": "Durrak plunges into the quench tank and comes out wreathed in steam.",
+      "abilities": [
+        "hammer",
+        "steam",
+        "stack",
+        "slam"
+      ]
+    }
+  ],
+  "triggers": [
+    {
+      "when": {
+        "broken": 2
+      },
+      "do": [
+        {
+          "say": "Both slag coolers are cracked through. Nothing will stop the next blast.",
+          "style": "warn"
+        }
+      ]
+    }
+  ]
+}

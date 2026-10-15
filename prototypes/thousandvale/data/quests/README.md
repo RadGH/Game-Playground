@@ -145,3 +145,12 @@ B's bake never reads.
 - **Ox carts (W5)** — every carter is an NPC of its zone file (`role: 'carter'`, `cart: <stop id>`, `placedBy: 'content-towns'`). New step kind `ride` `{ from?, to }` (stop ids of data/provinces/carts.json), quest `tip` (a how-to paragraph), good `cart_token`. `start.json` `start_wheels_for_hire` teaches it (a side step from the carter outside Orrinsford).
 - **Events (W1, W24)** — `director.newcomer`, `director.raid`, `director.chest`; `startOn.clearOfNewcomersM` and `raid.gates` are written by `tools/content-towns.mjs` (not by hand).
 - **Experience (W4)** — a hand-in pays `reward.xp` x the level span x stream C's `questMult` x `data/provinces/economy.json` `quest.xpMult` (1.5). `node tools/sim-economy.mjs --curve`.
+
+## Vharlen (Expansion 1, stream C)
+
+Nine zone files (`blackstrand`, `steamwood`, `sulphur_bight`, `fumarole_fen`, `glasswind_strand`, `pumice_wastes`, `ashfall_hollow`, `kiln_ridge`,
+`the_caldera`), 6 quests and 3 givers each, levels inside the zone band; every zone has a dungeon quest and a rare quest, most an elite or zone-event
+quest. No vignette steps (Vharlen has none). `vharlen-province.json` is the island's story index in province.json's shape — "The Burning Isle", 5
+steps from Port Vharl to the Caldera, ending at Ossathra (`world_ossathra`, a realm event in events.json). The content tools skip any
+`<province>-province.json` when they list zone files. Events: `event_<zone>` for each island zone and `world_ossathra` in events.json carry their words
+on the record (`words`), tools/content-events.mjs --province=vharlen builds `info`.

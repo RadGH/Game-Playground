@@ -148,6 +148,7 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `delete` | gw | `char:int, name:str:24` | 0.5 / 3 | §25.1: delete a character (the typed name confirms it). Answers `deleted`, then `charList`. |
 | `feedbackMine` | both | `limit?:int, before?:int` | 1 / 5 | §24.1: my own reports (`feedback {op:'mine'}` is the same call). Answer `feedbackMine`. |
 | `cart` | p | `op:str:8, id:id, to?:str:48, token?:bool` | 2 / 4 | §24.5: ox-cart travel — `list` / `go`. Answers `cartList`, `cartR`, `cartRide`. |
+| `ship` | p | `op:str:8, id?:id, to?:str:48, party?:bool` | 2 / 4 | Expansion 1 §6: the voyage — `list` / `go` (the Harbourmaster `id`, the far harbour `to`, `party` boards party members close by) / `skip` (after 5 s). Answers `shipList`, `shipR`, `shipSail` (js/sim/ships.js). |
 | `meter` | p | `on:bool` | 1 / 4 | §24.6: the damage meter's hit feed on / off. Answers `meterR`, then `hits`. |
 | `fish` | p | `op:str:8, aim?:vec2, held?:num, score?:num, holds?:nums` | 4 / 8 | §21.10 angling: `cast`, `hook`, `land`, `stop`. Answers `fishR`, `fishBite`, `fishTug`, `fishCatch`. |
 | `cook` | p | `op?:str:8, id?:str:64, n?:int` | 2 / 6 | §21.10: no `id` = list (`cookList`), with `id` = cook it at a fire (`cookR`). |
@@ -245,6 +246,9 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `cartList` | `id, from, name, stops, gold, tokens` | §24.5: where this cart goes and what it costs. |
 | `cartR` | `op, ok, to, fare?, why?, msg?` | §24.5: answer to `cart` (`op:'go'`), and the arrival (`op:'arrive'`). |
 | `cartRide` | `to, from, ms, fare` | §24.5: the ride has begun (the client's presentation). |
+| `shipList` | `id, from, name, master, says, sailings, gold, log` | Expansion 1 §6: the sailings from this harbour (fare, seconds at sea, the far land's levels, why not). |
+| `shipR` | `op, ok, to, name?, fare?, crew?, left?, why?, msg?, first?, log?` | Expansion 1 §6: answer to `ship` (`go` / `skip`), and the arrival (`op:'arrive'`, said before the move). |
+| `shipSail` | `from, to, ship, ms, skipMs, fare, path, crew, berth, volcano` | Expansion 1 §6: the voyage has begun — the sea route (world metres) the client draws the ship along. |
 | `adminReports` | `list, counts` | (both) §21.9: feedback reports for an admin. |
 | `adminR` | `op, ok, id?, state?, why?, msg?, counts?` | (both) §21.9: answer to an admin change (or a refusal: `forbidden`). |
 | `fishR` | `ok, state, at?, water?, pool?, why?, msg?` | (game) §21.10: a cast accepted (`state:'wait'`) / refused, or the line coming in (`state:'idle', why`). |
@@ -1462,3 +1466,17 @@ and spent nodes in the existing `opened` table. Quest step kinds: `gather {prof?
 | `held: { kind: 'cage', x, z, open? }` | a road-event captive (NPC) | What holds them and where it stands (`data/provinces/road-events.json` `rescue[].held`). `open` is set, and the info re-sent, when they are freed. Drawn by `js/client/held-view.js`. |
 
 No version bump: both are additive and an older client ignores them.
+
+## Expansion 1 §4 — Vharlen's hazards (stream S, 2026-10-14) — still protocol 8 (additive)
+
+| What | Shape | Notes |
+|---|---|---|
+| snapshot self flag `8` | `sm & 8` -> `self.glide = true` | You were thrown by a geyser and are drifting down (js/sim/movement.js `glide`: slow fall, a little faster in the air, may pass over steep ground you are above). The predictor carries it into its replay (js/client/predict.js `reconcile`), so the client predicts the same fall. Cleared on landing / in water. |
+| `tele` with `ab: 'geyser'` | `{ id: 'gy:<site>:<k>', ab, k: 'lift', ms, shape: 'circle', x, z, r, el: 'steam', hazard: 1 }` | A geyser's 2 s rumble. No `s` (no caster). Its `teleR {id, hits}` is delivered by place. |
+| `tele` with `ab: 'lava_vent'` | `{ id: 'lv:<site>:<k>', ab, k: 'harm', ms, shape: 'line', x, z, yaw, len, w, el: 'fire', hazard: 1 }` | A vent's warning; always sent to everyone in view. |
+| `fx {kind:'geyser'}` | `{ site, phase: 'rumble' \| 'erupt', ms, x, z }` | Drawn by js/client/vharlen-fx.js (bubbles; the water-and-steam column). |
+| `fx {kind:'lavaVent'}` | `{ site, phase: 'warn' \| 'spout', ms, x, z }` | The crack brightens / fire along its length. |
+| `fx {kind:'toss'}` | `{ id, ms, h }` | A monster a geyser threw: drawn up and down again (actors.js `liftY`). |
+| `fx {kind:'spring'}` | `{ id, warmMs }` | You climbed out of a hot spring warmed: the buff row's Steam-warmed countdown. |
+| `hit` with `skill: 'lava_vent'` / `'geyser'` | `s: null` | Hazard damage has no source. |
+| statuses | `steam_soaked`, `item:steamed` | On `info.st` like any status: Steam-soaked (in a spring), Steam-warmed (+5% max health, 10 min; saved with the build as an item buff, `source: 'spring'`). |

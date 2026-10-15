@@ -2,6 +2,23 @@
   "_doc": "Player-facing changelog, newest first. The lead appends an entry at each publish (from the feedback reports' Completed notes). `id` is stable; the client remembers the last id a player has seen and highlights newer ones. Plain language, no internal names.",
   "entries": [
     {
+      "id": "2026-10-14-vharlen",
+      "date": "2026-10-14",
+      "title": "Expansion: Vharlen, the Burning Isle",
+      "items": [
+        "Torbor Downs is now an island in its own right. The land falls away to the sea at its edges, and the map shows open sea where it used to show locked land.",
+        "New island for levels 10 to 20: Vharlen, a young volcano across the sea. Nine new zones: black-sand beaches, a steaming jungle, sulphur flats, mud fens, obsidian dunes, grey pumice wastes, a valley buried in ash, basalt ridges and the crater itself.",
+        "The only way there is by ship. Talk to Osric Fennimore, the Harbourmaster in Gullwick (60 gold), and sail the Saltwren across the open sea to Port Vharl. You stand on deck for the crossing and can skip it after a few seconds. Tavu Okkarin sails you back. A level 8 quest in Gullwick, Smoke on the Horizon, sends you on your first voyage.",
+        "The Vharl live in stilt houses of dark basalt and red plaster. Their towns, people, shops and quests are all new: 54 quests, 18 rares, 9 elites, zone events, eight new dungeons and a world boss, Ossathra the Caldera Wyrm.",
+        "New monsters found only on the island: Scoria Crawlers, Ashback Salamanders, Pumice Golems, Vent Wisps, Glasswings, Steamwood Prowlers, Sulphur Toads, Obsidian Wardens, Mudback Lurkers and the Slagborn raiders.",
+        "Hot springs: rest in one out of combat to get health and mana back fast, and climb out Steam-warmed (+5% maximum health for 10 minutes).",
+        "Geysers rumble, then erupt. Stand on one and it throws you high into the air so you can drift down onto ledges. Monsters get thrown too.",
+        "Lava vents glow, warn you, then spout fire along the crack. They hurt, and monsters burn in them too.",
+        "Ash falls in the Pumice Wastes and Ashfall Hollow and shortens how far you can see.",
+        "New materials to gather (obsidian, sulphur, ironpalm, steamcap, cinderbloom and salamander hide), new recipes, 15 new fish and 9 new legendary catches."
+      ]
+    },
+    {
       "id": "2026-10-14",
       "date": "2026-10-14",
       "title": "New icons everywhere, and every class's spells have their own look",

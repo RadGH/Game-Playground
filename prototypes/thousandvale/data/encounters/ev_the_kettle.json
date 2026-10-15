@@ -1,0 +1,340 @@
+{
+  "id": "ev_the_kettle",
+  "name": "The Kettle",
+  "tier": "event",
+  "zone": "steamwood",
+  "level": 13,
+  "body": "vent_wisp",
+  "place": {
+    "rank": "boss",
+    "level": 13,
+    "respawnMs": 1800000
+  },
+  "_doc": "Expansion 1 (Vharlen). The ZONE EVENT BOSS for the Steamwood: the spirit of a boiling spring that has come to the boil. P1 'Simmering': a scalding cone, geysers that throw you, and rings of boiling water that roll outward one after another. P2 at 55% 'Coming to the Boil': two vents open — two players must stand on each to cap it (soak) or everyone is scalded; the cold springs at the edge heal. P3, a new health bar 'Boiled Dry': the Kettle cracks — a WHISTLE it charges (interrupt it, or the whole clearing is silenced and scalded), spinning jets of steam, and steam that follows each player. Soft enrage from 4 minutes, hard at 7.",
+  "party": "Zone event, everyone nearby joins. Solo: not intended (the vent soak needs 2). 3-5: playable. 10+: intended. M5 scaling: health by players enrolled; soak need = clamp(players/5, 2, 4).",
+  "hpMult": 3,
+  "arena": {
+    "radius": 36,
+    "objects": [
+      {
+        "id": "spring_w",
+        "type": "pool",
+        "name": "Cold spring",
+        "x": -24,
+        "z": 8,
+        "r": 3,
+        "every": 1,
+        "seconds": 99999,
+        "heal": 0.03
+      },
+      {
+        "id": "spring_e",
+        "type": "pool",
+        "name": "Cold spring",
+        "x": 24,
+        "z": 8,
+        "r": 3,
+        "every": 1,
+        "seconds": 99999,
+        "heal": 0.03
+      }
+    ]
+  },
+  "say": {
+    "pull": [
+      "The spring starts to bubble. Then to roar.",
+      "A lid of steam lifts off the pool, and something underneath it is very, very hot.",
+      "The Kettle rattles. Everyone in the clearing can hear it."
+    ],
+    "death": "The Kettle gives one last thin whistle and cools to a puddle.",
+    "reset": "The Kettle settles back to a slow simmer."
+  },
+  "enrage": {
+    "seconds": 420,
+    "damage": 3,
+    "say": "The Kettle boils over! The whole clearing scalds!",
+    "soft": {
+      "from": 240,
+      "every": 15,
+      "add": 0.08,
+      "say": "The steam gets thicker. It is hard to breathe."
+    }
+  },
+  "abilities": {
+    "scald": {
+      "id": "scald",
+      "name": "Scald",
+      "every": [
+        7,
+        9
+      ],
+      "first": 2,
+      "range": 8,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 7,
+          "arc": 1.3,
+          "wind": 1.1,
+          "damage": 1.8,
+          "element": "fire",
+          "status": "seared"
+        }
+      ]
+    },
+    "geyser": {
+      "id": "geyser",
+      "name": "Geyser",
+      "every": [
+        12,
+        15
+      ],
+      "first": 4,
+      "say": "The ground gurgles under your feet — geysers!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3,
+          "wind": 1.6,
+          "damage": 1.4,
+          "count": 3,
+          "delay": 0.3,
+          "knock": 5,
+          "element": "fire"
+        }
+      ]
+    },
+    "boil_rings": {
+      "id": "boil_rings",
+      "name": "Rolling Boil",
+      "every": [
+        15,
+        18
+      ],
+      "first": 8,
+      "cast": 0.6,
+      "say": "Rings of boiling water roll outward — step through them as they pass!",
+      "telegraphs": [
+        {
+          "shape": "donut",
+          "at": "self",
+          "r": 9,
+          "r2": 4,
+          "wind": 1.4,
+          "damage": 1.6,
+          "element": "fire"
+        },
+        {
+          "shape": "donut",
+          "at": "self",
+          "r": 16,
+          "r2": 10,
+          "wind": 1.4,
+          "damage": 1.6,
+          "element": "fire",
+          "after": 1.2
+        },
+        {
+          "shape": "donut",
+          "at": "self",
+          "r": 24,
+          "r2": 17,
+          "wind": 1.4,
+          "damage": 1.6,
+          "element": "fire",
+          "after": 2.4
+        }
+      ]
+    },
+    "vent_cap": {
+      "id": "vent_cap",
+      "name": "Open Vents",
+      "every": [
+        20,
+        24
+      ],
+      "first": 5,
+      "cast": 1,
+      "say": "Two vents tear open — two of you on EACH to hold them shut!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "home",
+          "r": 3.5,
+          "wind": 5,
+          "damage": 0.6,
+          "offset": [
+            -12,
+            -8
+          ],
+          "kind": "soak",
+          "need": 2,
+          "fail": 1.8,
+          "failSay": "A vent was left open — boiling steam sweeps the clearing!",
+          "element": "fire"
+        },
+        {
+          "shape": "circle",
+          "at": "home",
+          "r": 3.5,
+          "wind": 5,
+          "damage": 0.6,
+          "offset": [
+            12,
+            -8
+          ],
+          "kind": "soak",
+          "need": 2,
+          "fail": 1.8,
+          "failSay": "A vent was left open — boiling steam sweeps the clearing!",
+          "element": "fire"
+        }
+      ]
+    },
+    "spit": {
+      "id": "spit",
+      "name": "Boiling Spit",
+      "every": [
+        10,
+        13
+      ],
+      "first": 3,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "r": 3,
+          "wind": 1.5,
+          "damage": 1.1,
+          "spread": 22,
+          "count": 5,
+          "delay": 0.2,
+          "element": "fire",
+          "leave": {
+            "type": "pool",
+            "name": "Scalding puddle",
+            "r": 2.6,
+            "every": 1,
+            "seconds": 16,
+            "damage": 0.25,
+            "status": "burn",
+            "element": "fire"
+          }
+        }
+      ]
+    },
+    "whistle": {
+      "id": "whistle",
+      "name": "The Whistle",
+      "every": [
+        26,
+        30
+      ],
+      "first": 10,
+      "cast": 3,
+      "interrupt": true,
+      "say": "The Kettle starts to WHISTLE — interrupt it!",
+      "onInterrupt": [
+        {
+          "say": "The whistle chokes into a gurgle.",
+          "style": "emote"
+        }
+      ],
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 36,
+          "wind": 0.6,
+          "damage": 1.2,
+          "status": "silence",
+          "element": "fire"
+        }
+      ]
+    },
+    "jets": {
+      "id": "jets",
+      "name": "Steam Jets",
+      "every": [
+        14,
+        17
+      ],
+      "first": 6,
+      "cast": 0.6,
+      "say": "Cracks split the Kettle — three jets of steam swing round!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 30,
+          "w": 3,
+          "wind": 1.5,
+          "damage": 2,
+          "count": 3,
+          "rotate": 2.094,
+          "yaw": "random",
+          "element": "fire"
+        }
+      ]
+    },
+    "cloud": {
+      "id": "cloud",
+      "name": "Clinging Steam",
+      "every": [
+        15,
+        18
+      ],
+      "first": 4,
+      "cast": 0.6,
+      "say": "Steam clings to everyone — spread out!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "each",
+          "r": 3,
+          "wind": 2.4,
+          "damage": 1.4,
+          "follow": true,
+          "element": "fire",
+          "status": "seared"
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Simmering",
+      "abilities": [
+        "scald",
+        "geyser",
+        "boil_rings"
+      ]
+    },
+    {
+      "name": "Coming to the Boil",
+      "at": 0.55,
+      "say": "The Kettle comes to the boil! The vents are opening!",
+      "abilities": [
+        "scald",
+        "vent_cap",
+        "spit",
+        "geyser"
+      ]
+    },
+    {
+      "name": "Boiled Dry",
+      "newBar": {
+        "hp": 0.5
+      },
+      "say": "The Kettle cracks right across — and whistles.",
+      "abilities": [
+        "scald",
+        "whistle",
+        "jets",
+        "cloud"
+      ]
+    }
+  ]
+}

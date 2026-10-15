@@ -1,0 +1,354 @@
+{
+  "id": "ev_kilnwife_orra",
+  "name": "Kilnwife Orra",
+  "tier": "event",
+  "zone": "kiln_ridge",
+  "level": 18,
+  "body": "slagborn_firecaller",
+  "place": {
+    "rank": "boss",
+    "level": 18,
+    "respawnMs": 1800000
+  },
+  "_doc": "Expansion 1 (Vharlen). The ZONE EVENT BOSS for Kiln Ridge: the Slagborn fire-priestess who fires the high kilns for the warband's rites. P1 'The Firing': a firebrand cone, sparks from the kilns on random players, and three rite lines of fire. P2 at 55% 'The Rite': she draws a ward out of the four kilns while raiders hold the yard — TIP ALL FOUR QUENCH BARRELS (use them) into the kilns to break it — and ash rain burns where it falls. P3, a new health bar 'Orra Unfired': pot shards ride every player, two kiln mouths need two players each, and a firewheel ring. Soft enrage from 4 minutes, hard at 7.",
+  "party": "Zone event, everyone nearby joins. Solo: not intended (four barrels under raiders, two soaks of 2). 3-5: playable. 10+: intended. M5 scaling: health and raiders by players enrolled; soak need = clamp(players/5, 2, 4).",
+  "hpMult": 3,
+  "arena": {
+    "radius": 38,
+    "objects": [
+      {
+        "id": "barrel_ne",
+        "type": "brazier",
+        "name": "Quench barrel",
+        "x": 20,
+        "z": -20
+      },
+      {
+        "id": "barrel_se",
+        "type": "brazier",
+        "name": "Quench barrel",
+        "x": 20,
+        "z": 20
+      },
+      {
+        "id": "barrel_sw",
+        "type": "brazier",
+        "name": "Quench barrel",
+        "x": -20,
+        "z": 20
+      },
+      {
+        "id": "barrel_nw",
+        "type": "brazier",
+        "name": "Quench barrel",
+        "x": -20,
+        "z": -20
+      }
+    ]
+  },
+  "say": {
+    "pull": [
+      "The kilns are hot. Bring the offering.",
+      "Kilnwife Orra turns from the fire with clay up to her elbows and murder in her eyes.",
+      "You will do for the next firing."
+    ],
+    "death": "Kilnwife Orra falls against her kiln. 'The fire... was not finished...'",
+    "reset": "Kilnwife Orra goes back to her kilns, singing."
+  },
+  "enrage": {
+    "seconds": 420,
+    "damage": 3,
+    "say": "Orra throws every kiln door open at once!",
+    "soft": {
+      "from": 240,
+      "every": 15,
+      "add": 0.08,
+      "say": "The kilns roar louder. The ridge is an oven."
+    }
+  },
+  "abilities": {
+    "firebrand": {
+      "id": "firebrand",
+      "name": "Firebrand",
+      "every": [
+        7,
+        9
+      ],
+      "first": 2,
+      "range": 7,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 6,
+          "arc": 1.5,
+          "wind": 1.1,
+          "damage": 1.8,
+          "element": "fire",
+          "status": "burn"
+        }
+      ]
+    },
+    "sparks": {
+      "id": "sparks",
+      "name": "Kiln Sparks",
+      "every": [
+        12,
+        15
+      ],
+      "first": 4,
+      "cast": 0.6,
+      "say": "Sparks fly from the kiln mouths!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3,
+          "wind": 1.5,
+          "damage": 1.2,
+          "count": 4,
+          "delay": 0.25,
+          "element": "fire",
+          "status": "burn"
+        }
+      ]
+    },
+    "rite_lines": {
+      "id": "rite_lines",
+      "name": "Rite of Three Fires",
+      "every": [
+        14,
+        17
+      ],
+      "first": 8,
+      "cast": 0.8,
+      "say": "Orra draws three lines of fire through the yard!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 28,
+          "w": 3,
+          "wind": 1.6,
+          "damage": 2,
+          "count": 3,
+          "rotate": 2.094,
+          "yaw": "random",
+          "element": "fire"
+        }
+      ]
+    },
+    "ash_rain": {
+      "id": "ash_rain",
+      "name": "Ash Rain",
+      "every": [
+        12,
+        15
+      ],
+      "first": 3,
+      "cast": 0.6,
+      "say": "Hot ash rains from the kiln chimneys!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "r": 3.5,
+          "wind": 1.6,
+          "damage": 1.1,
+          "spread": 26,
+          "count": 6,
+          "delay": 0.2,
+          "element": "fire",
+          "leave": {
+            "type": "pool",
+            "name": "Hot ash",
+            "r": 3,
+            "every": 1,
+            "seconds": 20,
+            "damage": 0.25,
+            "status": "burn",
+            "element": "fire"
+          }
+        }
+      ]
+    },
+    "pot_shards": {
+      "id": "pot_shards",
+      "name": "Pot Shards",
+      "every": [
+        15,
+        18
+      ],
+      "first": 4,
+      "cast": 0.6,
+      "say": "Fired pots burst over everyone — spread out!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "each",
+          "r": 3,
+          "wind": 2.4,
+          "damage": 1.4,
+          "follow": true,
+          "element": "fire"
+        }
+      ]
+    },
+    "kiln_mouths": {
+      "id": "kiln_mouths",
+      "name": "Kiln Mouths",
+      "every": [
+        22,
+        26
+      ],
+      "first": 7,
+      "cast": 1,
+      "say": "Two kiln mouths open in the ground — two of you on EACH to hold them shut!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "home",
+          "r": 3.5,
+          "wind": 5,
+          "damage": 0.6,
+          "offset": [
+            -12,
+            10
+          ],
+          "kind": "soak",
+          "need": 2,
+          "fail": 1.8,
+          "failSay": "A kiln mouth is left open — fire sweeps the whole yard!",
+          "element": "fire"
+        },
+        {
+          "shape": "circle",
+          "at": "home",
+          "r": 3.5,
+          "wind": 5,
+          "damage": 0.6,
+          "offset": [
+            12,
+            10
+          ],
+          "kind": "soak",
+          "need": 2,
+          "fail": 1.8,
+          "failSay": "A kiln mouth is left open — fire sweeps the whole yard!",
+          "element": "fire"
+        }
+      ]
+    },
+    "firewheel": {
+      "id": "firewheel",
+      "name": "Firewheel",
+      "every": [
+        16,
+        19
+      ],
+      "first": 11,
+      "cast": 1,
+      "say": "A wheel of fire rolls out from her — get in close!",
+      "telegraphs": [
+        {
+          "shape": "donut",
+          "at": "self",
+          "r": 18,
+          "r2": 4,
+          "wind": 1.9,
+          "damage": 2.3,
+          "element": "fire"
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "The Firing",
+      "abilities": [
+        "firebrand",
+        "sparks",
+        "rite_lines"
+      ]
+    },
+    {
+      "name": "The Rite",
+      "at": 0.55,
+      "say": "Kilns, give me your fire! Raiders, hold the yard!",
+      "abilities": [
+        "firebrand",
+        "ash_rain"
+      ],
+      "ward": {
+        "seconds": 25,
+        "pool": 0.1,
+        "break": "objects",
+        "need": 4,
+        "what": "brazier",
+        "say": "Orra draws a ward out of the four kilns. Tip all four quench barrels to break it! It fails by itself in 25 seconds.",
+        "fade": "The ward fails by itself. No opening this time."
+      },
+      "onEnter": [
+        {
+          "shield": {
+            "seconds": 25,
+            "pool": 0.1
+          }
+        },
+        {
+          "adds": {
+            "type": "slagborn_raider",
+            "count": 3,
+            "radius": 14,
+            "at": "home"
+          }
+        },
+        {
+          "say": "Orra draws a ward out of the four kilns. Tip all four quench barrels to break it! It fails by itself in 25 seconds.",
+          "style": "warn"
+        }
+      ]
+    },
+    {
+      "name": "Orra Unfired",
+      "newBar": {
+        "hp": 0.5
+      },
+      "say": "You QUENCHED my kilns? Then I will fire you by hand!",
+      "abilities": [
+        "firebrand",
+        "pot_shards",
+        "kiln_mouths",
+        "firewheel",
+        "sparks"
+      ]
+    }
+  ],
+  "triggers": [
+    {
+      "when": {
+        "lit": 4,
+        "phase": 1
+      },
+      "do": [
+        {
+          "shield": false
+        },
+        {
+          "stun": 4
+        },
+        {
+          "vuln": {
+            "takeMore": 0.4,
+            "seconds": 12,
+            "name": "Quenched"
+          }
+        },
+        {
+          "say": "Four barrels of water hit four kilns. Steam everywhere — and the ward round Orra cracks!",
+          "style": "warn"
+        }
+      ]
+    }
+  ]
+}

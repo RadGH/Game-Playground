@@ -1,0 +1,176 @@
+{
+ "_doc": "Stream V (Expansion 1 §6): THE VOYAGE between the two continents. `harbours` = one per continent: `master` = where the Harbourmaster NPC stands (WORLD metres, like carts.json stops; js/sim/ships.js placeHarbours puts it in the town room it stands in), `dock` = where a voyage TO this harbour puts you ashore, `seaward` = the way to open water from the dock (tools/ship-routes.mjs walks that way to the first water deep enough for a ship: `berth` = where the ship lies, `pier` = the jetty from the shore to it). `sailings` = from -> to with the fare in gold, the time held (`sec`), and `path` = the sea route in world metres from berth to berth (tools/ship-routes.mjs finds it over data/world/horizon.bin, keeping off the coasts). `volcano` = Vharlen's peak for the ash plume (the client takes the highest ground near it). Re-run `node tools/ship-routes.mjs --write` after any re-bake of the coasts. Port Vharl's quay is stream T's `harbour` placement in data/zones/z13_10/placements.json (zone 1505, 914; world 28129, 21394), ~380 m east of the town on the beach; Gullwick has no sea inside its zone (the coast is ~2 km east, past the playable edge), so its Harbourmaster stands on Gullwick's main street and the ship lies at the real coast east of the town.",
+ "service": {
+  "name": "the Narrow Sea Packet",
+  "ship": "the Saltwren",
+  "line": "Three masts, one captain, and no promises about the weather."
+ },
+ "rules": {
+  "boardM": 6,
+  "partyM": 30,
+  "voyageSec": 40,
+  "skipAfterSec": 5,
+  "minLevel": 1,
+  "fare": 60,
+  "refuse": {
+   "gold": "The passage to {town} is {fare} gold. Come back when you have it.",
+   "combat": "Not with that after you. Deal with it first.",
+   "same": "You are standing in {town}.",
+   "closed": "The Saltwren is not sailing to {town} yet. The harbour there is still being built.",
+   "level": "The sea out there is no place for anyone under level {level}."
+  },
+  "says": [
+   "The Saltwren sails on the tide. Are you coming?",
+   "Mind the gulls. They steal.",
+   "Smoke on the horizon means Vharlen. Fire under the smoke means you have arrived."
+  ]
+ },
+ "volcano": {
+  "x": 25600,
+  "z": 21504,
+  "searchM": 1400
+ },
+ "harbours": [
+  {
+   "id": "gullwick",
+   "name": "Gullwick",
+   "land": "Torbor Downs",
+   "province": "torbor_downs",
+   "zone": "z14_02",
+   "sheetZone": "gullwick",
+   "band": [
+    1,
+    10
+   ],
+   "master": {
+    "name": "Osric Fennimore",
+    "title": "Harbourmaster",
+    "x": 30228,
+    "z": 4478,
+    "yaw": -1.571,
+    "says": [
+     "The ship lies at the Gull Stair, down the tide road. I sell the passage; the sea does the rest."
+    ]
+   },
+   "dock": {
+    "x": 30223,
+    "z": 4479
+   },
+   "seaward": [
+    1,
+    0
+   ],
+   "berth": {
+    "x": 32277,
+    "z": 4479,
+    "yaw": 3.142
+   },
+   "pier": {
+    "from": [
+     32193,
+     4479
+    ],
+    "to": [
+     32267,
+     4479
+    ]
+   }
+  },
+  {
+   "id": "port_vharl",
+   "name": "Port Vharl",
+   "land": "Vharlen",
+   "province": "vharlen",
+   "zone": "z13_10",
+   "sheetZone": "blackstrand",
+   "band": [
+    10,
+    20
+   ],
+   "master": {
+    "name": "Tavu Okkarin",
+    "title": "Harbourmaster",
+    "x": 28116,
+    "z": 21389,
+    "yaw": -1.571,
+    "says": [
+     "Welcome to Vharlen. Watch the ground: some of it is warm for a reason."
+    ]
+   },
+   "dock": {
+    "x": 28110,
+    "z": 21394
+   },
+   "seaward": [
+    1,
+    0
+   ],
+   "berth": {
+    "x": 28188,
+    "z": 21394,
+    "yaw": 3.142
+   },
+   "pier": {
+    "from": [
+     28108,
+     21394
+    ],
+    "to": [
+     28178,
+     21394
+    ]
+   },
+   "harbourSite": "harbour_port_vharl (z13_10 placements.json)"
+  }
+ ],
+ "sailings": [
+  {
+   "from": "gullwick",
+   "to": "port_vharl",
+   "gold": 60,
+   "sec": 40,
+   "path": [
+    [
+     32277,
+     4479
+    ],
+    [
+     33216,
+     6336
+    ],
+    [
+     31168,
+     19136
+    ],
+    [
+     28188,
+     21394
+    ]
+   ]
+  },
+  {
+   "from": "port_vharl",
+   "to": "gullwick",
+   "gold": 60,
+   "sec": 40,
+   "path": [
+    [
+     28188,
+     21394
+    ],
+    [
+     31168,
+     19136
+    ],
+    [
+     33216,
+     6336
+    ],
+    [
+     32277,
+     4479
+    ]
+   ]
+  }
+ ]
+}

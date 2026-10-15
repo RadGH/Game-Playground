@@ -1,0 +1,51 @@
+{
+  "zones": {
+    "blackstrand": {
+      "world": "z13_10",
+      "rename": {},
+      "asks": []
+    },
+    "steamwood": {
+      "world": "z12_09",
+      "rename": {},
+      "asks": []
+    },
+    "sulphur_bight": {
+      "world": "z13_09",
+      "rename": {},
+      "asks": []
+    },
+    "fumarole_fen": {
+      "world": "z13_11",
+      "rename": {},
+      "asks": []
+    },
+    "glasswind_strand": {
+      "world": "z11_09",
+      "rename": {},
+      "asks": []
+    },
+    "pumice_wastes": {
+      "world": "z11_10",
+      "rename": {},
+      "asks": []
+    },
+    "ashfall_hollow": {
+      "world": "z12_11",
+      "rename": {},
+      "asks": []
+    },
+    "kiln_ridge": {
+      "world": "z11_11",
+      "rename": {},
+      "asks": []
+    },
+    "the_caldera": {
+      "world": "z12_10",
+      "rename": {},
+      "asks": []
+    }
+  },
+  "_doc": "Stream E. Settlement names for Vharlen on stream B's bake (tools/place-vignettes.mjs). Per E zone: `world` zone id; `rename` = B settlement/crossing id -> the name the sheet and quests use (B: impose at bake time, like Torborhold); `asks` = a settlement the sheet needs where the world has none (B: place a planned settlement of that kind and radius at x, z — zone metres — with that name; E's placements already keep clear of the circle). After B re-bakes, E re-runs the placer and asks that now exist drop out.",
+  "province": "vharlen"
+}

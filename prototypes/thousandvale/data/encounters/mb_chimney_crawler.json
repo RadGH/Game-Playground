@@ -1,0 +1,193 @@
+{
+  "id": "mb_chimney_crawler",
+  "name": "The Chimney Crawler",
+  "tier": "miniboss",
+  "body": "scoria_crawler",
+  "place": "dungeon buried_town (Under Cinderholt): mini-boss",
+  "_doc": "A crawler grown huge inside a buried chimney, coming out of the hearth. P1 \"Soot\": it spits clinkers and blows soot plumes up out of three old hearths in the room (stand clear of a hearth when it puffs). P2 at 50% \"Up the Flue\": it climbs into the chimney (the shield holds while its brood is out) and drops hot clinkers from above until the brood is dead.",
+  "party": "Solo: hard in P2 — the brood is the fight. 2-3: kill the brood. 5: easy P2, crowded P1.",
+  "hpMult": 2,
+  "arena": {
+    "radius": 12,
+    "objects": [
+      {
+        "id": "hearth",
+        "type": "rock",
+        "name": "Old hearth",
+        "x": -7,
+        "z": -5,
+        "r": 1.3,
+        "hp": 4
+      },
+      {
+        "id": "hearth",
+        "type": "rock",
+        "name": "Old hearth",
+        "x": 7,
+        "z": -5,
+        "r": 1.3,
+        "hp": 4
+      },
+      {
+        "id": "hearth",
+        "type": "rock",
+        "name": "Old hearth",
+        "x": 0,
+        "z": 7,
+        "r": 1.3,
+        "hp": 4
+      }
+    ]
+  },
+  "say": {
+    "pull": [
+      "Soot falls from the chimney, then a leg the size of a rafter.",
+      "Something scrapes down the inside of the flue."
+    ],
+    "death": "The Chimney Crawler curls up in the old hearth and lets the soot cover it.",
+    "reset": "The crawler climbs back up the flue."
+  },
+  "enrage": {
+    "seconds": 270,
+    "damage": 2.5,
+    "say": "Soot pours out of every hearth at once!"
+  },
+  "abilities": {
+    "pincer": {
+      "id": "pincer",
+      "name": "Sooty Pincer",
+      "every": [
+        5,
+        7
+      ],
+      "range": 5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 5,
+          "arc": 1.4,
+          "wind": 1,
+          "damage": 1.5,
+          "status": "bleed"
+        }
+      ]
+    },
+    "clinker": {
+      "id": "clinker",
+      "name": "Clinker Spit",
+      "every": [
+        8,
+        10
+      ],
+      "first": 2,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "count": 2,
+          "delay": 0.3,
+          "r": 2.4,
+          "wind": 1.3,
+          "damage": 1.3,
+          "element": "fire",
+          "status": "burn"
+        }
+      ]
+    },
+    "plume": {
+      "id": "plume",
+      "name": "Soot Plume",
+      "every": [
+        13,
+        16
+      ],
+      "first": 5,
+      "cast": 0.6,
+      "say": "The old hearths rumble — stand clear!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "object",
+          "object": "hearth",
+          "r": 4,
+          "wind": 1.6,
+          "damage": 1.8,
+          "status": "weaken"
+        }
+      ]
+    },
+    "drop": {
+      "id": "drop",
+      "name": "Clinker Drop",
+      "every": [
+        7,
+        9
+      ],
+      "first": 1,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "spread": 10,
+          "r": 2.4,
+          "count": 3,
+          "delay": 0.3,
+          "wind": 1.4,
+          "damage": 1.3,
+          "element": "fire"
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Soot",
+      "abilities": [
+        "pincer",
+        "clinker",
+        "plume"
+      ]
+    },
+    {
+      "name": "Up the Flue",
+      "at": 0.5,
+      "say": "It climbs back into the chimney and its brood pours out!",
+      "abilities": [
+        "drop",
+        "plume"
+      ],
+      "shieldWhileAdds": true,
+      "shieldDown": "The brood is dead — the crawler drops out of the chimney!",
+      "onEnter": [
+        {
+          "shield": {
+            "seconds": 15,
+            "pool": 0.08
+          }
+        },
+        {
+          "adds": {
+            "type": "scoria_crawler",
+            "count": 3,
+            "radius": 7,
+            "at": "home"
+          }
+        },
+        {
+          "say": "The crawler climbs the flue behind a ward. Kill its three brood to drop it! It fails by itself in 15 seconds.",
+          "style": "warn"
+        }
+      ],
+      "ward": {
+        "seconds": 15,
+        "pool": 0.08,
+        "break": "adds",
+        "need": 3,
+        "what": "scoria_crawler",
+        "say": "The crawler climbs the flue behind a ward. Kill its three brood to drop it! It fails by itself in 15 seconds.",
+        "fade": "The ward fails by itself. No opening this time."
+      }
+    }
+  ]
+}

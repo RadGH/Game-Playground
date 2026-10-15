@@ -1,0 +1,2698 @@
+{
+ "_doc": "Stream E (play-test 2, Q10). Where every town NPC works: one building plot per NPC in every hub town of Torbor Downs (stream B's town plans, data/zones/<zone>/placements.json kind building — `plot` is its id; x, z, yaw = the plot, zone metres; `door` = where the NPC stands by day, facing the street, as js/sim/schedules.js front() computes it). Made by tools/content-offices.mjs (re-run by tools/place-vignettes.mjs after every re-bake). `role` = the schedules.json role (its day/night blocks: the office replaces the role's day anchor), `shop` = the data/provinces/shops.json kind traded here, `sign` = what hangs over the door and `light` = a lit shopfront (stream D-world: a distinct look per sign; lamps only where `light`), `npc` = a quest NPC id (data/quests/*.json) who IS this office's keeper — stream A spawns ONE body (the quest NPC) carrying the office's role/shop, not a second generic one; `home: true` = a quest NPC's own house (no shop, no light), `trains` = the classes a trainer teaches. No plot is used twice in a town; `setpieces` lists the NPCs whose office is a set piece (data/vignettes/setpieces.json).",
+ "province": "vharlen",
+ "towns": {
+  "port_vharl": {
+   "name": "Port Vharl",
+   "zone": "z13_10",
+   "sheetZone": "blackstrand",
+   "kind": "town",
+   "x": 1126,
+   "z": 914,
+   "r": 90,
+   "offices": [
+    {
+     "role": "elder",
+     "title": "Elder",
+     "name": "Hearth-elder Tavi Keshvar",
+     "npc": "hearth_elder_tavi",
+     "plot": "port_vharl_plot_8",
+     "want": "hall",
+     "x": 1134.4,
+     "z": 902.81,
+     "yaw": -0.6066,
+     "w": 5.88,
+     "d": 4.96,
+     "door": {
+      "x": 1132.3,
+      "z": 905.8,
+      "yaw": 2.535
+     },
+     "sign": "banner",
+     "light": false,
+     "label": "Town Hall",
+     "titled": true,
+     "service": [
+      "quests",
+      "town news"
+     ]
+    },
+    {
+     "role": "merchant",
+     "title": "Merchant",
+     "name": "Bekka Uskel",
+     "plot": "port_vharl_plot_5",
+     "want": "shop",
+     "x": 1155.22,
+     "z": 892.03,
+     "yaw": 2.5349,
+     "w": 7.47,
+     "d": 7.25,
+     "door": {
+      "x": 1158,
+      "z": 888.1,
+      "yaw": 5.676
+     },
+     "sign": "barrel",
+     "light": true,
+     "label": "General Goods",
+     "shop": "general",
+     "titled": true
+    },
+    {
+     "role": "trader",
+     "title": "Market trader",
+     "name": "Nairu Tovaru",
+     "plot": "port_vharl_plot_12",
+     "want": "market",
+     "x": 1107.29,
+     "z": 882.72,
+     "yaw": 1.0705,
+     "w": 4.65,
+     "d": 7.99,
+     "door": {
+      "x": 1111.8,
+      "z": 885.2,
+      "yaw": 4.212
+     },
+     "sign": "awning",
+     "light": true,
+     "label": "Market",
+     "shop": "market",
+     "titled": true
+    },
+    {
+     "role": "smith",
+     "title": "Smith",
+     "name": "Zennu Ormakku",
+     "plot": "port_vharl_plot_7",
+     "want": "forge",
+     "x": 1141.85,
+     "z": 895.84,
+     "yaw": -0.6066,
+     "w": 5.83,
+     "d": 9.25,
+     "door": {
+      "x": 1138.5,
+      "z": 900.6,
+      "yaw": 2.535
+     },
+     "sign": "anvil",
+     "light": true,
+     "label": "Smithy",
+     "shop": "weaponsmith",
+     "titled": true
+    },
+    {
+     "role": "armourer",
+     "title": "Armourer",
+     "name": "Murro Askaru",
+     "plot": "port_vharl_plot_15",
+     "want": "armoury",
+     "x": 1136.95,
+     "z": 949.38,
+     "yaw": 1.011,
+     "w": 10.22,
+     "d": 8.43,
+     "door": {
+      "x": 1141.5,
+      "z": 952.3,
+      "yaw": 4.153
+     },
+     "sign": "shield",
+     "light": true,
+     "label": "Armourer",
+     "shop": "armourer",
+     "titled": true
+    },
+    {
+     "role": "bowyer",
+     "title": "Bowyer",
+     "name": "Rhaska Askaru",
+     "plot": "port_vharl_plot_14",
+     "want": "bowyer",
+     "x": 1146.24,
+     "z": 955.2,
+     "yaw": -2.1306,
+     "w": 10.22,
+     "d": 5.93,
+     "door": {
+      "x": 1140.3,
+      "z": 956.8,
+      "yaw": 1.011
+     },
+     "sign": "bow",
+     "light": true,
+     "label": "Bowyer",
+     "shop": "bowyer",
+     "titled": true
+    },
+    {
+     "role": "apothecary",
+     "title": "Apothecary",
+     "name": "Sennu Mhorrak",
+     "plot": "port_vharl_plot_18",
+     "want": "apothecary",
+     "x": 1115.97,
+     "z": 942.24,
+     "yaw": 2.5818,
+     "w": 7.15,
+     "d": 5.97,
+     "door": {
+      "x": 1118.2,
+      "z": 938.7,
+      "yaw": 5.723
+     },
+     "sign": "flask",
+     "light": true,
+     "label": "Apothecary",
+     "shop": "apothecary",
+     "titled": true
+    },
+    {
+     "role": "tailor",
+     "title": "Tailor",
+     "name": "Eiru Ulvessa",
+     "plot": "port_vharl_plot_22",
+     "want": "tailor",
+     "x": 1098.25,
+     "z": 921.32,
+     "yaw": -2.2146,
+     "w": 8.11,
+     "d": 6.7,
+     "door": {
+      "x": 1094.6,
+      "z": 918.6,
+      "yaw": 0.927
+     },
+     "sign": "needle",
+     "light": true,
+     "label": "Tailor",
+     "shop": "tailor",
+     "titled": true
+    },
+    {
+     "role": "stablehand",
+     "title": "Stable master",
+     "name": "Iolu Tukkari",
+     "plot": "port_vharl_plot_1",
+     "want": "stable",
+     "x": 1166.95,
+     "z": 919,
+     "yaw": 0.9642,
+     "w": 6.48,
+     "d": 6.6,
+     "door": {
+      "x": 1170.6,
+      "z": 921.6,
+      "yaw": 4.106
+     },
+     "sign": "horseshoe",
+     "light": true,
+     "label": "Stables",
+     "shop": "stable",
+     "titled": true
+    },
+    {
+     "role": "innkeeper",
+     "title": "Innkeeper",
+     "name": "Eiru Pakkari",
+     "plot": "port_vharl_plot_4",
+     "want": "inn",
+     "x": 1158.18,
+     "z": 913.59,
+     "yaw": -0.6066,
+     "w": 7.59,
+     "d": 7.08,
+     "door": {
+      "x": 1155.5,
+      "z": 917.5,
+      "yaw": 2.535
+     },
+     "sign": "tankard",
+     "light": true,
+     "label": "Inn",
+     "shop": "inn",
+     "titled": true
+    },
+    {
+     "role": "provisioner",
+     "title": "Provisioner",
+     "name": "Miru Zhakku",
+     "plot": "port_vharl_plot_13",
+     "want": "provisioner",
+     "x": 1103.27,
+     "z": 890.07,
+     "yaw": 2.6413,
+     "w": 5.09,
+     "d": 7.99,
+     "door": {
+      "x": 1105.8,
+      "z": 885.5,
+      "yaw": 5.783
+     },
+     "sign": "sack",
+     "light": true,
+     "label": "Provisioner",
+     "shop": "provisioner",
+     "titled": true
+    },
+    {
+     "role": "barber",
+     "title": "Barber",
+     "name": "Mossa Tovaru",
+     "plot": "port_vharl_plot_6",
+     "want": "barber",
+     "x": 1146.73,
+     "z": 886.26,
+     "yaw": 0.9642,
+     "w": 7.27,
+     "d": 6.35,
+     "door": {
+      "x": 1150.3,
+      "z": 888.8,
+      "yaw": 4.106
+     },
+     "sign": "scissors",
+     "light": true,
+     "label": "Barber",
+     "shop": "barber",
+     "titled": true
+    },
+    {
+     "role": "broker",
+     "title": "Broker",
+     "name": "Wakku Karrovu",
+     "plot": "port_vharl_plot_0",
+     "want": "counting_house",
+     "x": 1168.01,
+     "z": 899.24,
+     "yaw": -0.6066,
+     "w": 7.23,
+     "d": 6.86,
+     "door": {
+      "x": 1165.4,
+      "z": 903,
+      "yaw": 2.535
+     },
+     "sign": "scroll",
+     "light": false,
+     "label": "Counting House",
+     "shop": "broker",
+     "titled": true
+    },
+    {
+     "role": "unbinder",
+     "title": "Unbinder",
+     "name": "Arrik Hokkara",
+     "plot": "port_vharl_plot_19",
+     "want": "study",
+     "x": 1110.53,
+     "z": 929.72,
+     "yaw": -0.5598,
+     "w": 7.29,
+     "d": 8.37,
+     "door": {
+      "x": 1107.7,
+      "z": 934.3,
+      "yaw": 2.582
+     },
+     "sign": "candle",
+     "light": false,
+     "label": "Unbinder's Study",
+     "shop": "unbinder",
+     "titled": true
+    },
+    {
+     "role": "healer",
+     "title": "Healer",
+     "name": "Dakku Lhessu",
+     "plot": "port_vharl_plot_9",
+     "want": "temple",
+     "x": 1118.54,
+     "z": 897.61,
+     "yaw": -2.0711,
+     "w": 6.5,
+     "d": 6.45,
+     "door": {
+      "x": 1114.7,
+      "z": 895.5,
+      "yaw": 1.07
+     },
+     "sign": "bowl",
+     "light": false,
+     "label": "Temple",
+     "shop": "healer",
+     "titled": true
+    },
+    {
+     "role": "guard",
+     "title": "",
+     "name": "Kesk Ormakku",
+     "npc": "harbour_warden_kesk",
+     "plot": "port_vharl_plot_10",
+     "want": "house",
+     "x": 1112.62,
+     "z": 875.51,
+     "yaw": -0.5003,
+     "w": 5.11,
+     "d": 5.55,
+     "door": {
+      "x": 1110.7,
+      "z": 879,
+      "yaw": 2.641
+     },
+     "sign": null,
+     "light": false,
+     "titled": true,
+     "home": true
+    },
+    {
+     "role": "fisher",
+     "title": "",
+     "name": "Net-mender Bekka",
+     "npc": "net_mender_bekka",
+     "plot": "port_vharl_plot_16",
+     "want": "house",
+     "x": 1132.14,
+     "z": 961.53,
+     "yaw": 1.011,
+     "w": 6.36,
+     "d": 6.69,
+     "door": {
+      "x": 1136,
+      "z": 963.9,
+      "yaw": 4.153
+     },
+     "sign": null,
+     "light": false,
+     "titled": true,
+     "home": true
+    },
+    {
+     "role": "prospector",
+     "title": "Mining trainer",
+     "name": "Varr Ivvessk",
+     "plot": "port_vharl_plot_21",
+     "want": "house",
+     "x": 1099.5,
+     "z": 944.15,
+     "yaw": -0.5598,
+     "w": 6.12,
+     "d": 4.99,
+     "door": {
+      "x": 1097.5,
+      "z": 947.3,
+      "yaw": 2.582
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "logger",
+     "title": "Logging trainer",
+     "name": "Tavi Vhorrun",
+     "plot": "port_vharl_plot_23",
+     "want": "house",
+     "x": 1091.49,
+     "z": 930.33,
+     "yaw": 2.4978,
+     "w": 6.98,
+     "d": 6.7,
+     "door": {
+      "x": 1094.2,
+      "z": 926.7,
+      "yaw": 5.639
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "forager",
+     "title": "Foraging trainer",
+     "name": "Iolu Tovaru",
+     "plot": "port_vharl_plot_24",
+     "want": "house",
+     "x": 1086.34,
+     "z": 917.46,
+     "yaw": 2.4978,
+     "w": 5.28,
+     "d": 9.94,
+     "door": {
+      "x": 1090,
+      "z": 912.5,
+      "yaw": 5.639
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "skinner",
+     "title": "Skinning trainer",
+     "name": "Lekka Nuvaru",
+     "plot": "port_vharl_plot_11",
+     "want": "house",
+     "x": 1104.51,
+     "z": 871.07,
+     "yaw": 1.0705,
+     "w": 5.11,
+     "d": 5.68,
+     "door": {
+      "x": 1108.1,
+      "z": 873,
+      "yaw": 4.212
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    }
+   ]
+  },
+  "mistfall": {
+   "name": "Mistfall",
+   "zone": "z12_09",
+   "sheetZone": "steamwood",
+   "kind": "hamlet",
+   "x": 1174,
+   "z": 1322,
+   "r": 40,
+   "offices": [
+    {
+     "role": "elder",
+     "title": "Elder",
+     "name": "Old Varr",
+     "npc": "old_varr",
+     "plot": "mistfall_plot_6",
+     "want": "hut",
+     "x": 1169.31,
+     "z": 1342.53,
+     "yaw": -2.7944,
+     "w": 3.5,
+     "d": 4.96,
+     "door": {
+      "x": 1168.1,
+      "z": 1339.1,
+      "yaw": 0.347
+     },
+     "sign": "banner",
+     "light": false,
+     "titled": true,
+     "service": [
+      "quests",
+      "town news"
+     ]
+    },
+    {
+     "role": "merchant",
+     "title": "Merchant",
+     "name": "Jassu Orvakk",
+     "plot": "mistfall_plot_3",
+     "want": "shop",
+     "x": 1192.72,
+     "z": 1325.38,
+     "yaw": 1.943,
+     "w": 7.26,
+     "d": 5.07,
+     "door": {
+      "x": 1196.2,
+      "z": 1324,
+      "yaw": 5.085
+     },
+     "sign": "barrel",
+     "light": true,
+     "label": "General Goods",
+     "shop": "general",
+     "titled": true
+    },
+    {
+     "role": "innkeeper",
+     "title": "Innkeeper",
+     "name": "Gakk Thallu",
+     "plot": "mistfall_plot_7",
+     "want": "inn",
+     "x": 1153.73,
+     "z": 1335.42,
+     "yaw": 0.3472,
+     "w": 5.57,
+     "d": 6.93,
+     "door": {
+      "x": 1155.3,
+      "z": 1339.8,
+      "yaw": 3.489
+     },
+     "sign": "tankard",
+     "light": true,
+     "label": "Inn",
+     "shop": "inn",
+     "titled": true
+    },
+    {
+     "role": "farmer",
+     "title": "Farmer",
+     "name": "Sorr Gennvar",
+     "plot": "mistfall_plot_2",
+     "want": "granary",
+     "x": 1170.29,
+     "z": 1313.3,
+     "yaw": -2.8406,
+     "w": 3.28,
+     "d": 6,
+     "door": {
+      "x": 1169,
+      "z": 1309.3,
+      "yaw": 0.301
+     },
+     "sign": "sheaf",
+     "light": false,
+     "label": "Granary",
+     "titled": false
+    },
+    {
+     "role": "miller",
+     "title": "Miller",
+     "name": "Raku Sarrvek",
+     "plot": "mistfall_plot_4",
+     "want": "mill",
+     "x": 1179.72,
+     "z": 1330.33,
+     "yaw": -2.7944,
+     "w": 4.64,
+     "d": 4.43,
+     "door": {
+      "x": 1178.6,
+      "z": 1327.1,
+      "yaw": 0.347
+     },
+     "sign": "wheel",
+     "light": false,
+     "label": "Mill",
+     "titled": false,
+     "service": [
+      "flour"
+     ]
+    },
+    {
+     "role": "healer",
+     "title": "",
+     "name": "Steam-wife Ninu",
+     "npc": "steam_wife_ninu",
+     "plot": "mistfall_plot_1",
+     "want": "house",
+     "x": 1167.77,
+     "z": 1301.14,
+     "yaw": -2.8406,
+     "w": 3.71,
+     "d": 3.59,
+     "door": {
+      "x": 1166.9,
+      "z": 1298.3,
+      "yaw": 0.301
+     },
+     "sign": null,
+     "light": false,
+     "shop": "healer",
+     "titled": true,
+     "home": true
+    },
+    {
+     "role": "trader",
+     "title": "",
+     "name": "Corra Sulvenn",
+     "npc": "corra_sulvenn",
+     "plot": "mistfall_plot_0",
+     "want": "house",
+     "x": 1185.63,
+     "z": 1305.05,
+     "yaw": 0.2067,
+     "w": 3.63,
+     "d": 4.48,
+     "door": {
+      "x": 1186.3,
+      "z": 1308.4,
+      "yaw": 3.348
+     },
+     "sign": null,
+     "light": false,
+     "shop": "market",
+     "titled": true,
+     "home": true
+    }
+   ]
+  },
+  "yellowpan": {
+   "name": "Yellowpan",
+   "zone": "z13_09",
+   "sheetZone": "sulphur_bight",
+   "kind": "village",
+   "x": 516,
+   "z": 1582,
+   "r": 65,
+   "offices": [
+    {
+     "role": "elder",
+     "title": "Elder",
+     "name": "Mother Sarrai",
+     "npc": "mother_sarrai",
+     "plot": "yellowpan_plot_15",
+     "want": "house",
+     "x": 526.02,
+     "z": 1617,
+     "yaw": -1.7446,
+     "w": 7.65,
+     "d": 6.24,
+     "door": {
+      "x": 521.8,
+      "z": 1616.3,
+      "yaw": 1.397
+     },
+     "sign": "banner",
+     "light": false,
+     "titled": true,
+     "service": [
+      "quests",
+      "town news"
+     ]
+    },
+    {
+     "role": "merchant",
+     "title": "Merchant",
+     "name": "Pit-boss Drask",
+     "npc": "pit_boss_drask",
+     "plot": "yellowpan_plot_10",
+     "want": "shop",
+     "x": 533.97,
+     "z": 1591.34,
+     "yaw": 2.9187,
+     "w": 6.81,
+     "d": 5.08,
+     "door": {
+      "x": 534.8,
+      "z": 1587.7,
+      "yaw": 6.06
+     },
+     "sign": "barrel",
+     "light": true,
+     "label": "General Goods",
+     "shop": "general",
+     "titled": true
+    },
+    {
+     "role": "smith",
+     "title": "Smith",
+     "name": "Anu Skelvaru",
+     "plot": "yellowpan_plot_12",
+     "want": "forge",
+     "x": 517.39,
+     "z": 1604.8,
+     "yaw": -0.1738,
+     "w": 5.43,
+     "d": 7.26,
+     "door": {
+      "x": 516.6,
+      "z": 1609.6,
+      "yaw": 2.968
+     },
+     "sign": "anvil",
+     "light": true,
+     "label": "Smithy",
+     "shop": "weaponsmith",
+     "titled": true
+    },
+    {
+     "role": "stablehand",
+     "title": "Stable master",
+     "name": "Jorro Ivvessk",
+     "plot": "yellowpan_plot_4",
+     "want": "stable",
+     "x": 501.49,
+     "z": 1599.89,
+     "yaw": -1.7326,
+     "w": 7.54,
+     "d": 7.37,
+     "door": {
+      "x": 496.7,
+      "z": 1599.1,
+      "yaw": 1.409
+     },
+     "sign": "horseshoe",
+     "light": true,
+     "label": "Stables",
+     "shop": "stable",
+     "titled": true
+    },
+    {
+     "role": "innkeeper",
+     "title": "Innkeeper",
+     "name": "Velu Sarrvek",
+     "plot": "yellowpan_plot_9",
+     "want": "inn",
+     "x": 527.66,
+     "z": 1578.85,
+     "yaw": 1.3479,
+     "w": 9.57,
+     "d": 8.79,
+     "door": {
+      "x": 533.1,
+      "z": 1580.1,
+      "yaw": 4.489
+     },
+     "sign": "tankard",
+     "light": true,
+     "label": "Inn",
+     "shop": "inn",
+     "titled": true
+    },
+    {
+     "role": "provisioner",
+     "title": "Provisioner",
+     "name": "Kesk Vhorrun",
+     "plot": "yellowpan_plot_11",
+     "want": "provisioner",
+     "x": 547.25,
+     "z": 1581.93,
+     "yaw": -0.2229,
+     "w": 6.09,
+     "d": 6.13,
+     "door": {
+      "x": 546.3,
+      "z": 1586.1,
+      "yaw": 2.919
+     },
+     "sign": "sack",
+     "light": true,
+     "label": "Provisioner",
+     "shop": "provisioner",
+     "titled": true
+    },
+    {
+     "role": "farmer",
+     "title": "Farmer",
+     "name": "Ashka Nesskaru",
+     "plot": "yellowpan_plot_2",
+     "want": "granary",
+     "x": 507.28,
+     "z": 1571.24,
+     "yaw": -0.1386,
+     "w": 7.61,
+     "d": 5.96,
+     "door": {
+      "x": 506.7,
+      "z": 1575.4,
+      "yaw": 3.003
+     },
+     "sign": "sheaf",
+     "light": false,
+     "label": "Granary",
+     "titled": false
+    },
+    {
+     "role": "miller",
+     "title": "Miller",
+     "name": "Imma Orvakk",
+     "plot": "yellowpan_plot_7",
+     "want": "mill",
+     "x": 528.84,
+     "z": 1566.98,
+     "yaw": 1.3479,
+     "w": 9.68,
+     "d": 4.7,
+     "door": {
+      "x": 532.3,
+      "z": 1567.8,
+      "yaw": 4.489
+     },
+     "sign": "wheel",
+     "light": false,
+     "label": "Mill",
+     "titled": false,
+     "service": [
+      "flour"
+     ]
+    },
+    {
+     "role": "guard",
+     "title": "",
+     "name": "Ilko Rhovek",
+     "npc": "ilko_rhovek",
+     "plot": "yellowpan_plot_1",
+     "want": "house",
+     "x": 509.62,
+     "z": 1558.24,
+     "yaw": -1.7094,
+     "w": 9.51,
+     "d": 8.99,
+     "door": {
+      "x": 504,
+      "z": 1557.5,
+      "yaw": 1.432
+     },
+     "sign": null,
+     "light": false,
+     "titled": true,
+     "home": true
+    },
+    {
+     "role": "prospector",
+     "title": "Mining trainer",
+     "name": "Ilra Draskar",
+     "plot": "yellowpan_plot_8",
+     "want": "house",
+     "x": 548.03,
+     "z": 1564.25,
+     "yaw": -0.2229,
+     "w": 5.84,
+     "d": 5.74,
+     "door": {
+      "x": 547.1,
+      "z": 1568.2,
+      "yaw": 2.919
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "logger",
+     "title": "Logging trainer",
+     "name": "Kalvu Lhessu",
+     "plot": "yellowpan_plot_3",
+     "want": "house",
+     "x": 490.18,
+     "z": 1598.04,
+     "yaw": 1.409,
+     "w": 8.34,
+     "d": 7.37,
+     "door": {
+      "x": 495.6,
+      "z": 1595.3,
+      "yaw": 4.551
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "forager",
+     "title": "Foraging trainer",
+     "name": "Orsk Sarrvek",
+     "plot": "yellowpan_plot_5",
+     "want": "house",
+     "x": 494.34,
+     "z": 1609.85,
+     "yaw": -1.7326,
+     "w": 4.88,
+     "d": 5.31,
+     "door": {
+      "x": 490.5,
+      "z": 1609.2,
+      "yaw": 1.409
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "skinner",
+     "title": "Skinning trainer",
+     "name": "Dakku Morrakk",
+     "plot": "yellowpan_plot_6",
+     "want": "house",
+     "x": 530.59,
+     "z": 1549.56,
+     "yaw": 1.3479,
+     "w": 5.39,
+     "d": 8.12,
+     "door": {
+      "x": 535.7,
+      "z": 1550.7,
+      "yaw": 4.489
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    }
+   ]
+  },
+  "stiltreach": {
+   "name": "Stiltreach",
+   "zone": "z13_11",
+   "sheetZone": "fumarole_fen",
+   "kind": "hamlet",
+   "x": 440,
+   "z": 584,
+   "r": 46,
+   "offices": [
+    {
+     "role": "elder",
+     "title": "Elder",
+     "name": "Mother Imma",
+     "npc": "mother_imma",
+     "plot": "stiltreach_plot_0",
+     "want": "house",
+     "x": 447.27,
+     "z": 615.49,
+     "yaw": -2.3158,
+     "w": 5.19,
+     "d": 6.06,
+     "door": {
+      "x": 444.2,
+      "z": 612.6,
+      "yaw": 0.826
+     },
+     "sign": "banner",
+     "light": false,
+     "titled": true,
+     "service": [
+      "quests",
+      "town news"
+     ]
+    },
+    {
+     "role": "merchant",
+     "title": "Merchant",
+     "name": "Eiru Sulvenn",
+     "plot": "stiltreach_plot_1",
+     "want": "shop",
+     "x": 439.8,
+     "z": 608.6,
+     "yaw": 0.8258,
+     "w": 8.3,
+     "d": 6.06,
+     "door": {
+      "x": 445.3,
+      "z": 608.9,
+      "yaw": 3.967
+     },
+     "sign": "barrel",
+     "light": true,
+     "label": "General Goods",
+     "shop": "general",
+     "titled": true
+    },
+    {
+     "role": "innkeeper",
+     "title": "Innkeeper",
+     "name": "Miru Thakkun",
+     "plot": "stiltreach_plot_2",
+     "want": "inn",
+     "x": 464.51,
+     "z": 596.92,
+     "yaw": -0.8366,
+     "w": 7.59,
+     "d": 8.33,
+     "door": {
+      "x": 460.5,
+      "z": 600.5,
+      "yaw": 2.305
+     },
+     "sign": "tankard",
+     "light": true,
+     "label": "Inn",
+     "shop": "inn",
+     "titled": true
+    },
+    {
+     "role": "miller",
+     "title": "Miller",
+     "name": "Ninu Mhorrak",
+     "plot": "stiltreach_plot_3",
+     "want": "mill",
+     "x": 467.91,
+     "z": 576.33,
+     "yaw": 0.5142,
+     "w": 6.73,
+     "d": 7.58,
+     "door": {
+      "x": 470.4,
+      "z": 580.7,
+      "yaw": 3.656
+     },
+     "sign": "wheel",
+     "light": false,
+     "label": "Mill",
+     "titled": false,
+     "service": [
+      "flour"
+     ]
+    },
+    {
+     "role": "farmer",
+     "title": "Farmer",
+     "name": "Ghessa Gennvar",
+     "plot": "stiltreach_plot_7",
+     "want": "granary",
+     "x": 442.05,
+     "z": 564.41,
+     "yaw": 1.8818,
+     "w": 5.53,
+     "d": 7.82,
+     "door": {
+      "x": 446.9,
+      "z": 562.8,
+      "yaw": 5.023
+     },
+     "sign": "sheaf",
+     "light": false,
+     "label": "Granary",
+     "titled": false
+    },
+    {
+     "role": "resident",
+     "title": "",
+     "name": "Stilt-builder Oskel",
+     "npc": "stilt_builder_oskel",
+     "plot": "stiltreach_plot_6",
+     "want": "house",
+     "x": 422.77,
+     "z": 562.2,
+     "yaw": 0.4554,
+     "w": 8.32,
+     "d": 8.45,
+     "door": {
+      "x": 425.2,
+      "z": 567.1,
+      "yaw": 3.597
+     },
+     "sign": null,
+     "light": false,
+     "titled": true,
+     "home": true
+    }
+   ]
+  },
+  "shardhaven": {
+   "name": "Shardhaven",
+   "zone": "z11_09",
+   "sheetZone": "glasswind_strand",
+   "kind": "hamlet",
+   "x": 1572,
+   "z": 1572,
+   "r": 40,
+   "offices": [
+    {
+     "role": "elder",
+     "title": "Elder",
+     "name": "Old Jorro",
+     "npc": "old_jorro",
+     "plot": "shardhaven_plot_0",
+     "want": "house",
+     "x": 1582.18,
+     "z": 1589.87,
+     "yaw": -0.7875,
+     "w": 3.9,
+     "d": 4.48,
+     "door": {
+      "x": 1579.7,
+      "z": 1592.3,
+      "yaw": 2.354
+     },
+     "sign": "banner",
+     "light": false,
+     "titled": true,
+     "service": [
+      "quests",
+      "town news"
+     ]
+    },
+    {
+     "role": "merchant",
+     "title": "Merchant",
+     "name": "Oru Nuvaru",
+     "plot": "shardhaven_plot_5",
+     "want": "shop",
+     "x": 1560.44,
+     "z": 1568.07,
+     "yaw": 0.8379,
+     "w": 6.41,
+     "d": 5.28,
+     "door": {
+      "x": 1563.3,
+      "z": 1570.6,
+      "yaw": 3.979
+     },
+     "sign": "barrel",
+     "light": true,
+     "label": "General Goods",
+     "shop": "general",
+     "titled": true
+    },
+    {
+     "role": "innkeeper",
+     "title": "Innkeeper",
+     "name": "Pekku Ulvessa",
+     "plot": "shardhaven_plot_6",
+     "want": "inn",
+     "x": 1579.97,
+     "z": 1565.08,
+     "yaw": -2.3037,
+     "w": 7.05,
+     "d": 3.79,
+     "door": {
+      "x": 1577.7,
+      "z": 1563,
+      "yaw": 0.838
+     },
+     "sign": "tankard",
+     "light": true,
+     "label": "Inn",
+     "shop": "inn",
+     "titled": true
+    },
+    {
+     "role": "farmer",
+     "title": "Farmer",
+     "name": "Pekku Imbaru",
+     "plot": "shardhaven_plot_2",
+     "want": "granary",
+     "x": 1560.94,
+     "z": 1585.85,
+     "yaw": -0.6381,
+     "w": 6.91,
+     "d": 5.05,
+     "door": {
+      "x": 1558.7,
+      "z": 1588.8,
+      "yaw": 2.503
+     },
+     "sign": "sheaf",
+     "light": false,
+     "label": "Granary",
+     "titled": false
+    },
+    {
+     "role": "miller",
+     "title": "Miller",
+     "name": "Lekko Tovaru",
+     "plot": "shardhaven_plot_9",
+     "want": "mill",
+     "x": 1587.24,
+     "z": 1557.71,
+     "yaw": -2.3037,
+     "w": 4.57,
+     "d": 6.77,
+     "door": {
+      "x": 1583.8,
+      "z": 1554.6,
+      "yaw": 0.838
+     },
+     "sign": "wheel",
+     "light": false,
+     "label": "Mill",
+     "titled": false,
+     "service": [
+      "flour"
+     ]
+    },
+    {
+     "role": "smith",
+     "title": "",
+     "name": "Glass-cutter Lunna",
+     "npc": "glass_cutter_lunna",
+     "plot": "shardhaven_plot_8",
+     "want": "house",
+     "x": 1564.11,
+     "z": 1551.02,
+     "yaw": -2.3037,
+     "w": 3.38,
+     "d": 4.12,
+     "door": {
+      "x": 1561.7,
+      "z": 1548.8,
+      "yaw": 0.838
+     },
+     "sign": null,
+     "light": false,
+     "shop": "weaponsmith",
+     "titled": true,
+     "home": true
+    },
+    {
+     "role": "guard",
+     "title": "",
+     "name": "Tide-caller Dessa",
+     "npc": "tide_caller_dessa",
+     "plot": "shardhaven_plot_1",
+     "want": "house",
+     "x": 1592.5,
+     "z": 1585.6,
+     "yaw": -2.3583,
+     "w": 4,
+     "d": 6.5,
+     "door": {
+      "x": 1589.4,
+      "z": 1582.4,
+      "yaw": 0.783
+     },
+     "sign": null,
+     "light": false,
+     "titled": true,
+     "home": true
+    },
+    {
+     "role": "prospector",
+     "title": "Mining trainer",
+     "name": "Nevvu Dhorru",
+     "plot": "shardhaven_plot_3",
+     "want": "house",
+     "x": 1553.1,
+     "z": 1579.44,
+     "yaw": 0.9327,
+     "w": 6.38,
+     "d": 4.08,
+     "door": {
+      "x": 1555.7,
+      "z": 1581.4,
+      "yaw": 4.074
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "logger",
+     "title": "Logging trainer",
+     "name": "Ghessa Nesskaru",
+     "plot": "shardhaven_plot_7",
+     "want": "house",
+     "x": 1555.28,
+     "z": 1554.17,
+     "yaw": 0.8379,
+     "w": 4.09,
+     "d": 5.23,
+     "door": {
+      "x": 1558.1,
+      "z": 1556.7,
+      "yaw": 3.979
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "forager",
+     "title": "Foraging trainer",
+     "name": "Velu Keshvar",
+     "plot": "shardhaven_plot_10",
+     "want": "shrine",
+     "x": 1577.31,
+     "z": 1548.76,
+     "yaw": -2.3037,
+     "w": 4.02,
+     "d": 6.77,
+     "door": {
+      "x": 1573.9,
+      "z": 1545.7,
+      "yaw": 0.838
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    }
+   ]
+  },
+  "lastwell": {
+   "name": "Lastwell",
+   "zone": "z11_10",
+   "sheetZone": "pumice_wastes",
+   "kind": "town",
+   "x": 1312,
+   "z": 1144,
+   "r": 90,
+   "offices": [
+    {
+     "role": "elder",
+     "title": "Elder",
+     "name": "Hearth-elder Halla Morrakk",
+     "npc": "hearth_elder_halla",
+     "plot": "lastwell_plot_12",
+     "want": "hall",
+     "x": 1317.83,
+     "z": 1150.64,
+     "yaw": 1.1718,
+     "w": 5.23,
+     "d": 8.91,
+     "door": {
+      "x": 1323,
+      "z": 1152.8,
+      "yaw": 4.313
+     },
+     "sign": "banner",
+     "light": false,
+     "label": "Town Hall",
+     "titled": true,
+     "service": [
+      "quests",
+      "town news"
+     ]
+    },
+    {
+     "role": "merchant",
+     "title": "Merchant",
+     "name": "Dessa Jakkora",
+     "plot": "lastwell_plot_14",
+     "want": "shop",
+     "x": 1294.61,
+     "z": 1159.6,
+     "yaw": -1.9698,
+     "w": 5.53,
+     "d": 7.51,
+     "door": {
+      "x": 1290,
+      "z": 1157.7,
+      "yaw": 1.172
+     },
+     "sign": "barrel",
+     "light": true,
+     "label": "General Goods",
+     "shop": "general",
+     "titled": true
+    },
+    {
+     "role": "trader",
+     "title": "Market trader",
+     "name": "Tavi Tovaru",
+     "plot": "lastwell_plot_27",
+     "want": "market",
+     "x": 1284.18,
+     "z": 1119.75,
+     "yaw": -2.0401,
+     "w": 7.5,
+     "d": 10.21,
+     "door": {
+      "x": 1278.6,
+      "z": 1116.9,
+      "yaw": 1.101
+     },
+     "sign": "awning",
+     "light": true,
+     "label": "Market",
+     "shop": "market",
+     "titled": true
+    },
+    {
+     "role": "smith",
+     "title": "Smith",
+     "name": "Benno Wekkaru",
+     "plot": "lastwell_plot_15",
+     "want": "forge",
+     "x": 1314.37,
+     "z": 1132.24,
+     "yaw": -0.399,
+     "w": 4.69,
+     "d": 5.92,
+     "door": {
+      "x": 1312.8,
+      "z": 1136.1,
+      "yaw": 2.743
+     },
+     "sign": "anvil",
+     "light": true,
+     "label": "Smithy",
+     "shop": "weaponsmith",
+     "titled": true
+    },
+    {
+     "role": "armourer",
+     "title": "Armourer",
+     "name": "Ilko Thallu",
+     "plot": "lastwell_plot_3",
+     "want": "armoury",
+     "x": 1290.51,
+     "z": 1174.63,
+     "yaw": -0.399,
+     "w": 9.25,
+     "d": 6.98,
+     "door": {
+      "x": 1288.7,
+      "z": 1179,
+      "yaw": 2.743
+     },
+     "sign": "shield",
+     "light": true,
+     "label": "Armourer",
+     "shop": "armourer",
+     "titled": true
+    },
+    {
+     "role": "bowyer",
+     "title": "Bowyer",
+     "name": "Sennu Arvessu",
+     "plot": "lastwell_plot_25",
+     "want": "bowyer",
+     "x": 1274.45,
+     "z": 1150.28,
+     "yaw": -1.9657,
+     "w": 5.75,
+     "d": 9.02,
+     "door": {
+      "x": 1269.2,
+      "z": 1148.1,
+      "yaw": 1.176
+     },
+     "sign": "bow",
+     "light": true,
+     "label": "Bowyer",
+     "shop": "bowyer",
+     "titled": true
+    },
+    {
+     "role": "apothecary",
+     "title": "Apothecary",
+     "name": "Dessa Zhakku",
+     "plot": "lastwell_plot_6",
+     "want": "apothecary",
+     "x": 1331.31,
+     "z": 1168.13,
+     "yaw": -1.9698,
+     "w": 5.89,
+     "d": 5.59,
+     "door": {
+      "x": 1327.6,
+      "z": 1166.6,
+      "yaw": 1.172
+     },
+     "sign": "flask",
+     "light": true,
+     "label": "Apothecary",
+     "shop": "apothecary",
+     "titled": true
+    },
+    {
+     "role": "tailor",
+     "title": "Tailor",
+     "name": "Sorr Uskel",
+     "plot": "lastwell_plot_22",
+     "want": "tailor",
+     "x": 1313.92,
+     "z": 1113.35,
+     "yaw": 2.734,
+     "w": 6.48,
+     "d": 7.27,
+     "door": {
+      "x": 1315.8,
+      "z": 1108.9,
+      "yaw": 5.876
+     },
+     "sign": "needle",
+     "light": true,
+     "label": "Tailor",
+     "shop": "tailor",
+     "titled": true
+    },
+    {
+     "role": "jeweller",
+     "title": "Jeweller",
+     "name": "Kirra Mhorrak",
+     "plot": "lastwell_plot_21",
+     "want": "jeweller",
+     "x": 1328.61,
+     "z": 1119.69,
+     "yaw": 2.734,
+     "w": 4.7,
+     "d": 7.27,
+     "door": {
+      "x": 1330.5,
+      "z": 1115.3,
+      "yaw": 5.876
+     },
+     "sign": "ring",
+     "light": true,
+     "label": "Jeweller",
+     "shop": "jeweller",
+     "titled": true
+    },
+    {
+     "role": "stablehand",
+     "title": "Stable master",
+     "name": "Mossa Wekkaru",
+     "plot": "lastwell_plot_8",
+     "want": "stable",
+     "x": 1310.44,
+     "z": 1167.58,
+     "yaw": 2.7426,
+     "w": 4.77,
+     "d": 5.1,
+     "door": {
+      "x": 1311.9,
+      "z": 1164.1,
+      "yaw": 5.884
+     },
+     "sign": "horseshoe",
+     "light": true,
+     "label": "Stables",
+     "shop": "stable",
+     "titled": true
+    },
+    {
+     "role": "innkeeper",
+     "title": "Innkeeper",
+     "name": "Matu Tukkari",
+     "npc": "matu_tukkari",
+     "plot": "lastwell_plot_13",
+     "want": "inn",
+     "x": 1323.67,
+     "z": 1138.28,
+     "yaw": -0.399,
+     "w": 6.38,
+     "d": 9.83,
+     "door": {
+      "x": 1321.3,
+      "z": 1143.9,
+      "yaw": 2.743
+     },
+     "sign": "tankard",
+     "light": true,
+     "label": "Inn",
+     "shop": "inn",
+     "titled": true
+    },
+    {
+     "role": "provisioner",
+     "title": "Provisioner",
+     "name": "Velu Tovaru",
+     "plot": "lastwell_plot_1",
+     "want": "provisioner",
+     "x": 1301.65,
+     "z": 1181.16,
+     "yaw": -0.399,
+     "w": 7.1,
+     "d": 10.37,
+     "door": {
+      "x": 1299.2,
+      "z": 1187,
+      "yaw": 2.743
+     },
+     "sign": "sack",
+     "light": true,
+     "label": "Provisioner",
+     "shop": "provisioner",
+     "titled": true
+    },
+    {
+     "role": "barber",
+     "title": "Barber",
+     "name": "Imma Kelvu",
+     "plot": "lastwell_plot_7",
+     "want": "barber",
+     "x": 1322.47,
+     "z": 1163.92,
+     "yaw": -0.399,
+     "w": 6.53,
+     "d": 4.7,
+     "door": {
+      "x": 1321.1,
+      "z": 1167.2,
+      "yaw": 2.743
+     },
+     "sign": "scissors",
+     "light": true,
+     "label": "Barber",
+     "shop": "barber",
+     "titled": true
+    },
+    {
+     "role": "broker",
+     "title": "Broker",
+     "name": "Lekko Pakkari",
+     "plot": "lastwell_plot_26",
+     "want": "counting_house",
+     "x": 1278.77,
+     "z": 1139.92,
+     "yaw": -0.3949,
+     "w": 5.75,
+     "d": 5.98,
+     "door": {
+      "x": 1277.2,
+      "z": 1143.8,
+      "yaw": 2.747
+     },
+     "sign": "scroll",
+     "light": false,
+     "label": "Counting House",
+     "shop": "broker",
+     "titled": true
+    },
+    {
+     "role": "unbinder",
+     "title": "Unbinder",
+     "name": "Sorr Sulvenn",
+     "plot": "lastwell_plot_9",
+     "want": "study",
+     "x": 1335.18,
+     "z": 1159.41,
+     "yaw": 2.7426,
+     "w": 5.53,
+     "d": 6.24,
+     "door": {
+      "x": 1336.9,
+      "z": 1155.4,
+      "yaw": 5.884
+     },
+     "sign": "candle",
+     "light": false,
+     "label": "Unbinder's Study",
+     "shop": "unbinder",
+     "titled": true
+    },
+    {
+     "role": "healer",
+     "title": "Healer",
+     "name": "Ferro Keshvar",
+     "plot": "lastwell_plot_11",
+     "want": "temple",
+     "x": 1326.28,
+     "z": 1154.21,
+     "yaw": -0.399,
+     "w": 5.38,
+     "d": 8.91,
+     "door": {
+      "x": 1324.1,
+      "z": 1159.4,
+      "yaw": 2.743
+     },
+     "sign": "bowl",
+     "light": false,
+     "label": "Temple",
+     "shop": "healer",
+     "titled": true
+    },
+    {
+     "role": "farmer",
+     "title": "Farmer",
+     "name": "Ilko Morrakk",
+     "plot": "lastwell_plot_10",
+     "want": "granary",
+     "x": 1341.72,
+     "z": 1143.92,
+     "yaw": -0.399,
+     "w": 5.53,
+     "d": 6.19,
+     "door": {
+      "x": 1340.1,
+      "z": 1147.9,
+      "yaw": 2.743
+     },
+     "sign": "sheaf",
+     "light": false,
+     "label": "Granary",
+     "titled": false
+    },
+    {
+     "role": "miller",
+     "title": "Miller",
+     "name": "Raku Yorrvenn",
+     "plot": "lastwell_plot_19",
+     "want": "mill",
+     "x": 1339.22,
+     "z": 1123.47,
+     "yaw": 2.734,
+     "w": 9.49,
+     "d": 8.98,
+     "door": {
+      "x": 1341.5,
+      "z": 1118.2,
+      "yaw": 5.876
+     },
+     "sign": "wheel",
+     "light": false,
+     "label": "Mill",
+     "titled": false,
+     "service": [
+      "flour"
+     ]
+    },
+    {
+     "role": "guard",
+     "title": "",
+     "name": "Haro Draskar",
+     "npc": "haro_draskar",
+     "plot": "lastwell_plot_28",
+     "want": "house",
+     "x": 1289.2,
+     "z": 1108.94,
+     "yaw": -2.0401,
+     "w": 8.15,
+     "d": 6.13,
+     "door": {
+      "x": 1285.4,
+      "z": 1107,
+      "yaw": 1.101
+     },
+     "sign": null,
+     "light": false,
+     "titled": true,
+     "home": true
+    },
+    {
+     "role": "prospector",
+     "title": "Mining trainer",
+     "name": "Tekk Jakkora",
+     "plot": "lastwell_plot_23",
+     "want": "house",
+     "x": 1332.8,
+     "z": 1109.86,
+     "yaw": -1.9784,
+     "w": 4.81,
+     "d": 7.09,
+     "door": {
+      "x": 1328.4,
+      "z": 1108,
+      "yaw": 1.163
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "logger",
+     "title": "Logging trainer",
+     "name": "Jassu Jakkora",
+     "plot": "lastwell_plot_4",
+     "want": "house",
+     "x": 1342.94,
+     "z": 1175.05,
+     "yaw": 2.7426,
+     "w": 9.49,
+     "d": 5.07,
+     "door": {
+      "x": 1344.4,
+      "z": 1171.6,
+      "yaw": 5.884
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "forager",
+     "title": "Foraging trainer",
+     "name": "Hekka Bhelvar",
+     "plot": "lastwell_plot_24",
+     "want": "house",
+     "x": 1318.62,
+     "z": 1102.43,
+     "yaw": 1.1632,
+     "w": 6.44,
+     "d": 9.49,
+     "door": {
+      "x": 1324.1,
+      "z": 1104.8,
+      "yaw": 4.305
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "skinner",
+     "title": "Skinning trainer",
+     "name": "Ashka Karrovu",
+     "plot": "lastwell_plot_0",
+     "want": "house",
+     "x": 1324.56,
+     "z": 1189.41,
+     "yaw": -0.399,
+     "w": 8.17,
+     "d": 7.76,
+     "door": {
+      "x": 1322.6,
+      "z": 1194.1,
+      "yaw": 2.743
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    }
+   ]
+  },
+  "cinderholt": {
+   "name": "Cinderholt",
+   "zone": "z12_11",
+   "sheetZone": "ashfall_hollow",
+   "kind": "village",
+   "x": 1084,
+   "z": 736,
+   "r": 65,
+   "offices": [
+    {
+     "role": "elder",
+     "title": "Elder",
+     "name": "Ash-reader Kirra",
+     "npc": "ash_reader_kirra",
+     "plot": "cinderholt_plot_9",
+     "want": "hut",
+     "x": 1078.16,
+     "z": 730.25,
+     "yaw": 0.3823,
+     "w": 4.39,
+     "d": 5.11,
+     "door": {
+      "x": 1079.6,
+      "z": 733.7,
+      "yaw": 3.524
+     },
+     "sign": "banner",
+     "light": false,
+     "titled": true,
+     "service": [
+      "quests",
+      "town news"
+     ]
+    },
+    {
+     "role": "merchant",
+     "title": "Merchant",
+     "name": "Nessk Gennvar",
+     "plot": "cinderholt_plot_17",
+     "want": "shop",
+     "x": 1090.25,
+     "z": 721.75,
+     "yaw": 0.4146,
+     "w": 5.66,
+     "d": 6.61,
+     "door": {
+      "x": 1092.1,
+      "z": 725.9,
+      "yaw": 3.556
+     },
+     "sign": "barrel",
+     "light": true,
+     "label": "General Goods",
+     "shop": "general",
+     "titled": true
+    },
+    {
+     "role": "smith",
+     "title": "Smith",
+     "name": "Lorr Hulkaru",
+     "plot": "cinderholt_plot_2",
+     "want": "forge",
+     "x": 1075.5,
+     "z": 756.88,
+     "yaw": 0.4032,
+     "w": 7.23,
+     "d": 6.4,
+     "door": {
+      "x": 1077.2,
+      "z": 760.9,
+      "yaw": 3.545
+     },
+     "sign": "anvil",
+     "light": true,
+     "label": "Smithy",
+     "shop": "weaponsmith",
+     "titled": true
+    },
+    {
+     "role": "stablehand",
+     "title": "Stable master",
+     "name": "Tullu Bhelvar",
+     "plot": "cinderholt_plot_0",
+     "want": "stable",
+     "x": 1073.71,
+     "z": 768.45,
+     "yaw": 1.974,
+     "w": 5.64,
+     "d": 4.78,
+     "door": {
+      "x": 1077,
+      "z": 767,
+      "yaw": 5.116
+     },
+     "sign": "horseshoe",
+     "light": true,
+     "label": "Stables",
+     "shop": "stable",
+     "titled": true
+    },
+    {
+     "role": "innkeeper",
+     "title": "Innkeeper",
+     "name": "Benno Lhessu",
+     "npc": "benno_lhessu",
+     "plot": "cinderholt_plot_15",
+     "want": "inn",
+     "x": 1093.31,
+     "z": 730.68,
+     "yaw": 1.9854,
+     "w": 5.81,
+     "d": 5,
+     "door": {
+      "x": 1096.7,
+      "z": 729.2,
+      "yaw": 5.127
+     },
+     "sign": "tankard",
+     "light": true,
+     "label": "Inn",
+     "shop": "inn",
+     "titled": true
+    },
+    {
+     "role": "provisioner",
+     "title": "Provisioner",
+     "name": "Zelle Karrovu",
+     "plot": "cinderholt_plot_11",
+     "want": "provisioner",
+     "x": 1052.96,
+     "z": 716.49,
+     "yaw": -1.1885,
+     "w": 6.3,
+     "d": 4.95,
+     "door": {
+      "x": 1049.6,
+      "z": 717.9,
+      "yaw": 1.953
+     },
+     "sign": "sack",
+     "light": true,
+     "label": "Provisioner",
+     "shop": "provisioner",
+     "titled": true
+    },
+    {
+     "role": "miller",
+     "title": "Miller",
+     "name": "Varr Vakkatu",
+     "plot": "cinderholt_plot_7",
+     "want": "mill",
+     "x": 1049.69,
+     "z": 742.25,
+     "yaw": 0.3823,
+     "w": 5.42,
+     "d": 6.1,
+     "door": {
+      "x": 1051.3,
+      "z": 746.2,
+      "yaw": 3.524
+     },
+     "sign": "wheel",
+     "light": false,
+     "label": "Mill",
+     "titled": false,
+     "service": [
+      "flour"
+     ]
+    },
+    {
+     "role": "farmer",
+     "title": "Farmer",
+     "name": "Yorr Mhorrak",
+     "plot": "cinderholt_plot_21",
+     "want": "granary",
+     "x": 1088.96,
+     "z": 704.54,
+     "yaw": -1.1562,
+     "w": 6.24,
+     "d": 6.69,
+     "door": {
+      "x": 1084.8,
+      "z": 706.4,
+      "yaw": 1.985
+     },
+     "sign": "sheaf",
+     "light": false,
+     "label": "Granary",
+     "titled": false
+    },
+    {
+     "role": "resident",
+     "title": "",
+     "name": "Gakk Nuvaru",
+     "npc": "gakk_nuvaru",
+     "plot": "cinderholt_plot_3",
+     "want": "house",
+     "x": 1099.02,
+     "z": 756.01,
+     "yaw": -2.7384,
+     "w": 5.15,
+     "d": 3.95,
+     "door": {
+      "x": 1097.8,
+      "z": 753.1,
+      "yaw": 0.403
+     },
+     "sign": null,
+     "light": false,
+     "titled": true,
+     "home": true
+    },
+    {
+     "role": "prospector",
+     "title": "Mining trainer",
+     "name": "Pakku Skelvaru",
+     "plot": "cinderholt_plot_1",
+     "want": "house",
+     "x": 1080.83,
+     "z": 765.41,
+     "yaw": -2.7384,
+     "w": 5.64,
+     "d": 3.29,
+     "door": {
+      "x": 1079.7,
+      "z": 762.8,
+      "yaw": 0.403
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "logger",
+     "title": "Logging trainer",
+     "name": "Nairu Vakkatu",
+     "plot": "cinderholt_plot_18",
+     "want": "house",
+     "x": 1107.72,
+     "z": 724.84,
+     "yaw": -1.1562,
+     "w": 4.89,
+     "d": 3.4,
+     "door": {
+      "x": 1105.1,
+      "z": 726,
+      "yaw": 1.985
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "forager",
+     "title": "Foraging trainer",
+     "name": "Lunna Kelvu",
+     "plot": "cinderholt_plot_19",
+     "want": "house",
+     "x": 1103.95,
+     "z": 716.29,
+     "yaw": 0.4146,
+     "w": 6.7,
+     "d": 3.4,
+     "door": {
+      "x": 1105.6,
+      "z": 719,
+      "yaw": 3.556
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "skinner",
+     "title": "Skinning trainer",
+     "name": "Nairu Ivvessk",
+     "plot": "cinderholt_plot_14",
+     "want": "house",
+     "x": 1067.18,
+     "z": 702.75,
+     "yaw": -1.1885,
+     "w": 5.42,
+     "d": 5.47,
+     "door": {
+      "x": 1063.5,
+      "z": 704.2,
+      "yaw": 1.953
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    }
+   ]
+  },
+  "kilnhold": {
+   "name": "Kilnhold",
+   "zone": "z11_11",
+   "sheetZone": "kiln_ridge",
+   "kind": "village",
+   "x": 1572,
+   "z": 476,
+   "r": 65,
+   "offices": [
+    {
+     "role": "elder",
+     "title": "Elder",
+     "name": "Old Rhaska",
+     "npc": "old_rhaska",
+     "plot": "kilnhold_plot_0",
+     "want": "house",
+     "x": 1590.57,
+     "z": 453.49,
+     "yaw": -1.4188,
+     "w": 10.27,
+     "d": 5.79,
+     "door": {
+      "x": 1586.5,
+      "z": 454.1,
+      "yaw": 1.723
+     },
+     "sign": "banner",
+     "light": false,
+     "titled": true,
+     "service": [
+      "quests",
+      "town news"
+     ]
+    },
+    {
+     "role": "merchant",
+     "title": "Merchant",
+     "name": "Benno Rukkesh",
+     "plot": "kilnhold_plot_9",
+     "want": "shop",
+     "x": 1588.19,
+     "z": 493.11,
+     "yaw": -2.9956,
+     "w": 8.22,
+     "d": 8.27,
+     "door": {
+      "x": 1587.4,
+      "z": 487.8,
+      "yaw": 0.146
+     },
+     "sign": "barrel",
+     "light": true,
+     "label": "General Goods",
+     "shop": "general",
+     "titled": true
+    },
+    {
+     "role": "smith",
+     "title": "Smith",
+     "name": "Kiln-hand Tekk",
+     "npc": "kiln_hand_tekk",
+     "plot": "kilnhold_plot_3",
+     "want": "forge",
+     "x": 1565.21,
+     "z": 460.28,
+     "yaw": 1.7228,
+     "w": 6.37,
+     "d": 8.88,
+     "door": {
+      "x": 1570.8,
+      "z": 459.4,
+      "yaw": 4.864
+     },
+     "sign": "anvil",
+     "light": true,
+     "label": "Smithy",
+     "shop": "weaponsmith",
+     "titled": true
+    },
+    {
+     "role": "stablehand",
+     "title": "Stable master",
+     "name": "Ilko Ivvessk",
+     "plot": "kilnhold_plot_6",
+     "want": "stable",
+     "x": 1599.22,
+     "z": 475.37,
+     "yaw": 0.146,
+     "w": 5.75,
+     "d": 7.55,
+     "door": {
+      "x": 1599.9,
+      "z": 480.3,
+      "yaw": 3.288
+     },
+     "sign": "horseshoe",
+     "light": true,
+     "label": "Stables",
+     "shop": "stable",
+     "titled": true
+    },
+    {
+     "role": "innkeeper",
+     "title": "Innkeeper",
+     "name": "Ekka Ivvessk",
+     "plot": "kilnhold_plot_8",
+     "want": "inn",
+     "x": 1586.69,
+     "z": 482.89,
+     "yaw": -2.9956,
+     "w": 4.6,
+     "d": 8.27,
+     "door": {
+      "x": 1585.9,
+      "z": 477.6,
+      "yaw": 0.146
+     },
+     "sign": "tankard",
+     "light": true,
+     "label": "Inn",
+     "shop": "inn",
+     "titled": true
+    },
+    {
+     "role": "provisioner",
+     "title": "Provisioner",
+     "name": "Drask Skelvaru",
+     "plot": "kilnhold_plot_7",
+     "want": "provisioner",
+     "x": 1599.74,
+     "z": 486.86,
+     "yaw": 1.7168,
+     "w": 9.07,
+     "d": 5.23,
+     "door": {
+      "x": 1603.5,
+      "z": 486.3,
+      "yaw": 4.858
+     },
+     "sign": "sack",
+     "light": true,
+     "label": "Provisioner",
+     "shop": "provisioner",
+     "titled": true
+    },
+    {
+     "role": "miller",
+     "title": "Miller",
+     "name": "Dessa Mhorrak",
+     "plot": "kilnhold_plot_11",
+     "want": "mill",
+     "x": 1554.52,
+     "z": 483.35,
+     "yaw": -1.3704,
+     "w": 5.53,
+     "d": 5.02,
+     "door": {
+      "x": 1550.9,
+      "z": 484.1,
+      "yaw": 1.771
+     },
+     "sign": "wheel",
+     "light": false,
+     "label": "Mill",
+     "titled": false,
+     "service": [
+      "flour"
+     ]
+    },
+    {
+     "role": "farmer",
+     "title": "Farmer",
+     "name": "Miru Ulvessa",
+     "plot": "kilnhold_plot_13",
+     "want": "granary",
+     "x": 1555.72,
+     "z": 495.96,
+     "yaw": -1.3704,
+     "w": 10.7,
+     "d": 7.68,
+     "door": {
+      "x": 1550.8,
+      "z": 497,
+      "yaw": 1.771
+     },
+     "sign": "sheaf",
+     "light": false,
+     "label": "Granary",
+     "titled": false
+    },
+    {
+     "role": "guard",
+     "title": "",
+     "name": "Vosk Karrovu",
+     "npc": "vosk_karrovu",
+     "plot": "kilnhold_plot_4",
+     "want": "house",
+     "x": 1550.85,
+     "z": 460.32,
+     "yaw": -1.314,
+     "w": 10,
+     "d": 4.59,
+     "door": {
+      "x": 1547.5,
+      "z": 461.2,
+      "yaw": 1.828
+     },
+     "sign": null,
+     "light": false,
+     "titled": true,
+     "home": true
+    },
+    {
+     "role": "prospector",
+     "title": "Mining trainer",
+     "name": "Ekka Pakkari",
+     "plot": "kilnhold_plot_12",
+     "want": "house",
+     "x": 1543.53,
+     "z": 485.59,
+     "yaw": 1.7712,
+     "w": 5.53,
+     "d": 9.86,
+     "door": {
+      "x": 1549.1,
+      "z": 482.3,
+      "yaw": 4.913
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "logger",
+     "title": "Logging trainer",
+     "name": "Drask Orvakk",
+     "plot": "kilnhold_plot_14",
+     "want": "house",
+     "x": 1544.83,
+     "z": 498.17,
+     "yaw": 1.7712,
+     "w": 10.7,
+     "d": 7.41,
+     "door": {
+      "x": 1548.7,
+      "z": 492.5,
+      "yaw": 4.913
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "forager",
+     "title": "Foraging trainer",
+     "name": "Jorro Sarrvek",
+     "plot": "kilnhold_plot_5",
+     "want": "house",
+     "x": 1541.89,
+     "z": 462.68,
+     "yaw": 1.8276,
+     "w": 10,
+     "d": 6.18,
+     "door": {
+      "x": 1544.9,
+      "z": 457.3,
+      "yaw": 4.969
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    },
+    {
+     "role": "skinner",
+     "title": "Skinning trainer",
+     "name": "Pekku Kelvu",
+     "plot": "kilnhold_plot_2",
+     "want": "shrine",
+     "x": 1575.45,
+     "z": 458.71,
+     "yaw": -1.4188,
+     "w": 6.37,
+     "d": 4.67,
+     "door": {
+      "x": 1572.4,
+      "z": 461.8,
+      "yaw": 1.723
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    }
+   ]
+  },
+  "rim_shrine": {
+   "name": "Rim Shrine",
+   "zone": "z12_10",
+   "sheetZone": "the_caldera",
+   "kind": "hamlet",
+   "x": 1794,
+   "z": 1148,
+   "r": 40,
+   "offices": [
+    {
+     "role": "elder",
+     "title": "Elder",
+     "name": "Mother Anu",
+     "npc": "mother_anu",
+     "plot": "rim_shrine_plot_1",
+     "want": "house",
+     "x": 1781.98,
+     "z": 1153.68,
+     "yaw": 1.0959,
+     "w": 4.17,
+     "d": 5.43,
+     "door": {
+      "x": 1785.5,
+      "z": 1155.5,
+      "yaw": 4.237
+     },
+     "sign": "banner",
+     "light": false,
+     "titled": true,
+     "service": [
+      "quests",
+      "town news"
+     ]
+    },
+    {
+     "role": "merchant",
+     "title": "Merchant",
+     "name": "Drask Rhovek",
+     "plot": "rim_shrine_plot_6",
+     "want": "shop",
+     "x": 1801.57,
+     "z": 1125.37,
+     "yaw": -1.9259,
+     "w": 4.12,
+     "d": 6.58,
+     "door": {
+      "x": 1797.4,
+      "z": 1123.8,
+      "yaw": 1.216
+     },
+     "sign": "barrel",
+     "light": true,
+     "label": "General Goods",
+     "shop": "general",
+     "titled": true
+    },
+    {
+     "role": "innkeeper",
+     "title": "Innkeeper",
+     "name": "Lekka Ivvessk",
+     "plot": "rim_shrine_plot_5",
+     "want": "inn",
+     "x": 1798.32,
+     "z": 1133.13,
+     "yaw": -1.9259,
+     "w": 5.13,
+     "d": 7.28,
+     "door": {
+      "x": 1793.8,
+      "z": 1131.4,
+      "yaw": 1.216
+     },
+     "sign": "tankard",
+     "light": true,
+     "label": "Inn",
+     "shop": "inn",
+     "titled": true
+    },
+    {
+     "role": "miller",
+     "title": "Miller",
+     "name": "Kesh Ivvessk",
+     "plot": "rim_shrine_plot_2",
+     "want": "mill",
+     "x": 1790.71,
+     "z": 1158.17,
+     "yaw": -2.0456,
+     "w": 4.17,
+     "d": 7.15,
+     "door": {
+      "x": 1785.4,
+      "z": 1158.2,
+      "yaw": 1.096
+     },
+     "sign": "wheel",
+     "light": false,
+     "label": "Mill",
+     "titled": false,
+     "service": [
+      "flour"
+     ]
+    },
+    {
+     "role": "farmer",
+     "title": "Farmer",
+     "name": "Imma Dhorru",
+     "plot": "rim_shrine_plot_7",
+     "want": "granary",
+     "x": 1817.38,
+     "z": 1144.57,
+     "yaw": -0.3871,
+     "w": 5.15,
+     "d": 6.14,
+     "door": {
+      "x": 1815.8,
+      "z": 1148.5,
+      "yaw": 2.754
+     },
+     "sign": "sheaf",
+     "light": false,
+     "label": "Granary",
+     "titled": false
+    },
+    {
+     "role": "guard",
+     "title": "",
+     "name": "Rim-keeper Orsk Vhorrun",
+     "npc": "rim_keeper_orsk",
+     "plot": "rim_shrine_plot_4",
+     "want": "house",
+     "x": 1801.41,
+     "z": 1163.08,
+     "yaw": 1.1606,
+     "w": 6.93,
+     "d": 5.64,
+     "door": {
+      "x": 1805.1,
+      "z": 1164.7,
+      "yaw": 4.302
+     },
+     "sign": null,
+     "light": false,
+     "titled": true,
+     "home": true
+    },
+    {
+     "role": "healer",
+     "title": "",
+     "name": "Iolu Skelvaru",
+     "npc": "iolu_skelvaru",
+     "plot": "rim_shrine_plot_3",
+     "want": "house",
+     "x": 1796.69,
+     "z": 1170.91,
+     "yaw": -0.4102,
+     "w": 3.71,
+     "d": 3.35,
+     "door": {
+      "x": 1795.5,
+      "z": 1173.5,
+      "yaw": 2.731
+     },
+     "sign": null,
+     "light": false,
+     "shop": "healer",
+     "titled": true,
+     "home": true
+    },
+    {
+     "role": "prospector",
+     "title": "Mining trainer",
+     "name": "Oru Sarrvek",
+     "plot": "rim_shrine_plot_0",
+     "want": "house",
+     "x": 1785.8,
+     "z": 1171.15,
+     "yaw": 2.6667,
+     "w": 4.12,
+     "d": 4.02,
+     "door": {
+      "x": 1787.3,
+      "z": 1168.3,
+      "yaw": 5.808
+     },
+     "sign": null,
+     "light": false,
+     "titled": true
+    }
+   ]
+  }
+ },
+ "setpieces": [],
+ "problems": [
+  "Mistfall: prospector — no free plot",
+  "Mistfall: logger — no free plot",
+  "Mistfall: forager — no free plot",
+  "Mistfall: skinner — no free plot",
+  "Stiltreach: fisher — no free plot",
+  "Stiltreach: prospector — no free plot",
+  "Stiltreach: logger — no free plot",
+  "Stiltreach: forager — no free plot",
+  "Stiltreach: skinner — no free plot",
+  "Shardhaven: skinner — no free plot",
+  "Rim Shrine: logger — no free plot",
+  "Rim Shrine: forager — no free plot",
+  "Rim Shrine: skinner — no free plot"
+ ],
+ "townShops": {
+  "Port Vharl": [
+   "general",
+   "market",
+   "weaponsmith",
+   "armourer",
+   "bowyer",
+   "apothecary",
+   "tailor",
+   "stable",
+   "inn",
+   "provisioner",
+   "barber",
+   "broker",
+   "unbinder",
+   "healer"
+  ],
+  "Mistfall": [
+   "general",
+   "inn"
+  ],
+  "Yellowpan": [
+   "general",
+   "weaponsmith",
+   "stable",
+   "inn",
+   "provisioner"
+  ],
+  "Stiltreach": [
+   "general",
+   "inn"
+  ],
+  "Shardhaven": [
+   "general",
+   "inn"
+  ],
+  "Lastwell": [
+   "general",
+   "market",
+   "weaponsmith",
+   "armourer",
+   "bowyer",
+   "apothecary",
+   "tailor",
+   "jeweller",
+   "stable",
+   "inn",
+   "provisioner",
+   "barber",
+   "broker",
+   "unbinder",
+   "healer"
+  ],
+  "Cinderholt": [
+   "general",
+   "weaponsmith",
+   "stable",
+   "inn",
+   "provisioner"
+  ],
+  "Kilnhold": [
+   "general",
+   "weaponsmith",
+   "stable",
+   "inn",
+   "provisioner"
+  ],
+  "Rim Shrine": [
+   "general",
+   "inn"
+  ]
+ }
+}

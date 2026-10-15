@@ -1,0 +1,2583 @@
+{
+ "_doc": "Stream W (Expansion 1). Vharlen's own curios — the island's answer to data/vignettes/curios.json, exactly the same record shape (id, name, kind, radius, weight, near, tags{biomes, archetypes, band}, lore, props, objects) and read the same way by tools/content-living.mjs when it fills a Vharlen zone. Props ONLY from data/vignettes/vharlen-props.json; objects only in the forms curios.json uses (use with gives.gold 1-3 or a buff, shrines charge cost.gold 1; chest common/uncommon, hidden + hint; note). Band 10-20.",
+ "curios": [
+  {
+   "id": "vh_steamcaps",
+   "name": "Steamcap Flush",
+   "kind": "forage",
+   "radius": 4,
+   "weight": 5,
+   "near": "forest",
+   "tags": {
+    "biomes": [
+     "rainforest",
+     "marsh",
+     "shrubland"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "Pale caps pushing up through hot wet leaf mould, each one breathing out a little thread of steam. They are cooking themselves.",
+   "props": [
+    {
+     "kind": "ground",
+     "id": "lichen_patch",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "puddle_ring",
+     "x": 1.6,
+     "z": -1,
+     "yaw": 0
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Steamcaps",
+     "x": 0,
+     "z": 1,
+     "text": "You fill a pocket and it gets warm. The cooks in Port Vharl pay for these.",
+     "gives": {
+      "gold": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "vh_cinderbloom",
+   "name": "Cinderbloom",
+   "kind": "forage",
+   "radius": 4,
+   "weight": 4,
+   "near": "steep",
+   "tags": {
+    "biomes": [
+     "volcanic",
+     "ashPlain",
+     "badlands",
+     "blighted"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "A low red flower growing straight out of the scoria, where nothing should. Its petals are warm to the touch, like a hand.",
+   "props": [
+    {
+     "kind": "ground",
+     "id": "ash_patch",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_basalt_cairn",
+     "x": 1.6,
+     "z": 1,
+     "yaw": 0.4
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Cinderbloom",
+     "x": 0,
+     "z": 0.8,
+     "text": "You chew a petal the way the islanders do. Your arms feel like somebody else's, somebody stronger.",
+     "buff": {
+      "status": "might",
+      "seconds": 180
+     }
+    }
+   ]
+  },
+  {
+   "id": "vh_fern_hearts",
+   "name": "Fern Hearts",
+   "kind": "forage",
+   "radius": 4,
+   "weight": 4,
+   "near": "forest",
+   "tags": {
+    "biomes": [
+     "rainforest",
+     "shrubland",
+     "marsh"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "Curled fern shoots, tight as a fist. The Vharl boil them. You are not going to wait for a pot.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_tree_fern",
+     "x": 0,
+     "z": -1.6,
+     "yaw": 0.5
+    },
+    {
+     "kind": "ground",
+     "id": "lichen_patch",
+     "x": 0.8,
+     "z": 1,
+     "yaw": 0
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Fern shoots",
+     "x": 0.6,
+     "z": 1,
+     "text": "Crunchy, green and slightly fizzy. Your scrapes stop stinging.",
+     "buff": {
+      "status": "regen",
+      "seconds": 180
+     }
+    }
+   ]
+  },
+  {
+   "id": "vh_ironpalm_down",
+   "name": "Fallen Ironpalm",
+   "kind": "forage",
+   "radius": 5,
+   "weight": 4,
+   "near": "forest",
+   "tags": {
+    "biomes": [
+     "rainforest",
+     "savanna",
+     "beach",
+     "shrubland"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "An ironpalm lies across the ground with its crown smashed open. Hard nuts everywhere, and something has been at them.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_fallen_ironpalm",
+     "x": 0,
+     "z": 0,
+     "yaw": 0.2
+    },
+    {
+     "kind": "ground",
+     "id": "lichen_patch",
+     "x": -1.6,
+     "z": 1.4,
+     "yaw": 0
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Ironpalm nuts",
+     "x": 2,
+     "z": 1.2,
+     "text": "You crack three on a rock and drink the milk. Sweet, a bit smoky. You walk on feeling better.",
+     "buff": {
+      "status": "regen",
+      "seconds": 200
+     }
+    }
+   ]
+  },
+  {
+   "id": "vh_tussock_seed",
+   "name": "Seedheads",
+   "kind": "forage",
+   "radius": 4,
+   "weight": 3,
+   "near": "field",
+   "tags": {
+    "biomes": [
+     "savanna",
+     "shrubland",
+     "desert"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "Tall tussock gone to seed, heads so heavy they bow. The island birds have not found it yet. You have.",
+   "props": [
+    {
+     "kind": "ground",
+     "id": "sand_ripple",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_reed_screen",
+     "x": 0,
+     "z": -1.8,
+     "yaw": 0.1
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Seedheads",
+     "x": 0,
+     "z": 1,
+     "text": "You strip a sackful. Millers in town will grind it and complain about the grit.",
+     "gives": {
+      "gold": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "vh_salt_sulphur_crust",
+   "name": "Yellow Crust",
+   "kind": "forage",
+   "radius": 4,
+   "weight": 3,
+   "near": "any",
+   "tags": {
+    "biomes": [
+     "desert",
+     "volcanic",
+     "marsh"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "Sulphur crystals grown in a crust round a crack, sharp and bright as broken egg yolk. It smells exactly like you think.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_sulphur_heap",
+     "x": 0,
+     "z": -0.6,
+     "yaw": 0.4
+    },
+    {
+     "kind": "ground",
+     "id": "puddle_ring",
+     "x": 1.4,
+     "z": 1,
+     "yaw": 0
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Crystal crust",
+     "x": 0.4,
+     "z": 0.8,
+     "text": "You knock off the best crystals. Somebody in Yellowpan will buy them and hold their nose.",
+     "gives": {
+      "gold": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "vh_deserter_pack",
+   "name": "Deserter's Pack",
+   "kind": "remains",
+   "radius": 4,
+   "weight": 4,
+   "near": "road",
+   "tags": {
+    "biomes": [
+     "ashPlain",
+     "savanna",
+     "blighted",
+     "shrubland",
+     "badlands"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "A Slagborn raider face down by the track, the ash on his face washed off in streaks. The ash came off. He did not get far.",
+   "props": [
+    {
+     "kind": "ground",
+     "id": "ash_patch",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "bone_scatter",
+     "x": -1.2,
+     "z": 0.6,
+     "yaw": 0
+    }
+   ],
+   "objects": [
+    {
+     "type": "chest",
+     "name": "Deserter's pack",
+     "x": 1.2,
+     "z": 0.6,
+     "tier": "common"
+    },
+    {
+     "type": "note",
+     "name": "Scratched slate",
+     "x": -1.4,
+     "z": 1,
+     "text": "If they ask, I was taken by the wind. Tell my mother I went the other way. The OTHER way."
+    }
+   ]
+  },
+  {
+   "id": "vh_sulphur_wreck",
+   "name": "Sulphur Cart Wreck",
+   "kind": "remains",
+   "radius": 5,
+   "weight": 4,
+   "near": "road",
+   "tags": {
+    "biomes": [
+     "desert",
+     "volcanic",
+     "ashPlain",
+     "badlands"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "A hand cart tipped on its side, sulphur spilled in a yellow fan. One wheel still turns when the wind gets it.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_sulphur_cart",
+     "x": 0,
+     "z": 0,
+     "yaw": 0.3
+    },
+    {
+     "kind": "prop",
+     "id": "vh_sulphur_heap",
+     "x": 1.6,
+     "z": 1.6,
+     "yaw": 1
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Under the cart",
+     "x": -1.4,
+     "z": 1,
+     "text": "Wedged under the axle: the carter's pay purse. It smells of eggs. Money does not care.",
+     "gives": {
+      "gold": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "vh_salamander_bones",
+   "name": "Salamander Ribs",
+   "kind": "remains",
+   "radius": 5,
+   "weight": 3,
+   "near": "any",
+   "tags": {
+    "biomes": [
+     "desert",
+     "savanna",
+     "volcanic",
+     "beach"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "A great salamander skull and a cage of ribs, bleached clean. A few scales still cling to the jaw, glossy as lacquer.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_salamander_bones",
+     "x": 0,
+     "z": 0,
+     "yaw": 0.5
+    },
+    {
+     "kind": "ground",
+     "id": "bone_scatter",
+     "x": 1,
+     "z": 1.8,
+     "yaw": 0
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Loose scales",
+     "x": 1.2,
+     "z": 1.2,
+     "text": "You prise off a handful. Armourers pay well for them, and ask no questions.",
+     "gives": {
+      "gold": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "vh_glass_kings_hand",
+   "name": "A King's Hand",
+   "kind": "remains",
+   "radius": 4,
+   "weight": 2,
+   "near": "any",
+   "tags": {
+    "biomes": [
+     "glimmerwaste",
+     "mountains",
+     "badlands"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "A skeleton hand sticking out of the dune, every finger ringed in black glass. The Glass Kings were buried with their jewellery on. Most of them.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_glass_shards",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "bone_scatter",
+     "x": 0.6,
+     "z": 1.2,
+     "yaw": 0
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Glass rings",
+     "x": 0.4,
+     "z": 0.6,
+     "text": "You slide off one ring and apologise to the hand. It waves in the wind. You decide that means yes.",
+     "gives": {
+      "gold": 3
+     }
+    }
+   ]
+  },
+  {
+   "id": "vh_drowned_paddler",
+   "name": "Washed-up Paddler",
+   "kind": "remains",
+   "radius": 4,
+   "weight": 3,
+   "near": "water",
+   "tags": {
+    "biomes": [
+     "beach",
+     "marsh"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "A paddler on the black sand, paddle still in both hands. The tide has been busy taking the rest of them out a bit at a time.",
+   "props": [
+    {
+     "kind": "ground",
+     "id": "sand_ripple",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_mooring_post",
+     "x": -1.6,
+     "z": -1,
+     "yaw": 0.2
+    }
+   ],
+   "objects": [
+    {
+     "type": "chest",
+     "name": "Paddler's dry bag",
+     "x": 1.2,
+     "z": 1,
+     "tier": "common"
+    }
+   ]
+  },
+  {
+   "id": "vh_house_in_ash",
+   "name": "House Under the Ash",
+   "kind": "cache",
+   "radius": 6,
+   "weight": 2,
+   "near": "any",
+   "tags": {
+    "biomes": [
+     "ashPlain",
+     "glimmerwaste",
+     "blighted",
+     "volcanic"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "A thatched roof rising out of the ash like a boat's keel. A whole house is under there, up to its eaves. The family left in a hurry, or did not.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_buried_roof",
+     "x": 0,
+     "z": -1,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_ash_drift",
+     "x": 0.6,
+     "z": 2.2,
+     "yaw": 0.2
+    }
+   ],
+   "objects": [
+    {
+     "type": "chest",
+     "name": "Through the roof thatch",
+     "x": -1.4,
+     "z": 0.4,
+     "tier": "uncommon",
+     "hidden": true,
+     "hint": "One patch of thatch has been cut and tucked back in."
+    }
+   ]
+  },
+  {
+   "id": "vh_urn_stash",
+   "name": "The Shallow Urn",
+   "kind": "cache",
+   "radius": 4,
+   "weight": 2,
+   "near": "any",
+   "tags": {
+    "biomes": [
+     "ashPlain",
+     "desert",
+     "glimmerwaste"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "A burial urn, but the ash round its neck has been dug and patted down again. Somebody did not bury a grandmother in this.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_buried_urn",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "ash_patch",
+     "x": 1,
+     "z": 1,
+     "yaw": 0
+    }
+   ],
+   "objects": [
+    {
+     "type": "chest",
+     "name": "In the urn",
+     "x": 0,
+     "z": 0.4,
+     "tier": "common",
+     "hidden": true,
+     "hint": "The lid sits on crooked, and the ash round it has finger marks."
+    }
+   ]
+  },
+  {
+   "id": "vh_pot_cache",
+   "name": "Three Pots",
+   "kind": "cache",
+   "radius": 4,
+   "weight": 2,
+   "near": "field",
+   "tags": {
+    "biomes": [
+     "savanna",
+     "shrubland",
+     "rainforest"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "Three ochre storage pots under a reed screen. Two are full of rainwater and drowned beetles. One is sealed with wax.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_clay_pots",
+     "x": 0,
+     "z": 0,
+     "yaw": 0.3
+    },
+    {
+     "kind": "prop",
+     "id": "vh_reed_screen",
+     "x": 0,
+     "z": -1.6,
+     "yaw": 0
+    }
+   ],
+   "objects": [
+    {
+     "type": "chest",
+     "name": "Waxed pot",
+     "x": 0.6,
+     "z": 0.6,
+     "tier": "uncommon"
+    }
+   ]
+  },
+  {
+   "id": "vh_cairn_stash",
+   "name": "Keeper's Cache",
+   "kind": "cache",
+   "radius": 4,
+   "weight": 2,
+   "near": "steep",
+   "tags": {
+    "biomes": [
+     "mountains",
+     "badlands",
+     "volcanic"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "A basalt cairn with one column turned sideways, pointing at its own foot. Rim Keepers leave supplies for the next keeper. You count as the next keeper.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_basalt_cairn",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "lichen_patch",
+     "x": 1.2,
+     "z": 0.8,
+     "yaw": 0
+    }
+   ],
+   "objects": [
+    {
+     "type": "chest",
+     "name": "Under the turned stone",
+     "x": 0.3,
+     "z": 0.4,
+     "tier": "common",
+     "hidden": true,
+     "hint": "One column in the cairn lies the wrong way, pointing down."
+    }
+   ]
+  },
+  {
+   "id": "vh_slagborn_ash_shrine",
+   "name": "Slagborn Ash Shrine",
+   "kind": "shrine",
+   "radius": 5,
+   "weight": 3,
+   "near": "any",
+   "tags": {
+    "biomes": [
+     "volcanic",
+     "blighted",
+     "ashPlain",
+     "badlands"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "Basalt slabs stacked into a seat, a bowl of grey ash on top, red handprints climbing it. The Slagborn smear ash on their faces here before a raid.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_ash_shrine",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_slag_totem",
+     "x": 1.8,
+     "z": -1.2,
+     "yaw": 0.3
+    },
+    {
+     "kind": "ground",
+     "id": "ash_patch",
+     "x": -1.4,
+     "z": 1.2,
+     "yaw": 0
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Bowl of ash",
+     "x": 0,
+     "z": 0.9,
+     "text": "You drop a coin in and smear a thumb of ash on your brow. It is a raider's prayer. It works anyway.",
+     "cost": {
+      "gold": 1
+     },
+     "buff": {
+      "status": "might",
+      "seconds": 300
+     }
+    }
+   ]
+  },
+  {
+   "id": "vh_rim_bowls",
+   "name": "Rim Offering Bowls",
+   "kind": "shrine",
+   "radius": 4,
+   "weight": 3,
+   "near": "road",
+   "tags": {
+    "biomes": [
+     "mountains",
+     "volcanic",
+     "shrubland",
+     "badlands"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "A waymarker with three stone bowls at its foot. The Rim Keepers ask travellers to feed the mountain something so it does not feed on them.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_rim_waymarker",
+     "x": 0,
+     "z": -0.8,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_offering_bowl",
+     "x": -1,
+     "z": 0.6,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_offering_bowl",
+     "x": 1,
+     "z": 0.6,
+     "yaw": 1.2
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Offering bowl",
+     "x": 0,
+     "z": 0.9,
+     "text": "You leave a coin in the ash. The ground under your boots feels like it has agreed to stay put.",
+     "cost": {
+      "gold": 1
+     },
+     "buff": {
+      "status": "guard",
+      "seconds": 300
+     }
+    }
+   ]
+  },
+  {
+   "id": "vh_ribbon_post",
+   "name": "Pilgrim Ribbons",
+   "kind": "shrine",
+   "radius": 3,
+   "weight": 3,
+   "near": "road",
+   "tags": {
+    "biomes": [],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "A pilgrim post so thick with ribbons it looks like a sheaf of grass. Every pilgrim to the Caldera ties one on the way up.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_pilgrim_post",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Spare ribbon",
+     "x": 0,
+     "z": 0.7,
+     "text": "You pay a coin into the knot-box and tie your own. Your feet stop arguing with the hill for a while.",
+     "cost": {
+      "gold": 1
+     },
+     "buff": {
+      "status": "haste",
+      "seconds": 240
+     }
+    }
+   ]
+  },
+  {
+   "id": "vh_kings_door",
+   "name": "Glass King's Door",
+   "kind": "shrine",
+   "radius": 6,
+   "weight": 2,
+   "near": "any",
+   "tags": {
+    "biomes": [
+     "glimmerwaste",
+     "mountains",
+     "desert"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "A stone arch with its door long gone, inlaid with black glass in the shape of a crowned face. Islanders leave a coin on the step, to keep the king inside.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "ruined_arch",
+     "x": 0,
+     "z": -1,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_glass_shards",
+     "x": 1.8,
+     "z": 1.4,
+     "yaw": 0.6
+    },
+    {
+     "kind": "prop",
+     "id": "stone_step",
+     "x": 0,
+     "z": 1.4,
+     "yaw": 0
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Coin step",
+     "x": 0,
+     "z": 1.6,
+     "text": "You leave a coin. The glass face seems to approve. You feel like you could lead a charge.",
+     "cost": {
+      "gold": 1
+     },
+     "buff": {
+      "status": "rally",
+      "seconds": 300
+     }
+    }
+   ]
+  },
+  {
+   "id": "vh_steam_vent_altar",
+   "name": "Breathing Stone",
+   "kind": "shrine",
+   "radius": 5,
+   "weight": 2,
+   "near": "steep",
+   "tags": {
+    "biomes": [
+     "volcanic",
+     "rainforest",
+     "mountains"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "A crack in the rock breathing hot white steam, with a stone bowl set in front of it. The Vharl say the mountain answers questions here. It mostly says hhhhhhh.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_offering_bowl",
+     "x": 0,
+     "z": 0.6,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "puddle_ring",
+     "x": 0,
+     "z": -1.4,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_basalt_cairn",
+     "x": 1.8,
+     "z": -0.6,
+     "yaw": 0.6
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Steam crack",
+     "x": 0,
+     "z": -0.8,
+     "text": "You put a coin in the bowl and lean into the steam. You come out pink and loose and quick.",
+     "cost": {
+      "gold": 1
+     },
+     "buff": {
+      "status": "haste",
+      "seconds": 300
+     }
+    }
+   ]
+  },
+  {
+   "id": "vh_carved_waymarker",
+   "name": "Carved Waymarker",
+   "kind": "lore",
+   "radius": 3,
+   "weight": 4,
+   "near": "road",
+   "tags": {
+    "biomes": [
+     "mountains",
+     "volcanic",
+     "badlands",
+     "ashPlain"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "A Rim Keeper column with words cut into the red band, fresh enough that the dust is still pale.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_rim_waymarker",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    }
+   ],
+   "objects": [
+    {
+     "type": "note",
+     "name": "Carved band",
+     "x": 0,
+     "z": 0.6,
+     "text": "THE TRAIL BELOW IS HOT SINCE THE NEW MOON. GO ROUND BY THE CAIRNS. IF YOU WENT THE SHORT WAY ANYWAY, YOUR BOOTS ARE ON THE LEFT."
+    }
+   ]
+  },
+  {
+   "id": "vh_council_notice",
+   "name": "Harbour Council Notice",
+   "kind": "lore",
+   "radius": 3,
+   "weight": 4,
+   "near": "road",
+   "tags": {
+    "biomes": [
+     "beach",
+     "savanna",
+     "shrubland",
+     "rainforest"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "A board on a post with the Harbour Council's wax seal, the wax melted into a sad little puddle by the heat.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "banner_pole",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    }
+   ],
+   "objects": [
+    {
+     "type": "note",
+     "name": "Sealed notice",
+     "x": 0,
+     "z": 0.5,
+     "text": "By order of the Harbour Council of Port Vharl: all sulphur, glass and pumice leaving the island pays the quay tax. All complaints about the quay tax also pay the quay tax."
+    }
+   ]
+  },
+  {
+   "id": "vh_slagborn_marker",
+   "name": "Slagborn Marker",
+   "kind": "lore",
+   "radius": 3,
+   "weight": 3,
+   "near": "any",
+   "tags": {
+    "biomes": [
+     "blighted",
+     "ashPlain",
+     "volcanic",
+     "savanna"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "A stake of slag with a strip of hide nailed to it, words burned into the hide with a hot point.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_slag_totem",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "ash_patch",
+     "x": 0.8,
+     "z": 0.6,
+     "yaw": 0
+    }
+   ],
+   "objects": [
+    {
+     "type": "note",
+     "name": "Burned hide",
+     "x": 0.4,
+     "z": 0.5,
+     "text": "THIS GROUND IS ASH-CLAIMED. WALK SOFT, PAY THE CHIEF, OR FEED THE MOUNTAIN. (Underneath, smaller:) chief says bring salt."
+    }
+   ]
+  },
+  {
+   "id": "vh_window_letter",
+   "name": "Letter in the Window",
+   "kind": "lore",
+   "radius": 4,
+   "weight": 3,
+   "near": "any",
+   "tags": {
+    "biomes": [
+     "ashPlain",
+     "blighted",
+     "glimmerwaste",
+     "desert"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "The top of a buried wall, its window still shuttered. A letter has been pushed through the slats from the inside.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_buried_wall",
+     "x": 0,
+     "z": -0.6,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_ash_drift",
+     "x": 0.4,
+     "z": 1.4,
+     "yaw": 0.1
+    }
+   ],
+   "objects": [
+    {
+     "type": "note",
+     "name": "Folded letter",
+     "x": 0.3,
+     "z": 0.2,
+     "text": "Ash up to the sill now. Father says it will stop. Father said that yesterday. I am leaving the good pot for whoever finds this. It is the good pot. Look after it."
+    }
+   ]
+  },
+  {
+   "id": "vh_knappers_tally",
+   "name": "Knapper's Tally",
+   "kind": "lore",
+   "radius": 4,
+   "weight": 3,
+   "near": "steep",
+   "tags": {
+    "biomes": [
+     "glimmerwaste",
+     "mountains",
+     "volcanic"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "A knapping stone with marks scratched along its edge, and a pile of finished blades nobody collected.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_knapping_stone",
+     "x": 0,
+     "z": 0,
+     "yaw": 0.3
+    },
+    {
+     "kind": "prop",
+     "id": "vh_glass_shards",
+     "x": 1.2,
+     "z": 1,
+     "yaw": 0
+    }
+   ],
+   "objects": [
+    {
+     "type": "note",
+     "name": "Scratched edge",
+     "x": 0,
+     "z": 0.8,
+     "text": "Blades: forty. Cut thumbs: nine. Cut thumbs that were mine: nine. Asking for a raise."
+    }
+   ]
+  },
+  {
+   "id": "vh_pilgrim_complaint",
+   "name": "Pilgrim's Rest",
+   "kind": "lore",
+   "radius": 4,
+   "weight": 3,
+   "near": "road",
+   "tags": {
+    "biomes": [
+     "mountains",
+     "volcanic",
+     "shrubland"
+    ],
+    "archetypes": [
+     "holy_ground",
+     "pass",
+     "wilds",
+     "mine_country",
+     "frontier",
+     "ruinfield"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "Two pilgrim posts and a flat stone to sit on. Pilgrims scratch their names on the stone. Some scratch more than their names.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_pilgrim_post",
+     "x": -1.6,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_pilgrim_post",
+     "x": 1.6,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "stone_step",
+     "x": 0,
+     "z": -0.6,
+     "yaw": 0
+    }
+   ],
+   "objects": [
+    {
+     "type": "note",
+     "name": "Scratched stone",
+     "x": 0,
+     "z": -0.2,
+     "text": "Third climb to the Caldera. Still no answer. Leaving my good sandals as an offering. Walking down barefoot. Regret this."
+    }
+   ]
+  },
+  {
+   "id": "vh_outriggers",
+   "name": "Outrigger Canoes",
+   "kind": "fishing",
+   "radius": 5,
+   "weight": 4,
+   "near": "water",
+   "tags": {
+    "biomes": [
+     "beach",
+     "marsh"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "Two dugout canoes pulled up on the black sand, floats on their sides. Their owners are somewhere eating the catch.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_outrigger",
+     "x": 0,
+     "z": -1.4,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_outrigger",
+     "x": 0,
+     "z": 1.4,
+     "yaw": 0.1
+    },
+    {
+     "kind": "prop",
+     "id": "vh_mooring_post",
+     "x": -1.8,
+     "z": 2.8,
+     "yaw": 0
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Fish basket",
+     "x": 1.8,
+     "z": 0,
+     "text": "They left a basket of small fish under a wet cloth. You take a few and leave a coin you will claim you left.",
+     "gives": {
+      "gold": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "vh_fish_pit",
+   "name": "Steam Pit",
+   "kind": "fishing",
+   "radius": 5,
+   "weight": 3,
+   "near": "water",
+   "tags": {
+    "biomes": [
+     "beach",
+     "rainforest",
+     "marsh"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "An earth oven puffing steam through its leaves. Under there, fish wrapped in fern are cooking on the island's own heat. Nobody is watching it.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_steam_pit",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_kettle",
+     "x": 1.8,
+     "z": -1.4,
+     "yaw": 0.4
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Under the leaves",
+     "x": 0,
+     "z": 1.2,
+     "text": "You burn your fingers and eat the best fish of your life standing up. Tender, smoky, worth it.",
+     "buff": {
+      "status": "regen",
+      "seconds": 200
+     }
+    }
+   ]
+  },
+  {
+   "id": "vh_net_poles",
+   "name": "Net Poles",
+   "kind": "fishing",
+   "radius": 4,
+   "weight": 3,
+   "near": "water",
+   "tags": {
+    "biomes": [
+     "beach",
+     "marsh"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "A net hung between two poles to dry, with half the sea's rubbish still caught in it.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_net_poles",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_glass_floats",
+     "x": 1.6,
+     "z": 1.4,
+     "yaw": 0.4
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Tangle in the net",
+     "x": 0,
+     "z": 1,
+     "text": "You pick out shells, a dead crab, a sandal and a glass float with a coin stuck inside.",
+     "gives": {
+      "gold": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "vh_fish_rack",
+   "name": "Split Fish Rack",
+   "kind": "fishing",
+   "radius": 4,
+   "weight": 3,
+   "near": "water",
+   "tags": {
+    "biomes": [
+     "beach",
+     "marsh",
+     "rainforest"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "A rack of split fish drying in hot salty wind. The flies are queueing.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_fish_rack",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "sand_ripple",
+     "x": 1,
+     "z": 1.6,
+     "yaw": 0
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Dried fish",
+     "x": 0,
+     "z": 1,
+     "text": "Salty enough to stop your heart. Your legs do not care; they are fed.",
+     "buff": {
+      "status": "regen",
+      "seconds": 180
+     }
+    }
+   ]
+  },
+  {
+   "id": "vh_glass_floats",
+   "name": "Glass Floats",
+   "kind": "fishing",
+   "radius": 4,
+   "weight": 3,
+   "near": "water",
+   "tags": {
+    "biomes": [
+     "beach",
+     "marsh"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "Green and amber glass floats washed up together in a line, bright as sweets on the black sand.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_glass_floats",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_glass_floats",
+     "x": 1.4,
+     "z": 0.8,
+     "yaw": 1.1
+    },
+    {
+     "kind": "ground",
+     "id": "sand_ripple",
+     "x": -1.2,
+     "z": 1,
+     "yaw": 0
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Glass floats",
+     "x": 0.4,
+     "z": 0.6,
+     "text": "Unbroken ones. Fisherfolk buy them back, and pretend they did not lose them.",
+     "gives": {
+      "gold": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "vh_glasswing_roost",
+   "name": "Glasswing Roost",
+   "kind": "nest",
+   "radius": 5,
+   "weight": 3,
+   "near": "steep",
+   "tags": {
+    "biomes": [
+     "mountains",
+     "glimmerwaste",
+     "blighted",
+     "badlands"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "A charred tree hung with glittering scraps. Glasswings line their nests with anything sharp and shiny.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_charred_trunk",
+     "x": 0,
+     "z": -0.8,
+     "yaw": 0.4
+    },
+    {
+     "kind": "prop",
+     "id": "vh_glass_shards",
+     "x": 0.8,
+     "z": 1.2,
+     "yaw": 0
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Glitter at the roots",
+     "x": 0.8,
+     "z": 1.6,
+     "text": "You sift the fallen scraps. Mostly glass. One is a silver earring, slightly chewed.",
+     "gives": {
+      "gold": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "vh_toad_spawn",
+   "name": "Toad Spawn",
+   "kind": "nest",
+   "radius": 5,
+   "weight": 3,
+   "near": "water",
+   "tags": {
+    "biomes": [
+     "marsh",
+     "desert"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "Yellow scum on a warm pool, and in the scum, thousands of eggs. The sulphur toads are not far away. You can hear them not being far away.",
+   "props": [
+    {
+     "kind": "ground",
+     "id": "puddle_ring",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "puddle_ring",
+     "x": 1.6,
+     "z": 1.2,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_sulphur_heap",
+     "x": -1.8,
+     "z": -1,
+     "yaw": 0.2
+    }
+   ],
+   "objects": []
+  },
+  {
+   "id": "vh_salamander_burrow",
+   "name": "Salamander Burrow",
+   "kind": "nest",
+   "radius": 5,
+   "weight": 2,
+   "near": "steep",
+   "tags": {
+    "biomes": [
+     "volcanic",
+     "savanna",
+     "badlands"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "A hole in warm scoria, the ground round it scorched in a fan. A shed skin hangs on the lip like a dropped coat.",
+   "props": [
+    {
+     "kind": "ground",
+     "id": "ash_patch",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_basalt_cairn",
+     "x": 1.8,
+     "z": -1,
+     "yaw": 0.5
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Shed skin",
+     "x": 0.6,
+     "z": 0.8,
+     "text": "It is still warm and it crackles. A leatherworker will pay for it.",
+     "gives": {
+      "gold": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "vh_lava_tube",
+   "name": "Lava-Tube Mouth",
+   "kind": "hazard",
+   "radius": 6,
+   "weight": 2,
+   "near": "steep",
+   "tags": {
+    "biomes": [
+     "volcanic",
+     "mountains",
+     "badlands",
+     "rainforest"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "A black basalt arch half sunk in the slope, breathing warm air. The tube runs back into the dark further than your torch does.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_lava_tube",
+     "x": 0,
+     "z": -1.4,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "ash_patch",
+     "x": 1.6,
+     "z": 2,
+     "yaw": 0
+    }
+   ],
+   "objects": [
+    {
+     "type": "chest",
+     "name": "Just inside the mouth",
+     "x": 0,
+     "z": 0.2,
+     "tier": "common",
+     "hidden": true,
+     "hint": "There is a ledge just inside the mouth, and a rope end hanging off it."
+    }
+   ]
+  },
+  {
+   "id": "vh_ash_sink",
+   "name": "Ash Sink",
+   "kind": "hazard",
+   "radius": 5,
+   "weight": 3,
+   "near": "any",
+   "tags": {
+    "biomes": [
+     "ashPlain",
+     "glimmerwaste",
+     "blighted"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "Ash that looks firm and is not. A walking stick stands upright in the middle of it, which is not a good sign for the walker.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_ash_drift",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "ash_patch",
+     "x": 1.6,
+     "z": 1.4,
+     "yaw": 0
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Walking stick",
+     "x": 0,
+     "z": 0.4,
+     "text": "You hook it out at full stretch. A purse is tied to the handle. Whoever owned it planned ahead, mostly.",
+     "gives": {
+      "gold": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "vh_boiling_mud",
+   "name": "Boiling Mud",
+   "kind": "hazard",
+   "radius": 5,
+   "weight": 3,
+   "near": "water",
+   "tags": {
+    "biomes": [
+     "marsh",
+     "rainforest",
+     "volcanic"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "A pool of grey mud going plop, plop, plop, each bubble the size of a head. The air smells of eggs and regret.",
+   "props": [
+    {
+     "kind": "ground",
+     "id": "puddle_ring",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "puddle_ring",
+     "x": -1.4,
+     "z": 1.2,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_stilt_platform",
+     "x": 1.6,
+     "z": -0.6,
+     "yaw": 0.3
+    }
+   ],
+   "objects": []
+  },
+  {
+   "id": "vh_sulphur_flat",
+   "name": "Bad Air",
+   "kind": "hazard",
+   "radius": 5,
+   "weight": 2,
+   "near": "any",
+   "tags": {
+    "biomes": [
+     "desert",
+     "volcanic"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "Nothing grows here, the birds fly round it and the ground is crusted yellow. Breathe through your sleeve and keep walking.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_sulphur_heap",
+     "x": 0,
+     "z": 0,
+     "yaw": 0.6
+    },
+    {
+     "kind": "ground",
+     "id": "bone_scatter",
+     "x": 1.6,
+     "z": 1.4,
+     "yaw": 0
+    }
+   ],
+   "objects": []
+  },
+  {
+   "id": "vh_knappers_camp",
+   "name": "Knappers' Camp",
+   "kind": "camp",
+   "radius": 6,
+   "weight": 3,
+   "near": "steep",
+   "tags": {
+    "biomes": [
+     "glimmerwaste",
+     "mountains",
+     "volcanic",
+     "badlands"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "A knapping stone, a heap of obsidian cores and a reed mat. Knappers strike blades here so sharp you can shave with them, and then they shave with them.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_knapping_stone",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_obsidian_cores",
+     "x": 1.6,
+     "z": -1,
+     "yaw": 0.4
+    },
+    {
+     "kind": "prop",
+     "id": "vh_glass_shards",
+     "x": -1.4,
+     "z": 1,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_bedroll",
+     "x": -1.6,
+     "z": -2.2,
+     "yaw": 0.2
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Finished blades",
+     "x": 1.2,
+     "z": 1.2,
+     "text": "A neat bundle of black blades, wrapped in leaf. Somebody in town will pay and not ask where.",
+     "gives": {
+      "gold": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "vh_pumice_racks",
+   "name": "Pumice Drying Racks",
+   "kind": "camp",
+   "radius": 6,
+   "weight": 3,
+   "near": "field",
+   "tags": {
+    "biomes": [
+     "ashPlain",
+     "desert",
+     "volcanic"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "Two pole racks full of pale pumice blocks drying in the sun. Cut, dried, sold to every bath-house on three coasts.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_pumice_rack",
+     "x": 0,
+     "z": -1.6,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_pumice_rack",
+     "x": 0,
+     "z": 1.2,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_pumice_pile",
+     "x": 2.4,
+     "z": 3,
+     "yaw": 0.5
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Loose block",
+     "x": 2,
+     "z": 2,
+     "text": "One block has rolled off. You scrub the ash off your hands with it, then sell it anyway.",
+     "gives": {
+      "gold": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "vh_trap_line",
+   "name": "Salamander Trap Line",
+   "kind": "camp",
+   "radius": 6,
+   "weight": 3,
+   "near": "field",
+   "tags": {
+    "biomes": [
+     "savanna",
+     "volcanic",
+     "desert",
+     "marsh"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "Reed cone traps staked out in a row, mouths facing the burrows. One is shaking. One is very still. One has been chewed open from inside.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_salamander_trap",
+     "x": -1.4,
+     "z": -1.6,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_salamander_trap",
+     "x": -1.4,
+     "z": 0.2,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_salamander_trap",
+     "x": -1.4,
+     "z": 2,
+     "yaw": 0.1
+    },
+    {
+     "kind": "ground",
+     "id": "ash_patch",
+     "x": 2,
+     "z": 0,
+     "yaw": 0
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Chewed trap",
+     "x": -1.4,
+     "z": 3.2,
+     "text": "Whatever was in here left its tail behind. Trappers pay for tails. They will not ask how.",
+     "gives": {
+      "gold": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "vh_glass_kiln",
+   "name": "Glass-Blower's Kiln",
+   "kind": "camp",
+   "radius": 6,
+   "weight": 2,
+   "near": "any",
+   "tags": {
+    "biomes": [
+     "beach",
+     "glimmerwaste",
+     "shrubland",
+     "volcanic"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "A beehive kiln with its mouth still glowing, a heap of floats cooling at its side. The glass-blower has gone for water. Probably.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_glass_kiln",
+     "x": 0,
+     "z": -1.4,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_glass_floats",
+     "x": 2,
+     "z": 0.4,
+     "yaw": 0.6
+    },
+    {
+     "kind": "prop",
+     "id": "vh_clay_pots",
+     "x": -2.2,
+     "z": 0.6,
+     "yaw": 0.4
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Cooling bead",
+     "x": 1.2,
+     "z": 1.2,
+     "text": "A little green bead, still warm. You keep it in your fist. It is the sort of thing you feel safer for holding.",
+     "buff": {
+      "status": "guard",
+      "seconds": 240
+     }
+    }
+   ]
+  },
+  {
+   "id": "vh_bath_hut",
+   "name": "Hot-Spring Bathing Hut",
+   "kind": "camp",
+   "radius": 7,
+   "weight": 2,
+   "near": "water",
+   "tags": {
+    "biomes": [
+     "rainforest",
+     "volcanic",
+     "marsh",
+     "mountains"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "A little ochre hut with a steaming pool in front of it, and a box on a post for coins. A sign says one coin. A smaller sign says per ache.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_bath_hut",
+     "x": 0,
+     "z": -2.2,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_hot_pool",
+     "x": 0,
+     "z": 2.2,
+     "yaw": 0
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Hot pool",
+     "x": 0,
+     "z": 2.2,
+     "text": "You pay and sink in to the chin. Every bruise you own lets go at once.",
+     "cost": {
+      "gold": 1
+     },
+     "buff": {
+      "status": "regen",
+      "seconds": 420
+     }
+    }
+   ]
+  },
+  {
+   "id": "vh_stilt_camp",
+   "name": "Stilt Camp",
+   "kind": "camp",
+   "radius": 6,
+   "weight": 2,
+   "near": "water",
+   "tags": {
+    "biomes": [
+     "marsh",
+     "rainforest"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "A pole platform standing over the mud, a reed lean-to on it gone soft. Fen hunters sleep up off the ground here, away from the things that live in it.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_stilt_platform",
+     "x": 0,
+     "z": -1,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_reed_lean_to",
+     "x": 0,
+     "z": 2.4,
+     "yaw": 3.14
+    },
+    {
+     "kind": "ground",
+     "id": "puddle_ring",
+     "x": 2.4,
+     "z": 0.4,
+     "yaw": 0
+    }
+   ],
+   "objects": [
+    {
+     "type": "chest",
+     "name": "Basket on the platform",
+     "x": 0.8,
+     "z": -0.6,
+     "tier": "common"
+    }
+   ]
+  },
+  {
+   "id": "vh_salvage_fire",
+   "name": "Wreckers' Fire",
+   "kind": "camp",
+   "radius": 6,
+   "weight": 3,
+   "near": "water",
+   "tags": {
+    "biomes": [
+     "beach",
+     "shrubland"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "A fire in a scoria ring on the beach, a reed screen against the wind and a crate of things the sea gave up. The wreckers are out looking for more.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_scoria_ring",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_reed_screen",
+     "x": 0,
+     "z": -2,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "crate",
+     "x": 2,
+     "z": 1.2,
+     "yaw": 0.4
+    }
+   ],
+   "objects": [
+    {
+     "type": "chest",
+     "name": "Wreckers' crate",
+     "x": 2,
+     "z": 1.2,
+     "tier": "common"
+    }
+   ]
+  },
+  {
+   "id": "vh_cairn_line",
+   "name": "Cairn Line",
+   "kind": "marker",
+   "radius": 6,
+   "weight": 4,
+   "near": "steep",
+   "tags": {
+    "biomes": [
+     "mountains",
+     "badlands",
+     "ashPlain",
+     "volcanic"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "Three basalt cairns in a line across the slope. The Rim Keepers say: walk on the line and the ground holds. Walk off it and you are the next lesson.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_basalt_cairn",
+     "x": -3,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_basalt_cairn",
+     "x": 0,
+     "z": 0.4,
+     "yaw": 0.6
+    },
+    {
+     "kind": "prop",
+     "id": "vh_basalt_cairn",
+     "x": 3,
+     "z": 0,
+     "yaw": 1.2
+    }
+   ],
+   "objects": []
+  },
+  {
+   "id": "vh_column_ring",
+   "name": "Column Ring",
+   "kind": "marker",
+   "radius": 6,
+   "weight": 2,
+   "near": "field",
+   "tags": {
+    "biomes": [
+     "badlands",
+     "savanna",
+     "shrubland",
+     "mountains"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "Basalt columns set upright in a ring, each one a different height, like a broken set of organ pipes. The wind plays them badly.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_rim_waymarker",
+     "x": -3,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_rim_waymarker",
+     "x": 3,
+     "z": 0,
+     "yaw": 1
+    },
+    {
+     "kind": "prop",
+     "id": "vh_basalt_cairn",
+     "x": 0,
+     "z": 3,
+     "yaw": 0.4
+    },
+    {
+     "kind": "prop",
+     "id": "vh_basalt_cairn",
+     "x": 0,
+     "z": -3,
+     "yaw": 2
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Centre of the ring",
+     "x": 0,
+     "z": 0,
+     "text": "The wind drops dead in the middle. When you walk out, it seems to push you along.",
+     "buff": {
+      "status": "haste",
+      "seconds": 150
+     }
+    }
+   ]
+  },
+  {
+   "id": "vh_lone_tomb_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "radius": 5,
+   "weight": 2,
+   "near": "any",
+   "tags": {
+    "biomes": [
+     "glimmerwaste",
+     "desert",
+     "ashPlain"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "A Glass King's arch standing alone in the dunes, its tomb long since blown away. Under the step, the sand has been dug.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "ruined_arch",
+     "x": 0,
+     "z": -0.8,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "stone_step",
+     "x": 0,
+     "z": 1,
+     "yaw": 0
+    }
+   ],
+   "objects": [
+    {
+     "type": "chest",
+     "name": "Under the step",
+     "x": 0,
+     "z": 1.2,
+     "tier": "uncommon",
+     "hidden": true,
+     "hint": "The sand under the step is darker, as if it was turned over not long ago."
+    }
+   ]
+  },
+  {
+   "id": "vh_ochre_hands",
+   "name": "Ochre Hands",
+   "kind": "marker",
+   "radius": 4,
+   "weight": 3,
+   "near": "steep",
+   "tags": {
+    "biomes": [
+     "rainforest",
+     "shrubland",
+     "mountains",
+     "badlands"
+    ],
+    "archetypes": [
+     "any"
+    ],
+    "band": [
+     10,
+     20
+    ]
+   },
+   "lore": "A flat rock covered in red-ochre handprints, big and small, hundreds of them. The Vharl put their hands here when a child is born. Nobody knows who started it.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "ruined_wall",
+     "x": 0,
+     "z": -0.8,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "lichen_patch",
+     "x": 1.2,
+     "z": 1,
+     "yaw": 0
+    }
+   ],
+   "objects": []
+  }
+ ]
+}

@@ -1,0 +1,167 @@
+{
+  "id": "mb_gorm_mudmouth",
+  "name": "Gorm Mudmouth",
+  "tier": "miniboss",
+  "body": "mudback_lurker",
+  "place": "dungeon drowned_vent (The Drowned Vent, Fumarole Fen, level 14): floor 1's mini-boss",
+  "_doc": "A mudback lurker that lives in the warm silt. P1 \"Lurking\": bites and a tail sweep; it sinks into the mud and comes up under a player (a circle that follows them, then erupts), leaving sucking mud (stuck). P2 at 50% \"Wallow\": it rolls, throwing mud waves in a cross, and drags people in from across the room.",
+  "party": "Solo: walk away from where it will surface. 2-3: keep the sucking mud at the room edges. 5: spread — it surfaces under someone every few seconds.",
+  "hpMult": 2,
+  "arena": {
+    "radius": 12,
+    "objects": []
+  },
+  "say": {
+    "pull": [
+      "The mud bulges, then breathes out.",
+      "Two eyes on stalks rise out of the silt."
+    ],
+    "death": "Gorm sinks into the mud for the last time. A few bubbles, then nothing.",
+    "reset": "Gorm sinks back into the silt."
+  },
+  "enrage": {
+    "seconds": 270,
+    "damage": 2.5,
+    "say": "Gorm thrashes the whole room into mud!"
+  },
+  "abilities": {
+    "bite": {
+      "id": "bite",
+      "name": "Silty Bite",
+      "every": [
+        5,
+        7
+      ],
+      "range": 5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 5,
+          "arc": 1.3,
+          "wind": 1,
+          "damage": 1.5
+        }
+      ]
+    },
+    "surface": {
+      "id": "surface",
+      "name": "Surface",
+      "every": [
+        11,
+        14
+      ],
+      "first": 3,
+      "cast": 0.5,
+      "say": "Gorm sinks — the mud moves under {target}!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3,
+          "follow": true,
+          "wind": 2,
+          "damage": 1.8,
+          "knock": 3,
+          "leave": {
+            "type": "pool",
+            "name": "Sucking mud",
+            "r": 2.6,
+            "every": 1,
+            "seconds": 16,
+            "damage": 0.15,
+            "status": "stuck"
+          }
+        }
+      ]
+    },
+    "sweep": {
+      "id": "sweep",
+      "name": "Tail Sweep",
+      "every": [
+        10,
+        12
+      ],
+      "first": 5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 6,
+          "arc": 2.4,
+          "yaw": 3.14,
+          "wind": 1.2,
+          "damage": 1.5,
+          "knock": 3
+        }
+      ]
+    },
+    "mud_cross": {
+      "id": "mud_cross",
+      "name": "Mud Waves",
+      "every": [
+        14,
+        17
+      ],
+      "first": 3,
+      "cast": 0.8,
+      "say": "Mud waves roll out in four lines!",
+      "telegraphs": [
+        {
+          "shape": "cross",
+          "at": "self",
+          "r": 12,
+          "w": 3,
+          "wind": 1.5,
+          "damage": 1.7,
+          "status": "lagging"
+        }
+      ]
+    },
+    "drag": {
+      "id": "drag",
+      "name": "Drag Under",
+      "every": [
+        16,
+        19
+      ],
+      "first": 7,
+      "cast": 0.6,
+      "say": "Gorm hauls {target} toward it through the mud!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "farthest",
+          "len": 16,
+          "w": 2.2,
+          "wind": 1.3,
+          "damage": 1.2,
+          "pull": true,
+          "knock": 8,
+          "status": "stuck"
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Lurking",
+      "abilities": [
+        "bite",
+        "surface",
+        "sweep"
+      ]
+    },
+    {
+      "name": "Wallow",
+      "at": 0.5,
+      "say": "Gorm rolls in the mud, throwing it everywhere!",
+      "abilities": [
+        "bite",
+        "mud_cross",
+        "drag",
+        "surface"
+      ]
+    }
+  ]
+}

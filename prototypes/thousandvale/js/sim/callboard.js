@@ -30,6 +30,8 @@ export function createCallboard({ parties, presence, gwByChar, partyChanged = ()
 
   const tell = (c, msg) => { const g = gwByChar.get(c); if (g) g.sendJSON({ t: 'callboard', ...msg }); };
   const levelOf = c => (presence.get(c) || {}).level || 1;
+  // Expansion 1 §6: the board never sends anyone across the sea — a dungeon on another island is not offered
+  const sameSea = (d, c) => { const k = (presence.get(c) || {}).continent; return !d.continent || !k || d.continent === k; };
   const fits = (d, lv) => lv >= d.band[0] - R.bandSlack && lv <= d.band[1] + R.bandSlack;
   const entryOf = c => queue.find(e => e.chars.includes(c)) || null;
   const popOf = c => { for (const p of pops.values()) if (p.members.includes(c)) return p; return null; };
@@ -39,7 +41,7 @@ export function createCallboard({ parties, presence, gwByChar, partyChanged = ()
   /** The dungeons an entry may do. */
   function choices(e) {
     const all = e.dungeon === 'any' ? [...dungeons.values()] : [dungeons.get(e.dungeon)].filter(Boolean);
-    return all.filter(d => e.chars.every(c => fits(d, levelOf(c))));
+    return all.filter(d => e.chars.every(c => fits(d, levelOf(c)) && sameSea(d, c)));
   }
 
   function list(s) {
@@ -47,7 +49,7 @@ export function createCallboard({ parties, presence, gwByChar, partyChanged = ()
     const counts = {};
     for (const e of queue) for (const d of choices(e)) { const k = counts[d.key] ||= { tank: 0, healer: 0, dps: 0, any: 0 }; for (const r of e.roles.values()) k[r] = (k[r] || 0) + 1; }
     const e = entryOf(s.charId);
-    tell(s.charId, { state: 'list', minLevel: R.minLevel, dungeons: [...dungeons.values()].map(d => ({ ...dView(d), fits: fits(d, lv), waiting: counts[d.key] || null })), queued: e ? { dungeon: e.dungeon, since: e.since, waitedMs: Math.round(now() - e.at), role: e.roles.get(s.charId) } : null });
+    tell(s.charId, { state: 'list', minLevel: R.minLevel, dungeons: [...dungeons.values()].filter(d => sameSea(d, s.charId)).map(d => ({ ...dView(d), fits: fits(d, lv), waiting: counts[d.key] || null })), queued: e ? { dungeon: e.dungeon, since: e.since, waitedMs: Math.round(now() - e.at), role: e.roles.get(s.charId) } : null });
   }
 
   function op(s, m) {

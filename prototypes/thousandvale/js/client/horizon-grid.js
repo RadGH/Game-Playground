@@ -64,6 +64,25 @@ export const TREE_COVER = {
 };
 /** Canopy colour by biome (sRGB hex): conifers are darker and bluer than broadleaf woods. */
 export const CANOPY = { default: '#2c5f2e', temperateForest: '#2f6a33', rainforest: '#1d5a2c', borealForest: '#1f4a36', mountains: '#234f38', hills: '#2f6130', blighted: '#3a2c48', hallowed: '#6fbf8a', veiledHills: '#3d4a5c', marsh: '#35553a', savanna: '#5a6a2e' };
+/**
+ * Ground palettes by region (stream T, docs/EXPANSION-1.md): Vharlen, the Burning Isle, uses the same biome ids as the
+ * rest of the world but they mean other ground there (js/client/terrain-view.js GROUND_PALETTES): black sand for
+ * `beach`, sulphur for `desert`, pumice for `ashPlain`… Inside a region's rectangle (world metres; the island's block,
+ * tools/lib/world-core.mjs CONTINENTS) the horizon paints with that region's colours, cover and canopy instead.
+ */
+export const GROUND_REGIONS = [{ palette: 'vharl', minX: 22528, minZ: 18432, maxX: 28672, maxZ: 24576 }];
+export const REGION_PALETTES = {
+  vharl: {
+    colors: { beach: '#2e2c2b', coast: '#2e2c2b', desert: '#c8b03a', ashPlain: '#a19c94', badlands: '#3c3a3c', volcanic: '#5e3a30', glimmerwaste: '#2a2433',
+      marsh: '#4a3f30', mountains: '#353336', rainforest: '#2b5a30', shrubland: '#4f6a3a', savanna: '#6a6a48', blighted: '#4a4440', road: '#6a5f52' },
+    cover: { rainforest: 1, shrubland: 0.45, savanna: 0.15, marsh: 0.15, blighted: 0.22 },
+    canopy: { default: '#2b4a2a', rainforest: '#24512a', shrubland: '#3d5a2c', savanna: '#4f5a2e', marsh: '#3e4a30', blighted: '#2a2624' },
+    rock: '#3a383b',
+  },
+};
+/** The region palette a world point is drawn with (null = the world's own). */
+export function regionAt(x, z) { for (const r of GROUND_REGIONS) if (x >= r.minX && x < r.maxX && z >= r.minZ && z < r.maxZ) return r.palette; return null; }
+
 /** Trees thin out between these heights (metres) and stop: the snow tint starts at 900, so the last trees stand in the first snow. */
 export const TREE_LINE = { from: 780, to: 940 };
 /**
@@ -79,8 +98,8 @@ const sstep = (a, b, v) => { const t = Math.max(0, Math.min(1, (v - a) / (b - a)
  * Pure: how wooded a sample is. `patch` (0..1, a slow noise) breaks the cover into woods and clearings: full forest
  * biomes stay nearly solid, half-wooded ones (hills) become stands of trees with open ground between.
  */
-export function treeCover(biomeKey, y = 0, steep = 0, patch = 0.5) {
-  const base = TREE_COVER[biomeKey] || 0;
+export function treeCover(biomeKey, y = 0, steep = 0, patch = 0.5, table = TREE_COVER) {
+  const base = table[biomeKey] || 0;
   if (!base || y < 0.5) return 0;
   const height = 1 - sstep(TREE_LINE.from, TREE_LINE.to, y), slope = 1 - sstep(TREE_SLOPE.from, TREE_SLOPE.to, steep);
   const clump = base >= 0.95 ? 0.8 + 0.2 * patch : sstep(1 - base - 0.22, 1 - base + 0.22, patch) * (0.55 + 0.45 * base) + base * 0.18;
@@ -110,7 +129,21 @@ export function prepareGrid(buffer) {
   const palette = (h.biomes || []).map(b => hexLinear(b[2]).map(c => c * 0.78));   // map colours are bright: toward the ground textures' tones
   // W18: per biome id, its key (for the cover table) and its canopy colour
   const keys = (h.biomes || []).map(b => b[0]), canopy = keys.map(k => hexLinear(CANOPY[k] || CANOPY.default));
-  return { meta: h.meta, W, H, step: h.step, drawn, wet, biome: h.layers.biome, palette, keys, canopy };
+  // per region palette: the same arrays by biome id, drawn inside that region's rectangle
+  const regions = {};
+  for (const [name, P] of Object.entries(REGION_PALETTES)) {
+    regions[name] = {
+      palette: keys.map((k, i) => (P.colors[k] ? hexLinear(P.colors[k]).map(c => c * 0.78) : palette[i])),
+      canopy: keys.map(k => hexLinear(P.canopy[k] || P.canopy.default)), cover: P.cover, rock: hexLinear(P.rock),
+    };
+  }
+  return { meta: h.meta, W, H, step: h.step, drawn, wet, biome: h.layers.biome, palette, keys, canopy, regions };
+}
+/** The arrays to colour a sample with: the region's if the point lies in one, else the world's. */
+function paintFor(g, x, z) {
+  const r = g.regions && regionAt(x, z);
+  const R = r && g.regions[r];
+  return R ? { palette: R.palette, canopy: R.canopy, cover: R.cover, rock: R.rock } : { palette: g.palette, canopy: g.canopy || [], cover: TREE_COVER, rock: ROCK };
 }
 
 /** The drawn surface at world metres: the triangle split horizon-read.js uses, clamped to the world. */
@@ -153,17 +186,18 @@ export function buildChunk(g, ci, cj, chunk, stride, holes = null, opts = null) 
     const ny = 1 / len;
     nor[v * 3] = ddx / len; nor[v * 3 + 1] = ny; nor[v * 3 + 2] = ddz / len;
     let r, gg, bb;
+    const PT = paintFor(g, i * step, j * step), pal = PT.palette, ROCKc = PT.rock;
     if (wet[k]) [r, gg, bb] = wet[k] === 1 ? SEA : LAKE;
     else {
-      const p = palette[biome[k]] || palette[5] || [0.12, 0.25, 0.07];
+      const p = pal[biome[k]] || pal[5] || [0.12, 0.25, 0.07];
       r = p[0]; gg = p[1]; bb = p[2];
       const steep = 1 - ny;                                         // 0 flat .. ~0.3 at 45°
-      if (steep > 0.12) { const t = Math.min(1, (steep - 0.12) * 5); r += (ROCK[0] - r) * t; gg += (ROCK[1] - gg) * t; bb += (ROCK[2] - bb) * t; }
+      if (steep > 0.12) { const t = Math.min(1, (steep - 0.12) * 5); r += (ROCKc[0] - r) * t; gg += (ROCKc[1] - gg) * t; bb += (ROCKc[2] - bb) * t; }
       // W18: wooded ground is canopy-coloured — after the rock tint, so a forested slope stays green up to the tree line
       if (wooded) {
-        const cv = treeCover(keys[biome[k]], y, steep, patchNoise(i, j));
+        const cv = treeCover(keys[biome[k]], y, steep, patchNoise(i, j), PT.cover);
         if (cv > 0.01) {
-          const cc = canopy[biome[k]] || canopy[5], mottle = 0.86 + 0.28 * hash2(i, j, 11), t = Math.min(0.92, cv * 1.05);
+          const cc = PT.canopy[biome[k]] || PT.canopy[5], mottle = 0.86 + 0.28 * hash2(i, j, 11), t = Math.min(0.92, cv * 1.05);
           r += (cc[0] * mottle - r) * t; gg += (cc[1] * mottle - gg) * t; bb += (cc[2] * mottle - bb) * t;
           if (cover) cover[v] = cv;
         }
@@ -218,7 +252,7 @@ export function buildChunk(g, ci, cj, chunk, stride, holes = null, opts = null) 
     pos = grow(pos); nor = grow(nor); col = grow(col);
     for (let s = 0; s < nSp; s++) {
       const src = spires[s * 7], x = spires[s * 7 + 1], y = spires[s * 7 + 2], z = spires[s * 7 + 3], hgt = spires[s * 7 + 4], rad = spires[s * 7 + 5], turn = spires[s * 7 + 6] * 1.5708;
-      const o = V + s * 5, k = (sj(Math.floor(src / nx)) * W + si(src % nx)), cc = canopy[biome[k]] || canopy[5] || [0.03, 0.1, 0.03];
+      const o = V + s * 5, k = (sj(Math.floor(src / nx)) * W + si(src % nx)), cn = paintFor(g, x, z).canopy, cc = cn[biome[k]] || cn[5] || [0.03, 0.1, 0.03];
       for (let q = 0; q < 5; q++) {
         const ang = turn + q * 1.5708, top = q === 4, px = top ? x : x + Math.cos(ang) * rad, pz = top ? z : z + Math.sin(ang) * rad;
         const vi = (o + q) * 3, shadeK = top ? 1.25 : 0.72;
@@ -275,7 +309,7 @@ export function buildCanopy(g, ci, cj, chunk, holes = null, opts = null) {
     const i = i0 + a, j = j0 + b, k = j * W + i;
     if (wet[k] || !allow.has(keys[biome[k]]) || !inHole((i + 0.5) * step, (j + 0.5) * step)) continue;
     const ddx = (hAt(i - 1, j) - hAt(i + 1, j)) / (2 * step), ddz = (hAt(i, j - 1) - hAt(i, j + 1)) / (2 * step), len = Math.hypot(ddx, 1, ddz);
-    const cv = treeCover(keys[biome[k]], drawn[k], 1 - 1 / len, patchNoise(i, j));
+    const cv = treeCover(keys[biome[k]], drawn[k], 1 - 1 / len, patchNoise(i, j), paintFor(g, i * step, j * step).cover);
     if (!(cv > 0.2)) continue;
     // up close a slope needs more trees than a far ridge does: up to five clumps a 32 m cell (the first two stand where the
     // horizon's own stood, so the slope does not rearrange itself when its zone loads)
@@ -291,7 +325,7 @@ export function buildCanopy(g, ci, cj, chunk, holes = null, opts = null) {
   if (!N) return null;
   const pos = new Float32Array(N * 15), nor = new Float32Array(N * 15), col = new Float32Array(N * 15), idx = N * 5 > 65535 ? new Uint32Array(N * 12) : new Uint16Array(N * 12);
   kept.forEach(([x, y, z, hgt, rad, turn, nx0, ny0, nz0, bi], s) => {
-    const cc = canopy[bi] || [0.03, 0.1, 0.03];
+    const cc = paintFor(g, x, z).canopy[bi] || canopy[bi] || [0.03, 0.1, 0.03];
     for (let q = 0; q < 5; q++) {
       const ang = turn + q * 1.5708, top = q === 4, vi = (s * 5 + q) * 3, shadeK = top ? 1.25 : 0.72;
       pos[vi] = top ? x : x + Math.cos(ang) * rad; pos[vi + 1] = top ? y + hgt : y - 1.5; pos[vi + 2] = top ? z : z + Math.sin(ang) * rad;

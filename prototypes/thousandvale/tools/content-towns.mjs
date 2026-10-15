@@ -21,12 +21,13 @@
 // hash of the town).
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { parseNav, NAV } from '../js/rules/terrain-read.js';
+import { HOME_PROVINCE, provinceArg, provinceDataPath, provinceDataSync, readNames, zoneBelongs, requireProvince } from './content-lib.mjs';
 
 const ROOT = new URL('../', import.meta.url);
 const P = f => new URL(f, ROOT);
 const readJ = f => JSON.parse(readFileSync(P(f), 'utf8'));
 const CHECK = process.argv.includes('--check');
-const ZM = 2048, PROV = 'torbor_downs';
+const ZM = 2048, PROV = provinceArg(process.argv);     // --province=<id> (default torbor_downs)
 
 /** Guards per settlement kind: at each gate (up to `gates` gates), and in the square (the first is the sergeant where `sergeant`). */
 export const GUARDS = Object.freeze({
@@ -196,7 +197,7 @@ export function standingThings(S, g, c) {
       for (const p of readJ(`data/vignettes/placements/${f}`).placements || []) if (p.type !== 'dummy' && p.type !== 'camp' && p.type !== 'guard' && p.type !== 'cart') { add(wid, p.x, p.z, p.radius || 1); for (const q of p.path || []) add(wid, q[0], q[1], 0.5); }
     }
   }
-  const off = existsSync(P('data/provinces/offices.json')) ? readJ('data/provinces/offices.json') : null;
+  const off = provinceDataSync(readJ, PROV, 'offices');
   for (const t of Object.values((off && off.towns) || {})) for (const o of t.offices || []) { if (o.door) add(t.zone, o.door.x, o.door.z, 1.5); }
   // the waystone the server itself puts 6 m off a town's middle when the placer set none there
   for (const s of S) add(s.wid, s.x + 6, s.z + 6, 1);
@@ -301,7 +302,7 @@ export const NEWCOMER = Object.freeze({ underLevel: 3, firstMinutes: 10, townPad
  * A town raid also gets `raid.gates` (where its waves come in) and `raid.guards` (how many stand there).
  * Returns the new file object (the caller writes it).
  */
-export function safeEvents(ev, S, guards) {
+export function safeEvents(ev, S, guards, prov = PROV) {
   const out = JSON.parse(JSON.stringify(ev));
   out.director.newcomer = { underLevel: NEWCOMER.underLevel, firstMinutes: NEWCOMER.firstMinutes,
     _doc: 'W1 (owner feedback 8): a NEWCOMER is a character under `underLevel` OR one with less than `firstMinutes` of played time. An event with `startOn.clearOfNewcomersM` may not start, nor run its countdown, while a newcomer stands within that many metres of its centre (the settlement for a town event, the arena for a zone event); a countdown already running is called off. tools/content-towns.mjs writes the distances.' };
@@ -317,6 +318,7 @@ export function safeEvents(ev, S, guards) {
     e.raid = { gates: guards.gates.filter(g => g.town === s.name).map(g => ({ id: g.id, x: g.x, z: g.z, out: g.out, main: g.main })), guards: guards.posts.filter(p => p.town === s.name).length, zone: s.wid };
   }
   for (const e of out.zone) {
+    if (!zoneBelongs(prov, e.zone)) continue;            // another province's zone event: its own run writes it
     const at = e.map && e.map[0]; if (!at) continue;
     let near = Infinity;
     for (const s of S) { const w = world(s); near = Math.min(near, Math.hypot(w.x - at.x, w.z - at.z) - s.r); }
@@ -341,19 +343,22 @@ export const CARTER_GREETINGS = Object.freeze([
 /** W5: every carter is an NPC of its zone's quest file (`placedBy`: the placer and the offices tool leave it alone). */
 function carterNpcs(stops) {
   const out = {};
+  // [W] a province may give its carters their own words (its carts file's hand-kept `rules.greetings`); Torbor's are the list above
+  const own = (((existsSync(P(provinceDataPath(PROV, 'carts'))) ? readJ(provinceDataPath(PROV, 'carts')) : {}).rules) || {}).greetings;
+  const GREET = PROV !== HOME_PROVINCE && Array.isArray(own) && own.length ? own : CARTER_GREETINGS;
   for (const s of stops) {
-    const g = CARTER_GREETINGS[hash('greet:' + s.id) % CARTER_GREETINGS.length].replace('{town}', s.town);
+    const g = GREET[hash('greet:' + s.id) % GREET.length].replace('{town}', s.town);
     (out[s.sheet] ||= {})[s.carter.id] = { name: s.carter.name, role: 'carter', at: s.town, greeting: g, cart: s.id, placedBy: 'content-towns' };
   }
   return out;
 }
 
 function build() {
-  const names = readJ('data/names/torbor.json'), routes = readJ(`data/provinces/${PROV}-routes.json`), econ = readJ('data/provinces/economy.json');
+  const sheet = readJ(`data/provinces/${PROV}.json`);
+  const names = readNames(PROV, sheet), routes = readJ(`data/provinces/${PROV}-routes.json`), econ = provinceDataSync(readJ, PROV, 'economy');
   const S = settlements();
   const g = guardPosts(S, names), c = cartStops(S, names, routes);
   const t = cartTable(c.stops, routes, m => cartFare(econ, m));
-  const sheet = readJ(`data/provinces/${PROV}.json`);
   const things = standingThings(S, g, c);
   Object.defineProperty(things, 'startTown', { value: sheet.zones[sheet.grid.start].town, enumerable: false });
   Object.defineProperty(things, 'note', { value: t => console.log('NOTE ' + t), enumerable: false });
@@ -362,8 +367,10 @@ function build() {
 }
 
 /** Write `gen` over the generated keys of a file, keeping every hand-written key. */
-function put(file, gen) {
-  const cur = existsSync(P(file)) ? readJ(file) : {};
+function put(file, gen, thing = null) {
+  // a province's first run starts from the home file's hand-written blocks (rules, ranks, raid, roaming…), never its generated ones
+  const seed = () => { if (!thing) return {}; const h = provinceDataSync(readJ, HOME_PROVINCE, thing) || {}; const o = { ...h }; for (const k of Object.keys(gen)) delete o[k]; return o; };
+  const cur = existsSync(P(file)) ? readJ(file) : seed();
   const next = { ...cur, ...gen };
   const a = JSON.stringify(next, null, 1) + '\n', b = existsSync(P(file)) ? readFileSync(P(file), 'utf8') : '';
   if (a === b) return false;
@@ -372,14 +379,17 @@ function put(file, gen) {
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
+  requireProvince(process.argv, { need: [p => `data/provinces/${p}-routes.json`] });
   const { S, g, c, t, d } = build();
   const changed = [
-    put('data/provinces/guards.json', { made: 'tools/content-towns.mjs — posts, gates and problems are generated; edit rules / ranks / hold by hand', gates: g.gates, posts: g.posts, dummies: d.dummies, problems: [...g.problems, ...d.problems] }),
-    put('data/provinces/carts.json', { made: 'tools/content-towns.mjs — stops, links, fares and problems are generated; edit rules / roaming by hand', stops: c.stops, links: t.links, fares: t.fares, problems: c.problems }),
+    put(provinceDataPath(PROV, 'guards'), { made: 'tools/content-towns.mjs — posts, gates and problems are generated; edit rules / ranks / hold by hand', gates: g.gates, posts: g.posts, dummies: d.dummies, problems: [...g.problems, ...d.problems] }, 'guards'),
+    put(provinceDataPath(PROV, 'carts'), { made: 'tools/content-towns.mjs — stops, links, fares and problems are generated; edit rules / roaming by hand', stops: c.stops, links: t.links, fares: t.fares, problems: c.problems }, 'carts'),
   ];
   // W5: the carters join their zone's quest file (stream A gives a quest NPC a body, a greeting and its quests)
   for (const [sheet, npcs] of Object.entries(carterNpcs(c.stops))) {
-    const f = `data/quests/${sheet}.json`, src = readFileSync(P(f), 'utf8'), j = JSON.parse(src);
+    const f = `data/quests/${sheet}.json`;
+    if (!existsSync(P(f))) { console.log(`NOTE no quest file ${f}: its carters are not written`); continue; }
+    const src = readFileSync(P(f), 'utf8'), j = JSON.parse(src);
     for (const k of Object.keys(j.npcs || {})) if (j.npcs[k].placedBy === 'content-towns' && !npcs[k]) delete j.npcs[k];
     for (const [id, n] of Object.entries(npcs)) j.npcs[id] = { ...n, ...(j.npcs[id] && 'titled' in j.npcs[id] ? { titled: j.npcs[id].titled } : {}) };
     const ind = /^\{\n( +)"/.exec(src), next = JSON.stringify(j, null, ind ? ind[1].length : 1) + '\n';

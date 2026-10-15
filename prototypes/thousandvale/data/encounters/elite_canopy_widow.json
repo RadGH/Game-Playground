@@ -1,0 +1,195 @@
+{
+  "id": "elite_canopy_widow",
+  "name": "The Canopy Widow",
+  "tier": "elite",
+  "zone": "steamwood",
+  "level": 13,
+  "body": "steamwood_prowler",
+  "place": {
+    "rank": "elite",
+    "level": 13,
+    "near": {
+      "site": "Mistfall",
+      "dx": -210,
+      "dz": 170
+    },
+    "respawnMs": 1200000,
+    "escort": [
+      {
+        "type": "steamwood_prowler",
+        "count": 2
+      }
+    ]
+  },
+  "_doc": "Expansion 1 (Vharlen). A black jungle cat that lives in the ironpalm canopy; her mate was killed by Mistfall hunters and she has hunted them since. She drops out of the trees onto a random player (a long, loud warning), pulls a strangler vine taut across the ground (it roots you), and at 60% calls her grown cubs. At 30% she yowls in grief: a frightening cone and a get-in-close ring.",
+  "party": "Open world elite. Solo: tough — the drops are big. 2-3: intended. 5+: quick. M5 scaling: health by players tagged; cubs 2 -> 3 at five; drops +1 per extra player.",
+  "hpMult": 1.6,
+  "arena": {
+    "radius": 26
+  },
+  "say": {
+    "pull": [
+      "Leaves fall like rain. Something heavy is coming down with them.",
+      "A low yowl from the canopy. Every bird goes quiet."
+    ],
+    "death": "The Canopy Widow falls out of the last tree and does not get up.",
+    "reset": "The Canopy Widow climbs back into the dark green."
+  },
+  "abilities": {
+    "claws": {
+      "id": "claws",
+      "name": "Claws",
+      "every": [
+        6,
+        8
+      ],
+      "first": 2,
+      "range": 5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 4.6,
+          "arc": 1.5,
+          "wind": 1,
+          "damage": 1.6,
+          "status": "bleed"
+        }
+      ]
+    },
+    "drop": {
+      "id": "drop",
+      "name": "Canopy Drop",
+      "every": [
+        13,
+        16
+      ],
+      "first": 4,
+      "say": "Leaves rustle above {target} — move!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3.6,
+          "wind": 2,
+          "damage": 2.2
+        }
+      ]
+    },
+    "vine": {
+      "id": "vine",
+      "name": "Strangler Vine",
+      "every": [
+        14,
+        17
+      ],
+      "first": 8,
+      "say": "She hauls a vine taut across the ground!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 16,
+          "w": 2.2,
+          "wind": 1.4,
+          "damage": 1,
+          "status": "root",
+          "yaw": "random"
+        }
+      ]
+    },
+    "cry": {
+      "id": "cry",
+      "name": "Mourning Cry",
+      "every": [
+        16,
+        19
+      ],
+      "first": 3,
+      "cast": 0.6,
+      "say": "The Widow throws her head back — get out of the front!",
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 8,
+          "arc": 1.4,
+          "wind": 1.4,
+          "damage": 1.4,
+          "status": "fear"
+        }
+      ]
+    },
+    "circling_dark": {
+      "id": "circling_dark",
+      "name": "Circling Dark",
+      "every": [
+        13,
+        16
+      ],
+      "first": 6,
+      "cast": 0.8,
+      "say": "She circles you in the shadows — get in close!",
+      "telegraphs": [
+        {
+          "shape": "donut",
+          "at": "self",
+          "r": 10,
+          "r2": 3,
+          "wind": 1.6,
+          "damage": 1.9
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "From Above",
+      "abilities": [
+        "claws",
+        "drop",
+        "vine"
+      ]
+    },
+    {
+      "name": "The Litter",
+      "at": 0.6,
+      "say": "A yowl answers from the ferns. Then two more.",
+      "abilities": [
+        "claws",
+        "drop",
+        "vine"
+      ],
+      "onEnter": [
+        {
+          "adds": {
+            "type": "steamwood_prowler",
+            "count": 2,
+            "radius": 8
+          }
+        }
+      ]
+    },
+    {
+      "name": "Widow's Grief",
+      "at": 0.3,
+      "say": "The Canopy Widow howls for her lost mate!",
+      "abilities": [
+        "claws",
+        "cry",
+        "circling_dark",
+        "drop"
+      ],
+      "onEnter": [
+        {
+          "modifier": {
+            "id": "widows_grief",
+            "dmg": 1.2,
+            "attackEvery": 0.85,
+            "exact": true
+          }
+        }
+      ]
+    }
+  ]
+}

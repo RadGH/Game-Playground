@@ -1,0 +1,2956 @@
+{
+ "_doc": "Stream E. Content placements for world zone z13_11 (E zone 'fumarole_fen', Fumarole Fen) — tools/place-vignettes.mjs against stream B's bake (terrain a6d6efa9). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
+ "zone": "z13_11",
+ "sheetZone": "fumarole_fen",
+ "province": "vharlen",
+ "terrainHash": "a6d6efa9",
+ "band": [
+  13,
+  15
+ ],
+ "archetype": "marsh",
+ "rules": {
+  "vignette": {
+   "townGap": 60,
+   "gap": 30,
+   "slope": 20,
+   "sameKindSpacing": 140
+  },
+  "fort": {
+   "townGap": 80,
+   "gap": 40,
+   "slope": 16
+  },
+  "farm": {
+   "townGap": 25,
+   "gap": 30,
+   "slope": 12
+  },
+  "cave": {
+   "townGap": 120,
+   "gap": 40,
+   "slope": 28
+  },
+  "camp": {
+   "townGap": 120,
+   "gap": 25,
+   "slope": 24
+  },
+  "rare": {
+   "townGap": 150,
+   "gap": 30,
+   "slope": 24
+  },
+  "hook": {
+   "townGap": 40,
+   "gap": 30,
+   "slope": 26
+  },
+  "wayside": {
+   "townGap": 20,
+   "gap": 12,
+   "slope": 34,
+   "edge": 24
+  },
+  "settlement": {
+   "townGap": 300,
+   "gap": 60,
+   "slope": 10
+  },
+  "curio": {
+   "townGap": 30,
+   "gap": 10,
+   "slope": 26,
+   "edge": 30
+  },
+  "stray": {
+   "townGap": 70,
+   "gap": 16,
+   "slope": 26,
+   "edge": 30
+  },
+  "folk": {
+   "townGap": 30,
+   "gap": 12,
+   "slope": 24,
+   "edge": 30
+  },
+  "setpiece": {
+   "townGap": 20,
+   "gap": 25,
+   "slope": 20
+  }
+ },
+ "mainWalkableShare": 0.248,
+ "settlements": [
+  {
+   "name": "Stiltreach",
+   "kind": "hamlet",
+   "x": 440,
+   "z": 584,
+   "r": 46,
+   "source": "bake",
+   "bakeId": "stiltreach"
+  }
+ ],
+ "checks": [
+  {
+   "id": "door_1",
+   "kind": "dungeon_door",
+   "x": 270,
+   "z": 690,
+   "reachable": true,
+   "openShare": 1
+  },
+  {
+   "id": "event_fumarole_fen",
+   "kind": "event_site",
+   "x": 925,
+   "z": 601,
+   "reachable": true,
+   "openShare": 1
+  }
+ ],
+ "problems": [],
+ "placements": [
+  {
+   "type": "fort",
+   "id": "fort_fumarole_fen_0",
+   "name": null,
+   "template": "watchtower_garrison",
+   "friendly": true,
+   "x": 105,
+   "z": 632,
+   "yaw": 1.57,
+   "radius": 16,
+   "level": 14
+  },
+  {
+   "type": "farm",
+   "id": "farm_fumarole_fen_0",
+   "name": "Stiltreach Salt Pans",
+   "template": "pig",
+   "flavour": null,
+   "settlement": "Stiltreach",
+   "x": 555,
+   "z": 592,
+   "yaw": -1.57,
+   "radius": 18,
+   "level": 13
+  },
+  {
+   "type": "farm",
+   "id": "farm_fumarole_fen_1",
+   "name": "Stiltreach Net Racks",
+   "template": "fishing_plot",
+   "flavour": null,
+   "settlement": "Stiltreach",
+   "x": 353,
+   "z": 609,
+   "yaw": -1.57,
+   "radius": 16,
+   "level": 13
+  },
+  {
+   "type": "cave",
+   "id": "cave_fumarole_fen_0",
+   "name": "Steam grotto",
+   "template": "sump_grotto",
+   "plan": {
+    "family": "steam_grotto",
+    "floors": 1,
+    "level": 14
+   },
+   "x": 1053,
+   "z": 273,
+   "yaw": 0.79,
+   "radius": 10,
+   "level": 14
+  },
+  {
+   "type": "vignette",
+   "id": "vh_empty_traps",
+   "name": "The Line of Empty Traps",
+   "x": 120,
+   "z": 62,
+   "yaw": 2.29,
+   "radius": 14,
+   "biome": "marsh",
+   "biomeFits": true,
+   "level": 1,
+   "levelBase": 13,
+   "levelCap": 14
+  },
+  {
+   "type": "vignette",
+   "id": "vh_feast_unfinished",
+   "name": "The Feast Nobody Finished",
+   "x": 112,
+   "z": 1066,
+   "yaw": 6.18,
+   "radius": 14,
+   "biome": "beach",
+   "biomeFits": true,
+   "level": 1,
+   "levelBase": 14,
+   "levelCap": 15
+  },
+  {
+   "type": "vignette",
+   "id": "vh_felled_palm",
+   "name": "The Felled Palm",
+   "x": 752,
+   "z": 155,
+   "yaw": 0.02,
+   "radius": 14,
+   "biome": "shrubland",
+   "biomeFits": true,
+   "level": 1,
+   "levelBase": 13,
+   "levelCap": 14
+  },
+  {
+   "type": "vignette",
+   "id": "vh_grove_burned_twice",
+   "name": "The Grove That Burned Twice",
+   "x": 255,
+   "z": 864,
+   "yaw": 0.46,
+   "radius": 15,
+   "biome": "ashPlain",
+   "biomeFits": true,
+   "level": 1,
+   "levelBase": 13,
+   "levelCap": 14
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_0_0",
+   "monster": "mudback_lurker",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 855,
+   "z": 759,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_0_1",
+   "monster": "mudback_lurker",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 347,
+   "z": 252,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_1_0",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 818,
+   "z": 440,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_1_1",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 68,
+   "z": 359,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_2_0",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 599,
+   "z": 883,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_2_1",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 425,
+   "z": 956,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_3_0",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 433,
+   "z": 788,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_3_1",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1033,
+   "z": 518,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_4_0",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 505,
+   "z": 64,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_4_1",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 502,
+   "z": 396,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "rare",
+   "id": "rare_bubblejaw",
+   "slot": 0,
+   "name": "Bubblejaw",
+   "x": 749,
+   "z": 607,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     782,
+     663
+    ],
+    [
+     692,
+     680
+    ],
+    [
+     661,
+     618
+    ],
+    [
+     746,
+     531
+    ],
+    [
+     817,
+     558
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 15
+  },
+  {
+   "type": "rare",
+   "id": "rare_old_wellen",
+   "slot": 1,
+   "name": "Old Wellen",
+   "x": 216,
+   "z": 479,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     167,
+     521
+    ],
+    [
+     160,
+     478
+    ],
+    [
+     212,
+     430
+    ],
+    [
+     263,
+     462
+    ],
+    [
+     262,
+     515
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 15
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z13_11_stiltreach",
+   "name": "Stiltreach",
+   "x": 450.5,
+   "z": 593.8,
+   "yaw": 0,
+   "settlement": "Stiltreach",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z13_11_door",
+   "name": "The Drowned Vent",
+   "x": 264.3,
+   "z": 681.7,
+   "yaw": 0,
+   "door": "door_1",
+   "radius": 1
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_door",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 232,
+   "z": 689,
+   "yaw": 0,
+   "radius": 6,
+   "doorGuard": true
+  },
+  {
+   "type": "npc",
+   "id": "mother_imma",
+   "name": "Mother Imma",
+   "role": "elder",
+   "at": "Stiltreach",
+   "x": 444.2,
+   "z": 612.6,
+   "yaw": 0.826,
+   "office": "stiltreach_plot_0",
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "stilt_builder_oskel",
+   "name": "Stilt-builder Oskel",
+   "role": "resident",
+   "at": "Stiltreach",
+   "x": 425.7,
+   "z": 567.4,
+   "yaw": 3.597,
+   "office": "stiltreach_plot_6",
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "fennu_draskar",
+   "name": "Fennu Draskar",
+   "role": "fisher",
+   "at": "Stiltreach",
+   "x": 450.7,
+   "z": 589.8,
+   "yaw": 1.2,
+   "radius": 1
+  },
+  {
+   "type": "wayside",
+   "id": "vh_roadside_fire_fumarole_fen_0",
+   "kind": "vh_roadside_fire",
+   "name": "Somebody's Fire",
+   "x": 967,
+   "z": 24,
+   "yaw": 5.03,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_f1",
+   "monster": "mudback_lurker",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 62,
+   "z": 863,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_beach_mooring_fumarole_fen_2",
+   "kind": "vh_beach_mooring",
+   "name": "Mooring Post",
+   "x": 308,
+   "z": 25,
+   "yaw": 0.74,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_f3",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1168,
+   "z": 122,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_offering_bowls_fumarole_fen_4",
+   "kind": "vh_offering_bowls",
+   "name": "Offering Bowls",
+   "x": 25,
+   "z": 1190,
+   "yaw": 2.55,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_f5",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 580,
+   "z": 232,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_pilgrim_ribbons_fumarole_fen_6",
+   "kind": "vh_pilgrim_ribbons",
+   "name": "Pilgrim Post",
+   "x": 630,
+   "z": 308,
+   "yaw": 0.54,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_1",
+   "recipe": "vh_trap_line",
+   "name": "Salamander Trap Line",
+   "kind": "camp",
+   "x": 888,
+   "z": 280,
+   "yaw": 1.46,
+   "radius": 6,
+   "levelBase": 13
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_s1",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 172,
+   "z": 203,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_2",
+   "recipe": "vh_salt_sulphur_crust",
+   "name": "Yellow Crust",
+   "kind": "forage",
+   "x": 757,
+   "z": 877,
+   "yaw": 1.49,
+   "radius": 4,
+   "levelBase": 13
+  },
+  {
+   "type": "wayside",
+   "id": "vh_offering_bowls_fumarole_fen_d1",
+   "kind": "vh_offering_bowls",
+   "name": "Offering Bowls",
+   "x": 1128,
+   "z": 414,
+   "yaw": 5.45,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_3",
+   "recipe": "vh_stilt_camp",
+   "name": "Stilt Camp",
+   "kind": "camp",
+   "x": 646,
+   "z": 41,
+   "yaw": 4.81,
+   "radius": 6,
+   "levelBase": 13
+  },
+  {
+   "type": "camp",
+   "id": "roam_fumarole_fen_1",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 960,
+   "z": 160,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     977,
+     80
+    ],
+    [
+     1036,
+     206
+    ],
+    [
+     953,
+     215
+    ],
+    [
+     896,
+     139
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_s2",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 569,
+   "z": 747,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_4",
+   "recipe": "vh_glass_floats",
+   "name": "Glass Floats",
+   "kind": "fishing",
+   "x": 632,
+   "z": 448,
+   "yaw": 2.97,
+   "radius": 4,
+   "levelBase": 13
+  },
+  {
+   "type": "folk",
+   "id": "folk_fumarole_fen_1",
+   "role": "obsidian_knapper",
+   "name": "Obsidian knapper",
+   "work": "tend",
+   "chatter": [
+    "role.obsidian_knapper"
+   ],
+   "x": 952,
+   "z": 402,
+   "yaw": 1.64,
+   "radius": 6,
+   "path": [
+    [
+     949,
+     391
+    ],
+    [
+     968,
+     405
+    ],
+    [
+     942,
+     410
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_knapping_stone",
+     "x": 0,
+     "z": 0,
+     "yaw": 0.3
+    },
+    {
+     "kind": "prop",
+     "id": "vh_obsidian_cores",
+     "x": 1.6,
+     "z": 0.4,
+     "yaw": 0.9
+    },
+    {
+     "kind": "prop",
+     "id": "vh_glass_shards",
+     "x": 0.6,
+     "z": 1.4,
+     "yaw": 0
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_5",
+   "recipe": "vh_fish_rack",
+   "name": "Split Fish Rack",
+   "kind": "fishing",
+   "x": 760,
+   "z": 312,
+   "yaw": 5,
+   "radius": 4,
+   "levelBase": 13
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_s3",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 40,
+   "z": 224,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_offering_bowls_fumarole_fen_d2",
+   "kind": "vh_offering_bowls",
+   "name": "Offering Bowls",
+   "x": 393,
+   "z": 127,
+   "yaw": 6.04,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_6",
+   "recipe": "vh_council_notice",
+   "name": "Harbour Council Notice",
+   "kind": "lore",
+   "x": 817,
+   "z": 41,
+   "yaw": 3.2,
+   "radius": 3,
+   "levelBase": 13
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_s4",
+   "monster": "mudback_lurker",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 40,
+   "z": 512,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_7",
+   "recipe": "vh_glass_kiln",
+   "name": "Glass-Blower's Kiln",
+   "kind": "camp",
+   "x": 224,
+   "z": 992,
+   "yaw": 2.89,
+   "radius": 6,
+   "levelBase": 14
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_8",
+   "recipe": "vh_fish_pit",
+   "name": "Steam Pit",
+   "kind": "fishing",
+   "x": 1165,
+   "z": 294,
+   "yaw": 5.72,
+   "radius": 5,
+   "levelBase": 13
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_9",
+   "recipe": "vh_toad_spawn",
+   "name": "Toad Spawn",
+   "kind": "nest",
+   "x": 136,
+   "z": 760,
+   "yaw": 3.48,
+   "radius": 5,
+   "levelBase": 13
+  },
+  {
+   "type": "wayside",
+   "id": "vh_fern_pair_fumarole_fen_d3",
+   "kind": "vh_fern_pair",
+   "name": "Fern Gate",
+   "x": 383,
+   "z": 432,
+   "yaw": 5.88,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_s5",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 230,
+   "z": 307,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_10",
+   "recipe": "vh_fern_hearts",
+   "name": "Fern Hearts",
+   "kind": "forage",
+   "x": 271,
+   "z": 136,
+   "yaw": 1.63,
+   "radius": 4,
+   "levelBase": 13
+  },
+  {
+   "type": "folk",
+   "id": "folk_fumarole_fen_2",
+   "role": "spring_keeper",
+   "name": "Hot-spring keeper",
+   "work": "tend",
+   "chatter": [
+    "role.spring_keeper"
+   ],
+   "x": 464,
+   "z": 281,
+   "yaw": 1.83,
+   "radius": 6,
+   "path": [
+    [
+     457,
+     287
+    ],
+    [
+     463,
+     273
+    ],
+    [
+     471,
+     287
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_hot_pool",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_bath_hut",
+     "x": 3.5,
+     "z": -2,
+     "yaw": 3.6
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_11",
+   "recipe": "vh_net_poles",
+   "name": "Net Poles",
+   "kind": "fishing",
+   "x": 681,
+   "z": 792,
+   "yaw": 4.33,
+   "radius": 4,
+   "levelBase": 13
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_s6",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1089,
+   "z": 41,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_offering_bowls_fumarole_fen_d4",
+   "kind": "vh_offering_bowls",
+   "name": "Offering Bowls",
+   "x": 40,
+   "z": 975,
+   "yaw": 6.25,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_12",
+   "recipe": "vh_toad_spawn",
+   "name": "Toad Spawn",
+   "kind": "nest",
+   "x": 643,
+   "z": 146,
+   "yaw": 5.05,
+   "radius": 5,
+   "levelBase": 13
+  },
+  {
+   "type": "camp",
+   "id": "roam_fumarole_fen_2",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 43,
+   "z": 724,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     8,
+     671
+    ],
+    [
+     84,
+     679
+    ],
+    [
+     99,
+     794
+    ],
+    [
+     11,
+     772
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_s7",
+   "monster": "mudback_lurker",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 153,
+   "z": 919,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_13",
+   "recipe": "vh_boiling_mud",
+   "name": "Boiling Mud",
+   "kind": "hazard",
+   "x": 327,
+   "z": 775,
+   "yaw": 5.83,
+   "radius": 5,
+   "levelBase": 13
+  },
+  {
+   "type": "wayside",
+   "id": "vh_pilgrim_ribbons_fumarole_fen_d5",
+   "kind": "vh_pilgrim_ribbons",
+   "name": "Pilgrim Post",
+   "x": 488,
+   "z": 168,
+   "yaw": 6.19,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_14",
+   "recipe": "vh_glass_floats",
+   "name": "Glass Floats",
+   "kind": "fishing",
+   "x": 319,
+   "z": 958,
+   "yaw": 3.12,
+   "radius": 4,
+   "levelBase": 13
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_s8",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 490,
+   "z": 863,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_15",
+   "recipe": "vh_salt_sulphur_crust",
+   "name": "Yellow Crust",
+   "kind": "forage",
+   "x": 719,
+   "z": 400,
+   "yaw": 3.85,
+   "radius": 4,
+   "levelBase": 13
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_16",
+   "recipe": "vh_fish_pit",
+   "name": "Steam Pit",
+   "kind": "fishing",
+   "x": 319,
+   "z": 353,
+   "yaw": 1.52,
+   "radius": 5,
+   "levelBase": 13
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_s9",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 368,
+   "z": 872,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_17",
+   "recipe": "vh_net_poles",
+   "name": "Net Poles",
+   "kind": "fishing",
+   "x": 41,
+   "z": 127,
+   "yaw": 4.85,
+   "radius": 4,
+   "levelBase": 13
+  },
+  {
+   "type": "wayside",
+   "id": "vh_fern_pair_fumarole_fen_d6",
+   "kind": "vh_fern_pair",
+   "name": "Fern Gate",
+   "x": 224,
+   "z": 56,
+   "yaw": 3.38,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_18",
+   "recipe": "vh_net_poles",
+   "name": "Net Poles",
+   "kind": "fishing",
+   "x": 694,
+   "z": 251,
+   "yaw": 1.62,
+   "radius": 4,
+   "levelBase": 13
+  },
+  {
+   "type": "camp",
+   "id": "roam_fumarole_fen_3",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 570,
+   "z": 483,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     633,
+     524
+    ],
+    [
+     524,
+     537
+    ],
+    [
+     521,
+     436
+    ],
+    [
+     590,
+     430
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_s10",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 409,
+   "z": 39,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_19",
+   "recipe": "vh_fish_rack",
+   "name": "Split Fish Rack",
+   "kind": "fishing",
+   "x": 119,
+   "z": 279,
+   "yaw": 0.75,
+   "radius": 4,
+   "levelBase": 13
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_20",
+   "recipe": "vh_council_notice",
+   "name": "Harbour Council Notice",
+   "kind": "lore",
+   "x": 215,
+   "z": 604,
+   "yaw": 4.11,
+   "radius": 3,
+   "levelBase": 13
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_21",
+   "recipe": "vh_outriggers",
+   "name": "Outrigger Canoes",
+   "kind": "fishing",
+   "x": 1126,
+   "z": 208,
+   "yaw": 5.31,
+   "radius": 5,
+   "levelBase": 13
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_s11",
+   "monster": "mudback_lurker",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 385,
+   "z": 702,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_tangled_floats_fumarole_fen_d7",
+   "kind": "vh_tangled_floats",
+   "name": "Floats on a Post",
+   "x": 494,
+   "z": 702,
+   "yaw": 4.5,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_22",
+   "recipe": "vh_slagborn_marker",
+   "name": "Slagborn Marker",
+   "kind": "lore",
+   "x": 808,
+   "z": 240,
+   "yaw": 5.64,
+   "radius": 3,
+   "levelBase": 13
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_s12",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1058,
+   "z": 375,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_23",
+   "recipe": "vh_outriggers",
+   "name": "Outrigger Canoes",
+   "kind": "fishing",
+   "x": 767,
+   "z": 793,
+   "yaw": 4.87,
+   "radius": 5,
+   "levelBase": 13
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_24",
+   "recipe": "vh_trap_line",
+   "name": "Salamander Trap Line",
+   "kind": "camp",
+   "x": 521,
+   "z": 942,
+   "yaw": 0.08,
+   "radius": 6,
+   "levelBase": 13
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_25",
+   "recipe": "vh_steamcaps",
+   "name": "Steamcap Flush",
+   "kind": "forage",
+   "x": 736,
+   "z": 56,
+   "yaw": 5.54,
+   "radius": 4,
+   "levelBase": 13
+  },
+  {
+   "type": "wayside",
+   "id": "vh_roadside_fire_fumarole_fen_d8",
+   "kind": "vh_roadside_fire",
+   "name": "Somebody's Fire",
+   "x": 160,
+   "z": 358,
+   "yaw": 6.07,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_s13",
+   "monster": "mudback_lurker",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 257,
+   "z": 224,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_26",
+   "recipe": "vh_fish_pit",
+   "name": "Steam Pit",
+   "kind": "fishing",
+   "x": 224,
+   "z": 776,
+   "yaw": 4.64,
+   "radius": 5,
+   "levelBase": 13
+  },
+  {
+   "type": "folk",
+   "id": "folk_fumarole_fen_3",
+   "role": "obsidian_knapper",
+   "name": "Obsidian knapper",
+   "work": "tend",
+   "chatter": [
+    "role.obsidian_knapper"
+   ],
+   "x": 1080,
+   "z": 128,
+   "yaw": 1.77,
+   "radius": 6,
+   "path": [
+    [
+     1076,
+     123
+    ],
+    [
+     1086,
+     126
+    ],
+    [
+     1078,
+     134
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_knapping_stone",
+     "x": 0,
+     "z": 0,
+     "yaw": 0.3
+    },
+    {
+     "kind": "prop",
+     "id": "vh_obsidian_cores",
+     "x": 1.6,
+     "z": 0.4,
+     "yaw": 0.9
+    },
+    {
+     "kind": "prop",
+     "id": "vh_glass_shards",
+     "x": 0.6,
+     "z": 1.4,
+     "yaw": 0
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_27",
+   "recipe": "vh_glass_floats",
+   "name": "Glass Floats",
+   "kind": "fishing",
+   "x": 1201,
+   "z": 39,
+   "yaw": 2.35,
+   "radius": 4,
+   "levelBase": 13
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_s14",
+   "monster": "mudback_lurker",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 969,
+   "z": 302,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_tangled_floats_fumarole_fen_d9",
+   "kind": "vh_tangled_floats",
+   "name": "Floats on a Post",
+   "x": 895,
+   "z": 487,
+   "yaw": 5.57,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_28",
+   "recipe": "vh_fern_hearts",
+   "name": "Fern Hearts",
+   "kind": "forage",
+   "x": 862,
+   "z": 370,
+   "yaw": 1.52,
+   "radius": 4,
+   "levelBase": 13
+  },
+  {
+   "type": "camp",
+   "id": "roam_fumarole_fen_4",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 897,
+   "z": 54,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     891,
+     3
+    ],
+    [
+     966,
+     69
+    ],
+    [
+     904,
+     129
+    ],
+    [
+     829,
+     51
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_s15",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 363,
+   "z": 477,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_29",
+   "recipe": "vh_boiling_mud",
+   "name": "Boiling Mud",
+   "kind": "hazard",
+   "x": 553,
+   "z": 328,
+   "yaw": 3.37,
+   "radius": 5,
+   "levelBase": 13
+  },
+  {
+   "type": "wayside",
+   "id": "vh_roadside_fire_fumarole_fen_d10",
+   "kind": "vh_roadside_fire",
+   "name": "Somebody's Fire",
+   "x": 575,
+   "z": 115,
+   "yaw": 5.2,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_30",
+   "recipe": "vh_bath_hut",
+   "name": "Hot-Spring Bathing Hut",
+   "kind": "camp",
+   "x": 682,
+   "z": 899,
+   "yaw": 1.4,
+   "radius": 7,
+   "levelBase": 13
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_s16",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 415,
+   "z": 199,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_31",
+   "recipe": "vh_outriggers",
+   "name": "Outrigger Canoes",
+   "kind": "fishing",
+   "x": 168,
+   "z": 840,
+   "yaw": 1.57,
+   "radius": 5,
+   "levelBase": 13
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_32",
+   "recipe": "vh_trap_line",
+   "name": "Salamander Trap Line",
+   "kind": "camp",
+   "x": 428,
+   "z": 360,
+   "yaw": 5.06,
+   "radius": 6,
+   "levelBase": 13
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_s17",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 76,
+   "z": 439,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_33",
+   "recipe": "vh_fish_rack",
+   "name": "Split Fish Rack",
+   "kind": "fishing",
+   "x": 40,
+   "z": 1112,
+   "yaw": 2.37,
+   "radius": 4,
+   "levelBase": 14
+  },
+  {
+   "type": "wayside",
+   "id": "vh_fern_pair_fumarole_fen_d11",
+   "kind": "vh_fern_pair",
+   "name": "Fern Gate",
+   "x": 112,
+   "z": 152,
+   "yaw": 0.12,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_34",
+   "recipe": "vh_boiling_mud",
+   "name": "Boiling Mud",
+   "kind": "hazard",
+   "x": 184,
+   "z": 120,
+   "yaw": 4.07,
+   "radius": 5,
+   "levelBase": 13
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_35",
+   "recipe": "vh_trap_line",
+   "name": "Salamander Trap Line",
+   "kind": "camp",
+   "x": 40,
+   "z": 41,
+   "yaw": 1.46,
+   "radius": 6,
+   "levelBase": 13
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_s18",
+   "monster": "mudback_lurker",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 113,
+   "z": 985,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_36",
+   "recipe": "vh_drowned_paddler",
+   "name": "Washed-up Paddler",
+   "kind": "remains",
+   "x": 447,
+   "z": 465,
+   "yaw": 3.26,
+   "radius": 4,
+   "levelBase": 13
+  },
+  {
+   "type": "folk",
+   "id": "folk_fumarole_fen_4",
+   "role": "net_mender",
+   "name": "Net mender",
+   "work": "fish",
+   "chatter": [
+    "role.net_mender"
+   ],
+   "x": 648,
+   "z": 376,
+   "yaw": 2.09,
+   "radius": 6,
+   "path": [
+    [
+     644,
+     396
+    ],
+    [
+     627,
+     364
+    ],
+    [
+     665,
+     364
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_net_poles",
+     "x": 0,
+     "z": -2,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_outrigger",
+     "x": 3,
+     "z": 2,
+     "yaw": 1.3
+    },
+    {
+     "kind": "prop",
+     "id": "vh_fish_rack",
+     "x": -3,
+     "z": 1,
+     "yaw": 0.4
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_37",
+   "recipe": "vh_glass_floats",
+   "name": "Glass Floats",
+   "kind": "fishing",
+   "x": 336,
+   "z": 168,
+   "yaw": 0.53,
+   "radius": 4,
+   "levelBase": 13
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_s19",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 580,
+   "z": 672,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_pilgrim_ribbons_fumarole_fen_d12",
+   "kind": "vh_pilgrim_ribbons",
+   "name": "Pilgrim Post",
+   "x": 704,
+   "z": 474,
+   "yaw": 0.75,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_reed_windbreak_fumarole_fen_d13",
+   "kind": "vh_reed_windbreak",
+   "name": "Reed Screen",
+   "x": 339,
+   "z": 90,
+   "yaw": 2.02,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_38",
+   "recipe": "vh_ironpalm_down",
+   "name": "Fallen Ironpalm",
+   "kind": "forage",
+   "x": 833,
+   "z": 177,
+   "yaw": 2.74,
+   "radius": 5,
+   "levelBase": 13
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_s20",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1064,
+   "z": 448,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_39",
+   "recipe": "vh_fern_hearts",
+   "name": "Fern Hearts",
+   "kind": "forage",
+   "x": 552,
+   "z": 825,
+   "yaw": 0.6,
+   "radius": 4,
+   "levelBase": 13
+  },
+  {
+   "type": "camp",
+   "id": "roam_fumarole_fen_5",
+   "monster": "mudback_lurker",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 857,
+   "z": 678,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     838,
+     763
+    ],
+    [
+     804,
+     650
+    ],
+    [
+     873,
+     616
+    ],
+    [
+     908,
+     704
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_40",
+   "recipe": "vh_salt_sulphur_crust",
+   "name": "Yellow Crust",
+   "kind": "forage",
+   "x": 577,
+   "z": 42,
+   "yaw": 5.06,
+   "radius": 4,
+   "levelBase": 13
+  },
+  {
+   "type": "wayside",
+   "id": "vh_palm_stumps_fumarole_fen_d14",
+   "kind": "vh_palm_stumps",
+   "name": "Ironpalm Stumps",
+   "x": 87,
+   "z": 1159,
+   "yaw": 5.7,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_s21",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 640,
+   "z": 736,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_41",
+   "recipe": "vh_salt_sulphur_crust",
+   "name": "Yellow Crust",
+   "kind": "forage",
+   "x": 161,
+   "z": 695,
+   "yaw": 5.25,
+   "radius": 4,
+   "levelBase": 13
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_42",
+   "recipe": "vh_bath_hut",
+   "name": "Hot-Spring Bathing Hut",
+   "kind": "camp",
+   "x": 784,
+   "z": 376,
+   "yaw": 1.91,
+   "radius": 7,
+   "levelBase": 13
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_43",
+   "recipe": "vh_ribbon_post",
+   "name": "Pilgrim Ribbons",
+   "kind": "shrine",
+   "x": 274,
+   "z": 606,
+   "yaw": 4.36,
+   "radius": 3,
+   "levelBase": 13
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_44",
+   "recipe": "vh_drowned_paddler",
+   "name": "Washed-up Paddler",
+   "kind": "remains",
+   "x": 616,
+   "z": 808,
+   "yaw": 2.61,
+   "radius": 4,
+   "levelBase": 13
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_s22",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 105,
+   "z": 552,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_offering_bowls_fumarole_fen_d15",
+   "kind": "vh_offering_bowls",
+   "name": "Offering Bowls",
+   "x": 504,
+   "z": 776,
+   "yaw": 6.27,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_45",
+   "recipe": "vh_ash_sink",
+   "name": "Ash Sink",
+   "kind": "hazard",
+   "x": 30,
+   "z": 1025,
+   "yaw": 3.71,
+   "radius": 5,
+   "levelBase": 14
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_46",
+   "recipe": "vh_bath_hut",
+   "name": "Hot-Spring Bathing Hut",
+   "kind": "camp",
+   "x": 256,
+   "z": 376,
+   "yaw": 3.17,
+   "radius": 7,
+   "levelBase": 13
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_s23",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1120,
+   "z": 344,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_47",
+   "recipe": "vh_salamander_bones",
+   "name": "Salamander Ribs",
+   "kind": "remains",
+   "x": 824,
+   "z": 307,
+   "yaw": 5.94,
+   "radius": 5,
+   "levelBase": 13
+  },
+  {
+   "type": "wayside",
+   "id": "vh_offering_bowls_fumarole_fen_d16",
+   "kind": "vh_offering_bowls",
+   "name": "Offering Bowls",
+   "x": 759,
+   "z": 728,
+   "yaw": 1.82,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_roadside_fire_fumarole_fen_d17",
+   "kind": "vh_roadside_fire",
+   "name": "Somebody's Fire",
+   "x": 678,
+   "z": 184,
+   "yaw": 6.12,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_48",
+   "recipe": "vh_salamander_bones",
+   "name": "Salamander Ribs",
+   "kind": "remains",
+   "x": 167,
+   "z": 1055,
+   "yaw": 0.32,
+   "radius": 5,
+   "levelBase": 14
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_s24",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 377,
+   "z": 319,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_49",
+   "recipe": "vh_toad_spawn",
+   "name": "Toad Spawn",
+   "kind": "nest",
+   "x": 981,
+   "z": 475,
+   "yaw": 1.93,
+   "radius": 5,
+   "levelBase": 13
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_50",
+   "recipe": "vh_outriggers",
+   "name": "Outrigger Canoes",
+   "kind": "fishing",
+   "x": 39,
+   "z": 296,
+   "yaw": 4.55,
+   "radius": 5,
+   "levelBase": 13
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_s25",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 456,
+   "z": 112,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_51",
+   "recipe": "vh_toad_spawn",
+   "name": "Toad Spawn",
+   "kind": "nest",
+   "x": 324,
+   "z": 427,
+   "yaw": 4.92,
+   "radius": 5,
+   "levelBase": 13
+  },
+  {
+   "type": "wayside",
+   "id": "vh_pilgrim_ribbons_fumarole_fen_d18",
+   "kind": "vh_pilgrim_ribbons",
+   "name": "Pilgrim Post",
+   "x": 688,
+   "z": 96,
+   "yaw": 1.06,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_52",
+   "recipe": "vh_slagborn_marker",
+   "name": "Slagborn Marker",
+   "kind": "lore",
+   "x": 80,
+   "z": 928,
+   "yaw": 1.17,
+   "radius": 3,
+   "levelBase": 14
+  },
+  {
+   "type": "camp",
+   "id": "roam_fumarole_fen_6",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 888,
+   "z": 208,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     969,
+     193
+    ],
+    [
+     877,
+     285
+    ],
+    [
+     817,
+     207
+    ],
+    [
+     885,
+     146
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_roadside_fire_fumarole_fen_d19",
+   "kind": "vh_roadside_fire",
+   "name": "Somebody's Fire",
+   "x": 802,
+   "z": 837,
+   "yaw": 6.19,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_53",
+   "recipe": "vh_drowned_paddler",
+   "name": "Washed-up Paddler",
+   "kind": "remains",
+   "x": 50,
+   "z": 580,
+   "yaw": 1.26,
+   "radius": 4,
+   "levelBase": 13
+  },
+  {
+   "type": "folk",
+   "id": "folk_fumarole_fen_5",
+   "role": "obsidian_knapper",
+   "name": "Obsidian knapper",
+   "work": "tend",
+   "chatter": [
+    "role.obsidian_knapper"
+   ],
+   "x": 256,
+   "z": 936,
+   "yaw": 3.66,
+   "radius": 6,
+   "path": [
+    [
+     262,
+     940
+    ],
+    [
+     248,
+     940
+    ],
+    [
+     259,
+     928
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_knapping_stone",
+     "x": 0,
+     "z": 0,
+     "yaw": 0.3
+    },
+    {
+     "kind": "prop",
+     "id": "vh_obsidian_cores",
+     "x": 1.6,
+     "z": 0.4,
+     "yaw": 0.9
+    },
+    {
+     "kind": "prop",
+     "id": "vh_glass_shards",
+     "x": 0.6,
+     "z": 1.4,
+     "yaw": 0
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_54",
+   "recipe": "vh_steamcaps",
+   "name": "Steamcap Flush",
+   "kind": "forage",
+   "x": 318,
+   "z": 547,
+   "yaw": 6.05,
+   "radius": 4,
+   "levelBase": 13
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_s26",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 808,
+   "z": 111,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_reed_windbreak_fumarole_fen_d20",
+   "kind": "vh_reed_windbreak",
+   "name": "Reed Screen",
+   "x": 105,
+   "z": 217,
+   "yaw": 0.04,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_55",
+   "recipe": "vh_salt_sulphur_crust",
+   "name": "Yellow Crust",
+   "kind": "forage",
+   "x": 295,
+   "z": 295,
+   "yaw": 2.77,
+   "radius": 4,
+   "levelBase": 13
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_s27",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 139,
+   "z": 415,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_56",
+   "recipe": "vh_outriggers",
+   "name": "Outrigger Canoes",
+   "kind": "fishing",
+   "x": 512,
+   "z": 232,
+   "yaw": 5.6,
+   "radius": 5,
+   "levelBase": 13
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_57",
+   "recipe": "vh_net_poles",
+   "name": "Net Poles",
+   "kind": "fishing",
+   "x": 382,
+   "z": 997,
+   "yaw": 5.38,
+   "radius": 4,
+   "levelBase": 14
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_58",
+   "recipe": "vh_stilt_camp",
+   "name": "Stilt Camp",
+   "kind": "camp",
+   "x": 159,
+   "z": 585,
+   "yaw": 3.09,
+   "radius": 6,
+   "levelBase": 13
+  },
+  {
+   "type": "wayside",
+   "id": "vh_palm_stumps_fumarole_fen_d21",
+   "kind": "vh_palm_stumps",
+   "name": "Ironpalm Stumps",
+   "x": 754,
+   "z": 224,
+   "yaw": 5.52,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_s28",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 189,
+   "z": 266,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_59",
+   "recipe": "vh_tussock_seed",
+   "name": "Seedheads",
+   "kind": "forage",
+   "x": 912,
+   "z": 337,
+   "yaw": 2.46,
+   "radius": 4,
+   "levelBase": 13
+  },
+  {
+   "type": "folk",
+   "id": "folk_fumarole_fen_6",
+   "role": "salamander_trapper",
+   "name": "Salamander trapper",
+   "work": "watch",
+   "chatter": [
+    "role.salamander_trapper"
+   ],
+   "x": 1025,
+   "z": 40,
+   "yaw": 0.37,
+   "radius": 6,
+   "path": [
+    [
+     1033,
+     2
+    ],
+    [
+     1065,
+     56
+    ],
+    [
+     988,
+     65
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_salamander_trap",
+     "x": 2,
+     "z": 0,
+     "yaw": 0.5
+    },
+    {
+     "kind": "prop",
+     "id": "vh_salamander_trap",
+     "x": -3,
+     "z": 2,
+     "yaw": 2.4
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_60",
+   "recipe": "vh_ribbon_post",
+   "name": "Pilgrim Ribbons",
+   "kind": "shrine",
+   "x": 544,
+   "z": 176,
+   "yaw": 4.36,
+   "radius": 3,
+   "levelBase": 13
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_s29",
+   "monster": "mudback_lurker",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 711,
+   "z": 839,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_pilgrim_ribbons_fumarole_fen_d22",
+   "kind": "vh_pilgrim_ribbons",
+   "name": "Pilgrim Post",
+   "x": 1016,
+   "z": 136,
+   "yaw": 1.32,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_61",
+   "recipe": "vh_stilt_camp",
+   "name": "Stilt Camp",
+   "kind": "camp",
+   "x": 224,
+   "z": 168,
+   "yaw": 6.22,
+   "radius": 6,
+   "levelBase": 13
+  },
+  {
+   "type": "camp",
+   "id": "roam_fumarole_fen_7",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 760,
+   "z": 464,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     752,
+     517
+    ],
+    [
+     703,
+     467
+    ],
+    [
+     754,
+     384
+    ],
+    [
+     840,
+     466
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_s30",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 280,
+   "z": 81,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_62",
+   "recipe": "vh_fish_rack",
+   "name": "Split Fish Rack",
+   "kind": "fishing",
+   "x": 320,
+   "z": 832,
+   "yaw": 1.55,
+   "radius": 4,
+   "levelBase": 13
+  },
+  {
+   "type": "wayside",
+   "id": "vh_pilgrim_ribbons_fumarole_fen_d23",
+   "kind": "vh_pilgrim_ribbons",
+   "name": "Pilgrim Post",
+   "x": 328,
+   "z": 671,
+   "yaw": 2.82,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_63",
+   "recipe": "vh_salvage_fire",
+   "name": "Wreckers' Fire",
+   "kind": "camp",
+   "x": 1143,
+   "z": 65,
+   "yaw": 4.12,
+   "radius": 6,
+   "levelBase": 13
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_s31",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 700,
+   "z": 569,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_64",
+   "recipe": "vh_fish_pit",
+   "name": "Steam Pit",
+   "kind": "fishing",
+   "x": 693,
+   "z": 320,
+   "yaw": 4.04,
+   "radius": 5,
+   "levelBase": 13
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_65",
+   "recipe": "vh_stilt_camp",
+   "name": "Stilt Camp",
+   "kind": "camp",
+   "x": 428,
+   "z": 846,
+   "yaw": 0.4,
+   "radius": 6,
+   "levelBase": 13
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_s32",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 640,
+   "z": 250,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_fumarole_fen_66",
+   "recipe": "vh_fish_rack",
+   "name": "Split Fish Rack",
+   "kind": "fishing",
+   "x": 1177,
+   "z": 222,
+   "yaw": 1.13,
+   "radius": 4,
+   "levelBase": 13
+  },
+  {
+   "type": "wayside",
+   "id": "vh_fern_pair_fumarole_fen_d24",
+   "kind": "vh_fern_pair",
+   "name": "Fern Gate",
+   "x": 440,
+   "z": 728,
+   "yaw": 0.55,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_roadside_fire_fumarole_fen_d25",
+   "kind": "vh_roadside_fire",
+   "name": "Somebody's Fire",
+   "x": 376,
+   "z": 808,
+   "yaw": 0.8,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_fumarole_fen_8",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 173,
+   "z": 647,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     205,
+     609
+    ],
+    [
+     221,
+     686
+    ],
+    [
+     137,
+     689
+    ],
+    [
+     130,
+     623
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_fumarole_fen_s33",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1006,
+   "z": 311,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  }
+ ],
+ "features": [],
+ "density": {
+  "target": 50,
+  "roadTarget": 45,
+  "added": {
+   "curio": 66,
+   "wayside": 25,
+   "stray": 33,
+   "roamer": 8,
+   "folk": 6
+  },
+  "openShareCovered": 1,
+  "roadShareCovered": 1
+ },
+ "levels": [
+  13,
+  15
+ ]
+}

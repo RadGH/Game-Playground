@@ -29,11 +29,13 @@
 import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { parseTerrain, parseNav, NAV } from '../js/rules/terrain-read.js';
 import { provinceComponents } from './content-place.mjs';
+import { provinceArg, provinceDataPath, provinceDataSync, requireProvince } from './content-lib.mjs';
 
 const ROOT = new URL('../', import.meta.url);
 const P = f => new URL(f, ROOT);
 const readJ = f => JSON.parse(readFileSync(P(f), 'utf8'));
 const CHECK = process.argv.includes('--check');
+const PROV = provinceArg(process.argv);     // --province=<id> (default torbor_downs): writes that province's own <id>-angling-pools.json
 const ZM = 2048;
 
 export const POOL = Object.freeze({ depth: 0.5, wade: 0.35, shelf: [0.22, 0.1], few: 12, shore: [3, 15], gap: 90, startGap: 80, max: 44, edge: 40, lattice: 6, roadside: 45, far: 220,
@@ -189,10 +191,11 @@ function anglerSpot(F, reach, town, taken, reachM = ANGLER.reach) {
   return null;
 }
 
-export function buildPools() {
-  const sheet = readJ('data/provinces/torbor_downs.json');
-  const map = readJ('data/world/province-map.json').provinces.torbor_downs.map;
-  const angling = readJ('data/provinces/angling.json');
+export function buildPools(prov = PROV) {
+  const sheet = readJ(`data/provinces/${prov}.json`);
+  const map = readJ('data/world/province-map.json').provinces[prov].map;
+  const angling = provinceDataSync(readJ, prov, 'angling');
+  angling.anglers ||= []; angling.legends ||= [];      // another province without its own anglers: none
   const out = { zones: {}, meta: {}, anglers: [] }, problems = [];
   // reachable = on foot from the province hub over every zone stitched together (a far bank reached through a neighbour counts)
   const navs = Object.fromEntries(Object.entries(map).map(([eid, wid]) => [eid, parseNav(readFileSync(P(`data/zones/${wid}/nav.bin`)))]));
@@ -251,10 +254,11 @@ function write(file, text) {
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
+  requireProvince(process.argv);
   const { out, problems, angling } = buildPools();
   let changed = 0;
   const total = Object.values(out.zones).reduce((a, l) => a + l.length, 0);
-  changed += write('data/provinces/angling-pools.json', JSON.stringify({
+  changed += write(provinceDataPath(PROV, 'angling-pools'), JSON.stringify({
     _doc: 'Stream E (play-test 5 T25 Angling) — MADE by tools/content-pools.mjs from stream B\'s baked water; do not edit by hand. `zones.<world zone>` = every fish-pool spot of that zone, WORLD metres: `x, z` in the water (where the ripples are drawn and the bobber lands), `shore` = a dry point a walker can reach, 3-11 m from it (stand there and cast), `water` river | lake | marsh | coast (what the catch table is rolled on), `band` = the zone\'s level band, `tier` 1 | 2 | 3 (C\'s fishing.pool(tier): skill 0 / 25 / 50), `road` = metres from the shore point to the nearest road (roadside pools are tier 1). `start: true` + `always: true` = the first quest\'s pool by Torborhold: always open, never fished out. `meta.<zone>.live` = how many of the listed spots are open at once (a pool closes after C\'s `catches` and another listed spot opens); `meta.<zone>.water` = what each BAKED water kind (terrain waterAt().kind: river / lake / sea) counts as in that zone, for a cast outside any pool. `anglers[]` = where each town\'s angler stands (world metres; tools/content-hunts.mjs copies them into <zone>.quest.json as npc records, role `angler`; their shop is shops.json kinds.angler).',
     pools: total, ...out }, null, 1) + '\n');
   // the anglers as NPCs of their zone's quest file (greeting + role; the Torborhold one lives in data/quests/angling.json)

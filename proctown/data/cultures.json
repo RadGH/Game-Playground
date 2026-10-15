@@ -602,6 +602,91 @@
         "fish"
       ],
       "storeyScale": 1.0
+    },
+    "vharl": {
+      "name": "Vharl",
+      "blurb": "Island folk of the Burning Isle. Stilted houses of dark basalt and red-ochre plaster under steep reed thatch, lifted clear of the ash and the mud.",
+      "signature": [
+        "stilt_long",
+        "stilt_hut",
+        "basalt_hall"
+      ],
+      "bases": {
+        "stilt_hut": 4.0,
+        "stilt_long": 3.5,
+        "basalt_hall": 1.0,
+        "long": 0.5,
+        "hovel": 0.3
+      },
+      "roofs": {
+        "gable": 3.0,
+        "conical": 2.5,
+        "half_hip": 1.4,
+        "hip": 0.8,
+        "tent": 0.5
+      },
+      "wallMaterials": {
+        "ochre_plaster": 4,
+        "basalt": 3,
+        "wattle": 0.8
+      },
+      "roofMaterials": {
+        "reed_thatch": 5,
+        "thatch": 1
+      },
+      "palette": {
+        "wall": [
+          "#a8432c",
+          "#b5552f",
+          "#9a3d2a",
+          "#8c3a2a",
+          "#b86a3c"
+        ],
+        "wallUpper": [
+          "#c0703f",
+          "#a9512f"
+        ],
+        "roof": [
+          "#8a7a4a",
+          "#7d6c3e",
+          "#96854f",
+          "#6e6038"
+        ],
+        "trim": [
+          "#2b2a2c",
+          "#383436"
+        ],
+        "door": [
+          "#2d2a26",
+          "#6b2a1e",
+          "#c8922f"
+        ],
+        "accent": "#e0a030"
+      },
+      "street": {
+        "surface": "ash",
+        "colour": "#4a4643"
+      },
+      "townWall": {
+        "kind": "palisade",
+        "colour": "#3a3634"
+      },
+      "night": {
+        "lamp": "#ffb060",
+        "glow": "#ff9a40",
+        "flame": "#ff8a30"
+      },
+      "stalls": [
+        "fish",
+        "produce",
+        "brew",
+        "charms"
+      ],
+      "storeyScale": 1.0,
+      "alwaysExtras": [
+        "stilt_rows",
+        "stair"
+      ]
     }
   },
   "wantBases": {
@@ -614,14 +699,16 @@
       "canopy",
       "bazaar_block",
       "tomb_row",
-      "long"
+      "long",
+      "basalt_hall"
     ],
     "forge": [
       "long",
       "blockhouse",
       "delve",
       "war_hall",
-      "square"
+      "square",
+      "basalt_hall"
     ],
     "inn": [
       "jettied",
@@ -629,14 +716,16 @@
       "courtyard",
       "square",
       "long",
-      "bower"
+      "bower",
+      "basalt_hall"
     ],
     "market": [
       "bazaar_block",
       "courtyard",
       "hall",
       "long",
-      "square"
+      "square",
+      "basalt_hall"
     ],
     "granary": [
       "round",
@@ -663,14 +752,16 @@
       "blockhouse",
       "hall",
       "bazaar_block",
-      "square"
+      "square",
+      "basalt_hall"
     ],
     "barracks": [
       "long",
       "blockhouse",
       "row",
       "war_hall",
-      "terraced"
+      "terraced",
+      "basalt_hall"
     ],
     "mill": [
       "tower_house",
@@ -698,7 +789,8 @@
       "long",
       "bazaar_block",
       "stacked",
-      "bower"
+      "bower",
+      "stilt_long"
     ],
     "temple": [
       "hall",
@@ -707,7 +799,8 @@
       "round",
       "canopy",
       "tomb_row",
-      "long"
+      "long",
+      "basalt_hall"
     ],
     "barber": [
       "row",
@@ -715,7 +808,8 @@
       "hovel",
       "square",
       "bower",
-      "stacked"
+      "stacked",
+      "stilt_long"
     ],
     "counting_house": [
       "tower_house",
@@ -723,7 +817,8 @@
       "stacked",
       "ell",
       "blockhouse",
-      "courtyard"
+      "courtyard",
+      "basalt_hall"
     ],
     "study": [
       "tower_house",
@@ -731,28 +826,32 @@
       "round",
       "stilted",
       "burrow",
-      "square"
+      "square",
+      "stilt_long"
     ],
     "armoury": [
       "blockhouse",
       "long",
       "war_hall",
       "delve",
-      "square"
+      "square",
+      "basalt_hall"
     ],
     "bowyer": [
       "long",
       "row",
       "ell",
       "bower",
-      "hovel"
+      "hovel",
+      "stilt_long"
     ],
     "tailor": [
       "jettied",
       "row",
       "ell",
       "stacked",
-      "bower"
+      "bower",
+      "stilt_long"
     ],
     "apothecary": [
       "round",
@@ -760,14 +859,16 @@
       "row",
       "stilted",
       "burrow",
-      "tower_house"
+      "tower_house",
+      "stilt_long"
     ],
     "provisioner": [
       "long",
       "square",
       "row",
       "ell",
-      "courtyard"
+      "courtyard",
+      "stilt_long"
     ],
     "jeweller": [
       "tower_house",

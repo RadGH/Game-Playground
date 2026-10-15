@@ -236,6 +236,34 @@
           "slot": "any"
         }
       }
+    },
+    {
+      "id": "smoke_on_the_horizon",
+      "name": "Smoke on the Horizon",
+      "level": 8,
+      "giver": "elder_hollis",
+      "offer": "See that smudge out past the lakes, on a clear day? That is Vharlen: a whole island with a mountain on fire in the middle of it. The Saltwren sails there from our harbour. Osric the Harbourmaster sells the passage. Go and see it, if you have the stomach. Most come back with stories. Some come back.",
+      "steps": [
+        {
+          "kind": "voyage",
+          "to": "port_vharl",
+          "text": "Take the Saltwren from Gullwick's harbour to Port Vharl",
+          "where": "Osric Fennimore, the Harbourmaster on Gullwick's pier (60 gold for the passage)",
+          "at": {
+            "x": 30228,
+            "z": 4478,
+            "r": 8,
+            "name": "Osric Fennimore, Harbourmaster"
+          }
+        }
+      ],
+      "done": "You made it across. Port Vharl's Hearth-elder will want a word with anyone fresh off the boat.",
+      "reward": {
+        "xp": 0.5,
+        "gold": 20
+      },
+      "next": "bs_fresh_off_the_saltwren",
+      "tip": "The voyage is the only way between the two islands: talk to the Harbourmaster on the pier, pay the fare and you sail. Waystones never cross the sea. The ship sails back from Port Vharl the same way."
     }
   ]
 }

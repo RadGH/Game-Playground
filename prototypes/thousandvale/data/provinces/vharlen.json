@@ -1,0 +1,1098 @@
+{
+ "_doc": "Stream C (Expansion 1, docs/EXPANSION-1.md). Province sheet for Vharlen, the Burning Isle: its own continent, reached only by ship (Gullwick <-> Port Vharl, js/sim/ships.js). 9 zones on a 3x3 grid (world zones in data/world/province-map.json); bands rise from the landing at Blackstrand (10-12) to the Caldera (18-20). Same shape as torbor_downs.json plus: `elite` and `eventBoss` (encounter ids; data/encounters/<id>.json says where each stands in its `place`), `specialties` (hot_spring | geyser | lava_vent | ashfall — the sites a later stream gives mechanics; the bake's zone.json `pools` are the springs/acid pools), `gathering` (tools/content-professions.mjs: the node kinds this island grows per family and tier, and the tier shares by the top of a zone's band). Monsters are Thousandvale-only (data/rules/monsters-tv.json). Names: data/names/vharlen.json.",
+ "id": "vharlen",
+ "name": "Vharlen",
+ "culture": "vharl",
+ "band": [
+  10,
+  20
+ ],
+ "capital": "Port Vharl",
+ "palette": {
+  "sky": "#d9a878",
+  "fog": "#b9a594",
+  "grass": "#5a5248",
+  "accent": "#e8622a"
+ },
+ "weather": {
+  "clear": 3,
+  "haze": 4,
+  "ashfall": 2,
+  "rain": 2
+ },
+ "music": "burning_isle",
+ "factions": [
+  "the_harbour_council",
+  "the_rim_keepers"
+ ],
+ "warband": "slagborn",
+ "enemyFamilies": {
+  "beast": 3,
+  "humanoid": 2,
+  "elemental": 1.5,
+  "construct": 1.5,
+  "dragonkin": 1
+ },
+ "worldBoss": {
+  "id": "world_ossathra",
+  "zone": "the_caldera",
+  "note": "Ossathra, the Caldera Wyrm: a realm event in the crater (PLAN §5.2), arena radius 50."
+ },
+ "questline": {
+  "name": "The Burning Isle",
+  "file": "data/quests/vharlen-province.json"
+ },
+ "zones": {
+  "blackstrand": {
+   "name": "Blackstrand",
+   "grid": [
+    2,
+    1
+   ],
+   "archetype": "coast",
+   "band": [
+    10,
+    12
+   ],
+   "biomes": [
+    "beach",
+    "rainforest"
+   ],
+   "town": "Port Vharl",
+   "hamlets": [],
+   "fort": "the Harbour Watch",
+   "dungeon": {
+    "name": "The Brineglass Tubes",
+    "family": "lava_tube",
+    "floors": 2,
+    "level": 11
+   },
+   "rares": [
+    "rare_tidecoal",
+    "rare_old_blister"
+   ],
+   "eventBoss": "ev_skarra_ashkeel",
+   "elite": "elite_slag_hetter",
+   "camps": [
+    {
+     "type": "scoria_crawler",
+     "level": [
+      10,
+      11
+     ],
+     "count": [
+      2,
+      3
+     ],
+     "where": "the black-sand coves north of Port Vharl"
+    },
+    {
+     "type": "ashback_salamander",
+     "level": [
+      10,
+      12
+     ],
+     "count": [
+      1,
+      2
+     ],
+     "where": "the warm rocks above the tideline"
+    },
+    {
+     "type": "slagborn_raider",
+     "level": [
+      11,
+      12
+     ],
+     "count": [
+      2,
+      4
+     ],
+     "where": "the raider camp on the jungle edge",
+     "with": "slagborn_firecaller"
+    },
+    {
+     "type": "steamwood_prowler",
+     "level": [
+      11,
+      12
+     ],
+     "count": [
+      1,
+      2
+     ],
+     "where": "where the jungle meets the sand"
+    },
+    {
+     "type": "sulphur_toad",
+     "level": [
+      10,
+      11
+     ],
+     "count": [
+      2,
+      3
+     ],
+     "where": "the warm pools south of the harbour"
+    }
+   ],
+   "specialties": [
+    "hot_spring"
+   ],
+   "quests": "data/quests/blackstrand.json",
+   "specialtySites": []
+  },
+  "steamwood": {
+   "name": "The Steamwood",
+   "grid": [
+    1,
+    0
+   ],
+   "archetype": "wilds",
+   "band": [
+    11,
+    13
+   ],
+   "biomes": [
+    "rainforest",
+    "beach"
+   ],
+   "town": "Mistfall",
+   "hamlets": [],
+   "fort": null,
+   "dungeon": {
+    "name": "The Hissing Grotto",
+    "family": "steam_grotto",
+    "floors": 2,
+    "level": 12
+   },
+   "rares": [
+    "rare_greenjaw",
+    "rare_mother_of_moss"
+   ],
+   "eventBoss": "ev_the_kettle",
+   "elite": "elite_canopy_widow",
+   "camps": [
+    {
+     "type": "steamwood_prowler",
+     "level": [
+      11,
+      13
+     ],
+     "count": [
+      2,
+      3
+     ],
+     "where": "the deep jungle"
+    },
+    {
+     "type": "vent_wisp",
+     "level": [
+      12,
+      13
+     ],
+     "count": [
+      2,
+      3
+     ],
+     "where": "around the steam vents"
+    },
+    {
+     "type": "sulphur_toad",
+     "level": [
+      11,
+      12
+     ],
+     "count": [
+      2,
+      3
+     ],
+     "where": "the hot pools"
+    },
+    {
+     "type": "ashback_salamander",
+     "level": [
+      12,
+      13
+     ],
+     "count": [
+      1,
+      2
+     ],
+     "where": "the rocky stream beds"
+    },
+    {
+     "type": "scoria_crawler",
+     "level": [
+      11,
+      12
+     ],
+     "count": [
+      2,
+      3
+     ],
+     "where": "under the fallen ironpalms"
+    }
+   ],
+   "specialties": [
+    "hot_spring",
+    "geyser"
+   ],
+   "quests": "data/quests/steamwood.json",
+   "specialtySites": [
+    {
+     "id": "hot_spring_1",
+     "kind": "hot_spring",
+     "name": "the Kettle Pools"
+    },
+    {
+     "id": "hot_spring_2",
+     "kind": "hot_spring",
+     "name": "Mistfall Spring"
+    },
+    {
+     "id": "hot_spring_3",
+     "kind": "hot_spring",
+     "name": "the Fern Bath"
+    }
+   ]
+  },
+  "sulphur_bight": {
+   "name": "Sulphur Bight",
+   "grid": [
+    2,
+    0
+   ],
+   "archetype": "mine_country",
+   "band": [
+    12,
+    14
+   ],
+   "biomes": [
+    "volcanic",
+    "beach"
+   ],
+   "town": "Yellowpan",
+   "hamlets": [],
+   "fort": "the Pit Gate",
+   "dungeon": {
+    "name": "The Yellow Pits",
+    "family": "sulphur_mine",
+    "floors": 3,
+    "level": 13,
+    "floorStep": 1
+   },
+   "rares": [
+    "rare_brimbelly",
+    "rare_the_assayer"
+   ],
+   "eventBoss": "ev_old_yellowback",
+   "elite": "elite_crust_king",
+   "camps": [
+    {
+     "type": "sulphur_toad",
+     "level": [
+      12,
+      14
+     ],
+     "count": [
+      3,
+      4
+     ],
+     "where": "the yellow flats"
+    },
+    {
+     "type": "vent_wisp",
+     "level": [
+      13,
+      14
+     ],
+     "count": [
+      2,
+      3
+     ],
+     "where": "the acid pools"
+    },
+    {
+     "type": "slagborn_raider",
+     "level": [
+      12,
+      14
+     ],
+     "count": [
+      2,
+      4
+     ],
+     "where": "the old sulphur workings",
+     "with": "slagborn_firecaller"
+    },
+    {
+     "type": "scoria_crawler",
+     "level": [
+      12,
+      13
+     ],
+     "count": [
+      2,
+      3
+     ],
+     "where": "the spoil heaps"
+    },
+    {
+     "type": "pumice_golem",
+     "level": [
+      13,
+      14
+     ],
+     "count": [
+      1,
+      2
+     ],
+     "where": "the crust fields by the shore"
+    }
+   ],
+   "specialties": [
+    "geyser"
+   ],
+   "quests": "data/quests/sulphur_bight.json",
+   "specialtySites": [
+    {
+     "id": "acid_pool_7",
+     "kind": "acid_pool",
+     "name": "the Yolk Pool"
+    },
+    {
+     "id": "acid_pool_8",
+     "kind": "acid_pool",
+     "name": "the Stinking Eye"
+    },
+    {
+     "id": "acid_pool_9",
+     "kind": "acid_pool",
+     "name": "Pan Seven"
+    }
+   ]
+  },
+  "fumarole_fen": {
+   "name": "Fumarole Fen",
+   "grid": [
+    2,
+    2
+   ],
+   "archetype": "marsh",
+   "band": [
+    13,
+    15
+   ],
+   "biomes": [
+    "marsh",
+    "volcanic"
+   ],
+   "town": "Stiltreach",
+   "hamlets": [],
+   "fort": null,
+   "dungeon": {
+    "name": "The Drowned Vent",
+    "family": "drowned_vent",
+    "floors": 2,
+    "level": 14
+   },
+   "rares": [
+    "rare_bubblejaw",
+    "rare_old_wellen"
+   ],
+   "eventBoss": "ev_the_fen_breath",
+   "elite": "elite_old_mudlord",
+   "camps": [
+    {
+     "type": "mudback_lurker",
+     "level": [
+      13,
+      15
+     ],
+     "count": [
+      2,
+      3
+     ],
+     "where": "the hot mud channels"
+    },
+    {
+     "type": "sulphur_toad",
+     "level": [
+      13,
+      14
+     ],
+     "count": [
+      2,
+      3
+     ],
+     "where": "the steaming reed beds"
+    },
+    {
+     "type": "vent_wisp",
+     "level": [
+      14,
+      15
+     ],
+     "count": [
+      2,
+      3
+     ],
+     "where": "the fumaroles, thickest at dusk"
+    },
+    {
+     "type": "steamwood_prowler",
+     "level": [
+      13,
+      15
+     ],
+     "count": [
+      1,
+      2
+     ],
+     "where": "the fen edge"
+    },
+    {
+     "type": "scoria_crawler",
+     "level": [
+      13,
+      14
+     ],
+     "count": [
+      2,
+      3
+     ],
+     "where": "the drowned lava field"
+    }
+   ],
+   "specialties": [
+    "hot_spring",
+    "geyser"
+   ],
+   "quests": "data/quests/fumarole_fen.json",
+   "specialtySites": [
+    {
+     "id": "hot_spring_5",
+     "kind": "hot_spring",
+     "name": "the Stilt Baths"
+    },
+    {
+     "id": "hot_spring_6",
+     "kind": "hot_spring",
+     "name": "Old Wellen's Tub"
+    }
+   ]
+  },
+  "glasswind_strand": {
+   "name": "Glasswind Strand",
+   "grid": [
+    0,
+    0
+   ],
+   "archetype": "ruinfield",
+   "band": [
+    13,
+    15
+   ],
+   "biomes": [
+    "beach",
+    "volcanic"
+   ],
+   "town": "Shardhaven",
+   "hamlets": [],
+   "fort": null,
+   "dungeon": {
+    "name": "Tomb of the Glass Kings",
+    "family": "glass_tomb",
+    "floors": 3,
+    "level": 14,
+    "floorStep": 1
+   },
+   "rares": [
+    "rare_shardmother",
+    "rare_the_glazier"
+   ],
+   "eventBoss": "ev_the_glass_herald",
+   "elite": "elite_mirror_knight",
+   "camps": [
+    {
+     "type": "glasswing",
+     "level": [
+      13,
+      15
+     ],
+     "count": [
+      1,
+      2
+     ],
+     "where": "the obsidian dunes"
+    },
+    {
+     "type": "obsidian_warden",
+     "level": [
+      14,
+      15
+     ],
+     "count": [
+      1,
+      2
+     ],
+     "where": "the glass king's ruins"
+    },
+    {
+     "type": "scoria_crawler",
+     "level": [
+      13,
+      14
+     ],
+     "count": [
+      2,
+      3
+     ],
+     "where": "the glass beach"
+    },
+    {
+     "type": "slagborn_raider",
+     "level": [
+      13,
+      15
+     ],
+     "count": [
+      2,
+      4
+     ],
+     "where": "the wreckers' camp",
+     "with": "slagborn_firecaller"
+    },
+    {
+     "type": "ashback_salamander",
+     "level": [
+      13,
+      14
+     ],
+     "count": [
+      1,
+      2
+     ],
+     "where": "the warm hollows between the dunes"
+    }
+   ],
+   "specialties": [],
+   "quests": "data/quests/glasswind_strand.json",
+   "specialtySites": []
+  },
+  "pumice_wastes": {
+   "name": "The Pumice Wastes",
+   "grid": [
+    0,
+    1
+   ],
+   "archetype": "frontier",
+   "band": [
+    14,
+    16
+   ],
+   "biomes": [
+    "volcanic",
+    "desert"
+   ],
+   "town": "Lastwell",
+   "hamlets": [],
+   "fort": "Lastwell Stockade",
+   "dungeon": {
+    "name": "The Dry Wells",
+    "family": "lava_tube",
+    "floors": 3,
+    "level": 15,
+    "floorStep": 1
+   },
+   "rares": [
+    "rare_ashcoat",
+    "rare_the_tally_man"
+   ],
+   "eventBoss": "ev_warlord_thrane",
+   "elite": "elite_ash_reaver",
+   "camps": [
+    {
+     "type": "slagborn_raider",
+     "level": [
+      14,
+      16
+     ],
+     "count": [
+      3,
+      4
+     ],
+     "where": "the raider trails",
+     "with": "slagborn_firecaller"
+    },
+    {
+     "type": "slagborn_chief",
+     "level": [
+      15,
+      16
+     ],
+     "count": [
+      1,
+      1
+     ],
+     "where": "the raiders' burned-out farm"
+    },
+    {
+     "type": "pumice_golem",
+     "level": [
+      14,
+      16
+     ],
+     "count": [
+      1,
+      2
+     ],
+     "where": "the grey dunes"
+    },
+    {
+     "type": "glasswing",
+     "level": [
+      15,
+      16
+     ],
+     "count": [
+      1,
+      2
+     ],
+     "where": "the dead-tree ridges"
+    },
+    {
+     "type": "scoria_crawler",
+     "level": [
+      14,
+      15
+     ],
+     "count": [
+      2,
+      3
+     ],
+     "where": "the ash pans"
+    }
+   ],
+   "specialties": [
+    "lava_vent",
+    "ashfall"
+   ],
+   "quests": "data/quests/pumice_wastes.json",
+   "specialtySites": []
+  },
+  "ashfall_hollow": {
+   "name": "Ashfall Hollow",
+   "grid": [
+    1,
+    2
+   ],
+   "archetype": "blight",
+   "band": [
+    15,
+    17
+   ],
+   "biomes": [
+    "volcanic",
+    "desert"
+   ],
+   "town": "Cinderholt",
+   "hamlets": [],
+   "fort": "the Buried Gate",
+   "dungeon": {
+    "name": "Under Cinderholt",
+    "family": "buried_town",
+    "floors": 3,
+    "level": 16,
+    "floorStep": 1
+   },
+   "rares": [
+    "rare_cellar_queen",
+    "rare_ashfather"
+   ],
+   "eventBoss": "ev_the_buried_mayor",
+   "elite": "elite_ashen_reeve",
+   "camps": [
+    {
+     "type": "slagborn_firecaller",
+     "level": [
+      15,
+      17
+     ],
+     "count": [
+      2,
+      3
+     ],
+     "where": "the half-buried streets",
+     "with": "slagborn_raider"
+    },
+    {
+     "type": "pumice_golem",
+     "level": [
+      15,
+      17
+     ],
+     "count": [
+      1,
+      2
+     ],
+     "where": "the ash drifts"
+    },
+    {
+     "type": "vent_wisp",
+     "level": [
+      15,
+      16
+     ],
+     "count": [
+      2,
+      3
+     ],
+     "where": "the smoking roofs"
+    },
+    {
+     "type": "obsidian_warden",
+     "level": [
+      16,
+      17
+     ],
+     "count": [
+      1,
+      2
+     ],
+     "where": "the old square"
+    },
+    {
+     "type": "scoria_crawler",
+     "level": [
+      15,
+      16
+     ],
+     "count": [
+      2,
+      3
+     ],
+     "where": "the buried cellars"
+    }
+   ],
+   "specialties": [
+    "ashfall"
+   ],
+   "quests": "data/quests/ashfall_hollow.json",
+   "specialtySites": []
+  },
+  "kiln_ridge": {
+   "name": "Kiln Ridge",
+   "grid": [
+    0,
+    2
+   ],
+   "archetype": "pass",
+   "band": [
+    16,
+    18
+   ],
+   "biomes": [
+    "mountains",
+    "volcanic"
+   ],
+   "town": "Kilnhold",
+   "hamlets": [],
+   "fort": "Kilnhold",
+   "dungeon": {
+    "name": "The Old Kilns",
+    "family": "kiln_forge",
+    "floors": 3,
+    "level": 17,
+    "floorStep": 1
+   },
+   "rares": [
+    "rare_slagjaw",
+    "rare_the_kilnmaster"
+   ],
+   "eventBoss": "ev_kilnwife_orra",
+   "elite": "elite_basalt_tyrant",
+   "camps": [
+    {
+     "type": "obsidian_warden",
+     "level": [
+      16,
+      18
+     ],
+     "count": [
+      1,
+      2
+     ],
+     "where": "the basalt steps"
+    },
+    {
+     "type": "glasswing",
+     "level": [
+      16,
+      18
+     ],
+     "count": [
+      1,
+      2
+     ],
+     "where": "the cliff nests"
+    },
+    {
+     "type": "pumice_golem",
+     "level": [
+      16,
+      17
+     ],
+     "count": [
+      1,
+      2
+     ],
+     "where": "the old quarry"
+    },
+    {
+     "type": "slagborn_chief",
+     "level": [
+      17,
+      18
+     ],
+     "count": [
+      1,
+      1
+     ],
+     "where": "the high camp",
+     "with": "slagborn_raider"
+    },
+    {
+     "type": "ashback_salamander",
+     "level": [
+      16,
+      17
+     ],
+     "count": [
+      2,
+      3
+     ],
+     "where": "the warm ledges"
+    }
+   ],
+   "specialties": [
+    "lava_vent"
+   ],
+   "quests": "data/quests/kiln_ridge.json",
+   "specialtySites": []
+  },
+  "the_caldera": {
+   "name": "The Caldera",
+   "grid": [
+    1,
+    1
+   ],
+   "archetype": "holy_ground",
+   "band": [
+    18,
+    20
+   ],
+   "biomes": [
+    "volcanic",
+    "mountains"
+   ],
+   "town": "Rim Shrine",
+   "hamlets": [],
+   "fort": null,
+   "dungeon": {
+    "name": "The Throat",
+    "family": "caldera_deep",
+    "floors": 4,
+    "level": 18,
+    "floorStep": 1
+   },
+   "rares": [
+    "rare_mountainheart",
+    "rare_the_last_keeper"
+   ],
+   "eventBoss": "ev_rimwarden_ysk",
+   "elite": "elite_crater_guard",
+   "camps": [
+    {
+     "type": "pumice_golem",
+     "level": [
+      18,
+      20
+     ],
+     "count": [
+      2,
+      3
+     ],
+     "where": "the crater lake shore"
+    },
+    {
+     "type": "ashback_salamander",
+     "level": [
+      18,
+      20
+     ],
+     "count": [
+      2,
+      3
+     ],
+     "where": "the lava shelves"
+    },
+    {
+     "type": "obsidian_warden",
+     "level": [
+      19,
+      20
+     ],
+     "count": [
+      1,
+      2
+     ],
+     "where": "the shrine stair"
+    },
+    {
+     "type": "vent_wisp",
+     "level": [
+      18,
+      19
+     ],
+     "count": [
+      2,
+      3
+     ],
+     "where": "the steaming rim"
+    },
+    {
+     "type": "glasswing",
+     "level": [
+      19,
+      20
+     ],
+     "count": [
+      1,
+      2
+     ],
+     "where": "the high crags"
+    }
+   ],
+   "specialties": [
+    "lava_vent",
+    "hot_spring"
+   ],
+   "quests": "data/quests/the_caldera.json",
+   "specialtySites": [
+    {
+     "id": "crater_lake",
+     "kind": "crater_lake",
+     "name": "Crater Lake"
+    },
+    {
+     "id": "hot_spring_4",
+     "kind": "hot_spring",
+     "name": "the Rim-keepers' Spring"
+    }
+   ]
+  }
+ },
+ "grid": {
+  "w": 3,
+  "h": 3,
+  "adjacency": "4-way (north/south/east/west)",
+  "start": "blackstrand",
+  "worldBossZone": "the_caldera"
+ },
+ "names": "vharlen",
+ "gathering": {
+  "_doc": "tools/content-professions.mjs: `mix` = [top of band, shares of tiers 1-5] (first row whose top >= the zone's band top); `kinds` = node kinds by family and tier that replace the home table's (several = dealt in turn). Vharlen grows the tier-4/5 nodes Torbor Downs never does.",
+  "mix": [
+   [
+    12,
+    [
+     0,
+     0.1,
+     0.5,
+     0.4,
+     0
+    ]
+   ],
+   [
+    15,
+    [
+     0,
+     0,
+     0.3,
+     0.5,
+     0.2
+    ]
+   ],
+   [
+    17,
+    [
+     0,
+     0,
+     0.2,
+     0.5,
+     0.3
+    ]
+   ],
+   [
+    20,
+    [
+     0,
+     0,
+     0.1,
+     0.45,
+     0.45
+    ]
+   ]
+  ],
+  "kinds": {
+   "mining": {
+    "4": [
+     "obsidian",
+     "sulphur",
+     "blackiron"
+    ],
+    "5": [
+     "sunsteel",
+     "obsidian"
+    ]
+   },
+   "logging": {
+    "4": [
+     "ironpalm",
+     "ironbark"
+    ],
+    "5": [
+     "heartwood",
+     "ironpalm"
+    ]
+   },
+   "herb": {
+    "4": [
+     "frostbloom"
+    ],
+    "5": [
+     "cinderbloom",
+     "sunroot"
+    ]
+   },
+   "mushroom": {
+    "4": [
+     "steamcap",
+     "king_bolete"
+    ],
+    "5": [
+     "starcap",
+     "steamcap"
+    ]
+   }
+  }
+ },
+ "_specialtyDoc": "zones.<z>.specialtySites = the bake's own special water (stream T's zone.json `pools`: hot springs, acid pools, the crater lake) with the name the island calls each one. `specialties` lists what a later stream gives mechanics to (hot_spring: Steam-soaked; geyser; lava_vent; ashfall). Zones whose specialty has no baked site yet (Blackstrand's spring, every geyser and lava vent) wait on that stream.",
+ "levels": {
+  "_doc": "tools/content-place.mjs levelField: the island's level ramp. Torbor Downs ramps gently from its start hub (550 m a level, below a zone's band near the hub). Vharlen is small and its hardest zone (the Caldera) is in the middle, a short walk from the landing, so every zone keeps its own band floor and the ramp inside a zone is steeper.",
+  "metresPerLevel": 300,
+  "bandFloor": true
+ }
+}

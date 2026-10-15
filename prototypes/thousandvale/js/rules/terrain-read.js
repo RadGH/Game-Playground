@@ -385,6 +385,11 @@ export const SCATTER_KINDS = Object.freeze([
   // play-test 2 (Q18, set pieces): orchard fruit trees in rows; hedgerow bushes along field / orchard edges (walkable
   // through, like a bush — a client draws them as a clipped hedge; the hedge LINES are `hedge` placements too)
   { key: 'tree_fruit', solid: true, r: 0.35 }, { key: 'hedge', solid: false, r: 0.9 },
+  // Vharlen, the Burning Isle (stream T, docs/EXPANSION-1.md): tree ferns and ironpalms in the steam jungle, charred trees
+  // in the ash, basalt column clusters, obsidian boulders, steam vent mounds and sulphur crusts (walk over the last two)
+  { key: 'tree_fern', solid: true, r: 0.3 }, { key: 'ironpalm', solid: true, r: 0.35 }, { key: 'tree_charred', solid: true, r: 0.35 },
+  { key: 'basalt_columns', solid: true, r: 1.5 }, { key: 'obsidian', solid: true, r: 1.2 },
+  { key: 'steam_vent', solid: false, r: 1.4 }, { key: 'sulphur_crust', solid: false, r: 1.2 },
 ]);
 export const SCATTER_VERSION = 1;
 export const NAV_VERSION = 1;

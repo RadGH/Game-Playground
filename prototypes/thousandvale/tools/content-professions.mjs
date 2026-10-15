@@ -5,6 +5,8 @@
 //                                                 recipes, skins, trainers, job frames) and data/provinces/professions-nodes.json
 //                                                 (where every boulder, marked tree and patch stands, on the CURRENT bake)
 //   node tools/content-professions.mjs --check    change nothing; exit 1 when a file would change
+//   --province=<id>   another province (default torbor_downs): its nodes go to data/provinces/<id>-professions-nodes.json;
+//                     the recipes, materials and the start-town prospector + his quest chain stay the home province's
 //
 // Run it again after any re-bake of the zones, after C changes the gear catalog (the gear recipes list real bases), or
 // after a number in data/rules/professions.json `tiers[].unit` moves (prices are worked out from it). Same inputs ->
@@ -19,12 +21,15 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { parseTerrain, parseNav, NAV } from '../js/rules/terrain-read.js';
 import { provinceComponents } from './content-place.mjs';
 import { CREATURE_TYPES } from '../../../avatar-3d/js/creature-types.js';
+import { HOME_PROVINCE, provinceArg, provinceDataPath, provinceDataSync, requireProvince } from './content-lib.mjs';
 
 const ROOT = new URL('../', import.meta.url);
 const P = f => new URL(f, ROOT);
 const readJ = f => JSON.parse(readFileSync(P(f), 'utf8'));
 const opt = f => { try { return readJ(f); } catch { return null; } };
 const CHECK = process.argv.includes('--check');
+const PROV = provinceArg(process.argv);     // --province=<id> (default torbor_downs)
+const HOME = PROV === HOME_PROVINCE;
 const ZM = 2048;
 const hash = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
 const h01 = s => hash(s) / 4294967296;
@@ -43,6 +48,32 @@ const CLOTH = [['linen_bolt', 'Bolt of Linen', '#e4dcc8'], ['canvas_bolt', 'Bolt
 const HIDE = [['light_hide', 'Light Hide', '#b08a5e'], ['thick_hide', 'Thick Hide', '#8c6a44'], ['rugged_hide', 'Rugged Hide', '#6e5236'], ['heavy_hide', 'Heavy Hide', '#57402a'], ['drake_hide', 'Drake Hide', '#4c7a5a']];
 const LEATHER = [['light_leather', 'Light Leather', '#c49a68'], ['thick_leather', 'Thick Leather', '#9c764c'], ['rugged_leather', 'Rugged Leather', '#7c5c3c'], ['heavy_leather', 'Heavy Leather', '#624830'], ['drake_leather', 'Drake Leather', '#588a66']];
 const TREE = ['Ash', 'Oak', 'Yew', 'Ironbark', 'Heartwood'];
+
+/**
+ * VHARLEN (Expansion 1 §4.5, stream C): materials that grow only on the Burning Isle. Tier 4-5, so they are the island's
+ * answer to the tiers Torbor Downs never grows. Each one feeds the existing tier-4/5 recipes as an ALTERNATE (`alt`) and
+ * most start one new recipe line of their own (`VHARL_RECIPES` below). Nodes stand only where a province sheet's
+ * `gathering.kinds` names them (data/provinces/vharlen.json). `icon` = the icon library's material class
+ * (icons/js/game-icons.js itemArtKey falls back by it). [id, name, tier, prof, icon, tint, price class, price, desc]
+ */
+export const VHARL_MATERIALS = [
+  ['obsidian_ore', 'Obsidian', 4, 'mining', 'ore', '#1c1a24', 'ore', 40, 'Black volcanic glass, broken out of a Vharlen outcrop. A smith melts it down with blackiron, or knaps it into an edge that takes a whetstone like nothing else.'],
+  ['sulphur', 'Sulphur', 4, 'mining', 'resin', '#e8d24a', 'resin', 40, 'Yellow crust scraped off the flats of Vharlen. It stinks, it burns hot, and it makes a smelting fire do twice the work.'],
+  ['ironpalm_log', 'Ironpalm Log', 4, 'logging', 'wood', '#4a3a2a', 'log', 50, 'Timber from the steam jungle of Vharlen: as hard as ironbark and it never warps in the heat. Hafts, bows, staves and shields.'],
+  ['steamcap', 'Steamcap', 4, 'foraging', 'mushroom', '#c8d0c0', 'mushroom', 48, 'A pale mushroom that grows only where the ground breathes steam. Good in a broth, better in a caster\'s orb.'],
+  ['cinderbloom', 'Cinderbloom', 5, 'foraging', 'herb', '#ff6a2a', 'herb', 78, 'A red flower that opens on warm ash and nowhere else. The still turns it into something that makes your blood run hot.'],
+  ['salamander_hide', 'Salamander Hide', 4, 'skinning', 'hide', '#2a2224', 'hide', 24, 'The black, heat-proof skin of an Ashback Salamander. An outfitter cures it into the toughest leather there is.'],
+];
+/** Node kinds of the Vharlen materials (the hide comes off a corpse: SKIN_HIDE). [id, prof, tier, name, gives, bonus, look] */
+export const VHARL_NODES = [
+  ['obsidian', 'mining', 4, 'Obsidian Outcrop', 'obsidian_ore', 'sapphire', { model: 'boulder', size: 2, tint: '#1c1a24', n: 8 }],
+  ['sulphur', 'mining', 4, 'Sulphur Crust', 'sulphur', null, { model: 'boulder', size: 1.5, tint: '#e8d24a', n: 6 }],
+  ['ironpalm', 'logging', 4, 'Marked Ironpalm', 'ironpalm_log', null, { model: 'tree', size: 10, tint: '#8a3ad0', n: 1 }],
+  ['steamcap', 'foraging', 4, 'Steamcap Ring', 'steamcap', null, { model: 'mushroom', size: 0.4, tint: '#c8d0c0', n: 6 }],
+  ['cinderbloom', 'foraging', 5, 'Cinderbloom Patch', 'cinderbloom', null, { model: 'herb', size: 0.55, tint: '#ff6a2a', n: 6 }],
+];
+/** A monster whose hide is not its tier's plain one (skins.types[id].hide; js/rules/professions.js skinOf). */
+export const SKIN_HIDE = { ashback_salamander: 'salamander_hide' };
 
 /**
  * What a merchant pays for ONE raw piece, by tier 1-5 — the knob tools/sim-professions.mjs is tuned with (the rule: an
@@ -104,6 +135,9 @@ function buildContent(numbers, engine, shops) {
   mat('game_meat', 'Game Meat', 1, 'skinning', 'meat', '#b8504a', 'meat', 'Fresh meat from a beast. Cook it at any fire.');
   materials.sovereign_core = { id: 'sovereign_core', name: 'Sovereign Core', desc: 'The hot heart of something that should not have been killed. Only world bosses and the hardest events leave one. A master temperer can promote a rare item to legendary with it.', tier: 5, prof: 'tempering', icon: 'core', tint: '#ffd24a', rarity: 'legendary', price: 1 };      // X5 (round 9)
   mat('beast_fang', 'Beast Fang', 1, 'skinning', 'trophy', '#efe6d2', 'fang', 'A good fang, taken with a careful cut. It sells.');
+  // Vharlen (Expansion 1 §4.5): the island's own materials and the nodes that give them
+  for (const [id, name, tier, prof, icon, tint, , price, desc] of VHARL_MATERIALS) materials[id] = { id, name, desc, tier, prof, icon, tint, price, island: 'vharlen' };
+  for (const [id, prof, tier, name, gives, bonus, look] of VHARL_NODES) nodeKinds[id] = { id, prof, tier, name, gives, bonus, look: { ...look } };
 
   const classes = { ore: ORE.map(x => x[0]), metal: BAR.map(x => x[0]), gem: GEM.map(x => x[0]), wood: LOG.map(x => x[0]), herb: HERB.map(x => x[0]), mushroom: SHROOM.map(x => x[0]),
     fibre: FIBRE.map(x => x[0]), cloth: CLOTH.map(x => x[0]), hide: HIDE.map(x => x[0]), leather: LEATHER.map(x => x[0]), resin: Array(5).fill('pine_resin') };
@@ -197,13 +231,33 @@ function buildContent(numbers, engine, shops) {
   cook('cook_foragers_stew', 15, 'Forager\'s Stew', [{ id: 'game_meat', n: 2 }, { id: 'field_mushroom', n: 1 }, { id: 'meadowmint', n: 1 }], meal('foragers_stew', 'Forager\'s Stew', 'Eat out of combat: recover health and mana over 20 seconds, then +5% health for 30 minutes.', { type: 'food', regen: 0.05, seconds: 20, buff: { stat: 'hpPct', amount: 0.05, minutes: 30 } }));
   cook('cook_amber_broth', 0, 'Amber Broth', [{ id: 'amber_cap', n: 2 }, { id: 'feverleaf', n: 1 }, { id: 'game_meat', n: 1 }], meal('amber_broth', 'Amber Broth', 'Eat out of combat: recover health and mana over 20 seconds, then +8% health for 30 minutes.', { type: 'food', regen: 0.06, seconds: 20, buff: { stat: 'hpPct', amount: 0.08, minutes: 30 } }), 2);
 
+  // ---- Vharlen (Expansion 1 §4.5): each island material as an ALTERNATE in the existing tier-4/5 recipes, and a new line ----
+  const vh = (r, alt = null) => recipes.push({ ...r, ...(alt ? { alt } : {}), island: 'vharlen' });
+  vh({ id: 'smelt_blackiron_bar_obsidian', prof: 'smithing', tier: 4, skill: skillAt(4, 2), name: 'Blackiron Bar (from obsidian)', desc: 'Obsidian melted down in a hot fire comes out as blackiron. Two lumps of the glass for one bar.', kind: 'material', refine: true, needs: [{ id: 'obsidian_ore', n: 2 }], makes: { id: 'blackiron_bar', n: 1 } }, 'smelt_blackiron_bar');
+  vh({ id: 'smelt_sunsteel_bar_sulphur', prof: 'smithing', tier: 5, skill: skillAt(5, 2), name: 'Sunsteel Bar (sulphur fire)', desc: 'A sulphur fire burns hot enough to smelt sunsteel from half the ore.', kind: 'material', refine: true, needs: [{ id: 'sunsteel_ore', n: 1 }, { id: 'sulphur', n: 1 }], makes: { id: 'sunsteel_bar', n: 1 } }, 'smelt_sunsteel_bar');
+  vh({ id: 'cure_drake_leather_salamander', prof: 'outfitting', tier: 5, skill: skillAt(5, 2), name: 'Drake Leather (from salamander hide)', desc: 'Three salamander hides, cured slow, make a leather as tough as a drake\'s.', kind: 'material', refine: true, needs: [{ id: 'salamander_hide', n: 3 }], makes: { id: 'drake_leather', n: 1 } }, 'cure_drake_leather');
+  // the gear patterns that use the island's wood (tier 4, ironpalm for ironbark), mushroom (tier 4, steamcap for king bolete) and herb (tier 5, cinderbloom for sunroot)
+  const SWAP = [[4, 'ironbark_log', 'ironpalm_log', 'ironpalm'], [4, 'king_bolete', 'steamcap', 'steamcap'], [5, 'sunroot', 'cinderbloom', 'cinderbloom']];
+  for (const [t, from, to, word] of SWAP) for (const r of recipes.filter(x => x.kind === 'gear' && x.tier === t && !x.island && x.needs.some(n => n.id === from)))
+    vh({ ...r, id: `${r.id}_${word}`, name: `${r.name} (${materials[to].name})`, needs: r.needs.map(n => (n.id === from ? { id: to, n: n.n } : n)) }, r.id);
+  // new lines: a good made from each where one fits
+  const vgood = (id, name, desc, use) => { goods[id] = { kind: 'good', id, name, desc, rarity: 'normal', use }; return id; };
+  vh({ id: 'knap_obsidian_edge', prof: 'smithing', tier: 4, skill: skillAt(4, 6), name: 'Obsidian Edge', desc: 'Knap a sliver of obsidian along your weapon\'s edge: +6% weapon damage for 15 minutes.', kind: 'good', needs: [{ id: 'obsidian_ore', n: 1 }, { id: 'blackiron_bar', n: 1 }],
+    makes: { id: vgood('obsidian_edge', 'Obsidian edge', 'Knap a sliver of obsidian along your weapon\'s edge: +6% weapon damage for 15 minutes.', { type: 'buff', buff: { stat: 'dmgPct', amount: 0.06, minutes: 15 } }), n: 2 } });
+  vh({ id: 'brew_brimstone_oil', prof: 'alchemy', tier: 4, skill: skillAt(4, 4), name: 'Brimstone Oil', desc: 'Sulphur boiled into an oil that hardens on leather and mail: +8% armour for 15 minutes.', kind: 'good', needs: [{ id: 'sulphur', n: 2 }, { id: 'moonflax', n: 1 }],
+    makes: { id: vgood('brimstone_oil', 'Brimstone oil', 'Sulphur boiled into an oil that hardens on leather and mail: +8% armour for 15 minutes.', { type: 'buff', buff: { stat: 'armorPct', amount: 0.08, minutes: 15 } }), n: 2 } });
+  vh({ id: 'brew_cinderbloom_draught', prof: 'alchemy', tier: 5, skill: skillAt(5, 4), name: 'Cinderbloom Draught', desc: 'It burns going down and keeps burning: +8% weapon damage for 20 minutes.', kind: 'good', needs: [{ id: 'cinderbloom', n: 2 }, { id: 'starcap', n: 1 }],
+    makes: { id: vgood('cinderbloom_draught', 'Cinderbloom draught', 'It burns going down and keeps burning: +8% weapon damage for 20 minutes.', { type: 'buff', buff: { stat: 'dmgPct', amount: 0.08, minutes: 20 } }), n: 1 } });
+  recipes.push({ id: 'cook_steamcap_broth', prof: 'cooking', tier: 4, skill: skillAt(4, 0), name: 'Steamcap Broth', desc: 'Eat out of combat: recover health and mana over 20 seconds, then +10% health for 30 minutes.', kind: 'good', steps: 1, island: 'vharlen',
+    needs: [{ id: 'steamcap', n: 2 }, { id: 'game_meat', n: 1 }], makes: { id: meal('steamcap_broth', 'Steamcap Broth', 'Eat out of combat: recover health and mana over 20 seconds, then +10% health for 30 minutes.', { type: 'food', regen: 0.06, seconds: 20, buff: { stat: 'hpPct', amount: 0.1, minutes: 30 } }), n: 1 } });
+
   // ---- skinning: which monsters have a hide ----
   const en = Array.isArray(engine.bestiary.enemies) ? engine.bestiary.enemies : Object.values(engine.bestiary.enemies || {});
   const skins = { meat: 'game_meat', bonus: 'beast_fang', types: {}, none: {} };
   const bosses = Array.isArray(engine.bestiary.bosses) ? engine.bestiary.bosses : [];
   for (const d of [...en, ...bosses]) {
     const s = skinRule(d);
-    if (s.ok) skins.types[d.id] = { name: d.name, ...(s.noMeat ? { noMeat: true } : {}), ...(s.worn ? { worn: 1 } : {}) };
+    if (s.ok) skins.types[d.id] = { name: d.name, ...(s.noMeat ? { noMeat: true } : {}), ...(s.worn ? { worn: 1 } : {}), ...(SKIN_HIDE[d.id] ? { hide: SKIN_HIDE[d.id] } : {}) };
     else skins.none[d.id] = { name: d.name, why: s.why, ...(s.person ? { person: 1 } : {}) };
   }
 
@@ -293,7 +347,11 @@ const lineDist = (pts, x, z) => { let d = 1e9; for (let i = 0; i + 1 < pts.lengt
 /** Tier shares of a zone by the top of its level band. */
 export const tierMix = hi => (hi <= 4 ? [0.92, 0.08, 0] : hi <= 5 ? [0.8, 0.2, 0] : hi <= 8 ? [0.45, 0.55, 0] : [0.15, 0.55, 0.3]);
 
-function placeZone(F, { eid, band, reach, baked, vig, content }) {
+/** A province sheet's own tier shares (`gathering.mix`: [band top, shares of tiers 1-5]) -> five shares, or null (the home rule). */
+export const sheetMix = (gathering, hi) => { const rows = (gathering && gathering.mix) || []; const r = rows.find(x => hi <= x[0]) || rows[rows.length - 1]; return r ? r[1] : null; };
+
+function placeZone(F, { eid, band, reach, baked, vig, content, gathering = null }) {
+  const mix5 = sheetMix(gathering, band[1]);
   const mix = tierMix(band[1]);
   const fields = baked.filter(p => p.kind === 'field' && p.data && p.data.poly).map(p => p.data.poly);
   const discs = [...baked.filter(p => (p.kind === 'set_piece' || p.kind === 'set_building') && p.data && p.data.piece !== 'belt').map(p => ({ x: p.x, z: p.z, r: (p.data.r || Math.max(p.data.w || 8, p.data.d || 8) / 2) + PLACE.keepOff })),
@@ -332,26 +390,34 @@ function placeZone(F, { eid, band, reach, baked, vig, content }) {
     const got = [];
     for (const { c } of order) { if (got.length >= n) break; if (!far(c, prof)) continue; const p = { x: c.x, z: c.z, prof, kind: null, dRoad: c.dRoad, j: c.j }; placed.push(p); got.push(p); }
     const ranked = got.slice().sort((a, b) => (a.j * 0.5 + Math.min(1, a.dRoad / 150) * 0.5) - (b.j * 0.5 + Math.min(1, b.dRoad / 150) * 0.5));
+    if (mix5) {      // a province with its own `gathering` (Vharlen): five tiers, the best tiers to the spots furthest from a road
+      const cuts = []; let acc = 0; for (let t = 5; t >= 1; t--) { acc += mix5[t - 1] || 0; cuts.push([t, Math.round(ranked.length * acc)]); }
+      ranked.forEach((p, r) => { const from = ranked.length - r; const t = (cuts.find(([, n]) => from <= n) || [1])[0]; p.kind = kindOf(p, t); });
+      return;
+    }
     const n3 = Math.round(ranked.length * mix[2]), n2 = Math.round(ranked.length * mix[1]);
     ranked.forEach((p, r) => { const t = r >= ranked.length - n3 ? 3 : r >= ranked.length - n3 - n2 ? 2 : 1; p.kind = kindOf(p, t); });
   };
   const i = t => t - 1;
-  take('mining', score.mining, PLACE.perZone.mining, (c, t) => (t === 1 ? (h01('tin' + c.x + ':' + c.z) < 0.42 ? 'tin' : 'copper') : ORE[i(t)][0].replace('_ore', '')));
-  take('logging', score.logging, PLACE.perZone.logging, (c, t) => LOG[i(t)][0].replace('_log', ''));
+  // a province sheet's `gathering.kinds[family][tier]` replaces the home kind of that tier (several: picked by the spot's hash)
+  const own = (fam, t, c, home) => { const l = gathering && gathering.kinds && gathering.kinds[fam] && gathering.kinds[fam][t]; return l && l.length ? l[Math.floor(h01(fam + c.x + ':' + c.z) * l.length)] : home; };
+  take('mining', score.mining, PLACE.perZone.mining, (c, t) => own('mining', t, c, t === 1 ? (h01('tin' + c.x + ':' + c.z) < 0.42 ? 'tin' : 'copper') : ORE[i(t)][0].replace('_ore', '')));
+  take('logging', score.logging, PLACE.perZone.logging, (c, t) => own('logging', t, c, LOG[i(t)][0].replace('_log', '')));
   const third = Math.round(PLACE.perZone.foraging / 3);
-  take('foraging', score.herb, third, (c, t) => HERB[i(t)][0]);
-  take('foraging', score.mushroom, third, (c, t) => SHROOM[i(t)][0]);
-  take('foraging', score.fibre, third, (c, t) => FIBRE[i(t)][0]);
+  take('foraging', score.herb, third, (c, t) => own('herb', t, c, HERB[i(t)][0]));
+  take('foraging', score.mushroom, third, (c, t) => own('mushroom', t, c, SHROOM[i(t)][0]));
+  take('foraging', score.fibre, third, (c, t) => own('fibre', t, c, FIBRE[i(t)][0]));
   return { placed, cands, ok };
 }
 
-export function buildAll() {
+export function buildAll(prov = PROV) {
+  const home = prov === HOME_PROVINCE;
   const numbers = readJ('data/rules/professions.json');
-  const sheet = readJ('data/provinces/torbor_downs.json');
-  const map = readJ('data/world/province-map.json').provinces.torbor_downs.map;
+  const sheet = readJ(`data/provinces/${prov}.json`);
+  const map = readJ('data/world/province-map.json').provinces[prov].map;
   const problems = [];
   return import('../js/rules/index.js').then(R => {
-    const content = buildContent(numbers, R.rulesEngine(), opt('data/provinces/shops.json'));
+    const content = buildContent(numbers, R.rulesEngine(), provinceDataSync(readJ, prov, 'shops'));
     // reach: on foot from the province hub over every zone stitched together
     const navs = Object.fromEntries(Object.entries(map).map(([eid, wid]) => [eid, parseNav(readFileSync(P(`data/zones/${wid}/nav.bin`)))]));
     const se = sheet.grid.start, hubTown = readJ(`data/vignettes/placements/${map[se]}.json`).settlements.find(s => s.name === sheet.zones[se].town);
@@ -365,9 +431,9 @@ export function buildAll() {
       const F = zoneFacts(wid), reach = reachOf(eid);
       const baked = readJ(`data/zones/${wid}/placements.json`).placements || [];
       const vig = [`${wid}.json`, `${wid}.quest.json`, `${wid}.hunt.json`].flatMap(f => ((opt(`data/vignettes/placements/${f}`) || {}).placements || [])).filter(p => !p.trainer);      // (not the trainers this tool itself places)
-      const Z = placeZone(F, { eid, band: zs.band, reach, baked, vig, content });
+      const Z = placeZone(F, { eid, band: zs.band, reach, baked, vig, content, gathering: sheet.gathering || null });
       // Torborhold: copper (and a tin) within sight of the gate road, and the prospector just inside the gate
-      if (eid === se) {
+      if (eid === se && home) {      // (the home province's start town only: a later province's newcomers already know the trade)
         const wall = baked.find(p => p.kind === 'town_wall' && p.data && String(p.data.name).toLowerCase() === String(zs.town).toLowerCase());
         const gate = wall && (wall.data.gates.find(g => g.main && g.road && /spur/.test(g.road)) || wall.data.gates.find(g => g.main && g.road) || wall.data.gates[0]);
         if (!gate) problems.push(`${eid}: no gate found for ${zs.town}`);
@@ -406,12 +472,12 @@ export function buildAll() {
       }
       zones[wid] = Z.placed.map((p, n) => ({ id: `${wid}_${n + 1}`, k: p.kind, x: p.x + ox, z: p.z + oz, v: hash(`${wid}:${p.x}:${p.z}`) % 4, ...(p.starter ? { s: 1 } : {}) }));
       const count = prof => Z.placed.filter(p => p.prof === prof).length;
-      const tiers = [1, 2, 3].map(t => Z.placed.filter(p => content.nodeKinds[p.kind].tier === t).length);
+      const tiers = (sheet.gathering ? [1, 2, 3, 4, 5] : [1, 2, 3]).map(t => Z.placed.filter(p => content.nodeKinds[p.kind].tier === t).length);
       meta[wid] = { sheet: eid, name: zs.name, band: zs.band, mining: count('mining'), logging: count('logging'), foraging: count('foraging'), tiers, roadside: Z.placed.filter(p => p.dRoad <= 45).length };
       if (count('mining') < 20) problems.push(`${eid}: only ${count('mining')} boulders`);
     }
     // the smith's door in the start town (E's offices.json, zone metres there -> world metres), for the chain's marks
-    const offices = opt('data/provinces/offices.json'), startWid = map[se];
+    const offices = provinceDataSync(readJ, prov, 'offices'), startWid = map[se];
     const [, sx, sy] = /^z(\d+)_(\d+)$/.exec(startWid).map(Number);
     const ent = offices && Object.values(offices.towns || {}).find(t => String(t.name).toLowerCase() === String(sheet.zones[se].town).toLowerCase());
     const so = ent && (ent.offices || []).find(f => f.role === 'smith');
@@ -429,16 +495,20 @@ function write(file, text) {
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
+  requireProvince(process.argv);
   const { content, zones, meta, problems, quests } = await buildAll();
   let changed = 0;
   const total = Object.values(zones).reduce((a, l) => a + l.length, 0);
-  changed += write('data/provinces/professions.json', JSON.stringify({
+  // another province: its own professions file only holds its own trainers (the server lends the home recipes and
+  // never the home trainers — js/sim/province-files.js PLACED_KEYS), so it is written only when it has some
+  if (!HOME && content.trainers.length) changed += write(provinceDataPath(PROV, 'professions'), JSON.stringify({ _doc: `MADE by tools/content-professions.mjs --province=${PROV}: this province's own profession trainers (world metres), laid over data/provinces/professions.json.`, trainers: content.trainers }, null, 1) + '\n');
+  if (HOME) changed += write('data/provinces/professions.json', JSON.stringify({
     _doc: 'Stream P-core (round 8, W9 Professions) — MADE by tools/content-professions.mjs; do not edit by hand (edit the tables in the tool and run it). materials: every stackable material (price = what a merchant pays for one). classes: the material of each tier 1-5 by what it is (metal, leather, cloth, wood, gem, herb, mushroom, fibre, ore, hide, resin). nodeKinds: what a node gives and how it looks (look.model boulder | tree | herb | mushroom | fibre). tools. recipes (kind material | tool | gear | potion | good; a gear recipe lists the real bases of C\'s catalog you may pick). goods: the consumables recipes make, as bag items. skins: which monsters a skinner can skin (types; worn = the hide is one grade lower) and, for the rest, the sentence that says why not (none). trainers: NPCs this system places (world metres). jobs: job frames appended to the job board.',
     ...content }, null, 1) + '\n');
-  changed += write('data/provinces/professions-nodes.json', JSON.stringify({
+  changed += write(provinceDataPath(PROV, 'professions-nodes'), JSON.stringify({
     _doc: 'Stream P-core (round 8, W9) — MADE by tools/content-professions.mjs from the CURRENT bake; do not edit by hand. zones.<world zone> = every gathering node of that zone, WORLD metres: id, k = node kind (data/provinces/professions.json nodeKinds), v = look variant 0-3, s = 1 for a starter node by Torborhold\'s gate (back in 2 minutes). Nodes are per player: the same entity for everyone, spent only for the one who worked it.',
     nodes: total, meta, zones }, null, 0).replace(/\],"z/g, '],\n"z') + '\n');
-  if (quests) changed += write('data/quests/professions.json', JSON.stringify(quests, null, 2) + '\n');
+  if (quests && HOME) changed += write('data/quests/professions.json', JSON.stringify(quests, null, 2) + '\n');
   for (const [wid, m] of Object.entries(meta)) console.log(`${wid} ${m.sheet.padEnd(18)} band ${m.band.join('-').padEnd(5)} mining ${String(m.mining).padStart(2)} logging ${String(m.logging).padStart(2)} foraging ${String(m.foraging).padStart(2)}  tiers ${m.tiers.join('/')}  roadside ${m.roadside}`);
   for (const t of content.trainers) console.log(`trainer ${t.id} at ${t.x}, ${t.z} (${t.gate}); starter boulders ${t.starters.length}`);
   console.log(`materials ${Object.keys(content.materials).length}, node kinds ${Object.keys(content.nodeKinds).length}, tools ${content.tools.length}, recipes ${content.recipes.length} (${['smithing', 'outfitting', 'alchemy', 'cooking'].map(p => p + ' ' + content.recipes.filter(r => r.prof === p).length).join(', ')}), skins ${Object.keys(content.skins.types).length} (no hide: ${Object.keys(content.skins.none).length}); nodes ${total}; ${changed} file(s) ${CHECK ? 'would change' : 'written'}`);

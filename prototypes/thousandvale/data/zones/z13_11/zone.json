@@ -1,0 +1,202 @@
+{
+  "name": "Stiltreach (z13_11)",
+  "zone": "z13_11",
+  "sheet": {
+    "sheet": "vharlen",
+    "zone": "fumarole_fen"
+  },
+  "province": {
+    "id": 0,
+    "name": "Feafeast Highlands"
+  },
+  "size": 1025,
+  "step": 2,
+  "origin": {
+    "x": 0,
+    "z": 0
+  },
+  "heightMin": -240,
+  "heightMax": 1660,
+  "bakeVersion": 4,
+  "inputHash": "a6d6efa9",
+  "waterKinds": [
+    "none",
+    "sea",
+    "lake",
+    "river"
+  ],
+  "source": {
+    "tool": "tools/bake-zone.mjs",
+    "world": {
+      "seed": 1001,
+      "width": 288,
+      "height": 224,
+      "method": "pangea",
+      "seaLevel": 0.2,
+      "inputHash": "9805a835"
+    },
+    "zone": {
+      "zx": 13,
+      "zy": 11
+    },
+    "worldOrigin": {
+      "x": 26624,
+      "z": 22528
+    },
+    "zoneMetres": 2048
+  },
+  "rivers": [],
+  "sites": [
+    {
+      "type": "settlement",
+      "kind": "hamlet",
+      "name": "Stiltreach",
+      "x": 440,
+      "z": 584,
+      "hub": true,
+      "radius": 46,
+      "movedFrom": {
+        "x": 536,
+        "z": 456
+      }
+    },
+    {
+      "type": "dungeon",
+      "id": "door_1",
+      "name": "Cave mouth",
+      "x": 270,
+      "z": 690,
+      "yaw": 0.982,
+      "pinned": true
+    },
+    {
+      "type": "event",
+      "id": "event_fumarole_fen",
+      "x": 925,
+      "z": 601,
+      "r": 40,
+      "pinned": true
+    }
+  ],
+  "spawn": {
+    "x": 440,
+    "z": 584
+  },
+  "bridges": [],
+  "palette": "vharl",
+  "continent": "vharlen",
+  "biomeNames": {
+    "beach": "Black Sand",
+    "rainforest": "Steam Jungle",
+    "shrubland": "Fern Scrub",
+    "savanna": "Tussock",
+    "desert": "Sulphur Flats",
+    "badlands": "Basalt Highland",
+    "marsh": "Mud Fen",
+    "volcanic": "Scoria Slopes",
+    "blighted": "Charred Wood",
+    "ashPlain": "Pumice Waste",
+    "glimmerwaste": "Obsidian Dunes",
+    "mountains": "Basalt Cliffs"
+  },
+  "pools": [
+    {
+      "id": "hot_spring_5",
+      "kind": "hot_spring",
+      "name": null,
+      "x": 206,
+      "z": 226,
+      "r": 10,
+      "level": 2.97
+    },
+    {
+      "id": "hot_spring_6",
+      "kind": "hot_spring",
+      "name": null,
+      "x": 766,
+      "z": 96,
+      "r": 8,
+      "level": 3.459
+    }
+  ],
+  "summary": {
+    "zone": "z13_11",
+    "province": "Feafeast Highlands",
+    "inputHash": "a6d6efa9",
+    "rivers": 0,
+    "wetShare": 0.794,
+    "unwalkableShare": 0.746,
+    "towns": [
+      {
+        "name": "Stiltreach",
+        "kind": "hamlet",
+        "hub": true,
+        "at": [
+          440,
+          584
+        ],
+        "radius": 46,
+        "movedFrom": {
+          "x": 536,
+          "z": 456
+        },
+        "culture": "vharl",
+        "plots": 6,
+        "streets": 31,
+        "links": 2,
+        "overlaps": 0,
+        "highStreets": 2,
+        "w6": {
+          "plotsBefore": 8,
+          "plots": 6,
+          "kept": 6,
+          "removed": [
+            {
+              "plot": 4,
+              "want": "house",
+              "office": false
+            },
+            {
+              "plot": 5,
+              "want": "house",
+              "office": false
+            }
+          ]
+        }
+      }
+    ],
+    "roads": 3,
+    "bridges": 0,
+    "paths": 5,
+    "pathMetres": 850,
+    "scatter": 3282,
+    "scatterKinds": {
+      "reed": 1778,
+      "tree_charred": 152,
+      "ironpalm": 172,
+      "bush": 371,
+      "tree_fern": 575,
+      "steam_vent": 136,
+      "rock_small": 81,
+      "obsidian": 15,
+      "basalt_columns": 2
+    },
+    "sites": [
+      "settlement(HUB) hamlet Stiltreach 440 584 46",
+      "dungeon door_1 Cave mouth 270 690  0.982",
+      "event event_fumarole_fen  925 601 40"
+    ],
+    "spawn": {
+      "x": 440,
+      "z": 584
+    },
+    "placements": 52,
+    "vignettesAvoided": 171
+  },
+  "files": {
+    "terrain.bin": 273477,
+    "nav.bin": 15910,
+    "scatter.bin": 26340,
+    "placements.json": 64279
+  }
+}

@@ -1,0 +1,2920 @@
+{
+ "_doc": "Stream E. Content placements for world zone z13_09 (E zone 'sulphur_bight', Sulphur Bight) — tools/place-vignettes.mjs against stream B's bake (terrain 669bc5b6). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
+ "zone": "z13_09",
+ "sheetZone": "sulphur_bight",
+ "province": "vharlen",
+ "terrainHash": "669bc5b6",
+ "band": [
+  12,
+  14
+ ],
+ "archetype": "mine_country",
+ "rules": {
+  "vignette": {
+   "townGap": 60,
+   "gap": 30,
+   "slope": 20,
+   "sameKindSpacing": 140
+  },
+  "fort": {
+   "townGap": 80,
+   "gap": 40,
+   "slope": 16
+  },
+  "farm": {
+   "townGap": 25,
+   "gap": 30,
+   "slope": 12
+  },
+  "cave": {
+   "townGap": 120,
+   "gap": 40,
+   "slope": 28
+  },
+  "camp": {
+   "townGap": 120,
+   "gap": 25,
+   "slope": 24
+  },
+  "rare": {
+   "townGap": 150,
+   "gap": 30,
+   "slope": 24
+  },
+  "hook": {
+   "townGap": 40,
+   "gap": 30,
+   "slope": 26
+  },
+  "wayside": {
+   "townGap": 20,
+   "gap": 12,
+   "slope": 34,
+   "edge": 24
+  },
+  "settlement": {
+   "townGap": 300,
+   "gap": 60,
+   "slope": 10
+  },
+  "curio": {
+   "townGap": 30,
+   "gap": 10,
+   "slope": 26,
+   "edge": 30
+  },
+  "stray": {
+   "townGap": 70,
+   "gap": 16,
+   "slope": 26,
+   "edge": 30
+  },
+  "folk": {
+   "townGap": 30,
+   "gap": 12,
+   "slope": 24,
+   "edge": 30
+  },
+  "setpiece": {
+   "townGap": 20,
+   "gap": 25,
+   "slope": 20
+  }
+ },
+ "mainWalkableShare": 0.248,
+ "settlements": [
+  {
+   "name": "Yellowpan",
+   "kind": "village",
+   "x": 516,
+   "z": 1582,
+   "r": 65,
+   "source": "bake",
+   "bakeId": "yellowpan"
+  }
+ ],
+ "checks": [
+  {
+   "id": "door_1",
+   "kind": "dungeon_door",
+   "x": 308,
+   "z": 1462,
+   "reachable": true,
+   "openShare": 1
+  },
+  {
+   "id": "event_sulphur_bight",
+   "kind": "event_site",
+   "x": 770,
+   "z": 1303,
+   "reachable": true,
+   "openShare": 1
+  }
+ ],
+ "problems": [],
+ "placements": [
+  {
+   "type": "fort",
+   "id": "fort_sulphur_bight_0",
+   "name": "the Pit Gate",
+   "template": "toll_fort",
+   "friendly": true,
+   "x": 796,
+   "z": 1965,
+   "yaw": -1.57,
+   "radius": 20,
+   "level": 13
+  },
+  {
+   "type": "farm",
+   "id": "farm_sulphur_bight_0",
+   "name": "Yellowpan Salt Pans",
+   "template": "pig",
+   "flavour": null,
+   "settlement": "Yellowpan",
+   "x": 439,
+   "z": 1488,
+   "yaw": 0.79,
+   "radius": 18,
+   "level": 12
+  },
+  {
+   "type": "farm",
+   "id": "farm_sulphur_bight_1",
+   "name": "Yellowpan Steam Well",
+   "template": "mill",
+   "flavour": null,
+   "settlement": "Yellowpan",
+   "x": 299,
+   "z": 1766,
+   "yaw": -1.96,
+   "radius": 20,
+   "level": 12
+  },
+  {
+   "type": "cave",
+   "id": "cave_sulphur_bight_0",
+   "name": "Old sulphur shaft",
+   "template": "old_shaft",
+   "plan": {
+    "family": "sulphur_mine",
+    "floors": 1,
+    "level": 14
+   },
+   "x": 68,
+   "z": 1019,
+   "yaw": 2.75,
+   "radius": 10,
+   "level": 14
+  },
+  {
+   "type": "cave",
+   "id": "cave_sulphur_bight_1",
+   "name": "Old sulphur shaft",
+   "template": "old_shaft",
+   "plan": {
+    "family": "sulphur_mine",
+    "floors": 1,
+    "level": 13
+   },
+   "x": 1355,
+   "z": 1974,
+   "yaw": 1.96,
+   "radius": 10,
+   "level": 13
+  },
+  {
+   "type": "cave",
+   "id": "cave_sulphur_bight_2",
+   "name": "Old sulphur shaft",
+   "template": "old_shaft",
+   "plan": {
+    "family": "sulphur_mine",
+    "floors": 1,
+    "level": 13
+   },
+   "x": 997,
+   "z": 1447,
+   "yaw": 2.36,
+   "radius": 10,
+   "level": 13
+  },
+  {
+   "type": "vignette",
+   "id": "vh_crawlers_in_tube",
+   "name": "Crawlers in the Tube",
+   "x": 1049,
+   "z": 1955,
+   "yaw": 0.01,
+   "radius": 13,
+   "biome": "rainforest",
+   "biomeFits": true,
+   "level": 1,
+   "levelBase": 12,
+   "levelCap": 13
+  },
+  {
+   "type": "vignette",
+   "id": "vh_defaced_rim_shrine",
+   "name": "The Defaced Rim Shrine",
+   "x": 749,
+   "z": 1641,
+   "yaw": 5.32,
+   "radius": 14,
+   "biome": "shrubland",
+   "biomeFits": true,
+   "level": 1,
+   "levelBase": 12,
+   "levelCap": 13
+  },
+  {
+   "type": "vignette",
+   "id": "vh_toad_chorus",
+   "name": "Toad Chorus at the Pans",
+   "x": 85,
+   "z": 1495,
+   "yaw": 3.34,
+   "radius": 13,
+   "biome": "desert",
+   "biomeFits": true,
+   "level": 1,
+   "levelBase": 12,
+   "levelCap": 13
+  },
+  {
+   "type": "vignette",
+   "id": "vh_yellow_cart_down",
+   "name": "Yellow Cart Down",
+   "x": 686,
+   "z": 1360,
+   "yaw": 5.88,
+   "radius": 13,
+   "biome": "desert",
+   "biomeFits": true,
+   "level": 1,
+   "levelBase": 12,
+   "levelCap": 13
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_0_0",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    3,
+    4
+   ],
+   "x": 314,
+   "z": 1191,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_0_1",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    3,
+    4
+   ],
+   "x": 88,
+   "z": 1963,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_1_0",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 861,
+   "z": 1302,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_1_1",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1118,
+   "z": 1658,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_2_0",
+   "monster": "slagborn_raider",
+   "with": "slagborn_firecaller",
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 75,
+   "z": 1271,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_2_1",
+   "monster": "slagborn_raider",
+   "with": "slagborn_firecaller",
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 524,
+   "z": 1951,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_3_0",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 819,
+   "z": 1484,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_3_1",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 108,
+   "z": 1734,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_4_0",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 253,
+   "z": 1064,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_4_1",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 437,
+   "z": 1214,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "rare",
+   "id": "rare_brimbelly",
+   "slot": 0,
+   "name": "Brimbelly",
+   "x": 265,
+   "z": 1540,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     218,
+     1498
+    ],
+    [
+     301,
+     1500
+    ],
+    [
+     331,
+     1548
+    ],
+    [
+     269,
+     1595
+    ],
+    [
+     208,
+     1562
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 14
+  },
+  {
+   "type": "rare",
+   "id": "rare_the_assayer",
+   "slot": 1,
+   "name": "The Assayer",
+   "x": 914,
+   "z": 1795,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     900,
+     1720
+    ],
+    [
+     985,
+     1770
+    ],
+    [
+     961,
+     1845
+    ],
+    [
+     880,
+     1876
+    ],
+    [
+     852,
+     1781
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 14
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z13_09_yellowpan",
+   "name": "Yellowpan",
+   "x": 529,
+   "z": 1588.8,
+   "yaw": 0,
+   "settlement": "Yellowpan",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z13_09_door",
+   "name": "The Yellow Pits",
+   "x": 308,
+   "z": 1472,
+   "yaw": 0,
+   "door": "door_1",
+   "radius": 1
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_door",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 270,
+   "z": 1458,
+   "yaw": 0,
+   "radius": 6,
+   "doorGuard": true
+  },
+  {
+   "type": "npc",
+   "id": "mother_sarrai",
+   "name": "Mother Sarrai",
+   "role": "elder",
+   "at": "Yellowpan",
+   "x": 521.8,
+   "z": 1616.2,
+   "yaw": 1.397,
+   "office": "yellowpan_plot_15",
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "pit_boss_drask",
+   "name": "Pit-boss Drask",
+   "role": "merchant",
+   "at": "Yellowpan",
+   "x": 534.8,
+   "z": 1587.7,
+   "yaw": 6.06,
+   "office": "yellowpan_plot_10",
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "ilko_rhovek",
+   "name": "Ilko Rhovek",
+   "role": "guard",
+   "at": "Yellowpan",
+   "x": 504,
+   "z": 1557.5,
+   "yaw": 1.432,
+   "office": "yellowpan_plot_1",
+   "radius": 1
+  },
+  {
+   "type": "wayside",
+   "id": "vh_kings_pillar_sulphur_bight_0",
+   "kind": "vh_kings_pillar",
+   "name": "Glass King's Pillar",
+   "x": 1208,
+   "z": 1828,
+   "yaw": 2.02,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_f1",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 640,
+   "z": 1800,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_salamander_skull_sulphur_bight_2",
+   "kind": "vh_salamander_skull",
+   "name": "Salamander Skull",
+   "x": 285,
+   "z": 1972,
+   "yaw": 4.22,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_f3",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 62,
+   "z": 916,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_1",
+   "recipe": "vh_outriggers",
+   "name": "Outrigger Canoes",
+   "kind": "fishing",
+   "x": 602,
+   "z": 1202,
+   "yaw": 4.23,
+   "radius": 5,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_s1",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 473,
+   "z": 1801,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_2",
+   "recipe": "vh_ribbon_post",
+   "name": "Pilgrim Ribbons",
+   "kind": "shrine",
+   "x": 1197,
+   "z": 2007,
+   "yaw": 1.12,
+   "radius": 3,
+   "levelBase": 12
+  },
+  {
+   "type": "wayside",
+   "id": "vh_pilgrim_ribbons_sulphur_bight_d1",
+   "kind": "vh_pilgrim_ribbons",
+   "name": "Pilgrim Post",
+   "x": 528,
+   "z": 1344,
+   "yaw": 1.47,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_3",
+   "recipe": "vh_trap_line",
+   "name": "Salamander Trap Line",
+   "kind": "camp",
+   "x": 224,
+   "z": 1312,
+   "yaw": 2.86,
+   "radius": 6,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "roam_sulphur_bight_1",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 968,
+   "z": 1592,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     966,
+     1635
+    ],
+    [
+     924,
+     1574
+    ],
+    [
+     981,
+     1535
+    ],
+    [
+     1012,
+     1611
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_roadside_fire_sulphur_bight_d2",
+   "kind": "vh_roadside_fire",
+   "name": "Somebody's Fire",
+   "x": 669,
+   "z": 2008,
+   "yaw": 0.13,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_s2",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 136,
+   "z": 1144,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_4",
+   "recipe": "vh_tussock_seed",
+   "name": "Seedheads",
+   "kind": "forage",
+   "x": 384,
+   "z": 1344,
+   "yaw": 0.08,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "folk",
+   "id": "folk_sulphur_bight_1",
+   "role": "pumice_cutter",
+   "name": "Pumice cutter",
+   "work": "dig",
+   "chatter": [
+    "role.pumice_cutter"
+   ],
+   "x": 176,
+   "z": 1855,
+   "yaw": 5.53,
+   "radius": 6,
+   "path": [
+    [
+     176,
+     1863
+    ],
+    [
+     167,
+     1853
+    ],
+    [
+     181,
+     1849
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_pumice_rack",
+     "x": 2.5,
+     "z": 0,
+     "yaw": 0.2
+    },
+    {
+     "kind": "prop",
+     "id": "vh_pumice_pile",
+     "x": -1.5,
+     "z": 1,
+     "yaw": 0.6
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_5",
+   "recipe": "vh_tussock_seed",
+   "name": "Seedheads",
+   "kind": "forage",
+   "x": 393,
+   "z": 1904,
+   "yaw": 3.19,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_s3",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 688,
+   "z": 1505,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_drift_wall_sulphur_bight_d3",
+   "kind": "vh_drift_wall",
+   "name": "Wall in the Drift",
+   "x": 35,
+   "z": 1635,
+   "yaw": 0.37,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_6",
+   "recipe": "vh_steamcaps",
+   "name": "Steamcap Flush",
+   "kind": "forage",
+   "x": 927,
+   "z": 2008,
+   "yaw": 2.4,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_s4",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 40,
+   "z": 1833,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_7",
+   "recipe": "vh_net_poles",
+   "name": "Net Poles",
+   "kind": "fishing",
+   "x": 1088,
+   "z": 1831,
+   "yaw": 4.39,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_8",
+   "recipe": "vh_fish_rack",
+   "name": "Split Fish Rack",
+   "kind": "fishing",
+   "x": 176,
+   "z": 969,
+   "yaw": 0.51,
+   "radius": 4,
+   "levelBase": 13
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_9",
+   "recipe": "vh_ironpalm_down",
+   "name": "Fallen Ironpalm",
+   "kind": "forage",
+   "x": 752,
+   "z": 1840,
+   "yaw": 6.05,
+   "radius": 5,
+   "levelBase": 12
+  },
+  {
+   "type": "wayside",
+   "id": "vh_roadside_fire_sulphur_bight_d4",
+   "kind": "vh_roadside_fire",
+   "name": "Somebody's Fire",
+   "x": 133,
+   "z": 1386,
+   "yaw": 4.19,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_s5",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 423,
+   "z": 2007,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_10",
+   "recipe": "vh_kings_door",
+   "name": "Glass King's Door",
+   "kind": "shrine",
+   "x": 594,
+   "z": 1432,
+   "yaw": 6.26,
+   "radius": 6,
+   "levelBase": 12
+  },
+  {
+   "type": "folk",
+   "id": "folk_sulphur_bight_2",
+   "role": "ash_pilgrim",
+   "name": "Resting ash pilgrim",
+   "work": "pray",
+   "chatter": [
+    "role.ash_pilgrim"
+   ],
+   "x": 368,
+   "z": 1663,
+   "yaw": 1.66,
+   "radius": 6,
+   "path": [
+    [
+     365,
+     1657
+    ],
+    [
+     375,
+     1661
+    ],
+    [
+     364,
+     1669
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_pilgrim_post",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_offering_bowl",
+     "x": 1,
+     "z": 0.8,
+     "yaw": 0
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_11",
+   "recipe": "vh_ribbon_post",
+   "name": "Pilgrim Ribbons",
+   "kind": "shrine",
+   "x": 613,
+   "z": 1909,
+   "yaw": 2.07,
+   "radius": 3,
+   "levelBase": 12
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_12",
+   "recipe": "vh_window_letter",
+   "name": "Letter in the Window",
+   "kind": "lore",
+   "x": 209,
+   "z": 1687,
+   "yaw": 5.94,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_s6",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1256,
+   "z": 1919,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_kings_pillar_sulphur_bight_d5",
+   "kind": "vh_kings_pillar",
+   "name": "Glass King's Pillar",
+   "x": 896,
+   "z": 1409,
+   "yaw": 5.75,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_13",
+   "recipe": "vh_steamcaps",
+   "name": "Steamcap Flush",
+   "kind": "forage",
+   "x": 640,
+   "z": 1687,
+   "yaw": 2.71,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "roam_sulphur_bight_2",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 183,
+   "z": 2007,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     144,
+     2047
+    ],
+    [
+     146,
+     1964
+    ],
+    [
+     226,
+     1977
+    ],
+    [
+     216,
+     2040
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_s7",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1152,
+   "z": 1911,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_14",
+   "recipe": "vh_lone_tomb_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 549,
+   "z": 1731,
+   "yaw": 6.11,
+   "radius": 5,
+   "levelBase": 12
+  },
+  {
+   "type": "wayside",
+   "id": "vh_sulphur_spill_sulphur_bight_d6",
+   "kind": "vh_sulphur_spill",
+   "name": "Sulphur Spill",
+   "x": 40,
+   "z": 1368,
+   "yaw": 0.05,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_15",
+   "recipe": "vh_urn_stash",
+   "name": "The Shallow Urn",
+   "kind": "cache",
+   "x": 208,
+   "z": 1215,
+   "yaw": 1,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_s8",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 39,
+   "z": 1176,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_16",
+   "recipe": "vh_sulphur_flat",
+   "name": "Bad Air",
+   "kind": "hazard",
+   "x": 729,
+   "z": 1744,
+   "yaw": 1.84,
+   "radius": 5,
+   "levelBase": 12
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_17",
+   "recipe": "vh_glass_floats",
+   "name": "Glass Floats",
+   "kind": "fishing",
+   "x": 1152,
+   "z": 1752,
+   "yaw": 3.69,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_s9",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 296,
+   "z": 1880,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_18",
+   "recipe": "vh_council_notice",
+   "name": "Harbour Council Notice",
+   "kind": "lore",
+   "x": 128,
+   "z": 1623,
+   "yaw": 5.61,
+   "radius": 3,
+   "levelBase": 12
+  },
+  {
+   "type": "wayside",
+   "id": "vh_pilgrim_ribbons_sulphur_bight_d7",
+   "kind": "vh_pilgrim_ribbons",
+   "name": "Pilgrim Post",
+   "x": 608,
+   "z": 1296,
+   "yaw": 4.29,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_roadside_fire_sulphur_bight_d8",
+   "kind": "vh_roadside_fire",
+   "name": "Somebody's Fire",
+   "x": 317,
+   "z": 1286,
+   "yaw": 6,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_19",
+   "recipe": "vh_window_letter",
+   "name": "Letter in the Window",
+   "kind": "lore",
+   "x": 849,
+   "z": 1632,
+   "yaw": 0.81,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "roam_sulphur_bight_3",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 527,
+   "z": 1256,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     528,
+     1294
+    ],
+    [
+     477,
+     1240
+    ],
+    [
+     533,
+     1221
+    ],
+    [
+     583,
+     1273
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_s10",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 554,
+   "z": 1847,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_20",
+   "recipe": "vh_council_notice",
+   "name": "Harbour Council Notice",
+   "kind": "lore",
+   "x": 160,
+   "z": 1056,
+   "yaw": 3.37,
+   "radius": 3,
+   "levelBase": 13
+  },
+  {
+   "type": "folk",
+   "id": "folk_sulphur_bight_3",
+   "role": "glass_blower",
+   "name": "Glass-blower",
+   "work": "tend",
+   "chatter": [
+    "role.glass_blower"
+   ],
+   "x": 1069,
+   "z": 1542,
+   "yaw": 3.74,
+   "radius": 6,
+   "path": [
+    [
+     1074,
+     1539
+    ],
+    [
+     1067,
+     1549
+    ],
+    [
+     1063,
+     1539
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_glass_kiln",
+     "x": 0,
+     "z": -2.5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_glass_floats",
+     "x": 2,
+     "z": 0.5,
+     "yaw": 0.3
+    },
+    {
+     "kind": "prop",
+     "id": "crate",
+     "x": -2,
+     "z": 0.5,
+     "yaw": 0.2
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_21",
+   "recipe": "vh_column_ring",
+   "name": "Column Ring",
+   "kind": "marker",
+   "x": 704,
+   "z": 1921,
+   "yaw": 5.4,
+   "radius": 6,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_s11",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 664,
+   "z": 1592,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_kings_pillar_sulphur_bight_d9",
+   "kind": "vh_kings_pillar",
+   "name": "Glass King's Pillar",
+   "x": 296,
+   "z": 1369,
+   "yaw": 3.41,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_22",
+   "recipe": "vh_pumice_racks",
+   "name": "Pumice Drying Racks",
+   "kind": "camp",
+   "x": 447,
+   "z": 1711,
+   "yaw": 1.1,
+   "radius": 6,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_s12",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 456,
+   "z": 1392,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_23",
+   "recipe": "vh_salt_sulphur_crust",
+   "name": "Yellow Crust",
+   "kind": "forage",
+   "x": 744,
+   "z": 1431,
+   "yaw": 5.97,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "roam_sulphur_bight_4",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1031,
+   "z": 1695,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1017,
+     1749
+    ],
+    [
+     966,
+     1691
+    ],
+    [
+     1044,
+     1610
+    ],
+    [
+     1106,
+     1698
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_24",
+   "recipe": "vh_salt_sulphur_crust",
+   "name": "Yellow Crust",
+   "kind": "forage",
+   "x": 384,
+   "z": 1817,
+   "yaw": 5.64,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "wayside",
+   "id": "vh_pilgrim_ribbons_sulphur_bight_d10",
+   "kind": "vh_pilgrim_ribbons",
+   "name": "Pilgrim Post",
+   "x": 680,
+   "z": 1224,
+   "yaw": 0.17,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_s13",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 761,
+   "z": 1552,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_25",
+   "recipe": "vh_glass_kiln",
+   "name": "Glass-Blower's Kiln",
+   "kind": "camp",
+   "x": 911,
+   "z": 1488,
+   "yaw": 2.85,
+   "radius": 6,
+   "levelBase": 12
+  },
+  {
+   "type": "folk",
+   "id": "folk_sulphur_bight_4",
+   "role": "ironpalm_tapper",
+   "name": "Ironpalm tapper",
+   "work": "gather",
+   "chatter": [
+    "role.ironpalm_tapper"
+   ],
+   "x": 954,
+   "z": 1927,
+   "yaw": 3.25,
+   "radius": 6,
+   "path": [
+    [
+     956,
+     1905
+    ],
+    [
+     980,
+     1934
+    ],
+    [
+     940,
+     1938
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_ironpalm",
+     "x": 2.5,
+     "z": 0,
+     "yaw": 0.7
+    },
+    {
+     "kind": "prop",
+     "id": "vh_ironpalm_stump",
+     "x": -2,
+     "z": 1,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_clay_pots",
+     "x": 0.5,
+     "z": 1.8,
+     "yaw": 1.2
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_26",
+   "recipe": "vh_urn_stash",
+   "name": "The Shallow Urn",
+   "kind": "cache",
+   "x": 816,
+   "z": 1705,
+   "yaw": 2.08,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_s14",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 200,
+   "z": 1768,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_fern_pair_sulphur_bight_d11",
+   "kind": "vh_fern_pair",
+   "name": "Fern Gate",
+   "x": 219,
+   "z": 1391,
+   "yaw": 4.9,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_27",
+   "recipe": "vh_kings_door",
+   "name": "Glass King's Door",
+   "kind": "shrine",
+   "x": 1120,
+   "z": 2008,
+   "yaw": 0.41,
+   "radius": 6,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "roam_sulphur_bight_5",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 594,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     638,
+     2021
+    ],
+    [
+     591,
+     2041
+    ],
+    [
+     559,
+     2006
+    ],
+    [
+     607,
+     1976
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_s15",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1280,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_28",
+   "recipe": "vh_tussock_seed",
+   "name": "Seedheads",
+   "kind": "forage",
+   "x": 45,
+   "z": 1083,
+   "yaw": 6.24,
+   "radius": 4,
+   "levelBase": 13
+  },
+  {
+   "type": "wayside",
+   "id": "vh_drift_wall_sulphur_bight_d12",
+   "kind": "vh_drift_wall",
+   "name": "Wall in the Drift",
+   "x": 472,
+   "z": 1887,
+   "yaw": 5.86,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_29",
+   "recipe": "vh_ribbon_post",
+   "name": "Pilgrim Ribbons",
+   "kind": "shrine",
+   "x": 240,
+   "z": 1145,
+   "yaw": 2.33,
+   "radius": 3,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_s16",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 144,
+   "z": 1312,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_30",
+   "recipe": "vh_salamander_bones",
+   "name": "Salamander Ribs",
+   "kind": "remains",
+   "x": 376,
+   "z": 1424,
+   "yaw": 1.24,
+   "radius": 5,
+   "levelBase": 12
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_31",
+   "recipe": "vh_column_ring",
+   "name": "Column Ring",
+   "kind": "marker",
+   "x": 519,
+   "z": 1447,
+   "yaw": 3.63,
+   "radius": 6,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_s17",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 280,
+   "z": 1672,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_32",
+   "recipe": "vh_trap_line",
+   "name": "Salamander Trap Line",
+   "kind": "camp",
+   "x": 840,
+   "z": 1561,
+   "yaw": 1.51,
+   "radius": 6,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_s18",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 151,
+   "z": 1539,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_lone_fallen_palm_sulphur_bight_d13",
+   "kind": "vh_lone_fallen_palm",
+   "name": "Fallen Ironpalm",
+   "x": 824,
+   "z": 1400,
+   "yaw": 0.07,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_33",
+   "recipe": "vh_fern_hearts",
+   "name": "Fern Hearts",
+   "kind": "forage",
+   "x": 448,
+   "z": 1313,
+   "yaw": 1.65,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_34",
+   "recipe": "vh_ribbon_post",
+   "name": "Pilgrim Ribbons",
+   "kind": "shrine",
+   "x": 927,
+   "z": 1352,
+   "yaw": 0.95,
+   "radius": 3,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_s19",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 136,
+   "z": 1224,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_35",
+   "recipe": "vh_salamander_bones",
+   "name": "Salamander Ribs",
+   "kind": "remains",
+   "x": 357,
+   "z": 1968,
+   "yaw": 3.4,
+   "radius": 5,
+   "levelBase": 12
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_36",
+   "recipe": "vh_glass_kiln",
+   "name": "Glass-Blower's Kiln",
+   "kind": "camp",
+   "x": 310,
+   "z": 1116,
+   "yaw": 3.33,
+   "radius": 6,
+   "levelBase": 12
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_37",
+   "recipe": "vh_ribbon_post",
+   "name": "Pilgrim Ribbons",
+   "kind": "shrine",
+   "x": 39,
+   "z": 1559,
+   "yaw": 4.66,
+   "radius": 3,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_s20",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 385,
+   "z": 1273,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_pilgrim_ribbons_sulphur_bight_d14",
+   "kind": "vh_pilgrim_ribbons",
+   "name": "Pilgrim Post",
+   "x": 96,
+   "z": 1888,
+   "yaw": 3.4,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_38",
+   "recipe": "vh_deserter_pack",
+   "name": "Deserter's Pack",
+   "kind": "remains",
+   "x": 1032,
+   "z": 1872,
+   "yaw": 6.06,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_s21",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 385,
+   "z": 1744,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_39",
+   "recipe": "vh_pumice_racks",
+   "name": "Pumice Drying Racks",
+   "kind": "camp",
+   "x": 161,
+   "z": 1447,
+   "yaw": 4.01,
+   "radius": 6,
+   "levelBase": 12
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_40",
+   "recipe": "vh_ironpalm_down",
+   "name": "Fallen Ironpalm",
+   "kind": "forage",
+   "x": 41,
+   "z": 1704,
+   "yaw": 2.06,
+   "radius": 5,
+   "levelBase": 12
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_41",
+   "recipe": "vh_ribbon_post",
+   "name": "Pilgrim Ribbons",
+   "kind": "shrine",
+   "x": 393,
+   "z": 1594,
+   "yaw": 0.92,
+   "radius": 3,
+   "levelBase": 12
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_42",
+   "recipe": "vh_bath_hut",
+   "name": "Hot-Spring Bathing Hut",
+   "kind": "camp",
+   "x": 809,
+   "z": 1880,
+   "yaw": 4,
+   "radius": 7,
+   "levelBase": 12
+  },
+  {
+   "type": "wayside",
+   "id": "vh_roadside_fire_sulphur_bight_d15",
+   "kind": "vh_roadside_fire",
+   "name": "Somebody's Fire",
+   "x": 112,
+   "z": 1807,
+   "yaw": 5.81,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_s22",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 592,
+   "z": 1360,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_roadside_fire_sulphur_bight_d16",
+   "kind": "vh_roadside_fire",
+   "name": "Somebody's Fire",
+   "x": 264,
+   "z": 1227,
+   "yaw": 3.29,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_43",
+   "recipe": "vh_pumice_racks",
+   "name": "Pumice Drying Racks",
+   "kind": "camp",
+   "x": 664,
+   "z": 1434,
+   "yaw": 3.37,
+   "radius": 6,
+   "levelBase": 12
+  },
+  {
+   "type": "folk",
+   "id": "folk_sulphur_bight_5",
+   "role": "ash_pilgrim",
+   "name": "Resting ash pilgrim",
+   "work": "pray",
+   "chatter": [
+    "role.ash_pilgrim"
+   ],
+   "x": 617,
+   "z": 1505,
+   "yaw": 5.84,
+   "radius": 6,
+   "path": [
+    [
+     617,
+     1514
+    ],
+    [
+     611,
+     1502
+    ],
+    [
+     624,
+     1499
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_pilgrim_post",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_offering_bowl",
+     "x": 1,
+     "z": 0.8,
+     "yaw": 0
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_44",
+   "recipe": "vh_fern_hearts",
+   "name": "Fern Hearts",
+   "kind": "forage",
+   "x": 992,
+   "z": 2008,
+   "yaw": 4.4,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_s23",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 689,
+   "z": 1856,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_roadside_fire_sulphur_bight_d17",
+   "kind": "vh_roadside_fire",
+   "name": "Somebody's Fire",
+   "x": 232,
+   "z": 1904,
+   "yaw": 4.05,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_45",
+   "recipe": "vh_net_poles",
+   "name": "Net Poles",
+   "kind": "fishing",
+   "x": 382,
+   "z": 1169,
+   "yaw": 1.11,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "roam_sulphur_bight_6",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 45,
+   "z": 1406,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     81,
+     1427
+    ],
+    [
+     34,
+     1451
+    ],
+    [
+     21,
+     1386
+    ],
+    [
+     65,
+     1377
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_s24",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 248,
+   "z": 1832,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_46",
+   "recipe": "vh_salamander_bones",
+   "name": "Salamander Ribs",
+   "kind": "remains",
+   "x": 785,
+   "z": 1784,
+   "yaw": 2.44,
+   "radius": 5,
+   "levelBase": 12
+  },
+  {
+   "type": "wayside",
+   "id": "vh_roadside_fire_sulphur_bight_d18",
+   "kind": "vh_roadside_fire",
+   "name": "Somebody's Fire",
+   "x": 672,
+   "z": 1288,
+   "yaw": 3.33,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_47",
+   "recipe": "vh_outriggers",
+   "name": "Outrigger Canoes",
+   "kind": "fishing",
+   "x": 1087,
+   "z": 1768,
+   "yaw": 3.86,
+   "radius": 5,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_s25",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 864,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_48",
+   "recipe": "vh_salt_sulphur_crust",
+   "name": "Yellow Crust",
+   "kind": "forage",
+   "x": 40,
+   "z": 1912,
+   "yaw": 5.56,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_49",
+   "recipe": "vh_deserter_pack",
+   "name": "Deserter's Pack",
+   "kind": "remains",
+   "x": 48,
+   "z": 1768,
+   "yaw": 2.06,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_s26",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 112,
+   "z": 969,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_50",
+   "recipe": "vh_sulphur_flat",
+   "name": "Bad Air",
+   "kind": "hazard",
+   "x": 427,
+   "z": 1949,
+   "yaw": 5.89,
+   "radius": 5,
+   "levelBase": 12
+  },
+  {
+   "type": "wayside",
+   "id": "vh_kings_pillar_sulphur_bight_d19",
+   "kind": "vh_kings_pillar",
+   "name": "Glass King's Pillar",
+   "x": 488,
+   "z": 2008,
+   "yaw": 3.92,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_51",
+   "recipe": "vh_pot_cache",
+   "name": "Three Pots",
+   "kind": "cache",
+   "x": 1087,
+   "z": 1896,
+   "yaw": 5.06,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "roam_sulphur_bight_7",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 872,
+   "z": 1943,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     848,
+     1985
+    ],
+    [
+     835,
+     1920
+    ],
+    [
+     890,
+     1900
+    ],
+    [
+     924,
+     1964
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_s27",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 728,
+   "z": 1999,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_52",
+   "recipe": "vh_glass_kiln",
+   "name": "Glass-Blower's Kiln",
+   "kind": "camp",
+   "x": 1314,
+   "z": 1918,
+   "yaw": 3.45,
+   "radius": 6,
+   "levelBase": 12
+  },
+  {
+   "type": "folk",
+   "id": "folk_sulphur_bight_6",
+   "role": "pumice_cutter",
+   "name": "Pumice cutter",
+   "work": "dig",
+   "chatter": [
+    "role.pumice_cutter"
+   ],
+   "x": 191,
+   "z": 1625,
+   "yaw": 0.09,
+   "radius": 6,
+   "path": [
+    [
+     176,
+     1631
+    ],
+    [
+     192,
+     1604
+    ],
+    [
+     201,
+     1642
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_pumice_rack",
+     "x": 2.5,
+     "z": 0,
+     "yaw": 0.2
+    },
+    {
+     "kind": "prop",
+     "id": "vh_pumice_pile",
+     "x": -1.5,
+     "z": 1,
+     "yaw": 0.6
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_53",
+   "recipe": "vh_tussock_seed",
+   "name": "Seedheads",
+   "kind": "forage",
+   "x": 904,
+   "z": 1655,
+   "yaw": 0.14,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_s28",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 39,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_tangled_floats_sulphur_bight_d20",
+   "kind": "vh_tangled_floats",
+   "name": "Floats on a Post",
+   "x": 1263,
+   "z": 1860,
+   "yaw": 3.93,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_54",
+   "recipe": "vh_glass_floats",
+   "name": "Glass Floats",
+   "kind": "fishing",
+   "x": 191,
+   "z": 1112,
+   "yaw": 1.42,
+   "radius": 4,
+   "levelBase": 13
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_s29",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 104,
+   "z": 1088,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_55",
+   "recipe": "vh_fish_rack",
+   "name": "Split Fish Rack",
+   "kind": "fishing",
+   "x": 1144,
+   "z": 1848,
+   "yaw": 3.82,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "roam_sulphur_bight_8",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 609,
+   "z": 1744,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     555,
+     1712
+    ],
+    [
+     656,
+     1669
+    ],
+    [
+     675,
+     1773
+    ],
+    [
+     563,
+     1808
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_56",
+   "recipe": "vh_tussock_seed",
+   "name": "Seedheads",
+   "kind": "forage",
+   "x": 88,
+   "z": 1664,
+   "yaw": 0.58,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "wayside",
+   "id": "vh_roadside_fire_sulphur_bight_d21",
+   "kind": "vh_roadside_fire",
+   "name": "Somebody's Fire",
+   "x": 98,
+   "z": 1569,
+   "yaw": 4.68,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_s30",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 754,
+   "z": 1489,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_57",
+   "recipe": "vh_pot_cache",
+   "name": "Three Pots",
+   "kind": "cache",
+   "x": 368,
+   "z": 1496,
+   "yaw": 4.83,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "wayside",
+   "id": "vh_offering_bowls_sulphur_bight_d22",
+   "kind": "vh_offering_bowls",
+   "name": "Offering Bowls",
+   "x": 629,
+   "z": 1847,
+   "yaw": 4.22,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_sulphur_bight_7",
+   "role": "glass_blower",
+   "name": "Glass-blower",
+   "work": "tend",
+   "chatter": [
+    "role.glass_blower"
+   ],
+   "x": 222,
+   "z": 1011,
+   "yaw": 2.95,
+   "radius": 6,
+   "path": [
+    [
+     225,
+     1006
+    ],
+    [
+     226,
+     1018
+    ],
+    [
+     216,
+     1011
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_glass_kiln",
+     "x": 0,
+     "z": -2.5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_glass_floats",
+     "x": 2,
+     "z": 0.5,
+     "yaw": 0.3
+    },
+    {
+     "kind": "prop",
+     "id": "crate",
+     "x": -2,
+     "z": 0.5,
+     "yaw": 0.2
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_58",
+   "recipe": "vh_rim_bowls",
+   "name": "Rim Offering Bowls",
+   "kind": "shrine",
+   "x": 154,
+   "z": 1687,
+   "yaw": 1.31,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_s31",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1032,
+   "z": 1807,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_offering_bowls_sulphur_bight_d23",
+   "kind": "vh_offering_bowls",
+   "name": "Offering Bowls",
+   "x": 1202,
+   "z": 1952,
+   "yaw": 2.47,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_59",
+   "recipe": "vh_sulphur_wreck",
+   "name": "Sulphur Cart Wreck",
+   "kind": "remains",
+   "x": 327,
+   "z": 1609,
+   "yaw": 4.41,
+   "radius": 5,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "roam_sulphur_bight_9",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 426,
+   "z": 1854,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     491,
+     1858
+    ],
+    [
+     426,
+     1914
+    ],
+    [
+     358,
+     1838
+    ],
+    [
+     449,
+     1800
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_offering_bowls_sulphur_bight_d24",
+   "kind": "vh_offering_bowls",
+   "name": "Offering Bowls",
+   "x": 668,
+   "z": 1953,
+   "yaw": 4.83,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_sulphur_bight_s32",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 952,
+   "z": 1400,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_sulphur_bight_60",
+   "recipe": "vh_window_letter",
+   "name": "Letter in the Window",
+   "kind": "lore",
+   "x": 185,
+   "z": 1264,
+   "yaw": 1.58,
+   "radius": 4,
+   "levelBase": 12
+  }
+ ],
+ "features": [],
+ "density": {
+  "target": 50,
+  "roadTarget": 45,
+  "added": {
+   "curio": 60,
+   "wayside": 24,
+   "stray": 32,
+   "roamer": 9,
+   "folk": 7
+  },
+  "openShareCovered": 1,
+  "roadShareCovered": 1
+ },
+ "levels": [
+  12,
+  14
+ ]
+}

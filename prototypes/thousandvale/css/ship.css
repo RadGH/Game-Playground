@@ -1,0 +1,25 @@
+/* Expansion 1 §6 (stream V): the Harbourmaster's window and the banner while at sea (js/client/ui/ship-travel.js).
+   The rows reuse the ox-cart window's look (css/pt8.css .cart-*). */
+.ship-says { margin: 0 0 6px; font-style: italic; color: var(--ink-dim); font-size: 13px; }
+.ship-party { display: flex; align-items: center; justify-content: flex-start; gap: 8px; text-align: left; width: auto; margin: 8px 0 2px; font-size: 12.5px; color: var(--ink-dim); cursor: pointer; }
+.ship-party input { width: auto; flex: none; margin: 0; }
+.ship-panel .note:empty { display: none; }
+.ship-panel .note { margin: 6px 0 0; color: var(--warn, #e0a050); font-size: 12.5px; }
+
+.ship-banner {
+  position: absolute; top: 14px; left: 50%; transform: translateX(-50%); z-index: 40;
+  min-width: 300px; max-width: calc(100vw - 32px); padding: 8px 14px 10px; border-radius: 10px;
+  background: rgba(10, 18, 26, 0.72); border: 1px solid rgba(217, 178, 106, 0.45); color: #f1e8d6;
+  display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: auto;
+  font-family: inherit; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+.ship-banner[hidden] { display: none; }
+.ship-banner .sb-route { font-size: 14px; letter-spacing: 0.02em; }
+.ship-banner .sb-route i { font-style: normal; color: var(--gold, #d9b26a); }
+.ship-banner .sb-bar { width: 100%; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.15); overflow: hidden; }
+.ship-banner .sb-fill { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #6fb7c2, #d9b26a); }
+.ship-banner .sb-skip[disabled][data-left]:not([data-left=""])::after { content: ' (' attr(data-left) ')'; }
+.ship-log h4 { margin: 4px 0 8px; }
+.ship-log p { margin: 0 0 6px; }
+html[data-layout="phone"] .ship-banner { top: 8px; min-width: 0; width: calc(100vw - 32px); }
+html[data-layout="phone"] .ship-banner .sb-skip { min-height: var(--tap, 44px); }

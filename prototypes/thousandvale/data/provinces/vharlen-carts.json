@@ -1,0 +1,941 @@
+{
+ "_doc": "Stream E (owner feedback 8, W5: \"ox carts at towns, and sometimes travelling the road, that act as PAID fast travel to other towns\"). THE CARTERS. `rules` = how a ride works; `stops` = one per settlement of the province (a carter and a parked ox cart outside its main gate; x, z of a stop are WORLD metres like the routes file, `carter` and `cart` are ZONE metres like every placement — tools/content-hunts.mjs copies them into <zone>.quest.json as an `npc` row with role carter and a `cart` row, which is what the server spawns); `links` = which stops are joined directly (a road from data/provinces/torbor_downs-routes.json, or `overland: true` = a back lane the routes file does not list, at 1.3 x the straight line); `fares` = for every stop, every other stop with the road metres, the number of towns passed (`hops`), the first stop on the way (`next`) and the gold — already worked out with data/provinces/economy.json `cart` (cartFare = max(minGold, round(base + metres / metresPerGold))), so nothing computes a path at run time; `roaming` = the carts you meet on the road. Made by tools/content-towns.mjs; a test fails when the fares do not match economy.json.",
+ "service": {
+  "name": "the Ash-Road Haulers",
+  "line": "Slow wheels, hot roads, and we always get there."
+ },
+ "rules": {
+  "boardM": 6,
+  "flagDownM": 12,
+  "needsDiscovery": false,
+  "minLevel": 1,
+  "rideSecPerKm": 2,
+  "minRideSec": 4,
+  "maxRideSec": 14,
+  "arriveAt": "the cart of the stop you rode to",
+  "mounted": "you get down from your own mount first",
+  "combat": "not while you are in a fight",
+  "party": "each rider pays their own fare",
+  "refuse": {
+   "gold": "That is {fare} gold to {town}. Come back when you have it.",
+   "combat": "Not with that after you. Lose it first.",
+   "same": "You are standing in {town}."
+  },
+  "says": [
+   "Where to? The cart knows every road on the island, and the cracks in most of them.",
+   "Climb up. Mind the sulphur sacks.",
+   "Slow and steady. The mountain does the hurrying."
+  ],
+  "greetings": [
+   "Where to? The cart knows every road on the island, and takes the cool side when it can.",
+   "Climb up. Mind the sulphur sacks. A few coins and you are in another town before your soles notice.",
+   "Ash-Road Haulers. We go everywhere there is a gate, and we are never late, because we never say when.",
+   "Walking is free. Riding is nearly free, and you arrive with your feet unboiled.",
+   "Name a town. If it has a gate, I have waited outside it in the steam.",
+   "The beast is called Breeze. It is a joke. Where are we going?",
+   "I do not go fast, I do not go near vents, and I do not stop for raiders. Fares are on the board.",
+   "Out of {town} by cart is the only way to leave without ash in your boots. Pick a town."
+  ],
+  "_doc": "A ride needs no waystone and no discovery (that is the point of it: it takes you somewhere you have never been). Talk to a carter (or use the cart) within boardM, pick a town, pay the fare, arrive beside that town cart after a short ride (rideSecPerKm x km of road, clamped to min/max — the client shows you on the cart). A `cart_token` good (the start chain gives one) pays any ONE fare."
+ },
+ "roaming": {
+  "kind": "ash_hauler",
+  "from": "data/provinces/vharlen-wanderers.json kinds.ash_hauler",
+  "takesYouTo": "any stop, at the fare from the stop the cart is walking TO (its next town)",
+  "flagDown": "use the carter or the cart while it is within rules.flagDownM; the group stops for you (stopNear)",
+  "_doc": "A few carts walk the real routes like any traveller. Flag one down and the same route window opens, priced from the town it is heading for.",
+  "runs": [
+   {
+    "id": "cart_run_port_vharl_yellowpan",
+    "route": "route_port_vharl_yellowpan",
+    "only": [
+     "ash_hauler"
+    ],
+    "carts": 1,
+    "name": "the Yellowpan run",
+    "_doc": "A hauler's cart ALWAYS on the road between Port Vharl and Yellowpan, so a newcomer off the ship meets one: a route of its own over the same road (`route` = the data/provinces/vharlen-routes.json id whose points it uses) on which ONLY `only` kinds walk (js/sim/content.js). Stream W (Expansion 1): it named Torbor's Torborhold-Orrinsford road before, which the island has not got, so the server skipped it."
+   }
+  ]
+ },
+ "made": "tools/content-towns.mjs — stops, links, fares and problems are generated; edit rules / roaming by hand",
+ "stops": [
+  {
+   "id": "cart_port_vharl",
+   "town": "Port Vharl",
+   "kind": "town",
+   "zone": "z13_10",
+   "sheet": "blackstrand",
+   "x": 27750,
+   "z": 21394,
+   "gate": "port_vharl_gate_1",
+   "fromGate": 15,
+   "carter": {
+    "id": "carter_port_vharl",
+    "name": "Rhaska Ormakku",
+    "x": 1126,
+    "z": 840,
+    "yaw": -1.433
+   },
+   "cart": {
+    "id": "cart_port_vharl",
+    "model": "ox_cart",
+    "x": 1128,
+    "z": 840,
+    "yaw": 3.142
+   }
+  },
+  {
+   "id": "cart_mistfall",
+   "town": "Mistfall",
+   "kind": "hamlet",
+   "zone": "z12_09",
+   "sheet": "steamwood",
+   "x": 25750,
+   "z": 19754,
+   "gate": "mistfall_gate_0",
+   "fromGate": 14,
+   "carter": {
+    "id": "carter_mistfall",
+    "name": "Orsk Yorrvenn",
+    "x": 1214,
+    "z": 1338,
+    "yaw": -0.077
+   },
+   "cart": {
+    "id": "cart_mistfall",
+    "model": "ox_cart",
+    "x": 1214,
+    "z": 1336,
+    "yaw": 1.571
+   }
+  },
+  {
+   "id": "cart_yellowpan",
+   "town": "Yellowpan",
+   "kind": "village",
+   "zone": "z13_09",
+   "sheet": "sulphur_bight",
+   "x": 27140,
+   "z": 20014,
+   "gate": "yellowpan_gate_0",
+   "fromGate": 15,
+   "carter": {
+    "id": "carter_yellowpan",
+    "name": "Yssa Jakkora",
+    "x": 506,
+    "z": 1642,
+    "yaw": 1.617
+   },
+   "cart": {
+    "id": "cart_yellowpan",
+    "model": "ox_cart",
+    "x": 504,
+    "z": 1642,
+    "yaw": 0
+   }
+  },
+  {
+   "id": "cart_stiltreach",
+   "town": "Stiltreach",
+   "kind": "hamlet",
+   "zone": "z13_11",
+   "sheet": "fumarole_fen",
+   "x": 27064,
+   "z": 23112,
+   "gate": "stiltreach_gate_1",
+   "fromGate": 17,
+   "carter": {
+    "id": "carter_stiltreach",
+    "name": "Velu Karrovu",
+    "x": 390,
+    "z": 554,
+    "yaw": 0.042
+   },
+   "cart": {
+    "id": "cart_stiltreach",
+    "model": "ox_cart",
+    "x": 390,
+    "z": 552,
+    "yaw": -1.571
+   }
+  },
+  {
+   "id": "cart_shardhaven",
+   "town": "Shardhaven",
+   "kind": "hamlet",
+   "zone": "z11_09",
+   "sheet": "glasswind_strand",
+   "x": 24100,
+   "z": 20004,
+   "gate": "shardhaven_gate_0",
+   "fromGate": 16,
+   "carter": {
+    "id": "carter_shardhaven",
+    "name": "Ilko Rukkesh",
+    "x": 1562,
+    "z": 1620,
+    "yaw": 1.659
+   },
+   "cart": {
+    "id": "cart_shardhaven",
+    "model": "ox_cart",
+    "x": 1560,
+    "z": 1620,
+    "yaw": 0
+   }
+  },
+  {
+   "id": "cart_lastwell",
+   "town": "Lastwell",
+   "kind": "town",
+   "zone": "z11_10",
+   "sheet": "pumice_wastes",
+   "x": 23840,
+   "z": 21624,
+   "gate": "lastwell_gate_0",
+   "fromGate": 14,
+   "carter": {
+    "id": "carter_lastwell",
+    "name": "Matu Imbaru",
+    "x": 1306,
+    "z": 1218,
+    "yaw": 1.571
+   },
+   "cart": {
+    "id": "cart_lastwell",
+    "model": "ox_cart",
+    "x": 1304,
+    "z": 1218,
+    "yaw": 0
+   }
+  },
+  {
+   "id": "cart_cinderholt",
+   "town": "Cinderholt",
+   "kind": "village",
+   "zone": "z12_11",
+   "sheet": "ashfall_hollow",
+   "x": 25660,
+   "z": 23264,
+   "gate": "cinderholt_gate_0",
+   "fromGate": 14,
+   "carter": {
+    "id": "carter_cinderholt",
+    "name": "Ilko Zhakku",
+    "x": 1144,
+    "z": 742,
+    "yaw": 3.142
+   },
+   "cart": {
+    "id": "cart_cinderholt",
+    "model": "ox_cart",
+    "x": 1144,
+    "z": 744,
+    "yaw": 1.571
+   }
+  },
+  {
+   "id": "cart_kilnhold",
+   "town": "Kilnhold",
+   "kind": "village",
+   "zone": "z11_11",
+   "sheet": "kiln_ridge",
+   "x": 24100,
+   "z": 23004,
+   "gate": "kilnhold_gate_0",
+   "fromGate": 15,
+   "carter": {
+    "id": "carter_kilnhold",
+    "name": "Ashka Askaru",
+    "x": 1614,
+    "z": 516,
+    "yaw": -0.624
+   },
+   "cart": {
+    "id": "cart_kilnhold",
+    "model": "ox_cart",
+    "x": 1616,
+    "z": 514,
+    "yaw": 0.917
+   }
+  },
+  {
+   "id": "cart_rim_shrine",
+   "town": "Rim Shrine",
+   "kind": "hamlet",
+   "zone": "z12_10",
+   "sheet": "the_caldera",
+   "x": 26370,
+   "z": 21628,
+   "gate": "rim_shrine_gate_0",
+   "fromGate": 15,
+   "carter": {
+    "id": "carter_rim_shrine",
+    "name": "Ferro Hulkaru",
+    "x": 1832,
+    "z": 1120,
+    "yaw": -2.316
+   },
+   "cart": {
+    "id": "cart_rim_shrine",
+    "model": "ox_cart",
+    "x": 1834,
+    "z": 1122,
+    "yaw": 2.356
+   }
+  }
+ ],
+ "links": [
+  {
+   "a": "cart_port_vharl",
+   "b": "cart_yellowpan",
+   "metres": 1526,
+   "route": "route_port_vharl_yellowpan"
+  },
+  {
+   "a": "cart_port_vharl",
+   "b": "cart_rim_shrine",
+   "metres": 3063,
+   "route": "route_port_vharl_rim_shrine"
+  },
+  {
+   "a": "cart_mistfall",
+   "b": "cart_shardhaven",
+   "metres": 1866,
+   "route": "route_mistfall_shardhaven"
+  },
+  {
+   "a": "cart_yellowpan",
+   "b": "cart_rim_shrine",
+   "metres": 3668,
+   "route": "route_yellowpan_rim_shrine"
+  },
+  {
+   "a": "cart_stiltreach",
+   "b": "cart_cinderholt",
+   "metres": 1493,
+   "route": "route_stiltreach_cinderholt"
+  },
+  {
+   "a": "cart_lastwell",
+   "b": "cart_kilnhold",
+   "metres": 1826,
+   "overland": true
+  },
+  {
+   "a": "cart_mistfall",
+   "b": "cart_yellowpan",
+   "metres": 1838,
+   "overland": true
+  },
+  {
+   "a": "cart_cinderholt",
+   "b": "cart_kilnhold",
+   "metres": 2056,
+   "overland": true
+  },
+  {
+   "a": "cart_stiltreach",
+   "b": "cart_rim_shrine",
+   "metres": 2130,
+   "overland": true
+  }
+ ],
+ "fares": {
+  "cart_port_vharl": [
+   {
+    "to": "cart_yellowpan",
+    "town": "Yellowpan",
+    "metres": 1526,
+    "hops": 1,
+    "next": "cart_yellowpan",
+    "gold": 9
+   },
+   {
+    "to": "cart_rim_shrine",
+    "town": "Rim Shrine",
+    "metres": 3063,
+    "hops": 1,
+    "next": "cart_rim_shrine",
+    "gold": 15
+   },
+   {
+    "to": "cart_mistfall",
+    "town": "Mistfall",
+    "metres": 3364,
+    "hops": 2,
+    "next": "cart_yellowpan",
+    "gold": 16
+   },
+   {
+    "to": "cart_stiltreach",
+    "town": "Stiltreach",
+    "metres": 5193,
+    "hops": 2,
+    "next": "cart_rim_shrine",
+    "gold": 24
+   },
+   {
+    "to": "cart_shardhaven",
+    "town": "Shardhaven",
+    "metres": 5230,
+    "hops": 3,
+    "next": "cart_yellowpan",
+    "gold": 24
+   },
+   {
+    "to": "cart_cinderholt",
+    "town": "Cinderholt",
+    "metres": 6686,
+    "hops": 3,
+    "next": "cart_rim_shrine",
+    "gold": 30
+   },
+   {
+    "to": "cart_kilnhold",
+    "town": "Kilnhold",
+    "metres": 8742,
+    "hops": 4,
+    "next": "cart_rim_shrine",
+    "gold": 38
+   },
+   {
+    "to": "cart_lastwell",
+    "town": "Lastwell",
+    "metres": 10568,
+    "hops": 5,
+    "next": "cart_rim_shrine",
+    "gold": 45
+   }
+  ],
+  "cart_mistfall": [
+   {
+    "to": "cart_yellowpan",
+    "town": "Yellowpan",
+    "metres": 1838,
+    "hops": 1,
+    "next": "cart_yellowpan",
+    "gold": 10
+   },
+   {
+    "to": "cart_shardhaven",
+    "town": "Shardhaven",
+    "metres": 1866,
+    "hops": 1,
+    "next": "cart_shardhaven",
+    "gold": 10
+   },
+   {
+    "to": "cart_port_vharl",
+    "town": "Port Vharl",
+    "metres": 3364,
+    "hops": 2,
+    "next": "cart_yellowpan",
+    "gold": 16
+   },
+   {
+    "to": "cart_rim_shrine",
+    "town": "Rim Shrine",
+    "metres": 5506,
+    "hops": 2,
+    "next": "cart_yellowpan",
+    "gold": 25
+   },
+   {
+    "to": "cart_stiltreach",
+    "town": "Stiltreach",
+    "metres": 7636,
+    "hops": 3,
+    "next": "cart_yellowpan",
+    "gold": 34
+   },
+   {
+    "to": "cart_cinderholt",
+    "town": "Cinderholt",
+    "metres": 9129,
+    "hops": 4,
+    "next": "cart_yellowpan",
+    "gold": 40
+   },
+   {
+    "to": "cart_kilnhold",
+    "town": "Kilnhold",
+    "metres": 11185,
+    "hops": 5,
+    "next": "cart_yellowpan",
+    "gold": 48
+   },
+   {
+    "to": "cart_lastwell",
+    "town": "Lastwell",
+    "metres": 13011,
+    "hops": 6,
+    "next": "cart_yellowpan",
+    "gold": 55
+   }
+  ],
+  "cart_yellowpan": [
+   {
+    "to": "cart_port_vharl",
+    "town": "Port Vharl",
+    "metres": 1526,
+    "hops": 1,
+    "next": "cart_port_vharl",
+    "gold": 9
+   },
+   {
+    "to": "cart_mistfall",
+    "town": "Mistfall",
+    "metres": 1838,
+    "hops": 1,
+    "next": "cart_mistfall",
+    "gold": 10
+   },
+   {
+    "to": "cart_rim_shrine",
+    "town": "Rim Shrine",
+    "metres": 3668,
+    "hops": 1,
+    "next": "cart_rim_shrine",
+    "gold": 18
+   },
+   {
+    "to": "cart_shardhaven",
+    "town": "Shardhaven",
+    "metres": 3704,
+    "hops": 2,
+    "next": "cart_mistfall",
+    "gold": 18
+   },
+   {
+    "to": "cart_stiltreach",
+    "town": "Stiltreach",
+    "metres": 5798,
+    "hops": 2,
+    "next": "cart_rim_shrine",
+    "gold": 26
+   },
+   {
+    "to": "cart_cinderholt",
+    "town": "Cinderholt",
+    "metres": 7291,
+    "hops": 3,
+    "next": "cart_rim_shrine",
+    "gold": 32
+   },
+   {
+    "to": "cart_kilnhold",
+    "town": "Kilnhold",
+    "metres": 9347,
+    "hops": 4,
+    "next": "cart_rim_shrine",
+    "gold": 40
+   },
+   {
+    "to": "cart_lastwell",
+    "town": "Lastwell",
+    "metres": 11173,
+    "hops": 5,
+    "next": "cart_rim_shrine",
+    "gold": 48
+   }
+  ],
+  "cart_stiltreach": [
+   {
+    "to": "cart_cinderholt",
+    "town": "Cinderholt",
+    "metres": 1493,
+    "hops": 1,
+    "next": "cart_cinderholt",
+    "gold": 9
+   },
+   {
+    "to": "cart_rim_shrine",
+    "town": "Rim Shrine",
+    "metres": 2130,
+    "hops": 1,
+    "next": "cart_rim_shrine",
+    "gold": 12
+   },
+   {
+    "to": "cart_kilnhold",
+    "town": "Kilnhold",
+    "metres": 3549,
+    "hops": 2,
+    "next": "cart_cinderholt",
+    "gold": 17
+   },
+   {
+    "to": "cart_port_vharl",
+    "town": "Port Vharl",
+    "metres": 5193,
+    "hops": 2,
+    "next": "cart_rim_shrine",
+    "gold": 24
+   },
+   {
+    "to": "cart_lastwell",
+    "town": "Lastwell",
+    "metres": 5375,
+    "hops": 3,
+    "next": "cart_cinderholt",
+    "gold": 25
+   },
+   {
+    "to": "cart_yellowpan",
+    "town": "Yellowpan",
+    "metres": 5798,
+    "hops": 2,
+    "next": "cart_rim_shrine",
+    "gold": 26
+   },
+   {
+    "to": "cart_mistfall",
+    "town": "Mistfall",
+    "metres": 7636,
+    "hops": 3,
+    "next": "cart_rim_shrine",
+    "gold": 34
+   },
+   {
+    "to": "cart_shardhaven",
+    "town": "Shardhaven",
+    "metres": 9502,
+    "hops": 4,
+    "next": "cart_rim_shrine",
+    "gold": 41
+   }
+  ],
+  "cart_shardhaven": [
+   {
+    "to": "cart_mistfall",
+    "town": "Mistfall",
+    "metres": 1866,
+    "hops": 1,
+    "next": "cart_mistfall",
+    "gold": 10
+   },
+   {
+    "to": "cart_yellowpan",
+    "town": "Yellowpan",
+    "metres": 3704,
+    "hops": 2,
+    "next": "cart_mistfall",
+    "gold": 18
+   },
+   {
+    "to": "cart_port_vharl",
+    "town": "Port Vharl",
+    "metres": 5230,
+    "hops": 3,
+    "next": "cart_mistfall",
+    "gold": 24
+   },
+   {
+    "to": "cart_rim_shrine",
+    "town": "Rim Shrine",
+    "metres": 7372,
+    "hops": 3,
+    "next": "cart_mistfall",
+    "gold": 32
+   },
+   {
+    "to": "cart_stiltreach",
+    "town": "Stiltreach",
+    "metres": 9502,
+    "hops": 4,
+    "next": "cart_mistfall",
+    "gold": 41
+   },
+   {
+    "to": "cart_cinderholt",
+    "town": "Cinderholt",
+    "metres": 10995,
+    "hops": 5,
+    "next": "cart_mistfall",
+    "gold": 47
+   },
+   {
+    "to": "cart_kilnhold",
+    "town": "Kilnhold",
+    "metres": 13051,
+    "hops": 6,
+    "next": "cart_mistfall",
+    "gold": 55
+   },
+   {
+    "to": "cart_lastwell",
+    "town": "Lastwell",
+    "metres": 14877,
+    "hops": 7,
+    "next": "cart_mistfall",
+    "gold": 63
+   }
+  ],
+  "cart_lastwell": [
+   {
+    "to": "cart_kilnhold",
+    "town": "Kilnhold",
+    "metres": 1826,
+    "hops": 1,
+    "next": "cart_kilnhold",
+    "gold": 10
+   },
+   {
+    "to": "cart_cinderholt",
+    "town": "Cinderholt",
+    "metres": 3882,
+    "hops": 2,
+    "next": "cart_kilnhold",
+    "gold": 19
+   },
+   {
+    "to": "cart_stiltreach",
+    "town": "Stiltreach",
+    "metres": 5375,
+    "hops": 3,
+    "next": "cart_kilnhold",
+    "gold": 25
+   },
+   {
+    "to": "cart_rim_shrine",
+    "town": "Rim Shrine",
+    "metres": 7505,
+    "hops": 4,
+    "next": "cart_kilnhold",
+    "gold": 33
+   },
+   {
+    "to": "cart_port_vharl",
+    "town": "Port Vharl",
+    "metres": 10568,
+    "hops": 5,
+    "next": "cart_kilnhold",
+    "gold": 45
+   },
+   {
+    "to": "cart_yellowpan",
+    "town": "Yellowpan",
+    "metres": 11173,
+    "hops": 5,
+    "next": "cart_kilnhold",
+    "gold": 48
+   },
+   {
+    "to": "cart_mistfall",
+    "town": "Mistfall",
+    "metres": 13011,
+    "hops": 6,
+    "next": "cart_kilnhold",
+    "gold": 55
+   },
+   {
+    "to": "cart_shardhaven",
+    "town": "Shardhaven",
+    "metres": 14877,
+    "hops": 7,
+    "next": "cart_kilnhold",
+    "gold": 63
+   }
+  ],
+  "cart_cinderholt": [
+   {
+    "to": "cart_stiltreach",
+    "town": "Stiltreach",
+    "metres": 1493,
+    "hops": 1,
+    "next": "cart_stiltreach",
+    "gold": 9
+   },
+   {
+    "to": "cart_kilnhold",
+    "town": "Kilnhold",
+    "metres": 2056,
+    "hops": 1,
+    "next": "cart_kilnhold",
+    "gold": 11
+   },
+   {
+    "to": "cart_rim_shrine",
+    "town": "Rim Shrine",
+    "metres": 3623,
+    "hops": 2,
+    "next": "cart_stiltreach",
+    "gold": 17
+   },
+   {
+    "to": "cart_lastwell",
+    "town": "Lastwell",
+    "metres": 3882,
+    "hops": 2,
+    "next": "cart_kilnhold",
+    "gold": 19
+   },
+   {
+    "to": "cart_port_vharl",
+    "town": "Port Vharl",
+    "metres": 6686,
+    "hops": 3,
+    "next": "cart_stiltreach",
+    "gold": 30
+   },
+   {
+    "to": "cart_yellowpan",
+    "town": "Yellowpan",
+    "metres": 7291,
+    "hops": 3,
+    "next": "cart_stiltreach",
+    "gold": 32
+   },
+   {
+    "to": "cart_mistfall",
+    "town": "Mistfall",
+    "metres": 9129,
+    "hops": 4,
+    "next": "cart_stiltreach",
+    "gold": 40
+   },
+   {
+    "to": "cart_shardhaven",
+    "town": "Shardhaven",
+    "metres": 10995,
+    "hops": 5,
+    "next": "cart_stiltreach",
+    "gold": 47
+   }
+  ],
+  "cart_kilnhold": [
+   {
+    "to": "cart_lastwell",
+    "town": "Lastwell",
+    "metres": 1826,
+    "hops": 1,
+    "next": "cart_lastwell",
+    "gold": 10
+   },
+   {
+    "to": "cart_cinderholt",
+    "town": "Cinderholt",
+    "metres": 2056,
+    "hops": 1,
+    "next": "cart_cinderholt",
+    "gold": 11
+   },
+   {
+    "to": "cart_stiltreach",
+    "town": "Stiltreach",
+    "metres": 3549,
+    "hops": 2,
+    "next": "cart_cinderholt",
+    "gold": 17
+   },
+   {
+    "to": "cart_rim_shrine",
+    "town": "Rim Shrine",
+    "metres": 5679,
+    "hops": 3,
+    "next": "cart_cinderholt",
+    "gold": 26
+   },
+   {
+    "to": "cart_port_vharl",
+    "town": "Port Vharl",
+    "metres": 8742,
+    "hops": 4,
+    "next": "cart_cinderholt",
+    "gold": 38
+   },
+   {
+    "to": "cart_yellowpan",
+    "town": "Yellowpan",
+    "metres": 9347,
+    "hops": 4,
+    "next": "cart_cinderholt",
+    "gold": 40
+   },
+   {
+    "to": "cart_mistfall",
+    "town": "Mistfall",
+    "metres": 11185,
+    "hops": 5,
+    "next": "cart_cinderholt",
+    "gold": 48
+   },
+   {
+    "to": "cart_shardhaven",
+    "town": "Shardhaven",
+    "metres": 13051,
+    "hops": 6,
+    "next": "cart_cinderholt",
+    "gold": 55
+   }
+  ],
+  "cart_rim_shrine": [
+   {
+    "to": "cart_stiltreach",
+    "town": "Stiltreach",
+    "metres": 2130,
+    "hops": 1,
+    "next": "cart_stiltreach",
+    "gold": 12
+   },
+   {
+    "to": "cart_port_vharl",
+    "town": "Port Vharl",
+    "metres": 3063,
+    "hops": 1,
+    "next": "cart_port_vharl",
+    "gold": 15
+   },
+   {
+    "to": "cart_cinderholt",
+    "town": "Cinderholt",
+    "metres": 3623,
+    "hops": 2,
+    "next": "cart_stiltreach",
+    "gold": 17
+   },
+   {
+    "to": "cart_yellowpan",
+    "town": "Yellowpan",
+    "metres": 3668,
+    "hops": 1,
+    "next": "cart_yellowpan",
+    "gold": 18
+   },
+   {
+    "to": "cart_mistfall",
+    "town": "Mistfall",
+    "metres": 5506,
+    "hops": 2,
+    "next": "cart_yellowpan",
+    "gold": 25
+   },
+   {
+    "to": "cart_kilnhold",
+    "town": "Kilnhold",
+    "metres": 5679,
+    "hops": 3,
+    "next": "cart_stiltreach",
+    "gold": 26
+   },
+   {
+    "to": "cart_shardhaven",
+    "town": "Shardhaven",
+    "metres": 7372,
+    "hops": 3,
+    "next": "cart_yellowpan",
+    "gold": 32
+   },
+   {
+    "to": "cart_lastwell",
+    "town": "Lastwell",
+    "metres": 7505,
+    "hops": 4,
+    "next": "cart_stiltreach",
+    "gold": 33
+   }
+  ]
+ },
+ "problems": []
+}

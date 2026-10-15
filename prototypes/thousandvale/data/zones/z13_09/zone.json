@@ -1,0 +1,198 @@
+{
+  "name": "Yellowpan (z13_09)",
+  "zone": "z13_09",
+  "sheet": {
+    "sheet": "vharlen",
+    "zone": "sulphur_bight"
+  },
+  "province": {
+    "id": 0,
+    "name": "Feafeast Highlands"
+  },
+  "size": 1025,
+  "step": 2,
+  "origin": {
+    "x": 0,
+    "z": 0
+  },
+  "heightMin": -240,
+  "heightMax": 1660,
+  "bakeVersion": 4,
+  "inputHash": "669bc5b6",
+  "waterKinds": [
+    "none",
+    "sea",
+    "lake",
+    "river"
+  ],
+  "source": {
+    "tool": "tools/bake-zone.mjs",
+    "world": {
+      "seed": 1001,
+      "width": 288,
+      "height": 224,
+      "method": "pangea",
+      "seaLevel": 0.2,
+      "inputHash": "9805a835"
+    },
+    "zone": {
+      "zx": 13,
+      "zy": 9
+    },
+    "worldOrigin": {
+      "x": 26624,
+      "z": 18432
+    },
+    "zoneMetres": 2048
+  },
+  "rivers": [],
+  "sites": [
+    {
+      "type": "settlement",
+      "kind": "village",
+      "name": "Yellowpan",
+      "x": 516,
+      "z": 1582,
+      "hub": true,
+      "radius": 65
+    },
+    {
+      "type": "dungeon",
+      "id": "door_1",
+      "name": "Cave mouth",
+      "x": 308,
+      "z": 1462,
+      "yaw": 2.078,
+      "pinned": true
+    },
+    {
+      "type": "event",
+      "id": "event_sulphur_bight",
+      "x": 770,
+      "z": 1303,
+      "r": 40,
+      "pinned": true
+    }
+  ],
+  "spawn": {
+    "x": 516,
+    "z": 1582
+  },
+  "bridges": [],
+  "palette": "vharl",
+  "continent": "vharlen",
+  "biomeNames": {
+    "beach": "Black Sand",
+    "rainforest": "Steam Jungle",
+    "shrubland": "Fern Scrub",
+    "savanna": "Tussock",
+    "desert": "Sulphur Flats",
+    "badlands": "Basalt Highland",
+    "marsh": "Mud Fen",
+    "volcanic": "Scoria Slopes",
+    "blighted": "Charred Wood",
+    "ashPlain": "Pumice Waste",
+    "glimmerwaste": "Obsidian Dunes",
+    "mountains": "Basalt Cliffs"
+  },
+  "pools": [
+    {
+      "id": "acid_pool_7",
+      "kind": "acid_pool",
+      "name": null,
+      "x": 266,
+      "z": 1782,
+      "r": 12,
+      "level": 25.189
+    },
+    {
+      "id": "acid_pool_8",
+      "kind": "acid_pool",
+      "name": null,
+      "x": 776,
+      "z": 1892,
+      "r": 9,
+      "level": 15.113
+    },
+    {
+      "id": "acid_pool_9",
+      "kind": "acid_pool",
+      "name": null,
+      "x": 326,
+      "z": 1352,
+      "r": 7,
+      "level": 12.368
+    }
+  ],
+  "summary": {
+    "zone": "z13_09",
+    "province": "Feafeast Highlands",
+    "inputHash": "669bc5b6",
+    "rivers": 0,
+    "wetShare": 0.758,
+    "unwalkableShare": 0.75,
+    "towns": [
+      {
+        "name": "Yellowpan",
+        "kind": "village",
+        "hub": true,
+        "at": [
+          516,
+          1582
+        ],
+        "radius": 65,
+        "movedFrom": null,
+        "culture": "vharl",
+        "plots": 15,
+        "streets": 56,
+        "links": 2,
+        "overlaps": 0,
+        "highStreets": 2,
+        "w6": {
+          "plotsBefore": 16,
+          "plots": 15,
+          "kept": 15,
+          "removed": [
+            {
+              "plot": 14,
+              "want": "house",
+              "office": false
+            }
+          ]
+        }
+      }
+    ],
+    "roads": 2,
+    "bridges": 0,
+    "paths": 8,
+    "pathMetres": 2088,
+    "scatter": 3085,
+    "scatterKinds": {
+      "rock_small": 266,
+      "ironpalm": 299,
+      "obsidian": 20,
+      "sulphur_crust": 695,
+      "bush": 955,
+      "tree_fern": 753,
+      "steam_vent": 95,
+      "basalt_columns": 2
+    },
+    "sites": [
+      "settlement(HUB) village Yellowpan 516 1582 65",
+      "dungeon door_1 Cave mouth 308 1462  2.078",
+      "event event_sulphur_bight  770 1303 40"
+    ],
+    "spawn": {
+      "x": 516,
+      "z": 1582
+    },
+    "placements": 89,
+    "vignettesAvoided": 164
+  },
+  "files": {
+    "terrain.bin": 231703,
+    "nav.bin": 7916,
+    "scatter.bin": 24764,
+    "placements.json": 103868
+  }
+}

@@ -1,0 +1,2755 @@
+{
+  "_doc": "Stream C (Expansion 1). Vharlen's own shop data, laid over data/provinces/shops.json key by key (js/sim/province-files.js): `towns`, `kinds` and `goodsCatalog` are Vharlen's. `towns.<settlement>` = `zone` (sheet zone), `levelCap` (no stock above it: the band top + 1 to + 2, so the island's shelves run to level 21), `priceMult` (everything is shipped in: 1.1 at the harbour rising to 1.3 at the crater), `note`, and `shops` — WRITTEN by tools/content-offices.mjs --province=vharlen from the trader roles of stream T's town plans. `harbour` = the ships.json harbour this town's pier serves (stream V's Harbourmaster stands there, role `harbourmaster`). `kinds` = every home kind (same categories, services, prices and level gates) with island names and words, and island goods in place of the home ones at the SAME price (smoked reef fish for rations, palm toddy for ale, steamcap broth for stew, a Rim Keeper's token for the recall charm, pumice whetstone, salamander-fat grease, obsidian dust, glass-head fletching, cinderbloom poultice, ochre dye, an ironpalm saddle pack, toasted cane-seed for mounts, an obsidian charm). `goodsCatalog` = the home catalog whole (rods, bait, and every home good a player may carry here) plus the island goods; `haulers_token` is the island's cart token (sold nowhere, like the home one).",
+  "towns": {
+    "Port Vharl": {
+      "zone": "blackstrand",
+      "levelCap": 13,
+      "priceMult": 1.1,
+      "harbour": "port_vharl",
+      "note": "the landing and the island's one real market: every trader, and the Harbourmaster on the pier (stream V, data/provinces/ships.json) sells passage back to the mainland",
+      "shops": [
+        "general",
+        "market",
+        "weaponsmith",
+        "armourer",
+        "bowyer",
+        "apothecary",
+        "tailor",
+        "stable",
+        "inn",
+        "provisioner",
+        "barber",
+        "broker",
+        "unbinder",
+        "healer"
+      ]
+    },
+    "Mistfall": {
+      "zone": "steamwood",
+      "levelCap": 14,
+      "priceMult": 1.15,
+      "note": "a jungle hamlet round a hot spring: the spring-house is the inn",
+      "shops": [
+        "general",
+        "inn"
+      ]
+    },
+    "Yellowpan": {
+      "zone": "sulphur_bight",
+      "levelCap": 15,
+      "priceMult": 1.15,
+      "note": "the sulphur diggers' village: a smith who works with gloves on",
+      "shops": [
+        "general",
+        "weaponsmith",
+        "stable",
+        "inn",
+        "provisioner"
+      ]
+    },
+    "Stiltreach": {
+      "zone": "fumarole_fen",
+      "levelCap": 16,
+      "priceMult": 1.2,
+      "note": "houses on stilts over hot mud",
+      "shops": [
+        "general",
+        "inn"
+      ]
+    },
+    "Shardhaven": {
+      "zone": "glasswind_strand",
+      "levelCap": 16,
+      "priceMult": 1.2,
+      "note": "glass-cutters on the obsidian beach",
+      "shops": [
+        "general",
+        "inn"
+      ]
+    },
+    "Lastwell": {
+      "zone": "pumice_wastes",
+      "levelCap": 17,
+      "priceMult": 1.2,
+      "note": "the fort-town at the last good well before the ash",
+      "shops": [
+        "general",
+        "market",
+        "weaponsmith",
+        "armourer",
+        "bowyer",
+        "apothecary",
+        "tailor",
+        "jeweller",
+        "stable",
+        "inn",
+        "provisioner",
+        "barber",
+        "broker",
+        "unbinder",
+        "healer"
+      ]
+    },
+    "Cinderholt": {
+      "zone": "ashfall_hollow",
+      "levelCap": 18,
+      "priceMult": 1.25,
+      "note": "half a village above the ash, half below it",
+      "shops": [
+        "general",
+        "weaponsmith",
+        "stable",
+        "inn",
+        "provisioner"
+      ]
+    },
+    "Kilnhold": {
+      "zone": "kiln_ridge",
+      "levelCap": 19,
+      "priceMult": 1.25,
+      "note": "the fort of the kiln-hands on the basalt steps",
+      "shops": [
+        "general",
+        "weaponsmith",
+        "stable",
+        "inn",
+        "provisioner"
+      ]
+    },
+    "Rim Shrine": {
+      "zone": "the_caldera",
+      "levelCap": 21,
+      "priceMult": 1.3,
+      "note": "the Rim-keepers' shrine on the crater's edge: a healer, a supplier, little else",
+      "shops": [
+        "general",
+        "inn"
+      ]
+    }
+  },
+  "kinds": {
+    "general": {
+      "name": "Hearth Store",
+      "role": "merchant",
+      "sign": "barrel",
+      "light": true,
+      "categories": {
+        "other": {
+          "label": "Rings & charms",
+          "bases": [
+            "ring",
+            "necklace"
+          ],
+          "count": 3,
+          "rarity": {
+            "normal": 0.6,
+            "magic": 0.35,
+            "rare": 0.05
+          }
+        },
+        "armor": {
+          "label": "Plain clothes",
+          "bases": [
+            "cloth_helm",
+            "cloth_chest",
+            "cloth_legs",
+            "light_boots"
+          ],
+          "count": 4,
+          "rarity": {
+            "normal": 0.8,
+            "magic": 0.2
+          }
+        }
+      },
+      "goods": [
+        {
+          "id": "healing_potion",
+          "source": "potion",
+          "price": 10,
+          "minLevel": 1
+        },
+        {
+          "id": "mana_potion",
+          "source": "potion",
+          "price": 10,
+          "minLevel": 1
+        },
+        {
+          "id": "antidote",
+          "source": "potion",
+          "price": 7,
+          "minLevel": 1
+        },
+        {
+          "id": "smoked_reef_fish",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        },
+        {
+          "id": "palm_toddy",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        },
+        {
+          "id": "rim_recall_token",
+          "source": "good",
+          "price": 25,
+          "minLevel": 1
+        },
+        {
+          "id": "obsidian_charm",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        },
+        {
+          "id": "sling_satchel",
+          "source": "gear",
+          "price": 60,
+          "minLevel": 1
+        }
+      ],
+      "says": [
+        "Fair prices! Fair for an island, anyway.",
+        "If I don't have it, the next ship might. Or the one after.",
+        "Potions on the left, salt fish on the right, ash everywhere."
+      ]
+    },
+    "market": {
+      "name": "Strand Stall",
+      "role": "trader",
+      "sign": "awning",
+      "light": true,
+      "categories": {
+        "weapon": {
+          "label": "Odds and ends",
+          "bases": [
+            "dagger",
+            "sword",
+            "spear",
+            "shortbow",
+            "wand",
+            "hammer",
+            "battleaxe",
+            "staff",
+            "iron_mace",
+            "javelin",
+            "crossbow",
+            "halberd",
+            "g5_wand_dart",
+            "g5_leafblade",
+            "g5_bostaff",
+            "g5_harpoon",
+            "g5_moonaxe",
+            "g5_wand_bell",
+            "g5_headsman",
+            "g5_staff_lens",
+            "g5_staff_branch",
+            "g5_staff_aegis"
+          ],
+          "count": 10,
+          "rarity": {
+            "normal": 0.5,
+            "magic": 0.42,
+            "rare": 0.08
+          },
+          "countBase": 6,
+          "catalog": [
+            "g5_wand_dart",
+            "g5_leafblade",
+            "g5_bostaff",
+            "g5_harpoon",
+            "g5_moonaxe",
+            "g5_wand_bell",
+            "g5_headsman",
+            "g5_staff_lens",
+            "g5_staff_branch",
+            "g5_staff_aegis"
+          ],
+          "minCap": {
+            "g5_headsman": 7,
+            "g5_staff_lens": 8,
+            "g5_staff_branch": 10,
+            "g5_staff_aegis": 12
+          }
+        },
+        "armor": {
+          "label": "Second-hand gear",
+          "bases": [
+            "light_chest",
+            "medium_helm",
+            "light_boots",
+            "cloth_legs",
+            "buckler",
+            "medium_gauntlets"
+          ],
+          "count": 4,
+          "rarity": {
+            "normal": 0.5,
+            "magic": 0.42,
+            "rare": 0.08
+          }
+        },
+        "other": {
+          "label": "Trinkets",
+          "bases": [
+            "ring",
+            "necklace"
+          ],
+          "count": 2,
+          "rarity": {
+            "normal": 0.4,
+            "magic": 0.5,
+            "rare": 0.1
+          }
+        }
+      },
+      "goods": [
+        {
+          "id": "ochre_dye",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        },
+        {
+          "id": "smoked_reef_fish",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        }
+      ],
+      "says": [
+        "Everything here came off a ship. That's how you know it floats.",
+        "Haggle? I love to haggle. I always win.",
+        "Fresh off the harbour. Which boat? Don't ask."
+      ]
+    },
+    "weaponsmith": {
+      "name": "Basalt Forge",
+      "role": "smith",
+      "sign": "anvil",
+      "light": true,
+      "categories": {
+        "weapon": {
+          "label": "Blades, axes, maces & polearms",
+          "bases": [
+            "sword",
+            "rapier",
+            "dagger",
+            "iron_mace",
+            "hammer",
+            "battleaxe",
+            "axe2h",
+            "sword2h",
+            "halberd",
+            "spear",
+            "longsword",
+            "warhammer",
+            "greatsword",
+            "g5_kris",
+            "g5_leafblade",
+            "g5_mallet",
+            "g5_moonaxe",
+            "g5_morningstar",
+            "g5_partisan",
+            "g5_headsman",
+            "g5_flamberge",
+            "g5_stonemaul",
+            "g5_bardiche"
+          ],
+          "count": 17,
+          "rarity": {
+            "normal": 0.55,
+            "magic": 0.38,
+            "rare": 0.07
+          },
+          "countBase": 13,
+          "catalog": [
+            "g5_kris",
+            "g5_leafblade",
+            "g5_mallet",
+            "g5_moonaxe",
+            "g5_morningstar",
+            "g5_partisan",
+            "g5_headsman",
+            "g5_flamberge",
+            "g5_stonemaul",
+            "g5_bardiche"
+          ],
+          "minCap": {
+            "g5_headsman": 7,
+            "g5_flamberge": 8,
+            "g5_stonemaul": 9,
+            "g5_bardiche": 10
+          }
+        },
+        "armor": {
+          "label": "Shields",
+          "bases": [
+            "buckler",
+            "shield",
+            "kite_shield",
+            "g5_targe",
+            "g5_scutcheon",
+            "g5_almond",
+            "g5_pavise"
+          ],
+          "count": 5,
+          "rarity": {
+            "normal": 0.6,
+            "magic": 0.35,
+            "rare": 0.05
+          },
+          "countBase": 3,
+          "catalog": [
+            "g5_targe",
+            "g5_scutcheon",
+            "g5_almond",
+            "g5_pavise"
+          ],
+          "minCap": {
+            "g5_pavise": 10
+          }
+        }
+      },
+      "goods": [
+        {
+          "id": "pumice_whetstone",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        },
+        {
+          "id": "salamander_grease",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        }
+      ],
+      "services": {
+        "salvage": {
+          "label": "Break down gear for materials",
+          "price": 0
+        }
+      },
+      "says": [
+        "Mind the sparks. And the steam.",
+        "Good steel doesn't care how hot the road is.",
+        "Bring it here, I'll take the dent out. Free. Don't tell the Council."
+      ]
+    },
+    "armourer": {
+      "name": "Armourer",
+      "role": "armourer",
+      "sign": "shield",
+      "light": true,
+      "categories": {
+        "armor": {
+          "label": "Mail & plate",
+          "bases": [
+            "light_helm",
+            "medium_helm",
+            "heavy_helm",
+            "light_chest",
+            "medium_chest",
+            "scaled_chest",
+            "heavy_chest",
+            "light_legs",
+            "medium_legs",
+            "heavy_legs",
+            "light_gauntlets",
+            "medium_gauntlets",
+            "heavy_gauntlets",
+            "light_boots",
+            "medium_boots",
+            "heavy_boots",
+            "g5_leather_brigandine",
+            "g5_leather_chaps",
+            "g5_leather_cuffboots",
+            "g5_leather_gloves",
+            "g5_leather_slouch",
+            "g5_mail_cap",
+            "g5_mail_chausses",
+            "g5_mail_hauberk",
+            "g5_mail_mitts",
+            "g5_mail_splints",
+            "g5_plate_armet",
+            "g5_plate_cuirass",
+            "g5_plate_cuisses",
+            "g5_plate_gauntlets",
+            "g5_plate_sabatons"
+          ],
+          "count": 17,
+          "rarity": {
+            "normal": 0.55,
+            "magic": 0.38,
+            "rare": 0.07
+          },
+          "countBase": 12,
+          "catalog": [
+            "g5_leather_brigandine",
+            "g5_leather_chaps",
+            "g5_leather_cuffboots",
+            "g5_leather_gloves",
+            "g5_leather_slouch",
+            "g5_mail_cap",
+            "g5_mail_chausses",
+            "g5_mail_hauberk",
+            "g5_mail_mitts",
+            "g5_mail_splints",
+            "g5_plate_armet",
+            "g5_plate_cuirass",
+            "g5_plate_cuisses",
+            "g5_plate_gauntlets",
+            "g5_plate_sabatons"
+          ],
+          "minCap": {
+            "g5_plate_armet": 9,
+            "g5_plate_cuirass": 9,
+            "g5_plate_cuisses": 9,
+            "g5_plate_gauntlets": 9,
+            "g5_plate_sabatons": 9
+          }
+        },
+        "other": {
+          "label": "Shields",
+          "bases": [
+            "buckler",
+            "shield",
+            "kite_shield",
+            "tower_shield",
+            "g5_targe",
+            "g5_scutcheon",
+            "g5_almond",
+            "g5_pavise"
+          ],
+          "count": 5,
+          "rarity": {
+            "normal": 0.6,
+            "magic": 0.35,
+            "rare": 0.05
+          },
+          "countBase": 3,
+          "catalog": [
+            "g5_targe",
+            "g5_scutcheon",
+            "g5_almond",
+            "g5_pavise"
+          ],
+          "minCap": {
+            "g5_pavise": 10
+          }
+        }
+      },
+      "goods": [
+        {
+          "id": "salamander_grease",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        }
+      ],
+      "says": [
+        "Try it on. No, the other way round.",
+        "Mail in this heat? You'll thank me when the raiders come.",
+        "Plate's heavy. So is a lava tube grave."
+      ]
+    },
+    "bowyer": {
+      "name": "Spear & Bow",
+      "role": "bowyer",
+      "sign": "bow",
+      "light": true,
+      "categories": {
+        "weapon": {
+          "label": "Bows & throwing spears",
+          "bases": [
+            "shortbow",
+            "bow",
+            "crossbow",
+            "javelin",
+            "spear",
+            "g5_harpoon",
+            "g5_recurve",
+            "g5_arbalest"
+          ],
+          "count": 9,
+          "rarity": {
+            "normal": 0.55,
+            "magic": 0.38,
+            "rare": 0.07
+          },
+          "countBase": 8,
+          "catalog": [
+            "g5_harpoon",
+            "g5_recurve",
+            "g5_arbalest"
+          ],
+          "minCap": {
+            "g5_arbalest": 8
+          }
+        },
+        "other": {
+          "label": "Quivers",
+          "bases": [
+            "quiver",
+            "g5_hipquiver"
+          ],
+          "count": 3,
+          "rarity": {
+            "normal": 0.6,
+            "magic": 0.4
+          },
+          "countBase": 2,
+          "catalog": [
+            "g5_hipquiver"
+          ]
+        }
+      },
+      "goods": [
+        {
+          "id": "quiver",
+          "source": "gear",
+          "price": 60,
+          "minLevel": 1
+        },
+        {
+          "id": "glasshead_fletching",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        }
+      ],
+      "says": [
+        "Straight shafts, glass heads, no refunds.",
+        "A bow is a stick that's angry at a string.",
+        "No, I don't sell arrows. Nobody counts arrows on this island."
+      ]
+    },
+    "apothecary": {
+      "name": "Fume-House Apothecary",
+      "role": "apothecary",
+      "sign": "flask",
+      "light": true,
+      "categories": {
+        "weapon": {
+          "label": "Staves, wands & rods",
+          "bases": [
+            "wand",
+            "staff",
+            "scepter",
+            "tome",
+            "quarterstaff",
+            "g5_staff_spire",
+            "g5_wand_dart",
+            "g5_bostaff",
+            "g5_codex",
+            "g5_staff_horn",
+            "g5_wand_bell",
+            "g5_crownsceptre",
+            "g5_staff_halo",
+            "g5_wand_hoop",
+            "g5_staff_lens",
+            "g5_wand_lens",
+            "g5_staff_branch",
+            "g5_wand_fork",
+            "g5_staff_aegis",
+            "g5_wand_ward"
+          ],
+          "count": 11,
+          "rarity": {
+            "normal": 0.5,
+            "magic": 0.42,
+            "rare": 0.08
+          },
+          "countBase": 6,
+          "catalog": [
+            "g5_staff_spire",
+            "g5_wand_dart",
+            "g5_bostaff",
+            "g5_codex",
+            "g5_staff_horn",
+            "g5_wand_bell",
+            "g5_crownsceptre",
+            "g5_staff_halo",
+            "g5_wand_hoop",
+            "g5_staff_lens",
+            "g5_wand_lens",
+            "g5_staff_branch",
+            "g5_wand_fork",
+            "g5_staff_aegis",
+            "g5_wand_ward"
+          ],
+          "minCap": {
+            "g5_staff_lens": 8,
+            "g5_wand_lens": 8,
+            "g5_staff_branch": 10,
+            "g5_wand_fork": 10,
+            "g5_staff_aegis": 12,
+            "g5_wand_ward": 12
+          }
+        }
+      },
+      "goods": [
+        {
+          "id": "healing_potion",
+          "source": "potion",
+          "price": 9,
+          "minLevel": 1
+        },
+        {
+          "id": "greater_healing",
+          "source": "potion",
+          "price": 36,
+          "minLevel": 5
+        },
+        {
+          "id": "mana_potion",
+          "source": "potion",
+          "price": 9,
+          "minLevel": 1
+        },
+        {
+          "id": "antidote",
+          "source": "potion",
+          "price": 6,
+          "minLevel": 1
+        },
+        {
+          "id": "cinderbloom_poultice",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        },
+        {
+          "id": "group_tonic",
+          "source": "potion",
+          "price": 120,
+          "minLevel": 10
+        },
+        {
+          "id": "revival_flask",
+          "source": "potion",
+          "price": 90,
+          "minLevel": 5
+        },
+        {
+          "id": "obsidian_dust",
+          "source": "good",
+          "price": 8,
+          "minLevel": 3
+        }
+      ],
+      "says": [
+        "Don't sniff that. Don't sniff ANY of it.",
+        "Cinderbloom for wounds, sulphur salve for the skin, and this one for your enemies.",
+        "Everything here's a cure for something. Possibly you."
+      ]
+    },
+    "tailor": {
+      "name": "Reed & Hide Tailor",
+      "role": "tailor",
+      "sign": "needle",
+      "light": true,
+      "categories": {
+        "armor": {
+          "label": "Robes, leathers, cloaks, belts & packs",
+          "bases": [
+            "cloth_helm",
+            "cloth_chest",
+            "cloth_legs",
+            "light_helm",
+            "light_chest",
+            "light_legs",
+            "light_gauntlets",
+            "light_boots",
+            "travel_cloak",
+            "leather_belt",
+            "expedition_pack",
+            "trail_rucksack",
+            "sling_satchel",
+            "g5_cloth_curltoes",
+            "g5_cloth_handwraps",
+            "g5_cloth_pleats",
+            "g5_cloth_vestment",
+            "g5_cloth_wrap",
+            "g5_pack_satchel",
+            "g5_girdle",
+            "g5_leather_brigandine",
+            "g5_leather_chaps",
+            "g5_leather_cuffboots",
+            "g5_leather_gloves",
+            "g5_leather_slouch",
+            "g5_swallowtail",
+            "g5_pack_explorer",
+            "g5_pack_rucksack",
+            "g5_pack_frame"
+          ],
+          "count": 19,
+          "rarity": {
+            "normal": 0.55,
+            "magic": 0.38,
+            "rare": 0.07
+          },
+          "minCapBase": {
+            "trail_rucksack": 10,
+            "expedition_pack": 20
+          },
+          "minCap": {
+            "trail_rucksack": 10,
+            "expedition_pack": 20,
+            "g5_pack_explorer": 10,
+            "g5_pack_rucksack": 10,
+            "g5_pack_frame": 20
+          },
+          "countBase": 13,
+          "catalog": [
+            "g5_cloth_curltoes",
+            "g5_cloth_handwraps",
+            "g5_cloth_pleats",
+            "g5_cloth_vestment",
+            "g5_cloth_wrap",
+            "g5_pack_satchel",
+            "g5_girdle",
+            "g5_leather_brigandine",
+            "g5_leather_chaps",
+            "g5_leather_cuffboots",
+            "g5_leather_gloves",
+            "g5_leather_slouch",
+            "g5_swallowtail",
+            "g5_pack_explorer",
+            "g5_pack_rucksack",
+            "g5_pack_frame"
+          ]
+        },
+        "other": {
+          "label": "Caster's off hand",
+          "bases": [
+            "warded_focus",
+            "spellguard_orb",
+            "grimoire",
+            "seer_orb",
+            "reliquary",
+            "effigy",
+            "orb",
+            "g5_folio",
+            "g5_armillary",
+            "g5_starglass",
+            "g5_thurible",
+            "g5_sigilplate",
+            "g5_antlerrod",
+            "g5_seeingmask"
+          ],
+          "count": 9,
+          "rarity": {
+            "normal": 0.5,
+            "magic": 0.42,
+            "rare": 0.08
+          },
+          "countBase": 6,
+          "catalog": [
+            "g5_folio",
+            "g5_armillary",
+            "g5_starglass",
+            "g5_thurible",
+            "g5_sigilplate",
+            "g5_antlerrod",
+            "g5_seeingmask"
+          ],
+          "minCap": {
+            "g5_antlerrod": 8,
+            "g5_seeingmask": 8
+          }
+        }
+      },
+      "goods": [
+        {
+          "id": "ochre_dye",
+          "source": "good",
+          "price": 6,
+          "minLevel": 1
+        },
+        {
+          "id": "sling_satchel",
+          "source": "gear",
+          "price": 60,
+          "minLevel": 1
+        },
+        {
+          "id": "trail_rucksack",
+          "source": "gear",
+          "price": 800,
+          "minLevel": 10
+        },
+        {
+          "id": "expedition_pack",
+          "source": "gear",
+          "price": 2170,
+          "minLevel": 20
+        }
+      ],
+      "says": [
+        "Stand still. STILL. Breathe in. Not the fumes.",
+        "Robes are armour for people who'd rather not be hit at all.",
+        "That scorch mark? Cost you extra. That bloodstain? Free."
+      ]
+    },
+    "jeweller": {
+      "name": "Glass Jeweller",
+      "role": "jeweller",
+      "sign": "ring",
+      "light": true,
+      "categories": {
+        "other": {
+          "label": "Rings & amulets",
+          "bases": [
+            "ring",
+            "gold_signet",
+            "necklace",
+            "silver_amulet",
+            "g5_signet",
+            "g5_torc"
+          ],
+          "count": 9,
+          "rarity": {
+            "normal": 0.35,
+            "magic": 0.5,
+            "rare": 0.15
+          },
+          "countBase": 8,
+          "catalog": [
+            "g5_signet",
+            "g5_torc"
+          ]
+        }
+      },
+      "goods": [],
+      "says": [
+        "Every bead has a story. Most of them end with a fight.",
+        "Obsidian doesn't tarnish. People do.",
+        "Two rings, two hands, no limits. Well, two limits."
+      ]
+    },
+    "stable": {
+      "name": "Beast Pens",
+      "role": "stablehand",
+      "sign": "horseshoe",
+      "light": true,
+      "categories": {},
+      "goods": [
+        {
+          "id": "trail_horse",
+          "source": "gear",
+          "price": 400,
+          "minLevel": 1,
+          "note": "the owner wants to try a mount (play-test 2, Q16): the plain horse is sold from level 1, ahead of PLAN §6.5's mount-at-10 ladder"
+        },
+        {
+          "id": "pony",
+          "source": "gear",
+          "price": 1800,
+          "minLevel": 5
+        },
+        {
+          "id": "courser",
+          "source": "gear",
+          "price": 5300,
+          "minLevel": 10
+        },
+        {
+          "id": "dray",
+          "source": "gear",
+          "price": 9000,
+          "minLevel": 15
+        },
+        {
+          "id": "cane_seed_sack",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        },
+        {
+          "id": "ironpalm_pack",
+          "source": "good",
+          "price": 45,
+          "minLevel": 1
+        }
+      ],
+      "services": {
+        "stable": {
+          "label": "Swap your riding mount (mounts you own are kept here)",
+          "price": 0
+        }
+      },
+      "says": [
+        "Mind his back legs. And his front ones. And his teeth.",
+        "Every beast here has crossed the ash at least once. They don't talk about it.",
+        "Cane-seed, water, a kind word. Same as people, really."
+      ]
+    },
+    "inn": {
+      "name": "Spring-House",
+      "role": "innkeeper",
+      "sign": "tankard",
+      "light": true,
+      "categories": {},
+      "goods": [
+        {
+          "id": "smoked_reef_fish",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        },
+        {
+          "id": "palm_toddy",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        },
+        {
+          "id": "steamcap_broth",
+          "source": "good",
+          "price": 9,
+          "minLevel": 1
+        },
+        {
+          "id": "healing_potion",
+          "source": "potion",
+          "price": 10,
+          "minLevel": 1
+        }
+      ],
+      "services": {
+        "bind": {
+          "label": "Make this inn your home (recall and respawn here)",
+          "price": 0
+        }
+      },
+      "says": [
+        "Broth's on. It's always on. The mountain sees to that.",
+        "Rooms upstairs, hot pools out back, everyone's happy."
+      ]
+    },
+    "provisioner": {
+      "name": "Salt-and-Rope",
+      "role": "provisioner",
+      "sign": "sack",
+      "light": true,
+      "categories": {},
+      "goods": [
+        {
+          "id": "smoked_reef_fish",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        },
+        {
+          "id": "palm_toddy",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        },
+        {
+          "id": "rim_recall_token",
+          "source": "good",
+          "price": 25,
+          "minLevel": 1
+        },
+        {
+          "id": "cane_seed_sack",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        },
+        {
+          "id": "ironpalm_pack",
+          "source": "good",
+          "price": 45,
+          "minLevel": 1
+        },
+        {
+          "id": "cinderbloom_poultice",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        },
+        {
+          "id": "obsidian_charm",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        }
+      ],
+      "says": [
+        "Salt fish, toddy, grease and a charm. Everything a traveller forgets.",
+        "Pack light. Pack fish. Pack more fish.",
+        "Going over the ash? Buy two."
+      ]
+    },
+    "barber": {
+      "name": "Barber",
+      "role": "barber",
+      "sign": "scissors",
+      "light": true,
+      "categories": {},
+      "goods": [],
+      "services": {
+        "appearance": {
+          "label": "Change your look",
+          "editor": "the character editor (the same one the title screen's Customize Appearance opens), limited to what this barber does",
+          "firstVisitFree": true,
+          "prices": {
+            "hair": 15,
+            "hairColour": 12,
+            "beard": 12,
+            "eyes": 18,
+            "face": 30,
+            "skin": 36,
+            "body": 60,
+            "voice": 24,
+            "everything": 120
+          },
+          "perLevel": 0.05,
+          "note": "price = list price x (1 + perLevel x (level - 1)), rounded; the first change a character ever makes here is free. Class outfits are not the barber's (gear is gear)."
+        }
+      },
+      "says": [
+        "Sit. A little off the top? A little off the side? A little ash out of the ear?",
+        "I've cut the hair of three Glass Kings. Well. Three men who said they were.",
+        "New face, new you. Same debts, mind."
+      ]
+    },
+    "broker": {
+      "name": "Spear Hall",
+      "role": "broker",
+      "sign": "scroll",
+      "light": true,
+      "categories": {},
+      "goods": [],
+      "services": {
+        "followers": {
+          "label": "Hire a follower (Farhold mercenaries)",
+          "price": "rules"
+        }
+      },
+      "says": [
+        "Spears for hire, priced by the day, buried at your expense.",
+        "Need a shield arm? I've got six. Attached to people, mostly."
+      ]
+    },
+    "unbinder": {
+      "name": "Unbinder",
+      "role": "unbinder",
+      "sign": "candle",
+      "light": false,
+      "categories": {},
+      "goods": [],
+      "services": {
+        "retrain": {
+          "label": "Take back a talent or a perk",
+          "price": "rules.retrainPrice"
+        }
+      },
+      "says": [
+        "What was learned can be unlearned. For a fee.",
+        "Regret is a door. I have the key. It's obsidian."
+      ]
+    },
+    "healer": {
+      "name": "Steam Healer",
+      "role": "healer",
+      "sign": "bowl",
+      "light": true,
+      "categories": {},
+      "goods": [
+        {
+          "id": "healing_potion",
+          "source": "potion",
+          "price": 10,
+          "minLevel": 1
+        },
+        {
+          "id": "greater_healing",
+          "source": "potion",
+          "price": 36,
+          "minLevel": 5
+        },
+        {
+          "id": "mana_potion",
+          "source": "potion",
+          "price": 10,
+          "minLevel": 1
+        },
+        {
+          "id": "cinderbloom_poultice",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        },
+        {
+          "id": "antidote",
+          "source": "potion",
+          "price": 7,
+          "minLevel": 1
+        }
+      ],
+      "services": {
+        "cure": {
+          "label": "Lift lingering curses and sickness",
+          "price": 0
+        }
+      },
+      "says": [
+        "Sit. No, not there, that's where the hot stones go.",
+        "Whatever it is, I've seen worse. This morning, mostly."
+      ]
+    },
+    "angler": {
+      "name": "Reef Angler",
+      "role": "angler",
+      "sign": "fish",
+      "light": false,
+      "goods": [
+        {
+          "id": "angling_rod",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        },
+        {
+          "id": "ash_rod",
+          "source": "good",
+          "price": 450,
+          "minLevel": 1,
+          "minSkill": 25
+        },
+        {
+          "id": "river_wardens_rod",
+          "source": "good",
+          "price": 2400,
+          "minLevel": 1,
+          "minSkill": 50
+        },
+        {
+          "id": "bait_worms",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        },
+        {
+          "id": "bait_bread_paste",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        },
+        {
+          "id": "bait_bright_lure",
+          "source": "good",
+          "price": 20,
+          "minLevel": 1
+        }
+      ],
+      "buys": [
+        "fish"
+      ],
+      "says": [
+        "Fish pay for themselves. Bring me what you land.",
+        "The shoals move when you thin them. Follow the ripples.",
+        "Sit down to eat what you cook. Standing meals do half the good."
+      ],
+      "note": "play-test 5 T25: rods (Tools: no weapon slot) and bait; buys fish at the usual sell factor. One per hub town, standing on the bank (data/provinces/angling-pools.json anglers)."
+    }
+  },
+  "goodsCatalog": {
+    "travel_rations": {
+      "name": "Travel rations",
+      "desc": "Bread, cheese and something that was once a sausage. Eat out of combat to recover health over 20 seconds.",
+      "use": {
+        "type": "food",
+        "regen": 0.04,
+        "seconds": 20
+      }
+    },
+    "trail_ale": {
+      "name": "Mug of trail ale",
+      "desc": "Drink out of combat to recover mana over 20 seconds. Tastes of the barrel.",
+      "use": {
+        "type": "drink",
+        "regen": 0.04,
+        "seconds": 20
+      }
+    },
+    "hearty_stew": {
+      "name": "Bowl of hearty stew",
+      "desc": "Eat out of combat: recover health and mana over 20 seconds, then +5% health for 30 minutes.",
+      "use": {
+        "type": "food",
+        "regen": 0.05,
+        "seconds": 20,
+        "buff": {
+          "stat": "hpPct",
+          "amount": 0.05,
+          "minutes": 30
+        }
+      }
+    },
+    "recall_charm": {
+      "name": "Recall charm",
+      "desc": "Snap it to walk out of the wilds to your bound inn after 5 seconds of standing still. One use.",
+      "use": {
+        "type": "recall",
+        "cast": 5
+      }
+    },
+    "whetstone": {
+      "name": "Whetstone",
+      "desc": "Sharpen an edge before a fight: +3% weapon damage for 15 minutes.",
+      "use": {
+        "type": "buff",
+        "buff": {
+          "stat": "dmgPct",
+          "amount": 0.03,
+          "minutes": 15
+        }
+      }
+    },
+    "armour_oil": {
+      "name": "Armour oil",
+      "desc": "Oil the joints: +4% armour for 15 minutes.",
+      "use": {
+        "type": "buff",
+        "buff": {
+          "stat": "armorPct",
+          "amount": 0.04,
+          "minutes": 15
+        }
+      }
+    },
+    "silver_dust": {
+      "name": "Pinch of silver dust",
+      "desc": "Rub it on your weapon: +6% damage to the dead and the cursed for 10 minutes.",
+      "use": {
+        "type": "buff",
+        "buff": {
+          "stat": "vsUndeadPct",
+          "amount": 0.06,
+          "minutes": 10
+        }
+      }
+    },
+    "fletching_kit": {
+      "name": "Fletching kit",
+      "desc": "Fresh flights and heads for a bow or crossbow: +4% ranged damage for 15 minutes. (There is no ammunition; this is just better arrows.)",
+      "use": {
+        "type": "buff",
+        "buff": {
+          "stat": "rangedPct",
+          "amount": 0.04,
+          "minutes": 15
+        }
+      }
+    },
+    "herb_poultice": {
+      "name": "Herb poultice",
+      "desc": "Press it on a wound: stops bleeding and heals a little at once.",
+      "use": {
+        "type": "cleanse",
+        "statuses": [
+          "bleed"
+        ],
+        "heal": 0.08
+      }
+    },
+    "dye_pot": {
+      "name": "Pot of cloth dye",
+      "desc": "Recolour one piece of cloth or leather you are wearing (pick the colour in the window).",
+      "use": {
+        "type": "dye"
+      }
+    },
+    "saddle_bags": {
+      "name": "Saddle bags",
+      "desc": "Twelve more bag slots while you own a mount. Kept on the mount.",
+      "use": {
+        "type": "bag",
+        "slots": 12,
+        "needs": "mount"
+      }
+    },
+    "oat_sack": {
+      "name": "Sack of oats",
+      "desc": "Feed your mount: +10% riding speed for 30 minutes.",
+      "use": {
+        "type": "buff",
+        "buff": {
+          "stat": "mountSpeedPct",
+          "amount": 0.1,
+          "minutes": 30
+        }
+      }
+    },
+    "lucky_horseshoe": {
+      "name": "Lucky horseshoe",
+      "desc": "Nail it over your door, or hang it from your saddle. Does nothing measurable. People swear by it.",
+      "use": {
+        "type": "trinket"
+      }
+    },
+    "angling_rod": {
+      "name": "Hazel Rod",
+      "desc": "A hazel switch, a length of line and a hook. A Tool: it takes no weapon slot. Lets you fish any water.",
+      "use": {
+        "type": "rod",
+        "minSkill": 0,
+        "bonus": {}
+      },
+      "tool": true
+    },
+    "ash_rod": {
+      "name": "Whippy Ash Rod",
+      "desc": "Longer, springier and far too good for gudgeon. The tug band is 15% wider.",
+      "use": {
+        "type": "rod",
+        "minSkill": 25,
+        "bonus": {
+          "band": 0.15
+        }
+      },
+      "tool": true
+    },
+    "river_wardens_rod": {
+      "name": "River Warden's Rod",
+      "desc": "Split cane with a brass reel. The tug band is 25% wider and bites come 20% sooner.",
+      "use": {
+        "type": "rod",
+        "minSkill": 50,
+        "bonus": {
+          "band": 0.25,
+          "wait": -0.2
+        }
+      },
+      "tool": true
+    },
+    "bait_worms": {
+      "name": "Tin of Worms",
+      "desc": "Ten worms. Bites come 25% sooner for the next ten casts.",
+      "use": {
+        "type": "bait",
+        "effect": {
+          "wait": -0.25,
+          "casts": 10
+        }
+      },
+      "stack": 20
+    },
+    "bait_bread_paste": {
+      "name": "Bread Paste",
+      "desc": "Common fish cannot resist it; rare fish can. Ten casts with fewer junk catches.",
+      "use": {
+        "type": "bait",
+        "effect": {
+          "junk": -0.5,
+          "casts": 10
+        }
+      },
+      "stack": 20
+    },
+    "bait_bright_lure": {
+      "name": "Bright Tin Lure",
+      "desc": "Flashes like a perch's dream. Ten casts with a better chance at uncommon and rare fish.",
+      "use": {
+        "type": "bait",
+        "effect": {
+          "rarity": 0.25,
+          "casts": 10
+        }
+      },
+      "stack": 20
+    },
+    "cart_token": {
+      "name": "Carter's token",
+      "desc": "A stamped wooden token from the Longroad Carters. Hand it to any carter instead of the fare: one ride to any town, however far.",
+      "use": {
+        "type": "cartToken",
+        "rides": 1
+      }
+    },
+    "smoked_reef_fish": {
+      "name": "Smoked reef fish",
+      "desc": "Split, salted and smoked over ironpalm. Eat out of combat to recover health over 20 seconds.",
+      "use": {
+        "type": "food",
+        "regen": 0.04,
+        "seconds": 20
+      }
+    },
+    "palm_toddy": {
+      "name": "Gourd of palm toddy",
+      "desc": "Drink out of combat to recover mana over 20 seconds. Sweet, sour and a little fizzy.",
+      "use": {
+        "type": "drink",
+        "regen": 0.04,
+        "seconds": 20
+      }
+    },
+    "steamcap_broth": {
+      "name": "Bowl of steamcap broth",
+      "desc": "Mushrooms slow-cooked in a vent pit. Eat out of combat: recover health and mana over 20 seconds, then +5% health for 30 minutes.",
+      "use": {
+        "type": "food",
+        "regen": 0.05,
+        "seconds": 20,
+        "buff": {
+          "stat": "hpPct",
+          "amount": 0.05,
+          "minutes": 30
+        }
+      }
+    },
+    "rim_recall_token": {
+      "name": "Rim Keeper's token",
+      "desc": "A chip of banded basalt. Snap it to walk out of the wilds to your bound inn after 5 seconds of standing still. One use.",
+      "use": {
+        "type": "recall",
+        "cast": 5
+      }
+    },
+    "pumice_whetstone": {
+      "name": "Pumice whetstone",
+      "desc": "Light, gritty and the only stone the island has plenty of: +3% weapon damage for 15 minutes.",
+      "use": {
+        "type": "buff",
+        "buff": {
+          "stat": "dmgPct",
+          "amount": 0.03,
+          "minutes": 15
+        }
+      }
+    },
+    "salamander_grease": {
+      "name": "Salamander-fat grease",
+      "desc": "Rendered from trapped salamanders and worked into the straps: +4% armour for 15 minutes. Smells of lizard.",
+      "use": {
+        "type": "buff",
+        "buff": {
+          "stat": "armorPct",
+          "amount": 0.04,
+          "minutes": 15
+        }
+      }
+    },
+    "obsidian_dust": {
+      "name": "Pinch of obsidian dust",
+      "desc": "Rub it on your weapon: +6% damage to the dead and the cursed for 10 minutes. The Glass Kings' dead dislike their own glass.",
+      "use": {
+        "type": "buff",
+        "buff": {
+          "stat": "vsUndeadPct",
+          "amount": 0.06,
+          "minutes": 10
+        }
+      }
+    },
+    "glasshead_fletching": {
+      "name": "Glass-head fletching",
+      "desc": "Obsidian heads and fresh flights for a bow or crossbow: +4% ranged damage for 15 minutes. (There is no ammunition; this is just better arrows.)",
+      "use": {
+        "type": "buff",
+        "buff": {
+          "stat": "rangedPct",
+          "amount": 0.04,
+          "minutes": 15
+        }
+      }
+    },
+    "cinderbloom_poultice": {
+      "name": "Cinderbloom poultice",
+      "desc": "The red flower that grows on fresh lava, mashed. Press it on a wound: stops bleeding and heals a little at once.",
+      "use": {
+        "type": "cleanse",
+        "statuses": [
+          "bleed"
+        ],
+        "heal": 0.08
+      }
+    },
+    "ochre_dye": {
+      "name": "Pot of red-ochre dye",
+      "desc": "Recolour one piece of cloth or leather you are wearing (pick the colour in the window). Not only red, despite the name.",
+      "use": {
+        "type": "dye"
+      }
+    },
+    "ironpalm_pack": {
+      "name": "Ironpalm-fibre saddle pack",
+      "desc": "Twelve more bag slots while you own a mount. Kept on the mount.",
+      "use": {
+        "type": "bag",
+        "slots": 12,
+        "needs": "mount"
+      }
+    },
+    "cane_seed_sack": {
+      "name": "Sack of toasted cane-seed",
+      "desc": "Feed your mount: +10% riding speed for 30 minutes. Every beast on the island would sell its rider for a sack.",
+      "use": {
+        "type": "buff",
+        "buff": {
+          "stat": "mountSpeedPct",
+          "amount": 0.1,
+          "minutes": 30
+        }
+      }
+    },
+    "obsidian_charm": {
+      "name": "Obsidian charm",
+      "desc": "A polished black chip on a cord. Does nothing measurable. Every fisher on the island wears one anyway.",
+      "use": {
+        "type": "trinket"
+      }
+    },
+    "haulers_token": {
+      "name": "Hauler's token",
+      "desc": "A stamped clay token from the Ash-Road Haulers. Hand it to any carter instead of the fare: one ride to any town, however far.",
+      "use": {
+        "type": "cartToken",
+        "rides": 1
+      }
+    }
+  },
+  "roles": {
+    "merchant": {
+      "kind": "general",
+      "title": "Hearth Store",
+      "sells": [
+        {
+          "base": "ring",
+          "rarity": "normal",
+          "cat": "Rings & charms"
+        },
+        {
+          "base": "necklace",
+          "rarity": "normal",
+          "cat": "Rings & charms"
+        },
+        {
+          "base": "ring",
+          "rarity": "magic",
+          "cat": "Rings & charms"
+        },
+        {
+          "base": "cloth_helm",
+          "rarity": "normal",
+          "cat": "Plain clothes"
+        },
+        {
+          "base": "cloth_chest",
+          "rarity": "normal",
+          "cat": "Plain clothes"
+        },
+        {
+          "base": "cloth_legs",
+          "rarity": "normal",
+          "cat": "Plain clothes"
+        },
+        {
+          "base": "light_boots",
+          "rarity": "magic",
+          "cat": "Plain clothes"
+        }
+      ],
+      "markup": 1,
+      "sign": "barrel",
+      "light": true,
+      "goods": [
+        {
+          "id": "healing_potion",
+          "source": "potion",
+          "price": 10,
+          "minLevel": 1
+        },
+        {
+          "id": "mana_potion",
+          "source": "potion",
+          "price": 10,
+          "minLevel": 1
+        },
+        {
+          "id": "antidote",
+          "source": "potion",
+          "price": 7,
+          "minLevel": 1
+        },
+        {
+          "id": "smoked_reef_fish",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        },
+        {
+          "id": "palm_toddy",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        },
+        {
+          "id": "rim_recall_token",
+          "source": "good",
+          "price": 25,
+          "minLevel": 1
+        },
+        {
+          "id": "obsidian_charm",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        },
+        {
+          "id": "sling_satchel",
+          "source": "gear",
+          "price": 60,
+          "minLevel": 1
+        }
+      ]
+    },
+    "trader": {
+      "kind": "market",
+      "title": "Strand Stall",
+      "sells": [
+        {
+          "base": "dagger",
+          "rarity": "normal",
+          "cat": "Odds and ends"
+        },
+        {
+          "base": "sword",
+          "rarity": "normal",
+          "cat": "Odds and ends"
+        },
+        {
+          "base": "spear",
+          "rarity": "normal",
+          "cat": "Odds and ends"
+        },
+        {
+          "base": "shortbow",
+          "rarity": "normal",
+          "cat": "Odds and ends"
+        },
+        {
+          "base": "wand",
+          "rarity": "normal",
+          "cat": "Odds and ends"
+        },
+        {
+          "base": "hammer",
+          "rarity": "magic",
+          "cat": "Odds and ends"
+        },
+        {
+          "base": "battleaxe",
+          "rarity": "magic",
+          "cat": "Odds and ends"
+        },
+        {
+          "base": "staff",
+          "rarity": "magic",
+          "cat": "Odds and ends"
+        },
+        {
+          "base": "iron_mace",
+          "rarity": "magic",
+          "cat": "Odds and ends"
+        },
+        {
+          "base": "javelin",
+          "rarity": "rare",
+          "cat": "Odds and ends"
+        },
+        {
+          "base": "light_chest",
+          "rarity": "normal",
+          "cat": "Second-hand gear"
+        },
+        {
+          "base": "medium_helm",
+          "rarity": "normal",
+          "cat": "Second-hand gear"
+        },
+        {
+          "base": "light_boots",
+          "rarity": "magic",
+          "cat": "Second-hand gear"
+        },
+        {
+          "base": "cloth_legs",
+          "rarity": "magic",
+          "cat": "Second-hand gear"
+        },
+        {
+          "base": "ring",
+          "rarity": "normal",
+          "cat": "Trinkets"
+        },
+        {
+          "base": "necklace",
+          "rarity": "magic",
+          "cat": "Trinkets"
+        }
+      ],
+      "markup": 1,
+      "sign": "awning",
+      "light": true,
+      "goods": [
+        {
+          "id": "ochre_dye",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        },
+        {
+          "id": "smoked_reef_fish",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        }
+      ]
+    },
+    "smith": {
+      "kind": "weaponsmith",
+      "title": "Basalt Forge",
+      "sells": [
+        {
+          "base": "sword",
+          "rarity": "normal",
+          "cat": "Blades, axes, maces & polearms"
+        },
+        {
+          "base": "rapier",
+          "rarity": "normal",
+          "cat": "Blades, axes, maces & polearms"
+        },
+        {
+          "base": "dagger",
+          "rarity": "normal",
+          "cat": "Blades, axes, maces & polearms"
+        },
+        {
+          "base": "iron_mace",
+          "rarity": "normal",
+          "cat": "Blades, axes, maces & polearms"
+        },
+        {
+          "base": "hammer",
+          "rarity": "normal",
+          "cat": "Blades, axes, maces & polearms"
+        },
+        {
+          "base": "battleaxe",
+          "rarity": "normal",
+          "cat": "Blades, axes, maces & polearms"
+        },
+        {
+          "base": "axe2h",
+          "rarity": "normal",
+          "cat": "Blades, axes, maces & polearms"
+        },
+        {
+          "base": "sword2h",
+          "rarity": "normal",
+          "cat": "Blades, axes, maces & polearms"
+        },
+        {
+          "base": "halberd",
+          "rarity": "normal",
+          "cat": "Blades, axes, maces & polearms"
+        },
+        {
+          "base": "spear",
+          "rarity": "magic",
+          "cat": "Blades, axes, maces & polearms"
+        },
+        {
+          "base": "longsword",
+          "rarity": "magic",
+          "cat": "Blades, axes, maces & polearms"
+        },
+        {
+          "base": "warhammer",
+          "rarity": "magic",
+          "cat": "Blades, axes, maces & polearms"
+        },
+        {
+          "base": "greatsword",
+          "rarity": "magic",
+          "cat": "Blades, axes, maces & polearms"
+        },
+        {
+          "base": "g5_kris",
+          "rarity": "magic",
+          "cat": "Blades, axes, maces & polearms"
+        },
+        {
+          "base": "g5_leafblade",
+          "rarity": "magic",
+          "cat": "Blades, axes, maces & polearms"
+        },
+        {
+          "base": "g5_mallet",
+          "rarity": "magic",
+          "cat": "Blades, axes, maces & polearms"
+        },
+        {
+          "base": "g5_moonaxe",
+          "rarity": "rare",
+          "cat": "Blades, axes, maces & polearms"
+        },
+        {
+          "base": "buckler",
+          "rarity": "normal",
+          "cat": "Shields"
+        },
+        {
+          "base": "shield",
+          "rarity": "normal",
+          "cat": "Shields"
+        },
+        {
+          "base": "kite_shield",
+          "rarity": "normal",
+          "cat": "Shields"
+        },
+        {
+          "base": "g5_targe",
+          "rarity": "magic",
+          "cat": "Shields"
+        },
+        {
+          "base": "g5_scutcheon",
+          "rarity": "magic",
+          "cat": "Shields"
+        }
+      ],
+      "markup": 1,
+      "sign": "anvil",
+      "light": true,
+      "goods": [
+        {
+          "id": "pumice_whetstone",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        },
+        {
+          "id": "salamander_grease",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        }
+      ],
+      "services": {
+        "salvage": {
+          "label": "Break down gear for materials",
+          "price": 0
+        }
+      }
+    },
+    "armourer": {
+      "kind": "armourer",
+      "title": "Armourer",
+      "sells": [
+        {
+          "base": "light_helm",
+          "rarity": "normal",
+          "cat": "Mail & plate"
+        },
+        {
+          "base": "medium_helm",
+          "rarity": "normal",
+          "cat": "Mail & plate"
+        },
+        {
+          "base": "heavy_helm",
+          "rarity": "normal",
+          "cat": "Mail & plate"
+        },
+        {
+          "base": "light_chest",
+          "rarity": "normal",
+          "cat": "Mail & plate"
+        },
+        {
+          "base": "medium_chest",
+          "rarity": "normal",
+          "cat": "Mail & plate"
+        },
+        {
+          "base": "scaled_chest",
+          "rarity": "normal",
+          "cat": "Mail & plate"
+        },
+        {
+          "base": "heavy_chest",
+          "rarity": "normal",
+          "cat": "Mail & plate"
+        },
+        {
+          "base": "light_legs",
+          "rarity": "normal",
+          "cat": "Mail & plate"
+        },
+        {
+          "base": "medium_legs",
+          "rarity": "normal",
+          "cat": "Mail & plate"
+        },
+        {
+          "base": "heavy_legs",
+          "rarity": "magic",
+          "cat": "Mail & plate"
+        },
+        {
+          "base": "light_gauntlets",
+          "rarity": "magic",
+          "cat": "Mail & plate"
+        },
+        {
+          "base": "medium_gauntlets",
+          "rarity": "magic",
+          "cat": "Mail & plate"
+        },
+        {
+          "base": "heavy_gauntlets",
+          "rarity": "magic",
+          "cat": "Mail & plate"
+        },
+        {
+          "base": "light_boots",
+          "rarity": "magic",
+          "cat": "Mail & plate"
+        },
+        {
+          "base": "medium_boots",
+          "rarity": "magic",
+          "cat": "Mail & plate"
+        },
+        {
+          "base": "heavy_boots",
+          "rarity": "magic",
+          "cat": "Mail & plate"
+        },
+        {
+          "base": "g5_leather_brigandine",
+          "rarity": "rare",
+          "cat": "Mail & plate"
+        },
+        {
+          "base": "buckler",
+          "rarity": "normal",
+          "cat": "Shields"
+        },
+        {
+          "base": "shield",
+          "rarity": "normal",
+          "cat": "Shields"
+        },
+        {
+          "base": "kite_shield",
+          "rarity": "normal",
+          "cat": "Shields"
+        },
+        {
+          "base": "tower_shield",
+          "rarity": "magic",
+          "cat": "Shields"
+        },
+        {
+          "base": "g5_targe",
+          "rarity": "magic",
+          "cat": "Shields"
+        }
+      ],
+      "markup": 1,
+      "sign": "shield",
+      "light": true,
+      "goods": [
+        {
+          "id": "salamander_grease",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        }
+      ]
+    },
+    "bowyer": {
+      "kind": "bowyer",
+      "title": "Spear & Bow",
+      "sells": [
+        {
+          "base": "shortbow",
+          "rarity": "normal",
+          "cat": "Bows & throwing spears"
+        },
+        {
+          "base": "bow",
+          "rarity": "normal",
+          "cat": "Bows & throwing spears"
+        },
+        {
+          "base": "crossbow",
+          "rarity": "normal",
+          "cat": "Bows & throwing spears"
+        },
+        {
+          "base": "javelin",
+          "rarity": "normal",
+          "cat": "Bows & throwing spears"
+        },
+        {
+          "base": "spear",
+          "rarity": "normal",
+          "cat": "Bows & throwing spears"
+        },
+        {
+          "base": "g5_harpoon",
+          "rarity": "magic",
+          "cat": "Bows & throwing spears"
+        },
+        {
+          "base": "g5_recurve",
+          "rarity": "magic",
+          "cat": "Bows & throwing spears"
+        },
+        {
+          "base": "g5_arbalest",
+          "rarity": "magic",
+          "cat": "Bows & throwing spears"
+        },
+        {
+          "base": "shortbow",
+          "rarity": "rare",
+          "cat": "Bows & throwing spears"
+        },
+        {
+          "base": "quiver",
+          "rarity": "normal",
+          "cat": "Quivers"
+        },
+        {
+          "base": "g5_hipquiver",
+          "rarity": "normal",
+          "cat": "Quivers"
+        },
+        {
+          "base": "quiver",
+          "rarity": "magic",
+          "cat": "Quivers"
+        }
+      ],
+      "markup": 1,
+      "sign": "bow",
+      "light": true,
+      "goods": [
+        {
+          "id": "quiver",
+          "source": "gear",
+          "price": 60,
+          "minLevel": 1
+        },
+        {
+          "id": "glasshead_fletching",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        }
+      ]
+    },
+    "apothecary": {
+      "kind": "apothecary",
+      "title": "Fume-House Apothecary",
+      "sells": [
+        {
+          "base": "wand",
+          "rarity": "normal",
+          "cat": "Staves, wands & rods"
+        },
+        {
+          "base": "staff",
+          "rarity": "normal",
+          "cat": "Staves, wands & rods"
+        },
+        {
+          "base": "scepter",
+          "rarity": "normal",
+          "cat": "Staves, wands & rods"
+        },
+        {
+          "base": "tome",
+          "rarity": "normal",
+          "cat": "Staves, wands & rods"
+        },
+        {
+          "base": "quarterstaff",
+          "rarity": "normal",
+          "cat": "Staves, wands & rods"
+        },
+        {
+          "base": "g5_staff_spire",
+          "rarity": "magic",
+          "cat": "Staves, wands & rods"
+        },
+        {
+          "base": "g5_wand_dart",
+          "rarity": "magic",
+          "cat": "Staves, wands & rods"
+        },
+        {
+          "base": "g5_bostaff",
+          "rarity": "magic",
+          "cat": "Staves, wands & rods"
+        },
+        {
+          "base": "g5_codex",
+          "rarity": "magic",
+          "cat": "Staves, wands & rods"
+        },
+        {
+          "base": "g5_staff_horn",
+          "rarity": "magic",
+          "cat": "Staves, wands & rods"
+        },
+        {
+          "base": "g5_wand_bell",
+          "rarity": "rare",
+          "cat": "Staves, wands & rods"
+        }
+      ],
+      "markup": 1,
+      "sign": "flask",
+      "light": true,
+      "goods": [
+        {
+          "id": "healing_potion",
+          "source": "potion",
+          "price": 9,
+          "minLevel": 1
+        },
+        {
+          "id": "greater_healing",
+          "source": "potion",
+          "price": 36,
+          "minLevel": 5
+        },
+        {
+          "id": "mana_potion",
+          "source": "potion",
+          "price": 9,
+          "minLevel": 1
+        },
+        {
+          "id": "antidote",
+          "source": "potion",
+          "price": 6,
+          "minLevel": 1
+        },
+        {
+          "id": "cinderbloom_poultice",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        },
+        {
+          "id": "group_tonic",
+          "source": "potion",
+          "price": 120,
+          "minLevel": 10
+        },
+        {
+          "id": "revival_flask",
+          "source": "potion",
+          "price": 90,
+          "minLevel": 5
+        },
+        {
+          "id": "obsidian_dust",
+          "source": "good",
+          "price": 8,
+          "minLevel": 3
+        }
+      ]
+    },
+    "tailor": {
+      "kind": "tailor",
+      "title": "Reed & Hide Tailor",
+      "sells": [
+        {
+          "base": "cloth_helm",
+          "rarity": "normal",
+          "cat": "Robes, leathers, cloaks, belts & packs"
+        },
+        {
+          "base": "cloth_chest",
+          "rarity": "normal",
+          "cat": "Robes, leathers, cloaks, belts & packs"
+        },
+        {
+          "base": "cloth_legs",
+          "rarity": "normal",
+          "cat": "Robes, leathers, cloaks, belts & packs"
+        },
+        {
+          "base": "light_helm",
+          "rarity": "normal",
+          "cat": "Robes, leathers, cloaks, belts & packs"
+        },
+        {
+          "base": "light_chest",
+          "rarity": "normal",
+          "cat": "Robes, leathers, cloaks, belts & packs"
+        },
+        {
+          "base": "light_legs",
+          "rarity": "normal",
+          "cat": "Robes, leathers, cloaks, belts & packs"
+        },
+        {
+          "base": "light_gauntlets",
+          "rarity": "normal",
+          "cat": "Robes, leathers, cloaks, belts & packs"
+        },
+        {
+          "base": "light_boots",
+          "rarity": "normal",
+          "cat": "Robes, leathers, cloaks, belts & packs"
+        },
+        {
+          "base": "travel_cloak",
+          "rarity": "normal",
+          "cat": "Robes, leathers, cloaks, belts & packs"
+        },
+        {
+          "base": "leather_belt",
+          "rarity": "normal",
+          "cat": "Robes, leathers, cloaks, belts & packs"
+        },
+        {
+          "base": "expedition_pack",
+          "rarity": "normal",
+          "cat": "Robes, leathers, cloaks, belts & packs"
+        },
+        {
+          "base": "trail_rucksack",
+          "rarity": "magic",
+          "cat": "Robes, leathers, cloaks, belts & packs"
+        },
+        {
+          "base": "sling_satchel",
+          "rarity": "magic",
+          "cat": "Robes, leathers, cloaks, belts & packs"
+        },
+        {
+          "base": "g5_cloth_curltoes",
+          "rarity": "magic",
+          "cat": "Robes, leathers, cloaks, belts & packs"
+        },
+        {
+          "base": "g5_cloth_handwraps",
+          "rarity": "magic",
+          "cat": "Robes, leathers, cloaks, belts & packs"
+        },
+        {
+          "base": "g5_cloth_pleats",
+          "rarity": "magic",
+          "cat": "Robes, leathers, cloaks, belts & packs"
+        },
+        {
+          "base": "g5_cloth_vestment",
+          "rarity": "magic",
+          "cat": "Robes, leathers, cloaks, belts & packs"
+        },
+        {
+          "base": "g5_cloth_wrap",
+          "rarity": "magic",
+          "cat": "Robes, leathers, cloaks, belts & packs"
+        },
+        {
+          "base": "g5_pack_satchel",
+          "rarity": "rare",
+          "cat": "Robes, leathers, cloaks, belts & packs"
+        },
+        {
+          "base": "warded_focus",
+          "rarity": "normal",
+          "cat": "Caster's off hand"
+        },
+        {
+          "base": "spellguard_orb",
+          "rarity": "normal",
+          "cat": "Caster's off hand"
+        },
+        {
+          "base": "grimoire",
+          "rarity": "normal",
+          "cat": "Caster's off hand"
+        },
+        {
+          "base": "seer_orb",
+          "rarity": "normal",
+          "cat": "Caster's off hand"
+        },
+        {
+          "base": "reliquary",
+          "rarity": "magic",
+          "cat": "Caster's off hand"
+        },
+        {
+          "base": "effigy",
+          "rarity": "magic",
+          "cat": "Caster's off hand"
+        },
+        {
+          "base": "orb",
+          "rarity": "magic",
+          "cat": "Caster's off hand"
+        },
+        {
+          "base": "g5_folio",
+          "rarity": "magic",
+          "cat": "Caster's off hand"
+        },
+        {
+          "base": "g5_armillary",
+          "rarity": "rare",
+          "cat": "Caster's off hand"
+        }
+      ],
+      "markup": 1,
+      "sign": "needle",
+      "light": true,
+      "goods": [
+        {
+          "id": "ochre_dye",
+          "source": "good",
+          "price": 6,
+          "minLevel": 1
+        },
+        {
+          "id": "sling_satchel",
+          "source": "gear",
+          "price": 60,
+          "minLevel": 1
+        },
+        {
+          "id": "trail_rucksack",
+          "source": "gear",
+          "price": 800,
+          "minLevel": 10
+        },
+        {
+          "id": "expedition_pack",
+          "source": "gear",
+          "price": 2170,
+          "minLevel": 20
+        }
+      ]
+    },
+    "jeweller": {
+      "kind": "jeweller",
+      "title": "Glass Jeweller",
+      "sells": [
+        {
+          "base": "ring",
+          "rarity": "normal",
+          "cat": "Rings & amulets"
+        },
+        {
+          "base": "gold_signet",
+          "rarity": "normal",
+          "cat": "Rings & amulets"
+        },
+        {
+          "base": "necklace",
+          "rarity": "normal",
+          "cat": "Rings & amulets"
+        },
+        {
+          "base": "silver_amulet",
+          "rarity": "magic",
+          "cat": "Rings & amulets"
+        },
+        {
+          "base": "g5_signet",
+          "rarity": "magic",
+          "cat": "Rings & amulets"
+        },
+        {
+          "base": "g5_torc",
+          "rarity": "magic",
+          "cat": "Rings & amulets"
+        },
+        {
+          "base": "ring",
+          "rarity": "magic",
+          "cat": "Rings & amulets"
+        },
+        {
+          "base": "gold_signet",
+          "rarity": "magic",
+          "cat": "Rings & amulets"
+        },
+        {
+          "base": "necklace",
+          "rarity": "rare",
+          "cat": "Rings & amulets"
+        }
+      ],
+      "markup": 1,
+      "sign": "ring",
+      "light": true
+    },
+    "stablehand": {
+      "kind": "stable",
+      "title": "Beast Pens",
+      "sells": [],
+      "markup": 1,
+      "sign": "horseshoe",
+      "light": true,
+      "goods": [
+        {
+          "id": "trail_horse",
+          "source": "gear",
+          "price": 400,
+          "minLevel": 1,
+          "note": "the owner wants to try a mount (play-test 2, Q16): the plain horse is sold from level 1, ahead of PLAN §6.5's mount-at-10 ladder"
+        },
+        {
+          "id": "pony",
+          "source": "gear",
+          "price": 1800,
+          "minLevel": 5
+        },
+        {
+          "id": "courser",
+          "source": "gear",
+          "price": 5300,
+          "minLevel": 10
+        },
+        {
+          "id": "dray",
+          "source": "gear",
+          "price": 9000,
+          "minLevel": 15
+        },
+        {
+          "id": "cane_seed_sack",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        },
+        {
+          "id": "ironpalm_pack",
+          "source": "good",
+          "price": 45,
+          "minLevel": 1
+        }
+      ],
+      "services": {
+        "stable": {
+          "label": "Swap your riding mount (mounts you own are kept here)",
+          "price": 0
+        }
+      },
+      "mounts": true
+    },
+    "innkeeper": {
+      "kind": "inn",
+      "title": "Spring-House",
+      "sells": [],
+      "markup": 1,
+      "sign": "tankard",
+      "light": true,
+      "goods": [
+        {
+          "id": "smoked_reef_fish",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        },
+        {
+          "id": "palm_toddy",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        },
+        {
+          "id": "steamcap_broth",
+          "source": "good",
+          "price": 9,
+          "minLevel": 1
+        },
+        {
+          "id": "healing_potion",
+          "source": "potion",
+          "price": 10,
+          "minLevel": 1
+        }
+      ],
+      "services": {
+        "bind": {
+          "label": "Make this inn your home (recall and respawn here)",
+          "price": 0
+        }
+      }
+    },
+    "provisioner": {
+      "kind": "provisioner",
+      "title": "Salt-and-Rope",
+      "sells": [],
+      "markup": 1,
+      "sign": "sack",
+      "light": true,
+      "goods": [
+        {
+          "id": "smoked_reef_fish",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        },
+        {
+          "id": "palm_toddy",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        },
+        {
+          "id": "rim_recall_token",
+          "source": "good",
+          "price": 25,
+          "minLevel": 1
+        },
+        {
+          "id": "cane_seed_sack",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        },
+        {
+          "id": "ironpalm_pack",
+          "source": "good",
+          "price": 45,
+          "minLevel": 1
+        },
+        {
+          "id": "cinderbloom_poultice",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        },
+        {
+          "id": "obsidian_charm",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        }
+      ]
+    },
+    "healer": {
+      "kind": "healer",
+      "title": "Steam Healer",
+      "sells": [],
+      "markup": 1,
+      "sign": "bowl",
+      "light": true,
+      "goods": [
+        {
+          "id": "healing_potion",
+          "source": "potion",
+          "price": 10,
+          "minLevel": 1
+        },
+        {
+          "id": "greater_healing",
+          "source": "potion",
+          "price": 36,
+          "minLevel": 5
+        },
+        {
+          "id": "mana_potion",
+          "source": "potion",
+          "price": 10,
+          "minLevel": 1
+        },
+        {
+          "id": "cinderbloom_poultice",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        },
+        {
+          "id": "antidote",
+          "source": "potion",
+          "price": 7,
+          "minLevel": 1
+        }
+      ],
+      "services": {
+        "cure": {
+          "label": "Lift lingering curses and sickness",
+          "price": 0
+        }
+      }
+    },
+    "angler": {
+      "kind": "angler",
+      "title": "Reef Angler",
+      "sells": [],
+      "markup": 1,
+      "sign": "fish",
+      "light": false,
+      "goods": [
+        {
+          "id": "angling_rod",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        },
+        {
+          "id": "ash_rod",
+          "source": "good",
+          "price": 450,
+          "minLevel": 1,
+          "minSkill": 25
+        },
+        {
+          "id": "river_wardens_rod",
+          "source": "good",
+          "price": 2400,
+          "minLevel": 1,
+          "minSkill": 50
+        },
+        {
+          "id": "bait_worms",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        },
+        {
+          "id": "bait_bread_paste",
+          "source": "good",
+          "price": 5,
+          "minLevel": 1
+        },
+        {
+          "id": "bait_bright_lure",
+          "source": "good",
+          "price": 20,
+          "minLevel": 1
+        }
+      ]
+    }
+  },
+  "_rolesDoc": "MADE by tools/content-shops.mjs from `kinds` (do not edit by hand): stream A's js/sim/shops.js reads roles.<role> = { title, sells: [{ base, rarity }], markup } (+ goods, services, mounts, sign, light, kind). `cat` = the shop tab (the kind's category label)."
+}

@@ -1,0 +1,131 @@
+{
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z11_11, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "zone": "z11_11",
+ "terrainHash": "cbeaf687",
+ "placements": [
+  {
+   "type": "camp",
+   "id": "quest_kr_the_basalt_tyrant_0_0",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    17,
+    17
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1421,
+   "z": 359,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "kr_the_basalt_tyrant",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_kr_the_basalt_tyrant_0_1",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    17,
+    17
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1421,
+   "z": 359,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "kr_the_basalt_tyrant",
+   "hunt": true
+  },
+  {
+   "type": "npc",
+   "id": "angler_kilnhold",
+   "name": "Halla Tovaru",
+   "role": "angler",
+   "at": "Kilnhold",
+   "x": 1248,
+   "z": 716,
+   "yaw": 0,
+   "angler": true,
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "npc",
+   "id": "carter_kilnhold",
+   "name": "Ashka Askaru",
+   "role": "carter",
+   "at": "Kilnhold",
+   "x": 1614,
+   "z": 516,
+   "yaw": -0.624,
+   "cart": "cart_kilnhold",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_kilnhold",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Kilnhold",
+   "carter": "carter_kilnhold",
+   "x": 1616,
+   "z": 514,
+   "yaw": 0.917,
+   "radius": 2.2
+  },
+  {
+   "type": "guard",
+   "id": "guard_kilnhold_0",
+   "name": "Kilnhold Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "village",
+   "town": "Kilnhold",
+   "post": "gate",
+   "gate": "kilnhold_gate_0",
+   "x": 1596,
+   "z": 514,
+   "yaw": 0.917,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_kilnhold_1",
+   "name": "Kilnhold Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "village",
+   "town": "Kilnhold",
+   "post": "gate",
+   "gate": "kilnhold_gate_1",
+   "x": 1574,
+   "z": 430,
+   "yaw": -2.759,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_kilnhold_2",
+   "name": "Kilnhold Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "village",
+   "town": "Kilnhold",
+   "post": "square",
+   "x": 1570,
+   "z": 476,
+   "yaw": 1.03,
+   "titled": false
+  }
+ ]
+}

@@ -1,0 +1,178 @@
+{
+  "id": "rare_cellar_queen",
+  "name": "The Cellar Queen",
+  "tier": "rare",
+  "secret": true,
+  "zone": "ashfall_hollow",
+  "level": 16,
+  "body": "scoria_crawler",
+  "place": "nests in the buried cellars under the east end of Cinderholt; her brood ticks in the dark",
+  "_doc": "Expansion 1 (Vharlen). A crawler queen grown fat in the buried cellars. Her bite eats armour and she burrows down a line. At half health the cellar roof starts coming in: falling beams leave rubble that stays (it blocks her next blast — hide behind it), she lets her brood loose, and screeches a blast at the whole cellar.",
+  "party": {
+    "solo": "Hard solo at 16: the brood and the blast together.",
+    "small": "Right for 2-3.",
+    "full": "Easy.",
+    "m5": "M5 adds health per extra player and one more copy of the spread/scatter shapes for parties of 4-5; mechanics stay the same."
+  },
+  "hpMult": 2,
+  "arena": {
+    "radius": 24
+  },
+  "say": {
+    "pull": [
+      "Something big clicks in the dark cellar. Lots of small things click back.",
+      "The Cellar Queen rises on too many legs."
+    ],
+    "death": "The Cellar Queen collapses. Her brood scatters into the cracks.",
+    "reset": "The Cellar Queen backs into the dark."
+  },
+  "abilities": {
+    "acid_bite": {
+      "id": "acid_bite",
+      "name": "Acid Bite",
+      "every": [
+        6,
+        8
+      ],
+      "first": 2,
+      "range": 5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 4.6,
+          "arc": 1.3,
+          "wind": 1,
+          "damage": 1.6,
+          "status": "strip",
+          "element": "poison"
+        }
+      ]
+    },
+    "tunnel": {
+      "id": "tunnel",
+      "name": "Tunnel",
+      "every": [
+        12,
+        15
+      ],
+      "first": 4,
+      "cast": 0.6,
+      "say": "The Cellar Queen tunnels toward {target}!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 16,
+          "w": 3,
+          "wind": 1.4,
+          "damage": 1.7,
+          "knock": 2
+        }
+      ]
+    },
+    "spit": {
+      "id": "spit",
+      "name": "Brood Spit",
+      "every": [
+        11,
+        14
+      ],
+      "first": 7,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3,
+          "wind": 1.5,
+          "damage": 1.2,
+          "count": 2,
+          "delay": 0.3,
+          "element": "poison",
+          "status": "poison"
+        }
+      ]
+    },
+    "cave_in": {
+      "id": "cave_in",
+      "name": "Cave-in",
+      "every": [
+        16,
+        19
+      ],
+      "first": 3,
+      "cast": 0.5,
+      "say": "The cellar roof is coming in! The rubble will stay.",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "r": 3,
+          "wind": 1.8,
+          "damage": 1.4,
+          "spread": 12,
+          "count": 3,
+          "delay": 0.3,
+          "leave": {
+            "type": "rock",
+            "r": 1.6,
+            "hp": 2,
+            "name": "Rubble"
+          }
+        }
+      ]
+    },
+    "screech": {
+      "id": "screech",
+      "name": "Screech",
+      "every": [
+        20,
+        24
+      ],
+      "first": 9,
+      "cast": 2.5,
+      "say": "She rears up to screech — get behind the rubble!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 24,
+          "wind": 0.6,
+          "damage": 2,
+          "los": true,
+          "status": "fear"
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "In the Dark",
+      "abilities": [
+        "acid_bite",
+        "tunnel",
+        "spit"
+      ]
+    },
+    {
+      "name": "The Roof Comes In",
+      "at": 0.5,
+      "say": "The Cellar Queen slams the walls. Beams crack overhead!",
+      "abilities": [
+        "acid_bite",
+        "cave_in",
+        "screech",
+        "tunnel"
+      ],
+      "onEnter": [
+        {
+          "adds": {
+            "type": "scoria_crawler",
+            "count": 2,
+            "radius": 6
+          }
+        }
+      ]
+    }
+  ]
+}

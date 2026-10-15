@@ -100,6 +100,7 @@ export function buildMapModel(raw = {}) {
     provinces: [], zones: new Map(), settlements: [], rivers: [], roads: [], pois: [],
     npcs: new Map(), vigs: new Map(), camps: [], rares: new Map(), sites: new Map(), quests: new Map(), sheetOf: new Map(), worldOfSheet: new Map(),
     playable: null,
+    playables: [],         // 2026-10-14: every province you can walk (each its own continent); `playable` is the first
   };
   // which world zones each province sheet uses
   const sheetZone = new Map();          // world key -> { prov, id, sheet zone }
@@ -109,37 +110,45 @@ export function buildMapModel(raw = {}) {
       sheetZone.set(wk, { prov, id, z: sheet?.zones?.[id] || null, sheet });
       model.sheetOf.set(wk, id); model.worldOfSheet.set(id, wk);
     }
-    if (!model.playable) model.playable = { id: prov, name: sheet?.name || titleCase(prov), worldProvince: p.worldProvince, block: p.block, size: p.size, band: sheet?.band || null, capital: sheet?.capital || null };
+    const entry = { id: prov, name: sheet?.name || titleCase(prov), worldProvince: p.worldProvince, block: p.block, size: p.size, band: sheet?.band || null, capital: sheet?.capital || null };
+    model.playables.push(entry);
+    if (!model.playable) model.playable = entry;
   }
+  // 2026-10-14 (owner: each built province is its own continent): the world outside the playable blocks is SEA
+  // (tools/lib/world-core.mjs CONTINENTS) — no other provinces, towns, roads or rivers are drawn there
+  const inPlayable = (x, z) => model.playables.some(q => x >= q.block[0] * zm && x < (q.block[0] + q.size[0]) * zm && z >= q.block[1] * zm && z < (q.block[1] + q.size[1]) * zm);
+  model.inPlayable = inPlayable;
   // provinces of the whole world
-  for (const pr of world.provinces || []) {
-    const playable = model.playable && pr.id === model.playable.worldProvince;
-    let sx = 0, sz = 0, n = 0;
-    for (const k of pr.zones || []) { const b = zoneBoundsOf(k); if (b) { sx += b.minX + zm / 2; sz += b.minZ + zm / 2; n++; } }
-    model.provinces.push({ id: pr.id, name: playable ? model.playable.name : pr.name, worldName: pr.name, biome: pr.biome, danger: pr.danger, race: pr.race, zones: pr.zones || [], cx: n ? sx / n : 0, cz: n ? sz / n : 0, playable });
+  // the provinces drawn: the playable ones, each centred on its own block (labels sit on the continent)
+  for (const q of model.playables) {
+    const pr = (world.provinces || []).find(r => r.id === q.worldProvince) || {};
+    const zones = Object.values(pm[q.id]?.map || {});
+    model.provinces.push({ id: q.id, name: q.name, worldName: pr.name || q.name, biome: pr.biome, danger: pr.danger, race: pr.race, zones,
+      cx: (q.block[0] + q.size[0] / 2) * zm, cz: (q.block[1] + q.size[1] / 2) * zm, playable: true, band: q.band });
   }
   // zones (every world zone: province, land share; the playable ones get the sheet's name and band)
   for (const z of world.zones || []) {
     const b = zoneBoundsOf(z.id); if (!b) continue;
     const s = sheetZone.get(z.id);
     model.zones.set(z.id, {
-      key: z.id, zx: b.zx, zy: b.zy, bounds: b, province: z.province, land: z.land ?? 1,
+      key: z.id, zx: b.zx, zy: b.zy, bounds: b, province: s ? s.prov : null, land: s ? (z.land ?? 1) : 0,
       name: s?.z?.name || null, band: s?.z?.band || null, archetype: s?.z?.archetype || null, town: s?.z?.town || null,
       dungeon: s?.z?.dungeon || null, sheetId: s?.id || null, playable: !!s,
     });
   }
   for (const [wk, s] of sheetZone) if (!model.zones.has(wk)) {
     const b = zoneBoundsOf(wk);
-    model.zones.set(wk, { key: wk, zx: b.zx, zy: b.zy, bounds: b, province: model.playable?.worldProvince, land: 1, name: s.z?.name || null, band: s.z?.band || null, archetype: s.z?.archetype || null, town: s.z?.town || null, dungeon: s.z?.dungeon || null, sheetId: s.id, playable: true });
+    model.zones.set(wk, { key: wk, zx: b.zx, zy: b.zy, bounds: b, province: s.prov, land: 1, name: s.z?.name || null, band: s.z?.band || null, archetype: s.z?.archetype || null, town: s.z?.town || null, dungeon: s.z?.dungeon || null, sheetId: s.id, playable: true });
   }
   // settlements of the world (names inside the playable province come from its zone files below)
   for (const n of world.nodes || []) {
-    if (sheetZone.has(n.zone)) continue;
+    if (sheetZone.has(n.zone) || !inPlayable(n.x, n.z)) continue;
     if (n.type === 'settlement') model.settlements.push({ name: n.name, kind: n.kind, size: n.size || 1, x: n.x, z: n.z, zone: n.zone });
   }
   // rivers and roads, thinned for drawing
-  for (const r of world.rivers || []) { if (r.pts?.length > 1) { const pts = simplify(r.pts, 10); model.rivers.push({ id: r.id, name: r.name || null, pts, bbox: bboxOf(pts), cls: r.pts[0][3] || 1 }); } }
-  for (const r of world.roads || []) { if (r.pts?.length > 1) { const pts = simplify(r.pts, 6); model.roads.push({ id: r.id, cls: r.class || 'road', width: r.width || 4, pts, bbox: bboxOf(pts) }); } }
+  const keep = pts => pts.some(p => inPlayable(p[0], p[1]));
+  for (const r of world.rivers || []) { if (r.pts?.length > 1 && keep(r.pts)) { const pts = simplify(r.pts, 10); model.rivers.push({ id: r.id, name: r.name || null, pts, bbox: bboxOf(pts), cls: r.pts[0][3] || 1 }); } }
+  for (const r of world.roads || []) { if (r.pts?.length > 1 && keep(r.pts)) { const pts = simplify(r.pts, 6); model.roads.push({ id: r.id, cls: r.class || 'road', width: r.width || 4, pts, bbox: bboxOf(pts) }); } }
 
   // the playable province: zone sites, sheet names, placements
   for (const [wk, s] of sheetZone) {
@@ -156,6 +165,7 @@ export function buildMapModel(raw = {}) {
         model.pois.push({ id: `door:${wk}:${st.id || 0}`, kind: 'dungeon', name: d?.name || st.name || 'Dungeon', x, z, zone: wk, level: d?.level || Z?.band?.[0] || null, sub: d?.floors ? `${d.floors} floors` : '' });
       } else if (st.type === 'event') {
         const ev = (raw.events?.zone || []).find(e => e.site === st.id || e.id === st.id) || (raw.events?.realm || []).find(e => e.site === st.id || e.id === st.id);
+        if (ev && ev.boss && !model.sites.has(ev.boss)) model.sites.set(ev.boss, { x, z, r: st.r || 40, name: ev.name || null, zone: wk });      // Expansion 1: a quest's `killOne` on a zone-event boss points at its arena
         model.pois.push({ id: `arena:${st.id}`, kind: 'event', name: ev?.name || titleCase(String(st.id || 'event').replace(/^event_/, '')), x, z, zone: wk, r: st.r || 40,
           level: ev?.level || Z?.band?.[1] || null, arena: st.id, sub: ev ? (ev.kind === 'worldboss' ? 'World boss arena' : 'Zone event: comes every hour or so') : '' });
       } else if (st.type === 'crossing') model.pois.push({ id: `x:${wk}:${st.name}`, kind: st.kind === 'bridge' ? 'bridge' : 'ford', name: st.name, x, z, zone: wk });
@@ -177,7 +187,10 @@ export function buildMapModel(raw = {}) {
     for (const [id, n] of Object.entries(qf?.npcs || {})) if (!model.npcs.has(id)) model.npcs.set(id, { ...n, zone: wk });
     for (const q of qf?.quests || []) model.quests.set(q.id, { ...q, zone: wk });
   }
-  model.rareSlots = raw.rares || {};
+  // the rares of every zone: data/provinces/rares.json (Torbor Downs) over each sheet's own `rares` (Expansion 1: Vharlen's)
+  const sheetRares = {};
+  for (const sh of Object.values(raw.sheets || {})) for (const [zid, z] of Object.entries((sh && sh.zones) || {})) if (Array.isArray(z.rares)) sheetRares[zid] = z.rares;
+  model.rareSlots = { ...sheetRares, ...(raw.rares || {}) };
   return model;
 }
 
@@ -196,7 +209,7 @@ export function zoneAt(model, x, z) { return model.zones.get(zoneKeyAt(x, z)) ||
  * A step is about a PLACE only when it is one of these kinds — or carries its own spot (`at`). Crafting, cooking,
  * learning, riding, reaching a level: those are done wherever you are, so they get no marker and no circle at all.
  */
-export const PLACE_STEPS = new Set(['kill', 'collect', 'killOne', 'killRare', 'clear', 'visit', 'escort', 'use', 'talk', 'deliver', 'reach']);
+export const PLACE_STEPS = new Set(['voyage', 'kill', 'collect', 'killOne', 'killRare', 'clear', 'visit', 'escort', 'use', 'talk', 'deliver', 'reach']);
 export function stepHasPlace(st, def = null) {
   if (st?.anywhere || def?.anywhere) return false;
   if (st?.at && Number.isFinite(st.at.x)) return true;
@@ -226,9 +239,11 @@ export function locateQuest(q, model, me = null) {
   if (ds) {
     const site = name => (name ? (model.sites.get(name) || model.vigs.get(name) || [...model.pois].find(p => p.name && bare(p.name) === bare(name)) || null) : null);
     let p = null, name = '';
-    switch (ds.kind) {
+    if (ds.at && Number.isFinite(ds.at.x) && ds.kind !== 'voyage') { p = ds.at; name = ds.at.name || ''; }      // a step that carries its own place (Vharlen's elites: their encounter file's `place`)
+    else switch (ds.kind) {
       case 'visit': case 'escort': p = ds.vignette ? model.vigs.get(ds.vignette) : site(ds.site || (typeof ds.to === 'string' ? ds.to : null)); break;
       case 'use': p = model.vigs.get(ds.vignette); break;
+      case 'voyage': p = ds.at && Number.isFinite(ds.at.x) ? ds.at : null; if (p) name = p.name; break;      // EXPANSION-1 §6: the Harbourmaster's pier
       case 'talk': case 'deliver': p = model.npcs.get(ds.npc); if (p) name = p.name; break;
       case 'killOne': p = model.sites.get(ds.encounter) || model.rares.get(ds.encounter) || model.vigs.get(ds.encounter); break;
       case 'killRare': { const zid = ds.zone || model.sheetOf.get(wk); const id = (model.rareSlots[zid] || [])[ds.slot ?? 0]; p = id ? (model.rares.get(id) || model.sites.get(id)) : null; if (p) name = p.name; break; }

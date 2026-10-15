@@ -359,4 +359,48 @@ add('mat_resin', 'Resin', '#b6a58a', 'Two neutral honey-grey resin lumps with so
   P('M32 40Q34 25 46 27Q58 29 57 43L50 55L37 56Q29 50 32 40Z', c.h) +
   P('M12 39L23 45L34 36L32 46L23 51L14 47Z', c.s, 'none') + L('M15 26Q18 19 24 18M39 37Q42 32 47 33', c.l, 3));
 
+// Vharlen: tier-four volcanic harvests, with the tier-five cinderbloom.
+add('obsidian_ore', 'Obsidian', '#1c1a24', 'Razor-edged volcanic glass shards with shell-like fracture ripples and sharp silver reflections.', c =>
+  P('M8 46L14 24L27 18L24 44L16 54Z', c.m) + P('M14 24L27 18L19 40L8 46Z', '#565668', 'none') +
+  P('M22 45L32 7L44 18L49 43L38 55Z', c.m) + P('M32 7L34 36L22 45Z', '#777689', 'none') +
+  P('M34 36L44 18L49 43L38 55Z', '#34303f', 'none') +
+  L('M32 13L28 32', '#eee9df', 2.6) + L('M40 25Q34 29 37 36M43 32Q37 36 40 42M45 39Q41 41 43 46', '#96919f', 1.7) +
+  P('M39 49L55 32L57 48L48 56Z', c.m) + P('M55 32L48 49L39 49Z', '#b3b0b9', 'none') + L('M14 29L11 39', c.h, 1.8));
+add('sulphur', 'Sulphur', '#e8d24a', 'Crumbly sulphur crust on a dark volcanic base, studded with squat lemon-yellow crystal teeth.', c =>
+  P('M7 39L13 29L28 27L39 33L53 35L57 47L46 55L18 53L8 47Z', '#675c3c') +
+  P('M8 39L14 30L22 32L26 23L36 26L39 35L48 32L56 40L51 49L40 46L34 52L21 47L13 48Z', c.m) +
+  P('M13 30L15 19L22 15L28 23L24 35L18 37Z', c.m) + P('M15 19L22 15L22 28L18 32Z', c.l, 'none') +
+  P('M30 28L32 14L41 11L48 21L44 35L36 37Z', c.m) + P('M32 14L41 11L39 25L30 28Z', c.h, 'none') +
+  P('M39 25L48 21L44 35L36 37Z', '#b19a28', 'none') +
+  L('M10 40L18 39L22 43M28 38L33 40M44 40L49 39', c.l, 2.5) + P('M47 53L53 50L57 55L51 58Z', c.m) + C(30, 48, 2.2, c.h));
+add('ironpalm_log', 'Ironpalm Log', '#4a3a2a', 'A cut steam-jungle palm trunk with dark encircling bark ridges and a pale fibrous, speckled end.', c =>
+  P('M12 20L44 12L53 44Q52 53 39 57Q23 60 20 51Z', c.m) +
+  P('M37 21L44 16L53 44Q52 53 39 57L33 55Q43 48 37 21Z', c.s, 'none') +
+  L('M15 27Q30 35 46 24M17 34Q33 42 48 31M19 41Q35 49 50 38M22 49Q37 55 51 46', '#9d8760', 3) +
+  L('M22 28L23 32M37 30L39 34M27 39L29 43M44 43L46 47', '#292720', 2) +
+  E(28, 18, 17, 10, '#b7a179') + E(28, 18, 12.5, 6.5, '#dfc99b', '#756344', 1.7) +
+  C(23, 16, 1.5, '#7f6846') + C(30, 14, 1.3, '#9e8054') + C(34, 19, 1.5, '#7f6846') + C(25, 21, 1.4, '#7f6846') +
+  L('M18 17L20 15M28 18L29 20M37 16L39 17', '#a3885f', 1.6));
+add('steamcap', 'Steamcap', '#c8d0c0', 'A pale drooping steamcap on a bent ivory stalk, exhaling two soft wisps from its warm cap.', c =>
+  L('M26 19C16 14 32 11 25 6M40 17C33 13 44 10 39 6', '#dce3d4', 2.5) +
+  P('M28 33L37 33Q33 45 41 53Q34 59 23 54Q30 44 28 33Z', c.m) +
+  P('M29 36L33 36Q29 46 32 53L27 54Q32 44 29 36Z', c.l, 'none') +
+  P('M9 37Q13 22 29 22Q46 19 55 37L48 41L37 38L27 42L17 38Z', c.m) +
+  P('M10 37Q31 30 55 37L48 41L37 38L27 42L17 38Z', '#89958b', INK, 1.5) +
+  L('M17 31Q28 24 38 26', c.l, 3) + L('M19 37L26 39M33 36L34 39M41 36L46 39', c.h, 1.6) + E(42, 30, 3, 2, c.h, 'none'));
+add('cinderbloom', 'Cinderbloom', '#ff6a2a', 'A fire-red flower opens in curled ember petals above an ash-grey stem and charred leaves.', c =>
+  L('M27 57Q36 45 32 30', '#ada59b', 4) +
+  P('M32 46Q20 48 14 37Q27 35 32 46Z', '#656564') + P('M34 41Q42 31 53 35Q49 46 34 44Z', '#818078') +
+  P('M30 29C18 22 22 10 33 6Q30 16 37 23C40 12 48 11 55 16Q44 19 43 28C54 25 57 35 53 41Q48 33 38 35C43 45 34 50 27 46Q33 39 28 35C20 44 10 39 8 30Q19 34 23 28C11 26 11 15 17 11Q18 23 30 29Z', '#c83d2b') +
+  P('M33 12Q31 22 36 28Q42 18 48 17Q39 25 40 31Q49 29 51 35L36 34Q39 42 31 44L32 33Q21 37 15 33L29 30Q19 25 17 19Q24 29 33 29Z', c.m, 'none') +
+  L('M32 20L34 28M42 24L38 30M22 31L29 32', '#ffbb58', 2.4) + C(34, 31, 4, '#ffde82', '#a93c26', 1.5) + C(34, 30, 1.6, '#fff4c3') +
+  L('M20 40L28 44M41 41L48 37', '#b6aaa0', 1.6));
+add('salamander_hide', 'Salamander Hide', '#2a2224', 'A stretched black salamander skin with blunt splayed limbs, a tapered tail and a bright orange belly stripe.', c =>
+  P('M25 8Q32 12 39 8L42 16Q38 20 40 24L52 20L57 28L52 33L42 31Q39 36 41 40L52 45L51 53L43 55L35 47L32 58L28 48L19 55L11 52L10 45L23 39Q25 35 21 31L11 34L7 27L12 20L25 23L22 16Z', mix(c.m, '#8d7d87', .25)) +
+  P('M29 16Q33 20 36 16L35 30L37 39L33 48L29 44L27 34Z', '#df602a', 'none') +
+  P('M30 21L32 20L31 34L34 40L32 45L29 36Z', '#ffa449', 'none') +
+  L('M26 12Q32 16 38 12M25 27Q21 35 26 42M39 27Q43 35 38 42', '#73686a', 2) +
+  L('M24 13L26 21M17 25L12 26M45 26L51 25M23 45L17 49M40 45L47 49', '#817a78', 2.2) +
+  C(23, 32, 1.5, '#666368') + C(39, 34, 1.6, '#666368') + C(25, 40, 1.3, '#8c7670') + C(37, 22, 1.3, '#8c7670'));
+
 export default items;

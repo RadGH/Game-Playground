@@ -1,0 +1,69 @@
+{
+  "_doc": "Stream C (Expansion 1). The province story chain 'The Burning Isle' for Vharlen: 5 steps through 5 zones in rising band order, from the landing at Port Vharl to the province world boss in the Caldera. Each step names its zone and quest id; the quest bodies live in data/quests/<zone>.json, and each story quest's `next` points to the next step's quest. The final step clears the shrine stair (cd_the_rim_holds) and `then` the realm event against world_ossathra (Ossathra, the Caldera Wyrm).",
+  "province": "vharlen",
+  "name": "The Burning Isle",
+  "steps": [
+    {
+      "n": 1,
+      "zone": "blackstrand",
+      "quest": "bs_fresh_off_the_saltwren",
+      "beat": "Off the Saltwren: the Slagborn on the jungle edge carry orders paid in Yellowpan sulphur.",
+      "where": "Blackstrand (ask in Port Vharl)"
+    },
+    {
+      "n": 2,
+      "zone": "sulphur_bight",
+      "quest": "sb_sold_by_the_sack",
+      "beat": "The pit-boss sold the raiders sulphur, then they took the rest. Half the sacks come back empty.",
+      "where": "Sulphur Bight (ask in Yellowpan)"
+    },
+    {
+      "n": 3,
+      "zone": "fumarole_fen",
+      "quest": "ff_the_fen_breathes_wrong",
+      "beat": "The sulphur is poured into the fen vents: Slagborn bread, to make the Mother hungry.",
+      "where": "Fumarole Fen (ask in Stiltreach)"
+    },
+    {
+      "n": 4,
+      "zone": "ashfall_hollow",
+      "quest": "ah_what_the_ash_recalls",
+      "beat": "Cinderholt was buried the last time someone fed the Mother. The firecallers are reading the old rite off its walls.",
+      "where": "Ashfall Hollow (ask in Cinderholt)"
+    },
+    {
+      "n": 5,
+      "zone": "the_caldera",
+      "quest": "cd_the_rim_holds",
+      "then": "cd_the_caldera_wyrm",
+      "kind": "killOne",
+      "encounter": "world_ossathra",
+      "beat": "Clear the shrine stair, then stand with the whole island when Ossathra rises from the crater lake.",
+      "where": "The Caldera (ask in Rim Shrine)"
+    }
+  ],
+  "crossZone": [
+    {
+      "from": "blackstrand:bs_fresh_off_the_saltwren",
+      "to": "sulphur_bight:sb_sold_by_the_sack"
+    },
+    {
+      "from": "sulphur_bight:sb_sold_by_the_sack",
+      "to": "fumarole_fen:ff_the_fen_breathes_wrong"
+    },
+    {
+      "from": "fumarole_fen:ff_the_fen_breathes_wrong",
+      "to": "ashfall_hollow:ah_what_the_ash_recalls"
+    },
+    {
+      "from": "ashfall_hollow:ah_what_the_ash_recalls",
+      "to": "the_caldera:cd_the_rim_holds"
+    }
+  ],
+  "prelude": {
+    "zone": "gullwick",
+    "quest": "smoke_on_the_horizon",
+    "beat": "On the mainland, Gullwick's elder points at the smoke on the horizon: take the Saltwren from Gullwick's harbour to Port Vharl.",
+    "where": "Gullwick (Torbor Downs), the Harbourmaster on the pier"
+  }
+}

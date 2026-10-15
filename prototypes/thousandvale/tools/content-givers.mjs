@@ -18,23 +18,24 @@
 import { readFileSync, writeFileSync, readdirSync, existsSync } from 'node:fs';
 import { titledOf, JOB_ROLES, SERVICE_ROLES } from './content-titled.mjs';
 import { roadText } from './content-events.mjs';
+import { HOME_PROVINCE, provinceArg, provinceDataPath, provinceDataSync, zoneBelongs, requireProvince } from './content-lib.mjs';
 
 const ROOT = new URL('../', import.meta.url);
 const P = f => new URL(f, ROOT);
 const readJ = f => JSON.parse(readFileSync(P(f), 'utf8'));
 const CHECK = process.argv.includes('--check');
-const PROV = 'torbor_downs';
+const PROV = provinceArg(process.argv);     // --province=<id> (default torbor_downs)
 
 /** Every quest file that defines npcs or quests (zone files AND the parts they include), raw. */
-export function rawQuestFiles() {
-  return readdirSync(P('data/quests/')).filter(f => f.endsWith('.json') && !['jobs.json', 'treasure.json', 'province.json', 'events.json'].includes(f))
-    .map(f => ({ file: 'data/quests/' + f, data: readJ('data/quests/' + f) })).filter(x => x.data.npcs || x.data.quests);
+export function rawQuestFiles(prov = PROV) {
+  return readdirSync(P('data/quests/')).filter(f => f.endsWith('.json') && !['jobs.json', 'treasure.json', 'province.json', 'events.json'].includes(f) && !/-province\.json$/.test(f))
+    .map(f => ({ file: 'data/quests/' + f, data: readJ('data/quests/' + f) })).filter(x => (x.data.npcs || x.data.quests) && zoneBelongs(prov, x.data.zone));     // this province's zone files only
 }
 
 export function buildGivers() {
   const files = rawQuestFiles();
   const map = readJ('data/world/province-map.json').provinces[PROV].map;
-  const shops = readJ('data/provinces/shops.json');
+  const shops = provinceDataSync(readJ, PROV, 'shops');
   const shopRoles = new Set(Object.values(shops.kinds).map(k => k.role).filter(Boolean));
   const npcs = {}, objects = {};
   for (const { file, data } of files) for (const [id, n] of Object.entries(data.npcs || {}))
@@ -61,16 +62,19 @@ export function buildGivers() {
 
 /** Which services a town has: the roles of its offices, plus the angler, the carter and the class trainers who live there. */
 export function townServices() {
-  const offices = readJ('data/provinces/offices.json'), out = {};
+  const offices = provinceDataSync(readJ, PROV, 'offices') || { towns: {} }, out = {};
   const add = (town, role) => { if (!town || !role) return; const l = (out[town] ||= []); if (!l.includes(role)) l.push(role); };
   for (const t of Object.values(offices.towns)) for (const o of t.offices) if (o.titled !== false && (o.shop || o.npc || JOB_ROLES.includes(o.role) || SERVICE_ROLES.includes(o.role))) { add(t.name, o.role); if (o.shop) add(t.name, o.shop); }
-  if (existsSync(P('data/provinces/angling-pools.json'))) for (const a of readJ('data/provinces/angling-pools.json').anglers || []) add(a.town, 'angler');
-  if (existsSync(P('data/provinces/carts.json'))) for (const s of readJ('data/provinces/carts.json').stops || []) add(s.town, 'carter');
+  for (const a of (provinceDataSync(readJ, PROV, 'angling-pools') || {}).anglers || []) add(a.town, 'angler');
+  for (const s of (provinceDataSync(readJ, PROV, 'carts') || {}).stops || []) add(s.town, 'carter');
+  // Expansion 1: a town whose shops entry names a `harbour` (data/provinces/ships.json) has its Harbourmaster on the pier (js/sim/ships.js places the NPC)
+  for (const [t, v] of Object.entries((provinceDataSync(readJ, PROV, 'shops') || {}).towns || {})) if (v && v.harbour) add(t, 'harbourmaster');
   for (const t of Object.keys(out)) out[t].sort();
   return out;
 }
 
 function main() {
+  requireProvince(process.argv);
   const { npcs, objects, missing, ctx, files } = buildGivers();
   const changed = [];
   const put = (file, obj, indent = 1) => {
@@ -78,32 +82,34 @@ function main() {
     if (a === b) return; changed.push(file); if (!CHECK) writeFileSync(P(file), a);
   };
   /** Rewrite a file only through `edit(json)`, keeping its own indent. */
-  const patch = (file, edit) => { const src = readFileSync(P(file), 'utf8'), j = JSON.parse(src); edit(j); const ind = /^\{\n( +)"/.exec(src); put(file, j, ind ? ind[1].length : 1); };
+  // a shared file (travellers, wanderers, road events, titles) is the home province's to patch; another province patches its own copy when it has one
+  const mine = thing => { const f = provinceDataPath(PROV, thing); return PROV === HOME_PROVINCE || existsSync(P(f)) ? f : null; };
+  const patch = (file, edit) => { if (!file) return; const src = readFileSync(P(file), 'utf8'), j = JSON.parse(src); edit(j); const ind = /^\{\n( +)"/.exec(src); put(file, j, ind ? ind[1].length : 1); };
 
   // 1. the giver index
-  put('data/quests/marks/givers.json', {
+  put(provinceDataPath(PROV, 'givers'), {
     _doc: 'Stream E (owner feedback 8, W12 "show quest markers (! and ?) above NPCs" + W27). MADE by tools/content-givers.mjs; do not edit. `npcs.<quest NPC id>` = { name, role, zone (world zone), sheet (E zone id), at, gives: quests this NPC hands out (`giver`), takes: quests it can take back (the same ones: js/sim/quests.js gives()), mustTake: the ones that can ONLY be handed in to it (`needsGiver`; every other quest also pays itself when its last step is done), talks: quests with a talk / deliver step AT this NPC (a "?" while that step is the one you are on), jobs: it offers radiant jobs (its role is one of JOB_ROLES — always something to ask), trains: class ids for a trainer, offers: it has anything for the player at all, titled: W27 }. `objects.<vignette>/<object>` = quests started from a thing in the world (`startsFrom`). Stream A decides per player which mark to send: "!" when one of `gives` (or a job) is available to that character now, "?" when one of `takes` is finished or the current step of one of `talks` is here, grey when it has one for later.',
     province: PROV, jobRoles: JOB_ROLES, npcs, objects, missing }, 1);
 
   // 2. `titled` on every NPC record
   for (const { file } of files) patch(file, j => { for (const [id, n] of Object.entries(j.npcs || {})) n.titled = npcs[id].titled; });
-  patch('data/provinces/offices.json', j => {
+  patch(mine('offices'), j => {
     for (const t of Object.values(j.towns)) for (const o of t.offices) o.titled = titledOf({ role: o.role, npc: o.npc || null, shop: o.shop || null, trains: o.trains && o.trains.length ? o.trains : null }, ctx);
     for (const s of j.setpieces || []) s.titled = titledOf({ npc: s.npc, role: s.role, trains: s.trains }, ctx);
   });
   // travellers: nobody on the road has a title unless the group offers the player something — then only its first member
   const crewFlags = (j, wander) => { for (const k of Object.values(j.kinds || {})) (k.crew || []).forEach((c, i) => { c.titled = !!wander && i === 0 && titledOf({ role: c.role, shop: k.shop, offers: k.offers, curious: k.curious }, {}); }); };
-  patch('data/provinces/travellers.json', j => { crewFlags(j, false); for (const f of Object.values(j.folk || {})) f.titled = false; });
-  patch('data/provinces/wanderers.json', j => crewFlags(j, true));
-  {   // road-events.json keeps its own compact look (tools/content-events.mjs roadText)
-    const src = readFileSync(P('data/provinces/road-events.json'), 'utf8'), j = JSON.parse(src);
+  patch(mine('travellers'), j => { crewFlags(j, false); for (const f of Object.values(j.folk || {})) f.titled = false; });
+  patch(mine('wanderers'), j => crewFlags(j, true));
+  if (mine('road-events')) {   // road-events.json keeps its own compact look (tools/content-events.mjs roadText)
+    const rf = mine('road-events'), src = readFileSync(P(rf), 'utf8'), j = JSON.parse(src);
     for (const k of ['deliver', 'escort', 'rescue']) for (const r of j[k] || []) r.titled = true;
     const next = roadText(j);
-    if (next !== src) { changed.push('data/provinces/road-events.json'); if (!CHECK) writeFileSync(P('data/provinces/road-events.json'), next); }
+    if (next !== src) { changed.push(rf); if (!CHECK) writeFileSync(P(rf), next); }
   }
 
   // 3. the rule as data, for bodies the server spawns from code
-  patch('data/names/titles.json', j => {
+  patch(PROV === HOME_PROVINCE ? 'data/names/titles.json' : null, j => {      // the realm's one title rule: the home run writes it
     const roles = {};
     for (const r of Object.keys(j.roles)) roles[r] = titledOf({ role: r }, ctx);
     j.titled = {
@@ -116,7 +122,7 @@ function main() {
   });
 
   // 4. the town services, for the map's search (D-UI W15)
-  put('data/provinces/town-services.json', {
+  put(provinceDataPath(PROV, 'town-services'), {
     _doc: 'Stream E (owner feedback 8, W15: the map\'s search "finds shops and highlights the towns that have them"). MADE by tools/content-givers.mjs. `towns.<settlement name>` = the roles and shop kinds found there (offices.json offices that offer something, the angler, the carter). A settlement not listed has none.',
     province: PROV, towns: townServices() }, 1);
 

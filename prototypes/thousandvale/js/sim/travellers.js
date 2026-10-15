@@ -258,7 +258,9 @@ export function createTravellers({ room, travel, folk = [], rng = Math.random, c
     const rolePools = (k.chatter || ['role.' + c.role]).filter(id => !id.startsWith('road.'));
     // the road pool by where on the route the group is
     const fromEnd = g.dir > 0 ? g.s : g.route.line.length - g.s, toEnd = g.route.line.length - fromEnd;
-    const roadPool = ctx.danger && (k.chatter || []).includes('road.danger') ? 'road.danger' : fromEnd < 150 ? 'road.leaving' : toEnd < 250 ? 'road.arriving' : 'road.onroute';
+    // [W] a kind that names the island's road pools (road.isle_*) talks from those; every other kind from road.* as before
+    const rp = (k.chatter || []).some(id => id.startsWith('road.isle_')) ? 'road.isle_' : 'road.';
+    const roadPool = ctx.danger && (k.chatter || []).includes(rp + 'danger') ? rp + 'danger' : fromEnd < 150 ? rp + 'leaving' : toEnd < 250 ? rp + 'arriving' : rp + 'onroute';
     const recent = (ctx.recent || []).filter(id => P[id] && P[id].length);
     const W = { ...(chatter.rules && chatter.rules.weights) || { recent: 0.4, weather: 0.15, phase: 0.15, role: 0.2, archetype: 0.1 } };
     if (!recent.length) { W.role += W.recent; W.recent = 0; }

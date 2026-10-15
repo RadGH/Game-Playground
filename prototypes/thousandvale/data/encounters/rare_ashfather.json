@@ -1,0 +1,168 @@
+{
+  "id": "rare_ashfather",
+  "name": "The Ashfather",
+  "tier": "rare",
+  "secret": true,
+  "zone": "ashfall_hollow",
+  "level": 17,
+  "body": "pumice_golem",
+  "place": "walks the ash drifts west of Cinderholt; the townsfolk say the ash that buried them stood up and kept walking",
+  "_doc": "Expansion 1 (Vharlen). The ash that buried Cinderholt, standing up. It smothers its target (silence), throws ash over the area that slows you where it settles, and stamps. At half health its banked fire wakes: a get-in-close ring of heat and a cross of cinders.",
+  "party": {
+    "solo": "Fair solo at 17.",
+    "small": "Right for 2-3.",
+    "full": "Easy.",
+    "m5": "M5 adds health per extra player and one more copy of the spread/scatter shapes for parties of 4-5; mechanics stay the same."
+  },
+  "hpMult": 2,
+  "arena": {
+    "radius": 24
+  },
+  "say": {
+    "pull": [
+      "The ash drift stands up. It is shaped like a man, more or less.",
+      "Grey ash pours off something walking toward you."
+    ],
+    "death": "The Ashfather falls apart into a soft grey heap.",
+    "reset": "The Ashfather settles into a drift."
+  },
+  "abilities": {
+    "fist": {
+      "id": "fist",
+      "name": "Ash Fist",
+      "every": [
+        6,
+        8
+      ],
+      "first": 2,
+      "range": 5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 4.8,
+          "arc": 1.3,
+          "wind": 1,
+          "damage": 1.7
+        }
+      ]
+    },
+    "smother": {
+      "id": "smother",
+      "name": "Smother",
+      "every": [
+        12,
+        15
+      ],
+      "first": 4,
+      "say": "Ash pours down over {target}!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "target",
+          "r": 3.2,
+          "wind": 1.5,
+          "damage": 1.4,
+          "status": "silence"
+        }
+      ]
+    },
+    "ashfall": {
+      "id": "ashfall",
+      "name": "Ashfall",
+      "every": [
+        12,
+        15
+      ],
+      "first": 7,
+      "say": "Ash falls thick around the Ashfather.",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "r": 3.2,
+          "wind": 1.6,
+          "damage": 1,
+          "spread": 13,
+          "count": 4,
+          "delay": 0.25,
+          "leave": {
+            "type": "pool",
+            "name": "Drifted ash",
+            "r": 2.8,
+            "every": 1,
+            "seconds": 16,
+            "damage": 0.15,
+            "status": "lethargic"
+          }
+        }
+      ]
+    },
+    "heat_ring": {
+      "id": "heat_ring",
+      "name": "Banked Fire",
+      "every": [
+        13,
+        16
+      ],
+      "first": 3,
+      "cast": 0.8,
+      "say": "Heat pours out of its cracks — get in close!",
+      "telegraphs": [
+        {
+          "shape": "donut",
+          "at": "self",
+          "r": 10,
+          "r2": 3,
+          "wind": 1.6,
+          "damage": 1.8,
+          "element": "fire",
+          "status": "burn"
+        }
+      ]
+    },
+    "cinder_cross": {
+      "id": "cinder_cross",
+      "name": "Cinder Cross",
+      "every": [
+        14,
+        17
+      ],
+      "first": 6,
+      "cast": 0.5,
+      "telegraphs": [
+        {
+          "shape": "cross",
+          "at": "self",
+          "r": 13,
+          "w": 2.6,
+          "wind": 1.5,
+          "damage": 1.7,
+          "yaw": "random",
+          "element": "fire"
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Drifting",
+      "abilities": [
+        "fist",
+        "smother",
+        "ashfall"
+      ]
+    },
+    {
+      "name": "Banked Fire",
+      "at": 0.5,
+      "say": "Deep inside the Ashfather, something glows red.",
+      "abilities": [
+        "fist",
+        "heat_ring",
+        "cinder_cross",
+        "smother"
+      ]
+    }
+  ]
+}

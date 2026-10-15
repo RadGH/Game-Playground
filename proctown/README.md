@@ -46,6 +46,16 @@ know what an elf is.**
 The written design for each culture — aesthetic, materials, palette and cornerstone buildings — is in
 `prototypes/farhold/TOWN_EXPANSION.md` §6.
 
+**An eighth, `vharl` (2026-10-14, Thousandvale's Burning Isle — `prototypes/thousandvale/docs/EXPANSION-1.md`).** Island
+folk who lift their houses clear of ash and mud: `grown`, jitter 0.40, wide blocks (10–17 m) and big plots (6.5 m), one
+or two storeys. Its own bases in `data/buildkit.json` — `stilt_hut`, `stilt_long` (lifted 1.8–2.2 m) and `basalt_hall`
+(the ground-floor hall trades use) — its own materials (`basalt`, `ochre_plaster`, a steep `reed_thatch` at pitch
+1.15–1.75) and a red-ochre / dark-basalt / straw palette in `data/cultures.json`. Two things are new to the kit, both
+opt-in so no other culture's buildings change: a culture may list `alwaysExtras` (the Vharl never leave a stilt house
+without its stilts and stair; no random draw, so cultures without the field are byte-identical), and the `stilt_rows`
+extra (`js/buildkit-vharl.js`) stands a lifted mass on rows of posts every ~2.8 m, each on a basalt footing, instead of
+the four corner posts of `stilts`. No race maps to `vharl`: a game asks for it by name.
+
 ## The building kit: a building is a KIT, not a model
 
 `js/buildkit.js` is the second half of the same idea. The planner fixed **where** a building goes;

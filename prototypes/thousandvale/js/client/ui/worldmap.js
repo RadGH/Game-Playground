@@ -97,7 +97,7 @@ export function createWorldMap({ atlas, net, me, hud, worldUi, inCombat = () => 
       const fl = f ? [f] : d.floors;
       fit(Math.min(...fl.map(q => q.origin.x)), Math.min(...fl.map(q => q.origin.z)), Math.max(...fl.map(q => q.origin.x + q.w * d.cell)), Math.max(...fl.map(q => q.origin.z + q.h * d.cell)), 0.04);
     } else if (k === 'world' && m) fit(0, 0, m.worldW, m.worldH, 0.01);
-    else if (k === 'province' && m?.playable) { const b = m.playable.block, s = m.playable.size; fit(b[0] * ZONE_M, b[1] * ZONE_M, (b[0] + s[0]) * ZONE_M, (b[1] + s[1]) * ZONE_M, 0.03); }
+    else if (k === 'province' && m?.playable) { const q = (p && m.playables?.find(r => p.x >= r.block[0] * ZONE_M && p.x < (r.block[0] + r.size[0]) * ZONE_M && p.z >= r.block[1] * ZONE_M && p.z < (r.block[1] + r.size[1]) * ZONE_M)) || m.playable, b = q.block, s = q.size; fit(b[0] * ZONE_M, b[1] * ZONE_M, (b[0] + s[0]) * ZONE_M, (b[1] + s[1]) * ZONE_M, 0.03); }
     else if (k === 'region' && p) { const zx = Math.floor(p.x / ZONE_M), zy = Math.floor(p.z / ZONE_M); fit(zx * ZONE_M, zy * ZONE_M, zx * ZONE_M + ZONE_M, zy * ZONE_M + ZONE_M, 0.02); }
     else if (p) { size(); state.cx = p.x; state.cz = p.z; state.scale = 0.9; }
     drawPresets();
@@ -141,7 +141,7 @@ export function createWorldMap({ atlas, net, me, hud, worldUi, inCombat = () => 
       drawDungeon(g, v, { floors: d.floors, cell: d.cell, fog: d.fog, markers: lastMarkers, opts: { names: state.opts.names } });
     } else {
       const detail = state.scale > 0.45 ? detailOnScreen(v) : null;
-      drawMap(g, v, { model: atlas.model, world: atlas.world, zoneImage: k => atlas.src.zoneImage(k), fog: atlas.fog, markers: lastMarkers, detail, opts: { ...state.opts, level: me()?.level || 1 } });
+      drawMap(g, v, { model: atlas.model, world: atlas.world, zoneImage: k => atlas.src.zoneImage(k), fog: atlas.fog, markers: lastMarkers, detail, opts: { ...state.opts, here: (() => { const q = me(), mm = atlas.model; return q && mm?.playables?.find(r => q.x >= r.block[0] * ZONE_M && q.x < (r.block[0] + r.size[0]) * ZONE_M && q.z >= r.block[1] * ZONE_M && q.z < (r.block[1] + r.size[1]) * ZONE_M)?.id; })(), level: me()?.level || 1 } });
       if (!atlas.model) { g.setTransform(1, 0, 0, 1, 0, 0); g.fillStyle = '#e8dcc0'; g.font = '600 15px Alegreya Sans, sans-serif'; g.textAlign = 'center'; g.fillText('Unrolling the map…', state.w / 2 * (g.__dpr || 1), state.h / 2 * (g.__dpr || 1)); }
       drawScale(g, v);
     }
@@ -291,14 +291,12 @@ export function createWorldMap({ atlas, net, me, hud, worldUi, inCombat = () => 
     if (!zr) return null;
     const p = me();
     if (!zr.playable) {
-      const pr = m?.provinces.find(q => q.id === zr.province);
-      if (!pr || zr.land < 0.08) return `<div class="tip-title">Open sea</div>`;
-      return `<div class="tip-title">${esc(pr.name)}</div><div class="tip-sub">${esc(titleCase(pr.biome || ''))} · not open yet</div><hr><div>Another province of the Vale. The roads there are closed for now.</div>`;
+      return `<div class="tip-title">Open sea</div><div class="tip-sub">Between the continents</div>`;      // 2026-10-14: every built province is its own continent
     }
     const share = atlas.fog ? Math.round(atlas.fog.shareIn(zr.bounds) * 100) : 0;
     const tone = bandTone(zr.band, p?.level || 1);
     const toneText = { easy: 'Easy for you', fair: 'Right for your level', hard: 'Hard for you', deadly: 'Deadly at your level' }[tone];
-    return `<div class="tip-title">${esc(zr.name)}</div><div class="tip-sub">${esc(m?.playable?.name || '')}${zr.archetype ? ' · ' + esc(titleCase(zr.archetype)) : ''}</div>
+    return `<div class="tip-title">${esc(zr.name)}</div><div class="tip-sub">${esc(m?.playables?.find(q => q.id === zr.province)?.name || m?.playable?.name || '')}${zr.archetype ? ' · ' + esc(titleCase(zr.archetype)) : ''}</div>
       <div class="tip-row"><b class="tone-${tone}">${esc(bandText(zr.band))}</b><span>${share}% explored</span></div><div class="tone-${tone}">${toneText}</div>
       ${zr.town ? `<hr><div>Town: ${esc(zr.town)}</div>` : ''}${zr.dungeon ? `<div>Dungeon: ${esc(zr.dungeon.name)}${zr.dungeon.level ? ` (level ${esc(zr.dungeon.level)})` : ''}</div>` : ''}`;
   }

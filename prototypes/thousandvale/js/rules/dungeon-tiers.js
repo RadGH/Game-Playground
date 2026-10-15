@@ -22,14 +22,17 @@
 // one that honours them treats those tiles as walls until the lever is pulled. The test proves the lever
 // is reachable with the gate shut, and the boss is not.
 //
-// Families (8 planned, PLAN §3.6). M1 ships two: `crypt_spiral` (rooms in a ring that winds inward to a
-// central chamber) and `mine_descent` (a switchback shaft with galleries hanging off it). Asking for a
-// planned family gets the nearest ready one, with `familyFallback` naming what was asked for.
+// Families (16, all ready). Torbor's eight are the eight GENERATORS (PLAN §3.6): `crypt_spiral` (rooms in a
+// ring that winds inward), `mine_descent` (a switchback shaft with galleries), and the six chain families
+// (cistern, keep, cave river, tower, barrow maze, temple). Vharlen's eight (EXPANSION-1 §8: lava_tube,
+// steam_grotto, sulphur_mine, drowned_vent, glass_tomb, buried_town, kiln_forge, caldera_deep) each name a
+// `layout` — one of those eight generators — and keep their own name, look, roster, encounters, title parts
+// and floor names. Asking for an unknown family gets a ready one, with `familyFallback` naming what was asked for.
 
 export const CELL = 2;                  // metres per tile
 const GAP = 64;                         // metres between floors laid side by side
 
-/** The eight layout families. `ready` ones have a generator; `look` keys match Farhold DUNGEON_LOOKS. */
+/** The sixteen families. `ready` ones have a generator (their own key, or `layout`); `look` keys match js/client/dungeon-view.js LOOKS. */
 export const FAMILIES = {
   crypt_spiral: {
     name: 'Crypt spiral', ready: true, look: 'crypt', fallback: null,
@@ -70,6 +73,51 @@ export const FAMILIES = {
   sunken_temple: { name: 'Sunken temple', ready: true, look: 'hollow', borrow: 'flooded_cistern',
     blurb: 'A cross-shaped temple the marsh swallowed: nave, transept chapels, the apse at the head.',
     roster: { normal: ['bog_slime', 'marsh_wisp', 'sporecap_walker', 'veil_spider'], elite: 'sporecap_walker' } },
+
+  // ---- Vharlen (EXPANSION-1 §8): eight families of their own, each building its floors with one of the eight
+  // generators above (`layout`) under its own name, look, roster, encounters, title parts and floor names.
+  lava_tube: { name: 'Lava tube', ready: true, layout: 'cave_river', look: 'lava', borrow: 'cave_river',
+    blurb: 'Old lava runs under the black sand, cooled to glass where the sea got in.',
+    roster: { normal: ['scoria_crawler', 'ashback_salamander', 'vent_wisp', 'pumice_golem'], elite: 'ashback_salamander' },
+    encounterSets: [
+      { name: 'The Brineglass Tubes', miniboss: [{ id: 'mb_brinecrust', type: 'scoria_crawler' }, { id: 'mb_ottilde_tuberunner', type: 'ashback_salamander' }], boss: { id: 'boss_brineglass_matron', type: 'obsidian_warden' } },
+      { name: 'The Dry Wells', miniboss: [{ id: 'mb_mother_grit', type: 'pumice_golem' }, { id: 'mb_dry_throat_bogg', type: 'sulphur_toad' }], boss: { id: 'boss_well_warden', type: 'obsidian_warden' } }] },
+  steam_grotto: { name: 'Steam grotto', ready: true, layout: 'sunken_temple', look: 'steam', borrow: 'sunken_temple',
+    blurb: 'Hot springs under the steamwood, an old bathing shrine half lost in the fog.',
+    roster: { normal: ['steamwood_prowler', 'vent_wisp', 'mudback_lurker', 'sulphur_toad'], elite: 'steamwood_prowler' },
+    encounterSets: [
+      { name: 'The Hissing Grotto', miniboss: [{ id: 'mb_hushfoot', type: 'steamwood_prowler' }, { id: 'mb_spring_spirit', type: 'vent_wisp' }], boss: { id: 'boss_mother_hiss', type: 'ashback_salamander' } }] },
+  sulphur_mine: { name: 'Sulphur mine', ready: true, layout: 'mine_descent', look: 'sulphur', borrow: 'mine_descent',
+    blurb: 'Yellow galleries the Slagborn dig with captive hands, rails and carts down every switchback.',
+    roster: { normal: ['slagborn_raider', 'sulphur_toad', 'scoria_crawler', 'slagborn_firecaller'], elite: 'slagborn_raider' },
+    encounterSets: [
+      { name: 'The Yellow Pits', miniboss: [{ id: 'mb_yellowjaw', type: 'sulphur_toad' }, { id: 'mb_overseer_grask', type: 'slagborn_raider' }], boss: { id: 'boss_firecaller_ushka', type: 'slagborn_firecaller' } }] },
+  drowned_vent: { name: 'Drowned vent', ready: true, layout: 'flooded_cistern', look: 'vent', borrow: 'flooded_cistern',
+    blurb: 'A fumarole the fen flooded: warm black water over chambers that still breathe gas.',
+    roster: { normal: ['mudback_lurker', 'sulphur_toad', 'vent_wisp', 'steamwood_prowler'], elite: 'mudback_lurker' },
+    encounterSets: [
+      { name: 'The Drowned Vent', miniboss: [{ id: 'mb_gorm_mudmouth', type: 'mudback_lurker' }, { id: 'mb_bladder_queen_ussa', type: 'sulphur_toad' }], boss: { id: 'boss_gulgarra', type: 'vent_wisp' } }] },
+  glass_tomb: { name: 'Glass tomb', ready: true, layout: 'crypt_spiral', look: 'glass', borrow: 'crypt_spiral',
+    blurb: 'The old island kings, laid in rings of fused sand that wind down to the first of them.',
+    roster: { normal: ['glasswing', 'obsidian_warden', 'scoria_crawler', 'vent_wisp'], elite: 'obsidian_warden' },
+    encounterSets: [
+      { name: 'Tomb of the Glass Kings', miniboss: [{ id: 'mb_dirge_wing', type: 'glasswing' }, { id: 'mb_third_kings_sentinel', type: 'obsidian_warden' }], boss: { id: 'boss_orrvald_glass_king', type: 'slagborn_chief' } }] },
+  buried_town: { name: 'Buried town', ready: true, layout: 'barrow_maze', look: 'ash', borrow: 'barrow_maze',
+    blurb: 'The first town, under the ash of the great fall: streets dug back out house by house.',
+    roster: { normal: ['slagborn_raider', 'scoria_crawler', 'pumice_golem', 'vent_wisp'], elite: 'pumice_golem' },
+    encounterSets: [
+      { name: 'Under Cinderholt', miniboss: [{ id: 'mb_spademaster_varn', type: 'slagborn_raider' }, { id: 'mb_chimney_crawler', type: 'scoria_crawler' }], boss: { id: 'boss_bellman_of_cinderholt', type: 'pumice_golem' } }] },
+  kiln_forge: { name: 'Kiln forge', ready: true, layout: 'fortress_keep', look: 'kiln', borrow: 'fortress_keep',
+    blurb: 'Brick kilns and forge halls stacked up the ridge, the master kiln at the top.',
+    roster: { normal: ['slagborn_raider', 'slagborn_firecaller', 'pumice_golem', 'scoria_crawler'], elite: 'slagborn_firecaller' },
+    encounterSets: [
+      { name: 'The Old Kilns', miniboss: [{ id: 'mb_kiln_tender_murra', type: 'slagborn_raider' }, { id: 'mb_clinker', type: 'pumice_golem' }], boss: { id: 'boss_haggerd_brickburner', type: 'slagborn_firecaller' } },
+      { name: 'The Slag Heaps', miniboss: [{ id: 'mb_slagheap', type: 'scoria_crawler' }, { id: 'mb_ash_daughter_kesk', type: 'slagborn_firecaller' }], boss: { id: 'boss_chief_durrak', type: 'slagborn_chief' } }] },
+  caldera_deep: { name: 'Caldera deep', ready: true, layout: 'mine_descent', look: 'throat', borrow: 'mine_descent',
+    blurb: 'Down the volcano\'s own throat: basalt ledges over live rock, each floor hotter than the last.',
+    roster: { normal: ['ashback_salamander', 'vent_wisp', 'obsidian_warden', 'slagborn_firecaller'], elite: 'obsidian_warden' },
+    encounterSets: [
+      { name: 'The Throat', miniboss: [{ id: 'mb_basalt_doorkeeper', type: 'obsidian_warden' }, { id: 'mb_old_scorchhide', type: 'ashback_salamander' }], boss: { id: 'boss_skarn_slagborn_chief', type: 'slagborn_chief' } }] },
 };
 
 export const ROOM_KINDS = ['entry', 'arrival', 'fight', 'key', 'miniboss', 'boss', 'reward'];
@@ -84,6 +132,15 @@ const NAMES = {
   tower_climb: { a: ['Tower', 'Spire', 'Stair', 'Watchtower', 'Lighthouse'], b: ['of the Mad Astronomer', 'of Hollin Pass', 'of the Seven Bells', 'of the Weathercock', 'of Magister Quill'] },
   barrow_maze: { a: ['Barrows', 'Barrowdowns', 'Howes', 'Mounds', 'Long Barrow'], b: ['of the Nine Kings', 'of Wychwood', 'of the Sleeping Host', 'Under the Thorn', 'of Old Grimbold'] },
   sunken_temple: { a: ['Sunken Temple', 'Drowned Chapel', 'Mire Sanctum', 'Flooded Abbey', 'Reedwater Shrine'], b: ['of the Frog Saint', 'of Brackwater', 'of the Silent Bell', 'of Mother Reed', 'of the Green Lamp'] },
+  // Vharlen (EXPANSION-1 §8)
+  lava_tube: { a: ['Lava Tubes', 'Glassruns', 'Cooled Flows', 'Black Tubes', 'Salt Runs'], b: ['of Port Vharl', 'Under the Black Sand', 'of the Cooling Tide', 'of the Black Shore', 'of the Salt Widow'] },
+  steam_grotto: { a: ['Grotto', 'Hot Springs', 'Steam Baths', 'Fog Caves', 'Boiling Hollow'], b: ['of Mistfall', 'of the Boiling Spring', 'of the First Bathers', 'Under the Steamwood', 'of Mother Hiss'] },
+  sulphur_mine: { a: ['Pits', 'Yellow Workings', 'Brimstone Cut', 'Sulphur Galleries', 'Stink Shafts'], b: ['of Yellowpan', 'of the Slagborn Gangs', 'of Overseer Grask', 'of the Yellow Hand', 'Under the Bight'] },
+  drowned_vent: { a: ['Drowned Vent', 'Gas Wells', 'Sunk Fumarole', 'Warm Deeps', 'Bubbling Halls'], b: ['of Stiltreach', 'of the Black Water', 'of Gulgarra', 'Under the Stilts', 'of the Green Fog'] },
+  glass_tomb: { a: ['Tomb', 'Glass Vaults', 'Sand Crypts', 'Fused Halls', 'Kings\' Rest'], b: ['of the Glass Kings', 'of King Orrvald', 'of Shardhaven', 'of the Sunlit Dead', 'Under the Glasswind'] },
+  buried_town: { a: ['Buried Streets', 'Ash Town', 'Old Lanes', 'Sunk Houses', 'Grey Cellars'], b: ['of Old Cinderholt', 'Under the Ashfall', 'of the Bellman', 'of the Last Market', 'of the Choked Square'] },
+  kiln_forge: { a: ['Kilns', 'Forge Halls', 'Brickworks', 'Slag Hold', 'Firing Rooms'], b: ['of Kilnhold', 'of Master Haggerd', 'of the Red Brick', 'on the Ridge', 'of Chief Durrak'] },
+  caldera_deep: { a: ['Throat', 'Deep Vent', 'Fire Well', 'Basalt Stair', 'Burning Shaft'], b: ['of the Caldera', 'of the Wyrm', 'Under the Rim Shrine', 'of the Slagborn', 'of Chief Skarn'] },
 };
 
 // ------------------------------------------------------------------------------------------------
@@ -703,7 +760,10 @@ export function planDungeon(seed, { floors = 2, level = 3, family = 'crypt_spira
   const sets = encounterSetsFor(key);
   const setIndex = set != null ? set % sets.length : rng.int(sets.length);
   const enc = { ...sets[setIndex], ...(encounters || {}) };
-  const names = NAMES[key];
+  const names = NAMES[key] || NAMES[fam.layout] || NAMES.crypt_spiral;
+  // Expansion 1 (Vharlen, §8): a family may build its floors with another family's generator (`layout`) under its own
+  // name, look, roster, encounters and floor names. The RNG is still seeded by the family's own key.
+  const gen = fam.layout || key;
   const out = {
     family: key, familyName: fam.name, look: fam.look, level, seed: seed >>> 0, cell: CELL,
     name: `The ${rng.pick(names.a)} ${rng.pick(names.b)}`,
@@ -715,7 +775,7 @@ export function planDungeon(seed, { floors = 2, level = 3, family = 'crypt_spira
   for (let f = 0; f < floors; f++) {
     const { start, last } = kindsFor(f, floors);
     let built;
-    if (key === 'crypt_spiral') {
+    if (gen === 'crypt_spiral') {
       const n = 6 + rng.int(2);                           // 6-7 ring rooms
       const ring = [start];
       while (ring.length < n - 1) ring.push('fight');
@@ -723,14 +783,14 @@ export function planDungeon(seed, { floors = 2, level = 3, family = 'crypt_spira
       ring.length = n;
       if (last) ring[n - 1] = 'miniboss';               // the last ring room holds the floor's mini-boss
       built = cryptFloor(rng, { ring, centre: last ? 'boss' : 'miniboss', reward: last });
-    } else if (key === 'mine_descent') {
+    } else if (gen === 'mine_descent') {
       const list = [start, 'fight', 'fight', 'key', 'fight', 'miniboss'];
       if (last) list.push('boss', 'reward');
       built = mineFloor(rng, { list });
     } else {
       const list = [start, 'fight', 'fight', 'key', 'fight', 'miniboss'];
       if (last) list.push('boss', 'reward');
-      const place = key === 'tower_climb' ? (r, k, t) => placeTower(r, k, t, f) : CHAIN[key];
+      const place = gen === 'tower_climb' ? (r, k, t) => placeTower(r, k, t, f) : CHAIN[gen];
       built = buildChain(rng, place, list);
       if (!built) throw new Error(`dungeon-tiers: ${key} could not route floor ${f} for seed ${seed}`);
     }
@@ -814,6 +874,15 @@ export const FLOOR_NAMES = {
   tower_climb: ['The Undercroft', 'The Winding Stair', 'The Bell Loft', 'The Crown Room'],
   barrow_maze: ['The Outer Passages', 'The Turning Ways', 'The Inner Ring', 'The King\'s Chamber'],
   sunken_temple: ['The Fallen Porch', 'The Flooded Nave', 'The Silent Cells', 'The Sanctum'],
+  // Vharlen (EXPANSION-1 §8)
+  lava_tube: ['The Tube Mouth', 'The Glass Run', 'The Hot Narrows', 'The Last Flow'],
+  steam_grotto: ['The Bathing Steps', 'The Fog Halls', 'The Scalding Pools', 'The Spring Head'],
+  sulphur_mine: ['The Yellow Face', 'The Cart Ways', 'The Stink Seam', 'The Firecaller\'s Pit'],
+  drowned_vent: ['The Stilt Cellars', 'The Gas Rooms', 'The Warm Water', 'The Vent Mouth'],
+  glass_tomb: ['The Outer Graves', 'The Sand Halls', 'The Kings\' Ring', 'The First King\'s Vault'],
+  buried_town: ['The Roof Lanes', 'The Market Cellars', 'The Choked Square', 'The Bell Tower Foot'],
+  kiln_forge: ['The Brick Yard', 'The Drying Halls', 'The Firing Stair', 'The Master Kiln'],
+  caldera_deep: ['The Rim Ledges', 'The Basalt Stair', 'The Red Gullet', 'The Throat'],
 };
 export function floorName(family, f, floors) {
   const list = FLOOR_NAMES[family] || FLOOR_NAMES.crypt_spiral;

@@ -1,0 +1,194 @@
+{
+  "name": "Rim Shrine (z12_10)",
+  "zone": "z12_10",
+  "sheet": {
+    "sheet": "vharlen",
+    "zone": "the_caldera"
+  },
+  "province": {
+    "id": 0,
+    "name": "Feafeast Highlands"
+  },
+  "size": 1025,
+  "step": 2,
+  "origin": {
+    "x": 0,
+    "z": 0
+  },
+  "heightMin": -240,
+  "heightMax": 1660,
+  "bakeVersion": 4,
+  "inputHash": "4958e2b7",
+  "waterKinds": [
+    "none",
+    "sea",
+    "lake",
+    "river"
+  ],
+  "source": {
+    "tool": "tools/bake-zone.mjs",
+    "world": {
+      "seed": 1001,
+      "width": 288,
+      "height": 224,
+      "method": "pangea",
+      "seaLevel": 0.2,
+      "inputHash": "9805a835"
+    },
+    "zone": {
+      "zx": 12,
+      "zy": 10
+    },
+    "worldOrigin": {
+      "x": 24576,
+      "z": 20480
+    },
+    "zoneMetres": 2048
+  },
+  "rivers": [],
+  "sites": [
+    {
+      "type": "settlement",
+      "kind": "hamlet",
+      "name": "Rim Shrine",
+      "x": 1794,
+      "z": 1148,
+      "hub": true,
+      "radius": 40
+    },
+    {
+      "type": "dungeon",
+      "id": "door_1",
+      "name": "Cave mouth",
+      "x": 1535,
+      "z": 1127,
+      "yaw": 2.468,
+      "pinned": true
+    },
+    {
+      "type": "event",
+      "id": "world_ossathra",
+      "x": 1142,
+      "z": 1048,
+      "r": 100,
+      "pinned": true
+    },
+    {
+      "type": "event",
+      "id": "event_the_caldera",
+      "x": 1280,
+      "z": 966,
+      "r": 40,
+      "pinned": true
+    }
+  ],
+  "spawn": {
+    "x": 1794,
+    "z": 1148
+  },
+  "bridges": [],
+  "palette": "vharl",
+  "continent": "vharlen",
+  "biomeNames": {
+    "beach": "Black Sand",
+    "rainforest": "Steam Jungle",
+    "shrubland": "Fern Scrub",
+    "savanna": "Tussock",
+    "desert": "Sulphur Flats",
+    "badlands": "Basalt Highland",
+    "marsh": "Mud Fen",
+    "volcanic": "Scoria Slopes",
+    "blighted": "Charred Wood",
+    "ashPlain": "Pumice Waste",
+    "glimmerwaste": "Obsidian Dunes",
+    "mountains": "Basalt Cliffs"
+  },
+  "pools": [
+    {
+      "id": "crater_lake",
+      "kind": "crater_lake",
+      "name": "Crater Lake",
+      "x": 909,
+      "z": 919,
+      "r": 128,
+      "level": 437.6
+    },
+    {
+      "id": "hot_spring_4",
+      "kind": "hot_spring",
+      "name": null,
+      "x": 1174,
+      "z": 1194,
+      "r": 10,
+      "level": 439.251
+    }
+  ],
+  "summary": {
+    "zone": "z12_10",
+    "province": "Feafeast Highlands",
+    "inputHash": "4958e2b7",
+    "rivers": 0,
+    "wetShare": 0.013,
+    "unwalkableShare": 0.198,
+    "towns": [
+      {
+        "name": "Rim Shrine",
+        "kind": "hamlet",
+        "hub": true,
+        "at": [
+          1794,
+          1148
+        ],
+        "radius": 40,
+        "movedFrom": null,
+        "culture": "vharl",
+        "plots": 8,
+        "streets": 37,
+        "links": 1,
+        "overlaps": 0,
+        "highStreets": 1,
+        "w6": {
+          "plotsBefore": 8,
+          "plots": 8,
+          "kept": 8,
+          "removed": []
+        }
+      }
+    ],
+    "roads": 1,
+    "bridges": 0,
+    "paths": 9,
+    "pathMetres": 2681,
+    "scatter": 4504,
+    "scatterKinds": {
+      "obsidian": 695,
+      "tree_fern": 166,
+      "ironpalm": 25,
+      "bush": 213,
+      "basalt_columns": 915,
+      "rock_small": 1398,
+      "steam_vent": 190,
+      "sulphur_crust": 86,
+      "reed": 754,
+      "tree_charred": 62
+    },
+    "sites": [
+      "settlement(HUB) hamlet Rim Shrine 1794 1148 40",
+      "dungeon door_1 Cave mouth 1535 1127  2.468",
+      "event world_ossathra  1142 1048 100",
+      "event event_the_caldera  1280 966 40"
+    ],
+    "spawn": {
+      "x": 1794,
+      "z": 1148
+    },
+    "placements": 63,
+    "vignettesAvoided": 600
+  },
+  "files": {
+    "terrain.bin": 421723,
+    "nav.bin": 28945,
+    "scatter.bin": 36116,
+    "placements.json": 105827
+  }
+}

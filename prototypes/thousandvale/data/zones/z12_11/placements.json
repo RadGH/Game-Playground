@@ -1,0 +1,6199 @@
+{
+ "_doc": "Stream B zone placements (tools/bake-zone.mjs). Zone metres; yaw = atan2(dx, dz), the way the thing faces. kinds: settlement (data.radius, hub, planned), town_square, street (data.pts, width, cls), building (a proctown plot: data.w along `angle` (local +x = (cos angle, sin angle)), data.d across, want; yaw faces the nearest drawn street, data.streetGap = metres from the front to it), town_wall (play-test 4: every planned settlement; data.style/material/tier/h/thick/tint/radius, runs [[[x,z,h]…]…] open polylines between openings, towers [{x,z,h,yaw}], gates [{id,x,z,h,yaw = the way OUT along the road,out:[dx,dz],width,pass,kind gatehouse|posts|gap,way,ways,led,ends,approaches}], openings [{kind water|keep,ends,grate}] — SOLID in nav.bin except the gates; tools/lib/zone-walls.mjs), road (data.pts [[x,z,h]], width, cls, spur), bridge (yaw along the road, span, deck height), dungeon_door, event_site, camp_site, landmark/dungeon/pass/crossing (World Forge nodes).",
+ "zone": "z12_11",
+ "terrainHash": "84bc7a26",
+ "placements": [
+  {
+   "kind": "settlement",
+   "id": "cinderholt",
+   "x": 1084,
+   "z": 736,
+   "yaw": 0,
+   "data": {
+    "kind": "village",
+    "name": "Cinderholt",
+    "radius": 65,
+    "hub": true,
+    "planned": true
+   }
+  },
+  {
+   "kind": "dungeon_door",
+   "id": "door_1",
+   "x": 1149,
+   "z": 601,
+   "yaw": -0.382,
+   "data": {
+    "name": "Cave mouth"
+   }
+  },
+  {
+   "kind": "event_site",
+   "id": "event_ashfall_hollow",
+   "x": 1054,
+   "z": 880,
+   "yaw": 0,
+   "data": {
+    "r": 40
+   }
+  },
+  {
+   "kind": "town_square",
+   "id": "cinderholt_square",
+   "x": 1080.69,
+   "z": 736.56,
+   "yaw": 0,
+   "data": {
+    "r": 3.16,
+    "town": "cinderholt",
+    "culture": "vharl",
+    "stalls": []
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_0",
+   "x": 1047.48,
+   "z": 756.75,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "main",
+    "width": 5,
+    "pts": [
+     [
+      1047.48,
+      756.75
+     ],
+     [
+      1086.78,
+      743.48
+     ],
+     [
+      1125.2,
+      727.86
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_1",
+   "x": 1111.15,
+   "z": 768.05,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      1111.15,
+      768.05
+     ],
+     [
+      1106.4,
+      755.46
+     ],
+     [
+      1100.79,
+      741.33
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_2",
+   "x": 1089.68,
+   "z": 777.44,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1089.68,
+      777.44
+     ],
+     [
+      1085.23,
+      763.89
+     ],
+     [
+      1080.41,
+      750.46
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_3",
+   "x": 1072.23,
+   "z": 776.32,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1072.23,
+      776.32
+     ],
+     [
+      1069.62,
+      769.3
+     ],
+     [
+      1063.81,
+      757.29
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_4",
+   "x": 1057.88,
+   "z": 768.89,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1057.88,
+      768.89
+     ],
+     [
+      1060.68,
+      767.72
+     ],
+     [
+      1065.49,
+      765.63
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_5",
+   "x": 1064.23,
+   "z": 773.06,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1064.23,
+      773.06
+     ],
+     [
+      1064.22,
+      773.01
+     ],
+     [
+      1062.18,
+      768.27
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_6",
+   "x": 1066.32,
+   "z": 774.1,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1066.32,
+      774.1
+     ],
+     [
+      1067.29,
+      773.62
+     ],
+     [
+      1068.68,
+      773.11
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_7",
+   "x": 1059.91,
+   "z": 766.77,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1059.91,
+      766.77
+     ],
+     [
+      1058.41,
+      763.5
+     ],
+     [
+      1057.08,
+      760.16
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_8",
+   "x": 1069.16,
+   "z": 765.42,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1069.16,
+      765.42
+     ],
+     [
+      1075.11,
+      762.83
+     ],
+     [
+      1081.1,
+      760.32
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_9",
+   "x": 1072.84,
+   "z": 774.03,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1072.84,
+      774.03
+     ],
+     [
+      1078.7,
+      771.23
+     ],
+     [
+      1084.78,
+      768.94
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_10",
+   "x": 1082.86,
+   "z": 777.98,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1082.86,
+      777.98
+     ],
+     [
+      1081.67,
+      775.2
+     ],
+     [
+      1080.43,
+      772.29
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_11",
+   "x": 1078.95,
+   "z": 769.93,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1078.95,
+      769.93
+     ],
+     [
+      1077.47,
+      766.84
+     ],
+     [
+      1076.27,
+      763.63
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_12",
+   "x": 1072.59,
+   "z": 762.71,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1072.59,
+      762.71
+     ],
+     [
+      1070.89,
+      758.85
+     ],
+     [
+      1069.29,
+      754.95
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_13",
+   "x": 1088.14,
+   "z": 765.67,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1088.14,
+      765.67
+     ],
+     [
+      1095.54,
+      762.15
+     ],
+     [
+      1103.2,
+      759.24
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_14",
+   "x": 1101.73,
+   "z": 771.61,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1101.73,
+      771.61
+     ],
+     [
+      1099.88,
+      767.31
+     ],
+     [
+      1098.06,
+      762.99
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_15",
+   "x": 1090.6,
+   "z": 771.44,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1090.6,
+      771.44
+     ],
+     [
+      1094.82,
+      769.79
+     ],
+     [
+      1098.93,
+      767.88
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_16",
+   "x": 1096.03,
+   "z": 774.04,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1096.03,
+      774.04
+     ],
+     [
+      1095.4,
+      772.53
+     ],
+     [
+      1094.74,
+      771.02
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_17",
+   "x": 1094.35,
+   "z": 768.49,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1094.35,
+      768.49
+     ],
+     [
+      1093.71,
+      766.81
+     ],
+     [
+      1092.93,
+      765.18
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_18",
+   "x": 1100.63,
+   "z": 766.18,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1100.63,
+      766.18
+     ],
+     [
+      1102.9,
+      765.03
+     ],
+     [
+      1105.3,
+      764.18
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_19",
+   "x": 1096.87,
+   "z": 760.38,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1096.87,
+      760.38
+     ],
+     [
+      1094.23,
+      754.2
+     ],
+     [
+      1091.6,
+      748.01
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_20",
+   "x": 1084.01,
+   "z": 756,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1084.01,
+      756
+     ],
+     [
+      1088.2,
+      754.35
+     ],
+     [
+      1092.3,
+      752.47
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_21",
+   "x": 1091.19,
+   "z": 762.8,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1091.19,
+      762.8
+     ],
+     [
+      1089.63,
+      759.21
+     ],
+     [
+      1088.11,
+      755.59
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_22",
+   "x": 1086.95,
+   "z": 753.42,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1086.95,
+      753.42
+     ],
+     [
+      1086.32,
+      751.98
+     ],
+     [
+      1085.71,
+      750.52
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_23",
+   "x": 1094.94,
+   "z": 753.01,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1094.94,
+      753.01
+     ],
+     [
+      1097.34,
+      752.08
+     ],
+     [
+      1099.68,
+      750.99
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_24",
+   "x": 1108.35,
+   "z": 754.55,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1108.35,
+      754.55
+     ],
+     [
+      1119.32,
+      750.15
+     ],
+     [
+      1124,
+      748.8
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_25",
+   "x": 1119.21,
+   "z": 758.9,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1119.21,
+      758.9
+     ],
+     [
+      1117.42,
+      754.05
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_26",
+   "x": 1112.79,
+   "z": 763.67,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1112.79,
+      763.67
+     ],
+     [
+      1115.92,
+      762.59
+     ],
+     [
+      1116.88,
+      762.13
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_27",
+   "x": 1120.05,
+   "z": 757.07,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1120.05,
+      757.07
+     ],
+     [
+      1120.41,
+      756.93
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_28",
+   "x": 1119.76,
+   "z": 748.14,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1119.76,
+      748.14
+     ],
+     [
+      1117.17,
+      742.76
+     ],
+     [
+      1115.24,
+      737.1
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_29",
+   "x": 1107.16,
+   "z": 747.57,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1107.16,
+      747.57
+     ],
+     [
+      1111.73,
+      745.56
+     ],
+     [
+      1116.4,
+      743.79
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_30",
+   "x": 1112.24,
+   "z": 751.22,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1112.24,
+      751.22
+     ],
+     [
+      1111.43,
+      749.35
+     ],
+     [
+      1110.7,
+      747.46
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_31",
+   "x": 1109.5,
+   "z": 745.28,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1109.5,
+      745.28
+     ],
+     [
+      1108.56,
+      742.75
+     ],
+     [
+      1107.46,
+      740.28
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_32",
+   "x": 1118.48,
+   "z": 741.16,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1118.48,
+      741.16
+     ],
+     [
+      1122.52,
+      739.77
+     ],
+     [
+      1125.95,
+      738.13
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_33",
+   "x": 1125.29,
+   "z": 743.68,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1125.29,
+      743.68
+     ],
+     [
+      1125.02,
+      742.97
+     ],
+     [
+      1123.91,
+      740.39
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_34",
+   "x": 1121.88,
+   "z": 738.31,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1121.88,
+      738.31
+     ],
+     [
+      1121.2,
+      736.63
+     ],
+     [
+      1120.51,
+      734.95
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_35",
+   "x": 1088.26,
+   "z": 736.9,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "lane",
+    "width": 3.2,
+    "pts": [
+     [
+      1088.26,
+      736.9
+     ],
+     [
+      1080.83,
+      716.28
+     ],
+     [
+      1072.44,
+      696.03
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_36",
+   "x": 1042.85,
+   "z": 739.56,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1042.85,
+      739.56
+     ],
+     [
+      1061.82,
+      732.14
+     ],
+     [
+      1080.25,
+      723.48
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_37",
+   "x": 1066.29,
+   "z": 744.08,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1066.29,
+      744.08
+     ],
+     [
+      1064.14,
+      738.91
+     ],
+     [
+      1062.11,
+      733.68
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_38",
+   "x": 1057.12,
+   "z": 747.77,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1057.12,
+      747.77
+     ],
+     [
+      1054.95,
+      742.6
+     ],
+     [
+      1052.94,
+      737.37
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_39",
+   "x": 1047.95,
+   "z": 747.73,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1047.95,
+      747.73
+     ],
+     [
+      1051.33,
+      746.34
+     ],
+     [
+      1054.73,
+      745
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_40",
+   "x": 1056.17,
+   "z": 742.25,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1056.17,
+      742.25
+     ],
+     [
+      1059.73,
+      740.99
+     ],
+     [
+      1063.17,
+      739.44
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_41",
+   "x": 1077.2,
+   "z": 739.69,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1077.2,
+      739.69
+     ],
+     [
+      1075.25,
+      734.44
+     ],
+     [
+      1073.02,
+      729.3
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_42",
+   "x": 1065.09,
+   "z": 737.96,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1065.09,
+      737.96
+     ],
+     [
+      1069.33,
+      735.99
+     ],
+     [
+      1073.75,
+      734.47
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_43",
+   "x": 1072.54,
+   "z": 741.57,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1072.54,
+      741.57
+     ],
+     [
+      1071.55,
+      739.39
+     ],
+     [
+      1070.76,
+      737.12
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_44",
+   "x": 1068.46,
+   "z": 735.15,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1068.46,
+      735.15
+     ],
+     [
+      1067.76,
+      733.43
+     ],
+     [
+      1067.07,
+      731.69
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_45",
+   "x": 1076.72,
+   "z": 735.13,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1076.72,
+      735.13
+     ],
+     [
+      1079.61,
+      733.86
+     ],
+     [
+      1082.58,
+      732.77
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_46",
+   "x": 1062.84,
+   "z": 728.6,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1062.84,
+      728.6
+     ],
+     [
+      1058.5,
+      716.51
+     ],
+     [
+      1054.06,
+      706.55
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_47",
+   "x": 1043.26,
+   "z": 725.77,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1043.26,
+      725.77
+     ],
+     [
+      1048.01,
+      723.7
+     ],
+     [
+      1057.73,
+      720.11
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_48",
+   "x": 1052.11,
+   "z": 732.92,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1052.11,
+      732.92
+     ],
+     [
+      1050.63,
+      728.99
+     ],
+     [
+      1048.98,
+      725.14
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_49",
+   "x": 1046.84,
+   "z": 735.03,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1046.84,
+      735.03
+     ],
+     [
+      1045.46,
+      731.07
+     ],
+     [
+      1043.72,
+      727.25
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_50",
+   "x": 1056.17,
+   "z": 731.28,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1056.17,
+      731.28
+     ],
+     [
+      1054.6,
+      727.39
+     ],
+     [
+      1053.04,
+      723.5
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_51",
+   "x": 1045.03,
+   "z": 723.72,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1045.03,
+      723.72
+     ],
+     [
+      1044.36,
+      722.11
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_52",
+   "x": 1049.35,
+   "z": 712.26,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1049.35,
+      712.26
+     ],
+     [
+      1053.92,
+      710.63
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_53",
+   "x": 1050.4,
+   "z": 721.56,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1050.4,
+      721.56
+     ],
+     [
+      1049.09,
+      718.04
+     ],
+     [
+      1047.71,
+      714.85
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_54",
+   "x": 1059.65,
+   "z": 716.42,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1059.65,
+      716.42
+     ],
+     [
+      1066.84,
+      713.62
+     ],
+     [
+      1073.96,
+      710.66
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_55",
+   "x": 1070.47,
+   "z": 725.53,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1070.47,
+      725.53
+     ],
+     [
+      1068.42,
+      720.26
+     ],
+     [
+      1066.26,
+      715.04
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_56",
+   "x": 1062.71,
+   "z": 724.04,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1062.71,
+      724.04
+     ],
+     [
+      1065.26,
+      723.01
+     ],
+     [
+      1067.8,
+      721.99
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_57",
+   "x": 1069.78,
+   "z": 720.69,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1069.78,
+      720.69
+     ],
+     [
+      1073.33,
+      719.31
+     ],
+     [
+      1076.84,
+      717.85
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_58",
+   "x": 1066.1,
+   "z": 712.54,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1066.1,
+      712.54
+     ],
+     [
+      1063.66,
+      707.06
+     ],
+     [
+      1061.62,
+      701.41
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_59",
+   "x": 1057.78,
+   "z": 711.77,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1057.78,
+      711.77
+     ],
+     [
+      1060.63,
+      710.68
+     ],
+     [
+      1063.45,
+      709.49
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_60",
+   "x": 1065.79,
+   "z": 708.25,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1065.79,
+      708.25
+     ],
+     [
+      1068.96,
+      707.18
+     ],
+     [
+      1071.99,
+      705.77
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_61",
+   "x": 1084.28,
+   "z": 718.36,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1084.28,
+      718.36
+     ],
+     [
+      1099.6,
+      711.02
+     ],
+     [
+      1113.2,
+      705.81
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_62",
+   "x": 1105.71,
+   "z": 729.05,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1105.71,
+      729.05
+     ],
+     [
+      1102.54,
+      721.52
+     ],
+     [
+      1099.12,
+      714.1
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_63",
+   "x": 1088.56,
+   "z": 727.59,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1088.56,
+      727.59
+     ],
+     [
+      1094.85,
+      724.67
+     ],
+     [
+      1101.25,
+      722
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_64",
+   "x": 1098.65,
+   "z": 732.16,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1098.65,
+      732.16
+     ],
+     [
+      1097.15,
+      728.99
+     ],
+     [
+      1095.83,
+      725.74
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_65",
+   "x": 1096.27,
+   "z": 722.84,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1096.27,
+      722.84
+     ],
+     [
+      1094.95,
+      719.68
+     ],
+     [
+      1093.51,
+      716.57
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_66",
+   "x": 1112.23,
+   "z": 726.18,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1112.23,
+      726.18
+     ],
+     [
+      1109.12,
+      718.62
+     ],
+     [
+      1105.65,
+      711.22
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_67",
+   "x": 1103.91,
+   "z": 721.9,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1103.91,
+      721.9
+     ],
+     [
+      1105.98,
+      720.91
+     ],
+     [
+      1108.12,
+      720.05
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_68",
+   "x": 1109.6,
+   "z": 716.99,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1109.6,
+      716.99
+     ],
+     [
+      1114.11,
+      715.01
+     ],
+     [
+      1118.61,
+      713.03
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_69",
+   "x": 1117.56,
+   "z": 723.84,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1117.56,
+      723.84
+     ],
+     [
+      1116.09,
+      719.91
+     ],
+     [
+      1114.19,
+      716.17
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_70",
+   "x": 1114.45,
+   "z": 713.66,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1114.45,
+      713.66
+     ],
+     [
+      1113.17,
+      711.07
+     ],
+     [
+      1112.12,
+      708.38
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_71",
+   "x": 1097.55,
+   "z": 710.56,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1097.55,
+      710.56
+     ],
+     [
+      1093.6,
+      700.58
+     ],
+     [
+      1090.66,
+      694.53
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_72",
+   "x": 1078.18,
+   "z": 703.68,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1078.18,
+      703.68
+     ],
+     [
+      1084.22,
+      700.69
+     ],
+     [
+      1090.5,
+      698.26
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_73",
+   "x": 1087.71,
+   "z": 714.89,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1087.71,
+      714.89
+     ],
+     [
+      1085.4,
+      708.98
+     ],
+     [
+      1082.6,
+      703.27
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_74",
+   "x": 1080.53,
+   "z": 709.03,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1080.53,
+      709.03
+     ],
+     [
+      1081.84,
+      708.46
+     ],
+     [
+      1083.14,
+      707.88
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_75",
+   "x": 1087.37,
+   "z": 710.73,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1087.37,
+      710.73
+     ],
+     [
+      1091.07,
+      709.33
+     ],
+     [
+      1094.59,
+      707.55
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_76",
+   "x": 1084.76,
+   "z": 699.25,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1084.76,
+      699.25
+     ],
+     [
+      1083.48,
+      696.56
+     ],
+     [
+      1082.45,
+      694.03
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_77",
+   "x": 1094.47,
+   "z": 699.84,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1094.47,
+      699.84
+     ],
+     [
+      1100.64,
+      697.43
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_78",
+   "x": 1106.96,
+   "z": 706.42,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1106.96,
+      706.42
+     ],
+     [
+      1105.14,
+      701.98
+     ],
+     [
+      1103.7,
+      698.91
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_79",
+   "x": 1097.22,
+   "z": 706.09,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1097.22,
+      706.09
+     ],
+     [
+      1100.66,
+      704.51
+     ],
+     [
+      1104.14,
+      703.05
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_80",
+   "x": 1105.7,
+   "z": 700.52,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1105.7,
+      700.52
+     ],
+     [
+      1106.17,
+      700.33
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_81",
+   "x": 1092.5,
+   "z": 695.36,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1092.5,
+      695.36
+     ],
+     [
+      1093.29,
+      695.04
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_82",
+   "x": 1049.28,
+   "z": 774.72,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "main",
+    "width": 4.2,
+    "pts": [
+     [
+      1049.28,
+      774.72
+     ],
+     [
+      1078.69,
+      738.99
+     ]
+    ],
+    "high": true,
+    "to": "square",
+    "road": "road_v_ring_5"
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_83",
+   "x": 1136,
+   "z": 736,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "main",
+    "width": 4.2,
+    "pts": [
+     [
+      1136,
+      736
+     ],
+     [
+      1083.67,
+      737.61
+     ]
+    ],
+    "high": true,
+    "to": "square",
+    "road": "road_v_ring_6"
+   }
+  },
+  {
+   "kind": "street",
+   "id": "cinderholt_street_84",
+   "x": 1117.42,
+   "z": 754.05,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "cls": "alley",
+    "width": 2.2,
+    "pts": [
+     [
+      1117.42,
+      754.05
+     ],
+     [
+      1116.33,
+      751.35
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "building",
+   "id": "cinderholt_plot_0",
+   "x": 1073.71,
+   "z": 768.45,
+   "yaw": 1.974,
+   "data": {
+    "town": "cinderholt",
+    "want": "stable",
+    "district": "residential",
+    "w": 5.64,
+    "d": 4.78,
+    "angle": 4.3092,
+    "front": 5.88,
+    "streetGap": -0.4,
+    "office": "stable",
+    "role": "stablehand",
+    "lit": true,
+    "label": "Stables"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "cinderholt_plot_1",
+   "x": 1080.83,
+   "z": 765.41,
+   "yaw": -2.7384,
+   "data": {
+    "town": "cinderholt",
+    "want": "house",
+    "district": "residential",
+    "w": 5.64,
+    "d": 3.29,
+    "angle": 4.3092,
+    "front": 4.3092,
+    "streetGap": -0.34
+   }
+  },
+  {
+   "kind": "building",
+   "id": "cinderholt_plot_2",
+   "x": 1075.5,
+   "z": 756.88,
+   "yaw": 0.4032,
+   "data": {
+    "town": "cinderholt",
+    "want": "forge",
+    "district": "craft",
+    "w": 7.23,
+    "d": 6.4,
+    "angle": 4.3092,
+    "front": 7.4508,
+    "streetGap": -0.38,
+    "office": "forge",
+    "role": "smith",
+    "lit": true,
+    "label": "Smithy"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "cinderholt_plot_3",
+   "x": 1099.02,
+   "z": 756.01,
+   "yaw": -2.7384,
+   "data": {
+    "town": "cinderholt",
+    "want": "house",
+    "district": "residential",
+    "w": 5.15,
+    "d": 3.95,
+    "angle": 4.3092,
+    "front": 4.3092,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "cinderholt_plot_4",
+   "x": 1095.91,
+   "z": 748.74,
+   "yaw": -1.1676,
+   "data": {
+    "town": "cinderholt",
+    "want": "hut",
+    "district": "craft",
+    "w": 3.52,
+    "d": 3.95,
+    "angle": 4.3092,
+    "front": 9.0215,
+    "streetGap": -0.39
+   }
+  },
+  {
+   "kind": "building",
+   "id": "cinderholt_plot_5",
+   "x": 1114.26,
+   "z": 758.51,
+   "yaw": 1.9588,
+   "data": {
+    "town": "cinderholt",
+    "want": "house",
+    "district": "residential",
+    "w": 4.67,
+    "d": 5.43,
+    "angle": 4.3244,
+    "front": 5.8952,
+    "streetGap": -0.31
+   }
+  },
+  {
+   "kind": "building",
+   "id": "cinderholt_plot_7",
+   "x": 1049.69,
+   "z": 742.25,
+   "yaw": 0.3823,
+   "data": {
+    "town": "cinderholt",
+    "want": "mill",
+    "district": "residential",
+    "w": 5.42,
+    "d": 6.1,
+    "angle": 4.3301,
+    "front": 7.4717,
+    "streetGap": -0.4,
+    "office": "mill",
+    "role": "miller",
+    "lit": false,
+    "label": "Mill"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "cinderholt_plot_8",
+   "x": 1058.37,
+   "z": 737.6,
+   "yaw": 1.9531,
+   "data": {
+    "town": "cinderholt",
+    "want": "hut",
+    "district": "craft",
+    "w": 3.27,
+    "d": 6.34,
+    "angle": 4.3301,
+    "front": 5.9009,
+    "streetGap": -0.36
+   }
+  },
+  {
+   "kind": "building",
+   "id": "cinderholt_plot_9",
+   "x": 1078.16,
+   "z": 730.25,
+   "yaw": 0.3823,
+   "data": {
+    "town": "cinderholt",
+    "want": "hut",
+    "district": "civic",
+    "w": 4.39,
+    "d": 5.11,
+    "angle": 4.3301,
+    "front": 7.4717,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "cinderholt_plot_10",
+   "x": 1057.72,
+   "z": 726.14,
+   "yaw": -1.1885,
+   "data": {
+    "town": "cinderholt",
+    "want": "hut",
+    "district": "craft",
+    "w": 7.18,
+    "d": 3.31,
+    "angle": 4.3301,
+    "front": 9.0425,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "cinderholt_plot_11",
+   "x": 1052.96,
+   "z": 716.49,
+   "yaw": -1.1885,
+   "data": {
+    "town": "cinderholt",
+    "want": "provisioner",
+    "district": "residential",
+    "w": 6.3,
+    "d": 4.95,
+    "angle": 4.3301,
+    "front": 9.0425,
+    "streetGap": -0.4,
+    "office": "provisioner",
+    "role": "provisioner",
+    "lit": true,
+    "label": "Provisioner"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "cinderholt_plot_12",
+   "x": 1063.74,
+   "z": 719.25,
+   "yaw": 0.3823,
+   "data": {
+    "town": "cinderholt",
+    "want": "hut",
+    "district": "craft",
+    "w": 4.72,
+    "d": 4.28,
+    "angle": 4.3301,
+    "front": 7.4717,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "cinderholt_plot_13",
+   "x": 1071.88,
+   "z": 715.7,
+   "yaw": -1.1885,
+   "data": {
+    "town": "cinderholt",
+    "want": "shrine",
+    "district": "craft",
+    "w": 4.21,
+    "d": 6.41,
+    "angle": 4.3301,
+    "front": 9.0425,
+    "streetGap": -0.37,
+    "office": "shrine",
+    "role": null,
+    "lit": false,
+    "label": "Shrine"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "cinderholt_plot_14",
+   "x": 1067.18,
+   "z": 702.75,
+   "yaw": -1.1885,
+   "data": {
+    "town": "cinderholt",
+    "want": "house",
+    "district": "residential",
+    "w": 5.42,
+    "d": 5.47,
+    "angle": 4.3301,
+    "front": 9.0425,
+    "streetGap": -0.06
+   }
+  },
+  {
+   "kind": "building",
+   "id": "cinderholt_plot_15",
+   "x": 1093.31,
+   "z": 730.68,
+   "yaw": 1.9854,
+   "data": {
+    "town": "cinderholt",
+    "want": "inn",
+    "district": "civic",
+    "w": 5.81,
+    "d": 5,
+    "angle": 4.2978,
+    "front": 5.8686,
+    "streetGap": -0.4,
+    "office": "inn",
+    "role": "innkeeper",
+    "lit": true,
+    "label": "Inn"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "cinderholt_plot_16",
+   "x": 1100.75,
+   "z": 727.41,
+   "yaw": -2.727,
+   "data": {
+    "town": "cinderholt",
+    "want": "hut",
+    "district": "craft",
+    "w": 5.81,
+    "d": 4.07,
+    "angle": 4.2978,
+    "front": 4.2978,
+    "streetGap": -0.21
+   }
+  },
+  {
+   "kind": "building",
+   "id": "cinderholt_plot_17",
+   "x": 1090.25,
+   "z": 721.75,
+   "yaw": 0.4146,
+   "data": {
+    "town": "cinderholt",
+    "want": "shop",
+    "district": "craft",
+    "w": 5.66,
+    "d": 6.61,
+    "angle": 4.2978,
+    "front": 7.4394,
+    "streetGap": -0.34,
+    "office": "shop",
+    "role": "merchant",
+    "lit": true,
+    "label": "General Goods"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "cinderholt_plot_18",
+   "x": 1107.72,
+   "z": 724.84,
+   "yaw": -1.1562,
+   "data": {
+    "town": "cinderholt",
+    "want": "house",
+    "district": "residential",
+    "w": 4.89,
+    "d": 3.4,
+    "angle": 4.2978,
+    "front": 9.0102,
+    "streetGap": -0.31
+   }
+  },
+  {
+   "kind": "building",
+   "id": "cinderholt_plot_19",
+   "x": 1103.95,
+   "z": 716.29,
+   "yaw": 0.4146,
+   "data": {
+    "town": "cinderholt",
+    "want": "house",
+    "district": "residential",
+    "w": 6.7,
+    "d": 3.4,
+    "angle": 4.2978,
+    "front": 7.4394,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "cinderholt_plot_20",
+   "x": 1110.08,
+   "z": 712.43,
+   "yaw": 1.9854,
+   "data": {
+    "town": "cinderholt",
+    "want": "house",
+    "district": "residential",
+    "w": 4.57,
+    "d": 3.35,
+    "angle": 4.2978,
+    "front": 5.8686,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "building",
+   "id": "cinderholt_plot_21",
+   "x": 1088.96,
+   "z": 704.54,
+   "yaw": -1.1562,
+   "data": {
+    "town": "cinderholt",
+    "want": "granary",
+    "district": "residential",
+    "w": 6.24,
+    "d": 6.69,
+    "angle": 4.2978,
+    "front": 9.0102,
+    "streetGap": -0.29,
+    "office": "granary",
+    "role": "farmer",
+    "lit": false,
+    "label": "Granary"
+   }
+  },
+  {
+   "kind": "building",
+   "id": "cinderholt_plot_22",
+   "x": 1079.44,
+   "z": 698.34,
+   "yaw": 1.9854,
+   "data": {
+    "town": "cinderholt",
+    "want": "house",
+    "district": "residential",
+    "w": 4.75,
+    "d": 5.42,
+    "angle": 4.2978,
+    "front": 5.8686,
+    "streetGap": -0.4
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_v_ring_5",
+   "x": -476,
+   "z": 476,
+   "yaw": 0,
+   "data": {
+    "cls": "road",
+    "width": 6,
+    "spur": false,
+    "pts": [
+     [
+      -476,
+      476,
+      86.14
+     ],
+     [
+      -471.88,
+      482.86,
+      86.14
+     ],
+     [
+      -467.7,
+      489.67,
+      86.14
+     ],
+     [
+      -463,
+      496.15,
+      86.14
+     ],
+     [
+      -457.76,
+      502.19,
+      86.14
+     ],
+     [
+      -452.13,
+      507.87,
+      86.14
+     ],
+     [
+      -446.47,
+      513.53,
+      86.14
+     ],
+     [
+      -440.81,
+      519.19,
+      86.14
+     ],
+     [
+      -435.16,
+      524.84,
+      86.14
+     ],
+     [
+      -429.5,
+      530.5,
+      86.14
+     ],
+     [
+      -423.84,
+      536.16,
+      86.14
+     ],
+     [
+      -418.19,
+      541.81,
+      86.14
+     ],
+     [
+      -412.53,
+      547.47,
+      86.14
+     ],
+     [
+      -406.87,
+      553.13,
+      86.18
+     ],
+     [
+      -401.22,
+      558.78,
+      86.39
+     ],
+     [
+      -395.56,
+      564.44,
+      86.77
+     ],
+     [
+      -389.98,
+      570.17,
+      87.21
+     ],
+     [
+      -385.59,
+      576.82,
+      87.77
+     ],
+     [
+      -384,
+      584.59,
+      88.51
+     ],
+     [
+      -384,
+      592.59,
+      89.44
+     ],
+     [
+      -384,
+      600.59,
+      90.53
+     ],
+     [
+      -384,
+      608.59,
+      91.65
+     ],
+     [
+      -384,
+      616.59,
+      92.77
+     ],
+     [
+      -384,
+      624.59,
+      93.97
+     ],
+     [
+      -384,
+      632.59,
+      95.16
+     ],
+     [
+      -384,
+      640.59,
+      96.22
+     ],
+     [
+      -384,
+      648.59,
+      97.1
+     ],
+     [
+      -384,
+      656.59,
+      97.79
+     ],
+     [
+      -384,
+      664.59,
+      98.31
+     ],
+     [
+      -384,
+      672.59,
+      98.67
+     ],
+     [
+      -384,
+      680.59,
+      98.91
+     ],
+     [
+      -381.89,
+      688.23,
+      99.06
+     ],
+     [
+      -377.25,
+      694.71,
+      99.19
+     ],
+     [
+      -371.61,
+      700.39,
+      99.32
+     ],
+     [
+      -365.95,
+      706.05,
+      99.45
+     ],
+     [
+      -360.3,
+      711.7,
+      99.59
+     ],
+     [
+      -354.64,
+      717.36,
+      99.71
+     ],
+     [
+      -348.98,
+      723.02,
+      99.83
+     ],
+     [
+      -343.33,
+      728.67,
+      99.93
+     ],
+     [
+      -337.67,
+      734.33,
+      100.02
+     ],
+     [
+      -332.01,
+      739.99,
+      100.09
+     ],
+     [
+      -326.36,
+      745.64,
+      100.15
+     ],
+     [
+      -320.7,
+      751.3,
+      100.2
+     ],
+     [
+      -315.04,
+      756.96,
+      100.23
+     ],
+     [
+      -309.39,
+      762.61,
+      100.25
+     ],
+     [
+      -303.73,
+      768.27,
+      100.26
+     ],
+     [
+      -298.07,
+      773.93,
+      100.26
+     ],
+     [
+      -292.2,
+      779.35,
+      100.25
+     ],
+     [
+      -285.22,
+      783.17,
+      100.24
+     ],
+     [
+      -277.31,
+      784,
+      100.23
+     ],
+     [
+      -269.31,
+      784,
+      100.21
+     ],
+     [
+      -261.31,
+      784,
+      100.19
+     ],
+     [
+      -253.31,
+      784,
+      100.17
+     ],
+     [
+      -245.31,
+      784,
+      100.16
+     ],
+     [
+      -237.31,
+      784,
+      100.14
+     ],
+     [
+      -229.31,
+      784,
+      100.13
+     ],
+     [
+      -221.31,
+      784,
+      100.11
+     ],
+     [
+      -213.31,
+      784,
+      100.1
+     ],
+     [
+      -205.31,
+      784,
+      100.1
+     ],
+     [
+      -197.31,
+      784,
+      100.1
+     ],
+     [
+      -189.31,
+      784,
+      100.09
+     ],
+     [
+      -181.31,
+      784,
+      100.08
+     ],
+     [
+      -173.31,
+      784,
+      100.07
+     ],
+     [
+      -165.32,
+      784.21,
+      100.04
+     ],
+     [
+      -157.95,
+      787.16,
+      100
+     ],
+     [
+      -151.78,
+      792.22,
+      99.95
+     ],
+     [
+      -146.12,
+      797.88,
+      99.89
+     ],
+     [
+      -140.47,
+      803.53,
+      99.82
+     ],
+     [
+      -134.81,
+      809.19,
+      99.75
+     ],
+     [
+      -129.15,
+      814.85,
+      99.67
+     ],
+     [
+      -123.5,
+      820.5,
+      99.59
+     ],
+     [
+      -117.84,
+      826.16,
+      99.52
+     ],
+     [
+      -112.18,
+      831.82,
+      99.44
+     ],
+     [
+      -106.53,
+      837.47,
+      99.37
+     ],
+     [
+      -100.87,
+      843.13,
+      99.3
+     ],
+     [
+      -95.21,
+      848.79,
+      99.23
+     ],
+     [
+      -89.55,
+      854.45,
+      99.16
+     ],
+     [
+      -83.9,
+      860.1,
+      99.09
+     ],
+     [
+      -78.24,
+      865.76,
+      99.03
+     ],
+     [
+      -72.58,
+      871.42,
+      98.98
+     ],
+     [
+      -66.93,
+      877.07,
+      98.9
+     ],
+     [
+      -61.27,
+      882.73,
+      98.82
+     ],
+     [
+      -55.61,
+      888.39,
+      98.77
+     ],
+     [
+      -49.33,
+      893.3,
+      98.7
+     ],
+     [
+      -41.83,
+      895.9,
+      98.61
+     ],
+     [
+      -33.83,
+      896,
+      98.48
+     ],
+     [
+      -25.83,
+      896,
+      98.34
+     ],
+     [
+      -17.83,
+      896,
+      98.24
+     ],
+     [
+      -9.83,
+      896,
+      98.17
+     ],
+     [
+      -1.83,
+      896,
+      98.06
+     ],
+     [
+      6.17,
+      896,
+      97.93
+     ],
+     [
+      14.02,
+      897.13,
+      97.79
+     ],
+     [
+      20.89,
+      901.17,
+      97.63
+     ],
+     [
+      26.68,
+      906.68,
+      97.46
+     ],
+     [
+      32.34,
+      912.34,
+      97.29
+     ],
+     [
+      37.99,
+      917.99,
+      97.13
+     ],
+     [
+      43.65,
+      923.65,
+      97.06
+     ],
+     [
+      49.31,
+      929.31,
+      97.16
+     ],
+     [
+      54.96,
+      934.96,
+      97.31
+     ],
+     [
+      60.97,
+      940.23,
+      97.5
+     ],
+     [
+      68.19,
+      943.55,
+      97.73
+     ],
+     [
+      76.15,
+      944,
+      97.94
+     ],
+     [
+      84.15,
+      944,
+      98.11
+     ],
+     [
+      92.15,
+      944,
+      98.22
+     ],
+     [
+      100.15,
+      944,
+      98.19
+     ],
+     [
+      108.15,
+      944,
+      98.16
+     ],
+     [
+      116.15,
+      944,
+      98.12
+     ],
+     [
+      124.15,
+      944,
+      98.08
+     ],
+     [
+      132.15,
+      944,
+      98.03
+     ],
+     [
+      140.15,
+      944,
+      97.98
+     ],
+     [
+      148.15,
+      944,
+      97.92
+     ],
+     [
+      156.15,
+      944,
+      97.86
+     ],
+     [
+      164.15,
+      944,
+      97.8
+     ],
+     [
+      172.15,
+      944,
+      97.73
+     ],
+     [
+      180.15,
+      944,
+      97.66
+     ],
+     [
+      188.15,
+      944,
+      97.59
+     ],
+     [
+      196.15,
+      944,
+      97.52
+     ],
+     [
+      204.15,
+      944,
+      97.45
+     ],
+     [
+      212.15,
+      944,
+      97.38
+     ],
+     [
+      220.15,
+      944,
+      97.32
+     ],
+     [
+      228.15,
+      944,
+      97.27
+     ],
+     [
+      236.15,
+      944,
+      97.22
+     ],
+     [
+      244.15,
+      944,
+      97.19
+     ],
+     [
+      252.15,
+      944,
+      97.17
+     ],
+     [
+      260.15,
+      944,
+      97.14
+     ],
+     [
+      268.1,
+      944.53,
+      97.11
+     ],
+     [
+      275.28,
+      947.96,
+      97.07
+     ],
+     [
+      281.25,
+      953.25,
+      97.01
+     ],
+     [
+      286.91,
+      958.91,
+      96.69
+     ],
+     [
+      292.57,
+      964.57,
+      96.19
+     ],
+     [
+      298.3,
+      970.14,
+      95.43
+     ],
+     [
+      304.98,
+      974.49,
+      94.48
+     ],
+     [
+      312.77,
+      976,
+      93.6
+     ],
+     [
+      320.39,
+      978.19,
+      92.79
+     ],
+     [
+      326.85,
+      982.87,
+      92.07
+     ],
+     [
+      332.52,
+      988.52,
+      91.64
+     ],
+     [
+      338.17,
+      994.17,
+      91.4
+     ],
+     [
+      343.83,
+      999.83,
+      91.45
+     ],
+     [
+      349.49,
+      1005.49,
+      91.68
+     ],
+     [
+      355.14,
+      1011.14,
+      91.86
+     ],
+     [
+      360.8,
+      1016.8,
+      91.98
+     ],
+     [
+      366.46,
+      1022.46,
+      92.05
+     ],
+     [
+      372.11,
+      1028.11,
+      92.1
+     ],
+     [
+      377.77,
+      1033.77,
+      92.16
+     ],
+     [
+      383.43,
+      1039.43,
+      92.24
+     ],
+     [
+      389.09,
+      1045.09,
+      92.36
+     ],
+     [
+      394.74,
+      1050.74,
+      92.51
+     ],
+     [
+      400.4,
+      1056.4,
+      92.71
+     ],
+     [
+      406.06,
+      1062.06,
+      92.94
+     ],
+     [
+      411.71,
+      1067.71,
+      93.2
+     ],
+     [
+      417.37,
+      1073.37,
+      93.48
+     ],
+     [
+      423.03,
+      1079.03,
+      93.74
+     ],
+     [
+      428.68,
+      1084.68,
+      93.98
+     ],
+     [
+      434.34,
+      1090.34,
+      94.18
+     ],
+     [
+      440,
+      1096,
+      94.32
+     ],
+     [
+      445.65,
+      1101.65,
+      94.37
+     ],
+     [
+      451.31,
+      1107.31,
+      94.4
+     ],
+     [
+      456.97,
+      1112.97,
+      94.42
+     ],
+     [
+      463.39,
+      1117.7,
+      94.31
+     ],
+     [
+      470.99,
+      1120,
+      94.08
+     ],
+     [
+      478.79,
+      1121.42,
+      93.75
+     ],
+     [
+      485.51,
+      1125.7,
+      93.32
+     ],
+     [
+      491.26,
+      1131.26,
+      92.79
+     ],
+     [
+      496.92,
+      1136.92,
+      92.09
+     ],
+     [
+      502.57,
+      1142.57,
+      91.16
+     ],
+     [
+      508.23,
+      1148.23,
+      90.13
+     ],
+     [
+      513.89,
+      1153.89,
+      88.96
+     ],
+     [
+      519.54,
+      1159.54,
+      87.65
+     ],
+     [
+      525.2,
+      1165.2,
+      86.2
+     ],
+     [
+      530.86,
+      1170.86,
+      84.62
+     ],
+     [
+      536.51,
+      1176.51,
+      82.93
+     ],
+     [
+      542.17,
+      1182.17,
+      81.18
+     ],
+     [
+      547.83,
+      1187.83,
+      79.39
+     ],
+     [
+      553.48,
+      1193.48,
+      77.6
+     ],
+     [
+      559.14,
+      1199.14,
+      75.83
+     ],
+     [
+      564.8,
+      1204.8,
+      74.1
+     ],
+     [
+      570.46,
+      1210.46,
+      72.43
+     ],
+     [
+      576.11,
+      1216.11,
+      70.82
+     ],
+     [
+      581.77,
+      1221.77,
+      69.27
+     ],
+     [
+      587.43,
+      1227.43,
+      67.74
+     ],
+     [
+      593.08,
+      1233.08,
+      66.22
+     ],
+     [
+      598.74,
+      1238.74,
+      64.73
+     ],
+     [
+      604.4,
+      1244.4,
+      63.34
+     ],
+     [
+      610.05,
+      1250.05,
+      62.13
+     ],
+     [
+      615.71,
+      1255.71,
+      61.12
+     ],
+     [
+      621.86,
+      1260.79,
+      60.23
+     ],
+     [
+      629.22,
+      1263.78,
+      59.46
+     ],
+     [
+      637.21,
+      1264,
+      58.84
+     ],
+     [
+      645.21,
+      1264,
+      58.35
+     ],
+     [
+      653.12,
+      1263.2,
+      57.89
+     ],
+     [
+      660.12,
+      1259.41,
+      57.28
+     ],
+     [
+      666,
+      1254,
+      56.49
+     ],
+     [
+      671.66,
+      1248.34,
+      55.54
+     ],
+     [
+      677.32,
+      1242.68,
+      54.43
+     ],
+     [
+      682.97,
+      1237.03,
+      53.36
+     ],
+     [
+      688.63,
+      1231.37,
+      52.56
+     ],
+     [
+      694.29,
+      1225.71,
+      51.7
+     ],
+     [
+      699.94,
+      1220.06,
+      50.72
+     ],
+     [
+      705.6,
+      1214.4,
+      49.77
+     ],
+     [
+      711.26,
+      1208.74,
+      49.05
+     ],
+     [
+      716.45,
+      1202.68,
+      48.61
+     ],
+     [
+      719.65,
+      1195.4,
+      48.22
+     ],
+     [
+      720,
+      1187.43,
+      47.65
+     ],
+     [
+      720,
+      1179.43,
+      47.25
+     ],
+     [
+      720,
+      1171.43,
+      47.14
+     ],
+     [
+      720,
+      1163.43,
+      47.2
+     ],
+     [
+      720,
+      1155.43,
+      47.28
+     ],
+     [
+      720,
+      1147.43,
+      47.36
+     ],
+     [
+      720,
+      1139.43,
+      47.43
+     ],
+     [
+      720,
+      1131.43,
+      47.5
+     ],
+     [
+      720,
+      1123.43,
+      47.57
+     ],
+     [
+      720,
+      1115.43,
+      47.63
+     ],
+     [
+      720,
+      1107.43,
+      47.68
+     ],
+     [
+      720,
+      1099.43,
+      47.7
+     ],
+     [
+      720,
+      1091.43,
+      47.58
+     ],
+     [
+      720,
+      1083.43,
+      47.47
+     ],
+     [
+      720.63,
+      1075.49,
+      47.46
+     ],
+     [
+      724.21,
+      1068.39,
+      47.45
+     ],
+     [
+      729.55,
+      1062.45,
+      47.24
+     ],
+     [
+      735.21,
+      1056.79,
+      46.85
+     ],
+     [
+      740.86,
+      1051.14,
+      46.43
+     ],
+     [
+      746.41,
+      1045.38,
+      46.1
+     ],
+     [
+      750.64,
+      1038.63,
+      45.72
+     ],
+     [
+      752,
+      1030.82,
+      45.21
+     ],
+     [
+      752,
+      1022.82,
+      44.64
+     ],
+     [
+      752,
+      1014.82,
+      44.24
+     ],
+     [
+      752,
+      1006.82,
+      43.96
+     ],
+     [
+      752,
+      998.82,
+      43.72
+     ],
+     [
+      752,
+      990.82,
+      43.46
+     ],
+     [
+      752,
+      982.82,
+      43.09
+     ],
+     [
+      752,
+      974.82,
+      42.54
+     ],
+     [
+      752.02,
+      966.82,
+      41.99
+     ],
+     [
+      754.38,
+      959.24,
+      41.55
+     ],
+     [
+      759.15,
+      952.85,
+      41.2
+     ],
+     [
+      764.81,
+      947.19,
+      40.78
+     ],
+     [
+      770.47,
+      941.53,
+      40.24
+     ],
+     [
+      776.12,
+      935.88,
+      39.72
+     ],
+     [
+      782.36,
+      930.9,
+      39.34
+     ],
+     [
+      789.81,
+      928.15,
+      38.95
+     ],
+     [
+      797.8,
+      928,
+      38.42
+     ],
+     [
+      805.8,
+      928,
+      37.82
+     ],
+     [
+      813.8,
+      928,
+      37.26
+     ],
+     [
+      821.8,
+      928,
+      36.83
+     ],
+     [
+      829.8,
+      928,
+      36.41
+     ],
+     [
+      837.8,
+      928,
+      35.96
+     ],
+     [
+      845.67,
+      927,
+      35.47
+     ],
+     [
+      852.59,
+      923.06,
+      34.96
+     ],
+     [
+      858.51,
+      917.68,
+      34.42
+     ],
+     [
+      865.24,
+      913.41,
+      33.83
+     ],
+     [
+      873.04,
+      912,
+      33.19
+     ],
+     [
+      880.63,
+      909.68,
+      32.55
+     ],
+     [
+      887.05,
+      904.95,
+      31.91
+     ],
+     [
+      892.71,
+      899.29,
+      31.47
+     ],
+     [
+      898.37,
+      893.63,
+      31.34
+     ],
+     [
+      904.02,
+      887.98,
+      31.27
+     ],
+     [
+      909.68,
+      882.32,
+      31.2
+     ],
+     [
+      915.34,
+      876.66,
+      31.2
+     ],
+     [
+      920.99,
+      871.01,
+      31.26
+     ],
+     [
+      927.42,
+      866.29,
+      31.41
+     ],
+     [
+      935.02,
+      864,
+      31.48
+     ],
+     [
+      942.82,
+      862.57,
+      31.34
+     ],
+     [
+      949.54,
+      858.28,
+      31.29
+     ],
+     [
+      955.28,
+      852.72,
+      31.41
+     ],
+     [
+      960.94,
+      847.06,
+      31.65
+     ],
+     [
+      966.6,
+      841.4,
+      31.97
+     ],
+     [
+      972.56,
+      836.08,
+      32.36
+     ],
+     [
+      979.69,
+      832.58,
+      32.75
+     ],
+     [
+      987.6,
+      831.6,
+      33.09
+     ],
+     [
+      994.86,
+      828.34,
+      33.37
+     ],
+     [
+      1000.89,
+      823.11,
+      33.57
+     ],
+     [
+      1006.55,
+      817.45,
+      33.69
+     ],
+     [
+      1012.2,
+      811.8,
+      33.76
+     ],
+     [
+      1017.86,
+      806.14,
+      33.78
+     ],
+     [
+      1023.52,
+      800.48,
+      33.78
+     ],
+     [
+      1029.17,
+      794.83,
+      33.78
+     ],
+     [
+      1034.83,
+      789.17,
+      33.78
+     ],
+     [
+      1040.08,
+      783.92,
+      33.78
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "road",
+   "id": "road_v_ring_6",
+   "x": 1149,
+   "z": 736,
+   "yaw": 0,
+   "data": {
+    "cls": "road",
+    "width": 6,
+    "spur": false,
+    "pts": [
+     [
+      1149,
+      736,
+      33.78
+     ],
+     [
+      1156,
+      736,
+      33.78
+     ],
+     [
+      1164,
+      736,
+      33.78
+     ],
+     [
+      1172,
+      736,
+      33.78
+     ],
+     [
+      1180,
+      736,
+      33.78
+     ],
+     [
+      1188,
+      736,
+      33.77
+     ],
+     [
+      1195.96,
+      736.49,
+      33.72
+     ],
+     [
+      1203.15,
+      739.87,
+      33.57
+     ],
+     [
+      1209.15,
+      745.15,
+      33.29
+     ],
+     [
+      1214.8,
+      750.8,
+      32.79
+     ],
+     [
+      1220.46,
+      756.46,
+      32.11
+     ],
+     [
+      1226.26,
+      761.95,
+      31.29
+     ],
+     [
+      1233.76,
+      763.81,
+      30.33
+     ],
+     [
+      1240.4,
+      759.6,
+      29.24
+     ],
+     [
+      1246.06,
+      753.94,
+      28.07
+     ],
+     [
+      1251.72,
+      748.28,
+      26.86
+     ],
+     [
+      1257.37,
+      742.63,
+      25.69
+     ],
+     [
+      1263.03,
+      736.97,
+      24.51
+     ],
+     [
+      1268.69,
+      731.31,
+      23.31
+     ],
+     [
+      1274.34,
+      725.66,
+      22.1
+     ],
+     [
+      1280,
+      720,
+      20.81
+     ],
+     [
+      1285.66,
+      714.34,
+      19.51
+     ],
+     [
+      1291.69,
+      709.15,
+      18.21
+     ],
+     [
+      1299.37,
+      708.69,
+      16.95
+     ],
+     [
+      1305.6,
+      713.6,
+      15.74
+     ],
+     [
+      1311.26,
+      719.26,
+      14.53
+     ],
+     [
+      1316.91,
+      724.91,
+      13.31
+     ],
+     [
+      1322.78,
+      730.33,
+      12.16
+     ],
+     [
+      1330.38,
+      731.65,
+      11.03
+     ],
+     [
+      1336.86,
+      727.14,
+      9.9
+     ],
+     [
+      1342.51,
+      721.49,
+      8.76
+     ],
+     [
+      1348.17,
+      715.83,
+      7.61
+     ],
+     [
+      1353.88,
+      710.23,
+      6.55
+     ],
+     [
+      1360.48,
+      705.76,
+      5.63
+     ],
+     [
+      1368.21,
+      704,
+      4.85
+     ],
+     [
+      1376.21,
+      704,
+      4.24
+     ],
+     [
+      1384.21,
+      704,
+      3.79
+     ],
+     [
+      1392.21,
+      704,
+      3.49
+     ],
+     [
+      1400.21,
+      704,
+      3.32
+     ],
+     [
+      1408.21,
+      704,
+      3.23
+     ],
+     [
+      1416.21,
+      704,
+      3.17
+     ],
+     [
+      1424.21,
+      704,
+      3.11
+     ],
+     [
+      1432.21,
+      704,
+      3.05
+     ],
+     [
+      1440.21,
+      704,
+      2.99
+     ],
+     [
+      1448.21,
+      704,
+      2.92
+     ],
+     [
+      1456.21,
+      704,
+      2.84
+     ],
+     [
+      1464.21,
+      704,
+      2.76
+     ],
+     [
+      1472.21,
+      704,
+      2.71
+     ],
+     [
+      1480.21,
+      704,
+      2.69
+     ],
+     [
+      1488.21,
+      704,
+      2.69
+     ],
+     [
+      1496.21,
+      704,
+      2.69
+     ],
+     [
+      1504.21,
+      704,
+      2.7
+     ],
+     [
+      1512.21,
+      704,
+      2.75
+     ],
+     [
+      1520.21,
+      704,
+      2.81
+     ],
+     [
+      1528.21,
+      704,
+      2.86
+     ],
+     [
+      1536.21,
+      704,
+      2.91
+     ],
+     [
+      1544.21,
+      704,
+      2.95
+     ],
+     [
+      1552.21,
+      704,
+      2.99
+     ],
+     [
+      1560.21,
+      704,
+      3.02
+     ],
+     [
+      1568.21,
+      704,
+      3.04
+     ],
+     [
+      1576.21,
+      704,
+      3.04
+     ],
+     [
+      1584.21,
+      704,
+      3.02
+     ],
+     [
+      1592.21,
+      704,
+      2.98
+     ],
+     [
+      1600.21,
+      704,
+      2.93
+     ],
+     [
+      1608.21,
+      704,
+      2.9
+     ],
+     [
+      1616.21,
+      704,
+      2.86
+     ],
+     [
+      1624.21,
+      704,
+      2.83
+     ],
+     [
+      1632.21,
+      704,
+      2.82
+     ],
+     [
+      1640.21,
+      704,
+      2.84
+     ],
+     [
+      1648.21,
+      704,
+      2.88
+     ],
+     [
+      1656.21,
+      704,
+      2.94
+     ],
+     [
+      1664.21,
+      704,
+      3
+     ],
+     [
+      1672.21,
+      704,
+      3.05
+     ],
+     [
+      1680.21,
+      704,
+      3.07
+     ],
+     [
+      1688.21,
+      704,
+      3.07
+     ],
+     [
+      1696.21,
+      704,
+      3.04
+     ],
+     [
+      1704.21,
+      704,
+      3
+     ],
+     [
+      1712.21,
+      704,
+      2.95
+     ],
+     [
+      1720.21,
+      704,
+      2.9
+     ],
+     [
+      1728.21,
+      704,
+      2.88
+     ],
+     [
+      1736.21,
+      704,
+      2.88
+     ],
+     [
+      1744.21,
+      704,
+      2.88
+     ],
+     [
+      1752.21,
+      704,
+      2.88
+     ],
+     [
+      1760.21,
+      704,
+      2.87
+     ],
+     [
+      1768.21,
+      704,
+      2.88
+     ],
+     [
+      1776.21,
+      704,
+      2.89
+     ],
+     [
+      1784.21,
+      704,
+      2.87
+     ],
+     [
+      1792.21,
+      704,
+      2.85
+     ],
+     [
+      1800.21,
+      704,
+      2.83
+     ],
+     [
+      1808.21,
+      704,
+      2.81
+     ],
+     [
+      1816.21,
+      704,
+      2.77
+     ],
+     [
+      1824.21,
+      704,
+      2.73
+     ],
+     [
+      1832.21,
+      704,
+      2.7
+     ],
+     [
+      1840.21,
+      704,
+      2.68
+     ],
+     [
+      1848.21,
+      704,
+      2.68
+     ],
+     [
+      1856.21,
+      704,
+      2.69
+     ],
+     [
+      1864.21,
+      704,
+      2.72
+     ],
+     [
+      1872.21,
+      704,
+      2.76
+     ],
+     [
+      1880.21,
+      704,
+      2.79
+     ],
+     [
+      1888.21,
+      704,
+      2.8
+     ],
+     [
+      1896.21,
+      704,
+      2.81
+     ],
+     [
+      1904.21,
+      704,
+      2.83
+     ],
+     [
+      1912.21,
+      704,
+      2.85
+     ],
+     [
+      1920.21,
+      704,
+      2.86
+     ],
+     [
+      1928.21,
+      704,
+      2.89
+     ],
+     [
+      1936.21,
+      704,
+      2.94
+     ],
+     [
+      1944.21,
+      704,
+      2.98
+     ],
+     [
+      1951.89,
+      702.06,
+      2.98
+     ],
+     [
+      1958.43,
+      697.5,
+      2.96
+     ],
+     [
+      1964.4,
+      692.2,
+      2.93
+     ],
+     [
+      1971.51,
+      688.62,
+      2.9
+     ],
+     [
+      1979.45,
+      688,
+      2.85
+     ],
+     [
+      1987.45,
+      688,
+      2.78
+     ],
+     [
+      1995.42,
+      687.65,
+      2.71
+     ],
+     [
+      2002.69,
+      684.44,
+      2.66
+     ],
+     [
+      2008.75,
+      679.25,
+      2.63
+     ],
+     [
+      2014.41,
+      673.59,
+      2.59
+     ],
+     [
+      2020.07,
+      667.93,
+      2.55
+     ],
+     [
+      2025.77,
+      662.32,
+      2.51
+     ],
+     [
+      2032.35,
+      657.82,
+      2.48
+     ],
+     [
+      2040.06,
+      656,
+      2.46
+     ],
+     [
+      2048.06,
+      656,
+      2.42
+     ],
+     [
+      2056.06,
+      656,
+      2.39
+     ],
+     [
+      2064.06,
+      656,
+      2.37
+     ],
+     [
+      2072.06,
+      656,
+      2.35
+     ],
+     [
+      2080.06,
+      656,
+      2.33
+     ],
+     [
+      2088.06,
+      656,
+      2.31
+     ],
+     [
+      2096.06,
+      656,
+      2.33
+     ],
+     [
+      2104.06,
+      656,
+      2.37
+     ],
+     [
+      2112.06,
+      656,
+      2.43
+     ],
+     [
+      2120.06,
+      656,
+      2.49
+     ],
+     [
+      2128.06,
+      656,
+      2.56
+     ],
+     [
+      2136.06,
+      656,
+      2.63
+     ],
+     [
+      2144.06,
+      656,
+      2.7
+     ],
+     [
+      2152.06,
+      656,
+      2.74
+     ],
+     [
+      2160.06,
+      656,
+      2.75
+     ],
+     [
+      2168.06,
+      656,
+      2.74
+     ],
+     [
+      2175.76,
+      654.12,
+      2.75
+     ],
+     [
+      2182.32,
+      649.6,
+      2.75
+     ],
+     [
+      2188.29,
+      644.28,
+      2.74
+     ],
+     [
+      2195.37,
+      640.66,
+      2.74
+     ],
+     [
+      2203.28,
+      639.68,
+      2.74
+     ],
+     [
+      2210.57,
+      636.52,
+      2.75
+     ],
+     [
+      2216.65,
+      631.35,
+      2.76
+     ],
+     [
+      2222.99,
+      626.5,
+      2.74
+     ],
+     [
+      2230.55,
+      624.06,
+      2.69
+     ],
+     [
+      2238.54,
+      624,
+      2.61
+     ],
+     [
+      2246.54,
+      624,
+      2.51
+     ],
+     [
+      2254.54,
+      624,
+      2.41
+     ],
+     [
+      2262.54,
+      624,
+      2.31
+     ],
+     [
+      2270.37,
+      625.26,
+      2.22
+     ],
+     [
+      2277.18,
+      629.4,
+      2.16
+     ],
+     [
+      2283.07,
+      634.8,
+      2.12
+     ],
+     [
+      2289.93,
+      638.85,
+      2.11
+     ],
+     [
+      2297.78,
+      639.9,
+      2.11
+     ],
+     [
+      2305.28,
+      637.32,
+      2.14
+     ],
+     [
+      2311.58,
+      632.42,
+      2.18
+     ],
+     [
+      2317.24,
+      626.76,
+      2.24
+     ],
+     [
+      2322.89,
+      621.11,
+      2.28
+     ],
+     [
+      2328.55,
+      615.45,
+      2.32
+     ],
+     [
+      2334.87,
+      610.58,
+      2.36
+     ],
+     [
+      2342.4,
+      608.07,
+      2.39
+     ],
+     [
+      2350.24,
+      606.79,
+      2.41
+     ],
+     [
+      2357.07,
+      602.69,
+      2.41
+     ],
+     [
+      2362.84,
+      597.16,
+      2.4
+     ],
+     [
+      2368.5,
+      591.5,
+      2.39
+     ],
+     [
+      2374.15,
+      585.85,
+      2.39
+     ],
+     [
+      2380.06,
+      580.46,
+      2.38
+     ],
+     [
+      2387.09,
+      576.73,
+      2.36
+     ],
+     [
+      2395,
+      575.75,
+      2.34
+     ],
+     [
+      2402.32,
+      572.67,
+      2.32
+     ],
+     [
+      2408.45,
+      567.55,
+      2.32
+     ],
+     [
+      2414.75,
+      562.66,
+      2.33
+     ],
+     [
+      2422.26,
+      560.09,
+      2.35
+     ],
+     [
+      2430.25,
+      560,
+      2.39
+     ],
+     [
+      2438.25,
+      560,
+      2.45
+     ],
+     [
+      2446.25,
+      560,
+      2.49
+     ],
+     [
+      2454.25,
+      560,
+      2.5
+     ],
+     [
+      2462.1,
+      558.84,
+      2.49
+     ],
+     [
+      2468.96,
+      554.78,
+      2.46
+     ],
+     [
+      2474.85,
+      549.38,
+      2.42
+     ],
+     [
+      2481.66,
+      545.25,
+      2.38
+     ],
+     [
+      2489.49,
+      544,
+      2.32
+     ],
+     [
+      2497.49,
+      544,
+      2.29
+     ],
+     [
+      2505.49,
+      543.94,
+      2.26
+     ],
+     [
+      2513.04,
+      541.48,
+      2.24
+     ],
+     [
+      2519.37,
+      536.63,
+      2.23
+     ],
+     [
+      2525.03,
+      530.97,
+      2.22
+     ],
+     [
+      2530.69,
+      525.31,
+      2.21
+     ],
+     [
+      2536.34,
+      519.66,
+      2.2
+     ],
+     [
+      2542,
+      514,
+      2.2
+     ],
+     [
+      2547.66,
+      508.34,
+      2.2
+     ],
+     [
+      2553.31,
+      502.69,
+      2.2
+     ],
+     [
+      2558.97,
+      497.03,
+      2.2
+     ],
+     [
+      2564.63,
+      491.37,
+      2.2
+     ],
+     [
+      2570.2,
+      485.64,
+      2.2
+     ],
+     [
+      2574.9,
+      479.17,
+      2.2
+     ],
+     [
+      2578.5,
+      472.04,
+      2.2
+     ],
+     [
+      2581.17,
+      464.5,
+      2.2
+     ],
+     [
+      2583.7,
+      456.91,
+      2.2
+     ],
+     [
+      2584,
+      456,
+      2.2
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_door_1",
+   "x": 1146,
+   "z": 606,
+   "yaw": 0,
+   "data": {
+    "from": "door_1",
+    "to": "town:Cinderholt",
+    "width": 2.2,
+    "pts": [
+     [
+      1146,
+      606,
+      36.93
+     ],
+     [
+      1146,
+      606.75,
+      36.76
+     ],
+     [
+      1146,
+      608.5,
+      36.36
+     ],
+     [
+      1146,
+      610.5,
+      35.94
+     ],
+     [
+      1146,
+      612.5,
+      35.56
+     ],
+     [
+      1145.25,
+      614.5,
+      35.16
+     ],
+     [
+      1143.5,
+      616.5,
+      34.76
+     ],
+     [
+      1141.5,
+      618.5,
+      34.43
+     ],
+     [
+      1139.5,
+      620.5,
+      34.15
+     ],
+     [
+      1138.25,
+      622.5,
+      33.96
+     ],
+     [
+      1138,
+      624.5,
+      33.87
+     ],
+     [
+      1138,
+      626.5,
+      33.79
+     ],
+     [
+      1138,
+      628.5,
+      33.77
+     ],
+     [
+      1137.25,
+      630.5,
+      33.77
+     ],
+     [
+      1135.5,
+      632.5,
+      33.77
+     ],
+     [
+      1133.5,
+      634.5,
+      33.77
+     ],
+     [
+      1131.5,
+      636.5,
+      33.77
+     ],
+     [
+      1129.5,
+      638.5,
+      33.77
+     ],
+     [
+      1127.5,
+      640.5,
+      33.77
+     ],
+     [
+      1125.5,
+      642.5,
+      33.77
+     ],
+     [
+      1123.5,
+      644.5,
+      33.77
+     ],
+     [
+      1121.5,
+      646.5,
+      33.77
+     ],
+     [
+      1119.5,
+      648.5,
+      33.77
+     ],
+     [
+      1118.25,
+      650.5,
+      33.77
+     ],
+     [
+      1118,
+      652.5,
+      33.77
+     ],
+     [
+      1118,
+      654.5,
+      33.77
+     ],
+     [
+      1118,
+      656.5,
+      33.77
+     ],
+     [
+      1117.25,
+      658.5,
+      33.77
+     ],
+     [
+      1115.5,
+      660.5,
+      33.77
+     ],
+     [
+      1113.5,
+      662.5,
+      33.77
+     ],
+     [
+      1111.5,
+      664.5,
+      33.77
+     ],
+     [
+      1109.5,
+      666.5,
+      33.77
+     ],
+     [
+      1107.5,
+      668.5,
+      33.77
+     ],
+     [
+      1105.5,
+      670.5,
+      33.77
+     ],
+     [
+      1103.5,
+      672.5,
+      33.77
+     ],
+     [
+      1102.25,
+      673.75,
+      33.77
+     ],
+     [
+      1102,
+      674,
+      33.77
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_event_ashfall_hollow",
+   "x": 1026,
+   "z": 850,
+   "yaw": 0,
+   "data": {
+    "from": "event_ashfall_hollow",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      1026,
+      850,
+      33.63
+     ],
+     [
+      1025.25,
+      849.25,
+      33.63
+     ],
+     [
+      1023.5,
+      847.5,
+      33.66
+     ],
+     [
+      1021.5,
+      845.5,
+      33.69
+     ],
+     [
+      1019.5,
+      843.5,
+      33.71
+     ],
+     [
+      1017.5,
+      841.5,
+      33.71
+     ],
+     [
+      1015.5,
+      839.5,
+      33.74
+     ],
+     [
+      1013.5,
+      837.5,
+      33.74
+     ],
+     [
+      1011.5,
+      835.5,
+      33.75
+     ],
+     [
+      1009.5,
+      833.5,
+      33.77
+     ],
+     [
+      1007.5,
+      831.5,
+      33.77
+     ],
+     [
+      1005.5,
+      829.5,
+      33.77
+     ],
+     [
+      1003.5,
+      827.5,
+      33.66
+     ],
+     [
+      1002.25,
+      826.25,
+      33.58
+     ],
+     [
+      1002,
+      826,
+      33.57
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_farm_ashfall_hollow_0",
+   "x": 1150,
+   "z": 682,
+   "yaw": 0,
+   "data": {
+    "from": "farm_ashfall_hollow_0",
+    "to": "town:Cinderholt",
+    "width": 2.2,
+    "pts": [
+     [
+      1150,
+      682,
+      33.77
+     ],
+     [
+      1149.25,
+      682.75,
+      33.77
+     ],
+     [
+      1147.5,
+      684.5,
+      33.77
+     ],
+     [
+      1145.5,
+      686.5,
+      33.77
+     ],
+     [
+      1143.5,
+      688.5,
+      33.77
+     ],
+     [
+      1141.5,
+      690.5,
+      33.77
+     ],
+     [
+      1139.5,
+      692.5,
+      33.77
+     ],
+     [
+      1137.5,
+      694.5,
+      33.77
+     ],
+     [
+      1135.5,
+      696.5,
+      33.77
+     ],
+     [
+      1134.25,
+      697.75,
+      33.77
+     ],
+     [
+      1134,
+      698,
+      33.77
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_farm_ashfall_hollow_1",
+   "x": 1018,
+   "z": 678,
+   "yaw": 0,
+   "data": {
+    "from": "farm_ashfall_hollow_1",
+    "to": "town:Cinderholt",
+    "width": 2.2,
+    "pts": [
+     [
+      1018,
+      678,
+      33.77
+     ],
+     [
+      1018.75,
+      678.75,
+      33.77
+     ],
+     [
+      1020.5,
+      680.5,
+      33.77
+     ],
+     [
+      1022.5,
+      682.5,
+      33.77
+     ],
+     [
+      1024.5,
+      684.5,
+      33.77
+     ],
+     [
+      1026.5,
+      685.75,
+      33.77
+     ],
+     [
+      1028.5,
+      686,
+      33.77
+     ],
+     [
+      1030.5,
+      686.75,
+      33.77
+     ],
+     [
+      1032.5,
+      688.5,
+      33.77
+     ],
+     [
+      1034.5,
+      690.5,
+      33.77
+     ],
+     [
+      1036.5,
+      692.5,
+      33.77
+     ],
+     [
+      1037.75,
+      693.75,
+      33.77
+     ],
+     [
+      1038,
+      694,
+      33.77
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_farm_ashfall_hollow_2",
+   "x": 1134,
+   "z": 822,
+   "yaw": 0,
+   "data": {
+    "from": "farm_ashfall_hollow_2",
+    "to": "town:Cinderholt",
+    "width": 2.2,
+    "pts": [
+     [
+      1134,
+      822,
+      33.77
+     ],
+     [
+      1133.25,
+      821.25,
+      33.77
+     ],
+     [
+      1131.5,
+      819.5,
+      33.77
+     ],
+     [
+      1129.5,
+      817.5,
+      33.77
+     ],
+     [
+      1127.5,
+      815.5,
+      33.77
+     ],
+     [
+      1126.25,
+      813.5,
+      33.77
+     ],
+     [
+      1126,
+      811.5,
+      33.77
+     ],
+     [
+      1125.25,
+      809.5,
+      33.77
+     ],
+     [
+      1123.5,
+      807.5,
+      33.77
+     ],
+     [
+      1121.5,
+      805.5,
+      33.77
+     ],
+     [
+      1119.5,
+      803.5,
+      33.77
+     ],
+     [
+      1117.5,
+      801.5,
+      33.77
+     ],
+     [
+      1115.5,
+      799.5,
+      33.77
+     ],
+     [
+      1113.5,
+      797.5,
+      33.77
+     ],
+     [
+      1111.5,
+      795.5,
+      33.77
+     ],
+     [
+      1110.25,
+      794.25,
+      33.77
+     ],
+     [
+      1110,
+      794,
+      33.77
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_farm_ashfall_hollow_3",
+   "x": 994,
+   "z": 758,
+   "yaw": 0,
+   "data": {
+    "from": "farm_ashfall_hollow_3",
+    "to": "town:Cinderholt",
+    "width": 2.2,
+    "pts": [
+     [
+      994,
+      758,
+      33.77
+     ],
+     [
+      994.75,
+      758,
+      33.77
+     ],
+     [
+      996.5,
+      758,
+      33.77
+     ],
+     [
+      998.5,
+      758,
+      33.77
+     ],
+     [
+      1000.5,
+      758,
+      33.77
+     ],
+     [
+      1002.5,
+      758,
+      33.77
+     ],
+     [
+      1004.5,
+      758,
+      33.77
+     ],
+     [
+      1006.5,
+      758,
+      33.77
+     ],
+     [
+      1008.5,
+      758,
+      33.77
+     ],
+     [
+      1010.5,
+      758,
+      33.77
+     ],
+     [
+      1012.5,
+      758,
+      33.77
+     ],
+     [
+      1014.5,
+      758,
+      33.77
+     ],
+     [
+      1016.5,
+      758,
+      33.77
+     ],
+     [
+      1018.5,
+      757.25,
+      33.77
+     ],
+     [
+      1020.5,
+      755.5,
+      33.77
+     ],
+     [
+      1021.75,
+      754.25,
+      33.77
+     ],
+     [
+      1022,
+      754,
+      33.77
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "path",
+   "id": "path_cave_ashfall_hollow_0",
+   "x": 1966,
+   "z": 638,
+   "yaw": 0,
+   "data": {
+    "from": "cave_ashfall_hollow_0",
+    "to": "road",
+    "width": 2.2,
+    "pts": [
+     [
+      1966,
+      638,
+      3.01
+     ],
+     [
+      1966,
+      638.75,
+      3.01
+     ],
+     [
+      1966,
+      640.5,
+      3.02
+     ],
+     [
+      1966,
+      642.5,
+      3.04
+     ],
+     [
+      1966,
+      644.5,
+      3.04
+     ],
+     [
+      1966,
+      646.5,
+      3.05
+     ],
+     [
+      1966,
+      648.5,
+      3.07
+     ],
+     [
+      1966,
+      650.5,
+      3.07
+     ],
+     [
+      1966,
+      652.5,
+      3.07
+     ],
+     [
+      1966,
+      654.5,
+      3.07
+     ],
+     [
+      1966,
+      656.5,
+      3.07
+     ],
+     [
+      1966,
+      658.5,
+      3.08
+     ],
+     [
+      1966,
+      660.5,
+      3.09
+     ],
+     [
+      1966,
+      662.5,
+      3.07
+     ],
+     [
+      1966,
+      664.5,
+      3.07
+     ],
+     [
+      1966,
+      666.5,
+      3.07
+     ],
+     [
+      1966,
+      668.5,
+      3.06
+     ],
+     [
+      1966.75,
+      670.5,
+      3.03
+     ],
+     [
+      1968.5,
+      672.5,
+      3
+     ],
+     [
+      1970.5,
+      674.5,
+      2.94
+     ],
+     [
+      1972.5,
+      676.5,
+      2.89
+     ],
+     [
+      1973.75,
+      678.5,
+      2.84
+     ],
+     [
+      1974,
+      680.5,
+      2.84
+     ],
+     [
+      1974,
+      682.5,
+      2.85
+     ],
+     [
+      1974,
+      684.5,
+      2.87
+     ],
+     [
+      1974,
+      685.75,
+      2.87
+     ],
+     [
+      1974,
+      686,
+      2.87
+     ]
+    ]
+   }
+  },
+  {
+   "kind": "town_wall",
+   "id": "cinderholt_wall",
+   "x": 1084,
+   "z": 736,
+   "yaw": 0,
+   "data": {
+    "town": "cinderholt",
+    "name": "Cinderholt",
+    "settlement": "village",
+    "style": "barricade",
+    "material": "barricade",
+    "tier": "low",
+    "h": 2,
+    "thick": 1.6,
+    "tint": "#7d6448",
+    "radius": 47.9,
+    "solid": true,
+    "runs": [
+     [
+      [
+       1048.65,
+       768.32,
+       33.77
+      ],
+      [
+       1042.68,
+       760.22,
+       33.77
+      ],
+      [
+       1038.53,
+       751.05,
+       33.77
+      ],
+      [
+       1036.38,
+       741.22,
+       33.77
+      ],
+      [
+       1036.35,
+       731.15,
+       33.77
+      ],
+      [
+       1038.41,
+       721.3,
+       33.77
+      ],
+      [
+       1042.49,
+       712.09,
+       33.77
+      ],
+      [
+       1048.41,
+       703.95,
+       33.77
+      ],
+      [
+       1055.89,
+       697.21,
+       33.77
+      ],
+      [
+       1064.62,
+       692.2,
+       33.77
+      ],
+      [
+       1074.2,
+       689.11,
+       33.77
+      ],
+      [
+       1084.22,
+       688.1,
+       33.77
+      ],
+      [
+       1094.22,
+       689.2,
+       33.77
+      ],
+      [
+       1103.78,
+       692.37,
+       33.77
+      ],
+      [
+       1112.46,
+       697.47,
+       33.77
+      ],
+      [
+       1119.88,
+       704.27,
+       33.77
+      ],
+      [
+       1125.72,
+       712.47,
+       33.77
+      ],
+      [
+       1129.72,
+       721.71,
+       33.77
+      ],
+      [
+       1131.7,
+       731.58,
+       33.77
+      ]
+     ],
+     [
+      [
+       1131.67,
+       740.67,
+       33.77
+      ],
+      [
+       1129.63,
+       750.56,
+       33.77
+      ],
+      [
+       1125.57,
+       759.81,
+       33.77
+      ],
+      [
+       1119.65,
+       767.99,
+       33.77
+      ],
+      [
+       1112.15,
+       774.75,
+       33.77
+      ],
+      [
+       1103.4,
+       779.8,
+       33.77
+      ],
+      [
+       1093.79,
+       782.89,
+       33.77
+      ],
+      [
+       1083.74,
+       783.9,
+       33.77
+      ],
+      [
+       1073.7,
+       782.78,
+       33.77
+      ],
+      [
+       1064.12,
+       779.58,
+       33.77
+      ],
+      [
+       1055.43,
+       774.44,
+       33.77
+      ]
+     ]
+    ],
+    "towers": [],
+    "gates": [
+     {
+      "id": "cinderholt_gate_0",
+      "x": 1131.9,
+      "z": 736.13,
+      "h": 33.77,
+      "yaw": 1.6015,
+      "out": [
+       0.9995,
+       -0.0307
+      ],
+      "wallYaw": 1.5682,
+      "open": 5.5,
+      "width": 5.4,
+      "pass": 5.4,
+      "slant": 0.033,
+      "kind": "posts",
+      "way": "cinderholt_street_83",
+      "wayKind": "road",
+      "road": "road_v_ring_6",
+      "ways": [
+       "cinderholt_street_83"
+      ],
+      "led": [],
+      "ends": [
+       [
+        1131.7,
+        731.58
+       ],
+       [
+        1131.67,
+        740.67
+       ]
+      ],
+      "main": {
+       "street": "cinderholt_street_83",
+       "width": 4.2,
+       "pts": [
+        [
+         1131.9,
+         736.13
+        ],
+        [
+         1083.67,
+         737.61
+        ]
+       ],
+       "metres": 48.25
+      },
+      "approaches": [
+       {
+        "way": "road_v_ring_6",
+        "width": 6,
+        "pts": [
+         [
+          1136,
+          736
+         ],
+         [
+          1138,
+          736
+         ],
+         [
+          1140,
+          736
+         ],
+         [
+          1142,
+          736
+         ],
+         [
+          1144,
+          736
+         ],
+         [
+          1146,
+          736
+         ],
+         [
+          1148,
+          736
+         ],
+         [
+          1150,
+          736
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "cinderholt_gate_1",
+      "x": 1051.89,
+      "z": 771.55,
+      "h": 33.77,
+      "yaw": -0.6887,
+      "out": [
+       -0.6355,
+       0.7721
+      ],
+      "wallYaw": -0.7346,
+      "open": 5.54,
+      "width": 5.4,
+      "pass": 5.4,
+      "slant": 0.046,
+      "kind": "posts",
+      "way": "cinderholt_street_82",
+      "wayKind": "road",
+      "road": "road_v_ring_5",
+      "ways": [
+       "cinderholt_street_82"
+      ],
+      "led": [],
+      "ends": [
+       [
+        1055.43,
+        774.44
+       ],
+       [
+        1048.65,
+        768.32
+       ]
+      ],
+      "main": {
+       "street": "cinderholt_street_82",
+       "width": 4.2,
+       "pts": [
+        [
+         1051.89,
+         771.55
+        ],
+        [
+         1078.69,
+         738.99
+        ]
+       ],
+       "metres": 42.16
+      },
+      "approaches": [
+       {
+        "way": "road_v_ring_5",
+        "width": 6,
+        "pts": [
+         [
+          1039.36,
+          784.64
+         ],
+         [
+          1040.49,
+          783.51
+         ],
+         [
+          1041.9,
+          782.1
+         ],
+         [
+          1043.32,
+          780.68
+         ],
+         [
+          1044.73,
+          779.27
+         ],
+         [
+          1046.14,
+          777.86
+         ],
+         [
+          1047.27,
+          776.73
+         ],
+         [
+          1048.4,
+          775.6
+         ],
+         [
+          1049.54,
+          774.46
+         ]
+        ]
+       }
+      ]
+     }
+    ],
+    "openings": []
+   }
+  }
+ ]
+}

@@ -1,0 +1,215 @@
+{
+  "id": "elite_basalt_tyrant",
+  "name": "The Basalt Tyrant",
+  "tier": "elite",
+  "zone": "kiln_ridge",
+  "level": 18,
+  "body": "pumice_golem",
+  "place": {
+    "rank": "elite",
+    "level": 18,
+    "near": {
+      "site": "Kilnhold",
+      "dx": -240,
+      "dz": 220
+    },
+    "respawnMs": 1200000,
+    "escort": [
+      {
+        "type": "ashback_salamander",
+        "count": 2
+      }
+    ]
+  },
+  "_doc": "Expansion 1 (Vharlen). A giant of stacked basalt in the old quarry below Kilnhold. A fist cone and a ground quake that throws everyone near it. At 60% it raises basalt columns out of the ground (they stay — and they are cover) and then roars across the whole quarry: hide behind a column. At 30% it starts to crumble: chunks fall on everyone and the columns rise faster.",
+  "party": "Open world elite. Solo: tough — the roar needs a column. 2-3: intended. 5+: quick. M5 scaling: health by players tagged; columns +1 per extra player.",
+  "hpMult": 1.6,
+  "arena": {
+    "radius": 26
+  },
+  "say": {
+    "pull": [
+      "The quarry wall steps forward.",
+      "Columns of black stone grind together into the shape of a giant."
+    ],
+    "death": "The Basalt Tyrant falls apart into a heap of six-sided stones.",
+    "reset": "The Basalt Tyrant settles back into the quarry wall."
+  },
+  "abilities": {
+    "fist": {
+      "id": "fist",
+      "name": "Basalt Fist",
+      "every": [
+        6,
+        8
+      ],
+      "first": 2,
+      "range": 6,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 5.5,
+          "arc": 1.4,
+          "wind": 1,
+          "damage": 1.7
+        }
+      ]
+    },
+    "quake": {
+      "id": "quake",
+      "name": "Quake",
+      "every": [
+        13,
+        16
+      ],
+      "first": 4,
+      "cast": 0.6,
+      "say": "The Tyrant stamps — get clear!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 9,
+          "wind": 1.6,
+          "damage": 1.6,
+          "knock": 5
+        }
+      ]
+    },
+    "fling": {
+      "id": "fling",
+      "name": "Fling Stone",
+      "every": [
+        11,
+        14
+      ],
+      "first": 7,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3,
+          "wind": 1.5,
+          "damage": 1.4,
+          "count": 2,
+          "delay": 0.3
+        }
+      ]
+    },
+    "columns": {
+      "id": "columns",
+      "name": "Columns Rise",
+      "every": [
+        16,
+        19
+      ],
+      "first": 2,
+      "cast": 0.5,
+      "say": "Basalt columns burst out of the ground — they will stand!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "r": 2.8,
+          "wind": 1.8,
+          "damage": 1.4,
+          "spread": 13,
+          "count": 3,
+          "delay": 0.3,
+          "leave": {
+            "type": "rock",
+            "r": 1.6,
+            "hp": 2,
+            "name": "Basalt column"
+          }
+        }
+      ]
+    },
+    "roar": {
+      "id": "roar",
+      "name": "Tyrant's Roar",
+      "every": [
+        22,
+        26
+      ],
+      "first": 9,
+      "cast": 3,
+      "say": "The Tyrant draws breath to ROAR — get behind a column!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 26,
+          "wind": 0.6,
+          "damage": 2.2,
+          "los": true,
+          "status": "fear"
+        }
+      ]
+    },
+    "crumble": {
+      "id": "crumble",
+      "name": "Crumbling",
+      "every": [
+        13,
+        16
+      ],
+      "first": 4,
+      "cast": 0.5,
+      "say": "Chunks of the Tyrant break off over everyone — spread out!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "each",
+          "r": 2.8,
+          "wind": 2.2,
+          "damage": 1.4,
+          "follow": true
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "The Quarry",
+      "abilities": [
+        "fist",
+        "quake",
+        "fling"
+      ]
+    },
+    {
+      "name": "Columns Rise",
+      "at": 0.6,
+      "say": "The Tyrant raises its arms. The ground answers.",
+      "abilities": [
+        "fist",
+        "columns",
+        "roar",
+        "quake"
+      ]
+    },
+    {
+      "name": "Crumbling",
+      "at": 0.3,
+      "say": "Cracks run through the Basalt Tyrant!",
+      "abilities": [
+        "fist",
+        "crumble",
+        "columns",
+        "roar"
+      ],
+      "onEnter": [
+        {
+          "modifier": {
+            "id": "crumbling_tyrant",
+            "dmg": 1.2,
+            "attackEvery": 0.85,
+            "exact": true
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -7,13 +7,15 @@
 // Seeded local search: same inputs -> same file.   node tools/assign-vignettes.mjs [province=torbor_downs] [perZone=9]
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { connectedSets, gridDist } from './province-graph.mjs';
-import { pinnedVignettes, measuredBiomes, dryMismatch } from './content-lib.mjs';
+import { pinnedVignettes, measuredBiomes, dryMismatch, provinceArg, HOME_PROVINCE, provinceDressing } from './content-lib.mjs';
 
-const prov = process.argv[2] || "torbor_downs", PER = +(process.argv[3] || 10), FIT = +(process.argv[4] || 0.92);
+// positional [province] [perZone] [fit], or --province=<id> (js/sim/province-files.js provinceArg)
+const POS = process.argv.slice(2).filter((x, i, all) => !x.startsWith('--') && all[i - 1] !== '--province');
+const prov = process.argv.some(x => x.startsWith('--province')) ? provinceArg(process.argv) : (POS[0] || HOME_PROVINCE), PER = +(POS[1] || 10), FIT = +(POS[2] || 0.92);
 const root = new URL('../', import.meta.url);
 const J = p => JSON.parse(readFileSync(new URL(p, root), 'utf8'));
 const P = J(`data/provinces/${prov}.json`);
-const VIG = [...J('data/vignettes/m1.json').vignettes, ...J('data/vignettes/m2.json').vignettes, ...J('data/vignettes/m2b.json').vignettes];
+const VIG = provinceDressing(prov).vignettes;      // [W] the province's own catalogue when it has one (Torbor: m1 + m2 + m2b as always)
 const ids = Object.keys(P.zones), Z = ids.map(id => ({ id, ...P.zones[id] }));
 const sets = connectedSets(Z.map(z => z.grid), 5);
 const D = Z.map(a => Z.map(b => gridDist(a.grid, b.grid)));

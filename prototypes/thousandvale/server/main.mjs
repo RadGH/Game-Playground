@@ -50,7 +50,7 @@ import { MAX_FRAME, PROTOCOL_VERSION } from '../js/net/protocol.js';
 import { createStaticHandler } from './static.js';
 import { statusPage } from './status-page.js';
 import { turnstileFromEnv } from './turnstile.js';
-import { GAME, PLAYGROUND, log, loadRules, makeStore, loadClasses, loadClassNames, loadLayouts, defaultProvinces, feedbackSink, loadEconomy, loadMotd, loadChangelog } from './load.mjs';
+import { GAME, PLAYGROUND, log, loadRules, makeStore, loadClasses, loadClassNames, loadLayouts, defaultProvinces, starterOf, feedbackSink, loadEconomy, loadMotd, loadChangelog } from './load.mjs';
 import { wireSocket, startPinger } from './ws-conn.mjs';
 import { hashPassword, verifyPassword } from './passwords.js';
 import { createChatFilter } from '../js/sim/chatfilter.js';
@@ -146,7 +146,7 @@ export async function startServer(o) {
     await store.init();
     const assign = provinces.map((p, i) => ({ province: p, proc: i % o.procs }));
     const { events, directorRules } = await loadLayouts([]);          // the director learns events from the children's hello
-    gateway = createGateway({ ...common, events, starterProvince: provinces[0], directorOpts: { ...o.director, rules: directorRules || {} } });
+    gateway = createGateway({ ...common, events, starterProvince: starterOf(provinces), directorOpts: { ...o.director, rules: directorRules || {} } });
     for (let n = 0; n < o.procs; n++) children.push(spawnChild(n, assign.filter(a => a.proc === n).map(a => a.province)));
   } else {
     const { layouts, events, encounterInfo, directorRules } = await loadLayouts(provinces);

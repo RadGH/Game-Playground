@@ -1,0 +1,633 @@
+{
+ "_doc": "Stream C (Expansion 1). Vharlen's own angling text, laid over data/provinces/angling.json key by key (js/sim/province-files.js): `fish` (warm-water and volcanic species, bands 10-20 — Vharlen's catch list; Torbor's own fish never pass level 10), `legends` (one per Vharlen zone), `anglers` (one per Vharlen hub town; tools/content-pools.mjs --province=vharlen stands them on the bank) and `pullBack` (Vharlen monsters). Rods, bait, meals, recipes, junk and crates are Torbor's. The server joins every province's fish, legends, anglers and pull-backs into the one catch table (js/sim/angling.js), so a fish caught here stays a fish anywhere. Same row shapes as angling.json; checked by tests/C/vharlen-content.test.js.",
+ "fish": [
+  {
+   "id": "black_sand_sole",
+   "name": "Black Sand Sole",
+   "desc": "Flat, black, and lying on black sand. You only find it by stepping on it.",
+   "water": [
+    "coast"
+   ],
+   "bands": [
+    10,
+    20
+   ],
+   "time": "any",
+   "rarity": "common",
+   "size": [
+    18,
+    34
+   ],
+   "price": 5,
+   "skill": 35
+  },
+  {
+   "id": "vharl_sprat",
+   "name": "Harbour Sprat of Vharl",
+   "desc": "Silver, warm to the touch, and everywhere the boats are.",
+   "water": [
+    "coast"
+   ],
+   "bands": [
+    10,
+    20
+   ],
+   "time": "day",
+   "rarity": "common",
+   "size": [
+    8,
+    16
+   ],
+   "price": 4,
+   "skill": 30
+  },
+  {
+   "id": "ashfin_snapper",
+   "name": "Ashfin Snapper",
+   "desc": "Grey fins, red mouth, a temper to match. Bites the hook and then the line.",
+   "water": [
+    "coast"
+   ],
+   "bands": [
+    11,
+    20
+   ],
+   "time": "any",
+   "rarity": "uncommon",
+   "size": [
+    30,
+    60
+   ],
+   "price": 28,
+   "skill": 50
+  },
+  {
+   "id": "slagjaw_grouper",
+   "name": "Slagjaw Grouper",
+   "desc": "Lives in the cracks of cooled lava under the surf. Its jaw is as hard as the rock it hides in.",
+   "water": [
+    "coast"
+   ],
+   "bands": [
+    12,
+    20
+   ],
+   "time": "dusk",
+   "rarity": "rare",
+   "size": [
+    60,
+    110
+   ],
+   "price": 54,
+   "skill": 62,
+   "pool": true
+  },
+  {
+   "id": "glass_ray",
+   "name": "Glass Ray",
+   "desc": "A ray so clear you can see the sand through it, and the hook inside it.",
+   "water": [
+    "coast"
+   ],
+   "bands": [
+    13,
+    20
+   ],
+   "time": "night",
+   "rarity": "rare",
+   "size": [
+    70,
+    130
+   ],
+   "price": 56,
+   "skill": 68
+  },
+  {
+   "id": "mothers_marlin",
+   "name": "Mother's Marlin",
+   "desc": "The Vharl say it swims round the island once a year to count it. It does not like being counted back.",
+   "water": [
+    "coast"
+   ],
+   "bands": [
+    16,
+    20
+   ],
+   "time": "day",
+   "rarity": "epic",
+   "size": [
+    180,
+    290
+   ],
+   "price": 240,
+   "skill": 86,
+   "pool": true
+  },
+  {
+   "id": "spring_tilapia",
+   "name": "Springwater Tilapia",
+   "desc": "Only lives where the water is warm enough to bathe in. Tastes of the spring.",
+   "water": [
+    "lake",
+    "river"
+   ],
+   "bands": [
+    10,
+    20
+   ],
+   "time": "any",
+   "rarity": "common",
+   "size": [
+    14,
+    30
+   ],
+   "price": 5,
+   "skill": 35
+  },
+  {
+   "id": "sulphur_minnow",
+   "name": "Sulphur Minnow",
+   "desc": "Yellow, tiny and nearly inedible. Toads love them, which is why toads come looking.",
+   "water": [
+    "lake",
+    "marsh"
+   ],
+   "bands": [
+    10,
+    20
+   ],
+   "time": "day",
+   "rarity": "common",
+   "size": [
+    4,
+    9
+   ],
+   "price": 3,
+   "skill": 30
+  },
+  {
+   "id": "crater_cichlid",
+   "name": "Crater Cichlid",
+   "desc": "Bright as a lamp and as bad-tempered as the lake it lives in.",
+   "water": [
+    "lake"
+   ],
+   "bands": [
+    12,
+    20
+   ],
+   "time": "any",
+   "rarity": "uncommon",
+   "size": [
+    16,
+    32
+   ],
+   "price": 28,
+   "skill": 52
+  },
+  {
+   "id": "boilfin_gar",
+   "name": "Boilfin Gar",
+   "desc": "Swims in water that would cook anything else. Comes out of the pot looking offended.",
+   "water": [
+    "lake"
+   ],
+   "bands": [
+    15,
+    20
+   ],
+   "time": "night",
+   "rarity": "rare",
+   "size": [
+    70,
+    120
+   ],
+   "price": 56,
+   "skill": 66,
+   "pool": true
+  },
+  {
+   "id": "steam_trout",
+   "name": "Steam Trout",
+   "desc": "Leaps the hot falls in the jungle. Cooks itself if you are slow.",
+   "water": [
+    "river"
+   ],
+   "bands": [
+    11,
+    20
+   ],
+   "time": "any",
+   "rarity": "common",
+   "size": [
+    20,
+    44
+   ],
+   "price": 5,
+   "skill": 40
+  },
+  {
+   "id": "ashwater_barb",
+   "name": "Ashwater Barb",
+   "desc": "Grey with river ash, whiskered and patient.",
+   "water": [
+    "river",
+    "lake"
+   ],
+   "bands": [
+    11,
+    20
+   ],
+   "time": "dusk",
+   "rarity": "uncommon",
+   "size": [
+    24,
+    48
+   ],
+   "price": 27,
+   "skill": 50
+  },
+  {
+   "id": "mudvent_loach",
+   "name": "Mudvent Loach",
+   "desc": "Lives in mud that bubbles. Slick enough to slide out of a fist twice.",
+   "water": [
+    "marsh"
+   ],
+   "bands": [
+    12,
+    20
+   ],
+   "time": "any",
+   "rarity": "common",
+   "size": [
+    12,
+    26
+   ],
+   "price": 5,
+   "skill": 40
+  },
+  {
+   "id": "fumarole_catfish",
+   "name": "Fumarole Catfish",
+   "desc": "Whiskers like wet rope. Hunts by the warmth of whatever falls in.",
+   "water": [
+    "marsh"
+   ],
+   "bands": [
+    13,
+    20
+   ],
+   "time": "night",
+   "rarity": "uncommon",
+   "size": [
+    40,
+    80
+   ],
+   "price": 29,
+   "skill": 55
+  },
+  {
+   "id": "hotmud_lungfish",
+   "name": "Hotmud Lungfish",
+   "desc": "Breathes air, swims in mud, and has outlived three eruptions. Possibly the same one.",
+   "water": [
+    "marsh"
+   ],
+   "bands": [
+    14,
+    20
+   ],
+   "time": "any",
+   "rarity": "rare",
+   "size": [
+    70,
+    120
+   ],
+   "price": 56,
+   "skill": 70,
+   "pool": true
+  }
+ ],
+ "legends": [
+  {
+   "id": "legend_blackwater_queen",
+   "name": "Blackwater Queen",
+   "desc": "A sole the size of a door that lies under the harbour at Port Vharl. The pier pilings are worn smooth where she rubs.",
+   "zone": "blackstrand",
+   "water": "coast",
+   "time": "dawn",
+   "skill": 45,
+   "title": "of the Black Sand",
+   "trophy": {
+    "name": "Blackwater Queen's Fin",
+    "desc": "A black fin, edged with gold. Still warm."
+   },
+   "price": 4000
+  },
+  {
+   "id": "legend_old_scald",
+   "name": "Old Scald",
+   "desc": "A trout that lives in the hottest pool of the Steamwood. Its back is pink from it.",
+   "zone": "steamwood",
+   "water": "lake",
+   "time": "dusk",
+   "skill": 50,
+   "title": "the Scalded",
+   "trophy": {
+    "name": "Old Scald's Gill-plate",
+    "desc": "Pink, thin as paper and too hot to hold for long."
+   },
+   "price": 4200
+  },
+  {
+   "id": "legend_yolk",
+   "name": "The Yolk",
+   "desc": "A minnow grown huge and yellow in the acid pools. Nobody eats it. Everybody wants to catch it.",
+   "zone": "sulphur_bight",
+   "water": "lake",
+   "time": "day",
+   "skill": 55,
+   "title": "of the Yellow Pools",
+   "trophy": {
+    "name": "The Yolk's Scale",
+    "desc": "A yellow scale that stains anything it touches."
+   },
+   "price": 4400
+  },
+  {
+   "id": "legend_mudfather",
+   "name": "Mudfather",
+   "desc": "A lungfish older than Stiltreach. It sighs, and the whole fen bubbles.",
+   "zone": "fumarole_fen",
+   "water": "marsh",
+   "time": "night",
+   "skill": 60,
+   "title": "the Mud-Wise",
+   "trophy": {
+    "name": "Mudfather's Whisker",
+    "desc": "A whisker as thick as a finger, still twitching."
+   },
+   "price": 4600
+  },
+  {
+   "id": "legend_mirror_eel",
+   "name": "The Mirror Eel",
+   "desc": "An eel with a glass skin that hunts in the surf off the obsidian dunes. You see yourself in it as it bites.",
+   "zone": "glasswind_strand",
+   "water": "coast",
+   "time": "night",
+   "skill": 60,
+   "title": "of the Glass Surf",
+   "trophy": {
+    "name": "Mirror Eel's Skin",
+    "desc": "A strip of skin that is a mirror on one side."
+   },
+   "price": 4600
+  },
+  {
+   "id": "legend_last_drop",
+   "name": "The Last Drop",
+   "desc": "A fish caught once in the well at Lastwell, and twice in the sea below the wastes. Nobody agrees how it got in the well.",
+   "zone": "pumice_wastes",
+   "water": "coast",
+   "time": "dawn",
+   "skill": 65,
+   "title": "of the Last Well",
+   "trophy": {
+    "name": "The Last Drop's Fin",
+    "desc": "A grey fin that smells of the sea and of ash."
+   },
+   "price": 4800
+  },
+  {
+   "id": "legend_ashjaw",
+   "name": "Ashjaw",
+   "desc": "A barracuda that hunts in the ash-milk water where the buried valley meets the sea.",
+   "zone": "ashfall_hollow",
+   "water": "coast",
+   "time": "dusk",
+   "skill": 70,
+   "title": "the Ash-Fisher",
+   "trophy": {
+    "name": "Ashjaw's Tooth",
+    "desc": "A tooth with ash ground into it."
+   },
+   "price": 5000
+  },
+  {
+   "id": "legend_kilnback",
+   "name": "Kilnback",
+   "desc": "A grouper that lives under the sea cliffs of Kiln Ridge, red as a fired brick.",
+   "zone": "kiln_ridge",
+   "water": "coast",
+   "time": "any",
+   "skill": 75,
+   "title": "of the Basalt Steps",
+   "trophy": {
+    "name": "Kilnback's Scale",
+    "desc": "A red scale with a fingerprint baked into it."
+   },
+   "price": 5200
+  },
+  {
+   "id": "legend_mothers_eye",
+   "name": "The Mother's Eye",
+   "desc": "The Rim-keepers say there is one fish in the crater lake, and it watches the shrine. They are right about the fish.",
+   "zone": "the_caldera",
+   "water": "lake",
+   "time": "night",
+   "skill": 85,
+   "title": "Who Met the Eye",
+   "trophy": {
+    "name": "The Mother's Eye",
+    "desc": "A round, hot scale like a coin of the island's oldest mint."
+   },
+   "price": 6000
+  }
+ ],
+ "anglers": [
+  {
+   "id": "angler_port_vharl",
+   "name": "Nessk Thallu",
+   "town": "Port Vharl",
+   "zone": "blackstrand",
+   "greeting": "Harbour fish bite at the pier. Deep fish bite your fingers. Keep the two apart.",
+   "sells": [
+    "angling_rod",
+    "bait_worms",
+    "bait_bread_paste",
+    "ash_rod",
+    "bait_bright_lure"
+   ],
+   "buysFish": true
+  },
+  {
+   "id": "angler_mistfall",
+   "name": "Oru Keshvar",
+   "town": "Mistfall",
+   "zone": "steamwood",
+   "greeting": "Fish in the hot pools come out half-cooked. Saves a fire.",
+   "sells": [
+    "angling_rod",
+    "bait_worms",
+    "bait_bread_paste",
+    "ash_rod",
+    "bait_bright_lure"
+   ],
+   "buysFish": true
+  },
+  {
+   "id": "angler_yellowpan",
+   "name": "Tekk Sulvenn",
+   "town": "Yellowpan",
+   "zone": "sulphur_bight",
+   "greeting": "Do not drink from the yellow pools. Do fish them. Rinse after.",
+   "sells": [
+    "angling_rod",
+    "bait_worms",
+    "bait_bread_paste",
+    "ash_rod",
+    "bait_bright_lure"
+   ],
+   "buysFish": true
+  },
+  {
+   "id": "angler_stiltreach",
+   "name": "Pirra Nuvaru",
+   "town": "Stiltreach",
+   "zone": "fumarole_fen",
+   "greeting": "I fish off my own doorstep. The doorstep is three men high.",
+   "sells": [
+    "angling_rod",
+    "bait_worms",
+    "bait_bread_paste",
+    "ash_rod",
+    "bait_bright_lure"
+   ],
+   "buysFish": true
+  },
+  {
+   "id": "angler_shardhaven",
+   "name": "Lorr Imbaru",
+   "town": "Shardhaven",
+   "zone": "glasswind_strand",
+   "greeting": "Mind the beach. It cuts. The fish do not mind it.",
+   "sells": [
+    "angling_rod",
+    "bait_worms",
+    "bait_bread_paste",
+    "ash_rod",
+    "bait_bright_lure"
+   ],
+   "buysFish": true
+  },
+  {
+   "id": "angler_lastwell",
+   "name": "Kirra Askaru",
+   "town": "Lastwell",
+   "zone": "pumice_wastes",
+   "greeting": "The sea is the only thing out here that is not on fire. I like the sea.",
+   "sells": [
+    "angling_rod",
+    "bait_worms",
+    "bait_bread_paste",
+    "ash_rod",
+    "bait_bright_lure"
+   ],
+   "buysFish": true
+  },
+  {
+   "id": "angler_cinderholt",
+   "name": "Gethu Rhovek",
+   "town": "Cinderholt",
+   "zone": "ashfall_hollow",
+   "greeting": "The water's grey with ash. The fish are grey with ash. I am grey with ash.",
+   "sells": [
+    "angling_rod",
+    "bait_worms",
+    "bait_bread_paste",
+    "ash_rod",
+    "bait_bright_lure"
+   ],
+   "buysFish": true
+  },
+  {
+   "id": "angler_kilnhold",
+   "name": "Halla Tovaru",
+   "town": "Kilnhold",
+   "zone": "kiln_ridge",
+   "greeting": "Long line, long cliff, long wait. Worth it.",
+   "sells": [
+    "angling_rod",
+    "bait_worms",
+    "bait_bread_paste",
+    "ash_rod",
+    "bait_bright_lure"
+   ],
+   "buysFish": true
+  },
+  {
+   "id": "angler_rim_shrine",
+   "name": "Rim-keeper Essu",
+   "town": "Rim Shrine",
+   "zone": "the_caldera",
+   "greeting": "We do not take from the lake. We borrow, and we put back. Mostly.",
+   "sells": [
+    "angling_rod",
+    "bait_worms",
+    "bait_bread_paste",
+    "ash_rod",
+    "bait_bright_lure"
+   ],
+   "buysFish": true
+  }
+ ],
+ "pullBack": [
+  {
+   "water": "coast",
+   "type": "mudback_lurker",
+   "bands": [
+    10,
+    20
+   ],
+   "say": "The line goes slack. Then the surf stands up and has teeth."
+  },
+  {
+   "water": "coast",
+   "type": "ashback_salamander",
+   "bands": [
+    10,
+    20
+   ],
+   "say": "Something black and warm comes up the beach after its supper. Your supper."
+  },
+  {
+   "water": "lake",
+   "type": "sulphur_toad",
+   "bands": [
+    10,
+    20
+   ],
+   "say": "Your catch has legs, a yellow belly and an opinion."
+  },
+  {
+   "water": "marsh",
+   "type": "mudback_lurker",
+   "bands": [
+    10,
+    20
+   ],
+   "say": "That was not a log. That was never a log."
+  },
+  {
+   "water": "river",
+   "type": "ashback_salamander",
+   "bands": [
+    10,
+    20
+   ],
+   "say": "Something pulls back. It is coming up the bank, steaming."
+  }
+ ]
+}

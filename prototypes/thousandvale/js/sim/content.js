@@ -6,8 +6,17 @@
 //
 // Used by createWorld({ zoneSheet: content.sheet, encounterInfo: content.encounterInfo }).
 
-export const PROVINCE_FILES = ['data/provinces/torbor_downs.json'];
-export const VIGNETTE_FILES = ['data/vignettes/m1.json', 'data/vignettes/m2.json', 'data/vignettes/m2b.json', 'data/vignettes/curios.json', 'data/vignettes/setpieces.json'];   // curios: P19 mini vignettes; setpieces: play-test 2 Q18
+import { provinceData, namesPath, HOME_PROVINCE } from './province-files.js';
+
+export const PROVINCE_FILES = ['data/provinces/torbor_downs.json'];      // the single-zone loader's sheets (loadZoneContent); a whole province reads data/provinces/<id>.json
+export const VIGNETTE_FILES = ['data/vignettes/m1.json', 'data/vignettes/m2.json', 'data/vignettes/m2b.json', 'data/vignettes/curios.json', 'data/vignettes/setpieces.json',
+  'data/vignettes/vharlen-vignettes.json', 'data/vignettes/vharlen-curios.json'];   // curios: P19 mini vignettes; setpieces: play-test 2 Q18; vharlen-*: [W] the island's own (ids `vh_`, never a Torbor id)
+/** [W] Files whose `curios` list is read as recipes. Torbor's curios.json lists its recipes under `curios`, which this loader
+ *  has never read (only `vignettes`), so its curio objects have never reached the server; that is left exactly as it
+ *  was here (reported to the lead) and only the island's own curio file is read. */
+const OWN_CURIOS = new Set(['data/vignettes/vharlen-curios.json']);
+/** Roadside dressing kinds (`wayside` placements): Torbor's and each other province's own catalogue ([W] ids `vh_`). */
+export const WAYSIDE_FILES = ['data/vignettes/wayside.json', 'data/vignettes/vharlen-wayside.json'];
 
 export async function loadZoneContent(readJson, zone = 'test') {
   const out = { sheet: null, encounterInfo: {}, vignettes: null };
@@ -22,14 +31,14 @@ export async function loadZoneContent(readJson, zone = 'test') {
   // vignettes: every recipe file + this zone's placements (stream E)
   try {
     const recipes = [];
-    for (const f of VIGNETTE_FILES) { try { const d = await readJson(f); recipes.push(...(d.vignettes || [])); } catch { /* skip */ } }
+    for (const f of VIGNETTE_FILES) { try { const d = await readJson(f); recipes.push(...(d.vignettes || []), ...(OWN_CURIOS.has(f) ? d.curios || [] : [])); } catch { /* skip */ } }
     const placements = await readJson(`data/vignettes/placements/${zone}.json`);
     out.vignettes = { recipes, placements: placements.placements || [] };
   } catch { out.vignettes = null; }
   try {
     const idx = await readJson('data/encounters/index.json');
     for (const f of idx.files || []) {
-      try { const e = await readJson('data/encounters/' + f); if (e && e.id) out.encounterInfo[e.id] = { name: e.name || e.id, body: e.body || null, ...(Number.isFinite(e.level) ? { level: e.level } : {}), ...(e.announce ? { announce: { r: e.announce.r || 300 } } : {}), ...(e.secret ? { secret: true } : {}), ...(e.tier ? { tier: e.tier } : {}) }; } catch { /* skip */ }
+      try { const e = await readJson('data/encounters/' + f); if (e && e.id) out.encounterInfo[e.id] = { name: e.name || e.id, body: e.body || null, ...(Number.isFinite(e.level) ? { level: e.level } : {}), ...(e.announce ? { announce: { r: e.announce.r || 300 } } : {}), ...(e.secret ? { secret: true } : {}), ...(e.tier ? { tier: e.tier } : {}), ...(e.place && typeof e.place === 'object' ? { place: e.place } : {}) }; } catch { /* skip */ }
     }
   } catch { /* no encounters */ }
   return out;
@@ -46,12 +55,16 @@ export async function loadProvinceContent(readJson, readBytes, provinceId, { par
   const map = (await readJson('data/world/province-map.json')).provinces[provinceId];
   if (!map) throw new Error('no province ' + provinceId + ' in data/world/province-map.json');
   let sheet = null;
-  for (const f of PROVINCE_FILES) { try { const p = await readJson(f); if (p.id === provinceId) { sheet = p; break; } } catch { /* next */ } }
+  try { const p = await readJson(`data/provinces/${provinceId}.json`); if (p && (!p.id || p.id === provinceId)) sheet = p; } catch { /* no sheet of its own */ }
+  if (!sheet) for (const f of PROVINCE_FILES) { try { const p = await readJson(f); if (p.id === provinceId) { sheet = p; break; } } catch { /* next */ } }
+  // Expansion 1 (stream P): every per-province data file through js/sim/province-files.js — Torbor Downs reads the files it
+  // always did; another province its own `<prov>-<file>` (shared rules lent from Torbor's where it has none)
+  const pdata = thing => provinceData(readJson, provinceId, thing);
   const recipes = [];
-  for (const f of VIGNETTE_FILES) { try { recipes.push(...((await readJson(f)).vignettes || [])); } catch { /* skip */ } }
+  for (const f of VIGNETTE_FILES) { try { const d = await readJson(f); recipes.push(...(d.vignettes || []), ...(OWN_CURIOS.has(f) ? d.curios || [] : [])); } catch { /* skip */ } }
   // what E's placements refer to: site templates, hooks, treasure chains (per zone: its quest file)
   const opt = async f => { try { return await readJson(f); } catch { return null; } };
-  const sites = await opt('data/provinces/sites.json');
+  const sites = await pdata('sites');
   const hooks = ((await opt('data/hooks.json')) || {}).hooks || [];
   const treasure = ((await opt('data/quests/treasure.json')) || {}).chains || [];
   // a zone's quest file may `include` other files (stream E, play-test 2: start.json, classes.json, setpieces.json are parts
@@ -68,7 +81,8 @@ export async function loadProvinceContent(readJson, readBytes, provinceId, { par
     }
     return out;
   };
-  const wayside = Object.fromEntries((((await opt('data/vignettes/wayside.json')) || {}).kinds || []).map(k => [k.id, k]));   // roadside dressing kinds
+  const wayside = {};   // roadside dressing kinds (every province's catalogue: ids never collide)
+  for (const f of WAYSIDE_FILES) for (const k of (((await opt(f)) || {}).kinds || [])) wayside[k.id] = k;
   const zones = [], parts = [];
   for (const [eid, wid] of Object.entries(map.map)) {
     let reader;
@@ -119,20 +133,21 @@ export async function loadProvinceContent(readJson, readBytes, provinceId, { par
   for (const z of zones) z.events = zoneEvents.filter(e => e.zone === z.key);
   // a province whose band starts at level 1 is where new characters begin: its copies open earlier (PLAN §8.2: ~150)
   const starterProvince = !!(sheet && Array.isArray(sheet.band) && sheet.band[0] <= 1);
-  const rares = (await opt('data/provinces/rares.json')) || {};
+  const rares = (await pdata('rares')) || {};
   const jobs = await opt('data/quests/jobs.json');
-  const schedules = await opt('data/provinces/schedules.json');
+  const schedules = await pdata('schedules');
   // play-test 2: shop stock (Q11) and mounts (Q16), stream E's data (A has stand-ins for both)
-  const shops = await opt('data/provinces/shops.json');
-  const mounts = await opt('data/provinces/mounts.json');
-  const offices = await opt('data/provinces/offices.json');      // Q10: E's one-plot-per-NPC offices per hub town
+  const shops = await pdata('shops');
+  const mounts = await pdata('mounts');
+  const offices = await pdata('offices');      // Q10: E's one-plot-per-NPC offices per hub town
   const horizon = await opt('data/world/horizon.json');      // stream B's 32 m world horizon manifest (joined.room.horizon)
   // the living roads (P19, stream E): who travels, along which routes, and what they say (js/sim/travellers.js)
-  const tv = await opt('data/provinces/travellers.json'), rt = await opt(`data/provinces/${provinceId}-routes.json`);
+  const tv = await pdata('travellers'), rt = await opt(`data/provinces/${provinceId}-routes.json`);
   // play-test 4 S9: stream E's wanderers (pedlars with a shop, errand runners with a delivery, storytellers) walk the same
   // routes — their kinds join travellers.json's and every route's allowed list; their `rules` override travellers.json's
-  const wd = await opt('data/provinces/wanderers.json');
-  const cartsData = await opt('data/provinces/carts.json');
+  const wd = await pdata('wanderers');
+  const cartsData = await pdata('carts');
+  const names = (await opt(namesPath(provinceId, sheet))) || (provinceId === HOME_PROVINCE ? null : await opt(namesPath(HOME_PROVINCE)));      // a province's own names, else Torbor's
   const wk = (wd && wd.kinds) || {};
   if (shops && wd && wd.shops) shops.kinds = { ...(shops.kinds || {}), ...wd.shops };      // the pedlar's pack sells like any shop
   const travel = tv && rt ? { kinds: { ...(tv.kinds || {}), ...wk }, rules: { ...(tv.rules || {}), ...((wd && wd.rules) || {}) }, folkKinds: tv.folk || {}, fighters: tv.fighters || null,
@@ -140,19 +155,24 @@ export async function loadProvinceContent(readJson, readBytes, provinceId, { par
       // X7 (owner feedback 9, E's note): a guaranteed cart on the road — each carts.json `roaming.runs[]` is a route of its own over the same road
       // that carries ONLY its `only` kinds (no wanderer kinds appended), so there is always one to flag down
       ...(((cartsData && cartsData.roaming && cartsData.roaming.runs) || []).map(run => { const base = (rt.routes || []).find(r => r.id === run.route); return base && Array.isArray(run.only) && run.only.length ? { ...base, id: run.id, kinds: run.only.slice(), run: true, ...(run.carts ? { groups: run.carts } : {}) } : null; }).filter(Boolean))],
-    chatter: (await opt('data/names/chatter.json')) || { pools: {}, rules: {} }, names: (await opt('data/names/torbor.json')) || {} } : null;
+    chatter: (await opt('data/names/chatter.json')) || { pools: {}, rules: {} }, names: names || {} } : null;
   const marks = ((await opt(`data/quests/marks/${provinceId}.json`)) || {}).quests || null;   // P17: E's map mark per quest
   // play-test 4: data files that ride straight through buildLayout's `extra` into the province's L
   // play-test 5 T25: angling — C's numbers, E's fish / recipes / rods and E's pool spots (js/sim/angling.js)
   const fishNumbers = await opt('data/rules/fishing.json');
-  const angling = fishNumbers ? { numbers: fishNumbers, content: await opt('data/provinces/angling.json'), pools: await opt('data/provinces/angling-pools.json') } : null;
+  const angling = fishNumbers ? { numbers: fishNumbers, content: await pdata('angling'), pools: await pdata('angling-pools') } : null;
   // V2 (owner feedback 7): stream E's economy knobs (js/sim/economy-knobs.js reads them; an older `data/rules/economy.json` `server` block is read too)
   // W9 (P-core): professions — the numbers, the content and where the nodes stand (js/sim/professions.js); its job frames join the board's
   const profNumbers = await opt('data/rules/professions.json');
-  const professions = profNumbers ? { numbers: profNumbers, content: await opt('data/provinces/professions.json'), nodes: await opt('data/provinces/professions-nodes.json') } : null;
+  const professions = profNumbers ? { numbers: profNumbers, content: await pdata('professions'), nodes: await pdata('professions-nodes') } : null;
   if (jobs && Array.isArray(jobs.frames) && professions && professions.content && Array.isArray(professions.content.jobs)) for (const f of professions.content.jobs) if (!jobs.frames.some(x => x.id === f.id)) jobs.frames.push(f);
-  const extra = { professions, economy: (await opt('data/provinces/economy.json')) || (await opt('data/rules/economy.json')), angling, refunds: await opt('data/provinces/refunds.json'), wanderers: wd, treasure: await opt('data/provinces/road-events.json'), affixes: await opt('data/encounters/affixes.json'), spawnHints: await opt(`data/quests/marks/${provinceId}-hunts.json`),
-    titles: await opt('data/names/titles.json'), givers: await opt('data/quests/marks/givers.json'), carts: cartsData, guards: await opt('data/provinces/guards.json'), names: await opt('data/names/torbor.json') };
+  const extra = { professions, economy: (await pdata('economy')) || (await opt('data/rules/economy.json')), angling, refunds: await pdata('refunds'), wanderers: wd, treasure: await pdata('road-events'), affixes: await opt('data/encounters/affixes.json'), spawnHints: await opt(`data/quests/marks/${provinceId}-hunts.json`),
+    titles: await opt('data/names/titles.json'), givers: await pdata('givers'), carts: cartsData, guards: await pdata('guards'), names,
+    hazards: await pdata('hazards'),      // [S] Expansion 1 §4: Vharlen's springs, geysers, vents (js/sim/hazards.js)
+    ships: await opt('data/provinces/ships.json'),      // [V] Expansion 1 §6: the realm's harbours and sailings (js/sim/ships.js)
+    // Expansion 1: what the server needs to keep provinces apart — the starter (new characters begin there) and the
+    // continent (waystones and free event travel never cross the sea; province-map `continent`, else the province itself)
+    starterProvince: !!(sheet && Array.isArray(sheet.band) && sheet.band[0] <= 1), continent: map.continent || provinceId };
   return { extra, travel, marks, key: provinceId, name: sheet ? sheet.name : provinceId, terrain, zones, encounterInfo, events, zoneEvents, directorRules: (evData && evData.director) || null, starter, starterProvince, rares, jobs, schedules, horizon, shops, mounts, offices };
 }
 

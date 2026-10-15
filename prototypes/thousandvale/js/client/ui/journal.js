@@ -38,7 +38,7 @@ export function createJournal({ atlas, net, me, hud, worldMap }) {
   }
   function drawCatch(tabs) {
     const m = catchModel();
-    if (!m) { panel.fill(tabs, h('div.j-empty', {}, h('p', {}, 'Nothing caught yet.'), h('p.tiny', {}, 'Find the angler by the water near Torborhold: they will lend you a rod. Then face any water and press X.'))); return; }
+    if (!m) { panel.fill(tabs, h('div.j-empty', {}, h('p', {}, 'Nothing caught yet.'), h('p.tiny', {}, 'Find an angler by the water near a town: they will lend you a rod. Then face any water and press X.'))); return; }
     const R = m.rows, a = m.angling ? anglingText(m.angling) : null;
     const fish = r => h('li.jc-fish' + (r.known ? '.known' : ''), { dataset: { id: r.id, ...(r.hint ? { tip: r.hint } : {}) } },
       h('b.r-' + rarityClass(r.rarity), {}, r.name), r.known ? h('span', {}, `× ${r.n}`) : h('span.dim', {}, r.hint || 'not yet caught'), r.bestText ? h('em', {}, `biggest ${r.bestText}`) : null);

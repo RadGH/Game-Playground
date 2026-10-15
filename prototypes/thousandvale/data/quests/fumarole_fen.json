@@ -1,0 +1,238 @@
+{
+  "_doc": "Stream C (Expansion 1). Quests for zone 'fumarole_fen' on Vharlen, the Burning Isle. Format: data/quests/README.md. Rewards: xp = share of a level's XP at the quest level, gold = multiple of a kill's gold; item.tier rolls at your level. `killRare` {zone, slot} names the zone's rare by slot (data/provinces/rares.json). Story-chain quests carry `story: n` (data/quests/vharlen-province.json).",
+  "zone": "fumarole_fen",
+  "npcs": {
+    "mother_imma": {
+      "name": "Mother Imma",
+      "role": "elder",
+      "at": "Stiltreach",
+      "greeting": "Up the ladder, mind the third rung. The fen breathes under us. Lately it breathes badly.",
+      "titled": true
+    },
+    "stilt_builder_oskel": {
+      "name": "Stilt-builder Oskel",
+      "role": "resident",
+      "at": "Stiltreach",
+      "greeting": "Every house in Stiltreach is mine. Every house that is leaning is not.",
+      "titled": true
+    },
+    "fennu_draskar": {
+      "name": "Fennu Draskar",
+      "role": "fisher",
+      "at": "Stiltreach",
+      "greeting": "Mud-eels, boiled in the mud they live in. Saves on firewood.",
+      "titled": true
+    },
+    "angler_stiltreach": {
+      "name": "Pirra Nuvaru",
+      "role": "angler",
+      "at": "Stiltreach",
+      "greeting": "I fish off my own doorstep. The doorstep is three men high. See the ripples, just south-east of where I'm standing? That's the town pool. It never fishes out.",
+      "placedBy": "content-pools",
+      "titled": true
+    },
+    "carter_stiltreach": {
+      "name": "Velu Karrovu",
+      "role": "carter",
+      "at": "Stiltreach",
+      "greeting": "I do not go fast, I do not go near vents, and I do not stop for raiders. Fares are on the board.",
+      "cart": "cart_stiltreach",
+      "placedBy": "content-towns",
+      "titled": true
+    }
+  },
+  "quests": [
+    {
+      "id": "ff_mud_in_the_channels",
+      "name": "Mud in the Channels",
+      "level": 13,
+      "giver": "stilt_builder_oskel",
+      "offer": "The mudback lurkers lean on my stilts to scratch their backs. One good scratch and a family ends up in the mud with their breakfast.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "mudback_lurker",
+          "count": 6,
+          "where": "the hot mud channels",
+          "text": "Kill 6 mudback lurkers in the mud channels"
+        }
+      ],
+      "done": "Nothing has leaned on anything all morning. I almost miss it. No, I do not.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 12,
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "uncommon"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ff_the_fen_breathes_wrong",
+      "name": "The Fen Breathes Wrong",
+      "level": 14,
+      "giver": "mother_imma",
+      "story": 3,
+      "offer": "Yellowpan sent you with a nose full of sulphur. Good, you will know the smell. Slagborn wade out at dusk and tip sacks into our vents. Now the wisps come up thick and yellow and the whole fen coughs all night. Clear the vents and bring me what they are pouring.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "vent_wisp",
+          "count": 8,
+          "where": "the fumaroles, thickest at dusk",
+          "text": "Kill 8 vent wisps at the fumaroles"
+        },
+        {
+          "kind": "collect",
+          "item": "Burnt sulphur cake",
+          "count": 4,
+          "from": "vent_wisp",
+          "chance": 0.5,
+          "where": "the fumaroles, thickest at dusk",
+          "text": "Gather 4 burnt sulphur cakes from the vent wisps"
+        },
+        {
+          "kind": "talk",
+          "npc": "mother_imma",
+          "where": "Stiltreach",
+          "text": "Bring the cakes to Mother Imma in Stiltreach"
+        }
+      ],
+      "done": "Slagborn bread. This is what they feed the Mother, to make her hungry. The ash-reader in Cinderholt knows what happened the last time someone fed her. Go and ask.",
+      "reward": {
+        "xp": 0.75,
+        "gold": 18,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
+      },
+      "next": "ah_what_the_ash_recalls"
+    },
+    {
+      "id": "ff_old_mudlord",
+      "name": "Old Mudlord",
+      "level": 14,
+      "giver": "stilt_builder_oskel",
+      "offer": "The biggest lurker in the fen is so old the mud has grown over him. Old Mudlord. He does not lean on stilts. He eats them.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "mudback_lurker",
+          "count": 4,
+          "where": "the hot mud channels",
+          "text": "Kill 4 mudback lurkers to stir him up"
+        },
+        {
+          "kind": "killOne",
+          "encounter": "elite_old_mudlord",
+          "where": "the deep channels of Fumarole Fen",
+          "text": "Defeat Old Mudlord",
+          "at": {
+            "x": 27294,
+            "z": 23312,
+            "r": 45,
+            "name": "Old Mudlord"
+          }
+        }
+      ],
+      "done": "I will build a house where he used to lie. Very warm. Very quiet.",
+      "reward": {
+        "xp": 0.75,
+        "gold": 30,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "ff_bubblejaw",
+      "name": "Bubblejaw",
+      "level": 14,
+      "giver": "fennu_draskar",
+      "offer": "There is a mouth in the fen that blows bubbles. When the bubbles pop, a fisher goes missing. I have done the sums. It is Bubblejaw.",
+      "steps": [
+        {
+          "kind": "killRare",
+          "zone": "fumarole_fen",
+          "slot": 0,
+          "text": "Hunt down Bubblejaw",
+          "where": "the bubbling pools of Fumarole Fen"
+        }
+      ],
+      "done": "No more bubbles. I will boil you an eel. You will not like it, but it is the thought.",
+      "reward": {
+        "xp": 0.65,
+        "gold": 30,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "ff_drowned_vent",
+      "name": "The Drowned Vent",
+      "level": 14,
+      "giver": "mother_imma",
+      "group": "a party of 3-5",
+      "offer": "Under the fen is a vent the water got into long ago. It should be cold and dead. It has started to glow. Take friends, and take something that floats.",
+      "steps": [
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "floor": 1,
+          "text": "Swim down into the Drowned Vent",
+          "where": "The Drowned Vent, the dungeon door in Fumarole Fen"
+        },
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "boss": true,
+          "text": "Defeat what lit the bottom of the Drowned Vent",
+          "where": "the bottom of The Drowned Vent"
+        }
+      ],
+      "done": "Dark and cold again, as a drowned thing should be. Cinderholt could use hands like yours; they are digging out their cellars and not liking what they find.",
+      "reward": {
+        "xp": 1.2,
+        "gold": 55,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        }
+      },
+      "next": "ah_digging_out"
+    },
+    {
+      "id": "ff_the_fen_breath",
+      "name": "The Fen Breath",
+      "level": 15,
+      "giver": "fennu_draskar",
+      "offer": "Some nights the whole fen breathes in at once, and what comes out is not steam. We call it the Fen Breath. When the horn goes, come out on the boards with a weapon.",
+      "steps": [
+        {
+          "kind": "killOne",
+          "encounter": "ev_the_fen_breath",
+          "credit": "event",
+          "where": "the open fen, when the horn sounds (zone event)",
+          "text": "Defeat the Fen Breath when it rises"
+        }
+      ],
+      "done": "The fen breathes out, and it is only steam again. Good. Go and soak somewhere.",
+      "reward": {
+        "xp": 0.8,
+        "gold": 36,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    }
+  ]
+}

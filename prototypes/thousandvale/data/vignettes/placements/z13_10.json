@@ -1,0 +1,8561 @@
+{
+ "_doc": "Stream E. Content placements for world zone z13_10 (E zone 'blackstrand', Blackstrand) — tools/place-vignettes.mjs against stream B's bake (terrain 3fd22ea0). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
+ "zone": "z13_10",
+ "sheetZone": "blackstrand",
+ "province": "vharlen",
+ "terrainHash": "3fd22ea0",
+ "band": [
+  10,
+  12
+ ],
+ "archetype": "coast",
+ "rules": {
+  "vignette": {
+   "townGap": 60,
+   "gap": 30,
+   "slope": 20,
+   "sameKindSpacing": 140
+  },
+  "fort": {
+   "townGap": 80,
+   "gap": 40,
+   "slope": 16
+  },
+  "farm": {
+   "townGap": 25,
+   "gap": 30,
+   "slope": 12
+  },
+  "cave": {
+   "townGap": 120,
+   "gap": 40,
+   "slope": 28
+  },
+  "camp": {
+   "townGap": 120,
+   "gap": 25,
+   "slope": 24
+  },
+  "rare": {
+   "townGap": 150,
+   "gap": 30,
+   "slope": 24
+  },
+  "hook": {
+   "townGap": 40,
+   "gap": 30,
+   "slope": 26
+  },
+  "wayside": {
+   "townGap": 20,
+   "gap": 12,
+   "slope": 34,
+   "edge": 24
+  },
+  "settlement": {
+   "townGap": 300,
+   "gap": 60,
+   "slope": 10
+  },
+  "curio": {
+   "townGap": 30,
+   "gap": 10,
+   "slope": 26,
+   "edge": 30
+  },
+  "stray": {
+   "townGap": 70,
+   "gap": 16,
+   "slope": 26,
+   "edge": 30
+  },
+  "folk": {
+   "townGap": 30,
+   "gap": 12,
+   "slope": 24,
+   "edge": 30
+  },
+  "setpiece": {
+   "townGap": 20,
+   "gap": 25,
+   "slope": 20
+  }
+ },
+ "mainWalkableShare": 0.668,
+ "settlements": [
+  {
+   "name": "Port Vharl",
+   "kind": "town",
+   "x": 1126,
+   "z": 914,
+   "r": 90,
+   "source": "bake",
+   "bakeId": "port_vharl"
+  }
+ ],
+ "checks": [
+  {
+   "id": "door_1",
+   "kind": "dungeon_door",
+   "x": 930,
+   "z": 813,
+   "reachable": true,
+   "openShare": 1
+  },
+  {
+   "id": "event_blackstrand",
+   "kind": "event_site",
+   "x": 1046,
+   "z": 1043,
+   "reachable": true,
+   "openShare": 1
+  }
+ ],
+ "problems": [],
+ "placements": [
+  {
+   "type": "fort",
+   "id": "fort_blackstrand_0",
+   "name": "the Harbour Watch",
+   "template": "stone_keep",
+   "friendly": true,
+   "x": 796,
+   "z": 415,
+   "yaw": 1.57,
+   "radius": 28,
+   "level": 11
+  },
+  {
+   "type": "farm",
+   "id": "farm_blackstrand_0",
+   "name": "Port Vharl Salt Pans",
+   "template": "pig",
+   "flavour": null,
+   "settlement": "Port Vharl",
+   "x": 1215,
+   "z": 1015,
+   "yaw": -2.36,
+   "radius": 18,
+   "level": 10
+  },
+  {
+   "type": "farm",
+   "id": "farm_blackstrand_1",
+   "name": "Port Vharl Net Racks",
+   "template": "fishing_plot",
+   "flavour": null,
+   "settlement": "Port Vharl",
+   "x": 1429,
+   "z": 488,
+   "yaw": -1.18,
+   "radius": 16,
+   "level": 10
+  },
+  {
+   "type": "cave",
+   "id": "cave_blackstrand_0",
+   "name": "Prowler den",
+   "template": "beast_den",
+   "plan": {
+    "family": "lava_tube",
+    "floors": 1,
+    "level": 12
+   },
+   "x": 185,
+   "z": 473,
+   "yaw": 1.57,
+   "radius": 10,
+   "level": 12
+  },
+  {
+   "type": "cave",
+   "id": "cave_blackstrand_1",
+   "name": "Slagborn cache",
+   "template": "smugglers_cave",
+   "plan": {
+    "family": "drowned_vent",
+    "floors": 1,
+    "level": 12
+   },
+   "x": 409,
+   "z": 1858,
+   "yaw": -1.18,
+   "radius": 10,
+   "level": 12
+  },
+  {
+   "type": "vignette",
+   "id": "vh_kiln_left_burning",
+   "name": "The Kiln Left Burning",
+   "x": 1137,
+   "z": 1628,
+   "yaw": 5.11,
+   "radius": 13,
+   "biome": "beach",
+   "biomeFits": true,
+   "level": 1,
+   "levelBase": 10,
+   "levelCap": 11
+  },
+  {
+   "type": "vignette",
+   "id": "vh_knappers_overrun",
+   "name": "Crawler Flakes",
+   "x": 456,
+   "z": 1152,
+   "yaw": 1.79,
+   "radius": 13,
+   "biome": "shrubland",
+   "biomeFits": false,
+   "level": 1,
+   "levelBase": 10,
+   "levelCap": 11
+  },
+  {
+   "type": "vignette",
+   "id": "vh_pilgrim_camp",
+   "name": "Pilgrims' Halt",
+   "x": 1250,
+   "z": 70,
+   "yaw": 1.79,
+   "radius": 12,
+   "biome": "shrubland",
+   "biomeFits": true,
+   "level": 1,
+   "levelBase": 11,
+   "levelCap": 12
+  },
+  {
+   "type": "vignette",
+   "id": "vh_raided_kiln_road",
+   "name": "The Glass Train",
+   "x": 134,
+   "z": 1478,
+   "yaw": 2.03,
+   "radius": 14,
+   "biome": "shrubland",
+   "biomeFits": true,
+   "level": 1,
+   "levelBase": 11,
+   "levelCap": 12
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_0_0",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1473,
+   "z": 852,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_0_1",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1417,
+   "z": 1189,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_1_0",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 625,
+   "z": 1948,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_1_1",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1194,
+   "z": 1949,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_2_0",
+   "monster": "slagborn_raider",
+   "with": "slagborn_firecaller",
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 414,
+   "z": 67,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_2_1",
+   "monster": "slagborn_raider",
+   "with": "slagborn_firecaller",
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 592,
+   "z": 1511,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_3_0",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 488,
+   "z": 1734,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_3_1",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1474,
+   "z": 228,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_4_0",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1265,
+   "z": 1401,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_4_1",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1459,
+   "z": 1061,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "rare",
+   "id": "rare_tidecoal",
+   "slot": 0,
+   "name": "Tidecoal",
+   "x": 1434,
+   "z": 661,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     1437,
+     712
+    ],
+    [
+     1373,
+     712
+    ],
+    [
+     1411,
+     618
+    ],
+    [
+     1457,
+     604
+    ],
+    [
+     1485,
+     670
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 12
+  },
+  {
+   "type": "rare",
+   "id": "rare_old_blister",
+   "slot": 1,
+   "name": "Old Blister",
+   "x": 467,
+   "z": 1802,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     564,
+     1833
+    ],
+    [
+     449,
+     1876
+    ],
+    [
+     410,
+     1826
+    ],
+    [
+     434,
+     1746
+    ],
+    [
+     514,
+     1724
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 12
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z13_10_port_vharl",
+   "name": "Port Vharl",
+   "x": 1144,
+   "z": 911,
+   "yaw": 0,
+   "settlement": "Port Vharl",
+   "radius": 1
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z13_10_door",
+   "name": "The Brineglass Tubes",
+   "x": 926.5,
+   "z": 822.4,
+   "yaw": 0,
+   "door": "door_1",
+   "radius": 1
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_door",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 964,
+   "z": 831,
+   "yaw": 0,
+   "radius": 6,
+   "doorGuard": true
+  },
+  {
+   "type": "npc",
+   "id": "hearth_elder_tavi",
+   "name": "Hearth-elder Tavi Keshvar",
+   "role": "elder",
+   "at": "Port Vharl",
+   "x": 1132.1,
+   "z": 905.8,
+   "yaw": 2.535,
+   "office": "port_vharl_plot_8",
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "harbour_warden_kesk",
+   "name": "Kesk Ormakku",
+   "role": "guard",
+   "at": "Port Vharl",
+   "x": 1110.2,
+   "z": 879.2,
+   "yaw": 2.641,
+   "office": "port_vharl_plot_10",
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "net_mender_bekka",
+   "name": "Net-mender Bekka",
+   "role": "fisher",
+   "at": "Port Vharl",
+   "x": 1136,
+   "z": 963.9,
+   "yaw": 4.153,
+   "office": "port_vharl_plot_16",
+   "radius": 1
+  },
+  {
+   "type": "wayside",
+   "id": "vh_reed_windbreak_blackstrand_0",
+   "kind": "vh_reed_windbreak",
+   "name": "Reed Screen",
+   "x": 120,
+   "z": 890,
+   "yaw": 1.12,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_f1",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 520,
+   "z": 748,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_fern_pair_blackstrand_2",
+   "kind": "vh_fern_pair",
+   "name": "Fern Gate",
+   "x": 888,
+   "z": 1368,
+   "yaw": 0.43,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_f3",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1136,
+   "z": 364,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_offering_bowls_blackstrand_4",
+   "kind": "vh_offering_bowls",
+   "name": "Offering Bowls",
+   "x": 591,
+   "z": 459,
+   "yaw": 6.01,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_f5",
+   "monster": "slagborn_raider",
+   "with": "slagborn_firecaller",
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 840,
+   "z": 1708,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_tangled_floats_blackstrand_6",
+   "kind": "vh_tangled_floats",
+   "name": "Floats on a Post",
+   "x": 125,
+   "z": 1800,
+   "yaw": 5.04,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_f7",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 697,
+   "z": 984,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_rim_marker_blackstrand_8",
+   "kind": "vh_rim_marker",
+   "name": "Rim Keeper Waymarker",
+   "x": 160,
+   "z": 1159,
+   "yaw": 3.36,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_f9",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 417,
+   "z": 431,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_pilgrim_ribbons_blackstrand_10",
+   "kind": "vh_pilgrim_ribbons",
+   "name": "Pilgrim Post",
+   "x": 943,
+   "z": 156,
+   "yaw": 0.13,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_f11",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 664,
+   "z": 165,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_offering_bowls_blackstrand_12",
+   "kind": "vh_offering_bowls",
+   "name": "Offering Bowls",
+   "x": 188,
+   "z": 192,
+   "yaw": 3.47,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_f13",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 354,
+   "z": 335,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_roadside_fire_blackstrand_14",
+   "kind": "vh_roadside_fire",
+   "name": "Somebody's Fire",
+   "x": 372,
+   "z": 1392,
+   "yaw": 5.56,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_f15",
+   "monster": "slagborn_raider",
+   "with": "slagborn_firecaller",
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1028,
+   "z": 589,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_roadside_fire_blackstrand_16",
+   "kind": "vh_roadside_fire",
+   "name": "Somebody's Fire",
+   "x": 1001,
+   "z": 1607,
+   "yaw": 0.12,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_f17",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 276,
+   "z": 700,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_pilgrim_ribbons_blackstrand_18",
+   "kind": "vh_pilgrim_ribbons",
+   "name": "Pilgrim Post",
+   "x": 668,
+   "z": 1281,
+   "yaw": 1.82,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_f19",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 352,
+   "z": 936,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_offering_bowls_blackstrand_20",
+   "kind": "vh_offering_bowls",
+   "name": "Offering Bowls",
+   "x": 1030,
+   "z": 1439,
+   "yaw": 3.27,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_f21",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 740,
+   "z": 667,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_tangled_floats_blackstrand_22",
+   "kind": "vh_tangled_floats",
+   "name": "Floats on a Post",
+   "x": 292,
+   "z": 1648,
+   "yaw": 1.62,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_f23",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1004,
+   "z": 1860,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_fern_pair_blackstrand_24",
+   "kind": "vh_fern_pair",
+   "name": "Fern Gate",
+   "x": 26,
+   "z": 1297,
+   "yaw": 5.28,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_f25",
+   "monster": "slagborn_raider",
+   "with": "slagborn_firecaller",
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 132,
+   "z": 356,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_offering_bowls_blackstrand_26",
+   "kind": "vh_offering_bowls",
+   "name": "Offering Bowls",
+   "x": 840,
+   "z": 1168,
+   "yaw": 0.11,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_f27",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 167,
+   "z": 691,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_reed_windbreak_blackstrand_28",
+   "kind": "vh_reed_windbreak",
+   "name": "Reed Screen",
+   "x": 1240,
+   "z": 573,
+   "yaw": 4.79,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_f29",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1108,
+   "z": 1264,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_offering_bowls_blackstrand_30",
+   "kind": "vh_offering_bowls",
+   "name": "Offering Bowls",
+   "x": 740,
+   "z": 1930,
+   "yaw": 1.31,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_roadside_fire_blackstrand_31",
+   "kind": "vh_roadside_fire",
+   "name": "Somebody's Fire",
+   "x": 49,
+   "z": 1092,
+   "yaw": 2.98,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_glass_spill_blackstrand_32",
+   "kind": "vh_glass_spill",
+   "name": "Glass Spill",
+   "x": 32,
+   "z": 563,
+   "yaw": 0.1,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_f33",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 788,
+   "z": 1528,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_pilgrim_ribbons_blackstrand_34",
+   "kind": "vh_pilgrim_ribbons",
+   "name": "Pilgrim Post",
+   "x": 848,
+   "z": 288,
+   "yaw": 5.29,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_f35",
+   "monster": "slagborn_raider",
+   "with": "slagborn_firecaller",
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 61,
+   "z": 77,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_sulphur_spill_blackstrand_36",
+   "kind": "vh_sulphur_spill",
+   "name": "Sulphur Spill",
+   "x": 1300,
+   "z": 284,
+   "yaw": 3.21,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_f37",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 668,
+   "z": 1768,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_1",
+   "recipe": "vh_urn_stash",
+   "name": "The Shallow Urn",
+   "kind": "cache",
+   "x": 224,
+   "z": 42,
+   "yaw": 2.25,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s1",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1416,
+   "z": 41,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_2",
+   "recipe": "vh_fern_hearts",
+   "name": "Fern Hearts",
+   "kind": "forage",
+   "x": 511,
+   "z": 912,
+   "yaw": 3.05,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "wayside",
+   "id": "vh_rim_marker_blackstrand_d1",
+   "kind": "vh_rim_marker",
+   "name": "Rim Keeper Waymarker",
+   "x": 856,
+   "z": 992,
+   "yaw": 3.48,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_3",
+   "recipe": "vh_ochre_hands",
+   "name": "Ochre Hands",
+   "kind": "marker",
+   "x": 185,
+   "z": 1311,
+   "yaw": 1.54,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_4",
+   "recipe": "vh_tussock_seed",
+   "name": "Seedheads",
+   "kind": "forage",
+   "x": 40,
+   "z": 1639,
+   "yaw": 0.05,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s2",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 40,
+   "z": 1952,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_5",
+   "recipe": "vh_trap_line",
+   "name": "Salamander Trap Line",
+   "kind": "camp",
+   "x": 201,
+   "z": 1952,
+   "yaw": 1.4,
+   "radius": 6,
+   "levelBase": 11
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackstrand_1",
+   "role": "slag_deserter",
+   "name": "Slagborn deserter in hiding",
+   "work": "sit",
+   "chatter": [
+    "role.slag_deserter"
+   ],
+   "x": 1096,
+   "z": 200,
+   "yaw": 2.73,
+   "radius": 6,
+   "path": [
+    [
+     1102,
+     208
+    ],
+    [
+     1087,
+     200
+    ],
+    [
+     1102,
+     191
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_reed_lean_to",
+     "x": 0,
+     "z": -1.5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "fire_ring",
+     "x": 0,
+     "z": 1,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_bedroll",
+     "x": 1.8,
+     "z": 0,
+     "yaw": 0.6
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_6",
+   "recipe": "vh_council_notice",
+   "name": "Harbour Council Notice",
+   "kind": "lore",
+   "x": 975,
+   "z": 425,
+   "yaw": 2.94,
+   "radius": 3,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s3",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 513,
+   "z": 271,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_offering_bowls_blackstrand_d2",
+   "kind": "vh_offering_bowls",
+   "name": "Offering Bowls",
+   "x": 808,
+   "z": 40,
+   "yaw": 2.43,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_7",
+   "recipe": "vh_ribbon_post",
+   "name": "Pilgrim Ribbons",
+   "kind": "shrine",
+   "x": 896,
+   "z": 2008,
+   "yaw": 4.72,
+   "radius": 3,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s4",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 424,
+   "z": 592,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_8",
+   "recipe": "vh_steamcaps",
+   "name": "Steamcap Flush",
+   "kind": "forage",
+   "x": 432,
+   "z": 1544,
+   "yaw": 5.67,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_9",
+   "recipe": "vh_glass_kiln",
+   "name": "Glass-Blower's Kiln",
+   "kind": "camp",
+   "x": 1224,
+   "z": 1788,
+   "yaw": 2.3,
+   "radius": 6,
+   "levelBase": 11
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_10",
+   "recipe": "vh_ironpalm_down",
+   "name": "Fallen Ironpalm",
+   "kind": "forage",
+   "x": 672,
+   "z": 824,
+   "yaw": 5.29,
+   "radius": 5,
+   "levelBase": 10
+  },
+  {
+   "type": "wayside",
+   "id": "vh_offering_bowls_blackstrand_d3",
+   "kind": "vh_offering_bowls",
+   "name": "Offering Bowls",
+   "x": 1256,
+   "z": 1184,
+   "yaw": 0.12,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s5",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 512,
+   "z": 1312,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_11",
+   "recipe": "vh_ironpalm_down",
+   "name": "Fallen Ironpalm",
+   "kind": "forage",
+   "x": 1048,
+   "z": 40,
+   "yaw": 4.18,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackstrand_2",
+   "role": "salamander_trapper",
+   "name": "Salamander trapper",
+   "work": "watch",
+   "chatter": [
+    "role.salamander_trapper"
+   ],
+   "x": 624,
+   "z": 1128,
+   "yaw": 3.11,
+   "radius": 6,
+   "path": [
+    [
+     616,
+     1106
+    ],
+    [
+     644,
+     1127
+    ],
+    [
+     610,
+     1153
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_salamander_trap",
+     "x": 2,
+     "z": 0,
+     "yaw": 0.5
+    },
+    {
+     "kind": "prop",
+     "id": "vh_salamander_trap",
+     "x": -3,
+     "z": 2,
+     "yaw": 2.4
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_12",
+   "recipe": "vh_salt_sulphur_crust",
+   "name": "Yellow Crust",
+   "kind": "forage",
+   "x": 352,
+   "z": 2008,
+   "yaw": 0.45,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s6",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 296,
+   "z": 1088,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_pilgrim_ribbons_blackstrand_d4",
+   "kind": "vh_pilgrim_ribbons",
+   "name": "Pilgrim Post",
+   "x": 328,
+   "z": 1247,
+   "yaw": 0.36,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_13",
+   "recipe": "vh_steamcaps",
+   "name": "Steamcap Flush",
+   "kind": "forage",
+   "x": 871,
+   "z": 580,
+   "yaw": 5.01,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_14",
+   "recipe": "vh_kings_door",
+   "name": "Glass King's Door",
+   "kind": "shrine",
+   "x": 568,
+   "z": 40,
+   "yaw": 3.1,
+   "radius": 6,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s7",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 592,
+   "z": 608,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_15",
+   "recipe": "vh_glass_kiln",
+   "name": "Glass-Blower's Kiln",
+   "kind": "camp",
+   "x": 40,
+   "z": 232,
+   "yaw": 3.61,
+   "radius": 6,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "vh_palm_stumps_blackstrand_d5",
+   "kind": "vh_palm_stumps",
+   "name": "Ironpalm Stumps",
+   "x": 1050,
+   "z": 2010,
+   "yaw": 4.13,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_16",
+   "recipe": "vh_column_ring",
+   "name": "Column Ring",
+   "kind": "marker",
+   "x": 1280,
+   "z": 433,
+   "yaw": 0.62,
+   "radius": 6,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s8",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 656,
+   "z": 320,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_17",
+   "recipe": "vh_fish_pit",
+   "name": "Steam Pit",
+   "kind": "fishing",
+   "x": 1152,
+   "z": 688,
+   "yaw": 3.37,
+   "radius": 5,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s9",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1361,
+   "z": 952,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_18",
+   "recipe": "vh_salamander_bones",
+   "name": "Salamander Ribs",
+   "kind": "remains",
+   "x": 288,
+   "z": 1504,
+   "yaw": 6.21,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "vh_rim_marker_blackstrand_d6",
+   "kind": "vh_rim_marker",
+   "name": "Rim Keeper Waymarker",
+   "x": 960,
+   "z": 1240,
+   "yaw": 3.38,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_19",
+   "recipe": "vh_fern_hearts",
+   "name": "Fern Hearts",
+   "kind": "forage",
+   "x": 264,
+   "z": 1814,
+   "yaw": 3.96,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackstrand_1",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 328,
+   "z": 192,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     407,
+     171
+    ],
+    [
+     372,
+     249
+    ],
+    [
+     277,
+     228
+    ],
+    [
+     294,
+     108
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s10",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 856,
+   "z": 1856,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_20",
+   "recipe": "vh_ironpalm_down",
+   "name": "Fallen Ironpalm",
+   "kind": "forage",
+   "x": 681,
+   "z": 1622,
+   "yaw": 0.39,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackstrand_3",
+   "role": "net_mender",
+   "name": "Net mender",
+   "work": "fish",
+   "chatter": [
+    "role.net_mender"
+   ],
+   "x": 1250,
+   "z": 1546,
+   "yaw": 0.91,
+   "radius": 6,
+   "path": [
+    [
+     1253,
+     1552
+    ],
+    [
+     1243,
+     1547
+    ],
+    [
+     1253,
+     1540
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_net_poles",
+     "x": 0,
+     "z": -2,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_outrigger",
+     "x": 3,
+     "z": 2,
+     "yaw": 1.3
+    },
+    {
+     "kind": "prop",
+     "id": "vh_fish_rack",
+     "x": -3,
+     "z": 1,
+     "yaw": 0.4
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_21",
+   "recipe": "vh_pot_cache",
+   "name": "Three Pots",
+   "kind": "cache",
+   "x": 168,
+   "z": 1024,
+   "yaw": 1.17,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s11",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 498,
+   "z": 2007,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_palm_stumps_blackstrand_d7",
+   "kind": "vh_palm_stumps",
+   "name": "Ironpalm Stumps",
+   "x": 385,
+   "z": 791,
+   "yaw": 1.5,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_22",
+   "recipe": "vh_salamander_bones",
+   "name": "Salamander Ribs",
+   "kind": "remains",
+   "x": 247,
+   "z": 840,
+   "yaw": 3.8,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s12",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 743,
+   "z": 1393,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_23",
+   "recipe": "vh_council_notice",
+   "name": "Harbour Council Notice",
+   "kind": "lore",
+   "x": 800,
+   "z": 872,
+   "yaw": 3.62,
+   "radius": 3,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackstrand_2",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 984,
+   "z": 288,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1016,
+     317
+    ],
+    [
+     957,
+     317
+    ],
+    [
+     960,
+     270
+    ],
+    [
+     1021,
+     257
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_24",
+   "recipe": "vh_lone_tomb_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 296,
+   "z": 550,
+   "yaw": 3.86,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "vh_offering_bowls_blackstrand_d8",
+   "kind": "vh_offering_bowls",
+   "name": "Offering Bowls",
+   "x": 801,
+   "z": 167,
+   "yaw": 5.07,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s13",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 169,
+   "z": 1614,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_25",
+   "recipe": "vh_ochre_hands",
+   "name": "Ochre Hands",
+   "kind": "marker",
+   "x": 1097,
+   "z": 1759,
+   "yaw": 0.55,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_26",
+   "recipe": "vh_tussock_seed",
+   "name": "Seedheads",
+   "kind": "forage",
+   "x": 920,
+   "z": 1504,
+   "yaw": 1.54,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s14",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1352,
+   "z": 160,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_reed_windbreak_blackstrand_d9",
+   "kind": "vh_reed_windbreak",
+   "name": "Reed Screen",
+   "x": 704,
+   "z": 537,
+   "yaw": 3.79,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_27",
+   "recipe": "vh_fern_hearts",
+   "name": "Fern Hearts",
+   "kind": "forage",
+   "x": 1128,
+   "z": 496,
+   "yaw": 3.85,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackstrand_3",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1409,
+   "z": 352,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1462,
+     356
+    ],
+    [
+     1408,
+     393
+    ],
+    [
+     1345,
+     335
+    ],
+    [
+     1407,
+     303
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s15",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 977,
+   "z": 1728,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_28",
+   "recipe": "vh_salamander_bones",
+   "name": "Salamander Ribs",
+   "kind": "remains",
+   "x": 1352,
+   "z": 1303,
+   "yaw": 5.03,
+   "radius": 5,
+   "levelBase": 10
+  },
+  {
+   "type": "wayside",
+   "id": "vh_palm_stumps_blackstrand_d10",
+   "kind": "vh_palm_stumps",
+   "name": "Ironpalm Stumps",
+   "x": 1023,
+   "z": 719,
+   "yaw": 0.7,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_29",
+   "recipe": "vh_ochre_hands",
+   "name": "Ochre Hands",
+   "kind": "marker",
+   "x": 864,
+   "z": 704,
+   "yaw": 5.08,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s16",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1320,
+   "z": 832,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_fern_pair_blackstrand_d11",
+   "kind": "vh_fern_pair",
+   "name": "Fern Gate",
+   "x": 95,
+   "z": 772,
+   "yaw": 0.4,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_30",
+   "recipe": "vh_drowned_paddler",
+   "name": "Washed-up Paddler",
+   "kind": "remains",
+   "x": 1328,
+   "z": 1088,
+   "yaw": 0.37,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s17",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 504,
+   "z": 1032,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_31",
+   "recipe": "vh_pot_cache",
+   "name": "Three Pots",
+   "kind": "cache",
+   "x": 800,
+   "z": 1280,
+   "yaw": 0.78,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "wayside",
+   "id": "vh_pilgrim_ribbons_blackstrand_d12",
+   "kind": "vh_pilgrim_ribbons",
+   "name": "Pilgrim Post",
+   "x": 1145,
+   "z": 1474,
+   "yaw": 0.61,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_32",
+   "recipe": "vh_trap_line",
+   "name": "Salamander Trap Line",
+   "kind": "camp",
+   "x": 40,
+   "z": 440,
+   "yaw": 5.55,
+   "radius": 6,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackstrand_4",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 488,
+   "z": 1431,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     528,
+     1406
+    ],
+    [
+     517,
+     1479
+    ],
+    [
+     456,
+     1476
+    ],
+    [
+     465,
+     1397
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s18",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 687,
+   "z": 40,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_33",
+   "recipe": "vh_tussock_seed",
+   "name": "Seedheads",
+   "kind": "forage",
+   "x": 928,
+   "z": 40,
+   "yaw": 1.73,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_34",
+   "recipe": "vh_ribbon_post",
+   "name": "Pilgrim Ribbons",
+   "kind": "shrine",
+   "x": 1224,
+   "z": 192,
+   "yaw": 0.52,
+   "radius": 3,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s19",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 527,
+   "z": 152,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_offering_bowls_blackstrand_d13",
+   "kind": "vh_offering_bowls",
+   "name": "Offering Bowls",
+   "x": 760,
+   "z": 1088,
+   "yaw": 5.5,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_35",
+   "recipe": "vh_tussock_seed",
+   "name": "Seedheads",
+   "kind": "forage",
+   "x": 1255,
+   "z": 736,
+   "yaw": 1.13,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s20",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1145,
+   "z": 1150,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_36",
+   "recipe": "vh_drowned_paddler",
+   "name": "Washed-up Paddler",
+   "kind": "remains",
+   "x": 1248,
+   "z": 1672,
+   "yaw": 6,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackstrand_5",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 528,
+   "z": 1608,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     532,
+     1670
+    ],
+    [
+     439,
+     1610
+    ],
+    [
+     503,
+     1512
+    ],
+    [
+     614,
+     1611
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_37",
+   "recipe": "vh_fish_rack",
+   "name": "Split Fish Rack",
+   "kind": "fishing",
+   "x": 1224,
+   "z": 1288,
+   "yaw": 3.96,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s21",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 632,
+   "z": 720,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_38",
+   "recipe": "vh_fern_hearts",
+   "name": "Fern Hearts",
+   "kind": "forage",
+   "x": 247,
+   "z": 1400,
+   "yaw": 3.04,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackstrand_4",
+   "role": "steam_cook",
+   "name": "Steam-pit cook",
+   "work": "tend",
+   "chatter": [
+    "role.steam_cook"
+   ],
+   "x": 297,
+   "z": 440,
+   "yaw": 3.2,
+   "radius": 6,
+   "path": [
+    [
+     291,
+     435
+    ],
+    [
+     302,
+     436
+    ],
+    [
+     299,
+     449
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_steam_pit",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_kettle",
+     "x": 1.8,
+     "z": 0.5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_clay_pots",
+     "x": -1.8,
+     "z": 0.6,
+     "yaw": 0.5
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_39",
+   "recipe": "vh_glass_floats",
+   "name": "Glass Floats",
+   "kind": "fishing",
+   "x": 208,
+   "z": 1720,
+   "yaw": 4.08,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s22",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1506,
+   "z": 964,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_offering_bowls_blackstrand_d14",
+   "kind": "vh_offering_bowls",
+   "name": "Offering Bowls",
+   "x": 735,
+   "z": 1192,
+   "yaw": 1.29,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_40",
+   "recipe": "vh_salt_sulphur_crust",
+   "name": "Yellow Crust",
+   "kind": "forage",
+   "x": 40,
+   "z": 1407,
+   "yaw": 4.87,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackstrand_6",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1152,
+   "z": 1368,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1215,
+     1394
+    ],
+    [
+     1118,
+     1411
+    ],
+    [
+     1103,
+     1320
+    ],
+    [
+     1195,
+     1311
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s23",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1120,
+   "z": 1864,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_41",
+   "recipe": "vh_boiling_mud",
+   "name": "Boiling Mud",
+   "kind": "hazard",
+   "x": 896,
+   "z": 1608,
+   "yaw": 1.91,
+   "radius": 5,
+   "levelBase": 10
+  },
+  {
+   "type": "wayside",
+   "id": "vh_reed_windbreak_blackstrand_d15",
+   "kind": "vh_reed_windbreak",
+   "name": "Reed Screen",
+   "x": 304,
+   "z": 1910,
+   "yaw": 4.87,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_42",
+   "recipe": "vh_salt_sulphur_crust",
+   "name": "Yellow Crust",
+   "kind": "forage",
+   "x": 136,
+   "z": 584,
+   "yaw": 0.03,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s24",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 912,
+   "z": 1088,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_43",
+   "recipe": "vh_trap_line",
+   "name": "Salamander Trap Line",
+   "kind": "camp",
+   "x": 744,
+   "z": 256,
+   "yaw": 2.05,
+   "radius": 6,
+   "levelBase": 10
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_44",
+   "recipe": "vh_salamander_bones",
+   "name": "Salamander Ribs",
+   "kind": "remains",
+   "x": 512,
+   "z": 528,
+   "yaw": 0.39,
+   "radius": 5,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s25",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 519,
+   "z": 383,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_reed_windbreak_blackstrand_d16",
+   "kind": "vh_reed_windbreak",
+   "name": "Reed Screen",
+   "x": 241,
+   "z": 337,
+   "yaw": 5.42,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_45",
+   "recipe": "vh_ironpalm_down",
+   "name": "Fallen Ironpalm",
+   "kind": "forage",
+   "x": 392,
+   "z": 1040,
+   "yaw": 0.88,
+   "radius": 5,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackstrand_7",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 990,
+   "z": 1344,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     981,
+     1273
+    ],
+    [
+     1071,
+     1334
+    ],
+    [
+     1018,
+     1419
+    ],
+    [
+     909,
+     1366
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s26",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 240,
+   "z": 945,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_46",
+   "recipe": "vh_steamcaps",
+   "name": "Steamcap Flush",
+   "kind": "forage",
+   "x": 40,
+   "z": 1744,
+   "yaw": 5.16,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackstrand_5",
+   "role": "slag_deserter",
+   "name": "Slagborn deserter in hiding",
+   "work": "sit",
+   "chatter": [
+    "role.slag_deserter"
+   ],
+   "x": 631,
+   "z": 1375,
+   "yaw": 1.42,
+   "radius": 6,
+   "path": [
+    [
+     627,
+     1366
+    ],
+    [
+     644,
+     1378
+    ],
+    [
+     626,
+     1388
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_reed_lean_to",
+     "x": 0,
+     "z": -1.5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "fire_ring",
+     "x": 0,
+     "z": 1,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_bedroll",
+     "x": 1.8,
+     "z": 0,
+     "yaw": 0.6
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_47",
+   "recipe": "vh_pot_cache",
+   "name": "Three Pots",
+   "kind": "cache",
+   "x": 785,
+   "z": 767,
+   "yaw": 2.02,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s27",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 616,
+   "z": 912,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_offering_bowls_blackstrand_d17",
+   "kind": "vh_offering_bowls",
+   "name": "Offering Bowls",
+   "x": 953,
+   "z": 508,
+   "yaw": 4.41,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_roadside_fire_blackstrand_d18",
+   "kind": "vh_roadside_fire",
+   "name": "Somebody's Fire",
+   "x": 40,
+   "z": 1536,
+   "yaw": 2.84,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_48",
+   "recipe": "vh_ribbon_post",
+   "name": "Pilgrim Ribbons",
+   "kind": "shrine",
+   "x": 385,
+   "z": 686,
+   "yaw": 5.7,
+   "radius": 3,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s28",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1144,
+   "z": 96,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_49",
+   "recipe": "vh_deserter_pack",
+   "name": "Deserter's Pack",
+   "kind": "remains",
+   "x": 753,
+   "z": 1831,
+   "yaw": 5.02,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackstrand_8",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 937,
+   "z": 927,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     933,
+     872
+    ],
+    [
+     986,
+     937
+    ],
+    [
+     939,
+     969
+    ],
+    [
+     879,
+     909
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_50",
+   "recipe": "vh_rim_bowls",
+   "name": "Rim Offering Bowls",
+   "kind": "shrine",
+   "x": 1039,
+   "z": 1183,
+   "yaw": 0.57,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "wayside",
+   "id": "vh_tangled_floats_blackstrand_d19",
+   "kind": "vh_tangled_floats",
+   "name": "Floats on a Post",
+   "x": 40,
+   "z": 1848,
+   "yaw": 3.09,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s29",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 230,
+   "z": 1223,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_51",
+   "recipe": "vh_stilt_camp",
+   "name": "Stilt Camp",
+   "kind": "camp",
+   "x": 424,
+   "z": 1256,
+   "yaw": 1.82,
+   "radius": 6,
+   "levelBase": 10
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackstrand_6",
+   "role": "salamander_trapper",
+   "name": "Salamander trapper",
+   "work": "watch",
+   "chatter": [
+    "role.salamander_trapper"
+   ],
+   "x": 800,
+   "z": 2010,
+   "yaw": 5.51,
+   "radius": 6,
+   "path": [
+    [
+     786,
+     1995
+    ],
+    [
+     828,
+     2005
+    ],
+    [
+     786,
+     2027
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_salamander_trap",
+     "x": 2,
+     "z": 0,
+     "yaw": 0.5
+    },
+    {
+     "kind": "prop",
+     "id": "vh_salamander_trap",
+     "x": -3,
+     "z": 2,
+     "yaw": 2.4
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_52",
+   "recipe": "vh_slagborn_marker",
+   "name": "Slagborn Marker",
+   "kind": "lore",
+   "x": 1072,
+   "z": 1537,
+   "yaw": 4.69,
+   "radius": 3,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s30",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 943,
+   "z": 648,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_kings_pillar_blackstrand_d20",
+   "kind": "vh_kings_pillar",
+   "name": "Glass King's Pillar",
+   "x": 1328,
+   "z": 528,
+   "yaw": 0.32,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackstrand_9",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1136,
+   "z": 592,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1101,
+     564
+    ],
+    [
+     1171,
+     540
+    ],
+    [
+     1188,
+     638
+    ],
+    [
+     1088,
+     641
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s31",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 327,
+   "z": 1733,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_53",
+   "recipe": "vh_ribbon_post",
+   "name": "Pilgrim Ribbons",
+   "kind": "shrine",
+   "x": 675,
+   "z": 457,
+   "yaw": 0.61,
+   "radius": 3,
+   "levelBase": 10
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_54",
+   "recipe": "vh_deserter_pack",
+   "name": "Deserter's Pack",
+   "kind": "remains",
+   "x": 694,
+   "z": 1481,
+   "yaw": 4.14,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "wayside",
+   "id": "vh_offering_bowls_blackstrand_d21",
+   "kind": "vh_offering_bowls",
+   "name": "Offering Bowls",
+   "x": 1192,
+   "z": 280,
+   "yaw": 1.83,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_55",
+   "recipe": "vh_fish_rack",
+   "name": "Split Fish Rack",
+   "kind": "fishing",
+   "x": 1464,
+   "z": 128,
+   "yaw": 5.01,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s32",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 122,
+   "z": 1896,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_56",
+   "recipe": "vh_fish_pit",
+   "name": "Steam Pit",
+   "kind": "fishing",
+   "x": 121,
+   "z": 2009,
+   "yaw": 3.39,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_57",
+   "recipe": "vh_ironpalm_down",
+   "name": "Fallen Ironpalm",
+   "kind": "forage",
+   "x": 1298,
+   "z": 649,
+   "yaw": 2.99,
+   "radius": 5,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s33",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 776,
+   "z": 1633,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_58",
+   "recipe": "vh_ribbon_post",
+   "name": "Pilgrim Ribbons",
+   "kind": "shrine",
+   "x": 601,
+   "z": 1009,
+   "yaw": 6.17,
+   "radius": 3,
+   "levelBase": 10
+  },
+  {
+   "type": "wayside",
+   "id": "vh_fern_pair_blackstrand_d22",
+   "kind": "vh_fern_pair",
+   "name": "Fern Gate",
+   "x": 537,
+   "z": 1216,
+   "yaw": 1.81,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_59",
+   "recipe": "vh_glass_kiln",
+   "name": "Glass-Blower's Kiln",
+   "kind": "camp",
+   "x": 503,
+   "z": 647,
+   "yaw": 2.7,
+   "radius": 6,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackstrand_10",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 968,
+   "z": 1952,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1006,
+     1892
+    ],
+    [
+     1016,
+     1965
+    ],
+    [
+     955,
+     2000
+    ],
+    [
+     927,
+     1918
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s34",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 223,
+   "z": 608,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_60",
+   "recipe": "vh_toad_spawn",
+   "name": "Toad Spawn",
+   "kind": "nest",
+   "x": 122,
+   "z": 1695,
+   "yaw": 2.33,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackstrand_7",
+   "role": "salamander_trapper",
+   "name": "Salamander trapper",
+   "work": "watch",
+   "chatter": [
+    "role.salamander_trapper"
+   ],
+   "x": 1064,
+   "z": 432,
+   "yaw": 2.17,
+   "radius": 6,
+   "path": [
+    [
+     1025,
+     427
+    ],
+    [
+     1080,
+     409
+    ],
+    [
+     1076,
+     463
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_salamander_trap",
+     "x": 2,
+     "z": 0,
+     "yaw": 0.5
+    },
+    {
+     "kind": "prop",
+     "id": "vh_salamander_trap",
+     "x": -3,
+     "z": 2,
+     "yaw": 2.4
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_61",
+   "recipe": "vh_salamander_bones",
+   "name": "Salamander Ribs",
+   "kind": "remains",
+   "x": 834,
+   "z": 1440,
+   "yaw": 3.4,
+   "radius": 5,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s35",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 40,
+   "z": 328,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_roadside_fire_blackstrand_d23",
+   "kind": "vh_roadside_fire",
+   "name": "Somebody's Fire",
+   "x": 424,
+   "z": 872,
+   "yaw": 2.59,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_62",
+   "recipe": "vh_column_ring",
+   "name": "Column Ring",
+   "kind": "marker",
+   "x": 342,
+   "z": 1576,
+   "yaw": 1.32,
+   "radius": 6,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s36",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 568,
+   "z": 833,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_63",
+   "recipe": "vh_tussock_seed",
+   "name": "Seedheads",
+   "kind": "forage",
+   "x": 159,
+   "z": 104,
+   "yaw": 0.91,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackstrand_11",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 127,
+   "z": 256,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     41,
+     238
+    ],
+    [
+     116,
+     176
+    ],
+    [
+     206,
+     266
+    ],
+    [
+     113,
+     317
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_64",
+   "recipe": "vh_tussock_seed",
+   "name": "Seedheads",
+   "kind": "forage",
+   "x": 792,
+   "z": 528,
+   "yaw": 4.05,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "wayside",
+   "id": "vh_fern_pair_blackstrand_d24",
+   "kind": "vh_fern_pair",
+   "name": "Fern Gate",
+   "x": 600,
+   "z": 240,
+   "yaw": 4.34,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_65",
+   "recipe": "vh_tussock_seed",
+   "name": "Seedheads",
+   "kind": "forage",
+   "x": 1240,
+   "z": 353,
+   "yaw": 1.72,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackstrand_8",
+   "role": "slag_deserter",
+   "name": "Slagborn deserter in hiding",
+   "work": "sit",
+   "chatter": [
+    "role.slag_deserter"
+   ],
+   "x": 103,
+   "z": 1343,
+   "yaw": 1.7,
+   "radius": 6,
+   "path": [
+    [
+     109,
+     1348
+    ],
+    [
+     91,
+     1349
+    ],
+    [
+     104,
+     1331
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_reed_lean_to",
+     "x": 0,
+     "z": -1.5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "fire_ring",
+     "x": 0,
+     "z": 1,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_bedroll",
+     "x": 1.8,
+     "z": 0,
+     "yaw": 0.6
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_66",
+   "recipe": "vh_slagborn_marker",
+   "name": "Slagborn Marker",
+   "kind": "lore",
+   "x": 672,
+   "z": 1864,
+   "yaw": 0.23,
+   "radius": 3,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s37",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 360,
+   "z": 1160,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_fern_pair_blackstrand_d25",
+   "kind": "vh_fern_pair",
+   "name": "Fern Gate",
+   "x": 536,
+   "z": 1920,
+   "yaw": 5.84,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_67",
+   "recipe": "vh_pot_cache",
+   "name": "Three Pots",
+   "kind": "cache",
+   "x": 1057,
+   "z": 1679,
+   "yaw": 6.18,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackstrand_12",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 297,
+   "z": 1328,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     257,
+     1308
+    ],
+    [
+     313,
+     1299
+    ],
+    [
+     322,
+     1355
+    ],
+    [
+     280,
+     1365
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s38",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 696,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_roadside_fire_blackstrand_d26",
+   "kind": "vh_roadside_fire",
+   "name": "Somebody's Fire",
+   "x": 1025,
+   "z": 127,
+   "yaw": 0.53,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_68",
+   "recipe": "vh_fern_hearts",
+   "name": "Fern Hearts",
+   "kind": "forage",
+   "x": 863,
+   "z": 102,
+   "yaw": 1.71,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s39",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 440,
+   "z": 968,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_69",
+   "recipe": "vh_steamcaps",
+   "name": "Steamcap Flush",
+   "kind": "forage",
+   "x": 1192,
+   "z": 440,
+   "yaw": 4.57,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s40",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 376,
+   "z": 512,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_70",
+   "recipe": "vh_steam_vent_altar",
+   "name": "Breathing Stone",
+   "kind": "shrine",
+   "x": 720,
+   "z": 895,
+   "yaw": 1.51,
+   "radius": 5,
+   "levelBase": 10
+  },
+  {
+   "type": "wayside",
+   "id": "vh_roadside_fire_blackstrand_d27",
+   "kind": "vh_roadside_fire",
+   "name": "Somebody's Fire",
+   "x": 753,
+   "z": 1728,
+   "yaw": 3.98,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_71",
+   "recipe": "vh_ribbon_post",
+   "name": "Pilgrim Ribbons",
+   "kind": "shrine",
+   "x": 424,
+   "z": 1959,
+   "yaw": 4.77,
+   "radius": 3,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackstrand_13",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 905,
+   "z": 1775,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     921,
+     1839
+    ],
+    [
+     851,
+     1803
+    ],
+    [
+     873,
+     1726
+    ],
+    [
+     951,
+     1737
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s41",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 887,
+   "z": 1280,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_72",
+   "recipe": "vh_trap_line",
+   "name": "Salamander Trap Line",
+   "kind": "camp",
+   "x": 184,
+   "z": 784,
+   "yaw": 2.2,
+   "radius": 6,
+   "levelBase": 11
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackstrand_9",
+   "role": "steam_cook",
+   "name": "Steam-pit cook",
+   "work": "tend",
+   "chatter": [
+    "role.steam_cook"
+   ],
+   "x": 208,
+   "z": 1536,
+   "yaw": 3.39,
+   "radius": 6,
+   "path": [
+    [
+     217,
+     1530
+    ],
+    [
+     208,
+     1546
+    ],
+    [
+     202,
+     1528
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_steam_pit",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_kettle",
+     "x": 1.8,
+     "z": 0.5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_clay_pots",
+     "x": -1.8,
+     "z": 0.6,
+     "yaw": 0.5
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_73",
+   "recipe": "vh_steamcaps",
+   "name": "Steamcap Flush",
+   "kind": "forage",
+   "x": 736,
+   "z": 112,
+   "yaw": 0.01,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "vh_salamander_skull_blackstrand_d28",
+   "kind": "vh_salamander_skull",
+   "name": "Salamander Skull",
+   "x": 93,
+   "z": 505,
+   "yaw": 5.05,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_74",
+   "recipe": "vh_pot_cache",
+   "name": "Three Pots",
+   "kind": "cache",
+   "x": 872,
+   "z": 208,
+   "yaw": 2.14,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "wayside",
+   "id": "vh_charred_stand_blackstrand_d29",
+   "kind": "vh_charred_stand",
+   "name": "Burned Stand",
+   "x": 68,
+   "z": 906,
+   "yaw": 2.07,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_75",
+   "recipe": "vh_ironpalm_down",
+   "name": "Fallen Ironpalm",
+   "kind": "forage",
+   "x": 872,
+   "z": 496,
+   "yaw": 4.67,
+   "radius": 5,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackstrand_14",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 785,
+   "z": 952,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     783,
+     885
+    ],
+    [
+     836,
+     935
+    ],
+    [
+     778,
+     1017
+    ],
+    [
+     740,
+     966
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_76",
+   "recipe": "vh_tussock_seed",
+   "name": "Seedheads",
+   "kind": "forage",
+   "x": 368,
+   "z": 1480,
+   "yaw": 1.76,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "vh_pilgrim_ribbons_blackstrand_d30",
+   "kind": "vh_pilgrim_ribbons",
+   "name": "Pilgrim Post",
+   "x": 448,
+   "z": 328,
+   "yaw": 2.96,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s42",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1176,
+   "z": 1712,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_77",
+   "recipe": "vh_drowned_paddler",
+   "name": "Washed-up Paddler",
+   "kind": "remains",
+   "x": 263,
+   "z": 2009,
+   "yaw": 3.54,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackstrand_10",
+   "role": "slag_deserter",
+   "name": "Slagborn deserter in hiding",
+   "work": "sit",
+   "chatter": [
+    "role.slag_deserter"
+   ],
+   "x": 1400,
+   "z": 799,
+   "yaw": 4.68,
+   "radius": 6,
+   "path": [
+    [
+     1408,
+     791
+    ],
+    [
+     1401,
+     808
+    ],
+    [
+     1390,
+     796
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_reed_lean_to",
+     "x": 0,
+     "z": -1.5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "fire_ring",
+     "x": 0,
+     "z": 1,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_bedroll",
+     "x": 1.8,
+     "z": 0,
+     "yaw": 0.6
+    }
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s43",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1328,
+   "z": 1224,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_charred_stand_blackstrand_d31",
+   "kind": "vh_charred_stand",
+   "name": "Burned Stand",
+   "x": 904,
+   "z": 384,
+   "yaw": 3.05,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackstrand_15",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 616,
+   "z": 1696,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     648,
+     1679
+    ],
+    [
+     648,
+     1733
+    ],
+    [
+     570,
+     1712
+    ],
+    [
+     594,
+     1654
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s44",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 960,
+   "z": 1160,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_78",
+   "recipe": "vh_ochre_hands",
+   "name": "Ochre Hands",
+   "kind": "marker",
+   "x": 1248,
+   "z": 1104,
+   "yaw": 3.6,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "wayside",
+   "id": "vh_lone_fallen_palm_blackstrand_d32",
+   "kind": "vh_lone_fallen_palm",
+   "name": "Fallen Ironpalm",
+   "x": 328,
+   "z": 848,
+   "yaw": 4.77,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_79",
+   "recipe": "vh_stilt_camp",
+   "name": "Stilt Camp",
+   "kind": "camp",
+   "x": 200,
+   "z": 1864,
+   "yaw": 6.24,
+   "radius": 6,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s45",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 208,
+   "z": 1096,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_80",
+   "recipe": "vh_pumice_racks",
+   "name": "Pumice Drying Racks",
+   "kind": "camp",
+   "x": 336,
+   "z": 624,
+   "yaw": 1.19,
+   "radius": 6,
+   "levelBase": 11
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_81",
+   "recipe": "vh_outriggers",
+   "name": "Outrigger Canoes",
+   "kind": "fishing",
+   "x": 1232,
+   "z": 1872,
+   "yaw": 4.32,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s46",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1104,
+   "z": 1952,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_82",
+   "recipe": "vh_fish_pit",
+   "name": "Steam Pit",
+   "kind": "fishing",
+   "x": 376,
+   "z": 1664,
+   "yaw": 1.53,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "vh_pilgrim_ribbons_blackstrand_d33",
+   "kind": "vh_pilgrim_ribbons",
+   "name": "Pilgrim Post",
+   "x": 1096,
+   "z": 752,
+   "yaw": 4.84,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_palm_stumps_blackstrand_d34",
+   "kind": "vh_palm_stumps",
+   "name": "Ironpalm Stumps",
+   "x": 134,
+   "z": 984,
+   "yaw": 4.85,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_offering_bowls_blackstrand_d35",
+   "kind": "vh_offering_bowls",
+   "name": "Offering Bowls",
+   "x": 63,
+   "z": 613,
+   "yaw": 3.86,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s47",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1336,
+   "z": 64,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackstrand_11",
+   "role": "steam_cook",
+   "name": "Steam-pit cook",
+   "work": "tend",
+   "chatter": [
+    "role.steam_cook"
+   ],
+   "x": 592,
+   "z": 1272,
+   "yaw": 0.48,
+   "radius": 6,
+   "path": [
+    [
+     595,
+     1275
+    ],
+    [
+     588,
+     1272
+    ],
+    [
+     594,
+     1268
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_steam_pit",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_kettle",
+     "x": 1.8,
+     "z": 0.5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_clay_pots",
+     "x": -1.8,
+     "z": 0.6,
+     "yaw": 0.5
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_83",
+   "recipe": "vh_kings_door",
+   "name": "Glass King's Door",
+   "kind": "shrine",
+   "x": 624,
+   "z": 528,
+   "yaw": 3.91,
+   "radius": 6,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s48",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1000,
+   "z": 1512,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_offering_bowls_blackstrand_d36",
+   "kind": "vh_offering_bowls",
+   "name": "Offering Bowls",
+   "x": 536,
+   "z": 1118,
+   "yaw": 3.02,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_84",
+   "recipe": "vh_glass_kiln",
+   "name": "Glass-Blower's Kiln",
+   "kind": "camp",
+   "x": 599,
+   "z": 114,
+   "yaw": 3.27,
+   "radius": 6,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s49",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 600,
+   "z": 384,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_85",
+   "recipe": "vh_steamcaps",
+   "name": "Steamcap Flush",
+   "kind": "forage",
+   "x": 488,
+   "z": 824,
+   "yaw": 3.18,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackstrand_16",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 672,
+   "z": 616,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     753,
+     599
+    ],
+    [
+     667,
+     701
+    ],
+    [
+     585,
+     632
+    ],
+    [
+     676,
+     511
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_86",
+   "recipe": "vh_steam_vent_altar",
+   "name": "Breathing Stone",
+   "kind": "shrine",
+   "x": 304,
+   "z": 1008,
+   "yaw": 2.33,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "vh_pilgrim_ribbons_blackstrand_d37",
+   "kind": "vh_pilgrim_ribbons",
+   "name": "Pilgrim Post",
+   "x": 1096,
+   "z": 290,
+   "yaw": 2.27,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s50",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 496,
+   "z": 72,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_87",
+   "recipe": "vh_ribbon_post",
+   "name": "Pilgrim Ribbons",
+   "kind": "shrine",
+   "x": 1291,
+   "z": 910,
+   "yaw": 4.15,
+   "radius": 3,
+   "levelBase": 10
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackstrand_12",
+   "role": "slag_deserter",
+   "name": "Slagborn deserter in hiding",
+   "work": "sit",
+   "chatter": [
+    "role.slag_deserter"
+   ],
+   "x": 944,
+   "z": 728,
+   "yaw": 4.51,
+   "radius": 6,
+   "path": [
+    [
+     941,
+     736
+    ],
+    [
+     937,
+     720
+    ],
+    [
+     951,
+     724
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_reed_lean_to",
+     "x": 0,
+     "z": -1.5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "fire_ring",
+     "x": 0,
+     "z": 1,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_bedroll",
+     "x": 1.8,
+     "z": 0,
+     "yaw": 0.6
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_88",
+   "recipe": "vh_sulphur_wreck",
+   "name": "Sulphur Cart Wreck",
+   "kind": "remains",
+   "x": 335,
+   "z": 40,
+   "yaw": 1.71,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s51",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 824,
+   "z": 641,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_palm_stumps_blackstrand_d38",
+   "kind": "vh_palm_stumps",
+   "name": "Ironpalm Stumps",
+   "x": 1183,
+   "z": 1226,
+   "yaw": 0.41,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_89",
+   "recipe": "vh_steamcaps",
+   "name": "Steamcap Flush",
+   "kind": "forage",
+   "x": 1305,
+   "z": 1007,
+   "yaw": 0.57,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackstrand_17",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 736,
+   "z": 336,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     687,
+     322
+    ],
+    [
+     743,
+     302
+    ],
+    [
+     786,
+     340
+    ],
+    [
+     736,
+     383
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s52",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 848,
+   "z": 808,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_90",
+   "recipe": "vh_glass_kiln",
+   "name": "Glass-Blower's Kiln",
+   "kind": "camp",
+   "x": 1184,
+   "z": 759,
+   "yaw": 4.91,
+   "radius": 6,
+   "levelBase": 10
+  },
+  {
+   "type": "wayside",
+   "id": "vh_salamander_skull_blackstrand_d39",
+   "kind": "vh_salamander_skull",
+   "name": "Salamander Skull",
+   "x": 440,
+   "z": 735,
+   "yaw": 4.26,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_91",
+   "recipe": "vh_council_notice",
+   "name": "Harbour Council Notice",
+   "kind": "lore",
+   "x": 304,
+   "z": 776,
+   "yaw": 0.68,
+   "radius": 3,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s53",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 96,
+   "z": 1583,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_92",
+   "recipe": "vh_glass_kiln",
+   "name": "Glass-Blower's Kiln",
+   "kind": "camp",
+   "x": 167,
+   "z": 1399,
+   "yaw": 1.28,
+   "radius": 6,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s54",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1384,
+   "z": 1033,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_93",
+   "recipe": "vh_glass_kiln",
+   "name": "Glass-Blower's Kiln",
+   "kind": "camp",
+   "x": 1360,
+   "z": 240,
+   "yaw": 2.88,
+   "radius": 6,
+   "levelBase": 10
+  },
+  {
+   "type": "wayside",
+   "id": "vh_offering_bowls_blackstrand_d40",
+   "kind": "vh_offering_bowls",
+   "name": "Offering Bowls",
+   "x": 1239,
+   "z": 2018,
+   "yaw": 1.7,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_94",
+   "recipe": "vh_fern_hearts",
+   "name": "Fern Hearts",
+   "kind": "forage",
+   "x": 832,
+   "z": 1080,
+   "yaw": 2.91,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackstrand_18",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1436,
+   "z": 931,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1483,
+     932
+    ],
+    [
+     1443,
+     980
+    ],
+    [
+     1381,
+     939
+    ],
+    [
+     1430,
+     866
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s55",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 712,
+   "z": 1552,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_95",
+   "recipe": "vh_glass_kiln",
+   "name": "Glass-Blower's Kiln",
+   "kind": "camp",
+   "x": 664,
+   "z": 1208,
+   "yaw": 1.03,
+   "radius": 6,
+   "levelBase": 10
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackstrand_13",
+   "role": "slag_deserter",
+   "name": "Slagborn deserter in hiding",
+   "work": "sit",
+   "chatter": [
+    "role.slag_deserter"
+   ],
+   "x": 824,
+   "z": 1928,
+   "yaw": 3.41,
+   "radius": 6,
+   "path": [
+    [
+     832,
+     1925
+    ],
+    [
+     825,
+     1933
+    ],
+    [
+     817,
+     1926
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_reed_lean_to",
+     "x": 0,
+     "z": -1.5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "fire_ring",
+     "x": 0,
+     "z": 1,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_bedroll",
+     "x": 1.8,
+     "z": 0,
+     "yaw": 0.6
+    }
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "vh_lone_fallen_palm_blackstrand_d41",
+   "kind": "vh_lone_fallen_palm",
+   "name": "Fallen Ironpalm",
+   "x": 120,
+   "z": 1080,
+   "yaw": 2.76,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s56",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 688,
+   "z": 1065,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_roadside_fire_blackstrand_d42",
+   "kind": "vh_roadside_fire",
+   "name": "Somebody's Fire",
+   "x": 815,
+   "z": 1351,
+   "yaw": 3.86,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_96",
+   "recipe": "vh_slagborn_marker",
+   "name": "Slagborn Marker",
+   "kind": "lore",
+   "x": 1239,
+   "z": 496,
+   "yaw": 4.19,
+   "radius": 3,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s57",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1158,
+   "z": 1542,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_97",
+   "recipe": "vh_urn_stash",
+   "name": "The Shallow Urn",
+   "kind": "cache",
+   "x": 497,
+   "z": 455,
+   "yaw": 0.34,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "wayside",
+   "id": "vh_offering_bowls_blackstrand_d43",
+   "kind": "vh_offering_bowls",
+   "name": "Offering Bowls",
+   "x": 933,
+   "z": 1677,
+   "yaw": 3.33,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackstrand_19",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 414,
+   "z": 1336,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     465,
+     1359
+    ],
+    [
+     384,
+     1387
+    ],
+    [
+     343,
+     1299
+    ],
+    [
+     448,
+     1277
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_98",
+   "recipe": "vh_fish_pit",
+   "name": "Steam Pit",
+   "kind": "fishing",
+   "x": 1216,
+   "z": 1472,
+   "yaw": 5.1,
+   "radius": 5,
+   "levelBase": 10
+  },
+  {
+   "type": "wayside",
+   "id": "vh_offering_bowls_blackstrand_d44",
+   "kind": "vh_offering_bowls",
+   "name": "Offering Bowls",
+   "x": 1400,
+   "z": 1112,
+   "yaw": 4.03,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s58",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1257,
+   "z": 803,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_99",
+   "recipe": "vh_pot_cache",
+   "name": "Three Pots",
+   "kind": "cache",
+   "x": 39,
+   "z": 153,
+   "yaw": 3.75,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackstrand_14",
+   "role": "salamander_trapper",
+   "name": "Salamander trapper",
+   "work": "watch",
+   "chatter": [
+    "role.salamander_trapper"
+   ],
+   "x": 272,
+   "z": 1160,
+   "yaw": 1.78,
+   "radius": 6,
+   "path": [
+    [
+     289,
+     1144
+    ],
+    [
+     275,
+     1175
+    ],
+    [
+     250,
+     1157
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_salamander_trap",
+     "x": 2,
+     "z": 0,
+     "yaw": 0.5
+    },
+    {
+     "kind": "prop",
+     "id": "vh_salamander_trap",
+     "x": -3,
+     "z": 2,
+     "yaw": 2.4
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_100",
+   "recipe": "vh_slagborn_marker",
+   "name": "Slagborn Marker",
+   "kind": "lore",
+   "x": 736,
+   "z": 1312,
+   "yaw": 5.55,
+   "radius": 3,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s59",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1352,
+   "z": 448,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_reed_windbreak_blackstrand_d45",
+   "kind": "vh_reed_windbreak",
+   "name": "Reed Screen",
+   "x": 336,
+   "z": 1809,
+   "yaw": 1.9,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_101",
+   "recipe": "vh_trap_line",
+   "name": "Salamander Trap Line",
+   "kind": "camp",
+   "x": 576,
+   "z": 2008,
+   "yaw": 5.38,
+   "radius": 6,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackstrand_20",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 577,
+   "z": 313,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     483,
+     329
+    ],
+    [
+     550,
+     249
+    ],
+    [
+     654,
+     299
+    ],
+    [
+     597,
+     409
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s60",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1151,
+   "z": 1082,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_102",
+   "recipe": "vh_rim_bowls",
+   "name": "Rim Offering Bowls",
+   "kind": "shrine",
+   "x": 120,
+   "z": 432,
+   "yaw": 3.93,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "vh_fern_pair_blackstrand_d46",
+   "kind": "vh_fern_pair",
+   "name": "Fern Gate",
+   "x": 473,
+   "z": 208,
+   "yaw": 6.17,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_103",
+   "recipe": "vh_council_notice",
+   "name": "Harbour Council Notice",
+   "kind": "lore",
+   "x": 943,
+   "z": 1432,
+   "yaw": 2.8,
+   "radius": 3,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s61",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 128,
+   "z": 40,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_104",
+   "recipe": "vh_sulphur_flat",
+   "name": "Bad Air",
+   "kind": "hazard",
+   "x": 203,
+   "z": 391,
+   "yaw": 4.38,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_105",
+   "recipe": "vh_fish_pit",
+   "name": "Steam Pit",
+   "kind": "fishing",
+   "x": 192,
+   "z": 888,
+   "yaw": 5.49,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s62",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 312,
+   "z": 1432,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_106",
+   "recipe": "vh_trap_line",
+   "name": "Salamander Trap Line",
+   "kind": "camp",
+   "x": 712,
+   "z": 758,
+   "yaw": 5.18,
+   "radius": 6,
+   "levelBase": 10
+  },
+  {
+   "type": "wayside",
+   "id": "vh_slag_stake_blackstrand_d47",
+   "kind": "vh_slag_stake",
+   "name": "Slag Totem",
+   "x": 1280,
+   "z": 144,
+   "yaw": 3.29,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_107",
+   "recipe": "vh_salvage_fire",
+   "name": "Wreckers' Fire",
+   "kind": "camp",
+   "x": 1031,
+   "z": 1783,
+   "yaw": 5.08,
+   "radius": 6,
+   "levelBase": 11
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_108",
+   "recipe": "vh_column_ring",
+   "name": "Column Ring",
+   "kind": "marker",
+   "x": 1024,
+   "z": 792,
+   "yaw": 5.8,
+   "radius": 6,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s63",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1288,
+   "z": 216,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_109",
+   "recipe": "vh_trap_line",
+   "name": "Salamander Trap Line",
+   "kind": "camp",
+   "x": 864,
+   "z": 1544,
+   "yaw": 1.41,
+   "radius": 6,
+   "levelBase": 10
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackstrand_15",
+   "role": "slag_deserter",
+   "name": "Slagborn deserter in hiding",
+   "work": "sit",
+   "chatter": [
+    "role.slag_deserter"
+   ],
+   "x": 226,
+   "z": 129,
+   "yaw": 4.32,
+   "radius": 6,
+   "path": [
+    [
+     234,
+     126
+    ],
+    [
+     224,
+     137
+    ],
+    [
+     221,
+     126
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_reed_lean_to",
+     "x": 0,
+     "z": -1.5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "fire_ring",
+     "x": 0,
+     "z": 1,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_bedroll",
+     "x": 1.8,
+     "z": 0,
+     "yaw": 0.6
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_110",
+   "recipe": "vh_lava_tube",
+   "name": "Lava-Tube Mouth",
+   "kind": "hazard",
+   "x": 952,
+   "z": 577,
+   "yaw": 4.9,
+   "radius": 6,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s64",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 896,
+   "z": 1208,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_tangled_floats_blackstrand_d48",
+   "kind": "vh_tangled_floats",
+   "name": "Floats on a Post",
+   "x": 1281,
+   "z": 1327,
+   "yaw": 1.15,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_111",
+   "recipe": "vh_bath_hut",
+   "name": "Hot-Spring Bathing Hut",
+   "kind": "camp",
+   "x": 192,
+   "z": 1791,
+   "yaw": 5.66,
+   "radius": 7,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s65",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 743,
+   "z": 827,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_112",
+   "recipe": "vh_deserter_pack",
+   "name": "Deserter's Pack",
+   "kind": "remains",
+   "x": 740,
+   "z": 178,
+   "yaw": 2.23,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackstrand_21",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 273,
+   "z": 1583,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     277,
+     1494
+    ],
+    [
+     363,
+     1592
+    ],
+    [
+     278,
+     1658
+    ],
+    [
+     179,
+     1586
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_113",
+   "recipe": "vh_steamcaps",
+   "name": "Steamcap Flush",
+   "kind": "forage",
+   "x": 224,
+   "z": 536,
+   "yaw": 3.15,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "vh_rim_marker_blackstrand_d49",
+   "kind": "vh_rim_marker",
+   "name": "Rim Keeper Waymarker",
+   "x": 144,
+   "z": 1269,
+   "yaw": 3.05,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s66",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1154,
+   "z": 1800,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_114",
+   "recipe": "vh_salamander_burrow",
+   "name": "Salamander Burrow",
+   "kind": "nest",
+   "x": 1320,
+   "z": 759,
+   "yaw": 2.45,
+   "radius": 5,
+   "levelBase": 10
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackstrand_16",
+   "role": "slag_deserter",
+   "name": "Slagborn deserter in hiding",
+   "work": "sit",
+   "chatter": [
+    "role.slag_deserter"
+   ],
+   "x": 1024,
+   "z": 512,
+   "yaw": 3.56,
+   "radius": 6,
+   "path": [
+    [
+     1018,
+     514
+    ],
+    [
+     1024,
+     505
+    ],
+    [
+     1029,
+     516
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_reed_lean_to",
+     "x": 0,
+     "z": -1.5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "fire_ring",
+     "x": 0,
+     "z": 1,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_bedroll",
+     "x": 1.8,
+     "z": 0,
+     "yaw": 0.6
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_115",
+   "recipe": "vh_trap_line",
+   "name": "Salamander Trap Line",
+   "kind": "camp",
+   "x": 447,
+   "z": 504,
+   "yaw": 4.11,
+   "radius": 6,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s67",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 240,
+   "z": 1033,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_offering_bowls_blackstrand_d50",
+   "kind": "vh_offering_bowls",
+   "name": "Offering Bowls",
+   "x": 207,
+   "z": 1455,
+   "yaw": 0.37,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_116",
+   "recipe": "vh_trap_line",
+   "name": "Salamander Trap Line",
+   "kind": "camp",
+   "x": 56,
+   "z": 1472,
+   "yaw": 3.93,
+   "radius": 6,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "vh_palm_stumps_blackstrand_d51",
+   "kind": "vh_palm_stumps",
+   "name": "Ironpalm Stumps",
+   "x": 127,
+   "z": 1152,
+   "yaw": 3.37,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s68",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1470,
+   "z": 767,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_117",
+   "recipe": "vh_salamander_bones",
+   "name": "Salamander Ribs",
+   "kind": "remains",
+   "x": 1152,
+   "z": 2008,
+   "yaw": 0.05,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "vh_lone_fallen_palm_blackstrand_d52",
+   "kind": "vh_lone_fallen_palm",
+   "name": "Fallen Ironpalm",
+   "x": 808,
+   "z": 232,
+   "yaw": 1.07,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s69",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1344,
+   "z": 1152,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_118",
+   "recipe": "vh_column_ring",
+   "name": "Column Ring",
+   "kind": "marker",
+   "x": 968,
+   "z": 97,
+   "yaw": 5.03,
+   "radius": 6,
+   "levelBase": 11
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_119",
+   "recipe": "vh_council_notice",
+   "name": "Harbour Council Notice",
+   "kind": "lore",
+   "x": 1344,
+   "z": 603,
+   "yaw": 2.91,
+   "radius": 3,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s70",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 368,
+   "z": 1928,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_120",
+   "recipe": "vh_column_ring",
+   "name": "Column Ring",
+   "kind": "marker",
+   "x": 543,
+   "z": 970,
+   "yaw": 2.38,
+   "radius": 6,
+   "levelBase": 10
+  },
+  {
+   "type": "wayside",
+   "id": "vh_pilgrim_ribbons_blackstrand_d53",
+   "kind": "vh_pilgrim_ribbons",
+   "name": "Pilgrim Post",
+   "x": 1208,
+   "z": 1608,
+   "yaw": 4.53,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_121",
+   "recipe": "vh_council_notice",
+   "name": "Harbour Council Notice",
+   "kind": "lore",
+   "x": 1184,
+   "z": 40,
+   "yaw": 6.23,
+   "radius": 3,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackstrand_22",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1064,
+   "z": 1599,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1089,
+     1570
+    ],
+    [
+     1097,
+     1626
+    ],
+    [
+     1025,
+     1634
+    ],
+    [
+     1042,
+     1573
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s71",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1168,
+   "z": 160,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_122",
+   "recipe": "vh_salamander_bones",
+   "name": "Salamander Ribs",
+   "kind": "remains",
+   "x": 1415,
+   "z": 185,
+   "yaw": 3.93,
+   "radius": 5,
+   "levelBase": 10
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackstrand_17",
+   "role": "steam_cook",
+   "name": "Steam-pit cook",
+   "work": "tend",
+   "chatter": [
+    "role.steam_cook"
+   ],
+   "x": 1000,
+   "z": 191,
+   "yaw": 2.4,
+   "radius": 6,
+   "path": [
+    [
+     996,
+     197
+    ],
+    [
+     998,
+     184
+    ],
+    [
+     1007,
+     192
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_steam_pit",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_kettle",
+     "x": 1.8,
+     "z": 0.5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_clay_pots",
+     "x": -1.8,
+     "z": 0.6,
+     "yaw": 0.5
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_123",
+   "recipe": "vh_salvage_fire",
+   "name": "Wreckers' Fire",
+   "kind": "camp",
+   "x": 440,
+   "z": 263,
+   "yaw": 0.33,
+   "radius": 6,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s72",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 296,
+   "z": 296,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_palm_stumps_blackstrand_d54",
+   "kind": "vh_palm_stumps",
+   "name": "Ironpalm Stumps",
+   "x": 1400,
+   "z": 112,
+   "yaw": 3.02,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_124",
+   "recipe": "vh_steamcaps",
+   "name": "Steamcap Flush",
+   "kind": "forage",
+   "x": 952,
+   "z": 1560,
+   "yaw": 2.64,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s73",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 762,
+   "z": 1466,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_125",
+   "recipe": "vh_column_ring",
+   "name": "Column Ring",
+   "kind": "marker",
+   "x": 737,
+   "z": 480,
+   "yaw": 1.95,
+   "radius": 6,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackstrand_23",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 448,
+   "z": 1072,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     516,
+     1109
+    ],
+    [
+     403,
+     1153
+    ],
+    [
+     379,
+     1025
+    ],
+    [
+     492,
+     1007
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_126",
+   "recipe": "vh_ironpalm_down",
+   "name": "Fallen Ironpalm",
+   "kind": "forage",
+   "x": 799,
+   "z": 1215,
+   "yaw": 3.76,
+   "radius": 5,
+   "levelBase": 10
+  },
+  {
+   "type": "wayside",
+   "id": "vh_pilgrim_ribbons_blackstrand_d55",
+   "kind": "vh_pilgrim_ribbons",
+   "name": "Pilgrim Post",
+   "x": 800,
+   "z": 704,
+   "yaw": 0.56,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s74",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 712,
+   "z": 1128,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s75",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1117,
+   "z": 1192,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_127",
+   "recipe": "vh_glass_kiln",
+   "name": "Glass-Blower's Kiln",
+   "kind": "camp",
+   "x": 1399,
+   "z": 1251,
+   "yaw": 2.04,
+   "radius": 6,
+   "levelBase": 10
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackstrand_18",
+   "role": "slag_deserter",
+   "name": "Slagborn deserter in hiding",
+   "work": "sit",
+   "chatter": [
+    "role.slag_deserter"
+   ],
+   "x": 360,
+   "z": 120,
+   "yaw": 0.23,
+   "radius": 6,
+   "path": [
+    [
+     372,
+     120
+    ],
+    [
+     355,
+     130
+    ],
+    [
+     355,
+     111
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_reed_lean_to",
+     "x": 0,
+     "z": -1.5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "fire_ring",
+     "x": 0,
+     "z": 1,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_bedroll",
+     "x": 1.8,
+     "z": 0,
+     "yaw": 0.6
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_128",
+   "recipe": "vh_stilt_camp",
+   "name": "Stilt Camp",
+   "kind": "camp",
+   "x": 800,
+   "z": 106,
+   "yaw": 5.49,
+   "radius": 6,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s76",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 680,
+   "z": 233,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_129",
+   "recipe": "vh_ribbon_post",
+   "name": "Pilgrim Ribbons",
+   "kind": "shrine",
+   "x": 669,
+   "z": 89,
+   "yaw": 3.02,
+   "radius": 3,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "vh_pilgrim_ribbons_blackstrand_d56",
+   "kind": "vh_pilgrim_ribbons",
+   "name": "Pilgrim Post",
+   "x": 720,
+   "z": 1672,
+   "yaw": 4.27,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_130",
+   "recipe": "vh_tussock_seed",
+   "name": "Seedheads",
+   "kind": "forage",
+   "x": 1080,
+   "z": 1136,
+   "yaw": 0.46,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_131",
+   "recipe": "vh_slagborn_marker",
+   "name": "Slagborn Marker",
+   "kind": "lore",
+   "x": 81,
+   "z": 1264,
+   "yaw": 5.66,
+   "radius": 3,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s77",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 440,
+   "z": 1680,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_132",
+   "recipe": "vh_sulphur_flat",
+   "name": "Bad Air",
+   "kind": "hazard",
+   "x": 568,
+   "z": 696,
+   "yaw": 0.76,
+   "radius": 5,
+   "levelBase": 10
+  },
+  {
+   "type": "wayside",
+   "id": "vh_roadside_fire_blackstrand_d57",
+   "kind": "vh_roadside_fire",
+   "name": "Somebody's Fire",
+   "x": 1017,
+   "z": 657,
+   "yaw": 2.21,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_133",
+   "recipe": "vh_fern_hearts",
+   "name": "Fern Hearts",
+   "kind": "forage",
+   "x": 633,
+   "z": 1455,
+   "yaw": 2,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s78",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 616,
+   "z": 784,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_134",
+   "recipe": "vh_ochre_hands",
+   "name": "Ochre Hands",
+   "kind": "marker",
+   "x": 783,
+   "z": 1144,
+   "yaw": 6.04,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_135",
+   "recipe": "vh_salamander_bones",
+   "name": "Salamander Ribs",
+   "kind": "remains",
+   "x": 1392,
+   "z": 552,
+   "yaw": 2.94,
+   "radius": 5,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s79",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 264,
+   "z": 1752,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_136",
+   "recipe": "vh_tussock_seed",
+   "name": "Seedheads",
+   "kind": "forage",
+   "x": 440,
+   "z": 656,
+   "yaw": 2.73,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "wayside",
+   "id": "vh_lone_fallen_palm_blackstrand_d58",
+   "kind": "vh_lone_fallen_palm",
+   "name": "Fallen Ironpalm",
+   "x": 912,
+   "z": 448,
+   "yaw": 5.87,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_137",
+   "recipe": "vh_slagborn_marker",
+   "name": "Slagborn Marker",
+   "kind": "lore",
+   "x": 287,
+   "z": 898,
+   "yaw": 1.84,
+   "radius": 3,
+   "levelBase": 11
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_138",
+   "recipe": "vh_window_letter",
+   "name": "Letter in the Window",
+   "kind": "lore",
+   "x": 145,
+   "z": 636,
+   "yaw": 6.13,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s80",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 456,
+   "z": 128,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_139",
+   "recipe": "vh_ribbon_post",
+   "name": "Pilgrim Ribbons",
+   "kind": "shrine",
+   "x": 831,
+   "z": 1600,
+   "yaw": 1.96,
+   "radius": 3,
+   "levelBase": 10
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackstrand_19",
+   "role": "steam_cook",
+   "name": "Steam-pit cook",
+   "work": "tend",
+   "chatter": [
+    "role.steam_cook"
+   ],
+   "x": 352,
+   "z": 736,
+   "yaw": 2.62,
+   "radius": 6,
+   "path": [
+    [
+     345,
+     735
+    ],
+    [
+     355,
+     732
+    ],
+    [
+     354,
+     740
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_steam_pit",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_kettle",
+     "x": 1.8,
+     "z": 0.5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_clay_pots",
+     "x": -1.8,
+     "z": 0.6,
+     "yaw": 0.5
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_140",
+   "recipe": "vh_lava_tube",
+   "name": "Lava-Tube Mouth",
+   "kind": "hazard",
+   "x": 1081,
+   "z": 1472,
+   "yaw": 0.98,
+   "radius": 6,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s81",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 794,
+   "z": 1776,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_fern_pair_blackstrand_d59",
+   "kind": "vh_fern_pair",
+   "name": "Fern Gate",
+   "x": 297,
+   "z": 368,
+   "yaw": 2.68,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_141",
+   "recipe": "vh_fish_rack",
+   "name": "Split Fish Rack",
+   "kind": "fishing",
+   "x": 670,
+   "z": 393,
+   "yaw": 3.87,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s82",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 138,
+   "z": 823,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_142",
+   "recipe": "vh_trap_line",
+   "name": "Salamander Trap Line",
+   "kind": "camp",
+   "x": 1112,
+   "z": 40,
+   "yaw": 2.18,
+   "radius": 6,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackstrand_24",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1080,
+   "z": 105,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1020,
+     105
+    ],
+    [
+     1072,
+     33
+    ],
+    [
+     1159,
+     112
+    ],
+    [
+     1095,
+     163
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_143",
+   "recipe": "vh_tussock_seed",
+   "name": "Seedheads",
+   "kind": "forage",
+   "x": 600,
+   "z": 1776,
+   "yaw": 6.1,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "vh_offering_bowls_blackstrand_d60",
+   "kind": "vh_offering_bowls",
+   "name": "Offering Bowls",
+   "x": 591,
+   "z": 178,
+   "yaw": 1.69,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s83",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 608,
+   "z": 1880,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_144",
+   "recipe": "vh_salvage_fire",
+   "name": "Wreckers' Fire",
+   "kind": "camp",
+   "x": 1471,
+   "z": 544,
+   "yaw": 3.26,
+   "radius": 6,
+   "levelBase": 10
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackstrand_20",
+   "role": "ash_pilgrim",
+   "name": "Resting ash pilgrim",
+   "work": "pray",
+   "chatter": [
+    "role.ash_pilgrim"
+   ],
+   "x": 72,
+   "z": 385,
+   "yaw": 4.1,
+   "radius": 6,
+   "path": [
+    [
+     72,
+     378
+    ],
+    [
+     76,
+     390
+    ],
+    [
+     64,
+     388
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_pilgrim_post",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_offering_bowl",
+     "x": 1,
+     "z": 0.8,
+     "yaw": 0
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_145",
+   "recipe": "vh_deserter_pack",
+   "name": "Deserter's Pack",
+   "kind": "remains",
+   "x": 1040,
+   "z": 1248,
+   "yaw": 1.36,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s84",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1168,
+   "z": 224,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_roadside_fire_blackstrand_d61",
+   "kind": "vh_roadside_fire",
+   "name": "Somebody's Fire",
+   "x": 361,
+   "z": 1095,
+   "yaw": 3.07,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_146",
+   "recipe": "vh_ochre_hands",
+   "name": "Ochre Hands",
+   "kind": "marker",
+   "x": 648,
+   "z": 1552,
+   "yaw": 1.31,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackstrand_25",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 488,
+   "z": 584,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     516,
+     566
+    ],
+    [
+     504,
+     614
+    ],
+    [
+     449,
+     614
+    ],
+    [
+     477,
+     555
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s85",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 568,
+   "z": 1064,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_147",
+   "recipe": "vh_column_ring",
+   "name": "Column Ring",
+   "kind": "marker",
+   "x": 248,
+   "z": 760,
+   "yaw": 5.24,
+   "radius": 6,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "vh_roadside_fire_blackstrand_d62",
+   "kind": "vh_roadside_fire",
+   "name": "Somebody's Fire",
+   "x": 945,
+   "z": 1031,
+   "yaw": 1.79,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_148",
+   "recipe": "vh_salamander_burrow",
+   "name": "Salamander Burrow",
+   "kind": "nest",
+   "x": 721,
+   "z": 1248,
+   "yaw": 5.53,
+   "radius": 5,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s86",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 480,
+   "z": 1944,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_149",
+   "recipe": "vh_rim_bowls",
+   "name": "Rim Offering Bowls",
+   "kind": "shrine",
+   "x": 570,
+   "z": 1344,
+   "yaw": 0.68,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_150",
+   "recipe": "vh_sulphur_wreck",
+   "name": "Sulphur Cart Wreck",
+   "kind": "remains",
+   "x": 360,
+   "z": 400,
+   "yaw": 5.76,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s87",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 102,
+   "z": 1417,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_151",
+   "recipe": "vh_fern_hearts",
+   "name": "Fern Hearts",
+   "kind": "forage",
+   "x": 1207,
+   "z": 1152,
+   "yaw": 0.35,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "wayside",
+   "id": "vh_roadside_fire_blackstrand_d63",
+   "kind": "vh_roadside_fire",
+   "name": "Somebody's Fire",
+   "x": 887,
+   "z": 324,
+   "yaw": 1.08,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_beach_mooring_blackstrand_d64",
+   "kind": "vh_beach_mooring",
+   "name": "Mooring Post",
+   "x": 1478,
+   "z": 296,
+   "yaw": 5.74,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_152",
+   "recipe": "vh_rim_bowls",
+   "name": "Rim Offering Bowls",
+   "kind": "shrine",
+   "x": 1359,
+   "z": 881,
+   "yaw": 1.42,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackstrand_26",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1279,
+   "z": 1264,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1342,
+     1251
+    ],
+    [
+     1289,
+     1338
+    ],
+    [
+     1220,
+     1258
+    ],
+    [
+     1294,
+     1189
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_reed_windbreak_blackstrand_d65",
+   "kind": "vh_reed_windbreak",
+   "name": "Reed Screen",
+   "x": 187,
+   "z": 1221,
+   "yaw": 5.4,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_153",
+   "recipe": "vh_ochre_hands",
+   "name": "Ochre Hands",
+   "kind": "marker",
+   "x": 752,
+   "z": 56,
+   "yaw": 1.74,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackstrand_21",
+   "role": "salamander_trapper",
+   "name": "Salamander trapper",
+   "work": "watch",
+   "chatter": [
+    "role.salamander_trapper"
+   ],
+   "x": 1073,
+   "z": 344,
+   "yaw": 1.58,
+   "radius": 6,
+   "path": [
+    [
+     1061,
+     317
+    ],
+    [
+     1116,
+     336
+    ],
+    [
+     1052,
+     372
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_salamander_trap",
+     "x": 2,
+     "z": 0,
+     "yaw": 0.5
+    },
+    {
+     "kind": "prop",
+     "id": "vh_salamander_trap",
+     "x": -3,
+     "z": 2,
+     "yaw": 2.4
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_154",
+   "recipe": "vh_kings_door",
+   "name": "Glass King's Door",
+   "kind": "shrine",
+   "x": 124,
+   "z": 517,
+   "yaw": 1.02,
+   "radius": 6,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s88",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1240,
+   "z": 672,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_roadside_fire_blackstrand_d66",
+   "kind": "vh_roadside_fire",
+   "name": "Somebody's Fire",
+   "x": 215,
+   "z": 1656,
+   "yaw": 1.08,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_155",
+   "recipe": "vh_outriggers",
+   "name": "Outrigger Canoes",
+   "kind": "fishing",
+   "x": 304,
+   "z": 1968,
+   "yaw": 1.97,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s89",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1287,
+   "z": 968,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_156",
+   "recipe": "vh_column_ring",
+   "name": "Column Ring",
+   "kind": "marker",
+   "x": 1110,
+   "z": 1695,
+   "yaw": 1.41,
+   "radius": 6,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackstrand_27",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 578,
+   "z": 1448,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     547,
+     1494
+    ],
+    [
+     534,
+     1431
+    ],
+    [
+     596,
+     1411
+    ],
+    [
+     621,
+     1480
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_157",
+   "recipe": "vh_column_ring",
+   "name": "Column Ring",
+   "kind": "marker",
+   "x": 688,
+   "z": 1425,
+   "yaw": 4.21,
+   "radius": 6,
+   "levelBase": 10
+  },
+  {
+   "type": "wayside",
+   "id": "vh_palm_stumps_blackstrand_d67",
+   "kind": "vh_palm_stumps",
+   "name": "Ironpalm Stumps",
+   "x": 175,
+   "z": 945,
+   "yaw": 5.32,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s90",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1296,
+   "z": 376,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_158",
+   "recipe": "vh_salamander_burrow",
+   "name": "Salamander Burrow",
+   "kind": "nest",
+   "x": 1080,
+   "z": 1816,
+   "yaw": 4.2,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackstrand_22",
+   "role": "steam_cook",
+   "name": "Steam-pit cook",
+   "work": "tend",
+   "chatter": [
+    "role.steam_cook"
+   ],
+   "x": 969,
+   "z": 1800,
+   "yaw": 5.96,
+   "radius": 6,
+   "path": [
+    [
+     966,
+     1809
+    ],
+    [
+     964,
+     1797
+    ],
+    [
+     976,
+     1798
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_steam_pit",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_kettle",
+     "x": 1.8,
+     "z": 0.5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_clay_pots",
+     "x": -1.8,
+     "z": 0.6,
+     "yaw": 0.5
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_159",
+   "recipe": "vh_steam_vent_altar",
+   "name": "Breathing Stone",
+   "kind": "shrine",
+   "x": 864,
+   "z": 40,
+   "yaw": 0.2,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s91",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 472,
+   "z": 1216,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_reed_windbreak_blackstrand_d68",
+   "kind": "vh_reed_windbreak",
+   "name": "Reed Screen",
+   "x": 1223,
+   "z": 137,
+   "yaw": 4.55,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_160",
+   "recipe": "vh_fern_hearts",
+   "name": "Fern Hearts",
+   "kind": "forage",
+   "x": 632,
+   "z": 1826,
+   "yaw": 1.73,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackstrand_28",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1171,
+   "z": 1893,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1234,
+     1898
+    ],
+    [
+     1149,
+     1961
+    ],
+    [
+     1070,
+     1887
+    ],
+    [
+     1186,
+     1821
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s92",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 408,
+   "z": 368,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_roadside_fire_blackstrand_d69",
+   "kind": "vh_roadside_fire",
+   "name": "Somebody's Fire",
+   "x": 1087,
+   "z": 703,
+   "yaw": 5.53,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_161",
+   "recipe": "vh_bath_hut",
+   "name": "Hot-Spring Bathing Hut",
+   "kind": "camp",
+   "x": 929,
+   "z": 217,
+   "yaw": 3.24,
+   "radius": 7,
+   "levelBase": 10
+  },
+  {
+   "type": "wayside",
+   "id": "vh_fern_pair_blackstrand_d70",
+   "kind": "vh_fern_pair",
+   "name": "Fern Gate",
+   "x": 95,
+   "z": 1753,
+   "yaw": 1.64,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_162",
+   "recipe": "vh_ochre_hands",
+   "name": "Ochre Hands",
+   "kind": "marker",
+   "x": 1137,
+   "z": 432,
+   "yaw": 5.7,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s93",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 512,
+   "z": 1864,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_163",
+   "recipe": "vh_fish_rack",
+   "name": "Split Fish Rack",
+   "kind": "fishing",
+   "x": 184,
+   "z": 2008,
+   "yaw": 4.21,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_164",
+   "recipe": "vh_boiling_mud",
+   "name": "Boiling Mud",
+   "kind": "hazard",
+   "x": 152,
+   "z": 1744,
+   "yaw": 4.15,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s94",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 248,
+   "z": 1903,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_165",
+   "recipe": "vh_rim_bowls",
+   "name": "Rim Offering Bowls",
+   "kind": "shrine",
+   "x": 624,
+   "z": 56,
+   "yaw": 4.58,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "vh_kings_pillar_blackstrand_d71",
+   "kind": "vh_kings_pillar",
+   "name": "Glass King's Pillar",
+   "x": 567,
+   "z": 512,
+   "yaw": 2.95,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_166",
+   "recipe": "vh_toad_spawn",
+   "name": "Toad Spawn",
+   "kind": "nest",
+   "x": 352,
+   "z": 569,
+   "yaw": 4.82,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackstrand_29",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 376,
+   "z": 1769,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     360,
+     1816
+    ],
+    [
+     326,
+     1761
+    ],
+    [
+     404,
+     1717
+    ],
+    [
+     435,
+     1781
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s95",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1296,
+   "z": 575,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_167",
+   "recipe": "vh_net_poles",
+   "name": "Net Poles",
+   "kind": "fishing",
+   "x": 64,
+   "z": 2008,
+   "yaw": 3.14,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackstrand_23",
+   "role": "slag_deserter",
+   "name": "Slagborn deserter in hiding",
+   "work": "sit",
+   "chatter": [
+    "role.slag_deserter"
+   ],
+   "x": 984,
+   "z": 40,
+   "yaw": 2.46,
+   "radius": 6,
+   "path": [
+    [
+     990,
+     43
+    ],
+    [
+     977,
+     43
+    ],
+    [
+     982,
+     35
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_reed_lean_to",
+     "x": 0,
+     "z": -1.5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "fire_ring",
+     "x": 0,
+     "z": 1,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_bedroll",
+     "x": 1.8,
+     "z": 0,
+     "yaw": 0.6
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_168",
+   "recipe": "vh_stilt_camp",
+   "name": "Stilt Camp",
+   "kind": "camp",
+   "x": 544,
+   "z": 1777,
+   "yaw": 5.26,
+   "radius": 6,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s96",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 888,
+   "z": 153,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_offering_bowls_blackstrand_d72",
+   "kind": "vh_offering_bowls",
+   "name": "Offering Bowls",
+   "x": 681,
+   "z": 1919,
+   "yaw": 3.35,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_169",
+   "recipe": "vh_pot_cache",
+   "name": "Three Pots",
+   "kind": "cache",
+   "x": 1248,
+   "z": 264,
+   "yaw": 1.83,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s97",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 249,
+   "z": 477,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackstrand_30",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 792,
+   "z": 1873,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     836,
+     1851
+    ],
+    [
+     806,
+     1919
+    ],
+    [
+     734,
+     1897
+    ],
+    [
+     779,
+     1815
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_salamander_skull_blackstrand_d73",
+   "kind": "vh_salamander_skull",
+   "name": "Salamander Skull",
+   "x": 888,
+   "z": 1456,
+   "yaw": 0.41,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_roadside_fire_blackstrand_d74",
+   "kind": "vh_roadside_fire",
+   "name": "Somebody's Fire",
+   "x": 856,
+   "z": 1646,
+   "yaw": 2.2,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s98",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 440,
+   "z": 792,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_170",
+   "recipe": "vh_pot_cache",
+   "name": "Three Pots",
+   "kind": "cache",
+   "x": 1279,
+   "z": 1056,
+   "yaw": 4.15,
+   "radius": 4,
+   "levelBase": 10
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackstrand_24",
+   "role": "steam_cook",
+   "name": "Steam-pit cook",
+   "work": "tend",
+   "chatter": [
+    "role.steam_cook"
+   ],
+   "x": 144,
+   "z": 1950,
+   "yaw": 4.22,
+   "radius": 6,
+   "path": [
+    [
+     148,
+     1953
+    ],
+    [
+     139,
+     1952
+    ],
+    [
+     145,
+     1947
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_steam_pit",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_kettle",
+     "x": 1.8,
+     "z": 0.5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_clay_pots",
+     "x": -1.8,
+     "z": 0.6,
+     "yaw": 0.5
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_171",
+   "recipe": "vh_drowned_paddler",
+   "name": "Washed-up Paddler",
+   "kind": "remains",
+   "x": 111,
+   "z": 1641,
+   "yaw": 4.6,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s99",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 887,
+   "z": 1142,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_pilgrim_ribbons_blackstrand_d75",
+   "kind": "vh_pilgrim_ribbons",
+   "name": "Pilgrim Post",
+   "x": 688,
+   "z": 1336,
+   "yaw": 3.8,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_172",
+   "recipe": "vh_salt_sulphur_crust",
+   "name": "Yellow Crust",
+   "kind": "forage",
+   "x": 66,
+   "z": 1800,
+   "yaw": 5.67,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackstrand_31",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 280,
+   "z": 48,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     337,
+     8
+    ],
+    [
+     326,
+     99
+    ],
+    [
+     233,
+     115
+    ],
+    [
+     218,
+     4
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s100",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1312,
+   "z": 703,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_drift_wall_blackstrand_d76",
+   "kind": "vh_drift_wall",
+   "name": "Wall in the Drift",
+   "x": 280,
+   "z": 632,
+   "yaw": 3.52,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_roadside_fire_blackstrand_d77",
+   "kind": "vh_roadside_fire",
+   "name": "Somebody's Fire",
+   "x": 384,
+   "z": 1215,
+   "yaw": 1.41,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_173",
+   "recipe": "vh_outriggers",
+   "name": "Outrigger Canoes",
+   "kind": "fishing",
+   "x": 64,
+   "z": 1688,
+   "yaw": 6.03,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s101",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 726,
+   "z": 1774,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_174",
+   "recipe": "vh_steam_vent_altar",
+   "name": "Breathing Stone",
+   "kind": "shrine",
+   "x": 937,
+   "z": 1310,
+   "yaw": 6.22,
+   "radius": 5,
+   "levelBase": 10
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_175",
+   "recipe": "vh_salvage_fire",
+   "name": "Wreckers' Fire",
+   "kind": "camp",
+   "x": 896,
+   "z": 265,
+   "yaw": 5.93,
+   "radius": 6,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s102",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1287,
+   "z": 866,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_176",
+   "recipe": "vh_ribbon_post",
+   "name": "Pilgrim Ribbons",
+   "kind": "shrine",
+   "x": 184,
+   "z": 318,
+   "yaw": 0.7,
+   "radius": 3,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "vh_rim_marker_blackstrand_d78",
+   "kind": "vh_rim_marker",
+   "name": "Rim Keeper Waymarker",
+   "x": 361,
+   "z": 456,
+   "yaw": 3.83,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_177",
+   "recipe": "vh_lava_tube",
+   "name": "Lava-Tube Mouth",
+   "kind": "hazard",
+   "x": 672,
+   "z": 928,
+   "yaw": 5.39,
+   "radius": 6,
+   "levelBase": 10
+  },
+  {
+   "type": "camp",
+   "id": "roam_blackstrand_32",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    10,
+    11
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 976,
+   "z": 1104,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     942,
+     1192
+    ],
+    [
+     905,
+     1104
+    ],
+    [
+     1016,
+     1018
+    ],
+    [
+     1066,
+     1123
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s103",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1230,
+   "z": 1725,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_reed_windbreak_blackstrand_d79",
+   "kind": "vh_reed_windbreak",
+   "name": "Reed Screen",
+   "x": 344,
+   "z": 1873,
+   "yaw": 2.4,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_blackstrand_25",
+   "role": "slag_deserter",
+   "name": "Slagborn deserter in hiding",
+   "work": "sit",
+   "chatter": [
+    "role.slag_deserter"
+   ],
+   "x": 888,
+   "z": 762,
+   "yaw": 5.98,
+   "radius": 6,
+   "path": [
+    [
+     886,
+     752
+    ],
+    [
+     894,
+     766
+    ],
+    [
+     881,
+     767
+    ]
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_reed_lean_to",
+     "x": 0,
+     "z": -1.5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "fire_ring",
+     "x": 0,
+     "z": 1,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_bedroll",
+     "x": 1.8,
+     "z": 0,
+     "yaw": 0.6
+    }
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_blackstrand_178",
+   "recipe": "vh_ribbon_post",
+   "name": "Pilgrim Ribbons",
+   "kind": "shrine",
+   "x": 407,
+   "z": 1439,
+   "yaw": 2.84,
+   "radius": 3,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_blackstrand_s104",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 208,
+   "z": 1360,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "vh_pilgrim_ribbons_blackstrand_d80",
+   "kind": "vh_pilgrim_ribbons",
+   "name": "Pilgrim Post",
+   "x": 961,
+   "z": 1644,
+   "yaw": 0.76,
+   "radius": 3,
+   "filler": true
+  }
+ ],
+ "features": [],
+ "density": {
+  "target": 50,
+  "roadTarget": 45,
+  "added": {
+   "curio": 178,
+   "wayside": 80,
+   "stray": 104,
+   "roamer": 32,
+   "folk": 25
+  },
+  "openShareCovered": 0.996,
+  "roadShareCovered": 1
+ },
+ "levels": [
+  10,
+  12
+ ]
+}

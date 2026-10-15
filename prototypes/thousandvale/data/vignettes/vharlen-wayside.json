@@ -1,0 +1,547 @@
+{
+ "_doc": "Stream W (Expansion 1). Vharlen's own wayside dressing — the island's answer to data/vignettes/wayside.json, same record shape (id, name, radius, biomes, lore, props) and read the same way by the placer's boring-walk fillers when it dresses a Vharlen zone. Props come ONLY from data/vignettes/vharlen-props.json (island ids + the neutral kit lists); no Torbor kit pieces, no trees (standing palms and ferns are island props). `biomes` = the baked island's World Forge keys this fits (empty = anywhere).",
+ "kinds": [
+  {
+   "id": "vh_rim_marker",
+   "name": "Rim Keeper Waymarker",
+   "radius": 3,
+   "biomes": [
+    "mountains",
+    "volcanic",
+    "badlands",
+    "shrubland"
+   ],
+   "lore": "A basalt column banded in red ochre. The Rim Keepers set one wherever the trail could kill you. There are a lot of them.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_rim_waymarker",
+     "x": 0,
+     "z": 0,
+     "yaw": 0.2
+    },
+    {
+     "kind": "ground",
+     "id": "lichen_patch",
+     "x": 1,
+     "z": 0.8,
+     "yaw": 0
+    }
+   ]
+  },
+  {
+   "id": "vh_column_cairn",
+   "name": "Basalt Cairn",
+   "radius": 3,
+   "biomes": [
+    "badlands",
+    "mountains",
+    "ashPlain",
+    "glimmerwaste"
+   ],
+   "lore": "Six-sided stones stacked like cut cheese. The island makes them that shape for free, so everybody stacks them.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_basalt_cairn",
+     "x": 0,
+     "z": 0,
+     "yaw": 0.5
+    },
+    {
+     "kind": "prop",
+     "id": "vh_glass_shards",
+     "x": 1.2,
+     "z": 0.8,
+     "yaw": 1.1
+    }
+   ]
+  },
+  {
+   "id": "vh_pilgrim_ribbons",
+   "name": "Pilgrim Post",
+   "radius": 3,
+   "biomes": [],
+   "lore": "A pole knotted with grey and red ribbons, one for each pilgrim who passed on the way up the mountain. Grey for asking, red for thanks. Mostly grey.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_pilgrim_post",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    }
+   ]
+  },
+  {
+   "id": "vh_roadside_ash_shrine",
+   "name": "Ash Shrine",
+   "radius": 4,
+   "biomes": [
+    "blighted",
+    "ashPlain",
+    "volcanic"
+   ],
+   "lore": "Stacked slabs, a bowl of grey ash and red handprints. The Slagborn pray here. The handprints are fresh.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_ash_shrine",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_slag_totem",
+     "x": 1.6,
+     "z": -1,
+     "yaw": 0.4
+    },
+    {
+     "kind": "ground",
+     "id": "ash_patch",
+     "x": -1.2,
+     "z": 1,
+     "yaw": 0
+    }
+   ]
+  },
+  {
+   "id": "vh_offering_bowls",
+   "name": "Offering Bowls",
+   "radius": 3,
+   "biomes": [],
+   "lore": "Two stone bowls of ash set at the trail edge. Islanders drop a pinch of their own hearth in as they pass, so the mountain knows who is walking on it.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_offering_bowl",
+     "x": -0.6,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_offering_bowl",
+     "x": 0.7,
+     "z": 0.3,
+     "yaw": 0.9
+    }
+   ]
+  },
+  {
+   "id": "vh_lone_fallen_palm",
+   "name": "Fallen Ironpalm",
+   "radius": 5,
+   "biomes": [
+    "rainforest",
+    "shrubland",
+    "savanna",
+    "beach"
+   ],
+   "lore": "An ironpalm lying where the wind put it. The wood is so hard nobody has bothered to cut it up. Nobody ever will.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_fallen_ironpalm",
+     "x": 0,
+     "z": 0,
+     "yaw": 0.3
+    },
+    {
+     "kind": "ground",
+     "id": "lichen_patch",
+     "x": -1.5,
+     "z": 1.2,
+     "yaw": 0
+    }
+   ]
+  },
+  {
+   "id": "vh_salamander_skull",
+   "name": "Salamander Skull",
+   "radius": 4,
+   "biomes": [
+    "desert",
+    "savanna",
+    "badlands",
+    "volcanic"
+   ],
+   "lore": "A salamander skull the size of a handcart, bleached white. Whatever it ate, it ate a lot of it.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_salamander_bones",
+     "x": 0,
+     "z": 0,
+     "yaw": 0.7
+    },
+    {
+     "kind": "ground",
+     "id": "bone_scatter",
+     "x": 1.2,
+     "z": 1.4,
+     "yaw": 0
+    }
+   ]
+  },
+  {
+   "id": "vh_half_buried_urn",
+   "name": "Buried Urn",
+   "radius": 3,
+   "biomes": [
+    "ashPlain",
+    "glimmerwaste",
+    "desert"
+   ],
+   "lore": "A clay urn sunk to its shoulders in ash, lid still on. Old people out here were buried standing up, so they could keep an eye on things.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_buried_urn",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "ash_patch",
+     "x": 0.8,
+     "z": 0.6,
+     "yaw": 0
+    }
+   ]
+  },
+  {
+   "id": "vh_tangled_floats",
+   "name": "Floats on a Post",
+   "radius": 3,
+   "biomes": [
+    "beach",
+    "marsh"
+   ],
+   "lore": "A driftwood post wrapped in torn net, green and amber glass floats caught in it like fruit. The sea keeps the lost ones.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_mooring_post",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_glass_floats",
+     "x": 0.8,
+     "z": 0.5,
+     "yaw": 0.6
+    }
+   ]
+  },
+  {
+   "id": "vh_roadside_fire",
+   "name": "Somebody's Fire",
+   "radius": 3,
+   "biomes": [],
+   "lore": "A ring of red scoria with a fire still going in it. On this island you do not need wood to keep a fire. You need the ground to stay angry.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_scoria_ring",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "ash_patch",
+     "x": 1,
+     "z": 1,
+     "yaw": 0
+    }
+   ]
+  },
+  {
+   "id": "vh_reed_windbreak",
+   "name": "Reed Screen",
+   "radius": 4,
+   "biomes": [
+    "savanna",
+    "shrubland",
+    "marsh",
+    "desert"
+   ],
+   "lore": "A reed screen on two posts, set against the wind that brings the ash. The ash came round the side.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_reed_screen",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "ash_patch",
+     "x": 0.6,
+     "z": 1.4,
+     "yaw": 0
+    }
+   ]
+  },
+  {
+   "id": "vh_beach_mooring",
+   "name": "Mooring Post",
+   "radius": 3,
+   "biomes": [
+    "beach",
+    "marsh"
+   ],
+   "lore": "A post sunk in black sand with a coil of rope on it. The canoe it held is gone. The knot is still very good.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_mooring_post",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "sand_ripple",
+     "x": 1,
+     "z": 1,
+     "yaw": 0
+    }
+   ]
+  },
+  {
+   "id": "vh_drift_wall",
+   "name": "Wall in the Drift",
+   "radius": 5,
+   "biomes": [
+    "ashPlain",
+    "blighted",
+    "glimmerwaste",
+    "desert"
+   ],
+   "lore": "The top of a red wall poking out of an ash drift, a window still in it. Somebody had a view. Now the view has them.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_ash_drift",
+     "x": 0,
+     "z": 0.6,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_buried_wall",
+     "x": 0,
+     "z": -0.8,
+     "yaw": 0
+    }
+   ]
+  },
+  {
+   "id": "vh_charred_stand",
+   "name": "Burned Stand",
+   "radius": 4,
+   "biomes": [
+    "blighted",
+    "rainforest",
+    "volcanic"
+   ],
+   "lore": "One tree burned black and still standing, a heap of beams at its foot. The fire ate the house and left the tree as a receipt.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_charred_trunk",
+     "x": -1,
+     "z": -0.6,
+     "yaw": 0.3
+    },
+    {
+     "kind": "prop",
+     "id": "vh_charred_beams",
+     "x": 0.8,
+     "z": 1.2,
+     "yaw": 0.4
+    }
+   ]
+  },
+  {
+   "id": "vh_fern_pair",
+   "name": "Fern Gate",
+   "radius": 5,
+   "biomes": [
+    "rainforest",
+    "shrubland",
+    "marsh"
+   ],
+   "lore": "Two tree ferns either side of the track, leaning in to touch. The Vharl say walking between them washes the ash off you. It does not.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_tree_fern",
+     "x": -2.2,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_tree_fern",
+     "x": 2.2,
+     "z": 0,
+     "yaw": 2.1
+    }
+   ]
+  },
+  {
+   "id": "vh_glass_spill",
+   "name": "Glass Spill",
+   "radius": 4,
+   "biomes": [
+    "glimmerwaste",
+    "mountains",
+    "volcanic"
+   ],
+   "lore": "Black glass broken all over the ground and a heap of cores somebody meant to come back for. Watch your feet. Watch your hands. Watch everything.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_glass_shards",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_obsidian_cores",
+     "x": 1.4,
+     "z": -1,
+     "yaw": 0.5
+    }
+   ]
+  },
+  {
+   "id": "vh_slag_stake",
+   "name": "Slag Totem",
+   "radius": 3,
+   "biomes": [
+    "blighted",
+    "ashPlain",
+    "savanna",
+    "badlands"
+   ],
+   "lore": "A stake hung with black slag and a red rag. Slagborn mark where they have been. They are not shy about it.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_slag_totem",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "ash_patch",
+     "x": 0.9,
+     "z": 0.7,
+     "yaw": 0
+    }
+   ]
+  },
+  {
+   "id": "vh_sulphur_spill",
+   "name": "Sulphur Spill",
+   "radius": 4,
+   "biomes": [
+    "desert",
+    "volcanic",
+    "savanna"
+   ],
+   "lore": "A heap of yellow sulphur dropped by the track. Somebody was carrying too much, or running.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_sulphur_heap",
+     "x": 0,
+     "z": 0,
+     "yaw": 0.2
+    },
+    {
+     "kind": "ground",
+     "id": "sand_ripple",
+     "x": -1.4,
+     "z": 1,
+     "yaw": 0
+    }
+   ]
+  },
+  {
+   "id": "vh_kings_pillar",
+   "name": "Glass King's Pillar",
+   "radius": 5,
+   "biomes": [
+    "glimmerwaste",
+    "mountains",
+    "desert",
+    "beach"
+   ],
+   "lore": "A fallen pillar inlaid with black glass. The Glass Kings put their names on everything. The wind has been taking them off.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "ruined_pillar",
+     "x": 0,
+     "z": 0,
+     "yaw": 1.4
+    },
+    {
+     "kind": "prop",
+     "id": "vh_glass_shards",
+     "x": 1.6,
+     "z": 1.4,
+     "yaw": 0.3
+    }
+   ]
+  },
+  {
+   "id": "vh_palm_stumps",
+   "name": "Ironpalm Stumps",
+   "radius": 4,
+   "biomes": [
+    "rainforest",
+    "savanna",
+    "beach",
+    "marsh"
+   ],
+   "lore": "Three ironpalm stumps cut flat. It takes a day and two axes to fell one. Whoever did this was paid well, or very stubborn.",
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_ironpalm_stump",
+     "x": -1.4,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_ironpalm_stump",
+     "x": 1,
+     "z": -0.8,
+     "yaw": 1.3
+    },
+    {
+     "kind": "prop",
+     "id": "vh_ironpalm_stump",
+     "x": 0.4,
+     "z": 1.4,
+     "yaw": 2.2
+    }
+   ]
+  }
+ ]
+}

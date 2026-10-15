@@ -29,7 +29,7 @@ export function createWorld(opts) {
   })];
   if (opts.camps) for (const L of layouts) L.camps = opts.camps;
   const [gwBus, pBus] = createLocalBus();
-  const gateway = createGateway({ ...opts, now, wallNow, events: opts.events || layoutEvents(layouts), starterProvince: layouts[0].key });
+  const gateway = createGateway({ ...opts, now, wallNow, events: opts.events || layoutEvents(layouts), starterProvince: (layouts.find(L => L.starterProvince !== false) || layouts[0]).key });
   const province = createProvince({ ...opts, proc: 0, layouts, bus: pBus, clock: { epoch: gateway.epoch, dayMs: gateway.clockDayMs }, now, wallNow });
   gateway.attach(0, gwBus, { provinces: layouts.map(L => L.key) });
 
@@ -69,7 +69,7 @@ export function layoutEvents(layouts) {
 export function createRealm(opts) {
   const { procs: sets, now = () => Date.now(), wallNow = () => Date.now() } = opts;
   const all = sets.flat();
-  const gateway = createGateway({ ...opts, now, wallNow, events: opts.events || layoutEvents(all), starterProvince: all[0].key });
+  const gateway = createGateway({ ...opts, now, wallNow, events: opts.events || layoutEvents(all), starterProvince: (all.find(L => L.starterProvince !== false) || all[0]).key });
   const procs = sets.map((layouts, n) => {
     const [gwBus, pBus] = createLocalBus();
     const p = createProvince({ ...opts, proc: n, layouts, bus: pBus, processName: (opts.processName || 'p') + '.' + n, clock: { epoch: gateway.epoch, dayMs: gateway.clockDayMs }, now, wallNow });

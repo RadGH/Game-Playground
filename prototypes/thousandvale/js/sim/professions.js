@@ -30,6 +30,7 @@
 //   W.prof(o, m) ; W.gather(o, m) ; W.craft(o, m) ; W.tick() ; W.stop(o, why) ; W.view(ch) ; W.ensureNodes(room)
 //   W.npcExtra(o, obj) ; W.useItem(o, item, idx, R) -> bool ; W.onKill(room, dead, creditedRecords) ; W.onEvent(o, ev)
 
+import { joinProvinceData } from './province-files.js';
 import { STATE } from '../net/protocol.js';
 import { createProfessions as createRules, PROFESSIONS } from '../rules/professions.js';
 import { scoreGame, checkInputs } from '../rules/professions-games.js';
@@ -40,14 +41,16 @@ export const CRAFT_OPS = Object.freeze(['list', 'start', 'done', 'stop', 'cancel
 
 const hash01 = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0) / 4294967296; };
 
+const dedupeById = list => { const seen = new Set(); return list.filter(x => x && !seen.has(x.id) && seen.add(x.id)); };
 export function createProfessions({ layouts, online, provOf, grant, journal, questEvent = () => {}, now, wallNow = () => Date.now(), log = () => {}, counters = {},
   fighting = () => false, dismount = () => {}, endMeal = () => {}, stopFishing = () => {}, wantSheet = () => {}, bagCap = () => 120, isFire = () => false, anglingView = () => ({ level: 1, xp: 0, next: null }),
   spend = (o, gold) => { o.char.gold -= gold; }, potionText = null, tradeHolds = () => false, loadEngine = null, opts = {} }) {
   const first = layouts[0] || {};
   const D = first.professions || null;               // { numbers, content, nodes }
   const P = D && D.numbers ? createRules(D.numbers, D.content || {}) : null;
-  const content = (D && D.content) || {};
-  const nodeData = (D && D.nodes) || null;
+  // Expansion 1: the rules and recipes are the first province's; the nodes and the trainers that stand in the world are every province's
+  const content = layouts.length > 1 && D && D.content ? { ...D.content, trainers: dedupeById(layouts.flatMap(L => (L && L.professions && L.professions.content && L.professions.content.trainers) || [])) } : (D && D.content) || {};
+  const nodeData = joinProvinceData(layouts.map(L => L && L.professions && L.professions.nodes)) || (D && D.nodes) || null;
   const G = P ? P.gatherNumbers : {}, K = P ? P.craftNumbers : {};
   const working = new Set();                          // province records in a mini-game
   const trainerIds = new Set((content.trainers || []).map(t => t.id));      // the trainers of this system teach at the first word

@@ -1,0 +1,412 @@
+{
+  "id": "ev_skarra_ashkeel",
+  "name": "Skarra Ashkeel",
+  "tier": "event",
+  "zone": "blackstrand",
+  "level": 12,
+  "body": "slagborn_chief",
+  "place": {
+    "rank": "boss",
+    "level": 12,
+    "respawnMs": 1800000
+  },
+  "_doc": "Expansion 1 (Vharlen). The ZONE EVENT BOSS for Blackstrand: a Slagborn raid captain who beaches her longboats on the black sand. P1 'The Landing': a keel-axe cleave, flaming arrows from the boats, a boat-ram charge down a line, and the Ash Horn — a blast the size of the beach; hide behind a stack of harbour crates. P2 at 55% 'Burn the Boats': she stands behind a fire-rite ward while raiders pour off the boats — SET ALL THREE TARRED LONGBOATS ALIGHT (use them) to strand her raiders and break the ward. P3, a new health bar 'No Retreat': a stand-together stack, keel sweeps in four directions and a get-in-close ring. Soft enrage from 4 minutes, hard at 7.",
+  "party": "Zone event, everyone nearby joins. Solo: not intended (three boats to burn under raiders, a stack that needs 3). 3-5: playable. 10+: intended. M5 scaling: health and raider adds by players enrolled; stack need = clamp(players/4, 2, 5).",
+  "hpMult": 3,
+  "arena": {
+    "radius": 36,
+    "objects": [
+      {
+        "id": "crates_w",
+        "type": "pillar",
+        "name": "Harbour crates",
+        "x": -11,
+        "z": 6,
+        "r": 1.8,
+        "hp": 2
+      },
+      {
+        "id": "crates_e",
+        "type": "pillar",
+        "name": "Harbour crates",
+        "x": 11,
+        "z": 6,
+        "r": 1.8,
+        "hp": 2
+      },
+      {
+        "id": "crates_s",
+        "type": "pillar",
+        "name": "Harbour crates",
+        "x": 0,
+        "z": 14,
+        "r": 1.8,
+        "hp": 2
+      },
+      {
+        "id": "boat_w",
+        "type": "brazier",
+        "name": "Tarred longboat",
+        "x": -20,
+        "z": -16
+      },
+      {
+        "id": "boat_c",
+        "type": "brazier",
+        "name": "Tarred longboat",
+        "x": 0,
+        "z": -24
+      },
+      {
+        "id": "boat_e",
+        "type": "brazier",
+        "name": "Tarred longboat",
+        "x": 20,
+        "z": -16
+      }
+    ]
+  },
+  "say": {
+    "pull": [
+      "Beach the boats! Everything that burns, burn it!",
+      "Port Vharl! Your harbour is ours by sundown.",
+      "Skarra Ashkeel steps off the prow with an axe in each hand."
+    ],
+    "death": "Skarra Ashkeel drops to her knees in the surf. 'Push... the boats... off...'",
+    "reset": "Skarra Ashkeel whistles her crews back to the boats."
+  },
+  "enrage": {
+    "seconds": 420,
+    "damage": 3,
+    "say": "Skarra Ashkeel has run out of patience — the whole beach burns!",
+    "soft": {
+      "from": 240,
+      "every": 15,
+      "add": 0.08,
+      "say": "More raiders wade ashore. The sand is black with them."
+    }
+  },
+  "abilities": {
+    "keel_axe": {
+      "id": "keel_axe",
+      "name": "Keel Axe",
+      "every": [
+        7,
+        9
+      ],
+      "first": 2,
+      "range": 7,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 6,
+          "arc": 1.6,
+          "wind": 1.1,
+          "damage": 1.8
+        }
+      ]
+    },
+    "fire_arrows": {
+      "id": "fire_arrows",
+      "name": "Fire Arrows",
+      "every": [
+        12,
+        15
+      ],
+      "first": 4,
+      "cast": 0.8,
+      "say": "Archers on the boats — fire arrows!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3.2,
+          "wind": 1.5,
+          "damage": 1.2,
+          "count": 4,
+          "delay": 0.25,
+          "element": "fire",
+          "status": "burn"
+        }
+      ]
+    },
+    "boat_ram": {
+      "id": "boat_ram",
+      "name": "Boat Ram",
+      "every": [
+        15,
+        18
+      ],
+      "first": 8,
+      "cast": 1,
+      "say": "Skarra drives a boat up the sand at {target} — get out of the line!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 24,
+          "w": 4,
+          "wind": 1.6,
+          "damage": 2.2,
+          "knock": 5
+        }
+      ]
+    },
+    "ash_horn": {
+      "id": "ash_horn",
+      "name": "Ash Horn",
+      "every": [
+        26,
+        30
+      ],
+      "first": 12,
+      "cast": 3,
+      "say": "THE ASH HORN! Get behind the crates!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 36,
+          "wind": 0.6,
+          "damage": 2.6,
+          "los": true,
+          "status": "fear"
+        }
+      ]
+    },
+    "wade_in": {
+      "id": "wade_in",
+      "name": "Wade In",
+      "every": [
+        20,
+        24
+      ],
+      "first": 4,
+      "say": "Another crew wades ashore!",
+      "actions": [
+        {
+          "adds": {
+            "type": "slagborn_raider",
+            "count": 2,
+            "radius": 14,
+            "at": "home"
+          }
+        }
+      ]
+    },
+    "pitch_rain": {
+      "id": "pitch_rain",
+      "name": "Pitch Rain",
+      "every": [
+        12,
+        15
+      ],
+      "first": 3,
+      "cast": 0.6,
+      "say": "Burning pitch rains from the boats — and it keeps burning!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "r": 3.5,
+          "wind": 1.6,
+          "damage": 1.1,
+          "spread": 24,
+          "count": 6,
+          "delay": 0.2,
+          "element": "fire",
+          "leave": {
+            "type": "pool",
+            "name": "Burning pitch",
+            "r": 3,
+            "every": 1,
+            "seconds": 20,
+            "damage": 0.25,
+            "status": "burn",
+            "element": "fire"
+          }
+        }
+      ]
+    },
+    "shield_ring": {
+      "id": "shield_ring",
+      "name": "Shield Ring",
+      "every": [
+        20,
+        24
+      ],
+      "first": 6,
+      "cast": 1,
+      "say": "Skarra comes for {target} — three of you, lock shields with them!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3.6,
+          "wind": 4,
+          "damage": 3,
+          "kind": "stack",
+          "need": 3,
+          "follow": true
+        }
+      ]
+    },
+    "keel_sweep": {
+      "id": "keel_sweep",
+      "name": "Keel Sweep",
+      "every": [
+        14,
+        17
+      ],
+      "first": 9,
+      "cast": 0.6,
+      "say": "She swings the keel-chain round — four ways at once!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 30,
+          "w": 3,
+          "wind": 1.6,
+          "damage": 2,
+          "count": 4,
+          "rotate": 1.5708,
+          "yaw": "random"
+        }
+      ]
+    },
+    "surf_ring": {
+      "id": "surf_ring",
+      "name": "Surf Ring",
+      "every": [
+        16,
+        19
+      ],
+      "first": 13,
+      "cast": 1,
+      "say": "The surf rises round her — get in close!",
+      "telegraphs": [
+        {
+          "shape": "donut",
+          "at": "self",
+          "r": 18,
+          "r2": 4,
+          "wind": 1.9,
+          "damage": 2.3,
+          "knock": 3
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "The Landing",
+      "abilities": [
+        "keel_axe",
+        "fire_arrows",
+        "boat_ram",
+        "ash_horn"
+      ]
+    },
+    {
+      "name": "Burn the Boats",
+      "at": 0.55,
+      "say": "Hold the beach! Nobody touches my boats!",
+      "abilities": [
+        "keel_axe",
+        "wade_in",
+        "pitch_rain"
+      ],
+      "ward": {
+        "seconds": 25,
+        "pool": 0.1,
+        "break": "objects",
+        "need": 3,
+        "what": "brazier",
+        "say": "Skarra stands behind a fire-rite ward. Burn all three tarred longboats! It fails by itself in 25 seconds.",
+        "fade": "The ward fails by itself. No opening this time."
+      },
+      "onEnter": [
+        {
+          "shield": {
+            "seconds": 25,
+            "pool": 0.1
+          }
+        },
+        {
+          "adds": {
+            "type": "slagborn_raider",
+            "count": 3,
+            "radius": 12,
+            "at": "home"
+          }
+        },
+        {
+          "adds": {
+            "type": "slagborn_firecaller",
+            "count": 1,
+            "radius": 16,
+            "at": "home"
+          }
+        },
+        {
+          "say": "Skarra stands behind a fire-rite ward. Burn all three tarred longboats! It fails by itself in 25 seconds.",
+          "style": "warn"
+        }
+      ]
+    },
+    {
+      "name": "No Retreat",
+      "newBar": {
+        "hp": 0.5
+      },
+      "say": "MY BOATS! Then nobody leaves this beach.",
+      "abilities": [
+        "keel_axe",
+        "shield_ring",
+        "keel_sweep",
+        "surf_ring",
+        "fire_arrows"
+      ]
+    }
+  ],
+  "triggers": [
+    {
+      "when": {
+        "lit": 3,
+        "phase": 1
+      },
+      "do": [
+        {
+          "shield": false
+        },
+        {
+          "stun": 4
+        },
+        {
+          "vuln": {
+            "takeMore": 0.4,
+            "seconds": 12,
+            "name": "Stranded"
+          }
+        },
+        {
+          "say": "All three longboats go up in flames! Skarra howls as her ward gutters out.",
+          "style": "warn"
+        }
+      ]
+    },
+    {
+      "when": {
+        "broken": 3
+      },
+      "do": [
+        {
+          "say": "The crates are kindling. Nothing left to hide behind!",
+          "style": "warn"
+        }
+      ]
+    }
+  ]
+}

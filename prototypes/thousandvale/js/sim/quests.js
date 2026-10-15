@@ -36,7 +36,7 @@ const OWN_FRAMES = new Set(['angler', 'smith', 'apothecary', 'tailor', 'bowyer',
 const JOB_ROLES = new Set(['elder', 'sergeant', 'captain', 'quartermaster', 'tollkeeper', 'broker', 'innkeeper', 'angler', 'smith', 'apothecary', 'tailor', 'bowyer', 'prospector']);   // W9 (P-core): trade folk offer their own frames only (see jobsFor)   // angler: play-test 5 T25 (frames with giverRole 'angler')
 const RARITY_RANK = { common: 0, uncommon: 1, rare: 2, epic: 3, legendary: 4 };
 
-export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null, rng = Math.random, now = () => Date.now(), isNight = () => false, angling = null }) {
+export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null, rng = Math.random, now = () => Date.now(), isNight = () => false, angling = null, peerDef = null }) {      // peerDef(id): Expansion 1 — another province's quest, so it still shows while you are away
   const sites = (L.terrain.reader && L.terrain.reader.meta && L.terrain.reader.meta.sites) || [];
   const defs = new Map();
   const nextOf = new Map();      // id -> the quest it unlocks
@@ -182,7 +182,7 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
   }
 
   const stateOf = ch => { ch.quests ||= { active: {}, done: {}, jobs: {} }; ch.quests.active ||= {}; ch.quests.done ||= {}; ch.quests.jobs ||= {}; return ch.quests; };
-  const defOf = (ch, id) => defs.get(id) || (stateOf(ch).active[id] && stateOf(ch).active[id].def) || null;
+  const defOf = (ch, id) => defs.get(id) || (stateOf(ch).active[id] && stateOf(ch).active[id].def) || (peerDef && stateOf(ch).active[id] ? peerDef(id) : null) || null;
   /** Is `giver` the one who hands out / takes back quest `def`? */
   function gives(def, giver) {
     if (!giver) return false;
@@ -340,6 +340,7 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
       case 'use': return ev.kind === 'use' && ev.vignette === st.vignette && (!st.object || ev.name === st.object);
       case 'talk': case 'deliver': return ev.kind === 'talk' && ev.npcId === st.npc;
       case 'ride': return ev.kind === 'ride' && (!st.to || ev.to === st.to) && (!st.from || ev.from === st.from);      // W5 (round 8): an ox-cart ride that arrived
+      case 'voyage': return ev.kind === 'voyage' && (!st.to || ev.to === st.to) && (!st.from || ev.from === st.from);   // EXPANSION-1 §6: a sea crossing that arrived (js/sim/ships.js)
       case 'clear': return ev.kind === 'clear' && ev.door === st.door && ev.zone === st.zone && (st.boss || st.floor == null ? ev.boss : ev.floor >= st.floor || ev.boss);
       // play-test 5 T25 (E's step kinds): a landed fish (never junk or a crate) / a cooked meal
       case 'catch': return ev.kind === 'fish' && (!st.fish || ev.species === st.fish) && (!st.pool || !!ev.pool) && (!st.rarity || (RARITY_RANK[ev.rarity] ?? 0) >= (RARITY_RANK[st.rarity] ?? 0));

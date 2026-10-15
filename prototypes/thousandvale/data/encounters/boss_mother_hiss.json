@@ -1,0 +1,329 @@
+{
+  "id": "boss_mother_hiss",
+  "name": "Old Mother Hiss",
+  "tier": "boss",
+  "body": "ashback_salamander",
+  "place": "dungeon steam_grotto (The Hissing Grotto, Steamwood, level 12-14): the end boss at the spring head",
+  "_doc": "The great salamander that basks in the hot spring the shrine was built over. P1 \"Basking\": a bite and a tail swipe for the tank, scalding spit, and the four geysers round the pool erupting one after another (stand clear of the one that rumbles). P2 at 55% \"Under the Water\": she sinks into the spring and will not come up while her brood is alive — kill the wisps (the shield drops with the last one) while boiling waves roll out of the pool. P3 new bar \"Steam Burst\": she comes up furious; geysers erupt all together, she spits a stack on one player, and the spring throws a huge burst that only the space close by her is safe from.",
+  "party": "Solo: hard in P2 (adds). 2-3: one tank, the rest kill the brood. 5: as designed.",
+  "hpMult": 3.8,
+  "arena": {
+    "radius": 16,
+    "objects": [
+      {
+        "id": "geyser",
+        "type": "rock",
+        "name": "Geyser cone",
+        "x": -9,
+        "z": -9,
+        "r": 1.3,
+        "hp": 4
+      },
+      {
+        "id": "geyser",
+        "type": "rock",
+        "name": "Geyser cone",
+        "x": 9,
+        "z": -9,
+        "r": 1.3,
+        "hp": 4
+      },
+      {
+        "id": "geyser",
+        "type": "rock",
+        "name": "Geyser cone",
+        "x": 9,
+        "z": 9,
+        "r": 1.3,
+        "hp": 4
+      },
+      {
+        "id": "geyser",
+        "type": "rock",
+        "name": "Geyser cone",
+        "x": -9,
+        "z": 9,
+        "r": 1.3,
+        "hp": 4
+      },
+      {
+        "id": "hot_spring",
+        "type": "pool",
+        "name": "Hot spring",
+        "x": 0,
+        "z": 0,
+        "r": 3,
+        "every": 1,
+        "damage": 0.2,
+        "status": "seared",
+        "element": "fire"
+      }
+    ]
+  },
+  "say": {
+    "pull": [
+      "A long hiss from the spring, like every spring on the island at once.",
+      "Old Mother Hiss lifts her head out of the water. She is bigger than the shrine.",
+      "Bathers. How rude."
+    ],
+    "death": "Old Mother Hiss sinks back into her spring, and the steam thins for the first time in a hundred years.",
+    "reset": "Old Mother Hiss slides back into her spring to bask."
+  },
+  "enrage": {
+    "seconds": 330,
+    "damage": 3,
+    "say": "The spring boils over the whole grotto!"
+  },
+  "abilities": {
+    "bite": {
+      "id": "bite",
+      "name": "Bite",
+      "every": [
+        5,
+        7
+      ],
+      "range": 6,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 6,
+          "arc": 1.3,
+          "wind": 1,
+          "damage": 1.8
+        }
+      ]
+    },
+    "tail": {
+      "id": "tail",
+      "name": "Tail Swipe",
+      "every": [
+        10,
+        12
+      ],
+      "first": 4,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 7,
+          "arc": 2.2,
+          "yaw": 3.14,
+          "wind": 1.2,
+          "damage": 1.5,
+          "knock": 4
+        }
+      ]
+    },
+    "spit": {
+      "id": "spit",
+      "name": "Scalding Spit",
+      "every": [
+        8,
+        10
+      ],
+      "first": 2,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "count": 2,
+          "delay": 0.3,
+          "r": 2.5,
+          "wind": 1.3,
+          "damage": 1.3,
+          "element": "fire",
+          "status": "burn"
+        }
+      ]
+    },
+    "geyser_one": {
+      "id": "geyser_one",
+      "name": "Geyser",
+      "every": [
+        12,
+        15
+      ],
+      "first": 6,
+      "cast": 0.6,
+      "say": "A geyser rumbles!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "object",
+          "object": "geyser",
+          "r": 4,
+          "count": 1,
+          "wind": 1.6,
+          "damage": 1.9,
+          "element": "fire",
+          "knock": 3
+        }
+      ]
+    },
+    "waves": {
+      "id": "waves",
+      "name": "Boiling Waves",
+      "every": [
+        10,
+        12
+      ],
+      "first": 2,
+      "cast": 0.5,
+      "say": "Boiling waves roll out of the spring!",
+      "telegraphs": [
+        {
+          "shape": "ring",
+          "at": "home",
+          "r": 8,
+          "r2": 4,
+          "wind": 1.3,
+          "damage": 1.4,
+          "element": "fire"
+        },
+        {
+          "shape": "ring",
+          "at": "home",
+          "r": 14,
+          "r2": 10,
+          "wind": 2,
+          "damage": 1.4,
+          "element": "fire"
+        }
+      ]
+    },
+    "all_geysers": {
+      "id": "all_geysers",
+      "name": "All the Geysers",
+      "every": [
+        16,
+        19
+      ],
+      "first": 5,
+      "cast": 1,
+      "say": "Every geyser is about to blow!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "object",
+          "object": "geyser",
+          "r": 5,
+          "wind": 1.8,
+          "damage": 2.2,
+          "element": "fire",
+          "knock": 3
+        }
+      ]
+    },
+    "spit_stack": {
+      "id": "spit_stack",
+      "name": "Hot Mouthful",
+      "every": [
+        19,
+        22
+      ],
+      "first": 7,
+      "cast": 1,
+      "say": "She spits a mouthful at {target} — stand together to share it!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3,
+          "kind": "stack",
+          "need": 3,
+          "follow": true,
+          "wind": 3.8,
+          "damage": 3,
+          "element": "fire"
+        }
+      ]
+    },
+    "steam_burst": {
+      "id": "steam_burst",
+      "name": "Steam Burst",
+      "every": [
+        26,
+        30
+      ],
+      "first": 12,
+      "cast": 1.5,
+      "say": "STEAM BURST — get in close to her!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 5,
+          "kind": "safe",
+          "wind": 3.2,
+          "damage": 2.6,
+          "element": "fire"
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Basking",
+      "abilities": [
+        "bite",
+        "tail",
+        "spit",
+        "geyser_one"
+      ]
+    },
+    {
+      "name": "Under the Water",
+      "at": 0.55,
+      "say": "Mother Hiss sinks under the water. Her brood rises in her place!",
+      "abilities": [
+        "waves",
+        "spit"
+      ],
+      "shieldWhileAdds": true,
+      "shieldDown": "The last of the brood pops — Mother Hiss surfaces, gasping!",
+      "onEnter": [
+        {
+          "shield": {
+            "seconds": 20,
+            "pool": 0.1
+          }
+        },
+        {
+          "adds": {
+            "type": "vent_wisp",
+            "count": 3,
+            "radius": 8,
+            "at": "home"
+          }
+        },
+        {
+          "say": "Mother Hiss sinks behind a ward of steam. Kill her three wisps to drop it! It fails by itself in 20 seconds.",
+          "style": "warn"
+        }
+      ],
+      "ward": {
+        "seconds": 20,
+        "pool": 0.1,
+        "break": "adds",
+        "need": 3,
+        "what": "vent_wisp",
+        "say": "Mother Hiss sinks behind a ward of steam. Kill her three wisps to drop it! It fails by itself in 20 seconds.",
+        "fade": "The ward fails by itself. No opening this time."
+      }
+    },
+    {
+      "name": "Steam Burst",
+      "newBar": {
+        "hp": 0.5
+      },
+      "say": "She comes up out of the spring in a cloud of steam, furious.",
+      "abilities": [
+        "bite",
+        "all_geysers",
+        "spit_stack",
+        "steam_burst"
+      ]
+    }
+  ]
+}

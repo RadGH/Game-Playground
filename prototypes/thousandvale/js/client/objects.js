@@ -81,6 +81,16 @@ export const CHEST_LOOKS = {
     { box: [0.7, 0.14, 0.18], at: [-0.6, 0.07, -0.5], rot: [0, -0.9, 0], colour: '#4e3c2a' }, { ball: [0.2, 0.14, 0.2], at: [0.1, 0.9, 0.05], colour: '#b08a3a' }] },
   packs: { sink: 0.2, shapes: [{ ball: [0.5, 0.3, 0.36], at: [0.95, 0.26, 0.3], rot: [0, 0.4, 0.15], colour: '#7a5a3a' }, { ball: [0.46, 0.28, 0.34], at: [-0.9, 0.24, -0.25], rot: [0, -0.7, -0.1], colour: '#6b4e32' },
     { ball: [0.34, 0.24, 0.3], at: [0.2, 0.2, 1.05], colour: '#b59a62' }, { box: [1.7, 0.03, 0.12], at: [0.05, 0.05, 0.05], rot: [0, 0.35, 0], colour: '#3a2a1c' }, { box: [0.5, 0.04, 0.4], at: [-0.5, 0.03, 0.9], rot: [0, 0.9, 0], colour: '#8a2f2a' }] },
+  // [W] Vharlen's road-event chests (data/provinces/vharlen-road-events.json): a tipped sulphur cart, a holed outrigger,
+  // a strongbox half under the ash, a cold kiln with a cache in its mouth — the island's colours, plain shapes only
+  sulphur_cart: { shapes: [{ box: [2.0, 0.08, 1.1], at: [0, 0.55, -0.2], rot: [1.2, 0.15, 0], colour: '#7d6d58' }, { box: [2.0, 0.42, 0.07], at: [0, 0.2, 0.4], rot: [0, 0.15, 0], colour: '#5f5242' },
+    { cyl: [0.55, 0.55, 0.08, 10], at: [1.15, 0.55, -0.55], rot: [0, 0.15, 1.57], colour: '#5f5242' }, { ball: [0.9, 0.25, 0.6], at: [0.2, 0.08, 0.95], colour: '#e0c437' }, { ball: [0.4, 0.16, 0.3], at: [-0.9, 0.06, 1.2], colour: '#c4a62a' }] },
+  outrigger_wreck: { shapes: [{ box: [4.4, 0.45, 0.8], at: [0, 0.22, -0.6], rot: [0.35, 0.1, 0], colour: '#5f5242' }, { box: [4.2, 0.05, 0.6], at: [0, 0.47, -0.55], rot: [0.35, 0.1, 0], colour: '#2c2622' },
+    { cyl: [0.1, 0.1, 2.8, 6], at: [0.2, 0.12, 1.25], rot: [0, 0.1, 1.57], colour: '#7d6d58' }, { box: [0.08, 0.08, 2.0], at: [-1.0, 0.3, 0.4], colour: '#6c5944' }, { ball: [0.16, 0.16, 0.16], at: [1.3, 0.14, 0.8], colour: '#3f8a62' }] },
+  ash_buried: { sink: 0.3, shapes: [{ ball: [1.4, 0.38, 1.1], at: [0, 0, 0], colour: '#8d8883' }, { ball: [0.7, 0.24, 0.6], at: [1.1, 0, -0.6], colour: '#a39e98' }, { disc: 1.6, at: [0, 0.02, 0], colour: '#77726d' },
+    { box: [0.9, 0.6, 0.12], at: [-0.9, 0.3, 0.7], rot: [0.3, 0.4, 0.1], colour: '#9a4a2c' }] },
+  kiln_cache: { shapes: [{ ball: [1.15, 1.5, 1.15], at: [0, 0, -1.3], colour: '#3b383b' }, { box: [0.8, 0.7, 0.3], at: [0, 0.35, -0.2], colour: '#141214' }, { cyl: [0.2, 0.18, 0.6, 6], at: [0, 1.7, -1.3], colour: '#2f2d30' },
+    { ball: [0.3, 0.2, 0.3], at: [-0.9, 0.1, 0.4], colour: '#3f8a62' }, { ball: [0.22, 0.18, 0.22], at: [0.9, 0.1, 0.5], colour: '#c58b2c' }] },
 };
 const dressMats = new Map();
 function chestDress(look, root, geo, mat) {

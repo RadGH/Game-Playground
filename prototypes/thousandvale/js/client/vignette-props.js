@@ -9,13 +9,38 @@ import { buildTree } from '../../../../highdef-3d/js/kit/trees.js';
 import { buildGroundDetail } from '../../../../highdef-3d/js/kit/rocks.js';
 import { createDecor, foliageMaterials } from './decor.js';
 import { localToWorld } from './town-view.js';
+import { VHARL_FIRE } from './vharl-props.js';
 
-const RECIPE_FILES = ['m1', 'm2', 'm2b', 'curios'];   // curios (P19, E): same recipe shape, list key `curios`
+const RECIPE_FILES = ['m1', 'm2', 'm2b', 'curios', 'vharlen-vignettes', 'vharlen-curios'];   // curios (P19, E): same recipe shape, list key `curios`; vharlen-*: [W] the island's own
 let recipes = null;
 export function loadVignetteRecipes() {
   if (!recipes) recipes = Promise.all(RECIPE_FILES.map(f => fetch(new URL(`../../data/vignettes/${f}.json`, import.meta.url)).then(r => (r.ok ? r.json() : { vignettes: [] })).catch(() => ({ vignettes: [] }))))
     .then(list => new Map(list.flatMap(d => [...(d.vignettes || []), ...(d.curios || [])]).map(v => [v.id, v])));
   return recipes;
+}
+
+/**
+ * [W] Roadside dressing (`wayside` placements) the client DRAWS: Vharlen's own kinds (data/vignettes/vharlen-wayside.json).
+ * Torbor's wayside.json is not in this list on purpose — its dressing has never been drawn (only its lore line reaches the
+ * player) and Torbor's look stays as it is; a kind found here is drawn exactly like a curio (same props, same yaw rule).
+ */
+const DRAWN_WAYSIDE = ['vharlen-wayside'];
+let waysides = null;
+export function loadWaysideKinds() {
+  if (!waysides) waysides = Promise.all(DRAWN_WAYSIDE.map(f => fetch(new URL(`../../data/vignettes/${f}.json`, import.meta.url)).then(r => (r.ok ? r.json() : { kinds: [] })).catch(() => ({ kinds: [] }))))
+    .then(list => new Map(list.flatMap(d => d.kinds || []).map(k => [k.id, k])));
+  return waysides;
+}
+/** Every prop of the drawn wayside placements and of island folk camps (`folk` records carrying `props`), world metres. Pure. */
+export function waysidePropList(placements, kinds, ox = 0, oz = 0) {
+  const out = [];
+  for (const pl of placements || []) {
+    const props = pl.type === 'wayside' ? (kinds.get(pl.kind) || {}).props : pl.type === 'folk' ? pl.props : null;
+    if (!props) continue;
+    const px = pl.x + ox, pz = pl.z + oz, yaw = pl.yaw || 0;
+    for (const p of props) { const w = localToWorld(px, pz, yaw, p.x || 0, p.z || 0); out.push({ kind: p.kind, id: p.id, x: w.x, z: w.z, yaw: (p.yaw || 0) + yaw, scale: p.scale || 1, dead: !!p.dead, vignette: pl.id }); }
+  }
+  return out;
 }
 
 /** Every prop of every placement, in world metres. Pure given the recipes — exported for tests. */
@@ -32,7 +57,7 @@ export function vignettePropList(placements, byId, ox = 0, oz = 0) {
   return out;
 }
 
-const FIRE = new Set(['campfire', 'torch_post', 'fire_ring']);
+const FIRE = new Set(['campfire', 'torch_post', 'fire_ring', ...VHARL_FIRE]);
 const GROUND_GEO = new Map();
 
 export async function createVignetteProps(T, placements, { quality = 'high' } = {}) {

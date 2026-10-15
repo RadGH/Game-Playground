@@ -31,6 +31,7 @@ void worldTransform;
 // ---- the fog picture (one pixel per fog cell, drawn smoothed so the edge is soft) ------------------------------
 const fogCache = new WeakMap();
 function fogCanvas(fog, { playableBounds = null } = {}) {
+  const boxes = Array.isArray(playableBounds) ? playableBounds : playableBounds ? [playableBounds] : null;
   let c = fogCache.get(fog);
   if (c && c.version === fog.version) return c.canvas;
   const cv = c?.canvas || (typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(fog.cw, fog.ch) : Object.assign(document.createElement('canvas'), { width: fog.cw, height: fog.ch }));
@@ -40,10 +41,10 @@ function fogCanvas(fog, { playableBounds = null } = {}) {
     const o = (j * fog.cw + i) * 4;
     const seen = fog.has(i, j);
     let a = seen ? 0 : 150;
-    if (playableBounds) {
+    if (boxes) {
       const x = (i + 0.5) * fog.cell, z = (j + 0.5) * fog.cell;
-      const inside = x >= playableBounds.minX && x <= playableBounds.maxX && z >= playableBounds.minZ && z <= playableBounds.maxZ;
-      if (!inside) a = seen ? 60 : 120;          // the rest of the world: drawn, but dimmed — not open yet
+      const inside = boxes.some(b => x >= b.minX && x <= b.maxX && z >= b.minZ && z <= b.maxZ);
+      if (!inside) a = seen ? 20 : 45;           // the open sea between the continents: drawn, lightly shaded
     }
     img.data[o] = 24; img.data[o + 1] = 20; img.data[o + 2] = 15; img.data[o + 3] = a;
   }
@@ -136,7 +137,7 @@ export function drawMap(ctx, view, src) {
   }
   // fog of the map
   if (fog) {
-    const pb = model?.playable?.block ? { minX: model.playable.block[0] * ZONE_M, minZ: model.playable.block[1] * ZONE_M, maxX: (model.playable.block[0] + model.playable.size[0]) * ZONE_M, maxZ: (model.playable.block[1] + model.playable.size[1]) * ZONE_M } : null;
+    const pb = (model?.playables?.length ? model.playables : model?.playable ? [model.playable] : []).map(q => ({ minX: q.block[0] * ZONE_M, minZ: q.block[1] * ZONE_M, maxX: (q.block[0] + q.size[0]) * ZONE_M, maxZ: (q.block[1] + q.size[1]) * ZONE_M }));
     ctx.imageSmoothingEnabled = true;
     ctx.drawImage(fogCanvas(fog, { playableBounds: pb }), 0, 0, fog.cw * fog.cell, fog.ch * fog.cell);
   }
@@ -200,8 +201,8 @@ function drawLabels(ctx, view, { model, fog, opts = {} }) {
       if (!p.zones.length) continue;
       const [x, y] = view.toScreen(p.cx, p.cz);
       label(ctx, p.name, x, y, { size: p.playable ? 16 : 12, weight: p.playable ? 800 : 600, italic: !p.playable, color: p.playable ? '#2a1c0c' : '#4a3a28', font: p.playable ? 'Cinzel, Georgia, serif' : undefined, force: p.playable });
-      if (p.playable && model.playable?.band) label(ctx, bandText(model.playable.band) + ' · you are here', x, y + 16, { size: 11, weight: 800, color: COLORS.tone.fair, force: true });
-      else if (!p.playable) label(ctx, 'not open yet', x, y + 13, { size: 10, weight: 500, italic: true, color: '#5a4a38' });
+      const here = opts.here ? opts.here === p.id : p.id === model.playable?.id;
+      if (p.band) label(ctx, bandText(p.band) + (here ? ' · you are here' : ' · across the sea'), x, y + 16, { size: 11, weight: 800, color: here ? COLORS.tone.fair : '#4a3a28', force: true });
     }
   }
   if (s >= 0.02 && !opts.minimap) {

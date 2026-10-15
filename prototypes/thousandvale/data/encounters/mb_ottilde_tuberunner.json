@@ -1,0 +1,227 @@
+{
+  "id": "mb_ottilde_tuberunner",
+  "name": "Ottilde the Tube-Runner",
+  "tier": "miniboss",
+  "body": "ashback_salamander",
+  "place": "dungeon lava_tube set A (The Brineglass Tubes): floor 2's mini-boss",
+  "_doc": "A salamander that hunts the tubes at a run. P1 \"The Run\": she charges the length of the gallery and leaves a burning trail where she ran (pools), bites, and spits a glob that splashes. Three glass knobs stand in the room (pillars): her Sunflash glare is blocked by them. P2 at 45% \"Hot Tail\": she calls the crawlers out of the cracks and her tail lash sweeps a wide arc behind and in front.",
+  "party": "Solo: keep a glass knob between you and her for the glare. 2-3: tank faces her away; others hide. 5: the burning trails eat the floor fast — kite her along one wall.",
+  "hpMult": 2.1,
+  "arena": {
+    "radius": 12,
+    "objects": [
+      {
+        "id": "knob_a",
+        "type": "pillar",
+        "name": "Glass knob",
+        "x": -6,
+        "z": -4,
+        "r": 1.1,
+        "hp": 2
+      },
+      {
+        "id": "knob_b",
+        "type": "pillar",
+        "name": "Glass knob",
+        "x": 6,
+        "z": -4,
+        "r": 1.1,
+        "hp": 2
+      },
+      {
+        "id": "knob_c",
+        "type": "pillar",
+        "name": "Glass knob",
+        "x": 0,
+        "z": 6,
+        "r": 1.1,
+        "hp": 2
+      }
+    ]
+  },
+  "say": {
+    "pull": [
+      "A hiss and a flash of orange: something runs at you down the tube!",
+      "Ottilde skids to a stop, tongue tasting the air."
+    ],
+    "death": "Ottilde curls up in her own heat and goes dark.",
+    "reset": "Ottilde runs off up the tube, too quick to follow."
+  },
+  "enrage": {
+    "seconds": 280,
+    "damage": 2.5,
+    "say": "Ottilde burns white-hot!"
+  },
+  "abilities": {
+    "bite": {
+      "id": "bite",
+      "name": "Snapping Bite",
+      "every": [
+        4,
+        6
+      ],
+      "range": 5,
+      "melee": {
+        "damage": 1.2
+      },
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 4.5,
+          "arc": 1.2,
+          "wind": 0.9,
+          "damage": 1.3
+        }
+      ]
+    },
+    "tube_run": {
+      "id": "tube_run",
+      "name": "Tube Run",
+      "every": [
+        12,
+        15
+      ],
+      "first": 4,
+      "cast": 0.6,
+      "say": "Ottilde drops low — she is going to run!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "target",
+          "len": 18,
+          "w": 3,
+          "wind": 1.4,
+          "damage": 1.8,
+          "element": "fire",
+          "knock": 2,
+          "leave": {
+            "type": "pool",
+            "name": "Burning trail",
+            "r": 2,
+            "every": 1,
+            "seconds": 12,
+            "damage": 0.3,
+            "status": "burn",
+            "element": "fire"
+          }
+        }
+      ]
+    },
+    "spit": {
+      "id": "spit",
+      "name": "Slag Spit",
+      "every": [
+        8,
+        10
+      ],
+      "first": 2,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "farthest",
+          "r": 3,
+          "wind": 1.3,
+          "damage": 1.3,
+          "element": "fire",
+          "status": "burn"
+        }
+      ]
+    },
+    "sunflash": {
+      "id": "sunflash",
+      "name": "Sunflash",
+      "every": [
+        17,
+        20
+      ],
+      "first": 9,
+      "cast": 1.2,
+      "say": "Her hide flares blinding bright — get behind a glass knob!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 14,
+          "wind": 2,
+          "damage": 2.4,
+          "element": "fire",
+          "los": true,
+          "status": "seared"
+        }
+      ]
+    },
+    "tail_lash": {
+      "id": "tail_lash",
+      "name": "Tail Lash",
+      "every": [
+        9,
+        11
+      ],
+      "first": 3,
+      "cast": 0.4,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 6,
+          "arc": 1.6,
+          "wind": 1,
+          "damage": 1.6
+        },
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 6,
+          "arc": 1.6,
+          "yaw": 3.14,
+          "wind": 1,
+          "damage": 1.6,
+          "knock": 3
+        }
+      ]
+    },
+    "cracks": {
+      "id": "cracks",
+      "name": "Out of the Cracks",
+      "every": [
+        22,
+        26
+      ],
+      "first": 2,
+      "say": "Ottilde shrieks and the cracks start crawling.",
+      "actions": [
+        {
+          "adds": {
+            "type": "scoria_crawler",
+            "count": 2,
+            "radius": 7
+          }
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "The Run",
+      "abilities": [
+        "bite",
+        "tube_run",
+        "spit",
+        "sunflash"
+      ]
+    },
+    {
+      "name": "Hot Tail",
+      "at": 0.45,
+      "say": "Ottilde lashes her tail — the whole tube shakes!",
+      "abilities": [
+        "bite",
+        "tail_lash",
+        "cracks",
+        "sunflash",
+        "tube_run"
+      ]
+    }
+  ]
+}

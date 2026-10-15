@@ -15,12 +15,24 @@
 //
 //   node tools/content-events.mjs            write
 //   node tools/content-events.mjs --check    exit 1 when a file would change (tests use eventInfo() directly)
-import { readFileSync, writeFileSync } from 'node:fs';
+//   --province=<id>   only that province's events (their zones are in its province-map entry; default torbor_downs) and
+//                     its own road-events file (data/provinces/<id>-road-events.json, when it has one). An event TEXT
+//                     does not know may carry its own words on the record: `words: [what, objective, onSuccess, onFail]`.
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { HOME_PROVINCE, provinceArg, provinceDataPath } from '../js/sim/province-files.js';
 
 const ROOT = new URL('../', import.meta.url);
+const PROV = provinceArg(process.argv);
 const EVENTS = new URL('data/quests/events.json', ROOT);
-const ROAD = new URL('data/provinces/road-events.json', ROOT);
+const ROAD = new URL(provinceDataPath(PROV, 'road-events'), ROOT);
+/** Is E zone `eid` this province's? (a zone in no province's map is the home province's) */
+function zoneBelongs(prov, eid) {
+  let maps = {};
+  try { maps = JSON.parse(readFileSync(new URL('data/world/province-map.json', ROOT), 'utf8')).provinces || {}; } catch { /* none */ }
+  for (const [k, m] of Object.entries(maps)) if (m && m.map && Object.prototype.hasOwnProperty.call(m.map, eid)) return k === prov;
+  return prov === HOME_PROVINCE;
+}
 
 // ---------------------------------------------------------------------------------------------------- the words
 // [what, objective text, onSuccess, onFail]
@@ -142,9 +154,9 @@ export function questRewardText(spec) {
   return s[0].toUpperCase() + s.slice(1);
 }
 
-const words = id => { const t = TEXT[id]; if (!t || t.length !== 4 || t.some(x => !x)) throw new Error(`no event text for "${id}" — add it to TEXT in tools/content-events.mjs`); return t; };
-const block = (name, id, objective, durationSec, rewardText) => {
-  const [what, text, onSuccess, onFail] = words(id);
+const words = (id, rec = null) => { const t = TEXT[id] || (rec && rec.words); if (!t || t.length !== 4 || t.some(x => !x)) throw new Error(`no event text for "${id}" — add it to TEXT in tools/content-events.mjs`); return t; };
+const block = (name, id, objective, durationSec, rewardText, rec = null) => {
+  const [what, text, onSuccess, onFail] = words(id, rec);
   return { name, what, objective: { kind: objective.kind, text, count: objective.count, unit: objective.unit }, durationSec, onSuccess, onFail, rewardText };
 };
 
@@ -154,16 +166,16 @@ export const stagesOf = ev => (ev.waves || []).length + 1;
 export function runnerInfo(ev) {
   const waves = (ev.waves || []).length;
   const obj = waves ? { kind: 'waves_boss', count: stagesOf(ev), unit: 'stages' } : { kind: 'boss', count: 1, unit: 'boss' };
-  return block(ev.name, ev.id, obj, Math.round((ev.durationMinutes || 10) * 60), runnerRewardText(ev));
+  return block(ev.name, ev.id, obj, Math.round((ev.durationMinutes || 10) * 60), runnerRewardText(ev), ev);
 }
 /** Road-event durations: a chest packs up after rules.lifeSec; the walking kinds get longer, a rescue (a fight first) longest. */
 export const roadDuration = (kind, rules) => { const life = (rules && rules.lifeSec) || 600; return kind === 'chest' ? life : kind === 'rescue' ? life * 2 : kind === 'ambush' ? 120 : Math.round(life * 1.5); };
 export function roadInfo(kind, spec, rules) {
   const d = roadDuration(kind, rules);
-  if (kind === 'chest') return block(spec.name, spec.id, { kind: 'open', count: 1, unit: 'chest' }, d, chestRewardText(spec));
-  if (kind === 'deliver') return block(spec.title, spec.id, { kind: 'deliver', count: 1, unit: 'delivery' }, d, questRewardText(spec));
-  if (kind === 'escort') return block(spec.title, spec.id, { kind: 'escort', count: 1, unit: 'arrival' }, d, questRewardText(spec));
-  if (kind === 'rescue') return block(spec.title, spec.id, { kind: 'rescue', count: 2, unit: 'steps' }, d, questRewardText(spec));
+  if (kind === 'chest') return block(spec.name, spec.id, { kind: 'open', count: 1, unit: 'chest' }, d, chestRewardText(spec), spec);
+  if (kind === 'deliver') return block(spec.title, spec.id, { kind: 'deliver', count: 1, unit: 'delivery' }, d, questRewardText(spec), spec);
+  if (kind === 'escort') return block(spec.title, spec.id, { kind: 'escort', count: 1, unit: 'arrival' }, d, questRewardText(spec), spec);
+  if (kind === 'rescue') return block(spec.title, spec.id, { kind: 'rescue', count: 2, unit: 'steps' }, d, questRewardText(spec), spec);
   throw new Error('unknown road event kind ' + kind);
 }
 export function codedInfo(rules) {
@@ -190,15 +202,17 @@ export function roadText(d) {
 const DOC_EVENTS = ' INFO (play-test 5 T12, tools/content-events.mjs): every realm and zone event carries `info` = { name, what (one sentence), objective { kind, text, count, unit } (count = what the server counts: stages = waves + the boss), durationSec (the hard limit: at 0 the event FAILS), onSuccess / onFail (the result line), rewardText (a preview composed from `reward`) }. Never edit `info` by hand: change the words in the tool and re-run it.';
 const DOC_ROAD = ' INFO (play-test 5 T12, tools/content-events.mjs): every chest and every deliver / escort / rescue variant carries `info` = { name, what (one sentence), objective { kind, text, count, unit }, durationSec, onSuccess, onFail, rewardText } with the same {name} {town} {npc} {guards} slots as the rest of the record; `coded` holds the info of kinds the server starts from code (the escort `ambush`). Never edit `info` by hand: change the words in the tool and re-run it.';
 
-export function build() {
+export function build(prov = PROV) {
   const ev = JSON.parse(readFileSync(EVENTS, 'utf8'));
-  for (const e of [...ev.realm, ...ev.zone]) e.info = runnerInfo(e);
+  for (const e of [...ev.realm, ...ev.zone]) if ((e.zones || [e.zone]).every(z => zoneBelongs(prov, z))) e.info = runnerInfo(e);     // only this province's events
   if (!ev._doc.includes('INFO (play-test 5 T12')) ev._doc += DOC_EVENTS;
-  const road = JSON.parse(readFileSync(ROAD, 'utf8'));
-  for (const c of road.chests) c.info = roadInfo('chest', c, road.rules);
-  for (const k of ['deliver', 'escort', 'rescue']) for (const s of road[k]) s.info = roadInfo(k, s, road.rules);
+  const roadUrl = new URL(provinceDataPath(prov, 'road-events'), ROOT);
+  if (!existsSync(roadUrl)) return { events: JSON.stringify(ev, null, 2) + '\n', road: null };      // another province borrowing the home road events
+  const road = JSON.parse(readFileSync(roadUrl, 'utf8'));
+  for (const c of road.chests || []) c.info = roadInfo('chest', c, road.rules);
+  for (const k of ['deliver', 'escort', 'rescue']) for (const s of road[k] || []) s.info = roadInfo(k, s, road.rules);
   road.coded = codedInfo(road.rules);
-  if (!road._doc.includes('INFO (play-test 5 T12')) road._doc += DOC_ROAD;
+  if (!(road._doc || '').includes('INFO (play-test 5 T12')) road._doc = (road._doc || '') + DOC_ROAD;
   return { events: JSON.stringify(ev, null, 2) + '\n', road: roadText(road) };
 }
 
@@ -208,6 +222,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const check = process.argv.includes('--check');
   let changed = 0;
   for (const [url, text] of [[EVENTS, out.events], [ROAD, out.road]]) {
+    if (text == null) continue;
     if (readFileSync(url, 'utf8') === text) continue;
     changed++;
     if (!check) writeFileSync(url, text);

@@ -114,6 +114,14 @@ export const CULTURES = {
     plotMin: 7, storeys: [1, 3], wall: 'mudbrick', street: 'sand',
     cornerstones: ['bazaar', 'windcatcher'],
   },
+  // Thousandvale's Burning Isle (docs/EXPANSION-1.md): island folk who lift their houses on stilts clear of the ash and the
+  // mud. Wide, wandering blocks (a stilt house wants room round it for its stair) with big plots, never more than two
+  // storeys. Opt-in by name only: no race maps to it, so no existing settlement changes.
+  vharl: {
+    name: 'Vharl', grammar: 'grown', jitter: 0.40, blockMin: 10, blockMax: 17,
+    plotMin: 6.5, storeys: [1, 2], wall: 'palisade', street: 'ash',
+    cornerstones: ['fire_hall', 'stilt_row'],
+  },
 };
 
 /**

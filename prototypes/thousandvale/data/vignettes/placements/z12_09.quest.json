@@ -5,39 +5,19 @@
  "placements": [
   {
    "type": "camp",
-   "id": "quest_sw_steam_in_a_jar_0_0",
-   "monster": "vent_wisp",
-   "with": null,
-   "level": [
-    12,
-    12
-   ],
-   "count": [
-    2,
-    2
-   ],
-   "x": 1372,
-   "z": 1618,
-   "yaw": 0,
-   "radius": 8,
-   "quest": "sw_steam_in_a_jar",
-   "hunt": true
-  },
-  {
-   "type": "camp",
    "id": "champ_z12_09_1",
-   "monster": "sulphur_toad",
+   "monster": "ashback_salamander",
    "with": null,
    "level": [
-    12,
-    12
+    11,
+    11
    ],
    "count": [
     1,
     1
    ],
-   "x": 1000,
-   "z": 1264,
+   "x": 807,
+   "z": 1304,
    "yaw": 0,
    "radius": 5,
    "rank": "champion",
@@ -54,51 +34,23 @@
   {
    "type": "camp",
    "id": "champ_z12_09_2",
-   "monster": "vent_wisp",
+   "monster": "steamwood_prowler",
    "with": null,
    "level": [
-    12,
-    12
+    13,
+    13
    ],
    "count": [
     1,
     1
    ],
-   "x": 431,
-   "z": 1382,
+   "x": 459,
+   "z": 1393,
    "yaw": 0,
    "radius": 5,
    "rank": "champion",
    "affixes": [
     "ironclad"
-   ],
-   "respawnMin": [
-    4,
-    8
-   ],
-   "champion": true,
-   "hunt": true
-  },
-  {
-   "type": "camp",
-   "id": "champ_z12_09_3",
-   "monster": "steamwood_prowler",
-   "with": null,
-   "level": [
-    12,
-    12
-   ],
-   "count": [
-    1,
-    1
-   ],
-   "x": 81,
-   "z": 1376,
-   "yaw": 0,
-   "radius": 5,
-   "rank": "champion",
-   "affixes": [
-    "venomous"
    ],
    "respawnMin": [
     4,

@@ -62,14 +62,16 @@
       "name": "Cave mouth",
       "x": 1462,
       "z": 1225,
-      "yaw": -2.035
+      "yaw": -2.035,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_pumice_wastes",
       "x": 1079,
       "z": 992,
-      "r": 40
+      "r": 40,
+      "pinned": true
     }
   ],
   "spawn": {
@@ -134,16 +136,16 @@
     ],
     "roads": 2,
     "bridges": 0,
-    "paths": 6,
-    "pathMetres": 781,
-    "scatter": 3444,
+    "paths": 8,
+    "pathMetres": 1012,
+    "scatter": 3433,
     "scatterKinds": {
-      "tree_charred": 1040,
-      "obsidian": 543,
-      "rock_small": 1507,
-      "basalt_columns": 342,
-      "steam_vent": 2,
-      "ironpalm": 10
+      "tree_charred": 1034,
+      "obsidian": 532,
+      "rock_small": 1514,
+      "basalt_columns": 341,
+      "ironpalm": 10,
+      "steam_vent": 2
     },
     "sites": [
       "settlement(HUB) town Lastwell 1312 1144 90",
@@ -154,13 +156,13 @@
       "x": 1312,
       "z": 1144
     },
-    "placements": 125,
-    "vignettesAvoided": 474
+    "placements": 127,
+    "vignettesAvoided": 491
   },
   "files": {
-    "terrain.bin": 351341,
-    "nav.bin": 17672,
-    "scatter.bin": 27636,
-    "placements.json": 90085
+    "terrain.bin": 351480,
+    "nav.bin": 17711,
+    "scatter.bin": 27548,
+    "placements.json": 96354
   }
 }

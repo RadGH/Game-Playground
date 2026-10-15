@@ -35,7 +35,7 @@
       "name": "Ashka Askaru",
       "role": "carter",
       "at": "Kilnhold",
-      "greeting": "Name a town. If it has a gate, I have been stuck outside it.",
+      "greeting": "Name a town. If it has a gate, I have waited outside it in the steam.",
       "cart": "cart_kilnhold",
       "placedBy": "content-towns",
       "titled": true

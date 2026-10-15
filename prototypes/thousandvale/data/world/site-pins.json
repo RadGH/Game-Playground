@@ -1,5 +1,5 @@
 {
- "_doc": "Stream B. Door / event / camp sites PINNED at the positions stream E placed its content around (from the bake committed in ad99280). tools/bake-zone.mjs uses a pin instead of searching while it stays clear of every settlement, so a re-bake (which keeps scatter off E's discs) can never move a site E already avoided \u2014 the B<->E placement loop is closed. Delete a zone's entry to let the bake search again (then E re-places).",
+ "_doc": "Stream B. Door / event / camp sites PINNED at the positions stream E placed its content around (from the bake committed in ad99280). tools/bake-zone.mjs uses a pin instead of searching while it stays clear of every settlement, so a re-bake (which keeps scatter off E's discs) can never move a site E already avoided \u2014 the B<->E placement loop is closed. Delete a zone's entry to let the bake search again (then E re-places). Vharlen (stream W, Expansion 1): its nine zones' doors and event arenas pinned where the island bake put them, so the door's waystone can stand 10-30 m from it (an unpinned door keeps everything 41 m off for the bake's re-search, which is why every island door had no stone).",
  "z11_01": {
   "door_1": {
    "x": 1908,
@@ -182,6 +182,109 @@
   "event_sunken_wolds": {
    "x": 1068,
    "z": 1007
+  }
+ },
+ "z13_10": {
+  "door_1": {
+   "x": 930,
+   "z": 813,
+   "yaw": 1.114
+  },
+  "event_blackstrand": {
+   "x": 1046,
+   "z": 1043
+  }
+ },
+ "z12_09": {
+  "door_1": {
+   "x": 1164,
+   "z": 1502,
+   "yaw": 2.27
+  },
+  "event_steamwood": {
+   "x": 1093,
+   "z": 1237
+  }
+ },
+ "z13_09": {
+  "door_1": {
+   "x": 308,
+   "z": 1462,
+   "yaw": 2.078
+  },
+  "event_sulphur_bight": {
+   "x": 770,
+   "z": 1303
+  }
+ },
+ "z13_11": {
+  "door_1": {
+   "x": 270,
+   "z": 690,
+   "yaw": 0.982
+  },
+  "event_fumarole_fen": {
+   "x": 925,
+   "z": 601
+  }
+ },
+ "z11_09": {
+  "door_1": {
+   "x": 1792,
+   "z": 1572,
+   "yaw": -2.538
+  },
+  "event_glasswind_strand": {
+   "x": 1354,
+   "z": 1298
+  }
+ },
+ "z11_10": {
+  "door_1": {
+   "x": 1462,
+   "z": 1225,
+   "yaw": -2.035
+  },
+  "event_pumice_wastes": {
+   "x": 1079,
+   "z": 992
+  }
+ },
+ "z12_11": {
+  "door_1": {
+   "x": 1149,
+   "z": 601,
+   "yaw": -0.382
+  },
+  "event_ashfall_hollow": {
+   "x": 1054,
+   "z": 880
+  }
+ },
+ "z11_11": {
+  "door_1": {
+   "x": 1669,
+   "z": 639,
+   "yaw": -2.157
+  },
+  "event_kiln_ridge": {
+   "x": 1312,
+   "z": 730
+  }
+ },
+ "z12_10": {
+  "door_1": {
+   "x": 1535,
+   "z": 1127,
+   "yaw": 2.468
+  },
+  "world_ossathra": {
+   "x": 1142,
+   "z": 1048
+  },
+  "event_the_caldera": {
+   "x": 1280,
+   "z": 966
   }
  }
 }

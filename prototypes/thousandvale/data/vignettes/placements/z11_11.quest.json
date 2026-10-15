@@ -5,8 +5,8 @@
  "placements": [
   {
    "type": "camp",
-   "id": "quest_kr_the_basalt_steps_0_0",
-   "monster": "obsidian_warden",
+   "id": "quest_kr_the_basalt_tyrant_0_0",
+   "monster": "pumice_golem",
    "with": null,
    "level": [
     17,
@@ -16,50 +16,30 @@
     2,
     2
    ],
-   "x": 1344,
-   "z": 240,
+   "x": 1421,
+   "z": 359,
    "yaw": 0,
    "radius": 8,
-   "quest": "kr_the_basalt_steps",
+   "quest": "kr_the_basalt_tyrant",
    "hunt": true
   },
   {
    "type": "camp",
-   "id": "quest_kr_quarry_quills_0_0",
-   "monster": "glasswing",
-   "with": null,
-   "level": [
-    16,
-    16
-   ],
-   "count": [
-    2,
-    2
-   ],
-   "x": 1430,
-   "z": 501,
-   "yaw": 0,
-   "radius": 8,
-   "quest": "kr_quarry_quills",
-   "hunt": true
-  },
-  {
-   "type": "camp",
-   "id": "quest_kr_the_basalt_tyrant_0_0",
+   "id": "quest_kr_the_basalt_tyrant_0_1",
    "monster": "pumice_golem",
    "with": null,
    "level": [
-    16,
-    16
+    17,
+    17
    ],
    "count": [
-    2,
-    2
+    1,
+    1
    ],
-   "x": 1638,
-   "z": 676,
+   "x": 1421,
+   "z": 359,
    "yaw": 0,
-   "radius": 6,
+   "radius": 8,
    "quest": "kr_the_basalt_tyrant",
    "hunt": true
   },

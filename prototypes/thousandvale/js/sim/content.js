@@ -9,7 +9,14 @@
 import { provinceData, namesPath, HOME_PROVINCE } from './province-files.js';
 
 export const PROVINCE_FILES = ['data/provinces/torbor_downs.json'];      // the single-zone loader's sheets (loadZoneContent); a whole province reads data/provinces/<id>.json
-export const VIGNETTE_FILES = ['data/vignettes/m1.json', 'data/vignettes/m2.json', 'data/vignettes/m2b.json', 'data/vignettes/curios.json', 'data/vignettes/setpieces.json'];   // curios: P19 mini vignettes; setpieces: play-test 2 Q18
+export const VIGNETTE_FILES = ['data/vignettes/m1.json', 'data/vignettes/m2.json', 'data/vignettes/m2b.json', 'data/vignettes/curios.json', 'data/vignettes/setpieces.json',
+  'data/vignettes/vharlen-vignettes.json', 'data/vignettes/vharlen-curios.json'];   // curios: P19 mini vignettes; setpieces: play-test 2 Q18; vharlen-*: [W] the island's own (ids `vh_`, never a Torbor id)
+/** [W] Files whose `curios` list is read as recipes. Torbor's curios.json lists its recipes under `curios`, which this loader
+ *  has never read (only `vignettes`), so its curio objects have never reached the server; that is left exactly as it
+ *  was here (reported to the lead) and only the island's own curio file is read. */
+const OWN_CURIOS = new Set(['data/vignettes/vharlen-curios.json']);
+/** Roadside dressing kinds (`wayside` placements): Torbor's and each other province's own catalogue ([W] ids `vh_`). */
+export const WAYSIDE_FILES = ['data/vignettes/wayside.json', 'data/vignettes/vharlen-wayside.json'];
 
 export async function loadZoneContent(readJson, zone = 'test') {
   const out = { sheet: null, encounterInfo: {}, vignettes: null };
@@ -24,7 +31,7 @@ export async function loadZoneContent(readJson, zone = 'test') {
   // vignettes: every recipe file + this zone's placements (stream E)
   try {
     const recipes = [];
-    for (const f of VIGNETTE_FILES) { try { const d = await readJson(f); recipes.push(...(d.vignettes || [])); } catch { /* skip */ } }
+    for (const f of VIGNETTE_FILES) { try { const d = await readJson(f); recipes.push(...(d.vignettes || []), ...(OWN_CURIOS.has(f) ? d.curios || [] : [])); } catch { /* skip */ } }
     const placements = await readJson(`data/vignettes/placements/${zone}.json`);
     out.vignettes = { recipes, placements: placements.placements || [] };
   } catch { out.vignettes = null; }
@@ -54,7 +61,7 @@ export async function loadProvinceContent(readJson, readBytes, provinceId, { par
   // always did; another province its own `<prov>-<file>` (shared rules lent from Torbor's where it has none)
   const pdata = thing => provinceData(readJson, provinceId, thing);
   const recipes = [];
-  for (const f of VIGNETTE_FILES) { try { recipes.push(...((await readJson(f)).vignettes || [])); } catch { /* skip */ } }
+  for (const f of VIGNETTE_FILES) { try { const d = await readJson(f); recipes.push(...(d.vignettes || []), ...(OWN_CURIOS.has(f) ? d.curios || [] : [])); } catch { /* skip */ } }
   // what E's placements refer to: site templates, hooks, treasure chains (per zone: its quest file)
   const opt = async f => { try { return await readJson(f); } catch { return null; } };
   const sites = await pdata('sites');
@@ -74,7 +81,8 @@ export async function loadProvinceContent(readJson, readBytes, provinceId, { par
     }
     return out;
   };
-  const wayside = Object.fromEntries((((await opt('data/vignettes/wayside.json')) || {}).kinds || []).map(k => [k.id, k]));   // roadside dressing kinds
+  const wayside = {};   // roadside dressing kinds (every province's catalogue: ids never collide)
+  for (const f of WAYSIDE_FILES) for (const k of (((await opt(f)) || {}).kinds || [])) wayside[k.id] = k;
   const zones = [], parts = [];
   for (const [eid, wid] of Object.entries(map.map)) {
     let reader;

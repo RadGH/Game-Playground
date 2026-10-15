@@ -9,6 +9,20 @@ export const ROOT = new URL('../', import.meta.url);
 export const J = p => JSON.parse(readFileSync(new URL(p, ROOT), 'utf8'));
 export const VIGNETTE_FILES = ['data/vignettes/m1.json', 'data/vignettes/m2.json', 'data/vignettes/m2b.json'];
 export const allVignettes = () => VIGNETTE_FILES.flatMap(f => J(f).vignettes);
+/**
+ * [W] A province's own wilderness dressing (Expansion 1): data/vignettes/<prov>-vignettes.json / -curios.json /
+ * -wayside.json when the province has them, else the home catalogues — so an island is never dressed with Torbor's
+ * sheep pens and scarecrows, and a Torbor run reads exactly the files it always did. -> { vignettes, curios, wayside }
+ */
+export function provinceDressing(prov = HOME_PROVINCE) {
+  const own = f => (prov && prov !== HOME_PROVINCE && existsSync(new URL(`data/vignettes/${prov}-${f}.json`, ROOT)) ? J(`data/vignettes/${prov}-${f}.json`) : null);
+  const v = own('vignettes'), c = own('curios'), w = own('wayside');
+  return {
+    vignettes: v ? v.vignettes : allVignettes(),
+    curios: c ? c.curios : ((existsSync(new URL('data/vignettes/curios.json', ROOT)) ? J('data/vignettes/curios.json') : { curios: [] }).curios),
+    wayside: w ? w.kinds : J('data/vignettes/wayside.json').kinds,
+  };
+}
 const NOT_ZONE = new Set(['jobs.json', 'treasure.json', 'province.json', 'events.json']);
 /**
  * A zone's quest file plus the PARTS it names in `include` (play-test 2: start.json, classes.json, setpieces.json —

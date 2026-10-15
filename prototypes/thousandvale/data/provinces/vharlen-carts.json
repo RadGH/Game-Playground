@@ -1,8 +1,8 @@
 {
  "_doc": "Stream E (owner feedback 8, W5: \"ox carts at towns, and sometimes travelling the road, that act as PAID fast travel to other towns\"). THE CARTERS. `rules` = how a ride works; `stops` = one per settlement of the province (a carter and a parked ox cart outside its main gate; x, z of a stop are WORLD metres like the routes file, `carter` and `cart` are ZONE metres like every placement — tools/content-hunts.mjs copies them into <zone>.quest.json as an `npc` row with role carter and a `cart` row, which is what the server spawns); `links` = which stops are joined directly (a road from data/provinces/torbor_downs-routes.json, or `overland: true` = a back lane the routes file does not list, at 1.3 x the straight line); `fares` = for every stop, every other stop with the road metres, the number of towns passed (`hops`), the first stop on the way (`next`) and the gold — already worked out with data/provinces/economy.json `cart` (cartFare = max(minGold, round(base + metres / metresPerGold))), so nothing computes a path at run time; `roaming` = the carts you meet on the road. Made by tools/content-towns.mjs; a test fails when the fares do not match economy.json.",
  "service": {
-  "name": "the Longroad Carters",
-  "line": "An ox does not hurry, but it does arrive."
+  "name": "the Ash-Road Haulers",
+  "line": "Slow wheels, hot roads, and we always get there."
  },
  "rules": {
   "boardM": 6,
@@ -22,28 +22,38 @@
    "same": "You are standing in {town}."
   },
   "says": [
-   "Where to? The ox knows every road in the Downs.",
-   "Climb up. Mind the turnips.",
-   "Slow and sure. Mostly sure."
+   "Where to? The cart knows every road on the island, and the cracks in most of them.",
+   "Climb up. Mind the sulphur sacks.",
+   "Slow and steady. The mountain does the hurrying."
+  ],
+  "greetings": [
+   "Where to? The cart knows every road on the island, and takes the cool side when it can.",
+   "Climb up. Mind the sulphur sacks. A few coins and you are in another town before your soles notice.",
+   "Ash-Road Haulers. We go everywhere there is a gate, and we are never late, because we never say when.",
+   "Walking is free. Riding is nearly free, and you arrive with your feet unboiled.",
+   "Name a town. If it has a gate, I have waited outside it in the steam.",
+   "The beast is called Breeze. It is a joke. Where are we going?",
+   "I do not go fast, I do not go near vents, and I do not stop for raiders. Fares are on the board.",
+   "Out of {town} by cart is the only way to leave without ash in your boots. Pick a town."
   ],
   "_doc": "A ride needs no waystone and no discovery (that is the point of it: it takes you somewhere you have never been). Talk to a carter (or use the cart) within boardM, pick a town, pay the fare, arrive beside that town cart after a short ride (rideSecPerKm x km of road, clamped to min/max — the client shows you on the cart). A `cart_token` good (the start chain gives one) pays any ONE fare."
  },
  "roaming": {
-  "kind": "ox_carter",
-  "from": "data/provinces/wanderers.json kinds.ox_carter",
+  "kind": "ash_hauler",
+  "from": "data/provinces/vharlen-wanderers.json kinds.ash_hauler",
   "takesYouTo": "any stop, at the fare from the stop the cart is walking TO (its next town)",
   "flagDown": "use the carter or the cart while it is within rules.flagDownM; the group stops for you (stopNear)",
   "_doc": "A few carts walk the real routes like any traveller. Flag one down and the same route window opens, priced from the town it is heading for.",
   "runs": [
    {
-    "id": "cart_run_torborhold_orrinsford",
-    "route": "route_torborhold_orrinsford",
+    "id": "cart_run_port_vharl_yellowpan",
+    "route": "route_port_vharl_yellowpan",
     "only": [
-     "ox_carter"
+     "ash_hauler"
     ],
     "carts": 1,
-    "name": "the Orrinsford run",
-    "_doc": "A cart that is ALWAYS on the road between Torborhold and Orrinsford, so a newcomer walking the start chain meets one and a test can flag one down: a route of its own over the same road (`route` = the data/provinces/torbor_downs-routes.json id whose points it uses) on which ONLY `only` kinds walk. tests/E/playtest8-roaming.test.js walks a real cart along it and flags it down through js/sim/travellers.js + js/sim/carts.js. Ask of stream A (two lines, js/sim/content.js): add each run to `travel.routes` as { ...route, id, kinds: only, only: true } and do NOT append the wanderer kinds to a route with `only`."
+    "name": "the Yellowpan run",
+    "_doc": "A hauler's cart ALWAYS on the road between Port Vharl and Yellowpan, so a newcomer off the ship meets one: a route of its own over the same road (`route` = the data/provinces/vharlen-routes.json id whose points it uses) on which ONLY `only` kinds walk (js/sim/content.js). Stream W (Expansion 1): it named Torbor's Torborhold-Orrinsford road before, which the island has not got, so the server skipped it."
    }
   ]
  },
@@ -132,7 +142,7 @@
    "sheet": "fumarole_fen",
    "x": 27064,
    "z": 23112,
-   "gate": "stiltreach_gate_0",
+   "gate": "stiltreach_gate_1",
    "fromGate": 17,
    "carter": {
     "id": "carter_stiltreach",

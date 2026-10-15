@@ -62,14 +62,16 @@
       "name": "Cave mouth",
       "x": 308,
       "z": 1462,
-      "yaw": 2.078
+      "yaw": 2.078,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_sulphur_bight",
       "x": 770,
       "z": 1303,
-      "r": 40
+      "r": 40,
+      "pinned": true
     }
   ],
   "spawn": {
@@ -162,17 +164,17 @@
     ],
     "roads": 2,
     "bridges": 0,
-    "paths": 7,
-    "pathMetres": 2004,
-    "scatter": 3138,
+    "paths": 8,
+    "pathMetres": 2088,
+    "scatter": 3085,
     "scatterKinds": {
-      "rock_small": 264,
-      "ironpalm": 314,
-      "obsidian": 18,
-      "sulphur_crust": 699,
-      "bush": 949,
-      "tree_fern": 800,
-      "steam_vent": 92,
+      "rock_small": 266,
+      "ironpalm": 299,
+      "obsidian": 20,
+      "sulphur_crust": 695,
+      "bush": 955,
+      "tree_fern": 753,
+      "steam_vent": 95,
       "basalt_columns": 2
     },
     "sites": [
@@ -184,13 +186,13 @@
       "x": 516,
       "z": 1582
     },
-    "placements": 88,
-    "vignettesAvoided": 169
+    "placements": 89,
+    "vignettesAvoided": 164
   },
   "files": {
-    "terrain.bin": 231734,
-    "nav.bin": 8092,
-    "scatter.bin": 25188,
-    "placements.json": 99883
+    "terrain.bin": 231703,
+    "nav.bin": 7916,
+    "scatter.bin": 24764,
+    "placements.json": 103868
   }
 }

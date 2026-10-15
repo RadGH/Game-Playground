@@ -62,21 +62,24 @@
       "name": "Cave mouth",
       "x": 1535,
       "z": 1127,
-      "yaw": 2.468
+      "yaw": 2.468,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "world_ossathra",
       "x": 1142,
       "z": 1048,
-      "r": 100
+      "r": 100,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_the_caldera",
       "x": 1280,
       "z": 966,
-      "r": 40
+      "r": 40,
+      "pinned": true
     }
   ],
   "spawn": {
@@ -155,19 +158,19 @@
     "roads": 1,
     "bridges": 0,
     "paths": 9,
-    "pathMetres": 1712,
-    "scatter": 4523,
+    "pathMetres": 2681,
+    "scatter": 4504,
     "scatterKinds": {
-      "obsidian": 704,
+      "obsidian": 695,
       "tree_fern": 166,
       "ironpalm": 25,
       "bush": 213,
-      "basalt_columns": 920,
-      "rock_small": 1397,
-      "steam_vent": 193,
-      "sulphur_crust": 87,
-      "reed": 755,
-      "tree_charred": 63
+      "basalt_columns": 915,
+      "rock_small": 1398,
+      "steam_vent": 190,
+      "sulphur_crust": 86,
+      "reed": 754,
+      "tree_charred": 62
     },
     "sites": [
       "settlement(HUB) hamlet Rim Shrine 1794 1148 40",
@@ -180,12 +183,12 @@
       "z": 1148
     },
     "placements": 63,
-    "vignettesAvoided": 579
+    "vignettesAvoided": 600
   },
   "files": {
-    "terrain.bin": 421299,
-    "nav.bin": 28603,
-    "scatter.bin": 36268,
-    "placements.json": 85036
+    "terrain.bin": 421723,
+    "nav.bin": 28945,
+    "scatter.bin": 36116,
+    "placements.json": 105827
   }
 }

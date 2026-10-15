@@ -9,15 +9,35 @@
    "monster": "obsidian_warden",
    "with": null,
    "level": [
-    19,
-    19
+    18,
+    18
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1717,
+   "z": 842,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "cd_the_rim_holds",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_cd_the_rim_holds_0_1",
+   "monster": "obsidian_warden",
+   "with": null,
+   "level": [
+    18,
+    18
    ],
    "count": [
     1,
     1
    ],
-   "x": 1968,
-   "z": 1864,
+   "x": 1717,
+   "z": 842,
    "yaw": 0,
    "radius": 8,
    "quest": "cd_the_rim_holds",
@@ -36,30 +56,10 @@
     2,
     2
    ],
-   "x": 1569,
-   "z": 961,
+   "x": 1653,
+   "z": 1143,
    "yaw": 0,
-   "radius": 7,
-   "quest": "cd_lake_shore",
-   "hunt": true
-  },
-  {
-   "type": "camp",
-   "id": "quest_cd_lake_shore_0_1",
-   "monster": "pumice_golem",
-   "with": null,
-   "level": [
-    18,
-    18
-   ],
-   "count": [
-    1,
-    1
-   ],
-   "x": 1569,
-   "z": 961,
-   "yaw": 0,
-   "radius": 7,
+   "radius": 8,
    "quest": "cd_lake_shore",
    "hunt": true
   },
@@ -76,8 +76,8 @@
     1,
     1
    ],
-   "x": 1637,
-   "z": 850,
+   "x": 1660,
+   "z": 1107,
    "yaw": 0,
    "radius": 8,
    "quest": "cd_crater_guard",

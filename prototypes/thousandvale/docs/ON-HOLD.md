@@ -16,6 +16,9 @@ forgotten — bring it up when the game is resumed.
 
 ## Where it stands
 
+- **2026-10-14 update: Expansion 1 shipped while on hold** — Torbor Downs is an island; Vharlen (levels 10–20) is a
+  second island across the sea, reached by ship. Spec and leftovers: `docs/EXPANSION-1.md`.
+
 - One province of twelve is built (Torbor Downs): 16 zones, 18 towns, dungeons, world boss, events, 31 classes
   (Farhold's 30 + Starcaller), 180+ skills, ten professions with mini-games, parties, guilds, mail, trading,
   friends, mounts, phone layout and controller support.
@@ -52,8 +55,12 @@ forgotten — bring it up when the game is resumed.
   recipes learned one at a time instead of by skill band; tempering an item while it is worn; tier 4–5 nodes.
   The last one is also why gathering at level 9 earns only 42–47% of questing (the rule is 70–100%, met at
   levels 1 / 5 / 10 / 20 where the test looks).
-- **The other eleven provinces.** Owner direction (2026-10-07): each new region is completely different — new
-  biomes, new assets, new themes, nothing reused from Torbor Downs.
+- **The other provinces.** Owner direction (2026-10-07): each new region is completely different — new
+  biomes, new assets, new themes, nothing reused from Torbor Downs. **2026-10-14: the second is built** — Vharlen,
+  the Burning Isle (levels 10–20, 3×3 zones, reached only by ship from Gullwick), and the world is now separate
+  islands rather than one pangea with locked areas (`docs/EXPANSION-1.md`). Add the next one as a new entry in
+  `tools/lib/world-core.mjs` `CONTINENTS` plus a new sea route in `data/provinces/ships.json`; the expansion's own
+  leftovers are listed at the end of EXPANSION-1.md.
 
 ### Gate work nobody has closed
 - **A real-iPhone pass in Safari.** The phone layout is on and passes at 393×852 in Chromium's touch emulation;

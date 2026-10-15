@@ -62,14 +62,16 @@
       "name": "Cave mouth",
       "x": 930,
       "z": 813,
-      "yaw": 1.114
+      "yaw": 1.114,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_blackstrand",
       "x": 1046,
       "z": 1043,
-      "r": 40
+      "r": 40,
+      "pinned": true
     },
     {
       "type": "harbour",
@@ -147,19 +149,19 @@
     "roads": 3,
     "bridges": 0,
     "paths": 7,
-    "pathMetres": 1035,
-    "scatter": 15638,
+    "pathMetres": 1033,
+    "scatter": 15622,
     "scatterKinds": {
-      "rock_small": 529,
-      "sulphur_crust": 427,
-      "tree_fern": 5679,
-      "bush": 4995,
-      "ironpalm": 2524,
+      "rock_small": 519,
+      "sulphur_crust": 417,
+      "tree_fern": 5690,
+      "bush": 4999,
+      "ironpalm": 2519,
       "steam_vent": 152,
-      "obsidian": 60,
-      "basalt_columns": 239,
-      "reed": 959,
-      "tree_charred": 74
+      "obsidian": 59,
+      "basalt_columns": 238,
+      "reed": 957,
+      "tree_charred": 72
     },
     "sites": [
       "settlement(HUB) town Port Vharl 1126 914 90",
@@ -172,12 +174,12 @@
       "z": 914
     },
     "placements": 113,
-    "vignettesAvoided": 479
+    "vignettesAvoided": 484
   },
   "files": {
-    "terrain.bin": 266861,
-    "nav.bin": 26486,
-    "scatter.bin": 125188,
-    "placements.json": 111942
+    "terrain.bin": 266882,
+    "nav.bin": 26447,
+    "scatter.bin": 125060,
+    "placements.json": 111919
   }
 }

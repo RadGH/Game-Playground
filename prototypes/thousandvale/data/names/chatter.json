@@ -883,6 +883,301 @@
    "Raiders try the road every few weeks. They have not got past this gate yet.",
    "New here? The Elder is in the hall on the square.",
    "Move along. Kindly."
+  ],
+  "road.isle_onroute": [
+   "Left {from} before the steam lifted. {dest} by dark, if the ground stays put.",
+   "{from} to {dest}, with ash in my teeth the whole way.",
+   "Is this the road to {dest}? The waymarkers say so. I trust the markers more than you.",
+   "Came up from {from}. They say hello. They said it with their mouths full.",
+   "Halfway to {dest}, by the cairns. Every cairn looks like the last one.",
+   "The road was here yesterday. Lava is not a great respecter of roads.",
+   "Keep to the black stones. The grey ones are sometimes hot underneath.",
+   "Walk where the Rim Keepers walk. None of them have been boiled yet."
+  ],
+  "road.isle_danger": [
+   "Something in the steam ahead. It breathes louder than the vents.",
+   "Slagborn paint on the rocks back there. Still wet.",
+   "Crawlers in the scree. Don't kick the pebbles, they kick back.",
+   "There's a salamander on the road the size of a canoe. I went round it. Far round.",
+   "Don't take the low path. The toads are out and they spit.",
+   "Smoke on the ridge that isn't the mountain's. Raiders, most like.",
+   "Ground's ticking ahead. That's a vent waking, or something worse walking.",
+   "Fresh-chipped glass on the path. Something sharp came through."
+  ],
+  "road.isle_leaving": [
+   "Off to {dest}. Wish me cool feet.",
+   "{dest} by nightfall, if the mountain stays in a good mood.",
+   "Leaving {from} with my pots and my temper.",
+   "Bound for {dest}. The harbour gossip will have to wait.",
+   "Out of {from} at last. It smells of eggs there. Everywhere smells of eggs, but less.",
+   "Pack's tied, sandals are wet. Off we go.",
+   "The first stretch is the worst. Then it's the second stretch.",
+   "If I'm not in {dest} by dark, tell my hearth I owed nobody anything."
+  ],
+  "road.isle_arriving": [
+   "Nearly in {dest}. I can smell the cook-pits.",
+   "{dest} at last. My soles are half melted.",
+   "Stilts and smoke ahead. That'll be {dest}.",
+   "Almost there. First a cold pot, then a hot one.",
+   "{dest}'s gate. I'd kiss it, but it's basalt and it's warm.",
+   "Made it with all my toes. I counted twice.",
+   "Home stretch. Even the mud looks friendly.",
+   "{dest}. I'm sitting down and staying sat."
+  ],
+  "role.obsidian_trader": [
+   "Black glass, sharp as gossip. Cuts clean, sells cleaner.",
+   "Mainland smiths pay twice for an edge they can't make.",
+   "Don't touch the cores bare-handed. I'm not selling bandages.",
+   "Every chip off the cliff is coin. Every chip in your thumb is your problem.",
+   "The harbour clerks count my crates like I've hidden a mountain in them.",
+   "I sell to anyone. The Slagborn just don't pay.",
+   "A good flake rings when you tap it. A bad one bites."
+  ],
+  "role.hired_spear": [
+   "I'm paid to walk beside the crates and look unfriendly. Going well, I think.",
+   "Spear's for crawlers. The face is for people.",
+   "Keep back from the cart. It's not you I don't trust. It's everyone.",
+   "Last raid I got three of them. The trader got a bruise and still docked my pay.",
+   "If something jumps out, get behind me. Or in front. Somewhere not in the way.",
+   "Hot work, guarding glass. Can't even sit on it."
+  ],
+  "role.ash_pilgrim": [
+   "We walk to the Rim to give back a handful of ash. The mountain likes it returned.",
+   "Bare feet on a hot road. That is rather the point.",
+   "Every step is a prayer. Some of the prayers are about blisters.",
+   "The Rim Shrine keeps a bowl for every hearth on the island. Ours is chipped.",
+   "I carry my grandmother's ash. She was lighter in life. Grumpier too.",
+   "We don't eat till the shrine. The steam-cooks along the way make that very hard.",
+   "Walk with us if you like. Don't sing. We have someone for that."
+  ],
+  "role.council_clerk": [
+   "Harbour Council business. Everything on this island is Harbour Council business.",
+   "Three crates of sulphur, two of glass, one of something the label won't admit to.",
+   "I tally. The wardens frown. Between us, we get paid.",
+   "The ink boils if you leave it in the sun. I learned that the hard way.",
+   "Every hamlet owes a share to the harbour. Every hamlet thinks it has paid already.",
+   "Sign here. And here. And there, where it's smudged."
+  ],
+  "role.council_warden": [
+   "Stand back from the tally box, please. Further. That's it.",
+   "We keep the clerk breathing. The clerk keeps the harbour fed.",
+   "Nobody loves the Council. Everybody wants its ships to come in.",
+   "My spear is Council property. So is the clerk, the way they talk.",
+   "Raiders know the tally box is heavy. They don't know it's mostly paper.",
+   "Eyes on the rocks. The rocks have eyes on us."
+  ],
+  "role.sulphur_porter": [
+   "Yellow on my hands, yellow in my chest, yellow in my supper.",
+   "One basket on the back, one on the cart, one in my dreams.",
+   "Don't stand downwind. I've stopped noticing. You haven't.",
+   "The diggers dig. We carry. The harbour counts. Guess who's tired.",
+   "Sulphur sells for matches and medicine and things nobody tells me about.",
+   "The wheel squeaks, the basket creaks, and I just sigh."
+  ],
+  "role.rim_keeper": [
+   "Stay on the marked trail. We marked it so you'd live.",
+   "The ground moved a pace east last month. We moved the markers with it.",
+   "Ochre bands on a column mean safe. No bands means we haven't been back yet.",
+   "We tend the shrines and we tend the road. Neither says thank you.",
+   "If the vents go quiet, walk faster. Quiet means it's thinking.",
+   "Raiders broke three waymarkers this season. We put up four.",
+   "The mountain doesn't hate anyone. It just doesn't notice you."
+  ],
+  "role.fish_carrier": [
+   "Salt fish for the uplands. They pay double because they've never seen the sea.",
+   "Smell that? That's money. Briny money.",
+   "Fish, salt, more fish. The cart's lighter on the way back, and so am I.",
+   "The steam gets in the salt and the salt gets in everything.",
+   "Uplanders ask if the fish is fresh. It's salted. That's the opposite.",
+   "Reef fish keeps a month salted. I keep about a week before I need a wash."
+  ],
+  "role.glass_blower": [
+   "Breathe soft and steady. Glass knows when you're nervous.",
+   "Floats for the nets, bottles for the harbour, beads for the vain.",
+   "The kiln eats ironpalm faster than I can split it.",
+   "Green glass from beach sand, black from the mountain, amber from luck.",
+   "Mind the cart. Everything in it is fragile or very fragile.",
+   "My father blew a bottle so thin you could read through it. Nobody could afford it."
+  ],
+  "role.glass_apprentice": [
+   "I'm allowed to carry the broken glass. Next year, maybe the pipe.",
+   "Is it true the mainland has glass windows in every house? Every one?",
+   "I burned my eyebrows off twice. They grow back faster now.",
+   "Master says I blow like a sulphur toad. I think that's a compliment.",
+   "Don't drop anything. That's the whole job, so far.",
+   "I made a bead once. It's round. Mostly."
+  ],
+  "role.slag_deserter": [
+   "I've washed the ash off my face. Please don't look at it too hard.",
+   "The chiefs said the mountain wanted fire. The mountain has plenty.",
+   "We're walking to the harbour. Ships don't ask what you used to be.",
+   "If anyone in paint asks, you never saw us.",
+   "I burned a hamlet once. I think about it every time I see a stilt.",
+   "The Firecallers will want us back. They want everything back.",
+   "Is the harbour still taking hands for the nets? Any work. Any work at all."
+  ],
+  "role.drummer": [
+   "Drum, pipe and a song about a fisher who married a whale. The whale left.",
+   "We play at hearth-nights and boilings. Mostly boilings.",
+   "The drumskin is salamander hide. Sounds better hot.",
+   "Stiltreach pays in eels. Yellowpan pays in coughs.",
+   "If the mountain rumbles in time, we take the credit.",
+   "Clap along. Not like that. Never mind."
+  ],
+  "role.salamander_trapper": [
+   "Big ones bite, small ones burn, middle ones do both.",
+   "We sell the fat for armour grease and the hides for drumskins.",
+   "Set the cone, wait for dusk, don't put your hand in after.",
+   "An ashback took my partner's sandal and half his foot. He still traps. Slowly.",
+   "If you see one basking, walk round. They hate being stepped over.",
+   "Good weather for lizards. That means bad weather for everyone else.",
+   "The trap's for the salamander. The spear's for whatever eats the salamander."
+  ],
+  "role.obsidian_knapper": [
+   "Strike it at the shoulder, not the face. The face strikes back.",
+   "One good core makes forty blades. One bad swing makes forty cuts.",
+   "Mind the flakes. They don't look sharp. They are.",
+   "My knuckles have more scars than a slag totem.",
+   "The Glass Kings kept knappers by the hundred. Now there's just me.",
+   "Listen. Hear that ring? That's a sale."
+  ],
+  "role.pumice_cutter": [
+   "Pumice floats. My wages don't.",
+   "Cut it in blocks, dry it on the rack, sell it for scrubbing and building.",
+   "Light as bread, rough as a raider. Good stone.",
+   "The ash plain gives one good block in three. The other two crumble out of spite.",
+   "Every house in Port Vharl has my stone in its walls. None of them invite me in.",
+   "Keep a cloth over your mouth out here. The dust gets in your sums."
+  ],
+  "role.sulphur_digger": [
+   "Smells like the mountain had a bad night.",
+   "Dig it yellow, bag it quick, cough later.",
+   "Take your gloves off and you'll be yellow to the elbow for a month.",
+   "The vents here move. So do we.",
+   "The Harbour Council wants twice what we dug last month. The ground has opinions.",
+   "Toads come up for the warmth. Throw something and they leave. Throw something big.",
+   "Yellowpan was a field once. Then the field caught fire."
+  ],
+  "role.net_mender": [
+   "Every hole in a net is a fish that got a story out of it.",
+   "Black sand gets in the knots. Then it gets in your fingers. Then your bread.",
+   "The outrigger's sound. I'm the bit that leaks.",
+   "Reef fish in the morning, eels at dusk, nothing at noon. Noon is for mending.",
+   "Glass floats keep the net up. Glass-blowers keep the price up.",
+   "Tide's out. Plenty of time to fix what the tide did."
+  ],
+  "role.steam_cook": [
+   "Wrap it in leaves, bury it by the vent, come back by afternoon.",
+   "The mountain cooks for free. I just tell it what.",
+   "Breadroot, reef fish, a lizard tail if you're brave.",
+   "Don't step on the mound. That's lunch.",
+   "Pilgrims can't eat till the Rim. I cook upwind of them on purpose. I'm terrible.",
+   "Steam-cooked is the only cooked. Fire is for people in a hurry."
+  ],
+  "role.spring_keeper": [
+   "Cold pot, warm pot, hot pot. In that order, or you'll scream.",
+   "The spring was here before any of us. We just keep it company.",
+   "Bathe if you like. Leave the mud in the mud.",
+   "The teal pools are safe. The white ones are for boiling eggs. And fools.",
+   "A soak here fixes the back, the feet and the temper. Two of three, anyway.",
+   "Don't drink it. It's for outsides."
+  ],
+  "role.marker_mender": [
+   "Ochre band, pale cap, straight as you can make it. That's a waymarker.",
+   "This one fell when the ground shrugged. I'm standing it back up.",
+   "Every marker on the island has a Keeper's mark at its foot. Mine's a little crooked.",
+   "The raiders knock them over for sport. We put them back for the same reason.",
+   "If you're ever lost up here, find a column and follow the bands uphill.",
+   "Basalt's heavy. That's why it stays put. Mostly."
+  ],
+  "role.ironpalm_tapper": [
+   "Cut the crown, catch the sap, leave it in the pot two days. That's toddy.",
+   "Ironpalm wood turns an axe. That's why they call it ironpalm.",
+   "The fibre makes rope, the sap makes toddy, the fronds make roofs. The rest makes splinters.",
+   "Climbing's the easy part. Coming down with a full pot is the trick.",
+   "Toddy for the harbour, toddy for the hamlets, a little toddy for the tapper.",
+   "Prowlers like the shade under the palms. So do I. We take turns."
+  ],
+  "role.eel_spearer": [
+   "Stand on the platform, wait for the bubbles, strike just under them.",
+   "The mud's hot a hand down. The eels like it. I don't.",
+   "A good eel feeds a stilt-house for two days.",
+   "Mudbacks lie under the reeds. You find them by stepping on them. Once.",
+   "Stiltreach eats eel, sells eel and dreams eel.",
+   "Quiet. The bubbles are listening."
+  ],
+  "role.tube_hermit": [
+   "The tube goes down further than I've ever followed it. I've stopped trying.",
+   "Cool in here, even at noon. The mountain hollowed it out. Not for me, but still.",
+   "People come to ask me things. I tell them to bring water next time.",
+   "The Glass Kings walked these tunnels. They left no water either.",
+   "Sit. Don't lean on the walls. They were liquid once and might change their minds.",
+   "I hear the mountain breathing at night. We get on.",
+   "Out there is noise. In here is drips."
+  ],
+  "role.strand_pedlar": [
+   "Floats, hooks, beads, blades. All off the back of one patient mule.",
+   "Everything here came through the harbour. Some of it twice.",
+   "Have a look. Touch the glass, not the blades.",
+   "Prices are fair. Fairish. Fair for an island.",
+   "I walk every road on this rock once a month. The roads walk me back.",
+   "No, the mule isn't for sale. She'd only come back."
+  ],
+  "role.wreck_picker": [
+   "Every storm is a market day for me.",
+   "The sea gives up crates, rope and the odd boot. I sell all three.",
+   "That's a mainland buckle. Washed up a month back. Still shiny.",
+   "Buy anything, sell everything, ask nothing.",
+   "Outriggers break, cargo floats, I wait on the beach.",
+   "Barrow's heavy today. Good tide."
+  ],
+  "role.bundle_runner": [
+   "Letters, parcels, a tooth somebody wanted back. All in the bundle.",
+   "Too many hamlets, not enough runners.",
+   "Run on the black stones, walk on the grey. Simple rule.",
+   "The Council pays by the bundle, not by the mile. The miles are on me.",
+   "Don't hold me up. The steam-cooks hold me up enough.",
+   "Sandals worn through again. Third pair this season."
+  ],
+  "role.fen_mother": [
+   "My eldest is in town and hasn't sent a word. So I'm sending one.",
+   "Stiltreach is a long way from every other place.",
+   "Children. You build them a stilt-house and they move to the harbour.",
+   "Wrapped some eel for the journey. Not for you. Sorry.",
+   "If you're headed to town, I'd be grateful for a hand.",
+   "The mud never leaves your feet. Neither do the children, until they do."
+  ],
+  "role.tale_teller": [
+   "Sit a moment. Every hamlet on this road has a story, and most of them are true.",
+   "The Glass Kings were buried with their thrones. Nobody won that arrangement.",
+   "I trade tales for toddy. Fair rate.",
+   "There's a song about this very road. It ends badly.",
+   "Ask me about the drowned harbour. Everyone does. I tell it differently each time.",
+   "A story's like obsidian. The shiny bits cut."
+  ],
+  "role.rim_scholar": [
+   "I measure how far the rim has moved since the last Keeper wrote it down. A lot.",
+   "The ash layers are a calendar. This one was a bad year.",
+   "The Glass Kings wrote on obsidian. Shame they wrote so small.",
+   "Hold this cord. Don't let go. Don't step back. Thank you.",
+   "Every vent has a name in the old ledgers. Most of them are rude.",
+   "I'm off to the Rim to read the shrine stones. They change. Nobody is sure how."
+  ],
+  "role.harbour_veteran": [
+   "Thirty years on the harbour wall. Now I walk the roads to keep my knees honest.",
+   "Saw the Slagborn come up the beach in canoes once. Once was enough.",
+   "Keep your spear wet near the vents. The shaft scorches otherwise.",
+   "Young ones today don't know what a proper raid looks like. Lucky them.",
+   "I still salute the Council's flag. Out of habit, not affection.",
+   "The ships used to come every week. Now they come when they come."
+  ],
+  "role.ash_hauler": [
+   "Cart's for hire. Any town with a gate.",
+   "The beast is slow, the road is hot, the fare is cheap.",
+   "Climb up. Mind the sulphur sacks.",
+   "I haul ash, glass, fish and people. People complain most.",
+   "We don't hurry. Hurrying gets you into a vent.",
+   "Fares are on the board. The board is me."
   ]
  }
 }

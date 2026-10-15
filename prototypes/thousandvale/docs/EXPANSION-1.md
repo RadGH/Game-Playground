@@ -58,6 +58,9 @@ Start: `blackstrand`. World boss: **Ossathra, the Caldera Wyrm** (`world_ossathr
 3. **Lava vents and fissures** (Pumice Wastes, Kiln Ridge, Caldera): lines in the ground that glow, warn (telegraph,
    always visible), then spout fire. Real damage; fights near them are a dance.
 4. **Ashfall weather** (Pumice Wastes, Ashfall Hollow): drifting ash, shorter sight; no rules effect beyond looks.
+   *Built (stream S, 2026-10-14):* items 1–4 — sites in `data/provinces/vharlen-hazards.json` (tools/content-hazards.mjs),
+   rules `js/rules/hazards.js`, server `js/sim/hazards.js`, look `js/client/vharlen-fx.js`; the throw is a `glide` in the shared
+   movement step (snapshot self flag 8). See data/provinces/README.md "Vharlen's hazards".
 5. **New gathering** (tier 4–5 nodes, Vharlen only): obsidian (ore), sulphur (resin), steamcap (mushroom), ironpalm
    (wood), cinderbloom (herb), salamander hide (skinning). They feed the existing tier-4/5 recipes as alternates and
    one new recipe line each where it fits.
@@ -114,6 +117,12 @@ Each zone: its settlement (planned with the `vharl` culture), 5–7 camps of the
 (family names in §8), a zone event, 1–2 rares, an elite, 4–6 quests from the zone's giver(s), harvest nodes, the
 zone's specialty sites. A short province questline ("The Burning Isle", 5 steps) from Port Vharl to the Caldera.
 
+**Wilderness dressing (stream W, 2026-10-14):** the island no longer borrows Torbor's catalogues — its own vignettes,
+curios, wayside dressing, folk, travellers, wanderers, road events, carter greetings and shop goods (data/provinces/README.md
+"Vharlen", data/vignettes/README.md "Per-province dressing"), 43 island props (js/client/vharl-props.js, vocabulary in
+data/vignettes/vharlen-props.json), island farms and forts drawn in the `vharl` culture, and every dungeon door pinned in
+data/world/site-pins.json with its waystone beside it. Tests: tests/W/vharlen-dressing.test.js.
+
 ## 8. Dungeons (new family names, Vharlen only)
 
 `lava_tube` (Blackstrand: *The Brineglass Tubes*), `steam_grotto` (Steamwood: *Hissing Grotto*), `sulphur_mine`
@@ -131,3 +140,22 @@ Glass Kings*), `buried_town` (Ashfall Hollow: *Under Cinderholt*), `kiln_forge` 
 | **C** content | `data/provinces/vharlen*.json`, `data/quests/<vharlen zones>.json`, `data/monsters-tv.json`, names, encounters, specialties | §3–§5, §7–§8 (after T + P) |
 
 Check after any re-bake: `content-professions -> content-towns -> content-givers -> content-hunts` (per province).
+
+## 10. Leftovers (known, not built — bring up when the game is resumed)
+
+- **Shared between the islands:** barber prices come from Torbor's table; recipes and fish rules are one shared
+  set; zone-event announcements reach players on both islands.
+- **Torbor's vignette placements** are stale against the current `place-vignettes` tool (not regenerated, so
+  Torbor stays byte-identical).
+- **Terrain:** the east gorge reaches ~50° in places; Port Vharl sits ~290 m back from the shore, so its pier is
+  a walk from the square.
+- **Voyage:** Gullwick has no sea inside its zone, so its Harbourmaster stands on the main street and the ship lies
+  at the real coast past the playable edge; jetties are decor; a multi-process server must be given
+  `opts.realmProvinces`. The ship lands you in `wilds:1` just outside Port Vharl, not in the town hub.
+- **Hazards:** three of the four Fumarole Fen geysers have no ledge to throw you onto (the fen is flat).
+- **Island dressing (stream W):** the hired carter still drives the ox-cart model (island names, greetings and route);
+  stables keep the shared horseshoe sign (proctown `offices.js`).
+- **Found in Torbor, not changed:** Torbor's curios have never loaded on the server (`curios.json` keeps them under
+  `curios`, the loader reads `vignettes`), and Torbor's wayside props have never been drawn (players only get the
+  lore line). Vharlen's do both. Turning Torbor's on is a separate decision.
+- **Icons:** the six Vharlen materials and the new fish use their class's general picture until Codex draws theirs.

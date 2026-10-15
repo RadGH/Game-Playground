@@ -1,5 +1,5 @@
 {
- "_doc": "Stream C (Expansion 1). Vharlen's own fort / farm / cave templates, laid over data/provinces/sites.json key by key (so this file's `forts`, `farms`, `caves` and `byArchetype` replace Torbor's for the island). The template KEYS are the home file's (tools/place-vignettes.mjs names some of them), the CONTENT is the island's: Slagborn fire-camps and the Glass Kings' ruins instead of brigand stockades and barrow forts, taro terraces, goat walls, salt pans, ironpalm groves, net racks and steam wells instead of fields, sheep and mills (`short` = the word after the town in a farm's name), and caves that are cooled lava tubes, sulphur shafts and steam grottos built on Vharlen's own dungeon families. Every monster is a Vharlen monster (data/rules/monsters-tv.json). Props reuse the kit (highdef-3d kit ids); the buildings' look is stream T's.",
+ "_doc": "Stream C (Expansion 1). Vharlen's own fort / farm / cave templates, laid over data/provinces/sites.json key by key (so this file's `forts`, `farms`, `caves` and `byArchetype` replace Torbor's for the island). The template KEYS are the home file's (tools/place-vignettes.mjs names some of them), the CONTENT is the island's: Slagborn fire-camps and the Glass Kings' ruins instead of brigand stockades and barrow forts, taro terraces, goat walls, salt pans, ironpalm groves, net racks and steam wells instead of fields, sheep and mills (`short` = the word after the town in a farm's name), and caves that are cooled lava tubes, sulphur shafts and steam grottos built on Vharlen's own dungeon families. Every monster is a Vharlen monster (data/rules/monsters-tv.json). Props are the island's own (data/vignettes/vharlen-props.json — stream W replaced the hay bales, fences, wells, oaks and birches stream C borrowed from the kit) and are drawn for the island by js/client/site-view.js with the vharl building culture, basalt goat walls, taro terraces, salt pans and an ironpalm grove instead of Torbor's fences, fields and orchards.",
  "forts": {
   "watchtower_garrison": {
    "name": "Basalt watchtower",
@@ -63,7 +63,7 @@
     },
     {
      "kind": "prop",
-     "id": "signpost",
+     "id": "vh_rim_waymarker",
      "x": 0,
      "z": 8,
      "yaw": 0
@@ -157,7 +157,7 @@
     },
     {
      "kind": "prop",
-     "id": "wood_pile",
+     "id": "vh_charred_beams",
      "x": -5,
      "z": 5,
      "yaw": 0
@@ -244,7 +244,7 @@
     },
     {
      "kind": "prop",
-     "id": "well",
+     "id": "vh_hot_pool",
      "x": 0,
      "z": 4,
      "yaw": 0
@@ -345,14 +345,14 @@
     },
     {
      "kind": "prop",
-     "id": "skull_totem",
+     "id": "vh_slag_totem",
      "x": 0,
      "z": -10,
      "yaw": 0
     },
     {
      "kind": "prop",
-     "id": "skull_totem",
+     "id": "vh_slag_totem",
      "x": -6,
      "z": 6,
      "yaw": 0
@@ -373,7 +373,7 @@
     },
     {
      "kind": "prop",
-     "id": "wood_pile",
+     "id": "vh_charred_beams",
      "x": -4,
      "z": -4,
      "yaw": 0
@@ -516,14 +516,14 @@
     },
     {
      "kind": "prop",
-     "id": "fence_rail",
+     "id": "vh_reed_screen",
      "x": -4,
      "z": 0,
      "yaw": 1.57
     },
     {
      "kind": "prop",
-     "id": "fence_rail",
+     "id": "vh_reed_screen",
      "x": 4,
      "z": 0,
      "yaw": 1.57
@@ -544,7 +544,7 @@
     },
     {
      "kind": "prop",
-     "id": "signpost",
+     "id": "vh_rim_waymarker",
      "x": 0,
      "z": 5,
      "yaw": 0
@@ -584,58 +584,51 @@
    "props": [
     {
      "kind": "prop",
-     "id": "hay_bale",
+     "id": "vh_clay_pots",
      "x": -4,
      "z": 2,
      "yaw": 0
     },
     {
      "kind": "prop",
-     "id": "hay_bale",
-     "x": -2.5,
-     "z": 3,
-     "yaw": 0
-    },
-    {
-     "kind": "prop",
-     "id": "hay_bale",
+     "id": "vh_clay_pots",
      "x": 5,
      "z": -3,
-     "yaw": 0
+     "yaw": 1.1
     },
     {
      "kind": "prop",
-     "id": "fence_post",
-     "x": -8,
-     "z": -6,
-     "yaw": 0
-    },
-    {
-     "kind": "prop",
-     "id": "fence_rail",
+     "id": "vh_reed_screen",
      "x": -6,
      "z": -6,
      "yaw": 0
     },
     {
      "kind": "prop",
-     "id": "fence_post",
-     "x": -4,
-     "z": -6,
-     "yaw": 0
-    },
-    {
-     "kind": "prop",
-     "id": "well",
+     "id": "vh_reed_lean_to",
      "x": 3,
      "z": 4,
+     "yaw": 3.14
+    },
+    {
+     "kind": "prop",
+     "id": "vh_bedroll",
+     "x": 3.4,
+     "z": 3.6,
+     "yaw": 0.2
+    },
+    {
+     "kind": "prop",
+     "id": "vh_ironpalm_stump",
+     "x": 6,
+     "z": 2,
      "yaw": 0
     },
     {
      "kind": "prop",
-     "id": "sawhorse",
-     "x": 6,
-     "z": 2,
+     "id": "vh_basalt_cairn",
+     "x": -8,
+     "z": -4,
      "yaw": 0
     }
    ],
@@ -658,56 +651,49 @@
    "props": [
     {
      "kind": "prop",
-     "id": "fence_post",
+     "id": "vh_basalt_cairn",
      "x": -8,
      "z": -8,
      "yaw": 0
     },
     {
      "kind": "prop",
-     "id": "fence_rail",
-     "x": -5,
-     "z": -8,
-     "yaw": 0
-    },
-    {
-     "kind": "prop",
-     "id": "fence_post",
+     "id": "vh_basalt_cairn",
      "x": -2,
      "z": -8,
      "yaw": 0
     },
     {
      "kind": "prop",
-     "id": "fence_rail",
-     "x": -8,
-     "z": -5,
-     "yaw": 1.57
-    },
-    {
-     "kind": "prop",
-     "id": "fence_post",
+     "id": "vh_basalt_cairn",
      "x": -8,
      "z": -2,
      "yaw": 0
     },
     {
      "kind": "prop",
-     "id": "hay_bale",
+     "id": "vh_reed_screen",
+     "x": -5,
+     "z": -8,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_clay_pots",
      "x": 3,
      "z": 0,
      "yaw": 0
     },
     {
      "kind": "prop",
-     "id": "drying_rack",
+     "id": "vh_reed_lean_to",
      "x": 5,
      "z": 4,
-     "yaw": 0
+     "yaw": 3.14
     },
     {
      "kind": "prop",
-     "id": "well",
+     "id": "vh_offering_bowl",
      "x": -2,
      "z": 4,
      "yaw": 0
@@ -732,23 +718,37 @@
    "props": [
     {
      "kind": "prop",
-     "id": "fence_post",
+     "id": "vh_basalt_cairn",
      "x": -5,
      "z": -5,
      "yaw": 0
     },
     {
      "kind": "prop",
-     "id": "fence_rail",
+     "id": "vh_reed_screen",
      "x": -3,
-     "z": -5,
+     "z": -5.4,
      "yaw": 0
     },
     {
      "kind": "prop",
-     "id": "fence_post",
-     "x": -1,
-     "z": -5,
+     "id": "vh_clay_pots",
+     "x": 3,
+     "z": 2,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_pumice_pile",
+     "x": 4,
+     "z": -3,
+     "yaw": 0.4
+    },
+    {
+     "kind": "prop",
+     "id": "vh_buried_urn",
+     "x": 2,
+     "z": 4,
      "yaw": 0
     },
     {
@@ -756,27 +756,6 @@
      "id": "puddle_ring",
      "x": -3,
      "z": -2,
-     "yaw": 0
-    },
-    {
-     "kind": "prop",
-     "id": "barrel",
-     "x": 3,
-     "z": 2,
-     "yaw": 0
-    },
-    {
-     "kind": "prop",
-     "id": "wood_pile",
-     "x": 4,
-     "z": -3,
-     "yaw": 0
-    },
-    {
-     "kind": "prop",
-     "id": "hay_bale",
-     "x": 2,
-     "z": 4,
      "yaw": 0
     }
    ],
@@ -798,60 +777,60 @@
    ],
    "props": [
     {
-     "kind": "tree",
-     "id": "oak",
+     "kind": "prop",
+     "id": "vh_ironpalm",
      "x": -6,
      "z": -6,
      "yaw": 0
     },
     {
-     "kind": "tree",
-     "id": "oak",
+     "kind": "prop",
+     "id": "vh_ironpalm",
      "x": 0,
-     "z": -6,
+     "z": -6.5,
      "yaw": 0.5
     },
     {
-     "kind": "tree",
-     "id": "oak",
+     "kind": "prop",
+     "id": "vh_ironpalm",
      "x": 6,
      "z": -6,
      "yaw": 1
     },
     {
-     "kind": "tree",
-     "id": "birch",
+     "kind": "prop",
+     "id": "vh_ironpalm",
      "x": -6,
-     "z": 0,
-     "yaw": 0
+     "z": 0.5,
+     "yaw": 2
     },
     {
-     "kind": "tree",
-     "id": "birch",
+     "kind": "prop",
+     "id": "vh_ironpalm",
      "x": 6,
      "z": 0,
      "yaw": 0.3
     },
     {
      "kind": "prop",
-     "id": "barrel",
+     "id": "vh_ironpalm_stump",
+     "x": -2.5,
+     "z": -2.5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_clay_pots",
      "x": 0,
      "z": 3,
      "yaw": 0
     },
     {
      "kind": "prop",
-     "id": "barrel",
-     "x": 1.2,
-     "z": 3.4,
-     "yaw": 0
-    },
-    {
-     "kind": "prop",
-     "id": "crate",
-     "x": -2,
-     "z": 4,
-     "yaw": 0
+     "id": "vh_fallen_ironpalm",
+     "x": 2,
+     "z": 6,
+     "yaw": 0.3
     }
    ],
    "short": "Palm Grove"
@@ -873,42 +852,42 @@
    "props": [
     {
      "kind": "prop",
-     "id": "drying_rack",
+     "id": "vh_fish_rack",
      "x": -3,
      "z": 0,
      "yaw": 0
     },
     {
      "kind": "prop",
-     "id": "drying_rack",
+     "id": "vh_net_poles",
      "x": -1,
-     "z": 0.5,
-     "yaw": 0
+     "z": 2.5,
+     "yaw": 0.2
     },
     {
      "kind": "prop",
-     "id": "barrel",
+     "id": "vh_clay_pots",
      "x": 2,
      "z": 1,
      "yaw": 0
     },
     {
      "kind": "prop",
-     "id": "crate",
+     "id": "vh_glass_floats",
      "x": 3,
      "z": -1,
      "yaw": 0
     },
     {
      "kind": "prop",
-     "id": "stone_step",
+     "id": "vh_outrigger",
      "x": 0,
-     "z": 4,
-     "yaw": 0
+     "z": 5,
+     "yaw": 0.1
     },
     {
      "kind": "prop",
-     "id": "campfire",
+     "id": "vh_scoria_ring",
      "x": -4,
      "z": -4,
      "yaw": 0
@@ -934,42 +913,42 @@
    "props": [
     {
      "kind": "prop",
-     "id": "cart_wheel",
+     "id": "vh_steam_pit",
      "x": 0,
      "z": 0,
      "yaw": 0
     },
     {
      "kind": "prop",
-     "id": "crate",
+     "id": "vh_kettle",
      "x": -3,
      "z": 2,
      "yaw": 0
     },
     {
      "kind": "prop",
-     "id": "crate",
+     "id": "vh_clay_pots",
      "x": -2,
-     "z": 3,
-     "yaw": 0
+     "z": 3.5,
+     "yaw": 0.6
     },
     {
      "kind": "prop",
-     "id": "barrel",
+     "id": "crate",
      "x": 3,
      "z": 3,
-     "yaw": 0
+     "yaw": 0.4
     },
     {
      "kind": "prop",
-     "id": "hay_bale",
+     "id": "vh_reed_lean_to",
      "x": 4,
      "z": -2,
-     "yaw": 0
+     "yaw": 1.57
     },
     {
      "kind": "prop",
-     "id": "fence_post",
+     "id": "vh_basalt_cairn",
      "x": -6,
      "z": -4,
      "yaw": 0

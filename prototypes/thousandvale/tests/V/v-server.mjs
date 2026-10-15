@@ -20,7 +20,7 @@ const port = +arg('--port', 8496), hookPort = +arg('--hook', port + 1);
 const s = await startServer({
   port, host: '127.0.0.1', hostGiven: true, adminPort: 0, guestsPerIpHour: null, guestsPerHour: null, unlimitedIp: [], db: 'memory',
   dbFile: join(GAME, '.data/v-ships.json'), build: 'dev', rules: 'auto', terrain: 'test', linger: 3000, maxPerIp: 16, saveEvery: 60000,
-  process: 'v-ships', env: 'dev', publicDir: null, journalMs: 2000, provinces: null, procs: 0, director: {},
+  process: 'v-ships', env: 'dev', publicDir: null, journalMs: 2000, provinces: process.env.V_BOTH ? ['torbor_downs', 'vharlen'] : null, procs: 0, director: {},
 });
 const W = s.world;
 const byName = name => { for (const o of W.online.values()) if (o.char && o.char.name.toLowerCase() === String(name).toLowerCase()) return o; return null; };

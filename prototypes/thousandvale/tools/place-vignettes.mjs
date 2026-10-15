@@ -14,7 +14,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { parseTerrain, parseNav, NAV } from '../js/rules/terrain-read.js';
 import { boringWalk, SIGHT, LIMIT as BORING_LIMIT } from './boring-walk.mjs';
-import { J, ROOT, allVignettes, questFiles, provinceMap, provinceArg, provinceDataPath, provinceDataSync, zoneBelongs, requireProvince } from './content-lib.mjs';
+import { J, ROOT, allVignettes, provinceDressing, questFiles, provinceMap, provinceArg, provinceDataPath, provinceDataSync, zoneBelongs, requireProvince } from './content-lib.mjs';
 import { POINT_TYPES, zoneContext, provinceComponents, discProblem, findSpot, findPoint, openPoint, walkLine, hintFrom, hintScore, rngFor, KIND_RULES, settlementEdge, levelField, campLevels, heavyOk, capCount, countCapAt, groundPieces } from './content-place.mjs';
 import { fillDensity, fillHunting, HUNT, routesFor, placeWords } from './content-living.mjs';
 import { placeSetpieces, slotFolk } from './content-setpieces.mjs';
@@ -36,12 +36,14 @@ const ASSIGN = J(`data/vignettes/assignment/${PROV}.json`).zones;
 const RARES = provinceDataSync(J, PROV, 'rares');
 const TREASURE = J('data/quests/treasure.json').chains;
 const HOOKS = J('data/hooks.json').hooks;
-const VIG = new Map(allVignettes().map(v => [v.id, v]));
+const DRESS = provinceDressing(PROV);      // [W] the province's own vignettes / curios / wayside (Torbor: the files it always read)
+const VIG = new Map([...allVignettes(), ...DRESS.vignettes].map(v => [v.id, v]));
 const QUESTS = Object.fromEntries(questFiles().map(q => [q.zone, q]));
 const ARCH = provinceDataSync(J, PROV, 'archetypes');
 /** play-test 2 (Q18): hand-designed set pieces pinned near the start (tools/content-setpieces.mjs) */
 const SETPIECES = J('data/vignettes/setpieces.json').vignettes;
 const TRAVELLERS = provinceDataSync(J, PROV, 'travellers');
+const HAZ = provinceDataSync(J, PROV, 'hazards');      // [W] stream S's hazard sites (none for Torbor): hazardDiscs below
 /** where each free-standing set piece stood last run (kept while still fair — tools/content-setpieces.mjs) */
 const SP_PINS_FILE = new URL(provinceDataPath(PROV, 'setpiece-pins'), ROOT);
 const SP_PINS = existsSync(SP_PINS_FILE) ? JSON.parse(readFileSync(SP_PINS_FILE, 'utf8')) : { _doc: '', pins: {} };
@@ -51,7 +53,7 @@ const OFFICE_OF = new Map(Object.values(OFFICES.towns).flatMap(t => t.offices.fi
 const ROUTES = existsSync(new URL(`data/provinces/${PROV_ID()}-routes.json`, ROOT)) ? J(`data/provinces/${PROV_ID()}-routes.json`) : null;
 function PROV_ID() { return PROV; }
 /** names imposed on stream B's World Forge places that the M1 content already uses */
-const WAYSIDE = J('data/vignettes/wayside.json').kinds;
+const WAYSIDE = DRESS.wayside;
 const IMPOSE_EXTRA = { test: { mipider_ford: 'Fitockpi Ford' } };
 /** hooks pinned beside a named stream B road (the cliff is cut there by B's bake on request): hook id -> road id */
 const HOOK_ROAD = { the_long_stair: 'road_138' };
@@ -114,6 +116,20 @@ places.province = PROV;
 writeFileSync(placesFile, JSON.stringify(places, null, 2) + '\n');
 if (bad) { console.error(`${bad} problem(s)`); process.exitCode = 1; }
 
+/**
+ * [W] Stream S's hazard sites in world zone `wid` (data/provinces/<prov>-hazards.json, a PLACED file: Torbor has none) as
+ * keep-clear discs in zone metres — a spring's pool, a geyser's mouth and the ground its throw starts from, a vent's whole
+ * fissure line with room to dance round it. Torbor (no hazards file) gets none, so its runs are unchanged.
+ */
+function hazardDiscs(wid) {
+  if (!HAZ) return [];
+  const [, zx, zy] = /^z(\d+)_(\d+)$/.exec(wid).map(Number), ox = zx * 2048, oz = zy * 2048, out = [];
+  for (const h of HAZ.springs || []) if (h.zone === wid) out.push({ kind: 'hazard', id: h.id, x: h.x - ox, z: h.z - oz, r: (h.r || 8) + 4 });
+  for (const h of HAZ.geysers || []) if (h.zone === wid) out.push({ kind: 'hazard', id: h.id, x: h.x - ox, z: h.z - oz, r: (h.r || 3) + 8 });
+  for (const h of HAZ.vents || []) if (h.zone === wid) out.push({ kind: 'hazard', id: h.id, x: (h.ax + h.bx) / 2 - ox, z: (h.az + h.bz) / 2 - oz, r: Math.hypot(h.bx - h.ax, h.bz - h.az) / 2 + (h.w || 2) + 6 });
+  return out;
+}
+
 function placeZone(eid, wid) {
   const dir = `data/zones/${wid}/`;
   if (!existsSync(new URL(dir + "nav.bin", ROOT))) { console.error(`${wid}: not baked`); process.exitCode = 1; return null; }
@@ -168,6 +184,7 @@ function placeZone(eid, wid) {
   ctx = zoneContext({ terrain, nav, placements: bake, start: town0, reserve: asks.filter(a => !want.some(w => w.at && w.name === a.name)).map(a => ({ ...a })), province: PCOMP, cell, pinned });
   for (const s of ctx.settlements) { const k = slug(s.wfName || s.name); if (rename[k]) s.name = rename[k]; }
   places.zones[eid] = { world: wid, rename, asks, ...nameAsks(eid, wid) };
+  ctx.siteDiscs.push(...hazardDiscs(wid));        // [W] stream S's hot springs, geysers and lava vents: nothing of ours stands on one
 
   const P = ctx.placed, features = [];
   const lvl = (x, z) => LF.at(eid, x, z), top = zs.band[1];

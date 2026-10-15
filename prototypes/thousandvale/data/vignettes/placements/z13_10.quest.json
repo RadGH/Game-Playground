@@ -16,10 +16,10 @@
     2,
     2
    ],
-   "x": 1073,
-   "z": 647,
+   "x": 1371,
+   "z": 727,
    "yaw": 0,
-   "radius": 6,
+   "radius": 7,
    "quest": "bs_fresh_off_the_saltwren",
    "hunt": true
   },
@@ -36,10 +36,30 @@
     2,
     2
    ],
-   "x": 902,
-   "z": 851,
+   "x": 1287,
+   "z": 968,
    "yaw": 0,
-   "radius": 6,
+   "radius": 8,
+   "quest": "bs_crawlers_in_the_nets",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_bs_crawlers_in_the_nets_0_1",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    11
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1287,
+   "z": 968,
+   "yaw": 0,
+   "radius": 8,
    "quest": "bs_crawlers_in_the_nets",
    "hunt": true
   },
@@ -49,20 +69,76 @@
    "monster": "slagborn_firecaller",
    "with": null,
    "level": [
-    10,
-    10
+    11,
+    11
    ],
    "count": [
     1,
     1
    ],
-   "x": 1073,
-   "z": 647,
+   "x": 1032,
+   "z": 592,
    "yaw": 0,
    "radius": 5,
    "rank": "champion",
    "affixes": [
     "giant"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z13_10_2",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    12,
+    12
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 687,
+   "z": 40,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "fiery"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z13_10_3",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    11,
+    11
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 328,
+   "z": 192,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "packleader"
    ],
    "respawnMin": [
     4,
@@ -218,18 +294,18 @@
    "id": "dummy_port_vharl_0",
    "name": "Training Dummy",
    "town": "Port Vharl",
-   "x": 1149.2,
-   "z": 923,
-   "yaw": -2.357
+   "x": 1152.8,
+   "z": 904,
+   "yaw": -0.943
   },
   {
    "type": "dummy",
    "id": "dummy_port_vharl_1",
    "name": "Training Dummy",
    "town": "Port Vharl",
-   "x": 1150.8,
-   "z": 921,
-   "yaw": -2.165
+   "x": 1151.2,
+   "z": 902,
+   "yaw": -0.785
   }
  ]
 }

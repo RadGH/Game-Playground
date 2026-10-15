@@ -13,11 +13,11 @@
     14
    ],
    "count": [
-    2,
-    2
+    1,
+    1
    ],
-   "x": 335,
-   "z": 979,
+   "x": 173,
+   "z": 647,
    "yaw": 0,
    "radius": 8,
    "quest": "ff_the_fen_breathes_wrong",
@@ -26,7 +26,7 @@
   {
    "type": "camp",
    "id": "champ_z13_11_1",
-   "monster": "steamwood_prowler",
+   "monster": "vent_wisp",
    "with": null,
    "level": [
     14,
@@ -36,13 +36,13 @@
     1,
     1
    ],
-   "x": 144,
-   "z": 672,
+   "x": 173,
+   "z": 647,
    "yaw": 0,
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "packleader"
+    "frostbound"
    ],
    "respawnMin": [
     4,
@@ -100,7 +100,7 @@
    "tier": "hamlet",
    "town": "Stiltreach",
    "post": "gate",
-   "gate": "stiltreach_gate_0",
+   "gate": "stiltreach_gate_1",
    "x": 408,
    "z": 562,
    "yaw": -2.117,

@@ -87,3 +87,16 @@ ground pieces). Placed FIRST by `tools/content-setpieces.mjs` (from place-vignet
 `scale` = B's radius / ours — stream A/D multiply offsets by it; B's piece takes our name through places.json `setPieces` /
 `lanes`), the rest by their pin as discs (rule `setpiece` in content-place.mjs). B's other pieces get a worker at each of
 their slots (`slotFolk`). B's set pieces, fields and set buildings are keep-clear discs for everything we place.
+
+## Per-province dressing (Expansion 1, stream W)
+
+A province other than Torbor Downs may have its own catalogues beside Torbor's: `<province>-vignettes.json`
+(`vignettes`), `<province>-curios.json` (`curios`), `<province>-wayside.json` (`kinds`) — Vharlen has all three. When
+it has one, the tools use it INSTEAD of Torbor's (tools/content-lib.mjs `provinceDressing`; assign-vignettes,
+place-vignettes, content-living) — never a mix — and every id is prefixed (`vh_`) so the server and client can hold
+every province's recipes at once (js/sim/content.js VIGNETTE_FILES / WAYSIDE_FILES, js/client/vignette-props.js).
+Island recipes use only the props listed in `vharlen-props.json` (`island` ids drawn by js/client/vharl-props.js,
+plus a few neutral kit pieces); no `tree` kind (palms, tree ferns and charred trunks are island props).
+Unlike Torbor's (whose wayside props have never been drawn — only the lore reaches the player), the island's wayside
+dressing and its folk's camp props ARE drawn (site-view.js `waysidePropList`; Torbor's look is unchanged).
+Dev page: tools/vharl-props.html shows every island prop; tools/ground-look.html?sites=1 draws a zone's placed content.

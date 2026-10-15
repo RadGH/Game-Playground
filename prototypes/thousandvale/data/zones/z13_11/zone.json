@@ -66,14 +66,16 @@
       "name": "Cave mouth",
       "x": 270,
       "z": 690,
-      "yaw": 0.982
+      "yaw": 0.982,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_fumarole_fen",
       "x": 925,
       "z": 601,
-      "r": 40
+      "r": 40,
+      "pinned": true
     }
   ],
   "spawn": {
@@ -165,18 +167,18 @@
     ],
     "roads": 3,
     "bridges": 0,
-    "paths": 7,
-    "pathMetres": 1536,
-    "scatter": 3292,
+    "paths": 5,
+    "pathMetres": 850,
+    "scatter": 3282,
     "scatterKinds": {
-      "reed": 1786,
-      "tree_charred": 153,
-      "ironpalm": 170,
-      "bush": 379,
-      "tree_fern": 572,
-      "steam_vent": 135,
+      "reed": 1778,
+      "tree_charred": 152,
+      "ironpalm": 172,
+      "bush": 371,
+      "tree_fern": 575,
+      "steam_vent": 136,
       "rock_small": 81,
-      "obsidian": 14,
+      "obsidian": 15,
       "basalt_columns": 2
     },
     "sites": [
@@ -188,13 +190,13 @@
       "x": 440,
       "z": 584
     },
-    "placements": 54,
-    "vignettesAvoided": 166
+    "placements": 52,
+    "vignettesAvoided": 171
   },
   "files": {
-    "terrain.bin": 273801,
-    "nav.bin": 16226,
-    "scatter.bin": 26420,
-    "placements.json": 78227
+    "terrain.bin": 273477,
+    "nav.bin": 15910,
+    "scatter.bin": 26340,
+    "placements.json": 64279
   }
 }

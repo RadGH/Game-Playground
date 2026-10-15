@@ -62,14 +62,16 @@
       "name": "Cave mouth",
       "x": 1669,
       "z": 639,
-      "yaw": -2.157
+      "yaw": -2.157,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_kiln_ridge",
       "x": 1312,
       "z": 730,
-      "r": 40
+      "r": 40,
+      "pinned": true
     }
   ],
   "spawn": {
@@ -139,15 +141,15 @@
     ],
     "roads": 2,
     "bridges": 0,
-    "paths": 6,
-    "pathMetres": 2125,
-    "scatter": 1796,
+    "paths": 5,
+    "pathMetres": 2023,
+    "scatter": 1787,
     "scatterKinds": {
-      "rock_small": 801,
-      "tree_charred": 133,
-      "basalt_columns": 708,
+      "rock_small": 800,
+      "tree_charred": 135,
+      "basalt_columns": 697,
       "ironpalm": 2,
-      "obsidian": 152
+      "obsidian": 153
     },
     "sites": [
       "settlement(HUB) village Kilnhold 1572 476 65",
@@ -158,13 +160,13 @@
       "x": 1572,
       "z": 476
     },
-    "placements": 77,
-    "vignettesAvoided": 196
+    "placements": 76,
+    "vignettesAvoided": 198
   },
   "files": {
-    "terrain.bin": 255401,
-    "nav.bin": 14349,
-    "scatter.bin": 14452,
-    "placements.json": 103696
+    "terrain.bin": 255353,
+    "nav.bin": 14267,
+    "scatter.bin": 14380,
+    "placements.json": 101193
   }
 }

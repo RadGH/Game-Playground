@@ -13,40 +13,20 @@
     13
    ],
    "count": [
-    2,
-    2
-   ],
-   "x": 1317,
-   "z": 1415,
-   "yaw": 0,
-   "radius": 7,
-   "quest": "gw_crown_feathers",
-   "hunt": true
-  },
-  {
-   "type": "camp",
-   "id": "quest_gw_crown_feathers_0_1",
-   "monster": "glasswing",
-   "with": null,
-   "level": [
-    13,
-    13
-   ],
-   "count": [
     1,
     1
    ],
-   "x": 1317,
-   "z": 1415,
+   "x": 1671,
+   "z": 1408,
    "yaw": 0,
-   "radius": 7,
+   "radius": 8,
    "quest": "gw_crown_feathers",
    "hunt": true
   },
   {
    "type": "camp",
    "id": "champ_z11_09_1",
-   "monster": "ashback_salamander",
+   "monster": "scoria_crawler",
    "with": null,
    "level": [
     13,
@@ -56,13 +36,13 @@
     1,
     1
    ],
-   "x": 1728,
-   "z": 1576,
+   "x": 1908,
+   "z": 1464,
    "yaw": 0,
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "gilded"
+    "venomous"
    ],
    "respawnMin": [
     4,

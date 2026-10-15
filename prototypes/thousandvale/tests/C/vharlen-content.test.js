@@ -43,7 +43,8 @@ const banned = t => [...BANNED.filter(w => new RegExp(`(^|[^A-Za-z])${w}($|[^A-Z
 // Torbor Downs' places (towns, hamlets, forts, zone names) and the province itself
 const TORBOR_PLACES = [...new Set(['Torbor', ...Object.values(TORBOR.zones).flatMap(z => [z.town, ...(z.hamlets || [])])].filter(Boolean))];
 const torborIn = t => TORBOR_PLACES.filter(p => new RegExp(`(^|[^A-Za-z])${p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}($|[^A-Za-z])`).test(t));
-const SKIP_KEYS = new Set(['_doc', 'id', 'type', 'body', 'from', 'with', 'base', 'encounter', 'boss', 'monster', 'kind', 'status', 'shape', 'at', 'site', 'zone', 'giver', 'npc', 'next', 'then', 'quest', 'species', 'look', 'roster', 'family', 'element']);
+const SKIP_KEYS = new Set(['_doc', 'id', 'type', 'body', 'from', 'with', 'base', 'encounter', 'boss', 'monster', 'kind', 'status', 'shape', 'at', 'site', 'zone', 'giver', 'npc', 'next', 'then', 'quest', 'species', 'look', 'roster', 'family', 'element',
+  'bases', 'catalog', 'minCap', 'minCapBase', 'only', 'route', 'chatter', 'props', 'guardTypes', 'guardFallback', 'guardFamily', 'role', 'sign', 'held', 'deliverTargets']);   // [W] id lists in the island's shop / road / traveller files
 function strings(o, path = '', out = []) {
   if (typeof o === 'string') out.push([path, o]);
   else if (Array.isArray(o)) o.forEach((v, i) => strings(v, `${path}[${i}]`, out));
@@ -181,7 +182,15 @@ test('no banned word and no Torbor Downs place name in any Vharlen text', () => 
   const sources = { sheet: SHEET, names: NAMES, rares: RARES, shops: SHOPS, angling: ANGLING, events: VH_EVENTS, story: { ...STORY, prelude: null }, monsters: TV,   // (the prelude is the mainland quest that sends you here: it names Gullwick on purpose)
     ...Object.fromEntries(ZIDS.map(z => ['quests/' + z, QUESTS[z]])),
     ...Object.fromEntries([...encIds(), ...dungeonScripts()].filter(script).map(id => ['encounters/' + id, script(id)])),
-    families: VH_FAMILIES.map(k => ({ name: FAMILIES[k].name, blurb: FAMILIES[k].blurb, sets: (FAMILIES[k].encounterSets || []).map(s => s.name) })) };
+    families: VH_FAMILIES.map(k => ({ name: FAMILIES[k].name, blurb: FAMILIES[k].blurb, sets: (FAMILIES[k].encounterSets || []).map(s => s.name) })),
+    // [W] the island's own wilderness dressing, people and roads (the Torbor goods kept in the catalogue are not shelved here)
+    ...Object.fromEntries(['data/vignettes/vharlen-wayside.json', 'data/vignettes/vharlen-curios.json', 'data/vignettes/vharlen-vignettes.json', 'data/provinces/vharlen-travellers.json',
+      'data/provinces/vharlen-wanderers.json', 'data/provinces/vharlen-road-events.json'].filter(has).map(f => [f, J(f)])),
+    carts: { service: J('data/provinces/vharlen-carts.json').service, rules: J('data/provinces/vharlen-carts.json').rules },
+    chatter: (() => { const pools = J('data/names/chatter.json').pools, T = has('data/provinces/vharlen-travellers.json') ? J('data/provinces/vharlen-travellers.json') : { kinds: {}, folk: {} }, Wd = has('data/provinces/vharlen-wanderers.json') ? J('data/provinces/vharlen-wanderers.json') : { kinds: {} };
+      const ids = new Set([...Object.values(T.kinds), ...Object.values(T.folk), ...Object.values(Wd.kinds)].flatMap(k => k.chatter || []).filter(id => /^(role|road)\./.test(id) && /isle|^role\./.test(id)));
+      const torborPools = new Set([...Object.values(J('data/provinces/travellers.json').kinds), ...Object.values(J('data/provinces/travellers.json').folk)].flatMap(k => k.chatter || []));
+      return Object.fromEntries([...ids].filter(id => !torborPools.has(id)).map(id => [id, pools[id] || []])); })() };
   const bad = [];
   for (const [src, d] of Object.entries(sources)) for (const [p, s] of strings(d)) {
     for (const h of banned(s)) bad.push(`${src} ${p}: banned "${h}" in "${s.slice(0, 70)}"`);

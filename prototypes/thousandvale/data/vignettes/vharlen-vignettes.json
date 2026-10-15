@@ -1,0 +1,2617 @@
+{
+ "_doc": "Stream W (Expansion 1). Vharlen's own vignettes — the island's answer to data/vignettes/m1.json / m2.json, same recipe shape (id, name, blurb, lore, tags{biomes, archetypes, band, cultures}, radius, props, monsters, objects; see data/vignettes/README.md). Props ONLY from data/vignettes/vharlen-props.json, monsters only from data/rules/monsters-tv.json (`level` is added to the zone's low band). No quest links yet. Every one of the island's nine archetypes is fitted by at least six, so tools/assign-vignettes.mjs can give a zone four with no repeat within two zones.",
+ "vignettes": [
+  {
+   "id": "vh_cut_rope_landing",
+   "name": "Cut-Rope Landing",
+   "blurb": "Slagborn raiders stripping a fishing landing: two outriggers, a fish rack, cut mooring ropes. The fishermen fled; one hides behind the net poles.",
+   "lore": "The mooring ropes have been cut, not untied. Raiders are going through the canoes, throwing the fish they do not want into the sea.",
+   "tags": {
+    "biomes": [
+     "beach"
+    ],
+    "archetypes": [
+     "coast",
+     "frontier",
+     "wilds"
+    ],
+    "band": [
+     10,
+     20
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 14,
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_outrigger",
+     "x": -4,
+     "z": -3,
+     "yaw": 0.1
+    },
+    {
+     "kind": "prop",
+     "id": "vh_outrigger",
+     "x": -4,
+     "z": 0.5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_mooring_post",
+     "x": -8,
+     "z": -1,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_mooring_post",
+     "x": -8,
+     "z": 2.5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_fish_rack",
+     "x": 4,
+     "z": -5,
+     "yaw": 0.4
+    },
+    {
+     "kind": "prop",
+     "id": "vh_net_poles",
+     "x": 6,
+     "z": 4,
+     "yaw": 1.3
+    },
+    {
+     "kind": "prop",
+     "id": "vh_scoria_ring",
+     "x": 2,
+     "z": 1,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "sand_ripple",
+     "x": -1,
+     "z": 7,
+     "yaw": 0
+    }
+   ],
+   "monsters": [
+    {
+     "type": "slagborn_raider",
+     "count": 3,
+     "level": 1,
+     "x": 1,
+     "z": -1,
+     "radius": 6
+    }
+   ],
+   "objects": [
+    {
+     "type": "npc",
+     "name": "Pekku the net-mender",
+     "x": 7.5,
+     "z": 5.5,
+     "says": [
+      "They cut every rope on the beach. Every rope! Do you know how long it takes to plait a rope?",
+      "They wanted the glass floats. Raiders think glass is treasure. It is just glass.",
+      "The catch box is still under the rack. Take some. You earned more than fish."
+     ]
+    },
+    {
+     "type": "chest",
+     "name": "Catch box",
+     "x": 4,
+     "z": -3.6,
+     "tier": "common"
+    }
+   ]
+  },
+  {
+   "id": "vh_knappers_overrun",
+   "name": "Crawler Flakes",
+   "blurb": "An obsidian knappers' camp overrun by scoria crawlers drawn to the heat of the work fire; the knappers left mid-blade.",
+   "lore": "Glass flakes everywhere, a fire still burning, and a knapping stone with a half-finished blade on it. The things clicking over the scoria are not knappers.",
+   "tags": {
+    "biomes": [
+     "glimmerwaste",
+     "volcanic",
+     "badlands",
+     "ashPlain"
+    ],
+    "archetypes": [
+     "mine_country",
+     "ruinfield",
+     "frontier",
+     "coast"
+    ],
+    "band": [
+     10,
+     20
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 13,
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_knapping_stone",
+     "x": 0,
+     "z": 0,
+     "yaw": 0.2
+    },
+    {
+     "kind": "prop",
+     "id": "vh_obsidian_cores",
+     "x": 2.2,
+     "z": -1.4,
+     "yaw": 0.5
+    },
+    {
+     "kind": "prop",
+     "id": "vh_obsidian_cores",
+     "x": -2.6,
+     "z": 2,
+     "yaw": 1.2
+    },
+    {
+     "kind": "prop",
+     "id": "vh_glass_shards",
+     "x": 1,
+     "z": 2.4,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_glass_shards",
+     "x": -2,
+     "z": -2.4,
+     "yaw": 0.8
+    },
+    {
+     "kind": "prop",
+     "id": "vh_scoria_ring",
+     "x": 4.6,
+     "z": 3,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_reed_lean_to",
+     "x": -6,
+     "z": -5,
+     "yaw": 0.5
+    },
+    {
+     "kind": "prop",
+     "id": "vh_bedroll",
+     "x": -6,
+     "z": -1.6,
+     "yaw": 0.2
+    }
+   ],
+   "monsters": [
+    {
+     "type": "scoria_crawler",
+     "count": 4,
+     "level": 0,
+     "x": 1,
+     "z": 0,
+     "radius": 7
+    }
+   ],
+   "objects": [
+    {
+     "type": "note",
+     "name": "Half-struck blade",
+     "x": 0,
+     "z": 0.8,
+     "text": "Scratched on the stone: THEY LIKE THE FIRE. DO NOT LIGHT THE FIRE. (Below, newer:) who lit the fire"
+    },
+    {
+     "type": "chest",
+     "name": "Knappers' tool roll",
+     "x": -6,
+     "z": -3.6,
+     "tier": "common"
+    }
+   ]
+  },
+  {
+   "id": "vh_occupied_bath",
+   "name": "The Occupied Bath",
+   "blurb": "A hot-spring bathing hut where an ashback salamander has moved into the pool and will not move out. The bath-keeper waits on a stilt platform.",
+   "lore": "Steam, a bath hut, a coin box on a post and, lying in the hot pool like it pays rent, a salamander. It opens one eye at you.",
+   "tags": {
+    "biomes": [
+     "rainforest",
+     "volcanic",
+     "marsh",
+     "shrubland"
+    ],
+    "archetypes": [
+     "wilds",
+     "marsh",
+     "holy_ground",
+     "pass"
+    ],
+    "band": [
+     10,
+     20
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 13,
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_bath_hut",
+     "x": 0,
+     "z": -5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_hot_pool",
+     "x": 0,
+     "z": 0.5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_stilt_platform",
+     "x": 7,
+     "z": 2,
+     "yaw": 0.4
+    },
+    {
+     "kind": "prop",
+     "id": "vh_tree_fern",
+     "x": -7,
+     "z": -2,
+     "yaw": 0.6
+    },
+    {
+     "kind": "prop",
+     "id": "vh_tree_fern",
+     "x": -6,
+     "z": 5,
+     "yaw": 2
+    },
+    {
+     "kind": "prop",
+     "id": "vh_clay_pots",
+     "x": 3.4,
+     "z": -4.6,
+     "yaw": 0.3
+    },
+    {
+     "kind": "ground",
+     "id": "puddle_ring",
+     "x": 4,
+     "z": 6,
+     "yaw": 0
+    }
+   ],
+   "monsters": [
+    {
+     "type": "ashback_salamander",
+     "count": 1,
+     "level": 2,
+     "x": 0,
+     "z": 0.5,
+     "radius": 4
+    }
+   ],
+   "objects": [
+    {
+     "type": "npc",
+     "name": "Steam-wife Ninu",
+     "x": 7,
+     "z": 2,
+     "says": [
+      "Three days it has been in my pool. Three days! I have had to bathe in a pot.",
+      "It likes the heat. Everything on this island likes the heat. I like the heat. Get it out.",
+      "Afterwards, have a soak. On the house. Well, on the pool."
+     ]
+    },
+    {
+     "type": "use",
+     "name": "Hot pool",
+     "x": 0,
+     "z": 2,
+     "text": "You lower yourself in where the salamander was. It is even hotter now. Every ache gives up.",
+     "buff": {
+      "status": "regen",
+      "seconds": 420
+     }
+    }
+   ]
+  },
+  {
+   "id": "vh_yellow_cart_down",
+   "name": "Yellow Cart Down",
+   "blurb": "A sulphur cart tipped over on a hot flat, ambushed by vent wisps that rose out of the cracks as it passed; sulphur baskets scattered.",
+   "lore": "The cart went over when the ground started breathing. Sulphur all over the flat, baskets rolled into the cracks, and pale shapes drifting up out of them.",
+   "tags": {
+    "biomes": [
+     "desert",
+     "volcanic",
+     "ashPlain",
+     "badlands"
+    ],
+    "archetypes": [
+     "mine_country",
+     "blight",
+     "frontier",
+     "pass"
+    ],
+    "band": [
+     10,
+     20
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 13,
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_sulphur_cart",
+     "x": 0,
+     "z": 0,
+     "yaw": 0.3
+    },
+    {
+     "kind": "prop",
+     "id": "vh_sulphur_heap",
+     "x": 3,
+     "z": 2,
+     "yaw": 0.4
+    },
+    {
+     "kind": "prop",
+     "id": "vh_sulphur_baskets",
+     "x": -3.6,
+     "z": 2.4,
+     "yaw": 0.9
+    },
+    {
+     "kind": "prop",
+     "id": "vh_sulphur_baskets",
+     "x": 4.4,
+     "z": -3,
+     "yaw": 2.1
+    },
+    {
+     "kind": "ground",
+     "id": "puddle_ring",
+     "x": -4,
+     "z": -4,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "puddle_ring",
+     "x": 6,
+     "z": 5,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "sand_ripple",
+     "x": -7,
+     "z": 2,
+     "yaw": 0
+    }
+   ],
+   "monsters": [
+    {
+     "type": "vent_wisp",
+     "count": 3,
+     "level": 1,
+     "x": 0,
+     "z": -3,
+     "radius": 6
+    }
+   ],
+   "objects": [
+    {
+     "type": "chest",
+     "name": "Carter's strongbox",
+     "x": -1.6,
+     "z": 1.4,
+     "tier": "common"
+    },
+    {
+     "type": "note",
+     "name": "Delivery tally",
+     "x": 2,
+     "z": -1.6,
+     "text": "Twelve baskets, Yellowpan to the quay. Tax paid. Route checked. Ground checked. Ground lied."
+    }
+   ]
+  },
+  {
+   "id": "vh_glass_king_mound",
+   "name": "Mound of the Glass King",
+   "blurb": "A Glass King's grave mound: an arch into the dune, inlaid pillars, a scatter of black glass. An obsidian warden still stands guard and the grave goods are behind it.",
+   "lore": "An arch half buried in black sand, pillars inlaid with glass, and in front of it a figure of polished obsidian that has not moved for four hundred years. It moves now.",
+   "tags": {
+    "biomes": [
+     "glimmerwaste",
+     "badlands",
+     "mountains",
+     "ashPlain"
+    ],
+    "archetypes": [
+     "ruinfield",
+     "holy_ground",
+     "pass",
+     "blight"
+    ],
+    "band": [
+     10,
+     20
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 15,
+   "props": [
+    {
+     "kind": "prop",
+     "id": "ruined_arch",
+     "x": 0,
+     "z": -7,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "ruined_pillar",
+     "x": -5,
+     "z": -4,
+     "yaw": 0.2
+    },
+    {
+     "kind": "prop",
+     "id": "ruined_pillar",
+     "x": 5,
+     "z": -4,
+     "yaw": 2.9
+    },
+    {
+     "kind": "prop",
+     "id": "vh_glass_shards",
+     "x": -2.6,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_glass_shards",
+     "x": 3,
+     "z": 2.6,
+     "yaw": 1.3
+    },
+    {
+     "kind": "prop",
+     "id": "stone_step",
+     "x": 0,
+     "z": -5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_buried_urn",
+     "x": -7,
+     "z": 3,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_buried_urn",
+     "x": 7,
+     "z": 2,
+     "yaw": 0
+    }
+   ],
+   "monsters": [
+    {
+     "type": "obsidian_warden",
+     "count": 1,
+     "level": 2,
+     "x": 0,
+     "z": -2,
+     "radius": 5
+    }
+   ],
+   "objects": [
+    {
+     "type": "chest",
+     "name": "The king's grave goods",
+     "x": 0,
+     "z": -6,
+     "tier": "rare"
+    },
+    {
+     "type": "note",
+     "name": "Inlaid lintel",
+     "x": 0,
+     "z": -7.6,
+     "text": "HERE SLEEPS A KING OF GLASS. HE SEES THROUGH YOU. (Somebody has scratched underneath:) everyone can see through glass, that is the point of glass"
+    }
+   ]
+  },
+  {
+   "id": "vh_house_under_ash",
+   "name": "The House Under the Ash",
+   "blurb": "A stilt house buried to its eaves in an ashfall, its roof the only thing showing. A pumice golem has risen out of the drift beside it.",
+   "lore": "Only the thatch shows, sticking out of the ash like a boat upside down. Beside it the drift is getting up on its legs.",
+   "tags": {
+    "biomes": [
+     "ashPlain",
+     "glimmerwaste",
+     "blighted",
+     "volcanic"
+    ],
+    "archetypes": [
+     "blight",
+     "ruinfield",
+     "frontier"
+    ],
+    "band": [
+     10,
+     20
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 13,
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_buried_roof",
+     "x": 0,
+     "z": -2,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_buried_wall",
+     "x": -5,
+     "z": 2,
+     "yaw": 0.4
+    },
+    {
+     "kind": "prop",
+     "id": "vh_ash_drift",
+     "x": 4,
+     "z": 3,
+     "yaw": 0.2
+    },
+    {
+     "kind": "prop",
+     "id": "vh_ash_drift",
+     "x": -3,
+     "z": 6,
+     "yaw": 1.1
+    },
+    {
+     "kind": "prop",
+     "id": "vh_clay_pots",
+     "x": 6,
+     "z": -4,
+     "yaw": 0.3
+    },
+    {
+     "kind": "prop",
+     "id": "vh_charred_beams",
+     "x": -6,
+     "z": -6,
+     "yaw": 0.6
+    },
+    {
+     "kind": "ground",
+     "id": "ash_patch",
+     "x": 1,
+     "z": 7,
+     "yaw": 0
+    }
+   ],
+   "monsters": [
+    {
+     "type": "pumice_golem",
+     "count": 1,
+     "level": 1,
+     "x": 3,
+     "z": 4,
+     "radius": 5
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Cut through the thatch",
+     "x": -1.6,
+     "z": -0.4,
+     "text": "You hack a hole in the roof. Below, a dark room, dry as an oven and full of a family's things."
+    },
+    {
+     "type": "chest",
+     "name": "The family's strongbox",
+     "x": -1.6,
+     "z": -0.4,
+     "tier": "uncommon",
+     "after": "Cut through the thatch"
+    }
+   ]
+  },
+  {
+   "id": "vh_rim_waystation",
+   "name": "Rim Keepers' Waystation",
+   "blurb": "A peaceful Rim Keeper waystation: a waymarker, a reed lean-to, a fire and a keeper who reads the ground for travellers. No fight.",
+   "lore": "A banded waymarker, a fire in a scoria ring and a keeper with a staff, crouched with one palm flat on the ground, listening.",
+   "tags": {
+    "biomes": [
+     "mountains",
+     "volcanic",
+     "badlands",
+     "shrubland"
+    ],
+    "archetypes": [
+     "holy_ground",
+     "pass",
+     "wilds",
+     "mine_country"
+    ],
+    "band": [
+     10,
+     20
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 12,
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_rim_waymarker",
+     "x": 0,
+     "z": -4,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_reed_lean_to",
+     "x": -5,
+     "z": -2,
+     "yaw": 0.6
+    },
+    {
+     "kind": "prop",
+     "id": "vh_scoria_ring",
+     "x": 0,
+     "z": 1,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_offering_bowl",
+     "x": 2,
+     "z": -3,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_basalt_cairn",
+     "x": 6,
+     "z": 2,
+     "yaw": 0.4
+    },
+    {
+     "kind": "prop",
+     "id": "vh_kettle",
+     "x": -2,
+     "z": 2.6,
+     "yaw": 0.8
+    },
+    {
+     "kind": "ground",
+     "id": "lichen_patch",
+     "x": 4,
+     "z": 6,
+     "yaw": 0
+    }
+   ],
+   "objects": [
+    {
+     "type": "npc",
+     "name": "Varr the rim-keeper",
+     "x": 1.6,
+     "z": 2,
+     "says": [
+      "Hush. The ground is talking. ... It says you are standing on its foot.",
+      "We Keepers walk the rim every day and mark where it is warm. Where it is warm today, it is lava next year.",
+      "Sit by the fire. Drink something. Then go round by the cairns, not the short way. Nobody who takes the short way tells me about it."
+     ]
+    },
+    {
+     "type": "use",
+     "name": "Keeper's kettle",
+     "x": -2,
+     "z": 2.6,
+     "text": "A bitter tea of ash-root. The keeper says it steadies the feet. Your feet agree.",
+     "buff": {
+      "status": "guard",
+      "seconds": 300
+     }
+    }
+   ]
+  },
+  {
+   "id": "vh_feast_unfinished",
+   "name": "The Feast Nobody Finished",
+   "blurb": "A fish-pit feast abandoned mid-meal when a mudback lurker came out of the fen and started eating the guests' dinner. Mats, a kettle, a half-dug steam pit.",
+   "lore": "Reed mats laid out for a dozen, a steam pit half dug open, fish on the leaves. And in the middle of it all, something enormous eating the fish, leaves and all.",
+   "tags": {
+    "biomes": [
+     "marsh",
+     "beach",
+     "rainforest"
+    ],
+    "archetypes": [
+     "marsh",
+     "coast",
+     "wilds"
+    ],
+    "band": [
+     10,
+     20
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 14,
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_steam_pit",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_bedroll",
+     "x": -4,
+     "z": -3,
+     "yaw": 0.3
+    },
+    {
+     "kind": "prop",
+     "id": "vh_bedroll",
+     "x": 4,
+     "z": -3,
+     "yaw": 2.8
+    },
+    {
+     "kind": "prop",
+     "id": "vh_bedroll",
+     "x": 0,
+     "z": 4.5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_kettle",
+     "x": -5,
+     "z": 2,
+     "yaw": 0.2
+    },
+    {
+     "kind": "prop",
+     "id": "vh_fish_rack",
+     "x": 6,
+     "z": 4,
+     "yaw": 1.6
+    },
+    {
+     "kind": "ground",
+     "id": "puddle_ring",
+     "x": -7,
+     "z": -6,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_clay_pots",
+     "x": 7,
+     "z": -6,
+     "yaw": 0.5
+    }
+   ],
+   "monsters": [
+    {
+     "type": "mudback_lurker",
+     "count": 1,
+     "level": 1,
+     "x": 0,
+     "z": 1,
+     "radius": 5
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "What is left in the pit",
+     "x": 0,
+     "z": -1.4,
+     "text": "Under the trampled leaves, three fish the lurker missed. Smoky, tender, and yours.",
+     "buff": {
+      "status": "regen",
+      "seconds": 240
+     }
+    },
+    {
+     "type": "chest",
+     "name": "Host's gift basket",
+     "x": 7,
+     "z": -4.8,
+     "tier": "common"
+    }
+   ]
+  },
+  {
+   "id": "vh_ash_at_prayer",
+   "name": "Ash at Prayer",
+   "blurb": "A Slagborn ash shrine with firecallers at prayer before a raid; slag totems, offering bowls, a fire. Their raid tithe sits behind the shrine.",
+   "lore": "Firecallers kneel before a shrine of ash and slag, chanting into a fire. They are praying for a good raid. You can help them find out how good.",
+   "tags": {
+    "biomes": [
+     "volcanic",
+     "blighted",
+     "ashPlain",
+     "badlands"
+    ],
+    "archetypes": [
+     "holy_ground",
+     "blight",
+     "frontier",
+     "pass"
+    ],
+    "band": [
+     10,
+     20
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 14,
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_ash_shrine",
+     "x": 0,
+     "z": -4,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_slag_totem",
+     "x": -4,
+     "z": -5,
+     "yaw": 0.3
+    },
+    {
+     "kind": "prop",
+     "id": "vh_slag_totem",
+     "x": 4,
+     "z": -5,
+     "yaw": 2.4
+    },
+    {
+     "kind": "prop",
+     "id": "vh_scoria_ring",
+     "x": 0,
+     "z": 0.5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_offering_bowl",
+     "x": -2.4,
+     "z": -2,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_offering_bowl",
+     "x": 2.4,
+     "z": -2,
+     "yaw": 1.1
+    },
+    {
+     "kind": "ground",
+     "id": "ash_patch",
+     "x": -6,
+     "z": 3,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "banner_pole",
+     "x": 6,
+     "z": 2,
+     "yaw": 0.4
+    }
+   ],
+   "monsters": [
+    {
+     "type": "slagborn_firecaller",
+     "count": 2,
+     "level": 1,
+     "x": 0,
+     "z": 2,
+     "radius": 5
+    }
+   ],
+   "objects": [
+    {
+     "type": "chest",
+     "name": "Raid tithe",
+     "x": 0,
+     "z": -6.4,
+     "tier": "uncommon"
+    },
+    {
+     "type": "use",
+     "name": "Bowl of ash",
+     "x": 2.4,
+     "z": -1.2,
+     "text": "You tip the bowl into the fire and the shrine sputters. It feels like taking a debt back.",
+     "buff": {
+      "status": "rally",
+      "seconds": 300
+     }
+    }
+   ]
+  },
+  {
+   "id": "vh_kiln_left_burning",
+   "name": "The Kiln Left Burning",
+   "blurb": "A glass-blower's kiln still glowing after its owner fled; glasswings, drawn to hot glass, have taken the yard. Floats, pots and a cooling rack.",
+   "lore": "The kiln is still alight and the yard is full of half-made glass. Above it, wings like broken windows catch the glow.",
+   "tags": {
+    "biomes": [
+     "glimmerwaste",
+     "beach",
+     "mountains",
+     "badlands"
+    ],
+    "archetypes": [
+     "ruinfield",
+     "mine_country",
+     "coast",
+     "pass"
+    ],
+    "band": [
+     10,
+     20
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 13,
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_glass_kiln",
+     "x": 0,
+     "z": -4,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_glass_floats",
+     "x": 3,
+     "z": -1,
+     "yaw": 0.4
+    },
+    {
+     "kind": "prop",
+     "id": "vh_glass_floats",
+     "x": -3.4,
+     "z": 0,
+     "yaw": 1.4
+    },
+    {
+     "kind": "prop",
+     "id": "vh_glass_shards",
+     "x": 1,
+     "z": 3,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_clay_pots",
+     "x": -5,
+     "z": -5,
+     "yaw": 0.2
+    },
+    {
+     "kind": "prop",
+     "id": "vh_reed_screen",
+     "x": 6,
+     "z": -5,
+     "yaw": 1.2
+    },
+    {
+     "kind": "prop",
+     "id": "crate",
+     "x": -6,
+     "z": 3,
+     "yaw": 0.5
+    }
+   ],
+   "monsters": [
+    {
+     "type": "glasswing",
+     "count": 2,
+     "level": 0,
+     "x": 0,
+     "z": 0,
+     "radius": 6
+    }
+   ],
+   "objects": [
+    {
+     "type": "chest",
+     "name": "Glass-blower's crate",
+     "x": -6,
+     "z": 3,
+     "tier": "common"
+    },
+    {
+     "type": "note",
+     "name": "Order slip",
+     "x": 3,
+     "z": -1.6,
+     "text": "Forty floats for the Stiltreach boats, green not amber, they were VERY clear about green. Kiln hot by dawn. Do not leave it unwatched. (Unwatched.)"
+    }
+   ]
+  },
+  {
+   "id": "vh_stranded_clerk",
+   "name": "The Stranded Clerk",
+   "blurb": "A Harbour Council tax clerk stranded on a cart wreck, ledger held high, surrounded by sulphur toads. He is more worried about the ledger.",
+   "lore": "A man in a good coat standing on a tipped cart, holding a ledger over his head like it matters more than he does. Around the cart, toads the colour of mustard.",
+   "tags": {
+    "biomes": [
+     "desert",
+     "marsh",
+     "shrubland",
+     "savanna"
+    ],
+    "archetypes": [
+     "mine_country",
+     "marsh",
+     "frontier",
+     "coast"
+    ],
+    "band": [
+     10,
+     20
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 13,
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_sulphur_cart",
+     "x": 0,
+     "z": 0,
+     "yaw": 1.1
+    },
+    {
+     "kind": "prop",
+     "id": "vh_sulphur_baskets",
+     "x": 3,
+     "z": 3,
+     "yaw": 0.2
+    },
+    {
+     "kind": "ground",
+     "id": "puddle_ring",
+     "x": -4,
+     "z": 3,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "puddle_ring",
+     "x": 4,
+     "z": -4,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_reed_screen",
+     "x": -6,
+     "z": -3,
+     "yaw": 0.6
+    },
+    {
+     "kind": "prop",
+     "id": "crate",
+     "x": 2.6,
+     "z": -2.4,
+     "yaw": 0.4
+    }
+   ],
+   "monsters": [
+    {
+     "type": "sulphur_toad",
+     "count": 3,
+     "level": 0,
+     "x": 0,
+     "z": 3,
+     "radius": 6
+    }
+   ],
+   "objects": [
+    {
+     "type": "npc",
+     "name": "Clerk Ilko Sulvenn",
+     "x": 0.6,
+     "z": -0.6,
+     "says": [
+      "Harbour Council business! Do not touch the ledger. Do not touch me either, I have been licked.",
+      "I was assessing the sulphur pans for the quay tax. The pans assessed me back.",
+      "The Council will be told of your help. In writing. In triplicate. Take the cart's strongbox, the Council would want you paid. Probably."
+     ]
+    },
+    {
+     "type": "chest",
+     "name": "Cart strongbox",
+     "x": 2.6,
+     "z": -2.4,
+     "tier": "common"
+    }
+   ]
+  },
+  {
+   "id": "vh_crawlers_in_tube",
+   "name": "Crawlers in the Tube",
+   "blurb": "A lava-tube mouth used as a store by sulphur miners; scoria crawlers nest just inside and pour out at anyone who comes near. The miners' cache is in the mouth.",
+   "lore": "A basalt arch breathing warm air out of the hillside. Something inside is clicking, and the clicking is getting closer.",
+   "tags": {
+    "biomes": [
+     "volcanic",
+     "mountains",
+     "badlands",
+     "rainforest"
+    ],
+    "archetypes": [
+     "mine_country",
+     "pass",
+     "wilds",
+     "blight"
+    ],
+    "band": [
+     10,
+     20
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 13,
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_lava_tube",
+     "x": 0,
+     "z": -6,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_sulphur_baskets",
+     "x": -4,
+     "z": -2,
+     "yaw": 0.6
+    },
+    {
+     "kind": "prop",
+     "id": "vh_pumice_pile",
+     "x": 4.4,
+     "z": -2.6,
+     "yaw": 0.2
+    },
+    {
+     "kind": "prop",
+     "id": "torch_post",
+     "x": -3,
+     "z": -3.6,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "torch_post",
+     "x": 3,
+     "z": -3.6,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "ash_patch",
+     "x": 0,
+     "z": 3,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "bone_scatter",
+     "x": 5,
+     "z": 4,
+     "yaw": 0
+    }
+   ],
+   "monsters": [
+    {
+     "type": "scoria_crawler",
+     "count": 3,
+     "level": 2,
+     "x": 0,
+     "z": -2,
+     "radius": 5
+    }
+   ],
+   "objects": [
+    {
+     "type": "chest",
+     "name": "Miners' store",
+     "x": 0,
+     "z": -5.6,
+     "tier": "uncommon"
+    },
+    {
+     "type": "note",
+     "name": "Chalk on the arch",
+     "x": -2,
+     "z": -5,
+     "text": "STORE ONLY. DO NOT GO PAST THE BEND. Somebody went past the bend."
+    }
+   ]
+  },
+  {
+   "id": "vh_felled_palm",
+   "name": "The Felled Palm",
+   "blurb": "An ironpalm felled across a track on purpose: a Slagborn road block with raiders waiting behind it for a cart. Cut stump shows the axe marks.",
+   "lore": "An ironpalm lies across the track, and the stump it came off has fresh axe marks. Trees do not fall this neatly by themselves. Neither do ambushes.",
+   "tags": {
+    "biomes": [
+     "rainforest",
+     "shrubland",
+     "savanna",
+     "beach"
+    ],
+    "archetypes": [
+     "wilds",
+     "coast",
+     "frontier",
+     "marsh"
+    ],
+    "band": [
+     10,
+     20
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 14,
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_fallen_ironpalm",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_ironpalm_stump",
+     "x": -5,
+     "z": -2.4,
+     "yaw": 0.4
+    },
+    {
+     "kind": "prop",
+     "id": "vh_ironpalm",
+     "x": 6,
+     "z": -7,
+     "yaw": 0.8
+    },
+    {
+     "kind": "prop",
+     "id": "vh_tree_fern",
+     "x": -7,
+     "z": 5,
+     "yaw": 1.2
+    },
+    {
+     "kind": "prop",
+     "id": "vh_slag_totem",
+     "x": 4,
+     "z": 3,
+     "yaw": 0.2
+    },
+    {
+     "kind": "prop",
+     "id": "vh_scoria_ring",
+     "x": -2,
+     "z": -6,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_bedroll",
+     "x": 1,
+     "z": -7,
+     "yaw": 0.4
+    }
+   ],
+   "monsters": [
+    {
+     "type": "slagborn_raider",
+     "count": 2,
+     "level": 0,
+     "x": 0,
+     "z": -4,
+     "radius": 5
+    }
+   ],
+   "objects": [
+    {
+     "type": "chest",
+     "name": "Toll takings",
+     "x": -2,
+     "z": -7.4,
+     "tier": "common"
+    },
+    {
+     "type": "note",
+     "name": "Slag stake tag",
+     "x": 4,
+     "z": 3.6,
+     "text": "PAY THE ASH OR GO ROUND. (It is a long way round.)"
+    }
+   ]
+  },
+  {
+   "id": "vh_deserters_fire",
+   "name": "Deserters' Fire",
+   "blurb": "Two Slagborn deserters washed their faces and fled; one is left, hiding up a stilt platform while steamwood prowlers circle the camp.",
+   "lore": "A small fire, two reed mats, a bowl of washed-off ash, and a young man up a stilt platform with a knife, shouting at the bushes. The bushes are shouting back.",
+   "tags": {
+    "biomes": [
+     "rainforest",
+     "shrubland",
+     "savanna",
+     "blighted"
+    ],
+    "archetypes": [
+     "wilds",
+     "frontier",
+     "blight",
+     "ruinfield"
+    ],
+    "band": [
+     10,
+     20
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 13,
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_scoria_ring",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_bedroll",
+     "x": -3,
+     "z": -2,
+     "yaw": 0.4
+    },
+    {
+     "kind": "prop",
+     "id": "vh_bedroll",
+     "x": 3,
+     "z": -2.6,
+     "yaw": 2.6
+    },
+    {
+     "kind": "prop",
+     "id": "vh_stilt_platform",
+     "x": 6,
+     "z": 4,
+     "yaw": 0.2
+    },
+    {
+     "kind": "prop",
+     "id": "vh_offering_bowl",
+     "x": -1.6,
+     "z": 2,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_tree_fern",
+     "x": -7,
+     "z": -5,
+     "yaw": 0.3
+    },
+    {
+     "kind": "prop",
+     "id": "vh_charred_trunk",
+     "x": 7,
+     "z": -6,
+     "yaw": 0.9
+    }
+   ],
+   "monsters": [
+    {
+     "type": "steamwood_prowler",
+     "count": 2,
+     "level": 1,
+     "x": -3,
+     "z": 3,
+     "radius": 6
+    }
+   ],
+   "objects": [
+    {
+     "type": "npc",
+     "name": "Drask, no longer Slagborn",
+     "x": 6,
+     "z": 4,
+     "says": [
+      "Are they gone? The cats? I washed the ash off and the jungle noticed. It noticed very fast.",
+      "Do not tell the chief you saw me. Tell him I fed the mountain. He likes that story.",
+      "My pack is by the fire. Take what you want, I am travelling light now. Very light. Very fast."
+     ]
+    },
+    {
+     "type": "chest",
+     "name": "Deserter's pack",
+     "x": -3,
+     "z": -0.8,
+     "tier": "common"
+    }
+   ]
+  },
+  {
+   "id": "vh_empty_traps",
+   "name": "The Line of Empty Traps",
+   "blurb": "A salamander trapper's line where the traps worked too well: two ashbacks broke out and have the trapper stuck on her platform.",
+   "lore": "A row of reed traps, every one torn open from the inside. On a pole platform at the end, a trapper with a noose-stick and a very tired face.",
+   "tags": {
+    "biomes": [
+     "marsh",
+     "savanna",
+     "volcanic",
+     "desert"
+    ],
+    "archetypes": [
+     "marsh",
+     "wilds",
+     "mine_country",
+     "frontier"
+    ],
+    "band": [
+     10,
+     20
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 14,
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_salamander_trap",
+     "x": -6,
+     "z": -4,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_salamander_trap",
+     "x": -6,
+     "z": -1.6,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_salamander_trap",
+     "x": -6,
+     "z": 0.8,
+     "yaw": 0.1
+    },
+    {
+     "kind": "prop",
+     "id": "vh_salamander_trap",
+     "x": -6,
+     "z": 3.2,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_stilt_platform",
+     "x": 6,
+     "z": -4,
+     "yaw": 0.3
+    },
+    {
+     "kind": "prop",
+     "id": "vh_salamander_bones",
+     "x": 2,
+     "z": 6,
+     "yaw": 0.6
+    },
+    {
+     "kind": "ground",
+     "id": "ash_patch",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    }
+   ],
+   "monsters": [
+    {
+     "type": "ashback_salamander",
+     "count": 2,
+     "level": 1,
+     "x": 0,
+     "z": 0,
+     "radius": 5
+    }
+   ],
+   "objects": [
+    {
+     "type": "npc",
+     "name": "Hekka the trapper",
+     "x": 6,
+     "z": -4,
+     "says": [
+      "Twelve years trapping and I have never caught two at once. Today I caught two at once.",
+      "They are worth a fortune alive. Dead, they are worth a smaller fortune. I will take either.",
+      "There is a tail-basket under the platform. Your share. Mind the teeth, some tails come with the rest attached."
+     ]
+    },
+    {
+     "type": "chest",
+     "name": "Tail basket",
+     "x": 5,
+     "z": -2.4,
+     "tier": "common"
+    }
+   ]
+  },
+  {
+   "id": "vh_cutters_scrape",
+   "name": "Pumice Cutters' Scrape",
+   "blurb": "A pumice cutters' work site: drying racks, heaped blocks, a cut face. The cutters dug too far into one block and it stood up.",
+   "lore": "Drying racks full of pale blocks, picks dropped mid-swing. The cutters were digging into the biggest block on the island. It turns out the block did not want to be dug.",
+   "tags": {
+    "biomes": [
+     "ashPlain",
+     "desert",
+     "volcanic"
+    ],
+    "archetypes": [
+     "mine_country",
+     "frontier",
+     "blight"
+    ],
+    "band": [
+     10,
+     20
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 14,
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_pumice_rack",
+     "x": -4,
+     "z": -5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_pumice_rack",
+     "x": -4,
+     "z": -2,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_pumice_pile",
+     "x": 3,
+     "z": -4,
+     "yaw": 0.3
+    },
+    {
+     "kind": "prop",
+     "id": "vh_pumice_pile",
+     "x": 5,
+     "z": 0,
+     "yaw": 1.4
+    },
+    {
+     "kind": "prop",
+     "id": "vh_reed_lean_to",
+     "x": -7,
+     "z": 5,
+     "yaw": 0.5
+    },
+    {
+     "kind": "prop",
+     "id": "crate",
+     "x": 1,
+     "z": 6,
+     "yaw": 0.6
+    },
+    {
+     "kind": "ground",
+     "id": "ash_patch",
+     "x": 2,
+     "z": 2,
+     "yaw": 0
+    }
+   ],
+   "monsters": [
+    {
+     "type": "pumice_golem",
+     "count": 2,
+     "level": 0,
+     "x": 3,
+     "z": 1,
+     "radius": 5
+    }
+   ],
+   "objects": [
+    {
+     "type": "chest",
+     "name": "Cutters' pay crate",
+     "x": 1,
+     "z": 6,
+     "tier": "common"
+    },
+    {
+     "type": "note",
+     "name": "Foreman's board",
+     "x": -7,
+     "z": 3.4,
+     "text": "Biggest block yet. Light as bread. Moving it tomorrow. (Tomorrow:) IT MOVED ITSELF."
+    }
+   ]
+  },
+  {
+   "id": "vh_ash_chief_fire",
+   "name": "The Ash-Chief's Fire",
+   "blurb": "A Slagborn chief's private fire: banner pole, totems, a chest of loot from the coast raids. The chief sits alone, sure nobody would dare.",
+   "lore": "A big fire, a banner, a ring of slag stakes and one big raider sitting with a cleaver across his knees. He looks up, and he grins, which is worse.",
+   "tags": {
+    "biomes": [
+     "ashPlain",
+     "volcanic",
+     "badlands",
+     "blighted"
+    ],
+    "archetypes": [
+     "pass",
+     "holy_ground",
+     "frontier",
+     "blight"
+    ],
+    "band": [
+     10,
+     20
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 15,
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_scoria_ring",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "banner_pole",
+     "x": 0,
+     "z": -6,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_slag_totem",
+     "x": -5,
+     "z": -4,
+     "yaw": 0.2
+    },
+    {
+     "kind": "prop",
+     "id": "vh_slag_totem",
+     "x": 5,
+     "z": -4,
+     "yaw": 1.9
+    },
+    {
+     "kind": "prop",
+     "id": "vh_slag_totem",
+     "x": -6,
+     "z": 3,
+     "yaw": 2.7
+    },
+    {
+     "kind": "prop",
+     "id": "vh_slag_totem",
+     "x": 6,
+     "z": 3,
+     "yaw": 0.8
+    },
+    {
+     "kind": "prop",
+     "id": "vh_bedroll",
+     "x": 3,
+     "z": -7,
+     "yaw": 0.1
+    },
+    {
+     "kind": "prop",
+     "id": "vh_ash_shrine",
+     "x": -3,
+     "z": -8,
+     "yaw": 0.4
+    }
+   ],
+   "monsters": [
+    {
+     "type": "slagborn_chief",
+     "count": 1,
+     "level": 2,
+     "x": 0,
+     "z": -2,
+     "radius": 4
+    }
+   ],
+   "objects": [
+    {
+     "type": "chest",
+     "name": "Chief's hoard",
+     "x": 1,
+     "z": -8,
+     "tier": "rare"
+    },
+    {
+     "type": "note",
+     "name": "Tally of the raids",
+     "x": 3,
+     "z": -6.4,
+     "text": "Blackstrand: floats, glass, fish. Stiltreach: rope, pots. The Council boat: TAX MONEY (laughing for days). Next: the Rim Shrine."
+    }
+   ]
+  },
+  {
+   "id": "vh_sinking_stilts",
+   "name": "The Sinking Stilts",
+   "blurb": "A fen hunters' stilt camp half sunk in steaming mud; mudback lurkers have made the pools under the platforms their own.",
+   "lore": "Three stilt platforms leaning at drunk angles over mud that steams and burps. Something under the mud is very big, and leaning on the stilts.",
+   "tags": {
+    "biomes": [
+     "marsh",
+     "rainforest"
+    ],
+    "archetypes": [
+     "marsh",
+     "coast",
+     "blight"
+    ],
+    "band": [
+     10,
+     20
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 14,
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_stilt_platform",
+     "x": -5,
+     "z": -3,
+     "yaw": 0.2
+    },
+    {
+     "kind": "prop",
+     "id": "vh_stilt_platform",
+     "x": 4,
+     "z": -5,
+     "yaw": 1.1
+    },
+    {
+     "kind": "prop",
+     "id": "vh_stilt_platform",
+     "x": 3,
+     "z": 5,
+     "yaw": 2.3
+    },
+    {
+     "kind": "ground",
+     "id": "puddle_ring",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "puddle_ring",
+     "x": -3,
+     "z": 4,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_reed_lean_to",
+     "x": -7,
+     "z": 6,
+     "yaw": 0.4
+    },
+    {
+     "kind": "prop",
+     "id": "vh_net_poles",
+     "x": 8,
+     "z": 0,
+     "yaw": 1.6
+    }
+   ],
+   "monsters": [
+    {
+     "type": "mudback_lurker",
+     "count": 2,
+     "level": 0,
+     "x": 0,
+     "z": 0,
+     "radius": 6
+    }
+   ],
+   "objects": [
+    {
+     "type": "chest",
+     "name": "Hunter's dry box",
+     "x": 4,
+     "z": -5,
+     "tier": "common"
+    },
+    {
+     "type": "use",
+     "name": "Platform rope",
+     "x": -5,
+     "z": -3,
+     "text": "You haul a sunken basket up out of the mud on its rope. Inside: coins, and a frog, who leaves.",
+     "gives": {
+      "gold": 3
+     }
+    }
+   ]
+  },
+  {
+   "id": "vh_grove_burned_twice",
+   "name": "The Grove That Burned Twice",
+   "blurb": "A ring of charred trunks round a burned-out Vharl house where vent wisps rise from cracks in the floor; the old hearth hides a cache.",
+   "lore": "Burned trees in a ring round a burned house. The fire went out years ago. The ground has not forgotten it: things made of steam drift between the trunks.",
+   "tags": {
+    "biomes": [
+     "blighted",
+     "volcanic",
+     "ashPlain"
+    ],
+    "archetypes": [
+     "blight",
+     "ruinfield",
+     "holy_ground",
+     "marsh"
+    ],
+    "band": [
+     10,
+     20
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 15,
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_charred_trunk",
+     "x": -6,
+     "z": -4,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_charred_trunk",
+     "x": 6,
+     "z": -5,
+     "yaw": 1.3
+    },
+    {
+     "kind": "prop",
+     "id": "vh_charred_trunk",
+     "x": -5,
+     "z": 6,
+     "yaw": 2.2
+    },
+    {
+     "kind": "prop",
+     "id": "vh_charred_trunk",
+     "x": 7,
+     "z": 5,
+     "yaw": 0.6
+    },
+    {
+     "kind": "prop",
+     "id": "vh_charred_beams",
+     "x": 0,
+     "z": -1,
+     "yaw": 0.3
+    },
+    {
+     "kind": "prop",
+     "id": "vh_buried_wall",
+     "x": -1,
+     "z": 2.6,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "ash_patch",
+     "x": 3,
+     "z": 1,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "puddle_ring",
+     "x": -3,
+     "z": -2,
+     "yaw": 0
+    }
+   ],
+   "monsters": [
+    {
+     "type": "vent_wisp",
+     "count": 3,
+     "level": 1,
+     "x": 0,
+     "z": 0,
+     "radius": 7
+    }
+   ],
+   "objects": [
+    {
+     "type": "chest",
+     "name": "In the cold hearth",
+     "x": 1.4,
+     "z": -2.6,
+     "tier": "uncommon",
+     "hidden": true,
+     "hint": "One hearth stone under the beams is clean, as if somebody lifted it."
+    }
+   ]
+  },
+  {
+   "id": "vh_sealed_tomb_door",
+   "name": "The Sealed Door",
+   "blurb": "The door of a Glass Kings' tomb dug out of a dune by robbers who never got it open; glasswings nest in the lintel and the robbers' tools lie where they dropped them.",
+   "lore": "An arch with a door of solid black glass, robbers' picks and ropes scattered in front of it, and a nest of glittering wings over the lintel.",
+   "tags": {
+    "biomes": [
+     "glimmerwaste",
+     "mountains",
+     "badlands"
+    ],
+    "archetypes": [
+     "ruinfield",
+     "holy_ground",
+     "pass"
+    ],
+    "band": [
+     10,
+     20
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 14,
+   "props": [
+    {
+     "kind": "prop",
+     "id": "ruined_arch",
+     "x": 0,
+     "z": -6,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "ruined_wall",
+     "x": -5,
+     "z": -6,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "ruined_wall",
+     "x": 5,
+     "z": -6,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_glass_shards",
+     "x": 0,
+     "z": -2,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_obsidian_cores",
+     "x": -4,
+     "z": 1,
+     "yaw": 0.4
+    },
+    {
+     "kind": "prop",
+     "id": "crate",
+     "x": 5,
+     "z": 2,
+     "yaw": 0.8
+    },
+    {
+     "kind": "prop",
+     "id": "vh_bedroll",
+     "x": -5,
+     "z": 5,
+     "yaw": 0.3
+    },
+    {
+     "kind": "ground",
+     "id": "bone_scatter",
+     "x": 3,
+     "z": 6,
+     "yaw": 0
+    }
+   ],
+   "monsters": [
+    {
+     "type": "glasswing",
+     "count": 2,
+     "level": 2,
+     "x": 0,
+     "z": -2,
+     "radius": 5
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Robbers' pry bar",
+     "x": 0,
+     "z": -5,
+     "text": "You get the bar into the seam and lean. The glass door groans and shifts a hand's width. Enough."
+    },
+    {
+     "type": "chest",
+     "name": "Behind the glass door",
+     "x": 0,
+     "z": -6.6,
+     "tier": "uncommon",
+     "after": "Robbers' pry bar"
+    },
+    {
+     "type": "note",
+     "name": "Robbers' plan",
+     "x": 5,
+     "z": 3,
+     "text": "Day 1: dig. Day 2: dig. Day 3: found door. Day 4: door is glass, cannot break it, will not break, why will it not break. Day 5: birds."
+    }
+   ]
+  },
+  {
+   "id": "vh_defaced_rim_shrine",
+   "name": "The Defaced Rim Shrine",
+   "blurb": "A Rim Keeper shrine (waymarkers, offering bowls, pilgrim posts) that Slagborn raiders have smashed and hung with slag totems; the raiders are still at it.",
+   "lore": "The Keepers' waymarkers are daubed with ash, the bowls kicked over and slag stakes driven in between the pilgrim posts. The raiders doing it are laughing.",
+   "tags": {
+    "biomes": [
+     "mountains",
+     "volcanic",
+     "badlands",
+     "shrubland"
+    ],
+    "archetypes": [
+     "holy_ground",
+     "pass",
+     "ruinfield",
+     "mine_country"
+    ],
+    "band": [
+     10,
+     20
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 14,
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_rim_waymarker",
+     "x": -4,
+     "z": -5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_rim_waymarker",
+     "x": 4,
+     "z": -5,
+     "yaw": 0.4
+    },
+    {
+     "kind": "prop",
+     "id": "vh_offering_bowl",
+     "x": -1.6,
+     "z": -3,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_offering_bowl",
+     "x": 1.6,
+     "z": -3,
+     "yaw": 1
+    },
+    {
+     "kind": "prop",
+     "id": "vh_slag_totem",
+     "x": 0,
+     "z": -6,
+     "yaw": 0.2
+    },
+    {
+     "kind": "prop",
+     "id": "vh_pilgrim_post",
+     "x": -6,
+     "z": 2,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_pilgrim_post",
+     "x": 6,
+     "z": 2,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_slag_totem",
+     "x": 0,
+     "z": 5,
+     "yaw": 1.7
+    }
+   ],
+   "monsters": [
+    {
+     "type": "slagborn_raider",
+     "count": 3,
+     "level": 2,
+     "x": 0,
+     "z": 0,
+     "radius": 6
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Overturned bowl",
+     "x": -1.6,
+     "z": -3,
+     "text": "You set the bowl right and scrape the ash back in. The mountain seems to notice. So do you.",
+     "buff": {
+      "status": "guard",
+      "seconds": 300
+     }
+    },
+    {
+     "type": "chest",
+     "name": "Raiders' sack",
+     "x": 0,
+     "z": 6.4,
+     "tier": "common"
+    }
+   ]
+  },
+  {
+   "id": "vh_toad_chorus",
+   "name": "Toad Chorus at the Pans",
+   "blurb": "Abandoned sulphur pans taken over by sulphur toads in spawning season; baskets of dug sulphur sit unclaimed among them.",
+   "lore": "Shallow yellow pans, abandoned baskets and a sound like a hundred rusty gates. The toads are singing. Do not let them sing at you.",
+   "tags": {
+    "biomes": [
+     "desert",
+     "marsh"
+    ],
+    "archetypes": [
+     "mine_country",
+     "marsh",
+     "blight"
+    ],
+    "band": [
+     10,
+     20
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 13,
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_sulphur_baskets",
+     "x": -4,
+     "z": -3,
+     "yaw": 0.3
+    },
+    {
+     "kind": "prop",
+     "id": "vh_sulphur_baskets",
+     "x": 4,
+     "z": 3,
+     "yaw": 1.9
+    },
+    {
+     "kind": "prop",
+     "id": "vh_sulphur_heap",
+     "x": 5,
+     "z": -4,
+     "yaw": 0.6
+    },
+    {
+     "kind": "ground",
+     "id": "puddle_ring",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "puddle_ring",
+     "x": -3,
+     "z": 4,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "puddle_ring",
+     "x": 3,
+     "z": -1,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_reed_screen",
+     "x": -7,
+     "z": 0,
+     "yaw": 1.4
+    }
+   ],
+   "monsters": [
+    {
+     "type": "sulphur_toad",
+     "count": 4,
+     "level": 1,
+     "x": 0,
+     "z": 1,
+     "radius": 6
+    }
+   ],
+   "objects": [
+    {
+     "type": "use",
+     "name": "Abandoned baskets",
+     "x": -4,
+     "z": -3,
+     "text": "You pick the best lumps out of the baskets. The pan-boss will buy them back and not ask how.",
+     "gives": {
+      "gold": 3
+     }
+    },
+    {
+     "type": "note",
+     "name": "Pan-boss's chalk board",
+     "x": -7,
+     "z": 1.6,
+     "text": "PANS SHUT FOR SPAWNING. AGAIN. Anyone who says \"they are just toads\" can go and say it to them."
+    }
+   ]
+  },
+  {
+   "id": "vh_pilgrim_camp",
+   "name": "Pilgrims' Halt",
+   "blurb": "A peaceful pilgrims' rest on the way to the Caldera: posts, mats, a fire, an old pilgrim who blesses travellers. No fight.",
+   "lore": "Pilgrim posts hung with ribbons, mats round a little fire and an old woman with feet like boot leather, waving you over.",
+   "tags": {
+    "biomes": [
+     "mountains",
+     "shrubland",
+     "volcanic",
+     "rainforest"
+    ],
+    "archetypes": [
+     "holy_ground",
+     "pass",
+     "wilds",
+     "coast",
+     "ruinfield"
+    ],
+    "band": [
+     10,
+     20
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 12,
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_pilgrim_post",
+     "x": -4,
+     "z": -4,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_pilgrim_post",
+     "x": 4,
+     "z": -4,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_pilgrim_post",
+     "x": 0,
+     "z": -6,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_scoria_ring",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_bedroll",
+     "x": -3.6,
+     "z": 1.6,
+     "yaw": 0.6
+    },
+    {
+     "kind": "prop",
+     "id": "vh_bedroll",
+     "x": 3.6,
+     "z": 1.6,
+     "yaw": 2.5
+    },
+    {
+     "kind": "prop",
+     "id": "vh_kettle",
+     "x": 1.6,
+     "z": -1.8,
+     "yaw": 0.2
+    },
+    {
+     "kind": "prop",
+     "id": "vh_tree_fern",
+     "x": -7,
+     "z": 6,
+     "yaw": 0.4
+    }
+   ],
+   "objects": [
+    {
+     "type": "npc",
+     "name": "Mother Oru",
+     "x": 0,
+     "z": 2.4,
+     "says": [
+      "Sit, sit. I have climbed to the Caldera eleven times. My knees have climbed it once and complained about it ten.",
+      "You carry a weapon. Pilgrims do not. But the mountain does not mind a weapon. It minds a sharp tongue.",
+      "Tie a ribbon on the post before you go. Red, for thanks. You will think of something to thank it for."
+     ]
+    },
+    {
+     "type": "use",
+     "name": "Ribbon on the post",
+     "x": 0,
+     "z": -5.4,
+     "text": "You tie a red one. Mother Oru claps. You feel like walking a long way, and quickly.",
+     "buff": {
+      "status": "haste",
+      "seconds": 300
+     }
+    }
+   ]
+  },
+  {
+   "id": "vh_raided_kiln_road",
+   "name": "The Glass Train",
+   "blurb": "A line of porters carrying glass floats and blades to Port Vharl, ambushed by steamwood prowlers; crates and baskets dropped along the track, one porter up a palm.",
+   "lore": "Crates dropped, floats rolling, and a porter clinging to the top of an ironpalm like a coconut that can swear. Something striped is pacing round the trunk.",
+   "tags": {
+    "biomes": [
+     "shrubland",
+     "savanna",
+     "beach",
+     "glimmerwaste"
+    ],
+    "archetypes": [
+     "coast",
+     "wilds",
+     "frontier",
+     "ruinfield"
+    ],
+    "band": [
+     10,
+     20
+    ],
+    "cultures": [
+     "any"
+    ]
+   },
+   "radius": 14,
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_ironpalm",
+     "x": 0,
+     "z": -5,
+     "yaw": 0.2
+    },
+    {
+     "kind": "prop",
+     "id": "crate",
+     "x": -4,
+     "z": 0,
+     "yaw": 0.3
+    },
+    {
+     "kind": "prop",
+     "id": "crate",
+     "x": 4,
+     "z": 1,
+     "yaw": 1.1
+    },
+    {
+     "kind": "prop",
+     "id": "vh_glass_floats",
+     "x": -2,
+     "z": 3,
+     "yaw": 0.8
+    },
+    {
+     "kind": "prop",
+     "id": "vh_glass_floats",
+     "x": 2.4,
+     "z": -1.4,
+     "yaw": 2.2
+    },
+    {
+     "kind": "prop",
+     "id": "vh_clay_pots",
+     "x": 6,
+     "z": 5,
+     "yaw": 0.4
+    },
+    {
+     "kind": "ground",
+     "id": "sand_ripple",
+     "x": -6,
+     "z": 6,
+     "yaw": 0
+    }
+   ],
+   "monsters": [
+    {
+     "type": "steamwood_prowler",
+     "count": 2,
+     "level": 0,
+     "x": 0,
+     "z": 1,
+     "radius": 6
+    }
+   ],
+   "objects": [
+    {
+     "type": "npc",
+     "name": "Kesk the porter",
+     "x": 0,
+     "z": -4,
+     "says": [
+      "Is it gone? I am not coming down until it is gone. I am not coming down until next week.",
+      "Twelve crates of glass for the Harbour Council. Twelve! Do you know what the Council does to a porter who breaks glass?",
+      "Take the crate on the left, that is my own. The rest is the Council's, and they count."
+     ]
+    },
+    {
+     "type": "chest",
+     "name": "Porter's own crate",
+     "x": -4,
+     "z": 0,
+     "tier": "common"
+    }
+   ]
+  }
+ ]
+}

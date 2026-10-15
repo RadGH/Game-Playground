@@ -6,34 +6,6 @@
   {
    "type": "camp",
    "id": "champ_z12_11_1",
-   "monster": "obsidian_warden",
-   "with": null,
-   "level": [
-    15,
-    15
-   ],
-   "count": [
-    1,
-    1
-   ],
-   "x": 1879,
-   "z": 726,
-   "yaw": 0,
-   "radius": 5,
-   "rank": "champion",
-   "affixes": [
-    "frostbound"
-   ],
-   "respawnMin": [
-    4,
-    8
-   ],
-   "champion": true,
-   "hunt": true
-  },
-  {
-   "type": "camp",
-   "id": "champ_z12_11_2",
    "monster": "scoria_crawler",
    "with": null,
    "level": [
@@ -126,7 +98,7 @@
    "gate": "cinderholt_gate_1",
    "x": 1052,
    "z": 766,
-   "yaw": -0.712,
+   "yaw": -0.689,
    "titled": false
   },
   {

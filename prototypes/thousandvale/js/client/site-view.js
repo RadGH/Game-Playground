@@ -20,17 +20,43 @@ import { tuneFor } from './building-tune.js';   // T13: Thousandvale's building 
 import { buildBush } from '../../../../highdef-3d/js/kit/trees.js';
 import { createDecor, foliageMaterials } from './decor.js';
 import { unitGeometry, localToWorld } from './town-view.js';
-import { loadVignetteRecipes, vignettePropList } from './vignette-props.js';
+import { loadVignetteRecipes, vignettePropList, loadWaysideKinds, waysidePropList } from './vignette-props.js';
+import { VHARL_FIRE } from './vharl-props.js';
 
-let siteData = null;
-export function loadSiteData() {
-  if (!siteData) siteData = Promise.all(['provinces/sites.json', 'hooks.json'].map(f => fetch(new URL(`../../data/${f}`, import.meta.url)).then(r => (r.ok ? r.json() : null)).catch(() => null)))
-    .then(([sites, hooks]) => ({ sites: sites || { forts: {}, farms: {}, caves: {} }, hooks: new Map(((hooks && hooks.hooks) || []).map(h => [h.id, h])) }));
-  return siteData;
+const siteData = new Map();
+/**
+ * The site templates and hooks. [W] A placement file of another province (`file.province`, e.g. vharlen) reads that
+ * province's own templates laid over Torbor's key by key (js/sim/province-files.js's rule: data/provinces/<prov>-sites.json)
+ * and is drawn in the province's building culture (`culture`); Torbor's files are read exactly as before.
+ */
+const CULTURE = { vharlen: 'vharl' };
+export function loadSiteData(province = null) {
+  const own = province && province !== 'torbor_downs' ? province : '';
+  if (!siteData.has(own)) siteData.set(own, Promise.all(['provinces/sites.json', 'hooks.json', ...(own ? [`provinces/${own}-sites.json`] : [])].map(f => fetch(new URL(`../../data/${f}`, import.meta.url)).then(r => (r.ok ? r.json() : null)).catch(() => null)))
+    .then(([sites, hooks, mine]) => ({ sites: { ...(sites || { forts: {}, farms: {}, caves: {} }), ...(mine || {}) }, hooks: new Map(((hooks && hooks.hooks) || []).map(h => [h.id, h])), culture: (own && CULTURE[own]) || null })));
+  return siteData.get(own);
 }
 
-const FIRE = new Set(['campfire', 'torch_post', 'fire_ring']);
-const STONE = '#8a857c', DARK_STONE = '#6d6961', WOOD = '#6e553d', DARK_WOOD = '#4a3a2c', THATCH = '#a8925a', EARTH = '#5f6b45', VOID = '#0b0a0c';
+const FIRE = new Set(['campfire', 'torch_post', 'fire_ring', ...VHARL_FIRE]);
+const STONE_T = '#8a857c', DARK_STONE_T = '#6d6961', WOOD_T = '#6e553d', DARK_WOOD_T = '#4a3a2c', THATCH = '#a8925a', EARTH_T = '#5f6b45', VOID = '#0b0a0c';
+// [W] Vharlen's site colours: dark basalt, red-ochre footings, ironpalm wood, ash-grey earth
+const ISLE = { STONE: '#625c62', DARK_STONE: '#4a454b', WOOD: '#5b4a39', DARK_WOOD: '#3a2f25', EARTH: '#6a6560', OCHRE: '#9a4a2c', TARO: '#4f7a36', TARO2: '#3d6a2c', SOIL: '#2a2422', SALT: '#e6e1d4', WATER: '#3c6f74', STEAM: '#d9d6cf', THATCH: '#9c8450' };
+/** [W] An island farm (vharlen-sites.json keys, island content): taro terraces, basalt goat walls, salt pans, a steam well. */
+function islandFarm(template, R, part, solids, L) {
+  if (template === 'arable') {                 // three stepped terraces of black soil with taro rows, basalt-edged
+    for (let k = 0; k < 3; k++) { const lz = R * (0.05 + k * 0.32); part('box', 0, lz, -0.4 + k * 0.32, R * 1.3, 0.75, R * 0.3, ISLE.DARK_STONE); for (let i = -4; i <= 4; i++) part('box', i * R * 0.14, lz, 0.3 + k * 0.32, R * 0.08, 0.32, R * 0.24, i % 2 ? ISLE.TARO : ISLE.TARO2); }
+  } else if (template === 'sheep') {           // a dry-stone ring of lava rock with a gap at the front
+    const r = R * 0.62;
+    for (let a = 0; a < Math.PI * 2; a += 0.24) { const d = Math.atan2(Math.sin(a), Math.cos(a)); if (Math.abs(d) < 0.3) continue; part('box', Math.sin(a) * r, Math.cos(a) * r + R * 0.2, -0.2, 0.7, 1.0, r * 0.26, (Math.round(a * 10) % 2) ? ISLE.STONE : ISLE.DARK_STONE, -a + Math.PI / 2); }
+  } else if (template === 'pig') {             // salt pans: shallow basalt-rimmed beds, white crust in some, brine in others
+    for (let i = -1; i <= 1; i++) for (let j = 0; j <= 1; j++) { part('box', i * 3.4, R * 0.15 + j * 2.8, -0.2, 3.1, 0.38, 2.5, ISLE.DARK_STONE); part('box', i * 3.4, R * 0.15 + j * 2.8, 0.0, 2.7, 0.2, 2.1, (i + j) % 2 ? ISLE.SALT : ISLE.WATER); }
+  } else if (template === 'mill') {            // the steam well: a covered vent under a thatched roof on posts, steam rising
+    part('cyl', R * 0.1, R * 0.4, -0.4, 3.4, 1.3, 3.4, ISLE.DARK_STONE); part('cyl', R * 0.1, R * 0.4, 0.85, 2.2, 0.1, 2.2, ISLE.SOIL);
+    for (const [dx, dz] of [[-1.7, -1.7], [1.7, -1.7], [-1.7, 1.7], [1.7, 1.7]]) part('box', R * 0.1 + dx, R * 0.4 + dz, -0.2, 0.22, 3.4, 0.22, ISLE.WOOD);
+    part('cone', R * 0.1, R * 0.4, 3.0, 5.2, 2.4, 5.2, ISLE.THATCH); part('dome', R * 0.1, R * 0.4, 0.9, 1.6, 1.4, 1.6, ISLE.STEAM);
+    solids.push({ ...L(R * 0.1, R * 0.4), r: 1.9, h: 1.4 });
+  }
+}
 
 /**
  * Every prop and structure part a placement list needs, in world metres. Pure given the data (exported for tests):
@@ -40,6 +66,7 @@ const STONE = '#8a857c', DARK_STONE = '#6d6961', WOOD = '#6e553d', DARK_WOOD = '
 export function sitePlan(placements, features, data, ox = 0, oz = 0) {
   const props = [], parts = [], buildings = [], bushes = [], solids = [];
   const { sites, hooks } = data;
+  const isle = data.culture === 'vharl';      // [W] Vharlen: basalt and red ochre, no fences, fields or orchards of Torbor's
   for (const raw of [...(placements || []), ...(features || [])]) {
     const p = { ...raw, x: raw.x + ox, z: raw.z + oz };
     const yaw = p.yaw || 0;
@@ -47,6 +74,7 @@ export function sitePlan(placements, features, data, ox = 0, oz = 0) {
     const part = (mesh, lx, lz, y, w, h, d, colour, ry = 0) => { const q = L(lx, lz); parts.push({ mesh, x: q.x, y, z: q.z, yaw: yaw + ry, w, h, d, colour }); };
     const tplProps = list => { for (const pr of list || []) { const q = L(pr.x || 0, pr.z || 0); props.push({ kind: pr.kind, id: pr.id, x: q.x, z: q.z, yaw: (pr.yaw || 0) + yaw, scale: pr.scale || 1, dead: !!pr.dead }); } };
     const ring = (r, step, gapHalf, fn) => { for (let a = 0; a < Math.PI * 2; a += step) { const d = Math.atan2(Math.sin(a), Math.cos(a)); if (Math.abs(d) < gapHalf) continue; fn(Math.sin(a) * r, Math.cos(a) * r, a); } };   // gap faces local +z (the yaw)
+    const STONE = isle ? ISLE.STONE : STONE_T, DARK_STONE = isle ? ISLE.DARK_STONE : DARK_STONE_T, WOOD = isle ? ISLE.WOOD : WOOD_T, DARK_WOOD = isle ? ISLE.DARK_WOOD : DARK_WOOD_T, EARTH = isle ? ISLE.EARTH : EARTH_T;
     if (p.type === 'fort') {
       const t = sites.forts[p.template] || {};
       tplProps(t.props);
@@ -88,7 +116,8 @@ export function sitePlan(placements, features, data, ox = 0, oz = 0) {
       const R = (p.radius || t.radius || 20) * 0.7;
       buildings.push({ plot: { ...L(-R * 0.55, -R * 0.55), w: 7, d: 6, angle: Math.PI / 2 - yaw, facing: Math.PI / 2 - yaw, want: p.template === 'mill' ? 'mill' : p.template === 'fishing_plot' ? 'hut' : 'house' }, yaw });
       if (p.template !== 'fishing_plot') buildings.push({ plot: { ...L(R * 0.55, -R * 0.6), w: 8, d: 7, angle: Math.PI / 2 - yaw, facing: Math.PI / 2 - yaw, want: 'granary' }, yaw });
-      if (p.template === 'arable') {
+      if (isle) islandFarm(p.template, R, part, solids, L);
+      else if (p.template === 'arable') {
         const burned = p.flavour === 'burned', colour = burned ? '#3a3330' : p.flavour === 'corrupted' ? '#5a4a6a' : '#b9a24e';
         for (let k = -4; k <= 4; k++) part('box', k * 1.6, R * 0.35, -0.15, 0.7, 0.45, R * 0.9, k % 2 ? colour : '#7a8a3a');
       } else if (p.template === 'sheep' || p.template === 'pig') {
@@ -111,7 +140,7 @@ export function sitePlan(placements, features, data, ox = 0, oz = 0) {
         part('box', 0, -0.2, 0.1, 3.6, 0.3, 3.6, DARK_WOOD);
       } else {
         // a hillside mouth: three rock lumps behind and over a dark opening
-        part('dome', 0, -5, -1.2, 12, 5.5, 9, p.template === 'spider_hollow' ? '#5a5650' : '#6f6a60'); solids.push({ ...L(0, -5), r: 5, h: 5 });
+        part('dome', 0, -5, -1.2, 12, 5.5, 9, isle ? ISLE.STONE : p.template === 'spider_hollow' ? '#5a5650' : '#6f6a60'); solids.push({ ...L(0, -5), r: 5, h: 5 });
         part('dome', -4.5, -2.5, -1, 5, 4, 5, DARK_STONE); part('dome', 4.5, -2.5, -1, 5, 3.6, 5, DARK_STONE);
         part('dome', 0, -0.9, -0.6, 4.2, 3.2, 1.4, VOID);
       }
@@ -141,13 +170,15 @@ export function sitePlan(placements, features, data, ox = 0, oz = 0) {
 
 const SITE_TREES = new Map();
 export async function createSiteView(T, file, { quality = 'high' } = {}) {
-  const data = await loadSiteData();
+  const data = await loadSiteData(file.province || null);
   const recipes = await loadVignetteRecipes();
   const ox = T.ox || 0, oz = T.oz || 0;
   const placements = file.placements || [], features = file.features || [];
   const plan = sitePlan(placements, features, data, ox, oz);
   // vignette props join the same prop pass
   plan.props.push(...vignettePropList(placements.filter(p => !p.type || p.type === 'vignette' || p.type === 'curio'), recipes, ox, oz));
+  // [W] the island's roadside dressing and folk camps (Torbor's wayside kinds are not in the drawn list; its folk carry no props)
+  plan.props.push(...waysidePropList(placements.filter(p => p.type === 'wayside' || p.type === 'folk'), await loadWaysideKinds(), ox, oz));
   if (!plan.props.length && !plan.parts.length && !plan.buildings.length && !plan.bushes.length) return null;
   const cheap = quality === 'low';
   const decor = await createDecor(T, { placements: plan.props.filter(p => p.kind === 'prop').map(p => ({ kind: 'prop', id: p.id, x: p.x, z: p.z, yaw: p.yaw, data: FIRE.has(p.id) ? { fire: true } : {} })), density: 0, cheap });
@@ -188,7 +219,7 @@ export async function createSiteView(T, file, { quality = 'high' } = {}) {
   const solids = plan.solids.map(s => { const g = T.heightAt(s.x, s.z); return { x: s.x, z: s.z, r: s.r, bottom: g - 1, top: g + s.h }; });
   for (const b of plan.buildings) {
     const g = T.heightAt(b.plot.x, b.plot.z);
-    const desc = describeBuilding({ plot: { cx: b.plot.x, cz: b.plot.z, w: b.plot.w, d: b.plot.d, angle: b.plot.angle, facing: b.plot.facing, want: b.plot.want }, culture: 'halfling', seed: Math.round(b.plot.x * 7 + b.plot.z * 13) >>> 0, want: b.plot.want, tune: tuneFor(b.plot.want, { plot: b.plot, seed: Math.round(b.plot.x * 7 + b.plot.z * 13) >>> 0 }) });
+    const desc = describeBuilding({ plot: { cx: b.plot.x, cz: b.plot.z, w: b.plot.w, d: b.plot.d, angle: b.plot.angle, facing: b.plot.facing, want: b.plot.want }, culture: data.culture || 'halfling', seed: Math.round(b.plot.x * 7 + b.plot.z * 13) >>> 0, want: b.plot.want, tune: tuneFor(b.plot.want, { plot: b.plot, seed: Math.round(b.plot.x * 7 + b.plot.z * 13) >>> 0 }) });
     const c = Math.cos(desc.yaw), s = Math.sin(desc.yaw);
     let top = 0;
     all.push({ mesh: 'box', x: b.plot.x, y: g - 0.7, z: b.plot.z, yaw: desc.yaw, w: desc.footprint.w + 0.6, h: 0.95, d: desc.footprint.d + 0.6, colour: '#5a5248' });

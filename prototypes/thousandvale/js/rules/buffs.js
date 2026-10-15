@@ -32,7 +32,7 @@ export const BUFF_KINDS = Object.freeze({
   vsUndeadPct: { kind: 'silvered', name: 'Silvered' },
   armorPct: { kind: 'oiled', name: 'Oiled armour' },
   hpPct: { kind: 'well_fed', name: 'Well fed' },
-  mountSpeedPct: { kind: 'oats', name: 'Oat-fed mount' },
+  mountSpeedPct: { kind: 'oats', name: 'Well-fed mount' },
 });
 /** Caps, so a data typo can never make a god: no item buff past these. */
 export const BUFF_CAPS = Object.freeze({ dmgPct: 0.25, rangedPct: 0.25, vsUndeadPct: 0.4, armorPct: 0.5, hpPct: 0.25, mountSpeedPct: 0.5 });

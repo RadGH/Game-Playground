@@ -62,14 +62,16 @@
       "name": "Cave mouth",
       "x": 1149,
       "z": 601,
-      "yaw": -0.382
+      "yaw": -0.382,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_ashfall_hollow",
       "x": 1054,
       "z": 880,
-      "r": 40
+      "r": 40,
+      "pinned": true
     }
   ],
   "spawn": {
@@ -136,17 +138,17 @@
     "bridges": 0,
     "paths": 7,
     "pathMetres": 285,
-    "scatter": 7163,
+    "scatter": 7168,
     "scatterKinds": {
       "basalt_columns": 460,
-      "rock_small": 1302,
-      "steam_vent": 161,
-      "tree_fern": 323,
-      "tree_charred": 2668,
-      "reed": 1919,
-      "obsidian": 156,
-      "bush": 154,
-      "ironpalm": 20
+      "rock_small": 1296,
+      "steam_vent": 156,
+      "tree_fern": 322,
+      "tree_charred": 2677,
+      "reed": 1932,
+      "obsidian": 153,
+      "bush": 151,
+      "ironpalm": 21
     },
     "sites": [
       "settlement(HUB) village Cinderholt 1084 736 65",
@@ -158,12 +160,12 @@
       "z": 736
     },
     "placements": 121,
-    "vignettesAvoided": 502
+    "vignettesAvoided": 495
   },
   "files": {
-    "terrain.bin": 304814,
-    "nav.bin": 19647,
-    "scatter.bin": 57388,
-    "placements.json": 77474
+    "terrain.bin": 304836,
+    "nav.bin": 19618,
+    "scatter.bin": 57428,
+    "placements.json": 77472
   }
 }

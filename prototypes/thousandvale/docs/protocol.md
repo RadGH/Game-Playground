@@ -1466,3 +1466,17 @@ and spent nodes in the existing `opened` table. Quest step kinds: `gather {prof?
 | `held: { kind: 'cage', x, z, open? }` | a road-event captive (NPC) | What holds them and where it stands (`data/provinces/road-events.json` `rescue[].held`). `open` is set, and the info re-sent, when they are freed. Drawn by `js/client/held-view.js`. |
 
 No version bump: both are additive and an older client ignores them.
+
+## Expansion 1 §4 — Vharlen's hazards (stream S, 2026-10-14) — still protocol 8 (additive)
+
+| What | Shape | Notes |
+|---|---|---|
+| snapshot self flag `8` | `sm & 8` -> `self.glide = true` | You were thrown by a geyser and are drifting down (js/sim/movement.js `glide`: slow fall, a little faster in the air, may pass over steep ground you are above). The predictor carries it into its replay (js/client/predict.js `reconcile`), so the client predicts the same fall. Cleared on landing / in water. |
+| `tele` with `ab: 'geyser'` | `{ id: 'gy:<site>:<k>', ab, k: 'lift', ms, shape: 'circle', x, z, r, el: 'steam', hazard: 1 }` | A geyser's 2 s rumble. No `s` (no caster). Its `teleR {id, hits}` is delivered by place. |
+| `tele` with `ab: 'lava_vent'` | `{ id: 'lv:<site>:<k>', ab, k: 'harm', ms, shape: 'line', x, z, yaw, len, w, el: 'fire', hazard: 1 }` | A vent's warning; always sent to everyone in view. |
+| `fx {kind:'geyser'}` | `{ site, phase: 'rumble' \| 'erupt', ms, x, z }` | Drawn by js/client/vharlen-fx.js (bubbles; the water-and-steam column). |
+| `fx {kind:'lavaVent'}` | `{ site, phase: 'warn' \| 'spout', ms, x, z }` | The crack brightens / fire along its length. |
+| `fx {kind:'toss'}` | `{ id, ms, h }` | A monster a geyser threw: drawn up and down again (actors.js `liftY`). |
+| `fx {kind:'spring'}` | `{ id, warmMs }` | You climbed out of a hot spring warmed: the buff row's Steam-warmed countdown. |
+| `hit` with `skill: 'lava_vent'` / `'geyser'` | `s: null` | Hazard damage has no source. |
+| statuses | `steam_soaked`, `item:steamed` | On `info.st` like any status: Steam-soaked (in a spring), Steam-warmed (+5% max health, 10 min; saved with the build as an item buff, `source: 'spring'`). |

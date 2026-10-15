@@ -14,6 +14,7 @@ import { buildTree, buildBush, makeRng } from '../../../../highdef-3d/js/kit/tre
 import { buildRock, buildProp } from '../../../../highdef-3d/js/kit/rocks.js';
 import { loadFoliageAtlas, makeSurface } from '../../../../highdef-3d/js/kit/textures.js';
 import { makeNoise2D, fbm } from '../../../../worldgen/js/noise.js';
+import { buildVharlProp } from './vharl-props.js';     // [W] Vharlen's own wilderness props (`vh_` ids)
 
 const SPECIES = ['pine', 'fir', 'oak', 'birch'];
 const VARIANTS = 2;
@@ -178,7 +179,7 @@ export async function createDecor(hf, { placements = [], paths = [], seed = 7, a
   const lights = [];   // flickering fires
   const flames = [];
   const propCache = PROP_CACHE;          // shared by every zone (P1)
-  const propGeo = id => { if (!propCache.has(id)) { try { propCache.set(id, buildProp(id, { seed: 5, lod: 0 }).geometry); } catch { try { propCache.set(id, buildRock(id, { seed: 5, lod: 0 }).geometry); } catch { propCache.set(id, null); } } } return propCache.get(id); };
+  const propGeo = id => { if (!propCache.has(id)) { if (id.startsWith('vh_')) { propCache.set(id, buildVharlProp(id)); return propCache.get(id); } try { propCache.set(id, buildProp(id, { seed: 5, lod: 0 }).geometry); } catch { try { propCache.set(id, buildRock(id, { seed: 5, lod: 0 }).geometry); } catch { propCache.set(id, null); } } } return propCache.get(id); };
   const flameMat = new THREE.SpriteMaterial({ map: makeFlameTexture(), color: 0xffc070, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true });
   // Props are batched by id into one InstancedMesh each (a palisade is 150 stakes, one draw).
   const batches = new Map();   // id -> [{ x, y, z, yaw }]

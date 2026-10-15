@@ -119,6 +119,25 @@ The second province (docs/EXPANSION-1.md): 9 zones, levels 10–20, reached only
 
 Gathering: tools/content-professions.mjs `VHARL_MATERIALS` / `VHARL_NODES` / `SKIN_HIDE` add obsidian, sulphur, ironpalm, steamcap, cinderbloom and salamander hide to the realm-wide data/provinces/professions.json, each as an ALTERNATE in an existing tier-4/5 recipe (blackiron from obsidian, sunsteel with a sulphur fire, drake leather from salamander hide, the tier-4 wood / mushroom and tier-5 herb gear patterns) and most with a new line (Obsidian Edge, Brimstone Oil, Cinderbloom Draught, Steamcap Broth). A salamander's hide is its own (`skins.types.<id>.hide`, read by js/rules/professions.js skinOf).
 
-No vignettes on purpose (data/vignettes/assignment/vharlen.json): the catalogue is Torbor's. NOT yet island-specific: the curios, wayside dressing and folk roles the placer scatters (data/vignettes/curios.json, wayside.json, travellers.json `folk`) are still the shared Torbor catalogues — a Vharlen dressing catalogue is open work.
+**The island's own wilderness dressing (stream W).** Vharlen is never dressed from Torbor's catalogues any more: its own
+`data/vignettes/vharlen-vignettes.json` (24 vignettes, 4 a zone — `assign-vignettes.mjs vharlen 4`), `vharlen-curios.json`
+(49), `vharlen-wayside.json` (20), and here `vharlen-travellers.json` (10 traveller kinds, 14 folk roles, `fighters`),
+`vharlen-wanderers.json` (8 kinds incl. the `ash_hauler` cart for hire, an island pedlar shop, lore, tips),
+`vharlen-road-events.json` (8 chests, 4 deliver, 3 escort, 3 rescue; `words` on each record, `info` by content-events),
+`vharlen-shops.json` `kinds` + `goodsCatalog` (island goods in place of trail ale, oats and horseshoes; `roles` made by
+content-shops) and `vharlen-carts.json` `rules.greetings` (read by content-towns for the carters). New chatter pools
+(`role.<island role>`, `road.isle_*`) are in data/names/chatter.json; js/sim/travellers.js speaks `road.isle_*` for a kind
+that lists them. The tools pick a province's catalogue through tools/content-lib.mjs `provinceDressing` (Torbor's runs
+are byte-identical); island folk records carry their camp `props`, which the client draws. Props: only the ids in
+data/vignettes/vharlen-props.json (js/client/vharl-props.js). The placer keeps every disc off stream S's hazard sites
+(`hazardDiscs`). `vharlen-sites.json` props are island props too, and js/client/site-view.js draws island farms/forts in
+the `vharl` culture (basalt goat walls, taro terraces, salt pans, a steam well). Tests: tests/W/vharlen-dressing.test.js.
 
-Run order after any re-bake of the island: `place-vignettes -> content-pools -> content-professions -> content-towns -> content-givers -> content-hunts -> content-events`, all `--province=vharlen`. Tests: tests/C/vharlen-content.test.js (ids, bands, names, banned words, no Torbor place names, gathering, angling, shops, placements, marks) and tests/C/vharlen-server.test.js (the real realm: sail to Port Vharl, camps, folk, a quest, a shop, the Harbourmaster).
+Run order after a change to the island's content: `place-vignettes -> bake-zone --province vharlen -> bake-horizon -> bake-map -> content-pools -> content-professions -> content-towns -> content-givers -> content-hunts -> content-events -> content-hazards`, all `--province=vharlen`. The bake keeps scatter off the placed discs, so it must come AFTER the last place-vignettes (the density filler does not settle: placing again on the new bake moves ~1,000 things a zone); the content tools after the bake. Tests: tests/C/vharlen-content.test.js (ids, bands, names, banned words, no Torbor place names, gathering, angling, shops, placements, marks) and tests/C/vharlen-server.test.js (the real realm: sail to Port Vharl, camps, folk, a quest, a shop, the Harbourmaster).
+
+## Vharlen's hazards (Expansion 1 §4 items 1–4, stream S)
+
+- **`vharlen-hazards.json`** — MADE by `node tools/content-hazards.mjs --province=vharlen` from the baked island (never by hand; the bake does not write it). A **placed** file (`js/sim/province-files.js` `hazards`; Torbor Downs has none). World metres: `springs` (stream T's hot-spring pools + the crater lake, whose warm shallows count), `geysers` (4–7 each in the Steamwood, Fumarole Fen, Sulphur Bight; a `ledge` = where a throw from it lands, found by running the real movement step over the real terrain), `vents` (fissure lines a→b in the Pumice Wastes, Kiln Ridge, the Caldera; `level` = the zone band top the fire is scaled to), `ashfall.zones`, and `terrain` (each zone's bake hash — the test fails when the island is re-baked and the tool has not been re-run).
+- Rules: `js/rules/hazards.js` (numbers, timing per site from its id, geometry, what a soak / warm / hit does). Server: `js/sim/hazards.js` (ticked from province.js). Client: `js/client/vharlen-fx.js`. Wire: docs/protocol.md "Expansion 1 §4".
+- Placement keeps clear of roads (a vent line is 35 m+ from any road its whole length), towns, NPCs, folk, guards, waystones, event arenas, dungeon doors and camps' middles; vents prefer to sit near a camp.
+- **Run order after a re-bake of the island:** the chain above (`place-vignettes … content-events`), THEN `content-hazards --province=vharlen`. Tests: `tests/S/hazards.test.js` (rules, server loop, glide, placement), `tests/S/hazards-server.test.js` (the real realm), `tests/S/hazards.spec.js` (browser look; shots in tests/S/shots/).

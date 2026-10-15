@@ -199,6 +199,20 @@
    "id": "stiltreach_gate_0",
    "town": "Stiltreach",
    "zone": "z13_11",
+   "x": 481.8,
+   "z": 594,
+   "out": [
+    1,
+    0
+   ],
+   "width": 4.21,
+   "kind": "posts",
+   "main": false
+  },
+  {
+   "id": "stiltreach_gate_1",
+   "town": "Stiltreach",
+   "zone": "z13_11",
    "x": 402.8,
    "z": 562.5,
    "out": [
@@ -210,7 +224,7 @@
    "main": true
   },
   {
-   "id": "stiltreach_gate_1",
+   "id": "stiltreach_gate_2",
    "town": "Stiltreach",
    "zone": "z13_11",
    "x": 461.4,
@@ -297,13 +311,13 @@
    "id": "cinderholt_gate_1",
    "town": "Cinderholt",
    "zone": "z12_11",
-   "x": 1052,
+   "x": 1051.9,
    "z": 771.6,
    "out": [
-    -0.653,
-    0.757
+    -0.635,
+    0.772
    ],
-   "width": 5.46,
+   "width": 5.54,
    "kind": "posts",
    "main": false
   },
@@ -519,7 +533,7 @@
    "zone": "z13_11",
    "tier": "hamlet",
    "post": "gate",
-   "gate": "stiltreach_gate_0",
+   "gate": "stiltreach_gate_1",
    "rank": "guard",
    "name": "Stiltreach Guard",
    "yaw": -2.117,
@@ -669,7 +683,7 @@
    "gate": "cinderholt_gate_1",
    "rank": "guard",
    "name": "Cinderholt Guard",
-   "yaw": -0.712,
+   "yaw": -0.689,
    "titled": false,
    "x": 1052,
    "z": 766
@@ -756,10 +770,10 @@
    "settlement": "port_vharl",
    "zone": "z13_10",
    "tier": "town",
-   "x": 1149.2,
-   "z": 923,
-   "yaw": -2.357,
-   "fromSquare": 13.3
+   "x": 1152.8,
+   "z": 904,
+   "yaw": -0.943,
+   "fromSquare": 16.2
   },
   {
    "id": "dummy_port_vharl_1",
@@ -768,10 +782,10 @@
    "settlement": "port_vharl",
    "zone": "z13_10",
    "tier": "town",
-   "x": 1150.8,
-   "z": 921,
-   "yaw": -2.165,
-   "fromSquare": 13.3
+   "x": 1151.2,
+   "z": 902,
+   "yaw": -0.785,
+   "fromSquare": 16.2
   },
   {
    "id": "dummy_lastwell_0",

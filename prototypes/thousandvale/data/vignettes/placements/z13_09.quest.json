@@ -5,8 +5,8 @@
  "placements": [
   {
    "type": "camp",
-   "id": "champ_z13_09_1",
-   "monster": "sulphur_toad",
+   "id": "quest_sb_crust_king_0_0",
+   "monster": "pumice_golem",
    "with": null,
    "level": [
     12,
@@ -16,19 +16,11 @@
     1,
     1
    ],
-   "x": 680,
-   "z": 2008,
+   "x": 456,
+   "z": 1392,
    "yaw": 0,
-   "radius": 5,
-   "rank": "champion",
-   "affixes": [
-    "fiery"
-   ],
-   "respawnMin": [
-    4,
-    8
-   ],
-   "champion": true,
+   "radius": 8,
+   "quest": "sb_crust_king",
    "hunt": true
   },
   {

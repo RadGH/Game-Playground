@@ -343,8 +343,11 @@ export const CARTER_GREETINGS = Object.freeze([
 /** W5: every carter is an NPC of its zone's quest file (`placedBy`: the placer and the offices tool leave it alone). */
 function carterNpcs(stops) {
   const out = {};
+  // [W] a province may give its carters their own words (its carts file's hand-kept `rules.greetings`); Torbor's are the list above
+  const own = (((existsSync(P(provinceDataPath(PROV, 'carts'))) ? readJ(provinceDataPath(PROV, 'carts')) : {}).rules) || {}).greetings;
+  const GREET = PROV !== HOME_PROVINCE && Array.isArray(own) && own.length ? own : CARTER_GREETINGS;
   for (const s of stops) {
-    const g = CARTER_GREETINGS[hash('greet:' + s.id) % CARTER_GREETINGS.length].replace('{town}', s.town);
+    const g = GREET[hash('greet:' + s.id) % GREET.length].replace('{town}', s.town);
     (out[s.sheet] ||= {})[s.carter.id] = { name: s.carter.name, role: 'carter', at: s.town, greeting: g, cart: s.id, placedBy: 'content-towns' };
   }
   return out;

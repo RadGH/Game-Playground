@@ -1,18 +1,78 @@
 {
- "_doc": "Stream C (Expansion 1). Which vignettes each zone of Vharlen gets: NONE on purpose. The vignette catalogue (data/vignettes/m1/m2/m2b.json) is Torbor Downs' \u2014 farms, mills, fairy rings, Torbor monsters \u2014 and the owner wants the Burning Isle to share nothing re-skinned with it. Vharlen's zones are filled by their own camps, rares, elites, zone events, gathering nodes, specialty sites (hot springs, geysers, lava vents: a later stream) and quests. Give it its own vignette catalogue later and re-run tools/assign-vignettes.mjs --province=vharlen.",
- "province": "vharlen",
- "perZone": 0,
- "check": {},
- "pinned": {},
- "zones": {
-  "blackstrand": [],
-  "steamwood": [],
-  "sulphur_bight": [],
-  "fumarole_fen": [],
-  "glasswind_strand": [],
-  "pumice_wastes": [],
-  "ashfall_hollow": [],
-  "kiln_ridge": [],
-  "the_caldera": []
- }
+  "_doc": "Stream E. Which vignettes each zone of Vharlen gets (tools/assign-vignettes.mjs). Coordinates are NOT here: tools/place-vignettes.mjs places them on the baked zone once stream B publishes it. Hard rule: no repeats within 2 zones; soft: within 3. Variety: every connected set of 5 zones holds >= 40 distinct vignettes.",
+  "province": "vharlen",
+  "perZone": 4,
+  "check": {
+    "hard": 0,
+    "soft": 9,
+    "minSet": 16,
+    "cost": 4809.2040816326535
+  },
+  "pinned": {
+    "blackstrand": [],
+    "steamwood": [],
+    "sulphur_bight": [],
+    "fumarole_fen": [],
+    "glasswind_strand": [],
+    "pumice_wastes": [],
+    "ashfall_hollow": [],
+    "kiln_ridge": [],
+    "the_caldera": []
+  },
+  "zones": {
+    "blackstrand": [
+      "vh_kiln_left_burning",
+      "vh_knappers_overrun",
+      "vh_pilgrim_camp",
+      "vh_raided_kiln_road"
+    ],
+    "steamwood": [
+      "vh_cut_rope_landing",
+      "vh_deserters_fire",
+      "vh_feast_unfinished",
+      "vh_occupied_bath"
+    ],
+    "sulphur_bight": [
+      "vh_crawlers_in_tube",
+      "vh_defaced_rim_shrine",
+      "vh_toad_chorus",
+      "vh_yellow_cart_down"
+    ],
+    "fumarole_fen": [
+      "vh_empty_traps",
+      "vh_feast_unfinished",
+      "vh_felled_palm",
+      "vh_grove_burned_twice"
+    ],
+    "glasswind_strand": [
+      "vh_glass_king_mound",
+      "vh_grove_burned_twice",
+      "vh_house_under_ash",
+      "vh_kiln_left_burning"
+    ],
+    "pumice_wastes": [
+      "vh_cutters_scrape",
+      "vh_empty_traps",
+      "vh_stranded_clerk",
+      "vh_yellow_cart_down"
+    ],
+    "ashfall_hollow": [
+      "vh_glass_king_mound",
+      "vh_house_under_ash",
+      "vh_sinking_stilts",
+      "vh_toad_chorus"
+    ],
+    "kiln_ridge": [
+      "vh_crawlers_in_tube",
+      "vh_defaced_rim_shrine",
+      "vh_occupied_bath",
+      "vh_pilgrim_camp"
+    ],
+    "the_caldera": [
+      "vh_ash_at_prayer",
+      "vh_ash_chief_fire",
+      "vh_rim_waystation",
+      "vh_sealed_tomb_door"
+    ]
+  }
 }

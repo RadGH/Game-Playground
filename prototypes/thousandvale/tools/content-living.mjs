@@ -20,7 +20,7 @@
 // Same inputs -> same output (every choice draws from the zone's seeded rng).
 import { readFileSync, existsSync } from 'node:fs';
 import { NAV } from '../js/rules/terrain-read.js';
-import { J, ROOT, provinceArg, provinceDataSync, readNames } from './content-lib.mjs';
+import { J, ROOT, provinceArg, provinceDataSync, readNames, provinceDressing, HOME_PROVINCE } from './content-lib.mjs';
 import { findSpot, openPoint, walkLine, settlementEdge, campLevels, POINT_TYPES, heavyOk, capCount, groundPieces } from './content-place.mjs';
 
 export const TARGET = 50;          // metres: no reachable open sample further than this from the edge of something (≈ one thing every ~100 m)
@@ -28,10 +28,10 @@ export const ROAD_TARGET = 45;     // metres, for road samples (travellers walk 
 export const STEP = 8;             // the coverage grid
 const RIM = 40;                    // samples this close to the zone edge are the neighbour's to cover
 const opt = p => (existsSync(new URL(p, ROOT)) ? J(p) : null);
-const CURIOS = (opt('data/vignettes/curios.json') || { curios: [] }).curios;
-const WAYSIDE = (opt('data/vignettes/wayside.json') || { kinds: [] }).kinds;
-// the province the calling tool works on (place-vignettes --province=<id>; default torbor_downs): its travellers and names
+// the province the calling tool works on (place-vignettes --province=<id>; default torbor_downs): its travellers and names,
+// and [W] its own curios and wayside dressing (content-lib provinceDressing: Torbor's files for Torbor, the island's for Vharlen)
 const PROV = provinceArg(process.argv);
+const { curios: CURIOS, wayside: WAYSIDE } = provinceDressing(PROV);
 const TRAV = provinceDataSync(J, PROV, 'travellers') || { kinds: {}, folk: {} };
 const NAMES = readNames(PROV, opt(`data/provinces/${PROV}.json`));
 const FOREST = new Set(['temperateForest', 'borealForest', 'rainforest']);
@@ -188,7 +188,8 @@ export function fillDensity(st, { LF, typeMid, target = TARGET, roadTarget = ROA
     const path = loop(s, l0 + rnd() * (l1 - l0), 3, 0);
     if (!path) return null;
     counts.folk++;
-    return { type: 'folk', id: `folk_${eid}_${counts.folk}`, role, name: personName(f.name), work: f.work || null, chatter: f.chatter || [`role.${role}`], x: s.x, z: s.z, yaw: +(rnd() * 6.28).toFixed(2), radius: 6, path };
+    return { type: 'folk', id: `folk_${eid}_${counts.folk}`, role, name: personName(f.name), work: f.work || null, chatter: f.chatter || [`role.${role}`], x: s.x, z: s.z, yaw: +(rnd() * 6.28).toFixed(2), radius: 6, path,
+      ...(PROV !== HOME_PROVINCE && Array.isArray(f.props) && f.props.length ? { props: f.props } : {}) };     // [W] an island folk's camp is drawn (js/client/site-view.js); Torbor's records stay as they were
   }
   /** A small walkable loop round `c`: n points at about radius R, every leg walkable, `townGap` m off any settlement. */
   function loop(c, R, n, townGap) {

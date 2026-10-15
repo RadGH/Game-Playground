@@ -1,0 +1,910 @@
+{
+ "_doc": "Vharlen's own travellers and folk (Expansion 1), laid over data/provinces/travellers.json key by key (js/sim/province-files.js): `kinds`, `folk` and `fighters` are the island's; `rules` is the home file's. Same shapes as the home file (read its _doc). Kinds walk data/provinces/vharlen-routes.json; display names use data/names/vharlen.json. Folk `props` use only data/vignettes/vharlen-props.json ids (tests/W/vharlen-dressing.test.js). Chatter pools are the island ones in data/names/chatter.json (`role.<island role>`, `road.isle_*`). Beasts are `none` or `mule` (no oxen, horses or cattle on the island). Nobody here herds anything.",
+ "fighters": {
+  "_doc": "Report #18 (wrap-up 2026-10-13): who in the wilds FIGHTS the monsters beside them while a player is near (js/rules/guards.js 'wanderer': nothing happens with nobody watching; they never die, they sit down and get up again; helping one earns thanks by economy.json npcThanks). `roles` = a placed NPC, a set-piece or wayside worker, a fort's garrison or a village's own guard with one of these roles fights (js/sim/realm.js marks the placed ones, js/sim/travellers.js the wayside ones). `crew` 'armed' = a traveller on the road fights when its crew row says `armed: true` (caravan guards, road patrols, a collector's escort, hunting parties). Everyone else — traders, farmers, pilgrims, children, shepherds — stays out of it. Each fights at the level of the zone it stands in (the floor of its band + `levelOver`). Vharlen: the island's own fighting roles (hired spears, Council wardens, Rim Keepers, salamander trappers, eel spearers); guard / sergeant / captain stay for the town guards and fort garrisons.",
+  "roles": [
+   "guard",
+   "sergeant",
+   "captain",
+   "hired_spear",
+   "council_warden",
+   "rim_keeper",
+   "marker_mender",
+   "salamander_trapper",
+   "eel_spearer",
+   "harbour_veteran"
+  ],
+  "crew": "armed",
+  "levelOver": 0
+ },
+ "kinds": {
+  "obsidian_caravan": {
+   "name": "Obsidian traders",
+   "crew": [
+    {
+     "role": "obsidian_trader",
+     "count": [
+      1,
+      1
+     ],
+     "name": "{first} {family}, Glass Trader",
+     "armed": false,
+     "titled": false
+    },
+    {
+     "role": "hired_spear",
+     "count": [
+      1,
+      2
+     ],
+     "name": "Hired Spear",
+     "armed": true,
+     "titled": false
+    },
+    {
+     "role": "sulphur_porter",
+     "count": [
+      0,
+      1
+     ],
+     "name": "Porter",
+     "armed": false,
+     "titled": false
+    }
+   ],
+   "beast": "mule",
+   "cart": true,
+   "speedMps": 1.2,
+   "weight": 4,
+   "minRouteM": 600,
+   "day": true,
+   "night": false,
+   "fights": "defend",
+   "chatter": [
+    "role.obsidian_trader",
+    "role.hired_spear",
+    "road.isle_onroute",
+    "road.isle_danger"
+   ],
+   "blurb": "A cart of black glass wrapped in reed, and a spear on each side of it."
+  },
+  "rim_patrol": {
+   "name": "Rim Keeper patrol",
+   "crew": [
+    {
+     "role": "rim_keeper",
+     "count": [
+      2,
+      3
+     ],
+     "name": "Rim Keeper",
+     "armed": true,
+     "titled": false
+    }
+   ],
+   "beast": "none",
+   "cart": false,
+   "speedMps": 1.5,
+   "weight": 3,
+   "day": true,
+   "night": true,
+   "fights": "hunts",
+   "chatter": [
+    "role.rim_keeper",
+    "road.isle_danger"
+   ],
+   "blurb": "Keepers walking the trails they marked, checking the ground has not moved again."
+  },
+  "ash_pilgrims": {
+   "name": "Ash pilgrims",
+   "crew": [
+    {
+     "role": "ash_pilgrim",
+     "count": [
+      2,
+      4
+     ],
+     "name": "Ash Pilgrim",
+     "armed": false,
+     "titled": false
+    }
+   ],
+   "beast": "none",
+   "cart": false,
+   "speedMps": 1.1,
+   "weight": 2,
+   "day": true,
+   "night": false,
+   "fights": "never",
+   "chatter": [
+    "role.ash_pilgrim",
+    "road.isle_onroute"
+   ],
+   "blurb": "Grey-smudged and barefoot, carrying a pinch of somebody back to the mountain."
+  },
+  "council_clerk": {
+   "name": "Harbour Council clerk",
+   "crew": [
+    {
+     "role": "council_clerk",
+     "count": [
+      1,
+      1
+     ],
+     "name": "{first} {family}, Tally-keeper",
+     "armed": false,
+     "titled": false
+    },
+    {
+     "role": "council_warden",
+     "count": [
+      2,
+      2
+     ],
+     "name": "Council Warden",
+     "armed": true,
+     "titled": false
+    }
+   ],
+   "beast": "mule",
+   "cart": false,
+   "speedMps": 1.3,
+   "weight": 1,
+   "minRouteM": 700,
+   "day": true,
+   "night": false,
+   "fights": "defend",
+   "chatter": [
+    "role.council_clerk",
+    "role.council_warden"
+   ],
+   "blurb": "A tally box, two wardens and a clerk who has already decided what you owe."
+  },
+  "sulphur_porters": {
+   "name": "Sulphur porters",
+   "crew": [
+    {
+     "role": "sulphur_porter",
+     "count": [
+      2,
+      3
+     ],
+     "name": "Sulphur Porter",
+     "armed": false,
+     "titled": false
+    }
+   ],
+   "beast": "none",
+   "cart": true,
+   "speedMps": 1.1,
+   "weight": 2,
+   "day": true,
+   "night": false,
+   "fights": "never",
+   "chatter": [
+    "role.sulphur_porter",
+    "road.isle_onroute"
+   ],
+   "blurb": "Reed baskets of yellow rock and a hand cart you can smell before you see."
+  },
+  "fish_carriers": {
+   "name": "Salt-fish carriers",
+   "crew": [
+    {
+     "role": "fish_carrier",
+     "count": [
+      1,
+      2
+     ],
+     "name": "Fish Carrier",
+     "armed": false,
+     "titled": false
+    }
+   ],
+   "beast": "none",
+   "cart": true,
+   "speedMps": 1.3,
+   "weight": 2,
+   "day": true,
+   "night": false,
+   "fights": "never",
+   "chatter": [
+    "role.fish_carrier",
+    "road.isle_onroute"
+   ],
+   "blurb": "Salted reef fish going uphill to people who have never seen the reef."
+  },
+  "glassblower_family": {
+   "name": "Glass-blower's family",
+   "crew": [
+    {
+     "role": "glass_blower",
+     "count": [
+      1,
+      1
+     ],
+     "name": "{first} {family}, Glass-blower",
+     "armed": false,
+     "titled": false
+    },
+    {
+     "role": "glass_apprentice",
+     "count": [
+      1,
+      2
+     ],
+     "name": "Apprentice",
+     "armed": false,
+     "titled": false
+    }
+   ],
+   "beast": "mule",
+   "cart": true,
+   "speedMps": 1.1,
+   "weight": 1,
+   "day": true,
+   "night": false,
+   "fights": "never",
+   "chatter": [
+    "role.glass_blower",
+    "role.glass_apprentice",
+    "road.isle_onroute"
+   ],
+   "blurb": "A cart of floats and bottles packed in ash, and children told not to touch any of it."
+  },
+  "slag_deserters": {
+   "name": "Slagborn deserters",
+   "crew": [
+    {
+     "role": "slag_deserter",
+     "count": [
+      2,
+      3
+     ],
+     "name": "Deserter",
+     "armed": false,
+     "titled": false
+    }
+   ],
+   "beast": "none",
+   "cart": false,
+   "speedMps": 1.3,
+   "weight": 1,
+   "day": true,
+   "night": true,
+   "fights": "never",
+   "chatter": [
+    "role.slag_deserter",
+    "road.isle_danger"
+   ],
+   "blurb": "Faces scrubbed raw where the paint was, walking for the harbour and not looking back."
+  },
+  "drum_troupe": {
+   "name": "Drum-and-pipe troupe",
+   "crew": [
+    {
+     "role": "drummer",
+     "count": [
+      2,
+      3
+     ],
+     "name": "{first} the Drummer",
+     "armed": false,
+     "titled": false
+    }
+   ],
+   "beast": "mule",
+   "cart": true,
+   "speedMps": 1.3,
+   "weight": 1,
+   "day": true,
+   "night": false,
+   "fights": "never",
+   "chatter": [
+    "role.drummer",
+    "road.isle_onroute"
+   ],
+   "blurb": "Hide drums, reed pipes and songs about people who fell in a hot spring."
+  },
+  "salamander_trappers": {
+   "name": "Salamander trappers",
+   "crew": [
+    {
+     "role": "salamander_trapper",
+     "count": [
+      2,
+      3
+     ],
+     "name": "{first} the Trapper",
+     "armed": true,
+     "titled": false
+    }
+   ],
+   "beast": "none",
+   "cart": false,
+   "speedMps": 1.5,
+   "weight": 2,
+   "day": true,
+   "night": true,
+   "fights": "hunts",
+   "chatter": [
+    "role.salamander_trapper",
+    "road.isle_danger"
+   ],
+   "blurb": "Reed cones on their backs, long spears in their hands and burn scars up both arms."
+  }
+ },
+ "folk": {
+  "obsidian_knapper": {
+   "name": "Obsidian knapper",
+   "places": "steep",
+   "biomes": [
+    "beach",
+    "volcanic",
+    "badlands",
+    "glimmerwaste"
+   ],
+   "archetypes": [],
+   "loopM": [
+    6,
+    15
+   ],
+   "work": "tend",
+   "chatter": [
+    "role.obsidian_knapper"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_knapping_stone",
+     "x": 0,
+     "z": 0,
+     "yaw": 0.3
+    },
+    {
+     "kind": "prop",
+     "id": "vh_obsidian_cores",
+     "x": 1.6,
+     "z": 0.4,
+     "yaw": 0.9
+    },
+    {
+     "kind": "prop",
+     "id": "vh_glass_shards",
+     "x": 0.6,
+     "z": 1.4,
+     "yaw": 0
+    }
+   ],
+   "weight": 3,
+   "titled": false
+  },
+  "pumice_cutter": {
+   "name": "Pumice cutter",
+   "places": "steep",
+   "biomes": [
+    "desert",
+    "ashPlain",
+    "volcanic",
+    "badlands"
+   ],
+   "archetypes": [],
+   "loopM": [
+    8,
+    20
+   ],
+   "work": "dig",
+   "chatter": [
+    "role.pumice_cutter"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_pumice_rack",
+     "x": 2.5,
+     "z": 0,
+     "yaw": 0.2
+    },
+    {
+     "kind": "prop",
+     "id": "vh_pumice_pile",
+     "x": -1.5,
+     "z": 1,
+     "yaw": 0.6
+    }
+   ],
+   "weight": 2,
+   "titled": false
+  },
+  "sulphur_digger": {
+   "name": "Sulphur digger",
+   "places": "any",
+   "biomes": [
+    "volcanic",
+    "badlands",
+    "blighted",
+    "ashPlain"
+   ],
+   "archetypes": [],
+   "loopM": [
+    8,
+    20
+   ],
+   "work": "dig",
+   "chatter": [
+    "role.sulphur_digger"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_sulphur_heap",
+     "x": 1.5,
+     "z": 0,
+     "yaw": 0.4
+    },
+    {
+     "kind": "prop",
+     "id": "vh_sulphur_baskets",
+     "x": -1.5,
+     "z": 1,
+     "yaw": 1.1
+    },
+    {
+     "kind": "ground",
+     "id": "puddle_ring",
+     "x": 0,
+     "z": 2.5,
+     "yaw": 0
+    }
+   ],
+   "weight": 3,
+   "titled": false
+  },
+  "salamander_trapper": {
+   "name": "Salamander trapper",
+   "places": "any",
+   "biomes": [
+    "volcanic",
+    "rainforest",
+    "marsh",
+    "shrubland",
+    "savanna"
+   ],
+   "archetypes": [],
+   "loopM": [
+    20,
+    50
+   ],
+   "work": "watch",
+   "chatter": [
+    "role.salamander_trapper"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_salamander_trap",
+     "x": 2,
+     "z": 0,
+     "yaw": 0.5
+    },
+    {
+     "kind": "prop",
+     "id": "vh_salamander_trap",
+     "x": -3,
+     "z": 2,
+     "yaw": 2.4
+    }
+   ],
+   "weight": 2,
+   "titled": false
+  },
+  "glass_blower": {
+   "name": "Glass-blower",
+   "places": "field",
+   "biomes": [
+    "beach",
+    "volcanic",
+    "glimmerwaste"
+   ],
+   "archetypes": [],
+   "loopM": [
+    4,
+    10
+   ],
+   "work": "tend",
+   "chatter": [
+    "role.glass_blower"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_glass_kiln",
+     "x": 0,
+     "z": -2.5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_glass_floats",
+     "x": 2,
+     "z": 0.5,
+     "yaw": 0.3
+    },
+    {
+     "kind": "prop",
+     "id": "crate",
+     "x": -2,
+     "z": 0.5,
+     "yaw": 0.2
+    }
+   ],
+   "weight": 1,
+   "titled": false
+  },
+  "net_mender": {
+   "name": "Net mender",
+   "places": "water",
+   "biomes": [
+    "beach",
+    "marsh"
+   ],
+   "archetypes": [],
+   "loopM": [
+    8,
+    25
+   ],
+   "work": "fish",
+   "chatter": [
+    "role.net_mender"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_net_poles",
+     "x": 0,
+     "z": -2,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_outrigger",
+     "x": 3,
+     "z": 2,
+     "yaw": 1.3
+    },
+    {
+     "kind": "prop",
+     "id": "vh_fish_rack",
+     "x": -3,
+     "z": 1,
+     "yaw": 0.4
+    }
+   ],
+   "weight": 2,
+   "titled": false
+  },
+  "steam_cook": {
+   "name": "Steam-pit cook",
+   "places": "any",
+   "biomes": [
+    "volcanic",
+    "rainforest",
+    "marsh",
+    "shrubland"
+   ],
+   "archetypes": [],
+   "loopM": [
+    4,
+    10
+   ],
+   "work": "tend",
+   "chatter": [
+    "role.steam_cook"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_steam_pit",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_kettle",
+     "x": 1.8,
+     "z": 0.5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_clay_pots",
+     "x": -1.8,
+     "z": 0.6,
+     "yaw": 0.5
+    }
+   ],
+   "weight": 2,
+   "titled": false
+  },
+  "spring_keeper": {
+   "name": "Hot-spring keeper",
+   "places": "water",
+   "biomes": [
+    "rainforest",
+    "volcanic",
+    "mountains",
+    "marsh"
+   ],
+   "archetypes": [],
+   "loopM": [
+    4,
+    12
+   ],
+   "work": "tend",
+   "chatter": [
+    "role.spring_keeper"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_hot_pool",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_bath_hut",
+     "x": 3.5,
+     "z": -2,
+     "yaw": 3.6
+    }
+   ],
+   "weight": 1,
+   "titled": false
+  },
+  "marker_mender": {
+   "name": "Rim Keeper marker-mender",
+   "places": "steep",
+   "biomes": [
+    "mountains",
+    "volcanic",
+    "ashPlain",
+    "desert",
+    "badlands"
+   ],
+   "archetypes": [
+    "pass",
+    "holy_ground",
+    "frontier",
+    "blight"
+   ],
+   "loopM": [
+    10,
+    30
+   ],
+   "work": "tend",
+   "chatter": [
+    "role.marker_mender"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_rim_waymarker",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_basalt_cairn",
+     "x": 2,
+     "z": 1,
+     "yaw": 0.3
+    }
+   ],
+   "weight": 2,
+   "titled": false
+  },
+  "ash_pilgrim": {
+   "name": "Resting ash pilgrim",
+   "places": "shrine",
+   "biomes": [],
+   "archetypes": [],
+   "loopM": [
+    4,
+    10
+   ],
+   "work": "pray",
+   "chatter": [
+    "role.ash_pilgrim"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_pilgrim_post",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_offering_bowl",
+     "x": 1,
+     "z": 0.8,
+     "yaw": 0
+    }
+   ],
+   "weight": 2,
+   "titled": false
+  },
+  "ironpalm_tapper": {
+   "name": "Ironpalm tapper",
+   "places": "forest",
+   "biomes": [
+    "rainforest",
+    "beach",
+    "savanna"
+   ],
+   "archetypes": [],
+   "loopM": [
+    10,
+    25
+   ],
+   "work": "gather",
+   "chatter": [
+    "role.ironpalm_tapper"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_ironpalm",
+     "x": 2.5,
+     "z": 0,
+     "yaw": 0.7
+    },
+    {
+     "kind": "prop",
+     "id": "vh_ironpalm_stump",
+     "x": -2,
+     "z": 1,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_clay_pots",
+     "x": 0.5,
+     "z": 1.8,
+     "yaw": 1.2
+    }
+   ],
+   "weight": 2,
+   "titled": false
+  },
+  "eel_spearer": {
+   "name": "Mud-fen eel spearer",
+   "places": "water",
+   "biomes": [
+    "marsh"
+   ],
+   "archetypes": [],
+   "loopM": [
+    6,
+    15
+   ],
+   "work": "fish",
+   "chatter": [
+    "role.eel_spearer"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_stilt_platform",
+     "x": 0,
+     "z": 0,
+     "yaw": 0.3
+    },
+    {
+     "kind": "prop",
+     "id": "vh_reed_screen",
+     "x": 2.5,
+     "z": 1,
+     "yaw": 1.4
+    }
+   ],
+   "weight": 2,
+   "titled": false
+  },
+  "tube_hermit": {
+   "name": "Hermit of the lava tubes",
+   "places": "any",
+   "biomes": [],
+   "archetypes": [
+    "wilds",
+    "holy_ground",
+    "pass",
+    "blight",
+    "ruinfield"
+   ],
+   "loopM": [
+    6,
+    15
+   ],
+   "work": "sit",
+   "chatter": [
+    "role.tube_hermit"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_lava_tube",
+     "x": 0,
+     "z": -4,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_scoria_ring",
+     "x": 0,
+     "z": 1,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_bedroll",
+     "x": 2,
+     "z": 0,
+     "yaw": 0.4
+    }
+   ],
+   "weight": 1,
+   "titled": false
+  },
+  "slag_deserter": {
+   "name": "Slagborn deserter in hiding",
+   "places": "any",
+   "biomes": [],
+   "archetypes": [
+    "frontier",
+    "blight",
+    "wilds",
+    "ruinfield",
+    "coast"
+   ],
+   "loopM": [
+    6,
+    15
+   ],
+   "work": "sit",
+   "chatter": [
+    "role.slag_deserter"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "vh_reed_lean_to",
+     "x": 0,
+     "z": -1.5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "fire_ring",
+     "x": 0,
+     "z": 1,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "vh_bedroll",
+     "x": 1.8,
+     "z": 0,
+     "yaw": 0.6
+    }
+   ],
+   "weight": 1,
+   "titled": false
+  }
+ }
+}

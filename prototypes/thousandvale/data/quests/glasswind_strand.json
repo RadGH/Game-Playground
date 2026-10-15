@@ -35,7 +35,7 @@
       "name": "Ilko Rukkesh",
       "role": "carter",
       "at": "Shardhaven",
-      "greeting": "Out of Shardhaven by cart is the only way to leave with dignity. Pick a town.",
+      "greeting": "Out of Shardhaven by cart is the only way to leave without ash in your boots. Pick a town.",
       "cart": "cart_shardhaven",
       "placedBy": "content-towns",
       "titled": true

@@ -34,6 +34,8 @@ const town = createTownView(T, extras.placements, { quality: 'high' }); scene.ad
 const walls = createWallsView(T, extras.placements, { quality: 'high' }); if (walls) scene.add(walls.group);
 const sc = extras.scatter ? await createScatterView(T, extras.scatter, { quality: 'high' }) : null;
 if (sc) { scene.add(sc.group); sc.refresh({ x: cx, z: cz }); }
+// [W] ?sites=1: the placed content as the game draws it (forts, farms, curios, vignettes, the island's wayside and folk camps)
+if (q.get('sites')) { const { createSiteView } = await import('../js/client/site-view.js'); const sv = extras.vignetteFile ? await createSiteView(T, extras.vignetteFile, { quality: 'high' }) : null; if (sv) { scene.add(sv.group); sv.update?.(0.1, { x: cx, z: cz }); } }
 for (let k = 0; k < 40; k++) ground.update(0.3, { x: cx, z: cz });
 renderer.render(scene, camera);
 info.textContent = `${zone} · ${base.reader.meta.palette || 'default'} palette · cam ${cx},${cz}`;

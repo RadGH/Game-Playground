@@ -62,14 +62,16 @@
       "name": "Cave mouth",
       "x": 1164,
       "z": 1502,
-      "yaw": 2.27
+      "yaw": 2.27,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_steamwood",
       "x": 1093,
       "z": 1237,
-      "r": 40
+      "r": 40,
+      "pinned": true
     }
   ],
   "spawn": {
@@ -162,19 +164,19 @@
     ],
     "roads": 2,
     "bridges": 0,
-    "paths": 6,
-    "pathMetres": 1241,
-    "scatter": 20998,
+    "paths": 7,
+    "pathMetres": 1987,
+    "scatter": 20901,
     "scatterKinds": {
       "ironpalm": 3704,
-      "rock_small": 386,
-      "obsidian": 292,
-      "tree_fern": 9251,
-      "bush": 4740,
-      "basalt_columns": 2117,
-      "steam_vent": 107,
-      "sulphur_crust": 394,
-      "tree_charred": 7
+      "rock_small": 391,
+      "obsidian": 291,
+      "tree_fern": 9178,
+      "bush": 4738,
+      "basalt_columns": 2113,
+      "steam_vent": 104,
+      "sulphur_crust": 376,
+      "tree_charred": 6
     },
     "sites": [
       "settlement(HUB) hamlet Mistfall 1174 1322 40",
@@ -185,13 +187,13 @@
       "x": 1174,
       "z": 1322
     },
-    "placements": 64,
-    "vignettesAvoided": 511
+    "placements": 65,
+    "vignettesAvoided": 501
   },
   "files": {
-    "terrain.bin": 394614,
-    "nav.bin": 40437,
-    "scatter.bin": 168068,
-    "placements.json": 78831
+    "terrain.bin": 395049,
+    "nav.bin": 40731,
+    "scatter.bin": 167292,
+    "placements.json": 96933
   }
 }

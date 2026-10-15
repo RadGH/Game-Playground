@@ -36,6 +36,7 @@ import { ANIMS, STATE, KIND_NAMES, TICK_MS, cleanName } from '../net/protocol.js
 import { tabNext, tabOrder } from '../net/tab.js';
 import { tabPick } from './pick-rule.js';
 import { createTelegraphs } from './telegraphs.js';
+import { createVharlenFx } from './vharlen-fx.js';      // [S] Expansion 1 §4: springs, geysers, lava vents, ashfall
 import { createBossUi } from './boss.js';
 import { createObjects } from './objects.js';
 import { createDungeonView } from './dungeon-view.js';
@@ -157,6 +158,7 @@ const lootMarks = createLootMarkers({ actors, glowTexture: makeGlowTexture() });
 const held = createHeld(scene, { groundY: (x, z) => groundY(x, z), compile: g => compileBeforeShow(view.renderer, g, camera, scene) });   // #59: the cage a road-event captive sits in
 const carts = createCarts(scene, { actors, groundY: (x, z) => groundY(x, z), compile: g => compileBeforeShow(view.renderer, g, camera, scene) });
 const ships = createShipVoyage(scene, { view, camera, actors, travel: { cover: t => travel.cover(t), reveal: () => travel.reveal(), get covered() { return travel.covered; } }, hud: { toast: (...a) => hud.toast(...a), chat: (...a) => hud.chat(...a) }, controls: { hold: v => controls.hold(v), stop: () => controls.stop() }, horizon: () => W.horizon, ws: { get terrain() { return WS.terrain; }, whenReady: (x, z) => WS.whenReady(x, z) }, worldUi: { closeDialog: () => worldUi.closeDialog?.() }, journal: () => ui.journal, selfId: () => S.selfId, compile: g => compileBeforeShow(view.renderer, g, camera, scene) });   // [V]
+const vharl = createVharlenFx(scene, { actors, camera, renderer: view.renderer, quality, groundY: (x, z) => groundY(x, z), zones: { get loaded() { return WS.loaded; } }, roomOf: () => S.room, indoors: () => !!D.view, shake: k => fx.shake(k), selfPos: () => (S.selfId != null && S.phase === 'world' ? S.predictor.pos : null) });      // [S]
 // W12: A's per-player quest marks, floated over the NPCs they belong to (D-UI reads questMarks.list() for the minimap)
 const questMarks = createQuestMarks(scene, { actors, camera });
 // Q8: auras follow the server's info.st on every body (late arrivals see them; a death clears them)
@@ -848,6 +850,7 @@ function onEvent(ev) {
     }
     return;
   }
+  if (ev.type === 'fx') vharl.onEvent(ev);      // [S]
   if (ev.type === 'cast' || ev.type === 'hit' || ev.type === 'fx') { spells.onEvent(ev); sig.onEvent(ev); statusSync.onEvent(ev); statusSync.onChannel(ev); weaponFx.onEvent(ev); formFx.onEvent(ev); reviveFx.onEvent(ev); angling.onEvent(ev); profView.onEvent(ev); }
   const me = S.selfId;
   switch (ev.type) {
@@ -918,7 +921,7 @@ function onEvent(ev) {
       const t = tele.resolve(ev);
       if (t && !ev.x) {
         const at = { x: t.x, y: groundY(t.x, t.z) + 0.4, z: t.z };
-        fx.burst(at, { color: { fire: '#ff9a3d', frost: '#8fe4ff', poison: '#9ef06a', shadow: '#c08aff', lightning: '#fff08a' }[t.el] || '#ff6a4a', count: 14 });
+        fx.burst(at, { color: { fire: '#ff9a3d', frost: '#8fe4ff', poison: '#9ef06a', shadow: '#c08aff', lightning: '#fff08a', steam: '#eef6fb' /* [S] */ }[t.el] || '#ff6a4a', count: 14 });
       }
       break;
     }
@@ -1277,6 +1280,7 @@ function frame(now) {
   statusSync.update();
   weaponFx.update(dt); formFx.update(dt); angling.update(dt); profView.update(dt); shots.update(dt);
   lootMarks.update(dt); questMarks.update(dt); carts.update(dt, elapsed); held.update(dt, id => actors.get(id)?.pos || null); moveMark.update(dt);
+  vharl.update(dt);      // [S] Vharlen's hazards + ash weather (after the day/night fog, before the render)
   ships.update(dt, elapsed);      // [V] the voyage camera + sea + moored ships (after the game's own camera, before the render)
   // W5: an arrival inside the SAME room brings no `joined` — step down once the ride's own time is up (on the ride's clock, not the wall's)
   if (S.cartRide && (!carts.riding || carts.rideOver())) { endCartRide(); if (travel.covered) travel.reveal(); }
@@ -1527,3 +1531,4 @@ const tv = {
 window.tv = tv;
 window.thousandvale = { stars, onEvent, held, ui10, tracking: () => ui10.tracking(), titleFront: () => titleFront, moveMark, prof, profView, shots, questMarks, carts, input, formFx, reviveFx, angling, lootMarks, weaponFx, statusSync, S, W, D, WS, view, actors, spells, LIGHTS, travel, camera, controls, hud, fx, tv, tele, boss, objects, social, bag, worldUi, footprints, chat, friends, guild, mail, callboard, account, ui, ui2, ui5, ui8 };
 window.thousandvale.ships = ships;      // [V]
+window.thousandvale.vharl = vharl;      // [S]

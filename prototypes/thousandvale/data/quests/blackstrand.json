@@ -35,7 +35,7 @@
       "name": "Rhaska Ormakku",
       "role": "carter",
       "at": "Port Vharl",
-      "greeting": "Name a town. If it has a gate, I have been stuck outside it.",
+      "greeting": "Name a town. If it has a gate, I have waited outside it in the steam.",
       "cart": "cart_port_vharl",
       "placedBy": "content-towns",
       "titled": true

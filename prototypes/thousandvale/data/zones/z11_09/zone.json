@@ -62,14 +62,16 @@
       "name": "Cave mouth",
       "x": 1792,
       "z": 1572,
-      "yaw": -2.538
+      "yaw": -2.538,
+      "pinned": true
     },
     {
       "type": "event",
       "id": "event_glasswind_strand",
       "x": 1354,
       "z": 1298,
-      "r": 40
+      "r": 40,
+      "pinned": true
     }
   ],
   "spawn": {
@@ -135,15 +137,15 @@
     "roads": 2,
     "bridges": 0,
     "paths": 6,
-    "pathMetres": 820,
+    "pathMetres": 767,
     "scatter": 1081,
     "scatterKinds": {
-      "obsidian": 463,
-      "rock_small": 308,
-      "bush": 63,
-      "tree_fern": 117,
-      "ironpalm": 44,
-      "tree_charred": 83,
+      "obsidian": 464,
+      "rock_small": 305,
+      "bush": 62,
+      "tree_fern": 119,
+      "ironpalm": 46,
+      "tree_charred": 82,
       "steam_vent": 2,
       "basalt_columns": 1
     },
@@ -157,12 +159,12 @@
       "z": 1572
     },
     "placements": 61,
-    "vignettesAvoided": 160
+    "vignettesAvoided": 158
   },
   "files": {
-    "terrain.bin": 257996,
-    "nav.bin": 7947,
+    "terrain.bin": 257982,
+    "nav.bin": 7918,
     "scatter.bin": 8732,
-    "placements.json": 68410
+    "placements.json": 66506
   }
 }

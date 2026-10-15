@@ -5,6 +5,7 @@
 // `joined` at the far end. Then the way back (Port Vharl -> Gullwick) is played from a `shipSail` and looked at.
 // Shots: tests/V/shots/*.png — LOOK at them.
 // Run: cd ~/claude/playground && flock /tmp/claude-1000/farhold-pw.lock npx playwright test prototypes/thousandvale/tests/V/voyage.spec.js
+//   V_BOTH=1 loads Vharlen too, so the real Gullwick -> Port Vharl crossing runs end to end (no test sailing).
 import { test, expect } from '@playwright/test';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';

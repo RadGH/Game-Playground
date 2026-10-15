@@ -105,18 +105,16 @@
     "z13_09"
    ],
    "kinds": [
-    "merchant_caravan",
-    "guard_patrol",
-    "pilgrims",
-    "hunters",
-    "courier",
-    "drover",
-    "minstrels",
-    "tinker",
-    "refugees",
-    "woodcart",
-    "tax_collector",
-    "gravediggers"
+    "obsidian_caravan",
+    "rim_patrol",
+    "ash_pilgrims",
+    "council_clerk",
+    "sulphur_porters",
+    "fish_carriers",
+    "glassblower_family",
+    "slag_deserters",
+    "drum_troupe",
+    "salamander_trappers"
    ],
    "pts": [
     [
@@ -445,18 +443,16 @@
     "z12_10"
    ],
    "kinds": [
-    "merchant_caravan",
-    "guard_patrol",
-    "pilgrims",
-    "hunters",
-    "courier",
-    "drover",
-    "minstrels",
-    "tinker",
-    "refugees",
-    "woodcart",
-    "tax_collector",
-    "gravediggers"
+    "obsidian_caravan",
+    "rim_patrol",
+    "ash_pilgrims",
+    "council_clerk",
+    "sulphur_porters",
+    "fish_carriers",
+    "glassblower_family",
+    "slag_deserters",
+    "drum_troupe",
+    "salamander_trappers"
    ],
    "pts": [
     [
@@ -1125,18 +1121,16 @@
     "z11_09"
    ],
    "kinds": [
-    "merchant_caravan",
-    "guard_patrol",
-    "pilgrims",
-    "hunters",
-    "courier",
-    "drover",
-    "minstrels",
-    "tinker",
-    "refugees",
-    "woodcart",
-    "tax_collector",
-    "gravediggers"
+    "obsidian_caravan",
+    "rim_patrol",
+    "ash_pilgrims",
+    "council_clerk",
+    "sulphur_porters",
+    "fish_carriers",
+    "glassblower_family",
+    "slag_deserters",
+    "drum_troupe",
+    "salamander_trappers"
    ],
    "pts": [
     [
@@ -1538,18 +1532,16 @@
     "z12_10"
    ],
    "kinds": [
-    "merchant_caravan",
-    "guard_patrol",
-    "pilgrims",
-    "hunters",
-    "courier",
-    "drover",
-    "minstrels",
-    "tinker",
-    "refugees",
-    "woodcart",
-    "tax_collector",
-    "gravediggers"
+    "obsidian_caravan",
+    "rim_patrol",
+    "ash_pilgrims",
+    "council_clerk",
+    "sulphur_porters",
+    "fish_carriers",
+    "glassblower_family",
+    "slag_deserters",
+    "drum_troupe",
+    "salamander_trappers"
    ],
    "pts": [
     [
@@ -2346,18 +2338,16 @@
     "z12_11"
    ],
    "kinds": [
-    "merchant_caravan",
-    "guard_patrol",
-    "pilgrims",
-    "hunters",
-    "courier",
-    "drover",
-    "minstrels",
-    "tinker",
-    "refugees",
-    "woodcart",
-    "tax_collector",
-    "gravediggers"
+    "obsidian_caravan",
+    "rim_patrol",
+    "ash_pilgrims",
+    "council_clerk",
+    "sulphur_porters",
+    "fish_carriers",
+    "glassblower_family",
+    "slag_deserters",
+    "drum_troupe",
+    "salamander_trappers"
    ],
    "pts": [
     [

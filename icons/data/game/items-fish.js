@@ -368,4 +368,108 @@ add('legend_steeplejack', 'Steeplejack', 'A sturgeon that lives in the nave of a
 add('fish', 'Fish', 'A generic silver fish with a blue-grey back, forked tail and clean pale belly.', 'minnow', '#b1c3c4', '#839ba4', '#7d959c', '', '', c =>
   L('M23 32Q34 29 42 30',c.light,2));
 
+// Vharlen cichlids: a blunt forehead, rounded paddle tail and a continuous comb dorsal.
+// The existing carp's puckered mouth and forked tail do not fit these warm-water fish.
+templates.cichlid = c =>
+  fin('M22 27Q12 16 7 23L7 41Q12 48 22 36Z',c) +
+  fin('M19 26L20 17L24 20L27 12L31 16L35 10L39 15L43 12L47 20L49 27Z',c) +
+  fin('M25 40L27 51Q40 55 48 39Z',c) +
+  skin('M19 29Q27 14 42 18Q51 20 54 29L58 32L55 36Q51 47 37 47Q24 45 19 36Z',c) +
+  P('M21 34Q34 38 49 31L55 34Q51 45 37 46Q25 43 21 36Z',c.belly,'none') +
+  P('M23 27Q32 18 43 22L45 27Q33 24 23 30Z',c.back,'none') + markings(c) +
+  fin('M43 32Q34 36 32 44Q42 44 48 36Z',c) +
+  L('M46 24Q41 29 46 37M53 34H57M11 25L17 30M11 39L17 35',c.shadow,1.6) +
+  eye(50,28,c) + glint('M27 23Q34 19 40 21',c);
+
+// Barracuda: two separated dorsals, a cylindrical flank and a projecting toothed lower jaw.
+templates.barracuda = c =>
+  fin('M18 30L7 18L10 32L6 46L19 36Z',c) +
+  fin('M20 28L23 17L30 26ZM35 25L40 14L44 27Z',c) + fin('M25 36L28 46L36 37Z',c) +
+  skin('M17 30Q32 23 45 26L57 28L53 32L59 34L55 39L46 36Q32 41 18 36Z',c) +
+  P('M20 34L48 30L53 33L58 34L54 37L46 34Q32 39 20 36Z',c.belly,'none') +
+  P('M20 29Q34 25 45 28L45 30L20 32Z',c.back,'none') + markings(c) +
+  fin('M43 32L34 41L44 37L47 33Z',c) + L('M46 28L45 33M49 32L55 33',c.shadow,1.8) +
+  P('M49 32L50 36L52 32M54 33L55 36L57 33',c.light,'none') + eye(49,28.5,c,2.2) + glint('M23 28L39 27',c);
+
+// Vharlen coast: black sand, warm silver, ash-grey fins and volcanic glass.
+add('black_sand_sole', 'Black Sand Sole', 'Flat, black, and lying on black sand. You only find it by stepping on it.', 'flat', '#3b3941', '#625b62', '#8f8175', 'freckles', '', c =>
+  L('M23 19L27 22M34 13L36 17M23 43L27 41M34 50L36 46', '#a59786', 1.8), { belly:'#50484e', light:'#b7afa6', iris:'#bd9454' });
+add('vharl_sprat', 'Harbour Sprat of Vharl', 'Silver, warm to the touch, and everywhere the boats are.', 'minnow', '#c4bdba', '#ba895e', '#eebd79', 'stripe', '', c =>
+  P('M23 34L42 31L40 35L25 37Z','#eee7d6','none') + L('M9 24L14 31M10 41L15 35','#f2c48c',1.8), { back:'#777983', belly:'#ede1c8' });
+add('ashfin_snapper', 'Ashfin Snapper', 'Grey fins, red mouth, a temper to match. Bites the hook and then the line.', 'perch', '#ca795e', '#8b8a87', '#713e3c', 'stripe', '', c =>
+  P('M49 32L58 30L56 38L50 38L47 35Z','#ad3430',INK,1.6) + L('M51 34L56 33','#552b2a',2) +
+  P('M52 33L53 36L54 33', '#ffe2b2','none') + L('M26 19L28 24M34 17L36 24','#c0bab2',1.7), { belly:'#e4ac86' });
+add('slagjaw_grouper', 'Slagjaw Grouper', 'Lives in the cracks of cooled lava under the surf. Its jaw is as hard as the rock it hides in.', 'perch', '#57575b', '#71695f', '#302d34', 'marble', 'sail', c =>
+  P('M46 33Q51 35 57 31L58 37Q57 43 51 44L44 41Z','#6f6965',INK,2.2) + L('M48 36L55 35','#302c2c',2.5) + L('M49 41L54 39','#b4a58b',2) +
+  L('M26 16L30 23M36 15L40 23','#a89a86',1.8) + dots([[25,31],[32,27],[37,32]],'#b2a27b',1.8), { belly:'#7d7467', light:'#c1b4a0' });
+add('glass_ray', 'Glass Ray', 'A ray so clear you can see the sand through it, and the hook inside it.', 'flat', '#668a85', '#7ba9a0', '#d0e7d5', '', 'ray', c =>
+  L('M30 30L45 31M33 26L39 30M34 36L39 32M35 20L42 29M35 43L42 34','#c4dcd0',1.8) +
+  L('M40 29L43 34Q46 38 48 35L47 32','#333e42',2.1) + L('M32 16L34 25M34 39L33 47','#e8f0db',2.3),
+  { belly:'#91b1a2', shadow:'#405f61', light:'#c9e7d6', iris:'#d1e4cc' });
+add('mothers_marlin', "Mother's Marlin", 'The Vharl say it swims round the island once a year to count it. It does not like being counted back.', 'gar', '#464d76', '#a44846', '#d7ac83', 'bars', 'spear', c =>
+  P('M20 28L24 12L29 6L34 12L35 25Z','#7c3e50',INK,2.2) + L('M25 23L28 12M30 24L31 15','#ee9d6a',1.8) +
+  L('M39 35L25 49','#cf9e85',2.2) + L('M46 28L58 29','#e4c6a6',1.6), { belly:'#c5b7aa', back:'#313348' });
+
+// Warm springs, crater lakes and the steaming jungle waterways.
+add('spring_tilapia', 'Springwater Tilapia', 'Only lives where the water is warm enough to bathe in. Tastes of the spring.', 'cichlid', '#94a888', '#b1a274', '#526e64', 'bars', '', c =>
+  L('M10 27L15 30M10 33H16M10 39L15 36','#d8cf9f',1.8) + C(41,21,2.4,'#314f49') + C(41,21,1,'#dbb96c'), { belly:'#d4c6a2', iris:'#d8a653' });
+add('sulphur_minnow', 'Sulphur Minnow', 'Yellow, tiny and nearly inedible. Toads love them, which is why toads come looking.', 'minnow', '#e5cf42', '#bda448', '#746b32', 'stripe', '', c =>
+  C(22,32,2,'#4d5135') + L('M27 36L39 35','#fff2a0',2), { belly:'#f4de75', back:'#b1a337', light:'#fff5b6', iris:'#4a4631' });
+add('crater_cichlid', 'Crater Cichlid', 'Bright as a lamp and as bad-tempered as the lake it lives in.', 'cichlid', '#f58c25', '#d73f2c', '#6b3431', 'bars', '', c =>
+  L('M27 17L42 18M29 48L39 48','#ffd371',2.3) + P('M45 22L52 24L53 26L46 25Z','#6c3633','none') +
+  dots([[12,27],[12,37]],'#ffd578',1.8), { belly:'#ffc75c', back:'#e46826', iris:'#ffe594' });
+add('boilfin_gar', 'Boilfin Gar', 'Swims in water that would cook anything else. Comes out of the pot looking offended.', 'gar', '#a68c69', '#e58142', '#51443c', 'spots', '', c =>
+  L('M21 25L24 22M29 41L31 38','#ffc781',2) + L('M45 22Q42 18 46 15M53 22Q50 18 53 13','#cdd0bc',2), { belly:'#dcb48a', back:'#645e52' });
+add('steam_trout', 'Steam Trout', 'Leaps the hot falls in the jungle. Cooks itself if you are slow.', 'trout', '#c8bbaa', '#80a798', '#a35548', 'spots', '', c =>
+  P('M21 32Q31 27 43 29L43 32Q31 30 23 35Z','#d7a784','none') +
+  L('M20 20Q14 16 20 11M45 18Q40 13 45 8','#dae0ce',2.2), { belly:'#efe0bf', back:'#9ba992' });
+add('ashwater_barb', 'Ashwater Barb', 'Grey with river ash, whiskered and patient.', 'carp', '#92938d', '#676e6b', '#4f5152', 'double', 'barbel', c =>
+  P('M27 24L31 21L33 37L29 36Z','#55585b','none') + L('M55 37Q53 49 46 46','#ddd2b7',2), { belly:'#bfb8a4', back:'#686d6b', iris:'#d6a76b' });
+add('mudvent_loach', 'Mudvent Loach', 'Lives in mud that bubbles. Slick enough to slide out of a fist twice.', 'lungfish', '#b18d74', '#8a6859', '#654f49', 'bars', 'loach', c =>
+  L('M14 34Q16 38 23 32','#ead3ae',2.3) + C(15,15,3,'none','#c0c6ac',1.7) + C(23,9,2,'none','#dad8b5',1.5), { belly:'#d9ba91' });
+add('fumarole_catfish', 'Fumarole Catfish', 'Whiskers like wet rope. Hunts by the warmth of whatever falls in.', 'catfish', '#635849', '#c6804b', '#d29e5c', 'spots', '', c =>
+  L('M54 34Q61 46 51 53M51 36Q49 55 34 54','#e2bd83',2.6) + L('M49 34Q56 27 57 20','#d6ae77',2.1) +
+  L('M30 44L35 46','#f2c18a',2), { belly:'#b1a07a', iris:'#efa956' });
+add('hotmud_lungfish', 'Hotmud Lungfish', 'Breathes air, swims in mud, and has outlived three eruptions. Possibly the same one.', 'lungfish', '#645d51', '#995d42', '#ac7858', 'marble', '', c =>
+  P('M12 30Q16 29 19 32L15 38L11 38Z','#ac7952','none') + L('M43 22L46 27M46 22L49 26','#d7bea0',2) +
+  L('M25 39L24 44M43 41L44 46','#e0a579',2), { belly:'#aa8769', back:'#393e39' });
+
+// Vharlen legends retain the warm silhouette rim and add their individual story marks.
+add('legend_blackwater_queen', 'Blackwater Queen', 'A sole the size of a door that lies under the harbour at Port Vharl. The pier pilings are worn smooth where she rubs.', 'flat', '#36323c', '#574442', '#9e8a70', 'pearls', '', c =>
+  L('M22 24Q30 12 42 19M22 40Q30 50 42 43',gold,2.3) +
+  P('M27 27Q35 23 39 27L35 30L29 31Z','#777077','none') + L('M27 35Q33 33 38 35','#b1a08c',2),
+  { belly:'#49404c', back:'#272630', light:'#bca17b', iris:'#ffd27a' });
+add('legend_old_scald', 'Old Scald', 'A trout that lives in the hottest pool of the Steamwood. Its back is pink from it.', 'trout', '#d4a49b', '#d07d83', '#904e5d', 'freckles', '', c =>
+  P('M21 28Q32 18 46 24L44 29Q31 24 22 31Z','#f09aa7','none') +
+  L('M27 25Q35 21 40 24','#ffd7bc',2.4) + L('M21 18Q14 12 21 7M47 18Q41 13 47 8','#e5ddc6',2.6) +
+  P('M44 30L48 33L45 38L42 34Z','#f7b4af',INK,1.5), { belly:'#ead2b4', iris:'#923d4e' });
+add('legend_yolk', 'The Yolk', 'A minnow grown huge and yellow in the acid pools. Nobody eats it. Everybody wants to catch it.', 'minnow', '#f4c42d', '#bd8a28', '#b56b24', 'scales', 'tunny', c =>
+  skin('M21 35Q35 39 50 35L49 42Q33 55 22 41Z',c,'#e6a72a') +
+  P('M27 39Q38 43 46 39Q36 48 28 43Z','#ffe181','none') + fin('M40 36L35 46L45 41L48 36Z',c) +
+  L('M29 17L33 13M12 24L15 29','#fff0a3',2.4), { belly:'#ffd65c', back:'#d5a12b', iris:'#80532b' });
+add('legend_mudfather', 'Mudfather', 'A lungfish older than Stiltreach. It sighs, and the whole fen bubbles.', 'lungfish', '#61564f', '#7c6761', '#ab8b6c', 'bars', '', c =>
+  L('M53 35Q57 52 44 55M50 37Q44 54 33 53','#d2bc92',3) +
+  L('M36 23L40 28M37 30L41 32','#c4ad8e',1.8) + C(17,12,4,'none','#c9bb8a',1.9) +
+  C(28,8,2.2,'none','#e0cc96',1.7) + C(9,22,2.3,'none','#a7ad91',1.7), { belly:'#9e8c7c', back:'#403d3b', iris:'#dfb467' });
+add('legend_mirror_eel', 'The Mirror Eel', 'An eel with a glass skin that hunts in the surf off the obsidian dunes. You see yourself in it as it bites.', 'eel', '#363c50', '#7f8f9b', '#d7e2dd', '', '', c =>
+  P('M37 21Q44 13 51 17L44 20L39 27Z M40 34L46 41L43 47L40 44Z M21 50L31 52L35 50L30 54Z','#e6e5d8','none') +
+  L('M39 23L41 27M40 47L36 50','#929cb3',2.5) + star(48,15,3.5,'#fff2c5') +
+  P('M53 24L54 28L55 24M56 24L57 27L58 23', '#f6e4c4','none'), { belly:'#909ca9', light:'#f0eada', iris:'#e6b87b' });
+add('legend_last_drop', 'The Last Drop', 'A fish caught once in the well at Lastwell, and twice in the sea below the wastes. Nobody agrees how it got in the well.', 'perch', '#939189', '#647c82', '#4c6068', '', 'sail', c =>
+  P('M31 25Q22 34 26 39Q32 45 36 38Q38 34 31 25Z','#cdd6c9','#5a6b6e',1.5) +
+  L('M28 33Q26 37 29 38','#fff0cb',2) + L('M27 12L29 21M35 13L36 21M42 17L42 23',gold,1.7) +
+  P('M41 38Q39 48 45 52L48 42Z','#b2bdb2',INK,1.7), { belly:'#c2bba5', back:'#706f71', iris:'#abd7cd' });
+add('legend_ashjaw', 'Ashjaw', 'A barracuda that hunts in the ash-milk water where the buried valley meets the sea.', 'barracuda', '#b9b8ae', '#7f7d78', '#646265', 'tiger', '', c =>
+  L('M23 33L38 32','#e9dbc0',2.2) + P('M50 34L51 39L53 34M54 35L55 39L57 35','#fff0ce','none') +
+  L('M35 28L39 34','#ede2c7',1.8), { belly:'#e0d5bd', back:'#777b7a', iris:'#e39b56' });
+add('legend_kilnback', 'Kilnback', 'A grouper that lives under the sea cliffs of Kiln Ridge, red as a fired brick.', 'perch', '#b44c36', '#8f372d', '#e48351', 'marble', 'sail', c =>
+  P('M44 33Q51 36 57 31L58 38Q58 44 51 46L43 42Z','#9a3e2c',INK,2.2) + L('M47 36L55 35','#552d28',2.5) + L('M48 42L54 40','#f29d68',2.2) +
+  L('M24 23L26 13L31 18L34 11L39 18L43 15',gold,1.9) +
+  L('M29 28Q33 26 35 30Q36 34 32 34Q29 33 31 30','#ffbd83',1.8), { belly:'#d58756', back:'#813b31', iris:'#ffc366' });
+add('legend_mothers_eye', "The Mother's Eye", 'The Rim-keepers say there is one fish in the crater lake, and it watches the shrine. They are right about the fish.', 'cichlid', '#42383f', '#e27236', '#d76c37', 'scales', '', c =>
+  L('M24 20L27 15L31 19L35 14L39 19L43 17',gold,2.1) +
+  L('M28 48Q36 51 43 45','#ffc278',2.2) + C(49,29,6.4,'#e27932',INK,1.9) +
+  C(49,29,4.2,'#ffcb65','#9f4b29',1.5) + C(50,29,2.5,'#30252c') + C(48,27,1.2,'#fff3c3') +
+  P('M12 26L17 31L12 37Z','#efa054','none'), { belly:'#9b634c', back:'#2e2d36', light:'#e7bc83' });
+
 export default fish;

@@ -158,4 +158,3 @@ Check after any re-bake: `content-professions -> content-towns -> content-givers
 - **Found in Torbor, not changed:** Torbor's curios have never loaded on the server (`curios.json` keeps them under
   `curios`, the loader reads `vignettes`), and Torbor's wayside props have never been drawn (players only get the
   lore line). Vharlen's do both. Turning Torbor's on is a separate decision.
-- **Icons:** the six Vharlen materials and the new fish use their class's general picture until Codex draws theirs.

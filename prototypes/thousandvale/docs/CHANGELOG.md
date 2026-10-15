@@ -1307,3 +1307,34 @@ New: `js/client/star-looks.js` (pure decisions), `js/client/star-fx.js` (drawing
 - **H** `tools/publish-thousandvale.sh` has no folder list any more: it reads the lists from `server/static.js` at the commit being published. Gate 3 is wider and written out by hand: no private folder name, package file, script, `CLAUDE.md` or symlink anywhere in `public/`, nothing at its top the allow-list did not name, and the home page + `library/js/make.js` must be present. Symlinks in git (Tiny RTS) and uncommitted folders are skipped with a line saying so.
 - **H** Home page (`js/home.js`, playground root): `forHost()` — on the game server the Thousandvale card is a same-address link (no "Play on this network", no Docs button, no "Live link" to the address you are already on) and the Tiny RTS card is left out. Unchanged on 8400 and GitHub Pages, where `data/served-by.json` is `{}`.
 - **H** `tools/check-public-pages.mjs <address>`: walks `data/experiments.json` on a running server — each page, its scripts/stylesheets, their imports — and lists anything not found, plus a private-path check. `tests/H/public-lists.test.js` (8 tests), `ops/lib/probe-public.mjs` expects the home page at `/` and 9 more refused paths.
+
+## 2026-10-14 — art pass: drawn icons, mannequin gear icons, class signature spell effects
+Owner: "update all other icons in the game to have icons designed by codex, like we did for spells. Attack, fish, mana
+potion (is also red and should be blue), and redo all existing programmer art. For equipment keep the 3d icons… make the
+character model in the icons… more like a manekin… Also design new enhanced spell effect graphics for all spells… Add an
+option to disable graphics."
+* **Icons.** Every non-spell, non-gear picture is now Codex-drawn SVG from the shared icon library
+  (`icons/js/game-icons.js`, `icons/data/game/*.js`, gallery `icons/game.html`): Attack (with the spell medallion), Cast a
+  line, the touch buttons, quick wheel, the 10 window buttons, emotes, the 10 professions, event-tracker eye, map locate,
+  the paper-doll mannequin; and in the bag/shop/loot/hotbar every potion (mana is blue — it was red because every potion
+  was one canvas drawing tinted `#d83838`), food, fish meal, good, tool, rod, bait, crate, gift, trophy, junk, all 55
+  materials and all 78 fish. `ui/inv-core.js iconSpec` gains `{ kind: 'art', id }` (looked up by item id → species → what
+  it is → a family fallback); `item-icons.js iconFor` returns it at once (no render queue). Rings keep their coloured
+  drawing (it takes the ring model's metal and stone). Crafting "needs" chips show the material's picture.
+* **Gear icons on a mannequin.** `avatar-3d/js/chibi2.js` gains opt-in `createChibi2Character(avatar, { mannequin: true })`:
+  the face is built with every colour replaced by the skin colour (a carved dummy's face). `item-icons.js` dresses a bald
+  pale-ash dummy (skin and under-clothes one colour) and bumps the icon cache to `v5`. Off = byte-identical for every
+  other game.
+* **Class signature spell effects.** `js/client/sig-looks.js` (pure) gives each of the 30 classes its own way of moving
+  (`CLASS_STYLE`: a bard's notes bob up on a wave, a tinker's cogs tumble and bounce, a chronomancer's sigil ticks like a
+  clock hand, a stormcaller's heads zigzag…) over its own three Codex shapes and three colours (`icons/js/motifs.js`), and
+  varies each skill by shape and a hash (no two of a class's six skills alike — `tests/D/sig-looks.test.js`).
+  `js/client/sig-fx.js` draws it: ONE instanced quad mesh + one shader + one atlas; casts write numbers into slots and
+  create nothing. Heads fly the server's own flight time; bursts on hit (one per body per skill per 150 ms from
+  `fx impact` or `hit`); ground sigils with orbiters and rising motes; cast blooms; beam streams, melee arcs, dash paths.
+  It sits on top of the element effects. The Starcaller keeps its own stars.
+* **Settings → Graphics → Spell effects** (`js/client/fx-level.js`, saved as `fx`, applies at once): Enhanced (default) /
+  Standard (no signatures) / Reduced (full effects only for your spells, spells at you and at your target; others show
+  only what flies) / Off (projectiles only). Telegraphs are never affected. `spells.js` draws a 'flight' event with
+  `quiet` set (the projectile flies, its landing draws nothing).
+* `tests/D/m3-server.mjs` gains `POST /grant {name, items}` (exact item objects) for icon screenshots.

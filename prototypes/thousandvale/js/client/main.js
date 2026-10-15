@@ -82,7 +82,8 @@ import { tileLos } from './ui/pt6-core.js';
 import { createUi10 } from './ui/pt10.js';        // D-UI play-test 10: changelog, tracking a friend, emotes
 import { createUi8 } from './ui/pt8.js';          // D-UI play-test 8: ox-cart window, damage meter, quest marks on the map
 import { createUi5 } from './ui/pt5.js';          // D-UI play-test 5: kit step, crates, event tracker, character sheet, feedback, angling
-import { savedQuality } from './ui/settings.js';
+import { savedQuality, savedFxLevel } from './ui/settings.js';
+import { createSigFx } from './sig-fx.js';                 // 2026-10-14: every class's signature spell shapes
 import { createTitleFront, rememberGear, rememberedGear } from './ui/title-front.js';   // D-UI play-test 10 (Y29): the title's front card + whose figure it shows
 import { titleCharLook } from './ui/pt10-core.js';
 import { loadCallings, drawClassCard } from './ui/class-card.js';
@@ -133,12 +134,16 @@ const tele = createTelegraphs(scene, {
   onHitMe: () => { vignette.classList.add('hit'); setTimeout(() => vignette.classList.remove('hit'), 220); fx.shake(0.6); },
 });
 // P20: every skill's look (spell-looks.js) drawn with avatar-3d SpellFx from the rules' cast/fx/hit events
-let SKILLS = null; loadSkillData().then(d => { SKILLS = d?.skills || null; window.__skillClasses = d?.classes || {}; }).catch(() => {});
+let SKILLS = null; const SKILL_CLASS = new Map();
+loadSkillData().then(d => { SKILLS = d?.skills || null; window.__skillClasses = d?.classes || {}; for (const [c, ids] of Object.entries(d?.classes || {})) for (const id of ids) SKILL_CLASS.set(id, c); }).catch(() => {});
+const FX_FOCUS = () => ({ self: S.selfId, target: S.target });       // Spell effects: Reduced draws these in full
 // play-test 8 (W2/W14): every ranged attack is a body in the air — arrows, quarrels, knives, stones, firebolts (pooled, warmed at boot)
 const shots = createProjectiles(scene, { actors, groundY: (x, z) => groundY(x, z), night: () => S.night || 0 });
 // Y32 (wrap-up): the Starcaller's thrown and falling stars, star-rune zones and Constellation motes (pooled, warmed at boot)
 const stars = createStarFx(scene, { camera, actors, quality, groundY: (x, z) => groundY(x, z) });
-const spells = createSpells(scene, { camera, renderer: view.renderer, actors, quality, lights: LIGHTS, shots, stars, groundY: (x, z) => groundY(x, z), skillOf: id => SKILLS?.[id] || null });
+const spells = createSpells(scene, { camera, renderer: view.renderer, actors, quality, lights: LIGHTS, shots, stars, groundY: (x, z) => groundY(x, z), skillOf: id => SKILLS?.[id] || null, level: savedFxLevel(), focus: FX_FOCUS });
+// the caster's class: the skill's owner in the class table, else the body's own class (a druid's shape skills, a talent's)
+const sig = createSigFx(scene, { camera, actors, groundY: (x, z) => groundY(x, z), level: savedFxLevel(), focus: FX_FOCUS, skillOf: id => SKILLS?.[id] || null, classOf: (id, a) => SKILL_CLASS.get(id) || a?.look?.cls || null });
 // R5: every weapon's basic attack drawn (swing crescents, staff spells, shot flashes)
 const weaponFx = createWeaponFx(scene, { shots, spellFx: spells.fx, actors, groundY: (x, z) => groundY(x, z), targetOf: id => (id === S.selfId ? S.target : null) });
 // play-test 5: a look per caster attack form + the sceptre's elemental swing (T15/T16), each class's revive (T4), angling (T25)
@@ -301,6 +306,7 @@ const input = installInput({ controls, hud, setTarget: id => setTarget(id), targ
   mount: () => toggleMount(), attackButton: () => attackButton(), tracker: () => ui10,
   waterAt: (x, z) => (D.view ? null : WS.terrain.waterAt(x, z)), pools: () => angling.list(),
   project: (x, y, z) => { const v = camera.position.clone().set(x, y ?? groundY(x, z) + 1.4, z).project(camera); return { x: (v.x + 1) / 2 * innerWidth, y: (1 - v.y) / 2 * innerHeight, behind: v.z > 1 }; } });
+ui2.settings.on((k, v) => { if (k === 'fx') { spells.setLevel(v); sig.setLevel(v); } });     // Spell effects: at once, no reload
 const ui8 = createUi8({ net: () => S.net, hud, actors, worldUi, feedback: ui5.feedback, atlas: ui.atlas, settings: ui2.settings, selfId: () => S.selfId, bar: () => S.bar });
 const ui10 = createUi10({ net: () => S.net, hud, actors, atlas: ui.atlas, me, pos: () => S.predictor.pos, worldMap: ui.worldMap, settings: ui2.settings, camYaw: () => controls.cam.yaw, room: () => S.room });
 friends.tracker = ui10;
@@ -839,7 +845,7 @@ function onEvent(ev) {
     }
     return;
   }
-  if (ev.type === 'cast' || ev.type === 'hit' || ev.type === 'fx') { spells.onEvent(ev); statusSync.onEvent(ev); statusSync.onChannel(ev); weaponFx.onEvent(ev); formFx.onEvent(ev); reviveFx.onEvent(ev); angling.onEvent(ev); profView.onEvent(ev); }
+  if (ev.type === 'cast' || ev.type === 'hit' || ev.type === 'fx') { spells.onEvent(ev); sig.onEvent(ev); statusSync.onEvent(ev); statusSync.onChannel(ev); weaponFx.onEvent(ev); formFx.onEvent(ev); reviveFx.onEvent(ev); angling.onEvent(ev); profView.onEvent(ev); }
   const me = S.selfId;
   switch (ev.type) {
     case 'cast':
@@ -1259,7 +1265,7 @@ function frame(now) {
     WS.update(dt, { x: px, z: pz });
   }
   fx.update(dt);
-  spells.update(dt);
+  spells.update(dt); sig.update(dt);
   if (S.selfId != null) stars.setMotes(S.selfId, S.self.dead ? 0 : moteCount(ui10.classRes.state));   // Y32: your Starlight, as motes round your head
   stars.update(dt);
   statusSync.update();
@@ -1305,7 +1311,7 @@ Promise.all([titleWorld(), loadLookData(), loadMonsterLooks()]).then(() => {
   S.warm = { done: false };
   import('./scatter-view.js').then(m => m.prewarmScatter({ quality })).catch(() => {})
     .then(() => Promise.all([import('./warmup.js'), loadMonsterLooks()]))
-    .then(([m, looks]) => m.warmBodies({ scene, renderer: view.renderer, camera, monsterLooks: looks, extras: [shots.sample(), moveMark.sample(), questMarks.sample(), weaponFx.sample(), lootMarks.sample(), formFx.sample(), spells.beams.sample(), angling.sample(), profView.sample(), cropSample(), stars.sample()], extraTypes: ['wolf', 'boar', 'crocodile', 'mushroom', 'bear', 'cow'] }))
+    .then(([m, looks]) => m.warmBodies({ scene, renderer: view.renderer, camera, monsterLooks: looks, extras: [shots.sample(), moveMark.sample(), questMarks.sample(), weaponFx.sample(), lootMarks.sample(), formFx.sample(), spells.beams.sample(), sig.sample(), angling.sample(), profView.sample(), cropSample(), stars.sample()], extraTypes: ['wolf', 'boar', 'crocodile', 'mushroom', 'bear', 'cow'] }))
     .then(r => carts.prewarm().then(() => r, () => r))                     // W5: one ox cart built and compiled before anybody meets one
     .then(r => { S.warm = { done: true, ...r }; }, e => { S.warm = { done: true, error: e?.message }; });
 });
@@ -1348,9 +1354,11 @@ const tv = {
     const ids = only ? [].concat(only) : (SKILLS && cls !== null ? (window.__skillClasses?.[cls] || []) : S.bar.filter(b => b.id).map(b => b.id));
     const me = S.selfId, p = S.predictor.pos;
     const t = S.target ?? [...actors.actors.values()].filter(a => a.kind === 'monster' && !a.dead).sort((x, y) => Math.hypot(x.pos.x - p.x, x.pos.z - p.z) - Math.hypot(y.pos.x - p.x, y.pos.z - p.z))[0]?.id;
-    ids.forEach((id, i) => setTimeout(() => spells.demo(id, me, t), i * gap));
+    ids.forEach((id, i) => setTimeout(() => { spells.demo(id, me, t); sig.demo(SKILL_CLASS.get(id) || cls || S.self.cls, id, me, t); }, i * gap));
     return { ids, target: t ?? null };
   },
+  /** 2026-10-14: the class signature layer (sig-fx.js) — its counters, and its level for tests. */
+  sig() { return { level: sig.level, live: sig.live, ...sig.stats }; },
   /** Frame watchdog (P1): long frames with the spans that ran in them; tv.perf(true) resets the counters. */
   perf(reset = false) {
     const progs = (view.renderer.info.programs || []).map(p => `${p.name}#${p.id}`);

@@ -2,12 +2,14 @@
 // toasts, the zone banner and the death screen. DOM only (index.html holds the markup), no game rules.
 
 import { skillIconSvg } from './ui/skill-icons.js';
+import { uiIconSvg } from '../../../../icons/js/game-icons.js';
 
 const $ = id => document.getElementById(id);
 
+// 2026-10-14: drawn pictures from the icon library (Codex), the same medallion as the spell buttons
 const ICONS = {
-  sword: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 17.5 3 6V3h3l11.5 11.5"/><path d="m13 19 6-6"/><path d="m16 16 4 4"/><path d="m19 21 2-2"/></svg>',
-  lock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>',
+  sword: uiIconSvg('attack', 30, { medallion: true }),
+  lock: uiIconSvg('lock', 24),
 };
 
 export function createHud({ onSlot, onChatSubmit, onChatFocus, onRise } = {}) {

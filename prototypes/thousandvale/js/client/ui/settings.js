@@ -15,11 +15,14 @@ import { h, createPanel } from '../ui-panel.js';
 import { SETTINGS_DEFAULTS, QUALITIES, cleanSettings } from './pt2-core.js';
 import { SHORTCUTS } from '../social-core.js';
 import { send2 } from './net2.js';
-import { bindingsTab } from '../input/bindings-ui.js';   // T27 (stream G): the one binding table — re-bind keys, controller glyphs, touch
+import { bindingsTab } from '../input/bindings-ui.js';
+import { FX_LEVELS } from '../fx-level.js';   // T27 (stream G): the one binding table — re-bind keys, controller glyphs, touch
 
 const KEY = 'tv.settings';
 const load = () => { try { return cleanSettings(JSON.parse(localStorage.getItem(KEY) || 'null')); } catch { return { ...SETTINGS_DEFAULTS }; } };
 
+/** The saved Spell effects level for main.js's boot (fx-level.js). */
+export function savedFxLevel() { return load().fx; }
 /** The saved quality for main.js's boot (null = automatic). */
 export function savedQuality() { const q = load().quality; return q && q !== 'auto' ? q : null; }
 
@@ -82,6 +85,9 @@ export function createSettings({ net, hud, help, onLogout, onGear }) {
       h('label.set-row', {}, h('span', {}, 'Graphics quality'), h('select', { dataset: { k: 'quality' }, onchange: e => { set('quality', e.target.value); hud.toast('Quality applies after a reload.', 'info'); } }, ...QUALITIES.map(q => h('option', { value: q.id, selected: S.quality === q.id }, q.label)))),
       h('p.tiny-left', {}, 'Automatic picks Low on computers without a graphics card and High otherwise. A change takes effect the next time the page loads.'),
       h('button.ghost.wide', { type: 'button', onclick: () => location.reload() }, 'Reload now'),
+      // 2026-10-14: how much spell effect to draw — applies at once (fx-level.js)
+      h('label.set-row', {}, h('span', {}, 'Spell effects'), h('select', { dataset: { k: 'fx' }, onchange: e => set('fx', e.target.value) }, ...FX_LEVELS.map(l => h('option', { value: l.id, selected: S.fx === l.id }, l.label)))),
+      h('p.tiny-left', {}, 'Enhanced gives every class its own spell shapes and colours. Reduced keeps full effects for your own spells and your target, and shows only what flies for everyone else. Off shows only projectiles. Danger marks on the ground always show. Applies at once.'),
     ];
     else if (tab === 'audio') body = [
       slider('master', 'Master volume', 0, 1, 0.05, v => `${Math.round(v * 100)}%`),
@@ -91,7 +97,7 @@ export function createSettings({ net, hud, help, onLogout, onGear }) {
     ];
     else body = bindingsTab({ redraw: draw });   // T27: generated from js/client/input/bindings.js (SHORTCUTS is built from the same table)
     panel.setTitle('Settings', 'Saved as you change them');
-    panel.fill(tabs, h('div.set-body', {}, ...body), h('div.row.end', {}, h('button.ghost.small', { type: 'button', onclick: () => { S = { ...SETTINGS_DEFAULTS }; save(); apply(); draw(); for (const k of ['tradeFriends', 'showGear', 'showHelm', 'shareLocation']) set(k, S[k]); } }, 'Defaults'), h('button.primary.small', { type: 'button', onclick: () => panel.close() }, 'Done')));
+    panel.fill(tabs, h('div.set-body', {}, ...body), h('div.row.end', {}, h('button.ghost.small', { type: 'button', onclick: () => { S = { ...SETTINGS_DEFAULTS }; save(); apply(); draw(); for (const k of ['tradeFriends', 'showGear', 'showHelm', 'shareLocation', 'fx']) set(k, S[k]); } }, 'Defaults'), h('button.primary.small', { type: 'button', onclick: () => panel.close() }, 'Done')));
   }
 
   function wire(n) {

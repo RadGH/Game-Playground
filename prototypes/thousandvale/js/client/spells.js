@@ -21,10 +21,14 @@ import { skillLook, statusLook, elementOf } from './spell-looks.js';
 import { perf } from './perf.js';
 import { createBeams } from './beam-fx.js';                       // Y20: a held, pulsing beam (Storm Beam)
 import { carriedBy, zoneDrawMs, carryOffset } from './zone-follow.js';   // Y25: zones that ride their owner
+import { drawFor, FX_DEFAULT } from './fx-level.js';                // 2026-10-14: Settings → Graphics → Spell effects
 
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
 
-export function createSpells(scene, { camera, renderer = null, actors, groundY = () => 0, skillOf = () => null, quality = 'high', lights = null, shots = null, stars = null } = {}) {
+export function createSpells(scene, { camera, renderer = null, actors, groundY = () => 0, skillOf = () => null, quality = 'high', lights = null, shots = null, stars = null, level = FX_DEFAULT, focus = () => ({}) } = {}) {
+  // `quiet`: drawing an event at the 'flight' level (Spell effects Reduced for others' spells, or Off) — the projectile
+  // still flies (you must see what is coming at you), nothing else is drawn
+  let quiet = false;
   const fx = new SpellFx(scene, { camera, scale: 1.15, maxParticles: quality === 'low' ? 120 : 260, maxLive: quality === 'low' ? 20 : 40 });
   let ready = false;
   Assets.open(new URL('../../../../assets/', import.meta.url).href)
@@ -87,7 +91,7 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
   const starCtx = { target, chest, hand: a => shots?.handOf?.(a) || null };
 
   function impactAt(p, element, { scale = 1, crit = false } = {}) {
-    if (!p) return;
+    if (!p || quiet) return;
     stats.impacts++;
     fx.impact({ at: p, element, crit, scale, ground: g(p), height: 1.8 });
   }
@@ -197,6 +201,7 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
         // (projectiles.js: arrow, quarrel, knife, stone, firebolt…). A skill's own look still decides the burst on arrival.
         if (shots) {
           const to0 = target(ev.to); if (!to0) break;
+          const hush = quiet;                               // the landing comes later: remember how this one is drawn
           const follow = typeof ev.to !== 'object' && ev.to != null ? () => target(ev.to) : null;
           // (wrap-up: the rules send ONE event for each projectile of a volley, so one body per event — drawing the look's
           // whole count for each would be nine arrows for a three-arrow shot. Only the client's own demo sends one for all.)
@@ -207,7 +212,7 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
             const end = off ? to0.clone().add(V(Math.cos(off * 2) * off, 0, Math.sin(off * 2) * off)) : to0;
             stats.projectiles++;
             shots.fire(ev, { to: end, follow: off ? null : follow, from: start, ms: ev.ms, onLand: p => {
-              if (ev.miss) return;
+              if (ev.miss || hush) return;
               impactAt(p, el, { scale: L ? L.scale : ev.kind === 'bolt' ? 0.8 : 0.6 });
               if (L?.area?.kind === 'burst') area(L, p, 0);
             } });
@@ -221,7 +226,8 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
           const off = n > 1 ? (k / (n - 1) - 0.5) * 1.2 : 0;
           const end = to && off ? to.clone().add(V(Math.cos(off) * off, 0, Math.sin(off) * off)) : to;
           const body = L?.travel?.body || (ev.kind === 'bolt' ? null : 'arrow');
-          projectile(from, end, el, { ms: ev.ms, body, onLand: () => { const p = target(ev.to) || end; impactAt(p, el, { scale: L ? L.scale : 0.7 }); if (L?.area?.kind === 'burst') area(L, p, 0); } });
+          const hush = quiet;
+          projectile(from, end, el, { ms: ev.ms, body, onLand: () => { if (hush) return; const p = target(ev.to) || end; impactAt(p, el, { scale: L ? L.scale : 0.7 }); if (L?.area?.kind === 'burst') area(L, p, 0); } });
         }
         break;
       }
@@ -307,13 +313,22 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
     impactAt(chest(d), elementOf(ev.el), { scale: ev.crit ? 0.9 : 0.6, crit: !!ev.crit });
   }
 
+  const FLIGHT = new Set(['bolt', 'arrow', 'shot', 'thrown', 'beam', 'beamPulse', 'beamEnd', 'unplace', 'zone']);
   function onEvent(ev) {
     try {
+      const how = drawFor(level, ev, focus());
+      if (how === 'flight') {
+        // only what flies (and a zone's END, so nothing drawn earlier is left behind when the level changes mid-fight)
+        if (ev.type !== 'fx' || !FLIGHT.has(ev.kind) || (ev.kind === 'zone' && !ev.end)) return;
+        quiet = true;
+      }
       if (ev.type === 'cast') onCast(ev);
       else if (ev.type === 'fx') onFx(ev);
       else if (ev.type === 'hit') onHit(ev);
     } catch (e) { console.warn('[spells]', ev.type, ev.kind || ev.skill, e.message); }
+    finally { quiet = false; }
   }
+  function setLevel(l) { level = l; }
 
   /**
    * Client-only: play a skill the way the server would describe it (cast, then the bolt/arrow fx for a bolt, then
@@ -335,7 +350,7 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
 
   return {
     ownerGone, endZone, zones, beams,
-    fx, onEvent, lookOf, stats, demo, get ready() { return ready; },
+    fx, onEvent, lookOf, stats, demo, setLevel, get level() { return level; }, get ready() { return ready; },
     update(dt) {
       fx.update(dt);
       moveCarried(); beams.update(dt);

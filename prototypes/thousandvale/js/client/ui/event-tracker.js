@@ -22,6 +22,7 @@ import { mergeEvent, eventLines, eventResult, inEvent } from './pt5-core.js';
 import { canHideEvent } from './pt8-core.js';
 import { HIDDEN } from './hidden-events.js';
 import { staleEvents } from './pt10-core.js';
+import { uiIconSvg } from '../../../../../icons/js/game-icons.js';
 
 const RESULT_MS = 14000;
 
@@ -33,7 +34,7 @@ export function createEventTracker({ hud, me, net, parent = null }) {
   const cards = new Map();        // key -> { sig, el }: a card's DOM is kept until its own content changes
   // W13: the foot line that brings hidden events back
   const foot = h('div.et-hidden', { hidden: true }, h('span'), h('button.ghost.small', { type: 'button', dataset: { act: 'unhide' } }, 'Show'));
-  const EYE = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.6 10.6 0 0 1 12 5c6 0 10 7 10 7a17.6 17.6 0 0 1-3.2 3.9M6.5 6.6C3.7 8.4 2 12 2 12s4 7 10 7c1.6 0 3-.4 4.3-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>';
+  const EYE = uiIconSvg('eye', 14) || '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.6 10.6 0 0 1 12 5c6 0 10 7 10 7a17.6 17.6 0 0 1-3.2 3.9M6.5 6.6C3.7 8.4 2 12 2 12s4 7 10 7c1.6 0 3-.4 4.3-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>';
   const hideBtn = e => { const b = h('button.ghost.et-x.et-hide', { type: 'button', 'aria-label': 'Hide this event', dataset: { act: 'hide', key: e.key, tip: 'Hide this event from your screen. Bring it back from the line under the events, or from the map.' } }); b.innerHTML = EYE; return b; };
   HIDDEN.onChange(() => draw(true));
 

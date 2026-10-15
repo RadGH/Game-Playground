@@ -178,7 +178,7 @@ export function tradeView(t) {
 export const TRADE_WHY = { cancelled: 'The trade was cancelled.', tradeFar: 'You walked too far apart.', tradeFailed: 'The trade did not go through.', bagFull: 'Someone\'s bag is full.', gone: 'They left.', friendsOnly: 'They only trade with friends.', busy: 'They are already trading.', far: 'Stand closer (10 m) to trade.' };
 
 // ---- Q15: settings ----------------------------------------------------------------------------------------
-export const SETTINGS_DEFAULTS = { quality: 'auto', master: 0.8, music: 0.6, sfx: 0.8, ui: 1, tradeFriends: false, showGear: true, showHelm: true, meter: false, shareLocation: true };   // meter: play-test 8 W21, off by default
+export const SETTINGS_DEFAULTS = { quality: 'auto', master: 0.8, music: 0.6, sfx: 0.8, ui: 1, tradeFriends: false, showGear: true, showHelm: true, meter: false, shareLocation: true, fx: 'enhanced' };   // meter: play-test 8 W21, off by default
 export const QUALITIES = [{ id: 'auto', label: 'Automatic' }, { id: 'low', label: 'Low' }, { id: 'medium', label: 'Medium' }, { id: 'high', label: 'High' }];
 /** A saved settings blob, cleaned: unknown keys dropped, numbers clamped, booleans forced. */
 export function cleanSettings(raw) {
@@ -188,6 +188,7 @@ export function cleanSettings(raw) {
   for (const k of ['master', 'music', 'sfx']) if (Number.isFinite(raw[k])) s[k] = Math.max(0, Math.min(1, raw[k]));
   if (Number.isFinite(raw.ui)) s.ui = Math.max(0.8, Math.min(1.4, Math.round(raw.ui * 20) / 20));
   for (const k of ['tradeFriends', 'showGear', 'showHelm', 'meter', 'shareLocation']) if (typeof raw[k] === 'boolean') s[k] = raw[k];
+  if (['enhanced', 'standard', 'reduced', 'off'].includes(raw.fx)) s.fx = raw.fx;      // Spell effects (fx-level.js), 2026-10-14
   return s;
 }
 

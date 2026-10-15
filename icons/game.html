@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Game Icons · Playground</title>
+  <link rel="stylesheet" href="../shared/style.css">
+  <link rel="stylesheet" href="icons.css">
+  <link rel="stylesheet" href="game.css">
+</head>
+<body>
+  <header class="topbar">
+    <a href="../">← Home</a><h1>Game Icons</h1>
+    <a href="./">Spell icons</a>
+    <a href="../prototypes/thousandvale/">Thousandvale</a>
+  </header>
+  <main>
+    <div class="intro"><div><h2>Everything that is not a spell.</h2>
+      <p class="muted">Buttons, menus, emotes, professions, potions, food, goods, tools, materials, fish — and the shapes each class's spells throw. Drawn by Codex as plain SVG; used by Thousandvale.</p></div>
+      <p id="total" class="total"></p>
+    </div>
+    <nav class="gi-tabs chips" id="tabs" role="tablist" aria-label="Sets"></nav>
+    <label class="gi-search">Search <input type="search" id="q" placeholder="Name or id…" autocomplete="off"></label>
+    <div id="grid" class="gi-grid"></div>
+  </main>
+  <script type="module" src="js/game-page.js"></script>
+</body>
+</html>

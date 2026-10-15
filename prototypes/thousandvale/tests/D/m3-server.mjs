@@ -9,6 +9,7 @@
 //   POST http://127.0.0.1:<hook>/give  {name, gold, items, itemName?, slot?, rarity?}  grant gold and N plain test items (a bag message follows)
 //   POST http://127.0.0.1:<hook>/event {id, announceMs}  force a realm event (the admin page's button)
 //   POST http://127.0.0.1:<hook>/roll  {name, n, level, boost, bases?}  grant n REAL items rolled by Farhold's generator (inventory spec; bases = only these item bases)
+//   POST http://127.0.0.1:<hook>/grant {name, items:[{…}]}   grant these exact item objects (potions, fish, materials…)
 //   GET  http://127.0.0.1:<hook>/who                    online characters [{char, name, level}]
 //   POST http://127.0.0.1:<hook>/kill {name}              the character dies where it stands (death/respawn spec)
 //   POST http://127.0.0.1:<hook>/teleport {name, x, z}  move a character within its room (the freeze spec starts walks
@@ -74,6 +75,7 @@ const hook = http.createServer(async (req, res) => {
       return send(200, { ok: true, x: e.x, z: e.z, room: o.room.kind });
     }
     if (req.url === '/kill') { const e = o.entity; e.setHp(0); e.kill(null); return send(200, { ok: true, dead: !!e.dead }); }   // P8 spec
+    if (req.url === '/grant') { W.grant(o, { items: (b.items || []).slice(0, 40), gold: 0, reason: 'test' }); return send(200, { ok: true }); }   // 2026-10-14: exact item objects (the icon spec)
     if (req.url === '/give') {
       const items = Array.from({ length: Math.max(0, Math.min(12, b.items | 0)) }, (_, i) => ({ name: b.itemName || ['Hollin Shortsword', 'Weathered Cloak', 'Copper Ring', 'Ashwood Staff'][(itemN + i) % 4], rarity: b.rarity || ['common', 'magic', 'rare'][(itemN++ + i) % 3], ...(b.kind ? { kind: b.kind, id: b.id || 'healing_potion', use: { type: 'heal', hp: 0.3 } } : { slot: b.slot || 'weapon', ...(b.slot && b.slot !== 'weapon' ? { type: 'armor' } : {}) }), value: 4, level: b.slot ? 1 : 3 }));
       W.grant(o, { items, gold: Math.max(0, b.gold | 0), reason: 'test' });

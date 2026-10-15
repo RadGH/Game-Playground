@@ -14,6 +14,7 @@ import { h } from '../ui-panel.js';
 import { createChangelog } from './changelog.js';
 import { createClassRes } from './class-res.js';
 import { partyPeople, whereRow, isInstance, TRACK_MAX, TRACK_NEAR_M, trackRefusal, trackBearing, edgeArrow, metresText, EMOTES, emoteFor, emoteRefusal, whereText } from './pt10-core.js';
+import { uiIconSvg } from '../../../../../icons/js/game-icons.js';
 
 export function createUi10(o) {
   const { net, hud, actors, atlas, me, pos, worldMap = null, settings = null, camYaw = () => 0, room = () => null } = o;
@@ -132,7 +133,7 @@ export function createUi10(o) {
     bow: '<circle cx="16" cy="8" r="2.2"/><path d="M14 10l-6 2v4M8 12l1 9M8 16l5 5M10 11l3 4"/>',
     point: '<path d="M3 13h12"/><path d="M11 9l4 4-4 4"/><circle cx="19" cy="13" r="2"/>',
   };
-  const emoteSvg = id => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${EMOTE_ICON[id] || EMOTE_ICON.wave}</svg>`;
+  const emoteSvg = id => uiIconSvg(EMOTE_ICON[id] ? id : 'wave', 24) || `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${EMOTE_ICON[id] || EMOTE_ICON.wave}</svg>`;      // 2026-10-14: the icon library's figures first
   let wheelDone = false;
   const useRadial = radial => { if (wheelDone || !radial?.addRing) return; wheelDone = true; radial.addRing({ title: 'Emotes', items: EMOTES.map(e => ({ id: 'emote:' + e.id, label: e.label, sub: e.cmd, html: emoteSvg(e.id) })), onPick: w => emote(String(w.id).replace(/^emote:/, '')) }); };
   useRadial(o.radial);

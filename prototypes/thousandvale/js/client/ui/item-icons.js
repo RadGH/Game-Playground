@@ -17,18 +17,20 @@
 // (item bases, the wearer's class kit, armour themes, stream F's gear catalog). Farhold's look tables are no longer read.
 //   weapons, shields, foci   built on their own by the same builders the hands hold (chibi2-gear.js; chibi2-gear5.js for g5_)
 //   armour, cloaks, packs, belts, torcs, catalog rings   a plain Chibi 2 body wearing exactly the item's parts, framed on them
-//   potions, junk, a ring or amulet the catalog does not draw   2D glyphs
+//   potions, food, goods, materials, fish, junk, amulets, foci   drawn SVG art from icons/js/game-icons.js (2026-10-14)
+//   a ring the catalog does not draw                              a 2D glyph in the ring's own colours
 // Nothing is drawn until the look data has loaded (an icon made without the catalog would be the wrong picture, cached).
 
 import * as THREE from 'three';
 import { buildHeld, buildOffhand } from '../../../../../avatar-3d/js/chibi2-gear.js';
 import { G5_WEAPON_BUILDERS, G5_OFFHAND_BUILDERS } from '../../../../../avatar-3d/js/chibi2-gear5.js';
 import { isG5, G5_HELD, G5_OFFHAND } from '../../../../../avatar-3d/js/chibi2-gear5-ids.js';
-import { iconSpec } from './inv-core.js';
+import { iconSpec, slotOf } from './inv-core.js';
+import { itemIconUrl, itemArtKey } from '../../../../../icons/js/game-icons.js';
 import { wornPart } from '../gear-look.js';
 import { gearOpts, lookDataReady, loadLookData } from '../looks.js';
 
-const VERSION = 'v4';      // v4: play-test 8 — every picture is the worn model (the v3 cache held the old look tables' pictures)
+const VERSION = 'v5';      // v5 (2026-10-14): armour is worn by a plain mannequin, not a person; potions/goods are drawn art (v4: the worn model)
 const SIZE = 96, PX = SIZE;
 const DB = 'tv-icons', OS = 'icons';
 const mem = new Map();               // key -> object URL
@@ -83,9 +85,11 @@ export function specFor(item) { return iconSpec(item, { worn: wornFor }); }
 /** The icon for an item: a data URL when ready, else null (and it is queued). */
 export function iconFor(item) {
   if (!item) return null;
+  if (!slotOf(item)) { const art = itemArtKey(item); if (art) return itemIconUrl(art); }   // drawn art needs no look data
   if (!lookDataReady()) { loadLooks(); return null; }      // the catalog decides the picture: no guess before it is here
   const spec = specFor(item);
   if (!spec) return null;
+  if (spec.kind === 'art') return itemIconUrl(spec.id);           // a drawn picture: ready at once, nothing to render or cache
   const hit = mem.get(spec.key);
   if (hit) return hit;
   if (!waiting.has(spec.key)) { waiting.add(spec.key); queue.push(spec); pump(); }
@@ -231,9 +235,11 @@ function itemModel(spec) {
 
 let bodyLib = null;
 function bodyModules() {
-  if (!bodyLib) bodyLib = Promise.all([import('../../../../../avatar-3d/js/chibi2.js'), import('../looks.js')]).then(([c, l]) => ({ create: c.createChibi2Character, avatarFor: l.avatarFor }));
+  if (!bodyLib) bodyLib = Promise.all([import('../../../../../avatar-3d/js/chibi2.js'), import('../looks.js')]).then(([c, l]) => ({ create: a => c.createChibi2Character(a, { mannequin: true }), avatarFor: l.avatarFor }));
   return bodyLib;
 }
+/** The dummy's one colour: a pale matte ash, light enough that dark leather reads and dull enough that steel still shines. */
+const MANNEQUIN = '#b9b2a6';
 const PART_FRAMES = {
   bust: { bones: ['head'], lift: 0.17, radius: 0.33, yaw: 0.35 },
   torso: { bones: ['chest'], lift: -0.02, radius: 0.2, yaw: 0.3, pitch: 0.05 },
@@ -249,9 +255,13 @@ const PART_FRAMES = {
 async function armourShot(spec) {
   const { create, avatarFor } = await bodyModules();
   const base = JSON.parse(JSON.stringify(await avatarFor({ race: 'human', cls: 'warrior', seed: 4242 })));
-  // plain clothes everywhere, the piece in its slot, empty hands
+  // 2026-10-14 (owner: "a solid texture more like a mannequin… it should not feature random characters"): a shop dummy —
+  // one matte colour for skin and the plain clothes under the piece, a bald carved head (chibi2 `mannequin` paints the
+  // face the body's colour), no beard or marks. Only the item keeps its own colours.
   Object.assign(base, { hat: { id: 'none' }, cape: { id: 'none' }, decor: { id: 'none' }, held: { id: 'none' }, offhand: { id: 'none' },
-    top: { id: 'tunic', color: '#4a4038' }, bottom: { id: 'pants', color: '#3a3028' }, shoes: { id: 'boots', color: '#3a2a1e' } });
+    hair: { ...(base.hair || {}), id: 'bald' }, facialHair: { id: 'none' }, extras: { id: 'none' },
+    top: { id: 'tunic', color: MANNEQUIN }, bottom: { id: 'pants', color: MANNEQUIN }, shoes: { id: 'boots', color: MANNEQUIN } });
+  base.body = { ...(base.body || {}), skin: MANNEQUIN };
   // exactly the parts the item puts on a body (W25): the same objects gearLook() hands the world's bodies
   for (const [k, v] of Object.entries(spec.parts || {})) base[k] = JSON.parse(JSON.stringify(v));
   let t0 = performance.now();

@@ -53,3 +53,34 @@ npx playwright test prototypes/thousandvale/tests/D/skill-icons.spec.js
 ```
 
 Coverage checks compare every real class/skill ID and name against the catalog, require exactly five classes per new batch, and reject duplicate pictures, missing descriptions and unsafe/broken SVG output. Browser checks exercise search/filter combinations, details, downloads, keyboard closing, mobile layout, and the real game's action bar and Skills window. The catalog audit also runs inside Thousandvale's release gate via `tests/D/skill-icons.test.js`.
+
+## Game icons (2026-10-14)
+
+Everything in Thousandvale that is not a spell or a piece of gear now has a drawn picture too — Codex-authored SVG in the
+same spirit as the spell set, reviewed on contact sheets. Browse them at `icons/game.html` (tabs per set, search).
+`data/game/STYLE.md` is the art contract (viewBox, allowed SVG, palette, how to review a batch).
+
+| File | Pictures | Used by |
+|---|---|---|
+| `data/game/ui.js` (32×32) | Attack, Cast a line, Hook, lock, mount, jump, target, ally, potion belt, quick wheel, chat, close, menu, auto-run, camp; the 14 window buttons; 6 emotes; 10 professions (`prof_<id>`); eye, locate; `doll` (the empty paper-doll mannequin) | `hud.js` (attack with the spell medallion), `menubar.js`, `input/touch.js`, `input/radial.js`, `ui/angling.js`, `ui/pt10.js` (emotes), `ui/prof-icons.js`, `ui/event-tracker.js`, `ui/worldmap.js`, `bag.js` |
+| `data/game/items-goods.js` (64×64) | every potion (mana is BLUE), food, drink, the 12 fish meals, goods, rods, bait, the 12 gathering tools, crates, gift, trophy, quest parcel, key, letter, coins, the 12 fishing junk items, and fallbacks (`potion`, `junk`, `bundle`, `tool`, `ring`, `amulet`, `focus`) | the bag, shop, loot, trade, mail and hotbar, through `ui/inv-core.js iconSpec` → `{ kind: 'art' }` |
+| `data/game/items-materials.js` (64×64) | the 55 profession materials by id, plus a fallback per material class (`mat_ore` …) | same |
+| `data/game/items-fish.js` (64×64) | the 62 fish and 16 legendary fish by species id, plus `fish` | same |
+| `data/game/fx-motifs.js` (64×64, white) | three spell-effect shapes for each of the 30 classes (`<class>.a` projectile head, `.b` impact shard, `.c` ground glyph) and `palettes` (core / glow / accent per class) | Thousandvale's class signature effects (`js/client/sig-looks.js`, `sig-fx.js`) |
+
+```js
+import { uiIconSvg, itemArtKey, itemIconSvg, itemIconUrl } from '../icons/js/game-icons.js';
+uiIconSvg('attack', 40, { medallion: true });    // the spell disc behind it
+itemArtKey({ kind: 'potion', id: 'mana_potion' }); // 'mana_potion'  (id → species → what it is → a family fallback; null for gear)
+itemIconUrl('mana_potion');                       // data: URL for an <img>
+import { CLASS_MOTIFS, classPalette, motifSvg } from '../icons/js/motifs.js';   // the effect shapes alone (no item art)
+```
+
+Gear (weapons, shields, armour, cloaks) is not here on purpose: the game draws those from the 3D models, now worn by a
+plain mannequin (`createChibi2Character(avatar, { mannequin: true })` — the face keeps its carved shape in the body's one
+colour, so an icon never shows a particular person). Rings keep their own coloured drawing, which takes the ring
+model's metal and stone colours.
+
+Adding a picture: add an entry to the right file (same id as the game's item/button), run
+`node icons/tools/contact-sheet.mjs icons/data/game/<file>.js out.png`, look at it, then `node --test icons/tests/game-icons.test.js`
+(safe-SVG audit, every real item in Thousandvale's data has a picture, mana is blue, 30 distinct class palettes).

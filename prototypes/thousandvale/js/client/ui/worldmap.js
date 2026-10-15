@@ -17,6 +17,7 @@ import { esc } from './tips.js';
 import { createMapFind, questZoneAt, savedView, saveView } from './map-tools.js';
 import { HIDDEN } from './hidden-events.js';
 import { edgeArrow, metresText } from './pt10-core.js';
+import { uiIconSvg } from '../../../../../icons/js/game-icons.js';
 
 const LEGEND = [
   ['me', 'You'], ['party', 'Party member'], ['quest', 'Quest goal'], ['questdone', 'Hand a quest in'], ['liveevent', 'Event happening now'],
@@ -53,7 +54,7 @@ export function createWorldMap({ atlas, net, me, hud, worldUi, inCombat = () => 
     const list = atlas.dungeon ? DPRESETS : PRESETS;
     // play-test 10 (Y28, report #39): "Locate player" at the top-left, left of World / Province / Region
     const locate = h('button.ghost.small.map-locate', { type: 'button', title: 'Centre the map on where you stand', dataset: { act: 'locate' }, onclick: () => locateMe() });
-    locate.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg><span>Locate player</span>';
+    locate.innerHTML = (uiIconSvg('locate', 15) || '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>') + '<span>Locate player</span>';
     presets.replaceChildren(locate, ...list.map(([k, t]) => h('button.chip', { type: 'button', role: 'tab', 'aria-checked': String(state.preset === k), onclick: () => fitPreset(k) }, t)),
       h('button.ghost.small', { type: 'button', title: 'What the symbols mean', onclick: () => { legend.hidden = !legend.hidden; } }, 'Legend'));
     layers.replaceChildren(...(atlas.dungeon ? [] : [['roads', 'Roads'], ['rivers', 'Rivers'], ['places', 'Places'], ['quests', 'Quests'], ['events', 'Events'], ['names', 'Names']].map(([k, t]) =>

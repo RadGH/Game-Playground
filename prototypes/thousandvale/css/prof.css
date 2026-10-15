@@ -64,6 +64,7 @@ html[data-prof] #interact, html[data-prof] .interact { visibility: hidden; }
 .pc-cost { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
 .pc-needs { display: contents; }
 .pc-needs span, .pc-fee { font-size: 12.5px; padding: 1px 8px; border-radius: 9px; border: 1px solid var(--edge); background: rgba(0, 0, 0, 0.4); white-space: nowrap; }
+.pc-needs .pc-pic { width: 18px; height: 18px; vertical-align: -4px; margin: 0 4px 0 -4px; }
 .pc-needs .ok { color: var(--good); border-color: rgba(127, 224, 138, 0.45); } .pc-needs .lack { color: var(--bad); border-color: rgba(255, 106, 85, 0.5); }
 .pc-fee { color: var(--gold-hi); }
 .pc-why { color: var(--warn) !important; }

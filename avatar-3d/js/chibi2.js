@@ -19,7 +19,7 @@ const HAT_BRIM = { wizard: 0.5, wide_brim: 0.41, straw: 0.43, top_hat: 0.51, fea
 const sphere = () => new THREE.SphereGeometry(1, 10, 6);
 const ring = (r, tube) => new THREE.TorusGeometry(r, tube, 4, 12);
 
-function buildTemplate(a, rig) {
+function buildTemplate(a, rig, opts = {}) {
   const b = new SkinBuilder(rig), H = rig.headScale, W = rig.wide, T = rig.torso;
   rig.byName.eyeL.rotation.z = -(a.eyes.rot || 0) * Math.PI / 180;
   rig.byName.eyeR.rotation.z = (a.eyes.rot || 0) * Math.PI / 180;
@@ -34,7 +34,9 @@ function buildTemplate(a, rig) {
   // Body and clothes (chibi2-body.js), then the face (chibi2-face.js). Both hand back the surfaces
   // the hair, hats and gear are laid on.
   const body = buildBody(a, rig, { add, ellipsoid, strip, trim, leather, steel, darkSteel });
-  const face = buildFace(a, rig, { add, head, ellipsoid, strip });
+  // `opts.mannequin` (Thousandvale's gear icons, 2026-10-14): the face keeps its sculpted shape but is painted the body's
+  // one colour, so a shop dummy shows the piece and never a particular person. Off = the face exactly as before.
+  const face = buildFace(a, rig, opts.mannequin ? mannequinCtx(add, a.body.skin, H) : { add, head, ellipsoid, strip });
   const hs = HEAD_SHAPES[a.headShape] || HEAD_SHAPES.round, faceWidth = hs.w, faceDepth = hs.d;
 
   if (a.hair.id !== 'bald') {
@@ -165,6 +167,15 @@ function buildTemplate(a, rig) {
   buildArmour2(a, gearCtx);   // tier-2 armour kits + emblems (chibi2-armour2.js) — opt-in: nothing for a look that names neither
   buildGear5(a, { ...gearCtx, body, face });   // play-test 5: the g5_ models (chibi2-gear5.js) — opt-in: nothing for a look that names no g5_ id
   return b.finish();
+}
+
+/** The face builder's drawing kit with every colour replaced by one (and no metal): a mannequin's carved face. */
+function mannequinCtx(add, colour, H) {
+  const one = (g, bone, _c, options = {}) => add(g, bone, colour, { ...options, metal: false });
+  const ellipsoid = (bone, _c, position, scale, options = {}) => one(sphere(), bone, colour, { position, scale, ...options });
+  const strip = (bone, points, radius, _c, options = {}) => one(taperedCurve(points, [radius, radius, radius], 4, 4), bone, colour, options);
+  const head = (g, _c, options = {}) => one(g, 'head', colour, { ...options, position: (options.position || [0, 0, 0]).map(v => v * H), scale: (options.scale || [1, 1, 1]).map(v => v * H) });
+  return { add: one, head, ellipsoid, strip };
 }
 
 // Hood colours: the cloth colour, a darker lining for the inside, and a lighter rolled edge.
@@ -391,15 +402,15 @@ function normalizeForChibi2(avatar) {
   return a;
 }
 
-function acquire(avatar, anims = CHIBI2_ANIMS) {
+function acquire(avatar, anims = CHIBI2_ANIMS, opts = {}) {
   const a = normalizeForChibi2(avatar), rig = createRig(a.body, raceOf(a));
   rig.hold = holdFor(a);            // what the hands carry decides how every clip carries it
   // the clip set is part of the cache key: two characters with different animation sets are not
   // the same template
-  const key = JSON.stringify(a) + '|' + anims.length;
+  const key = JSON.stringify(a) + '|' + anims.length + (opts.mannequin ? '|mannequin' : '');
   let template = templates.get(key);
   if (!template) {
-    template = { parts: buildTemplate(a, rig), clips: createClips(rig, anims), refs: 0, anims };
+    template = { parts: buildTemplate(a, rig, opts), clips: createClips(rig, anims), refs: 0, anims };
     templates.set(key, template);
   }
   template.refs++;
@@ -426,7 +437,7 @@ function acquire(avatar, anims = CHIBI2_ANIMS) {
 /**
  * Chibi 2: shared avatar JSON, two skinned meshes, 18 bones and twelve animation states.
  * `opts.swim` adds the three swimming strokes — off by default, because every character pays the
- * build cost of every clip.
+ * build cost of every clip. `opts.mannequin` paints the face the body's colour (a shop dummy: icons).
  */
 export async function createChibi2Character(avatar, opts = {}) {
   const anims = opts.swim ? CHIBI2_ALL_ANIMS : (opts.anims || CHIBI2_ANIMS);
@@ -434,7 +445,7 @@ export async function createChibi2Character(avatar, opts = {}) {
   let asset, action, anim = 'idle', elapsed = 0, disposed = false, handsFree = false;
   const gaze = { x: 0, y: 0, tx: 0, ty: 0, next: 0.8 + Math.random() * 1.5 };
   function install(a) {
-    const next = acquire(a, anims);
+    const next = acquire(a, anims, { mannequin: !!opts.mannequin });
     if (asset) { group.remove(asset.root); asset.release(); }
     asset = next; group.add(asset.root); action = null; elapsed = 0;
     asset.lidded = ['narrow', 'sleepy', 'tired', 'angry'].includes(a?.eyes?.id);   // lidded eyes never glance up under the lid

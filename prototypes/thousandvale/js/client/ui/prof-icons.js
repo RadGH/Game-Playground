@@ -1,5 +1,6 @@
 // W9 professions — ten small line icons (24 × 24, drawn here: no icon font, no image file) and each craft's colour.
 //   profIcon('mining') -> <svg class="prof-svg" …>      PROF_TINT.mining -> '#c9824a'
+import { uiIconSvg } from '../../../../../icons/js/game-icons.js';
 const NS = 'http://www.w3.org/2000/svg';
 export const PROF_TINT = { mining: '#c9824a', logging: '#7fb069', foraging: '#c58bff', skinning: '#d9a066', angling: '#6ab8e0', smithing: '#ff9a4a', outfitting: '#e58fb0', alchemy: '#58c0a0', cooking: '#f0c060', tempering: '#7fd0ff' };
 export const PROF_NAME = { mining: 'Mining', logging: 'Logging', foraging: 'Foraging', skinning: 'Skinning', angling: 'Angling', smithing: 'Smithing', outfitting: 'Outfitting', alchemy: 'Alchemy', cooking: 'Cooking', tempering: 'Tempering' };
@@ -16,6 +17,9 @@ const PATHS = {
   tempering: ['M12 3 9.5 9.5 3 12l6.5 2.5L12 21l2.5-6.5L21 12l-6.5-2.5z'],                              // a struck spark
 };
 export function profIcon(id, size = 22) {
+  // 2026-10-14: the icon library's drawn picture (icons/data/game/ui.js `prof_<id>`); the line drawing below is the fallback
+  const art = uiIconSvg('prof_' + id, size, { cls: 'prof-svg' });
+  if (art && typeof DOMParser !== 'undefined') { const el = new DOMParser().parseFromString(art, 'image/svg+xml').documentElement; if (el && el.nodeName === 'svg') return document.importNode(el, true); }
   const svg = document.createElementNS(NS, 'svg');
   svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('width', size); svg.setAttribute('height', size); svg.setAttribute('class', 'prof-svg'); svg.setAttribute('aria-hidden', 'true');
   svg.style.color = PROF_TINT[id] || '#d9b26a';

@@ -1,0 +1,14 @@
+.gi-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 14px; }
+.gi-tabs button { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border); background: var(--bg2); color: var(--fg); cursor: pointer; }
+.gi-tabs button[aria-selected="true"] { border-color: var(--accent); color: var(--accent); }
+.gi-search { display: flex; gap: 8px; align-items: center; margin: 0 0 16px; max-width: 420px; }
+.gi-search input { flex: 1; }
+.gi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+.gi-card { background: var(--bg2); border-radius: 8px; padding: 12px; display: grid; gap: 8px; }
+.gi-pics { display: flex; align-items: flex-end; gap: 10px; min-height: 72px; }
+.gi-pics.dark { background: #12141f; border-radius: 6px; padding: 6px; }
+.gi-pics.slot { background: #2a2018; border-radius: 6px; padding: 6px; }
+.gi-card b { font-size: 13px; }
+.gi-card small { color: var(--fg2); font-size: 12px; overflow-wrap: anywhere; }
+.gi-card p { margin: 0; font-size: 12px; color: #c2c6cf; }
+@media (max-width: 520px) { .gi-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); } }

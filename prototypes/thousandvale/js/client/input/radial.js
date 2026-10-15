@@ -4,6 +4,7 @@
 // can never open something the keyboard cannot.
 import { WHEEL, WHEEL_ACTIONS, ACTION_BY_ID } from './bindings.js';
 import { actionKey } from './emit.js';
+import { uiIconSvg } from '../../../../../icons/js/game-icons.js';
 
 const ICON = {
   menu: '<path d="M4 6h16M4 12h16M4 18h16"/>',
@@ -18,7 +19,7 @@ const svg = inner => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
 function iconFor(w) {
   const mb = document.querySelector(`#menubar [data-panel="${w.id}"] svg`) || (w.id === 'help' ? document.querySelector('#menubar [data-panel="help"] svg') : null);
   if (mb) return mb.outerHTML;
-  return svg(ICON[w.icon] || ICON.menu);
+  return uiIconSvg(w.icon === 'fish' ? 'cast_line' : w.icon, 26) || svg(ICON[w.icon] || ICON.menu);      // 2026-10-14: the icon library first
 }
 
 export function createRadial({ run, parent = document.body } = {}) {

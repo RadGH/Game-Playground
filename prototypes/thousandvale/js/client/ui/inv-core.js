@@ -158,6 +158,7 @@ export function armourTier(item) {
 // (D-world's; = gearLook({[slot]: item}, opts)). ui/item-icons.js passes the game's own options (looks.js gearOpts);
 // with none (node tests) the plain tables answer, exactly as a body built without the catalog would look.
 import { wornPart as wornPartOf } from '../gear-look.js';
+import { itemArtKey } from '../../../../../icons/js/game-icons.js';
 
 /** Which part of the body an armour icon frames. */
 const FRAME = { head: 'bust', chest: 'torso', legs: 'legs', feet: 'feet', hands: 'hands', back: 'back', waist: 'waist', necklace: 'neck', ring: 'ring', ring2: 'ring' };
@@ -169,7 +170,8 @@ const empty = p => !p || !p.id || p.id === 'none';
  * swords renders one sword):
  *   { kind: 'held' | 'offhand', id, color, quality, part }      a weapon / shield / focus, built on its own
  *   { kind: 'worn', slot, frame, id, parts }                     armour, a cloak, a pack, a belt…: a plain body wearing exactly `parts`
- *   { kind: 'glyph', id, color }                                 things with no model (potions, junk, a ring the catalog does not draw)
+ *   { kind: 'art', id }                                          a drawn picture (icons/js/game-icons.js): potions, food, goods, materials, fish…
+ *   { kind: 'glyph', id, color }                                 a ring the catalog does not draw (its own colours), or anything left over
  * `worn(item, slot)` -> gear-look.js wornPart's answer `{ partSlot, part, parts }`.
  */
 export function iconSpec(item, { worn = wornPartOf } = {}) {
@@ -192,13 +194,20 @@ export function iconSpec(item, { worn = wornPartOf } = {}) {
     else if (w.partSlot === 'offhand') spec = { kind: 'offhand', id: part.id, color: part.color || '#8d97a3', quality: part.quality ?? 0, part };
     else spec = { kind: 'worn', slot: w.partSlot, frame: FRAME[s] || 'torso', id: part.id, parts: w.parts };
   }
+  // 2026-10-14 (owner: "update all other icons… redo all existing programmer art"): everything that is not a 3D model —
+  // potions (a mana potion is BLUE), food, goods, tools, materials, fish, crates, junk — is a drawn picture from the icon
+  // library (icons/js/game-icons.js), looked up by the item's id, then what it is
+  if (!spec) {
+    const art = s === 'necklace' ? 'amulet' : s === 'offhand' ? 'focus' : itemArtKey(item);
+    if (art) spec = { kind: 'art', id: art };
+  }
   if (!spec) {
     if (s === 'necklace') spec = { kind: 'glyph', id: 'amulet', color: RARE_TINT[r] || '#3a8ad8' };
     else if (s === 'offhand') spec = { kind: 'glyph', id: 'focus', color: '#8fd0ff' };
     else if (/potion|draught|elixir|tonic/i.test(item.name || '') || item.kind === 'potion') spec = { kind: 'glyph', id: 'potion', color: '#d83838' };
     else spec = { kind: 'glyph', id: item.kind === 'junk' ? 'junk' : 'bundle', color: item.kind === 'material' && /^#[0-9a-f]{6}$/i.test(item.tint || '') ? item.tint : '#a08060' };   // W9 (P-client): a material's icon takes the material's own colour
   }
-  spec.key = spec.kind === 'worn' ? `worn|${spec.frame}|${JSON.stringify(spec.parts)}` : spec.kind === 'glyph' ? `glyph|${spec.id}|${spec.color}${spec.color2 ? '|' + spec.color2 + '|r2' : ''}` : `${spec.kind}|${JSON.stringify(spec.part)}`;
+  spec.key = spec.kind === 'worn' ? `worn|${spec.frame}|${JSON.stringify(spec.parts)}` : spec.kind === 'art' ? `art|${spec.id}` : spec.kind === 'glyph' ? `glyph|${spec.id}|${spec.color}${spec.color2 ? '|' + spec.color2 + '|r2' : ''}` : `${spec.kind}|${JSON.stringify(spec.part)}`;
   return spec;
 }
 export function mixHex(a, b, t) {

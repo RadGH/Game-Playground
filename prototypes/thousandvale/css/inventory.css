@@ -12,7 +12,7 @@
   padding: 10px; border: 1px solid var(--edge); border-radius: 10px; background: radial-gradient(ellipse at 50% 40%, rgba(217, 178, 106, 0.08), rgba(0, 0, 0, 0.25) 70%); }
 .doll-col { display: flex; flex-direction: column; gap: 8px; }
 .doll-figure { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: space-between; color: rgba(217, 178, 106, 0.14); min-height: 280px; }
-.doll-figure svg { width: 100%; max-width: 120px; flex: 1; }
+.doll-figure svg { width: 100%; max-width: 120px; flex: 1; opacity: 0.32; filter: saturate(0.6); }   /* 2026-10-14: the drawn mannequin, kept quiet behind the slots */
 .doll-stats { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 13px; color: var(--ink-dim); pointer-events: auto; }
 .doll-stats b { font-family: var(--serif); color: var(--gold-hi); font-size: 14px; letter-spacing: 0.05em; }
 .doll-stats .dim { color: var(--ink-faint); font-style: italic; }

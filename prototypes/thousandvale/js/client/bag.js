@@ -20,6 +20,9 @@ import { wearSlot } from './ui/pt2-core.js';
 import { offhandRefusal, hasDual2h, BAG_MAX as BAG_CAP } from './ui/pt5-core.js';
 import { handRefusal } from './ui/pt10-core.js';
 import { UNSEEN } from './ui/unseen.js';
+import { uiIconSvg } from '../../../../icons/js/game-icons.js';
+// 2026-10-14: the empty paper doll is the icon library's wooden mannequin (the same dummy the armour icons are worn by)
+const DOLL_FIGURE = uiIconSvg('doll', 120) || '';
 import { packRefusal, bagSlotsOf } from './ui/pt8-core.js';      // W19: a backpack's extra squares
 
 const $ = id => document.getElementById(id);
@@ -50,7 +53,7 @@ export function createBag({ net: getNet, hud, me = null }) {
     <div class="inv-body">
       <section class="inv-doll" aria-label="Worn gear">
         <div class="doll-col" id="doll-left"></div>
-        <div class="doll-figure"><svg viewBox="0 0 100 200" aria-hidden="true"><g fill="currentColor"><circle cx="50" cy="30" r="22"/><path d="M28 60h44l8 62H66l-3 70H37l-3-70H20z"/><path d="M28 62 12 116l9 4 14-44zM72 62l16 54-9 4-14-44z"/></g></svg>
+        <div class="doll-figure">${DOLL_FIGURE}
           <div class="doll-stats" id="doll-stats"></div></div>
         <div class="doll-col" id="doll-right"></div>
         <div class="doll-bottom" id="doll-bottom"></div>

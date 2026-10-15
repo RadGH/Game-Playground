@@ -15,6 +15,7 @@ import { fmt } from '../../../../../shared/format.js';
 import { RARITY_NAME, rarityOf, slotOf } from './inv-core.js';
 import { rememberItems } from './item-card.js';
 import { profIcon, PROF_NAME, PROF_TINT } from './prof-icons.js';
+import { ITEM_ART, itemIconUrl } from '../../../../../icons/js/game-icons.js';     // 2026-10-14: a material's picture on its chip
 
 /** The legendary power a quote or a finished work names (the server's `power` / `now`), as one sentence — or null. Pure. */
 export function powerOf(m) { const p = m && (m.power || m.now); if (!p || typeof p !== 'object') return null; if (p.id && p.id !== 'legendary_effect' && !p.legendaryId) return null; return p.descriptor || p.text || p.desc || (p.name && p.name !== 'Legendary' ? p.name : null); }
@@ -74,7 +75,7 @@ export function createCraftWindow({ net, hud, bag, numbers = () => null, onMake,
   }
 
   // (round 9, X5: a `kept` material — the Sovereign Core — is needed but NOT spent when the gauge is missed: its chip says so)
-  const needChips = needs => h('span.pc-needs', {}, ...(needs || []).map(n => h('span.' + ((n.have ?? 0) >= n.n ? 'ok' : 'lack') + (n.kept ? '.kept' : ''), n.kept ? { dataset: { tip: `${n.name} is needed for this work, and you keep it if the gauge is missed.` } } : {}, `${fmt(n.have ?? 0, { decimals: 0 })}/${fmt(n.n, { decimals: 0 })} ${n.name}`, n.kept ? h('em', {}, 'kept on a miss') : null)));
+  const needChips = needs => h('span.pc-needs', {}, ...(needs || []).map(n => h('span.' + ((n.have ?? 0) >= n.n ? 'ok' : 'lack') + (n.kept ? '.kept' : ''), n.kept ? { dataset: { tip: `${n.name} is needed for this work, and you keep it if the gauge is missed.` } } : {}, ITEM_ART[n.id] ? h('img.pc-pic', { src: itemIconUrl(n.id), alt: '' }) : null, `${fmt(n.have ?? 0, { decimals: 0 })}/${fmt(n.n, { decimals: 0 })} ${n.name}`, n.kept ? h('em', {}, 'kept on a miss') : null)));
   const feeNode = gold => (gold > 0 ? h('span.pc-fee', {}, `${fmt(gold, { decimals: 0 })} gold`) : null);
 
   function recipeRow(r) {

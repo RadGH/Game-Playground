@@ -14,6 +14,7 @@
 // D-world hears `tv:fish` on window: { state: 'cast'|'wait'|'bite'|'tug'|'catch'|'lost'|'idle', tension? } (rod bend, bobber).
 
 import { createPanel, h } from '../ui-panel.js';
+import { uiIconSvg } from '../../../../../icons/js/game-icons.js';
 import { tugParams, tugStart, tugStep, tugHeld, tugTension, cookRows, rarityWord, rarityClass, anglingText } from './pt5-core.js';
 import { fmt } from '../../../../../shared/format.js';
 
@@ -28,7 +29,7 @@ export function createAngling({ net, hud, bag, reveal = null, typing = () => fal
   // a rod with its line and a fish — and says "Cast a line" in words under it, on its tip and to a screen reader
   const btn = h('button.slot.fish-btn', { type: 'button', hidden: true, dataset: { tip: 'Cast a line (X). Face the water first.' }, 'aria-label': 'Cast a line' },
     h('span.key', {}, 'X'), h('span.fish-glyph', { 'aria-hidden': 'true' }), h('small.fish-cap', {}, 'Cast a line'));
-  btn.querySelector('.fish-glyph').innerHTML = '<svg viewBox="0 0 32 32" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 27 L22 5"/><path d="M22 5 Q27 6 26 14"/><path d="M26 14 v5"/><path d="M26 19 q-3 4 -7 2"/><path d="M8.5 22.5 l3 2.2" stroke-width="3"/><path d="M12 24 c3-4 8-4 11-1 l3-2 v6 l-3-2 c-3 3-8 3-11-1 Z" fill="currentColor" stroke="none" opacity="0.9"/></svg>';
+  btn.querySelector('.fish-glyph').innerHTML = uiIconSvg('cast_line', 30, { medallion: true });       // 2026-10-14: the icon library's picture
   document.getElementById('actionbar')?.append(btn);
   btn.addEventListener('click', () => castOrStop());
 

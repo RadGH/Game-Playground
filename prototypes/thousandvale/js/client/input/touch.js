@@ -20,6 +20,7 @@ import { ACTION_BY_ID, TOUCH_CONTROLS } from './bindings.js';
 import { actionKey, keyDown, keyUp } from './emit.js';
 import { device } from './device.js';
 import { waterInReach } from './water-reach.js';
+import { uiIconSvg } from '../../../../../icons/js/game-icons.js';
 
 const HOLD_MS = 380;
 const svg = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
@@ -36,6 +37,8 @@ const ICON = {
   fish: '<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 28 21 4"/><path d="M21 4q6 1 5 9"/><path d="M26 13v4"/><path d="M7.5 23.5l3 2.2" stroke-width="3.2"/><path d="M11 23c3.4-4.6 9-4.6 12.4-1.2L27 19.4v7.2l-3.6-2.4C20 27.6 14.400 27.600 11 23Z" fill="currentColor" stroke="none"/><circle cx="15" cy="22.6" r="0.9" fill="#10202c" stroke="none"/></svg>',
   mount: '<svg viewBox="0 0 32 32" fill="currentColor" stroke="none" aria-hidden="true"><path d="M9 29h15v-3.500c0-6-1.200-9.500-3.400-12.500.8-3.200-.2-6.300-2.400-8.500l-1.700 2.300C12.200 6.800 8.300 10 7.200 15l-2.600 4.200 2.300 2.600 4.300-2c1.200 0 2.300-.3 3.300-1-1 4.200-5.500 5.200-5.500 10.200Z"/><circle cx="13" cy="12.500" r="1.100" fill="#1a1206"/></svg>',
 };
+// 2026-10-14: the drawn pictures from the icon library (Codex) replace the line drawings above, which stay as the fallback
+for (const [k, id] of Object.entries({ jump: 'jump', target: 'target', ally: 'ally', belt: 'belt', wheel: 'wheel', chat: 'chat', close: 'close', hook: 'hook', fish: 'cast_line', mount: 'mount' })) ICON[k] = uiIconSvg(id, 24) || ICON[k];
 const ROD_KIND = /(^|_)rod($|_)|angling_rod|fishing/i;      // a tool is not a potion: the Belt never uses it (Y34)
 const FISH_HOW = ['Tap Fish — it lights up when water is in reach.', 'Wait. When it says “A bite!”, tap Hook (the big blue button).', 'Then hold to reel in and let go to give line: keep the float inside the green band.'];
 /** The sheets a tab stands for: tab id (an action id) -> what is on screen when it is open. */

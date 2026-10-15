@@ -2,6 +2,17 @@
   "_doc": "Player-facing changelog, newest first. The lead appends an entry at each publish (from the feedback reports' Completed notes). `id` is stable; the client remembers the last id a player has seen and highlights newer ones. Plain language, no internal names.",
   "entries": [
     {
+      "id": "2026-10-14",
+      "date": "2026-10-14",
+      "title": "New icons everywhere, and every class's spells have their own look",
+      "items": [
+        "Every icon that was a plain drawing is now a proper picture: the Attack and Cast a line buttons, the window buttons, emotes, professions, and in your bag every potion, meal, tool, material and fish. The Mana Potion is blue now.",
+        "Armour and clothing icons are shown on a plain shop mannequin instead of a stranger.",
+        "Each of the 30 classes now has its own spell effects on top of the element ones: its own shapes, colours and movement. A bard's spells throw music notes, a tinker's throw cogs, a chronomancer's lay down a ticking clock face, and so on.",
+        "New setting: Settings, Graphics, Spell effects. Enhanced, Standard, Reduced (full effects only for your own spells and your target) or Off (only projectiles). It applies at once."
+      ]
+    },
+    {
       "id": "2026-10-13",
       "date": "2026-10-13",
       "title": "Cheaper gear, Starcaller, emotes and the last of your reports",

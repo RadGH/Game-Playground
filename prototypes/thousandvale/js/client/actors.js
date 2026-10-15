@@ -454,7 +454,8 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
   }
 
   // --- per frame --------------------------------------------------------------------------------
-  function update(dt, renderTime, { selfPos = null, selfYaw = 0, selfMoving = 0, selfSwim = false, targetId = null, hoverId = null, sample = null, speed = null } = {}) {
+  const TWIST_MAX = 1.1;          // how far the chest turns on the hips (~63°) before the whole body comes round
+  function update(dt, renderTime, { selfPos = null, selfYaw = 0, selfMoving = 0, selfSwim = false, selfAim = null, targetId = null, hoverId = null, sample = null, speed = null } = {}) {
     const now = performance.now();
     // LOD: who gets a body (re-ranked four times a second)
     if (now >= lodAt) {
@@ -499,6 +500,23 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
         }
         a.speed = a.still ? (a.still.speed || 0) : speed ? speed(a.id, renderTime) : 0;
       }
+      // owner 2026-10-15: SHOOT ON THE RUN. While attacking, a person's chest turns to the target on the hips and leans
+      // a little; the legs keep the running line. Past what the hips can turn, the whole body comes round the rest of the
+      // way (a sideways run, a backpedal), so the shot always leaves toward the target. Standing still, you just face it.
+      let aimYaw = null;
+      if (!a.dead && !a.mount && !a.shape && !a.swim && person(a)) {
+        if (a.self) aimYaw = selfAim;
+        else if (a.kind === 'player' && a.tgt && now - (a.swingAt || 0) < 1800) { const t = actors.get(a.tgt); if (t && !t.dead) aimYaw = Math.atan2(t.pos.x - a.pos.x, t.pos.z - a.pos.z); }
+      }
+      let wantTwist = 0;
+      if (aimYaw != null) {
+        const d = angleDelta(a.yaw, aimYaw);
+        if (a.speed > 0.4) { wantTwist = Math.max(-TWIST_MAX, Math.min(TWIST_MAX, d)); a.yaw += d - wantTwist; }
+        else a.yaw += d * Math.min(1, dt * 16);
+      }
+      a.twistNow = (a.twistNow || 0) + (wantTwist - (a.twistNow || 0)) * Math.min(1, dt * 12);
+      if (Math.abs(a.twistNow) < 1e-3 && !wantTwist) a.twistNow = 0;
+      a.body?.setTwist?.(a.twistNow, -a.twistNow * 0.22, aimYaw != null && a.speed > 0.4 ? 0.07 : 0);
       // Hit recoil and punch decay.
       a.recoil.multiplyScalar(Math.exp(-dt * 10));
       a.punch *= Math.exp(-dt * 12);

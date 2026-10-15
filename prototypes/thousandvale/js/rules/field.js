@@ -337,13 +337,15 @@ export function attachField(room, { terrain = null, safeZones = [] } = {}) {
    * actors.js `strikeArea` (line ~1664): everything within `radius` of a point. Farhold falls back
    * to `feel.swing.shot` when `power` is null (an arrow's draw); here an arrow passes its power.
    */
-  field.strikeArea = (x, z, radius, attacker, { falloff = 0.45, power = null, element = 'physical', skill = null, onHit = null, applyStatus: applyFn = null, proc = false, rules = null, knock = null, from = null, noDamage = false, kind = 'area', skip = null } = {}) => {
+  field.strikeArea = (x, z, radius, attacker, { falloff = 0.45, power = null, element = 'physical', skill = null, onHit = null, applyStatus: applyFn = null, proc = false, rules = null, knock = null, from = null, noDamage = false, kind = 'area', skip = null, only = null } = {}) => {
     const hits = [];
     const mult = power != null ? power : 1;
     const shape = knock || null;
     // Y10: a burst does not reach round a dungeon wall (measured from where it goes off)
-    const inside = field.monsters.filter(e => e.dying == null && !(skip && skip.has(e)) && Math.hypot(e.x - x, e.z - z) <= radius + (e.reach || 2) * 0.25
-      && (!field.sight || field.sight(x, z, e.x, e.z)));
+    // owner 2026-10-15: `only` = a shot at a chosen target strikes that body and nothing standing beside it
+    const inside = only ? (only.dying == null && !only.removed && (!field.sight || field.sight(x, z, only.x, only.z)) ? [only] : [])
+      : field.monsters.filter(e => e.dying == null && !(skip && skip.has(e)) && Math.hypot(e.x - x, e.z - z) <= radius + (e.reach || 2) * 0.25
+        && (!field.sight || field.sight(x, z, e.x, e.z)));
     const crowd = inside.length;
     for (const e of inside) {
       if (e.dying != null) continue;

@@ -2,6 +2,16 @@
   "_doc": "Player-facing changelog, newest first. The lead appends an entry at each publish (from the feedback reports' Completed notes). `id` is stable; the client remembers the last id a player has seen and highlights newer ones. Plain language, no internal names.",
   "entries": [
     {
+      "id": "2026-10-15",
+      "date": "2026-10-15",
+      "title": "Auto-attack keeps to your target, and you can shoot on the run",
+      "items": [
+        "Your auto-attack only hits the enemy you selected. Before, a shot could land on whatever was nearest the line, and arrows splashed onto the small enemies standing next to a big one.",
+        "Keep attacking while you move: your character turns at the hips to face the target and keeps shooting or swinging at it, whichever way you run. Run straight away and you backpedal.",
+        "You can get 10 wrong passwords before an account locks for a few minutes (it was 5)."
+      ]
+    },
+    {
       "id": "2026-10-14-vharlen",
       "date": "2026-10-14",
       "title": "Expansion: Vharlen, the Burning Isle",

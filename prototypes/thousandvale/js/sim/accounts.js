@@ -8,8 +8,9 @@
 // deletes that token. A guest cannot log out (there would be no way back in). Changing a password or using a
 // reset code ends every other session.
 //
-// The reset stub sends no email: the one-hour code goes to the ADMIN page (server/admin.mjs) and the owner
-// passes it on; the server log records only that a reset was asked for.
+// A reset code lasts an hour. When the server has a `mailer` (server/mail.mjs, SendGrid) and the account has an
+// email, the code is emailed to it. It ALSO always goes to the ADMIN page (server/admin.mjs), so an account with no
+// email can still be helped by the owner; the server log records only that a reset was asked for.
 //
 //   const A = createAccounts({ store, hasher, verifyHuman, wallNow, log, filter, sendAll, kickChar, counters })
 //   A.handle(s, m)            the `account {op}` message (docs/protocol.md §16.1)
@@ -21,8 +22,8 @@ import { sha256Hex, randomHex } from './sha256.js';
 
 export const ACCOUNT_OPS = Object.freeze(['claim', 'login', 'logout', 'password', 'resetAsk', 'reset', 'info', 'peek', 'adopt']);
 export const LOGIN_LIMITS = Object.freeze({
-  ipFails: 10, ipWindowMs: 10 * 60000,          // failed logins from one address
-  userFails: 5, userWindowMs: 15 * 60000,       // failed logins on one username
+  ipFails: 20, ipWindowMs: 10 * 60000,          // failed logins from one address (above userFails, so it never trips first)
+  userFails: 10, userWindowMs: 15 * 60000,      // failed logins on one username (owner 2026-10-15: 5 was too strict)
   resetAsks: 3, resetWindowMs: 3600000,         // reset requests from one address
   resetMs: 3600000,                             // a reset code lasts an hour
 });
@@ -52,7 +53,7 @@ export function createLimiter(now) {
   };
 }
 
-export function createAccounts({ store, hasher = null, verifyHuman = null, wallNow, log = () => {}, filter = null, sendAll = () => {}, kickChar = () => {}, counters = {}, trustIps = [], charLimit = 20 }) {
+export function createAccounts({ store, hasher = null, mailer = null, verifyHuman = null, wallNow, log = () => {}, filter = null, sendAll = () => {}, kickChar = () => {}, counters = {}, trustIps = [], charLimit = 20 }) {
   const limiter = createLimiter(wallNow);
   const L = LOGIN_LIMITS;
   const resetLog = [];             // { at, username, email, code, until } for the admin page (last 50)
@@ -154,7 +155,10 @@ export function createAccounts({ store, hasher = null, verifyHuman = null, wallN
       }
       case 'resetAsk': {
         if (s.state !== 'anon' && s.state !== 'authed') return 'order';
-        const said = { ok: true, msg: 'If that account exists, a reset code has been sent to the game\'s keeper. Ask them for it; it works for one hour.' };
+        // one answer whatever happened, so it never says whether a username exists or has an email
+        const said = { ok: true, msg: mailer
+          ? 'If that account has an email address, a reset code is on its way to it (check your spam folder). It works for one hour. No email on the account? Ask the game\'s admin for the code.'
+          : 'This server cannot send email. Ask the game\'s admin for your reset code; it works for one hour.' };
         if (limited(s) && limiter.over('reset:' + (s.ip || '?'), L.resetAsks, L.resetWindowMs)) return fail(s, op, 'tooManyLogins');
         limiter.hit('reset:' + (s.ip || '?'));
         const username = cleanUsername(m.user);
@@ -166,7 +170,14 @@ export function createAccounts({ store, hasher = null, verifyHuman = null, wallN
         const a = await store.accountInfo(info.account);
         resetLog.push({ at: wallNow(), account: info.account, username: a ? a.username : username, email: a ? a.email : null, code, until });
         while (resetLog.length > 50) resetLog.shift();
-        log('password reset asked', { account: info.account });     // the code itself goes only to the admin page
+        log('password reset asked', { account: info.account });     // the code itself goes only to the admin page and the email
+        if (mailer && a && a.email) {
+          const who = a.username || username;
+          mailer.send({ to: a.email, subject: 'Your Thousandvale password reset code',
+            text: `Someone (hopefully you) asked to reset the password for the Thousandvale account "${who}".\n\nYour reset code is: ${code}\n\nOn the title screen choose Log in, then "Forgot your password?", and enter this code with a new password. It works for one hour.\n\nIf you did not ask for this, ignore this email; your password has not changed.` })
+            .then(() => { counters.resetMails = (counters.resetMails || 0) + 1; log('reset code emailed', { account: info.account }); },
+              err => log('reset email failed', { account: info.account, err: String(err && err.message) }));
+        }
         return reply(s, op, said);
       }
       case 'reset': {

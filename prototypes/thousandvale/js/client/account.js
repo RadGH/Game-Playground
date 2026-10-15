@@ -1,5 +1,5 @@
 // Accounts (M3, protocol §16.1): the title screen's "New adventurer" (a guest, no questions) and "Log in" tabs,
-// "Forgot password" (a code from the game's keeper — no email is sent), your characters when this browser already
+// "Forgot password" (a code emailed to the account's address, or from the game's admin when it has none), your characters when this browser already
 // has an account, the Privacy link; and in the game the Account window: claim a guest (username, password,
 // optional email), change the password, log out. Turnstile only when the server asks (welcome.human).
 // DOM only; checks in social-core.js; the connection itself is main.js's (startNet / js/net/client.js).
@@ -95,7 +95,7 @@ export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onPick, 
   T.forgot.onclick = () => { T.reset.hidden = !T.reset.hidden; if (!T.reset.hidden) drawReset(); };
   function drawReset() {
     const u = h('input', { maxLength: 20, placeholder: 'Username', value: T.user.value, autocomplete: 'username' });
-    const code = h('input', { maxLength: 16, placeholder: 'Code from the keeper' });
+    const code = h('input', { maxLength: 16, placeholder: 'Reset code' });
     const p1 = h('input', { type: 'password', maxLength: 128, placeholder: 'New password (8+ characters)', autocomplete: 'new-password' });
     const msg = h('p.note');
     const ask = async () => {
@@ -109,7 +109,7 @@ export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onPick, 
       catch (err) { msg.textContent = err.message; }
     };
     T.reset.replaceChildren(
-      h('p.tiny-left', {}, 'The game sends no email. Ask for a code, then ask the game\'s keeper for it — it works for one hour.'),
+      h('p.tiny-left', {}, 'Ask for a reset code. If your account has an email address, the code is emailed to you; if not, the game\'s admin can give it to you. It works for one hour.'),
       h('div.row', {}, u, h('button.ghost', { type: 'button', onclick: ask }, 'Ask for a code')),
       h('div.row', {}, code), h('div.row', {}, p1),
       h('button.ghost.wide', { type: 'button', onclick: set }, 'Set the new password'), msg);

@@ -133,6 +133,7 @@
     "rings": {
       "id": "rings",
       "name": "Burning Rings",
+      "say": "Rings of fire bloom around you — step into the middle of one!",
       "every": [
         13,
         16

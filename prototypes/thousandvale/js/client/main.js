@@ -1209,6 +1209,9 @@ function frame(now) {
           it.mx = 0; it.mz = 0; S.stats.edgeHolds = (S.stats.edgeHolds || 0) + 1;
           WS.whenReady(ahead.x, ahead.z);
           if (!S.edgeToastAt || performance.now() - S.edgeToastAt > 4000) { S.edgeToastAt = performance.now(); hud.toast('The land ahead is still loading…', 'info'); }
+        } else if (!WS.terrain.zoneAt(ahead.x, ahead.z) && (!S.coastToastAt || performance.now() - S.coastToastAt > 6000)) {
+          // 2026-10-14: past the last zone is the continent's wild coast, falling to the sea (tools/lib/world-core.mjs)
+          S.coastToastAt = performance.now(); hud.toast('The land falls away to the sea here. Ships sail from the harbours.', 'info');
         }
       }
       const inp = S.predictor.apply(it);

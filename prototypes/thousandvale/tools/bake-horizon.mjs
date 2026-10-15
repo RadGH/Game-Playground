@@ -14,13 +14,14 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { deflateRawSync } from 'node:zlib';
 import { loadWorld } from './bake-zone.mjs';
-import { heightRange } from './lib/world-core.mjs';
+import { heightRange, continentAt } from './lib/world-core.mjs';
 import { parseTerrain, predictHeights } from '../js/rules/terrain-read.js';
 import { HORIZON_MAGIC, HORIZON_VERSION, parseHorizon } from '../js/rules/horizon-read.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const WORLD_DIR = join(HERE, '..', 'data', 'world'), ZONES_DIR = join(HERE, '..', 'data', 'zones');
 export const HORIZON_STEP = 32;
+const BEACH = 4;                 // World Forge BIOMES index (bake-zone.mjs uses the same number)
 
 export function bakeHorizon() {
   const { json: W, macro: m, ref } = loadWorld();
@@ -58,6 +59,8 @@ export function bakeHorizon() {
     else if (m.water[mi] === 2) { const lv = lakeLevel.get(mi) ?? 0; top = lv; g = Math.min(g, lv - 2.5); }
     hq[k] = q(g); wq[k] = Number.isNaN(top) ? 0 : Math.max(1, q(top));
     biome[k] = m.biome[ref.warpedIndex(wx, wz)];
+    // 2026-10-14 continents: a new coast (land the sea has risen around) gets a beach, not grass to the waterline
+    if (top !== 0 && g < 6 && !continentAt(wx, wz) && m.water[mi] !== 2) biome[k] = BEACH;
   }
   const meta = {
     name: 'horizon', width, height, step: HORIZON_STEP, zoneMetres: ZM, origin: { x: 0, z: 0 }, heightMin, heightMax,

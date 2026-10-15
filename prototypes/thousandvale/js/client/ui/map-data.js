@@ -100,6 +100,7 @@ export function buildMapModel(raw = {}) {
     provinces: [], zones: new Map(), settlements: [], rivers: [], roads: [], pois: [],
     npcs: new Map(), vigs: new Map(), camps: [], rares: new Map(), sites: new Map(), quests: new Map(), sheetOf: new Map(), worldOfSheet: new Map(),
     playable: null,
+    playables: [],         // 2026-10-14: every province you can walk (each its own continent); `playable` is the first
   };
   // which world zones each province sheet uses
   const sheetZone = new Map();          // world key -> { prov, id, sheet zone }
@@ -109,37 +110,45 @@ export function buildMapModel(raw = {}) {
       sheetZone.set(wk, { prov, id, z: sheet?.zones?.[id] || null, sheet });
       model.sheetOf.set(wk, id); model.worldOfSheet.set(id, wk);
     }
-    if (!model.playable) model.playable = { id: prov, name: sheet?.name || titleCase(prov), worldProvince: p.worldProvince, block: p.block, size: p.size, band: sheet?.band || null, capital: sheet?.capital || null };
+    const entry = { id: prov, name: sheet?.name || titleCase(prov), worldProvince: p.worldProvince, block: p.block, size: p.size, band: sheet?.band || null, capital: sheet?.capital || null };
+    model.playables.push(entry);
+    if (!model.playable) model.playable = entry;
   }
+  // 2026-10-14 (owner: each built province is its own continent): the world outside the playable blocks is SEA
+  // (tools/lib/world-core.mjs CONTINENTS) — no other provinces, towns, roads or rivers are drawn there
+  const inPlayable = (x, z) => model.playables.some(q => x >= q.block[0] * zm && x < (q.block[0] + q.size[0]) * zm && z >= q.block[1] * zm && z < (q.block[1] + q.size[1]) * zm);
+  model.inPlayable = inPlayable;
   // provinces of the whole world
-  for (const pr of world.provinces || []) {
-    const playable = model.playable && pr.id === model.playable.worldProvince;
-    let sx = 0, sz = 0, n = 0;
-    for (const k of pr.zones || []) { const b = zoneBoundsOf(k); if (b) { sx += b.minX + zm / 2; sz += b.minZ + zm / 2; n++; } }
-    model.provinces.push({ id: pr.id, name: playable ? model.playable.name : pr.name, worldName: pr.name, biome: pr.biome, danger: pr.danger, race: pr.race, zones: pr.zones || [], cx: n ? sx / n : 0, cz: n ? sz / n : 0, playable });
+  // the provinces drawn: the playable ones, each centred on its own block (labels sit on the continent)
+  for (const q of model.playables) {
+    const pr = (world.provinces || []).find(r => r.id === q.worldProvince) || {};
+    const zones = Object.values(pm[q.id]?.map || {});
+    model.provinces.push({ id: q.id, name: q.name, worldName: pr.name || q.name, biome: pr.biome, danger: pr.danger, race: pr.race, zones,
+      cx: (q.block[0] + q.size[0] / 2) * zm, cz: (q.block[1] + q.size[1] / 2) * zm, playable: true, band: q.band });
   }
   // zones (every world zone: province, land share; the playable ones get the sheet's name and band)
   for (const z of world.zones || []) {
     const b = zoneBoundsOf(z.id); if (!b) continue;
     const s = sheetZone.get(z.id);
     model.zones.set(z.id, {
-      key: z.id, zx: b.zx, zy: b.zy, bounds: b, province: z.province, land: z.land ?? 1,
+      key: z.id, zx: b.zx, zy: b.zy, bounds: b, province: s ? s.prov : null, land: s ? (z.land ?? 1) : 0,
       name: s?.z?.name || null, band: s?.z?.band || null, archetype: s?.z?.archetype || null, town: s?.z?.town || null,
       dungeon: s?.z?.dungeon || null, sheetId: s?.id || null, playable: !!s,
     });
   }
   for (const [wk, s] of sheetZone) if (!model.zones.has(wk)) {
     const b = zoneBoundsOf(wk);
-    model.zones.set(wk, { key: wk, zx: b.zx, zy: b.zy, bounds: b, province: model.playable?.worldProvince, land: 1, name: s.z?.name || null, band: s.z?.band || null, archetype: s.z?.archetype || null, town: s.z?.town || null, dungeon: s.z?.dungeon || null, sheetId: s.id, playable: true });
+    model.zones.set(wk, { key: wk, zx: b.zx, zy: b.zy, bounds: b, province: s.prov, land: 1, name: s.z?.name || null, band: s.z?.band || null, archetype: s.z?.archetype || null, town: s.z?.town || null, dungeon: s.z?.dungeon || null, sheetId: s.id, playable: true });
   }
   // settlements of the world (names inside the playable province come from its zone files below)
   for (const n of world.nodes || []) {
-    if (sheetZone.has(n.zone)) continue;
+    if (sheetZone.has(n.zone) || !inPlayable(n.x, n.z)) continue;
     if (n.type === 'settlement') model.settlements.push({ name: n.name, kind: n.kind, size: n.size || 1, x: n.x, z: n.z, zone: n.zone });
   }
   // rivers and roads, thinned for drawing
-  for (const r of world.rivers || []) { if (r.pts?.length > 1) { const pts = simplify(r.pts, 10); model.rivers.push({ id: r.id, name: r.name || null, pts, bbox: bboxOf(pts), cls: r.pts[0][3] || 1 }); } }
-  for (const r of world.roads || []) { if (r.pts?.length > 1) { const pts = simplify(r.pts, 6); model.roads.push({ id: r.id, cls: r.class || 'road', width: r.width || 4, pts, bbox: bboxOf(pts) }); } }
+  const keep = pts => pts.some(p => inPlayable(p[0], p[1]));
+  for (const r of world.rivers || []) { if (r.pts?.length > 1 && keep(r.pts)) { const pts = simplify(r.pts, 10); model.rivers.push({ id: r.id, name: r.name || null, pts, bbox: bboxOf(pts), cls: r.pts[0][3] || 1 }); } }
+  for (const r of world.roads || []) { if (r.pts?.length > 1 && keep(r.pts)) { const pts = simplify(r.pts, 6); model.roads.push({ id: r.id, cls: r.class || 'road', width: r.width || 4, pts, bbox: bboxOf(pts) }); } }
 
   // the playable province: zone sites, sheet names, placements
   for (const [wk, s] of sheetZone) {

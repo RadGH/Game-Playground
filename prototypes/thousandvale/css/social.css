@@ -36,6 +36,9 @@ input.text:focus, .tvp-body input:focus, .tvp-body textarea:focus, .tvp-body sel
 .signed { margin: 0 0 10px; color: var(--good); font-size: 14px; }
 .signed:empty { display: none; }
 .card .reset { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--edge); }
+/* owner 2026-10-15: "Create an account" replaces the log-in fields while it is open (js/client/account.js) */
+#signin.creating > :not(#create) { display: none; }
+#signin.creating > #create { margin-top: 0; padding-top: 0; border-top: 0; }
 .card .reset .row { margin-bottom: 6px; }
 .card .reset button.ghost { white-space: nowrap; }
 .mychars .chips .chip.char { color: var(--ink); }

@@ -59,11 +59,11 @@ export function guestMovedText(r) {
 }
 
 /** @param o.guestKey  { get(), clear() } the guest key this browser held before a sign-in (main.js sets it aside) */
-export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onPick, onLoggedOut, onTitleStep = null, guestKey = null }) {
+export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onPick, onLoggedOut, onTitleStep = null, guestKey = null, onGuest = null }) {
   const net = () => getNet();
   const T = {
     tabNew: $('tab-new'), tabLogin: $('tab-login'), newForm: $('login'), signin: $('signin'), user: $('signin-user'), pass: $('signin-pass'),
-    note: $('signin-note'), go: $('signin-go'), forgot: $('signin-forgot'), reset: $('reset'), mine: $('mychars'), chips: $('char-chips'), who: $('signin-who'),
+    note: $('signin-note'), go: $('signin-go'), forgot: $('signin-forgot'), reset: $('reset'), createLink: $('signin-create'), create: $('create'), mine: $('mychars'), chips: $('char-chips'), who: $('signin-who'),
   };
 
   let lastChars = [], lastUser = null;       // the title's character list, for redraws (play-test 2)
@@ -93,6 +93,47 @@ export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onPick, 
     } finally { T.go.disabled = false; T.go.textContent = 'Log in'; }
   });
   T.forgot.onclick = () => { T.reset.hidden = !T.reset.hidden; if (!T.reset.hidden) drawReset(); };
+  // owner 2026-10-15: "Can we add a create account link to the log in page?" An account is a guest that is claimed at
+  // once: `onGuest` connects this browser's guest (its characters come along, if it has any — a browser logged in to
+  // another account gets a fresh guest), then the claim names it.
+  // the create form stands in for the log-in fields while it is open (css/social.css #signin.creating)
+  const creating = on => { T.create.hidden = !on; T.signin.classList.toggle('creating', on); if (on) { T.reset.hidden = true; drawCreate(); } else T.user.focus(); };
+  if (T.createLink && T.create) T.createLink.onclick = () => creating(true);
+  function drawCreate() {
+    const user = h('input', { maxLength: 20, placeholder: 'Username', value: T.user.value.trim(), autocomplete: 'username' });
+    const p1 = h('input', { type: 'password', maxLength: 128, placeholder: 'Password (8+ characters)', autocomplete: 'new-password' });
+    const p2 = h('input', { type: 'password', maxLength: 128, placeholder: 'The same password again', autocomplete: 'new-password' });
+    const email = h('input', { type: 'email', maxLength: 120, placeholder: 'Email (optional, for password resets)', autocomplete: 'email' });
+    const hc = h('div.human-check', { hidden: true });
+    const msg = h('p.note'), go = h('button.primary.wide', { type: 'button' }, 'Create account');
+    const done = t => { go.disabled = false; go.textContent = 'Create account'; if (t) msg.textContent = t; };
+    go.onclick = async () => {
+      const bad = claimCheck({ user: user.value.trim(), pass: p1.value, pass2: p2.value, email: email.value.trim() });
+      if (bad) { msg.className = 'note'; msg.textContent = bad; return; }
+      if (typeof onGuest !== 'function') { msg.textContent = 'Accounts are not available here.'; return; }
+      msg.className = 'note'; msg.textContent = ''; go.disabled = true; go.textContent = 'Creating…';
+      let n;
+      try { n = await onGuest(user.value.trim()); } catch (err) { return done(err.message || 'Cannot reach the game server.'); }
+      if (!n) return done('Cannot reach the game server.');
+      let human;
+      if (n.humanCheck) { try { human = await humanToken(hc, n.humanCheck.siteKey); } catch (err) { return done(err.message); } }
+      const r = await new Promise(res => {
+        const off = n.on('accountR', m => { if (m.op === 'claim') { off(); clearTimeout(t); res(m); } });
+        const t = setTimeout(() => { off(); res({ ok: false, msg: 'The server did not answer.' }); }, 15000);
+        n.accountOp('claim', { user: user.value.trim(), pass: p1.value, email: email.value.trim() || undefined, human });
+      });
+      if (!r.ok) return done(r.msg || ACCOUNT_WHY[r.why] || 'That did not work.');
+      done(); creating(false); T.pass.value = ''; T.user.value = r.username || user.value.trim();
+      showChars(n.chars || [], r.username || n.username);
+      front();
+    };
+    T.create.replaceChildren(
+      h('p.step-title', {}, h('b', {}, 'Create an account')),
+      h('p.tiny-left', {}, 'Pick a username and password to log in from any browser. Any guest characters on this browser come with you.'),
+      h('div.row', {}, user), h('div.row', {}, p1), h('div.row', {}, p2), h('div.row', {}, email), hc, msg, go,
+      h('p.tiny', {}, 'Have an account? ', h('button.linkish', { type: 'button', onclick: () => creating(false) }, 'Log in')));
+    user.focus();
+  }
   function drawReset() {
     const u = h('input', { maxLength: 20, placeholder: 'Username', value: T.user.value, autocomplete: 'username' });
     const code = h('input', { maxLength: 16, placeholder: 'Reset code' });

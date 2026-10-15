@@ -287,7 +287,7 @@ const guild = createGuild({ net: () => S.net, hud, chat, me });
 const mail = createMail({ net: () => S.net, hud, bag, me, inTown: () => S.room?.kind === 'town' });
 const callboard = createCallboard({ net: () => S.net, hud, me });
 const account = createAccount({ net: () => S.net, hud, me, guestKey: { get: () => { try { return localStorage.getItem(tokenKey() + '.guest'); } catch { return null; } }, clear: () => { try { localStorage.removeItem(tokenKey() + '.guest'); } catch {} } }, netOpts: () => ({ mode: netMode(), url: q.get('server') || undefined, build: q.get('build') || 'dev' }),
-  onLogin: (user, pass) => loginFromTitle(user, pass), onPick: ch => enterWorld(ch), onLoggedOut: () => backToTitle(), onTitleStep: step => titleStep(step) });
+  onLogin: (user, pass) => loginFromTitle(user, pass), onGuest: name => guestForAccount(name), onPick: ch => enterWorld(ch), onLoggedOut: () => backToTitle(), onTitleStep: step => titleStep(step) });
 const help = createHelp();
 loadZoneNames();
 const ui = createUiSuite({ net: () => S.net, hud, room: () => S.room, actors, objects, worldUi, social, chat, panels: { friends: friends.panel, guild: guild.panel, mail: mail.panel, callboard: callboard.panel },
@@ -518,6 +518,15 @@ async function loginFromTitle(user, pass) {
     const t = setTimeout(() => { off(); rej(new Error('The server did not answer.')); }, 15000);
     net.ready.then(n => { clearTimeout(t); off(); res(n.chars); });
   });
+}
+/** Title "Create an account": this browser's guest, connected (a fresh one when the page is logged in to another account). */
+async function guestForAccount(name) {
+  if (S.net && S.net.claimed) { dropNet(); TOKENS().set(null); }
+  const net = startNet({ guestName: name });
+  const ok = await Promise.race([net.ready.then(() => true, () => false), new Promise(r => setTimeout(() => r(false), 15000))]);
+  if (!ok) { if (!net.claimed) dropNet(); return null; }
+  if (net.claimed) throw new Error('This browser is already logged in to an account.');
+  return net;
 }
 /** Logged out (or the account was): back to a clean title screen. */
 function backToTitle() { saveTitleGear(); try { S.net?.close(); } catch {} location.href = location.pathname; }

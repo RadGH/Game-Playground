@@ -6,7 +6,8 @@ import { memoryTokenStore } from '../../js/net/client.js';
 import { makeClient } from './helpers.js';
 import { m3Server, settle, joinAs, run, waitP, until } from './m3-helpers.js';
 import { hashPassword, verifyPassword, TEST_COST } from '../../server/passwords.js';
-import { cleanUsername, cleanEmail } from '../../js/sim/accounts.js';
+import { cleanUsername, cleanEmail, LOGIN_LIMITS } from '../../js/sim/accounts.js';
+import { mailerFromEnv } from '../../server/mail.mjs';
 
 test('scrypt hashes: salted, verify, refuse wrong / malformed; never the password itself', async () => {
   const h1 = await hashPassword('hunter22hunter', TEST_COST), h2 = await hashPassword('hunter22hunter', TEST_COST);
@@ -112,7 +113,7 @@ test('password change ends other sessions; reset stub: code only on the admin pa
   a.close(); b.close(); c.close(); e.close(); await srv.stop();
 });
 
-test('login rate limits: 5 wrong passwords lock the username for a while, the right one too; then it opens', async () => {
+test('login rate limits: userFails wrong passwords (10) lock the username for a while, the right one too; then it opens', async () => {
   const { srv, clock } = m3Server();
   await srv.ready;
   srv.world.gateway.accounts.limiter;     // exists
@@ -120,19 +121,62 @@ test('login rate limits: 5 wrong passwords lock the username for a while, the ri
   let r = null; a.on('accountR', m => { r = m; });
   a.claim('locked', 'rightpass1'); await settle(clock, () => r);
   const tries = [];
-  for (let i = 0; i < 7; i++) {
-    const x = makeClient(srv, clock, { login: { user: 'locked', pass: i === 6 ? 'rightpass1' : 'wrongpass' + i }, ip: '10.0.0.' + (i + 1) });
+  const N = LOGIN_LIMITS.userFails;
+  assert.ok(N >= 10, 'owner 2026-10-15: at least 10 tries before a lock');
+  assert.ok(LOGIN_LIMITS.ipFails > N, 'one address may make all N tries on a username without the address limit tripping first');
+  for (let i = 0; i < N + 2; i++) {
+    const x = makeClient(srv, clock, { login: { user: 'locked', pass: i === N + 1 ? 'rightpass1' : 'wrongpass' + i }, ip: '10.0.0.' + (i + 1) });
     const xs = []; x.on('accountR', m => xs.push(m));
     await settle(clock, () => xs.length);
     tries.push(xs[0].why); x.close();
   }
-  assert.deepEqual(tries.slice(0, 5), ['auth', 'auth', 'auth', 'auth', 'auth']);
-  assert.equal(tries[5], 'tooManyLogins'); assert.equal(tries[6], 'tooManyLogins', 'even the right password waits');
+  assert.deepEqual(tries.slice(0, N), Array(N).fill('auth'));
+  assert.equal(tries[N], 'tooManyLogins'); assert.equal(tries[N + 1], 'tooManyLogins', 'even the right password waits');
   await run(clock, 16 * 60000, 1000);
   const ok = makeClient(srv, clock, { login: { user: 'locked', pass: 'rightpass1' } });
   await settle(clock, () => ok.status === 'select');
   assert.equal(ok.claimed, true);
   a.close(); ok.close(); await srv.stop();
+});
+
+test('password reset by email: an account with an email gets the code mailed; one without does not; same answer for both', async () => {
+  const sent = [];
+  const mailer = { send: async m => { sent.push(m); } };
+  const { srv, clock } = m3Server({ worldOpts: { mailer } });
+  await srv.ready;
+  const a = await joinAs(srv, clock, 'Mailed');
+  const ar = []; a.on('accountR', m => ar.push(m));
+  a.claim('mailed', 'firstpass1', 'mailed@example.com'); await settle(clock, () => ar.length);
+  assert.equal(ar[0].ok, true, JSON.stringify(ar[0]));
+  const b = await joinAs(srv, clock, 'Unmailed');
+  const br = []; b.on('accountR', m => br.push(m));
+  b.claim('unmailed', 'firstpass1'); await settle(clock, () => br.length);
+  const c = makeClient(srv, clock, { tokenStore: memoryTokenStore('0'.repeat(64)) });
+  await settle(clock, () => c.status === 'select');
+  const cr = []; c.on('accountR', m => cr.push(m));
+  c.accountOp('resetAsk', { user: 'mailed' }); await settle(clock, () => cr.length);
+  c.accountOp('resetAsk', { user: 'unmailed' }); await settle(clock, () => cr.length >= 2);
+  await run(clock, 50);
+  assert.equal(cr[0].msg, cr[1].msg, 'never says whether an account has an email');
+  assert.match(cr[0].msg, /email/i); assert.doesNotMatch(cr[0].msg, /keeper/i);
+  assert.equal(sent.length, 1, 'only the account with an email is mailed');
+  assert.equal(sent[0].to, 'mailed@example.com');
+  const code = srv.world.gateway.admin.resets().find(r => r.username === 'mailed').code;
+  assert.ok(sent[0].text.includes(code), 'the email carries the same code the admin page shows');
+  assert.ok(!JSON.stringify(cr).includes(code), 'never in the reply');
+  a.close(); b.close(); c.close(); await srv.stop();
+});
+
+test('mailerFromEnv: off without a key; posts to SendGrid with the key and sender', async () => {
+  assert.equal(mailerFromEnv({}), null);
+  const calls = [];
+  const m = mailerFromEnv({ RGS_SENDGRID_API_KEY: 'k1', RGS_MAIL_FROM: 'Games <noreply@x.test>' }, { fetchFn: async (url, o) => { calls.push({ url, o }); return { ok: true }; } });
+  await m.send({ to: 'p@x.test', subject: 's', text: 't' });
+  assert.equal(calls[0].url, 'https://api.sendgrid.com/v3/mail/send');
+  assert.equal(calls[0].o.headers.authorization, 'Bearer k1');
+  const body = JSON.parse(calls[0].o.body);
+  assert.deepEqual(body.from, { name: 'Games', email: 'noreply@x.test' });
+  assert.equal(body.personalizations[0].to[0].email, 'p@x.test');
 });
 
 test('bans: a banned account is refused at the door; an IP ban refuses new sockets from that address', async () => {

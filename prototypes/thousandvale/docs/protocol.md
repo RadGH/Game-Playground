@@ -793,18 +793,20 @@ new kick codes. Server files: `js/sim/accounts.js`, `chat.js`, `chatfilter.js`, 
 ### 16.1 Accounts
 - A guest is still made with no questions; its 256-bit token lives in the browser, only the SHA-256 on the server.
 - **Claim** (`account {op:'claim', user, pass, email?, human?}`): username 3–20 of `A-Z a-z 0-9 . _ -` (unique,
-  case-insensitive, passes the name filter), password 8–128, email optional (used only by the reset stub). The
+  case-insensitive, passes the name filter), password 8–128, email optional (used only to email a password reset code). The
   password is hashed with **scrypt** (N=2^15, r=8, p=1, salted, `scrypt$N$r$p$salt$hash`) off the game thread. With
   Turnstile on (`welcome.human`), send its token as `human`, like `guest`. Answer `accountR {op:'claim', ok, username}`.
 - **Login** from any browser: `connect({ login: {user, pass} })` (or `account {op:'login'}` before `guest`/`auth`). A
   good login answers `authed {account, token, claimed:true, username}` with a NEW session token — store it like the
   guest token. A wrong one answers `accountR {op:'login', ok:false, why:'auth'}` and makes no guest.
-- **Limits**: 5 wrong passwords on one username in 15 min, or 10 from one address in 10 min → `tooManyLogins` (the
+- **Limits** (`LOGIN_LIMITS`): 10 wrong passwords on one username in 15 min, or 20 from one address in 10 min → `tooManyLogins` (the
   right password waits too). The `account` message itself is 0.5/s, burst 4.
 - **Logout** (`account {op:'logout'}`, claimed accounts only — a guest gets `claimFirst`): that browser's token is
   deleted; the character is kicked from the world (`kick {code:'loggedOut'}`); `net.logout()` clears the stored token.
-- **Password** `{op:'password', old, pass}` and **reset** `{op:'resetAsk', user}` → (the one-hour code shows on the
-  ADMIN page; no email is sent; the answer never says whether the username exists) → `{op:'reset', user, code, pass}`.
+- **Password** `{op:'password', old, pass}` and **reset** `{op:'resetAsk', user}` → (the one-hour code is emailed to
+  the account's address when it has one and the server has a SendGrid key — `server/mail.mjs`, `TV_SENDGRID_API_KEY` or
+  `RGS_SENDGRID_API_KEY`, sender `TV_MAIL_FROM` / `RGS_MAIL_FROM` — and always shows on the ADMIN page; the answer never
+  says whether the username exists or has an email) → `{op:'reset', user, code, pass}`.
   Both end every other session.
 - **Bans** (admin): a banned account gets `refuse {code:'banned'}` at `auth`/`login`; a banned address (stored as a
   salted hash) is refused at `hello`.

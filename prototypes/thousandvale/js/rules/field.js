@@ -308,6 +308,11 @@ export function attachField(room, { terrain = null, safeZones = [] } = {}) {
       if (traits.momentum) mult *= 1 + Math.min(2, unit?.combo || 0) * 0.08;
       let behind = false;
       if (traits.backstab) {
+        // Round 11 finding (left as Farhold has it, reported to the lead): this measures the back against "from the
+        // target toward the attacker" — the way a body FACES when it is fighting you — so a dagger hit on a monster that
+        // is looking at you counts as a stab in the back (x2.2 and a bleed), and one from behind does not. Every dagger
+        // class is balanced on it (solo, the monster always faces you); turning it round halves solo dagger damage and
+        // needs a dagger re-tune with it, so it is not changed here.
         const away = Math.atan2(-dx, -dz);
         const delta = Math.abs(((away - (e.facing || 0) + Math.PI * 3) % (Math.PI * 2)) - Math.PI);
         behind = delta < 0.87;

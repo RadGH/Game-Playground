@@ -26,7 +26,16 @@ const P = f => new URL(f, ROOT);
 const readJ = f => JSON.parse(readFileSync(P(f), 'utf8'));
 /** This province's copy of a per-province data file (js/sim/province-files.js), or null. */
 const data = thing => provinceDataSync(readJ, PROV, thing);
-export const NEED_CAP = 4;
+/**
+ * Round 11 (World, live #30 / #35: "kill 6 fen croakers — I found 3 … killed 4 dust flitters, none left … enough enemies
+ * for several players"). A kill / collect step's circle must hold `needFor(count)` of its monster when full — enough for
+ * two players on the step at once — and the quest camps added for it come back in QUEST_RESPAWN_MIN minutes (a camp's
+ * usual 1.5–2.5). (The old rule was min(count, 4).)
+ */
+export const needFor = count => { const c = Math.max(1, count | 0 || 1); return Math.max(c + 4, 2 * c); };
+export const QUEST_RESPAWN_MIN = Object.freeze([1, 1.5]);
+/** @deprecated round 11 — kept so an old import does not break; the rule is needFor(). */
+export const NEED_CAP = Infinity;
 
 const quiet = async fn => { const q = console.log; console.log = () => {}; try { return await fn(); } finally { console.log = q; } };
 const zoneOffset = wid => { const [, zx, zy] = /^z(\d+)_(\d+)$/.exec(wid).map(Number); return { ox: zx * 2048, oz: zy * 2048 }; };
@@ -102,34 +111,87 @@ async function main() {
   }
   let L = (await quiet(() => loadLayouts([PROV]))).layouts[0];
   let book = createQuestBook({ layout: L, zones: L.zones, rares: L.rares, jobs: null, rng: () => 0.3 });
-  const added = {}, addedW = [], report = [];
+  const HUB = readJ(`data/provinces/${PROV}-routes.json`).hub || { x: Infinity, z: Infinity };
+  const added = {}, report = [];
+  let addedW = [];
+  const L0 = L, kOf = new Map();       // L0: the world with no quest camps (the roadside champions are chosen from it)
+  // round 11 (World): several passes — a step with no `near` is pointed at the BEST area of its monster, and adding camps
+  // can change which area that is; each pass reloads the world with the camps so far and tops up whatever is still short
+  for (let pass = 0; pass < 4; pass++) {
+  let short = 0;
   for (const d of book.defs.values()) d.steps.forEach((st, i) => {
     const type = stepType(st); if (!type || !st.at) return;
-    const reg = regionOf(st), need = Math.min(NEED_CAP, st.count || 1);
+    const reg = regionOf(st), need = needFor(st.count || 1);
     let have = headsIn(L.camps, type, reg) + headsIn(addedW, type, reg);      // copies made for an earlier step count too
-    if (have >= need) return;
+    const markerEmpty = !!st.nearAt && !headsIn(L.camps, type, st.at) && !headsIn(addedW, type, st.at);
+    if (have >= need && !markerEmpty) return;
     // copy a camp of that type the server already spawns in the circle (a placed camp, a vignette's, a ring camp)
-    const recs = L.camps.filter(c => c.type === type && !c.encounter && Math.hypot(c.x - reg.x, c.z - reg.z) <= reg.r)
+    let recs = L.camps.filter(c => c.type === type && !c.encounter && Math.hypot(c.x - reg.x, c.z - reg.z) <= reg.r)
       .sort((a, b) => Math.hypot(a.x - st.at.x, a.z - st.at.z) - Math.hypot(b.x - st.at.x, b.z - st.at.z));
-    if (!recs.length) { report.push(`${d.id}#${i} ${type}: nothing of that type in its circle to copy`); return; }
+    // round 11 (World, #31): a step moved next to the rest of its quest may name a monster nothing in that circle spawns —
+    // it gets a camp on the nearest PROVEN camp spot of any kind inside the circle (same ground the server already
+    // spawns on), at the level its own kind lives at elsewhere in the province (held to that spot's level +-1)
+    let foreign = false;
+    if (!recs.length) {
+      const own = L.camps.filter(c => c.type === type && !c.encounter).map(c => c.level || 1).sort((a, b) => a - b);
+      const lvl = own.length ? own[Math.floor(own.length / 2)] : null;
+      const centre = st.nearAt && Number.isFinite(st.nearAt.x) ? st.nearAt : reg;
+      recs = L.camps.filter(c => !c.encounter && !c.rank && !c.warband && !c.doorGuard && Math.hypot(c.x - reg.x, c.z - reg.z) <= reg.r)
+        .sort((a, b) => Math.hypot(a.x - centre.x, a.z - centre.z) - Math.hypot(b.x - centre.x, b.z - centre.z)).slice(0, 2)
+        .map(c => ({ ...c, level: lvl == null ? c.level : Math.max((c.level || 1) - 1, Math.min((c.level || 1) + 1, lvl)) }));
+      foreign = true;
+    }
+    if (!recs.length) { report.push(`${d.id}#${i} ${type}: nothing in its circle to copy`); return; }
     const from = have;
-    let k = 0;
-    while (have < need && k < 8) {
-      const c = recs[k % recs.length], cw = L.zoneOf(c.x, c.z), o = zoneOffset(cw);
-      const per = Math.min(2, need - have);
+    const kKey = d.id + '#' + i;
+    let k = kOf.get(kKey) || 0;
+    const k0 = k;
+    while (have < need && k - k0 < 12) {
+      // round 11: spread the copies round the camp they copy (12-24 m out, walkable, still inside the circle, not in a town)
+      // so a quest area is several small packs, not one heap that comes at you all at once
+      let c = recs[k % recs.length];
+      if (k >= recs.length && L.terrain && L.terrain.walkable) {
+        const ang = k * 2.39996, dist = 12 + (k % 3) * 6, x = c.x + Math.cos(ang) * dist, z = c.z + Math.sin(ang) * dist;
+        const okSpot = L.terrain.walkable(x, z) && !(L.terrain.waterAt && ((L.terrain.waterAt(x, z) || {}).depth || 0) > 0.3) && Math.hypot(x - reg.x, z - reg.z) <= reg.r && !(L.towns || []).some(t => Math.hypot(t.x - x, t.z - z) < (t.r || 60) + 20);
+        if (okSpot) c = { ...c, x, z };
+      }
+      const cw = L.zoneOf(c.x, c.z), o = zoneOffset(cw);
+      // stream C's starting-area rule (tests/E/living.test.js P26): solos and pairs within 400 m of the province hub
+      const per = Math.min(Math.hypot(c.x - HUB.x, c.z - HUB.z) < 420 ? 2 : 3, need - have);
       (added[cw] ||= []).push({ type: 'camp', id: `quest_${d.id}_${i}_${k}`, monster: type, with: null, level: [c.level || 1, c.level || 1], count: [per, per],
-        x: Math.round(c.x - o.ox), z: Math.round(c.z - o.oz), yaw: 0, radius: Math.min(8, c.radius || 6), quest: d.id, hunt: true });
+        x: Math.round(c.x - o.ox), z: Math.round(c.z - o.oz), yaw: 0, radius: Math.min(8, c.radius || 6), quest: d.id, hunt: true, respawnMin: QUEST_RESPAWN_MIN.slice(), ...(foreign ? { placedFor: 'round11-moved' } : {}) });
       addedW.push({ type, x: c.x, z: c.z, count: per });
       have += per; k++;
     }
-    report.push(`${d.id}#${i} ${type}: ${from} -> ${have} (need ${need})`);
+    kOf.set(kKey, k);
+    // a `near` step's marker (the place it names) must show the monster too (tests/E/playtest4-hunts S14): when none
+    // stands inside the marker circle, one small camp goes on the nearest proven camp spot inside it
+    if (st.nearAt && !headsIn(L.camps, type, st.at) && !headsIn(addedW, type, st.at)) {
+      const spot = L.camps.filter(c => !c.encounter && !c.rank && !c.warband && !c.doorGuard && Math.hypot(c.x - st.at.x, c.z - st.at.z) <= (st.at.r || 12) - 2)
+        .sort((a, b) => Math.hypot(a.x - st.at.x, a.z - st.at.z) - Math.hypot(b.x - st.at.x, b.z - st.at.z))[0];
+      const lvl = (recs[0] && recs[0].level) || (spot && spot.level) || 1;
+      if (spot) {
+        const cw = L.zoneOf(spot.x, spot.z), o = zoneOffset(cw);
+        (added[cw] ||= []).push({ type: 'camp', id: `quest_${d.id}_${i}_m`, monster: type, with: null, level: [lvl, lvl], count: [2, 2],
+          x: Math.round(spot.x - o.ox), z: Math.round(spot.z - o.oz), yaw: 0, radius: Math.min(6, spot.radius || 6), quest: d.id, hunt: true, respawnMin: QUEST_RESPAWN_MIN.slice(), placedFor: 'round11-marker' });
+        addedW.push({ type, x: spot.x, z: spot.z, count: 2 }); have += 2;
+      } else report.push(`${d.id}#${i} ${type}: no camp spot inside its marker`);
+    }
+    report.push(`${d.id}#${i} ${type}: ${from} -> ${have} (need ${need})${pass ? ' [pass ' + (pass + 1) + ']' : ''}`);
+    short++;
   });
+  if (!short) break;
+  for (const wid of Object.keys(mains)) writeFileSync(P(`data/vignettes/placements/${wid}.quest.json`), JSON.stringify({ zone: wid, terrainHash: mains[wid].terrainHash, placements: added[wid] || [] }) + '\n');
+  L = (await quiet(() => loadLayouts([PROV]))).layouts[0];
+  book = createQuestBook({ layout: L, zones: L.zones, rares: L.rares, jobs: null, rng: () => 0.3 });
+  addedW = [];
+  }
   // 1b. play-test 5 T10 ("rare monsters much more frequent — I still haven't seen one"): ROADSIDE CHAMPIONS. A rolled
   // champion needs level `chance.minLevel`+ and luck; these simply stand there. A copy of an ordinary camp the server
   // already spawns within CHAMP.road m of a road people walk (the routes file), one body, rank 'champion' with one
   // fixed modifier — so it is bigger, tinted and has a special (js/rules/affixes.js). Spread CHAMP.gap m apart, never
   // within CHAMP.town m of a town's edge, never under level CHAMP.minLevel (the first quest's ground stays gentle).
-  const champs = roadsideChampions(L, readJ(`data/provinces/${PROV}-routes.json`), CHAMP, startLine(readJ(`data/quests/marks/${PROV}.json`), Infinity));
+  const champs = roadsideChampions(L0, readJ(`data/provinces/${PROV}-routes.json`), CHAMP, startLine(readJ(`data/quests/marks/${PROV}.json`), Infinity));
   for (const c of champs) (added[c.wid] ||= []).push(c.rec);
   // 1c. play-test 5 T25: the town anglers stand on the bank (tools/content-pools.mjs chose the spots from B's water);
   // an npc record like the placer's own, so the server gives them a body, their greeting, their quests and their shop
@@ -165,7 +227,7 @@ async function main() {
   }
   console.log(`carters + carts: ${carts}; guard posts: ${guards}; training dummies: ${dummies}`);
   for (const wid of Object.keys(mains)) writeFileSync(P(`data/vignettes/placements/${wid}.quest.json`), JSON.stringify({
-    _doc: `Stream E (play-test 4 S14). Copies of camps already standing in world zone ${wid}, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at ${NEED_CAP}). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.`,
+    _doc: `Stream E (play-test 4 S14). Copies of camps already standing in world zone ${wid}, added where a kill / collect quest's area held fewer of its monster than the step needs (round 11: max(count + 4, 2 x count) — two players at once; they come back in 1-1.5 minutes). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.`,
     zone: wid, terrainHash: mains[wid].terrainHash, placements: added[wid] || [] }, null, 1) + '\n');
   console.log(`anglers: ${anglers.length}; roadside champions: ${champs.length} (${Object.entries(champs.reduce((a, c) => (a[c.wid] = (a[c.wid] || 0) + 1, a), {})).map(([w, n]) => w + ' ' + n).join(', ')})`);
   // 2. with the new camps: every type's areas

@@ -13,6 +13,8 @@
 // Pure-ish: no three.js import; it is handed a camera and a heightAt. The step function `intent()` is
 // what the game loop samples once per sim step to build an input message.
 
+import { createWalker } from './click-path.js';
+
 /** A stick pushed less than this far (0..1) walks; further runs (W20). */
 export const WALK_BELOW = 0.6;
 /**
@@ -27,7 +29,10 @@ export function wantsRun({ shift = false, analog = null, stickLen = null } = {})
   return true;
 }
 
-export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCycleTarget, onClearTarget, onChat, onPickGround, getTarget, onRise, onSkill, onContext, onAutorun }) {
+export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCycleTarget, onClearTarget, onChat, onPickGround, getTarget, onRise, onSkill, onContext, onAutorun, validTarget = null, onNoTarget = null, route = null }) {
+  // play-test 11 (Z38, live #39): a click-to-move goal is walked ROUND trees, rocks and walls (click-path.js), not in a
+  // straight line into the first corner. `route(from, to)` plans; the walker follows its waypoints and re-plans when stuck.
+  const walker = createWalker();
   const keys = new Set();
   const cam = { yaw: Math.PI, pitch: 0.38, dist: 9, distWant: 9, focus: { x: 0, y: 0, z: 0 }, ready: false };
   let blocker = null;
@@ -53,7 +58,8 @@ export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCy
     if (k === 'NumLock') { e.preventDefault(); if (!e.repeat) { autorun = !autorun; if (autorun) { moveGoal = null; chase = null; } onAutorun?.(autorun); } return; }
     if (k === 'Space') { e.preventDefault(); if (!e.repeat) jumpQueued = true; return; }
     if (k === 'KeyR') { onRise?.(); return; }
-    if (k === 'KeyF') { e.preventDefault(); const t = getTarget?.(); if (t != null) { chase = t; auto = t; onAttack?.(t); } return; }
+    // round 11 (owner #21): Strike with no live enemy targeted picks the one you face (else the nearest) instead of doing nothing
+    if (k === 'KeyF') { e.preventDefault(); if (e.repeat) return; const t = getTarget?.(); if (t != null && (!validTarget || validTarget(t))) { chase = t; auto = t; onAttack?.(t); } else onNoTarget?.(); return; }
     if (/^Digit[1-6]$/.test(k)) { e.preventDefault(); onSkill?.(+k.slice(5)); return; }
     if (e.repeat && dropped.has(k)) return; else if (!e.repeat) dropped.delete(k);   // Y1 (G2): a key let go by release() stays quiet until it is pressed again
     if (['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(k)) { moveGoal = null; chase = null; if (autorun && (k === 'KeyW' || k === 'KeyS' || k === 'ArrowUp' || k === 'ArrowDown')) { autorun = false; onAutorun?.(false); } }
@@ -124,8 +130,9 @@ export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCy
         const dx = targetPos.x - self.x, dz = targetPos.z - self.z, d = Math.hypot(dx, dz);
         if (d > reach) { mx = dx / d; mz = dz / d; } else { inRange = true; facing = Math.atan2(dx, dz); }
       } else if (moveGoal) {
-        const dx = moveGoal.x - self.x, dz = moveGoal.z - self.z, d = Math.hypot(dx, dz);
-        if (d < 0.5) moveGoal = null; else { mx = dx / d; mz = dz / d; }
+        const wp = route ? walker.steer(self, moveGoal, route, performance.now()) : moveGoal;
+        const dx = (wp ? wp.x : moveGoal.x) - self.x, dz = (wp ? wp.z : moveGoal.z) - self.z, d = Math.hypot(dx, dz);
+        if (!wp || Math.hypot(moveGoal.x - self.x, moveGoal.z - self.z) < 0.5) moveGoal = null; else if (d > 1e-3) { mx = dx / d; mz = dz / d; }
       }
     }
     const len = Math.hypot(mx, mz);
@@ -203,5 +210,8 @@ export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCy
     setAnalog(a) { analog = a || null; },
     get chasing() { return chase; },
     get moveGoal() { return moveGoal; },
+    /** Z38: the waypoints left on the way to the click-to-move goal (null when walking straight / none). */
+    get route() { return moveGoal ? walker.waypoints : null; },
+    routeStats: walker.stats,
   };
 }

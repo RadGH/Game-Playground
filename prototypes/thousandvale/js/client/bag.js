@@ -24,6 +24,8 @@ import { uiIconSvg } from '../../../../icons/js/game-icons.js';
 // 2026-10-14: the empty paper doll is the icon library's wooden mannequin (the same dummy the armour icons are worn by)
 const DOLL_FIGURE = uiIconSvg('doll', 120) || '';
 import { packRefusal, bagSlotsOf } from './ui/pt8-core.js';      // W19: a backpack's extra squares
+import { TABS, tabOf, tabCounts, sortOther, isKept } from '../sim/bag-tabs.js';      // round 11 (#11): Equipment / Items / Other
+import { mountRows, mountTip, slotMount, speedText } from './ui/pt11-core.js';      // round 11 (#44): the Mount slot
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -40,7 +42,7 @@ export function createBag({ net: getNet, hud, me = null }) {
   const dual2h = () => hasDual2h(getNet()?.joined?.you);
   // W19: the bag is 40 squares + the worn pack's (the server's `you.bagMax`, kept current by `you {bagMax}`)
   const bagMax = () => S.bagMax || getNet()?.joined?.you?.bagMax || BAG_MAX;
-  const S = { bag: [], equipment: {}, gold: 0, fresh: new Set(), level: 1, filter: 'all', sort: 'new', search: '', bagMax: 0 };
+  const S = { bag: [], equipment: {}, gold: 0, fresh: new Set(), level: 1, filter: 'all', sort: 'new', search: '', bagMax: 0, tab: 'gear', mounts: [], mountPick: null, saddle: null };
   try { Object.assign(S, JSON.parse(localStorage.getItem(UI_KEY) || '{}')); S.search = ''; S.bagMax = 0; } catch {}
   const level = () => (me?.()?.level ?? S.level ?? getNet()?.joined?.you?.level ?? 1);
   setIconContext({ cls: () => me?.()?.cls || getNet()?.joined?.you?.cls || null });      // W25: icons wear what YOUR class would
@@ -59,16 +61,17 @@ export function createBag({ net: getNet, hud, me = null }) {
         <div class="doll-bottom" id="doll-bottom"></div>
       </section>
       <section class="inv-bag" aria-label="Bag">
+        <div class="chips inv-tabs" id="inv-tabs" role="tablist" aria-label="Bag tabs"></div>
         <div class="inv-tools">
           <div class="chips inv-filters" id="inv-filters" role="radiogroup" aria-label="Show"></div>
           <div class="row"><input id="inv-search" type="search" placeholder="Find by name…" aria-label="Find by name"><select id="inv-sort" aria-label="Sort"></select></div>
         </div>
         <div class="bag-grid" id="bag-grid"></div>
-        <p class="bag-hint"><span id="inv-count"></span> Click to wear (or use / open) · <kbd>Shift</kbd>-click for the other hand (a stack: split it; drop one stack on another to join them) · drag onto a slot or a 7–0 key · right-click to throw away · hold <kbd>Shift</kbd> to compare the other hand.</p>
+        <p class="bag-hint"><span id="inv-count"></span> <span class="hint-pad">Focus a square and press <kbd data-pad="Y">Y</kbd> for its card and the compare. </span>Click to wear (or use / open) · <kbd>Shift</kbd>-click for the other hand (a stack: split it; drop one stack on another to join them) · drag onto a slot or a 7–0 key · right-click to throw away · hold <kbd>Shift</kbd> to compare the other hand.</p>
       </section>
     </div>`;
   const el = { gold: $('bag-gold'), sub: $('inv-sub'), grid: $('bag-grid'), left: $('doll-left'), right: $('doll-right'), bottom: $('doll-bottom'), stats: $('doll-stats'),
-    filters: $('inv-filters'), sort: $('inv-sort'), search: $('inv-search'), count: $('inv-count'), badge: btn?.querySelector('b') || $('bag-count') };
+    filters: $('inv-filters'), tabs: $('inv-tabs'), sort: $('inv-sort'), search: $('inv-search'), count: $('inv-count'), badge: btn?.querySelector('b') || $('bag-count') };
   // the old #paperdoll / #itemcard elements are not used any more (the card is the shared tooltip)
   $('itemcard')?.setAttribute('hidden', '');
 
@@ -80,19 +83,30 @@ export function createBag({ net: getNet, hud, me = null }) {
   el.sort.value = S.sort;
   el.sort.onchange = () => { S.sort = el.sort.value; saveUi(); draw(); };
   el.search.oninput = () => { S.search = el.search.value; draw(); };
+  // round 11 (#11): three tabs. Equipment keeps the old filters; Items and Other are one list each
+  for (const t of TABS) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'chip tab'; b.dataset.tab = t.id; b.setAttribute('role', 'tab');
+    b.innerHTML = `${esc(t.label)} <b class="n"></b>`;
+    b.onclick = () => { S.tab = t.id; saveUi(); draw(); };
+    el.tabs.appendChild(b);
+  }
   for (const f of FILTERS) {
+    if (f.id === 'other') continue;      // round 11: what the Other filter showed lives in the Items / Other tabs now
     const b = document.createElement('button');
     b.type = 'button'; b.className = 'chip'; b.dataset.f = f.id; b.textContent = f.label; b.setAttribute('role', 'radio');
     b.onclick = () => { S.filter = f.id; saveUi(); draw(); };
     el.filters.appendChild(b);
   }
   root.addEventListener('keydown', e => { if (e.key === 'Escape') { toggle(false); e.preventDefault(); } e.stopPropagation(); });
-  function saveUi() { try { localStorage.setItem(UI_KEY, JSON.stringify({ filter: S.filter, sort: S.sort })); } catch {} }
+  function saveUi() { try { localStorage.setItem(UI_KEY, JSON.stringify({ filter: S.filter, sort: S.sort, tab: S.tab })); } catch {} }
+  if (!TABS.some(t => t.id === S.tab)) S.tab = 'gear';
+  if (S.filter === 'other') S.filter = 'all';
 
   function toggle(open = root.hidden) {
     root.hidden = !open; btn?.classList.toggle('on', open);
     iconsActive(open);                    // icons render only while this window is open (P1: no freezes in play)
-    if (open) { draw(); drag.clamp(); } else hideTip();
+    if (open) { draw(); drag.clamp(); } else { hideTip(); root.querySelector('.mount-pick')?.remove(); }      // round 11: the mount list goes with the window
     for (const fn of toggleFns) fn(open);
     return open;
   }
@@ -141,7 +155,7 @@ export function createBag({ net: getNet, hud, me = null }) {
     { const no = handRefusal(it, slot === 'offhand' ? 'offhand' : slot === 'weapon' ? 'weapon' : null); if (no) { hud.toast(no, 'warn'); return; } }      // Y16: Main hand / Off hand items fit only that hand
     if (slot === 'offhand') { const no = offhandRefusal(it, S.equipment, { dual2h: dual2h() }); if (no) { hud.toast(no, 'warn'); return; } }
     // W19: a cloak (or a smaller pack) over a pack whose extra squares are in use — say why before asking the server
-    if (slotOf(it) === 'back' && S.equipment?.back) { const no = packRefusal(S.equipment.back, { bagCount: S.bag.length, bagMax: bagMax(), next: it }); if (no) { hud.toast(no, 'warn'); return; } }
+    if (slotOf(it) === 'back' && S.equipment?.back) { const no = packRefusal(S.equipment.back, { bagCount: Math.max(tabCounts(S.bag).gear, tabCounts(S.bag).items), bagMax: bagMax(), next: it }); if (no) { hud.toast(no, 'warn'); return; } }
     const wire = slot === 'ring' ? 'ring1' : slot || wearSlot(it, S.equipment) || undefined;
     getNet()?.item('equip', it.uid, wire === 'ring' ? undefined : wire); hideTip();
   }
@@ -164,7 +178,7 @@ export function createBag({ net: getNet, hud, me = null }) {
   });
   /** Take a worn piece off. W19: a pack whose extra squares are holding things stays on, and says how many to empty. */
   function takeOff(it, sl) {
-    const no = packRefusal(it, { bagCount: S.bag.length, bagMax: bagMax() });
+    const no = packRefusal(it, { bagCount: Math.max(tabCounts(S.bag).gear, tabCounts(S.bag).items), bagMax: bagMax() });
     if (no) { hud.toast(no, 'warn'); return false; }
     getNet()?.item('unequip', it.uid, sl); hideTip(); return true;
   }
@@ -204,6 +218,43 @@ export function createBag({ net: getNet, hud, me = null }) {
     const n = getNet();
     if (typeof n?.mergeItem === 'function') n.mergeItem(fromUid, onto.uid); else n?._raw?.('game', JSON.stringify({ t: 'item', op: 'merge', uid: String(fromUid), onto: String(onto.uid) }));
   }
+  // ---- round 11 (owner #44): the Mount slot. Mounts are owned, not carried: the slot shows the one you call (`you.mountPick`,
+  // else the fastest), its picture is the icon library's mount, and clicking it lists every mount you own to swap — each with
+  // a card comparing it to the one in the slot.
+  const MOUNT_ICON = uiIconSvg('mount', 34) || '♞';
+  function mountSlot() {
+    const cur = slotMount(S.mounts, S.mountPick);
+    const d = document.createElement('div');
+    d.className = 'islot mount-slot' + (cur ? ' r-normal' : ' empty'); d.dataset.slot = 'mount'; d.tabIndex = 0;
+    d.innerHTML = `<span class="mount-ico" aria-hidden="true">${MOUNT_ICON}</span><span class="slotname">${cur ? esc(cur.name) : 'Mount'}</span>`;
+    d.dataset.tipHtml = mountTip(cur, null, { saddle: S.saddle });
+    d.setAttribute('aria-label', cur ? `Mount: ${cur.name}, ${speedText(cur.speed)}` : 'Mount: none yet');
+    d.onclick = () => mountPicker(d);
+    d.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); mountPicker(d); } };
+    return d;
+  }
+  function mountPicker(anchor) {
+    hideTip();
+    root.querySelector('.mount-pick')?.remove();
+    const rows = mountRows(S.mounts, S.mountPick), cur = rows.find(r => r.on) || null;
+    const box = document.createElement('div'); box.className = 'mount-pick'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-label', 'Your mounts');
+    const head = document.createElement('div'); head.className = 'mp-head'; head.innerHTML = '<b>Your mounts</b>';
+    const x = document.createElement('button'); x.type = 'button'; x.className = 'ghost small'; x.textContent = '×'; x.setAttribute('aria-label', 'Close'); x.onclick = () => box.remove();
+    head.appendChild(x); box.appendChild(head);
+    if (!rows.length) { const p = document.createElement('p'); p.className = 'dim'; p.textContent = 'You have no mount yet. A stablehand sells them — the Trail Horse is cheap.'; box.appendChild(p); }
+    rows.forEach((m, i) => {
+      const r = document.createElement('button'); r.type = 'button'; r.className = 'mp-row' + (m.on ? ' on' : ''); r.dataset.mount = m.id;
+      if (i === 0) r.dataset.padFirst = '';
+      r.innerHTML = `<span class="mount-ico" aria-hidden="true">${MOUNT_ICON}</span><span class="mp-name">${esc(m.name)}</span><small>${esc(speedText(m.speed))}</small>${m.on ? '<i class="mp-on">in the slot</i>' : ''}`;
+      r.dataset.tipHtml = mountTip(m, cur, { saddle: m.on ? S.saddle : null });
+      r.onclick = () => { if (!m.on) { getNet()?.mount?.('pick', { id: m.id }); S.mountPick = m.id; draw(); } box.remove(); };
+      box.appendChild(r);
+    });
+    if (S.saddle) { const p = document.createElement('p'); p.className = 'tiny-left'; p.textContent = `${S.saddle.name || 'Saddle bags'}: +${S.saddle.slots} squares in Equipment and Items while you own a mount.`; box.appendChild(p); }
+    box.addEventListener('keydown', e => { if (e.key === 'Escape') { box.remove(); e.stopPropagation(); } });
+    root.querySelector('.inv-doll')?.appendChild(box);
+    box.querySelector('.mp-row')?.focus?.();
+  }
   let drawT = 0;
   function draw() {
     el.gold.textContent = `${S.gold.toLocaleString()} gold`;
@@ -212,11 +263,19 @@ export function createBag({ net: getNet, hud, me = null }) {
     const worn = S.equipment || {};
     const put = (box, list) => { box.replaceChildren(...list.map(sl => { const it = worn[sl] || null; const d = slotEl(it, { slot: sl, worn: !!it }); if (it) d.onclick = () => takeOff(it, sl); return d; })); };
     put(el.left, DOLL_LEFT); put(el.right, DOLL_RIGHT);
-    put(el.bottom, [...DOLL_BOTTOM, ...DOLL_EXTRA.filter(s => worn[s])]);          // (W22: no Light slot — an old save's `light` is refunded by the server and never drawn)
+    put(el.bottom, [...DOLL_BOTTOM, ...DOLL_EXTRA.filter(s => worn[s] && s !== 'mount')]);          // (W22: no Light slot — an old save's `light` is refunded by the server and never drawn)
+    el.bottom.appendChild(mountSlot());      // round 11 (owner #44): the Mount slot — always there, even with no mount yet
     el.stats.innerHTML = stats();
     for (const b of el.filters.children) b.setAttribute('aria-checked', String(b.dataset.f === S.filter));
     el.sort.value = S.sort;
-    const list = viewBag(S.bag, { filter: S.filter, sort: S.sort, equipment: worn, level: level(), score: scoreOf, search: S.search });
+    // round 11 (#11): the tab first, then (Equipment only) the old filters; Other is sorted for you and never padded
+    const counts = tabCounts(S.bag);
+    for (const b of el.tabs.children) { const on = b.dataset.tab === S.tab; b.setAttribute('aria-selected', String(on)); b.classList.toggle('on', on); b.querySelector('.n').textContent = String(counts[b.dataset.tab] || 0); }
+    el.filters.hidden = S.tab !== 'gear';
+    el.sort.hidden = S.tab === 'other';
+    const inTab = S.bag.filter(it => tabOf(it) === S.tab);
+    const filter = S.tab === 'gear' ? S.filter : 'all';
+    const list = S.tab === 'other' ? sortOther(viewBag(inTab, { filter: 'all', sort: 'name', equipment: worn, level: level(), score: scoreOf, search: S.search })) : viewBag(inTab, { filter, sort: S.sort, equipment: worn, level: level(), score: scoreOf, search: S.search });
     const cells = list.map(it => {
       const d = slotEl(it);
       d.onclick = e => {
@@ -240,22 +299,25 @@ export function createBag({ net: getNet, hud, me = null }) {
         if (!sameStack(from, it)) { hud.toast('Only two stacks of the same thing go together.', 'warn'); return; }
         merge(from.uid, it);
       });
-      d.oncontextmenu = async e => { e.preventDefault(); hideTip(); if (await confirmBox(`Throw away ${nameOf(it)}? It is gone for good.`, { yes: 'Throw away', danger: true })) getNet()?.item('destroy', it.uid); };
+      d.oncontextmenu = async e => { e.preventDefault(); hideTip(); if (isKept(it)) { hud.toast(`${nameOf(it)} stays with you — it cannot be thrown away.`, 'warn'); return; } if (await confirmBox(`Throw away ${nameOf(it)}? It is gone for good.`, { yes: 'Throw away', danger: true })) getNet()?.item('destroy', it.uid); };
       return d;
     });
     const cols = Math.max(1, (getComputedStyle(el.grid).gridTemplateColumns || '').split(' ').filter(Boolean).length || 6);
     // W19: with no filter the grid IS the bag — every square you have, used or not (an old save over its capacity keeps its extra rows)
     const cap = S.bagMax || getNet()?.joined?.you?.bagMax || 0;      // 0 = the server has not said: the old four rows
-    const want = S.filter === 'all' && !S.search ? (cap ? Math.max(cap, list.length) : Math.max(cols * 4, list.length + 1)) : list.length;
-    const pad = Math.max(0, (cap && S.filter === 'all' && !S.search ? want : Math.ceil(want / cols) * cols) - list.length);      // a known capacity is drawn exactly: 46 squares are 46
+    const whole = filter === 'all' && !S.search && S.tab !== 'other';      // Other has no size: it shows only what you have
+    const want = whole ? (cap ? Math.max(cap, list.length) : Math.max(cols * 4, list.length + 1)) : list.length;
+    const pad = Math.max(0, (cap && whole ? want : S.tab === 'other' ? list.length : Math.ceil(want / cols) * cols) - list.length);      // a known capacity is drawn exactly: 46 squares are 46
     for (let k = 0; k < pad; k++) cells.push(slotEl(null));
     el.grid.replaceChildren(...cells);
     rehover();
     const pack = bagSlotsOf(worn.back);
-    el.count.textContent = `${S.bag.length} / ${bagMax()}${list.length !== S.bag.length ? ` (showing ${list.length})` : ''} ·`;
-    el.count.dataset.tip = pack ? `${bagMax() - pack} squares of your own + ${pack} from ${nameOf(worn.back)}.` : 'A backpack in the Back slot adds squares.';
-    el.count.classList.toggle('over', S.bag.length > bagMax());
-    el.sub.textContent = S.filter !== 'all' ? FILTERS.find(f => f.id === S.filter)?.label || '' : '';
+    const used = counts[S.tab] || 0, sad = S.saddle && S.mounts.length ? S.saddle.slots || 0 : 0;
+    el.count.textContent = S.tab === 'other' ? `${used} kept · no limit ·` : `${used} / ${bagMax()}${list.length !== used ? ` (showing ${list.length})` : ''} ·`;
+    el.count.dataset.tip = S.tab === 'other' ? 'Quest items, reward boxes, your recall charm and other things no merchant buys. This tab never fills up.'
+      : `${S.tab === 'gear' ? 'Equipment' : 'Items'} and ${S.tab === 'gear' ? 'Items' : 'Equipment'} each hold ${bagMax()} squares: ${bagMax() - pack - sad} of your own${pack ? ` + ${pack} from ${nameOf(worn.back)}` : ''}${sad ? ` + ${sad} from ${S.saddle.name || 'saddle bags'}` : ''}.${pack ? '' : ' A backpack in the Back slot adds squares.'}`;
+    el.count.classList.toggle('over', S.tab !== 'other' && used > bagMax());
+    el.sub.textContent = S.tab === 'gear' && S.filter !== 'all' ? FILTERS.find(f => f.id === S.filter)?.label || '' : '';
   }
   // A redraw replaces the square under the pointer, and the tooltip engine only hears about a square when the
   // pointer ENTERS it: tell it about the new one so the card stays up through icon/loot redraws.
@@ -288,8 +350,8 @@ export function createBag({ net: getNet, hud, me = null }) {
   function warm() { for (const it of [...S.bag, ...Object.values(S.equipment || {})]) if (it) iconFor(it); }
 
   function wire(n) {
-    n.on('joined', j => { S.bagMax = j.you.bagMax || 0; S.bag = [...(j.you.bag || [])]; S.equipment = { ...(j.you.equipment || {}) }; S.gold = j.you.gold || 0; if (j.you.level) S.level = j.you.level; remember(); warm(); draw(); });
-    n.on('you', p => { let ch = false; if (p.bagMax != null && p.bagMax !== S.bagMax) { S.bagMax = p.bagMax; ch = true; } if (p.gold != null) { S.gold = p.gold; ch = true; } if (p.level != null && p.level !== S.level) { S.level = p.level; ch = true; } if (ch) draw(); });
+    n.on('joined', j => { S.mounts = j.you.mounts || []; S.mountPick = j.you.mountPick || null; S.saddle = j.you.saddle || null; S.bagMax = j.you.bagMax || 0; S.bag = [...(j.you.bag || [])]; S.equipment = { ...(j.you.equipment || {}) }; S.gold = j.you.gold || 0; if (j.you.level) S.level = j.you.level; remember(); warm(); draw(); });
+    n.on('you', p => { let ch = false; if (p.mounts) { S.mounts = p.mounts; ch = true; } if ('mountPick' in p) { S.mountPick = p.mountPick || null; ch = true; } if ('saddle' in p) { S.saddle = p.saddle || null; ch = true; } if (p.bagMax != null && p.bagMax !== S.bagMax) { S.bagMax = p.bagMax; ch = true; } if (p.gold != null) { S.gold = p.gold; ch = true; } if (p.level != null && p.level !== S.level) { S.level = p.level; ch = true; } if (ch) draw(); });
     n.on('bag', m => {
       const rm = new Set(m.remove || []);
       // U5: a stack that changed arrives as remove + add of the SAME uid — it keeps its place, and only a bigger count is news

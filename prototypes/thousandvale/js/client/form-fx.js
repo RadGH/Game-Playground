@@ -192,7 +192,8 @@ export function createFormFx(scene, { spellFx = null, actors = null, groundY = (
         const hand = handOf(a, a.yaw || 0);
         if (L.draw.includes('spiral')) for (let i = 0; i < 2; i++) ring(hand.x, hand.z, 0.5, el, { life: 0.3, from: 0.2, delay: i * 0.08, y: hand.y - 0.4 + i * 0.3 });
         if (L.draw.includes('thump')) ring(a.pos.x, a.pos.z, 1.5, el, { life: 0.4, from: 0.3, y: a.pos.y });
-        if (L.draw.includes('flare') && to) { const d = to.clone().sub(hand).setY(0).normalize(), side = V(d.z, 0, -d.x); shards(hand, [-0.45, 0, 0.45].map(k => hand.clone().addScaledVector(d, 2.2).addScaledVector(side, k * 2.2)), el, { life: 0.2, width: 0.12 }); }
+        // [C, owner #40] a fan's three bolts each arrive as their own fx bolt (n 1..3): the hand flare once
+        if (L.draw.includes('flare') && to && !(ev.n > 1)) { const d = to.clone().sub(hand).setY(0).normalize(), side = V(d.z, 0, -d.x); shards(hand, [-0.45, 0, 0.45].map(k => hand.clone().addScaledVector(d, 2.2).addScaledVector(side, k * 2.2)), el, { life: 0.2, width: 0.12 }); }
       }
       if (to) {
         if (L.draw.includes('landRing')) later(ms, () => ring(to.x, to.z, ev.r || (ev.form === 'lob' ? 3 : 3.2), el, { life: 0.55 }));

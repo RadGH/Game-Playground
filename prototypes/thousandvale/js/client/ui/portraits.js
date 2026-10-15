@@ -90,7 +90,9 @@ export function createPortraits({ renderer, scene, avatarFor, createBody, fps = 
   function frameFace(a) {
     const b = a.body;
     const head = b?.parts?.head;
-    const creature = !(a.kind === 'player' || a.kind === 'npc') || a.pet || !head;
+    // Z54 (live #55): a humanoid MONSTER (a brigand, a Slagborn) has a face too — framed like a person's, at its own size
+    // (it was framed as a beast, whole body, so a Giant came out a speck in the corner)
+    const creature = !(a.kind === 'player' || a.kind === 'npc' || a.humanoid) || a.pet || !head;
     if (head && !creature) { head.getWorldPosition(_h); _h.y += a.height * 0.1; }
     else { const p = a.group.position; _h.set(p.x, p.y + (a.pickTop || a.height) * 0.62, p.z); }
     const r = creature ? Math.max(0.35, (a.pickR || 0.6) * 0.75, (a.pickTop || a.height) * 0.33) : Math.max(0.24, a.height * 0.2);

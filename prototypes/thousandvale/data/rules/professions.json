@@ -34,17 +34,27 @@
   "gather": {
     "reach": 4.5, "driftM": 2, "graceMs": 350, "lateMs": 30000, "minGapMs": 90,
     "respawnMin": [6, 10], "starterRespawnMin": 2, "skinReach": 4, "skinKeepMs": 60000,
-    "xpPerTier": 10, "greyAfter": 40, "greyMult": 0.25,
-    "townBorderM": 160
+    "xpPerTier": 30, "greyAfter": 40, "greyMult": 0.25,
+    "townBorderM": 160,
+    "highScore": {
+      "_doc": "round 11 (live #9): a gathering mini-game played to `from` (fine = score 0.65+, perfect = 0.9+) gives every main material x `mult` (rounded UP) and ONE find: finds[prof][tier - 1] (the last entry past the end) — always uncommon or better (the gems, golden resin, wild honeycomb and the beast fang carry rarity magic; the star opal rare). Angling has its own catch table and no find.",
+      "from": ["fine", "perfect"], "mult": 1.5,
+      "finds": {
+        "mining": ["rough_quartz", "garnet", "amethyst", "sapphire", "star_opal"],
+        "logging": ["golden_resin"],
+        "foraging": ["wild_honeycomb"],
+        "skinning": ["beast_fang"]
+      }
+    }
   },
   "craft": {
-    "stationM": 9, "fireM": 6, "xpPerTier": 12, "refineXp": 0.5, "levelLag": 1,
+    "stationM": 9, "fireM": 6, "xpPerTier": 36, "refineXp": 0.5, "levelLag": 1,
     "feeShare": 0.06,
     "rarity": {
-      "_doc": "crafted gear: chance of magic / rare by mini-game quality, + perSkill for each skill point past the recipe (to maxSurplus). Never above rare. extraAffix: a magic item may carry one more property (never a rare).",
-      "magic": { "poor": 0, "good": 0.25, "fine": 0.45, "perfect": 0.6 },
-      "rare": { "poor": 0, "good": 0, "fine": 0.04, "perfect": 0.12 },
-      "perSkill": { "magic": 0.01, "rare": 0.003 }, "maxSurplus": 30,
+      "_doc": "crafted gear: round 11 (live #58) — never plain (`floor`: magic); the chance of RARE by mini-game quality, + perSkill.rare for each skill point past the recipe (to maxSurplus). Never above rare. extraAffix: a magic item may carry one more property (never a rare).",
+      "floor": "magic",
+      "rare": { "poor": 0.15, "good": 0.25, "fine": 0.35, "perfect": 0.5 },
+      "perSkill": { "rare": 0.005 }, "maxSurplus": 30,
       "extraAffix": { "fine": 0.1, "perfect": 0.25 }
     },
     "batchMax": 10

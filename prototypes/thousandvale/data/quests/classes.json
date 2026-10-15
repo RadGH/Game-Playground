@@ -1,5 +1,5 @@
 {
-  "_doc": "Stream E (play-test 2, Q28). A low-level class quest for each of the 30 Farhold classes and (wrap-up 2026-10-13) Thousandvale's own Starcaller, merged into zone 'test' (the Torbor Fields) via test.json `include`. `npcs` are the class trainers (role 'trainer', `trains` = class ids; `at` = a set piece id from data/vignettes/setpieces.json, or Torborhold with an `office` kind resolved by data/provinces/offices.json). A quest with `classes` is offered only to those classes. Rewards: `item` {tier, slot, base (items.json base key), name (bespoke)}; `unlock: 'companion'` (rules.unlock: the class companion now instead of level 10) for the 13 companion classes; `perks: 1` (one extra perk-forest point) for the other 17. `rewardText` = the player-facing summary. S10 (play-test 4): `needsGiver: true` on the quests whose trainer hands you a companion — those are turned in in person; every other quest pays itself where you finish it (remote turn-in).",
+  "_doc": "Stream E (play-test 2, Q28). A low-level class quest for each of the 30 Farhold classes and (wrap-up 2026-10-13) Thousandvale's own Starcaller and (round 11, #53) Star Blade, merged into zone 'test' (the Torbor Fields) via test.json `include`. `npcs` are the class trainers (role 'trainer', `trains` = class ids; `at` = a set piece id from data/vignettes/setpieces.json, or Torborhold with an `office` kind resolved by data/provinces/offices.json). A quest with `classes` is offered only to those classes. Rewards: `item` {tier, slot, base (items.json base key), name (bespoke)}; `unlock: 'companion'` (rules.unlock: the class companion now instead of level 10) for the 13 companion classes; `perks: 1` (one extra perk-forest point) for the other 17. `rewardText` = the player-facing summary. S10 (play-test 4): `needsGiver: true` on the quests whose trainer hands you a companion — those are turned in in person; every other quest pays itself where you finish it (remote turn-in).",
   "zone": "test",
   "part": "classes",
   "npcs": {
@@ -51,7 +51,8 @@
         "enchanter",
         "stormcaller",
         "pyromancer",
-        "starcaller"
+        "starcaller",
+        "starblade"
       ],
       "at": "Torborhold",
       "office": "house",
@@ -60,7 +61,8 @@
         "The scorch marks are load-bearing, leave them.",
         "Magic is just arithmetic that shouts.",
         "If my eyebrows grow back, I'll have won.",
-        "If one more star lands in my cabbages, I am sending the bill to the sky."
+        "If one more star lands in my cabbages, I am sending the bill to the sky.",
+        "Star Blades keep asking to borrow my whetstone. Starlight does not need sharpening. Starlight needs SHIELDING."
       ],
       "titled": true
     },
@@ -227,8 +229,9 @@
           "kind": "kill",
           "type": "moor_hound",
           "count": 6,
-          "text": "Kill 6 moor hounds out in the open grass",
-          "where": "the sheep folds and open grass around Torborhold"
+          "text": "Kill 6 moor hounds on the grass round the Drill Field",
+          "where": "the open grass round the Drill Field",
+          "near": "sp_drill_field"
         },
         {
           "kind": "use",
@@ -266,21 +269,22 @@
       "name": "Stance and Answer",
       "level": 3,
       "giver": "trainer_arms",
-      "offer": "Fighters don't flail. Fighters answer. Go to the sand pit and hold your guard. Then find the brigands on the road and answer every swing they throw — a counter for every blow.",
+      "offer": "Fighters don't flail. Fighters answer. The brigands squatting in Coldharrow Ruins swing first and think later. Hold your guard on the collapsed stair, then answer every swing they throw — a counter for every blow.",
       "steps": [
         {
           "kind": "use",
-          "vignette": "sp_drill_field",
-          "object": "Sand pit",
-          "text": "Hold your stance in the sand pit",
-          "where": "Torbor Drill Field, just outside Torborhold's gate"
+          "vignette": "sp_coldharrow_ruins",
+          "object": "Collapsed stair",
+          "text": "Hold your stance on the collapsed stair at Coldharrow Ruins",
+          "where": "Coldharrow Ruins, the burnt manor in the fields"
         },
         {
           "kind": "kill",
           "type": "road_brigand",
           "count": 5,
-          "text": "Defeat 5 road brigands",
-          "where": "along the roads out of Torborhold"
+          "text": "Defeat 5 road brigands at Coldharrow Ruins",
+          "where": "Coldharrow Ruins, the burnt manor in the fields",
+          "near": "sp_coldharrow_ruins"
         },
         {
           "kind": "collect",
@@ -289,7 +293,8 @@
           "from": "road_brigand",
           "chance": 0.6,
           "text": "Take 3 notched blades as proof",
-          "where": "along the roads out of Torborhold"
+          "where": "Coldharrow Ruins, the burnt manor in the fields",
+          "near": "sp_coldharrow_ruins"
         }
       ],
       "done": "Notched on the edge, clean on the flat. You let them hit the blade, not you. That's the whole trade. Here — a proper two-hander, and a perk point for the lesson.",
@@ -372,32 +377,32 @@
       "name": "Flair for the Dramatic",
       "level": 2,
       "giver": "trainer_arms",
-      "offer": "Anyone can win a fight. A swashbuckler wins it with style, a different trick each time. Go to the Pail and Plough, climb on the hearth and tell them you're the finest blade in the downs. Then prove it on the boars at Brannock Fields. With FLOURISH.",
+      "offer": "Anyone can win a fight. A swashbuckler wins it with style, a different trick each time. Go to the Pail and Plough, pin your challenge on the notice post, then prove it on the boars in the fields behind the inn. With FLOURISH. Then come in and boast about it from the hearth.",
       "steps": [
         {
           "kind": "use",
           "vignette": "sp_pail_and_plough",
-          "object": "Hearth",
-          "text": "Boast from the hearth at the Pail and Plough",
+          "object": "Notice post",
+          "text": "Pin your challenge to the notice post at the Pail and Plough",
           "where": "The Pail and Plough, the crossroads inn on the Orrinsford road"
         },
         {
           "kind": "kill",
           "type": "thicket_boar",
           "count": 5,
-          "near": "sp_brannock_fields",
-          "text": "Defeat 5 thicket boars at Brannock Fields — stylishly",
-          "where": "Brannock Fields, the farmland near Torborhold"
+          "near": "sp_pail_and_plough",
+          "text": "Defeat 5 thicket boars in the fields behind the inn — stylishly",
+          "where": "the fields behind the Pail and Plough"
         },
         {
           "kind": "use",
-          "vignette": "sp_brannock_fields",
-          "object": "Scarecrow",
-          "text": "Bow to the scarecrow, your only audience",
-          "where": "Brannock Fields, the farmland near Torborhold"
+          "vignette": "sp_pail_and_plough",
+          "object": "Hearth",
+          "text": "Boast from the hearth at the Pail and Plough",
+          "where": "The Pail and Plough, the crossroads inn on the Orrinsford road"
         }
       ],
-      "done": "The scarecrow clapped. Well, it flapped. Close enough. A rapier with a little bit of swagger in the blade, and a perk point.",
+      "done": "The whole inn clapped. Well, two of them did, and one was asleep. Close enough. A rapier with a little bit of swagger in the blade, and a perk point.",
       "reward": {
         "xp": 0.6,
         "gold": 15,
@@ -425,14 +430,14 @@
       "name": "Temper the Scale",
       "level": 4,
       "giver": "trainer_arms",
-      "offer": "A dragon knight picks a temper — fire, frost or storm — and the wyrm's heart answers. You'll need heat to wake yours. The mill's grindstone sparks, the lumber camp's grindstone sparks more. Put an edge on your blade at both, then blood it on the flitters in the woods.",
+      "offer": "A dragon knight picks a temper — fire, frost or storm — and the wyrm's heart answers. You'll need heat to wake yours. The lumber camp's grindstone sparks, and the teeth of its big saw spark more. Put an edge on your blade at both, then blood it on the flitters in the woods.",
       "steps": [
         {
           "kind": "use",
-          "vignette": "sp_turnwater_mill",
-          "object": "Millstone",
-          "text": "Grind your edge on the millstone at Turnwater Mill",
-          "where": "Turnwater Mill, on the stream near Torborhold"
+          "vignette": "sp_ashby_lumber_camp",
+          "object": "Saw pit",
+          "text": "Strike sparks off the big saw in the saw pit at Ashby's Lumber Camp",
+          "where": "Ashby's Lumber Camp, at the edge of the woods"
         },
         {
           "kind": "use",
@@ -478,7 +483,7 @@
       "name": "Orders for the Boars",
       "level": 3,
       "giver": "trainer_arms",
-      "offer": "A tactician wins the fight before it starts. Study the planting tally at Brannock Fields — the boars come by the same path every dusk. Give the order: thin the herd, then report to Goody Harl so she knows her turnips have a general.",
+      "offer": "A tactician wins the fight before it starts. Study the planting at Brannock Fields — the boars come by the same path every dusk. Give the order: thin the herd, then plant your banner on the scarecrow so the field knows it has a general.",
       "steps": [
         {
           "kind": "visit",
@@ -502,10 +507,11 @@
           "where": "Brannock Fields, the farmland near Torborhold"
         },
         {
-          "kind": "talk",
-          "npc": "goody_harl",
-          "text": "Report to Goody Harl",
-          "where": "Wamonhold, east of Torborhold"
+          "kind": "use",
+          "vignette": "sp_brannock_fields",
+          "object": "Scarecrow",
+          "text": "Plant your banner on the scarecrow",
+          "where": "Brannock Fields, the farmland near Torborhold"
         }
       ],
       "done": "Bees. You used BEES. That's not in any manual I own, which means I'm writing one. A sword for the field commander, and a perk point.",
@@ -536,13 +542,14 @@
       "name": "Bandages for the Living",
       "level": 2,
       "giver": "trainer_holy",
-      "offer": "A cleric's heal doesn't stop at full — it overflows into a shield. Practise on someone who needs it. Bryn the Bonesetter is out of clean linen and patience. Take her what the fen frogs have been hoarding, and pray at the Kind Mother on the way back.",
+      "offer": "A cleric's heal doesn't stop at full — it overflows into a shield. Practise on someone who needs it: the Kind Mother's pilgrims come in muddy and bruised. Pray at her shrine, take river reed off the fen frogs round it for splints, and lay the splints at her statue for whoever needs them.",
       "steps": [
         {
-          "kind": "talk",
-          "npc": "bryn_bonesetter",
-          "text": "Ask Bryn the Bonesetter what she needs",
-          "where": "Torborhold"
+          "kind": "use",
+          "vignette": "sp_kind_mother_shrine",
+          "object": "Prayer stones",
+          "text": "Pray at the Shrine of the Kind Mother",
+          "where": "Shrine of the Kind Mother, beside the south road"
         },
         {
           "kind": "collect",
@@ -550,14 +557,15 @@
           "count": 5,
           "from": "fen_croaker",
           "chance": 0.6,
-          "text": "Gather 5 bundles of river reed from fen croakers",
-          "where": "the marsh and riverbanks south of Torborhold"
+          "near": "sp_kind_mother_shrine",
+          "text": "Gather 5 bundles of river reed from fen croakers by the shrine",
+          "where": "the wet ground round the Shrine of the Kind Mother"
         },
         {
           "kind": "use",
           "vignette": "sp_kind_mother_shrine",
-          "object": "Prayer stones",
-          "text": "Pray at the Shrine of the Kind Mother",
+          "object": "Mother's statue",
+          "text": "Lay the reed splints at the Mother's statue",
           "where": "Shrine of the Kind Mother, beside the south road"
         }
       ],
@@ -604,8 +612,9 @@
           "count": 4,
           "from": "road_brigand",
           "chance": 0.55,
-          "text": "Take back 4 stolen grave rings from road brigands",
-          "where": "along the roads out of Torborhold"
+          "text": "Take back 4 stolen grave rings from the road brigands camped near the yard",
+          "where": "the brigands camped near Saint Hulda's Yard",
+          "near": "sp_saint_hulda_yard"
         },
         {
           "kind": "use",
@@ -644,7 +653,7 @@
       "name": "Strike and Heal",
       "level": 3,
       "giver": "trainer_holy",
-      "offer": "A paladin heals by hitting. Strange, but it works. The shrine on the south road is defiled by brigands camped in the Coldharrow ruins. Drive them out — every blow you land is a prayer — then cleanse the Mother's statue.",
+      "offer": "A paladin heals by hitting. Strange, but it works. Brigands have made a den of the Coldharrow ruins and daubed their mark on the old manor. Drive them out — every blow you land is a prayer — then bless the ruin so nothing camps there again.",
       "steps": [
         {
           "kind": "kill",
@@ -663,13 +672,13 @@
         },
         {
           "kind": "use",
-          "vignette": "sp_kind_mother_shrine",
-          "object": "Mother's statue",
-          "text": "Wash the Mother's statue clean",
-          "where": "Shrine of the Kind Mother, beside the south road"
+          "vignette": "sp_coldharrow_ruins",
+          "object": "Collapsed stair",
+          "text": "Bless the collapsed stair so the ruin stays clean",
+          "where": "Coldharrow Ruins, the burnt manor in the fields"
         }
       ],
-      "done": "The Mother is smiling again. Statues can't smile, so I'm told. This one can. A sword with a little light in it, and a perk point.",
+      "done": "The ruin is quiet, and it will stay quiet. You hit things until they were holy. That's the order, more or less. A sword with a little light in it, and a perk point.",
       "reward": {
         "xp": 0.6,
         "gold": 12,
@@ -752,7 +761,7 @@
       "name": "Wild Results",
       "level": 3,
       "giver": "trainer_arcane",
-      "offer": "Sorcery is chance with a loud voice. Your bolts will roll their own element. Fine. Go to the Nine Maidens and let the stones decide what you are today, then test whatever comes out on the boars.",
+      "offer": "Sorcery is chance with a loud voice. Your bolts will roll their own element. Fine. Go to the Nine Maidens and let the stones decide what you are today, then test whatever comes out on the boars on the slope below.",
       "steps": [
         {
           "kind": "use",
@@ -765,9 +774,9 @@
           "kind": "kill",
           "type": "thicket_boar",
           "count": 5,
-          "near": "sp_brannock_fields",
-          "text": "Test your wild bolts on 5 thicket boars",
-          "where": "Brannock Fields, the farmland near Torborhold"
+          "near": "sp_nine_maidens",
+          "text": "Test your wild bolts on 5 thicket boars below the stones",
+          "where": "the slope below the Nine Maidens"
         },
         {
           "kind": "use",
@@ -865,14 +874,15 @@
       "name": "Sleep, Little Hounds",
       "level": 2,
       "giver": "trainer_arcane",
-      "offer": "An enchanter picks her fights by putting the others to sleep. The sheep folds are plagued by hounds. Lull them, then deal with the ones that won't nap. And ask Goody Harl if her pig is still awake — I'm curious.",
+      "offer": "An enchanter picks her fights by putting the others to sleep. The hounds have been worrying Brannock Fields. Lull them, deal with the ones that won't nap, then hum the bees to sleep — and see if you can make the scarecrow's crows nod off too. I'm curious.",
       "steps": [
         {
           "kind": "kill",
           "type": "moor_hound",
           "count": 5,
-          "text": "Deal with 5 moor hounds that will not sleep",
-          "where": "the sheep folds and open grass around Torborhold"
+          "text": "Deal with 5 moor hounds round Brannock Fields that will not sleep",
+          "where": "the grass round Brannock Fields",
+          "near": "sp_brannock_fields"
         },
         {
           "kind": "use",
@@ -882,13 +892,14 @@
           "where": "Brannock Fields, the farmland near Torborhold"
         },
         {
-          "kind": "talk",
-          "npc": "goody_harl",
-          "text": "Ask Goody Harl about her pig",
-          "where": "Wamonhold, east of Torborhold"
+          "kind": "use",
+          "vignette": "sp_brannock_fields",
+          "object": "Scarecrow",
+          "text": "Lull the crows on the scarecrow to sleep",
+          "where": "Brannock Fields, the farmland near Torborhold"
         }
       ],
-      "done": "The pig is asleep. The pig has never been asleep. You're better than you think. Robes that hum softly, and a bound imp now does as you ask.",
+      "done": "The crows are asleep. Crows have never been asleep. You're better than you think. Robes that hum softly, and a bound imp now does as you ask.",
       "reward": {
         "xp": 0.6,
         "gold": 15,
@@ -1024,7 +1035,7 @@
       "name": "Nine Stones, Nine Stars",
       "level": 3,
       "giver": "trainer_arcane",
-      "offer": "The old folk stood nine stones in a ring to mark where the stars come down. You throw stars for a living, so go and check. Sight the evening star over the heel stone, then fill your Constellation on the dusk flitters at Ashby's lumber camp.",
+      "offer": "The old folk stood nine stones in a ring to mark where the stars come down. You throw stars for a living, so go and check. Sight the evening star over the heel stone, then fill your Constellation on the dusk flitters that roost round the stones.",
       "steps": [
         {
           "kind": "use",
@@ -1037,9 +1048,9 @@
           "kind": "kill",
           "type": "dusk_flitter",
           "count": 6,
-          "near": "sp_ashby_lumber_camp",
-          "text": "Bring down 6 dusk flitters with thrown stars",
-          "where": "Ashby's Lumber Camp, at the edge of the woods"
+          "near": "sp_nine_maidens",
+          "text": "Bring down 6 dusk flitters round the stones with thrown stars",
+          "where": "The Nine Maidens, a ring of standing stones on the hill"
         },
         {
           "kind": "use",
@@ -1057,7 +1068,9 @@
           "tier": "rare",
           "slot": "weapon",
           "base": "wand",
-          "name": "Wand of the Ninth Star"
+          "name": "Wand of the Ninth Star",
+          "attune": "arcane",
+          "castStyle": "fan"
         },
         "perks": 1,
         "crates": [
@@ -1070,6 +1083,59 @@
       "rewardText": "A rare wand, Wand of the Ninth Star, and one extra perk-forest point.",
       "classes": [
         "starcaller"
+      ]
+    },
+    {
+      "id": "class_starblade",
+      "name": "Steel by Starlight",
+      "level": 3,
+      "giver": "trainer_arcane",
+      "offer": "A Star Blade's sword is only steel until the sky has had a look at it. Go up to the Nine Maidens — it is all up there, you will not have to walk back and forth. Lay your blade on the altar stone, let the boars on the hill find out what a star shield does when they charge it, then hold the blade up at the heel stone and see if the evening star sits on its point.",
+      "steps": [
+        {
+          "kind": "use",
+          "vignette": "sp_nine_maidens",
+          "object": "Altar stone",
+          "text": "Lay your blade on the altar stone at the Nine Maidens",
+          "where": "The Nine Maidens, a ring of standing stones on the hill"
+        },
+        {
+          "kind": "kill",
+          "type": "thicket_boar",
+          "count": 5,
+          "near": "sp_nine_maidens",
+          "text": "Turn 5 thicket boars on your star shield, just below the stones",
+          "where": "The slope under the Nine Maidens"
+        },
+        {
+          "kind": "use",
+          "vignette": "sp_nine_maidens",
+          "object": "Heel stone",
+          "text": "Hold the blade up at the heel stone until the evening star sits on its point",
+          "where": "The Nine Maidens, a ring of standing stones on the hill"
+        }
+      ],
+      "done": "Five boars and not a scratch through the shield? The star took to the blade, then. Here — a sword that was waiting for someone like you, and a perk point.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "item": {
+          "tier": "rare",
+          "slot": "weapon",
+          "base": "longsword",
+          "name": "Edge of the Evening Star"
+        },
+        "perks": 1,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
+      },
+      "rewardText": "A rare longsword, Edge of the Evening Star, and one extra perk-forest point.",
+      "classes": [
+        "starblade"
       ]
     },
     {
@@ -1182,28 +1248,28 @@
       "name": "Lucky Finds",
       "level": 2,
       "giver": "trainer_shadow",
-      "offer": "Scavengers live on luck. Luck is mostly looking where other people don't. Rummage the lumber camp, the jetty and the inn's notice post. Something good is always lying about.",
+      "offer": "Scavengers live on luck. Luck is mostly looking where other people don't. Rummage round Turnwater Mill: under the millstone, behind the gear housing, in the sluice box. Something good is always lying about — and the rats have been at it first.",
       "steps": [
         {
           "kind": "use",
-          "vignette": "sp_ashby_lumber_camp",
-          "object": "Saw pit",
-          "text": "Rummage in the saw pit at Ashby's Lumber Camp",
-          "where": "Ashby's Lumber Camp, at the edge of the woods"
+          "vignette": "sp_turnwater_mill",
+          "object": "Millstone",
+          "text": "Rummage under the millstone at Turnwater Mill",
+          "where": "Turnwater Mill, on the stream near Torborhold"
         },
         {
           "kind": "use",
-          "vignette": "sp_tench_pool",
-          "object": "Old jetty",
-          "text": "Poke under the old jetty at Tench Pool",
-          "where": "Tench Pool, the fishing spot near Torborhold"
+          "vignette": "sp_turnwater_mill",
+          "object": "Gear housing",
+          "text": "Poke about behind the gear housing",
+          "where": "Turnwater Mill, on the stream near Torborhold"
         },
         {
           "kind": "use",
-          "vignette": "sp_pail_and_plough",
-          "object": "Notice post",
-          "text": "Read every scrap on the inn's notice post",
-          "where": "The Pail and Plough, the crossroads inn on the Orrinsford road"
+          "vignette": "sp_turnwater_mill",
+          "object": "Sluice lever",
+          "text": "Check the box under the sluice lever",
+          "where": "Turnwater Mill, on the stream near Torborhold"
         },
         {
           "kind": "collect",
@@ -1211,6 +1277,7 @@
           "count": 3,
           "from": "cairn_rat",
           "chance": 0.5,
+          "near": "sp_turnwater_mill",
           "text": "Find 3 lucky trinkets in the nests of cairn rats",
           "where": "Turnwater Mill, on the stream near Torborhold"
         }
@@ -1243,7 +1310,7 @@
       "name": "A Rune That Holds",
       "level": 3,
       "giver": "trainer_runes",
-      "offer": "A rune is struck, not drawn. You need a stone that's heard a lot and said nothing. The heel stone at the Nine Maidens has been listening for a thousand years. Take a rubbing, temper it at the mill, then test it on hide.",
+      "offer": "A rune is struck, not drawn. You need a stone that's heard a lot and said nothing. The heel stone at the Nine Maidens has been listening for a thousand years. Take a rubbing, temper it on the altar stone, then test it on hide.",
       "steps": [
         {
           "kind": "use",
@@ -1254,18 +1321,18 @@
         },
         {
           "kind": "use",
-          "vignette": "sp_turnwater_mill",
-          "object": "Millstone",
-          "text": "Temper your rune on the turning millstone",
-          "where": "Turnwater Mill, on the stream near Torborhold"
+          "vignette": "sp_nine_maidens",
+          "object": "Altar stone",
+          "text": "Temper your rune on the altar stone",
+          "where": "The Nine Maidens, a ring of standing stones on the hill"
         },
         {
           "kind": "kill",
           "type": "thicket_boar",
           "count": 5,
-          "near": "sp_brannock_fields",
-          "text": "Test your rune hammer on 5 thicket boars",
-          "where": "Brannock Fields, the farmland near Torborhold"
+          "near": "sp_nine_maidens",
+          "text": "Test your rune hammer on 5 thicket boars below the stones",
+          "where": "the slope below the Nine Maidens"
         }
       ],
       "done": "It held. Five boars and not a crack. You're a runesmith now, heaven help the anvils. A hammer with my mark under yours, and a perk point.",
@@ -1296,7 +1363,7 @@
       "name": "The Hunt",
       "level": 2,
       "giver": "trainer_hunt",
-      "offer": "A ranger's whole life is the hunt. Hit the butts at the drill field so I know you can shoot, then bring me hides from the hounds around the folds. Do it well and I'll whistle up the cat.",
+      "offer": "A ranger's whole life is the hunt. Hit the butts at the drill field so I know you can shoot, then bring me hides from the hounds on the grass round it and hang them on the rack to dry. Do it well and I'll whistle up the cat.",
       "steps": [
         {
           "kind": "use",
@@ -1311,15 +1378,16 @@
           "count": 5,
           "from": "moor_hound",
           "chance": 0.6,
-          "text": "Bring 5 moor hound hides",
-          "where": "the sheep folds and open grass around Torborhold"
+          "text": "Bring 5 moor hound hides from the grass round the Drill Field",
+          "where": "the open grass round the Drill Field",
+          "near": "sp_drill_field"
         },
         {
           "kind": "use",
-          "vignette": "sp_greyfletch_camp",
-          "object": "Skinning frame",
-          "text": "Stretch the hides on the skinning frame at Greyfletch Camp",
-          "where": "Greyfletch Camp, the hunters' camp at the wood's edge"
+          "vignette": "sp_drill_field",
+          "object": "Weapon rack",
+          "text": "Hang the hides on the weapon rack to dry",
+          "where": "Torbor Drill Field, just outside Torborhold's gate"
         }
       ],
       "done": "Clean hides, clean shots. You'll do. Here's a bow from my own rack — and hear that rustle? Your hunting cat's found you.",
@@ -1351,14 +1419,14 @@
       "name": "Silver and Salt",
       "level": 3,
       "giver": "trainer_hunt",
-      "offer": "Something at the Nine Maidens is souring the milk for three villages. A witch hunter strips magic off whatever wears it. Silver your edge on the tally board's old nails, then go and see what dances in the mushroom ring.",
+      "offer": "Something at the Nine Maidens is souring the milk for three villages. A witch hunter strips magic off whatever wears it. Silver your edge on the old iron bands of the heel stone, then go and see what dances in the mushroom ring.",
       "steps": [
         {
           "kind": "use",
-          "vignette": "sp_greyfletch_camp",
-          "object": "Tally board",
-          "text": "Pull silvered nails from the tally board at Greyfletch Camp",
-          "where": "Greyfletch Camp, the hunters' camp at the wood's edge"
+          "vignette": "sp_nine_maidens",
+          "object": "Heel stone",
+          "text": "Scrape silver off the old iron bands on the heel stone",
+          "where": "The Nine Maidens, a ring of standing stones on the hill"
         },
         {
           "kind": "use",
@@ -1371,8 +1439,9 @@
           "kind": "kill",
           "type": "bog_slime",
           "count": 4,
-          "text": "Purge 4 bog slimes that crawl out of the soured ground",
-          "where": "the marsh and riverbanks south of Torborhold"
+          "text": "Purge 4 bog slimes that crawl out of the soured ground by the stones",
+          "where": "the soured ground round the Nine Maidens",
+          "near": "sp_nine_maidens"
         }
       ],
       "done": "Slime. It was SLIME. Magic slime, granted. The milk's sweet again. A crossbow with a silver-tipped bolt in the groove, and a perk point.",
@@ -1403,7 +1472,7 @@
       "name": "Hold a Grudge",
       "level": 4,
       "giver": "trainer_hunt",
-      "offer": "A demon hunter's strength is a grudge, carried and fed. Gristle's hollow killed my brother's dog. I want that grudge carried by someone with younger knees. Feed it on the hounds, then hang their teeth on the trophy post.",
+      "offer": "A demon hunter's strength is a grudge, carried and fed. Gristle's hollow killed my brother's dog. I want that grudge carried by someone with younger knees. Feed it on the hounds, then dig the old dog's collar out of their bone heap.",
       "steps": [
         {
           "kind": "visit",
@@ -1425,13 +1494,6 @@
           "object": "Bone heap",
           "text": "Find the old dog's collar in the bone heap",
           "where": "Gristle's Hollow, a hound den past Greyfletch Camp"
-        },
-        {
-          "kind": "use",
-          "vignette": "sp_greyfletch_camp",
-          "object": "Trophy post",
-          "text": "Hang the teeth on the trophy post at Greyfletch Camp",
-          "where": "Greyfletch Camp, the hunters' camp at the wood's edge"
         }
       ],
       "done": "My brother will cry, and then he'll buy you a drink. A crossbow for the long grudge — and your dire hound comes to heel today.",
@@ -1463,7 +1525,7 @@
       "name": "Wearing Another Shape",
       "level": 3,
       "giver": "trainer_wilds",
-      "offer": "A druid borrows shapes. To borrow, you must first understand. Sit with the bees at Brannock, listen to the stones, then run with the boars — not after them, WITH them, until you've learned how they think. Then thin them a little.",
+      "offer": "A druid borrows shapes. To borrow, you must first understand. Sit with the bees at Brannock, stand as still as the scarecrow until the crows forget you, then run with the boars — not after them, WITH them, until you've learned how they think. Then thin them a little.",
       "steps": [
         {
           "kind": "use",
@@ -1474,10 +1536,10 @@
         },
         {
           "kind": "use",
-          "vignette": "sp_nine_maidens",
-          "object": "Ring of mushrooms",
-          "text": "Sleep one breath inside the ring of mushrooms",
-          "where": "The Nine Maidens, a ring of standing stones on the hill"
+          "vignette": "sp_brannock_fields",
+          "object": "Scarecrow",
+          "text": "Stand as still as the scarecrow until the crows forget you",
+          "where": "Brannock Fields, the farmland near Torborhold"
         },
         {
           "kind": "kill",
@@ -1517,14 +1579,14 @@
       "name": "Posts for the Spirits",
       "level": 3,
       "giver": "trainer_wilds",
-      "offer": "Shamans plant posts and the spirits gather to them. The lumber camp has posts, the jetty has posts, the inn has a post. Ask the spirits at each, then drive off the frogs that keep knocking the jetty's over.",
+      "offer": "Shamans plant posts and the spirits gather to them. Tench Pool has posts enough: the stakes of the fish traps, the jetty, the rod rack. Ask the spirits at each, and drive off the frogs that keep knocking them over.",
       "steps": [
         {
           "kind": "use",
-          "vignette": "sp_ashby_lumber_camp",
-          "object": "Log pile",
-          "text": "Choose a post-log from the pile at Ashby's Lumber Camp",
-          "where": "Ashby's Lumber Camp, at the edge of the woods"
+          "vignette": "sp_tench_pool",
+          "object": "Fish traps",
+          "text": "Choose a post from the fish traps' stakes at Tench Pool",
+          "where": "Tench Pool, the fishing spot near Torborhold"
         },
         {
           "kind": "use",
@@ -1543,13 +1605,13 @@
         },
         {
           "kind": "use",
-          "vignette": "sp_pail_and_plough",
-          "object": "Notice post",
-          "text": "Carve a spirit mark on the inn's notice post",
-          "where": "The Pail and Plough, the crossroads inn on the Orrinsford road"
+          "vignette": "sp_tench_pool",
+          "object": "Rod rack",
+          "text": "Carve a spirit mark on the rod rack",
+          "where": "Tench Pool, the fishing spot near Torborhold"
         }
       ],
-      "done": "Three posts and three happy spirits. One of them is a bear. The bear is coming with you. A scepter carved from the post-log, and the spirit bear walks at your side now.",
+      "done": "Three posts and three happy spirits. One of them is a bear. The bear is coming with you. A scepter carved from the trap stake, and the spirit bear walks at your side now.",
       "reward": {
         "xp": 0.6,
         "gold": 12,
@@ -1701,8 +1763,9 @@
           "kind": "kill",
           "type": "moor_hound",
           "count": 6,
-          "text": "Keep your poise against 6 moor hounds",
-          "where": "the sheep folds and open grass around Torborhold"
+          "text": "Keep your poise against 6 moor hounds round the shrine",
+          "where": "the grass round the Shrine of the Kind Mother",
+          "near": "sp_kind_mother_shrine"
         },
         {
           "kind": "use",
@@ -1740,7 +1803,7 @@
       "name": "Foresight",
       "level": 3,
       "giver": "trainer_mind",
-      "offer": "I saw you in a dream, killing frogs by a pool. It must happen now or my dream was a liar. First read the omens at the well and the hearth of the Pail and Plough. Then go and make my dream honest.",
+      "offer": "I saw you in a dream, killing boars in a field beside an inn. It must happen now or my dream was a liar. First read the omens at the well and the hearth of the Pail and Plough. Then go out the back and make my dream honest.",
       "steps": [
         {
           "kind": "use",
@@ -1758,11 +1821,11 @@
         },
         {
           "kind": "kill",
-          "type": "fen_croaker",
+          "type": "thicket_boar",
           "count": 5,
-          "near": "sp_tench_pool",
-          "text": "Fulfil the dream: kill 5 fen croakers at Tench Pool",
-          "where": "Tench Pool, the fishing spot near Torborhold"
+          "near": "sp_pail_and_plough",
+          "text": "Fulfil the dream: kill 5 thicket boars in the fields behind the inn",
+          "where": "the fields behind the Pail and Plough"
         }
       ],
       "done": "Exactly as dreamed. Except the hat. You weren't wearing a hat in my dream. A scepter for seeing a little further — and a small bright familiar wakes at your shoulder.",
@@ -1849,7 +1912,7 @@
       "name": "A Song for the Pail",
       "level": 2,
       "giver": "trainer_bard",
-      "offer": "A bard's songs make the party better and the enemy worse. But first, a song needs a story. The Pail and Plough has no song of its own. Go and find one: sweet water from the well, a hound's howl, a farmer's grumble. Then sing it by the hearth.",
+      "offer": "A bard's songs make the party better and the enemy worse. But first, a song needs a story. The Pail and Plough has no song of its own. Go and find one: sweet water from the well, a hound's howl from the fields, a farmer's grumble off the notice post. Then sing it by the hearth.",
       "steps": [
         {
           "kind": "use",
@@ -1862,14 +1925,16 @@
           "kind": "kill",
           "type": "moor_hound",
           "count": 4,
-          "text": "Make 4 moor hounds howl their last verse",
-          "where": "along the roads out of Torborhold"
+          "text": "Make 4 moor hounds in the fields round the inn howl their last verse",
+          "where": "the fields round the Pail and Plough",
+          "near": "sp_pail_and_plough"
         },
         {
-          "kind": "talk",
-          "npc": "goody_harl",
-          "text": "Hear Goody Harl's grumbling for the chorus",
-          "where": "Wamonhold, east of Torborhold"
+          "kind": "use",
+          "vignette": "sp_pail_and_plough",
+          "object": "Notice post",
+          "text": "Copy a farmer's grumble off the notice post for the chorus",
+          "where": "The Pail and Plough, the crossroads inn on the Orrinsford road"
         },
         {
           "kind": "use",

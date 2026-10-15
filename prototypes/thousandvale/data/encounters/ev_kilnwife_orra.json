@@ -10,7 +10,7 @@
     "level": 18,
     "respawnMs": 1800000
   },
-  "_doc": "Expansion 1 (Vharlen). The ZONE EVENT BOSS for Kiln Ridge: the Slagborn fire-priestess who fires the high kilns for the warband's rites. P1 'The Firing': a firebrand cone, sparks from the kilns on random players, and three rite lines of fire. P2 at 55% 'The Rite': she draws a ward out of the four kilns while raiders hold the yard — TIP ALL FOUR QUENCH BARRELS (use them) into the kilns to break it — and ash rain burns where it falls. P3, a new health bar 'Orra Unfired': pot shards ride every player, two kiln mouths need two players each, and a firewheel ring. Soft enrage from 4 minutes, hard at 7.",
+  "_doc": "Expansion 1 (Vharlen). The ZONE EVENT BOSS for Kiln Ridge: the Slagborn fire-priestess who fires the high kilns for the warband's rites. P1 'The Firing': a firebrand cone, sparks from the kilns on random players, and three rite lines of fire. P2 at 55% 'The Rite': she draws a ward out of the four kilns while raiders hold the yard — TIP ALL FOUR QUENCH BARRELS (use them) into the kilns to break it — and ash rain burns where it falls. P3, a new health bar 'Orra Unfired': pot shards ride every player, two kiln mouths need two players each, and a firewheel ring. Soft enrage from 4 minutes, hard at 7. OWNER #51 (2026-10-15): the phase that refilled the health bar is removed; the health bar is the whole fight.",
   "party": "Zone event, everyone nearby joins. Solo: not intended (four barrels under raiders, two soaks of 2). 3-5: playable. 10+: intended. M5 scaling: health and raiders by players enrolled; soak need = clamp(players/5, 2, 4).",
   "hpMult": 3,
   "arena": {
@@ -171,95 +171,6 @@
           }
         }
       ]
-    },
-    "pot_shards": {
-      "id": "pot_shards",
-      "name": "Pot Shards",
-      "every": [
-        15,
-        18
-      ],
-      "first": 4,
-      "cast": 0.6,
-      "say": "Fired pots burst over everyone — spread out!",
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "each",
-          "r": 3,
-          "wind": 2.4,
-          "damage": 1.4,
-          "follow": true,
-          "element": "fire"
-        }
-      ]
-    },
-    "kiln_mouths": {
-      "id": "kiln_mouths",
-      "name": "Kiln Mouths",
-      "every": [
-        22,
-        26
-      ],
-      "first": 7,
-      "cast": 1,
-      "say": "Two kiln mouths open in the ground — two of you on EACH to hold them shut!",
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "home",
-          "r": 3.5,
-          "wind": 5,
-          "damage": 0.6,
-          "offset": [
-            -12,
-            10
-          ],
-          "kind": "soak",
-          "need": 2,
-          "fail": 1.8,
-          "failSay": "A kiln mouth is left open — fire sweeps the whole yard!",
-          "element": "fire"
-        },
-        {
-          "shape": "circle",
-          "at": "home",
-          "r": 3.5,
-          "wind": 5,
-          "damage": 0.6,
-          "offset": [
-            12,
-            10
-          ],
-          "kind": "soak",
-          "need": 2,
-          "fail": 1.8,
-          "failSay": "A kiln mouth is left open — fire sweeps the whole yard!",
-          "element": "fire"
-        }
-      ]
-    },
-    "firewheel": {
-      "id": "firewheel",
-      "name": "Firewheel",
-      "every": [
-        16,
-        19
-      ],
-      "first": 11,
-      "cast": 1,
-      "say": "A wheel of fire rolls out from her — get in close!",
-      "telegraphs": [
-        {
-          "shape": "donut",
-          "at": "self",
-          "r": 18,
-          "r2": 4,
-          "wind": 1.9,
-          "damage": 2.3,
-          "element": "fire"
-        }
-      ]
     }
   },
   "phases": [
@@ -307,20 +218,6 @@
           "say": "Orra draws a ward out of the four kilns. Tip all four quench barrels to break it! It fails by itself in 25 seconds.",
           "style": "warn"
         }
-      ]
-    },
-    {
-      "name": "Orra Unfired",
-      "newBar": {
-        "hp": 0.5
-      },
-      "say": "You QUENCHED my kilns? Then I will fire you by hand!",
-      "abilities": [
-        "firebrand",
-        "pot_shards",
-        "kiln_mouths",
-        "firewheel",
-        "sparks"
       ]
     }
   ],

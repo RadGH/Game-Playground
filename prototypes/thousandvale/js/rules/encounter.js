@@ -212,22 +212,32 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
       if (ab.minRange != null && dist < ab.minRange) continue;
       if (ab.below != null && e.hp / e.maxHp > ab.below) continue;
       st.timers[ab.id] = now() + cooldownOf(st, ab);
-      const castS = (ab.cast ?? 0) * (st.script ? 1 : st.scale.wind);
-      say(st, ab.say, target);
-      if (castS > 0) {
-        st.cast = { ab, start: now(), end: now() + castS, target, tele: [], gone: false };
-        e.knockDx = 0; e.knockDz = 0; e.knockSeen = e.knockedAt;            // (Y12) only a knock DURING the cast counts
-        emit({ t: 'castbar', id: e.id, ab: ab.id, name: ab.name || ab.id, ms: Math.round(castS * 1000), int: ab.interrupt ? 1 : undefined });
-        // play-test 1 P12: the ground is marked when the cast STARTS, not when it ends — the red zone
-        // is on the client for the whole cast bar plus the wind-up, and goes off at the same moment
-        // it always did (cast end + wind)
-        placeAll(st, ab, target, castS, st.cast);
-        e.anim = 'cast';
-        return !ab.move;
-      }
-      fire(st, ab, target);
+      if (begin(st, ab, target)) { e.anim = 'cast'; return !ab.move; }
       return false;
     }
+    return false;
+  }
+
+  /**
+   * An ability starts: its call-out, then its cast bar (the ground marked at cast START — play-test 1 P12) or, with no
+   * cast bar, it goes off now. Returns true when a cast bar started. Also how a phase's or a trigger's `{ ability }`
+   * action starts one (owner #51's moved cave-ins found that an action fired the ability with no call-out and no bar).
+   */
+  function begin(st, ab, target) {
+    const e = st.e;
+    const castS = (ab.cast ?? 0) * (st.script ? 1 : st.scale.wind);
+    say(st, ab.say, target);
+    if (castS > 0 && !st.cast) {
+      st.cast = { ab, start: now(), end: now() + castS, target, tele: [], gone: false };
+      e.knockDx = 0; e.knockDz = 0; e.knockSeen = e.knockedAt;            // (Y12) only a knock DURING the cast counts
+      emit({ t: 'castbar', id: e.id, ab: ab.id, name: ab.name || ab.id, ms: Math.round(castS * 1000), int: ab.interrupt ? 1 : undefined });
+      // play-test 1 P12: the ground is marked when the cast STARTS, not when it ends — the red zone
+      // is on the client for the whole cast bar plus the wind-up, and goes off at the same moment
+      // it always did (cast end + wind)
+      placeAll(st, ab, target, castS, st.cast);
+      return true;
+    }
+    fire(st, ab, target);
     return false;
   }
 
@@ -531,7 +541,7 @@ export function attachEncounters(room, { data = null, spawn = null, spawnObject 
       if (a.say) say(st, a.say, target, a.style);
       if (a.adds) spawnAdds(st, a.adds);
       if (a.shield != null) setShield(st, a.shield);
-      if (a.ability) { const ab = abilityDef(st, a.ability); if (ab) fire(st, ab, target || bestTarget(e)); }
+      if (a.ability) { const ab = abilityDef(st, a.ability); if (ab) begin(st, ab, target || bestTarget(e)); }
       if (a.vuln) { applyStatus(e, 'vulnerable', { name: a.vuln.name || 'Exposed', kind: 'debuff', element: 'arcane', seconds: a.vuln.seconds ?? 10, takeMore: a.vuln.takeMore ?? 0.5 }, 1); emit({ t: 'fx', kind: 'status', id: e.id, status: 'vulnerable', on: true }); }
       if (a.stun) { e.stagger = Math.max(e.stagger || 0, a.stun); e.lastInterruptAt = now(); cancelCast(st, 'stun'); }
       if (a.hurt) { e.hp = Math.max(1, e.hp - Math.round(e.maxHp * a.hurt)); emit({ t: 'hit', src: null, dst: e.id, amt: Math.round(e.maxHp * a.hurt), kind: 'env', hp: Math.round(e.hp) }); checkPhases(st); }
@@ -843,7 +853,9 @@ export function validateEncounters(D) {
     for (const [k, ab] of Object.entries(s.abilities || {})) { if (ab.id !== k) bad.push(`scripts.${id}.abilities.${k}: id mismatch`); checkAbility(`scripts.${id}.abilities.${k}`, ab); }
     for (const [i, ph] of (s.phases || []).entries()) {
       for (const r of ph.abilities || []) if (typeof r === 'string' && !s.abilities?.[r]) bad.push(`scripts.${id}.phases[${i}]: unknown ability "${r}"`);
-      if (i > 0 && !ph.newBar && ph.at == null) bad.push(`scripts.${id}.phases[${i}]: needs "at" (health share) or "newBar"`);
+      // owner #51 (2026-10-15): "their health bar should be real" — no phase may refill it. A new phase is a health share.
+      if (ph.newBar) bad.push(`scripts.${id}.phases[${i}]: "newBar" is not allowed (a boss never heals back to a full bar for another phase); use "at"`);
+      if (i > 0 && !ph.newBar && ph.at == null) bad.push(`scripts.${id}.phases[${i}]: needs "at" (health share)`);
       if (i > 0 && ph.at != null && s.phases[i - 1].at != null && !s.phases[i - 1].newBar && ph.at >= s.phases[i - 1].at) bad.push(`scripts.${id}.phases[${i}]: "at" must fall`);
     }
   }

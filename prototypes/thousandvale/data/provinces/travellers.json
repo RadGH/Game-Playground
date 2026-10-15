@@ -476,7 +476,7 @@
    "titled": false
   },
   "herbalist": {
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "places": "any",
    "biomes": [
     "temperateForest",

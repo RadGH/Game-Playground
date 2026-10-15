@@ -37,14 +37,38 @@ export const WAVE_NEAR_M = [16, 24];      // a wave lands this far from the play
 export const HUNT_FAR_M = 20;             // a wave monster further than this from every living player is re-aimed
 export const ABANDON_MS = 60000;          // nobody alive in reach for this long: the event is lost (when ev.abandonMs is set)
 
-export function createEventRunner({ room, ev, rng = Math.random, info = {}, now = () => room.now() }) {
+/**
+ * Round 11 (World, live #5: "the raid should scale with the number of players taking part … this should apply to most
+ * group activities"). n = living players inside the event's reach when a wave or the boss appears (1..capPlayers):
+ *   wave head-count  x (1 + wavePerPlayer       x (n-1))   default 0.5  — each extra player brings half a wave more
+ *   wave health      x (1 + waveHealthPerPlayer x (n-1))   default 0.15
+ *   boss health      x (1 + bossHealthPerPlayer x (n-1))   default 0.6  — and a boss GROWS when more arrive mid-fight
+ * Knobs: data/quests/events.json `director.size`. Pure.
+ */
+export const CROWD_DEFAULTS = Object.freeze({ wavePerPlayer: 0.5, waveHealthPerPlayer: 0.15, bossHealthPerPlayer: 0.6, capPlayers: 20 });
+export function crowdScale(n, size = {}) {
+  const src = { ...(size || {}), ...(size && Number.isFinite(+size.crowdCapPlayers) ? { capPlayers: +size.crowdCapPlayers } : { capPlayers: CROWD_DEFAULTS.capPlayers }) };
+  const k = { ...CROWD_DEFAULTS, ...Object.fromEntries(Object.entries(src).filter(([key, v]) => key in CROWD_DEFAULTS && Number.isFinite(+v)).map(([key, v]) => [key, +v])) };
+  const players = Math.max(1, Math.min(k.capPlayers, n | 0 || 1)), more = players - 1;
+  return { players, waveCount: 1 + k.wavePerPlayer * more, waveHp: 1 + k.waveHealthPerPlayer * more, bossHp: 1 + k.bossHealthPerPlayer * more };
+}
+/** Round 11 (World, #5): how far an event reaches — who is in it, and how far its monsters follow (a raid covers its town). */
+/** One wave never brings more than this many bodies, however big the crowd (a tick budget). */
+export const WAVE_CAP = 40;
+export const EVENT_REACH = Object.freeze({ min: 150, perR: 2.5, leashM: 300, leashS: 60 });
+
+export function createEventRunner({ room, ev, rng = Math.random, info = {}, now = () => room.now(), size = null }) {
   const t0 = now();
   const spawned = new Set();
   const enrolled = new Set();
   let phase = 'warn', wave = -1, waveAt = t0, boss = null, landing = 0, landedAt = t0, result = 'live', why = null;
   let waveMobs = [], aloneSince = 0;
   const R = ev.r || 40;
-  const enrolR = Math.max(ev.enrol || 60, R * 1.2);
+  const enrolR = Math.max(ev.enrol || 60, R * EVENT_REACH.perR, EVENT_REACH.min);      // round 11 (#5): was max(enrol, R x 1.2)
+  const sizeK = size || ev.size || null;
+  const crowd = () => crowdScale(fighters(40).length, sizeK || {});
+  const leash = { m: Math.max(EVENT_REACH.leashM, enrolR + 60), s: EVENT_REACH.leashS };
+  let bossCrowd = 1;
   const I = ev.info || {};
   const durMs = ev.durationMs || (I.durationSec ? I.durationSec * 1000 : 10 * 60000);
   const centre = () => (ev.arenas && ev.arenas.length ? ev.arenas[landing % ev.arenas.length] : ev);
@@ -68,8 +92,9 @@ export function createEventRunner({ room, ev, rng = Math.random, info = {}, now 
   let lastGate = null;
   function spawnWave(k) {
     const w = ev.waves[k], c = centre(), f = focus();
-    const extra = Math.ceil((ev.scale?.adds || 0) / Math.max(1, ev.waves.length));
-    const n = pick(w.count) + extra;
+    const cs = crowd();
+    const n = Math.max(1, Math.min(WAVE_CAP, Math.round(pick(w.count) * cs.waveCount)));       // round 11 (#5): scaled by who is there now
+    const waveHp = Math.round(cs.waveHp * 100) / 100;
     // one side: away from the arena centre as seen from the players (they come IN from the edge), a 100 degree fan
     const out = Math.hypot(f.x - c.x, f.z - c.z) > 4 ? Math.atan2(f.z - c.z, f.x - c.x) + Math.PI : rng() * Math.PI * 2;
     waveMobs = [];
@@ -90,7 +115,7 @@ export function createEventRunner({ room, ev, rng = Math.random, info = {}, now 
         if (!room.walkable(x, z)) { x = g.x - ux * 2; z = g.z - uz * 2; }
         if (!room.walkable(x, z)) { x = f.x; z = f.z; }
         const m = room.spawn({ kind: 'monster', type: w.type, level: w.level || ev.level || 1, x, z, yaw: Math.atan2(-uz, -ux), rank: w.rank || 'normal',
-          data: { event: ev.uid, noRank: true, gate: g.id || null, path: [[g.x - ux * 5, g.z - uz * 5], [f.x, f.z]] } });
+          data: { event: ev.uid, noRank: true, gate: g.id || null, path: [[g.x - ux * 5, g.z - uz * 5], [f.x, f.z]], leash, ...(waveHp !== 1 ? { scale: waveHp } : {}) } });
         spawned.add(m); waveMobs.push(m);
       }
       return;
@@ -102,7 +127,7 @@ export function createEventRunner({ room, ev, rng = Math.random, info = {}, now 
       for (let q = 1; q < 16 && !room.walkable(x, z); q++) { const aa = a + q * 0.7, dd = d * (q < 8 ? 1 : 0.5); x = f.x + Math.cos(aa) * dd; z = f.z + Math.sin(aa) * dd; }
       if (!room.walkable(x, z)) { x = f.x; z = f.z; }
       const m = room.spawn({ kind: 'monster', type: w.type, level: w.level || ev.level || 1, x, z, yaw: a + Math.PI, rank: w.rank || 'normal',
-        data: { event: ev.uid, noRank: true, path: [[f.x + 1.5, f.z], [f.x - 1.5, f.z]] } });
+        data: { event: ev.uid, noRank: true, path: [[f.x + 1.5, f.z], [f.x - 1.5, f.z]], leash, ...(waveHp !== 1 ? { scale: waveHp } : {}) } });
       spawned.add(m); waveMobs.push(m);
     }
   }
@@ -123,11 +148,20 @@ export function createEventRunner({ room, ev, rng = Math.random, info = {}, now 
     const c = centre();
     const enc = ev.boss || null, meta = bossInfo();
     const type = ev.monster || meta.body || 'wolf';
+    const cs = crowd(); bossCrowd = cs.players;
+    const hpX = Math.round(Math.max(cs.bossHp, ev.scale?.hp || 1) * 100) / 100;      // round 11 (#5): the crowd here now (the director's start-time size is the floor)
     const e = room.spawn({ kind: 'monster', type, level: ev.level || 5, x: c.x, z: c.z, rank: 'boss', state: STATE.elite, name: ev.bossName || meta.name || ev.name,
-      data: { encounter: enc, event: ev.uid, scale: ev.scale?.hp || 1 } });
-    if (!e.r || !e.r.unit) { e.setMax(Math.round(e.hpMax * (ev.scale?.hp || 1))); e.setHp(e.hpMax); }   // the stand-in rules: scale here (C reads data.scale)
+      data: { encounter: enc, event: ev.uid, scale: hpX, leash } });
+    if (!e.r || !e.r.unit) { e.setMax(Math.round(e.hpMax * hpX)); e.setHp(e.hpMax); }   // the stand-in rules: scale here (C reads data.scale)
     spawned.add(e);
     return e;
+  }
+  /** Multiply a living boss's health (maximum and current) by k > 1 — the rules' unit when there is one. */
+  function growBoss(e, k) {
+    if (!e || e.dead || !(k > 1)) return;
+    const u = e.r && e.r.unit;
+    if (u && Number.isFinite(u.maxHp)) { u.maxHp = Math.round(u.maxHp * k); u.hp = Math.round(u.hp * k); e.setMax(u.maxHp, 0); e.setHp(u.hp); }
+    else { const frac = e.hp / Math.max(1, e.hpMax); e.setMax(Math.round(e.hpMax * k)); e.setHp(Math.max(1, Math.round(e.hpMax * frac))); }
   }
   function enrol() {
     const c = centre();
@@ -145,6 +179,8 @@ export function createEventRunner({ room, ev, rng = Math.random, info = {}, now 
     get result() { return result; },
     get why() { return why; },
     get endsAt() { return t0 + durMs; },
+    get reach() { return enrolR; },
+    get crowd() { return bossCrowd; },
     step() {
       if (result !== 'live') return result;
       const t = now();
@@ -174,6 +210,8 @@ export function createEventRunner({ room, ev, rng = Math.random, info = {}, now 
       if (phase === 'boss') {
         if (!boss || boss.dead) { result = 'won'; why = null; return result; }
         if (boss.removed) return lose('fled');
+        // round 11 (#5): more people turned up — the boss grows with them (its health share is kept; it never shrinks)
+        { const cs = crowd(); if (cs.players > bossCrowd) { growBoss(boss, cs.bossHp / crowdScale(bossCrowd, sizeK || {}).bossHp); bossCrowd = cs.players; } }
         // a flyover lifts off and lands at the next arena
         if (ev.arenas && ev.arenas.length > 1 && t - landedAt > LANDING_MS) {
           const frac = boss.hp / Math.max(1, boss.hpMax);

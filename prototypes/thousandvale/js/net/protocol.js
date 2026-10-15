@@ -76,6 +76,7 @@ export const CODES = Object.freeze({
   ignored: 'They are not listening to you.',
   guild: 'Guild action not possible.',
   mail: 'Mail action not possible.',
+  market: 'Market action not possible.',
   callboard: 'Callboard action not possible.',
   kit: 'That starting kit is not one your class can pick.',
   forbidden: 'Admins only.',
@@ -162,12 +163,14 @@ export const CLIENT_MSGS = Object.freeze({
   delete:  { on: 'gw', fields: { char: 'int', name: 'str:24' }, rate: 0.5, burst: 3 },      // owner feedback 9, X6: delete a character (the typed name confirms it) -> deleted, then charList
   feedbackMine: { on: 'both', fields: { limit: '?int', before: '?int' }, rate: 1, burst: 5 },      // round 8, W29: my own reports -> feedbackMine (`feedback {op:'mine'}` is the same call)
   admin:   { on: 'both', fields: { op: 'str:16', id: '?int', state: '?str:16', kind: '?str:16', limit: '?int', before: '?int', note: '?str:500' }, rate: 2, burst: 10 },
-  fish:    { on: 'p', fields: { op: 'str:8', aim: '?vec2', held: '?num', score: '?num', holds: '?nums' }, rate: 4, burst: 8 },
+  fish:    { on: 'p', fields: { op: 'str:8', aim: '?vec2', held: '?num', score: '?num', holds: '?nums', pool: '?id' }, rate: 4, burst: 8 },      // round 11 (P, live #12): `pool` = the fish pool E was pressed on (casting is only at a pool)
   cook:    { on: 'p', fields: { op: '?str:8', id: '?str:64', n: '?int' }, rate: 2, burst: 6 },
   // round 8 W9 (P-core, docs/protocol.md §25): professions — learn / gather / make. `inputs` = the mini-game's raw [t, v, t, v, …]
   prof:    { on: 'p', fields: { op: 'str:8', id: 'str:16', npc: 'id' }, rate: 2, burst: 6 },
   gather:  { on: 'p', fields: { op: 'str:8', id: '?id', inputs: '?nums' }, rate: 4, burst: 8 },
   craft:   { on: 'p', fields: { op: '?str:8', id: '?str:48', npc: '?id', base: '?str:48', n: '?int', uid: '?str:40', index: '?int', element: '?str:16', inputs: '?nums' }, rate: 4, burst: 10 },
+  // round 11 (Market, owner #25; docs/protocol.md "Round 11 — Market"): browse | mine | sell {uid, price} | buy {id, price} | cancel {id}
+  market:  { on: 'p', fields: { op: 'str:8', q: '?str:40', tab: '?str:8', slot: '?str:16', sort: '?str:8', page: '?int', uid: '?str:40', price: '?int', id: '?int' }, rate: 2, burst: 8 },
 });
 
 /** Server -> client JSON messages (documentation + tests; the server is trusted, the client does not validate). */
@@ -218,6 +221,9 @@ export const SERVER_MSGS = Object.freeze({
   mailList: ['mail', 'unread'],
   mailOpen: ['mail'],
   mailR: ['op', 'ok', 'why', 'msg'],
+  marketList: ['list', 'total', 'page', 'per'],
+  marketMine: ['list', 'cap', 'feePct', 'quotes'],
+  marketR: ['op', 'ok'],
   muted: ['until', 'by', 'msg'],
   // play-test 1
   talentR: ['op', 'ok'],
@@ -297,7 +303,7 @@ export const LOOT_OPS = Object.freeze(['open', 'take', 'all', 'close', 'roll']);
 /** Shop op aliases D-UI's first draft used ('list' = open, 'buyback' = back, 'repair' = refused: no durability). */
 export const ROLL_CHOICES = Object.freeze(['need', 'greed', 'skip']);
 export const SHOP_OPS = Object.freeze(['open', 'buy', 'sell', 'back', 'list', 'buyback', 'repair']);
-export const MOUNT_OPS = Object.freeze(['summon', 'off', 'cancel']);      // cancel (round 8, W26): stop the call, stay on foot
+export const MOUNT_OPS = Object.freeze(['summon', 'off', 'cancel', 'pick']);      // pick {id} (round 11, #44): the mount in the Mount slot      // cancel (round 8, W26): stop the call, stay on foot
 export const PREF_KEYS = Object.freeze(['showGear', 'showHelm']);
 /** Party loot thresholds (`party {op:'loot', code}`), lowest first; Farhold's rarity ladder. */
 export const LOOT_MINS = Object.freeze(['magic', 'rare', 'legendary', 'unique']);   // = C's js/rules/loot-rules.js LOOT_THRESHOLDS ('epic' -> legendary)
@@ -309,6 +315,8 @@ export const ITEM_OPS = Object.freeze(['equip', 'unequip', 'destroy', 'use', 'st
 export const CHAT_CHANNELS = Object.freeze(['party', 'guild', 'zone', 'trade', 'world', 'w']);
 /** Mail ops (`mail {op}`, province socket). */
 export const MAIL_OPS = Object.freeze(['list', 'read', 'send', 'take', 'return', 'delete']);
+/** Market ops (`market {op}`, province socket; round 11, owner #25). */
+export const MARKET_OPS = Object.freeze(['browse', 'mine', 'sell', 'buy', 'cancel']);
 /** Room kinds (`joined.room.kind`). */
 export const ROOM_KINDS = Object.freeze(['wilds', 'town', 'instance']);
 

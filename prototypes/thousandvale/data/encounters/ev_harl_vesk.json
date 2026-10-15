@@ -4,7 +4,7 @@
   "tier": "event",
   "body": "brigand_captain",
   "place": "realm event siege_torborhold: the raid's captain, fought in the open at Torborhold's gate (no arena, no furniture)",
-  "_doc": "Stream E (play-test 6 U8). The captain of the raid on Torborhold. Before this the siege's boss had NO script and fell back to the Barrow Warden's (defaults.boss.any) — the dungeon boss's name, and a ward that only three braziers can break, in a town street with no braziers: 'he became unkillable'. Harl is a level-3 fight for whoever is in town: a wide axe sweep to step out of, a charge down a line, and at half health he whistles up three raiders (no ward — he keeps fighting). Out of raiders, he fights on with a second, shorter health bar. Nothing in this script needs an object to be there. Enrage 4 min.",
+  "_doc": "Stream E (play-test 6 U8). The captain of the raid on Torborhold. Before this the siege's boss had NO script and fell back to the Barrow Warden's (defaults.boss.any) — the dungeon boss's name, and a ward that only three braziers can break, in a town street with no braziers: 'he became unkillable'. Harl is a level-3 fight for whoever is in town: a wide axe sweep to step out of, a charge down a line, and at half health he whistles up three raiders (no ward — he keeps fighting). Out of raiders, he fights on with a second, shorter health bar. Nothing in this script needs an object to be there. Enrage 4 min. OWNER #51 (2026-10-15): the phase that refilled the health bar is removed; the health bar is the whole fight.",
   "party": "Solo: fair at level 3-4 (step out of the sweep, sidestep the charge). 2-5: the event's own sizing adds health and raiders.",
   "hpMult": 2.5,
   "say": {
@@ -114,18 +114,6 @@
           "say": "Three raiders answer the whistle. Harl is NOT shielded: keep hitting him or clear them first.",
           "style": "warn"
         }
-      ]
-    },
-    {
-      "name": "On His Own",
-      "newBar": {
-        "hp": 0.5
-      },
-      "say": "Fine. I'll do it myself.",
-      "abilities": [
-        "axe_sweep",
-        "gate_charge",
-        "thrown_torch"
       ]
     }
   ]

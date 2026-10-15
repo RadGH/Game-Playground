@@ -8,6 +8,7 @@ import { createPanel, h, confirmBox } from './ui-panel.js';
 import { rememberItems } from './ui/item-card.js';
 import { iconFor } from './ui/item-icons.js';
 import { bagRoom, isGift, isCrate } from './ui/pt5-core.js';
+import { tabOf, freeIn } from '../sim/bag-tabs.js';      // round 11 (#11): bag tabs
 import { UNSEEN } from './ui/unseen.js';
 
 /** An item square with its 3D icon and the shared item card on hover (P7/P15/P16). */
@@ -62,16 +63,20 @@ export function createMail({ net: getNet, hud, bag, me, inTown }) {
     const items = list.map(it => itemSlot(it, (m.taken ? '.taken' : '') + (isGift(it) ? '.gift' : isCrate(it) ? '.crate' : '')));
     const left = hasAttachments(m);
     // T20 (play-test 5): taking needs room in the bag — say so BEFORE the click, with the numbers
-    const room = bagRoom(bag?.state?.bag?.length || 0, list.length, bag?.max || undefined);
+    // round 11 (#11): room is per bag tab (Equipment / Items; Other never fills) — the tab that cannot take its share decides
+    const have = bag?.state?.bag || [], max = bag?.max || 40;
+    const tight = ['gear', 'items'].map(t => ({ t, need: list.filter(it => tabOf(it) === t).length, free: freeIn(have, max, t) })).find(x => x.need > x.free);
+    const room = tight ? bagRoom(max - tight.free, tight.need, max) : { ok: true, need: list.length, free: list.length, why: '' };
     const gift = list.find(it => isGift(it) || isCrate(it)) || null;
     const canTake = left && room.ok && (inTown?.() || isSystem(m));
     panel.fill(
-      h('div.ml-head', {}, h('span', {}, when(m.sentAt)), m.kind === 'return' ? h('span.ml-tag', {}, 'Returned to you') : isSystem(m) ? h('span.ml-tag.sys', {}, m.kind === 'gift' ? 'A gift' : m.kind === 'event' ? 'Event reward' : 'From the realm') : null, left && m.kind !== 'return' && m.expiresAt ? h('span.ml-exp', {}, expiresText(m.expiresAt)) : null),
+      h('div.ml-head', {}, h('span', {}, when(m.sentAt)), m.kind === 'return' ? h('span.ml-tag', {}, 'Returned to you') : isSystem(m) ? h('span.ml-tag.sys', {}, m.kind === 'gift' ? 'A gift' : m.kind === 'event' ? 'Event reward' : m.kind === 'market' ? 'From the Market' : 'From the realm') : null, left && m.kind !== 'return' && m.expiresAt ? h('span.ml-exp', {}, expiresText(m.expiresAt)) : null),
       h('div.ml-body', {}, m.body || (m.body === undefined ? 'Opening…' : '')),
       list.length || m.gold ? h('div.ml-attach' + (gift && left ? '.has-gift' : ''), {}, h('span.label', {}, m.taken ? 'It held' : `Inside — ${attachText(m)}`), h('div.ml-items', {}, items, m.gold ? h('span.ml-gold', {}, `${m.gold} gold`) : null),
         left && list.length ? h('p.ml-names', {}, list.map(it => it.name).filter(Boolean).join(' · ')) : null,
-        gift && left ? h('p.ml-gifthint', {}, isGift(gift) ? 'The gift goes into your bag and is unwrapped at once.' : 'The crate goes into your bag — click it there to open it.') : null) : null,
-      left && !room.ok ? h('p.tiny-left.warn-text.ml-room', {}, room.why) : null,
+        gift && left ? h('p.ml-gifthint', {}, isGift(gift) ? 'The gift goes into your bag and is unwrapped at once.' : 'The crate goes into your bag — click it there to open it.') : null,
+        gift && left && room.ok && freeIn(have, max, 'gear') < 1 ? h('p.tiny-left.warn-text.ml-room', {}, `Your Equipment tab is full: the ${isGift(gift) ? 'gift' : 'crate'} will wait in your bag (Other) unopened until you make room.`) : null) : null,      // round 11 (owner #25)
+      left && !room.ok ? h('p.tiny-left.warn-text.ml-room', {}, room.why + ' Everything stays in the letter until then.') : null,
       left ? townNote(m) : null,
       h('div.row.end', {},
         h('button.ghost', { type: 'button', onclick: () => { S.view = 'inbox'; S.open = null; draw(); } }, '← Inbox'),

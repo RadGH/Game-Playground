@@ -4,7 +4,7 @@
   "tier": "boss",
   "body": "obsidian_warden",
   "place": "dungeon lava_tube set B (The Dry Wells, Pumice Wastes, level 15-18): the end boss at the last well",
-  "_doc": "An obsidian warden left to guard the island's last spring; the spring dried and it still guards the hole. P1 \"Dry Watch\": an obsidian sweep, a beam of sunlight focused through its glass body (a long line that turns), and dust devils that wander (scatter). P2 at 60% \"Locked Spring\": it seals itself; draw water at the three well windlasses (braziers you use) to crack its seal. P3 new bar \"Parched\": the heat comes up through the floor — only the ground right beside the three wells is safe from the Heat Wave; a stack on a random player and the beam turning twice as fast.",
+  "_doc": "An obsidian warden left to guard the island's last spring; the spring dried and it still guards the hole. P1 \"Dry Watch\": an obsidian sweep, a beam of sunlight focused through its glass body (a long line that turns), and dust devils that wander (scatter). P2 at 60% \"Locked Spring\": it seals itself; draw water at the three well windlasses (braziers you use) to crack its seal. P3 new bar \"Parched\": the heat comes up through the floor — only the ground right beside the three wells is safe from the Heat Wave; a stack on a random player and the beam turning twice as fast. OWNER #51 (2026-10-15): the phase that refilled the health bar is removed; the health bar is the whole fight.",
   "party": "Solo: very hard (three windlasses and the heat wave). 2-3: one tanks, one draws water. 5: as designed — share the stack.",
   "hpMult": 4,
   "arena": {
@@ -134,78 +134,6 @@
           "status": "bleed"
         }
       ]
-    },
-    "heat_wave": {
-      "id": "heat_wave",
-      "name": "Heat Wave",
-      "every": [
-        24,
-        28
-      ],
-      "first": 10,
-      "cast": 1.5,
-      "say": "HEAT WAVE — get beside a well before it hits!",
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "object",
-          "object": "well",
-          "r": 3.5,
-          "kind": "safe",
-          "wind": 3.5,
-          "damage": 2.6,
-          "element": "fire"
-        }
-      ]
-    },
-    "thirst": {
-      "id": "thirst",
-      "name": "Shared Thirst",
-      "every": [
-        19,
-        23
-      ],
-      "first": 6,
-      "cast": 1,
-      "say": "{target} is parched — stand with them and share the water!",
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "random",
-          "r": 3,
-          "kind": "stack",
-          "need": 3,
-          "follow": true,
-          "wind": 4,
-          "damage": 3
-        }
-      ]
-    },
-    "fast_beam": {
-      "id": "fast_beam",
-      "name": "Noon Glass",
-      "every": [
-        14,
-        17
-      ],
-      "first": 3,
-      "cast": 0.6,
-      "say": "The beam turns faster!",
-      "telegraphs": [
-        {
-          "shape": "line",
-          "at": "self",
-          "len": 18,
-          "w": 2.5,
-          "count": 6,
-          "rotate": 0.5,
-          "delay": 0.2,
-          "wind": 1.2,
-          "damage": 1.8,
-          "element": "fire",
-          "status": "seared"
-        }
-      ]
     }
   },
   "phases": [
@@ -255,19 +183,6 @@
         "fade": "The obsidian seal cracks by itself.",
         "pool": 0.1
       }
-    },
-    {
-      "name": "Parched",
-      "newBar": {
-        "hp": 0.55
-      },
-      "say": "The ground cracks with heat. Only the wells are cool now.",
-      "abilities": [
-        "sweep",
-        "heat_wave",
-        "thirst",
-        "fast_beam"
-      ]
     }
   ],
   "triggers": [

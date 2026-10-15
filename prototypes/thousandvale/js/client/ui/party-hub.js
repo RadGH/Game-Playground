@@ -12,6 +12,7 @@ export const HUB_TABS = [
   { id: 'friends', label: 'Friends' },
   { id: 'guild', label: 'Guild' },
   { id: 'mail', label: 'Mail' },
+  { id: 'market', label: 'Market' },      // round 11 (owner #25): the player market (js/client/ui/market.js)
   { id: 'callboard', label: 'Group Finder' },
 ];
 
@@ -67,7 +68,7 @@ export function createPartyHub({ panels, social, net, hud, chat }) {
     current = id;
     const t = T.get(id);
     switching = true; try { t.origOpen?.(); } finally { switching = false; }
-    hub.setTitle(HUB_TABS.find(x => x.id === id)?.label || 'Party', 'Party · friends · guild · mail · group finder');
+    hub.setTitle(HUB_TABS.find(x => x.id === id)?.label || 'Party', 'Party · friends · guild · mail · market · group finder');
     markTabs();
   }
   function toggle(id = 'party') { if (hub.isOpen && current === id) hub.close(); else show(id); }

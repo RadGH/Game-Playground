@@ -1,0 +1,161 @@
+{
+ "_doc": "Skybox panoramas (play-test 11 Z59): js/client/sky-box.js. horizonV = where the horizon sits in the picture (0 top .. 1 bottom); horizon / zenith = average colours there (linear-ish sRGB 0..1). Made by tools/sky-art.py from Codex pictures.",
+ "skies": {
+  "day_clear": {
+   "file": "day_clear.webp",
+   "w": 2048,
+   "h": 732,
+   "horizonV": 0.9164,
+   "horizon": [
+    0.5843,
+    0.8118,
+    0.9843
+   ],
+   "fog": [
+    0.5882,
+    0.8,
+    0.9804
+   ],
+   "low": [
+    0.5725,
+    0.7608,
+    0.9373
+   ],
+   "zenith": [
+    0.0118,
+    0.4196,
+    0.8549
+   ]
+  },
+  "cloudy": {
+   "file": "cloudy.webp",
+   "w": 2048,
+   "h": 675,
+   "horizonV": 0.9097,
+   "horizon": [
+    0.7216,
+    0.7882,
+    0.8549
+   ],
+   "fog": [
+    0.7255,
+    0.7843,
+    0.8392
+   ],
+   "low": [
+    0.5686,
+    0.6431,
+    0.7255
+   ],
+   "zenith": [
+    0.1843,
+    0.4627,
+    0.7882
+   ]
+  },
+  "dawn": {
+   "file": "dawn.webp",
+   "w": 2048,
+   "h": 670,
+   "horizonV": 0.9099,
+   "horizon": [
+    0.9922,
+    0.9059,
+    0.651
+   ],
+   "fog": [
+    0.9922,
+    0.8667,
+    0.6275
+   ],
+   "low": [
+    0.9647,
+    0.7216,
+    0.698
+   ],
+   "zenith": [
+    0.4078,
+    0.6667,
+    0.9569
+   ]
+  },
+  "dusk": {
+   "file": "dusk.webp",
+   "w": 2048,
+   "h": 650,
+   "horizonV": 0.9059,
+   "horizon": [
+    0.9922,
+    0.6314,
+    0.2863
+   ],
+   "fog": [
+    0.9882,
+    0.6078,
+    0.2706
+   ],
+   "low": [
+    0.9294,
+    0.498,
+    0.3333
+   ],
+   "zenith": [
+    0.0627,
+    0.1647,
+    0.4078
+   ]
+  },
+  "night": {
+   "file": "night.webp",
+   "w": 2048,
+   "h": 708,
+   "horizonV": 0.9145,
+   "horizon": [
+    0.4353,
+    0.651,
+    0.9725
+   ],
+   "fog": [
+    0.1686,
+    0.2843,
+    0.4588
+   ],
+   "low": [
+    0.098,
+    0.2745,
+    0.6078
+   ],
+   "zenith": [
+    0.0,
+    0.0863,
+    0.2588
+   ]
+  },
+  "vharlen": {
+   "file": "vharlen.webp",
+   "w": 2048,
+   "h": 690,
+   "horizonV": 0.9122,
+   "horizon": [
+    0.9725,
+    0.6706,
+    0.3098
+   ],
+   "fog": [
+    0.9725,
+    0.6863,
+    0.3255
+   ],
+   "low": [
+    0.8941,
+    0.6431,
+    0.3725
+   ],
+   "zenith": [
+    0.1608,
+    0.4039,
+    0.6745
+   ]
+  }
+ }
+}

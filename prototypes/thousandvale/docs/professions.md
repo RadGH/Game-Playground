@@ -33,3 +33,11 @@ Ten trades, skill 1-100 each, every character can learn all of them.
 - **Tempering** (ideas from Farhold's upgrade bench, none of its code): quality one step up (capped by skill: high at 25, elite at 60, exotic at 90), promote
   plain -> uncommon -> rare with a new property, reweave one property, brand a weapon with an element. A missed gauge costs the materials and the fee; the item is never changed.
 - **Adding a province / higher zones:** tiers 4 and 5 are already in the data (skill 75 / 90, level bands 28-40 / 38-50); `tierMix()` in the tool decides which tiers a zone gets from its level band.
+
+## Round 11 (2026-10-15) — what changed
+- **Every character knows all ten trades** and starts with a pick, hatchet, knife, sickle and rod (given once per trade on join: `grantAll` in js/sim/professions.js). Trainers no longer teach; they show your rank, sell a lost tool and open their station. A quest step `learn {prof}` completes on talking to anyone who trains that trade.
+- **Fishing only at a fish pool** (E on it, "Fish here", within 16 m of its middle or its shore point). Open water takes no line.
+- **High score** (Fine or Perfect): main materials x1.5 rounded up + one uncommon-or-better find (`gather.highScore` in data/rules/professions.json). Raw prices were lowered to keep the gold rule (`RAW_PRICE`).
+- **Experience x3** for every profession (gather/craft `xpPerTier`, angling `xp.mult`).
+- **Crafted gear is never plain** (`craft.rarity.floor: magic`, rare 15/25/35/50% by quality + skill surplus); the chosen pattern is honoured.
+- **Marked trees:** tier 2+ only in zones whose band starts at level 5 (`logMix` in the tool); `tierMix()` still decides ore and herbs.

@@ -1,5 +1,5 @@
 {
- "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z12_10, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z12_10, added where a kill / collect quest's area held fewer of its monster than the step needs (round 11: max(count + 4, 2 x count) — two players at once; they come back in 1-1.5 minutes). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
  "zone": "z12_10",
  "terrainHash": "4958e2b7",
  "placements": [
@@ -13,15 +13,19 @@
     18
    ],
    "count": [
-    2,
-    2
+    3,
+    3
    ],
    "x": 1717,
    "z": 842,
    "yaw": 0,
    "radius": 8,
    "quest": "cd_the_rim_holds",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",
@@ -33,15 +37,139 @@
     18
    ],
    "count": [
-    1,
-    1
+    3,
+    3
    ],
-   "x": 1717,
-   "z": 842,
+   "x": 1704,
+   "z": 854,
    "yaw": 0,
    "radius": 8,
    "quest": "cd_the_rim_holds",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_cd_the_rim_holds_0_2",
+   "monster": "obsidian_warden",
+   "with": null,
+   "level": [
+    18,
+    18
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1719,
+   "z": 818,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "cd_the_rim_holds",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_cd_the_rim_holds_1_0",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    18,
+    18
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1337,
+   "z": 1552,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "cd_the_rim_holds",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_cd_the_rim_holds_1_1",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    18,
+    18
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1256,
+   "z": 1533,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "cd_the_rim_holds",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_cd_the_rim_holds_1_2",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    18,
+    18
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1339,
+   "z": 1528,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "cd_the_rim_holds",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_cd_the_rim_holds_1_3",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    18,
+    18
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1263,
+   "z": 1543,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "cd_the_rim_holds",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",
@@ -53,15 +181,91 @@
     18
    ],
    "count": [
-    2,
-    2
+    3,
+    3
    ],
    "x": 1653,
    "z": 1143,
    "yaw": 0,
    "radius": 8,
    "quest": "cd_lake_shore",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_cd_lake_shore_0_1",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    18,
+    18
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1640,
+   "z": 1155,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "cd_lake_shore",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_cd_lake_shore_0_2",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    18,
+    18
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1655,
+   "z": 1119,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "cd_lake_shore",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_cd_lake_shore_0_3",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    18,
+    18
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1660,
+   "z": 1153,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "cd_lake_shore",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",
@@ -73,15 +277,67 @@
     18
    ],
    "count": [
-    1,
-    1
+    3,
+    3
    ],
    "x": 1660,
    "z": 1107,
    "yaw": 0,
    "radius": 8,
    "quest": "cd_crater_guard",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_cd_crater_guard_0_1",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    18,
+    18
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1647,
+   "z": 1119,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "cd_crater_guard",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_cd_crater_guard_0_2",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    18,
+    18
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1660,
+   "z": 1107,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "cd_crater_guard",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "npc",

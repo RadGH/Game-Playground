@@ -17,6 +17,7 @@
 //   hz.setBiomes(reader.biomes) (macro only)    hz.setVisible(bool)  hz.stats()
 
 import * as THREE from 'three';
+import { createNearTrees } from './near-trees.js';         // Z25: real conifers where the canopy is near
 import { CHUNK, prepareGrid, buildChunk, gridHeightAt, chunkCounts, chunkRect, rectDistance, coveredBy, touchedBy, lodFor, TREE_SPIRES, CANOPY_SPIRES, buildCanopy } from './horizon-grid.js';
 
 const MAGIC = 'TVWM';
@@ -143,8 +144,10 @@ async function createFineHorizon(scene, { quality, base }) {
   // play-test 8 (W18): far hills are wooded — a canopy tint everywhere, tree spires on the nearest ring (not on Low).
   // `?horizonTrees=0` turns both off (to compare, and to prove a perf question is or is not this).
   const treesOff = typeof location !== 'undefined' && new URLSearchParams(location.search).get('horizonTrees') === '0';
-  const treeOpts = { trees: !treesOff, spires: treesOff ? 0 : (TREE_SPIRES[quality] ?? 0) };
-  const canopyOpts = { spires: treesOff ? 0 : (CANOPY_SPIRES[quality] ?? 0) };
+  // Z25: `?spire=4` draws the old four-sided spires (to compare before / after)
+  const spire = typeof location !== 'undefined' && new URLSearchParams(location.search).get('spire') === '4' ? 4 : 0;
+  const treeOpts = { trees: !treesOff, spires: treesOff ? 0 : (TREE_SPIRES[quality] ?? 0), spire };
+  const canopyOpts = { spires: treesOff ? 0 : (CANOPY_SPIRES[quality] ?? 0), spire };
   const [src, world] = await Promise.all([
     chunkSource(new URL('horizon.bin', base)),
     fetch(new URL('world.json', base)).then(r => (r.ok ? r.json() : null)).catch(() => null),
@@ -154,6 +157,9 @@ async function createFineHorizon(scene, { quality, base }) {
   const { cx, cz } = chunkCounts(g, size);
   // no fragment discard here: cells under loaded zones are left out of the chunk itself (rebuilt when that set changes)
   const mat = new THREE.MeshLambertMaterial({ vertexColors: true });
+  // Z25 (live #26): the canopy's spires near you become real kit conifers (near-trees.js); the canopy folds those spires away
+  const near = createNearTrees(scene, { quality });
+  const canopyMat = near.canopyMaterial(mat);
   const group = new THREE.Group(); group.name = 'horizon';
   scene.add(group);
   const heightAt = (x, z) => gridHeightAt(g, x, z);
@@ -211,6 +217,7 @@ async function createFineHorizon(scene, { quality, base }) {
       for (const ch of chunks) { ch.dist = rectDistance(ch.rect, cam.x, cam.z); ch.want = lodFor(ch.dist, quality, ch.stride); }
     }
     pump(); pumpCanopy();
+    near.update(cam);
   }
   const lastCam = { x: NaN, z: NaN }, lodAt = { x: Infinity, z: Infinity };
   let lodDirty = true;
@@ -239,16 +246,17 @@ async function createFineHorizon(scene, { quality, base }) {
     if (!canopyOpts.spires || !src.canopy) return;
     for (const ch of chunks) {
       if (ch.canopyBusy || ch.canopyVer === ch.canopyWant) continue;
-      if (!ch.canopyWant) { if (ch.canopy) { group.remove(ch.canopy); ch.canopy.geometry.dispose(); ch.canopy = null; ch.canopyN = 0; } ch.canopyVer = 0; continue; }
+      if (!ch.canopyWant) { if (ch.canopy) { group.remove(ch.canopy); ch.canopy.geometry.dispose(); ch.canopy = null; ch.canopyN = 0; near.removeRoots(ch.ci + ',' + ch.cj); } ch.canopyVer = 0; continue; }
       const ver = ch.canopyWant, cut = loadedRects.filter(r => touchedBy(ch.rect, [r]));
       ch.canopyBusy = true;
       src.canopy(ch.ci, ch.cj, size, cut, canopyOpts).then(c => {
-        if (ch.canopy) { group.remove(ch.canopy); ch.canopy.geometry.dispose(); ch.canopy = null; ch.canopyN = 0; }
+        if (ch.canopy) { group.remove(ch.canopy); ch.canopy.geometry.dispose(); ch.canopy = null; ch.canopyN = 0; near.removeRoots(ch.ci + ',' + ch.cj); }
         if (c && !c.empty) {
           const geo = new THREE.BufferGeometry();
           geo.setAttribute('position', new THREE.BufferAttribute(c.pos, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(c.nor, 3)); geo.setAttribute('color', new THREE.BufferAttribute(c.col, 3));
           geo.setIndex(new THREE.BufferAttribute(c.idx, 1)); geo.computeBoundingSphere();
-          const mesh = new THREE.Mesh(geo, mat); mesh.name = `horizon-canopy-${ch.ci}-${ch.cj}`; mesh.castShadow = false; mesh.receiveShadow = false; mesh.matrixAutoUpdate = false;
+          if (c.roots) { geo.setAttribute('aRoot', near.rootAttribute(c.roots, c.sv || 14)); near.addRoots(ch.ci + ',' + ch.cj, c.roots); }
+          const mesh = new THREE.Mesh(geo, c.roots ? canopyMat : mat); mesh.name = `horizon-canopy-${ch.ci}-${ch.cj}`; mesh.castShadow = false; mesh.receiveShadow = false; mesh.matrixAutoUpdate = false;
           group.add(mesh); ch.canopy = mesh; ch.canopyN = c.spires;
         }
         ch.canopyVer = ver;
@@ -257,7 +265,8 @@ async function createFineHorizon(scene, { quality, base }) {
     }
   }
 
-  function setLoaded(rects) {
+  function setLoaded(rects, groundAt = null) {
+    if (groundAt) near.setGround(groundAt);
     const key = rects.map(r => `${r.minX},${r.minZ},${r.maxX},${r.maxZ}`).sort().join('|');
     if (key === setLoaded.key) return;
     setLoaded.key = key;
@@ -273,9 +282,10 @@ async function createFineHorizon(scene, { quality, base }) {
     stats() {
       const lods = {}; let tris = 0, drawn = 0, spires = 0, canopy = 0; for (const ch of chunks) canopy += ch.canopyN || 0;
       for (const ch of chunks) if (ch.mesh && !ch.covered) { drawn++; tris += ch.tris; spires += ch.spires || 0; lods[ch.stride] = (lods[ch.stride] || 0) + 1; }
-      return { source: 'horizon.bin', worker: src.worker, chunks: chunks.length, drawn, tris, lods, spires, canopy, trees: treeOpts.trees, pending: inFlight, built, cut: chunks.filter(c => c.needVer).length };
+      return { source: 'horizon.bin', worker: src.worker, chunks: chunks.length, drawn, tris, lods, spires, canopy, trees: treeOpts.trees, pending: inFlight, built, cut: chunks.filter(c => c.needVer).length, near: { ...near.stats } };
     },
-    dispose() { src.dispose(); for (const ch of chunks) { ch.mesh?.geometry.dispose(); ch.canopy?.geometry.dispose(); } mat.dispose(); scene.remove(group); scene.remove(points); },
+    dispose() { src.dispose(); near.dispose(); for (const ch of chunks) { ch.mesh?.geometry.dispose(); ch.canopy?.geometry.dispose(); } mat.dispose(); canopyMat.dispose(); scene.remove(group); scene.remove(points); },
+    nearTrees: near,
   };
 }
 

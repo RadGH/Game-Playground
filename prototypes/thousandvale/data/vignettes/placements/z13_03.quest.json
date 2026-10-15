@@ -1,5 +1,5 @@
 {
- "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z13_03, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z13_03, added where a kill / collect quest's area held fewer of its monster than the step needs (round 11: max(count + 4, 2 x count) — two players at once; they come back in 1-1.5 minutes). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
  "zone": "z13_03",
  "terrainHash": "13703724",
  "placements": [
@@ -13,15 +13,91 @@
     5
    ],
    "count": [
-    2,
-    2
+    3,
+    3
    ],
    "x": 321,
    "z": 1679,
    "yaw": 0,
    "radius": 6,
    "quest": "millbrook_wheels",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_millbrook_wheels_0_1",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 308,
+   "z": 1691,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "millbrook_wheels",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_millbrook_wheels_0_2",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 323,
+   "z": 1655,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "millbrook_wheels",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_millbrook_wheels_0_3",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 328,
+   "z": 1689,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "millbrook_wheels",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",
@@ -33,15 +109,67 @@
     5
    ],
    "count": [
-    1,
-    1
+    3,
+    3
    ],
    "x": 1521,
    "z": 1342,
    "yaw": 0,
    "radius": 8,
    "quest": "moth_eaten",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_moth_eaten_0_1",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1508,
+   "z": 1354,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "moth_eaten",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_moth_eaten_0_2",
+   "monster": "carrion_moth",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1523,
+   "z": 1318,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "moth_eaten",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",
@@ -53,15 +181,139 @@
     5
    ],
    "count": [
-    2,
-    2
+    3,
+    3
    ],
    "x": 2008,
    "z": 1928,
    "yaw": 0,
    "radius": 8,
    "quest": "the_tinkers_tools",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_the_tinkers_tools_0_1",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1995,
+   "z": 1940,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "the_tinkers_tools",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_keep_watch_0_0",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1808,
+   "z": 1816,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "keep_watch",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_keep_watch_0_1",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1736,
+   "z": 1831,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "keep_watch",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_keep_watch_0_2",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1810,
+   "z": 1792,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "keep_watch",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_keep_watch_0_3",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1743,
+   "z": 1841,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "keep_watch",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",

@@ -14,6 +14,7 @@ import { sellPrice, buyRefusal, SHOP_WHY, saleRows } from './pt2-core.js';
 import { hideTip } from './tips.js';
 import { itemCardHtml, rememberItems } from './item-card.js';
 import { RARITY_RANK, rarityOf, slotOf, levelCheck } from './inv-core.js';
+import { tabOf, freeIn } from '../../sim/bag-tabs.js';      // round 11 (#11 / #42): bag tabs; Sell filters by Equipment / Items
 
 const SHOP_RANGE = 7;
 const BAG_MAX = 120;
@@ -21,7 +22,7 @@ const BAG_MAX = 120;
 export const SHOP_ROLES = new Set(['merchant', 'smith', 'trader', 'stablehand', 'stable', 'stablemaster', 'stable_master', 'fletcher', 'armourer', 'armorer', 'jeweller', 'jeweler', 'alchemist', 'grocer', 'tailor', 'weaponsmith', 'provisioner', 'pedlar', 'peddler', 'quartermaster', 'outfitter', 'tanner', 'bowyer', 'herbalist', 'fishmonger', 'general']);
 
 export function createShop({ net, hud, actors, me, bag }) {
-  const S = { npc: null, view: null, tab: 'buy', cat: 'all', pending: false, sel: null, touch: false };
+  const S = { npc: null, view: null, tab: 'buy', cat: 'all', pending: false, sel: null, touch: false, sellTab: 'gear' };
   const panel = createPanel({ id: 'shop', title: 'Shop', width: 420, cls: 'shop-panel', onClose: () => { S.npc = null; S.view = null; iconsActive(false, 'shop'); hideTip(); } });
 
   function open(npcId, name = null) {
@@ -43,7 +44,7 @@ export function createShop({ net, hud, actors, me, bag }) {
     else if (S.tab === 'sell') body = sellList(v);
     else body = backList(v);
     const says = v.says ? h('p.shop-says', {}, `“${Array.isArray(v.says) ? v.says[0] : v.says}”`) : null;
-    panel.fill(says, tabs, body, h('p.tiny-left.shop-hint', {}, S.tab === 'sell' ? 'Click an item to sell it. Rare and better ask first.' : S.tab === 'back' ? 'Things you sold here — buy them back at the price you got.' : 'Point at a thing (or tap it) to see it against what you wear; click it — or press Buy — to buy it.'));
+    panel.fill(says, tabs, body, h('p.tiny-left.shop-hint', {}, S.tab === 'sell' ? 'Click an item to sell it. Rare and better ask first. (Quest things and your recall charm are not for sale.)' : S.tab === 'back' ? 'Things you sold here — buy them back at the price you got.' : 'Point at a thing (or tap it) to see it against what you wear; click it — or press Buy — to buy it.'));
   }
   const roleName = r => String(r || 'Trader').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
   function buyList(v) {
@@ -57,13 +58,13 @@ export function createShop({ net, hud, actors, me, bag }) {
     const stock = S.cat === 'all' ? all : all.filter(r => r.cat === S.cat);
     const catBar = cats.length > 1 ? h('div.chips.shop-cats', {}, ...[['all', 'Everything'], ...cats.map(c => [c, v.categories?.[c] || c.replace(/_/g, ' ')])].map(([id, label]) =>
       h('button.chip', { type: 'button', 'aria-checked': String(S.cat === id), dataset: { cat: id }, onclick: () => { S.cat = id; draw(); } }, label))) : null;
-    const lv = me()?.level || 1, free = BAG_MAX - (bag?.state?.bag?.length || 0);
+    const lv = me()?.level || 1;
     return h('div', {}, catBar, h('div.shop-list', {}, ...stock.map(row => {
       const it = row.item || {};
-      const why = buyRefusal(row, gold(), free);
+      const why = buyRefusal(row, gold(), freeFor(it));
       const req = slotOf(it) ? levelCheck(it, lv, bag?.state?.equipment) : { ok: true };
       // play-test 7 V13: pointing at a row (or the first tap on it) shows it in the compare card under the list; a click / the Buy button buys
-      return h('div.shop-row' + (why ? '.cant' : '') + (S.sel === row.id ? '.sel' : ''), { dataset: { id: String(row.id) }, title: why || null, tabIndex: 0,
+      return h('div.shop-row' + (why ? '.cant' : '') + (S.sel === row.id ? '.sel' : ''), { dataset: { id: String(row.id), padAlt: '1' }, title: why || null, tabIndex: 0,
         onpointerenter: e => { if (e.pointerType !== 'touch') select(row.id); }, onfocus: () => select(row.id),
         onpointerdown: e => { S.touch = e.pointerType === 'touch'; },
         onclick: () => { if (S.touch && S.sel !== row.id) { select(row.id); return; } if (S.touch) return; buy(row, why); } },
@@ -83,7 +84,7 @@ export function createShop({ net, hud, actors, me, bag }) {
     if (!row || !row.item) { box.replaceChildren(h('p.dim', {}, 'Point at something on the shelf to see it against what you are wearing.')); return; }
     const it = row.item.uid == null ? { ...row.item, uid: 'shop:' + S.npc + ':' + row.id } : row.item;
     rememberItems([it]);
-    const free = BAG_MAX - (bag?.state?.bag?.length || 0), why = buyRefusal(row, gold(), free);
+    const why = buyRefusal(row, gold(), freeFor(it));
     const card = h('div.shop-cardbody'); card.innerHTML = itemCardHtml(it, { equipment: bag?.state?.equipment || {}, level: me()?.level || 1 });
     box.replaceChildren(card, h('div.row.shop-cardfoot', {}, why ? h('span.bad', {}, why) : h('span.price', {}, goldText(row.price)), h('span.grow'),
       h('button.primary.small', { type: 'button', disabled: !!why, dataset: { act: 'buy' }, onclick: () => buy(row, why) }, `Buy — ${goldText(row.price)}`)));
@@ -94,8 +95,19 @@ export function createShop({ net, hud, actors, me, bag }) {
     for (const r of panel.body.querySelectorAll('.shop-row')) r.classList.toggle('sel', r.dataset.id === String(id));
     const box = panel.body.querySelector('[data-k="shopcard"]'); if (box && S.view) paintCard(box, S.view);
   }
+  /** Free squares in the tab this item would go in (Other: no limit). */
+  const freeFor = it => (it && !it.name && !it.kind && !it.type ? 99 : Math.min(999, freeIn(bag?.state?.bag || [], bag?.max || BAG_MAX, tabOf(it))));
   function sellList(v) {
-    const items = (bag?.state?.bag || []).slice().sort((a, b) => (RARITY_RANK[rarityOf(a)] ?? 0) - (RARITY_RANK[rarityOf(b)] ?? 0));
+    // round 11 (owner #42): Equipment / Items filters; what lives in Other (the recall charm, quest things, reward boxes) is not for sale
+    const sellable = (bag?.state?.bag || []).filter(it => tabOf(it) !== 'other');
+    const n = { gear: sellable.filter(it => tabOf(it) === 'gear').length, items: sellable.filter(it => tabOf(it) === 'items').length };
+    if (!n[S.sellTab] && n[S.sellTab === 'gear' ? 'items' : 'gear']) S.sellTab = S.sellTab === 'gear' ? 'items' : 'gear';
+    const bar = h('div.chips.shop-cats.sell-tabs', {}, ...[['gear', 'Equipment'], ['items', 'Items']].map(([id, label]) =>
+      h('button.chip', { type: 'button', 'aria-checked': String(S.sellTab === id), dataset: { sell: id }, onclick: () => { S.sellTab = id; draw(); } }, `${label} (${n[id]})`)));
+    return h('div', {}, bar, sellRows(v, sellable.filter(it => tabOf(it) === S.sellTab)));
+  }
+  function sellRows(v, list) {
+    const items = list.slice().sort((a, b) => (RARITY_RANK[rarityOf(a)] ?? 0) - (RARITY_RANK[rarityOf(b)] ?? 0));
     if (!items.length) return h('p.dim', {}, 'Your bag is empty.');
     const sellMap = new Map((v.sell || []).map(r => [r.uid, r.price]));
     const eachMap = new Map((v.sell || []).map(r => [r.uid, r.each]));
@@ -126,6 +138,11 @@ export function createShop({ net, hud, actors, me, bag }) {
   }
   onIcon(() => { if (panel.isOpen && S.view) { clearTimeout(draw.t); draw.t = setTimeout(draw, 80); } });
 
+  // round 11 (owner #43): the compare card under the Buy list is drawn once — Shift (or a controller's Y on a row) must redraw it
+  const repaintCard = () => { if (!panel.isOpen || S.tab !== 'buy' || !S.view) return; const box = panel.body.querySelector('[data-k="shopcard"]'); if (box) paintCard(box, S.view); };
+  const onShift = e => { if (e.key === 'Shift') setTimeout(repaintCard, 0); };
+  addEventListener('keydown', onShift, true); addEventListener('keyup', onShift, true);
+  addEventListener('tv:pad-alt', () => setTimeout(repaintCard, 0));
   function wire(n) {
     n.on('shopView', v => { if (S.npc == null || v.npc !== S.npc) return; S.view = v; draw(); });
     n.on('shopR', r => {
@@ -138,5 +155,5 @@ export function createShop({ net, hud, actors, me, bag }) {
     n.on('you', p => { if (p.gold != null && panel.isOpen) draw(); });
     n.on('joined', () => { if (panel.isOpen) panel.close(); });
   }
-  return { wire, open, tick, panel, get state() { return { npc: S.npc, tab: S.tab, view: S.view ? { name: S.view.name, stock: (S.view.stock || []).length, buyback: (S.view.buyback || []).length } : null }; }, setTab(t) { S.tab = t; draw(); } };
+  return { wire, open, tick, panel, get state() { return { npc: S.npc, tab: S.tab, sellTab: S.sellTab, view: S.view ? { name: S.view.name, stock: (S.view.stock || []).length, buyback: (S.view.buyback || []).length } : null }; }, setTab(t) { S.tab = t; draw(); } };
 }

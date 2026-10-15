@@ -363,6 +363,8 @@ exceeds its limit.
 
 ## 6. Classes, skills, items — and the combat core
 
+> **Thousandvale's own classes** (added after this plan; injected in memory from `data/rules/classes-tv.json`, Farhold's files untouched): the **Starcaller** (round 10, arcane caster) and the **Star Blade** (round 11, its arcane melee partner: plate and swords, Starlight built by blows given and taken and spent on a star shield that strikes back and on holding a crowd). 32 classes, 192 class skills.
+
 ### 6.1 Combat extraction (the biggest M0/M1 job)
 
 Verified by both reports: Farhold's *formulas* import in Node (`rpg.js`, `skills.js`, `skillmech.js`,

@@ -5,6 +5,7 @@
 
 import { createHash, randomBytes } from 'node:crypto';
 import { FRIENDS_MAX, GUILD_MAX } from '../../js/sim/store-memory-m3.js';
+import { describe, letter, MARKET } from '../../js/sim/market-rules.js';
 
 const sha = t => createHash('sha256').update(String(t)).digest('hex');
 const ms = t => (t == null ? null : new Date(t));
@@ -57,6 +58,39 @@ export function pgM3({ pool, q, realm, SAVE_SQL, saveParams }) {
     await c.query('UPDATE items SET mail_id = $1 WHERE mail_id = $2', [id, m.id]);
     await c.query('DELETE FROM mail WHERE id = $1', [m.id]);
     return { to: m.from_char, id };
+  }
+
+
+  // ---- the market (round 11, owner #25; schema v8) ----
+  /** Like tx(), but fn may answer { rollback: true, ... } to undo what it wrote and still say why. */
+  async function txWhy(fn) {
+    const c = await pool.connect();
+    try {
+      await c.query('BEGIN');
+      const r = await fn(c);
+      if (r === false || r == null || (r && r.rollback)) { await c.query('ROLLBACK'); if (r && r.rollback) { const { rollback, ...why } = r; return why; } return r ?? false; }
+      await c.query('COMMIT');
+      return r;
+    } catch (err) {
+      try { await c.query('ROLLBACK'); } catch { /* ignore */ }
+      if (err.code === '23505' || err.code === '23503') return false;
+      throw err;
+    } finally { c.release(); }
+  }
+  const listingRow = x => ({ id: +x.id, seller: x.seller_name, sellerChar: +x.seller_char, item: x.item || null, price: Number(x.price), fee: Number(x.fee), count: x.count, tab: x.tab, sub: x.sub, rarity: x.rarity, lvl: x.lvl, listedAt: toMs(x.listed_at), expiresAt: toMs(x.expires_at) });
+  async function postMarket(c, to, words, gold, nowMs) {
+    const r = await c.query(`INSERT INTO mail (realm, to_char, from_char, from_name, subject, body, gold, kind, sent_at, expires_at)
+      VALUES ($1, $2, NULL, $3, $4, $5, $6, 'market', $7, NULL) RETURNING id`, [realm, to, MARKET.from, words.subject, words.body, gold || 0, ms(nowMs)]);
+    return +r.rows[0].id;
+  }
+  /** A locked listing goes back to its seller by mail (cancelled / expired). */
+  async function backToSeller(c, l, kind, nowMs) {
+    const it = await c.query('SELECT item FROM items WHERE listing_id = $1', [l.id]);
+    const item = it.rows.length ? it.rows[0].item : null;
+    const mail = await postMarket(c, l.seller_char, letter(kind, { name: item ? item.name : 'item', count: l.count }), 0, nowMs);
+    await c.query('UPDATE items SET listing_id = NULL, mail_id = $1 WHERE listing_id = $2', [mail, l.id]);
+    await c.query('DELETE FROM market_listings WHERE id = $1', [l.id]);
+    return { ok: true, item, mail };
   }
 
   return {
@@ -170,6 +204,90 @@ export function pgM3({ pool, q, realm, SAVE_SQL, saveParams }) {
     async guildSetRank(id, char, rank) { const r = await q('UPDATE guild_members SET rank = $3 WHERE guild_id = $1 AND char_id = $2', [id, char, rank]); return r.rowCount > 0; },
     async guildMotd(id, text) { const r = await q('UPDATE guilds SET motd = $2 WHERE id = $1', [id, text]); return r.rowCount > 0; },
     async guildDisband(id) { const r = await q('DELETE FROM guilds WHERE id = $1', [id]); return r.rowCount > 0; },
+
+
+    // ---- the market (round 11, owner #25): every move in ONE transaction ----
+    async marketList({ ch, fence }, x) {
+      const it = x.item;
+      return txWhy(async c => {
+        const s = await c.query(SAVE_SQL, saveParams(ch, fence));          // locks the seller's row: two lists of one character queue here
+        if (!s.rows.length) return false;
+        const n = await c.query('SELECT count(*)::int AS n FROM market_listings WHERE seller_char = $1', [x.seller]);
+        if (n.rows[0].n >= (x.cap ?? MARKET.cap)) return { rollback: true, err: 'cap' };
+        const dsc = describe(it);
+        const l = await c.query(`INSERT INTO market_listings (realm, seller_char, seller_name, item_uid, name_lower, tab, sub, rarity, lvl, count, price, fee, listed_at, expires_at)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING id`,
+          [realm, x.seller, x.sellerName, it.uid, dsc.name_lower, dsc.tab, dsc.sub, dsc.rarity, dsc.lvl, dsc.count, x.price, x.fee || 0, ms(x.listedAt ?? Date.now()), ms(x.expiresAt)]);
+        const id = +l.rows[0].id;
+        await c.query('INSERT INTO items (uid, mail_id, listing_id, item) VALUES ($1, NULL, $2, $3)', [it.uid, id, JSON.stringify(it)]);
+        ch.version = s.rows[0].version;
+        return { id };
+      });
+    },
+    async marketBrowse(f, nowMs = Date.now()) {
+      const where = ['l.realm = $1', 'l.expires_at > $2'], args = [realm, ms(nowMs)];
+      if (f.tab) { args.push(f.tab); where.push('l.tab = $' + args.length); }
+      if (f.sub) { args.push(f.sub); where.push('l.sub = $' + args.length); }
+      if (f.q) { args.push('%' + f.q.replace(/[\\%_]/g, m => '\\' + m) + '%'); where.push('l.name_lower LIKE $' + args.length); }
+      const order = { cheap: 'l.price ASC', dear: 'l.price DESC', each: '(l.price::float8 / l.count) ASC', new: 'l.listed_at DESC, l.id DESC' }[f.sort] || 'l.price ASC';
+      const per = f.per || MARKET.per;
+      const tot = await q('SELECT count(*)::int AS n FROM market_listings l WHERE ' + where.join(' AND '), args);
+      const r = await q(`SELECT l.*, i.item FROM market_listings l LEFT JOIN items i ON i.listing_id = l.id WHERE ${where.join(' AND ')}
+                         ORDER BY ${order}, l.listed_at ASC, l.id ASC LIMIT ${per | 0} OFFSET ${(f.page | 0) * per}`, args);
+      return { list: r.rows.map(listingRow), total: tot.rows[0].n };
+    },
+    async marketMine(char) {
+      const r = await q('SELECT l.*, i.item FROM market_listings l LEFT JOIN items i ON i.listing_id = l.id WHERE l.seller_char = $1 ORDER BY l.listed_at DESC, l.id DESC', [char]);
+      return r.rows.map(listingRow);
+    },
+    async marketGet(id) {
+      const r = await q('SELECT l.*, i.item FROM market_listings l LEFT JOIN items i ON i.listing_id = l.id WHERE l.id = $1 AND l.realm = $2', [id, realm]);
+      return r.rows.length ? listingRow(r.rows[0]) : null;
+    },
+    async marketCount(char) { const r = await q('SELECT count(*)::int AS n FROM market_listings WHERE seller_char = $1', [char]); return r.rows[0].n; },
+    async marketBuy({ ch, fence }, id, { buyer, buyerName, price, nowMs = Date.now() }) {
+      return txWhy(async c => {
+        // the row lock is the race: a second buyer waits here, then finds the row gone
+        const x = await c.query('SELECT * FROM market_listings WHERE id = $1 AND realm = $2 FOR UPDATE', [id, realm]);
+        if (!x.rows.length) return { rollback: true, err: 'gone' };
+        const l = x.rows[0];
+        if (toMs(l.expires_at) <= nowMs) return { rollback: true, err: 'gone' };
+        if (+l.seller_char === buyer) return { rollback: true, err: 'own' };
+        if (Number(l.price) !== price) return { rollback: true, err: 'changed' };
+        const s = await c.query(SAVE_SQL, saveParams(ch, fence));
+        if (!s.rows.length) return false;
+        const it = await c.query('SELECT item FROM items WHERE listing_id = $1', [l.id]);
+        if (it.rows.length !== 1) return false;
+        const item = it.rows[0].item;
+        const buyerMail = await postMarket(c, buyer, letter('bought', { name: item.name, count: l.count, price: Number(l.price) }), 0, nowMs);
+        await c.query('UPDATE items SET listing_id = NULL, mail_id = $1 WHERE listing_id = $2', [buyerMail, l.id]);
+        const sellerMail = await postMarket(c, l.seller_char, letter('sold', { name: item.name, count: l.count, price: Number(l.price), buyer: buyerName }), Number(l.price), nowMs);
+        await c.query('DELETE FROM market_listings WHERE id = $1', [l.id]);
+        ch.version = s.rows[0].version;
+        return { ok: true, seller: +l.seller_char, item, buyerMail, sellerMail };
+      });
+    },
+    async marketCancel(char, id, nowMs = Date.now()) {
+      return txWhy(async c => {
+        const x = await c.query('SELECT * FROM market_listings WHERE id = $1 AND seller_char = $2 FOR UPDATE', [id, char]);
+        if (!x.rows.length) return { rollback: true, err: 'gone' };
+        return backToSeller(c, x.rows[0], 'cancelled', nowMs);
+      });
+    },
+    async marketExpire(nowMs = Date.now()) {
+      const due = await q('SELECT id FROM market_listings WHERE realm = $1 AND expires_at <= $2 ORDER BY id LIMIT 500', [realm, ms(nowMs)]);
+      const out = [];
+      for (const { id } of due.rows) {
+        const r = await txWhy(async c => {
+          const x = await c.query('SELECT * FROM market_listings WHERE id = $1 AND expires_at <= $2 FOR UPDATE', [id, ms(nowMs)]);
+          if (!x.rows.length) return { rollback: true, none: true };
+          const b = await backToSeller(c, x.rows[0], 'expired', nowMs);
+          return { ...b, to: +x.rows[0].seller_char, id: +id };
+        });
+        if (r && r.ok) out.push({ to: r.to, id: r.id });
+      }
+      return out;
+    },
 
     // ---- mail ----
     async mailSend({ ch, fence }, mail) {

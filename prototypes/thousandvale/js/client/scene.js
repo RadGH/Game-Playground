@@ -4,6 +4,8 @@
 
 import * as THREE from 'three';
 import { skyAt, carriedLight, DUNGEON_AMBIENT } from './daynight.js';
+import { createSkyBox } from './sky-box.js';           // Z59: the painted sky
+import { skyPlan } from './sky-plan.js';
 
 export function createScene(canvas, { quality = 'high' } = {}) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance', preserveDrawingBuffer: false });
@@ -27,6 +29,10 @@ export function createScene(canvas, { quality = 'high' } = {}) {
   const sunDir = new THREE.Vector3(-0.45, 0.62, -0.64).normalize();
   const keyDir = sunDir.clone(), moonDir = new THREE.Vector3(0.4, 0.6, 0.3).normalize();
   let mood = 'outdoor', lastSky = null;
+  // play-test 11 (Z59, live #60): the painted sky (sky-box.js) replaces the gradient dome; the gradient below is kept as
+  // the fallback the box draws until its first picture has loaded
+  const skyBox = createSkyBox({ base: new URL('../../assets/sky/', import.meta.url), gradient: SKY });
+  const skyCtx = { province: null, day: 0 };
   const skyMat = new THREE.ShaderMaterial({
     side: THREE.BackSide, depthWrite: false, fog: false,
     uniforms: { uZenith: { value: SKY.zenith }, uHorizon: { value: SKY.horizon }, uGround: { value: SKY.ground }, uSun: { value: sunDir } },
@@ -43,8 +49,7 @@ export function createScene(canvas, { quality = 'high' } = {}) {
         #include <colorspace_fragment>
       }`,
   });
-  const sky = new THREE.Mesh(new THREE.SphereGeometry(2000, 32, 16), skyMat);
-  sky.frustumCulled = false; sky.renderOrder = -10;
+  const sky = skyBox.mesh;      // (skyMat, the old gradient, is kept only as the fallback's reference; it is never drawn)
   scene.add(sky);
 
   // Soft cloud band: a few flattened, faint sprites high up so the sky is not a flat gradient.
@@ -109,6 +114,7 @@ export function createScene(canvas, { quality = 'high' } = {}) {
     mood = m;
     const dark = mood === 'dungeon';
     sky.visible = clouds.visible = !dark;
+    if (!dark && skyBox.ready) clouds.visible = false;
     scene.background = dark ? new THREE.Color(fog) : SKY.horizon.clone();
     scene.fog.color.set(dark ? fog : SKY.horizon);
     // play-test 8 (W22): a dungeon is never pitch black — a floor of ambient light under every look, fog pushed back
@@ -128,21 +134,41 @@ export function createScene(canvas, { quality = 'high' } = {}) {
     if (mood === 'outdoor') applySky(k);
     return k;
   }
+  /** Z59: where the sky is (a province key — Vharlen has its own) and which realm day (the weather comes from it). */
+  function setSkyContext({ province = skyCtx.province, day = skyCtx.day } = {}) {
+    const changed = province !== skyCtx.province || day !== skyCtx.day;
+    skyCtx.province = province; skyCtx.day = day;
+    if (changed && lastSky && mood === 'outdoor') applySky(lastSky);
+    return changed;
+  }
   const _c = new THREE.Color();
   function applySky(k) {
     SKY.zenith.setRGB(...k.zenith); SKY.horizon.setRGB(...k.horizon); SKY.ground.setRGB(...k.ground);
-    scene.fog.color.copy(SKY.horizon); scene.background = SKY.horizon.clone();
-    scene.fog.near = k.fogNear; scene.fog.far = k.fogFar;
+    // Z59: the painted sky for this hour, place and weather; the fog takes the painting's own horizon colour, written as
+    // display values (three adds fog after tone mapping, so a fogged hill shows exactly this colour)
+    const plan = skyPlan(k.t, skyCtx);
+    skyBox.setPlan(plan); lastPlan = plan;
+    const f = skyBox.fog;
+    if (f) scene.fog.color.setRGB(f[0], f[1], f[2], THREE.LinearSRGBColorSpace);
+    else { scene.fog.color.copy(SKY.horizon); skyBox.setFallbackFog([scene.fog.color.r, scene.fog.color.g, scene.fog.color.b]); }
+    scene.background = scene.fog.color.clone();
+    scene.fog.near = k.fogNear; scene.fog.far = k.fogFar * (plan.weather === 'cloudy' && plan.stage === 'day' ? 0.85 : 1);
+    clouds.visible = !skyBox.ready;
     sunDir.set(...k.sun); keyDir.set(...k.keyDir);
     moonDir.set(-k.sun[0], Math.max(0.25, -k.sun[1]), -k.sun[2]).normalize();
     skyMat.uniforms.uSun.value.copy(k.night > 0.6 ? moonDir : sunDir);
+    skyBox.setSun(k.night > 0.6 ? moonDir : sunDir, k.night > 0.6 ? 0.18 : Math.max(0.15, 1 - k.night));
     sun.color.setRGB(...k.keyColor); sun.intensity = k.keyIntensity;
     hemi.color.setRGB(...k.hemiSky); hemi.groundColor.setRGB(...k.hemiGround); hemi.intensity = k.hemiIntensity;
     renderer.toneMappingExposure = k.exposure;
     starMat.opacity = k.stars * 0.9; stars.visible = k.stars > 0.02;
     moon.visible = k.night > 0.2; moon.material.opacity = Math.min(1, k.night * 1.3);
     for (const c of clouds.children) c.material.color.copy(_c.setRGB(...k.horizon).lerp(new THREE.Color('#ffffff'), 0.55));
+    if (skyBox.ready) { starMat.opacity = k.stars * 0.55; }       // the night picture has its own stars; the points add a crisp few
   }
+  let lastPlan = null;
+  // a picture that arrives after the clock last ticked: apply it at once (not half a second later, grey)
+  skyBox.manifest.then(() => setTimeout(() => { if (lastSky && mood === 'outdoor') applySky(lastSky); }, 0));
   // The light everyone carries (W22): warm, follows you (placed in follow()); underground always, outdoors as night falls.
   // ONE PointLight that is always in the scene and only ever dimmed — adding, removing or hiding a light recompiles every lit material.
   const lantern = new THREE.PointLight('#ffc98a', 9, 13, 1.6);
@@ -161,7 +187,7 @@ export function createScene(canvas, { quality = 'high' } = {}) {
     return applyCarry();
   }
 
-  return { renderer, scene, camera, sun, hemi, sunDir, follow, resize, setMood, setTimeOfDay, setCarryLight, get carry() { return { intensity: lantern.intensity, distance: lantern.distance, hemi: hemi.intensity, fogNear: scene.fog.near, fogFar: scene.fog.far }; }, get sky() { return lastSky; }, render: () => renderer.render(scene, camera) };
+  return { renderer, scene, camera, sun, hemi, sunDir, follow, resize, setMood, setTimeOfDay, setSkyContext, skyBox, get skyPlan() { return lastPlan; }, setCarryLight, get carry() { return { intensity: lantern.intensity, distance: lantern.distance, hemi: hemi.intensity, fogNear: scene.fog.near, fogFar: scene.fog.far }; }, get sky() { return lastSky; }, render: () => renderer.render(scene, camera) };
 }
 
 function makeCloudSprite() {

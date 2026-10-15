@@ -42,6 +42,8 @@ export const palettes = {
   tinker:        { core: '#fff9df', glow: '#d8c478', accent: '#75bfcb' },
   priest:       { core: '#fff7ff', glow: '#d2b6ef', accent: '#f6d581' },
   enchanter:     { core: '#fff0fe', glow: '#f1a2db', accent: '#a5eab9' },
+  // play-test 11 (owner #53): the Star Blade — star steel (cold silver-blue) with the Starcaller's gold as its accent
+  starblade:     { core: '#f6f8ff', glow: '#8fa6ff', accent: '#e6c14a' },
 };
 
 export default {
@@ -433,4 +435,22 @@ export default {
     radial(stroke('M18 13 C26 3 42 6 43 16 C44 23 33 25 32 18 Q32 14 36 14 M18 13 Q10 21 16 28', 4), [0, 90, 180, 270])
     + radial(shape('M32 4 L36 8 L32 12 L28 8 Z', .6), [0, 90, 180, 270])
     + shape('M32 24 L38 32 L32 40 L26 32 Z', .65)),
+
+  // play-test 11 (owner #53): the Star Blade, the Starcaller's melee partner — hand-drawn in the same contract (64x64 white)
+  'starblade.a': motif('Star-steel point', 'A long four-point star whose forward point is drawn out into a sword tip.',
+    shape('M32 2 L37 25 L58 32 L37 39 L32 62 L27 39 L6 32 L27 25 Z', .35)
+    + shape('M32 2 L35.5 26 L32 46 L28.5 26 Z')
+    + shape('M14 32 L28 29.5 L32 32 L28 34.5 Z M50 32 L36 29.5 L32 32 L36 34.5 Z', .8)
+    + stroke('M22 50 L42 50 M32 50 V60', 4)),
+  'starblade.b': motif('Star shard', 'A sharp faceted star splinter with one bright edge and a dimmer back facet.',
+    shape('M32 4 L40 28 L58 34 L38 38 L30 60 L26 36 L8 30 L28 26 Z')
+    + shape('M32 4 L28 26 L8 30 L26 36 Z', .45)),
+  'starblade.c': motif('Sworn star', 'An eight-point star stands in a ring, its top point a sword blade and four steel studs on the rim.',
+    ring(32, 32, 26, 4)
+    + radial(shape('M32 10 L35 27 L32 32 L29 27 Z', .55), [45, 135, 225, 315])
+    + radial(shape('M32 12 L36 27 L32 32 L28 27 Z'), [90, 180, 270])
+    + shape('M32 2 L35 10 L35 28 L32 32 L29 28 L29 10 Z')
+    + stroke('M26 12 H38', 3.5)
+    + radial(disc(32, 6, 2.5), [45, 135, 225, 315])
+    + disc(32, 32, 4, .6)),
 };

@@ -10,7 +10,7 @@
     "level": 13,
     "respawnMs": 1800000
   },
-  "_doc": "Expansion 1 (Vharlen). The ZONE EVENT BOSS for the Steamwood: the spirit of a boiling spring that has come to the boil. P1 'Simmering': a scalding cone, geysers that throw you, and rings of boiling water that roll outward one after another. P2 at 55% 'Coming to the Boil': two vents open — two players must stand on each to cap it (soak) or everyone is scalded; the cold springs at the edge heal. P3, a new health bar 'Boiled Dry': the Kettle cracks — a WHISTLE it charges (interrupt it, or the whole clearing is silenced and scalded), spinning jets of steam, and steam that follows each player. Soft enrage from 4 minutes, hard at 7.",
+  "_doc": "Expansion 1 (Vharlen). The ZONE EVENT BOSS for the Steamwood: the spirit of a boiling spring that has come to the boil. P1 'Simmering': a scalding cone, geysers that throw you, and rings of boiling water that roll outward one after another. P2 at 55% 'Coming to the Boil': two vents open — two players must stand on each to cap it (soak) or everyone is scalded; the cold springs at the edge heal. P3, a new health bar 'Boiled Dry': the Kettle cracks — a WHISTLE it charges (interrupt it, or the whole clearing is silenced and scalded), spinning jets of steam, and steam that follows each player. Soft enrage from 4 minutes, hard at 7. OWNER #51 (2026-10-15): the phase that refilled the health bar is removed; the health bar is the whole fight.",
   "party": "Zone event, everyone nearby joins. Solo: not intended (the vent soak needs 2). 3-5: playable. 10+: intended. M5 scaling: health by players enrolled; soak need = clamp(players/5, 2, 4).",
   "hpMult": 3,
   "arena": {
@@ -224,83 +224,6 @@
           }
         }
       ]
-    },
-    "whistle": {
-      "id": "whistle",
-      "name": "The Whistle",
-      "every": [
-        26,
-        30
-      ],
-      "first": 10,
-      "cast": 3,
-      "interrupt": true,
-      "say": "The Kettle starts to WHISTLE — interrupt it!",
-      "onInterrupt": [
-        {
-          "say": "The whistle chokes into a gurgle.",
-          "style": "emote"
-        }
-      ],
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "self",
-          "r": 36,
-          "wind": 0.6,
-          "damage": 1.2,
-          "status": "silence",
-          "element": "fire"
-        }
-      ]
-    },
-    "jets": {
-      "id": "jets",
-      "name": "Steam Jets",
-      "every": [
-        14,
-        17
-      ],
-      "first": 6,
-      "cast": 0.6,
-      "say": "Cracks split the Kettle — three jets of steam swing round!",
-      "telegraphs": [
-        {
-          "shape": "line",
-          "at": "self",
-          "len": 30,
-          "w": 3,
-          "wind": 1.5,
-          "damage": 2,
-          "count": 3,
-          "rotate": 2.094,
-          "yaw": "random",
-          "element": "fire"
-        }
-      ]
-    },
-    "cloud": {
-      "id": "cloud",
-      "name": "Clinging Steam",
-      "every": [
-        15,
-        18
-      ],
-      "first": 4,
-      "cast": 0.6,
-      "say": "Steam clings to everyone — spread out!",
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "each",
-          "r": 3,
-          "wind": 2.4,
-          "damage": 1.4,
-          "follow": true,
-          "element": "fire",
-          "status": "seared"
-        }
-      ]
     }
   },
   "phases": [
@@ -321,19 +244,6 @@
         "vent_cap",
         "spit",
         "geyser"
-      ]
-    },
-    {
-      "name": "Boiled Dry",
-      "newBar": {
-        "hp": 0.5
-      },
-      "say": "The Kettle cracks right across — and whistles.",
-      "abilities": [
-        "scald",
-        "whistle",
-        "jets",
-        "cloud"
       ]
     }
   ]

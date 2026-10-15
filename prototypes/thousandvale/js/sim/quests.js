@@ -73,7 +73,7 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
     const s = { ...st };
     if (s.kind === 'killRare' && !s.rare) s.rare = ((rares[s.zone] || [])[s.slot ?? 0]) || null;
     if (s.kind === 'visit' || s.kind === 'escort') s.place = resolveAt(s.kind === 'escort' && s.to ? (typeof s.to === 'object' ? { at: s.to } : { site: s.to }) : s, zoneKey);
-    if (s.kind === 'kill' && s.near) s.nearAt = typeof s.near === 'object' ? s.near : resolveAt({ site: s.near, vignette: s.near }, zoneKey);
+    if ((s.kind === 'kill' || s.kind === 'collect') && s.near) s.nearAt = typeof s.near === 'object' ? s.near : resolveAt({ site: s.near, vignette: s.near }, zoneKey);
     if (s.kind === 'clear') { s.zone = zoneKey; if (s.dungeon === 'door') s.door = L.doors.findIndex(d => d.zone === zoneKey && d.kind !== 'cave'); }
     s.count = s.count || 1;
     return s;
@@ -151,7 +151,7 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
   function stepAt(st, zoneKey, from = null) {
     switch (st.kind) {
       case 'kill': return st.nearAt ? { x: st.nearAt.x, z: st.nearAt.z, r: (st.nearAt.r || 12) + NEAR_M * 0.25, name: st.nearAt.name || null } : st.type ? campAt({ type: st.type }, zoneKey, from) : null;
-      case 'collect': return st.from ? campAt({ type: st.from }, zoneKey, from) : null;
+      case 'collect': return st.nearAt ? { x: st.nearAt.x, z: st.nearAt.z, r: (st.nearAt.r || 12) + NEAR_M * 0.25, name: st.nearAt.name || null } : st.from ? campAt({ type: st.from }, zoneKey, from) : null;      // round 11 (World, #31): a collect step may carry `near` too
       case 'killOne': return st.encounter ? campAt({ encounter: st.encounter }, null) : null;
       case 'killRare': return st.rare ? campAt({ encounter: st.rare }, null) : null;
       case 'visit': case 'escort': case 'reach': return st.place && Number.isFinite(st.place.x) ? { x: st.place.x, z: st.place.z, r: st.place.r || 12, name: st.place.name || null } : null;
@@ -334,7 +334,7 @@ export function createQuestBook({ layout: L, zones = [], rares = {}, jobs = null
       case 'kill': return ev.kind === 'kill' && ev.type === st.type && (!st.rank || ev.rankName === st.rank || ev.rank === st.rank) && (!st.when || (st.when === 'night') === ev.night) && (!st.nearAt || within(st.nearAt, ev.x, ev.z, NEAR_M));
       case 'killOne': return (ev.kind === 'kill' || ev.kind === 'event') && ev.encounter === st.encounter;
       case 'killRare': return ev.kind === 'kill' && !!st.rare && ev.encounter === st.rare;
-      case 'collect': return ev.kind === 'kill' && ev.type === st.from && rng() < (st.chance ?? 1);
+      case 'collect': return ev.kind === 'kill' && ev.type === st.from && (!st.nearAt || within(st.nearAt, ev.x, ev.z, NEAR_M)) && rng() < (st.chance ?? 1);
       case 'visit': case 'escort': return ev.kind === 'visit' && within(st.place, ev.x, ev.z, 6);
       case 'reach': return (ev.kind === 'visit' && within(st.place, ev.x, ev.z, 6)) || (ev.kind === 'talk' && within(st.place, ev.x, ev.z, 10));
       case 'use': return ev.kind === 'use' && ev.vignette === st.vignette && (!st.object || ev.name === st.object);

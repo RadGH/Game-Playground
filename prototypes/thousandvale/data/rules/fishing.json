@@ -139,6 +139,8 @@
     "priceSpan": 0.8
   },
   "xp": {
+    "_mult": "round 11 (stream P, live #10): every catch's experience is multiplied by `mult` (3) — the profession pace was tripled for gathering and making alike",
+    "mult": 3,
     "common": 10,
     "uncommon": 18,
     "rare": 34,

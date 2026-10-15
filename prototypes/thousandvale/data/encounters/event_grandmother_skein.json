@@ -4,7 +4,7 @@
   "tier": "event",
   "body": "thornmother",
   "place": "wilds: the zone event boss. Rises from the old sinkhole in Mawehaven's barley field (~832, 576); needs ~40 m of open, walkable ground. Rotates with the zone's other events; every player nearby is enrolled.",
-  "_doc": "Stream E. The ZONE EVENT BOSS for Torborhold's zone (many players). A spider older than the village, who speaks like everyone's grandmother. P1 'Hush, Now': a spinneret lash for the front, webs flung at random players, and a LULLABY that puts the whole field to sleep unless someone interrupts it — or you stand behind a hay rick (line of sight). P2 at 60% 'The Brood': she climbs into the old barn behind a silk ward; her three egg sacs hatch spiders until you BURN them (use them like a brazier). Burning all three drops the ward. P3 is a new health bar 'Grandmother's Embrace': cocoon stacks, threads in six directions, a get-under-her ring, and the well's clean water heals anyone standing at it. Soft enrage from 4 minutes, hard at 7.",
+  "_doc": "Stream E. The ZONE EVENT BOSS for Torborhold's zone (many players). A spider older than the village, who speaks like everyone's grandmother. P1 'Hush, Now': a spinneret lash for the front, webs flung at random players, and a LULLABY that puts the whole field to sleep unless someone interrupts it — or you stand behind a hay rick (line of sight). P2 at 60% 'The Brood': she climbs into the old barn behind a silk ward; her three egg sacs hatch spiders until you BURN them (use them like a brazier). Burning all three drops the ward. P3 is a new health bar 'Grandmother's Embrace': cocoon stacks, threads in six directions, a get-under-her ring, and the well's clean water heals anyone standing at it. Soft enrage from 4 minutes, hard at 7. OWNER #51 (2026-10-15): the phase that refilled the health bar is removed; the health bar is the whole fight.",
   "party": "Zone event, everyone nearby joins. Solo: not intended (cocoon stack needs 3, three egg sacs to burn under adds). 3-5: playable. 10+: intended. M5 scaling: health and spider adds by players enrolled; cocoon need = clamp(players/4, 2, 5); egg sacs 3 -> 5 at 15+.",
   "hpMult": 3,
   "arena": {
@@ -40,16 +40,7 @@
       "say": "The egg sacs split. Grandmother's babies are hungry!",
       "actions": [ { "adds": { "type": "veil_spider", "count": 2, "radius": 14, "at": "home" } } ] },
     "silk_rain": { "id": "silk_rain", "name": "Silk Rain", "every": [10, 12], "first": 2,
-      "telegraphs": [ { "shape": "circle", "at": "scatter", "spread": 26, "r": 3, "count": 5, "delay": 0.2, "wind": 1.6, "damage": 1.1, "status": "web" } ] },
-    "cocoon": { "id": "cocoon", "name": "Silk Cocoon", "every": [20, 24], "first": 6, "cast": 1,
-      "say": "Grandmother is wrapping {target} for later — stand with them, three of you!",
-      "telegraphs": [ { "shape": "circle", "at": "random", "r": 3.2, "kind": "stack", "need": 3, "wind": 4, "damage": 3, "follow": true } ] },
-    "threads": { "id": "threads", "name": "Thread the Needle", "every": [15, 18], "first": 10, "cast": 0.6,
-      "say": "Six threads snap taut across the field!",
-      "telegraphs": [ { "shape": "line", "at": "self", "len": 34, "w": 3, "count": 6, "rotate": 1.047, "wind": 1.6, "damage": 2, "yaw": "random" } ] },
-    "embrace": { "id": "embrace", "name": "Grandmother's Embrace", "every": [17, 20], "first": 15, "cast": 1,
-      "say": "Her legs spread wide — come give Grandmother a hug! (Get under her!)",
-      "telegraphs": [ { "shape": "donut", "at": "self", "r": 20, "r2": 4, "wind": 2, "damage": 2.4 } ] }
+      "telegraphs": [ { "shape": "circle", "at": "scatter", "spread": 26, "r": 3, "count": 5, "delay": 0.2, "wind": 1.6, "damage": 1.1, "status": "web" } ] }
   },
   "phases": [
     { "name": "Hush, Now", "abilities": ["lash", "web_volley", "lullaby"] },
@@ -57,9 +48,7 @@
       "abilities": ["brood_call", "silk_rain"],
       "ward": {"seconds": 25, "pool": 0.1, "break": "objects", "need": 3, "what": "brazier", "say": "A ward of silk closes over Grandmother Skein. Burn all three egg sacs! It fails by itself in 25 seconds.", "fade": "The ward fails by itself. No opening this time."},
       "onEnter": [ { "shield": { "seconds": 25, "pool": 0.1 } }, { "adds": { "type": "veil_spider", "count": 3, "radius": 12, "at": "home" } },
-        { "say": "A ward of silk closes over Grandmother Skein. Burn all three egg sacs! It fails by itself in 25 seconds.", "style": "warn" } ] },
-    { "name": "Grandmother's Embrace", "newBar": { "hp": 0.5 }, "say": "My babies! My BABIES! Oh, you will pay for that, dears.",
-      "abilities": ["lash", "cocoon", "threads", "embrace", "web_volley"] }
+        { "say": "A ward of silk closes over Grandmother Skein. Burn all three egg sacs! It fails by itself in 25 seconds.", "style": "warn" } ] }
   ],
   "triggers": [
     { "when": { "lit": 3, "phase": 1 }, "do": [ { "shield": false }, { "stun": 4 }, { "vuln": { "takeMore": 0.4, "seconds": 12, "name": "Grief-stricken" } },

@@ -1953,7 +1953,7 @@
    "type": "folk",
    "id": "folk_millbrook_1",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -5181,7 +5181,7 @@
    "type": "folk",
    "id": "folk_millbrook_11",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -6845,7 +6845,7 @@
    "type": "folk",
    "id": "folk_millbrook_17",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -8135,7 +8135,7 @@
    "type": "folk",
    "id": "folk_millbrook_22",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -9026,7 +9026,7 @@
    "type": "folk",
    "id": "folk_millbrook_25",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -10333,7 +10333,7 @@
    "type": "folk",
    "id": "folk_millbrook_30",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"

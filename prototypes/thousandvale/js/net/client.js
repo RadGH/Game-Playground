@@ -15,7 +15,7 @@
 //   net.say(text) ; net.respawn() ; net.leave() ; net.close()
 //   M3 (docs/protocol.md §16): net.accountOp(op, {...}) -> accountR ; net.login(user, pass) ; net.claim(user, pass, email?)
 //     net.logout() ; net.chat(ch, text, to?) ; net.whisper(name, text) ; net.friend(op, name) ; net.guild(op, {...})
-//     net.callboard(op, {...}) ; net.report(name, why, text?) ; net.mail(op, {...})
+//     net.callboard(op, {...}) ; net.report(name, why, text?) ; net.mail(op, {...}) ; net.market(op, {...}) (round 11)
 //     events accountR friends friendState guildState guildInvite guildR callboard reportR mailNew mailList mailOpen mailR
 //   play-test 1 (§17): net.talent(op, {skill, tier, node}) -> talentR ; net.perk(op, {id}) -> perkR ; net.map() -> mapData ;
 //     events discover (zone/places found; merged into joined.you.seen)
@@ -330,6 +330,8 @@ export function connect(opts = {}) {
   net.report = (name, why, text) => sendJ(gw, text ? { t: 'report', name, why, text } : { t: 'report', name, why });
   /** mail('list') | ('read'|'take'|'return'|'delete', {id}) | ('send', {to, subject, body, items:[uids], gold}) — province socket */
   net.mail = (op, a = {}) => sendJ(game, pick({ t: 'mail', op }, a, ['id', 'to', 'subject', 'body', 'items', 'gold']));
+  /** market('browse', {q, tab, slot, sort, page}) | ('mine') | ('sell', {uid, price}) | ('buy', {id, price}) | ('cancel', {id}) — round 11 (#25), province socket */
+  net.market = (op, a = {}) => sendJ(game, pick({ t: 'market', op }, a, ['q', 'tab', 'slot', 'sort', 'page', 'uid', 'price', 'id']));
   // ---- play-test 2 (docs/protocol.md §18) ----
   /** loot('open'|'take'|'all'|'close', {id: corpse entity id, uid?}) | ('roll', {roll, choice:'need'|'greed'|'skip'}) -> lootWin / lootR / lootRolled */
   net.loot = (op, a = {}) => sendJ(game, pick({ t: 'loot', op }, a, ['id', 'uid', 'roll', 'choice', 'gold', 'near']));
@@ -370,8 +372,8 @@ export function connect(opts = {}) {
   net.myReports = (q = {}) => sendJ(game && game.readyState === OPEN && net.joined ? game : gw, { t: 'feedbackMine', ...(q.limit ? { limit: q.limit } : {}), ...(q.before ? { before: q.before } : {}) });
   /** admin('reports', {kind?, state?, limit?, before?}) -> adminReports ; admin('report', {id, state, note?}) -> adminR (admin accounts only) */
   net.adminOp = (op, a = {}) => sendJ(game && game.readyState === OPEN && net.joined ? game : gw, pick({ t: 'admin', op }, a, ['id', 'state', 'kind', 'limit', 'before', 'note']));
-  /** fish('cast', {aim?}) | ('hook') | ('land', {held}) | ('stop') -> fishR / fishBite / fishTug / fishCatch */
-  net.fish = (op, a = {}) => sendJ(game, pick({ t: 'fish', op }, a, ['aim', 'held', 'score', 'holds']));
+  /** fish('cast', {pool?, aim?}) | ('hook') | ('land', {held}) | ('stop') -> fishR / fishBite / fishTug / fishCatch */
+  net.fish = (op, a = {}) => sendJ(game, pick({ t: 'fish', op }, a, ['aim', 'held', 'score', 'holds', 'pool']));      // round 11 (P): pool = the fish pool E was pressed on
   /** cook() -> cookList ; cook(id, n?) -> cookR */
   // ---- round 8 W9 (P-core, docs/protocol.md §25): professions ----
   /** prof('learn'|'tool', {id, npc}) -> profR */

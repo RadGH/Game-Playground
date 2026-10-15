@@ -10,6 +10,7 @@
 
 import { describeAffix } from './farhold.js';
 import { whoText } from './wording.js';
+import { FAMILY_STAT_TEXT } from './attributes.js';
 
 const pct = v => `${+(v * 100).toFixed(1).replace(/\.0$/, '')}%`;
 const n2 = v => `${+(+v).toFixed(2)}`;
@@ -22,6 +23,9 @@ export const TEXT_FIXES = Object.freeze({
   cond_forageRation: v => `+${n2(v)} health a second while you are out of a fight`,
   cond_easeExhaustion: v => `+${n2(v)} health a second`,
   cond_sunderOnHit: v => `Every hit strips ${n2(v)} armour off the target for good`,
+  // owner #2 (2026-10-15): what Strength / Dexterity / Intellect became (js/rules/attributes.js) — printed here too, so a
+  // client that never boots an engine (the item card) has the words without Farhold's effect table knowing them
+  ...FAMILY_STAT_TEXT,
 });
 
 /** One property line for an item card. `a` = an affix object off an item (`{ stat, value, … }`). */
@@ -37,6 +41,6 @@ export function affixText(a) {
 export function itemLines(item) {
   const out = [];
   for (const a of item?.affixes || []) { const t = affixText(a); if (t) out.push(t); }
-  for (const k of ['attackText', 'focusText']) if (item?.[k]) out.push(item[k]);
+  for (const k of ['attackText', 'focusText', 'familyText']) if (item?.[k]) out.push(item[k]);
   return out;
 }

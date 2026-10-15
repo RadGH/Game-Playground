@@ -12,6 +12,9 @@ import * as THREE from 'three';
 
 const $ = id => document.getElementById(id);
 
+/** Round 11 (owner #54): a passing NPC remark — chat only. Exported for the tests. */
+export const isBark = ev => !!ev && (ev.style === 'bark' || ev.style === 'greet' || ev.style === 'chatter');
+
 export function createBossUi({ actors, serverNow, toast } = {}) {
   const el = {
     root: $('boss'), name: $('boss-name'), title: $('boss-title'), fill: $('boss-fill'), lag: $('boss-lag'), ticks: $('boss-ticks'),
@@ -109,6 +112,9 @@ export function createBossUi({ actors, serverNow, toast } = {}) {
         break;
       case 'say': {
         const who = ev.id === B.id ? B.name : actors.get(ev.id)?.name;
+        // round 11 (owner #54): an NPC's passing remark ("Evening, morning, whichever…", style 'bark') goes to chat and a
+        // speech bubble over the speaker — never the big centre callout, which stays for bosses, warnings and event calls
+        if (isBark(ev)) { toast?.chat?.(who ? `${who}: ${ev.text}` : ev.text, 'npc-say'); actors.say?.(ev.id, ev.text); break; }
         callout(ev.text, ev.style || 'yell', who);
         lastSay.id = ev.id; lastSay.at = performance.now();
         break;

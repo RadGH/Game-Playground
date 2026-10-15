@@ -108,6 +108,8 @@ export function createCombat(room) {
       if (members.length < 2) continue;
       const mf = members.reduce((a, m) => a + (m.derived?.magicFind || 0), 0) / members.length;
       const drops = rpg.rollDrops(e, { rng: lootRng, magicFind: mf }) || [];
+      const sure = rankReward(e);
+      if (sure && !drops.some(it => RARITY_RANK[it?.rarity] >= RARITY_RANK[sure])) { const it = rpg.rollDrop({ level: e.level || 1, rng: lootRng, magicFind: mf, chance: 1, floor: sure }); if (it) drops.push(it); }
       for (const it of drops) it.uid = `${room.id}:${++uidN}`;
       for (const m of members) partyDrop.set(m, true);
       combat.partyLoot(members, drops, e, pid);
@@ -146,6 +148,14 @@ export function createCombat(room) {
         ? goldFound(engine.prices, killGold(engine.prices, e.level || 1, { rank: e.rank, boss: !!e.boss, defGold: e.goldBase ?? null }), p.derived?.goldFind || 0)
         : foundGold(p, e.gold);
       const drops = partyDrop.has(p) ? [] : rpg.rollDrops(e, { rng: lootRng, magicFind: p.derived.magicFind }) || [];
+      // owner #61 (2026-10-15): "it only gave me a useless blue item! Not worth it" — a champion is sure to pay one item of
+      // at least magic quality, a rare one of at least rare quality (data/rules/affixes.json `ranks.<rank>.reward`), on
+      // top of what it rolled; in a party it is in the shared pile (below), once
+      const sure = !partyDrop.has(p) && rankReward(e);
+      if (sure && !drops.some(it => RARITY_RANK[it?.rarity] >= RARITY_RANK[sure])) {
+        const it = rpg.rollDrop({ level: e.level || 1, rng: lootRng, magicFind: p.derived.magicFind || 0, chance: 1, floor: sure });
+        if (it) drops.push(it);
+      }
       for (const it of drops) it.uid = `${room.id}:${++uidN}`;
       // the room owns experience, gold and the bag when it says so (js/rules/index.js sets `award`);
       // otherwise (tests, the parity fixtures) the sheet keeps them itself, as Farhold does
@@ -155,7 +165,10 @@ export function createCombat(room) {
       field.emit({ t: 'reward', to: p.id, from: e.id, xp: award, levels, level: p.level, gold: coin, restore: back, items: drops });
     }
   };
+  const RARITY_RANK = { normal: 0, magic: 1, rare: 2, legendary: 3, set: 4, unique: 4 };
   const foundGold = (p, amount) => Math.max(0, Math.round(amount * (1 + (p.derived?.goldFind || 0) / 100)));
+  /** Owner #61: the least rarity a champion / rare is sure to pay (null: a normal monster, a boss, a parity engine). */
+  const rankReward = e => (engine.combatCfg && !e.boss && !e.dummy ? engine.affixes?.cfg?.ranks?.[e.rank]?.reward || null : null);
 
   // ------------------------------------------------------------------ the basic attack (main.js swingWith)
 
@@ -478,7 +491,18 @@ export function createCombat(room) {
       }
       return hits;
     } : (h => h);
-    throwBolt(combat, ch, plan, a, a.dx, a.dz, opts, {}, collect);
+    // owner #40 (2026-10-15): "if it says 3 projectiles, I expect to see 3 distinct projectiles each with their own
+    // damage" — a fan (Farhold's `split`, projectiles 3) throws EVERY bolt, spread across the fan, each its own flight,
+    // its own `fx bolt` and its own hit (it used to throw one). The unique powers ride the first bolt only.
+    // (Farhold's main.js wand path calls fireBolt once whatever `projectiles` says — a Farhold finding; the parity engine keeps it)
+    const nBolts = engine.casterForms ? Math.max(1, plan.projectiles | 0) : 1;
+    for (let k = 0; k < nBolts; k++) {
+      const off = nBolts === 1 ? 0 : (k / (nBolts - 1) - 0.5) * (plan.spread || 0);
+      const cs = Math.cos(off), sn = Math.sin(off);
+      const one = k === 0 ? plan : { ...plan, mods: null, fxTag: { ...plan.fxTag, n: k + 1, of: nBolts } };
+      if (k === 0 && nBolts > 1) plan.fxTag = { ...plan.fxTag, n: 1, of: nBolts };
+      throwBolt(combat, ch, one, a, a.dx * cs - a.dz * sn, a.dx * sn + a.dz * cs, opts, {}, collect);
+    }
     // Twin Bolt: a second bolt a beat behind the first, at a share of its damage
     if (mods.twin) combat.later(mods.twin.ms / 1000, () => throwBolt(combat, ch, { ...plan, mods: null, fxTag: plan.fxTag }, aimOfCh(ch), Math.sin(ch.yaw), Math.cos(ch.yaw), { ...opts, power: mult * share * mods.twin.power }), ch.id);
   }

@@ -74,6 +74,21 @@ export const MOUNT_TYPES = {
     tack: { kind: 'drake_saddle', leather: '#3a2418', cloth: '#6a3a5a', metal: '#b0a070', bags: false },
     gaits: { ...GAITS, trot: 2.2, gallop: 4.8, pace: { walk: 1.4, run: 5.6 } },
   },
+  // Thousandvale round 11 (owner live #48, World stream; opt-in rows — no other game names these keys): Vharlen's two
+  // island lizards. The Ash Strider is the drake frame in soot and ochre, lighter-built; the Slag Basker is the crocodile
+  // frame (broad, low, plated) in slag-black with ember-orange stripes.
+  ash_strider: {
+    label: 'Ash strider', creature: 'ash_strider', size: 1.45,          // (D-world round 11: its own long-legged build, creature-types.js)
+    colors: { body: '#5a4a42', belly: '#c89a5a', accent: '#d0562a' },
+    tack: { kind: 'drake_saddle', leather: '#2e1e16', cloth: '#a8452a', metal: '#c8a868', bags: false },
+    gaits: { ...GAITS, trot: 2.4, gallop: 5.2, pace: { walk: 1.6, run: 6.2 } },
+  },
+  slag_basker: {
+    label: 'Slag basker', creature: 'slag_basker', size: 1.5,          // (D-world round 11: broad, low and plated, creature-types.js)
+    colors: { body: '#3a3634', belly: '#8a7a5a', accent: '#e07a2a' },
+    tack: { kind: 'saddle', leather: '#3a2a1e', cloth: '#5a5048', metal: '#9a9080', bags: true },
+    gaits: { ...GAITS, trot: 2.0, gallop: 4.4, pace: { walk: 1.2, run: 5.0 } },
+  },
 };
 
 export const MOUNT_KEYS = Object.keys(MOUNT_TYPES);

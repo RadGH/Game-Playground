@@ -18,6 +18,45 @@
 export const CART_DEFAULTS = Object.freeze({ boardM: 6, flagDownM: 12, rideSecPerKm: 2, minRideSec: 4, maxRideSec: 14, minLevel: 1 });
 export const CART_TOKEN = 'cart_token';
 
+/**
+ * Round 11 (World, live #45: "When you start riding on a caravan to another town, it seems to just ride off in a random
+ * direction … right into the Torborhold walls … make the caravans leave following the road"). The first `maxM` metres of
+ * the ride as a polyline in world metres: from `start` (where the cart stands) onto the road out of `town` whose far end
+ * lies nearest the destination, then along it. `routes` = the province's travel routes ({ from:{name}, to:{name}, pts }).
+ * Empty when no road passes within `nearM` of the cart (the client then rolls straight, as before). Pure.
+ */
+export function departPath(routes, start, town, dest, { maxM = 160, nearM = 140, centre = null } = {}) {
+  if (!start) return [];
+  // no road near the cart: straight out, AWAY from the town's middle (the cart stands outside its gate), never through it
+  const outward = () => { if (!centre) return []; const dx = start.x - centre.x, dz = start.z - centre.z, d = Math.hypot(dx, dz); if (d < 1) return []; const r1 = v => Math.round(v * 10) / 10; return [[r1(start.x), r1(start.z)], [r1(start.x + dx / d * 40), r1(start.z + dz / d * 40)]]; };
+  if (!Array.isArray(routes) || !routes.length) return outward();
+  const bareN = n => String(n || '').toLowerCase().replace(/^the\s+/, '');
+  const T = bareN(town);
+  let best = null;
+  for (const r of routes) {
+    const pts = Array.isArray(r.pts) ? r.pts.filter(p => Array.isArray(p) && Number.isFinite(p[0]) && Number.isFinite(p[1])) : [];
+    if (pts.length < 2) continue;
+    const ends = bareN(r.from && r.from.name) === T ? [pts] : bareN(r.to && r.to.name) === T ? [pts.slice().reverse()] : [pts, pts.slice().reverse()];
+    for (const line of ends) {
+      let i0 = -1, d0 = Infinity;
+      for (let i = 0; i < line.length; i++) { const d = Math.hypot(line[i][0] - start.x, line[i][1] - start.z); if (d < d0) { d0 = d; i0 = i; } }
+      if (d0 > nearM || i0 >= line.length - 1) continue;
+      const far = line[line.length - 1], toDest = dest ? Math.hypot(far[0] - dest.x, far[1] - dest.z) : 0;
+      const score = toDest + d0 * 4 + (bareN(r.from && r.from.name) === T || bareN(r.to && r.to.name) === T ? 0 : 500);
+      if (!best || score < best.score) best = { score, line, i0 };
+    }
+  }
+  if (!best) return outward();
+  const out = [[Math.round(start.x * 10) / 10, Math.round(start.z * 10) / 10]];
+  let walked = 0, last = out[0];
+  for (let i = best.i0; i < best.line.length && walked < maxM; i++) {
+    const p = best.line[i], d = Math.hypot(p[0] - last[0], p[1] - last[1]);
+    if (d < 2) continue;
+    walked += d; last = [Math.round(p[0] * 10) / 10, Math.round(p[1] * 10) / 10]; out.push(last);
+  }
+  return out.length >= 2 ? out : outward();
+}
+
 export function createCarts({ data = null, layouts = [], online, journal = () => {}, econ = null, setTimeoutTicks, moveTo, questEvent = () => {}, fighting = () => false, dismount = () => {},
   consume = null, tickMs = 50, log = () => {}, counters = {}, cartFare = null }) {
   const D = data || {};
@@ -99,7 +138,13 @@ export function createCarts({ data = null, layouts = [], online, journal = () =>
     const ms = rideMs(row.metres);
     counters.cartRides = (counters.cartRides || 0) + 1;
     reply({ ok: true, name: dest.town, fare: byToken ? 0 : fare, ...(byToken ? { token: true } : {}), ms });
-    if (s) s.sendJSON({ t: 'cartRide', to: { id: dest.id, name: dest.town, x: Math.round(at.x), z: Math.round(at.z), province: at.province }, from: { id: from.id, name: from.town }, ms, fare: byToken ? 0 : fare, m: Math.round(row.metres || 0) });
+    // round 11 (#45): the way out — onto the road toward the destination, never straight through the town wall
+    const routes = (layouts.find(L => L.key === (o.room && o.room.meta && o.room.meta.province)) || layouts[0] || {}).travel?.routes || [];
+    let path = [];
+    const lay = layouts.find(L => L.key === (o.room && o.room.meta && o.room.meta.province)) || layouts[0] || {};
+    const centre = (lay.towns || []).find(t => bare(t.name) === bare(from.town)) || null;
+    try { path = departPath(routes, { x: obj.x, z: obj.z }, from.town, at, { centre }); } catch { path = []; }
+    if (s) s.sendJSON({ t: 'cartRide', to: { id: dest.id, name: dest.town, x: Math.round(at.x), z: Math.round(at.z), province: at.province }, from: { id: from.id, name: from.town }, ms, fare: byToken ? 0 : fare, m: Math.round(row.metres || 0), ...(path.length ? { path } : {}) });
     e.held = 'cart';
     const ride = o.cartRide = { to: dest.id, from: from.id, entity: e };
     setTimeoutTicks(() => {

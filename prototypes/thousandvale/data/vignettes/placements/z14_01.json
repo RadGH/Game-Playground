@@ -3376,7 +3376,7 @@
    "type": "folk",
    "id": "folk_saltmouth_5",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -5201,7 +5201,7 @@
    "type": "folk",
    "id": "folk_saltmouth_11",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -6296,7 +6296,7 @@
    "type": "folk",
    "id": "folk_saltmouth_15",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"

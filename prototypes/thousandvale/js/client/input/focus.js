@@ -27,12 +27,22 @@ export function createFocus({ parent = document.body, onText = null } = {}) {
   const items = c => [...c.querySelectorAll(FOCUSABLE)].filter(e => vis(e) && !e.disabled && e.getAttribute('aria-hidden') !== 'true' && !e.closest('[hidden]'));
   const isCanvas = e => e && e.tagName === 'CANVAS';
   function set(el) {
+    // round 11: the card of the square we leave goes with it (the next square brings its own)
+    if (cur && cur !== el && enabled) { try { cur.dispatchEvent(new PointerEvent('pointerout', { bubbles: true, relatedTarget: null })); } catch { /* old browsers */ } }
     cur = el || null; cursor = null; ptr.hidden = true;
     if (!cur) { ring.hidden = true; return; }
     try { cur.focus({ preventScroll: true }); } catch { /* not focusable: the ring alone marks it */ }
     cur.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
     if (isCanvas(cur)) cursorAt(cur, 0.5, 0.5);
     place();
+    // round 11 (owner #28): an item square shows its card (with the compare) as soon as the ring lands on it — a controller
+    // has no hover. Y on an open card flips the compare to the other hand / ring (what Shift does on a keyboard).
+    // (a scroll from scrollIntoView closes tooltips, so the card is asked for again until it stays up — at most ~0.7 s)
+    if (enabled && cur.closest?.('[data-tip-render]')) {
+      const el = cur;
+      const ask = n => setTimeout(() => { if (cur !== el || !el.isConnected) return; const b = document.getElementById('tipbox'); if (!b || b.hidden) details(); if (n > 0) ask(n - 1); }, n === 3 ? 60 : 200);
+      ask(3);
+    }
   }
   function place() {
     if (!enabled || !cur || !vis(cur)) { ring.hidden = true; return; }
@@ -46,10 +56,14 @@ export function createFocus({ parent = document.body, onText = null } = {}) {
   function sync() {
     const c = enabled ? container() : null;
     if (!c) { if (cur) set(null); return null; }
+    // round 11 (owner #22): a window that asks for it (`data-pad-first`, e.g. the loot window's first item) is entered there —
+    // also when its content arrives AFTER it opened and the ring is still parked on the close button
+    const first = () => items(c).find(e => e.matches('[data-pad-first]'));
     if (!cur || !c.contains(cur) || !vis(cur)) {
       const list = items(c);
-      set(list.find(e => e.matches('.primary, [aria-selected="true"], [aria-checked="true"], .on')) || list.find(e => !e.matches('.tvp-x, .gs-x')) || list[0] || null);
-    } else place();
+      set(list.find(e => e.matches('[data-pad-first]')) || list.find(e => e.matches('.primary, [aria-selected="true"], [aria-checked="true"], .on')) || list.find(e => !e.matches('.tvp-x, .gs-x')) || list[0] || null);
+    } else if (cur.matches('.tvp-x, .gs-x') && first()) set(first());
+    else place();
     return c;
   }
   function move(dx, dy) {
@@ -87,6 +101,13 @@ export function createFocus({ parent = document.body, onText = null } = {}) {
   function alt() { if (!cur) return false; const p = at(); if (cursor) { mouse(cur, 'pointerdown', p.x, p.y, { button: 2, buttons: 2 }); mouse(cur, 'pointerup', p.x, p.y, { button: 2 }); } mouse(cur, 'contextmenu', p.x, p.y, { button: 2 }); return true; }
   /** Show the card of what is focused (the shared tooltip opens on pointerover). */
   function details() { if (!cur) return false; const p = at(); for (const t of ['pointerover', 'mouseover', 'pointermove', 'mousemove']) mouse(cursor ? document.elementFromPoint(p.x, p.y) || cur : cur, t, p.x, p.y); return true; }
+  /** Y: the card of what is focused; pressed again on an item whose card is open, compare the other slot (item-card.js listens). */
+  function cardOrAlt() {
+    if (!cur) return false;
+    const box = document.getElementById('tipbox');
+    if ((box && !box.hidden && cur.closest?.('[data-tip-render="item"]')) || cur.closest?.('[data-pad-alt]')) { window.dispatchEvent(new CustomEvent('tv:pad-alt')); return true; }
+    return details();
+  }
   /** Step through the window's tabs (the first tab strip found in the container). */
   function tab(dir) {
     const c = container(); if (!c) return false;
@@ -119,7 +140,7 @@ export function createFocus({ parent = document.body, onText = null } = {}) {
     mouse(cur, 'pointermove', drag.x, drag.y, { buttons: 1, pointerId: 7 }); mouse(cur, 'mousemove', drag.x, drag.y, { buttons: 1 });
   }
   return {
-    ring, ptr, set(el) { enabled = true; set(el); }, sync, move, press, alt, details, tab, scroll, steer, zoom, pan, cursorAt, container,
+    ring, ptr, set(el) { enabled = true; set(el); }, sync, move, press, alt, details, cardOrAlt, tab, scroll, steer, zoom, pan, cursorAt, container,
     enable(on) { enabled = !!on; if (!on) { ring.hidden = true; ptr.hidden = true; cur = null; cursor = null; } },
     get current() { return cur; }, get steering() { return !!cursor; }, get enabled() { return enabled; },
   };

@@ -10,7 +10,7 @@
     "level": 14,
     "respawnMs": 1800000
   },
-  "_doc": "Expansion 1 (Vharlen). The ZONE EVENT BOSS for Sulphur Bight: the great toad of the yellow flats, older than Yellowpan. P1 'The Flats': a tongue that drags its target in, a gas belch, and a leap at whoever is farthest. P2 at 55% 'The Spawning': it sits on a ward of yellow slime while its spawn hatch — KILL THE TOADLINGS to drop it — and acid rain leaves poison puddles. P3, a new health bar 'The Last Croak': the Great Croak blasts the whole flat (hide behind a crust chimney), it tries to swallow a player whole (three of you stand with them so it cannot fit you all in), and a belly flop that throws everyone. Soft enrage from 4 minutes, hard at 7.",
+  "_doc": "Expansion 1 (Vharlen). The ZONE EVENT BOSS for Sulphur Bight: the great toad of the yellow flats, older than Yellowpan. P1 'The Flats': a tongue that drags its target in, a gas belch, and a leap at whoever is farthest. P2 at 55% 'The Spawning': it sits on a ward of yellow slime while its spawn hatch — KILL THE TOADLINGS to drop it — and acid rain leaves poison puddles. P3, a new health bar 'The Last Croak': the Great Croak blasts the whole flat (hide behind a crust chimney), it tries to swallow a player whole (three of you stand with them so it cannot fit you all in), and a belly flop that throws everyone. Soft enrage from 4 minutes, hard at 7. OWNER #51 (2026-10-15): the phase that refilled the health bar is removed; the health bar is the whole fight.",
   "party": "Zone event, everyone nearby joins. Solo: not intended (the swallow needs 3, the spawn come in fours). 3-5: playable. 10+: intended. M5 scaling: health and spawn by players enrolled; stack need = clamp(players/4, 2, 5).",
   "hpMult": 3,
   "arena": {
@@ -173,72 +173,6 @@
           }
         }
       ]
-    },
-    "great_croak": {
-      "id": "great_croak",
-      "name": "The Great Croak",
-      "every": [
-        26,
-        30
-      ],
-      "first": 10,
-      "cast": 3,
-      "say": "Its throat swells huge — get behind a crust chimney!",
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "self",
-          "r": 38,
-          "wind": 0.6,
-          "damage": 2.6,
-          "los": true,
-          "status": "fear"
-        }
-      ]
-    },
-    "swallow": {
-      "id": "swallow",
-      "name": "Swallow Whole",
-      "every": [
-        20,
-        24
-      ],
-      "first": 5,
-      "cast": 1,
-      "say": "Old Yellowback wants to swallow {target} — three of you stand with them so it cannot fit you all in!",
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "random",
-          "r": 3.4,
-          "wind": 4,
-          "damage": 3,
-          "kind": "stack",
-          "need": 3,
-          "follow": true
-        }
-      ]
-    },
-    "flop": {
-      "id": "flop",
-      "name": "Belly Flop",
-      "every": [
-        16,
-        19
-      ],
-      "first": 14,
-      "cast": 0.8,
-      "say": "Old Yellowback rears up — get clear of the flop!",
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "self",
-          "r": 10,
-          "wind": 1.9,
-          "damage": 2.4,
-          "knock": 6
-        }
-      ]
     }
   },
   "phases": [
@@ -289,20 +223,6 @@
         "say": "Old Yellowback sits on a ward of yellow slime. Kill its four spawn to drop it! It fails by itself in 25 seconds.",
         "fade": "The ward fails by itself. No opening this time."
       }
-    },
-    {
-      "name": "The Last Croak",
-      "newBar": {
-        "hp": 0.5
-      },
-      "say": "My children! The flats will have you for this.",
-      "abilities": [
-        "belch",
-        "great_croak",
-        "swallow",
-        "flop",
-        "tongue"
-      ]
     }
   ],
   "triggers": [

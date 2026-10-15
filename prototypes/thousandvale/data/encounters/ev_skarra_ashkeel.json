@@ -10,7 +10,7 @@
     "level": 12,
     "respawnMs": 1800000
   },
-  "_doc": "Expansion 1 (Vharlen). The ZONE EVENT BOSS for Blackstrand: a Slagborn raid captain who beaches her longboats on the black sand. P1 'The Landing': a keel-axe cleave, flaming arrows from the boats, a boat-ram charge down a line, and the Ash Horn — a blast the size of the beach; hide behind a stack of harbour crates. P2 at 55% 'Burn the Boats': she stands behind a fire-rite ward while raiders pour off the boats — SET ALL THREE TARRED LONGBOATS ALIGHT (use them) to strand her raiders and break the ward. P3, a new health bar 'No Retreat': a stand-together stack, keel sweeps in four directions and a get-in-close ring. Soft enrage from 4 minutes, hard at 7.",
+  "_doc": "Expansion 1 (Vharlen). The ZONE EVENT BOSS for Blackstrand: a Slagborn raid captain who beaches her longboats on the black sand. P1 'The Landing': a keel-axe cleave, flaming arrows from the boats, a boat-ram charge down a line, and the Ash Horn — a blast the size of the beach; hide behind a stack of harbour crates. P2 at 55% 'Burn the Boats': she stands behind a fire-rite ward while raiders pour off the boats — SET ALL THREE TARRED LONGBOATS ALIGHT (use them) to strand her raiders and break the ward. P3, a new health bar 'No Retreat': a stand-together stack, keel sweeps in four directions and a get-in-close ring. Soft enrage from 4 minutes, hard at 7. OWNER #51 (2026-10-15): the phase that refilled the health bar is removed; the health bar is the whole fight.",
   "party": "Zone event, everyone nearby joins. Solo: not intended (three boats to burn under raiders, a stack that needs 3). 3-5: playable. 10+: intended. M5 scaling: health and raider adds by players enrolled; stack need = clamp(players/4, 2, 5).",
   "hpMult": 3,
   "arena": {
@@ -228,75 +228,6 @@
           }
         }
       ]
-    },
-    "shield_ring": {
-      "id": "shield_ring",
-      "name": "Shield Ring",
-      "every": [
-        20,
-        24
-      ],
-      "first": 6,
-      "cast": 1,
-      "say": "Skarra comes for {target} — three of you, lock shields with them!",
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "random",
-          "r": 3.6,
-          "wind": 4,
-          "damage": 3,
-          "kind": "stack",
-          "need": 3,
-          "follow": true
-        }
-      ]
-    },
-    "keel_sweep": {
-      "id": "keel_sweep",
-      "name": "Keel Sweep",
-      "every": [
-        14,
-        17
-      ],
-      "first": 9,
-      "cast": 0.6,
-      "say": "She swings the keel-chain round — four ways at once!",
-      "telegraphs": [
-        {
-          "shape": "line",
-          "at": "self",
-          "len": 30,
-          "w": 3,
-          "wind": 1.6,
-          "damage": 2,
-          "count": 4,
-          "rotate": 1.5708,
-          "yaw": "random"
-        }
-      ]
-    },
-    "surf_ring": {
-      "id": "surf_ring",
-      "name": "Surf Ring",
-      "every": [
-        16,
-        19
-      ],
-      "first": 13,
-      "cast": 1,
-      "say": "The surf rises round her — get in close!",
-      "telegraphs": [
-        {
-          "shape": "donut",
-          "at": "self",
-          "r": 18,
-          "r2": 4,
-          "wind": 1.9,
-          "damage": 2.3,
-          "knock": 3
-        }
-      ]
     }
   },
   "phases": [
@@ -354,20 +285,6 @@
           "say": "Skarra stands behind a fire-rite ward. Burn all three tarred longboats! It fails by itself in 25 seconds.",
           "style": "warn"
         }
-      ]
-    },
-    {
-      "name": "No Retreat",
-      "newBar": {
-        "hp": 0.5
-      },
-      "say": "MY BOATS! Then nobody leaves this beach.",
-      "abilities": [
-        "keel_axe",
-        "shield_ring",
-        "keel_sweep",
-        "surf_ring",
-        "fire_arrows"
       ]
     }
   ],

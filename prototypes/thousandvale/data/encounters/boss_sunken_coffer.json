@@ -4,7 +4,7 @@
   "tier": "boss",
   "body": "hoard_mimic",
   "place": "dungeon flooded_cistern set B: the end boss in the treasury vault the flood sealed (28 m)",
-  "_doc": "Stream E (M2). The town's strongbox, sunk in the flood with the tax money inside, has grown teeth. Greedy and ridiculous. P1 \"Interest\": coin-spray cones, a lid slam on the tank, and GOLD PILES it spits around the room — walking through a pile pays it (heals the coffer: pools with boss heal). P2 at 60% \"Audit\": it locks itself shut (ward) and coin-golems... coin-gobbling slimes swarm out; open the three counting-house strongboxes (braziers) to break the lock. P3 new bar \"Bankrupt\": the vault floods — safe ledges, a three-player stack on the \"debt\", a spinning coin storm, and a soak on the scales (someone must stand on the tax scales or everyone is fined).",
+  "_doc": "Stream E (M2). The town's strongbox, sunk in the flood with the tax money inside, has grown teeth. Greedy and ridiculous. P1 \"Interest\": coin-spray cones, a lid slam on the tank, and GOLD PILES it spits around the room — walking through a pile pays it (heals the coffer: pools with boss heal). P2 at 60% \"Audit\": it locks itself shut (ward) and coin-golems... coin-gobbling slimes swarm out; open the three counting-house strongboxes (braziers) to break the lock. P3 new bar \"Bankrupt\": the vault floods — safe ledges, a three-player stack on the \"debt\", a spinning coin storm, and a soak on the scales (someone must stand on the tax scales or everyone is fined). OWNER #51 (2026-10-15): the phase that refilled the health bar is removed; the health bar is the whole fight.",
   "party": "Solo: needs a follower for the soak and the stack. 2-3: soak + stack are tight. 5: as designed. M5: stack need = min(3, party), soak need 1 for <=2 players, health x1.8 at 5.",
   "hpMult": 4,
   "arena": {
@@ -110,7 +110,7 @@
           "arc": 1.4,
           "knock": 2,
           "wind": 1.1,
-          "damage": 2.0
+          "damage": 2
         }
       ]
     },
@@ -210,79 +210,7 @@
           "count": 3,
           "delay": 0.25,
           "wind": 1.4,
-          "damage": 1.0
-        }
-      ]
-    },
-    "ledges": {
-      "id": "ledges",
-      "name": "The Vault Floods",
-      "every": [
-        26,
-        30
-      ],
-      "first": 16,
-      "cast": 1.5,
-      "say": "The vault is flooding — get into one of the dry circles!",
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "home",
-          "offset": [
-            9,
-            9
-          ],
-          "r": 3,
-          "kind": "safe",
-          "wind": 3.5,
-          "damage": 2.6
-        },
-        {
-          "shape": "circle",
-          "at": "home",
-          "offset": [
-            -9,
-            9
-          ],
-          "r": 3,
-          "kind": "safe",
-          "wind": 3.5,
-          "damage": 2.6
-        },
-        {
-          "shape": "circle",
-          "at": "home",
-          "offset": [
-            0,
-            -11
-          ],
-          "r": 3,
-          "kind": "safe",
-          "wind": 3.5,
-          "damage": 2.6
-        }
-      ]
-    },
-    "debt": {
-      "id": "debt",
-      "name": "Collected Debt",
-      "every": [
-        20,
-        24
-      ],
-      "first": 6,
-      "cast": 1,
-      "say": "{target} is in DEBT — three of you share it or it breaks them!",
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "random",
-          "r": 3,
-          "kind": "stack",
-          "need": 3,
-          "follow": true,
-          "wind": 4,
-          "damage": 3.0
+          "damage": 1
         }
       ]
     },
@@ -304,35 +232,10 @@
           "r": 2.8,
           "kind": "soak",
           "need": 1,
-          "fail": 2.0,
+          "fail": 2,
           "failSay": "Nobody tipped the scales — everyone is FINED!",
           "wind": 5,
           "damage": 0.6
-        }
-      ]
-    },
-    "coin_storm": {
-      "id": "coin_storm",
-      "name": "Coin Storm",
-      "every": [
-        16,
-        19
-      ],
-      "first": 4,
-      "cast": 0.8,
-      "say": "It spins up into a storm of coins!",
-      "telegraphs": [
-        {
-          "shape": "line",
-          "at": "self",
-          "len": 16,
-          "w": 2.4,
-          "count": 8,
-          "rotate": 0.785,
-          "delay": 0.3,
-          "yaw": "random",
-          "wind": 1.2,
-          "damage": 1.7
         }
       ]
     }
@@ -385,20 +288,6 @@
         "fade": "The ward fails by itself. No opening this time.",
         "pool": 0.1
       }
-    },
-    {
-      "name": "Bankrupt",
-      "newBar": {
-        "hp": 0.55
-      },
-      "say": "\"I have NOTHING LEFT. So neither will YOU.\"",
-      "abilities": [
-        "lid",
-        "ledges",
-        "debt",
-        "scales",
-        "coin_storm"
-      ]
     }
   ],
   "triggers": [

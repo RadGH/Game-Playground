@@ -54,24 +54,31 @@ export function simulate({ levels = [1, 5, 10, 20] } = {}) {
   const P = createProfessions(numbers, content);
   const Q = numbers.quality, G = numbers.gather;
   const price = id => (P.material(id) || {}).price || 0;
+  // round 11 (live #9): a high score (fine / perfect) gives the main material x1.5, rounded up, and one find — exactly as gatherYield
+  const mainN = (y, gn, q) => { if (!y) return 0; const k = Math.max(1, Math.round(y * (gn || 1))); return P.highScore(q) ? Math.ceil(k * (P.highScoreNumbers.mult || 1.5)) : k; };
+  const findValue = (prof, tier, q) => { if (!P.highScore(q)) return 0; const f = P.findFor(prof, tier); return f ? price(f) : 0; };
   const rows = [];
   /** Expected gold of one worked node of `kind` (priced as tier `as` when projecting). */
   const nodeValue = (kind, stats, as = null) => {
     const k = P.nodeKind(kind);
     const shift = id => { if (!as || as === k.tier) return id; for (const list of Object.values(P.classes)) { const i = list.indexOf(id); if (i === k.tier - 1 && list[as - 1]) return list[as - 1]; } return id; };
     let v = 0;
-    for (const [q, share] of Object.entries(stats.dist)) v += share * ((Q.yield[q] || 0) * price(shift(k.gives)) + (k.bonus ? (Q.bonusChance[q] || 0) * price(shift(k.bonus)) : 0));
+    for (const [q, share] of Object.entries(stats.dist)) v += share * (mainN(Q.yield[q] || 0, 1, q) * price(shift(k.gives)) + (k.bonus ? (Q.bonusChance[q] || 0) * price(shift(k.bonus)) : 0) + findValue(k.prof, as || k.tier, q));
     return v;
   };
   const gatherHour = (prof, L) => {
     const skill = skillAt(L), top = P.tierForSkill(skill).tier;
     let best = null;
+    // a PROJECTED row (no node of this skill's tier anywhere) prices the top-tier nodes of the zones that grow the province's
+    // best tier of this trade — round 11: since tier-2 trees left the low zones, an all-ash zone priced as tier 4 had won
+    const provTop = Math.max(0, ...Object.values(nodes.zones).flat().map(n => P.nodeKind(n.k)).filter(k => k && k.prof === prof && k.tier <= top).map(k => k.tier));
     for (const [wid, m] of Object.entries(nodes.meta)) {
       if (L <= 10 && (L < m.band[0] - 1 || L > m.band[1] + 1)) continue;
       const list = (nodes.zones[wid] || []).filter(n => { const k = P.nodeKind(n.k); return k && k.prof === prof && k.tier <= top; });
       if (list.length < 5) continue;
       const zoneTop = Math.max(...list.map(n => P.nodeKind(n.k).tier));
       const projected = top > zoneTop && L > 10;          // the province has nothing of the tier this skill works
+      if (projected && zoneTop < provTop) continue;
       const hop = meanHop(list);
       let value = 0, seconds = 0;
       for (const n of list) {
@@ -121,8 +128,8 @@ export function simulate({ levels = [1, 5, 10, 20] } = {}) {
       const tier = P.tierForLevel(L), sk = P.skinOf(Object.keys(content.skins.types)[0], L);
       const st = playStats(P, 'skinning', { skill, need: P.tier(sk.tier).minSkill, n: 300 });
       let per = 0;
-      for (const [q, share] of Object.entries(st.dist)) for (const g of sk.gives) per += share * Math.max(Q.yield[q] ? 1 : 0, Math.round((Q.yield[q] || 0) * (g.n || 1))) * price(g.id) + 0;
-      for (const [q, share] of Object.entries(st.dist)) per += share * (Q.bonusChance[q] || 0) * price(sk.bonus);
+      for (const [q, share] of Object.entries(st.dist)) for (const g of sk.gives) per += share * mainN(Q.yield[q] || 0, g.n, q) * price(g.id);
+      for (const [q, share] of Object.entries(st.dist)) per += share * ((Q.bonusChance[q] || 0) * price(sk.bonus) + findValue('skinning', sk.tier, q));
       const beasts = PLAYER.killsPerHour * PLAYER.beastShare;
       const lost = beasts * (st.seconds + PLAYER.settleS + 1) / 3600;      // the share of the hour spent with the knife
       rows.push({ activity: 'skinning (add-on)', level: L, goldPerHour: Math.round(beasts * (1 - lost) * per), kind: 'addOn', addOn: true, lostShare: +lost.toFixed(3),

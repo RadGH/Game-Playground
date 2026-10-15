@@ -62,19 +62,27 @@ export function setCardContext(c = {}) { ctx = { ...ctx, ...c }; }
 let potions = null;
 import('../../sim/consumables.js').then(m => { if (typeof m.effectOf === 'function' && typeof m.potionAmount === 'function') potions = m; }).catch(() => {});
 let shift = false;
+let padAlt = false;      // round 11 (#28): a controller has no Shift — the card's own button (pad Y on an open card) flips it
+/** Compare against the other slot (the other hand / ring) — what Shift does, for a controller or a tap. Returns the new state. */
+export function toggleAltCompare(on = !padAlt) { padAlt = !!on; refreshTip(); return padAlt; }
+export const altCompare = () => shift || padAlt;
 export function installItemCards(c = {}) {
   ctx = { ...ctx, ...c };
   registerTip('item', el => {
     const it = itemByUid(el.dataset.tipItem);
     return it ? itemCardHtml(it, { worn: el.dataset.worn === '1' }) : null;
   });
-  const key = on => e => { if (e.key === 'Shift' && shift !== on) { shift = on; refreshTip(); } };
-  addEventListener('keydown', key(true)); addEventListener('keyup', key(false));
-  addEventListener('blur', () => { shift = false; });
+  // round 11 (owner #43 "hold Shift to compare other slot — doesn't work" in the shop): every window stops its own key
+  // events (ui-panel.js), so a Shift pressed while the shop, loot or mail window had the focus never reached a window-level
+  // listener. Listen in the CAPTURE phase, ahead of them all.
+  const key = on => e => { if (e.key === 'Shift' && shift !== on) { shift = on; padAlt = false; refreshTip(); } };
+  addEventListener('keydown', key(true), true); addEventListener('keyup', key(false), true);
+  addEventListener('blur', () => { shift = false; padAlt = false; });
+  addEventListener('tv:pad-alt', () => toggleAltCompare());
 }
 
 /** The card's HTML. `worn` = this is what you are wearing (no compare). */
-export function itemCardHtml(item, { worn = false, level = null, equipment = null, alt = shift } = {}) {
+export function itemCardHtml(item, { worn = false, level = null, equipment = null, alt = shift || padAlt } = {}) {
   const lv = level ?? ctx.level() ?? 1, eq = equipment ?? ctx.equipment() ?? {};
   const r = rarityOf(item), slot = slotOf(item);
   const icon = iconFor(item);
@@ -119,7 +127,7 @@ export function itemCardHtml(item, { worn = false, level = null, equipment = nul
   if (item.desc && !item.lore && !(potionSaid && /restores?\s+\d/i.test(item.desc))) b.push(`<div class="ic-dim">${esc(item.desc)}</div>`);
   // T15 / T17 (C): what a caster weapon's attack IS, what a focus adds, what a converted weapon deals — written from the numbers
   const said = [];                              // every PROPERTY line (never the name or the lore): what the status notes read
-  for (const k of ['attackText', 'focusText', 'convertText']) if (item[k]) { said.push(item[k]); b.push(`<div class="ic-attack">${esc(who(item[k]))}</div>`); }
+  for (const k of ['attackText', 'focusText', 'convertText', 'familyText' /* round 11 (C, Z2): the weapon family's damage bonus + melee guard */]) if (item[k]) { said.push(item[k]); b.push(`<div class="ic-attack">${esc(who(item[k]))}</div>`); }
   if (item.weaponHeadline) b.push(`<div class="ic-dim">${esc(item.weaponHeadline)}</div>`);
   const rolled = (item.affixes || []).filter(a => !a.baseIntrinsic), built = (item.affixes || []).filter(a => a.baseIntrinsic);
   if (rolled.length || built.length) {
@@ -143,7 +151,8 @@ export function itemCardHtml(item, { worn = false, level = null, equipment = nul
       const lose = (c.worn.affixes || []).filter(a => !a.baseIntrinsic).map(affixText);
       if (was.length || lose.length) b.push(`<div class="ic-dim">You would lose: ${esc([...was, ...lose].join(' · '))}</div>`);
     } else b.push(`<div class="ic-dim">Nothing worn in ${esc(SLOT_NAME[c.slot] || c.slot)} — a free upgrade.</div>`);
-    if (altSlotOf(item)) b.push(`<div class="ic-shift">${alt ? 'Comparing the other slot.' : 'Hold <kbd>Shift</kbd> to compare the other slot.'}</div>`);
+    // round 11 (#28): a controller has no Shift — it reads "Press Y" (pt11.css shows one line or the other by the device in use)
+    if (altSlotOf(item)) b.push(`<div class="ic-shift"><span class="ic-keyalt">${alt ? 'Comparing the other slot.' : 'Hold <kbd>Shift</kbd> to compare the other slot.'}</span><span class="ic-padalt">${alt ? 'Comparing the other slot — press Y to go back.' : 'Press Y to compare the other slot.'}</span></div>`);
   }
   // #60: how each status named above works — one line a status, under everything else the card says
   if (statusNotes && statusTable && said.length) {

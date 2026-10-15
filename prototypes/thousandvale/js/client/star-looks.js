@@ -21,7 +21,17 @@ export const STAR_GOLD = '#ffc640';
 export const STAR_PALE = '#fff3c4';
 export const STAR_MIDNIGHT = '#1c1f4a';
 
-export const isStarSkill = id => SKILL_SET.has(String(id || ''));
+/** Round 11 (Star Blade, the Starcaller's plate-wearing sibling): its six skills are drawn in the same star gold — a gold
+ *  glint on the cast, a gold starburst on the hit, gold stars over its rings — never the generic arcane violet. */
+export const STARBLADE_CLASS = 'starblade';
+export const STARBLADE_SKILLS = Object.freeze(['starcut', 'star_aegis', 'star_tether', 'comet_rush', 'binding_stars', 'collapsing_star']);
+const BLADE_SET = new Set(STARBLADE_SKILLS);
+export const isStarSkill = id => SKILL_SET.has(String(id || '')) || BLADE_SET.has(String(id || ''));
+/** The element a Star Blade's arcane is drawn as by the GENERIC effects (a swing trail, a status): the white-gold 'holy'
+ *  look rather than violet. Anything else keeps its element. `cls` = the caster's class, `skill` = the skill id if known. */
+export function starTint(el, { cls = null, skill = null } = {}) {
+  return el === 'arcane' && (cls === STARBLADE_CLASS || BLADE_SET.has(String(skill || ''))) ? 'holy' : el;
+}
 const isStarClass = cls => cls === STAR_CLASS;
 const elementIsArcane = ev => { const e = String(ev?.element ?? ev?.el ?? 'arcane').toLowerCase(); return e === 'arcane' || e === 'magic'; };
 
@@ -111,12 +121,14 @@ export function moteSeat(i, time, full = false) {
  * a piece with its own model (item.look.worn) and every heavier piece keep what they had. Returns a NEW look.
  */
 export function classWearLook(look, wear, tierOfSlot = () => null) {
-  if (!wear?.cloth || !look) return look;
+  // play-test 11: any weight the class has a cut for (`wear[cls].cloth` — the Starcaller; `.heavy` / `.medium` — the Star Blade)
+  if (!wear || !look) return look;
   const out = { ...look };
   const PART = { head: 'hat', chest: 'top', legs: 'bottom', feet: 'shoes' };
   for (const [slot, part] of Object.entries(PART)) {
-    const w = wear.cloth[part];
-    if (!w || tierOfSlot(slot) !== 'cloth') continue;
+    const tier = tierOfSlot(slot);
+    const w = tier && wear[tier] && typeof wear[tier] === 'object' ? wear[tier][part] : null;
+    if (!w) continue;
     const had = out[part] || {};
     // keep what other layers hang on the part (gloves ride on the top; a tier-2 emblem and trim win over ours)
     out[part] = { ...had, ...w, ...(had.gloves ? { gloves: had.gloves } : {}) };

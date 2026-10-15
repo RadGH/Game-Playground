@@ -19,8 +19,8 @@ forgotten — bring it up when the game is resumed.
 - **2026-10-14 update: Expansion 1 shipped while on hold** — Torbor Downs is an island; Vharlen (levels 10–20) is a
   second island across the sea, reached by ship. Spec and leftovers: `docs/EXPANSION-1.md`.
 
-- One province of twelve is built (Torbor Downs): 16 zones, 18 towns, dungeons, world boss, events, 31 classes
-  (Farhold's 30 + Starcaller), 180+ skills, ten professions with mini-games, parties, guilds, mail, trading,
+- One province of twelve is built (Torbor Downs): 16 zones, 18 towns, dungeons, world boss, events, 32 classes
+  (Farhold's 30 + Starcaller + Star Blade, round 11), 190+ skills, ten professions with mini-games, parties, guilds, mail, trading,
   friends, mounts, phone layout and controller support.
 - Ten play-test rounds are closed. Round 10 (Y1–Y39) was audited on 2026-10-13: its 3D-client, professions and
   content streams had never run, so 16 of 39 items were partly or not done; they were finished in the wrap-up
@@ -39,12 +39,23 @@ forgotten — bring it up when the game is resumed.
 3. Dev server: `systemctl --user restart thousandvale-dev` (port 8491). Publish: commit, then
    `tools/publish-thousandvale.sh` (refuses a commit that does not parse or whose unit tests fail; rolls back
    if the new build does not come up). Add an entry to `data/ops/changelog.json` at each publish.
-4. After ANY zone re-bake: `content-professions -> content-towns -> content-givers -> content-hunts`.
+4. After ANY zone re-bake: `content-professions -> content-towns -> content-givers -> content-hunts -> fill-quest-marks` (round 11: `tools/fill-quest-marks.mjs` fills the step marks of hand-edited quests; content-hunts makes every kill area hold max(count + 4, 2 x count)).
    Never run `content-offices.mjs` alone (it renames shopkeepers). Do not run `place-vignettes.mjs` (it no longer
    reproduces the committed placements).
 5. Agents: at most three at a time; Playwright only under `flock /tmp/claude-1000/farhold-pw.lock`.
 
 ## Parked — not started, or too big for the wrap-up
+
+### Look and feel — future goal (owner, 2026-10-15)
+A friend's Claude-built game ("WAVE", a top-down raft RTS — screenshot https://radleysustaire.com/s3/bb7d57/chrome) makes
+Thousandvale look plain, and its characters are tiny: the quality comes from everything AROUND them. Goals:
+- **Detailed props and materials** — warm, stylised PBR props with wear, trim and small parts (planks, ropes, barrels,
+  railings), not flat-coloured primitives.
+- **Water and drifting-cloud effects** — lively shaded water with foam at edges, and low clouds / fog drifting over the
+  world below the camera.
+- **Soft lighting** — gentle sun, ambient occlusion, warm/cool split, nothing harsh or flat.
+- (Also: painted 2D portraits in unit/target frames, which look Codex-made.)
+Characters are handled separately by the Chibi 4 experiment (`~/claude/agent/chibi4-checklist.md`).
 
 ### New systems players asked for
 - **Rarity on gathering nodes** (live report #64): ore, wood and herb nodes can roll magic / rare / legendary like

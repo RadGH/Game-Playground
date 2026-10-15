@@ -38,12 +38,13 @@
  "sell": {
   "factor": 0.06,
   "fish": 1,
-  "_doc": "what a merchant pays for gear as a share of its list price — stream C's prices.json gear.sellFactor is the one the rules use; keep the two the same. A fish sells for its own price."
+  "goods": 0.5,
+  "_doc": "what a merchant pays for gear as a share of its list price — stream C's prices.json gear.sellFactor is the one the rules use; keep the two the same. A fish sells for its own price. `goods` (round 11, owner #15): a BOUGHT good (saddle bags, a potion, oats) sells back for this share of what the shops ask — always less than you paid, so it makes no gold."
  },
  "mounts": [
   {
    "id": "trail_horse",
-   "price": 400,
+   "price": 120,
    "level": 1
   },
   {
@@ -52,9 +53,19 @@
    "level": 5
   },
   {
+   "id": "ash_strider",
+   "price": 3600,
+   "level": 10
+  },
+  {
    "id": "courser",
    "price": 5300,
    "level": 10
+  },
+  {
+   "id": "slag_basker",
+   "price": 7000,
+   "level": 15
   },
   {
    "id": "dray",

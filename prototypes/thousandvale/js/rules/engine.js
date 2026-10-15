@@ -19,10 +19,33 @@ import { installTalentTrees } from './talents.js';
 import { buildTvForest } from './perk-forest.js';
 import { installLootPool, buildLootPool } from './loot-pool.js';
 import { installTvSkills, installTvClasses } from './tv-skills.js';
-import { buildCasterForms } from './caster-forms.js';
+import { buildCasterForms, installNamedCasters } from './caster-forms.js';
 import { installTvGear, poolTvGear, attachTvGear, removeLights, removeSlotless, stripInert } from './tv-gear.js';
 import { setKitSource } from './starter-kits.js';
 import { createFishing } from './fishing.js';
+import { installNoAttributes, installAttributeItems } from './attributes.js';
+import { COMPANION_DEFAULTS } from './progression.js';
+
+/**
+ * Owner #17 (2026-10-15): the numbers a perk card names that belong to another file — when a class companion comes
+ * (progression.json `companions`) and which classes have one (the class rows' `pet`, with `pet.extra` the second).
+ */
+function forestVars(data, classList) {
+  const c = { ...COMPANION_DEFAULTS, ...(data.progression?.companions || {}) };
+  const pets = data.enemies?.pets || [];
+  const nameOf = id => (pets.find(p => p.id === id)?.name || String(id || '').replace(/_/g, ' ')).toLowerCase();
+  const plural = w => (/f$/.test(w) ? w.replace(/f$/, 'ves') : `${w}s`);
+  const one = (n, id) => { const w = nameOf(id); return n > 1 ? `${n} ${plural(w)}` : `${/^[aeiou]/.test(w) ? 'an' : 'a'} ${w}`; };
+  const has = classList.filter(k => k.pet);
+  const lower = k => (k.name || k.id).toLowerCase();
+  const andList = a => (a.length > 1 ? `${a.slice(0, -1).join(', ')} and ${a[a.length - 1]}` : a[0] || '');
+  return {
+    companionMain: c.main, companionExtra: c.extra, earlyMain: c.earlyBondMain, earlyExtra: c.earlyBondExtra,
+    earlyMainText: c.earlyBondMain <= 1 ? 'at once' : `at level ${c.earlyBondMain}`,
+    secondClasses: (s => s.charAt(0).toUpperCase() + s.slice(1))(andList(has.filter(k => k.pet.extra).map(k => `${lower(k)}s`))),
+    companionClasses: has.map(k => `${lower(k)} (${one(k.pet.count || 1, k.pet.id)}${k.pet.extra ? `, then ${one(k.pet.extra.count || 1, k.pet.extra.id)}` : ''})`).join(', '),
+  };
+}
 
 /** The same describe hook main.js passes, so a unique's power text matches Farhold's tooltip. */
 const EFFECTS_DESC = id => EFFECTS['legendary:' + id]?.desc?.() || null;
@@ -64,7 +87,7 @@ export function createEngine(data, { seed = 1, levelCap = DEFAULT_LEVEL_CAP, tvS
   if (tvGear && gearReport) { gearReport.slotless = [...(gearReport.slotless || []), ...removeSlotless(items)]; { const more = stripInert(items); for (const k of ['uniques', 'sets', 'bases']) gearReport.inert[k].push(...more[k]); } const again = removeLights(items); gearReport.lights = { bases: [...gearReport.lights.bases, ...again.bases], uniques: [...gearReport.lights.uniques, ...again.uniques], affixes: [...gearReport.lights.affixes, ...again.affixes] }; }
   // P6 — Thousandvale's perk forest (data/rules/perks.json) replaces Farhold's in the engine's Rpg, so
   // Farhold's own perkBonuses / rpg.derive put every node's grants, flags and powers on the sheet
-  const forest = data.tvPerks?.arms ? buildTvForest(data.tvPerks) : rpg.forest;
+  const forest = data.tvPerks?.arms ? buildTvForest(data.tvPerks, { vars: forestVars(data, classes?.classes || []) }) : rpg.forest;
   rpg.forest = forest;
   const classList = classes?.classes || [];
   const bestiary = enemies || { enemies: [], bosses: [], modifiers: [] };
@@ -105,6 +128,10 @@ export function createEngine(data, { seed = 1, levelCap = DEFAULT_LEVEL_CAP, tvS
     forest, talentReport, skillReport, gearReport, classReport,
   };
   installLevelGap(engine);
+  // owner #2 (2026-10-15): no Strength / Dexterity / Intellect / Constitution — the weapon carries its family's share,
+  // a melee weapon guards (#61), the item table and perks convert (js/rules/attributes.js). Off for parity. Before the
+  // shop buffs, so a "+5% health" meal counts the health the attributes became.
+  if (tvGear) installNoAttributes(engine);
   installItemBuffs(engine);             // shop buffs: armour oil, hearty stew (js/rules/buffs.js)
   // play-test 4 S17/S18: every weapon family drops at low levels; themed second-tier armour from level 15
   const lootPool = buildLootPool(data.lootPool, items, balance);
@@ -127,5 +154,9 @@ export function createEngine(data, { seed = 1, levelCap = DEFAULT_LEVEL_CAP, tvS
   // owner feedback 10: one swing = one number, attacks while moving, attack speed, walls, knock interrupts, dummies (js/rules/combat-cfg.js); off for parity
   engine.combatCfg = tvGear ? buildCombatCfg(data.combat || null) : null;
   installAffixes(engine, data.affixes || null);          // play-test 4 S4: champion / rare rolls, Pack-leader, affix specials
+  // owner #2: the items half (owned items convert as they load; a weapon carries its family line)
+  if (tvGear) installAttributeItems(engine);
+  // owner #40: a named reward wand is always its own element and style (caster-forms.json `named`)
+  if (tvGear) installNamedCasters(engine);
   return engine;
 }

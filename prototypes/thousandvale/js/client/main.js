@@ -34,6 +34,7 @@ import { connect, localTokenStore } from '../net/client.js';
 import { createMirror } from '../net/mirror.js';
 import { ANIMS, STATE, KIND_NAMES, TICK_MS, cleanName } from '../net/protocol.js';
 import { tabNext, tabOrder } from '../net/tab.js';
+import { autoTarget } from './ui/pt11-core.js';      // round 11 (#21): Strike with no target
 import { tabPick } from './pick-rule.js';
 import { createTelegraphs } from './telegraphs.js';
 import { createVharlenFx } from './vharlen-fx.js';      // [S] Expansion 1 §4: springs, geysers, lava vents, ashfall
@@ -48,6 +49,7 @@ import { createChat } from './chat.js';
 import { createFriends } from './friends.js';
 import { createGuild } from './guild.js';
 import { createMail } from './mail.js';
+import { createMarket } from './ui/market.js';      // round 11 (owner #25): the Market tab of the party window
 import { createCallboard } from './callboard.js';
 import { createAccount } from './account.js';
 import { createHelp } from './help.js';
@@ -67,7 +69,9 @@ import { createMoveMarker } from './move-marker.js';       // play-test 9 (X2): 
 import { createHeld } from './held-view.js';
 import { createCarts } from './carts-view.js';             // play-test 8 (W5): ox carts — parked, on the road, and the ride
 import { createShipVoyage } from './ship-view.js';         // [V] Expansion 1 §6: the voyage between the continents + the Harbourmaster window
-import { createQuestMarks } from './quest-marks.js';     // play-test 8 (W12): ! and ? over quest givers
+import { createQuestMarks, travelOf } from './quest-marks.js';
+import { realmDay } from './sky-plan.js';
+import { createRouter } from './click-path.js';             // Z38: click-to-move pathfinding                  // Z59: the realm's day number (the weather)     // play-test 8 (W12): ! and ? over quest givers · Z45 travel marks
 import { createStatusSync } from './status-sync.js';
 import { createWeaponFx } from './weapon-fx.js';
 import { createFormFx } from './form-fx.js';             // play-test 5 (D-world): T15 caster forms, T16 sceptre swings
@@ -81,7 +85,8 @@ import { createLootMarkers } from './loot-marker.js';
 import { makeGlowTexture } from './decor.js';
 import { createUi2 } from './ui/pt2.js';          // D-UI play-test 2: menus, loot, rolls, shops, trade, pause/settings, portraits, editor
 import { tileLos } from './ui/pt6-core.js';
-import { createUi10 } from './ui/pt10.js';        // D-UI play-test 10: changelog, tracking a friend, emotes
+import { createUi10 } from './ui/pt10.js';
+import { createUi11 } from './ui/pt11.js';        // round 11: the Mount button (#29)        // D-UI play-test 10: changelog, tracking a friend, emotes
 import { createUi8 } from './ui/pt8.js';          // D-UI play-test 8: ox-cart window, damage meter, quest marks on the map
 import { createUi5 } from './ui/pt5.js';          // D-UI play-test 5: kit step, crates, event tracker, character sheet, feedback, angling
 import { savedQuality, savedFxLevel } from './ui/settings.js';
@@ -137,7 +142,10 @@ const tele = createTelegraphs(scene, {
 });
 // P20: every skill's look (spell-looks.js) drawn with avatar-3d SpellFx from the rules' cast/fx/hit events
 let SKILLS = null; const SKILL_CLASS = new Map();
-loadSkillData().then(d => { SKILLS = d?.skills || null; window.__skillClasses = d?.classes || {}; for (const [c, ids] of Object.entries(d?.classes || {})) for (const id of ids) SKILL_CLASS.set(id, c); }).catch(() => {});
+loadSkillData().then(async d => { SKILLS = d?.skills || null; window.__skillClasses = d?.classes || {}; for (const [c, ids] of Object.entries(d?.classes || {})) for (const id of ids) SKILL_CLASS.set(id, c);
+  // play-test 11 (Star Blade): Thousandvale's own classes' rows too, so their signature effects know each skill's shape
+  try { const tv = await (await fetch(new URL('../../data/rules/classes-tv.json', import.meta.url))).json(); SKILLS = { ...(SKILLS || {}), ...(tv.skills || {}) }; for (const c of tv.classes || []) for (const id of c.skills || []) SKILL_CLASS.set(id, c.id); } catch { /* Farhold's thirty only */ }
+}).catch(() => {});
 const FX_FOCUS = () => ({ self: S.selfId, target: S.target });       // Spell effects: Reduced draws these in full
 // play-test 8 (W2/W14): every ranged attack is a body in the air — arrows, quarrels, knives, stones, firebolts (pooled, warmed at boot)
 const shots = createProjectiles(scene, { actors, groundY: (x, z) => groundY(x, z), night: () => S.night || 0 });
@@ -160,11 +168,11 @@ const carts = createCarts(scene, { actors, groundY: (x, z) => groundY(x, z), com
 const ships = createShipVoyage(scene, { view, camera, actors, travel: { cover: t => travel.cover(t), reveal: () => travel.reveal(), get covered() { return travel.covered; } }, hud: { toast: (...a) => hud.toast(...a), chat: (...a) => hud.chat(...a) }, controls: { hold: v => controls.hold(v), stop: () => controls.stop() }, horizon: () => W.horizon, ws: { get terrain() { return WS.terrain; }, whenReady: (x, z) => WS.whenReady(x, z) }, worldUi: { closeDialog: () => worldUi.closeDialog?.() }, journal: () => ui.journal, selfId: () => S.selfId, compile: g => compileBeforeShow(view.renderer, g, camera, scene) });   // [V]
 const vharl = createVharlenFx(scene, { actors, camera, renderer: view.renderer, quality, groundY: (x, z) => groundY(x, z), zones: { get loaded() { return WS.loaded; } }, roomOf: () => S.room, indoors: () => !!D.view, shake: k => fx.shake(k), selfPos: () => (S.selfId != null && S.phase === 'world' ? S.predictor.pos : null) });      // [S]
 // W12: A's per-player quest marks, floated over the NPCs they belong to (D-UI reads questMarks.list() for the minimap)
-const questMarks = createQuestMarks(scene, { actors, camera });
+const questMarks = createQuestMarks(scene, { actors, camera, objectAt: id => { const o = objects.items.get(id); return o ? { x: o.x, z: o.z, y: groundY(o.x, o.z), name: o.name } : null; } });   // Z45: a parked cart is an object
 // Q8: auras follow the server's info.st on every body (late arrivals see them; a death clears them)
 const statusSync = createStatusSync({ actors, fx: spells.fx, infoOf: id => S.mirror?.infos.get(id), selfDead: () => S.self.dead, selfId: () => S.selfId, groundY: (x, z) => groundY(x, z) });
 const travel = createTransition({ el: document.getElementById('travel-veil'), view, scene, camera });
-const objects = createObjects(scene, { onUse: (id, o) => (String(id).startsWith('demo:') ? demoUse(o) : o.type === 'node' ? prof.gather(id) : o.type === 'skin' ? prof.gather(o.corpse) : S.net?.use(id)),   // W9 (P-client): a node / a skinnable corpse starts a mini-game
+const objects = createObjects(scene, { onUse: (id, o) => (String(id).startsWith('demo:') ? demoUse(o) : o.type === 'node' ? prof.gather(id) : o.type === 'skin' ? prof.gather(o.corpse) : o.type === 'fishpool' ? ui5.angling.castOrStop(id) /* round 11 (P, #12): E at a fish pool (ui5 is made below; this runs on a key press) */ : S.net?.use(id)),   // W9 (P-client): a node / a skinnable corpse starts a mini-game
   onNear: o => worldUi.lore(o.key || o.id, o.name, o.lore), labelLayer: document.getElementById('plates'), camera, posOf: id => { const a = actors.get(id); return a && !a.dead ? { x: a.pos.x, y: a.pos.y, z: a.pos.z, h: a.height } : null; } });
 
 // --- session state ----------------------------------------------------------------------------------
@@ -253,7 +261,10 @@ const controls = createControls({
     return null;
   },
   onPickGround: ndc => (S.phase === 'world' ? pickGround(ndc) : null),
+  route: (from, to) => (S.predictor.terrain ? createRouter(S.predictor.terrain)(from, to) : null),     // Z38 (live #39): click-to-move goes round things
   onAttack: id => { setTarget(id); tryStrike(true); },
+  validTarget: id => { const a = actors.get(id); return !!a && a.hostile && !a.dead; },      // round 11 (#21)
+  onNoTarget: () => strikeNoTarget(),
   onCycleTarget: () => cycleTarget(),
   onClearTarget: () => setTarget(null),
   onChat: () => hud.focusChat(),
@@ -285,12 +296,13 @@ hud.focusChat = prefill => chat.focus(prefill);
 const friends = createFriends({ net: () => S.net, hud, chat, social });
 const guild = createGuild({ net: () => S.net, hud, chat, me });
 const mail = createMail({ net: () => S.net, hud, bag, me, inTown: () => S.room?.kind === 'town' });
+const market = createMarket({ net: () => S.net, hud, bag, me });
 const callboard = createCallboard({ net: () => S.net, hud, me });
 const account = createAccount({ net: () => S.net, hud, me, guestKey: { get: () => { try { return localStorage.getItem(tokenKey() + '.guest'); } catch { return null; } }, clear: () => { try { localStorage.removeItem(tokenKey() + '.guest'); } catch {} } }, netOpts: () => ({ mode: netMode(), url: q.get('server') || undefined, build: q.get('build') || 'dev' }),
   onLogin: (user, pass) => loginFromTitle(user, pass), onGuest: name => guestForAccount(name), onPick: ch => enterWorld(ch), onLoggedOut: () => backToTitle(), onTitleStep: step => titleStep(step) });
 const help = createHelp();
 loadZoneNames();
-const ui = createUiSuite({ net: () => S.net, hud, room: () => S.room, actors, objects, worldUi, social, chat, panels: { friends: friends.panel, guild: guild.panel, mail: mail.panel, callboard: callboard.panel },
+const ui = createUiSuite({ net: () => S.net, hud, room: () => S.room, actors, objects, worldUi, social, chat, panels: { friends: friends.panel, guild: guild.panel, mail: mail.panel, market: market.panel, callboard: callboard.panel },
   me: () => (S.selfId != null && S.phase === 'world' ? { id: S.selfId, x: S.predictor.pos.x, z: S.predictor.pos.z, yaw: S.lastInput?.yaw ?? controls.cam.yaw, level: S.self.level, cls: S.self.cls, char: S.net?.joined?.you?.char ?? null } : null) });
 const ui2 = createUi2({ net: () => S.net, atlas: ui.atlas, hud, actors, controls, chat, social, friends, bag, help, account, objects, worldUi, renderer: view.renderer, scene,
   me: () => (S.selfId != null && S.phase === 'world' ? { id: S.selfId, x: S.predictor.pos.x, z: S.predictor.pos.z, level: S.self.level, name: S.self.name, dead: S.self.dead, char: S.net?.joined?.you?.char ?? null } : null),
@@ -315,10 +327,12 @@ const ui8 = createUi8({ net: () => S.net, hud, actors, worldUi, feedback: ui5.fe
 const ui10 = createUi10({ net: () => S.net, hud, actors, atlas: ui.atlas, me, pos: () => S.predictor.pos, worldMap: ui.worldMap, settings: ui2.settings, camYaw: () => controls.cam.yaw, room: () => S.room });
 friends.tracker = ui10;
 ui10.useRadial(input.radial);      // Y5: the quick wheel's emote ring
+const ui11 = createUi11({ net: () => S.net, hud, me, mount: () => toggleMount(), mounted: () => !!S.self.mount, calling: () => S.mountCall });
+window.tvui11 = ui11;
 // W9 (P-client): professions — the 3D side and the interface's controller
 const profView = createProfView(scene, { actors, objects, camera, groundY: (x, z) => groundY(x, z), selfId: () => S.selfId });
 const prof = createProf({ net: () => S.net, hud, bag, sheet: ui5.sheet, journal: ui.journal }); prof.setView(profView);
-const PANELS = { ...ui5.panels, ...ui8.panels, party: { toggle: () => social.toggleMenu() }, bag: { toggle: () => bag.toggle() }, friends: friends.panel, guild: guild.panel, mail: mail.panel, callboard: callboard.panel, account: account.panel, help, ...ui.panels };
+const PANELS = { ...ui5.panels, ...ui8.panels, party: { toggle: () => social.toggleMenu() }, bag: { toggle: () => bag.toggle() }, friends: friends.panel, guild: guild.panel, mail: mail.panel, market: market.panel, callboard: callboard.panel, account: account.panel, help, ...ui.panels };
 for (const b of menubar.nav.querySelectorAll('.mb-btn')) if (!['party', 'bag'].includes(b.dataset.panel)) b.addEventListener('click', () => PANELS[b.dataset.panel].toggle());
 window.addEventListener('keydown', e => {
   if (S.phase !== 'world' || (document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))) return;
@@ -613,10 +627,10 @@ function wireNet(net) {
   net.on('chat', m => { if (m.ch === 'say' && m.from != null) actors.say(m.from, m.text); });   // the line itself: chat.js
   net.on('zone', z => learnZone(z.zone, z.name));
   social.wire(net);
-  chat.wire(net); friends.wire(net); guild.wire(net); mail.wire(net); callboard.wire(net); account.wire(net);
+  chat.wire(net); friends.wire(net); guild.wire(net); mail.wire(net); market.wire(net); callboard.wire(net); account.wire(net);
   bag.wire(net);
   ui5.wire(net);
-  ui8.wire(net); ui10.wire(net);
+  ui8.wire(net); ui10.wire(net); ui11.wire(net);
   ships.wire(net);      // [V] the Harbourmaster window, the voyage
   prof.wire(net);   // W9 (P-client)
   ui.wire(net);
@@ -728,7 +742,8 @@ function ensureActor(id) {
         hidden: !!info.hidden, hint: info.hint, lore: info.lore, shimmer: info.shimmer, key: info.key, banner: info.banner || null, trace: info.trace || null, look: info.look || null, tether: info.tether ?? null, bare: !!info.bare });   // R7: look 'chained' + tether · #63: bare = the place draws it already
       if (info.type === 'fishpool') angling.setPool(id, { x: e.x, z: e.z }, info.pool || null);
       if (info.type === 'node') profView.setNode(id, { x: e.x, z: e.z, yaw: e.yaw || 0 }, info);   // W9 (P-client): boulders, marked trees, patches
-      if (info.type === 'cart' || info.vehicle) carts.setParked(id, { x: e.x, z: e.z, yaw: e.yaw ?? info.yaw ?? 0 });   // W5: the ox cart by the gate     // T25: ripples and a jumping fish, seen from the road
+      if (info.type === 'cart' || info.vehicle) carts.setParked(id, { x: e.x, z: e.z, yaw: e.yaw ?? info.yaw ?? 0 });
+      if (travelOf(info)) questMarks.setTravel(id, travelOf(info));                                // Z45: a cart you can ride from here   // W5: the ox cart by the gate     // T25: ripples and a jumping fish, seen from the road
       objectState(id, info);
       return null;
     }
@@ -745,6 +760,7 @@ function ensureActor(id) {
     });
     if (npc) { objects.upsert({ id, type: 'npc', name: a.name, x: e.x, z: e.z, source: 'room' }); if (info.office) WS.claimOffice(info.office); }   // Q10: its own building, dressed
     if (npc && info.held) held.set(id, info.held);
+    if (kind === 'npc' && travelOf(info)) questMarks.setTravel(id, travelOf(info));               // Z45 (live #46): a ship over the harbourmaster, a cart over the carter
     if (npc && info.role) profView.setNpc(id, { x: e.x, z: e.z, yaw: e.yaw || 0 }, info.role);   // W9 (P-client): a craftsman's forge / workbench / still beside him
     if (kind === 'player' && info.working) profView.setWorking(id, info.working);
     if (e.state & STATE.dead) actors.setDead(id, true);
@@ -797,6 +813,7 @@ function refreshFromInfo(id) {
   if (a.kind === 'player' && 'form' in info) actors.setShape(id, shapeOfForm(info.form));
   // U8: a boss ward for someone who walks in late (`info.ward {max, ms, until}`); the live changes come as `fx shield`
   if (a.kind === 'monster' && 'ward' in info) { const w = info.ward, on = !!w && w.on !== false; if (on !== (boss.ward.shielded && boss.bossId === id)) { let left = on && w.until ? w.until - (S.net ? S.net.clock.serverNow() : Date.now()) : null; if (on && !(left > 0 && left <= (w.ms || 6e4) + 500)) left = w.leftMs ?? w.ms ?? 0; boss.shield(id, on, on ? { ms: left, total: w.ms, text: w.text || null, need: w.need, have: w.have } : { why: 'faded' }); } }
+  if (a.kind === 'monster' && (info.sc || info.rank || info.aff)) actors.setScale(id, { sc: info.sc || null, rank: info.rank || null, mods: info.aff || info.mods || null });   // Z54: a Giant whose size came late
   const levelled = info.level > a.level;
   a.name = info.name ? displayName(info.name, a.kind) : a.name; a.level = info.level || a.level; a.hpMax = info.hpMax || a.hpMax;
   actors.refreshPlate(a);
@@ -819,7 +836,7 @@ function onSnap(s) {
   }
   if (s.vitals) { S.self.hp = s.vitals.hp; S.self.hpMax = s.vitals.hpMax; S.self.mp = s.vitals.mp; S.self.mpMax = s.vitals.mpMax; actors.setHp(S.selfId, s.vitals.hp, s.vitals.hpMax); hud.setSelf(S.self); }
   if (S.selfId != null && !!s.dead !== S.self.dead) setSelfDead(!!s.dead);
-  for (const id of s.left) { held.remove(id); carts.remove(id); actors.remove(id); objects.remove(id); angling.removePool(id); angling.setPhase(id, 'end'); profView.remove(id); if (S.target === id) setTarget(null); }
+  for (const id of s.left) { questMarks.setTravel(id, null); held.remove(id); carts.remove(id); actors.remove(id); objects.remove(id); angling.removePool(id); angling.setPhase(id, 'end'); profView.remove(id); if (S.target === id) setTarget(null); }
   for (const r of s.ents) {
     if (r.id === S.selfId) continue;
     const a = ensureActor(r.id); if (!a) continue;
@@ -1098,6 +1115,29 @@ function tryStrike(fromKey, slot = 0) {
   return true;
 }
 
+/**
+ * Round 11 (owner #21 "pressing Square to attack with no target gives no feedback … it should auto target what I am looking
+ * at or whatever is nearby"): Strike (F / pad X) with no live enemy targeted takes the enemy straight ahead of the camera
+ * (a 70° cone, within your reach + 14 m), else the nearest within 30 m, and starts attacking it — walking into reach as the
+ * Attack button does. With nothing about: a toast, and a short rumble on a controller.
+ */
+function strikeNoTarget() {
+  if (S.phase !== 'world' || S.self.dead || !S.net) return false;
+  const p = S.predictor.pos;
+  const all = [...actors.actors.values()].filter(a => a.id !== S.selfId && a.hostile && !a.dead);
+  const real = all.filter(a => !S.mirror.infos.get(a.id)?.dummy && S.mirror.infos.get(a.id)?.type !== 'training_dummy');
+  const cands = (real.length ? real : all).map(a => ({ id: a.id, x: a.pos.x, z: a.pos.z, hostile: true, dead: false }));
+  const pick = autoTarget(cands, { x: p.x, z: p.z, yaw: controls.cam.yaw }, { reach: S.reach || 2.4, far: 30 });
+  if (!pick) { hud.toast('No enemy near enough to attack.', 'warn'); padBuzz(); return false; }
+  setTarget(pick.id);
+  controls.release(); input.pad?.release?.(); input.touch?.release?.();
+  controls.attack(pick.id);
+  return true;
+}
+/** A short rumble on the pad in use, when the browser can (feedback for a press that did nothing). */
+function padBuzz() {
+  try { for (const g of navigator.getGamepads?.() || []) if (g && g.vibrationActuator?.playEffect) { g.vibrationActuator.playEffect('dual-rumble', { duration: 110, strongMagnitude: 0.35, weakMagnitude: 0.5 }); break; } } catch { /* no rumble */ }
+}
 const _ray = new THREE.Raycaster();
 function pickGround(ndc) {
   _ray.setFromCamera(ndc, camera);
@@ -1182,6 +1222,7 @@ function dayNight(dt) {
   if (todAt > 0) return;
   todAt = 0.5;                                        // the sky moves slowly: twice a second is plenty
   S.tod = S.todHold ?? TOD_HOLD ?? (S.net && S.net.realmClock ? S.net.timeOfDay() : S.tod);
+  view.setSkyContext({ province: S.skyProvince ?? S.room?.province ?? null, day: S.skyDay ?? realmDay(S.net?.realmClock) });   // Z59: the painted sky for this place and day's weather
   const k = view.setTimeOfDay(S.tod);
   const n = k.night;
   if (Math.abs(n - S.night) > 0.01 || !dayNight.done) {
@@ -1257,7 +1298,7 @@ function frame(now) {
     worldUi.tick(S.tod);
     ui.tick(dt);
     ui2.tick(dt);
-    ui5.tick(dt); ui8.tick(dt); ui10.tick(dt);
+    ui5.tick(dt); ui8.tick(dt); ui10.tick(dt); ui11.tick(dt);
     D.view?.update(dt, S.fly ? { x: S.fly.lx, z: S.fly.lz } : drawn);
     tele.update(dt);
     boss.update(dt);
@@ -1487,7 +1528,7 @@ const tv = {
       gold: bag.state.gold, bag: bag.state.bag.map(i => ({ uid: i.uid, name: i.name })), room: S.room?.kind || null,
     };
   },
-  panel(id, open = true) { const P = { friends: friends.panel, guild: guild.panel, mail: mail.panel, callboard: callboard.panel, account: account.panel, help }[id]; P?.toggle(open); return !!P?.isOpen; },
+  panel(id, open = true) { const P = { friends: friends.panel, guild: guild.panel, mail: mail.panel, market: market.panel, callboard: callboard.panel, account: account.panel, help }[id]; P?.toggle(open); return !!P?.isOpen; },
   /** Hide or show the HUD (clean screenshots). */
   hud(on = true) { $('hud').style.visibility = on ? '' : 'hidden'; $('plates').style.visibility = on ? '' : 'hidden'; },
   /** Hold the time of day (0 = midnight, 0.5 = noon); null goes back to the realm clock. */

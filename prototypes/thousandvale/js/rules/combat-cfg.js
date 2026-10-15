@@ -17,11 +17,20 @@ const num = (v, d) => (Number.isFinite(+v) ? +v : d);
 export const COMBAT_DEFAULTS = Object.freeze({
   melee: { foldSplash: true },
   moving: { melee: 1, arrow: 1, bolt: 1, staff: 1, form: 1 },
-  speed: { capPct: 40, floorPct: -50, ranged: true, staff: true, caster: true },
+  speed: { capPct: 40, floorPct: -50, ranged: true, staff: true, caster: true, basicPace: 1 },
+  // owner #37 (2026-10-15): what a skill is worth against a basic attack — `damage` multiplies every skill's damage share
+  // (its hits, repeats, zones, pools and the burns it lays), never a basic attack, a follower or a heal
+  skills: { damage: 1 },
   sight: { step: 0.5, skip: 0.6, ttl: 2 },
   knockInterrupt: { normal: 0.6, champion: 0.3, rare: 0.2, boss: 0, minPush: 0.5 },
   dummy: { hpMult: 400, resetSec: 3, reference: 'road_brigand' },
   wanderer: { hpMult: 0.5, dmgMult: 2, playerM: 40, noticeM: 12, leashM: 25, respawnSec: 45, savedBelow: 0.35, helpedShare: 0.2, quietSec: 4 },
+  // owner #2 / #61 (2026-10-15): a weapon's damage share by family, and the melee guard (js/rules/attributes.js)
+  families: {
+    heavy: { damagePct: 18, guardPct: 15, oneHandGuardPct: 10 },
+    light: { damagePct: 18, guardPct: 10, oneHandGuardPct: 10 },
+    magic: { damagePct: 18, guardPct: 10, oneHandGuardPct: 10 },
+  },
 });
 
 /** Validate + fill combat.json once. Null when the file is absent (the caller then keeps Farhold's behaviour). */
@@ -49,7 +58,16 @@ export function hasteK(engine, ch) {
   const cfg = engine?.combatCfg;
   const base = engine?.balance?.player?.attackEvery ?? 0.62;
   if (!cfg) return (ch?.derived?.attackEvery ?? base) / base;
-  return 1 / (1 + hastePct(cfg, ch) / 100);
+  return basicPace(engine) / (1 + hastePct(cfg, ch) / 100);
+}
+/**
+ * Owner #37 (2026-10-15): "weapon attacks are slower (all weapons attack very, very fast)". Every basic attack's clock —
+ * a swing pattern, a bow's draw, a wand's bolt, a staff's tap, a tome — is this many times as long (combat.json
+ * `speed.basicPace`); 1 on an engine without the knobs. The same number the card, the sheet and the fight read.
+ */
+export function basicPace(engine) {
+  const v = engine?.combatCfg?.speed?.basicPace;
+  return Number.isFinite(v) && v > 0 ? v : 1;
 }
 /** Y7: the rate multiplier of a basic attack of `kind` made while moving (1 = no change). Never above 1, never 0. */
 export function movingPace(engine, kind = 'melee') {
@@ -61,20 +79,20 @@ export function movingPace(engine, kind = 'melee') {
 export const kindOfWeapon = w => (isStaff(w) ? 'staff' : (w?.castElement && w?.ranged) ? 'bolt' : w?.ranged ? 'arrow' : 'melee');
 
 /** Seconds between two basic attacks of a weapon by its own pattern, before any attack speed. `style` = its caster style row. */
-export function baseEvery(item, { style = null } = {}) {
-  if (!item || item.type !== 'weapon') return strikeAt(null, 0)?.every ?? 0.46;
+export function baseEvery(item, { style = null, pace = 1 } = {}) {
+  if (!item || item.type !== 'weapon') return (strikeAt(null, 0)?.every ?? 0.46) * pace;
   if (item.noAttack) return null;
-  if (isStaff(item)) return 0.28;                              // rpg.js swingPlanFor: a staff's `afterCast`
+  if (isStaff(item)) return 0.28 * pace;                       // rpg.js swingPlanFor: a staff's `afterCast`
   const rp = item.ranged && item.weaponCategory !== 'magic' ? rangedPlan(item) : null;
-  if (rp?.kind === 'draw') return (rp.full ?? 0.95) + 0.12;     // draw to the nock + afterShot (cast.js draws to FULL for a click)
+  if (rp?.kind === 'draw') return ((rp.full ?? 0.95) + 0.12) * pace;     // draw to the nock + afterShot (cast.js draws to FULL for a click)
   const n = Math.max(1, profileOf(item)?.pattern?.length || 1);
   let sum = 0;
   for (let i = 0; i < n; i++) sum += strikeAt(item, i)?.every ?? 0.6;
-  return (sum / n) * (style?.pace ?? 1);
+  return (sum / n) * (style?.pace ?? 1) * pace;
 }
 /** Attacks per second of a weapon alone (its card): null for something that does not attack (an orb, a shield). */
-export function weaponAps(item, { style = null } = {}) {
-  const e = baseEvery(item, { style });
+export function weaponAps(item, { style = null, pace = 1 } = {}) {
+  const e = baseEvery(item, { style, pace });
   return e > 0 ? Math.round(100 / e) / 100 : null;
 }
 /**

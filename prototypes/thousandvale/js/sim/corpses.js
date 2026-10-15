@@ -37,10 +37,16 @@ export const ROLL_MS = 30000;           // Need / Greed / Skip: time to answer
 export const ROLL_R = 60;               // party members this close to the body (same room) are in the roll
 export const DEFAULT_LOOT_MIN = 'rare';
 export const LOOT_NEAR_M = 8;           // S12: bodies this close to YOU join the one loot window
+// Round 11 (World, live #19): "if a body is looted it becomes untargetable instead of removing it instantly" — a body
+// whose last share was taken lies this long more (nobody can click / Tab it: nothing is on it; E still skins it)
+export const LOOTED_STAY_MS = 12000;
 
-export function createCorpses({ now, newUid, rng = Math.random, partyOf, online, grant, log = () => {}, counters = {}, bagMax = 120 }) {
+export function createCorpses({ now, newUid, rng = Math.random, partyOf, online, grant, log = () => {}, counters = {}, bagMax = 120, bagFull = null }) {
   const capOf = o => (typeof bagMax === 'function' ? bagMax(o) : bagMax);      // W19: a backpack changes it per player
+  // round 11 (#11): the bag is tabs — ask by the item when the province says how (else the old whole-bag count)
+  const fullFor = (o, it) => (bagFull ? bagFull(o, it) : (o.char.bag || []).length >= capOf(o));
   const bodies = new Map();       // `${room.id}:${entity.id}` -> body
+  const emptied = new Map();      // round 11 (#19): body key -> { e, until } — looted out, still lying there a moment
   const windows = new Map();      // S12: char id -> { room, keys: [body keys], main: entity id } (a grouped window)
   const rolls = new Map();        // roll id -> roll
   let rollN = 0;
@@ -151,7 +157,7 @@ export function createCorpses({ now, newUid, rng = Math.random, partyOf, online,
       return { char: c, name: o ? o.char.name : '?', choice, n, o };
     });
     // C's rollWinner (need beats greed, highest number inside it) over the players who can still receive it
-    const able = out.filter(x => x.o && x.o.conn && x.o.room === r.body.room && x.o.char.bag && x.o.char.bag.length < capOf(x.o));
+    const able = out.filter(x => x.o && x.o.conn && x.o.room === r.body.room && x.o.char.bag && !fullFor(x.o, r.item));
     const best = rollWinner(able.map(x => ({ id: x.char, choice: x.choice, n: x.n })));
     const win = best ? able.find(x => x.char === best.id) : null;
     if (win) grant(win.o, { items: [r.item], gold: 0, reason: 'roll', from: r.body.e });
@@ -245,6 +251,7 @@ export function createCorpses({ now, newUid, rng = Math.random, partyOf, online,
   function forget(b, gone = false) {
     if (bodies.get(b.key) !== b) return;
     bodies.delete(b.key);
+    if (!gone && b.e && b.e.kind === 'monster' && !b.e.removed) emptied.set(b.key, { e: b.e, until: now() + LOOTED_STAY_MS });
     for (const rid of b.rolls) { const r = rolls.get(rid); if (r) resolveGone(r); }
     const told = new Set([...b.shares.keys(), ...b.freeTold, ...b.pileFor]);
     for (const c of told) tell(c, { t: 'lootable', id: b.e.id, on: false });
@@ -254,9 +261,11 @@ export function createCorpses({ now, newUid, rng = Math.random, partyOf, online,
 
   function keepBody(e, room) {
     if (!e || (e.kind !== 'monster' && !bodies.has(keyOf(room, e)))) return 0;
+    const st = emptied.get(keyOf(room, e));
+    if (st && st.e === e && !bodies.has(keyOf(room, e))) { const left = st.until - now(); if (left > 0) return Math.min(left, 10000); emptied.delete(keyOf(room, e)); return 0; }
     const b = bodies.get(keyOf(room, e));
     if (!b || b.e !== e) return 0;
-    if (!hasAny(b)) { forget(b); return 0; }
+    if (!hasAny(b)) { forget(b); const st2 = emptied.get(b.key); return st2 ? Math.min(Math.max(0, st2.until - now()), 10000) : 0; }
     const left = b.until - now();
     if (left <= 0) { forget(b, true); return 0; }
     return Math.min(left, 10000);
@@ -287,7 +296,7 @@ export function createCorpses({ now, newUid, rng = Math.random, partyOf, online,
     if (i < 0 && b.pileFor.has(c)) { list = b.pile; i = list.findIndex(x => x.uid === uid); }
     if (i < 0) { list = b.free; i = list.findIndex(x => x.uid === uid); }
     if (i < 0) return 'item';
-    if ((o.char.bag || []).length >= capOf(o)) return 'bagFull';
+    if (fullFor(o, list[i])) return 'bagFull';
     const [it] = list.splice(i, 1);
     grant(o, { items: [it], gold: 0, reason: 'kill', from: b.e });
     return null;
@@ -382,6 +391,7 @@ export function createCorpses({ now, newUid, rng = Math.random, partyOf, online,
     const t = now();
     for (const r of [...rolls.values()]) if (t >= r.until) resolve(r);
     for (const b of [...bodies.values()]) if (b.e.removed || t >= b.until + 60000) forget(b, true);
+    for (const [k, st] of emptied) if (st.e.removed || t >= st.until + 60000) emptied.delete(k);
   }
   function leftRoom(o) { for (const b of bodies.values()) b.watchers.delete(o.char.id); windows.delete(o.char.id); }
 

@@ -109,6 +109,12 @@ areas and `js/sim/quests.js` sets each step's marker + `areas` from them at load
 `node tools/content-hunts.mjs`: it tops up thin quest areas (`data/vignettes/placements/<zone>.quest.json`), writes
 `marks/torbor_downs-hunts.json` and re-points `marks/torbor_downs.json` (tests/E/playtest4-hunts.test.js fails until it is run).
 
+**Round 11 (owner #30 / #35 / #31).** A step's circle holds `needFor(count) = max(count + 4, 2 x count)` of its monster (two
+players at once; tools/content-hunts.mjs, several passes, copies spread 12-24 m apart, pairs only near the start town) and
+quest camps respawn in 1-1.5 minutes. A `collect` step may carry `near` like a `kill` step. Every class quest keeps each
+step within 150 m of the one before (tests/E/round11-world.test.js). After editing steps by hand: set the quest's mark
+steps to null, run content-hunts, then `node tools/fill-quest-marks.mjs [--province=<id>]`.
+
 ## Play-test 5 (2026-10-06): crates, angling quests, roadside champions
 
 **Crates (T9).** `reward.crates: [{ slot, min }]` — a gear crate per entry: a random item of that slot (`weapon` / `offhand` = something your class

@@ -47,6 +47,22 @@ export function rankScale(rank, mods = null) {
   if (Array.isArray(mods) && mods.some(m => /giant|huge|colossal/.test(modKey(m)))) k *= 1.35;
   return +k.toFixed(3);
 }
+/**
+ * Play-test 11 (Z32, live #33: "the horse is way too small compared to the character"): every mount is drawn this much
+ * bigger than the shared table's own size. A Chibi 2 rider's big head made a 1.35 m back read as a pony under a giant.
+ * The seat is counter-scaled in avatar-3d/js/mounts.js, so the rider keeps their size and sits on the bigger back.
+ */
+export const MOUNT_SCALE = 1.38;
+/** The shared table's spec for a mount id or the server's mount look, at Thousandvale's size. Pure — exported for tests. */
+export function tvMountSpec(want) {
+  const look = want && typeof want === 'object' ? want : { id: want };
+  return mountSpecFor({ ...look, scale: (Number.isFinite(look.scale) && look.scale > 0 ? look.scale : 1) * MOUNT_SCALE });
+}
+/**
+ * Z54 (live #55: "a Giant Slagborn Firecaller was normal size"): the body size an entity should be drawn at, from what the
+ * server said — its own `sc` when it sent one (a Giant rare is 3.2), else the rank / modifier rule. Pure — exported.
+ */
+export function bodyScale(sc, rank, mods) { return sc ? Math.max(0.5, Math.min(3, sc)) : rankScale(rank, mods); }
 /** An affix as text: an id string, or the server's {id, name, aura} (protocol §20.4). */
 export const modKey = m => (m && typeof m === 'object' ? `${m.id || ''} ${m.name || ''}` : String(m || '')).toLowerCase();
 export const isLeader = mods => Array.isArray(mods) && mods.some(m => /leader|alpha|chief|warlord|pack/.test(modKey(m)));
@@ -205,7 +221,8 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
         const looks = await loadMonsterLooks();
         const look = looks[a.creature?.type] || null;
         a.flying = !!look?.flying;
-        const big = a.sc ? Math.max(0.5, Math.min(3, a.sc)) : rankScale(a.rank, a.mods);      // S4: rares and champions stand out by size (a giant much more)
+        const big = bodyScale(a.sc, a.rank, a.mods);      // S4: rares and champions stand out by size (a giant much more)
+        a.big = big; a.builtBig = big;                    // a beast is built at its size; a person is scaled as a whole (below)
         const kindOfBody = bodyKindFor(a.creature?.type, look);
         if (kindOfBody === 'dummy') {
           // #61: a post, a sack and a target board (it had no looks row, and an unknown creature type is a wolf)
@@ -213,8 +230,8 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
         } else if (look?.avatar) {
           // A humanoid monster (brigand, cultist, knight): a Chibi 2 body, scaled up when it is an elite or boss.
           body = await createChibi2Character(normalizeAvatar(look.avatar), { anims: CHIBI_ANIMS });
-          a.humanoid = true;
-          body.group.scale.setScalar(big);
+          a.humanoid = true; a.heldId = look.avatar.held?.id || null;      // Z26: the bow a brigand archer looses arrows from (projectiles.js heldOf)
+          body.group.scale.setScalar(big); a.builtBig = 1;
         } else {
           const spec = look?.creature ? { ...look.creature, seed: a.creature?.seed, size: (look.creature.size || 1) * big } : { ...(a.creature || { type: 'wolf' }), size: big };
           body = await createCreature(look?.creature ? spec : creatureFor(spec), { detail: a.rank === 'boss' ? 1 : 0.8 });
@@ -236,7 +253,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
       if (!actors.has(a.id) || a.body) { body.dispose?.(); return; }
       a.body = body; a.model = body.group;
       a.group.remove(a.standin); a.group.add(a.model);
-      try { const m = body.metrics(); a.height = Math.max(0.8, m.height || m.totalHeight || a.height); } catch {}
+      try { const m = body.metrics(); a.height = Math.max(0.8, (m.height || m.totalHeight || a.height) * (a.humanoid ? (a.big || 1) : 1)); } catch {}   // Z54: a scaled-up person is that much taller
       // P28: the click/hover volume is the body's real size (a squat bog slime, a long crocodile, a dragon), not one
       // fixed radius — and never thinner than 0.6 m so a rat is still easy to click
       try {
@@ -274,7 +291,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
     try {
       let m = mountCache.get(want); mountCache.delete(want);
       if (!m) {
-        m = await createMount(mountSpecFor(a.mountLook || want), { detail: quality === 'low' ? 0.6 : 1 });
+        m = await createMount(tvMountSpec(a.mountLook || want), { detail: quality === 'low' ? 0.6 : 1 });
         m.group.traverse(o => { if (o.isMesh) o.castShadow = true; });
         if (renderer) await compileBeforeShow(renderer, m.group, camera, scene);
       }
@@ -522,7 +539,9 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
       a.punch *= Math.exp(-dt * 12);
       a.group.position.set(a.pos.x + a.recoil.x, a.pos.y + (a.liftY || 0) /* [S] a geyser's toss (vharlen-fx.js) */ + (a.flying && !a.dead ? 1.3 + Math.sin(now / 420 + (typeof a.id === 'number' ? a.id : 0)) * 0.15 : 0), a.pos.z + a.recoil.z);
       if (a.mount) { a.mount.group.rotation.y = a.yaw; a.mount.setGait(a.speed); }
-      if (a.model) { a.model.rotation.y = a.mount ? 0 : a.yaw; a.model.scale.setScalar(1 + a.punch * 0.12); }
+      // Z54 (live #55): the body's own size rides the hit pulse — this line used to set the scale to 1 + pulse every frame,
+      // which threw away a humanoid monster's rank / Giant size (a creature's is built into its geometry: builtBig)
+      if (a.model) { a.model.rotation.y = a.mount ? 0 : a.yaw; a.model.scale.setScalar(((a.big || 1) / (a.builtBig || 1)) * (1 + a.punch * 0.12)); }
       if (a.shape) { a.shape.pivot.rotation.y = a.yaw; a.shape.pivot.scale.setScalar(1 + a.punch * 0.12); }
       if (a.body && (a.shapeWant?.key ?? null) !== (a.shape?.key ?? null) && !a.shaping) syncShape(a);
       if (a.body && a.mountWant !== (a.mountHave ?? null) && !a.mounting) syncMount(a);
@@ -584,8 +603,11 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
       }
 
       // Corpses fade and sink after a while (monsters only; players stand back up on respawn).
-      if (a.dead && a.kind === 'monster' && a.deathAt && now - a.deathAt > 9000 && !a.lootMark) {   // a body with loot for you stays (Q3)
-        a.fade = Math.max(0, 1 - (now - a.deathAt - 9000) / 2500);
+      // [World #19] a body with loot for you, or one you may still skin, stays; once it has neither it lies 9 s more, then sinks
+      if (a.dead && (a.lootMark || a.skinMark)) a.keptAt = now;
+      const fadeFrom = Math.max(a.deathAt || 0, a.keptAt || 0);
+      if (a.dead && a.kind === 'monster' && a.deathAt && now - fadeFrom > 9000 && !a.lootMark && !a.skinMark) {   // a body with loot for you stays (Q3)
+        a.fade = Math.max(0, 1 - (now - fadeFrom - 9000) / 2500);
         a.group.position.y -= (1 - a.fade) * 0.8;
       } else a.fade = 1;
     }
@@ -706,6 +728,23 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
     return choosePick(cands);
   }
 
+  /**
+   * Z54 (live #55): the server's word on a body's size can come AFTER the body was built (its first snapshot carried no
+   * info, or a rank was rolled a tick later) — a Giant was then built, and stayed, at plain size. Re-scale it in place.
+   */
+  function setScale(id, { sc = null, rank = null, mods = null } = {}) {
+    const a = actors.get(id); if (!a || !(a.kind === 'monster' || a.pet)) return false;
+    if (sc != null) a.sc = Number.isFinite(sc) && sc > 0 ? sc : null;
+    if (rank != null) a.rank = rank || null;
+    if (Array.isArray(mods)) a.mods = mods;
+    const want = bodyScale(a.sc, a.rank, a.mods);
+    if (!a.body || !a.big || Math.abs(want - a.big) < 0.01) return false;       // not built yet: build() reads the new fields
+    const k = want / a.big;
+    a.big = want; a.height *= k;                       // (the frame loop scales the body: big / builtBig)
+    if (a.pickR) a.pickR = Math.min(4, a.pickR * k); if (a.pickTop) a.pickTop *= k;
+    refreshPlate(a);
+    return true;
+  }
   /** P22: dress a player in a new look (gear changed). Keeps the body and its clips; swaps the parts. */
   async function setLook(id, look) {
     const a = actors.get(id); if (!a || a.kind === 'monster' || a.pet) return;
@@ -731,5 +770,5 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
     p.root.classList.toggle('self-plate', !!a.self);
   }
 
-  return { actors, lodStats, setShape, setMount, setEating, add, remove, rekey, say, update, setLook, playAttack, playClip, playEmote, setFishing, setWorking, playHit, setDead, setHp, pickAt, get: id => actors.get(id), refreshPlate };
+  return { actors, lodStats, setShape, setScale, setMount, setEating, add, remove, rekey, say, update, setLook, playAttack, playClip, playEmote, setFishing, setWorking, playHit, setDead, setHp, pickAt, get: id => actors.get(id), refreshPlate };
 }

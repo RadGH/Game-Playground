@@ -4,7 +4,7 @@
   "tier": "boss",
   "body": "ashback_salamander",
   "place": "dungeon steam_grotto (The Hissing Grotto, Steamwood, level 12-14): the end boss at the spring head",
-  "_doc": "The great salamander that basks in the hot spring the shrine was built over. P1 \"Basking\": a bite and a tail swipe for the tank, scalding spit, and the four geysers round the pool erupting one after another (stand clear of the one that rumbles). P2 at 55% \"Under the Water\": she sinks into the spring and will not come up while her brood is alive — kill the wisps (the shield drops with the last one) while boiling waves roll out of the pool. P3 new bar \"Steam Burst\": she comes up furious; geysers erupt all together, she spits a stack on one player, and the spring throws a huge burst that only the space close by her is safe from.",
+  "_doc": "The great salamander that basks in the hot spring the shrine was built over. P1 \"Basking\": a bite and a tail swipe for the tank, scalding spit, and the four geysers round the pool erupting one after another (stand clear of the one that rumbles). P2 at 55% \"Under the Water\": she sinks into the spring and will not come up while her brood is alive — kill the wisps (the shield drops with the last one) while boiling waves roll out of the pool. P3 new bar \"Steam Burst\": she comes up furious; geysers erupt all together, she spits a stack on one player, and the spring throws a huge burst that only the space close by her is safe from. OWNER #51 (2026-10-15): the phase that refilled the health bar is removed; the health bar is the whole fight.",
   "party": "Solo: hard in P2 (adds). 2-3: one tank, the rest kill the brood. 5: as designed.",
   "hpMult": 3.8,
   "arena": {
@@ -191,75 +191,6 @@
           "element": "fire"
         }
       ]
-    },
-    "all_geysers": {
-      "id": "all_geysers",
-      "name": "All the Geysers",
-      "every": [
-        16,
-        19
-      ],
-      "first": 5,
-      "cast": 1,
-      "say": "Every geyser is about to blow!",
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "object",
-          "object": "geyser",
-          "r": 5,
-          "wind": 1.8,
-          "damage": 2.2,
-          "element": "fire",
-          "knock": 3
-        }
-      ]
-    },
-    "spit_stack": {
-      "id": "spit_stack",
-      "name": "Hot Mouthful",
-      "every": [
-        19,
-        22
-      ],
-      "first": 7,
-      "cast": 1,
-      "say": "She spits a mouthful at {target} — stand together to share it!",
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "random",
-          "r": 3,
-          "kind": "stack",
-          "need": 3,
-          "follow": true,
-          "wind": 3.8,
-          "damage": 3,
-          "element": "fire"
-        }
-      ]
-    },
-    "steam_burst": {
-      "id": "steam_burst",
-      "name": "Steam Burst",
-      "every": [
-        26,
-        30
-      ],
-      "first": 12,
-      "cast": 1.5,
-      "say": "STEAM BURST — get in close to her!",
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "self",
-          "r": 5,
-          "kind": "safe",
-          "wind": 3.2,
-          "damage": 2.6,
-          "element": "fire"
-        }
-      ]
     }
   },
   "phases": [
@@ -311,19 +242,6 @@
         "say": "Mother Hiss sinks behind a ward of steam. Kill her three wisps to drop it! It fails by itself in 20 seconds.",
         "fade": "The ward fails by itself. No opening this time."
       }
-    },
-    {
-      "name": "Steam Burst",
-      "newBar": {
-        "hp": 0.5
-      },
-      "say": "She comes up out of the spring in a cloud of steam, furious.",
-      "abilities": [
-        "bite",
-        "all_geysers",
-        "spit_stack",
-        "steam_burst"
-      ]
     }
   ]
 }

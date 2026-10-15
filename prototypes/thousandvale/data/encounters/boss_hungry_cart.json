@@ -4,7 +4,7 @@
   "tier": "boss",
   "body": "hoard_mimic",
   "place": "dungeon mine_descent SET B: the boss cavern of the last floor (28 m square)",
-  "_doc": "Stream E (M2). An ore cart that ate the last shift and liked it. Two sets of rails cross the cavern: RUNAWAY CARTS come down them as long lines along the fixed rails (the rails are where you must not stand). The rail switch (lever) sends one cart into the boss, once. P1 'Ore Rush': a coin-spray cone, runaway carts, ore lumps tossed to random players. P2 at 60% 'Lights Out': it snuffs the three mine lanterns and shelters in darkness (a shield) while rats swarm; relight the lanterns to crack it. P3 is a new health bar 'Feeding Time': a gulp that must be SOAKED by two players, a stack, carts on both rails at once, and a ring of thrown teeth.",
+  "_doc": "Stream E (M2). An ore cart that ate the last shift and liked it. Two sets of rails cross the cavern: RUNAWAY CARTS come down them as long lines along the fixed rails (the rails are where you must not stand). The rail switch (lever) sends one cart into the boss, once. P1 'Ore Rush': a coin-spray cone, runaway carts, ore lumps tossed to random players. P2 at 60% 'Lights Out': it snuffs the three mine lanterns and shelters in darkness (a shield) while rats swarm; relight the lanterns to crack it. P3 is a new health bar 'Feeding Time': a gulp that must be SOAKED by two players, a stack, carts on both rails at once, and a ring of thrown teeth. OWNER #51 (2026-10-15): the phase that refilled the health bar is removed; the health bar is the whole fight.",
   "party": "Solo: rails are learnable; the two-player gulp soak will fail — survivable with a follower. 2-3: intended. 5: easy soaks; carts hit crowds. M5 scaling: gulp need = min(2, party); rat adds 4 -> 2 solo.",
   "hpMult": 4,
   "arena": {
@@ -37,20 +37,7 @@
       "telegraphs": [ { "shape": "circle", "at": "random", "r": 2.6, "count": 2, "delay": 0.4, "wind": 1.5, "damage": 1.5 } ] },
     "rat_swarm": { "id": "rat_swarm", "name": "Rat Swarm", "every": [22, 26], "first": 10,
       "say": "Rats pour out of the cart's belly!",
-      "actions": [ { "adds": { "type": "cairn_rat", "count": 3, "radius": 8, "at": "home" } } ] },
-    "gulp": { "id": "gulp", "name": "Gulp", "every": [22, 26], "first": 8, "cast": 1,
-      "say": "The cart opens wide near {target} — two of you stand in its mouth or it eats the room!",
-      "telegraphs": [ { "shape": "circle", "at": "farthest", "r": 3, "wind": 5, "kind": "soak", "need": 2, "damage": 0.8, "fail": 2, "failSay": "Nobody filled its mouth — the cart inhales and everything gets bitten!" } ] },
-    "share_the_load": { "id": "share_the_load", "name": "Heavy Load", "every": [20, 24], "first": 14, "cast": 1,
-      "say": "{target} is buried under ore — three of you, dig them out together!",
-      "telegraphs": [ { "shape": "circle", "at": "random", "r": 3, "kind": "stack", "need": 3, "wind": 4, "damage": 3, "follow": true } ] },
-    "both_rails": { "id": "both_rails", "name": "Pile-up", "every": [16, 19], "first": 4, "cast": 0.8,
-      "say": "Carts on BOTH lines!",
-      "telegraphs": [ { "shape": "line", "at": "home", "offset": [-13, -4], "yaw": 1.5708, "len": 26, "w": 3, "wind": 1.8, "damage": 2.2, "knock": 4 },
-                      { "shape": "line", "at": "home", "offset": [4, -13], "yaw": 0, "len": 26, "w": 3, "wind": 1.8, "damage": 2.2, "knock": 4 } ] },
-    "teeth": { "id": "teeth", "name": "Thrown Teeth", "every": [15, 18], "first": 11, "cast": 1,
-      "say": "Teeth fly in a ring — get in close!",
-      "telegraphs": [ { "shape": "donut", "at": "self", "r": 14, "r2": 3.5, "wind": 1.7, "damage": 2 } ] }
+      "actions": [ { "adds": { "type": "cairn_rat", "count": 3, "radius": 8, "at": "home" } } ] }
   },
   "phases": [
     { "name": "Ore Rush", "abilities": ["coin_spray", "runaway_east", "runaway_north", "ore_toss"] },
@@ -58,9 +45,7 @@
       "abilities": ["runaway_east", "rat_swarm", "ore_toss"],
       "ward": {"seconds": 20, "pool": 0.1, "break": "objects", "need": 3, "what": "brazier", "say": "The Hungry Cart hides in the dark. Light all three mine lanterns! It fails by itself in 20 seconds.", "fade": "The ward fails by itself. No opening this time."},
       "onEnter": [ { "shield": { "seconds": 20, "pool": 0.1 } }, { "reset": "brazier" }, { "adds": { "type": "cairn_rat", "count": 4, "radius": 8, "at": "home" } },
-        { "say": "The Hungry Cart hides in the dark. Light all three mine lanterns! It fails by itself in 20 seconds.", "style": "warn" } ] },
-    { "name": "Feeding Time", "newBar": { "hp": 0.5 }, "say": "The cart rears up on its back wheels. It is very, very hungry.",
-      "abilities": ["coin_spray", "gulp", "share_the_load", "both_rails", "teeth"] }
+        { "say": "The Hungry Cart hides in the dark. Light all three mine lanterns! It fails by itself in 20 seconds.", "style": "warn" } ] }
   ],
   "triggers": [
     { "when": { "lit": 3, "phase": 1 }, "do": [ { "shield": false }, { "stun": 3 }, { "vuln": { "takeMore": 0.4, "seconds": 10, "name": "Dazzled" } },

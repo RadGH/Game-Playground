@@ -30,6 +30,8 @@ export const SAVE_FIELDS = Object.freeze([
   { k: 'build', def: null },       // the rules' build blob: talents, perks, unlocks (C's rules.saveBuild; P4/P6)
   { k: 'seen', def: { zones: [], places: [] } },   // map discovery: zone keys entered, place keys found (P3/P27)           // starting-kit version applied (play-test 1 P22: 1 = class weapon only, plain clothes)         // once-a-day things: key -> UTC day number (the world boss's first kill of the day)
   { k: 'mounts', def: [] },        // mount ids this character owns (play-test 2, Q16)
+  { k: 'mountPick', def: null },   // round 11 (#44): the mount in the Mount slot (summon rides it; null = the fastest owned)
+  { k: 'saddle', def: null },      // round 11 (#15): fitted saddle bags { id, name, slots } — extra squares in both bag tabs while you own a mount
   { k: 'prefs', def: null },
   { k: 'flags', def: {} },
   { k: 'bind', def: null },        // the town room id this character calls home (an innkeeper's bind): recall + respawn go there         // one-off facts: { barberUsed } (the first barber visit is free, E's shops.json)       // display choices others see: { showGear, showHelm } (Q22)

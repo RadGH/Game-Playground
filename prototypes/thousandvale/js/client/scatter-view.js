@@ -125,7 +125,7 @@ export async function createScatterView(T, sc, { quality = 'high' } = {}) {
     counts[pi]++;
     P[i] = pi;
     X[i] = sc.x[i] + ox; Z[i] = sc.z[i] + oz; Y[i] = T.heightAt(X[i], Z[i]);
-    S[i] = Math.max(0.4, Math.min(1.6, sc.scale[i] * art.scale));
+    S[i] = Math.max(0.4, Math.min(1.6, sc.scale[i] * art.scale)) * (sc.size ? sc.size[i] : 1);     // Z25: a giant of forest.js is drawn 3-5x
   }
   // meshes: trees get three levels, everything else one
   for (const [pi, p] of protos.entries()) {
@@ -145,6 +145,7 @@ export async function createScatterView(T, sc, { quality = 'high' } = {}) {
     });
   }
   const buckets = bucketScatter(sc, ox, oz);
+  const giants = !!(sc.size && sc.giants);
   // big rocks stop the camera (trees do not: a trunk in front of you every few steps would make it twitch)
   const solids = [];
   for (let i = 0; i < n; i++) { const k = SCATTER_SOLID[sc.kind[i]]; if (k) solids.push({ x: X[i], z: Z[i], r: k.r * S[i], bottom: Y[i] - 1, top: Y[i] + k.h * S[i] }); }
@@ -157,11 +158,12 @@ export async function createScatterView(T, sc, { quality = 'high' } = {}) {
     const far = R.tree[2];
     for (const b of buckets) {
       const d = Math.hypot(b.cx - cam.x, b.cz - cam.z) - BUCKET * 0.7;
-      if (d > far) continue;
+      if (d > far * (giants ? 1.6 : 1)) continue;
       for (const i of b.items) {
         const pi = P[i]; if (pi === 65535) continue;
         const p = protos[pi];
-        const di = Math.hypot(X[i] - cam.x, Z[i] - cam.z);
+        // Z25: a giant (forest.js, 3-5x) keeps its detail further out — as if it stood nearer by its extra height
+        const sz = sc.size ? sc.size[i] : 1, di = Math.hypot(X[i] - cam.x, Z[i] - cam.z) / (sz > 1 ? 1 + (sz - 1) * 0.35 : 1);
         let lvl;
         if (p.type === 'tree') { if (di > far) continue; lvl = di < R.tree[0] ? 0 : di < R.tree[1] ? 1 : 2; }
         else { if (di > (p.cls === 'reed' ? R.reed : p.cls === 'far' ? R.tree[1] : R.small)) continue; lvl = 0; }

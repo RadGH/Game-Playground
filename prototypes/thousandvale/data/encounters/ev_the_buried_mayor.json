@@ -10,7 +10,7 @@
     "level": 17,
     "respawnMs": 1800000
   },
-  "_doc": "Expansion 1 (Vharlen). The ZONE EVENT BOSS for Ashfall Hollow: Cinderholt's mayor was buried at his desk when the ash came down, and now he has dug himself out of the old square to call the council to order. P1 'The Council Sits': a gavel cone, edicts in lines, and his Speech — a blast across the square; hide behind a buried chimney. The TOWN BELL (use it once) stuns him. P2 at 55% 'The Townsfolk': the ghosts of the town gather round him behind a ward — DEFEAT THE GHOSTS to drop it — and ash drifts settle where they fall. P3, a new health bar 'The Recall Vote': the square splits open (four of you stand on it to hold it shut), stone falls on everyone, and a get-in-close shockwave. Soft enrage from 4 minutes, hard at 7.",
+  "_doc": "Expansion 1 (Vharlen). The ZONE EVENT BOSS for Ashfall Hollow: Cinderholt's mayor was buried at his desk when the ash came down, and now he has dug himself out of the old square to call the council to order. P1 'The Council Sits': a gavel cone, edicts in lines, and his Speech — a blast across the square; hide behind a buried chimney. The TOWN BELL (use it once) stuns him. P2 at 55% 'The Townsfolk': the ghosts of the town gather round him behind a ward — DEFEAT THE GHOSTS to drop it — and ash drifts settle where they fall. P3, a new health bar 'The Recall Vote': the square splits open (four of you stand on it to hold it shut), stone falls on everyone, and a get-in-close shockwave. Soft enrage from 4 minutes, hard at 7. OWNER #51 (2026-10-15): the phase that refilled the health bar is removed; the health bar is the whole fight.",
   "party": "Zone event, everyone nearby joins. Solo: not intended (a soak of 4). 3-5: playable, tight. 10+: intended. M5 scaling: health and ghosts by players enrolled; soak need = clamp(players/5, 2, 4).",
   "hpMult": 3,
   "arena": {
@@ -182,73 +182,6 @@
           }
         }
       ]
-    },
-    "split": {
-      "id": "split",
-      "name": "The Square Splits",
-      "every": [
-        22,
-        26
-      ],
-      "first": 5,
-      "cast": 1,
-      "say": "The square cracks under {target} — FOUR of you stand on it to hold it shut!",
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "farthest",
-          "r": 4.5,
-          "wind": 5,
-          "damage": 0.8,
-          "kind": "soak",
-          "need": 4,
-          "fail": 2.4,
-          "failSay": "Not enough feet on the crack — the square caves in under everyone!"
-        }
-      ]
-    },
-    "stonefall": {
-      "id": "stonefall",
-      "name": "Stonefall",
-      "every": [
-        14,
-        17
-      ],
-      "first": 8,
-      "cast": 0.8,
-      "say": "The town hall is falling on everyone — keep moving!",
-      "telegraphs": [
-        {
-          "shape": "circle",
-          "at": "each",
-          "r": 3,
-          "wind": 2.5,
-          "damage": 1.5,
-          "follow": true
-        }
-      ]
-    },
-    "shockwave": {
-      "id": "shockwave",
-      "name": "Square Shockwave",
-      "every": [
-        16,
-        19
-      ],
-      "first": 12,
-      "cast": 1,
-      "say": "A shockwave rolls out of the square — get in close!",
-      "telegraphs": [
-        {
-          "shape": "donut",
-          "at": "self",
-          "r": 20,
-          "r2": 4,
-          "wind": 1.9,
-          "damage": 2.3,
-          "knock": 3
-        }
-      ]
     }
   },
   "phases": [
@@ -307,20 +240,6 @@
         "say": "The ghosts of Cinderholt gather round the Mayor behind a ward. Kill the ghosts and the ash golem to drop it! It fails by itself in 25 seconds.",
         "fade": "The ward fails by itself. No opening this time."
       }
-    },
-    {
-      "name": "The Recall Vote",
-      "newBar": {
-        "hp": 0.5
-      },
-      "say": "A recall vote? On ME? The square will decide!",
-      "abilities": [
-        "gavel",
-        "split",
-        "stonefall",
-        "shockwave",
-        "edict"
-      ]
     }
   ],
   "triggers": [

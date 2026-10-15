@@ -14,7 +14,7 @@ export function loadZoneNames(base = new URL('../../data/', import.meta.url)) {
         try { sheet = await (await fetch(new URL(`provinces/${prov}.json`, base))).json(); } catch { /* no sheet */ }
         for (const [id, wz] of Object.entries(p.map || {})) {
           const nm = sheet?.zones?.[id]?.name;
-          if (nm) ZONES.set(wz, nm);
+          if (nm) { ZONES.set(wz, nm); if (!ZONES.has(id)) ZONES.set(id, nm); }      // round 11 (P, live #59): the SHEET id too — a legend fish names its zone by it, and the starter zone's id is "test" ("Somewhere in Test")
         }
       }
     } catch { /* offline/test: keys stay tidy */ }

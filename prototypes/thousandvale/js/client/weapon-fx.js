@@ -18,6 +18,7 @@
 //   wfx.update(dt)
 
 import * as THREE from 'three';
+import { starTint } from './star-looks.js';             // round 11: the Star Blade's arcane drawn gold
 
 /** Element -> trail colour. */
 export const ELEMENT_COLOUR = {
@@ -92,7 +93,7 @@ export function createWeaponFx(scene, { spellFx = null, actors = null, groundY =
     if (ev.kind === 'attack') {
       const a = actors?.get(ev.id);
       const x = ev.x ?? a?.pos.x, z = ev.z ?? a?.pos.z; if (x == null) return;
-      const el = elementKey(ev.el), colour = ELEMENT_COLOUR[el] || ELEMENT_COLOUR.physical;
+      const el = starTint(elementKey(ev.el), { cls: a?.look?.cls, skill: ev.skill || ev.ab }), colour = ELEMENT_COLOUR[el] || ELEMENT_COLOUR.physical;   // round 11: a Star Blade's swing is gold
       const gy = groundY(x, z), yaw = ev.yaw ?? a?.yaw ?? 0;
       const L = weaponLook(ev.wt, ev.wk);
       if (ev.shape === 'swing' || ev.wk === 'melee') {

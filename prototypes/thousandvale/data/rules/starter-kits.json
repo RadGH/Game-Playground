@@ -2375,6 +2375,72 @@
      "element": "arcane"
     }
    ]
+  },
+  "starblade": {
+   "armour": [
+    {
+     "id": "star_forged_plate",
+     "name": "Star-Forged Plate",
+     "blurb": "Plate chest, plate helm and plate gauntlets. Nothing on: legs, boots.",
+     "pieces": [
+      "heavy_chest",
+      "heavy_helm",
+      "heavy_gauntlets"
+     ],
+     "lean": "guard"
+    },
+    {
+     "id": "comet_harness",
+     "name": "Comet Rider's Harness",
+     "blurb": "Plate chest, mail legs and plate boots. Nothing on: head, gloves.",
+     "pieces": [
+      "heavy_chest",
+      "medium_legs",
+      "heavy_boots"
+     ],
+     "lean": "keen"
+    },
+    {
+     "id": "night_watch_mail",
+     "name": "Night-Watch Mail",
+     "blurb": "Mail chest, mail helm and leather boots. Nothing on: legs, gloves.",
+     "pieces": [
+      "medium_chest",
+      "medium_helm",
+      "light_boots"
+     ],
+     "lean": "ward"
+    }
+   ],
+   "weapons": [
+    {
+     "id": "longsword_orb",
+     "name": "Star-Steel Longsword and Seeing Glass",
+     "blurb": "Longsword: one-handed, with a seer's orb in the off hand (a focus with its own power).",
+     "main": "longsword",
+     "off": "seer_orb"
+    },
+    {
+     "id": "greatsword",
+     "name": "Night-Sky Greatsword",
+     "blurb": "Greatsword: two-handed; slow, wide sweeps that catch several enemies.",
+     "main": "greatsword"
+    },
+    {
+     "id": "sabre_buckler",
+     "name": "Comet Sabre and Buckler",
+     "blurb": "Sabre: one-handed, quick curved cuts, with a buckler in the off hand (blocks).",
+     "main": "militia_sabre",
+     "off": "buckler"
+    },
+    {
+     "id": "rapier_dagger",
+     "name": "Needle-Star Rapier and Dagger",
+     "blurb": "Rapier: one-handed, quick thrusts, with a dagger in the off hand (it swings too, for less).",
+     "main": "rapier",
+     "off": "dagger"
+    }
+   ]
   }
  },
  "leans": {

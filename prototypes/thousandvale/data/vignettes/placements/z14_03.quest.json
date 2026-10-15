@@ -1,8 +1,56 @@
 {
- "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z14_03, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z14_03, added where a kill / collect quest's area held fewer of its monster than the step needs (round 11: max(count + 4, 2 x count) — two players at once; they come back in 1-1.5 minutes). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
  "zone": "z14_03",
  "terrainHash": "106d6a71",
  "placements": [
+  {
+   "type": "camp",
+   "id": "quest_flags_over_redcliff_0_0",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    8,
+    8
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1985,
+   "z": 1590,
+   "yaw": 0,
+   "radius": 4,
+   "quest": "flags_over_redcliff",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_flags_over_redcliff_0_1",
+   "monster": "cinder_imp",
+   "with": null,
+   "level": [
+    8,
+    8
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1905,
+   "z": 1616,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "flags_over_redcliff",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
   {
    "type": "camp",
    "id": "quest_flags_over_redcliff_1_0",
@@ -13,15 +61,187 @@
     8
    ],
    "count": [
-    2,
-    2
+    3,
+    3
    ],
    "x": 1728,
    "z": 792,
    "yaw": 0,
    "radius": 8,
    "quest": "flags_over_redcliff",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_flags_over_redcliff_1_1",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    8,
+    8
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1715,
+   "z": 804,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "flags_over_redcliff",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_flags_over_redcliff_1_2",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    8,
+    8
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1730,
+   "z": 768,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "flags_over_redcliff",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_flags_over_redcliff_1_3",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    8,
+    8
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1735,
+   "z": 802,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "flags_over_redcliff",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_cinder_farm_0_0",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    8,
+    8
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1105,
+   "z": 1975,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "cinder_farm",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_cinder_farm_0_1",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    8,
+    8
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1175,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "cinder_farm",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_cellar_cultists_1_0",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    7,
+    7
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1817,
+   "z": 154,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "cellar_cultists",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_cellar_cultists_1_1",
+   "monster": "sky_cultist",
+   "with": null,
+   "level": [
+    7,
+    7
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1760,
+   "z": 104,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "cellar_cultists",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",

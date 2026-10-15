@@ -122,7 +122,7 @@ export function createWorldUi({ hud, net: getNet, me, room, onFootprints, onBann
         wireQuestButtons(u);
         return true;
       case 'use':
-        if (u.text) show(u.name || 'Something', '', `<p>${esc(u.text)}</p>${u.buff ? `<p class="quest">You feel ${esc(u.buff.name || u.buff.id || 'stronger')}.</p>` : ''}`);
+        if (u.text) show(u.name || 'Something', '', `<p>${esc(u.text)}</p>${u.buff && u.buff.text ? `<p class="quest">${esc(u.buff.text)}</p>` : ''}`);
         return true;
       case 'grave':
         show(`${u.who || 'Someone'}'s grave`, u.level ? `Level ${u.level}` : '', `<p>${u.by ? `Slain by <b>${esc(u.by)}</b>` : 'Fell here'}${u.at ? `, ${ago(u.at)}` : ''}.</p><p class="tiny">Graves fade after an hour.</p>`);

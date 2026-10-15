@@ -1,5 +1,5 @@
 {
- "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z12_03, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z12_03, added where a kill / collect quest's area held fewer of its monster than the step needs (round 11: max(count + 4, 2 x count) — two players at once; they come back in 1-1.5 minutes). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
  "zone": "z12_03",
  "terrainHash": "a6a668c3",
  "placements": [
@@ -13,15 +13,115 @@
     5
    ],
    "count": [
-    1,
-    1
+    3,
+    3
    ],
    "x": 961,
    "z": 1762,
    "yaw": 0,
    "radius": 8,
    "quest": "the_restless_cloister",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_the_restless_cloister_0_1",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 948,
+   "z": 1774,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "the_restless_cloister",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_the_restless_cloister_0_2",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 963,
+   "z": 1738,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "the_restless_cloister",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_owls_in_the_belfry_0_0",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    3,
+    3
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1201,
+   "z": 977,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "owls_in_the_belfry",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_owls_in_the_belfry_0_1",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1172,
+   "z": 911,
+   "yaw": 0,
+   "radius": 3,
+   "quest": "owls_in_the_belfry",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",
@@ -33,15 +133,67 @@
     4
    ],
    "count": [
-    1,
-    1
+    3,
+    3
    ],
    "x": 1154,
    "z": 1961,
    "yaw": 0,
    "radius": 3,
    "quest": "candles_for_the_crypt",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_candles_for_the_crypt_0_1",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1141,
+   "z": 1973,
+   "yaw": 0,
+   "radius": 3,
+   "quest": "candles_for_the_crypt",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_candles_for_the_crypt_0_2",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1157,
+   "z": 1937,
+   "yaw": 0,
+   "radius": 3,
+   "quest": "candles_for_the_crypt",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",

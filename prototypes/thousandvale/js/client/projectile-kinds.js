@@ -46,6 +46,10 @@ const GLOW = {
 export const STAR = Object.freeze({ glow: true, gold: true, arc: 0, spin: 1.2, scale: 1, tail: 2 });
 const GLOW_BY_ELEMENT = { fire: 'firebolt', ice: 'shard', lightning: 'spark', shadow: 'orb', holy: 'orb', nature: 'orb', arcane: 'orb', poison: 'orb', bleed: 'shard', true: 'orb', physical: 'orb' };
 
+/** Play-test 11 (Z26): ranged monsters whose body holds no weapon model, by type -> what they loose. (Every humanoid
+ *  archer carries its bow in its look; these are the beasts and engines that shoot something solid.) */
+export const SHOOTER_HELD = Object.freeze({ clockwork_sentry: 'crossbow', bone_archer: 'bow', brigand_archer: 'bow' });
+
 /** What a held model id / weapon type throws or looses. */
 function byWeapon(w) {
   const t = String(w || '').toLowerCase();
@@ -102,3 +106,11 @@ export function flightMs(ev = {}, dist = 0, model = 'arrow') {
 
 /** Where along its flight (0..1) a body is, and how far above the straight line: a lobbed path that still lands on time. */
 export function arcHeight(t, dist, arc) { return arc > 0 ? 4 * arc * Math.min(dist, 40) * t * (1 - t) : 0; }
+
+/**
+ * Play-test 11 (Z39, live #40): how far (metres, sideways) a bolt of a fan bows from the straight line at 0..1 of its
+ * flight. `side` = -1 .. 1 (the left bolt, the middle one 0, the right one). Wide early, back on the line as it lands.
+ */
+export function fanBow(t, dist, side) { return side ? side * Math.min(3.2, 0.2 * Math.max(0, dist) + 0.4) * 4 * t * (1 - t) * (1 - 0.35 * t) : 0; }
+/** Which side of its fan a bolt flies on: `fx bolt {n, of}` (C: n 1..of) -> -1 .. 1; 0 when it is not part of a fan. */
+export function fanSide(ev = {}) { const of = ev.of | 0, n = ev.n | 0; return of > 1 && n >= 1 && n <= of ? (n - 1) / (of - 1) * 2 - 1 : 0; }

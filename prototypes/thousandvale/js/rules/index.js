@@ -33,7 +33,7 @@ import { allyEffects, aimsAtAlly } from './ally.js';
 import { cardText, whoOf, whoText } from './wording.js';
 import { reviveOf, directHealSlot } from './tv-skills.js';
 import { runtimeFor, shapeOfUnit } from './cast-skills.js';
-import { attackReach, basicCard, isHeldFocus, stampCaster } from './caster-forms.js';
+import { attackReach, basicCard, isHeldFocus, stampCaster, restyleCaster } from './caster-forms.js';
 import { TV_SLOTS, bagBonusOf, isLightItem as isLightRaw, lightRefund as lightRefundRaw } from './tv-gear.js';
 import { itemPrice, sellPrice as sellPriceOf, priceParts, killGold as killGoldOf, goldFound, isGear, retrainPrice as retrainPriceTv, questHour as questHourOf, lifetimeGold as lifetimeGoldOf } from './economy.js';
 import { weaponHands, resourceOf, resourceMax } from './farhold.js';
@@ -50,6 +50,7 @@ import { canTakePerk, allocatePerk, refundPerk as refundPerkFor, refundAllPerks,
 /** What an arena object is called on a nameplate. */
 const OBJECT_NAMES = { pillar: 'Stone pillar', rock: 'Fallen rock', brazier: 'Brazier', lever: 'Lever', pool: 'Pool', cracked_floor: 'Cracked floor' };
 import { validTarget, TAB } from './targeting.js';
+import { applyBlessing, blessMove } from './blessings.js';      // [World, round 11 #47] shrine blessings (vignette use.buff)
 import { applyItemBuff, itemBuffs as itemBuffsOf, sheetKey, saveItemBuffs, restoreItemBuffs, RECALL, REVIVE_FLASK } from './buffs.js';
 import { applyHazard } from './hazards.js';      // [S] Expansion 1 §4: Vharlen's springs, geysers and vents (js/sim/hazards.js drives them)
 import { groundAdapter } from './terrain-read.js';
@@ -645,6 +646,8 @@ export function createRules(host, opts = {}) {
         // owner feedback 8 (W1): an EVENT's monster (a raid wave, its captain) is a raider — the town's guards meet it at
         // its level, and its opening target is the nearest guard, never a newcomer
         if (e.data?.event != null && guards.list.length) { guards.raise(e.level || 1); guards.opening(unit, 'guard'); }
+        // [World, round 11 #5] an event's monster follows much further than a camp's (events.js data.leash: 300 m / 60 s)
+        if (e.data?.leash && Number.isFinite(+e.data.leash.m)) { unit.leashM = +e.data.leash.m; unit.leashS = +e.data.leash.s || null; }
         // play-test 4 S4: a champion / rare is visibly bigger (a floor, so a Giant stays giant), and the room entity says so
         if (!script && (rk.rank === 'champion' || rk.rank === 'rare') && !rk.boss) {
           const floor = sizeFloor(engine, rk.rank);
@@ -1107,6 +1110,10 @@ export function createRules(host, opts = {}) {
     const lvl = spec.level || e?.r?.unit?.level || e?.level || 1;
     const it = engine.makeItem({ base: spec.base, rarity: spec.rarity || 'normal', level: lvl, rng: room.streams.get('loot') });
     if (it) it.uid = `${room.id}:m${++madeN}`;
+    // owner #40: a reward that names its element / wand style (E's `reward.item { attune, castStyle }`) is made that way;
+    // a name the rules know (caster-forms.json `named`) is honoured too, whatever the caller passes
+    if (it && spec.name) it.name = spec.name;
+    if (it && (spec.attune || spec.castStyle || (spec.name && engine.casterForms?.named?.[spec.name]))) restyleCaster(engine, it, { keepName: !!spec.name, ...(engine.casterForms?.named?.[it.name] || {}), ...(spec.attune ? { attune: spec.attune } : {}), ...(spec.castStyle ? { castStyle: spec.castStyle } : {}) });
     return it;
   }
   let madeN = 0;
@@ -1457,6 +1464,10 @@ export function createRules(host, opts = {}) {
     isLightItem, lightRefund,
     /** owner feedback 8 (W22): the light everyone carries — `{ radius, dungeonRadius, dungeonAmbient }` */
     LIGHT: lightOf(engine), rollLoot, onParty, useObject, bar, backfill, unlock, revived,
+    /** [World, round 11 #47] a vignette's `use.buff {status, seconds}` -> a real shrine blessing (js/rules/blessings.js). -> { ok, id, name, seconds, text } */
+    buff: (e, spec) => { const u = e?.r?.unit; if (!u || u.dead || e.dead) return { ok: false }; const r = run(() => applyBlessing(u, spec)); if (r.ok) host.event({ type: 'fx', id: e.id, kind: 'status', status: r.id, on: true }); return r; },
+    /** [World, round 11 #47] the share of speed on foot a blessing adds (A's footMul) */
+    blessMove: e => blessMove(e?.r?.unit),
     applyKit, makeItem, makeCrate, openCrate, sheet, sheetWith,
     /** owner feedback 7 (V2): an item's list price (final), what a merchant pays, and the parts for a tooltip */
     price: priceOf, sellPrice: sellPriceFor, priceRow,

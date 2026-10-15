@@ -26,7 +26,7 @@ export function wantedAuras(st, dead) {
   if (dead || !Array.isArray(st)) return new Set();
   const out = new Set();
   // `item:*` are consumable buffs (C: whetted, oiled, well_fed, oats…) — no aura. (`item:torch` and the worn `light` slot were carried lights until play-test 8, W22: light items are gone and nothing is drawn for one.)
-  for (const s of st) { if (String(s).startsWith('item:')) continue; const k = statusLook(s) || String(s || ''); if (k) out.add(k); }
+  for (const s of st) { if (String(s).startsWith('item:') || String(s).startsWith('bless:')) continue;      /* [World #47] a shrine blessing: no aura */ const k = statusLook(s) || String(s || ''); if (k) out.add(k); }
   return out;
 }
 

@@ -25,16 +25,36 @@ import { lootRows, lootStep, lootCloses, lootGoldBody } from './pt8-core.js';
 
 const LOOT_RANGE = 6;
 
-export function createLoot({ net, hud, actors, me }) {
+export function createLoot({ net, hud, actors, me, controls = null }) {
   const lootable = new Map();          // corpse id -> best rarity in it for me (S23: the marker's colour)
   const W = { id: null, data: null, sel: 0, rows: [], seen: new Set() };      // seen: every id this window was drawn under (#58)
   const panel = createPanel({ id: 'loot', title: 'Loot', width: 300, cls: 'loot-panel', onClose: () => { if (W.id != null) send2.loot(net(), 'close', { id: W.id }); W.id = null; W.data = null; W.seen.clear(); iconsActive(false, 'loot'); } });
 
   // ---- the window ----
+  // round 11 (owner #8): "Loot" on a far body walks you there (the same walk-to as attack-move) and opens it on arrival
+  const going = { id: null, goal: null, at: 0 };
+  function goLoot(a) {
+    if (!controls?.walkTo) { hud.toast('Too far away to loot.', 'warn'); return; }
+    going.id = a.id; going.goal = { x: a.pos.x, z: a.pos.z }; going.at = performance.now();
+    controls.walkTo(a.pos.x, a.pos.z);
+    hud.toast(`Walking to ${a.name || 'the body'} to loot it.`, 'info');
+  }
+  function goTick() {
+    if (going.id == null) return;
+    const a = actors.get(going.id), m = me();
+    const g = controls?.moveGoal;
+    // given up: the body is gone, you steered elsewhere (a new goal or none before arriving), or a minute went by
+    const steered = !g || Math.hypot(g.x - going.goal.x, g.z - going.goal.z) > 0.5;
+    if (!a || !m || performance.now() - going.at > 60000) { going.id = null; return; }
+    const d = Math.hypot(a.pos.x - m.x, a.pos.z - m.z);
+    if (d <= LOOT_RANGE - 0.5) { const id = going.id; going.id = null; controls?.stop?.(); open(id); return; }
+    if (steered) going.id = null;
+  }
   function open(id) {
     const a = actors.get(id), m = me();
     if (!a || !m) return false;
-    if (Math.hypot(a.pos.x - m.x, a.pos.z - m.z) > LOOT_RANGE + 0.5) { hud.toast('Too far away to loot.', 'warn'); return true; }
+    if (Math.hypot(a.pos.x - m.x, a.pos.z - m.z) > LOOT_RANGE + 0.5) { goLoot(a); return true; }
+    going.id = null;
     W.id = id; W.data = null; W.sel = 0; W.seen = new Set([id]);
     send2.loot(net(), 'open', { id });
     panel.setTitle(a.name || 'Loot', 'Searching…');
@@ -61,6 +81,8 @@ export function createLoot({ net, hud, actors, me }) {
       empty ? h('p.dim', {}, 'Nothing left.') : h('div.loot-list', { role: 'listbox', 'aria-label': 'What is here' }, ...rows),
       h('div.row.end.loot-foot', {}, h('button.ghost.small', { type: 'button', onclick: () => panel.close() }, 'Close'), h('span.grow'),
         empty ? null : h('button.primary.small', { type: 'button', dataset: { act: 'all' }, oncontextmenu: e => e.preventDefault(), onclick: takeAll }, h('kbd', { dataset: { action: 'strike' } }, 'F'), ' Take all')));
+    // round 11 (owner #22): a controller enters the window on the FIRST ITEM (A takes it, Y shows its card), not on Close
+    (panel.body.querySelector('.loot-row:not(.gold) .islot') || panel.body.querySelector('.loot-row .loot-take'))?.setAttribute('data-pad-first', '');
     paintSel();
   }
   const takeBtn = () => h('button.ghost.small.loot-take', { type: 'button' }, h('kbd', { dataset: { action: 'interact' } }, 'E'), ' Take');
@@ -103,6 +125,7 @@ export function createLoot({ net, hud, actors, me }) {
     return best;
   }
   function tick() {
+    goTick();
     for (const id of lootable.keys()) { const el = actors.get(id)?.plate?.root; if (el && !el.classList.contains('has-loot')) markPlate(id); }
     const a = panel.isOpen ? null : nearest();
     if ((a?.id ?? null) !== near) { near = a?.id ?? null; prompt.hidden = near == null; if (a) prompt.querySelector('span').textContent = `Loot ${a.name}`; }
@@ -182,6 +205,6 @@ export function createLoot({ net, hud, actors, me }) {
   return {
     wire, open, tick: () => { tick(); tickRolls(); }, useKey, onRoll, onRolled, choose, panel,
     isLootable: id => lootable.has(id), lootable, takeSel, takeAll, step,
-    get state() { return { open: panel.isOpen ? W.id : null, data: W.data, sel: W.sel, selUid: W.rows[W.sel]?.uid ?? null, lootable: [...lootable.keys()], rolls: [...rolls.keys()], prompt: !prompt.hidden }; },
+    get state() { return { open: panel.isOpen ? W.id : null, data: W.data, sel: W.sel, selUid: W.rows[W.sel]?.uid ?? null, lootable: [...lootable.keys()], rolls: [...rolls.keys()], prompt: !prompt.hidden, going: going.id }; },
   };
 }

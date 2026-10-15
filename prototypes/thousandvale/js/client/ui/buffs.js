@@ -7,7 +7,9 @@ import { h } from '../ui-panel.js';
 
 const GLYPH = { whetted: '⚔', oiled: '◈', silvered: '✧', fletched: '➶', well_fed: '♨', oats: '♞', torch: '🔥', steamed: '♨', steam_soaked: '♒' };      // [S] the hot springs' two
 const NAMES = { 'item:steamed': 'Steam-warmed (+5% max health)', steam_soaked: 'Steam-soaked (fast health and mana)' };      // [S]
-const NICE = id => NAMES[id] || String(id).replace(/^item:/, '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+// [World, round 11 #47] a shrine's blessing: the server's own sentence (used.buff.text) is its name on the bar
+const BLESS_GLYPH = { haste: '»', might: '⚔', guard: '◈', rally: '✦', regen: '✚' };
+const NICE = id => NAMES[id] || String(id).replace(/^bless:/, '').replace(/^item:/, '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
 export function createBuffs({ me, infoOf, net = null }) {
   const root = document.getElementById('hud');
@@ -48,7 +50,7 @@ export function createBuffs({ me, infoOf, net = null }) {
     row.replaceChildren(...st.map(s => {
       const left = Math.max(0, (until.get(s) || 0) - now), short = String(s).replace(/^item:/, '');
       const t = left > 0 ? (left > 60000 ? `${Math.ceil(left / 60000)}m` : `${Math.ceil(left / 1000)}s`) : '';
-      return h('span.buff' + (String(s).startsWith('item:') ? '.item' : ''), { dataset: { tip: `${NICE(s)}${t ? ` — ${t} left` : ''}`, st: s } }, h('b', {}, GLYPH[short] || NICE(s)[0]), t ? h('em', {}, t) : null);
+      return h('span.buff' + (String(s).startsWith('item:') ? '.item' : ''), { dataset: { tip: `${NICE(s)}${t ? ` — ${t} left` : ''}`, st: s } }, h('b', {}, GLYPH[short] || BLESS_GLYPH[String(s).replace(/^bless:/, '')] || NICE(s)[0]), t ? h('em', {}, t) : null);
     }));
   }
   /** S21: the mount-call delay and anything else timed on you gets the same bar. */
@@ -75,6 +77,7 @@ export function createBuffs({ me, infoOf, net = null }) {
     });
     n.on('ev', ({ e }) => { for (const ev of e || []) if ((ev.type || ev.t) === 'fx') onFx(ev); });
     n.on('itemR', r => { if (r.ok && r.ms && r.id) { const s = r.status || ('item:' + (r.buff || r.id)); until.set(s, performance.now() + r.ms); if (r.buff) until.set('item:' + r.buff, performance.now() + r.ms); } });
+    n.on('used', u => { const b = u && u.ok && u.buff; if (b && b.id && b.seconds) { until.set(b.id, performance.now() + b.seconds * 1000); if (b.text) NAMES[b.id] = b.text.replace(/ for [^.]*\.$/, ''); } });      // [World #47]
     n.on('joined', () => { C.on = false; bar.hidden = true; });
   }
   return { wire, tick, onFx, startBar, get state() { return { cast: C.on ? label.textContent : null, buffs: [...row.children].map(c => c.dataset.st) }; }, setUntil: (s, ms) => until.set(s, performance.now() + ms) };

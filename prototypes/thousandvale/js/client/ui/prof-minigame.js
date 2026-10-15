@@ -31,6 +31,7 @@ import { h } from '../ui-panel.js';
 import { createRun, HOW, GAME_INPUT, QUALITY_WORD, PROF_OF_GAME, hoverBegins } from './prof-games.js';
 import { drawGame, hitTest, pointFor } from './prof-draw.js';
 import { padLayers, PAD_INDEX } from '../input/bindings.js';
+import { hintFor } from '../input/hints.js';
 import { profIcon, PROF_NAME } from './prof-icons.js';
 
 const WORK = new Set(['Space', 'KeyE', 'Enter', 'NumpadEnter', 'KeyF']);
@@ -38,12 +39,21 @@ const LEFT = new Set(['KeyA', 'ArrowLeft']), RIGHT = new Set(['KeyD', 'ArrowRigh
 const PASS = /^(F\d+|Tab|Meta|OS|Control|Alt|Shift|CapsLock|PrintScreen)/;          // keys the browser keeps
 /** Y19 (G2) / #57: how long a game waits for the player; after it the game is PUT AWAY, never started (the server allows lateMs = 30 s). */
 export const READY_MAX_MS = 25000;
+/** Round 11 (live #23): a stick pushed this far begins the skinning cut; the stick's height is the knife's height. */
+export const STICK_BEGIN = 0.3;
+export const stickAim = ly => Math.max(0.04, Math.min(0.96, 0.5 - ly * 0.46));
 const READY_HOW = {
   keyboard: { trace: 'Put the mouse on the knife to begin (or press Space).', any: 'Press Space (or click) when you are ready.' },
-  pad: { trace: 'Press the work button when you are ready.', any: 'Press the work button when you are ready.' },
+  pad: { trace: 'Move the left stick to begin (or press the work button).', any: 'Press the work button when you are ready.' },
   touch: { trace: 'Put your finger on the knife to begin.', any: 'Tap when you are ready.' },
 };
 const device = () => document.documentElement.dataset.input || (window.matchMedia?.('(pointer: coarse)').matches ? 'touch' : 'keyboard');
+/** Round 11 (live #57): the keys of this device, for the words drawn ON a game (the forge's "FIRE (D)"). Null on touch: you tap the thing itself. */
+export function keyCaps(dev = device()) {
+  if (dev === 'touch') return null;
+  const one = (id, dflt) => { let t = ''; try { t = hintFor(id, dev === 'pad' ? 'pad' : 'keyboard').text; } catch { /* the input layer is not loaded (tests) */ } return t || dflt; };
+  return { work: one('profWork', 'Space'), left: one('profLeft', 'A'), right: one('profRight', 'D') };
+}
 
 /** "{work} when …" -> text nodes and key caps (input/hints.js re-labels a <kbd data-action> for the device in use). */
 export function howNodes(text) {
@@ -147,13 +157,19 @@ export function createMinigame({ sound = null, words = () => QUALITY_WORD, paren
     const state = { work: Object.keys(PAD).some(b => PAD[b] === 'profWork' && on(b)), left: Object.keys(PAD).some(b => PAD[b] === 'profLeft' && on(b)) || on('LEFT') || lx < -0.6, right: Object.keys(PAD).some(b => PAD[b] === 'profRight' && on(b)) || on('RIGHT') || lx > 0.6, back: on('START') };
     const P = S.padPrev;
     if (root.dataset.state === 'result') { if (state.work && !P.work && performance.now() - S.cardAt > 350) close(); }
-    else if (waiting()) { if ((state.work && !P.work) || (state.left && !P.left) || (state.right && !P.right)) begin(); else if (state.back && !P.back) cancel(); }      // Y19 (G2)
+    else if (waiting()) {      // Y19 (G2)
+      // round 11 (live #23): the skinning cut begins as soon as the stick moves, and from then on the stick holds the knife
+      // (no "dropping down" at the start while the stick was still at rest — the knife sinks only when nothing holds it)
+      if (Math.abs(ly) < 0.2) S.stickRest = true;          // (the stick that walked you up to the beast must come back to rest first)
+      const stick = S.run.type === 'trace' && S.stickRest && Math.abs(ly) > STICK_BEGIN;
+      if (stick || (state.work && !P.work) || (state.left && !P.left) || (state.right && !P.right)) { if (S.run.type === 'trace') S.padAim = true; begin(); if (stick) aim(stickAim(ly)); }
+      else if (state.back && !P.back) cancel();
+    }
     else {
       if (state.work !== !!P.work) { if (state.work) work(); else workUp(); }
-      if (state.left && !P.left) side(-1);
-      if (state.right && !P.right) side(1);
+      if (S.run?.type !== 'trace') { if (state.left && !P.left) side(-1); if (state.right && !P.right) side(1); }
       if (state.back && !P.back) cancel();
-      if (S.run?.type === 'trace') { if (Math.abs(ly) > 0.2) S.padAim = true; if (S.padAim && !state.work) aim(0.5 - ly * 0.46); }
+      if (S.run?.type === 'trace') { if (Math.abs(ly) > 0.2) S.padAim = true; if (S.padAim && !state.work) aim(stickAim(ly)); }
     }
     S.padPrev = state;
   }
@@ -169,7 +185,7 @@ export function createMinigame({ sound = null, words = () => QUALITY_WORD, paren
   function draw() {
     if (!S.run || !S.ctx) return;
     const dev = device();
-    drawGame(S.ctx, S.run, S.w, S.h, { tint: S.opts.tint, cursor: dev !== 'touch', numbers: dev === 'keyboard' });
+    drawGame(S.ctx, S.run, S.w, S.h, { tint: S.opts.tint, cursor: dev !== 'touch', numbers: dev === 'keyboard', keys: keyCaps(dev) });
     if (S.time) S.time.style.width = (S.run.view().left * 100).toFixed(1) + '%';
   }
   function frame() {
@@ -191,7 +207,7 @@ export function createMinigame({ sound = null, words = () => QUALITY_WORD, paren
     if (S.run) abort();
     clearTimeout(S.closeT);
     const game = opts.game, type = game.type, dev = device(), prof = opts.prof || PROF_OF_GAME[type];
-    S.opts = { ...opts, prof }; S.run = createRun(game, { mins: opts.mins }); S.noteN = 0; S.padPrev = { work: true, left: true, right: true, back: true }; S.padAim = false; S.frames = 0;
+    S.opts = { ...opts, prof }; S.run = createRun(game, { mins: opts.mins }); S.noteN = 0; S.padPrev = { work: true, left: true, right: true, back: true }; S.padAim = false; S.stickRest = false; S.frames = 0;
     S.canvas = h('canvas.prof-canvas', { 'aria-label': HOW[type].title });
     S.time = h('i');
     const x = h('button.prof-x', { type: 'button', 'aria-label': 'Stop', dataset: { tip: 'Stop (Esc). Nothing is lost.' }, onclick: () => cancel() }, '×');
@@ -241,7 +257,7 @@ export function createMinigame({ sound = null, words = () => QUALITY_WORD, paren
     S.card.dataset.q = quality;
     S.card.replaceChildren(...[
       h('strong.prof-q', {}, word), title ? h('span.prof-what', {}, title) : null,
-      ...items.map(it => h('span.prof-item' + (it.rarity ? '.r-' + it.rarity : ''), {}, it.tint ? h('i.prof-dot', { style: `background:${it.tint}` }) : null, `${it.count > 1 ? it.count + ' × ' : ''}${it.name}`, it.bonus ? h('em', {}, 'bonus') : null)),
+      ...items.map(it => h('span.prof-item' + (it.rarity ? '.r-' + it.rarity : ''), {}, it.tint ? h('i.prof-dot', { style: `background:${it.tint}` }) : null, `${it.count > 1 ? it.count + ' × ' : ''}${it.name}`, it.tag || it.bonus ? h('em', {}, it.tag || 'bonus') : null)),
       ...lines.map(l => h('span', {}, l)),
       note ? h('small', {}, note) : null,
       pending ? h('small.prof-wait', {}, '…') : null].filter(Boolean));

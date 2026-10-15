@@ -17,13 +17,20 @@ import { createPanel, h } from '../ui-panel.js';
 import { Meter } from '../../../../../meters/js/meter.js';
 import { renderMeter, METER_CSS } from '../../../../../meters/js/meter-ui.js';
 import { meterRecord, hitRowFromEvent, createFightClock, meterOurs, meterToggle, HIT_FLAGS } from './pt8-core.js';
+import { OURS, oursKey } from './pt11-core.js';      // round 11 (#51): our side's keys do not change with the room
 
+// Round 11 (owner #18 / #51): the meter RECORDS from the moment you log in, whether or not the window was ever opened —
+// the setting (and /meter) only shows or hides the window. And #51 ("19 misses · 290 absorbed · 133 deaths — No records
+// yet" after a boss fight): nothing had been cleared. Our side was told apart by ENTITY ID, and your entity id changes
+// every time you change room — dying and waking at the inn, a ship, a dungeon door. The fight's records were all still
+// there under your OLD id, and the filter below hid every bar. Now our side is written into the record itself, with keys
+// that do not change: `ours:self` for you, `ours:p:<name>` for a party member, `ours:<id>` for a pet.
 /** The experiment's meter, with the game's one rule on top: only OUR side has bars under "done" (and healing / absorbs). */
 class PartyMeter extends Meter {
-  constructor(o) { super(o); this.ours = new Set(); }
+  constructor(o) { super(o); }
   report(mode = 'damage', scope = 'current', o = {}) {
     const rows = super.report(mode, scope, o);
-    const side = mode === 'status' ? () => true : r => this.ours.has(String(r.id));      // (under "taken" and "deaths" the row is the one who was hurt)
+    const side = mode === 'status' ? () => true : r => String(r.id).startsWith(OURS);      // (under "taken" and "deaths" the row is the one who was hurt)
     const out = rows.filter(side);
     const top = (out[0]?.total || out[0]?.count) || 1;
     for (const r of out) r.pct = +(100 * (r.total || r.count) / top).toFixed(1);
@@ -34,15 +41,15 @@ class PartyMeter extends Meter {
 
 export function createMeterWindow({ net, hud, actors, selfId, bar, settings }) {
   if (!document.getElementById('tv-meter-css')) { const st = document.createElement('style'); st.id = 'tv-meter-css'; st.textContent = METER_CSS; document.head.appendChild(st); }
-  const meter = new PartyMeter({ maxFights: 30 });
+  const meter = new PartyMeter({ maxFights: 200 });      // round 11: the whole session (a fight is a few hundred small records)
   const clock = createFightClock();
-  const S = { on: false, srv: false, dirty: false, last: 0, state: { mode: 'damage', scope: 'current' }, names: new Map(), party: [], records: 0 };
+  const S = { on: false, rec: false, srv: false, dirty: false, last: 0, state: { mode: 'damage', scope: 'current' }, names: new Map(), party: [], records: 0 };
   const body = h('div.tv-meter');
   const foot = h('p.tiny.meter-foot');
-  const panel = createPanel({ id: 'meter', title: 'Damage meter', width: 380, cls: 'meter-panel', onOpen: () => { draw(true); }, onClose: () => { if (S.on && !S.closing) hud.toast('The damage meter keeps counting. Open it again with /meter, or switch it off in Settings.', 'info'); } });
+  const panel = createPanel({ id: 'meter', title: 'Damage meter', width: 380, cls: 'meter-panel', onOpen: () => { draw(true); }, onClose: () => { if (S.on && !S.closing) hud.toast('The damage meter keeps counting. /meter opens it again.', 'info'); } });
   panel.fill(body, foot,
     h('div.row.end', {}, h('button.ghost.small', { type: 'button', dataset: { act: 'reset' }, title: 'Forget every fight so far', onclick: () => reset() }, 'Reset'), h('span.grow'),
-      h('button.ghost.small', { type: 'button', dataset: { act: 'off' }, title: 'Stop counting and close. Settings -> Game -> Damage meter brings it back.', onclick: () => settings?.set?.('meter', false) }, 'Switch off')));
+      h('button.ghost.small', { type: 'button', dataset: { act: 'off' }, title: 'Hide the window. It keeps counting every fight; /meter or Settings -> Game -> Damage meter shows it again.', onclick: () => settings?.set?.('meter', false) }, 'Hide')));
 
   const now = () => performance.now() / 1000;
   const nameOf = id => actors.get(id)?.name || actors.get(+id)?.name || S.names.get(String(id)) || '';
@@ -63,7 +70,8 @@ export function createMeterWindow({ net, hud, actors, selfId, bar, settings }) {
     else if (meter.current && meter.current.label !== clock.label()) meter.current.label = clock.label();
     const rec = meterRecord(row, { t, nameOf, skillName });
     if (!rec) return false;
-    meter.ours = O;
+    const key = id => (O.has(String(id)) ? oursKey(id, { selfId: selfId(), partyIds: S.party, nameOf }) : String(id));
+    rec.source = src == null ? rec.source : key(src); rec.target = key(tgt);
     meter.record(rec);
     if (rec.killingBlow) meter.record({ t, kind: 'death', source: rec.source, sourceName: rec.sourceName, target: rec.target, targetName: rec.targetName, via: rec.via, viaName: rec.viaName });
     S.records++; S.dirty = true;
@@ -76,7 +84,6 @@ export function createMeterWindow({ net, hud, actors, selfId, bar, settings }) {
     const t = performance.now();
     if (!force && (!S.dirty || t - S.last < 500)) return;      // twice a second is plenty for a table of numbers
     S.last = t; S.dirty = false;
-    meter.ours = ours();
     // a click inside the list re-renders it; keep the scroll where it was
     const top = body.querySelector('.meter-list')?.scrollTop || 0;
     renderMeter(meter, body, S.state);
@@ -87,28 +94,33 @@ export function createMeterWindow({ net, hud, actors, selfId, bar, settings }) {
     foot.textContent = party ? 'You, your pets, and party members near you. Click a bar for its skills, a skill for every hit.' : 'You and your pets. In a party, members near you are counted too. Click a bar for its skills.';
   }
 
+  /** Ask the server for the hit feed (once a session, and again after each join). Recording never stops. */
+  function record() {
+    S.rec = true;
+    const n = net();
+    if (typeof n?.meter === 'function') { try { n.meter(true); S.srv = true; } catch { S.srv = false; } }
+    else if (n?._raw && n.joined) { try { n._raw('game', JSON.stringify({ t: 'meter', on: true })); } catch { /* an older server */ } }
+  }
+  /** Show (true) or hide the window. It keeps counting either way. */
   function setOn(on) {
     on = !!on;
+    if (!S.rec) record();
     if (S.on === on) { if (on && !panel.isOpen) panel.open(); return; }
     S.on = on;
-    const n = net();
-    if (typeof n?.meter === 'function') { try { n.meter(on); S.srv = on; } catch { S.srv = false; } }
-    else if (n?._raw && n.joined) { try { n._raw('game', JSON.stringify({ t: 'meter', on })); } catch { /* an older server */ } }
     if (on) panel.open(); else { S.closing = true; panel.close(); S.closing = false; }
   }
   settings?.on?.((k, v) => { if (k === 'meter') setOn(v); });
 
   function wire(n) {
     n.on('hits', m => {
-      if (!S.on) return;
       S.srv = true; S.gotHits = true;
       for (const [id, name] of Object.entries(m.names || {})) S.names.set(String(id), name);
       for (const row of m.l || []) feed(row);
     });
     // the older feed: only while the server has never sent `hits`
-    n.on('ev', ({ e }) => { if (!S.on || S.gotHits) return; for (const ev of e || []) { const row = hitRowFromEvent(ev); if (row) feed(row); } });
+    n.on('ev', ({ e }) => { if (S.gotHits) return; for (const ev of e || []) { const row = hitRowFromEvent(ev); if (row) feed(row); } });
     n.on('partyFrames', list => { S.party = (list || []).filter(r => r.id != null && r.online !== false).map(r => r.id); });
-    n.on('joined', () => { S.gotHits = false; if (S.on) { const c = net(); if (typeof c?.meter === 'function') c.meter(true); else c?._raw?.('game', JSON.stringify({ t: 'meter', on: true })); } });
+    n.on('joined', () => { S.gotHits = false; record(); });      // round 11 (#18): every join, window or not
   }
   function tick() { draw(); }
   // the saved setting (default off)
@@ -117,5 +129,5 @@ export function createMeterWindow({ net, hud, actors, selfId, bar, settings }) {
   return { panel, wire, tick, setOn, feed, reset, meter, HIT_FLAGS,
     // #67: closed with the X it is still counting — /meter then brings the window back instead of switching the meter off
     toggle() { const act = meterToggle({ on: S.on, open: panel.isOpen }); if (act === 'show') { panel.open(); return true; } const on = act === 'on'; if (settings?.set) settings.set('meter', on); else setOn(on); return on; },
-    get state() { const rows = meter.fights.length ? meter.report(S.state.mode, S.state.scope) : []; return { on: S.on, open: panel.isOpen, server: S.srv, records: S.records, fights: meter.fights.length, label: meter.fight()?.label || '', mode: S.state.mode, rows: rows.map(r => ({ id: r.id, name: r.name, total: r.total, dps: r.dps, hits: r.hits })) }; } };
+    get state() { const rows = meter.fights.length ? meter.report(S.state.mode, S.state.scope) : []; return { on: S.on, rec: S.rec, open: panel.isOpen, server: S.srv, records: S.records, fights: meter.fights.length, label: meter.fight()?.label || '', mode: S.state.mode, rows: rows.map(r => ({ id: r.id, name: r.name, total: r.total, dps: r.dps, hits: r.hits })) }; } };
 }

@@ -2475,7 +2475,7 @@
    "type": "folk",
    "id": "folk_hollin_pass_4",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -3327,7 +3327,7 @@
    "type": "folk",
    "id": "folk_hollin_pass_6",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -4508,7 +4508,7 @@
    "type": "folk",
    "id": "folk_hollin_pass_10",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -9708,7 +9708,7 @@
    "type": "folk",
    "id": "folk_hollin_pass_29",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"

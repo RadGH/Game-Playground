@@ -1,6 +1,6 @@
 # Icon Library
 
-A standalone browser experiment and shared spell-art library. Open `/icons/` from the Playground browser or Thousandvale's public origin. All 31 Thousandvale classes have six distinct pictures: the six original Starcaller icons and 180 new SVG compositions, made and visually reviewed in six batches of five classes.
+A standalone browser experiment and shared spell-art library. Open `/icons/` from the Playground browser or Thousandvale's public origin. All 32 Thousandvale classes have six distinct pictures: the six original Starcaller icons, 180 new SVG compositions made and visually reviewed in six batches of five classes, and (play-test 11) the Star Blade's six as batch 7.
 
 Every icon has a stable skill ID, name, visual description, class, categories and batch number. Search covers all metadata; class, category and batch filters combine. Click a card to compare 26/40/96 px previews, copy its ID or download a standalone, accessible SVG. The page works on phones, with keyboard navigation and native dialog focus/escape handling. Filter state lives in the URL. No build step or image service is required.
 
@@ -20,6 +20,7 @@ iconSvg('star_dart', 128, { accessible: true }); // SVG with title and descripti
 ## Data and artwork
 
 - `data/starcaller.js` preserves the original Starcaller artwork as batch 0.
+- `data/starblade.js` (batch 7, play-test 11) is the Star Blade: the same medallion and gold, with STAR STEEL (`#c9d3e6`) for every blade, shield rim and binding so it reads as the Starcaller's sword-and-shield partner.
 - `data/batch-01.js` through `batch-06.js` each hold five classes, in Farhold class order, with six explicit compositions per class. Each row is `[skillId, visualDescription, svgArt, additionalCategories]`.
 - `js/draw.js` has the 32×32 medallion, gold/pale/midnight palette and composable drawing primitives. Pictures describe their skill's action; no random shape selection or initials.
 - `js/records.js` attaches names and class/category metadata and the shared medallion to each composition.
@@ -37,6 +38,7 @@ The visual descriptions describe the picture rather than copying combat numbers 
 | 4 | Stormcaller, Druid, Oracle, Tactician, Chronomancer |
 | 5 | Monk, Shaman, Witch Hunter, Knight, Sorcerer |
 | 6 | Runesmith, Shadow Dancer, Tinker, Priest, Enchanter |
+| 7 | Star Blade (play-test 11; Thousandvale-only, the Starcaller's partner) |
 
 ## Game integration and release
 
@@ -66,7 +68,7 @@ same spirit as the spell set, reviewed on contact sheets. Browse them at `icons/
 | `data/game/items-goods.js` (64×64) | every potion (mana is BLUE), food, drink, the 12 fish meals, goods, rods, bait, the 12 gathering tools, crates, gift, trophy, quest parcel, key, letter, coins, the 12 fishing junk items, and fallbacks (`potion`, `junk`, `bundle`, `tool`, `ring`, `amulet`, `focus`) | the bag, shop, loot, trade, mail and hotbar, through `ui/inv-core.js iconSpec` → `{ kind: 'art' }` |
 | `data/game/items-materials.js` (64×64) | the 55 profession materials by id, plus a fallback per material class (`mat_ore` …) | same |
 | `data/game/items-fish.js` (64×64) | the 62 fish and 16 legendary fish by species id, plus `fish` | same |
-| `data/game/fx-motifs.js` (64×64, white) | three spell-effect shapes for each of the 30 classes (`<class>.a` projectile head, `.b` impact shard, `.c` ground glyph) and `palettes` (core / glow / accent per class) | Thousandvale's class signature effects (`js/client/sig-looks.js`, `sig-fx.js`) |
+| `data/game/fx-motifs.js` (64×64, white) | three spell-effect shapes for each of the 30 classes and the Star Blade (hand-drawn in the same contract, play-test 11 — its `.c` sigil is also the calling's emblem on the creation card) (`<class>.a` projectile head, `.b` impact shard, `.c` ground glyph) and `palettes` (core / glow / accent per class) | Thousandvale's class signature effects (`js/client/sig-looks.js`, `sig-fx.js`) |
 
 ```js
 import { uiIconSvg, itemArtKey, itemIconSvg, itemIconUrl } from '../icons/js/game-icons.js';

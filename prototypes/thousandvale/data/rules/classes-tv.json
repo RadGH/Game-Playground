@@ -1,5 +1,5 @@
 {
- "_doc": "Stream C (owner feedback 10, Y32): classes that exist ONLY in Thousandvale, injected in memory at engine boot by js/rules/tv-skills.js `installTvClasses` (Farhold's classes.json and skills.json are shared with live games and are never written). `classes` = whole class rows in Farhold's classes.json shape (plus `tv: true`, `outfit` = the class-outfit id D-world dresses it with, `resourceName` = its signature resource). `skills` = its skill rows in Farhold's skills.json shape, each with a four-tier talent tree (2 bespoke nodes + one shared library node a tier, every node a rule); a row's `tv.sky` = { proj, fallMs } makes each of its ground strikes a star that FALLS: the rules send fx `skyfall` (to, r, ms, proj) `fallMs` before the strike so the client can draw it coming down. The Starcaller's signature is the resource `starlight` (Farhold's own resource mechanic: 5 at most): Star Dart and Scattered Stars gain 1 for each enemy hit, Called Star / Star Field / Heavens' Barrage spend all of it (`perPoint.mult` more damage a point) and change at five (`atMax`). Projectile kinds are named in data/rules/projectiles.json (`star` for the two thrown skills, `skystar` for what falls). Kits are in data/rules/starter-kits.json, the themed armour in data/rules/armour-tiers.json.",
+ "_doc": "Stream C (owner feedback 10, Y32): classes that exist ONLY in Thousandvale, injected in memory at engine boot by js/rules/tv-skills.js `installTvClasses` (Farhold's classes.json and skills.json are shared with live games and are never written). `classes` = whole class rows in Farhold's classes.json shape (plus `tv: true`, `outfit` = the class-outfit id D-world dresses it with, `resourceName` = its signature resource). `skills` = its skill rows in Farhold's skills.json shape, each with a four-tier talent tree (2 bespoke nodes + one shared library node a tier, every node a rule); a row's `tv.sky` = { proj, fallMs } makes each of its ground strikes a star that FALLS: the rules send fx `skyfall` (to, r, ms, proj) `fallMs` before the strike so the client can draw it coming down. The Starcaller's signature is the resource `starlight` (Farhold's own resource mechanic: 5 at most): Star Dart and Scattered Stars gain 1 for each enemy hit, Called Star / Star Field / Heavens' Barrage spend all of it (`perPoint.mult` more damage a point) and change at five (`atMax`). Projectile kinds are named in data/rules/projectiles.json (`star` for the two thrown skills, `skystar` for what falls). Kits are in data/rules/starter-kits.json, the themed armour in data/rules/armour-tiers.json. ROUND 11 (Z52/Z55, owner #53/#56): the Star Blade (`starblade`) — the Starcaller's melee partner, same `starlight` resource spent differently: gained by melee hits (Starcut / Star Tether / Comet Rush), by hits TAKEN (`tv.hurtGain` { id, n, every seconds, fromLevel }) and by each blow Star Aegis answers (its `counter.gain`); spent on defence and control. `tv.points` = what each point spent adds besides damage (`barrier` share of maximum health, `answer` x the counter's answer, `hold` seconds on the skill's roots) and `atMax.stun` (seconds, a stun on what it hits/answers at five) — js/rules/cast-skills.js `applyPoints`, card text js/rules/wording.js.",
  "classes": [
   {
    "id": "starcaller",
@@ -7,6 +7,7 @@
    "role": "Arcane Star Caster",
    "hook": "Throws golden stars, calls bigger ones down from the sky and lays fields of them on the ground. Stars that land fill your Constellation.",
    "primaryAttr": "INT",
+   "weaponFamily": "magic",
    "armorTier": "cloth",
    "weapons": [
     "wand",
@@ -98,9 +99,113 @@
     }
    },
    "sample": "Sabel Thorne",
-   "signature": "Constellation: Star Dart and Scattered Stars gain 1 Starlight for each enemy they hit (it holds 5); Called Star, Star Field and Heavens' Barrage spend it all for more damage, and do more still at five.",
+   "signature": "Constellation: from level 6 (when Called Star, the first skill that spends it, opens), Star Dart and Scattered Stars gain 1 Starlight for each enemy they hit (it holds 5); Called Star, Star Field and Heavens' Barrage spend it all for more damage, and do more still at five.",
    "tv": true,
    "outfit": "starcaller",
+   "resource": "mana",
+   "resourceName": "Starlight"
+  },
+  {
+   "id": "starblade",
+   "name": "Star Blade",
+   "role": "Arcane Star Guardian",
+   "hook": "Fights up close with a sword of starlight: wraps itself in a star shield that strikes back, drags enemies in on star threads and pins them in place. Every blow you give or take fills your Constellation.",
+   "primaryAttr": "STR",
+   "weaponFamily": "heavy",
+   "armorTier": "heavy",
+   "weapons": [
+    "sword",
+    "sword2h"
+   ],
+   "starter": "longsword",
+   "startingArmour": [
+    "heavy_chest",
+    "heavy_helm",
+    "heavy_gauntlets"
+   ],
+   "shield": false,
+   "skills": [
+    "starcut",
+    "star_aegis",
+    "star_tether",
+    "comet_rush",
+    "binding_stars",
+    "collapsing_star"
+   ],
+   "look": {
+    "body": {
+     "height": 0.52,
+     "width": 0.66,
+     "headSize": 0.5,
+     "skin": "#d9b08c"
+    },
+    "headShape": "oval",
+    "hair": {
+     "id": "side_part",
+     "color": "#c9d3e6"
+    },
+    "eyes": {
+     "id": "narrow",
+     "color": "#c9a23a"
+    },
+    "brows": {
+     "id": "straight"
+    },
+    "nose": {
+     "id": "small"
+    },
+    "mouth": {
+     "id": "neutral",
+     "color": "#b5484d"
+    },
+    "ears": {
+     "id": "normal"
+    },
+    "facialHair": {
+     "id": "none"
+    },
+    "top": {
+     "id": "plate",
+     "color": "#1a2350",
+     "color2": "#c9d3e6"
+    },
+    "bottom": {
+     "id": "greaves",
+     "color": "#2a3466"
+    },
+    "shoes": {
+     "id": "heavy",
+     "color": "#1a2350"
+    },
+    "accessory": {
+     "id": "none"
+    },
+    "hat": {
+     "id": "none"
+    },
+    "extras": {
+     "id": "none"
+    },
+    "cape": {
+     "id": "cape",
+     "color": "#141a3e"
+    },
+    "held": {
+     "id": "sword",
+     "color": "#c9d3e6"
+    },
+    "offhand": {
+     "id": "none"
+    },
+    "decor": {
+     "id": "pauldrons",
+     "color": "#e6c14a"
+    }
+   },
+   "sample": "Corwen Ashgrave",
+   "signature": "Constellation, the blade's way: from level 3 (when Star Aegis, the first skill that spends it, opens), Starcut, Star Tether and Comet Rush gain 1 Starlight for each enemy they hit, and every hit you take gains 1 (once a second at most) — it holds 5. Star Aegis, Binding Stars and Collapsing Star spend it all: a stronger star shield that strikes back harder, a longer hold, a heavier collapse — and more again at five.",
+   "tv": true,
+   "outfit": "starblade",
    "resource": "mana",
    "resourceName": "Starlight"
   }
@@ -117,6 +222,7 @@
    "mp": 5,
    "resource": {
     "id": "starlight",
+    "fromLevel": 6,
     "gain": 1,
     "gainPer": "hit"
    },
@@ -255,6 +361,7 @@
    "mp": 12,
    "resource": {
     "id": "starlight",
+    "fromLevel": 6,
     "gain": 1,
     "gainPer": "hit"
    },
@@ -979,6 +1086,905 @@
         "mul": {
          "mult": 0.85
         }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "starcut": {
+   "name": "Starcut",
+   "shape": "melee",
+   "element": "arcane",
+   "mult": 1.25,
+   "reach": 3.2,
+   "arc": 1.6,
+   "cooldown": 4,
+   "mp": 4,
+   "resource": {
+    "id": "starlight",
+    "fromLevel": 3,
+    "gain": 1,
+    "gainPer": "hit"
+   },
+   "tv": {
+    "hurtGain": {
+     "id": "starlight",
+     "n": 1,
+     "every": 1,
+     "fromLevel": 3
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": "burst",
+     "nodes": [
+      {
+       "id": "starlit_edge",
+       "name": "Starlit Edge",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "marked",
+          "takeMore": 0.1,
+          "seconds": 4
+         }
+        ]
+       }
+      },
+      {
+       "id": "hooked_light",
+       "name": "Hooked Light",
+       "fx": "pull",
+       "mod": {
+        "pullIn": {
+         "metres": 2,
+         "to": "self"
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "echoing_cut",
+       "name": "Echoing Cut",
+       "fx": "afterimage",
+       "mod": {
+        "afterimage": {
+         "at": "end",
+         "delay": 0.4,
+         "mult": 0.5
+        }
+       }
+      },
+      {
+       "id": "dimming_cut",
+       "name": "Dimming Cut",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "weaken",
+          "dealLess": 0.15,
+          "seconds": 3
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "drain",
+     "nodes": [
+      {
+       "id": "star_thirst",
+       "name": "Star Thirst",
+       "fx": "drain",
+       "mod": {
+        "onHit": {
+         "heal": 0.02
+        }
+       }
+      },
+      {
+       "id": "quick_aegis",
+       "name": "Quick Aegis",
+       "fx": "charge",
+       "mod": {
+        "cutCooldown": {
+         "skill": "star_aegis",
+         "seconds": 1,
+         "per": "hit",
+         "orSelf": 0.5
+        }
+       },
+       "requires": "star_aegis"
+      }
+     ]
+    },
+    "4": {
+     "lib": "echo",
+     "nodes": [
+      {
+       "id": "twin_starcut",
+       "name": "Twin Starcut",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      },
+      {
+       "id": "brimming_cut",
+       "name": "Brimming Cut",
+       "fx": "charge",
+       "mod": {
+        "resource": {
+         "gain": 2
+        },
+        "mul": {
+         "cooldown": 1.4
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "star_aegis": {
+   "name": "Star Aegis",
+   "shape": "self",
+   "element": "arcane",
+   "cooldown": 18,
+   "mp": 12,
+   "barrier": {
+    "share": 0.12,
+    "seconds": 8
+   },
+   "counter": {
+    "window": 8,
+    "hits": 6,
+    "negate": 0.3,
+    "answer": {
+     "mult": 0.9,
+     "element": "arcane"
+    },
+    "gain": {
+     "resource": "starlight",
+     "n": 1
+    }
+   },
+   "resource": {
+    "id": "starlight",
+    "spend": "all",
+    "optional": true
+   },
+   "tv": {
+    "points": {
+     "barrier": 0.03,
+     "answer": 0.2,
+     "atMax": {
+      "stun": 0.5
+     }
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "star_ward",
+       "name": "Star Ward",
+       "fx": "ward",
+       "mod": {
+        "ward": {
+         "charges": 1,
+         "cap": 0.25,
+         "seconds": 8
+        }
+       }
+      },
+      {
+       "id": "calling_light",
+       "name": "Calling Light",
+       "fx": "counter",
+       "mod": {
+        "taunt": {
+         "radius": 8,
+         "seconds": 3
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "shared_aegis",
+       "name": "Shared Aegis",
+       "fx": "ward",
+       "mod": {
+        "barrier": {
+         "pets": true
+        }
+       }
+      },
+      {
+       "id": "thorned_light",
+       "name": "Thorned Light",
+       "fx": "counter",
+       "mod": {
+        "selfBuff": {
+         "name": "Thorned Light",
+         "seconds": 8,
+         "reflect": 0.2
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "mending_light",
+       "name": "Mending Light",
+       "fx": "drain",
+       "mod": {
+        "counter": {
+         "heal": 0.02
+        }
+       }
+      },
+      {
+       "id": "unmoving_star",
+       "name": "Unmoving Star",
+       "fx": "ward",
+       "mod": {
+        "counter": {
+         "ccImmune": true
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": null,
+     "nodes": [
+      {
+       "id": "breaking_aegis",
+       "name": "Breaking Aegis",
+       "fx": "detonate",
+       "mod": {
+        "recast": {
+         "window": 8,
+         "then": {
+          "shape": "around",
+          "radius": 6,
+          "mult": 1.2,
+          "element": "arcane"
+         },
+         "say": "break the shield outward as a 6 m ring of star force for 120% weapon damage"
+        }
+       }
+      },
+      {
+       "id": "second_aegis",
+       "name": "Second Aegis",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "star_tether": {
+   "name": "Star Tether",
+   "shape": "around",
+   "element": "arcane",
+   "mult": 0.5,
+   "radius": 10,
+   "pullIn": {
+    "metres": 6,
+    "to": "self"
+   },
+   "knock": {
+    "stagger": 0.5
+   },
+   "taunt": {
+    "radius": 10,
+    "seconds": 3
+   },
+   "cooldown": 12,
+   "mp": 10,
+   "resource": {
+    "id": "starlight",
+    "fromLevel": 3,
+    "gain": 1,
+    "gainPer": "hit"
+   },
+   "talents": {
+    "1": {
+     "lib": "linger",
+     "nodes": [
+      {
+       "id": "tangle",
+       "name": "Tangle",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "root",
+          "seconds": 1.5
+         }
+        ]
+       }
+      },
+      {
+       "id": "long_threads",
+       "name": "Long Threads",
+       "fx": "pull",
+       "mod": {
+        "set": {
+         "radius": 14
+        },
+        "pullIn": {
+         "metres": 9,
+         "to": "self"
+        },
+        "taunt": {
+         "radius": 14,
+         "seconds": 3
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "star_snare",
+       "name": "Star Snare",
+       "fx": "zone",
+       "mod": {
+        "place": {
+         "kind": "zone",
+         "seconds": 4,
+         "radius": 5,
+         "every": 1,
+         "pull": 1,
+         "follow": "self",
+         "strike": {
+          "mult": 0.15,
+          "targets": 6
+         }
+        }
+       }
+      },
+      {
+       "id": "drawn_and_dimmed",
+       "name": "Drawn and Dimmed",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "weaken",
+          "dealLess": 0.2,
+          "seconds": 4
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "gathered_threads",
+       "name": "Gathered Threads",
+       "fx": "charge",
+       "mod": {
+        "resource": {
+         "gain": 2
+        },
+        "mul": {
+         "cooldown": 1.3
+        }
+       }
+      },
+      {
+       "id": "bright_hold",
+       "name": "Bright Hold",
+       "fx": "ward",
+       "mod": {
+        "taunt": {
+         "radius": 10,
+         "seconds": 3,
+         "barrierPer": 0.02
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "conflagration",
+     "nodes": [
+      {
+       "id": "second_pull",
+       "name": "Second Pull",
+       "fx": "echo",
+       "mod": {
+        "again": {
+         "delay": 1.2,
+         "mult": 0.5
+        }
+       }
+      },
+      {
+       "id": "twin_threads",
+       "name": "Twin Threads",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "comet_rush": {
+   "name": "Comet Rush",
+   "shape": "dash",
+   "element": "arcane",
+   "mult": 1.25,
+   "range": 14,
+   "splash": 2.5,
+   "dash": {
+    "to": "target",
+    "range": 14,
+    "hitMult": 0.4
+   },
+   "knock": {
+    "stagger": 0.6
+   },
+   "cooldown": 10,
+   "mp": 8,
+   "resource": {
+    "id": "starlight",
+    "fromLevel": 3,
+    "gain": 1,
+    "gainPer": "hit"
+   },
+   "talents": {
+    "1": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "comet_trail",
+       "name": "Comet Trail",
+       "fx": "zone",
+       "mod": {
+        "pool": {
+         "seconds": 4,
+         "radius": 2.5,
+         "power": 0.2,
+         "element": "arcane"
+        }
+       }
+      },
+      {
+       "id": "impact_ring",
+       "name": "Impact Ring",
+       "fx": "wide",
+       "mod": {
+        "dash": {
+         "land": {
+          "radius": 4,
+          "mult": 0.6
+         }
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "drain",
+     "nodes": [
+      {
+       "id": "pinning_comet",
+       "name": "Pinning Comet",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "root",
+          "seconds": 2
+         }
+        ]
+       }
+      },
+      {
+       "id": "comet_guard",
+       "name": "Comet Guard",
+       "fx": "ward",
+       "mod": {
+        "barrier": {
+         "share": 0.08,
+         "seconds": 5
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "return_orbit",
+       "name": "Return Orbit",
+       "fx": "leap",
+       "mod": {
+        "recast": {
+         "window": 4,
+         "then": {
+          "shape": "dash",
+          "dash": {
+           "to": "back",
+           "range": 10
+          }
+         },
+         "say": "dash 10 m back out the way you came"
+        }
+       }
+      },
+      {
+       "id": "rushing_light",
+       "name": "Rushing Light",
+       "fx": "charge",
+       "mod": {
+        "empowerNext": {
+         "count": 1,
+         "mult": 0.4,
+         "seconds": 4
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "echo",
+     "nodes": [
+      {
+       "id": "twin_comets",
+       "name": "Twin Comets",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      },
+      {
+       "id": "endless_comet",
+       "name": "Endless Comet",
+       "fx": "charge",
+       "mod": {
+        "onKill": {
+         "reset": true
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "binding_stars": {
+   "name": "Binding Stars",
+   "shape": "around",
+   "element": "arcane",
+   "mult": 0.8,
+   "radius": 7,
+   "statuses": [
+    {
+     "id": "root",
+     "seconds": 2.5
+    }
+   ],
+   "place": {
+    "kind": "zone",
+    "seconds": 5,
+    "radius": 7,
+    "every": 1,
+    "pull": 1,
+    "strike": {
+     "mult": 0.15,
+     "targets": 6
+    }
+   },
+   "cooldown": 20,
+   "mp": 18,
+   "resource": {
+    "id": "starlight",
+    "spend": "all",
+    "optional": true,
+    "perPoint": {
+     "mult": 0.08
+    }
+   },
+   "tv": {
+    "points": {
+     "hold": 0.3,
+     "atMax": {
+      "stun": 1
+     }
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": "linger",
+     "nodes": [
+      {
+       "id": "moving_ring",
+       "name": "Moving Ring",
+       "fx": "zone",
+       "mod": {
+        "place": {
+         "follow": "self"
+        }
+       }
+      },
+      {
+       "id": "dimming_ring",
+       "name": "Dimming Ring",
+       "fx": "tag",
+       "mod": {
+        "place": {
+         "debuff": "weaken"
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "tightening_ring",
+       "name": "Tightening Ring",
+       "fx": "pull",
+       "mod": {
+        "place": {
+         "pull": 2
+        }
+       }
+      },
+      {
+       "id": "star_brand",
+       "name": "Star Brand",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "marked",
+          "takeMore": 0.15,
+          "seconds": 6
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "closing_ring",
+       "name": "Closing Ring",
+       "fx": "detonate",
+       "mod": {
+        "place": {
+         "onExpire": {
+          "radius": 7,
+          "mult": 1
+         }
+        }
+       }
+      },
+      {
+       "id": "kind_ring",
+       "name": "Kind Ring",
+       "fx": "ward",
+       "mod": {
+        "place": {
+         "heal": 0.02
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "aegis",
+     "nodes": [
+      {
+       "id": "second_ring",
+       "name": "Second Ring",
+       "fx": "charge",
+       "mod": {
+        "charges": {
+         "max": 2
+        }
+       }
+      },
+      {
+       "id": "wide_binding",
+       "name": "Wide Binding",
+       "fx": "wide",
+       "mod": {
+        "set": {
+         "radius": 10
+        },
+        "place": {
+         "radius": 10
+        }
+       }
+      }
+     ]
+    }
+   }
+  },
+  "collapsing_star": {
+   "name": "Collapsing Star",
+   "shape": "around",
+   "element": "arcane",
+   "mult": 2.4,
+   "radius": 8,
+   "pullIn": {
+    "metres": 4,
+    "to": "self"
+   },
+   "knock": {
+    "stagger": 0.8
+   },
+   "cooldown": 26,
+   "mp": 26,
+   "resource": {
+    "id": "starlight",
+    "spend": "all",
+    "perPoint": {
+     "mult": 0.12
+    },
+    "atMax": {
+     "set": {
+      "radius": 11
+     }
+    }
+   },
+   "talents": {
+    "1": {
+     "lib": "conflagration",
+     "nodes": [
+      {
+       "id": "star_hollow",
+       "name": "Star Hollow",
+       "fx": "zone",
+       "mod": {
+        "pool": {
+         "seconds": 5,
+         "radius": 6,
+         "power": 0.2,
+         "element": "arcane"
+        }
+       }
+      },
+      {
+       "id": "heavy_collapse",
+       "name": "Heavy Collapse",
+       "fx": "knock",
+       "mod": {
+        "knock": {
+         "stagger": 1.4
+        }
+       }
+      }
+     ]
+    },
+    "2": {
+     "lib": "shatter",
+     "nodes": [
+      {
+       "id": "laid_open",
+       "name": "Laid Open",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "marked",
+          "takeMore": 0.2,
+          "seconds": 6
+         }
+        ]
+       }
+      },
+      {
+       "id": "twin_collapse",
+       "name": "Twin Collapse",
+       "fx": "echo",
+       "mod": {
+        "again": {
+         "delay": 1.0,
+         "mult": 0.5
+        }
+       }
+      }
+     ]
+    },
+    "3": {
+     "lib": "hunger",
+     "nodes": [
+      {
+       "id": "debt_repaid",
+       "name": "Debt Repaid",
+       "fx": "charge",
+       "mod": {
+        "onKill": {
+         "refund": 0.5
+        }
+       }
+      },
+      {
+       "id": "collapse_ward",
+       "name": "Collapse Ward",
+       "fx": "ward",
+       "mod": {
+        "barrier": {
+         "share": 0.15,
+         "seconds": 6
+        }
+       }
+      }
+     ]
+    },
+    "4": {
+     "lib": "echo",
+     "nodes": [
+      {
+       "id": "afterglow",
+       "name": "Afterglow",
+       "fx": "wide",
+       "mod": {
+        "onKill": {
+         "burst": {
+          "radius": 4,
+          "mult": 0.8
+         }
+        }
+       }
+      },
+      {
+       "id": "binding_collapse",
+       "name": "Binding Collapse",
+       "fx": "tag",
+       "mod": {
+        "statuses": [
+         {
+          "id": "root",
+          "seconds": 2
+         }
+        ]
        }
       }
      ]

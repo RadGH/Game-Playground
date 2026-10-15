@@ -1,8 +1,32 @@
 {
- "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z13_02, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z13_02, added where a kill / collect quest's area held fewer of its monster than the step needs (round 11: max(count + 4, 2 x count) — two players at once; they come back in 1-1.5 minutes). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
  "zone": "z13_02",
  "terrainHash": "b3a20e5d",
  "placements": [
+  {
+   "type": "camp",
+   "id": "quest_class_demon_hunter_1_1",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 40,
+   "z": 888,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "class_demon_hunter",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
   {
    "type": "camp",
    "id": "quest_bells_for_halsbridge_0_0",
@@ -13,15 +37,91 @@
     5
    ],
    "count": [
-    2,
-    2
+    3,
+    3
    ],
    "x": 1598,
    "z": 1382,
    "yaw": 0,
    "radius": 6,
    "quest": "bells_for_halsbridge",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_bells_for_halsbridge_0_1",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1585,
+   "z": 1394,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "bells_for_halsbridge",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_bells_for_halsbridge_0_2",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1600,
+   "z": 1358,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "bells_for_halsbridge",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_bells_for_halsbridge_0_3",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1605,
+   "z": 1392,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "bells_for_halsbridge",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",
@@ -33,15 +133,235 @@
     4
    ],
    "count": [
-    1,
-    1
+    3,
+    3
    ],
    "x": 1640,
    "z": 1395,
    "yaw": 0,
    "radius": 8,
    "quest": "under_the_cobbles",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_under_the_cobbles_0_1",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1672,
+   "z": 1439,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "under_the_cobbles",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_under_the_cobbles_0_2",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1642,
+   "z": 1371,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "under_the_cobbles",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_under_the_cobbles_0_3",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1679,
+   "z": 1449,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "under_the_cobbles",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_under_the_cobbles_0_4",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1622,
+   "z": 1392,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "under_the_cobbles",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_flour_and_fangs_0_0",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    3
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 40,
+   "z": 1419,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "flour_and_fangs",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_flour_and_fangs_0_1",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 65,
+   "z": 1366,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "flour_and_fangs",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_flour_and_fangs_0_2",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 42,
+   "z": 1395,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "flour_and_fangs",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_archers_on_the_bridge_0_0",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1097,
+   "z": 840,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "archers_on_the_bridge",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_archers_on_the_bridge_0_1",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1084,
+   "z": 852,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "archers_on_the_bridge",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",

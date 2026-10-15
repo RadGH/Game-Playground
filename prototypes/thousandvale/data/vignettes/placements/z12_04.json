@@ -6155,7 +6155,7 @@
    "type": "folk",
    "id": "folk_coldwater_9",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"

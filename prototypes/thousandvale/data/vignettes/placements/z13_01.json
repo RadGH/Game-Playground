@@ -2088,7 +2088,7 @@
    "type": "folk",
    "id": "folk_brackwater_2",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -2614,7 +2614,7 @@
    "type": "folk",
    "id": "folk_brackwater_3",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -5319,7 +5319,7 @@
    "type": "folk",
    "id": "folk_brackwater_12",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -6945,7 +6945,7 @@
    "type": "folk",
    "id": "folk_brackwater_18",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -9088,7 +9088,7 @@
    "type": "folk",
    "id": "folk_brackwater_26",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -9426,7 +9426,7 @@
    "type": "folk",
    "id": "folk_brackwater_27",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -9630,7 +9630,7 @@
    "type": "folk",
    "id": "folk_brackwater_28",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -9979,7 +9979,7 @@
    "type": "folk",
    "id": "folk_brackwater_29",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"

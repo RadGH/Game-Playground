@@ -4,7 +4,7 @@
   "tier": "boss",
   "body": "hollow_wraith",
   "place": "dungeon crypt_spiral: the central vault of the last floor (30-34 m square)",
-  "_doc": "Stream E. End boss of the crypt spiral. P1 'Vespers': a frontal scythe for the tank, spread bells, and a line-of-sight Dirge you hide from behind the four pillars (each pillar survives two Dirges, so the room runs out of cover). P2 at 65% 'The Procession': he raises a ward and calls the dead; the ward only breaks when all four candle stands are lit, and he tries to SNUFF them with an interruptible breath. P3 'Unhallowed' is a new, shorter health bar: the cracked floor caves in (pits that stay), a three-player stack, a sweeping spiral, and safe circles in the candlelight. Hard enrage at 5.5 minutes. Objects sit inside the 30 m vault (offsets within 12 m of its centre).",
+  "_doc": "Stream E. End boss of the crypt spiral. P1 'Vespers': a frontal scythe for the tank, spread bells, and a line-of-sight Dirge you hide from behind the four pillars (each pillar survives two Dirges, so the room runs out of cover). P2 at 65% 'The Procession': he raises a ward and calls the dead; the ward only breaks when all four candle stands are lit, and he tries to SNUFF them with an interruptible breath. P3 'Unhallowed' is a new, shorter health bar: the cracked floor caves in (pits that stay), a three-player stack, a sweeping spiral, and safe circles in the candlelight. Hard enrage at 5.5 minutes. Objects sit inside the 30 m vault (offsets within 12 m of its centre). OWNER #51 (2026-10-15): the phase that refilled the health bar is removed; the health bar is the whole fight.",
   "party": "Solo: very hard — the Rite of Ash stack needs 3 and the candles must be lit while adds chase you. 2-3: playable, stack takes extra damage at 2. 5: intended. M5 scaling: Rite of Ash need = min(3, party); procession adds by party; candle stands 4 -> 3 at two players.",
   "hpMult": 4,
   "arena": {
@@ -45,19 +45,6 @@
     "procession": { "id": "procession", "name": "Procession", "every": [26, 30], "first": 14, "cast": 1.5,
       "say": "More of the faithful file in.",
       "actions": [ { "adds": { "type": "cairn_rat", "count": 3, "radius": 9, "at": "home" } } ] },
-    "rite_of_ash": { "id": "rite_of_ash", "name": "Rite of Ash", "every": [20, 24], "first": 8, "cast": 1,
-      "say": "{target} is marked for the rite — share it, three of you!",
-      "telegraphs": [ { "shape": "circle", "at": "random", "r": 3, "kind": "stack", "need": 3, "wind": 4, "damage": 3.2, "follow": true, "element": "fire" } ] },
-    "spiral": { "id": "spiral", "name": "Ossuary Spiral", "every": [17, 20], "first": 4, "cast": 0.8,
-      "say": "Bone dust spirals out from the Abbot!",
-      "telegraphs": [ { "shape": "line", "at": "self", "len": 17, "w": 2.6, "count": 8, "rotate": 0.785, "delay": 0.3, "wind": 1.2, "damage": 1.7, "yaw": "random", "element": "shadow" } ] },
-    "candlelight": { "id": "candlelight", "name": "Lights Out", "every": [28, 32], "first": 18, "cast": 1.5,
-      "say": "The dark comes in from the walls — stand in the candlelight!",
-      "telegraphs": [
-        { "shape": "circle", "at": "home", "offset": [10, 0], "r": 3, "wind": 3.5, "kind": "safe", "damage": 2.6 },
-        { "shape": "circle", "at": "home", "offset": [-10, 0], "r": 3, "wind": 3.5, "kind": "safe", "damage": 2.6 },
-        { "shape": "circle", "at": "home", "offset": [0, 10], "r": 3, "wind": 3.5, "kind": "safe", "damage": 2.6 },
-        { "shape": "circle", "at": "home", "offset": [0, -10], "r": 3, "wind": 3.5, "kind": "safe", "damage": 2.6 } ] },
     "cave_in": { "id": "cave_in", "name": "The Floor Gives Way", "every": [99, 99], "cast": 0.5,
       "say": "The flagstones crack open beneath you!",
       "telegraphs": [ { "shape": "circle", "at": "object", "object": "cracked_floor", "r": 3, "wind": 2.2, "damage": 2.2,
@@ -70,10 +57,7 @@
       "abilities": ["bone_scythe", "snuff", "procession"],
       "ward": {"seconds": 20, "pool": 0.1, "break": "objects", "need": 4, "what": "brazier", "say": "A ward of grey light closes around the Abbot. Light all four candle stands! It fails by itself in 20 seconds.", "fade": "The ward fails by itself. No opening this time."},
       "onEnter": [ { "shield": { "seconds": 20, "pool": 0.1 } }, { "adds": { "type": "barrow_hound", "count": 2, "radius": 8, "at": "home" } },
-        { "say": "A ward of grey light closes around the Abbot. Light all four candle stands! It fails by itself in 20 seconds.", "style": "warn" } ] },
-    { "name": "Unhallowed", "newBar": { "hp": 0.55 }, "say": "You put out my light. Then I shall put out yours.",
-      "abilities": ["bone_scythe", "rite_of_ash", "spiral", "candlelight"],
-      "onEnter": [ { "ability": "cave_in" } ] }
+        { "say": "A ward of grey light closes around the Abbot. Light all four candle stands! It fails by itself in 20 seconds.", "style": "warn" }, { "ability": "cave_in" } ] }
   ],
   "triggers": [
     { "when": { "lit": 4, "phase": 1 }, "do": [ { "shield": false }, { "vuln": { "takeMore": 0.4, "seconds": 10, "name": "Ward Broken" } }, { "stun": 3 },

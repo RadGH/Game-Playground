@@ -107,6 +107,46 @@ export function treeCover(biomeKey, y = 0, steep = 0, patch = 0.5, table = TREE_
 }
 /** A stable 0..1 number for a lattice point (no state: a tree stands where it stood last frame and last session). */
 export function hash2(i, j, k = 0) { let h = (Math.imul(i | 0, 374761393) ^ Math.imul(j | 0, 668265263) ^ Math.imul(k | 0, 1274126177)) >>> 0; h = Math.imul(h ^ (h >>> 13), 1274126177) >>> 0; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
+
+/**
+ * Play-test 11 (Z25, live #26: "trees on distant mountains are very low res … their low quality model is particularly
+ * bad"): one far tree. It was a four-sided pyramid (5 vertices, 4 triangles); now a two-tier SIX-sided conifer — a broad
+ * lower skirt of boughs and a narrower upper crown, darker underneath and catching the light at the tips, each tree a
+ * little lighter or darker than its neighbours — 14 vertices, 12 triangles. `old: true` keeps the pyramid (`?spire=4`).
+ */
+export const SPIRE = Object.freeze({ verts: 14, tris: 12, oldVerts: 5, oldTris: 4 });
+export function writeSpire(pos, nor, col, o, x, y, z, hgt, rad, turn, gn, cc, tint = 1, old = false) {
+  const put = (v, px, py, pz, ax, ay, az, k) => {
+    const vi = (o + v) * 3, nl = Math.hypot(ax, ay, az) || 1;
+    pos[vi] = px; pos[vi + 1] = py; pos[vi + 2] = pz;
+    nor[vi] = ax / nl; nor[vi + 1] = ay / nl; nor[vi + 2] = az / nl;
+    col[vi] = cc[0] * k * tint; col[vi + 1] = cc[1] * k * tint; col[vi + 2] = cc[2] * k * tint;
+  };
+  if (old) {
+    for (let q = 0; q < 5; q++) {
+      const ang = turn + q * 1.5708, top = q === 4;
+      put(q, top ? x : x + Math.cos(ang) * rad, top ? y + hgt : y - 1.5, top ? z : z + Math.sin(ang) * rad, gn[0] + (top ? 0 : Math.cos(ang) * 0.45), gn[1], gn[2] + (top ? 0 : Math.sin(ang) * 0.45), top ? 1.25 : 0.72);
+    }
+    return 5;
+  }
+  // tier 1: a wide skirt from just under the ground to 62 % up; tier 2: a crown from 34 % up to the top
+  const tiers = [[y - 1.5, rad, y + hgt * 0.62, 0.62, 0.98], [y + hgt * 0.34, rad * 0.66, y + hgt, 0.8, 1.28]];
+  let v = 0;
+  for (const [y0, r, yTop, kBase, kTop] of tiers) {
+    for (let q = 0; q < 6; q++) {
+      const ang = turn + q * 1.0472;
+      put(v++, x + Math.cos(ang) * r, y0, z + Math.sin(ang) * r, gn[0] + Math.cos(ang) * 0.7, gn[1] + 0.25, gn[2] + Math.sin(ang) * 0.7, kBase);
+    }
+    put(v++, x, yTop, z, gn[0], gn[1] + 1, gn[2], kTop);
+  }
+  return 14;
+}
+/** Index the triangles of a spire written at vertex `o` into idx at `q`; returns the new q. */
+export function indexSpire(idx, q, o, old = false) {
+  if (old) { for (let f = 0; f < 4; f++) { idx[q++] = o + f; idx[q++] = o + 4; idx[q++] = o + (f + 1) % 4; } return q; }
+  for (let t = 0; t < 2; t++) { const b = o + t * 7; for (let f = 0; f < 6; f++) { idx[q++] = b + f; idx[q++] = b + 6; idx[q++] = b + (f + 1) % 6; } }
+  return q;
+}
 /** Slow value noise over the sample lattice (cells of `cell` samples), 0..1: where the woods are. */
 export function patchNoise(i, j, cell = 9) {
   const x = i / cell, z = j / cell, x0 = Math.floor(x), z0 = Math.floor(z), u = x - x0, w = z - z0, su = u * u * (3 - 2 * u), sw = w * w * (3 - 2 * w);
@@ -246,25 +286,19 @@ export function buildChunk(g, ci, cj, chunk, stride, holes = null, opts = null) 
       }
     }
   }
-  const nSp = spires.length / 7, V2 = V + nSp * 5;
+  const oldSp = opts?.spire === 4, SV = oldSp ? SPIRE.oldVerts : SPIRE.verts, ST = oldSp ? SPIRE.oldTris : SPIRE.tris;
+  const nSp = spires.length / 7, V2 = V + nSp * SV;
   if (nSp) {
     const grow = a => { const o = new Float32Array(V2 * 3); o.set(a); return o; };
     pos = grow(pos); nor = grow(nor); col = grow(col);
     for (let s = 0; s < nSp; s++) {
       const src = spires[s * 7], x = spires[s * 7 + 1], y = spires[s * 7 + 2], z = spires[s * 7 + 3], hgt = spires[s * 7 + 4], rad = spires[s * 7 + 5], turn = spires[s * 7 + 6] * 1.5708;
-      const o = V + s * 5, k = (sj(Math.floor(src / nx)) * W + si(src % nx)), cn = paintFor(g, x, z).canopy, cc = cn[biome[k]] || cn[5] || [0.03, 0.1, 0.03];
-      for (let q = 0; q < 5; q++) {
-        const ang = turn + q * 1.5708, top = q === 4, px = top ? x : x + Math.cos(ang) * rad, pz = top ? z : z + Math.sin(ang) * rad;
-        const vi = (o + q) * 3, shadeK = top ? 1.25 : 0.72;
-        pos[vi] = px; pos[vi + 1] = top ? y + hgt : y - 1.5; pos[vi + 2] = pz;
-        // lit like the slope it stands on, leaning out a little at the foot so the sides catch the sun differently
-        const nxn = nor[src * 3] + (top ? 0 : Math.cos(ang) * 0.45), nzn = nor[src * 3 + 2] + (top ? 0 : Math.sin(ang) * 0.45), nyn = nor[src * 3 + 1], nl = Math.hypot(nxn, nyn, nzn) || 1;
-        nor[vi] = nxn / nl; nor[vi + 1] = nyn / nl; nor[vi + 2] = nzn / nl;
-        col[vi] = cc[0] * shadeK; col[vi + 1] = cc[1] * shadeK; col[vi + 2] = cc[2] * shadeK;
-      }
+      const k = (sj(Math.floor(src / nx)) * W + si(src % nx)), cn = paintFor(g, x, z).canopy, cc = cn[biome[k]] || cn[5] || [0.03, 0.1, 0.03];
+      // lit like the slope it stands on (the sides lean out so they catch the sun differently)
+      writeSpire(pos, nor, col, V + s * SV, x, y, z, hgt, rad, turn, [nor[src * 3], nor[src * 3 + 1], nor[src * 3 + 2]], cc, 0.88 + 0.24 * spires[s * 7 + 6], oldSp);
     }
   }
-  const maxTris = n * m * 2 + edge.length * 2 + nSp * 4;
+  const maxTris = n * m * 2 + edge.length * 2 + nSp * ST;
   const full = V2 > 65535 ? new Uint32Array(maxTris * 3) : new Uint16Array(maxTris * 3);
   let q = 0;
   for (let b = 0; b < m; b++) for (let a = 0; a < n; a++) {
@@ -279,7 +313,7 @@ export function buildChunk(g, ci, cj, chunk, stride, holes = null, opts = null) 
     idx[q++] = a0; idx[q++] = a1; idx[q++] = s0;
     idx[q++] = a1; idx[q++] = s1; idx[q++] = s0;
   }
-  for (let s = 0; s < nSp; s++) { const o = V + s * 5; for (let f = 0; f < 4; f++) { idx[q++] = o + f; idx[q++] = o + 4; idx[q++] = o + (f + 1) % 4; } }
+  for (let s = 0; s < nSp; s++) q = indexSpire(idx, q, V + s * SV, oldSp);
   const tris = q / 3;
   const bounds = { minX: i0 * step, minZ: j0 * step, maxX: si(n) * step, maxZ: sj(m) * step };
   return { ci, cj, stride, pos, nor, col, idx: q === full.length ? full : full.slice(0, q), tris, bounds, holed: hs.length > 0, spires: nSp };
@@ -323,19 +357,18 @@ export function buildCanopy(g, ci, cj, chunk, holes = null, opts = null) {
   if (!list.length) return null;
   const keep = list.length > max ? max / list.length : 1, kept = keep < 1 ? list.filter(s => s[10] <= keep) : list, N = kept.length;
   if (!N) return null;
-  const pos = new Float32Array(N * 15), nor = new Float32Array(N * 15), col = new Float32Array(N * 15), idx = N * 5 > 65535 ? new Uint32Array(N * 12) : new Uint16Array(N * 12);
+  const oldSp = opts?.spire === 4, SV = oldSp ? SPIRE.oldVerts : SPIRE.verts, ST = oldSp ? SPIRE.oldTris : SPIRE.tris;
+  const pos = new Float32Array(N * SV * 3), nor = new Float32Array(N * SV * 3), col = new Float32Array(N * SV * 3), idx = N * SV > 65535 ? new Uint32Array(N * ST * 3) : new Uint16Array(N * ST * 3);
+  // Z25: the root of every tree (x, y, z, height, turn) — near-trees.js swaps the nearest for real kit trees
+  const roots = new Float32Array(N * 5);
+  let q = 0;
   kept.forEach(([x, y, z, hgt, rad, turn, nx0, ny0, nz0, bi], s) => {
     const cc = paintFor(g, x, z).canopy[bi] || canopy[bi] || [0.03, 0.1, 0.03];
-    for (let q = 0; q < 5; q++) {
-      const ang = turn + q * 1.5708, top = q === 4, vi = (s * 5 + q) * 3, shadeK = top ? 1.25 : 0.72;
-      pos[vi] = top ? x : x + Math.cos(ang) * rad; pos[vi + 1] = top ? y + hgt : y - 1.5; pos[vi + 2] = top ? z : z + Math.sin(ang) * rad;
-      const ax = nx0 + (top ? 0 : Math.cos(ang) * 0.45), az = nz0 + (top ? 0 : Math.sin(ang) * 0.45), nl = Math.hypot(ax, ny0, az) || 1;
-      nor[vi] = ax / nl; nor[vi + 1] = ny0 / nl; nor[vi + 2] = az / nl;
-      col[vi] = cc[0] * shadeK; col[vi + 1] = cc[1] * shadeK; col[vi + 2] = cc[2] * shadeK;
-    }
-    for (let f = 0; f < 4; f++) { idx[s * 12 + f * 3] = s * 5 + f; idx[s * 12 + f * 3 + 1] = s * 5 + 4; idx[s * 12 + f * 3 + 2] = s * 5 + (f + 1) % 4; }
+    writeSpire(pos, nor, col, s * SV, x, y, z, hgt, rad, turn, [nx0, ny0, nz0], cc, 0.88 + 0.24 * (turn / 1.5708), oldSp);
+    q = indexSpire(idx, q, s * SV, oldSp);
+    roots.set([x, y, z, hgt, turn], s * 5);
   });
-  return { ci, cj, pos, nor, col, idx, tris: N * 4, spires: N };
+  return { ci, cj, pos, nor, col, idx, tris: N * ST, spires: N, roots, sv: SV };
 }
 
 /** How far a chunk's skirt hangs: enough to cover the step between a chunk and a neighbour drawn twice as coarse. */

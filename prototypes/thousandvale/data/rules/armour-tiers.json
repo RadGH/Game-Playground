@@ -20,6 +20,7 @@
   },
   "classes": {
     "starcaller": { "weight": "cloth", "theme": "rune", "set": "Zenith-Thread Robes" },
+    "starblade":  { "weight": "heavy", "theme": "rune", "set": "Nightsteel Plate" },
     "warrior":      { "weight": "heavy",  "theme": "flame",     "set": "Forgefire Harness" },
     "fighter":      { "weight": "heavy",  "theme": "storm",     "set": "Stormguard Plate" },
     "paladin":      { "weight": "medium", "theme": "dawn",      "set": "Sunsworn Mail" },

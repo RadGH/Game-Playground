@@ -17,7 +17,7 @@
 
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { projectileKind, flightMs, arcHeight, SHOT_COLOUR, MODELS } from './projectile-kinds.js';
+import { projectileKind, flightMs, arcHeight, fanBow, SHOT_COLOUR, MODELS, SHOOTER_HELD } from './projectile-kinds.js';
 
 /** Bodies are drawn a little larger than life: a real arrow is a hair at 30 m. */
 const SIZE = 1.5;
@@ -133,8 +133,10 @@ export function createProjectiles(scene, { actors = null, groundY = () => 0, nig
     } catch { /* fall through */ }
     return fallback();
   }
-  /** What the shooter holds, for a monster `shot` that does not say (a brigand archer's look holds a bow). */
-  const heldOf = a => a?.look?.held?.id || a?.avatar?.held?.id || a?.heldId || a?.look?.gear?.weapon?.sub || a?.look?.gear?.weapon?.subtype || a?.look?.gear?.weapon?.base || null;
+  /** What the shooter holds, for a monster `shot` that does not say (a brigand archer's look holds a bow). Play-test 11 (Z26,
+   *  live #27: "Brigand Archers look like they throw rocks"): a humanoid monster's bow sits in its bestiary look
+   *  (`look.avatar.held`), which this never read, so every physical monster shot fell through to a stone. */
+  const heldOf = a => a?.look?.held?.id || a?.avatar?.held?.id || a?.heldId || a?.look?.avatar?.held?.id || SHOOTER_HELD[a?.creature?.type] || a?.look?.gear?.weapon?.sub || a?.look?.gear?.weapon?.subtype || a?.look?.gear?.weapon?.base || null;
 
   /**
    * Loose one. `ev` = the rules' event (kind, element, proj, wt, ms / speed, id). `to` = where it is going (Vector3);
@@ -171,6 +173,9 @@ export function createProjectiles(scene, { actors = null, groundY = () => 0, nig
     if (it.follow) { const p = it.follow(); if (p) it.to.lerp(p, Math.min(1, 0.25 + k)); }
     _a.lerpVectors(it.from, it.to, k);
     _a.y += arcHeight(k, it.dist, it.kind.arc);
+    // play-test 11 (Z39, live #40): one bolt of a FAN bows out to its own side and comes back in on its mark, so three
+    // bolts at one target are three flights you can count, not one streak drawn three times
+    if (it.side) { const b = fanBow(k, it.dist, it.side), dx = it.to.x - it.from.x, dz = it.to.z - it.from.z, l = Math.hypot(dx, dz) || 1; _a.x += dz / l * b; _a.z -= dx / l * b; }
     return _a;
   }
 

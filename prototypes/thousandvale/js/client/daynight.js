@@ -57,7 +57,7 @@ export function skyAt(t) {
   return {
     t, night, sun, keyDir, moonUp: night > 0.3,
     zenith: c(1), horizon: c(2), ground: c(3), keyColor: c(4), keyIntensity: n(5),
-    hemiSky: c(6), hemiGround: c(7), hemiIntensity: n(8), fogFar: n(9), fogNear: Math.min(260, n(9) * 0.06), exposure: n(10),
+    hemiSky: c(6), hemiGround: c(7), hemiIntensity: n(8), fogFar: n(9), fogNear: Math.min(520, n(9) * 0.08), exposure: n(10),
     stars: Math.max(0, night - 0.15) / 0.85,
   };
 }

@@ -1,8 +1,104 @@
 {
- "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z11_03, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z11_03, added where a kill / collect quest's area held fewer of its monster than the step needs (round 11: max(count + 4, 2 x count) — two players at once; they come back in 1-1.5 minutes). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
  "zone": "z11_03",
  "terrainHash": "a23813e6",
  "placements": [
+  {
+   "type": "camp",
+   "id": "quest_the_antler_stockade_0_0",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1347,
+   "z": 363,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "the_antler_stockade",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_the_antler_stockade_0_1",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    3,
+    3
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1259,
+   "z": 349,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "the_antler_stockade",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_the_antler_stockade_0_2",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1420,
+   "z": 338,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "the_antler_stockade",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_the_antler_stockade_0_3",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1453,
+   "z": 284,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "the_antler_stockade",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
   {
    "type": "camp",
    "id": "quest_charcoal_and_cobwebs_0_0",
@@ -13,15 +109,67 @@
     4
    ],
    "count": [
-    2,
-    2
+    3,
+    3
    ],
    "x": 94,
    "z": 120,
    "yaw": 0,
    "radius": 8,
    "quest": "charcoal_and_cobwebs",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_charcoal_and_cobwebs_0_1",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 81,
+   "z": 132,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "charcoal_and_cobwebs",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_charcoal_and_cobwebs_0_2",
+   "monster": "veil_spider",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 96,
+   "z": 96,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "charcoal_and_cobwebs",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",
@@ -33,15 +181,91 @@
     3
    ],
    "count": [
-    2,
-    2
+    3,
+    3
    ],
    "x": 1193,
    "z": 360,
    "yaw": 0,
    "radius": 8,
    "quest": "the_hermits_peace",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_the_hermits_peace_0_1",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    3,
+    3
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1180,
+   "z": 372,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "the_hermits_peace",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_the_hermits_peace_0_2",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    3,
+    3
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1195,
+   "z": 336,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "the_hermits_peace",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_the_hermits_peace_0_3",
+   "monster": "gallows_owl",
+   "with": null,
+   "level": [
+    3,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1200,
+   "z": 370,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "the_hermits_peace",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",
@@ -53,15 +277,67 @@
     5
    ],
    "count": [
-    2,
-    2
+    3,
+    3
    ],
    "x": 1081,
    "z": 1945,
    "yaw": 0,
    "radius": 8,
    "quest": "lost_and_hound",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_lost_and_hound_1_1",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1068,
+   "z": 1957,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "lost_and_hound",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_lost_and_hound_1_2",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1083,
+   "z": 1921,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "lost_and_hound",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",

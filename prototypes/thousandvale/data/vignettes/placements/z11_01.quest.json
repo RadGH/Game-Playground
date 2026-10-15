@@ -1,5 +1,5 @@
 {
- "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z11_01, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z11_01, added where a kill / collect quest's area held fewer of its monster than the step needs (round 11: max(count + 4, 2 x count) — two players at once; they come back in 1-1.5 minutes). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
  "zone": "z11_01",
  "terrainHash": "6a42e50c",
  "placements": [
@@ -13,15 +13,91 @@
     5
    ],
    "count": [
-    2,
-    2
+    3,
+    3
    ],
    "x": 1933,
    "z": 589,
    "yaw": 0,
    "radius": 6,
    "quest": "snow_in_the_pass",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_snow_in_the_pass_0_1",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1920,
+   "z": 601,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "snow_in_the_pass",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_snow_in_the_pass_0_2",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1935,
+   "z": 565,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "snow_in_the_pass",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_snow_in_the_pass_0_3",
+   "monster": "frost_stalker",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1940,
+   "z": 599,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "snow_in_the_pass",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",
@@ -33,15 +109,67 @@
     5
    ],
    "count": [
-    1,
-    1
+    3,
+    3
    ],
    "x": 289,
    "z": 1392,
    "yaw": 0,
    "radius": 8,
    "quest": "hyenas_and_goats",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_hyenas_and_goats_0_1",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 276,
+   "z": 1404,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "hyenas_and_goats",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_hyenas_and_goats_0_2",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 291,
+   "z": 1368,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "hyenas_and_goats",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",
@@ -53,15 +181,67 @@
     6
    ],
    "count": [
-    1,
-    1
+    3,
+    3
    ],
    "x": 888,
    "z": 552,
    "yaw": 0,
    "radius": 8,
    "quest": "beetles_on_the_road",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_beetles_on_the_road_0_1",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    6,
+    6
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 875,
+   "z": 564,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "beetles_on_the_road",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_beetles_on_the_road_0_2",
+   "monster": "ironback_beetle",
+   "with": null,
+   "level": [
+    6,
+    6
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 890,
+   "z": 528,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "beetles_on_the_road",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",
@@ -73,15 +253,91 @@
     6
    ],
    "count": [
-    2,
-    2
+    3,
+    3
    ],
    "x": 1671,
    "z": 776,
    "yaw": 0,
    "radius": 8,
    "quest": "brigand_toll",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_brigand_toll_0_1",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    6,
+    6
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1658,
+   "z": 788,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "brigand_toll",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_brigand_toll_0_2",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    6,
+    6
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1673,
+   "z": 752,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "brigand_toll",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_brigand_toll_0_3",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    6,
+    6
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1678,
+   "z": 786,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "brigand_toll",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",
@@ -93,15 +349,43 @@
     5
    ],
    "count": [
-    2,
-    2
+    3,
+    3
    ],
    "x": 1936,
    "z": 688,
    "yaw": 0,
    "radius": 8,
    "quest": "brigand_toll",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_brigand_toll_1_1",
+   "monster": "brigand_archer",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1923,
+   "z": 700,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "brigand_toll",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",

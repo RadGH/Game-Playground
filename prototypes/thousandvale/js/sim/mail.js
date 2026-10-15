@@ -18,10 +18,13 @@
 
 import { MAIL_OPS } from '../net/protocol.js';
 import { economy } from './economy-knobs.js';
+import { isKept } from './bag-tabs.js';
 
 export const MAIL = Object.freeze({ items: 6, postage: 1, minLevel: 5, expireMs: 30 * 86400000, perHour: 20, subjectMax: 60, bodyMax: 500, list: 50 });
 
-export function createMail({ store, online, journal, syncChar, econ, trades, send = () => {}, setTimeoutTicks, wallNow, filter = null, log = () => {}, counters = {}, BAG_MAX = 120, saveNow = () => {}, restack = () => {}, opts = {} }) {
+export function createMail({ store, online, journal, syncChar, econ, trades, send = () => {}, setTimeoutTicks, wallNow, filter = null, log = () => {}, counters = {}, BAG_MAX = 120, bagFits = null, saveNow = () => {}, restack = () => {}, opts = {}, refreshItem = null, roomWords = null }) {
+  // round 11 (World, C's ask): an item that waited in the post since before a rules change reads today's words when it comes out
+  const fresh = it => { if (refreshItem && it && typeof it === 'object') { try { refreshItem(it); } catch { /* an item the rules do not know stays as it is */ } } return it; };
   /** U1 (play-test 6): the unread count the badge shows, re-sent after anything that can change it (read, take, delete). */
   const tellUnread = o => store.mailUnread(o.char.id).then(n => { if (o.conn) o.conn.sendJSON({ t: 'mailNew', unread: n }); }, () => {});
   const R = { ...MAIL, postage: economy().mail.postage, ...opts };          // V2: postage from data/rules/economy.json server.mail
@@ -54,6 +57,7 @@ export function createMail({ store, online, journal, syncChar, econ, trades, sen
     const bag = ch.bag || [];
     const items = uids.map(u => bag.find(i => i.uid === u));
     if (items.some(x => !x)) return fail(o, op, 'item', 'You do not have that item.');
+    if (items.some(isKept)) return fail(o, op, 'keep', 'You cannot post that.');      // round 11 (#3): the recall charm stays with you
     if (uids.some(u => trades.offered(ch.id, u)) || trades.of(ch.id)) return fail(o, op, 'trade', 'Finish your trade first.');
     const recent = (sentLog.get(ch.id) || []).filter(t => t > wallNow() - 3600000);
     if (recent.length >= R.perHour) return fail(o, op, 'slow', 'That is a lot of letters. Try again later.');
@@ -104,10 +108,11 @@ export function createMail({ store, online, journal, syncChar, econ, trades, sen
     if (mail.taken || (!mail.gold && !mail.itemsFull.length)) return fail(o, op, 'empty', 'Nothing in it to take.');
     if (busy(o) || online.get(ch.id) !== o) return fail(o, op, 'busy', 'Busy, try again in a moment.');
     const cap = typeof BAG_MAX === 'function' ? BAG_MAX(o) : BAG_MAX;      // W19: a backpack changes it per player
-    if ((ch.bag || []).length + mail.itemsFull.length > cap) return reply(o, op, { ok: false, why: 'bagFull', msg: 'Your bag is full.', need: mail.itemsFull.length, free: Math.max(0, cap - (ch.bag || []).length) });
+    // round 11 (#11): per bag tab when the province says how (Other never fills)
+    if (bagFits ? !bagFits(o, mail.itemsFull) : (ch.bag || []).length + mail.itemsFull.length > cap) return reply(o, op, { ok: false, why: 'bagFull', msg: (roomWords ? roomWords(o, mail.itemsFull, 'take it') : 'Your bag is full.') + ' Everything stays in the letter.', need: mail.itemsFull.length, free: Math.max(0, cap - (ch.bag || []).length) });      // round 11 (#25): it never leaves the post
     o.frozen = true; o.saving = true; o.mailBusy = true;
     syncChar(o);
-    const got = mail.itemsFull.map(i => JSON.parse(JSON.stringify(i)));
+    const got = mail.itemsFull.map(i => fresh(JSON.parse(JSON.stringify(i))));
     const next = JSON.parse(JSON.stringify(ch));
     next.bag = (next.bag || []).concat(got);
     next.gold = (next.gold || 0) + mail.gold;
@@ -140,7 +145,7 @@ export function createMail({ store, online, journal, syncChar, econ, trades, sen
         if (!mail) return fail(o, 'read', 'missing', 'No such letter.');
         if (!mail.read) await store.mailRead(ch.id, mail.id, wallNow());
         const { itemsFull, ...view } = mail;
-        if (o.conn) o.conn.sendJSON({ t: 'mailOpen', mail: { ...view, read: true, items: itemsFull.length ? itemsFull : view.items } });
+        if (o.conn) o.conn.sendJSON({ t: 'mailOpen', mail: { ...view, read: true, items: itemsFull.length ? itemsFull.map(i => fresh(JSON.parse(JSON.stringify(i)))) : view.items } });
         return tellUnread(o);
       }
       case 'send': return sendMail(o, m);

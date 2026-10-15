@@ -1,0 +1,11 @@
+Tool: built-in image_gen
+Reference image: /home/radgh/claude/playground/avatar-3d/chibi4/ref/mage-turnaround.png
+
+Use case: stylized-concept.
+Create exactly ONE image: a character turnaround reference sheet for a 3D game modeller.
+Input image 1 is the art-style and sheet-layout reference. Match its stylised-realistic fantasy MMO rendering closely: believable anatomy, subtly enlarged expressive eyes, softly painted material textures, carefully defined costume construction, restrained smooth shading, flat even studio lighting and plain light grey background. Match its level of stylisation and polish.
+Replace the male mage subject with the SAME female elf warrior shown in exactly TWO views side by side: FRONT view on the left and a TRUE SIDE PROFILE on the right, rotated exactly 90 degrees and facing RIGHT. The side view must be fully lateral, including head, shoulders, torso, hips, legs, and feet; do not make it a three-quarter view. Both views are orthographic, at the same scale, with aligned heads and soles, fully visible from hair to boots, adequate margins, no cropping.
+Character: female elf warrior, approximately 28 years old, long pointed ears, auburn hair gathered into a single braid down her BACK. Mature adult face, believable proportions approximately 6.5–7 heads tall, slightly larger eyes, athletic but natural build.
+Costume in both views: light armour consisting of a fitted leather jerkin, steel pauldrons and steel bracers, short split forest-green tabard over leather leggings, knee-high leather boots and a sword belt. Both hands are empty and relaxed. Show consistent construction and materials between both views.
+Pose: neutral A-pose, arms angled approximately 45 degrees downward from horizontal, hands open naturally, balanced upright stance. The side profile is a rigid 90-degree rotation of this same pose; arms project naturally in the orthographic side view. Neutral expression.
+Style constraints: painted fantasy game character reference matching the supplied mage image, not photorealistic, not chibi, not a doll, no oversized head, no anime look. No action pose, no perspective distortion, no dramatic lighting. No text, no labels, no borders, no watermark. Exactly two views of one character in one image.

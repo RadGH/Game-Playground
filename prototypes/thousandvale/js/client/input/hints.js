@@ -16,8 +16,11 @@ for (const a of ACTIONS) { if (!a.key || a.shares) continue; const t = a.keyText
 BY_TEXT.set('F1', 'help');
 
 export function actionOf(el) {
-  if (el.dataset.action) return ACTION_BY_ID[el.dataset.action] ? el.dataset.action : null;
+  // round 11 (P, live #34 / #57): the default text is kept for a `data-action` cap too — it used to be read only for a
+  // plain one, so once a controller had been used (the sweep runs from then on) every <kbd data-action> on a keyboard was
+  // re-labelled with `undefined` and went blank: "Hold [] to lift", the forge's "[] puts the bar back in the fire"
   if (el.dataset.key0 == null) el.dataset.key0 = el.textContent.trim();
+  if (el.dataset.action) return ACTION_BY_ID[el.dataset.action] ? el.dataset.action : null;
   return BY_TEXT.get(el.dataset.key0) || null;
 }
 /** The text (and, for a pad, the button names) to show for an action right now. */
@@ -29,7 +32,7 @@ export function hintFor(id, dev = device.current, set = device.glyphs) {
 function relabel(el) {
   const id = actionOf(el); if (!id) return;
   const h = hintFor(id);
-  const want = device.current === 'keyboard' && !B.changed(id) ? el.dataset.key0 : h.text;
+  const want = device.current === 'keyboard' && !B.changed(id) ? (el.dataset.key0 || h.text) : h.text;
   if (el.textContent !== want) el.textContent = want;
   el.classList.toggle('pad-glyph', device.current === 'pad' && !!want);
   el.classList.toggle('hint-empty', !want);

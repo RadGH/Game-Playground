@@ -1,8 +1,152 @@
 {
- "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z12_02, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z12_02, added where a kill / collect quest's area held fewer of its monster than the step needs (round 11: max(count + 4, 2 x count) — two players at once; they come back in 1-1.5 minutes). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
  "zone": "z12_02",
  "terrainHash": "0ba48d02",
  "placements": [
+  {
+   "type": "camp",
+   "id": "quest_wolves_at_the_fold_0_0",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 723,
+   "z": 1123,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "wolves_at_the_fold",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_wolves_at_the_fold_0_1",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    1
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 689,
+   "z": 1115,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "wolves_at_the_fold",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_wolves_at_the_fold_0_2",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 776,
+   "z": 1160,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "wolves_at_the_fold",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_wolves_at_the_fold_0_3",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 730,
+   "z": 1133,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "wolves_at_the_fold",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_wolves_at_the_fold_0_4",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    1
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 671,
+   "z": 1112,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "wolves_at_the_fold",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_wolves_at_the_fold_0_5",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 796,
+   "z": 1147,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "wolves_at_the_fold",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
   {
    "type": "camp",
    "id": "quest_tusks_in_the_turnips_0_0",
@@ -13,15 +157,19 @@
     2
    ],
    "count": [
-    2,
-    2
+    3,
+    3
    ],
    "x": 1475,
    "z": 1518,
    "yaw": 0,
    "radius": 6,
    "quest": "tusks_in_the_turnips",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",
@@ -33,15 +181,163 @@
     2
    ],
    "count": [
-    1,
-    1
+    3,
+    3
    ],
-   "x": 1475,
-   "z": 1518,
+   "x": 1462,
+   "z": 1530,
    "yaw": 0,
    "radius": 6,
    "quest": "tusks_in_the_turnips",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_tusks_in_the_turnips_0_2",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1477,
+   "z": 1494,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "tusks_in_the_turnips",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_toll_at_fitockpi_0_0",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    1,
+    1
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 260,
+   "z": 1737,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "toll_at_fitockpi",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_toll_at_fitockpi_0_1",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    1,
+    1
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 344,
+   "z": 1705,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "toll_at_fitockpi",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_toll_at_fitockpi_0_2",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    1,
+    1
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 262,
+   "z": 1713,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "toll_at_fitockpi",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_the_carter_s_crates_0_0",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 735,
+   "z": 1394,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "the_carter_s_crates",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_the_carter_s_crates_0_1",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    1,
+    1
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 667,
+   "z": 1448,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "the_carter_s_crates",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",
@@ -53,15 +349,91 @@
     2
    ],
    "count": [
-    2,
-    2
+    3,
+    3
    ],
    "x": 183,
    "z": 2013,
    "yaw": 0,
    "radius": 6,
    "quest": "frogs_are_not_food",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_frogs_are_not_food_0_1",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 133,
+   "z": 2011,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "frogs_are_not_food",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_frogs_are_not_food_0_2",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 185,
+   "z": 1989,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "frogs_are_not_food",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_frogs_are_not_food_0_3",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 140,
+   "z": 2021,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "frogs_are_not_food",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",
@@ -81,7 +453,131 @@
    "yaw": 0,
    "radius": 2.905,
    "quest": "bones_for_bryn",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_bones_for_bryn_0_1",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 381,
+   "z": 1078,
+   "yaw": 0,
+   "radius": 2.905,
+   "quest": "bones_for_bryn",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_bones_for_bryn_0_2",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 396,
+   "z": 1042,
+   "yaw": 0,
+   "radius": 2.905,
+   "quest": "bones_for_bryn",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_bones_for_bryn_0_3",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 401,
+   "z": 1076,
+   "yaw": 0,
+   "radius": 2.905,
+   "quest": "bones_for_bryn",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_bones_for_bryn_0_4",
+   "monster": "barrow_hound",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 376,
+   "z": 1063,
+   "yaw": 0,
+   "radius": 2.905,
+   "quest": "bones_for_bryn",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_start_letters_south_0_0",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    1
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 763,
+   "z": 1854,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "start_letters_south",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",
@@ -93,20 +589,72 @@
     1
    ],
    "count": [
-    2,
-    2
+    3,
+    3
    ],
    "x": 730,
    "z": 1704,
    "yaw": 0,
    "radius": 8,
    "quest": "start_road_to_orrinsford",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",
-   "id": "quest_class_fighter_1_0",
+   "id": "quest_start_road_to_orrinsford_1_1",
    "monster": "road_brigand",
+   "with": null,
+   "level": [
+    1,
+    1
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 717,
+   "z": 1716,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "start_road_to_orrinsford",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_start_signs_of_the_beast_1_0",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    3
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1436,
+   "z": 1396,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "start_signs_of_the_beast",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_warrior_1_0",
+   "monster": "moor_hound",
    "with": null,
    "level": [
     2,
@@ -116,12 +664,88 @@
     2,
     2
    ],
-   "x": 409,
-   "z": 1238,
+   "x": 422,
+   "z": 1461,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "class_warrior",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_warrior_1_1",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    1
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 352,
+   "z": 1368,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "class_warrior",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_warrior_1_2",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    1
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 263,
+   "z": 1437,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "class_warrior",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_fighter_1_0",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    3
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1313,
+   "z": 1956,
    "yaw": 0,
    "radius": 6,
    "quest": "class_fighter",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",
@@ -136,12 +760,64 @@
     1,
     1
    ],
-   "x": 409,
-   "z": 1238,
+   "x": 1360,
+   "z": 1848,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "class_fighter",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_swashbuckler_1_0",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 654,
+   "z": 1793,
    "yaw": 0,
    "radius": 6,
-   "quest": "class_fighter",
-   "hunt": true
+   "quest": "class_swashbuckler",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_swashbuckler_1_1",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    1,
+    1
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 721,
+   "z": 1784,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "class_swashbuckler",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",
@@ -153,15 +829,212 @@
     1
    ],
    "count": [
-    2,
-    2
+    3,
+    3
    ],
    "x": 1060,
    "z": 1295,
    "yaw": 0,
    "radius": 3.665,
    "quest": "class_dragon_knight",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_dragon_knight_2_1",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    1,
+    1
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1047,
+   "z": 1307,
+   "yaw": 0,
+   "radius": 3.665,
+   "quest": "class_dragon_knight",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_dragon_knight_2_2",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    1,
+    1
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1062,
+   "z": 1271,
+   "yaw": 0,
+   "radius": 3.665,
+   "quest": "class_dragon_knight",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_dragon_knight_2_3",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    1,
+    1
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1067,
+   "z": 1304,
+   "yaw": 0,
+   "radius": 3.665,
+   "quest": "class_dragon_knight",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_tactician_2_0",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
+    1,
+    1
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 714,
+   "z": 857,
+   "yaw": 0,
+   "radius": 2.3649999999999998,
+   "quest": "class_tactician",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_cleric_1_0",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    3,
+    3
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 803,
+   "z": 2010,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "class_cleric",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_cleric_1_1",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    3,
+    3
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 524,
+   "z": 2004,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "class_cleric",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_cleric_1_2",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    3,
+    3
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 805,
+   "z": 1986,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "class_cleric",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_cleric_1_m",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    3,
+    3
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 717,
+   "z": 1958,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "class_cleric",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ],
+   "placedFor": "round11-marker"
   },
   {
    "type": "camp",
@@ -173,15 +1046,115 @@
     2
    ],
    "count": [
-    1,
-    1
+    2,
+    2
    ],
-   "x": 735,
-   "z": 1394,
+   "x": 319,
+   "z": 1161,
    "yaw": 0,
    "radius": 8,
    "quest": "class_priest",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_priest_1_1",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 306,
+   "z": 1173,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "class_priest",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_priest_1_2",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 321,
+   "z": 1137,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "class_priest",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_priest_1_3",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 326,
+   "z": 1171,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "class_priest",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_paladin_0_0",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    3,
+    3
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1313,
+   "z": 1956,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "class_paladin",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",
@@ -193,15 +1166,67 @@
     2
    ],
    "count": [
-    1,
-    1
+    3,
+    3
    ],
    "x": 110,
    "z": 1794,
    "yaw": 0,
    "radius": 4,
    "quest": "class_mage",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_mage_1_1",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 104,
+   "z": 1680,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "class_mage",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_mage_1_2",
+   "monster": "fen_croaker",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 112,
+   "z": 1770,
+   "yaw": 0,
+   "radius": 4,
+   "quest": "class_mage",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",
@@ -213,15 +1238,19 @@
     2
    ],
    "count": [
-    2,
-    2
+    3,
+    3
    ],
    "x": 104,
    "z": 1680,
    "yaw": 0,
    "radius": 6,
    "quest": "class_mage",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",
@@ -233,15 +1262,264 @@
     1
    ],
    "count": [
-    1,
-    1
+    2,
+    2
    ],
    "x": 828,
    "z": 1290,
    "yaw": 0,
    "radius": 1.716,
    "quest": "class_chronomancer",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_chronomancer_2_1",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    1,
+    1
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 815,
+   "z": 1302,
+   "yaw": 0,
+   "radius": 1.716,
+   "quest": "class_chronomancer",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_chronomancer_2_2",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    1,
+    1
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 830,
+   "z": 1266,
+   "yaw": 0,
+   "radius": 1.716,
+   "quest": "class_chronomancer",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_chronomancer_2_3",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    1,
+    1
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 835,
+   "z": 1300,
+   "yaw": 0,
+   "radius": 1.716,
+   "quest": "class_chronomancer",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_chronomancer_2_4",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    1,
+    1
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 810,
+   "z": 1287,
+   "yaw": 0,
+   "radius": 1.716,
+   "quest": "class_chronomancer",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_enchanter_0_0",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 763,
+   "z": 905,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "class_enchanter",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_enchanter_0_m",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 714,
+   "z": 857,
+   "yaw": 0,
+   "radius": 2.3649999999999998,
+   "quest": "class_enchanter",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ],
+   "placedFor": "round11-marker"
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_starcaller_1_0",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1555,
+   "z": 512,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "class_starcaller",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ],
+   "placedFor": "round11-moved"
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_starcaller_1_1",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    3,
+    3
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1486,
+   "z": 477,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "class_starcaller",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ],
+   "placedFor": "round11-moved"
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_starcaller_1_2",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1557,
+   "z": 488,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "class_starcaller",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ],
+   "placedFor": "round11-moved"
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_starcaller_1_3",
+   "monster": "dusk_flitter",
+   "with": null,
+   "level": [
+    3,
+    3
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1493,
+   "z": 487,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "class_starcaller",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ],
+   "placedFor": "round11-moved"
   },
   {
    "type": "camp",
@@ -249,19 +1527,24 @@
    "monster": "bog_slime",
    "with": null,
    "level": [
-    2,
-    2
+    4,
+    4
    ],
    "count": [
-    2,
-    2
+    3,
+    3
    ],
-   "x": 428,
-   "z": 1409,
+   "x": 1555,
+   "z": 512,
    "yaw": 0,
    "radius": 6,
    "quest": "class_witch_hunter",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ],
+   "placedFor": "round11-moved"
   },
   {
    "type": "camp",
@@ -269,19 +1552,146 @@
    "monster": "bog_slime",
    "with": null,
    "level": [
+    3,
+    3
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1486,
+   "z": 477,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "class_witch_hunter",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ],
+   "placedFor": "round11-moved"
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_witch_hunter_2_2",
+   "monster": "bog_slime",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
     2,
     2
+   ],
+   "x": 1557,
+   "z": 488,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "class_witch_hunter",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ],
+   "placedFor": "round11-moved"
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_demon_hunter_1_0",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1982,
+   "z": 846,
+   "yaw": 0,
+   "radius": 5,
+   "quest": "class_demon_hunter",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_monk_1_m",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 717,
+   "z": 1958,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "class_monk",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ],
+   "placedFor": "round11-marker"
+  },
+  {
+   "type": "camp",
+   "id": "quest_tallies_for_the_board_0_0",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    3
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1436,
+   "z": 1396,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "tallies_for_the_board",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_tallies_for_the_board_0_1",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    3,
+    3
    ],
    "count": [
     1,
     1
    ],
-   "x": 428,
-   "z": 1409,
+   "x": 1353,
+   "z": 1375,
    "yaw": 0,
-   "radius": 6,
-   "quest": "class_witch_hunter",
-   "hunt": true
+   "radius": 8,
+   "quest": "tallies_for_the_board",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",
@@ -301,7 +1711,11 @@
    "yaw": 0,
    "radius": 6,
    "quest": "the_fairy_ring",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",
@@ -313,15 +1727,19 @@
     2
    ],
    "count": [
-    2,
-    2
+    3,
+    3
    ],
    "x": 1112,
    "z": 1887,
    "yaw": 0,
    "radius": 8,
    "quest": "stones_for_the_mother",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",
@@ -333,15 +1751,43 @@
     2
    ],
    "count": [
-    1,
-    1
+    3,
+    3
    ],
-   "x": 1112,
-   "z": 1887,
+   "x": 1099,
+   "z": 1899,
    "yaw": 0,
    "radius": 8,
    "quest": "stones_for_the_mother",
-   "hunt": true
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_stones_for_the_mother_0_2",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1114,
+   "z": 1863,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "stones_for_the_mother",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
   },
   {
    "type": "camp",

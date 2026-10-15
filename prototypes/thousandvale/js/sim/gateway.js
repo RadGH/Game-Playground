@@ -687,6 +687,8 @@ export function createGateway(opts) {
   function sweepMail() {
     if (!store.mailExpire) return;
     store.mailExpire(wallNow()).then(list => { for (const x of list) mailNote(x.to); }, err => log('mail sweep failed', err && err.message));
+    // round 11 (Market, owner #25): a listing 30 days old goes back to its seller by mail (js/sim/market-rules.js MARKET.lastsMs)
+    if (store.marketExpire) store.marketExpire(wallNow()).then(list => { counters.marketExpired = (counters.marketExpired || 0) + list.length; for (const x of list) mailNote(x.to); }, err => log('market sweep failed', err && err.message));
   }
 
   // ---- the event director (js/sim/director.js) ----

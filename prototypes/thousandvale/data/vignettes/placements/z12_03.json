@@ -2363,7 +2363,7 @@
    "type": "folk",
    "id": "folk_saint_orrins_rise_2",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -5042,7 +5042,7 @@
    "type": "folk",
    "id": "folk_saint_orrins_rise_10",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"
@@ -5671,7 +5671,7 @@
    "type": "folk",
    "id": "folk_saint_orrins_rise_12",
    "role": "herbalist",
-   "name": "Herbalist",
+   "name": "Herb Gatherer",
    "work": "gather",
    "chatter": [
     "role.herbalist"

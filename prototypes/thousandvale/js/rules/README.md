@@ -62,7 +62,7 @@ room.run(() => room.combat.attack(ch, { yaw }));      // ALWAYS inside room.run
 
 - **Threat**: damage ×`threatMult`. Healing adds 50%, split across the monsters already fighting whoever was healed. A taunt forces the target and lifts the taunter to 110% of the top. A monster only switches targets when someone passes 110% of its current target's threat (melee) or 130% (ranged).
 - **Allies** = the caster's own followers (anywhere in the room, as in Farhold) plus party members (`partyId`) and their pets **within 30 m** (`ALLY_RANGE`). See "Ally targeting" below.
-- **Leash**: 40 m from home, or 8 s with no damage dealt or taken while out of reach of its target (walking a path that reaches it, and getting closer along it, counts as progress). Either one sends the monster home to heal, along a path round walls; one that has not made it home in 12 s is put back. It doesn't think at all when nothing friendly is within 200 m.
+- **Leash** (owner #5, 2026-10-15: x3 / x2.5): 120 m from home, or 20 s with no damage dealt or taken while out of reach of its target (walking a path that reaches it, and getting closer along it, counts as progress). Either one sends the monster home to heal, along a path round walls; one that has not made it home in 12 s is put back. It doesn't think at all when nothing friendly is within 200 m.
 - **Pathfinding** (`pathfind.js`): on a baked zone monsters go round walls, buildings, trees, cliffs and deep water. Budget: 4,000 expansions per room per tick (≈2 ms worst case), measured 0.2 ms mean for 100 hounds in a maze (tests/C/pathfind).
 - **Province scale (A's M2)**: monsters with no player within 200 m sleep (`e.asleep`) and are skipped by the push-apart pass and by `syncOut` after one last sync; the nearest player comes from a 200 m bucket grid built once a tick; "monsters near this point" (a player's fighting flag, a follower looking for prey) reads a 24 m monster index rebuilt once a tick (`field.eachMonsterNear`). Strikes still walk the list in order, because their dice depend on it. 1,300 monsters + 70 players: rules step 1.6 ms mean (tests/C/province-rules); A's bots100 spread phase p99 7.0 ms.
 - **Perf pass (2026-10-05, A's 100-bot gate red after E's denser content)**: profiled (`node --cpu-prof` on tests/A/bots100) — the worst ticks were not the monster brain but (1) a level-up's build view writing ~70 talent cards through `toLocaleString` (up to 38 ms in one tick: `talents.js nodeText` is now cached per row/node), and (2) a monster's first path into fresh ground working out ~3,000 cells × 5 terrain samples (15 ms in one tick: a first-time cell now costs budget like an expansion — `PATH.EVAL_COST` — so the search spreads over ticks, and the slope/water test is taken once per cell, the cheap obstacle test still at five points). Plus monster LOD in rooms (`field.lod`, never the parity fixtures): a wanderer with nobody within 70 m, nothing on it and no awake band thinks every 4th tick on its own phase with the time it skipped (1,400 idle awake monsters: 1.84 -> 1.10 ms a tick). Spread phase: p99 22 -> 11.4-11.7 ms, worst 37.5 -> 18-21 ms; rules step per tick p99 8.1 -> 5.4 ms, max 42 -> 6.7 ms.
@@ -293,3 +293,23 @@ Contracts and every number: docs/requests.md "Round 10 — C status". Tests: tes
 | Y32 Starcaller | `classes-tv.json`, `tv-skills.js` installTvClasses, `cast-skills.js` `tv.sky` (`fx skyfall`) | A class that exists only here; built and audited by the code every other class goes through. |
 
 Farhold findings 8 and 9 (the melee double hit; a ground skill's `follow: 'self'` ignored) are written up in docs/requests.md.
+
+## Owner feedback 11 (2026-10-15) — what changed in the rules
+
+Contracts and every number: docs/requests.md "Round 11 — C status". Tests: tests/C/playtest11.test.mjs.
+
+| Item | Where | What |
+|---|---|---|
+| Z2 no attributes (#2) | `attributes.js` (new), `perk-forest.js`, `estimate.js`, `item-text.js`, `data/rules/perks.json` | `rpg.derive` wrapped: attributes zeroed, the base 6 of each folded into health / mana / crit / dodge, the weapon's family share (`combat.json families`) in their place; the item table, uniques, sets and perk nodes carry `heavyPct` / `lightPct` / `magicPct`; owned items convert in `engine.finishItem`. A perk entry may be `[key, value, { more grants }]`. |
+| Z60 melee guard (#61) | `attributes.js meleeGuardOf` | A melee weapon in the main hand adds to `resistAll` (Farhold's own reader in `rpg.strike`). |
+| Z60 rares (#61) | `monster-ai.js retuneRank`, `cast.js onKill`, `data/rules/affixes.json ranks` | Rank health / damage under caps (bosses untouched); a rare / champion is sure to pay one item of `reward` rarity. |
+| Z36 (#37) | `combat-cfg.js basicPace` (in `hasteK`, `baseEvery`), `character.js` bar wrapper `empowerPlan` + card share | Every basic attack's clock x `speed.basicPace`; every skill plan's `mult` / `damage` x `skills.damage` (sub-strikes follow through `scaleOf`; a damage-sized barrier keeps its size). |
+| Z50 (#51) | `encounter.js` (validator, `begin`), `data/encounters/*.json` | No `newBar` phases; an `{ ability }` action starts like a timed ability (call-out, cast bar). |
+| Z1 (#1) | `cast-skills.js gateResource`, `wording.js cardText`, `classes-tv.json` | `resource.fromLevel` holds a builder's gain back until that level. |
+| Z39 (#40) | `cast.js resolveWand`, `caster-forms.js restyleCaster` / `installNamedCasters`, `caster-forms.json named` | A fan throws every bolt; a named reward wand is always its element and style. |
+| Z17 (#17) | `engine.js forestVars`, `perk-forest.js` (placeholders) | A perk card may name `{companionMain}` etc., filled from the engine's data. |
+| Z35 (#36) | `estimate.js FIND_TIPS` | The find rows say what they count for. |
+| Z5 (#5) | `monster-ai.js AI` | Leash 120 m / 20 s. |
+| sheet dummy | `estimate.js stepArena` | The training dummy faces you (a dagger's back-stab reads facing). |
+
+Farhold findings 10 and 11 (a fan wand fires one bolt; the dagger back-stab counts from the front) are written up in docs/requests.md.

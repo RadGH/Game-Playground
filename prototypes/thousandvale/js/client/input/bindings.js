@@ -80,13 +80,13 @@ export const ACTIONS = [
   // ---- world
   { id: 'interact', group: 'World', label: 'Use, talk, open, loot a body — in a loot window: take the selected item', key: 'KeyE', pad: pad('A', false, 'when a prompt shows'), ctx: 'prompt', touch: 'Tap the prompt' },
   { id: 'camp', group: 'World', label: 'Make camp (wilds)', key: 'KeyC', pad: pad('RB', true), touch: 'Quick wheel: Camp' },
-  { id: 'fish', group: 'World', label: 'Cast a line / reel in', key: 'KeyX', pad: pad('A', true), touch: 'Fish button (lit when water is in reach), or the quick wheel' },
+  { id: 'fish', group: 'World', label: 'Cast a line / reel in (at a fishing spot)', key: 'KeyX', pad: pad('A', true), touch: 'The “Fish here” prompt at a fishing spot, or the quick wheel' },
   { id: 'hook', group: 'World', label: 'Hook a bite; hold to reel during the tug', key: 'Space', shares: 'jump', pad: pad('A', false, 'while fishing'), ctx: 'fishing', touch: 'The Hook / Reel button (replaces Attack)' },
   // W9 (P-client): the profession mini-games (js/client/ui/prof-minigame.js). ctx 'prof' = only while a mini-game is on screen
   { id: 'profWork', group: 'World', label: 'Mini-game: work (strike, pick, stop — hold to lift the knife)', key: 'Space', shares: 'jump', pad: pad('A', false, 'in a mini-game'), ctx: 'prof', touch: 'Tap the mini-game panel' },
   { id: 'profLeft', group: 'World', label: 'Mini-game: left (chop left, move left, back in the fire)', key: 'KeyA', shares: 'moveL', pad: pad('X', false, 'in a mini-game, or D-pad left'), ctx: 'prof', touch: 'Tap the left half of the panel' },
   { id: 'profRight', group: 'World', label: 'Mini-game: right (chop right, move right, back in the fire)', key: 'KeyD', shares: 'moveR', pad: pad('B', false, 'in a mini-game, or D-pad right'), ctx: 'prof', touch: 'Tap the right half of the panel' },
-  { id: 'mount', group: 'World', label: 'Ride your mount / get down', key: 'KeyH', pad: pad('X', true), touch: 'Mount button, or the quick wheel' },
+  { id: 'mount', group: 'World', label: 'Ride your mount / get down', key: 'KeyH', pad: pad('X', true, 'hold LT, press X — or the Mount button on the action bar'), touch: 'Mount button, or the quick wheel' },
   // ---- windows
   { id: 'map', group: 'Windows', label: 'Map', key: 'KeyM', panel: 'map', pad: pad('BACK'), touch: 'Tap the minimap' },
   { id: 'journal', group: 'Windows', label: 'Journal (quests)', key: 'KeyJ', panel: 'journal', radial: true, touch: 'Quick wheel, or tap the quest tracker' },

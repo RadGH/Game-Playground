@@ -256,9 +256,9 @@ export function createFishing(numbers = {}, content = null) {
     if (!c) return 0;
     const X = N.xp || {};
     const key = c.kind === 'fish' ? (c.rarity || 'common') : c.kind;
-    const base = num(X[key], 0);
-    if (c.kind !== 'fish' && c.kind !== 'legend') return Math.round(base);
-    return Math.round(base + num(X.perFishSkill, 0) * num(c.skill, 0) + (first ? base * num(X.firstMult, 0.6) : 0) + (best && !first ? num(X.best, 3) : 0));
+    const base = num(X[key], 0), mult = num(X.mult, 1);      // round 11 (P, live #10): `mult` — every profession's experience x3
+    if (c.kind !== 'fish' && c.kind !== 'legend') return Math.round(base * mult);
+    return Math.round((base + num(X.perFishSkill, 0) * num(c.skill, 0) + (first ? base * num(X.firstMult, 0.6) : 0) + (best && !first ? num(X.best, 3) : 0)) * mult);
   }
 
   // ---------------------------------------------------------------- items and cooking

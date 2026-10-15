@@ -43,6 +43,22 @@ export function rideAt(p, yaw, t, R = RIDE) {
   const d = t < tUp ? 0.5 * R.accel * t * t : 0.5 * R.accel * tUp * tUp + R.speed * (t - tUp);
   return { x: p.x + Math.sin(yaw) * d, z: p.z + Math.cos(yaw) * d, d };
 }
+/**
+ * [World, round 11 #45] Pure: the point `d` metres along a polyline [[x, z], …] (past its end: on along the last leg), and
+ * the heading of the leg it is on — the ride follows A's `cartRide.path` out along the road instead of a straight line
+ * through the town wall.
+ */
+export function alongPath(path, d) {
+  if (!Array.isArray(path) || path.length < 2) return null;
+  let left = Math.max(0, d);
+  for (let i = 1; i < path.length; i++) {
+    const a = path[i - 1], b = path[i], len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    if (len < 1e-6) continue;
+    if (left <= len || i === path.length - 1) { const t = left / len; return { x: a[0] + (b[0] - a[0]) * t, z: a[1] + (b[1] - a[1]) * t, yaw: Math.atan2(b[0] - a[0], b[1] - a[1]) }; }
+    left -= len;
+  }
+  return null;
+}
 /** Pure: the heading (our yaw: 0 = +z) from a to b, or `fallback` when they are the same spot. */
 export const headingTo = (a, b, fallback = 0) => (b && Number.isFinite(b.x) && Math.hypot(b.x - a.x, b.z - a.z) > 0.5 ? Math.atan2(b.x - a.x, b.z - a.z) : fallback);
 
@@ -129,7 +145,10 @@ export function createCarts(scene, { groundY = () => 0, compile = null, actors =
       if (!c) c = await ensure('ride:' + stats.rides, { x: self.x + 1.6, z: self.z, yaw: headingTo(self, msg.to, 0), mode: 'parked' });
       if (!c?.v) return false;
       const total = Math.max(1200, Number.isFinite(msg.ms) ? msg.ms : RIDE.showMs);
-      ride = { cart: c, t: 0, from: { x: c.x, z: c.z }, yaw0: c.yaw, yaw: headingTo(c, msg.to, c.yaw), showMs: total, totalMs: total, veiled: false, cover, name: msg.to?.name || msg.toName || 'the next town', was: c.mode };
+      // [World, round 11 #45] A's `path` (the road out): start where this cart stands, skip points right under it
+      const path = Array.isArray(msg.path) && msg.path.length >= 2 ? [[c.x, c.z], ...msg.path.filter(p => Array.isArray(p) && Math.hypot(p[0] - c.x, p[1] - c.z) > 3)] : null;
+      const lead = path && path.length >= 2 ? alongPath(path, 4) : null;
+      ride = { cart: c, t: 0, from: { x: c.x, z: c.z }, yaw0: c.yaw, yaw: lead ? lead.yaw : headingTo(c, msg.to, c.yaw), path: path && path.length >= 2 ? path : null, showMs: total, totalMs: total, veiled: false, cover, name: msg.to?.name || msg.toName || 'the next town', was: c.mode };
       c.mode = 'ride'; c.v.setAnim('roll');
       return true;
     },
@@ -176,9 +195,14 @@ export function createCarts(scene, { groundY = () => 0, compile = null, actors =
         ride.t += dt * 1000;
         const c = ride.cart, t = ride.t / 1000;
         // swing round to the road first (half a second), then pull away
-        let dy = ride.yaw - c.yaw; dy = Math.atan2(Math.sin(dy), Math.cos(dy)); c.yaw += dy * (1 - Math.exp(-dt * 2.5));
-        const p = rideAt(ride.from, c.yaw, Math.max(0, t - 0.35));
-        c.x = p.x; c.z = p.z; place(c);
+        if (ride.path) {       // [World #45] along the road: the distance the same easing covers, laid on the path
+          const d = rideAt(ride.from, 0, Math.max(0, t - 0.35)).d, q = alongPath(ride.path, d), ahead = alongPath(ride.path, d + 3);
+          if (q) { const want = ahead ? ahead.yaw : q.yaw; let dy = want - c.yaw; dy = Math.atan2(Math.sin(dy), Math.cos(dy)); c.yaw += dy * (1 - Math.exp(-dt * 4)); c.x = q.x; c.z = q.z; place(c); }
+        } else {
+          let dy = ride.yaw - c.yaw; dy = Math.atan2(Math.sin(dy), Math.cos(dy)); c.yaw += dy * (1 - Math.exp(-dt * 2.5));
+          const p = rideAt(ride.from, c.yaw, Math.max(0, t - 0.35));
+          c.x = p.x; c.z = p.z; place(c);
+        }
         if (!ride.veiled && ride.t >= Math.max(600, ride.showMs - RIDE.veilLeadMs)) { ride.veiled = true; try { ride.cover?.(`Riding to ${ride.name}…`); } catch {} }
         if (ride.t > ride.totalMs + 6000) this.endRide();        // the arrival never came: do not leave you sat on a cart
       }

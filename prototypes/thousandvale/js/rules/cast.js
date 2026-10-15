@@ -235,7 +235,7 @@ export function createCombat(room) {
             const tg = target && target.dying == null && !target.dead && !target.removed ? target : null;
             if (tg) ch.yaw = Math.atan2(tg.x - ch.x, tg.z - ch.z);
             field.emit({ t: 'swing', id: ch.id, hand, step: 0, clip: 'shoot', wind: 0, every: after, range: plan.range, ...tag });
-            resolveArrow(ch, weapon, power, hstep);
+            resolveArrow(ch, weapon, power, hstep, tg);
           }, ch.id);
           return { ok: true, hand, kind, drawing: true, wind: wait, every: wait + after, power };
         }
@@ -243,7 +243,7 @@ export function createCombat(room) {
         clock.readySince = clock[readyKey];
         clock.lastAt = t; clock.lastEvery = after;
         field.emit({ t: 'swing', id: ch.id, hand, step: 0, clip: 'shoot', wind: 0, every: after, range: plan.range, ...tag });
-        resolveArrow(ch, weapon, d.power, hstep);
+        resolveArrow(ch, weapon, d.power, hstep, liveTarget(target));
         return { ok: true, hand, kind, power: d.power, every: after };
       }
       // the staff's channel drinks mana while held: hold no longer than you can pay for
@@ -282,14 +282,20 @@ export function createCombat(room) {
     clock.lastAt = t; clock.lastEvery = every;
     if (hand === 'off') clock.offStep++; else clock.mainStep++;
 
-    const fire = kind === 'melee' ? () => resolveSwing(ch, hand, step, weapon)
-      : kind === 'bolt' ? () => resolveWand(ch, weapon, step, { hand, target })
-        : () => resolveArrow(ch, weapon, plan?.power ?? 1, step);
+    // owner 2026-10-15: the blow lands on the CHOSEN target. The room copies your movement facing onto you every tick, so
+    // after a wind-up spent running the other way the strike went where you were running (into whatever was there).
+    const face = () => { const tg = liveTarget(target); if (tg && Math.hypot(tg.x - ch.x, tg.z - ch.z) > 0.05) ch.yaw = Math.atan2(tg.x - ch.x, tg.z - ch.z); return tg; };
+    const fire = kind === 'melee' ? () => { face(); resolveSwing(ch, hand, step, weapon); }
+      : kind === 'bolt' ? () => { face(); resolveWand(ch, weapon, step, { hand, target }); }
+        : () => resolveArrow(ch, weapon, plan?.power ?? 1, step, face());
     if (wind <= 0) fire(); else pending.push({ at: t + wind, fn: fire, who: ch.id });
     const shapeNow = kind === 'melee' ? strikeAt(weapon, step) : null;
     field.emit({ t: 'swing', id: ch.id, hand, step, clip: stepRow?.clip || 'attack', wind, every, ...tag, ...(shapeNow ? { reach: shapeNow.reach, arc: shapeNow.arc, strike: shapeNow.key || undefined } : {}) });
     return { ok: true, hand, kind, step, wind, every };
   };
+
+  /** The chosen target while it can still be hit (null when it died, despawned or there was none). */
+  const liveTarget = t => (t && t.dying == null && !t.dead && !t.removed ? t : null);
 
   /** The facing as Farhold's `aim()`, flat. */
   const aimOfCh = ch => ({ x: ch.x, y: (ch.y || 0) + 1.6, z: ch.z, dx: Math.sin(ch.yaw), dy: 0, dz: Math.cos(ch.yaw) });
@@ -304,7 +310,7 @@ export function createCombat(room) {
    * where it was aimed — on the first body along the shot, or at full range — after its flight,
    * and strikes everything within the arrow splash at the draw's power.
    */
-  function resolveArrow(ch, weapon, power, step = 0) {
+  function resolveArrow(ch, weapon, power, step = 0, chosen = null) {
     if (runtimeFor(combat).formBasic(ch, 'main')) return;
     const mods = rpg.attackMods(ch, 'arrow', { weapon, hand: 'main' });
     // swingWith posts the weapon's strike shape for every kind of attack; a melee skill borrows it
@@ -330,7 +336,11 @@ export function createCombat(room) {
       const yaw = Math.atan2(a.dx, a.dz) + k * spread;
       const dx = Math.sin(yaw), dz = Math.cos(yaw);
       const clearTo = field.sight ? field.sight.reach(ch.x, ch.z, dx, dz, range) : range;      // Y10: an arrow stops at a dungeon wall
-      const target = scanLine(ch.x, ch.z, dx, dz, clearTo, 1.1 + homing * 2.6);
+      // owner 2026-10-15: with a target chosen, the arrow is loosed AT it (a multi-shot's side arrows still fly free) —
+      // the line scan took the first body near the line, so the adds round a big target soaked the shots
+      const toChosen = chosen && k === 0 ? Math.hypot(chosen.x - ch.x, chosen.z - ch.z) : Infinity;
+      const target = toChosen <= clearTo + (chosen?.bodyR || 0.5) ? { enemy: chosen, distance: toChosen } : scanLine(ch.x, ch.z, dx, dz, clearTo, 1.1 + homing * 2.6);
+      const single = !!(chosen && target && target.enemy === chosen);
       const dist = target ? target.distance : clearTo;
       const at = { x: ch.x + dx * dist, z: ch.z + dz * dist };
       // owner feedback 8 (W14): a slower arrow that is seen, and that homes on what it was loosed at
@@ -353,7 +363,7 @@ export function createCombat(room) {
           at.x = ch.x + ex / len * d; at.z = ch.z + ez / len * d;
           field.emit({ t: 'fx', kind: 'blocked', id: ch.id, x: at.x, z: at.z, by: 'wall' });
         }
-        const hits = field.strikeArea(at.x, at.z, balance.player?.arrowSplash ?? 2.6, ch, { element, applyStatus: hookFor(ch), power, kind: 'arrow' });   // main.js onArrowLand: the draw's power and nothing else
+        const hits = field.strikeArea(at.x, at.z, balance.player?.arrowSplash ?? 2.6, ch, { element, applyStatus: hookFor(ch), power, kind: 'arrow', ...(single ? { only: chosen } : {}) });   // main.js onArrowLand: the draw's power and nothing else
         for (const { enemy, result } of hits) brand(enemy, result);
         runtimeFor(combat).resolveAttack(ch, mods, hits, { x: ch.x, z: ch.z, at: { x: at.x, z: at.z }, element });
       }, ch.id);

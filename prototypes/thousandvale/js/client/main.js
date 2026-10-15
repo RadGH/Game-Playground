@@ -1235,7 +1235,10 @@ function frame(now) {
     if (CROWD.list.length) crowdTick(dt);
     const renderTime = S.net ? S.net.clock.serverNow() - INTERP_MS : 0;
     if (mouseNdc) { const h = actors.pickAt(mouseNdc, { exclude: S.selfId }); S.hover = h ? h.id : null; $('view').style.cursor = h ? (h.hostile && !h.dead ? 'crosshair' : 'pointer') : 'default'; }
-    actors.update(fx.stopped ? dt * 0.1 : dt, renderTime, { selfPos: drawn, selfYaw: drawn.riding ? drawn.yaw : S.lastInput?.yaw ?? 0, selfMoving: S.movingSpeed, selfSwim: !!S.predictor.pos.swim, targetId: S.target, hoverId: S.hover, sample: sampleEnt, speed: speedOf });
+    // owner 2026-10-15: while you attack your target your chest turns to it, whichever way you run (actors.js twist)
+    const aimT = S.target != null && !drawn.riding ? actors.get(S.target) : null;
+    const selfAim = aimT && aimT.hostile && !aimT.dead && (controls.auto != null || now - S.swing.last < 1500) ? Math.atan2(aimT.pos.x - drawn.x, aimT.pos.z - drawn.z) : null;
+    actors.update(fx.stopped ? dt * 0.1 : dt, renderTime, { selfPos: drawn, selfYaw: drawn.riding ? drawn.yaw : S.lastInput?.yaw ?? 0, selfMoving: S.movingSpeed, selfSwim: !!S.predictor.pos.swim, selfAim, targetId: S.target, hoverId: S.hover, sample: sampleEnt, speed: speedOf });
     const me = actors.get(S.selfId);
     controls.updateCamera(drawn, dt, me ? Math.min(1.9, me.height * 0.8) : 1.5);
     fx.applyShake(camera, elapsed);

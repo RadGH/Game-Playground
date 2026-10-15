@@ -474,6 +474,8 @@ export async function createChibi2Character(avatar, opts = {}) {
   }
   install(avatar);
   let rate = 1;                     // clip playback rate; see `setRate`
+  // `setTwist`: the upper body turned on the hips (yaw) and leaned (side, fwd), radians, applied on top of the clip
+  const twist = { yaw: 0, side: 0, fwd: 0, on: false, q: new THREE.Quaternion(), inv: new THREE.Quaternion(), e: new THREE.Euler(0, 0, 0, 'YXZ') };
 
   return {
     group,
@@ -496,10 +498,25 @@ export async function createChibi2Character(avatar, opts = {}) {
      * a step should land.
      */
     setRate(k) { rate = Math.max(0.15, Math.min(3.5, Number(k) || 1)); },
+    /**
+     * Turn the upper body on the hips by `yaw` radians (positive = toward the character's left, as `rotation.y`) and
+     * lean it `side` (about the forward axis) and `fwd` (about the side axis), on top of whatever clip plays. The legs
+     * keep the body's own facing, so a character can run one way and shoot another. Opt-in: 0, 0, 0 (the default)
+     * changes nothing. Applied in `update`.
+     */
+    setTwist(yaw = 0, side = 0, fwd = 0) { twist.yaw = Number(yaw) || 0; twist.side = Number(side) || 0; twist.fwd = Number(fwd) || 0; },
+    get twist() { return { yaw: twist.yaw, side: twist.side, fwd: twist.fwd }; },
     get rate() { return rate; },
     update(dt) {
       if (disposed) return;
-      const d = Math.min(0.1, Math.max(0, dt)); elapsed += d; asset.mixer.update(d * rate);
+      const d = Math.min(0.1, Math.max(0, dt)); elapsed += d;
+      // the twist is taken off before the mixer runs and put back after, so a clip that does not key the chest is not
+      // twisted again every frame and a clip that does is twisted exactly once
+      const chest = asset.rig.byName.chest;
+      if (twist.on) chest.quaternion.multiply(twist.inv);
+      asset.mixer.update(d * rate);
+      twist.on = !!(chest && (twist.yaw || twist.side || twist.fwd));
+      if (twist.on) { twist.q.setFromEuler(twist.e.set(twist.fwd, twist.yaw, twist.side)); twist.inv.copy(twist.q).invert(); chest.quaternion.multiply(twist.q); }
       // THE EYES GLANCE instead of blinking. A blink squashed the eye to a line, which on a face this
       // simple read as eyes clamped shut every few seconds; now the iris drifts to a new spot every
       // couple of seconds and settles there, which is what makes a face look alive.

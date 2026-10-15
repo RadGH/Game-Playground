@@ -1,0 +1,235 @@
+{
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z13_10, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "zone": "z13_10",
+ "terrainHash": "3fd22ea0",
+ "placements": [
+  {
+   "type": "camp",
+   "id": "quest_bs_fresh_off_the_saltwren_1_0",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    10,
+    10
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1073,
+   "z": 647,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "bs_fresh_off_the_saltwren",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_bs_crawlers_in_the_nets_0_0",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    11
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 902,
+   "z": 851,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "bs_crawlers_in_the_nets",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z13_10_1",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    10,
+    10
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1073,
+   "z": 647,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "giant"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "npc",
+   "id": "angler_port_vharl",
+   "name": "Nessk Thallu",
+   "role": "angler",
+   "at": "Port Vharl",
+   "x": 1484,
+   "z": 848,
+   "yaw": 1.57,
+   "angler": true,
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "npc",
+   "id": "carter_port_vharl",
+   "name": "Rhaska Ormakku",
+   "role": "carter",
+   "at": "Port Vharl",
+   "x": 1126,
+   "z": 840,
+   "yaw": -1.433,
+   "cart": "cart_port_vharl",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_port_vharl",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Port Vharl",
+   "carter": "carter_port_vharl",
+   "x": 1128,
+   "z": 840,
+   "yaw": 3.142,
+   "radius": 2.2
+  },
+  {
+   "type": "guard",
+   "id": "guard_port_vharl_0",
+   "name": "Port Vharl Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Port Vharl",
+   "post": "gate",
+   "gate": "port_vharl_gate_1",
+   "x": 1126,
+   "z": 856,
+   "yaw": -3.008,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_port_vharl_1",
+   "name": "Port Vharl Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Port Vharl",
+   "post": "gate",
+   "gate": "port_vharl_gate_1",
+   "x": 1116,
+   "z": 858,
+   "yaw": -3.008,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_port_vharl_2",
+   "name": "Port Vharl Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Port Vharl",
+   "post": "gate",
+   "gate": "port_vharl_gate_0",
+   "x": 1104,
+   "z": 966,
+   "yaw": -0.549,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_port_vharl_3",
+   "name": "Port Vharl Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Port Vharl",
+   "post": "gate",
+   "gate": "port_vharl_gate_0",
+   "x": 1112,
+   "z": 970,
+   "yaw": -0.549,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_port_vharl_4",
+   "name": "Sergeant Tukkari",
+   "role": "guard",
+   "rank": "sergeant",
+   "tier": "town",
+   "town": "Port Vharl",
+   "post": "square",
+   "x": 1140,
+   "z": 906,
+   "yaw": -0.039,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_port_vharl_5",
+   "name": "Port Vharl Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Port Vharl",
+   "post": "square",
+   "x": 1134,
+   "z": 916,
+   "yaw": 1.983,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_port_vharl_6",
+   "name": "Port Vharl Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "town",
+   "town": "Port Vharl",
+   "post": "square",
+   "x": 1146,
+   "z": 918,
+   "yaw": -2.192,
+   "titled": false
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_port_vharl_0",
+   "name": "Training Dummy",
+   "town": "Port Vharl",
+   "x": 1149.2,
+   "z": 923,
+   "yaw": -2.357
+  },
+  {
+   "type": "dummy",
+   "id": "dummy_port_vharl_1",
+   "name": "Training Dummy",
+   "town": "Port Vharl",
+   "x": 1150.8,
+   "z": 921,
+   "yaw": -2.165
+  }
+ ]
+}

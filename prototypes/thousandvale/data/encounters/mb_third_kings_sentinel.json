@@ -1,0 +1,175 @@
+{
+  "id": "mb_third_kings_sentinel",
+  "name": "Sentinel of the Third King",
+  "tier": "miniboss",
+  "body": "obsidian_warden",
+  "place": "dungeon glass_tomb (Tomb of the Glass Kings): mini-boss",
+  "_doc": "The obsidian guard at the third king's grave. P1 \"On Guard\": a halberd sweep, a spear thrust line, and the King's Glare — sunlight focused through the tomb roof that only the three glass grave-markers block (hide behind one; it cracks). P2 at 50% \"Breaking the Markers\": it smashes its way through the markers (each slam breaks the ones it hits), so the hiding places run out — finish it fast.",
+  "party": "Solo: use the markers one at a time. 2-3: everyone behind the same marker cracks it fast — share them out. 5: two to a marker.",
+  "hpMult": 2.1,
+  "arena": {
+    "radius": 12,
+    "objects": [
+      {
+        "id": "marker_a",
+        "type": "pillar",
+        "name": "Glass grave-marker",
+        "x": -5,
+        "z": -4,
+        "r": 1.1,
+        "hp": 2
+      },
+      {
+        "id": "marker_b",
+        "type": "pillar",
+        "name": "Glass grave-marker",
+        "x": 5,
+        "z": -4,
+        "r": 1.1,
+        "hp": 2
+      },
+      {
+        "id": "marker_c",
+        "type": "pillar",
+        "name": "Glass grave-marker",
+        "x": 0,
+        "z": 5,
+        "r": 1.1,
+        "hp": 2
+      }
+    ]
+  },
+  "say": {
+    "pull": [
+      "\"The third king sleeps. You will not wake him.\"",
+      "The Sentinel lowers its halberd. Sand pours from the joints."
+    ],
+    "death": "The Sentinel kneels at the grave it kept, and stays there.",
+    "reset": "The Sentinel takes up its post by the third king again."
+  },
+  "enrage": {
+    "seconds": 270,
+    "damage": 2.5,
+    "say": "The Sentinel glows with stored sunlight!"
+  },
+  "abilities": {
+    "sweep": {
+      "id": "sweep",
+      "name": "Halberd Sweep",
+      "every": [
+        5,
+        7
+      ],
+      "range": 6,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 6,
+          "arc": 1.7,
+          "wind": 1.1,
+          "damage": 1.6
+        }
+      ]
+    },
+    "thrust": {
+      "id": "thrust",
+      "name": "Spear Thrust",
+      "every": [
+        9,
+        11
+      ],
+      "first": 3,
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "target",
+          "len": 11,
+          "w": 2,
+          "wind": 1.1,
+          "damage": 1.6,
+          "status": "bleed"
+        }
+      ]
+    },
+    "glare": {
+      "id": "glare",
+      "name": "King's Glare",
+      "every": [
+        15,
+        18
+      ],
+      "first": 6,
+      "cast": 1.2,
+      "say": "Light floods down through the roof — get behind a grave-marker!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 15,
+          "wind": 2,
+          "damage": 2.4,
+          "element": "fire",
+          "los": true,
+          "status": "seared"
+        }
+      ]
+    },
+    "marker_slam": {
+      "id": "marker_slam",
+      "name": "Marker Slam",
+      "every": [
+        12,
+        15
+      ],
+      "first": 3,
+      "cast": 0.6,
+      "say": "It slams the ground — the markers crack!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "target",
+          "r": 4.5,
+          "wind": 1.4,
+          "damage": 1.7,
+          "breaks": 1,
+          "knock": 2
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "On Guard",
+      "abilities": [
+        "sweep",
+        "thrust",
+        "glare"
+      ]
+    },
+    {
+      "name": "Breaking the Markers",
+      "at": 0.5,
+      "say": "\"No hiding from the king's light.\"",
+      "abilities": [
+        "sweep",
+        "marker_slam",
+        "glare",
+        "thrust"
+      ]
+    }
+  ],
+  "triggers": [
+    {
+      "when": {
+        "broken": 3
+      },
+      "do": [
+        {
+          "say": "The last marker shatters. Nothing stands between you and the light.",
+          "style": "warn"
+        }
+      ]
+    }
+  ]
+}

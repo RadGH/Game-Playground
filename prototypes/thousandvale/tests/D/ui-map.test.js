@@ -28,10 +28,13 @@ const M = realModel();
 
 test('model: the whole world, every playable zone named with a level band', () => {
   assert.ok(M.worldW > 30000 && M.worldH > 20000, 'world size in metres');
-  assert.equal(M.provinces.length, 12);
-  assert.equal(M.provinces.filter(p => p.playable).length, 1);
+  // 2026-10-14: every built province is its own continent and the rest of the world is open sea (EXPANSION-1 §1)
+  const built = Object.keys(J('world/province-map.json').provinces);
+  assert.deepEqual(M.provinces.map(p => p.id).sort(), [...built].sort());
+  assert.ok(M.provinces.every(p => p.playable));
   const playable = [...M.zones.values()].filter(z => z.playable);
-  assert.equal(playable.length, 16);
+  assert.equal(playable.length, Object.values(J('world/province-map.json').provinces).reduce((n, p) => n + Object.keys(p.map).length, 0));
+  assert.ok([...M.zones.values()].filter(z => !z.playable).every(z => z.land === 0), 'outside a continent is sea');
   for (const z of playable) {
     assert.ok(z.name, `${z.key} has a name`);
     assert.ok(Array.isArray(z.band) && z.band[0] <= z.band[1], `${z.key} has a level band`);
@@ -48,13 +51,15 @@ test('model: towns, dungeons, caves, forts, event arenas, waystones-free places 
     const b = zoneBoundsOf(p.zone);
     assert.ok(p.x >= b.minX - 1 && p.x <= b.maxX + 1 && p.z >= b.minZ - 1 && p.z <= b.maxZ + 1, `${p.name} sits in ${p.zone}`);
   }
-  assert.equal(M.pois.filter(p => p.kind === 'dungeon').length, 16, 'one dungeon door per zone');
+  assert.equal(M.pois.filter(p => p.kind === 'dungeon').length, [...M.zones.values()].filter(z => z.playable).length, 'one dungeon door per zone');
   const tor = M.pois.find(p => p.name === 'Torborhold');
   assert.ok(tor && tor.hub && tor.kind === 'town');
   const crypt = M.pois.find(p => p.kind === 'dungeon' && p.zone === 'z12_02');
   assert.equal(crypt.name, "The Ploughman's Crypt");
   assert.ok(M.pois.find(p => p.kind === 'event' && p.zone === 'z12_02').name.length > 3);
-  assert.ok(M.rivers.length > 50 && M.roads.length > 100, 'rivers and roads');
+  // 2026-10-14: only rivers and roads that touch a continent are drawn (the rest of the old mainland is under the sea)
+  assert.ok(M.rivers.length > 5 && M.roads.length > 20, 'rivers and roads');
+  for (const r of [...M.rivers, ...M.roads]) assert.ok(r.pts.some(p => M.inPlayable(p[0], p[1])), `${r.id} touches a continent`);
   assert.ok(M.roads.reduce((a, r) => a + r.pts.length, 0) < 8000, 'roads are thinned for drawing');
 });
 

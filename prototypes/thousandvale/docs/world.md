@@ -584,3 +584,57 @@ ends where the paving starts.)
 measure notices a house put in the road; the planner with and without the option), `proctown/tests/highstreets.test.js`
 (4), `tests/B/walls.test.js` updated where it read a gate's `way`/`out` as the road's. `tools/town-plan-png.mjs` draws
 any town's plan top-down from the baked files (no browser).
+
+## 14. Vharlen, the Burning Isle — the second continent (stream T, 2026-10-14)
+
+The expansion island (`docs/EXPANSION-1.md` is the spec) is world zones **x 11–13, y 9–11**, province-map entry `vharlen`
+(`continent`, `culture: 'vharl'`, `worldBoss` asked for before the sheet exists; the first map entry, `blackstrand`, is
+the landing the reachability flood starts from). Torbor Downs' 16 zones are untouched — `tests/B/vharlen.test.js` pins
+their decoded layers and re-bakes the corner nearest the sea.
+
+**Ground** (`tools/lib/vharlen.mjs`, called by world-core's `continentProfile` for `profile: 'volcanic'`): a pure
+function of world metres, so zone edges agree bit for bit. Centre (25600, 21504) = the middle of `z12_10`. A volcano
+(rim crest ~690–730 m, radius 360 m) with a flat caldera floor at 440 m, a crater lake (437.6 m, `crater_lake`) and
+three breaches in the rim — east (toward Port Vharl), south-west and north-west — each a gorge at floor level running
+out onto a smooth cone (≤ ~35°); everywhere else the inner wall is a cliff. Nine radial ridges down the cone. Then eight
+shores by bearing: a flat landing plain east, sulphur flats in shallow terraces north-east, jungle hills north, obsidian
+dunes north-west, pumice swells west, a stepped basalt plateau with sea cliffs south-west (two ramps climb it), an ash
+valley south and a mud fen south-east (pools at 2.0 m). Settlements and pools sit on flattened pads in the profile, so
+the bake never has to move them. The island falls to the sea inside the block; the block's edge is ~55–80 m deep, and in
+its last 100 m the ground hands back to the old mainland so the sea floor is continuous.
+
+**Bake** (`tools/bake-zone.mjs`, `isl` branches): World Forge's nodes, rivers, lakes, roads and bridges in the block are
+left out (they were drawn for the old mainland); the island supplies one settlement per zone (`VHARLEN.settlements`),
+its waters (`waterAt`: crater lake, 3 hot-spring pools in the Steamwood + 1 on the crater floor + 2 in the fen, 3 acid
+pools in Sulphur Bight, fen pools — all lake-kind, filed as `lake` placements with `data.kind` = crater_lake /
+hot_spring / acid_pool), and its roads (`islandRoads`: A* on a 16 m grid, a ring road through all eight shore towns and
+a trail up to the Rim Shrine; graded like a world road). Settlements keep their designed size (the sheet's "town" does
+not grow them); towns are planned in proctown culture `vharl`. No automatic field belts or chapel graveyards. Scatter
+from `VHARL_SCATTER`. Port Vharl has a `harbour` placement (`x, z` the waterline due east of the town, `data.deep` the
+first point 3 m deep, yaw out to sea) for the voyage's pier. Each zone ~20 s to bake: `node tools/bake-zone.mjs
+--province vharlen`, then `bake-horizon` and `bake-map`.
+
+**Biomes** reuse World Forge's ids so every zone shares one surface table (Torbor's road id never moves); the zone meta
+carries `palette: 'vharl'`, `continent: 'vharlen'` and `biomeNames` (what each id is there): beach = Black Sand,
+rainforest = Steam Jungle, shrubland = Fern Scrub, savanna = Tussock, desert = Sulphur Flats, badlands = Basalt
+Highland, marsh = Mud Fen, volcanic = Scoria Slopes (cone and caldera), blighted = Charred Wood, ashPlain = Pumice Waste,
+glimmerwaste = Obsidian Dunes, mountains = Basalt Cliffs.
+
+**Scatter kinds 11–17** (`SCATTER_KINDS`): tree_fern, ironpalm, tree_charred (solid), basalt_columns, obsidian (solid),
+steam_vent, sulphur_crust (walk over). Client art: kit `palm_fan` / darkened dead trees (`tint`), the rest built in
+`js/client/vharl-scatter-art.js`.
+
+**Client look**: `js/client/terrain-view.js` `GROUND_PALETTES.vharl` — ash for grass, dark jungle moss, black basalt,
+black sand, plus two layers only Vharlen has (sulphur crust, steaming mud) in a second splat attribute; per-biome colour
+multipliers (pale pumice, red scoria, purple-black obsidian); inland water tinted hot teal / sulphur / mud. Zones without
+a palette are drawn exactly as before. `js/client/horizon-grid.js` `GROUND_REGIONS` + `REGION_PALETTES` paint the far
+horizon (and `tools/bake-map.mjs` the map images) in the same colours with Vharlen's own tree cover. Dev page:
+`tools/ground-look.html?zone=z13_10&cam=x,up,z&at=x,up,z` draws one zone as the game does.
+
+**Numbers** (2026-10-14): land per zone 23–25 % in the four corners, 66–71 % on the sides, 100 % in the caldera; scatter
+1.1k (Glasswind Strand) – 21.5k (Steamwood) a zone; `province-reach vharlen`: 37 targets, 0 unreached, 99.9 % of the
+island's walkable ground one piece.
+
+(Also 2026-10-14: `tools/bake-world.mjs` grades rivers, lakes and roads on the PRE-continent ground (`mainland`), so
+`world.json` — and every Torbor zone hashed on it — is what it was before the islands; continents apply in the zone and
+horizon bakes only.)

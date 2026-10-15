@@ -21,7 +21,7 @@ import { buildProp, buildGroundDetail } from '../../../../highdef-3d/js/kit/rock
 
 const WALL_H = 4.2;
 /**
- * The eight dungeon looks (stream E's `plan.look`, Farhold DUNGEON_LOOKS keys; the family picks one when no
+ * The sixteen dungeon looks — eight Torbor + eight Vharlen (stream E's `plan.look`; the family picks one when no
  * look is sent). Each is surfaces + tints + light colour + fog + the props that dress its rooms.
  */
 export const LOOKS = {
@@ -33,8 +33,18 @@ export const LOOKS = {
   vault:   { floor: 'cobble', wall: 'cliff', fT: '#b0a8a0', wT: '#c0b8ae', torch: '#c9a8ff', fog: '#08060e', wallH: 5.2, props: ['rune_stone', 'ruined_pillar'], ground: ['lichen_patch'] },
   barrow:  { floor: 'dirt', wall: 'moss', fT: '#8e9a7e', wT: '#7e8a6e', torch: '#ffb070', fog: '#070806', wallH: 3.4, props: ['stone_marker', 'dolmen'], ground: ['root_mat', 'lichen_patch'] },
   hollow:  { floor: 'cobble', wall: 'cliff', fT: '#b8a77e', wT: '#b8a77e', torch: '#ffd56a', fog: '#0a0806', wallH: 5.6, props: ['ruined_arch', 'ruined_pillar'], ground: ['lichen_patch', 'root_mat'] },
+  // Vharlen (EXPANSION-1 §8) — same surfaces and kit props, volcanic tints and lights
+  lava:    { floor: 'gravel', wall: 'rock', fT: '#5a524c', wT: '#3c3734', torch: '#ff7a2a', fog: '#0c0503', wallH: 5.2, props: ['stone_marker', 'fire_ring'], ground: ['ash_patch'], glow: '#ff6a1a', rough: 0.2 },
+  steam:   { floor: 'mud', wall: 'moss', fT: '#7a9484', wT: '#4f6a5a', torch: '#e8f4ff', fog: '#121815', wallH: 5.0, props: ['stone_marker', 'rune_stone', 'stone_step'], ground: ['puddle_ring', 'lichen_patch', 'mushroom_ring'], water: true, rough: 0.12 },
+  sulphur: { floor: 'gravel', wall: 'rock', fT: '#c8b860', wT: '#b8a548', torch: '#ffe070', fog: '#0c0a03', wallH: 3.8, props: ['cart_wheel', 'crate', 'barrel', 'wood_pile'], ground: ['ash_patch', 'sand_ripple'], beams: true, glow: '#e8e040' },
+  vent:    { floor: 'mud', wall: 'moss', fT: '#6e6852', wT: '#5a5848', torch: '#b8e0a0', fog: '#070a06', wallH: 4.4, props: ['barrel', 'stone_step', 'fence_post'], ground: ['puddle_ring', 'root_mat'], water: true, glow: '#a8e070' },
+  glass:   { floor: 'cobble', wall: 'cliff', fT: '#6a6878', wT: '#3e3c4e', torch: '#e0d0ff', fog: '#06050c', wallH: 5.6, props: ['ruined_pillar', 'rune_stone', 'skull_totem'], ground: ['sand_ripple', 'bone_scatter'], tombs: true, glow: '#c8b8ff' },
+  ash:     { floor: 'dirt', wall: 'cliff', fT: '#8f8b86', wT: '#6e6a66', torch: '#ffa860', fog: '#0a0908', wallH: 4.0, props: ['ruined_wall', 'ruined_arch', 'well', 'signpost', 'crate'], ground: ['ash_patch', 'bone_scatter'], beams: true },
+  kiln:    { floor: 'cobble', wall: 'cliff', fT: '#9a6a52', wT: '#a85a40', torch: '#ff9040', fog: '#0c0604', wallH: 4.8, props: ['wood_pile', 'barrel', 'crate', 'fire_ring', 'sawhorse'], ground: ['ash_patch'], beams: true },
+  throat:  { floor: 'rock', wall: 'rock', fT: '#5e3026', wT: '#4a201a', torch: '#ff5020', fog: '#140402', wallH: 6.0, props: ['stone_marker', 'dolmen', 'fire_ring'], ground: ['ash_patch'], glow: '#ff4010', rough: 0.25 },
 };
-export const FAMILY_LOOK = { crypt_spiral: 'crypt', mine_descent: 'warren', flooded_cistern: 'flooded', fortress_keep: 'ruin', cave_river: 'cave', tower_climb: 'vault', barrow_maze: 'barrow', sunken_temple: 'hollow', crypt: 'crypt', mine: 'warren' };
+export const FAMILY_LOOK = { crypt_spiral: 'crypt', mine_descent: 'warren', flooded_cistern: 'flooded', fortress_keep: 'ruin', cave_river: 'cave', tower_climb: 'vault', barrow_maze: 'barrow', sunken_temple: 'hollow', crypt: 'crypt', mine: 'warren',
+  lava_tube: 'lava', steam_grotto: 'steam', sulphur_mine: 'sulphur', drowned_vent: 'vent', glass_tomb: 'glass', buried_town: 'ash', kiln_forge: 'kiln', caldera_deep: 'throat' };
 export const lookFor = d => LOOKS[d.look] ? d.look : LOOKS[FAMILY_LOOK[d.family]] ? FAMILY_LOOK[d.family] : 'crypt';
 
 export function createDungeonView(d, { quality = 'high' } = {}) {

@@ -148,6 +148,7 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `delete` | gw | `char:int, name:str:24` | 0.5 / 3 | §25.1: delete a character (the typed name confirms it). Answers `deleted`, then `charList`. |
 | `feedbackMine` | both | `limit?:int, before?:int` | 1 / 5 | §24.1: my own reports (`feedback {op:'mine'}` is the same call). Answer `feedbackMine`. |
 | `cart` | p | `op:str:8, id:id, to?:str:48, token?:bool` | 2 / 4 | §24.5: ox-cart travel — `list` / `go`. Answers `cartList`, `cartR`, `cartRide`. |
+| `ship` | p | `op:str:8, id?:id, to?:str:48, party?:bool` | 2 / 4 | Expansion 1 §6: the voyage — `list` / `go` (the Harbourmaster `id`, the far harbour `to`, `party` boards party members close by) / `skip` (after 5 s). Answers `shipList`, `shipR`, `shipSail` (js/sim/ships.js). |
 | `meter` | p | `on:bool` | 1 / 4 | §24.6: the damage meter's hit feed on / off. Answers `meterR`, then `hits`. |
 | `fish` | p | `op:str:8, aim?:vec2, held?:num, score?:num, holds?:nums` | 4 / 8 | §21.10 angling: `cast`, `hook`, `land`, `stop`. Answers `fishR`, `fishBite`, `fishTug`, `fishCatch`. |
 | `cook` | p | `op?:str:8, id?:str:64, n?:int` | 2 / 6 | §21.10: no `id` = list (`cookList`), with `id` = cook it at a fire (`cookR`). |
@@ -245,6 +246,9 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `cartList` | `id, from, name, stops, gold, tokens` | §24.5: where this cart goes and what it costs. |
 | `cartR` | `op, ok, to, fare?, why?, msg?` | §24.5: answer to `cart` (`op:'go'`), and the arrival (`op:'arrive'`). |
 | `cartRide` | `to, from, ms, fare` | §24.5: the ride has begun (the client's presentation). |
+| `shipList` | `id, from, name, master, says, sailings, gold, log` | Expansion 1 §6: the sailings from this harbour (fare, seconds at sea, the far land's levels, why not). |
+| `shipR` | `op, ok, to, name?, fare?, crew?, left?, why?, msg?, first?, log?` | Expansion 1 §6: answer to `ship` (`go` / `skip`), and the arrival (`op:'arrive'`, said before the move). |
+| `shipSail` | `from, to, ship, ms, skipMs, fare, path, crew, berth, volcano` | Expansion 1 §6: the voyage has begun — the sea route (world metres) the client draws the ship along. |
 | `adminReports` | `list, counts` | (both) §21.9: feedback reports for an admin. |
 | `adminR` | `op, ok, id?, state?, why?, msg?, counts?` | (both) §21.9: answer to an admin change (or a refusal: `forbidden`). |
 | `fishR` | `ok, state, at?, water?, pool?, why?, msg?` | (game) §21.10: a cast accepted (`state:'wait'`) / refused, or the line coming in (`state:'idle', why`). |

@@ -26,6 +26,7 @@ const ELEMENT = {
   fire: '#ff7a2a', frost: '#5fd2ff', cold: '#5fd2ff', ice: '#5fd2ff', poison: '#7ee04a', nature: '#7ee04a',
   shadow: '#b066ff', arcane: '#c77dff', void: '#9b5cff', lightning: '#ffe15a', storm: '#ffe15a', holy: '#ffe9a8',
   physical: '#ff3b2f',
+  steam: '#e8f6ff',      // [S] a geyser's rumble (Vharlen)
 };
 const SAFE_GAP = 0.08;   // metres above the ground
 

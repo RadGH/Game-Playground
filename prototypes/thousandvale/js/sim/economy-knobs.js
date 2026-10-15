@@ -44,8 +44,30 @@ function merge(base, over) {
   return out;
 }
 let live = merge(ECONOMY_DEFAULTS, {});
-/** Set the numbers (the `server` block of data/rules/economy.json, or the whole file). Unknown / wrong-typed values keep the default. */
-export function configureEconomy(data = null) {
+let base = live;                        // the realm's numbers (configureEconomy without a province)
+const byProvince = new Map();           // Expansion 1: province key -> its own numbers (data/provinces/<prov>-economy.json)
+/**
+ * Set the numbers (the `server` block of data/rules/economy.json, or the whole file). Unknown / wrong-typed values keep the
+ * default. With `province`, they are that province's own (used inside withEconomy(province, fn)); the realm's stay as they are.
+ */
+export function configureEconomy(data = null, province = null) {
+  const parsed = parse(data);
+  if (province) { byProvince.set(province, parsed); return parsed; }
+  base = live = parsed;
+  return live;
+}
+/** Forget every province's own numbers (tests). */
+export function clearProvinceEconomies() { byProvince.clear(); }
+/** Run `fn` with `province`'s numbers live (its own when it has them, else the realm's). Synchronous code only. */
+export function withEconomy(province, fn) {
+  if (!byProvince.size) return fn();
+  const prev = live;
+  live = (province && byProvince.get(province)) || base;
+  try { return fn(); } finally { live = prev; }
+}
+/** A province's numbers (its own, else the realm's). */
+export const economyOf = province => (province && byProvince.get(province)) || base;
+function parse(data) {
   const d = isObj(data) ? (isObj(data.server) ? { ...data, ...data.server } : data) : {};
   // stream E's names (data/provinces/economy.json) onto ours
   const o = { ...d };
@@ -56,8 +78,7 @@ export function configureEconomy(data = null) {
   if (isObj(d.fare)) put('travel', d.fare);
   if (isObj(d.sell)) put('shop', { sellFactor: d.sell.factor, fishFactor: d.sell.fish });
   if (Array.isArray(d.mounts)) o.mounts = Object.fromEntries(d.mounts.filter(m => m && typeof m.id === 'string').map(m => [m.id, { ...(Number.isFinite(m.price) ? { price: m.price } : {}), ...(Number.isFinite(m.level) ? { level: m.level } : {}) }]));
-  live = merge(ECONOMY_DEFAULTS, o);
-  return live;
+  return merge(ECONOMY_DEFAULTS, o);
 }
 export const economy = () => live;
 

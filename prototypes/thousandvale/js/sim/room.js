@@ -204,7 +204,7 @@ export function createRoom(opts) {
   // ---- entities ----
   room.spawn = function (spec) {
     // S19 (play-test 4): every NPC you can talk to gets a title above its name and a real name (js/sim/npc-names.js)
-    if (spec.kind === 'npc' && spec.data && (spec.data.npc || spec.data.folk)) { const id = npcIdentity(spec); spec = { ...spec, name: id.name, data: { ...spec.data, title: id.title, ...(id.titled ? {} : { filler: 1 }) } }; }
+    if (spec.kind === 'npc' && spec.data && (spec.data.npc || spec.data.folk)) { const id = npcIdentity(spec, meta && meta.province); spec = { ...spec, name: id.name, data: { ...spec.data, title: id.title, ...(id.titled ? {} : { filler: 1 }) } }; }
     if (nextId > 0xFFFE) nextId = 1;
     while (entities.has(nextId)) nextId++;
     const e = new Entity(room, nextId++, spec);
@@ -461,7 +461,7 @@ export function createRoom(opts) {
     c.budget = Math.min(MOVE_BUDGET_CAP, c.budget + tickMs);
     if (!c.inputs.length) {
       if (!e.dead && e.airborne) {   // keep falling with no input
-        const st = { x: e.x, y: e.y, z: e.z, vy: e.vy, airborne: e.airborne };
+        const st = { x: e.x, y: e.y, z: e.z, vy: e.vy, airborne: e.airborne, glide: !!e.glide };      // [S] glide: a geyser's slow fall
         stepMove(st, { mx: 0, mz: 0, b: 0 }, tickMs, terrain);
         commitMove(e, st, 0, 0, 0); c.selfDirty = true;
       }
@@ -475,7 +475,7 @@ export function createRoom(opts) {
       const dt = Math.min(m.dt, 100, c.budget);
       if (dt <= 0) continue;
       c.budget -= dt;
-      const st = { x: e.x, y: e.y, z: e.z, vy: e.vy, airborne: e.airborne, speedMul: e.speedMul || 1 };
+      const st = { x: e.x, y: e.y, z: e.z, vy: e.vy, airborne: e.airborne, speedMul: e.speedMul || 1, glide: !!e.glide };      // [S]
       // W26 (round 8): while `e.held` (calling a mount, riding a cart) you STAND — the client's movement is ignored, facing still turns
       stepMove(st, e.held ? { ...m, mx: 0, mz: 0, b: 0 } : m, dt, terrain);
       commitMove(e, st);
@@ -496,7 +496,7 @@ export function createRoom(opts) {
   }
   function commitMove(e, st) {
     const wasAir = e.airborne;
-    e.vy = st.vy; e.airborne = st.airborne;
+    e.vy = st.vy; e.airborne = st.airborne; e.glide = !!st.glide;      // [S]
     if (wasAir !== st.airborne) e.setState(STATE.airborne, st.airborne);
     if (!!st.swim !== !!(e.state & STATE.swimming)) setSwim(e, !!st.swim);
     e.moveTo(st.x, st.z, st.y);
@@ -630,7 +630,7 @@ export function createRoom(opts) {
         if (sig !== c.lastResources) { c.lastResources = sig; c.you({ res }); }
       }
       let self = null, vitals = null;
-      if (c.selfDirty || !c.lastSelf) { self = { x: me.x, y: me.y, z: me.z, vy: me.vy }; c.selfDirty = false; c.lastSelf = self; }
+      if (c.selfDirty || !c.lastSelf) { self = { x: me.x, y: me.y, z: me.z, vy: me.vy, glide: !!me.glide }; c.selfDirty = false; c.lastSelf = self; }      // [S] glide rides the self block (snapshot flag 8)
       const lv = c.lastVitals;
       if (!lv || lv.hp !== me.hp || lv.hpMax !== me.hpMax || lv.mp !== Math.round(me.mp) || lv.mpMax !== me.mpMax) {
         vitals = { hp: me.hp, hpMax: me.hpMax, mp: Math.round(me.mp), mpMax: me.mpMax }; c.lastVitals = vitals;

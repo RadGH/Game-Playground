@@ -53,7 +53,7 @@ export class Predictor {
     if (ack < this.lastAck) return 0;
     this.lastAck = ack;
     while (this.pending.length && this.pending[0].s <= ack) this.pending.shift();
-    const s = { x: p.x, y: p.y, z: p.z, vy: p.vy || 0, airborne: (p.vy || 0) !== 0, speedMul: this.speedMul };
+    const s = { x: p.x, y: p.y, z: p.z, vy: p.vy || 0, airborne: (p.vy || 0) !== 0, speedMul: this.speedMul, glide: !!p.glide };      // [S] a geyser's slow fall is part of the state
     if (!this.locked && this.terrain) for (const inp of this.pending) stepMove(s, inp, inp.dt, this.terrain);
     const dx = s.x - this.st.x, dy = s.y - this.st.y, dz = s.z - this.st.z;
     const d = Math.hypot(dx, dz);

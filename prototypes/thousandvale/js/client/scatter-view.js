@@ -12,11 +12,12 @@ import * as THREE from 'three';
 import { buildTree, buildBush, buildFern } from '../../../../highdef-3d/js/kit/trees.js';
 import { buildRock } from '../../../../highdef-3d/js/kit/rocks.js';
 import { foliageMaterials, setWindTime } from './decor.js';
+import { buildVharlPiece, vharlMaterial } from './vharl-scatter-art.js';
 import { perf } from './perf.js';
 
 const BUCKET = 128;
 /** Scatter kinds the camera cannot pass (index = SCATTER_KINDS): radius and height at scale 1. */
-const SCATTER_SOLID = { 6: { r: 1.2, h: 1.8 }, 7: { r: 2.1, h: 2.8 } };
+const SCATTER_SOLID = { 6: { r: 1.2, h: 1.8 }, 7: { r: 2.1, h: 2.8 }, 14: { r: 1.4, h: 3.2 }, 15: { r: 1.1, h: 1.4 } };
 /** scatter kind (terrain-read SCATTER_KINDS order) -> the kit pieces it may be drawn as. */
 export const KIND_ART = [
   { key: 'tree_broadleaf', tree: ['oak', 'beech', 'birch'], scale: 0.62 },
@@ -32,17 +33,33 @@ export const KIND_ART = [
   // bushes, clipped wide and low
   { key: 'tree_fruit', tree: ['oak', 'beech'], scale: 0.3, squash: [1.4, 0.95, 1.4] },
   { key: 'hedge', bush: ['shrub'], scale: 1.15, squash: [1.5, 0.85, 1.5] },
+  // Vharlen, the Burning Isle (stream T): `custom` pieces come from vharl-scatter-art.js (one variant per name);
+  // `tint` darkens a kit tree's vertex colours (a charred trunk); `far` draws a custom piece out to the mid tree range
+  { key: 'tree_fern', custom: ['a', 'b', 'c'], scale: 1, far: true },
+  { key: 'ironpalm', tree: ['palm_fan'], scale: 0.62, tint: [0.62, 0.58, 0.55] },
+  { key: 'tree_charred', tree: ['dead_snag', 'dead_pine'], scale: 0.62, tint: [0.22, 0.2, 0.19] },
+  { key: 'basalt_columns', custom: ['a', 'b', 'c', 'd'], scale: 1, far: true },
+  { key: 'obsidian', custom: ['a', 'b', 'c'], scale: 1 },
+  { key: 'steam_vent', custom: ['a', 'b'], scale: 1 },
+  { key: 'sulphur_crust', custom: ['a', 'b', 'c'], scale: 1 },
 ];
+const artType = art => (art.custom ? 'custom' : art.tree ? 'tree' : art.bush ? 'bush' : art.rock ? 'rock' : 'fern');
 /** How far each class of thing is drawn, by quality: [full detail, simplified, cards / last]. */
 export const RANGES = { high: { tree: [80, 240, 700], small: 220, reed: 110 }, medium: { tree: [60, 200, 560], small: 170, reed: 90 }, low: { tree: [0, 90, 280], small: 70, reed: 40 } };
 
 const GEO = new Map();
-function geoFor(art, name, lod) {
-  const k = `${art}|${name}|${lod}`;
+function geoFor(art, name, lod, tint = null) {
+  const k = `${art}|${name}|${lod}${tint ? '|' + tint.join(',') : ''}`;
   if (!GEO.has(k)) {
     let g = null;
     try {
-      if (art === 'tree') { const b = buildTree(name, { seed: 1000 + name.length * 13, lod }); g = { bark: b.bark, leaf: b.foliage }; }
+      if (tint) {
+        // a darker copy of the kit piece (same geometry, vertex colours scaled)
+        const b = geoFor(art, name, lod);
+        const dark = geo => { if (!geo) return null; const c = geo.clone(), col = c.getAttribute('color'); if (col) { for (let i = 0; i < col.count; i++) col.setXYZ(i, col.getX(i) * tint[0], col.getY(i) * tint[1], col.getZ(i) * tint[2]); col.needsUpdate = true; } return c; };
+        g = b ? { bark: dark(b.bark), leaf: dark(b.leaf), rock: dark(b.rock) } : null;
+      } else if (art === 'custom') { const [kind, variant] = name.split(':'); const geo = buildVharlPiece(kind, variant); g = geo ? { custom: geo, kind } : null; }
+      else if (art === 'tree') { const b = buildTree(name, { seed: 1000 + name.length * 13, lod }); g = { bark: b.bark, leaf: b.foliage }; }
       else if (art === 'bush') { const b = buildBush(name, { seed: 60 + name.length, lod: 1 }); g = { bark: b.bark, leaf: b.foliage }; }
       else if (art === 'fern') { const b = buildFern(name, { seed: 70 + name.length, lod: 1 }); g = { bark: b.bark || null, leaf: b.foliage }; }
       else if (art === 'rock') { g = { rock: buildRock(name, { seed: 40 + name.length, lod: 1, size: 2 }).geometry }; }
@@ -59,15 +76,15 @@ function geoFor(art, name, lod) {
 export async function prewarmScatter({ quality = 'high' } = {}) {
   const todo = [];
   for (const art of KIND_ART) {
-    const type = art.tree ? 'tree' : art.bush ? 'bush' : art.rock ? 'rock' : 'fern';
-    for (const name of art[type]) for (const lod of (type === 'tree' ? (quality === 'low' ? [1, 2] : [0, 1, 2]) : [1])) todo.push([type, name, lod]);
+    const type = artType(art);
+    for (const name of art[type]) for (const lod of (type === 'tree' ? (quality === 'low' ? [1, 2] : [0, 1, 2]) : [1])) todo.push([type, type === 'custom' ? `${art.key}:${name}` : name, lod, art.tint || null]);
   }
   // (play-test 7) rest when 12 ms of building have been done, not before every piece: on a renderer that draws a frame
   // every few seconds an idle callback comes once a frame, and sixty waits were five minutes of boot
   let at = performance.now();
-  for (const [type, name, lod] of todo) {
+  for (const [type, name, lod, tint] of todo) {
     if (performance.now() - at > 12) { await new Promise(r => (typeof requestIdleCallback === 'function' ? requestIdleCallback(() => r(), { timeout: 400 }) : setTimeout(r, 30))); at = performance.now(); }
-    perf.span('scatter:prewarm', () => geoFor(type, name, lod));
+    perf.span('scatter:prewarm', () => geoFor(type, name, lod, tint));
   }
   return todo.length;
 }
@@ -99,12 +116,12 @@ export async function createScatterView(T, sc, { quality = 'high' } = {}) {
   const counts = [];
   for (let i = 0; i < n; i++) {
     const art = KIND_ART[sc.kind[i]]; if (!art) { P[i] = 65535; continue; }
-    const type = art.tree ? 'tree' : art.bush ? 'bush' : art.rock ? 'rock' : 'fern';
+    const type = artType(art);
     const list = art[type];
-    const name = list[sc.variant[i] % list.length];
+    const name = type === 'custom' ? `${art.key}:${list[sc.variant[i] % list.length]}` : list[sc.variant[i] % list.length];
     const pk = sc.kind[i] + '|' + name;
     let pi = protoIndex.get(pk);
-    if (pi === undefined) { pi = protos.length; protoIndex.set(pk, pi); protos.push({ type, name, art, cls: type === 'tree' ? 'tree' : type === 'fern' ? 'reed' : 'small' }); counts.push(0); }
+    if (pi === undefined) { pi = protos.length; protoIndex.set(pk, pi); protos.push({ type, name, art, cls: type === 'tree' ? 'tree' : type === 'fern' ? 'reed' : art.far ? 'far' : 'small' }); counts.push(0); }
     counts[pi]++;
     P[i] = pi;
     X[i] = sc.x[i] + ox; Z[i] = sc.z[i] + oz; Y[i] = T.heightAt(X[i], Z[i]);
@@ -114,9 +131,9 @@ export async function createScatterView(T, sc, { quality = 'high' } = {}) {
   for (const [pi, p] of protos.entries()) {
     const levels = p.type === 'tree' ? [0, 1, 2] : [1];
     p.meshes = levels.map(lod => {
-      const g = geoFor(p.type, p.name, lod);
+      const g = geoFor(p.type, p.name, lod, p.art.tint || null);
       const parts = [];
-      if (g) for (const [geo, mat] of [[g.bark, mats.bark], [g.leaf, mats.leaf], [g.rock, mats.rock]]) {
+      if (g) for (const [geo, mat] of [[g.bark, mats.bark], [g.leaf, mats.leaf], [g.rock, mats.rock], [g.custom, g.custom ? vharlMaterial(g.kind, quality === 'low') : null]]) {
         if (!geo) continue;
         const cap = Math.min(counts[pi], p.type === 'tree' ? (lod === 0 ? 900 : lod === 1 ? 3000 : 12000) : 6000);
         const m = new THREE.InstancedMesh(geo, mat, Math.max(1, cap));
@@ -147,14 +164,14 @@ export async function createScatterView(T, sc, { quality = 'high' } = {}) {
         const di = Math.hypot(X[i] - cam.x, Z[i] - cam.z);
         let lvl;
         if (p.type === 'tree') { if (di > far) continue; lvl = di < R.tree[0] ? 0 : di < R.tree[1] ? 1 : 2; }
-        else { if (di > (p.cls === 'reed' ? R.reed : R.small)) continue; lvl = 0; }
+        else { if (di > (p.cls === 'reed' ? R.reed : p.cls === 'far' ? R.tree[1] : R.small)) continue; lvl = 0; }
         const parts = p.meshes[lvl]; if (!parts.length) continue;
         const k = fill[pi][lvl];
         if (k >= parts[0].instanceMatrix.count) continue;
         _q.setFromAxisAngle(_up, sc.yaw[i]);
         const sq = p.art.squash;
         _s.set(S[i] * (sq ? sq[0] : 1), S[i] * (sq ? sq[1] : 1), S[i] * (sq ? sq[2] : 1));
-        _p.set(X[i], Y[i] - (p.type === 'rock' ? 0.25 * S[i] : 0.12), Z[i]);
+        _p.set(X[i], Y[i] - (p.type === 'rock' ? 0.25 * S[i] : p.type === 'custom' ? 0.05 : 0.12), Z[i]);
         _m.compose(_p, _q, _s);
         for (const m of parts) m.setMatrixAt(k, _m);
         fill[pi][lvl] = k + 1;

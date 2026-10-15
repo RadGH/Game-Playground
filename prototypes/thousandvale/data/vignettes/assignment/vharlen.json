@@ -1,0 +1,18 @@
+{
+ "_doc": "Stream C (Expansion 1). Which vignettes each zone of Vharlen gets: NONE on purpose. The vignette catalogue (data/vignettes/m1/m2/m2b.json) is Torbor Downs' \u2014 farms, mills, fairy rings, Torbor monsters \u2014 and the owner wants the Burning Isle to share nothing re-skinned with it. Vharlen's zones are filled by their own camps, rares, elites, zone events, gathering nodes, specialty sites (hot springs, geysers, lava vents: a later stream) and quests. Give it its own vignette catalogue later and re-run tools/assign-vignettes.mjs --province=vharlen.",
+ "province": "vharlen",
+ "perZone": 0,
+ "check": {},
+ "pinned": {},
+ "zones": {
+  "blackstrand": [],
+  "steamwood": [],
+  "sulphur_bight": [],
+  "fumarole_fen": [],
+  "glasswind_strand": [],
+  "pumice_wastes": [],
+  "ashfall_hollow": [],
+  "kiln_ridge": [],
+  "the_caldera": []
+ }
+}

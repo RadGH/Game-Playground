@@ -1,0 +1,222 @@
+{
+  "id": "elite_ashen_reeve",
+  "name": "The Ashen Reeve",
+  "tier": "elite",
+  "zone": "ashfall_hollow",
+  "level": 17,
+  "body": "slagborn_firecaller",
+  "place": {
+    "rank": "elite",
+    "level": 17,
+    "near": {
+      "site": "Cinderholt",
+      "dx": 200,
+      "dz": -260
+    },
+    "respawnMs": 1200000,
+    "escort": [
+      {
+        "type": "slagborn_raider",
+        "count": 2
+      }
+    ]
+  },
+  "_doc": "Expansion 1 (Vharlen). The Slagborn firecaller who rules the buried half of Cinderholt and collects an ash-tithe from the living half. He calls ash down on everyone not standing under his canopy — STAND NEXT TO HIM — writes a writ on the farthest player (a following circle) and brings his gavel down in a line. At 60% his raiders come. At 30% he burns the writs: burning circles on everyone and a get-in-close ring.",
+  "party": "Open world elite. Solo: tough — the verdict punishes running away. 2-3: intended. 5+: quick. M5 scaling: health by players tagged; raiders 2 -> 3 at five.",
+  "hpMult": 1.6,
+  "arena": {
+    "radius": 26
+  },
+  "say": {
+    "pull": [
+      "'Your tithe is late.'",
+      "The Ashen Reeve unrolls a scroll of grey ash. Your name is on it."
+    ],
+    "death": "The Ashen Reeve's scroll catches fire in his hand. He crumbles with it.",
+    "reset": "The Ashen Reeve goes back to his ledger."
+  },
+  "abilities": {
+    "staff": {
+      "id": "staff",
+      "name": "Reeve's Staff",
+      "every": [
+        6,
+        8
+      ],
+      "first": 2,
+      "range": 5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 4.8,
+          "arc": 1.4,
+          "wind": 1,
+          "damage": 1.6,
+          "element": "fire"
+        }
+      ]
+    },
+    "verdict": {
+      "id": "verdict",
+      "name": "Ash Verdict",
+      "every": [
+        16,
+        19
+      ],
+      "first": 4,
+      "cast": 0.8,
+      "say": "The Reeve calls ash down on everyone not under his canopy — stand next to him!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 5,
+          "wind": 2.5,
+          "damage": 2.2,
+          "kind": "safe"
+        }
+      ]
+    },
+    "writ": {
+      "id": "writ",
+      "name": "Writ of Ash",
+      "every": [
+        14,
+        17
+      ],
+      "first": 8,
+      "cast": 0.6,
+      "say": "{target} is written in the ledger — take it away from the others!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "farthest",
+          "r": 3,
+          "wind": 2.6,
+          "damage": 1.5,
+          "follow": true,
+          "status": "marked"
+        }
+      ]
+    },
+    "gavel": {
+      "id": "gavel",
+      "name": "Gavel",
+      "every": [
+        12,
+        15
+      ],
+      "first": 6,
+      "cast": 0.6,
+      "say": "The Reeve brings his gavel down toward {target}!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 14,
+          "w": 3,
+          "wind": 1.3,
+          "damage": 1.7,
+          "knock": 3
+        }
+      ]
+    },
+    "burn_writs": {
+      "id": "burn_writs",
+      "name": "Burning Writs",
+      "every": [
+        14,
+        17
+      ],
+      "first": 3,
+      "cast": 0.5,
+      "say": "He burns the writs — and everyone named in them! Spread out!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "each",
+          "r": 2.6,
+          "wind": 2,
+          "damage": 1.3,
+          "follow": true,
+          "element": "fire",
+          "status": "burn"
+        }
+      ]
+    },
+    "ash_ring": {
+      "id": "ash_ring",
+      "name": "Ring of Ash",
+      "every": [
+        13,
+        16
+      ],
+      "first": 6,
+      "cast": 0.8,
+      "say": "A ring of burning ash — get in close!",
+      "telegraphs": [
+        {
+          "shape": "donut",
+          "at": "self",
+          "r": 11,
+          "r2": 3,
+          "wind": 1.6,
+          "damage": 1.9,
+          "element": "fire"
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "The Tithe",
+      "abilities": [
+        "staff",
+        "verdict",
+        "writ",
+        "gavel"
+      ]
+    },
+    {
+      "name": "Collectors",
+      "at": 0.6,
+      "say": "'Collectors! We have defaulters.'",
+      "abilities": [
+        "staff",
+        "gavel",
+        "writ"
+      ],
+      "onEnter": [
+        {
+          "adds": {
+            "type": "slagborn_raider",
+            "count": 2,
+            "radius": 8
+          }
+        }
+      ]
+    },
+    {
+      "name": "Burning the Writs",
+      "at": 0.3,
+      "say": "'No tithe? Then the ledger burns, and you with it.'",
+      "abilities": [
+        "staff",
+        "burn_writs",
+        "ash_ring",
+        "verdict"
+      ],
+      "onEnter": [
+        {
+          "modifier": {
+            "id": "burning_writs",
+            "dmg": 1.2,
+            "attackEvery": 0.85,
+            "exact": true
+          }
+        }
+      ]
+    }
+  ]
+}

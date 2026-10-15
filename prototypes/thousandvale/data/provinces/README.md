@@ -71,3 +71,54 @@ schedules), `tests/E/quests.test.js` (sites).
 - Made by `tools/content-towns.mjs` -> `tools/content-givers.mjs` -> `tools/content-hunts.mjs` (the last copies guards, carters and carts into `data/vignettes/placements/<zone>.quest.json` as `guard`, `npc` and `cart` rows). Run those three after any re-bake that moves a gate. The hand-written blocks of guards.json / carts.json are kept by the tool.
 - `titled: true | false` (W27) is on every NPC record; the rule is `tools/content-titled.mjs` and, as data, `data/names/titles.json` `titled`.
 - `shops.json`: no light items (W22); backpacks at the tailor (W19) — `minCapBase` on a category is the hand-kept version of `minCap` for bases that are not catalog rows.
+
+## More than one province (Expansion 1, stream P)
+
+Torbor Downs is the HOME province: every file above stays where it is and means what it meant. Any other province
+(`vharlen`, levels 10–20, its own island) keeps its OWN copy of each file beside Torbor's, named `<province>-<file>`
+in the same folder. The one table of which file is which is `js/sim/province-files.js` (`PROVINCE_DATA`); the server
+(js/sim/content.js `loadProvinceContent`), the content tools (`--province=<id>`) and the map's search all go through it.
+
+| Kind | Files | A province without its own file gets |
+|---|---|---|
+| **shared** (rules, catalogues) | shops, schedules, travellers, wanderers, economy, angling, professions, road-events, rares, sites, archetypes, mounts; names (`data/names/<province>.json`, or the sheet's `names`) | Torbor's file. WITH its own file: Torbor's, with its own laid over it **key by key at the top level** — name only the blocks you change (e.g. `vharlen-shops.json` = `{ "towns": {…} }`, or a `kinds` block that replaces all kinds). Torbor's town-bound keys are never lent: shops `towns`, angling `anglers`, professions `trainers`. |
+| **placed** (things that stand on one map) | offices, carts, guards, angling-pools, professions-nodes, town-services, setpiece-pins, refunds, and `data/quests/marks/<province>-givers.json` | nothing (no offices, no carts, no guard posts until its tools are run for it). |
+
+Already per province before Expansion 1: the sheet `<province>.json`, `<province>-places.json`, `<province>-routes.json`,
+`data/quests/marks/<province>.json` + `-hunts.json`, `data/vignettes/assignment/<province>.json`. Shared across every
+province and filtered by zone: `data/quests/events.json`, `data/quests/<sheet zone>.json`, `data/vignettes/placements/<world zone>*.json`.
+
+What the server does with them (js/sim/province.js): each province has its own shops, ox carts (a cart never leaves its
+island), road events, guards' words, NPC name pool, schedule phases, potion drops and — when its economy file differs —
+its own gold numbers (economy-knobs `withEconomy`, applied to its rooms and its players' messages). Realm-wide on purpose:
+the mount book (every province's mounts; a mount you own rides everywhere), refunds (per character), fishing pools and
+gathering nodes (keyed by world zone, so all of them are held at once), potion numbers, the professions recipes.
+
+The rules between provinces: the **starter** province is the one whose sheet band starts at level 1 — new characters
+begin there whatever order the provinces load in. A province's **continent** is its province-map entry's `continent`
+(else the province itself); waystone travel, free travel to a realm event and the Callboard never cross from one
+continent to another ("take a ship from a harbour" — the voyage, js/sim/ships.js, is the only way). Respawn, the recall
+charm and the inn you are bound at stay on the island you are on. The server loads every province of
+data/world/province-map.json that has a sheet and at least one baked zone (server/load.mjs `defaultProvinces`, starter
+first); one that fails to load is left out with a log line and never stops Torbor. Named encounters of a new province say
+where they stand in their own encounter file (`data/encounters/<id>.json` `place`), not in realm.js's Torbor table.
+Tests: `tests/A/expansion-provinces.test.js`.
+
+## Vharlen, the Burning Isle (Expansion 1, stream C — content)
+
+The second province (docs/EXPANSION-1.md): 9 zones, levels 10–20, reached only by ship. Its own files:
+
+| File | What |
+|---|---|
+| `vharlen.json` | The sheet (same shape as torbor_downs.json) plus `elite` / `eventBoss` per zone, `specialties` + `specialtySites` (the bake's hot springs, acid pools and crater lake, with the names the island gives them — the mechanics are a later stream's), `gathering` (tools/content-professions.mjs: node kinds per family and tier, tier shares by band top — tiers 3–5, Torbor never grows 4–5) and `levels` (tools/content-place.mjs levelField: 300 m a level and every zone keeps its own band floor, because the hardest zone is in the middle of a small island). |
+| `vharlen-rares.json` | Two named rares per zone (encounter ids). |
+| `vharlen-sites.json` | The island's fort / farm / cave templates under the home template KEYS: Slagborn fire-camps (`warband: false` = its own garrison, not a Farhold warband), the Glass Kings' ruins, taro terraces, goat walls, salt pans, ironpalm groves, net racks, steam wells (`short` = the farm-name word), caves on the island's dungeon families. Island monsters only. |
+| `vharlen-shops.json` | `towns` only (levelCap = band top + 1–2, priceMult 1.1–1.3; `shops` written by content-offices from stream T's town plans). `harbour` on Port Vharl = the ships.json harbour on its pier; tools/content-givers.mjs lists `harbourmaster` in the town's services for it. Trader kinds are Torbor's. |
+| `vharlen-angling.json` | 15 warm-water / volcanic fish (bands 10–20), 9 legends, 9 anglers, island pull-backs. The server joins every province's species into one catch table (js/sim/angling.js `joinAnglingContent`). |
+| made by the tools (`--province=vharlen`) | `-places`, `-routes`, `-offices`, `-setpiece-pins`, `-angling-pools`, `-professions-nodes`, `-carts`, `-guards`, `-town-services`; data/quests/marks/`vharlen.json`, `-givers`, `-hunts`; data/vignettes/placements/z1{1,2,3}_{09,10,11}*.json. |
+
+Gathering: tools/content-professions.mjs `VHARL_MATERIALS` / `VHARL_NODES` / `SKIN_HIDE` add obsidian, sulphur, ironpalm, steamcap, cinderbloom and salamander hide to the realm-wide data/provinces/professions.json, each as an ALTERNATE in an existing tier-4/5 recipe (blackiron from obsidian, sunsteel with a sulphur fire, drake leather from salamander hide, the tier-4 wood / mushroom and tier-5 herb gear patterns) and most with a new line (Obsidian Edge, Brimstone Oil, Cinderbloom Draught, Steamcap Broth). A salamander's hide is its own (`skins.types.<id>.hide`, read by js/rules/professions.js skinOf).
+
+No vignettes on purpose (data/vignettes/assignment/vharlen.json): the catalogue is Torbor's. NOT yet island-specific: the curios, wayside dressing and folk roles the placer scatters (data/vignettes/curios.json, wayside.json, travellers.json `folk`) are still the shared Torbor catalogues — a Vharlen dressing catalogue is open work.
+
+Run order after any re-bake of the island: `place-vignettes -> content-pools -> content-professions -> content-towns -> content-givers -> content-hunts -> content-events`, all `--province=vharlen`. Tests: tests/C/vharlen-content.test.js (ids, bands, names, banned words, no Torbor place names, gathering, angling, shops, placements, marks) and tests/C/vharlen-server.test.js (the real realm: sail to Port Vharl, camps, folk, a quest, a shop, the Harbourmaster).

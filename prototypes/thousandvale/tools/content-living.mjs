@@ -20,7 +20,7 @@
 // Same inputs -> same output (every choice draws from the zone's seeded rng).
 import { readFileSync, existsSync } from 'node:fs';
 import { NAV } from '../js/rules/terrain-read.js';
-import { J, ROOT } from './content-lib.mjs';
+import { J, ROOT, provinceArg, provinceDataSync, readNames } from './content-lib.mjs';
 import { findSpot, openPoint, walkLine, settlementEdge, campLevels, POINT_TYPES, heavyOk, capCount, groundPieces } from './content-place.mjs';
 
 export const TARGET = 50;          // metres: no reachable open sample further than this from the edge of something (≈ one thing every ~100 m)
@@ -30,8 +30,10 @@ const RIM = 40;                    // samples this close to the zone edge are th
 const opt = p => (existsSync(new URL(p, ROOT)) ? J(p) : null);
 const CURIOS = (opt('data/vignettes/curios.json') || { curios: [] }).curios;
 const WAYSIDE = (opt('data/vignettes/wayside.json') || { kinds: [] }).kinds;
-const TRAV = opt('data/provinces/travellers.json') || { kinds: {}, folk: {} };
-const NAMES = opt('data/names/torbor.json') || {};
+// the province the calling tool works on (place-vignettes --province=<id>; default torbor_downs): its travellers and names
+const PROV = provinceArg(process.argv);
+const TRAV = provinceDataSync(J, PROV, 'travellers') || { kinds: {}, folk: {} };
+const NAMES = readNames(PROV, opt(`data/provinces/${PROV}.json`));
 const FOREST = new Set(['temperateForest', 'borealForest', 'rainforest']);
 // open ground, in every 32: 14 curio, 8 stray, 5 wayside, 3 roaming pack, 2 folk (the owner: "more stuff to do", "no enemies")
 const OPEN_MIX = 'cscwcrscfcswcscr' + 'cwscfcswcrscwcsc';

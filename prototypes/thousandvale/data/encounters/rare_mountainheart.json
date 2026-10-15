@@ -1,0 +1,166 @@
+{
+  "id": "rare_mountainheart",
+  "name": "Mountainheart",
+  "tier": "rare",
+  "secret": true,
+  "zone": "the_caldera",
+  "level": 19,
+  "body": "pumice_golem",
+  "place": "walks the crater lake shore below Rim Shrine; a red light beats in its chest like a heart",
+  "_doc": "Expansion 1 (Vharlen). A golem with a lump of the mountain's own fire for a heart. Its heartbeat pulses out round it on a steady rhythm (step back on the beat), it slams a cone, and cracks the ground in magma veins that stay hot. At half health its heart flares: fire rides every player and the beat gets faster.",
+  "party": {
+    "solo": "Hard solo at 19.",
+    "small": "Right for 2-3.",
+    "full": "Easy.",
+    "m5": "M5 adds health per extra player and one more copy of the spread/scatter shapes for parties of 4-5; mechanics stay the same."
+  },
+  "hpMult": 2,
+  "arena": {
+    "radius": 24
+  },
+  "say": {
+    "pull": [
+      "A boulder on the shore has a heartbeat.",
+      "Mountainheart stands. The red light in its chest beats faster."
+    ],
+    "death": "Mountainheart's heart gives one last beat and goes dark.",
+    "reset": "Mountainheart sits back down on the shore. The beat slows."
+  },
+  "abilities": {
+    "slam": {
+      "id": "slam",
+      "name": "Stone Slam",
+      "every": [
+        6,
+        8
+      ],
+      "first": 2,
+      "range": 6,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 5,
+          "arc": 1.4,
+          "wind": 1,
+          "damage": 1.7
+        }
+      ]
+    },
+    "heartbeat": {
+      "id": "heartbeat",
+      "name": "Heartbeat",
+      "every": [
+        10,
+        12
+      ],
+      "first": 4,
+      "say": "Thump... thump... — step back on the beat!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 7,
+          "wind": 1.4,
+          "damage": 1.4,
+          "element": "fire"
+        },
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 7,
+          "wind": 1.4,
+          "damage": 1.4,
+          "element": "fire",
+          "after": 1.6
+        }
+      ]
+    },
+    "vein": {
+      "id": "vein",
+      "name": "Magma Vein",
+      "every": [
+        13,
+        16
+      ],
+      "first": 7,
+      "cast": 0.6,
+      "say": "The ground splits toward {target} and fills with magma!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 18,
+          "w": 3,
+          "wind": 1.4,
+          "damage": 1.6,
+          "element": "fire",
+          "leave": {
+            "type": "pool",
+            "name": "Magma vein",
+            "r": 2.8,
+            "every": 1,
+            "seconds": 16,
+            "damage": 0.3,
+            "status": "burn",
+            "element": "fire"
+          }
+        }
+      ]
+    },
+    "flare": {
+      "id": "flare",
+      "name": "Heart Flare",
+      "every": [
+        14,
+        17
+      ],
+      "first": 3,
+      "cast": 0.5,
+      "say": "Its heart flares — fire on everyone! Spread out!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "each",
+          "r": 2.8,
+          "wind": 2.2,
+          "damage": 1.4,
+          "follow": true,
+          "element": "fire",
+          "status": "seared"
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Steady Beat",
+      "abilities": [
+        "slam",
+        "heartbeat",
+        "vein"
+      ]
+    },
+    {
+      "name": "Racing Heart",
+      "at": 0.5,
+      "say": "Mountainheart's heart races and flares white!",
+      "abilities": [
+        "slam",
+        "flare",
+        "heartbeat",
+        "vein"
+      ],
+      "onEnter": [
+        {
+          "modifier": {
+            "id": "racing_heart",
+            "dmg": 1.1,
+            "attackEvery": 0.85,
+            "exact": true
+          }
+        }
+      ]
+    }
+  ]
+}

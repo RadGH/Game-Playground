@@ -1,0 +1,222 @@
+{
+  "_doc": "Stream C (Expansion 1). Quests for zone 'pumice_wastes' on Vharlen, the Burning Isle. Format: data/quests/README.md. Rewards: xp = share of a level's XP at the quest level, gold = multiple of a kill's gold; item.tier rolls at your level. `killRare` {zone, slot} names the zone's rare by slot (data/provinces/rares.json). Story-chain quests carry `story: n` (data/quests/vharlen-province.json).",
+  "zone": "pumice_wastes",
+  "npcs": {
+    "hearth_elder_halla": {
+      "name": "Hearth-elder Halla Morrakk",
+      "role": "elder",
+      "at": "Lastwell",
+      "greeting": "Lastwell has the last good water before the grey. Drink. Then help.",
+      "titled": true
+    },
+    "haro_draskar": {
+      "name": "Haro Draskar",
+      "role": "guard",
+      "at": "Lastwell",
+      "greeting": "Stockade's strong. Walls are thick. The raiders are just very, very patient.",
+      "titled": true
+    },
+    "matu_tukkari": {
+      "name": "Matu Tukkari",
+      "role": "innkeeper",
+      "at": "Lastwell",
+      "greeting": "Water is free. Beer costs. Ash in your beer is free as well.",
+      "titled": true
+    },
+    "angler_lastwell": {
+      "name": "Kirra Askaru",
+      "role": "angler",
+      "at": "Lastwell",
+      "greeting": "The sea is the only thing out here that is not on fire. I like the sea. The nearest pool is about 790 paces west of here. Look for the ripples.",
+      "placedBy": "content-pools",
+      "titled": true
+    },
+    "carter_lastwell": {
+      "name": "Matu Imbaru",
+      "role": "carter",
+      "at": "Lastwell",
+      "greeting": "Walking is free. Riding is nearly free, and you arrive with your legs.",
+      "cart": "cart_lastwell",
+      "placedBy": "content-towns",
+      "titled": true
+    }
+  },
+  "quests": [
+    {
+      "id": "pw_raider_trails",
+      "name": "The Raider Trails",
+      "level": 14,
+      "giver": "haro_draskar",
+      "offer": "Slagborn run the trails across the Wastes like they own them. Every water cart that leaves Lastwell comes back as a story. Go and change the ending.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "slagborn_raider",
+          "count": 8,
+          "where": "the raider trails",
+          "text": "Kill 8 Slagborn raiders on the trails"
+        }
+      ],
+      "done": "A cart came back with water in it. Water! We had a small party.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 13,
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "uncommon"
+          }
+        ]
+      }
+    },
+    {
+      "id": "pw_golem_on_the_pipe",
+      "name": "A Golem on the Pipe",
+      "level": 15,
+      "giver": "matu_tukkari",
+      "offer": "The pumice golems wander in off the grey dunes and sit down on our well-pipe. Then they do not get up. A golem is very heavy and a pipe is not.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "pumice_golem",
+          "count": 5,
+          "where": "the grey dunes",
+          "text": "Kill 5 pumice golems on the grey dunes"
+        }
+      ],
+      "done": "The tap runs! I will put that in my beer, sparingly.",
+      "reward": {
+        "xp": 0.45,
+        "gold": 14,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
+      }
+    },
+    {
+      "id": "pw_ash_reaver",
+      "name": "The Ash Reaver",
+      "level": 15,
+      "giver": "haro_draskar",
+      "offer": "Out at the burned-out farm the raiders have a reaver who comes out of the ash storms with a hook on a chain. The Ash Reaver. We lose a watchman every storm. I am running out of watchmen.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "slagborn_raider",
+          "count": 5,
+          "where": "the raiders' burned-out farm",
+          "text": "Kill 5 Slagborn raiders near the burned-out farm"
+        },
+        {
+          "kind": "killOne",
+          "encounter": "elite_ash_reaver",
+          "where": "the raiders' burned-out farm",
+          "text": "Defeat the Ash Reaver",
+          "at": {
+            "x": 23670,
+            "z": 21904,
+            "r": 45,
+            "name": "The Ash Reaver"
+          }
+        }
+      ],
+      "done": "Next storm, nobody gets hooked. I will tell the watchmen. Both of them.",
+      "reward": {
+        "xp": 0.75,
+        "gold": 30,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "pw_the_tally_man",
+      "name": "The Tally Man",
+      "level": 15,
+      "giver": "hearth_elder_halla",
+      "offer": "Out on the ash pans walks a tall grey thing with a stick full of notches. One notch for every traveller it has met. We have counted them. The stick is long. Make him stop counting.",
+      "steps": [
+        {
+          "kind": "killRare",
+          "zone": "pumice_wastes",
+          "slot": 1,
+          "text": "Hunt down the Tally Man",
+          "where": "the ash pans of the Pumice Wastes"
+        }
+      ],
+      "done": "Bring me the stick. I want to know if my cousin is on it.",
+      "reward": {
+        "xp": 0.65,
+        "gold": 32,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "pw_the_dry_wells",
+      "name": "The Dry Wells",
+      "level": 15,
+      "giver": "hearth_elder_halla",
+      "group": "a party of 3-5",
+      "offer": "Lastwell is the last well because the others ran dry and something moved into them. The old wells go down into lava tubes, deep and warm. Take a party and take our water back.",
+      "steps": [
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "floor": 1,
+          "text": "Climb down into the Dry Wells",
+          "where": "The Dry Wells, the dungeon door in the Pumice Wastes"
+        },
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "boss": true,
+          "text": "Defeat what drank the wells dry",
+          "where": "the bottom of The Dry Wells"
+        }
+      ],
+      "done": "If there is water down there, we will find it. If not, at least nothing is coming up. The Rim-keepers on the Caldera could use you too, when you are ready for the climb.",
+      "reward": {
+        "xp": 1.2,
+        "gold": 55,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        }
+      },
+      "next": "cd_crater_guard"
+    },
+    {
+      "id": "pw_warlord_thrane",
+      "name": "Warlord Thrane",
+      "level": 16,
+      "giver": "haro_draskar",
+      "offer": "Thrane Cinderhand calls himself warlord of the Wastes. When the drums start out in the grey, he is coming for the stockade. When you hear them, get to the wall.",
+      "steps": [
+        {
+          "kind": "killOne",
+          "encounter": "ev_warlord_thrane",
+          "credit": "event",
+          "where": "the grey outside Lastwell Stockade, when the drums start (zone event)",
+          "text": "Defeat Warlord Thrane when he attacks"
+        }
+      ],
+      "done": "His drum is our drum now. It is very loud. The kiln folk up on the ridge have their own raiders, if you liked this.",
+      "reward": {
+        "xp": 0.85,
+        "gold": 38,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      },
+      "next": "kr_the_basalt_steps"
+    }
+  ]
+}

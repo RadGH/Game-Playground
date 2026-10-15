@@ -1,0 +1,196 @@
+{
+  "id": "mb_clinker",
+  "name": "Clinker",
+  "tier": "miniboss",
+  "body": "pumice_golem",
+  "place": "dungeon kiln_forge set A (The Old Kilns): mini-boss",
+  "_doc": "A golem of over-fired brick, still red-hot inside. P1 \"Red Hot\": heavy fists, a hot handprint on a random player, and Brick Shrapnel (lines in all directions). A quench trough stands in the room: lure Clinker into it and it cracks (stun, takes more) — once. P2 at 50% \"Glazing\": it glazes over and heats up: every few seconds it leaves heat on the floor around it and its slam knocks far.",
+  "party": "Solo: save the trough for P2. 2-3: the tank walks it through the trough. 5: the shrapnel lines go everywhere — spread round it, not in a line.",
+  "hpMult": 2.2,
+  "arena": {
+    "radius": 12,
+    "objects": [
+      {
+        "id": "quench",
+        "type": "pool",
+        "name": "Quench trough",
+        "x": 0,
+        "z": 7,
+        "r": 1.8,
+        "every": 1,
+        "heal": 0.01,
+        "boss": [
+          {
+            "say": "Clinker steps in the quench trough — it cracks with a bang!",
+            "style": "warn"
+          },
+          {
+            "stun": 3
+          },
+          {
+            "vuln": {
+              "takeMore": 0.35,
+              "seconds": 10,
+              "name": "Quenched"
+            }
+          },
+          {
+            "remove": "quench"
+          }
+        ]
+      }
+    ]
+  },
+  "say": {
+    "pull": [
+      "It looks like a heap of bad bricks, until it stands up.",
+      "Heat pours off Clinker like a kiln with the door open."
+    ],
+    "death": "Clinker cools with a long series of ticks and cracks.",
+    "reset": "Clinker settles back into a heap of bricks, glowing."
+  },
+  "enrage": {
+    "seconds": 280,
+    "damage": 2.5,
+    "say": "Clinker glows white!"
+  },
+  "abilities": {
+    "fists": {
+      "id": "fists",
+      "name": "Brick Fists",
+      "every": [
+        5,
+        7
+      ],
+      "range": 5,
+      "melee": {
+        "damage": 1.4
+      },
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 5,
+          "arc": 1.4,
+          "wind": 1,
+          "damage": 1.6
+        }
+      ]
+    },
+    "handprint": {
+      "id": "handprint",
+      "name": "Red Handprint",
+      "every": [
+        9,
+        11
+      ],
+      "first": 3,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 2.6,
+          "wind": 1.3,
+          "damage": 1.4,
+          "element": "fire",
+          "status": "seared"
+        }
+      ]
+    },
+    "shrapnel": {
+      "id": "shrapnel",
+      "name": "Brick Shrapnel",
+      "every": [
+        13,
+        16
+      ],
+      "first": 5,
+      "cast": 0.8,
+      "say": "Bricks burst off it in every direction!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 13,
+          "w": 2,
+          "count": 6,
+          "rotate": 1.047,
+          "yaw": "random",
+          "wind": 1.4,
+          "damage": 1.6
+        }
+      ]
+    },
+    "heat_step": {
+      "id": "heat_step",
+      "name": "Glowing Footing",
+      "every": [
+        8,
+        10
+      ],
+      "first": 2,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 3.5,
+          "wind": 1.2,
+          "damage": 1.2,
+          "element": "fire",
+          "leave": {
+            "type": "pool",
+            "name": "Hot bricks",
+            "r": 3,
+            "every": 1,
+            "seconds": 10,
+            "damage": 0.3,
+            "status": "burn",
+            "element": "fire"
+          }
+        }
+      ]
+    },
+    "slam": {
+      "id": "slam",
+      "name": "Kiln Slam",
+      "every": [
+        15,
+        18
+      ],
+      "first": 6,
+      "cast": 1,
+      "say": "Clinker raises both fists — get back!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 6.5,
+          "wind": 1.6,
+          "damage": 2.4,
+          "knock": 6
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Red Hot",
+      "abilities": [
+        "fists",
+        "handprint",
+        "shrapnel"
+      ]
+    },
+    {
+      "name": "Glazing",
+      "at": 0.5,
+      "say": "A glaze runs over Clinker, hot as a fresh pot!",
+      "abilities": [
+        "fists",
+        "heat_step",
+        "slam",
+        "shrapnel"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,170 @@
+{
+  "id": "rare_bubblejaw",
+  "name": "Bubblejaw",
+  "tier": "rare",
+  "secret": true,
+  "zone": "fumarole_fen",
+  "level": 14,
+  "body": "mudback_lurker",
+  "place": "lies in the hot mud channels south of Stiltreach; a line of bubbles shows where it is going",
+  "_doc": "Expansion 1 (Vharlen). A lurker that breathes out through the mud. Its gas bubbles drift onto players and pop with a shove, and it sends a wave of mud down a line. At half health the whole channel belches gas: only the three dry hummocks are safe (stand inside one), while bubbles keep coming.",
+  "party": {
+    "solo": "Solo-able at 14 if you know the hummocks.",
+    "small": "Right for 2-3.",
+    "full": "Easy.",
+    "m5": "M5 adds health per extra player and one more copy of the spread/scatter shapes for parties of 4-5; mechanics stay the same."
+  },
+  "hpMult": 2,
+  "arena": {
+    "radius": 24
+  },
+  "say": {
+    "pull": [
+      "A line of bubbles turns toward you. Fast.",
+      "The mud opens into a mouth."
+    ],
+    "death": "Bubblejaw sinks. One last bubble comes up, and pops.",
+    "reset": "The bubbles drift away down the channel."
+  },
+  "abilities": {
+    "jaws": {
+      "id": "jaws",
+      "name": "Muddy Jaws",
+      "every": [
+        6,
+        8
+      ],
+      "first": 2,
+      "range": 5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 4.6,
+          "arc": 1.3,
+          "wind": 1,
+          "damage": 1.6
+        }
+      ]
+    },
+    "bubbles": {
+      "id": "bubbles",
+      "name": "Gas Bubbles",
+      "every": [
+        12,
+        15
+      ],
+      "first": 4,
+      "say": "Fat gas bubbles drift toward you — keep them away from the others!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 2.8,
+          "wind": 2.2,
+          "damage": 1.3,
+          "count": 2,
+          "follow": true,
+          "knock": 3,
+          "element": "poison"
+        }
+      ]
+    },
+    "mud_wave": {
+      "id": "mud_wave",
+      "name": "Mud Wave",
+      "every": [
+        12,
+        15
+      ],
+      "first": 7,
+      "cast": 0.5,
+      "say": "{boss} heaves a wave of mud at {target}!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 16,
+          "w": 5,
+          "wind": 1.4,
+          "damage": 1.5,
+          "knock": 3,
+          "status": "stuck"
+        }
+      ]
+    },
+    "fen_belch": {
+      "id": "fen_belch",
+      "name": "Fen Belch",
+      "every": [
+        16,
+        19
+      ],
+      "first": 3,
+      "cast": 0.8,
+      "say": "The whole channel belches gas — get onto a dry hummock!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "home",
+          "r": 3.5,
+          "wind": 3,
+          "damage": 2,
+          "offset": [
+            -8,
+            6
+          ],
+          "kind": "safe",
+          "element": "poison"
+        },
+        {
+          "shape": "circle",
+          "at": "home",
+          "r": 3.5,
+          "wind": 3,
+          "damage": 2,
+          "offset": [
+            8,
+            6
+          ],
+          "kind": "safe",
+          "element": "poison"
+        },
+        {
+          "shape": "circle",
+          "at": "home",
+          "r": 3.5,
+          "wind": 3,
+          "damage": 2,
+          "offset": [
+            0,
+            -9
+          ],
+          "kind": "safe",
+          "element": "poison"
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Surfacing",
+      "abilities": [
+        "jaws",
+        "bubbles",
+        "mud_wave"
+      ]
+    },
+    {
+      "name": "Boiling Mud",
+      "at": 0.5,
+      "say": "The mud around Bubblejaw starts to boil!",
+      "abilities": [
+        "jaws",
+        "fen_belch",
+        "bubbles",
+        "mud_wave"
+      ]
+    }
+  ]
+}

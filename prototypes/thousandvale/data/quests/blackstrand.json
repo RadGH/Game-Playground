@@ -1,0 +1,239 @@
+{
+  "_doc": "Stream C (Expansion 1). Quests for zone 'blackstrand' on Vharlen, the Burning Isle. Format: data/quests/README.md. Rewards: xp = share of a level's XP at the quest level, gold = multiple of a kill's gold; item.tier rolls at your level. `killRare` {zone, slot} names the zone's rare by slot (data/provinces/rares.json). Story-chain quests carry `story: n` (data/quests/vharlen-province.json).",
+  "zone": "blackstrand",
+  "npcs": {
+    "hearth_elder_tavi": {
+      "name": "Hearth-elder Tavi Keshvar",
+      "role": "elder",
+      "at": "Port Vharl",
+      "greeting": "Off the Saltwren? Welcome to the Mother. Keep your boots on, the sand is hotter than it looks.",
+      "titled": true
+    },
+    "harbour_warden_kesk": {
+      "name": "Kesk Ormakku",
+      "role": "guard",
+      "at": "Port Vharl",
+      "greeting": "The Harbour Council pays me to watch the sea. The trouble keeps walking out of the jungle instead.",
+      "titled": true
+    },
+    "net_mender_bekka": {
+      "name": "Net-mender Bekka",
+      "role": "fisher",
+      "at": "Port Vharl",
+      "greeting": "Nets do not mend themselves. Mine try, if you shout at them.",
+      "titled": true
+    },
+    "angler_port_vharl": {
+      "name": "Nessk Thallu",
+      "role": "angler",
+      "at": "Port Vharl",
+      "greeting": "Harbour fish bite at the pier. Deep fish bite your fingers. Keep the two apart. See the ripples, just east of where I'm standing? That's the town pool. It never fishes out.",
+      "placedBy": "content-pools",
+      "titled": true
+    },
+    "carter_port_vharl": {
+      "name": "Rhaska Ormakku",
+      "role": "carter",
+      "at": "Port Vharl",
+      "greeting": "Name a town. If it has a gate, I have been stuck outside it.",
+      "cart": "cart_port_vharl",
+      "placedBy": "content-towns",
+      "titled": true
+    }
+  },
+  "quests": [
+    {
+      "id": "bs_fresh_off_the_saltwren",
+      "name": "Fresh Off the Saltwren",
+      "level": 10,
+      "giver": "hearth_elder_tavi",
+      "story": 1,
+      "offer": "You came in on the Saltwren with a sword and no house. That makes you the Harbour Council's favourite kind of person. Slagborn raiders sit on the jungle edge and stare at our harbour all day. Find out what they are staring at.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "slagborn_raider",
+          "count": 6,
+          "where": "the raider camp on the jungle edge",
+          "text": "Kill 6 Slagborn raiders on the jungle edge"
+        },
+        {
+          "kind": "collect",
+          "item": "Scorched order",
+          "count": 3,
+          "from": "slagborn_firecaller",
+          "chance": 0.5,
+          "where": "the raider camp on the jungle edge",
+          "text": "Take 3 scorched orders from Slagborn firecallers"
+        },
+        {
+          "kind": "talk",
+          "npc": "hearth_elder_tavi",
+          "where": "Port Vharl",
+          "text": "Bring the orders to Hearth-elder Tavi in Port Vharl"
+        }
+      ],
+      "done": "\"Feed the Mother, and the island will be clean.\" Clean of us, they mean. The orders are paid in Yellowpan sulphur. Go and ask the pit-boss there who he has been selling to.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 12,
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "uncommon"
+          }
+        ]
+      },
+      "next": "sb_sold_by_the_sack"
+    },
+    {
+      "id": "bs_crawlers_in_the_nets",
+      "name": "Crawlers in the Nets",
+      "level": 10,
+      "giver": "net_mender_bekka",
+      "offer": "Scoria crawlers come up the coves at night and eat my nets. Not the fish in the nets. The nets. Make them stop.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "scoria_crawler",
+          "count": 8,
+          "where": "the black-sand coves north of Port Vharl",
+          "text": "Kill 8 scoria crawlers in the coves"
+        }
+      ],
+      "done": "Not a hole in them. I will have to find something else to complain about. Give me a day.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 9,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
+      }
+    },
+    {
+      "id": "bs_hetter_slagjaw",
+      "name": "Hetter Slagjaw",
+      "level": 11,
+      "giver": "harbour_warden_kesk",
+      "offer": "The raiders on the jungle edge answer to Hetter Slagjaw. He has a jaw of cooled slag and he bites with it. The Watch would like him to stop biting.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "slagborn_raider",
+          "count": 5,
+          "where": "the raider camp on the jungle edge",
+          "text": "Kill 5 Slagborn raiders to draw him out"
+        },
+        {
+          "kind": "killOne",
+          "encounter": "elite_slag_hetter",
+          "where": "the raider camp on the jungle edge",
+          "text": "Defeat Hetter Slagjaw",
+          "at": {
+            "x": 27990,
+            "z": 21204,
+            "r": 45,
+            "name": "Hetter Slagjaw"
+          }
+        }
+      ],
+      "done": "Hetter Slagjaw, down. The jaw goes on the Watch house wall. It is very ugly. We are very proud of it.",
+      "reward": {
+        "xp": 0.7,
+        "gold": 24,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "bs_tidecoal",
+      "name": "The Thing at Low Tide",
+      "level": 11,
+      "giver": "net_mender_bekka",
+      "offer": "When the tide goes out, a lump of black rock walks along the waterline and hisses at the sea. We call it Tidecoal. It ate a boat last spring. A whole boat.",
+      "steps": [
+        {
+          "kind": "killRare",
+          "zone": "blackstrand",
+          "slot": 0,
+          "text": "Hunt down Tidecoal",
+          "where": "walks the tideline of Blackstrand at low water"
+        }
+      ],
+      "done": "Tidecoal, cold at last. I will tell the boat.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 26,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      },
+      "next": "sb_spitting_season"
+    },
+    {
+      "id": "bs_brineglass_tubes",
+      "name": "The Brineglass Tubes",
+      "level": 11,
+      "giver": "hearth_elder_tavi",
+      "group": "a party of 3-5",
+      "offer": "Under the black sand run old lava tubes where the sea gets in and turns to glass. Something down there sings at night, and the singing is getting closer to the harbour. Take friends.",
+      "steps": [
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "floor": 1,
+          "text": "Climb down into the Brineglass Tubes",
+          "where": "The Brineglass Tubes, the dungeon door in Blackstrand"
+        },
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "boss": true,
+          "text": "Silence what sings at the bottom of the tubes",
+          "where": "the bottom of The Brineglass Tubes"
+        }
+      ],
+      "done": "Quiet nights again. The children are furious. They liked the singing.",
+      "reward": {
+        "xp": 1.2,
+        "gold": 50,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "bs_skarra_ashkeel",
+      "name": "Ashkeel on the Sand",
+      "level": 12,
+      "giver": "harbour_warden_kesk",
+      "offer": "Skarra Ashkeel lands her boats on the black sand when the haze is thick, and burns whatever she can reach before the bell rings. When the bell rings, come and stand on the beach with everyone else.",
+      "steps": [
+        {
+          "kind": "killOne",
+          "encounter": "ev_skarra_ashkeel",
+          "credit": "event",
+          "where": "the beaches of Blackstrand, when the bell rings (zone event)",
+          "text": "Defeat Skarra Ashkeel when she lands"
+        }
+      ],
+      "done": "Her boats burned instead of our roofs. The Council will pretend that was their plan. Stiltreach could use you next; the fen is coughing.",
+      "reward": {
+        "xp": 0.8,
+        "gold": 30,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      },
+      "next": "ff_mud_in_the_channels"
+    }
+  ]
+}

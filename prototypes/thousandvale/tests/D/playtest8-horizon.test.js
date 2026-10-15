@@ -49,7 +49,8 @@ test('W18: tree shapes — only on the nearest ring, inside the budget, on the g
     let maxI = 0; for (const i of c.idx) if (i > maxI) maxI = i;
     assert.ok(maxI < c.pos.length / 3, 'every index points at a vertex');
   }
-  assert.ok(withTrees > 20 && most > 500, `${withTrees} chunks carry trees, the densest ${most}`);
+  // (2026-10-14: only the two islands carry land, so far fewer of the sampled chunks have trees at all)
+  assert.ok(withTrees >= 6 && most > 500, `${withTrees} chunks carry trees, the densest ${most}`);
   const ci = Math.floor(23000 / 2048), cj = Math.floor(6200 / 2048);
   const hi = buildChunk(g, ci, cj, 64, 1, null, { spires: TREE_SPIRES.high }), again = buildChunk(g, ci, cj, 64, 1, null, { spires: TREE_SPIRES.high });
   assert.ok(hi.spires > 100, `${hi.spires} spires on the range's chunk`);

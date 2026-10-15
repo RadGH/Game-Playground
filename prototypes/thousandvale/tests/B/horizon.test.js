@@ -67,7 +67,8 @@ test('the horizon covers the world, has sea where the world has sea, and never r
   for (const [x, z] of [[-50, -50], [1e9, 3], [NaN, 7], [18000, 9000]]) assert.ok(Number.isFinite(H.heightAt(x, z)));
   assert.ok(H.waterAt(10, 10), 'the world corner is ocean');
   let wet = 0; const g = H.waterGrid(); for (let k = 0; k < g.length; k++) if (!Number.isNaN(g[k])) wet++;
-  assert.ok(wet / g.length > 0.1 && wet / g.length < 0.4, `wet share ${wet / g.length}`);
+  // (2026-10-14: the world is two islands in open sea — Torbor Downs and Vharlen — so most of it is water)
+  assert.ok(wet / g.length > 0.7 && wet / g.length < 0.97, `wet share ${wet / g.length}`);
 });
 
 test('horizonRef: what the server puts in `joined`', () => {

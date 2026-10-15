@@ -30,7 +30,8 @@ test('drawn height: the land is horizon.bin\'s own height, water is flat at its 
     if (!w) { land++; const i = Math.round(x / 32), j = Math.round(z / 32); assert.ok(Math.abs(g.drawn[j * g.W + i] - h.heightOfSample(i, j)) < 1e-3); }
     else { wet++; assert.ok(gridHeightAt(g, x, z) >= h.heightAt(x, z) - 0.01, 'water is never drawn under its bed'); }
   }
-  assert.ok(land > 1000 && wet > 100, `sampled both (${land} land, ${wet} wet)`);
+  // (2026-10-14: the world is two islands in open sea, so about one sample in eight is land)
+  assert.ok(land > 300 && wet > 100, `sampled both (${land} land, ${wet} wet)`);
 });
 
 test('baked zones: the horizon sample IS the zone\'s ground sample, so the far mesh meets a loaded zone', () => {

@@ -20,9 +20,9 @@ for (const family of READY) for (const floors of [1, 2, 3, 4]) for (const seed o
 
 const walk = (f, p) => { const k = tileIndex(f, p.x, p.z); return k >= 0 && f.tiles[k] === 1; };
 
-test('all 8 families are ready; an unknown family falls back; at least 4 families have 2 encounter sets of their own', () => {
-  assert.equal(Object.keys(FAMILIES).length, 8);
-  assert.equal(READY.length, 8, 'M2: every layout family');
+test('all 16 families are ready (8 Torbor + 8 Vharlen, EXPANSION-1 §8); an unknown family falls back; at least 4 families have 2 encounter sets of their own', () => {
+  assert.equal(Object.keys(FAMILIES).length, 16);
+  assert.equal(READY.length, 16, 'M2: every layout family');
   for (const k of Object.keys(FAMILIES)) { assert.ok(FAMILIES[familyFor(k)].ready, k); assert.ok(SETS(k).length >= 1, k); }
   const p = planDungeon(5, { family: 'no_such_family' });
   assert.equal(p.familyFallback, 'no_such_family');
@@ -152,7 +152,7 @@ test('the gate matters: lever reachable with the gate shut, the guarded room (bo
 
 test('every encounter body is a real bestiary id and every encounter script exists', () => {
   const enemies = JSON.parse(readFileSync(new URL('../../../farhold/data/enemies.json', import.meta.url), 'utf8'));
-  const ids = new Set([...enemies.enemies, ...enemies.bosses].map(e => e.id));
+  const ids = new Set([...[...enemies.enemies, ...enemies.bosses].map(e => e.id), ...JSON.parse(readFileSync(new URL('../../data/rules/monsters-tv.json', import.meta.url), 'utf8')).monsters.map(m => m.id)]);   // + Thousandvale-only monsters (EXPANSION-1 §5)
   for (const [k, f] of Object.entries(FAMILIES)) if (f.ready) {
     for (const t of [...f.roster.normal, f.roster.elite]) assert.ok(ids.has(t), `${k} roster ${t}`);
     for (const e of SETS(k).flatMap(set => [...set.miniboss, set.boss])) { assert.ok(ids.has(e.type), `${e.id} body ${e.type}`); assert.equal(script(e.id).body, e.type, `${e.id}: script body and family body agree`); }

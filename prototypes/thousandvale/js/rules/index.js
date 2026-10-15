@@ -51,6 +51,7 @@ import { canTakePerk, allocatePerk, refundPerk as refundPerkFor, refundAllPerks,
 const OBJECT_NAMES = { pillar: 'Stone pillar', rock: 'Fallen rock', brazier: 'Brazier', lever: 'Lever', pool: 'Pool', cracked_floor: 'Cracked floor' };
 import { validTarget, TAB } from './targeting.js';
 import { applyItemBuff, itemBuffs as itemBuffsOf, sheetKey, saveItemBuffs, restoreItemBuffs, RECALL, REVIVE_FLASK } from './buffs.js';
+import { applyHazard } from './hazards.js';      // [S] Expansion 1 §4: Vharlen's springs, geysers and vents (js/sim/hazards.js drives them)
 import { groundAdapter } from './terrain-read.js';
 import { serializeGear } from './character.js';
 export { serializeGear, restoreGear } from './character.js';
@@ -1479,6 +1480,8 @@ export function createRules(host, opts = {}) {
     companion: e => (e.r.unit ? companionInfo(e.r.unit, engine.classById(e.r.unit.classId), engine.progression.companions) : null),
     encounters: enc,
     stats: () => ({ builds, handoffs }),
+    /** [S] Expansion 1 §4: a hazard touches a body — `{kind:'soak'|'warm'|'hit', amount?, element?, floor?}` (js/rules/hazards.js) */
+    hazard: (e, op) => { const u = e?.r?.unit; return u ? run(() => applyHazard(u, op, ev => field.emit(ev))) : null; },
     addEntity, removeEntity, intent, step, respawn, onLevel, statusesOf, restore, cleanse, useItem, itemBuffs,
     levelFor: xp => levelFromXp(xp, engine.levelCap),
     xpFor: level => xpForLevel(level, engine.levelCap),

@@ -101,6 +101,8 @@ export function loadMonsterLooks() {
       for (const k of ['enemies', 'bosses', 'pets']) for (const e of d[k] || []) if (e.look) out[e.id] = e.flying ? { ...e.look, flying: true } : e.look;   // flying: drawn hovering (C: the snapshot has no hover)
     } catch {}
     try { const r = await fetch(new URL('../../data/monster-looks.json', import.meta.url)); if (r.ok) Object.assign(out, await r.json()); } catch {}
+    // EXPANSION-1 §5: Thousandvale-only monsters carry their own look (js/rules/tv-monsters.js gives them stats)
+    try { const r = await fetch(new URL('../../data/rules/monsters-tv.json', import.meta.url)); if (r.ok) for (const m of (await r.json()).monsters || []) if (m.look) out[m.id] = m.flying ? { ...m.look, flying: true } : m.look; } catch {}
     return out;
   })();
   return monsterLooks;

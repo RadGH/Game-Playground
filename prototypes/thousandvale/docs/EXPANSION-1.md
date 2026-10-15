@@ -65,7 +65,7 @@ Start: `blackstrand`. World boss: **Ossathra, the Caldera Wyrm** (`world_ossathr
 
 ## 5. Monsters (Vharlen only — new names and new looks; stats borrow a Farhold bestiary block)
 
-`data/monsters-tv.json` (new): `{ id, name, base: <bestiary id>, family, levels, look }`. The rules resolve `base`
+`data/rules/monsters-tv.json` (new, done; js/rules/tv-monsters.js): `{ id, name, base: <bestiary id>, family, levels, look }`. The rules resolve `base`
 for numbers (generalising `TYPE_ALIASES`); the client resolves `look` (same shape as `data/monster-looks.json`).
 
 | id | Name | base stats | look idea |
@@ -99,6 +99,14 @@ Levels are scaled to the zone band (10–20) by the existing level curve.
   distance) and the volcano of Vharlen rises ahead with its ash plume; it ends coming alongside Port Vharl's pier.
   Time is compressed (the ship covers ~10 km in ~40 s), skippable after 5 s.
 - First voyage awards a journal entry and a quest step.
+- **Built (stream V, 2026-10-14):** `js/sim/ships.js` + `data/provinces/ships.json` (harbours, sailings, fare 60 gold,
+  40 s held, skip after 5 s, refund if cut short, `party: true` boards party members within 30 m), sea routes from
+  `tools/ship-routes.mjs` (re-run after a coast re-bake), client `js/client/ship-view.js` (ship, local sea + wake,
+  gulls, spray, the brine-wyrm, ash plume, moored ships + jetties) and `js/client/ui/ship-travel.js` (Harbourmaster
+  window, voyage banner, journal "Voyages" page). Gullwick has no sea inside its zone (coast ~2 km east, past the
+  playable edge): its Harbourmaster stands on Gullwick's main street and the ship lies at the real coast. Port Vharl's
+  pier uses stream T's `harbour` placement. Quest steps of kind `voyage` still need a matcher in `js/sim/quests.js`.
+  Tests: `tests/V/ships.test.js`, `tests/V/voyage.spec.js` (shots in `tests/V/shots/`).
 
 ## 7. Content (per zone, the floor of PLAN §3.4)
 

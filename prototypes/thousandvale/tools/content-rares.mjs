@@ -20,9 +20,11 @@
 //            the share of the half hour it is standing (respawn 20-60 min means a solo newcomer finds it up)
 import { readFileSync } from 'node:fs';
 import { loadLayouts } from '../server/load.mjs';
+import { provinceArg } from '../js/sim/province-files.js';
 
 const root = new URL('../', import.meta.url);
 const readJ = p => JSON.parse(readFileSync(new URL(p, root), 'utf8'));
+const PROV = provinceArg(process.argv);     // --province=<id> (default torbor_downs)
 export const SIGHT = 45;
 export const MINUTES = 30;
 export const KILLS = 40;
@@ -37,12 +39,13 @@ function segDist(p, a, b) {
 const lineDist = (p, line) => { let d = Infinity; for (let i = 1; i < line.length; i++) d = Math.min(d, segDist(p, line[i - 1], line[i])); return d; };
 
 /** The line a newcomer walks: giver -> each step, quest after quest (world metres). */
-export function startLine(marks = readJ('data/quests/marks/torbor_downs.json'), cut = WALK_M) {
+export function startLine(marks = readJ(`data/quests/marks/${PROV}.json`), cut = WALK_M) {
   const line = [];
   for (const id of CHAIN) {
     const m = marks.quests[id]; if (!m) continue;
     for (const p of [m.giver, ...(m.steps || [])]) if (p && Number.isFinite(p.x)) line.push({ x: p.x, z: p.z });
   }
+  if (!line.length) return [];                 // a province without the start chain (its newcomers come from elsewhere)
   // cut it off at WALK_M
   const out = [line[0]]; let left = cut;
   for (let i = 1; i < line.length && left > 0; i++) {
@@ -52,10 +55,10 @@ export function startLine(marks = readJ('data/quests/marks/torbor_downs.json'), 
   return out;
 }
 
-export async function measureRares({ chance = null, layout = null, sight = SIGHT } = {}) {
-  if (!layout) { const q = console.log; console.log = () => {}; try { layout = (await loadLayouts(['torbor_downs'])).layouts[0]; } finally { console.log = q; } }
+export async function measureRares({ chance = null, layout = null, sight = SIGHT, prov = PROV } = {}) {
+  if (!layout) { const q = console.log; console.log = () => {}; try { layout = (await loadLayouts([prov])).layouts[0]; } finally { console.log = q; } }
   const c = chance || readJ('data/rules/affixes.json').chance;
-  const line = startLine();
+  const line = startLine(readJ(`data/quests/marks/${prov}.json`));
   let length = 0; for (let i = 1; i < line.length; i++) length += Math.hypot(line[i].x - line[i - 1].x, line[i].z - line[i - 1].z);
   const met = layout.camps.filter(k => lineDist(k, line) <= sight + (k.radius || 0));
   const plain = met.filter(k => !k.rank && !k.encounter && !k.warband);
@@ -92,7 +95,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const arg = process.argv.find(a => a.startsWith('--chance='));
   let chance = null;
   if (arg) { const [champion, rare, minLevel] = arg.slice(9).split(',').map(Number); chance = { champion, rare, minLevel }; }
-  const r = await measureRares({ chance });
+  let r;
+  try { r = await measureRares({ chance }); } catch (err) { console.error(`content-rares: province ${PROV}: ${err.message}`); process.exit(2); }
   if (process.argv.includes('--json')) console.log(JSON.stringify(r, null, 2));
   else {
     console.log(`A newcomer's first ${MINUTES} minutes on the start chain: ${r.lineMetres} m walked, ${KILLS} kills, sight ${r.sight} m`);

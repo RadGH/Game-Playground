@@ -16,7 +16,7 @@ import { WALL_KINDS, EXTRA_WALL_KINDS, wallKitParts, gateLeafParts, gatePostPart
 register('../../../../avatar-3d/tests/three-loader.mjs', import.meta.url);
 const ROOT = new URL('../../', import.meta.url);
 const read = p => readFileSync(new URL(p, ROOT));
-const PMAP = JSON.parse(read('data/world/province-map.json')).provinces.torbor_downs.map;
+const PMAP = /* every province (Torbor Downs + Vharlen) */ Object.assign({}, ...Object.values(JSON.parse(read('data/world/province-map.json')).provinces).map(p => p.map));
 const ZONES = Object.values(PMAP);
 const CFG = JSON.parse(read('data/world/town-walls.json'));
 const cache = new Map();

@@ -1,0 +1,119 @@
+{
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z13_09, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "zone": "z13_09",
+ "terrainHash": "669bc5b6",
+ "placements": [
+  {
+   "type": "camp",
+   "id": "champ_z13_09_1",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    12,
+    12
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 680,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "fiery"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "npc",
+   "id": "angler_yellowpan",
+   "name": "Tekk Sulvenn",
+   "role": "angler",
+   "at": "Yellowpan",
+   "x": 328,
+   "z": 1360,
+   "yaw": -2.36,
+   "angler": true,
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "npc",
+   "id": "carter_yellowpan",
+   "name": "Yssa Jakkora",
+   "role": "carter",
+   "at": "Yellowpan",
+   "x": 506,
+   "z": 1642,
+   "yaw": 1.617,
+   "cart": "cart_yellowpan",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_yellowpan",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Yellowpan",
+   "carter": "carter_yellowpan",
+   "x": 504,
+   "z": 1642,
+   "yaw": 0,
+   "radius": 2.2
+  },
+  {
+   "type": "guard",
+   "id": "guard_yellowpan_0",
+   "name": "Yellowpan Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "village",
+   "town": "Yellowpan",
+   "post": "gate",
+   "gate": "yellowpan_gate_0",
+   "x": 508,
+   "z": 1626,
+   "yaw": 0.062,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_yellowpan_1",
+   "name": "Yellowpan Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "village",
+   "town": "Yellowpan",
+   "post": "gate",
+   "gate": "yellowpan_gate_1",
+   "x": 472,
+   "z": 1580,
+   "yaw": -1.655,
+   "titled": false
+  },
+  {
+   "type": "guard",
+   "id": "guard_yellowpan_2",
+   "name": "Yellowpan Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "village",
+   "town": "Yellowpan",
+   "post": "square",
+   "x": 530,
+   "z": 1588,
+   "yaw": -1.401,
+   "titled": false
+  }
+ ]
+}

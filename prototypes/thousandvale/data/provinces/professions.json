@@ -402,6 +402,72 @@
    "tint": "#efe6d2",
    "price": 1
   },
+  "obsidian_ore": {
+   "id": "obsidian_ore",
+   "name": "Obsidian",
+   "desc": "Black volcanic glass, broken out of a Vharlen outcrop. A smith melts it down with blackiron, or knaps it into an edge that takes a whetstone like nothing else.",
+   "tier": 4,
+   "prof": "mining",
+   "icon": "ore",
+   "tint": "#1c1a24",
+   "price": 40,
+   "island": "vharlen"
+  },
+  "sulphur": {
+   "id": "sulphur",
+   "name": "Sulphur",
+   "desc": "Yellow crust scraped off the flats of Vharlen. It stinks, it burns hot, and it makes a smelting fire do twice the work.",
+   "tier": 4,
+   "prof": "mining",
+   "icon": "resin",
+   "tint": "#e8d24a",
+   "price": 40,
+   "island": "vharlen"
+  },
+  "ironpalm_log": {
+   "id": "ironpalm_log",
+   "name": "Ironpalm Log",
+   "desc": "Timber from the steam jungle of Vharlen: as hard as ironbark and it never warps in the heat. Hafts, bows, staves and shields.",
+   "tier": 4,
+   "prof": "logging",
+   "icon": "wood",
+   "tint": "#4a3a2a",
+   "price": 50,
+   "island": "vharlen"
+  },
+  "steamcap": {
+   "id": "steamcap",
+   "name": "Steamcap",
+   "desc": "A pale mushroom that grows only where the ground breathes steam. Good in a broth, better in a caster's orb.",
+   "tier": 4,
+   "prof": "foraging",
+   "icon": "mushroom",
+   "tint": "#c8d0c0",
+   "price": 48,
+   "island": "vharlen"
+  },
+  "cinderbloom": {
+   "id": "cinderbloom",
+   "name": "Cinderbloom",
+   "desc": "A red flower that opens on warm ash and nowhere else. The still turns it into something that makes your blood run hot.",
+   "tier": 5,
+   "prof": "foraging",
+   "icon": "herb",
+   "tint": "#ff6a2a",
+   "price": 78,
+   "island": "vharlen"
+  },
+  "salamander_hide": {
+   "id": "salamander_hide",
+   "name": "Salamander Hide",
+   "desc": "The black, heat-proof skin of an Ashback Salamander. An outfitter cures it into the toughest leather there is.",
+   "tier": 4,
+   "prof": "skinning",
+   "icon": "hide",
+   "tint": "#2a2224",
+   "price": 24,
+   "island": "vharlen"
+  },
   "bronze_bar": {
    "id": "bronze_bar",
    "name": "Bronze Bar",
@@ -1010,6 +1076,76 @@
     "size": 1.6,
     "tint": "#c9ccd2",
     "n": 5
+   }
+  },
+  "obsidian": {
+   "id": "obsidian",
+   "prof": "mining",
+   "tier": 4,
+   "name": "Obsidian Outcrop",
+   "gives": "obsidian_ore",
+   "bonus": "sapphire",
+   "look": {
+    "model": "boulder",
+    "size": 2,
+    "tint": "#1c1a24",
+    "n": 8
+   }
+  },
+  "sulphur": {
+   "id": "sulphur",
+   "prof": "mining",
+   "tier": 4,
+   "name": "Sulphur Crust",
+   "gives": "sulphur",
+   "bonus": null,
+   "look": {
+    "model": "boulder",
+    "size": 1.5,
+    "tint": "#e8d24a",
+    "n": 6
+   }
+  },
+  "ironpalm": {
+   "id": "ironpalm",
+   "prof": "logging",
+   "tier": 4,
+   "name": "Marked Ironpalm",
+   "gives": "ironpalm_log",
+   "bonus": null,
+   "look": {
+    "model": "tree",
+    "size": 10,
+    "tint": "#8a3ad0",
+    "n": 1
+   }
+  },
+  "steamcap": {
+   "id": "steamcap",
+   "prof": "foraging",
+   "tier": 4,
+   "name": "Steamcap Ring",
+   "gives": "steamcap",
+   "bonus": null,
+   "look": {
+    "model": "mushroom",
+    "size": 0.4,
+    "tint": "#c8d0c0",
+    "n": 6
+   }
+  },
+  "cinderbloom": {
+   "id": "cinderbloom",
+   "prof": "foraging",
+   "tier": 5,
+   "name": "Cinderbloom Patch",
+   "gives": "cinderbloom",
+   "bonus": null,
+   "look": {
+    "model": "herb",
+    "size": 0.55,
+    "tint": "#ff6a2a",
+    "n": 6
    }
   }
  },
@@ -8552,6 +8688,1121 @@
     "id": "amber_broth",
     "n": 1
    }
+  },
+  {
+   "id": "smelt_blackiron_bar_obsidian",
+   "prof": "smithing",
+   "tier": 4,
+   "skill": 77,
+   "name": "Blackiron Bar (from obsidian)",
+   "desc": "Obsidian melted down in a hot fire comes out as blackiron. Two lumps of the glass for one bar.",
+   "kind": "material",
+   "refine": true,
+   "needs": [
+    {
+     "id": "obsidian_ore",
+     "n": 2
+    }
+   ],
+   "makes": {
+    "id": "blackiron_bar",
+    "n": 1
+   },
+   "alt": "smelt_blackiron_bar",
+   "island": "vharlen"
+  },
+  {
+   "id": "smelt_sunsteel_bar_sulphur",
+   "prof": "smithing",
+   "tier": 5,
+   "skill": 92,
+   "name": "Sunsteel Bar (sulphur fire)",
+   "desc": "A sulphur fire burns hot enough to smelt sunsteel from half the ore.",
+   "kind": "material",
+   "refine": true,
+   "needs": [
+    {
+     "id": "sunsteel_ore",
+     "n": 1
+    },
+    {
+     "id": "sulphur",
+     "n": 1
+    }
+   ],
+   "makes": {
+    "id": "sunsteel_bar",
+    "n": 1
+   },
+   "alt": "smelt_sunsteel_bar",
+   "island": "vharlen"
+  },
+  {
+   "id": "cure_drake_leather_salamander",
+   "prof": "outfitting",
+   "tier": 5,
+   "skill": 92,
+   "name": "Drake Leather (from salamander hide)",
+   "desc": "Three salamander hides, cured slow, make a leather as tough as a drake's.",
+   "kind": "material",
+   "refine": true,
+   "needs": [
+    {
+     "id": "salamander_hide",
+     "n": 3
+    }
+   ],
+   "makes": {
+    "id": "drake_leather",
+    "n": 1
+   },
+   "alt": "cure_drake_leather",
+   "island": "vharlen"
+  },
+  {
+   "id": "axes_4_ironpalm",
+   "prof": "smithing",
+   "tier": 4,
+   "skill": 78,
+   "name": "Blackiron-grade Axes (Ironpalm Log)",
+   "pattern": "axes",
+   "desc": "Axes, one-handed and great. You choose the pattern; the item comes out at up to level 40, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "blackiron_bar",
+     "n": 4
+    },
+    {
+     "id": "ironpalm_log",
+     "n": 2
+    }
+   ],
+   "bases": [
+    {
+     "key": "battleaxe",
+     "name": "Battleaxe",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "woodsman_axe",
+     "name": "Woodsman's Axe",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "axe2h",
+     "name": "Greataxe",
+     "slot": "weapon",
+     "from": 2
+    },
+    {
+     "key": "g5_moonaxe",
+     "name": "Halfmoon Axe",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "g5_headsman",
+     "name": "Headsman's Longaxe",
+     "slot": "weapon",
+     "from": 7
+    },
+    {
+     "key": "breakers_pick",
+     "name": "Breaker's Pick",
+     "slot": "weapon",
+     "from": 12
+    }
+   ],
+   "alt": "axes_4",
+   "island": "vharlen"
+  },
+  {
+   "id": "maces_4_ironpalm",
+   "prof": "smithing",
+   "tier": 4,
+   "skill": 78,
+   "name": "Blackiron-grade Maces and Hammers (Ironpalm Log)",
+   "pattern": "maces",
+   "desc": "Maces, hammers and mauls. You choose the pattern; the item comes out at up to level 40, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "blackiron_bar",
+     "n": 4
+    },
+    {
+     "id": "ironpalm_log",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "hammer",
+     "name": "Hammer",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "iron_mace",
+     "name": "Iron Mace",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_mallet",
+     "name": "Cooper's Mallet",
+     "slot": "weapon",
+     "from": 2
+    },
+    {
+     "key": "lantern_mace",
+     "name": "Lantern Mace",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "g5_morningstar",
+     "name": "Thornhead Morningstar",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "warhammer",
+     "name": "Warhammer",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
+     "key": "g5_stonemaul",
+     "name": "Quarrybound Sledge",
+     "slot": "weapon",
+     "from": 9
+    },
+    {
+     "key": "axle_club",
+     "name": "Wagon-Axle Club",
+     "slot": "weapon",
+     "from": 11
+    },
+    {
+     "key": "dawnwarden_hammer",
+     "name": "Dawnwarden Hammer",
+     "slot": "weapon",
+     "from": 16
+    },
+    {
+     "key": "drakehammer",
+     "name": "Drakehammer",
+     "slot": "weapon",
+     "from": 23
+    }
+   ],
+   "alt": "maces_4",
+   "island": "vharlen"
+  },
+  {
+   "id": "greatblades_4_ironpalm",
+   "prof": "smithing",
+   "tier": 4,
+   "skill": 81,
+   "name": "Blackiron-grade Greatswords (Ironpalm Log)",
+   "pattern": "greatblades",
+   "desc": "Two-handed swords. You choose the pattern; the item comes out at up to level 40, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "blackiron_bar",
+     "n": 5
+    },
+    {
+     "id": "ironpalm_log",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "sword2h",
+     "name": "Greatsword",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "greatsword",
+     "name": "Greatsword",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "g5_flamberge",
+     "name": "Rippled Greatblade",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "bloodledger_blade",
+     "name": "Blood Ledger",
+     "slot": "weapon",
+     "from": 23
+    },
+    {
+     "key": "dragonfang_greatsword",
+     "name": "Dragonfang Greatsword",
+     "slot": "weapon",
+     "from": 23
+    },
+    {
+     "key": "grudgebrand",
+     "name": "Grudgebrand",
+     "slot": "weapon",
+     "from": 23
+    }
+   ],
+   "alt": "greatblades_4",
+   "island": "vharlen"
+  },
+  {
+   "id": "polearms_4_ironpalm",
+   "prof": "smithing",
+   "tier": 4,
+   "skill": 81,
+   "name": "Blackiron-grade Spears and Polearms (Ironpalm Log)",
+   "pattern": "polearms",
+   "desc": "Spears, javelins and halberds. You choose the pattern; the item comes out at up to level 40, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "blackiron_bar",
+     "n": 2
+    },
+    {
+     "id": "ironpalm_log",
+     "n": 3
+    }
+   ],
+   "bases": [
+    {
+     "key": "halberd",
+     "name": "Halberd",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "javelin",
+     "name": "Javelin",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "spear",
+     "name": "Spear",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_harpoon",
+     "name": "Barbed Harpoon",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "pathfinder_javelin",
+     "name": "Pathfinder Javelin",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "g5_partisan",
+     "name": "Winged Partisan",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "g5_bardiche",
+     "name": "Reaper's Bardiche",
+     "slot": "weapon",
+     "from": 10
+    },
+    {
+     "key": "watchfire_glaive",
+     "name": "Watchfire Glaive",
+     "slot": "weapon",
+     "from": 16
+    }
+   ],
+   "alt": "polearms_4",
+   "island": "vharlen"
+  },
+  {
+   "id": "shields_4_ironpalm",
+   "prof": "smithing",
+   "tier": 4,
+   "skill": 80,
+   "name": "Blackiron-grade Shields (Ironpalm Log)",
+   "pattern": "shields",
+   "desc": "Bucklers to tower shields. You choose the pattern; the item comes out at up to level 40, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "blackiron_bar",
+     "n": 3
+    },
+    {
+     "id": "ironpalm_log",
+     "n": 2
+    }
+   ],
+   "bases": [
+    {
+     "key": "buckler",
+     "name": "Buckler",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "shield",
+     "name": "Shield",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "g5_targe",
+     "name": "Studded Targe",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "kite_shield",
+     "name": "Kite Shield",
+     "slot": "offhand",
+     "from": 3
+    },
+    {
+     "key": "g5_scutcheon",
+     "name": "Notched Scutcheon",
+     "slot": "offhand",
+     "from": 3
+    },
+    {
+     "key": "g5_almond",
+     "name": "Almond Kite",
+     "slot": "offhand",
+     "from": 6
+    },
+    {
+     "key": "tower_shield",
+     "name": "Tower Shield",
+     "slot": "offhand",
+     "from": 6
+    },
+    {
+     "key": "g5_pavise",
+     "name": "Ridged Pavise",
+     "slot": "offhand",
+     "from": 10
+    }
+   ],
+   "alt": "shields_4",
+   "island": "vharlen"
+  },
+  {
+   "id": "bows_4_ironpalm",
+   "prof": "outfitting",
+   "tier": 4,
+   "skill": 81,
+   "name": "Blackiron-grade Bows and Quivers (Ironpalm Log)",
+   "pattern": "bows",
+   "desc": "Bows, crossbows and quivers. You choose the pattern; the item comes out at up to level 40, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "ironpalm_log",
+     "n": 3
+    },
+    {
+     "id": "heavy_leather",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "crossbow",
+     "name": "Crossbow",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "quiver",
+     "name": "Quiver",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "shortbow",
+     "name": "Shortbow",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_hipquiver",
+     "name": "Hip Quiver",
+     "slot": "offhand",
+     "from": 2
+    },
+    {
+     "key": "bow",
+     "name": "Bow",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "g5_recurve",
+     "name": "Horn Recurve",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "roadwarden_bow",
+     "name": "Roadwarden Bow",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "g5_arbalest",
+     "name": "Stirrup Arbalest",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "stormpin_crossbow",
+     "name": "Stormpin Crossbow",
+     "slot": "weapon",
+     "from": 11
+    },
+    {
+     "key": "starwake_bow",
+     "name": "Starwake Bow",
+     "slot": "weapon",
+     "from": 16
+    },
+    {
+     "key": "wyrmscale_bow",
+     "name": "Wyrmscale Bow",
+     "slot": "weapon",
+     "from": 23
+    }
+   ],
+   "alt": "bows_4",
+   "island": "vharlen"
+  },
+  {
+   "id": "staves_4_ironpalm",
+   "prof": "alchemy",
+   "tier": 4,
+   "skill": 81,
+   "name": "Blackiron-grade Staves (Ironpalm Log)",
+   "pattern": "staves",
+   "desc": "A staff, steeped until it holds a charge. You choose the pattern; the item comes out at up to level 40, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "ironpalm_log",
+     "n": 3
+    },
+    {
+     "id": "frostbloom",
+     "n": 2
+    }
+   ],
+   "bases": [
+    {
+     "key": "g5_staff_spire",
+     "name": "Spire Staff",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "staff",
+     "name": "Staff",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_bostaff",
+     "name": "Ironshod Bo",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "g5_staff_horn",
+     "name": "Horncall Staff",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "quarterstaff",
+     "name": "Quarterstaff",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "g5_staff_halo",
+     "name": "Halo Staff",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
+     "key": "pilgrims_staff",
+     "name": "Pilgrim's Staff",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "g5_staff_lens",
+     "name": "Sunglass Staff",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "bramble_staff",
+     "name": "Bramble Staff",
+     "slot": "weapon",
+     "from": 9
+    },
+    {
+     "key": "g5_staff_branch",
+     "name": "Stormbranch Staff",
+     "slot": "weapon",
+     "from": 10
+    },
+    {
+     "key": "g5_staff_aegis",
+     "name": "Bulwark Staff",
+     "slot": "weapon",
+     "from": 12
+    },
+    {
+     "key": "dragonbone_staff",
+     "name": "Dragonbone Staff",
+     "slot": "weapon",
+     "from": 23
+    }
+   ],
+   "alt": "staves_4",
+   "island": "vharlen"
+  },
+  {
+   "id": "wands_4_ironpalm",
+   "prof": "alchemy",
+   "tier": 4,
+   "skill": 83,
+   "name": "Blackiron-grade Wands and Sceptres (Ironpalm Log)",
+   "pattern": "wands",
+   "desc": "A wand or a sceptre with a stone at its heart. You choose the pattern; the item comes out at up to level 40, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "ironpalm_log",
+     "n": 1
+    },
+    {
+     "id": "sapphire",
+     "n": 1
+    },
+    {
+     "id": "frostbloom",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "g5_wand_dart",
+     "name": "Dart Wand",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "scepter",
+     "name": "Scepter",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "wand",
+     "name": "Wand",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_wand_bell",
+     "name": "Bellmouth Wand",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "g5_crownsceptre",
+     "name": "Crownhead Sceptre",
+     "slot": "weapon",
+     "from": 5
+    },
+    {
+     "key": "g5_wand_hoop",
+     "name": "Hoop Wand",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
+     "key": "g5_wand_lens",
+     "name": "Sunglass Wand",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "g5_wand_fork",
+     "name": "Forked Wand",
+     "slot": "weapon",
+     "from": 10
+    },
+    {
+     "key": "g5_wand_ward",
+     "name": "Warding Wand",
+     "slot": "weapon",
+     "from": 12
+    },
+    {
+     "key": "gravebound_scepter",
+     "name": "Gravebound Scepter",
+     "slot": "weapon",
+     "from": 16
+    },
+    {
+     "key": "dragontooth_wand",
+     "name": "Dragontooth Wand",
+     "slot": "weapon",
+     "from": 23
+    }
+   ],
+   "alt": "wands_4",
+   "island": "vharlen"
+  },
+  {
+   "id": "foci_4_steamcap",
+   "prof": "alchemy",
+   "tier": 4,
+   "skill": 85,
+   "name": "Blackiron-grade Orbs, Tomes and Charms (Steamcap)",
+   "pattern": "foci",
+   "desc": "A caster's off-hand or orb. You choose the pattern; the item comes out at up to level 40, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "moonweave_bolt",
+     "n": 1
+    },
+    {
+     "id": "sapphire",
+     "n": 1
+    },
+    {
+     "id": "steamcap",
+     "n": 2
+    }
+   ],
+   "bases": [
+    {
+     "key": "grimoire",
+     "name": "Grimoire",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "orb",
+     "name": "Orb",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "tome",
+     "name": "Tome",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "warded_focus",
+     "name": "Warded Focus",
+     "slot": "offhand",
+     "from": 1
+    },
+    {
+     "key": "psalter",
+     "name": "Psalter",
+     "slot": "offhand",
+     "from": 2
+    },
+    {
+     "key": "g5_folio",
+     "name": "Sealed Folio",
+     "slot": "offhand",
+     "from": 3
+    },
+    {
+     "key": "spellguard_orb",
+     "name": "Spellguard Orb",
+     "slot": "offhand",
+     "from": 3
+    },
+    {
+     "key": "g5_codex",
+     "name": "Open Codex",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "reliquary",
+     "name": "Reliquary",
+     "slot": "offhand",
+     "from": 4
+    },
+    {
+     "key": "seer_orb",
+     "name": "Seer's Orb",
+     "slot": "offhand",
+     "from": 4
+    },
+    {
+     "key": "g5_armillary",
+     "name": "Armillary Orb",
+     "slot": "weapon",
+     "from": 5
+    },
+    {
+     "key": "g5_starglass",
+     "name": "Caged Starglass",
+     "slot": "offhand",
+     "from": 5
+    },
+    {
+     "key": "g5_thurible",
+     "name": "Pilgrim's Thurible",
+     "slot": "offhand",
+     "from": 5
+    },
+    {
+     "key": "effigy",
+     "name": "Effigy",
+     "slot": "offhand",
+     "from": 6
+    },
+    {
+     "key": "g5_sigilplate",
+     "name": "Sigil Plate",
+     "slot": "offhand",
+     "from": 6
+    },
+    {
+     "key": "g5_antlerrod",
+     "name": "Antler Rod",
+     "slot": "offhand",
+     "from": 8
+    },
+    {
+     "key": "g5_seeingmask",
+     "name": "Seeing Mask",
+     "slot": "offhand",
+     "from": 8
+    }
+   ],
+   "alt": "foci_4",
+   "island": "vharlen"
+  },
+  {
+   "id": "staves_5_cinderbloom",
+   "prof": "alchemy",
+   "tier": 5,
+   "skill": 96,
+   "name": "Sunsteel-grade Staves (Cinderbloom)",
+   "pattern": "staves",
+   "desc": "A staff, steeped until it holds a charge. You choose the pattern; the item comes out at up to level 50, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "heartwood_log",
+     "n": 3
+    },
+    {
+     "id": "cinderbloom",
+     "n": 2
+    }
+   ],
+   "bases": [
+    {
+     "key": "g5_staff_spire",
+     "name": "Spire Staff",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "staff",
+     "name": "Staff",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_bostaff",
+     "name": "Ironshod Bo",
+     "slot": "weapon",
+     "from": 3
+    },
+    {
+     "key": "g5_staff_horn",
+     "name": "Horncall Staff",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "quarterstaff",
+     "name": "Quarterstaff",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "g5_staff_halo",
+     "name": "Halo Staff",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
+     "key": "pilgrims_staff",
+     "name": "Pilgrim's Staff",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "g5_staff_lens",
+     "name": "Sunglass Staff",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "bramble_staff",
+     "name": "Bramble Staff",
+     "slot": "weapon",
+     "from": 9
+    },
+    {
+     "key": "g5_staff_branch",
+     "name": "Stormbranch Staff",
+     "slot": "weapon",
+     "from": 10
+    },
+    {
+     "key": "g5_staff_aegis",
+     "name": "Bulwark Staff",
+     "slot": "weapon",
+     "from": 12
+    },
+    {
+     "key": "dragonbone_staff",
+     "name": "Dragonbone Staff",
+     "slot": "weapon",
+     "from": 23
+    }
+   ],
+   "alt": "staves_5",
+   "island": "vharlen"
+  },
+  {
+   "id": "wands_5_cinderbloom",
+   "prof": "alchemy",
+   "tier": 5,
+   "skill": 98,
+   "name": "Sunsteel-grade Wands and Sceptres (Cinderbloom)",
+   "pattern": "wands",
+   "desc": "A wand or a sceptre with a stone at its heart. You choose the pattern; the item comes out at up to level 50, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "heartwood_log",
+     "n": 1
+    },
+    {
+     "id": "star_opal",
+     "n": 1
+    },
+    {
+     "id": "cinderbloom",
+     "n": 1
+    }
+   ],
+   "bases": [
+    {
+     "key": "g5_wand_dart",
+     "name": "Dart Wand",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "scepter",
+     "name": "Scepter",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "wand",
+     "name": "Wand",
+     "slot": "weapon",
+     "from": 1
+    },
+    {
+     "key": "g5_wand_bell",
+     "name": "Bellmouth Wand",
+     "slot": "weapon",
+     "from": 4
+    },
+    {
+     "key": "g5_crownsceptre",
+     "name": "Crownhead Sceptre",
+     "slot": "weapon",
+     "from": 5
+    },
+    {
+     "key": "g5_wand_hoop",
+     "name": "Hoop Wand",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
+     "key": "g5_wand_lens",
+     "name": "Sunglass Wand",
+     "slot": "weapon",
+     "from": 8
+    },
+    {
+     "key": "g5_wand_fork",
+     "name": "Forked Wand",
+     "slot": "weapon",
+     "from": 10
+    },
+    {
+     "key": "g5_wand_ward",
+     "name": "Warding Wand",
+     "slot": "weapon",
+     "from": 12
+    },
+    {
+     "key": "gravebound_scepter",
+     "name": "Gravebound Scepter",
+     "slot": "weapon",
+     "from": 16
+    },
+    {
+     "key": "dragontooth_wand",
+     "name": "Dragontooth Wand",
+     "slot": "weapon",
+     "from": 23
+    }
+   ],
+   "alt": "wands_5",
+   "island": "vharlen"
+  },
+  {
+   "id": "knap_obsidian_edge",
+   "prof": "smithing",
+   "tier": 4,
+   "skill": 81,
+   "name": "Obsidian Edge",
+   "desc": "Knap a sliver of obsidian along your weapon's edge: +6% weapon damage for 15 minutes.",
+   "kind": "good",
+   "needs": [
+    {
+     "id": "obsidian_ore",
+     "n": 1
+    },
+    {
+     "id": "blackiron_bar",
+     "n": 1
+    }
+   ],
+   "makes": {
+    "id": "obsidian_edge",
+    "n": 2
+   },
+   "island": "vharlen"
+  },
+  {
+   "id": "brew_brimstone_oil",
+   "prof": "alchemy",
+   "tier": 4,
+   "skill": 79,
+   "name": "Brimstone Oil",
+   "desc": "Sulphur boiled into an oil that hardens on leather and mail: +8% armour for 15 minutes.",
+   "kind": "good",
+   "needs": [
+    {
+     "id": "sulphur",
+     "n": 2
+    },
+    {
+     "id": "moonflax",
+     "n": 1
+    }
+   ],
+   "makes": {
+    "id": "brimstone_oil",
+    "n": 2
+   },
+   "island": "vharlen"
+  },
+  {
+   "id": "brew_cinderbloom_draught",
+   "prof": "alchemy",
+   "tier": 5,
+   "skill": 94,
+   "name": "Cinderbloom Draught",
+   "desc": "It burns going down and keeps burning: +8% weapon damage for 20 minutes.",
+   "kind": "good",
+   "needs": [
+    {
+     "id": "cinderbloom",
+     "n": 2
+    },
+    {
+     "id": "starcap",
+     "n": 1
+    }
+   ],
+   "makes": {
+    "id": "cinderbloom_draught",
+    "n": 1
+   },
+   "island": "vharlen"
+  },
+  {
+   "id": "cook_steamcap_broth",
+   "prof": "cooking",
+   "tier": 4,
+   "skill": 75,
+   "name": "Steamcap Broth",
+   "desc": "Eat out of combat: recover health and mana over 20 seconds, then +10% health for 30 minutes.",
+   "kind": "good",
+   "steps": 1,
+   "island": "vharlen",
+   "needs": [
+    {
+     "id": "steamcap",
+     "n": 2
+    },
+    {
+     "id": "game_meat",
+     "n": 1
+    }
+   ],
+   "makes": {
+    "id": "steamcap_broth",
+    "n": 1
+   }
   }
  ],
  "goods": {
@@ -8719,6 +9970,70 @@
      "minutes": 30
     }
    }
+  },
+  "obsidian_edge": {
+   "kind": "good",
+   "id": "obsidian_edge",
+   "name": "Obsidian edge",
+   "desc": "Knap a sliver of obsidian along your weapon's edge: +6% weapon damage for 15 minutes.",
+   "rarity": "normal",
+   "use": {
+    "type": "buff",
+    "buff": {
+     "stat": "dmgPct",
+     "amount": 0.06,
+     "minutes": 15
+    }
+   }
+  },
+  "brimstone_oil": {
+   "kind": "good",
+   "id": "brimstone_oil",
+   "name": "Brimstone oil",
+   "desc": "Sulphur boiled into an oil that hardens on leather and mail: +8% armour for 15 minutes.",
+   "rarity": "normal",
+   "use": {
+    "type": "buff",
+    "buff": {
+     "stat": "armorPct",
+     "amount": 0.08,
+     "minutes": 15
+    }
+   }
+  },
+  "cinderbloom_draught": {
+   "kind": "good",
+   "id": "cinderbloom_draught",
+   "name": "Cinderbloom draught",
+   "desc": "It burns going down and keeps burning: +8% weapon damage for 20 minutes.",
+   "rarity": "normal",
+   "use": {
+    "type": "buff",
+    "buff": {
+     "stat": "dmgPct",
+     "amount": 0.08,
+     "minutes": 20
+    }
+   }
+  },
+  "steamcap_broth": {
+   "kind": "good",
+   "id": "steamcap_broth",
+   "name": "Steamcap Broth",
+   "desc": "Eat out of combat: recover health and mana over 20 seconds, then +10% health for 30 minutes.",
+   "rarity": "normal",
+   "cooked": true,
+   "value": 3,
+   "use": {
+    "type": "food",
+    "regen": 0.06,
+    "seconds": 20,
+    "buff": {
+     "stat": "hpPct",
+     "amount": 0.1,
+     "minutes": 30
+    }
+   }
   }
  },
  "skins": {
@@ -8798,11 +10113,35 @@
     "name": "Rime Wyrm",
     "noMeat": true
    },
+   "scoria_crawler": {
+    "name": "Scoria Crawler"
+   },
+   "ashback_salamander": {
+    "name": "Ashback Salamander",
+    "noMeat": true,
+    "hide": "salamander_hide"
+   },
+   "glasswing": {
+    "name": "Glasswing"
+   },
+   "steamwood_prowler": {
+    "name": "Steamwood Prowler"
+   },
+   "sulphur_toad": {
+    "name": "Sulphur Toad"
+   },
+   "mudback_lurker": {
+    "name": "Mudback Lurker"
+   },
    "thornmother": {
     "name": "Thornmother"
    },
    "kirrath_cinderwyrm": {
     "name": "Kirrath, the Cinder Wyrm",
+    "noMeat": true
+   },
+   "world_ossathra": {
+    "name": "Ossathra, the Caldera Wyrm",
     "noMeat": true
    }
   },
@@ -9058,6 +10397,33 @@
    },
    "stonehide_bearer": {
     "name": "Stonehide Stone-Herald",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "pumice_golem": {
+    "name": "Pumice Golem",
+    "why": "Stone and metal all the way through. There is no hide on it."
+   },
+   "vent_wisp": {
+    "name": "Vent Wisp",
+    "why": "Nothing is left of it to skin."
+   },
+   "obsidian_warden": {
+    "name": "Obsidian Warden",
+    "why": "Stone and metal all the way through. There is no hide on it."
+   },
+   "slagborn_raider": {
+    "name": "Slagborn Raider",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "slagborn_firecaller": {
+    "name": "Slagborn Firecaller",
+    "why": "People are not skinned.",
+    "person": 1
+   },
+   "slagborn_chief": {
+    "name": "Slagborn Chief",
     "why": "People are not skinned.",
     "person": 1
    },

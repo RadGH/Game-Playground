@@ -209,7 +209,8 @@ test("E's placed content: every fort, farm, cave and hook in Torbor Downs gets s
   const { readdirSync } = await import('node:fs');
   const sites = JSON.parse(read('data/provinces/sites.json'));
   const hooks = new Map(JSON.parse(read('data/hooks.json')).hooks.map(h => [h.id, h]));
-  const files = readdirSync(new URL('data/vignettes/placements/', G)).filter(f => /^z\d+_\d+\.json$/.test(f));
+  const torbor = new Set(Object.values(JSON.parse(read('data/world/province-map.json')).provinces.torbor_downs.map));   // (Expansion 1: Vharlen's own sites are tests/C/vharlen-content.test.js's)
+  const files = readdirSync(new URL('data/vignettes/placements/', G)).filter(f => /^z\d+_\d+\.json$/.test(f) && torbor.has(f.replace('.json', '')));
   assert.equal(files.length, 16);
   const kinds = new Set();
   let thorn = 0;

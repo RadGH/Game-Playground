@@ -1,0 +1,163 @@
+{
+  "id": "mb_dirge_wing",
+  "name": "The Dirge-Wing",
+  "tier": "miniboss",
+  "body": "glasswing",
+  "place": "dungeon glass_tomb (Tomb of the Glass Kings, Glasswind Strand, level 14): mini-boss",
+  "_doc": "A glasswing the old kings kept to sing at their burials, still singing. P1 \"The Dirge\": shard volleys (lines in a fan), a wing buffet, and a ringing note that only stops if you interrupt it (it hurts the whole room). P2 at 50% \"Shatterwing\": it breaks its own wings and the pieces fly as smaller glasswings; shards rain where they land.",
+  "party": "Solo: save an interrupt for the note. 2-3: kill the small glasswings. 5: the fan of shards goes through crowds — spread.",
+  "hpMult": 1.9,
+  "arena": {
+    "radius": 12,
+    "objects": []
+  },
+  "say": {
+    "pull": [
+      "A high, clear note, like a wet finger round a glass rim.",
+      "Glass wings unfold in the dark, catching your torchlight."
+    ],
+    "death": "The Dirge-Wing's last note cracks, and so does the Dirge-Wing.",
+    "reset": "The Dirge-Wing folds its wings and goes back to singing quietly."
+  },
+  "enrage": {
+    "seconds": 260,
+    "damage": 2.5,
+    "say": "The Dirge-Wing's song becomes a shriek!"
+  },
+  "abilities": {
+    "buffet": {
+      "id": "buffet",
+      "name": "Wing Buffet",
+      "every": [
+        5,
+        7
+      ],
+      "range": 5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 5,
+          "arc": 1.6,
+          "wind": 1,
+          "damage": 1.4,
+          "knock": 2
+        }
+      ]
+    },
+    "volley": {
+      "id": "volley",
+      "name": "Shard Volley",
+      "every": [
+        9,
+        12
+      ],
+      "first": 3,
+      "cast": 0.5,
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "target",
+          "len": 14,
+          "w": 1.6,
+          "count": 3,
+          "rotate": 0.35,
+          "wind": 1.2,
+          "damage": 1.4,
+          "status": "bleed"
+        }
+      ]
+    },
+    "note": {
+      "id": "note",
+      "name": "Ringing Note",
+      "every": [
+        16,
+        19
+      ],
+      "first": 6,
+      "cast": 2.5,
+      "interrupt": true,
+      "say": "The Dirge-Wing draws a long breath — interrupt the note!",
+      "onInterrupt": [
+        {
+          "say": "The note cracks and dies.",
+          "style": "emote"
+        }
+      ],
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 14,
+          "wind": 0.5,
+          "damage": 2,
+          "element": "lightning",
+          "status": "silence"
+        }
+      ]
+    },
+    "shatter": {
+      "id": "shatter",
+      "name": "Shatterwing",
+      "every": [
+        22,
+        26
+      ],
+      "first": 2,
+      "say": "Pieces of its wings fly off and take wing themselves!",
+      "actions": [
+        {
+          "adds": {
+            "type": "glasswing",
+            "count": 2,
+            "radius": 6
+          }
+        }
+      ]
+    },
+    "shard_rain": {
+      "id": "shard_rain",
+      "name": "Shard Rain",
+      "every": [
+        11,
+        13
+      ],
+      "first": 4,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "spread": 9,
+          "r": 2.4,
+          "count": 4,
+          "delay": 0.3,
+          "wind": 1.4,
+          "damage": 1.3,
+          "status": "bleed"
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "The Dirge",
+      "abilities": [
+        "buffet",
+        "volley",
+        "note"
+      ]
+    },
+    {
+      "name": "Shatterwing",
+      "at": 0.5,
+      "say": "The Dirge-Wing beats its wings until they break!",
+      "abilities": [
+        "buffet",
+        "shatter",
+        "shard_rain",
+        "volley"
+      ]
+    }
+  ]
+}

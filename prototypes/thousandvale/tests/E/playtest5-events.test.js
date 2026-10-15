@@ -29,8 +29,8 @@ const BANNED = /muster|ember|veil/i;   // even inside a word ("remembers"), as t
 const oneSentence = s => typeof s === 'string' && /^[A-Z{].*[.!]$/.test(s) && !/[.!?]\s+\S/.test(s);
 
 test('there are events of every kind to check', () => {
-  assert.equal(events.realm.length, 4);
-  assert.equal(events.zone.length, 16);
+  assert.equal(events.realm.length, 4 + 1, 'Torbor Downs 4 + Vharlen\'s Ossathra (Expansion 1)');
+  assert.equal(events.zone.length, 16 + 9, 'one per zone: Torbor Downs 16 + Vharlen 9');
   assert.ok(road.chests.length >= 7 && road.deliver.length && road.escort.length && road.rescue.length);
   assert.ok(road.coded && road.coded.ambush, 'the escort ambush (started from code) has a record');
 });

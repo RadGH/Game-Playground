@@ -165,6 +165,7 @@ export function buildMapModel(raw = {}) {
         model.pois.push({ id: `door:${wk}:${st.id || 0}`, kind: 'dungeon', name: d?.name || st.name || 'Dungeon', x, z, zone: wk, level: d?.level || Z?.band?.[0] || null, sub: d?.floors ? `${d.floors} floors` : '' });
       } else if (st.type === 'event') {
         const ev = (raw.events?.zone || []).find(e => e.site === st.id || e.id === st.id) || (raw.events?.realm || []).find(e => e.site === st.id || e.id === st.id);
+        if (ev && ev.boss && !model.sites.has(ev.boss)) model.sites.set(ev.boss, { x, z, r: st.r || 40, name: ev.name || null, zone: wk });      // Expansion 1: a quest's `killOne` on a zone-event boss points at its arena
         model.pois.push({ id: `arena:${st.id}`, kind: 'event', name: ev?.name || titleCase(String(st.id || 'event').replace(/^event_/, '')), x, z, zone: wk, r: st.r || 40,
           level: ev?.level || Z?.band?.[1] || null, arena: st.id, sub: ev ? (ev.kind === 'worldboss' ? 'World boss arena' : 'Zone event: comes every hour or so') : '' });
       } else if (st.type === 'crossing') model.pois.push({ id: `x:${wk}:${st.name}`, kind: st.kind === 'bridge' ? 'bridge' : 'ford', name: st.name, x, z, zone: wk });
@@ -186,7 +187,10 @@ export function buildMapModel(raw = {}) {
     for (const [id, n] of Object.entries(qf?.npcs || {})) if (!model.npcs.has(id)) model.npcs.set(id, { ...n, zone: wk });
     for (const q of qf?.quests || []) model.quests.set(q.id, { ...q, zone: wk });
   }
-  model.rareSlots = raw.rares || {};
+  // the rares of every zone: data/provinces/rares.json (Torbor Downs) over each sheet's own `rares` (Expansion 1: Vharlen's)
+  const sheetRares = {};
+  for (const sh of Object.values(raw.sheets || {})) for (const [zid, z] of Object.entries((sh && sh.zones) || {})) if (Array.isArray(z.rares)) sheetRares[zid] = z.rares;
+  model.rareSlots = { ...sheetRares, ...(raw.rares || {}) };
   return model;
 }
 
@@ -205,7 +209,7 @@ export function zoneAt(model, x, z) { return model.zones.get(zoneKeyAt(x, z)) ||
  * A step is about a PLACE only when it is one of these kinds — or carries its own spot (`at`). Crafting, cooking,
  * learning, riding, reaching a level: those are done wherever you are, so they get no marker and no circle at all.
  */
-export const PLACE_STEPS = new Set(['kill', 'collect', 'killOne', 'killRare', 'clear', 'visit', 'escort', 'use', 'talk', 'deliver', 'reach']);
+export const PLACE_STEPS = new Set(['voyage', 'kill', 'collect', 'killOne', 'killRare', 'clear', 'visit', 'escort', 'use', 'talk', 'deliver', 'reach']);
 export function stepHasPlace(st, def = null) {
   if (st?.anywhere || def?.anywhere) return false;
   if (st?.at && Number.isFinite(st.at.x)) return true;
@@ -235,9 +239,11 @@ export function locateQuest(q, model, me = null) {
   if (ds) {
     const site = name => (name ? (model.sites.get(name) || model.vigs.get(name) || [...model.pois].find(p => p.name && bare(p.name) === bare(name)) || null) : null);
     let p = null, name = '';
-    switch (ds.kind) {
+    if (ds.at && Number.isFinite(ds.at.x) && ds.kind !== 'voyage') { p = ds.at; name = ds.at.name || ''; }      // a step that carries its own place (Vharlen's elites: their encounter file's `place`)
+    else switch (ds.kind) {
       case 'visit': case 'escort': p = ds.vignette ? model.vigs.get(ds.vignette) : site(ds.site || (typeof ds.to === 'string' ? ds.to : null)); break;
       case 'use': p = model.vigs.get(ds.vignette); break;
+      case 'voyage': p = ds.at && Number.isFinite(ds.at.x) ? ds.at : null; if (p) name = p.name; break;      // EXPANSION-1 §6: the Harbourmaster's pier
       case 'talk': case 'deliver': p = model.npcs.get(ds.npc); if (p) name = p.name; break;
       case 'killOne': p = model.sites.get(ds.encounter) || model.rares.get(ds.encounter) || model.vigs.get(ds.encounter); break;
       case 'killRare': { const zid = ds.zone || model.sheetOf.get(wk); const id = (model.rareSlots[zid] || [])[ds.slot ?? 0]; p = id ? (model.rares.get(id) || model.sites.get(id)) : null; if (p) name = p.name; break; }

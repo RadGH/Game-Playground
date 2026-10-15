@@ -17,7 +17,7 @@ const INDEX = read('index.json');
 const MINE = readdirSync(DIR).filter(f => f.endsWith('.json') && f !== 'index.json').map(f => [f, read(f)]).filter(([, d]) => d.tier);
 const SPECIALS = read('specials_torbor.json');
 const STATUSES = Object.keys(JSON.parse(readFileSync(new URL('../../../farhold/data/skills.json', import.meta.url), 'utf8')).statuses);
-const BESTIARY = (() => { const d = JSON.parse(readFileSync(new URL('../../../farhold/data/enemies.json', import.meta.url), 'utf8')); return new Set([...d.enemies, ...d.bosses].map(e => e.id)); })();
+const BESTIARY = (() => { const d = JSON.parse(readFileSync(new URL('../../../farhold/data/enemies.json', import.meta.url), 'utf8')); return new Set([...[...d.enemies, ...d.bosses].map(e => e.id), ...JSON.parse(readFileSync(new URL('../../data/rules/monsters-tv.json', import.meta.url), 'utf8')).monsters.map(m => m.id)]); })();   // + Thousandvale-only monsters (EXPANSION-1 §5)
 const DT = 0.05;
 
 let ENGINE = null;

@@ -1,0 +1,2716 @@
+{
+ "_doc": "Stream E. Content placements for world zone z11_09 (E zone 'glasswind_strand', Glasswind Strand) — tools/place-vignettes.mjs against stream B's bake (terrain 1e622a94). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
+ "zone": "z11_09",
+ "sheetZone": "glasswind_strand",
+ "province": "vharlen",
+ "terrainHash": "1e622a94",
+ "band": [
+  13,
+  15
+ ],
+ "archetype": "ruinfield",
+ "rules": {
+  "vignette": {
+   "townGap": 60,
+   "gap": 30,
+   "slope": 20,
+   "sameKindSpacing": 140
+  },
+  "fort": {
+   "townGap": 80,
+   "gap": 40,
+   "slope": 16
+  },
+  "farm": {
+   "townGap": 25,
+   "gap": 30,
+   "slope": 12
+  },
+  "cave": {
+   "townGap": 120,
+   "gap": 40,
+   "slope": 28
+  },
+  "camp": {
+   "townGap": 120,
+   "gap": 25,
+   "slope": 24
+  },
+  "rare": {
+   "townGap": 150,
+   "gap": 30,
+   "slope": 24
+  },
+  "hook": {
+   "townGap": 40,
+   "gap": 30,
+   "slope": 26
+  },
+  "wayside": {
+   "townGap": 20,
+   "gap": 12,
+   "slope": 34,
+   "edge": 24
+  },
+  "settlement": {
+   "townGap": 300,
+   "gap": 60,
+   "slope": 10
+  },
+  "curio": {
+   "townGap": 30,
+   "gap": 10,
+   "slope": 26,
+   "edge": 30
+  },
+  "stray": {
+   "townGap": 70,
+   "gap": 16,
+   "slope": 26,
+   "edge": 30
+  },
+  "folk": {
+   "townGap": 30,
+   "gap": 12,
+   "slope": 24,
+   "edge": 30
+  },
+  "setpiece": {
+   "townGap": 20,
+   "gap": 25,
+   "slope": 20
+  }
+ },
+ "mainWalkableShare": 0.234,
+ "settlements": [
+  {
+   "name": "Shardhaven",
+   "kind": "hamlet",
+   "x": 1572,
+   "z": 1572,
+   "r": 40,
+   "source": "bake",
+   "bakeId": "shardhaven"
+  }
+ ],
+ "checks": [
+  {
+   "id": "door_1",
+   "kind": "dungeon_door",
+   "x": 1792,
+   "z": 1572,
+   "reachable": true,
+   "openShare": 1
+  },
+  {
+   "id": "event_glasswind_strand",
+   "kind": "event_site",
+   "x": 1354,
+   "z": 1298,
+   "reachable": true,
+   "openShare": 1
+  }
+ ],
+ "problems": [
+  "waystone door"
+ ],
+ "placements": [
+  {
+   "type": "fort",
+   "id": "fort_glasswind_strand_0",
+   "name": null,
+   "template": "ruined_fort",
+   "friendly": false,
+   "x": 1598,
+   "z": 1730,
+   "yaw": -2.75,
+   "radius": 22,
+   "level": 14
+  },
+  {
+   "type": "farm",
+   "id": "farm_glasswind_strand_0",
+   "name": "Shardhaven Net Racks",
+   "template": "fishing_plot",
+   "flavour": null,
+   "settlement": "Shardhaven",
+   "x": 1355,
+   "z": 1194,
+   "yaw": 1.18,
+   "radius": 16,
+   "level": 13
+  },
+  {
+   "type": "farm",
+   "id": "farm_glasswind_strand_1",
+   "name": "Shardhaven Net Racks",
+   "template": "fishing_plot",
+   "flavour": null,
+   "settlement": "Shardhaven",
+   "x": 1288,
+   "z": 1528,
+   "yaw": 2.75,
+   "radius": 16,
+   "level": 13
+  },
+  {
+   "type": "cave",
+   "id": "cave_glasswind_strand_0",
+   "name": "Glass grave",
+   "template": "barrow_mound",
+   "plan": {
+    "family": "glass_tomb",
+    "floors": 1,
+    "level": 14
+   },
+   "x": 1908,
+   "z": 1261,
+   "yaw": -3.14,
+   "radius": 10,
+   "level": 14
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_0_0",
+   "monster": "glasswing",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 960,
+   "z": 1977,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_0_1",
+   "monster": "glasswing",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1658,
+   "z": 941,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_1_0",
+   "monster": "obsidian_warden",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1967,
+   "z": 1873,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_1_1",
+   "monster": "obsidian_warden",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1292,
+   "z": 1896,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_2_0",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1916,
+   "z": 854,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_2_1",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1200,
+   "z": 1634,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_3_0",
+   "monster": "slagborn_raider",
+   "with": "slagborn_firecaller",
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1541,
+   "z": 981,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_3_1",
+   "monster": "slagborn_raider",
+   "with": "slagborn_firecaller",
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    4
+   ],
+   "x": 1070,
+   "z": 1779,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_4_0",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1608,
+   "z": 1361,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_4_1",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1938,
+   "z": 1566,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "rare",
+   "id": "rare_shardmother",
+   "slot": 0,
+   "name": "The Shardmother",
+   "x": 1696,
+   "z": 1965,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     1656,
+     2007
+    ],
+    [
+     1658,
+     1944
+    ],
+    [
+     1729,
+     1913
+    ],
+    [
+     1754,
+     1965
+    ],
+    [
+     1712,
+     2027
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 15
+  },
+  {
+   "type": "rare",
+   "id": "rare_the_glazier",
+   "slot": 1,
+   "name": "The Glazier",
+   "x": 1689,
+   "z": 1149,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     1684,
+     1207
+    ],
+    [
+     1641,
+     1155
+    ],
+    [
+     1651,
+     1101
+    ],
+    [
+     1723,
+     1093
+    ],
+    [
+     1759,
+     1167
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 15
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z11_09_shardhaven",
+   "name": "Shardhaven",
+   "x": 1573.6,
+   "z": 1565.5,
+   "yaw": 0,
+   "settlement": "Shardhaven",
+   "radius": 1
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_door",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1835,
+   "z": 1552,
+   "yaw": 0,
+   "radius": 6,
+   "doorGuard": true
+  },
+  {
+   "type": "npc",
+   "id": "old_jorro",
+   "name": "Old Jorro",
+   "role": "elder",
+   "at": "Shardhaven",
+   "x": 1579.7,
+   "z": 1592.3,
+   "yaw": 2.354,
+   "office": "shardhaven_plot_0",
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "glass_cutter_lunna",
+   "name": "Glass-cutter Lunna",
+   "role": "smith",
+   "at": "Shardhaven",
+   "x": 1561.8,
+   "z": 1548.8,
+   "yaw": 0.838,
+   "office": "shardhaven_plot_8",
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "tide_caller_dessa",
+   "name": "Tide-caller Dessa",
+   "role": "guard",
+   "at": "Shardhaven",
+   "x": 1589.4,
+   "z": 1582.4,
+   "yaw": 0.783,
+   "office": "shardhaven_plot_1",
+   "radius": 1
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_glasswind_strand_0",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 2024,
+   "z": 1054,
+   "yaw": 2.74,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_f1",
+   "monster": "glasswing",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1476,
+   "z": 1986,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_glasswind_strand_2",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1380,
+   "z": 1712,
+   "yaw": 1.53,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_f3",
+   "monster": "obsidian_warden",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1799,
+   "z": 1776,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_glasswind_strand_4",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1166,
+   "z": 2023,
+   "yaw": 1.17,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_f5",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1844,
+   "z": 1025,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_glasswind_strand_6",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 2024,
+   "z": 1701,
+   "yaw": 0.2,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_glasswind_strand_d1",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1768,
+   "z": 1391,
+   "yaw": 3.43,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_s1",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 2017,
+   "z": 1411,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_glasswind_strand_1",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1465,
+   "z": 1831,
+   "yaw": 2.92,
+   "radius": 7,
+   "levelBase": 13
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_glasswind_strand_d2",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1896,
+   "z": 2008,
+   "yaw": 0.33,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_glasswind_strand_d3",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1496,
+   "z": 1128,
+   "yaw": 2.41,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_glasswind_strand_1",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1432,
+   "z": 1464,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1381,
+     1481
+    ],
+    [
+     1430,
+     1414
+    ],
+    [
+     1491,
+     1442
+    ],
+    [
+     1448,
+     1521
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_s2",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1765,
+   "z": 855,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_glasswind_strand_d4",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1218,
+   "z": 1778,
+   "yaw": 6.06,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_glasswind_strand_1",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 1520,
+   "z": 1256,
+   "yaw": 2.85,
+   "radius": 6,
+   "path": [
+    [
+     1556,
+     1186
+    ],
+    [
+     1565,
+     1315
+    ],
+    [
+     1448,
+     1255
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_glasswind_strand_d5",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1089,
+   "z": 1919,
+   "yaw": 2.82,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_s3",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1888,
+   "z": 1432,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_glasswind_strand_d6",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 2006,
+   "z": 1177,
+   "yaw": 4.52,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_glasswind_strand_d7",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1896,
+   "z": 1687,
+   "yaw": 2.25,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_s4",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1354,
+   "z": 2007,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_glasswind_strand_d8",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 2008,
+   "z": 936,
+   "yaw": 2.01,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_glasswind_strand_2",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1703,
+   "z": 1487,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1700,
+     1518
+    ],
+    [
+     1661,
+     1469
+    ],
+    [
+     1717,
+     1452
+    ],
+    [
+     1733,
+     1485
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_glasswind_strand_d9",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 974,
+   "z": 1848,
+   "yaw": 1.33,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_glasswind_strand_d10",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1718,
+   "z": 1671,
+   "yaw": 2.96,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_s5",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1896,
+   "z": 1136,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_glasswind_strand_d11",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1848,
+   "z": 1886,
+   "yaw": 0.95,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_glasswind_strand_2",
+   "role": "gravedigger",
+   "name": "Gravedigger",
+   "work": "dig",
+   "chatter": [
+    "role.gravedigger"
+   ],
+   "x": 2008,
+   "z": 1992,
+   "yaw": 2.85,
+   "radius": 6,
+   "path": [
+    [
+     2001,
+     2001
+    ],
+    [
+     2004,
+     1982
+    ],
+    [
+     2021,
+     1991
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_glasswind_strand_d12",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1784,
+   "z": 1280,
+   "yaw": 4.89,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_s6",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1576,
+   "z": 1863,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_glasswind_strand_d13",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1481,
+   "z": 1678,
+   "yaw": 1.4,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_glasswind_strand_d14",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1377,
+   "z": 1607,
+   "yaw": 0.82,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_glasswind_strand_d15",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 2008,
+   "z": 1307,
+   "yaw": 1.15,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_s7",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1185,
+   "z": 1881,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_glasswind_strand_d16",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1696,
+   "z": 1807,
+   "yaw": 4.56,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_glasswind_strand_d17",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 2007,
+   "z": 799,
+   "yaw": 4.37,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_glasswind_strand_d18",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1400,
+   "z": 1913,
+   "yaw": 3.38,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_s8",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1320,
+   "z": 1793,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_glasswind_strand_d19",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1912,
+   "z": 1784,
+   "yaw": 4.8,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_glasswind_strand_d20",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1758,
+   "z": 959,
+   "yaw": 2.97,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_s9",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1412,
+   "z": 1093,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_glasswind_strand_d21",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1280,
+   "z": 1696,
+   "yaw": 0.11,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_glasswind_strand_d22",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1257,
+   "z": 1993,
+   "yaw": 2.21,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_glasswind_strand_d23",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1056,
+   "z": 2008,
+   "yaw": 6.01,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_glasswind_strand_3",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1697,
+   "z": 1312,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1672,
+     1250
+    ],
+    [
+     1776,
+     1297
+    ],
+    [
+     1702,
+     1405
+    ],
+    [
+     1617,
+     1338
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_s10",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1943,
+   "z": 1009,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_glasswind_strand_d24",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1848,
+   "z": 928,
+   "yaw": 1.4,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_glasswind_strand_3",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 1808,
+   "z": 1672,
+   "yaw": 1.15,
+   "radius": 6,
+   "path": [
+    [
+     1749,
+     1647
+    ],
+    [
+     1862,
+     1641
+    ],
+    [
+     1801,
+     1742
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_glasswind_strand_d25",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1146,
+   "z": 1712,
+   "yaw": 2.25,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_s11",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1314,
+   "z": 1414,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_glasswind_strand_d26",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1856,
+   "z": 1344,
+   "yaw": 5.72,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_glasswind_strand_d27",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1569,
+   "z": 1969,
+   "yaw": 1.98,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_s12",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 2008,
+   "z": 1504,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_glasswind_strand_d28",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 2000,
+   "z": 1784,
+   "yaw": 5.81,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_glasswind_strand_4",
+   "monster": "glasswing",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1559,
+   "z": 1072,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1519,
+     1058
+    ],
+    [
+     1573,
+     1028
+    ],
+    [
+     1612,
+     1089
+    ],
+    [
+     1541,
+     1126
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_glasswind_strand_d29",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1945,
+   "z": 1360,
+   "yaw": 4.67,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_glasswind_strand_d30",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1481,
+   "z": 1336,
+   "yaw": 4.24,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_s13",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1576,
+   "z": 1447,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_glasswind_strand_d31",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1840,
+   "z": 1201,
+   "yaw": 3.87,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_glasswind_strand_4",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 2007,
+   "z": 1616,
+   "yaw": 3.71,
+   "radius": 6,
+   "path": [
+    [
+     2030,
+     1659
+    ],
+    [
+     1948,
+     1600
+    ],
+    [
+     2034,
+     1566
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_glasswind_strand_d32",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1504,
+   "z": 1903,
+   "yaw": 1.25,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_s14",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1505,
+   "z": 1751,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_glasswind_strand_d33",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1815,
+   "z": 1471,
+   "yaw": 5.36,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_glasswind_strand_d34",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1818,
+   "z": 1105,
+   "yaw": 4.73,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_glasswind_strand_5",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1694,
+   "z": 1013,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1750,
+     1046
+    ],
+    [
+     1654,
+     1061
+    ],
+    [
+     1648,
+     991
+    ],
+    [
+     1741,
+     965
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_s15",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1296,
+   "z": 1614,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_glasswind_strand_d35",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1464,
+   "z": 1600,
+   "yaw": 6.24,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_glasswind_strand_d36",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1680,
+   "z": 1600,
+   "yaw": 1.35,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_glasswind_strand_d37",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1385,
+   "z": 1839,
+   "yaw": 3.05,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_s16",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1970,
+   "z": 1104,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_glasswind_strand_d38",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1441,
+   "z": 1175,
+   "yaw": 2.32,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_glasswind_strand_d39",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1932,
+   "z": 1477,
+   "yaw": 2.91,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_glasswind_strand_d40",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1109,
+   "z": 1849,
+   "yaw": 5.93,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_s17",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1833,
+   "z": 1960,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_glasswind_strand_d41",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1912,
+   "z": 1936,
+   "yaw": 1.81,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_glasswind_strand_d42",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1016,
+   "z": 1912,
+   "yaw": 2.19,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_glasswind_strand_d43",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1920,
+   "z": 936,
+   "yaw": 1.62,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_glasswind_strand_6",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1688,
+   "z": 1737,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1741,
+     1759
+    ],
+    [
+     1656,
+     1779
+    ],
+    [
+     1621,
+     1718
+    ],
+    [
+     1721,
+     1685
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_s18",
+   "monster": "obsidian_warden",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1769,
+   "z": 1848,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_glasswind_strand_d44",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1840,
+   "z": 840,
+   "yaw": 3.56,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_glasswind_strand_5",
+   "role": "gravedigger",
+   "name": "Gravedigger",
+   "work": "dig",
+   "chatter": [
+    "role.gravedigger"
+   ],
+   "x": 1162,
+   "z": 1935,
+   "yaw": 0.15,
+   "radius": 6,
+   "path": [
+    [
+     1171,
+     1931
+    ],
+    [
+     1163,
+     1946
+    ],
+    [
+     1154,
+     1929
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_glasswind_strand_d45",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1424,
+   "z": 1768,
+   "yaw": 3.57,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_s19",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1657,
+   "z": 1864,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_glasswind_strand_d46",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1957,
+   "z": 1728,
+   "yaw": 5.36,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_glasswind_strand_d47",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1536,
+   "z": 1385,
+   "yaw": 2.96,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_s20",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1690,
+   "z": 879,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_glasswind_strand_d48",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1538,
+   "z": 1799,
+   "yaw": 0.01,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_glasswind_strand_d49",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1144,
+   "z": 1783,
+   "yaw": 2.63,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_glasswind_strand_7",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1600,
+   "z": 1247,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1546,
+     1240
+    ],
+    [
+     1609,
+     1198
+    ],
+    [
+     1655,
+     1246
+    ],
+    [
+     1607,
+     1289
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_glasswind_strand_d50",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1984,
+   "z": 1240,
+   "yaw": 5.07,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_glasswind_strand_d51",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1992,
+   "z": 864,
+   "yaw": 4.03,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_s21",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1216,
+   "z": 1712,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_glasswind_strand_d52",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1257,
+   "z": 1833,
+   "yaw": 1.91,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_glasswind_strand_6",
+   "role": "gravedigger",
+   "name": "Gravedigger",
+   "work": "dig",
+   "chatter": [
+    "role.gravedigger"
+   ],
+   "x": 1041,
+   "z": 1849,
+   "yaw": 2.8,
+   "radius": 6,
+   "path": [
+    [
+     1037,
+     1844
+    ],
+    [
+     1048,
+     1847
+    ],
+    [
+     1036,
+     1857
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_glasswind_strand_d53",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 896,
+   "z": 2008,
+   "yaw": 2.93,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_glasswind_strand_d54",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1881,
+   "z": 1530,
+   "yaw": 0.23,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_s22",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1937,
+   "z": 1193,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_glasswind_strand_d55",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1858,
+   "z": 1815,
+   "yaw": 2.91,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_glasswind_strand_d56",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1419,
+   "z": 1655,
+   "yaw": 5.16,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_glasswind_strand_d57",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1650,
+   "z": 1655,
+   "yaw": 2.3,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_s23",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1228,
+   "z": 1576,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_glasswind_strand_d58",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1904,
+   "z": 1066,
+   "yaw": 3.39,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_glasswind_strand_d59",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1596,
+   "z": 923,
+   "yaw": 1.51,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_glasswind_strand_d60",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1359,
+   "z": 1546,
+   "yaw": 4.9,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_s24",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1533,
+   "z": 1686,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_glasswind_strand_d61",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1960,
+   "z": 1664,
+   "yaw": 4.2,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_glasswind_strand_d62",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1743,
+   "z": 1232,
+   "yaw": 2.07,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_s25",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 955,
+   "z": 1903,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_glasswind_strand_d63",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1832,
+   "z": 1400,
+   "yaw": 3.14,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_glasswind_strand_d64",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1336,
+   "z": 1664,
+   "yaw": 4.92,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_glasswind_strand_d65",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1344,
+   "z": 1944,
+   "yaw": 5.06,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_glasswind_strand_8",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1112,
+   "z": 1984,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1139,
+     1944
+    ],
+    [
+     1154,
+     1997
+    ],
+    [
+     1095,
+     2032
+    ],
+    [
+     1057,
+     1955
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_s26",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1240,
+   "z": 1938,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_glasswind_strand_d66",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1864,
+   "z": 1741,
+   "yaw": 4.52,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_glasswind_strand_7",
+   "role": "gravedigger",
+   "name": "Gravedigger",
+   "work": "dig",
+   "chatter": [
+    "role.gravedigger"
+   ],
+   "x": 1905,
+   "z": 1856,
+   "yaw": 3.01,
+   "radius": 6,
+   "path": [
+    [
+     1901,
+     1847
+    ],
+    [
+     1914,
+     1856
+    ],
+    [
+     1901,
+     1863
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_glasswind_strand_d67",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1840,
+   "z": 1264,
+   "yaw": 2.58,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_s27",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1792,
+   "z": 1912,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_glasswind_strand_d68",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1458,
+   "z": 1050,
+   "yaw": 1.5,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_glasswind_strand_d69",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1408,
+   "z": 1977,
+   "yaw": 4.57,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_s28",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1790,
+   "z": 912,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_glasswind_strand_d70",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1600,
+   "z": 1920,
+   "yaw": 1.73,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_glasswind_strand_9",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1952,
+   "z": 1424,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1973,
+     1444
+    ],
+    [
+     1923,
+     1451
+    ],
+    [
+     1910,
+     1399
+    ],
+    [
+     1968,
+     1380
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_glasswind_strand_d71",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1498,
+   "z": 1207,
+   "yaw": 1.04,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_glasswind_strand_d72",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1272,
+   "z": 1752,
+   "yaw": 5.29,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_s29",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 2008,
+   "z": 1000,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_glasswind_strand_d73",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 2008,
+   "z": 1920,
+   "yaw": 2.51,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_glasswind_strand_8",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 1520,
+   "z": 1496,
+   "yaw": 2.21,
+   "radius": 6,
+   "path": [
+    [
+     1470,
+     1516
+    ],
+    [
+     1531,
+     1421
+    ],
+    [
+     1562,
+     1521
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_glasswind_strand_d74",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1599,
+   "z": 1807,
+   "yaw": 4.55,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_s30",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1010,
+   "z": 1799,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_glasswind_strand_d75",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1952,
+   "z": 1304,
+   "yaw": 0.57,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_glasswind_strand_d76",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1449,
+   "z": 1887,
+   "yaw": 0.17,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_glasswind_strand_10",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1880,
+   "z": 976,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1940,
+     975
+    ],
+    [
+     1871,
+     1023
+    ],
+    [
+     1812,
+     962
+    ],
+    [
+     1896,
+     937
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_s31",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1728,
+   "z": 1576,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_glasswind_strand_d77",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1353,
+   "z": 1888,
+   "yaw": 5.33,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_glasswind_strand_d78",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1328,
+   "z": 1728,
+   "yaw": 4.43,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_glasswind_strand_d79",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1367,
+   "z": 1392,
+   "yaw": 1.81,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_glasswind_strand_s32",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    13,
+    14
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1441,
+   "z": 1714,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_glasswind_strand_d80",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1799,
+   "z": 2008,
+   "yaw": 4.1,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_glasswind_strand_d81",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1632,
+   "z": 1416,
+   "yaw": 4.46,
+   "radius": 3,
+   "filler": true
+  }
+ ],
+ "features": [],
+ "density": {
+  "target": 50,
+  "roadTarget": 45,
+  "added": {
+   "curio": 1,
+   "wayside": 81,
+   "stray": 32,
+   "roamer": 10,
+   "folk": 8
+  },
+  "openShareCovered": 1,
+  "roadShareCovered": 1
+ },
+ "levels": [
+  13,
+  15
+ ]
+}

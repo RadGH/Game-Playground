@@ -1,0 +1,648 @@
+{
+ "_doc": "Stream S (Expansion 1 §4) — MADE by tools/content-hazards.mjs from the baked island; do not edit by hand, re-run the tool after a re-bake (and after the place-vignettes / content-* chain). WORLD metres. `springs` = hot-spring pools (and the crater lake, whose warm shallows count: a ring `shore` m wide inside `r`) — stand in one out of combat for Steam-soaked. `geysers` = a mouth of radius `r` that throws you ~14 m up on its own cycle (js/rules/hazards.js cycleOf); `ledge` = the higher ground beside it the throw is for. `vents` = fissure lines a -> b, `w` wide, that warn then spout fire; `level` = the zone band top the damage is scaled to. `ashfall.zones` = world zones with ash weather (client look only). `terrain` = each zone's bake hash when this was made.",
+ "province": "vharlen",
+ "terrain": {
+  "z13_10": "3fd22ea0",
+  "z12_09": "de552a99",
+  "z13_09": "669bc5b6",
+  "z13_11": "a6d6efa9",
+  "z11_09": "1e622a94",
+  "z11_10": "70a02eb6",
+  "z12_11": "84bc7a26",
+  "z11_11": "cbeaf687",
+  "z12_10": "4958e2b7"
+ },
+ "springs": [
+  {
+   "id": "hot_spring_1",
+   "kind": "hot_spring",
+   "zone": "z12_09",
+   "name": "The Kettle Pools",
+   "x": 25280,
+   "z": 20084,
+   "r": 11,
+   "level": 147.6
+  },
+  {
+   "id": "hot_spring_2",
+   "kind": "hot_spring",
+   "zone": "z12_09",
+   "name": "Fernwash Spring",
+   "x": 26030,
+   "z": 19544,
+   "r": 9,
+   "level": 55
+  },
+  {
+   "id": "hot_spring_3",
+   "kind": "hot_spring",
+   "zone": "z12_09",
+   "name": "Mosswater Spring",
+   "x": 25040,
+   "z": 19784,
+   "r": 8,
+   "level": 32.4
+  },
+  {
+   "id": "hot_spring_5",
+   "kind": "hot_spring",
+   "zone": "z13_11",
+   "name": "Bubblemere",
+   "x": 26830,
+   "z": 22754,
+   "r": 10,
+   "level": 3
+  },
+  {
+   "id": "hot_spring_6",
+   "kind": "hot_spring",
+   "zone": "z13_11",
+   "name": "Stiltreach Soak",
+   "x": 27390,
+   "z": 22624,
+   "r": 8,
+   "level": 3.5
+  },
+  {
+   "id": "crater_lake",
+   "kind": "crater_lake",
+   "zone": "z12_10",
+   "name": "Crater Lake shallows",
+   "x": 25485,
+   "z": 21399,
+   "r": 128,
+   "level": 437.6,
+   "shore": 14
+  },
+  {
+   "id": "hot_spring_4",
+   "kind": "hot_spring",
+   "zone": "z12_10",
+   "name": "The Rim-keepers' Bath",
+   "x": 25750,
+   "z": 21674,
+   "r": 10,
+   "level": 439.3
+  }
+ ],
+ "geysers": [
+  {
+   "id": "steamwood_geyser_1",
+   "zone": "z12_09",
+   "x": 25636,
+   "z": 19318,
+   "r": 2.6,
+   "level": 13,
+   "ledge": {
+    "x": 25631,
+    "z": 19336.7,
+    "rise": 8.9,
+    "dist": 19,
+    "yaw": 6.021,
+    "cliff": false
+   }
+  },
+  {
+   "id": "steamwood_geyser_2",
+   "zone": "z12_09",
+   "x": 25198,
+   "z": 19462,
+   "r": 2.6,
+   "level": 13,
+   "ledge": {
+    "x": 25204,
+    "z": 19484.5,
+    "rise": 6.8,
+    "dist": 23,
+    "yaw": 0.262,
+    "cliff": true
+   }
+  },
+  {
+   "id": "steamwood_geyser_3",
+   "zone": "z12_09",
+   "x": 24970,
+   "z": 19654,
+   "r": 2.6,
+   "level": 13,
+   "ledge": {
+    "x": 24975.4,
+    "z": 19674.1,
+    "rise": 8,
+    "dist": 21,
+    "yaw": 0.262,
+    "cliff": true
+   }
+  },
+  {
+   "id": "steamwood_geyser_4",
+   "zone": "z12_09",
+   "x": 24766,
+   "z": 19942,
+   "r": 2.6,
+   "level": 13,
+   "ledge": {
+    "x": 24756.5,
+    "z": 19958.4,
+    "rise": 9.1,
+    "dist": 19,
+    "yaw": 5.76,
+    "cliff": false
+   }
+  },
+  {
+   "id": "steamwood_geyser_5",
+   "zone": "z12_09",
+   "x": 24916,
+   "z": 19954,
+   "r": 2.6,
+   "level": 13,
+   "ledge": {
+    "x": 24916,
+    "z": 19972.2,
+    "rise": 9.3,
+    "dist": 18,
+    "yaw": 0,
+    "cliff": true
+   }
+  },
+  {
+   "id": "steamwood_geyser_6",
+   "zone": "z12_09",
+   "x": 26398,
+   "z": 20062,
+   "r": 2.6,
+   "level": 13,
+   "ledge": {
+    "x": 26402.9,
+    "z": 20043.7,
+    "rise": 9,
+    "dist": 19,
+    "yaw": 2.88,
+    "cliff": false
+   }
+  },
+  {
+   "id": "steamwood_geyser_7",
+   "zone": "z12_09",
+   "x": 24796,
+   "z": 20098,
+   "r": 2.6,
+   "level": 13,
+   "ledge": {
+    "x": 24800.7,
+    "z": 20115.6,
+    "rise": 9.3,
+    "dist": 18,
+    "yaw": 0.262,
+    "cliff": false
+   }
+  },
+  {
+   "id": "sulphur_bight_geyser_1",
+   "zone": "z13_09",
+   "x": 26664,
+   "z": 19540,
+   "r": 2.6,
+   "level": 14,
+   "ledge": {
+    "x": 26669.8,
+    "z": 19561.5,
+    "rise": 7.4,
+    "dist": 22,
+    "yaw": 0.262,
+    "cliff": false
+   }
+  },
+  {
+   "id": "sulphur_bight_geyser_2",
+   "zone": "z13_09",
+   "x": 26832,
+   "z": 19672,
+   "r": 2.6,
+   "level": 14,
+   "ledge": {
+    "x": 26826.3,
+    "z": 19693.1,
+    "rise": 7.6,
+    "dist": 22,
+    "yaw": 6.021,
+    "cliff": false
+   }
+  },
+  {
+   "id": "sulphur_bight_geyser_3",
+   "zone": "z13_09",
+   "x": 27222,
+   "z": 19828,
+   "r": 2.6,
+   "level": 14,
+   "ledge": {
+    "x": 27211.1,
+    "z": 19846.9,
+    "rise": 7.6,
+    "dist": 22,
+    "yaw": 5.76,
+    "cliff": false
+   }
+  },
+  {
+   "id": "sulphur_bight_geyser_4",
+   "zone": "z13_09",
+   "x": 26676,
+   "z": 19876,
+   "r": 2.6,
+   "level": 14,
+   "ledge": {
+    "x": 26656.4,
+    "z": 19887.3,
+    "rise": 7.3,
+    "dist": 23,
+    "yaw": 5.236,
+    "cliff": false
+   }
+  },
+  {
+   "id": "sulphur_bight_geyser_5",
+   "zone": "z13_09",
+   "x": 26664,
+   "z": 20038,
+   "r": 2.6,
+   "level": 14,
+   "ledge": {
+    "x": 26642.2,
+    "z": 20043.8,
+    "rise": 7.4,
+    "dist": 23,
+    "yaw": 4.974,
+    "cliff": false
+   }
+  },
+  {
+   "id": "sulphur_bight_geyser_6",
+   "zone": "z13_09",
+   "x": 26688,
+   "z": 20290,
+   "r": 2.6,
+   "level": 14,
+   "ledge": {
+    "x": 26666.5,
+    "z": 20290,
+    "rise": 7.9,
+    "dist": 22,
+    "yaw": 4.712,
+    "cliff": false
+   }
+  },
+  {
+   "id": "sulphur_bight_geyser_7",
+   "zone": "z13_09",
+   "x": 27078,
+   "z": 20380,
+   "r": 2.6,
+   "level": 14,
+   "ledge": {
+    "x": 27071.8,
+    "z": 20403.2,
+    "rise": 6.5,
+    "dist": 24,
+    "yaw": 6.021,
+    "cliff": false
+   }
+  },
+  {
+   "id": "fumarole_fen_geyser_1",
+   "zone": "z13_11",
+   "x": 27612,
+   "z": 22724,
+   "r": 2.6,
+   "level": 15
+  },
+  {
+   "id": "fumarole_fen_geyser_2",
+   "zone": "z13_11",
+   "x": 27096,
+   "z": 22772,
+   "r": 2.6,
+   "level": 15
+  },
+  {
+   "id": "fumarole_fen_geyser_3",
+   "zone": "z13_11",
+   "x": 26886,
+   "z": 22850,
+   "r": 2.6,
+   "level": 15
+  },
+  {
+   "id": "fumarole_fen_geyser_4",
+   "zone": "z13_11",
+   "x": 26676,
+   "z": 23570,
+   "r": 2.6,
+   "level": 15,
+   "ledge": {
+    "x": 26660.9,
+    "z": 23543.8,
+    "rise": 3.5,
+    "dist": 30,
+    "yaw": 3.665,
+    "cliff": false
+   }
+  }
+ ],
+ "vents": [
+  {
+   "id": "pumice_wastes_vent_1",
+   "zone": "z11_10",
+   "ax": 24020.5,
+   "az": 20572.5,
+   "bx": 24027.5,
+   "bz": 20579.5,
+   "w": 2.4,
+   "level": 16,
+   "camp": 9
+  },
+  {
+   "id": "pumice_wastes_vent_2",
+   "zone": "z11_10",
+   "ax": 23398.7,
+   "az": 20667.2,
+   "bx": 23401.3,
+   "bz": 20676.8,
+   "w": 2.4,
+   "level": 16,
+   "camp": 9
+  },
+  {
+   "id": "pumice_wastes_vent_3",
+   "zone": "z11_10",
+   "ax": 23468.5,
+   "az": 21060.5,
+   "bx": 23475.5,
+   "bz": 21067.5,
+   "w": 2.4,
+   "level": 16,
+   "camp": 9
+  },
+  {
+   "id": "pumice_wastes_vent_4",
+   "zone": "z11_10",
+   "ax": 23429.5,
+   "az": 21275.7,
+   "bx": 23434.5,
+   "bz": 21284.3,
+   "w": 2.4,
+   "level": 16,
+   "camp": 9
+  },
+  {
+   "id": "pumice_wastes_vent_5",
+   "zone": "z11_10",
+   "ax": 23870.7,
+   "az": 21331.2,
+   "bx": 23873.3,
+   "bz": 21340.8,
+   "w": 2.4,
+   "level": 16,
+   "camp": 9
+  },
+  {
+   "id": "pumice_wastes_vent_6",
+   "zone": "z11_10",
+   "ax": 23189.5,
+   "az": 21387.7,
+   "bx": 23194.5,
+   "bz": 21396.3,
+   "w": 2.4,
+   "level": 16,
+   "camp": 9
+  },
+  {
+   "id": "pumice_wastes_vent_7",
+   "zone": "z11_10",
+   "ax": 23110.7,
+   "az": 21803.2,
+   "bx": 23113.3,
+   "bz": 21812.8,
+   "w": 2.4,
+   "level": 16,
+   "camp": 9
+  },
+  {
+   "id": "pumice_wastes_vent_8",
+   "zone": "z11_10",
+   "ax": 23523.2,
+   "az": 22174.7,
+   "bx": 23532.8,
+   "bz": 22177.3,
+   "w": 2.4,
+   "level": 16,
+   "camp": 9
+  },
+  {
+   "id": "kiln_ridge_vent_1",
+   "zone": "z11_11",
+   "ax": 24155.2,
+   "az": 22606.7,
+   "bx": 24164.8,
+   "bz": 22609.3,
+   "w": 2.4,
+   "level": 18,
+   "camp": 9
+  },
+  {
+   "id": "kiln_ridge_vent_2",
+   "zone": "z11_11",
+   "ax": 24395.2,
+   "az": 22689.3,
+   "bx": 24404.8,
+   "bz": 22686.7,
+   "w": 2.4,
+   "level": 18,
+   "camp": 9
+  },
+  {
+   "id": "kiln_ridge_vent_3",
+   "zone": "z11_11",
+   "ax": 23379.7,
+   "az": 22738.5,
+   "bx": 23388.3,
+   "bz": 22733.5,
+   "w": 2.4,
+   "level": 18,
+   "camp": 9
+  },
+  {
+   "id": "kiln_ridge_vent_4",
+   "zone": "z11_11",
+   "ax": 24133.5,
+   "az": 22787.7,
+   "bx": 24138.5,
+   "bz": 22796.3,
+   "w": 2.4,
+   "level": 18,
+   "camp": 9
+  },
+  {
+   "id": "kiln_ridge_vent_5",
+   "zone": "z11_11",
+   "ax": 24486.7,
+   "az": 22907.2,
+   "bx": 24489.3,
+   "bz": 22916.8,
+   "w": 2.4,
+   "level": 18,
+   "camp": 9
+  },
+  {
+   "id": "kiln_ridge_vent_6",
+   "zone": "z11_11",
+   "ax": 24491.2,
+   "az": 23313.3,
+   "bx": 24500.8,
+   "bz": 23310.7,
+   "w": 2.4,
+   "level": 18,
+   "camp": 9
+  },
+  {
+   "id": "kiln_ridge_vent_7",
+   "zone": "z11_11",
+   "ax": 24259.2,
+   "az": 23357.3,
+   "bx": 24268.8,
+   "bz": 23362.8,
+   "w": 2.4,
+   "level": 18,
+   "camp": 10
+  },
+  {
+   "id": "kiln_ridge_vent_8",
+   "zone": "z11_11",
+   "ax": 24291,
+   "az": 23552,
+   "bx": 24301,
+   "bz": 23552,
+   "w": 2.4,
+   "level": 18,
+   "camp": 9
+  },
+  {
+   "id": "the_caldera_vent_1",
+   "zone": "z12_10",
+   "ax": 25637.5,
+   "az": 20612.3,
+   "bx": 25642.5,
+   "bz": 20603.7,
+   "w": 2.4,
+   "level": 20,
+   "camp": 9
+  },
+  {
+   "id": "the_caldera_vent_2",
+   "zone": "z12_10",
+   "ax": 24830.6,
+   "az": 20661.3,
+   "bx": 24833.4,
+   "bz": 20650.7,
+   "w": 2.4,
+   "level": 20,
+   "camp": 10
+  },
+  {
+   "id": "the_caldera_vent_3",
+   "zone": "z12_10",
+   "ax": 25356.5,
+   "az": 20956.5,
+   "bx": 25363.5,
+   "bz": 20963.5,
+   "w": 2.4,
+   "level": 20,
+   "camp": 9
+  },
+  {
+   "id": "the_caldera_vent_4",
+   "zone": "z12_10",
+   "ax": 25606.7,
+   "az": 21219.2,
+   "bx": 25609.3,
+   "bz": 21228.8,
+   "w": 2.4,
+   "level": 20,
+   "camp": 9
+  },
+  {
+   "id": "the_caldera_vent_5",
+   "zone": "z12_10",
+   "ax": 25469.5,
+   "az": 21596.3,
+   "bx": 25474.5,
+   "bz": 21587.7,
+   "w": 2.4,
+   "level": 20,
+   "camp": 9
+  },
+  {
+   "id": "the_caldera_vent_6",
+   "zone": "z12_10",
+   "ax": 25171,
+   "az": 22272,
+   "bx": 25181,
+   "bz": 22272,
+   "w": 2.4,
+   "level": 20,
+   "camp": 10
+  },
+  {
+   "id": "the_caldera_vent_7",
+   "zone": "z12_10",
+   "ax": 26326.7,
+   "az": 22347.2,
+   "bx": 26329.3,
+   "bz": 22356.8,
+   "w": 2.4,
+   "level": 20,
+   "camp": 9
+  },
+  {
+   "id": "the_caldera_vent_8",
+   "zone": "z12_10",
+   "ax": 24707.7,
+   "az": 22394.5,
+   "bx": 24716.3,
+   "bz": 22389.5,
+   "w": 2.4,
+   "level": 20,
+   "camp": 9
+  },
+  {
+   "id": "the_caldera_vent_9",
+   "zone": "z12_10",
+   "ax": 25013.5,
+   "az": 22427.7,
+   "bx": 25018.5,
+   "bz": 22436.3,
+   "w": 2.4,
+   "level": 20,
+   "camp": 9
+  },
+  {
+   "id": "the_caldera_vent_10",
+   "zone": "z12_10",
+   "ax": 25459.2,
+   "az": 22441.3,
+   "bx": 25468.8,
+   "bz": 22438.7,
+   "w": 2.4,
+   "level": 20,
+   "camp": 9
+  }
+ ],
+ "ashfall": {
+  "zones": [
+   "z11_10",
+   "z12_11"
+  ]
+ }
+}

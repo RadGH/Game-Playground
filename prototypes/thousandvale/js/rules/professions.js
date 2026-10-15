@@ -156,7 +156,7 @@ export function createProfessions(numbers = {}, content = null) {
     const row = sk.types && sk.types[type];
     if (!row) return null;
     const t = tierForLevel(level);
-    const hide = (classes.hide || [])[Math.max(0, t.tier - 1 - (row.worn | 0))];      // (worn: the long dead give a hide one grade lower)
+    const hide = (row.hide && materials[row.hide]) ? row.hide : (classes.hide || [])[Math.max(0, t.tier - 1 - (row.worn | 0))];      // (worn: the long dead give a hide one grade lower; `hide`: a beast with its own — Vharlen's salamanders, EXPANSION-1 §4.5)
     if (!hide) return null;
     return { prof: 'skinning', kind: 'corpse', tier: t.tier, name: row.name || type, gives: [{ id: hide, n: 0.5 }, ...(sk.meat && !row.noMeat ? [{ id: sk.meat, n: 0.34 }] : [])], bonus: row.bonus || sk.bonus || null };
   }

@@ -1,0 +1,157 @@
+{
+  "id": "rare_greenjaw",
+  "name": "Greenjaw",
+  "tier": "rare",
+  "secret": true,
+  "zone": "steamwood",
+  "level": 12,
+  "body": "steamwood_prowler",
+  "place": "hunts the deep jungle west of Mistfall; moss grows on its lower jaw and it hides in the vent steam",
+  "_doc": "Expansion 1 (Vharlen). A jungle cat with moss growing in its jaw. It pounces on whoever stands farthest and lunges down a line. At half health it slips into the vent steam and comes out of it at three players in a row, then circles the group (get in close).",
+  "party": {
+    "solo": "Hard solo at 12: the leaps come back to back.",
+    "small": "Right for 2-3.",
+    "full": "Easy.",
+    "m5": "M5 adds health per extra player and one more copy of the spread/scatter shapes for parties of 4-5; mechanics stay the same."
+  },
+  "hpMult": 2,
+  "arena": {
+    "radius": 24
+  },
+  "say": {
+    "pull": [
+      "The steam parts. Something green-jawed is already moving.",
+      "Greenjaw coughs a low growl from the ferns."
+    ],
+    "death": "Greenjaw slumps into the ferns. The steam closes over it.",
+    "reset": "Greenjaw melts back into the steam."
+  },
+  "abilities": {
+    "bite": {
+      "id": "bite",
+      "name": "Mossy Bite",
+      "every": [
+        6,
+        8
+      ],
+      "first": 2,
+      "range": 5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 4.4,
+          "arc": 1.2,
+          "wind": 1,
+          "damage": 1.6,
+          "status": "bleed"
+        }
+      ]
+    },
+    "pounce": {
+      "id": "pounce",
+      "name": "Pounce",
+      "every": [
+        12,
+        15
+      ],
+      "first": 4,
+      "say": "{boss} crouches low, eyes on {target}...",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "farthest",
+          "r": 3,
+          "wind": 1.5,
+          "damage": 1.7,
+          "knock": 2
+        }
+      ]
+    },
+    "lunge": {
+      "id": "lunge",
+      "name": "Lunge",
+      "every": [
+        11,
+        14
+      ],
+      "first": 7,
+      "cast": 0.4,
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 12,
+          "w": 2.6,
+          "wind": 1.2,
+          "damage": 1.6
+        }
+      ]
+    },
+    "leaps": {
+      "id": "leaps",
+      "name": "Out of the Steam",
+      "every": [
+        14,
+        17
+      ],
+      "first": 3,
+      "cast": 0.5,
+      "say": "Greenjaw is in the steam — it could come out at anyone!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3,
+          "wind": 1.6,
+          "damage": 1.4,
+          "count": 3,
+          "delay": 0.6,
+          "status": "bleed"
+        }
+      ]
+    },
+    "circling": {
+      "id": "circling",
+      "name": "Circling",
+      "every": [
+        13,
+        16
+      ],
+      "first": 8,
+      "cast": 0.5,
+      "say": "It circles the group in the steam — close in!",
+      "telegraphs": [
+        {
+          "shape": "donut",
+          "at": "self",
+          "r": 9,
+          "r2": 3,
+          "wind": 1.5,
+          "damage": 1.5
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Stalking",
+      "abilities": [
+        "bite",
+        "pounce",
+        "lunge"
+      ]
+    },
+    {
+      "name": "Into the Steam",
+      "at": 0.5,
+      "say": "Greenjaw vanishes into a gout of vent steam!",
+      "abilities": [
+        "bite",
+        "leaps",
+        "circling",
+        "pounce"
+      ]
+    }
+  ]
+}

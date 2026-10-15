@@ -1,0 +1,321 @@
+{
+  "id": "ev_old_yellowback",
+  "name": "Old Yellowback",
+  "tier": "event",
+  "zone": "sulphur_bight",
+  "level": 14,
+  "body": "sulphur_toad",
+  "place": {
+    "rank": "boss",
+    "level": 14,
+    "respawnMs": 1800000
+  },
+  "_doc": "Expansion 1 (Vharlen). The ZONE EVENT BOSS for Sulphur Bight: the great toad of the yellow flats, older than Yellowpan. P1 'The Flats': a tongue that drags its target in, a gas belch, and a leap at whoever is farthest. P2 at 55% 'The Spawning': it sits on a ward of yellow slime while its spawn hatch — KILL THE TOADLINGS to drop it — and acid rain leaves poison puddles. P3, a new health bar 'The Last Croak': the Great Croak blasts the whole flat (hide behind a crust chimney), it tries to swallow a player whole (three of you stand with them so it cannot fit you all in), and a belly flop that throws everyone. Soft enrage from 4 minutes, hard at 7.",
+  "party": "Zone event, everyone nearby joins. Solo: not intended (the swallow needs 3, the spawn come in fours). 3-5: playable. 10+: intended. M5 scaling: health and spawn by players enrolled; stack need = clamp(players/4, 2, 5).",
+  "hpMult": 3,
+  "arena": {
+    "radius": 38,
+    "objects": [
+      {
+        "id": "chimney_n",
+        "type": "pillar",
+        "name": "Crust chimney",
+        "x": 0,
+        "z": -14,
+        "r": 1.8,
+        "hp": 2
+      },
+      {
+        "id": "chimney_e",
+        "type": "pillar",
+        "name": "Crust chimney",
+        "x": 14,
+        "z": 0,
+        "r": 1.8,
+        "hp": 2
+      },
+      {
+        "id": "chimney_s",
+        "type": "pillar",
+        "name": "Crust chimney",
+        "x": 0,
+        "z": 14,
+        "r": 1.8,
+        "hp": 2
+      },
+      {
+        "id": "chimney_w",
+        "type": "pillar",
+        "name": "Crust chimney",
+        "x": -14,
+        "z": 0,
+        "r": 1.8,
+        "hp": 2
+      }
+    ]
+  },
+  "say": {
+    "pull": [
+      "The yellow flat heaves. A back as wide as a barn comes up out of it.",
+      "Old Yellowback opens its eyes. They are older than the town.",
+      "A croak so deep you feel it in your teeth."
+    ],
+    "death": "Old Yellowback settles into the flat, croaks once, softly, and is still.",
+    "reset": "Old Yellowback sinks back under the yellow mud."
+  },
+  "enrage": {
+    "seconds": 420,
+    "damage": 3,
+    "say": "Old Yellowback swells up, fat with sulphur and spite!",
+    "soft": {
+      "from": 240,
+      "every": 15,
+      "add": 0.08,
+      "say": "The flats steam harder. The air turns yellow."
+    }
+  },
+  "abilities": {
+    "belch": {
+      "id": "belch",
+      "name": "Sulphur Belch",
+      "every": [
+        7,
+        9
+      ],
+      "first": 2,
+      "range": 9,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 8,
+          "arc": 1.3,
+          "wind": 1.1,
+          "damage": 1.8,
+          "element": "poison",
+          "status": "poison"
+        }
+      ]
+    },
+    "tongue": {
+      "id": "tongue",
+      "name": "Long Tongue",
+      "every": [
+        13,
+        16
+      ],
+      "first": 5,
+      "cast": 0.6,
+      "say": "Yellowback's tongue whips out at {target} — it drags you in!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 18,
+          "w": 2.4,
+          "wind": 1.3,
+          "damage": 1.4,
+          "pull": true
+        }
+      ]
+    },
+    "leap": {
+      "id": "leap",
+      "name": "Great Leap",
+      "every": [
+        15,
+        18
+      ],
+      "first": 8,
+      "cast": 0.6,
+      "say": "Old Yellowback crouches and leaps at {target}!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "farthest",
+          "r": 5,
+          "wind": 1.8,
+          "damage": 2,
+          "knock": 4
+        }
+      ]
+    },
+    "acid_rain": {
+      "id": "acid_rain",
+      "name": "Acid Rain",
+      "every": [
+        12,
+        15
+      ],
+      "first": 3,
+      "cast": 0.6,
+      "say": "Yellow rain falls — and it eats the ground where it lands!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "r": 3.5,
+          "wind": 1.6,
+          "damage": 1.1,
+          "spread": 26,
+          "count": 6,
+          "delay": 0.2,
+          "element": "poison",
+          "leave": {
+            "type": "pool",
+            "name": "Acid puddle",
+            "r": 3,
+            "every": 1,
+            "seconds": 22,
+            "damage": 0.25,
+            "status": "poison",
+            "element": "poison"
+          }
+        }
+      ]
+    },
+    "great_croak": {
+      "id": "great_croak",
+      "name": "The Great Croak",
+      "every": [
+        26,
+        30
+      ],
+      "first": 10,
+      "cast": 3,
+      "say": "Its throat swells huge — get behind a crust chimney!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 38,
+          "wind": 0.6,
+          "damage": 2.6,
+          "los": true,
+          "status": "fear"
+        }
+      ]
+    },
+    "swallow": {
+      "id": "swallow",
+      "name": "Swallow Whole",
+      "every": [
+        20,
+        24
+      ],
+      "first": 5,
+      "cast": 1,
+      "say": "Old Yellowback wants to swallow {target} — three of you stand with them so it cannot fit you all in!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3.4,
+          "wind": 4,
+          "damage": 3,
+          "kind": "stack",
+          "need": 3,
+          "follow": true
+        }
+      ]
+    },
+    "flop": {
+      "id": "flop",
+      "name": "Belly Flop",
+      "every": [
+        16,
+        19
+      ],
+      "first": 14,
+      "cast": 0.8,
+      "say": "Old Yellowback rears up — get clear of the flop!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 10,
+          "wind": 1.9,
+          "damage": 2.4,
+          "knock": 6
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "The Flats",
+      "abilities": [
+        "belch",
+        "tongue",
+        "leap"
+      ]
+    },
+    {
+      "name": "The Spawning",
+      "at": 0.55,
+      "say": "The flat bubbles. Its spawn are hatching!",
+      "abilities": [
+        "belch",
+        "acid_rain"
+      ],
+      "shieldWhileAdds": true,
+      "shieldDown": "The last toadling bursts — Old Yellowback heaves itself up, furious!",
+      "onEnter": [
+        {
+          "shield": {
+            "seconds": 25,
+            "pool": 0.1
+          }
+        },
+        {
+          "adds": {
+            "type": "sulphur_toad",
+            "count": 4,
+            "radius": 12,
+            "at": "home"
+          }
+        },
+        {
+          "say": "Old Yellowback sits on a ward of yellow slime. Kill its four spawn to drop it! It fails by itself in 25 seconds.",
+          "style": "warn"
+        }
+      ],
+      "ward": {
+        "seconds": 25,
+        "pool": 0.1,
+        "break": "adds",
+        "need": 4,
+        "what": "sulphur_toad",
+        "say": "Old Yellowback sits on a ward of yellow slime. Kill its four spawn to drop it! It fails by itself in 25 seconds.",
+        "fade": "The ward fails by itself. No opening this time."
+      }
+    },
+    {
+      "name": "The Last Croak",
+      "newBar": {
+        "hp": 0.5
+      },
+      "say": "My children! The flats will have you for this.",
+      "abilities": [
+        "belch",
+        "great_croak",
+        "swallow",
+        "flop",
+        "tongue"
+      ]
+    }
+  ],
+  "triggers": [
+    {
+      "when": {
+        "broken": 4
+      },
+      "do": [
+        {
+          "say": "Every crust chimney is rubble. Nothing left to hide behind!",
+          "style": "warn"
+        }
+      ]
+    }
+  ]
+}

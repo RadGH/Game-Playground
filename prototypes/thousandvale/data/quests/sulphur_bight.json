@@ -1,0 +1,237 @@
+{
+  "_doc": "Stream C (Expansion 1). Quests for zone 'sulphur_bight' on Vharlen, the Burning Isle. Format: data/quests/README.md. Rewards: xp = share of a level's XP at the quest level, gold = multiple of a kill's gold; item.tier rolls at your level. `killRare` {zone, slot} names the zone's rare by slot (data/provinces/rares.json). Story-chain quests carry `story: n` (data/quests/vharlen-province.json).",
+  "zone": "sulphur_bight",
+  "npcs": {
+    "mother_sarrai": {
+      "name": "Mother Sarrai",
+      "role": "elder",
+      "at": "Yellowpan",
+      "greeting": "Yellowpan: we dig the yellow, we sell the yellow, we cough the yellow. Welcome.",
+      "titled": true
+    },
+    "pit_boss_drask": {
+      "name": "Pit-boss Drask",
+      "role": "merchant",
+      "at": "Yellowpan",
+      "greeting": "Everything here is for sale. Especially if you are asking about something I should not have sold.",
+      "titled": true
+    },
+    "ilko_rhovek": {
+      "name": "Ilko Rhovek",
+      "role": "guard",
+      "at": "Yellowpan",
+      "greeting": "I guard the Pit Gate. Mostly from people trying to get out of the pits, not in.",
+      "titled": true
+    },
+    "angler_yellowpan": {
+      "name": "Tekk Sulvenn",
+      "role": "angler",
+      "at": "Yellowpan",
+      "greeting": "Do not drink from the yellow pools. Do fish them. Rinse after. See the ripples, just north of where I'm standing? That's the town pool. It never fishes out.",
+      "placedBy": "content-pools",
+      "titled": true
+    },
+    "carter_yellowpan": {
+      "name": "Yssa Jakkora",
+      "role": "carter",
+      "at": "Yellowpan",
+      "greeting": "I do not go fast, I do not go far in the dark, and I do not stop for wolves. Fares are on the board.",
+      "cart": "cart_yellowpan",
+      "placedBy": "content-towns",
+      "titled": true
+    }
+  },
+  "quests": [
+    {
+      "id": "sb_sold_by_the_sack",
+      "name": "Sold by the Sack",
+      "level": 12,
+      "giver": "pit_boss_drask",
+      "story": 2,
+      "offer": "Port Vharl sent you? Fine. Yes, I sold the Slagborn sulphur. They paid in gold and promised not to burn the pan. Then they stopped paying and started taking. Get my sacks back from the old workings and I will tell you where the rest went.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "slagborn_raider",
+          "count": 6,
+          "where": "the old sulphur workings",
+          "text": "Kill 6 Slagborn raiders in the old workings"
+        },
+        {
+          "kind": "collect",
+          "item": "Stolen sulphur sack",
+          "count": 5,
+          "from": "slagborn_raider",
+          "chance": 0.5,
+          "where": "the old sulphur workings",
+          "text": "Take back 5 stolen sulphur sacks"
+        },
+        {
+          "kind": "talk",
+          "npc": "pit_boss_drask",
+          "where": "Yellowpan",
+          "text": "Bring the sacks back to Pit-boss Drask in Yellowpan"
+        }
+      ],
+      "done": "Half of them are empty. They are not selling it, they are pouring it out somewhere. The stilt folk at Stiltreach say the fen vents stink worse than ever. Start there.",
+      "reward": {
+        "xp": 0.7,
+        "gold": 16,
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "uncommon"
+          }
+        ]
+      },
+      "next": "ff_the_fen_breathes_wrong"
+    },
+    {
+      "id": "sb_spitting_season",
+      "name": "Spitting Season",
+      "level": 12,
+      "giver": "mother_sarrai",
+      "offer": "The toads on the flats spit, and their spit eats boot leather. Half of Yellowpan is walking barefoot on hot ground. Do something.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "sulphur_toad",
+          "count": 8,
+          "where": "the yellow flats",
+          "text": "Kill 8 sulphur toads on the yellow flats"
+        }
+      ],
+      "done": "The cobbler is crying. He was doing very well this month.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 11,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
+      }
+    },
+    {
+      "id": "sb_crust_king",
+      "name": "The Crust King",
+      "level": 13,
+      "giver": "ilko_rhovek",
+      "offer": "Out on the crust fields the pumice golems have started walking in a line behind one big one. We call him the Crust King. He has not been crowned by anybody. He crowned himself.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "pumice_golem",
+          "count": 4,
+          "where": "the crust fields by the shore",
+          "text": "Kill 4 pumice golems on the crust fields"
+        },
+        {
+          "kind": "killOne",
+          "encounter": "elite_crust_king",
+          "where": "the crust fields by the shore",
+          "text": "Defeat the Crust King",
+          "at": {
+            "x": 27320,
+            "z": 20244,
+            "r": 45,
+            "name": "The Crust King"
+          }
+        }
+      ],
+      "done": "The King is gravel. Long live nobody.",
+      "reward": {
+        "xp": 0.75,
+        "gold": 28,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "sb_the_assayer",
+      "name": "The Assayer",
+      "level": 13,
+      "giver": "pit_boss_drask",
+      "offer": "Something down the spoil heaps catches miners and weighs them. Holds them up, turns them over, puts them down again. The ones it finds too light, it keeps. They call it the Assayer.",
+      "steps": [
+        {
+          "kind": "killRare",
+          "zone": "sulphur_bight",
+          "slot": 1,
+          "text": "Hunt down the Assayer",
+          "where": "the spoil heaps of Sulphur Bight"
+        }
+      ],
+      "done": "Nobody is getting weighed today. Except at my counter, for sulphur.",
+      "reward": {
+        "xp": 0.65,
+        "gold": 30,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "sb_yellow_pits",
+      "name": "The Yellow Pits",
+      "level": 13,
+      "giver": "mother_sarrai",
+      "group": "a party of 3-5",
+      "offer": "The deep pits were shut when the air down there started catching fire on its own. Now there are lights moving in them again. Take a party, take a wet cloth for your face, and find out whose lights.",
+      "steps": [
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "floor": 1,
+          "text": "Go down into the Yellow Pits",
+          "where": "The Yellow Pits, the dungeon door in Sulphur Bight"
+        },
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "boss": true,
+          "text": "Defeat whatever keeps the lights burning at the bottom of the pits",
+          "where": "the bottom of The Yellow Pits"
+        }
+      ],
+      "done": "Shut again, and this time we are bricking it. You can keep the cloth.",
+      "reward": {
+        "xp": 1.2,
+        "gold": 55,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "sb_old_yellowback",
+      "name": "Old Yellowback",
+      "level": 14,
+      "giver": "ilko_rhovek",
+      "offer": "Every so often the flats heave and Old Yellowback climbs out of the biggest acid pool, older than the town and twice as wide. When the pan bell rings, grab a weapon. Everyone does.",
+      "steps": [
+        {
+          "kind": "killOne",
+          "encounter": "ev_old_yellowback",
+          "credit": "event",
+          "where": "the acid pools of Sulphur Bight, when the pan bell rings (zone event)",
+          "text": "Defeat Old Yellowback when it rises"
+        }
+      ],
+      "done": "Back in the pool he goes. He always comes back. So do we.",
+      "reward": {
+        "xp": 0.8,
+        "gold": 34,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    }
+  ]
+}

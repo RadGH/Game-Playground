@@ -1,0 +1,388 @@
+{
+  "id": "ev_the_fen_breath",
+  "name": "The Fen Breath",
+  "tier": "event",
+  "zone": "fumarole_fen",
+  "level": 15,
+  "body": "vent_wisp",
+  "place": {
+    "rank": "boss",
+    "level": 15,
+    "respawnMs": 1800000
+  },
+  "_doc": "Expansion 1 (Vharlen). The ZONE EVENT BOSS for Fumarole Fen: at dusk the fen breathes out, and this time the breath stood up. P1 'Low Mist': a choking cone, marsh-light gas balls on random players, and a slow sigh that hangs poison over the ground. P2 at 55% 'The Choking': it hides in a ward of thick gas while wisps drift in — LIGHT ALL FOUR MARSH LAMPS to burn the gas off — and gas tides leave poison where they roll. P3, a new health bar 'The Last Breath': it inhales (everything slides toward it) then exhales a blast (run out), two players must cap each vent, and spinning lines of gas. Soft enrage from 4 minutes, hard at 7.",
+  "party": "Zone event, everyone nearby joins. Solo: not intended (four lamps under wisps, a soak of 2). 3-5: playable. 10+: intended. M5 scaling: health and wisps by players enrolled; soak need = clamp(players/5, 2, 4).",
+  "hpMult": 3,
+  "arena": {
+    "radius": 38,
+    "objects": [
+      {
+        "id": "lamp_ne",
+        "type": "brazier",
+        "name": "Marsh lamp",
+        "x": 22,
+        "z": -22
+      },
+      {
+        "id": "lamp_se",
+        "type": "brazier",
+        "name": "Marsh lamp",
+        "x": 22,
+        "z": 22
+      },
+      {
+        "id": "lamp_sw",
+        "type": "brazier",
+        "name": "Marsh lamp",
+        "x": -22,
+        "z": 22
+      },
+      {
+        "id": "lamp_nw",
+        "type": "brazier",
+        "name": "Marsh lamp",
+        "x": -22,
+        "z": -22
+      }
+    ]
+  },
+  "say": {
+    "pull": [
+      "The fen breathes out. The breath does not go away.",
+      "Every fumarole in the fen sighs at once, and the steam takes a shape.",
+      "The reeds bend toward the vent. Something is breathing in."
+    ],
+    "death": "The Fen Breath thins, wavers, and is only mist over the water.",
+    "reset": "The Fen Breath sinks back into the vents."
+  },
+  "enrage": {
+    "seconds": 420,
+    "damage": 3,
+    "say": "The whole fen exhales at once!",
+    "soft": {
+      "from": 240,
+      "every": 15,
+      "add": 0.08,
+      "say": "The air turns thick and yellow. Every breath stings."
+    }
+  },
+  "abilities": {
+    "choke": {
+      "id": "choke",
+      "name": "Choking Breath",
+      "every": [
+        7,
+        9
+      ],
+      "first": 2,
+      "range": 9,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 8,
+          "arc": 1.2,
+          "wind": 1.1,
+          "damage": 1.8,
+          "element": "poison",
+          "status": "poison"
+        }
+      ]
+    },
+    "marsh_lights": {
+      "id": "marsh_lights",
+      "name": "Marsh Lights",
+      "every": [
+        12,
+        15
+      ],
+      "first": 4,
+      "say": "Pale lights drift toward you over the water!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3,
+          "wind": 1.6,
+          "damage": 1.3,
+          "count": 4,
+          "delay": 0.3,
+          "element": "poison",
+          "status": "weaken"
+        }
+      ]
+    },
+    "sigh": {
+      "id": "sigh",
+      "name": "Long Sigh",
+      "every": [
+        14,
+        17
+      ],
+      "first": 8,
+      "cast": 0.6,
+      "say": "It sighs, and the gas settles where it falls.",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "r": 3.5,
+          "wind": 1.6,
+          "damage": 1,
+          "spread": 22,
+          "count": 4,
+          "delay": 0.3,
+          "element": "poison",
+          "leave": {
+            "type": "pool",
+            "name": "Hanging gas",
+            "r": 3,
+            "every": 1,
+            "seconds": 18,
+            "damage": 0.2,
+            "status": "poison",
+            "element": "poison"
+          }
+        }
+      ]
+    },
+    "wisps": {
+      "id": "wisps",
+      "name": "Drifting Wisps",
+      "every": [
+        20,
+        24
+      ],
+      "first": 4,
+      "say": "More wisps drift in from the vents!",
+      "actions": [
+        {
+          "adds": {
+            "type": "vent_wisp",
+            "count": 2,
+            "radius": 16,
+            "at": "home"
+          }
+        }
+      ]
+    },
+    "gas_tide": {
+      "id": "gas_tide",
+      "name": "Gas Tide",
+      "every": [
+        12,
+        15
+      ],
+      "first": 3,
+      "cast": 0.6,
+      "say": "Gas rolls across the fen in a wall — step out of it!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 34,
+          "w": 6,
+          "wind": 1.6,
+          "damage": 1.6,
+          "count": 2,
+          "delay": 1,
+          "rotate": 1.5708,
+          "yaw": "random",
+          "element": "poison",
+          "status": "poison"
+        }
+      ]
+    },
+    "inhale": {
+      "id": "inhale",
+      "name": "Inhale, Exhale",
+      "every": [
+        18,
+        22
+      ],
+      "first": 5,
+      "cast": 0.6,
+      "say": "It breathes IN — everything slides toward it! Then run before it breathes out!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 20,
+          "wind": 1.8,
+          "damage": 0.4,
+          "pull": true
+        },
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 9,
+          "wind": 1.2,
+          "damage": 2.6,
+          "after": 1.8,
+          "element": "poison",
+          "knock": 5
+        }
+      ]
+    },
+    "vents": {
+      "id": "vents",
+      "name": "Vent Caps",
+      "every": [
+        22,
+        26
+      ],
+      "first": 9,
+      "cast": 1,
+      "say": "Two vents roar open — two of you on EACH to hold them shut!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "home",
+          "r": 3.5,
+          "wind": 5,
+          "damage": 0.6,
+          "offset": [
+            -14,
+            8
+          ],
+          "kind": "soak",
+          "need": 2,
+          "fail": 1.8,
+          "failSay": "A vent is left open — gas floods the whole fen!",
+          "element": "poison"
+        },
+        {
+          "shape": "circle",
+          "at": "home",
+          "r": 3.5,
+          "wind": 5,
+          "damage": 0.6,
+          "offset": [
+            14,
+            8
+          ],
+          "kind": "soak",
+          "need": 2,
+          "fail": 1.8,
+          "failSay": "A vent is left open — gas floods the whole fen!",
+          "element": "poison"
+        }
+      ]
+    },
+    "spin": {
+      "id": "spin",
+      "name": "Spinning Fumes",
+      "every": [
+        15,
+        18
+      ],
+      "first": 12,
+      "cast": 0.6,
+      "say": "Fumes spin out from it like spokes!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 30,
+          "w": 3,
+          "wind": 1.5,
+          "damage": 2,
+          "count": 6,
+          "rotate": 1.047,
+          "delay": 0.3,
+          "yaw": "random",
+          "element": "poison"
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Low Mist",
+      "abilities": [
+        "choke",
+        "marsh_lights",
+        "sigh"
+      ]
+    },
+    {
+      "name": "The Choking",
+      "at": 0.55,
+      "say": "The Fen Breath pulls the gas round itself like a cloak!",
+      "abilities": [
+        "choke",
+        "wisps",
+        "gas_tide"
+      ],
+      "ward": {
+        "seconds": 25,
+        "pool": 0.1,
+        "break": "objects",
+        "need": 4,
+        "what": "brazier",
+        "say": "The Fen Breath hides in a ward of thick gas. Light all four marsh lamps to burn it off! It fails by itself in 25 seconds.",
+        "fade": "The ward fails by itself. No opening this time."
+      },
+      "onEnter": [
+        {
+          "shield": {
+            "seconds": 25,
+            "pool": 0.1
+          }
+        },
+        {
+          "adds": {
+            "type": "vent_wisp",
+            "count": 3,
+            "radius": 14,
+            "at": "home"
+          }
+        },
+        {
+          "say": "The Fen Breath hides in a ward of thick gas. Light all four marsh lamps to burn it off! It fails by itself in 25 seconds.",
+          "style": "warn"
+        }
+      ]
+    },
+    {
+      "name": "The Last Breath",
+      "newBar": {
+        "hp": 0.5
+      },
+      "say": "The fire took its cloak. Now it takes one great breath.",
+      "abilities": [
+        "choke",
+        "inhale",
+        "vents",
+        "spin"
+      ]
+    }
+  ],
+  "triggers": [
+    {
+      "when": {
+        "lit": 4,
+        "phase": 1
+      },
+      "do": [
+        {
+          "shield": false
+        },
+        {
+          "stun": 4
+        },
+        {
+          "vuln": {
+            "takeMore": 0.4,
+            "seconds": 12,
+            "name": "Burned Off"
+          }
+        },
+        {
+          "say": "Four marsh lamps flare! The gas round the Fen Breath catches and burns away!",
+          "style": "warn"
+        }
+      ]
+    }
+  ]
+}

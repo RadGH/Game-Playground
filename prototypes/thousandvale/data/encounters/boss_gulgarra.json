@@ -1,0 +1,337 @@
+{
+  "id": "boss_gulgarra",
+  "name": "Gulgarra of the Drowned Vent",
+  "tier": "boss",
+  "body": "vent_wisp",
+  "place": "dungeon drowned_vent (The Drowned Vent, Fumarole Fen, level 14-16): the end boss at the vent mouth",
+  "_doc": "The vent itself, risen as a spirit of hot gas and black water. P1 \"Breathing\": a hot breath cone, scald spouts under random players, and the vent mouth breathing out rings of steam. Two sluice wheels (levers, repeatable) drain the scalding water it spills (pools) out of the chamber. P2 at 60% \"Low Water\": three mud mounds stand in the room; it draws all the gas in and lets it out as a blast you hide from behind the mounds (each blast cracks the mound that saved you). P3 new bar \"The Vent Opens\": a ring you must be in close or far for, gas on each player that spreads, and a stack.",
+  "party": "Solo: drain the water, use the mounds wisely (they break). 2-3: share the mounds. 5: as designed.",
+  "hpMult": 3.8,
+  "arena": {
+    "radius": 16,
+    "objects": [
+      {
+        "id": "sluice_w",
+        "type": "lever",
+        "name": "Sluice wheel",
+        "x": -12,
+        "z": 0,
+        "repeat": true,
+        "onUse": [
+          {
+            "remove": "scald"
+          },
+          {
+            "say": "The sluice wheel turns — the scalding water drains away!",
+            "style": "warn"
+          }
+        ]
+      },
+      {
+        "id": "sluice_e",
+        "type": "lever",
+        "name": "Sluice wheel",
+        "x": 12,
+        "z": 0,
+        "repeat": true,
+        "onUse": [
+          {
+            "remove": "scald"
+          },
+          {
+            "say": "The sluice wheel turns — the scalding water drains away!",
+            "style": "warn"
+          }
+        ]
+      },
+      {
+        "id": "mound_a",
+        "type": "pillar",
+        "name": "Mud mound",
+        "x": -6,
+        "z": -7,
+        "r": 1.5,
+        "hp": 2
+      },
+      {
+        "id": "mound_b",
+        "type": "pillar",
+        "name": "Mud mound",
+        "x": 6,
+        "z": -7,
+        "r": 1.5,
+        "hp": 2
+      },
+      {
+        "id": "mound_c",
+        "type": "pillar",
+        "name": "Mud mound",
+        "x": 0,
+        "z": 8,
+        "r": 1.5,
+        "hp": 2
+      }
+    ]
+  },
+  "say": {
+    "pull": [
+      "The vent breathes out. The whole fen breathes out with it.",
+      "Warm water rises around your ankles, then your knees.",
+      "A voice made of bubbles: \"Breathe in.\""
+    ],
+    "death": "Gulgarra sinks into the vent, and the water over it goes still and cold.",
+    "reset": "The vent settles back to a slow simmer."
+  },
+  "enrage": {
+    "seconds": 330,
+    "damage": 3,
+    "say": "The vent erupts!"
+  },
+  "abilities": {
+    "hot_breath": {
+      "id": "hot_breath",
+      "name": "Hot Breath",
+      "every": [
+        6,
+        8
+      ],
+      "range": 8,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 7,
+          "arc": 1.3,
+          "wind": 1.1,
+          "damage": 1.8,
+          "element": "fire",
+          "status": "seared"
+        }
+      ]
+    },
+    "spouts": {
+      "id": "spouts",
+      "name": "Scald Spouts",
+      "every": [
+        10,
+        12
+      ],
+      "first": 3,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "count": 3,
+          "delay": 0.3,
+          "r": 2.6,
+          "wind": 1.4,
+          "damage": 1.3,
+          "element": "fire",
+          "leave": {
+            "id": "scald",
+            "type": "pool",
+            "name": "Scalding water",
+            "r": 2.6,
+            "every": 1,
+            "seconds": 30,
+            "damage": 0.3,
+            "status": "burn",
+            "element": "fire"
+          }
+        }
+      ]
+    },
+    "vent_rings": {
+      "id": "vent_rings",
+      "name": "Vent Rings",
+      "every": [
+        14,
+        17
+      ],
+      "first": 6,
+      "cast": 0.6,
+      "say": "Steam rolls out from the vent in rings!",
+      "telegraphs": [
+        {
+          "shape": "ring",
+          "at": "home",
+          "r": 7,
+          "r2": 3.5,
+          "wind": 1.3,
+          "damage": 1.5,
+          "element": "fire"
+        },
+        {
+          "shape": "ring",
+          "at": "home",
+          "r": 13,
+          "r2": 9.5,
+          "wind": 2,
+          "damage": 1.5,
+          "element": "fire"
+        }
+      ]
+    },
+    "gas_blast": {
+      "id": "gas_blast",
+      "name": "Gas Blast",
+      "every": [
+        18,
+        22
+      ],
+      "first": 5,
+      "cast": 1.5,
+      "say": "It is drawing in all the gas — hide behind a mud mound!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 16,
+          "wind": 2.5,
+          "damage": 2.6,
+          "element": "poison",
+          "los": true,
+          "status": "poison"
+        }
+      ]
+    },
+    "bubbles": {
+      "id": "bubbles",
+      "name": "Rising Bubbles",
+      "every": [
+        11,
+        13
+      ],
+      "first": 2,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "spread": 12,
+          "r": 2.6,
+          "count": 4,
+          "delay": 0.3,
+          "wind": 1.4,
+          "damage": 1.2,
+          "element": "poison",
+          "status": "weaken"
+        }
+      ]
+    },
+    "vent_opens": {
+      "id": "vent_opens",
+      "name": "The Vent Opens",
+      "every": [
+        16,
+        19
+      ],
+      "first": 4,
+      "cast": 1,
+      "say": "The vent opens wide — hug it or get far away!",
+      "telegraphs": [
+        {
+          "shape": "ring",
+          "at": "self",
+          "r": 12,
+          "r2": 4,
+          "wind": 1.8,
+          "damage": 2.2,
+          "element": "fire",
+          "status": "burn"
+        }
+      ]
+    },
+    "gas_spread": {
+      "id": "gas_spread",
+      "name": "Clinging Gas",
+      "every": [
+        13,
+        15
+      ],
+      "first": 3,
+      "say": "Gas clings to each of you — spread out!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "each",
+          "r": 3,
+          "follow": true,
+          "wind": 2,
+          "damage": 1.3,
+          "element": "poison",
+          "status": "poison"
+        }
+      ]
+    },
+    "stack": {
+      "id": "stack",
+      "name": "Deep Breath",
+      "every": [
+        20,
+        24
+      ],
+      "first": 8,
+      "cast": 1,
+      "say": "It breathes in at {target} — stand with them!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3,
+          "kind": "stack",
+          "need": 3,
+          "follow": true,
+          "wind": 4,
+          "damage": 3,
+          "element": "poison"
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Breathing",
+      "abilities": [
+        "hot_breath",
+        "spouts",
+        "vent_rings"
+      ]
+    },
+    {
+      "name": "Low Water",
+      "at": 0.6,
+      "say": "The water drops. The gas does not.",
+      "abilities": [
+        "hot_breath",
+        "gas_blast",
+        "bubbles"
+      ]
+    },
+    {
+      "name": "The Vent Opens",
+      "newBar": {
+        "hp": 0.55
+      },
+      "say": "The vent tears open beneath it.",
+      "abilities": [
+        "hot_breath",
+        "vent_opens",
+        "gas_spread",
+        "stack"
+      ]
+    }
+  ],
+  "triggers": [
+    {
+      "when": {
+        "broken": 3
+      },
+      "do": [
+        {
+          "say": "The last mud mound slumps. There is nowhere left to hide.",
+          "style": "warn"
+        }
+      ]
+    }
+  ]
+}

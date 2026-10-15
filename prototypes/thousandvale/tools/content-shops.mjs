@@ -4,10 +4,14 @@
 // weights, fixed goods, services) and `towns`. This turns every kind into its role's row — same inputs, same rows:
 // each category's `count` split over its rarity weights (largest remainder), bases taken in turn so every base shows up
 // before any repeats. Run after editing `kinds`:  node tools/content-shops.mjs   (tests/E/playtest2 checks it is current)
-import { readFileSync, writeFileSync } from 'node:fs';
+//   node tools/content-shops.mjs --province=<id>   another province's own file (data/provinces/<id>-shops.json), when it
+//                                                  has its own `kinds` (else it borrows the home roles; nothing to do)
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { HOME_PROVINCE, provinceArg, provinceDataPath } from '../js/sim/province-files.js';
 
 const ROOT = new URL('../', import.meta.url);
 const FILE = new URL('data/provinces/shops.json', ROOT);
+const ROLES_DOC = 'MADE by tools/content-shops.mjs from `kinds` (do not edit by hand): stream A\'s js/sim/shops.js reads roles.<role> = { title, sells: [{ base, rarity }], markup } (+ goods, services, mounts, sign, light, kind). `cat` = the shop tab (the kind\'s category label).';
 
 /** count split over weights, largest remainder: { normal: .55, magic: .38, rare: .07 }, 10 -> { normal: 6, magic: 4, rare: 0 } */
 export function splitCount(count, weights) {
@@ -43,7 +47,17 @@ export function rolesFrom(data) {
  * Rewrite shops.json: `roles` from `kinds`, and (when given) each town's `shops` = the kinds whose keeper stream B gave a
  * building there (`townShops` from tools/content-offices.mjs buildOffices). Returns the data written.
  */
-export function writeShops(townShops = null) {
+export function writeShops(townShops = null, prov = HOME_PROVINCE) {
+  if (prov !== HOME_PROVINCE) {
+    // another province: its own file holds its towns (and, when it has its own `kinds`, its own roles); the rest is lent
+    // from the home file by the server (js/sim/province-files.js), so it is never copied here
+    const own = new URL(provinceDataPath(prov, 'shops'), ROOT);
+    const data = existsSync(own) ? JSON.parse(readFileSync(own, 'utf8')) : { _doc: `Stream E/P. ${prov}'s own shop data, laid over data/provinces/shops.json key by key (js/sim/province-files.js). \`towns\` is written by tools/content-offices.mjs --province=${prov}.` };
+    if (townShops) { data.towns ||= {}; for (const [name, list] of Object.entries(townShops)) { data.towns[name] ||= { levelCap: 8, priceMult: 1 }; data.towns[name].shops = list; } }
+    if (data.kinds) { data.roles = rolesFrom(data); data._rolesDoc = ROLES_DOC; }
+    writeFileSync(own, JSON.stringify(data, null, 2) + '\n');
+    return data;
+  }
   const data = JSON.parse(readFileSync(FILE, 'utf8'));
   if (townShops) for (const [name, list] of Object.entries(townShops)) { data.towns[name] ||= { levelCap: 8, priceMult: 1 }; data.towns[name].shops = list; }
   data.roles = rolesFrom(data);
@@ -53,6 +67,13 @@ export function writeShops(townShops = null) {
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
+  const prov = provinceArg(process.argv);
+  if (prov !== HOME_PROVINCE) {
+    if (!existsSync(new URL(provinceDataPath(prov, 'shops'), ROOT))) { console.log(`shops: ${prov} has no ${provinceDataPath(prov, 'shops')}; it uses the home roles`); process.exit(0); }
+    const d = writeShops(null, prov);
+    console.log(`shops (${prov}): ${d.kinds ? Object.keys(d.roles).length + ' roles from its own ' + Object.keys(d.kinds).length + ' kinds' : 'no kinds of its own; the home roles apply'}`);
+    process.exit(0);
+  }
   const data = JSON.parse(readFileSync(FILE, 'utf8'));
   data.roles = rolesFrom(data);
   data._rolesDoc = 'MADE by tools/content-shops.mjs from `kinds` (do not edit by hand): stream A\'s js/sim/shops.js reads roles.<role> = { title, sells: [{ base, rarity }], markup } (+ goods, services, mounts, sign, light, kind). `cat` = the shop tab (the kind\'s category label).';

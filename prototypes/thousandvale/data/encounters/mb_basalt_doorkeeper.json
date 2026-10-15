@@ -1,0 +1,213 @@
+{
+  "id": "mb_basalt_doorkeeper",
+  "name": "The Basalt Doorkeeper",
+  "tier": "miniboss",
+  "body": "obsidian_warden",
+  "place": "dungeon caldera_deep (The Throat, The Caldera, level 18): mini-boss",
+  "_doc": "An obsidian warden that the Slagborn set at the top of the throat to keep the way down. P1 \"The Door\": a door-bar sweep, a stamp that sends cracks out in a cross, and lava spitting up through the cracks at random. Two basalt columns hold up the ledge: its Rockfall comes down everywhere except their shelter. P2 at 50% \"Closing the Door\": it brings the ledge down — rocks rain and stay on the floor, and its sweep turns into a full circle.",
+  "party": "Solo: use the columns. 2-3: the tank keeps the stamp cross off the group. 5: as designed.",
+  "hpMult": 2.2,
+  "arena": {
+    "radius": 12,
+    "objects": [
+      {
+        "id": "column_a",
+        "type": "pillar",
+        "name": "Basalt column",
+        "x": -6,
+        "z": -5,
+        "r": 1.3,
+        "hp": 3
+      },
+      {
+        "id": "column_b",
+        "type": "pillar",
+        "name": "Basalt column",
+        "x": 6,
+        "z": -5,
+        "r": 1.3,
+        "hp": 3
+      }
+    ]
+  },
+  "say": {
+    "pull": [
+      "\"Nobody goes down.\"",
+      "The Doorkeeper steps into the ledge path. The whole throat seems to close."
+    ],
+    "death": "The Doorkeeper topples off the ledge and you hear it fall for a long time.",
+    "reset": "The Doorkeeper steps back into the path."
+  },
+  "enrage": {
+    "seconds": 280,
+    "damage": 2.5,
+    "say": "The Doorkeeper brings the roof down!"
+  },
+  "abilities": {
+    "bar_sweep": {
+      "id": "bar_sweep",
+      "name": "Door-Bar Sweep",
+      "every": [
+        5,
+        7
+      ],
+      "range": 7,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 6.5,
+          "arc": 1.7,
+          "wind": 1.1,
+          "damage": 1.7
+        }
+      ]
+    },
+    "stamp": {
+      "id": "stamp",
+      "name": "Stamp",
+      "every": [
+        11,
+        14
+      ],
+      "first": 3,
+      "cast": 0.6,
+      "say": "It stamps — cracks run out across the floor!",
+      "telegraphs": [
+        {
+          "shape": "cross",
+          "at": "self",
+          "r": 12,
+          "w": 2.6,
+          "wind": 1.4,
+          "damage": 1.7,
+          "element": "fire",
+          "status": "burn"
+        }
+      ]
+    },
+    "lava_spit": {
+      "id": "lava_spit",
+      "name": "Lava Spit",
+      "every": [
+        8,
+        10
+      ],
+      "first": 2,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "spread": 10,
+          "r": 2.4,
+          "count": 3,
+          "delay": 0.3,
+          "wind": 1.4,
+          "damage": 1.3,
+          "element": "fire"
+        }
+      ]
+    },
+    "rockfall": {
+      "id": "rockfall",
+      "name": "Rockfall",
+      "every": [
+        17,
+        20
+      ],
+      "first": 7,
+      "cast": 1.2,
+      "say": "The ledge above is coming down — get under a basalt column!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "object",
+          "object": "column_a",
+          "r": 3,
+          "kind": "safe",
+          "wind": 3,
+          "damage": 2.4
+        },
+        {
+          "shape": "circle",
+          "at": "object",
+          "object": "column_b",
+          "r": 3,
+          "kind": "safe",
+          "wind": 3,
+          "damage": 2.4
+        }
+      ]
+    },
+    "rain": {
+      "id": "rain",
+      "name": "Ledge Rain",
+      "every": [
+        11,
+        14
+      ],
+      "first": 2,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "spread": 10,
+          "r": 2,
+          "count": 3,
+          "delay": 0.3,
+          "wind": 1.5,
+          "damage": 1.4,
+          "leave": {
+            "type": "rock",
+            "name": "Fallen basalt",
+            "r": 1.1,
+            "hp": 2
+          }
+        }
+      ]
+    },
+    "full_sweep": {
+      "id": "full_sweep",
+      "name": "Full Sweep",
+      "every": [
+        12,
+        15
+      ],
+      "first": 5,
+      "cast": 0.8,
+      "say": "It swings the door-bar all the way round — back off!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 6.5,
+          "wind": 1.5,
+          "damage": 2.1,
+          "knock": 3
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "The Door",
+      "abilities": [
+        "bar_sweep",
+        "stamp",
+        "lava_spit",
+        "rockfall"
+      ]
+    },
+    {
+      "name": "Closing the Door",
+      "at": 0.5,
+      "say": "\"The door is closing.\"",
+      "abilities": [
+        "bar_sweep",
+        "rain",
+        "full_sweep",
+        "rockfall"
+      ]
+    }
+  ]
+}

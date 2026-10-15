@@ -113,7 +113,9 @@ export async function loadLayouts(keys, { copyCap = 300 } = {}) {
   try { provinces = (await readJson('data/world/province-map.json')).provinces || {}; } catch { /* no world bake */ }
   for (const key of keys) {
     if (provinces[key]) {
-      const c = await loadProvinceContent(readJson, readBytes, key, { parseTerrain, parseNav, createProvinceTerrain, log });
+      let c;
+      try { c = await loadProvinceContent(readJson, readBytes, key, { parseTerrain, parseNav, createProvinceTerrain, log }); }
+      catch (err) { if (!layouts.length) throw err; log('province ' + key + ' left out: ' + err.message); continue; }      // Expansion 1: a second province that is not ready yet never stops the first
       encounterInfo = c.encounterInfo;
       layouts.push(buildLayout({ key, name: c.name, terrain: c.terrain, zones: c.zones, encounterInfo, copyCap: c.starterProvince ? Math.min(copyCap, STARTER_COPY_CAP) : copyCap, vignetteContent, starter: c.starter, rares: c.rares, jobs: c.jobs, schedules: c.schedules, horizon: c.horizon, travel: c.travel, marks: c.marks, shops: c.shops, mounts: c.mounts, offices: c.offices, extra: c.extra }));
       events.push(...c.events);
@@ -133,8 +135,33 @@ export async function loadLayouts(keys, { copyCap = 300 } = {}) {
   return { layouts, events, encounterInfo, directorRules };
 }
 
-/** The default world: the starter province when the world is baked, else the M0 test zone. */
-export function defaultProvinces() {
-  try { const m = JSON.parse(readFileSync(join(GAME, 'data/world/province-map.json'), 'utf8')); if (m.provinces && m.provinces.torbor_downs) return ['torbor_downs']; } catch { /* none */ }
+/**
+ * The default world: every province of data/world/province-map.json that has a sheet (data/provinces/<id>.json) and at
+ * least one baked zone — the starter province (its sheet's band starts at level 1: where new characters begin) FIRST,
+ * the rest in map order. Expansion 1: Torbor Downs and Vharlen run side by side. No baked world: the M0 test zone.
+ */
+export function defaultProvinces(game = GAME) {
+  try {
+    const m = JSON.parse(readFileSync(join(game, 'data/world/province-map.json'), 'utf8'));
+    const out = [];
+    for (const [id, p] of Object.entries(m.provinces || {})) {
+      let sheet = null;
+      try { sheet = JSON.parse(readFileSync(join(game, 'data/provinces', id + '.json'), 'utf8')); } catch { continue; }      // no sheet yet (stream C writes it)
+      if (!Object.values((p && p.map) || {}).some(w => existsSync(join(game, 'data/zones', w, 'terrain.bin')))) continue;      // nothing baked
+      out.push({ id, starter: !!(sheet && Array.isArray(sheet.band) && sheet.band[0] <= 1) });
+    }
+    out.sort((a, b) => (b.starter ? 1 : 0) - (a.starter ? 1 : 0));
+    if (out.length) return out.map(x => x.id);
+  } catch { /* none */ }
   return ['test'];
+}
+
+/** Expansion 1: the province new characters begin in, out of `keys`: the first whose sheet's band starts at level 1 (or that has no sheet: a test zone), else the first. */
+export function starterOf(keys, game = GAME) {
+  for (const k of keys || []) {
+    let s = null;
+    try { s = JSON.parse(readFileSync(join(game, 'data/provinces', k + '.json'), 'utf8')); } catch { return k; }      // a test zone (no sheet) is a starter, as it always was
+    if (!Array.isArray(s.band) || s.band[0] <= 1) return k;
+  }
+  return (keys || [])[0] || null;
 }

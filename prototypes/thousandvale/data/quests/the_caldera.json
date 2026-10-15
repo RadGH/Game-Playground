@@ -1,0 +1,231 @@
+{
+  "_doc": "Stream C (Expansion 1). Quests for zone 'the_caldera' on Vharlen, the Burning Isle. Format: data/quests/README.md. Rewards: xp = share of a level's XP at the quest level, gold = multiple of a kill's gold; item.tier rolls at your level. `killRare` {zone, slot} names the zone's rare by slot (data/provinces/rares.json). Story-chain quests carry `story: n` (data/quests/vharlen-province.json).",
+  "zone": "the_caldera",
+  "npcs": {
+    "mother_anu": {
+      "name": "Mother Anu",
+      "role": "elder",
+      "at": "Rim Shrine",
+      "greeting": "The Rim-keepers have watched the Mother for nine hundred years. She has never once looked back. Until this month.",
+      "titled": true
+    },
+    "rim_keeper_orsk": {
+      "name": "Rim-keeper Orsk Vhorrun",
+      "role": "guard",
+      "at": "Rim Shrine",
+      "greeting": "Keep to the stair. Off the stair the ground is thin and the lake is very, very hot.",
+      "titled": true
+    },
+    "iolu_skelvaru": {
+      "name": "Iolu Skelvaru",
+      "role": "healer",
+      "at": "Rim Shrine",
+      "greeting": "I heal burns. Up here, that is all I heal. It keeps me busy.",
+      "titled": true
+    },
+    "angler_rim_shrine": {
+      "name": "Rim-keeper Essu",
+      "role": "angler",
+      "at": "Rim Shrine",
+      "greeting": "We do not take from the lake. We borrow, and we put back. Mostly. See the ripples, just south-west of where I'm standing? That's the town pool. It never fishes out.",
+      "placedBy": "content-pools",
+      "titled": true
+    },
+    "carter_rim_shrine": {
+      "name": "Ferro Hulkaru",
+      "role": "carter",
+      "at": "Rim Shrine",
+      "greeting": "The ox is called Thunder. It is a joke. Where are we going?",
+      "cart": "cart_rim_shrine",
+      "placedBy": "content-towns",
+      "titled": true
+    }
+  },
+  "quests": [
+    {
+      "id": "cd_the_rim_holds",
+      "name": "The Rim Holds",
+      "level": 18,
+      "giver": "mother_anu",
+      "story": 5,
+      "offer": "You have the rite from Cinderholt? Then you know. The Slagborn have fed her and sung to her, and the Mother is listening. The wardens on the shrine stair and the wisps on the rim have gone wild with it. Clear the way up so the whole island can come and stand with us.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "obsidian_warden",
+          "count": 5,
+          "where": "the shrine stair",
+          "text": "Kill 5 obsidian wardens on the shrine stair"
+        },
+        {
+          "kind": "kill",
+          "type": "vent_wisp",
+          "count": 8,
+          "where": "the steaming rim",
+          "text": "Kill 8 vent wisps on the steaming rim"
+        }
+      ],
+      "done": "The stair is ours. When the shrine bell rings, every soul on Vharlen will hear it. She is waking. Gather everyone.",
+      "reward": {
+        "xp": 0.8,
+        "gold": 22,
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "uncommon"
+          }
+        ]
+      },
+      "next": "cd_the_caldera_wyrm"
+    },
+    {
+      "id": "cd_lake_shore",
+      "name": "Bread in the Soup",
+      "level": 18,
+      "giver": "iolu_skelvaru",
+      "offer": "The pumice golems float in the crater lake like bread in soup. Then they come ashore and stamp on pilgrims. I am tired of setting pilgrims' legs.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "pumice_golem",
+          "count": 6,
+          "where": "the crater lake shore",
+          "text": "Kill 6 pumice golems on the crater lake shore"
+        }
+      ],
+      "done": "Not one broken leg today. I sat down. It was odd.",
+      "reward": {
+        "xp": 0.45,
+        "gold": 16,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
+      }
+    },
+    {
+      "id": "cd_the_caldera_wyrm",
+      "name": "The Caldera Wyrm",
+      "level": 19,
+      "giver": "mother_anu",
+      "story": 5,
+      "group": "world boss — everyone on the island is called",
+      "offer": "Ossathra sleeps in the crater lake, the island's oldest thing. When she rises, stand on the shore with everyone who came. Do not stand in the boiling bits. Most of it is the boiling bits.",
+      "steps": [
+        {
+          "kind": "killOne",
+          "encounter": "world_ossathra",
+          "credit": "event",
+          "where": "the crater lake of the Caldera, when the shrine bell rings (realm event)",
+          "text": "Defeat Ossathra, the Caldera Wyrm, with the island"
+        }
+      ],
+      "done": "She sinks back into the lake, and the Mother goes quiet under our feet. The Slagborn will hate this. Vharlen is still ours. Thank you.",
+      "reward": {
+        "xp": 1.5,
+        "gold": 60,
+        "item": {
+          "tier": "epic",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "cd_crater_guard",
+      "name": "The Crater Guard",
+      "level": 19,
+      "giver": "rim_keeper_orsk",
+      "offer": "A great warden of black glass guards the crater, and it used to guard it for us. Since the Slagborn sang to the Mother, it guards it from us. The Crater Guard has to fall.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "ashback_salamander",
+          "count": 6,
+          "where": "the lava shelves",
+          "text": "Kill 6 ashback salamanders on the lava shelves"
+        },
+        {
+          "kind": "killOne",
+          "encounter": "elite_crater_guard",
+          "where": "the lava shelves below Rim Shrine",
+          "text": "Defeat the Crater Guard",
+          "at": {
+            "x": 26140,
+            "z": 21438,
+            "r": 45,
+            "name": "The Crater Guard"
+          }
+        }
+      ],
+      "done": "It served us well, once. I will say words for it. Short ones.",
+      "reward": {
+        "xp": 0.85,
+        "gold": 38,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "cd_the_last_keeper",
+      "name": "The Last Keeper",
+      "level": 19,
+      "giver": "rim_keeper_orsk",
+      "offer": "Before the Rim-keepers there were older keepers. One of them never stopped. He walks the high crags and keeps the crater from anyone who comes, us included. The Last Keeper.",
+      "steps": [
+        {
+          "kind": "killRare",
+          "zone": "the_caldera",
+          "slot": 1,
+          "text": "Hunt down the Last Keeper",
+          "where": "the high crags of the Caldera"
+        }
+      ],
+      "done": "His watch is over. Ours carries on. I hope we do it with less shouting.",
+      "reward": {
+        "xp": 0.75,
+        "gold": 40,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "cd_the_throat",
+      "name": "The Throat",
+      "level": 19,
+      "giver": "mother_anu",
+      "group": "a party of 3-5",
+      "offer": "Below the shrine is the Throat, the way down into the Mother herself. We go in once a generation to see that she is sleeping. This generation is you. Take your best friends.",
+      "steps": [
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "floor": 1,
+          "text": "Go down into the Throat",
+          "where": "The Throat, the dungeon door in the Caldera"
+        },
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "boss": true,
+          "text": "Defeat what waits at the bottom of the Throat",
+          "where": "the bottom of The Throat"
+        }
+      ],
+      "done": "You went into the Mother and came back. The keepers will sing about it. Badly. They are not singers.",
+      "reward": {
+        "xp": 1.2,
+        "gold": 60,
+        "item": {
+          "tier": "epic",
+          "slot": "any"
+        }
+      }
+    }
+  ]
+}

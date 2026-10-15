@@ -1,0 +1,3049 @@
+{
+ "_doc": "Stream E. Content placements for world zone z11_11 (E zone 'kiln_ridge', Kiln Ridge) — tools/place-vignettes.mjs against stream B's bake (terrain cbeaf687). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
+ "zone": "z11_11",
+ "sheetZone": "kiln_ridge",
+ "province": "vharlen",
+ "terrainHash": "cbeaf687",
+ "band": [
+  16,
+  18
+ ],
+ "archetype": "pass",
+ "rules": {
+  "vignette": {
+   "townGap": 60,
+   "gap": 30,
+   "slope": 20,
+   "sameKindSpacing": 140
+  },
+  "fort": {
+   "townGap": 80,
+   "gap": 40,
+   "slope": 16
+  },
+  "farm": {
+   "townGap": 25,
+   "gap": 30,
+   "slope": 12
+  },
+  "cave": {
+   "townGap": 120,
+   "gap": 40,
+   "slope": 28
+  },
+  "camp": {
+   "townGap": 120,
+   "gap": 25,
+   "slope": 24
+  },
+  "rare": {
+   "townGap": 150,
+   "gap": 30,
+   "slope": 24
+  },
+  "hook": {
+   "townGap": 40,
+   "gap": 30,
+   "slope": 26
+  },
+  "wayside": {
+   "townGap": 20,
+   "gap": 12,
+   "slope": 34,
+   "edge": 24
+  },
+  "settlement": {
+   "townGap": 300,
+   "gap": 60,
+   "slope": 10
+  },
+  "curio": {
+   "townGap": 30,
+   "gap": 10,
+   "slope": 26,
+   "edge": 30
+  },
+  "stray": {
+   "townGap": 70,
+   "gap": 16,
+   "slope": 26,
+   "edge": 30
+  },
+  "folk": {
+   "townGap": 30,
+   "gap": 12,
+   "slope": 24,
+   "edge": 30
+  },
+  "setpiece": {
+   "townGap": 20,
+   "gap": 25,
+   "slope": 20
+  }
+ },
+ "mainWalkableShare": 0.25,
+ "settlements": [
+  {
+   "name": "Kilnhold",
+   "kind": "village",
+   "x": 1572,
+   "z": 476,
+   "r": 65,
+   "source": "bake",
+   "bakeId": "kilnhold"
+  }
+ ],
+ "checks": [
+  {
+   "id": "door_1",
+   "kind": "dungeon_door",
+   "x": 1669,
+   "z": 639,
+   "reachable": true,
+   "openShare": 0.94
+  },
+  {
+   "id": "event_kiln_ridge",
+   "kind": "event_site",
+   "x": 1312,
+   "z": 730,
+   "reachable": true,
+   "openShare": 1
+  }
+ ],
+ "problems": [
+  "waystone door"
+ ],
+ "placements": [
+  {
+   "type": "fort",
+   "id": "fort_kiln_ridge_0",
+   "name": "Kilnhold",
+   "template": "stone_keep",
+   "friendly": true,
+   "x": 1817,
+   "z": 444,
+   "yaw": -2.36,
+   "radius": 28,
+   "level": 17
+  },
+  {
+   "type": "farm",
+   "id": "farm_kiln_ridge_0",
+   "name": "Kilnhold Goat Walls",
+   "template": "sheep",
+   "flavour": null,
+   "settlement": "Kilnhold",
+   "x": 1475,
+   "z": 397,
+   "yaw": 1.18,
+   "radius": 24,
+   "level": 16
+  },
+  {
+   "type": "farm",
+   "id": "farm_kiln_ridge_1",
+   "name": "Kilnhold Terraces",
+   "template": "arable",
+   "flavour": null,
+   "settlement": "Kilnhold",
+   "x": 1539,
+   "z": 589,
+   "yaw": 2.75,
+   "radius": 22,
+   "level": 16
+  },
+  {
+   "type": "cave",
+   "id": "cave_kiln_ridge_0",
+   "name": "Old sulphur shaft",
+   "template": "old_shaft",
+   "plan": {
+    "family": "sulphur_mine",
+    "floors": 1,
+    "level": 17
+   },
+   "x": 914,
+   "z": 268,
+   "yaw": -0.79,
+   "radius": 10,
+   "level": 17
+  },
+  {
+   "type": "cave",
+   "id": "cave_kiln_ridge_1",
+   "name": "Prowler den",
+   "template": "beast_den",
+   "plan": {
+    "family": "lava_tube",
+    "floors": 1,
+    "level": 17
+   },
+   "x": 1632,
+   "z": 1075,
+   "yaw": -0.39,
+   "radius": 10,
+   "level": 17
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_0_0",
+   "monster": "obsidian_warden",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1138,
+   "z": 564,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_0_1",
+   "monster": "obsidian_warden",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1298,
+   "z": 69,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_1_0",
+   "monster": "glasswing",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1959,
+   "z": 900,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_1_1",
+   "monster": "glasswing",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1243,
+   "z": 320,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_2_0",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1722,
+   "z": 818,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_2_1",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1765,
+   "z": 174,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_3_0",
+   "monster": "slagborn_chief",
+   "with": "slagborn_raider",
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1438,
+   "z": 870,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_3_1",
+   "monster": "slagborn_chief",
+   "with": "slagborn_raider",
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1102,
+   "z": 150,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_4_0",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1920,
+   "z": 1244,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_4_1",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1498,
+   "z": 152,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "rare",
+   "id": "rare_slagjaw",
+   "slot": 0,
+   "name": "Slagjaw",
+   "x": 1960,
+   "z": 192,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     1860,
+     256
+    ],
+    [
+     1901,
+     89
+    ],
+    [
+     2028,
+     103
+    ],
+    [
+     2036,
+     193
+    ],
+    [
+     2000,
+     287
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 18
+  },
+  {
+   "type": "rare",
+   "id": "rare_the_kilnmaster",
+   "slot": 1,
+   "name": "The Kilnmaster",
+   "x": 1927,
+   "z": 585,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     1972,
+     519
+    ],
+    [
+     1991,
+     642
+    ],
+    [
+     1923,
+     662
+    ],
+    [
+     1844,
+     579
+    ],
+    [
+     1881,
+     494
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 18
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z11_11_kilnhold",
+   "name": "Kilnhold",
+   "x": 1570.2,
+   "z": 481.8,
+   "yaw": 0,
+   "settlement": "Kilnhold",
+   "radius": 1
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_door",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1638,
+   "z": 676,
+   "yaw": 0,
+   "radius": 6,
+   "doorGuard": true
+  },
+  {
+   "type": "npc",
+   "id": "old_rhaska",
+   "name": "Old Rhaska",
+   "role": "elder",
+   "at": "Kilnhold",
+   "x": 1586.1,
+   "z": 454,
+   "yaw": 1.723,
+   "office": "kilnhold_plot_0",
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "kiln_hand_tekk",
+   "name": "Kiln-hand Tekk",
+   "role": "smith",
+   "at": "Kilnhold",
+   "x": 1570.8,
+   "z": 459.4,
+   "yaw": 4.864,
+   "office": "kilnhold_plot_3",
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "vosk_karrovu",
+   "name": "Vosk Karrovu",
+   "role": "guard",
+   "at": "Kilnhold",
+   "x": 1547.5,
+   "z": 461.2,
+   "yaw": 1.828,
+   "office": "kilnhold_plot_4",
+   "radius": 1
+  },
+  {
+   "type": "wayside",
+   "id": "driftwood_post_kiln_ridge_0",
+   "kind": "driftwood_post",
+   "name": "Driftwood Post",
+   "x": 738,
+   "z": 101,
+   "yaw": 0.09,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_f1",
+   "monster": "obsidian_warden",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1975,
+   "z": 62,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_kiln_ridge_2",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1841,
+   "z": 1064,
+   "yaw": 2.27,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_f3",
+   "monster": "glasswing",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1630,
+   "z": 61,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_kiln_ridge_4",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1068,
+   "z": 388,
+   "yaw": 2.88,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_f5",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 932,
+   "z": 76,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_kiln_ridge_6",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 2022,
+   "z": 728,
+   "yaw": 2.24,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_f7",
+   "monster": "slagborn_chief",
+   "with": "slagborn_raider",
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1304,
+   "z": 492,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_kiln_ridge_8",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 2016,
+   "z": 1092,
+   "yaw": 1.06,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_f9",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1357,
+   "z": 112,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_kiln_ridge_10",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1471,
+   "z": 270,
+   "yaw": 3.93,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_1",
+   "recipe": "cu_drying_fish",
+   "name": "Fish Rack",
+   "kind": "fishing",
+   "x": 1438,
+   "z": 1025,
+   "yaw": 1.45,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s1",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1625,
+   "z": 262,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_2",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 1592,
+   "z": 917,
+   "yaw": 1.35,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "broken_wheel_kiln_ridge_d1",
+   "kind": "broken_wheel",
+   "name": "Broken Wheel",
+   "x": 1776,
+   "z": 1191,
+   "yaw": 5.67,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_3",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1736,
+   "z": 968,
+   "yaw": 3.99,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_4",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 1512,
+   "z": 744,
+   "yaw": 6.28,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s2",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1860,
+   "z": 799,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_5",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 1775,
+   "z": 39,
+   "yaw": 2.09,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_6",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1232,
+   "z": 181,
+   "yaw": 5.26,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_7",
+   "recipe": "cu_horse_bones",
+   "name": "Horse Bones",
+   "kind": "remains",
+   "x": 1744,
+   "z": 312,
+   "yaw": 2.48,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s3",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1184,
+   "z": 442,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_kiln_ridge_d2",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1784,
+   "z": 697,
+   "yaw": 5.21,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_8",
+   "recipe": "cu_miners_notice",
+   "name": "Miners' Notice",
+   "kind": "lore",
+   "x": 1392,
+   "z": 593,
+   "yaw": 1.64,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s4",
+   "monster": "obsidian_warden",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1344,
+   "z": 240,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_kiln_ridge_d3",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1168,
+   "z": 41,
+   "yaw": 1.09,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_9",
+   "recipe": "cu_crab_rocks",
+   "name": "Crab Rocks",
+   "kind": "forage",
+   "x": 2008,
+   "z": 1333,
+   "yaw": 3.1,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_10",
+   "recipe": "cu_desert_melon",
+   "name": "Bitter Melons",
+   "kind": "forage",
+   "x": 1120,
+   "z": 280,
+   "yaw": 3.06,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_kiln_ridge_d4",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 840,
+   "z": 160,
+   "yaw": 4.22,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s5",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1961,
+   "z": 401,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_kiln_ridge_d5",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1048,
+   "z": 40,
+   "yaw": 4.68,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_11",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 1840,
+   "z": 920,
+   "yaw": 0.29,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_kiln_ridge_d6",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1456,
+   "z": 40,
+   "yaw": 5.59,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s6",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1344,
+   "z": 377,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_kiln_ridge_d7",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1607,
+   "z": 800,
+   "yaw": 0.77,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_12",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1247,
+   "z": 596,
+   "yaw": 1.95,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "roam_kiln_ridge_1",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 992,
+   "z": 186,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1021,
+     144
+    ],
+    [
+     1029,
+     215
+    ],
+    [
+     960,
+     243
+    ],
+    [
+     946,
+     163
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s7",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1739,
+   "z": 568,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_13",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 1937,
+   "z": 1018,
+   "yaw": 0.85,
+   "radius": 3,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_kiln_ridge_d8",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 823,
+   "z": 37,
+   "yaw": 0.9,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_14",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 962,
+   "z": 361,
+   "yaw": 4.55,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s8",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1921,
+   "z": 1137,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_15",
+   "recipe": "cu_dune_idol",
+   "name": "Dune Idol",
+   "kind": "shrine",
+   "x": 1743,
+   "z": 1096,
+   "yaw": 5.29,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_16",
+   "recipe": "cu_miners_notice",
+   "name": "Miners' Notice",
+   "kind": "lore",
+   "x": 1516,
+   "z": 1026,
+   "yaw": 4.39,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s9",
+   "monster": "glasswing",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1430,
+   "z": 501,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_17",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 1656,
+   "z": 160,
+   "yaw": 4.46,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_kiln_ridge_d9",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1449,
+   "z": 670,
+   "yaw": 4.09,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_18",
+   "recipe": "cu_horse_bones",
+   "name": "Horse Bones",
+   "kind": "remains",
+   "x": 2008,
+   "z": 1192,
+   "yaw": 0.77,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_19",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1074,
+   "z": 481,
+   "yaw": 2.69,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s10",
+   "monster": "glasswing",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1960,
+   "z": 799,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_20",
+   "recipe": "cu_horse_bones",
+   "name": "Horse Bones",
+   "kind": "remains",
+   "x": 1384,
+   "z": 952,
+   "yaw": 2.62,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "folk",
+   "id": "folk_kiln_ridge_1",
+   "role": "hermit",
+   "name": "Hermit",
+   "work": "sit",
+   "chatter": [
+    "role.hermit"
+   ],
+   "x": 1353,
+   "z": 851,
+   "yaw": 1.53,
+   "radius": 6,
+   "path": [
+    [
+     1367,
+     855
+    ],
+    [
+     1344,
+     859
+    ],
+    [
+     1348,
+     835
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_21",
+   "recipe": "cu_empty_gallows_post",
+   "name": "Weathered Post",
+   "kind": "lore",
+   "x": 1552,
+   "z": 320,
+   "yaw": 5.29,
+   "radius": 3,
+   "levelBase": 16
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_22",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1643,
+   "z": 364,
+   "yaw": 0.59,
+   "radius": 6,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_kiln_ridge_d10",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1529,
+   "z": 840,
+   "yaw": 1.55,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_kiln_ridge_d11",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1890,
+   "z": 348,
+   "yaw": 3.31,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s11",
+   "monster": "slagborn_chief",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1508,
+   "z": 931,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_kiln_ridge_d12",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1713,
+   "z": 723,
+   "yaw": 4.02,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_23",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1651,
+   "z": 980,
+   "yaw": 3.16,
+   "radius": 7,
+   "levelBase": 16
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_24",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 1432,
+   "z": 776,
+   "yaw": 3.33,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_25",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 1034,
+   "z": 307,
+   "yaw": 1.73,
+   "radius": 6,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_kiln_ridge_d13",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1536,
+   "z": 64,
+   "yaw": 5.59,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s12",
+   "monster": "glasswing",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1857,
+   "z": 168,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_26",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 1153,
+   "z": 358,
+   "yaw": 3.91,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_kiln_ridge_d14",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1435,
+   "z": 203,
+   "yaw": 0.13,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_kiln_ridge_2",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 2006,
+   "z": 977,
+   "yaw": 6.06,
+   "radius": 6,
+   "path": [
+    [
+     2045,
+     914
+    ],
+    [
+     2030,
+     1021
+    ],
+    [
+     1957,
+     972
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_27",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1711,
+   "z": 97,
+   "yaw": 0.76,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s13",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1214,
+   "z": 665,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_kiln_ridge_d15",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1680,
+   "z": 896,
+   "yaw": 2.5,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_28",
+   "recipe": "cu_desert_melon",
+   "name": "Bitter Melons",
+   "kind": "forage",
+   "x": 1543,
+   "z": 227,
+   "yaw": 5.72,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_kiln_ridge_d16",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1401,
+   "z": 310,
+   "yaw": 0.6,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s14",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1264,
+   "z": 408,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_29",
+   "recipe": "cu_frozen_climber",
+   "name": "Frozen Climber",
+   "kind": "remains",
+   "x": 1696,
+   "z": 440,
+   "yaw": 0.1,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_kiln_ridge_d17",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1216,
+   "z": 518,
+   "yaw": 3.18,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_30",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1836,
+   "z": 1246,
+   "yaw": 5.28,
+   "radius": 6,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s15",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1212,
+   "z": 117,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_31",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1699,
+   "z": 250,
+   "yaw": 5.52,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_32",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1764,
+   "z": 894,
+   "yaw": 4.68,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s16",
+   "monster": "glasswing",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1838,
+   "z": 1146,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_33",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1159,
+   "z": 208,
+   "yaw": 3.76,
+   "radius": 7,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_kiln_ridge_d18",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1584,
+   "z": 136,
+   "yaw": 4.34,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_34",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 1808,
+   "z": 992,
+   "yaw": 0.52,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_35",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 1322,
+   "z": 619,
+   "yaw": 1.09,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s17",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1559,
+   "z": 679,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_36",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1856,
+   "z": 721,
+   "yaw": 4.64,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "folk",
+   "id": "folk_kiln_ridge_3",
+   "role": "hermit",
+   "name": "Hermit",
+   "work": "sit",
+   "chatter": [
+    "role.hermit"
+   ],
+   "x": 703,
+   "z": 39,
+   "yaw": 4.25,
+   "radius": 6,
+   "path": [
+    [
+     708,
+     44
+    ],
+    [
+     696,
+     40
+    ],
+    [
+     706,
+     32
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_37",
+   "recipe": "cu_miners_notice",
+   "name": "Miners' Notice",
+   "kind": "lore",
+   "x": 1826,
+   "z": 338,
+   "yaw": 0.15,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s18",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1824,
+   "z": 96,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_kiln_ridge_d19",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1784,
+   "z": 768,
+   "yaw": 4.54,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_38",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 1689,
+   "z": 1140,
+   "yaw": 1.06,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s19",
+   "monster": "glasswing",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1551,
+   "z": 1085,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_kiln_ridge_d20",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1376,
+   "z": 448,
+   "yaw": 4.84,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_39",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 1306,
+   "z": 177,
+   "yaw": 3.43,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_40",
+   "recipe": "cu_desert_melon",
+   "name": "Bitter Melons",
+   "kind": "forage",
+   "x": 1704,
+   "z": 1032,
+   "yaw": 1.97,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_kiln_ridge_d21",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1384,
+   "z": 40,
+   "yaw": 2.22,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_41",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 1769,
+   "z": 360,
+   "yaw": 5.76,
+   "radius": 6,
+   "levelBase": 16
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_42",
+   "recipe": "cu_dune_idol",
+   "name": "Dune Idol",
+   "kind": "shrine",
+   "x": 1784,
+   "z": 248,
+   "yaw": 6.02,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_kiln_ridge_d22",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1102,
+   "z": 72,
+   "yaw": 5.22,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_kiln_ridge_4",
+   "role": "pilgrim_resting",
+   "name": "Resting pilgrim",
+   "work": "pray",
+   "chatter": [
+    "role.pilgrim"
+   ],
+   "x": 1584,
+   "z": 1008,
+   "yaw": 1.77,
+   "radius": 6,
+   "path": [
+    [
+     1593,
+     1006
+    ],
+    [
+     1582,
+     1015
+    ],
+    [
+     1579,
+     1001
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_43",
+   "recipe": "cu_miners_notice",
+   "name": "Miners' Notice",
+   "kind": "lore",
+   "x": 1433,
+   "z": 102,
+   "yaw": 0.32,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s20",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 853,
+   "z": 225,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_kiln_ridge_d23",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1264,
+   "z": 248,
+   "yaw": 4.95,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_44",
+   "recipe": "cu_miners_notice",
+   "name": "Miners' Notice",
+   "kind": "lore",
+   "x": 1877,
+   "z": 977,
+   "yaw": 5.96,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "roam_kiln_ridge_2",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1991,
+   "z": 1263,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1992,
+     1212
+    ],
+    [
+     2048,
+     1265
+    ],
+    [
+     1992,
+     1320
+    ],
+    [
+     1933,
+     1275
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_kiln_ridge_d24",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1651,
+   "z": 580,
+   "yaw": 5.73,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s21",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 2008,
+   "z": 456,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_45",
+   "recipe": "cu_empty_gallows_post",
+   "name": "Weathered Post",
+   "kind": "lore",
+   "x": 1744,
+   "z": 640,
+   "yaw": 4.48,
+   "radius": 3,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_kiln_ridge_d25",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1927,
+   "z": 280,
+   "yaw": 4.78,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_46",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 1887,
+   "z": 871,
+   "yaw": 4.57,
+   "radius": 6,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_kiln_ridge_d26",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1440,
+   "z": 968,
+   "yaw": 4.72,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s22",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1456,
+   "z": 562,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_47",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1952,
+   "z": 728,
+   "yaw": 4.5,
+   "radius": 7,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_kiln_ridge_d27",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1139,
+   "z": 485,
+   "yaw": 2.85,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_48",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1652,
+   "z": 739,
+   "yaw": 0.34,
+   "radius": 6,
+   "levelBase": 16
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_49",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 1696,
+   "z": 512,
+   "yaw": 3.99,
+   "radius": 3,
+   "levelBase": 16
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_50",
+   "recipe": "cu_desert_melon",
+   "name": "Bitter Melons",
+   "kind": "forage",
+   "x": 1834,
+   "z": 644,
+   "yaw": 3.94,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_kiln_ridge_d28",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 857,
+   "z": 97,
+   "yaw": 0.21,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_51",
+   "recipe": "cu_dune_idol",
+   "name": "Dune Idol",
+   "kind": "shrine",
+   "x": 1320,
+   "z": 312,
+   "yaw": 4.93,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_52",
+   "recipe": "cu_desert_melon",
+   "name": "Bitter Melons",
+   "kind": "forage",
+   "x": 1360,
+   "z": 537,
+   "yaw": 2.54,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s23",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1233,
+   "z": 41,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_kiln_ridge_d29",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1800,
+   "z": 840,
+   "yaw": 2.42,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_53",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1199,
+   "z": 270,
+   "yaw": 4.94,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_kiln_ridge_d30",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 2008,
+   "z": 848,
+   "yaw": 2.4,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s24",
+   "monster": "glasswing",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 2007,
+   "z": 576,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_kiln_ridge_d31",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1575,
+   "z": 743,
+   "yaw": 4.82,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_54",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 1904,
+   "z": 1072,
+   "yaw": 4.79,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s25",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1600,
+   "z": 200,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_55",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 1124,
+   "z": 428,
+   "yaw": 5.26,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_56",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 1794,
+   "z": 529,
+   "yaw": 3.78,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_kiln_ridge_d32",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1000,
+   "z": 80,
+   "yaw": 1.59,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_kiln_ridge_d33",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1658,
+   "z": 840,
+   "yaw": 4.26,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s26",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1371,
+   "z": 667,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_57",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 1681,
+   "z": 306,
+   "yaw": 5.4,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "folk",
+   "id": "folk_kiln_ridge_5",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 2009,
+   "z": 352,
+   "yaw": 2.79,
+   "radius": 6,
+   "path": [
+    [
+     2044,
+     377
+    ],
+    [
+     1974,
+     373
+    ],
+    [
+     2015,
+     308
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_kiln_ridge_d34",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1374,
+   "z": 171,
+   "yaw": 3.03,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_58",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 1097,
+   "z": 224,
+   "yaw": 1.34,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s27",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1904,
+   "z": 432,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_kiln_ridge_d35",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1291,
+   "z": 559,
+   "yaw": 1.24,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_59",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1408,
+   "z": 720,
+   "yaw": 4.94,
+   "radius": 7,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "roam_kiln_ridge_3",
+   "monster": "glasswing",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1857,
+   "z": 41,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1843,
+     6
+    ],
+    [
+     1886,
+     27
+    ],
+    [
+     1872,
+     82
+    ],
+    [
+     1817,
+     45
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s28",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1767,
+   "z": 1041,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_60",
+   "recipe": "cu_empty_gallows_post",
+   "name": "Weathered Post",
+   "kind": "lore",
+   "x": 1008,
+   "z": 400,
+   "yaw": 1.84,
+   "radius": 3,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_kiln_ridge_d36",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1096,
+   "z": 336,
+   "yaw": 5.73,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_61",
+   "recipe": "cu_samphire",
+   "name": "Samphire Flats",
+   "kind": "forage",
+   "x": 800,
+   "z": 113,
+   "yaw": 6.06,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s29",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1696,
+   "z": 40,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_62",
+   "recipe": "cu_empty_gallows_post",
+   "name": "Weathered Post",
+   "kind": "lore",
+   "x": 1881,
+   "z": 1193,
+   "yaw": 4.67,
+   "radius": 3,
+   "levelBase": 16
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_63",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 1487,
+   "z": 800,
+   "yaw": 5.19,
+   "radius": 6,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s30",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1584,
+   "z": 856,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_64",
+   "recipe": "cu_dune_idol",
+   "name": "Dune Idol",
+   "kind": "shrine",
+   "x": 1609,
+   "z": 620,
+   "yaw": 0.59,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_kiln_ridge_d37",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1176,
+   "z": 618,
+   "yaw": 2.1,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_65",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1704,
+   "z": 192,
+   "yaw": 1.41,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_66",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1152,
+   "z": 104,
+   "yaw": 3.93,
+   "radius": 6,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s31",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 880,
+   "z": 40,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_67",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 1218,
+   "z": 380,
+   "yaw": 5.22,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_68",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1492,
+   "z": 326,
+   "yaw": 1.89,
+   "radius": 7,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_kiln_ridge_d38",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1960,
+   "z": 1080,
+   "yaw": 2.81,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s32",
+   "monster": "slagborn_chief",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1240,
+   "z": 464,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_kiln_ridge_d39",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 769,
+   "z": 50,
+   "yaw": 4.32,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_69",
+   "recipe": "cu_horse_bones",
+   "name": "Horse Bones",
+   "kind": "remains",
+   "x": 985,
+   "z": 302,
+   "yaw": 1.74,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s33",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1416,
+   "z": 256,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_70",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 1320,
+   "z": 432,
+   "yaw": 1.08,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_kiln_ridge_d40",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1904,
+   "z": 927,
+   "yaw": 1.1,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_71",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1952,
+   "z": 120,
+   "yaw": 3.22,
+   "radius": 6,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_kiln_ridge_d41",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 1801,
+   "z": 600,
+   "yaw": 2.52,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s34",
+   "monster": "obsidian_warden",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1272,
+   "z": 649,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_72",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 1727,
+   "z": 346,
+   "yaw": 6.1,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "folk",
+   "id": "folk_kiln_ridge_6",
+   "role": "hermit",
+   "name": "Hermit",
+   "work": "sit",
+   "chatter": [
+    "role.hermit"
+   ],
+   "x": 1905,
+   "z": 760,
+   "yaw": 4.65,
+   "radius": 6,
+   "path": [
+    [
+     1919,
+     761
+    ],
+    [
+     1902,
+     771
+    ],
+    [
+     1898,
+     753
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_73",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 1394,
+   "z": 396,
+   "yaw": 3.48,
+   "radius": 6,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s35",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1487,
+   "z": 214,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_kiln_ridge_d42",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1763,
+   "z": 512,
+   "yaw": 4.63,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_74",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1990,
+   "z": 1147,
+   "yaw": 1.09,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "roam_kiln_ridge_4",
+   "monster": "obsidian_warden",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1777,
+   "z": 112,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1781,
+     43
+    ],
+    [
+     1843,
+     114
+    ],
+    [
+     1777,
+     167
+    ],
+    [
+     1712,
+     94
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_kiln_ridge_s36",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1594,
+   "z": 334,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_kiln_ridge_75",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 913,
+   "z": 323,
+   "yaw": 2.35,
+   "radius": 4,
+   "levelBase": 16
+  }
+ ],
+ "features": [],
+ "density": {
+  "target": 50,
+  "roadTarget": 45,
+  "added": {
+   "curio": 75,
+   "wayside": 42,
+   "stray": 36,
+   "roamer": 4,
+   "folk": 6
+  },
+  "openShareCovered": 1,
+  "roadShareCovered": 1
+ },
+ "levels": [
+  16,
+  18
+ ]
+}

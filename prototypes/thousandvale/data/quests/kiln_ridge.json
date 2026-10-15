@@ -1,0 +1,218 @@
+{
+  "_doc": "Stream C (Expansion 1). Quests for zone 'kiln_ridge' on Vharlen, the Burning Isle. Format: data/quests/README.md. Rewards: xp = share of a level's XP at the quest level, gold = multiple of a kill's gold; item.tier rolls at your level. `killRare` {zone, slot} names the zone's rare by slot (data/provinces/rares.json). Story-chain quests carry `story: n` (data/quests/vharlen-province.json).",
+  "zone": "kiln_ridge",
+  "npcs": {
+    "old_rhaska": {
+      "name": "Old Rhaska",
+      "role": "elder",
+      "at": "Kilnhold",
+      "greeting": "The kilns are older than the Vharl. We only keep them warm. They seem to like it.",
+      "titled": true
+    },
+    "kiln_hand_tekk": {
+      "name": "Kiln-hand Tekk",
+      "role": "smith",
+      "at": "Kilnhold",
+      "greeting": "Pots, blades, roof tiles. If it can be fired, I fire it. If it can't, I fire it anyway and see.",
+      "titled": true
+    },
+    "vosk_karrovu": {
+      "name": "Vosk Karrovu",
+      "role": "guard",
+      "at": "Kilnhold",
+      "greeting": "Kilnhold is a fort with an oven in the middle. Best-fed garrison on the island.",
+      "titled": true
+    },
+    "angler_kilnhold": {
+      "name": "Halla Tovaru",
+      "role": "angler",
+      "at": "Kilnhold",
+      "greeting": "Long line, long cliff, long wait. Worth it. See the ripples, just south-west of where I'm standing? That's the town pool. It never fishes out.",
+      "placedBy": "content-pools",
+      "titled": true
+    },
+    "carter_kilnhold": {
+      "name": "Ashka Askaru",
+      "role": "carter",
+      "at": "Kilnhold",
+      "greeting": "Name a town. If it has a gate, I have been stuck outside it.",
+      "cart": "cart_kilnhold",
+      "placedBy": "content-towns",
+      "titled": true
+    }
+  },
+  "quests": [
+    {
+      "id": "kr_the_basalt_steps",
+      "name": "The Basalt Steps",
+      "level": 16,
+      "giver": "vosk_karrovu",
+      "offer": "The obsidian wardens have come down off the old kilns and sat themselves on the basalt steps, which is the only road up. We go round them. It takes a day.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "obsidian_warden",
+          "count": 5,
+          "where": "the basalt steps",
+          "text": "Kill 5 obsidian wardens on the basalt steps"
+        }
+      ],
+      "done": "The road is the road again. My knees thank you.",
+      "reward": {
+        "xp": 0.45,
+        "gold": 14,
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "uncommon"
+          }
+        ]
+      }
+    },
+    {
+      "id": "kr_warm_ledges",
+      "name": "Warm Ledges",
+      "level": 16,
+      "giver": "kiln_hand_tekk",
+      "offer": "The salamanders sleep in my kilns because kilns are warm. I would like to fire a pot without firing a salamander. Clear the ledges they come in from.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "ashback_salamander",
+          "count": 8,
+          "where": "the warm ledges",
+          "text": "Kill 8 ashback salamanders on the warm ledges"
+        }
+      ],
+      "done": "An empty kiln. Do you know how long it has been? I am going to fire something just to feel it.",
+      "reward": {
+        "xp": 0.45,
+        "gold": 15,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
+      }
+    },
+    {
+      "id": "kr_quarry_quills",
+      "name": "Quills for the Glaze",
+      "level": 17,
+      "giver": "kiln_hand_tekk",
+      "offer": "Glasswing quills, ground fine, give a glaze that looks like the night sky. I have a buyer and no quills. The birds nest on the cliffs and do not share.",
+      "steps": [
+        {
+          "kind": "collect",
+          "item": "Glasswing quill",
+          "count": 5,
+          "from": "glasswing",
+          "chance": 0.45,
+          "where": "the cliff nests",
+          "text": "Gather 5 glasswing quills from the cliff nests"
+        }
+      ],
+      "done": "Look at that black. You could fall into it. Mind the cliffs, I mean that both ways.",
+      "reward": {
+        "xp": 0.5,
+        "gold": 18
+      }
+    },
+    {
+      "id": "kr_the_basalt_tyrant",
+      "name": "The Basalt Tyrant",
+      "level": 17,
+      "giver": "old_rhaska",
+      "offer": "In the old quarry stands a golem cut from the columns themselves, and the other golems do what it tells them. The Basalt Tyrant. It wants the quarry. We want the quarry. One of us has to lose.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "pumice_golem",
+          "count": 4,
+          "where": "the old quarry",
+          "text": "Kill 4 pumice golems in the old quarry"
+        },
+        {
+          "kind": "killOne",
+          "encounter": "elite_basalt_tyrant",
+          "where": "the old quarry",
+          "text": "Defeat the Basalt Tyrant",
+          "at": {
+            "x": 23860,
+            "z": 23224,
+            "r": 45,
+            "name": "The Basalt Tyrant"
+          }
+        }
+      ],
+      "done": "The quarry is ours. We will cut it into something nicer.",
+      "reward": {
+        "xp": 0.8,
+        "gold": 34,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "kr_the_kilnmaster",
+      "name": "The Kilnmaster",
+      "level": 17,
+      "giver": "kiln_hand_tekk",
+      "offer": "Somebody is firing the old kilns at night. Not me. The pots that come out are full of ash shaped like people. Find the Kilnmaster and put the fire out.",
+      "steps": [
+        {
+          "kind": "killRare",
+          "zone": "kiln_ridge",
+          "slot": 1,
+          "text": "Hunt down the Kilnmaster",
+          "where": "the old kilns along Kiln Ridge"
+        }
+      ],
+      "done": "No more night firing. I will break the pots. Gently, with words first.",
+      "reward": {
+        "xp": 0.7,
+        "gold": 34,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "kr_the_old_kilns",
+      "name": "The Old Kilns",
+      "level": 17,
+      "giver": "old_rhaska",
+      "group": "a party of 3-5",
+      "offer": "Inside the ridge the old kilns go down and down, and something has lit every one of them. Kilnwife Orra, the stories say, though she has been dead a long while. Take a party and find out whose fire it is.",
+      "steps": [
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "floor": 1,
+          "text": "Go into the Old Kilns",
+          "where": "The Old Kilns, the dungeon door in Kiln Ridge"
+        },
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "boss": true,
+          "text": "Put out the fire at the bottom of the Old Kilns",
+          "where": "the bottom of The Old Kilns"
+        }
+      ],
+      "done": "Cold kilns, and quiet. The ridge has not been quiet since my grandmother was a girl. Strange. Nice. Strange.",
+      "reward": {
+        "xp": 1.2,
+        "gold": 60,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        }
+      }
+    }
+  ]
+}

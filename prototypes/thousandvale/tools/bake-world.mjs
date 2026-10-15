@@ -49,7 +49,9 @@ export function bakeWorld(cfg = WORLD) {
   const M = cfg.macroMetres, W = w.width, H = w.height;
   const meta = { ...cfg, width: W, height: H, bakeVersion: WORLD_BAKE_VERSION };
   const macro = { ...meta, elevation: w.elevation, slope: w.slope, water: w.water, river: w.river, biome: w.biome };
-  const ref = makeRefiner(macro);
+  // the world bake is the PRE-continent world (2026-10-14 islands): rivers, lakes and roads are graded on the pangea
+  // ground, so world.json (and every Torbor Downs zone hashed on it) stays as it was; continents apply in the zone bakes
+  const full = makeRefiner(macro), ref = { ...full, baseGround: full.mainland };
   const cellXZ = c => ({ x: (c % W) * M, z: Math.floor(c / W) * M });
 
   // rivers: smooth + meander + surfaces, in world metres

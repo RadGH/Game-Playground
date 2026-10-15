@@ -1,0 +1,174 @@
+{
+  "id": "rare_the_assayer",
+  "name": "The Assayer",
+  "tier": "rare",
+  "secret": true,
+  "zone": "sulphur_bight",
+  "level": 14,
+  "body": "slagborn_firecaller",
+  "place": "wanders the old sulphur workings north of the Pit Gate with a rack of flasks, testing every vein with fire",
+  "_doc": "Expansion 1 (Vharlen). A Slagborn firecaller who tests sulphur for the warband. His acid flasks leave puddles that eat armour, and his assay flame is a straight beam. At half health he 'tests' the group: three flasks thrown at once over the area, and a crucible of molten sulphur swung round him (get in close).",
+  "party": {
+    "solo": "Fair solo at 14; the armour-eating puddles hurt.",
+    "small": "Right for 2-3.",
+    "full": "Easy.",
+    "m5": "M5 adds health per extra player and one more copy of the spread/scatter shapes for parties of 4-5; mechanics stay the same."
+  },
+  "hpMult": 2,
+  "arena": {
+    "radius": 24
+  },
+  "say": {
+    "pull": [
+      "Hm. Let's see what you are made of.",
+      "The Assayer holds a flask up to the light and squints at you."
+    ],
+    "death": "The Assayer drops his rack. Flasks smash and hiss. 'Low... grade...'",
+    "reset": "The Assayer goes back to scratching notes on a slate."
+  },
+  "abilities": {
+    "pick": {
+      "id": "pick",
+      "name": "Ore Hammer",
+      "every": [
+        6,
+        8
+      ],
+      "first": 2,
+      "range": 5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 4.4,
+          "arc": 1.3,
+          "wind": 1,
+          "damage": 1.6
+        }
+      ]
+    },
+    "flask": {
+      "id": "flask",
+      "name": "Acid Flask",
+      "every": [
+        11,
+        14
+      ],
+      "first": 4,
+      "say": "{boss} lobs a hissing flask!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3,
+          "wind": 1.5,
+          "damage": 1.2,
+          "count": 2,
+          "delay": 0.3,
+          "element": "poison",
+          "leave": {
+            "type": "pool",
+            "name": "Acid puddle",
+            "r": 2.4,
+            "every": 1,
+            "seconds": 14,
+            "damage": 0.2,
+            "status": "strip",
+            "element": "poison"
+          }
+        }
+      ]
+    },
+    "assay_flame": {
+      "id": "assay_flame",
+      "name": "Assay Flame",
+      "every": [
+        12,
+        15
+      ],
+      "first": 7,
+      "cast": 0.8,
+      "say": "{boss} aims a jet of flame at {target}!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 16,
+          "w": 2.4,
+          "wind": 1.3,
+          "damage": 1.7,
+          "element": "fire",
+          "status": "burn"
+        }
+      ]
+    },
+    "volley": {
+      "id": "volley",
+      "name": "Sample Volley",
+      "every": [
+        13,
+        16
+      ],
+      "first": 3,
+      "cast": 0.5,
+      "say": "Three flasks in the air at once!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "r": 3.2,
+          "wind": 1.6,
+          "damage": 1.2,
+          "spread": 13,
+          "count": 3,
+          "delay": 0.3,
+          "element": "poison",
+          "status": "strip"
+        }
+      ]
+    },
+    "crucible": {
+      "id": "crucible",
+      "name": "Swinging Crucible",
+      "every": [
+        14,
+        17
+      ],
+      "first": 8,
+      "cast": 0.8,
+      "say": "He swings the crucible round — get in close!",
+      "telegraphs": [
+        {
+          "shape": "donut",
+          "at": "self",
+          "r": 10,
+          "r2": 3,
+          "wind": 1.6,
+          "damage": 1.8,
+          "element": "fire"
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Sampling",
+      "abilities": [
+        "pick",
+        "flask",
+        "assay_flame"
+      ]
+    },
+    {
+      "name": "False Weights",
+      "at": 0.5,
+      "say": "Not good enough. Into the crucible with you.",
+      "abilities": [
+        "pick",
+        "volley",
+        "crucible",
+        "assay_flame"
+      ]
+    }
+  ]
+}

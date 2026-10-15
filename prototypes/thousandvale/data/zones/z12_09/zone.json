@@ -1,0 +1,197 @@
+{
+  "name": "Mistfall (z12_09)",
+  "zone": "z12_09",
+  "sheet": {
+    "sheet": "vharlen",
+    "zone": "steamwood"
+  },
+  "province": {
+    "id": 0,
+    "name": "Feafeast Highlands"
+  },
+  "size": 1025,
+  "step": 2,
+  "origin": {
+    "x": 0,
+    "z": 0
+  },
+  "heightMin": -240,
+  "heightMax": 1660,
+  "bakeVersion": 4,
+  "inputHash": "de552a99",
+  "waterKinds": [
+    "none",
+    "sea",
+    "lake",
+    "river"
+  ],
+  "source": {
+    "tool": "tools/bake-zone.mjs",
+    "world": {
+      "seed": 1001,
+      "width": 288,
+      "height": 224,
+      "method": "pangea",
+      "seaLevel": 0.2,
+      "inputHash": "9805a835"
+    },
+    "zone": {
+      "zx": 12,
+      "zy": 9
+    },
+    "worldOrigin": {
+      "x": 24576,
+      "z": 18432
+    },
+    "zoneMetres": 2048
+  },
+  "rivers": [],
+  "sites": [
+    {
+      "type": "settlement",
+      "kind": "hamlet",
+      "name": "Mistfall",
+      "x": 1174,
+      "z": 1322,
+      "hub": true,
+      "radius": 40
+    },
+    {
+      "type": "dungeon",
+      "id": "door_1",
+      "name": "Cave mouth",
+      "x": 1164,
+      "z": 1502,
+      "yaw": 2.27
+    },
+    {
+      "type": "event",
+      "id": "event_steamwood",
+      "x": 1093,
+      "z": 1237,
+      "r": 40
+    }
+  ],
+  "spawn": {
+    "x": 1174,
+    "z": 1322
+  },
+  "bridges": [],
+  "palette": "vharl",
+  "continent": "vharlen",
+  "biomeNames": {
+    "beach": "Black Sand",
+    "rainforest": "Steam Jungle",
+    "shrubland": "Fern Scrub",
+    "savanna": "Tussock",
+    "desert": "Sulphur Flats",
+    "badlands": "Basalt Highland",
+    "marsh": "Mud Fen",
+    "volcanic": "Scoria Slopes",
+    "blighted": "Charred Wood",
+    "ashPlain": "Pumice Waste",
+    "glimmerwaste": "Obsidian Dunes",
+    "mountains": "Basalt Cliffs"
+  },
+  "pools": [
+    {
+      "id": "hot_spring_1",
+      "kind": "hot_spring",
+      "name": null,
+      "x": 704,
+      "z": 1652,
+      "r": 11,
+      "level": 147.573
+    },
+    {
+      "id": "hot_spring_2",
+      "kind": "hot_spring",
+      "name": null,
+      "x": 1454,
+      "z": 1112,
+      "r": 9,
+      "level": 54.965
+    },
+    {
+      "id": "hot_spring_3",
+      "kind": "hot_spring",
+      "name": null,
+      "x": 464,
+      "z": 1352,
+      "r": 8,
+      "level": 32.419
+    }
+  ],
+  "summary": {
+    "zone": "z12_09",
+    "province": "Feafeast Highlands",
+    "inputHash": "de552a99",
+    "rivers": 0,
+    "wetShare": 0.323,
+    "unwalkableShare": 0.338,
+    "towns": [
+      {
+        "name": "Mistfall",
+        "kind": "hamlet",
+        "hub": true,
+        "at": [
+          1174,
+          1322
+        ],
+        "radius": 40,
+        "movedFrom": null,
+        "culture": "vharl",
+        "plots": 7,
+        "streets": 41,
+        "links": 2,
+        "overlaps": 0,
+        "highStreets": 2,
+        "w6": {
+          "plotsBefore": 8,
+          "plots": 7,
+          "kept": 7,
+          "removed": [
+            {
+              "plot": 5,
+              "want": "hut",
+              "office": false
+            }
+          ]
+        }
+      }
+    ],
+    "roads": 2,
+    "bridges": 0,
+    "paths": 6,
+    "pathMetres": 1241,
+    "scatter": 20998,
+    "scatterKinds": {
+      "ironpalm": 3704,
+      "rock_small": 386,
+      "obsidian": 292,
+      "tree_fern": 9251,
+      "bush": 4740,
+      "basalt_columns": 2117,
+      "steam_vent": 107,
+      "sulphur_crust": 394,
+      "tree_charred": 7
+    },
+    "sites": [
+      "settlement(HUB) hamlet Mistfall 1174 1322 40",
+      "dungeon door_1 Cave mouth 1164 1502  2.27",
+      "event event_steamwood  1093 1237 40"
+    ],
+    "spawn": {
+      "x": 1174,
+      "z": 1322
+    },
+    "placements": 64,
+    "vignettesAvoided": 511
+  },
+  "files": {
+    "terrain.bin": 394614,
+    "nav.bin": 40437,
+    "scatter.bin": 168068,
+    "placements.json": 78831
+  }
+}

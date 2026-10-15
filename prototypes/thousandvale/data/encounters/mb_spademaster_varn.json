@@ -1,0 +1,165 @@
+{
+  "id": "mb_spademaster_varn",
+  "name": "Spademaster Varn",
+  "tier": "miniboss",
+  "body": "slagborn_raider",
+  "place": "dungeon buried_town (Under Cinderholt, Ashfall Hollow, level 16): mini-boss",
+  "_doc": "The Slagborn digger-boss looting the buried town. P1 \"Digging\": a spade chop and a fling of ash into faces (silence), and he knocks out a roof prop — falling ash and rubble that leaves rocks on the floor. P2 at 50% \"Bury Them\": he swings the spade round in a full circle and buries players where they stand (root under a pile that follows them).",
+  "party": "Solo: watch the roof. 2-3: casters stay out of the ash flings. 5: spread — buried players block each other.",
+  "hpMult": 2.1,
+  "arena": {
+    "radius": 12,
+    "objects": []
+  },
+  "say": {
+    "pull": [
+      "\"Finders keepers. And I found it first.\"",
+      "Varn leans on his spade. \"You can dig your own grave or I can do it.\""
+    ],
+    "death": "Varn drops into the hole he was digging.",
+    "reset": "\"Back to the digging.\" Varn spits and turns away."
+  },
+  "enrage": {
+    "seconds": 270,
+    "damage": 2.5,
+    "say": "Varn knocks out every prop in the room!"
+  },
+  "abilities": {
+    "chop": {
+      "id": "chop",
+      "name": "Spade Chop",
+      "every": [
+        5,
+        7
+      ],
+      "range": 5,
+      "melee": {
+        "damage": 1.3
+      },
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 5,
+          "arc": 1.2,
+          "wind": 1,
+          "damage": 1.6
+        }
+      ]
+    },
+    "ash_fling": {
+      "id": "ash_fling",
+      "name": "Ash in the Face",
+      "every": [
+        9,
+        11
+      ],
+      "first": 3,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 8,
+          "arc": 0.9,
+          "wind": 1.1,
+          "damage": 1.1,
+          "status": "silence"
+        }
+      ]
+    },
+    "roof_prop": {
+      "id": "roof_prop",
+      "name": "Knock Out the Prop",
+      "every": [
+        14,
+        17
+      ],
+      "first": 5,
+      "cast": 0.8,
+      "say": "He kicks out a roof prop — the ceiling is coming down!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "spread": 10,
+          "r": 2.6,
+          "count": 4,
+          "delay": 0.3,
+          "wind": 1.6,
+          "damage": 1.6,
+          "leave": {
+            "type": "rock",
+            "name": "Fallen rubble",
+            "r": 1.1,
+            "hp": 2
+          }
+        }
+      ]
+    },
+    "spin": {
+      "id": "spin",
+      "name": "Spade Spin",
+      "every": [
+        11,
+        14
+      ],
+      "first": 3,
+      "cast": 0.6,
+      "say": "Varn whirls his spade — back off!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 5.5,
+          "wind": 1.3,
+          "damage": 1.8,
+          "knock": 3
+        }
+      ]
+    },
+    "bury": {
+      "id": "bury",
+      "name": "Bury Them",
+      "every": [
+        15,
+        18
+      ],
+      "first": 6,
+      "cast": 0.6,
+      "say": "Ash pours down on {target} — get out from under it!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "count": 2,
+          "r": 2.8,
+          "follow": true,
+          "wind": 2,
+          "damage": 1.6,
+          "status": "root"
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Digging",
+      "abilities": [
+        "chop",
+        "ash_fling",
+        "roof_prop"
+      ]
+    },
+    {
+      "name": "Bury Them",
+      "at": 0.5,
+      "say": "\"Into the ash with you!\"",
+      "abilities": [
+        "chop",
+        "spin",
+        "bury",
+        "roof_prop"
+      ]
+    }
+  ]
+}

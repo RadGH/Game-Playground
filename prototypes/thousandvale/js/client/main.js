@@ -65,6 +65,7 @@ import { moteCount } from './star-looks.js';
 import { createMoveMarker } from './move-marker.js';       // play-test 9 (X2): the marker where click-to-move is heading
 import { createHeld } from './held-view.js';
 import { createCarts } from './carts-view.js';             // play-test 8 (W5): ox carts — parked, on the road, and the ride
+import { createShipVoyage } from './ship-view.js';         // [V] Expansion 1 §6: the voyage between the continents + the Harbourmaster window
 import { createQuestMarks } from './quest-marks.js';     // play-test 8 (W12): ! and ? over quest givers
 import { createStatusSync } from './status-sync.js';
 import { createWeaponFx } from './weapon-fx.js';
@@ -155,6 +156,7 @@ const lootMarks = createLootMarkers({ actors, glowTexture: makeGlowTexture() });
 // W5: ox carts by the town gates and on the roads (avatar-3d's ox cart; one is built and compiled at boot)
 const held = createHeld(scene, { groundY: (x, z) => groundY(x, z), compile: g => compileBeforeShow(view.renderer, g, camera, scene) });   // #59: the cage a road-event captive sits in
 const carts = createCarts(scene, { actors, groundY: (x, z) => groundY(x, z), compile: g => compileBeforeShow(view.renderer, g, camera, scene) });
+const ships = createShipVoyage(scene, { view, camera, actors, travel: { cover: t => travel.cover(t), reveal: () => travel.reveal(), get covered() { return travel.covered; } }, hud: { toast: (...a) => hud.toast(...a), chat: (...a) => hud.chat(...a) }, controls: { hold: v => controls.hold(v), stop: () => controls.stop() }, horizon: () => W.horizon, ws: { get terrain() { return WS.terrain; }, whenReady: (x, z) => WS.whenReady(x, z) }, worldUi: { closeDialog: () => worldUi.closeDialog?.() }, journal: () => ui.journal, selfId: () => S.selfId, compile: g => compileBeforeShow(view.renderer, g, camera, scene) });   // [V]
 // W12: A's per-player quest marks, floated over the NPCs they belong to (D-UI reads questMarks.list() for the minimap)
 const questMarks = createQuestMarks(scene, { actors, camera });
 // Q8: auras follow the server's info.st on every body (late arrivals see them; a death clears them)
@@ -604,6 +606,7 @@ function wireNet(net) {
   bag.wire(net);
   ui5.wire(net);
   ui8.wire(net); ui10.wire(net);
+  ships.wire(net);      // [V] the Harbourmaster window, the voyage
   prof.wire(net);   // W9 (P-client)
   ui.wire(net);
   worldUi.wire(net);
@@ -1225,7 +1228,7 @@ function frame(now) {
       if (controls.auto != null && (it.inRange || it.manual || controls.chasing == null)) tryStrike(false);
     }
     if (steps === 5 || !online) S.acc = Math.min(S.acc, TICK_MS);
-    const drawn = carts.ridePos(S.predictor.render(S.acc / TICK_MS, dt));      // W5: on a cart you are drawn on its bed
+    const drawn = ships.ridePos(carts.ridePos(S.predictor.render(S.acc / TICK_MS, dt)));      // W5: on a cart you are drawn on its bed; [V] at sea, on the ship's deck
     if (CROWD.list.length) crowdTick(dt);
     const renderTime = S.net ? S.net.clock.serverNow() - INTERP_MS : 0;
     if (mouseNdc) { const h = actors.pickAt(mouseNdc, { exclude: S.selfId }); S.hover = h ? h.id : null; $('view').style.cursor = h ? (h.hostile && !h.dead ? 'crosshair' : 'pointer') : 'default'; }
@@ -1274,6 +1277,7 @@ function frame(now) {
   statusSync.update();
   weaponFx.update(dt); formFx.update(dt); angling.update(dt); profView.update(dt); shots.update(dt);
   lootMarks.update(dt); questMarks.update(dt); carts.update(dt, elapsed); held.update(dt, id => actors.get(id)?.pos || null); moveMark.update(dt);
+  ships.update(dt, elapsed);      // [V] the voyage camera + sea + moored ships (after the game's own camera, before the render)
   // W5: an arrival inside the SAME room brings no `joined` — step down once the ride's own time is up (on the ride's clock, not the wall's)
   if (S.cartRide && (!carts.riding || carts.rideOver())) { endCartRide(); if (travel.covered) travel.reveal(); }
   hud.tick(dt);
@@ -1420,7 +1424,7 @@ const tv = {
     put('vig', 0, 0, { type: 'vignette', name: 'The Hanging Oak', r: 14, lore: 'Somebody cut the rope down, but not before the crows had their turn. A satchel lies in the grass beneath.', key: 'demo:vig' });
     worldUi.onZone({ zone: 'z12_02', name: 'The Torbor Fields', band: [1, 4], deeds: { rares: 3, bosses: 1, elites: 2, deaths: 4, visitors: 17 },
       heat: Array.from({ length: 40 }, (_, i) => [Math.round((p.x + Math.cos(i * 0.6) * i * 9) / 32) * 32 + 16, Math.round((p.z + Math.sin(i * 0.6) * i * 9) / 32) * 32 + 16, 250 - i * 5]) });
-    const ev = { id: 'world_grimtallow', uid: 'demo', name: 'Grimtallow, the Siege-Husk', province: 'torbor_downs', zoneName: 'Blackthorn Scar', x: p.x + 900, z: p.z, r: 100, level: 10, kind: 'worldboss' };
+    const ev = { id: 'world_grimtallow', uid: 'demo', name: 'Grimtallow, the Siege-Husk', province: S.room?.province || 'torbor_downs', zoneName: 'Blackthorn Scar', x: p.x + 900, z: p.z, r: 100, level: 10, kind: 'worldboss' };
     worldUi.onRealm({ kind: 'eventSoon', ev, at: now + 600000 });
     setTimeout(() => worldUi.onRealm({ kind: 'eventStart', ev }), 2500);
     setTimeout(() => worldUi.onEventFrame({ uid: 'demo', name: ev.name, hp: 0.62, players: 23 }), 3200);
@@ -1440,7 +1444,7 @@ const tv = {
     const b = mons.sort((x, y) => Math.hypot(x.pos.x - p.x, x.pos.z - p.z) - Math.hypot(y.pos.x - p.x, y.pos.z - p.z))[0];
     const id = b ? b.id : me;
     const fire = evs => { S.evTick = Math.round(S.net.clock.serverNow() / TICK_MS); for (const ev of evs) onEvent(ev); };
-    const ev = { id: 'world_grimtallow', uid: 'demo', name: 'Grimtallow, the Siege-Husk', province: 'torbor_downs', zoneName: 'The Ashcombe Ruins', kind: 'worldboss', roamed: true, level: 10 };
+    const ev = { id: 'world_grimtallow', uid: 'demo', name: 'Grimtallow, the Siege-Husk', province: S.room?.province || 'torbor_downs', zoneName: 'The Ashcombe Ruins', kind: 'worldboss', roamed: true, level: 10 };
     worldUi.onRealm({ kind: 'eventStart', ev, text: 'Grimtallow has torn free of Blackthorn Scar and marches on the Ashcombe Ruins!' });
     fire([{ type: 'boss', id, name: 'Grimtallow', title: 'the Siege-Husk', bars: 3, enrageMs: 540000,
       phases: [{ n: 0, name: 'The March', at: 1 }, { n: 1, name: 'The Warband', at: 0.65 }, { n: 2, name: 'Uprooted', at: 0.5 }, { n: 3, name: 'Death Throes', at: 0.3 }] }]);
@@ -1522,3 +1526,4 @@ const tv = {
 };
 window.tv = tv;
 window.thousandvale = { stars, onEvent, held, ui10, tracking: () => ui10.tracking(), titleFront: () => titleFront, moveMark, prof, profView, shots, questMarks, carts, input, formFx, reviveFx, angling, lootMarks, weaponFx, statusSync, S, W, D, WS, view, actors, spells, LIGHTS, travel, camera, controls, hud, fx, tv, tele, boss, objects, social, bag, worldUi, footprints, chat, friends, guild, mail, callboard, account, ui, ui2, ui5, ui8 };
+window.thousandvale.ships = ships;      // [V]

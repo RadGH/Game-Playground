@@ -43,6 +43,7 @@ export const OPTIONAL_DATA_FILES = {
   angling: '../../data/provinces/angling.json',
   guards: '../../data/provinces/guards.json',          // owner feedback 8 W1: stream E's town guards (js/rules/guards.js reads `rules`, `ranks`, `raid`)
   gearCatalog: '../../../../avatar-3d/data/gear-catalog.json',
+  tvMonsters: '../../data/rules/monsters-tv.json',    // 2026-10-14 (EXPANSION-1 §5): Thousandvale-only monsters (js/rules/tv-monsters.js)
 };
 
 /** URL of one data file, resolved against this module. */

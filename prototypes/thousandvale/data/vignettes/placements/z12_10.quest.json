@@ -1,0 +1,142 @@
+{
+ "_doc": "Stream E (play-test 4 S14). Copies of camps already standing in world zone z12_10, added where a kill / collect quest's area held fewer of its monster than the step needs (its count, capped at 4). Same ground and level as the camp copied (its id minus the quest_ prefix is the quest + step). Made by tools/content-hunts.mjs; js/sim/content.js merges it like <zone>.hunt.json; stream B's bake never reads it.",
+ "zone": "z12_10",
+ "terrainHash": "4958e2b7",
+ "placements": [
+  {
+   "type": "camp",
+   "id": "quest_cd_the_rim_holds_0_0",
+   "monster": "obsidian_warden",
+   "with": null,
+   "level": [
+    19,
+    19
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1968,
+   "z": 1864,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "cd_the_rim_holds",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_cd_lake_shore_0_0",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    18,
+    18
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1569,
+   "z": 961,
+   "yaw": 0,
+   "radius": 7,
+   "quest": "cd_lake_shore",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_cd_lake_shore_0_1",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    18,
+    18
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1569,
+   "z": 961,
+   "yaw": 0,
+   "radius": 7,
+   "quest": "cd_lake_shore",
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "quest_cd_crater_guard_0_0",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    18,
+    18
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1637,
+   "z": 850,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "cd_crater_guard",
+   "hunt": true
+  },
+  {
+   "type": "npc",
+   "id": "angler_rim_shrine",
+   "name": "Rim-keeper Essu",
+   "role": "angler",
+   "at": "Rim Shrine",
+   "x": 1184,
+   "z": 1188,
+   "yaw": -0.39,
+   "angler": true,
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "npc",
+   "id": "carter_rim_shrine",
+   "name": "Ferro Hulkaru",
+   "role": "carter",
+   "at": "Rim Shrine",
+   "x": 1832,
+   "z": 1120,
+   "yaw": -2.316,
+   "cart": "cart_rim_shrine",
+   "placedBy": "content-towns",
+   "quests": 0,
+   "titled": true
+  },
+  {
+   "type": "cart",
+   "id": "cart_rim_shrine",
+   "name": "Longroad Cart",
+   "model": "ox_cart",
+   "vehicle": "ox_cart",
+   "town": "Rim Shrine",
+   "carter": "carter_rim_shrine",
+   "x": 1834,
+   "z": 1122,
+   "yaw": 2.356,
+   "radius": 2.2
+  },
+  {
+   "type": "guard",
+   "id": "guard_rim_shrine_0",
+   "name": "Rim Shrine Guard",
+   "role": "guard",
+   "rank": "guard",
+   "tier": "hamlet",
+   "town": "Rim Shrine",
+   "post": "gate",
+   "gate": "rim_shrine_gate_0",
+   "x": 1818,
+   "z": 1130,
+   "yaw": 2.278,
+   "titled": false
+  }
+ ]
+}

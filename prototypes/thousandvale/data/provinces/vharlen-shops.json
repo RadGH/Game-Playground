@@ -1,0 +1,130 @@
+{
+  "_doc": "Stream C (Expansion 1). Vharlen's own shop data, laid over data/provinces/shops.json key by key (js/sim/province-files.js): only `towns` is Vharlen's — every trader KIND (what a smith, a tailor, an inn sells) is the home file's. `towns.<settlement>` = `zone` (sheet zone), `levelCap` (no stock above it: the band top + 1 to + 2, so the island's shelves run to level 21), `priceMult` (everything is shipped in: 1.1 at the harbour rising to 1.3 at the crater), `note`, and `shops` — WRITTEN by tools/content-offices.mjs --province=vharlen from the trader roles of stream T's town plans. `harbour` = the ships.json harbour this town's pier serves (stream V's Harbourmaster stands there, role `harbourmaster`).",
+  "towns": {
+    "Port Vharl": {
+      "zone": "blackstrand",
+      "levelCap": 13,
+      "priceMult": 1.1,
+      "harbour": "port_vharl",
+      "note": "the landing and the island's one real market: every trader, and the Harbourmaster on the pier (stream V, data/provinces/ships.json) sells passage back to the mainland",
+      "shops": [
+        "general",
+        "market",
+        "weaponsmith",
+        "armourer",
+        "bowyer",
+        "apothecary",
+        "tailor",
+        "stable",
+        "inn",
+        "provisioner",
+        "barber",
+        "broker",
+        "unbinder",
+        "healer"
+      ]
+    },
+    "Mistfall": {
+      "zone": "steamwood",
+      "levelCap": 14,
+      "priceMult": 1.15,
+      "note": "a jungle hamlet round a hot spring: the spring-house is the inn",
+      "shops": [
+        "general",
+        "inn"
+      ]
+    },
+    "Yellowpan": {
+      "zone": "sulphur_bight",
+      "levelCap": 15,
+      "priceMult": 1.15,
+      "note": "the sulphur diggers' village: a smith who works with gloves on",
+      "shops": [
+        "general",
+        "weaponsmith",
+        "stable",
+        "inn",
+        "provisioner"
+      ]
+    },
+    "Stiltreach": {
+      "zone": "fumarole_fen",
+      "levelCap": 16,
+      "priceMult": 1.2,
+      "note": "houses on stilts over hot mud",
+      "shops": [
+        "general",
+        "inn"
+      ]
+    },
+    "Shardhaven": {
+      "zone": "glasswind_strand",
+      "levelCap": 16,
+      "priceMult": 1.2,
+      "note": "glass-cutters on the obsidian beach",
+      "shops": [
+        "general",
+        "inn"
+      ]
+    },
+    "Lastwell": {
+      "zone": "pumice_wastes",
+      "levelCap": 17,
+      "priceMult": 1.2,
+      "note": "the fort-town at the last good well before the ash",
+      "shops": [
+        "general",
+        "market",
+        "weaponsmith",
+        "armourer",
+        "bowyer",
+        "apothecary",
+        "tailor",
+        "jeweller",
+        "stable",
+        "inn",
+        "provisioner",
+        "barber",
+        "broker",
+        "unbinder",
+        "healer"
+      ]
+    },
+    "Cinderholt": {
+      "zone": "ashfall_hollow",
+      "levelCap": 18,
+      "priceMult": 1.25,
+      "note": "half a village above the ash, half below it",
+      "shops": [
+        "general",
+        "weaponsmith",
+        "stable",
+        "inn",
+        "provisioner"
+      ]
+    },
+    "Kilnhold": {
+      "zone": "kiln_ridge",
+      "levelCap": 19,
+      "priceMult": 1.25,
+      "note": "the fort of the kiln-hands on the basalt steps",
+      "shops": [
+        "general",
+        "weaponsmith",
+        "stable",
+        "inn",
+        "provisioner"
+      ]
+    },
+    "Rim Shrine": {
+      "zone": "the_caldera",
+      "levelCap": 21,
+      "priceMult": 1.3,
+      "note": "the Rim-keepers' shrine on the crater's edge: a healer, a supplier, little else",
+      "shops": [
+        "general",
+        "inn"
+      ]
+    }
+  }
+}

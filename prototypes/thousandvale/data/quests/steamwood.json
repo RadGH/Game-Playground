@@ -1,0 +1,220 @@
+{
+  "_doc": "Stream C (Expansion 1). Quests for zone 'steamwood' on Vharlen, the Burning Isle. Format: data/quests/README.md. Rewards: xp = share of a level's XP at the quest level, gold = multiple of a kill's gold; item.tier rolls at your level. `killRare` {zone, slot} names the zone's rare by slot (data/provinces/rares.json). Story-chain quests carry `story: n` (data/quests/vharlen-province.json).",
+  "zone": "steamwood",
+  "npcs": {
+    "old_varr": {
+      "name": "Old Varr",
+      "role": "elder",
+      "at": "Mistfall",
+      "greeting": "Seventy years in the Steamwood. The jungle has tried to eat me every one of them. It has bad manners and no teeth left.",
+      "titled": true
+    },
+    "steam_wife_ninu": {
+      "name": "Steam-wife Ninu",
+      "role": "healer",
+      "at": "Mistfall",
+      "greeting": "The springs heal anything but stupidity. Sit. Soak. Do not drink it.",
+      "titled": true
+    },
+    "corra_sulvenn": {
+      "name": "Corra Sulvenn",
+      "role": "trader",
+      "at": "Mistfall",
+      "greeting": "Ironpalm sap, bottled steam, a very small amount of honesty. What do you need?",
+      "titled": true
+    },
+    "angler_mistfall": {
+      "name": "Oru Keshvar",
+      "role": "angler",
+      "at": "Mistfall",
+      "greeting": "Fish in the hot pools come out half-cooked. Saves a fire. See the ripples, just east of where I'm standing? That's the town pool. It never fishes out.",
+      "placedBy": "content-pools",
+      "titled": true
+    },
+    "carter_mistfall": {
+      "name": "Orsk Yorrvenn",
+      "role": "carter",
+      "at": "Mistfall",
+      "greeting": "Walking is free. Riding is nearly free, and you arrive with your legs.",
+      "cart": "cart_mistfall",
+      "placedBy": "content-towns",
+      "titled": true
+    }
+  },
+  "quests": [
+    {
+      "id": "sw_prowler_season",
+      "name": "Prowler Season",
+      "level": 11,
+      "giver": "old_varr",
+      "offer": "The prowlers have had cubs, and now the parents have opinions about everyone who walks past. Thin them out before they have opinions about Mistfall.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "steamwood_prowler",
+          "count": 6,
+          "where": "the deep jungle",
+          "text": "Kill 6 steamwood prowlers in the deep jungle"
+        }
+      ],
+      "done": "The leaves are moving again. That is how you know it is safe. Or that something worse is coming. Mostly safe.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 10,
+        "crates": [
+          {
+            "slot": "weapon",
+            "min": "uncommon"
+          }
+        ]
+      }
+    },
+    {
+      "id": "sw_spit_in_the_springs",
+      "name": "Spit in the Springs",
+      "level": 11,
+      "giver": "steam_wife_ninu",
+      "offer": "The sulphur toads sit in my healing springs and spit in them. I have patients who come out yellower than they went in.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "sulphur_toad",
+          "count": 7,
+          "where": "the hot pools",
+          "text": "Kill 7 sulphur toads at the hot pools"
+        }
+      ],
+      "done": "Clean water, nearly. Go and soak in it. You smell like a toad.",
+      "reward": {
+        "xp": 0.4,
+        "gold": 10,
+        "crates": [
+          {
+            "slot": "armor",
+            "min": "uncommon"
+          }
+        ]
+      }
+    },
+    {
+      "id": "sw_steam_in_a_jar",
+      "name": "Steam in a Jar",
+      "level": 12,
+      "giver": "corra_sulvenn",
+      "offer": "A vent wisp, popped at the right moment, leaves a puff of steam you can cork. A jar of it lights a lamp for a week. It smells like eggs. It sells like bread.",
+      "steps": [
+        {
+          "kind": "collect",
+          "item": "Jar of wisp-steam",
+          "count": 5,
+          "from": "vent_wisp",
+          "chance": 0.4,
+          "where": "around the steam vents",
+          "text": "Catch 5 jars of wisp-steam from vent wisps"
+        }
+      ],
+      "done": "Five jars! I will sell four and keep one for the outhouse.",
+      "reward": {
+        "xp": 0.45,
+        "gold": 14
+      }
+    },
+    {
+      "id": "sw_mother_of_moss",
+      "name": "Mother of Moss",
+      "level": 12,
+      "giver": "steam_wife_ninu",
+      "offer": "There is a thing in the stream beds that grows moss on its back and lets the moss do the thinking. Mother of Moss, we call her. She has started taking my herb-pickers.",
+      "steps": [
+        {
+          "kind": "killRare",
+          "zone": "steamwood",
+          "slot": 1,
+          "text": "Hunt down Mother of Moss",
+          "where": "the mossy stream beds of the Steamwood"
+        }
+      ],
+      "done": "Bring me a scrap of that moss next time. Waste not.",
+      "reward": {
+        "xp": 0.6,
+        "gold": 26,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      }
+    },
+    {
+      "id": "sw_hissing_grotto",
+      "name": "The Hissing Grotto",
+      "level": 12,
+      "giver": "old_varr",
+      "group": "a party of 3-5",
+      "offer": "The grotto under the big geyser has hissed since before I was born. This month it started hissing words. Take some friends and go and tell it to stop.",
+      "steps": [
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "floor": 1,
+          "text": "Go down into the Hissing Grotto",
+          "where": "The Hissing Grotto, the dungeon door in the Steamwood"
+        },
+        {
+          "kind": "clear",
+          "dungeon": "door",
+          "boss": true,
+          "text": "Defeat whatever is talking at the bottom of the grotto",
+          "where": "the bottom of The Hissing Grotto"
+        }
+      ],
+      "done": "It has gone back to plain hissing. Much better. Words from the ground are never good news. Yellowpan has its own troubles, if you are walking that way.",
+      "reward": {
+        "xp": 1.2,
+        "gold": 50,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        }
+      },
+      "next": "sb_crust_king"
+    },
+    {
+      "id": "sw_canopy_widow",
+      "name": "The Canopy Widow",
+      "level": 13,
+      "giver": "corra_sulvenn",
+      "offer": "Something up in the ironpalm canopy drops on my sap-tappers and hauls them up by the ankle. We call her the Canopy Widow. I would like my tappers to stay on the ground.",
+      "steps": [
+        {
+          "kind": "kill",
+          "type": "scoria_crawler",
+          "count": 5,
+          "where": "under the fallen ironpalms",
+          "text": "Kill 5 scoria crawlers under the fallen ironpalms"
+        },
+        {
+          "kind": "killOne",
+          "encounter": "elite_canopy_widow",
+          "where": "the high canopy of the Steamwood",
+          "text": "Defeat the Canopy Widow",
+          "at": {
+            "x": 25540,
+            "z": 19924,
+            "r": 45,
+            "name": "The Canopy Widow"
+          }
+        }
+      ],
+      "done": "My tappers send their thanks, from ground level. The wreckers on Glasswind Strand are lighting false fires again, by the way. Someone ought to look.",
+      "reward": {
+        "xp": 0.7,
+        "gold": 26,
+        "item": {
+          "tier": "uncommon",
+          "slot": "any"
+        }
+      },
+      "next": "gw_the_wreckers"
+    }
+  ]
+}

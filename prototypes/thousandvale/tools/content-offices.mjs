@@ -3,6 +3,7 @@
 // each other. Each NPC needs their own office — the smith at a forge").
 //
 //   node tools/content-offices.mjs          -> data/provinces/offices.json (every hub town of Torbor Downs)
+//   node tools/content-offices.mjs --province=<id>  -> that province's own <id>-offices.json and <id>-shops.json `towns`
 //   import { officesFor, buildOffices } from './content-offices.mjs'   (tools/place-vignettes.mjs, tests/E)
 //
 // For each hub town (stream B's settlements with `hub`, i.e. the ones with a town room) this picks ONE building plot
@@ -18,7 +19,7 @@
 import { titledOf } from './content-titled.mjs';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { parseNav, NAV } from '../js/rules/terrain-read.js';
-import { J, ROOT, questFiles, provinceMap } from './content-lib.mjs';
+import { J, ROOT, questFiles, provinceMap, provinceDataPath, provinceDataSync, readNames, zoneBelongs, requireProvince, HOME_PROVINCE } from './content-lib.mjs';
 import { writeShops } from './content-shops.mjs';
 
 /** Plot `want`s a role prefers, best first. Stream B's town plan tags the plot each role works in (data.role, from
@@ -135,10 +136,11 @@ function nameFor(N, town, role) {
 }
 
 /** Every hub town of a province. -> the offices.json object */
-export function buildOffices(prov = 'torbor_downs') {
-  const MAP = provinceMap(prov), SHEET = J(`data/provinces/${prov}.json`), SHOPS = J('data/provinces/shops.json'), N = J('data/names/torbor.json');
-  const quests = questFiles();
-  const placesFile = J(`data/provinces/${prov}-places.json`);
+export function buildOffices(prov = HOME_PROVINCE) {
+  const MAP = provinceMap(prov), SHEET = J(`data/provinces/${prov}.json`), SHOPS = provinceDataSync(J, prov, 'shops'), N = readNames(prov, SHEET);
+  SHOPS.towns ||= {};
+  const quests = questFiles().filter(q => zoneBelongs(prov, q.zone));     // this province's quest files only
+  let placesFile = { zones: {} }; try { placesFile = J(`data/provinces/${prov}-places.json`); } catch { /* a new province: tools/place-vignettes.mjs writes it on its first run */ }
   const towns = {}, problems = [], townShops = {};
   for (const [eid, wid] of Object.entries(MAP)) {
     const bake = J(`data/zones/${wid}/placements.json`).placements;
@@ -212,9 +214,10 @@ export function buildOffices(prov = 'torbor_downs') {
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const out = buildOffices();
-  writeShops(out.townShops);
-  writeFileSync(new URL('data/provinces/offices.json', ROOT), JSON.stringify(out, null, 1) + '\n');
+  const prov = requireProvince(process.argv, { need: [p => `data/provinces/${p}-places.json`] });     // --province=<id> (default torbor_downs)
+  const out = buildOffices(prov);
+  writeShops(out.townShops, prov);
+  writeFileSync(new URL(provinceDataPath(prov, 'offices'), ROOT), JSON.stringify(out, null, 1) + '\n');
   const n = Object.values(out.towns).reduce((a, t) => a + t.offices.length, 0);
   console.log(`offices: ${Object.keys(out.towns).length} towns, ${n} offices, ${out.setpieces.length} set-piece NPCs${out.problems.length ? ' PROBLEMS ' + out.problems.join('; ') : ''}`);
   if (out.problems.length) process.exitCode = 1;

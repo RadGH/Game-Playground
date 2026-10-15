@@ -1,0 +1,189 @@
+{
+  "id": "mb_dry_throat_bogg",
+  "name": "Dry-Throat Bogg",
+  "tier": "miniboss",
+  "body": "sulphur_toad",
+  "place": "dungeon lava_tube set B (The Dry Wells): floor 2's mini-boss",
+  "_doc": "A huge toad that drank the last well dry and sits on its rim. P1 \"Thirst\": it spits yellow gobbets that leave stinging puddles; the old well windlass (a lever, repeatable) sloshes the last bucket of water out and washes the puddles away. P2 at 50% \"Bloat\": it swells, belches a cone, and leaps onto a player (a follow circle) with a croak that knocks everyone out.",
+  "party": "Solo: wash the puddles every second spit. 2-3: one on the windlass. 5: spread for the leap — it lands where its target stands.",
+  "hpMult": 2.1,
+  "arena": {
+    "radius": 12,
+    "objects": [
+      {
+        "id": "windlass",
+        "type": "lever",
+        "name": "Well windlass",
+        "x": 0,
+        "z": -7,
+        "repeat": true,
+        "onUse": [
+          {
+            "remove": "spit_puddle"
+          },
+          {
+            "say": "The last bucket sloshes across the floor — the puddles wash away.",
+            "style": "emote"
+          }
+        ]
+      }
+    ]
+  },
+  "say": {
+    "pull": [
+      "A croak like a dropped bell. Bogg turns on the well rim to look at you.",
+      "The well is dry. Bogg is not."
+    ],
+    "death": "Bogg sags over the well rim, and a trickle of water runs out of its mouth back down the well.",
+    "reset": "Bogg settles back on the well rim and closes its eyes."
+  },
+  "enrage": {
+    "seconds": 270,
+    "damage": 2.5,
+    "say": "Bogg puffs up to twice its size!"
+  },
+  "abilities": {
+    "tongue": {
+      "id": "tongue",
+      "name": "Tongue Lash",
+      "every": [
+        5,
+        7
+      ],
+      "range": 7,
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "target",
+          "len": 7,
+          "w": 2,
+          "wind": 0.9,
+          "damage": 1.4,
+          "pull": true,
+          "knock": 2
+        }
+      ]
+    },
+    "gobbet": {
+      "id": "gobbet",
+      "name": "Yellow Gobbet",
+      "every": [
+        8,
+        10
+      ],
+      "first": 2,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "count": 2,
+          "delay": 0.4,
+          "r": 2.5,
+          "wind": 1.3,
+          "damage": 1.1,
+          "element": "poison",
+          "status": "poison",
+          "leave": {
+            "id": "spit_puddle",
+            "type": "pool",
+            "name": "Stinging puddle",
+            "r": 2.3,
+            "every": 1,
+            "seconds": 30,
+            "damage": 0.3,
+            "status": "poison",
+            "element": "poison"
+          }
+        }
+      ]
+    },
+    "belch": {
+      "id": "belch",
+      "name": "Sulphur Belch",
+      "every": [
+        9,
+        12
+      ],
+      "first": 3,
+      "cast": 0.5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 8,
+          "arc": 1.2,
+          "wind": 1.1,
+          "damage": 1.7,
+          "element": "poison",
+          "status": "weaken"
+        }
+      ]
+    },
+    "leap": {
+      "id": "leap",
+      "name": "Big Leap",
+      "every": [
+        14,
+        17
+      ],
+      "first": 6,
+      "cast": 0.6,
+      "say": "Bogg crouches — it is going to land on {target}!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 4,
+          "follow": true,
+          "wind": 2.2,
+          "damage": 2.4,
+          "knock": 3
+        }
+      ]
+    },
+    "croak": {
+      "id": "croak",
+      "name": "Croak",
+      "every": [
+        19,
+        22
+      ],
+      "first": 9,
+      "cast": 1,
+      "say": "Bogg fills its throat — get away before it croaks!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 7,
+          "wind": 1.6,
+          "damage": 1.8,
+          "knock": 5,
+          "status": "off_balance"
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Thirst",
+      "abilities": [
+        "tongue",
+        "gobbet",
+        "belch"
+      ]
+    },
+    {
+      "name": "Bloat",
+      "at": 0.5,
+      "say": "Bogg swells up, wheezing yellow smoke!",
+      "abilities": [
+        "tongue",
+        "belch",
+        "leap",
+        "croak",
+        "gobbet"
+      ]
+    }
+  ]
+}

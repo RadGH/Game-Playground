@@ -301,4 +301,5 @@ export const sceneFits = (s, deviceId) => !s.only || s.only.includes(deviceId);
  * This is a to-do list, not an exemption: tests/G/gallery.test.js prints it on every run, and the lead's audit reads it.
  */
 export const PENDING_SCENES = {
+  'js/client/ui/ship-travel.js': 'Expansion 1 (2026-10-14): the Harbourmaster window needs a recorded `ship` fixture from a two-province server; until then tests/V/voyage.spec.js opens it on a real server and screenshots it (tests/V/shots/v2-harbour-window.png).',
 };

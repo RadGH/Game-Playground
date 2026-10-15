@@ -33,6 +33,10 @@ import { fileURLToPath } from 'node:url';
 import { parseTerrain } from '../js/rules/terrain-read.js';
 import { parseHorizon } from '../js/rules/horizon-read.js';
 import { encodePng } from './lib/png.mjs';
+import { REGION_PALETTES, regionAt } from '../js/client/horizon-grid.js';
+import { loadWorld } from './bake-zone.mjs';
+import { CONTINENTS, continentRect } from './lib/world-core.mjs';
+import { islandRoads } from './lib/vharlen.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const DATA = join(HERE, '..', 'data');
@@ -86,6 +90,17 @@ export function bakeMap() {
   for (const sid of Object.keys(PMAP)) { try { sheets[sid] = JSON.parse(readFileSync(join(DATA, 'provinces', `${sid}.json`), 'utf8')); } catch { /* none */ } }
   const sheetOf = id => { for (const [sid, pm] of Object.entries(PMAP)) { const e = Object.entries(pm.map || {}).find(([, z]) => z === id); if (e) return { sid, zone: e[0], row: sheets[sid]?.zones?.[e[0]] || null }; } return null; };
   const biomeRgb = H.biomes.map(b => hex(b[2]));
+  // a region with its own ground (Vharlen) is drawn in its own colours (js/client/horizon-grid.js REGION_PALETTES)
+  const regionRgb = Object.fromEntries(Object.entries(REGION_PALETTES).map(([k, P]) => [k, H.biomes.map(b => (P.colors[b[0]] ? hex(P.colors[b[0]]) : hex(b[2])))]));
+  // 2026-10-14 islands: an expansion island's roads are its own (tools/lib/vharlen.mjs) and World Forge's old mainland
+  // roads and rivers inside its block are gone; elsewhere a line is drawn only where it runs over land
+  const { ref } = loadWorld();
+  const islandRects = CONTINENTS.filter(c => c.profile).map(continentRect);
+  const inIsland = pts => islandRects.some(r => pts.some(p => p[0] >= r.x0 && p[0] < r.x1 && p[1] >= r.z0 && p[1] < r.z1));
+  const isle = CONTINENTS.filter(c => c.profile).map(c => ref.profileOf(c)).filter(Boolean);
+  const ROADS = [...W.roads.filter(r => !inIsland(r.pts)), ...isle.flatMap(i => islandRoads(i))];
+  const RIVERS = W.rivers.filter(r => !inIsland(r.pts));
+  const dry = (a, b) => { const w = H.waterAt((a[0] + b[0]) / 2, (a[1] + b[1]) / 2); return !(w && w.depth > 1.5); };
   const files = {};
 
   // ---- world image: 1 px = one horizon sample (32 m) ----
@@ -96,11 +111,11 @@ export function bakeMap() {
     const w = H.waterAt(x, z);
     let rgb;
     if (w && w.depth > 0) { const d = clamp(w.depth / 40, 0, 1); rgb = [52 - 30 * d, 104 - 50 * d, 150 - 40 * d].map(v => band(v / 255, 24) * 255); }
-    else { const s = band(0.45 + 0.75 * shade(hAt, x, z, step), 10), b = biomeRgb[H.biomeAt(x, z)] || [120, 140, 90]; rgb = b.map(c => clamp(c * s, 0, 255)); }
+    else { const s = band(0.45 + 0.75 * shade(hAt, x, z, step), 10), rg = regionAt(x, z), b = (rg ? regionRgb[rg] : biomeRgb)[H.biomeAt(x, z)] || [120, 140, 90]; rgb = b.map(c => clamp(c * s, 0, 255)); }
     wpx[o] = rgb[0]; wpx[o + 1] = rgb[1]; wpx[o + 2] = rgb[2]; wpx[o + 3] = 255;
   }
-  for (const r of W.rivers) for (let k = 0; k < r.pts.length - 1; k++) { const a = r.pts[k], b = r.pts[k + 1]; line(wpx, WW, WH, a[0] / step, a[1] / step, b[0] / step, b[1] / step, [58, 112, 160], b[3] >= 2 ? 1 : 0.6); }
-  for (const r of W.roads) for (let k = 0; k < r.pts.length - 1; k++) { const a = r.pts[k], b = r.pts[k + 1]; line(wpx, WW, WH, a[0] / step, a[1] / step, b[0] / step, b[1] / step, [214, 190, 140], r.class === 'trail' ? 0.45 : 0.8); }
+  for (const r of RIVERS) for (let k = 0; k < r.pts.length - 1; k++) { const a = r.pts[k], b = r.pts[k + 1]; if (!dry(a, b)) continue; line(wpx, WW, WH, a[0] / step, a[1] / step, b[0] / step, b[1] / step, [58, 112, 160], b[3] >= 2 ? 1 : 0.6); }
+  for (const r of ROADS) for (let k = 0; k < r.pts.length - 1; k++) { const a = r.pts[k], b = r.pts[k + 1]; if (!dry(a, b)) continue; line(wpx, WW, WH, a[0] / step, a[1] / step, b[0] / step, b[1] / step, [214, 190, 140], r.class === 'trail' ? 0.45 : 0.8); }
   files['world.png'] = encodePng(WW, WH, wpx, { opaque: true });
 
   // ---- zone images + labels from the baked zones ----
@@ -112,7 +127,7 @@ export function bakeMap() {
     if (existsSync(join(dir, 'terrain.bin'))) {
       const t = parseTerrain(readFileSync(join(dir, 'terrain.bin')));
       const P = JSON.parse(readFileSync(join(dir, 'placements.json'), 'utf8')).placements;
-      const px = new Uint8Array(ZPX * ZPX * 4), roadId = t.biomes.length - 1, zb = t.biomes.map(b => hex(b.color));
+      const px = new Uint8Array(ZPX * ZPX * 4), roadId = t.biomes.length - 1, zb = t.biomes.map(b => hex(REGION_PALETTES[t.meta.palette]?.colors[b.key] || b.color));
       const g = (x, zz) => t.groundAt(x, zz);
       for (let j = 0; j < ZPX; j++) for (let i = 0; i < ZPX; i++) {
         const x = (i + 0.5) * ZMPP, zz = (j + 0.5) * ZMPP, o = (j * ZPX + i) * 4;
@@ -189,8 +204,8 @@ export function bakeMap() {
     zoneImage: { mPerPx: ZMPP, size: ZPX, zoneMetres: ZM },
     grid: W.grid,
     zones, provinces, labels,
-    roads: W.roads.map(r => ({ id: r.id, cls: r.class, pts: simplify(r.pts, 2) })),
-    rivers: W.rivers.map(r => ({ id: r.id, name: r.name, cls: Math.max(...r.pts.map(p => p[3])), pts: simplify(r.pts, 2) })),
+    roads: ROADS.map(r => ({ id: r.id, cls: r.class, pts: simplify(r.pts, 2) })),
+    rivers: RIVERS.map(r => ({ id: r.id, name: r.name, cls: Math.max(...r.pts.map(p => p[3])), pts: simplify(r.pts, 2) })),
   };
   files['map.json'] = JSON.stringify(map) + '\n';
   return { files, map };

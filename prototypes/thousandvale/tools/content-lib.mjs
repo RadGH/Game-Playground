@@ -2,6 +2,8 @@
 // Node only (reads files). Pure logic lives in the functions; nothing here writes.
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { parseTerrain } from '../js/rules/terrain-read.js';
+import { HOME_PROVINCE, provinceArg, provinceDataPath, provinceDataSync, namesPath } from '../js/sim/province-files.js';
+export { HOME_PROVINCE, provinceArg, provinceDataPath, provinceDataSync, namesPath };
 
 export const ROOT = new URL('../', import.meta.url);
 export const J = p => JSON.parse(readFileSync(new URL(p, ROOT), 'utf8'));
@@ -27,12 +29,41 @@ export function mergeQuestParts(main, readPart) {
 const partFiles = () => new Set(readdirSync(new URL('data/quests/', ROOT)).filter(f => f.endsWith('.json')).flatMap(f => { try { return J('data/quests/' + f).include || []; } catch { return []; } }));
 export const questFiles = () => {
   const parts = partFiles();
-  return readdirSync(new URL('data/quests/', ROOT)).filter(f => f.endsWith('.json') && !NOT_ZONE.has(f) && !parts.has(f))
+  return readdirSync(new URL('data/quests/', ROOT)).filter(f => f.endsWith('.json') && !NOT_ZONE.has(f) && !/-province\.json$/.test(f) && !parts.has(f))      // (<province>-province.json: another province's story index, Expansion 1)
     .map(f => mergeQuestParts(J('data/quests/' + f), pf => (existsSync(new URL('data/quests/' + pf, ROOT)) ? J('data/quests/' + pf) : null)));
 };
 
 /** E zone id -> world zone id for a province (stream B's data/world/province-map.json). */
-export const provinceMap = (prov = 'torbor_downs') => J('data/world/province-map.json').provinces[prov].map;
+export const provinceMap = (prov = HOME_PROVINCE) => J('data/world/province-map.json').provinces[prov].map;
+
+/** A province's name lists: the sheet's own `names` file when it names one, else its data/names/<prov>.json, else the home names (shared kind). */
+export const readNames = (prov, sheet = null) => ((sheet && sheet.names) ? J(namesPath(prov, sheet)) : provinceDataSync(J, prov, 'names')) || {};
+/** Every province of data/world/province-map.json -> its map (E zone id -> world zone id). */
+export const provinceMaps = () => { try { return Object.fromEntries(Object.entries(J('data/world/province-map.json').provinces || {}).map(([k, v]) => [k, (v && v.map) || {}])); } catch { return {}; } };
+/**
+ * Does E zone id `eid` belong to province `prov`? A zone in some province's map belongs to that province; a zone in
+ * no map (the quest parts' `test`-style files, shared files) belongs to the home province. A content tool run for one
+ * province only rewrites the shared-file entries this says are its own.
+ */
+export function zoneBelongs(prov, eid, maps = provinceMaps()) {
+  for (const [k, m] of Object.entries(maps)) if (eid != null && Object.prototype.hasOwnProperty.call(m, eid)) return k === prov;
+  return prov === HOME_PROVINCE;
+}
+/**
+ * A content tool's province, checked: the `--province` argument (default the home province) with its map entry and
+ * sheet present — else one clear line and exit 2 (no stack trace). `need` = extra paths that must exist (bakes…).
+ */
+export function requireProvince(argv = process.argv, { need = [], sheet = true } = {}) {
+  const prov = provinceArg(argv);
+  const fail = why => { console.error(`${(argv[1] || 'tool').replace(/^.*\//, '')}: province ${prov}: ${why}`); process.exit(2); };
+  let map = null;
+  try { map = J('data/world/province-map.json').provinces[prov]; } catch { /* below */ }
+  if (!map) fail('not in data/world/province-map.json yet');
+  if (sheet && !existsSync(new URL(`data/provinces/${prov}.json`, ROOT))) fail(`no sheet data/provinces/${prov}.json yet`);
+  if (!Object.values(map.map || {}).some(wid => existsSync(new URL(`data/zones/${wid}/placements.json`, ROOT)))) fail('none of its zones is baked yet');
+  for (const f of need) if (!existsSync(new URL(typeof f === 'function' ? f(prov) : f, ROOT))) fail(`missing ${typeof f === 'function' ? f(prov) : f}`);
+  return prov;
+}
 
 /**
  * Vignettes that quests, quest NPCs and treasure steps in a zone NAME — they have to be placed in that zone.
@@ -57,7 +88,7 @@ export function pinnedVignettes() {
 export const WET_BIOMES = new Set(['lake', 'coast', 'beach', 'marsh']);
 /** A vignette that only makes sense by water (every biome tag wet) does not go in a zone that has none of those biomes and (almost) no water. */
 export const dryMismatch = (v, real) => !!real && v.tags.biomes.every(b => WET_BIOMES.has(b)) && !v.tags.biomes.some(b => real.includes(b)) && (real.water || 0) < 0.01;
-export function measuredBiomes(prov = 'torbor_downs', min = 0.03) {
+export function measuredBiomes(prov = HOME_PROVINCE, min = 0.03) {
   const out = {};
   for (const [eid, wid] of Object.entries(provinceMap(prov))) {
     const f = new URL(`data/zones/${wid}/terrain.bin`, ROOT);

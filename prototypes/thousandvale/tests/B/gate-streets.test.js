@@ -14,8 +14,8 @@ import { planTown, overlaps } from '../../../../proctown/js/townplan.js';
 
 const ZONES = zoneIds();
 
-test('W6: every zone is baked with main streets (16 zones, every road gate has one)', () => {
-  assert.equal(ZONES.length, 16);
+test('W6: every zone is baked with main streets (16 Torbor zones + 9 Vharlen, every road gate has one)', () => {
+  assert.equal(ZONES.length, 25);
   let gates = 0;
   for (const z of ZONES) for (const r of measureGates(loadZone(z))) if (r.road) { gates++; assert.ok(r.hasMain, `${z} ${r.gate} has no main street`); }
   assert.ok(gates >= 60, `only ${gates} road gates`);

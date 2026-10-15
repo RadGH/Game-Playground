@@ -17,6 +17,7 @@ import { realServer, joinReal, rec, run } from '../A/pt1-helpers.js';
 
 const root = new URL('../../', import.meta.url);
 const readJ = f => JSON.parse(readFileSync(new URL(f, root), 'utf8'));
+const OTHER_ZONES = new Set(Object.entries(readJ('data/world/province-map.json').provinces).filter(([k]) => k !== 'torbor_downs').flatMap(([, p]) => Object.keys(p.map || {})));   // Expansion 1: another province's zones (tests/C/vharlen-content.test.js checks Vharlen's)
 const q = console.log; console.log = () => {};
 const L = (await loadLayouts(['torbor_downs'])).layouts[0];
 console.log = q;
@@ -28,6 +29,7 @@ test('S14: every kill / collect step in the quest files is loaded, points at its
   for (const f of readdirSync(new URL('data/quests/', root))) {
     if (!f.endsWith('.json') || f === 'test.json') continue;
     const d = readJ('data/quests/' + f);
+    if (d && OTHER_ZONES.has(d.zone)) continue;      // another province's quests (this layout is Torbor's; tests/C/vharlen-content.test.js)
     for (const qq of (d && Array.isArray(d.quests) ? d.quests : [])) if ((qq.steps || []).some(st => st.kind === 'kill' || st.kind === 'collect')) ids.push(qq.id);
   }
   assert.ok(ids.length >= 90, 'kill quests found: ' + ids.length);

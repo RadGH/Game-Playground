@@ -502,7 +502,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
       // Hit recoil and punch decay.
       a.recoil.multiplyScalar(Math.exp(-dt * 10));
       a.punch *= Math.exp(-dt * 12);
-      a.group.position.set(a.pos.x + a.recoil.x, a.pos.y + (a.flying && !a.dead ? 1.3 + Math.sin(now / 420 + (typeof a.id === 'number' ? a.id : 0)) * 0.15 : 0), a.pos.z + a.recoil.z);
+      a.group.position.set(a.pos.x + a.recoil.x, a.pos.y + (a.liftY || 0) /* [S] a geyser's toss (vharlen-fx.js) */ + (a.flying && !a.dead ? 1.3 + Math.sin(now / 420 + (typeof a.id === 'number' ? a.id : 0)) * 0.15 : 0), a.pos.z + a.recoil.z);
       if (a.mount) { a.mount.group.rotation.y = a.yaw; a.mount.setGait(a.speed); }
       if (a.model) { a.model.rotation.y = a.mount ? 0 : a.yaw; a.model.scale.setScalar(1 + a.punch * 0.12); }
       if (a.shape) { a.shape.pivot.rotation.y = a.yaw; a.shape.pivot.scale.setScalar(1 + a.punch * 0.12); }

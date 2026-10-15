@@ -257,8 +257,9 @@ test('settlement names and asks for stream B: renames key real World Forge place
 });
 
 test('event director: one zone event per zone at B\'s arena with a real boss script; Grimtallow is a fixed-time scheduled realm event', () => {
-  assert.equal(EVENTS.zone.length, EIDS.length);
-  for (const e of EVENTS.zone) {
+  const zoneEvents = EVENTS.zone.filter(e => EIDS.includes(e.zone));      // Torbor Downs' (Expansion 1: Vharlen's are tests/C/vharlen-content.test.js's)
+  assert.equal(zoneEvents.length, EIDS.length);
+  for (const e of zoneEvents) {
     const z = Z[e.zone];
     assert.ok(z, e.id);
     assert.ok(z.bake.some(p => p.kind === 'event_site' && p.id === e.site), `${e.id}: no arena ${e.site} in ${z.wid}`);
@@ -272,7 +273,7 @@ test('event director: one zone event per zone at B\'s arena with a real boss scr
   assert.ok(ENCOUNTERS.has(wb.encounter));
   assert.ok(Z[wb.zone].bake.some(p => p.id === wb.site), 'world boss arena baked');
   assert.ok(EVENTS.director.oneRealmEventAtATime && EVENTS.director.announceMinutes === 10 && EVENTS.director.freeWaystoneTravel);
-  for (const e of EVENTS.realm) for (const zz of e.zones || [e.zone]) assert.ok(SHEET.zones[zz], `${e.id}: zone ${zz}`);
+  for (const e of EVENTS.realm.filter(e => (e.zones || [e.zone]).some(zz => SHEET.zones[zz]))) for (const zz of e.zones || [e.zone]) assert.ok(SHEET.zones[zz], `${e.id}: zone ${zz}`);   // (a realm event of another province: its own test)
 });
 
 test('NPC schedules: every block names a phase and an anchor that resolves; every anchor want is a proctown building want', () => {

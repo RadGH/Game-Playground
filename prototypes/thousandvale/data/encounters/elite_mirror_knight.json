@@ -1,0 +1,203 @@
+{
+  "id": "elite_mirror_knight",
+  "name": "The Mirror Knight",
+  "tier": "elite",
+  "zone": "glasswind_strand",
+  "level": 15,
+  "body": "obsidian_warden",
+  "place": {
+    "rank": "elite",
+    "level": 15,
+    "near": {
+      "site": "Shardhaven",
+      "dx": -260,
+      "dz": -160
+    },
+    "respawnMs": 1200000,
+    "escort": [
+      {
+        "type": "glasswing",
+        "count": 1
+      },
+      {
+        "type": "scoria_crawler",
+        "count": 2
+      }
+    ]
+  },
+  "_doc": "Expansion 1 (Vharlen). A Glass King's knight in polished obsidian armour, still guarding a road that leads nowhere. His blade cone is plain, but he flashes sunlight off his shield in a long glare that weakens you, and his reflections land on random players. At 60% two glasswings answer his horn. At 30% his armour cracks: a get-in-close ring and four-way lines of flying splinters.",
+  "party": "Open world elite. Solo: tough — the glare is easy to stand in. 2-3: intended. 5+: quick. M5 scaling: health by players tagged; glasswings 2 -> 3 at five; reflections +1 per extra player.",
+  "hpMult": 1.6,
+  "arena": {
+    "radius": 26
+  },
+  "say": {
+    "pull": [
+      "Halt. The road is closed by order of the Glass Kings.",
+      "The knight raises a shield so bright you can see yourself in it."
+    ],
+    "death": "The Mirror Knight kneels. 'The road... is open.' Then he shatters.",
+    "reset": "The Mirror Knight returns to his post."
+  },
+  "abilities": {
+    "blade": {
+      "id": "blade",
+      "name": "Obsidian Blade",
+      "every": [
+        6,
+        8
+      ],
+      "first": 2,
+      "range": 6,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 5,
+          "arc": 1.5,
+          "wind": 1,
+          "damage": 1.6,
+          "status": "bleed"
+        }
+      ]
+    },
+    "glare": {
+      "id": "glare",
+      "name": "Sun Glare",
+      "every": [
+        13,
+        16
+      ],
+      "first": 4,
+      "cast": 0.6,
+      "say": "He turns his shield to the sun — look away from the line!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 22,
+          "w": 4,
+          "wind": 1.4,
+          "damage": 1.2,
+          "status": "weaken",
+          "element": "holy"
+        }
+      ]
+    },
+    "reflections": {
+      "id": "reflections",
+      "name": "Reflections",
+      "every": [
+        14,
+        17
+      ],
+      "first": 8,
+      "say": "His reflection steps out of the shield — at {target}!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3,
+          "wind": 1.6,
+          "damage": 1.5,
+          "count": 2,
+          "delay": 0.4
+        }
+      ]
+    },
+    "crack_ring": {
+      "id": "crack_ring",
+      "name": "Cracking Armour",
+      "every": [
+        13,
+        16
+      ],
+      "first": 3,
+      "cast": 0.8,
+      "say": "His armour cracks and splinters fly — get in close!",
+      "telegraphs": [
+        {
+          "shape": "donut",
+          "at": "self",
+          "r": 11,
+          "r2": 3,
+          "wind": 1.6,
+          "damage": 1.9
+        }
+      ]
+    },
+    "splinters": {
+      "id": "splinters",
+      "name": "Splinters",
+      "every": [
+        14,
+        17
+      ],
+      "first": 6,
+      "cast": 0.5,
+      "say": "Splinters fly four ways!",
+      "telegraphs": [
+        {
+          "shape": "cross",
+          "at": "self",
+          "r": 14,
+          "w": 2.4,
+          "wind": 1.5,
+          "damage": 1.8,
+          "yaw": "random",
+          "status": "bleed"
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "On Guard",
+      "abilities": [
+        "blade",
+        "glare",
+        "reflections"
+      ]
+    },
+    {
+      "name": "The Horn",
+      "at": 0.6,
+      "say": "The knight sounds a glass horn. Wings answer from the dunes.",
+      "abilities": [
+        "blade",
+        "glare",
+        "reflections"
+      ],
+      "onEnter": [
+        {
+          "adds": {
+            "type": "glasswing",
+            "count": 2,
+            "radius": 9
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cracked",
+      "at": 0.3,
+      "say": "A long crack runs down the Mirror Knight. He fights harder.",
+      "abilities": [
+        "blade",
+        "crack_ring",
+        "splinters",
+        "glare"
+      ],
+      "onEnter": [
+        {
+          "modifier": {
+            "id": "cracked_knight",
+            "dmg": 1.2,
+            "attackEvery": 0.85,
+            "exact": true
+          }
+        }
+      ]
+    }
+  ]
+}

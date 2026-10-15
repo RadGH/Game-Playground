@@ -23,6 +23,7 @@
 // Pure.
 
 import { weaponHands } from './farhold.js';
+import { warmStatus } from './hazards.js';      // [S] Expansion 1 §4
 
 /** Buff kinds: stat -> the status id suffix and the name on the card. */
 export const BUFF_KINDS = Object.freeze({
@@ -106,7 +107,10 @@ export const saveItemBuffs = unit => Object.values(unit?.statuses || {}).filter(
   .map(st => ({ stat: st.itemBuff.stat, amount: st.itemBuff.amount, seconds: Math.round(st.remaining), source: st.itemBuff.source || null }));
 /** …and back on a sheet. */
 export function restoreItemBuffs(unit, rows) {
-  for (const r of Array.isArray(rows) ? rows : []) if (r && BUFF_KINDS[r.stat] && r.seconds > 0) applyItemBuff(unit, { stat: r.stat, amount: r.amount, minutes: r.seconds / 60 }, { source: r.source });
+  for (const r of Array.isArray(rows) ? rows : []) {
+    if (r && r.source === 'spring' && r.seconds > 0) { warmStatus(unit, r.seconds); continue; }      // [S] a hot spring's Steam-warmed comes back as itself, not as "Well fed"
+    if (r && BUFF_KINDS[r.stat] && r.seconds > 0) applyItemBuff(unit, { stat: r.stat, amount: r.amount, minutes: r.seconds / 60 }, { source: r.source });
+  }
 }
 
 /** The recall charm's channel (the lead: 5 s, standing still). */

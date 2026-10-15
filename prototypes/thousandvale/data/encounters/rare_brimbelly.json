@@ -1,0 +1,176 @@
+{
+  "id": "rare_brimbelly",
+  "name": "Brimbelly",
+  "tier": "rare",
+  "secret": true,
+  "zone": "sulphur_bight",
+  "level": 13,
+  "body": "sulphur_toad",
+  "place": "wallows on the yellow flats east of Yellowpan, swollen round as a barrel with swallowed sulphur",
+  "_doc": "Expansion 1 (Vharlen). A toad that has eaten so much sulphur it is nearly round. It belches a narrow cone of gas, and gulps: first a wide circle that pulls everyone toward its mouth, then a snap close in — so run out as soon as the pull ends. At half health it rolls down a line like a barrel and leaves gas pockets that poison.",
+  "party": {
+    "solo": "Solo-able at 13; the gulp is the only real danger.",
+    "small": "Right for 2-3.",
+    "full": "Easy.",
+    "m5": "M5 adds health per extra player and one more copy of the spread/scatter shapes for parties of 4-5; mechanics stay the same."
+  },
+  "hpMult": 2,
+  "arena": {
+    "radius": 24
+  },
+  "say": {
+    "pull": [
+      "Brimbelly opens its mouth. The smell arrives first.",
+      "Something yellow and round rolls over and looks at you."
+    ],
+    "death": "Brimbelly lets out a last long belch and goes flat.",
+    "reset": "Brimbelly rolls back into its yellow wallow."
+  },
+  "abilities": {
+    "belch": {
+      "id": "belch",
+      "name": "Belch",
+      "every": [
+        6,
+        8
+      ],
+      "first": 2,
+      "range": 8,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 7,
+          "arc": 0.9,
+          "wind": 1,
+          "damage": 1.5,
+          "element": "poison",
+          "status": "poison"
+        }
+      ]
+    },
+    "gulp": {
+      "id": "gulp",
+      "name": "Gulp",
+      "every": [
+        14,
+        17
+      ],
+      "first": 4,
+      "cast": 0.4,
+      "say": "Brimbelly breathes IN — everything slides toward it! Then run!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 9,
+          "wind": 1.6,
+          "damage": 0.4,
+          "pull": true
+        },
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 4,
+          "wind": 1,
+          "damage": 2,
+          "after": 1.6
+        }
+      ]
+    },
+    "slap": {
+      "id": "slap",
+      "name": "Belly Slap",
+      "every": [
+        10,
+        13
+      ],
+      "first": 7,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "target",
+          "r": 3.2,
+          "wind": 1.3,
+          "damage": 1.6,
+          "knock": 3
+        }
+      ]
+    },
+    "roll": {
+      "id": "roll",
+      "name": "Barrel Roll",
+      "every": [
+        12,
+        15
+      ],
+      "first": 3,
+      "cast": 0.6,
+      "say": "Brimbelly tucks in and rolls at {target}!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 16,
+          "w": 4,
+          "wind": 1.4,
+          "damage": 1.8,
+          "knock": 3
+        }
+      ]
+    },
+    "gas": {
+      "id": "gas",
+      "name": "Gas Pockets",
+      "every": [
+        11,
+        14
+      ],
+      "first": 6,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "r": 3,
+          "wind": 1.6,
+          "damage": 1,
+          "spread": 12,
+          "count": 4,
+          "delay": 0.25,
+          "element": "poison",
+          "leave": {
+            "type": "pool",
+            "name": "Gas pocket",
+            "r": 2.6,
+            "every": 1,
+            "seconds": 15,
+            "damage": 0.25,
+            "status": "poison",
+            "element": "poison"
+          }
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Wallowing",
+      "abilities": [
+        "belch",
+        "gulp",
+        "slap"
+      ]
+    },
+    {
+      "name": "Swollen",
+      "at": 0.5,
+      "say": "Brimbelly puffs up even bigger. It is not built for this.",
+      "abilities": [
+        "belch",
+        "roll",
+        "gas",
+        "gulp"
+      ]
+    }
+  ]
+}

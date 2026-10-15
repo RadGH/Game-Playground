@@ -155,6 +155,7 @@ export const CLIENT_MSGS = Object.freeze({
   sheet:   { on: 'p', fields: {}, rate: 2, burst: 4 },
   feedback: { on: 'both', fields: { kind: '?str:16', text: '?str:2000', ctx: '?obj', ref: '?int', op: '?str:8', limit: '?int', before: '?int' }, rate: 0.5, burst: 10 },      // the real limit is js/sim/feedback.js (answered). ref (round 8, W29): a reply to your own report #ref
   cart:    { on: 'p', fields: { op: 'str:8', id: 'id', to: '?str:48', token: '?bool' }, rate: 2, burst: 4 },      // owner feedback 8, W5: ox-cart travel — op list | go
+  ship:    { on: 'p', fields: { op: 'str:8', id: '?id', to: '?str:48', party: '?bool' }, rate: 2, burst: 4 },      // [V] Expansion 1 §6: the voyage — op list | go | skip (js/sim/ships.js)
   emote:   { on: 'p', fields: { id: 'str:16' }, rate: 0.7, burst: 3 },      // owner feedback 10, Y5: wave | sit | dance | cheer | bow | point
   meter:   { on: 'p', fields: { on: 'bool' }, rate: 1, burst: 4 },      // owner feedback 8, W21: the damage meter's per-hit feed (`hits`) on / off — off by default
   track:   { on: 'gw', fields: { char: 'int', off: '?bool' }, rate: 2, burst: 8 },      // owner feedback 10, Y36: follow where a party member / mutual friend is -> trackR, whereabouts (char 0 = stop all)

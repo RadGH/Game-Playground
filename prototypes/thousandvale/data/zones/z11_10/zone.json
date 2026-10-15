@@ -1,0 +1,166 @@
+{
+  "name": "Lastwell (z11_10)",
+  "zone": "z11_10",
+  "sheet": {
+    "sheet": "vharlen",
+    "zone": "pumice_wastes"
+  },
+  "province": {
+    "id": 0,
+    "name": "Feafeast Highlands"
+  },
+  "size": 1025,
+  "step": 2,
+  "origin": {
+    "x": 0,
+    "z": 0
+  },
+  "heightMin": -240,
+  "heightMax": 1660,
+  "bakeVersion": 4,
+  "inputHash": "70a02eb6",
+  "waterKinds": [
+    "none",
+    "sea",
+    "lake",
+    "river"
+  ],
+  "source": {
+    "tool": "tools/bake-zone.mjs",
+    "world": {
+      "seed": 1001,
+      "width": 288,
+      "height": 224,
+      "method": "pangea",
+      "seaLevel": 0.2,
+      "inputHash": "9805a835"
+    },
+    "zone": {
+      "zx": 11,
+      "zy": 10
+    },
+    "worldOrigin": {
+      "x": 22528,
+      "z": 20480
+    },
+    "zoneMetres": 2048
+  },
+  "rivers": [],
+  "sites": [
+    {
+      "type": "settlement",
+      "kind": "town",
+      "name": "Lastwell",
+      "x": 1312,
+      "z": 1144,
+      "hub": true,
+      "radius": 90
+    },
+    {
+      "type": "dungeon",
+      "id": "door_1",
+      "name": "Cave mouth",
+      "x": 1462,
+      "z": 1225,
+      "yaw": -2.035
+    },
+    {
+      "type": "event",
+      "id": "event_pumice_wastes",
+      "x": 1079,
+      "z": 992,
+      "r": 40
+    }
+  ],
+  "spawn": {
+    "x": 1312,
+    "z": 1144
+  },
+  "bridges": [],
+  "palette": "vharl",
+  "continent": "vharlen",
+  "biomeNames": {
+    "beach": "Black Sand",
+    "rainforest": "Steam Jungle",
+    "shrubland": "Fern Scrub",
+    "savanna": "Tussock",
+    "desert": "Sulphur Flats",
+    "badlands": "Basalt Highland",
+    "marsh": "Mud Fen",
+    "volcanic": "Scoria Slopes",
+    "blighted": "Charred Wood",
+    "ashPlain": "Pumice Waste",
+    "glimmerwaste": "Obsidian Dunes",
+    "mountains": "Basalt Cliffs"
+  },
+  "pools": [],
+  "summary": {
+    "zone": "z11_10",
+    "province": "Feafeast Highlands",
+    "inputHash": "70a02eb6",
+    "rivers": 0,
+    "wetShare": 0.326,
+    "unwalkableShare": 0.339,
+    "towns": [
+      {
+        "name": "Lastwell",
+        "kind": "town",
+        "hub": true,
+        "at": [
+          1312,
+          1144
+        ],
+        "radius": 90,
+        "movedFrom": null,
+        "culture": "vharl",
+        "plots": 29,
+        "streets": 83,
+        "links": 2,
+        "overlaps": 0,
+        "highStreets": 2,
+        "w6": {
+          "plotsBefore": 30,
+          "plots": 29,
+          "kept": 29,
+          "removed": [
+            {
+              "plot": 2,
+              "want": "house",
+              "office": false
+            }
+          ]
+        }
+      }
+    ],
+    "roads": 2,
+    "bridges": 0,
+    "paths": 6,
+    "pathMetres": 781,
+    "scatter": 3444,
+    "scatterKinds": {
+      "tree_charred": 1040,
+      "obsidian": 543,
+      "rock_small": 1507,
+      "basalt_columns": 342,
+      "steam_vent": 2,
+      "ironpalm": 10
+    },
+    "sites": [
+      "settlement(HUB) town Lastwell 1312 1144 90",
+      "dungeon door_1 Cave mouth 1462 1225  -2.035",
+      "event event_pumice_wastes  1079 992 40"
+    ],
+    "spawn": {
+      "x": 1312,
+      "z": 1144
+    },
+    "placements": 125,
+    "vignettesAvoided": 474
+  },
+  "files": {
+    "terrain.bin": 351341,
+    "nav.bin": 17672,
+    "scatter.bin": 27636,
+    "placements.json": 90085
+  }
+}

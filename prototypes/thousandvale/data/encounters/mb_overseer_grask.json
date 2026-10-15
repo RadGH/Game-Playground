@@ -1,0 +1,212 @@
+{
+  "id": "mb_overseer_grask",
+  "name": "Overseer Grask",
+  "tier": "miniboss",
+  "body": "slagborn_raider",
+  "place": "dungeon sulphur_mine (The Yellow Pits): mini-boss",
+  "_doc": "The Slagborn overseer who drives the captive diggers. P1 \"Work Faster\": a whip that reaches far (a line), a chain that pins you (root), and a kick. A loaded ore cart stands at the top of the rails: pull its brake (a lever, once) and it runs down the gallery and smashes into him — if he is standing on the rails. P2 at 50% \"Call the Gang\": he whistles up raiders and hides behind them (a shield that drops when they are dead).",
+  "party": "Solo: save the cart for P2. 2-3: kill the gang fast. 5: as designed.",
+  "hpMult": 2.1,
+  "arena": {
+    "radius": 12,
+    "objects": [
+      {
+        "id": "cart_brake",
+        "type": "lever",
+        "name": "Ore cart brake",
+        "x": -9,
+        "z": 0,
+        "onUse": [
+          {
+            "say": "The ore cart rattles down the rails and slams into Grask!",
+            "style": "warn"
+          },
+          {
+            "hurt": 0.08
+          },
+          {
+            "stun": 3
+          }
+        ]
+      }
+    ]
+  },
+  "say": {
+    "pull": [
+      "\"Who said you could stop digging?\"",
+      "A whip cracks. \"New hands. Good.\""
+    ],
+    "death": "Grask drops his whip. Somewhere down the gallery, a digger starts to laugh.",
+    "reset": "\"Back to work, all of you!\" Grask stalks back to his post."
+  },
+  "enrage": {
+    "seconds": 270,
+    "damage": 2.5,
+    "say": "Grask loses his temper completely!"
+  },
+  "abilities": {
+    "kick": {
+      "id": "kick",
+      "name": "Boot",
+      "every": [
+        4,
+        6
+      ],
+      "range": 4,
+      "melee": {
+        "damage": 1.2
+      },
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 4,
+          "arc": 1.3,
+          "wind": 0.9,
+          "damage": 1.3,
+          "knock": 2
+        }
+      ]
+    },
+    "whip": {
+      "id": "whip",
+      "name": "Overseer's Whip",
+      "every": [
+        8,
+        10
+      ],
+      "first": 2,
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "target",
+          "len": 12,
+          "w": 1.8,
+          "wind": 1.1,
+          "damage": 1.5,
+          "status": "bleed"
+        }
+      ]
+    },
+    "chain": {
+      "id": "chain",
+      "name": "Shackle Chain",
+      "every": [
+        12,
+        15
+      ],
+      "first": 5,
+      "cast": 0.5,
+      "say": "He throws a shackle chain at {target}!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 2.6,
+          "wind": 1.3,
+          "damage": 1.2,
+          "status": "root"
+        }
+      ]
+    },
+    "sulphur_pot": {
+      "id": "sulphur_pot",
+      "name": "Sulphur Pot",
+      "every": [
+        13,
+        16
+      ],
+      "first": 7,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "farthest",
+          "r": 3.5,
+          "wind": 1.5,
+          "damage": 1.5,
+          "element": "fire",
+          "status": "burn",
+          "leave": {
+            "type": "pool",
+            "name": "Burning sulphur",
+            "r": 3,
+            "every": 1,
+            "seconds": 10,
+            "damage": 0.3,
+            "status": "burn",
+            "element": "fire"
+          }
+        }
+      ]
+    },
+    "gang": {
+      "id": "gang",
+      "name": "Call the Gang",
+      "every": [
+        99,
+        99
+      ],
+      "say": "Grask whistles — raiders come running!",
+      "actions": [
+        {
+          "adds": {
+            "type": "slagborn_raider",
+            "count": 2,
+            "radius": 6
+          }
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Work Faster",
+      "abilities": [
+        "kick",
+        "whip",
+        "chain"
+      ]
+    },
+    {
+      "name": "Call the Gang",
+      "at": 0.5,
+      "say": "\"Gang! To me!\"",
+      "abilities": [
+        "kick",
+        "whip",
+        "sulphur_pot"
+      ],
+      "shieldWhileAdds": true,
+      "shieldDown": "The last of his gang falls — Grask has nobody left to hide behind!",
+      "onEnter": [
+        {
+          "shield": {
+            "seconds": 15,
+            "pool": 0.08
+          }
+        },
+        {
+          "adds": {
+            "type": "slagborn_raider",
+            "count": 2,
+            "radius": 7,
+            "at": "home"
+          }
+        },
+        {
+          "say": "Grask hides behind his gang. Kill both raiders to break his ward! It fails by itself in 15 seconds.",
+          "style": "warn"
+        }
+      ],
+      "ward": {
+        "seconds": 15,
+        "pool": 0.08,
+        "break": "adds",
+        "need": 2,
+        "what": "slagborn_raider",
+        "say": "Grask hides behind his gang. Kill both raiders to break his ward! It fails by itself in 15 seconds.",
+        "fade": "The ward fails by itself. No opening this time."
+      }
+    }
+  ]
+}

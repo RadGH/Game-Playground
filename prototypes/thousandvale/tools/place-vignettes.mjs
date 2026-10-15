@@ -4,6 +4,8 @@
 //   node tools/place-vignettes.mjs                  every zone of Torbor Downs  -> data/vignettes/placements/<world zone>.json
 //   node tools/place-vignettes.mjs z12_02           one world zone (or an E zone id, e.g. `ashcombe`)
 //   node tools/place-vignettes.mjs test             the M0 fixture zone (vignettes only, the M1 behaviour)
+//   --province=<id>                                 another province (default torbor_downs): its sheet, map, own
+//                                                   <id>-offices.json / <id>-shops.json towns / <id>-setpiece-pins.json
 //
 // Also writes data/provinces/torbor_downs-places.json: which of B's settlements carry which sheet name, and
 // "asks" — a town/hamlet the sheet needs where World Forge put none (stream B places a planned settlement there
@@ -12,41 +14,42 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { parseTerrain, parseNav, NAV } from '../js/rules/terrain-read.js';
 import { boringWalk, SIGHT, LIMIT as BORING_LIMIT } from './boring-walk.mjs';
-import { J, ROOT, allVignettes, questFiles, provinceMap } from './content-lib.mjs';
+import { J, ROOT, allVignettes, questFiles, provinceMap, provinceArg, provinceDataPath, provinceDataSync, zoneBelongs, requireProvince } from './content-lib.mjs';
 import { POINT_TYPES, zoneContext, provinceComponents, discProblem, findSpot, findPoint, openPoint, walkLine, hintFrom, hintScore, rngFor, KIND_RULES, settlementEdge, levelField, campLevels, heavyOk, capCount, countCapAt, groundPieces } from './content-place.mjs';
 import { fillDensity, fillHunting, HUNT, routesFor, placeWords } from './content-living.mjs';
 import { placeSetpieces, slotFolk } from './content-setpieces.mjs';
 import { buildOffices } from './content-offices.mjs';
 import { writeShops } from './content-shops.mjs';
 
-const PROV = 'torbor_downs';
-const arg = process.argv.slice(2).find(a => !a.startsWith('--')) || null;
+const PROV = provinceArg(process.argv);     // --province=<id> (default torbor_downs)
+const arg = process.argv.slice(2).find((a, i, all) => !a.startsWith('--') && all[i - 1] !== '--province') || null;
 // --keep=z12_02,…: keep these zones' placement files as they are (stream B's checked-in bake of the M1 zone is made FROM
 // our file, so changing it breaks B's fresh-bake test); they still feed the routes, event places and quest marks
 const KEEP = new Set((process.argv.find(a => a.startsWith('--keep=')) || '--keep=').slice(7).split(',').filter(Boolean));
 if (arg === 'test') { await legacyTest(); process.exit(); }
+requireProvince(process.argv, { need: [p => `data/vignettes/assignment/${p}.json`] });
 
 const SHEET = J(`data/provinces/${PROV}.json`);
 const MAP = provinceMap(PROV);
-const SITES = J('data/provinces/sites.json');
+const SITES = provinceDataSync(J, PROV, 'sites');
 const ASSIGN = J(`data/vignettes/assignment/${PROV}.json`).zones;
-const RARES = J('data/provinces/rares.json');
+const RARES = provinceDataSync(J, PROV, 'rares');
 const TREASURE = J('data/quests/treasure.json').chains;
 const HOOKS = J('data/hooks.json').hooks;
 const VIG = new Map(allVignettes().map(v => [v.id, v]));
 const QUESTS = Object.fromEntries(questFiles().map(q => [q.zone, q]));
-const ARCH = J('data/provinces/archetypes.json');
+const ARCH = provinceDataSync(J, PROV, 'archetypes');
 /** play-test 2 (Q18): hand-designed set pieces pinned near the start (tools/content-setpieces.mjs) */
 const SETPIECES = J('data/vignettes/setpieces.json').vignettes;
-const TRAVELLERS = J('data/provinces/travellers.json');
+const TRAVELLERS = provinceDataSync(J, PROV, 'travellers');
 /** where each free-standing set piece stood last run (kept while still fair — tools/content-setpieces.mjs) */
-const SP_PINS_FILE = new URL('data/provinces/setpiece-pins.json', ROOT);
+const SP_PINS_FILE = new URL(provinceDataPath(PROV, 'setpiece-pins'), ROOT);
 const SP_PINS = existsSync(SP_PINS_FILE) ? JSON.parse(readFileSync(SP_PINS_FILE, 'utf8')) : { _doc: '', pins: {} };
 /** play-test 2 (Q10): every town NPC's office (tools/content-offices.mjs) — quest NPCs with an office stand at its door */
 const OFFICES = buildOffices(PROV_ID());
 const OFFICE_OF = new Map(Object.values(OFFICES.towns).flatMap(t => t.offices.filter(o => o.npc).map(o => [o.npc, { ...o, town: t.name }])));
 const ROUTES = existsSync(new URL(`data/provinces/${PROV_ID()}-routes.json`, ROOT)) ? J(`data/provinces/${PROV_ID()}-routes.json`) : null;
-function PROV_ID() { return 'torbor_downs'; }
+function PROV_ID() { return PROV; }
 /** names imposed on stream B's World Forge places that the M1 content already uses */
 const WAYSIDE = J('data/vignettes/wayside.json').kinds;
 const IMPOSE_EXTRA = { test: { mipider_ford: 'Fitockpi Ford' } };
@@ -97,7 +100,7 @@ if (!arg) livingFiles(states);                                      // routes, e
   SP_PINS._doc = 'Stream E. Where each free-standing set piece (data/vignettes/setpieces.json, not bound to a stream B piece) was placed, zone metres. tools/place-vignettes.mjs keeps a set piece on its old spot while that spot is still fair, so a B re-bake (which levels and clears the ground under our discs) never makes it move. Delete an entry to let the placer choose again.';
   writeFileSync(SP_PINS_FILE, JSON.stringify(SP_PINS, null, 1) + '\n');
 }
-if (!arg) { writeShops(OFFICES.townShops); writeFileSync(new URL('data/provinces/offices.json', ROOT), JSON.stringify(OFFICES, null, 1) + '\n'); console.log(`offices: ${Object.values(OFFICES.towns).reduce((a, t) => a + t.offices.length, 0)} in ${Object.keys(OFFICES.towns).length} towns${OFFICES.problems.length ? ' PROBLEMS ' + OFFICES.problems.join('; ') : ''}`); }
+if (!arg) { writeShops(OFFICES.townShops, PROV); writeFileSync(new URL(provinceDataPath(PROV, 'offices'), ROOT), JSON.stringify(OFFICES, null, 1) + '\n'); console.log(`offices: ${Object.values(OFFICES.towns).reduce((a, t) => a + t.offices.length, 0)} in ${Object.keys(OFFICES.towns).length} towns${OFFICES.problems.length ? ' PROBLEMS ' + OFFICES.problems.join('; ') : ''}`); }
 for (const st of states) {
   const { file, wid, eid } = st;
   if (st.kept) { console.log(`${wid} kept as it is`); continue; }
@@ -291,7 +294,10 @@ function placeZone(eid, wid) {
     let p = null;
     if (townRoom(s)) {
       const sq = bake.find(b => b.kind === 'town_square' && b.data.town === s.id), c = sq ? { x: sq.x, z: sq.z } : s;
-      p = findPoint(ctx, rnd, { x: c.x, z: c.z, min: 5, max: Math.max(12, s.r * 0.5) }, { allowTown: true, avoidRoad: false, clearance: 2, keepFrom: ws, minSep: WS_SEP, prefer: (x, z) => -Math.hypot(x - c.x, z - c.z) });
+      // never on a gate's main street (tests/B/gate-streets.test.js: a stone there narrows the way into town)
+      const mains = bake.filter(b => b.kind === 'town_wall' && b.data && b.data.gates).flatMap(b => b.data.gates.filter(g => g.main && g.main.pts).map(g => ({ pts: g.main.pts, w: g.main.width || 4.2 })));
+      const offMain = (x, z) => mains.every(m => { for (let i = 0; i + 1 < m.pts.length; i++) { const [ax, az] = m.pts[i], [bx, bz] = m.pts[i + 1], dx = bx - ax, dz = bz - az, l = dx * dx + dz * dz || 1, u = Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / l)); if (Math.hypot(x - ax - u * dx, z - az - u * dz) < m.w / 2 + 3) return false; } return true; });
+      p = findPoint(ctx, rnd, { x: c.x, z: c.z, min: 5, max: Math.max(12, s.r * 0.5) }, { allowTown: true, avoidRoad: false, clearance: 2, keepFrom: ws, minSep: WS_SEP, prefer: (x, z) => (offMain(x, z) ? -Math.hypot(x - c.x, z - c.z) : -Infinity) });
     }
     if (!p) p = findPoint(ctx, rnd, { x: s.x, z: s.z, min: s.r + 8, max: s.r + 30 }, { clearance: 2, keepFrom: ws, minSep: WS_SEP, prefer: (x, z) => -Math.abs(ctx.roadDist(x, z) - 8) });
     if (p) wsPush({ type: 'waystone', id: `ws_${wid}_${slug(s.name)}`, name: s.name, x: p.x, z: p.z, yaw: 0, settlement: s.name });
@@ -579,6 +585,7 @@ function livingFiles(states) {
   };
   for (const e of [...EV.realm, ...EV.zone]) {
     const zonesOf = e.zones || [e.zone], spots = [];
+    if (!zonesOf.every(z => zoneBelongs(PROV, z))) continue;      // another province's event: its own run places it
     for (const z of zonesOf) { const st = byE.get(z); const s = st && siteOf(st, { ...e, zone: z }); if (s) spots.push({ st, s }); }
     if (!spots.length) { console.error(`event ${e.id}: no site`); continue; }
     const { st, s } = spots[0];
@@ -659,7 +666,7 @@ function fortTemplateFor(name, archetype) {
   return null;
 }
 function farmName(tpl, home, flavour) {
-  const base = { arable: 'Farm', sheep: 'Sheepfold', pig: 'Piggery', orchard: 'Orchard', fishing_plot: 'Fishing Plot', mill: 'Mill' }[tpl] || 'Farm';
+  const base = (SITES.farms[tpl] && SITES.farms[tpl].short) || { arable: 'Farm', sheep: 'Sheepfold', pig: 'Piggery', orchard: 'Orchard', fishing_plot: 'Fishing Plot', mill: 'Mill' }[tpl] || 'Farm';   // `short`: a province's own word (Vharlen's net racks, goat walls)
   const pre = flavour === 'burned' ? 'Burned ' : flavour === 'corrupted' ? 'Blighted ' : '';
   return home ? `${pre}${home.name} ${base}` : `${pre}${base}`;
 }

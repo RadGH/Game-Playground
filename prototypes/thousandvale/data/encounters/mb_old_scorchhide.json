@@ -1,0 +1,182 @@
+{
+  "id": "mb_old_scorchhide",
+  "name": "Old Scorchhide",
+  "tier": "miniboss",
+  "body": "ashback_salamander",
+  "place": "dungeon caldera_deep (The Throat): mini-boss",
+  "_doc": "The oldest salamander in the caldera, so used to the heat it carries lava in its mouth. P1 \"Swimming in Fire\": bites, a gout of lava along a line that leaves burning rock, and it dives into a lava pool and comes up under someone (follow circle). P2 at 50% \"Molten Hide\": its skin goes liquid — touching it burns (a ring on itself every few seconds) and its gouts come in threes.",
+  "party": "Solo: keep out of the lava lines. 2-3: the tank keeps it turned. 5: spread for the dive.",
+  "hpMult": 2.1,
+  "arena": {
+    "radius": 12,
+    "objects": [
+      {
+        "id": "lava_pool",
+        "type": "pool",
+        "name": "Lava pool",
+        "x": 0,
+        "z": 7,
+        "r": 2,
+        "every": 1,
+        "damage": 0.4,
+        "status": "burn",
+        "element": "fire"
+      }
+    ]
+  },
+  "say": {
+    "pull": [
+      "Something heavy rises from the lava pool, dripping fire.",
+      "Old Scorchhide opens its jaws and the inside of its mouth is glowing."
+    ],
+    "death": "Old Scorchhide slides back into the lava pool and does not come up.",
+    "reset": "Old Scorchhide sinks back into its pool."
+  },
+  "enrage": {
+    "seconds": 270,
+    "damage": 2.5,
+    "say": "Old Scorchhide boils over!"
+  },
+  "abilities": {
+    "bite": {
+      "id": "bite",
+      "name": "Scorching Bite",
+      "every": [
+        5,
+        7
+      ],
+      "range": 5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 5,
+          "arc": 1.3,
+          "wind": 1,
+          "damage": 1.6,
+          "element": "fire",
+          "status": "burn"
+        }
+      ]
+    },
+    "gout": {
+      "id": "gout",
+      "name": "Lava Gout",
+      "every": [
+        10,
+        13
+      ],
+      "first": 3,
+      "cast": 0.5,
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "target",
+          "len": 14,
+          "w": 2.6,
+          "wind": 1.3,
+          "damage": 1.6,
+          "element": "fire",
+          "leave": {
+            "type": "pool",
+            "name": "Burning rock",
+            "r": 2.3,
+            "every": 1,
+            "seconds": 12,
+            "damage": 0.35,
+            "status": "burn",
+            "element": "fire"
+          }
+        }
+      ]
+    },
+    "dive": {
+      "id": "dive",
+      "name": "Lava Dive",
+      "every": [
+        14,
+        17
+      ],
+      "first": 6,
+      "cast": 0.6,
+      "say": "Scorchhide dives into the lava — it is coming up under {target}!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3.5,
+          "follow": true,
+          "wind": 2.2,
+          "damage": 2.2,
+          "element": "fire",
+          "knock": 3
+        }
+      ]
+    },
+    "molten_ring": {
+      "id": "molten_ring",
+      "name": "Molten Hide",
+      "every": [
+        8,
+        10
+      ],
+      "first": 2,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 4,
+          "wind": 1.2,
+          "damage": 1.3,
+          "element": "fire",
+          "status": "seared"
+        }
+      ]
+    },
+    "triple_gout": {
+      "id": "triple_gout",
+      "name": "Triple Gout",
+      "every": [
+        13,
+        16
+      ],
+      "first": 4,
+      "cast": 0.6,
+      "say": "Three gouts of lava!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "target",
+          "len": 14,
+          "w": 2.4,
+          "count": 3,
+          "rotate": 0.5,
+          "wind": 1.4,
+          "damage": 1.5,
+          "element": "fire"
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Swimming in Fire",
+      "abilities": [
+        "bite",
+        "gout",
+        "dive"
+      ]
+    },
+    {
+      "name": "Molten Hide",
+      "at": 0.5,
+      "say": "Scorchhide's skin runs like wax!",
+      "abilities": [
+        "bite",
+        "molten_ring",
+        "triple_gout",
+        "dive"
+      ]
+    }
+  ]
+}

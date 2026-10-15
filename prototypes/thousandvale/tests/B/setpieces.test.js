@@ -26,7 +26,7 @@ test('surfaces: the set-piece surfaces sit before road, and road is still the la
   const keys = t.biomes.map(b => b.key);
   assert.equal(keys[keys.length - 1], 'road');
   for (const k of ['field', 'crop', 'pasture', 'yard', 'graveyard', 'orchard', 'gravel']) assert.ok(keys.includes(k), k);
-  assert.deepEqual(SCATTER_KINDS.slice(9).map(k => k.key), ['tree_fruit', 'hedge']);
+  assert.deepEqual(SCATTER_KINDS.slice(9, 11).map(k => k.key), ['tree_fruit', 'hedge']);
 });
 
 test('the start zone is hand-made: an inn at a crossroads, graveyards, farms with fields, orchards, a mill pond, clearings, stones, folds, copses', () => {

@@ -1,0 +1,300 @@
+{
+  "id": "boss_well_warden",
+  "name": "The Warden of the Dry Wells",
+  "tier": "boss",
+  "body": "obsidian_warden",
+  "place": "dungeon lava_tube set B (The Dry Wells, Pumice Wastes, level 15-18): the end boss at the last well",
+  "_doc": "An obsidian warden left to guard the island's last spring; the spring dried and it still guards the hole. P1 \"Dry Watch\": an obsidian sweep, a beam of sunlight focused through its glass body (a long line that turns), and dust devils that wander (scatter). P2 at 60% \"Locked Spring\": it seals itself; draw water at the three well windlasses (braziers you use) to crack its seal. P3 new bar \"Parched\": the heat comes up through the floor — only the ground right beside the three wells is safe from the Heat Wave; a stack on a random player and the beam turning twice as fast.",
+  "party": "Solo: very hard (three windlasses and the heat wave). 2-3: one tanks, one draws water. 5: as designed — share the stack.",
+  "hpMult": 4,
+  "arena": {
+    "radius": 16,
+    "objects": [
+      {
+        "id": "well",
+        "type": "brazier",
+        "name": "Well windlass",
+        "x": -10,
+        "z": -6
+      },
+      {
+        "id": "well",
+        "type": "brazier",
+        "name": "Well windlass",
+        "x": 10,
+        "z": -6
+      },
+      {
+        "id": "well",
+        "type": "brazier",
+        "name": "Well windlass",
+        "x": 0,
+        "z": 11
+      }
+    ]
+  },
+  "say": {
+    "pull": [
+      "The well is under guard. The well is always under guard.",
+      "Dust pours off the Warden as it turns. Its glass eyes catch the light."
+    ],
+    "death": "The Warden topples into the dry well. Far below, something splashes.",
+    "reset": "The Warden walks back to the well and stands over it again."
+  },
+  "enrage": {
+    "seconds": 340,
+    "damage": 3,
+    "say": "The Warden blazes like the noon sun!"
+  },
+  "abilities": {
+    "sweep": {
+      "id": "sweep",
+      "name": "Obsidian Sweep",
+      "every": [
+        6,
+        8
+      ],
+      "range": 7,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 7,
+          "arc": 1.8,
+          "wind": 1.1,
+          "damage": 1.9,
+          "status": "bleed"
+        }
+      ]
+    },
+    "sunbeam": {
+      "id": "sunbeam",
+      "name": "Burning Glass",
+      "every": [
+        13,
+        16
+      ],
+      "first": 4,
+      "cast": 0.8,
+      "say": "Light gathers in its chest — the beam is turning!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 18,
+          "w": 2.5,
+          "count": 4,
+          "rotate": 0.5,
+          "delay": 0.4,
+          "wind": 1.3,
+          "damage": 1.8,
+          "element": "fire",
+          "status": "seared"
+        }
+      ]
+    },
+    "dust_devils": {
+      "id": "dust_devils",
+      "name": "Dust Devils",
+      "every": [
+        11,
+        14
+      ],
+      "first": 6,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "spread": 13,
+          "r": 2.6,
+          "count": 5,
+          "delay": 0.3,
+          "wind": 1.4,
+          "damage": 1.2,
+          "knock": 2
+        }
+      ]
+    },
+    "glass_spikes": {
+      "id": "glass_spikes",
+      "name": "Glass Spikes",
+      "every": [
+        10,
+        12
+      ],
+      "first": 3,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "count": 2,
+          "r": 2.8,
+          "wind": 1.3,
+          "damage": 1.3,
+          "status": "bleed"
+        }
+      ]
+    },
+    "heat_wave": {
+      "id": "heat_wave",
+      "name": "Heat Wave",
+      "every": [
+        24,
+        28
+      ],
+      "first": 10,
+      "cast": 1.5,
+      "say": "HEAT WAVE — get beside a well before it hits!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "object",
+          "object": "well",
+          "r": 3.5,
+          "kind": "safe",
+          "wind": 3.5,
+          "damage": 2.6,
+          "element": "fire"
+        }
+      ]
+    },
+    "thirst": {
+      "id": "thirst",
+      "name": "Shared Thirst",
+      "every": [
+        19,
+        23
+      ],
+      "first": 6,
+      "cast": 1,
+      "say": "{target} is parched — stand with them and share the water!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3,
+          "kind": "stack",
+          "need": 3,
+          "follow": true,
+          "wind": 4,
+          "damage": 3
+        }
+      ]
+    },
+    "fast_beam": {
+      "id": "fast_beam",
+      "name": "Noon Glass",
+      "every": [
+        14,
+        17
+      ],
+      "first": 3,
+      "cast": 0.6,
+      "say": "The beam turns faster!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 18,
+          "w": 2.5,
+          "count": 6,
+          "rotate": 0.5,
+          "delay": 0.2,
+          "wind": 1.2,
+          "damage": 1.8,
+          "element": "fire",
+          "status": "seared"
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Dry Watch",
+      "abilities": [
+        "sweep",
+        "sunbeam",
+        "dust_devils"
+      ]
+    },
+    {
+      "name": "Locked Spring",
+      "at": 0.6,
+      "say": "Obsidian closes over the Warden. Draw water at all three wells!",
+      "abilities": [
+        "sweep",
+        "glass_spikes",
+        "dust_devils"
+      ],
+      "onEnter": [
+        {
+          "shield": {
+            "seconds": 20,
+            "pool": 0.1
+          }
+        },
+        {
+          "adds": {
+            "type": "pumice_golem",
+            "count": 1,
+            "radius": 8,
+            "at": "home"
+          }
+        },
+        {
+          "say": "The Warden seals itself in obsidian. Tip the buckets at all three well windlasses! It fails by itself in 20 seconds.",
+          "style": "warn"
+        }
+      ],
+      "ward": {
+        "seconds": 20,
+        "break": "objects",
+        "need": 3,
+        "what": "brazier",
+        "say": "The Warden seals itself in obsidian. Tip the buckets at all three well windlasses! It fails by itself in 20 seconds.",
+        "fade": "The obsidian seal cracks by itself.",
+        "pool": 0.1
+      }
+    },
+    {
+      "name": "Parched",
+      "newBar": {
+        "hp": 0.55
+      },
+      "say": "The ground cracks with heat. Only the wells are cool now.",
+      "abilities": [
+        "sweep",
+        "heat_wave",
+        "thirst",
+        "fast_beam"
+      ]
+    }
+  ],
+  "triggers": [
+    {
+      "when": {
+        "lit": 3,
+        "phase": 1
+      },
+      "do": [
+        {
+          "shield": false
+        },
+        {
+          "stun": 3
+        },
+        {
+          "vuln": {
+            "takeMore": 0.4,
+            "seconds": 10,
+            "name": "Seal Cracked"
+          }
+        },
+        {
+          "say": "Cold well water splashes over the Warden — the obsidian cracks!",
+          "style": "warn"
+        }
+      ]
+    }
+  ]
+}

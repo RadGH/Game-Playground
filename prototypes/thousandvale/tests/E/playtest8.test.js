@@ -241,7 +241,8 @@ test('W12: every quest giver, hand-in and talk-to NPC is in the giver index, and
   assert.deepEqual(GIVERS.missing, []);
   const bodies = new Set([...Object.values(MAIN).flatMap(f => f.placements), ...Object.values(QUEST).flat()].filter(p => p.type === 'npc').map(p => p.id));
   let quests = 0;
-  for (const [, d] of readdirSync(new URL('data/quests/', ROOT)).filter(f => f.endsWith('.json')).map(f => [f, J('data/quests/' + f)])) for (const q of d.quests || []) {
+  const other = new Set(Object.entries(J('data/world/province-map.json').provinces).filter(([k]) => k !== 'torbor_downs').flatMap(([, p]) => Object.keys(p.map || {})));   // Expansion 1: another province's givers are in its own index (tests/C/vharlen-content.test.js)
+  for (const [, d] of readdirSync(new URL('data/quests/', ROOT)).filter(f => f.endsWith('.json')).map(f => [f, J('data/quests/' + f)]).filter(([, d]) => !other.has(d.zone))) for (const q of d.quests || []) {
     if (!q.id || !q.steps) continue;
     quests++;
     if (q.giver) {

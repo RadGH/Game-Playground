@@ -1103,11 +1103,13 @@
    "at": "Gullwick",
    "gives": [
     "croaking_at_dawn",
-    "the_underground_river"
+    "the_underground_river",
+    "smoke_on_the_horizon"
    ],
    "takes": [
     "croaking_at_dawn",
-    "the_underground_river"
+    "the_underground_river",
+    "smoke_on_the_horizon"
    ],
    "mustTake": [],
    "talks": [],

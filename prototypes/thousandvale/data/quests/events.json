@@ -456,6 +456,78 @@
         "onFail": "The drake finishes its meal and flies home, fat and unbothered.",
         "rewardText": "A rare item or better for everyone who takes part, gold and about a level of experience"
       }
+    },
+    {
+      "id": "world_ossathra",
+      "kind": "worldboss",
+      "name": "Ossathra, the Caldera Wyrm",
+      "zone": "the_caldera",
+      "site": "world_ossathra",
+      "encounter": "world_ossathra",
+      "schedule": {
+        "type": "fixed",
+        "everyHours": 3,
+        "atMinute": 0,
+        "also": "on demand when >= 1 character in band walks up to its arena and none ran in the last 60 minutes",
+        "onDemand": {
+          "minInBand": 1,
+          "quietMinutes": 60
+        }
+      },
+      "minOnline": 1,
+      "minInBand": 1,
+      "durationMinutes": 20,
+      "level": 20,
+      "weight": 0,
+      "announce": [
+        "Ossathra, the Caldera Wyrm, is stirring under the crater lake. Waystones to the Caldera are free.",
+        "The crater lake is boiling. Ossathra rises in five minutes.",
+        "Ossathra has risen! The Caldera needs every blade on the island."
+      ],
+      "reward": {
+        "xp": 1.2,
+        "gold": 60,
+        "item": {
+          "tier": "epic",
+          "slot": "any"
+        },
+        "chest": "world_cache",
+        "firstKillDaily": {
+          "item": {
+            "tier": "legendary",
+            "chance": 0.05
+          }
+        }
+      },
+      "blurb": "Ossathra, the magma wyrm who sleeps in the crater lake, has woken. The whole island is called to bring her down; hide from her roar, flood her vents, and stay out of the red.",
+      "words": [
+        "Ossathra, the Caldera Wyrm, has risen out of the boiling crater lake.",
+        "Bring down Ossathra, the Caldera Wyrm",
+        "Ossathra sinks into the crater lake for good, and the water slowly stops boiling.",
+        "Ossathra slides back under the boiling lake, undefeated."
+      ],
+      "where": "The Caldera: in the wilds, about 600 m west of Rim Shrine",
+      "map": [
+        {
+          "zone": "z12_10",
+          "x": 25718,
+          "z": 21528
+        }
+      ],
+      "info": {
+        "name": "Ossathra, the Caldera Wyrm",
+        "what": "Ossathra, the Caldera Wyrm, has risen out of the boiling crater lake.",
+        "objective": {
+          "kind": "boss",
+          "text": "Bring down Ossathra, the Caldera Wyrm",
+          "count": 1,
+          "unit": "boss"
+        },
+        "durationSec": 1200,
+        "onSuccess": "Ossathra sinks into the crater lake for good, and the water slowly stops boiling.",
+        "onFail": "Ossathra slides back under the boiling lake, undefeated.",
+        "rewardText": "An epic item for everyone who takes part, a small chance of a legendary one on your first kill of the day, gold and more than a level of experience"
+      }
     }
   ],
   "zone": [
@@ -1814,6 +1886,819 @@
       },
       "startOn": {
         "clearOfNewcomersM": 220
+      }
+    },
+    {
+      "id": "event_blackstrand",
+      "zone": "blackstrand",
+      "name": "Longboats on the Black Sand",
+      "kind": "longboats_on_the_black_sand",
+      "site": "event_blackstrand",
+      "announce": "Longboats are grinding up the black sand north of Port Vharl. Skarra Ashkeel has come for the harbour.",
+      "durationMinutes": 10,
+      "level": 12,
+      "waves": [
+        {
+          "type": "slagborn_raider",
+          "count": [
+            3,
+            5
+          ],
+          "level": 11,
+          "at": "arena edge",
+          "levelAuthored": 11
+        },
+        {
+          "type": "slagborn_firecaller",
+          "count": [
+            2,
+            3
+          ],
+          "level": 12,
+          "at": "arena edge",
+          "levelAuthored": 12
+        },
+        {
+          "type": "scoria_crawler",
+          "count": [
+            4,
+            6
+          ],
+          "level": 11,
+          "at": "arena edge",
+          "levelAuthored": 11
+        }
+      ],
+      "boss": "ev_skarra_ashkeel",
+      "autoEnrolMetres": 60,
+      "reward": {
+        "xp": 0.6,
+        "gold": 14,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        },
+        "chest": "event_cache"
+      },
+      "blurb": "Slagborn longboats have beached on the black sand. Hold the beach against her crews, then bring down Skarra Ashkeel and burn her boats.",
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ],
+      "words": [
+        "Slagborn longboats have beached on the black sand below Port Vharl.",
+        "Hold the beach against the three landing waves, then defeat Skarra Ashkeel",
+        "Skarra Ashkeel is dead, and her longboats are burning on the tide.",
+        "The raiders push their boats off and row away with what they took."
+      ],
+      "where": "Blackstrand: in the wet forest, about 50 m south-west of Port Vharl",
+      "map": [
+        {
+          "zone": "z13_10",
+          "x": 27670,
+          "z": 21523
+        }
+      ],
+      "levelAuthored": 12,
+      "startOn": {
+        "clearOfNewcomersM": 220
+      },
+      "info": {
+        "name": "Longboats on the Black Sand",
+        "what": "Slagborn longboats have beached on the black sand below Port Vharl.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Hold the beach against the three landing waves, then defeat Skarra Ashkeel",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "Skarra Ashkeel is dead, and her longboats are burning on the tide.",
+        "onFail": "The raiders push their boats off and row away with what they took.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      }
+    },
+    {
+      "id": "event_steamwood",
+      "zone": "steamwood",
+      "name": "The Spring Boils Over",
+      "kind": "the_spring_boils_over",
+      "site": "event_steamwood",
+      "announce": "A spring in the Steamwood has come to a rolling boil, and something in it is whistling.",
+      "durationMinutes": 10,
+      "level": 13,
+      "waves": [
+        {
+          "type": "vent_wisp",
+          "count": [
+            3,
+            5
+          ],
+          "level": 12,
+          "at": "arena edge",
+          "levelAuthored": 12
+        },
+        {
+          "type": "sulphur_toad",
+          "count": [
+            4,
+            6
+          ],
+          "level": 12,
+          "at": "arena edge",
+          "levelAuthored": 12
+        },
+        {
+          "type": "ashback_salamander",
+          "count": [
+            2,
+            3
+          ],
+          "level": 13,
+          "at": "arena edge",
+          "levelAuthored": 13
+        }
+      ],
+      "boss": "ev_the_kettle",
+      "autoEnrolMetres": 60,
+      "reward": {
+        "xp": 0.65,
+        "gold": 15,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        },
+        "chest": "event_cache"
+      },
+      "blurb": "The Kettle, the spirit of a boiling spring, is boiling over. Clear what the steam drives out, then cap its vents and bring it down.",
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ],
+      "words": [
+        "A boiling spring in the Steamwood has woken up angry.",
+        "Clear the three waves the steam drives out, then defeat the Kettle",
+        "The Kettle cools to a quiet pool, and the jungle drips in peace.",
+        "The spring boils itself out and sinks back underground, still hot."
+      ],
+      "where": "The Steamwood: in the wet forest, about 100 m north-west of Mistfall",
+      "map": [
+        {
+          "zone": "z12_09",
+          "x": 25669,
+          "z": 19669
+        }
+      ],
+      "levelAuthored": 13,
+      "startOn": {
+        "clearOfNewcomersM": 220
+      },
+      "info": {
+        "name": "The Spring Boils Over",
+        "what": "A boiling spring in the Steamwood has woken up angry.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Clear the three waves the steam drives out, then defeat the Kettle",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "The Kettle cools to a quiet pool, and the jungle drips in peace.",
+        "onFail": "The spring boils itself out and sinks back underground, still hot.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      }
+    },
+    {
+      "id": "event_sulphur_bight",
+      "zone": "sulphur_bight",
+      "name": "The Yellow Flats Heave",
+      "kind": "the_yellow_flats_heave",
+      "site": "event_sulphur_bight",
+      "announce": "The yellow flats east of Yellowpan are heaving. Old Yellowback is coming up for air.",
+      "durationMinutes": 10,
+      "level": 14,
+      "waves": [
+        {
+          "type": "sulphur_toad",
+          "count": [
+            4,
+            6
+          ],
+          "level": 13,
+          "at": "arena edge",
+          "levelAuthored": 13
+        },
+        {
+          "type": "scoria_crawler",
+          "count": [
+            3,
+            5
+          ],
+          "level": 13,
+          "at": "arena edge",
+          "levelAuthored": 13
+        },
+        {
+          "type": "vent_wisp",
+          "count": [
+            2,
+            4
+          ],
+          "level": 14,
+          "at": "arena edge",
+          "levelAuthored": 14
+        }
+      ],
+      "boss": "ev_old_yellowback",
+      "autoEnrolMetres": 60,
+      "reward": {
+        "xp": 0.65,
+        "gold": 16,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        },
+        "chest": "event_cache"
+      },
+      "blurb": "Old Yellowback, the great toad of the flats, has surfaced. Fight off what it stirs up, kill its spawn, then hide from its croak.",
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ],
+      "words": [
+        "Old Yellowback has heaved itself up out of the yellow flats.",
+        "Fight off the three waves from the flats, then defeat Old Yellowback",
+        "Old Yellowback lies still, and the flats settle into plain stinking mud.",
+        "Old Yellowback sinks back under the flats to sleep it off."
+      ],
+      "where": "Sulphur Bight: in the shore, about 300 m north-east of Yellowpan",
+      "map": [
+        {
+          "zone": "z13_09",
+          "x": 27394,
+          "z": 19735
+        }
+      ],
+      "levelAuthored": 14,
+      "startOn": {
+        "clearOfNewcomersM": 220
+      },
+      "info": {
+        "name": "The Yellow Flats Heave",
+        "what": "Old Yellowback has heaved itself up out of the yellow flats.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Fight off the three waves from the flats, then defeat Old Yellowback",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "Old Yellowback lies still, and the flats settle into plain stinking mud.",
+        "onFail": "Old Yellowback sinks back under the flats to sleep it off.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      }
+    },
+    {
+      "id": "event_fumarole_fen",
+      "zone": "fumarole_fen",
+      "name": "The Fen Exhales",
+      "kind": "the_fen_exhales",
+      "site": "event_fumarole_fen",
+      "announce": "Every fumarole in the fen is breathing out at once. The gas is taking a shape.",
+      "durationMinutes": 10,
+      "level": 15,
+      "waves": [
+        {
+          "type": "vent_wisp",
+          "count": [
+            3,
+            5
+          ],
+          "level": 14,
+          "at": "arena edge",
+          "levelAuthored": 14
+        },
+        {
+          "type": "mudback_lurker",
+          "count": [
+            2,
+            4
+          ],
+          "level": 14,
+          "at": "arena edge",
+          "levelAuthored": 14
+        },
+        {
+          "type": "sulphur_toad",
+          "count": [
+            4,
+            6
+          ],
+          "level": 15,
+          "at": "arena edge",
+          "levelAuthored": 15
+        }
+      ],
+      "boss": "ev_the_fen_breath",
+      "autoEnrolMetres": 60,
+      "reward": {
+        "xp": 0.7,
+        "gold": 16,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        },
+        "chest": "event_cache"
+      },
+      "blurb": "The Fen Breath has risen out of the vents near Stiltreach. Clear the fen, light the marsh lamps to burn its gas off, then cap the vents.",
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ],
+      "words": [
+        "The fumaroles of the fen have breathed out something that stood up.",
+        "Clear the three waves out of the fen, then defeat the Fen Breath",
+        "The Fen Breath thins to mist, and the stilt folk can breathe again.",
+        "The gas sinks back into the vents and the fen goes quiet, for now."
+      ],
+      "where": "Fumarole Fen: in the marsh, about 400 m east of Stiltreach",
+      "map": [
+        {
+          "zone": "z13_11",
+          "x": 27549,
+          "z": 23129
+        }
+      ],
+      "levelAuthored": 15,
+      "info": {
+        "name": "The Fen Exhales",
+        "what": "The fumaroles of the fen have breathed out something that stood up.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Clear the three waves out of the fen, then defeat the Fen Breath",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "The Fen Breath thins to mist, and the stilt folk can breathe again.",
+        "onFail": "The gas sinks back into the vents and the fen goes quiet, for now.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      }
+    },
+    {
+      "id": "event_glasswind_strand",
+      "zone": "glasswind_strand",
+      "name": "The Herald of Glass",
+      "kind": "the_herald_of_glass",
+      "site": "event_glasswind_strand",
+      "announce": "A bell is ringing in the Tomb of the Glass Kings. The Herald is walking out.",
+      "durationMinutes": 10,
+      "level": 15,
+      "waves": [
+        {
+          "type": "scoria_crawler",
+          "count": [
+            4,
+            6
+          ],
+          "level": 14,
+          "at": "arena edge",
+          "levelAuthored": 14
+        },
+        {
+          "type": "glasswing",
+          "count": [
+            2,
+            3
+          ],
+          "level": 15,
+          "at": "arena edge",
+          "levelAuthored": 15
+        },
+        {
+          "type": "obsidian_warden",
+          "count": [
+            1,
+            2
+          ],
+          "level": 15,
+          "at": "arena edge",
+          "levelAuthored": 15
+        }
+      ],
+      "boss": "ev_the_glass_herald",
+      "autoEnrolMetres": 60,
+      "reward": {
+        "xp": 0.7,
+        "gold": 16,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        },
+        "chest": "event_cache"
+      },
+      "blurb": "The Glass Herald has come out of the tomb to proclaim a dead king. Break his court, turn the sun mirrors on him, then shatter him.",
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ],
+      "words": [
+        "The Glass Herald has walked out of the tomb to proclaim a king three hundred years dead.",
+        "Break the three waves of his court, then defeat the Glass Herald",
+        "The Glass Herald lies in pieces, and his bell rings no more.",
+        "The Glass Herald walks back into the tomb, still proclaiming."
+      ],
+      "where": "Glasswind Strand: in the wilds, about 300 m north-west of Shardhaven",
+      "map": [
+        {
+          "zone": "z11_09",
+          "x": 23882,
+          "z": 19730
+        }
+      ],
+      "levelAuthored": 15,
+      "startOn": {
+        "clearOfNewcomersM": 220
+      },
+      "info": {
+        "name": "The Herald of Glass",
+        "what": "The Glass Herald has walked out of the tomb to proclaim a king three hundred years dead.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Break the three waves of his court, then defeat the Glass Herald",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "The Glass Herald lies in pieces, and his bell rings no more.",
+        "onFail": "The Glass Herald walks back into the tomb, still proclaiming.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      }
+    },
+    {
+      "id": "event_pumice_wastes",
+      "zone": "pumice_wastes",
+      "name": "Warlord at the Stockade",
+      "kind": "warlord_at_the_stockade",
+      "site": "event_pumice_wastes",
+      "announce": "War drums in the Pumice Wastes. Warlord Thrane is marching on Lastwell Stockade.",
+      "durationMinutes": 10,
+      "level": 16,
+      "waves": [
+        {
+          "type": "slagborn_raider",
+          "count": [
+            4,
+            6
+          ],
+          "level": 15,
+          "at": "arena edge",
+          "levelAuthored": 15
+        },
+        {
+          "type": "pumice_golem",
+          "count": [
+            2,
+            3
+          ],
+          "level": 15,
+          "at": "arena edge",
+          "levelAuthored": 15
+        },
+        {
+          "type": "slagborn_firecaller",
+          "count": [
+            2,
+            4
+          ],
+          "level": 16,
+          "at": "arena edge",
+          "levelAuthored": 16
+        }
+      ],
+      "boss": "ev_warlord_thrane",
+      "autoEnrolMetres": 60,
+      "reward": {
+        "xp": 0.7,
+        "gold": 18,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        },
+        "chest": "event_cache"
+      },
+      "blurb": "Warlord Thrane is marching on Lastwell. Break his warband, kill the firecallers who ward him, then face the warlord himself.",
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ],
+      "words": [
+        "Warlord Thrane is marching his warband on Lastwell Stockade.",
+        "Break the three waves of his warband, then defeat Warlord Thrane",
+        "Warlord Thrane is dead, and his warband scatters into the waste.",
+        "Thrane pulls his standard and marches off to try somewhere easier."
+      ],
+      "where": "The Pumice Wastes: in the wilds, about 200 m north-west of Lastwell",
+      "map": [
+        {
+          "zone": "z11_10",
+          "x": 23607,
+          "z": 21472
+        }
+      ],
+      "levelAuthored": 16,
+      "startOn": {
+        "clearOfNewcomersM": 220
+      },
+      "info": {
+        "name": "Warlord at the Stockade",
+        "what": "Warlord Thrane is marching his warband on Lastwell Stockade.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Break the three waves of his warband, then defeat Warlord Thrane",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "Warlord Thrane is dead, and his warband scatters into the waste.",
+        "onFail": "Thrane pulls his standard and marches off to try somewhere easier.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      }
+    },
+    {
+      "id": "event_ashfall_hollow",
+      "zone": "ashfall_hollow",
+      "name": "The Council Is Called",
+      "kind": "the_council_is_called",
+      "site": "event_ashfall_hollow",
+      "announce": "Cinderholt's old square is cracking open. The Buried Mayor is calling the council to order.",
+      "durationMinutes": 10,
+      "level": 17,
+      "waves": [
+        {
+          "type": "vent_wisp",
+          "count": [
+            3,
+            5
+          ],
+          "level": 16,
+          "at": "arena edge",
+          "levelAuthored": 16
+        },
+        {
+          "type": "scoria_crawler",
+          "count": [
+            4,
+            6
+          ],
+          "level": 16,
+          "at": "arena edge",
+          "levelAuthored": 16
+        },
+        {
+          "type": "slagborn_firecaller",
+          "count": [
+            2,
+            3
+          ],
+          "level": 17,
+          "at": "arena edge",
+          "levelAuthored": 17
+        }
+      ],
+      "boss": "ev_the_buried_mayor",
+      "autoEnrolMetres": 60,
+      "reward": {
+        "xp": 0.75,
+        "gold": 18,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        },
+        "chest": "event_cache"
+      },
+      "blurb": "The Buried Mayor has dug himself out of Cinderholt's old square. Clear the square, drive off the ghosts round him, then hold the ground shut.",
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ],
+      "words": [
+        "Cinderholt's Buried Mayor has dug himself out of the old square.",
+        "Clear the three waves that crowd the square, then defeat the Buried Mayor",
+        "The Buried Mayor sits down for the last time, and the meeting is over.",
+        "The Mayor sinks back into the square, still giving his speech."
+      ],
+      "where": "Ashfall Hollow: in the wilds, about 100 m south of Cinderholt",
+      "map": [
+        {
+          "zone": "z12_11",
+          "x": 25630,
+          "z": 23408
+        }
+      ],
+      "levelAuthored": 17,
+      "startOn": {
+        "clearOfNewcomersM": 220
+      },
+      "info": {
+        "name": "The Council Is Called",
+        "what": "Cinderholt's Buried Mayor has dug himself out of the old square.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Clear the three waves that crowd the square, then defeat the Buried Mayor",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "The Buried Mayor sits down for the last time, and the meeting is over.",
+        "onFail": "The Mayor sinks back into the square, still giving his speech.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      }
+    },
+    {
+      "id": "event_kiln_ridge",
+      "zone": "kiln_ridge",
+      "name": "The High Firing",
+      "kind": "the_high_firing",
+      "site": "event_kiln_ridge",
+      "announce": "Smoke is pouring from the high kilns on Kiln Ridge. Kilnwife Orra has started a Slagborn firing.",
+      "durationMinutes": 10,
+      "level": 18,
+      "waves": [
+        {
+          "type": "slagborn_raider",
+          "count": [
+            4,
+            6
+          ],
+          "level": 17,
+          "at": "arena edge",
+          "levelAuthored": 17
+        },
+        {
+          "type": "ashback_salamander",
+          "count": [
+            3,
+            4
+          ],
+          "level": 17,
+          "at": "arena edge",
+          "levelAuthored": 17
+        },
+        {
+          "type": "obsidian_warden",
+          "count": [
+            1,
+            2
+          ],
+          "level": 18,
+          "at": "arena edge",
+          "levelAuthored": 18
+        }
+      ],
+      "boss": "ev_kilnwife_orra",
+      "autoEnrolMetres": 60,
+      "reward": {
+        "xp": 0.75,
+        "gold": 19,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        },
+        "chest": "event_cache"
+      },
+      "blurb": "Kilnwife Orra is firing the high kilns for a Slagborn rite. Fight through her yard, tip the quench barrels into the kilns, then bring her down.",
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ],
+      "words": [
+        "Kilnwife Orra has lit the high kilns for a Slagborn fire rite.",
+        "Fight through the three waves in her kiln yard, then defeat Kilnwife Orra",
+        "Kilnwife Orra is dead, and the high kilns cool for the first time in years.",
+        "The firing ends, the kilns roar on, and Orra goes back to her rites."
+      ],
+      "where": "Kiln Ridge: in the badlands, about 300 m south-west of Kilnhold",
+      "map": [
+        {
+          "zone": "z11_11",
+          "x": 23840,
+          "z": 23258
+        }
+      ],
+      "levelAuthored": 18,
+      "startOn": {
+        "clearOfNewcomersM": 220
+      },
+      "info": {
+        "name": "The High Firing",
+        "what": "Kilnwife Orra has lit the high kilns for a Slagborn fire rite.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Fight through the three waves in her kiln yard, then defeat Kilnwife Orra",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "Kilnwife Orra is dead, and the high kilns cool for the first time in years.",
+        "onFail": "The firing ends, the kilns roar on, and Orra goes back to her rites.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
+      }
+    },
+    {
+      "id": "event_the_caldera",
+      "zone": "the_caldera",
+      "name": "The Rimwarden Wakes",
+      "kind": "the_rimwarden_wakes",
+      "site": "event_the_caldera",
+      "announce": "A great shadow is circling the crater rim. Rimwarden Ysk has come down from the crags.",
+      "durationMinutes": 10,
+      "level": 20,
+      "waves": [
+        {
+          "type": "glasswing",
+          "count": [
+            2,
+            4
+          ],
+          "level": 19,
+          "at": "arena edge",
+          "levelAuthored": 19
+        },
+        {
+          "type": "pumice_golem",
+          "count": [
+            2,
+            3
+          ],
+          "level": 19,
+          "at": "arena edge",
+          "levelAuthored": 19
+        },
+        {
+          "type": "vent_wisp",
+          "count": [
+            3,
+            5
+          ],
+          "level": 20,
+          "at": "arena edge",
+          "levelAuthored": 20
+        }
+      ],
+      "boss": "ev_rimwarden_ysk",
+      "autoEnrolMetres": 60,
+      "reward": {
+        "xp": 0.8,
+        "gold": 20,
+        "item": {
+          "tier": "rare",
+          "slot": "any"
+        },
+        "chest": "event_cache"
+      },
+      "blurb": "Rimwarden Ysk, the glass-winged guardian of the crater, has gone wild. Clear the rim, kill her flock, then ground her.",
+      "countdownSeconds": 15,
+      "cooldownMinutes": [
+        3,
+        5
+      ],
+      "words": [
+        "Rimwarden Ysk has come down from the crags to the crater rim.",
+        "Clear the three waves on the rim, then defeat Rimwarden Ysk",
+        "Rimwarden Ysk falls into the crater, and the rim is quiet.",
+        "Ysk lifts off and goes back to circling the crags."
+      ],
+      "where": "The Caldera: in the wilds, about 500 m west of Rim Shrine",
+      "map": [
+        {
+          "zone": "z12_10",
+          "x": 25856,
+          "z": 21446
+        }
+      ],
+      "levelAuthored": 20,
+      "info": {
+        "name": "The Rimwarden Wakes",
+        "what": "Rimwarden Ysk has come down from the crags to the crater rim.",
+        "objective": {
+          "kind": "waves_boss",
+          "text": "Clear the three waves on the rim, then defeat Rimwarden Ysk",
+          "count": 4,
+          "unit": "stages"
+        },
+        "durationSec": 600,
+        "onSuccess": "Rimwarden Ysk falls into the crater, and the rim is quiet.",
+        "onFail": "Ysk lifts off and goes back to circling the crags.",
+        "rewardText": "A rare item or better for everyone who takes part, gold and a good share of experience"
       }
     }
   ]

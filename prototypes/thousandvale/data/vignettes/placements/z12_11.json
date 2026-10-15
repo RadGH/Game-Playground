@@ -1,0 +1,7916 @@
+{
+ "_doc": "Stream E. Content placements for world zone z12_11 (E zone 'ashfall_hollow', Ashfall Hollow) — tools/place-vignettes.mjs against stream B's bake (terrain 84bc7a26). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
+ "zone": "z12_11",
+ "sheetZone": "ashfall_hollow",
+ "province": "vharlen",
+ "terrainHash": "84bc7a26",
+ "band": [
+  15,
+  17
+ ],
+ "archetype": "blight",
+ "rules": {
+  "vignette": {
+   "townGap": 60,
+   "gap": 30,
+   "slope": 20,
+   "sameKindSpacing": 140
+  },
+  "fort": {
+   "townGap": 80,
+   "gap": 40,
+   "slope": 16
+  },
+  "farm": {
+   "townGap": 25,
+   "gap": 30,
+   "slope": 12
+  },
+  "cave": {
+   "townGap": 120,
+   "gap": 40,
+   "slope": 28
+  },
+  "camp": {
+   "townGap": 120,
+   "gap": 25,
+   "slope": 24
+  },
+  "rare": {
+   "townGap": 150,
+   "gap": 30,
+   "slope": 24
+  },
+  "hook": {
+   "townGap": 40,
+   "gap": 30,
+   "slope": 26
+  },
+  "wayside": {
+   "townGap": 20,
+   "gap": 12,
+   "slope": 34,
+   "edge": 24
+  },
+  "settlement": {
+   "townGap": 300,
+   "gap": 60,
+   "slope": 10
+  },
+  "curio": {
+   "townGap": 30,
+   "gap": 10,
+   "slope": 26,
+   "edge": 30
+  },
+  "stray": {
+   "townGap": 70,
+   "gap": 16,
+   "slope": 26,
+   "edge": 30
+  },
+  "folk": {
+   "townGap": 30,
+   "gap": 12,
+   "slope": 24,
+   "edge": 30
+  },
+  "setpiece": {
+   "townGap": 20,
+   "gap": 25,
+   "slope": 20
+  }
+ },
+ "mainWalkableShare": 0.685,
+ "settlements": [
+  {
+   "name": "Cinderholt",
+   "kind": "village",
+   "x": 1084,
+   "z": 736,
+   "r": 65,
+   "source": "bake",
+   "bakeId": "cinderholt"
+  }
+ ],
+ "checks": [
+  {
+   "id": "door_1",
+   "kind": "dungeon_door",
+   "x": 1149,
+   "z": 601,
+   "reachable": true,
+   "openShare": 1
+  },
+  {
+   "id": "event_ashfall_hollow",
+   "kind": "event_site",
+   "x": 1054,
+   "z": 880,
+   "reachable": true,
+   "openShare": 1
+  }
+ ],
+ "problems": [
+  "waystone door"
+ ],
+ "placements": [
+  {
+   "type": "fort",
+   "id": "fort_ashfall_hollow_0",
+   "name": "the Buried Gate",
+   "template": "warband_stockade",
+   "friendly": false,
+   "x": 907,
+   "z": 837,
+   "yaw": 1.57,
+   "radius": 26,
+   "level": 16
+  },
+  {
+   "type": "farm",
+   "id": "farm_ashfall_hollow_0",
+   "name": "Cinderholt Terraces",
+   "template": "arable",
+   "flavour": null,
+   "settlement": "Cinderholt",
+   "x": 1176,
+   "z": 671,
+   "yaw": -1.96,
+   "radius": 22,
+   "level": 15
+  },
+  {
+   "type": "farm",
+   "id": "farm_ashfall_hollow_1",
+   "name": "Cinderholt Goat Walls",
+   "template": "sheep",
+   "flavour": null,
+   "settlement": "Cinderholt",
+   "x": 998,
+   "z": 655,
+   "yaw": 0.79,
+   "radius": 24,
+   "level": 15
+  },
+  {
+   "type": "farm",
+   "id": "farm_ashfall_hollow_2",
+   "name": "Blighted Cinderholt Terraces",
+   "template": "arable",
+   "flavour": "corrupted",
+   "settlement": "Cinderholt",
+   "x": 1156,
+   "z": 842,
+   "yaw": -2.36,
+   "radius": 22,
+   "level": 15
+  },
+  {
+   "type": "farm",
+   "id": "farm_ashfall_hollow_3",
+   "name": "Blighted Cinderholt Goat Walls",
+   "template": "sheep",
+   "flavour": "corrupted",
+   "settlement": "Cinderholt",
+   "x": 967,
+   "z": 768,
+   "yaw": 0.79,
+   "radius": 24,
+   "level": 15
+  },
+  {
+   "type": "farm",
+   "id": "farm_ashfall_hollow_4",
+   "name": "Blighted Cinderholt Terraces",
+   "template": "arable",
+   "flavour": "corrupted",
+   "settlement": "Cinderholt",
+   "x": 1190,
+   "z": 774,
+   "yaw": 1.96,
+   "radius": 22,
+   "level": 15
+  },
+  {
+   "type": "cave",
+   "id": "cave_ashfall_hollow_0",
+   "name": "Glass grave",
+   "template": "barrow_mound",
+   "plan": {
+    "family": "glass_tomb",
+    "floors": 1,
+    "level": 16
+   },
+   "x": 1960,
+   "z": 624,
+   "yaw": 1.57,
+   "radius": 10,
+   "level": 16
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_0_0",
+   "monster": "slagborn_firecaller",
+   "with": "slagborn_raider",
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 416,
+   "z": 102,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_0_1",
+   "monster": "slagborn_firecaller",
+   "with": "slagborn_raider",
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1551,
+   "z": 1399,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_1_0",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 303,
+   "z": 732,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_1_1",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 864,
+   "z": 1454,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_2_0",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1576,
+   "z": 143,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_2_1",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1043,
+   "z": 70,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_3_0",
+   "monster": "obsidian_warden",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 102,
+   "z": 1289,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_3_1",
+   "monster": "obsidian_warden",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 68,
+   "z": 383,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_4_0",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1972,
+   "z": 1111,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_4_1",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1598,
+   "z": 843,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "rare",
+   "id": "rare_cellar_queen",
+   "slot": 0,
+   "name": "The Cellar Queen",
+   "x": 1245,
+   "z": 1216,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     1303,
+     1218
+    ],
+    [
+     1258,
+     1285
+    ],
+    [
+     1195,
+     1245
+    ],
+    [
+     1201,
+     1179
+    ],
+    [
+     1295,
+     1167
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 17
+  },
+  {
+   "type": "rare",
+   "id": "rare_ashfather",
+   "slot": 1,
+   "name": "The Ashfather",
+   "x": 682,
+   "z": 483,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     608,
+     464
+    ],
+    [
+     704,
+     383
+    ],
+    [
+     742,
+     455
+    ],
+    [
+     733,
+     551
+    ],
+    [
+     640,
+     535
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 17
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z12_11_cinderholt",
+   "name": "Cinderholt",
+   "x": 1075.7,
+   "z": 736.6,
+   "yaw": 0,
+   "settlement": "Cinderholt",
+   "radius": 1
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_door",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1146,
+   "z": 554,
+   "yaw": 0,
+   "radius": 6,
+   "doorGuard": true
+  },
+  {
+   "type": "npc",
+   "id": "ash_reader_kirra",
+   "name": "Ash-reader Kirra",
+   "role": "elder",
+   "at": "Cinderholt",
+   "x": 1079.6,
+   "z": 733.7,
+   "yaw": 3.524,
+   "office": "cinderholt_plot_9",
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "gakk_nuvaru",
+   "name": "Gakk Nuvaru",
+   "role": "resident",
+   "at": "Cinderholt",
+   "x": 1098.1,
+   "z": 752,
+   "yaw": 0.403,
+   "office": "cinderholt_plot_3",
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "benno_lhessu",
+   "name": "Benno Lhessu",
+   "role": "innkeeper",
+   "at": "Cinderholt",
+   "x": 1096.7,
+   "z": 729.2,
+   "yaw": 5.127,
+   "office": "cinderholt_plot_15",
+   "radius": 1
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_ashfall_hollow_0",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 516,
+   "z": 1127,
+   "yaw": 4.61,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_f1",
+   "monster": "slagborn_firecaller",
+   "with": "slagborn_raider",
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 108,
+   "z": 962,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_ashfall_hollow_2",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1504,
+   "z": 500,
+   "yaw": 1.17,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_f3",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1180,
+   "z": 1538,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_ashfall_hollow_4",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 526,
+   "z": 1456,
+   "yaw": 5.23,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_f5",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 711,
+   "z": 193,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_ashfall_hollow_6",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1300,
+   "z": 267,
+   "yaw": 2.97,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_f7",
+   "monster": "obsidian_warden",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1820,
+   "z": 352,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_ashfall_hollow_8",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 376,
+   "z": 424,
+   "yaw": 4.58,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_f9",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 824,
+   "z": 1148,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_ashfall_hollow_10",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1356,
+   "z": 721,
+   "yaw": 2.86,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_f11",
+   "monster": "slagborn_firecaller",
+   "with": "slagborn_raider",
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 576,
+   "z": 840,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_ashfall_hollow_12",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1664,
+   "z": 1132,
+   "yaw": 5.69,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_f13",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 623,
+   "z": 1280,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_ashfall_hollow_14",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 923,
+   "z": 338,
+   "yaw": 5.91,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_f15",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 165,
+   "z": 61,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_ashfall_hollow_16",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1384,
+   "z": 992,
+   "yaw": 5.74,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_f17",
+   "monster": "obsidian_warden",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1552,
+   "z": 688,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_ashfall_hollow_18",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1865,
+   "z": 859,
+   "yaw": 2.29,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_f19",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1832,
+   "z": 84,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_ashfall_hollow_20",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 731,
+   "z": 1130,
+   "yaw": 0.67,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_f21",
+   "monster": "slagborn_firecaller",
+   "with": "slagborn_raider",
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1791,
+   "z": 1316,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_ashfall_hollow_22",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 336,
+   "z": 1328,
+   "yaw": 4.6,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_f23",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 364,
+   "z": 952,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_ashfall_hollow_24",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1016,
+   "z": 1272,
+   "yaw": 3.47,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_f25",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1740,
+   "z": 560,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_ashfall_hollow_26",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 500,
+   "z": 632,
+   "yaw": 3.93,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_f27",
+   "monster": "obsidian_warden",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 609,
+   "z": 64,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_ashfall_hollow_28",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 136,
+   "z": 584,
+   "yaw": 5.22,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_f29",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1749,
+   "z": 720,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_ashfall_hollow_30",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 247,
+   "z": 257,
+   "yaw": 1.26,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_f31",
+   "monster": "slagborn_firecaller",
+   "with": "slagborn_raider",
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1471,
+   "z": 1200,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_ashfall_hollow_32",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 264,
+   "z": 1136,
+   "yaw": 2.27,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_f33",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 532,
+   "z": 288,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_ashfall_hollow_34",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 734,
+   "z": 693,
+   "yaw": 1.58,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_f35",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1345,
+   "z": 1417,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_ashfall_hollow_36",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1128,
+   "z": 352,
+   "yaw": 3.41,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_f37",
+   "monster": "obsidian_warden",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 746,
+   "z": 941,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_ashfall_hollow_38",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1612,
+   "z": 340,
+   "yaw": 5.11,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_f39",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1316,
+   "z": 464,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_ashfall_hollow_40",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 698,
+   "z": 1525,
+   "yaw": 2.47,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_f41",
+   "monster": "slagborn_firecaller",
+   "with": "slagborn_raider",
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1083,
+   "z": 1104,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_ashfall_hollow_42",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1230,
+   "z": 107,
+   "yaw": 1.9,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_f43",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1984,
+   "z": 436,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_ashfall_hollow_44",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1968,
+   "z": 224,
+   "yaw": 0.16,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_f45",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 852,
+   "z": 60,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lonely_pier_ashfall_hollow_46",
+   "kind": "lonely_pier",
+   "name": "Bridge Pier",
+   "x": 1812,
+   "z": 1027,
+   "yaw": 4.49,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_f47",
+   "monster": "obsidian_warden",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1004,
+   "z": 1565,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_1",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1384,
+   "z": 40,
+   "yaw": 3.17,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s1",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1992,
+   "z": 40,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_2",
+   "recipe": "cu_desert_melon",
+   "name": "Bitter Melons",
+   "kind": "forage",
+   "x": 40,
+   "z": 224,
+   "yaw": 2.45,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_ashfall_hollow_d1",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1457,
+   "z": 303,
+   "yaw": 3.73,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_3",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 40,
+   "z": 736,
+   "yaw": 0.45,
+   "radius": 6,
+   "levelBase": 16
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_4",
+   "recipe": "cu_blight_bloom",
+   "name": "Ash Lily",
+   "kind": "forage",
+   "x": 40,
+   "z": 1118,
+   "yaw": 3.53,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s2",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1542,
+   "z": 1011,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_ashfall_hollow_d2",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 2007,
+   "z": 952,
+   "yaw": 5.58,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_ashfall_hollow_1",
+   "role": "gravedigger",
+   "name": "Gravedigger",
+   "work": "dig",
+   "chatter": [
+    "role.gravedigger"
+   ],
+   "x": 285,
+   "z": 570,
+   "yaw": 0.76,
+   "radius": 6,
+   "path": [
+    [
+     277,
+     566
+    ],
+    [
+     293,
+     567
+    ],
+    [
+     283,
+     579
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_ashfall_hollow_d3",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 887,
+   "z": 491,
+   "yaw": 0.55,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s3",
+   "monster": "obsidian_warden",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1232,
+   "z": 1008,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_ashfall_hollow_d4",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 2008,
+   "z": 784,
+   "yaw": 3.4,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_5",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 1729,
+   "z": 217,
+   "yaw": 6,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s4",
+   "monster": "obsidian_warden",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 784,
+   "z": 1312,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_6",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1072,
+   "z": 1416,
+   "yaw": 1.26,
+   "radius": 7,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "roam_ashfall_hollow_1",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 928,
+   "z": 1025,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     885,
+     1018
+    ],
+    [
+     937,
+     984
+    ],
+    [
+     976,
+     1039
+    ],
+    [
+     927,
+     1057
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_7",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 225,
+   "z": 416,
+   "yaw": 3.76,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_ashfall_hollow_d5",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1440,
+   "z": 848,
+   "yaw": 5.53,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s5",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 600,
+   "z": 1000,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_8",
+   "recipe": "cu_dune_idol",
+   "name": "Dune Idol",
+   "kind": "shrine",
+   "x": 1944,
+   "z": 1262,
+   "yaw": 3.7,
+   "radius": 5,
+   "levelBase": 15
+  },
+  {
+   "type": "folk",
+   "id": "folk_ashfall_hollow_2",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 167,
+   "z": 815,
+   "yaw": 4.87,
+   "radius": 6,
+   "path": [
+    [
+     215,
+     756
+    ],
+    [
+     197,
+     863
+    ],
+    [
+     102,
+     824
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_9",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 937,
+   "z": 193,
+   "yaw": 2.1,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_ashfall_hollow_d6",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1121,
+   "z": 241,
+   "yaw": 3.01,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_ashfall_hollow_d7",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 472,
+   "z": 1272,
+   "yaw": 3.1,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_10",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 1688,
+   "z": 41,
+   "yaw": 3.04,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "roam_ashfall_hollow_2",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1646,
+   "z": 1257,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1666,
+     1226
+    ],
+    [
+     1682,
+     1285
+    ],
+    [
+     1631,
+     1300
+    ],
+    [
+     1615,
+     1237
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s6",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1033,
+   "z": 463,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_11",
+   "recipe": "cu_blight_pool",
+   "name": "Blight Pool",
+   "kind": "hazard",
+   "x": 432,
+   "z": 808,
+   "yaw": 5.08,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "driftwood_post_ashfall_hollow_d8",
+   "kind": "driftwood_post",
+   "name": "Driftwood Post",
+   "x": 1833,
+   "z": 1169,
+   "yaw": 0.64,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_12",
+   "recipe": "cu_smugglers_drop",
+   "name": "Smuggler's Drop",
+   "kind": "cache",
+   "x": 1721,
+   "z": 910,
+   "yaw": 4.49,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s7",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 392,
+   "z": 248,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_13",
+   "recipe": "cu_smugglers_drop",
+   "name": "Smuggler's Drop",
+   "kind": "cache",
+   "x": 1400,
+   "z": 592,
+   "yaw": 1.09,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_14",
+   "recipe": "cu_fishing_rock",
+   "name": "Fishing Rock",
+   "kind": "fishing",
+   "x": 1407,
+   "z": 177,
+   "yaw": 5.21,
+   "radius": 5,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s8",
+   "monster": "obsidian_warden",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1308,
+   "z": 880,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_ashfall_hollow_d9",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 849,
+   "z": 623,
+   "yaw": 0.35,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_ashfall_hollow_d10",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1632,
+   "z": 472,
+   "yaw": 3.02,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_ashfall_hollow_d11",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 394,
+   "z": 1169,
+   "yaw": 3.45,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_ashfall_hollow_3",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1856,
+   "z": 488,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1816,
+     437
+    ],
+    [
+     1894,
+     443
+    ],
+    [
+     1890,
+     534
+    ],
+    [
+     1806,
+     514
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s9",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 480,
+   "z": 504,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_15",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 241,
+   "z": 1007,
+   "yaw": 4.53,
+   "radius": 7,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_ashfall_hollow_d12",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 609,
+   "z": 693,
+   "yaw": 4.74,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_16",
+   "recipe": "cu_dune_idol",
+   "name": "Dune Idol",
+   "kind": "shrine",
+   "x": 284,
+   "z": 129,
+   "yaw": 3.09,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s10",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1210,
+   "z": 1409,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_ashfall_hollow_d13",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 680,
+   "z": 1400,
+   "yaw": 0.39,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_17",
+   "recipe": "cu_blight_pool",
+   "name": "Blight Pool",
+   "kind": "hazard",
+   "x": 801,
+   "z": 295,
+   "yaw": 5.04,
+   "radius": 5,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s11",
+   "monster": "obsidian_warden",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1879,
+   "z": 726,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_18",
+   "recipe": "cu_drowned_saint",
+   "name": "Drowned Saint",
+   "kind": "shrine",
+   "x": 858,
+   "z": 1579,
+   "yaw": 1.31,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_ashfall_hollow_d14",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 704,
+   "z": 817,
+   "yaw": 1.58,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_ashfall_hollow_d15",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 232,
+   "z": 1256,
+   "yaw": 4.13,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_ashfall_hollow_d16",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1440,
+   "z": 1327,
+   "yaw": 2.52,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s12",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1452,
+   "z": 1487,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_19",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 40,
+   "z": 96,
+   "yaw": 1.76,
+   "radius": 7,
+   "levelBase": 16
+  },
+  {
+   "type": "folk",
+   "id": "folk_ashfall_hollow_3",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 913,
+   "z": 1337,
+   "yaw": 1.65,
+   "radius": 6,
+   "path": [
+    [
+     956,
+     1348
+    ],
+    [
+     879,
+     1397
+    ],
+    [
+     888,
+     1297
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_20",
+   "recipe": "cu_blight_bloom",
+   "name": "Ash Lily",
+   "kind": "forage",
+   "x": 41,
+   "z": 512,
+   "yaw": 4.63,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s13",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1504,
+   "z": 40,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_ashfall_hollow_d17",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 528,
+   "z": 160,
+   "yaw": 1.83,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_ashfall_hollow_d18",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 470,
+   "z": 1015,
+   "yaw": 2.26,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_ashfall_hollow_4",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1848,
+   "z": 224,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1843,
+     265
+    ],
+    [
+     1799,
+     219
+    ],
+    [
+     1840,
+     173
+    ],
+    [
+     1888,
+     225
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s14",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 152,
+   "z": 184,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_21",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 1280,
+   "z": 582,
+   "yaw": 3.03,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_ashfall_hollow_d19",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 151,
+   "z": 1168,
+   "yaw": 1.01,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_ashfall_hollow_d20",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 952,
+   "z": 1176,
+   "yaw": 5.04,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s15",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 726,
+   "z": 37,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_22",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 427,
+   "z": 1400,
+   "yaw": 2.21,
+   "radius": 6,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_ashfall_hollow_d21",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 1268,
+   "z": 375,
+   "yaw": 4.13,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s16",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1623,
+   "z": 592,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_23",
+   "recipe": "cu_samphire",
+   "name": "Samphire Flats",
+   "kind": "forage",
+   "x": 1682,
+   "z": 1015,
+   "yaw": 5.96,
+   "radius": 5,
+   "levelBase": 15
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_ashfall_hollow_d22",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1400,
+   "z": 1104,
+   "yaw": 2.07,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_24",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 384,
+   "z": 640,
+   "yaw": 4.08,
+   "radius": 7,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "roam_ashfall_hollow_5",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1424,
+   "z": 416,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1351,
+     373
+    ],
+    [
+     1450,
+     359
+    ],
+    [
+     1481,
+     469
+    ],
+    [
+     1372,
+     482
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s17",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 622,
+   "z": 1160,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_ashfall_hollow_d23",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1185,
+   "z": 448,
+   "yaw": 4.56,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_ashfall_hollow_4",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 312,
+   "z": 848,
+   "yaw": 5.07,
+   "radius": 6,
+   "path": [
+    [
+     309,
+     898
+    ],
+    [
+     276,
+     825
+    ],
+    [
+     346,
+     809
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_25",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1712,
+   "z": 392,
+   "yaw": 0.81,
+   "radius": 6,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s18",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1936,
+   "z": 328,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_ashfall_hollow_d24",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 144,
+   "z": 295,
+   "yaw": 2.18,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_ashfall_hollow_d25",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 824,
+   "z": 175,
+   "yaw": 1.83,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s19",
+   "monster": "obsidian_warden",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1298,
+   "z": 1511,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_ashfall_hollow_d26",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 480,
+   "z": 392,
+   "yaw": 6.24,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_ashfall_hollow_6",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 342,
+   "z": 1064,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     387,
+     1057
+    ],
+    [
+     362,
+     1127
+    ],
+    [
+     294,
+     1060
+    ],
+    [
+     330,
+     1011
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_ashfall_hollow_d27",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 480,
+   "z": 904,
+   "yaw": 3.17,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_ashfall_hollow_d28",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 650,
+   "z": 288,
+   "yaw": 2.47,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_ashfall_hollow_d29",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 993,
+   "z": 243,
+   "yaw": 4.3,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_ashfall_hollow_d30",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 839,
+   "z": 728,
+   "yaw": 2.43,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_ashfall_hollow_5",
+   "role": "pilgrim_resting",
+   "name": "Resting pilgrim",
+   "work": "pray",
+   "chatter": [
+    "role.pilgrim"
+   ],
+   "x": 512,
+   "z": 735,
+   "yaw": 0.85,
+   "radius": 6,
+   "path": [
+    [
+     513,
+     728
+    ],
+    [
+     518,
+     741
+    ],
+    [
+     504,
+     737
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_26",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1897,
+   "z": 958,
+   "yaw": 0.57,
+   "radius": 6,
+   "levelBase": 15
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_ashfall_hollow_d31",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1572,
+   "z": 1103,
+   "yaw": 4.59,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_ashfall_hollow_d32",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 320,
+   "z": 336,
+   "yaw": 2.8,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_27",
+   "recipe": "cu_spring_altar",
+   "name": "Spring Altar",
+   "kind": "shrine",
+   "x": 1823,
+   "z": 633,
+   "yaw": 5.74,
+   "radius": 5,
+   "levelBase": 15
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_28",
+   "recipe": "cu_blight_pool",
+   "name": "Blight Pool",
+   "kind": "hazard",
+   "x": 40,
+   "z": 624,
+   "yaw": 5.66,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_29",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 1547,
+   "z": 247,
+   "yaw": 1.34,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_ashfall_hollow_d33",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 136,
+   "z": 472,
+   "yaw": 6.12,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_ashfall_hollow_d34",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 151,
+   "z": 1062,
+   "yaw": 3.17,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s20",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1112,
+   "z": 1312,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_30",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 538,
+   "z": 1351,
+   "yaw": 3.99,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_ashfall_hollow_d35",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1018,
+   "z": 366,
+   "yaw": 2.38,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s21",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 504,
+   "z": 41,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_ashfall_hollow_d36",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1205,
+   "z": 204,
+   "yaw": 1.42,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_ashfall_hollow_d37",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 824,
+   "z": 415,
+   "yaw": 3.26,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_31",
+   "recipe": "cu_blight_pool",
+   "name": "Blight Pool",
+   "kind": "hazard",
+   "x": 976,
+   "z": 1456,
+   "yaw": 1.56,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "roam_ashfall_hollow_7",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1120,
+   "z": 999,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1134,
+     1067
+    ],
+    [
+     1061,
+     994
+    ],
+    [
+     1117,
+     953
+    ],
+    [
+     1165,
+     1009
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s22",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1935,
+   "z": 128,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_ashfall_hollow_d38",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 136,
+   "z": 688,
+   "yaw": 4.81,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_ashfall_hollow_d39",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1445,
+   "z": 693,
+   "yaw": 0.62,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_ashfall_hollow_6",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 785,
+   "z": 1041,
+   "yaw": 0.84,
+   "radius": 6,
+   "path": [
+    [
+     746,
+     1016
+    ],
+    [
+     811,
+     1019
+    ],
+    [
+     802,
+     1093
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_32",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 1098,
+   "z": 1207,
+   "yaw": 1.06,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s23",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 720,
+   "z": 1233,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_ashfall_hollow_d40",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 327,
+   "z": 41,
+   "yaw": 5.52,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_33",
+   "recipe": "cu_bog_hole",
+   "name": "Sucking Mire",
+   "kind": "hazard",
+   "x": 1765,
+   "z": 827,
+   "yaw": 0.81,
+   "radius": 5,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s24",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1651,
+   "z": 746,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_34",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 1520,
+   "z": 912,
+   "yaw": 4.17,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "roam_ashfall_hollow_8",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1512,
+   "z": 784,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1549,
+     862
+    ],
+    [
+     1445,
+     846
+    ],
+    [
+     1481,
+     716
+    ],
+    [
+     1591,
+     719
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_35",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1496,
+   "z": 599,
+   "yaw": 1.24,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_ashfall_hollow_d41",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1535,
+   "z": 1274,
+   "yaw": 3.65,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s25",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1616,
+   "z": 943,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_36",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 629,
+   "z": 915,
+   "yaw": 4.89,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "folk",
+   "id": "folk_ashfall_hollow_7",
+   "role": "gravedigger",
+   "name": "Gravedigger",
+   "work": "dig",
+   "chatter": [
+    "role.gravedigger"
+   ],
+   "x": 968,
+   "z": 544,
+   "yaw": 0.32,
+   "radius": 6,
+   "path": [
+    [
+     957,
+     542
+    ],
+    [
+     973,
+     536
+    ],
+    [
+     972,
+     558
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_ashfall_hollow_d42",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 384,
+   "z": 528,
+   "yaw": 4.95,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s26",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1680,
+   "z": 137,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "mushroom_ring_ashfall_hollow_d43",
+   "kind": "mushroom_ring",
+   "name": "Mushroom Ring",
+   "x": 2008,
+   "z": 539,
+   "yaw": 4.1,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_ashfall_hollow_d44",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1203,
+   "z": 301,
+   "yaw": 3.24,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_ashfall_hollow_d45",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 833,
+   "z": 937,
+   "yaw": 4.67,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_ashfall_hollow_9",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1955,
+   "z": 872,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1960,
+     810
+    ],
+    [
+     2045,
+     880
+    ],
+    [
+     1928,
+     931
+    ],
+    [
+     1901,
+     855
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s27",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1312,
+   "z": 1063,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_37",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1760,
+   "z": 1113,
+   "yaw": 1.79,
+   "radius": 6,
+   "levelBase": 15
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_ashfall_hollow_d46",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 592,
+   "z": 368,
+   "yaw": 2.25,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_ashfall_hollow_d47",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 792,
+   "z": 848,
+   "yaw": 2.06,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s28",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 759,
+   "z": 1449,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_38",
+   "recipe": "cu_blight_bloom",
+   "name": "Ash Lily",
+   "kind": "forage",
+   "x": 1681,
+   "z": 1382,
+   "yaw": 5.01,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_39",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 617,
+   "z": 1480,
+   "yaw": 4.13,
+   "radius": 7,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s29",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1640,
+   "z": 248,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_40",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 225,
+   "z": 655,
+   "yaw": 4.58,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_ashfall_hollow_d48",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 944,
+   "z": 96,
+   "yaw": 0.99,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_41",
+   "recipe": "cu_blight_pool",
+   "name": "Blight Pool",
+   "kind": "hazard",
+   "x": 317,
+   "z": 1232,
+   "yaw": 3.98,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_ashfall_hollow_d49",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 1342,
+   "z": 183,
+   "yaw": 4.89,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s30",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 607,
+   "z": 209,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_42",
+   "recipe": "cu_blight_bloom",
+   "name": "Ash Lily",
+   "kind": "forage",
+   "x": 547,
+   "z": 1204,
+   "yaw": 0,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "folk",
+   "id": "folk_ashfall_hollow_8",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 1560,
+   "z": 416,
+   "yaw": 1.54,
+   "radius": 6,
+   "path": [
+    [
+     1549,
+     401
+    ],
+    [
+     1587,
+     416
+    ],
+    [
+     1552,
+     436
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_ashfall_hollow_d50",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1352,
+   "z": 1304,
+   "yaw": 4.98,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s31",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 650,
+   "z": 624,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_ashfall_hollow_d51",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 48,
+   "z": 1208,
+   "yaw": 1.73,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_ashfall_hollow_d52",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1760,
+   "z": 1224,
+   "yaw": 1.43,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s32",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 665,
+   "z": 1075,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_43",
+   "recipe": "cu_desert_melon",
+   "name": "Bitter Melons",
+   "kind": "forage",
+   "x": 1088,
+   "z": 1511,
+   "yaw": 4.75,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "roam_ashfall_hollow_10",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 297,
+   "z": 471,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     236,
+     453
+    ],
+    [
+     317,
+     429
+    ],
+    [
+     358,
+     488
+    ],
+    [
+     277,
+     520
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_ashfall_hollow_d53",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1880,
+   "z": 1088,
+   "yaw": 5.11,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_ashfall_hollow_d54",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 38,
+   "z": 897,
+   "yaw": 3.91,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s33",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1600,
+   "z": 48,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_44",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 45,
+   "z": 1357,
+   "yaw": 3.2,
+   "radius": 6,
+   "levelBase": 16
+  },
+  {
+   "type": "folk",
+   "id": "folk_ashfall_hollow_9",
+   "role": "pilgrim_resting",
+   "name": "Resting pilgrim",
+   "work": "pray",
+   "chatter": [
+    "role.pilgrim"
+   ],
+   "x": 2000,
+   "z": 1206,
+   "yaw": 1.48,
+   "radius": 6,
+   "path": [
+    [
+     2002,
+     1208
+    ],
+    [
+     1997,
+     1207
+    ],
+    [
+     2001,
+     1203
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_45",
+   "recipe": "cu_blight_bloom",
+   "name": "Ash Lily",
+   "kind": "forage",
+   "x": 1298,
+   "z": 784,
+   "yaw": 1.68,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_ashfall_hollow_d55",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 914,
+   "z": 408,
+   "yaw": 4.78,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_ashfall_hollow_d56",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1736,
+   "z": 303,
+   "yaw": 1.88,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_ashfall_hollow_d57",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 551,
+   "z": 560,
+   "yaw": 3.98,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_ashfall_hollow_11",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1479,
+   "z": 128,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1462,
+     182
+    ],
+    [
+     1440,
+     104
+    ],
+    [
+     1504,
+     83
+    ],
+    [
+     1527,
+     166
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s34",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 408,
+   "z": 344,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_ashfall_hollow_d58",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1281,
+   "z": 678,
+   "yaw": 4.63,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_ashfall_hollow_d59",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1488,
+   "z": 1088,
+   "yaw": 6.27,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s35",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 46,
+   "z": 1037,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_ashfall_hollow_d60",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 401,
+   "z": 729,
+   "yaw": 0.23,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_ashfall_hollow_d61",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 880,
+   "z": 255,
+   "yaw": 4.58,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s36",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 182,
+   "z": 1323,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_46",
+   "recipe": "cu_samphire",
+   "name": "Samphire Flats",
+   "kind": "forage",
+   "x": 784,
+   "z": 1535,
+   "yaw": 5.93,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_ashfall_hollow_d62",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1816,
+   "z": 927,
+   "yaw": 2.79,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_47",
+   "recipe": "cu_blight_pool",
+   "name": "Blight Pool",
+   "kind": "hazard",
+   "x": 1224,
+   "z": 920,
+   "yaw": 0.35,
+   "radius": 5,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "roam_ashfall_hollow_12",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1385,
+   "z": 264,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1428,
+     317
+    ],
+    [
+     1337,
+     295
+    ],
+    [
+     1348,
+     222
+    ],
+    [
+     1425,
+     225
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s37",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1696,
+   "z": 646,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_48",
+   "recipe": "cu_desert_melon",
+   "name": "Bitter Melons",
+   "kind": "forage",
+   "x": 1857,
+   "z": 1249,
+   "yaw": 3.98,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "folk",
+   "id": "folk_ashfall_hollow_10",
+   "role": "gravedigger",
+   "name": "Gravedigger",
+   "work": "dig",
+   "chatter": [
+    "role.gravedigger"
+   ],
+   "x": 1951,
+   "z": 1023,
+   "yaw": 0.73,
+   "radius": 6,
+   "path": [
+    [
+     1951,
+     1029
+    ],
+    [
+     1946,
+     1020
+    ],
+    [
+     1957,
+     1021
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_49",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1066,
+   "z": 582,
+   "yaw": 2.67,
+   "radius": 5,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s38",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1226,
+   "z": 519,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_ashfall_hollow_d63",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1232,
+   "z": 1096,
+   "yaw": 5.92,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_50",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1384,
+   "z": 1184,
+   "yaw": 2.98,
+   "radius": 7,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s39",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 313,
+   "z": 208,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_51",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1969,
+   "z": 712,
+   "yaw": 3.94,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_ashfall_hollow_d64",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 825,
+   "z": 546,
+   "yaw": 3.61,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_ashfall_hollow_d65",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1206,
+   "z": 31,
+   "yaw": 1.88,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_ashfall_hollow_d66",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 768,
+   "z": 113,
+   "yaw": 4.52,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_ashfall_hollow_d67",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 190,
+   "z": 955,
+   "yaw": 4.11,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s40",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1493,
+   "z": 961,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_ashfall_hollow_11",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 427,
+   "z": 165,
+   "yaw": 0.51,
+   "radius": 6,
+   "path": [
+    [
+     410,
+     122
+    ],
+    [
+     456,
+     167
+    ],
+    [
+     406,
+     188
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_ashfall_hollow_d68",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 634,
+   "z": 773,
+   "yaw": 1.71,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s41",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 768,
+   "z": 768,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_ashfall_hollow_d69",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 920,
+   "z": 1520,
+   "yaw": 1.92,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_52",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1392,
+   "z": 911,
+   "yaw": 3.39,
+   "radius": 6,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "roam_ashfall_hollow_13",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 393,
+   "z": 1264,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     338,
+     1184
+    ],
+    [
+     454,
+     1233
+    ],
+    [
+     446,
+     1344
+    ],
+    [
+     335,
+     1297
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_ashfall_hollow_d70",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1078,
+   "z": 306,
+   "yaw": 3.79,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_53",
+   "recipe": "cu_blight_pool",
+   "name": "Blight Pool",
+   "kind": "hazard",
+   "x": 240,
+   "z": 336,
+   "yaw": 5.63,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_ashfall_hollow_d71",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 690,
+   "z": 106,
+   "yaw": 2.21,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_54",
+   "recipe": "cu_fishing_rock",
+   "name": "Fishing Rock",
+   "kind": "fishing",
+   "x": 1729,
+   "z": 473,
+   "yaw": 1.06,
+   "radius": 5,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s42",
+   "monster": "obsidian_warden",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 808,
+   "z": 1232,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_ashfall_hollow_d72",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 194,
+   "z": 528,
+   "yaw": 3.54,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_55",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 247,
+   "z": 40,
+   "yaw": 2.14,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s43",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1376,
+   "z": 799,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_ashfall_hollow_d73",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 600,
+   "z": 1400,
+   "yaw": 4.19,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_ashfall_hollow_d74",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1904,
+   "z": 41,
+   "yaw": 5.93,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_56",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1303,
+   "z": 968,
+   "yaw": 2.63,
+   "radius": 5,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "roam_ashfall_hollow_14",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 152,
+   "z": 377,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     91,
+     345
+    ],
+    [
+     200,
+     340
+    ],
+    [
+     204,
+     436
+    ],
+    [
+     127,
+     422
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s44",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 458,
+   "z": 1088,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s45",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1432,
+   "z": 1409,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_ashfall_hollow_d75",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 582,
+   "z": 1090,
+   "yaw": 4.8,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_ashfall_hollow_12",
+   "role": "gravedigger",
+   "name": "Gravedigger",
+   "work": "dig",
+   "chatter": [
+    "role.gravedigger"
+   ],
+   "x": 906,
+   "z": 680,
+   "yaw": 3.3,
+   "radius": 6,
+   "path": [
+    [
+     910,
+     693
+    ],
+    [
+     893,
+     679
+    ],
+    [
+     913,
+     670
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_ashfall_hollow_d76",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 696,
+   "z": 1320,
+   "yaw": 6.03,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s46",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1142,
+   "z": 1457,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_ashfall_hollow_d77",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 759,
+   "z": 621,
+   "yaw": 5.86,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_57",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1105,
+   "z": 423,
+   "yaw": 2.36,
+   "radius": 7,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s47",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1533,
+   "z": 1182,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_58",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 1760,
+   "z": 128,
+   "yaw": 5.59,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_59",
+   "recipe": "cu_sea_camp",
+   "name": "Beachcomber's Camp",
+   "kind": "camp",
+   "x": 1899,
+   "z": 1157,
+   "yaw": 3.21,
+   "radius": 6,
+   "levelBase": 15
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_60",
+   "recipe": "cu_blight_bloom",
+   "name": "Ash Lily",
+   "kind": "forage",
+   "x": 440,
+   "z": 585,
+   "yaw": 3.23,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_ashfall_hollow_d78",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 552,
+   "z": 936,
+   "yaw": 4.62,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s48",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1032,
+   "z": 1168,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_61",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 1378,
+   "z": 95,
+   "yaw": 1.65,
+   "radius": 6,
+   "levelBase": 15
+  },
+  {
+   "type": "folk",
+   "id": "folk_ashfall_hollow_13",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 2008,
+   "z": 160,
+   "yaw": 0.04,
+   "radius": 6,
+   "path": [
+    [
+     2025,
+     136
+    ],
+    [
+     2018,
+     186
+    ],
+    [
+     1982,
+     163
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_62",
+   "recipe": "cu_samphire",
+   "name": "Samphire Flats",
+   "kind": "forage",
+   "x": 2007,
+   "z": 287,
+   "yaw": 4.29,
+   "radius": 5,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s49",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 889,
+   "z": 1215,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_ashfall_hollow_d79",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1579,
+   "z": 527,
+   "yaw": 0.96,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_63",
+   "recipe": "cu_blight_bloom",
+   "name": "Ash Lily",
+   "kind": "forage",
+   "x": 1281,
+   "z": 1368,
+   "yaw": 4.88,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_64",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 983,
+   "z": 184,
+   "yaw": 5.37,
+   "radius": 5,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s50",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 409,
+   "z": 879,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_ashfall_hollow_d80",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 728,
+   "z": 270,
+   "yaw": 4.38,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_ashfall_hollow_d81",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1040,
+   "z": 1344,
+   "yaw": 3.23,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_ashfall_hollow_d82",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1191,
+   "z": 1333,
+   "yaw": 4.8,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s51",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 231,
+   "z": 185,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_65",
+   "recipe": "cu_eel_trap",
+   "name": "Eel Trap",
+   "kind": "fishing",
+   "x": 1832,
+   "z": 791,
+   "yaw": 6.08,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_66",
+   "recipe": "cu_samphire",
+   "name": "Samphire Flats",
+   "kind": "forage",
+   "x": 1526,
+   "z": 322,
+   "yaw": 3.98,
+   "radius": 5,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s52",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1375,
+   "z": 1503,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_ashfall_hollow_d83",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1344,
+   "z": 640,
+   "yaw": 5.02,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_67",
+   "recipe": "cu_drowned_saint",
+   "name": "Drowned Saint",
+   "kind": "shrine",
+   "x": 1753,
+   "z": 975,
+   "yaw": 3.31,
+   "radius": 5,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "roam_ashfall_hollow_15",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1409,
+   "z": 1257,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1444,
+     1299
+    ],
+    [
+     1350,
+     1279
+    ],
+    [
+     1387,
+     1216
+    ],
+    [
+     1460,
+     1224
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s53",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1762,
+   "z": 48,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_68",
+   "recipe": "cu_smugglers_drop",
+   "name": "Smuggler's Drop",
+   "kind": "cache",
+   "x": 2008,
+   "z": 359,
+   "yaw": 5.28,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "folk",
+   "id": "folk_ashfall_hollow_14",
+   "role": "gravedigger",
+   "name": "Gravedigger",
+   "work": "dig",
+   "chatter": [
+    "role.gravedigger"
+   ],
+   "x": 79,
+   "z": 159,
+   "yaw": 0.59,
+   "radius": 6,
+   "path": [
+    [
+     89,
+     153
+    ],
+    [
+     79,
+     169
+    ],
+    [
+     70,
+     155
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_69",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 536,
+   "z": 440,
+   "yaw": 4.2,
+   "radius": 6,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s54",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 672,
+   "z": 976,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_ashfall_hollow_d84",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1431,
+   "z": 527,
+   "yaw": 0.31,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_ashfall_hollow_d85",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1447,
+   "z": 1026,
+   "yaw": 5.24,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s55",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1616,
+   "z": 1048,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_ashfall_hollow_d86",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 543,
+   "z": 1280,
+   "yaw": 4.18,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_70",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 89,
+   "z": 40,
+   "yaw": 3.77,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_71",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 466,
+   "z": 264,
+   "yaw": 1.85,
+   "radius": 6,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_ashfall_hollow_d87",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 265,
+   "z": 1320,
+   "yaw": 4.79,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s56",
+   "monster": "obsidian_warden",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 312,
+   "z": 656,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_ashfall_hollow_d88",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 575,
+   "z": 633,
+   "yaw": 6.15,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_ashfall_hollow_15",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 158,
+   "z": 1241,
+   "yaw": 3.01,
+   "radius": 6,
+   "path": [
+    [
+     130,
+     1211
+    ],
+    [
+     217,
+     1253
+    ],
+    [
+     145,
+     1283
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_72",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 504,
+   "z": 816,
+   "yaw": 2.41,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s57",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 887,
+   "z": 136,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_ashfall_hollow_d89",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 802,
+   "z": 1384,
+   "yaw": 1.69,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_73",
+   "recipe": "cu_blight_pool",
+   "name": "Blight Pool",
+   "kind": "hazard",
+   "x": 1104,
+   "z": 496,
+   "yaw": 5.6,
+   "radius": 5,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "roam_ashfall_hollow_16",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 984,
+   "z": 1111,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1023,
+     1140
+    ],
+    [
+     931,
+     1167
+    ],
+    [
+     928,
+     1085
+    ],
+    [
+     1025,
+     1058
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s58",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1183,
+   "z": 378,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_ashfall_hollow_d90",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 976,
+   "z": 468,
+   "yaw": 3.79,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_ashfall_hollow_d91",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1231,
+   "z": 1480,
+   "yaw": 2.25,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_ashfall_hollow_d92",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 447,
+   "z": 679,
+   "yaw": 5.06,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s59",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1672,
+   "z": 528,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_74",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1344,
+   "z": 552,
+   "yaw": 1.82,
+   "radius": 3,
+   "levelBase": 15
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_ashfall_hollow_d93",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 226,
+   "z": 1082,
+   "yaw": 1.34,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s60",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 776,
+   "z": 360,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_ashfall_hollow_d94",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1136,
+   "z": 1385,
+   "yaw": 2.27,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_ashfall_hollow_d95",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 856,
+   "z": 352,
+   "yaw": 4.6,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_75",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 112,
+   "z": 753,
+   "yaw": 1.23,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s61",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1249,
+   "z": 841,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_76",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 595,
+   "z": 134,
+   "yaw": 5.97,
+   "radius": 3,
+   "levelBase": 15
+  },
+  {
+   "type": "folk",
+   "id": "folk_ashfall_hollow_16",
+   "role": "gravedigger",
+   "name": "Gravedigger",
+   "work": "dig",
+   "chatter": [
+    "role.gravedigger"
+   ],
+   "x": 536,
+   "z": 1040,
+   "yaw": 2.72,
+   "radius": 6,
+   "path": [
+    [
+     536,
+     1032
+    ],
+    [
+     543,
+     1042
+    ],
+    [
+     530,
+     1048
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_77",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 1886,
+   "z": 607,
+   "yaw": 0.31,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s62",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 905,
+   "z": 574,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_ashfall_hollow_d96",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1815,
+   "z": 715,
+   "yaw": 5.71,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "mushroom_ring_ashfall_hollow_d97",
+   "kind": "mushroom_ring",
+   "name": "Mushroom Ring",
+   "x": 1711,
+   "z": 784,
+   "yaw": 5.69,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_78",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1530,
+   "z": 1362,
+   "yaw": 3.52,
+   "radius": 6,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s63",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 952,
+   "z": 1248,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_79",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 695,
+   "z": 886,
+   "yaw": 5.28,
+   "radius": 7,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_ashfall_hollow_d98",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 257,
+   "z": 933,
+   "yaw": 5.37,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_80",
+   "recipe": "cu_empty_gallows_post",
+   "name": "Weathered Post",
+   "kind": "lore",
+   "x": 40,
+   "z": 296,
+   "yaw": 1.51,
+   "radius": 3,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_ashfall_hollow_d99",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 808,
+   "z": 480,
+   "yaw": 0.06,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_ashfall_hollow_d100",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1192,
+   "z": 162,
+   "yaw": 0,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s64",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 803,
+   "z": 670,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_81",
+   "recipe": "cu_blight_bloom",
+   "name": "Ash Lily",
+   "kind": "forage",
+   "x": 216,
+   "z": 112,
+   "yaw": 0.3,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "folk",
+   "id": "folk_ashfall_hollow_17",
+   "role": "gravedigger",
+   "name": "Gravedigger",
+   "work": "dig",
+   "chatter": [
+    "role.gravedigger"
+   ],
+   "x": 769,
+   "z": 232,
+   "yaw": 4.07,
+   "radius": 6,
+   "path": [
+    [
+     760,
+     244
+    ],
+    [
+     763,
+     220
+    ],
+    [
+     780,
+     235
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_ashfall_hollow_d101",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1719,
+   "z": 1169,
+   "yaw": 5.83,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s65",
+   "monster": "obsidian_warden",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 104,
+   "z": 240,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_ashfall_hollow_d102",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 638,
+   "z": 719,
+   "yaw": 3.6,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_ashfall_hollow_d103",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1615,
+   "z": 1369,
+   "yaw": 6.03,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_ashfall_hollow_17",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1671,
+   "z": 312,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1719,
+     350
+    ],
+    [
+     1634,
+     348
+    ],
+    [
+     1638,
+     281
+    ],
+    [
+     1713,
+     277
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s66",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1136,
+   "z": 1153,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_ashfall_hollow_d104",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 975,
+   "z": 40,
+   "yaw": 1.57,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "sand_shrine_ashfall_hollow_d105",
+   "kind": "sand_shrine",
+   "name": "Wind Shrine",
+   "x": 926,
+   "z": 1584,
+   "yaw": 3.88,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_ashfall_hollow_d106",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 951,
+   "z": 912,
+   "yaw": 5.27,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_ashfall_hollow_d107",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 695,
+   "z": 753,
+   "yaw": 2.76,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_ashfall_hollow_d108",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 136,
+   "z": 896,
+   "yaw": 4.18,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_82",
+   "recipe": "cu_blight_pool",
+   "name": "Blight Pool",
+   "kind": "hazard",
+   "x": 1628,
+   "z": 1141,
+   "yaw": 5.77,
+   "radius": 5,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s67",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 208,
+   "z": 592,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_ashfall_hollow_d109",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 216,
+   "z": 1184,
+   "yaw": 2.98,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_ashfall_hollow_d110",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1744,
+   "z": 1048,
+   "yaw": 3.32,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_83",
+   "recipe": "cu_shepherds_hut",
+   "name": "Shepherd's Lean-to",
+   "kind": "camp",
+   "x": 1953,
+   "z": 504,
+   "yaw": 3.85,
+   "radius": 6,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "roam_ashfall_hollow_18",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 440,
+   "z": 448,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     446,
+     498
+    ],
+    [
+     382,
+     466
+    ],
+    [
+     413,
+     379
+    ],
+    [
+     513,
+     429
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_ashfall_hollow_d111",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1261,
+   "z": 450,
+   "yaw": 3.68,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_84",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 104,
+   "z": 528,
+   "yaw": 4.03,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_85",
+   "recipe": "cu_bog_body",
+   "name": "Bog Body",
+   "kind": "remains",
+   "x": 1661,
+   "z": 882,
+   "yaw": 4.4,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_86",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 112,
+   "z": 1112,
+   "yaw": 4.71,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s68",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 831,
+   "z": 796,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_ashfall_hollow_d112",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 41,
+   "z": 447,
+   "yaw": 1.95,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_87",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 545,
+   "z": 96,
+   "yaw": 5.23,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s69",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1438,
+   "z": 776,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_88",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 349,
+   "z": 97,
+   "yaw": 2.69,
+   "radius": 4,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_ashfall_hollow_d113",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1277,
+   "z": 735,
+   "yaw": 5.36,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_ashfall_hollow_19",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 440,
+   "z": 958,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     465,
+     1003
+    ],
+    [
+     406,
+     999
+    ],
+    [
+     412,
+     922
+    ],
+    [
+     468,
+     931
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_ashfall_hollow_d114",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1216,
+   "z": 593,
+   "yaw": 4.34,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_ashfall_hollow_d115",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 496,
+   "z": 1400,
+   "yaw": 0.36,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s70",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 736,
+   "z": 1368,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_89",
+   "recipe": "cu_blight_pool",
+   "name": "Blight Pool",
+   "kind": "hazard",
+   "x": 1559,
+   "z": 616,
+   "yaw": 0.41,
+   "radius": 5,
+   "levelBase": 15
+  },
+  {
+   "type": "folk",
+   "id": "folk_ashfall_hollow_18",
+   "role": "herbalist",
+   "name": "Herbalist",
+   "work": "gather",
+   "chatter": [
+    "role.herbalist"
+   ],
+   "x": 1889,
+   "z": 378,
+   "yaw": 5.51,
+   "radius": 6,
+   "path": [
+    [
+     1911,
+     399
+    ],
+    [
+     1860,
+     378
+    ],
+    [
+     1907,
+     349
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_90",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 1384,
+   "z": 1360,
+   "yaw": 2.72,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s71",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1510,
+   "z": 1453,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_ashfall_hollow_d116",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1007,
+   "z": 1398,
+   "yaw": 4.92,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_91",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1280,
+   "z": 1438,
+   "yaw": 5.99,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_ashfall_hollow_d117",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1057,
+   "z": 117,
+   "yaw": 2.19,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s72",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 184,
+   "z": 248,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_92",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 456,
+   "z": 1160,
+   "yaw": 3.39,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_ashfall_hollow_d118",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 71,
+   "z": 680,
+   "yaw": 3.17,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_93",
+   "recipe": "cu_heron_nest",
+   "name": "Heron Rookery",
+   "kind": "nest",
+   "x": 1634,
+   "z": 663,
+   "yaw": 5.17,
+   "radius": 6,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s73",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 639,
+   "z": 1351,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_ashfall_hollow_d119",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 40,
+   "z": 968,
+   "yaw": 2.13,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_ashfall_hollow_d120",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1880,
+   "z": 1024,
+   "yaw": 1.28,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s74",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 39,
+   "z": 802,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_94",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 679,
+   "z": 1464,
+   "yaw": 0.59,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_ashfall_hollow_d121",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1071,
+   "z": 30,
+   "yaw": 2.98,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_95",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 472,
+   "z": 329,
+   "yaw": 1.2,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "roam_ashfall_hollow_20",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 327,
+   "z": 271,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     309,
+     331
+    ],
+    [
+     281,
+     271
+    ],
+    [
+     327,
+     217
+    ],
+    [
+     389,
+     269
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s75",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1760,
+   "z": 631,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_ashfall_hollow_d122",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 656,
+   "z": 1216,
+   "yaw": 1.13,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_ashfall_hollow_19",
+   "role": "gravedigger",
+   "name": "Gravedigger",
+   "work": "dig",
+   "chatter": [
+    "role.gravedigger"
+   ],
+   "x": 1038,
+   "z": 1473,
+   "yaw": 5.9,
+   "radius": 6,
+   "path": [
+    [
+     1039,
+     1483
+    ],
+    [
+     1025,
+     1473
+    ],
+    [
+     1046,
+     1466
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_96",
+   "recipe": "cu_blight_bloom",
+   "name": "Ash Lily",
+   "kind": "forage",
+   "x": 947,
+   "z": 275,
+   "yaw": 0.37,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s76",
+   "monster": "obsidian_warden",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1000,
+   "z": 968,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_ashfall_hollow_d123",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 647,
+   "z": 838,
+   "yaw": 4.49,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_97",
+   "recipe": "cu_blight_pool",
+   "name": "Blight Pool",
+   "kind": "hazard",
+   "x": 1632,
+   "z": 185,
+   "yaw": 2.44,
+   "radius": 5,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s77",
+   "monster": "obsidian_warden",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 640,
+   "z": 410,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_98",
+   "recipe": "cu_desert_melon",
+   "name": "Bitter Melons",
+   "kind": "forage",
+   "x": 393,
+   "z": 33,
+   "yaw": 4.82,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_99",
+   "recipe": "cu_crab_rocks",
+   "name": "Crab Rocks",
+   "kind": "forage",
+   "x": 1728,
+   "z": 1344,
+   "yaw": 2.52,
+   "radius": 5,
+   "levelBase": 15
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_ashfall_hollow_d124",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1227,
+   "z": 151,
+   "yaw": 3.24,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_ashfall_hollow_d125",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 647,
+   "z": 160,
+   "yaw": 6.12,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s78",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1904,
+   "z": 664,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_100",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1488,
+   "z": 240,
+   "yaw": 0.13,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_ashfall_hollow_d126",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 976,
+   "z": 405,
+   "yaw": 6.27,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_101",
+   "recipe": "cu_blight_pool",
+   "name": "Blight Pool",
+   "kind": "hazard",
+   "x": 865,
+   "z": 1081,
+   "yaw": 2.29,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s79",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1816,
+   "z": 1088,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "frost_marker_ashfall_hollow_d127",
+   "kind": "frost_marker",
+   "name": "Snow Pole",
+   "x": 1208,
+   "z": 243,
+   "yaw": 4.04,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_102",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 760,
+   "z": 1184,
+   "yaw": 1.1,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_103",
+   "recipe": "cu_horse_bones",
+   "name": "Horse Bones",
+   "kind": "remains",
+   "x": 512,
+   "z": 217,
+   "yaw": 2.1,
+   "radius": 5,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s80",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1143,
+   "z": 296,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_104",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1401,
+   "z": 655,
+   "yaw": 6.08,
+   "radius": 6,
+   "levelBase": 15
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_ashfall_hollow_d128",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1343,
+   "z": 1120,
+   "yaw": 3.7,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_ashfall_hollow_d129",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 871,
+   "z": 921,
+   "yaw": 2.56,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_ashfall_hollow_d130",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 490,
+   "z": 112,
+   "yaw": 0.17,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s81",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1896,
+   "z": 791,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_ashfall_hollow_d131",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1040,
+   "z": 528,
+   "yaw": 6.08,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_105",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 1656,
+   "z": 416,
+   "yaw": 0.39,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s82",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 847,
+   "z": 1520,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_106",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 1681,
+   "z": 952,
+   "yaw": 6.22,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_ashfall_hollow_d132",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1696,
+   "z": 1080,
+   "yaw": 1.31,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_ashfall_hollow_d133",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1447,
+   "z": 1136,
+   "yaw": 2.01,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s83",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 38,
+   "z": 1272,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_107",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 573,
+   "z": 767,
+   "yaw": 3.53,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "folk",
+   "id": "folk_ashfall_hollow_20",
+   "role": "gravedigger",
+   "name": "Gravedigger",
+   "work": "dig",
+   "chatter": [
+    "role.gravedigger"
+   ],
+   "x": 192,
+   "z": 1129,
+   "yaw": 3.27,
+   "radius": 6,
+   "path": [
+    [
+     196,
+     1126
+    ],
+    [
+     193,
+     1134
+    ],
+    [
+     188,
+     1127
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_ashfall_hollow_d134",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 529,
+   "z": 350,
+   "yaw": 2.84,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s84",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1808,
+   "z": 576,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_ashfall_hollow_d135",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 360,
+   "z": 585,
+   "yaw": 5.59,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_108",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 2008,
+   "z": 1056,
+   "yaw": 1.12,
+   "radius": 7,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s85",
+   "monster": "obsidian_warden",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 111,
+   "z": 1345,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_ashfall_hollow_d136",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 560,
+   "z": 504,
+   "yaw": 0.97,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_ashfall_hollow_21",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 104,
+   "z": 632,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     108,
+     695
+    ],
+    [
+     40,
+     638
+    ],
+    [
+     86,
+     580
+    ],
+    [
+     170,
+     622
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_109",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 79,
+   "z": 1159,
+   "yaw": 4.85,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_ashfall_hollow_d137",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 687,
+   "z": 1169,
+   "yaw": 0.4,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_110",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1297,
+   "z": 326,
+   "yaw": 5.04,
+   "radius": 6,
+   "levelBase": 15
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_ashfall_hollow_d138",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 166,
+   "z": 1009,
+   "yaw": 1.06,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_ashfall_hollow_21",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 1071,
+   "z": 1263,
+   "yaw": 2.03,
+   "radius": 6,
+   "path": [
+    [
+     1109,
+     1203
+    ],
+    [
+     1112,
+     1317
+    ],
+    [
+     998,
+     1244
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_ashfall_hollow_d139",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 376,
+   "z": 1368,
+   "yaw": 4.4,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_ashfall_hollow_d140",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 995,
+   "z": 119,
+   "yaw": 0.52,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_ashfall_hollow_d141",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 111,
+   "z": 95,
+   "yaw": 2.39,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_111",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 1488,
+   "z": 408,
+   "yaw": 1.76,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "roam_ashfall_hollow_22",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1455,
+   "z": 912,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1467,
+     845
+    ],
+    [
+     1508,
+     943
+    ],
+    [
+     1402,
+     987
+    ],
+    [
+     1388,
+     900
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s86",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 847,
+   "z": 1346,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_ashfall_hollow_d142",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 656,
+   "z": 343,
+   "yaw": 1.41,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_ashfall_hollow_d143",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 888,
+   "z": 760,
+   "yaw": 2.45,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_ashfall_hollow_d144",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 792,
+   "z": 40,
+   "yaw": 0.31,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s87",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 911,
+   "z": 39,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_ashfall_hollow_d145",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 592,
+   "z": 312,
+   "yaw": 0.07,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_112",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 1496,
+   "z": 656,
+   "yaw": 2.12,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_ashfall_hollow_d146",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1684,
+   "z": 694,
+   "yaw": 1.44,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_ashfall_hollow_d147",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1221,
+   "z": 48,
+   "yaw": 1.76,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_113",
+   "recipe": "cu_fishing_rock",
+   "name": "Fishing Rock",
+   "kind": "fishing",
+   "x": 1776,
+   "z": 888,
+   "yaw": 1.21,
+   "radius": 5,
+   "levelBase": 15
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_ashfall_hollow_d148",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1528,
+   "z": 552,
+   "yaw": 3.63,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_114",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 356,
+   "z": 158,
+   "yaw": 3.36,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "roam_ashfall_hollow_23",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 496,
+   "z": 575,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     557,
+     555
+    ],
+    [
+     496,
+     624
+    ],
+    [
+     437,
+     583
+    ],
+    [
+     474,
+     506
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s88",
+   "monster": "obsidian_warden",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 943,
+   "z": 1408,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_115",
+   "recipe": "cu_crow_roost",
+   "name": "Crow Roost",
+   "kind": "nest",
+   "x": 1295,
+   "z": 515,
+   "yaw": 4.13,
+   "radius": 5,
+   "levelBase": 15
+  },
+  {
+   "type": "folk",
+   "id": "folk_ashfall_hollow_22",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 1376,
+   "z": 1047,
+   "yaw": 1.06,
+   "radius": 6,
+   "path": [
+    [
+     1390,
+     1083
+    ],
+    [
+     1349,
+     1047
+    ],
+    [
+     1398,
+     1023
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_ashfall_hollow_d149",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 272,
+   "z": 1192,
+   "yaw": 0.39,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_ashfall_hollow_d150",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1704,
+   "z": 839,
+   "yaw": 3.81,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_ashfall_hollow_d151",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 710,
+   "z": 1086,
+   "yaw": 4.41,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_ashfall_hollow_d152",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 603,
+   "z": 1230,
+   "yaw": 0.07,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_116",
+   "recipe": "cu_drowned_saint",
+   "name": "Drowned Saint",
+   "kind": "shrine",
+   "x": 1440,
+   "z": 40,
+   "yaw": 2.9,
+   "radius": 5,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s89",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 824,
+   "z": 120,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_ashfall_hollow_d153",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 880,
+   "z": 200,
+   "yaw": 2.13,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_ashfall_hollow_24",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 272,
+   "z": 384,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     238,
+     452
+    ],
+    [
+     196,
+     327
+    ],
+    [
+     288,
+     317
+    ],
+    [
+     350,
+     418
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_117",
+   "recipe": "cu_smugglers_drop",
+   "name": "Smuggler's Drop",
+   "kind": "cache",
+   "x": 1624,
+   "z": 104,
+   "yaw": 4.69,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s90",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 301,
+   "z": 952,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lonely_pier_ashfall_hollow_d154",
+   "kind": "lonely_pier",
+   "name": "Bridge Pier",
+   "x": 1793,
+   "z": 299,
+   "yaw": 3.87,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s91",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1841,
+   "z": 976,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_118",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1136,
+   "z": 1256,
+   "yaw": 3.3,
+   "radius": 6,
+   "levelBase": 16
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_ashfall_hollow_d155",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 112,
+   "z": 1024,
+   "yaw": 1.71,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_ashfall_hollow_d156",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 2012,
+   "z": 691,
+   "yaw": 0.36,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_119",
+   "recipe": "cu_heron_nest",
+   "name": "Heron Rookery",
+   "kind": "nest",
+   "x": 1576,
+   "z": 296,
+   "yaw": 5.74,
+   "radius": 6,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s92",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1775,
+   "z": 1168,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_ashfall_hollow_d157",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1576,
+   "z": 1328,
+   "yaw": 5.41,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_ashfall_hollow_d158",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 686,
+   "z": 636,
+   "yaw": 1.98,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_120",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 677,
+   "z": 217,
+   "yaw": 1.36,
+   "radius": 5,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s93",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1907,
+   "z": 1225,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_121",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 1644,
+   "z": 810,
+   "yaw": 4.53,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_ashfall_hollow_d159",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1160,
+   "z": 496,
+   "yaw": 1.42,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_ashfall_hollow_d160",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1169,
+   "z": 920,
+   "yaw": 1.65,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s94",
+   "monster": "obsidian_warden",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 536,
+   "z": 672,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_122",
+   "recipe": "cu_blight_pool",
+   "name": "Blight Pool",
+   "kind": "hazard",
+   "x": 1946,
+   "z": 560,
+   "yaw": 2.79,
+   "radius": 5,
+   "levelBase": 15
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_123",
+   "recipe": "cu_bog_body",
+   "name": "Bog Body",
+   "kind": "remains",
+   "x": 1768,
+   "z": 384,
+   "yaw": 5.49,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s95",
+   "monster": "slagborn_firecaller",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1072,
+   "z": 376,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_ashfall_hollow_d161",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1183,
+   "z": 1120,
+   "yaw": 2.46,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_ashfall_hollow_d162",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 705,
+   "z": 320,
+   "yaw": 0.2,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_124",
+   "recipe": "cu_dune_idol",
+   "name": "Dune Idol",
+   "kind": "shrine",
+   "x": 1064,
+   "z": 1560,
+   "yaw": 1.17,
+   "radius": 5,
+   "levelBase": 16
+  },
+  {
+   "type": "camp",
+   "id": "roam_ashfall_hollow_25",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    16,
+    17
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 250,
+   "z": 702,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     300,
+     752
+    ],
+    [
+     194,
+     756
+    ],
+    [
+     206,
+     658
+    ],
+    [
+     301,
+     674
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_ashfall_hollow_s96",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1448,
+   "z": 625,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_ashfall_hollow_125",
+   "recipe": "cu_blight_bloom",
+   "name": "Ash Lily",
+   "kind": "forage",
+   "x": 665,
+   "z": 41,
+   "yaw": 2.93,
+   "radius": 4,
+   "levelBase": 15
+  }
+ ],
+ "features": [],
+ "density": {
+  "target": 50,
+  "roadTarget": 45,
+  "added": {
+   "curio": 125,
+   "wayside": 162,
+   "stray": 96,
+   "roamer": 25,
+   "folk": 22
+  },
+  "openShareCovered": 0.999,
+  "roadShareCovered": 1
+ },
+ "levels": [
+  15,
+  17
+ ]
+}

@@ -31,6 +31,8 @@ const TRAV = J('data/provinces/travellers.json');
 const CHAT = J('data/names/chatter.json');
 const ROUTES = J('data/provinces/torbor_downs-routes.json');
 const MARKS = J('data/quests/marks/torbor_downs.json');
+const OTHER_ZONES = new Set(Object.entries(J('data/world/province-map.json').provinces).filter(([k]) => k !== 'torbor_downs').flatMap(([, p]) => Object.keys(p.map || {})));   // Expansion 1: another province's zones (tests/C/vharlen-content.test.js checks Vharlen's)
+const TORBOR_EV = e => (e.zones || [e.zone]).every(z => !OTHER_ZONES.has(z));
 const VIGS = new Map(['m1', 'm2', 'm2b'].flatMap(f => J(`data/vignettes/${f}.json`).vignettes).map(v => [v.id, v]));
 const ZM = 2048;
 const se = SHEET.grid.start, hubP = BAKE[se].find(p => p.kind === 'settlement' && p.data.hub);
@@ -129,7 +131,7 @@ test('P26: every camp we place sits at the ramp\'s level for its spot, inside it
 });
 
 test('P26: zone events and town raids are never more than 2 levels over the ground round them', () => {
-  for (const e of [...EVENTS.zone, ...EVENTS.realm]) {
+  for (const e of [...EVENTS.zone, ...EVENTS.realm].filter(TORBOR_EV)) {
     if (e.kind === 'worldboss' || e.kind === 'flyover') continue;
     const m = e.map[0], eid = EIDS.find(k => MAP[k] === m.zone);
     const cap = Math.max(SHEET.zones[eid].band[0], Math.floor(LF.at(eid, m.x - ORG(eid)[0], m.z - ORG(eid)[1])) + 2);
@@ -213,7 +215,7 @@ test('P19: travellers have routes along the real roads between neighbouring town
 });
 
 test('events: every event has a place (world metres in its zone) and words + a description the map can show', () => {
-  for (const e of [...EVENTS.zone, ...EVENTS.realm]) {
+  for (const e of [...EVENTS.zone, ...EVENTS.realm].filter(TORBOR_EV)) {
     assert.ok(typeof e.where === 'string' && e.where.length > 8, `${e.id}: where`);
     assert.ok(typeof e.blurb === 'string' && e.blurb.length > 20, `${e.id}: blurb`);
     assert.ok(Array.isArray(e.map) && e.map.length >= 1, `${e.id}: map`);
@@ -229,7 +231,7 @@ test('events: every event has a place (world metres in its zone) and words + a d
 
 test('P17: every quest step says what to do and where, every step has a map mark, and the tracker can show the giver', () => {
   const bad = [];
-  for (const q of questFiles()) for (const qq of q.quests || []) {
+  for (const q of questFiles().filter(q => !OTHER_ZONES.has(q.zone))) for (const qq of q.quests || []) {
     const m = MARKS.quests[qq.id];
     if (!m) { bad.push(`${qq.id}: no marks`); continue; }
     if (!m.giver) bad.push(`${qq.id}: no giver mark`);

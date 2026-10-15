@@ -1,0 +1,210 @@
+{
+  "id": "mb_hushfoot",
+  "name": "Hushfoot, the Scald-Stalker",
+  "tier": "miniboss",
+  "body": "steamwood_prowler",
+  "place": "dungeon steam_grotto (The Hissing Grotto, Steamwood, level 12): floor 1's mini-boss",
+  "_doc": "A steamwood prowler that hunts by hiding in the grotto fog. P1 \"In the Fog\": rakes and pounces on whoever is farthest; it breathes fog banks (pools that slow) to hide in. Two steam valves (levers, repeatable) blow the fog out of the room and catch it in the gust (short stun). P2 at 50% \"Scalded\": it rolls in a boiling spring and comes out steaming — burning pounce chains and a scalding shake.",
+  "party": "Solo: blow the fog when it gets thick. 2-3: the farthest player gets pounced — let the tank be the farthest when possible. 5: spread for the chain.",
+  "hpMult": 2,
+  "arena": {
+    "radius": 12,
+    "objects": [
+      {
+        "id": "valve_a",
+        "type": "lever",
+        "name": "Steam valve",
+        "x": -8,
+        "z": 3,
+        "repeat": true,
+        "onUse": [
+          {
+            "remove": "fog"
+          },
+          {
+            "stun": 1.5
+          },
+          {
+            "say": "The valve shrieks and the fog blows out of the grotto!",
+            "style": "warn"
+          }
+        ]
+      },
+      {
+        "id": "valve_b",
+        "type": "lever",
+        "name": "Steam valve",
+        "x": 8,
+        "z": -3,
+        "repeat": true,
+        "onUse": [
+          {
+            "remove": "fog"
+          },
+          {
+            "stun": 1.5
+          },
+          {
+            "say": "The valve shrieks and the fog blows out of the grotto!",
+            "style": "warn"
+          }
+        ]
+      }
+    ]
+  },
+  "say": {
+    "pull": [
+      "Nothing in the fog. Then two green eyes.",
+      "Wet paws on wet stone, very quiet."
+    ],
+    "death": "Hushfoot slumps into the warm water and does not get up.",
+    "reset": "Hushfoot melts back into the fog."
+  },
+  "enrage": {
+    "seconds": 270,
+    "damage": 2.5,
+    "say": "Hushfoot goes wild in the steam!"
+  },
+  "abilities": {
+    "claws": {
+      "id": "claws",
+      "name": "Wet Claws",
+      "every": [
+        4,
+        6
+      ],
+      "range": 5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 4.5,
+          "arc": 1.4,
+          "wind": 0.9,
+          "damage": 1.4,
+          "status": "bleed"
+        }
+      ]
+    },
+    "pounce": {
+      "id": "pounce",
+      "name": "Pounce from the Fog",
+      "every": [
+        10,
+        13
+      ],
+      "first": 3,
+      "cast": 0.5,
+      "say": "Something leaps out of the fog at {target}!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "farthest",
+          "r": 3,
+          "wind": 1.4,
+          "damage": 1.8,
+          "status": "off_balance"
+        }
+      ]
+    },
+    "fog_breath": {
+      "id": "fog_breath",
+      "name": "Fog Breath",
+      "every": [
+        13,
+        16
+      ],
+      "first": 5,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "spread": 9,
+          "r": 3,
+          "count": 2,
+          "delay": 0.4,
+          "wind": 1.4,
+          "damage": 0.8,
+          "status": "lagging",
+          "leave": {
+            "id": "fog",
+            "type": "pool",
+            "name": "Fog bank",
+            "r": 3,
+            "every": 1,
+            "seconds": 25,
+            "damage": 0.1,
+            "status": "lagging"
+          }
+        }
+      ]
+    },
+    "scald_chain": {
+      "id": "scald_chain",
+      "name": "Scalding Leaps",
+      "every": [
+        14,
+        17
+      ],
+      "first": 4,
+      "cast": 0.6,
+      "say": "Hushfoot bounds from one of you to the next!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "count": 3,
+          "delay": 0.6,
+          "r": 2.8,
+          "wind": 1.4,
+          "damage": 1.5,
+          "element": "fire",
+          "status": "burn"
+        }
+      ]
+    },
+    "shake": {
+      "id": "shake",
+      "name": "Scalding Shake",
+      "every": [
+        16,
+        19
+      ],
+      "first": 8,
+      "cast": 0.9,
+      "say": "It shakes off boiling water — back away!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 6,
+          "wind": 1.5,
+          "damage": 2.2,
+          "element": "fire",
+          "status": "seared"
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "In the Fog",
+      "abilities": [
+        "claws",
+        "pounce",
+        "fog_breath"
+      ]
+    },
+    {
+      "name": "Scalded",
+      "at": 0.5,
+      "say": "Hushfoot rolls in a boiling spring and comes out steaming!",
+      "abilities": [
+        "claws",
+        "scald_chain",
+        "shake",
+        "fog_breath"
+      ]
+    }
+  ]
+}

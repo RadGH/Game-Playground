@@ -88,6 +88,8 @@ export function wildsCamps(terrain, town, door, mix = null) {
  * (`{type:'camp'|'event', id}`), else from first guesses near the named settlements. `info` = encounter id ->
  * { name, body } (the script files). Each camp carries `encounter` + `name` onto the monster it spawns.
  */
+// Torbor Downs' own four (Expansion 1: another province's named encounters say where they stand in their own encounter file,
+// data/encounters/<id>.json `place: { rank, level, near: { site | between | kind, dx?, dz? }, respawnMs, escort? }`, which wins)
 export const ENCOUNTER_PLACES = {
   elite_hobb_gallowsby: { rank: 'elite', level: 5, near: { kind: 'ford' }, respawnMs: 20 * 60000,
     escort: [{ type: 'road_brigand', count: 2 }, { type: 'brigand_archer', count: 2 }] },
@@ -105,9 +107,9 @@ export function zoneEncounterCamps(terrain, ids, info = {}, zoneSheetId = null) 
   const byName = n => sites.find(s => s.name === n);
   const out = [];
   ids.forEach((id, k) => {
-    const known = ENCOUNTER_PLACES[id];
-    const rank = known ? known.rank : id.startsWith('rare_') ? 'rare' : id.startsWith('elite_') ? 'elite' : 'boss';
-    const enc = { id, rank, level: known ? known.level : null, near: known ? known.near : {}, respawnMs: known ? known.respawnMs : rank === 'rare' ? [20 * 60000, 60 * 60000] : rank === 'elite' ? 20 * 60000 : 30 * 60000, escort: known ? known.escort : null };
+    const known = (info[id] && info[id].place) || ENCOUNTER_PLACES[id];
+    const rank = known && known.rank ? known.rank : id.startsWith('rare_') ? 'rare' : id.startsWith('elite_') ? 'elite' : 'boss';
+    const enc = { id, rank, level: known ? known.level ?? null : null, near: (known && known.near) || {}, respawnMs: known && known.respawnMs != null ? known.respawnMs : rank === 'rare' ? [20 * 60000, 60 * 60000] : rank === 'elite' ? 20 * 60000 : 30 * 60000, escort: (known && known.escort) || null };
     let p = null;
     const placed = sites.find(s => s.id === id && (s.type === 'camp' || s.type === 'event'))
       || (rank === 'boss' && zoneSheetId ? sites.find(s => s.type === 'event' && s.id === 'event_' + zoneSheetId) : null);

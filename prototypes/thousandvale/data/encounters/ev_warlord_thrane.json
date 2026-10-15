@@ -1,0 +1,277 @@
+{
+  "id": "ev_warlord_thrane",
+  "name": "Warlord Thrane",
+  "tier": "event",
+  "zone": "pumice_wastes",
+  "level": 16,
+  "body": "slagborn_chief",
+  "place": {
+    "rank": "boss",
+    "level": 16,
+    "respawnMs": 1800000
+  },
+  "_doc": "Expansion 1 (Vharlen). The ZONE EVENT BOSS for the Pumice Wastes: the Slagborn warlord marches on Lastwell Stockade. P1 'The Warcry': a cleaver cone, flaming arrows, and a war stamp that throws everyone near him. P2 at 55% 'The Pyre Line': his firecallers chant a ward over him — KILL THE FIRECALLERS to drop it — while burning ground spreads. P3, a new health bar 'Thrane Alone': three charges in a row down the field, a slag brand that three players must share, and a get-in-close ring. Soft enrage from 4 minutes, hard at 7.",
+  "party": "Zone event, everyone nearby joins. Solo: not intended (three firecallers to kill, a stack of 3). 3-5: playable. 10+: intended. M5 scaling: health and firecallers by players enrolled; stack need = clamp(players/4, 2, 5).",
+  "hpMult": 3,
+  "arena": {
+    "radius": 38
+  },
+  "say": {
+    "pull": [
+      "Lastwell! Open the gate or I open it for you.",
+      "Warlord Thrane plants his standard in the pumice. The drums start.",
+      "The mountain sent me. The mountain is hungry."
+    ],
+    "death": "Warlord Thrane falls across his own standard. The drums stop.",
+    "reset": "Warlord Thrane pulls his standard and marches back into the waste."
+  },
+  "enrage": {
+    "seconds": 420,
+    "damage": 3,
+    "say": "Thrane roars and the whole waste catches fire!",
+    "soft": {
+      "from": 240,
+      "every": 15,
+      "add": 0.08,
+      "say": "The drums beat faster. The warband sings."
+    }
+  },
+  "abilities": {
+    "cleaver": {
+      "id": "cleaver",
+      "name": "Warlord's Cleaver",
+      "every": [
+        7,
+        9
+      ],
+      "first": 2,
+      "range": 7,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 6,
+          "arc": 1.7,
+          "wind": 1.1,
+          "damage": 1.8
+        }
+      ]
+    },
+    "arrows": {
+      "id": "arrows",
+      "name": "Fire Rite Arrows",
+      "every": [
+        12,
+        15
+      ],
+      "first": 4,
+      "cast": 0.8,
+      "say": "Archers — fire!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3.2,
+          "wind": 1.5,
+          "damage": 1.2,
+          "count": 4,
+          "delay": 0.25,
+          "element": "fire",
+          "status": "burn"
+        }
+      ]
+    },
+    "stamp": {
+      "id": "stamp",
+      "name": "War Stamp",
+      "every": [
+        14,
+        17
+      ],
+      "first": 8,
+      "cast": 0.6,
+      "say": "Thrane lifts his boot — get clear!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 8,
+          "wind": 1.6,
+          "damage": 1.8,
+          "knock": 6
+        }
+      ]
+    },
+    "burning_ground": {
+      "id": "burning_ground",
+      "name": "Burning Ground",
+      "every": [
+        12,
+        15
+      ],
+      "first": 3,
+      "cast": 0.6,
+      "say": "The firecallers set the ground alight!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "r": 3.5,
+          "wind": 1.6,
+          "damage": 1.1,
+          "spread": 26,
+          "count": 6,
+          "delay": 0.2,
+          "element": "fire",
+          "leave": {
+            "type": "pool",
+            "name": "Burning pumice",
+            "r": 3,
+            "every": 1,
+            "seconds": 20,
+            "damage": 0.25,
+            "status": "burn",
+            "element": "fire"
+          }
+        }
+      ]
+    },
+    "charges": {
+      "id": "charges",
+      "name": "Triple Charge",
+      "every": [
+        18,
+        22
+      ],
+      "first": 5,
+      "cast": 1,
+      "say": "Thrane charges — and charges — and charges! Watch the lines!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 28,
+          "w": 4,
+          "wind": 1.6,
+          "damage": 2.2,
+          "count": 3,
+          "delay": 1.4,
+          "yaw": "random",
+          "rotate": 2.094,
+          "knock": 5
+        }
+      ]
+    },
+    "slag_brand": {
+      "id": "slag_brand",
+      "name": "Slag Brand",
+      "every": [
+        20,
+        24
+      ],
+      "first": 7,
+      "cast": 1,
+      "say": "Thrane brands {target} — three of you share the burn!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "random",
+          "r": 3.6,
+          "wind": 4,
+          "damage": 3,
+          "kind": "stack",
+          "need": 3,
+          "follow": true,
+          "element": "fire",
+          "status": "brand"
+        }
+      ]
+    },
+    "war_ring": {
+      "id": "war_ring",
+      "name": "Warlord's Ring",
+      "every": [
+        16,
+        19
+      ],
+      "first": 11,
+      "cast": 1,
+      "say": "Fire rings the warlord — get in close!",
+      "telegraphs": [
+        {
+          "shape": "donut",
+          "at": "self",
+          "r": 18,
+          "r2": 4,
+          "wind": 1.9,
+          "damage": 2.2,
+          "element": "fire"
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "The Warcry",
+      "abilities": [
+        "cleaver",
+        "arrows",
+        "stamp"
+      ]
+    },
+    {
+      "name": "The Pyre Line",
+      "at": 0.55,
+      "say": "Firecallers! Raise the pyre!",
+      "abilities": [
+        "cleaver",
+        "burning_ground"
+      ],
+      "shieldWhileAdds": true,
+      "shieldDown": "The last firecaller falls silent — the pyre ward collapses!",
+      "onEnter": [
+        {
+          "shield": {
+            "seconds": 25,
+            "pool": 0.1
+          }
+        },
+        {
+          "adds": {
+            "type": "slagborn_firecaller",
+            "count": 3,
+            "radius": 12,
+            "at": "home"
+          }
+        },
+        {
+          "say": "Thrane stands in a ring of chanting firecallers. Kill all three firecallers to drop the ward! It fails by itself in 25 seconds.",
+          "style": "warn"
+        }
+      ],
+      "ward": {
+        "seconds": 25,
+        "pool": 0.1,
+        "break": "adds",
+        "need": 3,
+        "what": "slagborn_firecaller",
+        "say": "Thrane stands in a ring of chanting firecallers. Kill all three firecallers to drop the ward! It fails by itself in 25 seconds.",
+        "fade": "The ward fails by itself. No opening this time."
+      }
+    },
+    {
+      "name": "Thrane Alone",
+      "newBar": {
+        "hp": 0.5
+      },
+      "say": "Fine. The old way, then. Me and my cleaver.",
+      "abilities": [
+        "cleaver",
+        "charges",
+        "slag_brand",
+        "war_ring",
+        "arrows"
+      ]
+    }
+  ]
+}

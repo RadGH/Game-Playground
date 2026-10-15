@@ -12,6 +12,7 @@
 //              lakes (with levels), roads — everything a zone bake needs besides the macro layers.
 
 import { makeNoise2D, fbm, ridged, subSeed, clamp } from '../../../../worldgen/js/noise.js';
+import { makeVolcanic } from './vharlen.mjs';
 
 export const MACRO_MAGIC = 'TVWM';
 export const MACRO_VERSION = 1;
@@ -44,7 +45,7 @@ export const WORLD = {
  */
 export const CONTINENTS = [
   { id: 'torbor', province: 'torbor_downs', kind: 'block', block: [11, 1], size: [4, 4], fall: 1100, wander: 1000, depth: 70 },
-  { id: 'vharlen', province: 'vharlen', kind: 'island', block: [11, 9], size: [3, 3], radius: 0.8, fall: 520, wander: 330, depth: 90, profile: 'volcanic' },
+  { id: 'vharlen', province: 'vharlen', kind: 'island', block: [11, 9], size: [3, 3], radius: 0.8, fall: 520, wander: 240, depth: 90, profile: 'volcanic' },
 ];
 const ZM = 2048;
 /** The rectangle of a continent in world metres. */
@@ -170,10 +171,24 @@ export function makeRefiner(m) {
     return h + (floor - h) * t;
   }
   /**
-   * Terrain shaping inside an 'island' continent, before the coast falls away (expansion terrain). 'volcanic' is a
-   * placeholder here; the expansion's own shaping replaces it (docs/EXPANSION-1.md).
+   * Terrain shaping inside an 'island' continent, before the coast falls away (expansion terrain).
+   * 'volcanic' = Vharlen, the Burning Isle (tools/lib/vharlen.mjs, docs/EXPANSION-1.md §2–§3). Within 100 m of the block's
+   * edge (open sea by then) it hands back to the old ground, so the sea floor is continuous across the edge.
    */
-  function continentProfile(c, wx, wz, ground) { return ground; }
+  const profiles = {};
+  function profileOf(c) {
+    if (!(c.id in profiles)) {
+      profiles[c.id] = c.profile === 'volcanic' ? makeVolcanic({ seed: m.seed, seaward: (x, z) => seaward(c, x, z) }) : null;
+      if (profiles[c.id]) profiles[c.id].ground = baseGround;     // with the coast's fall to the sea (roads, pools)
+    }
+    return profiles[c.id];
+  }
+  function continentProfile(c, wx, wz, ground) {
+    const P = profileOf(c); if (!P) return ground;
+    const h = P.height(wx, wz), r = continentRect(c);
+    const edge = Math.min(wx - r.x0, r.x1 - wx, wz - r.z0, r.z1 - wz);
+    return h + (ground - h) * (1 - smooth(edge / 100));
+  }
   /** A warped macro index: biome borders wander instead of following 128 m squares. */
   function warpedIndex(wx, wz) {
     const ox = (fbm(nWX, wx / 260, wz / 260, { octaves: 3 }) - 0.5) * 220;
@@ -184,7 +199,7 @@ export function makeRefiner(m) {
   function meander(x, z) {
     return [(fbm(nWX, x / 300, z / 300, { octaves: 2 }) - 0.5) * 50, (fbm(nWZ, x / 300, z / 300, { octaves: 2 }) - 0.5) * 50];
   }
-  return { baseGround, mainland, warpedIndex, meander, metres, seaward };
+  return { baseGround, mainland, warpedIndex, meander, metres, seaward, profileOf, islandAt: (wx, wz) => { const c = continentAt(wx, wz); return c && c.profile ? profileOf(c) : null; } };
 }
 
 export const RIVER_WIDTH = [0, 7, 14, 24];

@@ -6,6 +6,7 @@
 // and every fight call is passed its room's own rng. Rooms keep their mutable state in
 // js/rules/room.js, never here.
 
+import { installTvMonsters } from './tv-monsters.js';
 import { buildProjectiles } from './projectiles.js';
 import { buildCombatCfg } from './combat-cfg.js';
 import { installAffixes } from './affixes.js';
@@ -69,6 +70,7 @@ export function createEngine(data, { seed = 1, levelCap = DEFAULT_LEVEL_CAP, tvS
   const bestiary = enemies || { enemies: [], bosses: [], modifiers: [] };
   // main.js line ~307: the five warbands (members + warlords) into the bestiary, in memory
   if (data.warbands) { installWarbands(bestiary, data.warbands); bestiary.warbands = data.warbands; }
+  if (data.tvMonsters) installTvMonsters(bestiary, data.tvMonsters);      // EXPANSION-1 §5: new names + looks over borrowed stat blocks
 
   const engine = {
     rpg, items, balance,

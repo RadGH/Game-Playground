@@ -22,6 +22,8 @@ const ZONE_FILES = Object.keys(ZONES).filter(z => z !== 'test');
 const FILES = Object.fromEntries([...ZONE_FILES, 'test'].map(z => [z, J(`data/quests/${z}.json`)]));
 const ALL_Q = Object.entries(FILES).flatMap(([z, f]) => f.quests.map(q => ({ ...q, zone: z })));
 const QBY = new Map(ALL_Q.map(q => [q.id, q]));
+// Expansion 1: a Torbor quest may lead on to another province's (Gullwick's voyage -> Vharlen's first quest)
+const OTHER_Q = new Set(Object.entries(J('data/world/province-map.json').provinces).filter(([k]) => k !== 'torbor_downs').flatMap(([, p]) => Object.keys(p.map || {})).flatMap(z => { try { return J(`data/quests/${z}.json`).quests.map(q => q.id); } catch { return []; } }));
 const PCHAIN = J('data/quests/province.json');
 const JOBS = J('data/quests/jobs.json');
 const TREASURE = J('data/quests/treasure.json');
@@ -44,7 +46,7 @@ test('every non-test zone has a quest file with 5-7 quests; quest ids unique acr
 
 test('zone quests: givers, places, monster types, encounters, vignettes, rares, nexts all resolve', () => {
   const bad = [];
-  const KINDS = ['kill', 'killOne', 'killRare', 'collect', 'visit', 'talk', 'use', 'clear', 'deliver'];
+  const KINDS = ['kill', 'killOne', 'killRare', 'collect', 'visit', 'talk', 'use', 'clear', 'deliver', 'voyage'];   // voyage: EXPANSION-1 §6 (Gullwick's smoke_on_the_horizon)
   for (const z of ZONE_FILES) {
     const f = FILES[z];
     for (const [id, n] of Object.entries(f.npcs)) if (!placesOf(z).has(n.at) && !VIG.has(n.at) && !(n.placedBy === 'content-towns' && CART_TOWNS.has(n.at))) bad.push(`${z} npc ${id} at "${n.at}"`);
@@ -53,7 +55,7 @@ test('zone quests: givers, places, monster types, encounters, vignettes, rares, 
       if (!q.offer || !q.done || !q.steps.length) bad.push(`${q.id}: text/steps`);
       if (!(q.reward.xp > 0 && q.reward.xp <= 2)) bad.push(`${q.id}: xp share ${q.reward.xp}`);
       if (q.level < ZONES[z].band[0] - 1 || q.level > ZONES[z].band[1] + 1) bad.push(`${q.id}: level ${q.level} outside ${z} band ${ZONES[z].band}`);
-      if (q.next && !QBY.has(q.next)) bad.push(`${q.id}: next ${q.next}`);
+      if (q.next && !QBY.has(q.next) && !OTHER_Q.has(q.next)) bad.push(`${q.id}: next ${q.next}`);
       for (const s of q.steps) {
         if (!KINDS.includes(s.kind)) bad.push(`${q.id}: kind ${s.kind}`);
         if (!s.text) bad.push(`${q.id}: step text`);
@@ -74,7 +76,7 @@ test('zone quests: givers, places, monster types, encounters, vignettes, rares, 
 });
 
 test('quests string zones together: cross-zone `next` links exist and every zone is reached by one or by the story chain', () => {
-  const cross = ALL_Q.filter(q => q.next && QBY.get(q.next).zone !== q.zone);
+  const cross = ALL_Q.filter(q => q.next && QBY.has(q.next) && QBY.get(q.next).zone !== q.zone);
   assert.ok(cross.length >= 12, `${cross.length} cross-zone links`);
   const linked = new Set(cross.flatMap(q => [q.zone, QBY.get(q.next).zone]));
   for (const s of PCHAIN.steps) linked.add(s.zone);

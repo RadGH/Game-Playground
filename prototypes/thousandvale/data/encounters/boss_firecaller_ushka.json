@@ -1,0 +1,368 @@
+{
+  "id": "boss_firecaller_ushka",
+  "name": "Firecaller Ushka",
+  "tier": "boss",
+  "body": "slagborn_firecaller",
+  "place": "dungeon sulphur_mine (The Yellow Pits, Sulphur Bight, level 13-16): the end boss in the Firecaller's Pit",
+  "_doc": "The Slagborn firecaller who lights the sulphur seams to drive the diggers deeper. P1 \"Lighting the Seams\": firebolts at the tank, a fire cone, and SEAM FIRE — the four yellow seams in the walls flare all at once (stay away from them); two water barrels (levers, repeatable) put out the burning ground she leaves. P2 at 60% \"Choking Pit\": the pit fills with yellow smoke; she drops soaks of burning sulphur that need two players each, and a long cast you must interrupt (Call the Diggers) or she gets two raiders. P3 new bar \"The Pit Burns\": the floor is alight except a few safe circles, she chains fire between players (spread) and her seams burn on a short timer.",
+  "party": "Solo: hard — interrupt the call, skip the soaks only if you must. 2-3: one on the barrels. 5: as designed.",
+  "hpMult": 3.9,
+  "arena": {
+    "radius": 16,
+    "objects": [
+      {
+        "id": "seam",
+        "type": "pillar",
+        "name": "Sulphur seam",
+        "x": -10,
+        "z": -6,
+        "r": 1.2,
+        "hp": 3
+      },
+      {
+        "id": "seam",
+        "type": "pillar",
+        "name": "Sulphur seam",
+        "x": 10,
+        "z": -6,
+        "r": 1.2,
+        "hp": 3
+      },
+      {
+        "id": "seam",
+        "type": "pillar",
+        "name": "Sulphur seam",
+        "x": -10,
+        "z": 7,
+        "r": 1.2,
+        "hp": 3
+      },
+      {
+        "id": "seam",
+        "type": "pillar",
+        "name": "Sulphur seam",
+        "x": 10,
+        "z": 7,
+        "r": 1.2,
+        "hp": 3
+      },
+      {
+        "id": "barrel_n",
+        "type": "lever",
+        "name": "Water barrel",
+        "x": 0,
+        "z": -12,
+        "repeat": true,
+        "onUse": [
+          {
+            "remove": "burning"
+          },
+          {
+            "say": "Water hisses over the burning sulphur — the fire goes out.",
+            "style": "emote"
+          }
+        ]
+      },
+      {
+        "id": "barrel_s",
+        "type": "lever",
+        "name": "Water barrel",
+        "x": 0,
+        "z": 12,
+        "repeat": true,
+        "onUse": [
+          {
+            "remove": "burning"
+          },
+          {
+            "say": "Water hisses over the burning sulphur — the fire goes out.",
+            "style": "emote"
+          }
+        ]
+      }
+    ]
+  },
+  "say": {
+    "pull": [
+      "\"More hands for the deep seams. Or more fuel. Same thing.\"",
+      "Ushka snaps her fingers and the walls start to smoke.",
+      "\"Burn, and dig, and burn.\""
+    ],
+    "death": "Ushka falls into her own smoke, and the seams go dark one by one.",
+    "reset": "\"Back to work.\" Ushka goes back to tending her fires."
+  },
+  "enrage": {
+    "seconds": 330,
+    "damage": 3,
+    "say": "Ushka sets the whole pit alight!",
+    "soft": {
+      "from": 260,
+      "every": 15,
+      "add": 0.08,
+      "say": "The smoke grows thicker."
+    }
+  },
+  "abilities": {
+    "firebolt": {
+      "id": "firebolt",
+      "name": "Firebolt",
+      "every": [
+        4,
+        6
+      ],
+      "range": 20,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "target",
+          "r": 2.2,
+          "wind": 1,
+          "damage": 1.5,
+          "element": "fire",
+          "status": "burn"
+        }
+      ]
+    },
+    "flame_cone": {
+      "id": "flame_cone",
+      "name": "Sulphur Flame",
+      "every": [
+        9,
+        11
+      ],
+      "first": 3,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 7,
+          "arc": 1.2,
+          "wind": 1.1,
+          "damage": 1.8,
+          "element": "fire",
+          "status": "burn"
+        }
+      ]
+    },
+    "seam_fire": {
+      "id": "seam_fire",
+      "name": "Seam Fire",
+      "every": [
+        15,
+        18
+      ],
+      "first": 6,
+      "cast": 0.8,
+      "say": "The seams are catching — get away from the yellow walls!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "object",
+          "object": "seam",
+          "r": 5,
+          "wind": 1.6,
+          "damage": 2,
+          "element": "fire",
+          "status": "seared",
+          "leave": {
+            "id": "burning",
+            "type": "pool",
+            "name": "Burning sulphur",
+            "r": 3,
+            "every": 1,
+            "seconds": 30,
+            "damage": 0.3,
+            "status": "burn",
+            "element": "fire"
+          }
+        }
+      ]
+    },
+    "sulphur_soak": {
+      "id": "sulphur_soak",
+      "name": "Burning Sulphur",
+      "every": [
+        14,
+        17
+      ],
+      "first": 4,
+      "cast": 0.8,
+      "say": "Burning lumps fall — two of you catch each one!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "spread": 8,
+          "r": 2.6,
+          "count": 2,
+          "kind": "soak",
+          "need": 2,
+          "fail": 1.4,
+          "wind": 3,
+          "damage": 1.2,
+          "element": "fire"
+        }
+      ]
+    },
+    "call_diggers": {
+      "id": "call_diggers",
+      "name": "Call the Diggers",
+      "every": [
+        20,
+        24
+      ],
+      "first": 8,
+      "cast": 3,
+      "interrupt": true,
+      "say": "She is calling her gang — interrupt her!",
+      "onInterrupt": [
+        {
+          "say": "Ushka chokes on her own smoke.",
+          "style": "emote"
+        }
+      ],
+      "actions": [
+        {
+          "adds": {
+            "type": "slagborn_raider",
+            "count": 2,
+            "radius": 8,
+            "at": "home"
+          }
+        }
+      ]
+    },
+    "smoke": {
+      "id": "smoke",
+      "name": "Yellow Smoke",
+      "every": [
+        11,
+        13
+      ],
+      "first": 2,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "spread": 12,
+          "r": 3,
+          "count": 3,
+          "delay": 0.3,
+          "wind": 1.4,
+          "damage": 1,
+          "status": "weaken",
+          "element": "poison"
+        }
+      ]
+    },
+    "pit_burns": {
+      "id": "pit_burns",
+      "name": "The Pit Burns",
+      "every": [
+        24,
+        28
+      ],
+      "first": 10,
+      "cast": 1.5,
+      "say": "The whole floor catches — get into a clear circle!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "home",
+          "offset": [
+            6,
+            0
+          ],
+          "r": 3,
+          "kind": "safe",
+          "wind": 3.5,
+          "damage": 2.6,
+          "element": "fire"
+        },
+        {
+          "shape": "circle",
+          "at": "home",
+          "offset": [
+            -6,
+            0
+          ],
+          "r": 3,
+          "kind": "safe",
+          "wind": 3.5,
+          "damage": 2.6,
+          "element": "fire"
+        },
+        {
+          "shape": "circle",
+          "at": "home",
+          "offset": [
+            0,
+            7
+          ],
+          "r": 3,
+          "kind": "safe",
+          "wind": 3.5,
+          "damage": 2.6,
+          "element": "fire"
+        }
+      ]
+    },
+    "fire_chain": {
+      "id": "fire_chain",
+      "name": "Fire Chain",
+      "every": [
+        13,
+        16
+      ],
+      "first": 4,
+      "cast": 0.6,
+      "say": "Fire leaps between you — spread out!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "each",
+          "r": 3,
+          "follow": true,
+          "wind": 2,
+          "damage": 1.4,
+          "element": "fire",
+          "status": "burn"
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Lighting the Seams",
+      "abilities": [
+        "firebolt",
+        "flame_cone",
+        "seam_fire"
+      ]
+    },
+    {
+      "name": "Choking Pit",
+      "at": 0.6,
+      "say": "\"Breathe deep.\"",
+      "abilities": [
+        "firebolt",
+        "sulphur_soak",
+        "call_diggers",
+        "smoke"
+      ]
+    },
+    {
+      "name": "The Pit Burns",
+      "newBar": {
+        "hp": 0.55
+      },
+      "say": "Ushka throws her torch on the floor. \"Then we all burn.\"",
+      "abilities": [
+        "flame_cone",
+        "pit_burns",
+        "fire_chain",
+        "seam_fire"
+      ]
+    }
+  ]
+}

@@ -24,6 +24,7 @@
 //   const A = createAngling({ ...province helpers })
 //   A.fish(o, m) ; A.cook(o, m) ; A.tick() ; A.stop(o, why) ; A.view(ch) ; A.isFire(obj) ; A.useItem(o, item, idx, R) -> bool
 
+import { joinProvinceData } from './province-files.js';
 import { FISH_OPS, STATE } from '../net/protocol.js';
 import { createFishing } from '../rules/fishing.js';
 import { crateItem } from './crates.js';
@@ -47,14 +48,30 @@ export const ANGLING = Object.freeze({
 });
 const FIRE_TYPES = new Set(['campfire', 'hearth', 'cookfire', 'firepit', 'fire']);
 
+/** Every province's angling content -> one: the first one's, with `fish`, `legends`, `anglers` and `pullBack` joined (first wins per id). Pure. */
+export function joinAnglingContent(list) {
+  const have = (list || []).filter(c => c && typeof c === 'object');
+  if (have.length <= 1) return have[0] || null;
+  const out = { ...have[0] };
+  const keyOf = (k, r) => (k === 'pullBack' ? `${r.water}|${r.type}|${(r.bands || []).join('-')}` : r.id);
+  for (const k of ['fish', 'legends', 'anglers', 'pullBack']) {
+    const seen = new Set(), rows = [];
+    for (const c of have) for (const r of Array.isArray(c[k]) ? c[k] : []) { if (!r) continue; const id = keyOf(k, r); if (id != null && seen.has(id)) continue; if (id != null) seen.add(id); rows.push(r); }
+    out[k] = rows;
+  }
+  return out;
+}
+
 export function createAngling({ layouts, online, provOf, grant, journal, questEvent = () => {}, consume, now, wallNow = () => Date.now(), log = () => {}, counters = {},
   safeRules = () => undefined, dayPhase = () => 'day', fighting = () => false, dismount = () => {}, endMeal = () => {}, wantSheet = () => {}, bagMax = 120, setTimeoutTicks = (fn) => fn(), opts = {} }) {
   const R = { ...ANGLING, ...opts };
   const first = layouts[0] || {};
   const D = first.angling || null;                     // { numbers, content, pools }
-  const content = (D && D.content) || null;
+  // Expansion 1 (stream C): the loop's rules, rods, bait and recipes are the first province's; the SPECIES are every
+  // province's (Vharlen's own fish, legends, anglers and pull-backs, data/provinces/vharlen-angling.json) in one catch table
+  const content = joinAnglingContent(layouts.map(L => L && L.angling && L.angling.content)) || (D && D.content) || null;
   const F = D && D.numbers ? createFishing(D.numbers, content || {}) : null;
-  const poolData = (D && D.pools) || null;
+  const poolData = joinProvinceData(layouts.map(L => L && L.angling && L.angling.pools)) || (D && D.pools) || null;      // Expansion 1: every province's pools (keyed by world zone)
   const recipes = (content && content.recipes) || [];
   const meals = (content && content.meals) || {};
   const toolRows = new Map(((content && content.tools) || []).map(t => [t.id, t]));

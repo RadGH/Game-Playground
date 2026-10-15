@@ -1,0 +1,171 @@
+{
+  "id": "rare_shardmother",
+  "name": "The Shardmother",
+  "tier": "rare",
+  "secret": true,
+  "zone": "glasswind_strand",
+  "level": 14,
+  "body": "glasswing",
+  "place": "nests on the obsidian dunes west of Shardhaven, in a bowl lined with broken glass",
+  "_doc": "Expansion 1 (Vharlen). A glasswing with feathers of black glass that nests in shards. Her wingbeat throws you back and her dive lands on whoever is farthest. At half health she moults: her glass feathers rain down and stay on the sand as broken glass that cuts, and a gale of shards blows down three lines.",
+  "party": {
+    "solo": "Fair solo at 14; watch your footing.",
+    "small": "Right for 2-3.",
+    "full": "Easy.",
+    "m5": "M5 adds health per extra player and one more copy of the spread/scatter shapes for parties of 4-5; mechanics stay the same."
+  },
+  "hpMult": 2,
+  "arena": {
+    "radius": 24
+  },
+  "say": {
+    "pull": [
+      "The dune glitters, then lifts on two black glass wings.",
+      "A shriek like a pane cracking."
+    ],
+    "death": "The Shardmother falls in a long tinkling crash.",
+    "reset": "The Shardmother settles back on her glass nest."
+  },
+  "abilities": {
+    "talons": {
+      "id": "talons",
+      "name": "Glass Talons",
+      "every": [
+        6,
+        8
+      ],
+      "first": 2,
+      "range": 5,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 4.6,
+          "arc": 1.3,
+          "wind": 1,
+          "damage": 1.6,
+          "status": "bleed"
+        }
+      ]
+    },
+    "wingbeat": {
+      "id": "wingbeat",
+      "name": "Wingbeat",
+      "every": [
+        11,
+        14
+      ],
+      "first": 5,
+      "cast": 0.4,
+      "say": "She beats her wings — hold on!",
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 8,
+          "arc": 1.8,
+          "wind": 1.2,
+          "damage": 1.2,
+          "knock": 5
+        }
+      ]
+    },
+    "dive": {
+      "id": "dive",
+      "name": "Dive",
+      "every": [
+        13,
+        16
+      ],
+      "first": 8,
+      "say": "The Shardmother climbs and dives at {target}!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "farthest",
+          "r": 3.5,
+          "wind": 1.6,
+          "damage": 1.8
+        }
+      ]
+    },
+    "moult": {
+      "id": "moult",
+      "name": "Moult",
+      "every": [
+        12,
+        15
+      ],
+      "first": 3,
+      "say": "Glass feathers rain down — and stay where they land!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "r": 3,
+          "wind": 1.6,
+          "damage": 1.2,
+          "spread": 13,
+          "count": 4,
+          "delay": 0.25,
+          "status": "bleed",
+          "leave": {
+            "type": "pool",
+            "name": "Broken glass",
+            "r": 2.4,
+            "every": 1,
+            "seconds": 18,
+            "damage": 0.2,
+            "status": "bleed"
+          }
+        }
+      ]
+    },
+    "shard_gale": {
+      "id": "shard_gale",
+      "name": "Shard Gale",
+      "every": [
+        14,
+        17
+      ],
+      "first": 6,
+      "cast": 0.6,
+      "say": "A gale of shards blows out in front of her!",
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "self",
+          "len": 18,
+          "w": 2.6,
+          "wind": 1.4,
+          "damage": 1.6,
+          "count": 3,
+          "rotate": 0.6,
+          "yaw": "facing",
+          "status": "bleed"
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "On the Nest",
+      "abilities": [
+        "talons",
+        "wingbeat",
+        "dive"
+      ]
+    },
+    {
+      "name": "Moulting",
+      "at": 0.5,
+      "say": "The Shardmother shakes herself, and glass flies everywhere!",
+      "abilities": [
+        "talons",
+        "moult",
+        "shard_gale",
+        "dive"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,196 @@
+{
+  "id": "mb_mother_grit",
+  "name": "Mother Grit",
+  "tier": "miniboss",
+  "body": "pumice_golem",
+  "place": "dungeon lava_tube set B (The Dry Wells, Pumice Wastes, level 15): floor 1's mini-boss",
+  "_doc": "A pumice golem worn down by the wind into something shaped like an old woman. P1 \"Sandpaper\": she grinds the tank, throws a light pumice boulder that bounces twice (a sequence of circles along a line), and blows grit clouds that blind casters (silence). P2 at 50% \"Shedding\": she crumbles — chunks of her fall as rocks you can hide behind from her grit storm, and crawlers come out of the holes.",
+  "party": "Solo: stand behind the fallen chunks in P2. 2-3: casters stay out of the grit clouds. 5: the bouncing boulder goes through a crowd — spread.",
+  "hpMult": 2.2,
+  "arena": {
+    "radius": 12,
+    "objects": []
+  },
+  "say": {
+    "pull": [
+      "A grinding like a millstone. Mother Grit stands up out of the dust.",
+      "\"Dry,\" she rasps. \"All of it, dry.\""
+    ],
+    "death": "Mother Grit falls apart into a heap of light grey stone, and the wind takes the rest.",
+    "reset": "Mother Grit settles back into the dust."
+  },
+  "enrage": {
+    "seconds": 280,
+    "damage": 2.5,
+    "say": "The whole gallery fills with grit!"
+  },
+  "abilities": {
+    "grind": {
+      "id": "grind",
+      "name": "Grind",
+      "every": [
+        5,
+        7
+      ],
+      "range": 6,
+      "melee": {
+        "damage": 1.3
+      },
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 5,
+          "arc": 1.3,
+          "wind": 1,
+          "damage": 1.5,
+          "status": "rent"
+        }
+      ]
+    },
+    "bounce": {
+      "id": "bounce",
+      "name": "Bouncing Boulder",
+      "every": [
+        11,
+        14
+      ],
+      "first": 3,
+      "cast": 0.6,
+      "say": "She hurls a boulder — it bounces!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "target",
+          "r": 2.8,
+          "count": 3,
+          "delay": 0.5,
+          "lead": 3,
+          "wind": 1.3,
+          "damage": 1.6,
+          "knock": 2
+        }
+      ]
+    },
+    "grit_cloud": {
+      "id": "grit_cloud",
+      "name": "Grit Cloud",
+      "every": [
+        13,
+        16
+      ],
+      "first": 5,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "farthest",
+          "r": 3.5,
+          "wind": 1.4,
+          "damage": 0.9,
+          "status": "silence",
+          "leave": {
+            "type": "pool",
+            "name": "Grit cloud",
+            "r": 3,
+            "every": 1,
+            "seconds": 10,
+            "damage": 0.15,
+            "status": "silence"
+          }
+        }
+      ]
+    },
+    "shed": {
+      "id": "shed",
+      "name": "Shedding",
+      "every": [
+        14,
+        17
+      ],
+      "first": 2,
+      "cast": 0.8,
+      "say": "Chunks fall off her — hide behind them before the storm!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "spread": 9,
+          "r": 2,
+          "count": 3,
+          "delay": 0.3,
+          "wind": 1.4,
+          "damage": 1.4,
+          "leave": {
+            "type": "rock",
+            "name": "Pumice chunk",
+            "r": 1.2,
+            "hp": 2
+          }
+        }
+      ]
+    },
+    "grit_storm": {
+      "id": "grit_storm",
+      "name": "Grit Storm",
+      "every": [
+        18,
+        21
+      ],
+      "first": 8,
+      "cast": 1.2,
+      "say": "A storm of grit — get behind a fallen chunk!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "self",
+          "r": 15,
+          "wind": 2.2,
+          "damage": 2.4,
+          "los": true,
+          "status": "weaken"
+        }
+      ]
+    },
+    "crawlers": {
+      "id": "crawlers",
+      "name": "Out of the Holes",
+      "every": [
+        24,
+        28
+      ],
+      "first": 10,
+      "say": "Crawlers spill out of the holes in her.",
+      "actions": [
+        {
+          "adds": {
+            "type": "scoria_crawler",
+            "count": 2,
+            "radius": 6
+          }
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Sandpaper",
+      "abilities": [
+        "grind",
+        "bounce",
+        "grit_cloud"
+      ]
+    },
+    {
+      "name": "Shedding",
+      "at": 0.5,
+      "say": "Mother Grit starts to come apart!",
+      "abilities": [
+        "grind",
+        "shed",
+        "grit_storm",
+        "crawlers",
+        "bounce"
+      ]
+    }
+  ]
+}

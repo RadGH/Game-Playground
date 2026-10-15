@@ -1,0 +1,1209 @@
+{
+ "_doc": "Stream C (Expansion 1). Vharlen's own fort / farm / cave templates, laid over data/provinces/sites.json key by key (so this file's `forts`, `farms`, `caves` and `byArchetype` replace Torbor's for the island). The template KEYS are the home file's (tools/place-vignettes.mjs names some of them), the CONTENT is the island's: Slagborn fire-camps and the Glass Kings' ruins instead of brigand stockades and barrow forts, taro terraces, goat walls, salt pans, ironpalm groves, net racks and steam wells instead of fields, sheep and mills (`short` = the word after the town in a farm's name), and caves that are cooled lava tubes, sulphur shafts and steam grottos built on Vharlen's own dungeon families. Every monster is a Vharlen monster (data/rules/monsters-tv.json). Props reuse the kit (highdef-3d kit ids); the buildings' look is stream T's.",
+ "forts": {
+  "watchtower_garrison": {
+   "name": "Basalt watchtower",
+   "friendly": true,
+   "radius": 16,
+   "blurb": "A tower of stacked basalt columns and a yard; a handful of Harbour Council guards, a sergeant, a job board.",
+   "garrison": {
+    "npcs": [
+     {
+      "role": "guard",
+      "count": 3
+     },
+     {
+      "role": "sergeant",
+      "count": 1
+     }
+    ]
+   },
+   "props": [
+    {
+     "kind": "prop",
+     "id": "ruined_pillar",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "banner_pole",
+     "x": 3,
+     "z": -2,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "torch_post",
+     "x": -4,
+     "z": 4,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "torch_post",
+     "x": 4,
+     "z": 4,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "crate",
+     "x": -3,
+     "z": -3,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "barrel",
+     "x": -2,
+     "z": -4,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "signpost",
+     "x": 0,
+     "z": 8,
+     "yaw": 0
+    }
+   ]
+  },
+  "palisade_fort": {
+   "name": "Ironpalm stockade",
+   "friendly": true,
+   "radius": 24,
+   "blurb": "A stockade of ironpalm trunks that do not burn; a gate, a quartermaster and the fort's Callboard.",
+   "garrison": {
+    "npcs": [
+     {
+      "role": "guard",
+      "count": 5
+     },
+     {
+      "role": "quartermaster",
+      "count": 1
+     },
+     {
+      "role": "captain",
+      "count": 1
+     }
+    ]
+   },
+   "props": [
+    {
+     "kind": "prop",
+     "id": "palisade_stake",
+     "x": -10,
+     "z": -10,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "palisade_stake",
+     "x": -6,
+     "z": -11,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "palisade_stake",
+     "x": 6,
+     "z": -11,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "palisade_stake",
+     "x": 10,
+     "z": -10,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "banner_pole",
+     "x": 0,
+     "z": -12,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "torch_post",
+     "x": -3,
+     "z": -12,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "torch_post",
+     "x": 3,
+     "z": -12,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "crate",
+     "x": 4,
+     "z": 3,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "barrel",
+     "x": 5,
+     "z": 4,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "wood_pile",
+     "x": -5,
+     "z": 5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "campfire",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    }
+   ]
+  },
+  "stone_keep": {
+   "name": "Basalt keep",
+   "friendly": true,
+   "radius": 28,
+   "blurb": "A squat keep of black stone on red-ochre footings: the Council's grip on a road or a pass. A smith and a castellan.",
+   "garrison": {
+    "npcs": [
+     {
+      "role": "guard",
+      "count": 6
+     },
+     {
+      "role": "smith",
+      "count": 1
+     },
+     {
+      "role": "castellan",
+      "count": 1
+     }
+    ]
+   },
+   "props": [
+    {
+     "kind": "prop",
+     "id": "ruined_wall",
+     "x": -8,
+     "z": -8,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "ruined_wall",
+     "x": 8,
+     "z": -8,
+     "yaw": 1.57
+    },
+    {
+     "kind": "prop",
+     "id": "ruined_arch",
+     "x": 0,
+     "z": -10,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "banner_pole",
+     "x": -3,
+     "z": -10,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "banner_pole",
+     "x": 3,
+     "z": -10,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "torch_post",
+     "x": -6,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "torch_post",
+     "x": 6,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "well",
+     "x": 0,
+     "z": 4,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "crate",
+     "x": -5,
+     "z": 6,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "barrel",
+     "x": 5,
+     "z": 6,
+     "yaw": 0
+    }
+   ]
+  },
+  "warband_stockade": {
+   "name": "Slagborn fire-camp",
+   "friendly": false,
+   "radius": 26,
+   "blurb": "A ring of charred stakes round a fire pit that never goes out; a Slagborn chief and the raiders who feed the fire. Clearing it plants your banner (phased per character).",
+   "garrison": {
+    "monsters": [
+     {
+      "type": "slagborn_raider",
+      "count": [
+       4,
+       6
+      ]
+     },
+     {
+      "type": "slagborn_firecaller",
+      "count": [
+       2,
+       3
+      ]
+     },
+     {
+      "type": "slagborn_chief",
+      "count": 1,
+      "rank": "elite"
+     }
+    ],
+    "blight": [
+     {
+      "type": "slagborn_firecaller",
+      "count": [
+       3,
+       5
+      ]
+     },
+     {
+      "type": "vent_wisp",
+      "count": [
+       2,
+       3
+      ]
+     },
+     {
+      "type": "slagborn_chief",
+      "count": 1,
+      "rank": "elite"
+     }
+    ]
+   },
+   "props": [
+    {
+     "kind": "prop",
+     "id": "palisade_stake",
+     "x": -9,
+     "z": -9,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "palisade_stake",
+     "x": 9,
+     "z": -9,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "palisade_stake",
+     "x": -9,
+     "z": 9,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "palisade_stake",
+     "x": 9,
+     "z": 9,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "skull_totem",
+     "x": 0,
+     "z": -10,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "skull_totem",
+     "x": -6,
+     "z": 6,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "fire_ring",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "crate",
+     "x": 4,
+     "z": -3,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "wood_pile",
+     "x": -4,
+     "z": -4,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "banner_pole",
+     "x": 0,
+     "z": 10,
+     "yaw": 0
+    }
+   ],
+   "warband": false
+  },
+  "ruined_fort": {
+   "name": "Glass Kings' ruin",
+   "friendly": false,
+   "radius": 22,
+   "blurb": "Fused black walls from the old Glass Kings, held by scavengers and things that like warm stone; a chest in the old armoury.",
+   "garrison": {
+    "monsters": [
+     {
+      "type": "slagborn_raider",
+      "count": [
+       3,
+       5
+      ]
+     },
+     {
+      "type": "scoria_crawler",
+      "count": [
+       2,
+       3
+      ]
+     }
+    ],
+    "undead": [
+     {
+      "type": "obsidian_warden",
+      "count": [
+       1,
+       2
+      ]
+     },
+     {
+      "type": "scoria_crawler",
+      "count": [
+       3,
+       5
+      ]
+     }
+    ]
+   },
+   "props": [
+    {
+     "kind": "prop",
+     "id": "ruined_wall",
+     "x": -7,
+     "z": -6,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "ruined_wall",
+     "x": 6,
+     "z": -7,
+     "yaw": 1.2
+    },
+    {
+     "kind": "prop",
+     "id": "ruined_arch",
+     "x": 0,
+     "z": -8,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "ruined_pillar",
+     "x": -5,
+     "z": 4,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "ruined_pillar",
+     "x": 5,
+     "z": 4,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "stone_step",
+     "x": 0,
+     "z": 6,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "bone_scatter",
+     "x": 2,
+     "z": 1,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "lichen_patch",
+     "x": -3,
+     "z": -2,
+     "yaw": 0
+    }
+   ],
+   "loot": {
+    "chest": "uncommon"
+   }
+  },
+  "toll_fort": {
+   "name": "Ash gate",
+   "friendly": true,
+   "radius": 20,
+   "blurb": "A gatehouse across the road where the ash begins; pays out bounties, charges a coin for the wells.",
+   "garrison": {
+    "npcs": [
+     {
+      "role": "guard",
+      "count": 4
+     },
+     {
+      "role": "tollkeeper",
+      "count": 1
+     }
+    ]
+   },
+   "props": [
+    {
+     "kind": "prop",
+     "id": "ruined_arch",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "fence_rail",
+     "x": -4,
+     "z": 0,
+     "yaw": 1.57
+    },
+    {
+     "kind": "prop",
+     "id": "fence_rail",
+     "x": 4,
+     "z": 0,
+     "yaw": 1.57
+    },
+    {
+     "kind": "prop",
+     "id": "torch_post",
+     "x": -2,
+     "z": 1,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "torch_post",
+     "x": 2,
+     "z": 1,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "signpost",
+     "x": 0,
+     "z": 5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "barrel",
+     "x": -4,
+     "z": 3,
+     "yaw": 0
+    }
+   ]
+  }
+ },
+ "farms": {
+  "arable": {
+   "name": "Taro terraces",
+   "radius": 22,
+   "blurb": "Steps of black soil cut into the slope, taro and ash-beans; a farmer who swears at the volcano.",
+   "npcs": [
+    {
+     "role": "farmer",
+     "count": 1
+    },
+    {
+     "role": "farmhand",
+     "count": [
+      1,
+      2
+     ]
+    }
+   ],
+   "pests": [
+    "scoria_crawler",
+    "sulphur_toad"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "hay_bale",
+     "x": -4,
+     "z": 2,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "hay_bale",
+     "x": -2.5,
+     "z": 3,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "hay_bale",
+     "x": 5,
+     "z": -3,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "fence_post",
+     "x": -8,
+     "z": -6,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "fence_rail",
+     "x": -6,
+     "z": -6,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "fence_post",
+     "x": -4,
+     "z": -6,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "well",
+     "x": 3,
+     "z": 4,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "sawhorse",
+     "x": 6,
+     "z": 2,
+     "yaw": 0
+    }
+   ],
+   "short": "Terraces"
+  },
+  "sheep": {
+   "name": "Goat walls",
+   "radius": 24,
+   "blurb": "Dry-stone pens of lava rock and a herd of black goats that eat anything; prowlers are the usual trouble.",
+   "npcs": [
+    {
+     "role": "farmer",
+     "count": 1
+    }
+   ],
+   "pests": [
+    "steamwood_prowler",
+    "scoria_crawler"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "fence_post",
+     "x": -8,
+     "z": -8,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "fence_rail",
+     "x": -5,
+     "z": -8,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "fence_post",
+     "x": -2,
+     "z": -8,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "fence_rail",
+     "x": -8,
+     "z": -5,
+     "yaw": 1.57
+    },
+    {
+     "kind": "prop",
+     "id": "fence_post",
+     "x": -8,
+     "z": -2,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "hay_bale",
+     "x": 3,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "drying_rack",
+     "x": 5,
+     "z": 4,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "well",
+     "x": -2,
+     "z": 4,
+     "yaw": 0
+    }
+   ],
+   "short": "Goat Walls"
+  },
+  "pig": {
+   "name": "Salt pans",
+   "radius": 18,
+   "blurb": "Shallow pans of sea water drying in the heat; toads come for the brine flies.",
+   "npcs": [
+    {
+     "role": "farmer",
+     "count": 1
+    }
+   ],
+   "pests": [
+    "sulphur_toad",
+    "mudback_lurker"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "fence_post",
+     "x": -5,
+     "z": -5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "fence_rail",
+     "x": -3,
+     "z": -5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "fence_post",
+     "x": -1,
+     "z": -5,
+     "yaw": 0
+    },
+    {
+     "kind": "ground",
+     "id": "puddle_ring",
+     "x": -3,
+     "z": -2,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "barrel",
+     "x": 3,
+     "z": 2,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "wood_pile",
+     "x": 4,
+     "z": -3,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "hay_bale",
+     "x": 2,
+     "z": 4,
+     "yaw": 0
+    }
+   ],
+   "short": "Salt Pans"
+  },
+  "orchard": {
+   "name": "Ironpalm grove",
+   "radius": 24,
+   "blurb": "Rows of ironpalms tapped for sap and cut for timber; salamanders bask in the cuttings.",
+   "npcs": [
+    {
+     "role": "farmer",
+     "count": 1
+    }
+   ],
+   "pests": [
+    "ashback_salamander",
+    "scoria_crawler"
+   ],
+   "props": [
+    {
+     "kind": "tree",
+     "id": "oak",
+     "x": -6,
+     "z": -6,
+     "yaw": 0
+    },
+    {
+     "kind": "tree",
+     "id": "oak",
+     "x": 0,
+     "z": -6,
+     "yaw": 0.5
+    },
+    {
+     "kind": "tree",
+     "id": "oak",
+     "x": 6,
+     "z": -6,
+     "yaw": 1
+    },
+    {
+     "kind": "tree",
+     "id": "birch",
+     "x": -6,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "tree",
+     "id": "birch",
+     "x": 6,
+     "z": 0,
+     "yaw": 0.3
+    },
+    {
+     "kind": "prop",
+     "id": "barrel",
+     "x": 0,
+     "z": 3,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "barrel",
+     "x": 1.2,
+     "z": 3.4,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "crate",
+     "x": -2,
+     "z": 4,
+     "yaw": 0
+    }
+   ],
+   "short": "Palm Grove"
+  },
+  "fishing_plot": {
+   "name": "Net racks",
+   "radius": 16,
+   "blurb": "Drying racks, black nets and a jetty stub of ironpalm on the shore.",
+   "npcs": [
+    {
+     "role": "fisher",
+     "count": 1
+    }
+   ],
+   "pests": [
+    "mudback_lurker",
+    "sulphur_toad"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "drying_rack",
+     "x": -3,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "drying_rack",
+     "x": -1,
+     "z": 0.5,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "barrel",
+     "x": 2,
+     "z": 1,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "crate",
+     "x": 3,
+     "z": -1,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "stone_step",
+     "x": 0,
+     "z": 4,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "campfire",
+     "x": -4,
+     "z": -4,
+     "yaw": 0
+    }
+   ],
+   "needs": "water within 12 m",
+   "short": "Net Racks"
+  },
+  "mill": {
+   "name": "Steam well",
+   "radius": 20,
+   "blurb": "A covered vent whose steam turns a wheel; the heart of a hamlet.",
+   "npcs": [
+    {
+     "role": "miller",
+     "count": 1
+    }
+   ],
+   "pests": [
+    "vent_wisp",
+    "scoria_crawler"
+   ],
+   "props": [
+    {
+     "kind": "prop",
+     "id": "cart_wheel",
+     "x": 0,
+     "z": 0,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "crate",
+     "x": -3,
+     "z": 2,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "crate",
+     "x": -2,
+     "z": 3,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "barrel",
+     "x": 3,
+     "z": 3,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "hay_bale",
+     "x": 4,
+     "z": -2,
+     "yaw": 0
+    },
+    {
+     "kind": "prop",
+     "id": "fence_post",
+     "x": -6,
+     "z": -4,
+     "yaw": 0
+    }
+   ],
+   "needs": "a river",
+   "short": "Steam Well"
+  }
+ },
+ "caves": {
+  "beast_den": {
+   "name": "Prowler den",
+   "plan": {
+    "family": "lava_tube",
+    "floors": 1
+   },
+   "theme": "A den in a cooled lava tube; bones and black fur at the mouth.",
+   "packs": [
+    "steamwood_prowler",
+    "ashback_salamander"
+   ],
+   "boss": {
+    "type": "steamwood_prowler",
+    "rank": "elite"
+   }
+  },
+  "spider_hollow": {
+   "name": "Crawler hollow",
+   "plan": {
+    "family": "lava_tube",
+    "floors": 1
+   },
+   "theme": "A hollow under the scoria, wall to wall with crawler trails.",
+   "packs": [
+    "scoria_crawler"
+   ],
+   "boss": {
+    "type": "scoria_crawler",
+    "rank": "elite"
+   }
+  },
+  "old_shaft": {
+   "name": "Old sulphur shaft",
+   "plan": {
+    "family": "sulphur_mine",
+    "floors": 1
+   },
+   "theme": "A dug-out sulphur working; yellow walls and something breathing in the seam.",
+   "packs": [
+    "sulphur_toad",
+    "vent_wisp"
+   ],
+   "boss": {
+    "type": "sulphur_toad",
+    "rank": "elite"
+   }
+  },
+  "smugglers_cave": {
+   "name": "Slagborn cache",
+   "plan": {
+    "family": "drowned_vent",
+    "floors": 1
+   },
+   "theme": "A sea cave where the Slagborn hide what they take; crates and a lookout fire.",
+   "packs": [
+    "slagborn_raider",
+    "slagborn_firecaller"
+   ],
+   "boss": {
+    "type": "slagborn_chief",
+    "rank": "elite"
+   }
+  },
+  "barrow_mound": {
+   "name": "Glass grave",
+   "plan": {
+    "family": "glass_tomb",
+    "floors": 1
+   },
+   "theme": "A small tomb of fused glass from the Glass Kings, its door cracked open.",
+   "packs": [
+    "obsidian_warden",
+    "scoria_crawler"
+   ],
+   "boss": {
+    "type": "obsidian_warden",
+    "rank": "elite"
+   }
+  },
+  "sump_grotto": {
+   "name": "Steam grotto",
+   "plan": {
+    "family": "steam_grotto",
+    "floors": 1
+   },
+   "theme": "A grotto full of steam and hot water, glowing faintly yellow.",
+   "packs": [
+    "vent_wisp",
+    "mudback_lurker",
+    "sulphur_toad"
+   ],
+   "boss": {
+    "type": "mudback_lurker",
+    "rank": "elite"
+   }
+  }
+ },
+ "byArchetype": {
+  "coast": {
+   "forts": {
+    "stone_keep": 2,
+    "watchtower_garrison": 2
+   },
+   "farms": {
+    "fishing_plot": 4,
+    "pig": 2
+   },
+   "caves": {
+    "smugglers_cave": 3,
+    "beast_den": 1
+   }
+  },
+  "wilds": {
+   "forts": {
+    "watchtower_garrison": 2,
+    "palisade_fort": 1
+   },
+   "farms": {
+    "orchard": 3,
+    "sheep": 1
+   },
+   "caves": {
+    "beast_den": 3,
+    "sump_grotto": 2
+   }
+  },
+  "mine_country": {
+   "forts": {
+    "toll_fort": 1,
+    "watchtower_garrison": 2
+   },
+   "farms": {
+    "pig": 2,
+    "mill": 1
+   },
+   "caves": {
+    "old_shaft": 4,
+    "spider_hollow": 1
+   }
+  },
+  "marsh": {
+   "forts": {
+    "watchtower_garrison": 3,
+    "ruined_fort": 1
+   },
+   "farms": {
+    "fishing_plot": 3,
+    "pig": 1
+   },
+   "caves": {
+    "sump_grotto": 3,
+    "smugglers_cave": 1
+   }
+  },
+  "ruinfield": {
+   "forts": {
+    "ruined_fort": 3,
+    "watchtower_garrison": 1
+   },
+   "farms": {
+    "fishing_plot": 2,
+    "arable": 1
+   },
+   "caves": {
+    "barrow_mound": 3,
+    "spider_hollow": 1
+   }
+  },
+  "frontier": {
+   "forts": {
+    "palisade_fort": 2,
+    "toll_fort": 1,
+    "warband_stockade": 1
+   },
+   "farms": {
+    "sheep": 2,
+    "arable": 1
+   },
+   "caves": {
+    "beast_den": 2,
+    "smugglers_cave": 1
+   }
+  },
+  "blight": {
+   "forts": {
+    "warband_stockade": 2,
+    "ruined_fort": 1
+   },
+   "farms": {
+    "arable": 2,
+    "sheep": 1
+   },
+   "caves": {
+    "barrow_mound": 2,
+    "spider_hollow": 2
+   }
+  },
+  "pass": {
+   "forts": {
+    "stone_keep": 2,
+    "toll_fort": 1
+   },
+   "farms": {
+    "sheep": 2,
+    "arable": 1
+   },
+   "caves": {
+    "old_shaft": 2,
+    "beast_den": 2
+   }
+  },
+  "holy_ground": {
+   "forts": {
+    "watchtower_garrison": 2,
+    "ruined_fort": 1
+   },
+   "farms": {
+    "mill": 1,
+    "arable": 2
+   },
+   "caves": {
+    "sump_grotto": 2,
+    "barrow_mound": 1
+   }
+  }
+ }
+}

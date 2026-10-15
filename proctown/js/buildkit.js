@@ -38,6 +38,7 @@
 import { makeRng } from './townplan.js';
 import KIT from '../data/buildkit.json' with { type: 'json' };
 import CULTURE_KIT from '../data/cultures.json' with { type: 'json' };
+import { stiltRowParts } from './buildkit-vharl.js';
 
 export { KIT, CULTURE_KIT };
 
@@ -395,6 +396,9 @@ export function describeBuilding({
       && roomFor('sign')) {
     extras.push('sign');
   }
+  // a culture may insist on some of its base's extras (the Vharl never leave a stilt house without its stilts and
+  // stair). No random draw here, so a culture without `alwaysExtras` builds exactly what it built before.
+  for (const e of cult.alwaysExtras || []) if (allowed.includes(e) && !extras.includes(e)) extras.push(e);
 
   return {
     schema: 1,
@@ -803,6 +807,9 @@ export function partsFor(desc) {
         push('box', m.x, y + 0.14, m.z + m.d / 2 + 1.0, m.w * 0.7, 0.8, 0.1, 0, desc.colour.trim, 'extra', m.index);
         break;
       }
+      case 'stilt_rows':
+        for (const a of stiltRowParts(desc)) push(...a);
+        break;
       case 'stilts': {
         const m = desc.masses[0];
         for (const sx of [-1, 1]) for (const sz of [-1, 1]) {

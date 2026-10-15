@@ -3,7 +3,7 @@
 // floats on both sides, so a well-behaved client reconciles to within rounding.
 //
 //   stepMove(state, input, dtMs, terrain) -> state (mutated)
-//     state   = { x, y, z, vy, airborne, swim?, wade?, speedMul? }   (swim/wade are OUTPUTS; speedMul = riding, Q16)
+//     state   = { x, y, z, vy, airborne, swim?, wade?, speedMul?, glide? }   (swim/wade are OUTPUTS; speedMul = riding, Q16; glide = thrown by a geyser [S])
 //     input   = { mx, mz, b }      world-space direction (length <= 1, longer is normalised), b = IN bits
 //     terrain = { heightAt(x,z), walkable?(x,z), waterAt?(x,z), moveAt?(x,z), bounds?: {minX,minZ,maxX,maxZ} }
 //
@@ -18,6 +18,7 @@
 
 import { IN } from '../net/protocol.js';
 import * as TR from '../rules/terrain-read.js';
+import { GLIDE } from '../rules/hazards.js';      // [S] Expansion 1 §4: the slow fall after a geyser throws you
 
 // WALLS AND HOUSES (play-test 4, B's town walls): when the terrain carries stream B's nav (`terrain.nav.at(x, z)` -> NAV
 // bits), a step may not cross a SOLID (wall runs, towers, gate jambs, grates, rocks) or BUILDING cell. The step is
@@ -96,6 +97,11 @@ export function stepMove(state, input, dtMs, terrain) {
   if (here === 'wade' && !state.airborne) speed *= MOVE.wade;
   // riding (play-test 2, Q16): the mount's factor on land; the client predicts with the same `you.speedMul`
   if (!swimming && state.speedMul > 0 && state.speedMul !== 1) speed *= Math.min(3, state.speedMul);
+  // [S] GLIDE (Expansion 1 §4, geysers): `state.glide` is set by the server when a geyser throws you and lasts until you
+  // land; while it lasts you steer a little faster in the air and fall slowly (below), and you may drift OVER steep ground
+  // you are above (a cliff face you are clearing) — the point of the throw is to reach the ledge. Never set by a jump.
+  const gliding = !!state.glide && state.airborne;
+  if (gliding) speed *= GLIDE.air;
   let nx = state.x + mx * speed * dt, nz = state.z + mz * speed * dt;
   const bd = terrain.bounds;
   if (bd) {
@@ -104,7 +110,8 @@ export function stepMove(state, input, dtMs, terrain) {
   }
   // Blocked ground (too steep / off the map; deep water only when the terrain cannot say it is water): slide
   // along one axis, else stay. Standing somewhere blocked already (a bad spawn) never traps you.
-  const ok = water ? (x, z) => open(moveKind(terrain, x, z)) : terrain.walkable;
+  const ok0 = water ? (x, z) => open(moveKind(terrain, x, z)) : terrain.walkable;
+  const ok = gliding ? (x, z) => (state.y > terrain.heightAt(x, z) + 0.5 && (!terrain.moveAt || terrain.moveAt(x, z) !== 'out')) || !!(ok0 && ok0(x, z)) : ok0;      // [S]
   if (ok && (nx !== state.x || nz !== state.z) && !ok(nx, nz) && ok(state.x, state.z)) {
     if (ok(nx, state.z)) nz = state.z;
     else if (ok(state.x, nz)) nx = state.x;
@@ -127,7 +134,7 @@ export function stepMove(state, input, dtMs, terrain) {
     const float = Number.isFinite(surf) ? Math.max(ground, surf - MOVE.swimSink) : ground;
     // falling into water: keep falling until the body reaches the float line, then swim
     if (state.airborne && state.y + state.vy * dt > float) { state.vy -= MOVE.gravity * dt; state.y += state.vy * dt; state.swim = false; return state; }
-    state.swim = true; state.airborne = false; state.vy = 0; state.y = float;
+    state.swim = true; state.airborne = false; state.vy = 0; state.y = float; state.glide = false;
     return state;
   }
   state.swim = false;
@@ -136,8 +143,9 @@ export function stepMove(state, input, dtMs, terrain) {
     else if (state.y - ground > MOVE.fallGap) { state.airborne = true; state.vy = 0; }
     else { state.y = ground; state.vy = 0; return state; }
   }
-  state.vy -= MOVE.gravity * dt;
+  if (gliding && state.vy <= 0) state.vy = Math.max(-GLIDE.fall, state.vy - MOVE.gravity * GLIDE.gravity * dt);      // [S] drifting down
+  else state.vy -= MOVE.gravity * dt;
   state.y += state.vy * dt;
-  if (state.y <= ground) { state.y = ground; state.vy = 0; state.airborne = false; }
+  if (state.y <= ground) { state.y = ground; state.vy = 0; state.airborne = false; state.glide = false; }
   return state;
 }

@@ -14,7 +14,7 @@ import { readFileSync } from 'node:fs';
 register('../../../../avatar-3d/tests/three-loader.mjs', import.meta.url);
 const ROOT = new URL('../../', import.meta.url);
 const json = p => JSON.parse(readFileSync(new URL(p, ROOT), 'utf8'));
-const ZONES = Object.values(json('data/world/province-map.json').provinces.torbor_downs.map);
+const ZONES = Object.values(/* every province (Torbor Downs + Vharlen) */ Object.assign({}, ...Object.values(json('data/world/province-map.json').provinces).map(p => p.map)));
 const { buildingLook, plotFromPlacement, buildingSeed } = await import('../../js/client/town-view.js');
 const { BUILDING_SCALE, CHARACTER_HEIGHT, tuneFor } = await import('../../js/client/building-tune.js');
 const { describeBuilding, partsFor, heightOf, fitToPlot, KIT } = await import('../../../../proctown/js/buildkit.js');

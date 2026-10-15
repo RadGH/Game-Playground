@@ -1,0 +1,7841 @@
+{
+ "_doc": "Stream E. Content placements for world zone z12_09 (E zone 'steamwood', The Steamwood) — tools/place-vignettes.mjs against stream B's bake (terrain de552a99). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
+ "zone": "z12_09",
+ "sheetZone": "steamwood",
+ "province": "vharlen",
+ "terrainHash": "de552a99",
+ "band": [
+  11,
+  13
+ ],
+ "archetype": "wilds",
+ "rules": {
+  "vignette": {
+   "townGap": 60,
+   "gap": 30,
+   "slope": 20,
+   "sameKindSpacing": 140
+  },
+  "fort": {
+   "townGap": 80,
+   "gap": 40,
+   "slope": 16
+  },
+  "farm": {
+   "townGap": 25,
+   "gap": 30,
+   "slope": 12
+  },
+  "cave": {
+   "townGap": 120,
+   "gap": 40,
+   "slope": 28
+  },
+  "camp": {
+   "townGap": 120,
+   "gap": 25,
+   "slope": 24
+  },
+  "rare": {
+   "townGap": 150,
+   "gap": 30,
+   "slope": 24
+  },
+  "hook": {
+   "townGap": 40,
+   "gap": 30,
+   "slope": 26
+  },
+  "wayside": {
+   "townGap": 20,
+   "gap": 12,
+   "slope": 34,
+   "edge": 24
+  },
+  "settlement": {
+   "townGap": 300,
+   "gap": 60,
+   "slope": 10
+  },
+  "curio": {
+   "townGap": 30,
+   "gap": 10,
+   "slope": 26,
+   "edge": 30
+  },
+  "stray": {
+   "townGap": 70,
+   "gap": 16,
+   "slope": 26,
+   "edge": 30
+  },
+  "folk": {
+   "townGap": 30,
+   "gap": 12,
+   "slope": 24,
+   "edge": 30
+  },
+  "setpiece": {
+   "townGap": 20,
+   "gap": 25,
+   "slope": 20
+  }
+ },
+ "mainWalkableShare": 0.633,
+ "settlements": [
+  {
+   "name": "Mistfall",
+   "kind": "hamlet",
+   "x": 1174,
+   "z": 1322,
+   "r": 40,
+   "source": "bake",
+   "bakeId": "mistfall"
+  }
+ ],
+ "checks": [
+  {
+   "id": "door_1",
+   "kind": "dungeon_door",
+   "x": 1164,
+   "z": 1502,
+   "reachable": true,
+   "openShare": 1
+  },
+  {
+   "id": "event_steamwood",
+   "kind": "event_site",
+   "x": 1093,
+   "z": 1237,
+   "reachable": true,
+   "openShare": 1
+  }
+ ],
+ "problems": [
+  "waystone door"
+ ],
+ "placements": [
+  {
+   "type": "fort",
+   "id": "fort_steamwood_0",
+   "name": null,
+   "template": "watchtower_garrison",
+   "friendly": true,
+   "x": 1460,
+   "z": 1331,
+   "yaw": -0.39,
+   "radius": 16,
+   "level": 12
+  },
+  {
+   "type": "farm",
+   "id": "farm_steamwood_0",
+   "name": "Mistfall Goat Walls",
+   "template": "sheep",
+   "flavour": null,
+   "settlement": "Mistfall",
+   "x": 1122,
+   "z": 1422,
+   "yaw": 0.79,
+   "radius": 24,
+   "level": 11
+  },
+  {
+   "type": "farm",
+   "id": "farm_steamwood_1",
+   "name": "Mistfall Palm Grove",
+   "template": "orchard",
+   "flavour": null,
+   "settlement": "Mistfall",
+   "x": 1273,
+   "z": 1306,
+   "yaw": 0,
+   "radius": 24,
+   "level": 11
+  },
+  {
+   "type": "cave",
+   "id": "cave_steamwood_0",
+   "name": "Steam grotto",
+   "template": "sump_grotto",
+   "plan": {
+    "family": "steam_grotto",
+    "floors": 1,
+    "level": 13
+   },
+   "x": 381,
+   "z": 1622,
+   "yaw": -2.75,
+   "radius": 10,
+   "level": 13
+  },
+  {
+   "type": "cave",
+   "id": "cave_steamwood_1",
+   "name": "Prowler den",
+   "template": "beast_den",
+   "plan": {
+    "family": "lava_tube",
+    "floors": 1,
+    "level": 13
+   },
+   "x": 963,
+   "z": 702,
+   "yaw": -2.36,
+   "radius": 10,
+   "level": 13
+  },
+  {
+   "type": "cave",
+   "id": "cave_steamwood_2",
+   "name": "Prowler den",
+   "template": "beast_den",
+   "plan": {
+    "family": "lava_tube",
+    "floors": 1,
+    "level": 13
+   },
+   "x": 518,
+   "z": 1085,
+   "yaw": -0.39,
+   "radius": 10,
+   "level": 13
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_0_0",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1566,
+   "z": 745,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_0_1",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1361,
+   "z": 1966,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_1_0",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 104,
+   "z": 833,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_1_1",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1907,
+   "z": 1707,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_2_0",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1952,
+   "z": 895,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_2_1",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1281,
+   "z": 502,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_3_0",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 867,
+   "z": 1876,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_3_1",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 113,
+   "z": 1984,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_4_0",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1843,
+   "z": 1247,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_4_1",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 98,
+   "z": 1284,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "rare",
+   "id": "rare_greenjaw",
+   "slot": 0,
+   "name": "Greenjaw",
+   "x": 982,
+   "z": 1068,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     970,
+     994
+    ],
+    [
+     1033,
+     1051
+    ],
+    [
+     1033,
+     1115
+    ],
+    [
+     968,
+     1117
+    ],
+    [
+     935,
+     1069
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 13
+  },
+  {
+   "type": "rare",
+   "id": "rare_mother_of_moss",
+   "slot": 1,
+   "name": "Mother of Moss",
+   "x": 731,
+   "z": 1371,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     677,
+     1404
+    ],
+    [
+     675,
+     1355
+    ],
+    [
+     742,
+     1317
+    ],
+    [
+     815,
+     1378
+    ],
+    [
+     764,
+     1425
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 13
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z12_09_mistfall",
+   "name": "Mistfall",
+   "x": 1165.6,
+   "z": 1331,
+   "yaw": 0,
+   "settlement": "Mistfall",
+   "radius": 1
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_door",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1211,
+   "z": 1493,
+   "yaw": 0,
+   "radius": 6,
+   "doorGuard": true
+  },
+  {
+   "type": "npc",
+   "id": "old_varr",
+   "name": "Old Varr",
+   "role": "elder",
+   "at": "Mistfall",
+   "x": 1168.1,
+   "z": 1339.2,
+   "yaw": 0.347,
+   "office": "mistfall_plot_6",
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "steam_wife_ninu",
+   "name": "Steam-wife Ninu",
+   "role": "healer",
+   "at": "Mistfall",
+   "x": 1166.9,
+   "z": 1298.2,
+   "yaw": 0.301,
+   "office": "mistfall_plot_1",
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "corra_sulvenn",
+   "name": "Corra Sulvenn",
+   "role": "trader",
+   "at": "Mistfall",
+   "x": 1186.3,
+   "z": 1308.4,
+   "yaw": 3.348,
+   "office": "mistfall_plot_0",
+   "radius": 1
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_steamwood_0",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 548,
+   "z": 644,
+   "yaw": 5.74,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_f1",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1700,
+   "z": 1988,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "mushroom_ring_steamwood_2",
+   "kind": "mushroom_ring",
+   "name": "Mushroom Ring",
+   "x": 1553,
+   "z": 1673,
+   "yaw": 4.39,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_f3",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1285,
+   "z": 924,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_steamwood_4",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 445,
+   "z": 1953,
+   "yaw": 2.2,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_f5",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1599,
+   "z": 1055,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_steamwood_6",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 650,
+   "z": 1272,
+   "yaw": 1.56,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_f7",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 740,
+   "z": 880,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_steamwood_8",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 675,
+   "z": 1660,
+   "yaw": 1.77,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_f9",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1128,
+   "z": 1771,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_steamwood_10",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 376,
+   "z": 1328,
+   "yaw": 5.98,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_f11",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 522,
+   "z": 1379,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_steamwood_12",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1014,
+   "z": 445,
+   "yaw": 0.22,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_f13",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1118,
+   "z": 1986,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_steamwood_14",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 384,
+   "z": 857,
+   "yaw": 5.93,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_f15",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1950,
+   "z": 1392,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_steamwood_16",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1700,
+   "z": 1464,
+   "yaw": 5.75,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_f17",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 241,
+   "z": 1067,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "mushroom_ring_steamwood_18",
+   "kind": "mushroom_ring",
+   "name": "Mushroom Ring",
+   "x": 916,
+   "z": 1608,
+   "yaw": 2.28,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_f19",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 758,
+   "z": 552,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_steamwood_20",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 160,
+   "z": 1524,
+   "yaw": 3.81,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_f21",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 192,
+   "z": 1768,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_steamwood_22",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1759,
+   "z": 1433,
+   "yaw": 4.35,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_f23",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1204,
+   "z": 712,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_steamwood_24",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 223,
+   "z": 1417,
+   "yaw": 5.24,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_f25",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1350,
+   "z": 1718,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_steamwood_26",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1896,
+   "z": 2015,
+   "yaw": 4.64,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_f27",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 646,
+   "z": 1839,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_steamwood_28",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1392,
+   "z": 1112,
+   "yaw": 0.41,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_f29",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 764,
+   "z": 1100,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_steamwood_30",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1772,
+   "z": 794,
+   "yaw": 2.1,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_f31",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1076,
+   "z": 880,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_steamwood_32",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1720,
+   "z": 1776,
+   "yaw": 5.26,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_f33",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1536,
+   "z": 1872,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_steamwood_34",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 880,
+   "z": 1232,
+   "yaw": 4.22,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_f35",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1397,
+   "z": 1533,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_steamwood_36",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1808,
+   "z": 1048,
+   "yaw": 2.67,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_f37",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1392,
+   "z": 664,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_steamwood_38",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1644,
+   "z": 1263,
+   "yaw": 5.9,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_f39",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 276,
+   "z": 1982,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_steamwood_40",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1480,
+   "z": 908,
+   "yaw": 5.51,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_f41",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 564,
+   "z": 828,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_steamwood_42",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 920,
+   "z": 1404,
+   "yaw": 2.31,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_f43",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 258,
+   "z": 742,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_steamwood_44",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 476,
+   "z": 1780,
+   "yaw": 3.33,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_1",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 728,
+   "z": 712,
+   "yaw": 1.27,
+   "radius": 5,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s1",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 40,
+   "z": 992,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_steamwood_d1",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1960,
+   "z": 1055,
+   "yaw": 4.54,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_steamwood_d2",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 2008,
+   "z": 1208,
+   "yaw": 0.48,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_2",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 1712,
+   "z": 1614,
+   "yaw": 4.67,
+   "radius": 3,
+   "levelBase": 11
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_3",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 595,
+   "z": 1996,
+   "yaw": 6.23,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "ribbon_tree_steamwood_d3",
+   "kind": "ribbon_tree",
+   "name": "Ribbon Tree",
+   "x": 2019,
+   "z": 1871,
+   "yaw": 3.13,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_steamwood_d4",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 40,
+   "z": 1656,
+   "yaw": 0.09,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_steamwood_1",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 2008,
+   "z": 1552,
+   "yaw": 2.26,
+   "radius": 6,
+   "path": [
+    [
+     2004,
+     1509
+    ],
+    [
+     2035,
+     1574
+    ],
+    [
+     1956,
+     1572
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_steamwood_d5",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 543,
+   "z": 1543,
+   "yaw": 6.11,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s2",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1233,
+   "z": 1079,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "mushroom_ring_steamwood_d6",
+   "kind": "mushroom_ring",
+   "name": "Mushroom Ring",
+   "x": 752,
+   "z": 2008,
+   "yaw": 1.13,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_steamwood_d7",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 377,
+   "z": 1177,
+   "yaw": 1.43,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s3",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1640,
+   "z": 896,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_4",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1096,
+   "z": 583,
+   "yaw": 0.48,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "roam_steamwood_1",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 44,
+   "z": 1827,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     61,
+     1781
+    ],
+    [
+     77,
+     1841
+    ],
+    [
+     25,
+     1875
+    ],
+    [
+     4,
+     1812
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_steamwood_d8",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1848,
+   "z": 1863,
+   "yaw": 4.63,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_steamwood_d9",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 959,
+   "z": 2010,
+   "yaw": 4.33,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s4",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 895,
+   "z": 848,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_5",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 967,
+   "z": 1751,
+   "yaw": 6.09,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "folk",
+   "id": "folk_steamwood_2",
+   "role": "pilgrim_resting",
+   "name": "Resting pilgrim",
+   "work": "pray",
+   "chatter": [
+    "role.pilgrim"
+   ],
+   "x": 38,
+   "z": 1431,
+   "yaw": 1.46,
+   "radius": 6,
+   "path": [
+    [
+     39,
+     1439
+    ],
+    [
+     31,
+     1428
+    ],
+    [
+     44,
+     1425
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_6",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 1544,
+   "z": 1472,
+   "yaw": 1.06,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_steamwood_d10",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 813,
+   "z": 1721,
+   "yaw": 2.03,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_steamwood_d11",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 338,
+   "z": 1831,
+   "yaw": 3.79,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_7",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 241,
+   "z": 913,
+   "yaw": 0.06,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_8",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 1080,
+   "z": 1610,
+   "yaw": 3.66,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s5",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 384,
+   "z": 1008,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_steamwood_d12",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 248,
+   "z": 1248,
+   "yaw": 4.92,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_steamwood_d13",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 912,
+   "z": 552,
+   "yaw": 2.8,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_9",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 1263,
+   "z": 1848,
+   "yaw": 4.03,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s6",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 40,
+   "z": 1144,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_10",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 1520,
+   "z": 1185,
+   "yaw": 3.7,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_11",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 648,
+   "z": 1000,
+   "yaw": 2.56,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s7",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 402,
+   "z": 1464,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_12",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 1201,
+   "z": 1664,
+   "yaw": 2.02,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_steamwood_d14",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 511,
+   "z": 1232,
+   "yaw": 0.71,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_13",
+   "recipe": "cu_farmers_sign",
+   "name": "Angry Sign",
+   "kind": "lore",
+   "x": 1375,
+   "z": 807,
+   "yaw": 5.78,
+   "radius": 3,
+   "levelBase": 11
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_14",
+   "recipe": "cu_hollow_stump",
+   "name": "Hollow Stump",
+   "kind": "cache",
+   "x": 1037,
+   "z": 1895,
+   "yaw": 2.58,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s8",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 784,
+   "z": 1569,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_15",
+   "recipe": "cu_sea_camp",
+   "name": "Beachcomber's Camp",
+   "kind": "camp",
+   "x": 1149,
+   "z": 444,
+   "yaw": 5.72,
+   "radius": 6,
+   "levelBase": 12
+  },
+  {
+   "type": "folk",
+   "id": "folk_steamwood_3",
+   "role": "hermit",
+   "name": "Hermit",
+   "work": "sit",
+   "chatter": [
+    "role.hermit"
+   ],
+   "x": 1712,
+   "z": 1144,
+   "yaw": 4.94,
+   "radius": 6,
+   "path": [
+    [
+     1705,
+     1148
+    ],
+    [
+     1711,
+     1139
+    ],
+    [
+     1719,
+     1147
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_steamwood_d15",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1496,
+   "z": 2008,
+   "yaw": 4.11,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s9",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 240,
+   "z": 1619,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_steamwood_d16",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1824,
+   "z": 1542,
+   "yaw": 0.96,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_16",
+   "recipe": "cu_dune_idol",
+   "name": "Dune Idol",
+   "kind": "shrine",
+   "x": 1800,
+   "z": 920,
+   "yaw": 4.76,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s10",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 543,
+   "z": 1671,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_17",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 834,
+   "z": 984,
+   "yaw": 2.02,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "roam_steamwood_2",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 504,
+   "z": 952,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     560,
+     972
+    ],
+    [
+     479,
+     1001
+    ],
+    [
+     451,
+     915
+    ],
+    [
+     531,
+     895
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_18",
+   "recipe": "cu_hollow_stump",
+   "name": "Hollow Stump",
+   "kind": "cache",
+   "x": 1001,
+   "z": 1504,
+   "yaw": 0.96,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_steamwood_d17",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 458,
+   "z": 752,
+   "yaw": 0.89,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s11",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1417,
+   "z": 1837,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_19",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 641,
+   "z": 1146,
+   "yaw": 4.42,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "folk",
+   "id": "folk_steamwood_4",
+   "role": "shepherd",
+   "name": "Shepherd",
+   "work": "herd",
+   "chatter": [
+    "role.shepherd"
+   ],
+   "x": 842,
+   "z": 658,
+   "yaw": 4.28,
+   "radius": 6,
+   "path": [
+    [
+     831,
+     713
+    ],
+    [
+     811,
+     616
+    ],
+    [
+     896,
+     646
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_20",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 1158,
+   "z": 979,
+   "yaw": 1.66,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s12",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1080,
+   "z": 752,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_steamwood_d18",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1391,
+   "z": 992,
+   "yaw": 0.77,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_21",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 663,
+   "z": 1529,
+   "yaw": 1.99,
+   "radius": 7,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_steamwood_d19",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1586,
+   "z": 1370,
+   "yaw": 3.87,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_steamwood_3",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 159,
+   "z": 1168,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     112,
+     1184
+    ],
+    [
+     143,
+     1107
+    ],
+    [
+     229,
+     1141
+    ],
+    [
+     187,
+     1206
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s13",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1240,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_22",
+   "recipe": "cu_hollow_stump",
+   "name": "Hollow Stump",
+   "kind": "cache",
+   "x": 1362,
+   "z": 1419,
+   "yaw": 3.96,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_steamwood_d20",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1192,
+   "z": 840,
+   "yaw": 4.33,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_steamwood_d21",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 304,
+   "z": 1720,
+   "yaw": 3.9,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s14",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1743,
+   "z": 1321,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_23",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 1610,
+   "z": 1569,
+   "yaw": 5.37,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_24",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 1296,
+   "z": 1600,
+   "yaw": 1.79,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s15",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 200,
+   "z": 1890,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_25",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1658,
+   "z": 1872,
+   "yaw": 2.9,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_steamwood_d22",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 289,
+   "z": 1514,
+   "yaw": 5.29,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_26",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 552,
+   "z": 1893,
+   "yaw": 4,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s16",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1704,
+   "z": 1001,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_27",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 1298,
+   "z": 1179,
+   "yaw": 2.91,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "folk",
+   "id": "folk_steamwood_5",
+   "role": "fisher",
+   "name": "Fisher",
+   "work": "fish",
+   "chatter": [
+    "role.fisher"
+   ],
+   "x": 656,
+   "z": 616,
+   "yaw": 6.25,
+   "radius": 6,
+   "path": [
+    [
+     646,
+     617
+    ],
+    [
+     660,
+     606
+    ],
+    [
+     660,
+     623
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_28",
+   "recipe": "cu_childs_map",
+   "name": "Child's Map",
+   "kind": "lore",
+   "x": 1880,
+   "z": 1136,
+   "yaw": 5.25,
+   "radius": 3,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s17",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 752,
+   "z": 1897,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "toll_stone_steamwood_d23",
+   "kind": "toll_stone",
+   "name": "Old Toll Stone",
+   "x": 1280,
+   "z": 624,
+   "yaw": 5.93,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_29",
+   "recipe": "cu_wayshrine",
+   "name": "Wayfarer Shrine",
+   "kind": "shrine",
+   "x": 1443,
+   "z": 1636,
+   "yaw": 5.17,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s18",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1791,
+   "z": 1688,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_30",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 1599,
+   "z": 1776,
+   "yaw": 4.82,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "roam_steamwood_4",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 152,
+   "z": 976,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     183,
+     994
+    ],
+    [
+     121,
+     1013
+    ],
+    [
+     119,
+     952
+    ],
+    [
+     180,
+     942
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_31",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 879,
+   "z": 1516,
+   "yaw": 1.42,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_steamwood_d24",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 960,
+   "z": 1304,
+   "yaw": 3.8,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_steamwood_d25",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 2008,
+   "z": 1760,
+   "yaw": 2.63,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_32",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 1437,
+   "z": 1224,
+   "yaw": 2.91,
+   "radius": 6,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_steamwood_d26",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1185,
+   "z": 1882,
+   "yaw": 1.38,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_33",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 616,
+   "z": 728,
+   "yaw": 5.31,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s19",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 55,
+   "z": 1550,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_steamwood_d27",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1483,
+   "z": 1049,
+   "yaw": 5.59,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_steamwood_d28",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 856,
+   "z": 1990,
+   "yaw": 2.72,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_34",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 736,
+   "z": 1208,
+   "yaw": 2.09,
+   "radius": 5,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s20",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1464,
+   "z": 1723,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_steamwood_d29",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1591,
+   "z": 1971,
+   "yaw": 5.32,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_steamwood_d30",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1840,
+   "z": 1368,
+   "yaw": 0.09,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_steamwood_d31",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1812,
+   "z": 1953,
+   "yaw": 0.03,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s21",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1663,
+   "z": 793,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_steamwood_d32",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 144,
+   "z": 1664,
+   "yaw": 3.66,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_35",
+   "recipe": "cu_samphire",
+   "name": "Samphire Flats",
+   "kind": "forage",
+   "x": 1886,
+   "z": 983,
+   "yaw": 3.68,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s22",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1483,
+   "z": 809,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_36",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 991,
+   "z": 807,
+   "yaw": 2.5,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_steamwood_d33",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 324,
+   "z": 1420,
+   "yaw": 5.39,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_steamwood_d34",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 730,
+   "z": 1749,
+   "yaw": 1.86,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_37",
+   "recipe": "cu_drowned_saint",
+   "name": "Drowned Saint",
+   "kind": "shrine",
+   "x": 1374,
+   "z": 568,
+   "yaw": 4.43,
+   "radius": 5,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "roam_steamwood_5",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1192,
+   "z": 561,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1251,
+     550
+    ],
+    [
+     1202,
+     616
+    ],
+    [
+     1140,
+     575
+    ],
+    [
+     1171,
+     506
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s23",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1276,
+   "z": 783,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_38",
+   "recipe": "cu_drowned_sailor",
+   "name": "Washed Up",
+   "kind": "remains",
+   "x": 1499,
+   "z": 666,
+   "yaw": 3.46,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "folk",
+   "id": "folk_steamwood_6",
+   "role": "woodcutter",
+   "name": "Woodcutter",
+   "work": "chop",
+   "chatter": [
+    "role.woodcutter"
+   ],
+   "x": 1656,
+   "z": 1696,
+   "yaw": 3.82,
+   "radius": 6,
+   "path": [
+    [
+     1669,
+     1682
+    ],
+    [
+     1665,
+     1709
+    ],
+    [
+     1638,
+     1693
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_steamwood_d35",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1928,
+   "z": 1920,
+   "yaw": 6.15,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s24",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1946,
+   "z": 1289,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_steamwood_d36",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 360,
+   "z": 765,
+   "yaw": 5.93,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_39",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 997,
+   "z": 595,
+   "yaw": 5.48,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s25",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1245,
+   "z": 1741,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_40",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 1513,
+   "z": 1569,
+   "yaw": 4.14,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "roam_steamwood_6",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1560,
+   "z": 960,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1494,
+     918
+    ],
+    [
+     1598,
+     907
+    ],
+    [
+     1622,
+     1027
+    ],
+    [
+     1510,
+     1009
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_41",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 638,
+   "z": 905,
+   "yaw": 2.15,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_steamwood_d37",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1138,
+   "z": 1113,
+   "yaw": 0.75,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s26",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1897,
+   "z": 1479,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_steamwood_d38",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 592,
+   "z": 1456,
+   "yaw": 3.91,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_steamwood_7",
+   "role": "hermit",
+   "name": "Hermit",
+   "work": "sit",
+   "chatter": [
+    "role.hermit"
+   ],
+   "x": 280,
+   "z": 1336,
+   "yaw": 3.58,
+   "radius": 6,
+   "path": [
+    [
+     274,
+     1336
+    ],
+    [
+     284,
+     1330
+    ],
+    [
+     282,
+     1340
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_steamwood_d39",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1937,
+   "z": 1824,
+   "yaw": 5.8,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s27",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1751,
+   "z": 1865,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_steamwood_d40",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 680,
+   "z": 800,
+   "yaw": 4.92,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_42",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 589,
+   "z": 1764,
+   "yaw": 1.95,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "roam_steamwood_7",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 397,
+   "z": 1736,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     432,
+     1781
+    ],
+    [
+     366,
+     1776
+    ],
+    [
+     376,
+     1707
+    ],
+    [
+     424,
+     1698
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s28",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1457,
+   "z": 1439,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_43",
+   "recipe": "cu_hollow_stump",
+   "name": "Hollow Stump",
+   "kind": "cache",
+   "x": 864,
+   "z": 1136,
+   "yaw": 3.4,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_steamwood_d41",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 135,
+   "z": 1375,
+   "yaw": 6.14,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_44",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 1551,
+   "z": 1281,
+   "yaw": 0.52,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s29",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1000,
+   "z": 1664,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_45",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 1009,
+   "z": 1392,
+   "yaw": 4.37,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_steamwood_d42",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1999,
+   "z": 1664,
+   "yaw": 5.37,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s30",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 159,
+   "z": 753,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_46",
+   "recipe": "cu_crab_rocks",
+   "name": "Crab Rocks",
+   "kind": "forage",
+   "x": 2008,
+   "z": 976,
+   "yaw": 1.84,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "beehive_row_steamwood_d43",
+   "kind": "beehive_row",
+   "name": "Beehive Row",
+   "x": 336,
+   "z": 1096,
+   "yaw": 2,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_steamwood_d44",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 808,
+   "z": 808,
+   "yaw": 4.27,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_steamwood_8",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 295,
+   "z": 833,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     213,
+     840
+    ],
+    [
+     292,
+     762
+    ],
+    [
+     367,
+     826
+    ],
+    [
+     285,
+     910
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s31",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 359,
+   "z": 1928,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_steamwood_d45",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1609,
+   "z": 1160,
+   "yaw": 1.52,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_steamwood_8",
+   "role": "woodcutter",
+   "name": "Woodcutter",
+   "work": "chop",
+   "chatter": [
+    "role.woodcutter"
+   ],
+   "x": 1302,
+   "z": 1506,
+   "yaw": 3.38,
+   "radius": 6,
+   "path": [
+    [
+     1294,
+     1511
+    ],
+    [
+     1304,
+     1499
+    ],
+    [
+     1308,
+     1510
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_steamwood_d46",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 742,
+   "z": 1006,
+   "yaw": 3.91,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s32",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 446,
+   "z": 1547,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_steamwood_d47",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1457,
+   "z": 1928,
+   "yaw": 4.4,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_47",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 961,
+   "z": 1846,
+   "yaw": 3.14,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s33",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 977,
+   "z": 896,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_48",
+   "recipe": "cu_empty_gallows_post",
+   "name": "Weathered Post",
+   "kind": "lore",
+   "x": 1824,
+   "z": 1776,
+   "yaw": 4.67,
+   "radius": 3,
+   "levelBase": 11
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_49",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 1405,
+   "z": 883,
+   "yaw": 4.81,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_50",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 971,
+   "z": 1212,
+   "yaw": 4.6,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "toll_stone_steamwood_d48",
+   "kind": "toll_stone",
+   "name": "Old Toll Stone",
+   "x": 1873,
+   "z": 1615,
+   "yaw": 5.96,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s34",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1209,
+   "z": 1183,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_steamwood_d49",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 695,
+   "z": 1979,
+   "yaw": 3,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_51",
+   "recipe": "cu_hollow_stump",
+   "name": "Hollow Stump",
+   "kind": "cache",
+   "x": 1319,
+   "z": 1050,
+   "yaw": 1.32,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s35",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1264,
+   "z": 1416,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_steamwood_d50",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 802,
+   "z": 1813,
+   "yaw": 0.61,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_52",
+   "recipe": "cu_hollow_stump",
+   "name": "Hollow Stump",
+   "kind": "cache",
+   "x": 425,
+   "z": 1104,
+   "yaw": 0.94,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "roam_steamwood_9",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1056,
+   "z": 664,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1023,
+     650
+    ],
+    [
+     1068,
+     626
+    ],
+    [
+     1102,
+     669
+    ],
+    [
+     1053,
+     698
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s36",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1030,
+   "z": 1823,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_53",
+   "recipe": "cu_hollow_stump",
+   "name": "Hollow Stump",
+   "kind": "cache",
+   "x": 608,
+   "z": 1600,
+   "yaw": 2.24,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_steamwood_d51",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 898,
+   "z": 1697,
+   "yaw": 1.33,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_steamwood_d52",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 424,
+   "z": 1259,
+   "yaw": 1.6,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s37",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 494,
+   "z": 1474,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_steamwood_d53",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1673,
+   "z": 1376,
+   "yaw": 1.1,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_steamwood_d54",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 590,
+   "z": 1338,
+   "yaw": 2.34,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_54",
+   "recipe": "cu_desert_melon",
+   "name": "Bitter Melons",
+   "kind": "forage",
+   "x": 1728,
+   "z": 872,
+   "yaw": 5.37,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s38",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1752,
+   "z": 1232,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_55",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 483,
+   "z": 1854,
+   "yaw": 5.44,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s39",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 812,
+   "z": 1249,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "driftwood_post_steamwood_d55",
+   "kind": "driftwood_post",
+   "name": "Driftwood Post",
+   "x": 1080,
+   "z": 496,
+   "yaw": 4.66,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_56",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 40,
+   "z": 903,
+   "yaw": 3.26,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_steamwood_d56",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 770,
+   "z": 1679,
+   "yaw": 0.68,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s40",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 529,
+   "z": 2007,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_57",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 933,
+   "z": 1924,
+   "yaw": 1.71,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_steamwood_d57",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 334,
+   "z": 1250,
+   "yaw": 3.28,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s41",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1311,
+   "z": 705,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_steamwood_d58",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 880,
+   "z": 1320,
+   "yaw": 5.68,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_steamwood_d59",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1376,
+   "z": 1288,
+   "yaw": 6.1,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s42",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 184,
+   "z": 1304,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_steamwood_d60",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1079,
+   "z": 1695,
+   "yaw": 0.2,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_58",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 1087,
+   "z": 971,
+   "yaw": 3.19,
+   "radius": 6,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_steamwood_d61",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1336,
+   "z": 1808,
+   "yaw": 5.79,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_steamwood_d62",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1288,
+   "z": 1925,
+   "yaw": 3.95,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s43",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 472,
+   "z": 832,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_59",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 2001,
+   "z": 1128,
+   "yaw": 1.08,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_steamwood_d63",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1217,
+   "z": 1583,
+   "yaw": 4.09,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_60",
+   "recipe": "cu_hollow_stump",
+   "name": "Hollow Stump",
+   "kind": "cache",
+   "x": 1743,
+   "z": 1537,
+   "yaw": 6.27,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s44",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 837,
+   "z": 1628,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "standing_stone_steamwood_d64",
+   "kind": "standing_stone",
+   "name": "Standing Stone",
+   "x": 608,
+   "z": 1071,
+   "yaw": 2.46,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_steamwood_d65",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1928,
+   "z": 1200,
+   "yaw": 4.71,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_steamwood_d66",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1080,
+   "z": 1528,
+   "yaw": 6.14,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s45",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 296,
+   "z": 1001,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_steamwood_d67",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 820,
+   "z": 908,
+   "yaw": 3.14,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_steamwood_d68",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 592,
+   "z": 1216,
+   "yaw": 2.02,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_steamwood_d69",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1032,
+   "z": 1976,
+   "yaw": 4.26,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s46",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1439,
+   "z": 735,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_61",
+   "recipe": "cu_samphire",
+   "name": "Samphire Flats",
+   "kind": "forage",
+   "x": 536,
+   "z": 736,
+   "yaw": 2.7,
+   "radius": 5,
+   "levelBase": 12
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_steamwood_d70",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 384,
+   "z": 2011,
+   "yaw": 6.01,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s47",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1808,
+   "z": 1169,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_steamwood_d71",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 40,
+   "z": 776,
+   "yaw": 5.61,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_steamwood_d72",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1622,
+   "z": 1441,
+   "yaw": 6.06,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_62",
+   "recipe": "cu_crab_rocks",
+   "name": "Crab Rocks",
+   "kind": "forage",
+   "x": 950,
+   "z": 485,
+   "yaw": 3.79,
+   "radius": 5,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "roam_steamwood_10",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 907,
+   "z": 941,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     902,
+     879
+    ],
+    [
+     952,
+     931
+    ],
+    [
+     918,
+     1014
+    ],
+    [
+     856,
+     943
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s48",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 431,
+   "z": 1382,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_steamwood_d73",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 259,
+   "z": 1824,
+   "yaw": 1.81,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_63",
+   "recipe": "cu_smugglers_drop",
+   "name": "Smuggler's Drop",
+   "kind": "cache",
+   "x": 1860,
+   "z": 875,
+   "yaw": 0.42,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s49",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 456,
+   "z": 1176,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_steamwood_d74",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 121,
+   "z": 1456,
+   "yaw": 5.96,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_steamwood_d75",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 620,
+   "z": 1924,
+   "yaw": 0.52,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s50",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 910,
+   "z": 773,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_steamwood_d76",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 471,
+   "z": 1624,
+   "yaw": 3.27,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_steamwood_d77",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 39,
+   "z": 1341,
+   "yaw": 4.04,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_64",
+   "recipe": "cu_smugglers_drop",
+   "name": "Smuggler's Drop",
+   "kind": "cache",
+   "x": 841,
+   "z": 530,
+   "yaw": 6.22,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_steamwood_d78",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1568,
+   "z": 832,
+   "yaw": 0.6,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s51",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 193,
+   "z": 2011,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_65",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 1247,
+   "z": 1000,
+   "yaw": 2.02,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "folk",
+   "id": "folk_steamwood_9",
+   "role": "hermit",
+   "name": "Hermit",
+   "work": "sit",
+   "chatter": [
+    "role.hermit"
+   ],
+   "x": 991,
+   "z": 1583,
+   "yaw": 1.7,
+   "radius": 6,
+   "path": [
+    [
+     988,
+     1574
+    ],
+    [
+     1001,
+     1584
+    ],
+    [
+     987,
+     1591
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_66",
+   "recipe": "cu_hollow_stump",
+   "name": "Hollow Stump",
+   "kind": "cache",
+   "x": 1490,
+   "z": 1803,
+   "yaw": 2.05,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s52",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 49,
+   "z": 1216,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_steamwood_d79",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 280,
+   "z": 1896,
+   "yaw": 2.54,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_steamwood_d80",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 840,
+   "z": 1064,
+   "yaw": 2.18,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_steamwood_11",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1372,
+   "z": 1618,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1327,
+     1595
+    ],
+    [
+     1391,
+     1575
+    ],
+    [
+     1408,
+     1645
+    ],
+    [
+     1342,
+     1655
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s53",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 409,
+   "z": 1856,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_steamwood_d81",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 295,
+   "z": 1185,
+   "yaw": 3.99,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_steamwood_d82",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 488,
+   "z": 1304,
+   "yaw": 2.76,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_steamwood_d83",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 686,
+   "z": 1062,
+   "yaw": 0.81,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s54",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 362,
+   "z": 1532,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_67",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1464,
+   "z": 1128,
+   "yaw": 5.71,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_steamwood_d84",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 128,
+   "z": 1594,
+   "yaw": 0.41,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s55",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1200,
+   "z": 1809,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_68",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 1793,
+   "z": 1609,
+   "yaw": 0.71,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_steamwood_d85",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1079,
+   "z": 1892,
+   "yaw": 0.59,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_69",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 730,
+   "z": 1497,
+   "yaw": 4.43,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "roam_steamwood_12",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1352,
+   "z": 1881,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1364,
+     1834
+    ],
+    [
+     1419,
+     1881
+    ],
+    [
+     1355,
+     1949
+    ],
+    [
+     1286,
+     1864
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s56",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1536,
+   "z": 1104,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_steamwood_d86",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 2009,
+   "z": 1338,
+   "yaw": 4.03,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_steamwood_10",
+   "role": "woodcutter",
+   "name": "Woodcutter",
+   "work": "chop",
+   "chatter": [
+    "role.woodcutter"
+   ],
+   "x": 368,
+   "z": 928,
+   "yaw": 0.94,
+   "radius": 6,
+   "path": [
+    [
+     343,
+     936
+    ],
+    [
+     375,
+     903
+    ],
+    [
+     388,
+     944
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_steamwood_d87",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 42,
+   "z": 1952,
+   "yaw": 2.26,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s57",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1151,
+   "z": 904,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_steamwood_d88",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 234,
+   "z": 1695,
+   "yaw": 1.46,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_70",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 847,
+   "z": 1449,
+   "yaw": 2.26,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s58",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 542,
+   "z": 1160,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_steamwood_d89",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1880,
+   "z": 1064,
+   "yaw": 4.46,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_steamwood_d90",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1064,
+   "z": 1344,
+   "yaw": 1.38,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_71",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 72,
+   "z": 1072,
+   "yaw": 5.49,
+   "radius": 5,
+   "levelBase": 12
+  },
+  {
+   "type": "wayside",
+   "id": "mushroom_ring_steamwood_d91",
+   "kind": "mushroom_ring",
+   "name": "Mushroom Ring",
+   "x": 736,
+   "z": 631,
+   "yaw": 1.54,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s59",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 121,
+   "z": 1907,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_steamwood_d92",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 697,
+   "z": 1591,
+   "yaw": 4.94,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_steamwood_11",
+   "role": "hermit",
+   "name": "Hermit",
+   "work": "sit",
+   "chatter": [
+    "role.hermit"
+   ],
+   "x": 1152,
+   "z": 777,
+   "yaw": 5.39,
+   "radius": 6,
+   "path": [
+    [
+     1149,
+     784
+    ],
+    [
+     1148,
+     770
+    ],
+    [
+     1162,
+     778
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_steamwood_d93",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1120,
+   "z": 1040,
+   "yaw": 1.56,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s60",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1832,
+   "z": 1440,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_steamwood_d94",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 666,
+   "z": 1720,
+   "yaw": 5.06,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_72",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1146,
+   "z": 1576,
+   "yaw": 1.94,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_73",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 1348,
+   "z": 1211,
+   "yaw": 5.5,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s61",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 224,
+   "z": 1488,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_steamwood_d95",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 800,
+   "z": 1168,
+   "yaw": 4.55,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_steamwood_d96",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 941,
+   "z": 1467,
+   "yaw": 3.92,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_steamwood_d97",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1536,
+   "z": 1744,
+   "yaw": 5.28,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s62",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1520,
+   "z": 1392,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_74",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 1320,
+   "z": 856,
+   "yaw": 3.99,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_steamwood_d98",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1473,
+   "z": 1513,
+   "yaw": 5.33,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s63",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 119,
+   "z": 1737,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_steamwood_d99",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 696,
+   "z": 944,
+   "yaw": 1.03,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_steamwood_d100",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1672,
+   "z": 1528,
+   "yaw": 3.94,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_steamwood_d101",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1188,
+   "z": 1953,
+   "yaw": 2.93,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_75",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 1425,
+   "z": 2008,
+   "yaw": 0.15,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s64",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1015,
+   "z": 529,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_steamwood_d102",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 153,
+   "z": 1832,
+   "yaw": 0.88,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_steamwood_12",
+   "role": "beekeeper",
+   "name": "Beekeeper",
+   "work": "gather",
+   "chatter": [
+    "role.beekeeper"
+   ],
+   "x": 1680,
+   "z": 1072,
+   "yaw": 5.9,
+   "radius": 6,
+   "path": [
+    [
+     1671,
+     1076
+    ],
+    [
+     1680,
+     1065
+    ],
+    [
+     1689,
+     1076
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_steamwood_d103",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 312,
+   "z": 1589,
+   "yaw": 4.7,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s65",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 552,
+   "z": 1824,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_steamwood_d104",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1440,
+   "z": 608,
+   "yaw": 0.02,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_steamwood_d105",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1353,
+   "z": 1354,
+   "yaw": 0.56,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_76",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 1011,
+   "z": 1731,
+   "yaw": 0.86,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_steamwood_d106",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 802,
+   "z": 1951,
+   "yaw": 5.05,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_steamwood_13",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1776,
+   "z": 984,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1813,
+     963
+    ],
+    [
+     1799,
+     1029
+    ],
+    [
+     1746,
+     998
+    ],
+    [
+     1748,
+     942
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_77",
+   "recipe": "cu_hollow_stump",
+   "name": "Hollow Stump",
+   "kind": "cache",
+   "x": 743,
+   "z": 784,
+   "yaw": 0.47,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_steamwood_d107",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1936,
+   "z": 1639,
+   "yaw": 3.62,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_steamwood_d108",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1775,
+   "z": 2007,
+   "yaw": 2.03,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_steamwood_d109",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1136,
+   "z": 1648,
+   "yaw": 3.07,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_steamwood_d110",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 874,
+   "z": 1746,
+   "yaw": 5.96,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_steamwood_d111",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 800,
+   "z": 1496,
+   "yaw": 5.91,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s66",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1507,
+   "z": 1958,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_steamwood_d112",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 560,
+   "z": 1280,
+   "yaw": 0.31,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_steamwood_d113",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1295,
+   "z": 1112,
+   "yaw": 3.59,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_steamwood_d114",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1591,
+   "z": 1224,
+   "yaw": 0.07,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s67",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1878,
+   "z": 1314,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_78",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1888,
+   "z": 1551,
+   "yaw": 3.74,
+   "radius": 6,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_steamwood_d115",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1600,
+   "z": 1904,
+   "yaw": 6,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_steamwood_d116",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 665,
+   "z": 1208,
+   "yaw": 1.36,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s68",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1776,
+   "z": 1104,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_steamwood_d117",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 311,
+   "z": 1655,
+   "yaw": 2.84,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_steamwood_d118",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 2007,
+   "z": 1439,
+   "yaw": 0.26,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s69",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1352,
+   "z": 942,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_79",
+   "recipe": "cu_desert_melon",
+   "name": "Bitter Melons",
+   "kind": "forage",
+   "x": 1077,
+   "z": 435,
+   "yaw": 6.2,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "wayside",
+   "id": "wayside_well_steamwood_d119",
+   "kind": "wayside_well",
+   "name": "Wayside Well",
+   "x": 1889,
+   "z": 1776,
+   "yaw": 3.72,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "mushroom_ring_steamwood_d120",
+   "kind": "mushroom_ring",
+   "name": "Mushroom Ring",
+   "x": 918,
+   "z": 1169,
+   "yaw": 1.01,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_steamwood_14",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1596,
+   "z": 1514,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1642,
+     1515
+    ],
+    [
+     1582,
+     1561
+    ],
+    [
+     1553,
+     1515
+    ],
+    [
+     1606,
+     1472
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s70",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1368,
+   "z": 744,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_80",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 1667,
+   "z": 1807,
+   "yaw": 1.67,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "folk",
+   "id": "folk_steamwood_13",
+   "role": "woodcutter",
+   "name": "Woodcutter",
+   "work": "chop",
+   "chatter": [
+    "role.woodcutter"
+   ],
+   "x": 1217,
+   "z": 936,
+   "yaw": 5.99,
+   "radius": 6,
+   "path": [
+    [
+     1212,
+     961
+    ],
+    [
+     1205,
+     926
+    ],
+    [
+     1237,
+     926
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_steamwood_d121",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1040,
+   "z": 1448,
+   "yaw": 1.76,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s71",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1600,
+   "z": 1840,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_steamwood_d122",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1257,
+   "z": 848,
+   "yaw": 5.29,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_steamwood_d123",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 496,
+   "z": 1719,
+   "yaw": 3.72,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s72",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 753,
+   "z": 939,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_81",
+   "recipe": "cu_dead_traveller",
+   "name": "Dead Traveller",
+   "kind": "remains",
+   "x": 1024,
+   "z": 952,
+   "yaw": 0.88,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_steamwood_d124",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 703,
+   "z": 1134,
+   "yaw": 4.43,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_82",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 1288,
+   "z": 1642,
+   "yaw": 0.81,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_steamwood_d125",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1792,
+   "z": 856,
+   "yaw": 3.54,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s73",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1954,
+   "z": 1949,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_steamwood_d126",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1750,
+   "z": 1936,
+   "yaw": 3.23,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_steamwood_14",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 1641,
+   "z": 1319,
+   "yaw": 4.58,
+   "radius": 6,
+   "path": [
+    [
+     1599,
+     1316
+    ],
+    [
+     1660,
+     1289
+    ],
+    [
+     1654,
+     1360
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_83",
+   "recipe": "cu_drowned_sailor",
+   "name": "Washed Up",
+   "kind": "remains",
+   "x": 1215,
+   "z": 457,
+   "yaw": 5.59,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s74",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 633,
+   "z": 840,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_steamwood_d127",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1884,
+   "z": 1398,
+   "yaw": 3.67,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_steamwood_d128",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1448,
+   "z": 968,
+   "yaw": 6.17,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_steamwood_d129",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1656,
+   "z": 1200,
+   "yaw": 6,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_84",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 517,
+   "z": 1948,
+   "yaw": 0.46,
+   "radius": 6,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s75",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1592,
+   "z": 1617,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_85",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 943,
+   "z": 1807,
+   "yaw": 6.02,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_steamwood_d130",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1656,
+   "z": 1936,
+   "yaw": 4.29,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_steamwood_d131",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 240,
+   "z": 1552,
+   "yaw": 5.31,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s76",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1936,
+   "z": 1112,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_steamwood_d132",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1496,
+   "z": 1248,
+   "yaw": 3.31,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_steamwood_d133",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1880,
+   "z": 1936,
+   "yaw": 5.51,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s77",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1807,
+   "z": 1312,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_steamwood_d134",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1785,
+   "z": 1488,
+   "yaw": 6.2,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_steamwood_d135",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 610,
+   "z": 1657,
+   "yaw": 4.35,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_steamwood_d136",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1176,
+   "z": 1720,
+   "yaw": 6.18,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_steamwood_15",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 152,
+   "z": 879,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     104,
+     823
+    ],
+    [
+     234,
+     817
+    ],
+    [
+     215,
+     933
+    ],
+    [
+     119,
+     933
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s78",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1502,
+   "z": 1632,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_steamwood_d137",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 664,
+   "z": 688,
+   "yaw": 5.23,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_steamwood_15",
+   "role": "woodcutter",
+   "name": "Woodcutter",
+   "work": "chop",
+   "chatter": [
+    "role.woodcutter"
+   ],
+   "x": 1056,
+   "z": 816,
+   "yaw": 3.12,
+   "radius": 6,
+   "path": [
+    [
+     1052,
+     831
+    ],
+    [
+     1047,
+     803
+    ],
+    [
+     1072,
+     812
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_86",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 600,
+   "z": 1519,
+   "yaw": 1.95,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s79",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 42,
+   "z": 1723,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_steamwood_d138",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1649,
+   "z": 960,
+   "yaw": 5.16,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_87",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 1439,
+   "z": 1071,
+   "yaw": 5.93,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s80",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 928,
+   "z": 1524,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "mushroom_ring_steamwood_d139",
+   "kind": "mushroom_ring",
+   "name": "Mushroom Ring",
+   "x": 1382,
+   "z": 1775,
+   "yaw": 4.42,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_steamwood_d140",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 646,
+   "z": 1889,
+   "yaw": 0.98,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_88",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1303,
+   "z": 1965,
+   "yaw": 2.79,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_steamwood_d141",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 2008,
+   "z": 1272,
+   "yaw": 1.93,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s81",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 528,
+   "z": 1609,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_steamwood_d142",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1777,
+   "z": 1377,
+   "yaw": 2.89,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_steamwood_16",
+   "role": "hermit",
+   "name": "Hermit",
+   "work": "sit",
+   "chatter": [
+    "role.hermit"
+   ],
+   "x": 752,
+   "z": 1812,
+   "yaw": 4.68,
+   "radius": 6,
+   "path": [
+    [
+     749,
+     1818
+    ],
+    [
+     746,
+     1803
+    ],
+    [
+     760,
+     1811
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_steamwood_d143",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1143,
+   "z": 1837,
+   "yaw": 0.68,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s82",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1313,
+   "z": 569,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_steamwood_d144",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 655,
+   "z": 1466,
+   "yaw": 4.01,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_89",
+   "recipe": "cu_drying_fish",
+   "name": "Fish Rack",
+   "kind": "fishing",
+   "x": 1944,
+   "z": 959,
+   "yaw": 1.68,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "roam_steamwood_16",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 215,
+   "z": 1952,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     172,
+     2007
+    ],
+    [
+     156,
+     1913
+    ],
+    [
+     259,
+     1895
+    ],
+    [
+     285,
+     1988
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s83",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 93,
+   "z": 769,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_steamwood_d145",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1407,
+   "z": 1167,
+   "yaw": 2.22,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_steamwood_d146",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 607,
+   "z": 1401,
+   "yaw": 4.5,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_steamwood_d147",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1735,
+   "z": 1717,
+   "yaw": 5.18,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s84",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 444,
+   "z": 2002,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_steamwood_d148",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 808,
+   "z": 1312,
+   "yaw": 5.7,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_90",
+   "recipe": "cu_rune_ring",
+   "name": "Little Stone Ring",
+   "kind": "marker",
+   "x": 1186,
+   "z": 1033,
+   "yaw": 6.24,
+   "radius": 6,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s85",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 721,
+   "z": 1634,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_steamwood_d149",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 256,
+   "z": 1753,
+   "yaw": 5.9,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_steamwood_d150",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 679,
+   "z": 1785,
+   "yaw": 3.51,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_steamwood_d151",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1200,
+   "z": 1430,
+   "yaw": 5.92,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_91",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 896,
+   "z": 712,
+   "yaw": 0.23,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_steamwood_d152",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1433,
+   "z": 1398,
+   "yaw": 3.01,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s86",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1312,
+   "z": 992,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_steamwood_d153",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 715,
+   "z": 1274,
+   "yaw": 4.49,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_92",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 39,
+   "z": 842,
+   "yaw": 6.2,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "folk",
+   "id": "folk_steamwood_17",
+   "role": "woodcutter",
+   "name": "Woodcutter",
+   "work": "chop",
+   "chatter": [
+    "role.woodcutter"
+   ],
+   "x": 1251,
+   "z": 1222,
+   "yaw": 0.18,
+   "radius": 6,
+   "path": [
+    [
+     1250,
+     1207
+    ],
+    [
+     1265,
+     1237
+    ],
+    [
+     1235,
+     1229
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_93",
+   "recipe": "cu_dune_idol",
+   "name": "Dune Idol",
+   "kind": "shrine",
+   "x": 1504,
+   "z": 728,
+   "yaw": 2.36,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s87",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 183,
+   "z": 1575,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_steamwood_d154",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1403,
+   "z": 1461,
+   "yaw": 5.27,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_94",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 1775,
+   "z": 1808,
+   "yaw": 1.68,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s88",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 600,
+   "z": 673,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_steamwood_d155",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 104,
+   "z": 1512,
+   "yaw": 2.28,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_steamwood_17",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 192,
+   "z": 1370,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     243,
+     1324
+    ],
+    [
+     225,
+     1414
+    ],
+    [
+     137,
+     1398
+    ],
+    [
+     149,
+     1327
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_95",
+   "recipe": "cu_drowned_sailor",
+   "name": "Washed Up",
+   "kind": "remains",
+   "x": 864,
+   "z": 584,
+   "yaw": 5.64,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_steamwood_d156",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1278,
+   "z": 1798,
+   "yaw": 4.26,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s89",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 785,
+   "z": 673,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_steamwood_d157",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1016,
+   "z": 1176,
+   "yaw": 0.54,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_steamwood_18",
+   "role": "pilgrim_resting",
+   "name": "Resting pilgrim",
+   "work": "pray",
+   "chatter": [
+    "role.pilgrim"
+   ],
+   "x": 1336,
+   "z": 632,
+   "yaw": 0.73,
+   "radius": 6,
+   "path": [
+    [
+     1342,
+     636
+    ],
+    [
+     1332,
+     633
+    ],
+    [
+     1337,
+     627
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_steamwood_d158",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 672,
+   "z": 744,
+   "yaw": 1.53,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s90",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1000,
+   "z": 1264,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_steamwood_d159",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1952,
+   "z": 1752,
+   "yaw": 3.4,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_steamwood_d160",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1008,
+   "z": 751,
+   "yaw": 4.33,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_steamwood_d161",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1384,
+   "z": 1048,
+   "yaw": 6.06,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s91",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1455,
+   "z": 1576,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_steamwood_d162",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1656,
+   "z": 1608,
+   "yaw": 6.24,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_steamwood_d163",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1640,
+   "z": 2008,
+   "yaw": 4.08,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_steamwood_d164",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1740,
+   "z": 1386,
+   "yaw": 1.33,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_96",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 1996,
+   "z": 1783,
+   "yaw": 3.52,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_steamwood_d165",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 344,
+   "z": 1369,
+   "yaw": 0.2,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s92",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1083,
+   "z": 1143,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_steamwood_d166",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 440,
+   "z": 1048,
+   "yaw": 4.27,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_steamwood_d167",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1354,
+   "z": 1152,
+   "yaw": 3.06,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_97",
+   "recipe": "cu_eagle_ledge",
+   "name": "Eagle Ledge",
+   "kind": "nest",
+   "x": 990,
+   "z": 1379,
+   "yaw": 5.62,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_98",
+   "recipe": "cu_herb_patch",
+   "name": "Woundwort Patch",
+   "kind": "forage",
+   "x": 846,
+   "z": 1565,
+   "yaw": 2.17,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_steamwood_d168",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 280,
+   "z": 1456,
+   "yaw": 6.18,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_steamwood_d169",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1223,
+   "z": 1930,
+   "yaw": 4.79,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_99",
+   "recipe": "cu_poachers_end",
+   "name": "Poacher's End",
+   "kind": "remains",
+   "x": 174,
+   "z": 1053,
+   "yaw": 0.96,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s93",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1720,
+   "z": 816,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_steamwood_d170",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 431,
+   "z": 1319,
+   "yaw": 0.01,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_steamwood_d171",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 552,
+   "z": 1032,
+   "yaw": 1.28,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_steamwood_d172",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 73,
+   "z": 1607,
+   "yaw": 0.11,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s94",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 288,
+   "z": 1128,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_steamwood_d173",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 792,
+   "z": 1031,
+   "yaw": 2.67,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_steamwood_d174",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 48,
+   "z": 2008,
+   "yaw": 5.46,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s95",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 608,
+   "z": 784,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_steamwood_d175",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1871,
+   "z": 1192,
+   "yaw": 3.03,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_100",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 924,
+   "z": 1998,
+   "yaw": 1.82,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_101",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 963,
+   "z": 641,
+   "yaw": 0.32,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_steamwood_d176",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1703,
+   "z": 1904,
+   "yaw": 0.94,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s96",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1169,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_steamwood_d177",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1847,
+   "z": 1664,
+   "yaw": 6.18,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_steamwood_19",
+   "role": "hermit",
+   "name": "Hermit",
+   "work": "sit",
+   "chatter": [
+    "role.hermit"
+   ],
+   "x": 1521,
+   "z": 864,
+   "yaw": 2.19,
+   "radius": 6,
+   "path": [
+    [
+     1520,
+     854
+    ],
+    [
+     1530,
+     866
+    ],
+    [
+     1513,
+     870
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_102",
+   "recipe": "cu_hunters_blind",
+   "name": "Hunter's Blind",
+   "kind": "camp",
+   "x": 1130,
+   "z": 839,
+   "yaw": 4.7,
+   "radius": 5,
+   "levelBase": 12
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s97",
+   "monster": "vent_wisp",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 414,
+   "z": 794,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_steamwood_d178",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 176,
+   "z": 1448,
+   "yaw": 0.47,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_steamwood_d179",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1951,
+   "z": 1456,
+   "yaw": 2.52,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_103",
+   "recipe": "cu_drowned_sailor",
+   "name": "Washed Up",
+   "kind": "remains",
+   "x": 1896,
+   "z": 920,
+   "yaw": 3.55,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s98",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 854,
+   "z": 1831,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_104",
+   "recipe": "cu_hollow_stump",
+   "name": "Hollow Stump",
+   "kind": "cache",
+   "x": 1255,
+   "z": 681,
+   "yaw": 4.3,
+   "radius": 4,
+   "levelBase": 12
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_steamwood_d180",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 2008,
+   "z": 920,
+   "yaw": 4.88,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s99",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 81,
+   "z": 1376,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_steamwood_d181",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1144,
+   "z": 1170,
+   "yaw": 1,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_steamwood_d182",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 986,
+   "z": 1947,
+   "yaw": 0.95,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s100",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1543,
+   "z": 2005,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_steamwood_d183",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 926,
+   "z": 1254,
+   "yaw": 2.64,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_steamwood_d184",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 924,
+   "z": 1343,
+   "yaw": 6.25,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_steamwood_d185",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 89,
+   "z": 1680,
+   "yaw": 0.5,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_steamwood_18",
+   "monster": "sulphur_toad",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1848,
+   "z": 1727,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1889,
+     1697
+    ],
+    [
+     1882,
+     1748
+    ],
+    [
+     1825,
+     1775
+    ],
+    [
+     1804,
+     1690
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s101",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1898,
+   "z": 1879,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_steamwood_d186",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 345,
+   "z": 1473,
+   "yaw": 0.42,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_steamwood_20",
+   "role": "woodcutter",
+   "name": "Woodcutter",
+   "work": "chop",
+   "chatter": [
+    "role.woodcutter"
+   ],
+   "x": 1544,
+   "z": 1336,
+   "yaw": 1.57,
+   "radius": 6,
+   "path": [
+    [
+     1562,
+     1330
+    ],
+    [
+     1534,
+     1356
+    ],
+    [
+     1529,
+     1318
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_105",
+   "recipe": "cu_wild_garlic",
+   "name": "Wild Garlic",
+   "kind": "forage",
+   "x": 1425,
+   "z": 831,
+   "yaw": 1.65,
+   "radius": 4,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s102",
+   "monster": "steamwood_prowler",
+   "with": null,
+   "level": [
+    12,
+    13
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 837,
+   "z": 845,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "hay_rick_steamwood_d187",
+   "kind": "hay_rick",
+   "name": "Hay Rick",
+   "x": 525,
+   "z": 1763,
+   "yaw": 3.56,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_106",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 618,
+   "z": 1711,
+   "yaw": 5.01,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s103",
+   "monster": "ashback_salamander",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 879,
+   "z": 1935,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_steamwood_107",
+   "recipe": "cu_crab_rocks",
+   "name": "Crab Rocks",
+   "kind": "forage",
+   "x": 1625,
+   "z": 840,
+   "yaw": 4.38,
+   "radius": 5,
+   "levelBase": 11
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_steamwood_d188",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1015,
+   "z": 1319,
+   "yaw": 1.07,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_steamwood_d189",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1552,
+   "z": 1812,
+   "yaw": 1.27,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_steamwood_d190",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 305,
+   "z": 1776,
+   "yaw": 2.87,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s104",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1959,
+   "z": 1873,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_steamwood_d191",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1160,
+   "z": 664,
+   "yaw": 1.59,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_steamwood_d192",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1089,
+   "z": 1807,
+   "yaw": 2.36,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_steamwood_d193",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1473,
+   "z": 1855,
+   "yaw": 3.98,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_steamwood_s105",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    11,
+    12
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1736,
+   "z": 1664,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  }
+ ],
+ "features": [],
+ "density": {
+  "target": 50,
+  "roadTarget": 45,
+  "added": {
+   "curio": 107,
+   "wayside": 193,
+   "stray": 105,
+   "roamer": 18,
+   "folk": 20
+  },
+  "openShareCovered": 1,
+  "roadShareCovered": 1
+ },
+ "levels": [
+  11,
+  13
+ ]
+}

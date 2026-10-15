@@ -54,6 +54,13 @@ export function bakeHorizon() {
     const k = j * width + i; if (done[k]) continue;
     const wx = i * HORIZON_STEP, wz = j * HORIZON_STEP;
     let g = ref.baseGround(wx, wz), top = NaN;
+    const isl = ref.islandAt(wx, wz);
+    if (isl) {                    // an expansion island not baked yet: its own waters and biomes (tools/lib/vharlen.mjs)
+      const w = g < 0 ? null : isl.waterAt(wx, wz, g);
+      if (g < 0) top = 0; else if (w) { g = w.ground; if (w.top === w.top) top = w.top; }
+      hq[k] = q(g); wq[k] = Number.isNaN(top) ? 0 : Math.max(1, q(top)); biome[k] = top === 0 ? 2 : top === top ? 3 : isl.biomeAt(wx, wz);
+      continue;
+    }
     const mi = Math.min(m.height - 1, Math.max(0, Math.round(wz / M))) * m.width + Math.min(m.width - 1, Math.max(0, Math.round(wx / M)));
     if (m.water[mi] === 1 || g < 0) top = 0;
     else if (m.water[mi] === 2) { const lv = lakeLevel.get(mi) ?? 0; top = lv; g = Math.min(g, lv - 2.5); }

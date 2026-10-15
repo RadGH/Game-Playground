@@ -10,7 +10,7 @@ import { RIVER_WIDTH } from '../../tools/lib/world-core.mjs';
 
 const ROOT = new URL('../../', import.meta.url);
 const read = p => readFileSync(new URL(p, ROOT));
-const ZONES = Object.values(JSON.parse(read('data/world/province-map.json')).provinces.torbor_downs.map);
+const ZONES = Object.values(/* every province (Torbor Downs + Vharlen) */ Object.assign({}, ...Object.values(JSON.parse(read('data/world/province-map.json')).provinces).map(p => p.map)));
 const W = JSON.parse(read('data/world/world.json'));
 
 test('all 16 zones: every water-sheet edge vertex is buried in the bank (ground ≥ surface), corners included', () => {

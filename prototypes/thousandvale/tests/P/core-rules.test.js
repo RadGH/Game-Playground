@@ -132,7 +132,7 @@ test('recipes: every need is a real material, every product exists, every gear b
     else { assert.ok(rc.kind === 'material' ? P.material(rc.makes.id) : rc.kind === 'tool' ? P.tool(rc.makes.id) : P.goodItem(rc.makes.id), `${rc.id} makes ${rc.makes.id}`); makes.add(rc.makes.id); }
   }
   // every material a recipe needs comes from a node, a corpse or another recipe
-  const raw = new Set([...Object.values(content.nodeKinds).flatMap(k => [k.gives, k.bonus]), ...content.classes.hide, content.skins.meat, content.skins.bonus].filter(Boolean));
+  const raw = new Set([...Object.values(content.nodeKinds).flatMap(k => [k.gives, k.bonus]), ...content.classes.hide, ...Object.values(content.skins.types).map(t => t.hide), content.skins.meat, content.skins.bonus].filter(Boolean));   // (a beast's own hide: Vharlen's salamander, EXPANSION-1 §4.5)
   for (const id of needs) assert.ok(raw.has(id) || makes.has(id), `${id} is needed and nothing gives it`);
   for (const p of ['sling_satchel', 'trail_rucksack', 'expedition_pack']) assert.ok(P.recipes.some(r => r.kind === 'gear' && r.bases.some(b => b.key === p)), `Outfitting makes the ${p} (W19)`);
   assert.ok(!P.recipes.some(r => (r.bases || []).some(b => b.slot === 'light')), 'no light items (W22)');

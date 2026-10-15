@@ -1,0 +1,379 @@
+{
+  "id": "boss_haggerd_brickburner",
+  "name": "Haggerd the Brick-Burner",
+  "tier": "boss",
+  "body": "slagborn_firecaller",
+  "place": "dungeon kiln_forge set A (The Old Kilns, Kiln Ridge, level 17-20): the end boss in the Master Kiln",
+  "_doc": "The Slagborn firecaller who fires the great kiln at the top of the ridge, and fires people in it when the bricks run short. P1 \"Firing\": fire bolts, a flame cone, and the four kiln mouths round the room venting in turn. Two bellows levers: pump one and the draught pulls the fire off the floor (removes the burning ground). P2 at 60% \"Sealed Kiln\": he steps into the master kiln and seals the door — close the three dampers (use them) to choke the fire and crack the seal. P3 new bar \"Firing Heat\": the heat climbs — a ring around him, a fire on each player that spreads, and a heat surge that only the kiln mouths' shadow (stand next to a mouth) escapes.",
+  "party": "Solo: hard. 2-3: one on dampers and bellows. 5: as designed.",
+  "hpMult": 4,
+  "arena": {
+    "radius": 16,
+    "objects": [
+      {
+        "id": "mouth",
+        "type": "rock",
+        "name": "Kiln mouth",
+        "x": -10,
+        "z": -10,
+        "r": 1.5,
+        "hp": 6
+      },
+      {
+        "id": "mouth",
+        "type": "rock",
+        "name": "Kiln mouth",
+        "x": 10,
+        "z": -10,
+        "r": 1.5,
+        "hp": 6
+      },
+      {
+        "id": "mouth",
+        "type": "rock",
+        "name": "Kiln mouth",
+        "x": 10,
+        "z": 10,
+        "r": 1.5,
+        "hp": 6
+      },
+      {
+        "id": "mouth",
+        "type": "rock",
+        "name": "Kiln mouth",
+        "x": -10,
+        "z": 10,
+        "r": 1.5,
+        "hp": 6
+      },
+      {
+        "id": "bellows_w",
+        "type": "lever",
+        "name": "Bellows",
+        "x": -13,
+        "z": 0,
+        "repeat": true,
+        "onUse": [
+          {
+            "remove": "kiln_fire"
+          },
+          {
+            "say": "The bellows draw the fire back off the floor!",
+            "style": "emote"
+          }
+        ]
+      },
+      {
+        "id": "bellows_e",
+        "type": "lever",
+        "name": "Bellows",
+        "x": 13,
+        "z": 0,
+        "repeat": true,
+        "onUse": [
+          {
+            "remove": "kiln_fire"
+          },
+          {
+            "say": "The bellows draw the fire back off the floor!",
+            "style": "emote"
+          }
+        ]
+      },
+      {
+        "id": "damper_a",
+        "type": "brazier",
+        "name": "Damper",
+        "x": 0,
+        "z": -12
+      },
+      {
+        "id": "damper_b",
+        "type": "brazier",
+        "name": "Damper",
+        "x": -6,
+        "z": 11
+      },
+      {
+        "id": "damper_c",
+        "type": "brazier",
+        "name": "Damper",
+        "x": 6,
+        "z": 11
+      }
+    ]
+  },
+  "say": {
+    "pull": [
+      "\"Good timing. The kiln is short of fuel.\"",
+      "Haggerd opens his hands and the kiln behind him roars.",
+      "\"Clay goes in soft. It comes out hard. So will you.\""
+    ],
+    "death": "Haggerd falls back against his kiln, and for the first time in years the fire in it goes out.",
+    "reset": "\"Next batch.\" Haggerd turns back to his kiln."
+  },
+  "enrage": {
+    "seconds": 340,
+    "damage": 3,
+    "say": "The master kiln is white-hot!",
+    "soft": {
+      "from": 270,
+      "every": 15,
+      "add": 0.08,
+      "say": "The heat climbs."
+    }
+  },
+  "abilities": {
+    "bolt": {
+      "id": "bolt",
+      "name": "Kiln Bolt",
+      "every": [
+        4,
+        6
+      ],
+      "range": 20,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "target",
+          "r": 2.2,
+          "wind": 1,
+          "damage": 1.5,
+          "element": "fire",
+          "status": "burn"
+        }
+      ]
+    },
+    "flame": {
+      "id": "flame",
+      "name": "Firing Flame",
+      "every": [
+        9,
+        11
+      ],
+      "first": 3,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 7,
+          "arc": 1.3,
+          "wind": 1.1,
+          "damage": 1.8,
+          "element": "fire"
+        }
+      ]
+    },
+    "mouths": {
+      "id": "mouths",
+      "name": "Kiln Mouths Vent",
+      "every": [
+        14,
+        17
+      ],
+      "first": 5,
+      "cast": 0.6,
+      "say": "The kiln mouths are venting — stay clear of them!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "object",
+          "object": "mouth",
+          "r": 4.5,
+          "wind": 1.6,
+          "damage": 1.9,
+          "element": "fire",
+          "leave": {
+            "id": "kiln_fire",
+            "type": "pool",
+            "name": "Kiln fire",
+            "r": 3,
+            "every": 1,
+            "seconds": 30,
+            "damage": 0.3,
+            "status": "burn",
+            "element": "fire"
+          }
+        }
+      ]
+    },
+    "cinders": {
+      "id": "cinders",
+      "name": "Hot Brick Rain",
+      "every": [
+        10,
+        12
+      ],
+      "first": 2,
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "scatter",
+          "spread": 12,
+          "r": 2.6,
+          "count": 4,
+          "delay": 0.3,
+          "wind": 1.4,
+          "damage": 1.3,
+          "element": "fire"
+        }
+      ]
+    },
+    "heat_ring": {
+      "id": "heat_ring",
+      "name": "Firing Heat",
+      "every": [
+        15,
+        18
+      ],
+      "first": 4,
+      "cast": 0.8,
+      "say": "Heat rolls off him in a ring — in close or far out!",
+      "telegraphs": [
+        {
+          "shape": "ring",
+          "at": "self",
+          "r": 11,
+          "r2": 4,
+          "wind": 1.7,
+          "damage": 2.1,
+          "element": "fire",
+          "status": "seared"
+        }
+      ]
+    },
+    "spread_fire": {
+      "id": "spread_fire",
+      "name": "Catching Fire",
+      "every": [
+        13,
+        15
+      ],
+      "first": 3,
+      "say": "Each of you is catching fire — spread out!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "each",
+          "r": 3,
+          "follow": true,
+          "wind": 2,
+          "damage": 1.4,
+          "element": "fire",
+          "status": "burn"
+        }
+      ]
+    },
+    "surge": {
+      "id": "surge",
+      "name": "Heat Surge",
+      "every": [
+        24,
+        28
+      ],
+      "first": 10,
+      "cast": 1.5,
+      "say": "HEAT SURGE — get beside a kiln mouth, in its shadow!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "object",
+          "object": "mouth",
+          "r": 3.5,
+          "kind": "safe",
+          "wind": 3.5,
+          "damage": 2.6,
+          "element": "fire"
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Firing",
+      "abilities": [
+        "bolt",
+        "flame",
+        "mouths"
+      ]
+    },
+    {
+      "name": "Sealed Kiln",
+      "at": 0.6,
+      "say": "Haggerd steps into the master kiln and slams the door. Close the three dampers!",
+      "abilities": [
+        "bolt",
+        "cinders"
+      ],
+      "onEnter": [
+        {
+          "shield": {
+            "seconds": 20,
+            "pool": 0.1
+          }
+        },
+        {
+          "adds": {
+            "type": "slagborn_raider",
+            "count": 2,
+            "radius": 8,
+            "at": "home"
+          }
+        },
+        {
+          "say": "The kiln door is sealed. Smash all three dampers shut to choke the fire! The seal fails by itself in 20 seconds.",
+          "style": "warn"
+        }
+      ],
+      "ward": {
+        "seconds": 20,
+        "break": "objects",
+        "need": 3,
+        "what": "brazier",
+        "say": "The kiln door is sealed. Smash all three dampers shut to choke the fire! The seal fails by itself in 20 seconds.",
+        "fade": "The kiln seal cracks in the heat.",
+        "pool": 0.1
+      }
+    },
+    {
+      "name": "Firing Heat",
+      "newBar": {
+        "hp": 0.55
+      },
+      "say": "\"Then I'll fire the whole ridge.\"",
+      "abilities": [
+        "flame",
+        "heat_ring",
+        "spread_fire",
+        "surge"
+      ]
+    }
+  ],
+  "triggers": [
+    {
+      "when": {
+        "lit": 3,
+        "phase": 1
+      },
+      "do": [
+        {
+          "shield": false
+        },
+        {
+          "stun": 3
+        },
+        {
+          "vuln": {
+            "takeMore": 0.4,
+            "seconds": 10,
+            "name": "Choked Fire"
+          }
+        },
+        {
+          "say": "The dampers slam shut! The fire chokes and the seal cracks open!",
+          "style": "warn"
+        }
+      ]
+    }
+  ]
+}

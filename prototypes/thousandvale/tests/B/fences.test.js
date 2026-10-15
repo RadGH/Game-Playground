@@ -121,7 +121,7 @@ function segD(r, [a, b]) { const dx = b[0] - a[0], dz = b[1] - a[1], t = Math.ma
 
 test('T8a client: the pasture fences of every zone, as setpiece-view plans them — rails along their span, a post at each joint', async () => {
   const { planSetPieces } = await import('../../js/client/setpiece-view.js');
-  const PMAP = json('data/world/province-map.json').provinces.torbor_downs.map;
+  const PMAP = /* every province (Torbor Downs + Vharlen) */ Object.assign({}, ...Object.values(json('data/world/province-map.json').provinces).map(p => p.map));
   let rails = 0, fences = 0;
   for (const id of Object.values(PMAP)) {
     const P = json(`data/zones/${id}/placements.json`).placements.filter(p => p.kind === 'fence');

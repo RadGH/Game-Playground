@@ -1,0 +1,7515 @@
+{
+ "_doc": "Stream E. Content placements for world zone z11_10 (E zone 'pumice_wastes', The Pumice Wastes) — tools/place-vignettes.mjs against stream B's bake (terrain 70a02eb6). Zone metres. type: vignette (id = recipe id in data/vignettes/*.json; rotate recipe offsets by yaw, js/sim/vignettes.js vignettePoint) · fort/farm/cave (template = data/provinces/sites.json key) · camp (monster, with, level [lo,hi], count [lo,hi]) · rare (encounter id, slot, path = roaming loop, every leg walkable) · waystone · npc (quest NPC id from data/quests/<zone>.json) · treasure_clue / treasure_cache (chain id from data/quests/treasure.json, step index) · hook (data/hooks.json) as a disc. `features` = hooks that ARE an existing feature (at a crossing, the settlement itself, a line across the zone with pts) — not keep-clear discs. Everything with a radius is on dry walkable ground in the zone's main walkable component, off roads, streets, plots and settlements.",
+ "zone": "z11_10",
+ "sheetZone": "pumice_wastes",
+ "province": "vharlen",
+ "terrainHash": "70a02eb6",
+ "band": [
+  14,
+  16
+ ],
+ "archetype": "frontier",
+ "rules": {
+  "vignette": {
+   "townGap": 60,
+   "gap": 30,
+   "slope": 20,
+   "sameKindSpacing": 140
+  },
+  "fort": {
+   "townGap": 80,
+   "gap": 40,
+   "slope": 16
+  },
+  "farm": {
+   "townGap": 25,
+   "gap": 30,
+   "slope": 12
+  },
+  "cave": {
+   "townGap": 120,
+   "gap": 40,
+   "slope": 28
+  },
+  "camp": {
+   "townGap": 120,
+   "gap": 25,
+   "slope": 24
+  },
+  "rare": {
+   "townGap": 150,
+   "gap": 30,
+   "slope": 24
+  },
+  "hook": {
+   "townGap": 40,
+   "gap": 30,
+   "slope": 26
+  },
+  "wayside": {
+   "townGap": 20,
+   "gap": 12,
+   "slope": 34,
+   "edge": 24
+  },
+  "settlement": {
+   "townGap": 300,
+   "gap": 60,
+   "slope": 10
+  },
+  "curio": {
+   "townGap": 30,
+   "gap": 10,
+   "slope": 26,
+   "edge": 30
+  },
+  "stray": {
+   "townGap": 70,
+   "gap": 16,
+   "slope": 26,
+   "edge": 30
+  },
+  "folk": {
+   "townGap": 30,
+   "gap": 12,
+   "slope": 24,
+   "edge": 30
+  },
+  "setpiece": {
+   "townGap": 20,
+   "gap": 25,
+   "slope": 20
+  }
+ },
+ "mainWalkableShare": 0.658,
+ "settlements": [
+  {
+   "name": "Lastwell",
+   "kind": "town",
+   "x": 1312,
+   "z": 1144,
+   "r": 90,
+   "source": "bake",
+   "bakeId": "lastwell"
+  }
+ ],
+ "checks": [
+  {
+   "id": "door_1",
+   "kind": "dungeon_door",
+   "x": 1462,
+   "z": 1225,
+   "reachable": true,
+   "openShare": 1
+  },
+  {
+   "id": "event_pumice_wastes",
+   "kind": "event_site",
+   "x": 1079,
+   "z": 992,
+   "reachable": true,
+   "openShare": 1
+  }
+ ],
+ "problems": [
+  "waystone door"
+ ],
+ "placements": [
+  {
+   "type": "fort",
+   "id": "fort_pumice_wastes_0",
+   "name": "Lastwell Stockade",
+   "template": "palisade_fort",
+   "friendly": true,
+   "x": 1388,
+   "z": 229,
+   "yaw": 0.79,
+   "radius": 24,
+   "level": 15
+  },
+  {
+   "type": "fort",
+   "id": "fort_pumice_wastes_1",
+   "name": "Lastwell Outpost",
+   "template": "warband_stockade",
+   "friendly": false,
+   "x": 1321,
+   "z": 1571,
+   "yaw": 0,
+   "radius": 26,
+   "level": 15
+  },
+  {
+   "type": "farm",
+   "id": "farm_pumice_wastes_0",
+   "name": "Lastwell Terraces",
+   "template": "arable",
+   "flavour": null,
+   "settlement": "Lastwell",
+   "x": 1264,
+   "z": 1015,
+   "yaw": 1.96,
+   "radius": 22,
+   "level": 14
+  },
+  {
+   "type": "farm",
+   "id": "farm_pumice_wastes_1",
+   "name": "Lastwell Terraces",
+   "template": "arable",
+   "flavour": null,
+   "settlement": "Lastwell",
+   "x": 1320,
+   "z": 1281,
+   "yaw": -1.18,
+   "radius": 22,
+   "level": 14
+  },
+  {
+   "type": "farm",
+   "id": "farm_pumice_wastes_2",
+   "name": "Burned Lastwell Terraces",
+   "template": "arable",
+   "flavour": "burned",
+   "settlement": "Lastwell",
+   "x": 1450,
+   "z": 1110,
+   "yaw": -1.18,
+   "radius": 22,
+   "level": 14
+  },
+  {
+   "type": "farm",
+   "id": "farm_pumice_wastes_3",
+   "name": "Burned Lastwell Terraces",
+   "template": "arable",
+   "flavour": "burned",
+   "settlement": "Lastwell",
+   "x": 1160,
+   "z": 1152,
+   "yaw": 1.57,
+   "radius": 22,
+   "level": 14
+  },
+  {
+   "type": "cave",
+   "id": "cave_pumice_wastes_0",
+   "name": "Prowler den",
+   "template": "beast_den",
+   "plan": {
+    "family": "lava_tube",
+    "floors": 1,
+    "level": 15
+   },
+   "x": 1952,
+   "z": 560,
+   "yaw": -1.57,
+   "radius": 10,
+   "level": 15
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_0_0",
+   "monster": "slagborn_raider",
+   "with": "slagborn_firecaller",
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    3,
+    4
+   ],
+   "x": 852,
+   "z": 507,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_0_1",
+   "monster": "slagborn_raider",
+   "with": "slagborn_firecaller",
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    3,
+    4
+   ],
+   "x": 851,
+   "z": 1955,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_1_0",
+   "monster": "slagborn_chief",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 536,
+   "z": 1214,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_1_1",
+   "monster": "slagborn_chief",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1798,
+   "z": 1942,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_2_0",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 990,
+   "z": 65,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_2_1",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1931,
+   "z": 1396,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_3_0",
+   "monster": "glasswing",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1957,
+   "z": 951,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_3_1",
+   "monster": "glasswing",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1898,
+   "z": 132,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_4_0",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1517,
+   "z": 678,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_4_1",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1390,
+   "z": 1978,
+   "yaw": 0,
+   "radius": 10
+  },
+  {
+   "type": "rare",
+   "id": "rare_ashcoat",
+   "slot": 0,
+   "name": "Ashcoat",
+   "x": 1410,
+   "z": 1417,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     1372,
+     1378
+    ],
+    [
+     1463,
+     1368
+    ],
+    [
+     1469,
+     1418
+    ],
+    [
+     1410,
+     1487
+    ],
+    [
+     1327,
+     1421
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 16
+  },
+  {
+   "type": "rare",
+   "id": "rare_the_tally_man",
+   "slot": 1,
+   "name": "The Tally Man",
+   "x": 902,
+   "z": 1454,
+   "yaw": 0,
+   "radius": 15,
+   "path": [
+    [
+     850,
+     1501
+    ],
+    [
+     830,
+     1439
+    ],
+    [
+     923,
+     1369
+    ],
+    [
+     965,
+     1444
+    ],
+    [
+     955,
+     1530
+    ]
+   ],
+   "respawnMin": [
+    20,
+    60
+   ],
+   "level": 16
+  },
+  {
+   "type": "waystone",
+   "id": "ws_z11_10_lastwell",
+   "name": "Lastwell",
+   "x": 1312.2,
+   "z": 1149.1,
+   "yaw": 0,
+   "settlement": "Lastwell",
+   "radius": 1
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_door",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1432,
+   "z": 1262,
+   "yaw": 0,
+   "radius": 6,
+   "doorGuard": true
+  },
+  {
+   "type": "npc",
+   "id": "hearth_elder_halla",
+   "name": "Hearth-elder Halla Morrakk",
+   "role": "elder",
+   "at": "Lastwell",
+   "x": 1322.7,
+   "z": 1152.4,
+   "yaw": 4.313,
+   "office": "lastwell_plot_12",
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "haro_draskar",
+   "name": "Haro Draskar",
+   "role": "guard",
+   "at": "Lastwell",
+   "x": 1285.5,
+   "z": 1106.2,
+   "yaw": 1.101,
+   "office": "lastwell_plot_28",
+   "radius": 1
+  },
+  {
+   "type": "npc",
+   "id": "matu_tukkari",
+   "name": "Matu Tukkari",
+   "role": "innkeeper",
+   "at": "Lastwell",
+   "x": 1321.3,
+   "z": 1143.9,
+   "yaw": 2.743,
+   "office": "lastwell_plot_13",
+   "radius": 1
+  },
+  {
+   "type": "wayside",
+   "id": "driftwood_post_pumice_wastes_0",
+   "kind": "driftwood_post",
+   "name": "Driftwood Post",
+   "x": 672,
+   "z": 852,
+   "yaw": 5.37,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_f1",
+   "monster": "slagborn_raider",
+   "with": "slagborn_firecaller",
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1192,
+   "z": 576,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "sand_shrine_pumice_wastes_2",
+   "kind": "sand_shrine",
+   "name": "Wind Shrine",
+   "x": 1677,
+   "z": 1640,
+   "yaw": 4.53,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_f3",
+   "monster": "slagborn_chief",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1665,
+   "z": 381,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_pumice_wastes_4",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 681,
+   "z": 1693,
+   "yaw": 6.19,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_f5",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1124,
+   "z": 1832,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_pumice_wastes_6",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 758,
+   "z": 240,
+   "yaw": 0.94,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_f7",
+   "monster": "glasswing",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1763,
+   "z": 1244,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_pumice_wastes_8",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 812,
+   "z": 1152,
+   "yaw": 0.63,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_f9",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1084,
+   "z": 324,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_pumice_wastes_10",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1696,
+   "z": 903,
+   "yaw": 5.64,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_f11",
+   "monster": "slagborn_raider",
+   "with": "slagborn_firecaller",
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 612,
+   "z": 1456,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_pumice_wastes_12",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 980,
+   "z": 728,
+   "yaw": 2.85,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_f13",
+   "monster": "slagborn_chief",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1918,
+   "z": 1670,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_pumice_wastes_14",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 2024,
+   "z": 335,
+   "yaw": 5.29,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_f15",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 917,
+   "z": 1724,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_pumice_wastes_16",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1620,
+   "z": 144,
+   "yaw": 4.28,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_f17",
+   "monster": "glasswing",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1582,
+   "z": 1852,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_pumice_wastes_18",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1312,
+   "z": 776,
+   "yaw": 3.26,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_f19",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1760,
+   "z": 688,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_pumice_wastes_20",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1408,
+   "z": 480,
+   "yaw": 5.63,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_f21",
+   "monster": "slagborn_raider",
+   "with": "slagborn_firecaller",
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1103,
+   "z": 1388,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_pumice_wastes_22",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1451,
+   "z": 778,
+   "yaw": 3.04,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_f23",
+   "monster": "slagborn_chief",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1973,
+   "z": 1894,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_pumice_wastes_24",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1459,
+   "z": 400,
+   "yaw": 1.06,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_f25",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1644,
+   "z": 1428,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_pumice_wastes_26",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1096,
+   "z": 1612,
+   "yaw": 5.75,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_f27",
+   "monster": "glasswing",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1960,
+   "z": 1180,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_pumice_wastes_28",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 864,
+   "z": 904,
+   "yaw": 2.1,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_f29",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 715,
+   "z": 656,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_pumice_wastes_30",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1322,
+   "z": 1785,
+   "yaw": 4.19,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_f31",
+   "monster": "slagborn_raider",
+   "with": "slagborn_firecaller",
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 682,
+   "z": 1898,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "sand_shrine_pumice_wastes_32",
+   "kind": "sand_shrine",
+   "name": "Wind Shrine",
+   "x": 648,
+   "z": 1048,
+   "yaw": 0.71,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_f33",
+   "monster": "slagborn_chief",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1968,
+   "z": 725,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_pumice_wastes_34",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 976,
+   "z": 1236,
+   "yaw": 2.75,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_f35",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1192,
+   "z": 164,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "sand_shrine_pumice_wastes_36",
+   "kind": "sand_shrine",
+   "name": "Wind Shrine",
+   "x": 1496,
+   "z": 1684,
+   "yaw": 5.76,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_f37",
+   "monster": "glasswing",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1624,
+   "z": 1146,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_pumice_wastes_38",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1836,
+   "z": 308,
+   "yaw": 2.88,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_f39",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1826,
+   "z": 1120,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_pumice_wastes_40",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 711,
+   "z": 412,
+   "yaw": 0.06,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_f41",
+   "monster": "slagborn_raider",
+   "with": "slagborn_firecaller",
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1251,
+   "z": 397,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_pumice_wastes_42",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 720,
+   "z": 1304,
+   "yaw": 2.48,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_f43",
+   "monster": "slagborn_chief",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1154,
+   "z": 1988,
+   "yaw": 0,
+   "radius": 10,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_pumice_wastes_44",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1524,
+   "z": 936,
+   "yaw": 0.08,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_pumice_wastes_d1",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1427,
+   "z": 39,
+   "yaw": 6.26,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_pumice_wastes_d2",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 834,
+   "z": 90,
+   "yaw": 3.45,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s1",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 911,
+   "z": 247,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_pumice_wastes_d3",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1015,
+   "z": 489,
+   "yaw": 2.68,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_pumice_wastes_d4",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1136,
+   "z": 736,
+   "yaw": 4.94,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_pumice_wastes_d5",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1792,
+   "z": 528,
+   "yaw": 4.13,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_pumice_wastes_1",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1639,
+   "z": 544,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1587,
+     579
+    ],
+    [
+     1611,
+     493
+    ],
+    [
+     1689,
+     532
+    ],
+    [
+     1657,
+     587
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s2",
+   "monster": "glasswing",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1764,
+   "z": 1774,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_1",
+   "recipe": "cu_blight_bloom",
+   "name": "Ash Lily",
+   "kind": "forage",
+   "x": 1807,
+   "z": 1529,
+   "yaw": 2.5,
+   "radius": 4,
+   "levelBase": 14
+  },
+  {
+   "type": "folk",
+   "id": "folk_pumice_wastes_1",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 1752,
+   "z": 40,
+   "yaw": 5.1,
+   "radius": 6,
+   "path": [
+    [
+     1732,
+     80
+    ],
+    [
+     1741,
+     4
+    ],
+    [
+     1801,
+     45
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_2",
+   "recipe": "cu_wasp_bank",
+   "name": "Wasp Bank",
+   "kind": "nest",
+   "x": 1640,
+   "z": 2009,
+   "yaw": 5.36,
+   "radius": 4,
+   "levelBase": 14
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s3",
+   "monster": "glasswing",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1354,
+   "z": 624,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_3",
+   "recipe": "cu_stone_watcher",
+   "name": "Stone Watcher",
+   "kind": "shrine",
+   "x": 2017,
+   "z": 1508,
+   "yaw": 4.58,
+   "radius": 5,
+   "levelBase": 14
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s4",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1001,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_4",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 832,
+   "z": 762,
+   "yaw": 2.23,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_pumice_wastes_d6",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1279,
+   "z": 41,
+   "yaw": 5.88,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_pumice_wastes_d7",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1552,
+   "z": 273,
+   "yaw": 3.53,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_pumice_wastes_d8",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1560,
+   "z": 1552,
+   "yaw": 1.56,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s5",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1378,
+   "z": 904,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_pumice_wastes_d9",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1632,
+   "z": 776,
+   "yaw": 0.06,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_pumice_wastes_d10",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 905,
+   "z": 1039,
+   "yaw": 1.01,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_pumice_wastes_d11",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 968,
+   "z": 1864,
+   "yaw": 3.48,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_pumice_wastes_d12",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 784,
+   "z": 1792,
+   "yaw": 3.63,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_pumice_wastes_2",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1200,
+   "z": 864,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1181,
+     806
+    ],
+    [
+     1263,
+     836
+    ],
+    [
+     1208,
+     915
+    ],
+    [
+     1142,
+     883
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s6",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1221,
+   "z": 1707,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_5",
+   "recipe": "cu_miners_notice",
+   "name": "Miners' Notice",
+   "kind": "lore",
+   "x": 1598,
+   "z": 1323,
+   "yaw": 1.2,
+   "radius": 4,
+   "levelBase": 14
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_pumice_wastes_d13",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 719,
+   "z": 1557,
+   "yaw": 2.42,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_6",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1784,
+   "z": 1392,
+   "yaw": 2.14,
+   "radius": 7,
+   "levelBase": 14
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s7",
+   "monster": "glasswing",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 518,
+   "z": 1080,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_pumice_wastes_d14",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 2008,
+   "z": 40,
+   "yaw": 2.9,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_pumice_wastes_d15",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1912,
+   "z": 425,
+   "yaw": 5.03,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_7",
+   "recipe": "cu_miners_notice",
+   "name": "Miners' Notice",
+   "kind": "lore",
+   "x": 1822,
+   "z": 776,
+   "yaw": 2.47,
+   "radius": 4,
+   "levelBase": 14
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_pumice_wastes_d16",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1728,
+   "z": 225,
+   "yaw": 0.63,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_pumice_wastes_d17",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 928,
+   "z": 385,
+   "yaw": 5.06,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_8",
+   "recipe": "cu_blight_pool",
+   "name": "Blight Pool",
+   "kind": "hazard",
+   "x": 776,
+   "z": 1008,
+   "yaw": 3.69,
+   "radius": 5,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "roam_pumice_wastes_3",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1127,
+   "z": 39,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1088,
+     69
+    ],
+    [
+     1108,
+     2
+    ],
+    [
+     1166,
+     11
+    ],
+    [
+     1152,
+     79
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s8",
+   "monster": "slagborn_chief",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1058,
+   "z": 613,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_9",
+   "recipe": "cu_empty_gallows_post",
+   "name": "Weathered Post",
+   "kind": "lore",
+   "x": 1441,
+   "z": 1848,
+   "yaw": 4.04,
+   "radius": 3,
+   "levelBase": 14
+  },
+  {
+   "type": "folk",
+   "id": "folk_pumice_wastes_2",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 1263,
+   "z": 1905,
+   "yaw": 4.55,
+   "radius": 6,
+   "path": [
+    [
+     1267,
+     1950
+    ],
+    [
+     1216,
+     1897
+    ],
+    [
+     1289,
+     1875
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_pumice_wastes_d18",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 680,
+   "z": 1175,
+   "yaw": 1.73,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_10",
+   "recipe": "cu_cloudberry",
+   "name": "Cloudberry Bog",
+   "kind": "forage",
+   "x": 1725,
+   "z": 1073,
+   "yaw": 2.27,
+   "radius": 4,
+   "levelBase": 14
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_pumice_wastes_d19",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1177,
+   "z": 1505,
+   "yaw": 1.22,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_pumice_wastes_d20",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 881,
+   "z": 643,
+   "yaw": 4.55,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_pumice_wastes_d21",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 984,
+   "z": 856,
+   "yaw": 1.18,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_pumice_wastes_4",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1040,
+   "z": 192,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1034,
+     160
+    ],
+    [
+     1072,
+     188
+    ],
+    [
+     1049,
+     227
+    ],
+    [
+     990,
+     189
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_pumice_wastes_d22",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 2007,
+   "z": 210,
+   "yaw": 1.72,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_pumice_wastes_d23",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 808,
+   "z": 1648,
+   "yaw": 1.33,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s9",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1552,
+   "z": 40,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_11",
+   "recipe": "cu_soldiers_tally",
+   "name": "Soldier's Tally",
+   "kind": "lore",
+   "x": 1979,
+   "z": 1751,
+   "yaw": 1.88,
+   "radius": 4,
+   "levelBase": 14
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_12",
+   "recipe": "cu_loose_stone",
+   "name": "Loose Stone",
+   "kind": "cache",
+   "x": 1521,
+   "z": 1969,
+   "yaw": 5.89,
+   "radius": 4,
+   "levelBase": 14
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_13",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 842,
+   "z": 1270,
+   "yaw": 4.41,
+   "radius": 7,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s10",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1912,
+   "z": 2008,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_pumice_wastes_d24",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1136,
+   "z": 456,
+   "yaw": 6.18,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_pumice_wastes_d25",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1048,
+   "z": 1728,
+   "yaw": 3.88,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_pumice_wastes_5",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 601,
+   "z": 1327,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     627,
+     1304
+    ],
+    [
+     620,
+     1366
+    ],
+    [
+     558,
+     1348
+    ],
+    [
+     590,
+     1289
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s11",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 816,
+   "z": 344,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_pumice_wastes_d26",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 2009,
+   "z": 1294,
+   "yaw": 5.37,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_pumice_wastes_d27",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1256,
+   "z": 272,
+   "yaw": 0.43,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_14",
+   "recipe": "cu_smugglers_drop",
+   "name": "Smuggler's Drop",
+   "kind": "cache",
+   "x": 730,
+   "z": 528,
+   "yaw": 1.06,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s12",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 992,
+   "z": 1121,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_15",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 1869,
+   "z": 998,
+   "yaw": 3.36,
+   "radius": 5,
+   "levelBase": 14
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_pumice_wastes_d28",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 2002,
+   "z": 1077,
+   "yaw": 0.98,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s13",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1505,
+   "z": 152,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_pumice_wastes_d29",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1888,
+   "z": 1280,
+   "yaw": 2.89,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_pumice_wastes_d30",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 735,
+   "z": 2008,
+   "yaw": 3.88,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_16",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 1296,
+   "z": 512,
+   "yaw": 6.13,
+   "radius": 4,
+   "levelBase": 14
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_17",
+   "recipe": "cu_cairn_cache",
+   "name": "Scout's Cairn",
+   "kind": "cache",
+   "x": 1802,
+   "z": 1640,
+   "yaw": 5.57,
+   "radius": 4,
+   "levelBase": 14
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_pumice_wastes_d31",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 2008,
+   "z": 840,
+   "yaw": 3.37,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_18",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 1863,
+   "z": 1841,
+   "yaw": 3.54,
+   "radius": 4,
+   "levelBase": 14
+  },
+  {
+   "type": "folk",
+   "id": "folk_pumice_wastes_3",
+   "role": "pilgrim_resting",
+   "name": "Resting pilgrim",
+   "work": "pray",
+   "chatter": [
+    "role.pilgrim"
+   ],
+   "x": 1082,
+   "z": 1261,
+   "yaw": 0.23,
+   "radius": 6,
+   "path": [
+    [
+     1073,
+     1260
+    ],
+    [
+     1087,
+     1255
+    ],
+    [
+     1087,
+     1268
+    ]
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s14",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1650,
+   "z": 1775,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_pumice_wastes_d32",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1240,
+   "z": 688,
+   "yaw": 4.08,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_19",
+   "recipe": "cu_blight_bloom",
+   "name": "Ash Lily",
+   "kind": "forage",
+   "x": 1872,
+   "z": 647,
+   "yaw": 4.55,
+   "radius": 4,
+   "levelBase": 14
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s15",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1784,
+   "z": 406,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_pumice_wastes_d33",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1222,
+   "z": 1368,
+   "yaw": 5.63,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_pumice_wastes_6",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1385,
+   "z": 1686,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1419,
+     1647
+    ],
+    [
+     1416,
+     1726
+    ],
+    [
+     1352,
+     1725
+    ],
+    [
+     1350,
+     1650
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_20",
+   "recipe": "cu_warrior_cairn",
+   "name": "Warrior's Cairn",
+   "kind": "shrine",
+   "x": 1698,
+   "z": 1882,
+   "yaw": 2.21,
+   "radius": 5,
+   "levelBase": 14
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_pumice_wastes_d34",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1465,
+   "z": 573,
+   "yaw": 2.95,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s16",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 624,
+   "z": 947,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_pumice_wastes_d35",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1063,
+   "z": 1504,
+   "yaw": 2.51,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_pumice_wastes_4",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 720,
+   "z": 1416,
+   "yaw": 0.56,
+   "radius": 6,
+   "path": [
+    [
+     739,
+     1385
+    ],
+    [
+     756,
+     1454
+    ],
+    [
+     677,
+     1423
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_pumice_wastes_d36",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1911,
+   "z": 1551,
+   "yaw": 5.37,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s17",
+   "monster": "slagborn_chief",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1360,
+   "z": 360,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_pumice_wastes_d37",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1697,
+   "z": 1528,
+   "yaw": 4.84,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_pumice_wastes_d38",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1769,
+   "z": 894,
+   "yaw": 3,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s18",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1544,
+   "z": 832,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_pumice_wastes_d39",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 992,
+   "z": 1640,
+   "yaw": 4.65,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_pumice_wastes_d40",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 2007,
+   "z": 470,
+   "yaw": 4.28,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_pumice_wastes_d41",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1921,
+   "z": 819,
+   "yaw": 3.59,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s19",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 760,
+   "z": 904,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_pumice_wastes_d42",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1352,
+   "z": 112,
+   "yaw": 1.76,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_21",
+   "recipe": "cu_desert_melon",
+   "name": "Bitter Melons",
+   "kind": "forage",
+   "x": 728,
+   "z": 768,
+   "yaw": 1.07,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s20",
+   "monster": "glasswing",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 952,
+   "z": 569,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_pumice_wastes_d43",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1560,
+   "z": 400,
+   "yaw": 4.02,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_pumice_wastes_d44",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1939,
+   "z": 280,
+   "yaw": 4.81,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_pumice_wastes_d45",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1064,
+   "z": 1919,
+   "yaw": 5.02,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_pumice_wastes_7",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1441,
+   "z": 991,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1438,
+     926
+    ],
+    [
+     1520,
+     995
+    ],
+    [
+     1437,
+     1057
+    ],
+    [
+     1352,
+     989
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s21",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1999,
+   "z": 1631,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_22",
+   "recipe": "cu_desert_melon",
+   "name": "Bitter Melons",
+   "kind": "forage",
+   "x": 684,
+   "z": 1792,
+   "yaw": 4.49,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "folk",
+   "id": "folk_pumice_wastes_5",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 872,
+   "z": 1840,
+   "yaw": 5.07,
+   "radius": 6,
+   "path": [
+    [
+     913,
+     1852
+    ],
+    [
+     853,
+     1877
+    ],
+    [
+     865,
+     1801
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_pumice_wastes_d46",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1696,
+   "z": 1336,
+   "yaw": 2.79,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s22",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1194,
+   "z": 1602,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_pumice_wastes_d47",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1825,
+   "z": 208,
+   "yaw": 5.02,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_pumice_wastes_d48",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1055,
+   "z": 791,
+   "yaw": 0.49,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s23",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 952,
+   "z": 952,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_pumice_wastes_d49",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1729,
+   "z": 800,
+   "yaw": 3.01,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_pumice_wastes_8",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1648,
+   "z": 281,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1629,
+     354
+    ],
+    [
+     1590,
+     272
+    ],
+    [
+     1664,
+     208
+    ],
+    [
+     1702,
+     313
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_23",
+   "recipe": "cu_old_battle",
+   "name": "Old Skirmish",
+   "kind": "remains",
+   "x": 1591,
+   "z": 1688,
+   "yaw": 5.29,
+   "radius": 7,
+   "levelBase": 14
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_pumice_wastes_d50",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1563,
+   "z": 1236,
+   "yaw": 4.63,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s24",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 736,
+   "z": 1096,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_pumice_wastes_d51",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1512,
+   "z": 489,
+   "yaw": 5.89,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_pumice_wastes_6",
+   "role": "pilgrim_resting",
+   "name": "Resting pilgrim",
+   "work": "pray",
+   "chatter": [
+    "role.pilgrim"
+   ],
+   "x": 1667,
+   "z": 1262,
+   "yaw": 3.61,
+   "radius": 6,
+   "path": [
+    [
+     1673,
+     1255
+    ],
+    [
+     1669,
+     1270
+    ],
+    [
+     1656,
+     1259
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_pumice_wastes_d52",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 904,
+   "z": 1177,
+   "yaw": 1.13,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s25",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1623,
+   "z": 678,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_pumice_wastes_d53",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 895,
+   "z": 1616,
+   "yaw": 5.52,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_pumice_wastes_d54",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1191,
+   "z": 1280,
+   "yaw": 4.14,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_pumice_wastes_d55",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 832,
+   "z": 184,
+   "yaw": 1.54,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s26",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 800,
+   "z": 592,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_pumice_wastes_d56",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1614,
+   "z": 943,
+   "yaw": 1.66,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_pumice_wastes_d57",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1511,
+   "z": 1777,
+   "yaw": 0.56,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_pumice_wastes_d58",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 2005,
+   "z": 1992,
+   "yaw": 0.19,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s27",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 981,
+   "z": 310,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_24",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 1017,
+   "z": 1338,
+   "yaw": 1.07,
+   "radius": 4,
+   "levelBase": 14
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_pumice_wastes_d59",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1160,
+   "z": 256,
+   "yaw": 3.22,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s28",
+   "monster": "slagborn_chief",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 598,
+   "z": 1129,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_pumice_wastes_d60",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1287,
+   "z": 175,
+   "yaw": 0.76,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_pumice_wastes_d61",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1857,
+   "z": 1744,
+   "yaw": 2.69,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_pumice_wastes_d62",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 911,
+   "z": 135,
+   "yaw": 0.95,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_pumice_wastes_9",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1417,
+   "z": 699,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1382,
+     646
+    ],
+    [
+     1477,
+     664
+    ],
+    [
+     1449,
+     738
+    ],
+    [
+     1381,
+     743
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s29",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 904,
+   "z": 817,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_pumice_wastes_d63",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1232,
+   "z": 1798,
+   "yaw": 5.71,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_pumice_wastes_d64",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 721,
+   "z": 319,
+   "yaw": 2.81,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_pumice_wastes_d65",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1023,
+   "z": 402,
+   "yaw": 5.43,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s30",
+   "monster": "glasswing",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 760,
+   "z": 1224,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_pumice_wastes_d66",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1471,
+   "z": 1569,
+   "yaw": 1.55,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_pumice_wastes_d67",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1648,
+   "z": 40,
+   "yaw": 4.24,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s31",
+   "monster": "glasswing",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1473,
+   "z": 312,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_pumice_wastes_d68",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1248,
+   "z": 1488,
+   "yaw": 1.8,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_pumice_wastes_d69",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1914,
+   "z": 1077,
+   "yaw": 5.11,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_pumice_wastes_10",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1918,
+   "z": 42,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1849,
+     12
+    ],
+    [
+     1946,
+     2
+    ],
+    [
+     1963,
+     74
+    ],
+    [
+     1891,
+     95
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_pumice_wastes_d70",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1551,
+   "z": 1465,
+   "yaw": 3.43,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_pumice_wastes_d71",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1728,
+   "z": 2008,
+   "yaw": 5.07,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s32",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 2009,
+   "z": 641,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_pumice_wastes_d72",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1856,
+   "z": 1456,
+   "yaw": 2.8,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_pumice_wastes_7",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 1128,
+   "z": 1696,
+   "yaw": 1.88,
+   "radius": 6,
+   "path": [
+    [
+     1122,
+     1719
+    ],
+    [
+     1111,
+     1671
+    ],
+    [
+     1152,
+     1697
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_pumice_wastes_d73",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1714,
+   "z": 1145,
+   "yaw": 3.37,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_pumice_wastes_d74",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1174,
+   "z": 345,
+   "yaw": 2.55,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_pumice_wastes_d75",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1104,
+   "z": 536,
+   "yaw": 4.33,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s33",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 799,
+   "z": 433,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_pumice_wastes_d76",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1880,
+   "z": 504,
+   "yaw": 2.72,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_pumice_wastes_d77",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1216,
+   "z": 480,
+   "yaw": 1.04,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s34",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 904,
+   "z": 40,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_pumice_wastes_d78",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1743,
+   "z": 600,
+   "yaw": 4.24,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_pumice_wastes_d79",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1888,
+   "z": 1921,
+   "yaw": 5.42,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s35",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 768,
+   "z": 1920,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_pumice_wastes_d80",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1152,
+   "z": 656,
+   "yaw": 1.66,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_pumice_wastes_d81",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1033,
+   "z": 1807,
+   "yaw": 4.15,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_25",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1863,
+   "z": 1200,
+   "yaw": 5.72,
+   "radius": 5,
+   "levelBase": 14
+  },
+  {
+   "type": "camp",
+   "id": "roam_pumice_wastes_11",
+   "monster": "glasswing",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 800,
+   "z": 679,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     747,
+     707
+    ],
+    [
+     776,
+     613
+    ],
+    [
+     842,
+     656
+    ],
+    [
+     827,
+     722
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s36",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 944,
+   "z": 1944,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_pumice_wastes_d82",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 832,
+   "z": 1072,
+   "yaw": 3.81,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_pumice_wastes_8",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 760,
+   "z": 1711,
+   "yaw": 1.98,
+   "radius": 6,
+   "path": [
+    [
+     782,
+     1724
+    ],
+    [
+     727,
+     1730
+    ],
+    [
+     774,
+     1675
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_pumice_wastes_d83",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 825,
+   "z": 1350,
+   "yaw": 4.68,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s37",
+   "monster": "glasswing",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1622,
+   "z": 1927,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_pumice_wastes_d84",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 936,
+   "z": 472,
+   "yaw": 0.87,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_pumice_wastes_d85",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1056,
+   "z": 705,
+   "yaw": 5.96,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s38",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1631,
+   "z": 857,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_26",
+   "recipe": "cu_horse_bones",
+   "name": "Horse Bones",
+   "kind": "remains",
+   "x": 1783,
+   "z": 1866,
+   "yaw": 2.03,
+   "radius": 5,
+   "levelBase": 14
+  },
+  {
+   "type": "camp",
+   "id": "roam_pumice_wastes_12",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1056,
+   "z": 1176,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1038,
+     1214
+    ],
+    [
+     1014,
+     1148
+    ],
+    [
+     1082,
+     1129
+    ],
+    [
+     1087,
+     1188
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_pumice_wastes_d86",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1517,
+   "z": 1304,
+   "yaw": 2.26,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "sand_shrine_pumice_wastes_d87",
+   "kind": "sand_shrine",
+   "name": "Wind Shrine",
+   "x": 644,
+   "z": 1541,
+   "yaw": 4.78,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s39",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 817,
+   "z": 840,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_pumice_wastes_d88",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 800,
+   "z": 1568,
+   "yaw": 2.09,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_pumice_wastes_9",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 1273,
+   "z": 607,
+   "yaw": 0.98,
+   "radius": 6,
+   "path": [
+    [
+     1300,
+     580
+    ],
+    [
+     1274,
+     656
+    ],
+    [
+     1243,
+     584
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_pumice_wastes_d89",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1296,
+   "z": 921,
+   "yaw": 1.8,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s40",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1335,
+   "z": 440,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_pumice_wastes_d90",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1730,
+   "z": 1456,
+   "yaw": 4.44,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_27",
+   "recipe": "cu_drowned_sailor",
+   "name": "Washed Up",
+   "kind": "remains",
+   "x": 563,
+   "z": 1008,
+   "yaw": 3.72,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "roam_pumice_wastes_13",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1810,
+   "z": 120,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1880,
+     90
+    ],
+    [
+     1814,
+     175
+    ],
+    [
+     1739,
+     124
+    ],
+    [
+     1799,
+     46
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s41",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1714,
+   "z": 1688,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_pumice_wastes_d91",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1816,
+   "z": 1313,
+   "yaw": 4.06,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_pumice_wastes_d92",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 705,
+   "z": 968,
+   "yaw": 4.68,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_pumice_wastes_d93",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 976,
+   "z": 647,
+   "yaw": 4.67,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_pumice_wastes_d94",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1802,
+   "z": 1026,
+   "yaw": 5.94,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_28",
+   "recipe": "cu_witch_warning",
+   "name": "Bone Warning",
+   "kind": "lore",
+   "x": 1543,
+   "z": 1384,
+   "yaw": 2.68,
+   "radius": 4,
+   "levelBase": 14
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_pumice_wastes_d95",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1368,
+   "z": 1896,
+   "yaw": 5.49,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s42",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 673,
+   "z": 1617,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_pumice_wastes_d96",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1720,
+   "z": 456,
+   "yaw": 6.25,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_pumice_wastes_d97",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1943,
+   "z": 1482,
+   "yaw": 4.51,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_29",
+   "recipe": "cu_blight_pool",
+   "name": "Blight Pool",
+   "kind": "hazard",
+   "x": 1936,
+   "z": 1816,
+   "yaw": 4.29,
+   "radius": 5,
+   "levelBase": 14
+  },
+  {
+   "type": "camp",
+   "id": "roam_pumice_wastes_14",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 920,
+   "z": 1289,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     936,
+     1355
+    ],
+    [
+     857,
+     1285
+    ],
+    [
+     928,
+     1240
+    ],
+    [
+     979,
+     1274
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s43",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1424,
+   "z": 136,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_pumice_wastes_d98",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1561,
+   "z": 752,
+   "yaw": 3.55,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_pumice_wastes_10",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 1057,
+   "z": 880,
+   "yaw": 4.28,
+   "radius": 6,
+   "path": [
+    [
+     1058,
+     844
+    ],
+    [
+     1103,
+     890
+    ],
+    [
+     1030,
+     911
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_pumice_wastes_d99",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1449,
+   "z": 856,
+   "yaw": 1.65,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_pumice_wastes_d100",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 832,
+   "z": 264,
+   "yaw": 1.34,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s44",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1455,
+   "z": 1927,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_pumice_wastes_d101",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1952,
+   "z": 360,
+   "yaw": 2.76,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_pumice_wastes_d102",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1376,
+   "z": 825,
+   "yaw": 4.57,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s45",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1488,
+   "z": 231,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_pumice_wastes_d103",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1176,
+   "z": 1056,
+   "yaw": 6.19,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_pumice_wastes_15",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1736,
+   "z": 1592,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1716,
+     1659
+    ],
+    [
+     1667,
+     1582
+    ],
+    [
+     1746,
+     1539
+    ],
+    [
+     1803,
+     1592
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_30",
+   "recipe": "cu_blight_pool",
+   "name": "Blight Pool",
+   "kind": "hazard",
+   "x": 2012,
+   "z": 1457,
+   "yaw": 4.54,
+   "radius": 5,
+   "levelBase": 14
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_pumice_wastes_d104",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1626,
+   "z": 1512,
+   "yaw": 0.62,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s46",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1871,
+   "z": 719,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_pumice_wastes_d105",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 847,
+   "z": 984,
+   "yaw": 4.95,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_pumice_wastes_11",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 1026,
+   "z": 1568,
+   "yaw": 0.15,
+   "radius": 6,
+   "path": [
+    [
+     1009,
+     1514
+    ],
+    [
+     1085,
+     1577
+    ],
+    [
+     983,
+     1596
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_pumice_wastes_d106",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1689,
+   "z": 727,
+   "yaw": 3.3,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s47",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1179,
+   "z": 1434,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_pumice_wastes_d107",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 904,
+   "z": 738,
+   "yaw": 0.36,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_pumice_wastes_d108",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 2008,
+   "z": 1368,
+   "yaw": 2.02,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_pumice_wastes_16",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1382,
+   "z": 552,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1373,
+     603
+    ],
+    [
+     1348,
+     543
+    ],
+    [
+     1380,
+     513
+    ],
+    [
+     1433,
+     568
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s48",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1905,
+   "z": 216,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_pumice_wastes_d109",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1848,
+   "z": 576,
+   "yaw": 4.14,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_pumice_wastes_d110",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1544,
+   "z": 1624,
+   "yaw": 1.14,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s49",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 616,
+   "z": 1217,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_pumice_wastes_d111",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1665,
+   "z": 1077,
+   "yaw": 5.88,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_pumice_wastes_d112",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1353,
+   "z": 38,
+   "yaw": 2.81,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s50",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1232,
+   "z": 96,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_pumice_wastes_d113",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 2008,
+   "z": 136,
+   "yaw": 5.84,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_pumice_wastes_d114",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 976,
+   "z": 1033,
+   "yaw": 2.06,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_pumice_wastes_d115",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 960,
+   "z": 1791,
+   "yaw": 5.56,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_pumice_wastes_17",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1136,
+   "z": 1912,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1082,
+     1956
+    ],
+    [
+     1118,
+     1868
+    ],
+    [
+     1171,
+     1878
+    ],
+    [
+     1189,
+     1957
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s51",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 888,
+   "z": 320,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s52",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1387,
+   "z": 1811,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_31",
+   "recipe": "cu_blight_bloom",
+   "name": "Ash Lily",
+   "kind": "forage",
+   "x": 2014,
+   "z": 1834,
+   "yaw": 0.41,
+   "radius": 4,
+   "levelBase": 14
+  },
+  {
+   "type": "folk",
+   "id": "folk_pumice_wastes_12",
+   "role": "pilgrim_resting",
+   "name": "Resting pilgrim",
+   "work": "pray",
+   "chatter": [
+    "role.pilgrim"
+   ],
+   "x": 1563,
+   "z": 191,
+   "yaw": 5.25,
+   "radius": 6,
+   "path": [
+    [
+     1573,
+     192
+    ],
+    [
+     1558,
+     201
+    ],
+    [
+     1562,
+     181
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_pumice_wastes_d116",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1488,
+   "z": 1496,
+   "yaw": 0.81,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s53",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1859,
+   "z": 372,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_pumice_wastes_d117",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1041,
+   "z": 1432,
+   "yaw": 1.14,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_pumice_wastes_d118",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1240,
+   "z": 760,
+   "yaw": 3.37,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s54",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1856,
+   "z": 1376,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_pumice_wastes_d119",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1320,
+   "z": 2007,
+   "yaw": 4.71,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_pumice_wastes_18",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1488,
+   "z": 81,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1432,
+     77
+    ],
+    [
+     1492,
+     23
+    ],
+    [
+     1540,
+     77
+    ],
+    [
+     1496,
+     128
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_pumice_wastes_d120",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1096,
+   "z": 400,
+   "yaw": 4.93,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_pumice_wastes_d121",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1732,
+   "z": 1946,
+   "yaw": 2.56,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_pumice_wastes_d122",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1513,
+   "z": 1881,
+   "yaw": 2.32,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s55",
+   "monster": "glasswing",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1272,
+   "z": 1648,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_pumice_wastes_d123",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 2006,
+   "z": 1011,
+   "yaw": 5.07,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_pumice_wastes_13",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 874,
+   "z": 425,
+   "yaw": 5.01,
+   "radius": 6,
+   "path": [
+    [
+     926,
+     403
+    ],
+    [
+     865,
+     469
+    ],
+    [
+     829,
+     392
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_pumice_wastes_d124",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1466,
+   "z": 2008,
+   "yaw": 5.13,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s56",
+   "monster": "glasswing",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 903,
+   "z": 2010,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_pumice_wastes_d125",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1944,
+   "z": 1320,
+   "yaw": 4.33,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_32",
+   "recipe": "cu_crab_rocks",
+   "name": "Crab Rocks",
+   "kind": "forage",
+   "x": 744,
+   "z": 1848,
+   "yaw": 5.3,
+   "radius": 5,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "roam_pumice_wastes_19",
+   "monster": "glasswing",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1320,
+   "z": 299,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1381,
+     243
+    ],
+    [
+     1362,
+     373
+    ],
+    [
+     1273,
+     335
+    ],
+    [
+     1290,
+     232
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s57",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1831,
+   "z": 2009,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_33",
+   "recipe": "cu_dune_idol",
+   "name": "Dune Idol",
+   "kind": "shrine",
+   "x": 1576,
+   "z": 1760,
+   "yaw": 5.99,
+   "radius": 5,
+   "levelBase": 14
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_pumice_wastes_d126",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1784,
+   "z": 264,
+   "yaw": 4.61,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_pumice_wastes_d127",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 888,
+   "z": 1112,
+   "yaw": 3.85,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s58",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1184,
+   "z": 983,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_34",
+   "recipe": "cu_smugglers_drop",
+   "name": "Smuggler's Drop",
+   "kind": "cache",
+   "x": 500,
+   "z": 1150,
+   "yaw": 2.88,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_pumice_wastes_d128",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1135,
+   "z": 1319,
+   "yaw": 2.57,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s59",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1282,
+   "z": 1348,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_pumice_wastes_d129",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1696,
+   "z": 648,
+   "yaw": 1.95,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_pumice_wastes_d130",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 681,
+   "z": 1247,
+   "yaw": 4.6,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_pumice_wastes_d131",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 880,
+   "z": 575,
+   "yaw": 1.31,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_pumice_wastes_d132",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 2008,
+   "z": 400,
+   "yaw": 5.56,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s60",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1871,
+   "z": 1596,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_35",
+   "recipe": "cu_desert_melon",
+   "name": "Bitter Melons",
+   "kind": "forage",
+   "x": 1784,
+   "z": 1704,
+   "yaw": 5.55,
+   "radius": 4,
+   "levelBase": 14
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_pumice_wastes_d133",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1824,
+   "z": 464,
+   "yaw": 0.52,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s61",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1782,
+   "z": 348,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_pumice_wastes_d134",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 800,
+   "z": 2008,
+   "yaw": 6.2,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_pumice_wastes_d135",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 744,
+   "z": 831,
+   "yaw": 3.13,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s62",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1808,
+   "z": 632,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_pumice_wastes_d136",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1936,
+   "z": 632,
+   "yaw": 1.36,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_pumice_wastes_d137",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1944,
+   "z": 488,
+   "yaw": 1.78,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_pumice_wastes_d138",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1256,
+   "z": 1425,
+   "yaw": 2.6,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "bone_heap_pumice_wastes_d139",
+   "kind": "bone_heap",
+   "name": "Old Bones",
+   "x": 1112,
+   "z": 1474,
+   "yaw": 4.91,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cairn_pumice_wastes_d140",
+   "kind": "cairn",
+   "name": "Cairn",
+   "x": 1973,
+   "z": 1545,
+   "yaw": 5.21,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_36",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1174,
+   "z": 1777,
+   "yaw": 4.77,
+   "radius": 6,
+   "levelBase": 14
+  },
+  {
+   "type": "folk",
+   "id": "folk_pumice_wastes_14",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 696,
+   "z": 1496,
+   "yaw": 6.03,
+   "radius": 6,
+   "path": [
+    [
+     683,
+     1421
+    ],
+    [
+     760,
+     1525
+    ],
+    [
+     644,
+     1518
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_37",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 1969,
+   "z": 899,
+   "yaw": 1.63,
+   "radius": 6,
+   "levelBase": 14
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s63",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 976,
+   "z": 792,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_pumice_wastes_d141",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 848,
+   "z": 1704,
+   "yaw": 4.69,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_38",
+   "recipe": "cu_drying_fish",
+   "name": "Fish Rack",
+   "kind": "fishing",
+   "x": 676,
+   "z": 1965,
+   "yaw": 4.2,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "roam_pumice_wastes_20",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1408,
+   "z": 1560,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1315,
+     1554
+    ],
+    [
+     1389,
+     1482
+    ],
+    [
+     1473,
+     1540
+    ],
+    [
+     1425,
+     1643
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s64",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1953,
+   "z": 1253,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_pumice_wastes_d142",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1320,
+   "z": 713,
+   "yaw": 5.44,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_pumice_wastes_d143",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 928,
+   "z": 888,
+   "yaw": 5.65,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_pumice_wastes_d144",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 713,
+   "z": 1032,
+   "yaw": 0.98,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s65",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 686,
+   "z": 720,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_pumice_wastes_d145",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 662,
+   "z": 1115,
+   "yaw": 5.67,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_39",
+   "recipe": "cu_blight_pool",
+   "name": "Blight Pool",
+   "kind": "hazard",
+   "x": 1608,
+   "z": 1615,
+   "yaw": 0.09,
+   "radius": 5,
+   "levelBase": 14
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s66",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1520,
+   "z": 610,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_40",
+   "recipe": "cu_desert_melon",
+   "name": "Bitter Melons",
+   "kind": "forage",
+   "x": 1576,
+   "z": 2008,
+   "yaw": 5.57,
+   "radius": 4,
+   "levelBase": 14
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_pumice_wastes_d146",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1897,
+   "z": 1144,
+   "yaw": 4.83,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_41",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1804,
+   "z": 1204,
+   "yaw": 0.41,
+   "radius": 6,
+   "levelBase": 14
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_pumice_wastes_d147",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1696,
+   "z": 1017,
+   "yaw": 0.22,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s67",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 985,
+   "z": 1704,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_pumice_wastes_d148",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1892,
+   "z": 938,
+   "yaw": 0.96,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_42",
+   "recipe": "cu_sinkhole",
+   "name": "Sinkhole",
+   "kind": "hazard",
+   "x": 1704,
+   "z": 1815,
+   "yaw": 1.75,
+   "radius": 6,
+   "levelBase": 14
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_pumice_wastes_d149",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1024,
+   "z": 551,
+   "yaw": 3.54,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_pumice_wastes_d150",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1784,
+   "z": 832,
+   "yaw": 6.02,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_pumice_wastes_d151",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1792,
+   "z": 1464,
+   "yaw": 5.33,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_pumice_wastes_d152",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1544,
+   "z": 336,
+   "yaw": 1.22,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s68",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1176,
+   "z": 408,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_pumice_wastes_d153",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 2008,
+   "z": 272,
+   "yaw": 0.33,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_pumice_wastes_d154",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1232,
+   "z": 2008,
+   "yaw": 1.55,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_43",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 784,
+   "z": 1305,
+   "yaw": 0.32,
+   "radius": 5,
+   "levelBase": 15
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_pumice_wastes_d155",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1937,
+   "z": 1016,
+   "yaw": 0.37,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s69",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1448,
+   "z": 1784,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_pumice_wastes_d156",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1072,
+   "z": 465,
+   "yaw": 2.71,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_pumice_wastes_15",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 744,
+   "z": 1616,
+   "yaw": 1.37,
+   "radius": 6,
+   "path": [
+    [
+     694,
+     1615
+    ],
+    [
+     766,
+     1568
+    ],
+    [
+     773,
+     1675
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_pumice_wastes_d157",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1672,
+   "z": 112,
+   "yaw": 5.53,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s70",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1160,
+   "z": 513,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_pumice_wastes_d158",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1128,
+   "z": 600,
+   "yaw": 3.37,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_pumice_wastes_d159",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1752,
+   "z": 1312,
+   "yaw": 5.84,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_pumice_wastes_d160",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1153,
+   "z": 1232,
+   "yaw": 0.77,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s71",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1280,
+   "z": 1736,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_44",
+   "recipe": "cu_blight_bloom",
+   "name": "Ash Lily",
+   "kind": "forage",
+   "x": 1587,
+   "z": 1190,
+   "yaw": 3.81,
+   "radius": 4,
+   "levelBase": 14
+  },
+  {
+   "type": "wayside",
+   "id": "fallen_pillar_pumice_wastes_d161",
+   "kind": "fallen_pillar",
+   "name": "Fallen Pillar",
+   "x": 2016,
+   "z": 1693,
+   "yaw": 4.61,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_pumice_wastes_d162",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1112,
+   "z": 136,
+   "yaw": 2.57,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s72",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 681,
+   "z": 912,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_pumice_wastes_d163",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 1312,
+   "z": 1488,
+   "yaw": 5.98,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s73",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1232,
+   "z": 1544,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_pumice_wastes_d164",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1409,
+   "z": 311,
+   "yaw": 1.13,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_pumice_wastes_d165",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 849,
+   "z": 1199,
+   "yaw": 4.4,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_pumice_wastes_d166",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1720,
+   "z": 1392,
+   "yaw": 4.23,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_45",
+   "recipe": "cu_lone_arch",
+   "name": "Lone Arch",
+   "kind": "marker",
+   "x": 1858,
+   "z": 1689,
+   "yaw": 3.99,
+   "radius": 5,
+   "levelBase": 14
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s74",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 675,
+   "z": 795,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_46",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1394,
+   "z": 1306,
+   "yaw": 2.49,
+   "radius": 6,
+   "levelBase": 14
+  },
+  {
+   "type": "folk",
+   "id": "folk_pumice_wastes_16",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 783,
+   "z": 496,
+   "yaw": 1.97,
+   "radius": 6,
+   "path": [
+    [
+     837,
+     457
+    ],
+    [
+     788,
+     571
+    ],
+    [
+     733,
+     484
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_pumice_wastes_d167",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1136,
+   "z": 200,
+   "yaw": 1.66,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s75",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1090,
+   "z": 1775,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_pumice_wastes_d168",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 760,
+   "z": 376,
+   "yaw": 1.37,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_pumice_wastes_d169",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 744,
+   "z": 1160,
+   "yaw": 4.96,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s76",
+   "monster": "slagborn_chief",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1114,
+   "z": 807,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_47",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 1576,
+   "z": 896,
+   "yaw": 1.54,
+   "radius": 6,
+   "levelBase": 14
+  },
+  {
+   "type": "camp",
+   "id": "roam_pumice_wastes_21",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1329,
+   "z": 864,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1398,
+     934
+    ],
+    [
+     1269,
+     925
+    ],
+    [
+     1237,
+     829
+    ],
+    [
+     1383,
+     805
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_pumice_wastes_d170",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1921,
+   "z": 1735,
+   "yaw": 3.32,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_pumice_wastes_d171",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1008,
+   "z": 1944,
+   "yaw": 0.01,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s77",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 583,
+   "z": 1063,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_pumice_wastes_d172",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1896,
+   "z": 320,
+   "yaw": 2.54,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_pumice_wastes_d173",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1647,
+   "z": 442,
+   "yaw": 5.76,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_48",
+   "recipe": "cu_blight_pool",
+   "name": "Blight Pool",
+   "kind": "hazard",
+   "x": 888,
+   "z": 1552,
+   "yaw": 1.39,
+   "radius": 5,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s78",
+   "monster": "slagborn_chief",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1645,
+   "z": 1835,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_pumice_wastes_d174",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1048,
+   "z": 1663,
+   "yaw": 4.09,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_pumice_wastes_d175",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 929,
+   "z": 680,
+   "yaw": 2.18,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_pumice_wastes_22",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1040,
+   "z": 1081,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1003,
+     1090
+    ],
+    [
+     1020,
+     1044
+    ],
+    [
+     1077,
+     1070
+    ],
+    [
+     1051,
+     1121
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s79",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 2008,
+   "z": 1136,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_pumice_wastes_d176",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1959,
+   "z": 179,
+   "yaw": 0.65,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_pumice_wastes_d177",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1670,
+   "z": 1226,
+   "yaw": 0.4,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_49",
+   "recipe": "cu_rockfall",
+   "name": "Fresh Rockfall",
+   "kind": "hazard",
+   "x": 1631,
+   "z": 1721,
+   "yaw": 5.04,
+   "radius": 6,
+   "levelBase": 14
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s80",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1948,
+   "z": 1960,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_pumice_wastes_d178",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 2003,
+   "z": 777,
+   "yaw": 1.25,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_50",
+   "recipe": "cu_drying_fish",
+   "name": "Fish Rack",
+   "kind": "fishing",
+   "x": 527,
+   "z": 1280,
+   "yaw": 1.8,
+   "radius": 4,
+   "levelBase": 15
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s81",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1824,
+   "z": 1797,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_pumice_wastes_d179",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1216,
+   "z": 224,
+   "yaw": 6.08,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_pumice_wastes_d180",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1294,
+   "z": 97,
+   "yaw": 5.93,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_pumice_wastes_d181",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 977,
+   "z": 130,
+   "yaw": 3.64,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_pumice_wastes_23",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1769,
+   "z": 753,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1772,
+     666
+    ],
+    [
+     1837,
+     756
+    ],
+    [
+     1745,
+     815
+    ],
+    [
+     1710,
+     749
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s82",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 775,
+   "z": 298,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_pumice_wastes_d182",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1504,
+   "z": 880,
+   "yaw": 3.08,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_51",
+   "recipe": "cu_blight_pool",
+   "name": "Blight Pool",
+   "kind": "hazard",
+   "x": 1863,
+   "z": 1054,
+   "yaw": 1.15,
+   "radius": 5,
+   "levelBase": 14
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_pumice_wastes_d183",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1143,
+   "z": 1553,
+   "yaw": 2.43,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s83",
+   "monster": "glasswing",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1038,
+   "z": 1866,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "sand_shrine_pumice_wastes_d184",
+   "kind": "sand_shrine",
+   "name": "Wind Shrine",
+   "x": 1560,
+   "z": 1919,
+   "yaw": 2.67,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_pumice_wastes_d185",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1608,
+   "z": 88,
+   "yaw": 0.44,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s84",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1185,
+   "z": 703,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_pumice_wastes_d186",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 2008,
+   "z": 1224,
+   "yaw": 4.2,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_pumice_wastes_d187",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 2008,
+   "z": 528,
+   "yaw": 5.07,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_pumice_wastes_d188",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1536,
+   "z": 544,
+   "yaw": 1.39,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_pumice_wastes_d189",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1206,
+   "z": 641,
+   "yaw": 6.25,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s85",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1334,
+   "z": 1944,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_pumice_wastes_d190",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 680,
+   "z": 1352,
+   "yaw": 2.85,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_pumice_wastes_17",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 1098,
+   "z": 663,
+   "yaw": 6.18,
+   "radius": 6,
+   "path": [
+    [
+     1143,
+     682
+    ],
+    [
+     1061,
+     704
+    ],
+    [
+     1078,
+     610
+    ]
+   ]
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_52",
+   "recipe": "cu_wanted_post",
+   "name": "Wanted Post",
+   "kind": "lore",
+   "x": 1864,
+   "z": 1512,
+   "yaw": 2.74,
+   "radius": 3,
+   "levelBase": 14
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s86",
+   "monster": "slagborn_raider",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 936,
+   "z": 1656,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_pumice_wastes_d191",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1104,
+   "z": 266,
+   "yaw": 3.15,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_pumice_wastes_d192",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 815,
+   "z": 935,
+   "yaw": 5.65,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_pumice_wastes_24",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1832,
+   "z": 1255,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1792,
+     1274
+    ],
+    [
+     1808,
+     1217
+    ],
+    [
+     1879,
+     1241
+    ],
+    [
+     1841,
+     1307
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s87",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1512,
+   "z": 432,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_pumice_wastes_d193",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1728,
+   "z": 376,
+   "yaw": 0,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_pumice_wastes_d194",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 961,
+   "z": 1176,
+   "yaw": 6.12,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_pumice_wastes_d195",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 976,
+   "z": 248,
+   "yaw": 3.95,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s88",
+   "monster": "glasswing",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1272,
+   "z": 456,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "league_stone_pumice_wastes_d196",
+   "kind": "league_stone",
+   "name": "League Stone",
+   "x": 1001,
+   "z": 1394,
+   "yaw": 6.13,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_53",
+   "recipe": "cu_blight_pool",
+   "name": "Blight Pool",
+   "kind": "hazard",
+   "x": 1400,
+   "z": 423,
+   "yaw": 4.9,
+   "radius": 5,
+   "levelBase": 14
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s89",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1456,
+   "z": 511,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_pumice_wastes_d197",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1199,
+   "z": 296,
+   "yaw": 4.99,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "cart_ruts_wreck_pumice_wastes_d198",
+   "kind": "cart_ruts_wreck",
+   "name": "Abandoned Cart",
+   "x": 1679,
+   "z": 1968,
+   "yaw": 0.96,
+   "radius": 5,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_pumice_wastes_d199",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1576,
+   "z": 640,
+   "yaw": 5.39,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_pumice_wastes_25",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1600,
+   "z": 1384,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1584,
+     1424
+    ],
+    [
+     1562,
+     1368
+    ],
+    [
+     1611,
+     1342
+    ],
+    [
+     1630,
+     1396
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s90",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1485,
+   "z": 1621,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_pumice_wastes_d200",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1072,
+   "z": 1328,
+   "yaw": 0.84,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "folk",
+   "id": "folk_pumice_wastes_18",
+   "role": "pilgrim_resting",
+   "name": "Resting pilgrim",
+   "work": "pray",
+   "chatter": [
+    "role.pilgrim"
+   ],
+   "x": 949,
+   "z": 1082,
+   "yaw": 3.11,
+   "radius": 6,
+   "path": [
+    [
+     946,
+     1079
+    ],
+    [
+     953,
+     1082
+    ],
+    [
+     947,
+     1086
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "shrine_niche_pumice_wastes_d201",
+   "kind": "shrine_niche",
+   "name": "Shrine Niche",
+   "x": 1856,
+   "z": 255,
+   "yaw": 1.43,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s91",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 889,
+   "z": 191,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_pumice_wastes_d202",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1512,
+   "z": 776,
+   "yaw": 0.5,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_54",
+   "recipe": "cu_dune_idol",
+   "name": "Dune Idol",
+   "kind": "shrine",
+   "x": 1913,
+   "z": 1869,
+   "yaw": 6.27,
+   "radius": 5,
+   "levelBase": 14
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s92",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1244,
+   "z": 1299,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "roadside_grave_pumice_wastes_d203",
+   "kind": "roadside_grave",
+   "name": "Roadside Grave",
+   "x": 1688,
+   "z": 839,
+   "yaw": 1.59,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_pumice_wastes_26",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    15,
+    16
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 984,
+   "z": 440,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     967,
+     359
+    ],
+    [
+     1068,
+     429
+    ],
+    [
+     1003,
+     513
+    ],
+    [
+     914,
+     432
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "wayside",
+   "id": "milestone_pumice_wastes_d204",
+   "kind": "milestone",
+   "name": "Milestone",
+   "x": 1794,
+   "z": 1153,
+   "yaw": 0.36,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "lost_signpost_pumice_wastes_d205",
+   "kind": "lost_signpost",
+   "name": "Lost Signpost",
+   "x": 1344,
+   "z": 168,
+   "yaw": 4.31,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s93",
+   "monster": "pumice_golem",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1844,
+   "z": 1891,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_55",
+   "recipe": "cu_blight_bloom",
+   "name": "Ash Lily",
+   "kind": "forage",
+   "x": 1167,
+   "z": 1376,
+   "yaw": 0.51,
+   "radius": 4,
+   "levelBase": 14
+  },
+  {
+   "type": "folk",
+   "id": "folk_pumice_wastes_19",
+   "role": "surveyor",
+   "name": "Surveyor",
+   "work": "watch",
+   "chatter": [
+    "role.surveyor"
+   ],
+   "x": 800,
+   "z": 1849,
+   "yaw": 1.02,
+   "radius": 6,
+   "path": [
+    [
+     788,
+     1807
+    ],
+    [
+     836,
+     1859
+    ],
+    [
+     757,
+     1881
+    ]
+   ]
+  },
+  {
+   "type": "wayside",
+   "id": "cold_campfire_pumice_wastes_d206",
+   "kind": "cold_campfire",
+   "name": "Cold Campfire",
+   "x": 1938,
+   "z": 764,
+   "yaw": 3.84,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s94",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1705,
+   "z": 1752,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "wayside",
+   "id": "boundary_stake_pumice_wastes_d207",
+   "kind": "boundary_stake",
+   "name": "Boundary Stakes",
+   "x": 1335,
+   "z": 1840,
+   "yaw": 3.72,
+   "radius": 4,
+   "filler": true
+  },
+  {
+   "type": "wayside",
+   "id": "banner_post_pumice_wastes_d208",
+   "kind": "banner_post",
+   "name": "Faded Banner",
+   "x": 784,
+   "z": 792,
+   "yaw": 2.88,
+   "radius": 3,
+   "filler": true
+  },
+  {
+   "type": "camp",
+   "id": "roam_pumice_wastes_27",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    2,
+    3
+   ],
+   "x": 1953,
+   "z": 1121,
+   "yaw": 0,
+   "radius": 8,
+   "path": [
+    [
+     1918,
+     1176
+    ],
+    [
+     1890,
+     1090
+    ],
+    [
+     1987,
+     1081
+    ],
+    [
+     2017,
+     1175
+    ]
+   ],
+   "roam": true
+  },
+  {
+   "type": "camp",
+   "id": "camp_pumice_wastes_s95",
+   "monster": "scoria_crawler",
+   "with": null,
+   "level": [
+    14,
+    15
+   ],
+   "count": [
+    1,
+    2
+   ],
+   "x": 1482,
+   "z": 1040,
+   "yaw": 0,
+   "radius": 8,
+   "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_pumice_wastes_56",
+   "recipe": "cu_ruined_hearth",
+   "name": "Ruined Hearth",
+   "kind": "marker",
+   "x": 864,
+   "z": 1392,
+   "yaw": 2.23,
+   "radius": 6,
+   "levelBase": 15
+  }
+ ],
+ "features": [],
+ "density": {
+  "target": 50,
+  "roadTarget": 45,
+  "added": {
+   "curio": 56,
+   "wayside": 208,
+   "stray": 95,
+   "roamer": 27,
+   "folk": 19
+  },
+  "openShareCovered": 0.998,
+  "roadShareCovered": 1
+ },
+ "levels": [
+  14,
+  16
+ ]
+}

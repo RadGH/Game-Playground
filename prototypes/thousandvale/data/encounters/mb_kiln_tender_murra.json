@@ -1,0 +1,199 @@
+{
+  "id": "mb_kiln_tender_murra",
+  "name": "Kiln-Tender Murra",
+  "tier": "miniboss",
+  "body": "slagborn_raider",
+  "place": "dungeon kiln_forge set A (The Old Kilns, Kiln Ridge, level 17): mini-boss",
+  "_doc": "The Slagborn woman who keeps the kilns fired. P1 \"Stoking\": a poker jab, hot coals flung from a shovel (pools), and she throws open a kiln door — a long cone of heat out of one of the two kilns. A bellows lever by the kilns: pump it while she stands at a kiln door and the flare catches her (stun). P2 at 50% \"Full Fire\": both kiln doors open at once and the heat comes in waves (rings from each kiln).",
+  "party": "Solo: stay out of the kiln mouths. 2-3: one works the bellows. 5: the coals crowd the floor — keep her moving.",
+  "hpMult": 2.1,
+  "arena": {
+    "radius": 12,
+    "objects": [
+      {
+        "id": "kiln",
+        "type": "rock",
+        "name": "Kiln door",
+        "x": -8,
+        "z": -6,
+        "r": 1.6,
+        "hp": 6
+      },
+      {
+        "id": "kiln",
+        "type": "rock",
+        "name": "Kiln door",
+        "x": 8,
+        "z": -6,
+        "r": 1.6,
+        "hp": 6
+      },
+      {
+        "id": "bellows",
+        "type": "lever",
+        "name": "Bellows",
+        "x": 0,
+        "z": -8,
+        "repeat": true,
+        "onUse": [
+          {
+            "stun": 1.5
+          },
+          {
+            "hurt": 0.03
+          },
+          {
+            "say": "The bellows roar and the kilns flare in her face!",
+            "style": "warn"
+          }
+        ]
+      }
+    ]
+  },
+  "say": {
+    "pull": [
+      "\"Mind the kilns. They bite.\"",
+      "Murra rakes the coals and grins at you over them."
+    ],
+    "death": "Murra slumps against a kiln door. The fire behind it slowly dies.",
+    "reset": "Murra goes back to raking her coals."
+  },
+  "enrage": {
+    "seconds": 270,
+    "damage": 2.5,
+    "say": "Murra throws open every door in the kiln room!"
+  },
+  "abilities": {
+    "poker": {
+      "id": "poker",
+      "name": "Poker Jab",
+      "every": [
+        5,
+        7
+      ],
+      "range": 5,
+      "melee": {
+        "damage": 1.3
+      },
+      "telegraphs": [
+        {
+          "shape": "line",
+          "at": "target",
+          "len": 5,
+          "w": 1.6,
+          "wind": 0.9,
+          "damage": 1.5,
+          "element": "fire",
+          "status": "burn"
+        }
+      ]
+    },
+    "coals": {
+      "id": "coals",
+      "name": "Shovel of Coals",
+      "every": [
+        9,
+        11
+      ],
+      "first": 2,
+      "telegraphs": [
+        {
+          "shape": "cone",
+          "at": "self",
+          "r": 7,
+          "arc": 0.9,
+          "wind": 1.1,
+          "damage": 1.3,
+          "element": "fire",
+          "leave": {
+            "type": "pool",
+            "name": "Hot coals",
+            "r": 2.4,
+            "every": 1,
+            "seconds": 12,
+            "damage": 0.3,
+            "status": "burn",
+            "element": "fire"
+          }
+        }
+      ]
+    },
+    "kiln_door": {
+      "id": "kiln_door",
+      "name": "Open the Kiln",
+      "every": [
+        13,
+        16
+      ],
+      "first": 5,
+      "cast": 0.8,
+      "say": "She heaves a kiln door open — stand clear of the kilns!",
+      "telegraphs": [
+        {
+          "shape": "circle",
+          "at": "object",
+          "object": "kiln",
+          "r": 5,
+          "wind": 1.6,
+          "damage": 2,
+          "element": "fire",
+          "status": "seared"
+        }
+      ]
+    },
+    "heat_waves": {
+      "id": "heat_waves",
+      "name": "Full Fire",
+      "every": [
+        15,
+        18
+      ],
+      "first": 3,
+      "cast": 0.8,
+      "say": "Both kilns roar — the heat comes in waves!",
+      "telegraphs": [
+        {
+          "shape": "ring",
+          "at": "object",
+          "object": "kiln",
+          "r": 7,
+          "r2": 4,
+          "wind": 1.4,
+          "damage": 1.6,
+          "element": "fire"
+        },
+        {
+          "shape": "ring",
+          "at": "object",
+          "object": "kiln",
+          "r": 11,
+          "r2": 8,
+          "wind": 2.1,
+          "damage": 1.6,
+          "element": "fire"
+        }
+      ]
+    }
+  },
+  "phases": [
+    {
+      "name": "Stoking",
+      "abilities": [
+        "poker",
+        "coals",
+        "kiln_door"
+      ]
+    },
+    {
+      "name": "Full Fire",
+      "at": 0.5,
+      "say": "\"Hotter!\"",
+      "abilities": [
+        "poker",
+        "coals",
+        "heat_waves",
+        "kiln_door"
+      ]
+    }
+  ]
+}

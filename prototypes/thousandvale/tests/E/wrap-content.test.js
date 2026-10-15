@@ -58,7 +58,10 @@ test('#26: every monster with an animal\'s body can be skinned, and every other 
   // what the generator would write today is what is in the file (nobody edited one without the other)
   for (const d of BEASTS) assert.equal(skinRule(d).ok, !!S.types[d.id], d.id);
   const n = Object.keys(S.types).length;
-  assert.equal(n, 24, `skinnable kinds of monster (19 before): ${n}`);
+  // Expansion 1 §5: + the 7 Vharlen beasts with a hide (scoria crawler, ashback salamander, glasswing, steamwood prowler,
+  // sulphur toad, mudback lurker, Ossathra) — the salamander's is its own (`hide: 'salamander_hide'`)
+  assert.equal(n, 24 + 7, `skinnable kinds of monster (19 before, 24 on Torbor alone): ${n}`);
+  assert.equal(S.types.ashback_salamander.hide, 'salamander_hide');
 });
 
 test('#26 on the real server: a barrow hound gives a hide (worn: a grade lower, no meat); a wraith tells the skinner why not, once, and again at the knife', async () => {

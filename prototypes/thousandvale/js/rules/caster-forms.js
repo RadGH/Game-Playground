@@ -16,10 +16,10 @@
 
 import {
   wandBehaviour, staffSpell, isStaff, isWand, elementOf, statusOf, hashStr, weaponHands, meleeSpanOf, chargedForm, formOf,
-  OFFHAND_DAMAGE, strikeAt, attuneWeapon,
+  OFFHAND_DAMAGE, strikeAt, attuneWeapon, traitsOf,
 } from './farhold.js';
 import { isOrb, isTome, stampHand } from './hands.js';
-import { attackRate, weaponAps, apsText, movingPace, basicPace } from './combat-cfg.js';
+import { attackRate, weaponAps, apsText, movingPace, basicPace, daggerRule, daggerText } from './combat-cfg.js';
 
 const FARHOLD_TO_STYLE = { plain: 'bolt', burst: 'burst', split: 'fan', chain: 'chain', seeking: 'seeking', heavy: 'heavy' };
 /** fireBolt's own chain falloff when a plan names none (js/rules/cast-skills.js). */
@@ -233,6 +233,8 @@ export function stampCaster(engine, item, { fresh = false } = {}) {
   if (item.type === 'weapon' && engine.combatCfg) {
     const aps = weaponAps(item, { style: isTome(item) ? forms.styles[item.castStyle] : null, pace: basicPace(engine) });
     if (aps) { item.aps = aps; item.apsText = apsText(aps); } else { delete item.aps; delete item.apsText; }
+    // round 11 Z62: a dagger says exactly what its edge and its back-stab are worth, and when the back-stab applies
+    if (traitsOf(item).backstab && !item.ranged && daggerRule(engine)) item.attackText = daggerText(daggerRule(engine));
   }
   return item;
 }
@@ -382,6 +384,9 @@ export function basicCard(engine, ch) {
     desc = form === 'sceptre' ? sceptreText(w, statuses)
       : `Basic attack: a melee swing${span?.reach ? ` reaching ${m(span.reach)}` : ''}${el !== 'physical' ? ` that deals ${el} damage` : ''}.`;
     if (hands.dual && !isHeldFocus(hands.off)) desc += ` Your off hand (${hands.off.name}) swings on its own clock for ${pct(OFFHAND_DAMAGE)} of its damage.`;
+    // round 11 Z62: the dagger's edge and back-stab, from the numbers js/rules/field.js strikes with
+    const DAG = daggerRule(engine);
+    if (DAG && (traitsOf(w).backstab || (hands.dual && traitsOf(hands.off).backstab))) desc += ` ${daggerText(DAG)}`;
   }
   const rider = isCaster(w) ? riderOf(forms, hands.off) : null;
   if (rider) desc += ` ${cap(hands.off.name)}: ${riderText(rider).replace(/^Held with a wand, tome or sceptre: /, '')}`;

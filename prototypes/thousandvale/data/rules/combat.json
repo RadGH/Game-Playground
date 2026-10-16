@@ -4,6 +4,8 @@
   "moving": { "melee": 1, "arrow": 1, "bolt": 1, "staff": 1, "form": 1 },
   "speed": { "capPct": 40, "floorPct": -50, "ranged": true, "staff": true, "caster": true, "basicPace": 1.5 },
   "skills": { "damage": 2 },
+  "dagger": { "edgePct": 120, "backstabPct": 50, "backDeg": 100 },
+  "_z62": "Round 11 Z62 (found by stream C, owner decided 2026-10-15): Farhold's dagger back-stab (x2.2 and a bleed) measured the target's back the wrong way round, so it landed when the target FACED you and never from behind; every dagger class was balanced on it. Here, read by js/rules/field.js strike through js/rules/combat-cfg.js: every dagger hit deals `edgePct` more (x2.2 — what a dagger dealt solo before, so solo damage stays within 2%), and a hit from behind — more than `backDeg` degrees from where the target looks, the same test a skill's \"more damage from behind\" uses, or a skill/mark that counts as from behind (Slip Away, Shadowstep lands you there) — deals `backstabPct` more on top and makes it bleed (the bleed now comes only from behind).",
   "families": {
     "heavy": { "damagePct": 18, "guardPct": 15, "oneHandGuardPct": 10 },
     "light": { "damagePct": 18, "guardPct": 10, "oneHandGuardPct": 10 },

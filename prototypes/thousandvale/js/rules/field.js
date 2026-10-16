@@ -23,6 +23,7 @@ import {
   traitsOf, applyStatus, staggerFor, pushFor, COMBAT_FEEL, addCorpse, untargetable,
 } from './farhold.js';
 import { threatFromDamage } from './threat.js';
+import { daggerRule, daggerMult, isBehind } from './combat-cfg.js';
 import { landed as perkLanded } from './perk-rules.js';
 
 /** The bleed row out of data/skills.json, used when the room has no status table (as actors.js does). */
@@ -307,12 +308,16 @@ export function attachField(room, { terrain = null, safeZones = [] } = {}) {
       let mult = power;
       if (traits.momentum) mult *= 1 + Math.min(2, unit?.combo || 0) * 0.08;
       let behind = false;
-      if (traits.backstab) {
-        // Round 11 finding (left as Farhold has it, reported to the lead): this measures the back against "from the
-        // target toward the attacker" — the way a body FACES when it is fighting you — so a dagger hit on a monster that
-        // is looking at you counts as a stab in the back (x2.2 and a bleed), and one from behind does not. Every dagger
-        // class is balanced on it (solo, the monster always faces you); turning it round halves solo dagger damage and
-        // needs a dagger re-tune with it, so it is not changed here.
+      const DAG = traits.backstab ? daggerRule(field.room?.engine) : null;
+      if (DAG) {
+        // Round 11 Z62 (owner's decision): Farhold's test below measures the back against "from the target toward the
+        // attacker" — the way a body FACES when it is fighting you — so its x2.2 and bleed land from the FRONT and never
+        // from behind. Thousandvale (combat.json `dagger`): every dagger hit gets the edge; from behind (the test a
+        // skill's "from behind" bonus uses, incl. Slip Away and marks) it gets the back-stab on top and the bleed.
+        behind = isBehind(from, e, { deg: DAG.backDeg, rules });
+        mult *= daggerMult(DAG, behind);
+      } else if (traits.backstab) {
+        // a parity engine keeps Farhold's own rule, inverted direction and all (Farhold finding 11, for the owner)
         const away = Math.atan2(-dx, -dz);
         const delta = Math.abs(((away - (e.facing || 0) + Math.PI * 3) % (Math.PI * 2)) - Math.PI);
         behind = delta < 0.87;

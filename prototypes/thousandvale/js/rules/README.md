@@ -311,5 +311,6 @@ Contracts and every number: docs/requests.md "Round 11 — C status". Tests: tes
 | Z35 (#36) | `estimate.js FIND_TIPS` | The find rows say what they count for. |
 | Z5 (#5) | `monster-ai.js AI` | Leash 120 m / 20 s. |
 | sheet dummy | `estimate.js stepArena` | The training dummy faces you (a dagger's back-stab reads facing). |
+| Z62 dagger | `combat-cfg.js` isBehind/daggerMult, `field.js` strike, combat.json `dagger` | Farhold's back-stab counted from the FRONT. Thousandvale: every dagger hit +`edgePct` (120); from behind — more than `backDeg` (100°) from where the target looks, `rules.behind`, or a fromBehind mark — +`backstabPct` (50) more and a bleed. A parity engine keeps Farhold's rule. |
 
 Farhold findings 10 and 11 (a fan wand fires one bolt; the dagger back-stab counts from the front) are written up in docs/requests.md.

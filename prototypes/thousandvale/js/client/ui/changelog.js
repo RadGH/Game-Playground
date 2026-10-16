@@ -26,7 +26,10 @@ export function createChangelog({ net = () => null, storage = null, load = null,
   // ---- data
   const fetchFile = load || (async () => {
     try { const r = await fetch(FILE, { cache: 'no-cache' }); if (r.ok) return await r.json(); } catch { /* try the server's own copy */ }
-    try { const r = await fetch('changelog.json', { cache: 'no-cache' }); if (r.ok) return await r.json(); } catch { /* none */ }
+    try { const r = await fetch('changelog.json', { cache: 'no-cache' }); if (r.ok) return await r.json(); } catch { /* try the root */ }
+    // the game server answers at the SITE ROOT (server/main.mjs '/changelog.json'), and the page lives under
+    // /prototypes/thousandvale/, so the relative fetch above 404s on the live site (data/ops/ is never public)
+    try { const r = await fetch(new URL('/changelog.json', location.origin), { cache: 'no-cache' }); if (r.ok) return await r.json(); } catch { /* none */ }
     return { entries: [] };
   });
   function ensure() {

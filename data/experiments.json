@@ -1,136 +1,663 @@
 {
-  "about": "The experiments home page (index.html) is drawn from this file by js/home.js. Adding an experiment = adding one row to `entries`. tests/experiments.test.js fails when a folder with an index.html + README.md is not listed, or a listed path does not exist. Fields: id (unique), group (a groups[].id), title, href (relative, never starting with '/'), summary, status (done | playable | prototype | docs | deprecated), statusNote (optional, shown beside the status), date (last milestone), tags, folder (the folder whose README documents it), links (extra pages: [{label, href}]), readme (the documentation file when it is not <folder>/README.md), deprecated (a sentence saying what is deprecated and what replaced it), isNew (true while it is this round's addition), server ({port, path}: a game that needs its own server — the card gets a 'Play on this network' button instead of a page link), live (a key of data/live-links.json — the card gets a separate 'Live link' button).",
-  "groups": [
-    { "id": "characters", "title": "Characters & gear", "blurb": "Bodies, faces, creatures, mounts and everything they wear or hold." },
-    { "id": "world", "title": "World", "blurb": "Maps, planets, towns, buildings, scenery and the high-detail outdoor world." },
-    { "id": "language", "title": "Sound & language", "blurb": "Voices, speech, names, conversations and sound effects." },
-    { "id": "systems", "title": "Systems", "blurb": "Items, blueprints, combat tools, effects and the pieces wired together." },
-    { "id": "prototypes", "title": "Prototypes", "blurb": "Small games built from the experiments, to test ideas before they get their own project." }
-  ],
-  "entries": [
-    { "id": "armory", "group": "characters", "title": "Armory", "href": "armory/", "folder": "armory",
-      "summary": "The one place to review every wearable and holdable model: swords, daggers, wands, staves, shields, foci, helms, chest pieces, capes and the rest. Each one shows its source file and builder, triangle count, size in metres, which games and items use it, a 3D preview on a body you can orbit (main hand, off hand or both, any attack animation, any race) and its in-game icon. Flag the ones you dislike and export the list.",
-      "status": "done", "date": "2026-10-06", "isNew": true, "tags": ["3d", "gear", "weapons", "armour", "review"] },
-    { "id": "avatar-3d", "group": "characters", "title": "Avatar 3D", "href": "avatar-3d/", "folder": "avatar-3d",
-      "summary": "Three.js character builder. Chibi 2 is the flagship: nine races (human, elf, dwarf, orc, giant, goblin, halfling, undead, beastkin), a roundness slider, self-contained outfits and about 90 animations with weapon-aware attacks and emotes. Reads the same character JSON as the 2D builder.",
-      "status": "done", "date": "2026-09-25", "tags": ["3d", "character", "three.js"],
-      "deprecated": "Two of its three modes are deprecated: the original procedural Chibi and the Quaternius mesh mode are kept only for comparison. Build new work on Chibi 2.",
-      "links": [ { "label": "Chibi 2 comparison + benchmark", "href": "avatar-3d/chibi2.html" }, { "label": "Tier-2 class armour gallery", "href": "avatar-3d/armour2.html" } ] },
-    { "id": "chibi3", "group": "characters", "title": "Chibi 3", "href": "avatar-3d/chibi3.html", "folder": "avatar-3d",
-      "summary": "Higher-detail characters with heroic proportions: one welded skin built from blended shapes, armour and clothes fitted to any body, physically based materials, a 66-bone rig with layered animation, face expressions and lip shapes, springy capes and hair, three levels of detail. Knight, Wizard and Orc Berserker, a full builder, a side-by-side with Chibi 2, a benchmark and a verdict.",
-      "status": "prototype", "statusNote": "no game uses it yet", "date": "2026-10-01", "tags": ["3d", "character", "three.js"],
-      "links": [ { "label": "Verdict", "href": "avatar-3d/data/chibi3-verdict.html" } ] },
-    { "id": "chibi4", "group": "characters", "title": "Chibi 4", "href": "avatar-3d/chibi4/", "folder": "avatar-3d",
-      "summary": "A step-by-step trial of a more realistic character system to replace Chibi 2: MakeHuman bodies from sliders with Codex-painted skin and hair, our own robe and armour measured off the body with the skin under them removed, skirt bones so feet never run through a robe (checked on every frame), and a three.js runtime with one mesh, one texture and three distance versions per character. Every step scored against the same reference sheet.",
-      "status": "prototype", "statusNote": "modular kit: 2 bodies, 13 garments, 6 hairs, any colours; opt-in in Thousandvale", "date": "2026-10-16", "isNew": true, "tags": ["3d", "character", "three.js", "blender"],
-      "links": [ { "label": "Chibi 2 vs 4 + dress up", "href": "avatar-3d/chibi4/compare.html" } ] },
-    { "id": "avatar-2d", "group": "characters", "title": "Avatar 2D", "href": "avatar-2d/", "folder": "avatar-2d",
-      "summary": "Paper-doll character builder from stacked SVG layers: hair, eyes, brows, nose, mouth, body height and width, tops, bottoms, shoes, accessories and about 85 gear parts. Presets, randomize by race, save in the browser, export PNG, SVG or JSON.",
-      "status": "done", "date": "2026-09-09", "tags": ["svg", "character"] },
-    { "id": "creatures", "group": "characters", "title": "Creatures 3D", "href": "avatar-3d/creatures.html", "folder": "avatar-3d",
-      "summary": "37 procedural non-humanoid bodies over six body plans: wolves, boars, bears, rats, horses, deer, bats, spiders, snakes, drakes, dragons, golems, wisps and more, with walk, run, attack, talk, fly and dead animations and a creature JSON.",
-      "status": "done", "date": "2026-09-13", "tags": ["3d", "procedural", "animals"] },
-    { "id": "mounts", "group": "characters", "title": "Mounts 3D", "href": "avatar-3d/mounts.html", "folder": "avatar-3d",
-      "summary": "Rideable creatures with saddle, stirrups, bridle and reins and a seated Chibi 2 rider: horse, pony, courser, barded warhorse, stag, crag ram and mire drake, with walk, trot, gallop and mount / dismount.",
-      "status": "done", "date": "2026-10-05", "tags": ["3d", "procedural", "mounts"] },
-    { "id": "vehicles", "group": "characters", "title": "Vehicles 3D", "href": "avatar-3d/vehicles.html", "folder": "avatar-3d",
-      "summary": "Procedural travel vehicles in the creature style: hand cart, pack mule, covered wagon, ox cart, iron-plated war wagon, closed coach and a sled pulled by a drake, with real animal bodies in the shafts.",
-      "status": "done", "date": "2026-09-13", "tags": ["3d", "procedural", "travel"] },
-
-    { "id": "worldgen", "group": "world", "title": "World Forge", "href": "worldgen/", "folder": "worldgen",
-      "summary": "Procedural world maps with a lot of knobs: seven ways to grow continents, erosion, rivers and lakes, climate, biomes and weather, an evil / blessed aura layer, named regions, towns, dungeons and roads. Zoom from the world into a region and into a single 640 m tile.",
-      "status": "done", "date": "2026-09-15", "tags": ["worldgen", "map", "noise"] },
-    { "id": "universe", "group": "world", "title": "Star Forge", "href": "universe/", "folder": "universe",
-      "summary": "A seeded universe: a galaxy laid out in spiral arms, clusters or rings; eleven kinds of star from blue giants to black holes; systems of planets with moons, rings, belts and comets; fourteen planet archetypes with their own hazards and rare elements. Land on one and World Forge draws its surface.",
-      "status": "done", "date": "2026-09-14", "tags": ["universe", "space", "3d", "worldgen"] },
-    { "id": "proctown", "group": "world", "title": "Procedural Towns", "href": "proctown/", "folder": "proctown",
-      "summary": "The one town planner, and a page to tune it on. A town is cut into blocks and the cuts become its streets, so a house can never sit on a road; each plot knows which way it faces. Seven cultures (human, elf, dwarf, undead, orc, halfling, desert) are parameter sets over one generator. Farhold and Thousandvale import this module, so tuning here tunes the games.",
-      "status": "done", "date": "2026-10-05", "tags": ["towns", "procgen", "layout"] },
-    { "id": "buildkit", "group": "world", "title": "Building Kit", "href": "proctown/kit.html", "folder": "proctown",
-      "summary": "The parts every town building is made of (walls, roofs, doors, windows, chimneys, stalls) drawn on their own, so a roof that does not meet its walls is obvious here rather than three hundred metres away in the game.",
-      "status": "done", "date": "2026-09-20", "tags": ["towns", "3d", "parts"] },
-    { "id": "propkit", "group": "world", "title": "Set-piece Kit", "href": "proctown/propkit.html", "folder": "proctown",
-      "summary": "89 models for everything that stands around the houses: graveyards, farmland with 23 crops, barns, a windmill and a turning water wheel, orchards, shrines, ruins, lumber and hunting camps, fishing jetties, inn yards. Same unit shapes as the building kit, so a game instances a whole zone of them.",
-      "status": "done", "date": "2026-10-05", "tags": ["towns", "3d", "props"] },
-    { "id": "highdef-3d", "group": "world", "title": "3D High Def", "href": "highdef-3d/", "folder": "highdef-3d",
-      "summary": "A high-detail atmospheric world you can walk around in: a generated landscape with biomes, forests, weather and water, cascaded shadows, a physical sky the world reflects, height fog that glows toward the sun and a quarter of a million blades of grass. A free strategy camera or third person behind a rigged character. Every tree, rock and texture is generated in code.",
-      "status": "done", "date": "2026-09-22", "tags": ["3d", "terrain", "lighting", "vegetation"] },
-    { "id": "assets", "group": "world", "title": "Asset Library", "href": "assets/", "folder": "assets",
-      "summary": "The drawn art the prototypes share, in files instead of code: 32 scenery backdrops with tags and a night wash, the map node icons, interface art and 35 effect sprites. Browse them in a gallery, load them by id.",
-      "status": "done", "date": "2026-09-12", "tags": ["svg", "scenery", "icons"],
-      "links": [ { "label": "Space models", "href": "assets/models.html" } ] },
-
-    { "id": "voice-lab", "group": "language", "title": "Voice Lab", "href": "voice-lab/", "folder": "voice-lab",
-      "summary": "Synthetic character voices in the browser, knob-driven. Five engines (our own formant synthesizer, espeak, our babble gibberish, Piper neural, Web Speech) with license badges, pitch / speed / tone / texture knobs, audio effects, 31 presets, a crowd stress test and voice JSON export.",
-      "status": "done", "date": "2026-09-10", "tags": ["audio", "tts", "web-audio"] },
-    { "id": "lingo", "group": "language", "title": "Lingo", "href": "lingo/", "folder": "lingo",
-      "summary": "Text language system: phrase templates with placeholders, a game-defined dictionary with singular / plural / possessive forms, personality sliders, traits, catchphrases and verbal tics, plus memories, scene awareness and relationships that change what a character says.",
-      "status": "done", "date": "2026-09-10", "tags": ["text", "dialog", "personality"] },
-    { "id": "namegen", "group": "language", "title": "Name Forge", "href": "namegen/", "folder": "namegen",
-      "summary": "Procedural names for people, factions, regions, settlements, landmarks, artifacts and mottos across 12 races, each with its own language (sound rules + concept dictionary), meanings, plural and adjective forms and pronunciations. Exports Lingo dictionary entries.",
-      "status": "done", "date": "2026-09-10", "tags": ["names", "languages"] },
-    { "id": "conversations", "group": "language", "title": "Conversations", "href": "conversations/", "folder": "conversations",
-      "summary": "Back-and-forth talk with structure: 82 topics with roles and requirements over real memories, loot, gear comparisons and weapon kill counts, spoken through Lingo personalities.",
-      "status": "done", "date": "2026-09-11", "tags": ["dialog", "memory"] },
-    { "id": "sfx", "group": "language", "title": "Sound Lab", "href": "sfx/", "folder": "sfx",
-      "summary": "Sound effects with four interchangeable makers (our own synthesizer, a CC0 sample pack, a hybrid of the two, and chiptune) over one catalog of 164 logical ids: spells, statuses, melee, deaths, loot, interface, ambience. Every clip is measured and levelled, so nothing is too quiet or too loud.",
-      "status": "done", "date": "2026-09-13", "tags": ["audio", "web-audio", "loudness"] },
-
-    { "id": "icons", "group": "systems", "title": "Icon Library", "href": "icons/", "folder": "icons",
-      "summary": "192 spell icons for all 32 Thousandvale classes, drawn in Starcaller’s gold-on-midnight style. Browse names, descriptions and categories; filter by class or five-class batch, preview small sizes and download SVGs.",
-      "status": "done", "date": "2026-10-11", "isNew": true, "tags": ["icons", "svg", "spells", "library"] },
-    { "id": "game-icons", "group": "systems", "title": "Game Icons", "href": "icons/game.html", "folder": "icons",
-      "summary": "Every picture in Thousandvale that is not a spell: buttons, menus, emotes, professions, potions, food, goods, tools, 55 materials, 78 fish, and three spell-effect shapes for each of 30 classes in that class's own colours. Hand-drawn SVG by Codex.",
-      "status": "done", "date": "2026-10-14", "isNew": true, "tags": ["icons", "svg", "items", "library"] },
-    { "id": "items", "group": "systems", "title": "Item Vault", "href": "items/", "folder": "items",
-      "summary": "Tagged catalog of about 340 items (weapons, armour, vessels, regalia, lore, tools, instruments, food) with race affinities and exclusives, plus a loot roller: material, quality, enchantment, artifact name, value and lore. For how an item LOOKS in 3D, see the Armory.",
-      "status": "done", "date": "2026-09-10", "tags": ["items", "loot"] },
-    { "id": "library", "group": "systems", "title": "Library", "href": "library/", "folder": "library",
-      "summary": "Blueprints of characters, NPCs, enemies, items and parties shared by every experiment and prototype. Stamp copies into games; export JSON or sync straight to Claude.",
-      "status": "done", "date": "2026-09-10", "tags": ["blueprints", "sync"] },
-    { "id": "meters", "group": "systems", "title": "Damage Meter", "href": "meters/", "folder": "meters",
-      "summary": "Drill-down combat meter: bars per fighter, drill into sources, drill into every hit with crit, overkill and damage type. Feed it from any combat system.",
-      "status": "done", "date": "2026-09-11", "tags": ["combat", "ui"] },
-    { "id": "spellfx", "group": "systems", "title": "Spell FX", "href": "avatar-3d/spellfx.html", "folder": "avatar-3d",
-      "summary": "Spell effects for a 3D stage: element projectiles (flame cones, ice shard clusters, jagged bolts, arcing runes), impact bursts and 23 looping status auras, built from shaped geometry and the effect sprite sheet.",
-      "status": "done", "date": "2026-09-13", "tags": ["3d", "particles", "combat"] },
-    { "id": "combined", "group": "systems", "title": "Combined demo", "href": "combined/", "folder": "combined",
-      "summary": "One character sheet that ties avatar, voice and speech together: two full characters in one 3D scene, talking with generated lines in their own voices.",
-      "status": "deprecated", "date": "2026-09-10", "tags": ["integration"],
-      "deprecated": "Still works, but it draws its characters with the original procedural Chibi body, which Chibi 2 replaced. Kept as the reference for wiring avatar + voice + speech together." },
-
-    { "id": "thousandvale", "group": "prototypes", "title": "Thousandvale", "folder": "prototypes/thousandvale",
-      "summary": "An online RPG in one huge walkable world, shared by everyone on the server: Farhold's 30 classes, skills, talents and loot in a province of big zones with towns, farms, forts, dungeons, rares, zone events and hidden treasure. Parties, guilds, trading, mail and friends. It runs on its own game server, so it has two ways in: over this network, or by the public link.",
-      "status": "playable", "statusNote": "online, own server", "date": "2026-10-06", "isNew": true, "tags": ["online", "rpg", "multiplayer", "3d", "loot"],
-      "server": { "port": 8490, "path": "prototypes/thousandvale/" }, "live": "thousandvale", "readme": "prototypes/thousandvale/docs/PLAN.md" },
-    { "id": "tumblefair", "group": "prototypes", "title": "Tumblefair", "folder": "prototypes/tumblefair",
-      "summary": "A couch party game for 2 to 4 players on their phones: scan the code, pick a look, then roll dice round a fairground board, vote for a minigame, play it and buy prize ribbons with your tickets. Running, throwing and painting games use your 3D character; drawing and quiz games show your face in the screens. A TV can join as the big screen. Own game server, so: this network, or the public link.",
-      "status": "playable", "statusNote": "party game, own server", "date": "2026-10-13", "isNew": true, "tags": ["party", "multiplayer", "phone", "3d", "minigames"],
-      "server": { "port": 8480, "path": "prototypes/tumblefair/" }, "live": "tumblefair" },
-    { "id": "farhold", "group": "prototypes", "title": "Farhold", "href": "prototypes/farhold/", "folder": "prototypes/farhold",
-      "summary": "A third-person RPG on a whole planet, and off it. Land on a world of a seeded star system and fight, loot, build and level your way across it: 30 classes with 180 skills, towns full of people who talk, bases, automation, followers, mounts, boats and flights to the neighbouring worlds.",
-      "status": "playable", "date": "2026-10-03", "tags": ["rpg", "planet", "3d", "loot", "space"] },
-    { "id": "bannerline", "group": "prototypes", "title": "Bannerline", "href": "prototypes/bannerline/", "folder": "prototypes/bannerline",
-      "summary": "A lane war for the couch and online. Guard your Keep with a hero while you spend gold sending units down the enemy field: four races of twelve units, five heroes, items, upgrades and battlefield powers. 1v1 to 3v3 with AI, split screen, gamepads and online play by room code; plus Hunters vs Farmers and a five-mission campaign.",
-      "status": "playable", "date": "2026-10-04", "tags": ["lane war", "multiplayer", "online", "gamepad"] },
-    { "id": "emberveil", "group": "prototypes", "title": "Emberveil (rebuilt)", "href": "prototypes/emberveil/", "folder": "prototypes/emberveil",
-      "summary": "The Emberveil RPG rebuilt on the playground pieces: thirty classes as chibi characters, a layered road map across six acts, loot with affixes, uniques and sets, talents and passives, towns, events, crossings, camp conversations and a damage meter.",
-      "status": "playable", "date": "2026-09-14", "tags": ["rpg", "loot", "auto-battler"] },
-    { "id": "frontier-foundry", "group": "prototypes", "title": "Frontier Foundry", "href": "prototypes/frontier-foundry/", "folder": "prototypes/frontier-foundry",
-      "summary": "A 4X + RTS automation game, playable end to end. Survey a star system, land a pod, scan for what is under the ground, drill it, haul it, refine it, build, research an 82-node tree, hold off waves and leave on a rocket carrying whatever fits in the hold.",
-      "status": "playable", "date": "2026-09-14", "tags": ["4X", "automation", "tower-defence"] },
-    { "id": "tinyrts", "group": "prototypes", "title": "Tiny RTS", "href": "prototypes/tinyrts/", "folder": "prototypes/tinyrts",
-      "summary": "A side-view RTS / defence game where everything is made of pixels. Mine crystal, paint walls a cell at a time, put turrets on them and hold against waves, or against a rival commander building its own fort. An 8-mission campaign, Siege and Versus free play, synthesized sound.",
-      "status": "playable", "statusNote": "own repo", "date": "2026-09-25", "tags": ["rts", "tower-defence", "physics"] },
-    { "id": "lanternfall", "group": "prototypes", "title": "Lanternfall", "href": "prototypes/lanternfall/", "folder": "prototypes/lanternfall",
-      "summary": "A side-scrolling pixel action RPG in a drowned chasm-city. Every pixel is simulated (water, wax, oil, fire, steam, rubble) and you build your own spells from a flame, a shape and charms. Six acts going down, lamp-posts to rest at, shops, 30 monsters and bosses.",
-      "status": "playable", "statusNote": "later bosses are stand-ins", "date": "2026-09-26", "tags": ["action-rpg", "pixel physics", "spellcrafting"] },
-    { "id": "party-quest", "group": "prototypes", "title": "Party Quest", "href": "prototypes/party-quest/", "folder": "prototypes/party-quest",
-      "summary": "Assemble four adventurers, talk to townsfolk, take quests, travel by choosing directions, auto-battle with reactive banter, camp at night and listen to the party talk about the day.",
-      "status": "deprecated", "date": "2026-09-10", "tags": ["party", "auto-battler"],
-      "deprecated": "The first prototype. Still playable, but it uses the original procedural Chibi body and has not been touched since the later games replaced it." },
-    { "id": "wildmarch", "group": "prototypes", "title": "Wildmarch", "href": "prototypes/wildmarch/", "folder": "prototypes/wildmarch",
-      "summary": "Design bible for an online action RPG built on Farhold's systems, on one continent where you start with a torch and one spell and earn everything else. Thirty classes with six bespoke spells each and five-player dungeons with telegraphed mechanics. Documents only, with a built-in Markdown viewer.",
-      "status": "docs", "statusNote": "not built", "date": "2026-09-30", "tags": ["design docs", "action-rpg", "online"] }
-  ]
+ "about": "The experiments home page (index.html) is drawn from this file by js/home.js. Adding an experiment = adding one row to `entries`. tests/experiments.test.js fails when a folder with an index.html + README.md is not listed, or a listed path does not exist. Fields: id (unique), group (a groups[].id), title, href (relative, never starting with '/'), summary, status (done | playable | prototype | docs | deprecated), statusNote (optional, shown beside the status), date (last milestone), tags, folder (the folder whose README documents it), links (extra pages: [{label, href}]), readme (the documentation file when it is not <folder>/README.md), deprecated (a sentence saying what is deprecated and what replaced it), isNew (true while it is this round's addition), server ({port, path}: a game that needs its own server — the card gets a 'Play on this network' button instead of a page link), live (a key of data/live-links.json — the card gets a separate 'Live link' button).",
+ "groups": [
+  {
+   "id": "characters",
+   "title": "Characters & gear",
+   "blurb": "Bodies, faces, creatures, mounts and everything they wear or hold."
+  },
+  {
+   "id": "world",
+   "title": "World",
+   "blurb": "Maps, planets, towns, buildings, scenery and the high-detail outdoor world."
+  },
+  {
+   "id": "language",
+   "title": "Sound & language",
+   "blurb": "Voices, speech, names, conversations and sound effects."
+  },
+  {
+   "id": "systems",
+   "title": "Systems",
+   "blurb": "Items, blueprints, combat tools, effects and the pieces wired together."
+  },
+  {
+   "id": "prototypes",
+   "title": "Prototypes",
+   "blurb": "Small games built from the experiments, to test ideas before they get their own project."
+  }
+ ],
+ "entries": [
+  {
+   "id": "armory",
+   "group": "characters",
+   "title": "Armory",
+   "href": "armory/",
+   "folder": "armory",
+   "summary": "The one place to review every wearable and holdable model: swords, daggers, wands, staves, shields, foci, helms, chest pieces, capes and the rest. Each one shows its source file and builder, triangle count, size in metres, which games and items use it, a 3D preview on a body you can orbit (main hand, off hand or both, any attack animation, any race) and its in-game icon. Flag the ones you dislike and export the list.",
+   "status": "done",
+   "date": "2026-10-06",
+   "isNew": true,
+   "tags": [
+    "3d",
+    "gear",
+    "weapons",
+    "armour",
+    "review"
+   ]
+  },
+  {
+   "id": "avatar-3d",
+   "group": "characters",
+   "title": "Avatar 3D",
+   "href": "avatar-3d/",
+   "folder": "avatar-3d",
+   "summary": "Three.js character builder. Chibi 2 is the flagship: nine races (human, elf, dwarf, orc, giant, goblin, halfling, undead, beastkin), a roundness slider, self-contained outfits and about 90 animations with weapon-aware attacks and emotes. Reads the same character JSON as the 2D builder.",
+   "status": "done",
+   "date": "2026-09-25",
+   "tags": [
+    "3d",
+    "character",
+    "three.js"
+   ],
+   "deprecated": "Two of its three modes are deprecated: the original procedural Chibi and the Quaternius mesh mode are kept only for comparison. Build new work on Chibi 2.",
+   "links": [
+    {
+     "label": "Chibi 2 comparison + benchmark",
+     "href": "avatar-3d/chibi2.html"
+    },
+    {
+     "label": "Tier-2 class armour gallery",
+     "href": "avatar-3d/armour2.html"
+    }
+   ]
+  },
+  {
+   "id": "chibi3",
+   "group": "characters",
+   "title": "Chibi 3",
+   "href": "avatar-3d/chibi3.html",
+   "folder": "avatar-3d",
+   "summary": "Higher-detail characters with heroic proportions: one welded skin built from blended shapes, armour and clothes fitted to any body, physically based materials, a 66-bone rig with layered animation, face expressions and lip shapes, springy capes and hair, three levels of detail. Knight, Wizard and Orc Berserker, a full builder, a side-by-side with Chibi 2, a benchmark and a verdict.",
+   "status": "prototype",
+   "statusNote": "no game uses it yet",
+   "date": "2026-10-01",
+   "tags": [
+    "3d",
+    "character",
+    "three.js"
+   ],
+   "links": [
+    {
+     "label": "Verdict",
+     "href": "avatar-3d/data/chibi3-verdict.html"
+    }
+   ]
+  },
+  {
+   "id": "chibi4",
+   "group": "characters",
+   "title": "Chibi 4",
+   "href": "avatar-3d/chibi4/",
+   "folder": "avatar-3d",
+   "summary": "A step-by-step trial of a more realistic character system to replace Chibi 2: MakeHuman bodies from sliders with Codex-painted skin and hair, our own robe and armour measured off the body with the skin under them removed, skirt bones so feet never run through a robe (checked on every frame), and a three.js runtime with one mesh, one texture and three distance versions per character. Every step scored against the same reference sheet.",
+   "status": "prototype",
+   "statusNote": "future game (too realistic for Thousandvale); LAN only",
+   "date": "2026-10-16",
+   "isNew": true,
+   "tags": [
+    "3d",
+    "character",
+    "three.js",
+    "blender"
+   ],
+   "links": [
+    {
+     "label": "Chibi 2 vs 4 + dress up",
+     "href": "avatar-3d/chibi4/compare.html"
+    }
+   ]
+  },
+  {
+   "id": "avatar-2d",
+   "group": "characters",
+   "title": "Avatar 2D",
+   "href": "avatar-2d/",
+   "folder": "avatar-2d",
+   "summary": "Paper-doll character builder from stacked SVG layers: hair, eyes, brows, nose, mouth, body height and width, tops, bottoms, shoes, accessories and about 85 gear parts. Presets, randomize by race, save in the browser, export PNG, SVG or JSON.",
+   "status": "done",
+   "date": "2026-09-09",
+   "tags": [
+    "svg",
+    "character"
+   ]
+  },
+  {
+   "id": "creatures",
+   "group": "characters",
+   "title": "Creatures 3D",
+   "href": "avatar-3d/creatures.html",
+   "folder": "avatar-3d",
+   "summary": "37 procedural non-humanoid bodies over six body plans: wolves, boars, bears, rats, horses, deer, bats, spiders, snakes, drakes, dragons, golems, wisps and more, with walk, run, attack, talk, fly and dead animations and a creature JSON.",
+   "status": "done",
+   "date": "2026-09-13",
+   "tags": [
+    "3d",
+    "procedural",
+    "animals"
+   ]
+  },
+  {
+   "id": "mounts",
+   "group": "characters",
+   "title": "Mounts 3D",
+   "href": "avatar-3d/mounts.html",
+   "folder": "avatar-3d",
+   "summary": "Rideable creatures with saddle, stirrups, bridle and reins and a seated Chibi 2 rider: horse, pony, courser, barded warhorse, stag, crag ram and mire drake, with walk, trot, gallop and mount / dismount.",
+   "status": "done",
+   "date": "2026-10-05",
+   "tags": [
+    "3d",
+    "procedural",
+    "mounts"
+   ]
+  },
+  {
+   "id": "vehicles",
+   "group": "characters",
+   "title": "Vehicles 3D",
+   "href": "avatar-3d/vehicles.html",
+   "folder": "avatar-3d",
+   "summary": "Procedural travel vehicles in the creature style: hand cart, pack mule, covered wagon, ox cart, iron-plated war wagon, closed coach and a sled pulled by a drake, with real animal bodies in the shafts.",
+   "status": "done",
+   "date": "2026-09-13",
+   "tags": [
+    "3d",
+    "procedural",
+    "travel"
+   ]
+  },
+  {
+   "id": "worldgen",
+   "group": "world",
+   "title": "World Forge",
+   "href": "worldgen/",
+   "folder": "worldgen",
+   "summary": "Procedural world maps with a lot of knobs: seven ways to grow continents, erosion, rivers and lakes, climate, biomes and weather, an evil / blessed aura layer, named regions, towns, dungeons and roads. Zoom from the world into a region and into a single 640 m tile.",
+   "status": "done",
+   "date": "2026-09-15",
+   "tags": [
+    "worldgen",
+    "map",
+    "noise"
+   ]
+  },
+  {
+   "id": "universe",
+   "group": "world",
+   "title": "Star Forge",
+   "href": "universe/",
+   "folder": "universe",
+   "summary": "A seeded universe: a galaxy laid out in spiral arms, clusters or rings; eleven kinds of star from blue giants to black holes; systems of planets with moons, rings, belts and comets; fourteen planet archetypes with their own hazards and rare elements. Land on one and World Forge draws its surface.",
+   "status": "done",
+   "date": "2026-09-14",
+   "tags": [
+    "universe",
+    "space",
+    "3d",
+    "worldgen"
+   ]
+  },
+  {
+   "id": "proctown",
+   "group": "world",
+   "title": "Procedural Towns",
+   "href": "proctown/",
+   "folder": "proctown",
+   "summary": "The one town planner, and a page to tune it on. A town is cut into blocks and the cuts become its streets, so a house can never sit on a road; each plot knows which way it faces. Seven cultures (human, elf, dwarf, undead, orc, halfling, desert) are parameter sets over one generator. Farhold and Thousandvale import this module, so tuning here tunes the games.",
+   "status": "done",
+   "date": "2026-10-05",
+   "tags": [
+    "towns",
+    "procgen",
+    "layout"
+   ]
+  },
+  {
+   "id": "buildkit",
+   "group": "world",
+   "title": "Building Kit",
+   "href": "proctown/kit.html",
+   "folder": "proctown",
+   "summary": "The parts every town building is made of (walls, roofs, doors, windows, chimneys, stalls) drawn on their own, so a roof that does not meet its walls is obvious here rather than three hundred metres away in the game.",
+   "status": "done",
+   "date": "2026-09-20",
+   "tags": [
+    "towns",
+    "3d",
+    "parts"
+   ]
+  },
+  {
+   "id": "propkit",
+   "group": "world",
+   "title": "Set-piece Kit",
+   "href": "proctown/propkit.html",
+   "folder": "proctown",
+   "summary": "89 models for everything that stands around the houses: graveyards, farmland with 23 crops, barns, a windmill and a turning water wheel, orchards, shrines, ruins, lumber and hunting camps, fishing jetties, inn yards. Same unit shapes as the building kit, so a game instances a whole zone of them.",
+   "status": "done",
+   "date": "2026-10-05",
+   "tags": [
+    "towns",
+    "3d",
+    "props"
+   ]
+  },
+  {
+   "id": "highdef-3d",
+   "group": "world",
+   "title": "3D High Def",
+   "href": "highdef-3d/",
+   "folder": "highdef-3d",
+   "summary": "A high-detail atmospheric world you can walk around in: a generated landscape with biomes, forests, weather and water, cascaded shadows, a physical sky the world reflects, height fog that glows toward the sun and a quarter of a million blades of grass. A free strategy camera or third person behind a rigged character. Every tree, rock and texture is generated in code.",
+   "status": "done",
+   "date": "2026-09-22",
+   "tags": [
+    "3d",
+    "terrain",
+    "lighting",
+    "vegetation"
+   ]
+  },
+  {
+   "id": "assets",
+   "group": "world",
+   "title": "Asset Library",
+   "href": "assets/",
+   "folder": "assets",
+   "summary": "The drawn art the prototypes share, in files instead of code: 32 scenery backdrops with tags and a night wash, the map node icons, interface art and 35 effect sprites. Browse them in a gallery, load them by id.",
+   "status": "done",
+   "date": "2026-09-12",
+   "tags": [
+    "svg",
+    "scenery",
+    "icons"
+   ],
+   "links": [
+    {
+     "label": "Space models",
+     "href": "assets/models.html"
+    }
+   ]
+  },
+  {
+   "id": "voice-lab",
+   "group": "language",
+   "title": "Voice Lab",
+   "href": "voice-lab/",
+   "folder": "voice-lab",
+   "summary": "Synthetic character voices in the browser, knob-driven. Five engines (our own formant synthesizer, espeak, our babble gibberish, Piper neural, Web Speech) with license badges, pitch / speed / tone / texture knobs, audio effects, 31 presets, a crowd stress test and voice JSON export.",
+   "status": "done",
+   "date": "2026-09-10",
+   "tags": [
+    "audio",
+    "tts",
+    "web-audio"
+   ]
+  },
+  {
+   "id": "lingo",
+   "group": "language",
+   "title": "Lingo",
+   "href": "lingo/",
+   "folder": "lingo",
+   "summary": "Text language system: phrase templates with placeholders, a game-defined dictionary with singular / plural / possessive forms, personality sliders, traits, catchphrases and verbal tics, plus memories, scene awareness and relationships that change what a character says.",
+   "status": "done",
+   "date": "2026-09-10",
+   "tags": [
+    "text",
+    "dialog",
+    "personality"
+   ]
+  },
+  {
+   "id": "namegen",
+   "group": "language",
+   "title": "Name Forge",
+   "href": "namegen/",
+   "folder": "namegen",
+   "summary": "Procedural names for people, factions, regions, settlements, landmarks, artifacts and mottos across 12 races, each with its own language (sound rules + concept dictionary), meanings, plural and adjective forms and pronunciations. Exports Lingo dictionary entries.",
+   "status": "done",
+   "date": "2026-09-10",
+   "tags": [
+    "names",
+    "languages"
+   ]
+  },
+  {
+   "id": "conversations",
+   "group": "language",
+   "title": "Conversations",
+   "href": "conversations/",
+   "folder": "conversations",
+   "summary": "Back-and-forth talk with structure: 82 topics with roles and requirements over real memories, loot, gear comparisons and weapon kill counts, spoken through Lingo personalities.",
+   "status": "done",
+   "date": "2026-09-11",
+   "tags": [
+    "dialog",
+    "memory"
+   ]
+  },
+  {
+   "id": "sfx",
+   "group": "language",
+   "title": "Sound Lab",
+   "href": "sfx/",
+   "folder": "sfx",
+   "summary": "Sound effects with four interchangeable makers (our own synthesizer, a CC0 sample pack, a hybrid of the two, and chiptune) over one catalog of 164 logical ids: spells, statuses, melee, deaths, loot, interface, ambience. Every clip is measured and levelled, so nothing is too quiet or too loud.",
+   "status": "done",
+   "date": "2026-09-13",
+   "tags": [
+    "audio",
+    "web-audio",
+    "loudness"
+   ]
+  },
+  {
+   "id": "icons",
+   "group": "systems",
+   "title": "Icon Library",
+   "href": "icons/",
+   "folder": "icons",
+   "summary": "192 spell icons for all 32 Thousandvale classes, drawn in Starcaller’s gold-on-midnight style. Browse names, descriptions and categories; filter by class or five-class batch, preview small sizes and download SVGs.",
+   "status": "done",
+   "date": "2026-10-11",
+   "isNew": true,
+   "tags": [
+    "icons",
+    "svg",
+    "spells",
+    "library"
+   ]
+  },
+  {
+   "id": "game-icons",
+   "group": "systems",
+   "title": "Game Icons",
+   "href": "icons/game.html",
+   "folder": "icons",
+   "summary": "Every picture in Thousandvale that is not a spell: buttons, menus, emotes, professions, potions, food, goods, tools, 55 materials, 78 fish, and three spell-effect shapes for each of 30 classes in that class's own colours. Hand-drawn SVG by Codex.",
+   "status": "done",
+   "date": "2026-10-14",
+   "isNew": true,
+   "tags": [
+    "icons",
+    "svg",
+    "items",
+    "library"
+   ]
+  },
+  {
+   "id": "items",
+   "group": "systems",
+   "title": "Item Vault",
+   "href": "items/",
+   "folder": "items",
+   "summary": "Tagged catalog of about 340 items (weapons, armour, vessels, regalia, lore, tools, instruments, food) with race affinities and exclusives, plus a loot roller: material, quality, enchantment, artifact name, value and lore. For how an item LOOKS in 3D, see the Armory.",
+   "status": "done",
+   "date": "2026-09-10",
+   "tags": [
+    "items",
+    "loot"
+   ]
+  },
+  {
+   "id": "library",
+   "group": "systems",
+   "title": "Library",
+   "href": "library/",
+   "folder": "library",
+   "summary": "Blueprints of characters, NPCs, enemies, items and parties shared by every experiment and prototype. Stamp copies into games; export JSON or sync straight to Claude.",
+   "status": "done",
+   "date": "2026-09-10",
+   "tags": [
+    "blueprints",
+    "sync"
+   ]
+  },
+  {
+   "id": "meters",
+   "group": "systems",
+   "title": "Damage Meter",
+   "href": "meters/",
+   "folder": "meters",
+   "summary": "Drill-down combat meter: bars per fighter, drill into sources, drill into every hit with crit, overkill and damage type. Feed it from any combat system.",
+   "status": "done",
+   "date": "2026-09-11",
+   "tags": [
+    "combat",
+    "ui"
+   ]
+  },
+  {
+   "id": "spellfx",
+   "group": "systems",
+   "title": "Spell FX",
+   "href": "avatar-3d/spellfx.html",
+   "folder": "avatar-3d",
+   "summary": "Spell effects for a 3D stage: element projectiles (flame cones, ice shard clusters, jagged bolts, arcing runes), impact bursts and 23 looping status auras, built from shaped geometry and the effect sprite sheet.",
+   "status": "done",
+   "date": "2026-09-13",
+   "tags": [
+    "3d",
+    "particles",
+    "combat"
+   ]
+  },
+  {
+   "id": "combined",
+   "group": "systems",
+   "title": "Combined demo",
+   "href": "combined/",
+   "folder": "combined",
+   "summary": "One character sheet that ties avatar, voice and speech together: two full characters in one 3D scene, talking with generated lines in their own voices.",
+   "status": "deprecated",
+   "date": "2026-09-10",
+   "tags": [
+    "integration"
+   ],
+   "deprecated": "Still works, but it draws its characters with the original procedural Chibi body, which Chibi 2 replaced. Kept as the reference for wiring avatar + voice + speech together."
+  },
+  {
+   "id": "thousandvale",
+   "group": "prototypes",
+   "title": "Thousandvale",
+   "folder": "prototypes/thousandvale",
+   "summary": "An online RPG in one huge walkable world, shared by everyone on the server: Farhold's 30 classes, skills, talents and loot in a province of big zones with towns, farms, forts, dungeons, rares, zone events and hidden treasure. Parties, guilds, trading, mail and friends. It runs on its own game server, so it has two ways in: over this network, or by the public link.",
+   "status": "playable",
+   "statusNote": "online, own server",
+   "date": "2026-10-06",
+   "isNew": true,
+   "tags": [
+    "online",
+    "rpg",
+    "multiplayer",
+    "3d",
+    "loot"
+   ],
+   "server": {
+    "port": 8490,
+    "path": "prototypes/thousandvale/"
+   },
+   "live": "thousandvale",
+   "readme": "prototypes/thousandvale/docs/PLAN.md"
+  },
+  {
+   "id": "gravenhold",
+   "group": "prototypes",
+   "title": "Gravenhold",
+   "folder": "prototypes/gravenhold",
+   "summary": "A side experiment built by Codex: the Roguelike's quick dungeon runs rebuilt in 3D with Thousandvale's classes, skills, items and monsters, seen from a classic isometric camera with an optional tilt-shift look. Attacks and skills go through Thousandvale's real combat rules.",
+   "status": "prototype",
+   "statusNote": "Codex build in progress (milestones M0-M8); LAN only",
+   "date": "2026-10-16",
+   "isNew": true,
+   "tags": [
+    "3d",
+    "roguelike",
+    "codex",
+    "isometric"
+   ],
+   "href": "prototypes/gravenhold/"
+  },
+  {
+   "id": "tumblefair",
+   "group": "prototypes",
+   "title": "Tumblefair",
+   "folder": "prototypes/tumblefair",
+   "summary": "A couch party game for 2 to 4 players on their phones: scan the code, pick a look, then roll dice round a fairground board, vote for a minigame, play it and buy prize ribbons with your tickets. Running, throwing and painting games use your 3D character; drawing and quiz games show your face in the screens. A TV can join as the big screen. Own game server, so: this network, or the public link.",
+   "status": "playable",
+   "statusNote": "party game, own server",
+   "date": "2026-10-13",
+   "isNew": true,
+   "tags": [
+    "party",
+    "multiplayer",
+    "phone",
+    "3d",
+    "minigames"
+   ],
+   "server": {
+    "port": 8480,
+    "path": "prototypes/tumblefair/"
+   },
+   "live": "tumblefair"
+  },
+  {
+   "id": "farhold",
+   "group": "prototypes",
+   "title": "Farhold",
+   "href": "prototypes/farhold/",
+   "folder": "prototypes/farhold",
+   "summary": "A third-person RPG on a whole planet, and off it. Land on a world of a seeded star system and fight, loot, build and level your way across it: 30 classes with 180 skills, towns full of people who talk, bases, automation, followers, mounts, boats and flights to the neighbouring worlds.",
+   "status": "playable",
+   "date": "2026-10-03",
+   "tags": [
+    "rpg",
+    "planet",
+    "3d",
+    "loot",
+    "space"
+   ]
+  },
+  {
+   "id": "bannerline",
+   "group": "prototypes",
+   "title": "Bannerline",
+   "href": "prototypes/bannerline/",
+   "folder": "prototypes/bannerline",
+   "summary": "A lane war for the couch and online. Guard your Keep with a hero while you spend gold sending units down the enemy field: four races of twelve units, five heroes, items, upgrades and battlefield powers. 1v1 to 3v3 with AI, split screen, gamepads and online play by room code; plus Hunters vs Farmers and a five-mission campaign.",
+   "status": "playable",
+   "date": "2026-10-04",
+   "tags": [
+    "lane war",
+    "multiplayer",
+    "online",
+    "gamepad"
+   ]
+  },
+  {
+   "id": "emberveil",
+   "group": "prototypes",
+   "title": "Emberveil (rebuilt)",
+   "href": "prototypes/emberveil/",
+   "folder": "prototypes/emberveil",
+   "summary": "The Emberveil RPG rebuilt on the playground pieces: thirty classes as chibi characters, a layered road map across six acts, loot with affixes, uniques and sets, talents and passives, towns, events, crossings, camp conversations and a damage meter.",
+   "status": "playable",
+   "date": "2026-09-14",
+   "tags": [
+    "rpg",
+    "loot",
+    "auto-battler"
+   ]
+  },
+  {
+   "id": "frontier-foundry",
+   "group": "prototypes",
+   "title": "Frontier Foundry",
+   "href": "prototypes/frontier-foundry/",
+   "folder": "prototypes/frontier-foundry",
+   "summary": "A 4X + RTS automation game, playable end to end. Survey a star system, land a pod, scan for what is under the ground, drill it, haul it, refine it, build, research an 82-node tree, hold off waves and leave on a rocket carrying whatever fits in the hold.",
+   "status": "playable",
+   "date": "2026-09-14",
+   "tags": [
+    "4X",
+    "automation",
+    "tower-defence"
+   ]
+  },
+  {
+   "id": "tinyrts",
+   "group": "prototypes",
+   "title": "Tiny RTS",
+   "href": "prototypes/tinyrts/",
+   "folder": "prototypes/tinyrts",
+   "summary": "A side-view RTS / defence game where everything is made of pixels. Mine crystal, paint walls a cell at a time, put turrets on them and hold against waves, or against a rival commander building its own fort. An 8-mission campaign, Siege and Versus free play, synthesized sound.",
+   "status": "playable",
+   "statusNote": "own repo",
+   "date": "2026-09-25",
+   "tags": [
+    "rts",
+    "tower-defence",
+    "physics"
+   ]
+  },
+  {
+   "id": "lanternfall",
+   "group": "prototypes",
+   "title": "Lanternfall",
+   "href": "prototypes/lanternfall/",
+   "folder": "prototypes/lanternfall",
+   "summary": "A side-scrolling pixel action RPG in a drowned chasm-city. Every pixel is simulated (water, wax, oil, fire, steam, rubble) and you build your own spells from a flame, a shape and charms. Six acts going down, lamp-posts to rest at, shops, 30 monsters and bosses.",
+   "status": "playable",
+   "statusNote": "later bosses are stand-ins",
+   "date": "2026-09-26",
+   "tags": [
+    "action-rpg",
+    "pixel physics",
+    "spellcrafting"
+   ]
+  },
+  {
+   "id": "party-quest",
+   "group": "prototypes",
+   "title": "Party Quest",
+   "href": "prototypes/party-quest/",
+   "folder": "prototypes/party-quest",
+   "summary": "Assemble four adventurers, talk to townsfolk, take quests, travel by choosing directions, auto-battle with reactive banter, camp at night and listen to the party talk about the day.",
+   "status": "deprecated",
+   "date": "2026-09-10",
+   "tags": [
+    "party",
+    "auto-battler"
+   ],
+   "deprecated": "The first prototype. Still playable, but it uses the original procedural Chibi body and has not been touched since the later games replaced it."
+  },
+  {
+   "id": "wildmarch",
+   "group": "prototypes",
+   "title": "Wildmarch",
+   "href": "prototypes/wildmarch/",
+   "folder": "prototypes/wildmarch",
+   "summary": "Design bible for an online action RPG built on Farhold's systems, on one continent where you start with a torch and one spell and earn everything else. Thirty classes with six bespoke spells each and five-player dungeons with telegraphed mechanics. Documents only, with a built-in Markdown viewer.",
+   "status": "docs",
+   "statusNote": "not built",
+   "date": "2026-09-30",
+   "tags": [
+    "design docs",
+    "action-rpg",
+    "online"
+   ]
+  }
+ ]
 }

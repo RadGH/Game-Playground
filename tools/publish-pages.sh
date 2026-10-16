@@ -46,7 +46,7 @@ while [ $# -gt 0 ]; do
 done
 
 # Paths the site never needs (regex, matched against the full path).
-EXCLUDE='^avatar-3d/chibi4/|(^|/)(tests|test-results|playwright-report|node_modules)/|/research/.*[.](png|jpe?g|webp)$|^package(-lock)?[.]json$|^playwright[.]config[.]js$'
+EXCLUDE='^avatar-3d/chibi4/|^prototypes/gravenhold/|(^|/)(tests|test-results|playwright-report|node_modules)/|/research/.*[.](png|jpe?g|webp)$|^package(-lock)?[.]json$|^playwright[.]config[.]js$'
 
 # 1. Pull TinyRTS's committed files into this repo's object store (no merge, just objects).
 git fetch -q "$TINYRTS" master:refs/tinyrts/master --force

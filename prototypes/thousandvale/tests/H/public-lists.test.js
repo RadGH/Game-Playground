@@ -44,6 +44,7 @@ test('the allow-list: explicit, relative, and covering the home page and everyth
   const allowed = p => ALLOW.some(a => p === a || p.startsWith(a + '/'));
   for (const e of experiments.entries) {
     if (e.folder === 'prototypes/tinyrts') continue;                 // a symlink to another repo: reported, not served
+    if (e.folder === 'prototypes/gravenhold') continue;              // 2026-10-16: Codex side experiment, dev site only (on DENY)
     assert.ok(allowed(e.folder), `${e.id}: its folder ${e.folder} is not in server/static.js ALLOW, so the game server cannot show it`);
     for (const href of [e.href, ...(e.links || []).map(l => l.href)].filter(Boolean)) assert.ok(allowed(href.replace(/\/$/, '')), `${e.id}: ${href} is outside the allow-list`);
   }
@@ -100,7 +101,7 @@ test('the home page is told who serves it, and every link it keeps is one the se
     assert.ok(gone.has(href) || canServe(PLAY, href), `${e.id}: ${href} is neither served nor reported`);
   // only Tiny RTS's card and README, and Thousandvale's private plan, are missing — a new gap must be a decision
   // and Chibi 4 (owner 2026-10-16: a LAN-only experiment for a future game, never public)
-  assert.deepEqual(info.unavailable.filter(u => !u.startsWith('prototypes/tinyrts/') && !u.startsWith('prototypes/tumblefair/') && !u.startsWith('avatar-3d/chibi4/')), ['prototypes/thousandvale/docs/PLAN.md']);
+  assert.deepEqual(info.unavailable.filter(u => !u.startsWith('prototypes/tinyrts/') && !u.startsWith('prototypes/tumblefair/') && !u.startsWith('avatar-3d/chibi4/') && !u.startsWith('prototypes/gravenhold')), ['prototypes/thousandvale/docs/PLAN.md']);
 });
 
 test('over http: / is the home page (no redirect), a published copy behaves the same, private paths are 404', async () => {

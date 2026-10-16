@@ -33,6 +33,7 @@ import { drawGame, hitTest, pointFor } from './prof-draw.js';
 import { padLayers, PAD_INDEX } from '../input/bindings.js';
 import { hintFor } from '../input/hints.js';
 import { profIcon, PROF_NAME } from './prof-icons.js';
+import { activePad } from '../input/gamepad.js';
 
 const WORK = new Set(['Space', 'KeyE', 'Enter', 'NumpadEnter', 'KeyF']);
 const LEFT = new Set(['KeyA', 'ArrowLeft']), RIGHT = new Set(['KeyD', 'ArrowRight']), UP = new Set(['KeyW', 'ArrowUp']);
@@ -150,7 +151,7 @@ export function createMinigame({ sound = null, words = () => QUALITY_WORD, paren
   }
   /** The pad, read here while a game is up (input/gamepad.js stands back: see <html data-prof>). */
   function pollPad() {
-    let pad = null; try { pad = [...(navigator.getGamepads?.() || [])].find(p => p && p.connected !== false) || null; } catch { return; }
+    const pad = activePad(); if (!pad) return;      // the pad the player last touched (input/gamepad.js), not simply the first
     if (!pad) return;
     const on = name => { const b = pad.buttons[PAD_INDEX[name]]; return !!b && (b.pressed || b.value > 0.5); };
     const lx = pad.axes[0] || 0, ly = pad.axes[1] || 0;

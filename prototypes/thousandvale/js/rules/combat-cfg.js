@@ -25,6 +25,10 @@ export const COMBAT_DEFAULTS = Object.freeze({
   knockInterrupt: { normal: 0.6, champion: 0.3, rare: 0.2, boss: 0, minPush: 0.5 },
   dummy: { hpMult: 400, resetSec: 3, reference: 'road_brigand' },
   wanderer: { hpMult: 0.5, dmgMult: 2, playerM: 40, noticeM: 12, leashM: 25, respawnSec: 45, savedBelow: 0.35, helpedShare: 0.2, quietSec: 4 },
+  // round 11 Z62: the dagger. Farhold's back-stab (x2.2 + a bleed) was counted when the target FACED you; here every
+  // dagger hit gets `edgePct` more, and one from behind — more than `backDeg` degrees from where the target looks, the
+  // same test a skill's "from behind" bonus uses — gets `backstabPct` more on top and makes it bleed (js/rules/field.js)
+  dagger: { edgePct: 120, backstabPct: 50, backDeg: 100 },
   // owner #2 / #61 (2026-10-15): a weapon's damage share by family, and the melee guard (js/rules/attributes.js)
   families: {
     heavy: { damagePct: 18, guardPct: 15, oneHandGuardPct: 10 },
@@ -122,3 +126,35 @@ export function attackRate(engine, ch, hand = 'main', { styleOf = null } = {}) {
 }
 export const apsText = aps => (aps > 0 ? `${+(+aps).toFixed(2)} attack${aps === 1 ? '' : 's'} per second` : '');
 export { STAFF_CHARGE };
+
+// ------------------------------------------------------------------------------------------------ the dagger (Z62)
+
+/**
+ * Round 11 Z62 — is `attacker` behind `target`? True when the line from the target to the attacker is more than
+ * `deg` degrees from where the target looks (`facing`), when the skill's own rules say the hit counts as from behind
+ * (`rules.behind`, e.g. Slip Away), or when the target wears a mark that makes every hit count from behind. The same
+ * test Farhold's js/skillmech.js `behind()` gives a skill's "more damage from behind", so a card says one thing.
+ */
+export function isBehind(attacker, target, { deg = 100, rules = null } = {}) {
+  if (rules?.behind) return true;
+  if (Object.values(target?.statuses || {}).some(st => st?.kind === 'tag' && st.fromBehind)) return true;
+  if (attacker?.x == null || target?.x == null) return false;
+  const away = Math.atan2(attacker.x - target.x, attacker.z - target.z);
+  const delta = Math.abs(((away - (target.facing || 0) + Math.PI * 3) % (Math.PI * 2)) - Math.PI);
+  return delta > deg * Math.PI / 180;
+}
+
+/** The dagger rule of this engine (`{ edgePct, backstabPct, backDeg }`), or null on a parity engine (Farhold's rule runs). */
+export const daggerRule = engine => engine?.combatCfg?.dagger || null;
+
+/** The multiplier one dagger hit gets: `edge` always, x `back` more from behind. */
+export function daggerMult(rule, behind) {
+  const edge = 1 + (rule.edgePct || 0) / 100;
+  return behind ? edge * (1 + (rule.backstabPct || 0) / 100) : edge;
+}
+
+/** One card sentence, from the same numbers the fight reads. */
+export function daggerText(rule) {
+  if (!rule) return '';
+  return `Dagger: every hit deals ${Math.round(rule.edgePct)}% more damage. A hit from behind — standing in the ${Math.round(360 - 2 * rule.backDeg)}° wedge at the target's back, or when a skill says its hit counts as from behind — deals ${Math.round(rule.backstabPct)}% more on top and makes the target bleed.`;
+}

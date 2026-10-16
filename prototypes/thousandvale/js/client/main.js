@@ -98,6 +98,7 @@ import { lookWith, lookCustom } from './ui/appearance-core.js';
 import { avatarFor } from './looks.js';
 import { installInput } from './input/index.js';
 import { looksLikePhone } from './input/layout.js';   // play-test 5 T27 (stream G): gamepad, re-bound keys, key hints that follow the device (touch only when the phone layout is on)
+import { activePad } from './input/gamepad.js';      // owner 2026-10-15: rumble the pad in the player's hands
 
 const q = new URLSearchParams(location.search);
 const $ = id => document.getElementById(id);
@@ -1136,7 +1137,7 @@ function strikeNoTarget() {
 }
 /** A short rumble on the pad in use, when the browser can (feedback for a press that did nothing). */
 function padBuzz() {
-  try { for (const g of navigator.getGamepads?.() || []) if (g && g.vibrationActuator?.playEffect) { g.vibrationActuator.playEffect('dual-rumble', { duration: 110, strongMagnitude: 0.35, weakMagnitude: 0.5 }); break; } } catch { /* no rumble */ }
+  try { const g = activePad(); g?.vibrationActuator?.playEffect?.('dual-rumble', { duration: 110, strongMagnitude: 0.35, weakMagnitude: 0.5 }); } catch { /* no rumble */ }      // the pad in the player's hands
 }
 const _ray = new THREE.Raycaster();
 function pickGround(ndc) {

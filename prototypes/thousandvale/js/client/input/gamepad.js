@@ -13,6 +13,27 @@ import { keyDown, keyUp, keyTap, releaseAll } from './emit.js';
 import { device } from './device.js';
 
 const DEAD = 0.22, REPEAT_FIRST = 320, REPEAT = 110;
+
+// Several controllers at once (owner 2026-10-15: a docked Steam Deck lists its own built-in controls AND the 8BitDo,
+// and the game only ever read the first one, so the pad in his hands did nothing). Not multiplayer: whichever pad was
+// touched LAST is the one that plays, until another one is touched. A pad only takes over on a button press or a stick
+// pushed past half-way, so an idle pad's stick drift can never steal control.
+const TAKEOVER = 0.5;
+let activeIndex = -1;
+function padActive(p) {
+  if (!p) return false;
+  for (const b of p.buttons) if (b && (b.pressed || b.value > 0.5)) return true;
+  for (const v of p.axes) if (Math.abs(v || 0) > TAKEOVER) return true;
+  return false;
+}
+/** The pad that plays: the last one touched (any connected pad on the list counts), else a standard-mapping one. */
+export function activePad() {
+  let pads = [];
+  try { pads = [...(navigator.getGamepads?.() || [])].filter(p => p && p.connected !== false); } catch { return null; }
+  if (!pads.length) { activeIndex = -1; return null; }
+  for (const p of pads) if (p.index !== activeIndex && padActive(p)) { activeIndex = p.index; break; }
+  return pads.find(p => p.index === activeIndex) || pads.find(p => p.mapping === 'standard') || pads[0];
+}
 const ZOOMS = [5.5, 9, 15];
 
 export function createGamepad({ api, focus, radial, osk, run }) {
@@ -24,7 +45,7 @@ export function createGamepad({ api, focus, radial, osk, run }) {
   let muted = false;                    // Y1 (G2): after release() the move stick is ignored until it has come back to the middle
   const stats = { polls: 0, presses: 0, mode: 'none', id: '' };
 
-  const pick = () => { let pads = []; try { pads = [...(navigator.getGamepads?.() || [])].filter(Boolean); } catch { return null; } return pads.find(p => p.connected !== false && p.mapping === 'standard') || pads.find(p => p.connected !== false) || null; };
+  const pick = () => activePad();
   const visible = sel => { const e = document.querySelector(sel); return !!e && !e.hidden && e.getClientRects().length > 0; };
   /** What A means in the world right now: the screen decides. */
   function aAction() {

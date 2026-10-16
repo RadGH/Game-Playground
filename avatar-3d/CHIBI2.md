@@ -4,6 +4,256 @@
 and the Quaternius mesh mode (`quaternius.js`) are **deprecated**: they stay on the avatar page,
 labelled as such, only so the three can be compared. Nothing new is built for them.
 
+## Chibi 2.5 contracts (2026-10-16) — read before touching any chibi2 file
+
+Chibi 2.5 is the improved cartoon Chibi 2 (same low-poly style, same two draw calls). It is built by two agents at once:
+**part A = the head** (face, eyes, brows, mouth, nose, ears, facial hair, face marks, hair, hats-vs-hair-vs-face fitting,
+blinking + looking, the face/hair builder options) and **part B = the body** (bodies, clothes, robe-vs-feet, outfit/gear
+clipping, body builder options). Rules both follow:
+
+1. **The flag is in the look: `avatar.body.v = 2.5`** (a number; `body` keeps unknown keys through the shared 2D
+   normaliser, so it survives Farhold's/Emberveil's normalise-then-build path and is part of the template cache key).
+   `createChibi2Character(avatar, { v25: true })` is the same thing for a caller that does not want to touch the look.
+   `isV25(a)` in `js/chibi25-options.js` (pure, no Three.js) is the one test: `Number(a?.body?.v) >= 2.5`.
+   Inside the builders: `const V25 = rig.v25` (set by `acquire()`).
+2. **A look without the flag builds byte-for-byte what it built before.** `tools/chibi2-v2-baseline.mjs` hashes 209
+   looks (all Emberveil classes, presets, tier-1 outfits, every original face id, six hats x six hairs) into
+   `tests/fixtures/chibi2-v2-hashes.json`, written at commit 4c8f8b1f BEFORE any 2.5 edit; `tests/chibi25.test.js`
+   fails if one hash moves. Every 2.5 change goes behind `V25`. Never rewrite the fixture to make a test pass
+   (`--force` exists for a deliberate v2 change the owner asked for).
+3. **New part ids** go in `avatar-2d/js/parts/chibi2-parts.js` with `bespoke: true` (so the seeded 2D random roll —
+   and every game's random NPCs — never hands them out and stays the same). `index.js` now merges every face slot
+   (hair, eyes, brows, nose, mouth, ears, extras) from `CHIBI2_2D` too. Ids are listed for games, with names and
+   groups, in `js/chibi25-options.js` (`CHIBI25_OPTIONS`) — a game exposes them explicitly; nothing is added to an
+   existing game's lists.
+4. **Rig.** v2 keeps its 22 bones in the same order. A 2.5 rig APPENDS bones at the end (part A: `eyelidL`,
+   `eyelidR`, children of `eyeL`/`eyeR`). Names starting `eye`/`pupil` are skipped by the clip builders. Part B
+   appends its own after A's if it needs any, and documents them here.
+5. **Files.** Part A owns `js/chibi2-face.js` (its v2 path untouched; 2.5 goes to `js/chibi25-face.js`),
+   `js/chibi25-hair.js`, `js/chibi25-options.js` (part B adds its own body lists in the same file under
+   `CHIBI25_OPTIONS.body`), the hair block and the eye controller (`blink`, `lookAt`) in `js/chibi2.js`. Part B owns
+   `js/chibi2-body.js`, `js/chibi2-gear*.js`, `js/chibi2-motion*.js`. In `chibi2.js`'s `buildTemplate`, A edits only
+   the face/hair/hat lines, B only the body/gear lines.
+6. **Builder page**: `avatar-3d/chibi25.html` + `js/chibi25-app.js` (part A). It shows v2 and v2.5 side by side
+   with face/hair options, a blink/look demo and stats. Part B adds its body controls in `<section id="c25-body">`
+   from its own module `js/chibi25-body-ui.js`, which the page imports if present
+   (`export function mountBodyUi(section, { get, set })` — `get()` returns the current look, `set(look)` rebuilds).
+7. **Measuring hook**: `createChibi2Character(look, { trace: [] })` pushes `{ tag, bone, positions }` for every piece
+   (bind space, before merging), tagged by the build stage (`body`, `face`, `hair`, `hat`, `gear`, `armour2`,
+   `gear5`, and finer tags a builder sets with `c.tag('…')`). The clipping tests read it. No cost when not passed.
+8. **Budgets**: still two meshes (cloth + metal); a 2.5 character stays under the same triangle budgets as v2
+   (8,500 for a class look). No per-frame geometry rebuilds, no material/light toggles (see the shader-recompile note).
+
+## Chibi 2.5 part A — the head (2026-10-16)
+
+Owner: "audit the hair and facial decorations to be more accurate, fix clipping issues… keeping the low poly cartoon
+models" and "add more eyes, blinking, ability for pupils to look around, more character builder options". Everything
+here is behind the flag (`body.v = 2.5`); a v2 look is byte-identical (contract 2).
+
+| File | What |
+|---|---|
+| `js/chibi25-face.js` | the 2.5 face: `EYE25` (24 eye shapes as outlines), `eyeSpec25` (pure numbers the controller shares), `addEyelids` (the two lid bones), `buildFace25` (ears, eyes, brows, nose, mouth, beards, marks, worn-on-face) |
+| `js/chibi25-hair.js` | the 2.5 hair (`buildHair25`), `HAT_FIT` / `hatFit()` (where each headwear covers), `HAIR_COVERS_EARS` |
+| `js/chibi25-eyes.js` | `EyeDriver25`: blinking, idle glances, `lookAt`, all bone moves |
+| `js/chibi25-options.js` | `CHIBI25_OPTIONS` (every id, the new ones, menu names, the extra fields, ears per race), `isV25`, `asV25` |
+| `js/chibi25-clip.js` | the clipping measure (direction maps from the head centre; a front-view depth grid) |
+| `chibi25.html` + `js/chibi25-app.js` | the builder: Chibi 2 and 2.5 side by side, every face/hair option, blink / look demo |
+| `chibi25-sheet.html` + `js/chibi25-sheet.js` | contact sheets: one row per id, 2D picture + front / 3/4 / side (`?slot=hair&v=2`, `&hat=wizard`, `&only=new`, `&blink=1`, `&look=1,-0.5`) |
+| `tools/chibi2-v2-baseline.mjs` · `tools/chibi25-clip-report.mjs` · `tools/chibi25-shot.mjs` | v2 hash fixture · hair x headwear / brows report · page screenshots |
+
+### The game API
+
+```js
+const actor = await createChibi2Character(look, { v25: true });   // or look.body.v = 2.5
+actor.lookAt(enemy.position, { head: 0.35 });   // world point; head 0..1 = how much of the turn the head takes
+actor.lookAt(null);                             // back to idle glances
+actor.setGaze(0.8, -0.3);  actor.setGaze(null); // pupils pushed to a fraction of their room
+actor.blink();  actor.setBlink(0.5);  actor.setBlink(null);
+actor.eyes      // { v25, blink, gaze: [x, y], looking, limits: [x, y] }
+```
+
+Blinks come on their own every 2–5.5 s (about three in ten seconds; one in six doubled), 0.17 s long; lids drop a
+little when the eyes look down; `dead` and `sleep` shut them; `eyes.blink = false` in the look turns blinking off. All
+of it is the eyelid bones' y scale and the pupil bones' x/y (plus a smoothed head turn for `lookAt`) — no geometry
+rebuild, no material or light change: `tests/chibi25.spec.js` counts `linkProgram` calls over three seconds of blinks
+and looks and requires zero. The lid is the eye's own outline drawn shut, domed (in front of the iris, back to the face
+at its rim), lit with the head's normals; it hangs from a bone at the top of the outline, so it closes over every
+shape — sleepy, narrow, cat and dot eyes too. `happy` (and wink's winking eye) are the 2D picture's closed arcs and do
+not blink. Gaze limits come from the white minus the iris, so the iris never leaves the white.
+
+### Fields 2.5 reads (no registration needed — fields survive the normaliser)
+
+`eyes.pupil` (round, slit, dot, star, heart, cross, ring, none), `eyes.iris` (normal, large, small, ring, none),
+`eyes.white`, `eyes.colorR` (odd eyes), `eyes.blink`; `brows.thick`, `brows.color` (default now the DARK hair shade,
+as the 2D picture draws it); `ears.scale`; `facialHair.color`; `hair.color2` (ties, tips: twin tails, locs, braids).
+
+### New ids (all `bespoke` in `avatar-2d/js/parts/chibi2-parts.js`)
+
+* **eyes (9)**: cat, doe, droopy, sharp, button, sparkle, hooded, lashes, heart
+* **hair (10)**: undercut, topknot, high_ponytail, twin_tails, messy, pompadour, locs, long_braid, mullet, side_swept
+* **brows (7)**: bushy, unibrow, slanted, soft, split, dots, curved · **mouth (8)**: laugh, cat, pout, gritted, wavy, buck, fang, shark
+* **nose (3)**: pointed, round, flat · **ears (6)**: long_pointed, swept, notched, small, cat_ears, wolf_ears (on top of the head; hidden under crown hats)
+* **facial hair (6)**: mutton_chops, handlebar, van_dyke, short_beard, forked_beard, sideburns
+* **marks (10)**: freckles_nose, beauty_mark, scar_brow, scar_lip, war_mask, chin_lines, tear_mark, star_mark, moon_mark, blush_soft
+
+### Audit (contact sheets, v2 vs 2.5) — what was wrong and what 2.5 does
+
+* Hair: **bun / buns** were built inside the hair cap (invisible) → on the crown. **afro** sat forward over the eyes →
+  back and up. **long** read as short from the front → face-framing curtains to the shoulders. **bangs** splayed out
+  like petals → a blunt-cut sheet. **buzz** had a slab over the brow and a bare back → tight cap with a hairline and a
+  back. **mohawk** had sideburn locks floating on the shaved scalp → stubble-shade sides. **tonsure** had no bald crown →
+  a ring cap. **horns_hair** had no horns → horns. Outer fringe locks curled out like horns → hug the temples.
+* Brows/fringe: every fringe ended ON the brows and the cap's front edge sat over their tops → the fringe stops above
+  `browTop` (reported by the face), the hairline is raised at the front, and brows are the dark hair shade.
+* Eyes: **almond** was a round eye → pointed corners; **narrow** a round eye under a bar → a lens; **hollow** was a pale
+  teal disc → a dark socket with a small glowing point; **happy / wink** ("Closed happy") were open eyes → the closed arc.
+* Mouth: **sad_open** ("Wail") was a round O → an arch with a flat base; **open** was the same as the wail → a D with
+  upper teeth and a tongue; **smirk** was nearly level → one-sided; **tusks** sat on the lip and read as fangs → rise from
+  under the lower lip.
+* Facial hair: **goatee** carried a moustache the 2D one does not (the moustache + goatee is the new van_dyke);
+  **long / braided** beards hung at the chin's depth into the collar → pushed out over the chest (`chestZ`).
+* Marks: **scar** ("Scar (eye)") was a cheek slash → brow to cheek, skipping the eye; **warpaint** was the cheek
+  stripes → a band across the eyes and a forehead line; **eye_black** ("Blackened eyes") were bars → dark rings;
+  **tattoo** was a cheek spiral → a temple line; **face_glyphs** → forehead cross + cheek chevrons; **brand** moved to the
+  forehead; **pale** did nothing → the skin is paled; **nose_scar** was too small to see. Forehead marks sit in front of a
+  fringe. `soot` stays as chibi2-gear.js draws it.
+* Ears: **fins** were one cone (the same as pointed) → a fan of spines with webbing. Normal ears are hidden under hair that
+  covers them (long, wavy, bob, shaggy, locs, side swept, twin tails); pointed ears poke out through it.
+
+### Fitting under headwear (`HAT_FIT`)
+
+One rule instead of per-pair patches: a hat says where it covers — a `shell` down to a brim line (front and back
+heights), a `band` at a height, `hood`, `noHang` (pelts and mail hoods tuck hanging hair away) — and every hair vertex
+in a covered region is pressed inside the hair cap's own surface (which every hat is built to clear). Hair below the
+brim still hangs (a ponytail under a wizard hat is kept, not dropped as in v2). Bands pinch the hair under them,
+easing out over 0.12. Unlisted `g5_` and future headwear get a generic shell from the id. Measured over 720 hair x
+headwear pairs (`tools/chibi25-clip-report.mjs`): mean share of hair vertices outside the hat **7.8% (v2) → 0.8%
+(2.5)** (pairs where the hat covers at least 30 hair vertices); brows hidden by any fringe, seen from the front, ≤ 5% for every style. Accepted: a crown or a band sits ON an
+afro / pompadour / spikes.
+
+### Cost
+
+Same two draw calls (one if a look has no metal), +2 bones. Emberveil class looks switched to 2.5: mean 6,887 → 6,609
+triangles, max 8,180 → 8,355 (budget 8,500, asserted). The eyes cost a few multiplies per character per frame.
+
+### Verify
+
+`node --test avatar-3d/tests/chibi25.test.js` (v2 hashes, flag, every id registered/bespoke/building, blinking,
+looking clamps, hair x every headwear, brows under fringes, beards over the chest, class budgets) and
+`flock /tmp/claude-1000/farhold-pw.lock npx playwright test avatar-3d/tests/chibi25.spec.js` (the builder page, no shader
+compiles while the eyes move). Not done: the v2 face is not tagged per feature, so the brow-under-fringe number has no
+v2 "before" figure; hair under a crown on an afro is left sitting on the hair.
+
+## Chibi 2.5 part B — the body (2026-10-16)
+
+Owner: "fix clipping issues, improve the robe clipping with feet running animation, but keeping the low poly cartoon
+models" and "more character builder options". Same flag (`body.v = 2.5`, contract 1); every v2 look is byte-identical
+(the 209 hashes pass) and every v2 clip is unchanged (a multiplier that is 1 on a v2 rig is the only touch in the
+shared clips).
+
+| File | What |
+|---|---|
+| `js/chibi25-body.js` | skirt bones: `longGarment` / `needsSkirt`, `addSkirtBones`, `skirtWeigh` (the `weigh` for SkinBuilder), `registerSkirtSurface`, `driveSkirt` (per baked frame), `strideFor` + `capShin` (the robe stride), `race25` + `applyBody25` (body options) |
+| `js/chibi25-motion.js` | opt-in clips `CHIBI25_MOVE_ANIMS` = sprint, backpedal, strafeL, strafeR (+ `moveClipFor(forward, right)`) |
+| `js/chibi25-outfits.js` | new clothes `TOP25` / `BOTTOM25` / `SHOE25` / `CAPE25` (`OUTFIT25`), and `ROBE_LOOKS` (one look per long garment, for the test and the sheet) |
+| `js/chibi25-body-options.js` | `CHIBI25_BODY_OPTIONS` (= `CHIBI25_OPTIONS.body`): `SHAPES`, `POSTURES`, `TAILS`, sliders, race tails, the new clothes |
+| `js/chibi25-body-ui.js` | `mountBodyUi(section, { get, set })` — the Body + Outfit controls on `chibi25.html`, and buttons that load the robe strips / outfit sheets / body options into a frame there (its own page, so the blink/look demo is untouched) |
+| `chibi25-body-sheet.html` + `js/chibi25-body-sheet.js` | `?mode=robe&garment=robe&clip=run` (side-on stride strip, Chibi 2 row over 2.5 row), `?mode=outfits&set=classes|t1|t2|tv&clips=idle,walk,run,attack` (one row per class look), `?mode=bodies` |
+| `tools/chibi25-measure.mjs` | builds a real character, keeps its pieces, skins them on the CPU per frame: `robeCheck` (feet vs cloth) and `clipCheck` (gear vs body) |
+| `tests/chibi25-robe.test.js` · `tests/chibi25-clip-body.test.js` | the robe test and the gear-vs-body count (below) |
+
+Edited (behind `rig.v25` / `rig.skirt`): `chibi2-geometry.js` (SkinBuilder `weigh` option, 4 influences),
+`chibi2-body.js` (garment weights + tags, waist room, coat tails, plate sides, tails, limb thickness, `rig.armSpread`),
+`chibi2-gear.js` (capes on skirt bones, capelets/feathers/fur on the arms, half-cape shoulder, `long_cloak`, `scarf`),
+`chibi2-motion.js` (`driveSkirt` + skirt scale tracks in `createClips`, `rig.stride` in walk/run/jump, guard tweaks),
+`chibi2.js` `acquire` (race25 + skirt bones + stride, `{ v25: true }`), `chibi25-options.js` (one import),
+`avatar-2d/js/parts/chibi2-parts.js` (new ids, `bespoke`), `data/gear-catalog.json` (rebuilt: 14 new rows).
+
+### Robe vs feet
+
+THE LESSON (Chibi 4 step 6) holds here too: weighting cloth to the thighs fails because the two thighs swing opposite
+ways (a front vertex on both moves by their average, zero). What works is both of:
+
+1. **Skirt bones** — `skirt0..7`, appended after part A's eyelids (bones 24-31), children of `hips` at the hip
+   pivot, built ONLY for a 2.5 look that wears something long (robe family, knee hems, coats/trench, skirt/kilt/
+   loincloth, long capes). Cloth below the pivot is shared by the two bones nearest its direction, handed over from its
+   own bone between 0.08 m above and 0.16 m below the pivot (capes: 0 to 0.22 m below, from the chest). On every baked
+   frame `driveSkirt` works out where both knees, shins, ankles, toes, heels and thighs are (forward kinematics of the
+   frame's own pose) and tilts each bone just far enough that the cloth — modelled exactly as linear blend skinning
+   will draw it — stays 4 cm outside every leg point above the hem, or lifts its hem over the point (a foot showing
+   under a hem is allowed). Where no tilt reaches (a thigh in a saddle, under the belt) the bone SPREADS (x/z scale
+   track). Search: steps of 0.1 rad then 0.02, curves cached per 5 degrees x tilt on the surface.
+2. **The robe stride** (`strideFor`, read by walk/run/jump/sprint/backpedal/strafe through `rig.stride`): floor
+   length keeps 62% of the thigh swing and 55% of the heel kick, knee hems/coats/skirts 78%/72%, long capes 95%/75%;
+   `capShin` also caps thigh + knee (1.3-1.7 rad), the forward thigh (0.66-1.2 rad) and keeps the heel at least
+   0.17 m under the hip pivot (a goblin's short leg at a sprint kicked it up to the belt, where nothing can cover it).
+
+Plus room: a 2.5 robe/kilt/coat is 2.5 cm deeper at the hip line (more on short legs, wider for thick legs), the long drop has three more
+rings, and the coat's left tail exists (Chibi 2 built both tails on the same arc — the left side had none).
+
+**Measured** (`tools/chibi25-measure.mjs`, human; worst gap, minus = through the cloth):
+
+| garment | Chibi 2 walk / run / jump | Chibi 2.5 walk / run / jump / sprint / backpedal / strafe | 2.5 ride / sit |
+|---|---|---|---|
+| robe, trim robe, cassock | -21 / -33 / -17 cm | +2.8 / +2.7 / +2.8 / +2.6 / +2.7 / +2.2 cm | -1.2 / -1.5 cm (v2: -30 / -33) |
+| dress | -3.9 / -33 / -15 | +3.3 / +3.3 / +3.5 / +3.4 / +3.4 / +2.8 | -0.2 / -0.6 |
+| surcoat | -8 / -33 / -15 | +3.2 / +3.0 / +3.1 / +3.0 / +3.2 / +2.7 | -1.0 / -1.5 |
+| trench | -27 / -35 / -21 | +2.4 / +2.4 / +2.4 / +1.8 / +2.5 / +2.1 | 0 / +3.2 |
+| coat | -12 / -34 / -20 | +3.2 / +3.1 / +3.2 / +3.1 / +3.2 / +2.8 | +0.3 / -0.4 |
+| skirt, long skirt | -3 to -23 / -33 to -35 | +2.6 to +3.2 everywhere | -1.0 to -1.4 |
+| kilt | -12 / -35 / -20 | +1.2 / +1.3 / +1.3 / +1.2 / +1.2 / +0.7 | -2.6 / +0.7 |
+| loincloth | -1.4 / -35 / -3 | no leg inside a flap's reach | — |
+| capes, travel cloak, long cloak | ok / -13 / ok | +18 to +29 (the hem lifts off the kicked heel) | — |
+
+`tests/chibi25-robe.test.js` (node, ~1 min): all 15 garments x all 9 races x 10 clips, plus 16 body extremes
+(height, width, roundness, legs, every shape, both corners) x 3 races x 11 garments on the 7 ground clips — **zero
+pokes on any ground locomotion frame**; seated (ride, rideGallop, sit) no vertex more than **3.5 cm** out (the top of a
+thigh straddling a saddle sits right under the belt). Mount/dismount clips do not exist in Chibi 2, so there is none
+to test.
+
+### Clipping audit (gear vs body)
+
+`clipCheck` stands the body in with solids just inside the skin (85% head / torso / hips, 80% limb radius, limbs
+starting 6 cm down from the joint) and counts vertex-frames of held items (vs head, torso, hips, legs, the other arm),
+shoulder pieces (vs head), chest gear — capes, capelets, quivers, packs (vs arms), hip gear (vs forearms, hands) and
+breastplates (vs upper arms). The contact sheets (`chibi25-body-sheet.html?mode=outfits`, all 30 class looks, the
+tier-1/tier-2 tables and Thousandvale's Starcaller/Starblade, read-only) were read at idle/walk/run/attack/guard/cast.
+Emberveil class looks over idle, walk, run, attack, ready, guard, cast, jump, hit (frames with a hit):
+
+| pair | Chibi 2 | Chibi 2.5 | fix |
+|---|---|---|---|
+| capelets / feather mantle / fur mantle / half cape vs upper arms | 1,998 | **0** | wider over the shoulders; the cloth over each shoulder rides that arm (up to 95%); the half cape's shoulder lump is on the arm bone |
+| held item vs head | 79 | **2** | guard: a one-hander is held further out and less across (the mace no longer sits in the face); a caster's item (lute, book) at the chest, not the face |
+| breastplate vs upper arms in ready/guard with a two-hander (dragon knight) | 5.5 cm | ≤ 3 cm | the hands meet on the haft further forward, the upper arms less across the chest |
+| breastplate vs upper arms (deepest) | 3.5-5.5 cm | 2-2.5 cm (= the arm against the chest itself) | the plate shell stands off the FRONT only, and plate/scale wearers hold their arms 0.12 rad wider |
+| chest gear vs forearms | 94 | 127 | not fixed: forearms crossing in front of a capelet's hem in attack/guard (≤3 cm) |
+| held vs thigh | 9 | 10 | not fixed: the oracle's staff / tinker's gear at the thigh in run/jump (≤4 cm) |
+
+### Body options (2.5 only, all on `avatar.body`)
+
+`shape` (average, slim, athletic, broad, stocky, heavy, petite, lanky — multipliers on the race), `shoulders`, `legs`
+(length against the torso), `arms` (thickness) — 0..1 sliders, 0.5 = the race; `posture` (neutral, upright, proud,
+relaxed, slouch, hunched — added to the race's lean); `tail` + `tailColor` (wolf, cat, fox, lizard, imp; beastkin
+offer the wolf first); `height` maps over a wider range on 2.5 (legs 0.7-1.3 instead of 0.8-1.2; 0.5 is the same).
+New clothes (any body; long hems want 2.5): tops cassock, gown, bodice_dress, hauberk, duster, brigandine; bottoms
+long_skirt, pleated_skirt, wide_trousers; shoes knee_boots, ankle_boots, soft_boots; capes long_cloak, scarf.
+
+### Cost
+
+Same two draw calls. A 2.5 look with nothing long: +2 bones (part A's lids). With something long: +8 skirt bones
+(32), 8 more quaternion + 8 scale tracks per clip, ~36 more triangles for the robe's extra rings. Template build with
+Farhold's whole clip list (~90 clips): a plain look 55-70 ms either way; a robed look ~140-270 ms on 2.5 against
+~55-80 ms on v2 (the skirt drive runs on every baked frame; templates are cached per look). Triangles: Emberveil
+class looks mean 6,887 (v2) / 6,609 (2.5, both parts), max 8,355 (budget 8,500).
+
+### Verify
+
+`node --test avatar-3d/tests/chibi25-robe.test.js avatar-3d/tests/chibi25-clip-body.test.js` (the second holds the table
+above: capes vs arms 0, held-in-head ≤ 3 frames and ≤ 1.5 cm, plate ≤ 3 cm, and checks that v2 really had the problems); `node --import ./avatar-3d/tests/three-register.mjs
+tools/chibi25-measure.mjs [--races=human,goblin] [--only=robe] [--worst]` (the table above); the v2 hashes
+(`tools/chibi2-v2-baseline.mjs --check`). Not done: seated clips keep up to 3.5 cm at the belt line; the two "not
+fixed" rows above; there is no mount/dismount clip to check.
+
 ## Tier-2 class armour and emblems (2026-10-05, Thousandvale play-test 4 S18) — opt-in
 
 "A second tier of armour for every class with iconography (flames, lightning bolts, poison drops…)."

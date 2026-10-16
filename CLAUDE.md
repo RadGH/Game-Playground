@@ -70,6 +70,8 @@ A specific example of "what went wrong" was on 9/17/2026, the agent stopped afte
 
 **2026-09-25 — class outfits**: `avatar-3d/data/class-outfits.json` + `js/class-outfits.js` (`dressAs(avatar, outfit)`) dress any body as any of the 30 classes; seven new headwear models (`CLASS_HATS` in chibi2-hats.js); and `profile()` now faces outward whichever way its rings run (legs, arms, hems and robes had been inside out in every game). See CHIBI2.md "Class outfits".
 
+**2026-10-16 — Chibi 2.5 (opt-in)**: `avatar.body.v = 2.5` (or `createChibi2Character(look, { v25: true })`) builds the improved head (part A: audited face/hair, blinking lids, `lookAt` pupils, new eyes/hair/brows/mouths/ears/beards/marks, hair fitted under every hat — `js/chibi25-face.js`, `chibi25-hair.js`, `chibi25-eyes.js`) and body (part B: `js/chibi25-body.js`). **A look without the flag must stay byte-identical** — `node --test avatar-3d/tests/chibi25.test.js` compares 209 v2 looks to `tests/fixtures/chibi2-v2-hashes.json`; new face ids are `bespoke` in chibi2-parts.js so the seeded random roll never changes. Builder `avatar-3d/chibi25.html`; option lists for games `js/chibi25-options.js`; read CHIBI2.md "Chibi 2.5 contracts" first.
+
 `avatar-3d/chibi2.html` is the first Chibi 2 comparison: three humanoid presets, an 18-bone rig,
 two merged skinned meshes per character and 12 animations, with eight-fighter spell benchmarks.
 `avatar-3d/CHIBI2.md` documents the API, performance budgets and incomplete part mappings.

@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chibi 2.5 Builder</title>
+  <link rel="stylesheet" href="../shared/tooltip.css">
+  <link rel="stylesheet" href="chibi25.css">
+  <script type="importmap">{ "imports": { "three": "../vendor/three/three.module.js", "three/addons/": "../vendor/three/addons/" } }</script>
+</head>
+<body>
+  <div class="c25">
+    <header>
+      <a href="./">Avatar 3D</a><span>/</span><h1>Chibi 2.5</h1>
+      <span class="note">Chibi 2 (left) and Chibi 2.5 (right) built from the same look</span>
+      <a href="chibi25-sheet.html?slot=hair">Contact sheets</a><a href="chibi2.html">Chibi 2 page</a>
+      <span id="state" role="status">Building</span>
+    </header>
+    <main class="c25-stage" id="stage">
+      <div class="c25-labels"><span>Chibi 2</span><span>Chibi 2.5</span></div>
+      <div class="c25-stats"><span id="stats-v2">--</span><span id="stats-calls">--</span><span id="stats-v25">--</span></div>
+    </main>
+    <aside>
+      <section>
+        <h2>Look</h2>
+        <label class="field">Start from<select id="preset"></select><span></span></label>
+        <label class="field">Race<select id="race"></select><span></span></label>
+        <div class="row"><button id="random" data-tip="A random face and hair from the 2.5 lists">Random face</button><button id="export" data-tip="Download this look as JSON">Export JSON</button><button id="frame" aria-pressed="true" data-tip="Frame the heads, or the whole body">Heads</button></div>
+      </section>
+      <section>
+        <h2>Eyes in motion</h2>
+        <div class="row"><button id="blink">Blink</button><button id="look-mouse" aria-pressed="false" data-tip="Both characters look at the point under the mouse">Look at the mouse</button><button id="look-each" aria-pressed="false" data-tip="Each looks at the other's face">Look at each other</button></div>
+        <label class="field">Head follows<input id="headk" type="range" min="0" max="1" step="0.05" value="0.35"><output id="headk-v">0.35</output></label>
+        <label class="field">Hold lids<input id="hold" type="range" min="-0.05" max="1" step="0.05" value="-0.05"><output id="hold-v">auto</output></label>
+        <label class="field">Animation<select id="anim"></select><span></span></label>
+        <p class="note">Blinks come on their own (about three in ten seconds). The pupils glance about and stay inside the white.</p>
+      </section>
+      <section id="face-ui"><h2>Face and hair</h2></section>
+      <section id="c25-body"><h2>Body</h2><p class="note" id="body-note">Body options load here when they are ready.</p></section>
+    </aside>
+  </div>
+  <script type="module" src="js/chibi25-app.js"></script>
+</body>
+</html>

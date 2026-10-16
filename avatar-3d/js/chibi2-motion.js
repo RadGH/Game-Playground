@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { driveSkirt, capShin, GAIT_CLIPS } from './chibi25-body.js';
 
 export const CHIBI2_ANIMS = ['idle', 'ready', 'walk', 'run', 'attack', 'cast', 'hit', 'guard', 'wave', 'talk', 'jump', 'dead'];
 
@@ -252,6 +253,11 @@ export function createClips(rig, anims = CHIBI2_ANIMS) {
       frames.push(poseAt(name, u, { names, hold, posture, R, rig }));
     }
     followThrough(frames, names, loop, duration / steps);
+    // Chibi 2.5: a rig with skirt bones (a 2.5 body in something long) tilts them off the legs on every frame
+    if (rig.skirt) for (const f of frames) {
+      if (GAIT_CLIPS.has(name)) capShin(f.pose, rig.stride, rig.leg);
+      f.skirtScale = {}; driveSkirt(f.pose, rig, undefined, f.skirtScale);
+    }
     const times = frames.map((_, i) => i / steps * duration);
     const tracks = [];
     for (const n of names) {
@@ -261,6 +267,8 @@ export function createClips(rig, anims = CHIBI2_ANIMS) {
     }
     tracks.push(new THREE.VectorKeyframeTrack('hips.position', times, frames.flatMap(f => [f.sway || 0, restY + f.bob, f.surge || 0])));
     tracks.push(new THREE.VectorKeyframeTrack('root.position', times, frames.flatMap(f => [0, f.rootY, f.rootZ || 0])));
+    // Chibi 2.5: each skirt bone's sideways spread (1 = none), only on a skirt-boned rig
+    if (rig.skirt) for (const n of rig.skirt.bones) tracks.push(new THREE.VectorKeyframeTrack(n + '.scale', times, frames.flatMap(f => { const k = f.skirtScale[n] || 1; return [k, 1, k]; })));
     // hands free: the grips shrink to nothing for the body of the clip
     const free = HANDS_FREE.has(name);
     for (const s of ['L', 'R']) {
@@ -311,7 +319,8 @@ function followThrough(frames, names, loop, dt) {
 /** The body's rest: arms clear of a round belly, the race's lean, soft knees. */
 function base(ctx) {
   const p = blank(ctx.names), { posture, R } = ctx;
-  const spread = 0.11 + R * 0.2 + (ctx.hold.left === 'shield' ? 0.04 : 0);
+  // (+ `rig.armSpread`, Chibi 2.5: a breastplate holds the arms a little off the body — chibi2-body.js sets it)
+  const spread = 0.11 + R * 0.2 + (ctx.hold.left === 'shield' ? 0.04 : 0) + (ctx.rig?.armSpread || 0);
   p.armL[2] = -spread; p.armR[2] = spread;
   p.elbowL[0] = p.elbowR[0] = -0.16;
   p.chest[0] = posture.chest; p.head[0] = posture.head - posture.chest * 0.6;
@@ -341,6 +350,9 @@ function carry(p, ctx, mode, swing = 0) {
     p.armR = [-0.62, 0, -0.32]; p.elbowR[0] = -0.95;
     p.armL = [-0.85, 0, 0.42]; p.elbowL[0] = -0.8;
     aims.R = [rp.ready, 0.1, h.right === 'polearm' ? -0.35 : -0.15];
+    // Chibi 2.5: the upper arms came in across the chest far enough to sink into a breastplate (5.5 cm); held a
+    // little more forward and less across, the hands still meet on the haft
+    if (ctx.rig?.v25) { p.armR = [-0.75, 0, -0.16]; p.elbowR[0] = -1.05; p.armL = [-0.95, 0, 0.26]; p.elbowL[0] = -0.85; }
   } else if (h.right === 'dagger') { fistGrip(p, 'R', mode === 'ready' ? 'ready' : 'idle'); aims.R = false; }     // a knife rides the fist (see fistGrip)
   else if (rp) aims.R = [rp[mode] ?? rp.idle, 0, 0];
   if (h.right === 'polearm' && mode !== 'ready') { p.armR[2] += 0.08; p.elbowR[0] = -0.55; aims.R = [rp[mode], 0, 0]; }
@@ -499,10 +511,13 @@ const CLIPS = {
     return carry(p, ctx, 'ready');
   },
   walk(p, u, cy, ctx, o) {
-    const s = sin(cy), c = cos(cy), amp = 0.42;
+    // `rig.stride` (Chibi 2.5, a 2.5 body in a long garment — chibi25-body.js strideFor): a shorter step and a smaller
+    // heel kick, as a person in a long robe walks. Unset (every v2 body) = the multipliers are 1 and nothing changes.
+    const st = ctx.rig?.stride, sw = st ? st.swing : 1, kk = st ? st.kick : 1;
+    const s = sin(cy), c = cos(cy), amp = 0.42 * sw;
     p.legL[0] += s * amp; p.legR[0] += -s * amp;
     // the knee bends on the swing (after toe-off) and straightens for the heel strike
-    p.kneeL[0] += Math.max(0, sin(cy - 0.9)) * 0.75 + 0.05; p.kneeR[0] += Math.max(0, -sin(cy - 0.9)) * 0.75 + 0.05;
+    p.kneeL[0] += Math.max(0, sin(cy - 0.9)) * 0.75 * kk + 0.05; p.kneeR[0] += Math.max(0, -sin(cy - 0.9)) * 0.75 * kk + 0.05;
     // heel strike then roll onto the toe
     p.footL[0] += -0.25 * Math.max(0, s) + 0.3 * Math.max(0, -sin(cy + 0.6)) - p.kneeL[0] * 0.25;
     p.footR[0] += -0.25 * Math.max(0, -s) + 0.3 * Math.max(0, sin(cy + 0.6)) - p.kneeR[0] * 0.25;
@@ -516,9 +531,10 @@ const CLIPS = {
     return aims;
   },
   run(p, u, cy, ctx, o) {
-    const s = sin(cy), c = cos(cy), amp = 0.78;
+    const st = ctx.rig?.stride, sw = st ? st.swing : 1, kk = st ? st.kick : 1;
+    const s = sin(cy), c = cos(cy), amp = 0.78 * sw;
     p.legL[0] += s * amp - 0.1; p.legR[0] += -s * amp - 0.1;
-    p.kneeL[0] += 0.25 + Math.max(0, sin(cy - 0.7)) * 1.35; p.kneeR[0] += 0.25 + Math.max(0, -sin(cy - 0.7)) * 1.35;
+    p.kneeL[0] += 0.25 + Math.max(0, sin(cy - 0.7)) * 1.35 * kk; p.kneeR[0] += 0.25 + Math.max(0, -sin(cy - 0.7)) * 1.35 * kk;
     p.footL[0] += -0.3 * Math.max(0, s) + 0.45 * Math.max(0, -sin(cy + 0.5)) - p.kneeL[0] * 0.2;
     p.footR[0] += -0.3 * Math.max(0, -s) + 0.45 * Math.max(0, sin(cy + 0.5)) - p.kneeR[0] * 0.2;
     p.chest[0] += 0.2; p.hips[0] = 0.1; p.head[0] -= 0.14;
@@ -539,7 +555,8 @@ const CLIPS = {
     const flight = sin(ss(u, 0.24, 0.8) * PI);
     o.rootY = flight * 0.34;
     const bend = crouch * 0.9 + land * 0.8 + air * 0.5;
-    p.kneeL[0] += bend; p.kneeR[0] += bend; p.legL[0] -= bend * 0.55; p.legR[0] -= bend * 0.45; p.footL[0] -= bend * 0.4; p.footR[0] -= bend * 0.4;
+    const lift = ctx.rig?.stride ? ctx.rig.stride.lift : 1;      // 2.5 robe: the knees come up less (see walk)
+    p.kneeL[0] += bend; p.kneeR[0] += bend; p.legL[0] -= bend * 0.55 * lift; p.legR[0] -= bend * 0.45 * lift; p.footL[0] -= bend * 0.4; p.footR[0] -= bend * 0.4;
     p.chest[0] += crouch * 0.3 + land * 0.25 - air * 0.12;
     p.armL[0] += crouch * 0.5 - air * 1.3; p.armR[0] += crouch * 0.5 - air * 1.3;
     p.armL[2] -= air * 0.4; p.armR[2] += air * 0.4;
@@ -561,16 +578,21 @@ const CLIPS = {
       // a two-hander held across the body, haft up, to take a blow on the haft
       p.armR = [-0.95, 0, -0.25]; p.elbowR[0] = -0.9; p.armL = [-0.75, 0, 0.35]; p.elbowL[0] = -1.1;
       aims.R = [-2.6, 0, -0.9];
+      if (ctx.rig?.v25) { p.armR = [-1.05, 0, -0.12]; p.elbowR[0] = -0.95; p.armL = [-0.85, 0, 0.22]; p.elbowL[0] = -1.15; }   // 2.5: off the breastplate (see carry)
     } else if (REST_PITCH[h.right] && h.right !== 'staff') {
       // a single blade raised to parry, point up and angled across
       p.armR = [-0.95, 0, -0.1]; p.elbowR[0] = -1.1;
       aims.R = [-2.7, 0.2, -0.7];
+      // Chibi 2.5: held further out and less across, so a mace head or a hilt is not parked in front of the face
+      if (ctx.rig?.v25) { p.armR = [-0.8, 0, 0.3]; p.elbowR[0] = -0.95; aims.R = [-2.45, 0.25, -0.25]; }
       p.armL = [-0.6, 0, -0.35]; p.elbowL[0] = -1.4;
       if (REST_PITCH[h.left]) aims.L = [-2.4, -0.2, 0.6];
     } else {
       // fists up
       p.armL = [-0.75, 0.3, -0.2]; p.elbowL[0] = -2.0; p.armR = [-0.7, -0.3, 0.2]; p.elbowR[0] = -2.1;
       if (h.right === 'staff') aims.R = [0.2, 0, 0];
+      // Chibi 2.5: a caster's item (a lute, a book, an hourglass) is held up in front of the chest, not in the face
+      if (ctx.rig?.v25 && h.right === 'caster') { p.armR = [-0.45, -0.1, 0.3]; p.elbowR[0] = -0.95; }
     }
     return aims;
   },
@@ -1178,7 +1200,9 @@ export function registerClips(defs) {
  */
 export function sampleClip(rig, name, u) {
   const names = rig.bones.map(b => b.name).filter(n => !n.startsWith('eye') && !n.startsWith('pupil'));
-  return poseAt(name, u, { names, hold: rig.hold || HOLD_NONE, posture: rig.posture || { chest: 0, head: 0, knees: 0 }, R: rig.round || 0, rig });
+  const out = poseAt(name, u, { names, hold: rig.hold || HOLD_NONE, posture: rig.posture || { chest: 0, head: 0, knees: 0 }, R: rig.round || 0, rig });
+  if (rig.skirt) { if (GAIT_CLIPS.has(name)) capShin(out.pose, rig.stride, rig.leg); driveSkirt(out.pose, rig); }
+  return out;
 }
 /** The helpers every clip here is written with, lent to the opt-in clip files. */
 export const MOTION_KIT = { ss, env, phases, stance, carry, restAims, REST_PITCH, GUARD_PITCH, END, base, PI, fistGrip, FIST, clip: name => CLIPS[name] };

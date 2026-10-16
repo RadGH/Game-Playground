@@ -108,7 +108,7 @@ export function createRig(body = {}, race = null) {
 /** Assemble in bind space. All material buckets use the same skeleton, including rigid equipment. */
 export class SkinBuilder {
   constructor(rig) { this.rig = rig; this.buckets = { cloth: [], metal: [] }; }
-  add(geometry, boneName, color, { position = [0, 0, 0], scale = [1, 1, 1], rotation = [0, 0, 0], metal = false, bend = null, skinTo = null } = {}) {
+  add(geometry, boneName, color, { position = [0, 0, 0], scale = [1, 1, 1], rotation = [0, 0, 0], metal = false, bend = null, skinTo = null, weigh = null } = {}) {
     // `skinTo` places the piece in one bone's space but skins it to another (a weapon authored in
     // hand space, carried by the grip bone). Both are at rest in the bind pose, so nothing moves.
     const bone = this.rig.byName[boneName], skin = skinTo ? this.rig.byName[skinTo] : bone, count = geometry.attributes.position.count;
@@ -121,6 +121,19 @@ export class SkinBuilder {
       skinIndices[i * 4] = skin.userData.index;
       skinIndices[i * 4 + 1] = bend ? this.rig.byName[bend.bone].userData.index : 0;
       weights[i * 4] = 1 - mix; weights[i * 4 + 1] = mix;
+      /**
+       * `weigh(x, y, z)` (Chibi 2.5, part B — opt-in, only robes/skirts/capes on a 2.5 body pass it): up to four
+       * [boneName, weight] pairs for a vertex, in the piece's own bone space (where `bend` is measured). Weights are
+       * normalised here. A piece without it is skinned exactly as before.
+       */
+      if (weigh) {
+        const pairs = weigh(p.getX(i), p.getY(i), p.getZ(i)).filter(([, w]) => w > 1e-4).slice(0, 4);
+        const total = pairs.reduce((n, [, w]) => n + w, 0) || 1;
+        for (let k = 0; k < 4; k++) {
+          skinIndices[i * 4 + k] = pairs[k] ? this.rig.byName[pairs[k][0]].userData.index : 0;
+          weights[i * 4 + k] = pairs[k] ? pairs[k][1] / total : 0;
+        }
+      }
       // A restrained vertical tint makes large cloth surfaces legible at game distance.
       const tint = metal ? 1 : 0.94 + 0.06 * THREE.MathUtils.clamp(p.getY(i) + 0.5, 0, 1);
       colors.set([c.r * tint, c.g * tint, c.b * tint], i * 3);

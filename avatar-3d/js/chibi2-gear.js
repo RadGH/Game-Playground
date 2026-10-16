@@ -22,6 +22,7 @@ import { HELD_WEAPON_IDS } from './chibi2-weapon-ids.js';
 // PLAY-TEST 5 (T23): the g5_ models are built by chibi2-gear5.js (called by chibi2.js after this file);
 // the three builders below that have a catch-all default step aside for a g5_ id, and nothing else changes.
 import { isG5 } from './chibi2-gear5-ids.js';
+import { skirtWeigh, registerSkirtSurface } from './chibi25-body.js';   // Chibi 2.5 part B: capes on skirt bones
 
 const low = () => new THREE.SphereGeometry(1, 8, 5);
 const gem = () => new THREE.IcosahedronGeometry(1, 0);
@@ -47,7 +48,8 @@ function polyline(c, bone, pts, r, color, opts = {}) {
   for (let i = 0; i < pts.length - 1; i++) c.add(taperedCurve([pts[i], pts[i + 1]], [r, r], 4, 1), bone, color, opts);
 }
 /** A hanging sheet on the chest bone: width and z blend from top to bottom, both sides visible. */
-function drape(c, color, { x = 0, top, length, width, bottom, zTop, zBottom, sx = 5, sy = 7, ripple = 0.012, tatter = 0 }) {
+const CAPE_FROM = 0.0, CAPE_TO = 0.22;     // depth below the hip pivot over which a cape hands over to the skirt bones
+function drape(c, color, { x = 0, top, length, width, bottom, zTop, zBottom, sx = 5, sy = 7, ripple = 0.012, tatter = 0, main = false }) {
   const g = new THREE.PlaneGeometry(1, 1, sx, sy), p = g.attributes.position;
   for (let i = 0; i < p.count; i++) {
     const u = p.getX(i), v = 0.5 - p.getY(i);
@@ -57,7 +59,15 @@ function drape(c, color, { x = 0, top, length, width, bottom, zTop, zBottom, sx 
   }
   g.computeVertexNormals();
   const back = backface(g);
-  c.add(g, 'chest', color); c.add(back, 'chest', color);
+  // Chibi 2.5: a cape on a skirt-boned body hands its lower half to the back skirt bones, so a heel kicked back lifts
+  // the hem instead of going through it (chibi25-body.js). `main` tags the cape's own sheet for the robe test.
+  const o = c.rig?.skirt ? { weigh: skirtWeigh(c.rig, 'chest', { from: CAPE_FROM, to: CAPE_TO, back: true }) } : {};
+  c.add(g, 'chest', color, main ? { ...o, tag: 'garment:' + (sx + 1) } : o); c.add(back, 'chest', color, o);
+  if (main && c.rig?.skirt) {
+    const dy = c.rig.byName.chest.position.y, rings = [];
+    for (let r = 0; r <= sy; r++) { const v = r / sy; rings.push([top - v * length + dy, Math.abs(x) + THREE.MathUtils.lerp(width, bottom, v) / 2, -THREE.MathUtils.lerp(zTop, zBottom, v), 0]); }
+    registerSkirtSurface(c.rig, rings, { arc: [Math.PI / 2 + 0.25, Math.PI * 1.5 - 0.25], hem: top - length + dy, from: CAPE_FROM, to: CAPE_TO });
+  }
 }
 
 // ---------------------------------------------------------------- held (right hand)
@@ -401,20 +411,25 @@ export function buildMarks(a, c) {
 export function buildCape(a, c) {
   const id = a.cape.id, cc = a.cape.color, { add, trim, W, T } = c;
   if (id === 'none' || isG5(id)) return;
+  // CHIBI 2.5: the capelet stood exactly where the shoulder is, so the top of each upper arm came through it (3-6 cm,
+  // more when the arms pump). On a 2.5 body it is cut a little wider over the shoulders and the cloth over each one
+  // rides that arm part of the way, so it lifts with the shoulder instead of the shoulder coming through it.
+  const v25 = !!c.rig?.v25, cw = v25 ? 1.12 : 1;
+  const onShoulders = v25 ? { weigh: (x, y) => { const k = THREE.MathUtils.smoothstep(Math.abs(x), 0.1 * W, 0.26 * W) * (1 - THREE.MathUtils.smoothstep(y, 0.26 * T, 0.34 * T)) * 0.95; return [['chest', 1 - k], [x < 0 ? 'armL' : 'armR', k]]; } } : {};
   const capelet = (low) => {
-    add(profile([[low * T, 0.30 * W, 0.215 * W, -0.01], [0.22 * T, 0.29 * W, 0.205 * W, -0.01], [0.30 * T, 0.26 * W, 0.18 * W, -0.012], [0.335 * T, 0.15, 0.12, -0.02], [0.37 * T, 0.09, 0.08, -0.02]], 16), 'chest', cc);
-    add(profile([[low * T - 0.012, 0.305 * W, 0.22 * W, -0.01], [low * T + 0.01, 0.305 * W, 0.22 * W, -0.01]], 16), 'chest', tone(cc, 0.75));
+    add(profile([[low * T, 0.30 * W * cw, 0.215 * W * (v25 ? 1.06 : 1), -0.01], [0.22 * T, 0.29 * W * cw, 0.205 * W * (v25 ? 1.06 : 1), -0.01], [0.30 * T, 0.26 * W * (v25 ? 1.08 : 1), 0.18 * W, -0.012], [0.335 * T, 0.15, 0.12, -0.02], [0.37 * T, 0.09, 0.08, -0.02]], 16), 'chest', cc, onShoulders);
+    add(profile([[low * T - 0.012, 0.305 * W * cw, 0.22 * W * (v25 ? 1.06 : 1), -0.01], [low * T + 0.01, 0.305 * W * cw, 0.22 * W * (v25 ? 1.06 : 1), -0.01]], 16), 'chest', tone(cc, 0.75), onShoulders);
   };
   if (id === 'shoulder_cape' || id === 'fur_mantle') {
     capelet(id === 'fur_mantle' ? 0.17 : 0.12);
-    if (id === 'fur_mantle') for (let k = 0; k < 14; k++) { const t = k / 14 * Math.PI * 2; add(new THREE.ConeGeometry(0.03, 0.08, 4), 'chest', tone(cc, 0.8), { position: [Math.sin(t) * 0.30 * W, 0.15 * T, Math.cos(t) * 0.215 * W - 0.01], rotation: [Math.PI, 0, 0] }); }
+    if (id === 'fur_mantle') for (let k = 0; k < 14; k++) { const t = k / 14 * Math.PI * 2; add(new THREE.ConeGeometry(0.03, 0.08, 4), 'chest', tone(cc, 0.8), { position: [Math.sin(t) * 0.30 * W * cw, 0.15 * T, Math.cos(t) * 0.215 * W * (v25 ? 1.06 : 1) - 0.01], rotation: [Math.PI, 0, 0], ...onShoulders }); }
     return;
   }
   if (id === 'feather_mantle') {
     capelet(0.18);
     for (let k = 0; k < 10; k++) {
       const t = k / 10 * Math.PI * 2, sx = Math.sin(t), cz = Math.cos(t);
-      add(taperedCurve([[sx * 0.29 * W, 0.20 * T, cz * 0.21 * W - 0.01], [sx * 0.32 * W, 0.11 * T, cz * 0.235 * W - 0.01], [sx * 0.335 * W, 0.03 * T, cz * 0.245 * W - 0.01]], [0.022, 0.03, 0.004], 3, 4), 'chest', k % 2 ? bone : lift(cc, 0.35));
+      add(taperedCurve([[sx * 0.29 * W * cw, 0.20 * T, cz * 0.21 * W - 0.01], [sx * 0.32 * W * cw, 0.11 * T, cz * 0.235 * W - 0.01], [sx * 0.335 * W * cw, 0.03 * T, cz * 0.245 * W - 0.01]], [0.022, 0.03, 0.004], 3, 4), 'chest', k % 2 ? bone : lift(cc, 0.35), onShoulders);
     }
     return;
   }
@@ -425,15 +440,17 @@ export function buildCape(a, c) {
     return;
   }
   if (id === 'half_cape') {
-    drape(c, cc, { x: 0.12 * W, top: 0.30 * T, length: 0.62, width: 0.26 * W, bottom: 0.34 * W, zTop: -0.15 * W, zBottom: -0.28, sx: 4, sy: 6 });
-    add(low(), 'chest', cc, { position: [0.19 * W, 0.27 * T, 0.0], scale: [0.12, 0.05, 0.17] });
+    drape(c, cc, { x: 0.12 * W, top: 0.30 * T, length: 0.62, width: 0.26 * W, bottom: 0.34 * W, zTop: -0.15 * W, zBottom: -0.28, sx: 4, sy: 6, main: true });
+    // the shoulder lump: on a 2.5 body it rides the right arm (like a pauldron) — on the chest the top of the arm came through it in every clip
+    if (c.rig?.v25) { const sh = c.rig.byName.armR.position; add(low(), 'armR', cc, { position: [0.19 * W - sh.x, 0.27 * T - sh.y + 0.012, 0.0], scale: [0.13, 0.055, 0.175] }); }
+    else add(low(), 'chest', cc, { position: [0.19 * W, 0.27 * T, 0.0], scale: [0.12, 0.05, 0.17] });
     add(low(), 'chest', trim, { position: [0.12 * W, 0.26 * T, 0.13 * W], scale: [0.025, 0.025, 0.012], metal: true });
     return;
   }
   if (id === 'travel_cloak') {
     // A TRAVEL CLOAK: long, heavy, a hood lying rolled round the neck and a brooch pinning it at the
     // left shoulder. The road-worn thing every Farhold traveller wears.
-    drape(c, cc, { top: 0.31 * T, length: 0.86, width: 0.44 * W, bottom: 0.66 * W, zTop: -0.155 * W, zBottom: -0.36, sx: 6, sy: 8, ripple: 0.02 });
+    drape(c, cc, { top: 0.31 * T, length: 0.86, width: 0.44 * W, bottom: 0.66 * W, zTop: -0.155 * W, zBottom: -0.36, sx: 6, sy: 8, ripple: 0.02, main: true });
     for (const sgn of [-1, 1]) drape(c, tone(cc, 0.92), { x: sgn * 0.215 * W, top: 0.3 * T, length: 0.62, width: 0.06 * W, bottom: 0.1 * W, zTop: 0.02, zBottom: -0.1, sx: 2, sy: 5 });
     const roll = [];
     for (let k = 0; k <= 10; k++) { const t = -2.3 + k / 10 * 4.6, back = Math.max(0, -Math.cos(t)); roll.push([Math.sin(t) * (0.16 + back * 0.05) * W, (0.29 + back * 0.04) * T, Math.cos(t) * (0.11 + back * 0.06) * W - 0.01]); }
@@ -442,14 +459,33 @@ export function buildCape(a, c) {
     add(low(), 'chest', '#7a2a2a', { position: [-0.13 * W, 0.24 * T, 0.135 * W], scale: [0.016, 0.016, 0.01] });
     return;
   }
+  // CHIBI 2.5 (part B): two new ids (chibi25-outfits.js CAPE25) — no existing look names them.
+  if (id === 'long_cloak') {
+    // a cloak to the ankle, flared well back so a stride has room; on a 2.5 body its lower half rides the skirt bones
+    const len = 0.31 * T + 0.07 + (c.L || 0.53) * 0.88;
+    drape(c, cc, { top: 0.31 * T, length: len, width: 0.44 * W, bottom: 0.74 * W, zTop: -0.155 * W, zBottom: -0.44, sx: 6, sy: 10, ripple: 0.022, main: true });
+    const roll = [];
+    for (let k = 0; k <= 10; k++) { const t = -2.3 + k / 10 * 4.6, back = Math.max(0, -Math.cos(t)); roll.push([Math.sin(t) * (0.16 + back * 0.05) * W, (0.29 + back * 0.04) * T, Math.cos(t) * (0.11 + back * 0.06) * W - 0.01]); }
+    add(taperedCurve(roll, [0.03, 0.05, 0.06, 0.05, 0.03], 6, 16), 'chest', tone(cc, 0.82));
+    for (const s of [-1, 1]) add(low(), 'chest', trim, { position: [s * 0.13 * W, 0.25 * T, 0.12 * W], scale: [0.024, 0.024, 0.012], metal: true });
+    return;
+  }
+  if (id === 'scarf') {
+    // a knitted scarf: one loop round the neck, two tails over the chest (the left one longer)
+    const loop = [];
+    for (let k = 0; k <= 12; k++) { const t = k / 12 * Math.PI * 2; loop.push([Math.sin(t) * 0.12 * W, 0.3 * T + Math.cos(t) * 0.01, Math.cos(t) * 0.1 * W - 0.005]); }
+    add(taperedCurve(loop, [0.04, 0.045, 0.04], 6, 18), 'chest', cc);
+    for (const [s, len] of [[-1, 0.2], [1, 0.13]]) add(taperedCurve([[s * 0.05 * W, 0.29 * T, 0.12 * W], [s * 0.06 * W, 0.29 * T - len * 0.5, 0.15 * W], [s * 0.055 * W, 0.29 * T - len, 0.15 * W]], [0.035, 0.032, 0.03], 5, 6), 'chest', s < 0 ? cc : tone(cc, 0.88));
+    return;
+  }
   if (id === 'tattered_cape') {
     // a ragged cape: the hem torn into points, and a couple of holes' worth of darker patches
-    drape(c, cc, { top: 0.30 * T, length: 0.72, width: 0.4 * W, bottom: 0.58 * W, zTop: -0.15 * W, zBottom: -0.3, sx: 8, sy: 7, ripple: 0.018, tatter: 0.09 });
+    drape(c, cc, { top: 0.30 * T, length: 0.72, width: 0.4 * W, bottom: 0.58 * W, zTop: -0.15 * W, zBottom: -0.3, sx: 8, sy: 7, ripple: 0.018, tatter: 0.09, main: true });
     add(taperedCurve([[-0.17 * W, 0.29 * T, -0.02], [0, 0.31 * T, -0.145 * W], [0.17 * W, 0.29 * T, -0.02]], [0.025, 0.028, 0.025], 5, 8), 'chest', tone(cc, 0.8));
     return;
   }
   // Full cape: shoulders to above the knees, flaring back so the legs clear it when walking.
-  drape(c, cc, { top: 0.30 * T, length: 0.70, width: 0.40 * W, bottom: 0.60 * W, zTop: -0.15 * W, zBottom: -0.32 });
+  drape(c, cc, { top: 0.30 * T, length: 0.70, width: 0.40 * W, bottom: 0.60 * W, zTop: -0.15 * W, zBottom: -0.32, main: true });
   add(taperedCurve([[-0.17 * W, 0.29 * T, -0.02], [0, 0.31 * T, -0.145 * W], [0.17 * W, 0.29 * T, -0.02]], [0.03, 0.032, 0.03], 5, 8), 'chest', cc);
   for (const s of [-1, 1]) add(low(), 'chest', trim, { position: [s * 0.14 * W, 0.27 * T, 0.10 * W], scale: [0.026, 0.026, 0.014], metal: true });
 }

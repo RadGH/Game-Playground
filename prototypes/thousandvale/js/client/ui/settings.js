@@ -16,7 +16,8 @@ import { SETTINGS_DEFAULTS, QUALITIES, cleanSettings } from './pt2-core.js';
 import { SHORTCUTS } from '../social-core.js';
 import { send2 } from './net2.js';
 import { bindingsTab } from '../input/bindings-ui.js';
-import { FX_LEVELS } from '../fx-level.js';   // T27 (stream G): the one binding table — re-bind keys, controller glyphs, touch
+import { FX_LEVELS } from '../fx-level.js';
+import { tierWords } from '../gfx-tiers.js';      // G-ATMOS (2026-10-16): what each quality draws   // T27 (stream G): the one binding table — re-bind keys, controller glyphs, touch
 
 const KEY = 'tv.settings';
 const load = () => { try { return cleanSettings(JSON.parse(localStorage.getItem(KEY) || 'null')); } catch { return { ...SETTINGS_DEFAULTS }; } };
@@ -83,7 +84,8 @@ export function createSettings({ net, hud, help, onLogout, onGear }) {
     ];
     else if (tab === 'graphics') body = [
       h('label.set-row', {}, h('span', {}, 'Graphics quality'), h('select', { dataset: { k: 'quality' }, onchange: e => { set('quality', e.target.value); hud.toast('Quality applies after a reload.', 'info'); } }, ...QUALITIES.map(q => h('option', { value: q.id, selected: S.quality === q.id }, q.label)))),
-      h('p.tiny-left', {}, 'Automatic picks Low on computers without a graphics card and High otherwise. A change takes effect the next time the page loads.'),
+      h('p.tiny-left', {}, 'Automatic picks Low on computers without a graphics card, Medium on phones and High otherwise. A change takes effect the next time the page loads.'),
+      h('ul.tiny-left.set-tiers', {}, ...['low', 'medium', 'high'].map(q => h('li', {}, h('b', {}, q[0].toUpperCase() + q.slice(1) + ': '), tierWords(q) + '.'))),
       h('button.ghost.wide', { type: 'button', onclick: () => location.reload() }, 'Reload now'),
       // 2026-10-14: how much spell effect to draw — applies at once (fx-level.js)
       h('label.set-row', {}, h('span', {}, 'Spell effects'), h('select', { dataset: { k: 'fx' }, onchange: e => set('fx', e.target.value) }, ...FX_LEVELS.map(l => h('option', { value: l.id, selected: S.fx === l.id }, l.label)))),

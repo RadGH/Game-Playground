@@ -132,6 +132,7 @@ const { scene, camera } = view;
 perf.hookGl(view.renderer.getContext());
 LIGHTS.attach(scene, { count: quality === 'low' ? 4 : 8 });   // the page's fixed lights (lightpool.js: no recompiles)
 const actors = createActors(scene, { plateLayer: $('plates'), camera, quality, renderer: view.renderer, waterAt: (x, z) => (D.view ? null : WS.terrain.waterAt(x, z)) });
+view.atmos.setActors(actors.actors);      // G-ATMOS (2026-10-16): a soft round shadow under each character near the camera
 const fx = createFx(scene, { layer: $('numbers'), camera });
 const vignette = document.getElementById('vignette');
 const tele = createTelegraphs(scene, {
@@ -203,6 +204,8 @@ const WS = createWorldStream(scene, { quality, solids: SOLIDS, onZoneReady: L =>
   },
 } });
 const W = { terrain: WS.terrain, horizon: null, spot: null };
+// G-ATMOS: where drifting mist may stand — over water (the zones' own, or the far sea past them) and down in valleys
+view.atmos.setSpot((x, z) => { if (D.view) return { y: NaN, wet: false }; const w = WS.terrain.waterAt(x, z), y = WS.terrain.heightAt(x, z); return { y: w.depth > 0 ? w.surface : y, wet: w.depth > 0 || (!WS.ready(x, z) && y <= 0.5) }; });
 createHorizon(scene, { quality }).then(h => { W.horizon = h; WS.setHorizon(h); if (D.view) h.setVisible(false); }).catch(e => console.warn('[horizon] not drawn:', e.message));
 const footprints = createFootprints(scene, { heightAt: (x, z) => WS.terrain.heightAt(x, z) });
 /** Show the outdoor world for a room's zones and wait until the ground under (x, z) is drawn. */

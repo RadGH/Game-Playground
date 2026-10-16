@@ -1,0 +1,7 @@
+/* 2026-10-16 — graphics (G-ATMOS): a soft darkening of the screen's corners over the 3D view (js/client/scene.js adds
+   the element right after canvas#view when the quality's tier asks for one; --atmos-vignette is its strength). It sits
+   under the name plates and every window, and never takes a click. */
+.atmos-vignette {
+  position: fixed; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse 78% 72% at 50% 46%, rgba(0, 0, 0, 0) 58%, rgba(14, 10, 24, var(--atmos-vignette, 0.2)) 100%);
+}

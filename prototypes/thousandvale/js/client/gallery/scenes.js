@@ -303,6 +303,7 @@ export const sceneById = id => SCENES.find(s => s.id === id) || null;
 
 /** Modules under js/client/ui/ that have no screen of their own, and why (the coverage test reads this). */
 export const NO_SCREEN = {
+  'js/client/ui/painted-portraits.js': 'a helper of portraits.js: picks the painted portrait for a monster or townsfolk (graphics pass 2026-10-16) — seen in the target frame',      // G-PROPS
   'js/client/ui/net2.js': 'only sends messages (no markup)',
   'js/client/ui/svg-portrait.js': 'a helper of portraits.js — seen wherever a portrait is (Title — your characters, the HUD frames)',
   'js/client/ui/portrait-mode.js': 'a rule of portraits.js: where the live 3D portrait may be used (play-test 10, Y33) — no markup',

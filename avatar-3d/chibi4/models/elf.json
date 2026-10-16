@@ -1,0 +1,33 @@
+{
+ "who": "elf",
+ "clips": {
+  "idle": 2.5,
+  "walk": 1.333,
+  "run": 0.917,
+  "cast": 0.5,
+  "attack": 1.5,
+  "hit": 0.333,
+  "death": 2.375,
+  "talk": 2.917
+ },
+ "lods": [
+  {
+   "name": "C4_elf_LOD0",
+   "triangles": 36712,
+   "vertices": 21289
+  },
+  {
+   "name": "C4_elf_LOD1",
+   "triangles": 14684,
+   "vertices": 9855
+  },
+  {
+   "name": "C4_elf_LOD2",
+   "triangles": 5505,
+   "vertices": 4580
+  }
+ ],
+ "bones": 61,
+ "height": 1.703,
+ "glb_bytes": 3458732
+}

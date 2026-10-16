@@ -8,6 +8,7 @@
 //
 // Placements use the shape stream B's bake will emit: { kind: 'prop' | 'ring', id, x, z, yaw, data }.
 
+import { surfaceMaterial, surfaceVertexAttr, pageTier } from './surface-mat.js';
 import * as THREE from 'three';
 import { LIGHTS } from './lightpool.js';
 import { buildTree, buildBush, makeRng } from '../../../../highdef-3d/js/kit/trees.js';
@@ -211,6 +212,8 @@ export async function createDecor(hf, { placements = [], paths = [], seed = 7, a
     }
   }
   for (const [id, list] of batches) {
+    // G-PROPS 2026-10-16: a kit model's vertex colours say what each part is made of (wood grain, iron, cloth…)
+    if (!cheap && pageTier(cheap).detail) { surfaceMaterial(mats.prop, pageTier(cheap)); surfaceVertexAttr(propGeo(id)); }
     const m = new THREE.InstancedMesh(propGeo(id), mats.prop, list.length);
     list.forEach((b, i) => { _q.setFromAxisAngle(_up, b.yaw); _s.setScalar(1); _p.set(b.x, b.y, b.z); m.setMatrixAt(i, _m.compose(_p, _q, _s)); });
     m.castShadow = m.receiveShadow = true; m.name = 'prop-' + id; group.add(m);

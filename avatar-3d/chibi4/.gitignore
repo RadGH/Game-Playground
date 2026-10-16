@@ -1,5 +1,7 @@
 # Chibi 4: big working files stay local (rebuild with blender/step2_mage.py); the full-size Codex PNGs too
 *.glb
+!models/*.glb
+models/_*
 *.blend
 *.blend1
 shots/step2/mage-baked.png
@@ -8,3 +10,9 @@ __pycache__/
 shots/step2/s2*.png
 shots/step0/s0_*.png
 shots/step3/s3*.png
+shots/step4/s4*.png
+shots/step5/s5*.png
+shots/step6/s6*.png
+shots/step7/s7*.png
+shots/step5/*-clothes.png
+shots/step6/*-clothes.png

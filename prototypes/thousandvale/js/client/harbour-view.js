@@ -8,6 +8,8 @@
 // in WORLD metres; town-view.js pushes the parts into its instanced kit meshes (unit shapes: origin at the centre of the
 // base) and lights the lamps at night with the town's own. A Port Vharl-style record (no `quay`) draws nothing here.
 
+import { placeModel, CLUTTER_R } from './prop-clutter.js';
+
 const STONE = '#7d776c', COPING = '#958e80', PLANK = '#7a6048', POST = '#4e3b2c', RAIL = '#5e4a37', IRON = '#3b3330';
 const WOOD = ['#8a6a44', '#7d5f3d', '#94754c'], BARREL = '#6b4a2c', ROPE = '#a08c62', NET = '#5f6e5c', HULL = ['#6d5236', '#5a6b73', '#7a4a36'];
 
@@ -96,5 +98,127 @@ export function harbourParts(rec, { ox = 0, oz = 0, groundAt = () => -3 } = {}) 
     for (const side of [-1, 1]) { const off = p.width / 2 + 1.1, s = L * (0.45 + rnd() * 0.3); boat(p.ax + ux * s + uz * side * off, p.az + uz * s - ux * side * off, yaw + (rnd() - 0.5) * 0.15, HULL[b++ % 3]); }
   }
   boat(X1 - 8, Z1 + 1.9, Math.PI / 2 + (rnd() - 0.5) * 0.1, HULL[b++ % 3]);
+  // G-PROPS 2026-10-16: what each part is made of (the shader's grain / weave / rope layers)
+  for (const q of parts) {
+    if (q.colour === ROPE || q.colour === NET) q.surf = 'rope';
+    else if (q.colour === IRON) q.surf = 'metal';
+    else if (q.colour === STONE || q.colour === COPING) q.surf = 'ashlar';
+    else if (q.mesh !== 'cyl' || q.colour === BARREL) q.surf = 'planks';
+  }
   return { parts, lamps };
+}
+
+/**
+ * G-PROPS (graphics pass 2026-10-16): MORE working clutter for a built quay — barrels, crate stacks, grain sacks, rope
+ * coils, fish baskets and lobster pots along the quay's front, coils by the pier bollards, a hand crane with a crate on
+ * its rope at the long pier's root, nets and an old anchor. `density` (0..1, the graphics tier) thins it. Same frame and
+ * part shape as harbourParts (world metres, base at y). Never on a pier root, the harbourmaster's spot or the dock.
+ */
+export function harbourExtras(rec, { ox = 0, oz = 0, density = 1 } = {}) {
+  const d = rec?.data || {}, Q = d.quay, out = [];
+  if (!Q || !Array.isArray(d.piers) || density <= 0) return out;
+  const rnd = rngOf((rec.id || 'harbour') + ':extras');
+  const X0 = Q.x0 + ox, X1 = Q.x1 + ox, Z0 = Q.z0 + oz, Z1 = Q.z1 + oz, H = Q.h;
+  const piers = d.piers.map(p => ({ ...p, ax: p.a[0] + ox, az: p.a[1] + oz, bx: p.b[0] + ox, bz: p.b[1] + oz }));
+  const keep = [[d.master?.x, d.master?.z], [d.dock?.x, d.dock?.z]].filter(([x]) => Number.isFinite(x)).map(([x, z]) => [x + ox, z + oz]);
+  const taken = [];
+  const free = (x, z, r) => !piers.some(p => Math.abs(x - p.ax) < p.width / 2 + r + 1.2) && keep.every(([kx, kz]) => Math.hypot(kx - x, kz - z) > r + 2.6) && taken.every(t => Math.hypot(t.x - x, t.z - z) > t.r + r + 0.4);
+  const put = (id, x, y, z, yaw) => { taken.push({ x, z, r: CLUTTER_R[id] || 0.6 }); out.push(...placeModel(id, x, y, z, yaw, rnd)); };
+  // the quay front, a little back from the coping (the bollards stand at Z1 - 0.6)
+  const front = Z1 - 2.1;
+  for (let x = X0 + 16; x <= X1 - 3; x += 4.2 + rnd() * 3) {
+    if (rnd() > density) continue;
+    const id = ['barrels', 'crates', 'sacks', 'rope', 'fishbasket', 'lobsterpot', 'crate', 'barrel'][Math.floor(rnd() * 8)];
+    const r = CLUTTER_R[id];
+    if (!free(x, front, r)) continue;
+    put(id, x, H, front + (rnd() - 0.5) * 0.6, (rnd() - 0.5) * 0.8);
+  }
+  for (const p of piers) {
+    const L = Math.hypot(p.bx - p.ax, p.bz - p.az), ux = (p.bx - p.ax) / L, uz = (p.bz - p.az) / L, yaw = Math.atan2(ux, uz);
+    // a coil of rope beside the end bollards, a basket or a pot further in
+    out.push(...placeModel('rope', p.bx - ux * 1.9 + uz * (p.width / 2 - 0.6), p.deck, p.bz - uz * 1.9 - ux * (p.width / 2 - 0.6), yaw, rnd));
+    if (rnd() < density) out.push(...placeModel(rnd() < 0.5 ? 'fishbasket' : 'lobsterpot', p.ax + ux * L * 0.62 - uz * (p.width / 2 - 0.5), p.deck, p.az + uz * L * 0.62 + ux * (p.width / 2 - 0.5), yaw + rnd(), rnd));
+    if (!p.main) continue;
+    // a hand crane at the long pier's root: a post, a jib, the rope and a crate hanging off it
+    const cx = p.ax + ux * 3 + uz * (p.width / 2 + 1.6), cz = p.az + uz * 3 - ux * (p.width / 2 + 1.6);
+    if (cx > X0 && cx < X1 && cz > Z0 && cz < Z1 && free(cx, cz, 1)) {
+      const jy = Math.atan2(-uz, ux);
+      out.push({ mesh: 'box', x: cx, y: H, z: cz, yaw: jy, w: 0.32, h: 4.2, d: 0.32, colour: '#5e4a37', surf: 'logs' });
+      out.push({ mesh: 'box', x: cx, y: H - 0.1, z: cz, yaw: jy, w: 1.2, h: 0.3, d: 1.2, colour: '#7d776c', surf: 'ashlar' });
+      const jx = cx - uz * 1.4, jz = cz + ux * 1.4;
+      out.push({ mesh: 'box', x: (cx + jx) / 2, y: H + 3.9, z: (cz + jz) / 2, yaw: Math.atan2(jx - cx, jz - cz), w: 0.22, h: 0.22, d: 3.0, colour: '#5e4a37', surf: 'logs' });
+      out.push({ mesh: 'box', x: (cx + jx) / 2 + uz * 0.25, y: H + 2.6, z: (cz + jz) / 2 - ux * 0.25, yaw: Math.atan2(jx - cx, jz - cz), w: 0.12, h: 0.12, d: 2.0, colour: '#5e4a37', surf: 'planks', rx: 0.6 });
+      out.push({ mesh: 'box', x: jx - uz * 0.1, y: H + 1.9, z: jz + ux * 0.1, yaw: 0, w: 0.05, h: 2.0, d: 0.05, colour: ROPE, surf: 'rope' });
+      out.push(...placeModel('crate', jx - uz * 0.1, H + 1.1, jz + ux * 0.1, rnd(), rnd));
+      taken.push({ x: cx, z: cz, r: 1.2 });
+    }
+  }
+  // the back of the quay: nets on a frame and an old anchor against the wall, if there is room
+  for (const [id, f] of [['nets', 0.35], ['anchor', 0.55], ['woodpile', 0.75]]) {
+    const x = X0 + 12 + (X1 - X0 - 20) * f, z = Z0 + 1.1;
+    if (rnd() < density && free(x, z, CLUTTER_R[id])) put(id, x, H, z, 0);
+  }
+  return out;
+}
+
+/**
+ * G-PROPS: a harbour with NO built quay (Port Vharl: the jetty is the ship's own, drawn by ship-view.js from ships.json)
+ * gets its beach dressed in the vharl way — reed awnings over drying racks, outrigger canoes pulled up on the sand, clay
+ * pots, baskets, rope — on dry ground only, clear of the jetty line and the harbourmaster. rec = { x, z, yaw, data: {
+ * town, deep } } (zone metres; yaw points out to sea); the jetty runs along the yaw line through the record.
+ */
+export function portDressing(rec, { ox = 0, oz = 0, groundAt = () => 0, density = 1 } = {}) {
+  const out = [];
+  if (!rec || rec.data?.quay || density <= 0) return out;
+  const rnd = rngOf((rec.id || 'port') + ':beach');
+  const yaw = rec.yaw || 0, fx = Math.sin(yaw), fz = Math.cos(yaw), sx = fz, sz = -fx;     // forward (to sea), side
+  const X = rec.x + ox, Z = rec.z + oz;
+  const OCHRE = '#9a4a2e', BASALT = '#3a3634', REED = '#b8a060', CLAY = '#a5583a';
+  const taken = [];
+  const at = (f, s) => ({ x: X + fx * f + sx * s, z: Z + fz * f + sz * s });
+  const ok = (p, r) => groundAt(p.x, p.z) > 0.35 && taken.every(t => Math.hypot(t.x - p.x, t.z - p.z) > t.r + r + 0.5);
+  const models = {
+    awning: () => {
+      const o = [];
+      for (const [a, b] of [[-1.6, -1.1], [1.6, -1.1], [-1.6, 1.1], [1.6, 1.1]]) o.push({ mesh: 'box', x: a, y: 0, z: b, w: 0.14, h: 2.3, d: 0.14, colour: '#5a3a26', surf: 'logs' });
+      o.push({ mesh: 'gable', x: 0, y: 2.25, z: 0, w: 2.8, h: 0.7, d: 3.8, yaw: Math.PI / 2, colour: REED, surf: 'thatch' });
+      o.push({ mesh: 'box', x: 0, y: 1.25, z: 0, w: 3.0, h: 0.06, d: 0.06, colour: '#5a3a26', surf: 'logs' });
+      for (let i = 0; i < 6; i++) o.push({ mesh: 'box', x: -1.2 + i * 0.48, y: 0.85, z: 0, w: 0.16, h: 0.38, d: 0.04, colour: '#b9a58a', surf: 'cloth', rz: (rnd() - 0.5) * 0.2 });
+      return o;
+    },
+    canoe: () => [
+      { mesh: 'box', x: 0, y: 0.05, z: 0, w: 0.7, h: 0.42, d: 4.6, colour: OCHRE, surf: 'planks' },
+      { mesh: 'hip', x: 0, y: 0.05, z: 2.55, w: 0.62, h: 0.4, d: 0.6, colour: OCHRE, surf: 'planks' },
+      { mesh: 'box', x: 1.5, y: 0.05, z: 0, w: 0.22, h: 0.2, d: 3.0, colour: '#5a3a26', surf: 'logs' },
+      { mesh: 'box', x: 0.75, y: 0.38, z: -0.8, w: 1.6, h: 0.08, d: 0.1, colour: '#5a3a26', surf: 'logs' },
+      { mesh: 'box', x: 0.75, y: 0.38, z: 0.8, w: 1.6, h: 0.08, d: 0.1, colour: '#5a3a26', surf: 'logs' },
+      { mesh: 'box', x: -0.1, y: 0.45, z: 0.4, w: 0.12, h: 0.06, d: 2.0, colour: '#7d5f3d', surf: 'planks', rx: 0.1 },
+    ],
+    pots: () => [0, 1, 2].map(i => ({ mesh: 'barrel', x: i * 0.55 - 0.5, y: 0, z: (i % 2) * 0.35, w: 0.48 - i * 0.05, h: 0.62 - i * 0.08, d: 0.48 - i * 0.05, colour: i === 1 ? '#8a4a30' : CLAY, surf: 'brick' })),
+    stones: () => [{ mesh: 'dome', x: 0, y: -0.1, z: 0, w: 1.2, h: 0.5, d: 0.9, colour: BASALT, surf: 'rubble' }, { mesh: 'dome', x: 0.7, y: -0.1, z: 0.4, w: 0.7, h: 0.35, d: 0.6, colour: '#4a4440', surf: 'rubble' }],
+  };
+  const R = { awning: 2.2, canoe: 2.6, pots: 0.9, stones: 1, fishbasket: 0.4, rope: 0.5, sacks: 0.8, crates: 1 };
+  const place = (id, p, yw) => {
+    const parts = models[id] ? models[id]() : null;
+    const g = groundAt(p.x, p.z);
+    taken.push({ x: p.x, z: p.z, r: R[id] || 0.8 });
+    if (!parts) { out.push(...placeModel(id, p.x, g, p.z, yw, rnd)); return; }
+    const c = Math.cos(yw), s = Math.sin(yw);
+    for (const q of parts) out.push({ ...q, x: p.x + q.x * c + q.z * s, y: g + q.y, z: p.z - q.x * s + q.z * c, yaw: yw + (q.yaw || 0) });
+  };
+  // keep the jetty line and the harbourmaster's spot clear
+  taken.push(...[0, -8, -16, -24, -32].map(f => ({ ...at(f, 0), r: 2.6 })));
+  // and where people stand at the jetty's foot (Port Vharl's harbourmaster is ~13 m back and 5 m to the side)
+  for (const sd of [-5, 5]) for (const f of [-10, -14]) taken.push({ ...at(f, sd), r: 2.2 });
+  const plan = ['awning', 'canoe', 'canoe', 'awning', 'pots', 'fishbasket', 'rope', 'stones', 'pots', 'sacks', 'crates', 'canoe', 'fishbasket', 'stones'];
+  let k = 0;
+  for (let f = -6; f >= -46 && k < plan.length; f -= 4.5) for (const side of [-1, 1]) {
+    if (k >= plan.length) break;
+    if (rnd() > density) continue;
+    const id = plan[k], p = at(f + (rnd() - 0.5) * 2, side * (5 + rnd() * 7));
+    if (!ok(p, R[id] || 0.8)) continue;
+    place(id, p, yaw + (id === 'canoe' ? (rnd() - 0.5) * 0.5 : rnd() * Math.PI * 2));
+    k++;
+  }
+  return out;
 }

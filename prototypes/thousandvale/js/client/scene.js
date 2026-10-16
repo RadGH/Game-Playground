@@ -6,6 +6,10 @@ import * as THREE from 'three';
 import { skyAt, carriedLight, DUNGEON_AMBIENT } from './daynight.js';
 import { createSkyBox } from './sky-box.js';           // Z59: the painted sky
 import { skyPlan } from './sky-plan.js';
+// 2026-10-16 — graphics (G-ATMOS): water, drifting mist, cloud shadows, contact shadows, warm/cool light, grade, glow
+import { atmosTier, warmCool, cloudShadowStrength, CLOUD } from './gfx-tiers.js';
+import { ATMOS_U, setAtmosTier, installGrade, createMist, createContactShadows, noiseTexture } from './atmos.js';
+import { createBloom } from './postfx.js';
 
 export function createScene(canvas, { quality = 'high' } = {}) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance', preserveDrawingBuffer: false });
@@ -15,6 +19,13 @@ export function createScene(canvas, { quality = 'high' } = {}) {
   renderer.toneMappingExposure = 1.05;
   renderer.shadowMap.enabled = quality !== 'low';
   renderer.shadowMap.type = THREE.PCFShadowMap;
+  // G-ATMOS: what this quality draws of the atmosphere (gfx-tiers.js); ?atmos=0 = the look before 2026-10-16
+  const atmosFlag = typeof location !== 'undefined' ? new URLSearchParams(location.search).get('atmos') : null;
+  const tier = setAtmosTier(atmosTier(quality, atmosFlag));
+  installGrade(renderer, tier);       // warm highlights / cool shadows inside the tone mapping (Medium, High)
+  noiseTexture();
+  const vignette = tier.vignette && typeof document !== 'undefined' ? document.createElement('div') : null;
+  if (vignette) { vignette.className = 'atmos-vignette'; vignette.setAttribute('aria-hidden', 'true'); vignette.style.setProperty('--atmos-vignette', String(tier.vignette)); canvas.insertAdjacentElement('afterend', vignette); }
 
   const scene = new THREE.Scene();
   // far enough for the horizon (the whole world from the macro bake, ~36 km across); near pulled out a little
@@ -85,6 +96,13 @@ export function createScene(canvas, { quality = 'high' } = {}) {
   sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.6;
   scene.add(sun, sun.target);
 
+  // G-ATMOS: drifting wisps of low cloud (over water and valleys, never round the player) and a soft round shadow under
+  // each character — one draw call each, nothing at all when the tier says 0
+  const mist = createMist(scene, { count: tier.mist });
+  const contact = createContactShadows(scene, { opacity: tier.contact });
+  let actorList = null, lastFollow = 0, cloudBase = { night: 0, sunY: 1, weather: 'clear' };
+  const glow = tier.bloom ? createBloom(renderer, { strength: 0.3, threshold: 0.74 }) : null;
+
   /** Keep the sun and its shadow box centred on `p` (snapped to texels so shadows do not shimmer). */
   function follow(p) {
     const texel = (S * 2) / sun.shadow.mapSize.x;
@@ -96,6 +114,13 @@ export function createScene(canvas, { quality = 'high' } = {}) {
     moon.position.set(p.x + moonDir.x * 1700, moonDir.y * 1700, p.z + moonDir.z * 1700);
     lantern.position.set(p.x, p.y + 2.4, p.z);
     clouds.position.set(p.x * 0.9, 0, p.z * 0.9);
+    // G-ATMOS: the shared clock (wrapped at 1000 s: every drift rate in the shaders is a whole number of repeats per
+    // 1000 s, so the wrap never shows), the cloud shadows' drift, the mist and the contact shadows
+    const now = performance.now() / 1000, dt = lastFollow ? Math.min(0.25, now - lastFollow) : 0; lastFollow = now;
+    ATMOS_U.uT.value = now % 1000;
+    ATMOS_U.uCloudOff.value.set(((now * CLOUD.wind[0] * CLOUD.scale) % 1), ((now * CLOUD.wind[1] * CLOUD.scale) % 1));
+    if (mood === 'outdoor') mist.update(dt, p, camera.position);
+    if (actorList) contact.update(actorList.values(), camera.position);
   }
 
   function resize() {
@@ -124,6 +149,7 @@ export function createScene(canvas, { quality = 'high' } = {}) {
     // never toggle a light's visibility (every lit material would recompile: the P1/P10 freeze) — dim it instead
     moodBright = bright; applyCarry();
     stars.visible = moon.visible = false;
+    mist.setVisible(!dark); if (dark) ATMOS_U.uCloudK.value = 0;
     if (!dark && lastSky) applySky(lastSky);
   }
 
@@ -158,8 +184,15 @@ export function createScene(canvas, { quality = 'high' } = {}) {
     moonDir.set(-k.sun[0], Math.max(0.25, -k.sun[1]), -k.sun[2]).normalize();
     skyMat.uniforms.uSun.value.copy(k.night > 0.6 ? moonDir : sunDir);
     skyBox.setSun(k.night > 0.6 ? moonDir : sunDir, k.night > 0.6 ? 0.18 : Math.max(0.15, 1 - k.night));
-    sun.color.setRGB(...k.keyColor); sun.intensity = k.keyIntensity;
-    hemi.color.setRGB(...k.hemiSky); hemi.groundColor.setRGB(...k.hemiGround); hemi.intensity = k.hemiIntensity;
+    // G-ATMOS: a warmer sun and a cooler sky fill (moonlight left alone) — soft light with a warm / cool split
+    const lit = tier.warmCool ? warmCool(k.keyColor, k.hemiSky, k.night) : { key: k.keyColor, hemiSky: k.hemiSky };
+    sun.color.setRGB(...lit.key); sun.intensity = k.keyIntensity;
+    hemi.color.setRGB(...lit.hemiSky); hemi.groundColor.setRGB(...k.hemiGround); hemi.intensity = k.hemiIntensity;
+    ATMOS_U.uSunDir.value.copy(keyDir); ATMOS_U.uSunCol.value.setRGB(...lit.key).multiplyScalar(Math.min(1.4, k.keyIntensity * 0.5));
+    ATMOS_U.uSkyCol.value.setRGB(...k.horizon);
+    cloudBase = { night: k.night, sunY: k.sun[1], weather: plan.weather };
+    ATMOS_U.uCloudK.value = tier.cloudShadows ? cloudShadowStrength(cloudBase) : 0;
+    mist.setColour(scene.fog.color, k.night);
     renderer.toneMappingExposure = k.exposure;
     starMat.opacity = k.stars * 0.9; stars.visible = k.stars > 0.02;
     moon.visible = k.night > 0.2; moon.material.opacity = Math.min(1, k.night * 1.3);
@@ -187,7 +220,14 @@ export function createScene(canvas, { quality = 'high' } = {}) {
     return applyCarry();
   }
 
-  return { renderer, scene, camera, sun, hemi, sunDir, follow, resize, setMood, setTimeOfDay, setSkyContext, skyBox, get skyPlan() { return lastPlan; }, setCarryLight, get carry() { return { intensity: lantern.intensity, distance: lantern.distance, hemi: hemi.intensity, fogNear: scene.fog.near, fogFar: scene.fog.far }; }, get sky() { return lastSky; }, render: () => renderer.render(scene, camera) };
+  const atmos = {
+    tier, mist, contact, glow,
+    /** main.js: the actors Map (contact shadows read its values each frame). */
+    setActors(map) { actorList = map; },
+    /** main.js: (x, z) -> { y, wet } for the mist (ground or water height; wet = over water). */
+    setSpot(fn) { mist.setSpot(fn); },
+  };
+  return { renderer, scene, camera, sun, hemi, sunDir, follow, atmos, resize, setMood, setTimeOfDay, setSkyContext, skyBox, get skyPlan() { return lastPlan; }, setCarryLight, get carry() { return { intensity: lantern.intensity, distance: lantern.distance, hemi: hemi.intensity, fogNear: scene.fog.near, fogFar: scene.fog.far }; }, get sky() { return lastSky; }, render: () => (glow ? glow.render(scene, camera) : renderer.render(scene, camera)) };
 }
 
 function makeCloudSprite() {

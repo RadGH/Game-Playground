@@ -227,6 +227,7 @@ test('play-test 11, D-world: sky, archers, mounts, travel marks, fan bolts, gian
     await page.evaluate(() => thousandvale.ships.endVoyage());
   }
   expect(errors, errors.join('\n')).toEqual([]);
+  await ctx.close();
 });
 
 // Z25 perf + the mountain canopy up close: the same two views on High with the old look (`?forest=0&spire=4`: the bake's
@@ -239,7 +240,7 @@ test('play-test 11, D-world: forests and far trees — before / after on High, a
     const name = 'Treeline' + label[0];
     const ctx = await browser.newContext({ viewport: { width: 1100, height: 700 } }), page = await ctx.newPage(), errors = [];
     page.on('pageerror', e => errors.push(e.message));
-    await page.goto(`http://127.0.0.1:${port}/prototypes/thousandvale/?autoplay=1&name=${name}&cls=ranger&quality=high&tod=0.45${flags}`);
+    await page.goto(`http://127.0.0.1:${port}/prototypes/thousandvale/?autoplay=1&name=${name}&cls=ranger&quality=${process.env.PT11_PERF_Q || 'medium'}&tod=0.45${flags}`);
     await page.waitForFunction(() => window.tv && tv.state().status === 'online' && tv.state().you?.id != null, null, { timeout: 400000 });
     await page.waitForFunction(() => tv.warm()?.done, null, { timeout: 400000 });
     await hook('/level', { name, level: 40 }).catch(() => null);
@@ -256,6 +257,16 @@ test('play-test 11, D-world: forests and far trees — before / after on High, a
     // the mountain canopy: stand near its nearest spire (it is only drawn on High / Medium), looking at the slope
     const root = await page.evaluate(() => { const p = tv.state().you; return thousandvale.W.horizon?.nearTrees?.nearestRoot(p.x, p.z) || null; });
     if (root) out[label].canopy = await measure(root.x - 120, root.z - 120, [16, 0.12, 0.78], 'perf-canopy');
+    // and a look AT the slope: the free camera 90 m off the nearest spire, the player standing 60 m from it
+    if (root && process.env.PT11_CANOPY_LOOK) {
+      const r2 = await page.evaluate(() => { const p = tv.state().you; return thousandvale.W.horizon.nearTrees.nearestRoot(p.x, p.z); });
+      for (const [k, d] of [['near', 70], ['far', 380]]) {
+        await page.evaluate(([r, dd]) => tv.fly(r.x - dd * 0.7, r.y + dd * 0.35 + 8, r.z - dd * 0.7, r.x, r.y + 6, r.z), [r2, d]);
+        await page.waitForTimeout(5000);
+        await page.screenshot({ path: join(SHOTS, `pt11w-canopy-${k}-${label}.png`) });
+      }
+      await page.evaluate(() => tv.fly());
+    }
     out[label].spans = await page.evaluate(() => (tv.perf().top || []).filter(t => /zone:(forest|navRefine|scatter|ground)/.test(t.name)));
     expect(errors, errors.join('\n')).toEqual([]);
     await ctx.close();

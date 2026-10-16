@@ -27,10 +27,18 @@
 //
 // Pure data and arithmetic: no DOM, no Three.js, so the node tests drive the whole arc end to end.
 
-import DATA from '../data/shipyard.json' with { type: 'json' };
 import { bagOf, costText, MATERIALS, STATIONS, costValue, recipeFor, recipesFor, towCapacity, firstTower } from './vehicles.js';
 import { VEHICLES, unlockVehicle } from './gear.js';
 import { fmt } from '../../../shared/format.js';
+// JSON without `import ... with { type: 'json' }` — older browsers (Steam Deck Chrome/Firefox) throw a SyntaxError on
+// import attributes, which killed the whole page. Top-level await works everywhere this code runs (browser and node).
+async function loadJson(rel) {
+  const u = new URL(rel, import.meta.url);
+  if (u.protocol === 'file:') { const { readFile } = await import('node:fs/promises'); return JSON.parse(await readFile(u, 'utf8')); }
+  const r = await fetch(u); if (!r.ok) throw new Error(`${u.pathname}: HTTP ${r.status}`); return r.json();
+}
+const DATA = await loadJson('../data/shipyard.json');
+
 
 export const SUBSYSTEMS = DATA.subsystems;
 export const SHIPS = DATA.ships;

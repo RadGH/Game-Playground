@@ -30,10 +30,18 @@
 // The JSON is the source of truth for every number — house rule, and it means a balance pass never
 // opens a .js file. Imported as a module (the pattern proctown/js/buildkit.js already uses) rather
 // than fetched, so this module also works in a test with nothing wired to it.
-import DATA from '../data/vehicles.json' with { type: 'json' };
-import RESOURCES from '../data/resources.json' with { type: 'json' };
-import REFINING from '../data/refining.json' with { type: 'json' };
 import { fmt, pct } from '../../../shared/format.js';
+// JSON without `import ... with { type: 'json' }` — older browsers (Steam Deck Chrome/Firefox) throw a SyntaxError on
+// import attributes, which killed the whole page. Top-level await works everywhere this code runs (browser and node).
+async function loadJson(rel) {
+  const u = new URL(rel, import.meta.url);
+  if (u.protocol === 'file:') { const { readFile } = await import('node:fs/promises'); return JSON.parse(await readFile(u, 'utf8')); }
+  const r = await fetch(u); if (!r.ok) throw new Error(`${u.pathname}: HTTP ${r.status}`); return r.json();
+}
+const DATA = await loadJson('../data/vehicles.json');
+const RESOURCES = await loadJson('../data/resources.json');
+const REFINING = await loadJson('../data/refining.json');
+
 
 /** Every ground vehicle, keyed. */
 export const GROUND_VEHICLES = DATA.vehicles;

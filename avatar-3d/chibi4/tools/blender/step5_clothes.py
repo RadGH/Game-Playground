@@ -153,15 +153,15 @@ def mage_outfit(B, col):
 
 # ------------------------------------------------------------------ the elf: undershirt, jerkin, trousers, boots, bracers,
 # pauldrons, tabard, belt, pouch, scabbard
-def elf_outfit(B, col):
+def elf_outfit(B, col, under_drop=0.02, trousers_rise=0.0):
     H, bot, n = B.H, B.bot, 64
     pel = B.head("pelvis"); neck = B.head("neck_01")
     C = Vector((B.cx, pel.y, 0))
     torso = B.pick(cc.TORSO, 0.5)
-    under = cc.shell("Undershirt", B, B.pick(cc.TORSO + cc.ARM_L + cc.ARM_R, 0.5, zmin=pel.z - 0.02, zmax=neck.z - 0.005), 0.004, col=col)[0]
+    under = cc.shell("Undershirt", B, B.pick(cc.TORSO + cc.ARM_L + cc.ARM_R, 0.5, zmin=pel.z - under_drop, zmax=neck.z - 0.005), 0.004, col=col)[0]
     jerkin = cc.shell("Jerkin", B, B.pick(cc.TORSO, 0.55, zmin=pel.z - 0.05, zmax=neck.z - 0.01,
                                           test=lambda c, no, i: abs(c.x - B.cx) < 0.17), 0.011, taper=0.004, col=col)[0]
-    trousers = cc.shell("Trousers", B, B.pick(cc.LEG_L + cc.LEG_R + ["pelvis"], 0.45, zmax=pel.z), 0.006, col=col)[0]
+    trousers = cc.shell("Trousers", B, B.pick(cc.LEG_L + cc.LEG_R + ["pelvis"], 0.45, zmax=pel.z + trousers_rise), 0.006, col=col)[0]
     knee = B.head("calf_l").z
     boots = boot(B, "l", knee + 0.08, 0.014, cuff=0.025, col=col) + boot(B, "r", knee + 0.08, 0.014, cuff=0.025, col=col)
     bracers = []

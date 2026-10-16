@@ -9,22 +9,34 @@
 <script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/" } }</script>
 </head>
 <body class="c4cmp">
-<!-- Chibi 2 (today) on the left, Chibi 4 (the experiment's step-7 GLBs) on the right, same lights, same clip.
-     ?anim=run  ?crowd=20|50&sys=chibi2|chibi4 (runs the crowd test on load; results in window.__c4perf) -->
+<!-- Chibi 2 (today), Chibi 4 baked (step 7) and the Chibi 4 kit (step 9, assembled at runtime), same lights, same clip.
+     ?anim=run  ?crowd=20|50|100&sys=chibi2|chibi4|kit (runs the crowd test on load; results in window.__c4perf) -->
 <div id="view"></div>
 <div class="c4panel">
   <h1>Chibi 2 <span class="dim">vs</span> Chibi 4</h1>
-  <p class="dim">Left: Chibi 2 dressed as the two test characters. Right: the Chibi 4 GLBs. Drag to orbit, wheel to zoom.</p>
+  <p class="dim">Left: Chibi 2 dressed as the two test characters. Middle: step 7's baked Chibi 4 GLBs. Right: the step 9 kit —
+    the same two characters put together at runtime from separate pieces. Drag to orbit, wheel to zoom.</p>
   <div id="anims" class="row"></div>
+  <div class="row"><label>every Chibi 2 clip name <select id="moreanims"><option value="">…</option></select></label></div>
+  <p id="clipinfo" class="dim small"></p>
   <label class="row"><input type="checkbox" id="lod" checked> distance versions (LOD) on</label>
   <table id="stats" class="score"></table>
+  <h3>Dress up (the kit characters)</h3>
+  <p class="dim small">Pick body, race, skin, hair and garments; colour pickers recolour a garment's main / second colour live
+    (no rebuild). Garments that share a slot replace each other.</p>
+  <form id="dress" onsubmit="return false"></form>
+  <p id="dressinfo" class="dim small"></p>
   <h3>Crowd test</h3>
   <div class="row">
-    <button data-crowd="20" data-sys="chibi2">20 × Chibi 2</button><button data-crowd="20" data-sys="chibi4">20 × Chibi 4</button>
-    <button data-crowd="50" data-sys="chibi2">50 × Chibi 2</button><button data-crowd="50" data-sys="chibi4">50 × Chibi 4</button>
+    <button data-crowd="20" data-sys="chibi2">20 × Chibi 2</button><button data-crowd="20" data-sys="chibi4">20 × baked</button><button data-crowd="20" data-sys="kit">20 × kit</button>
+  </div><div class="row">
+    <button data-crowd="50" data-sys="chibi2">50 × Chibi 2</button><button data-crowd="50" data-sys="chibi4">50 × baked</button><button data-crowd="50" data-sys="kit">50 × kit</button>
+  </div><div class="row">
+    <button data-crowd="100" data-sys="chibi2">100 × Chibi 2</button><button data-crowd="100" data-sys="chibi4">100 × baked</button><button data-crowd="100" data-sys="kit">100 × kit</button>
   </div>
   <table id="crowd" class="score"></table>
-  <p class="dim small">The crowd walks in place in a grid at Thousandvale's camera distance; fps is the average over 3 seconds.
+  <p class="dim small">The crowd walks in place in a grid at Thousandvale's camera distance; fps is the average over 3 seconds,
+    ms/frame is ten frames of animation + render timed with the GPU flushed. The kit crowd wears random outfits and colours.
     Numbers are from whatever GPU this browser has — compare them side by side, not against another machine.</p>
 </div>
 <script type="module" src="js/compare.js"></script>

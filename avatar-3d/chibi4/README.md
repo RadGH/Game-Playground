@@ -1,13 +1,17 @@
 # Chibi 4 — trying a more realistic character system, one idea at a time
 
-Owner: Radley Sustaire. Started 2026-10-15. Status: **prototype** — two finished characters, a runtime with Chibi 2's
-call shape, and an opt-in switch in Thousandvale. Not a replacement for Chibi 2 yet (see the verdict).
+Owner: Radley Sustaire. Started 2026-10-15. Status: **prototype** — a modular kit (2 bodies, 13 garments, 6 hairs, 67
+clips, any colours) assembled at runtime with Chibi 2's call shape, and an opt-in switch in Thousandvale. Not a
+replacement for Chibi 2 yet (see the verdict).
 
 **Pages** (dev server 8401, stable 8400):
 - `avatar-3d/chibi4/index.html` — the review page: one card per step, same shots, same scorecard (`data/steps.json`)
-- `avatar-3d/chibi4/compare.html` — Chibi 2 vs Chibi 4 side by side, animated, with measured cost and a 20/50 crowd test
+- `avatar-3d/chibi4/compare.html` — Chibi 2 vs Chibi 4 baked (step 7) vs the Chibi 4 kit (step 9) side by side, every
+  Chibi 2 clip name, measured cost, a **dress-up panel** (body, race, skin, hair, garments, colours) and a 20/50/100 crowd test
+- `avatar-3d/chibi4/kit.html` — one kit character, timed from page start (`?look=mage|elf`, `?lineup=10`, `?side=1`)
 - `avatar-3d/chibi4/baseline.html` — step 0: Chibi 2 dressed as the test characters
-- Thousandvale: add `?renderer=chibi4` to the game URL — the PLAYER's body becomes Chibi 4 (everyone else stays Chibi 2)
+- Thousandvale: add `?renderer=chibi4` to the game URL — the PLAYER starts as Chibi 2 at once and becomes a Chibi 4 kit
+  body as soon as it has downloaded (everyone else stays Chibi 2)
 
 ## Why
 
@@ -29,6 +33,7 @@ the same two test characters — the robed mage and the elf warrior of `ref/` �
 | 6 | Skirt bones driven by both thighs + robe-aware stride; every frame checked for feet through the robe | 0 pokes walk + run (was 25/33 and 23/23 frames) | yes |
 | 7 | GLB per character (1 mesh/distance, 1 atlas, LOD 0/1/2, 8 clips), three.js loader with Chibi 2's API, compare page, Thousandvale opt-in | 1 draw call per character | yes |
 | 8 | Tripo3D image-to-3D (the friend's tool) | needs the owner's Tripo account | not started |
+| 9 | The modular kit: one skeleton per body, every garment / hair / hat its own GLB with a hide mask; assembled, merged to one draw call and recoloured at runtime; 67 clips covering all 96 Chibi 2 names; meshopt-compressed | modular 4/5, 0 feet through the robe on every robe clip, player ready in 1.8 s on 10 Mbps | **yes — the runtime** |
 
 Full scorecards, shots and honest notes per step: the review page.
 
@@ -95,6 +100,86 @@ Clip checks: `clip_report()` counts garment/hair vertices inside the visible bod
   is created by `createChibi4Character` (dynamic import, so nothing loads without the flag); any error falls back to
   Chibi 2. `equip()/dress()` return false — gear and mounts do not show on a Chibi 4 body.
 
+### The modular kit (step 9) — `tools/blender/step9_kit.py`, `c4kit.py`, `c4emotes.py`, `js/chibi4-kit.js`, `js/chibi4-outfit.js`
+
+**What gets built** (`$B -b -P avatar-3d/chibi4/tools/blender/step9_kit.py -- male|female`, ~2.5 min each) into
+`models/kit/<body>/`:
+
+| file | what | size (male) |
+|---|---|---|
+| `body.glb` | the skeleton (53 MakeHuman + 8 skirt bones) + body, eyes, brows, lashes at 3 distances; pointed ears as morph `elf_ears` | 339 KB |
+| `g_<id>.glb` x13 | robe, mantle, sleeves, boots_low, undershirt, jerkin, trousers, boots_tall, bracers, pauldrons, tabard, scabbard, hat | 20–130 KB each |
+| `h_<id>.glb` x6 | short, braid, ponytail, long, bob, crop (MakeHuman CC0 hair fitted to this body) | 40–160 KB each |
+| `atlas.webp` / `mask.webp` | ONE colour picture for every piece (3072x2048) / the tint mask (R main colour, G second colour, B skin) | 651 / 88 KB |
+| `anims.glb` / `anims_more.glb` | 14 clips needed at once / the other 53 (fetched when the first character of this body is made) | 248 / 854 KB |
+| `kit.json` | bones, garments (hide bit, slots, layer, painted colours), hairs, clips, the robe test, knee and weight checks | |
+
+- **Both outfits on both bodies**: the mage's and the elf's garments are measured off EACH body (step 5's functions),
+  so a woman can wear the robe and a man the armour. Each outfit is painted once per body from its reference pictures
+  (the elf's back view is now Codex's `ref/warrior-back.png`) and split back into garments.
+- **Hide masks**: every vertex of the body, the hair and each garment carries the bits of the garments that cover it
+  (step 5's ray test, per garment; an outer layer hides what is under it: jerkin under robe, undershirt under jerkin,
+  hair under the hat or the mantle). They travel as COLOR_0 (R = bits 0–7, G = 8–15, exact through 8-bit quantisation)
+  because gltfpack drops custom attributes. A floor-length robe also hides every leg vertex between its hem and the hips.
+- **Weights**: copied from the WHOLE body (the owner's "right leg bent backwards" was trousers skinned from a body with
+  the legs hidden — they took the hip's and foot's weights and never bent at the knee); only the robe copies from the
+  hidden body so it follows the spine; low boots ride the foot. `kit.json masks.weight_agreement` checks it per garment.
+- **Clips** (`c4emotes.py`): 35 copies of Quaternius' CC0 library, 4 mirrored for the left hand (`retarget_seq(...,
+  mirror=True)`: each bone reads its opposite, reflected through the mid-plane), jump = start + air + land, stand-up = a
+  fall played backwards, sleep = a fall's last frame; 21 emotes authored on top (`overlay()`: aim a bone at a direction or
+  another bone, turn, move — in the rig's space): wave, point, salute, cheer, clap, bow, nod, head shake, shrug, laugh,
+  folded arms, look around, stretch, pray, drink, guard, kick, spin, ride, ride at a gallop, sit on the ground. A
+  `<clip>_robe` twin with step 6's robe stride for walk, run, sprint and formal walk — and step 6's foot-vs-hem check on
+  every one of them, both bodies (the build fails the test if any foot gets through). Knees: any bend past straight is
+  taken out at retarget time and reported (`knees` in kit.json).
+- **Compression**: every GLB goes through `gltfpack -cc -kn -kv -vpf -vtf -af 30` (meshopt; positions and UVs stay full
+  precision so the face and hands do not move; npm devDependency) and loads with `vendor/meshopt/meshopt_decoder.mjs`.
+  Step 7's GLBs too: mage.glb 3.17 MB -> 0.92 MB.
+
+**How a character is assembled** (`createChibi4Kit(avatar)`, also the default of `createChibi4Character`):
+1. `outfitFor(avatar)` (pure, `chibi4-outfit.js`) turns Chibi 2's avatar JSON into `{ body, race, skin, hair: {id,
+   color}, garments: [{ id, color, color2 }] }` — robes/gowns -> robe + mantle + sleeves, anything else -> undershirt +
+   jerkin (+ pauldrons/bracers for armour), wizard hats -> hat; `avatar.chibi4` overrides any of it. Slots resolve
+   clashes (a later jerkin takes the robe's torso), knee boots become low boots under a robe, nobody is left bare.
+2. The body type's shared files load once per page (skeleton, atlas, mask, first clips); each piece's GLB loads once
+   and is unpacked to plain arrays with its joints renamed to the skeleton's order by bone name.
+3. For the outfit, the worn garments' bits are OR'd and every triangle with a vertex under a worn garment is dropped;
+   the kept triangles of all pieces are copied into ONE geometry per distance with a slot number per vertex (0 body,
+   1 hair, 2.. garments); elf ears are added from the morph. Cached by outfit, so identical outfits share it.
+4. One material per character over the shared atlas: the shader reads the tint mask and the slot's two colours from a
+   uniform array (colour x the painted brightness), and the skin ratio. Recolouring (`setColors`) is a uniform write.
+5. A cloned skeleton, a THREE.LOD of three SkinnedMeshes (0 / 8 / 18 m), an AnimationMixer; far characters evaluate
+   their animation every 2nd / 3rd frame. `setAnim(name)` maps any Chibi 2 name (`clipFor`), playing the robe twin when
+   a robe is worn; a clip still downloading plays idle until it lands.
+
+API: `{ group, setAnim(name, fade, restart), play, update(dt), setRate, setTwist, hit, dress(change), setAvatar(a),
+setColors({ skin, hair, garments }), attach(object, 'handR'), equip() -> false, stats(), metrics(), dispose(), parts,
+skeleton, lod, outfit, clip }`.
+
+## Measured (step 9)
+
+On this VM (headless Chromium, software renderer, no GPU — compare side by side, not with another machine), from
+`tests/chibi4.spec.js` (numbers saved in `shots/step9/measured.json`):
+
+| walking at Thousandvale's camera | Chibi 2 | Chibi 4 baked (step 7) | Chibi 4 kit (step 9) |
+|---|---|---|---|
+| 20 characters | 11.8 fps, 31 calls, 132k tris | 7.2 fps, 21 calls, 151k tris | 9.9 fps, 21 calls, 68k tris |
+| 50 characters | 6.2 fps, 76 calls, 330k tris | 4.6 fps, 51 calls, 268k tris | 5.1 fps, 51 calls, 170k tris |
+| 100 characters | 3.4 fps, 151 calls, 660k tris | 2.6 fps, 101 calls, 535k tris | 3.1 fps, 101 calls, 335k tris |
+
+The kit crowd wears random outfits (46 different ones in 50). Full detail at every distance: 1.53M triangles for 50 and
+a ~6x slower frame — the distance versions are the big win. Skipping animation frames for far characters made no
+measurable difference here (the VM's time goes into skinning vertices, not the mixer).
+
+| player load (kit.html, cache off) | bytes | download | decode | ready | first frame |
+|---|---|---|---|---|---|
+| mage, 10 Mbps + 40 ms | 1.69 MB, 10 files | 1.75 s | 41 ms | 1.78 s | +0.58 s |
+| elf, 10 Mbps + 40 ms | 1.86 MB, 13 files | 1.91 s | 40 ms | 1.94 s | +0.54 s |
+| mage, local server | 2.54 MB* | 0.26 s | 48 ms | 0.29 s | +0.56 s |
+
+(*local: the second clip file had landed before the first frame. First frame is mostly shader compiling on the CPU.)
+In Thousandvale the wait is hidden anyway: Chibi 2 body first, swap when ready.
+
 ## Measured (step 7)
 
 Measured by `tests/chibi4.spec.js` on `compare.html` (this VM: headless Chromium, software renderer, no GPU — the
@@ -117,6 +202,25 @@ Chibi 4 mage (1 draw call, 1.91 m, walks/runs, no page errors); without the flag
 
 ## Verdict
 
+**Step 9: the look, the robe AND runtime modularity are solved; what blocks replacing Chibi 2 is content and gear,
+not the system.**
+
+- Modular at runtime: two bodies x two races x any skin, six hairs in any colour, 13 garments with two colours each,
+  mixed freely (hide masks, slot rules), one draw call per character, shared downloads and merged outfits.
+- All 96 Chibi 2 clip names play something: 53 the action itself, 43 the nearest clip (the weapon families, fishing,
+  professions mostly reuse the sword swing / punches / kneel-and-work).
+- Cost: draws half Chibi 2's triangles thanks to the distance versions and the hidden-triangle removal; on this VM it
+  runs at ~85–90% of Chibi 2's frame rate (step 7 was ~60%). Player loads in ~1.8 s on 10 Mbps, and never waits in game.
+- Still missing before a swap: weapons and shields in the hands (Chibi 2 has the grip bones and hold-aware clips), mounts
+  and boats (Chibi 2's seat), more garments (only these two outfits' pieces exist; each new outfit is a script + a
+  reference picture), more body builds (each is a full kit; a slider body cannot share garments), a real-PC
+  measurement, and an owner look at the style next to Thousandvale's world.
+
+Recommendation: use the kit for new games and for Thousandvale's player/hero characters behind the flag; next pieces of
+work are weapon sockets with hold-aware clips, a seat pose for mounts, and a garment per Chibi 2 outfit family.
+
+### Step 7's verdict (kept for the record)
+
 **The look and the robe are solved; the system is not yet a Chibi 2 replacement.**
 
 - Looks: the first version that reads as the Codex reference — real faces (MakeHuman topology, painted), 6.6–6.8 heads,
@@ -135,17 +239,19 @@ past the opt-in flag yet.
 
 ## What is not done
 
-- **Not modular at runtime yet.** Each GLB is one baked character. The pieces ARE modular at build time (any body
-  from sliders, garments measured off it), but swapping a garment in the game needs one GLB per garment set, or
-  shipping garments as separate skinned meshes on the shared skeleton (one draw call each) — the next step if this
-  direction is kept.
-- Only two characters exist; `modelFor()` maps every avatar onto one of them.
-- The elf's braid is a no-AI stand-in and her back is painted from the front picture — Codex ran out of credit (resets
-  02:38 on 2026-10-16). Re-run: `tools/textures.py` with a Codex braid, and a Codex back view saved as
-  `ref/warrior-back.png` (step 5 picks it up automatically).
-- Quaternius' clips have no wave, guard or jump; the jog keeps a slight forward hunch.
+- No weapons, shields or off-hand items in the hands (`attach(obj, 'handR')` parents anything to a hand bone; there is
+  no grip pose or hold-aware clip). `equip()` returns false.
+- No mounts or boats: Thousandvale's mount code expects Chibi 2's seat; the kit has `ride`/`rideGallop` clips but no
+  seat point.
+- Only the two test outfits' garments exist (13 pieces) and one hat; Chibi 2's other outfit ids map onto them.
+- Two body builds only. A new build (heavier, dwarf, child) is a new kit: garments are measured off the body they are
+  for and cannot be shared with a body of different proportions.
+- Inner layers (undershirt, trousers) carry a little paint of what covered them in the reference picture when worn alone.
+- The male face always has the painted beard (it is in the skin picture).
+- Clips cannot be shared between the two bodies (up to 15 degrees apart at the thighs after retargeting); each body has
+  its own clip files.
+- Quaternius' jog keeps a slight forward hunch; its idle is a ready stance with bent knees.
 - Faces keep MakeHuman's glassy realistic eyes; painted eyes would match the reference better.
-- No weapons in hand, no mounts (Thousandvale's mount code expects Chibi 2's seat).
 - Step 8 (Tripo3D) needs the owner's account.
 
 ## Rebuild
@@ -160,16 +266,20 @@ $B -b -P avatar-3d/chibi4/tools/blender/step5_clothes.py                  # step
 $B -b --python-exit-code 3 -P avatar-3d/chibi4/tools/blender/step6_robe_run.py   # step 6, fails if a foot gets through
 $B -b -P avatar-3d/chibi4/tools/blender/step7_export.py -- mage          # models/mage.glb + mage.json (~30 s)
 $B -b -P avatar-3d/chibi4/tools/blender/step7_export.py -- elf
+$B -b -P avatar-3d/chibi4/tools/blender/step9_kit.py -- male              # the kit, ~2.5 min per body (fails its robe test loudly)
+$B -b -P avatar-3d/chibi4/tools/blender/step9_kit.py -- female
+node --test avatar-3d/chibi4/tests/kit.test.js                            # clip coverage, robe test, knees, weights, sizes
 python3 avatar-3d/chibi4/tools/sheet.py <out.png> <renders...>            # contact strips for the review page
 flock /tmp/claude-1000/farhold-pw.lock npx playwright test avatar-3d/chibi4/tests/   # compare page, crowd, Thousandvale hook
 ```
 
-`models/*.glb` (~3.2–3.5 MB each) are committed so the pages work from a fresh checkout; the big working files
+`models/*.glb` (~0.9 MB each, meshopt) and `models/kit/` (~4 MB per body) are committed so the pages work from a fresh checkout; the big working files
 (`.blend`, raw renders, full-size Codex PNGs, baked garment PNGs) are git-ignored and rebuilt by the scripts.
 
 ## Licences
 
 MakeHuman/MPFB output and the asset packs used (skins incl. the bearded one, hair, brows, lashes, eyes, game rig): CC0
 (per the packs' metadata; the "AGPL" line in some .mhclo headers is the MakeClothes tool's boilerplate). Quaternius
-Universal Animation Library: CC0. Codex pictures: generated for this project. MPFB's code (GPL) runs only at build
+Universal Animation Library: CC0. meshoptimizer's decoder (vendored) and gltfpack (build-time devDependency): MIT. Codex
+pictures: generated for this project. MPFB's code (GPL) runs only at build
 time and is not shipped.

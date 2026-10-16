@@ -1,0 +1,1040 @@
+{
+ "body": "female",
+ "bones": [
+  "Root",
+  "pelvis",
+  "spine_01",
+  "spine_02",
+  "spine_03",
+  "clavicle_l",
+  "upperarm_l",
+  "lowerarm_l",
+  "hand_l",
+  "index_01_l",
+  "index_02_l",
+  "index_03_l",
+  "middle_01_l",
+  "middle_02_l",
+  "middle_03_l",
+  "pinky_01_l",
+  "pinky_02_l",
+  "pinky_03_l",
+  "ring_01_l",
+  "ring_02_l",
+  "ring_03_l",
+  "thumb_01_l",
+  "thumb_02_l",
+  "thumb_03_l",
+  "clavicle_r",
+  "upperarm_r",
+  "lowerarm_r",
+  "hand_r",
+  "index_01_r",
+  "index_02_r",
+  "index_03_r",
+  "middle_01_r",
+  "middle_02_r",
+  "middle_03_r",
+  "pinky_01_r",
+  "pinky_02_r",
+  "pinky_03_r",
+  "ring_01_r",
+  "ring_02_r",
+  "ring_03_r",
+  "thumb_01_r",
+  "thumb_02_r",
+  "thumb_03_r",
+  "neck_01",
+  "head",
+  "thigh_l",
+  "calf_l",
+  "foot_l",
+  "ball_l",
+  "thigh_r",
+  "calf_r",
+  "foot_r",
+  "ball_r",
+  "skirt_0",
+  "skirt_1",
+  "skirt_2",
+  "skirt_3",
+  "skirt_4",
+  "skirt_5",
+  "skirt_6",
+  "skirt_7"
+ ],
+ "height": 1.703,
+ "fps": 24,
+ "atlas": {
+  "file": "atlas.webp",
+  "w": 3072,
+  "h": 2048
+ },
+ "mask": {
+  "file": "mask.webp",
+  "w": 768,
+  "h": 512
+ },
+ "skinRef": [
+  0.6867,
+  0.3419,
+  0.2086
+ ],
+ "browLum": 0.01,
+ "bits": {
+  "robe": 0,
+  "mantle": 1,
+  "sleeves": 2,
+  "boots_low": 3,
+  "undershirt": 4,
+  "jerkin": 5,
+  "trousers": 6,
+  "boots_tall": 7,
+  "bracers": 8,
+  "pauldrons": 9,
+  "tabard": 10,
+  "scabbard": 11,
+  "hat": 12
+ },
+ "garments": {
+  "robe": {
+   "refA": "#3a3e54",
+   "lumA": 0.05,
+   "refB": "#16151a",
+   "lumB": 0.01,
+   "share": [
+    0.52,
+    0.32,
+    0.16
+   ],
+   "file": "g_robe.glb",
+   "bit": 0,
+   "slots": [
+    "torso",
+    "skirt"
+   ],
+   "layer": 4,
+   "long": true,
+   "skirt": true,
+   "tris": [
+    6180,
+    2348,
+    802
+   ]
+  },
+  "mantle": {
+   "refA": "#373d59",
+   "lumA": 0.049,
+   "refB": "#09090d",
+   "lumB": 0.01,
+   "share": [
+    0.64,
+    0.2,
+    0.16
+   ],
+   "file": "g_mantle.glb",
+   "bit": 1,
+   "slots": [
+    "shoulders"
+   ],
+   "layer": 6,
+   "long": false,
+   "skirt": false,
+   "tris": [
+    1688,
+    642,
+    218
+   ]
+  },
+  "sleeves": {
+   "refA": "#3c3d51",
+   "lumA": 0.0485,
+   "refB": "#a1805e",
+   "lumB": 0.2386,
+   "share": [
+    0.51,
+    0.34,
+    0.15
+   ],
+   "file": "g_sleeves.glb",
+   "bit": 2,
+   "slots": [
+    "arms"
+   ],
+   "layer": 5,
+   "long": false,
+   "skirt": false,
+   "tris": [
+    1008,
+    382,
+    130
+   ]
+  },
+  "boots_low": {
+   "refA": "#423631",
+   "lumA": 0.04,
+   "refB": "#0d0b0a",
+   "lumB": 0.01,
+   "share": [
+    0.68,
+    0.22,
+    0.11
+   ],
+   "file": "g_boots_low.glb",
+   "bit": 3,
+   "slots": [
+    "feet"
+   ],
+   "layer": 2,
+   "long": false,
+   "skirt": false,
+   "tris": [
+    1550,
+    588,
+    200
+   ]
+  },
+  "undershirt": {
+   "refA": "#1a120e",
+   "lumA": 0.01,
+   "refB": "#b29880",
+   "lumB": 0.334,
+   "share": [
+    0.37,
+    0.33,
+    0.3
+   ],
+   "file": "g_undershirt.glb",
+   "bit": 4,
+   "slots": [
+    "shirt"
+   ],
+   "layer": 1,
+   "long": false,
+   "skirt": false,
+   "tris": [
+    1485,
+    563,
+    192
+   ]
+  },
+  "jerkin": {
+   "refA": "#4d4032",
+   "lumA": 0.0545,
+   "refB": "#090705",
+   "lumB": 0.01,
+   "share": [
+    0.64,
+    0.19,
+    0.17
+   ],
+   "file": "g_jerkin.glb",
+   "bit": 5,
+   "slots": [
+    "torso"
+   ],
+   "layer": 3,
+   "long": false,
+   "skirt": false,
+   "tris": [
+    799,
+    303,
+    104
+   ]
+  },
+  "trousers": {
+   "refA": "#4d3c32",
+   "lumA": 0.0508,
+   "refB": "#130e0c",
+   "lumB": 0.01,
+   "share": [
+    0.65,
+    0.24,
+    0.11
+   ],
+   "file": "g_trousers.glb",
+   "bit": 6,
+   "slots": [
+    "legs"
+   ],
+   "layer": 1,
+   "long": false,
+   "skirt": false,
+   "tris": [
+    777,
+    294,
+    101
+   ]
+  },
+  "boots_tall": {
+   "refA": "#46352c",
+   "lumA": 0.0399,
+   "refB": "#050403",
+   "lumB": 0.01,
+   "share": [
+    0.68,
+    0.18,
+    0.14
+   ],
+   "file": "g_boots_tall.glb",
+   "bit": 7,
+   "slots": [
+    "feet"
+   ],
+   "layer": 2,
+   "long": false,
+   "skirt": false,
+   "tris": [
+    3776,
+    1434,
+    490
+   ]
+  },
+  "bracers": {
+   "refA": "#5a4637",
+   "lumA": 0.0678,
+   "refB": "#9d8d7d",
+   "lumB": 0.2765,
+   "share": [
+    0.5,
+    0.29,
+    0.21
+   ],
+   "file": "g_bracers.glb",
+   "bit": 8,
+   "slots": [
+    "wrists"
+   ],
+   "layer": 3,
+   "long": false,
+   "skirt": false,
+   "tris": [
+    129,
+    49,
+    17
+   ]
+  },
+  "pauldrons": {
+   "refA": "#63584e",
+   "lumA": 0.1022,
+   "refB": "#aea193",
+   "lumB": 0.3663,
+   "share": [
+    0.46,
+    0.29,
+    0.25
+   ],
+   "file": "g_pauldrons.glb",
+   "bit": 9,
+   "slots": [
+    "shoulders"
+   ],
+   "layer": 7,
+   "long": false,
+   "skirt": false,
+   "tris": [
+    1326,
+    504,
+    172
+   ]
+  },
+  "tabard": {
+   "refA": "#484235",
+   "lumA": 0.0554,
+   "refB": "#0a0806",
+   "lumB": 0.01,
+   "share": [
+    0.59,
+    0.21,
+    0.2
+   ],
+   "file": "g_tabard.glb",
+   "bit": 10,
+   "slots": [
+    "skirt"
+   ],
+   "layer": 5,
+   "long": false,
+   "skirt": true,
+   "tris": [
+    2028,
+    770,
+    262
+   ]
+  },
+  "scabbard": {
+   "refA": "#4c3c2f",
+   "lumA": 0.0501,
+   "refB": "#927c66",
+   "lumB": 0.2149,
+   "share": [
+    0.63,
+    0.2,
+    0.17
+   ],
+   "file": "g_scabbard.glb",
+   "bit": 11,
+   "slots": [
+    "hip"
+   ],
+   "layer": 7,
+   "long": false,
+   "skirt": false,
+   "tris": [
+    36,
+    12,
+    12
+   ]
+  },
+  "hat": {
+   "refA": "#1e2a5a",
+   "lumA": 0.21404114048223255,
+   "refB": null,
+   "lumB": 1.0,
+   "tintAlways": true,
+   "file": "g_hat.glb",
+   "bit": 12,
+   "slots": [
+    "head"
+   ],
+   "layer": 8,
+   "long": false,
+   "skirt": false,
+   "tris": [
+    2112,
+    802,
+    274
+   ]
+  }
+ },
+ "hairs": {
+  "short": {
+   "ref": "#563a2a",
+   "lum": 0.0517,
+   "file": "h_short.glb",
+   "tris": [
+    3344,
+    1269,
+    433
+   ]
+  },
+  "braid": {
+   "ref": "#342828",
+   "lum": 0.024,
+   "file": "h_braid.glb",
+   "tris": [
+    8152,
+    3097,
+    1058
+   ]
+  },
+  "ponytail": {
+   "ref": "#543827",
+   "lum": 0.0486,
+   "file": "h_ponytail.glb",
+   "tris": [
+    5352,
+    2033,
+    695
+   ]
+  },
+  "long": {
+   "ref": "#351d16",
+   "lum": 0.0169,
+   "file": "h_long.glb",
+   "tris": [
+    4108,
+    1560,
+    533
+   ]
+  },
+  "bob": {
+   "ref": "#9a9283",
+   "lum": 0.2907,
+   "file": "h_bob.glb",
+   "tris": [
+    2248,
+    854,
+    292
+   ]
+  },
+  "crop": {
+   "ref": "#232323",
+   "lum": 0.0168,
+   "file": "h_crop.glb",
+   "tris": [
+    1050,
+    399,
+    135
+   ]
+  }
+ },
+ "clips": {
+  "idle": 2.5,
+  "ready": 1.667,
+  "walk": 1.333,
+  "run": 0.917,
+  "sprint": 0.667,
+  "walkFormal": 1.333,
+  "crouch": 2.917,
+  "crouchWalk": 2.0,
+  "attack": 1.5,
+  "jab": 0.833,
+  "cross": 1.0,
+  "cast": 0.5,
+  "castEnter": 0.5,
+  "channel": 2.083,
+  "castExit": 0.417,
+  "hit": 0.333,
+  "hitHead": 0.417,
+  "death": 2.375,
+  "talk": 2.917,
+  "torch": 1.25,
+  "interact": 2.0,
+  "pickUp": 0.833,
+  "kneelWork": 5.167,
+  "push": 2.667,
+  "roll": 1.458,
+  "sitDown": 1.292,
+  "sit": 1.667,
+  "sitUp": 1.0,
+  "sitTalk": 2.917,
+  "swim": 1.333,
+  "swimIdle": 3.333,
+  "dance": 1.0,
+  "drive": 1.667,
+  "reload": 1.667,
+  "aim": 0.167,
+  "attackL": 1.5,
+  "jabL": 0.833,
+  "crossL": 1.0,
+  "castL": 0.5,
+  "jump": 5.167,
+  "standUp": 2.375,
+  "sleep": 0.958,
+  "walk_robe": 1.333,
+  "run_robe": 0.917,
+  "sprint_robe": 0.667,
+  "walkFormal_robe": 1.333,
+  "wave": 2.208,
+  "point": 1.583,
+  "salute": 1.792,
+  "cheer": 1.792,
+  "clap": 1.792,
+  "bow": 2.0,
+  "nod": 1.208,
+  "headShake": 1.417,
+  "shrug": 1.417,
+  "laugh": 1.792,
+  "crossArms": 2.5,
+  "lookAround": 4.0,
+  "stretch": 2.208,
+  "pray": 2.5,
+  "drink": 2.0,
+  "guard": 1.667,
+  "kick": 1.0,
+  "spin": 1.5,
+  "ride": 1.667,
+  "rideGallop": 1.667,
+  "sitGround": 1.667
+ },
+ "robeStrides": {
+  "walk": {
+   "thigh": 0.463,
+   "calf_": 0.572,
+   "_extent": [
+    47.5,
+    87.5
+   ]
+  },
+  "run": {
+   "thigh": 0.306,
+   "calf_": 0.404,
+   "_extent": [
+    78.5,
+    128.6
+   ],
+   "spine": 0.6
+  },
+  "sprint": {
+   "thigh": 0.342,
+   "calf_": 0.404,
+   "_extent": [
+    70.1,
+    128.8
+   ],
+   "spine": 0.6
+  },
+  "walkFormal": {
+   "thigh": 0.444,
+   "calf_": 0.559,
+   "_extent": [
+    49.6,
+    89.5
+   ]
+  }
+ },
+ "robeTest": {
+  "walk_robe+boots_low": {
+   "frames": 33,
+   "poking_vertices": 0,
+   "frames_with_pokes": 0,
+   "min_gap_cm": null
+  },
+  "run_robe+boots_low": {
+   "frames": 23,
+   "poking_vertices": 0,
+   "frames_with_pokes": 0,
+   "min_gap_cm": null
+  },
+  "sprint_robe+boots_low": {
+   "frames": 17,
+   "poking_vertices": 0,
+   "frames_with_pokes": 0,
+   "min_gap_cm": null
+  },
+  "walkFormal_robe+boots_low": {
+   "frames": 33,
+   "poking_vertices": 0,
+   "frames_with_pokes": 0,
+   "min_gap_cm": null
+  }
+ },
+ "masks": {
+  "body_hidden_by": {
+   "robe": 1722,
+   "mantle": 307,
+   "sleeves": 727,
+   "boots_low": 2116,
+   "undershirt": 2027,
+   "jerkin": 1092,
+   "trousers": 1090,
+   "boots_tall": 2586,
+   "bracers": 84,
+   "pauldrons": 89,
+   "tabard": 5,
+   "scabbard": 0,
+   "robe_legs_rule": 461
+  },
+  "garment_hidden_by": {
+   "robe<mantle": 727,
+   "robe<sleeves": 116,
+   "robe<pauldrons": 147,
+   "robe<tabard": 365,
+   "mantle<pauldrons": 234,
+   "sleeves<mantle": 81,
+   "sleeves<pauldrons": 77,
+   "undershirt<robe": 1179,
+   "undershirt<mantle": 327,
+   "undershirt<sleeves": 715,
+   "undershirt<jerkin": 1072,
+   "undershirt<bracers": 84,
+   "undershirt<pauldrons": 94,
+   "undershirt<tabard": 11,
+   "jerkin<robe": 1024,
+   "jerkin<mantle": 266,
+   "jerkin<sleeves": 16,
+   "jerkin<tabard": 22,
+   "trousers<robe": 639,
+   "trousers<boots_low": 118,
+   "trousers<jerkin": 32,
+   "trousers<boots_tall": 568,
+   "boots_tall<robe": 1457,
+   "bracers<sleeves": 50
+  },
+  "hair_hidden_by": {
+   "short": {
+    "mantle": 0,
+    "robe": 0,
+    "jerkin": 0,
+    "pauldrons": 0,
+    "undershirt": 0,
+    "hat": 1044
+   },
+   "braid": {
+    "mantle": 376,
+    "robe": 2,
+    "jerkin": 0,
+    "pauldrons": 0,
+    "undershirt": 0,
+    "hat": 1411
+   },
+   "ponytail": {
+    "mantle": 219,
+    "robe": 26,
+    "jerkin": 10,
+    "pauldrons": 0,
+    "undershirt": 0,
+    "hat": 1617
+   },
+   "long": {
+    "mantle": 413,
+    "robe": 474,
+    "jerkin": 262,
+    "pauldrons": 0,
+    "undershirt": 98,
+    "hat": 628
+   },
+   "bob": {
+    "mantle": 0,
+    "robe": 0,
+    "jerkin": 0,
+    "pauldrons": 0,
+    "undershirt": 0,
+    "hat": 901
+   },
+   "crop": {
+    "mantle": 0,
+    "robe": 0,
+    "jerkin": 0,
+    "pauldrons": 0,
+    "undershirt": 0,
+    "hat": 511
+   }
+  },
+  "weight_agreement": {
+   "robe": 0.406,
+   "mantle": 0.984,
+   "sleeves": 0.981,
+   "boots_low": 0.382,
+   "undershirt": 0.994,
+   "jerkin": 0.992,
+   "trousers": 0.999,
+   "boots_tall": 0.978,
+   "bracers": 1.0,
+   "pauldrons": 0.968,
+   "tabard": 0.968,
+   "scabbard": 0.917,
+   "hat": 1.0
+  }
+ },
+ "knees": {
+  "idle_without_fix": {
+   "l": 20.4,
+   "r": 10.2
+  },
+  "idle": {
+   "l": 20.4,
+   "r": 10.2
+  },
+  "ready": {
+   "l": 62.1,
+   "r": 48.1
+  },
+  "walk": {
+   "l": 13.9,
+   "r": 9.2
+  },
+  "run": {
+   "l": 0.3,
+   "r": 3.8
+  },
+  "sprint": {
+   "l": 0.3,
+   "r": 0.3
+  },
+  "walkFormal": {
+   "l": 9.4,
+   "r": 0.3
+  },
+  "crouch": {
+   "l": 96.1,
+   "r": 132.9
+  },
+  "crouchWalk": {
+   "l": 97.5,
+   "r": 88.2
+  },
+  "attack": {
+   "l": 52.6,
+   "r": 41.9
+  },
+  "jab": {
+   "l": 41.5,
+   "r": 13.1
+  },
+  "cross": {
+   "l": 31.6,
+   "r": 12.4
+  },
+  "cast": {
+   "l": 18.0,
+   "r": 15.4
+  },
+  "castEnter": {
+   "l": 18.0,
+   "r": 10.2
+  },
+  "channel": {
+   "l": 18.0,
+   "r": 15.4
+  },
+  "castExit": {
+   "l": 18.0,
+   "r": 10.3
+  },
+  "hit": {
+   "l": 21.2,
+   "r": 10.2
+  },
+  "hitHead": {
+   "l": 20.0,
+   "r": 10.2
+  },
+  "death": {
+   "l": 0.2,
+   "r": 18.4
+  },
+  "talk": {
+   "l": 22.2,
+   "r": 11.5
+  },
+  "torch": {
+   "l": 21.2,
+   "r": 10.2
+  },
+  "interact": {
+   "l": 20.3,
+   "r": 10.2
+  },
+  "pickUp": {
+   "l": 19.8,
+   "r": 7.4
+  },
+  "kneelWork": {
+   "l": 20.2,
+   "r": 1.3
+  },
+  "push": {
+   "l": 47.6,
+   "r": 50.4
+  },
+  "roll": {
+   "l": 0.3,
+   "r": 0.2
+  },
+  "sitDown": {
+   "l": 21.2,
+   "r": 10.2
+  },
+  "sit": {
+   "l": 84.6,
+   "r": 84.2
+  },
+  "sitUp": {
+   "l": 21.6,
+   "r": 14.9
+  },
+  "sitTalk": {
+   "l": 84.6,
+   "r": 84.2
+  },
+  "swim": {
+   "l": 4.2,
+   "r": 4.2
+  },
+  "swimIdle": {
+   "l": -0.0,
+   "r": 37.3
+  },
+  "dance": {
+   "l": 0.3,
+   "r": 0.3
+  },
+  "drive": {
+   "l": 82.8,
+   "r": 82.4
+  },
+  "reload": {
+   "l": 20.8,
+   "r": 10.2
+  },
+  "aim": {
+   "l": 20.9,
+   "r": 10.2
+  },
+  "attackL": {
+   "l": 41.9,
+   "r": 52.6
+  },
+  "jabL": {
+   "l": 13.1,
+   "r": 41.5
+  },
+  "crossL": {
+   "l": 12.4,
+   "r": 31.6
+  },
+  "castL": {
+   "l": 15.4,
+   "r": 18.0
+  },
+  "jump": {
+   "l": 19.4,
+   "r": 2.7
+  },
+  "standUp": {
+   "l": 0.2,
+   "r": 18.4
+  },
+  "sleep": {
+   "l": 11.7,
+   "r": 31.8
+  },
+  "walk_robe": {
+   "l": 4.9,
+   "r": 4.9
+  },
+  "run_robe": {
+   "l": 5.0,
+   "r": 5.0
+  },
+  "sprint_robe": {
+   "l": 5.0,
+   "r": 5.0
+  },
+  "walkFormal_robe": {
+   "l": 3.7,
+   "r": 3.7
+  },
+  "wave": {
+   "l": 20.4,
+   "r": 10.2
+  },
+  "point": {
+   "l": 20.4,
+   "r": 10.2
+  },
+  "salute": {
+   "l": 20.4,
+   "r": 10.2
+  },
+  "cheer": {
+   "l": 20.4,
+   "r": 10.2
+  },
+  "clap": {
+   "l": 20.4,
+   "r": 10.2
+  },
+  "bow": {
+   "l": 20.4,
+   "r": 10.2
+  },
+  "nod": {
+   "l": 20.6,
+   "r": 10.2
+  },
+  "headShake": {
+   "l": 20.4,
+   "r": 10.2
+  },
+  "shrug": {
+   "l": 20.4,
+   "r": 10.2
+  },
+  "laugh": {
+   "l": 20.4,
+   "r": 10.2
+  },
+  "crossArms": {
+   "l": 20.4,
+   "r": 10.2
+  },
+  "lookAround": {
+   "l": 20.4,
+   "r": 10.2
+  },
+  "stretch": {
+   "l": 20.4,
+   "r": 10.2
+  },
+  "pray": {
+   "l": 20.4,
+   "r": 10.2
+  },
+  "drink": {
+   "l": 20.4,
+   "r": 10.2
+  },
+  "guard": {
+   "l": 62.1,
+   "r": 48.1
+  },
+  "kick": {
+   "l": 21.2,
+   "r": 4.0
+  },
+  "spin": {
+   "l": 52.6,
+   "r": 41.9
+  },
+  "ride": {
+   "l": 67.1,
+   "r": 67.6
+  },
+  "rideGallop": {
+   "l": 67.1,
+   "r": 67.6
+  },
+  "sitGround": {
+   "l": 11.0,
+   "r": 10.1
+  }
+ },
+ "bodyTris": [
+  29356,
+  11155,
+  3815
+ ],
+ "files": {
+  "body.glb": 336484,
+  "h_short.glb": 52984,
+  "h_braid.glb": 159304,
+  "h_ponytail.glb": 102980,
+  "h_long.glb": 99912,
+  "h_bob.glb": 56236,
+  "h_crop.glb": 40380,
+  "g_robe.glb": 119024,
+  "g_mantle.glb": 50964,
+  "g_sleeves.glb": 46112,
+  "g_boots_low.glb": 43436,
+  "g_undershirt.glb": 51656,
+  "g_jerkin.glb": 37928,
+  "g_trousers.glb": 36448,
+  "g_boots_tall.glb": 89736,
+  "g_bracers.glb": 22472,
+  "g_pauldrons.glb": 53560,
+  "g_tabard.glb": 59744,
+  "g_scabbard.glb": 19616,
+  "g_hat.glb": 33748,
+  "anims.glb": 247308,
+  "anims_more.glb": 854080,
+  "atlas.webp": 658516,
+  "mask.webp": 87352
+ },
+ "uncompressedBytes": {
+  "body.glb": 1780048,
+  "h_short.glb": 221296,
+  "h_braid.glb": 726788,
+  "h_ponytail.glb": 463868,
+  "h_long.glb": 385072,
+  "h_bob.glb": 211544,
+  "h_crop.glb": 133236,
+  "g_robe.glb": 473796,
+  "g_mantle.glb": 174488,
+  "g_sleeves.glb": 131224,
+  "g_boots_low.glb": 168152,
+  "g_undershirt.glb": 150652,
+  "g_jerkin.glb": 94192,
+  "g_trousers.glb": 93272,
+  "g_boots_tall.glb": 381440,
+  "g_bracers.glb": 38348,
+  "g_pauldrons.glb": 168896,
+  "g_tabard.glb": 201644,
+  "g_scabbard.glb": 29864,
+  "g_hat.glb": 137448,
+  "anims.glb": 2926772,
+  "anims_more.glb": 3686664
+ }
+}

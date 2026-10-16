@@ -24,3 +24,6 @@ body.c4cmp { overflow: hidden; }
 .c4labels { position: fixed; left: 0; right: 520px; bottom: 14px; display: flex; justify-content: space-around; pointer-events: none;
   color: #15171c; font-weight: 600; text-shadow: 0 1px 0 #fff4; }
 @media (max-width: 800px) { .c4cmp .c4panel { top: auto; bottom: 10px; max-height: 45vh; } .c4labels { right: 0; top: 10px; bottom: auto; } }
+.c4cmp table.dresslist td { padding: 1px 6px; }
+.c4cmp table.dresslist input[type=color] { width: 30px; height: 20px; padding: 0; border: 0; background: none; }
+.c4cmp #dress select { max-width: 9em; }

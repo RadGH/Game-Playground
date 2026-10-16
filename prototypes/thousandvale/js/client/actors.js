@@ -40,6 +40,10 @@ function creatureFor(spec) {
 const TAU = Math.PI * 2;
 // Chibi 4 experiment: ?renderer=chibi4 swaps the PLAYER's body only (default stays Chibi 2; see build() below)
 const CHIBI4 = typeof location !== 'undefined' && new URLSearchParams(location.search).get('renderer') === 'chibi4';
+// ...and its download starts NOW, at page start, not when the player's body is built (owner 2026-10-16: "my character
+// took ~5 seconds to load" — the fetch used to queue behind the zone downloads). Both body kits' shared files start;
+// the outfit's own pieces start the moment the look is known (build() below).
+const CHIBI4_MOD = CHIBI4 ? import('../../../../avatar-3d/chibi4/js/chibi4.js').then(m => { m.loadKit('male').catch(() => {}); m.loadKit('female').catch(() => {}); return m; }) : null;
 /** Shortest signed difference between two angles. */
 export function angleDelta(a, b) { let d = (b - a) % TAU; if (d > Math.PI) d -= TAU; if (d < -Math.PI) d += TAU; return d; }
 
@@ -215,6 +219,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
   function pick(i) { return { name: i.name, level: i.level, hp: i.hp, hpMax: i.hpMax, hostile: !!i.hostile, look: i.look, creature: i.creature, family: i.family, rank: i.rank || null, pet: !!i.pet, role: i.role || null, mods: Array.isArray(i.mods) ? i.mods : null, sc: Number.isFinite(i.sc) && i.sc > 0 ? i.sc : null }; }
 
   async function build(a) {
+    let chibi4Swap = null;
     a.building = true; lodStats.built++;
     const t0 = performance.now();
     try {
@@ -241,10 +246,12 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
         // One draw call per moving part instead of one per eye and toe (Farhold R27 M8).
         if (!body.isProp) try { compactCreature(body); } catch (e) { console.warn('[actors] compact failed', e); }
       } else if (a.self && CHIBI4) {
-        // Chibi 4 experiment (avatar-3d/chibi4/README.md): OPT-IN with ?renderer=chibi4, the player only. A baked
-        // MakeHuman GLB with Chibi 2's call shape; on any failure the player falls back to the normal Chibi 2 body.
-        try { body = await (await import('../../../../avatar-3d/chibi4/js/chibi4.js')).createChibi4Character(await avatarFor(a.look)); a.chibi4 = true; }
-        catch (e) { console.warn('[actors] chibi4 failed, using chibi2', e); body = await createChibi2Character(await avatarFor(a.look), { anims: CHIBI_ANIMS }); }
+        // Chibi 4 experiment (avatar-3d/chibi4/README.md): OPT-IN with ?renderer=chibi4, the player only. The player
+        // gets the normal Chibi 2 body AT ONCE and swaps to the Chibi 4 kit body when it is ready (never waits);
+        // on any failure the Chibi 2 body simply stays.
+        const av = await avatarFor(a.look);
+        body = await createChibi2Character(av, { anims: CHIBI_ANIMS });
+        chibi4Swap = CHIBI4_MOD.then(m => m.createChibi4Character(av)); chibi4Swap.catch(() => {});
       } else {
         body = await createChibi2Character(await avatarFor(a.look), { anims: CHIBI_ANIMS });
       }
@@ -273,9 +280,27 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
         if (Number.isFinite(size.x) && size.y > 0.05 && size.y < 20) { a.pickR = Math.max(0.6, Math.min(4, Math.max(size.x, size.z) * 0.55)); a.pickTop = Math.max(0.6, size.y); if (a.kind === 'monster' || a.pet) a.height = Math.max(0.6, Math.min(a.height, size.y * 1.05)); }
       } catch { /* the default volume stands */ }
       if (a.dead) setAnim(a, 'dead');
+      if (chibi4Swap) swapToChibi4(a, chibi4Swap);
     } catch (e) {
       console.warn('[actors] body failed for', a.id, e);
     }
+  }
+  // Chibi 4 experiment: the ready Chibi 4 body takes the Chibi 2 body's place (same spot, facing, clip, mount)
+  async function swapToChibi4(a, pending) {
+    let next;
+    try { next = await pending; } catch (e) { console.warn('[actors] chibi4 failed, keeping chibi2', e); return; }
+    if (!actors.has(a.id) || !a.body || a.shape) { next.dispose(); return; }
+    next.group.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = false; } });
+    if (renderer) await compileBeforeShow(renderer, next.group, camera, scene);
+    if (!actors.has(a.id) || !a.body) { next.dispose(); return; }
+    const old = a.body, mounted = a.mountHave;
+    if (mounted) dropMount(a);
+    next.group.position.copy(a.model.position); next.group.quaternion.copy(a.model.quaternion); next.group.scale.copy(a.model.scale);
+    a.group.remove(a.model); old.dispose?.();
+    a.body = next; a.model = next.group; a.group.add(a.model); a.chibi4 = true;
+    try { const m = next.metrics(); a.height = m.height || a.height; } catch {}
+    const anim = a.anim || 'idle'; a.anim = null; setAnim(a, anim);
+    if (mounted) syncMount(a);
   }
 
   // ---- mounts (play-test 2, Q16): `info.mount` / `you.mount` names what someone rides; the body sits in its saddle ----

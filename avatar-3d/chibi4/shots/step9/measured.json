@@ -1,0 +1,328 @@
+{
+ "compare": {
+  "chibi2": {
+   "calls": 1.5,
+   "triangles": 6598
+  },
+  "chibi4": {
+   "calls": 1,
+   "triangles": 35672
+  },
+  "kit": {
+   "calls": 1,
+   "triangles": 11758
+  },
+  "lodTriangles": [
+   [
+    34631,
+    13851,
+    5194
+   ],
+   [
+    36712,
+    14684,
+    5505
+   ]
+  ],
+  "kitLod": [
+   [
+    32830,
+    11200,
+    3677
+   ],
+   [
+    35619,
+    12315,
+    4092
+   ]
+  ],
+  "bytes": 1877396,
+  "kitBytes": 5257976,
+  "build": {
+   "chibi2": {
+    "buildMs": 77.80000001192093
+   },
+   "chibi4": {
+    "buildMs": 282.19999998807907
+   },
+   "kit": {
+    "buildMs": 444
+   }
+  }
+ },
+ "dress": [
+  {
+   "meshes": 1,
+   "drawCalls": 1,
+   "bones": 61,
+   "triangles": 32127,
+   "vertices": 19807,
+   "lodTriangles": [
+    32127,
+    10885,
+    3544
+   ],
+   "pieces": 7,
+   "bytes": 5600208,
+   "files": 30,
+   "textures": 2,
+   "lodLevel": 0
+  },
+  {
+   "meshes": 1,
+   "drawCalls": 1,
+   "bones": 61,
+   "triangles": 33826,
+   "vertices": 22679,
+   "lodTriangles": [
+    33826,
+    11601,
+    3796
+   ],
+   "pieces": 9,
+   "bytes": 6016956,
+   "files": 37,
+   "textures": 2,
+   "lodLevel": 0
+  },
+  {
+   "meshes": 1,
+   "drawCalls": 1,
+   "bones": 61,
+   "triangles": 25565,
+   "vertices": 15755,
+   "lodTriangles": [
+    25565,
+    8581,
+    2779
+   ],
+   "pieces": 5,
+   "bytes": 6073372,
+   "files": 38,
+   "textures": 2,
+   "lodLevel": 0
+  }
+ ],
+ "clips": {
+  "count": 67,
+  "map": {
+   "idle": "idle",
+   "ready": "ready",
+   "walk": "walk_robe",
+   "run": "run_robe",
+   "attack": "attack",
+   "cast": "cast",
+   "hit": "hit",
+   "guard": "guard",
+   "wave": "wave",
+   "talk": "talk",
+   "jump": "jump",
+   "dead": "death",
+   "swim": "swim",
+   "swimBack": "swimIdle",
+   "swimSide": "swim",
+   "slash": "attack",
+   "slashBack": "attackL",
+   "thrust": "jab",
+   "overhead": "attack",
+   "sweep": "spin",
+   "jab": "jab",
+   "arcCut": "attackL",
+   "slam": "attack",
+   "lunge": "cross",
+   "shoot": "cast",
+   "reload": "reload",
+   "castPoint": "cast",
+   "castStaff": "castEnter",
+   "channel": "channel",
+   "boat": "crouch",
+   "sit": "sit",
+   "ride": "ride",
+   "rideGallop": "rideGallop",
+   "pickSwing": "attack",
+   "chopSwing": "attack",
+   "forage": "pickUp",
+   "chop": "attack",
+   "hack": "attackL",
+   "smash": "attack",
+   "uppercut": "cross",
+   "stab": "jab",
+   "flurry": "jab",
+   "bash": "cross",
+   "block": "guard",
+   "parry": "jabL",
+   "offSlash": "attackL",
+   "offThrust": "jabL",
+   "crossSlash": "attack",
+   "twinCleave": "attack",
+   "twinSlam": "attack",
+   "spinSweep": "spin",
+   "thrust2h": "jab",
+   "punch": "cross",
+   "kick": "kick",
+   "throw": "castL",
+   "castBook": "cast",
+   "whirl": "spin",
+   "cheer": "cheer",
+   "bowGreet": "bow",
+   "point": "point",
+   "shrug": "shrug",
+   "nod": "nod",
+   "headShake": "headShake",
+   "laugh": "laugh",
+   "clap": "clap",
+   "salute": "salute",
+   "kneel": "kneelWork",
+   "sitGround": "sitGround",
+   "pray": "pray",
+   "dance": "dance",
+   "lookAround": "lookAround",
+   "crossArms": "crossArms",
+   "stretch": "stretch",
+   "drink": "drink",
+   "sleep": "sleep",
+   "dualSlashR": "attack",
+   "dualSlashL": "attackL",
+   "dualCross": "spin",
+   "dualStabR": "jab",
+   "dualStabL": "jabL",
+   "dualFlurry": "jab",
+   "twinChopR": "attack",
+   "twinChopL": "attackL",
+   "twinCrash": "attack",
+   "fishCast": "cast",
+   "fishWait": "torch",
+   "fishReel": "aim",
+   "fishShow": "interact",
+   "standUp": "standUp",
+   "profMine": "attack",
+   "profChop": "attack",
+   "profGather": "pickUp",
+   "profSkin": "kneelWork",
+   "profHammer": "kneelWork",
+   "profStitch": "kneelWork",
+   "profStir": "push"
+  }
+ },
+ "load": {
+  "mage": {
+   "bytes": 1689364,
+   "files": 10,
+   "downloadMs": 1752,
+   "parseMs": 41,
+   "readyMs": 1784,
+   "firstFrameMs": 575,
+   "totalMs": 2358
+  },
+  "elf": {
+   "bytes": 1860124,
+   "files": 13,
+   "downloadMs": 1907,
+   "parseMs": 40,
+   "readyMs": 1942,
+   "firstFrameMs": 541,
+   "totalMs": 2482
+  },
+  "local": {
+   "bytes": 2543772,
+   "files": 11,
+   "downloadMs": 263,
+   "parseMs": 48,
+   "readyMs": 290,
+   "firstFrameMs": 557,
+   "totalMs": 846
+  }
+ },
+ "crowd": [
+  {
+   "sys": "chibi2",
+   "n": 20,
+   "fps": 11.8,
+   "frameMs": 91.9,
+   "buildMs": 9,
+   "calls": 31,
+   "triangles": 132008,
+   "outfits": null
+  },
+  {
+   "sys": "chibi4",
+   "n": 20,
+   "fps": 7.2,
+   "frameMs": 155.4,
+   "buildMs": 13,
+   "calls": 21,
+   "triangles": 151367,
+   "outfits": null
+  },
+  {
+   "sys": "kit",
+   "n": 20,
+   "fps": 9.9,
+   "frameMs": 110.8,
+   "buildMs": 3819,
+   "calls": 21,
+   "triangles": 67563,
+   "outfits": 20
+  },
+  {
+   "sys": "chibi2",
+   "n": 50,
+   "fps": 6.2,
+   "frameMs": 183.5,
+   "buildMs": 12,
+   "calls": 76,
+   "triangles": 329948,
+   "outfits": null
+  },
+  {
+   "sys": "chibi4",
+   "n": 50,
+   "fps": 4.6,
+   "frameMs": 257,
+   "buildMs": 25,
+   "calls": 51,
+   "triangles": 267523,
+   "outfits": null
+  },
+  {
+   "sys": "kit",
+   "n": 50,
+   "fps": 5.1,
+   "frameMs": 218.2,
+   "buildMs": 3622,
+   "calls": 51,
+   "triangles": 170129,
+   "outfits": 46
+  },
+  {
+   "sys": "chibi2",
+   "n": 100,
+   "fps": 3.4,
+   "frameMs": 342.3,
+   "buildMs": 21,
+   "calls": 151,
+   "triangles": 659848,
+   "outfits": null
+  },
+  {
+   "sys": "chibi4",
+   "n": 100,
+   "fps": 2.6,
+   "frameMs": 468.1,
+   "buildMs": 48,
+   "calls": 101,
+   "triangles": 534998,
+   "outfits": null
+  },
+  {
+   "sys": "kit",
+   "n": 100,
+   "fps": 3.1,
+   "frameMs": 380.4,
+   "buildMs": 448,
+   "calls": 101,
+   "triangles": 335387,
+   "outfits": 87
+  }
+ ]
+}

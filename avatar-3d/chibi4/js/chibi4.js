@@ -1,20 +1,20 @@
-// Chibi 4 runtime: load a baked character GLB (tools/blender/step7_export.py) and drive it with Chibi 2's API shape.
+// Chibi 4 runtime entry point. Two kinds of character:
 //
-//   import { createChibi4Character } from '<...>/avatar-3d/chibi4/js/chibi4.js';
-//   const actor = await createChibi4Character(avatar);      // the same avatar JSON Chibi 2 reads
-//   scene.add(actor.group);
-//   actor.setAnim('walk');                                  // idle ready walk run attack cast hit guard wave talk jump dead
-//   actor.update(dt);                                       // each frame
-//   actor.stats(); actor.metrics(); actor.dispose();
+//   createChibi4Character(avatar)                 -> the step 9 KIT (default): assembled at runtime from separate
+//                                                    pieces on one skeleton — see chibi4-kit.js
+//   createChibi4Character(avatar, { model: 'mage'|'elf' }) or { baked: true }
+//                                                 -> step 7's two BAKED characters (one GLB each, nothing swaps)
 //
-// What it is, honestly: two finished characters (the robed mage and the elf warrior of the Chibi 4 experiment), not a
-// kit of parts yet. modelFor(avatar) picks the closer of the two (elves and women -> elf, everyone else -> mage).
-// Each GLB holds one skinned mesh per distance (LOD 0/1/2 in a THREE.LOD — the renderer switches by camera distance),
-// one texture atlas, the 61-bone skeleton and 8 clips. Instances share geometry and texture (only the skeleton is
-// cloned), so 50 characters cost 50 skeletons, not 50 downloads.
+// Both answer Chibi 2's calls: { group, setAnim(name, fade, restart), play, update(dt), setRate, setTwist, stats(),
+// metrics(), setAvatar(a), dispose(), parts, skeleton, lod }; the kit also has dress(), setColors(), attach().
+// The baked GLBs are meshopt-compressed (gltfpack): mesh names are gone, so the distance versions are told apart by
+// size (most vertices = LOD0), and GLTFLoader needs the meshopt decoder (vendor/meshopt/).
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
+import { MeshoptDecoder } from '../../../vendor/meshopt/meshopt_decoder.mjs';
+import { createChibi4Kit, preloadChibi4, loadKit } from './chibi4-kit.js';
+export { createChibi4Kit, preloadChibi4, loadKit };
 
 const BASE = new URL('../models/', import.meta.url);
 const cache = new Map();               // model id -> Promise<{ gltf, bytes, info }>
@@ -41,7 +41,8 @@ async function fetchModel(id) {
       const res = await fetch(url);
       if (!res.ok) throw new Error(`Chibi 4: ${url} is missing (${res.status}). Build it: avatar-3d/chibi4/README.md "Rebuild".`);
       const buf = await res.arrayBuffer();
-      const gltf = await new GLTFLoader().parseAsync(buf, url.href.replace(/[^/]*$/, ''));
+      await MeshoptDecoder.ready;
+      const gltf = await new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).parseAsync(buf, url.href.replace(/[^/]*$/, ''));
       let info = null;
       try { info = await (await fetch(new URL(`${id}.json`, BASE))).json(); } catch { /* optional */ }
       // one material: the atlas, cut-out alpha for hair/brows/lashes, both sides (hair cards, open sleeves)
@@ -59,6 +60,8 @@ async function fetchModel(id) {
 }
 
 export async function createChibi4Character(avatar = {}, opts = {}) {
+  // step 9: the modular kit is the default; opts.baked (or opts.model 'mage'/'elf') gives step 7's baked characters
+  if (!opts.baked && !opts.model) return createChibi4Kit(avatar, opts);
   const id = opts.model || modelFor(avatar);
   const { gltf, bytes, info } = await fetchModel(id);
   const root = SkeletonUtils.clone(gltf.scene);
@@ -67,7 +70,8 @@ export async function createChibi4Character(avatar = {}, opts = {}) {
   // the three distance versions become one THREE.LOD (they share the cloned skeleton)
   const meshes = [];
   root.traverse(o => { if (o.isSkinnedMesh) meshes.push(o); });
-  meshes.sort((a, b) => a.name.localeCompare(b.name));          // ..._LOD0, _LOD1, _LOD2
+  // gltfpack drops mesh names: the distance versions are told apart by size (LOD0 has the most vertices)
+  meshes.sort((a, b) => b.geometry.attributes.position.count - a.geometry.attributes.position.count);
   const lod = new THREE.LOD();
   const lodLevels = opts.lod === false ? [meshes[0]] : meshes;
   lodLevels.forEach((m, i) => {

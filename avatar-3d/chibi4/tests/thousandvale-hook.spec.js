@@ -1,5 +1,5 @@
-// Chibi 4 step 7: the OPT-IN Thousandvale hook. With ?renderer=chibi4 the PLAYER's body is a Chibi 4 GLB; without it
-// nothing changes. Runs Thousandvale's own throwaway test server (prototypes/thousandvale/tests/D/m3-server.mjs).
+// Chibi 4 steps 7 + 9: the OPT-IN Thousandvale hook. With ?renderer=chibi4 the PLAYER starts as Chibi 2 at once and
+// swaps to a Chibi 4 kit body when its download is done (never waits); without the flag nothing changes. Runs Thousandvale's own throwaway test server (prototypes/thousandvale/tests/D/m3-server.mjs).
 // Run: flock /tmp/claude-1000/farhold-pw.lock npx playwright test avatar-3d/chibi4/tests/thousandvale-hook.spec.js
 import { test, expect } from '@playwright/test';
 import { spawn } from 'node:child_process';
@@ -43,6 +43,10 @@ const selfInfo = page => page.evaluate(() => {
 test('?renderer=chibi4 gives the player a Chibi 4 body, walks, and nothing errors', async ({ browser }) => {
   test.setTimeout(600000);
   const { ctx, page, errors } = await enter(browser, '&renderer=chibi4', 'Cfourtest');
+  // the first body is up before the swap (or the swap already happened): the player never stood there with nothing
+  await page.waitForFunction(() => [...thousandvale.actors.actors.values()].find(x => x.self)?.chibi4, null, { timeout: 120000 });
+  const timing = await page.evaluate(() => ({ swapAt: Math.round(performance.now()), kitFiles: performance.getEntriesByType('resource').filter(r => /chibi4\/models\/kit/.test(r.name)).map(r => ({ f: r.name.replace(/^.*kit\//, ''), start: Math.round(r.startTime), end: Math.round(r.responseEnd), bytes: r.encodedBodySize })) }));
+  console.log('TVHOOK timing', JSON.stringify(timing));
   const s = await selfInfo(page);
   console.log('TVHOOK chibi4', JSON.stringify(s));
   expect(s.chibi4).toBe(true);

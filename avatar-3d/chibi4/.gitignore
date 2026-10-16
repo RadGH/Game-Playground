@@ -16,3 +16,7 @@ shots/step6/s6*.png
 shots/step7/s7*.png
 shots/step5/*-clothes.png
 shots/step6/*-clothes.png
+models/kit/*/_*
+shots/step9/s9*.png
+models/**/_*.png
+models/_*.png

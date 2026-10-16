@@ -196,6 +196,14 @@ def main():
               export_morph=False, export_apply=False, export_yup=True, export_image_format="WEBP")
     try: bpy.ops.export_scene.gltf(export_animation_mode="ACTIONS", **kw)
     except TypeError: bpy.ops.export_scene.gltf(**kw)
+    info["glb_bytes_raw"] = os.path.getsize(glb)
+    # meshopt compression (step 9, owner: "my character took ~5 seconds to load"): 3.2 MB -> 0.9 MB. Float positions
+    # and UVs (-vpf -vtf) so nothing about the face or hands moves; gltfpack drops mesh names, so the runtime orders
+    # the distance versions by vertex count
+    import subprocess, shutil
+    gp = os.path.normpath(os.path.join(C4, "..", "..", "node_modules", ".bin", "gltfpack"))
+    tmp = glb + ".raw.glb"; shutil.move(glb, tmp)
+    subprocess.run([gp, "-i", tmp, "-o", glb, "-cc", "-kn", "-vpf", "-vtf"], check=True); os.remove(tmp)
     info["glb_bytes"] = os.path.getsize(glb)
     json.dump(info, open(os.path.join(OUT, f"{WHO}.json"), "w"), indent=1)
     print("EXPORT", json.dumps(info))

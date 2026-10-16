@@ -12,6 +12,8 @@
 // planWalls() is pure (no three) and exported for tests; createWallsView() builds the meshes (one InstancedMesh per
 // unit shape, like town-view / setpiece-view) and camera solids.
 
+import { propTier, propsOff } from './surface-plan.js';
+import { surfaceMaterial, surfaceInstances, disposeKit } from './surface-mat.js';
 import * as THREE from 'three';
 import { LIGHTS } from './lightpool.js';
 import { unitGeometry } from './town-view.js';
@@ -164,6 +166,8 @@ export function createWallsView(T, placements, { quality = 'high' } = {}) {
   const group = new THREE.Group(); group.name = 'walls-' + (T.zoneKey || '');
   const Mat = cheap ? THREE.MeshLambertMaterial : THREE.MeshStandardMaterial;
   const mat = new Mat(cheap ? {} : { roughness: 0.92, metalness: 0 });
+  const tier = propTier(quality, { off: propsOff() });          // G-PROPS 2026-10-16: stone courses, palisade logs, wear
+  if (!cheap) surfaceMaterial(mat, tier, { unit: true });
   const meshes = [];
   const _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _e = new THREE.Euler(), _v = new THREE.Vector3(), _s = new THREE.Vector3(), col = new THREE.Color();
   const byMesh = Object.fromEntries(MESHES.map(m => [m, []]));
@@ -176,6 +180,7 @@ export function createWallsView(T, placements, { quality = 'high' } = {}) {
       m.setMatrixAt(i, _m.compose(_v.set(p.x, p.y, p.z), _q, _s.set(p.w, p.h, p.d)));
       m.setColorAt(i, col.set(p.colour || '#a29c90'));
     });
+    surfaceInstances(m, tier);
     m.castShadow = !cheap; m.receiveShadow = true; m.computeBoundingSphere(); m.name = 'wall-' + kind;
     group.add(m); meshes.push(m);
   }
@@ -189,6 +194,6 @@ export function createWallsView(T, placements, { quality = 'high' } = {}) {
     group, solids: plan.solids, stats: { ...plan.stats, meshes: meshes.length, parts: plan.parts.length },
     setNight(n) { for (const s of flames) s.visible = n > 0.05; for (const h of lights) h.intensity = n > 0.05 ? 9 * n : 0; },
     update(dt) { t += dt; for (let i = 0; i < flames.length; i++) { const f = flames[i]; if (f.visible) f.scale.y = f.userData.s * (1.2 + Math.sin(t * 9 + i) * 0.12); } },
-    dispose() { for (const m of meshes) m.dispose(); mat.dispose(); flameMat.dispose(); for (const h of lights) h.remove(); },
+    dispose() { for (const m of meshes) disposeKit(m); mat.dispose(); flameMat.dispose(); for (const h of lights) h.remove(); },
   };
 }

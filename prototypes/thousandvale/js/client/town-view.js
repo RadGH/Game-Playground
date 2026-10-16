@@ -19,7 +19,11 @@ import { squareFurniture } from './town-square.js';
 import { buildSignBoards } from './sign-text.js';
 import { officeDressing, officeKindFor, OFFICE_KINDS } from '../../../../proctown/js/offices.js';
 import { tuneFor } from './building-tune.js';
-import { harbourParts } from './harbour-view.js';
+import { harbourParts, harbourExtras, portDressing } from './harbour-view.js';
+// graphics pass 2026-10-16 (G-PROPS): surfaces (grain, seams, wear) on the kit, building trim and street clutter
+import { propTier, propsOff, surfaceForPart, SURF } from './surface-plan.js';
+import { surfaceMaterial, instancedKit, disposeKit } from './surface-mat.js';
+import { buildingTrim, doorClutter, squareClutter, placeModel } from './prop-clutter.js';
 
 /** proctown's plot from a placement record. Pure — exported for tests. */
 export function plotFromPlacement(p) {
@@ -81,6 +85,9 @@ export function unitGeometry(kind) {
     case 'frustum': g = new THREE.CylinderGeometry(0.225 * Math.SQRT2, 0.5 * Math.SQRT2, 1, 4); g.rotateY(Math.PI / 4); g.translate(0, 0.5, 0); break;
     case 'cone': g = new THREE.ConeGeometry(0.5, 1, 12); g.translate(0, 0.5, 0); break;
     case 'dome': g = new THREE.SphereGeometry(0.5, 12, 5, 0, Math.PI * 2, 0, Math.PI / 2); g.scale(1, 2, 1); break;
+    // G-PROPS 2026-10-16: a bulged barrel (staves come from the surface layer, hoops are thin cyls) and a tied sack
+    case 'barrel': g = new THREE.LatheGeometry([[0, 0], [0.4, 0], [0.47, 0.25], [0.5, 0.5], [0.47, 0.75], [0.4, 1], [0, 1]].map(([x, y]) => new THREE.Vector2(x, y)), 10); break;
+    case 'sack': g = new THREE.LatheGeometry([[0, 0], [0.4, 0.02], [0.5, 0.22], [0.48, 0.55], [0.32, 0.82], [0.12, 0.9], [0.17, 0.97], [0, 1]].map(([x, y]) => new THREE.Vector2(x, y)), 8); break;
     default: g = new THREE.BoxGeometry(1, 1, 1); g.translate(0, 0.5, 0); break;
   }
   UNIT.set(kind, g);
@@ -94,6 +101,11 @@ export function createTownView(T, placements, { quality = 'high' } = {}) {
   const cheap = quality === 'low';
   const Mat = cheap ? THREE.MeshLambertMaterial : THREE.MeshStandardMaterial;
   const kitMat = new Mat({ vertexColors: false, ...(cheap ? {} : { roughness: 0.88, metalness: 0 }) });
+  // G-PROPS: what this tier draws (surface-plan.js PROP_TIERS; ?props=0 = the look before the graphics pass)
+  const tier = propTier(quality, { off: propsOff() });
+  if (!cheap) surfaceMaterial(kitMat, tier, { unit: true });
+  let rngS = 0x9e3779b9 ^ strHash(T.zoneKey || 'zone');
+  const rng = () => { rngS = (rngS + 0x6d2b79f5) >>> 0; let x = rngS; x = Math.imul(x ^ (x >>> 15), x | 1); x ^= x + Math.imul(x ^ (x >>> 7), x | 61); return ((x ^ (x >>> 14)) >>> 0) / 4294967296; };
 
   // ---- gather -----------------------------------------------------------------------------------
   const towns = new Map();   // town id -> { id, name, x, z, r, culture, seed, lamps: [] }
@@ -102,16 +114,18 @@ export function createTownView(T, placements, { quality = 'high' } = {}) {
   const cultureOf = id => { const t = towns.get(id); return t && CULTURE_KIT.cultures[t.culture] ? t.culture : 'human'; };
 
   // ---- parts, collected per unit mesh -------------------------------------------------------------
-  const parts = Object.fromEntries(MESHES.map(m => [m, []]));   // [{ m: Matrix4, c: Color }]
+  const KINDS = [...MESHES, 'barrel', 'sack'];
+  const parts = Object.fromEntries(KINDS.map(m => [m, []]));   // [{ m: Matrix4, c: Color, s: surface code | undefined }]
   const _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _e = new THREE.Euler(), _v = new THREE.Vector3(), _s = new THREE.Vector3();
   // a part may carry tilts (rx pitch, rz roll) applied after its yaw — Euler order 'YXZ' (proctown offices/propkit)
-  const push = (mesh, x, y, z, yaw, w, h, d, colour, rx = 0, rz = 0, into = parts) => {
+  const push = (mesh, x, y, z, yaw, w, h, d, colour, rx = 0, rz = 0, into = parts, surf = null) => {
     _e.set(rx, yaw, rz, 'YXZ'); _q.setFromEuler(_e);
-    (into[mesh] || into.box).push({ m: new THREE.Matrix4().compose(_v.set(x, y, z), _q, _s.set(w, h, d)), c: new THREE.Color(colour) });
+    const s = surf == null ? undefined : typeof surf === 'number' ? surf : (SURF[surf] || 0);
+    (into[mesh] || into.box).push({ m: new THREE.Matrix4().compose(_v.set(x, y, z), _q, _s.set(w, h, d)), c: new THREE.Color(colour), s });
   };
   const placePart = (part, ox2, oz2, ground, yaw, into = parts) => {
     const c = Math.cos(yaw), s = Math.sin(yaw);
-    push(part.mesh, ox2 + part.x * c + part.z * s, ground + part.y, oz2 - part.x * s + part.z * c, yaw + (part.yaw || 0), part.w, part.h, part.d, part.colour, part.rx || 0, part.rz || 0, into);
+    push(part.mesh, ox2 + part.x * c + part.z * s, ground + part.y, oz2 - part.x * s + part.z * c, yaw + (part.yaw || 0), part.w, part.h, part.d, part.colour, part.rx || 0, part.rz || 0, into, part.surf ?? null);
   };
   // glass: the kit's own window parts (and lantern glass) go in two glowing meshes instead of the plain kit — BRIGHT on
   // the buildings meant to draw a player in (shops, the inn, the smithy: Q10), DIM on ordinary homes. Play-test 2 Q7:
@@ -166,8 +180,11 @@ export function createTownView(T, placements, { quality = 'high' } = {}) {
     for (const part of look.parts) {
       top = Math.max(top, part.y + part.h);
       if (part.tag === 'window') placeGlass(part, p.x, p.z, ground, yaw, lit);
-      else placePart(part, p.x, p.z, ground, yaw);
+      else placePart(tier.detail ? { ...part, surf: surfaceForPart(part, desc) } : part, p.x, p.z, ground, yaw);
     }
+    // G-PROPS: window frames, door jambs and step, ridge caps, timber braces; barrels / crates / a bench by the door
+    if (tier.trim) for (const part of buildingTrim(look.parts, desc)) placePart(part.surf === null ? { ...part, surf: surfaceForPart({ tag: 'roof', colour: part.colour }, desc) } : part, p.x, p.z, ground, yaw);
+    if (tier.clutter > 0) for (const c of doorClutter({ desc, lit }, rng, tier.clutter)) for (const part of placeModel(c.id, c.lx, 0, c.lz, c.yaw, rng)) placePart(part, p.x, p.z, ground, yaw);
     if (kind) { dress(b, kind, lit, parts, undefined, look.dressing); offices.push({ x: p.x, z: p.z, kind, lit, label: raw.data?.label || OFFICE_KINDS[kind].label, building: raw.id }); }
     solids.push({ x: p.x, z: p.z, r: radiusOf(desc) * 0.85, h: top, bottom: ground - 1, top: ground + top });
     buildings++;
@@ -196,6 +213,8 @@ export function createTownView(T, placements, { quality = 'high' } = {}) {
         for (const part of stallParts(stall)) placePart(part, sx, sz, sy, yaw);
       } catch {}
     }
+    // G-PROPS: benches round the rim, sacks and crates by the stalls, a hand cart, a bucket at the well
+    if (tier.clutter > 0) for (const c of squareClutter(t.square, spots, rng, tier.clutter)) { const y = T.heightAt(c.x, c.z); for (const part of placeModel(c.id, c.x, y, c.z, c.yaw, rng)) push(part.mesh, part.x, part.y, part.z, part.yaw, part.w, part.h, part.d, part.colour, part.rx || 0, part.rz || 0, parts, part.surf ?? null); }
   }
 
   // ---- lamp posts along main streets (lit at night) ---------------------------------------------
@@ -225,12 +244,30 @@ export function createTownView(T, placements, { quality = 'high' } = {}) {
   for (const raw of placements) {
     if (raw.kind !== 'harbour' || !raw.data?.quay) continue;
     const hb = harbourParts(raw, { ox, oz, groundAt: (x, z) => (T.groundAt ? T.groundAt(x, z) : T.heightAt(x, z)) });
-    for (const q of hb.parts) push(q.mesh, q.x, q.y, q.z, q.yaw, q.w, q.h, q.d, q.colour, q.rx || 0, q.rz || 0);
+    for (const q of hb.parts) push(q.mesh, q.x, q.y, q.z, q.yaw, q.w, q.h, q.d, q.colour, q.rx || 0, q.rz || 0, parts, q.surf ?? null);
     for (const l of hb.lamps) lamps.push({ x: l.x, y: l.y, z: l.z, town: raw.data.town });
+    // G-PROPS: the working clutter of the quay (more of it on a richer tier)
+    if (tier.clutter > 0) for (const q of harbourExtras(raw, { ox, oz, groundAt: (x, z) => (T.groundAt ? T.groundAt(x, z) : T.heightAt(x, z)), density: tier.clutter })) push(q.mesh, q.x, q.y, q.z, q.yaw, q.w, q.h, q.d, q.colour, q.rx || 0, q.rz || 0, parts, q.surf ?? null);
+  }
+  // G-PROPS: a harbour with no built quay (Port Vharl: its jetty is the ship's own, js/client/ship-view.js) gets a dressed beach
+  if (tier.clutter > 0) for (const raw of placements) {
+    if (raw.kind !== 'harbour' || raw.data?.quay) continue;
+    for (const q of portDressing(raw, { ox, oz, groundAt: (x, z) => (T.groundAt ? T.groundAt(x, z) : T.heightAt(x, z)), density: tier.clutter })) push(q.mesh, q.x, q.y, q.z, q.yaw, q.w, q.h, q.d, q.colour, q.rx || 0, q.rz || 0, parts, q.surf ?? null);
   }
   for (const l of lamps) {
-    push('cyl', l.x, l.y, l.z, 0, 0.16, 2.9, 0.16, '#3b3330');
-    push('box', l.x, l.y + 2.85, l.z, 0, 0.42, 0.45, 0.42, '#2d2622');
+    if (tier.trim) {
+      // G-PROPS: a stone foot, an iron post with a collar, and a lantern — cage, glass (lit at night), a little roof
+      push('box', l.x, l.y - 0.1, l.z, 0, 0.44, 0.38, 0.44, '#7a746b', 0, 0, parts, 'ashlar');
+      push('cyl', l.x, l.y, l.z, 0, 0.14, 2.6, 0.14, '#3b3330', 0, 0, parts, 'metal');
+      push('cyl', l.x, l.y + 0.3, l.z, 0, 0.2, 0.12, 0.2, '#2d2622', 0, 0, parts, 'metal');
+      push('box', l.x, l.y + 2.55, l.z, 0, 0.42, 0.06, 0.42, '#2d2622', 0, 0, parts, 'metal');
+      for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) push('box', l.x + dx * 0.18, l.y + 2.6, l.z + dz * 0.18, 0, 0.05, 0.42, 0.05, '#2d2622', 0, 0, parts, 'metal');
+      push('hip', l.x, l.y + 3.0, l.z, 0, 0.56, 0.24, 0.56, '#2d2622', 0, 0, parts, 'metal');
+      glass.bright.push({ m: new THREE.Matrix4().compose(_v.set(l.x, l.y + 2.62, l.z), _q.identity(), _s.set(0.3, 0.36, 0.3)), c: new THREE.Color('#d9c48a') });
+    } else {
+      push('cyl', l.x, l.y, l.z, 0, 0.16, 2.9, 0.16, '#3b3330');
+      push('box', l.x, l.y + 2.85, l.z, 0, 0.42, 0.45, 0.42, '#2d2622');
+    }
     const t = towns.get(l.town); if (t) t.lamps.push(l);
   }
 
@@ -277,8 +314,7 @@ export function createTownView(T, placements, { quality = 'high' } = {}) {
   const meshes = [];
   for (const [kind, list] of Object.entries(parts)) {
     if (!list.length) continue;
-    const m = new THREE.InstancedMesh(unitGeometry(kind), kitMat, list.length);
-    list.forEach((it, i) => { m.setMatrixAt(i, it.m); m.setColorAt(i, it.c); });
+    const m = instancedKit(unitGeometry(kind), kitMat, list, tier);
     m.castShadow = !cheap; m.receiveShadow = true; m.name = 'kit-' + kind;
     m.computeBoundingSphere();
     group.add(m); meshes.push(m);
@@ -302,8 +338,7 @@ export function createTownView(T, placements, { quality = 'high' } = {}) {
     for (const part of sp.parts) push(part.mesh, part.x, part.y, part.z, part.yaw || 0, part.w, part.h, part.d, part.colour, part.rx || 0, part.rz || 0, per);
     for (const [kind, list] of Object.entries(per)) {
       if (!list.length) continue;
-      const m = new THREE.InstancedMesh(unitGeometry(kind), kitMat, list.length);
-      list.forEach((it, i) => { m.setMatrixAt(i, it.m); m.setColorAt(i, it.c); });
+      const m = instancedKit(unitGeometry(kind), kitMat, list, tier);
       m.castShadow = !cheap; m.computeBoundingSphere(); turn.add(m); meshes.push(m);
     }
     into.add(g);
@@ -372,8 +407,7 @@ export function createTownView(T, placements, { quality = 'high' } = {}) {
     const own = [];
     for (const [k, list] of Object.entries(subParts)) {
       if (!list.length) continue;
-      const m = new THREE.InstancedMesh(unitGeometry(k), kitMat, list.length);
-      list.forEach((it, i) => { m.setMatrixAt(i, it.m); m.setColorAt(i, it.c); });
+      const m = instancedKit(unitGeometry(k), kitMat, list, tier);
       m.castShadow = !cheap; m.computeBoundingSphere(); sub.add(m); own.push(m);
     }
     if (lampGlass.length) { const m = new THREE.InstancedMesh(unitGeometry('box'), winMat, lampGlass.length); lampGlass.forEach((it, i) => { m.setMatrixAt(i, it.m); m.setColorAt(i, it.c); }); sub.add(m); own.push(m); }
@@ -382,7 +416,7 @@ export function createTownView(T, placements, { quality = 'high' } = {}) {
     const subBoards = buildSignBoards(sink.signs); if (subBoards) sub.add(subBoards.mesh);
     const srcs = sink.lights.map(l => LIGHTS.add({ x: l.x, y: l.y, z: l.z, color: l.color, intensity: 0, distance: 11, decay: 1.6, flicker: 0.06, owner: group }));
     group.add(sub);
-    const rec = { kind, setNight: n => { for (const h of srcs) h.intensity = n > 0.05 ? 9 * n : 0; }, dispose() { group.remove(sub); subBoards?.dispose(); for (const m of own) m.dispose(); for (const h of srcs) h.remove(); } };
+    const rec = { kind, setNight: n => { for (const h of srcs) h.intensity = n > 0.05 ? 9 * n : 0; }, dispose() { group.remove(sub); subBoards?.dispose(); for (const m of own) disposeKit(m); for (const h of srcs) h.remove(); } };
     rec.setNight(night);
     claimed.set(b.id, rec);
     offices.push({ x: b.x, z: b.z, kind, lit, label: OFFICE_KINDS[kind].label, building: b.id, claimed: true });
@@ -392,7 +426,7 @@ export function createTownView(T, placements, { quality = 'high' } = {}) {
   return {
     group, update, setNight, clearings, solids, lamps, offices, claimOffice, buildingsList: descs,
     towns: [...towns.values()],
-    stats: { signs: signBoards.length, buildings, lamps: lamps.length, windows: glass.bright.length + glass.dim.length, brightGlass: glass.bright.length, dimGlass: glass.dim.length, offices: offices.length, officeLights: officeLights.length, parts: Object.fromEntries(Object.entries(parts).map(([k, v]) => [k, v.length])) },
-    dispose() { for (const m of meshes) m.dispose(); kitMat.dispose(); winMat.dispose(); dimMat.dispose(); flameMat.dispose(); for (const s of lampSprites) s.material.dispose(); for (const s of officeGlows) s.material.dispose(); for (const h of lampLights) h.remove(); for (const h of officeSources) h.remove(); for (const c of claimed.values()) c.dispose(); boards?.dispose(); },
+    stats: { tier: tier.off ? 'off' : quality, signs: signBoards.length, buildings, lamps: lamps.length, windows: glass.bright.length + glass.dim.length, brightGlass: glass.bright.length, dimGlass: glass.dim.length, offices: offices.length, officeLights: officeLights.length, parts: Object.fromEntries(Object.entries(parts).map(([k, v]) => [k, v.length])) },
+    dispose() { for (const m of meshes) disposeKit(m); kitMat.dispose(); winMat.dispose(); dimMat.dispose(); flameMat.dispose(); for (const s of lampSprites) s.material.dispose(); for (const s of officeGlows) s.material.dispose(); for (const h of lampLights) h.remove(); for (const h of officeSources) h.remove(); for (const c of claimed.values()) c.dispose(); boards?.dispose(); },
   };
 }

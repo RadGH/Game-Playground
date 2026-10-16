@@ -31,7 +31,7 @@ if (arg('--event-announce')) director.announceMs = +arg('--event-announce');
 const s = await startServer({
   port, host: '127.0.0.1', hostGiven: true, adminPort: 0, guestsPerIpHour: null, guestsPerHour: null, unlimitedIp: [], db: 'memory',
   dbFile: join(GAME, '.data/d-m3.json'), build: 'dev', rules: 'auto', terrain: 'test', linger: 3000, maxPerIp: 16, saveEvery: 60000,
-  process: 'd-m3', env: 'dev', publicDir: null, journalMs: 2000, provinces: null, procs: 0, director,
+  process: 'd-m3', env: 'dev', publicDir: null, journalMs: 2000, provinces: process.env.M3_PROVINCES ? process.env.M3_PROVINCES.split(',') : null, procs: 0, director,   // [G-PROPS] M3_PROVINCES=torbor_downs,vharlen
 });
 const W = s.world;
 const byName = name => { for (const o of W.online.values()) if (o.char && o.char.name.toLowerCase() === String(name).toLowerCase()) return o; return null; };
@@ -68,6 +68,13 @@ const hook = http.createServer(async (req, res) => {
       for (let i = 0; i < want * 8 && items.length < want; i++) { const it = rpg.rollDrop({ level: Math.max(1, b.level | 0 || 5) + (i % 4) * 2, rarityBoost: b.boost ?? 2, chance: 1, ...(Array.isArray(b.bases) ? { bases: b.bases } : {}) }); if (it) items.push(it); }
       W.grant(o, { items, gold: 0, reason: 'test' });
       return send(200, { ok: true, items: items.length });
+    }
+    if (req.url === '/harbour') {      // [G-PROPS 2026-10-16] into the room of a harbourmaster (Port Vharl needs M3_PROVINCES with vharlen)
+      let hm = null;
+      for (const pv of W.P.values()) for (const r of [...pv.towns, ...pv.copies]) for (const x of r.objects.values()) if (!hm && x.data?.npc?.harbour === (b.id || 'gullwick')) hm = { x, r };
+      if (!hm) return send(404, { ok: false, why: 'no harbourmaster' });
+      W.transfer(o, hm.r, { x: hm.x.x - 2.2, z: hm.x.z + 0.6 }, 'test');
+      return send(200, { ok: true, x: hm.x.x, z: hm.x.z, room: hm.r.id });
     }
     if (req.url === '/teleport') {
       const e = o.entity; e.moveTo(+b.x, +b.z, undefined, true);

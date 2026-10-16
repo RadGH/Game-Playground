@@ -1,0 +1,113 @@
+{
+ "mage": {
+  "hidden_body_vertices": 5007,
+  "body_vertices": 13380,
+  "garment_vertices_inside_visible_body": {
+   "C4_Mage_Clothes": [
+    181,
+    20438
+   ]
+  },
+  "hair_brows_lashes_inside_head": {
+   "C4_Mage.short02": [
+    9,
+    1755
+   ],
+   "C4_Mage.eyebrow001": [
+    0,
+    124
+   ],
+   "C4_Mage.eyelashes01": [
+    0,
+    250
+   ]
+  },
+  "triangles": 70718
+ },
+ "elf": {
+  "hidden_body_vertices": 5380,
+  "body_vertices": 13380,
+  "garment_vertices_inside_visible_body": {
+   "C4_Elf_Clothes": [
+    2,
+    17413
+   ]
+  },
+  "hair_brows_lashes_inside_head": {
+   "C4_Elf.elvs_french_braid_variation": [
+    221,
+    6452
+   ],
+   "C4_Elf.eyebrow010": [
+    0,
+    124
+   ],
+   "C4_Elf.eyelashes01": [
+    0,
+    250
+   ]
+  },
+  "triangles": 68254
+ },
+ "fit": {
+  "mage_hat": {
+   "inside_head": {
+    "C4_Mage.short02": [
+     9,
+     1755
+    ],
+    "C4_Mage.eyebrow001": [
+     0,
+     124
+    ],
+    "C4_Mage.eyelashes01": [
+     0,
+     250
+    ],
+    "Hat": [
+     0,
+     864
+    ],
+    "HatBrim": [
+     0,
+     192
+    ]
+   },
+   "hair_vertices_tucked_under_hat": 302
+  },
+  "elf": {
+   "inside_head": {
+    "C4_Elf.elvs_french_braid_variation": [
+     221,
+     6452
+    ],
+    "C4_Elf.eyebrow010": [
+     0,
+     124
+    ],
+    "C4_Elf.eyelashes01": [
+     0,
+     250
+    ]
+   },
+   "hair_vertices_tucked_under_hat": 0
+  },
+  "mage": {
+   "inside_head": {
+    "C4_Mage.short02": [
+     9,
+     1755
+    ],
+    "C4_Mage.eyebrow001": [
+     0,
+     124
+    ],
+    "C4_Mage.eyelashes01": [
+     0,
+     250
+    ]
+   },
+   "hair_vertices_tucked_under_hat": 0
+  }
+ }
+}

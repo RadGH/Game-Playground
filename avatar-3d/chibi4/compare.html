@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chibi 4 vs Chibi 2</title>
+<link rel="stylesheet" href="../../shared/style.css">
+<link rel="stylesheet" href="chibi4.css">
+<script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/" } }</script>
+</head>
+<body class="c4cmp">
+<!-- Chibi 2 (today) on the left, Chibi 4 (the experiment's step-7 GLBs) on the right, same lights, same clip.
+     ?anim=run  ?crowd=20|50&sys=chibi2|chibi4 (runs the crowd test on load; results in window.__c4perf) -->
+<div id="view"></div>
+<div class="c4panel">
+  <h1>Chibi 2 <span class="dim">vs</span> Chibi 4</h1>
+  <p class="dim">Left: Chibi 2 dressed as the two test characters. Right: the Chibi 4 GLBs. Drag to orbit, wheel to zoom.</p>
+  <div id="anims" class="row"></div>
+  <label class="row"><input type="checkbox" id="lod" checked> distance versions (LOD) on</label>
+  <table id="stats" class="score"></table>
+  <h3>Crowd test</h3>
+  <div class="row">
+    <button data-crowd="20" data-sys="chibi2">20 × Chibi 2</button><button data-crowd="20" data-sys="chibi4">20 × Chibi 4</button>
+    <button data-crowd="50" data-sys="chibi2">50 × Chibi 2</button><button data-crowd="50" data-sys="chibi4">50 × Chibi 4</button>
+  </div>
+  <table id="crowd" class="score"></table>
+  <p class="dim small">The crowd walks in place in a grid at Thousandvale's camera distance; fps is the average over 3 seconds.
+    Numbers are from whatever GPU this browser has — compare them side by side, not against another machine.</p>
+</div>
+<script type="module" src="js/compare.js"></script>
+</body>
+</html>

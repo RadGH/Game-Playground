@@ -22,6 +22,10 @@ import * as THREE from 'three';
 export { softwareRenderer, svgPortrait } from './svg-portrait.js';
 import { softwareRenderer, svgPortrait } from './svg-portrait.js';
 import { deviceAllowsLive, canvasMatches, squareOnCanvas } from './portrait-mode.js';
+// G-PROPS 2026-10-16: painted art for monsters / townsfolk, a painted-look filter on the live face (?props=0 = neither)
+import { paintedUrl, paintFilter } from './painted-portraits.js';
+import { propsOff } from '../surface-plan.js';
+const PAINT = !propsOff();
 
 export const PORTRAIT_LAYER = 1;
 const VERSION = 'p1';
@@ -62,13 +66,25 @@ export function createPortraits({ renderer, scene, avatarFor, createBody, fps = 
   function liveSvg(el, get) {
     const img = document.createElement('img'); img.className = 'portrait-live portrait-svg'; img.alt = '';
     el.prepend(img);
-    const s = { el, img, get, key: '' };
+    const painted = document.createElement('img'); painted.className = 'portrait-painted'; painted.alt = '';
+    el.prepend(painted);
+    const s = { el, img, get, key: '', painted, purl: null };
     svgSlots.push(s);
     return s;
+  }
+  /** G-PROPS: a monster / townsperson with painted art shows the picture (no live render, no 2D face for that slot). */
+  function paintedPass() {
+    for (const s of svgSlots) {
+      const url = PAINT ? paintedUrl(s.get()) : null;
+      if (url === s.purl) continue;
+      s.purl = url;
+      if (url) { s.painted.src = url; s.el.classList.add('has-painted'); } else { s.painted.removeAttribute('src'); s.el.classList.remove('has-painted'); }
+    }
   }
   async function svgPass() {
     for (const s of svgSlots) {
       if (!flat) return;
+      if (s.purl) { s.key = ''; continue; }
       const a = s.get();
       const humanoid = a && (a.kind === 'player' || (a.kind === 'npc' && !a.pet)) && a.look;
       const key = humanoid ? JSON.stringify([a.id, a.look.race, a.look.seed, a.look.custom || a.look.avatar || null, a.look.cls]) : '';
@@ -130,6 +146,7 @@ export function createPortraits({ renderer, scene, avatarFor, createBody, fps = 
       // GL rows run bottom-up
       const row = s.w * 4, d = s.img.data;
       for (let y = 0; y < s.h; y++) d.set(s.buf.subarray((s.h - 1 - y) * row, (s.h - y) * row), y * row);
+      if (PAINT) { const t0 = performance.now(); paintFilter(d, s.w, s.h, s.w > 110 ? 3 : 2); stats.filterMs = Math.max(stats.filterMs || 0, performance.now() - t0); }
       if (s.cv.width !== s.w || s.cv.height !== s.h) { s.cv.width = s.w; s.cv.height = s.h; }
       s.ctx.putImageData(s.img, 0, 0);
       s.el.classList.add('has-live');
@@ -156,6 +173,7 @@ export function createPortraits({ renderer, scene, avatarFor, createBody, fps = 
   }
   function pass() {
     const now = performance.now();
+    paintedPass();
     if (!SOFT) setFlat(flatNow());
     if (flat) { if (!SOFT) collect(); if (now - last > 500) { last = now; svgPass(); } return; }
     collect();
@@ -165,7 +183,7 @@ export function createPortraits({ renderer, scene, avatarFor, createBody, fps = 
     for (const s of slots) {
       const a = s.get();
       // Y33: a square that is not wholly on the canvas would be clamped and drawn somewhere the frame does not cover
-      const ok = !!(a && a.body && a.model && a.lod !== 'far' && !a.dead && s.el.offsetParent !== null) && squareOnCanvas(s.el.getBoundingClientRect(), crNow);
+      const ok = !s.svg.purl && !!(a && a.body && a.model && a.lod !== 'far' && !a.dead && s.el.offsetParent !== null) && squareOnCanvas(s.el.getBoundingClientRect(), crNow);
       if (ok !== s.on) { s.on = ok; if (!ok) { s.el.classList.remove('has-live'); s.ctx.clearRect(0, 0, s.cv.width, s.cv.height); } }
       if (ok) any = true;
     }
@@ -311,7 +329,7 @@ export function createPortraits({ renderer, scene, avatarFor, createBody, fps = 
     /** A player's look seen in the world (info.look), kept for later static portraits by character id / name. */
     remember(id, look) { if (id != null && look) looks.set(String(id), look); },
     lookOf(id) { return looks.get(String(id)) || null; },
-    get stats() { return { ...stats, software: SOFT, flat, flatWhy, live: slots.filter(s => s.on).length, cached: mem.size, waiting: waiting.size }; },
+    get stats() { return { ...stats, painted: svgSlots.filter(s => s.purl).length, software: SOFT, flat, flatWhy, live: slots.filter(s => s.on).length, cached: mem.size, waiting: waiting.size }; },
   };
 }
 function hash(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36); }

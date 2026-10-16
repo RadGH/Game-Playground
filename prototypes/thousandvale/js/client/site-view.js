@@ -13,6 +13,8 @@
 // Local offsets turn with the placement's yaw by the server's own vignettePoint formula (localToWorld).
 // Also returns `solids` (towers, keeps, halls, mounds) for the camera.
 
+import { propTier, propsOff } from './surface-plan.js';
+import { surfaceMaterial, surfaceInstances, disposeKit } from './surface-mat.js';
 import * as THREE from 'three';
 import { nextFrame } from './perf.js';
 import { describeBuilding, partsFor, radiusOf } from '../../../../proctown/js/buildkit.js';
@@ -215,6 +217,9 @@ export async function createSiteView(T, file, { quality = 'high' } = {}) {
   // structures: unit shapes, instanced per shape
   const Mat = cheap ? THREE.MeshLambertMaterial : THREE.MeshStandardMaterial;
   const kitMat = new Mat(cheap ? {} : { roughness: 0.9 });
+  const tier = propTier(quality, { off: propsOff() });          // G-PROPS 2026-10-16
+  if (!cheap) surfaceMaterial(kitMat, tier, { unit: true });
+  const own = [];
   const all = plan.parts.map(p => ({ ...p, y: T.heightAt(p.x, p.z) + p.y }));
   const solids = plan.solids.map(s => { const g = T.heightAt(s.x, s.z); return { x: s.x, z: s.z, r: s.r, bottom: g - 1, top: g + s.h }; });
   for (const b of plan.buildings) {
@@ -233,6 +238,7 @@ export async function createSiteView(T, file, { quality = 'high' } = {}) {
   for (const [mesh, list] of byMesh) {
     const m = new THREE.InstancedMesh(unitGeometry(mesh), kitMat, list.length);
     list.forEach((p, i) => { _e.set(0, p.yaw, 0); _q.setFromEuler(_e); m.setMatrixAt(i, _m.compose(_v.set(p.x, p.y, p.z), _q, _s.set(p.w, p.h, p.d))); m.setColorAt(i, col.set(p.colour)); });
+    surfaceInstances(m, tier); own.push(m);
     m.castShadow = !cheap; m.receiveShadow = true; m.computeBoundingSphere(); group.add(m);
   }
   // hook lines: brambles
@@ -245,5 +251,5 @@ export async function createSiteView(T, file, { quality = 'high' } = {}) {
       m.castShadow = !cheap; group.add(m);
     }
   }
-  return { group, update: decor.update, solids, stats: { props: plan.props.length, parts: all.length, buildings: plan.buildings.length, bushes: plan.bushes.length }, dispose() { kitMat.dispose(); decor.dispose?.(); } };
+  return { group, update: decor.update, solids, stats: { props: plan.props.length, parts: all.length, buildings: plan.buildings.length, bushes: plan.bushes.length }, dispose() { kitMat.dispose(); for (const m of own) disposeKit(m); decor.dispose?.(); } };
 }

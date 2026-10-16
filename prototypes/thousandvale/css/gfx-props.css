@@ -1,0 +1,9 @@
+/* Graphics pass 2026-10-16 (G-PROPS): painted portraits in the unit / target frames (js/client/ui/painted-portraits.js). */
+.uf-portrait .portrait-painted { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: none; pointer-events: none; background: #2a2018; }
+.uf-portrait.has-painted .portrait-painted { display: block; }
+.uf-portrait.has-painted .portrait-live { display: none !important; }
+.uf-portrait.has-painted > span { visibility: hidden; }
+/* the live 3D face (players) gets a warmer, softer, painted read; every picture a thin gilt rim and a soft inner shadow */
+.uf-portrait canvas.portrait-live { filter: saturate(1.1) contrast(1.06); }
+.uf-portrait.has-live::after, .uf-portrait.has-painted::after { content: ''; position: absolute; inset: 0; border-radius: 50%; pointer-events: none; z-index: 1;
+  box-shadow: inset 0 0 0 1px rgba(255, 214, 150, 0.28), inset 0 0 9px 2px rgba(24, 12, 4, 0.55); }

@@ -1,0 +1,109 @@
+{
+ "desktop": {
+  "square": {
+   "calls": 518,
+   "tris": 4101878,
+   "textures": 132,
+   "geometries": 652,
+   "programs": 68,
+   "frame": {
+    "n": 4,
+    "median": 1833.2,
+    "p90": 1866.6,
+    "mean": 1812.4
+   }
+  },
+  "street": {
+   "calls": 479,
+   "tris": 4247023,
+   "textures": 127,
+   "geometries": 722,
+   "programs": 68,
+   "frame": {
+    "n": 3,
+    "median": 2416.5,
+    "p90": 2433.3,
+    "mean": 2366.6
+   }
+  },
+  "quay": {
+   "calls": 265,
+   "tris": 2117214,
+   "textures": 100,
+   "geometries": 472,
+   "programs": 69,
+   "frame": {
+    "n": 6,
+    "median": 1150,
+    "p90": 1249.9,
+    "mean": 1158.3
+   }
+  },
+  "vharl": {
+   "calls": 58,
+   "tris": 102704,
+   "textures": 97,
+   "geometries": 386,
+   "programs": 64,
+   "frame": {
+    "n": 49,
+    "median": 116.7,
+    "p90": 166.7,
+    "mean": 123.1
+   }
+  },
+  "vharl-pier": {
+   "calls": 88,
+   "tris": 118457,
+   "textures": 97,
+   "geometries": 397,
+   "programs": 64,
+   "frame": {
+    "n": 31,
+    "median": 183.4,
+    "p90": 233.3,
+    "mean": 195.2
+   }
+  },
+  "camp": {
+   "calls": 306,
+   "tris": 3378494,
+   "textures": 130,
+   "geometries": 477,
+   "programs": 69,
+   "frame": {
+    "n": 5,
+    "median": 1466.6,
+    "p90": 1533.3,
+    "mean": 1300
+   }
+  },
+  "setpiece": {
+   "calls": 334,
+   "tris": 2995988,
+   "textures": 132,
+   "geometries": 481,
+   "programs": 69,
+   "frame": {
+    "n": 5,
+    "median": 1200,
+    "p90": 1416.6,
+    "mean": 1236.6
+   }
+  },
+  "target-monster": {
+   "id": 7086,
+   "kind": "monster",
+   "name": "Grisel Thornhide",
+   "type": null,
+   "role": null
+  },
+  "target-npc": {
+   "id": 9,
+   "kind": "npc",
+   "name": "Tam Sedgeley",
+   "type": null,
+   "role": "angler"
+  }
+ }
+}

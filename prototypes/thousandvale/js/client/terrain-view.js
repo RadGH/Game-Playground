@@ -11,6 +11,9 @@
 import * as THREE from 'three';
 import { makeSurface } from '../../../../highdef-3d/js/kit/textures.js';
 import { perf } from './perf.js';
+// 2026-10-16 — graphics (G-ATMOS): shaded water with shore foam, cloud shadows on the ground, baked hollows
+import { ATMOS_U, atmosTierNow, patchWater, groundCloudGlsl, groundCloudPars } from './atmos.js';
+import { shoreDistance, hollowShade, waterColour, shoreFoam } from './gfx-tiers.js';
 
 /** Surfaces are made once per page: every zone's ground shares the same five textures. */
 const TEX_CACHE = new Map();
@@ -110,6 +113,8 @@ export const GROUND_PALETTES = {
 
 export function createTerrainView(T, { textureSize = 512, quality = 'high', clearings = [], biomeColors = null, palette = null } = {}) {
   const PAL = GROUND_PALETTES[palette || T.reader?.meta?.palette || ''] || null;
+  const tier = atmosTierNow(quality);       // G-ATMOS: what this quality draws (gfx-tiers.js)
+  const clouds = !!tier.cloudShadows && quality !== 'low';
   const group = new THREE.Group(); group.name = 'terrain';
   const grid = perf.span('terrain:grid', () => T.heightGrid());
   const { res, step, origin } = T;
@@ -177,15 +182,17 @@ export function createTerrainView(T, { textureSize = 512, quality = 'high', clea
   const LOW = PAL ? Object.fromEntries(Object.entries(PAL.low).map(([k, c]) => [k, new THREE.Color(c)]))
     : { grass: new THREE.Color('#5f7d3c'), floor: new THREE.Color('#4d4630'), rock: new THREE.Color('#7b766d'), sand: new THREE.Color('#b8a676'), path: new THREE.Color('#7a6446') };
   const material = cheap ? new THREE.MeshLambertMaterial({ vertexColors: true }) : new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, metalness: 0 });
+  if (!cheap) material.customProgramCacheKey = () => 'tv-ground|' + (PAL ? palette || T.reader?.meta?.palette : '') + (clouds ? '|clouds' : '');
   if (!cheap) material.onBeforeCompile = shader => {
     Object.assign(shader.uniforms, { tGrass: { value: tex.grass }, tFloor: { value: tex.floor }, tRock: { value: tex.rock }, tSand: { value: tex.sand }, tPath: { value: tex.path } });
     if (PAL) Object.assign(shader.uniforms, { tSul: { value: tex.sulphur }, tMud: { value: tex.mud } });
+    if (clouds) Object.assign(shader.uniforms, { tNoise: ATMOS_U.tNoise, uCloudOff: ATMOS_U.uCloudOff, uCloudK: ATMOS_U.uCloudK });
     shader.vertexShader = shader.vertexShader
       .replace('#include <common>', '#include <common>\nattribute vec4 aSplat; varying vec4 vSplat; varying vec3 vW; varying vec3 vWN;' + (PAL ? '\nattribute vec2 aSplat2; varying vec2 vSplat2;' : ''))
       .replace('#include <begin_vertex>', '#include <begin_vertex>\nvSplat = aSplat; vW = (modelMatrix * vec4(transformed,1.0)).xyz; vWN = normal;' + (PAL ? ' vSplat2 = aSplat2;' : ''));
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', `#include <common>
-        uniform sampler2D tGrass, tFloor, tRock, tSand, tPath; varying vec4 vSplat; varying vec3 vW; varying vec3 vWN;${PAL ? '\n        uniform sampler2D tSul, tMud; varying vec2 vSplat2;' : ''}
+        uniform sampler2D tGrass, tFloor, tRock, tSand, tPath; varying vec4 vSplat; varying vec3 vW; varying vec3 vWN;${PAL ? '\n        uniform sampler2D tSul, tMud; varying vec2 vSplat2;' : ''}${clouds ? '\n        ' + groundCloudPars : ''}
         float tvHash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453); }
         float tvNoise(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.0-2.0*f); return mix(mix(tvHash(i),tvHash(i+vec2(1,0)),f.x), mix(tvHash(i+vec2(0,1)),tvHash(i+vec2(1,1)),f.x), f.y); }`)
       .replace('#include <map_fragment>', `
@@ -207,6 +214,7 @@ export function createTerrainView(T, { textureSize = 512, quality = 'high', clea
           vec3 det = texture2D(tGrass, p * 0.9).rgb;
           c = mix(c, c * (det * ${PAL ? '2.2' : '1.5'} + 0.28), near * 0.25);
           diffuseColor.rgb *= c;
+          ${clouds ? groundCloudGlsl : ''}
         }`);
   };
 
@@ -226,15 +234,16 @@ export function createTerrainView(T, { textureSize = 512, quality = 'high', clea
       const ddx = (H(i + 1, j) - H(i - 1, j)) / (2 * step), ddz = (H(i, j + 1) - H(i, j - 1)) / (2 * step), l = Math.hypot(ddx, 1, ddz);
       nor[v * 3] = -ddx / l; nor[v * 3 + 1] = 1 / l; nor[v * 3 + 2] = -ddz / l;
       const c = surface(x, z, spl, v * 4, spl2, v * 2);
+      const ao = tier.terrainAO ? hollowShade(H, i, j) : 1;      // G-ATMOS: hollows and the foot of slopes a little darker
       if (cheap) {
         const wf = spl[v * 4], wr = spl[v * 4 + 1], ws = spl[v * 4 + 2], wp = spl[v * 4 + 3];
         const wsu = spl2 ? spl2[v * 2] : 0, wm = spl2 ? spl2[v * 2 + 1] : 0, wg = Math.max(0, 1 - wf - wr - ws - wp - wsu - wm);
         const n = 0.92 + 0.16 * (((i * 73856093) ^ (j * 19349663)) >>> 0) / 4294967296;   // a little grain per vertex
         const L = LOW, ch = q => (L.grass[q] * wg + L.floor[q] * wf + L.rock[q] * wr + L.sand[q] * ws + L.path[q] * wp + (wsu ? L.sulphur[q] * wsu : 0) + (wm ? L.mud[q] * wm : 0));
-        cols[v * 3] = ch('r') * c.r * n;
-        cols[v * 3 + 1] = ch('g') * c.g * n;
-        cols[v * 3 + 2] = ch('b') * c.b * n;
-      } else { cols[v * 3] = c.r; cols[v * 3 + 1] = c.g; cols[v * 3 + 2] = c.b; }
+        cols[v * 3] = ch('r') * c.r * n * ao;
+        cols[v * 3 + 1] = ch('g') * c.g * n * ao;
+        cols[v * 3 + 2] = ch('b') * c.b * n * ao;
+      } else { cols[v * 3] = c.r * ao; cols[v * 3 + 1] = c.g * ao; cols[v * 3 + 2] = c.b * ao; }
     }
     const idx = [];
     for (let b = 0; b < nz - 1; b++) for (let a = 0; a < nx - 1; a++) {
@@ -283,7 +292,7 @@ export function createTerrainView(T, { textureSize = 512, quality = 'high', clea
   endChunks();
   const endWater = perf.begin('terrain:water');
   // --- water --------------------------------------------------------------------------------------
-  let water = null, normals = null;
+  let water = null, normals = null, shaded = false, wAttr = null, wMap = null;
   const wg = T.waterGrid();
   if (wg) {
     const ws = quality === 'low' ? 2 : 1;
@@ -324,17 +333,79 @@ export function createTerrainView(T, { textureSize = 512, quality = 'high', clea
       // read back through a canvas) — the multi-second freeze when a neighbouring zone streamed in.
       normals = waterNormals();
       water = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: '#2c5b6e', roughness: 0.1, metalness: 0.15, transparent: true, opacity: 0.84, normalMap: normals, normalScale: new THREE.Vector2(0.4, 0.4), depthWrite: false, vertexColors: tinted }));
+      // G-ATMOS (2026-10-16): per vertex — depth below the sheet, metres to the waterline, foam round objects, river or not
+      if (tier.water !== 'legacy') waterLook(g, wpos, surf, map, tinted);
+      if (tier.water === 'shaded') { patchWater(water.material, tier, normals); water.material.vertexColors = tinted; shaded = true; }
+      else if (tier.water === 'basic') { water.material.color.set('#ffffff'); water.material.vertexColors = true; }
       water.position.y = 0.02; water.renderOrder = 1; water.name = 'water';
       group.add(water);
     }
   }
 
   endWater();
+
+  /**
+   * G-ATMOS: the water's own numbers per vertex (`aWater`): depth of the sheet over the ground (negative over the bank),
+   * metres to the waterline (gfx-tiers.js shoreDistance), foam round bridge and pier decks standing in the water, and
+   * 1 on a river (no waves rolling in, a narrower foam edge). The Low tier bakes depth colour and foam into the vertex
+   * colour instead (no shader work at all).
+   */
+  function waterLook(g, wpos, surf, map, tinted) {
+    const end = perf.begin('terrain:waterLook');
+    const shore = shoreDistance(surf, grid, res, step, 32);
+    const nv = wpos.length / 3, aw = new Float32Array(nv * 4);
+    for (let k = 0; k < res * res; k++) {
+      const v = map[k]; if (v < 0) continue;
+      aw[v * 4] = surf[k] - grid[k]; aw[v * 4 + 1] = shore[k];
+    }
+    // rivers: the reader's own water-kind layer (3 = river); a bank sample takes it from a river beside it. (Asking
+    // waterAt per vertex cost ~105 ms on an open-sea zone — over the one-frame budget.)
+    const kind = T.reader?.layers?.waterKind;
+    if (kind) for (let k = 0; k < res * res; k++) {
+      const v = map[k]; if (v < 0) continue;
+      if (kind[k] === 3 || (kind[k] === 0 && (kind[k - 1] === 3 || kind[k + 1] === 3 || kind[k - res] === 3 || kind[k + res] === 3))) aw[v * 4 + 3] = 1;
+    }
+    // bridge and pier decks over the water (the bake's meta.bridges, zone metres): foam along their sides
+    const ox = T.ox || 0, oz = T.oz || 0;
+    for (const b of T.bridges || T.reader?.bridges || []) {
+      const ax = b.a[0] + ox, az = b.a[1] + oz, dx = b.b[0] - b.a[0], dz = b.b[1] - b.a[1], L = Math.hypot(dx, dz) || 1, ux = dx / L, uz = dz / L, hw = b.w / 2, pad = 1.4;
+      const x0 = Math.min(ax, ax + dx) - hw - pad, x1 = Math.max(ax, ax + dx) + hw + pad, z0 = Math.min(az, az + dz) - hw - pad, z1 = Math.max(az, az + dz) + hw + pad;
+      foamBox(x0, z0, x1, z1, (x, z) => {
+        const rx = x - ax, rz = z - az, along = rx * ux + rz * uz, side = Math.abs(rx * uz - rz * ux);
+        const ex = Math.max(0, -along, along - L), ey = Math.max(0, side - hw);
+        return Math.hypot(ex, ey) / pad;
+      }, aw, map, 0.35);
+    }
+    g.setAttribute('aWater', (wAttr = new THREE.BufferAttribute(aw, 4)));
+    wMap = map;
+    if (tier.water === 'basic') {
+      const tint = tinted ? g.getAttribute('color').array : null, col = new Float32Array(nv * 3);
+      for (let v = 0; v < nv; v++) {
+        const c = waterColour(aw[v * 4]), f = shoreFoam(aw[v * 4 + 1] * (aw[v * 4 + 3] ? 1.8 : 1), aw[v * 4 + 2], aw[v * 4]) * 0.85;
+        for (let q = 0; q < 3; q++) col[v * 3 + q] = ((q === 0 ? c.r : q === 1 ? c.g : c.b) * (1 - f) + 0.92 * f) * (tint ? tint[v * 3 + q] : 1);
+      }
+      g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    }
+    end();
+  }
+  /** Foam on the water samples in a box: `dist(x, z)` -> 0 at the object's edge, 1 at the end of its foam. */
+  function foamBox(x0, z0, x1, z1, dist, aw, map, peak) {
+    const i0 = Math.max(0, Math.floor((x0 - origin.x) / step)), i1 = Math.min(cells, Math.ceil((x1 - origin.x) / step));
+    const j0 = Math.max(0, Math.floor((z0 - origin.z) / step)), j1 = Math.min(cells, Math.ceil((z1 - origin.z) / step));
+    const touched = [];
+    for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
+      const k = j * res + i, v = map[k]; if (v < 0 || !(aw[v * 4] > 0.05)) continue;
+      const f = peak * (1 - Math.min(1, dist(origin.x + i * step, origin.z + j * step)));
+      if (f > aw[v * 4 + 2]) { aw[v * 4 + 2] = f; touched.push(v); }
+    }
+    return touched;
+  }
+
   // --- per frame: re-level the chunks near the camera (two rebuilds a frame at most) --------------
   let lodAt = 0, t = 0;
   function update(dt, cam) {
     t += dt;
-    if (normals) { const w = performance.now() / 1000; normals.offset.set(w * 0.012, w * 0.007); }
+    if (normals && !shaded) { const w = performance.now() / 1000; normals.offset.set(w * 0.012, w * 0.007); }
     if (!cam || t < lodAt) return;
     lodAt = t + 0.25;
     let built = 0;
@@ -352,5 +423,27 @@ export function createTerrainView(T, { textureSize = 512, quality = 'high', clea
     material.dispose();
     if (water) { water.geometry.dispose(); water.material.dispose(); }
   }
-  return { group, material, water, update, dispose, ready: () => chunks.every(c => c.level !== 2 || true) };
+  /**
+   * G-ATMOS: foam round things standing in the water — called once the zone's solids are known (rocks, piers' posts,
+   * buildings by the shore). circles = [{ x, z, r }] in world metres. Uploads only the vertices it changed.
+   */
+  function foamAround(circles) {
+    if (!wAttr || !circles?.length || tier.water !== 'shaded') return 0;
+    const aw = wAttr.array; let touched = [];
+    for (const c of circles) {
+      if (!(c.r > 0.2) || c.r > 30) continue;
+      const pad = Math.max(1.6, Math.min(4, c.r * 0.8));
+      touched = touched.concat(foamBox(c.x - c.r - pad, c.z - c.r - pad, c.x + c.r + pad, c.z + c.r + pad, (x, z) => Math.max(0, Math.hypot(x - c.x, z - c.z) - c.r) / pad, aw, wMap, 0.8));
+    }
+    if (!touched.length) return 0;
+    touched.sort((a, b) => a - b);
+    wAttr.clearUpdateRanges();
+    for (let s0 = 0; s0 < touched.length;) {
+      let e = s0; while (e + 1 < touched.length && touched[e + 1] - touched[e] <= 8) e++;
+      wAttr.addUpdateRange(touched[s0] * 4, (touched[e] - touched[s0] + 1) * 4); s0 = e + 1;
+    }
+    wAttr.needsUpdate = true;
+    return touched.length;
+  }
+  return { group, material, water, update, dispose, foamAround, ready: () => chunks.every(c => c.level !== 2 || true) };
 }

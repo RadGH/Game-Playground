@@ -131,6 +131,7 @@ export function createWorldStream(scene, { quality = 'high', horizon: hz0 = null
         // S7 (stream B): town walls / palisades / fences / barricades and their gates; night rides on the town view's setNight
         if (extras.placements.length) { const wv = createWallsView(T, extras.placements, { quality }); if (wv && loaded.get(q.key) === L && await show(wv)) { L.views.push(wv); L.walls = wv; if (L.town?.setNight) { const sn = L.town.setNight; L.town.setNight = n => { sn(n); wv.setNight(n); }; } } else wv?.dispose?.(); }
         if (solids && loaded.get(q.key) === L) solids.add(q.key, [...(L.town?.solids || []), ...(L.sites?.solids || []), ...(L.scatter?.solids || []), ...(L.setpieces?.solids || []), ...(L.walls?.solids || [])]);
+        if (loaded.get(q.key) === L) L.ground?.foamAround?.([...(L.town?.solids || []), ...(L.sites?.solids || []), ...(L.scatter?.solids || []), ...(L.setpieces?.solids || [])]);   // G-ATMOS: foam round rocks, posts and walls standing in water
       } catch (e) { console.warn('[world] zone extras failed', q.key, e); }
       L.ready = true;
       onZoneReady?.(L);

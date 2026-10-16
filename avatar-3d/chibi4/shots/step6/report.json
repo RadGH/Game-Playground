@@ -1,0 +1,202 @@
+{
+ "setups": {
+  "A": "robe copies nearest body weights, full stride",
+  "B": "8 skirt bones driven by both thighs, full stride",
+  "C": "skirt bones + robe-aware stride",
+  "D": "copied weights + robe-aware stride"
+ },
+ "strides": {
+  "walk": {
+   "thigh": 0.463,
+   "calf_": 0.572,
+   "_extent": [
+    47.5,
+    87.5
+   ]
+  },
+  "run": {
+   "thigh": 0.306,
+   "calf_": 0.404,
+   "_extent": [
+    78.5,
+    128.6
+   ]
+  }
+ },
+ "results": {
+  "A_walk": {
+   "frames": 33,
+   "frames_with_pokes": 25,
+   "poking_vertices_total": 3738,
+   "poking_frames": [
+    0,
+    1,
+    2,
+    5,
+    6,
+    7,
+    8,
+    10,
+    11,
+    12,
+    14,
+    15
+   ],
+   "min_gap_cm": 0.0
+  },
+  "A_run": {
+   "frames": 23,
+   "frames_with_pokes": 23,
+   "poking_vertices_total": 5857,
+   "poking_frames": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+   ],
+   "min_gap_cm": 0.0
+  },
+  "D_walk": {
+   "frames": 33,
+   "frames_with_pokes": 28,
+   "poking_vertices_total": 2032,
+   "poking_frames": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    11,
+    12,
+    13,
+    14
+   ],
+   "min_gap_cm": 4.7
+  },
+  "D_run": {
+   "frames": 23,
+   "frames_with_pokes": 22,
+   "poking_vertices_total": 3730,
+   "poking_frames": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+   ],
+   "min_gap_cm": 0.6
+  },
+  "B_walk": {
+   "frames": 33,
+   "frames_with_pokes": 19,
+   "poking_vertices_total": 10597,
+   "poking_frames": [
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    20,
+    21
+   ],
+   "min_gap_cm": 0.0
+  },
+  "B_run": {
+   "frames": 23,
+   "frames_with_pokes": 10,
+   "poking_vertices_total": 10196,
+   "poking_frames": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    12,
+    13,
+    14,
+    15,
+    16
+   ],
+   "min_gap_cm": 0.0
+  },
+  "C_walk": {
+   "frames": 33,
+   "frames_with_pokes": 0,
+   "poking_vertices_total": 0,
+   "poking_frames": [],
+   "min_gap_cm": 3.2
+  },
+  "C_run": {
+   "frames": 23,
+   "frames_with_pokes": 0,
+   "poking_vertices_total": 0,
+   "poking_frames": [],
+   "min_gap_cm": 3.0
+  }
+ },
+ "strips": {
+  "A": [
+   "/home/radgh/claude/playground/avatar-3d/chibi4/shots/step6/s6A_00_v.png",
+   "/home/radgh/claude/playground/avatar-3d/chibi4/shots/step6/s6A_03_v.png",
+   "/home/radgh/claude/playground/avatar-3d/chibi4/shots/step6/s6A_06_v.png",
+   "/home/radgh/claude/playground/avatar-3d/chibi4/shots/step6/s6A_09_v.png",
+   "/home/radgh/claude/playground/avatar-3d/chibi4/shots/step6/s6A_12_v.png",
+   "/home/radgh/claude/playground/avatar-3d/chibi4/shots/step6/s6A_15_v.png",
+   "/home/radgh/claude/playground/avatar-3d/chibi4/shots/step6/s6A_18_v.png",
+   "/home/radgh/claude/playground/avatar-3d/chibi4/shots/step6/s6A_21_v.png"
+  ],
+  "B": [
+   "/home/radgh/claude/playground/avatar-3d/chibi4/shots/step6/s6B_00_v.png",
+   "/home/radgh/claude/playground/avatar-3d/chibi4/shots/step6/s6B_03_v.png",
+   "/home/radgh/claude/playground/avatar-3d/chibi4/shots/step6/s6B_06_v.png",
+   "/home/radgh/claude/playground/avatar-3d/chibi4/shots/step6/s6B_09_v.png",
+   "/home/radgh/claude/playground/avatar-3d/chibi4/shots/step6/s6B_12_v.png",
+   "/home/radgh/claude/playground/avatar-3d/chibi4/shots/step6/s6B_15_v.png",
+   "/home/radgh/claude/playground/avatar-3d/chibi4/shots/step6/s6B_18_v.png",
+   "/home/radgh/claude/playground/avatar-3d/chibi4/shots/step6/s6B_21_v.png"
+  ],
+  "C": [
+   "/home/radgh/claude/playground/avatar-3d/chibi4/shots/step6/s6C_00_v.png",
+   "/home/radgh/claude/playground/avatar-3d/chibi4/shots/step6/s6C_03_v.png",
+   "/home/radgh/claude/playground/avatar-3d/chibi4/shots/step6/s6C_06_v.png",
+   "/home/radgh/claude/playground/avatar-3d/chibi4/shots/step6/s6C_09_v.png",
+   "/home/radgh/claude/playground/avatar-3d/chibi4/shots/step6/s6C_12_v.png",
+   "/home/radgh/claude/playground/avatar-3d/chibi4/shots/step6/s6C_15_v.png",
+   "/home/radgh/claude/playground/avatar-3d/chibi4/shots/step6/s6C_18_v.png",
+   "/home/radgh/claude/playground/avatar-3d/chibi4/shots/step6/s6C_21_v.png"
+  ],
+  "D": [
+   "/home/radgh/claude/playground/avatar-3d/chibi4/shots/step6/s6D_00_v.png",
+   "/home/radgh/claude/playground/avatar-3d/chibi4/shots/step6/s6D_03_v.png",
+   "/home/radgh/claude/playground/avatar-3d/chibi4/shots/step6/s6D_06_v.png",
+   "/home/radgh/claude/playground/avatar-3d/chibi4/shots/step6/s6D_09_v.png",
+   "/home/radgh/claude/playground/avatar-3d/chibi4/shots/step6/s6D_12_v.png",
+   "/home/radgh/claude/playground/avatar-3d/chibi4/shots/step6/s6D_15_v.png",
+   "/home/radgh/claude/playground/avatar-3d/chibi4/shots/step6/s6D_18_v.png",
+   "/home/radgh/claude/playground/avatar-3d/chibi4/shots/step6/s6D_21_v.png"
+  ]
+ }
+}

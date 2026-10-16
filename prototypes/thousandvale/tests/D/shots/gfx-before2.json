@@ -1,0 +1,124 @@
+{
+ "desktop": {
+  "street": {
+   "calls": 517,
+   "tris": 4017208,
+   "textures": 124,
+   "geometries": 611,
+   "programs": 62,
+   "frame": {
+    "n": 5,
+    "median": 1483.2,
+    "p90": 1516.6,
+    "mean": 1476.6
+   }
+  },
+  "vharl": {
+   "calls": 361,
+   "tris": 1570799,
+   "textures": 128,
+   "geometries": 580,
+   "programs": 64,
+   "frame": {
+    "n": 7,
+    "median": 849.9,
+    "p90": 1283.3,
+    "mean": 950
+   }
+  },
+  "vharl-pier": {
+   "calls": 304,
+   "tris": 1294634,
+   "textures": 111,
+   "geometries": 604,
+   "programs": 65,
+   "frame": {
+    "n": 7,
+    "median": 933.3,
+    "p90": 949.9,
+    "mean": 930.9
+   }
+  },
+  "spans": [
+   {
+    "name": "zone:sites",
+    "n": 2,
+    "ms": 40537,
+    "max": 28706
+   },
+   {
+    "name": "zone:setpieces",
+    "n": 2,
+    "ms": 20655,
+    "max": 20654
+   },
+   {
+    "name": "zone:town",
+    "n": 4,
+    "ms": 51,
+    "max": 27
+   }
+  ]
+ },
+ "phone": {
+  "street": {
+   "calls": 387,
+   "tris": 3292009,
+   "textures": 122,
+   "geometries": 475,
+   "programs": 61,
+   "frame": {
+    "n": 7,
+    "median": 933.4,
+    "p90": 966.7,
+    "mean": 940.5
+   }
+  },
+  "vharl": {
+   "calls": 221,
+   "tris": 1347524,
+   "textures": 127,
+   "geometries": 420,
+   "programs": 65,
+   "frame": {
+    "n": 10,
+    "median": 633.2,
+    "p90": 916.7,
+    "mean": 633.3
+   }
+  },
+  "vharl-pier": {
+   "calls": 251,
+   "tris": 1205160,
+   "textures": 112,
+   "geometries": 437,
+   "programs": 67,
+   "frame": {
+    "n": 10,
+    "median": 650,
+    "p90": 666.7,
+    "mean": 620
+   }
+  },
+  "spans": [
+   {
+    "name": "zone:sites",
+    "n": 2,
+    "ms": 20707,
+    "max": 13811
+   },
+   {
+    "name": "zone:setpieces",
+    "n": 2,
+    "ms": 8832,
+    "max": 8832
+   },
+   {
+    "name": "zone:town",
+    "n": 4,
+    "ms": 51,
+    "max": 26
+   }
+  ]
+ }
+}

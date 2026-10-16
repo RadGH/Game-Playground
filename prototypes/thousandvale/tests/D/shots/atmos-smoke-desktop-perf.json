@@ -1,0 +1,45 @@
+{
+ "device": "desktop",
+ "label": "smoke",
+ "flags": "",
+ "places": {
+  "square": {
+   "calls": 558,
+   "tris": 3952249,
+   "programs": 68,
+   "frame": {
+    "median": 1849.9,
+    "p90": 1883.2
+   }
+  },
+  "quay": {
+   "calls": 375,
+   "tris": 1525050,
+   "programs": 69,
+   "frame": {
+    "median": 1683.2,
+    "p90": 1716.6
+   }
+  },
+  "river": {
+   "calls": 328,
+   "tris": 3749279,
+   "programs": 69,
+   "frame": {
+    "median": 1366.6,
+    "p90": 1416.6
+   }
+  },
+  "valley": {
+   "calls": 426,
+   "tris": 3748606,
+   "programs": 69,
+   "frame": {
+    "median": 2383.2,
+    "p90": 2416.7
+   }
+  }
+ },
+ "programs": 69,
+ "longFrames": 399
+}

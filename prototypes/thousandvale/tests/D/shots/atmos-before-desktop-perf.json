@@ -1,0 +1,64 @@
+{
+ "device": "desktop",
+ "label": "before",
+ "flags": "&atmos=0",
+ "places": {
+  "square": {
+   "calls": 545,
+   "tris": 3951299,
+   "programs": 64,
+   "mist": 0,
+   "contact": 0,
+   "frame": {
+    "median": 1799.9,
+    "p90": 1849.9
+   }
+  },
+  "quay": {
+   "calls": 369,
+   "tris": 1533292,
+   "programs": 65,
+   "mist": 0,
+   "contact": 0,
+   "frame": {
+    "median": 1633.2,
+    "p90": 1766.6
+   }
+  },
+  "river": {
+   "calls": 378,
+   "tris": 4524261,
+   "programs": 65,
+   "mist": 0,
+   "contact": 0,
+   "frame": {
+    "median": 1350,
+    "p90": 1383.3
+   }
+  },
+  "valley": {
+   "calls": 342,
+   "tris": 3089686,
+   "programs": 65,
+   "mist": 0,
+   "contact": 0,
+   "frame": {
+    "median": 2350,
+    "p90": 2383.3
+   }
+  },
+  "vharlen": {
+   "calls": 352,
+   "tris": 1853467,
+   "programs": 67,
+   "mist": 0,
+   "contact": 0,
+   "frame": {
+    "median": 1883.2,
+    "p90": 1900
+   }
+  }
+ },
+ "programs": 67,
+ "longFrames": 475
+}

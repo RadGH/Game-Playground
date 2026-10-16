@@ -15,6 +15,8 @@
 // Everything becomes unit shapes in ONE set of instanced meshes per zone (eight draw calls however many graves), plus
 // lantern glass, a few turning wheels/sails and flame sprites. Parts stand on the ground at their own point.
 
+import { propTier, propsOff } from './surface-plan.js';
+import { surfaceMaterial, surfaceInstances, disposeKit } from './surface-mat.js';
 import * as THREE from 'three';
 import { LIGHTS } from './lightpool.js';
 import { unitGeometry, localToWorld } from './town-view.js';
@@ -319,6 +321,8 @@ export async function createSetPieceView(T, { placements = [], vignetteFile = nu
   const group = new THREE.Group(); group.name = 'setpieces-' + (T.zoneKey || '');
   const Mat = cheap ? THREE.MeshLambertMaterial : THREE.MeshStandardMaterial;
   const kitMat = new Mat(cheap ? {} : { roughness: 0.9 });
+  const tier = propTier(quality, { off: propsOff() });          // G-PROPS 2026-10-16: grain, seams and wear on the kit
+  if (!cheap) surfaceMaterial(kitMat, tier, { unit: true });
   const meshes = [], disposers = [];
   const _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _e = new THREE.Euler(), _v = new THREE.Vector3(), _s = new THREE.Vector3(), col = new THREE.Color();
   const groundOf = (x, z) => T.heightAt(x, z);
@@ -385,6 +389,7 @@ export async function createSetPieceView(T, { placements = [], vignetteFile = nu
       m.setColorAt(i, col.set(q.colour || '#8a857c'));
       if ((i & 1023) === 1023) await budget.slice();
     }
+    if (!sheaf) surfaceInstances(m, tier);
     m.castShadow = !cheap && !sheaf; m.receiveShadow = true; m.computeBoundingSphere(); m.name = 'sp-' + kind;
     group.add(m); meshes.push(m);
   }
@@ -407,6 +412,7 @@ export async function createSetPieceView(T, { placements = [], vignetteFile = nu
       if (!list.length) continue;
       const m = new THREE.InstancedMesh(unitGeometry(kind), kitMat, list.length);
       list.forEach((q, i) => { _e.set(q.rx || 0, q.yaw || 0, q.rz || 0, 'YXZ'); _q.setFromEuler(_e); m.setMatrixAt(i, _m.compose(_v.set(q.x, q.y, q.z), _q, _s.set(q.w, q.h, q.d))); m.setColorAt(i, col.set(q.colour || '#6e553d')); });
+      surfaceInstances(m, tier);
       m.castShadow = !cheap; m.computeBoundingSphere(); turn.add(m); meshes.push(m);
     }
     group.add(g); spinners.push({ turn, axis: sp.axis || 'x', speed: sp.speed || 0.5 });
@@ -452,6 +458,6 @@ export async function createSetPieceView(T, { placements = [], vignetteFile = nu
       decor?.update?.(dt, pos);
     },
     stats: { signs: signs.length, parts: plan.parts.length + abs.length, buildings: plan.buildings.length, spinners: spinners.length, lights: lights.length, props: propList.length, meshes: meshes.length },
-    dispose() { for (const m of meshes) m.dispose(); kitMat.dispose(); glassMat.dispose(); flameMat.dispose(); for (const { h, s } of lights) { h.remove(); s.material.dispose(); } decor?.dispose?.(); boards?.dispose(); for (const d of disposers) d(); },
+    dispose() { for (const m of meshes) disposeKit(m); kitMat.dispose(); glassMat.dispose(); flameMat.dispose(); for (const { h, s } of lights) { h.remove(); s.material.dispose(); } decor?.dispose?.(); boards?.dispose(); for (const d of disposers) d(); },
   };
 }

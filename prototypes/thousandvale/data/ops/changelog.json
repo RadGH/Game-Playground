@@ -2,6 +2,19 @@
  "_doc": "Player-facing changelog, newest first. The lead appends an entry at each publish (from the feedback reports' Completed notes). `id` is stable; the client remembers the last id a player has seen and highlights newer ones. Plain language, no internal names.",
  "entries": [
   {
+   "id": "2026-10-16",
+   "date": "2026-10-16",
+   "title": "A prettier world: water, mist, light and lived-in towns",
+   "items": [
+    "Water got a makeover: clear turquoise shallows, deep blue sea, glinting ripples and white surf rolling onto the shore, with foam round piers and rocks.",
+    "Soft mist drifts over the sea and down in the valleys, and cloud shadows slide across the land on sunny days. Warmer, softer light everywhere, and a glow round lamps and spells at night on High.",
+    "Towns look lived in: walls show their brick, stone, plaster and timber, roofs their tiles and thatch, and streets and squares have barrels, crates, sacks, benches and proper lanterns. Gullwick's quay and Port Vharl's beach have their own harbour clutter.",
+    "Monsters and townsfolk have painted portraits in the target frame; your own character still shows your look.",
+    "Settings → Graphics lists what Low, Medium and High draw. Phones start on Medium and run nearly as fast as before.",
+    "Several controllers: whichever one you touched last plays (a docked Steam Deck with a second pad works now). Swords swing with your arm when you run. Gullwick sits on its own bay with a real harbour."
+   ]
+  },
+  {
    "id": "2026-10-15b",
    "date": "2026-10-15",
    "title": "The Star Blade, the Market, and 60 of your reports",

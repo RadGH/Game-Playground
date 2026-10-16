@@ -1,0 +1,42 @@
+{
+ "device": "desktop",
+ "label": "final",
+ "flags": "",
+ "places": {
+  "quay": {
+   "calls": 375,
+   "tris": 1533742,
+   "programs": 69,
+   "mist": 14,
+   "contact": 4,
+   "frame": {
+    "median": 1699.9,
+    "p90": 1716.6
+   }
+  },
+  "river": {
+   "calls": 384,
+   "tris": 4524705,
+   "programs": 69,
+   "mist": 16,
+   "contact": 1,
+   "frame": {
+    "median": 1383.2,
+    "p90": 1416.7
+   }
+  },
+  "vharlen": {
+   "calls": 349,
+   "tris": 1851459,
+   "programs": 71,
+   "mist": 16,
+   "contact": 0,
+   "frame": {
+    "median": 2033.2,
+    "p90": 2099.9
+   }
+  }
+ },
+ "programs": 71,
+ "longFrames": 338
+}

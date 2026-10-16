@@ -38,6 +38,8 @@ function creatureFor(spec) {
   return c;
 }
 const TAU = Math.PI * 2;
+// Chibi 4 experiment: ?renderer=chibi4 swaps the PLAYER's body only (default stays Chibi 2; see build() below)
+const CHIBI4 = typeof location !== 'undefined' && new URLSearchParams(location.search).get('renderer') === 'chibi4';
 /** Shortest signed difference between two angles. */
 export function angleDelta(a, b) { let d = (b - a) % TAU; if (d > Math.PI) d -= TAU; if (d < -Math.PI) d += TAU; return d; }
 
@@ -238,6 +240,11 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
         }
         // One draw call per moving part instead of one per eye and toe (Farhold R27 M8).
         if (!body.isProp) try { compactCreature(body); } catch (e) { console.warn('[actors] compact failed', e); }
+      } else if (a.self && CHIBI4) {
+        // Chibi 4 experiment (avatar-3d/chibi4/README.md): OPT-IN with ?renderer=chibi4, the player only. A baked
+        // MakeHuman GLB with Chibi 2's call shape; on any failure the player falls back to the normal Chibi 2 body.
+        try { body = await (await import('../../../../avatar-3d/chibi4/js/chibi4.js')).createChibi4Character(await avatarFor(a.look)); a.chibi4 = true; }
+        catch (e) { console.warn('[actors] chibi4 failed, using chibi2', e); body = await createChibi2Character(await avatarFor(a.look), { anims: CHIBI_ANIMS }); }
       } else {
         body = await createChibi2Character(await avatarFor(a.look), { anims: CHIBI_ANIMS });
       }

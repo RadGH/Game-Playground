@@ -1,0 +1,256 @@
+{
+ "desktop": {
+  "square": {
+   "calls": 512,
+   "tris": 4099594,
+   "textures": 127,
+   "geometries": 649,
+   "programs": 64,
+   "frame": {
+    "n": 4,
+    "median": 1616.6,
+    "p90": 1650,
+    "mean": 1620.8
+   }
+  },
+  "street": {
+   "calls": 517,
+   "tris": 4018374,
+   "textures": 122,
+   "geometries": 713,
+   "programs": 64,
+   "frame": {
+    "n": 4,
+    "median": 1566.7,
+    "p90": 1599.9,
+    "mean": 1562.4
+   }
+  },
+  "quay": {
+   "calls": 200,
+   "tris": 1379676,
+   "textures": 97,
+   "geometries": 514,
+   "programs": 65,
+   "frame": {
+    "n": 7,
+    "median": 983.2,
+    "p90": 983.4,
+    "mean": 961.9
+   }
+  },
+  "vharl": {
+   "calls": 365,
+   "tris": 1577695,
+   "textures": 133,
+   "geometries": 596,
+   "programs": 67,
+   "frame": {
+    "n": 6,
+    "median": 1033.2,
+    "p90": 1433.2,
+    "mean": 1094.4
+   }
+  },
+  "vharl-pier": {
+   "calls": 302,
+   "tris": 1360676,
+   "textures": 117,
+   "geometries": 625,
+   "programs": 67,
+   "frame": {
+    "n": 7,
+    "median": 966.7,
+    "p90": 1000,
+    "mean": 976.2
+   }
+  },
+  "camp": {
+   "calls": 240,
+   "tris": 3318422,
+   "textures": 119,
+   "geometries": 561,
+   "programs": 67,
+   "frame": {
+    "n": 6,
+    "median": 1050,
+    "p90": 1083.4,
+    "mean": 1058.3
+   }
+  },
+  "setpiece": {
+   "calls": 320,
+   "tris": 3049848,
+   "textures": 129,
+   "geometries": 610,
+   "programs": 67,
+   "frame": {
+    "n": 7,
+    "median": 950,
+    "p90": 983.4,
+    "mean": 961.9
+   }
+  },
+  "target-monster": {
+   "id": 7099,
+   "kind": "monster",
+   "name": "Grisel Thornhide",
+   "type": null,
+   "role": null
+  },
+  "target-npc": {
+   "id": 9,
+   "kind": "npc",
+   "name": "Tam Sedgeley",
+   "type": null,
+   "role": "angler"
+  },
+  "spans": [
+   {
+    "name": "zone:sites",
+    "n": 4,
+    "ms": 58167,
+    "max": 29841
+   },
+   {
+    "name": "zone:setpieces",
+    "n": 4,
+    "ms": 34627,
+    "max": 23008
+   },
+   {
+    "name": "zone:town",
+    "n": 9,
+    "ms": 212,
+    "max": 74
+   }
+  ]
+ },
+ "phone": {
+  "square": {
+   "calls": 377,
+   "tris": 3348755,
+   "textures": 127,
+   "geometries": 446,
+   "programs": 64,
+   "frame": {
+    "n": 7,
+    "median": 999.9,
+    "p90": 1016.7,
+    "mean": 997.6
+   }
+  },
+  "street": {
+   "calls": 395,
+   "tris": 3316267,
+   "textures": 121,
+   "geometries": 498,
+   "programs": 64,
+   "frame": {
+    "n": 7,
+    "median": 966.6,
+    "p90": 1000,
+    "mean": 976.1
+   }
+  },
+  "quay": {
+   "calls": 240,
+   "tris": 1794048,
+   "textures": 94,
+   "geometries": 352,
+   "programs": 65,
+   "frame": {
+    "n": 10,
+    "median": 683.3,
+    "p90": 800,
+    "mean": 656.6
+   }
+  },
+  "vharl": {
+   "calls": 225,
+   "tris": 1375052,
+   "textures": 130,
+   "geometries": 432,
+   "programs": 67,
+   "frame": {
+    "n": 10,
+    "median": 650,
+    "p90": 899.9,
+    "mean": 663.3
+   }
+  },
+  "vharl-pier": {
+   "calls": 267,
+   "tris": 1252920,
+   "textures": 112,
+   "geometries": 455,
+   "programs": 68,
+   "frame": {
+    "n": 10,
+    "median": 633.3,
+    "p90": 683.3,
+    "mean": 631.6
+   }
+  },
+  "camp": {
+   "calls": 250,
+   "tris": 3006462,
+   "textures": 116,
+   "geometries": 407,
+   "programs": 67,
+   "frame": {
+    "n": 9,
+    "median": 716.6,
+    "p90": 783.3,
+    "mean": 698.1
+   }
+  },
+  "setpiece": {
+   "calls": 283,
+   "tris": 2740456,
+   "textures": 128,
+   "geometries": 441,
+   "programs": 67,
+   "frame": {
+    "n": 9,
+    "median": 733.3,
+    "p90": 783.3,
+    "mean": 737
+   }
+  },
+  "target-monster": {
+   "id": 7311,
+   "kind": "monster",
+   "name": "Grisel Thornhide",
+   "type": null,
+   "role": null
+  },
+  "target-npc": {
+   "id": 19,
+   "kind": "npc",
+   "name": "Sergeant Kettleby",
+   "type": null,
+   "role": "guard"
+  },
+  "spans": [
+   {
+    "name": "zone:sites",
+    "n": 4,
+    "ms": 31185,
+    "max": 14456
+   },
+   {
+    "name": "zone:setpieces",
+    "n": 4,
+    "ms": 21431,
+    "max": 8692
+   },
+   {
+    "name": "zone:town",
+    "n": 9,
+    "ms": 180,
+    "max": 50
+   }
+  ]
+ }
+}

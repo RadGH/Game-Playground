@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { createChibi2Character } from '../../../avatar-3d/js/chibi2.js';
+import { createCreature } from '../../../avatar-3d/js/creatures.js';
 import { createSigFx } from '../../thousandvale/js/client/sig-fx.js';
 import { createCombatRoom } from './adapters/combat.js';
 
@@ -58,8 +59,9 @@ const { room, hero: initialCombatHero, target: practiceTarget, classes, skills, 
 let combatHero = initialCombatHero;
 const classData = { classes, skills };
 const actors = new Map([['hero', { id: 'hero', kind: 'player', pos: hero.position, yaw: 0, look: { cls: 'starcaller' } }]]);
-const targetMesh = new THREE.Mesh(new THREE.IcosahedronGeometry(0.55, 1), new THREE.MeshStandardMaterial({ color: '#a34d46', emissive: '#34100d' }));
-targetMesh.position.set(practiceTarget.x, 0.55, practiceTarget.z); scene.add(targetMesh);
+const targetBody = await createCreature({ type: 'hound', size: 0.85, seed: 41, colors: { body: '#80554b', belly: '#c3987b', accent: '#4e302b', eyes: '#e7b565' } }, { detail: 0.8 });
+const targetMesh = targetBody.group;
+targetMesh.position.set(practiceTarget.x, 0, practiceTarget.z); scene.add(targetMesh);
 actors.set(practiceTarget.id, { id: practiceTarget.id, kind: 'monster', pos: targetMesh.position, yaw: Math.PI, look: { id: 'practice_target' } });
 const sig = createSigFx(scene, { camera, actors, skillOf: id => skills[id], classOf: () => selectedClass.id });
 let selectedClass = classes.find(c => c.id === 'starcaller') || classes[0];
@@ -70,7 +72,8 @@ const cooldowns = new Map();
 const hotbar = document.querySelector('#hotbar');
 function drawBar() {
   hotbar.replaceChildren();
-  for (const [index, id] of selectedClass.skills.slice(0, 3).entries()) {
+  const equipped = combatHero.skills.slots.map(s => s.id);
+  for (const [index, id] of equipped.slice(0, 3).entries()) {
     const skill = skills[id];
     const b = document.createElement('button'); b.type = 'button'; b.dataset.skill = id;
     b.innerHTML = `<small>${index + 1} · ${skill.mp || 0} mana</small>${skill.name}`;
@@ -166,11 +169,11 @@ function frame(now) {
   combatHero.x = hero.position.x; combatHero.z = hero.position.z; combatHero.yaw = hero.rotation.y; combatHero.moving = length > 0;
   room.clock.advance(dt);
   room.run(() => room.combat.tick(dt));
-  targetMesh.position.set(practiceTarget.x, 0.55 + (practiceTarget.hover || 0), practiceTarget.z);
+  targetMesh.position.set(practiceTarget.x, practiceTarget.hover || 0, practiceTarget.z);
   targetMesh.visible = !practiceTarget.dead && !practiceTarget.removed;
   if (practiceTarget.hp != null) targetMesh.scale.setScalar(Math.max(0.25, practiceTarget.hp / practiceTarget.maxHp));
-  if (practiceTarget.hp < lastTargetHp) { targetMesh.material.emissive.set('#a33b26'); status.textContent = `Hit for ${Math.ceil(lastTargetHp - practiceTarget.hp)}`; }
-  else targetMesh.material.emissive.set('#34100d');
+  if (practiceTarget.hp < lastTargetHp) { targetBody.group.traverse(o => { if (o.material?.emissive) o.material.emissive.set('#a33b26'); }); status.textContent = `Hit for ${Math.ceil(lastTargetHp - practiceTarget.hp)}`; }
+  else targetBody.group.traverse(o => { if (o.material?.emissive) o.material.emissive.set('#000000'); });
   if (!targetMesh.visible && lastTargetHp > 0) status.textContent = `Target defeated · ${combatHero.xp || 0} XP`;
   lastTargetHp = practiceTarget.hp;
   targetHp.textContent = targetMesh.visible ? `${practiceTarget.name} · ${Math.ceil(practiceTarget.hp)} / ${practiceTarget.maxHp}` : `Target defeated · ${combatHero.xp || 0} XP`;
@@ -182,4 +185,5 @@ function frame(now) {
   renderer.render(scene, camera);
   requestAnimationFrame(frame);
 }
+window.gravenhold = { room, get hero() { return combatHero; }, target: practiceTarget };
 requestAnimationFrame(frame);

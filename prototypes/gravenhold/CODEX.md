@@ -19,7 +19,7 @@ You are building **Gravenhold** in `prototypes/gravenhold/` (read README.md for 
 ## Progress
 - **M0 complete:** Added a single-room playable page with orthographic isometric follow camera, walls/floor, shared Chibi 2 hero, WASD and standard-mapped gamepad movement, and a tilt-shift toggle. Smoke coverage is `tests/smoke.spec.js`.
 - **M1 complete:** Added a browser adapter that loads Thousandvale's rules data and constructs its real engine, room, character, field, and combat pipeline. Class selection rebuilds the rules-backed character; Space performs a basic attack; the hotbar resolves real skill slots with actual mana/cooldowns and `sig-fx`; a target health readout and hit feedback show landed damage. The smoke test confirms a Star Dart damages the target.
-- **M2 in progress:** The room now spawns a Thousandvale Moor Hound and ticks its real monster AI; its live health, movement, damage feedback, death/reward state use the rules entity. Still needed for M2 completion: render with shared `creatures`/`actors`, robust death/XP feedback and focused M2 coverage.
-- **Next:** Finish M2 shared monster rendering and test AI, hits, deaths, and XP together.
+- **M2 complete:** The Moor Hound uses avatar-3d's shared `createCreature` builder; Thousandvale's monster AI and combat remain rules-backed. The focused Playwright test covers AI movement, damage, death/XP, and verifies the Warrior hotbar no longer shows Starcaller skills after class selection.
+- **M3 in progress:** Not started; next add seeded procedural rooms/corridors, doors/stairs, and a minimap.
 - **Run/test:** Use the existing playground dev server at `http://127.0.0.1:8401/prototypes/gravenhold/`; run `npx playwright test prototypes/gravenhold/tests/smoke.spec.js`.
-- **Known issue:** M2 currently uses a simple local mesh for the hound rather than Thousandvale's shared creature renderer; its combat behavior is real.
+- **Known issue:** M3 dungeon generation has not started; the playable area remains one fixed room.

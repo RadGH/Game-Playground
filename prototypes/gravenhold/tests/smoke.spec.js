@@ -21,3 +21,23 @@ test('Gravenhold M0 room and M1 class hotbar load and work', async ({ page }) =>
   await expect(page.getByRole('button', { name: 'Tilt shift: on' })).toHaveAttribute('aria-pressed', 'true');
   expect(errors).toEqual([]);
 });
+
+test('M2 shared hound, monster AI, hit, death and XP; class hotbar follows selection', async ({ page }) => {
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto('/prototypes/gravenhold/');
+  await expect(page.locator('#target-hp')).toContainText('Moor Hound', { timeout: 20_000 });
+  const initial = await page.evaluate(() => ({ x: window.gravenhold.target.x, state: window.gravenhold.target.state }));
+  await page.waitForTimeout(900);
+  const moved = await page.evaluate(() => ({ x: window.gravenhold.target.x, z: window.gravenhold.target.z }));
+  expect(Math.abs(moved.x - initial.x) + Math.abs(moved.z + 3)).toBeGreaterThan(0);
+  await page.locator('#class-select').selectOption({ label: 'Warrior' });
+  await expect(page.locator('#hotbar')).not.toContainText('Star Dart');
+  await expect(page.locator('#hotbar')).not.toContainText('Scattered Stars');
+  await expect(page.locator('#hotbar')).not.toContainText('Called Star');
+  await page.evaluate(() => { window.gravenhold.target.hp = 1; });
+  await page.keyboard.press('Space');
+  await expect(page.locator('#target-hp')).toContainText('Target defeated', { timeout: 8_000 });
+  await expect(page.locator('#target-hp')).toContainText('XP');
+  expect(errors).toEqual([]);
+});

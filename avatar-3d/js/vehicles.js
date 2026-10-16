@@ -17,6 +17,7 @@
 //   v.setAnim('roll') · v.update(dt, t) · v.setSpec(spec) · v.dispose()
 import * as THREE from 'three';
 import { createCreature } from './creatures.js';
+import { createEquine } from './equine.js';      // opt-in: an animal spec with `breed` is drawn as the mounts' equine body
 import { shade } from '../../avatar-2d/js/render.js';
 
 function mat(color, extra = {}) { return new THREE.MeshStandardMaterial({ color: new THREE.Color(color), roughness: 0.85, metalness: 0, ...extra }); }
@@ -104,11 +105,14 @@ export async function createVehicle(spec) {
     if (s.animal) {
       const n = T.animals || 1; const hitch = state.parts.hitch;
       for (let i = 0; i < n; i++) {
-        const ctrl = await createCreature(s.animal);
+        // opt-in (Thousandvale 2026-10-16): `breed` ('horse', 'draft', 'pony'…) = the new equine body the mounts ride;
+        // without it, the bestiary creature as before (every existing vehicle unchanged)
+        const ctrl = s.animal.breed ? await createEquine({ breed: s.animal.breed, size: s.animal.size ?? 1, colors: s.animal.colors, seed: s.seed }) : await createCreature(s.animal);
         const m = ctrl.metrics();                                              // measured before turning it, so length is still nose-to-tail
         const g = ctrl.group; g.rotation.y = Math.PI / 2;                      // creatures face +z; the cart rolls +x
         const lane = n === 1 ? 0 : (i - (n - 1) / 2) * (m.width + 0.24);
-        const at = state.parts.animalAt || { x: hitch.x + m.length * 0.55, z: hitch.z };
+        // the equine body's length includes its tail and its origin sits mid-barrel: stand its rump between the shafts
+        const at = state.parts.animalAt || { x: hitch.x + m.length * (s.animal.breed ? 0.3 : 0.55), z: hitch.z };
         g.position.set(at.x, 0, at.z + lane);
         root.add(g); state.animals.push({ ctrl, group: g });
       }

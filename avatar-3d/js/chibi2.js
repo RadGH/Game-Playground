@@ -429,7 +429,8 @@ function normalizeForChibi2(avatar) {
   return a;
 }
 
-function acquire(avatar, anims = CHIBI2_ANIMS, opts = {}) {
+/** The normalised look, its rig and its template cache key (shared by `acquire` and `prepareChibi2`). */
+function rigFor(avatar, anims, opts) {
   const a = normalizeForChibi2(avatar);
   if (opts.v25 && !isV25(a)) a.body = { ...a.body, v: 2.5 };      // `{ v25: true }` = the flag in the look (so it is in the cache key)
   const v25 = isV25(a), rig = createRig(a.body, v25 ? race25(a, raceOf(a)) : raceOf(a));
@@ -442,12 +443,56 @@ function acquire(avatar, anims = CHIBI2_ANIMS, opts = {}) {
   // the clip set is part of the cache key: two characters with different animation sets are not
   // the same template
   const key = JSON.stringify(a) + '|' + anims.length + (opts.mannequin ? '|mannequin' : '');
+  return { a, rig, key };
+}
+
+/**
+ * Build a look's template AHEAD of `createChibi2Character`, a few clips at a time, giving the thread back between them
+ * (Thousandvale 2026-10-16: a Chibi 2.5 robed template is ~80-150 ms of clip baking — the skirt drive runs on every
+ * frame — and done in one go that is a long task on a slow machine). `opts.slice()` returns a promise that resolves
+ * when the caller may carry on (a requestAnimationFrame / idle wait); `opts.budget` = ms of work between slices (8).
+ * The result is the very template `acquire` would have built (same rig, same clips, same key), parked in the cache with
+ * no references, so the next `createChibi2Character` with the same look and options is a cache hit. Opt-in: nothing
+ * else calls it, and a template nobody takes is dropped when the cache passes PREPARED_MAX.
+ */
+const pending = new Map();
+const PREPARED_MAX = 48;
+export function prepareChibi2(avatar, opts = {}) {
+  const anims = opts.swim ? CHIBI2_ALL_ANIMS : (opts.anims || CHIBI2_ANIMS);
+  const o = { mannequin: !!opts.mannequin, v25: !!opts.v25 };
+  const { a, rig, key } = rigFor(avatar, anims, o);
+  if (templates.has(key)) return Promise.resolve(false);
+  if (pending.has(key)) return pending.get(key);
+  const slice = opts.slice || (() => new Promise(r => setTimeout(r, 0)));
+  const budget = opts.budget ?? 8;
+  const job = (async () => {
+    let t0 = performance.now();
+    const pause = async () => { if (performance.now() - t0 >= budget) { await slice(); t0 = performance.now(); } };
+    const parts = buildTemplate(a, rig, o);
+    await pause();
+    const clips = [];
+    for (const name of anims) { clips.push(...createClips(rig, [name])); await pause(); }
+    if (!templates.has(key)) {
+      // unclaimed prepared templates (refs 0) beyond the cap are let go, oldest first
+      const idle = [...templates.entries()].filter(([, t]) => t.refs === 0 && t.prepared);
+      for (let i = 0; i < idle.length - PREPARED_MAX; i++) { for (const p of idle[i][1].parts) { p.geometry.dispose(); p.material.dispose(); } templates.delete(idle[i][0]); }
+      templates.set(key, { parts, clips, refs: 0, anims, prepared: true });
+    } else for (const p of parts) { p.geometry.dispose(); p.material.dispose(); }
+    return true;
+  })().finally(() => pending.delete(key));
+  pending.set(key, job);
+  return job;
+}
+
+function acquire(avatar, anims = CHIBI2_ANIMS, opts = {}) {
+  const { a, rig, key } = rigFor(avatar, anims, opts);
   // a traced build (opts.trace) is never cached: it must run the builders to record them
   let template = opts.trace ? null : templates.get(key);
   if (!template) {
     template = { parts: buildTemplate(a, rig, opts), clips: createClips(rig, anims), refs: 0, anims };
     if (!opts.trace) templates.set(key, template);
   }
+  template.prepared = false;
   template.refs++;
   const root = new THREE.Group(); root.name = 'chibi2-body'; root.add(rig.root);
   const skeleton = new THREE.Skeleton(rig.bones);

@@ -5,7 +5,7 @@
 // nearest control in the direction pressed, A presses it, X is the "other" click (right-click), Y shows its card, LB/RB
 // step through that window's tabs. On a canvas you cannot step through (the perk forest, the world map) the ring turns
 // into a POINTER you steer; A clicks under it, the triggers zoom, the right stick pans.
-const CONTAINERS = ['.tv-osk:not([hidden])', '.tv-confirm', '.ent-menu:not([hidden])', '.name-menu:not([hidden])', '.phone-sheet:not([hidden])', '.tv-reveal:not([hidden])', '.tv-dialog:not([hidden])'];
+const CONTAINERS = ['.tv-osk:not([hidden])', '.tv-confirm', '.ent-menu:not([hidden])', '.name-menu:not([hidden])', '.phone-sheet:not([hidden])', '.tv-reveal:not([hidden])', '.tv-dialog:not([hidden])', '.tv-changelog:not([hidden])'];
 const LATE = ['#bag:not([hidden])', '#party-menu:not([hidden])', '.invite-pop:not([hidden])', '#death:not([hidden])', '#title:not([hidden])'];
 const FOCUSABLE = 'button, [role="tab"], [role="radio"], input, select, textarea, a[href], [tabindex]:not([tabindex="-1"]), .islot:not(.empty), .pmember, canvas.pad-cursor, .pf-host canvas, .wm-canvas, canvas[data-pad-cursor]';
 const vis = e => !!e && !e.hidden && e.getClientRects().length > 0 && getComputedStyle(e).visibility !== 'hidden';
@@ -19,7 +19,9 @@ export function createFocus({ parent = document.body, onText = null } = {}) {
   /** The thing the ring is confined to right now (null = nothing open: the pad drives the character). */
   function container() {
     for (const s of CONTAINERS) { const e = document.querySelector(s); if (vis(e)) return e; }
-    const panels = [...document.querySelectorAll('.tv-panel:not([hidden])')].filter(vis).sort((a, b) => (+b.style.zIndex || 0) - (+a.style.zIndex || 0));
+    // 2026-10-16: a window docked INSIDE another (the party window's Friends / Mail / Group Finder tabs) counts as the outer
+    // one — so its tab strip is in reach of LB / RB, and a tab with nothing to press still has the tabs
+    const panels = [...document.querySelectorAll('.tv-panel:not([hidden])')].filter(e => vis(e) && !e.parentElement?.closest('.tv-panel')).sort((a, b) => (+b.style.zIndex || 0) - (+a.style.zIndex || 0));
     if (panels.length) return panels[0];
     for (const s of LATE) { const e = document.querySelector(s); if (vis(e)) return e; }
     return null;

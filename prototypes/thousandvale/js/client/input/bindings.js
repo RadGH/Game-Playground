@@ -35,6 +35,7 @@ export function glyphSetFor(padId) {
   const s = String(padId || '').toLowerCase();
   if (/dualsense|dualshock|playstation|sony|054c|ps[345]\b/.test(s)) return 'playstation';
   if (/xbox|xinput|microsoft|045e|x-box/.test(s)) return 'xbox';
+  if (/steam|valve|28de/.test(s)) return 'xbox';          // 2026-10-16: the Steam Deck's own buttons read A B X Y, View, Menu
   return s ? 'generic' : 'xbox';
 }
 
@@ -75,7 +76,9 @@ export const ACTIONS = [
   { id: 'allyPrev', group: 'Fighting', label: 'Previous party member', key: null, run: 'allyPrev', pad: pad('UP'), touch: 'Tap a party frame' },
   { id: 'targetClear', group: 'Fighting', label: 'Clear target (heals go to you)', key: null, run: 'targetClear', mouse: 'Esc, or click your own frame', pad: pad('LEFT'), touch: 'Tap your own frame' },
   { id: 'back', group: 'Fighting', label: 'Close a window / clear target / the menu', key: 'Escape', fixed: true, pad: pad('B', false, 'in a window'), ctx: 'menu', touch: 'Close (×) or swipe the sheet down' },
-  { id: 'pause', group: 'Fighting', label: 'Menu: settings, help, log out', key: null, run: 'pause', mouse: 'Esc with nothing open', pad: pad('START'), touch: 'Menu (☰) in the quick wheel' },
+  // 2026-10-16: in the controller layout Menu opens the CONTROLLER MENU (input/pad-layout.js, PAD_MENU_TILES below): every
+  // window as a big tile. On a keyboard (and the phone) it is still the small pause menu.
+  { id: 'pause', group: 'Fighting', label: 'Menu: every window, settings, log out', key: null, run: 'pause', mouse: 'Esc with nothing open', pad: pad('START'), touch: 'Menu (☰) in the quick wheel' },
   { id: 'rise', group: 'Fighting', label: 'Rise after falling', key: 'KeyR', pad: pad('A', false, 'when fallen'), ctx: 'dead', touch: 'The Rise button' },
   // ---- world
   { id: 'interact', group: 'World', label: 'Use, talk, open, loot a body — in a loot window: take the selected item', key: 'KeyE', pad: pad('A', false, 'when a prompt shows'), ctx: 'prompt', touch: 'Tap the prompt' },
@@ -100,7 +103,9 @@ export const ACTIONS = [
   { id: 'help', group: 'Windows', label: 'This help', key: 'F1', keyText: 'F1 or ?', fixed: true, radial: true, touch: 'Menu (☰): Help and controls' },
   { id: 'radial', group: 'Windows', label: 'Quick wheel: every window in one hold', key: null, run: 'radial', pad: pad('LB', false, 'hold, point with a stick, let go'), touch: 'Hold the wheel button (top right)' },
   // ---- chat
-  { id: 'chat', group: 'Chat', label: 'Talk', key: 'Enter', fixed: true, radial: true, touch: 'Tap the chat bubble' },
+  { id: 'chat', group: 'Chat', label: 'Talk (opens the chat)', key: 'Enter', fixed: true, radial: true, pad: pad('BACK', true, 'hold LT, press View — the on-screen keyboard opens'), touch: 'Tap the chat bubble' },
+  // 2026-10-16 (controller layout): the quest and event trackers fold to one line; this shows them in full and folds them again
+  { id: 'hudInfo', group: 'Windows', label: 'Show / fold the quest and event trackers', key: null, run: 'hudInfo', mouse: 'Click the one-line tracker', pad: pad('START', true, 'hold LT, press Menu'), touch: 'The quests bubble (top right)' },
   { id: 'command', group: 'Chat', label: 'Start a command', key: 'Slash', keyText: '/', fixed: true, touch: 'Type / in the chat box' },
 ];
 
@@ -116,6 +121,37 @@ export const PAD_MENU = [
   { btn: 'LT', also: 'RT', label: 'Map and perk forest: zoom out / in' },
   { btn: 'LS', label: 'Map and perk forest: move the pointer (a ring you steer)', cursor: true },
   { btn: 'START', label: 'Close everything' },
+  { btn: 'BACK', label: 'Open / close the map' },
+];
+
+/**
+ * 2026-10-16 — the CONTROLLER MENU (Menu / Start in the controller layout; input/pad-layout.js draws it). One big tile per
+ * window, in three rows of meaning. `panel` = the id main.js's PANELS table toggles (the same one the menu bar and the
+ * window keys use, so a tile can never open something the keyboard cannot); `act` = a button of the pause menu
+ * (#panel-pause [data-act]) it presses; `run` = an input-layer action. `icon` = the icon library's picture (menubar ids).
+ * tests/G/bindings.test.js checks every row names a real window or action.
+ */
+export const PAD_MENU_TILES = [
+  { id: 'bag', group: 'You', label: 'Bag', sub: 'Gear and items', panel: 'bag', icon: 'bag', action: 'bag' },
+  { id: 'sheet', group: 'You', label: 'Character', sub: 'Stats and damage', panel: 'sheet', icon: 'sheet', action: 'sheet' },
+  { id: 'skills', group: 'You', label: 'Skills', sub: 'Skills and talents', panel: 'skills', icon: 'skills', action: 'skills' },
+  { id: 'perks', group: 'You', label: 'Perks', sub: 'The perk forest', panel: 'perks', icon: 'perks', action: 'perks' },
+  { id: 'journal', group: 'You', label: 'Journal', sub: 'Quests', panel: 'journal', icon: 'journal', action: 'journal' },
+  { id: 'map', group: 'You', label: 'Map', sub: 'Also: View', panel: 'map', icon: 'map', action: 'map' },
+  { id: 'party', group: 'People', label: 'Party', sub: 'Invite, join link', panel: 'party', icon: 'party', action: 'party' },
+  { id: 'friends', group: 'People', label: 'Friends', sub: 'Who is online', panel: 'friends', icon: 'friends' },
+  { id: 'guild', group: 'People', label: 'Guild', sub: 'Your guild', panel: 'guild', icon: 'guild' },
+  { id: 'mail', group: 'People', label: 'Mail', sub: 'Letters and parcels', panel: 'mail', icon: 'mail' },
+  { id: 'market', group: 'People', label: 'Market', sub: 'Buy and sell', panel: 'market', icon: 'travel_cart' },
+  { id: 'callboard', group: 'People', label: 'Group Finder', sub: 'Find a group', panel: 'callboard', icon: 'callboard' },
+  { id: 'chat', group: 'People', label: 'Chat', sub: 'Also: LT + View', run: 'chat', icon: 'chat', action: 'chat' },
+  { id: 'settings', group: 'Game', label: 'Settings', sub: 'Layout, sound, graphics', act: 'settings', icon: 'wheel' },
+  { id: 'help', group: 'Game', label: 'Controls', sub: 'Every button', act: 'help', icon: 'help' },
+  { id: 'changelog', group: 'Game', label: "What's new", sub: 'Recent changes', act: 'changelog', icon: 'eye' },
+  { id: 'feedback', group: 'Game', label: 'Feedback', sub: 'A bug or an idea', panel: 'feedback', icon: 'feedback' },
+  { id: 'account', group: 'Game', label: 'Account', sub: 'Claim, password', panel: 'account', icon: 'account' },
+  { id: 'meter', group: 'Game', label: 'Damage meter', sub: 'Who did what', panel: 'meter', icon: 'attack' },
+  { id: 'logout', group: 'Game', label: 'Log out', sub: 'Back to the title', act: 'logout', icon: 'close', danger: true },
 ];
 
 /** Things only a mouse or a finger does (no action id: nothing to re-bind). Printed in the tables next to the actions. */
@@ -363,6 +399,13 @@ export function auditBindings() {
   for (const w of [...WHEEL, ...WHEEL_ACTIONS]) if (!ACTION_BY_ID[w.id]) bad.push(`wheel slice ${w.id} is not an action`);
   for (const a of ACTIONS) if (a.radial && ![...WHEEL, ...WHEEL_ACTIONS].some(w => w.id === a.id)) bad.push(`${a.id} says it is in the wheel and is not`);
   if (PAD_MOD === PAD_RADIAL) bad.push('modifier and wheel on one button');
+  // the controller menu: unique tiles, each doing exactly one thing
+  const tileIds = new Set();
+  for (const t of PAD_MENU_TILES) {
+    if (tileIds.has(t.id)) bad.push(`menu tile ${t.id} twice`); tileIds.add(t.id);
+    if ([t.panel, t.act, t.run].filter(Boolean).length !== 1) bad.push(`menu tile ${t.id}: needs exactly one of panel / act / run`);
+    if (t.action && !ACTION_BY_ID[t.action]) bad.push(`menu tile ${t.id}: ${t.action} is not an action`);
+  }
   // Y34: every on-screen phone control names a real action, once, in plain words
   const seenC = new Set();
   for (const c of TOUCH_CONTROLS) {

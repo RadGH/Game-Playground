@@ -23,7 +23,10 @@ import { createVehicle } from '../../../../avatar-3d/js/vehicles.js';
 
 /** The ox: the cow frame without the dairy — heavier, brown, short horns. (avatar-3d creature spec.) */
 export const OX = { type: 'cow', size: 1.18, colors: { body: '#6e4a2c', belly: '#927050', accent: '#2a2018', eyes: '#1a1008', nose: '#4a3a34' }, features: { horns: true, hooves: true, spots: false, udder: false } };
-export const CART_SPEC = { type: 'ox_cart', size: 1, animal: OX };
+/** Owner 2026-10-16: "the horse attached to caravans is the old ugly model … we have a new horse model" — the cart is
+ * now pulled by the mounts' own equine body (a bay draft horse); OX stays exported for anything that still wants it. */
+export const CART_HORSE = { breed: 'draft', size: 1, colors: { body: '#6a4630', belly: '#8a6448', accent: '#241812' } };
+export const CART_SPEC = { type: 'ox_cart', size: 1, animal: CART_HORSE };
 /** How far behind / beside its walking carter a roaming cart is drawn (the carter leads the ox by the head). */
 export const LEAD = { back: 2.9, side: 0.95 };
 /** The ride you see before the veil: how long the cart rolls and how fast it gets. */

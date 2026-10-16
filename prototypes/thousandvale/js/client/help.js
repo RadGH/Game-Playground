@@ -9,7 +9,7 @@ export function createHelp() {
   const panel = createPanel({ id: 'help', title: 'Controls', width: 560, cls: 'help-panel centered' });
   panel.setTitle('Controls', 'F1 or ? opens this');
   const draw = () => panel.fill(h('div.help-grid.live', { dataset: { device: device.current } }, ...referenceTable(device.current === 'pad' ? 'pad' : device.current === 'touch' ? 'touch' : 'keyboard').children),
-    h('p.tiny-left', {}, device.current === 'pad' ? 'Hold the wheel button for every window. Settings has the keyboard list too.' : 'Windows can be dragged by their title. Esc closes the top one. Keys can be changed in Settings.'));
+    h('p.tiny-left', {}, device.current === 'pad' ? 'Menu opens every window as a tile (or hold LB for the quick wheel). LT + View opens the chat, LT + Menu shows the quest list. Settings has the keyboard list too.' : 'Windows can be dragged by their title. Esc closes the top one. Keys can be changed in Settings.'));
   const open0 = panel.open.bind(panel);
   panel.open = () => { draw(); open0(); };
   panel.toggle = force => { const want = force ?? !panel.isOpen; if (want) panel.open(); else panel.close(); return want; };

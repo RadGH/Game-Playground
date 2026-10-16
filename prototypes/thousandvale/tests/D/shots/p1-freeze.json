@@ -2,7 +2,7 @@
  "A": {
   "stalls": {
    "busyLong": 0,
-   "maxBusyMs": 36,
+   "maxBusyMs": 34,
    "frames": [],
    "longTasks": 0,
    "maxTaskMs": 0
@@ -12,38 +12,38 @@
    {
     "name": "zone:sites",
     "n": 1,
-    "ms": 12479,
-    "max": 12479
+    "ms": 12706,
+    "max": 12706
    },
    {
     "name": "zone:setpieces",
     "n": 1,
-    "ms": 11234,
-    "max": 11234
+    "ms": 9308,
+    "max": 9308
    },
    {
     "name": "zone:ground",
     "n": 1,
-    "ms": 101,
-    "max": 101
+    "ms": 90,
+    "max": 90
    },
    {
     "name": "terrain:water",
     "n": 1,
-    "ms": 74,
-    "max": 74
+    "ms": 62,
+    "max": 62
    },
    {
     "name": "zone:parse",
     "n": 1,
-    "ms": 56,
-    "max": 56
+    "ms": 53,
+    "max": 53
    },
    {
     "name": "zone:navRefine",
     "n": 1,
-    "ms": 23,
-    "max": 23
+    "ms": 34,
+    "max": 34
    },
    {
     "name": "terrain:chunks",
@@ -52,34 +52,40 @@
     "max": 23
    },
    {
+    "name": "world:views",
+    "n": 56,
+    "ms": 245,
+    "max": 22
+   },
+   {
     "name": "zone:town",
     "n": 1,
-    "ms": 23,
-    "max": 23
-   },
-   {
-    "name": "terrain:waterLook",
-    "n": 1,
-    "ms": 21,
-    "max": 21
-   },
-   {
-    "name": "render",
-    "n": 55,
-    "ms": 403,
-    "max": 18
+    "ms": 22,
+    "max": 22
    },
    {
     "name": "zone:scatter",
     "n": 1,
-    "ms": 17,
+    "ms": 19,
+    "max": 19
+   },
+   {
+    "name": "terrain:waterLook",
+    "n": 1,
+    "ms": 19,
+    "max": 19
+   },
+   {
+    "name": "render",
+    "n": 56,
+    "ms": 426,
     "max": 17
    },
    {
-    "name": "world:views",
-    "n": 55,
-    "ms": 228,
-    "max": 14
+    "name": "terrain:chunk",
+    "n": 62,
+    "ms": 212,
+    "max": 15
    },
    {
     "name": "zone:forest",
@@ -88,91 +94,127 @@
     "max": 10
    },
    {
-    "name": "terrain:chunk",
-    "n": 63,
-    "ms": 200,
-    "max": 9
+    "name": "terrain:grid",
+    "n": 1,
+    "ms": 6,
+    "max": 6
    },
    {
     "name": "scatter:relod",
     "n": 17,
-    "ms": 22,
-    "max": 5
-   },
-   {
-    "name": "terrain:grid",
-    "n": 1,
-    "ms": 5,
+    "ms": 25,
     "max": 5
    }
   ]
  },
  "B": {
-  "walked": 106.78051053973891,
+  "walked": 502.5888295963478,
   "stalls": {
    "busyLong": 0,
-   "maxBusyMs": 26,
+   "maxBusyMs": 62,
    "frames": [],
    "longTasks": 0,
    "maxTaskMs": 0
   },
-  "links": 0,
+  "links": 2,
   "top": [
    {
     "name": "zone:sites",
     "n": 1,
-    "ms": 17054,
-    "max": 17054
+    "ms": 17340,
+    "max": 17340
    },
    {
     "name": "zone:setpieces",
     "n": 1,
-    "ms": 15049,
-    "max": 15049
+    "ms": 16104,
+    "max": 16104
    },
    {
-    "name": "zone:scatter",
+    "name": "zone:ground",
     "n": 1,
-    "ms": 20,
-    "max": 20
+    "ms": 98,
+    "max": 98
+   },
+   {
+    "name": "terrain:water",
+    "n": 1,
+    "ms": 87,
+    "max": 87
+   },
+   {
+    "name": "terrain:waterLook",
+    "n": 1,
+    "ms": 49,
+    "max": 49
+   },
+   {
+    "name": "render",
+    "n": 57,
+    "ms": 626,
+    "max": 28
    },
    {
     "name": "zone:navRefine",
     "n": 1,
-    "ms": 19,
-    "max": 19
+    "ms": 22,
+    "max": 22
    },
    {
-    "name": "render",
-    "n": 56,
-    "ms": 511,
-    "max": 18
+    "name": "zone:scatter",
+    "n": 1,
+    "ms": 21,
+    "max": 21
+   },
+   {
+    "name": "zone:town",
+    "n": 1,
+    "ms": 21,
+    "max": 21
+   },
+   {
+    "name": "zone:forest",
+    "n": 1,
+    "ms": 12,
+    "max": 12
    },
    {
     "name": "world:views",
-    "n": 56,
-    "ms": 60,
-    "max": 8
+    "n": 57,
+    "ms": 80,
+    "max": 12
+   },
+   {
+    "name": "terrain:chunks",
+    "n": 1,
+    "ms": 12,
+    "max": 12
    },
    {
     "name": "terrain:chunk",
-    "n": 53,
-    "ms": 34,
+    "n": 60,
+    "ms": 55,
     "max": 7
    },
    {
     "name": "scatter:relod",
-    "n": 20,
-    "ms": 20,
+    "n": 18,
+    "ms": 19,
     "max": 2
    },
    {
     "name": "actor:build",
-    "n": 16,
+    "n": 20,
+    "ms": 0,
+    "max": 0
+   },
+   {
+    "name": "terrain:grid",
+    "n": 1,
     "ms": 0,
     "max": 0
    }
   ],
-  "monsters": 17
+  "monsters": 2
  }
 }

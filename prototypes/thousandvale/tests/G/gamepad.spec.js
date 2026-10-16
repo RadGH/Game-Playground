@@ -242,14 +242,15 @@ test.describe('controller — in the real game', () => {
     await page.screenshot({ path: join(SHOTS, 'game-pad-hud.png') });
   });
 
-  test('Menu opens the pause menu (A resumes); the wheel opens the bag; B closes it', async () => {
+  test('Menu opens the controller menu (2026-10-16: the controller layout; B closes it); the wheel opens the bag; B closes it', async () => {
     test.setTimeout(120000);
+    await expect.poll(() => input(page).then(st => st.layout)).toBe('pad');                          // a pad in hand: the controller layout
     await press(page, 'START');
-    await expect(page.locator('#panel-pause')).toBeVisible();
+    await expect(page.locator('#panel-padmenu')).toBeVisible();
     await expect(page.locator('.pad-ring')).toBeVisible();
     expect((await input(page)).pad.mode).toBe('menu');
-    await press(page, 'A');                                                                          // the ring starts on Resume
-    await expect(page.locator('#panel-pause')).toBeHidden();
+    await press(page, 'B');
+    await expect(page.locator('#panel-padmenu')).toBeHidden();
     await setBtn(page, 'LB', true); await page.waitForTimeout(250);
     await expect(page.locator('.tv-radial')).toBeVisible();
     await stick(page, { 2: 0, 3: -1 }); await page.waitForTimeout(250);

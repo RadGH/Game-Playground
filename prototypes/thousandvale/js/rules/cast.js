@@ -139,6 +139,7 @@ export function createCombat(room) {
       // the perk forest's own kill rules (js/rules/perk-rules.js): Momentum, Spoils, Contagion
       perkOnKill(field, p, e, { statuses, lastHit: e.lastHitBy === p.id });
       let award = rpg.killXpFor(p, e, engine.xpCfgFor ? engine.xpCfgFor(e.level) : xpCfg);      // W4: low-level monsters pay more
+      if (e.rewardScale > 0 && e.rewardScale < 1) award = Math.round(award * e.rewardScale);      // [Packs] a pack member pays a share (js/rules/packs.js); the pack's chest pays the rest
       // `xpFind` (gear and perks): Farhold's gainXp applies it; when the ROOM awards the experience it
       // never sees the sheet, so it is applied here (and only here)
       if (combat.award && p.derived?.xpFind) award = Math.round(award * (1 + p.derived.xpFind / 100));
@@ -147,7 +148,9 @@ export function createCombat(room) {
       const coin = engine.prices
         ? goldFound(engine.prices, killGold(engine.prices, e.level || 1, { rank: e.rank, boss: !!e.boss, defGold: e.goldBase ?? null }), p.derived?.goldFind || 0)
         : foundGold(p, e.gold);
-      const drops = partyDrop.has(p) ? [] : rpg.rollDrops(e, { rng: lootRng, magicFind: p.derived.magicFind }) || [];
+      const scaledCoin = e.rewardScale > 0 && e.rewardScale < 1 ? Math.round(coin * e.rewardScale) : coin;      // [Packs]
+      const dropsOk = !(e.rewardScale > 0 && e.rewardScale < 1) || lootRng() < e.rewardScale;              // [Packs] its own drop, at its share
+      const drops = partyDrop.has(p) || !dropsOk ? [] : rpg.rollDrops(e, { rng: lootRng, magicFind: p.derived.magicFind }) || [];
       // owner #61 (2026-10-15): "it only gave me a useless blue item! Not worth it" — a champion is sure to pay one item of
       // at least magic quality, a rare one of at least rare quality (data/rules/affixes.json `ranks.<rank>.reward`), on
       // top of what it rolled; in a party it is in the shared pile (below), once
@@ -160,9 +163,9 @@ export function createCombat(room) {
       // the room owns experience, gold and the bag when it says so (js/rules/index.js sets `award`);
       // otherwise (tests, the parity fixtures) the sheet keeps them itself, as Farhold does
       let levels = 0;
-      if (combat.award) combat.award(p, { xp: award, gold: coin, items: drops, from: e });
-      else { levels = rpg.gainXp(p, award) || 0; p.gold += coin; }
-      field.emit({ t: 'reward', to: p.id, from: e.id, xp: award, levels, level: p.level, gold: coin, restore: back, items: drops });
+      if (combat.award) combat.award(p, { xp: award, gold: scaledCoin, items: drops, from: e });
+      else { levels = rpg.gainXp(p, award) || 0; p.gold += scaledCoin; }
+      field.emit({ t: 'reward', to: p.id, from: e.id, xp: award, levels, level: p.level, gold: scaledCoin, restore: back, items: drops });
     }
   };
   const RARITY_RANK = { normal: 0, magic: 1, rare: 2, legendary: 3, set: 4, unique: 4 };

@@ -11,7 +11,7 @@
 
 import * as THREE from 'three';
 import { createCreature, randomCreature } from '../../../../avatar-3d/js/creatures.js';
-import { createChibi2Character } from '../../../../avatar-3d/js/chibi2.js';
+import { createTvBody } from './chibi-version.js';      // the same Chibi version the world draws (2.5)
 import { compactCreature } from '../../../../avatar-3d/js/mesh-merge.js';
 import { normalizeAvatar } from '../../../../avatar-2d/js/render.js';
 import { bodyTypeFor } from './looks.js';
@@ -49,7 +49,7 @@ export async function warmBodies({ scene, renderer, camera, monsterLooks = {}, m
   for (const av of humanoids) {
     await idle();
     try {
-      const body = await createChibi2Character(normalizeAvatar(av), { anims: CHIBI_ANIMS });
+      const body = await createTvBody(normalizeAvatar(av), { anims: CHIBI_ANIMS });
       body.group.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = false; } });
       pen.add(body.group); people++;
     } catch { /* ignore */ }

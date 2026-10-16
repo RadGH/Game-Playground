@@ -60,7 +60,8 @@ test('#26: every monster with an animal\'s body can be skinned, and every other 
   const n = Object.keys(S.types).length;
   // Expansion 1 §5: + the 7 Vharlen beasts with a hide (scoria crawler, ashback salamander, glasswing, steamwood prowler,
   // sulphur toad, mudback lurker, Ossathra) — the salamander's is its own (`hide: 'salamander_hide'`)
-  assert.equal(n, 24 + 7, `skinnable kinds of monster (19 before, 24 on Torbor alone): ${n}`);
+  // [Packs] (2026-10-16): + the two quarry a hunting pack runs down (Fallow Deer, Cinderhorn Goat; data/rules/monsters-tv.json)
+  assert.equal(n, 24 + 7 + 2, `skinnable kinds of monster (19 before, 24 on Torbor alone): ${n}`);
   assert.equal(S.types.ashback_salamander.hide, 'salamander_hide');
 });
 

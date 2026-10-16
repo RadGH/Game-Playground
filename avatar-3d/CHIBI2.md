@@ -44,6 +44,17 @@ clipping, body builder options). Rules both follow:
 8. **Budgets**: still two meshes (cloth + metal); a 2.5 character stays under the same triangle budgets as v2
    (8,500 for a class look). No per-frame geometry rebuilds, no material/light toggles (see the shader-recompile note).
 
+### Who uses 2.5, and building one without a long task
+
+* **Thousandvale draws every person as Chibi 2.5** since 2026-10-16 (owner: "Yes go with the 2.5 for Thousandvale"):
+  one switch, `prototypes/thousandvale/js/client/chibi-version.js` (`createTvBody` passes `{ v25: true }`; `?chibi=2`
+  in the URL is the debug escape). Farhold, Emberveil and Bannerline are still Chibi 2.
+* `prepareChibi2(look, { anims, v25, mannequin, slice, budget })` (opt-in, `js/chibi2.js`) bakes a template a few clips at
+  a time, awaiting `slice()` whenever `budget` ms (default 8) of work have passed, and parks it in the template cache
+  with no references, so the next `createChibi2Character` with the same look and options is a cache hit. Same rig, same
+  clips, same key as a direct build (`rigFor` is shared by both). A 2.5 robed template with Thousandvale's ~90 clips is
+  80-150 ms of baking in one go; sliced, the largest single step measured 36-56 ms (the mesh build, `buildTemplate`).
+
 ## Chibi 2.5 part A — the head (2026-10-16)
 
 Owner: "audit the hair and facial decorations to be more accurate, fix clipping issues… keeping the low poly cartoon
@@ -53,7 +64,7 @@ here is behind the flag (`body.v = 2.5`); a v2 look is byte-identical (contract 
 | File | What |
 |---|---|
 | `js/chibi25-face.js` | the 2.5 face: `EYE25` (24 eye shapes as outlines), `eyeSpec25` (pure numbers the controller shares), `addEyelids` (the two lid bones), `buildFace25` (ears, eyes, brows, nose, mouth, beards, marks, worn-on-face) |
-| `js/chibi25-hair.js` | the 2.5 hair (`buildHair25`), `HAT_FIT` / `hatFit()` (where each headwear covers), `HAIR_COVERS_EARS` |
+| `js/chibi25-hair.js` | the 2.5 hair (`buildHair25`, one function per style in `STYLES` since hair pass 2 — see below), `HAT_FIT` / `hatFit()` (where each headwear covers), `HAIR_COVERS_EARS`, `HAIR25_STYLES` |
 | `js/chibi25-eyes.js` | `EyeDriver25`: blinking, idle glances, `lookAt`, all bone moves |
 | `js/chibi25-options.js` | `CHIBI25_OPTIONS` (every id, the new ones, menu names, the extra fields, ears per race), `isV25`, `asV25` |
 | `js/chibi25-clip.js` | the clipping measure (direction maps from the head centre; a front-view depth grid) |
@@ -90,7 +101,7 @@ as the 2D picture draws it); `ears.scale`; `facialHair.color`; `hair.color2` (ti
 ### New ids (all `bespoke` in `avatar-2d/js/parts/chibi2-parts.js`)
 
 * **eyes (9)**: cat, doe, droopy, sharp, button, sparkle, hooded, lashes, heart
-* **hair (10)**: undercut, topknot, high_ponytail, twin_tails, messy, pompadour, locs, long_braid, mullet, side_swept
+* **hair (10 + 13)**: undercut, topknot, high_ponytail, twin_tails, messy, pompadour, locs, long_braid, mullet, side_swept; hair pass 2: crown_braid, side_shave, wolf_cut, half_up, ribbon_loops, cornrows, warrior_braids, feathered, curly_bob, puff, rolled_tail, bowl, court_cut
 * **brows (7)**: bushy, unibrow, slanted, soft, split, dots, curved · **mouth (8)**: laugh, cat, pout, gritted, wavy, buck, fang, shark
 * **nose (3)**: pointed, round, flat · **ears (6)**: long_pointed, swept, notched, small, cat_ears, wolf_ears (on top of the head; hidden under crown hats)
 * **facial hair (6)**: mutton_chops, handlebar, van_dyke, short_beard, forked_beard, sideburns
@@ -143,6 +154,72 @@ looking clamps, hair x every headwear, brows under fringes, beards over the ches
 `flock /tmp/claude-1000/farhold-pw.lock npx playwright test avatar-3d/tests/chibi25.spec.js` (the builder page, no shader
 compiles while the eyes move). Not done: the v2 face is not tagged per feature, so the brow-under-fringe number has no
 v2 "before" figure; hair under a crown on an afro is left sitting on the hair.
+
+## Chibi 2.5 hair pass 2 (2026-10-16)
+
+Owner: "Continue on improving the existing hairstyles and fix floating parts, see-through edges, and add more original
+hair styles (stop reusing the same top front decorations)." Still v2.5 only (a v2 look is byte-identical: the 209
+hashes pass); same two draw calls.
+
+**What was wrong with part A's hair** (measured, `tools/chibi25-xray.mjs` + `tools/chibi25-hair-audit.mjs`): the cap and
+the back were open sphere segments whose rims stood up to 2 cm off the skin, every lock was a tube with an open root,
+and every lock's END CAP was wound inside out — so from the back, the top and below you looked straight through the
+hair (the material is front-side only). Seen-through pixels over eight angles, the 30 older styles together:
+**15,248 → 525** (bald alone scores 16: the brows and lids are hair-coloured). Six styles shared one seven-lock
+fringe, four one combed set, two one blunt sheet.
+
+**How it is built now** (`js/chibi25-hair.js`, one function per style in `STYLES`, helpers in `buildHair25`):
+
+* `shell({ edge, hole, t })` — the hair laid ON the skull, read off the same head rings the face is built from
+  (`headRings`), so it fits every head shape and race. `edge(phi)` is the hairline height at each bearing
+  (`hairline({ f, t, sb, e, b, n, skew })`: forehead, temple, sideburn, over the ear, behind it, nape); the edge rows
+  dive 1.2 cm under the skin, so there is no rim to look past. The pole is one point. `SAG` (9 mm) keeps a stubble shell
+  outside the skull's 20-sided rings and ring creases (they poked through as skin flecks at 5 mm). The forehead
+  triangles are split off as the style's FRONT (`hair:front`), normals computed first so there is no seam.
+* `strand(pts, widths)` — a flattened ribbon lying flat on the head, both ends capped (wound opposite ways), the side
+  direction carried from ring to ring where the strand points straight out (spikes, brush tufts twisted inside out
+  before), and lifted 0/5/10 mm in turn past its root so neighbouring ribbons never share a surface.
+* `slab({ ph, y, lift, thick })` — hanging hair as a closed solid (walls on four sides); `braid()` beads that overlap.
+* Points come from `S(phi, y, lift)` (a point on the scalp at height y, bearing phi) and `T3(theta, phi, lift)`, never
+  fixed numbers on a round head.
+* Fit rules added: `flower` is a `spot` (hair under the flower lies flat); a helm whose back brim is under 0.25 (war
+  helm) tucks hair hanging by the cheeks; a lowered hood (`backPad`) tucks hair hanging down the back.
+
+**New styles (13, all `bespoke`, each with its own 2D picture):** crown_braid (Braided crown), side_shave (Side shave),
+wolf_cut (Wolf cut), half_up (Half-up knot), ribbon_loops (Ribbon loops), cornrows, warrior_braids (Warrior braids),
+feathered (Feathered), curly_bob (Curly bob), puff (Top puff), rolled_tail (Rolled tail), bowl (Bowl cut), court_cut
+(Court cut). Part A's ten new styles had 2D pictures that were aliases of older ones; each draws its own now.
+
+**Fronts, one per style:** buzz squared hairline · short tousled locks to the right · side_part deep left part sweeping
+right · bangs blunt slab · bob arched fringe with a rolled hem · long curtain bangs from a centre part · wavy off-centre
+S-waves · ponytail combed grooves + one loose temple strand · bun swept UP to the bun · buns centre part split to two
+buns · mohawk solid fin curling forward · spiky spikes standing up off the hairline · curly a row of curls · afro a
+rolled rim · braids zigzag part + wings · pixie feathery wisps to the left · slicked combed straight back · hood_hair
+(Shaggy) uneven points · tonsure rolled monk fringe · horns_hair jagged out-curling locks · undercut comb-over lifted at
+the front · topknot high hairline, grooves converging on the knot · high_ponytail two face-framing strands · twin_tails
+sawtooth · messy upward cowlicks · pompadour quiff · locs short locs at the temples · long_braid French braid from the
+forehead · mullet flat-top brush · side_swept one big swoop · crown_braid the braid over the forehead · side_shave long
+flop to the right · wolf_cut heavy V-point fringe · half_up strands tucked behind the ears · ribbon_loops split fringe,
+forehead clear in the middle · cornrows row starts · warrior_braids widow's peak ridge · feathered wings flicked back ·
+curly_bob short corkscrews · puff swirled baby hairs · rolled_tail two rolls either side of a part · bowl thick rim ·
+court_cut sparse wisps. The test fingerprints every `hair:front` piece and fails if two styles share one.
+
+**Measured** (all 43 styles + bald): floating pieces 0 (gap to the scalp or a neighbour chained back to it ≤ 5 mm),
+inside-out pieces 0, open edges in the air 0, coincident surfaces 0 (> 3% within 0.2 mm facing the same way), shared
+front pieces 0; seen-through ≤ 25 px over bald on every style. Hair x headwear: 1,036 pairs, mean poke-through 7.61%
+(v2) → **0.42%** (part A: 0.8%). Budget: every style on the heaviest class look (warrior, no hat) is under 8,500
+(highest: warrior_braids 8,403, feathered 8,379, cornrows 8,341, locs 8,331); Emberveil class looks max 8,355.
+
+**Tools and pages**: `tools/chibi25-hair-audit.mjs` (per-style floating / flipped / open / z-fight / front
+fingerprints), `tools/chibi25-xray.mjs ids [png]` (see-through counts), `chibi25-sheet.html?slot=hair&views=all`
+(eight angles: front, three quarters, side, back three quarters, back, other side, top, below) and `&xray=1` (back faces
+of the hair painted magenta, hair drawn green); the sheet page has links to these at the top.
+**Tests**: `node --test avatar-3d/tests/chibi25-hair.test.js` (~70 s) and
+`flock /tmp/claude-1000/farhold-pw.lock npx playwright test avatar-3d/tests/chibi25-hair.spec.js`.
+
+**Not done / left**: hair is still only skinned to the head (and the chest for hanging pieces) — a hanging curtain can
+separate from the cap a little in a big nod, which no test measures in motion; curls and braids are low-poly beads by
+design; the bowl and the braided crown read slightly hat-like from the side.
 
 ## Chibi 2.5 part B — the body (2026-10-16)
 

@@ -76,6 +76,49 @@ const hook = http.createServer(async (req, res) => {
       W.transfer(o, hm.r, { x: hm.x.x - 2.2, z: hm.x.z + 0.6 }, 'test');
       return send(200, { ok: true, x: hm.x.x, z: hm.x.z, room: hm.r.id });
     }
+    // [Packs] (2026-10-16): put the player beside a wandering pack (of a composition, with its leader when asked) out in the
+    // wilds, its bodies standing; `rest` makes it rest there (a crew's fire, a hunt); `/wild {kind, arg}` starts a wild event
+    if (req.url === '/pack') {
+      const pv = W.P.get(b.province || 'torbor_downs'), room = pv.copies[0];
+      const P = room.packs; if (!P) return send(404, { ok: false, why: 'no packs' });
+      const pk = P.packs.find(q => !q.gone && !q.event && (!b.comp || q.comp === b.comp) && (!b.lead || q.lead));
+      if (!pk) return send(404, { ok: false, why: 'no such pack' });
+      const h = pk.route.line.at(pk.s), off = +b.off || 40;
+      if (o.room !== room) W.transfer(o, room, { x: h.x + off, z: h.z }, 'test');
+      else { o.entity.moveTo(h.x + off, h.z, undefined, true); const c = room.clients.get(o.entity.id); if (c) c.selfDirty = true; }
+      o.roadNextAt = Infinity;
+      setTimeout(() => { if (!pk.live) P.materialise(pk); if (b.rest) setTimeout(() => P.restNow(pk), 1500); }, 600);
+      return send(200, { ok: true, comp: pk.comp, name: pk.name, lead: pk.lead ? pk.lead.name : null, x: h.x, z: h.z, bodies: pk.members.length + (pk.lead ? 1 : 0) });
+    }
+    if (req.url === '/tough') {      // [Packs] a spec's camera body that nothing can kill (the shots are of the world, not of a fight's outcome)
+      const u = o.entity.r && o.entity.r.unit; if (u) { u.maxHp = u.hp = 1e7; }
+      return send(200, { ok: !!u });
+    }
+    if (req.url === '/packat') {      // [Packs] the live pack nearest this player: where its bodies (and its quarry, its fire) are
+      const room = o.room, P = room.packs; if (!P) return send(404, { ok: false });
+      let best = null, bd = Infinity;
+      for (const pk of P.packs) if (pk.live) { const w = pk.ents.find(x => x.e && !x.e.dead); if (!w) continue; const d = Math.hypot(w.e.x - o.entity.x, w.e.z - o.entity.z); if (d < bd) { bd = d; best = pk; } }
+      if (!best) return send(200, { ok: false });
+      const al = best.ents.filter(x => x.e && !x.e.dead).map(x => x.e);
+      const cx = al.reduce((a, e) => a + e.x, 0) / al.length, cz = al.reduce((a, e) => a + e.z, 0) / al.length;
+      const R = best.resting;
+      return send(200, { ok: true, comp: best.comp, x: cx, z: cz, n: al.length, resting: R ? R.doing : null, fed: R ? !!R.fed : false, prey: R && R.prey && !R.prey.removed ? { x: R.prey.x, z: R.prey.z, dead: !!R.prey.dead } : null, fire: R && R.fire ? { x: R.fire.x, z: R.fire.z } : null });
+    }
+    if (req.url === '/wild') {
+      const WE = W.wildEvents && W.wildEvents();
+      if (!WE) return send(404, { ok: false });
+      if (b.road) {      // first out onto a road in a level 4+ zone, far from towns, villages and event arenas
+        const pv = W.P.get(b.province || 'torbor_downs'), room = pv.copies[0], g = WE.groundOf(pv);
+        let at = null;
+        for (const rt of g.routes) { for (const p of rt.pts) if (g.townDist(p.x, p.z) > 450 && g.band(p.x, p.z)[0] >= 4 && (pv.L.zoneEvents || []).every(a => Math.hypot(a.x - p.x, a.z - p.z) > 450) && g.villages.every(v => Math.hypot(v.x - p.x, v.z - p.z) > 300)) { at = p; break; } if (at) break; }
+        if (o.room !== room) W.transfer(o, room, { x: at.x, z: at.z }, 'test'); else o.entity.moveTo(at.x, at.z, undefined, true);
+        await new Promise(r => setTimeout(r, 800));
+      }
+      { const o1 = byName(b.name) || o; if (o1.room.kind !== 'wilds') { const pv = W.P.get(b.province || 'torbor_downs'); W.transfer(o1, pv.copies[0], { x: o1.entity.x, z: o1.entity.z }, 'test'); await new Promise(r => setTimeout(r, 800)); } }
+      const o2 = byName(b.name) || o;
+      const r = WE.start(b.kind, o2.room, o2, b.arg || null);
+      return send(200, r ? { ok: true, name: r.ev.name, x: r.at.x, z: r.at.z, uid: r.ev.uid } : { ok: false });
+    }
     if (req.url === '/teleport') {
       const e = o.entity; e.moveTo(+b.x, +b.z, undefined, true);
       const c = o.room.clients.get(e.id); if (c) c.selfDirty = true;

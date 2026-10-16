@@ -45,6 +45,8 @@ export const PROVINCE_DATA = Object.freeze({
   refunds: ['data/provinces/refunds.json', 'placed'],
   givers: ['data/quests/marks/givers.json', 'placed'],
   hazards: ['data/provinces/hazards.json', 'placed'],      // [S] Expansion 1 §4: hot springs, geysers, lava vents, ashfall (tools/content-hazards.mjs)
+  packs: ['data/provinces/packs.json', 'shared'],                 // [Packs] wandering packs: shared rules, each province its own compositions (js/sim/packs.js)
+  'pack-routes': ['data/provinces/pack-routes.json', 'placed'],   // [Packs] where they walk (tools/content-packs.mjs)
 });
 
 /** Keys of a shared home file that describe Torbor's own towns: never lent to another province. */

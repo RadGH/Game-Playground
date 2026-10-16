@@ -331,7 +331,7 @@ test('W25: the icon files keep no look table of their own and wait for the look 
   const core = src('js/client/ui/inv-core.js'), icons = src('js/client/ui/item-icons.js');
   assert.doesNotMatch(core, /ARMOUR_PARTS|PLAIN_HELD/); assert.doesNotMatch(icons, /heldLookFor|offhandLookFor|farhold\/js\/rpg/);
   assert.match(icons, /wornPart\(item, slot, gearOpts\(/); assert.match(icons, /if \(!lookDataReady\(\)\) \{ loadLooks\(\); return null; \}/);
-  assert.match(icons, /const VERSION = 'v5'/, 'the old pictures are not served from the cache (v5: the mannequin, 2026-10-14)');
+  assert.match(icons, /const VERSION = 'v([5-9]|\d{2,})'/, 'the old pictures are not served from the cache (v5: the mannequin, 2026-10-14; v6: Chibi 2.5, 2026-10-16)');
 });
 
 // ---------------------------------------------------------------------------------------------------- W11 / W23

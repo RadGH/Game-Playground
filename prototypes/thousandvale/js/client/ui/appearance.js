@@ -8,10 +8,12 @@
 //   ed.open({ look, avatar, mode: 'title'|'barber', price })    // avatar = the Chibi 2 avatar you look like now
 
 import { h, createPanel } from '../ui-panel.js';
-import { FACE_SLOTS, BODY_DIALS, PALETTES, cleanCustom, customFrom, lookWith, lookCustom, diffCustom, mergeCustom, barberCost, freshCustom } from './appearance-core.js';
+import { FACE_SLOTS, BODY_DIALS, BODY_PICKS, PART_NAMES, slotIds, PALETTES, cleanCustom, customFrom, lookWith, lookCustom, diffCustom, mergeCustom, barberCost, freshCustom } from './appearance-core.js';
 import { barberSaveText, barberFree } from './pt9-core.js';
 
 const PRETTY = id => String(id).replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+/** A part's menu name: Chibi 2.5's own label for its new ids, else the id made readable. */
+const NAME = (slot, id) => PART_NAMES[slot]?.[id] || PRETTY(id);
 
 export function createAppearanceEditor({ parent = null, races = [], raceNames = {}, onChange, onSave, onCancel, avatarFor }) {
   const E = { look: null, custom: null, start: null, mode: 'title', price: 0, saved: false, base: null, stored: null, bill: null };
@@ -60,6 +62,13 @@ export function createAppearanceEditor({ parent = null, races = [], raceNames = 
   function setSlot(slot, id) { if (slot === 'headShape') E.custom.headShape = id; else E.custom[slot] = { ...(E.custom[slot] || {}), id }; changed(); draw(); }
   function setColor(slot, color) { if (slot === 'skin') E.custom.body = { ...(E.custom.body || {}), skin: color }; else E.custom[slot] = { ...(E.custom[slot] || { id: FACE_SLOTS.find(s => s.slot === slot).ids[0] }), color }; changed(); draw(); }
   function setDial(k, v) { E.custom.body = { ...(E.custom.body || {}), [k]: v }; changed(); }
+  // Chibi 2.5: a body choice from a list (shape, posture) and a field on a part (pupil, iris, odd eye, brow thickness…)
+  function setPick(k, v) { E.custom.body = { ...(E.custom.body || {}), [k]: v }; changed(); draw(); }
+  function setField(slot, key, v, redraw = true) {
+    const cur = { ...(E.custom[slot] || { id: FACE_SLOTS.find(s => s.slot === slot).ids[0] }) };
+    if (v == null) delete cur[key]; else cur[key] = v;
+    E.custom[slot] = cur; changed(); if (redraw) draw();
+  }
 
   function draw() {
     // play-test 7 V5: a change (Beard, a colour…) rebuilds the rows — keep where the player had scrolled to, in the list and in the window
@@ -81,15 +90,29 @@ export function createAppearanceEditor({ parent = null, races = [], raceNames = 
       const v = E.custom.body?.[d.key] ?? (d.min + d.max) / 2;
       rows.push(h('label.ap-row.dial', {}, h('span.ap-label', {}, d.label), h('input', { type: 'range', min: d.min, max: d.max, step: 0.01, value: String(v), dataset: { dial: d.key }, onchange: e => setDial(d.key, +e.target.value) })));
     }
+    for (const p of BODY_PICKS) {
+      const cur = E.custom.body?.[p.key] || p.ids[0];
+      rows.push(h('div.ap-row.part', { dataset: { pick: p.key } }, h('span.ap-label', {}, p.label),
+        h('select', { 'aria-label': p.label, onchange: e => setPick(p.key, e.target.value) }, ...p.ids.map(id => h('option', { value: id, selected: id === cur }, p.names[id] || PRETTY(id))))));
+    }
     for (const s of FACE_SLOTS) {
       const cur = s.slot === 'headShape' ? E.custom.headShape : E.custom[s.slot]?.id;
-      const idx = Math.max(0, s.ids.indexOf(cur));
-      const step = k => setSlot(s.slot, s.ids[(idx + k + s.ids.length) % s.ids.length]);
+      const ids = slotIds(s, E.look.race);              // ears: the shapes that suit your people first
+      const idx = Math.max(0, ids.indexOf(cur));
+      const step = k => setSlot(s.slot, ids[(idx + k + ids.length) % ids.length]);
       rows.push(h('div.ap-row.part', { dataset: { slot: s.slot } }, h('span.ap-label', {}, s.label),
         h('button.ghost.small.ap-step', { type: 'button', 'aria-label': `Previous ${s.label}`, onclick: () => step(-1) }, '‹'),
-        h('select', { 'aria-label': s.label, onchange: e => setSlot(s.slot, e.target.value) }, ...s.ids.map(id => h('option', { value: id, selected: id === cur }, PRETTY(id)))),
+        h('select', { 'aria-label': s.label, onchange: e => setSlot(s.slot, e.target.value) }, ...ids.map(id => h('option', { value: id, selected: id === cur }, NAME(s.slot, id)))),
         h('button.ghost.small.ap-step', { type: 'button', 'aria-label': `Next ${s.label}`, onclick: () => step(1) }, '›')));
       if (s.color && !(s.slot === 'facialHair' && (cur || 'none') === 'none') && !(s.slot === 'hair' && cur === 'bald') && !(s.slot === 'accessory' && (cur || 'none') === 'none')) rows.push(swatches(`${s.label} colour`, s.slot, PALETTES[s.color], E.custom[s.slot]?.color));
+      if ((cur || 'none') !== 'none' && cur !== 'bald') for (const f of s.fields || []) {
+        if (f.when && !f.when.includes(cur)) continue;
+        const v = E.custom[s.slot]?.[f.key];
+        if (f.type === 'pick') rows.push(h('div.ap-row.part', { dataset: { field: s.slot + '.' + f.key } }, h('span.ap-label', {}, f.label),
+          h('select', { 'aria-label': f.label, onchange: e => setField(s.slot, f.key, e.target.value) }, ...f.ids.map(id => h('option', { value: id, selected: id === (v || f.ids[0]) }, f.names?.[id] || PRETTY(id))))));
+        else if (f.type === 'range') rows.push(h('label.ap-row.dial', {}, h('span.ap-label', {}, f.label), h('input', { type: 'range', min: f.min, max: f.max, step: 0.01, value: String(v ?? f.def), dataset: { field: s.slot + '.' + f.key }, onchange: e => setField(s.slot, f.key, +e.target.value, false) })));
+        else if (f.type === 'color') rows.push(swatches(f.label, s.slot, PALETTES[f.palette], v, f));
+      }
     }
     const costTxt = '';
     panel.setTitle(E.mode === 'barber' ? 'The Barber' : 'Customize Appearance', E.mode === 'barber' ? 'A new look, if you can sit still' : 'Overrides your calling\'s default face');
@@ -107,9 +130,12 @@ export function createAppearanceEditor({ parent = null, races = [], raceNames = 
     // (a layout that has not settled yet clamps scrollTop to 0: set it again once it has)
     requestAnimationFrame(() => { const l = panel.root.querySelector('.ap-body'); if (l && l.scrollTop !== keep[0]) l.scrollTop = keep[0]; if (panel.body.scrollTop !== keep[1]) panel.body.scrollTop = keep[1]; });
   }
-  function swatches(label, slot, list, cur) {
-    return h('div.ap-row.sw', { dataset: { swatch: slot } }, h('span.ap-label', {}, label), h('div.ap-swatches', {}, ...list.map(c =>
-      h('button.ap-sw', { type: 'button', 'aria-label': `${label} ${c}`, 'aria-pressed': String((cur || '').toLowerCase() === c), style: `background:${c}`, onclick: () => setColor(slot, c) }))));
+  function swatches(label, slot, list, cur, field = null) {
+    const pick = c => (field ? setField(slot, field.key, c) : setColor(slot, c));
+    return h('div.ap-row.sw', { dataset: { swatch: field ? slot + '.' + field.key : slot } }, h('span.ap-label', {}, label), h('div.ap-swatches', {},
+      ...(field?.clear ? [h('button.ghost.small.ap-sw-clear', { type: 'button', 'aria-pressed': String(!cur), onclick: () => pick(null) }, field.clear)] : []),
+      ...list.map(c =>
+      h('button.ap-sw', { type: 'button', 'aria-label': `${label} ${c}`, 'aria-pressed': String((cur || '').toLowerCase() === c), style: `background:${c}`, onclick: () => pick(c) }))));
   }
   return { open, panel, get look() { return E.look ? current() : null; }, get isOpen() { return panel.isOpen; } };
 }

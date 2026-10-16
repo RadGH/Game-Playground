@@ -19,8 +19,11 @@ export const CHIBI25_OPTIONS = {
   face: {
     hair: slot(
       ['bald', 'buzz', 'short', 'side_part', 'bangs', 'bob', 'long', 'wavy', 'ponytail', 'bun', 'buns', 'mohawk', 'spiky', 'curly', 'afro', 'braids', 'pixie', 'slicked', 'hood_hair', 'tonsure', 'horns_hair'],
-      ['undercut', 'topknot', 'high_ponytail', 'twin_tails', 'messy', 'pompadour', 'locs', 'long_braid', 'mullet', 'side_swept'],
-      { undercut: 'Undercut', topknot: 'Top knot', high_ponytail: 'High ponytail', twin_tails: 'Twin tails', messy: 'Messy', pompadour: 'Pompadour', locs: 'Locs', long_braid: 'Long braid', mullet: 'Mullet', side_swept: 'Side swept' }),
+      ['undercut', 'topknot', 'high_ponytail', 'twin_tails', 'messy', 'pompadour', 'locs', 'long_braid', 'mullet', 'side_swept',
+        // hair pass 2 (2026-10-16): thirteen more, each with its own front and silhouette
+        'crown_braid', 'side_shave', 'wolf_cut', 'half_up', 'ribbon_loops', 'cornrows', 'warrior_braids', 'feathered', 'curly_bob', 'puff', 'rolled_tail', 'bowl', 'court_cut'],
+      { crown_braid: 'Braided crown', side_shave: 'Side shave', wolf_cut: 'Wolf cut', half_up: 'Half-up knot', ribbon_loops: 'Ribbon loops', cornrows: 'Cornrows', warrior_braids: 'Warrior braids', feathered: 'Feathered', curly_bob: 'Curly bob', puff: 'Top puff', rolled_tail: 'Rolled tail', bowl: 'Bowl cut', court_cut: 'Court cut',
+        undercut: 'Undercut', topknot: 'Top knot', high_ponytail: 'High ponytail', twin_tails: 'Twin tails', messy: 'Messy', pompadour: 'Pompadour', locs: 'Locs', long_braid: 'Long braid', mullet: 'Mullet', side_swept: 'Side swept' }),
     eyes: slot(
       ['round', 'almond', 'narrow', 'wide', 'sleepy', 'angry', 'dot', 'anime', 'happy', 'wink', 'hollow', 'slit', 'tired', 'glow', 'glow_tear'],
       ['cat', 'doe', 'droopy', 'sharp', 'button', 'sparkle', 'hooded', 'lashes', 'heart'],

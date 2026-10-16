@@ -119,6 +119,10 @@ test('the phone layout: ONE switch (on since the owner approved it), chosen auto
   assert.equal(decideLayout({ phone: true }), 'phone'); assert.equal(decideLayout({ phone: false }), 'desktop');
   assert.equal(decideLayout({ phone: true, choice: 'desktop' }), 'desktop'); assert.equal(decideLayout({ phone: false, choice: 'phone' }), 'phone');
   assert.equal(decideLayout({ phone: true, enabled: false }), 'desktop'); assert.equal(decideLayout({ phone: false, asked: 'phone', enabled: false }), 'phone');
+  // 2026-10-16: the controller layout — a pad in use wins on Automatic (also on a phone), Desktop keeps the desktop, Controller forces it
+  assert.equal(decideLayout({ pad: true }), 'pad'); assert.equal(decideLayout({ pad: true, phone: true }), 'pad');
+  assert.equal(decideLayout({ pad: true, choice: 'desktop' }), 'desktop'); assert.equal(decideLayout({ pad: false, choice: 'pad' }), 'pad');
+  assert.equal(decideLayout({ pad: false, asked: 'pad' }), 'pad'); assert.equal(decideLayout({ pad: true, asked: 'desktop' }), 'desktop');
   assert.doesNotMatch(src('index.html'), /data-layout/);
   const setters = ['js/client/main.js', 'js/client/hud.js', 'js/client/controls.js'].filter(f => /dataset\.layout\s*=|data-layout/.test(src(f)));
   assert.deepEqual(setters, [], 'only input/layout.js may set data-layout');
@@ -130,4 +134,22 @@ test('the phone layout: ONE switch (on since the owner approved it), chosen auto
     for (const s of sel.split(/,\s*(?![^()]*\))/)) if (!s.trim().startsWith('html[data-layout="phone"]')) bad.push(s.trim().slice(0, 80));
   }
   assert.deepEqual(bad, []);
+});
+
+test('the controller layout (2026-10-16): its stylesheet only applies under html[data-layout="pad"]; every menu tile is a real window or action', async () => {
+  const css = src('css/layout-pad.css').replace(/\/\*[\s\S]*?\*\//g, '');
+  const bad = [];
+  for (const m of css.matchAll(/(^|[{}])\s*([^{}@]+?)\s*\{/g)) {
+    const sel = m[2].trim(); if (!sel || /^(from|to|\d+%)/.test(sel)) continue;
+    for (const s of sel.split(/,\s*(?![^()]*\))/)) if (!s.trim().startsWith('html[data-layout="pad"]') && !s.trim().startsWith('html:not([data-layout="pad"]) .pad-only')) bad.push(s.trim().slice(0, 80));
+  }
+  assert.deepEqual(bad, []);
+  assert.match(src('index.html'), /css\/layout-pad\.css/);
+  const { PAD_MENU_TILES, auditBindings } = await import('../../js/client/input/bindings.js');
+  assert.deepEqual(auditBindings(), []);
+  for (const id of ['bag', 'sheet', 'skills', 'perks', 'journal', 'map', 'party', 'mail', 'market', 'settings', 'logout']) assert.ok(PAD_MENU_TILES.some(t => t.id === id), `the controller menu has ${id}`);
+  // the panels a tile names are the ones main.js's PANELS table carries (menubar ids, party-hub tabs, ui5/ui8 panels)
+  const main = src('js/client/main.js');
+  for (const t of PAD_MENU_TILES.filter(t => t.panel)) assert.ok(new RegExp(`\\b${t.panel}\\b`).test(main) || ['sheet', 'feedback', 'meter', 'map', 'journal', 'skills', 'perks'].includes(t.panel), `${t.id}: main.js has no ${t.panel} window`);
+  assert.match(main, /panels: \(\) => PANELS/);
 });

@@ -311,7 +311,7 @@ const ui = createUiSuite({ net: () => S.net, hud, room: () => S.room, actors, ob
 const ui2 = createUi2({ net: () => S.net, atlas: ui.atlas, hud, actors, controls, chat, social, friends, bag, help, account, objects, worldUi, renderer: view.renderer, scene,
   me: () => (S.selfId != null && S.phase === 'world' ? { id: S.selfId, x: S.predictor.pos.x, z: S.predictor.pos.z, level: S.self.level, name: S.self.name, dead: S.self.dead, char: S.net?.joined?.you?.char ?? null } : null),
   self: () => S.self, targetId: () => S.target, setTarget: id => setTarget(id), infoOf: id => S.mirror.infos.get(id) || null,
-  avatarFor, createBody: async av => (await import('../../../../avatar-3d/js/chibi2.js')).createChibi2Character(av), defaultLook, races: PLAYABLE_RACES, raceNames: RACE_NAMES,
+  avatarFor, createBody: async av => (await import('./chibi-version.js')).createTvBody(av), defaultLook, races: PLAYABLE_RACES, raceNames: RACE_NAMES,
   titleLook: () => S.look, onLogout: () => { try { S.net?.leave(); } catch {} backToTitle(); },
   onLookPreview: (look, mode) => previewLook(look, mode), onLookSave: look => { S.look = look; store.set('look', look); previewLook(look, 'title'); if (S.titleStep === 'look') toKit(); } });
 // play-test 5 (created BEFORE the key handler below, so a bite's Space / E reaches the fishing prompt first)
@@ -320,7 +320,7 @@ const ui5 = createUi5({ atlas: ui.atlas, objects, inDungeon: () => !!D.view, loo
   targetId: () => S.target, setTarget: id => setTarget(id), stats: () => ({ fps: FPS.fps }), zoneName: () => document.getElementById('zone-name')?.textContent || null,
   ensureNet: () => kitNet(), onKitPreview: g => { S.titleGear = g; previewLook(S.look, 'title'); }, onKitBack: () => { if (S.phase === 'title') { S.titleGear = null; toAppearance(); } }, onKitCreate: c => { S.kit = c; enterWorld(); } });
 // T27: one binding table (js/client/input/bindings.js) drives the keyboard, the gamepad, the hints and — when switched on — touch
-const input = installInput({ controls, hud, setTarget: id => setTarget(id), targetId: () => S.target, pause: () => ui2.escape(), inWorld: () => S.phase === 'world', dead: () => S.self.dead, settings: ui2.settings, chat: () => chat.focus(), cycleTarget: any => cycleTarget(any),
+const input = installInput({ controls, hud, setTarget: id => setTarget(id), targetId: () => S.target, pause: () => ui2.escape(), panels: () => PANELS /* 2026-10-16: the controller menu's tiles (input/pad-layout.js) */, inWorld: () => S.phase === 'world', dead: () => S.self.dead, settings: ui2.settings, chat: () => chat.focus(), cycleTarget: any => cycleTarget(any),
   // Y34/Y35/Y36 (G2): what the phone's own controls need to know and do (docs/requests.md "Round 10 contracts — G")
   self: () => (S.selfId != null && S.phase === 'world' ? { x: S.predictor.pos.x, z: S.predictor.pos.z, yaw: S.lastInput?.yaw ?? controls.cam.yaw, mount: S.self.mount || null, calling: S.mountCall ? { at: S.mountCall.at, until: S.mountCall.until } : null, dead: !!S.self.dead, room: S.room?.id ?? null, indoors: !!D.view } : null),
   mount: () => toggleMount(), attackButton: () => attackButton(), tracker: () => ui10,
@@ -336,7 +336,7 @@ window.tvui11 = ui11;
 // W9 (P-client): professions — the 3D side and the interface's controller
 const profView = createProfView(scene, { actors, objects, camera, groundY: (x, z) => groundY(x, z), selfId: () => S.selfId });
 const prof = createProf({ net: () => S.net, hud, bag, sheet: ui5.sheet, journal: ui.journal }); prof.setView(profView);
-const PANELS = { ...ui5.panels, ...ui8.panels, party: { toggle: () => social.toggleMenu() }, bag: { toggle: () => bag.toggle() }, friends: friends.panel, guild: guild.panel, mail: mail.panel, market: market.panel, callboard: callboard.panel, account: account.panel, help, ...ui.panels };
+const PANELS = { ...ui5.panels, ...ui8.panels, party: { toggle: () => social.toggleMenu() }, bag: { toggle: f => bag.toggle(f) }, friends: friends.panel, guild: guild.panel, mail: mail.panel, market: market.panel, callboard: callboard.panel, account: account.panel, help, ...ui.panels };
 for (const b of menubar.nav.querySelectorAll('.mb-btn')) if (!['party', 'bag'].includes(b.dataset.panel)) b.addEventListener('click', () => PANELS[b.dataset.panel].toggle());
 window.addEventListener('keydown', e => {
   if (S.phase !== 'world' || (document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))) return;

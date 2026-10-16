@@ -16,7 +16,7 @@
 // for movement.
 
 import * as THREE from 'three';
-import { createChibi2Character } from '../../../../avatar-3d/js/chibi2.js';
+import { createTvBody } from './chibi-version.js';      // 2026-10-16: every person is Chibi 2.5 (one switch; ?chibi=2 = the old bodies)
 import { createCreature, randomCreature } from '../../../../avatar-3d/js/creatures.js';
 import { compactCreature } from '../../../../avatar-3d/js/mesh-merge.js';
 import { bodyKindFor } from './body-kind.js';
@@ -155,6 +155,24 @@ export function shapeSpec(shape) {
   return { key: `${shape.id || type}|${type}|${size}|${colors ? JSON.stringify(colors) : ''}|${shape.upright ? 'u' : ''}`, id: shape.id || type, type, size, colors, upright: !!shape.upright };
 }
 
+/**
+ * Chibi 2.5 (2026-10-16): who a person's eyes (and a little of the head) follow. Pure — exported for tests.
+ *   you                -> your target
+ *   a townsperson      -> you, while you stand within NPC_LOOK_M (talking to them, or walking past)
+ *   a player / a humanoid monster -> whatever it is fighting (the server's `tgt`)
+ * Nobody looks at the dead, at themselves, or at anything further than LOOK_MAX_M. -> the actor to look at, or null.
+ */
+export const NPC_LOOK_M = 7, LOOK_MAX_M = 30;
+export function lookTarget(a, { self = null, target = null, byId = () => null } = {}) {
+  if (!a || a.dead || a.shape || !(a.kind === 'player' || a.kind === 'npc' || a.humanoid)) return null;
+  let t = null;
+  if (a.self) t = target;
+  else if (a.kind === 'npc' && !a.hostile) t = self && !self.dead && Math.hypot(self.pos.x - a.pos.x, self.pos.z - a.pos.z) <= NPC_LOOK_M ? self : null;
+  else if (a.tgt != null) t = byId(a.tgt);
+  if (!t || t === a || t.dead) return null;
+  return Math.hypot(t.pos.x - a.pos.x, t.pos.z - a.pos.z) <= LOOK_MAX_M ? t : null;
+}
+
 export function createActors(scene, { plateLayer, camera, quality = 'high', renderer = null, waterAt = null }) {
   const actors = new Map();
   const queue = [];
@@ -232,7 +250,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
           body = createDummyBody(); a.fixed = true; a.flying = false;
         } else if (look?.avatar) {
           // A humanoid monster (brigand, cultist, knight): a Chibi 2 body, scaled up when it is an elite or boss.
-          body = await createChibi2Character(normalizeAvatar(look.avatar), { anims: CHIBI_ANIMS });
+          body = await createTvBody(normalizeAvatar(look.avatar), { anims: CHIBI_ANIMS });
           a.humanoid = true; a.heldId = look.avatar.held?.id || null;      // Z26: the bow a brigand archer looses arrows from (projectiles.js heldOf)
           body.group.scale.setScalar(big); a.builtBig = 1;
         } else {
@@ -242,7 +260,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
         // One draw call per moving part instead of one per eye and toe (Farhold R27 M8).
         if (!body.isProp) try { compactCreature(body); } catch (e) { console.warn('[actors] compact failed', e); }
       } else {
-        body = await createChibi2Character(await avatarFor(a.look), { anims: CHIBI_ANIMS });
+        body = await createTvBody(await avatarFor(a.look), { anims: CHIBI_ANIMS });
       }
       lodStats.buildMs = Math.max(lodStats.buildMs || 0, Math.round(performance.now() - t0));   // wall time, awaits included
       if (!actors.has(a.id) || a.body) { body.dispose?.(); return; }
@@ -475,6 +493,19 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
 
   // --- per frame --------------------------------------------------------------------------------
   const TWIST_MAX = 1.1;          // how far the chest turns on the hips (~63°) before the whole body comes round
+  // Chibi 2.5 eyes: ten times a second each near person is told where to look (the eye driver smooths in between)
+  let selfActor = null;
+  const _look = new THREE.Vector3();
+  function lookFor(a, now, selfPos, targetId) {
+    if (now < (a.lookAtNext || 0)) return;
+    a.lookAtNext = now + 100;
+    if (!selfActor || !selfActor.self || !actors.has(selfActor.id)) selfActor = [...actors.values()].find(x => x.self) || null;
+    const t = lookTarget(a, { self: selfActor, target: targetId != null ? actors.get(targetId) : null, byId: id => actors.get(id) });
+    if (!t) { if (a.lookingAt != null) { a.body.lookAt(null); a.lookingAt = null; } return; }
+    _look.set(t.group.position.x, t.group.position.y + Math.max(0.6, (t.height || 1.6) * 0.82), t.group.position.z);
+    a.body.lookAt(_look, { head: a.kind === 'npc' ? 0.5 : 0.35 });
+    a.lookingAt = t.id;
+  }
   function update(dt, renderTime, { selfPos = null, selfYaw = 0, selfMoving = 0, selfSwim = false, selfAim = null, targetId = null, hoverId = null, sample = null, speed = null } = {}) {
     const now = performance.now();
     // LOD: who gets a body (re-ranked four times a second)
@@ -598,6 +629,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
         continue;
       }
       if (!a.body && !a.building && !queue.includes(a)) queue.push(a);
+      if (a.body?.lookAt) lookFor(a, now, selfPos, targetId);      // Chibi 2.5 eyes + head (lookTarget, below)
       if (a.body) {
         const dCam = Math.hypot(a.pos.x - camera.position.x, a.pos.z - camera.position.z);
         if (dCam > ANIM_NEAR && !a.self) { a.animAcc = (a.animAcc || 0) + dt; if (a.animAcc >= 0.1) { a.body.update(a.animAcc, now / 1000); a.mount?.update(a.animAcc, now / 1000); a.animAcc = 0; } }

@@ -6,6 +6,9 @@ body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.4 syste
 /* contact sheet */
 .sheet-head { display: flex; gap: 16px; align-items: baseline; padding: 8px 16px; }
 .sheet-head h1 { font-size: 18px; margin: 0; }
+.sheet-head { flex-wrap: wrap; }
+.sheet-nav { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 13px; }
+.sheet-nav a { color: #2f5f6a; }
 .sheet { display: grid; grid-template-columns: repeat(var(--cols, 1), max-content); gap: 4px 16px; padding: 0 16px 16px; }
 .sheet-row { display: flex; align-items: center; gap: 2px; background: var(--panel); border: 1px solid var(--line); }
 .sheet-label { width: 120px; padding: 4px 8px; display: flex; flex-direction: column; }

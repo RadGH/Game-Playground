@@ -42,18 +42,20 @@ export function bindingsTab({ redraw }) {
   const save = () => { ctx?.save?.(); redraw(); };
   const tabs = h('div.chips.bind-tabs', { role: 'tablist' }, ...[['keyboard', 'Keyboard'], ['pad', 'Controller'], ['touch', 'Touch']].map(([id, label]) =>
     h('button.chip', { type: 'button', role: 'tab', 'aria-checked': String(sub === id), dataset: { bind: id }, onclick: () => { sub = id; redraw(); } }, label)));
+  // 2026-10-16: the layout choice sits on the Controller tab too (Automatic switches to the controller layout on its own)
+  const layoutRow = () => h('label.set-row', {}, h('span', {}, 'Layout'), h('select', { dataset: { k: 'layout' }, onchange: e => { setLayoutChoice(e.target.value); redraw(); } }, ...LAYOUTS.map(([id, label]) => h('option', { value: id, selected: layoutChoice() === id }, label))));
   if (sub === 'pad') {
     const set = device.glyphs;
-    return [tabs,
+    return [tabs, layoutRow(),
+      h('p.tiny-left', {}, 'Automatic switches to the controller layout while you play with a controller — Menu opens every window, the chat and the quest list fold away — and back as soon as you use the mouse, the keyboard or the screen. Pick Controller or Desktop to keep one.'),
       h('label.set-row', {}, h('span', {}, 'Button names'), h('select', { dataset: { k: 'glyphs' }, onchange: e => { device.setGlyphs(e.target.value); try { localStorage.setItem('tv.glyphs', e.target.value); } catch { /* private window */ } redraw(); } },
         h('option', { value: 'auto', selected: device.userGlyphs === 'auto' }, 'Automatic (from the controller)'), ...GLYPH_SETS.map(s => h('option', { value: s, selected: device.userGlyphs === s }, GLYPHS[s].name)))),
       h('p.tiny-left', {}, ctx?.input?.pad?.padId ? `Connected: ${ctx.input.pad.padId}` : 'No controller seen yet — press any button on it. Browsers only show a page its controllers on a secure address (https).'),
       referenceTable('pad', { set }),
       h('p.tiny-left', {}, 'Controller buttons cannot be moved yet; the keyboard ones can.')];
   }
-  if (sub === 'touch') return [tabs,
-    h('label.set-row', {}, h('span', {}, 'Layout'), h('select', { dataset: { k: 'layout' }, onchange: e => { setLayoutChoice(e.target.value); redraw(); } }, ...LAYOUTS.map(([id, label]) => h('option', { value: id, selected: layoutChoice() === id }, label)))),
-    h('p.tiny-left', {}, 'Automatic uses the phone layout on a touch screen whose short side is under 500 px, and the desktop one everywhere else. Pick one here to force it on this device.'),
+  if (sub === 'touch') return [tabs, layoutRow(),
+    h('p.tiny-left', {}, 'Automatic uses the phone layout on a touch screen whose short side is under 500 px, the controller layout while a controller is in use, and the desktop one everywhere else. Pick one here to force it on this device.'),
     h('button.ghost.wide', { type: 'button', dataset: { act: 'explain' }, hidden: !ctx?.input?.touch, onclick: () => { document.querySelector('#panel-settings .tvp-x')?.click(); setTimeout(() => ctx?.input?.touch?.explain?.(), 80); } }, 'Show me what the buttons do'),
     touchControlsTable(), referenceTable('touch')];
   const row = a => {

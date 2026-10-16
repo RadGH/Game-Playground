@@ -53,6 +53,8 @@ import { createSystemMail, SYSMAIL } from './sysmail.js';
 import { createFeedback, NUDGE } from './feedback.js';
 import { createAngling } from './angling.js';
 import { createHazards } from './hazards.js';      // [S] Expansion 1 §4
+import { createPackWorld } from './pack-world.js';      // [Packs] wandering packs (owner 2026-10-16)
+import { createWildEvents } from './wild-events.js';      // [Packs] the six wild events (owner 2026-10-16)
 import { createProfessions } from './professions.js';      // W9 (P-core)
 import { configureEconomy, economy, chestGold, treasureGold, eventGold, travelFare as fareOf, cartFare, withEconomy, clearProvinceEconomies } from './economy-knobs.js';
 import { mountRefusal, mountSpeedMul, dismounts, MOUNT_RULES } from '../rules/mount.js';   // stream C's riding rules (when, how fast, what throws you)
@@ -875,6 +877,7 @@ export function createProvince(opts) {
     if (d.waystone) return discover(o, obj);
     if (d.treasure) return treasureUse(o, obj);
     if (d.road && roadOf(o).use(o, obj)) return;                          // S5: a road event's chest / captive
+    if (d.rift && wildEvents && wildEvents.use(o, obj)) return;           // [Packs] a rift: set a seal while it falters
     // W5 (round 8): an ox cart — the parked cart itself answers with the route list; a carter answers as an NPC and the list follows
     // Y15 (round 10): Angling is learned from an angler — free, with the starting rod (existing anglers already know it)
     let taught = null;
@@ -1349,6 +1352,7 @@ export function createProvince(opts) {
       }
     }
     zoneEventsTick();
+    if (wildEvents) { try { wildEvents.tick(); } catch (err) { log('wild events', err && err.stack); } }      // [Packs]
     trackEvents();
   }
   /**
@@ -1557,6 +1561,7 @@ export function createProvince(opts) {
   }
   function observe(ev, r) {
     if (meterOn.size && (ev.type === 'hit' || ev.type === 'miss')) meterFeed(ev, r);
+    if (packWorld && r.packs) packWorld.observe(ev, r);      // [Packs] who is fighting which pack
     if (ev.type === 'hit') crowdOnRare(ev, r);
     if (ev.type === 'hit' || ev.type === 'die') contribute(ev, r);
     if ((ev.type === 'hit' && ev.kind === 'dmg' && (ev.n || 0) > 0) || ev.type === 'die') {      // Q16: a hit (unless the mount keeps calm) or a death unhorses you
@@ -2955,7 +2960,7 @@ export function createProvince(opts) {
     if ((before && before.race) !== after.race) sum = P.everything;
     else {
       if (!same(idOf(a.hair), idOf(b.hair))) sum += P.hair;
-      if (!same(a.hair && a.hair.color, b.hair && b.hair.color)) sum += P.hairColour;
+      if (!same(a.hair && a.hair.color, b.hair && b.hair.color) || !same(a.hair && a.hair.color2, b.hair && b.hair.color2)) sum += P.hairColour;   // (Chibi 2.5: the second colour too)
       if (!same(a.facialHair, b.facialHair)) sum += P.beard;
       if (!same(a.eyes, b.eyes)) sum += P.eyes;
       if (['headShape', 'nose', 'mouth', 'brows', 'ears', 'extras'].some(k => !same(a[k], b[k])) || (before && before.seed) !== after.seed) sum += P.face;
@@ -3666,6 +3671,11 @@ export function createProvince(opts) {
   }
 
   // ---- tick ----
+  // [Packs] (owner 2026-10-16): wandering packs in every wilds copy (js/sim/pack-world.js -> js/sim/packs.js); `packs: false` turns them off
+  const packWorld = opts.packs === false ? null : createPackWorld({ P, online, now, isNight: () => isNight(), log, counters, tickMs: TICK_MS });
+  // ...and the wild events (js/sim/wild-events.js): ambush, caravan, night raid, rift, warlord's march, bounty — ordinary zone runs; `wildEvents: false` turns them off
+  const wildEvents = opts.wildEvents === false ? null : createWildEvents({ P, online, zoneRuns, finishEvent: (run, room, res, hear) => finishEvent(run, room, res, hear), frameTo: (run, room) => frameTo(run, room),
+    tellZone: (cl, msg) => tellZone(cl, msg), isNight: () => isNight(), now, wallNow, isNewcomer: o => isNewcomer(o), log, counters });
   function step() {
     const t0 = perfNow();
     ticks++;
@@ -3693,6 +3703,7 @@ export function createProvince(opts) {
     for (const o of online.values()) if (o.mountCast) mountCastTick(o);
     if (ticks % 4 === 1) npcTick(TICK_MS * 4);
     roadsTick();
+    if (packWorld) packWorld.tick();      // [Packs]
     const t = now();
     let started = 0;
     for (const o of online.values()) {
@@ -3829,6 +3840,7 @@ export function createProvince(opts) {
       timeOfDay: Math.round(timeOfDay() * 1000) / 1000,
       sessions: kit.sessions.size, joinQueue: joining.size, warmMs: counters.warmMs || 0,
       travellers: [...rooms.values()].filter(r => r.travellers).map(r => ({ room: r.id, ...r.travellers.stats() })),
+      packs: [...rooms.values()].filter(r => r.packs).map(r => ({ room: r.id, ...r.packs.stats() })),      // [Packs]
       transferMs: { last: counters.transferMs || 0, max: counters.transferMaxMs || 0 },
       // play-test 5: sheets worked out (T18), events ended, feedback, angling
       sheets: { n: counters.sheets || 0, lastMs: counters.sheetMs || 0, maxMs: counters.sheetMaxMs || 0, queue: sheetQueue.size },
@@ -3843,7 +3855,7 @@ export function createProvince(opts) {
     accept, step, init, shutdown, status, rooms, P, online, partyOf, econ, tickStats, owner, counters, trades,
     room: copies[0], townRoom, copies, instances, town, door, gate,
     saveNow, logout, transfer, moveTo, grant, corpses, roadEvents, mute, flushEconomy, newUid, flushJournal, timeOfDay, devSetLevel,
-    carts, ships, shops, meterOn, bagCap, bagFull, keepsakesForTest: o => keepsakes(o), mountBook, isNewcomer, NEWCOMER, realmEvents, liveEventNow: () => liveEvent, mailTo: a => sysmail.mailTo(a), offerRevive, angling, professions, feedback, zoneRuns, kitCache, sheetOf, restack,
+    carts, ships, shops, meterOn, bagCap, bagFull, keepsakesForTest: o => keepsakes(o), mountBook, isNewcomer, NEWCOMER, realmEvents, liveEventNow: () => liveEvent, mailTo: a => sysmail.mailTo(a), offerRevive, angling, professions, feedback, zoneRuns, packWorld, wildEvents: () => wildEvents, kitCache, sheetOf, restack,
     chatterContext: (r, x, z) => chatterContext(provOf(r), r, x, z),
     hazards,      // [S]
     get liveEvent() { return liveEvent; },

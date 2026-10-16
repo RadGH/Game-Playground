@@ -1,0 +1,47 @@
+{
+ "desk25": {
+  "n": 36,
+  "bodies": 29,
+  "full": 29,
+  "allBuiltMs": 79076,
+  "stalls": {
+   "busyLong": 0,
+   "maxBusyMs": 19,
+   "frames": [],
+   "longTasks": 0,
+   "maxTaskMs": 0
+  },
+  "links": 1,
+  "buildMs": 16501
+ },
+ "desk2": {
+  "n": 36,
+  "bodies": 28,
+  "full": 28,
+  "allBuiltMs": 66929,
+  "stalls": {
+   "busyLong": 0,
+   "maxBusyMs": 20,
+   "frames": [],
+   "longTasks": 0,
+   "maxTaskMs": 0
+  },
+  "links": 0,
+  "buildMs": 7222
+ },
+ "phone25": {
+  "n": 20,
+  "bodies": 12,
+  "full": 11,
+  "allBuiltMs": 6457,
+  "stalls": {
+   "busyLong": 0,
+   "maxBusyMs": 13,
+   "frames": [],
+   "longTasks": 0,
+   "maxTaskMs": 0
+  },
+  "links": 0,
+  "buildMs": 3753
+ }
+}

@@ -56,6 +56,11 @@ export function createSkyBox({ base, radius = 2000, gradient = null } = {}) {
         vec3 d = normalize(vDir);
         float e = clamp(asin(clamp(d.y, -1.0, 1.0)) / (PI * 0.5), 0.0, 1.0);
         float u = atan(d.x, -d.z) / (2.0 * PI) + 0.5;
+        // owner 2026-10-16 "a tearing effect seam in the skybox": u jumps 1 -> 0 behind the camera, the screen-space
+        // derivative there is huge and the GPU samples the smallest mip for a one-pixel line. Where u jumps, the same
+        // direction as u+0.5 (shifted) is continuous — use whichever changes less across the pixel (wrapS repeats).
+        float uB = fract(u + 0.5) - 0.5;
+        if (fwidth(uB) < fwidth(u) - 0.0001) u = uB;
         vec3 c;
         if (uReady > 0.5) {
           c = pic(tA, uHA, u, e);

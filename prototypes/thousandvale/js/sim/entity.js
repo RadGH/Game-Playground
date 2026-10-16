@@ -145,6 +145,7 @@ export class Entity {
     if (this.sc && this.sc !== 1) o.sc = this.sc;              // S4: body scale (champions/rares are bigger; a Giant much bigger)
     if (this.ward) o.ward = this.ward;                         // play-test 6 U8: a boss's ward while it holds {max, ms, until}
     if (this.st && this.st.length) o.st = this.st;             // statuses everyone draws (Q8)
+    if (this.kind === 'monster' && this.data && this.data.pack) { o.pack = this.data.pack.lead ? 2 : 1; if (this.data.pack.title) o.title = this.data.pack.title; }      // [Packs] a wandering pack's member (1) / leader (2), and the leader's line over its name
     if ((this.kind === 'object' || this.kind === 'npc') && this.data) {
       const d = this.data;
       if (d.hidden) { o.hidden = 1; if (d.hint) o.hint = d.hint; }

@@ -14,7 +14,8 @@ import { sellPrice, buyRefusal, SHOP_WHY, saleRows } from './pt2-core.js';
 import { hideTip } from './tips.js';
 import { itemCardHtml, rememberItems } from './item-card.js';
 import { RARITY_RANK, rarityOf, slotOf, levelCheck } from './inv-core.js';
-import { tabOf, freeIn } from '../../sim/bag-tabs.js';      // round 11 (#11 / #42): bag tabs; Sell filters by Equipment / Items
+import { tabOf, freeIn } from '../../sim/bag-tabs.js';
+import { mountTip } from './pt11-core.js';      // owner 2026-10-16: a mount row's card on the shop's Buy tab      // round 11 (#11 / #42): bag tabs; Sell filters by Equipment / Items
 
 const SHOP_RANGE = 7;
 const BAG_MAX = 120;
@@ -81,6 +82,15 @@ export function createShop({ net, hud, actors, me, bag }) {
   }
   function paintCard(box, v) {
     const row = saleRows(v.stock).find(r => r.id === S.sel) || null;
+    // owner 2026-10-16 (mobile): a MOUNT row has no item, so the card used to say "point at something" and offered no
+    // Buy button — on a phone (first tap selects, the card's button buys) a mount could never be bought
+    if (row && !row.item && row.mount) {
+      const why = buyRefusal(row, gold(), 99);
+      const card = h('div.shop-cardbody'); card.innerHTML = mountTip(row.mount);
+      box.replaceChildren(card, h('div.row.shop-cardfoot', {}, why ? h('span.bad', {}, why) : h('span.price', {}, goldText(row.price)), h('span.grow'),
+        h('button.primary.small', { type: 'button', disabled: !!why, dataset: { act: 'buy' }, onclick: () => buy(row, why) }, `Buy — ${goldText(row.price)}`)));
+      return;
+    }
     if (!row || !row.item) { box.replaceChildren(h('p.dim', {}, 'Point at something on the shelf to see it against what you are wearing.')); return; }
     const it = row.item.uid == null ? { ...row.item, uid: 'shop:' + S.npc + ':' + row.id } : row.item;
     rememberItems([it]);

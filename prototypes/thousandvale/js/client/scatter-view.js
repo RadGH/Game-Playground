@@ -162,10 +162,11 @@ export async function createScatterView(T, sc, { quality = 'high' } = {}) {
       for (const i of b.items) {
         const pi = P[i]; if (pi === 65535) continue;
         const p = protos[pi];
-        // Z25: a giant (forest.js, 3-5x) keeps its detail further out — as if it stood nearer by its extra height
-        const sz = sc.size ? sc.size[i] : 1, di = Math.hypot(X[i] - cam.x, Z[i] - cam.z) / (sz > 1 ? 1 + (sz - 1) * 0.35 : 1);
+        // Z25: a giant (forest.js, 3-5x) is drawn further out (it stands over the trees round it), but at the same detail
+        // steps as any tree by its real distance — stretching those too put up to 900 full-detail giants in view (+3M triangles)
+        const sz = sc.size ? sc.size[i] : 1, di = Math.hypot(X[i] - cam.x, Z[i] - cam.z), dFar = sz > 1 ? di / (1 + (sz - 1) * 0.2) : di;
         let lvl;
-        if (p.type === 'tree') { if (di > far) continue; lvl = di < R.tree[0] ? 0 : di < R.tree[1] ? 1 : 2; }
+        if (p.type === 'tree') { if (dFar > far) continue; lvl = di < R.tree[0] ? 0 : di < R.tree[1] ? 1 : 2; }
         else { if (di > (p.cls === 'reed' ? R.reed : p.cls === 'far' ? R.tree[1] : R.small)) continue; lvl = 0; }
         const parts = p.meshes[lvl]; if (!parts.length) continue;
         const k = fill[pi][lvl];

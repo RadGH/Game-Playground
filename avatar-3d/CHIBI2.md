@@ -507,6 +507,17 @@ it sits at +x, which is the character's own left when it faces +z.
 Look at them: `prototypes/thousandvale/tests/D/pages/hands.html?cfg=[…]&cam=q` (served by the playground's dev server)
 lays out any list of `{ held, offhand, anim, u }` bodies frozen at a point of a clip.
 
+### A gait carries a one-fist weapon IN the fist (2026-10-15, Thousandvale play-test 11, #62/#63)
+
+`aim()` is a chest-frame direction, so in `walk`/`run` the solved wrist cancelled the whole arm swing: the sword hung at
+one angle while the fist pumped ("does not rotate with the hand"), and run's point sat 53 degrees below level. **Rule:**
+in a gait, a `blade`/`haft`/`wand` (either hand) is aimed once against the arm at the clip's neutral phase (u = 0) and
+that grip turn is kept for the whole cycle (`lockToFist`, pitches in `GAIT_LOCK`; the clip's aim becomes `false`, so
+the follow-through pass does not re-aim it). Staff, polearm, bow, torch, crossbow and a shouldered two-hander keep a
+steady aim. A weapon arm pumps 0.6x in the run. `REST_PITCH.blade` idle/walk is -1.2 (was -0.95). Test:
+`node --test avatar-3d/tests/gait-grip.test.js` (angle to the forearm within 10 degrees over a stride, never in line;
+the run's point above -35 degrees).
+
 ## Gear catalog (2026-10-06, Thousandvale play-test 5: T23 + the models for T15)
 
 **One list of every wearable / holdable Chibi 2 model, old and new**: `avatar-3d/data/gear-catalog.json` (259 rows), read

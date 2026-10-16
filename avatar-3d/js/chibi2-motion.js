@@ -196,7 +196,8 @@ function aim(p, side, pitch, roll = 0, yaw = 0, edgeAxis = '+x') {
 
 /** Where each kind of weapon points at rest, while walking, and at the ready. */
 const REST_PITCH = {
-  blade: { idle: -0.95, walk: -0.95, ready: -2.1 },          // ready (2026-10-06): was -1.85, 31 degrees off a level forearm — the hilt hid in the wrist
+  // idle/walk (2026-10-15, #62): was -0.95, the point 36 degrees below level; ready (2026-10-06): was -1.85, 31 degrees off a level forearm
+  blade: { idle: -1.2, walk: -1.2, ready: -2.1 },
   dagger: { idle: -0.8, walk: -0.8, ready: -1.6 },
   // 2026-09-25: a one-handed hammer, mace or axe hung head-down by the boot at -0.55; carried with
   // the head up and forward it reads as held rather than dragged ("back 45-90 degrees in his hand")
@@ -400,8 +401,43 @@ function poseAt(name, u, ctx) {
     if (kind === 'staff' || kind === 'bow' || kind === 'torch' || kind === 'crossbow') out.aim[s] = [REST_PITCH[kind][one ? 'ready' : 'idle'], 0, 0];
     else fistGrip(p, s, one ? 'ready' : 'idle');
   }
+  if (GAIT_LOCK[name]) lockToFist(p, name, ctx, out.aim);
   for (const s of ['R', 'L']) if (out.aim[s]) aim(p, s, ...withEdge(out.aim[s], h, s));
   return out;
+}
+
+/**
+ * A WEAPON SWINGS WITH THE ARM THAT CARRIES IT (2026-10-15, Thousandvale play-test 11, live reports #62/#63: "when
+ * running the sword does not rotate with the hand at all … drastically tilted downward almost touching the ground").
+ *
+ * `aim()` holds a weapon at a fixed direction in the CHEST's frame. That is right for a strike and for standing, and
+ * wrong for a gait: walk and run pump the arm (run: shoulder ±0.8 rad plus the elbow), and the solved wrist undid all
+ * of it, so the blade hung at one angle while the fist travelled from the hip to the chin — the grip turned ~108
+ * degrees against the forearm every stride, passed straight through it (the hilt in the wrist), and since run aimed at
+ * the walk's -0.95 on a body leaning 0.3 forward, the point sat 53 degrees below level, by the boots.
+ *
+ * So for the one-fist weapons (a blade, a hafted axe/mace/hammer, a wand) a gait aims ONCE, against the arm at the
+ * clip's neutral phase (u = 0, where the swing term is zero), and keeps that grip turn for the whole cycle: the weapon
+ * rides the fist like a dagger does (`fistGrip`). The pitch at that neutral is the gait's own (`GAIT_LOCK`) — run
+ * carries a blade up near level so the back swing does not drive the point into the ground. Long weapons that are
+ * held upright on purpose (staff, polearm, bow, torch, a two-hander on the shoulder) keep their steady aim.
+ */
+const GAIT_LOCK = {
+  walk: { blade: -1.25, haft: -2.0, wand: -1.2 },
+  run: { blade: -2.1, haft: -2.15, wand: -1.8 },
+};
+function lockToFist(p, name, ctx, aims) {
+  const h = ctx.hold, table = GAIT_LOCK[name];
+  const sides = [['R', h.right], ['L', h.left]].filter(([s, kind]) => table[kind] != null && Array.isArray(aims[s]));
+  if (!sides.length) return;
+  // the same clip at its neutral phase: same carry, same arm, no swing
+  const ref = base(ctx), refAims = CLIPS[name](ref, 0, 0, ctx, { pose: ref, bob: 0, rootY: 0, sway: 0, surge: 0, rootZ: 0, aim: null, handsFree: 0, hold: h }) || {};
+  for (const [s, kind] of sides) {
+    const a = refAims[s] || aims[s];
+    aim(ref, s, ...withEdge([table[kind], a[1] ?? 0, a[2] ?? 0], h, s));
+    p['grip' + s] = [...ref['grip' + s]];
+    aims[s] = false;                    // "I set the grip myself": the follow-through pass must not re-aim it
+  }
 }
 
 /** `attack` plays the strike the hands suggest, so a game that only ever asks for `attack` still gets the right one. */
@@ -487,7 +523,10 @@ const CLIPS = {
     p.footR[0] += -0.3 * Math.max(0, -s) + 0.45 * Math.max(0, sin(cy + 0.5)) - p.kneeR[0] * 0.2;
     p.chest[0] += 0.2; p.hips[0] = 0.1; p.head[0] -= 0.14;
     p.hips[1] = s * 0.16; p.chest[1] = -s * 0.24; p.head[1] = s * 0.1;
-    p.armL[0] += -s * 0.8 - 0.1; p.armR[0] += s * 0.8 - 0.1; p.elbowL[0] = -1.25 - Math.max(0, s) * 0.3; p.elbowR[0] = -1.25 - Math.max(0, -s) * 0.3;
+    // a hand carrying a sword, axe or wand pumps less (2026-10-15, #62: the weapon now swings WITH the arm — see
+    // lockToFist — and at the full 0.8 the back swing drove the point into the ground)
+    const kR = GAIT_LOCK.run[ctx.hold.right] != null ? 0.6 : 1, kL = GAIT_LOCK.run[ctx.hold.left] != null ? 0.6 : 1;
+    p.armL[0] += -s * 0.8 * kL - 0.1; p.armR[0] += s * 0.8 * kR - 0.1; p.elbowL[0] = -1.25 - Math.max(0, s) * 0.3; p.elbowR[0] = -1.25 - Math.max(0, -s) * 0.3;
     p.armL[2] -= 0.08; p.armR[2] += 0.08;
     o.bob = -Math.abs(c) * 0.04 + 0.02; o.sway = c * 0.01;
     const aims = carry(p, ctx, 'walk', s);

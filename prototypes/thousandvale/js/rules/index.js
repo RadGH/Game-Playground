@@ -29,6 +29,7 @@ import { makeRng } from './rng.js';
 import { attachEncounters } from './encounter.js';
 import { attachFollowers } from './followers.js';
 import { attachWarbands, escortFor } from './warband.js';
+import { attachPacks, packMember } from './packs.js';      // [Packs] wandering packs (2026-10-16)
 import { allyEffects, aimsAtAlly } from './ally.js';
 import { cardText, whoOf, whoText } from './wording.js';
 import { reviveOf, directHealSlot } from './tv-skills.js';
@@ -255,6 +256,7 @@ export function createRules(host, opts = {}) {
       return e?.r?.unit || null;
     },
   });
+  attachPacks(field);      // [Packs] a pack leader's fall (field.onPackDeath)
   // a siege needs something built to break: the room may hand over `structures(ax, az, bx, bz)` and
   // `strikeStructure(monsterEntity, id)` (no room does yet — Thousandvale v1 has no player building)
   if (host.structures) field.structures = host.structures;
@@ -332,7 +334,7 @@ export function createRules(host, opts = {}) {
       for (const u of list) {
         // M2 perf: a monster asleep (nobody within THINK_RADIUS) changes nothing — sync it once as it
         // falls asleep, then skip it (a province copy holds ~1,300 of them)
-        if (u.asleep && u._sentAsleep) continue;
+        if (u.asleep && u._sentAsleep && u.dying == null) continue;      // [Packs] (a body killed far from every player — a deer a pack ran down — still has to fall)
         let e = u._ent;
         if (!e || e.removed || e.id !== u.id) { e = entOf(u); u._ent = e; }
         if (!e || e.removed) continue;
@@ -642,7 +644,7 @@ export function createRules(host, opts = {}) {
         // ones — no random rank modifiers, none of its Farhold body's own boss phases (E's asks 3/4)
         const script = enc.scriptFor({ defId: def.id, boss: !!rk.boss, rank: rk.rolled ? 'normal' : rk.rank, encounterId: e.data?.encounter || null });   // S4: a rolled champion / rare fights with its modifiers' specials, not the default elite script
         if (script) rk.modifiers = [];
-        const unit = spawnMonster(field, def, e.level || 1, e.x, e.z, { id: e.id, rank: rk.rank, modifiers: rk.modifiers, boss: rk.boss, name: script?.name || rk.name || null });
+        const unit = spawnMonster(field, def, e.level || 1, e.x, e.z, { id: e.id, rank: rk.rank, modifiers: rk.modifiers, boss: rk.boss, name: script?.name || rk.name || (e.data?.pack?.name || null) });
         // owner feedback 8 (W1): an EVENT's monster (a raid wave, its captain) is a raider — the town's guards meet it at
         // its level, and its opening target is the nearest guard, never a newcomer
         if (e.data?.event != null && guards.list.length) { guards.raise(e.level || 1); guards.opening(unit, 'guard'); }
@@ -653,7 +655,8 @@ export function createRules(host, opts = {}) {
           const floor = sizeFloor(engine, rk.rank);
           if ((unit.scale || 1) < floor) { const k = floor / (unit.scale || 1); unit.scale = floor; unit.reach = (unit.reach || 2.2) * (1 + (k - 1) * 0.6); }
           if (rk.rolled) { e.rank = rk.rank; e.setState(64, true); unit.affixed = true; }                  // STATE.elite
-          if (!e.name || rk.name || rk.rolled) e.name = unit.name;
+          if (e.data?.pack?.name || (e.data?.keepName && e.name)) unit.name = e.name = e.data?.pack?.name || e.name;      // [Packs] a pack leader (or a wild event's named leader) keeps the name the world gave it
+          else if (!e.name || rk.name || rk.rolled) e.name = unit.name;
           e.aff = (rk.modifiers || []).map(m => ({ id: m.id, name: m.prefix || m.name || m.id, ...(m.aura ? { aura: m.aura } : {}) }));
         }
         if ((unit.scale || 1) !== 1) e.sc = Math.round(unit.scale * 100) / 100;
@@ -681,9 +684,12 @@ export function createRules(host, opts = {}) {
         e.setMax(unit.maxHp, 0);
         e.setHp(unit.hp);
         // a warband leader brings its escort and standard-bearer (Farhold actors.js spawnPack)
-        if (def.leads?.length && e.data?.escortOf == null && !script) escortFor(field, unit, def);
+        // [Packs] a pack member: weaker, pays less, wakes and leashes with its pack (js/rules/packs.js); a pack leader
+        // brings no escort of its own (the pack IS its escort)
+        if (e.data?.pack) { packMember(unit, e.data.pack); e.setMax(unit.maxHp, 0); e.setHp(unit.hp); }
+        if (def.leads?.length && e.data?.escortOf == null && !script && !e.data?.pack) escortFor(field, unit, def);
         // S4: a Pack-leader brings its own kind (two per `escort` pair), linked to it like a warband's escort
-        const packOf = !script && e.data?.escortOf == null ? escortCount(engine, unit.modifiers || []) : 0;
+        const packOf = !script && e.data?.escortOf == null && !e.data?.pack ? escortCount(engine, unit.modifiers || []) : 0;
         if (packOf > 0) escortFor(field, unit, { leads: Array.from({ length: Math.ceil(packOf / 2) }, () => def.id) });
       }
     });

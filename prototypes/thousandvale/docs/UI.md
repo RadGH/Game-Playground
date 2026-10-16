@@ -204,9 +204,27 @@ Settings > Key bindings > Controller. Hints flip between keys and glyphs by whic
 | D-pad right / down / up / left | next enemy / next party member / previous / clear target |
 | A | what the screen is asking for: rise > hook a bite > use / talk / loot > jump |
 | hold LB | the quick wheel: every window (RB while open: mount, fish, camp, map, help) |
-| View / Menu | map / pause menu |
+| View / Menu | map / the controller menu (every window as a tile; on a keyboard Esc is still the small pause menu) |
+| hold LT + View · LT + Menu | open the chat (with the on-screen keyboard) · show / fold the quest and event trackers |
 | In a window | D-pad or stick moves a focus ring, A presses, B backs out, X = the other click, Y = its card, LB / RB = tabs, right stick scrolls; on the map and the perk forest the ring becomes a pointer you steer (triggers zoom, right stick pans) |
 | Text | pressing A on a text box opens an on-screen keyboard |
+
+### The controller layout (2026-10-16 — owner on a Steam Deck)
+`<html data-layout="pad">` = `css/layout-pad.css` + `js/client/input/pad-layout.js`, switched by `input/layout.js`:
+**Automatic** turns it on whenever a controller is the device in use — on any screen size, and over the phone layout —
+and off when the mouse really moves (60 px), a key is pressed or the screen is touched; debounced 250 ms on / 1.5 s off so
+it never flickers. Settings > Key bindings > Controller (or Touch) > Layout forces Desktop / Phone / Controller
+(`tv.layout`; `?layout=pad` for one visit).
+
+What it changes: **Menu opens the controller menu** — big tiles from `PAD_MENU_TILES` (input/bindings.js): Bag,
+Character, Skills, Perks, Journal, Map · Party, Friends, Guild, Mail, Market, Group Finder, Chat · Settings, Controls,
+What's new, Feedback, Account, Damage meter, Log out. A tile opens its window through main.js's `PANELS` table (the same
+toggles the menu bar uses) or presses the pause menu's own button. **The HUD folds**: no menu bar, no minimap buttons,
+the connection pill only when something is wrong, smaller frames and minimap in the corners, the chat reduced to its last
+three lines that show for 7 s when one arrives and then fade (LT + View opens it whole), the quest / event cards reduced
+to one line under the minimap (LT + Menu unfolds), a hint strip bottom right (Menu · Map · Wheel · Chat). Nothing crosses
+the middle 40 % of the screen. Proof: `tests/G/pad-layout.spec.js` opens every tile on a real server at 1280 x 800 and
+checks the ring, the D-pad, the tabs and B; pictures in `tests/G/shots/pad-layout/`.
 
 **Reaching the game with a pad:** browsers only give a page its gamepads on a secure address. On the LAN use the
 playground's https dev port — `https://<LAN ip>:8441/prototypes/thousandvale/` serves the page (accept the self-signed

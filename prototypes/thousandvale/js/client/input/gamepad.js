@@ -3,7 +3,8 @@
 //   in the world   left stick moves · right stick turns the camera · X strikes · Y B RB RT = skills 1–4 · hold LT for the
 //                  second set (skills 5–6, mount, cast a line, camp, potions on the D-pad) · D-pad right = next enemy,
 //                  down / up = party members, left = clear · A jumps — or uses, hooks, rises when that is what the
-//                  screen is asking for · hold LB = the quick wheel · View = map · Menu = the pause menu
+//                  screen is asking for · hold LB = the quick wheel · View = map · Menu = the controller menu (every
+//                  window as a tile; input/pad-layout.js) · LT + View = chat · LT + Menu = show / fold the trackers
 //   in a window    the focus ring (input/focus.js): D-pad / stick moves, A presses, B backs out, X = the other click,
 //                  Y = its card, LB / RB = tabs, right stick scrolls — a steered pointer on the map and the perk forest
 // Browsers only hand a page its gamepads on a SECURE page (https, or localhost): on the LAN use the https dev port
@@ -67,7 +68,7 @@ export function createGamepad({ api, focus, radial, osk, run }) {
     let id = btn === 'A' && !mod ? aAction() : (mod ? L.mod : L.plain)[btn];
     if (!id) return;
     const a = ACTION_BY_ID[id];
-    if (a.run) { run(a.run, id); return; }
+    if (a.run || id === 'chat') { run(a.run || 'chat', id); return; }     // chat: the input layer opens the box AND the on-screen keyboard
     if (!a.key) return;
     keyDown(a.key); heldAct.set(btn, a.key);
   }
@@ -77,7 +78,11 @@ export function createGamepad({ api, focus, radial, osk, run }) {
     switch (btn) {
       case 'A': focus.press(); break;
       case 'B': document.activeElement?.blur?.();   // the game ignores keys while a text box, list or checkbox has the focus
-        if (!title) keyTap('Escape'); else document.querySelector('#back-front:not([hidden]), .tv-panel:not([hidden]) [data-act="back"]')?.click(); break;
+        if (!title) {
+          // 2026-10-16: a window that does not listen for Esc on window (What's new …) is closed by its own × instead
+          const c = focus.container(); keyTap('Escape');
+          if (c) setTimeout(() => { if (c.isConnected && !c.hidden && c.getClientRects().length && focus.container() === c) c.querySelector('.tvp-x, .cl-x, .gs-x, button[aria-label="Close"]')?.click(); }, 120);
+        } else document.querySelector('#back-front:not([hidden]), .tv-panel:not([hidden]) [data-act="back"]')?.click(); break;
       case 'X': focus.alt(); break;
       case 'Y': (focus.cardOrAlt || focus.details)(); break;      // round 11 (#28): the card, then the other-slot compare
       case 'LB': focus.tab(-1); break;

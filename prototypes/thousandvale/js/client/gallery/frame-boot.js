@@ -25,6 +25,8 @@
   if (G.real) html.dataset.galleryReal = '1';
   // THE phone switch: only the gallery sets it (js/client/input/layout.js keeps the game from doing so until approved).
   if (phone && layout === 'proposed') { html.dataset.layout = 'phone'; html.dataset.variant = G.variant; }
+  // 2026-10-16: the Controller frame's proposed layout is the game's controller layout (css/layout-pad.css)
+  if (device === 'pad' && layout === 'proposed') html.dataset.layout = 'pad';
   // Safe areas: a real phone reports them through env(); inside a desktop frame we draw an iPhone 15 Pro's.
   if (phone && !G.real) {
     var sa = device === 'phone-l' ? { top: 0, right: 59, bottom: 21, left: 59 } : { top: 59, right: 0, bottom: 34, left: 0 };

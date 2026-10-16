@@ -1,0 +1,50 @@
+{
+  "_doc": "Vharlen's wandering packs (the Burning Isle's own bodies only; laid over data/provinces/packs.json key by key, so the rules are the shared ones and only the compositions are the island's). Format: data/provinces/packs.json `_doc`.",
+  "eventMonsters": {
+    "_doc": "What comes out of a rift on the Burning Isle and the warlords that march there (island bodies only).",
+    "rift": [
+      { "upTo": 14, "types": ["vent_wisp", "glasswing", "scoria_crawler"], "guardian": "pumice_golem", "guardianAffixes": ["packleader", "scorched"] },
+      { "upTo": 99, "types": ["vent_wisp", "glasswing", "ashback_salamander"], "guardian": "obsidian_warden", "guardianAffixes": ["packleader", "fiery"] }
+    ],
+    "warlords": [
+      { "upTo": 99, "type": "slagborn_chief", "names": ["Warlord Gharrum Ash-Crowned", "Warlord Vessa Kiln-Heart", "Warlord Ruhk of the Black Slag"], "affixes": ["packleader", "fiery"] }
+    ]
+  },
+  "compositions": {
+    "slagborn_warparty": { "name": "Slagborn War-Party", "kind": "slagborn", "weight": 4,
+      "members": [{ "type": "slagborn_raider", "count": [3, 5] }, { "type": "slagborn_firecaller", "count": [1, 2] }],
+      "leader": { "type": "slagborn_chief", "rank": "champion", "affixes": ["packleader", "fiery"], "chance": 0.7, "names": ["Kharruk Two-Brands", "Ossa Slagmother", "Drumm the Cinder-Tongue", "Varrak Black-Hand"], "title": "War-chief of the party" },
+      "formation": "column", "doing": "camp", "sit": "sit", "fireName": "A slag-fire", "pace": 0.42, "onLeaderFall": "rout", "likes": ["road", "open", "cross"],
+      "says": { "pull": ["Burn them where they stand!", "For the mountain! Take their bones!", "Soft-skin! Feed it to the fire!"], "near": ["The mountain grumbles tonight.", "Keep the coals fed."] } },
+    "crawler_swarm": { "name": "Scoria Crawler Swarm", "kind": "beasts", "weight": 3,
+      "members": [{ "type": "scoria_crawler", "count": [6, 8] }],
+      "formation": "loose", "doing": "graze", "pace": 0.45, "likes": ["open", "valley", "cross"] },
+    "prowler_pack": { "name": "Steamwood Prowlers", "kind": "beasts", "weight": 3,
+      "members": [{ "type": "steamwood_prowler", "count": [4, 6] }],
+      "leader": { "type": "steamwood_prowler", "rank": "champion", "affixes": ["packleader"], "chance": 0.7, "names": ["Sootpaw", "Old Hiss", "the Steam-Mother", "Coalback"], "title": "Leads the hunting pack" },
+      "formation": "wedge", "doing": "hunt", "prey": "cinderhorn_goat", "preySpeed": 2.7, "pace": 0.5, "onLeaderFall": "rout", "likes": ["valley", "open", "cross"] },
+    "toad_chorus": { "name": "Sulphur Toad Chorus", "kind": "beasts", "weight": 2,
+      "members": [{ "type": "sulphur_toad", "count": [5, 7] }],
+      "leader": { "type": "mudback_lurker", "rank": "champion", "affixes": ["packleader"], "chance": 0.45, "names": ["Grandmother Mud", "the Bubbling One"], "title": "Sits over the chorus" },
+      "formation": "loose", "doing": "graze", "pace": 0.4, "onLeaderFall": "enrage", "likes": ["shore", "valley", "open"] },
+    "salamander_brood": { "name": "Ashback Brood", "kind": "beasts", "weight": 2,
+      "members": [{ "type": "ashback_salamander", "count": [4, 5] }, { "type": "vent_wisp", "count": [1, 2] }],
+      "leader": { "type": "ashback_salamander", "rank": "champion", "affixes": ["packleader", "scorched"], "chance": 0.55, "names": ["Old Kilnback", "the Glowing Sire"], "title": "Sire of the brood" },
+      "formation": "loose", "doing": "graze", "pace": 0.42, "onLeaderFall": "enrage", "likes": ["valley", "open"] },
+    "golem_procession": { "name": "Pumice Procession", "kind": "constructs", "weight": 2,
+      "members": [{ "type": "pumice_golem", "count": [4, 5] }],
+      "leader": { "type": "obsidian_warden", "rank": "champion", "affixes": ["packleader"], "chance": 0.5, "names": ["the Glass Shepherd", "Warden of the Rim"], "title": "Drives the procession" },
+      "formation": "column", "doing": "march", "pace": 0.36, "onLeaderFall": "enrage", "likes": ["road", "open", "cross"] },
+    "glasswing_flight": { "name": "Glasswing Flight", "kind": "beasts", "weight": 2,
+      "members": [{ "type": "glasswing", "count": [6, 8] }],
+      "formation": "loose", "doing": "graze", "pace": 0.45, "likes": ["open", "valley"] },
+    "firecaller_coven": { "name": "Firecaller Coven", "kind": "slagborn", "weight": 2,
+      "members": [{ "type": "slagborn_firecaller", "count": [3, 4] }, { "type": "vent_wisp", "count": [2, 3] }],
+      "leader": { "type": "slagborn_firecaller", "rank": "champion", "affixes": ["packleader", "fiery"], "chance": 0.6, "names": ["Mother Ashgrin", "the Kiln-Speaker"], "title": "Speaks for the coven" },
+      "formation": "column", "doing": "rite", "pace": 0.36, "onLeaderFall": "enrage", "likes": ["open", "valley", "road"],
+      "says": { "pull": ["The mountain wants you!", "Call the wisps — burn it!"], "near": ["Breathe the smoke. Hear it speak.", "Kneel, little one. Or run."] } },
+    "warden_vigil": { "name": "Obsidian Vigil", "kind": "constructs", "weight": 1,
+      "members": [{ "type": "obsidian_warden", "count": [2, 3] }, { "type": "pumice_golem", "count": [3, 3] }],
+      "formation": "column", "doing": "march", "pace": 0.32, "likes": ["open", "cross"] }
+  }
+}

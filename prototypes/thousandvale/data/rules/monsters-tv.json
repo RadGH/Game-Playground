@@ -39,6 +39,12 @@
       "look": { "avatar": { "body": { "skin": "#7e5e48", "height": 0.55, "width": 0.65 }, "headShape": "square", "hair": { "id": "buzz", "color": "#14100e" }, "eyes": { "id": "angry", "color": "#ff6a2a" }, "facialHair": { "id": "full", "color": "#14100e" }, "top": { "id": "chainmail", "color": "#2e2c2c", "color2": "#b84a24" }, "bottom": { "id": "greaves", "color": "#2a2828" }, "shoes": { "id": "heavy", "color": "#1e1c1c" }, "cape": { "id": "half_cape", "color": "#b84a24" }, "decor": { "id": "pauldrons", "color": "#3a3636" }, "held": { "id": "cleaver", "color": "#3a3a40" }, "offhand": { "id": "round_shield", "color": "#5a3a28" } } } },
     { "id": "world_ossathra", "name": "Ossathra, the Caldera Wyrm", "base": "kirrath_cinderwyrm", "family": "dragonkin", "levels": [20, 20], "boss": true,
       "desc": "The island's oldest thing. It sleeps in the crater lake and wakes when the mountain does.",
-      "look": { "creature": { "type": "dragon", "size": 2.6, "colors": { "body": "#141216", "belly": "#ff5a1a", "accent": "#ffb040", "eyes": "#fff07a" }, "features": { "wings": true, "horns": true } } } }
+      "look": { "creature": { "type": "dragon", "size": 2.6, "colors": { "body": "#141216", "belly": "#ff5a1a", "accent": "#ffb040", "eyes": "#fff07a" }, "features": { "wings": true, "horns": true } } } },
+    { "id": "vale_deer", "name": "Fallow Deer", "base": "cairn_rat", "family": "beast", "levels": [1, 10],
+      "desc": "A dappled deer of the downs. It never fights; it only runs — the hounds and hyenas of the open country run it down (a wandering pack's quarry, js/sim/packs.js).",
+      "look": { "creature": { "type": "deer", "size": 1.0, "colors": { "body": "#a8763e", "belly": "#e8d8b8", "accent": "#5a3a1a", "eyes": "#1a1008" } } } },
+    { "id": "cinderhorn_goat", "name": "Cinderhorn Goat", "base": "cairn_rat", "family": "beast", "levels": [10, 20],
+      "desc": "A shaggy grey goat of the Burning Isle with horns gone black at the tips. The prowlers of the steam-woods hunt it (a wandering pack's quarry).",
+      "look": { "creature": { "type": "ram", "size": 0.85, "colors": { "body": "#6e665e", "belly": "#b8ab98", "accent": "#2a2420", "eyes": "#e0a030" } } } }
   ]
 }

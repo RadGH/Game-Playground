@@ -90,6 +90,8 @@ export function unitGeometry(kind) {
     case 'sack': g = new THREE.LatheGeometry([[0, 0], [0.4, 0.02], [0.5, 0.22], [0.48, 0.55], [0.32, 0.82], [0.12, 0.9], [0.17, 0.97], [0, 1]].map(([x, y]) => new THREE.Vector2(x, y)), 8); break;
     default: g = new THREE.BoxGeometry(1, 1, 1); g.translate(0, 0.5, 0); break;
   }
+  // owner 2026-10-16: round shapes get their surface pattern laid by arc length (surface-mat.js aSurfRound)
+  if (['cyl', 'cone', 'dome', 'barrel', 'sack'].includes(kind)) g.setAttribute('aSurfRound', new THREE.Float32BufferAttribute(new Float32Array(g.attributes.position.count).fill(1), 1));
   UNIT.set(kind, g);
   return g;
 }

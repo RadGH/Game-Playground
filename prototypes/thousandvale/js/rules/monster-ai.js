@@ -422,10 +422,12 @@ export function tickMonsters(field, dtAll, hooks = {}) {
   const allies = field.allies;
   const list = [...field.monsters];
   const awakeBands = new Set();
+  const awakePacks = new Set();
   for (const e of list) {
     if (e.state !== 'chase' || e.dying != null) continue;
     const band = e.leader ?? (e.leads ? e.id : null);
     if (band != null) awakeBands.add(band);
+    if (e.packId != null && !e.prey) awakePacks.add(e.packId);      // [Packs] one member fighting wakes its whole pack (never its quarry)
   }
   const lookup = id => field.get(id);
   field.indexMonsters?.();
@@ -465,7 +467,7 @@ export function tickMonsters(field, dtAll, hooks = {}) {
     // nobody within LOD_RADIUS (well past any notice range), nothing on it and no awake band thinks once
     // every LOD_EVERY ticks, on its own phase, with the time it skipped — so its stroll covers the same
     // ground, and a body walking towards it is noticed within LOD_EVERY ticks of crossing LOD_RADIUS
-    if (field.lod && e.state === 'wander' && dist > AI.LOD_RADIUS && !e.boss && !e.push && !(e.stagger > 0) && !e.patrol
+    if (field.lod && e.state === 'wander' && dist > AI.LOD_RADIUS && !e.boss && !e.push && !(e.stagger > 0) && !e.patrol && !e.follow && e.huntOn == null && !e.prey
       && !(e.statuses && Object.keys(e.statuses).length) && !awakeBands.has(e.leader ?? (e.leads ? e.id : null))) {
       e.lodDt = (e.lodDt || 0) + dtAll;
       const phase = typeof e.id === 'number' ? e.id : (e.lodPhase ??= hashPhase(e.id));
@@ -506,7 +508,12 @@ export function tickMonsters(field, dtAll, hooks = {}) {
       const idle = field.clock - (Math.max(e.lastCombatAt ?? -Infinity, e.struckAt ?? -Infinity, e.pathingAt ?? -Infinity));
       const tgt = e.targetId != null ? field.get(e.targetId) : null;
       const close = tgt && Math.hypot(tgt.x - e.x, tgt.z - e.z) <= (e.reach || 2.4) + 1;
-      if (fromHome > (e.leashM || AI.LEASH_METRES) || (idle > (e.leashS || AI.LEASH_SECONDS) && !close)) { resetMonster(field, e); continue; }      // [World, round 11 #5] an event's own leash
+      if (fromHome > (e.leashM || AI.LEASH_METRES) || (idle > (e.leashS || AI.LEASH_SECONDS) && !close)) {      // [World, round 11 #5] an event's own leash
+        resetMonster(field, e);
+        // [Packs] a pack leashes TOGETHER: when one member gives up, every member still fighting goes home with it
+        if (e.packId != null) for (const m of field.monsters) if (m !== e && m.packId === e.packId && m.state !== 'return' && !m.prey && m.dying == null && !m.removed) resetMonster(field, m);
+        continue;
+      }
     }
 
     if (e.stagger > 0) {
@@ -630,10 +637,13 @@ export function tickMonsters(field, dtAll, hooks = {}) {
       if (e.fleeFor <= 0 && field.wild(e.x, e.z)) { e.state = e.routed ? 'chase' : 'wander'; e.routed = false; }
     }
 
+    // [Packs] a quarry never fights back: struck, it only runs (its hunters keep it on their minds, not the other way round)
+    if (e.prey && e.state === 'chase') { e.state = 'wander'; clearThreat(e); }
     // decide: notice the nearest friend; a pack notices together
     const notice = e.aggroRange * Math.max(0.25, 1 - (near?.derived?.stealth || 0));
-    if (e.state !== 'chase' && e.state !== 'flee' && near && dist < notice) {
+    if (e.state !== 'chase' && e.state !== 'flee' && near && dist < notice && !e.prey) {
       e.state = 'chase';
+      e.huntOn = null; e.emoteFor = 0;      // [Packs] a player in sight beats the deer
       noticeThreat(e, near);
       e.lastCombatAt = field.clock;
       for (const mate of field.monsters) {
@@ -644,11 +654,17 @@ export function tickMonsters(field, dtAll, hooks = {}) {
           mate.lastCombatAt = field.clock;
         }
       }
+    } else if (e.state !== 'chase' && e.state !== 'flee' && e.state !== 'return' && e.packId != null && !e.prey && awakePacks.has(e.packId)) {
+      // [Packs] the social pull: the whole pack comes when one of it is fighting (however far the fight has drawn it)
+      e.state = 'chase';
+      e.huntOn = null; e.emoteFor = 0;
+      if (near) noticeThreat(e, near);
+      e.lastCombatAt = field.clock;
     } else if (e.state !== 'chase' && e.state !== 'flee' && awakeBands.has(e.leader ?? (e.leads ? e.id : null))) {
       e.state = 'chase';
       if (near) noticeThreat(e, near);
       e.lastCombatAt = field.clock;
-    } else if (e.state === 'chase' && dist > notice * 2.2 && !e.boss) {
+    } else if (e.state === 'chase' && dist > notice * 2.2 && !e.boss && !(e.npcFoe && e.targetId != null && field.usable(field.get(e.targetId)))) {      // [Packs] (one that came for an NPC — a wagon's crew, a village's militia — keeps at it with no player near)
       e.state = 'wander';
       clearThreat(e);
     }
@@ -761,15 +777,68 @@ export function tickMonsters(field, dtAll, hooks = {}) {
         }
         if (hooks.onStrike) hooks.onStrike(e, victim); else monsterStrike(field, e, victim);
       }
+    } else if (e.prey && e.state !== 'flee') {
+      // [Packs] a deer the pack is running down: away from the nearest thing hunting it, else it grazes
+      let th = null, td = 24;
+      for (const m of field.monsters) { if (m.huntOn !== e.id || m.dying != null) continue; const d = Math.hypot(m.x - e.x, m.z - e.z); if (d < td) { td = d; th = m; } }
+      if (!th && near && dist < 9) { th = near; td = dist; }
+      if (th) { e.facing = Math.atan2(e.x - th.x, e.z - th.z) + Math.sin(field.clock * 1.3 + (typeof e.id === 'number' ? e.id : 0)) * 0.5; speed = e.speed; }
+      else { e.wanderTimer -= dt; if (e.wanderTimer <= 0) { e.wanderTimer = 3 + field.rng() * 5; e.facing = field.rng() * Math.PI * 2; e.strolling = field.rng() < 0.4; } if (e.strolling) speed = e.speed * 0.2; }
+      e.home[0] = e.x; e.home[1] = e.z;
+    } else if (e.huntOn != null && e.state !== 'flee') {
+      // [Packs] a hunting pack runs down its quarry (monster against monster; nobody's kill, nothing paid)
+      const q = field.get(e.huntOn);
+      if (!q || q.dying != null || q.removed) e.huntOn = null;
+      else {
+        const qx = q.x - e.x, qz = q.z - e.z, qd = Math.hypot(qx, qz);
+        e.facing = Math.atan2(qx, qz);
+        if (qd > (e.reach || 2.2) + 0.4) speed = e.speed;
+        else if (e.swingTimer <= 0) {
+          e.swingTimer = e.attackEvery;
+          e.anim = 'attack';
+          const res = field.rpg.strike(e, q, field.rng, { multiplier: 5 });      // (a pack's bite at its quarry is its real one, and then some: a hunt ends in a kill, not a scuffle)
+          field.land?.(q, res, { fromX: e.x, fromZ: e.z, by: null });
+          if (res.dead || q.hp <= 0) field.kill(q);
+        }
+      }
+      e.home[0] = e.x; e.home[1] = e.z;
+    } else if (e.follow && e.state !== 'flee') {
+      // [Packs] a pack member keeps its place behind its leader (or the spot the pack rests at), and its home rides
+      // along, so a leash measures from where the pack was pulled
+      const F = e.follow, L = F.at ? null : field.get(F.id);
+      if (F.at || (L && L.dying == null && !L.removed)) {
+        let tx, tz;
+        if (F.at) { tx = F.at.x; tz = F.at.z; }
+        else { const fy = L.facing || 0, sx = Math.sin(fy), cz = Math.cos(fy); tx = L.x - sx * (F.back || 0) + cz * (F.side || 0); tz = L.z - cz * (F.back || 0) - sx * (F.side || 0); }
+        const dx = tx - e.x, dz = tz - e.z, d = Math.hypot(dx, dz);
+        if (d > 0.9) {
+          const s = pf && d > 6 ? pf.steer(e, tx, tz) : null;
+          e.facing = Math.atan2((s ? s.x : tx) - e.x, (s ? s.z : tz) - e.z);
+          speed = d > 14 ? e.speed : Math.min(e.speed, e.speed * 0.32 + d * 0.3);
+          e.emoteFor = 0;
+        } else if (Number.isFinite(F.face)) { e.facing = F.face; if (F.anim) { e.anim = F.anim; e.emoteFor = 2; } }
+        else if (L && !F.at) e.facing = L.facing;
+      }
+      e.home[0] = e.x; e.home[1] = e.z;
     } else if (e.patrol && e.state !== 'flee') {
       // a rare walking its placement loop (A: `data.path`): waypoint to waypoint at a stroll, round
       // walls when it must; its home rides along, so a leash measures from where it was pulled
+      // [Packs] `hold` = stand where it is (the pack rests); `pingpong` = there and back along the road (`dir`); `pace` = its stroll
       const P = e.patrol;
-      let w = P.pts[P.i];
-      if (Math.hypot(w.x - e.x, w.z - e.z) < 2) { P.i = (P.i + 1) % P.pts.length; w = P.pts[P.i]; }
-      const s = pf ? pf.steer(e, w.x, w.z) : null;
-      e.facing = Math.atan2((s || w).x - e.x, (s || w).z - e.z);
-      speed = e.speed * 0.45;
+      if (P.hold) { speed = 0; if (Number.isFinite(P.face)) e.facing = P.face; if (P.anim) { e.anim = P.anim; e.emoteFor = 2; } }
+      else {
+        let w = P.pts[P.i];
+        if (Math.hypot(w.x - e.x, w.z - e.z) < 2) {
+          if (P.pingpong) { if (P.i + (P.dir || 1) < 0 || P.i + (P.dir || 1) >= P.pts.length) P.dir = -(P.dir || 1); P.i += P.dir || 1; }
+          else P.i = (P.i + 1) % P.pts.length;
+          P.reached = (P.reached || 0) + 1;
+          w = P.pts[P.i];
+        }
+        const s = pf ? pf.steer(e, w.x, w.z) : null;
+        e.facing = Math.atan2((s || w).x - e.x, (s || w).z - e.z);
+        speed = e.speed * (P.pace || 0.45);
+        e.emoteFor = 0;
+      }
       e.home[0] = e.x; e.home[1] = e.z;
     } else {
       e.wanderTimer -= dt;
@@ -806,7 +875,8 @@ export function tickMonsters(field, dtAll, hooks = {}) {
     }
     e.y = ground(field, e.x, e.z, e.y);
     if (e.recoil) { e.recoil.t -= dt; if (e.recoil.t <= 0) e.recoil = null; }
-    if ((e.swingTimer <= 0 || e.state !== 'chase') && !(e.emoteFor > 0)) {
+    if (e.emoteFor > 0) e.emoteFor -= dt;      // [Packs] a resting pose (sit, kneel) holds only while it is renewed
+    if ((e.swingTimer <= 0 || e.state !== 'chase') && !(e.emoteFor > 0 && e.state !== 'chase')) {
       e.anim = speed > e.speed * 0.6 ? 'run' : speed > 0 ? 'walk' : 'idle';
     }
   }

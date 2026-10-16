@@ -12,25 +12,58 @@
 // The part ids are the avatar-2d catalog's (avatar-2d/js/parts/*), which Chibi 2 draws — the same lists Farhold's
 // avatar editor offers.
 
+// 2026-10-16 (Chibi 2.5, owner: "Yes go with the 2.5 for Thousandvale"): every slot also offers the ids Chibi 2.5 added
+// (avatar-3d/js/chibi25-options.js CHIBI25_OPTIONS — registered in avatar-2d as `bespoke`, so a random roll never picks
+// them and an old save's random face is the face it always was), plus 2.5's extra fields on a part (`fields`: the
+// pupil and iris shape, a second eye colour for odd eyes, brow thickness, ear size, a second hair colour) and its body
+// options (`BODY_DIALS` shoulders / legs / arms, `BODY_PICKS` shape and posture). Tails are not offered: none of the
+// four playable peoples has one (CHIBI25_OPTIONS.body.raceTails), and clothes come from your calling and your gear.
+import { CHIBI25_OPTIONS } from '../../../../../avatar-3d/js/chibi25-options.js';
+const C25 = CHIBI25_OPTIONS.face, F25 = CHIBI25_OPTIONS.fields, B25 = CHIBI25_OPTIONS.body;
+const plus = (ids, slot, skip = []) => [...ids, ...C25[slot].added.filter(id => !ids.includes(id) && !skip.includes(id))];
+/** Ear shapes for beast folk only (none of Thousandvale's peoples). */
+const BEAST_EARS = ['cat_ears', 'wolf_ears'];
+/** Menu names for 2.5 ids (the rest are shown from their id). */
+export const PART_NAMES = Object.fromEntries(Object.entries(C25).map(([slot, o]) => [slot, o.names || {}]));
+
 export const FACE_SLOTS = [
   { slot: 'headShape', label: 'Head', ids: ['round', 'oval', 'square', 'heart', 'long', 'wide', 'chiseled'] },
-  { slot: 'hair', label: 'Hair', color: 'hair', ids: ['bald', 'buzz', 'short', 'side_part', 'bangs', 'bob', 'long', 'wavy', 'ponytail', 'bun', 'buns', 'mohawk', 'spiky', 'curly', 'afro', 'braids', 'pixie', 'slicked', 'tonsure'] },
-  { slot: 'eyes', label: 'Eyes', color: 'eye', ids: ['round', 'almond', 'narrow', 'wide', 'sleepy', 'angry', 'dot', 'anime', 'happy', 'tired'] },
-  { slot: 'brows', label: 'Brows', ids: ['straight', 'arched', 'angry', 'worried', 'thick', 'thin', 'raised', 'none'] },
-  { slot: 'nose', label: 'Nose', ids: ['small', 'dot', 'button', 'long', 'wide', 'hook', 'upturned', 'none'] },
-  { slot: 'mouth', label: 'Mouth', ids: ['smile', 'neutral', 'frown', 'open', 'grin', 'smirk', 'o'] },
-  { slot: 'ears', label: 'Ears', ids: ['normal', 'pointed', 'big', 'none'] },
-  { slot: 'facialHair', label: 'Beard', color: 'hair', ids: ['none', 'stubble', 'goatee', 'mustache', 'full', 'long', 'chinstrap', 'soul_patch', 'braided_beard'] },
+  { slot: 'hair', label: 'Hair', color: 'hair', ids: plus(['bald', 'buzz', 'short', 'side_part', 'bangs', 'bob', 'long', 'wavy', 'ponytail', 'bun', 'buns', 'mohawk', 'spiky', 'curly', 'afro', 'braids', 'pixie', 'slicked', 'tonsure'], 'hair'),
+    fields: [{ key: 'color2', label: 'Second colour', type: 'color', palette: 'hair', when: ['twin_tails', 'locs', 'long_braid'] }] },
+  { slot: 'eyes', label: 'Eyes', color: 'eye', ids: plus(['round', 'almond', 'narrow', 'wide', 'sleepy', 'angry', 'dot', 'anime', 'happy', 'tired'], 'eyes'),
+    fields: [{ key: 'pupil', label: 'Pupils', type: 'pick', ids: F25.eyes.pupil.ids, names: F25.eyes.pupil.names }, { key: 'iris', label: 'Iris', type: 'pick', ids: F25.eyes.iris.ids, names: F25.eyes.iris.names },
+      { key: 'colorR', label: 'Right eye', type: 'color', palette: 'eye', clear: 'Same' }] },
+  { slot: 'brows', label: 'Brows', ids: plus(['straight', 'arched', 'angry', 'worried', 'thick', 'thin', 'raised', 'none'], 'brows'),
+    fields: [{ key: 'thick', label: 'Brow thickness', type: 'range', min: F25.brows.thick.min, max: F25.brows.thick.max, def: 1 }] },
+  { slot: 'nose', label: 'Nose', ids: plus(['small', 'dot', 'button', 'long', 'wide', 'hook', 'upturned', 'none'], 'nose') },
+  { slot: 'mouth', label: 'Mouth', ids: plus(['smile', 'neutral', 'frown', 'open', 'grin', 'smirk', 'o'], 'mouth') },
+  { slot: 'ears', label: 'Ears', ids: plus(['normal', 'pointed', 'big', 'none'], 'ears', BEAST_EARS), byRace: CHIBI25_OPTIONS.raceEars,
+    fields: [{ key: 'scale', label: 'Ear size', type: 'range', min: F25.ears.scale.min, max: F25.ears.scale.max, def: 1 }] },
+  { slot: 'facialHair', label: 'Beard', color: 'hair', ids: plus(['none', 'stubble', 'goatee', 'mustache', 'full', 'long', 'chinstrap', 'soul_patch', 'braided_beard'], 'facialHair') },
   // R1 "face, accessories, hair": glasses, earrings, a scarf… and marks on the skin. A new character starts with NONE of either.
   { slot: 'accessory', label: 'Accessory', color: 'cloth', ids: ['none', 'glasses', 'round_glasses', 'monocle', 'eyepatch', 'goggles', 'earrings', 'nose_ring', 'sunglasses', 'scarf', 'pendant', 'prayer_beads'] },
-  { slot: 'extras', label: 'Face marks', ids: ['none', 'freckles', 'blush', 'scar', 'scar_cheek', 'warpaint', 'tattoo', 'wrinkles', 'freckles_heavy', 'cheek_stripes', 'war_stripe'] },
+  { slot: 'extras', label: 'Face marks', ids: plus(['none', 'freckles', 'blush', 'scar', 'scar_cheek', 'warpaint', 'tattoo', 'wrinkles', 'freckles_heavy', 'cheek_stripes', 'war_stripe'], 'extras') },
 ];
 export const BODY_DIALS = [
   { key: 'height', label: 'Height', min: 0, max: 1 },
   { key: 'width', label: 'Build', min: 0, max: 1 },
   { key: 'headSize', label: 'Head size', min: 0.2, max: 1 },
   { key: 'round', label: 'Roundness', min: 0, max: 0.85 },
+  // Chibi 2.5 body sliders (0.5 = as your people are built)
+  { key: 'shoulders', label: 'Shoulders', min: 0, max: 1 },
+  { key: 'legs', label: 'Leg length', min: 0, max: 1 },
+  { key: 'arms', label: 'Arm thickness', min: 0, max: 1 },
 ];
+/** Chibi 2.5 body choices from a list (`avatar.body.shape`, `.posture`). */
+export const BODY_PICKS = [
+  { key: 'shape', label: 'Body type', ids: B25.shape.ids, names: B25.shape.names },
+  { key: 'posture', label: 'Posture', ids: B25.posture.ids, names: B25.posture.names },
+];
+/** A slot's ids in the order a people's editor offers them (ears: the ones that suit your people first). */
+export function slotIds(s, race) {
+  const pref = s.byRace?.[race];
+  return pref ? [...pref.filter(id => s.ids.includes(id)), ...s.ids.filter(id => !pref.includes(id))] : s.ids;
+}
 export const PALETTES = {
   skin: ['#ffdbb4', '#f1c27d', '#e0ac69', '#c68642', '#8d5524', '#5c3a1e', '#d98f6a', '#c9cfc3'],
   hair: ['#111111', '#3b2a1a', '#6b4a2a', '#a86a3a', '#d9c27a', '#f2e2b0', '#8a1a1a', '#d94a2a', '#888888', '#eeeeee', '#4a3a8a', '#2a7a5a'],
@@ -48,6 +81,7 @@ export function cleanCustom(c) {
     const b = {};
     for (const d of BODY_DIALS) if (Number.isFinite(c.body[d.key])) b[d.key] = Math.round(Math.max(d.min, Math.min(d.max, c.body[d.key])) * 100) / 100;
     if (HEX.test(c.body.skin || '')) b.skin = c.body.skin.toLowerCase();
+    for (const p of BODY_PICKS) if (p.ids.includes(c.body[p.key])) b[p.key] = c.body[p.key];
     if (Object.keys(b).length) out.body = b;
   }
   for (const s of FACE_SLOTS) {
@@ -57,6 +91,12 @@ export function cleanCustom(c) {
     if (!v || typeof v !== 'object' || !SLOT_IDS[s.slot].has(v.id)) continue;
     out[s.slot] = { id: v.id };
     if (s.color && HEX.test(v.color || '')) out[s.slot].color = v.color.toLowerCase();
+    for (const f of s.fields || []) {
+      const x = v[f.key];
+      if (f.type === 'color' && HEX.test(x || '')) out[s.slot][f.key] = x.toLowerCase();
+      else if (f.type === 'pick' && f.ids.includes(x)) out[s.slot][f.key] = x;
+      else if (f.type === 'range' && Number.isFinite(x)) out[s.slot][f.key] = Math.round(Math.max(f.min, Math.min(f.max, x)) * 100) / 100;
+    }
   }
   return Object.keys(out).length ? out : null;
 }
@@ -81,8 +121,14 @@ export function customFrom(avatar) {
   const c = { body: {} };
   for (const d of BODY_DIALS) if (Number.isFinite(avatar.body?.[d.key])) c.body[d.key] = avatar.body[d.key];
   if (avatar.body?.skin) c.body.skin = avatar.body.skin;
+  for (const p of BODY_PICKS) if (avatar.body?.[p.key]) c.body[p.key] = avatar.body[p.key];
   if (avatar.headShape) c.headShape = avatar.headShape;
-  for (const s of FACE_SLOTS) if (s.slot !== 'headShape' && avatar[s.slot]?.id) c[s.slot] = { id: avatar[s.slot].id, ...(s.color && avatar[s.slot].color ? { color: avatar[s.slot].color } : {}) };
+  for (const s of FACE_SLOTS) {
+    const v = avatar[s.slot];
+    if (s.slot === 'headShape' || !v?.id) continue;
+    c[s.slot] = { id: v.id, ...(s.color && v.color ? { color: v.color } : {}) };
+    for (const f of s.fields || []) if (v[f.key] != null) c[s.slot][f.key] = v[f.key];
+  }
   return cleanCustom(c);
 }
 
@@ -137,7 +183,7 @@ export function barberCost(before, after, { prices = {}, perLevel = 0.05, level 
   if (raceChanged) sum = P.everything;
   else {
     if (!same(idOf(a.hair), idOf(b.hair))) sum += P.hair;
-    if (!same(a.hair?.color, b.hair?.color)) sum += P.hairColour;
+    if (!same(a.hair?.color, b.hair?.color) || !same(a.hair?.color2, b.hair?.color2)) sum += P.hairColour;
     if (!same(a.facialHair, b.facialHair)) sum += P.beard;
     if (!same(a.eyes, b.eyes)) sum += P.eyes;
     if (['headShape', 'nose', 'mouth', 'brows', 'ears'].some(k => !same(a[k], b[k])) || seedChanged) sum += P.face;

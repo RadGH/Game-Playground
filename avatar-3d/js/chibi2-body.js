@@ -22,6 +22,10 @@ import { shade } from '../../avatar-2d/js/render.js';
 import { profile, taperedCurve } from './chibi2-geometry.js';
 // PLAY-TEST 5 (T23): the plain garment under each g5_ armour piece — new ids only (chibi2-gear5-ids.js)
 import { G5_TOP_STYLES, G5_BOTTOM_STYLES, G5_SHOE_STYLES } from './chibi2-gear5-ids.js';
+// CHIBI 2.5 (part B): skirt-bone weights for long garments and the 2.5-only tops/bottoms/shoes (chibi25-body.js,
+// chibi25-outfits.js). A v2 look (no `body.v`) never reaches any of it.
+import { skirtWeigh, registerSkirtSurface } from './chibi25-body.js';
+import { TOP25, BOTTOM25, SHOE25 } from './chibi25-outfits.js';
 
 const sphere = () => new THREE.SphereGeometry(1, 10, 6);
 const low = () => new THREE.SphereGeometry(1, 8, 5);
@@ -72,6 +76,7 @@ export const TOP_STYLES = {
   rags: { sleeve: 'short', collar: 'round', front: 'patches', hem: 'jagged', belt: 'rope' },
   harness: { sleeve: 'none', bare: true, collar: 'none', front: 'harness', hem: 'none', belt: 'wide', cuffs: 'bracers' },
   ...G5_TOP_STYLES,
+  ...TOP25,
 };
 export const topStyle = id => TOP_STYLES[id] || TOP_STYLES.tunic;
 /** Tops whose hem reaches the knee or lower — the robe family. Gear and the hips read this. */
@@ -94,6 +99,7 @@ export const BOTTOM_STYLES = {
   kilt: { leg: 0, belt: true, garment: 'kilt' },
   loincloth: { leg: 0, belt: 'rope', garment: 'loincloth' },
   ...G5_BOTTOM_STYLES,
+  ...BOTTOM25,
 };
 export const bottomStyle = id => BOTTOM_STYLES[id] || BOTTOM_STYLES.pants;
 
@@ -110,6 +116,7 @@ export const SHOE_STYLES = {
   hooves: { shaft: 0, foot: 'hoof' },
   wraps: { shaft: 0.55, foot: 'wrap' },
   ...G5_SHOE_STYLES,
+  ...SHOE25,
 };
 export const shoeStyle = id => SHOE_STYLES[id] || SHOE_STYLES.boots;
 
@@ -142,13 +149,24 @@ const bump = (y, c, w) => Math.exp(-(((y - c) / w) ** 2));
 export function buildBody(a, rig, c) {
   const { add, ellipsoid, strip, trim, leather, steel, darkSteel } = c;
   const W = rig.wide, T = rig.torso, L = rig.leg, R = rig.round, S = rig.shoulders, A = rig.arm, HK = rig.hand;
+  // CHIBI 2.5: a long garment's cloth below the hip pivot rides the skirt bones (chibi25-body.js). `skirt(o)` adds the
+  // weights to a piece's options; on a v2 body (or a 2.5 body with nothing long on) it hands the options back as they are.
+  // `cols` tags the piece for the robe test (tools/chibi25-measure.mjs reads it as a grid of rows x cols; SkinBuilder ignores it).
+  // `thick`: a thick-legged 2.5 body (heavy, stocky, broad) needs the cloth that much wider at the hip line
+  const thick = rig.skirt ? Math.max(0, (rig.legThick || 1) - 1) * 0.15 * Math.pow(W, 0.65) : 0;
+  const SK = !!rig.skirt, skirt = (o = {}, cols = 0, bone = 'hips') => ({ ...o, ...(SK ? { weigh: skirtWeigh(rig, bone) } : {}), ...(cols ? { tag: 'garment:' + cols } : {}) });
   // Limbs thicken with the body: a giant's or a dwarf's arms and legs at human thickness read as sticks.
   const LW = Math.pow(W, 0.65);
   const skin = a.body.skin, cloth = a.top.color, cloth2 = a.top.color2 || shade(cloth, 0.35), lining = shade(cloth, -0.28);
   const top = topStyle(a.top.id), bot = bottomStyle(a.bottom.id), shoe = shoeStyle(a.shoes.id);
   const pants = a.bottom.color;
+  // 2.5: how much a greave, a loose trouser leg or a heavy boot adds round the shin (driveSkirt keeps the cloth off it)
+  if (rig.skirt) rig.skirt.legPad = (bot.armor ? 0.025 : bot.loose ? 0.022 : 0) + (shoe.foot === 'heavy' ? 0.015 : 0);
   const shirt = top.shirt ? cloth2 : cloth;           // what the sleeves are made of under a vest or jerkin
   const torsoColour = top.bare ? skin : top.under ? cloth2 : cloth;
+  // 2.5: a breastplate or a scale shell stands off the chest, so the arms are held that much wider in every clip (the
+  // upper arm went 3-6 cm into the plate on every frame)
+  if (rig.v25) rig.armSpread = top.armor === 'plate' || top.armor === 'scale' ? 0.12 : top.armor === 'mail' ? 0.03 : 0;
 
   // ---------------------------------------------------------------- torso
   // Chest-bone space. The waist, a chest, then shoulders that SLOPE into the neck — the old profile
@@ -272,7 +290,8 @@ export function buildBody(a, rig, c) {
   // ---------------------------------------------------------------- armour over the chest
   if (top.armor === 'plate') {
     // a breastplate: a raised shell over the front with a keel down the middle and a gorget
-    const pr = chestRings.filter(r => r[0] > -0.13 * T && r[0] < 0.27 * T).map(([y, rx, rz, z]) => [y, rx * 1.04 + 0.01, rz + 0.026 + 0.01, z + 0.004]);
+    // (2.5: no wider than the chest at the sides, where the arms hang — it stands off the FRONT, as a breastplate does)
+    const pr = chestRings.filter(r => r[0] > -0.13 * T && r[0] < 0.27 * T).map(([y, rx, rz, z]) => [y, rig.v25 ? rx + 0.004 : rx * 1.04 + 0.01, rz + 0.026 + 0.01, z + 0.004]);
     add(profile(pr, 16), 'chest', a.top.color, { metal: true });
     onChest([[0, 0.24 * T], [0, 0.05 * T], [0, -0.1 * T]], 0.008, a.top.color2 || trim, { lift: 0.034, metal: true });
     bandChest(-0.1 * T, 0.03, a.top.color2 || trim, 0.04, true);
@@ -310,9 +329,19 @@ export function buildBody(a, rig, c) {
     for (const s of [-1, 1]) add(profile([[-0.11, 0.07, 0.06], [-0.2, 0.085, 0.07], [-0.24, 0.07, 0.055]], 8), 'hips', a.top.color, { position: [s * 0.1 * W, 0, 0.03], metal: true });
   }
   const longHem = (y1, flare, colour = cloth) => {
-    const rr = [...hemRings(0.06, -0.1, 0.03), [y1, ringAt(hipsRings, -0.08)[1] + 0.05 + flare, ringAt(hipsRings, -0.08)[2] + 0.06 + flare * 0.9, 0]];
-    add(profile(rr, 16), 'hips', colour);
-    add(profile([[y1 - 0.008, rr[3][1] + 0.006, rr[3][2] + 0.006], [y1 + 0.02, rr[3][1] + 0.002, rr[3][2] + 0.002]], 16), 'hips', a.top.id === 'trim_robe' ? cloth2 : lining);
+    let rr = [...hemRings(0.06, -0.1, 0.03), [y1, ringAt(hipsRings, -0.08)[1] + 0.05 + flare, ringAt(hipsRings, -0.08)[2] + 0.06 + flare * 0.9, 0]];
+    // 2.5: the long drop gets three more rings, so the cloth can bend where the skirt bones swing it (12 more triangles a ring)
+    if (SK) {
+      const A0 = rr[2], B0 = rr[3]; rr = [rr[0], rr[1], A0, ...[0.25, 0.5, 0.75].map(t => A0.map((v, k) => v + ((B0[k] || 0) - (v || 0)) * t)), B0];
+      // and a little more room round the hip line, where a thigh swinging forward meets the cloth before any skirt bone has much say
+      // (more on a short-legged body — a goblin's knee comes up to the hip line in a sprint)
+      const room = 0.025 + Math.max(0, 0.5 - L) * 0.3;
+      rr = rr.map(([y, rx, rz, z], i) => i === 0 ? [y, rx, rz, z] : [y, rx + 0.012 + room * 0.3 + thick, rz + room + thick * 0.6, z]);
+    }
+    const last = rr[rr.length - 1];
+    add(profile(rr, 16), 'hips', colour, skirt({}, 17));
+    add(profile([[y1 - 0.008, last[1] + 0.006, last[2] + 0.006], [y1 + 0.02, last[1] + 0.002, last[2] + 0.002]], 16), 'hips', a.top.id === 'trim_robe' ? cloth2 : lining, skirt());
+    if (SK) registerSkirtSurface(rig, rr, { hem: y1 });
   };
   if (hem === 'long') longHem(-(L * 0.9), 0.1);
   if (hem === 'knee') longHem(-(L * 0.52), 0.08, a.top.id === 'surcoat' ? a.top.color2 || cloth : cloth);
@@ -320,14 +349,18 @@ export function buildBody(a, rig, c) {
     // coat tails: open at the front, so the legs show between them
     const y1 = hem === 'trench' ? -(L * 0.8) : -(L * 0.55);
     for (const s of [-1, 1]) {
-      const g = new THREE.CylinderGeometry(1, 1, 1, 8, 3, true, s > 0 ? 0.35 : Math.PI + 0.35 - Math.PI, Math.PI - 0.35), p = g.attributes.position;
+      // (Chibi 2 built BOTH tails from 0.35 rad — the same arc, so the left side had no tail at all. 2.5 puts the second
+      // one on the left, from the back round to 0.35 rad short of the front.)
+      const g = new THREE.CylinderGeometry(1, 1, 1, 8, SK ? 4 : 3, true, s > 0 ? 0.35 : SK ? Math.PI : Math.PI + 0.35 - Math.PI, Math.PI - 0.35), p = g.attributes.position;
       for (let i = 0; i < p.count; i++) {
         const v = 0.5 - p.getY(i), y = 0.04 + v * (y1 - 0.04), rr = ringAt(hipsRings, Math.max(-0.1, y));
         const fl = 1 + v * 0.35;
-        p.setXYZ(i, p.getX(i) * (rr[1] + 0.02) * fl, y, p.getZ(i) * (rr[2] + 0.025) * fl + rr[3]);
+        p.setXYZ(i, p.getX(i) * (rr[1] + 0.02 + (SK ? 0.01 + thick : 0)) * fl, y, p.getZ(i) * (rr[2] + 0.025 + (SK ? 0.025 : 0)) * fl + rr[3]);   // 2.5: room at the hip line (see longHem)
       }
-      g.computeVertexNormals(); add(g, 'hips', cloth); add(backfaced(g), 'hips', lining);
+      g.computeVertexNormals(); add(g, 'hips', cloth, skirt({}, 9)); add(backfaced(g), 'hips', lining, skirt());
     }
+    // the tails cover the sides and the back; the legs show (and may stride) through the open front
+    if (SK) { const r0 = ringAt(hipsRings, -0.08); registerSkirtSurface(rig, [[0.04, r0[1] + 0.03 + thick, r0[2] + 0.05, r0[3]], [y1, (r0[1] + 0.03 + thick) * 1.35, (r0[2] + 0.05) * 1.35, r0[3]]], { arc: [0.35, Math.PI * 2 - 0.35], hem: y1 }); }
   }
   if (a.top.id === 'surcoat') {
     // the surcoat itself: a sleeveless coat of the colour over mail, with a band down the middle
@@ -355,17 +388,24 @@ export function buildBody(a, rig, c) {
   }
 
   // ---------------------------------------------------------------- bottoms hanging from the hips
-  if (bot.garment === 'skirt') longHem(-(L * 0.42), 0.06, pants);
+  if (bot.garment === 'skirt') longHem(-(L * (bot.length ?? 0.42)), 0.06, pants);
   if (bot.garment === 'kilt') {
-    add(profile([[0.05, ringAt(hipsRings, 0.05)[1] + 0.012, ringAt(hipsRings, 0.05)[2] + 0.012], [-0.08, ringAt(hipsRings, -0.08)[1] + 0.03, ringAt(hipsRings, -0.08)[2] + 0.03], [-(L * 0.46), ringAt(hipsRings, -0.08)[1] + 0.065, ringAt(hipsRings, -0.08)[2] + 0.06]], 16), 'hips', pants);
-    for (let k = 0; k < 12; k++) { const t = k / 12 * Math.PI * 2, rr = ringAt(hipsRings, -0.08); add(taperedCurve([[Math.sin(t) * (rr[1] + 0.03), -0.05, Math.cos(t) * (rr[2] + 0.03)], [Math.sin(t) * (rr[1] + 0.066), -(L * 0.44), Math.cos(t) * (rr[2] + 0.061)]], [0.004, 0.004], 3, 1), 'hips', shade(pants, -0.2)); }
+    const kl = bot.length ?? 0.46, k0 = ringAt(hipsRings, 0.05), k1 = ringAt(hipsRings, -0.08);
+    const kw = SK ? 0.02 + Math.max(0, 0.5 - L) * 0.3 + thick : 0;     // 2.5: room for the thigh at the hip line (see longHem)
+    const kr = [[0.05, k0[1] + 0.012, k0[2] + 0.012], [-0.08, k1[1] + 0.03 + kw * 0.5 + thick * 0.5, k1[2] + 0.03 + kw], ...(SK ? [0.33, 0.66].map(t => [-0.08 + (-(L * kl) + 0.08) * t, k1[1] + 0.03 + 0.035 * t, k1[2] + 0.03 + 0.03 * t]) : []), [-(L * kl), k1[1] + 0.065, k1[2] + 0.06]];
+    add(profile(kr, 16), 'hips', pants, skirt({}, 17));
+    // 2.5: the pleats are one segment each, so they get three on a skirt-boned body (they bend with the cloth)
+    for (let k = 0; k < 12; k++) { const t = k / 12 * Math.PI * 2, rr = k1; add(taperedCurve([[Math.sin(t) * (rr[1] + 0.03), -0.05, Math.cos(t) * (rr[2] + 0.03)], [Math.sin(t) * (rr[1] + 0.066), -(L * (bot.length != null ? bot.length - 0.02 : 0.44)), Math.cos(t) * (rr[2] + 0.061)]], [0.004, 0.004], 3, SK ? 3 : 1), 'hips', shade(pants, -0.2), skirt()); }
+    if (SK) registerSkirtSurface(rig, kr, { hem: -(L * kl) });
   }
   if (bot.garment === 'loincloth') {
     for (const side of [1, -1]) {
       const g = new THREE.PlaneGeometry(0.16 * W, L * 0.42, 2, 3), p = g.attributes.position;
       for (let i = 0; i < p.count; i++) { const y = p.getY(i) - L * 0.21 + 0.02, x = p.getX(i) * (1 + (0.02 - y) * 0.4); p.setXYZ(i, x, y, side * (hipsZ(x * 0.6, Math.max(-0.1, y), 1, 0.016) + Math.max(0, -y - 0.1) * 0.12)); }
-      g.computeVertexNormals(); add(g, 'hips', pants); add(backfaced(g), 'hips', shade(pants, -0.15));
+      g.computeVertexNormals(); add(g, 'hips', pants, skirt({}, 3)); add(backfaced(g), 'hips', shade(pants, -0.15), skirt());
     }
+    // the two flaps hang front and back; a leg passes between them at the sides
+    if (SK) { const r0 = ringAt(hipsRings, -0.08); for (const arc of [[-0.6, 0.6], [Math.PI - 0.6, Math.PI + 0.6]]) registerSkirtSurface(rig, [[-0.06, r0[1] + 0.016, r0[2] + 0.016, 0], [-(L * 0.42) + 0.02, r0[1] + 0.03, r0[2] + 0.016 + (L * 0.32) * 0.12, 0]], { arc, hem: -(L * 0.42) + 0.02 }); }
   }
 
   // ---------------------------------------------------------------- arms
@@ -377,7 +417,9 @@ export function buildBody(a, rig, c) {
   for (const [side, s] of [['L', -1], ['R', 1]]) {
     const arm = 'arm' + side, elbow = 'elbow' + side, hand = 'hand' + side;
     const bend = { bone: elbow, at: Ua, width: 0.075 * T };
-    const lw = rr => rr.map(([y, x, z, o]) => [y, x * LW, z * LW, o]);
+    // 2.5: `rig.armThick` / `rig.legThick` (body shape + the arms slider) thicken the limbs on top of LW
+    const lw = rr => rr.map(([y, x, z, o]) => [y, x * LW * (rig.armThick || 1), z * LW * (rig.armThick || 1), o]);
+    const lwl = rr => rr.map(([y, x, z, o]) => [y, x * LW * (rig.legThick || 1), z * LW * (rig.legThick || 1), o]);
     const upper = lw([[0.05, 0.012, 0.012], [0.035, 0.07 + armT, 0.068 + armT], [-0.02, 0.09 + armT, 0.086 + armT], [-0.09, 0.083 + armT, 0.08 + armT], [-Ua * 0.75, 0.074 + armT * 0.8, 0.072 + armT * 0.8], [-Ua - 0.012, 0.067 + armT * 0.6, 0.066 + armT * 0.6]]);
     if (top.sleeve === 'short' || top.sleeve === 'rolled' || top.sleeve === 'puff') {
       // sleeve to the middle of the upper arm (rolled: to just above the elbow), then skin
@@ -419,7 +461,7 @@ export function buildBody(a, rig, c) {
     const leg = 'leg' + side, knee = 'knee' + side, foot = 'foot' + side;
     const legT = R * 0.03, calfT = R * 0.012;
     const loose = bot.loose ? 0.022 : bot.tight ? -0.006 : 0;
-    const thigh = lw([[0.03, 0.02, 0.02], [0.0, 0.097 + legT + loose, 0.088 + legT + loose], [-0.08, 0.105 + legT + loose, 0.104 + legT + loose], [-L * 0.3, 0.094 + legT * 0.8 + loose, 0.093 + legT * 0.8 + loose], [-L * 0.46, 0.082 + legT * 0.5 + loose, 0.083 + legT * 0.5 + loose], [-L * 0.55, 0.078 + loose, 0.08 + loose]]);
+    const thigh = lwl([[0.03, 0.02, 0.02], [0.0, 0.097 + legT + loose, 0.088 + legT + loose], [-0.08, 0.105 + legT + loose, 0.104 + legT + loose], [-L * 0.3, 0.094 + legT * 0.8 + loose, 0.093 + legT * 0.8 + loose], [-L * 0.46, 0.082 + legT * 0.5 + loose, 0.083 + legT * 0.5 + loose], [-L * 0.55, 0.078 + loose, 0.08 + loose]]);
     const kneeBend = { bone: knee, at: L * 0.51, width: 0.07 };
     const legCloth = bot.leg;  // share of the whole leg covered
     const thighCut = legCloth >= 0.55 ? null : legCloth > 0 ? -L * 0.51 * (legCloth / 0.5) : 0.05;
@@ -433,7 +475,7 @@ export function buildBody(a, rig, c) {
       add(profile(thigh.filter(r => r[0] < thighCut + 0.02), 10), leg, skin, { bend: kneeBend });
     }
     // shin on the knee bone: calf, then ankle
-    const shin = lw([[0.012, 0.079 + calfT + loose * 0.8, 0.081 + calfT + loose * 0.8], [-L * 0.12, 0.081 + calfT + loose * 0.8, 0.087 + calfT + loose * 0.8], [-L * 0.3, 0.068 + calfT * 0.6 + loose * 0.7, 0.072 + calfT * 0.6 + loose * 0.7], [-L * 0.46, 0.058 + loose * 0.5, 0.062 + loose * 0.5], [-L * 0.5, 0.056, 0.06]]);
+    const shin = lwl([[0.012, 0.079 + calfT + loose * 0.8, 0.081 + calfT + loose * 0.8], [-L * 0.12, 0.081 + calfT + loose * 0.8, 0.087 + calfT + loose * 0.8], [-L * 0.3, 0.068 + calfT * 0.6 + loose * 0.7, 0.072 + calfT * 0.6 + loose * 0.7], [-L * 0.46, 0.058 + loose * 0.5, 0.062 + loose * 0.5], [-L * 0.5, 0.056, 0.06]]);
     const shinCloth = legCloth >= 1 ? pants : legCloth > 0.5 ? (bot.stockings ? '#e8e2d2' : null) : null;
     if (legCloth > 0.5 && legCloth < 1 && !bot.stockings) {
       // cropped: cloth to `legCloth` of the shin, skin under it
@@ -481,7 +523,33 @@ export function buildBody(a, rig, c) {
     }
     if (fk === 'heavy') add(ring(0.11, 0.018), foot, darkSteel, { position: [0, -0.025, 0.02], rotation: [Math.PI / 2, 0, 0], metal: true });
   }
+  // ---------------------------------------------------------------- 2.5: a tail (body.tail, chibi25-body-options.js TAILS)
+  if (rig.v25 && a.body.tail && a.body.tail !== 'none') buildTail(a, rig, { add, hipsZ, skin, W, L });
   return { chestZ, hipsZ, chestRX, chestRings, hipsRings, neckR, top, bot, shoe, LW };
+}
+
+/**
+ * A tail on the hips (Chibi 2.5). Every tail leaves the small of the back and sweeps UP and back before it falls, so a
+ * heel kicked back in a run passes under it. Colour: `body.tailColor`, else the hair (furred) or the skin (scaled, imp).
+ */
+function buildTail(a, rig, { add, hipsZ, skin, W, L }) {
+  const id = a.body.tail, y0 = -0.03, z0 = hipsZ(0, y0, -1, 0.0) + 0.012;
+  const fur = a.body.tailColor || a.hair?.color || '#6b4a2a', scaled = a.body.tailColor || skin;
+  const at = pts => pts.map(([x, y, z]) => [x * W, y0 + y, z0 - z]);
+  if (id === 'wolf' || id === 'fox') {
+    const pts = at([[0, 0, 0], [0, 0.03, 0.09], [0, 0.0, 0.2], [0, -0.07, 0.29], [0, -0.17, 0.33]]);
+    add(taperedCurve(pts, [0.028, 0.055, 0.07, 0.062, 0.03], 7, 12), 'hips', fur);
+    if (id === 'fox') add(taperedCurve(at([[0, -0.13, 0.325], [0, -0.17, 0.33], [0, -0.215, 0.322]]), [0.05, 0.04, 0.008], 6, 4), 'hips', '#f2ece0');
+  } else if (id === 'cat') {
+    add(taperedCurve(at([[0, 0, 0], [0, 0.02, 0.1], [0.03, 0.1, 0.2], [0.06, 0.22, 0.23], [0.04, 0.3, 0.19]]), [0.022, 0.022, 0.02, 0.018, 0.012], 6, 14), 'hips', fur);
+  } else if (id === 'lizard') {
+    add(taperedCurve(at([[0, 0, 0], [0, -0.04, 0.12], [0, -0.1, 0.26], [0.02, -0.14, 0.4], [0.05, -0.15, 0.5]]), [0.06, 0.05, 0.036, 0.02, 0.004], 7, 14), 'hips', scaled);
+  } else if (id === 'imp') {
+    add(taperedCurve(at([[0, 0, 0], [0, 0.0, 0.12], [0.02, 0.08, 0.24], [0.05, 0.2, 0.28]]), [0.016, 0.014, 0.012, 0.01], 5, 12), 'hips', scaled);
+    const tip = at([[0.05, 0.2, 0.28]])[0];
+    add(new THREE.OctahedronGeometry(1, 0), 'hips', shade(scaled, -0.15), { position: [tip[0], tip[1] + 0.03, tip[2]], scale: [0.03, 0.045, 0.012] });
+  }
+  void L;
 }
 
 /** Reversed-winding copy of a geometry, for the inside of a sheet. */

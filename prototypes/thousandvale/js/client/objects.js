@@ -40,6 +40,8 @@ const KINDS = {
   use:     { prop: o => (o.bare ? null : usePropKind(o.name))   /* #63: `bare` = the place already draws it (two wells on top of each other) */, glow: '#c9a8ff', label: o => o.name || 'Use', use: true },
   grave:   { prop: 'stone_marker', glow: null, label: o => `${o.name || 'A grave'}`, use: true, tint: '#8a8780', mound: true },
   campfire: { prop: 'campfire', glow: '#ffae5c', label: o => o.name || 'A campfire', use: true, fire: true },
+  // [Packs] a wild event's rift (js/sim/wild-events.js): it can only be touched while it FALTERS (a wave is down) — then E sets a seal
+  rift: { prop: null, glow: '#b26bff', label: o => (o.state === 'faltering' ? 'Set a seal on the rift' : null), use: o => o.state === 'faltering', light: '#b26bff', rift: true },
   npc:     { prop: null, glow: null, label: o => `Talk to ${o.name || 'them'}`, use: true, invisible: true },
   vignette: { prop: null, glow: null, label: () => null, use: false, invisible: true },
   cart:    { prop: null, glow: null, label: o => (o.name && !/^cart$/i.test(o.name) ? `Ask about a ride: ${o.name}` : 'Ask about a ride on the ox cart'), use: true, invisible: true },   // W5: drawn by carts-view.js
@@ -135,6 +137,15 @@ export function createObjects(scene, { heightAt = () => 0, onUse, onNear = null,
         root.add(m);
       }
       root.scale.setScalar(K.scale || 1);
+    } else if (K.rift) {
+      // [Packs] a standing tear: two crossed rings of violet light round a dark core, spinning; it flickers gold while it falters
+      const ringMat = new THREE.MeshBasicMaterial({ color: '#c08aff', transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending, depthWrite: false, fog: false });
+      const coreMat = new THREE.MeshBasicMaterial({ color: '#1a0830', transparent: true, opacity: 0.9, side: THREE.DoubleSide });
+      const spin = new THREE.Group(); spin.position.y = 2.1; root.add(spin);
+      for (const ry of [0, Math.PI / 2]) { const t = new THREE.Mesh(new THREE.TorusGeometry(1.5, 0.09, 8, 40), ringMat); t.rotation.y = ry; spin.add(t); }
+      const core = new THREE.Mesh(new THREE.CircleGeometry(1.25, 28), coreMat); spin.add(core);
+      const scorch = new THREE.Mesh(new THREE.CircleGeometry(2.8, 24), new THREE.MeshBasicMaterial({ color: '#2a1638', transparent: true, opacity: 0.6, depthWrite: false })); scorch.rotation.x = -Math.PI / 2; scorch.position.y = 0.05; root.add(scorch);
+      o.riftSpin = spin; o.riftRing = ringMat;
     } else if (o.type === 'lever') {
       const base = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.35, 0.5), new THREE.MeshStandardMaterial({ color: '#5a4a3a', roughness: 0.9 }));
       base.position.y = 0.17; root.add(base);
@@ -252,6 +263,12 @@ export function createObjects(scene, { heightAt = () => 0, onUse, onNear = null,
           }
           o.chain.instanceMatrix.needsUpdate = true;
         }
+      }
+      if (o.riftSpin) {      // [Packs] the rift turns; faltering it shudders and goes gold; closed it shrinks away
+        o.riftSpin.rotation.y += dt * (o.state === 'faltering' ? 4 : 1.2);
+        const k = o.state === 'closed' ? Math.max(0, (o.riftScale ?? 1) - dt * 0.8) : 1 + (o.state === 'faltering' ? Math.sin(o.t * 18) * 0.08 : Math.sin(o.t * 2) * 0.04);
+        o.riftScale = k; o.riftSpin.scale.setScalar(k);
+        o.riftRing.color.set(o.state === 'faltering' ? '#ffd27a' : '#c08aff');
       }
       if (o.arm) o.arm.rotation.z += ((o.state === 'used' ? -0.6 : 0.6) - o.arm.rotation.z) * Math.min(1, dt * 8);
       if (me && can) { const d = Math.hypot(o.x - me.x, o.z - me.z) - (o.r || 1) * 0.5; if (d < (K.reach || REACH) && d < bd) { bd = d; best = o; } }      // (round 11: a kind may carry its own reach — the fish pool)

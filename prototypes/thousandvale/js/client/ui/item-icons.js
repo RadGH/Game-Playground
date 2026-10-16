@@ -30,7 +30,8 @@ import { itemIconUrl, itemArtKey } from '../../../../../icons/js/game-icons.js';
 import { wornPart } from '../gear-look.js';
 import { gearOpts, lookDataReady, loadLookData } from '../looks.js';
 
-const VERSION = 'v5';      // v5 (2026-10-14): armour is worn by a plain mannequin, not a person; potions/goods are drawn art (v4: the worn model)
+const VERSION = 'v6';      // v6 (2026-10-16): the mannequin is a Chibi 2.5 body (robes with room at the hips, both coat tails)
+//      // v5 (2026-10-14): armour is worn by a plain mannequin, not a person; potions/goods are drawn art (v4: the worn model)
 const SIZE = 96, PX = SIZE;
 const DB = 'tv-icons', OS = 'icons';
 const mem = new Map();               // key -> object URL
@@ -235,7 +236,7 @@ function itemModel(spec) {
 
 let bodyLib = null;
 function bodyModules() {
-  if (!bodyLib) bodyLib = Promise.all([import('../../../../../avatar-3d/js/chibi2.js'), import('../looks.js')]).then(([c, l]) => ({ create: a => c.createChibi2Character(a, { mannequin: true }), avatarFor: l.avatarFor }));
+  if (!bodyLib) bodyLib = Promise.all([import('../chibi-version.js'), import('../looks.js')]).then(([c, l]) => ({ create: a => c.createTvBody(a, { mannequin: true }), avatarFor: l.avatarFor }));
   return bodyLib;
 }
 /** The dummy's one colour: a pale matte ash, light enough that dark leather reads and dull enough that steel still shines. */

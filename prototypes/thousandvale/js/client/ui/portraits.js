@@ -28,7 +28,7 @@ import { propsOff } from '../surface-plan.js';
 const PAINT = !propsOff();
 
 export const PORTRAIT_LAYER = 1;
-const VERSION = 'p1';
+const VERSION = 'p2';      // p2 (2026-10-16): Chibi 2.5 faces (js/client/chibi-version.js)
 const SIZE = 96;
 const DB = 'tv-portraits', OS = 'p';
 
@@ -297,6 +297,8 @@ export function createPortraits({ renderer, scene, avatarFor, createBody, fps = 
     await new Promise(r => setTimeout(r, 0));               // give the frame back between building and drawing
     const { r, scene: s2, camera, canvas } = stage();
     s2.add(body.group);
+    // Chibi 2.5 blinks and glances on its own: a still picture is taken with the eyes open, looking ahead
+    body.setBlink?.(0); body.setGaze?.(0, 0);
     body.setAnim?.('idle', 0); for (let i = 0; i < 3; i++) body.update?.(0.15);
     body.group.updateMatrixWorld(true);
     const H = body.metrics?.().height || 1.8;

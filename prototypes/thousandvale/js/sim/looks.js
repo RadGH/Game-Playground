@@ -4,7 +4,8 @@
 // two things Thousandvale adds: the playable `race` and a `seed` (the client's defaultLook rolls the rest from them).
 //
 //   { v: 1, race: 'human'|'elf'|'dwarf'|'halfling', seed: <uint32>, custom?: { body: {height, width, headSize, skin,
-//     round?, cheeks?, ...}, <slot>: 'id' | { id, color?, color2?, x?, y?, scale?, rot? } } }
+//     round?, cheeks?, shape?, posture?, shoulders?, legs?, arms?, ...}, <slot>: 'id' | { id, color?, color2?, x?, y?, scale?, rot?,
+//     pupil?, iris?, white?, colorR?, thick?, blink? } } }      (the Chibi 2.5 fields: avatar-3d/js/chibi25-options.js)
 // `custom` (D-UI's name; `avatar` is read as the same thing) is the avatar-2d JSON that overrides the class default.
 //
 // cleanLook(raw) -> { ok, look, why? }. Nothing the client sends is stored as it is: unknown keys are dropped, part ids are
@@ -12,6 +13,17 @@
 // must be #rrggbb, numbers are clamped. Held / off-hand parts are dropped: what you hold is your gear, not your face.
 
 import { PARTS, SLOTS } from '../../../../avatar-2d/js/parts/index.js';
+// Chibi 2.5 (2026-10-16): the extra fields a 2.5 face reads and the body choices it offers (avatar-3d, pure data)
+import { CHIBI25_OPTIONS } from '../../../../avatar-3d/js/chibi25-options.js';
+const F25 = CHIBI25_OPTIONS.fields, B25 = CHIBI25_OPTIONS.body;
+/** Per-part fields from a list (any slot that has the key): pupil and iris shapes. */
+const PART_PICK = { pupil: new Set(F25.eyes.pupil.ids), iris: new Set(F25.eyes.iris.ids) };
+/** Per-part colours beyond color / color2: the eye white, the right eye (odd eyes). */
+const PART_HEX = ['white', 'colorR'];
+/** Per-part numbers beyond PART_NUM, by slot: brow thickness. */
+const PART_NUM25 = { brows: { thick: [F25.brows.thick.min, F25.brows.thick.max] } };
+/** Body choices by name (2.5): body type, posture, tail. */
+const BODY_PICK = { shape: new Set(B25.shape.ids), posture: new Set(B25.posture.ids), tail: new Set(B25.tail.ids) };
 
 export const PLAYABLE_RACES = Object.freeze(['human', 'elf', 'dwarf', 'halfling']);
 export const LOOK_MAX_BYTES = 4096;
@@ -31,6 +43,8 @@ function cleanBody(b) {
     if (n >= 24 || !KEY.test(k)) continue;
     if (k === 'skin' || k === 'skin2') { if (typeof v === 'string' && HEX.test(v)) { out[k] = v.toLowerCase(); n++; } continue; }
     if (k === 'race') { if (typeof v === 'string' && /^[a-z_]{1,24}$/.test(v)) { out.race = v; n++; } continue; }
+    if (k === 'tailColor') { if (typeof v === 'string' && HEX.test(v)) { out[k] = v.toLowerCase(); n++; } continue; }
+    if (BODY_PICK[k]) { if (BODY_PICK[k].has(v)) { out[k] = v; n++; } continue; }
     if (k === 'c3' && v && typeof v === 'object' && !Array.isArray(v)) {            // Chibi 3 dials: numbers only
       const c3 = {};
       for (const [ck, cv] of Object.entries(v)) if (KEY.test(ck) && num(cv) && Object.keys(c3).length < 32) c3[ck] = clamp(cv, -2, 2);
@@ -50,6 +64,11 @@ function cleanPart(slot, v) {
   const out = { id: v.id };
   for (const c of ['color', 'color2']) if (typeof v[c] === 'string' && HEX.test(v[c])) out[c] = v[c].toLowerCase();
   for (const [k, [a, b]] of Object.entries(PART_NUM)) if (num(v[k])) out[k] = clamp(v[k], a, b);
+  // Chibi 2.5 fields (an old look has none of them, and loses nothing)
+  for (const c of PART_HEX) if (typeof v[c] === 'string' && HEX.test(v[c])) out[c] = v[c].toLowerCase();
+  for (const [k, set] of Object.entries(PART_PICK)) if (set.has(v[k])) out[k] = v[k];
+  for (const [k, [a, b]] of Object.entries(PART_NUM25[slot] || {})) if (num(v[k])) out[k] = clamp(v[k], a, b);
+  if (typeof v.blink === 'boolean') out.blink = v.blink;
   return out;
 }
 

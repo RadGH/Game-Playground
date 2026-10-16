@@ -1,0 +1,94 @@
+/* Thousandvale — the CONTROLLER layout (2026-10-16). Every rule is under html[data-layout="pad"], which only
+   js/client/input/layout.js sets (when a controller is the device in use, or Settings > Key bindings > Layout says
+   Controller) — and the gallery's Controller frame. The pieces it styles are made by js/client/input/pad-layout.js.
+
+   Built for the Steam Deck (1280 x 800, read from a seat or a sofa) and a pad on a 1920 x 1080 screen:
+     · the world is the screen: nothing but the action bar, your frame and the minimap is drawn by default
+     · nothing sits in the middle third, where you fight
+     · nothing on screen needs a mouse: the menu bar, the minimap buttons and the "click here" hints go
+     · everything the pad can do is printed as the pad's own button (input/hints.js), and the corner says Menu / Map */
+
+html[data-layout="pad"] { --pad-gap: 12px; }
+
+/* ================================================================ what a controller cannot click, and does not need */
+html[data-layout="pad"] #menubar, html[data-layout="pad"] .minimap .mm-btns, html[data-layout="pad"] .bag-hint, html[data-layout="pad"] .tv-deeds,
+html[data-layout="pad"] .pf-foot, html[data-layout="pad"] .map-help, html[data-layout="pad"] .wm-help { display: none !important; }   /* the "drag / wheel / right-click" lines: a mouse's instructions */
+/* the connection pill only when something is wrong */
+html[data-layout="pad"] .conn.open { display: none; }
+html[data-layout="pad"] .conn { top: auto; bottom: 120px; right: var(--pad-gap); }
+/* the clock: a small line beside the minimap instead of a pill under the connection */
+html[data-layout="pad"] .tv-clock { top: var(--pad-gap); right: 168px; padding: 3px 10px; font-size: 12px; opacity: 0.85; }
+
+/* ================================================================ frames: smaller, tucked into the corners */
+html[data-layout="pad"] .unitframe.self { left: var(--pad-gap); top: var(--pad-gap); transform: scale(0.84); transform-origin: top left; }
+html[data-layout="pad"] .unitframe.target { left: 50%; top: var(--pad-gap); margin-left: -124px; transform: scale(0.84); transform-origin: top center; }
+html[data-layout="pad"] .unitframe.target.ranked { margin-left: -150px; }
+html[data-layout="pad"] .partyframes { top: 76px !important; left: var(--pad-gap) !important; transform: scale(0.8); transform-origin: top left; }
+html[data-layout="pad"] .buffrow { transform: scale(0.85); transform-origin: top left; }
+html[data-layout="pad"] .minimap { top: var(--pad-gap); right: var(--pad-gap); transform: scale(0.74); transform-origin: top right; }
+html[data-layout="pad"] .minimap .mm-zone { font-size: 15px; }
+html[data-layout="pad"] .boss { transform: translateX(-50%) scale(0.88); transform-origin: top center; }
+
+/* ================================================================ quests and events: one line under the minimap */
+html[data-layout="pad"] .right-col { display: none; }
+html[data-layout="pad"][data-hudinfo="open"] .right-col { display: flex; top: 216px; right: var(--pad-gap); width: 280px; max-height: calc(100vh - 216px - 150px); overflow-y: auto; scrollbar-width: none; }
+html[data-layout="pad"][data-hudinfo="open"] .right-col > * { font-size: 13px; }
+html:not([data-layout="pad"]) .pad-only { display: none !important; }
+html[data-layout="pad"] .pad-info { position: absolute; top: 184px; right: var(--pad-gap); max-width: 290px; display: flex; align-items: center; gap: 8px; padding: 4px 10px 4px 5px; border: 1px solid var(--edge); border-radius: 16px;
+  background: rgba(14, 12, 10, 0.72); color: var(--ink); font: 600 13px/1.2 var(--sans); pointer-events: auto; box-shadow: var(--shadow); }
+html[data-layout="pad"] .pad-info .pi-text { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html[data-layout="pad"] .pad-info .pi-more { color: var(--gold-hi); font-weight: 700; }
+html[data-layout="pad"] .pad-info .pi-more:empty { display: none; }
+html[data-layout="pad"] .pad-info.empty { opacity: 0.55; }
+html[data-layout="pad"] .pad-info.on { border-color: var(--gold-hi); }
+html[data-layout="pad"] .pad-info kbd, html[data-layout="pad"] .pad-hints kbd { flex: none; }
+
+/* ================================================================ chat: folded to its last lines, which fade */
+html[data-layout="pad"] .chat { width: min(380px, 32vw); left: var(--pad-gap); bottom: 30px; pointer-events: none; }
+html[data-layout="pad"] .chat .chat-tabs, html[data-layout="pad"] .chat .chat-entry { display: none; }
+html[data-layout="pad"] .chat .chat-log { max-height: 4.4em; overflow: hidden; background: none; padding: 0 4px; font-size: 13px; text-shadow: 0 1px 2px #000, 0 0 5px #000;
+  opacity: 0; transition: opacity 1.2s ease; scrollbar-width: none; }
+html[data-layout="pad"]:not([data-chat="open"]) .chat .chat-log > :not(:nth-last-child(-n+3)) { display: none; }
+html[data-layout="pad"][data-chatpeek] .chat .chat-log { opacity: 1; transition: opacity 0.15s ease; }
+/* open (LT + View, or the Chat tile): the whole chat as a panel on the left, with the on-screen keyboard under it */
+html[data-layout="pad"][data-chat="open"] .chat { bottom: auto; top: 90px; width: min(460px, 40vw); z-index: 40; padding: 8px 10px; pointer-events: auto;
+  background: rgba(14, 12, 10, 0.94); border: 1px solid var(--edge-strong); border-radius: 12px; box-shadow: var(--shadow); }
+html[data-layout="pad"][data-chat="open"] .chat .chat-tabs, html[data-layout="pad"][data-chat="open"] .chat .chat-entry { display: flex; }
+html[data-layout="pad"][data-chat="open"] .chat .chat-log { opacity: 1; max-height: 40vh; overflow-y: auto; }
+
+/* ================================================================ the action bar: a little smaller, lower */
+html[data-layout="pad"] .actionbar { bottom: 12px; transform: translateX(-50%) scale(0.86); transform-origin: bottom center; }
+html[data-layout="pad"] .xpbar { bottom: 3px; }
+html[data-layout="pad"] .interact { bottom: 112px; }
+html[data-layout="pad"] .ally-note { bottom: 150px !important; }
+
+/* the hint strip, bottom right: what Menu, View, LB and LT + View do */
+html[data-layout="pad"] .pad-hints { position: absolute; right: var(--pad-gap); bottom: 14px; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; pointer-events: none;
+  font: 600 12px/1 var(--sans); color: var(--ink-dim); text-shadow: 0 1px 2px #000; opacity: 0.85; }
+html[data-layout="pad"] .pad-hints span { display: flex; align-items: center; gap: 6px; }
+html[data-layout="pad"][data-pad-mod="1"] .pad-hints { opacity: 0.35; }
+
+/* ================================================================ windows: never under the hint strip; centred when they can be */
+html[data-layout="pad"] .tv-panel:not(.placed):not(.centered):not(.pause-panel) { max-height: calc(100vh - 110px); }
+html[data-layout="pad"] .tv-panel .tvp-body { scrollbar-width: thin; }
+/* the focus ring a little thicker: read from a sofa */
+html[data-layout="pad"] .pad-ring { border-width: 3px; }
+
+/* ================================================================ the controller menu (Menu / Start) */
+html[data-layout="pad"] .tv-panel.pad-menu-panel { left: 50% !important; top: 50% !important; right: auto !important; transform: translate(-50%, -50%); width: min(1000px, calc(100vw - 48px)) !important; max-height: calc(100vh - 40px); z-index: 880; }
+html[data-layout="pad"] .pad-menu-panel .tvp-body { max-height: none; overflow-y: auto; padding: 10px 16px 12px; }
+html[data-layout="pad"] .pad-menu { display: flex; flex-direction: column; gap: 12px; }
+html[data-layout="pad"] .pad-group h4 { margin: 0 0 6px; font: 700 12px/1 var(--sans); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); }
+html[data-layout="pad"] .pad-tiles { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
+html[data-layout="pad"] .pad-tile { position: relative; display: grid; grid-template-rows: auto auto auto; justify-items: center; align-content: center; gap: 3px; min-height: 104px; padding: 10px 6px; border-radius: 10px;
+  background: linear-gradient(180deg, rgba(60, 47, 32, 0.9), rgba(22, 18, 13, 0.92)); border: 1px solid var(--edge); color: var(--ink); text-align: center; cursor: pointer; }
+html[data-layout="pad"] .pad-tile .pt-ico svg { width: 34px; height: 34px; display: block; }
+html[data-layout="pad"] .pad-tile strong { font: 700 15px/1.15 var(--sans); }
+html[data-layout="pad"] .pad-tile small { font-size: 11.5px; line-height: 1.2; color: var(--ink-faint); }
+html[data-layout="pad"] .pad-tile:focus, html[data-layout="pad"] .pad-tile:hover { border-color: var(--gold-hi); background: linear-gradient(180deg, rgba(110, 82, 40, 0.95), rgba(40, 30, 18, 0.95)); outline: none; }
+html[data-layout="pad"] .pad-tile.danger strong { color: #ffb3a3; }
+html[data-layout="pad"] .pad-tile .pt-badge { position: absolute; top: 6px; right: 8px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: #c7372f; color: #fff; font: 700 12px/20px var(--sans); }
+html[data-layout="pad"] .pad-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 10px 0 0; font-size: 12.5px; color: var(--ink-dim); }
+html[data-layout="pad"] .pad-legend span { display: inline-flex; align-items: center; gap: 4px; }
+@media (max-width: 900px) { html[data-layout="pad"] .pad-tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); } html[data-layout="pad"] .pad-tile { min-height: 84px; } }
+@media (max-height: 820px) { html[data-layout="pad"] .pad-tile { min-height: 92px; padding: 8px 6px; } html[data-layout="pad"] .pad-menu { gap: 8px; } }

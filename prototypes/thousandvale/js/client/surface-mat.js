@@ -76,6 +76,7 @@ const U = {
 
 const VERT_PARS = /* glsl */`
 attribute float aSurf;
+attribute float aSurfRound;      // 1 on round unit shapes (cyl, cone, dome, barrel, sack): owner 2026-10-16 — towers read smooth
 flat varying float vSurf;
 varying vec2 vSurfUv;
 varying vec3 vSurfLocal;
@@ -109,6 +110,13 @@ const VERT_MAIN = /* glsl */`
     vec2 t = normalize(vec2(-nm.z, nm.x));
     float across = abs(dot(sScale.xz, t)), up = sScale.y;
     uv = vec2(dot(pm.xz, t), pm.y / max(length(nm.xz), 0.35));
+    if (aSurfRound > 0.5) {
+      // a round side: dot(position, tangent) is ~0 all the way round a cylinder, so the courses had no joints and a
+      // tower read as smooth bands. Lay the pattern by arc length instead (metres round the curve).
+      float rad = 0.25 * (sScale.x + sScale.z);
+      uv.x = atan(position.z, position.x) * rad;
+      across = 6.2831853 * rad;
+    }
     // wood grain runs along the longer side of the face (a post's grain runs up it)
     if (wood > 0.5 && up > across * 1.25) uv = uv.yx;
   }

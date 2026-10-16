@@ -2,6 +2,43 @@
  "_doc": "Player-facing changelog, newest first. The lead appends an entry at each publish (from the feedback reports' Completed notes). `id` is stable; the client remembers the last id a player has seen and highlights newer ones. Plain language, no internal names.",
  "entries": [
   {
+   "id": "2026-10-16d",
+   "date": "2026-10-16",
+   "title": "A layout for controllers (Steam Deck and gamepads)",
+   "items": [
+    "Pick up a controller and the screen switches to a controller layout by itself: the menu bar goes, the chat folds down to its last few lines (which fade), and your quests and events fold to one line under the map, so you see the world instead of panels. Use the mouse or keyboard again and it switches back.",
+    "Menu (Start) now opens a big menu with every window: bag, character, skills, perks, journal, map, party, friends, guild, mail, market, group finder, chat, settings, controls, what's new, feedback, account and log out. Move with the stick or D-pad, A opens, B goes back.",
+    "Every window works with the controller: LB and RB change tabs, the right stick scrolls, Y shows an item's card. View opens the map.",
+    "Hold LT and press View to chat (an on-screen keyboard opens). Hold LT and press Menu to show or fold your quest list.",
+    "Settings > Key bindings > Layout lets you keep the controller layout or the desktop one if you prefer."
+   ]
+  },
+  {
+   "id": "2026-10-16c",
+   "date": "2026-10-16",
+   "title": "New faces: livelier characters and many more looks",
+   "items": [
+    "Every character in the world has a new, more careful model: hair and hats fit properly, beards sit over the chest, and long robes, dresses and coats no longer have feet poking through them when you run.",
+    "Eyes blink now, and glance around when idle. People look at things: townsfolk turn their eyes to you as you walk up, enemies watch whoever they are fighting, and your character looks at your target.",
+    "Character creation and the barber have many more choices: 9 new eye shapes with pupil and iris styles and odd-coloured eyes, 10 new hairstyles (some with a second colour), new brows, mouths, noses, ear shapes that suit your people, 6 new beards and 10 new face marks.",
+    "New body options too: a body type (slim, athletic, broad, stocky, heavy, petite, lanky), posture, shoulder width, leg length and arm thickness.",
+    "Characters you already made look the way they did, on the new model, and can visit the barber to try the new options."
+   ]
+  },
+  {
+   "id": "2026-10-16b",
+   "date": "2026-10-16",
+   "title": "Wandering packs and six new events: a wilder, more dangerous world",
+   "items": [
+    "Packs of 5 to 10 monsters now roam the wilds instead of waiting at camps: hound hunts, boar sounders, hyena clans, brigand crews with archers, bone marches, cult processions, fen broods, and on the Burning Isle Slagborn war-parties, prowler packs and pumice processions. You meet one every couple of minutes on the roads.",
+    "Many are led by a named elite with a banner on its back and a line over its name. Bring the leader down and a beast pack scatters — or a pack that fights to the end turns savage and hits harder.",
+    "The whole pack comes when you pull one, and gives up together. Each member is weaker than a lone monster, so area spells shine. A pack grows tougher for every extra player fighting it.",
+    "A wiped pack leaves its spoils where it fell — a bundle only those who fought can open (a rare item if it had a leader) — plus a share of a level of experience.",
+    "Packs live their lives: brigands light a fire and sit round it, hounds and prowlers run down deer and goats and feed, cultists stand in a ring.",
+    "New events that come to you: an Ambush on the Road (both sides at once), a Caravan Under Attack (save the drover), a Night Raid on a village (its militia fight beside you), a Rift that spits monsters until you seal it three times, a Warlord marching a war-band across the zone, and Bounties on pack leaders with their last-seen spot on your map. Each has a tracker card, a map pin and a reward for everyone who helps."
+   ]
+  },
+  {
    "id": "2026-10-16",
    "date": "2026-10-16",
    "title": "A prettier world: water, mist, light and lived-in towns",

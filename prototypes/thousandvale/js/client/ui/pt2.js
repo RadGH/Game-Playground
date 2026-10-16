@@ -236,8 +236,9 @@ export function createUi2(o) {
   let titleAt = 0;
   function titles() {
     for (const a of actors.actors.values()) {
-      if (a.kind !== 'npc' || a.pet) continue;
+      if ((a.kind !== 'npc' && a.kind !== 'monster') || a.pet) continue;
       const i = infoOf(a.id) || {};
+      if (a.kind === 'monster' && !i.title && !a.npcTitle) continue;      // [Packs] a wandering pack's leader wears its line ("Leads the hunt", "Wanted — …")
       const t = npcTitle(i, a.name);            // W27: only somebody placed for you to find wears a title — filler folk get none
       if ((a.npcTitle || '') !== t) { a.npcTitle = t; actors.refreshPlate(a); }
     }

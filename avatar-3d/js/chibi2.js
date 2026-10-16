@@ -11,6 +11,12 @@ import { holdFor } from './chibi2-weapon-ids.js';
 import { buildArmour2 } from './chibi2-armour2.js';
 import { buildGear5 } from './chibi2-gear5.js';
 import { G5_HATS_COVER_CROWN, G5_HAT_BRIM } from './chibi2-gear5-ids.js';
+import { isV25 } from './chibi25-options.js';
+// Chibi 2.5 part A (the head): face, eyes + eyelid bones, hair fitting — only for a 2.5 look (CHIBI2.md "Chibi 2.5 contracts")
+import { buildFace25, addEyelids, eyeSpec25 } from './chibi25-face.js';
+import { buildHair25, hatFit, HAIR_COVERS_EARS } from './chibi25-hair.js';
+import { EyeDriver25 } from './chibi25-eyes.js';
+import { needsSkirt, addSkirtBones, strideFor, applyBody25, race25 } from './chibi25-body.js';
 
 export { CHIBI2_ANIMS, CHIBI2_SWIM_ANIMS, CHIBI2_ALL_ANIMS };
 const templates = new Map();
@@ -26,7 +32,10 @@ function buildTemplate(a, rig, opts = {}) {
   rig.root.updateMatrixWorld(true);
   const hair = a.hair.color;
   const trim = '#d9b477', leather = '#493c36', steel = '#c4d4d6', darkSteel = '#536a73';
-  const add = (...args) => b.add(...args);
+  // `opts.trace` (Chibi 2.5 measuring hook): every piece's bind-space vertices, tagged by build stage. Off = no cost.
+  let traceTag = 'body';
+  const tagAs = t => { traceTag = t; };
+  const add = opts.trace ? (g, bone, ...rest) => { b.add(g, bone, ...rest); opts.trace.push({ tag: traceTag, bone, positions: Float32Array.from(g.attributes.position.array), index: g.index ? Uint32Array.from(g.index.array) : null }); } : (...args) => b.add(...args);
   const ellipsoid = (bone, color, position, scale, options = {}) => add(sphere(), bone, color, { position, scale, ...options });
   const strip = (bone, points, radius, color, options = {}) => add(taperedCurve(points, [radius, radius, radius], 4, 4), bone, color, options);
   const head = (g, color, options = {}) => add(g, 'head', color, { ...options, position: (options.position || [0, 0, 0]).map(v => v * H), scale: (options.scale || [1, 1, 1]).map(v => v * H) });
@@ -36,10 +45,24 @@ function buildTemplate(a, rig, opts = {}) {
   const body = buildBody(a, rig, { add, ellipsoid, strip, trim, leather, steel, darkSteel });
   // `opts.mannequin` (Thousandvale's gear icons, 2026-10-14): the face keeps its sculpted shape but is painted the body's
   // one colour, so a shop dummy shows the piece and never a particular person. Off = the face exactly as before.
-  const face = buildFace(a, rig, opts.mannequin ? mannequinCtx(add, a.body.skin, H) : { add, head, ellipsoid, strip });
   const hs = HEAD_SHAPES[a.headShape] || HEAD_SHAPES.round, faceWidth = hs.w, faceDepth = hs.d;
+  let face;
+  if (rig.v25) {
+    // Chibi 2.5: the face knows the hat (ears under it, beast ears on top of it) and the hair (long hair over the ears),
+    // and hands the hair the brow height its fringe must stop above
+    const fit = hatFit(a.hat.id, { ...HAT_BRIM }), ctx = opts.mannequin ? mannequinCtx(add, a.body.skin, H) : { add, head, ellipsoid, strip };
+    tagAs('face');
+    face = buildFace25(a, rig, { ...ctx, tag: tagAs, chestZ: body.chestZ, neckLift: rig.byName.head.position.y, crownCovered: !!(fit && (fit.shell || fit.hood)), hairCoversEars: HAIR_COVERS_EARS.includes(a.hair.id) && !(fit && (fit.hood || fit.shell)) });
+    tagAs('hair');
+    buildHair25(a, rig, { head, faceWidth, faceDepth, fit, browTop: face.browTop, faceZ: face.faceZ, tag: tagAs });
+    tagAs('hat');
+  } else {
+    tagAs('face');
+    face = buildFace(a, rig, opts.mannequin ? mannequinCtx(add, a.body.skin, H) : { add, head, ellipsoid, strip });
+    tagAs('hair');
+  }
 
-  if (a.hair.id !== 'bald') {
+  if (!rig.v25 && a.hair.id !== 'bald') {
     const hairId = a.hair.id;
     const headwearCoversCrown = ['feather_cap', 'bard_red_feather', 'horned_helm', 'dragon_helm', 'hood', 'wide_brim', 'goggles_up', 'wizard', ...HATS_COVER_CROWN, ...G5_HATS_COVER_CROWN].includes(a.hat.id);
     // A raised hood tucks away everything outside the face opening; only a fringe shows under its brow.
@@ -125,6 +148,7 @@ function buildTemplate(a, rig, opts = {}) {
     if (hairId === 'ponytail' && !hoodUp) head(taperedCurve([[0.27, 0.38, -0.10], [0.38, 0.10, -0.13], [0.31, -0.20, -0.08]], [0.11, 0.09, 0.02], 7, 8), hair);
     if ((hairId === 'bun' || hairId === 'buns') && !hoodUp) for (const s of hairId === 'bun' ? [1] : [-1, 1]) head(sphere(), hair, { position: [s * (hairId === 'bun' ? 0 : 0.22), 0.47, -0.04], scale: [0.13, 0.13, 0.11] });
   }
+  tagAs('hat');
   if (a.hat.id === 'dragon_helm') {
     buildDragonHelm(a, head);
   } else if (CLASS_HATS.includes(a.hat.id)) {
@@ -163,8 +187,11 @@ function buildTemplate(a, rig, opts = {}) {
   } else buildExtraHat(a, { add, head, H, W, T, trim, leather, steel, darkSteel });
   // Held and off-hand items, accessories, marks, capes, greaves and decorations live in chibi2-gear.js.
   const gearCtx = { add, head, ellipsoid, strip, H, W, T, L: rig.leg, A: rig.arm, trim, leather, steel, darkSteel, skin: a.body.skin, faceWidth, faceDepth, chestZ: body.chestZ, hipsZ: body.hipsZ, faceZ: face.faceZ, topStyle: body.top, LW: body.LW, rig };
+  tagAs('gear');
   buildGear(a, gearCtx);
+  tagAs('armour2');
   buildArmour2(a, gearCtx);   // tier-2 armour kits + emblems (chibi2-armour2.js) — opt-in: nothing for a look that names neither
+  tagAs('gear5');
   buildGear5(a, { ...gearCtx, body, face });   // play-test 5: the g5_ models (chibi2-gear5.js) — opt-in: nothing for a look that names no g5_ id
   return b.finish();
 }
@@ -402,17 +429,70 @@ function normalizeForChibi2(avatar) {
   return a;
 }
 
-function acquire(avatar, anims = CHIBI2_ANIMS, opts = {}) {
-  const a = normalizeForChibi2(avatar), rig = createRig(a.body, raceOf(a));
+/** The normalised look, its rig and its template cache key (shared by `acquire` and `prepareChibi2`). */
+function rigFor(avatar, anims, opts) {
+  const a = normalizeForChibi2(avatar);
+  if (opts.v25 && !isV25(a)) a.body = { ...a.body, v: 2.5 };      // `{ v25: true }` = the flag in the look (so it is in the cache key)
+  const v25 = isV25(a), rig = createRig(a.body, v25 ? race25(a, raceOf(a)) : raceOf(a));
+  rig.v25 = v25;
+  if (v25) addEyelids(rig, a);      // part A: eyelidL/R, appended right after the 22 v2 bones (before part B's)
+  // Chibi 2.5 part B: skirt bones for a long garment, appended after every other bone, and the robe stride the gait
+  // clips read (chibi25-body.js). Nothing for a v2 look.
+  if (rig.v25) { applyBody25(rig, a); if (needsSkirt(a)) addSkirtBones(rig); rig.stride = strideFor(a); }
   rig.hold = holdFor(a);            // what the hands carry decides how every clip carries it
   // the clip set is part of the cache key: two characters with different animation sets are not
   // the same template
   const key = JSON.stringify(a) + '|' + anims.length + (opts.mannequin ? '|mannequin' : '');
-  let template = templates.get(key);
+  return { a, rig, key };
+}
+
+/**
+ * Build a look's template AHEAD of `createChibi2Character`, a few clips at a time, giving the thread back between them
+ * (Thousandvale 2026-10-16: a Chibi 2.5 robed template is ~80-150 ms of clip baking — the skirt drive runs on every
+ * frame — and done in one go that is a long task on a slow machine). `opts.slice()` returns a promise that resolves
+ * when the caller may carry on (a requestAnimationFrame / idle wait); `opts.budget` = ms of work between slices (8).
+ * The result is the very template `acquire` would have built (same rig, same clips, same key), parked in the cache with
+ * no references, so the next `createChibi2Character` with the same look and options is a cache hit. Opt-in: nothing
+ * else calls it, and a template nobody takes is dropped when the cache passes PREPARED_MAX.
+ */
+const pending = new Map();
+const PREPARED_MAX = 48;
+export function prepareChibi2(avatar, opts = {}) {
+  const anims = opts.swim ? CHIBI2_ALL_ANIMS : (opts.anims || CHIBI2_ANIMS);
+  const o = { mannequin: !!opts.mannequin, v25: !!opts.v25 };
+  const { a, rig, key } = rigFor(avatar, anims, o);
+  if (templates.has(key)) return Promise.resolve(false);
+  if (pending.has(key)) return pending.get(key);
+  const slice = opts.slice || (() => new Promise(r => setTimeout(r, 0)));
+  const budget = opts.budget ?? 8;
+  const job = (async () => {
+    let t0 = performance.now();
+    const pause = async () => { if (performance.now() - t0 >= budget) { await slice(); t0 = performance.now(); } };
+    const parts = buildTemplate(a, rig, o);
+    await pause();
+    const clips = [];
+    for (const name of anims) { clips.push(...createClips(rig, [name])); await pause(); }
+    if (!templates.has(key)) {
+      // unclaimed prepared templates (refs 0) beyond the cap are let go, oldest first
+      const idle = [...templates.entries()].filter(([, t]) => t.refs === 0 && t.prepared);
+      for (let i = 0; i < idle.length - PREPARED_MAX; i++) { for (const p of idle[i][1].parts) { p.geometry.dispose(); p.material.dispose(); } templates.delete(idle[i][0]); }
+      templates.set(key, { parts, clips, refs: 0, anims, prepared: true });
+    } else for (const p of parts) { p.geometry.dispose(); p.material.dispose(); }
+    return true;
+  })().finally(() => pending.delete(key));
+  pending.set(key, job);
+  return job;
+}
+
+function acquire(avatar, anims = CHIBI2_ANIMS, opts = {}) {
+  const { a, rig, key } = rigFor(avatar, anims, opts);
+  // a traced build (opts.trace) is never cached: it must run the builders to record them
+  let template = opts.trace ? null : templates.get(key);
   if (!template) {
     template = { parts: buildTemplate(a, rig, opts), clips: createClips(rig, anims), refs: 0, anims };
-    templates.set(key, template);
+    if (!opts.trace) templates.set(key, template);
   }
+  template.prepared = false;
   template.refs++;
   const root = new THREE.Group(); root.name = 'chibi2-body'; root.add(rig.root);
   const skeleton = new THREE.Skeleton(rig.bones);
@@ -429,7 +509,7 @@ function acquire(avatar, anims = CHIBI2_ANIMS, opts = {}) {
     mixer.stopAllAction(); mixer.uncacheRoot(root); skeleton.dispose();
     if (--template.refs === 0) {
       for (const p of template.parts) { p.geometry.dispose(); p.material.dispose(); }
-      templates.delete(key);
+      if (templates.get(key) === template) templates.delete(key);
     }
   } };
 }
@@ -444,8 +524,9 @@ export async function createChibi2Character(avatar, opts = {}) {
   const group = new THREE.Group(); group.userData.character = true;
   let asset, action, anim = 'idle', elapsed = 0, disposed = false, handsFree = false;
   const gaze = { x: 0, y: 0, tx: 0, ty: 0, next: 0.8 + Math.random() * 1.5 };
+  const eyes25 = new EyeDriver25();      // Chibi 2.5: blinking + looking (chibi25-eyes.js); idle for a v2 look
   function install(a) {
-    const next = acquire(a, anims, { mannequin: !!opts.mannequin });
+    const next = acquire(a, anims, { mannequin: !!opts.mannequin, v25: !!opts.v25, trace: opts.trace || null });
     if (asset) { group.remove(asset.root); asset.release(); }
     asset = next; group.add(asset.root); action = null; elapsed = 0;
     asset.lidded = ['narrow', 'sleepy', 'tired', 'angry'].includes(a?.eyes?.id);   // lidded eyes never glance up under the lid
@@ -514,6 +595,7 @@ export async function createChibi2Character(avatar, opts = {}) {
       // twisted again every frame and a clip that does is twisted exactly once
       const chest = asset.rig.byName.chest;
       if (twist.on) chest.quaternion.multiply(twist.inv);
+      if (asset.rig.v25) eyes25.pre(asset.rig);
       asset.mixer.update(d * rate);
       twist.on = !!(chest && (twist.yaw || twist.side || twist.fwd));
       if (twist.on) { twist.q.setFromEuler(twist.e.set(twist.fwd, twist.yaw, twist.side)); twist.inv.copy(twist.q).invert(); chest.quaternion.multiply(twist.q); }
@@ -521,6 +603,12 @@ export async function createChibi2Character(avatar, opts = {}) {
       // simple read as eyes clamped shut every few seconds; now the iris drifts to a new spot every
       // couple of seconds and settles there, which is what makes a face look alive.
       const bones = asset.rig.byName, H = asset.rig.headScale;
+      if (asset.rig.v25) {
+        // Chibi 2.5: real blinks with eyelids, glances clamped inside the white, lookAt (chibi25-eyes.js)
+        eyes25.update(asset.rig, d, anim);
+        if (handsFree) for (const s of ['L', 'R']) bones['grip' + s].scale.setScalar(0.001);
+        return;
+      }
       if (elapsed >= gaze.next) {
         gaze.next = elapsed + 1.4 + Math.random() * 2.6;
         const wide = Math.random() < 0.3;
@@ -542,6 +630,12 @@ export async function createChibi2Character(avatar, opts = {}) {
      */
     setHandsFree(v) { handsFree = !!v; if (!v) for (const s of ['L', 'R']) asset.rig.byName['grip' + s].scale.setScalar(1); },
     get handsFree() { return handsFree; },
+    /** Chibi 2.5 eyes (a v2 look ignores these): see chibi25-eyes.js. */
+    lookAt(point, { head = 0.35 } = {}) { eyes25.target = point ? (point.isVector3 ? point.clone() : new THREE.Vector3(...[].concat(point.x ?? point[0], point.y ?? point[1], point.z ?? point[2]))) : null; eyes25.headK = THREE.MathUtils.clamp(head, 0, 1); },
+    setGaze(x, y = 0) { eyes25.manual = x == null ? null : [THREE.MathUtils.clamp(+x || 0, -1, 1), THREE.MathUtils.clamp(+y || 0, -1, 1)]; },
+    blink() { eyes25.blink(); },
+    setBlink(k) { eyes25.hold = k == null ? null : +k; },
+    get eyes() { return { v25: !!asset.rig.v25, blink: eyes25.k, gaze: [...eyes25.g], looking: eyes25.looking, limits: asset.rig.eyes25 ? [asset.rig.eyes25.limX, asset.rig.eyes25.limY] : null }; },
     get hold() { return asset.rig.hold; },
     dispose() { if (disposed) return; disposed = true; group.remove(asset.root); asset.release(); },
   };

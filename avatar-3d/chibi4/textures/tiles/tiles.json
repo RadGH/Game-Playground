@@ -1,0 +1,364 @@
+{
+ "cell": 256,
+ "pad": 16,
+ "cols": 12,
+ "rows": 5,
+ "tintMean": 0.62,
+ "tintLum": 0.3424,
+ "tiles": {
+  "cloth": {
+   "index": 0,
+   "channel": "A",
+   "shine": 0.0,
+   "world": 0.1
+  },
+  "lining": {
+   "index": 1,
+   "channel": "A",
+   "shine": 0.0,
+   "world": 0.1
+  },
+  "leather": {
+   "index": 2,
+   "channel": "A",
+   "shine": 0.35,
+   "world": 0.18
+  },
+  "plate": {
+   "index": 3,
+   "channel": "A",
+   "shine": 0.85,
+   "world": 0.3
+  },
+  "mail": {
+   "index": 4,
+   "channel": "A",
+   "shine": 0.8,
+   "world": 0.07
+  },
+  "silk": {
+   "index": 5,
+   "channel": "A",
+   "shine": 0.5,
+   "world": 0.25
+  },
+  "fur": {
+   "index": 6,
+   "channel": "A",
+   "shine": 0.0,
+   "world": 0.12
+  },
+  "quilt": {
+   "index": 7,
+   "channel": "A",
+   "shine": 0.0,
+   "world": 0.16
+  },
+  "cloth_b": {
+   "index": 8,
+   "channel": "B",
+   "shine": 0.0,
+   "world": 0.1
+  },
+  "lining_b": {
+   "index": 9,
+   "channel": "B",
+   "shine": 0.0,
+   "world": 0.1
+  },
+  "leather_b": {
+   "index": 10,
+   "channel": "B",
+   "shine": 0.35,
+   "world": 0.18
+  },
+  "plate_b": {
+   "index": 11,
+   "channel": "B",
+   "shine": 0.85,
+   "world": 0.3
+  },
+  "mail_b": {
+   "index": 12,
+   "channel": "B",
+   "shine": 0.8,
+   "world": 0.07
+  },
+  "silk_b": {
+   "index": 13,
+   "channel": "B",
+   "shine": 0.5,
+   "world": 0.25
+  },
+  "fur_b": {
+   "index": 14,
+   "channel": "B",
+   "shine": 0.0,
+   "world": 0.12
+  },
+  "quilt_b": {
+   "index": 15,
+   "channel": "B",
+   "shine": 0.0,
+   "world": 0.16
+  },
+  "knit": {
+   "index": 16,
+   "channel": "A",
+   "shine": 0.0,
+   "world": 0.08
+  },
+  "scale": {
+   "index": 17,
+   "channel": "A",
+   "shine": 0.8,
+   "world": 0.14
+  },
+  "feather": {
+   "index": 18,
+   "channel": "A",
+   "shine": 0.1,
+   "world": 0.1
+  },
+  "strands": {
+   "index": 19,
+   "channel": "A",
+   "shine": 0.1,
+   "world": 0.06
+  },
+  "leather_brown": {
+   "index": 20,
+   "channel": "-",
+   "shine": 0.35,
+   "world": 0.18
+  },
+  "leather_dark": {
+   "index": 21,
+   "channel": "-",
+   "shine": 0.3,
+   "world": 0.18
+  },
+  "steel": {
+   "index": 22,
+   "channel": "-",
+   "shine": 0.9,
+   "world": 0.3
+  },
+  "darksteel": {
+   "index": 23,
+   "channel": "-",
+   "shine": 0.85,
+   "world": 0.3
+  },
+  "gold": {
+   "index": 24,
+   "channel": "-",
+   "shine": 0.95,
+   "world": 0.3
+  },
+  "brass": {
+   "index": 25,
+   "channel": "-",
+   "shine": 0.9,
+   "world": 0.3
+  },
+  "bone": {
+   "index": 26,
+   "channel": "-",
+   "shine": 0.25,
+   "world": 0.1
+  },
+  "rope": {
+   "index": 27,
+   "channel": "-",
+   "shine": 0.0,
+   "world": 0.06
+  },
+  "wood": {
+   "index": 28,
+   "channel": "-",
+   "shine": 0.15,
+   "world": 0.3
+  },
+  "black": {
+   "index": 29,
+   "channel": "-",
+   "shine": 0.1,
+   "world": 0.1
+  },
+  "glass": {
+   "index": 30,
+   "channel": "-",
+   "shine": 0.95,
+   "world": 0.2
+  },
+  "gem_red": {
+   "index": 31,
+   "channel": "-",
+   "shine": 0.95,
+   "world": 0.06
+  },
+  "gem_blue": {
+   "index": 32,
+   "channel": "-",
+   "shine": 0.95,
+   "world": 0.06
+  },
+  "herb": {
+   "index": 33,
+   "channel": "-",
+   "shine": 0.05,
+   "world": 0.08
+  },
+  "parchment": {
+   "index": 34,
+   "channel": "-",
+   "shine": 0.0,
+   "world": 0.15
+  },
+  "straw": {
+   "index": 35,
+   "channel": "-",
+   "shine": 0.0,
+   "world": 0.12
+  },
+  "white": {
+   "index": 36,
+   "channel": "-",
+   "shine": 0.0,
+   "world": 0.1
+  },
+  "fur_white": {
+   "index": 37,
+   "channel": "-",
+   "shine": 0.0,
+   "world": 0.12
+  },
+  "redcloth": {
+   "index": 38,
+   "channel": "-",
+   "shine": 0.0,
+   "world": 0.1
+  },
+  "glow_warm": {
+   "index": 39,
+   "channel": "-",
+   "shine": 1.0,
+   "world": 0.2
+  },
+  "glow_blue": {
+   "index": 40,
+   "channel": "-",
+   "shine": 1.0,
+   "world": 0.2
+  },
+  "glow_rune": {
+   "index": 41,
+   "channel": "-",
+   "shine": 1.0,
+   "world": 0.2
+  },
+  "glow_ember": {
+   "index": 42,
+   "channel": "-",
+   "shine": 1.0,
+   "world": 0.2
+  },
+  "glow_wisp": {
+   "index": 43,
+   "channel": "-",
+   "shine": 1.0,
+   "world": 0.2
+  },
+  "stubble": {
+   "index": 44,
+   "channel": "A",
+   "shine": 0.0,
+   "world": 0.03
+  },
+  "emblem_flame": {
+   "index": 45,
+   "channel": "A",
+   "shine": 0.8,
+   "world": 0.0
+  },
+  "emblem_frost": {
+   "index": 46,
+   "channel": "A",
+   "shine": 0.8,
+   "world": 0.0
+  },
+  "emblem_bolt": {
+   "index": 47,
+   "channel": "A",
+   "shine": 0.8,
+   "world": 0.0
+  },
+  "emblem_drop": {
+   "index": 48,
+   "channel": "A",
+   "shine": 0.8,
+   "world": 0.0
+  },
+  "emblem_blood": {
+   "index": 49,
+   "channel": "A",
+   "shine": 0.8,
+   "world": 0.0
+  },
+  "emblem_skull": {
+   "index": 50,
+   "channel": "A",
+   "shine": 0.8,
+   "world": 0.0
+  },
+  "emblem_sun": {
+   "index": 51,
+   "channel": "A",
+   "shine": 0.8,
+   "world": 0.0
+  },
+  "emblem_rune": {
+   "index": 52,
+   "channel": "A",
+   "shine": 0.8,
+   "world": 0.0
+  },
+  "emblem_leaf": {
+   "index": 53,
+   "channel": "A",
+   "shine": 0.8,
+   "world": 0.0
+  },
+  "emblem_star": {
+   "index": 54,
+   "channel": "A",
+   "shine": 0.8,
+   "world": 0.0
+  },
+  "emblem_claw": {
+   "index": 55,
+   "channel": "A",
+   "shine": 0.8,
+   "world": 0.0
+  },
+  "emblem_cog": {
+   "index": 56,
+   "channel": "A",
+   "shine": 0.8,
+   "world": 0.0
+  },
+  "emblem_eye": {
+   "index": 57,
+   "channel": "A",
+   "shine": 0.8,
+   "world": 0.0
+  },
+  "emblem_moon": {
+   "index": 58,
+   "channel": "A",
+   "shine": 0.8,
+   "world": 0.0
+  }
+ }
+}

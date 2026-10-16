@@ -156,6 +156,121 @@ API: `{ group, setAnim(name, fade, restart), play, update(dt), setRate, setTwist
 setColors({ skin, hair, garments }), attach(object, 'handR'), equip() -> false, stats(), metrics(), dispose(), parts,
 skeleton, lod, outfit, clip }`.
 
+## Step 10b — stopped here (2026-10-16)
+
+The owner pulled Chibi 4 out of Thousandvale (too realistic for it); it stays an experiment for a future game. 10b
+stopped right after starting, **before anything was wired in**. The step-9 kit, `step9_kit.py`, `js/chibi4-kit.js`
+and `js/chibi4-outfit.js` were not changed by 10b, so the kit builds and loads exactly as in step 9.
+
+**Done (building blocks, not yet used by anything):**
+- `tools/tiles.py` (run with Blender's Python, it has numpy: `~/opt/blender/5.2/python/bin/python3.13
+  avatar-3d/chibi4/tools/tiles.py`) -> `textures/tiles/tiles.png`, `tiles-mask.png`, `tiles.json`: 59 generated
+  seamless detail pictures (256 px cells, 16 px wrap border) for garments instead of projected reference paint.
+  Tinted grey tiles with one shared average brightness, in main-colour (A) and second-colour (B) versions: cloth,
+  lining (darker), leather, plate, mail, silk, fur, quilt; plus knit, scale, feather, beard strands; fixed colours
+  (steel, dark steel, gold, brass, bone, rope, wood, black, glass, gems, herb, parchment, straw, white, fur, red cloth,
+  four glows); stubble (skin-tinted with beard-tinted hairs); 14 tier-2 emblem discs (icon = A, rim = B). The mask's
+  alpha is "shine" (1 = glows).
+- `tools/blender/c4wardrobe.py`: the generator core (compiles; never run end to end). `Fit(B, rig, hairs)` measures any
+  kit body (landmarks: neck base, chin, brow band, mouth, ears, hips, waist, ribs, knees, ankles) and gives every body
+  vertex one of 21 HIDE ZONES (neck, sternum, chest, back, belly, hips, shoulder, upper arm, forearm, wrist, hand,
+  thigh, knee, calf, ankle, foot, scalp, head back, ears, face, jaw); mesh primitives (loft, sheet, tube, curve, sphere,
+  cone, torus, disc, box, octahedron, solidify, cut, mirror, shell over zones); `Garment` + `finish()` = tile UVs (UV
+  v = 4 + 32 x cell + local v; the shader would repeat the cell with fract), weights (nearest body / torso only /
+  rigid bone / skirt bones for long hems and capes), per-vertex zone bits, sway weights, and measured coverage per
+  zone (a garment hides a zone only if it really covers >= 95% of it).
+
+**Not done (the whole visible part of 10b):**
+- Recipes: 0 of the 157 worn catalog rows (92 armour, 5 hats, 60 accessories) and 0 of the 32 class outfits. The
+  port spec of every Chibi 2 recipe (shapes, sizes relative to the head/torso, colour roles, what each covers) was
+  extracted and is summarised in the 10b agent's report; it was not saved as a file.
+- Build integration into `step9_kit.py` (zone masks for body/hair/old garments, tiles band appended to the atlas and
+  mask, `kit.json` `zones` / `hides` / `layer`), beards as separate pieces + removing the painted beard from
+  `mage-skin.jpg`, robe-vs-feet check for every long garment, the 6-angle face/hat check per headpiece.
+- Runtime: layer-aware zone hiding in `mergeOutfit` (24 bits = COLOR_0 R/G/B, sway = 1 - A), the tile shader
+  (textureGrad + fract), cape sway uniform, MAX_SLOTS 32, `outfitFor` mapping Chibi 2 ids -> wardrobe pieces,
+  tier-2 emblems, facialHair; the lineup / catalog contact sheets and tests.
+
+## Step 10 contracts (two agents at once, 2026-10-16)
+
+Step 10 runs as parallel pieces. Each owns its files; shared files are touched only in the marked blocks below.
+
+**10a — held items, off-hands, seats (owner: the 10a agent)**
+- Owns NEW files: `js/chibi4-grip.js` (pure: hold kinds, real-world lengths, grip specs, sockets, seat numbers),
+  `js/chibi4-held.js` (three.js: builds each held/off-hand item from the Chibi 2 builders, attaches it, the per-frame
+  hold pose — finger curl, wrist lock, the second hand on a two-hander, the bow draw), `held.html` + `js/held-page.js`
+  (one character or the whole contact sheet), `tests/held.test.js`, `tests/held.spec.js`, `shots/step10a/`.
+- In `js/chibi4-kit.js` it adds, inside blocks marked `// 10a:` only: `equip({ held, offhand })` (was `return false`),
+  a hold hook called at the END of `update()` after the mixer, `seatHeight(clip)`, `parts.hips` (= pelvis, for
+  avatar-3d/js/mounts.js `seatRider`), and building `avatar.held` / `avatar.offhand` on create / `setAvatar`.
+- In `js/chibi4-outfit.js` it owns `avatar.held` / `avatar.offhand` (nothing there yet: the hold logic lives in
+  chibi4-grip.js so the two agents never edit the same lines). The kit's `scabbard` GARMENT stays 10b's.
+- Shared code: `avatar-3d/js/mounts.js` `riderHipsY` asks `body.seatHeight?.()` first (opt-in; a Chibi 2 body has no
+  such method, so nothing changes for Farhold/Emberveil/Thousandvale's Chibi 2). `armory/` gets a Chibi 4 toggle.
+- Held items are separate meshes parented to bones (hand_r / hand_l / lowerarm_l / spine_03 / pelvis), one draw call
+  per item, NOT merged into the body: the body merge is keyed by outfit, and weapons change far more often than clothes.
+
+**10b — worn garments (owner: the 10b agent)**: `tools/blender/c4kit*.py` garment building and the WORN slots of
+`js/chibi4-outfit.js` (`SLOTS`, `outfitFor` garments). 10a does not touch them.
+
+**10b in detail** (2026-10-16; 10b = worn things: armour, hats, accessories, capes, class outfits, beards):
+- `tools/blender/c4wardrobe.py` (new: the garment generator — recipes measured off ANY kit body), `c4clothes.py`,
+  `c4kit.py` mask helpers, and the garment / hair / beard / atlas / mask sections of `step9_kit.py`.
+- In `js/chibi4-outfit.js`: everything about WORN slots — `outfitFor()` for `top`, `bottom`, `shoes`, `hat`, `cape`,
+  `decor`, `accessory`, `gloves`, `face` and `facialHair`; `SLOTS`; the hide-zone logic (garment recipes may move to a
+  new pure `js/chibi4-wardrobe.js`).
+- In `js/chibi4-kit.js`: `mergeOutfit`, `partsOf`, the tint shader (incl. cape sway), `applyColors`, `MAX_SLOTS`.
+  10b edits there are small and local (Edit, never a whole-file rewrite) and never inside `// 10a:` blocks.
+- `models/kit/<body>/` garment files `g_*.glb`, `h_*.glb`, `f_*.glb` (facial hair), `atlas.webp`, `mask.webp`,
+  `body.glb` (its hide mask changes) and the `garments` / `hairs` / `beards` / `zones` parts of `kit.json`.
+
+**Shared rules** (10b proposed; 10a please object here if one does not work for you)
+- The SKELETON (bone list of `body.glb` / `anims*.glb`) does not change in step 10 without a note here first: 10b adds
+  no bones (capes sway in the shader), 10a uses runtime sockets parented to existing bones.
+- One kit build at a time: run `step9_kit.py` under `flock /tmp/claude-1000/chibi4-kit-build.lock ...`. It rebuilds
+  everything in `models/kit/<body>/`; never hand-edit the outputs.
+- **Hide zones** (10b, replaces step 9's one-bit-per-garment masks, which ran out at 16 garments): every vertex of the
+  body, hair, beards and garments carries the bits of the BODY ZONES it lies over (COLOR_0 R/G = 16 bits: neck,
+  chest, belly, hips, shoulder, upper arm, elbow, forearm, hand, thigh, knee, shin, foot, scalp, head back/ears, face).
+  A garment lists the zones it fully covers (`kit.json garments.<id>.hides`) and a `layer`; at runtime a piece's
+  triangle is dropped when one of its vertices lies in a zone hidden by a worn garment of a HIGHER layer. A held item
+  never hides anything.
+- kit.json additions are additive (new keys); nobody renames or removes a key the other uses.
+
+## Step 10a — stopped here (2026-10-16)
+
+The owner pulled Chibi 4 out of Thousandvale (too realistic for it); it stays an experiment for a future game. 10a was
+stopped part-way. What exists, and what does not:
+
+**Built (works, not polished):**
+- `js/chibi4-grip.js` (pure, no three.js): real-world lengths per weapon type and per id, how each Chibi 2 hold kind is
+  turned into one item frame (+Y the business end, +X the striking side, origin in the fist), which Chibi 4 anchor it
+  hangs on (fist, palm, forearm, back, hip, chest), the hold pose per family and clip state (`fist` = the wrist keeps
+  one turn so the item rides the fist, the Z63 rule; `steady` = arm IK + aim; `second` = other hand on the handle),
+  hands-free clip list, fist curl numbers, seat clearances.
+- `js/chibi4-held.js`: lifts an item's triangles out of a throwaway Chibi 2 body (diff against the bare body, per
+  carrying bone), canonical frame + real size, one shared material (vertex colours, metal per vertex), hand frames
+  measured from the kit's own finger bones, finger flex axes found per bone, two-bone arm IK, wrist lock per clip,
+  second hand on the handle, a live bow string with a draw to the cheek, `seatHeight(kit, clip)` (pelvis height in the
+  seated clip) and `seatChibi4(body, seat, { clip, feet })` for benches and boats.
+- `js/chibi4-kit.js` (`// 10a:` blocks): `actor.equip({ held, offhand })`, `actor.holdRig`, `actor.seatHeight(clip)`,
+  `parts.hips` (= pelvis), and the hold hook at the end of `update()`. **Equipping from the avatar is opt-in**
+  (`createChibi4Kit(avatar, { held: true })`); off by default so nothing shows broken weapons.
+- `held.html` + `js/held-page.js`: one character (`?held=…&off=…&anim=…&cam=…`), the contact sheet
+  (`?sheet=1&page=0&per=20`), a rider (`?seat=horse`). All 20 rows of the first sheet page build without an error.
+
+**Not working / not done:**
+- **Sizes are wrong for many items** (first sheet: `shots/step10a/sheet-page0-first-try.png`): the crossbow, staves,
+  polearms, two-handers and the sceptre came out huge. Likely the lift picks up triangles that are not the item (body
+  pieces that change when something is held), so the size box is too big; fix the lift first (keep only triangles on
+  grip/forearm/back bones, or compare per bone), then re-check the scale step.
+- Grip angles and poses are unchecked by eye; the 106-item contact sheet has not been reviewed; only page 0 was rendered.
+- No tests yet (planned: `tests/held.test.js` for the pure table, `tests/held.spec.js` for every row building and the
+  grip-to-forearm angle through idle/walk/run/attack).
+- Mounts: `avatar-3d/js/mounts.js` `riderHipsY` was NOT changed (it would need `body.seatHeight?.()` first; Chibi 4
+  has `parts.hips`, so `seatRider` runs but seats at the standing pelvis height). Boats and benches untested.
+- The armory page has no Chibi 4 toggle.
+
 ## Measured (step 9)
 
 On this VM (headless Chromium, software renderer, no GPU — compare side by side, not with another machine), from

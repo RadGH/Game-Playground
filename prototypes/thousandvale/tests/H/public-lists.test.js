@@ -99,7 +99,8 @@ test('the home page is told who serves it, and every link it keeps is one the se
   for (const e of experiments.entries) for (const href of [e.href, ...(e.links || []).map(l => l.href)].filter(Boolean))
     assert.ok(gone.has(href) || canServe(PLAY, href), `${e.id}: ${href} is neither served nor reported`);
   // only Tiny RTS's card and README, and Thousandvale's private plan, are missing — a new gap must be a decision
-  assert.deepEqual(info.unavailable.filter(u => !u.startsWith('prototypes/tinyrts/') && !u.startsWith('prototypes/tumblefair/')), ['prototypes/thousandvale/docs/PLAN.md']);
+  // and Chibi 4 (owner 2026-10-16: a LAN-only experiment for a future game, never public)
+  assert.deepEqual(info.unavailable.filter(u => !u.startsWith('prototypes/tinyrts/') && !u.startsWith('prototypes/tumblefair/') && !u.startsWith('avatar-3d/chibi4/')), ['prototypes/thousandvale/docs/PLAN.md']);
 });
 
 test('over http: / is the home page (no redirect), a published copy behaves the same, private paths are 404', async () => {

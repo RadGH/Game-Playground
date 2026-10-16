@@ -1,585 +1,608 @@
 [
-  {
-    "id": "ref",
-    "title": "Target — the Codex reference sheet",
-    "how": "Codex image generation: front, side and (added) back views of the mage in one art style. Every step is judged against this.",
-    "shots": [
-      [
-        "shots/step1/reference.png",
-        "Codex reference (front + side)"
-      ],
-      [
-        "ref/mage-back.jpg",
-        "Codex back view"
-      ]
-    ]
-  },
-  {
-    "id": "step0",
-    "title": "Step 0 — Chibi 2 today (baseline)",
-    "how": "Today's system: a Chibi 2 human dressed in the closest pieces it has (trim robe, boots, full beard), shot from the same angles. Page: avatar-3d/chibi4/baseline.html?who=mage&view=front.",
-    "shots": [
-      [
-        "shots/step0/body.png",
-        "front · three-quarter · back"
-      ],
-      [
-        "shots/step0/face.png",
-        "face close-up"
-      ],
-      [
-        "shots/step0/game-distance.png",
-        "Thousandvale camera distance"
-      ]
-    ],
-    "score": [
-      [
-        "Face",
-        "2/5 — doll face: giant eyes, ball nose, flat drawn mouth"
-      ],
-      [
-        "Proportions",
-        "1/5 — about 2.5 heads tall"
-      ],
-      [
-        "Clipping",
-        "3/5 — fine standing; the known robe/feet clipping when running"
-      ],
-      [
-        "Feet vs robe",
-        "2/5 — feet poke through the robe on the run (the reason for this experiment)"
-      ],
-      [
-        "Fits Thousandvale",
-        "what the game uses today"
-      ],
-      [
-        "Modular",
-        "5/5 — any part, any colour, any class"
-      ],
-      [
-        "Cost",
-        "2 meshes per character, tiny load"
-      ],
-      [
-        "Repeatable",
-        "5/5 — all code"
-      ]
-    ]
-  },
-  {
-    "id": "step1",
-    "title": "Step 1 — Blender MCP, built by eye in the owner's Blender",
-    "how": "The outline of the reference picture is measured every centimetre of height (front picture = width, side picture = depth); the body, robe, neck and head are one surface built through those measurements, the nose pushed out to the side outline. Sleeves and hands are tubes along the arm line in the picture. The three Codex pictures are then projected onto the model from their own directions and blended by which way the surface faces — so the face, beard, trim and belt are the reference's own paint. Script: avatar-3d/chibi4/tools/blender/step1_mage.py. Saved as Documents/chibi4_step1_mage.blend on the owner's PC.",
-    "shots": [
-      [
-        "shots/step1/body.png",
-        "front · three-quarter · back"
-      ],
-      [
-        "shots/step1/face.png",
-        "face close-up"
-      ],
-      [
-        "shots/step1/game-distance.png",
-        "Thousandvale camera distance"
-      ]
-    ],
-    "score": [
-      [
-        "Face",
-        "4/5 — reads as the reference's face; the jaw-to-neck is one smooth column"
-      ],
-      [
-        "Proportions",
-        "5/5 — measured from the reference (about 6.5 heads)"
-      ],
-      [
-        "Clipping",
-        "n/a — one surface, no separate clothes yet"
-      ],
-      [
-        "Feet vs robe",
-        "not tested — no skeleton or animation yet"
-      ],
-      [
-        "Fits Thousandvale",
-        "to judge in game (step 7)"
-      ],
-      [
-        "Modular",
-        "1/5 — one baked character, nothing swaps"
-      ],
-      [
-        "Cost",
-        "8,192 faces before smoothing; 7 meshes; 3 projected pictures (a single baked texture at export)"
-      ],
-      [
-        "Repeatable",
-        "4/5 — a script; needs a reference sheet per character"
-      ]
-    ],
-    "notes": [
-      "Why the doubles: each picture is projected straight through the model, so the front picture also lands on surfaces it could not see (the side of the head, the body behind the arms), and two pictures overlap at 45°. Fix to try in step 2: paint each spot only from a picture that actually sees it (a visibility test per pixel), then bake to one texture.",
-      "The sleeve cuffs and hands are separate tubes that only overlap — not joined.",
-      "Flat top of the head (the cap), rough boot toes, flat palms.",
-      "The painting only exists where the pictures saw something: under the arms and under the chin are smeared.",
-      "No skeleton yet — so no run test. That comes with steps 6–7."
-    ],
-    "review": "Owner (2026-10-15): looks a lot better than Chibi 3, but the textures are obviously bad — a duplicate face, a duplicate pair of arms; the sleeves near the hands may not be fully connected. Not sure this result would be usable."
-  },
-  {
-    "id": "step2",
-    "title": "Step 2 — headless Blender on the VM: same build as a script, painted only where each picture sees, baked to one texture",
-    "how": "Blender 5.2.2 installed on the VM (~/opt/blender), runs with no window: `blender -b -P avatar-3d/chibi4/tools/blender/step2_mage.py` builds, paints, bakes and exports in 31 seconds. Fixes from your step-1 review: each picture paints a spot only if its camera can see it (a ray test) and the studio grey behind the figure counts as unseen — so no doubled face or arms; spots no picture sees (20% of the surface: under arms, under chin, tops of shoulders) are filled from their neighbours; sleeves end in a cuff that turns in and closes round the wrist; rounded crown. One 2048 texture, exported as a GLB (shots/step2/mage.glb, 4.3 MB, 32,920 faces).",
-    "shots": [
-      [
-        "shots/step2/body.png",
-        "front · three-quarter · back · side"
-      ],
-      [
-        "shots/step2/face.png",
-        "face close-up"
-      ],
-      [
-        "shots/step2/game-distance.png",
-        "Thousandvale camera distance"
-      ],
-      [
-        "shots/step2/mage-baked.png",
-        "the one baked texture"
-      ]
-    ],
-    "score": [
-      [
-        "Face",
-        "4/5 — front and profile are the reference's face; a soft blend band on the cheek where front meets side"
-      ],
-      [
-        "Proportions",
-        "5/5 — measured from the reference"
-      ],
-      [
-        "Clipping",
-        "n/a — still one surface"
-      ],
-      [
-        "Feet vs robe",
-        "not tested — no skeleton yet"
-      ],
-      [
-        "Fits Thousandvale",
-        "to judge in game (step 7)"
-      ],
-      [
-        "Modular",
-        "1/5 — still one baked character"
-      ],
-      [
-        "Cost",
-        "32,920 faces (too many for a crowd — a game version needs ~5–8k), 1 mesh, 1 texture, 4.3 MB"
-      ],
-      [
-        "Repeatable",
-        "5/5 — one command, no window, same result every time"
-      ]
-    ],
-    "notes": [
-      "Doubled face and arms: gone (compare the three-quarter views).",
-      "Smudges remain where no picture could see — tops of the shoulders and the collar sides look blurred. More reference angles (a three-quarter and a top view from Codex) would cover those.",
-      "Hands and boot toes are still rough shapes; the method paints well but its shapes are only as good as an outline can give.",
-      "Conclusion so far: picture-projection makes a convincing single statue quickly, but it is not a modular system — every outfit would be a new character. That is what steps 3–7 address."
-    ]
-  },
-  {
-    "id": "step3",
-    "title": "Step 3 — MakeHuman base bodies (MPFB 2 in the VM's Blender)",
-    "how": "MPFB 2 (free Blender add-on; its code is GPL, the bodies, skins, hair and clothes it outputs are CC0 — free to ship, no credit needed) builds a real human: proper face topology, eyeballs, lids, lashes, brows, teeth, a 53-bone game skeleton with weights, and sliders for gender, age, muscle, weight, height and proportions. Both test characters are made from sliders in one script (avatar-3d/chibi4/tools/blender/step3_makehuman.py, ~1 minute headless): the mage as a ~35-year-old man (1.89 m), the elf as a ~28-year-old athletic woman (1.68 m), MakeHuman's own photo skins, a braid tinted auburn. No Codex paint and no fantasy clothes yet — they wear MakeHuman's stock modern outfits, because dressing them is steps 4–5.",
-    "shots": [
-      [
-        "shots/step3/bodies.png",
-        "mage front · three-quarter, elf front · three-quarter"
-      ],
-      [
-        "shots/step3/faces.png",
-        "faces close-up"
-      ],
-      [
-        "shots/step3/side-game.png",
-        "elf profile · Thousandvale camera distance"
-      ]
-    ],
-    "score": [
-      [
-        "Face",
-        "4/5 — properly modelled real faces, eyes and lids from every angle, nothing pokes through; but realistic, not the painted fantasy look of the reference"
-      ],
-      [
-        "Proportions",
-        "4/5 — real adult proportions (about 7.5 heads); sliders can push it more heroic"
-      ],
-      [
-        "Clipping",
-        "4/5 — MakeHuman clothes are fitted to the body and hide the skin under them"
-      ],
-      [
-        "Feet vs robe",
-        "not tested yet — but there is now a real skeleton to test it on"
-      ],
-      [
-        "Fits Thousandvale",
-        "2/5 as-is — modern clothes and photo skin; needs the painted style (step 4)"
-      ],
-      [
-        "Modular",
-        "4/5 — any body from sliders, hair/brows/clothes are separate swappable pieces on one shared skeleton"
-      ],
-      [
-        "Cost",
-        "~13,000 triangles per body before smoothing (41,600 smoothed); MakeHuman also ships low-poly 'proxy' bodies for distance versions"
-      ],
-      [
-        "Repeatable",
-        "5/5 — one script, no window"
-      ]
-    ],
-    "notes": [
-      "This is the first approach that is actually a SYSTEM: one skeleton, slider bodies, separate hair/brows/clothes — what Chibi 2 replacement needs.",
-      "The look is too realistic/photographic for Thousandvale. Step 4 paints it in the Codex style (skin, hair and cloth textures generated per character) — that is where it should start to match the reference sheet.",
-      "Pointed elf ears are applied but hidden under that hair. The eye-size slider is subtle; it can go further.",
-      "MakeHuman's CC0 clothes are modern (jeans, t-shirts). Fantasy clothing has to be ours (step 5: robes, armour fitted to this body with the body hidden underneath)."
-    ]
-  },
-  {
-    "id": "step4",
-    "title": "Step 4 — Codex-painted skin and hair on the MakeHuman bodies, sliders pushed toward the reference",
-    "how": "Codex repainted MakeHuman's own CC0 texture pictures in the reference sheets' painted style, given the original picture plus the reference and told to keep the layout. It refused the whole-body skin picture (an unrolled body reads as nudity to its safety filter), so only the HEAD part goes to Codex, turned upright; the body skin is smoothed and colour-matched to the painted head without AI (it is mostly under clothes). Codex kept the layout to the pixel (eyes land where they were). The mage starts from a CC0 skin that already has a painted beard (MakeHuman has no CC0 beard mesh), so the beard is paint. Sliders: head 1.0 bigger, eyes +0.6, broader shoulders and a V torso for the mage, bigger pointed ears for the elf — 6.8 heads tall (mage) and 6.6 (elf), down from 7.9. Scripts: tools/textures.py (crop / merge / hair) and tools/blender/step4_painted.py; the painted pictures are in avatar-3d/chibi4/textures/.",
-    "shots": [
-      [
-        "shots/step4/bodies.png",
-        "mage front · three-quarter · back, elf front · three-quarter · back"
-      ],
-      [
-        "shots/step4/faces.png",
-        "faces close-up (compare step 3)"
-      ],
-      [
-        "shots/step4/game-distance.png",
-        "Thousandvale camera distance"
-      ]
-    ],
-    "score": [
-      [
-        "Face",
-        "4/5 — the mage now reads as the reference (painted beard, warm skin, chestnut hair); the eyes are still MakeHuman's glassy realistic eyes and the elf's face is still close to a photo"
-      ],
-      [
-        "Proportions",
-        "5/5 — measured 6.8 heads (mage) and 6.6 (elf), the 6.5–7 target; bigger eyes"
-      ],
-      [
-        "Clipping",
-        "4/5 — unchanged from step 3"
-      ],
-      [
-        "Feet vs robe",
-        "not tested yet (step 6)"
-      ],
-      [
-        "Fits Thousandvale",
-        "3/5 — warmer and painted, still modern clothes until step 5"
-      ],
-      [
-        "Modular",
-        "4/5 — a painted skin works on any slider body (same picture layout)"
-      ],
-      [
-        "Cost",
-        "38,500 (mage) / 44,600 (elf) triangles as rendered (MakeHuman smoothing on); 2048 skin + 1024 hair pictures"
-      ],
-      [
-        "Repeatable",
-        "4/5 — the build is one command; Codex's painting differs every run, so the painted pictures are kept in git"
-      ]
-    ],
-    "notes": [
-      "Codex usage ran out mid-step (resets 02:38): the elf's braid is a no-AI stand-in (MakeHuman's braid picture mapped onto an auburn colour ramp — tools/textures.py gradient-hair). Re-run the Codex braid after the reset.",
-      "The elf's hair model is MakeHuman's French-braid with a side-swept fringe — not the reference's pulled-back braid. A closer hair model would have to be ours.",
-      "Doubled eyebrows are possible: Codex painted brows on the skin and MakeHuman adds brow meshes; at game distance it is invisible, in close-up the mage's brows look heavy.",
-      "Body hair on the mage's chest is softened, not gone (it never shows under a robe)."
-    ]
-  },
-  {
-    "id": "step5",
-    "title": "Step 5 — our own robe and armour on the MakeHuman body, body hidden under the clothes, hat fitted to the head",
-    "how": "Every garment is measured off the body it is made for (tools/blender/c4clothes.py), so a slider change and a rebuild still fit: tight pieces (trousers, undershirt, jerkin, bracers) are the body's own surface pushed out; loose pieces (robe, mantle, collar, belt, tabard) are stacks of the body's outline at each height, widened and smoothed; sleeves are bell tubes along the arm; boots are one smooth shape heel-to-toe plus a shaft; pauldrons are plates round the upper arm. BODY MASKING: every body vertex a garment covers is removed (a ray out of the skin in 5 directions must hit cloth) — 5,000 of 13,400 body vertices on each character, so no skin can poke through. Paint: the Codex reference pictures projected onto the clothes, each picture painting only where its camera sees, per pixel, with the studio grey keyed out; baked to one 2048 texture per outfit. The collar is lower at the front than the back so it never meets the chin; the hat is built from the head's own outline at brow height and the hair under it is pulled inside the band (never into the skull). Script: tools/blender/step5_clothes.py (2 minutes headless, both characters + all tests).",
-    "shots": [
-      [
-        "shots/step5/bodies.png",
-        "mage front · three-quarter · back · side, elf the same"
-      ],
-      [
-        "shots/step5/faces.png",
-        "faces with collar / pauldrons"
-      ],
-      [
-        "shots/step5/fit-mage-hat.png",
-        "hat fit, six angles"
-      ],
-      [
-        "shots/step5/fit-mage.png",
-        "mage hair, six angles"
-      ],
-      [
-        "shots/step5/fit-elf.png",
-        "elf hair, six angles"
-      ],
-      [
-        "shots/step5/game-distance.png",
-        "Thousandvale camera distance"
-      ]
-    ],
-    "score": [
-      [
-        "Face",
-        "4/5 — as step 4; nothing touches the face: collar, hat brim and pauldrons all clear the jaw"
-      ],
-      [
-        "Proportions",
-        "5/5 — as step 4"
-      ],
-      [
-        "Clipping",
-        "5/5 standing — body under the clothes is gone; 2 elf / 181 mage garment vertices sit inside VISIBLE skin (the mage's are sleeve tops buried in the shoulder under the mantle, not visible); hat: 0 vertices inside the head, 302 hair vertices tucked under it"
-      ],
-      [
-        "Feet vs robe",
-        "step 6"
-      ],
-      [
-        "Fits Thousandvale",
-        "4/5 — reads as the reference sheet at game distance; close up the painted trim is soft and the elf's boots have pale smears"
-      ],
-      [
-        "Modular",
-        "4/5 — each garment is a separate built piece measured off any body (the painted texture is per outfit)"
-      ],
-      [
-        "Cost",
-        "70,700 (mage) / 68,300 (elf) triangles as rendered — heavy; body + outfit + hair each one material"
-      ],
-      [
-        "Repeatable",
-        "5/5 — one command, same result every time"
-      ]
-    ],
-    "notes": [
-      "Painting by projection only reaches what a reference picture shows: the inside of the sleeves, under the arms and the boot sides take their neighbours' colour, and where our arm angle differs from the picture's the sleeve ends get a smeared edge.",
-      "The elf's back is painted from the FRONT picture seen from behind (a stand-in: Codex was out of credit for a back view). The tabard, boots and pauldrons are the same front and back so it mostly holds.",
-      "221 vertices of MakeHuman's own braid sit under the scalp — that is how that hair model is built (its inner layer), not something we added; nothing shows.",
-      "Garments are plain geometry with painted detail — no modelled folds or buckles; at Thousandvale's camera distance that does not show."
-    ]
-  },
-  {
-    "id": "step6",
-    "title": "Step 6 — the robe vs the feet: skirt bones that follow both thighs + a robe-aware stride, measured on every frame",
-    "how": "Real walk and run clips: Quaternius' Universal Animation Library (CC0, already in avatar-3d/assets/quaternius) copied onto MakeHuman's game skeleton by bone name — both use the same bone names, and each bone takes the source bone's world rotation corrected for the two different rest poses (checked: 0.0 degrees off on every limb). Eight skirt bones hang from the hips to the hem; every frame, the front ones swing as far forward as the FURTHER-forward thigh, the back ones as far back as the further-back thigh, the side ones follow their own leg; the robe below the hips is weighted to the two nearest skirt bones. The robe-aware stride caps each clip's thigh swing (~22-24 degrees) and knee bend (~50 degrees): someone in a floor-length robe takes short steps and does not kick their heels up. The test (tools/blender/c4anim.py measure_feet): on every frame, every boot vertex above the hem that is outside the robe's cloth wall is a poke-through; otherwise the smallest gap between foot and cloth is recorded. The script fails if the final set-up has any poke-through. Script: tools/blender/step6_robe_run.py (1 minute).",
-    "shots": [
-      [
-        "shots/step6/run-A.png",
-        "A — robe copies body weights, full stride (today's usual approach)"
-      ],
-      [
-        "shots/step6/run-B.png",
-        "B — skirt bones, full stride"
-      ],
-      [
-        "shots/step6/run-D.png",
-        "D — robe stride only"
-      ],
-      [
-        "shots/step6/run-C.png",
-        "C — skirt bones + robe stride (passes)"
-      ]
-    ],
-    "score": [
-      [
-        "Face",
-        "4/5 — unchanged"
-      ],
-      [
-        "Proportions",
-        "5/5 — unchanged"
-      ],
-      [
-        "Clipping",
-        "5/5 standing; in motion the robe is measured below"
-      ],
-      [
-        "Feet vs robe",
-        "5/5 — C: walk 0/33 frames, 0 boot vertices through the cloth, closest gap 3.2 cm; run 0/23 frames, 0 boot vertices through the cloth, closest gap 3.0 cm. For comparison A: walk 25/33 frames, 3738 boot vertices through the cloth; run 23/23 frames, 5857 boot vertices through the cloth. Skirt bones alone (B) or the stride alone (D) are NOT enough — it takes both."
-      ],
-      [
-        "Fits Thousandvale",
-        "4/5 — reads as a robed mage running; the borrowed jog hunches forward"
-      ],
-      [
-        "Modular",
-        "4/5 — skirt bones are built from the robe's own hem, so any long garment gets them"
-      ],
-      [
-        "Cost",
-        "+8 bones (61 total), skirt keys baked into each clip"
-      ],
-      [
-        "Repeatable",
-        "5/5 — one command; the check fails the build if a foot gets through"
-      ]
-    ],
-    "notes": [
-      "Quaternius' jog is an athletic run (thigh swing 78 degrees, heel kick 129 degrees) — copied faithfully, it rips any robe open (strip A). The robe stride keeps the rhythm and arm pump but shortens the steps.",
-      "The upper body keeps the jog's forward hunch; a robed run should be more upright — a spine factor like the leg one would fix it.",
-      "The shoulder mantle lifts at the back when the arms swing back (it copies the shoulder weights). It wants weights on the spine only — a step-7 tidy.",
-      "A foot coming out UNDER the hem is allowed (that is what a robe looks like running); only crossing the cloth's wall counts as a poke-through."
-    ]
-  },
-  {
-    "id": "step7",
-    "title": "Step 7 — swap-in runtime: one mesh and one texture per character, three distance versions, Chibi 2's API, ?renderer=chibi4 in Thousandvale",
-    "how": "tools/blender/step7_export.py (~30 s per character) exports one GLB each (avatar-3d/chibi4/models/mage.glb 3.2 MB, elf.glb 3.5 MB): the 61-bone skeleton (MakeHuman's 53 + 8 skirt bones), 8 clips (idle, walk, run, cast, attack, hit, death, talk; the mage's walk and run with step 6's robe stride and a straighter spine — still 0 feet through the robe), body + eyes + brows + lashes + hair + outfit joined into ONE mesh, their pictures copied into ONE 2048 texture, and the same mesh at 40% and 15% of its triangles for distance. js/chibi4.js createChibi4Character(avatar) loads it and answers the same calls as Chibi 2 (setAnim, update, stats, metrics, dispose...); instances share the download. compare.html shows Chibi 2 and Chibi 4 side by side with the same clip and measures them. In Thousandvale, adding ?renderer=chibi4 to the URL gives the PLAYER a Chibi 4 body (7 lines in js/client/actors.js; everyone else stays Chibi 2; any error falls back to Chibi 2).",
-    "shots": [
-      [
-        "shots/step7/compare.png",
-        "compare page: Chibi 2 (left pair) vs Chibi 4 (right pair) — walk · run · cast"
-      ],
-      [
-        "shots/step7/tv.png",
-        "Thousandvale: default Chibi 2 · ?renderer=chibi4 idle · walking"
-      ],
-      [
-        "shots/step7/glb-roundtrip.png",
-        "the GLBs loaded back into Blender, mid-run"
-      ]
-    ],
-    "score": [
-      [
-        "Face",
-        "4/5 — as steps 4–5"
-      ],
-      [
-        "Proportions",
-        "5/5"
-      ],
-      [
-        "Clipping",
-        "5/5 standing; robe test still 0 pokes after export"
-      ],
-      [
-        "Feet vs robe",
-        "5/5 — checked again on the exported clips"
-      ],
-      [
-        "Fits Thousandvale",
-        "4/5 — at the game's camera the mage reads as the reference character; next to Chibi 2 villagers it is a different style, which is the point of the swap"
-      ],
-      [
-        "Modular",
-        "2/5 at runtime — each GLB is one finished character; gear, colours and mounts do not show on it yet (4/5 at build time)"
-      ],
-      [
-        "Cost",
-        "1 draw call per character (Chibi 2: 1.5). Triangles near: 35k (Chibi 2: 6.6k); at distance the 15% version is 5.2k. 50 characters at game distance: 268k triangles (Chibi 2: 330k). FPS on this VM (software renderer, no GPU): 20 chars 6.9 vs Chibi 2 11.9; 50 chars 4.3 vs 6.1. Download 3.2–3.5 MB per character, once"
-      ],
-      [
-        "Repeatable",
-        "5/5 — one command per character; tests in avatar-3d/chibi4/tests/"
-      ]
-    ],
-    "notes": [
-      "The frame-rate gap is skinning: 61 bones and ~5–35k skinned vertices per character against Chibi 2's 22 bones. This VM has no GPU, so these numbers exaggerate it; measure on a real PC with compare.html before deciding.",
-      "The near version is heavy (35k triangles) because MakeHuman's body is ~16k triangles before clothes and the elf's braid is 12k on its own. A lighter hair model and MakeHuman's own low-poly body would halve it.",
-      "Not modular at runtime: the next step would ship the body and each garment as separate skinned meshes on the shared skeleton (one draw call each), with the body-hiding mask chosen per outfit.",
-      "Only 8 clips (Chibi 2 has ~90); no wave, guard, jump, weapon holds or mount seat."
-    ]
-  },
-  {
-    "id": "step8",
-    "title": "Step 8 — Tripo3D (tripo3d.ai): an AI image-to-3D model from the Codex reference",
-    "pending": true,
-    "how": "The owner's friend built his game's humanoids with Tripo3D. Feed it the Codex reference, then rig and clean it in Blender. Needs a Tripo account/API key from the owner (the Blender MCP add-on's Tripo hook is Premium only)."
-  },
-  {
-    "id": "step9",
-    "title": "Step 9 — the modular kit: one skeleton per body, every garment, hair and hat its own piece, assembled and recoloured at runtime",
-    "how": "tools/blender/step9_kit.py (~2.5 min per body type) builds a kit per body type (male = the mage's sliders, female = the elf's) into models/kit/<body>/: body.glb (the 61-bone skeleton + body, eyes, brows and lashes, with pointed elf ears as a morph target), 13 garments (robe, mantle, sleeves, low boots, undershirt, jerkin, trousers, knee boots, bracers, pauldrons, tabard, scabbard, wizard hat) and 6 CC0 MakeHuman hair styles, each its own GLB skinned to the same bones; ONE colour atlas and ONE tint mask for all of them; 67 clips in two files (14 needed at once, the rest fetched after). Both outfits are measured off BOTH bodies, so any garment fits either body. Every vertex carries the list of garments that cover it (the hide mask): the runtime drops any triangle under something being worn — body under the robe, jerkin under the robe, hair under the hat — so mixing pieces never pokes through. js/chibi4-kit.js puts a character together from Chibi 2's avatar JSON (or avatar.chibi4 = { body, race, hair, garments }), copies the kept triangles of every piece into ONE geometry per distance (one draw call per character), shares downloads and merged outfits between characters, and recolours each garment's main and second colour plus the skin tone in the shader (a uniform write, no rebuild). Clips: Quaternius' CC0 library (35 copied, 4 mirrored for the left hand, jump = start+air+land, stand-up = a fall played backwards, sleep = a fall's last frame), 21 emotes authored on top of them (wave, point, salute, cheer, clap, bow, nod, head shake, shrug, laugh, folded arms, look around, stretch, pray, drink, guard, kick, spin, ride at a walk and a gallop, sit on the ground) and a robe-stride twin of walk, run, sprint and formal walk that the runtime plays whenever a floor-length robe is worn. All 96 Chibi 2 clip names map: 53 to the action itself, 43 to the nearest clip. Owner feedback folded in: everything is meshopt-compressed with gltfpack (step 7's mage.glb 3.17 MB -> 0.92 MB, the kit body 1.78 MB -> 0.34 MB, no visible change: positions and UVs stay full precision), and in Thousandvale ?renderer=chibi4 the download starts at page start, the player gets the Chibi 2 body at once and swaps to Chibi 4 when it is ready. The 'right leg bent backwards' was the trousers: copied their bone weights from a body with the legs hidden, so they took the hip's and foot's weights and never bent at the knee; garments now copy from the whole body (only the robe copies from the hidden one, so it follows the spine), checked per garment (trousers: 99.7% of vertices on the bone the body under them uses).",
-    "shots": [
-      [
-        "shots/step9/compare.jpg",
-        "Chibi 2 · Chibi 4 baked (step 7) · the same two characters put together from kit pieces at runtime"
-      ],
-      [
-        "shots/step9/lineup.jpg",
-        "ten random outfits from the same kit: both bodies, human and elf, six hairs, any garment mix, any colours"
-      ],
-      [
-        "shots/step9/dress.jpg",
-        "the dress-up panel: a woman in a recoloured robe and hat · a male elf in armour · shirt and trousers · the same, recoloured live"
-      ],
-      [
-        "shots/step9/emotes.jpg",
-        "clips the library did not have, authored on top of it (wave, cheer, point, salute, clap, bow, shrug, folded arms, pray, drink, guard, kick, sit on the ground, kneel, ride, gallop, sit, jump, swim, sleep, dance, left-hand slash, laugh, stretch)"
-      ],
-      [
-        "shots/step9/crowd.jpg",
-        "the crowd test: 50 kit characters in 46 different outfits, 51 draw calls"
-      ],
-      [
-        "shots/step9/meshopt_face.jpg",
-        "before / after meshopt compression (step 7's mage): no visible change"
-      ]
-    ],
-    "score": [
-      [
-        "Face",
-        "4/5 — as steps 4–7"
-      ],
-      [
-        "Proportions",
-        "5/5"
-      ],
-      [
-        "Clipping",
-        "5/5 for the outfits it was built for; 4/5 when mixing (hide masks stop pokes; inner layers can carry a little paint of what covered them in the reference picture)"
-      ],
-      [
-        "Feet vs robe",
-        "5/5 — step 6's check on every robe clip (walk, run, sprint, formal walk), both bodies: 0 feet through. Knee boots are never put under a robe (one running frame poked; low boots take their place)"
-      ],
-      [
-        "Fits Thousandvale",
-        "4/5 — the player swaps in without waiting; gear and mounts still Chibi 2 only"
-      ],
-      [
-        "Modular",
-        "4/5 at runtime — 2 bodies, 2 races, any skin tone, 6 hairs + any colour, 13 garments with two colours each, slot rules; not yet: weapons in hand, mounts, more body builds"
-      ],
-      [
-        "Cost",
-        "1 draw call per character. Near: 26–36k triangles depending on outfit; at 8 m and 18 m ~9k and ~3k. On this VM (software renderer, no GPU), 20 / 50 / 100 walking at Thousandvale's camera: kit 9.9 / 5.1 / 3.1 fps, Chibi 2 11.8 / 6.2 / 3.4, step 7 baked 7.2 / 4.6 / 2.6 — the kit draws half Chibi 2's triangles. Player load on a 10 Mbps line, cold: 1.7 MB, 1.8 s to ready + 0.6 s first frame"
-      ],
-      [
-        "Repeatable",
-        "5/5 — one command per body; node + Playwright tests"
-      ]
-    ],
-    "notes": [
-      "Load numbers (tests/chibi4.spec.js, throttled to 10 Mbps with 40 ms latency, cache off): the mage player needs 10 files, 1.69 MB: download 1.75 s, decode 41 ms, assembled at 1.78 s, first frame +0.58 s (most of that is compiling shaders on this GPU-less VM). The elf: 13 files, 1.86 MB, 1.94 s + 0.54 s. Same files from the local server: ready in 0.29 s. Before: step 7's mage.glb alone was 3.17 MB uncompressed, and Thousandvale only started fetching it once the player body was built, behind the zone downloads.",
-      "In Thousandvale with ?renderer=chibi4 the player now gets the Chibi 2 body at once and swaps to the Chibi 4 kit body when it is ready (same spot, facing, clip and mount); the kit download starts at page start. Everyone else is still Chibi 2.",
-      "Clips are shared by every character of a body type (one file pair per body). They cannot be shared between the two bodies: the same retargeted clip differs by up to 15 degrees at the thighs and 80 at the toes, because each body's rest pose is its own.",
-      "The far versions matter most: 50 characters with full detail at every distance draw 1.53M triangles and a frame costs ~6x more. Evaluating far characters' animation every 2nd/3rd frame made no measurable difference here: on this VM the time goes into skinning vertices on the CPU, not into the animation mixer. Fewer bone influences per vertex for far versions was not tried (on a real GPU skinning is cheap; needs a real-PC measurement first).",
-      "A new outfit costs ~70 ms to assemble the first time (merging three distance versions); repeats are cached by outfit, so a crowd of the same uniform costs nothing extra.",
-      "Codex leftovers from steps 4–5, done this step: the elf's back view (ref/warrior-back.png, Codex) is now projected onto her clothes, and her braid is Codex-painted (textures/elf-hair.png; the raw Codex picture is textures/elf-hair-codex.png) instead of the no-AI colour-ramp stand-in.",
-      "Weak spots: inner layers (undershirt, trousers) were painted from the reference too, so where the tabard or jerkin covered them in the picture they carry a little of that paint when worn alone; the male body's beard is painted on the skin (every male face has it); only one hat model; no weapons in the hands yet (attach() puts any object on a hand bone); mounts still expect Chibi 2's seat."
-    ]
-  }
+ {
+  "id": "ref",
+  "title": "Target — the Codex reference sheet",
+  "how": "Codex image generation: front, side and (added) back views of the mage in one art style. Every step is judged against this.",
+  "shots": [
+   [
+    "shots/step1/reference.png",
+    "Codex reference (front + side)"
+   ],
+   [
+    "ref/mage-back.jpg",
+    "Codex back view"
+   ]
+  ]
+ },
+ {
+  "id": "step0",
+  "title": "Step 0 — Chibi 2 today (baseline)",
+  "how": "Today's system: a Chibi 2 human dressed in the closest pieces it has (trim robe, boots, full beard), shot from the same angles. Page: avatar-3d/chibi4/baseline.html?who=mage&view=front.",
+  "shots": [
+   [
+    "shots/step0/body.png",
+    "front · three-quarter · back"
+   ],
+   [
+    "shots/step0/face.png",
+    "face close-up"
+   ],
+   [
+    "shots/step0/game-distance.png",
+    "Thousandvale camera distance"
+   ]
+  ],
+  "score": [
+   [
+    "Face",
+    "2/5 — doll face: giant eyes, ball nose, flat drawn mouth"
+   ],
+   [
+    "Proportions",
+    "1/5 — about 2.5 heads tall"
+   ],
+   [
+    "Clipping",
+    "3/5 — fine standing; the known robe/feet clipping when running"
+   ],
+   [
+    "Feet vs robe",
+    "2/5 — feet poke through the robe on the run (the reason for this experiment)"
+   ],
+   [
+    "Fits Thousandvale",
+    "what the game uses today"
+   ],
+   [
+    "Modular",
+    "5/5 — any part, any colour, any class"
+   ],
+   [
+    "Cost",
+    "2 meshes per character, tiny load"
+   ],
+   [
+    "Repeatable",
+    "5/5 — all code"
+   ]
+  ]
+ },
+ {
+  "id": "step1",
+  "title": "Step 1 — Blender MCP, built by eye in the owner's Blender",
+  "how": "The outline of the reference picture is measured every centimetre of height (front picture = width, side picture = depth); the body, robe, neck and head are one surface built through those measurements, the nose pushed out to the side outline. Sleeves and hands are tubes along the arm line in the picture. The three Codex pictures are then projected onto the model from their own directions and blended by which way the surface faces — so the face, beard, trim and belt are the reference's own paint. Script: avatar-3d/chibi4/tools/blender/step1_mage.py. Saved as Documents/chibi4_step1_mage.blend on the owner's PC.",
+  "shots": [
+   [
+    "shots/step1/body.png",
+    "front · three-quarter · back"
+   ],
+   [
+    "shots/step1/face.png",
+    "face close-up"
+   ],
+   [
+    "shots/step1/game-distance.png",
+    "Thousandvale camera distance"
+   ]
+  ],
+  "score": [
+   [
+    "Face",
+    "4/5 — reads as the reference's face; the jaw-to-neck is one smooth column"
+   ],
+   [
+    "Proportions",
+    "5/5 — measured from the reference (about 6.5 heads)"
+   ],
+   [
+    "Clipping",
+    "n/a — one surface, no separate clothes yet"
+   ],
+   [
+    "Feet vs robe",
+    "not tested — no skeleton or animation yet"
+   ],
+   [
+    "Fits Thousandvale",
+    "to judge in game (step 7)"
+   ],
+   [
+    "Modular",
+    "1/5 — one baked character, nothing swaps"
+   ],
+   [
+    "Cost",
+    "8,192 faces before smoothing; 7 meshes; 3 projected pictures (a single baked texture at export)"
+   ],
+   [
+    "Repeatable",
+    "4/5 — a script; needs a reference sheet per character"
+   ]
+  ],
+  "notes": [
+   "Why the doubles: each picture is projected straight through the model, so the front picture also lands on surfaces it could not see (the side of the head, the body behind the arms), and two pictures overlap at 45°. Fix to try in step 2: paint each spot only from a picture that actually sees it (a visibility test per pixel), then bake to one texture.",
+   "The sleeve cuffs and hands are separate tubes that only overlap — not joined.",
+   "Flat top of the head (the cap), rough boot toes, flat palms.",
+   "The painting only exists where the pictures saw something: under the arms and under the chin are smeared.",
+   "No skeleton yet — so no run test. That comes with steps 6–7."
+  ],
+  "review": "Owner (2026-10-15): looks a lot better than Chibi 3, but the textures are obviously bad — a duplicate face, a duplicate pair of arms; the sleeves near the hands may not be fully connected. Not sure this result would be usable."
+ },
+ {
+  "id": "step2",
+  "title": "Step 2 — headless Blender on the VM: same build as a script, painted only where each picture sees, baked to one texture",
+  "how": "Blender 5.2.2 installed on the VM (~/opt/blender), runs with no window: `blender -b -P avatar-3d/chibi4/tools/blender/step2_mage.py` builds, paints, bakes and exports in 31 seconds. Fixes from your step-1 review: each picture paints a spot only if its camera can see it (a ray test) and the studio grey behind the figure counts as unseen — so no doubled face or arms; spots no picture sees (20% of the surface: under arms, under chin, tops of shoulders) are filled from their neighbours; sleeves end in a cuff that turns in and closes round the wrist; rounded crown. One 2048 texture, exported as a GLB (shots/step2/mage.glb, 4.3 MB, 32,920 faces).",
+  "shots": [
+   [
+    "shots/step2/body.png",
+    "front · three-quarter · back · side"
+   ],
+   [
+    "shots/step2/face.png",
+    "face close-up"
+   ],
+   [
+    "shots/step2/game-distance.png",
+    "Thousandvale camera distance"
+   ],
+   [
+    "shots/step2/mage-baked.png",
+    "the one baked texture"
+   ]
+  ],
+  "score": [
+   [
+    "Face",
+    "4/5 — front and profile are the reference's face; a soft blend band on the cheek where front meets side"
+   ],
+   [
+    "Proportions",
+    "5/5 — measured from the reference"
+   ],
+   [
+    "Clipping",
+    "n/a — still one surface"
+   ],
+   [
+    "Feet vs robe",
+    "not tested — no skeleton yet"
+   ],
+   [
+    "Fits Thousandvale",
+    "to judge in game (step 7)"
+   ],
+   [
+    "Modular",
+    "1/5 — still one baked character"
+   ],
+   [
+    "Cost",
+    "32,920 faces (too many for a crowd — a game version needs ~5–8k), 1 mesh, 1 texture, 4.3 MB"
+   ],
+   [
+    "Repeatable",
+    "5/5 — one command, no window, same result every time"
+   ]
+  ],
+  "notes": [
+   "Doubled face and arms: gone (compare the three-quarter views).",
+   "Smudges remain where no picture could see — tops of the shoulders and the collar sides look blurred. More reference angles (a three-quarter and a top view from Codex) would cover those.",
+   "Hands and boot toes are still rough shapes; the method paints well but its shapes are only as good as an outline can give.",
+   "Conclusion so far: picture-projection makes a convincing single statue quickly, but it is not a modular system — every outfit would be a new character. That is what steps 3–7 address."
+  ]
+ },
+ {
+  "id": "step3",
+  "title": "Step 3 — MakeHuman base bodies (MPFB 2 in the VM's Blender)",
+  "how": "MPFB 2 (free Blender add-on; its code is GPL, the bodies, skins, hair and clothes it outputs are CC0 — free to ship, no credit needed) builds a real human: proper face topology, eyeballs, lids, lashes, brows, teeth, a 53-bone game skeleton with weights, and sliders for gender, age, muscle, weight, height and proportions. Both test characters are made from sliders in one script (avatar-3d/chibi4/tools/blender/step3_makehuman.py, ~1 minute headless): the mage as a ~35-year-old man (1.89 m), the elf as a ~28-year-old athletic woman (1.68 m), MakeHuman's own photo skins, a braid tinted auburn. No Codex paint and no fantasy clothes yet — they wear MakeHuman's stock modern outfits, because dressing them is steps 4–5.",
+  "shots": [
+   [
+    "shots/step3/bodies.png",
+    "mage front · three-quarter, elf front · three-quarter"
+   ],
+   [
+    "shots/step3/faces.png",
+    "faces close-up"
+   ],
+   [
+    "shots/step3/side-game.png",
+    "elf profile · Thousandvale camera distance"
+   ]
+  ],
+  "score": [
+   [
+    "Face",
+    "4/5 — properly modelled real faces, eyes and lids from every angle, nothing pokes through; but realistic, not the painted fantasy look of the reference"
+   ],
+   [
+    "Proportions",
+    "4/5 — real adult proportions (about 7.5 heads); sliders can push it more heroic"
+   ],
+   [
+    "Clipping",
+    "4/5 — MakeHuman clothes are fitted to the body and hide the skin under them"
+   ],
+   [
+    "Feet vs robe",
+    "not tested yet — but there is now a real skeleton to test it on"
+   ],
+   [
+    "Fits Thousandvale",
+    "2/5 as-is — modern clothes and photo skin; needs the painted style (step 4)"
+   ],
+   [
+    "Modular",
+    "4/5 — any body from sliders, hair/brows/clothes are separate swappable pieces on one shared skeleton"
+   ],
+   [
+    "Cost",
+    "~13,000 triangles per body before smoothing (41,600 smoothed); MakeHuman also ships low-poly 'proxy' bodies for distance versions"
+   ],
+   [
+    "Repeatable",
+    "5/5 — one script, no window"
+   ]
+  ],
+  "notes": [
+   "This is the first approach that is actually a SYSTEM: one skeleton, slider bodies, separate hair/brows/clothes — what Chibi 2 replacement needs.",
+   "The look is too realistic/photographic for Thousandvale. Step 4 paints it in the Codex style (skin, hair and cloth textures generated per character) — that is where it should start to match the reference sheet.",
+   "Pointed elf ears are applied but hidden under that hair. The eye-size slider is subtle; it can go further.",
+   "MakeHuman's CC0 clothes are modern (jeans, t-shirts). Fantasy clothing has to be ours (step 5: robes, armour fitted to this body with the body hidden underneath)."
+  ]
+ },
+ {
+  "id": "step4",
+  "title": "Step 4 — Codex-painted skin and hair on the MakeHuman bodies, sliders pushed toward the reference",
+  "how": "Codex repainted MakeHuman's own CC0 texture pictures in the reference sheets' painted style, given the original picture plus the reference and told to keep the layout. It refused the whole-body skin picture (an unrolled body reads as nudity to its safety filter), so only the HEAD part goes to Codex, turned upright; the body skin is smoothed and colour-matched to the painted head without AI (it is mostly under clothes). Codex kept the layout to the pixel (eyes land where they were). The mage starts from a CC0 skin that already has a painted beard (MakeHuman has no CC0 beard mesh), so the beard is paint. Sliders: head 1.0 bigger, eyes +0.6, broader shoulders and a V torso for the mage, bigger pointed ears for the elf — 6.8 heads tall (mage) and 6.6 (elf), down from 7.9. Scripts: tools/textures.py (crop / merge / hair) and tools/blender/step4_painted.py; the painted pictures are in avatar-3d/chibi4/textures/.",
+  "shots": [
+   [
+    "shots/step4/bodies.png",
+    "mage front · three-quarter · back, elf front · three-quarter · back"
+   ],
+   [
+    "shots/step4/faces.png",
+    "faces close-up (compare step 3)"
+   ],
+   [
+    "shots/step4/game-distance.png",
+    "Thousandvale camera distance"
+   ]
+  ],
+  "score": [
+   [
+    "Face",
+    "4/5 — the mage now reads as the reference (painted beard, warm skin, chestnut hair); the eyes are still MakeHuman's glassy realistic eyes and the elf's face is still close to a photo"
+   ],
+   [
+    "Proportions",
+    "5/5 — measured 6.8 heads (mage) and 6.6 (elf), the 6.5–7 target; bigger eyes"
+   ],
+   [
+    "Clipping",
+    "4/5 — unchanged from step 3"
+   ],
+   [
+    "Feet vs robe",
+    "not tested yet (step 6)"
+   ],
+   [
+    "Fits Thousandvale",
+    "3/5 — warmer and painted, still modern clothes until step 5"
+   ],
+   [
+    "Modular",
+    "4/5 — a painted skin works on any slider body (same picture layout)"
+   ],
+   [
+    "Cost",
+    "38,500 (mage) / 44,600 (elf) triangles as rendered (MakeHuman smoothing on); 2048 skin + 1024 hair pictures"
+   ],
+   [
+    "Repeatable",
+    "4/5 — the build is one command; Codex's painting differs every run, so the painted pictures are kept in git"
+   ]
+  ],
+  "notes": [
+   "Codex usage ran out mid-step (resets 02:38): the elf's braid is a no-AI stand-in (MakeHuman's braid picture mapped onto an auburn colour ramp — tools/textures.py gradient-hair). Re-run the Codex braid after the reset.",
+   "The elf's hair model is MakeHuman's French-braid with a side-swept fringe — not the reference's pulled-back braid. A closer hair model would have to be ours.",
+   "Doubled eyebrows are possible: Codex painted brows on the skin and MakeHuman adds brow meshes; at game distance it is invisible, in close-up the mage's brows look heavy.",
+   "Body hair on the mage's chest is softened, not gone (it never shows under a robe)."
+  ]
+ },
+ {
+  "id": "step5",
+  "title": "Step 5 — our own robe and armour on the MakeHuman body, body hidden under the clothes, hat fitted to the head",
+  "how": "Every garment is measured off the body it is made for (tools/blender/c4clothes.py), so a slider change and a rebuild still fit: tight pieces (trousers, undershirt, jerkin, bracers) are the body's own surface pushed out; loose pieces (robe, mantle, collar, belt, tabard) are stacks of the body's outline at each height, widened and smoothed; sleeves are bell tubes along the arm; boots are one smooth shape heel-to-toe plus a shaft; pauldrons are plates round the upper arm. BODY MASKING: every body vertex a garment covers is removed (a ray out of the skin in 5 directions must hit cloth) — 5,000 of 13,400 body vertices on each character, so no skin can poke through. Paint: the Codex reference pictures projected onto the clothes, each picture painting only where its camera sees, per pixel, with the studio grey keyed out; baked to one 2048 texture per outfit. The collar is lower at the front than the back so it never meets the chin; the hat is built from the head's own outline at brow height and the hair under it is pulled inside the band (never into the skull). Script: tools/blender/step5_clothes.py (2 minutes headless, both characters + all tests).",
+  "shots": [
+   [
+    "shots/step5/bodies.png",
+    "mage front · three-quarter · back · side, elf the same"
+   ],
+   [
+    "shots/step5/faces.png",
+    "faces with collar / pauldrons"
+   ],
+   [
+    "shots/step5/fit-mage-hat.png",
+    "hat fit, six angles"
+   ],
+   [
+    "shots/step5/fit-mage.png",
+    "mage hair, six angles"
+   ],
+   [
+    "shots/step5/fit-elf.png",
+    "elf hair, six angles"
+   ],
+   [
+    "shots/step5/game-distance.png",
+    "Thousandvale camera distance"
+   ]
+  ],
+  "score": [
+   [
+    "Face",
+    "4/5 — as step 4; nothing touches the face: collar, hat brim and pauldrons all clear the jaw"
+   ],
+   [
+    "Proportions",
+    "5/5 — as step 4"
+   ],
+   [
+    "Clipping",
+    "5/5 standing — body under the clothes is gone; 2 elf / 181 mage garment vertices sit inside VISIBLE skin (the mage's are sleeve tops buried in the shoulder under the mantle, not visible); hat: 0 vertices inside the head, 302 hair vertices tucked under it"
+   ],
+   [
+    "Feet vs robe",
+    "step 6"
+   ],
+   [
+    "Fits Thousandvale",
+    "4/5 — reads as the reference sheet at game distance; close up the painted trim is soft and the elf's boots have pale smears"
+   ],
+   [
+    "Modular",
+    "4/5 — each garment is a separate built piece measured off any body (the painted texture is per outfit)"
+   ],
+   [
+    "Cost",
+    "70,700 (mage) / 68,300 (elf) triangles as rendered — heavy; body + outfit + hair each one material"
+   ],
+   [
+    "Repeatable",
+    "5/5 — one command, same result every time"
+   ]
+  ],
+  "notes": [
+   "Painting by projection only reaches what a reference picture shows: the inside of the sleeves, under the arms and the boot sides take their neighbours' colour, and where our arm angle differs from the picture's the sleeve ends get a smeared edge.",
+   "The elf's back is painted from the FRONT picture seen from behind (a stand-in: Codex was out of credit for a back view). The tabard, boots and pauldrons are the same front and back so it mostly holds.",
+   "221 vertices of MakeHuman's own braid sit under the scalp — that is how that hair model is built (its inner layer), not something we added; nothing shows.",
+   "Garments are plain geometry with painted detail — no modelled folds or buckles; at Thousandvale's camera distance that does not show."
+  ]
+ },
+ {
+  "id": "step6",
+  "title": "Step 6 — the robe vs the feet: skirt bones that follow both thighs + a robe-aware stride, measured on every frame",
+  "how": "Real walk and run clips: Quaternius' Universal Animation Library (CC0, already in avatar-3d/assets/quaternius) copied onto MakeHuman's game skeleton by bone name — both use the same bone names, and each bone takes the source bone's world rotation corrected for the two different rest poses (checked: 0.0 degrees off on every limb). Eight skirt bones hang from the hips to the hem; every frame, the front ones swing as far forward as the FURTHER-forward thigh, the back ones as far back as the further-back thigh, the side ones follow their own leg; the robe below the hips is weighted to the two nearest skirt bones. The robe-aware stride caps each clip's thigh swing (~22-24 degrees) and knee bend (~50 degrees): someone in a floor-length robe takes short steps and does not kick their heels up. The test (tools/blender/c4anim.py measure_feet): on every frame, every boot vertex above the hem that is outside the robe's cloth wall is a poke-through; otherwise the smallest gap between foot and cloth is recorded. The script fails if the final set-up has any poke-through. Script: tools/blender/step6_robe_run.py (1 minute).",
+  "shots": [
+   [
+    "shots/step6/run-A.png",
+    "A — robe copies body weights, full stride (today's usual approach)"
+   ],
+   [
+    "shots/step6/run-B.png",
+    "B — skirt bones, full stride"
+   ],
+   [
+    "shots/step6/run-D.png",
+    "D — robe stride only"
+   ],
+   [
+    "shots/step6/run-C.png",
+    "C — skirt bones + robe stride (passes)"
+   ]
+  ],
+  "score": [
+   [
+    "Face",
+    "4/5 — unchanged"
+   ],
+   [
+    "Proportions",
+    "5/5 — unchanged"
+   ],
+   [
+    "Clipping",
+    "5/5 standing; in motion the robe is measured below"
+   ],
+   [
+    "Feet vs robe",
+    "5/5 — C: walk 0/33 frames, 0 boot vertices through the cloth, closest gap 3.2 cm; run 0/23 frames, 0 boot vertices through the cloth, closest gap 3.0 cm. For comparison A: walk 25/33 frames, 3738 boot vertices through the cloth; run 23/23 frames, 5857 boot vertices through the cloth. Skirt bones alone (B) or the stride alone (D) are NOT enough — it takes both."
+   ],
+   [
+    "Fits Thousandvale",
+    "4/5 — reads as a robed mage running; the borrowed jog hunches forward"
+   ],
+   [
+    "Modular",
+    "4/5 — skirt bones are built from the robe's own hem, so any long garment gets them"
+   ],
+   [
+    "Cost",
+    "+8 bones (61 total), skirt keys baked into each clip"
+   ],
+   [
+    "Repeatable",
+    "5/5 — one command; the check fails the build if a foot gets through"
+   ]
+  ],
+  "notes": [
+   "Quaternius' jog is an athletic run (thigh swing 78 degrees, heel kick 129 degrees) — copied faithfully, it rips any robe open (strip A). The robe stride keeps the rhythm and arm pump but shortens the steps.",
+   "The upper body keeps the jog's forward hunch; a robed run should be more upright — a spine factor like the leg one would fix it.",
+   "The shoulder mantle lifts at the back when the arms swing back (it copies the shoulder weights). It wants weights on the spine only — a step-7 tidy.",
+   "A foot coming out UNDER the hem is allowed (that is what a robe looks like running); only crossing the cloth's wall counts as a poke-through."
+  ]
+ },
+ {
+  "id": "step7",
+  "title": "Step 7 — swap-in runtime: one mesh and one texture per character, three distance versions, Chibi 2's API, ?renderer=chibi4 in Thousandvale",
+  "how": "tools/blender/step7_export.py (~30 s per character) exports one GLB each (avatar-3d/chibi4/models/mage.glb 3.2 MB, elf.glb 3.5 MB): the 61-bone skeleton (MakeHuman's 53 + 8 skirt bones), 8 clips (idle, walk, run, cast, attack, hit, death, talk; the mage's walk and run with step 6's robe stride and a straighter spine — still 0 feet through the robe), body + eyes + brows + lashes + hair + outfit joined into ONE mesh, their pictures copied into ONE 2048 texture, and the same mesh at 40% and 15% of its triangles for distance. js/chibi4.js createChibi4Character(avatar) loads it and answers the same calls as Chibi 2 (setAnim, update, stats, metrics, dispose...); instances share the download. compare.html shows Chibi 2 and Chibi 4 side by side with the same clip and measures them. In Thousandvale, adding ?renderer=chibi4 to the URL gives the PLAYER a Chibi 4 body (7 lines in js/client/actors.js; everyone else stays Chibi 2; any error falls back to Chibi 2).",
+  "shots": [
+   [
+    "shots/step7/compare.png",
+    "compare page: Chibi 2 (left pair) vs Chibi 4 (right pair) — walk · run · cast"
+   ],
+   [
+    "shots/step7/tv.png",
+    "Thousandvale: default Chibi 2 · ?renderer=chibi4 idle · walking"
+   ],
+   [
+    "shots/step7/glb-roundtrip.png",
+    "the GLBs loaded back into Blender, mid-run"
+   ]
+  ],
+  "score": [
+   [
+    "Face",
+    "4/5 — as steps 4–5"
+   ],
+   [
+    "Proportions",
+    "5/5"
+   ],
+   [
+    "Clipping",
+    "5/5 standing; robe test still 0 pokes after export"
+   ],
+   [
+    "Feet vs robe",
+    "5/5 — checked again on the exported clips"
+   ],
+   [
+    "Fits Thousandvale",
+    "4/5 — at the game's camera the mage reads as the reference character; next to Chibi 2 villagers it is a different style, which is the point of the swap"
+   ],
+   [
+    "Modular",
+    "2/5 at runtime — each GLB is one finished character; gear, colours and mounts do not show on it yet (4/5 at build time)"
+   ],
+   [
+    "Cost",
+    "1 draw call per character (Chibi 2: 1.5). Triangles near: 35k (Chibi 2: 6.6k); at distance the 15% version is 5.2k. 50 characters at game distance: 268k triangles (Chibi 2: 330k). FPS on this VM (software renderer, no GPU): 20 chars 6.9 vs Chibi 2 11.9; 50 chars 4.3 vs 6.1. Download 3.2–3.5 MB per character, once"
+   ],
+   [
+    "Repeatable",
+    "5/5 — one command per character; tests in avatar-3d/chibi4/tests/"
+   ]
+  ],
+  "notes": [
+   "The frame-rate gap is skinning: 61 bones and ~5–35k skinned vertices per character against Chibi 2's 22 bones. This VM has no GPU, so these numbers exaggerate it; measure on a real PC with compare.html before deciding.",
+   "The near version is heavy (35k triangles) because MakeHuman's body is ~16k triangles before clothes and the elf's braid is 12k on its own. A lighter hair model and MakeHuman's own low-poly body would halve it.",
+   "Not modular at runtime: the next step would ship the body and each garment as separate skinned meshes on the shared skeleton (one draw call each), with the body-hiding mask chosen per outfit.",
+   "Only 8 clips (Chibi 2 has ~90); no wave, guard, jump, weapon holds or mount seat."
+  ]
+ },
+ {
+  "id": "step8",
+  "title": "Step 8 — Tripo3D (tripo3d.ai): an AI image-to-3D model from the Codex reference",
+  "pending": true,
+  "how": "The owner's friend built his game's humanoids with Tripo3D. Feed it the Codex reference, then rig and clean it in Blender. Needs a Tripo account/API key from the owner (the Blender MCP add-on's Tripo hook is Premium only)."
+ },
+ {
+  "id": "step9",
+  "title": "Step 9 — the modular kit: one skeleton per body, every garment, hair and hat its own piece, assembled and recoloured at runtime",
+  "how": "tools/blender/step9_kit.py (~2.5 min per body type) builds a kit per body type (male = the mage's sliders, female = the elf's) into models/kit/<body>/: body.glb (the 61-bone skeleton + body, eyes, brows and lashes, with pointed elf ears as a morph target), 13 garments (robe, mantle, sleeves, low boots, undershirt, jerkin, trousers, knee boots, bracers, pauldrons, tabard, scabbard, wizard hat) and 6 CC0 MakeHuman hair styles, each its own GLB skinned to the same bones; ONE colour atlas and ONE tint mask for all of them; 67 clips in two files (14 needed at once, the rest fetched after). Both outfits are measured off BOTH bodies, so any garment fits either body. Every vertex carries the list of garments that cover it (the hide mask): the runtime drops any triangle under something being worn — body under the robe, jerkin under the robe, hair under the hat — so mixing pieces never pokes through. js/chibi4-kit.js puts a character together from Chibi 2's avatar JSON (or avatar.chibi4 = { body, race, hair, garments }), copies the kept triangles of every piece into ONE geometry per distance (one draw call per character), shares downloads and merged outfits between characters, and recolours each garment's main and second colour plus the skin tone in the shader (a uniform write, no rebuild). Clips: Quaternius' CC0 library (35 copied, 4 mirrored for the left hand, jump = start+air+land, stand-up = a fall played backwards, sleep = a fall's last frame), 21 emotes authored on top of them (wave, point, salute, cheer, clap, bow, nod, head shake, shrug, laugh, folded arms, look around, stretch, pray, drink, guard, kick, spin, ride at a walk and a gallop, sit on the ground) and a robe-stride twin of walk, run, sprint and formal walk that the runtime plays whenever a floor-length robe is worn. All 96 Chibi 2 clip names map: 53 to the action itself, 43 to the nearest clip. Owner feedback folded in: everything is meshopt-compressed with gltfpack (step 7's mage.glb 3.17 MB -> 0.92 MB, the kit body 1.78 MB -> 0.34 MB, no visible change: positions and UVs stay full precision), and in Thousandvale ?renderer=chibi4 the download starts at page start, the player gets the Chibi 2 body at once and swaps to Chibi 4 when it is ready. The 'right leg bent backwards' was the trousers: copied their bone weights from a body with the legs hidden, so they took the hip's and foot's weights and never bent at the knee; garments now copy from the whole body (only the robe copies from the hidden one, so it follows the spine), checked per garment (trousers: 99.7% of vertices on the bone the body under them uses).",
+  "shots": [
+   [
+    "shots/step9/compare.jpg",
+    "Chibi 2 · Chibi 4 baked (step 7) · the same two characters put together from kit pieces at runtime"
+   ],
+   [
+    "shots/step9/lineup.jpg",
+    "ten random outfits from the same kit: both bodies, human and elf, six hairs, any garment mix, any colours"
+   ],
+   [
+    "shots/step9/dress.jpg",
+    "the dress-up panel: a woman in a recoloured robe and hat · a male elf in armour · shirt and trousers · the same, recoloured live"
+   ],
+   [
+    "shots/step9/emotes.jpg",
+    "clips the library did not have, authored on top of it (wave, cheer, point, salute, clap, bow, shrug, folded arms, pray, drink, guard, kick, sit on the ground, kneel, ride, gallop, sit, jump, swim, sleep, dance, left-hand slash, laugh, stretch)"
+   ],
+   [
+    "shots/step9/crowd.jpg",
+    "the crowd test: 50 kit characters in 46 different outfits, 51 draw calls"
+   ],
+   [
+    "shots/step9/meshopt_face.jpg",
+    "before / after meshopt compression (step 7's mage): no visible change"
+   ]
+  ],
+  "score": [
+   [
+    "Face",
+    "4/5 — as steps 4–7"
+   ],
+   [
+    "Proportions",
+    "5/5"
+   ],
+   [
+    "Clipping",
+    "5/5 for the outfits it was built for; 4/5 when mixing (hide masks stop pokes; inner layers can carry a little paint of what covered them in the reference picture)"
+   ],
+   [
+    "Feet vs robe",
+    "5/5 — step 6's check on every robe clip (walk, run, sprint, formal walk), both bodies: 0 feet through. Knee boots are never put under a robe (one running frame poked; low boots take their place)"
+   ],
+   [
+    "Fits Thousandvale",
+    "4/5 — the player swaps in without waiting; gear and mounts still Chibi 2 only"
+   ],
+   [
+    "Modular",
+    "4/5 at runtime — 2 bodies, 2 races, any skin tone, 6 hairs + any colour, 13 garments with two colours each, slot rules; not yet: weapons in hand, mounts, more body builds"
+   ],
+   [
+    "Cost",
+    "1 draw call per character. Near: 26–36k triangles depending on outfit; at 8 m and 18 m ~9k and ~3k. On this VM (software renderer, no GPU), 20 / 50 / 100 walking at Thousandvale's camera: kit 9.9 / 5.1 / 3.1 fps, Chibi 2 11.8 / 6.2 / 3.4, step 7 baked 7.2 / 4.6 / 2.6 — the kit draws half Chibi 2's triangles. Player load on a 10 Mbps line, cold: 1.7 MB, 1.8 s to ready + 0.6 s first frame"
+   ],
+   [
+    "Repeatable",
+    "5/5 — one command per body; node + Playwright tests"
+   ]
+  ],
+  "notes": [
+   "Load numbers (tests/chibi4.spec.js, throttled to 10 Mbps with 40 ms latency, cache off): the mage player needs 10 files, 1.69 MB: download 1.75 s, decode 41 ms, assembled at 1.78 s, first frame +0.58 s (most of that is compiling shaders on this GPU-less VM). The elf: 13 files, 1.86 MB, 1.94 s + 0.54 s. Same files from the local server: ready in 0.29 s. Before: step 7's mage.glb alone was 3.17 MB uncompressed, and Thousandvale only started fetching it once the player body was built, behind the zone downloads.",
+   "In Thousandvale with ?renderer=chibi4 the player now gets the Chibi 2 body at once and swaps to the Chibi 4 kit body when it is ready (same spot, facing, clip and mount); the kit download starts at page start. Everyone else is still Chibi 2.",
+   "Clips are shared by every character of a body type (one file pair per body). They cannot be shared between the two bodies: the same retargeted clip differs by up to 15 degrees at the thighs and 80 at the toes, because each body's rest pose is its own.",
+   "The far versions matter most: 50 characters with full detail at every distance draw 1.53M triangles and a frame costs ~6x more. Evaluating far characters' animation every 2nd/3rd frame made no measurable difference here: on this VM the time goes into skinning vertices on the CPU, not into the animation mixer. Fewer bone influences per vertex for far versions was not tried (on a real GPU skinning is cheap; needs a real-PC measurement first).",
+   "A new outfit costs ~70 ms to assemble the first time (merging three distance versions); repeats are cached by outfit, so a crowd of the same uniform costs nothing extra.",
+   "Codex leftovers from steps 4–5, done this step: the elf's back view (ref/warrior-back.png, Codex) is now projected onto her clothes, and her braid is Codex-painted (textures/elf-hair.png; the raw Codex picture is textures/elf-hair-codex.png) instead of the no-AI colour-ramp stand-in.",
+   "Weak spots: inner layers (undershirt, trousers) were painted from the reference too, so where the tabard or jerkin covered them in the picture they carry a little of that paint when worn alone; the male body's beard is painted on the skin (every male face has it); only one hat model; no weapons in the hands yet (attach() puts any object on a hand bone); mounts still expect Chibi 2's seat."
+  ]
+ },
+ {
+  "id": "step10a",
+  "title": "Step 10a — weapons, off-hands, seats (stopped early)",
+  "how": "Stopped 2026-10-16 when the owner pulled Chibi 4 out of Thousandvale. Built: chibi4-grip.js (pure: real lengths, hold kinds, poses per family), chibi4-held.js (lifts each item out of a Chibi 2 body, hangs it on the kit's hand/forearm/back/hip, finger curl, wrist lock, arm IK, bow string, seat height), held.html contact sheet, actor.equip() + seatHeight() in the kit. NOT working yet: many lifted items come out far too big (the lift picks up extra triangles), poses unchecked, no tests. Equip is opt-in (opts.held). See README 'Step 10a — stopped here'.",
+  "shots": [
+   [
+    "shots/step10a/sheet-page0-first-try.png",
+    "first contact-sheet try: sizes wrong"
+   ]
+  ]
+ },
+ {
+  "id": "step10b",
+  "title": "Step 10b — worn equipment on the kit (stopped early: owner pulled Chibi 4 out of Thousandvale, 2026-10-16)",
+  "how": "Started, not finished. Two building blocks exist and are NOT wired into the kit build or the runtime: tools/tiles.py (59 generated seamless detail pictures: cloth, lining, leather, plate, mail, silk, fur, quilt in two tint channels, knit, scale, feather, beard strands, stubble, fixed steel/gold/brass/bone/rope/wood/glass/gems/glow colours, and 14 tier-2 emblem discs; textures/tiles/) and tools/blender/c4wardrobe.py (the garment generator core: 21 hide zones measured on any kit body, landmarks, mesh primitives, tile UV encoding, skin binding incl. skirt bones for long hems and capes, measured coverage per zone).",
+  "shots": [],
+  "score": [],
+  "notes": [
+   "No garment recipes were written yet (0 of the 157 worn catalog rows, 0 of 32 class outfits).",
+   "The kit (models/kit/), step9_kit.py and js/chibi4-kit.js / chibi4-outfit.js were not changed by 10b, so the step-9 kit builds and loads exactly as before.",
+   "Plan and remaining work: README 'Step 10b — stopped here'."
+  ]
+ }
 ]

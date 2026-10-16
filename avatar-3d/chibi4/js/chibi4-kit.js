@@ -24,6 +24,8 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 import { MeshoptDecoder } from '../../../vendor/meshopt/meshopt_decoder.mjs';
 import { outfitFor, dressOutfit, outfitKey, isLong, clipFor, tintUniform, skinRatio, KIT_BODIES, CLIP_MAP } from './chibi4-outfit.js';
+// 10a: weapons, off-hands and seats (chibi4-held.js; README "Step 10 contracts")
+import { createHoldRig, seatHeight as seatHeightOf } from './chibi4-held.js';
 const CLIP_MAP_HAS = (name, clips) => (CLIP_MAP[name]?.[0] || name) in clips;
 
 const KIT_BASE = new URL('../models/kit/', import.meta.url);
@@ -249,6 +251,7 @@ export async function createChibi4Kit(avatar = {}, opts = {}) {
   const group = new THREE.Group(); group.name = 'chibi4kit'; group.userData.character = avatar;
   let root, skeleton, lod, mixer, actions = {}, current = null, currentName = 'idle', currentClip = null, bones = {};
   let held = null, rate = 1, acc = 0, frame = 0, disposed = false;
+  let holdRig = null, holding = null;                         // 10a: what is in the hands (chibi4-held.js), built lazily
   const material = makeMaterial(kit);
   const lodDist = opts.lodDistances || [0, 8, 18];
   const twist = { yaw: 0, side: 0, fwd: 0, on: false, q: new THREE.Quaternion(), inv: new THREE.Quaternion(), e: new THREE.Euler(0, 0, 0, 'YXZ') };
@@ -310,12 +313,13 @@ export async function createChibi4Kit(avatar = {}, opts = {}) {
   setAnim('idle', 0);
   const height = kit.meta.height || 1.8;
   group.userData.fxHeight = height;
+  const heldOf = a => ({ held: a?.held?.id && a.held.id !== 'none' ? a.held : null, offhand: a?.offhand?.id && a.offhand.id !== 'none' ? a.offhand : null });   // 10a
 
   const api = {
     group,
     get model() { return 'kit:' + outfit.body; },
     get outfit() { return JSON.parse(JSON.stringify(outfit)); },
-    get parts() { return { head: bones.head, handL: bones.hand_l, handR: bones.hand_r, spine: bones.spine_03, pelvis: bones.pelvis, bones }; },
+    get parts() { return { head: bones.head, handL: bones.hand_l, handR: bones.hand_r, spine: bones.spine_03, pelvis: bones.pelvis, hips: bones.pelvis, bones }; },   // 10a: hips (mounts.js)
     get skeleton() { return skeleton; },
     get lod() { return lod; },
     get anim() { return currentName; },
@@ -329,22 +333,33 @@ export async function createChibi4Kit(avatar = {}, opts = {}) {
       if (++frame % (level === 0 ? 1 : level === 1 ? 2 : 3) !== 0) return;
       const chest = bones.spine_03;
       if (twist.on) chest.quaternion.multiply(twist.inv);
-      mixer.update(acc * rate); acc = 0;
+      const step = acc * rate;
+      mixer.update(step); acc = 0;
       twist.on = !!(chest && (twist.yaw || twist.side || twist.fwd));
       if (twist.on) { twist.q.setFromEuler(twist.e.set(twist.fwd, twist.yaw, twist.side)); twist.inv.copy(twist.q).invert(); chest.quaternion.multiply(twist.q); }
+      if (holdRig) holdRig.update(currentName, current, Math.max(step, 1 / 120));   // 10a: the hold pose sits on top of the clip
     },
     setRate(k = 1) { rate = Math.max(0.15, Math.min(3.5, Number(k) || 1)); },
     get rate() { return rate; },
     setTwist(yaw = 0, side = 0, fwd = 0) { twist.yaw = +yaw || 0; twist.side = +side || 0; twist.fwd = +fwd || 0; },
     hit() { setAnim('hit', 0.08, true); }, hold() {}, setHandsFree() {},
-    /** Put anything in a hand: attach(mesh, 'handR'). (A real weapon kit is not built yet.) */
+    /** Put anything in a hand: attach(mesh, 'handR'). For catalog items use equip(). */
     attach(obj, socket = 'handR') { const b = api.parts[socket] || bones[socket]; if (b) b.add(obj); return !!b; },
-    equip() { return false; },
+    // 10a: equip({ held: { id, color, color2 }, offhand: { … } }) — any held / off-hand row of the gear catalog
+    async equip(want = {}) {
+      holding = { held: want.held || null, offhand: want.offhand || null };
+      if (!holdRig) holdRig = createHoldRig(api, kit);
+      return holdRig.equip(holding);
+    },
+    get holdRig() { return holdRig; },
+    // 10a: the pelvis height in a seated clip, for avatar-3d/js/mounts.js seatRider (riderHipsY asks for it)
+    seatHeight(clip = 'ride') { return seatHeightOf(kit, clip); },
     async dress(change) { outfit = dressOutfit(outfit, change); await build(); return true; },
     async setAvatar(a) {
       group.userData.character = a;
       const next = outfitFor(a);
-      if (next.body !== outfit.body) {                         // a new body type is a new skeleton
+      const newBody = next.body !== outfit.body;                 // 10a
+      if (newBody) {                         // a new body type is a new skeleton
         kit = await loadKit(next.body); kit.more(); outfit = next;
         group.remove(root); mixer.stopAllAction(); actions = {}; bones = {}; current = null;
         material.map = kit.atlas; material.userData.c4.c4mask.value = kit.mask;
@@ -352,6 +367,10 @@ export async function createChibi4Kit(avatar = {}, opts = {}) {
       } else outfit = next;
       await build();
       setAnim(currentName || 'idle', 0, true);
+      // 10a: a new skeleton loses what was hung on the old one; a changed look may change the hands
+      const h = heldOf(a);
+      if (holdRig && (newBody || JSON.stringify(h) !== JSON.stringify(holding))) { holdRig.dispose(); holdRig = null; }
+      if (opts.held && (h.held || h.offhand)) await api.equip(h);
     },
     setColors({ skin, hair, garments } = {}) {
       if (skin) outfit.skin = skin;
@@ -371,9 +390,13 @@ export async function createChibi4Kit(avatar = {}, opts = {}) {
       if (disposed) return; disposed = true;
       mixer.stopAllAction(); mixer.uncacheRoot(root); group.removeFromParent();
       if (held) release(held.key);
+      holdRig?.dispose();                                        // 10a (item geometry stays cached)
       material.dispose();                                        // the atlas, mask and piece geometry stay cached
     },
   };
+  // 10a (UNFINISHED, opt-in): with opts.held an avatar that names a held / off-hand item gets it in the background.
+  // Off by default — the item lift still mis-sizes many items (README "Step 10a — stopped here").
+  if (opts.held) { const h = heldOf(avatar); if (h.held || h.offhand) api.equip(h).catch(e => console.warn('[chibi4] equip failed', e)); }
   return api;
 }
 

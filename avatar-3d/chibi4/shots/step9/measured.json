@@ -40,13 +40,13 @@
   "kitBytes": 5257976,
   "build": {
    "chibi2": {
-    "buildMs": 77.80000001192093
+    "buildMs": 75.99999994039536
    },
    "chibi4": {
-    "buildMs": 282.19999998807907
+    "buildMs": 263.1000000834465
    },
    "kit": {
-    "buildMs": 444
+    "buildMs": 464.19999998807907
    }
   }
  },
@@ -208,37 +208,37 @@
   "mage": {
    "bytes": 1689364,
    "files": 10,
-   "downloadMs": 1752,
-   "parseMs": 41,
-   "readyMs": 1784,
-   "firstFrameMs": 575,
-   "totalMs": 2358
+   "downloadMs": 1760,
+   "parseMs": 43,
+   "readyMs": 1790,
+   "firstFrameMs": 585,
+   "totalMs": 2375
   },
   "elf": {
    "bytes": 1860124,
    "files": 13,
-   "downloadMs": 1907,
+   "downloadMs": 1905,
    "parseMs": 40,
-   "readyMs": 1942,
-   "firstFrameMs": 541,
-   "totalMs": 2482
+   "readyMs": 1937,
+   "firstFrameMs": 546,
+   "totalMs": 2483
   },
   "local": {
    "bytes": 2543772,
    "files": 11,
-   "downloadMs": 263,
-   "parseMs": 48,
+   "downloadMs": 262,
+   "parseMs": 44,
    "readyMs": 290,
-   "firstFrameMs": 557,
-   "totalMs": 846
+   "firstFrameMs": 565,
+   "totalMs": 854
   }
  },
  "crowd": [
   {
    "sys": "chibi2",
    "n": 20,
-   "fps": 11.8,
-   "frameMs": 91.9,
+   "fps": 11.2,
+   "frameMs": 90.6,
    "buildMs": 9,
    "calls": 31,
    "triangles": 132008,
@@ -247,8 +247,8 @@
   {
    "sys": "chibi4",
    "n": 20,
-   "fps": 7.2,
-   "frameMs": 155.4,
+   "fps": 7,
+   "frameMs": 158.1,
    "buildMs": 13,
    "calls": 21,
    "triangles": 151367,
@@ -257,9 +257,9 @@
   {
    "sys": "kit",
    "n": 20,
-   "fps": 9.9,
-   "frameMs": 110.8,
-   "buildMs": 3819,
+   "fps": 10,
+   "frameMs": 104.6,
+   "buildMs": 3904,
    "calls": 21,
    "triangles": 67563,
    "outfits": 20
@@ -267,9 +267,9 @@
   {
    "sys": "chibi2",
    "n": 50,
-   "fps": 6.2,
-   "frameMs": 183.5,
-   "buildMs": 12,
+   "fps": 6.1,
+   "frameMs": 186.2,
+   "buildMs": 13,
    "calls": 76,
    "triangles": 329948,
    "outfits": null
@@ -277,9 +277,9 @@
   {
    "sys": "chibi4",
    "n": 50,
-   "fps": 4.6,
-   "frameMs": 257,
-   "buildMs": 25,
+   "fps": 4.5,
+   "frameMs": 255.5,
+   "buildMs": 29,
    "calls": 51,
    "triangles": 267523,
    "outfits": null
@@ -287,9 +287,9 @@
   {
    "sys": "kit",
    "n": 50,
-   "fps": 5.1,
-   "frameMs": 218.2,
-   "buildMs": 3622,
+   "fps": 5.2,
+   "frameMs": 214.9,
+   "buildMs": 3638,
    "calls": 51,
    "triangles": 170129,
    "outfits": 46
@@ -297,9 +297,9 @@
   {
    "sys": "chibi2",
    "n": 100,
-   "fps": 3.4,
-   "frameMs": 342.3,
-   "buildMs": 21,
+   "fps": 3.5,
+   "frameMs": 338.9,
+   "buildMs": 24,
    "calls": 151,
    "triangles": 659848,
    "outfits": null
@@ -308,8 +308,8 @@
    "sys": "chibi4",
    "n": 100,
    "fps": 2.6,
-   "frameMs": 468.1,
-   "buildMs": 48,
+   "frameMs": 470.4,
+   "buildMs": 53,
    "calls": 101,
    "triangles": 534998,
    "outfits": null
@@ -317,9 +317,9 @@
   {
    "sys": "kit",
    "n": 100,
-   "fps": 3.1,
-   "frameMs": 380.4,
-   "buildMs": 448,
+   "fps": 3.2,
+   "frameMs": 370.7,
+   "buildMs": 437,
    "calls": 101,
    "triangles": 335387,
    "outfits": 87

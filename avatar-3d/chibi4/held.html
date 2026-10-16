@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chibi 4 held items</title>
+<link rel="stylesheet" href="../../shared/style.css">
+<link rel="stylesheet" href="chibi4.css">
+<script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/" } }</script>
+</head>
+<body class="c4cmp">
+<!-- Chibi 4 step 10a: weapons, off-hands and seats on the kit body.
+     One character:  ?held=fh_longsword&off=fh_kite_shield&anim=walk&body=male|female&t=0.3&cam=front|side|right|back&freeze=1
+     Contact sheet:  ?sheet=1&page=0&per=20&anim=idle&t=0.2      (every held/off-hand row of the gear catalog, 5 x 4 a page)
+     Seats:          ?seat=horse|pony|…|bench|boat&held=…
+     window.__held exposes { actor, scene, cam, renderer, sheet(), sampleGrip() } for the tests. -->
+<div id="view"></div>
+<div class="c4panel small" id="panel"></div>
+<script type="module" src="js/held-page.js"></script>
+</body>
+</html>

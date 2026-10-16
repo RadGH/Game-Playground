@@ -1,8 +1,0 @@
-Use case: stylized-concept.
-Asset type: ONE character model turnaround reference sheet for a 3D game modeller.
-Create a single image showing exactly two full-body views of the SAME human male mage: FRONT view on the left, true SIDE profile view on the right, side by side. Orthographic projection with no perspective distortion. Identical scale, aligned top of head and soles of feet, ample clear separation and margin around both figures; show entire hands and feet without cropping.
-Subject: a human male mage about 35 years old with short brown hair, a short brown beard, no hat, empty hands holding nothing. Long deep-blue wizard robes with gold trim; a leather belt with pouches. Robe hem ends just above the ankles and both simple leather boots are visible. Keep costume design, face, physique, garment construction and pouch placement consistent between views.
-Style: stylised-realistic fantasy MMO game character concept art, believable adult proportions about 6.5 heads tall, slightly larger eyes and softer facial features, painted textures. No photorealism, not chibi, not a doll.
-Pose: neutral relaxed facial expression and neutral A-pose with straight arms angled approximately 45 degrees downward from horizontal, hands relaxed and empty. In the side view rotate this exact A-pose 90 degrees to present a true side profile; retain the same anatomical pose. Stand upright with level shoulders and feet planted.
-Lighting/background: even flat studio lighting with restrained shading that clearly describes forms; plain light grey background.
-Constraints: no text, no labels, no lettering, no watermark, no additional character views, no props, no hat. ONE image containing the front and side reference views.

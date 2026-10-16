@@ -36,9 +36,17 @@
 //   for (const part of partsFor(desc)) { /* place a unit box/cylinder/prism */ }
 
 import { makeRng } from './townplan.js';
-import KIT from '../data/buildkit.json' with { type: 'json' };
-import CULTURE_KIT from '../data/cultures.json' with { type: 'json' };
 import { stiltRowParts } from './buildkit-vharl.js';
+// JSON without `import ... with { type: 'json' }` — older browsers (Steam Deck Chrome/Firefox) throw a SyntaxError on
+// import attributes, which killed the whole page. Top-level await works everywhere this code runs (browser and node).
+async function loadJson(rel) {
+  const u = new URL(rel, import.meta.url);
+  if (u.protocol === 'file:') { const { readFile } = await import('node:fs/promises'); return JSON.parse(await readFile(u, 'utf8')); }
+  const r = await fetch(u); if (!r.ok) throw new Error(`${u.pathname}: HTTP ${r.status}`); return r.json();
+}
+const KIT = await loadJson('../data/buildkit.json');
+const CULTURE_KIT = await loadJson('../data/cultures.json');
+
 
 export { KIT, CULTURE_KIT };
 

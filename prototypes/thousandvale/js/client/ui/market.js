@@ -11,7 +11,8 @@
 
 import { createPanel, h, confirmBox } from '../ui-panel.js';
 import { itemCell, itemName, goldText } from './item-cell.js';
-import { onIcon, iconsActive } from './item-icons.js';
+import { onIcon, iconsActive, iconFor } from './item-icons.js';
+import { itemByUid } from './item-card.js';
 import { hideTip } from './tips.js';
 import { MARKET, GEAR_SUBS, ITEM_SUBS, SORTS } from '../../sim/market-rules.js';
 
@@ -179,7 +180,17 @@ export function createMarket({ net: getNet, hud, bag, me }) {
     });
     n.on('bag', () => { if (panel.isOpen && S.view !== 'browse') net()?.market?.('mine'); else if (panel.isOpen) draw(); });
   }
-  onIcon(() => { if (panel.isOpen) { clearTimeout(draw.t); draw.t = setTimeout(draw, 80); } });
+  // a picture that arrives fills its square in place — never a whole redraw, which would drop a tap in progress or a
+  // price being typed
+  onIcon(() => {
+    if (!panel.isOpen) return;
+    for (const c of panel.root.querySelectorAll('.islot.pending[data-tip-item]')) {
+      const it = itemByUid(c.dataset.tipItem), url = it && iconFor(it);
+      if (!url) continue;
+      c.querySelector('.glyph')?.remove(); c.classList.remove('pending');
+      c.prepend(h('img', { src: url, alt: '', draggable: false }));
+    }
+  });
 
   return { panel, wire, draw, get state() { return S; } };
 }

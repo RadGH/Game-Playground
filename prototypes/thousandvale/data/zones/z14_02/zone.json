@@ -141,9 +141,9 @@
       "type": "dungeon",
       "id": "door_1",
       "name": "Barrow entrance",
-      "x": 1623,
+      "x": 1815,
       "z": 475,
-      "yaw": -2.777,
+      "yaw": -1.966,
       "pinned": true
     },
     {
@@ -153,11 +153,83 @@
       "z": 688,
       "r": 40,
       "pinned": true
+    },
+    {
+      "type": "harbour",
+      "id": "harbour_gullwick",
+      "town": "gullwick",
+      "x": 1597,
+      "z": 459.5,
+      "yaw": 0,
+      "deep": [
+        1600,
+        544
+      ],
+      "quay": {
+        "x0": 1544,
+        "x1": 1650,
+        "z0": 451,
+        "z1": 468,
+        "h": 2.2
+      },
+      "piers": [
+        {
+          "a": [
+            1600,
+            466
+          ],
+          "b": [
+            1600,
+            544
+          ],
+          "deck": 2.2,
+          "width": 5,
+          "main": true
+        },
+        {
+          "a": [
+            1561,
+            466
+          ],
+          "b": [
+            1561,
+            492
+          ],
+          "deck": 2.2,
+          "width": 3
+        },
+        {
+          "a": [
+            1637,
+            466
+          ],
+          "b": [
+            1637,
+            490
+          ],
+          "deck": 2.2,
+          "width": 3
+        }
+      ],
+      "berth": {
+        "x": 1610,
+        "z": 524,
+        "yaw": 0
+      },
+      "master": {
+        "x": 1606.5,
+        "z": 462.5,
+        "yaw": 0
+      },
+      "dock": {
+        "x": 1596,
+        "z": 461
+      }
     }
   ],
   "spawn": {
-    "x": 1512,
-    "z": 352
+    "x": 1520,
+    "z": 348
   },
   "bridges": [
     {
@@ -193,8 +265,44 @@
         1459.5,
         448
       ],
-      "h": 40.34,
+      "h": 6.597,
       "w": 4.5
+    },
+    {
+      "a": [
+        1600,
+        466
+      ],
+      "b": [
+        1600,
+        544
+      ],
+      "h": 2.2,
+      "w": 5
+    },
+    {
+      "a": [
+        1561,
+        466
+      ],
+      "b": [
+        1561,
+        492
+      ],
+      "h": 2.2,
+      "w": 3
+    },
+    {
+      "a": [
+        1637,
+        466
+      ],
+      "b": [
+        1637,
+        490
+      ],
+      "h": 2.2,
+      "w": 3
     }
   ],
   "summary": {
@@ -202,8 +310,8 @@
     "province": "Petbeck Basin",
     "inputHash": "b8a99ae8",
     "rivers": 5,
-    "wetShare": 0.023,
-    "unwalkableShare": 0.013,
+    "wetShare": 0.051,
+    "unwalkableShare": 0.04,
     "towns": [
       {
         "name": "Gullwick",
@@ -329,17 +437,17 @@
     ],
     "roads": 12,
     "bridges": 3,
-    "paths": 10,
-    "pathMetres": 643,
-    "scatter": 22295,
+    "paths": 11,
+    "pathMetres": 642,
+    "scatter": 21037,
     "scatterKinds": {
-      "rock_small": 1373,
-      "tree_broadleaf": 9627,
-      "bush": 5643,
-      "tree_conifer": 1405,
-      "rock_large": 329,
-      "tree_dead": 231,
-      "reed": 3140,
+      "rock_small": 1328,
+      "tree_broadleaf": 8721,
+      "bush": 5367,
+      "tree_conifer": 1402,
+      "rock_large": 324,
+      "reed": 3128,
+      "tree_dead": 220,
       "boulder": 1,
       "hedge": 546
     },
@@ -350,20 +458,21 @@
       "settlement hamlet Mirekeep 1008 1264 46",
       "landmark ancientwood Old Docktockwood 1984 1088",
       "crossing ford Wihot Ford 1465 464",
-      "dungeon door_1 Barrow entrance 1623 475  -2.777",
-      "event event_gullwick  1272 688 40"
+      "dungeon door_1 Barrow entrance 1815 475  -1.966",
+      "event event_gullwick  1272 688 40",
+      "harbour harbour_gullwick  1597 460  0"
     ],
     "spawn": {
-      "x": 1512,
-      "z": 352
+      "x": 1520,
+      "z": 348
     },
-    "placements": 344,
-    "vignettesAvoided": 660
+    "placements": 346,
+    "vignettesAvoided": 661
   },
   "files": {
-    "terrain.bin": 508794,
-    "nav.bin": 38248,
-    "scatter.bin": 178444,
-    "placements.json": 204563
+    "terrain.bin": 479827,
+    "nav.bin": 36869,
+    "scatter.bin": 168380,
+    "placements.json": 205569
   }
 }

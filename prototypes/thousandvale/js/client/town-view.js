@@ -19,6 +19,7 @@ import { squareFurniture } from './town-square.js';
 import { buildSignBoards } from './sign-text.js';
 import { officeDressing, officeKindFor, OFFICE_KINDS } from '../../../../proctown/js/offices.js';
 import { tuneFor } from './building-tune.js';
+import { harbourParts } from './harbour-view.js';
 
 /** proctown's plot from a placement record. Pure — exported for tests. */
 export function plotFromPlacement(p) {
@@ -219,6 +220,13 @@ export function createTownView(T, placements, { quality = 'high' } = {}) {
       }
       carry = (carry - L) % every; if (carry < 0) carry += every;
     }
+  }
+  // ---- a built harbour (play-test 11, Z61: Gullwick's quay, piers, boats; js/client/harbour-view.js) ------------------
+  for (const raw of placements) {
+    if (raw.kind !== 'harbour' || !raw.data?.quay) continue;
+    const hb = harbourParts(raw, { ox, oz, groundAt: (x, z) => (T.groundAt ? T.groundAt(x, z) : T.heightAt(x, z)) });
+    for (const q of hb.parts) push(q.mesh, q.x, q.y, q.z, q.yaw, q.w, q.h, q.d, q.colour, q.rx || 0, q.rz || 0);
+    for (const l of hb.lamps) lamps.push({ x: l.x, y: l.y, z: l.z, town: raw.data.town });
   }
   for (const l of lamps) {
     push('cyl', l.x, l.y, l.z, 0, 0.16, 2.9, 0.16, '#3b3330');

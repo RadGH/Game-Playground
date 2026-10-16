@@ -145,10 +145,19 @@ export function buildMapModel(raw = {}) {
     if (sheetZone.has(n.zone) || !inPlayable(n.x, n.z)) continue;
     if (n.type === 'settlement') model.settlements.push({ name: n.name, kind: n.kind, size: n.size || 1, x: n.x, z: n.z, zone: n.zone });
   }
-  // rivers and roads, thinned for drawing
-  const keep = pts => pts.some(p => inPlayable(p[0], p[1]));
-  for (const r of world.rivers || []) { if (r.pts?.length > 1 && keep(r.pts)) { const pts = simplify(r.pts, 10); model.rivers.push({ id: r.id, name: r.name || null, pts, bbox: bboxOf(pts), cls: r.pts[0][3] || 1 }); } }
-  for (const r of world.roads || []) { if (r.pts?.length > 1 && keep(r.pts)) { const pts = simplify(r.pts, 6); model.roads.push({ id: r.id, cls: r.class || 'road', width: r.width || 4, pts, bbox: bboxOf(pts) }); } }
+  // rivers and roads, thinned for drawing. Play-test 11 (Z4, live #4: "rivers and roads spilling out of the island and
+  // running into the ocean"): the map bake's BUILT lines when they are there (raw.lines = data/world/map/map.json roads /
+  // rivers: every road a zone laid, every river from its source to its mouth, none over the sea and none of the old
+  // mainland inside an island's block — tools/lib/coast-lines.mjs). Without them, world.json's lines are cut to the
+  // playable blocks point by point (a line no longer runs on past an island's edge).
+  if (raw.lines) {
+    for (const r of raw.lines.rivers || []) if (r.pts?.length > 1) { const pts = simplify(r.pts, 10); model.rivers.push({ id: r.id, name: r.name || null, pts, bbox: bboxOf(pts), cls: r.cls || 1 }); }
+    for (const r of raw.lines.roads || []) if (r.pts?.length > 1) { const pts = simplify(r.pts, 6); model.roads.push({ id: r.id, cls: r.cls || 'road', width: r.width || 4, pts, bbox: bboxOf(pts) }); }
+  } else {
+    const runsIn = pts => { const out = []; let cur = []; for (const p of pts) { if (inPlayable(p[0], p[1])) cur.push(p); else if (cur.length) { out.push(cur); cur = []; } } if (cur.length) out.push(cur); return out.filter(q => q.length > 1); };
+    for (const r of world.rivers || []) for (const run of runsIn(r.pts || [])) { const pts = simplify(run, 10); model.rivers.push({ id: r.id, name: r.name || null, pts, bbox: bboxOf(pts), cls: run[0][3] || 1 }); }
+    for (const r of world.roads || []) for (const run of runsIn(r.pts || [])) { const pts = simplify(run, 6); model.roads.push({ id: r.id, cls: r.class || 'road', width: r.width || 4, pts, bbox: bboxOf(pts) }); }
+  }
 
   // the playable province: zone sites, sheet names, placements
   for (const [wk, s] of sheetZone) {

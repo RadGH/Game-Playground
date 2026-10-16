@@ -193,8 +193,62 @@
   },
   {
     "id": "step3",
-    "title": "Step 3 \u2014 MakeHuman / MPFB2 base body",
-    "pending": true
+    "title": "Step 3 \u2014 MakeHuman base bodies (MPFB 2 in the VM's Blender)",
+    "how": "MPFB 2 (free Blender add-on; its code is GPL, the bodies, skins, hair and clothes it outputs are CC0 \u2014 free to ship, no credit needed) builds a real human: proper face topology, eyeballs, lids, lashes, brows, teeth, a 53-bone game skeleton with weights, and sliders for gender, age, muscle, weight, height and proportions. Both test characters are made from sliders in one script (avatar-3d/chibi4/tools/blender/step3_makehuman.py, ~1 minute headless): the mage as a ~35-year-old man (1.89 m), the elf as a ~28-year-old athletic woman (1.68 m), MakeHuman's own photo skins, a braid tinted auburn. No Codex paint and no fantasy clothes yet \u2014 they wear MakeHuman's stock modern outfits, because dressing them is steps 4\u20135.",
+    "shots": [
+      [
+        "shots/step3/bodies.png",
+        "mage front \u00b7 three-quarter, elf front \u00b7 three-quarter"
+      ],
+      [
+        "shots/step3/faces.png",
+        "faces close-up"
+      ],
+      [
+        "shots/step3/side-game.png",
+        "elf profile \u00b7 Thousandvale camera distance"
+      ]
+    ],
+    "score": [
+      [
+        "Face",
+        "4/5 \u2014 properly modelled real faces, eyes and lids from every angle, nothing pokes through; but realistic, not the painted fantasy look of the reference"
+      ],
+      [
+        "Proportions",
+        "4/5 \u2014 real adult proportions (about 7.5 heads); sliders can push it more heroic"
+      ],
+      [
+        "Clipping",
+        "4/5 \u2014 MakeHuman clothes are fitted to the body and hide the skin under them"
+      ],
+      [
+        "Feet vs robe",
+        "not tested yet \u2014 but there is now a real skeleton to test it on"
+      ],
+      [
+        "Fits Thousandvale",
+        "2/5 as-is \u2014 modern clothes and photo skin; needs the painted style (step 4)"
+      ],
+      [
+        "Modular",
+        "4/5 \u2014 any body from sliders, hair/brows/clothes are separate swappable pieces on one shared skeleton"
+      ],
+      [
+        "Cost",
+        "~13,000 triangles per body before smoothing (41,600 smoothed); MakeHuman also ships low-poly 'proxy' bodies for distance versions"
+      ],
+      [
+        "Repeatable",
+        "5/5 \u2014 one script, no window"
+      ]
+    ],
+    "notes": [
+      "This is the first approach that is actually a SYSTEM: one skeleton, slider bodies, separate hair/brows/clothes \u2014 what Chibi 2 replacement needs.",
+      "The look is too realistic/photographic for Thousandvale. Step 4 paints it in the Codex style (skin, hair and cloth textures generated per character) \u2014 that is where it should start to match the reference sheet.",
+      "Pointed elf ears are applied but hidden under that hair. The eye-size slider is subtle; it can go further.",
+      "MakeHuman's CC0 clothes are modern (jeans, t-shirts). Fantasy clothing has to be ours (step 5: robes, armour fitted to this body with the body hidden underneath)."
+    ]
   },
   {
     "id": "step4",

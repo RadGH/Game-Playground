@@ -44,7 +44,21 @@ export const WORLD = {
  * `ids` are the zone columns/rows in world zones (block = [zx, zy] of the top-left zone, size = [w, h]).
  */
 export const CONTINENTS = [
-  { id: 'torbor', province: 'torbor_downs', kind: 'block', block: [11, 1], size: [4, 4], fall: 1100, wander: 1000, depth: 70 },
+  { id: 'torbor', province: 'torbor_downs', kind: 'block', block: [11, 1], size: [4, 4], fall: 1100, wander: 1000, depth: 70, bays: [
+    // play-test 11 (owner, Z61): "edit the world east of Gullwick so that Gullwick actually sits on the coastline and has
+    // a real harbor". A sea inlet from the open sea, 2 km west through the coast and into z14_02, to its head just south-
+    // east of Gullwick's wall (Gullwick's World Forge name was Tideford). The Batpate Run now ends in it. See BAYS below.
+    { id: 'gullwick_bay', zone: 'z14_02', line: [[30242, 4626], [30720, 4816], [31372, 4996], [32272, 5146], [34200, 5400]],
+      hw: [85, 180, 420, 900, 1500], floor: [-7, -12, -26, -50, -70], band: 420, flat: 150, shore: 1.2, rise: 0.04, beach: 0.1,
+      // the harbour town stays exactly where it was (zone metres), so its plan, plot ids and stream E's offices stay put
+      town: { name: 'Gullwick', x: 1520, z: 352 },
+      // the harbour on the bay's north shore, below Gullwick's south gate (zone metres; tools/bake-zone.mjs bakeHarbour):
+      // a stone quay along the waterline, a long pier out to water deep enough for the Saltwren, two short jetties for the
+      // fishing boats. Decks are walkable (terrain meta.bridges); the ship lies alongside the long pier's end.
+      harbour: { id: 'harbour_gullwick', town: 'gullwick', quay: { x0: 1544, x1: 1650, z0: 451, z1: 468, h: 2.2 }, deck: 2.2,
+        piers: [{ a: [1600, 466], b: [1600, 544], w: 5, main: true }, { a: [1561, 466], b: [1561, 492], w: 3 }, { a: [1637, 466], b: [1637, 490], w: 3 }],
+        berth: { x: 1610, z: 524, yaw: 0 }, master: { x: 1606.5, z: 462.5, yaw: 0 }, dock: { x: 1596, z: 461 } } },
+  ] },
   { id: 'vharlen', province: 'vharlen', kind: 'island', block: [11, 9], size: [3, 3], radius: 0.8, fall: 520, wander: 240, depth: 90, profile: 'volcanic' },
 ];
 const ZM = 2048;
@@ -54,6 +68,143 @@ export const continentRect = c => ({ x0: c.block[0] * ZM, z0: c.block[1] * ZM, x
 export function continentAt(wx, wz) {
   for (const c of CONTINENTS) { const r = continentRect(c); if (wx >= r.x0 && wx < r.x1 && wz >= r.z0 && wz < r.z1) return c; }
   return null;
+}
+
+/**
+ * BAYS (play-test 11, Z61): an inlet the sea cuts INTO a continent — the one deliberate exception to "a block's own land is
+ * never touched". A bay is a centre line `line` (world metres, head first) with a half-width `hw` and a sea floor `floor`
+ * at each vertex (interpolated along it). For a point, s = (distance to the line) − (half-width there): s < 0 is in the
+ * bay. The ground is pulled toward a coastal profile — `shore` metres above the sea at s = 0, rising `rise` m/m inland and
+ * falling `beach` m/m into the water down to the floor — with full weight out to s = `flat` (a coastal lowland a harbour
+ * town can stand on), fading smoothly to nothing at s = `band`. It only ever LOWERS ground. Past `band` the ground is returned untouched (bit-exact), so only the zone named
+ * by `zone` (and the open sea / unbaked coast beyond the block) changes; tests/B/coast.test.js checks every other zone edge.
+ * Heights fixed by the world bake (road points, river surfaces, bridge decks) are moved by the same amount the ground under
+ * them moved (bayDelta), so a road, a river and its bridge keep their heights relative to the land.
+ */
+export const BAYS = CONTINENTS.flatMap(c => (c.bays || []).map(b => ({ ...b, continent: c.id })));
+for (const b of BAYS) {
+  const xs = b.line.map(p => p[0]), zs = b.line.map(p => p[1]), r = Math.max(...b.hw) + b.band;
+  b.bbox = [Math.min(...xs) - r, Math.min(...zs) - r, Math.max(...xs) + r, Math.max(...zs) + r];
+}
+/** Where a point stands against a bay: { s (metres past its shoreline; < 0 = in the water), floor }. */
+export function bayAt(b, wx, wz) {
+  let s = Infinity, floor = b.floor[0];
+  for (let k = 0; k < b.line.length - 1; k++) {
+    const a = b.line[k], e = b.line[k + 1], dx = e[0] - a[0], dz = e[1] - a[1], L2 = dx * dx + dz * dz || 1;
+    const t = clamp(((wx - a[0]) * dx + (wz - a[1]) * dz) / L2, 0, 1);
+    const d = Math.hypot(wx - a[0] - dx * t, wz - a[1] - dz * t) - (b.hw[k] + (b.hw[k + 1] - b.hw[k]) * t);
+    if (d < s) { s = d; floor = b.floor[k] + (b.floor[k + 1] - b.floor[k]) * t; }
+  }
+  return { s, floor };
+}
+/** Ground height g with every bay applied (identity — the same number, not a recomputed one — outside every band). */
+export function withBays(wx, wz, g) {
+  for (const b of BAYS) {
+    if (wx < b.bbox[0] || wx > b.bbox[2] || wz < b.bbox[1] || wz > b.bbox[3]) continue;
+    const { s, floor } = bayAt(b, wx, wz);
+    if (s >= b.band) continue;
+    const target = s < 0 ? Math.max(floor, b.shore + s * b.beach) : b.shore + s * b.rise;
+    const f = b.flat || 0, t = s <= f ? 0 : (s - f) / (b.band - f), w = 1 - t * t * (3 - 2 * t);
+    const h = g + (target - g) * w;
+    if (h < g) g = h;
+  }
+  return g;
+}
+
+const touchesBay = bbox => BAYS.some(b => !(bbox[2] < b.bbox[0] || bbox[0] > b.bbox[2] || bbox[3] < b.bbox[1] || bbox[1] > b.bbox[3]));
+const inBayWater = (ref, x, z) => BAYS.some(b => x >= b.bbox[0] && x <= b.bbox[2] && z >= b.bbox[1] && z <= b.bbox[3] && bayAt(b, x, z).s < 0) && ref.baseGround(x, z) < 0;
+
+/**
+ * The world bake's rivers, roads and bridges with the BAYS applied (play-test 11, Z61 + Z4): heights pulled toward the
+ * coast the same way the ground is (withBays on the height itself — a river's cut below its banks and a road's grade
+ * fade out toward the shore, where both meet the beach), a river ENDS where it first runs into a bay's water (its mouth: one last point a few metres out at sea level,
+ * and nothing downstream of it), a road is cut at the bay's waterline (each dry run kept), and a bridge that now stands in
+ * the water or over a river that no longer reaches it is dropped. A line whose box touches no bay is returned as it is (the
+ * same object), so every other zone bakes bit-for-bit as before. `ref` = makeRefiner(macro).
+ */
+export function coastWorld(W, ref) {
+  if (!BAYS.length) return W;
+  const bbOf = pts => [Math.min(...pts.map(p => p[0])), Math.min(...pts.map(p => p[1])), Math.max(...pts.map(p => p[0])), Math.max(...pts.map(p => p[1]))];
+  // the shore between a dry point a and a wet point b (bisection on the wet test)
+  const shoreBetween = (a, b) => {
+    let lo = 0, hi = 1;
+    for (let k = 0; k < 24; k++) { const t = (lo + hi) / 2; if (inBayWater(ref, a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t)) hi = t; else lo = t; }
+    return lo;
+  };
+  // a river that flowed INTO the part of another river the sea has now taken (the Fackfalpot joined the Batpate Run below
+  // where the bay now ends it) takes that river's old course from the confluence on, so it too runs on to the sea
+  const wetIndex = r => r.pts.findIndex(p => inBayWater(ref, p[0], p[1]));
+  const src = W.rivers.map(r => ({ r, pts: r.pts }));
+  for (let pass = 0; pass < 3; pass++) {
+    let grew = false;
+    for (const a of src) {
+      if (!touchesBay(a.r.bbox || bbOf(a.pts)) || wetIndex({ pts: a.pts }) >= 0) continue;
+      const e = a.pts[a.pts.length - 1];
+      for (const b of src) {
+        if (b === a) continue;
+        const w = wetIndex({ pts: b.pts }); if (w < 0) continue;
+        const k = b.pts.findIndex(p => Math.hypot(p[0] - e[0], p[1] - e[1]) < 20);
+        if (k < 0 || k < w - 1) continue;                                  // it joins above the mouth: nothing lost
+        a.pts = [...a.pts, ...b.pts.slice(k + 1).map(p => [p[0], p[1], Math.min(p[2], e[2]), Math.max(p[3], e[3])])];
+        a.joined = b.r.id; grew = true; break;
+      }
+    }
+    if (!grew) break;
+  }
+  const rivers = src.map(({ r: r0, pts: P, joined }) => {
+    const r = P === r0.pts ? r0 : { ...r0, pts: P, joined };
+    if (!touchesBay(r.bbox || bbOf(r.pts))) return r;
+    const pts = []; let moved = false;
+    for (let k = 0; k < r.pts.length; k++) {
+      const p = r.pts[k], y = ref.bayDelta(p[0], p[1]) ? withBays(p[0], p[1], p[2]) : p[2];   // only where the ground moved
+      const q = y !== p[2] ? [p[0], p[1], +y.toFixed(3), p[3]] : p;
+      if (q !== p) moved = true;
+      if (inBayWater(ref, p[0], p[1])) {
+        if (!pts.length) return null;                                     // a river that rises in the bay (none do)
+        const a = pts[pts.length - 1], t = shoreBetween(a, q), dx = q[0] - a[0], dz = q[1] - a[1], L = Math.hypot(dx, dz) || 1;
+        const sx = a[0] + dx * t, sz = a[1] + dz * t;
+        pts.push([+sx.toFixed(2), +sz.toFixed(2), +Math.max(0, Math.min(a[2], a[2] + (q[2] - a[2]) * t)).toFixed(3), q[3]]);
+        pts.push([+(sx + dx / L * 10).toFixed(2), +(sz + dz / L * 10).toFixed(2), 0, q[3]]);   // the mouth, out at sea level
+        break;
+      }
+      pts.push(q);
+    }
+    if (!moved && pts.length === r.pts.length && r === r0) return r;       // the bay does not reach it
+    for (let k = 1; k < pts.length; k++) if (pts[k][2] > pts[k - 1][2]) pts[k] = [pts[k][0], pts[k][1], pts[k - 1][2], pts[k][3]];   // never flows uphill
+    return { ...r, pts, bbox: bbOf(pts), ...(pts.length < r.pts.length ? { mouth: true } : {}) };
+  }).filter(r => r && r.pts.length >= 2);
+  const roads = [];
+  for (const r of W.roads) {
+    if (!touchesBay(r.bbox || bbOf(r.pts))) { roads.push(r); continue; }
+    const runs = []; let cur = [], moved = false;
+    for (let k = 0; k < r.pts.length; k++) {
+      const p = r.pts[k], y = ref.bayDelta(p[0], p[1]) ? withBays(p[0], p[1], p[2]) : p[2], q = y !== p[2] ? [p[0], p[1], +y.toFixed(3)] : p, wet = inBayWater(ref, p[0], p[1]);
+      if (q !== p || wet) moved = true;
+      const prev = r.pts[k - 1], prevWet = k > 0 && inBayWater(ref, prev[0], prev[1]);
+      if (k > 0 && wet !== prevWet) {
+        const a = wet ? prev : p, b = wet ? p : prev, t = shoreBetween(a, b), x = a[0] + (b[0] - a[0]) * t, z = a[1] + (b[1] - a[1]) * t;
+        const y = a[2] + (b[2] - a[2]) * t, s = [+x.toFixed(2), +z.toFixed(2), +(ref.bayDelta(x, z) ? withBays(x, z, y) : y).toFixed(3)];
+        if (wet) { cur.push(s); runs.push(cur); cur = []; } else cur.push(s);
+      }
+      if (!wet) cur.push(q);
+    }
+    if (cur.length) runs.push(cur);
+    if (!moved) { roads.push(r); continue; }
+    const kept = runs.filter(p => p.length >= 2);
+    kept.forEach((pts, n) => roads.push({ ...r, ...(kept.length > 1 ? { id: `${r.id}c${n}` } : {}), pts, bbox: bbOf(pts), ...(kept.length === 1 && runs.length === 1 && pts.length === r.pts.length ? {} : { shore: true }) }));
+  }
+  const near = (pts, x, z, r) => pts.some((p, k) => k && (() => { const a = pts[k - 1], dx = p[0] - a[0], dz = p[1] - a[1], L2 = dx * dx + dz * dz || 1, t = clamp(((x - a[0]) * dx + (z - a[1]) * dz) / L2, 0, 1); return Math.hypot(x - a[0] - dx * t, z - a[1] - dz * t) <= r; })());
+  const bridges = W.bridges.map(b => {
+    if (!touchesBay([Math.min(b.a[0], b.b[0]), Math.min(b.a[1], b.b[1]), Math.max(b.a[0], b.b[0]), Math.max(b.a[1], b.b[1])])) return b;
+    if (inBayWater(ref, b.x, b.z)) return null;
+    const river = rivers.find(r => r.id === b.river);
+    if (!river || (river.mouth && !near(river.pts, b.x, b.z, b.span))) return null;     // its river now ends upstream of it
+    // the river under it moved with the land; the deck keeps its clearance over the water
+    const surface = ref.bayDelta(b.x, b.z) ? withBays(b.x, b.z, b.surface) : b.surface;
+    if (surface === b.surface) return b;
+    return { ...b, deck: +(surface + b.deck - b.surface).toFixed(3), surface: +surface.toFixed(3) };
+  }).filter(Boolean);
+  return { ...W, rivers, roads, bridges };
 }
 
 /** World-fixed height quantisation, so a u16 means the same metres in every zone (edges match to the bit). */
@@ -158,7 +309,11 @@ export function makeRefiner(m) {
     return d - reach - Math.abs(wander) * 0.35;
   }
   /** The ground with the continents applied: land inside them, sea floor everywhere else. */
-  function baseGround(wx, wz) {
+  function baseGround(wx, wz) { return withBays(wx, wz, continentGround(wx, wz)); }
+  /** Metres the bays moved the ground here (0 outside every bay's band; never positive). Roads, river surfaces and bridge
+   *  decks fixed by the world bake are moved by this much (bake-zone), so they stay on the land they were graded to. */
+  function bayDelta(wx, wz) { const g = continentGround(wx, wz); return withBays(wx, wz, g) - g; }
+  function continentGround(wx, wz) {
     let best = Infinity, near = null;
     for (const c of CONTINENTS) { const s = seaward(c, wx, wz); if (s < best) { best = s; near = c; } }
     const c = continentAt(wx, wz);
@@ -199,7 +354,7 @@ export function makeRefiner(m) {
   function meander(x, z) {
     return [(fbm(nWX, x / 300, z / 300, { octaves: 2 }) - 0.5) * 50, (fbm(nWZ, x / 300, z / 300, { octaves: 2 }) - 0.5) * 50];
   }
-  return { baseGround, mainland, warpedIndex, meander, metres, seaward, profileOf, islandAt: (wx, wz) => { const c = continentAt(wx, wz); return c && c.profile ? profileOf(c) : null; } };
+  return { baseGround, bayDelta, continentGround, mainland, warpedIndex, meander, metres, seaward, profileOf, islandAt: (wx, wz) => { const c = continentAt(wx, wz); return c && c.profile ? profileOf(c) : null; } };
 }
 
 export const RIVER_WIDTH = [0, 7, 14, 24];

@@ -36,7 +36,7 @@ import { encodePng } from './lib/png.mjs';
 import { REGION_PALETTES, regionAt } from '../js/client/horizon-grid.js';
 import { loadWorld } from './bake-zone.mjs';
 import { CONTINENTS, continentRect } from './lib/world-core.mjs';
-import { islandRoads } from './lib/vharlen.mjs';
+import { builtLines } from './lib/coast-lines.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const DATA = join(HERE, '..', 'data');
@@ -94,13 +94,12 @@ export function bakeMap() {
   const regionRgb = Object.fromEntries(Object.entries(REGION_PALETTES).map(([k, P]) => [k, H.biomes.map(b => (P.colors[b[0]] ? hex(P.colors[b[0]]) : hex(b[2])))]));
   // 2026-10-14 islands: an expansion island's roads are its own (tools/lib/vharlen.mjs) and World Forge's old mainland
   // roads and rivers inside its block are gone; elsewhere a line is drawn only where it runs over land
-  const { ref } = loadWorld();
-  const islandRects = CONTINENTS.filter(c => c.profile).map(continentRect);
-  const inIsland = pts => islandRects.some(r => pts.some(p => p[0] >= r.x0 && p[0] < r.x1 && p[1] >= r.z0 && p[1] < r.z1));
-  const isle = CONTINENTS.filter(c => c.profile).map(c => ref.profileOf(c)).filter(Boolean);
-  const ROADS = [...W.roads.filter(r => !inIsland(r.pts)), ...isle.flatMap(i => islandRoads(i))];
-  const RIVERS = W.rivers.filter(r => !inIsland(r.pts));
-  const dry = (a, b) => { const w = H.waterAt((a[0] + b[0]) / 2, (a[1] + b[1]) / 2); return !(w && w.depth > 1.5); };
+  // play-test 11 (Z4, live #4 "rivers and roads spilling out of the island and running into the ocean"): the lines drawn
+  // are the ones BUILT — every road a zone bake laid, each river from its source to its mouth at the sea, nothing over
+  // open water and nothing of the old mainland inside an island's block (tools/lib/coast-lines.mjs)
+  const { roads: ROADS, rivers: RIVERS } = builtLines({ W: loadWorld().json, H, PMAP, CONTINENTS, continentRect,
+    placementsOf: id => { const f = join(DATA, 'zones', id, 'placements.json'); return existsSync(f) ? JSON.parse(readFileSync(f, 'utf8')).placements : null; } });
+  const dry = () => true;
   const files = {};
 
   // ---- world image: 1 px = one horizon sample (32 m) ----
@@ -114,8 +113,8 @@ export function bakeMap() {
     else { const s = band(0.45 + 0.75 * shade(hAt, x, z, step), 10), rg = regionAt(x, z), b = (rg ? regionRgb[rg] : biomeRgb)[H.biomeAt(x, z)] || [120, 140, 90]; rgb = b.map(c => clamp(c * s, 0, 255)); }
     wpx[o] = rgb[0]; wpx[o + 1] = rgb[1]; wpx[o + 2] = rgb[2]; wpx[o + 3] = 255;
   }
-  for (const r of RIVERS) for (let k = 0; k < r.pts.length - 1; k++) { const a = r.pts[k], b = r.pts[k + 1]; if (!dry(a, b)) continue; line(wpx, WW, WH, a[0] / step, a[1] / step, b[0] / step, b[1] / step, [58, 112, 160], b[3] >= 2 ? 1 : 0.6); }
-  for (const r of ROADS) for (let k = 0; k < r.pts.length - 1; k++) { const a = r.pts[k], b = r.pts[k + 1]; if (!dry(a, b)) continue; line(wpx, WW, WH, a[0] / step, a[1] / step, b[0] / step, b[1] / step, [214, 190, 140], r.class === 'trail' ? 0.45 : 0.8); }
+  for (const r of RIVERS) for (let k = 0; k < r.pts.length - 1; k++) { const a = r.pts[k], b = r.pts[k + 1]; if (!dry(a, b)) continue; line(wpx, WW, WH, a[0] / step, a[1] / step, b[0] / step, b[1] / step, [58, 112, 160], r.cls >= 2 ? 1 : 0.6); }
+  for (const r of ROADS) for (let k = 0; k < r.pts.length - 1; k++) { const a = r.pts[k], b = r.pts[k + 1]; if (!dry(a, b)) continue; line(wpx, WW, WH, a[0] / step, a[1] / step, b[0] / step, b[1] / step, [214, 190, 140], r.cls === 'trail' ? 0.45 : 0.8); }
   files['world.png'] = encodePng(WW, WH, wpx, { opaque: true });
 
   // ---- zone images + labels from the baked zones ----
@@ -204,8 +203,8 @@ export function bakeMap() {
     zoneImage: { mPerPx: ZMPP, size: ZPX, zoneMetres: ZM },
     grid: W.grid,
     zones, provinces, labels,
-    roads: ROADS.map(r => ({ id: r.id, cls: r.class, pts: simplify(r.pts, 2) })),
-    rivers: RIVERS.map(r => ({ id: r.id, name: r.name, cls: Math.max(...r.pts.map(p => p[3])), pts: simplify(r.pts, 2) })),
+    roads: ROADS.map(r => ({ id: r.id, cls: r.cls, width: r.width, pts: simplify(r.pts, 2) })),
+    rivers: RIVERS.map(r => ({ id: r.id, name: r.name, cls: r.cls, pts: simplify(r.pts, 2) })),
   };
   files['map.json'] = JSON.stringify(map) + '\n';
   return { files, map };

@@ -1,5 +1,5 @@
 {
- "_doc": "Stream V (Expansion 1 §6): THE VOYAGE between the two continents. `harbours` = one per continent: `master` = where the Harbourmaster NPC stands (WORLD metres, like carts.json stops; js/sim/ships.js placeHarbours puts it in the town room it stands in), `dock` = where a voyage TO this harbour puts you ashore, `seaward` = the way to open water from the dock (tools/ship-routes.mjs walks that way to the first water deep enough for a ship: `berth` = where the ship lies, `pier` = the jetty from the shore to it). `sailings` = from -> to with the fare in gold, the time held (`sec`), and `path` = the sea route in world metres from berth to berth (tools/ship-routes.mjs finds it over data/world/horizon.bin, keeping off the coasts). `volcano` = Vharlen's peak for the ash plume (the client takes the highest ground near it). Re-run `node tools/ship-routes.mjs --write` after any re-bake of the coasts. Port Vharl's quay is stream T's `harbour` placement in data/zones/z13_10/placements.json (zone 1505, 914; world 28129, 21394), ~380 m east of the town on the beach; Gullwick has no sea inside its zone (the coast is ~2 km east, past the playable edge), so its Harbourmaster stands on Gullwick's main street and the ship lies at the real coast east of the town.",
+ "_doc": "Stream V (Expansion 1 §6): THE VOYAGE between the two continents. `harbours` = one per continent: `master` = where the Harbourmaster NPC stands (WORLD metres, like carts.json stops; js/sim/ships.js placeHarbours puts it in the town room it stands in), `dock` = where a voyage TO this harbour puts you ashore, `seaward` = the way to open water from the dock (tools/ship-routes.mjs walks that way to the first water deep enough for a ship: `berth` = where the ship lies, `pier` = the jetty from the shore to it). `sailings` = from -> to with the fare in gold, the time held (`sec`), and `path` = the sea route in world metres from berth to berth (tools/ship-routes.mjs finds it over data/world/horizon.bin, keeping off the coasts). `volcano` = Vharlen's peak for the ash plume (the client takes the highest ground near it). Re-run `node tools/ship-routes.mjs --write` after any re-bake of the coasts. Port Vharl's quay is stream T's `harbour` placement in data/zones/z13_10/placements.json (zone 1505, 914; world 28129, 21394), ~380 m east of the town on the beach; Gullwick stands at the head of Gullwick Bay (play-test 11, Z61: tools/lib/world-core.mjs BAYS): its quay, long pier and two jetties are built by the zone bake (`harbourSite`), its Harbourmaster stands on the quay at the foot of the long pier and the ship lies alongside the pier's end (tools/ship-routes.mjs takes all three from the bake).",
  "service": {
   "name": "the Narrow Sea Packet",
   "ship": "the Saltwren",
@@ -45,36 +45,27 @@
    "master": {
     "name": "Osric Fennimore",
     "title": "Harbourmaster",
-    "x": 30228,
-    "z": 4478,
-    "yaw": -1.571,
+    "x": 30278.5,
+    "z": 4558.5,
+    "yaw": 0,
     "says": [
-     "The ship lies at the Gull Stair, down the tide road. I sell the passage; the sea does the rest."
+     "The Saltwren ties up at the end of the long pier. I sell the passage; the sea does the rest."
     ]
    },
    "dock": {
-    "x": 30223,
-    "z": 4479
+    "x": 30268,
+    "z": 4557
    },
    "seaward": [
-    1,
-    0
+    0,
+    1
    ],
    "berth": {
-    "x": 32277,
-    "z": 4479,
-    "yaw": 3.142
+    "x": 30282,
+    "z": 4620,
+    "yaw": 0
    },
-   "pier": {
-    "from": [
-     32193,
-     4479
-    ],
-    "to": [
-     32267,
-     4479
-    ]
-   }
+   "harbourSite": "harbour_gullwick (z14_02 placements.json: quay, walkable piers, berth)"
   },
   {
    "id": "port_vharl",
@@ -131,16 +122,20 @@
    "sec": 40,
    "path": [
     [
-     32277,
-     4479
+     30282,
+     4620
     ],
     [
-     33216,
-     6336
+     30656,
+     4800
     ],
     [
-     31168,
-     19136
+     32576,
+     5952
+    ],
+    [
+     32832,
+     17472
     ],
     [
      28188,
@@ -159,16 +154,20 @@
      21394
     ],
     [
-     31168,
-     19136
+     32832,
+     17472
     ],
     [
-     33216,
-     6336
+     32576,
+     5952
     ],
     [
-     32277,
-     4479
+     30656,
+     4800
+    ],
+    [
+     30282,
+     4620
     ]
    ]
   }

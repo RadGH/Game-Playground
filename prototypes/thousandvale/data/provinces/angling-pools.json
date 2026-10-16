@@ -1,6 +1,6 @@
 {
  "_doc": "Stream E (play-test 5 T25 Angling) — MADE by tools/content-pools.mjs from stream B's baked water; do not edit by hand. `zones.<world zone>` = every fish-pool spot of that zone, WORLD metres: `x, z` in the water (where the ripples are drawn and the bobber lands), `shore` = a dry point a walker can reach, 3-11 m from it (stand there and cast), `water` river | lake | marsh | coast (what the catch table is rolled on), `band` = the zone's level band, `tier` 1 | 2 | 3 (C's fishing.pool(tier): skill 0 / 25 / 50), `road` = metres from the shore point to the nearest road (roadside pools are tier 1). `start: true` + `always: true` = the first quest's pool by Torborhold: always open, never fished out. `meta.<zone>.live` = how many of the listed spots are open at once (a pool closes after C's `catches` and another listed spot opens); `meta.<zone>.water` = what each BAKED water kind (terrain waterAt().kind: river / lake / sea) counts as in that zone, for a cast outside any pool. `anglers[]` = where each town's angler stands (world metres; tools/content-hunts.mjs copies them into <zone>.quest.json as npc records, role `angler`; their shop is shops.json kinds.angler).",
- "pools": 385,
+ "pools": 386,
  "zones": {
   "z11_01": [
    {
@@ -2882,6 +2882,54 @@
    },
    {
     "id": "pool_z14_02_2",
+    "x": 30224,
+    "z": 4568,
+    "shore": {
+     "x": 30232,
+     "z": 4568
+    },
+    "water": "coast",
+    "band": [
+     5,
+     7
+    ],
+    "tier": 1,
+    "road": 0
+   },
+   {
+    "id": "pool_z14_02_3",
+    "x": 30314,
+    "z": 4568,
+    "shore": {
+     "x": 30310,
+     "z": 4572
+    },
+    "water": "coast",
+    "band": [
+     5,
+     7
+    ],
+    "tier": 1,
+    "road": 0
+   },
+   {
+    "id": "pool_z14_02_4",
+    "x": 30266,
+    "z": 4652,
+    "shore": {
+     "x": 30270,
+     "z": 4640
+    },
+    "water": "coast",
+    "band": [
+     5,
+     7
+    ],
+    "tier": 1,
+    "road": 0
+   },
+   {
+    "id": "pool_z14_02_5",
     "x": 29138,
     "z": 4910,
     "shore": {
@@ -2897,7 +2945,7 @@
     "road": 0
    },
    {
-    "id": "pool_z14_02_3",
+    "id": "pool_z14_02_6",
     "x": 29702,
     "z": 5102,
     "shore": {
@@ -2913,23 +2961,23 @@
     "road": 0
    },
    {
-    "id": "pool_z14_02_4",
-    "x": 30158,
-    "z": 4580,
+    "id": "pool_z14_02_7",
+    "x": 30476,
+    "z": 4616,
     "shore": {
-     "x": 30160,
-     "z": 4576
+     "x": 30482,
+     "z": 4602
     },
-    "water": "lake",
+    "water": "coast",
     "band": [
      5,
      7
     ],
     "tier": 1,
-    "road": 30
+    "road": 32
    },
    {
-    "id": "pool_z14_02_5",
+    "id": "pool_z14_02_8",
     "x": 29060,
     "z": 5402,
     "shore": {
@@ -2945,7 +2993,7 @@
     "road": 42
    },
    {
-    "id": "pool_z14_02_6",
+    "id": "pool_z14_02_9",
     "x": 29792,
     "z": 5114,
     "shore": {
@@ -2961,7 +3009,7 @@
     "road": 65
    },
    {
-    "id": "pool_z14_02_7",
+    "id": "pool_z14_02_10",
     "x": 29072,
     "z": 4982,
     "shore": {
@@ -2977,23 +3025,7 @@
     "road": 75
    },
    {
-    "id": "pool_z14_02_8",
-    "x": 30212,
-    "z": 4658,
-    "shore": {
-     "x": 30214,
-     "z": 4656
-    },
-    "water": "lake",
-    "band": [
-     5,
-     7
-    ],
-    "tier": 1,
-    "road": 85
-   },
-   {
-    "id": "pool_z14_02_9",
+    "id": "pool_z14_02_11",
     "x": 29630,
     "z": 5048,
     "shore": {
@@ -3009,7 +3041,7 @@
     "road": 93
    },
    {
-    "id": "pool_z14_02_10",
+    "id": "pool_z14_02_12",
     "x": 29054,
     "z": 5312,
     "shore": {
@@ -3025,7 +3057,7 @@
     "road": 93
    },
    {
-    "id": "pool_z14_02_11",
+    "id": "pool_z14_02_13",
     "x": 29216,
     "z": 4862,
     "shore": {
@@ -3041,7 +3073,23 @@
     "road": 94
    },
    {
-    "id": "pool_z14_02_12",
+    "id": "pool_z14_02_14",
+    "x": 30566,
+    "z": 4628,
+    "shore": {
+     "x": 30566,
+     "z": 4620
+    },
+    "water": "coast",
+    "band": [
+     5,
+     7
+    ],
+    "tier": 1,
+    "road": 102
+   },
+   {
+    "id": "pool_z14_02_15",
     "x": 30026,
     "z": 4442,
     "shore": {
@@ -3054,10 +3102,26 @@
      7
     ],
     "tier": 1,
-    "road": 110
+    "road": 103
    },
    {
-    "id": "pool_z14_02_13",
+    "id": "pool_z14_02_16",
+    "x": 30302,
+    "z": 4736,
+    "shore": {
+     "x": 30294,
+     "z": 4740
+    },
+    "water": "coast",
+    "band": [
+     5,
+     7
+    ],
+    "tier": 1,
+    "road": 106
+   },
+   {
+    "id": "pool_z14_02_17",
     "x": 29054,
     "z": 5492,
     "shore": {
@@ -3073,7 +3137,7 @@
     "road": 110
    },
    {
-    "id": "pool_z14_02_14",
+    "id": "pool_z14_02_18",
     "x": 29864,
     "z": 5060,
     "shore": {
@@ -3089,7 +3153,7 @@
     "road": 117
    },
    {
-    "id": "pool_z14_02_15",
+    "id": "pool_z14_02_19",
     "x": 29072,
     "z": 5072,
     "shore": {
@@ -3105,7 +3169,7 @@
     "road": 131
    },
    {
-    "id": "pool_z14_02_16",
+    "id": "pool_z14_02_20",
     "x": 29060,
     "z": 5222,
     "shore": {
@@ -3121,7 +3185,7 @@
     "road": 155
    },
    {
-    "id": "pool_z14_02_17",
+    "id": "pool_z14_02_21",
     "x": 29972,
     "z": 4370,
     "shore": {
@@ -3137,7 +3201,7 @@
     "road": 158
    },
    {
-    "id": "pool_z14_02_18",
+    "id": "pool_z14_02_22",
     "x": 29312,
     "z": 4874,
     "shore": {
@@ -3153,23 +3217,23 @@
     "road": 161
    },
    {
-    "id": "pool_z14_02_19",
-    "x": 30212,
-    "z": 4754,
+    "id": "pool_z14_02_23",
+    "x": 30656,
+    "z": 4646,
     "shore": {
-     "x": 30210,
-     "z": 4752
+     "x": 30656,
+     "z": 4638
     },
-    "water": "lake",
+    "water": "coast",
     "band": [
      5,
      7
     ],
     "tier": 1,
-    "road": 180
+    "road": 162
    },
    {
-    "id": "pool_z14_02_20",
+    "id": "pool_z14_02_24",
     "x": 29564,
     "z": 4982,
     "shore": {
@@ -3181,11 +3245,11 @@
      5,
      7
     ],
-    "tier": 1,
+    "tier": 2,
     "road": 180
    },
    {
-    "id": "pool_z14_02_21",
+    "id": "pool_z14_02_25",
     "x": 29948,
     "z": 5018,
     "shore": {
@@ -3201,7 +3265,23 @@
     "road": 184
    },
    {
-    "id": "pool_z14_02_22",
+    "id": "pool_z14_02_26",
+    "x": 30380,
+    "z": 4784,
+    "shore": {
+     "x": 30374,
+     "z": 4790
+    },
+    "water": "coast",
+    "band": [
+     5,
+     7
+    ],
+    "tier": 1,
+    "road": 189
+   },
+   {
+    "id": "pool_z14_02_27",
     "x": 29060,
     "z": 5582,
     "shore": {
@@ -3213,11 +3293,11 @@
      5,
      7
     ],
-    "tier": 1,
+    "tier": 2,
     "road": 196
    },
    {
-    "id": "pool_z14_02_23",
+    "id": "pool_z14_02_28",
     "x": 28982,
     "z": 5060,
     "shore": {
@@ -3233,7 +3313,7 @@
     "road": 206
    },
    {
-    "id": "pool_z14_02_24",
+    "id": "pool_z14_02_29",
     "x": 29402,
     "z": 4868,
     "shore": {
@@ -3245,11 +3325,11 @@
      5,
      7
     ],
-    "tier": 1,
+    "tier": 3,
     "road": 229
    },
    {
-    "id": "pool_z14_02_25",
+    "id": "pool_z14_02_30",
     "x": 29882,
     "z": 4364,
     "shore": {
@@ -3261,11 +3341,11 @@
      5,
      7
     ],
-    "tier": 1,
+    "tier": 3,
     "road": 238
    },
    {
-    "id": "pool_z14_02_26",
+    "id": "pool_z14_02_31",
     "x": 29498,
     "z": 4910,
     "shore": {
@@ -3277,11 +3357,11 @@
      5,
      7
     ],
-    "tier": 1,
+    "tier": 2,
     "road": 256
    },
    {
-    "id": "pool_z14_02_27",
+    "id": "pool_z14_02_32",
     "x": 30038,
     "z": 4994,
     "shore": {
@@ -3293,11 +3373,11 @@
      5,
      7
     ],
-    "tier": 1,
+    "tier": 3,
     "road": 262
    },
    {
-    "id": "pool_z14_02_28",
+    "id": "pool_z14_02_33",
     "x": 29096,
     "z": 5666,
     "shore": {
@@ -3313,23 +3393,23 @@
     "road": 265
    },
    {
-    "id": "pool_z14_02_29",
-    "x": 30212,
-    "z": 4850,
+    "id": "pool_z14_02_34",
+    "x": 30458,
+    "z": 4832,
     "shore": {
-     "x": 30214,
-     "z": 4848
+     "x": 30454,
+     "z": 4840
     },
-    "water": "lake",
+    "water": "coast",
     "band": [
      5,
      7
     ],
-    "tier": 2,
-    "road": 277
+    "tier": 3,
+    "road": 273
    },
    {
-    "id": "pool_z14_02_30",
+    "id": "pool_z14_02_35",
     "x": 28934,
     "z": 5138,
     "shore": {
@@ -3345,7 +3425,7 @@
     "road": 286
    },
    {
-    "id": "pool_z14_02_31",
+    "id": "pool_z14_02_36",
     "x": 29792,
     "z": 4358,
     "shore": {
@@ -3361,7 +3441,7 @@
     "road": 293
    },
    {
-    "id": "pool_z14_02_32",
+    "id": "pool_z14_02_37",
     "x": 30128,
     "z": 4988,
     "shore": {
@@ -3377,7 +3457,7 @@
     "road": 300
    },
    {
-    "id": "pool_z14_02_33",
+    "id": "pool_z14_02_38",
     "x": 29174,
     "z": 5972,
     "shore": {
@@ -3393,7 +3473,7 @@
     "road": 300
    },
    {
-    "id": "pool_z14_02_34",
+    "id": "pool_z14_02_39",
     "x": 29198,
     "z": 5876,
     "shore": {
@@ -3409,7 +3489,7 @@
     "road": 310
    },
    {
-    "id": "pool_z14_02_35",
+    "id": "pool_z14_02_40",
     "x": 29198,
     "z": 6062,
     "shore": {
@@ -3425,7 +3505,7 @@
     "road": 313
    },
    {
-    "id": "pool_z14_02_36",
+    "id": "pool_z14_02_41",
     "x": 28856,
     "z": 5186,
     "shore": {
@@ -3441,7 +3521,23 @@
     "road": 334
    },
    {
-    "id": "pool_z14_02_37",
+    "id": "pool_z14_02_42",
+    "x": 30536,
+    "z": 4880,
+    "shore": {
+     "x": 30528,
+     "z": 4888
+    },
+    "water": "coast",
+    "band": [
+     5,
+     7
+    ],
+    "tier": 2,
+    "road": 337
+   },
+   {
+    "id": "pool_z14_02_43",
     "x": 29702,
     "z": 4340,
     "shore": {
@@ -3457,116 +3553,37 @@
     "road": 348
    },
    {
-    "id": "pool_z14_02_38",
-    "x": 29144,
-    "z": 5744,
+    "id": "pool_z14_02_44",
+    "x": 30260,
+    "z": 5006,
     "shore": {
-     "x": 29140,
-     "z": 5746
+     "x": 30264,
+     "z": 4998
     },
     "water": "lake",
     "band": [
      5,
      7
     ],
-    "tier": 2,
+    "tier": 3,
     "road": 358
    },
    {
-    "id": "pool_z14_02_39",
-    "x": 28796,
-    "z": 5264,
+    "id": "pool_z14_02_45",
+    "x": 30140,
+    "z": 4562,
     "shore": {
-     "x": 28800,
-     "z": 5264
+     "x": 30142,
+     "z": 4560
     },
     "water": "lake",
     "band": [
      5,
      7
     ],
-    "tier": 2,
-    "road": 363
-   },
-   {
-    "id": "pool_z14_02_40",
-    "x": 30266,
-    "z": 4928,
-    "shore": {
-     "x": 30268,
-     "z": 4922
-    },
-    "water": "lake",
-    "band": [
-     5,
-     7
-    ],
-    "tier": 2,
-    "road": 367
-   },
-   {
-    "id": "pool_z14_02_41",
-    "x": 28736,
-    "z": 5336,
-    "shore": {
-     "x": 28740,
-     "z": 5336
-    },
-    "water": "lake",
-    "band": [
-     5,
-     7
-    ],
-    "tier": 3,
-    "road": 393
-   },
-   {
-    "id": "pool_z14_02_42",
-    "x": 30218,
-    "z": 5006,
-    "shore": {
-     "x": 30214,
-     "z": 5016
-    },
-    "water": "lake",
-    "band": [
-     5,
-     7
-    ],
-    "tier": 3,
-    "road": 403
-   },
-   {
-    "id": "pool_z14_02_43",
-    "x": 29054,
-    "z": 5786,
-    "shore": {
-     "x": 29052,
-     "z": 5784
-    },
-    "water": "lake",
-    "band": [
-     5,
-     7
-    ],
-    "tier": 3,
-    "road": 404
-   },
-   {
-    "id": "pool_z14_02_44",
-    "x": 29618,
-    "z": 4292,
-    "shore": {
-     "x": 29622,
-     "z": 4292
-    },
-    "water": "lake",
-    "band": [
-     5,
-     7
-    ],
-    "tier": 2,
-    "road": 409
+    "tier": 1,
+    "road": 14,
+    "byRoad": true
    }
   ],
   "z11_03": [
@@ -6462,15 +6479,16 @@
     "sea": "coast"
    },
    "kinds": [
+    "coast",
     "lake"
    ],
-   "candidates": 1977,
-   "roadside": 5,
+   "candidates": 2357,
+   "roadside": 9,
    "townPool": "pool_z14_02_1",
    "tiers": [
     27,
-    6,
-    11
+    5,
+    13
    ]
   },
   "z11_03": {

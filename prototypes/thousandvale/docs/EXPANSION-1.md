@@ -106,8 +106,10 @@ Levels are scaled to the zone band (10–20) by the existing level curve.
   40 s held, skip after 5 s, refund if cut short, `party: true` boards party members within 30 m), sea routes from
   `tools/ship-routes.mjs` (re-run after a coast re-bake), client `js/client/ship-view.js` (ship, local sea + wake,
   gulls, spray, the brine-wyrm, ash plume, moored ships + jetties) and `js/client/ui/ship-travel.js` (Harbourmaster
-  window, voyage banner, journal "Voyages" page). Gullwick has no sea inside its zone (coast ~2 km east, past the
-  playable edge): its Harbourmaster stands on Gullwick's main street and the ship lies at the real coast. Port Vharl's
+  window, voyage banner, journal "Voyages" page). Since play-test 11 (Z61) Gullwick stands at the head of **Gullwick
+  Bay** (`tools/lib/world-core.mjs` `BAYS`) with a built quay, a long pier and two jetties (zone bake step 6d, the `harbour`
+  placement, drawn by `js/client/harbour-view.js`); its Harbourmaster stands on the quay and the ship lies alongside the
+  pier's end (`tools/ship-routes.mjs` reads both from the bake). Port Vharl's
   pier uses stream T's `harbour` placement. Quest steps of kind `voyage` still need a matcher in `js/sim/quests.js`.
   Tests: `tests/V/ships.test.js`, `tests/V/voyage.spec.js` (shots in `tests/V/shots/`).
 
@@ -149,8 +151,7 @@ Check after any re-bake: `content-professions -> content-towns -> content-givers
   Torbor stays byte-identical).
 - **Terrain:** the east gorge reaches ~50° in places; Port Vharl sits ~290 m back from the shore, so its pier is
   a walk from the square.
-- **Voyage:** Gullwick has no sea inside its zone, so its Harbourmaster stands on the main street and the ship lies
-  at the real coast past the playable edge; jetties are decor; a multi-process server must be given
+- **Voyage:** Port Vharl's jetty is decor (Gullwick's harbour is real since play-test 11, Z61); a multi-process server must be given
   `opts.realmProvinces`. The ship lands you in `wilds:1` just outside Port Vharl, not in the town hub.
 - **Hazards:** three of the four Fumarole Fen geysers have no ledge to throw you onto (the fen is flat).
 - **Island dressing (stream W):** the hired carter still drives the ox-cart model (island names, greetings and route);

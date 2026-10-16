@@ -376,6 +376,34 @@
    "hunt": true
   },
   {
+   "type": "camp",
+   "id": "champ_z14_02_4",
+   "monster": "reed_serpent",
+   "with": null,
+   "level": [
+    6,
+    6
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 1357,
+   "z": 422,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "fiery"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
    "type": "npc",
    "id": "angler_gullwick",
    "name": "Josey Fourlakes",

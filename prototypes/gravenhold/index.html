@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gravenhold — The First Room</title>
+  <link rel="stylesheet" href="css/game.css">
+  <script type="importmap">{"imports":{"three":"../../vendor/three/three.module.js","three/addons/":"../../vendor/three/addons/"}}</script>
+</head>
+<body>
+  <canvas id="scene" aria-label="Gravenhold dungeon"></canvas>
+  <main class="hud">
+    <div class="title">GRAVENHOLD <span>THE FIRST ROOM</span></div>
+    <div class="help">WASD or left stick to move <b>·</b> <button id="tilt" type="button" aria-pressed="false">Tilt shift: off</button></div>
+    <div class="classpick"><label for="class-select">Class</label><select id="class-select" aria-label="Choose class"></select><span id="mana">Mana 40 / 40</span></div>
+    <div id="hotbar" aria-label="Skills"></div>
+    <div id="status" role="status">Preparing the dungeon…</div>
+  </main>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

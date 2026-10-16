@@ -1,0 +1,19 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #111018; color: #f3e8d2; font: 14px/1.4 system-ui, sans-serif; }
+#scene { display: block; width: 100%; height: 100%; }
+.hud { position: fixed; inset: 0; pointer-events: none; padding: 24px; text-shadow: 0 2px 8px #000; }
+.title { font: 700 17px/1.2 system-ui, sans-serif; letter-spacing: .18em; }
+.title span { display: block; margin-top: 5px; color: #c6aa7b; font-size: 10px; letter-spacing: .22em; }
+.help { position: absolute; left: 24px; bottom: 22px; color: #d5c7ad; }
+.help b { padding: 0 7px; color: #927d5e; }
+button { pointer-events: auto; border: 1px solid #8c7959; border-radius: 4px; background: #211e20d9; color: #f3e8d2; padding: 7px 11px; font: inherit; cursor: pointer; }
+button:hover { background: #39302a; }
+#status { position: absolute; right: 24px; bottom: 26px; color: #c6aa7b; }
+.classpick { position: absolute; right: 24px; top: 24px; display: flex; gap: 10px; align-items: center; pointer-events: auto; color: #c6aa7b; }
+select { border: 1px solid #8c7959; border-radius: 4px; background: #211e20e8; color: #f3e8d2; padding: 7px; font: inherit; }
+#hotbar { position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); display: flex; gap: 8px; pointer-events: auto; }
+#hotbar button { width: 138px; min-height: 50px; text-align: left; }
+#hotbar button small { display: block; color: #c6aa7b; }
+#hotbar button:disabled { opacity: .55; }
+.tilt #scene { filter: saturate(1.14); }
+.tilt::after { content: ""; position: fixed; inset: 0; pointer-events: none; backdrop-filter: blur(1.5px); mask-image: linear-gradient(to bottom, #000 0%, transparent 25%, transparent 76%, #000 100%); }

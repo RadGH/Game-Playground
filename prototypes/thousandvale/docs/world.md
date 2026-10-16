@@ -638,3 +638,25 @@ island's walkable ground one piece.
 (Also 2026-10-14: `tools/bake-world.mjs` grades rivers, lakes and roads on the PRE-continent ground (`mainland`), so
 `world.json` — and every Torbor zone hashed on it — is what it was before the islands; continents apply in the zone and
 horizon bakes only.)
+
+## 15. Bays: the sea cut into a continent (Coast stream, play-test 11, 2026-10-15)
+
+`tools/lib/world-core.mjs` `BAYS` (a `bays` list on a continent) is the one deliberate exception to "a block's own land is never
+touched": **Gullwick Bay** brings the sea into z14_02 so Gullwick (pinned at zone 1520, 352) stands on the coast. A bay is a centre
+line with a half-width and a sea floor per vertex; for a point, s = distance to the line minus the half-width there (s < 0 = in the
+bay). `withBays(x, z, h)` pulls a height toward a coastal profile (`shore` m at s = 0, `rise` m/m inland, `beach` m/m into the water
+down to the floor), full weight to s = `flat`, fading to nothing at s = `band`, and only ever lowers — past the band it returns the
+SAME number, so only the bay's own zone (and unbaked coast / open sea) changes; `tests/B/coast.test.js` checks every other zone.
+`baseGround` applies it; `bayDelta` says where the ground moved. `coastWorld(W, ref)` (used by `bake-zone.mjs loadWorld().json`;
+`.raw` is world.json as it is) gives the rivers, roads and bridges as the bay leaves them: heights moved with the ground (only where
+it moved), a river ENDS at its mouth (and a river that joined it below the new shore takes its old course on), roads are cut at the
+waterline, a bridge over a river that no longer reaches it is dropped; a line no bay reaches is the same object.
+In the bay's zone the towns and the automatic set pieces are PLANNED on the ground as it was before the sea came in (a no-bay pass
+of the same zone; `zone-setpieces.mjs` `choose`, opt-in) so plot ids, offices and graveyard / field spots do not move; everything is
+still levelled on the real ground. The bay's `harbour` (zone metres) is bake step 6d: the quay is ground (levelled, paved `gravel`,
+dry, its face dug to ~2.6 m of water), the piers are walkable decks in `meta.bridges` (nav stamps them), and the `harbour`
+placement `{ quay, piers [{a, b, deck, width, main}], berth, master, dock }` is what `js/client/harbour-view.js` draws and
+`tools/ship-routes.mjs` (`bakedHarbour`) reads. After changing a bay: bake its zone, `tools/coast-content.mjs`, bake again, the
+content chain (docs/ON-HOLD.md step 4 + content-pools), `bake-horizon`, `bake-map`, `ship-routes --write`.
+The map's roads and rivers are the BUILT lines (`tools/lib/coast-lines.mjs` `builtLines`, written to `data/world/map/map.json` by
+`bake-map`): roads from the zone bakes, rivers from source (or the island's edge) to the sea; none over open sea.

@@ -19,7 +19,7 @@ const P = id => JSON.parse(read(`data/zones/${id}/placements.json`)).placements;
 const layerHash = t => { const h = createHash('sha256'); for (const k of ['height', 'waterTop', 'waterKind', 'biome']) { const a = t.layers[k]; h.update(Buffer.from(a.buffer, a.byteOffset, a.byteLength)); } return h.digest('hex').slice(0, 16); };
 
 /** Torbor Downs' 16 zones as they were baked before the islands (decoded layers): the expansion must not touch them. */
-const TORBOR_LAYERS = { z11_01: '36770e0f17da1c5b', z12_01: '1e60915abf61232a', z13_01: 'd55b9d9b54ae647f', z14_01: 'a898cd13773a3520', z11_02: '2ecca1144b68bbbc', z12_02: '48ac4c1ed1b997d4', z13_02: '177777d488f00a0e', z14_02: '099f4891054aecf8', z11_03: 'fd0e8c5d6e662e36', z12_03: 'c687ea6ab12bf1ed', z13_03: 'bb673688ecd28879', z14_03: 'fd981031621814c3', z11_04: '6ee427adf059cf99', z12_04: '05cb706119a9e387', z13_04: '0be5104bdd5967ec', z14_04: '23d6536916fa1dd7' };
+const TORBOR_LAYERS = { z11_01: '36770e0f17da1c5b', z12_01: '1e60915abf61232a', z13_01: 'd55b9d9b54ae647f', z14_01: 'a898cd13773a3520', z11_02: '2ecca1144b68bbbc', z12_02: '48ac4c1ed1b997d4', z13_02: '177777d488f00a0e', z14_02: 'dfeac22610dc22f2' /* play-test 11 Z61: Gullwick Bay (tools/lib/world-core.mjs BAYS; tests/B/coast.test.js) */, z11_03: 'fd0e8c5d6e662e36', z12_03: 'c687ea6ab12bf1ed', z13_03: 'bb673688ecd28879', z14_03: 'fd981031621814c3', z11_04: '6ee427adf059cf99', z12_04: '05cb706119a9e387', z13_04: '0be5104bdd5967ec', z14_04: '23d6536916fa1dd7' };
 
 test('Torbor Downs is untouched: all 16 checked-in zones keep their layers, and a fresh bake of a coastal one still matches', () => {
   for (const id of Object.values(TZ)) assert.equal(layerHash(T(id)), TORBOR_LAYERS[id], `${id} terrain layers changed`);

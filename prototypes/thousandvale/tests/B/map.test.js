@@ -47,5 +47,7 @@ test('labels and vectors are in world metres, inside the world', () => {
   for (const l of map.labels) { assert.ok(l.x >= 0 && l.z >= 0 && l.x <= W && l.z <= H, JSON.stringify(l)); assert.ok([0, 1, 2].includes(l.minZoom)); }
   assert.ok(map.labels.some(l => l.kind === 'town' && l.hub && l.minZoom === 0), 'hub towns show on the world view');
   for (const r of map.roads) assert.ok(r.pts.length >= 2 && r.pts.every(p => p[0] >= -200 && p[1] >= -200 && p[0] <= W + 200 && p[1] <= H + 200));
-  assert.ok(map.rivers.length > 50 && map.roads.length > 100);
+  // play-test 11 (Z4): the lines are the BUILT ones (tools/lib/coast-lines.mjs) — the islands' roads and the rivers that run
+  // through them to the sea, not World Forge's whole pangea (tests/B/coast.test.js checks none lies over the sea)
+  assert.ok(map.rivers.length >= 10 && map.roads.length > 100, `${map.rivers.length} rivers, ${map.roads.length} roads`);
 });

@@ -9,6 +9,11 @@
 // that is the berth; the jetty runs from just above the waterline to the berth. Per sailing: a grid search over 128 m
 // cells of open water that pays extra for every cell close to a coast (so the ship stands off the land), then the
 // corners cut wherever a straight line keeps the same clearance. Run it again after any re-bake of a coast.
+//
+// Play-test 11 (Z61): a harbour the zone bake BUILT (a bay's harbour: tools/lib/world-core.mjs BAYS `harbour`, written as the
+// zone's `harbour` placement with its quay, walkable piers, berth, harbourmaster and dock) is taken from the bake as it is:
+// its ship lies at the bake's berth, its Harbourmaster stands on the quay, and it has no `pier` here (the town draws the
+// real ones). Only the sea route is searched.
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -17,6 +22,18 @@ import { parseHorizon } from '../js/rules/horizon-read.js';
 const GAME = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FILE = join(GAME, 'data/provinces/ships.json');
 export const ROUTE = Object.freeze({ cell: 128, deep: -9, berthDepth: -6, clearM: 420, shoreY: 0.6, maxWalkM: 4000 });
+
+/** A harbour the zone bake built (data/zones/<zone>/placements.json kind harbour with a berth) -> world-metre fields | null. */
+export function bakedHarbour(h, readPlacements = z => JSON.parse(readFileSync(join(GAME, `data/zones/${z}/placements.json`), 'utf8')).placements) {
+  if (!h.zone) return null;
+  let rec = null; try { rec = readPlacements(h.zone).find(p => p.kind === 'harbour' && p.data?.berth); } catch { return null; }
+  if (!rec) return null;
+  const m = /^z(\d+)_(\d+)$/.exec(h.zone), ox = +m[1] * 2048, oz = +m[2] * 2048, d = rec.data;
+  const main = (d.piers || []).find(p => p.main) || d.piers?.[0];
+  const sea = main ? [main.b[0] - main.a[0], main.b[1] - main.a[1]] : [Math.sin(rec.yaw), Math.cos(rec.yaw)], n = Math.hypot(...sea) || 1;
+  return { site: rec.id, berth: { x: Math.round(ox + d.berth.x), z: Math.round(oz + d.berth.z), yaw: d.berth.yaw }, master: { ...h.master, x: +(ox + d.master.x).toFixed(1), z: +(oz + d.master.z).toFixed(1), yaw: d.master.yaw },
+    dock: { x: +(ox + d.dock.x).toFixed(1), z: +(oz + d.dock.z).toFixed(1) }, seaward: [+(sea[0] / n).toFixed(3), +(sea[1] / n).toFixed(3)] };
+}
 
 /** Where a harbour's ship lies: walk seaward from the dock. -> { berth: {x,z,yaw}, pier: {from:[x,z], to:[x,z]} } | null */
 export function findBerth(h, hz, R = ROUTE) {
@@ -91,7 +108,7 @@ export function findRoute(a, b, hz, R = ROUTE) {
 
 export function routeAll(data, hz) {
   const out = { harbours: {}, sailings: [] };
-  for (const h of data.harbours) out.harbours[h.id] = findBerth(h, hz);
+  for (const h of data.harbours) { const b = bakedHarbour(h); out.harbours[h.id] = b ? { ...b, pier: null } : findBerth(h, hz); }
   for (const s of data.sailings) {
     const a = out.harbours[s.from]?.berth, b = out.harbours[s.to]?.berth;
     // the way back is the same sea lane, sailed the other way
@@ -109,7 +126,11 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   for (const [id, b] of Object.entries(r.harbours)) console.log(id, b ? JSON.stringify(b) : 'NO BERTH (no deep water along `seaward`)');
   for (const s of r.sailings) console.log(s.from, '->', s.to, s.path ? `${s.path.length} points, ${(pathMetres(s.path) / 1000).toFixed(1)} km` : 'NO ROUTE');
   if (process.argv.includes('--write')) {
-    for (const h of data.harbours) if (r.harbours[h.id]) Object.assign(h, r.harbours[h.id]);
+    for (const h of data.harbours) if (r.harbours[h.id]) {
+      const { site, pier, ...rest } = r.harbours[h.id];
+      Object.assign(h, rest);
+      if (pier === null) { delete h.pier; h.harbourSite = `${site} (${h.zone} placements.json: quay, walkable piers, berth)`; } else h.pier = pier;
+    }
     data.sailings.forEach((s, i) => { if (r.sailings[i].path) s.path = r.sailings[i].path; });
     writeFileSync(FILE, JSON.stringify(data, null, 1) + '\n');
     console.log('wrote', FILE);

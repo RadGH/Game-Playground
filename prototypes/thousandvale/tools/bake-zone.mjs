@@ -30,7 +30,7 @@ import { hashStr, clamp, smoothstep, makeNoise2D, fbm, subSeed } from '../../../
 import { planTown, overlaps, footprintOf, cultureFor, assignTrades } from '../../../proctown/js/townplan.js';
 import { FORMAT_VERSION, createTerrain, SCATTER_KINDS, NAV } from '../js/rules/terrain-read.js';
 import { encodeTerrain } from './bake-test-zone.mjs';
-import { decodeMacro, makeRefiner, bicubic, heightRange, RIVER_WIDTH, RIVER_DEPTH, crossingsOf, bridgeFor, DECK_LAND } from './lib/world-core.mjs';
+import { decodeMacro, makeRefiner, bicubic, heightRange, RIVER_WIDTH, RIVER_DEPTH, crossingsOf, bridgeFor, DECK_LAND, coastWorld, BAYS } from './lib/world-core.mjs';
 import { addZoneSites, TOWN_RADIUS } from './lib/zone-sites.mjs';
 import { encodeScatter, encodeNav, sameLayerFile } from './lib/zone-layers.mjs';
 import { carveTheme, inFen, shoreDistance, cutCliff } from './lib/zone-theme.mjs';
@@ -129,8 +129,10 @@ let worldCache = null;
 export function loadWorld() {
   if (!worldCache) {
     const json = JSON.parse(readFileSync(join(WORLD_DIR, 'world.json'), 'utf8'));
-    const macro = decodeMacro(readFileSync(join(WORLD_DIR, 'macro.bin')));
-    worldCache = { json, macro, ref: makeRefiner(macro) };
+    const macro = decodeMacro(readFileSync(join(WORLD_DIR, 'macro.bin'))), ref = makeRefiner(macro);
+    // play-test 11 (Z61): the rivers, roads and bridges the world bake drew, with the sea's BAYS applied (a river ends in
+    // its mouth, a road at the waterline, heights moved with the ground) — identity for every line no bay reaches
+    worldCache = { json: coastWorld(json, ref), raw: json, macro, ref };
   }
   return worldCache;
 }
@@ -163,7 +165,10 @@ function ringCrossings(pts, cx, cz, r) {
  * Bake one zone. opts.hub names the hub settlement (default: the world's starter flag, else the biggest).
  */
 export function bakeZone(id, opts = {}) {
-  const { json: W, macro: m, ref } = loadWorld();
+  const LW = loadWorld(), m = LW.macro;
+  // play-test 11 (Z61): `noBays` bakes the zone as it was before the sea came in (the town planner reads that ground, so a
+  // bay's harbour town keeps its plan, plot ids and offices: see `planGround` below)
+  const W = opts.noBays ? LW.raw : LW.json, ref = opts.noBays ? { ...LW.ref, baseGround: LW.ref.continentGround } : LW.ref;
   const zone = W.zones.find(z => z.id === id);
   if (!zone) throw new Error('no zone ' + id);
   const ox = zone.origin.x, oz = zone.origin.z, M = m.macroMetres;
@@ -253,7 +258,10 @@ export function bakeZone(id, opts = {}) {
     const ok = (x, z) => x >= keepOff && z >= keepOff && x <= ZM - keepOff && z <= ZM - keepOff
       && placed.every(p => Math.hypot(p.x - x, p.z - z) >= p.radius + s.radius + LEVEL_EASE * 2);
     let best = null, bestS = Infinity;
-    const reach = s.ask ? (ok(s.x, s.z) ? 0 : 48) : s.hub ? 480 : 320;
+    // play-test 11 (Z61): a bay's harbour town is pinned where it stood before the sea came in (world-core BAYS `town`)
+    const bayTown = BAYS.find(b => b.zone === id && b.town?.name === s.name)?.town;
+    const reach = bayTown ? -1 : s.ask ? (ok(s.x, s.z) ? 0 : 48) : s.hub ? 480 : 320;
+    if (bayTown) best = { x: bayTown.x, z: bayTown.z };
     for (let dz = -reach; dz <= reach; dz += 16) for (let dx = -reach; dx <= reach; dx += 16) {
       const x = s.x + dx, z = s.z + dz;
       if (!ok(x, z)) continue;
@@ -322,6 +330,11 @@ export function bakeZone(id, opts = {}) {
 
   // 5. level and plan each placed settlement (proctown — the one planner Farhold uses)
   const plans = [];
+  // the ground each town was planned on before any bay reached it (a harbour town's plan must not re-cut: stream E's NPCs
+  // are filed by plot id) — the heights the planner follows, from a no-bay pass of this same zone; the town is still levelled
+  // on the real ground
+  const planGround = opts.noBays || !BAYS.some(b => b.zone === id && b.town) ? null : bakeZone(id, { ...opts, noBays: true, planGroundOnly: true });
+  const planTowns = opts.planGroundOnly ? new Map() : null;
   let standing = [];
   try { standing = (JSON.parse(readFileSync(join(HERE, '..', 'data', 'vignettes', 'placements', `${id}.json`), 'utf8')).placements || []).filter(v => Number.isFinite(v.x)); } catch { /* E has not placed this zone yet */ }
   for (const s of placed) {
@@ -350,10 +363,11 @@ export function bakeZone(id, opts = {}) {
       for (const c of all) if (!kept.some(k => Math.hypot(k.x - c.x, k.z - c.z) < (k.road === c.road ? LINK_CHORD : LINK_APART))) kept.push(c);
       return kept;
     };
+    if (planTowns) { planTowns.set(s.name, Float32Array.from(ground)); continue; }
     const trades = OFFICES?.byKind?.[s.kind] ? { list: OFFICES.byKind[s.kind], share: OFFICES.share?.[s.kind] ?? 0.5, pick: 'square' } : null;
     const common = {
       seed: (hashStr(id + ':' + (s.wfName || s.name)) >>> 0) % 100000, size, culture,   // a renamed town keeps its plan
-      heightAt: (x, z) => ground[gIdx(tx + x, tz + z)],
+      heightAt: planGround?.has(s.name) ? (x, z) => planGround.get(s.name)[gIdx(tx + x, tz + z)] : (x, z) => ground[gIdx(tx + x, tz + z)],
       buildable: (x, z) => !wetAt(tx + x, tz + z),
       // play-test 2 (Q10): every townsperson who serves gets their own building, round the square (opt-in proctown option)
       ...(trades ? { trades } : {}),
@@ -387,11 +401,14 @@ export function bakeZone(id, opts = {}) {
     plans.push(plan);
   }
 
+  if (planTowns) { planTowns.set(' setpieces', Float32Array.from(ground)); return planTowns; }
+
   // 5b. set pieces (play-test 2, Q18): fitted to the ground and the ground prepared, BEFORE the rivers are carved (a river
   // still owns its bed). tools/lib/zone-setpieces.mjs; data/world/set-pieces.json + stream E's places `setPieces`.
   const riversNear = WRIVERS.filter(r => !(r.bbox[2] < ox - 200 || r.bbox[0] > ox + ZM + 200 || r.bbox[3] < oz - 200 || r.bbox[1] > oz + ZM + 200)).map(r => ({ id: r.id, pts: r.pts.map(([x, z, h, c]) => [x - ox, z - oz, h, c]) }));
   const pinDiscs = Object.entries(SITE_PINS[id] || {}).map(([k, p]) => ({ x: p.x, z: p.z, r: k.startsWith('door') ? 30 : k === 'world_grimtallow' ? 110 : 50 }));
   const SP = resolveSetPieces({ id, ZM, STEP, G, AP, ground, gIdx, waterTop, roadMask, rivers: riversNear, roads, plans, specs: SPECS, pins: pinDiscs,
+    ...(planGround ? { choose: planGround.get(' setpieces') } : {}),
     riverReach: cls => RIVER_WIDTH[cls] / 2 + 10 + cls * 6 + 4 });
   const pieces = SP.pieces;
   // stream E's own set pieces (data/vignettes/setpieces.json, placed in data/vignettes/placements/<zone>.json): level + paint
@@ -524,6 +541,25 @@ export function bakeZone(id, opts = {}) {
   // 6c. mill ponds (set pieces): small lakes dug after the rivers and bridges, before the skirt buries their edges
   carvePonds({ ground, waterTop, waterKind, gIdx, roadMask }, pieces);
 
+  // 6d. a bay's harbour (play-test 11, Z61): the quay is levelled ground (paved, dry, its seaward face dropping into dug-out
+  // water), the piers are walkable decks like a bridge's (meta.bridges), the berth is where the ship lies. world-core BAYS.
+  const HB = opts.noBays ? null : BAYS.find(b => b.zone === id && b.harbour)?.harbour || null;
+  const harbourDecks = [], quayMask = new Uint8Array(NG);
+  if (HB) {
+    const Q = HB.quay, EASE = 6, FACE = 8;
+    for (let j = 0; j < G; j++) for (let i = 0; i < G; i++) {
+      const x = (i - AP) * STEP, z = (j - AP) * STEP, k = j * G + i;
+      const ox2 = Math.max(Q.x0 - x, 0, x - Q.x1), oz2 = Math.max(Q.z0 - z, 0, z - Q.z1);
+      if (ox2 === 0 && oz2 === 0) { ground[k] = Q.h; waterTop[k] = NaN; waterKind[k] = 0; quayMask[k] = 1; continue; }
+      // the quay face: deep enough off its edge for the boats (the sea comes right up to the stone)
+      if (z > Q.z1 && z <= Q.z1 + FACE && x >= Q.x0 - 2 && x <= Q.x1 + 2 && !Number.isNaN(waterTop[k])) { ground[k] = Math.min(ground[k], -2.6 * (1 - 0.5 * smoothstep(0, 1, (z - Q.z1) / FACE)) - 0.4); continue; }
+      // landward and at the two ends it eases into the shore (never raised over a road)
+      const o = Math.hypot(ox2, oz2);
+      if (z <= Q.z1 && o <= EASE && Number.isNaN(waterTop[k])) ground[k] += (Q.h - ground[k]) * (1 - smoothstep(0, 1, o / EASE)) * 0.9;
+    }
+    for (const P of HB.piers) harbourDecks.push({ a: [P.a[0], P.a[1]], b: [P.b[0], P.b[1]], h: HB.deck, w: P.w, main: !!P.main });
+  }
+
   // 7. the wet skirt (P21): one ring of water surface laid past every wet edge, 8-connected (the old 4-connected ring
   // left the corner triangles out, so the sheet stopped in 2 m steps short of the bank), and the ground under every
   // skirt sample raised to at least surface + SKIRT_BURY. The sheet's edge is then always under the ground, the
@@ -563,6 +599,7 @@ export function bakeZone(id, opts = {}) {
     else { const s = Math.hypot(ground[k + 1] - ground[k - 1], ground[k + G] - ground[k - G]) / (2 * STEP); if (s > 0.9 && b !== 18) b = MOUNTAINS; }
     biome[j * SIZE + i] = b;
   }
+  if (HB) { const gravel = BIOMES.length + SET_SURFACES.findIndex(q => q[0] === 'gravel'); for (let j = 0; j < SIZE; j++) for (let i = 0; i < SIZE; i++) if (quayMask[(j + AP) * G + i + AP]) biome[j * SIZE + i] = gravel; }
   paintSetPieces({ biome, SIZE, STEP, surfaceId: key => BIOMES.length + SET_SURFACES.findIndex(s => s[0] === key), isProtected: o => biome[o] === LAKE || biome[o] === COAST || biome[o] === ROAD_SURFACE_ID }, pieces, ePieces);
   for (const plan of plans) {
     const { x: tx, z: tz } = plan.origin;
@@ -595,7 +632,7 @@ export function bakeZone(id, opts = {}) {
     source: { tool: 'tools/bake-zone.mjs', world: { seed: W.seed, width: W.width, height: W.height, method: W.method, seaLevel: W.seaLevel, inputHash: W.inputHash }, zone: { zx: zone.zx, zy: zone.zy }, worldOrigin: { x: ox, z: oz }, zoneMetres: ZM },
     rivers: riversUsed, sites: metaSites, spawn: null,
     // decks the reader stands walkers on (terrain-read deckAt): every bridge whose deck touches this zone
-    bridges: bridgesHere.flatMap(b => (b.pieces || [b]).map(p => ({ a: [r2(p.a[0]), r2(p.a[1])], b: [r2(p.b[0]), r2(p.b[1])], h: b.deck, w: p.width })))
+    bridges: [...bridgesHere.flatMap(b => (b.pieces || [b]).map(p => ({ a: [r2(p.a[0]), r2(p.a[1])], b: [r2(p.b[0]), r2(p.b[1])], h: b.deck, w: p.width }))), ...harbourDecks.map(d => ({ a: d.a, b: d.b, h: d.h, w: d.w }))]
       .filter(d => Math.max(d.a[0], d.b[0]) > -d.w && Math.min(d.a[0], d.b[0]) < ZM + d.w && Math.max(d.a[1], d.b[1]) > -d.w && Math.min(d.a[1], d.b[1]) < ZM + d.w),
     ...(cliff ? { cliff } : {}),
     // the island's own look (js/client/terrain-view.js, scatter-view.js) and what its biome ids are called there
@@ -614,6 +651,12 @@ export function bakeZone(id, opts = {}) {
   meta.spawn = hubSite ? spawnNear(terrain, hubSite) : { x: 1024, z: 1024 };
   // a harbour town (Vharlen's Port Vharl, docs/EXPANSION-1.md §6): where its shore meets the sea, walked out from the
   // town along `bearing` — `x, z` the waterline, `deep` the first point 3 m deep (where a pier can end), yaw = out to sea
+  if (HB) {
+    const Q = HB.quay, main = harbourDecks.find(d => d.main) || harbourDecks[0];
+    meta.sites.push({ type: 'harbour', id: HB.id, town: HB.town, x: r2((Q.x0 + Q.x1) / 2), z: r2((Q.z0 + Q.z1) / 2), yaw: main ? +Math.atan2(main.b[0] - main.a[0], main.b[1] - main.a[1]).toFixed(4) : 0,
+      deep: main ? [main.b[0], main.b[1]] : null, quay: { ...Q }, piers: harbourDecks.map(d => ({ a: d.a, b: d.b, deck: d.h, width: d.w, ...(d.main ? { main: true } : {}) })),
+      berth: { ...HB.berth }, master: { ...HB.master }, dock: { ...HB.dock } });
+  }
   if (isl) for (const S of VHARLEN.settlements.filter(q => q.zone === id && q.harbour)) {
     const town = meta.sites.find(q => q.type === 'settlement' && q.name === S.name); if (!town) continue;
     const dx = Math.cos(S.harbour.bearing), dz = Math.sin(S.harbour.bearing);
@@ -675,7 +718,7 @@ export function bakeZone(id, opts = {}) {
   const keepClear = [
     ...placed.map(s => ({ x: s.x, z: s.z, r: s.radius + 6 })),
     ...meta.sites.filter(s => s.type === 'dungeon').map(s => ({ x: s.x, z: s.z, r: 14 })),
-    ...meta.sites.filter(s => s.type === 'harbour').map(s => ({ x: s.x, z: s.z, r: 30 })),
+    ...meta.sites.filter(s => s.type === 'harbour').map(s => ({ x: s.x, z: s.z, r: s.quay ? Math.hypot(s.quay.x1 - s.quay.x0, s.quay.z1 - s.quay.z0) / 2 + 8 : 30 })),
     ...meta.sites.filter(s => s.type === 'event' || s.type === 'camp').map(s => ({ x: s.x, z: s.z, r: s.r })),
     ...avoid, ...poolDiscs,
   ];
@@ -874,7 +917,7 @@ export function placementsFor(meta, plans, roads = [], bridges = [], paths = [])
     if (s.type === 'settlement') out.push({ kind: 'settlement', id: slug(s.name), x: r2(s.x), z: r2(s.z), yaw: 0, data: { kind: s.kind, name: s.name, radius: s.radius ?? TOWN_RADIUS[s.kind] ?? 40, hub: !!s.hub, planned: !s.unplanned, ...(s.wfName ? { wfName: s.wfName } : {}), ...(s.ask ? { ask: true } : {}) } });
     else if (s.type === 'dungeon') out.push({ kind: 'dungeon_door', id: s.id, x: s.x, z: s.z, yaw: s.yaw, data: { name: s.name } });
     else if (s.type === 'event' || s.type === 'camp') out.push({ kind: s.type + '_site', id: s.id, x: s.x, z: s.z, yaw: 0, data: { r: s.r } });
-    else if (s.type === 'harbour') out.push({ kind: 'harbour', id: s.id, x: s.x, z: s.z, yaw: s.yaw, data: { town: s.town, deep: s.deep } });
+    else if (s.type === 'harbour') out.push({ kind: 'harbour', id: s.id, x: s.x, z: s.z, yaw: s.yaw, data: { town: s.town, deep: s.deep, ...(s.quay ? { quay: s.quay, piers: s.piers, berth: s.berth, master: s.master, dock: s.dock } : {}) } });
     else out.push({ kind: s.type, id: slug(s.name || s.kind), x: r2(s.x), z: r2(s.z), yaw: 0, data: { kind: s.kind, name: s.name } });
   }
   (meta.theme?.lakes || []).forEach((l, i) => out.push({ kind: 'lake', id: l.name ? slug(l.name) : `pool_${i}`, x: l.x, z: l.z, yaw: 0, data: { r: l.r, level: l.level, kind: l.kind, name: l.name } }));

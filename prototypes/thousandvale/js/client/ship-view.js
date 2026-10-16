@@ -711,7 +711,11 @@ export function createShipVoyage(scene, { view, camera, actors, travel, hud, con
   /** The ship's place at voyage time t (s): position along the route, heading, heave/roll/pitch. Cheap; once a frame. */
   function pose() {
     if (!V) return null;
-    const now = performance.now();
+    // ONE pose a frame (play-test 11, found by the Coast stream): the frame's own clock, not performance.now() — the actors
+    // ask for the deck (ridePos) and the ship is placed later in the same frame, and at the crossing's ~1 km/s two clocks a
+    // few ms apart drew you up to 11 m off the deck (worst on a turn of the route)
+    const tl = typeof document !== 'undefined' ? document.timeline?.currentTime : null;
+    const now = Number.isFinite(tl) ? tl : performance.now();
     if (V.poseAt === now) return V;
     V.poseAt = now;
     const t = Math.min(V.T + 30, (now - V.t0) / 1000);

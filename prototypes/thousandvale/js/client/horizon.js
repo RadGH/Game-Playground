@@ -85,10 +85,19 @@ function holeMaterial(holes) {
   return mat;
 }
 
-/** Warm points where people live (world.json settlements), lit at night. */
-function settlementLights(world, heightAt) {
+/**
+ * Warm points where people live, lit at night. Play-test 11 (Z4, "an artifact of having an ocean"): the settlements as
+ * BUILT (the map bake's town / village / hamlet labels, `built`, both islands) — plus, for the far land past an island's
+ * walkable edge, World Forge's own settlements that stand on land well away from every built one. Before, all of
+ * world.json's old-mainland settlements were lit: 213 of them on the open sea and 13 on Vharlen's empty hillsides.
+ */
+function settlementLights(world, heightAt, built = null) {
   const lights = [];
-  for (const n of world?.nodes || []) if (n.type === 'settlement') {
+  const towns = (built || []).filter(l => l.kind === 'town' || l.kind === 'village' || l.kind === 'hamlet').map(l => ({ type: 'settlement', kind: l.kind, x: l.x, z: l.z, id: (l.x * 73856093) ^ (l.z * 19349663) }));
+  const farOff = n => towns.every(t => Math.hypot(t.x - n.x, t.z - n.z) > 3000);
+  const nodes = built ? [...towns, ...(world?.nodes || []).filter(n => n.type === 'settlement' && farOff(n))] : (world?.nodes || []);
+  for (const n of nodes) if (n.type === 'settlement') {
+    if (!(heightAt(n.x, n.z) >= 2)) continue;             // never on the water
     const count = { capital: 18, city: 14, town: 9, village: 6, hamlet: 3, port: 7 }[n.kind] || 3;
     let s = (n.id * 2654435761) >>> 0;
     const rnd = () => ((s = Math.imul(s ^ (s >>> 15), 2246822507) >>> 0) / 4294967296);
@@ -148,9 +157,10 @@ async function createFineHorizon(scene, { quality, base }) {
   const spire = typeof location !== 'undefined' && new URLSearchParams(location.search).get('spire') === '4' ? 4 : 0;
   const treeOpts = { trees: !treesOff, spires: treesOff ? 0 : (TREE_SPIRES[quality] ?? 0), spire };
   const canopyOpts = { spires: treesOff ? 0 : (CANOPY_SPIRES[quality] ?? 0), spire };
-  const [src, world] = await Promise.all([
+  const [src, world, mapLabels] = await Promise.all([
     chunkSource(new URL('horizon.bin', base)),
     fetch(new URL('world.json', base)).then(r => (r.ok ? r.json() : null)).catch(() => null),
+    fetch(new URL('map/map.json', base)).then(r => (r.ok ? r.json() : null)).then(m => m?.labels || null).catch(() => null),
   ]);
   const g = src.info;                                   // { meta, W, H, step, drawn, wet } (drawn = what the mesh shows)
   const size = CHUNK[quality] || CHUNK.high;
@@ -163,7 +173,7 @@ async function createFineHorizon(scene, { quality, base }) {
   const group = new THREE.Group(); group.name = 'horizon';
   scene.add(group);
   const heightAt = (x, z) => gridHeightAt(g, x, z);
-  const { points, lmat } = settlementLights(world, heightAt);
+  const { points, lmat } = settlementLights(world, heightAt, mapLabels);
   scene.add(points);
 
   const chunks = [];

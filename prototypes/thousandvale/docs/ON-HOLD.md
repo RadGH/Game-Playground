@@ -40,6 +40,9 @@ forgotten — bring it up when the game is resumed.
    `tools/publish-thousandvale.sh` (refuses a commit that does not parse or whose unit tests fail; rolls back
    if the new build does not come up). Add an entry to `data/ops/changelog.json` at each publish.
 4. After ANY zone re-bake: `content-professions -> content-towns -> content-givers -> content-hunts -> fill-quest-marks` (round 11: `tools/fill-quest-marks.mjs` fills the step marks of hand-edited quests; content-hunts makes every kill area hold max(count + 4, 2 x count)).
+   A re-bake of a zone a sea BAY reaches (`tools/lib/world-core.mjs` `BAYS`, play-test 11 — Gullwick Bay, z14_02): bake it, run
+   `tools/coast-content.mjs` (moves only the stream E placements the water took), bake it again, then the chain above plus
+   `content-pools`, then `bake-horizon`, `bake-map` and `ship-routes --write`.
    Never run `content-offices.mjs` alone (it renames shopkeepers). Do not run `place-vignettes.mjs` (it no longer
    reproduces the committed placements).
 5. Agents: at most three at a time; Playwright only under `flock /tmp/claude-1000/farhold-pw.lock`.

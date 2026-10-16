@@ -6,6 +6,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { parseTerrain, parseNav, NAV, WADE_DEPTH, DRY_FOOT_DEPTH } from '../../js/rules/terrain-read.js';
 import { crossingsOf, RIVER_DEPTH } from '../../tools/lib/world-core.mjs';
+import { loadWorld } from '../../tools/bake-zone.mjs';
 
 const ROOT = new URL('../../', import.meta.url);
 const read = p => readFileSync(new URL(p, ROOT));
@@ -127,9 +128,11 @@ test('all 16 zones: each bridge deck meets the road at BOTH ends and sits sensib
 test('P2: small streams are wadeable all the way across; rivers are swum in the middle, never a wall', () => {
   const bad = [];
   const counts = { wade: 0, swim: 0 };
+  // (the rivers as baked: with the bays applied, a river ends at its mouth — play-test 11 Z61, tools/lib/world-core.mjs)
+  const RIVERS = loadWorld().json.rivers;
   for (const id of ZONES) {
     const { t } = zone(id), z0 = W.zones.find(z => z.id === id).origin;
-    for (const r of W.rivers) {
+    for (const r of RIVERS) {
       if (r.bbox[2] < z0.x || r.bbox[0] > z0.x + 2048 || r.bbox[3] < z0.z || r.bbox[1] > z0.z + 2048) continue;
       for (let k = 0; k < r.pts.length - 1; k += 3) {
         const a = r.pts[k], b = r.pts[k + 1], x = a[0] - z0.x, z = a[1] - z0.z, cls = Math.max(a[3], b[3]);
@@ -138,6 +141,7 @@ test('P2: small streams are wadeable all the way across; rivers are swum in the 
         for (let o = -12; o <= 12; o += 0.5) {
           const px = x + nx * o, pz = z + nz * o, kind = t.moveAt(px, pz);
           if (!Number.isNaN(t.deckAt(px, pz))) continue;
+          if (t.waterAt(px, pz).kind === 'sea') continue;          // where a stream meets the sea, the sea is the sea
           if (cls === 1 && kind === 'swim') { bad.push(`${id} stream ${r.id} swim at ${px.toFixed(1)},${pz.toFixed(1)} depth ${t.waterAt(px, pz).depth.toFixed(2)}`); break; }
           if (kind === 'wade') counts.wade++;
           if (kind === 'swim') { counts.swim++; if (!t.passable(px, pz)) bad.push(`${id} river ${r.id}: swim water not passable`); }

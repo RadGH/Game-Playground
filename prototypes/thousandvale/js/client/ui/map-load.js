@@ -42,7 +42,9 @@ export function createMapSource() {
     model() {
       if (modelP) return modelP;
       modelP = (async () => {
-        const [world, provinceMap, rares, events] = await Promise.all([j('world/world.json'), j('world/province-map.json'), j('provinces/rares.json', true), j('quests/events.json', true)]);
+        // (play-test 11, Z4: the roads and rivers drawn are stream B's BUILT lines from the map bake — data/world/map/map.json —
+        // cut at the shore; world.json's own lines run on across what is open sea since the world became islands)
+        const [world, provinceMap, rares, events, baked] = await Promise.all([j('world/world.json'), j('world/province-map.json'), j('provinces/rares.json', true), j('quests/events.json', true), j('world/map/map.json', true)]);
         const sheets = {}, zoneJsons = {}, placements = {}, quests = {};
         const jobs = [];
         for (const [prov, p] of Object.entries(provinceMap.provinces || {})) {
@@ -54,7 +56,7 @@ export function createMapSource() {
           }
         }
         await Promise.all(jobs);
-        return buildMapModel({ world, provinceMap, sheets, zoneJsons, placements, quests, rares, events });
+        return buildMapModel({ world, provinceMap, sheets, zoneJsons, placements, quests, rares, events, lines: baked && Array.isArray(baked.roads) ? { roads: baked.roads, rivers: baked.rivers || [] } : null });
       })();
       modelP.catch(e => console.warn('[map] model failed:', e.message));
       return modelP;

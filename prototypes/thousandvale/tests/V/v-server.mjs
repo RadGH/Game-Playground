@@ -36,6 +36,9 @@ const hook = http.createServer(async (req, res) => {
     const b = body ? JSON.parse(body) : {};
     if (req.url === '/testsail') {
       const S = W.ships, g = S.harbours.get('gullwick'), pv = S.harbours.get('port_vharl');
+      // `sec` also sets the hold of the REAL Gullwick -> Port Vharl sailing (test server only): a software-GL browser takes
+      // ~25 s to cast off after the fare, which the 40 s hold does not leave room for (play-test 11, Coast)
+      if (+b.sec) for (const q of S.sailings.get('gullwick') || []) if (q.to === 'port_vharl') q.sec = +b.sec;
       const town = [...W.P.values()][0].L.towns[0];
       if (!S.harbours.has('test_cove')) {
         S.harbours.set('test_cove', { id: 'test_cove', name: 'Test Cove', land: 'Torbor Downs', province: 'torbor_downs', band: [1, 10], dock: { x: town.x + 4, z: town.z + 4 }, berth: pv.berth, zone: null });

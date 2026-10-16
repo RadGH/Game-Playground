@@ -208,7 +208,11 @@ test('the REAL world: the Harbourmaster stands in Gullwick on walkable ground, t
   let hm = null;
   for (const pv of world.P.values()) for (const r of [...pv.towns, ...pv.copies]) for (const x of r.objects.values()) if (x.data && x.data.npc && x.data.npc.role === 'harbourmaster') hm = hm || { x, r };
   assert.ok(hm, 'a Harbourmaster stands somewhere');
-  assert.equal(hm.r.kind, 'town', 'in a town room'); assert.equal(hm.r.name, 'Gullwick');
+  // play-test 11 (Z61): Gullwick has a real harbour now — the Harbourmaster stands on its quay below the south gate,
+  // outside the walls (the wilds room, like Port Vharl's), within a short walk of the town (tests/B/coast.test.js)
+  const gw = [...world.P.values()].flatMap(pv => pv.L.towns).find(q => q.name === 'Gullwick');
+  assert.ok(gw && Math.hypot(hm.x.x - gw.x, hm.x.z - gw.z) < gw.r + 80, 'on Gullwick\'s waterfront');
+  assert.ok(hm.r.kind === 'town' ? hm.r.name === 'Gullwick' : hm.r.kind === 'wilds', `in Gullwick or on its quay (${hm.r.kind} ${hm.r.name})`);
   assert.equal(hm.x.info().title, 'Harbourmaster');
   const T = hm.r.terrain;
   if (T && T.walkable) assert.ok(T.walkable(hm.x.x, hm.x.z), 'the Harbourmaster stands on ground you can walk to');
@@ -282,7 +286,7 @@ test('the REAL realm with both islands: Gullwick -> Port Vharl and back, held at
   assert.equal(box.filter(m => m.t === 'shipR').at(-1).ok, true, JSON.stringify(box.filter(m => m.t === 'shipR').at(-1)));
   await run(clock, 41000);
   const back = rec(world, a), gd = DATA.harbours.find(h => h.id === 'gullwick').dock;
-  assert.equal(back.room.meta.province, 'torbor_downs'); assert.equal(back.room.name, 'Gullwick');
+  assert.equal(back.room.meta.province, 'torbor_downs');     // (Gullwick's quay is outside its walls since play-test 11 Z61)
   assert.ok(Math.hypot(back.entity.x - gd.x, back.entity.z - gd.z) < 4, 'on Gullwick\'s quay');
   assert.equal(back.char.flags.voyages.n, 2); assert.equal(back.char.gold, 180);
   a.close(); await srv.stop();

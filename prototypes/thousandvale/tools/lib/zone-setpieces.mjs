@@ -195,6 +195,10 @@ export function layLanes({ lanes, roads, ground, gIdx, ZM, edge = 120 }) {
  */
 export function resolveSetPieces(ctx) {
   const { id, ZM, ground, gIdx, waterTop, roads, plans, specs } = ctx;
+  // play-test 11 (Z61): `choose` = the ground the SPOTS are chosen on (default: the real ground). A zone a bay reached passes
+  // the ground as it was before the sea came in, so its graveyard and field belt stay where they stood; every spot is still
+  // prepared (levelled) on the real ground, and the same preparation is mirrored on `choose` so later choices see it too.
+  const CG = ctx.choose || ground;
   const log = [];
   // ---- what is in the way: coarse distance fields (8 m) to rivers and roads, town circles, pins
   const C = 8, N = Math.ceil(ZM / C) + 1;
@@ -242,15 +246,15 @@ export function resolveSetPieces(ctx) {
   /** A footprint is free: every sample clear of edges, water, rivers, pins, towns, roads (by `roadPad`), other pieces. */
   const free = (samples, { roadPad = 4, townPad = 14, pad = 4, riverPad = 6 } = {}) => samples.every(([x, z]) => !hard(x, z, riverPad) && !townHit(x, z, townPad) && field(roadD, x, z) >= roadPad && !takenHit(x, z, pad));
   /** how far the ground strays from its best plane over the samples (m), and that plane */
-  const planeFit = (samples) => {
+  const planeFit = (samples, G = CG) => {
     let n = 0, sx = 0, sz = 0, sh = 0, sxx = 0, szz = 0, sxz = 0, sxh = 0, szh = 0;
     const x0 = samples[0][0], z0 = samples[0][1];
-    for (const [x, z] of samples) { const X = x - x0, Z = z - z0, H = ground[gIdx(x, z)]; n++; sx += X; sz += Z; sh += H; sxx += X * X; szz += Z * Z; sxz += X * Z; sxh += X * H; szh += Z * H; }
+    for (const [x, z] of samples) { const X = x - x0, Z = z - z0, H = G[gIdx(x, z)]; n++; sx += X; sz += Z; sh += H; sxx += X * X; szz += Z * Z; sxz += X * Z; sxh += X * H; szh += Z * H; }
     // normal equations for H = A + B X + C Z
     const m = [[n, sx, sz, sh], [sx, sxx, sxz, sxh], [sz, sxz, szz, szh]];
     for (let c = 0; c < 3; c++) { let p = c; for (let r = c + 1; r < 3; r++) if (Math.abs(m[r][c]) > Math.abs(m[p][c])) p = r; [m[c], m[p]] = [m[p], m[c]]; if (Math.abs(m[c][c]) < 1e-9) return { res: 0, at: () => sh / n, slope: 0 }; for (let r = 0; r < 3; r++) if (r !== c) { const f = m[r][c] / m[c][c]; for (let k = c; k < 4; k++) m[r][k] -= f * m[c][k]; } }
     const A = m[0][3] / m[0][0], B = m[1][3] / m[1][1], Cc = m[2][3] / m[2][2];
-    let res = 0; for (const [x, z] of samples) res = Math.max(res, Math.abs(ground[gIdx(x, z)] - (A + B * (x - x0) + Cc * (z - z0))));
+    let res = 0; for (const [x, z] of samples) res = Math.max(res, Math.abs(G[gIdx(x, z)] - (A + B * (x - x0) + Cc * (z - z0))));
     return { res, at: (x, z) => A + B * (x - x0) + Cc * (z - z0), slope: Math.atan(Math.hypot(B, Cc)) * 180 / Math.PI, mean: sh / n };
   };
   const nearestRoad = (x, z) => {
@@ -271,10 +275,11 @@ export function resolveSetPieces(ctx) {
   };
 
   // ---- ground preparation (in place). Skips water, road and town-street samples so a road keeps its grade.
-  const prep = (R, { mode, ease = 8, weight = 0.9, disc = null }) => {
+  const prep = (R, o) => { const out = prepOn(ground, R, o); if (CG !== ground) prepOn(CG, R, o); return out; };
+  const prepOn = (ground, R, { mode, ease = 8, weight = 0.9, disc = null }) => {
     const pad = ease + 2, rad = disc ? disc.r + pad : Math.hypot(R.w, R.d) / 2 + pad, cx = disc ? disc.x : R.cx, cz = disc ? disc.z : R.cz;
     const S = disc ? discSamples(disc.x, disc.z, disc.r, 4) : rectSamples(R, 4);
-    const fit = planeFit(S), flat = S.reduce((s, [x, z]) => s + ground[gIdx(x, z)], 0) / S.length;
+    const fit = planeFit(S, ground), flat = S.reduce((s, [x, z]) => s + ground[gIdx(x, z)], 0) / S.length;
     const target = mode === 'flat' ? () => (disc?.h ?? R?.h ?? flat) : (x, z) => fit.at(x, z);
     const writes = [];
     for (let z = Math.floor((cz - rad) / 2) * 2; z <= cz + rad; z += 2) for (let x = Math.floor((cx - rad) / 2) * 2; x <= cx + rad; x += 2) {
@@ -532,7 +537,7 @@ export function resolveSetPieces(ctx) {
         if (!free(S, { roadPad: 5, townPad: 30, pad: 8 })) return null;
         const f = planeFit(S); if (sp.kind !== 'copse' && (f.res > 2.5 || f.slope > 12)) return null;
         // a stone circle wants a rise to stand on; a fold wants the lee; a copse anywhere not too steep
-        return { x, z, score: f.res + f.slope * 0.15 - (sp.kind === 'stone_circle' ? ground[gIdx(x, z)] * 0.02 : 0) };
+        return { x, z, score: f.res + f.slope * 0.15 - (sp.kind === 'stone_circle' ? CG[gIdx(x, z)] * 0.02 : 0) };
       });
       if (!res) { log.push(`${sp.id}: no room for a ${sp.kind}`); continue; }
       const disc = { x: res.x, z: res.z, r };

@@ -59,12 +59,15 @@ test('the voyage: the Harbourmaster, Set sail, the crossing on the real sea, the
   await shot('v2-harbour-window');
   const vharlen = !(await pvRow.locator('[data-act="pick"]').isDisabled());
   let row = pvRow;
+  // (a 70 s hold, for the real sailing too: on a software-GL test machine the ship takes ~25 s to cast off after you pay —
+  // the server's clock starts at the fare — and 40 s left too little for the moments below, which are taken at the same
+  // SHARE of the crossing; since play-test 11 the ship casts off inside Gullwick's bay, with more to draw)
+  expect((await post('/testsail', { sec: 70 })).ok).toBe(true);
   if (!vharlen) {
     await expect(pvRow).toContainText('not sailing');
-    expect((await post('/testsail', {})).ok).toBe(true);
     await page.evaluate(id => thousandvale.S.net.use(id), hm.id);
     row = page.locator('#panel-ship .ship-row[data-harbour="test_cove"]');
-  }
+  } else { await page.evaluate(id => thousandvale.S.net.use(id), hm.id); row = page.locator('#panel-ship .ship-row[data-harbour="port_vharl"]'); }
   await expect(row).toContainText('60 gold');
   await row.locator('[data-act="pick"]').click();
   await expect(row.locator('[data-act="go"]')).toHaveText('Pay 60 and sail');
@@ -74,13 +77,18 @@ test('the voyage: the Harbourmaster, Set sail, the crossing on the real sea, the
   const t0 = Date.now();
   await expect(page.locator('#panel-ship')).toBeHidden();
   await expect(page.locator('.ship-banner')).toBeVisible();
-  await expect(page.locator('.ship-banner .sb-skip')).toBeDisabled();
+  // (judged on the voyage's own clock: on a software-GL test machine the first frames at sea take about a second each, so
+  // the wall clock can be past 5 s before this line runs — and every second spent here is one the server's 40 s hold
+  // does not give back before the moments below)
+  const sk = await page.evaluate(() => ({ t: thousandvale.ships.state.t, off: document.querySelector('.ship-banner .sb-skip').disabled }));
+  if (sk.t < 4.5) expect(sk.off, `skip at ${sk.t.toFixed(1)} s`).toBe(true); else if (sk.t > 5.6) expect(sk.off, `skip at ${sk.t.toFixed(1)} s`).toBe(false);
   const gold = await page.evaluate(() => thousandvale.S.net.joined.you.gold);
   expect(gold).toBe(140);
   // moments of the crossing (the clock is jumped; the server's 40 s keep running underneath)
   const moments = [[0.8, 'v4-cast-off'], [5, 'v5-under-way'], [11, 'v6-open-sea'], [18.2, 'v7-serpent'], [27, 'v8-volcano-ahead'], [36.5, 'v9-coming-alongside']];
+  const total = await page.evaluate(() => thousandvale.ships.state.total);
   for (const [sec, name] of moments) {
-    await page.evaluate(s => thousandvale.ships.seek(s), sec);
+    await page.evaluate(s => thousandvale.ships.seek(s), sec * total / 40);
     await page.waitForTimeout(sec === 0.8 ? 400 : 900);
     const st = await page.evaluate(() => { const s = thousandvale.ships.state, me = thousandvale.actors.get(thousandvale.S.selfId); return { ...s, me: me && { x: me.pos.x, y: me.pos.y, z: me.pos.z }, cam: { x: thousandvale.camera.position.x, y: thousandvale.camera.position.y, z: thousandvale.camera.position.z } }; });
     expect(st, name).toBeTruthy();

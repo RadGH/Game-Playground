@@ -279,8 +279,8 @@
    "template": "fishing_plot",
    "flavour": null,
    "settlement": "Gullwick",
-   "x": 1535,
-   "z": 499,
+   "x": 1391,
+   "z": 426,
    "yaw": -2.75,
    "radius": 16,
    "level": 6
@@ -442,8 +442,8 @@
    "type": "vignette",
    "id": "weavers_bridge_toll",
    "name": "The Spider Bridge",
-   "x": 1985,
-   "z": 679,
+   "x": 1951,
+   "z": 514,
    "yaw": 2.18,
    "radius": 12,
    "biome": "temperateForest",
@@ -659,8 +659,8 @@
     2,
     4
    ],
-   "x": 1567,
-   "z": 614,
+   "x": 1581,
+   "z": 658,
    "yaw": 0,
    "radius": 10
   },
@@ -695,8 +695,8 @@
     2,
     4
    ],
-   "x": 1529,
-   "z": 583,
+   "x": 1551,
+   "z": 623,
    "yaw": 0,
    "radius": 10
   },
@@ -836,8 +836,8 @@
    "type": "waystone",
    "id": "ws_z14_02_door",
    "name": "The Gullwick Throat",
-   "x": 1628,
-   "z": 466.3,
+   "x": 1808.6,
+   "z": 468.5,
    "yaw": 0,
    "door": "door_1",
    "radius": 1
@@ -855,8 +855,8 @@
     2,
     2
    ],
-   "x": 1596,
-   "z": 503,
+   "x": 1854,
+   "z": 470,
    "yaw": 0,
    "radius": 6,
    "doorGuard": true
@@ -1431,8 +1431,8 @@
    "id": "dolmen_gullwick_30",
    "kind": "dolmen",
    "name": "Dolmen",
-   "x": 1792,
-   "z": 604,
+   "x": 1853,
+   "z": 508,
    "yaw": 1.92,
    "radius": 5,
    "filler": true
@@ -2359,8 +2359,8 @@
     2,
     3
    ],
-   "x": 1784,
-   "z": 464,
+   "x": 1774,
+   "z": 430,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -2401,8 +2401,8 @@
     1,
     2
    ],
-   "x": 1864,
-   "z": 768,
+   "x": 1855,
+   "z": 805,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -2924,26 +2924,26 @@
     1,
     2
    ],
-   "x": 1888,
-   "z": 528,
+   "x": 1880,
+   "z": 497,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1834,
-     545
+     1913,
+     473
     ],
     [
-     1873,
-     472
+     1904,
+     530
     ],
     [
-     1940,
-     502
+     1847,
+     521
     ],
     [
-     1900,
-     603
+     1856,
+     464
     ]
    ],
    "roam": true
@@ -3345,8 +3345,8 @@
    "recipe": "cu_crow_roost",
    "name": "Crow Roost",
    "kind": "nest",
-   "x": 1680,
-   "z": 584,
+   "x": 1688,
+   "z": 474,
    "yaw": 5.79,
    "radius": 5,
    "levelBase": 6
@@ -3872,22 +3872,22 @@
    "chatter": [
     "role.fisher"
    ],
-   "x": 2007,
-   "z": 784,
+   "x": 1934,
+   "z": 863,
    "yaw": 6.14,
    "radius": 6,
    "path": [
     [
-     1999,
-     773
+     1926,
+     852
     ],
     [
-     2016,
-     784
+     1943,
+     863
     ],
     [
-     2001,
-     795
+     1928,
+     874
     ]
    ]
   },
@@ -4542,8 +4542,8 @@
    "recipe": "cu_wayshrine",
    "name": "Wayfarer Shrine",
    "kind": "shrine",
-   "x": 1802,
-   "z": 698,
+   "x": 1780,
+   "z": 755,
    "yaw": 3.56,
    "radius": 4,
    "levelBase": 6
@@ -5395,8 +5395,8 @@
     2,
     3
    ],
-   "x": 1911,
-   "z": 838,
+   "x": 1877,
+   "z": 844,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -5531,22 +5531,51 @@
    "chatter": [
     "role.woodcutter"
    ],
-   "x": 1896,
-   "z": 688,
+   "x": 1825,
+   "z": 782,
    "yaw": 2.99,
    "radius": 6,
    "path": [
     [
-     1907,
-     696
+     1847,
+     788
     ],
     [
-     1877,
-     694
+     1809,
+     798
     ],
     [
-     1900,
-     670
+     1819,
+     760
+    ]
+   ]
+  },
+  {
+   "type": "folk",
+   "id": "folk_gullwick_harbour",
+   "role": "fisher",
+   "name": "Fisher",
+   "work": "fish",
+   "chatter": [
+    "role.fisher"
+   ],
+   "x": 1626,
+   "z": 459,
+   "yaw": 3.14,
+   "radius": 6,
+   "harbour": "harbour_gullwick",
+   "path": [
+    [
+     1622,
+     458
+    ],
+    [
+     1646,
+     458
+    ],
+    [
+     1641,
+     463
     ]
    ]
   },
@@ -5796,26 +5825,26 @@
     1,
     2
    ],
-   "x": 1992,
-   "z": 592,
+   "x": 1996,
+   "z": 483,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     2025,
-     664
+     2029,
+     555
     ],
     [
-     1929,
-     615
+     1933,
+     506
     ],
     [
-     1964,
-     500
+     1968,
+     391
     ],
     [
-     2040,
-     556
+     2044,
+     447
     ]
    ],
    "roam": true
@@ -5930,8 +5959,8 @@
     1,
     2
    ],
-   "x": 1744,
-   "z": 537,
+   "x": 1755,
+   "z": 483,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -5953,8 +5982,8 @@
    "id": "milestone_gullwick_d48",
    "kind": "milestone",
    "name": "Milestone",
-   "x": 1728,
-   "z": 656,
+   "x": 1688,
+   "z": 698,
    "yaw": 3.83,
    "radius": 3,
    "filler": true
@@ -8143,8 +8172,8 @@
    "recipe": "cu_charcoal_mound",
    "name": "Charcoal Clamp",
    "kind": "camp",
-   "x": 1680,
-   "z": 512,
+   "x": 1716,
+   "z": 475,
    "yaw": 5.13,
    "radius": 6,
    "levelBase": 6
@@ -8666,8 +8695,8 @@
     1,
     2
    ],
-   "x": 1617,
-   "z": 568,
+   "x": 1514,
+   "z": 600,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -8809,8 +8838,8 @@
    "recipe": "cu_spring_altar",
    "name": "Spring Altar",
    "kind": "shrine",
-   "x": 1928,
-   "z": 760,
+   "x": 1915,
+   "z": 843,
    "yaw": 5.36,
    "radius": 5,
    "levelBase": 6
@@ -9189,8 +9218,8 @@
    "recipe": "cu_wanted_post",
    "name": "Wanted Post",
    "kind": "lore",
-   "x": 1839,
-   "z": 639,
+   "x": 1628,
+   "z": 656,
    "yaw": 3.71,
    "radius": 3,
    "levelBase": 6
@@ -10367,26 +10396,26 @@
     2,
     3
    ],
-   "x": 1736,
-   "z": 598,
+   "x": 1667,
+   "z": 715,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1712,
-     562
+     1711,
+     722
     ],
     [
-     1774,
-     557
+     1660,
+     759
     ],
     [
-     1758,
-     646
+     1623,
+     708
     ],
     [
-     1696,
-     614
+     1674,
+     671
     ]
    ],
    "roam": true
@@ -10676,8 +10705,8 @@
    "recipe": "cu_farmers_sign",
    "name": "Angry Sign",
    "kind": "lore",
-   "x": 1808,
-   "z": 753,
+   "x": 1798,
+   "z": 767,
    "yaw": 3.61,
    "radius": 3,
    "levelBase": 6

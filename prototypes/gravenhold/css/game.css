@@ -9,6 +9,7 @@ html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background:
 button { pointer-events: auto; border: 1px solid #8c7959; border-radius: 4px; background: #211e20d9; color: #f3e8d2; padding: 7px 11px; font: inherit; cursor: pointer; }
 button:hover { background: #39302a; }
 #status { position: absolute; right: 24px; bottom: 26px; color: #c6aa7b; }
+#target-hp { position: absolute; left: 50%; top: 24px; transform: translateX(-50%); min-width: 210px; text-align: center; color: #f3e8d2; }
 .classpick { position: absolute; right: 24px; top: 24px; display: flex; gap: 10px; align-items: center; pointer-events: auto; color: #c6aa7b; }
 select { border: 1px solid #8c7959; border-radius: 4px; background: #211e20e8; color: #f3e8d2; padding: 7px; font: inherit; }
 #hotbar { position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); display: flex; gap: 8px; pointer-events: auto; }

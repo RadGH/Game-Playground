@@ -9,8 +9,12 @@ test('Gravenhold M0 room and M1 class hotbar load and work', async ({ page }) =>
   await expect(page.locator('#scene')).toBeVisible();
   await expect(page.locator('#class-select option')).not.toHaveCount(0);
   await expect(page.locator('#hotbar button')).toHaveCount(3);
+  const health = page.locator('#target-hp');
+  const initialHealth = await health.textContent();
   await page.getByRole('button', { name: /Star Dart/ }).click();
   await expect(page.locator('#status')).toHaveText('Star Dart cast');
+  await expect(health).not.toHaveText(initialHealth, { timeout: 5_000 });
+  await expect(health).toContainText('Moor Hound');
   const toggle = page.getByRole('button', { name: 'Tilt shift: off' });
   await toggle.click();
   await expect(page.locator('body')).toHaveClass(/tilt/);

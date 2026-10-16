@@ -18,7 +18,8 @@ You are building **Gravenhold** in `prototypes/gravenhold/` (read README.md for 
 
 ## Progress
 - **M0 complete:** Added a single-room playable page with orthographic isometric follow camera, walls/floor, shared Chibi 2 hero, WASD and standard-mapped gamepad movement, and a tilt-shift toggle. Smoke coverage is `tests/smoke.spec.js`.
-- **M1 in progress:** Added Thousandvale class selection, three data-driven skill buttons, mana regeneration/costs, cooldown display, and the shared `sig-fx` renderer. The current prototype casts presentation events only; it does not yet resolve basic attacks or skill hits through the Thousandvale combat rules, so M1 is not complete.
-- **Next:** Integrate the rules engine for attack/skill resolution and target/hit feedback; then extend the smoke test for cooldown/mana and run it again.
-- **Run/test:** Serve from the playground root with `python3 -m http.server 8470`, open `/prototypes/gravenhold/`; run `npx playwright test prototypes/gravenhold/tests/smoke.spec.js`.
-- **Known issue:** M1 casting is visual/UI scaffolding and is not yet combat-functional.
+- **M1 complete:** Added a browser adapter that loads Thousandvale's rules data and constructs its real engine, room, character, field, and combat pipeline. Class selection rebuilds the rules-backed character; Space performs a basic attack; the hotbar resolves real skill slots with actual mana/cooldowns and `sig-fx`; a target health readout and hit feedback show landed damage. The smoke test confirms a Star Dart damages the target.
+- **M2 in progress:** The room now spawns a Thousandvale Moor Hound and ticks its real monster AI; its live health, movement, damage feedback, death/reward state use the rules entity. Still needed for M2 completion: render with shared `creatures`/`actors`, robust death/XP feedback and focused M2 coverage.
+- **Next:** Finish M2 shared monster rendering and test AI, hits, deaths, and XP together.
+- **Run/test:** Use the existing playground dev server at `http://127.0.0.1:8401/prototypes/gravenhold/`; run `npx playwright test prototypes/gravenhold/tests/smoke.spec.js`.
+- **Known issue:** M2 currently uses a simple local mesh for the hound rather than Thousandvale's shared creature renderer; its combat behavior is real.

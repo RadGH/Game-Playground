@@ -20,3 +20,4 @@ models/kit/*/_*
 shots/step9/s9*.png
 models/**/_*.png
 models/_*.png
+!models/kit/**/*.glb

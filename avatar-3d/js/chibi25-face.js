@@ -246,7 +246,7 @@ export function buildFace25(a, rig, c) {
   tag('face:eyes');
   const spec = eyeSpec25(a, H), E = spec.e, { rx, ry, tilt } = spec;
   const eyeBone = rig.byName.eyeR.position;
-  const lidColour = shade(skin, -0.02), lash = '#3a2a2a', white = a.eyes.white || E.white || '#fff8e8';
+  const lidColour = shade(skin, -0.02), lash = '#221a1a', white = a.eyes.white || E.white || '#fff8e8';
   const pupilId = a.eyes.pupil || E.pupil || 'round';
   const Z = { rim: 0.008 * H, white: 0.012 * H, dome: 0.016 * H, iris: 0.031 * H, pupil: 0.0345 * H, shine: 0.038 * H, lid: 0.043 * H };
   /**
@@ -290,7 +290,7 @@ export function buildFace25(a, rig, c) {
       if (E.tear) { const bx = eyeBone.x * s + dx + s * 0.02 * H, by = eyeBone.y + dy; add(taperedCurve([[bx, by - ry * 0.8, 0.268 * H], [bx + s * 0.01 * H, by - ry * 1.6, 0.27 * H], [bx, by - ry * 2.3, 0.262 * H]], [0.012, 0.01, 0.004], 4, 5), 'head', glow); }
     } else {
       // the rim (a darker outline), then the white, both the outline's own shape on a low dome
-      add(flat(shapeOf(outline(1.1)), Z.rim, dome(0.85)), eye, spec.kind === 'hollow' ? '#101416' : shade(skin, -0.35), { position: [dx, dy, 0] });
+      add(flat(shapeOf(outline(1.1)), Z.rim, dome(0.85)), eye, spec.kind === 'hollow' ? '#101416' : shade(skin, -0.24), { position: [dx, dy, 0] });   // round 2: a softer rim (the redesign has no dark ring round the eye; the lash is the line)
       add(flat(shapeOf(outline(1)), Z.white, dome(1)), eye, spec.kind === 'hollow' ? '#14191b' : white, { position: [dx, dy, 0] });
       if (spec.kind === 'hollow') {
         // an undead socket: dark, with a small glowing point that still glances about (the 2D picture's look)
@@ -321,8 +321,10 @@ export function buildFace25(a, rig, c) {
     const lashStyle = E.lash || 'line';
     if (spec.kind === 'open' && lashStyle !== 'none' && !E.restLid) {
       const pts = s > 0 ? topLine(1.04, -0.9, 1) : topLine(1.04, 0.9, -1);
-      const r = lashStyle === 'heavy' ? [0.008, 0.013, 0.012] : [0.006, 0.01, 0.008];
+      // round 2: the plain line is a bold ink stroke, thickest over the outer half, as the redesign draws it
+      const r = lashStyle === 'heavy' ? [0.009, 0.015, 0.016] : lashStyle === 'line' ? [0.006, 0.012, 0.013] : [0.006, 0.01, 0.008];
       add(taperedCurve(pts, r.map(v => v * H), 4, 10), eye, lash);
+      if (lashStyle === 'line') { const o = pts[pts.length - 1]; add(taperedCurve([o, [o[0] + s * 0.022 * H, o[1] + 0.012 * H, o[2] - 0.001 * H]], [0.011 * H, 0.002 * H], 4, 3), eye, lash); }
       if (lashStyle === 'flick' || lashStyle === 'heavy') { const o = pts[pts.length - 1]; add(taperedCurve([o, [o[0] + s * 0.03 * H, o[1] + 0.022 * H, o[2]], [o[0] + s * 0.045 * H, o[1] + 0.04 * H, o[2] - 0.002 * H]], [0.008 * H, 0.005 * H, 0.001 * H], 4, 4), eye, lash); }
       if (lashStyle === 'long') for (const u of [0.35, 0.65, 0.92]) {
         const x = dx + s * u * rx * 1.04, y = dy + ell(u) * ry * 1.04;
@@ -377,10 +379,19 @@ export function buildFace25(a, rig, c) {
   if (brow !== 'none') for (const { s, dx, dy } of eyeInfo) {
     const cx = (eyeBone.x * s + dx) / H, eyeTop = (eyeBone.y + dy + spec.pivotY * 0.97) / H;
     const lift = clamp((a.brows.y || 0) * -0.035, -0.02, 0.05);
-    const y0 = eyeTop + 0.03 + lift, shiftX = (a.brows.x || 0) * 0.02 * s;
     const thick = thickK * (brow === 'thick' || brow === 'angry' || brow === 'bushy' ? 0.02 : brow === 'thin' ? 0.009 : brow === 'unibrow' ? 0.017 : 0.014);
     const inner = { angry: -0.035, worried: 0.03, raised: s > 0 ? 0.03 : 0, slanted: -0.045, curved: -0.01 }[brow] ?? 0;
     const outer = { angry: 0.012, worried: -0.022, raised: s > 0 ? 0.03 : -0.012, slanted: 0.035, curved: -0.02 }[brow] ?? -0.012;
+    /**
+     * ROUND 2 (owner's Starcaller redesign, 2026-10-17): a strip of forehead skin between the brow and the lash line.
+     * The brow used to start 0.03 above the eye's top, so an angry or slanted brow (inner end -0.035/-0.045) and any
+     * thick brow pressed straight onto the lash: "fixed some clipping around the top eyebrows". The LOWEST edge of the
+     * brow (its lowest end, minus half its thickness) now stays at least `GAP` above the eye's top. The ends only
+     * count 0.6 of their dip: they sit over the eye's corners, where its top has already curved down. Kept small on
+     * purpose — the fringe ends at `browTop`, and a bigger lift pushed a bowl cut out through a circlet's band.
+     */
+    const GAP = 0.022, lowest = Math.min(inner, outer, 0) * 0.6 - thick * 0.6;
+    const y0 = eyeTop + Math.max(0.035, GAP - lowest) + lift, shiftX = (a.brows.x || 0) * 0.02 * s;
     const mid = { arched: 0.03, raised: s > 0 ? 0.045 : 0.016, curved: 0.05, soft: 0.006 }[brow] ?? 0.016;
     const w = brow === 'soft' ? 0.055 : 0.095;
     browTop = Math.max(browTop, y0 + Math.max(inner, mid, outer) + thick);
@@ -473,7 +484,7 @@ export function buildFace25(a, rig, c) {
 
   // ---------------------------------------------------------------- mouth
   tag('face:mouth');
-  const mouth = a.mouth.id, lip = shade(a.mouth.color || '#b5484d', -0.3), teeth = '#fff8e8', dark = '#3a1518';
+  const mouth = a.mouth.id, lip = mix(shade(a.mouth.color || '#b5484d', -0.3), '#4a2420', 0.6), teeth = '#fff8e8', dark = '#3a1518';
   const curve = { smile: 0.02, grin: 0.026, neutral: 0.004, frown: -0.018, smirk: 0.012, stitched: 0, tongue: 0.012, fangs: 0.012, tusks: 0.004, buck: 0.02, fang: 0.02, gritted: 0.004 }[mouth] ?? 0.008;
   // a smirk is clearly one-sided (the 2D picture rises to one corner); v2's was nearly level
   const corner = s => mouth === 'smirk' ? (s > 0 ? 0.03 : -0.004) : 0;

@@ -331,6 +331,24 @@ tools/chibi25-measure.mjs [--races=human,goblin] [--only=robe] [--worst]` (the t
 (`tools/chibi2-v2-baseline.mjs --check`). Not done: seated clips keep up to 3.5 cm at the belt line; the two "not
 fixed" rows above; there is no mount/dismount clip to check.
 
+## Chibi 2.5 round 2 — the owner's Starcaller redesign (2026-10-17)
+
+The owner painted over an in-game screenshot of his Starcaller (`ref25/r2-starcaller-current.png` -> `ref25/r2-starcaller-reference.jpg`):
+"largely the same but the colors look better, the eyes fixed some clipping around the top eyebrows". 2.5 only; the 209 v2
+hashes are unchanged.
+
+| change | where |
+|---|---|
+| **Brows clear the eyes.** The brow started 0.03 above the eye's top, so angry/slanted/thick brows pressed onto the lash line. Its lowest edge (end dip x 0.6, because the ends sit over the eye's curved-down corners, minus 0.6 x thickness) now stays 0.022 above the eye; at least 0.035 for any brow. Kept small on purpose: the fringe ends at `browTop`, and a 0.02 lift on every brow pushed a bowl cut through a circlet (the CLIPPING test caught it) | `js/chibi25-face.js` brows block |
+| **Bold lash line.** The plain `line` lash is thicker over the outer half with a small outward flick, in near-black `#221a1a` | eyes block, "lashes" |
+| **Softer eye rim** (skin -0.24, was -0.35): the redesign has no dark ring round the eye, the lash is the line | eyes block, the rim |
+| **Darker, thinner-looking mouth**: the lip colour is mixed 60% toward `#4a2420` | mouth block |
+| **Colour grade** `grade25()`: every vertex colour gets 16% more saturation, done on the display (sRGB) values — in linear light it turned skin yellow — then warmed slightly (r x1.02, b x0.975), with darks lifted (gamma 0.9) so navy reads as blue at dusk | `js/chibi2-geometry.js` `finish()` |
+| **Matte cloth**: roughness 0.97 (was 0.82), envMapIntensity 0.55, so the sky stops laying a pale sheen over clothes and skin. Metal unchanged | same |
+
+Not changed: nose and boots are per-character options (the redesign's smaller nose is the owner's own pick), and the
+redesign's soft painted shading is beyond a two-draw-call vertex-coloured mesh.
+
 ## Tier-2 class armour and emblems (2026-10-05, Thousandvale play-test 4 S18) — opt-in
 
 "A second tier of armour for every class with iconography (flames, lightning bolts, poison drops…)."

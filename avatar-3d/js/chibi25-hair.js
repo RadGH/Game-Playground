@@ -365,7 +365,7 @@ const STYLES = {
   },
   short(x) {  // tousled: five chunky locks spilling forward and to the viewer's right
     x.shell({ edge: x.hairline({ f: 0.5, t: 0.44, sb: 0.3, e: 0.37, b: 0.25, n: 0.08 }), t: volTop(0.02, 0.025) });
-    for (let i = 0; i < 5; i++) { const ph = -0.56 + i * 0.27; x.strand([x.S(ph * 0.45, 0.58, 0.005), x.S(ph, 0.52, 0.034), x.S(ph + 0.13, x.tipY(0.44 + (i % 2) * 0.022), 0.02)], [0.06, 0.068, 0.012], i % 2 ? x.col.light : x.hair, { part: 'front' }); }
+    for (let i = 0; i < 5; i++) { const ph = -0.56 + i * 0.27; x.strand([x.S(ph * 0.45, 0.58, 0.005), x.S(ph, 0.52, 0.034), x.S(ph + 0.13, x.tipY(0.44) + (i % 2) * 0.022, 0.02)], [0.06, 0.068, 0.012], i % 2 ? x.col.light : x.hair, { part: 'front' }); }
   },
   side_part(x) {   // a deep part on the left; the hair from it sweeps across the forehead to the right temple
     x.shell({ edge: x.hairline({ f: 0.49, t: 0.44, sb: 0.3, e: 0.37, b: 0.25, n: 0.08 }), t: volTop(0.022, 0.015) });

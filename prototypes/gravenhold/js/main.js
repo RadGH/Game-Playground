@@ -96,10 +96,15 @@ targetMesh.position.set(practiceTarget.x, 0, practiceTarget.z); scene.add(target
 actors.set(practiceTarget.id, { id: practiceTarget.id, kind: 'monster', pos: targetMesh.position, yaw: Math.PI, look: { id: 'practice_target' } });
 const roomMonsters = [];
 const inventory = [], drops = [];
-const inventoryNode=document.querySelector('#inventory');
-function drawInventory(){ inventoryNode.replaceChildren(); inventory.forEach((item,i)=>{const b=document.createElement('button');b.textContent=item.name;b.title=(item.affixes||[]).map(a=>a.name).join(', ');b.addEventListener('click',()=>{const slot=item.slot||item.type||'weapon';engine.rpg.equip(combatHero,item,{into:slot,force:true}); drawGear(); b.disabled=true; status.textContent=`Equipped ${item.name}`;}); inventoryNode.append(b);}); }
+const inventoryNode=document.querySelector('#inventory'), BAG_LIMIT=12;
+const statsOf=item=>Object.entries(item?.stats||item?.mods||{}).map(([k,v])=>`${k}: ${v}`).join(' · ')||'No listed stats';
+function drawInventory(){inventoryNode.replaceChildren();document.querySelector('#bag-count').textContent=`${inventory.length}/${BAG_LIMIT}`;inventory.forEach(item=>{const b=document.createElement('button');b.textContent=item.name;b.addEventListener('mouseenter',()=>showCompare(item));b.addEventListener('click',()=>{showCompare(item);const slot=item.slot||item.type||'weapon';engine.rpg.equip(combatHero,item,{into:slot,force:true});drawGear();drawEquipment();status.textContent=`Equipped ${item.name}`;});inventoryNode.append(b);});}
+function showCompare(item){const slot=item.slot||item.type||'weapon',worn=combatHero.equipment?.[slot];document.querySelector('#compare').textContent=`${slot}: ${item.name} (${statsOf(item)}) · Worn: ${worn?`${worn.name} (${statsOf(worn)})`:'empty'}`;}
+
 const gearGroup=new THREE.Group(); hero.add(gearGroup);
 function drawGear(){while(gearGroup.children.length)gearGroup.remove(gearGroup.children[0]);for(const [slot,item] of Object.entries(combatHero.equipment||{})){if(!item)continue;const color=item.isUnique?'#e3b54a':item.rarity==='rare'?'#e0ca37':item.rarity==='magic'?'#709adb':'#a6aeb5';const geo=slot==='head'?new THREE.SphereGeometry(.23,8,6):new THREE.BoxGeometry(slot==='weapon' ? .12 : .48,slot==='weapon' ? .72 : .34,slot==='weapon' ? .12 : .34);const m=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color,metalness:.25,roughness:.6}));m.position.set(slot==='weapon' ? .38 : 0,slot==='head' ? .91 : slot==='weapon' ? .62 : .48,slot==='weapon' ? .05 : 0);gearGroup.add(m);}}
+function drawEquipment(){const n=document.querySelector('#equipment-slots');n.replaceChildren();for(const [slot,item] of Object.entries(combatHero.equipment||{})){const row=document.createElement('div');row.textContent=`${slot}: ${item?.name||'Empty'}`;n.append(row);}}
+
 function spawnDrop(item,x,z){const mesh=new THREE.Mesh(new THREE.OctahedronGeometry(.22),new THREE.MeshStandardMaterial({color:item.isUnique?'#e5b84c':item.rarity==='rare'?'#e0cd39':item.rarity==='magic'?'#679be5':'#d2d0c8',emissive:'#302010'}));mesh.position.set(x,.3,z);scene.add(mesh);drops.push({item,mesh});}
 function populateFloorMonsters(skipPractice = false) {
  for (const r of dungeon.rooms) {
@@ -161,10 +166,12 @@ picker.addEventListener('change', () => {
   room.field.add(combatHero, 'player');
   mana = combatHero.mp;
   actors.get('hero').look.cls = selectedClass.id;
-  drawBar();
+  drawBar(); drawEquipment(); drawBuildPicks();
 });
+function drawBuildPicks(){const box=document.querySelector('#build-picks');if(!box)return;box.replaceChildren();const cls=classData.classes.find(c=>c.id===selectedClass.id);for(const id of cls.skills||[]){const skill=skills[id];if(!skill)continue;const card=document.createElement('div');card.textContent=`${skill.name} · ${Object.values(skill.talents||{}).flatMap(t=>t.nodes||[]).map(n=>n.name).filter(Boolean).join(' / ')}`;box.append(card);}}
+document.querySelector('#level-up').addEventListener('click',()=>{combatHero.level=(combatHero.level||1)+1;document.querySelector('#level-options').textContent=`Level ${combatHero.level} · ${combatHero.maxHp||0} health · choose a skill or talent below`;drawBuildPicks();});
 drawBar();
-drawGear();
+drawGear(); drawBuildPicks(); drawInventory(); drawEquipment();
 addEventListener('keydown', e => { if (['Digit1', 'Digit2', 'Digit3'].includes(e.code)) { const id = combatHero.skills.slots[Number(e.code.slice(-1))-1]?.id; if (id) cast(id); } });
 addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); basicAttack(); } });
 
@@ -230,7 +237,7 @@ function frame(now) {
   room.clock.advance(dt);
   room.run(() => room.combat.tick(dt));
   for (const {entity,body} of roomMonsters) { const pos=moveWithWalls({x:body.group.position.x,z:body.group.position.z},entity.x-body.group.position.x,entity.z-body.group.position.z,wallBoxes,.35); entity.x=pos.x;entity.z=pos.z;body.group.position.set(entity.x,entity.hover||0,entity.z); body.group.visible=!entity.dead&&!entity.removed; if(entity.dead&&!entity._lootDropped){entity._lootDropped=true;const item=engine.rpg.rollDrops(entity,{rng:room.streams.get('loot'),magicFind:combatHero.derived?.magicFind||0})?.[0]||engine.rpg.rollDrop({level:entity.level||1,rng:room.streams.get('loot'),chance:1});if(item)spawnDrop(item,entity.x,entity.z);} }
-  for(const d of drops){d.mesh.rotation.y+=dt; if(Math.hypot(hero.position.x-d.mesh.position.x,hero.position.z-d.mesh.position.z)<.8){inventory.push(d.item);scene.remove(d.mesh);drops.splice(drops.indexOf(d),1);drawInventory();status.textContent=`Picked up ${d.item.name}`;}}
+  for(const d of drops){d.mesh.rotation.y+=dt; if(Math.hypot(hero.position.x-d.mesh.position.x,hero.position.z-d.mesh.position.z)<.8){scene.remove(d.mesh);drops.splice(drops.indexOf(d),1);if(inventory.length>=BAG_LIMIT){status.textContent='Bag full · 12/12';continue;}inventory.push(d.item);drawInventory();status.textContent=`Picked up ${d.item.name}`;}}
   for(const w of dungeonGroup.children) if(w.geometry?.type==='BoxGeometry' && w.position.y>.3 && Math.abs(w.position.x-hero.position.x)<2.5 && Math.abs(w.position.z-hero.position.z)<2.5){w.material.transparent=true;w.material.opacity=.24;}else if(w.material===wallMat){w.material.transparent=false;w.material.opacity=1;}
   targetMesh.position.set(practiceTarget.x, practiceTarget.hover || 0, practiceTarget.z);
   targetMesh.visible = !practiceTarget.dead && !practiceTarget.removed;
@@ -250,5 +257,5 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 window.gameplayTest={moveWithWalls,nearestLiving};
-window.gravenhold = { room, get hero() { return combatHero; }, player: hero, target: practiceTarget, get dungeon() { return dungeon; }, debugDrop(){const item=engine.rpg.loot.generate('wand','magic','low',{rng:room.streams.get('loot')});spawnDrop(item,hero.position.x,hero.position.z);}, debugFanWand(){const item=engine.rpg.loot.generate('wand','normal','low',{rng:room.streams.get('loot')});item.castStyle='fan';item.castForm='fork';item.name='Fan Wand';spawnDrop(item,hero.position.x,hero.position.z);} };
+window.gravenhold = { room, get hero() { return combatHero; }, player: hero, target: practiceTarget, get dungeon() { return dungeon; }, debugDrop(){const item=engine.rpg.loot.generate('wand','magic','low',{rng:room.streams.get('loot')});spawnDrop(item,hero.position.x,hero.position.z);}, debugFanWand(){const item=engine.rpg.loot.generate('wand','normal','low',{rng:room.streams.get('loot')});item.castStyle='fan';item.castForm='fork';item.name='Wand of the Ninth Star';spawnDrop(item,hero.position.x,hero.position.z);}, debugFillBag(){for(let i=inventory.length;i<BAG_LIMIT;i++)inventory.push({name:`Test item ${i+1}`,slot:'weapon'});drawInventory();} };
 requestAnimationFrame(frame);

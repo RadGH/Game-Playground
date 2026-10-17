@@ -22,3 +22,7 @@ select { border: 1px solid #8c7959; border-radius: 4px; background: #211e20e8; c
 #inventory button { text-align:left; font-size:12px; }
 .tilt #scene { filter: saturate(1.14); }
 .tilt::after { content: ""; position: fixed; inset: 0; pointer-events: none; backdrop-filter: blur(1.5px); mask-image: linear-gradient(to bottom, #000 0%, transparent 25%, transparent 76%, #000 100%); }
+#bag-count { color:#c6aa7b; font-weight:400; }
+#compare,#equipment-slots,#build-picks { margin-top:6px; color:#d5c7ad; font-size:11px; }
+#level-panel { position:absolute; right:24px; bottom:84px; width:250px; max-height:38vh; overflow:auto; padding:9px; border:1px solid #8c7959; border-radius:4px; background:#17151ce8; pointer-events:auto; }
+#level-panel #build-picks div { padding:4px 0; border-top:1px solid #504536; }

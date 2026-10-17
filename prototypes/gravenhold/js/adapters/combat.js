@@ -18,10 +18,10 @@ export async function createCombatRoom() {
   attachField(room, { terrain: flatTerrain({ size: 8 }) });
   room.combat = createCombat(room);
   const makeCharacter = classId => createCharacter(engine, { id: 'hero', classId, name: 'Wayfarer', x: 0, z: 0 });
-  const hero = makeCharacter('starcaller');
+  const hero = makeCharacter('warrior');
   room.field.add(hero, 'player');
   const def = engine.enemyDef('moor_hound') || engine.bestiary.enemies[0];
   const target = spawnMonster(room.field, def, 1, 0, -3, { id: 'practice_target' });
   room.combat.tickMonsters = dt => tickMonsters(room.field, dt);
-  return { room, hero, target, classes: engine.classes, skills: engine.skillData.skills, makeCharacter };
+  return { room, hero, target, classes: engine.classes, skills: engine.skillData.skills, makeCharacter, spawn: (id,x,z) => spawnMonster(room.field, def, 1, x, z, { id }) };
 }

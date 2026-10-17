@@ -106,6 +106,28 @@ export function createRig(body = {}, race = null) {
 }
 
 /** Assemble in bind space. All material buckets use the same skeleton, including rigid equipment. */
+/**
+ * CHIBI 2.5 COLOUR GRADE (round 2, the owner's Starcaller redesign, 2026-10-17: "the colors look better"). The
+ * redesign has the same hues as the game, only richer: gold that reads as gold, not mustard, a navy that is blue,
+ * warmer skin. So every vertex colour is pushed away from its own grey by SAT and warmed a touch, and (in finish) the
+ * cloth is fully matte so the sky stops laying a pale sheen over it. 2.5 only — a v2 look's colours are hashed.
+ */
+// Done on the DISPLAY values (sRGB), not the linear ones the attribute stores: the same push in linear light
+// overshot pale warm colours and turned skin yellow.
+const SAT = 1.16, WARM = [1.02, 0.995, 0.975], LIFT = 0.9;
+const toS = v => v <= 0.0031308 ? v * 12.92 : 1.055 * v ** (1 / 2.4) - 0.055;
+const toL = v => v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+function grade25(attr) {
+  const a = attr.array, c = [0, 0, 0];
+  for (let i = 0; i < a.length; i += 3) {
+    for (let k = 0; k < 3; k++) c[k] = toS(a[i + k]);
+    const L = 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2];
+    // ...and LIFT 0.9 opens the darks a little (the redesign's navy is a blue you can see; ours read as black at dusk)
+    for (let k = 0; k < 3; k++) a[i + k] = toL(Math.min(1, Math.max(0, (L + (c[k] - L) * SAT) * WARM[k])) ** LIFT);
+  }
+  attr.needsUpdate = true;
+}
+
 export class SkinBuilder {
   constructor(rig) { this.rig = rig; this.buckets = { cloth: [], metal: [] }; }
   add(geometry, boneName, color, { position = [0, 0, 0], scale = [1, 1, 1], rotation = [0, 0, 0], metal = false, bend = null, skinTo = null, weigh = null } = {}) {
@@ -172,7 +194,9 @@ export class SkinBuilder {
       for (const p of parts) p.dispose();
       if (!geometry) throw new Error('Chibi 2 geometry assembly failed');
       geometry.computeBoundingSphere();
-      const material = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: name === 'metal' ? 0.38 : 0.82, metalness: name === 'metal' ? 0.65 : 0 });
+      if (this.rig.v25) grade25(geometry.attributes.color);
+      const material = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: name === 'metal' ? 0.38 : (this.rig.v25 ? 0.97 : 0.82), metalness: name === 'metal' ? 0.65 : 0 });
+      if (this.rig.v25 && name === 'cloth') material.envMapIntensity = 0.55;
       result.push({ name, geometry, material });
     }
     return result;

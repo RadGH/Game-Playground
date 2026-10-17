@@ -90,3 +90,24 @@ test('M3 stairs descend to a new seeded floor with room monsters', async ({ page
   expect(nextFloor.seed).not.toBe(41);
   expect(nextFloor.rooms.length).toBeGreaterThan(4);
 });
+
+
+test('Ninth Star fans three distinct projectiles into three landed hits',async({page})=>{
+ await page.goto('/prototypes/gravenhold/'); await expect(page.locator('#target-hp')).toContainText('Moor Hound',{timeout:20000});
+ const setup=await page.evaluate(()=>{const d=window.gravenhold.debug;d.clearMonsters();d.equipNinthStar();window.gravenhold.player.position.set(0,0,0);window.gravenhold.player.rotation.y=0;for(const [i,x] of [-4,0,4].entries())d.spawnMonster(`fan${i}`,x,9);d.reset();return window.gravenhold.hero.equipment.weapon.name;});
+ expect(setup).toBe('Wand of the Ninth Star');
+ await page.evaluate(()=>window.gravenhold.debug.attack());
+ await expect.poll(()=>page.evaluate(()=>window.gravenhold.debug.stats.projectileHits.length),{timeout:5000}).toBe(3);
+ const stats=await page.evaluate(()=>window.gravenhold.debug.stats);
+ expect(stats.projectileSpawns).toBe(3);expect(stats.projectileHits).toHaveLength(3);expect(stats.projectileHits.every(h=>h.damage>0)).toBeTruthy();
+});
+
+test('M5 level-ups award Thousandvale perks and talent choices change a skill plan',async({page})=>{
+ await page.goto('/prototypes/gravenhold/');await expect(page.locator('#target-hp')).toContainText('Moor Hound',{timeout:20000});
+ const result=await page.evaluate(()=>{const d=window.gravenhold.debug;d.levelUp();d.levelUp();const h=window.gravenhold.hero;const skill=h.skills.slots.find(s=>s.id)?.id;const view=window.gravenhold.room.run(()=>window.gravenhold.room.engine.skillData.skills[skill]);const options=Object.entries(view.talents||{}).flatMap(([tier,t])=>(t.nodes||[]).map(n=>({tier:Number(tier),id:n.id,name:n.name})));return {skill,options,level:h.level};});
+ expect(result.level).toBe(3);expect(result.options.length).toBeGreaterThan(0);
+ const picked=await page.evaluate(({skill,option})=>{const d=window.gravenhold.debug;const before=d.skillPlan(skill);const accepted=d.chooseTalent(skill,option.tier,option.id);const after=d.skillPlan(skill);return {accepted,before,after,picks:window.gravenhold.hero.skillTalents?.[skill]};},{skill:result.skill,option:result.options[0]});
+ expect(picked.accepted.ok).toBeTruthy();expect(picked.picks).toBeTruthy();expect(JSON.stringify({mult:picked.after.mult,damage:picked.after.damage,kind:picked.after.kind,status:picked.after.status})).not.toBe(JSON.stringify({mult:picked.before.mult,damage:picked.before.damage,kind:picked.before.kind,status:picked.before.status}));
+ const perk=await page.evaluate(()=>{const f=window.gravenhold.room.engine.rpg.forest;return f.links.find(([a,b])=>a==='start'||b==='start')?.find(id=>id!=='start');});
+ if(perk){const r=await page.evaluate(id=>window.gravenhold.debug.choosePerk(id),perk);expect(r.ok).toBeTruthy();}
+});

@@ -1,5 +1,9 @@
 # Gravenhold
 
+> **ON HOLD (owner, 2026-10-17).** No more development until Radley resumes it. Codex is no longer the builder; going forward Codex is used for graphics only. Last state: M7 (local co-op) finished, M8 (polish) not started.
+>
+> **First fix on resume: W must move the hero NORTH, up the screen.** Right now `js/main.js` (~line 247) maps W/S/A/D straight onto world -z/+z/-x/+x, but the camera sits at a 45° yaw, so W sends the hero diagonally across the screen. The old Roguelike had the same fault. The fix: turn the input vector by the camera yaw before moving, so up on the keyboard or stick is always up on the screen, and add a test that presses W and checks the hero's screen position goes straight up.
+
 Side experiment (owner Radley Sustaire, 2026-10-16, independent project, sandbox, not public). Built by OpenAI Codex (cheap model) under Claude's supervision; Claude does not write the game code. Read `CODEX.md` first if you are the builder.
 
 ## Pitch

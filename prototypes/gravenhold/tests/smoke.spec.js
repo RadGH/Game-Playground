@@ -1,5 +1,24 @@
 import { test, expect } from '@playwright/test';
 
+test('M7 each gamepad index joins as its own player and shared camera tracks the party', async ({ page }) => {
+  await page.addInitScript(() => {
+    const makePad = index => ({ index, id:`Fake pad ${index}`, mapping:'standard', connected:true, axes:[0,0,0,0], buttons:Array.from({length:16},()=>({pressed:false,value:0})) });
+    window.fakePads=[makePad(0),makePad(1)];
+    Object.defineProperty(navigator,'getGamepads',{configurable:true,value:()=>window.fakePads});
+  });
+  await page.goto('/prototypes/gravenhold/');
+  await page.waitForFunction(() => !!window.gravenhold);
+  await page.locator('#start-run').click();
+  await page.evaluate(()=>{window.fakePads[0].buttons[0].pressed=true;window.fakePads[1].buttons[0].pressed=true;});
+  await expect(page.locator('#player-frames .player-frame')).toHaveCount(3);
+  await page.evaluate(()=>{window.fakePads[0].buttons[0].pressed=false;window.fakePads[1].buttons[0].pressed=false;window.fakePads[0].axes[0]=0.9;});
+  await page.waitForTimeout(450);
+  const result=await page.evaluate(()=>({players:document.querySelectorAll('#player-frames .player-frame').length, roster:window.gravenhold.players?.map(p=>p.padIndex), firstX:window.gravenhold.player.position.x, secondX:document.querySelector('[data-player="player2"]')?.dataset.player}));
+  expect(result.players).toBe(3);
+  expect(result.firstX).toBe(0);
+  expect(result.secondX).toBe('player2');
+});
+
 test('Gravenhold M0 room and M1 class hotbar load and work', async ({ page }) => {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));

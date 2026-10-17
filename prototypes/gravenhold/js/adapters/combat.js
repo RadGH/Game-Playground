@@ -17,7 +17,7 @@ export async function createCombatRoom() {
   const room = createRoomContext({ id: 'gravenhold', seed: 41, engine });
   attachField(room, { terrain: flatTerrain({ size: 8 }) });
   room.combat = createCombat(room);
-  const makeCharacter = classId => createCharacter(engine, { id: 'hero', classId, name: 'Wayfarer', x: 0, z: 0 });
+  const makeCharacter = (classId, id = 'hero') => createCharacter(engine, { id, classId, name: 'Wayfarer', x: 0, z: 0 });
   const hero = makeCharacter('warrior');
   room.field.add(hero, 'player');
   const def = engine.enemyDef('moor_hound') || engine.bestiary.enemies[0];

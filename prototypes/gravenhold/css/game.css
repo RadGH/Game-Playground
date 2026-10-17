@@ -29,6 +29,11 @@ select { border: 1px solid #8c7959; border-radius: 4px; background: #211e20e8; c
 
 .run-screen { position:fixed; inset:0; z-index:5; display:grid; place-items:center; background:#100e14d9; pointer-events:auto; }
 .run-screen[hidden] { display:none; }
+#player-frames { position:absolute; left:50%; top:54px; transform:translateX(-50%); display:flex; gap:8px; max-width:70vw; pointer-events:auto; }
+.player-frame { min-width:142px; padding:7px 9px; border:1px solid #8c7959; border-radius:5px; background:#17151ce8; display:grid; grid-template-columns:1fr; gap:3px; }
+.player-frame b { font-size:11px; color:#d6b77e; }
+.player-frame select { padding:3px 5px; font-size:11px; }
+.player-frame small { color:#d5c7ad; font-size:10px; }
 .run-card { width:min(420px,90vw); padding:28px; border:1px solid #aa8f61; border-radius:8px; background:#211e20f5; box-shadow:0 18px 70px #000; text-align:center; }
 .run-card h1 { letter-spacing:.18em; color:#d6b77e; }
 .run-card label { display:block; margin:14px 0 4px; }

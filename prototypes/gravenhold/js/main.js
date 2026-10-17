@@ -4,6 +4,7 @@ import { createCreature } from '../../../avatar-3d/js/creatures.js';
 import { createSigFx } from '../../thousandvale/js/client/sig-fx.js';
 import { createCombatRoom } from './adapters/combat.js';
 import { generateDungeon } from './dungeon.js';
+import { moveWithWalls, nearestLiving } from './gameplay.js';
 
 const canvas = document.querySelector('#scene');
 const status = document.querySelector('#status');
@@ -32,12 +33,14 @@ const floorMat = new THREE.MeshStandardMaterial({ color: '#514b48', roughness: 1
 const dungeonGroup = new THREE.Group(); scene.add(dungeonGroup);
 const minimap = document.querySelector('#minimap'), mapCtx = minimap.getContext('2d');
 let dungeon, floorNumber = 1;
+const wallBoxes = [];
 function buildDungeon(seed) {
   while (dungeonGroup.children.length) { const o = dungeonGroup.children.pop(); o.geometry?.dispose(); }
   dungeon = generateDungeon(seed, floorNumber);
   const rooms = new Map(dungeon.rooms.map(r => [r.id, r]));
   function slab(x,z,w,d, material=floorMat) { const m=new THREE.Mesh(new THREE.BoxGeometry(w,0.16,d),material); m.position.set(x,-0.08,z); dungeonGroup.add(m); }
-  function wall(x,z,w,d,h=2.8) { const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),wallMat); m.position.set(x,h/2-0.08,z); dungeonGroup.add(m); }
+  wallBoxes.length=0;
+  function wall(x,z,w,d,h=1.15) { const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),wallMat); m.position.set(x,h/2-0.08,z); dungeonGroup.add(m); wallBoxes.push({x,z,w,d}); }
   const doorMat = new THREE.MeshStandardMaterial({color:'#b99761', roughness:.8});
   for (const r of dungeon.rooms) {
     slab(r.x,r.z,r.width,r.depth);
@@ -82,7 +85,7 @@ hero.add(character.group);
 status.textContent = 'Room ready';
 
 // The UI and presentation read the same rows as the rules engine.
-const { room, hero: initialCombatHero, target: practiceTarget, classes, skills, makeCharacter, spawn } = await createCombatRoom();
+const { room, engine, hero: initialCombatHero, target: practiceTarget, classes, skills, makeCharacter, spawn } = await createCombatRoom();
 const picker = document.querySelector('#class-select');
 let combatHero = initialCombatHero;
 const classData = { classes, skills };
@@ -92,10 +95,16 @@ const targetMesh = targetBody.group;
 targetMesh.position.set(practiceTarget.x, 0, practiceTarget.z); scene.add(targetMesh);
 actors.set(practiceTarget.id, { id: practiceTarget.id, kind: 'monster', pos: targetMesh.position, yaw: Math.PI, look: { id: 'practice_target' } });
 const roomMonsters = [];
+const inventory = [], drops = [];
+const inventoryNode=document.querySelector('#inventory');
+function drawInventory(){ inventoryNode.replaceChildren(); inventory.forEach((item,i)=>{const b=document.createElement('button');b.textContent=item.name;b.title=(item.affixes||[]).map(a=>a.name).join(', ');b.addEventListener('click',()=>{const slot=item.slot||item.type||'weapon';engine.rpg.equip(combatHero,item,{into:slot,force:true}); drawGear(); b.disabled=true; status.textContent=`Equipped ${item.name}`;}); inventoryNode.append(b);}); }
+const gearGroup=new THREE.Group(); hero.add(gearGroup);
+function drawGear(){while(gearGroup.children.length)gearGroup.remove(gearGroup.children[0]);for(const [slot,item] of Object.entries(combatHero.equipment||{})){if(!item)continue;const color=item.isUnique?'#e3b54a':item.rarity==='rare'?'#e0ca37':item.rarity==='magic'?'#709adb':'#a6aeb5';const geo=slot==='head'?new THREE.SphereGeometry(.23,8,6):new THREE.BoxGeometry(slot==='weapon' ? .12 : .48,slot==='weapon' ? .72 : .34,slot==='weapon' ? .12 : .34);const m=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color,metalness:.25,roughness:.6}));m.position.set(slot==='weapon' ? .38 : 0,slot==='head' ? .91 : slot==='weapon' ? .62 : .48,slot==='weapon' ? .05 : 0);gearGroup.add(m);}}
+function spawnDrop(item,x,z){const mesh=new THREE.Mesh(new THREE.OctahedronGeometry(.22),new THREE.MeshStandardMaterial({color:item.isUnique?'#e5b84c':item.rarity==='rare'?'#e0cd39':item.rarity==='magic'?'#679be5':'#d2d0c8',emissive:'#302010'}));mesh.position.set(x,.3,z);scene.add(mesh);drops.push({item,mesh});}
 function populateFloorMonsters(skipPractice = false) {
  for (const r of dungeon.rooms) {
   for (let i = 0; i < r.monsters; i++) {
-    if (skipPractice && r.id === dungeon.start && i === 0) continue;
+    if (skipPractice && r.id === dungeon.start) continue;
     const entity = spawn(`floor${floorNumber}_${r.id}_${i}`, r.x + (i ? 1.4 : -1.4), r.z + (i ? -1.3 : 1.3));
     const body = { group: targetBody.group.clone(true) };
     body.group.position.set(entity.x,0,entity.z); body.group.scale.setScalar(.82); scene.add(body.group);
@@ -126,12 +135,13 @@ function cast(id) {
   const skill = skills[id], now = performance.now() / 1000;
   const slot = combatHero.skills.slots.findIndex(s => s.id === id);
   if (slot < 0) { status.textContent = 'Skill unavailable'; return; }
-  const targetEntity = room.field.monsters.find(m => !m.dead && !m.removed);
+  const targetEntity = nearestLiving(room.field.monsters, hero.position.x,hero.position.z);
   const result = room.run(() => room.combat.cast(combatHero, slot, { aim: { x: hero.position.x, z: hero.position.z - 4 }, target: targetEntity?.id, yaw: hero.rotation.y }));
   if (!result.ok) { status.textContent = result.why; return; }
   mana = combatHero.mp;
   cooldowns.set(id, now + (skill.cooldown || 1));
   actors.get('hero').look.cls = selectedClass.id;
+  drawGear();
   sig.onEvent({ type: 'cast', s: 'hero', skill: id, aim: { x: hero.position.x, z: hero.position.z - 4 } });
   status.textContent = `${skill.name} cast`;
   updateHotbar();
@@ -154,12 +164,13 @@ picker.addEventListener('change', () => {
   drawBar();
 });
 drawBar();
+drawGear();
 addEventListener('keydown', e => { if (['Digit1', 'Digit2', 'Digit3'].includes(e.code)) { const id = combatHero.skills.slots[Number(e.code.slice(-1))-1]?.id; if (id) cast(id); } });
 addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); basicAttack(); } });
 
 function basicAttack() {
   const dx = Math.sin(hero.rotation.y), dz = Math.cos(hero.rotation.y);
-  const foe = room.field.monsters.filter(m => !m.dead && !m.removed).sort((a,b) => Math.hypot(a.x-hero.position.x,a.z-hero.position.z)-Math.hypot(b.x-hero.position.x,b.z-hero.position.z))[0];
+  const foe = nearestLiving(room.field.monsters,hero.position.x,hero.position.z);
   const result = room.run(() => room.combat.attack(combatHero, { yaw: hero.rotation.y, target: foe || null }));
   if (!result.ok) { status.textContent = result.why; return; }
   status.textContent = foe ? `Attack: ${foe.name}` : 'Attack';
@@ -199,8 +210,7 @@ function frame(now) {
     x /= length; z /= length;
     // Camera-facing diagonal controls preserve the usual WASD feel in the isometric view.
     const dx = (x - z) * 0.7071, dz = (x + z) * 0.7071;
-    hero.position.x += dx * dt * 3.2;
-    hero.position.z += dz * dt * 3.2;
+    const moved=moveWithWalls(hero.position,dx*dt*3.2,dz*dt*3.2,wallBoxes); hero.position.set(moved.x,0,moved.z);
     hero.rotation.y = Math.atan2(dx, dz);
     character.setAnim('walk');
   } else {
@@ -219,7 +229,9 @@ function frame(now) {
   combatHero.x = hero.position.x; combatHero.z = hero.position.z; combatHero.yaw = hero.rotation.y; combatHero.moving = length > 0;
   room.clock.advance(dt);
   room.run(() => room.combat.tick(dt));
-  for (const {entity,body} of roomMonsters) { body.group.position.set(entity.x,entity.hover||0,entity.z); body.group.visible=!entity.dead&&!entity.removed; }
+  for (const {entity,body} of roomMonsters) { const pos=moveWithWalls({x:body.group.position.x,z:body.group.position.z},entity.x-body.group.position.x,entity.z-body.group.position.z,wallBoxes,.35); entity.x=pos.x;entity.z=pos.z;body.group.position.set(entity.x,entity.hover||0,entity.z); body.group.visible=!entity.dead&&!entity.removed; if(entity.dead&&!entity._lootDropped){entity._lootDropped=true;const item=engine.rpg.rollDrops(entity,{rng:room.streams.get('loot'),magicFind:combatHero.derived?.magicFind||0})?.[0]||engine.rpg.rollDrop({level:entity.level||1,rng:room.streams.get('loot'),chance:1});if(item)spawnDrop(item,entity.x,entity.z);} }
+  for(const d of drops){d.mesh.rotation.y+=dt; if(Math.hypot(hero.position.x-d.mesh.position.x,hero.position.z-d.mesh.position.z)<.8){inventory.push(d.item);scene.remove(d.mesh);drops.splice(drops.indexOf(d),1);drawInventory();status.textContent=`Picked up ${d.item.name}`;}}
+  for(const w of dungeonGroup.children) if(w.geometry?.type==='BoxGeometry' && w.position.y>.3 && Math.abs(w.position.x-hero.position.x)<2.5 && Math.abs(w.position.z-hero.position.z)<2.5){w.material.transparent=true;w.material.opacity=.24;}else if(w.material===wallMat){w.material.transparent=false;w.material.opacity=1;}
   targetMesh.position.set(practiceTarget.x, practiceTarget.hover || 0, practiceTarget.z);
   targetMesh.visible = !practiceTarget.dead && !practiceTarget.removed;
   if (practiceTarget.hp != null) targetMesh.scale.setScalar(Math.max(0.25, practiceTarget.hp / practiceTarget.maxHp));
@@ -237,5 +249,6 @@ function frame(now) {
   renderer.render(scene, camera);
   requestAnimationFrame(frame);
 }
-window.gravenhold = { room, get hero() { return combatHero; }, player: hero, target: practiceTarget, get dungeon() { return dungeon; } };
+window.gameplayTest={moveWithWalls,nearestLiving};
+window.gravenhold = { room, get hero() { return combatHero; }, player: hero, target: practiceTarget, get dungeon() { return dungeon; }, debugDrop(){const item=engine.rpg.loot.generate('wand','magic','low',{rng:room.streams.get('loot')});spawnDrop(item,hero.position.x,hero.position.z);}, debugFanWand(){const item=engine.rpg.loot.generate('wand','normal','low',{rng:room.streams.get('loot')});item.castStyle='fan';item.castForm='fork';item.name='Fan Wand';spawnDrop(item,hero.position.x,hero.position.z);} };
 requestAnimationFrame(frame);

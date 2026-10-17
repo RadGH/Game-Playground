@@ -23,5 +23,5 @@ export async function createCombatRoom() {
   const def = engine.enemyDef('moor_hound') || engine.bestiary.enemies[0];
   const target = spawnMonster(room.field, def, 1, 0, -3, { id: 'practice_target' });
   room.combat.tickMonsters = dt => tickMonsters(room.field, dt);
-  return { room, hero, target, classes: engine.classes, skills: engine.skillData.skills, makeCharacter, spawn: (id,x,z) => spawnMonster(room.field, def, 1, x, z, { id }) };
+  return { room, engine, hero, target, classes: engine.classes, skills: engine.skillData.skills, makeCharacter, spawn: (id,x,z) => spawnMonster(room.field, def, 1, x, z, { id }) };
 }

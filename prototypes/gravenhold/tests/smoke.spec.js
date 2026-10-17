@@ -16,6 +16,11 @@ test('Gravenhold M0 room and M1 class hotbar load and work', async ({ page }) =>
   expect(layout.rooms.length).toBeGreaterThan(4);
   expect(layout.links.length).toBe(layout.rooms.length - 1);
   expect(layout.stairs).toBeTruthy();
+  await page.evaluate(() => { window.gravenhold.player.position.set(0,0,0); window.dispatchEvent(new KeyboardEvent('keydown',{code:'KeyD'})); });
+  await page.waitForTimeout(450);
+  const blocked=await page.evaluate(()=>window.gravenhold.player.position.x);
+  expect(blocked).toBeLessThan(2.6);
+  await page.evaluate(()=>{window.dispatchEvent(new KeyboardEvent('keyup',{code:'KeyD'}));window.gravenhold.player.position.set(0,0,0);});
   await page.locator('#class-select').selectOption('starcaller');
   const health = page.locator('#target-hp');
   const initialHealth = await health.textContent();
@@ -28,6 +33,24 @@ test('Gravenhold M0 room and M1 class hotbar load and work', async ({ page }) =>
   await expect(page.locator('body')).toHaveClass(/tilt/);
   await expect(page.getByRole('button', { name: 'Tilt shift: on' })).toHaveAttribute('aria-pressed', 'true');
   expect(errors).toEqual([]);
+});
+
+test('M3 walls stop player and nearest monster selection is shared by attacks and skills', async ({page})=>{
+ await page.goto('/prototypes/gravenhold/'); await expect(page.locator('#target-hp')).toContainText('Moor Hound',{timeout:20000});
+ const result=await page.evaluate(()=>{
+   const {nearestLiving,moveWithWalls}=window.gameplayTest||{};
+   const mobs=[{id:'far',x:4,z:0},{id:'near',x:1,z:0},{id:'dead',x:.1,z:0,dead:true}];
+   return { target:nearestLiving(mobs,0,0)?.id, moved:moveWithWalls({x:0,z:0},1,0,[{x:.5,z:0,w:.4,d:2}]).x };
+ });
+ expect(result.target).toBe('near'); expect(result.moved).toBe(0);
+});
+
+test('M4 inventory lists picked Thousandvale loot and can equip it',async({page})=>{
+ await page.goto('/prototypes/gravenhold/'); await expect(page.locator('#target-hp')).toContainText('Moor Hound',{timeout:20000});
+ await page.evaluate(()=>window.gravenhold.debugDrop());
+ await expect(page.locator('#inventory button')).toHaveCount(1,{timeout:5000});
+ await page.locator('#inventory button').first().click();
+ await expect(page.locator('#status')).toContainText('Equipped');
 });
 
 test('M2 shared hound, monster AI, hit, death and XP; class hotbar follows selection', async ({ page }) => {

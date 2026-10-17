@@ -21,7 +21,8 @@ export async function createCombatRoom() {
   const hero = makeCharacter('warrior');
   room.field.add(hero, 'player');
   const def = engine.enemyDef('moor_hound') || engine.bestiary.enemies[0];
+  const bossDef = engine.enemyDef('world_ossathra');
   const target = spawnMonster(room.field, def, 1, 0, -3, { id: 'practice_target' });
   room.combat.tickMonsters = dt => tickMonsters(room.field, dt);
-  return { room, engine, hero, target, classes: engine.classes, skills: engine.skillData.skills, makeCharacter, spawn: (id,x,z) => spawnMonster(room.field, def, 1, x, z, { id }) };
+  return { room, engine, hero, target, classes: engine.classes, skills: engine.skillData.skills, makeCharacter, spawn: (id,x,z,level=1) => spawnMonster(room.field, def, level, x, z, { id }), spawnBoss: (id,x,z,level) => spawnMonster(room.field,bossDef,level,x,z,{id,boss:true}), bossLook: data.tvMonsters?.monsters?.find(m=>m.id==='world_ossathra')?.look?.creature };
 }

@@ -87,13 +87,14 @@ hero.add(character.group);
 status.textContent = 'Room ready';
 
 // The UI and presentation read the same rows as the rules engine.
-const { room, engine, hero: initialCombatHero, target: practiceTarget, classes, skills, makeCharacter, spawn } = await createCombatRoom();
+const { room, engine, hero: initialCombatHero, target: practiceTarget, classes, skills, makeCharacter, spawn, spawnBoss, bossLook } = await createCombatRoom();
 const picker = document.querySelector('#class-select');
 let combatHero = initialCombatHero;
 const classData = { classes, skills };
 const actors = new Map([['hero', { id: 'hero', kind: 'player', pos: hero.position, yaw: 0, look: { cls: 'warrior' } }]]);
 const targetBody = await createCreature({ type: 'hound', size: 0.85, seed: 41, colors: { body: '#80554b', belly: '#c3987b', accent: '#4e302b', eyes: '#e7b565' } }, { detail: 0.8 });
 const targetMesh = targetBody.group;
+const bossVisual = await createCreature(bossLook || { type:'dragon', size:2.6, colors:{body:'#141216',belly:'#ff5a1a',accent:'#ffb040',eyes:'#fff07a'}, features:{wings:true,horns:true} }, { detail:1 });
 targetMesh.position.set(practiceTarget.x, 0, practiceTarget.z); scene.add(targetMesh);
 actors.set(practiceTarget.id, { id: practiceTarget.id, kind: 'monster', pos: targetMesh.position, yaw: Math.PI, look: { id: 'practice_target' } });
 const roomMonsters = [];
@@ -112,7 +113,7 @@ function populateFloorMonsters(skipPractice = false) {
  for (const r of dungeon.rooms) {
   for (let i = 0; i < r.monsters; i++) {
     if (skipPractice && r.id === dungeon.start) continue;
-    const entity = spawn(`floor${floorNumber}_${r.id}_${i}`, r.x + (i ? 1.4 : -1.4), r.z + (i ? -1.3 : 1.3));
+    const entity = spawn(`floor${floorNumber}_${r.id}_${i}`, r.x + (i ? 1.4 : -1.4), r.z + (i ? -1.3 : 1.3), floorNumber * 2);
     const body = { group: targetBody.group.clone(true) };
     body.group.position.set(entity.x,0,entity.z); body.group.scale.setScalar(.82); scene.add(body.group);
     const actor={ id:entity.id,kind:'monster',pos:body.group.position,yaw:Math.PI,look:{id:entity.id} }; actors.set(entity.id,actor);
@@ -121,10 +122,20 @@ function populateFloorMonsters(skipPractice = false) {
  }
 }
 populateFloorMonsters(true);
+const FINAL_FLOOR = 4;
+let runActive = false, runEnded = false, runStartedAt = 0, runGold = 0;
+let meta = { runs: 0, bestFloor: 0, gold: 0, unlocked: ['warrior'] };
+try { const saved = JSON.parse(localStorage.getItem('gravenhold-meta') || 'null'); if (saved && Array.isArray(saved.unlocked)) meta = { ...meta, ...saved }; } catch {}
+function saveMeta(){ try { localStorage.setItem('gravenhold-meta', JSON.stringify(meta)); } catch {} }
+function paintMeta(){ document.querySelector('#meta-summary').textContent = `Runs ${meta.runs} · Gold ${meta.gold} · Best floor ${meta.bestFloor} · Unlocked: ${meta.unlocked.join(', ')}`; }
+function finishRun(won){ if(runEnded)return;runEnded=true;runActive=false;meta.runs++;meta.bestFloor=Math.max(meta.bestFloor,floorNumber);meta.gold+=runGold;if(won){const next=classes.find(c=>!meta.unlocked.includes(c.id));if(next)meta.unlocked.push(next.id);}saveMeta();paintMeta();const elapsed=Math.floor((performance.now()-runStartedAt)/1000);document.querySelector('#run-title').textContent=won?'KEEP CLEARED':'RUN ENDED';document.querySelector('#run-copy').textContent=`${won?'Boss defeated':'You fell'} on floor ${floorNumber} · ${runGold} gold · ${Math.floor(elapsed/60)}m ${elapsed%60}s`;document.querySelector('#start-run').textContent='Return to start';document.querySelector('#run-screen').hidden=false;}
+function startRun(){selectedClass=classes.find(c=>c.id===document.querySelector('#start-class').value)||classes[0];picker.value=selectedClass.id;room.field.remove(combatHero);combatHero=makeCharacter(selectedClass.id);room.field.add(combatHero,'player');mana=combatHero.mp;floorNumber=1;runGold=0;runEnded=false;runActive=true;runStartedAt=performance.now();document.querySelector('#floor-label').textContent='FLOOR 1';document.querySelector('#run-screen').hidden=true;const st=dungeon.rooms.find(r=>r.id===dungeon.start);hero.position.set(st.x,0,st.z);drawBar();drawEquipment();drawBuildPicks();status.textContent='Room ready';}
+for(const c of classes){const o=document.createElement('option');o.value=c.id;o.textContent=c.name;o.disabled=!meta.unlocked.includes(c.id);document.querySelector('#start-class').append(o);}document.querySelector('#start-class').value='warrior';document.querySelector('#start-class').addEventListener('change',e=>{if(!meta.unlocked.includes(e.target.value))e.target.value='warrior';picker.value=e.target.value;picker.dispatchEvent(new Event('change'));});document.querySelector('#start-run').addEventListener('click',()=>{if(runEnded){document.querySelector('#run-title').textContent='GRAVENHOLD';document.querySelector('#run-copy').textContent='Choose a class and enter the keep.';document.querySelector('#start-run').textContent='Begin run';runEnded=false;floorNumber=1;buildDungeon(41);for(const {entity,body} of roomMonsters.splice(0)){room.field.remove(entity);scene.remove(body.group);actors.delete(entity.id);}populateFloorMonsters(true);}startRun();});paintMeta();
 const sig = createSigFx(scene, { camera, actors, skillOf: id => skills[id], classOf: () => selectedClass.id });
 let selectedClass = classes.find(c => c.id === 'warrior') || classes[0];
 for (const cls of classData.classes) { const option = document.createElement('option'); option.value = cls.id; option.textContent = cls.name; picker.append(option); }
 picker.value = selectedClass.id;
+
 let mana = 40;
 const cooldowns = new Map();
 const hotbar = document.querySelector('#hotbar');
@@ -227,19 +238,21 @@ function frame(now) {
   }
   character.update?.(dt);
   const stairs = dungeonGroup.children.find(o => o.userData.stairs);
-  if (stairs && Math.hypot(hero.position.x-stairs.position.x,hero.position.z-stairs.position.z)<2 && (keys.has('KeyE') || pad?.buttons?.[0]?.pressed)) {
+  if (stairs && floorNumber<FINAL_FLOOR && Math.hypot(hero.position.x-stairs.position.x,hero.position.z-stairs.position.z)<2 && (keys.has('KeyE') || pad?.buttons?.[0]?.pressed) && roomMonsters.every(m=>m.entity.dead||m.entity.removed)) {
     floorNumber++;
     for (const {entity,body} of roomMonsters.splice(0)) { room.field.remove(entity); scene.remove(body.group); actors.delete(entity.id); }
     practiceTarget.removed=true; targetMesh.visible=false;
-    buildDungeon(41+floorNumber*997); populateFloorMonsters(); document.querySelector('#floor-label').textContent=`FLOOR ${floorNumber}`;
+    buildDungeon(41+floorNumber*997); populateFloorMonsters(); if(floorNumber===FINAL_FLOOR){const br=dungeon.rooms.find(r=>r.id===dungeon.stairs),entity=spawnBoss('ossathra',br.x,br.z-1,20),body={group:bossVisual.group.clone(true)};body.group.position.set(entity.x,0,entity.z);scene.add(body.group);actors.set(entity.id,{id:entity.id,kind:'monster',pos:body.group.position,yaw:Math.PI,look:{id:'world_ossathra'}});roomMonsters.push({entity,body});document.querySelector('#floor-label').textContent='BOSS FLOOR';}else document.querySelector('#floor-label').textContent=`FLOOR ${floorNumber}`;
     const start=dungeon.rooms.find(r=>r.id===dungeon.start); hero.position.set(start.x,0,start.z); status.textContent=`Floor ${floorNumber}`;
   }
+  const exitStairs=dungeonGroup.children.find(o=>o.userData.stairs); if(runActive&&!runEnded&&floorNumber===FINAL_FLOOR&&exitStairs&&Math.hypot(hero.position.x-exitStairs.position.x,hero.position.z-exitStairs.position.z)<2&&(keys.has('KeyE')||pad?.buttons?.[0]?.pressed)&&roomMonsters.every(m=>m.entity.dead||m.entity.removed))finishRun(true);
+  if(runActive && !runEnded && (combatHero.hp<=0 || combatHero.dead)) finishRun(false);
   mana = Math.min(40, mana + dt * 2.5);
   combatHero.x = hero.position.x; combatHero.z = hero.position.z; combatHero.yaw = hero.rotation.y; combatHero.moving = length > 0;
   room.clock.advance(dt);
   room.run(() => room.combat.tick(dt));
   for (const {entity,body} of roomMonsters) { const pos=moveWithWalls({x:body.group.position.x,z:body.group.position.z},entity.x-body.group.position.x,entity.z-body.group.position.z,wallBoxes,.35); entity.x=pos.x;entity.z=pos.z;body.group.position.set(entity.x,entity.hover||0,entity.z); body.group.visible=!entity.dead&&!entity.removed; if(entity.dead&&!entity._lootDropped){entity._lootDropped=true;const item=engine.rpg.rollDrops(entity,{rng:room.streams.get('loot'),magicFind:combatHero.derived?.magicFind||0})?.[0]||engine.rpg.rollDrop({level:entity.level||1,rng:room.streams.get('loot'),chance:1});if(item)spawnDrop(item,entity.x,entity.z);} }
-  for(const d of drops){d.mesh.rotation.y+=dt; if(Math.hypot(hero.position.x-d.mesh.position.x,hero.position.z-d.mesh.position.z)<.8){scene.remove(d.mesh);drops.splice(drops.indexOf(d),1);if(inventory.length>=BAG_LIMIT){status.textContent='Bag full · 12/12';continue;}inventory.push(d.item);drawInventory();status.textContent=`Picked up ${d.item.name}`;}}
+  for(const d of drops){d.mesh.rotation.y+=dt; if(Math.hypot(hero.position.x-d.mesh.position.x,hero.position.z-d.mesh.position.z)<.8){scene.remove(d.mesh);drops.splice(drops.indexOf(d),1);if(inventory.length>=BAG_LIMIT){status.textContent='Bag full · 12/12';continue;}inventory.push(d.item);drawInventory();runGold+=Math.max(1,Math.floor((d.item.value||d.item.sell||5)/5));status.textContent=`Picked up ${d.item.name}`;}}
   for(const w of dungeonGroup.children) if(w.geometry?.type==='BoxGeometry' && w.position.y>.3 && Math.abs(w.position.x-hero.position.x)<2.5 && Math.abs(w.position.z-hero.position.z)<2.5){w.material.transparent=true;w.material.opacity=.24;}else if(w.material===wallMat){w.material.transparent=false;w.material.opacity=1;}
   targetMesh.position.set(practiceTarget.x, practiceTarget.hover || 0, practiceTarget.z);
   targetMesh.visible = !practiceTarget.dead && !practiceTarget.removed;
@@ -260,7 +273,7 @@ function frame(now) {
 }
 window.gameplayTest={moveWithWalls,nearestLiving};
 const debugStats={projectileSpawns:0,projectileHits:[]};
-window.gravenhold = { room, debug:{stats:debugStats,reset(){debugStats.projectileSpawns=0;debugStats.projectileHits=[];room.field.out.length=0;},equipNinthStar(){const item=engine.rpg.loot.generate('wand','unique','low',{rng:room.streams.get('loot')});item.name='Wand of the Ninth Star';item.ranged=true;item.castElement='arcane';engine.finishItem(item,{fresh:false,convert:false});engine.rpg.equip(combatHero,item,{into:'weapon',force:true});drawGear();drawEquipment();return item.name;},clearMonsters(){for(const m of [...room.field.monsters])room.field.remove(m);for(const m of roomMonsters.splice(0)){scene.remove(m.body.group);actors.delete(m.entity.id);}},spawnMonster:(id,x,z)=>spawn(id,x,z),attack:basicAttack,levelUp(){document.querySelector('#level-up').click();},chooseTalent(skill,tier,node){return room.run(()=>pickTalent(engine,combatHero,skill,tier,node));},choosePerk(id){return room.run(()=>allocate(combatHero,engine.rpg.forest,id));},skillPlan(id){const i=combatHero.skills.slots.findIndex(s=>s.id===id);const mp=combatHero.mp;const plan=room.run(()=>combatHero.skills.use(i));combatHero.mp=mp;if(combatHero.skills.slots[i])combatHero.skills.slots[i].ready=0;return plan;}}, get hero() { return combatHero; }, player: hero, target: practiceTarget, get dungeon() { return dungeon; }, debugDrop(){const item=engine.rpg.loot.generate('wand','magic','low',{rng:room.streams.get('loot')});spawnDrop(item,hero.position.x,hero.position.z);}, debugFanWand(){const item=engine.rpg.loot.generate('wand','normal','low',{rng:room.streams.get('loot')});item.castStyle='fan';item.castForm='fork';item.name='Wand of the Ninth Star';spawnDrop(item,hero.position.x,hero.position.z);}, debugFillBag(){for(let i=inventory.length;i<BAG_LIMIT;i++)inventory.push({name:`Test item ${i+1}`,slot:'weapon'});drawInventory();} };
+window.gravenhold = { room, debug:{stats:debugStats,reset(){debugStats.projectileSpawns=0;debugStats.projectileHits=[];room.field.out.length=0;},equipNinthStar(){const item=engine.rpg.loot.generate('wand','unique','low',{rng:room.streams.get('loot')});item.name='Wand of the Ninth Star';item.ranged=true;item.castElement='arcane';engine.finishItem(item,{fresh:false,convert:false});engine.rpg.equip(combatHero,item,{into:'weapon',force:true});drawGear();drawEquipment();return item.name;},clearMonsters(){for(const m of [...room.field.monsters])room.field.remove(m);for(const m of roomMonsters.splice(0)){scene.remove(m.body.group);actors.delete(m.entity.id);}},spawnMonster:(id,x,z)=>spawn(id,x,z),attack:basicAttack,levelUp(){document.querySelector('#level-up').click();},chooseTalent(skill,tier,node){return room.run(()=>pickTalent(engine,combatHero,skill,tier,node));},choosePerk(id){return room.run(()=>allocate(combatHero,engine.rpg.forest,id));},skillPlan(id){const i=combatHero.skills.slots.findIndex(s=>s.id===id);const mp=combatHero.mp;const plan=room.run(()=>combatHero.skills.use(i));combatHero.mp=mp;if(combatHero.skills.slots[i])combatHero.skills.slots[i].ready=0;return plan;}}, get hero() { return combatHero; }, player: hero, target: practiceTarget, get dungeon() { return dungeon; }, get run(){return {active:runActive,ended:runEnded,floor:floorNumber,gold:runGold,meta:{...meta}};}, debugDrop(){const item=engine.rpg.loot.generate('wand','magic','low',{rng:room.streams.get('loot')});spawnDrop(item,hero.position.x,hero.position.z);}, debugFanWand(){const item=engine.rpg.loot.generate('wand','normal','low',{rng:room.streams.get('loot')});item.castStyle='fan';item.castForm='fork';item.name='Wand of the Ninth Star';spawnDrop(item,hero.position.x,hero.position.z);}, debugFillBag(){for(let i=inventory.length;i<BAG_LIMIT;i++)inventory.push({name:`Test item ${i+1}`,slot:'weapon'});drawInventory();} };
 requestAnimationFrame(frame);
 
 const originalEmit=room.field.emit;room.field.emit=ev=>{if(ev.t==='fx'&&ev.kind==='bolt'&&ev.id==='hero')debugStats.projectileSpawns++;if(ev.t==='hit'&&ev.src==='hero'&&ev.kind==='bolt'&&ev.amt>0)debugStats.projectileHits.push({target:ev.dst,damage:ev.amt});return originalEmit(ev);};

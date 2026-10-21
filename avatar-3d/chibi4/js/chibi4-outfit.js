@@ -119,6 +119,7 @@ export const CLIP_MAP = {
   bash: ['cross', N], block: ['guard', G], parry: ['jabL', N], offSlash: ['attackL', G], offThrust: ['jabL', G],
   crossSlash: ['attack', N], twinCleave: ['attack', N], twinSlam: ['attack', N], spinSweep: ['spin', G], thrust2h: ['jab', N],
   punch: ['cross', G], kick: ['kick', G], throw: ['castL', N], castBook: ['cast', N], whirl: ['spin', G],
+  lutePlay: ['idle', N],   // (2026-10-21) no lute clip in the kit yet: stand
   cheer: ['cheer', G], bowGreet: ['bow', G], point: ['point', G], shrug: ['shrug', G], nod: ['nod', G], headShake: ['headShake', G],
   laugh: ['laugh', G], clap: ['clap', G], salute: ['salute', G], kneel: ['kneelWork', N], sitGround: ['sitGround', G], pray: ['pray', G],
   dance: ['dance', G], lookAround: ['lookAround', G], crossArms: ['crossArms', G], stretch: ['stretch', G], drink: ['drink', G],

@@ -9,15 +9,15 @@
    "monster": "cult_zealot",
    "with": null,
    "level": [
-    9,
-    9
+    8,
+    8
    ],
    "count": [
     3,
     3
    ],
-   "x": 446,
-   "z": 823,
+   "x": 454,
+   "z": 1093,
    "yaw": 0,
    "radius": 8,
    "quest": "into_the_scar",
@@ -33,15 +33,15 @@
    "monster": "cult_zealot",
    "with": null,
    "level": [
-    9,
-    9
+    8,
+    8
    ],
    "count": [
     3,
     3
    ],
-   "x": 433,
-   "z": 835,
+   "x": 437,
+   "z": 1049,
    "yaw": 0,
    "radius": 8,
    "quest": "into_the_scar",
@@ -57,15 +57,15 @@
    "monster": "cult_zealot",
    "with": null,
    "level": [
-    9,
-    9
+    8,
+    8
    ],
    "count": [
-    2,
-    2
+    1,
+    1
    ],
-   "x": 448,
-   "z": 799,
+   "x": 456,
+   "z": 1069,
    "yaw": 0,
    "radius": 8,
    "quest": "into_the_scar",
@@ -88,8 +88,8 @@
     1,
     1
    ],
-   "x": 1239,
-   "z": 1448,
+   "x": 1204,
+   "z": 1449,
    "yaw": 0,
    "radius": 8,
    "quest": "into_the_scar",
@@ -112,8 +112,8 @@
     3,
     3
    ],
-   "x": 1376,
-   "z": 1872,
+   "x": 1427,
+   "z": 1834,
    "yaw": 0,
    "radius": 8,
    "quest": "baking_club",
@@ -136,8 +136,8 @@
     3,
     3
    ],
-   "x": 1239,
-   "z": 1448,
+   "x": 1204,
+   "z": 1449,
    "yaw": 0,
    "radius": 8,
    "quest": "crawlers_in_the_pits",
@@ -217,9 +217,9 @@
    "name": "Blanche Furlong",
    "role": "carter",
    "at": "Thornwick",
-   "x": 1724,
-   "z": 1926,
-   "yaw": -2.553,
+   "x": 1738,
+   "z": 1856,
+   "yaw": -0.877,
    "cart": "cart_thornwick",
    "placedBy": "content-towns",
    "quests": 0,
@@ -233,9 +233,9 @@
    "vehicle": "ox_cart",
    "town": "Thornwick",
    "carter": "carter_thornwick",
-   "x": 1724,
-   "z": 1928,
-   "yaw": -1.194,
+   "x": 1740,
+   "z": 1854,
+   "yaw": -2.413,
    "radius": 2.2
   },
   {
@@ -320,9 +320,9 @@
    "town": "Thornwick",
    "post": "gate",
    "gate": "thornwick_gate_0",
-   "x": 1734,
-   "z": 1912,
-   "yaw": -1.194,
+   "x": 1748,
+   "z": 1868,
+   "yaw": -2.413,
    "titled": false
   },
   {

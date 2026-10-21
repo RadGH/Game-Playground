@@ -53,10 +53,6 @@
     {
       "id": 57,
       "name": "The Walmanmouth"
-    },
-    {
-      "id": 86,
-      "name": null
     }
   ],
   "sites": [
@@ -145,7 +141,7 @@
         251.18,
         900.82
       ],
-      "h": 30.788,
+      "h": 29.588,
       "w": 4.5
     }
   ],
@@ -162,13 +158,31 @@
     "side": "north",
     "offset": 8
   },
+  "palette": "downs",
+  "continent": "torbor",
+  "biomeNames": {
+    "grassland": "Chalk Downs",
+    "temperateForest": "Oakwood",
+    "borealForest": "Pine Highwood",
+    "hills": "Heather Moor",
+    "hallowed": "Saint's Meadow",
+    "marsh": "Brack Fen",
+    "badlands": "Red Scarps",
+    "shrubland": "Gorse Heath",
+    "savanna": "Golden Wolds",
+    "veiledHills": "Blackthorn Scar",
+    "tundra": "High Fell",
+    "mountains": "Grey Crags",
+    "snowyPeaks": "Fell Tops",
+    "beach": "Shingle Shore"
+  },
   "summary": {
     "zone": "z11_01",
     "province": "Petbeck Basin",
     "inputHash": "6a42e50c",
-    "rivers": 3,
-    "wetShare": 0.01,
-    "unwalkableShare": 0.041,
+    "rivers": 2,
+    "wetShare": 0.187,
+    "unwalkableShare": 0.252,
     "towns": [
       {
         "name": "Hollin Toll",
@@ -257,17 +271,19 @@
     ],
     "roads": 10,
     "bridges": 1,
-    "paths": 12,
-    "pathMetres": 2401,
-    "scatter": 20106,
+    "paths": 11,
+    "pathMetres": 2536,
+    "scatter": 29751,
     "scatterKinds": {
-      "tree_conifer": 9691,
-      "bush": 4447,
-      "rock_small": 1891,
-      "tree_broadleaf": 1665,
-      "rock_large": 1476,
-      "boulder": 47,
-      "hedge": 889
+      "rock_small": 1917,
+      "tree_conifer": 15167,
+      "rock_large": 4845,
+      "bush": 1971,
+      "tree_birch": 3217,
+      "heather": 832,
+      "boulder": 239,
+      "tree_broadleaf": 791,
+      "hedge": 772
     },
     "sites": [
       "settlement(HUB) town Hollin Toll 1728 560 90",
@@ -282,13 +298,13 @@
       "x": 1732,
       "z": 560
     },
-    "placements": 290,
+    "placements": 285,
     "vignettesAvoided": 640
   },
   "files": {
-    "terrain.bin": 579898,
-    "nav.bin": 44745,
-    "scatter.bin": 160932,
-    "placements.json": 219373
+    "terrain.bin": 668870,
+    "nav.bin": 76965,
+    "scatter.bin": 238092,
+    "placements.json": 211752
   }
 }

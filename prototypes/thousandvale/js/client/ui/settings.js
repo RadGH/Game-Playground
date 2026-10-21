@@ -17,6 +17,8 @@ import { SHORTCUTS } from '../social-core.js';
 import { send2 } from './net2.js';
 import { bindingsTab } from '../input/bindings-ui.js';
 import { FX_LEVELS } from '../fx-level.js';
+import { GRASS_DISTANCES } from '../grass-types.js';   // 2026-10-20: Grass distance
+import { perfPanelWanted, setPerfPanel } from './perf-panel.js';   // 2026-10-20: Graphics → Performance panel
 import { tierWords } from '../gfx-tiers.js';      // G-ATMOS (2026-10-16): what each quality draws   // T27 (stream G): the one binding table — re-bind keys, controller glyphs, touch
 
 const KEY = 'tv.settings';
@@ -24,6 +26,8 @@ const load = () => { try { return cleanSettings(JSON.parse(localStorage.getItem(
 
 /** The saved Spell effects level for main.js's boot (fx-level.js). */
 export function savedFxLevel() { return load().fx; }
+/** The saved Grass distance for main.js's boot ('auto' or a grass-types.js GRASS_DISTANCES id). */
+export function savedGrass() { return load().grass; }
 /** The saved quality for main.js's boot (null = automatic). */
 export function savedQuality() { const q = load().quality; return q && q !== 'auto' ? q : null; }
 
@@ -55,6 +59,9 @@ export function createSettings({ net, hud, help, onLogout, onGear }) {
     h('button.primary', { type: 'button', dataset: { act: 'resume' }, onclick: () => pause.close() }, 'Resume'),
     h('button.ghost.wide', { type: 'button', dataset: { act: 'settings' }, onclick: () => { pause.close(); panel.open(); } }, 'Settings'),
     h('button.ghost.wide', { type: 'button', dataset: { act: 'help' }, onclick: () => { pause.close(); help.toggle(true); } }, 'Help and controls'),
+    h('button.ghost.wide', { type: 'button', dataset: { act: 'achievements' }, onclick: () => { pause.close(); document.getElementById('menu-achievements')?.click(); } }, 'Achievements and trophies'),      // feedback #106
+    // feedback #96: "add a /reset button" — the same as typing /reset: a nudge onto firm ground, again within two minutes = home
+    h('button.ghost.wide', { type: 'button', dataset: { act: 'unstuck', tip: 'Stuck in the ground, a wall or the sea? Moves you a little onto firm ground. Press it again within two minutes to be taken home.' }, onclick: () => { pause.close(); const n = net?.(); if (n?.unstuck) { n.unstuck(); hud.toast?.('Getting you unstuck…', 'info'); } } }, 'Stuck? Reset my position'),
     h('button.ghost.wide.danger-ish', { type: 'button', dataset: { act: 'logout' }, onclick: () => { pause.close(); onLogout?.(); } }, 'Log out')),
   h('p.tiny-left.pause-note', {}, 'The world keeps going while this menu is open — it is a shared world.'));
 
@@ -62,7 +69,7 @@ export function createSettings({ net, hud, help, onLogout, onGear }) {
   const panel = createPanel({ id: 'settings', title: 'Settings', width: 420, cls: 'settings-panel centered', onOpen: () => draw() });
   let tab = 'game';
   function draw() {
-    const tabs = h('div.chips.set-tabs', { role: 'tablist' }, ...[['game', 'Game'], ['graphics', 'Graphics'], ['audio', 'Sound'], ['keys', 'Key bindings']].map(([id, label]) =>
+    const tabs = h('div.chips.set-tabs', { role: 'tablist' }, ...[['game', 'Game'], ['graphics', 'Graphics'], ['audio', 'Sound'], ['keys', 'Controls & controller']].map(([id, label]) =>
       h('button.chip', { type: 'button', role: 'tab', 'aria-checked': String(tab === id), dataset: { tab: id }, onclick: () => { tab = id; draw(); } }, label)));
     const check = (k, label, tip) => h('label.set-row.check', { title: tip }, h('input', { type: 'checkbox', checked: !!S[k], dataset: { k }, onchange: e => set(k, e.target.checked) }), h('span', {}, label));
     const slider = (k, label, min, max, step, fmt) => {
@@ -89,7 +96,14 @@ export function createSettings({ net, hud, help, onLogout, onGear }) {
       h('button.ghost.wide', { type: 'button', onclick: () => location.reload() }, 'Reload now'),
       // 2026-10-14: how much spell effect to draw — applies at once (fx-level.js)
       h('label.set-row', {}, h('span', {}, 'Spell effects'), h('select', { dataset: { k: 'fx' }, onchange: e => set('fx', e.target.value) }, ...FX_LEVELS.map(l => h('option', { value: l.id, selected: S.fx === l.id }, l.label)))),
+      // 2026-10-20: how far the grass reaches — applies at once (grass-types.js GRASS_DISTANCES)
+      h('label.set-row', {}, h('span', {}, 'Grass distance'), h('select', { dataset: { k: 'grass' }, onchange: e => set('grass', e.target.value) }, h('option', { value: 'auto', selected: S.grass === 'auto' }, 'Automatic'), ...Object.entries(GRASS_DISTANCES).map(([id, d]) => h('option', { value: id, selected: S.grass === id }, d.label)))),
+      h('p.tiny-left', {}, 'How far out the grass grows. Automatic is Medium on phones and Far otherwise. Further looks fuller but costs more on slower machines. Low quality has no grass. Applies at once.'),
       h('p.tiny-left', {}, 'Enhanced gives every class its own spell shapes and colours. Reduced keeps full effects for your own spells and your target, and shows only what flies for everyone else. Off shows only projectiles. Danger marks on the ground always show. Applies at once.'),
+      // 2026-10-20: the performance panel (ui/perf-panel.js) — its own saved switch, not part of the settings object
+      h('h4', {}, 'Performance'),
+      h('label.set-row.check', { title: 'A small graph of frame times in the corner, the last stutter and what caused it, and a button that copies a report to send us. F9 switches it too.' }, h('input', { type: 'checkbox', checked: perfPanelWanted(), dataset: { k: 'perfPanel' }, onchange: e => setPerfPanel(e.target.checked) }), h('span', {}, 'Performance panel')),
+      h('p.tiny-left', {}, 'Shows how smoothly the game is running and why it stuttered. Bug reports always carry a short performance log, whether this is on or not.'),
     ];
     else if (tab === 'audio') body = [
       slider('master', 'Master volume', 0, 1, 0.05, v => `${Math.round(v * 100)}%`),
@@ -99,7 +113,7 @@ export function createSettings({ net, hud, help, onLogout, onGear }) {
     ];
     else body = bindingsTab({ redraw: draw });   // T27: generated from js/client/input/bindings.js (SHORTCUTS is built from the same table)
     panel.setTitle('Settings', 'Saved as you change them');
-    panel.fill(tabs, h('div.set-body', {}, ...body), h('div.row.end', {}, h('button.ghost.small', { type: 'button', onclick: () => { S = { ...SETTINGS_DEFAULTS }; save(); apply(); draw(); for (const k of ['tradeFriends', 'showGear', 'showHelm', 'shareLocation', 'fx']) set(k, S[k]); } }, 'Defaults'), h('button.primary.small', { type: 'button', onclick: () => panel.close() }, 'Done')));
+    panel.fill(tabs, h('div.set-body', {}, ...body), h('div.row.end', {}, h('button.ghost.small', { type: 'button', onclick: () => { S = { ...SETTINGS_DEFAULTS }; save(); apply(); draw(); for (const k of ['tradeFriends', 'showGear', 'showHelm', 'shareLocation', 'fx', 'grass']) set(k, S[k]); } }, 'Defaults'), h('button.primary.small', { type: 'button', onclick: () => panel.close() }, 'Done')));
   }
 
   function wire(n) {

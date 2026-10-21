@@ -351,9 +351,10 @@ export function createTouch({ api, input, run, radial }) {
     sActs.replaceChildren(b, x); sheet.hidden = false; return true;
   }
   /** A small button in a sheet's title bar that folds part of it away (V6: see the figure; V12: more map). */
-  function headToggle(panelSel, cls, label, attr) {
+  function headToggle(panelSel, cls, label, attr, startOn = false) {
     const head = document.querySelector(panelSel + ' .tvp-head'); if (!head || head.querySelector('.' + cls)) return;
     const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost ph-headbtn ' + cls; b.textContent = label[0];
+    if (startOn && html.dataset[attr] == null) { html.dataset[attr] = '1'; b.textContent = label[1]; b.classList.add('on'); }
     b.onclick = e => { e.stopPropagation(); const on = html.dataset[attr] !== '1'; html.dataset[attr] = on ? '1' : ''; b.textContent = label[on ? 1 : 0]; b.classList.toggle('on', on); };
     head.insertBefore(b, head.querySelector('.tvp-x'));
   }
@@ -413,7 +414,7 @@ export function createTouch({ api, input, run, radial }) {
       // Y34: every on-screen control, named (generated from the binding table)
       const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost wide ph-extra ph-explain-open'; b.textContent = 'What do these buttons do?'; b.onclick = () => { document.querySelector('#panel-pause .tvp-x')?.click(); setTimeout(explain, 60); }; pl.insertBefore(b, pl.firstElementChild);
     }
-    if (id === 'map') headToggle('#panel-map', 'ph-mapside', ['Hide list', 'Show list'], 'mapside');
+    if (id === 'map') headToggle('#panel-map', 'ph-mapside', ['Hide list', 'Show list'], 'mapside', true);      // feedback #111: the map gets the whole screen; the list is a tap away
     if (document.querySelector('#panel-appearance:not([hidden])')) headToggle('#panel-appearance', 'ph-peek', ['Preview', 'Back to editing'], 'peek');
     if (document.querySelector('#panel-kits:not([hidden])')) headToggle('#panel-kits', 'ph-peek', ['Preview', 'Back to choosing'], 'peek');
     const fs = document.querySelector('.tv-fish:not([hidden])')?.dataset.state || '';

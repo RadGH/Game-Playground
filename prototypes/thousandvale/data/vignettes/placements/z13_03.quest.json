@@ -334,7 +334,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "packleader"
+    "frostbound"
    ],
    "respawnMin": [
     4,
@@ -362,7 +362,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "stormlash"
+    "ironclad"
    ],
    "respawnMin": [
     4,
@@ -390,7 +390,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "thorned"
+    "giant"
    ],
    "respawnMin": [
     4,
@@ -418,7 +418,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "fiery"
+    "packleader"
    ],
    "respawnMin": [
     4,
@@ -446,7 +446,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "vicious"
+    "stormlash"
    ],
    "respawnMin": [
     4,
@@ -502,7 +502,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "frostbound"
+    "vicious"
    ],
    "respawnMin": [
     4,
@@ -530,7 +530,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "ironclad"
+    "venomous"
    ],
    "respawnMin": [
     4,
@@ -558,7 +558,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "giant"
+    "fiery"
    ],
    "respawnMin": [
     4,
@@ -573,9 +573,9 @@
    "name": "Jed Weirside",
    "role": "angler",
    "at": "Millbrook",
-   "x": 100,
-   "z": 1304,
-   "yaw": -1.57,
+   "x": 96,
+   "z": 1312,
+   "yaw": -1.96,
    "angler": true,
    "quests": 0,
    "titled": true
@@ -694,9 +694,9 @@
    "name": "Tegan Coombe",
    "role": "carter",
    "at": "Wildmere",
-   "x": 1644,
-   "z": 540,
-   "yaw": -2.19,
+   "x": 1654,
+   "z": 508,
+   "yaw": 0.818,
    "cart": "cart_wildmere",
    "placedBy": "content-towns",
    "quests": 0,
@@ -710,9 +710,9 @@
    "vehicle": "ox_cart",
    "town": "Wildmere",
    "carter": "carter_wildmere",
-   "x": 1646,
-   "z": 542,
-   "yaw": 2.356,
+   "x": 1652,
+   "z": 506,
+   "yaw": 2.515,
    "radius": 2.2
   },
   {

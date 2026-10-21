@@ -9,15 +9,15 @@
    "monster": "moor_hound",
    "with": null,
    "level": [
-    2,
-    2
+    1,
+    1
    ],
    "count": [
     2,
     2
    ],
-   "x": 723,
-   "z": 1123,
+   "x": 689,
+   "z": 1115,
    "yaw": 0,
    "radius": 6,
    "quest": "wolves_at_the_fold",
@@ -40,8 +40,8 @@
     2,
     2
    ],
-   "x": 689,
-   "z": 1115,
+   "x": 676,
+   "z": 1127,
    "yaw": 0,
    "radius": 6,
    "quest": "wolves_at_the_fold",
@@ -57,17 +57,17 @@
    "monster": "moor_hound",
    "with": null,
    "level": [
-    2,
-    2
+    1,
+    1
    ],
    "count": [
     2,
     2
    ],
-   "x": 776,
-   "z": 1160,
+   "x": 691,
+   "z": 1091,
    "yaw": 0,
-   "radius": 8,
+   "radius": 6,
    "quest": "wolves_at_the_fold",
    "hunt": true,
    "respawnMin": [
@@ -81,15 +81,15 @@
    "monster": "moor_hound",
    "with": null,
    "level": [
-    2,
-    2
+    1,
+    1
    ],
    "count": [
     2,
     2
    ],
-   "x": 730,
-   "z": 1133,
+   "x": 696,
+   "z": 1125,
    "yaw": 0,
    "radius": 6,
    "quest": "wolves_at_the_fold",
@@ -129,17 +129,41 @@
    "monster": "moor_hound",
    "with": null,
    "level": [
-    2,
-    2
-   ],
-   "count": [
     1,
     1
    ],
-   "x": 796,
-   "z": 1147,
+   "count": [
+    2,
+    2
+   ],
+   "x": 709,
+   "z": 1102,
    "yaw": 0,
-   "radius": 8,
+   "radius": 6,
+   "quest": "wolves_at_the_fold",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_wolves_at_the_fold_0_6",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    1,
+    1
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 686,
+   "z": 1127,
+   "yaw": 0,
+   "radius": 6,
    "quest": "wolves_at_the_fold",
    "hunt": true,
    "respawnMin": [
@@ -925,13 +949,37 @@
     1
    ],
    "count": [
+    3,
+    3
+   ],
+   "x": 766,
+   "z": 872,
+   "yaw": 0,
+   "radius": 2.3649999999999998,
+   "quest": "class_tactician",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_class_tactician_2_1",
+   "monster": "thicket_boar",
+   "with": null,
+   "level": [
     2,
     2
    ],
-   "x": 714,
-   "z": 857,
+   "count": [
+    1,
+    1
+   ],
+   "x": 797,
+   "z": 1046,
    "yaw": 0,
-   "radius": 2.3649999999999998,
+   "radius": 6,
    "quest": "class_tactician",
    "hunt": true,
    "respawnMin": [
@@ -952,8 +1000,8 @@
     3,
     3
    ],
-   "x": 803,
-   "z": 2010,
+   "x": 790,
+   "z": 1980,
    "yaw": 0,
    "radius": 8,
    "quest": "class_cleric",
@@ -1000,8 +1048,8 @@
     1,
     1
    ],
-   "x": 805,
-   "z": 1986,
+   "x": 792,
+   "z": 1956,
    "yaw": 0,
    "radius": 8,
    "quest": "class_cleric",
@@ -1265,8 +1313,8 @@
     2,
     2
    ],
-   "x": 828,
-   "z": 1290,
+   "x": 805,
+   "z": 1278,
    "yaw": 0,
    "radius": 1.716,
    "quest": "class_chronomancer",
@@ -1289,8 +1337,8 @@
     2,
     2
    ],
-   "x": 815,
-   "z": 1302,
+   "x": 792,
+   "z": 1290,
    "yaw": 0,
    "radius": 1.716,
    "quest": "class_chronomancer",
@@ -1313,8 +1361,8 @@
     2,
     2
    ],
-   "x": 830,
-   "z": 1266,
+   "x": 807,
+   "z": 1254,
    "yaw": 0,
    "radius": 1.716,
    "quest": "class_chronomancer",
@@ -1337,8 +1385,8 @@
     2,
     2
    ],
-   "x": 835,
-   "z": 1300,
+   "x": 812,
+   "z": 1288,
    "yaw": 0,
    "radius": 1.716,
    "quest": "class_chronomancer",
@@ -1361,35 +1409,11 @@
     1,
     1
    ],
-   "x": 810,
-   "z": 1287,
+   "x": 787,
+   "z": 1275,
    "yaw": 0,
    "radius": 1.716,
    "quest": "class_chronomancer",
-   "hunt": true,
-   "respawnMin": [
-    1,
-    1.5
-   ]
-  },
-  {
-   "type": "camp",
-   "id": "quest_class_enchanter_0_0",
-   "monster": "moor_hound",
-   "with": null,
-   "level": [
-    2,
-    2
-   ],
-   "count": [
-    1,
-    1
-   ],
-   "x": 763,
-   "z": 905,
-   "yaw": 0,
-   "radius": 6,
-   "quest": "class_enchanter",
    "hunt": true,
    "respawnMin": [
     1,
@@ -1409,8 +1433,8 @@
     2,
     2
    ],
-   "x": 714,
-   "z": 857,
+   "x": 766,
+   "z": 872,
    "yaw": 0,
    "radius": 2.3649999999999998,
    "quest": "class_enchanter",
@@ -1459,10 +1483,10 @@
     3,
     3
    ],
-   "x": 1486,
-   "z": 477,
+   "x": 1488,
+   "z": 592,
    "yaw": 0,
-   "radius": 6,
+   "radius": 8,
    "quest": "class_starcaller",
    "hunt": true,
    "respawnMin": [
@@ -1509,10 +1533,10 @@
     3,
     3
    ],
-   "x": 1493,
-   "z": 487,
+   "x": 1495,
+   "z": 602,
    "yaw": 0,
-   "radius": 6,
+   "radius": 8,
    "quest": "class_starcaller",
    "hunt": true,
    "respawnMin": [
@@ -1559,10 +1583,10 @@
     3,
     3
    ],
-   "x": 1486,
-   "z": 477,
+   "x": 1488,
+   "z": 592,
    "yaw": 0,
-   "radius": 6,
+   "radius": 8,
    "quest": "class_witch_hunter",
    "hunt": true,
    "respawnMin": [
@@ -1791,6 +1815,174 @@
   },
   {
    "type": "camp",
+   "id": "quest_start_two_good_legs_0_0",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 422,
+   "z": 1461,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "start_two_good_legs",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_start_two_good_legs_0_1",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 422,
+   "z": 1461,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "start_two_good_legs",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_wolves_at_the_fold_0_7",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 414,
+   "z": 1445,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "wolves_at_the_fold",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_wolves_at_the_fold_0_8",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 445,
+   "z": 1469,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "wolves_at_the_fold",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_wolves_at_the_fold_0_9",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 411,
+   "z": 1466,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "wolves_at_the_fold",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_wolves_at_the_fold_0_10",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 430,
+   "z": 1445,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "wolves_at_the_fold",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_wolves_at_the_fold_0_11",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 429,
+   "z": 1484,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "wolves_at_the_fold",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
    "id": "champ_z12_02_1",
    "monster": "bog_slime",
    "with": null,
@@ -1904,18 +2096,18 @@
   {
    "type": "camp",
    "id": "champ_z12_02_5",
-   "monster": "fen_croaker",
+   "monster": "road_brigand",
    "with": null,
    "level": [
-    3,
-    3
+    4,
+    4
    ],
    "count": [
     1,
     1
    ],
-   "x": 1816,
-   "z": 1032,
+   "x": 1894,
+   "z": 967,
    "yaw": 0,
    "radius": 5,
    "rank": "champion",

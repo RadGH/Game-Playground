@@ -301,8 +301,8 @@
    "template": "fishing_plot",
    "flavour": null,
    "settlement": "Eelwick",
-   "x": 1402,
-   "z": 817,
+   "x": 1498,
+   "z": 879,
    "yaw": -1.96,
    "radius": 16,
    "level": 5
@@ -317,8 +317,8 @@
     "floors": 1,
     "level": 6
    },
-   "x": 1226,
-   "z": 1521,
+   "x": 1221,
+   "z": 1460,
    "yaw": -2.75,
    "radius": 10,
    "level": 6
@@ -328,8 +328,8 @@
    "id": "the_drowned_bells",
    "name": "The Drowned Bells",
    "kind": "compositional",
-   "x": 1651,
-   "z": 1265,
+   "x": 1722,
+   "z": 1254,
    "yaw": 0,
    "radius": 20,
    "where": "best fit for: deep water",
@@ -339,8 +339,8 @@
    "type": "vignette",
    "id": "fen_witch_hut",
    "name": "Old Mabry's Stilt Hut",
-   "x": 83,
-   "z": 442,
+   "x": 114,
+   "z": 682,
    "yaw": 5.24,
    "radius": 12,
    "biome": "grassland",
@@ -395,8 +395,8 @@
    "type": "vignette",
    "id": "sinkhole_garden",
    "name": "The Sinkhole Garden",
-   "x": 1832,
-   "z": 100,
+   "x": 1859,
+   "z": 376,
    "yaw": 0.81,
    "radius": 11,
    "biome": "grassland",
@@ -437,8 +437,8 @@
    "type": "vignette",
    "id": "tide_bell_post",
    "name": "The Tide Post",
-   "x": 1462,
-   "z": 1049,
+   "x": 1610,
+   "z": 1066,
    "yaw": 2.24,
    "radius": 10,
    "biome": "marsh",
@@ -465,8 +465,8 @@
    "type": "vignette",
    "id": "witch_stump",
    "name": "The Wishing Stump",
-   "x": 631,
-   "z": 115,
+   "x": 681,
+   "z": 247,
    "yaw": 4.13,
    "radius": 10,
    "biome": "grassland",
@@ -488,8 +488,8 @@
     2,
     4
    ],
-   "x": 1393,
-   "z": 1266,
+   "x": 1435,
+   "z": 1284,
    "yaw": 0,
    "radius": 10
   },
@@ -524,7 +524,7 @@
     2,
     4
    ],
-   "x": 1892,
+   "x": 1841,
    "z": 541,
    "yaw": 0,
    "radius": 10
@@ -542,8 +542,8 @@
     2,
     4
    ],
-   "x": 1480,
-   "z": 91,
+   "x": 1411,
+   "z": 324,
    "yaw": 0,
    "radius": 10
   },
@@ -560,8 +560,8 @@
     2,
     4
    ],
-   "x": 898,
-   "z": 356,
+   "x": 904,
+   "z": 311,
    "yaw": 0,
    "radius": 10
   },
@@ -578,8 +578,8 @@
     2,
     4
    ],
-   "x": 1066,
-   "z": 83,
+   "x": 1150,
+   "z": 242,
    "yaw": 0,
    "radius": 10
   },
@@ -733,30 +733,30 @@
    "id": "rare_lantern_drowner",
    "slot": 1,
    "name": "The Lantern Drowner",
-   "x": 1126,
-   "z": 1215,
+   "x": 1186,
+   "z": 1206,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     1071,
-     1239
+     1131,
+     1230
     ],
     [
-     1102,
-     1176
+     1162,
+     1167
     ],
     [
-     1143,
-     1166
+     1203,
+     1157
     ],
     [
-     1170,
-     1237
+     1230,
+     1228
     ],
     [
-     1146,
-     1281
+     1206,
+     1272
     ]
    ],
    "respawnMin": [
@@ -789,8 +789,8 @@
    "type": "waystone",
    "id": "ws_z13_01_door",
    "name": "The Drowned Chancel",
-   "x": 1070,
-   "z": 1061.6,
+   "x": 1092.5,
+   "z": 1060.9,
    "yaw": 0,
    "door": "door_1",
    "radius": 1
@@ -808,8 +808,8 @@
     2,
     2
    ],
-   "x": 1081,
-   "z": 1099,
+   "x": 1130,
+   "z": 1068,
    "yaw": 0,
    "radius": 6,
    "doorGuard": true
@@ -854,8 +854,8 @@
    "name": "Old Mabry",
    "role": "hedge-witch",
    "at": "fen_witch_hut",
-   "x": 84.2,
-   "z": 439.8,
+   "x": 55.6,
+   "z": 478,
    "yaw": 1.33,
    "radius": 1
   },
@@ -881,8 +881,8 @@
    "clue": "note",
    "how": null,
    "shimmer": null,
-   "x": 81.9,
-   "z": 444.8,
+   "x": 41.9,
+   "z": 457.6,
    "yaw": 0,
    "where": "vignette fen_witch_hut",
    "radius": 1
@@ -925,8 +925,8 @@
     2,
     3
    ],
-   "x": 214,
-   "z": 64,
+   "x": 569,
+   "z": 350,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -985,8 +985,8 @@
     2,
     3
    ],
-   "x": 460,
-   "z": 424,
+   "x": 481,
+   "z": 479,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1105,8 +1105,8 @@
     2,
     3
    ],
-   "x": 492,
-   "z": 1620,
+   "x": 538,
+   "z": 1621,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1135,8 +1135,8 @@
     2,
     3
    ],
-   "x": 396,
-   "z": 1986,
+   "x": 425,
+   "z": 1950,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1146,8 +1146,8 @@
    "id": "lost_signpost_brackwater_16",
    "kind": "lost_signpost",
    "name": "Lost Signpost",
-   "x": 2024,
-   "z": 221,
+   "x": 1946,
+   "z": 420,
    "yaw": 5.61,
    "radius": 3,
    "filler": true
@@ -1225,8 +1225,8 @@
     2,
     3
    ],
-   "x": 412,
-   "z": 192,
+   "x": 609,
+   "z": 291,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1255,8 +1255,8 @@
     2,
     3
    ],
-   "x": 692,
-   "z": 464,
+   "x": 682,
+   "z": 508,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1315,8 +1315,8 @@
     2,
     3
    ],
-   "x": 847,
-   "z": 60,
+   "x": 800,
+   "z": 144,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1356,8 +1356,8 @@
    "id": "scarecrow_brackwater_30",
    "kind": "scarecrow",
    "name": "Scarecrow",
-   "x": 1840,
-   "z": 332,
+   "x": 1904,
+   "z": 392,
    "yaw": 2.06,
    "radius": 4,
    "filler": true
@@ -1386,8 +1386,8 @@
    "id": "standing_stone_brackwater_32",
    "kind": "standing_stone",
    "name": "Standing Stone",
-   "x": 1273,
-   "z": 136,
+   "x": 1277,
+   "z": 198,
    "yaw": 1.97,
    "radius": 4,
    "filler": true
@@ -1435,8 +1435,8 @@
     2,
     3
    ],
-   "x": 60,
-   "z": 661,
+   "x": 62,
+   "z": 713,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1465,8 +1465,8 @@
     2,
     3
    ],
-   "x": 228,
-   "z": 280,
+   "x": 164,
+   "z": 529,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1615,8 +1615,8 @@
     2,
     3
    ],
-   "x": 1652,
-   "z": 176,
+   "x": 1563,
+   "z": 347,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1645,8 +1645,8 @@
     2,
     3
    ],
-   "x": 276,
-   "z": 484,
+   "x": 283,
+   "z": 544,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1705,8 +1705,8 @@
     2,
     3
    ],
-   "x": 728,
-   "z": 276,
+   "x": 686,
+   "z": 302,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1772,18 +1772,6 @@
    "filler": true
   },
   {
-   "type": "curio",
-   "id": "cu_brackwater_1",
-   "recipe": "cu_oak_of_oaths",
-   "name": "Oath Oak",
-   "kind": "shrine",
-   "x": 40,
-   "z": 40,
-   "yaw": 2.92,
-   "radius": 6,
-   "levelBase": 5
-  },
-  {
    "type": "camp",
    "id": "camp_brackwater_s1",
    "monster": "fen_croaker",
@@ -1796,8 +1784,8 @@
     2,
     3
    ],
-   "x": 1993,
-   "z": 42,
+   "x": 1896,
+   "z": 454,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -1808,8 +1796,8 @@
    "recipe": "cu_shepherds_hut",
    "name": "Shepherd's Lean-to",
    "kind": "camp",
-   "x": 40,
-   "z": 200,
+   "x": 30,
+   "z": 461,
    "yaw": 0.53,
    "radius": 6,
    "levelBase": 5
@@ -1819,8 +1807,8 @@
    "id": "banner_post_brackwater_d1",
    "kind": "banner_post",
    "name": "Faded Banner",
-   "x": 1993,
-   "z": 375,
+   "x": 1981,
+   "z": 437,
    "yaw": 4.26,
    "radius": 3,
    "filler": true
@@ -1850,26 +1838,26 @@
     2,
     3
    ],
-   "x": 1858,
-   "z": 960,
+   "x": 1876,
+   "z": 933,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1829,
-     900
+     1847,
+     873
     ],
     [
-     1919,
-     936
+     1937,
+     909
     ],
     [
-     1893,
-     1042
+     1911,
+     1015
     ],
     [
-     1799,
-     964
+     1817,
+     937
     ]
    ],
    "roam": true
@@ -1981,8 +1969,8 @@
    "recipe": "cu_wayshrine",
    "name": "Wayfarer Shrine",
    "kind": "shrine",
-   "x": 568,
-   "z": 280,
+   "x": 603,
+   "z": 330,
    "yaw": 0.55,
    "radius": 4,
    "levelBase": 5
@@ -2012,8 +2000,8 @@
    "recipe": "cu_oak_of_oaths",
    "name": "Oath Oak",
    "kind": "shrine",
-   "x": 1779,
-   "z": 1401,
+   "x": 1778,
+   "z": 1379,
    "yaw": 0.36,
    "radius": 6,
    "levelBase": 5
@@ -2024,8 +2012,8 @@
    "recipe": "cu_wasp_bank",
    "name": "Wasp Bank",
    "kind": "nest",
-   "x": 2006,
-   "z": 672,
+   "x": 1987,
+   "z": 658,
    "yaw": 3.15,
    "radius": 4,
    "levelBase": 6
@@ -2036,8 +2024,8 @@
    "recipe": "cu_loose_stone",
    "name": "Loose Stone",
    "kind": "cache",
-   "x": 481,
-   "z": 38,
+   "x": 98,
+   "z": 523,
    "yaw": 5.65,
    "radius": 4,
    "levelBase": 5
@@ -2066,8 +2054,8 @@
     1,
     2
    ],
-   "x": 942,
-   "z": 191,
+   "x": 913,
+   "z": 205,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -2348,8 +2336,8 @@
    "recipe": "cu_wasp_bank",
    "name": "Wasp Bank",
    "kind": "nest",
-   "x": 43,
-   "z": 1496,
+   "x": 61,
+   "z": 1502,
    "yaw": 0.79,
    "radius": 4,
    "levelBase": 4
@@ -2428,8 +2416,8 @@
    "recipe": "cu_herb_patch",
    "name": "Woundwort Patch",
    "kind": "forage",
-   "x": 1696,
-   "z": 41,
+   "x": 1903,
+   "z": 495,
    "yaw": 3.85,
    "radius": 4,
    "levelBase": 6
@@ -2440,8 +2428,8 @@
    "recipe": "cu_childs_map",
    "name": "Child's Map",
    "kind": "lore",
-   "x": 1153,
-   "z": 200,
+   "x": 1188,
+   "z": 233,
    "yaw": 2.81,
    "radius": 3,
    "levelBase": 6
@@ -2470,8 +2458,8 @@
    "id": "fallen_pillar_brackwater_d7",
    "kind": "fallen_pillar",
    "name": "Fallen Pillar",
-   "x": 376,
-   "z": 592,
+   "x": 377,
+   "z": 568,
    "yaw": 2.69,
    "radius": 5,
    "filler": true
@@ -2513,8 +2501,8 @@
    "recipe": "cu_old_battle",
    "name": "Old Skirmish",
    "kind": "remains",
-   "x": 176,
-   "z": 584,
+   "x": 149,
+   "z": 574,
    "yaw": 3.58,
    "radius": 7,
    "levelBase": 5
@@ -2573,8 +2561,8 @@
    "id": "lonely_pier_brackwater_d8",
    "kind": "lonely_pier",
    "name": "Bridge Pier",
-   "x": 361,
-   "z": 328,
+   "x": 437,
+   "z": 495,
    "yaw": 1.07,
    "radius": 5,
    "filler": true
@@ -2604,8 +2592,8 @@
    "recipe": "cu_lovers_stone",
    "name": "Lovers' Stone",
    "kind": "lore",
-   "x": 352,
-   "z": 64,
+   "x": 674,
+   "z": 149,
    "yaw": 2.29,
    "radius": 4,
    "levelBase": 5
@@ -2687,7 +2675,7 @@
    "name": "Dead Traveller",
    "kind": "remains",
    "x": 1355,
-   "z": 1527,
+   "z": 1507,
    "yaw": 1.44,
    "radius": 4,
    "levelBase": 5
@@ -2754,8 +2742,8 @@
    "recipe": "cu_lovers_stone",
    "name": "Lovers' Stone",
    "kind": "lore",
-   "x": 1192,
-   "z": 40,
+   "x": 1268,
+   "z": 245,
    "yaw": 4.53,
    "radius": 4,
    "levelBase": 6
@@ -2765,8 +2753,8 @@
    "id": "beehive_row_brackwater_d10",
    "kind": "beehive_row",
    "name": "Beehive Row",
-   "x": 1776,
-   "z": 224,
+   "x": 1668,
+   "z": 384,
    "yaw": 1.11,
    "radius": 5,
    "filler": true
@@ -2796,8 +2784,8 @@
     2,
     3
    ],
-   "x": 1359,
-   "z": 42,
+   "x": 1361,
+   "z": 236,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -2839,8 +2827,8 @@
     2,
     3
    ],
-   "x": 97,
-   "z": 311,
+   "x": 57,
+   "z": 495,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -2893,26 +2881,26 @@
     1,
     2
    ],
-   "x": 1904,
-   "z": 209,
+   "x": 1819,
+   "z": 449,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1869,
-     272
+     1772,
+     445
     ],
     [
-     1863,
-     175
+     1823,
+     402
     ],
     [
-     1962,
-     153
+     1866,
+     453
     ],
     [
-     1972,
-     245
+     1815,
+     496
     ]
    ],
    "roam": true
@@ -2930,8 +2918,8 @@
     1,
     2
    ],
-   "x": 1320,
-   "z": 249,
+   "x": 1308,
+   "z": 279,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -3012,8 +3000,8 @@
    "id": "boundary_stake_brackwater_d12",
    "kind": "boundary_stake",
    "name": "Boundary Stakes",
-   "x": 287,
-   "z": 168,
+   "x": 224,
+   "z": 511,
    "yaw": 1.85,
    "radius": 4,
    "filler": true
@@ -3134,8 +3122,8 @@
     1,
     2
    ],
-   "x": 159,
-   "z": 176,
+   "x": 66,
+   "z": 527,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -3161,22 +3149,22 @@
    "chatter": [
     "role.beekeeper"
    ],
-   "x": 647,
-   "z": 585,
+   "x": 628,
+   "z": 570,
    "yaw": 3.74,
    "radius": 6,
    "path": [
     [
-     640,
-     591
+     621,
+     576
     ],
     [
-     647,
-     574
+     628,
+     559
     ],
     [
-     654,
-     591
+     635,
+     576
     ]
    ]
   },
@@ -3186,8 +3174,8 @@
    "recipe": "cu_oak_of_oaths",
    "name": "Oath Oak",
    "kind": "shrine",
-   "x": 817,
-   "z": 449,
+   "x": 799,
+   "z": 436,
    "yaw": 0.01,
    "radius": 6,
    "levelBase": 5
@@ -3205,8 +3193,8 @@
     2,
     3
    ],
-   "x": 1551,
-   "z": 1343,
+   "x": 1538,
+   "z": 1313,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -3247,26 +3235,26 @@
     1,
     2
    ],
-   "x": 1560,
-   "z": 256,
+   "x": 1526,
+   "z": 321,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1510,
-     244
+     1509,
+     329
     ],
     [
-     1572,
-     212
+     1518,
+     304
     ],
     [
-     1611,
-     269
+     1543,
+     313
     ],
     [
-     1558,
-     320
+     1534,
+     338
     ]
    ],
    "roam": true
@@ -3296,8 +3284,8 @@
    "recipe": "cu_sinkhole",
    "name": "Sinkhole",
    "kind": "hazard",
-   "x": 1391,
-   "z": 945,
+   "x": 1374,
+   "z": 921,
    "yaw": 4.18,
    "radius": 6,
    "levelBase": 5
@@ -3319,8 +3307,8 @@
    "recipe": "cu_old_battle",
    "name": "Old Skirmish",
    "kind": "remains",
-   "x": 729,
-   "z": 40,
+   "x": 753,
+   "z": 145,
    "yaw": 3.61,
    "radius": 7,
    "levelBase": 6
@@ -3427,8 +3415,8 @@
    "id": "milestone_brackwater_d17",
    "kind": "milestone",
    "name": "Milestone",
-   "x": 1378,
-   "z": 142,
+   "x": 1337,
+   "z": 214,
    "yaw": 2.68,
    "radius": 3,
    "filler": true
@@ -3483,8 +3471,8 @@
     2,
     3
    ],
-   "x": 192,
-   "z": 392,
+   "x": 121,
+   "z": 539,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -3495,8 +3483,8 @@
    "recipe": "cu_lone_arch",
    "name": "Lone Arch",
    "kind": "marker",
-   "x": 529,
-   "z": 174,
+   "x": 572,
+   "z": 392,
    "yaw": 3.24,
    "radius": 5,
    "levelBase": 5
@@ -3577,8 +3565,8 @@
    "recipe": "cu_bramble_berries",
    "name": "Bramble Berries",
    "kind": "forage",
-   "x": 1583,
-   "z": 38,
+   "x": 1423,
+   "z": 259,
    "yaw": 2.25,
    "radius": 4,
    "levelBase": 6
@@ -3596,8 +3584,8 @@
     1,
     2
    ],
-   "x": 392,
-   "z": 1560,
+   "x": 386,
+   "z": 1592,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -3627,26 +3615,26 @@
     1,
     2
    ],
-   "x": 560,
-   "z": 896,
+   "x": 551,
+   "z": 928,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     623,
-     916
+     548,
+     946
     ],
     [
-     540,
-     950
+     533,
+     925
     ],
     [
-     518,
-     877
+     554,
+     910
     ],
     [
-     597,
-     854
+     569,
+     931
     ]
    ],
    "roam": true
@@ -3657,8 +3645,8 @@
    "recipe": "cu_sinkhole",
    "name": "Sinkhole",
    "kind": "hazard",
-   "x": 960,
-   "z": 40,
+   "x": 955,
+   "z": 200,
    "yaw": 2.41,
    "radius": 6,
    "levelBase": 6
@@ -3739,8 +3727,8 @@
    "recipe": "cu_dead_traveller",
    "name": "Dead Traveller",
    "kind": "remains",
-   "x": 1896,
-   "z": 424,
+   "x": 1925,
+   "z": 409,
    "yaw": 3.96,
    "radius": 4,
    "levelBase": 6
@@ -3837,8 +3825,8 @@
     2,
     3
    ],
-   "x": 1727,
-   "z": 320,
+   "x": 1736,
+   "z": 419,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -3849,8 +3837,8 @@
    "recipe": "cu_herb_patch",
    "name": "Woundwort Patch",
    "kind": "forage",
-   "x": 1599,
-   "z": 871,
+   "x": 1605,
+   "z": 852,
    "yaw": 2.24,
    "radius": 4,
    "levelBase": 6
@@ -3860,8 +3848,8 @@
    "id": "wayside_well_brackwater_d21",
    "kind": "wayside_well",
    "name": "Wayside Well",
-   "x": 466,
-   "z": 297,
+   "x": 559,
+   "z": 410,
    "yaw": 2.56,
    "radius": 4,
    "filler": true
@@ -3903,8 +3891,8 @@
    "recipe": "cu_herb_patch",
    "name": "Woundwort Patch",
    "kind": "forage",
-   "x": 1432,
-   "z": 1367,
+   "x": 1427,
+   "z": 1349,
    "yaw": 0.15,
    "radius": 4,
    "levelBase": 5
@@ -4103,8 +4091,8 @@
    "recipe": "cu_old_battle",
    "name": "Old Skirmish",
    "kind": "remains",
-   "x": 408,
-   "z": 887,
+   "x": 392,
+   "z": 905,
    "yaw": 1.17,
    "radius": 7,
    "levelBase": 5
@@ -4307,8 +4295,8 @@
    "recipe": "cu_herb_patch",
    "name": "Woundwort Patch",
    "kind": "forage",
-   "x": 64,
-   "z": 1400,
+   "x": 83,
+   "z": 1408,
    "yaw": 2.8,
    "radius": 4,
    "levelBase": 4
@@ -4429,8 +4417,8 @@
    "recipe": "cu_oak_of_oaths",
    "name": "Oath Oak",
    "kind": "shrine",
-   "x": 377,
-   "z": 480,
+   "x": 409,
+   "z": 513,
    "yaw": 0,
    "radius": 6,
    "levelBase": 5
@@ -4441,8 +4429,8 @@
    "recipe": "cu_bramble_berries",
    "name": "Bramble Berries",
    "kind": "forage",
-   "x": 282,
-   "z": 584,
+   "x": 322,
+   "z": 563,
    "yaw": 4.17,
    "radius": 4,
    "levelBase": 5
@@ -4514,26 +4502,26 @@
     2,
     3
    ],
-   "x": 177,
-   "z": 488,
+   "x": 208,
+   "z": 537,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     181,
-     572
+     240,
+     498
     ],
     [
-     93,
-     501
+     247,
+     569
     ],
     [
      176,
-     421
+     576
     ],
     [
-     265,
-     489
+     169,
+     505
     ]
    ],
    "roam": true
@@ -4578,22 +4566,22 @@
    "chatter": [
     "role.pilgrim"
    ],
-   "x": 639,
-   "z": 225,
+   "x": 653,
+   "z": 201,
    "yaw": 1.5,
    "radius": 6,
    "path": [
     [
-     645,
-     228
+     659,
+     204
     ],
     [
-     633,
-     231
+     647,
+     207
     ],
     [
-     636,
-     217
+     650,
+     193
     ]
    ]
   },
@@ -4603,8 +4591,8 @@
    "recipe": "cu_childs_map",
    "name": "Child's Map",
    "kind": "lore",
-   "x": 120,
-   "z": 89,
+   "x": 573,
+   "z": 682,
    "yaw": 2.46,
    "radius": 3,
    "levelBase": 5
@@ -4622,8 +4610,8 @@
     1,
     2
    ],
-   "x": 289,
-   "z": 384,
+   "x": 374,
+   "z": 538,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -4633,8 +4621,8 @@
    "id": "cottage_corner_brackwater_d28",
    "kind": "cottage_corner",
    "name": "Ruined Cottage",
-   "x": 1736,
-   "z": 128,
+   "x": 1666,
+   "z": 408,
    "yaw": 3.04,
    "radius": 6,
    "filler": true
@@ -4695,26 +4683,26 @@
     1,
     2
    ],
-   "x": 1695,
-   "z": 1048,
+   "x": 1690,
+   "z": 1056,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1714,
-     1093
+     1709,
+     1101
     ],
     [
-     1640,
-     1059
+     1635,
+     1067
     ],
     [
-     1671,
-     977
+     1666,
+     985
     ],
     [
-     1768,
-     1031
+     1763,
+     1039
     ]
    ],
    "roam": true
@@ -4807,8 +4795,8 @@
    "recipe": "cu_hunters_blind",
    "name": "Hunter's Blind",
    "kind": "camp",
-   "x": 1375,
-   "z": 1441,
+   "x": 1379,
+   "z": 1462,
    "yaw": 5.67,
    "radius": 5,
    "levelBase": 5
@@ -4826,8 +4814,8 @@
     1,
     2
    ],
-   "x": 759,
-   "z": 648,
+   "x": 779,
+   "z": 675,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -5025,8 +5013,8 @@
    "id": "cairn_brackwater_d32",
    "kind": "cairn",
    "name": "Cairn",
-   "x": 568,
-   "z": 40,
+   "x": 662,
+   "z": 165,
    "yaw": 1.05,
    "radius": 4,
    "filler": true
@@ -5093,8 +5081,8 @@
     1,
     2
    ],
-   "x": 320,
-   "z": 247,
+   "x": 523,
+   "z": 459,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -5175,8 +5163,8 @@
    "id": "hay_rick_brackwater_d33",
    "kind": "hay_rick",
    "name": "Hay Rick",
-   "x": 1032,
-   "z": 168,
+   "x": 1015,
+   "z": 199,
    "yaw": 5.01,
    "radius": 4,
    "filler": true
@@ -5278,8 +5266,8 @@
    "id": "fallen_tree_brackwater_d34",
    "kind": "fallen_tree",
    "name": "Fallen Tree",
-   "x": 1905,
-   "z": 40,
+   "x": 1791,
+   "z": 434,
    "yaw": 0.55,
    "radius": 6,
    "filler": true
@@ -5324,22 +5312,22 @@
    "chatter": [
     "role.herbalist"
    ],
-   "x": 1568,
-   "z": 120,
+   "x": 1403,
+   "z": 247,
    "yaw": 1.11,
    "radius": 6,
    "path": [
     [
-     1576,
-     137
+     1417,
+     251
     ],
     [
-     1554,
-     119
+     1393,
+     258
     ],
     [
-     1582,
-     110
+     1399,
+     233
     ]
    ]
   },
@@ -5410,26 +5398,26 @@
     2,
     3
    ],
-   "x": 464,
-   "z": 120,
+   "x": 697,
+   "z": 199,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     400,
-     98
+     693,
+     235
     ],
     [
-     484,
-     68
+     661,
+     195
     ],
     [
-     523,
-     152
+     701,
+     163
     ],
     [
-     448,
-     161
+     733,
+     203
     ]
    ],
    "roam": true
@@ -5459,8 +5447,8 @@
    "recipe": "cu_loose_stone",
    "name": "Loose Stone",
    "kind": "cache",
-   "x": 1166,
-   "z": 122,
+   "x": 1111,
+   "z": 244,
    "yaw": 0.27,
    "radius": 4,
    "levelBase": 6
@@ -5482,8 +5470,8 @@
    "recipe": "cu_oak_of_oaths",
    "name": "Oath Oak",
    "kind": "shrine",
-   "x": 1458,
-   "z": 174,
+   "x": 1350,
+   "z": 268,
    "yaw": 4.44,
    "radius": 6,
    "levelBase": 6
@@ -5501,8 +5489,8 @@
     2,
     3
    ],
-   "x": 1660,
-   "z": 1172,
+   "x": 1629,
+   "z": 1185,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -5544,8 +5532,8 @@
     1,
     2
    ],
-   "x": 520,
-   "z": 360,
+   "x": 572,
+   "z": 438,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -5635,8 +5623,8 @@
     1,
     2
    ],
-   "x": 1273,
-   "z": 46,
+   "x": 1316,
+   "z": 235,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -5662,22 +5650,22 @@
    "chatter": [
     "role.shepherd"
    ],
-   "x": 1920,
-   "z": 342,
+   "x": 1932,
+   "z": 504,
    "yaw": 1.01,
    "radius": 6,
    "path": [
     [
-     1891,
-     313
+     1903,
+     475
     ],
     [
-     1959,
-     322
+     1971,
+     484
     ],
     [
-     1910,
-     399
+     1922,
+     561
     ]
    ]
   },
@@ -5706,8 +5694,8 @@
     1,
     2
    ],
-   "x": 1816,
-   "z": 417,
+   "x": 1791,
+   "z": 466,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -5851,8 +5839,8 @@
    "recipe": "cu_drowned_saint",
    "name": "Drowned Saint",
    "kind": "shrine",
-   "x": 1522,
-   "z": 1128,
+   "x": 1542,
+   "z": 1129,
    "yaw": 5.29,
    "radius": 5,
    "levelBase": 5
@@ -5989,8 +5977,8 @@
     1,
     2
    ],
-   "x": 47,
-   "z": 120,
+   "x": 84,
+   "z": 554,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -6043,8 +6031,8 @@
     1,
     2
    ],
-   "x": 1703,
-   "z": 401,
+   "x": 1698,
+   "z": 435,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -6055,8 +6043,8 @@
    "recipe": "cu_bramble_berries",
    "name": "Bramble Berries",
    "kind": "forage",
-   "x": 919,
-   "z": 111,
+   "x": 885,
+   "z": 198,
    "yaw": 2.58,
    "radius": 4,
    "levelBase": 6
@@ -6098,8 +6086,8 @@
    "recipe": "cu_loose_stone",
    "name": "Loose Stone",
    "kind": "cache",
-   "x": 1321,
-   "z": 568,
+   "x": 1313,
+   "z": 585,
    "yaw": 0.44,
    "radius": 4,
    "levelBase": 6
@@ -6121,8 +6109,8 @@
    "recipe": "cu_herb_patch",
    "name": "Woundwort Patch",
    "kind": "forage",
-   "x": 39,
-   "z": 368,
+   "x": 35,
+   "z": 519,
    "yaw": 5.97,
    "radius": 4,
    "levelBase": 5
@@ -6170,15 +6158,15 @@
    "monster": "veil_spider",
    "with": null,
    "level": [
-    6,
-    7
+    5,
+    6
    ],
    "count": [
     1,
     2
    ],
-   "x": 776,
-   "z": 104,
+   "x": 762,
+   "z": 176,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -6393,8 +6381,8 @@
    "recipe": "cu_wayshrine",
    "name": "Wayfarer Shrine",
    "kind": "shrine",
-   "x": 1392,
-   "z": 216,
+   "x": 1405,
+   "z": 269,
    "yaw": 5.48,
    "radius": 4,
    "levelBase": 6
@@ -6408,22 +6396,22 @@
    "chatter": [
     "role.shepherd"
    ],
-   "x": 1775,
-   "z": 40,
+   "x": 1832,
+   "z": 416,
    "yaw": 5.67,
    "radius": 6,
    "path": [
     [
-     1776,
-     65
+     1850,
+     436
     ],
     [
-     1746,
-     15
+     1805,
+     421
     ],
     [
-     1797,
-     26
+     1841,
+     390
     ]
    ]
   },
@@ -6531,8 +6519,8 @@
     2,
     3
    ],
-   "x": 1687,
-   "z": 249,
+   "x": 1591,
+   "z": 399,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -6566,8 +6554,8 @@
    "recipe": "cu_ruined_hearth",
    "name": "Ruined Hearth",
    "kind": "marker",
-   "x": 1345,
-   "z": 1600,
+   "x": 1348,
+   "z": 1622,
    "yaw": 1.62,
    "radius": 6,
    "levelBase": 5
@@ -6597,8 +6585,8 @@
    "recipe": "cu_bramble_berries",
    "name": "Bramble Berries",
    "kind": "forage",
-   "x": 152,
-   "z": 256,
+   "x": 920,
+   "z": 553,
    "yaw": 5.54,
    "radius": 4,
    "levelBase": 5
@@ -6609,8 +6597,8 @@
    "recipe": "cu_ruined_hearth",
    "name": "Ruined Hearth",
    "kind": "marker",
-   "x": 384,
-   "z": 400,
+   "x": 433,
+   "z": 525,
    "yaw": 4.72,
    "radius": 6,
    "levelBase": 5
@@ -6863,26 +6851,26 @@
     1,
     2
    ],
-   "x": 1714,
-   "z": 1433,
+   "x": 1684,
+   "z": 1421,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1771,
-     1476
+     1741,
+     1464
     ],
     [
-     1665,
-     1466
+     1635,
+     1454
     ],
     [
-     1674,
-     1380
+     1644,
+     1368
     ],
     [
-     1769,
-     1395
+     1739,
+     1383
     ]
    ],
    "roam": true
@@ -6923,8 +6911,8 @@
     2,
     3
    ],
-   "x": 288,
-   "z": 96,
+   "x": 625,
+   "z": 356,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -7096,8 +7084,8 @@
    "id": "stone_trough_brackwater_d51",
    "kind": "stone_trough",
    "name": "Stone Trough",
-   "x": 648,
-   "z": 41,
+   "x": 700,
+   "z": 148,
    "yaw": 5.45,
    "radius": 4,
    "filler": true
@@ -7108,8 +7096,8 @@
    "recipe": "cu_crow_roost",
    "name": "Crow Roost",
    "kind": "nest",
-   "x": 416,
-   "z": 1376,
+   "x": 409,
+   "z": 1357,
    "yaw": 5.39,
    "radius": 5,
    "levelBase": 4
@@ -7182,8 +7170,8 @@
    "recipe": "cu_sinkhole",
    "name": "Sinkhole",
    "kind": "hazard",
-   "x": 344,
-   "z": 656,
+   "x": 318,
+   "z": 666,
    "yaw": 2.69,
    "radius": 6,
    "levelBase": 5
@@ -7288,22 +7276,22 @@
    "chatter": [
     "role.shepherd"
    ],
-   "x": 535,
-   "z": 431,
+   "x": 553,
+   "z": 464,
    "yaw": 5.04,
    "radius": 6,
    "path": [
     [
-     537,
-     470
+     555,
+     503
     ],
     [
-     512,
-     413
+     530,
+     446
     ],
     [
-     572,
-     406
+     590,
+     439
     ]
    ]
   },
@@ -7332,8 +7320,8 @@
     2,
     3
    ],
-   "x": 1545,
-   "z": 1056,
+   "x": 1512,
+   "z": 1064,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -7374,8 +7362,8 @@
     1,
     2
    ],
-   "x": 992,
-   "z": 104,
+   "x": 960,
+   "z": 232,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -7405,26 +7393,26 @@
     1,
     2
    ],
-   "x": 104,
-   "z": 592,
+   "x": 72,
+   "z": 590,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     91,
-     552
+     42,
+     557
     ],
     [
-     146,
-     579
+     105,
+     560
     ],
     [
-     126,
-     634
+     102,
+     623
     ],
     [
-     45,
-     595
+     39,
+     620
     ]
    ],
    "roam": true
@@ -7517,8 +7505,8 @@
    "recipe": "cu_shepherds_hut",
    "name": "Shepherd's Lean-to",
    "kind": "camp",
-   "x": 1104,
-   "z": 152,
+   "x": 1071,
+   "z": 233,
    "yaw": 0.95,
    "radius": 6,
    "levelBase": 6
@@ -7547,8 +7535,8 @@
    "id": "ribbon_tree_brackwater_d55",
    "kind": "ribbon_tree",
    "name": "Ribbon Tree",
-   "x": 1938,
-   "z": 479,
+   "x": 1955,
+   "z": 493,
    "yaw": 5.96,
    "radius": 5,
    "filler": true
@@ -7578,26 +7566,26 @@
     1,
     2
    ],
-   "x": 391,
-   "z": 264,
+   "x": 531,
+   "z": 495,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     404,
-     362
+     523,
+     564
     ],
     [
-     321,
-     252
+     462,
+     487
     ],
     [
-     392,
-     165
+     539,
+     426
     ],
     [
-     472,
-     270
+     600,
+     503
     ]
    ],
    "roam": true
@@ -7681,8 +7669,8 @@
    "recipe": "cu_empty_gallows_post",
    "name": "Weathered Post",
    "kind": "lore",
-   "x": 352,
-   "z": 1496,
+   "x": 347,
+   "z": 1479,
    "yaw": 1.87,
    "radius": 3,
    "levelBase": 4
@@ -7693,8 +7681,8 @@
    "recipe": "cu_ruined_hearth",
    "name": "Ruined Hearth",
    "kind": "marker",
-   "x": 1656,
-   "z": 97,
+   "x": 1286,
+   "z": 907,
    "yaw": 0.48,
    "radius": 6,
    "levelBase": 6
@@ -7815,8 +7803,8 @@
    "recipe": "cu_wayshrine",
    "name": "Wayfarer Shrine",
    "kind": "shrine",
-   "x": 224,
-   "z": 144,
+   "x": 204,
+   "z": 509,
    "yaw": 4.61,
    "radius": 4,
    "levelBase": 5
@@ -7830,22 +7818,22 @@
    "chatter": [
     "role.shepherd"
    ],
-   "x": 335,
-   "z": 536,
+   "x": 350,
+   "z": 556,
    "yaw": 3.13,
    "radius": 6,
    "path": [
     [
-     333,
-     575
+     379,
+     565
     ],
     [
-     316,
-     505
+     328,
+     577
     ],
     [
-     372,
-     529
+     343,
+     527
     ]
    ]
   },
@@ -7855,8 +7843,8 @@
    "recipe": "cu_wayshrine",
    "name": "Wayfarer Shrine",
    "kind": "shrine",
-   "x": 1288,
-   "z": 1561,
+   "x": 1270,
+   "z": 1555,
    "yaw": 5.5,
    "radius": 4,
    "levelBase": 5
@@ -7897,8 +7885,8 @@
    "recipe": "cu_witch_warning",
    "name": "Bone Warning",
    "kind": "lore",
-   "x": 1367,
-   "z": 1188,
+   "x": 1316,
+   "z": 1178,
    "yaw": 2.36,
    "radius": 4,
    "levelBase": 5
@@ -7947,26 +7935,26 @@
     2,
     3
    ],
-   "x": 552,
-   "z": 799,
+   "x": 536,
+   "z": 771,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     614,
-     743
+     527,
+     833
     ],
     [
-     600,
-     865
+     474,
+     762
     ],
     [
-     494,
-     858
+     545,
+     709
     ],
     [
-     489,
-     735
+     598,
+     780
     ]
    ],
    "roam": true
@@ -8034,22 +8022,22 @@
    "chatter": [
     "role.shepherd"
    ],
-   "x": 1906,
-   "z": 111,
+   "x": 1693,
+   "z": 399,
    "yaw": 5.4,
    "radius": 6,
    "path": [
     [
-     1928,
-     78
+     1681,
+     425
     ],
     [
-     1929,
-     153
+     1677,
+     375
     ],
     [
-     1867,
-     109
+     1722,
+     397
     ]
    ]
   },
@@ -8059,8 +8047,8 @@
    "recipe": "cu_tinkers_halt",
    "name": "Tinker's Halt",
    "kind": "camp",
-   "x": 167,
-   "z": 320,
+   "x": 472,
+   "z": 551,
    "yaw": 4.97,
    "radius": 6,
    "levelBase": 5
@@ -8101,8 +8089,8 @@
    "recipe": "cu_rune_ring",
    "name": "Little Stone Ring",
    "kind": "marker",
-   "x": 216,
-   "z": 640,
+   "x": 196,
+   "z": 677,
    "yaw": 3.73,
    "radius": 6,
    "levelBase": 5
@@ -8113,8 +8101,8 @@
    "recipe": "cu_smugglers_drop",
    "name": "Smuggler's Drop",
    "kind": "cache",
-   "x": 1608,
-   "z": 936,
+   "x": 1620,
+   "z": 951,
    "yaw": 0.65,
    "radius": 4,
    "levelBase": 6
@@ -8198,8 +8186,8 @@
    "recipe": "cu_lone_arch",
    "name": "Lone Arch",
    "kind": "marker",
-   "x": 40,
-   "z": 272,
+   "x": 43,
+   "z": 585,
    "yaw": 0.23,
    "radius": 5,
    "levelBase": 5
@@ -8229,8 +8217,8 @@
     1,
     2
    ],
-   "x": 1792,
-   "z": 288,
+   "x": 1723,
+   "z": 470,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -8252,8 +8240,8 @@
    "id": "fallen_tree_brackwater_d62",
    "kind": "fallen_tree",
    "name": "Fallen Tree",
-   "x": 120,
-   "z": 376,
+   "x": 248,
+   "z": 515,
    "yaw": 1.59,
    "radius": 6,
    "filler": true
@@ -8283,26 +8271,26 @@
     1,
     2
    ],
-   "x": 1496,
-   "z": 1384,
+   "x": 1529,
+   "z": 1374,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1556,
-     1335
+     1589,
+     1325
     ],
     [
-     1571,
-     1424
+     1604,
+     1414
     ],
     [
-     1457,
-     1440
+     1490,
+     1430
     ],
     [
-     1449,
-     1320
+     1482,
+     1310
     ]
    ],
    "roam": true
@@ -8320,8 +8308,8 @@
     1,
     2
    ],
-   "x": 1126,
-   "z": 50,
+   "x": 1087,
+   "z": 272,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -8332,8 +8320,8 @@
    "recipe": "cu_hunters_blind",
    "name": "Hunter's Blind",
    "kind": "camp",
-   "x": 231,
-   "z": 208,
+   "x": 111,
+   "z": 573,
    "yaw": 4.37,
    "radius": 5,
    "levelBase": 5
@@ -8433,8 +8421,8 @@
     2,
     3
    ],
-   "x": 839,
-   "z": 514,
+   "x": 846,
+   "z": 546,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -8494,8 +8482,8 @@
    "recipe": "cu_dead_traveller",
    "name": "Dead Traveller",
    "kind": "remains",
-   "x": 1432,
-   "z": 40,
+   "x": 1144,
+   "z": 308,
    "yaw": 2.51,
    "radius": 4,
    "levelBase": 6
@@ -8536,8 +8524,8 @@
    "recipe": "cu_lone_arch",
    "name": "Lone Arch",
    "kind": "marker",
-   "x": 1328,
-   "z": 104,
+   "x": 1253,
+   "z": 260,
    "yaw": 0.1,
    "radius": 5,
    "levelBase": 6
@@ -8637,26 +8625,26 @@
     1,
     2
    ],
-   "x": 1224,
-   "z": 96,
+   "x": 1196,
+   "z": 269,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1309,
-     62
+     1281,
+     235
     ],
     [
-     1229,
-     187
+     1201,
+     360
     ],
     [
-     1169,
-     97
+     1141,
+     270
     ],
     [
-     1212,
-     38
+     1184,
+     211
     ]
    ],
    "roam": true
@@ -8709,8 +8697,8 @@
    "recipe": "cu_shepherds_hut",
    "name": "Shepherd's Lean-to",
    "kind": "camp",
-   "x": 704,
-   "z": 103,
+   "x": 685,
+   "z": 169,
    "yaw": 1.96,
    "radius": 6,
    "levelBase": 6
@@ -8771,8 +8759,8 @@
     1,
     2
    ],
-   "x": 879,
-   "z": 161,
+   "x": 855,
+   "z": 190,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -8783,8 +8771,8 @@
    "recipe": "cu_wasp_bank",
    "name": "Wasp Bank",
    "kind": "nest",
-   "x": 1792,
-   "z": 162,
+   "x": 1665,
+   "z": 517,
    "yaw": 2.72,
    "radius": 4,
    "levelBase": 6
@@ -8806,8 +8794,8 @@
    "recipe": "cu_oak_of_oaths",
    "name": "Oath Oak",
    "kind": "shrine",
-   "x": 1952,
-   "z": 639,
+   "x": 1977,
+   "z": 636,
    "yaw": 5.84,
    "radius": 6,
    "levelBase": 6
@@ -8862,8 +8850,8 @@
     1,
     2
    ],
-   "x": 105,
-   "z": 214,
+   "x": 407,
+   "z": 558,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -8956,8 +8944,8 @@
    "recipe": "cu_boundary_cross",
    "name": "Boundary Cross",
    "kind": "marker",
-   "x": 290,
-   "z": 315,
+   "x": 333,
+   "z": 541,
    "yaw": 2.94,
    "radius": 3,
    "levelBase": 5
@@ -8987,8 +8975,8 @@
    "recipe": "cu_lone_arch",
    "name": "Lone Arch",
    "kind": "marker",
-   "x": 1720,
-   "z": 192,
+   "x": 1662,
+   "z": 433,
    "yaw": 6.17,
    "radius": 5,
    "levelBase": 6
@@ -9036,8 +9024,8 @@
    "recipe": "cu_bramble_berries",
    "name": "Bramble Berries",
    "kind": "forage",
-   "x": 970,
-   "z": 1192,
+   "x": 983,
+   "z": 1216,
    "yaw": 0.42,
    "radius": 4,
    "levelBase": 5
@@ -9066,8 +9054,8 @@
     1,
     2
    ],
-   "x": 1319,
-   "z": 175,
+   "x": 1347,
+   "z": 298,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -9093,22 +9081,22 @@
    "chatter": [
     "role.herbalist"
    ],
-   "x": 465,
-   "z": 1415,
+   "x": 485,
+   "z": 1429,
    "yaw": 3.95,
    "radius": 6,
    "path": [
     [
-     463,
-     1402
+     483,
+     1416
     ],
     [
-     479,
-     1419
+     499,
+     1433
     ],
     [
-     452,
-     1425
+     472,
+     1439
     ]
    ]
   },
@@ -9137,8 +9125,8 @@
     1,
     2
    ],
-   "x": 1784,
-   "z": 360,
+   "x": 1770,
+   "z": 492,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -9148,8 +9136,8 @@
    "id": "cold_campfire_brackwater_d70",
    "kind": "cold_campfire",
    "name": "Cold Campfire",
-   "x": 327,
-   "z": 442,
+   "x": 307,
+   "z": 577,
    "yaw": 5.63,
    "radius": 4,
    "filler": true
@@ -9251,8 +9239,8 @@
    "recipe": "cu_ruined_hearth",
    "name": "Ruined Hearth",
    "kind": "marker",
-   "x": 784,
-   "z": 240,
+   "x": 777,
+   "z": 209,
    "yaw": 1.19,
    "radius": 6,
    "levelBase": 5
@@ -9282,8 +9270,8 @@
    "recipe": "cu_old_battle",
    "name": "Old Skirmish",
    "kind": "remains",
-   "x": 1776,
-   "z": 727,
+   "x": 1781,
+   "z": 751,
    "yaw": 0.27,
    "radius": 7,
    "levelBase": 6
@@ -9367,26 +9355,26 @@
     1,
     2
    ],
-   "x": 1623,
-   "z": 1337,
+   "x": 1634,
+   "z": 1306,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1637,
-     1285
+     1648,
+     1254
     ],
     [
-     1683,
-     1364
+     1694,
+     1333
     ],
     [
-     1601,
-     1381
+     1612,
+     1350
     ],
     [
-     1577,
-     1319
+     1588,
+     1288
     ]
    ],
    "roam": true
@@ -9404,8 +9392,8 @@
     1,
     2
    ],
-   "x": 2008,
-   "z": 432,
+   "x": 1979,
+   "z": 514,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -9431,22 +9419,22 @@
    "chatter": [
     "role.herbalist"
    ],
-   "x": 592,
-   "z": 168,
+   "x": 739,
+   "z": 200,
    "yaw": 4.73,
    "radius": 6,
    "path": [
     [
-     563,
-     155
+     744,
+     178
     ],
     [
-     613,
-     158
+     755,
+     215
     ],
     [
-     586,
-     188
+     718,
+     206
     ]
    ]
   },
@@ -9456,8 +9444,8 @@
    "recipe": "cu_wayshrine",
    "name": "Wayfarer Shrine",
    "kind": "shrine",
-   "x": 2008,
-   "z": 103,
+   "x": 2007,
+   "z": 432,
    "yaw": 6.26,
    "radius": 4,
    "levelBase": 6
@@ -9498,8 +9486,8 @@
    "recipe": "cu_rune_ring",
    "name": "Little Stone Ring",
    "kind": "marker",
-   "x": 152,
-   "z": 40,
+   "x": 637,
+   "z": 406,
    "yaw": 0.01,
    "radius": 6,
    "levelBase": 5
@@ -9517,8 +9505,8 @@
     2,
     3
    ],
-   "x": 1664,
-   "z": 312,
+   "x": 1530,
+   "z": 378,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -9608,8 +9596,8 @@
     2,
     3
    ],
-   "x": 1520,
-   "z": 176,
+   "x": 1461,
+   "z": 333,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -9620,8 +9608,8 @@
    "recipe": "cu_blight_pool",
    "name": "Blight Pool",
    "kind": "hazard",
-   "x": 1128,
-   "z": 1344,
+   "x": 1113,
+   "z": 1328,
    "yaw": 4.92,
    "radius": 5,
    "levelBase": 5
@@ -9770,8 +9758,8 @@
    "recipe": "cu_childs_map",
    "name": "Child's Map",
    "kind": "lore",
-   "x": 1520,
-   "z": 40,
+   "x": 1810,
+   "z": 420,
    "yaw": 0.26,
    "radius": 3,
    "levelBase": 6
@@ -9781,8 +9769,8 @@
    "id": "milestone_brackwater_d76",
    "kind": "milestone",
    "name": "Milestone",
-   "x": 1428,
-   "z": 122,
+   "x": 1302,
+   "z": 204,
    "yaw": 1.31,
    "radius": 3,
    "filler": true
@@ -9792,8 +9780,8 @@
    "id": "boundary_stake_brackwater_d77",
    "kind": "boundary_stake",
    "name": "Boundary Stakes",
-   "x": 242,
-   "z": 344,
+   "x": 192,
+   "z": 563,
    "yaw": 2.23,
    "radius": 4,
    "filler": true
@@ -9847,8 +9835,8 @@
    "recipe": "cu_old_battle",
    "name": "Old Skirmish",
    "kind": "remains",
-   "x": 336,
-   "z": 136,
+   "x": 577,
+   "z": 471,
    "yaw": 3.04,
    "radius": 7,
    "levelBase": 5
@@ -9901,8 +9889,8 @@
    "recipe": "cu_sinkhole",
    "name": "Sinkhole",
    "kind": "hazard",
-   "x": 104,
-   "z": 144,
+   "x": 602,
+   "z": 425,
    "yaw": 1.17,
    "radius": 6,
    "levelBase": 5
@@ -9920,26 +9908,26 @@
     1,
     2
    ],
-   "x": 1096,
-   "z": 215,
+   "x": 1013,
+   "z": 248,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1160,
-     249
+     1077,
+     282
     ],
     [
-     1085,
-     267
+     1002,
+     300
     ],
     [
-     1035,
-     173
+     952,
+     206
     ],
     [
-     1110,
-     172
+     1027,
+     205
     ]
    ],
    "roam": true
@@ -10082,8 +10070,8 @@
    "recipe": "cu_wild_garlic",
    "name": "Wild Garlic",
    "kind": "forage",
-   "x": 536,
-   "z": 232,
+   "x": 649,
+   "z": 341,
    "yaw": 0.24,
    "radius": 4,
    "levelBase": 5
@@ -10131,8 +10119,8 @@
    "recipe": "cu_ruined_hearth",
    "name": "Ruined Hearth",
    "kind": "marker",
-   "x": 1281,
-   "z": 520,
+   "x": 1260,
+   "z": 529,
    "yaw": 4.83,
    "radius": 6,
    "levelBase": 6
@@ -10173,8 +10161,8 @@
    "recipe": "cu_childs_map",
    "name": "Child's Map",
    "kind": "lore",
-   "x": 240,
-   "z": 432,
+   "x": 130,
+   "z": 566,
    "yaw": 4.14,
    "radius": 3,
    "levelBase": 5
@@ -10188,22 +10176,22 @@
    "chatter": [
     "role.fisher"
    ],
-   "x": 424,
-   "z": 40,
+   "x": 727,
+   "z": 305,
    "yaw": 4.91,
    "radius": 6,
    "path": [
     [
-     433,
-     42
+     736,
+     307
     ],
     [
-     416,
-     48
+     719,
+     313
     ],
     [
-     419,
-     29
+     722,
+     294
     ]
    ]
   },
@@ -10420,8 +10408,8 @@
    "recipe": "cu_oak_of_oaths",
    "name": "Oath Oak",
    "kind": "shrine",
-   "x": 552,
-   "z": 96,
+   "x": 1068,
+   "z": 670,
    "yaw": 4.88,
    "radius": 6,
    "levelBase": 5
@@ -10431,8 +10419,8 @@
    "id": "toll_stone_brackwater_d83",
    "kind": "toll_stone",
    "name": "Old Toll Stone",
-   "x": 1641,
-   "z": 41,
+   "x": 1485,
+   "z": 300,
    "yaw": 3.39,
    "radius": 3,
    "filler": true
@@ -10643,26 +10631,26 @@
     2,
     3
    ],
-   "x": 176,
-   "z": 112,
+   "x": 424,
+   "z": 610,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     206,
-     46
+     481,
+     566
     ],
     [
-     226,
-     132
+     468,
+     667
     ],
     [
-     142,
-     166
+     367,
+     654
     ],
     [
-     96,
-     97
+     380,
+     553
     ]
    ],
    "roam": true
@@ -10684,8 +10672,8 @@
    "id": "fallen_tree_brackwater_d85",
    "kind": "fallen_tree",
    "name": "Fallen Tree",
-   "x": 1448,
-   "z": 233,
+   "x": 1455,
+   "z": 363,
    "yaw": 2.33,
    "radius": 6,
    "filler": true
@@ -10865,8 +10853,8 @@
    "recipe": "cu_oak_of_oaths",
    "name": "Oath Oak",
    "kind": "shrine",
-   "x": 1016,
-   "z": 48,
+   "x": 1330,
+   "z": 913,
    "yaw": 1.05,
    "radius": 6,
    "levelBase": 6
@@ -10950,8 +10938,8 @@
     2,
     3
    ],
-   "x": 272,
-   "z": 40,
+   "x": 686,
+   "z": 351,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -10962,8 +10950,8 @@
    "recipe": "cu_crow_roost",
    "name": "Crow Roost",
    "kind": "nest",
-   "x": 832,
-   "z": 120,
+   "x": 839,
+   "z": 164,
    "yaw": 1.2,
    "radius": 5,
    "levelBase": 6
@@ -10973,8 +10961,8 @@
    "id": "roadside_grave_brackwater_d88",
    "kind": "roadside_grave",
    "name": "Roadside Grave",
-   "x": 1952,
-   "z": 536,
+   "x": 1940,
+   "z": 552,
    "yaw": 4.2,
    "radius": 4,
    "filler": true

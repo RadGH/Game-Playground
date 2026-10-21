@@ -169,7 +169,12 @@ export function createDungeonView(d, { quality = 'high' } = {}) {
     for (const p of dress.pools) { const m = new THREE.Mesh(new THREE.PlaneGeometry(p.w, p.h), wm); m.rotation.x = -Math.PI / 2; m.position.set(p.x, 0.07, p.z); m.renderOrder = 1; group.add(m); }
     for (const f of floors) if (Array.isArray(f.river) && f.river.length > 1) {
       for (let i = 0; i < f.river.length - 1; i++) {
-        const [ax, az] = f.river[i], [bx, bz] = f.river[i + 1];
+        // feedback #96 (2026-10-21): a lava tube's river points are {x, z} objects, not [x, z] pairs — destructuring one threw
+        // "object is not iterable", the whole dungeon view failed, and you stood in the outdoor world at the dungeon's local
+        // coordinates: the corner of the sea
+        const pt = q => (Array.isArray(q) ? q : [q?.x, q?.z]);
+        const [ax, az] = pt(f.river[i]), [bx, bz] = pt(f.river[i + 1]);
+        if (![ax, az, bx, bz].every(Number.isFinite)) continue;
         const L = Math.hypot(bx - ax, bz - az); if (L < 0.1) continue;
         const m = new THREE.Mesh(new THREE.PlaneGeometry(2.6, L + 1.2), wm); m.rotation.order = 'YXZ'; m.rotation.y = Math.atan2(bx - ax, bz - az); m.rotation.x = -Math.PI / 2;
         m.position.set((ax + bx) / 2, 0.06, (az + bz) / 2); m.renderOrder = 1; group.add(m);

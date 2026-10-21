@@ -350,6 +350,7 @@ export function memoryM3(d, { now, changed, sha256Hex, randomHex, packChar, prun
       changed();
       return { id, first };
     },
+    async feedbackTally(char) { const l = (d.feedback || []).filter(f => f.char === char && f.state !== 'trashed'); return { sent: l.length, done: l.filter(f => f.state === 'completed').length }; },      // feedback #106
     async hasFeedback(char) { return (d.feedback || []).some(f => f.char === char); },
     async feedbackGiftFailed(char) { for (const f of d.feedback || []) if (f.char === char) f.gift = false; changed(); },
     async getFeedback(id) { const f = (d.feedback || []).find(x => x.id === id); return f ? copy(f) : null; },

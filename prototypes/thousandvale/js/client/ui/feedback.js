@@ -20,6 +20,8 @@ import { createPanel, h, confirmBox } from '../ui-panel.js';
 import { createLogRing, feedbackCheck, feedbackCtx, feedbackPreview, FEEDBACK_MAX } from './pt5-core.js';
 import { REPORT_STATES, reportState, tidyMine, replyText, replyRef, noteHeading, completeCheck, NOTE_MAX } from './pt8-core.js';
 import { takeScreenshot } from './screenshot.js';
+import { perf } from '../perf.js';                         // 2026-10-20: a bug report carries the performance log
+import { reportLines, PERF_REPORT_LINES } from '../perf-log.js';
 
 export const LOG = createLogRing(40);
 let hooked = false;
@@ -57,7 +59,14 @@ export function createFeedback({ net, hud, context }) {
     if (o.t === 'admin' && typeof n.adminOp === 'function') { const { t, op, ...a } = o; n.adminOp(op, a); return true; }
     if (!n._raw) return false; n._raw('gw', JSON.stringify(o)); return true;
   };
-  const ctxNow = () => feedbackCtx(context?.() || {}, LOG.list());
+  // 2026-10-20: the performance log goes with every bug report (at most PERF_REPORT_LINES short lines, ~3 kB), and the
+  // whole context is kept under ~11 kB so text + context + log fit one 16 kB message (protocol MAX_FRAME)
+  const ctxNow = () => {
+    const c = context?.() || {}, o = feedbackCtx(c, LOG.list());
+    try { o.perf = reportLines(perf.snapshot({ fps: c.fps ?? null, quality: c.quality || null }), { max: PERF_REPORT_LINES }); } catch { /* the report goes without it */ }
+    while (JSON.stringify(o).length > 11000 && o.log?.length) o.log.splice(0, Math.max(1, Math.ceil(o.log.length / 4)));
+    return o;
+  };
   let adminTools = [];          // play-test 9: other admin windows (Online players) put their button beside Reports
 
   /** Signed in (a claimed account)? Guests have nothing to follow: their reports are not tied to anyone. */
@@ -140,7 +149,9 @@ export function createFeedback({ net, hud, context }) {
         h('p.tiny-left', {}, 'Only this, with your text. No password, no e-mail, nothing from outside the game.'),
         h('ul.fb-lines', {}, ...p.lines.map(l => h('li', {}, l))),
         h('span.label', {}, `The last ${p.log.length} log ${p.log.length === 1 ? 'line' : 'lines'}`),
-        p.log.length ? h('ol.fb-log', {}, ...p.log.map(l => h('li', {}, l))) : h('p.tiny-left', {}, 'The log is empty — nothing has gone wrong that the game noticed.'));
+        p.log.length ? h('ol.fb-log', {}, ...p.log.map(l => h('li', {}, l))) : h('p.tiny-left', {}, 'The log is empty — nothing has gone wrong that the game noticed.'),
+        p.perf.length ? h('span.label', {}, 'Performance log: how smoothly the game ran, and why it stuttered') : null,
+        p.perf.length ? h('ol.fb-log.fb-perf', {}, ...p.perf.map(l => h('li', {}, l))) : null);
     }
     panel.fill(tabs(),
       h('div.chips.fb-kind', { role: 'radiogroup', 'aria-label': 'Kind of feedback' }, chip('suggestion', 'Suggestion'), chip('bug', 'Bug report')),
@@ -205,6 +216,7 @@ export function createFeedback({ net, hud, context }) {
             h('p.rp-text', {}, r.text || ''),
             p.lines.length ? h('ul.fb-lines', {}, ...p.lines.map(l => h('li', {}, l))) : null,
             p.log.length ? h('details', {}, h('summary', {}, `Log (${p.log.length})`), h('ol.fb-log', {}, ...p.log.map(l => h('li', {}, l)))) : null,
+            p.perf.length ? h('details', {}, h('summary', {}, `Performance log (${p.perf.length})`), h('ol.fb-log.fb-perf', {}, ...p.perf.map(l => h('li', {}, l)))) : null,
             h('label.rp-notelabel', {}, h('span.label', {}, 'Note to the player'), noteBox), noteErr),
           h('div.row.end.rp-acts', {}, h('button.ghost.small', { type: 'button', onclick: () => { R.open = null; drawReports(); } }, '← List'), h('span.grow'), act('new', 'Back to new'), act('declined', 'Decline'), act('trash', 'Trash'), act('approved', 'Approve'), act('completed', 'Completed', 'primary')));
         return;

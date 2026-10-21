@@ -154,10 +154,15 @@ export function createPortraits({ renderer, scene, avatarFor, createBody, fps = 
   }
   /** Y33: may THIS pass draw into the game's canvas? Not in the phone layout, and not when the canvas box and its
    *  drawing buffer disagree (then "frame rectangle -> viewport" points somewhere else and the face shows in the open). */
-  let crNow = null;
+  let crNow = null, crKept = null;
+  // 2026-10-20 (combat-stutter trace): the canvas box was measured every frame (a forced page layout each time); it only
+  // changes when the window does, so it is measured once and again on a resize
+  const crRead = () => { crKept = renderer.domElement.getBoundingClientRect(); };
   function flatNow() {
     if (document.documentElement.dataset.layout === 'phone') { flatWhy = 'phone'; return true; }
-    const cv = renderer.domElement; crNow = cv.getBoundingClientRect();
+    const cv = renderer.domElement;
+    if (!crKept) { crRead(); try { new ResizeObserver(crRead).observe(cv); } catch { /* the window's resize still does it */ } addEventListener('resize', crRead); }
+    crNow = crKept;
     if (!canvasMatches({ cssW: crNow.width, cssH: crNow.height, bufW: cv.width, bufH: cv.height, dpr: renderer.getPixelRatio() })) { flatWhy = 'canvas'; return true; }
     flatWhy = ''; return false;
   }

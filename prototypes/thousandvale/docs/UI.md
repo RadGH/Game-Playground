@@ -283,3 +283,30 @@ secure). The gallery's Controller frame works on any address for looking; a real
 Hooks in files stream G does not own (all small, listed in `docs/requests.md` "Round 5 contracts — G"):
 `controls.js` `setAnalog()`, `main.js` `installInput()` + `input.tick()`, `social-core.js` (tables built from
 `bindings.js`), `ui/settings.js` (the Key bindings tab), `help.js` (drawn from the table).
+
+## 7. The performance panel and the performance log (2026-10-20)
+
+Asked for after the owner's "is it the game or my graphics card?" stutter report. Plain version: the game keeps a
+small diary of every slow frame and every time it had to build a new graphics shader while you were playing, and it
+can show you that diary and send it to us.
+
+- **The log** (`js/client/perf.js` measures, `js/client/perf-log.js` keeps it, pure and capped at 40 stutters + 40
+  shader builds). A *stutter* is a frame over 100 ms; it is stored with the named pieces of work that ran in it, draw
+  calls, triangles, shader / texture / mesh counts, the JavaScript heap (Chrome only), live spell effects, bodies near
+  you, and a cause in plain words: a new graphics shader (named — what it was drawn for, and with tracing on the file
+  that made it), page work between frames, memory clean-up, the game's own code (the biggest piece named), or
+  "waiting on the graphics card" (the game's code was quick, the frame still took long).
+- **The panel** (`js/client/ui/perf-panel.js`, `css/perf-panel.css`): Settings → Graphics → *Performance panel*, the
+  **F9** key, or load the page with `?perf=1`. A graph of the last 240 frames (green smooth, amber slow, red a
+  stutter), frames a second, the slowest recent frame, stutters and shaders built while playing, the last stutter and
+  its cause, and **Copy performance report** (plain text for a message; on a plain-http page it shows the text to copy
+  by hand). While the panel is on (or `?perf=trace`) every material remembers the file that made it, so a shader
+  build names its source; that starts with the next page load.
+- **Bug reports carry it**: the Feedback window adds at most 16 short lines (a header + the newest stutters and
+  shader builds) and says so under "What will be sent with it". The server keeps them (`js/sim/feedback.js`
+  `FEEDBACK.perfLines`, context limit 10 kB), and `node tools/feedback-report.mjs` prints them under "Performance log"
+  (`--no-perf` leaves them out).
+- **Console**: `thousandvale.perfPanel.snap()` is the whole log as JSON; `tv.perf()` the older counters.
+- **The guarantee**: `tests/D/perf-combat.spec.js` fights a rift, then a mixed group with targeting, levels up, dies,
+  draws every class's skills from you and another player at every Spell effects level and every telegraph — and fails
+  if one shader is built after the warm-up. `tests/D/cp-freeze.spec.js` (play-test 12 #82) is the older, narrower one.

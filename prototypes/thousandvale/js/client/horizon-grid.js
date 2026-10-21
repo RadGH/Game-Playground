@@ -70,7 +70,9 @@ export const CANOPY = { default: '#2c5f2e', temperateForest: '#2f6a33', rainfore
  * `beach`, sulphur for `desert`, pumice for `ashPlain`… Inside a region's rectangle (world metres; the island's block,
  * tools/lib/world-core.mjs CONTINENTS) the horizon paints with that region's colours, cover and canopy instead.
  */
-export const GROUND_REGIONS = [{ palette: 'vharl', minX: 22528, minZ: 18432, maxX: 28672, maxZ: 24576 }];
+export const GROUND_REGIONS = [{ palette: 'vharl', minX: 22528, minZ: 18432, maxX: 28672, maxZ: 24576 },
+  // Torbor Downs regenerated (play-test 12, #81): its own biome looks (terrain-view.js GROUND_PALETTES.downs)
+  { palette: 'downs', minX: 22528, minZ: 2048, maxX: 30720, maxZ: 10240 }];
 export const REGION_PALETTES = {
   vharl: {
     colors: { beach: '#2e2c2b', coast: '#2e2c2b', desert: '#c8b03a', ashPlain: '#a19c94', badlands: '#3c3a3c', volcanic: '#5e3a30', glimmerwaste: '#2a2433',
@@ -78,6 +80,13 @@ export const REGION_PALETTES = {
     cover: { rainforest: 1, shrubland: 0.45, savanna: 0.15, marsh: 0.15, blighted: 0.22 },
     canopy: { default: '#2b4a2a', rainforest: '#24512a', shrubland: '#3d5a2c', savanna: '#4f5a2e', marsh: '#3e4a30', blighted: '#2a2624' },
     rock: '#3a383b',
+  },
+  downs: {
+    colors: { grassland: '#6f9a48', temperateForest: '#3f6a34', borealForest: '#2f4f40', hills: '#7a5a6a', hallowed: '#8aa858', marsh: '#3e5038',
+      badlands: '#9a5a3c', shrubland: '#9a9030', savanna: '#b09a50', veiledHills: '#3a3034', tundra: '#7f877a', mountains: '#7b766d', snowyPeaks: '#d8dce0', beach: '#c8c0ae', road: '#7a6446' },
+    cover: { temperateForest: 1, borealForest: 1, hallowed: 0.45, hills: 0.12, marsh: 0.25, shrubland: 0.12, savanna: 0.08, veiledHills: 0.35, grassland: 0.12, tundra: 0.05, badlands: 0.06, mountains: 0.3 },
+    canopy: { default: '#2c5f2e', temperateForest: '#2f6a33', borealForest: '#1f4a36', hallowed: '#4f8a3a', hills: '#3a4a2c', marsh: '#3a5536', veiledHills: '#2a2226', savanna: '#5a6a2e', shrubland: '#5a5a24' },
+    rock: '#7b766d',
   },
 };
 /** The region palette a world point is drawn with (null = the world's own). */

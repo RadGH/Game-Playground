@@ -11,7 +11,7 @@
 // STORED in the store (`addFeedback` — Postgres table `feedback`, or the memory store) AND handed to `sink(row)`: the
 // server appends every report (and every state change) to `.data/feedback-<env>.jsonl`, so tools/feedback-report.mjs can
 // read reports from a server that keeps nothing else on disk.
-// LIMITS: one report per `gapMs` (2 s) and `perHour` (1000 — play-test 6 U2: the owner files them while play-testing) per account; text <= 2000 chars; the client context <= 6 kB of JSON.
+// LIMITS: one report per `gapMs` (2 s) and `perHour` (1000 — play-test 6 U2: the owner files them while play-testing) per account; text <= 2000 chars; the client context <= 10 kB of JSON (6 kB before 2026-10-20's performance log).
 
 import { FEEDBACK_KINDS, FEEDBACK_STATES } from '../net/protocol.js';
 import { economy } from './economy-knobs.js';
@@ -36,7 +36,9 @@ export function shotMagic(mime, b64) {
   if (mime === 'webp') return head.slice(0, 4) === 'RIFF' && head.slice(8, 12) === 'WEBP';
   return false;
 }
-export const FEEDBACK = Object.freeze({ textMax: 2000, ctxMax: 6000, logLines: 60, logLine: 300, depth: 4, keys: 40, str: 500, gapMs: 2000, perHour: 1000, list: 100, mine: 50 });
+// 2026-10-20: + `perf`, the client's performance log (js/client/perf-log.js reportLines): at most perfLines lines of perfLine
+// characters; ctxMax grew from 6000 to 10000 so a full log and the performance log both fit (trimmed in that order).
+export const FEEDBACK = Object.freeze({ textMax: 2000, ctxMax: 10000, perfLines: 16, perfLine: 240, logLines: 60, logLine: 300, depth: 4, keys: 40, str: 500, gapMs: 2000, perHour: 1000, list: 100, mine: 50 });
 export const THANKS = Object.freeze({
   subject: 'Thank you',
   body: 'Thank you for taking the time to improve the game. Every report is read.\n\nThere is a small gift with this letter — open it from your bag.',
@@ -49,11 +51,11 @@ const strip = (s, n) => String(s).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u00
 export function sanitize(ctx, L = FEEDBACK) {
   const walk = (v, d, key) => {
     if (v === null || v === undefined) return null;
-    if (typeof v === 'string') return strip(v, key === 'logs' || key === 'log' ? L.logLine : L.str);
+    if (typeof v === 'string') return strip(v, key === 'logs' || key === 'log' ? L.logLine : key === 'perf' ? L.perfLine : L.str);
     if (typeof v === 'number') return Number.isFinite(v) ? Math.round(v * 1000) / 1000 : null;
     if (typeof v === 'boolean') return v;
     if (d >= L.depth) return null;
-    if (Array.isArray(v)) { const isLog = key === 'logs' || key === 'log'; return (isLog ? v.slice(-L.logLines) : v.slice(0, 30)).map(x => walk(x, d + 1, key)).filter(x => x !== null); }
+    if (Array.isArray(v)) { const isLog = key === 'logs' || key === 'log'; return (isLog ? v.slice(-L.logLines) : key === 'perf' ? v.slice(0, L.perfLines) : v.slice(0, 30)).map(x => walk(x, d + 1, key)).filter(x => x !== null); }
     if (typeof v === 'object') {
       const out = {};
       let n = 0;
@@ -73,6 +75,7 @@ export function sanitize(ctx, L = FEEDBACK) {
   // still too big: drop the oldest log lines, then everything but the basics
   let json = JSON.stringify(out);
   while (json.length > L.ctxMax && Array.isArray(out.logs) && out.logs.length) { out.logs.splice(0, Math.max(1, Math.ceil(out.logs.length / 4))); json = JSON.stringify(out); }
+  while (json.length > L.ctxMax && Array.isArray(out.perf) && out.perf.length > 1) { out.perf.pop(); json = JSON.stringify(out); }      // the oldest performance lines go next (the header stays)
   if (json.length > L.ctxMax) { const keep = {}; for (const k of ['where', 'char', 'name', 'cls', 'level', 'zone', 'room', 'x', 'z', 'build', 'ua']) if (out[k] !== undefined) keep[k] = out[k]; out = JSON.stringify(keep).length <= L.ctxMax ? keep : {}; out.trimmed = true; }
   return out;
 }
@@ -85,7 +88,7 @@ export const NUDGE = Object.freeze({
 
 export const cleanState = s => { const v = String(s || '').toLowerCase(); return v === 'trash' ? 'trashed' : FEEDBACK_STATES.includes(v) ? v : null; };
 
-export function createFeedback({ env: envName = null, store, wallNow = () => Date.now(), sink = null, sysmail = null, log = () => {}, counters = {}, filter = null, opts = {} }) {
+export function createFeedback({ env: envName = null, store, wallNow = () => Date.now(), sink = null, sysmail = null, log = () => {}, counters = {}, filter = null, opts = {}, onDone = null }) {
   const R = { ...FEEDBACK, ...opts };
   const sent = new Map();          // account -> [wall ms]
   const view = r => ({ id: r.id, at: r.at, kind: r.kind, text: r.text, state: r.state === 'trashed' ? 'trashed' : r.state, account: r.account ?? null, char: r.char ?? null, name: r.name || null, cls: r.cls || null, level: r.level || null,
@@ -166,6 +169,7 @@ export function createFeedback({ env: envName = null, store, wallNow = () => Dat
       const ok = await store.setFeedbackState(m.id, state, { by: who.by || 'admin', at: wallNow(), note, done });
       if (!ok) return { t: 'adminR', op: m.op, ok: false, id: m.id, why: 'missing', msg: 'No such report.' };
       if (sink) { try { sink({ ev: 'state', id: m.id, state, by: who.by || 'admin', at: wallNow(), ...(note != null ? { note } : {}), ...(done != null ? { done } : {}) }); } catch { /* the store has it */ } }
+      if (state === 'completed' && onDone && store.getFeedback) { try { const row = await store.getFeedback(m.id); if (row && row.char != null) onDone(row.char); } catch { /* the next log-in catches up */ } }      // feedback #106: Heard and Built
       return { t: 'adminR', op: m.op, ok: true, id: m.id, state, ...(done != null ? { done } : {}), counts: await store.feedbackCounts() };
     }
     return { t: 'adminR', op: m.op, ok: false, why: 'op', msg: 'Unknown admin call.' };

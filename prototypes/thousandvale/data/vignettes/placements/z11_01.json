@@ -269,8 +269,8 @@
    "template": "sheep",
    "flavour": null,
    "settlement": "Hollin Toll",
-   "x": 1787,
-   "z": 687,
+   "x": 1545,
+   "z": 822,
    "yaw": -2.75,
    "radius": 24,
    "level": 5
@@ -336,8 +336,8 @@
    "type": "vignette",
    "id": "dark_lighthouse",
    "name": "The Dark Lighthouse",
-   "x": 174,
-   "z": 361,
+   "x": 453,
+   "z": 499,
    "yaw": 0.58,
    "radius": 10,
    "biome": "grassland",
@@ -350,8 +350,8 @@
    "type": "vignette",
    "id": "goblin_market_stones",
    "name": "The Moonlight Stones",
-   "x": 777,
-   "z": 1164,
+   "x": 732,
+   "z": 1300,
    "yaw": 4.63,
    "radius": 10,
    "biome": "grassland",
@@ -364,8 +364,8 @@
    "type": "vignette",
    "id": "hanging_sign_inn",
    "name": "The Shut-Up Inn",
-   "x": 719,
-   "z": 77,
+   "x": 759,
+   "z": 225,
    "yaw": 2.31,
    "radius": 13,
    "biome": "grassland",
@@ -378,8 +378,8 @@
    "type": "vignette",
    "id": "old_battlefield",
    "name": "The Old Battlefield",
-   "x": 1463,
-   "z": 60,
+   "x": 1527,
+   "z": 372,
    "yaw": 4.82,
    "radius": 15,
    "biome": "grassland",
@@ -392,8 +392,8 @@
    "type": "vignette",
    "id": "ore_cart_spill",
    "name": "The Runaway Cart",
-   "x": 1071,
-   "z": 1610,
+   "x": 1036,
+   "z": 1470,
    "yaw": 3.06,
    "radius": 10,
    "biome": "grassland",
@@ -406,8 +406,8 @@
    "type": "vignette",
    "id": "pilgrim_footbath",
    "name": "The Footbath of Saint Ida",
-   "x": 1272,
-   "z": 1004,
+   "x": 1368,
+   "z": 902,
    "yaw": 1.69,
    "radius": 11,
    "biome": "grassland",
@@ -434,8 +434,8 @@
    "type": "vignette",
    "id": "smugglers_beacon",
    "name": "The False Beacon",
-   "x": 604,
-   "z": 662,
+   "x": 504,
+   "z": 761,
    "yaw": 1.94,
    "radius": 11,
    "biome": "grassland",
@@ -462,8 +462,8 @@
    "type": "vignette",
    "id": "toll_bridge_trolls",
    "name": "The Toll Bridge",
-   "x": 305,
-   "z": 1967,
+   "x": 166,
+   "z": 1872,
    "yaw": 1.02,
    "radius": 11,
    "biome": "temperateForest",
@@ -503,8 +503,8 @@
     2,
     4
    ],
-   "x": 1121,
-   "z": 60,
+   "x": 1128,
+   "z": 140,
    "yaw": 0,
    "radius": 10
   },
@@ -521,8 +521,8 @@
     2,
     4
    ],
-   "x": 383,
-   "z": 60,
+   "x": 691,
+   "z": 197,
    "yaw": 0,
    "radius": 10
   },
@@ -539,8 +539,8 @@
     2,
     4
    ],
-   "x": 510,
-   "z": 369,
+   "x": 522,
+   "z": 456,
    "yaw": 0,
    "radius": 10
   },
@@ -586,15 +586,15 @@
    "monster": "road_brigand",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     2,
     4
    ],
-   "x": 100,
-   "z": 76,
+   "x": 705,
+   "z": 284,
    "yaw": 0,
    "radius": 10
   },
@@ -611,8 +611,8 @@
     2,
     4
    ],
-   "x": 1959,
-   "z": 1692,
+   "x": 1985,
+   "z": 1461,
    "yaw": 0,
    "radius": 10
   },
@@ -647,8 +647,8 @@
     2,
     4
    ],
-   "x": 1824,
-   "z": 66,
+   "x": 1739,
+   "z": 311,
    "yaw": 0,
    "radius": 10
   },
@@ -665,8 +665,8 @@
     1,
     2
    ],
-   "x": 819,
-   "z": 356,
+   "x": 780,
+   "z": 330,
    "yaw": 0,
    "radius": 10
   },
@@ -683,8 +683,8 @@
     1,
     2
    ],
-   "x": 1955,
-   "z": 327,
+   "x": 1936,
+   "z": 368,
    "yaw": 0,
    "radius": 10
   },
@@ -712,15 +712,15 @@
    "monster": "stone_sentinel",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     1,
     2
    ],
-   "x": 74,
-   "z": 642,
+   "x": 185,
+   "z": 808,
    "yaw": 0,
    "radius": 10
   },
@@ -802,30 +802,30 @@
    "id": "rare_scree_mother",
    "slot": 1,
    "name": "The Scree Mother",
-   "x": 1581,
-   "z": 1636,
+   "x": 1646,
+   "z": 1651,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     1599,
-     1573
+     1615,
+     1662
     ],
     [
-     1654,
-     1637
+     1626,
+     1625
     ],
     [
-     1617,
-     1677
+     1664,
+     1624
     ],
     [
-     1521,
-     1688
+     1678,
+     1660
     ],
     [
-     1534,
-     1601
+     1647,
+     1684
     ]
    ],
    "respawnMin": [
@@ -1013,8 +1013,8 @@
    "id": "mushroom_ring_hollin_pass_0",
    "kind": "mushroom_ring",
    "name": "Mushroom Ring",
-   "x": 488,
-   "z": 1667,
+   "x": 508,
+   "z": 1675,
    "yaw": 0.76,
    "radius": 4,
    "filler": true
@@ -1032,8 +1032,8 @@
     2,
     3
    ],
-   "x": 1172,
-   "z": 1308,
+   "x": 1161,
+   "z": 1352,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1062,8 +1062,8 @@
     2,
     3
    ],
-   "x": 988,
-   "z": 940,
+   "x": 1073,
+   "z": 894,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1103,8 +1103,8 @@
    "id": "wayside_well_hollin_pass_6",
    "kind": "wayside_well",
    "name": "Wayside Well",
-   "x": 1891,
-   "z": 1419,
+   "x": 1910,
+   "z": 1429,
    "yaw": 5.49,
    "radius": 4,
    "filler": true
@@ -1122,8 +1122,8 @@
     2,
     3
    ],
-   "x": 1272,
-   "z": 289,
+   "x": 1274,
+   "z": 348,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1152,8 +1152,8 @@
     2,
     3
    ],
-   "x": 1332,
-   "z": 1528,
+   "x": 1287,
+   "z": 1530,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1163,7 +1163,7 @@
    "id": "milestone_hollin_pass_10",
    "kind": "milestone",
    "name": "Milestone",
-   "x": 656,
+   "x": 676,
    "z": 1396,
    "yaw": 5.6,
    "radius": 3,
@@ -1182,8 +1182,8 @@
     2,
     3
    ],
-   "x": 332,
-   "z": 572,
+   "x": 329,
+   "z": 648,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1205,15 +1205,15 @@
    "monster": "stone_sentinel",
    "with": null,
    "level": [
-    5,
-    6
+    6,
+    7
    ],
    "count": [
     2,
     3
    ],
-   "x": 748,
-   "z": 876,
+   "x": 754,
+   "z": 828,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1272,8 +1272,8 @@
     2,
     3
    ],
-   "x": 1032,
-   "z": 271,
+   "x": 1005,
+   "z": 345,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1283,8 +1283,8 @@
    "id": "league_stone_hollin_pass_18",
    "kind": "league_stone",
    "name": "League Stone",
-   "x": 1644,
-   "z": 232,
+   "x": 1665,
+   "z": 283,
    "yaw": 4.31,
    "radius": 3,
    "filler": true
@@ -1302,8 +1302,8 @@
     2,
     3
    ],
-   "x": 320,
-   "z": 1120,
+   "x": 281,
+   "z": 1143,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1332,8 +1332,8 @@
     2,
     3
    ],
-   "x": 1765,
-   "z": 1771,
+   "x": 1954,
+   "z": 1703,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1343,8 +1343,8 @@
    "id": "standing_stone_hollin_pass_22",
    "kind": "standing_stone",
    "name": "Standing Stone",
-   "x": 1000,
-   "z": 1176,
+   "x": 986,
+   "z": 1192,
    "yaw": 0.84,
    "radius": 4,
    "filler": true
@@ -1392,8 +1392,8 @@
     2,
     3
    ],
-   "x": 60,
-   "z": 839,
+   "x": 125,
+   "z": 886,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1433,8 +1433,8 @@
    "id": "hay_rick_hollin_pass_28",
    "kind": "hay_rick",
    "name": "Hay Rick",
-   "x": 344,
-   "z": 256,
+   "x": 380,
+   "z": 487,
    "yaw": 2.27,
    "radius": 4,
    "filler": true
@@ -1463,8 +1463,8 @@
    "id": "fallen_tree_hollin_pass_30",
    "kind": "fallen_tree",
    "name": "Fallen Tree",
-   "x": 929,
-   "z": 104,
+   "x": 933,
+   "z": 144,
    "yaw": 3.4,
    "radius": 6,
    "filler": true
@@ -1475,15 +1475,15 @@
    "monster": "ridge_griffin",
    "with": null,
    "level": [
-    3,
-    4
+    4,
+    5
    ],
    "count": [
     2,
     3
    ],
-   "x": 1417,
-   "z": 1812,
+   "x": 1259,
+   "z": 1746,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1493,8 +1493,8 @@
    "id": "banner_post_hollin_pass_32",
    "kind": "banner_post",
    "name": "Faded Banner",
-   "x": 548,
-   "z": 176,
+   "x": 625,
+   "z": 230,
    "yaw": 2.46,
    "radius": 3,
    "filler": true
@@ -1512,8 +1512,8 @@
     2,
     3
    ],
-   "x": 668,
-   "z": 480,
+   "x": 651,
+   "z": 522,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1542,8 +1542,8 @@
     2,
     3
    ],
-   "x": 1464,
-   "z": 268,
+   "x": 1431,
+   "z": 365,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1632,8 +1632,8 @@
     2,
     3
    ],
-   "x": 1192,
-   "z": 1937,
+   "x": 1224,
+   "z": 1775,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1674,8 +1674,8 @@
    "recipe": "cu_buried_crock",
    "name": "Buried Crock",
    "kind": "cache",
-   "x": 1279,
-   "z": 39,
+   "x": 1245,
+   "z": 85,
    "yaw": 1.32,
    "radius": 4,
    "levelBase": 6
@@ -1693,8 +1693,8 @@
     1,
     2
    ],
-   "x": 1632,
-   "z": 42,
+   "x": 1673,
+   "z": 358,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -1705,8 +1705,8 @@
    "recipe": "cu_ruined_hearth",
    "name": "Ruined Hearth",
    "kind": "marker",
-   "x": 1984,
-   "z": 40,
+   "x": 1898,
+   "z": 308,
    "yaw": 0.38,
    "radius": 6,
    "levelBase": 6
@@ -1716,8 +1716,8 @@
    "id": "cottage_corner_hollin_pass_d1",
    "kind": "cottage_corner",
    "name": "Ruined Cottage",
-   "x": 337,
-   "z": 408,
+   "x": 390,
+   "z": 508,
    "yaw": 3.59,
    "radius": 6,
    "filler": true
@@ -1728,8 +1728,8 @@
    "recipe": "cu_ruined_hearth",
    "name": "Ruined Hearth",
    "kind": "marker",
-   "x": 1873,
-   "z": 863,
+   "x": 1913,
+   "z": 860,
    "yaw": 4.1,
    "radius": 6,
    "levelBase": 5
@@ -1758,8 +1758,8 @@
     2,
     3
    ],
-   "x": 1332,
-   "z": 1173,
+   "x": 1354,
+   "z": 1201,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -1785,22 +1785,22 @@
    "chatter": [
     "role.beekeeper"
    ],
-   "x": 1151,
-   "z": 1142,
+   "x": 1177,
+   "z": 1134,
    "yaw": 5.02,
    "radius": 6,
    "path": [
     [
-     1143,
-     1144
+     1169,
+     1136
     ],
     [
-     1157,
-     1134
+     1183,
+     1126
     ],
     [
-     1158,
-     1149
+     1184,
+     1141
     ]
    ]
   },
@@ -1810,8 +1810,8 @@
    "recipe": "cu_witch_warning",
    "name": "Bone Warning",
    "kind": "lore",
-   "x": 40,
-   "z": 240,
+   "x": 434,
+   "z": 542,
    "yaw": 4.01,
    "radius": 4,
    "levelBase": 7
@@ -1822,15 +1822,15 @@
    "monster": "brigand_archer",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     1,
     2
    ],
-   "x": 40,
-   "z": 480,
+   "x": 244,
+   "z": 632,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -1895,8 +1895,8 @@
    "recipe": "cu_bramble_berries",
    "name": "Bramble Berries",
    "kind": "forage",
-   "x": 2008,
-   "z": 1312,
+   "x": 1990,
+   "z": 1307,
    "yaw": 0.25,
    "radius": 4,
    "levelBase": 4
@@ -1907,8 +1907,8 @@
    "recipe": "cu_sinkhole",
    "name": "Sinkhole",
    "kind": "hazard",
-   "x": 840,
-   "z": 1008,
+   "x": 842,
+   "z": 985,
    "yaw": 2.17,
    "radius": 6,
    "levelBase": 5
@@ -1918,8 +1918,8 @@
    "id": "lost_signpost_hollin_pass_d4",
    "kind": "lost_signpost",
    "name": "Lost Signpost",
-   "x": 919,
-   "z": 2008,
+   "x": 906,
+   "z": 1995,
    "yaw": 5.13,
    "radius": 3,
    "filler": true
@@ -1949,8 +1949,8 @@
    "recipe": "cu_bramble_berries",
    "name": "Bramble Berries",
    "kind": "forage",
-   "x": 199,
-   "z": 199,
+   "x": 285,
+   "z": 622,
    "yaw": 1.41,
    "radius": 4,
    "levelBase": 7
@@ -1988,8 +1988,8 @@
    "id": "beehive_row_hollin_pass_d5",
    "kind": "beehive_row",
    "name": "Beehive Row",
-   "x": 1188,
-   "z": 1478,
+   "x": 1142,
+   "z": 1477,
    "yaw": 1.52,
    "radius": 5,
    "filler": true
@@ -2030,8 +2030,8 @@
    "recipe": "cu_pine_resin",
    "name": "Weeping Pine",
    "kind": "forage",
-   "x": 223,
-   "z": 688,
+   "x": 253,
+   "z": 671,
    "yaw": 2.98,
    "radius": 4,
    "levelBase": 6
@@ -2049,26 +2049,26 @@
     2,
     3
    ],
-   "x": 1145,
-   "z": 911,
+   "x": 1120,
+   "z": 890,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1125,
-     970
+     1150,
+     917
     ],
     [
-     1092,
-     888
+     1093,
+     920
     ],
     [
-     1177,
-     853
+     1090,
+     863
     ],
     [
-     1204,
-     943
+     1147,
+     860
     ]
    ],
    "roam": true
@@ -2109,8 +2109,8 @@
    "id": "banner_post_hollin_pass_d7",
    "kind": "banner_post",
    "name": "Faded Banner",
-   "x": 1793,
-   "z": 225,
+   "x": 1812,
+   "z": 309,
    "yaw": 1.82,
    "radius": 3,
    "filler": true
@@ -2121,8 +2121,8 @@
    "recipe": "cu_lovers_stone",
    "name": "Lovers' Stone",
    "kind": "lore",
-   "x": 1632,
-   "z": 1104,
+   "x": 1645,
+   "z": 1119,
    "yaw": 1.44,
    "radius": 4,
    "levelBase": 4
@@ -2133,15 +2133,15 @@
    "monster": "frost_stalker",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     2,
     3
    ],
-   "x": 183,
-   "z": 528,
+   "x": 251,
+   "z": 718,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -2183,8 +2183,8 @@
     1,
     2
    ],
-   "x": 1892,
-   "z": 1551,
+   "x": 1867,
+   "z": 1517,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -2195,8 +2195,8 @@
    "recipe": "cu_wanted_post",
    "name": "Wanted Post",
    "kind": "lore",
-   "x": 2000,
-   "z": 720,
+   "x": 2016,
+   "z": 724,
    "yaw": 4.36,
    "radius": 3,
    "levelBase": 5
@@ -2218,8 +2218,8 @@
    "recipe": "cu_crow_roost",
    "name": "Crow Roost",
    "kind": "nest",
-   "x": 1929,
-   "z": 176,
+   "x": 1918,
+   "z": 315,
    "yaw": 3.73,
    "radius": 5,
    "levelBase": 6
@@ -2230,8 +2230,8 @@
    "recipe": "cu_hunters_blind",
    "name": "Hunter's Blind",
    "kind": "camp",
-   "x": 1224,
-   "z": 1632,
+   "x": 1222,
+   "z": 1653,
    "yaw": 2.26,
    "radius": 5,
    "levelBase": 4
@@ -2276,22 +2276,22 @@
    "chatter": [
     "role.prospector"
    ],
-   "x": 1386,
-   "z": 1682,
+   "x": 1411,
+   "z": 1680,
    "yaw": 6.23,
    "radius": 6,
    "path": [
     [
-     1374,
-     1687
+     1399,
+     1685
     ],
     [
-     1394,
-     1670
+     1419,
+     1668
     ],
     [
-     1397,
-     1693
+     1422,
+     1691
     ]
    ]
   },
@@ -2301,8 +2301,8 @@
    "recipe": "cu_oak_of_oaths",
    "name": "Oath Oak",
    "kind": "shrine",
-   "x": 1144,
-   "z": 369,
+   "x": 1153,
+   "z": 401,
    "yaw": 1.03,
    "radius": 6,
    "levelBase": 6
@@ -2362,8 +2362,8 @@
     2,
     3
    ],
-   "x": 1350,
-   "z": 168,
+   "x": 1274,
+   "z": 97,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -2374,8 +2374,8 @@
    "recipe": "cu_mushroom_flush",
    "name": "Flush of Caps",
    "kind": "forage",
-   "x": 783,
-   "z": 1465,
+   "x": 795,
+   "z": 1480,
    "yaw": 1.69,
    "radius": 4,
    "levelBase": 5
@@ -2386,33 +2386,33 @@
    "monster": "brigand_archer",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     1,
     2
    ],
-   "x": 576,
-   "z": 40,
+   "x": 828,
+   "z": 165,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     529,
-     92
+     875,
+     154
     ],
     [
-     528,
-     6
+     839,
+     212
     ],
     [
-     633,
-     4
+     781,
+     176
     ],
     [
-     611,
-     92
+     817,
+     118
     ]
    ],
    "roam": true
@@ -2423,8 +2423,8 @@
    "recipe": "cu_lovers_stone",
    "name": "Lovers' Stone",
    "kind": "lore",
-   "x": 1208,
-   "z": 648,
+   "x": 1226,
+   "z": 647,
    "yaw": 3.36,
    "radius": 4,
    "levelBase": 5
@@ -2446,15 +2446,15 @@
    "monster": "ridge_griffin",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     2,
     3
    ],
-   "x": 241,
-   "z": 41,
+   "x": 658,
+   "z": 298,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -2465,8 +2465,8 @@
    "recipe": "cu_wasp_bank",
    "name": "Wasp Bank",
    "kind": "nest",
-   "x": 664,
-   "z": 992,
+   "x": 672,
+   "z": 975,
    "yaw": 4.99,
    "radius": 4,
    "levelBase": 5
@@ -2480,22 +2480,22 @@
    "chatter": [
     "role.herbalist"
    ],
-   "x": 1160,
-   "z": 200,
+   "x": 1068,
+   "z": 160,
    "yaw": 5.75,
    "radius": 6,
    "path": [
     [
-     1140,
-     177
+     1086,
+     165
     ],
     [
-     1191,
-     201
+     1054,
+     173
     ],
     [
-     1156,
-     236
+     1063,
+     141
     ]
    ]
   },
@@ -2505,8 +2505,8 @@
    "recipe": "cu_sinkhole",
    "name": "Sinkhole",
    "kind": "hazard",
-   "x": 848,
-   "z": 216,
+   "x": 871,
+   "z": 214,
    "yaw": 3.8,
    "radius": 6,
    "levelBase": 6
@@ -2566,26 +2566,26 @@
     1,
     2
    ],
-   "x": 1040,
-   "z": 655,
+   "x": 1046,
+   "z": 623,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1067,
-     690
-    ],
-    [
-     1012,
-     693
+     1073,
+     658
     ],
     [
      1018,
-     627
+     661
     ],
     [
-     1073,
-     622
+     1024,
+     595
+    ],
+    [
+     1079,
+     590
     ]
    ],
    "roam": true
@@ -2603,8 +2603,8 @@
     2,
     3
    ],
-   "x": 1465,
-   "z": 1478,
+   "x": 1497,
+   "z": 1482,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -2615,8 +2615,8 @@
    "recipe": "cu_stone_watcher",
    "name": "Stone Watcher",
    "kind": "shrine",
-   "x": 952,
-   "z": 1680,
+   "x": 968,
+   "z": 1666,
    "yaw": 4.46,
    "radius": 5,
    "levelBase": 4
@@ -2657,8 +2657,8 @@
     2,
     3
    ],
-   "x": 1776,
-   "z": 1104,
+   "x": 1792,
+   "z": 1132,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -2669,8 +2669,8 @@
    "recipe": "cu_bramble_berries",
    "name": "Bramble Berries",
    "kind": "forage",
-   "x": 1290,
-   "z": 1394,
+   "x": 1310,
+   "z": 1391,
    "yaw": 2.88,
    "radius": 4,
    "levelBase": 4
@@ -2755,25 +2755,25 @@
     2
    ],
    "x": 1000,
-   "z": 400,
+   "z": 432,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     998,
-     479
+     946,
+     495
     ],
     [
-     898,
-     414
+     937,
+     378
     ],
     [
-     1011,
-     339
+     1054,
+     369
     ],
     [
-     1066,
-     382
+     1063,
+     486
     ]
    ],
    "roam": true
@@ -2818,22 +2818,22 @@
    "chatter": [
     "role.shepherd"
    ],
-   "x": 800,
-   "z": 496,
+   "x": 822,
+   "z": 506,
    "yaw": 0.98,
    "radius": 6,
    "path": [
     [
-     758,
-     486
+     780,
+     496
     ],
     [
-     844,
-     450
+     866,
+     460
     ],
     [
-     825,
-     532
+     847,
+     542
     ]
    ]
   },
@@ -2904,8 +2904,8 @@
     2,
     3
    ],
-   "x": 642,
-   "z": 351,
+   "x": 688,
+   "z": 404,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -2928,33 +2928,33 @@
    "monster": "glacier_maw",
    "with": null,
    "level": [
-    6,
-    7
+    5,
+    6
    ],
    "count": [
     1,
     2
    ],
-   "x": 1545,
-   "z": 168,
+   "x": 1595,
+   "z": 427,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1472,
-     159
+     1522,
+     418
     ],
     [
-     1560,
-     118
+     1610,
+     377
     ],
     [
-     1616,
-     172
+     1666,
+     431
     ],
     [
-     1527,
-     245
+     1577,
+     504
     ]
    ],
    "roam": true
@@ -2965,8 +2965,8 @@
    "recipe": "cu_wasp_bank",
    "name": "Wasp Bank",
    "kind": "nest",
-   "x": 1048,
-   "z": 1288,
+   "x": 1071,
+   "z": 1295,
    "yaw": 2.27,
    "radius": 4,
    "levelBase": 5
@@ -3031,8 +3031,8 @@
    "recipe": "cu_lone_arch",
    "name": "Lone Arch",
    "kind": "marker",
-   "x": 432,
-   "z": 175,
+   "x": 503,
+   "z": 499,
    "yaw": 1.44,
    "radius": 5,
    "levelBase": 7
@@ -3043,15 +3043,15 @@
    "monster": "brigand_archer",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     1,
     2
    ],
-   "x": 48,
-   "z": 360,
+   "x": 294,
+   "z": 700,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -3092,26 +3092,26 @@
     2,
     3
    ],
-   "x": 944,
-   "z": 1560,
+   "x": 912,
+   "z": 1561,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1002,
-     1554
+     882,
+     1573
     ],
     [
-     953,
-     1632
+     900,
+     1531
     ],
     [
-     868,
-     1592
+     942,
+     1549
     ],
     [
-     939,
-     1493
+     924,
+     1591
     ]
    ],
    "roam": true
@@ -3164,8 +3164,8 @@
    "recipe": "cu_loose_stone",
    "name": "Loose Stone",
    "kind": "cache",
-   "x": 296,
-   "z": 144,
+   "x": 408,
+   "z": 524,
    "yaw": 3.66,
    "radius": 4,
    "levelBase": 7
@@ -3183,8 +3183,8 @@
     1,
     2
    ],
-   "x": 1728,
-   "z": 136,
+   "x": 1673,
+   "z": 322,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -3195,8 +3195,8 @@
    "recipe": "cu_pine_resin",
    "name": "Weeping Pine",
    "kind": "forage",
-   "x": 608,
-   "z": 1088,
+   "x": 603,
+   "z": 1030,
    "yaw": 3.53,
    "radius": 4,
    "levelBase": 5
@@ -3207,8 +3207,8 @@
    "recipe": "cu_lone_arch",
    "name": "Lone Arch",
    "kind": "marker",
-   "x": 1009,
-   "z": 808,
+   "x": 1011,
+   "z": 788,
    "yaw": 0.87,
    "radius": 5,
    "levelBase": 5
@@ -3226,8 +3226,8 @@
     2,
     3
    ],
-   "x": 810,
-   "z": 1711,
+   "x": 781,
+   "z": 1725,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -3238,8 +3238,8 @@
    "recipe": "cu_rune_ring",
    "name": "Little Stone Ring",
    "kind": "marker",
-   "x": 832,
-   "z": 40,
+   "x": 862,
+   "z": 149,
    "yaw": 0.85,
    "radius": 6,
    "levelBase": 7
@@ -3249,8 +3249,8 @@
    "id": "milestone_hollin_pass_d18",
    "kind": "milestone",
    "name": "Milestone",
-   "x": 129,
-   "z": 743,
+   "x": 141,
+   "z": 829,
    "yaw": 3.5,
    "radius": 3,
    "filler": true
@@ -3261,8 +3261,8 @@
    "recipe": "cu_empty_gallows_post",
    "name": "Weathered Post",
    "kind": "lore",
-   "x": 1241,
-   "z": 752,
+   "x": 1225,
+   "z": 756,
    "yaw": 1.07,
    "radius": 3,
    "levelBase": 5
@@ -3280,26 +3280,26 @@
     1,
     2
    ],
-   "x": 1033,
-   "z": 146,
+   "x": 1007,
+   "z": 165,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     979,
-     173
+     985,
+     160
     ],
     [
-     998,
-     101
+     1012,
+     143
     ],
     [
-     1098,
-     97
+     1029,
+     170
     ],
     [
-     1067,
-     191
+     1002,
+     187
     ]
    ],
    "roam": true
@@ -3317,8 +3317,8 @@
     2,
     3
    ],
-   "x": 1064,
-   "z": 1064,
+   "x": 1052,
+   "z": 1030,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -3332,22 +3332,22 @@
    "chatter": [
     "role.herbalist"
    ],
-   "x": 1513,
-   "z": 1048,
+   "x": 1538,
+   "z": 1054,
    "yaw": 0.43,
    "radius": 6,
    "path": [
     [
-     1528,
-     1034
+     1553,
+     1040
     ],
     [
-     1520,
-     1075
+     1545,
+     1081
     ],
     [
-     1487,
-     1047
+     1512,
+     1053
     ]
    ]
   },
@@ -3376,8 +3376,8 @@
     2,
     3
    ],
-   "x": 1000,
-   "z": 1800,
+   "x": 1009,
+   "z": 1831,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -3430,8 +3430,8 @@
    "recipe": "cu_witch_warning",
    "name": "Bone Warning",
    "kind": "lore",
-   "x": 441,
-   "z": 1080,
+   "x": 454,
+   "z": 1056,
    "yaw": 0.85,
    "radius": 4,
    "levelBase": 6
@@ -3536,22 +3536,22 @@
    "chatter": [
     "role.woodcutter"
    ],
-   "x": 320,
-   "z": 1007,
+   "x": 309,
+   "z": 983,
    "yaw": 3.84,
    "radius": 6,
    "path": [
     [
-     313,
-     1021
+     302,
+     997
     ],
     [
-     308,
-     996
+     297,
+     972
     ],
     [
-     335,
-     1001
+     324,
+     977
     ]
    ]
   },
@@ -3561,8 +3561,8 @@
    "recipe": "cu_pine_resin",
    "name": "Weeping Pine",
    "kind": "forage",
-   "x": 1793,
-   "z": 1686,
+   "x": 1789,
+   "z": 1706,
    "yaw": 2.51,
    "radius": 4,
    "levelBase": 3
@@ -3573,15 +3573,15 @@
    "monster": "road_brigand",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     2,
     3
    ],
-   "x": 448,
-   "z": 280,
+   "x": 619,
+   "z": 466,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -3622,26 +3622,26 @@
     1,
     2
    ],
-   "x": 432,
-   "z": 448,
+   "x": 534,
+   "z": 509,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     515,
-     427
+     607,
+     503
     ],
     [
-     474,
-     510
+     540,
+     582
     ],
     [
-     352,
-     484
+     461,
+     515
     ],
     [
-     404,
-     372
+     528,
+     436
     ]
    ],
    "roam": true
@@ -3659,8 +3659,8 @@
     1,
     2
    ],
-   "x": 879,
-   "z": 1137,
+   "x": 841,
+   "z": 1136,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -3694,8 +3694,8 @@
    "recipe": "cu_wild_garlic",
    "name": "Wild Garlic",
    "kind": "forage",
-   "x": 1487,
-   "z": 1278,
+   "x": 1476,
+   "z": 1294,
    "yaw": 6.27,
    "radius": 4,
    "levelBase": 4
@@ -3725,8 +3725,8 @@
    "recipe": "cu_bramble_berries",
    "name": "Bramble Berries",
    "kind": "forage",
-   "x": 568,
-   "z": 272,
+   "x": 596,
+   "z": 445,
    "yaw": 4.66,
    "radius": 4,
    "levelBase": 7
@@ -3768,8 +3768,8 @@
    "recipe": "cu_poachers_end",
    "name": "Poacher's End",
    "kind": "remains",
-   "x": 735,
-   "z": 1641,
+   "x": 719,
+   "z": 1656,
    "yaw": 2.23,
    "radius": 4,
    "levelBase": 5
@@ -3779,8 +3779,8 @@
    "id": "standing_stone_hollin_pass_d23",
    "kind": "standing_stone",
    "name": "Standing Stone",
-   "x": 249,
-   "z": 288,
+   "x": 355,
+   "z": 560,
    "yaw": 6.08,
    "radius": 4,
    "filler": true
@@ -3833,8 +3833,8 @@
    "id": "frost_marker_hollin_pass_d24",
    "kind": "frost_marker",
    "name": "Snow Pole",
-   "x": 1422,
-   "z": 1545,
+   "x": 1404,
+   "z": 1544,
    "yaw": 6.01,
    "radius": 3,
    "filler": true
@@ -3848,22 +3848,22 @@
    "chatter": [
     "role.woodcutter"
    ],
-   "x": 536,
-   "z": 2008,
+   "x": 521,
+   "z": 1986,
    "yaw": 1.53,
    "radius": 6,
    "path": [
     [
-     524,
-     2003
+     509,
+     1981
     ],
     [
-     542,
+     527,
+     1976
+    ],
+    [
+     525,
      1998
-    ],
-    [
-     540,
-     2020
     ]
    ]
   },
@@ -3873,8 +3873,8 @@
    "recipe": "cu_rune_ring",
    "name": "Little Stone Ring",
    "kind": "marker",
-   "x": 240,
-   "z": 440,
+   "x": 180,
+   "z": 867,
    "yaw": 1.28,
    "radius": 6,
    "levelBase": 7
@@ -3915,8 +3915,8 @@
    "recipe": "cu_bramble_berries",
    "name": "Bramble Berries",
    "kind": "forage",
-   "x": 1808,
-   "z": 944,
+   "x": 1818,
+   "z": 959,
    "yaw": 1.77,
    "radius": 4,
    "levelBase": 4
@@ -3934,8 +3934,8 @@
     2,
     3
    ],
-   "x": 1126,
-   "z": 1402,
+   "x": 1148,
+   "z": 1427,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -3946,8 +3946,8 @@
    "recipe": "cu_loose_stone",
    "name": "Loose Stone",
    "kind": "cache",
-   "x": 1653,
-   "z": 1212,
+   "x": 1675,
+   "z": 1216,
    "yaw": 3.42,
    "radius": 4,
    "levelBase": 4
@@ -3958,8 +3958,8 @@
    "recipe": "cu_herb_patch",
    "name": "Woundwort Patch",
    "kind": "forage",
-   "x": 2006,
-   "z": 240,
+   "x": 1990,
+   "z": 347,
    "yaw": 4.45,
    "radius": 4,
    "levelBase": 6
@@ -3970,8 +3970,8 @@
    "recipe": "cu_mushroom_flush",
    "name": "Flush of Caps",
    "kind": "forage",
-   "x": 496,
-   "z": 1256,
+   "x": 488,
+   "z": 1276,
    "yaw": 4.24,
    "radius": 4,
    "levelBase": 5
@@ -4001,7 +4001,7 @@
     3
    ],
    "x": 1280,
-   "z": 856,
+   "z": 888,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -4036,8 +4036,8 @@
    "recipe": "cu_oak_of_oaths",
    "name": "Oath Oak",
    "kind": "shrine",
-   "x": 1257,
-   "z": 1105,
+   "x": 1278,
+   "z": 1116,
    "yaw": 1.91,
    "radius": 6,
    "levelBase": 5
@@ -4055,8 +4055,8 @@
     1,
     2
    ],
-   "x": 1681,
-   "z": 1297,
+   "x": 1697,
+   "z": 1267,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -4078,8 +4078,8 @@
    "recipe": "cu_poachers_end",
    "name": "Poacher's End",
    "kind": "remains",
-   "x": 1376,
-   "z": 1428,
+   "x": 1343,
+   "z": 1405,
    "yaw": 2.31,
    "radius": 4,
    "levelBase": 4
@@ -4109,8 +4109,8 @@
     1,
     2
    ],
-   "x": 1502,
-   "z": 1378,
+   "x": 1514,
+   "z": 1409,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -4121,8 +4121,8 @@
    "recipe": "cu_herb_patch",
    "name": "Woundwort Patch",
    "kind": "forage",
-   "x": 128,
-   "z": 272,
+   "x": 380,
+   "z": 595,
    "yaw": 5.3,
    "radius": 4,
    "levelBase": 7
@@ -4132,8 +4132,8 @@
    "id": "stone_trough_hollin_pass_d28",
    "kind": "stone_trough",
    "name": "Stone Trough",
-   "x": 1096,
-   "z": 1512,
+   "x": 1077,
+   "z": 1519,
    "yaw": 2.55,
    "radius": 4,
    "filler": true
@@ -4156,15 +4156,15 @@
    "monster": "frost_stalker",
    "with": null,
    "level": [
-    6,
-    7
+    5,
+    6
    ],
    "count": [
     2,
     3
    ],
-   "x": 1882,
-   "z": 256,
+   "x": 1867,
+   "z": 312,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -4218,8 +4218,8 @@
    "recipe": "cu_mushroom_flush",
    "name": "Flush of Caps",
    "kind": "forage",
-   "x": 1145,
-   "z": 1680,
+   "x": 1157,
+   "z": 1700,
    "yaw": 2.28,
    "radius": 4,
    "levelBase": 4
@@ -4229,8 +4229,8 @@
    "id": "roadside_grave_hollin_pass_d29",
    "kind": "roadside_grave",
    "name": "Roadside Grave",
-   "x": 1730,
-   "z": 39,
+   "x": 1700,
+   "z": 338,
    "yaw": 2.83,
    "radius": 4,
    "filler": true
@@ -4253,33 +4253,33 @@
    "monster": "brigand_archer",
    "with": null,
    "level": [
-    5,
-    6
+    4,
+    5
    ],
    "count": [
     2,
     3
    ],
-   "x": 1240,
-   "z": 1200,
+   "x": 1272,
+   "z": 1205,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1211,
-     1221
+     1307,
+     1212
     ],
     [
-     1224,
-     1153
+     1265,
+     1240
     ],
     [
-     1276,
-     1193
+     1237,
+     1198
     ],
     [
-     1271,
-     1239
+     1279,
+     1170
     ]
    ],
    "roam": true
@@ -4309,8 +4309,8 @@
    "recipe": "cu_wayshrine",
    "name": "Wayfarer Shrine",
    "kind": "shrine",
-   "x": 1407,
-   "z": 1232,
+   "x": 1389,
+   "z": 1233,
    "yaw": 1.31,
    "radius": 4,
    "levelBase": 4
@@ -4335,22 +4335,22 @@
    "chatter": [
     "role.hermit"
    ],
-   "x": 768,
-   "z": 168,
+   "x": 835,
+   "z": 196,
    "yaw": 0.44,
    "radius": 6,
    "path": [
     [
-     779,
-     178
+     846,
+     206
     ],
     [
-     754,
-     169
+     821,
+     197
     ],
     [
-     772,
-     156
+     839,
+     184
     ]
    ]
   },
@@ -4360,8 +4360,8 @@
    "recipe": "cu_childs_map",
    "name": "Child's Map",
    "kind": "lore",
-   "x": 728,
-   "z": 392,
+   "x": 743,
+   "z": 383,
    "yaw": 2.08,
    "radius": 3,
    "levelBase": 6
@@ -4372,15 +4372,15 @@
    "monster": "road_brigand",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     1,
     2
    ],
-   "x": 104,
-   "z": 176,
+   "x": 420,
+   "z": 610,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -4402,8 +4402,8 @@
    "recipe": "cu_thin_ice",
    "name": "Thin Ice",
    "kind": "hazard",
-   "x": 39,
-   "z": 735,
+   "x": 225,
+   "z": 786,
    "yaw": 3.53,
    "radius": 5,
    "levelBase": 6
@@ -4421,8 +4421,8 @@
     2,
     3
    ],
-   "x": 472,
-   "z": 1760,
+   "x": 460,
+   "z": 1730,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -4444,8 +4444,8 @@
    "id": "frost_marker_hollin_pass_d32",
    "kind": "frost_marker",
    "name": "Snow Pole",
-   "x": 1697,
-   "z": 1474,
+   "x": 1715,
+   "z": 1477,
    "yaw": 0.72,
    "radius": 3,
    "filler": true
@@ -4456,8 +4456,8 @@
    "recipe": "cu_crow_roost",
    "name": "Crow Roost",
    "kind": "nest",
-   "x": 128,
-   "z": 448,
+   "x": 407,
+   "z": 574,
    "yaw": 3.8,
    "radius": 5,
    "levelBase": 7
@@ -4467,8 +4467,8 @@
    "id": "roadside_grave_hollin_pass_d33",
    "kind": "roadside_grave",
    "name": "Roadside Grave",
-   "x": 746,
-   "z": 1553,
+   "x": 707,
+   "z": 1551,
    "yaw": 0.16,
    "radius": 4,
    "filler": true
@@ -4498,8 +4498,8 @@
    "recipe": "cu_mushroom_flush",
    "name": "Flush of Caps",
    "kind": "forage",
-   "x": 40,
-   "z": 961,
+   "x": 66,
+   "z": 962,
    "yaw": 6.15,
    "radius": 4,
    "levelBase": 6
@@ -4538,8 +4538,8 @@
    "recipe": "cu_sinkhole",
    "name": "Sinkhole",
    "kind": "hazard",
-   "x": 1816,
-   "z": 792,
+   "x": 1802,
+   "z": 775,
    "yaw": 4.52,
    "radius": 6,
    "levelBase": 5
@@ -4580,8 +4580,8 @@
    "recipe": "cu_pine_resin",
    "name": "Weeping Pine",
    "kind": "forage",
-   "x": 696,
-   "z": 1480,
+   "x": 687,
+   "z": 1462,
    "yaw": 5.5,
    "radius": 4,
    "levelBase": 5
@@ -4599,26 +4599,26 @@
     2,
     3
    ],
-   "x": 1042,
-   "z": 1704,
+   "x": 1089,
+   "z": 1727,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1080,
-     1745
+     1062,
+     1769
     ],
     [
-     996,
-     1757
+     1047,
+     1700
     ],
     [
-     988,
-     1676
+     1116,
+     1685
     ],
     [
-     1073,
-     1666
+     1131,
+     1754
     ]
    ],
    "roam": true
@@ -4671,8 +4671,8 @@
    "recipe": "cu_dead_traveller",
    "name": "Dead Traveller",
    "kind": "remains",
-   "x": 1182,
-   "z": 1039,
+   "x": 1185,
+   "z": 1021,
    "yaw": 4.44,
    "radius": 4,
    "levelBase": 5
@@ -4690,8 +4690,8 @@
     1,
     2
    ],
-   "x": 1360,
-   "z": 71,
+   "x": 1419,
+   "z": 286,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -4702,8 +4702,8 @@
    "recipe": "cu_bramble_berries",
    "name": "Bramble Berries",
    "kind": "forage",
-   "x": 864,
-   "z": 1432,
+   "x": 881,
+   "z": 1439,
    "yaw": 1.01,
    "radius": 4,
    "levelBase": 5
@@ -4714,8 +4714,8 @@
    "recipe": "cu_oak_of_oaths",
    "name": "Oath Oak",
    "kind": "shrine",
-   "x": 1631,
-   "z": 2010,
+   "x": 1600,
+   "z": 2001,
    "yaw": 6.18,
    "radius": 6,
    "levelBase": 3
@@ -4733,8 +4733,8 @@
     1,
     2
    ],
-   "x": 1545,
-   "z": 1765,
+   "x": 1563,
+   "z": 1738,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -4745,8 +4745,8 @@
    "recipe": "cu_rune_ring",
    "name": "Little Stone Ring",
    "kind": "marker",
-   "x": 512,
-   "z": 680,
+   "x": 505,
+   "z": 701,
    "yaw": 4.81,
    "radius": 6,
    "levelBase": 6
@@ -4768,8 +4768,8 @@
    "recipe": "cu_stone_watcher",
    "name": "Stone Watcher",
    "kind": "shrine",
-   "x": 97,
-   "z": 551,
+   "x": 236,
+   "z": 751,
    "yaw": 4.83,
    "radius": 5,
    "levelBase": 7
@@ -4787,26 +4787,26 @@
     2,
     3
    ],
-   "x": 1120,
-   "z": 1233,
+   "x": 1087,
+   "z": 1237,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1143,
-     1181
+     1101,
+     1184
     ],
     [
-     1179,
-     1246
+     1140,
+     1251
     ],
     [
-     1099,
-     1276
+     1073,
+     1290
     ],
     [
-     1061,
-     1216
+     1034,
+     1223
     ]
    ],
    "roam": true
@@ -4824,8 +4824,8 @@
     2,
     3
    ],
-   "x": 1440,
-   "z": 544,
+   "x": 1412,
+   "z": 560,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -4836,8 +4836,8 @@
    "recipe": "cu_honey_tree",
    "name": "Honey Tree",
    "kind": "forage",
-   "x": 960,
-   "z": 1288,
+   "x": 978,
+   "z": 1298,
    "yaw": 3.33,
    "radius": 5,
    "levelBase": 5
@@ -4887,8 +4887,8 @@
    "id": "banner_post_hollin_pass_d37",
    "kind": "banner_post",
    "name": "Faded Banner",
-   "x": 1344,
-   "z": 1774,
+   "x": 1358,
+   "z": 1759,
    "yaw": 3.38,
    "radius": 3,
    "filler": true
@@ -4910,8 +4910,8 @@
    "recipe": "cu_shepherds_hut",
    "name": "Shepherd's Lean-to",
    "kind": "camp",
-   "x": 183,
-   "z": 112,
+   "x": 530,
+   "z": 545,
    "yaw": 6.15,
    "radius": 6,
    "levelBase": 7
@@ -4988,15 +4988,15 @@
    "monster": "crag_hyena",
    "with": null,
    "level": [
-    5,
-    6
+    6,
+    7
    ],
    "count": [
     1,
     2
    ],
-   "x": 945,
-   "z": 751,
+   "x": 930,
+   "z": 722,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -5007,8 +5007,8 @@
    "recipe": "cu_buried_crock",
    "name": "Buried Crock",
    "kind": "cache",
-   "x": 609,
-   "z": 1176,
+   "x": 625,
+   "z": 1167,
    "yaw": 5.61,
    "radius": 4,
    "levelBase": 5
@@ -5022,22 +5022,22 @@
    "chatter": [
     "role.charcoal_burner"
    ],
-   "x": 1913,
-   "z": 88,
+   "x": 1836,
+   "z": 330,
    "yaw": 2.47,
    "radius": 6,
    "path": [
     [
-     1903,
-     89
+     1826,
+     331
     ],
     [
-     1920,
-     78
+     1843,
+     320
     ],
     [
-     1919,
-     96
+     1842,
+     338
     ]
    ]
   },
@@ -5047,8 +5047,8 @@
    "recipe": "cu_soldiers_tally",
    "name": "Soldier's Tally",
    "kind": "lore",
-   "x": 1028,
-   "z": 1975,
+   "x": 1006,
+   "z": 1931,
    "yaw": 4.29,
    "radius": 4,
    "levelBase": 4
@@ -5089,8 +5089,8 @@
    "recipe": "cu_pine_resin",
    "name": "Weeping Pine",
    "kind": "forage",
-   "x": 1336,
-   "z": 1612,
+   "x": 1323,
+   "z": 1626,
    "yaw": 5.67,
    "radius": 4,
    "levelBase": 4
@@ -5157,8 +5157,8 @@
    "recipe": "cu_shepherds_hut",
    "name": "Shepherd's Lean-to",
    "kind": "camp",
-   "x": 1931,
-   "z": 1344,
+   "x": 1953,
+   "z": 1350,
    "yaw": 2.52,
    "radius": 6,
    "levelBase": 4
@@ -5180,8 +5180,8 @@
    "recipe": "cu_bramble_berries",
    "name": "Bramble Berries",
    "kind": "forage",
-   "x": 1357,
-   "z": 981,
+   "x": 1362,
+   "z": 963,
    "yaw": 1.76,
    "radius": 4,
    "levelBase": 5
@@ -5199,8 +5199,8 @@
     2,
     3
    ],
-   "x": 280,
-   "z": 1647,
+   "x": 275,
+   "z": 1615,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -5211,8 +5211,8 @@
    "recipe": "cu_shepherds_hut",
    "name": "Shepherd's Lean-to",
    "kind": "camp",
-   "x": 784,
-   "z": 272,
+   "x": 803,
+   "z": 259,
    "yaw": 2.58,
    "radius": 6,
    "levelBase": 6
@@ -5223,8 +5223,8 @@
    "recipe": "cu_childs_map",
    "name": "Child's Map",
    "kind": "lore",
-   "x": 1240,
-   "z": 1547,
+   "x": 1239,
+   "z": 1530,
    "yaw": 2.63,
    "radius": 3,
    "levelBase": 4
@@ -5254,8 +5254,8 @@
    "recipe": "cu_buried_crock",
    "name": "Buried Crock",
    "kind": "cache",
-   "x": 632,
-   "z": 176,
+   "x": 647,
+   "z": 234,
    "yaw": 4.73,
    "radius": 4,
    "levelBase": 7
@@ -5265,8 +5265,8 @@
    "id": "milestone_hollin_pass_d42",
    "kind": "milestone",
    "name": "Milestone",
-   "x": 384,
-   "z": 1735,
+   "x": 366,
+   "z": 1731,
    "yaw": 4.23,
    "radius": 3,
    "filler": true
@@ -5296,26 +5296,26 @@
     1,
     2
    ],
-   "x": 680,
-   "z": 568,
+   "x": 678,
+   "z": 601,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
+     672,
+     557
+    ],
+    [
+     749,
+     610
+    ],
+    [
      674,
-     524
+     658
     ],
     [
-     751,
-     577
-    ],
-    [
-     676,
-     625
-    ],
-    [
-     611,
-     561
+     609,
+     594
     ]
    ],
    "roam": true
@@ -5337,8 +5337,8 @@
    "recipe": "cu_poachers_end",
    "name": "Poacher's End",
    "kind": "remains",
-   "x": 528,
-   "z": 1070,
+   "x": 516,
+   "z": 1048,
    "yaw": 1.15,
    "radius": 4,
    "levelBase": 5
@@ -5352,22 +5352,22 @@
    "chatter": [
     "role.hunter"
    ],
-   "x": 327,
-   "z": 913,
+   "x": 323,
+   "z": 889,
    "yaw": 5.83,
    "radius": 6,
    "path": [
     [
-     293,
-     939
+     289,
+     915
     ],
     [
-     312,
-     872
+     308,
+     848
     ],
     [
-     378,
-     933
+     374,
+     909
     ]
    ]
   },
@@ -5377,8 +5377,8 @@
    "recipe": "cu_stone_watcher",
    "name": "Stone Watcher",
    "kind": "shrine",
-   "x": 1848,
-   "z": 160,
+   "x": 1798,
+   "z": 335,
    "yaw": 0.31,
    "radius": 5,
    "levelBase": 6
@@ -5389,15 +5389,15 @@
    "monster": "ironback_beetle",
    "with": null,
    "level": [
-    6,
-    7
+    5,
+    6
    ],
    "count": [
     1,
     2
    ],
-   "x": 2013,
-   "z": 108,
+   "x": 1824,
+   "z": 358,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -5438,8 +5438,8 @@
     1,
     2
    ],
-   "x": 737,
-   "z": 1393,
+   "x": 757,
+   "z": 1368,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -5469,26 +5469,26 @@
     1,
     2
    ],
-   "x": 160,
-   "z": 631,
+   "x": 258,
+   "z": 773,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     206,
-     657
+     325,
+     766
     ],
     [
-     118,
-     673
+     265,
+     840
     ],
     [
-     107,
-     610
+     191,
+     780
     ],
     [
-     184,
-     586
+     251,
+     706
     ]
    ],
    "roam": true
@@ -5529,8 +5529,8 @@
     2,
     3
    ],
-   "x": 800,
-   "z": 1080,
+   "x": 831,
+   "z": 1058,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -5541,8 +5541,8 @@
    "recipe": "cu_wasp_bank",
    "name": "Wasp Bank",
    "kind": "nest",
-   "x": 600,
-   "z": 424,
+   "x": 633,
+   "z": 435,
    "yaw": 3.32,
    "radius": 4,
    "levelBase": 6
@@ -5600,8 +5600,8 @@
     2,
     3
    ],
-   "x": 849,
-   "z": 120,
+   "x": 866,
+   "z": 182,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -5635,8 +5635,8 @@
    "recipe": "cu_thin_ice",
    "name": "Thin Ice",
    "kind": "hazard",
-   "x": 873,
-   "z": 1996,
+   "x": 872,
+   "z": 1976,
    "yaw": 3.68,
    "radius": 5,
    "levelBase": 4
@@ -5700,8 +5700,8 @@
    "id": "frost_marker_hollin_pass_d48",
    "kind": "frost_marker",
    "name": "Snow Pole",
-   "x": 1214,
-   "z": 1368,
+   "x": 1198,
+   "z": 1379,
    "yaw": 0.44,
    "radius": 3,
    "filler": true
@@ -5712,8 +5712,8 @@
    "recipe": "cu_crow_roost",
    "name": "Crow Roost",
    "kind": "nest",
-   "x": 845,
-   "z": 1511,
+   "x": 857,
+   "z": 1527,
    "yaw": 1.24,
    "radius": 5,
    "levelBase": 5
@@ -5724,8 +5724,8 @@
    "recipe": "cu_shepherds_hut",
    "name": "Shepherd's Lean-to",
    "kind": "camp",
-   "x": 1703,
-   "z": 1065,
+   "x": 1698,
+   "z": 1088,
    "yaw": 3.52,
    "radius": 6,
    "levelBase": 4
@@ -5759,8 +5759,8 @@
    "recipe": "cu_wild_garlic",
    "name": "Wild Garlic",
    "kind": "forage",
-   "x": 262,
-   "z": 520,
+   "x": 391,
+   "z": 610,
    "yaw": 2.46,
    "radius": 4,
    "levelBase": 6
@@ -5790,8 +5790,8 @@
     1,
     2
    ],
-   "x": 1664,
-   "z": 1385,
+   "x": 1696,
+   "z": 1379,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -5801,8 +5801,8 @@
    "id": "banner_post_hollin_pass_d50",
    "kind": "banner_post",
    "name": "Faded Banner",
-   "x": 1686,
-   "z": 1816,
+   "x": 1700,
+   "z": 1828,
    "yaw": 3.34,
    "radius": 3,
    "filler": true
@@ -5853,8 +5853,8 @@
    "recipe": "cu_witch_warning",
    "name": "Bone Warning",
    "kind": "lore",
-   "x": 1929,
-   "z": 1747,
+   "x": 1948,
+   "z": 1745,
    "yaw": 0.08,
    "radius": 4,
    "levelBase": 3
@@ -5924,8 +5924,8 @@
    "recipe": "cu_oak_of_oaths",
    "name": "Oath Oak",
    "kind": "shrine",
-   "x": 528,
-   "z": 600,
+   "x": 510,
+   "z": 587,
    "yaw": 5.01,
    "radius": 6,
    "levelBase": 6
@@ -5981,22 +5981,22 @@
    "chatter": [
     "role.shepherd"
    ],
-   "x": 321,
-   "z": 328,
+   "x": 493,
+   "z": 558,
    "yaw": 0.34,
    "radius": 6,
    "path": [
     [
-     345,
-     285
+     517,
+     515
     ],
     [
-     350,
-     359
+     522,
+     589
     ],
     [
-     289,
-     329
+     461,
+     559
     ]
    ]
   },
@@ -6036,8 +6036,8 @@
    "id": "beehive_row_hollin_pass_d53",
    "kind": "beehive_row",
    "name": "Beehive Row",
-   "x": 1201,
-   "z": 40,
+   "x": 1239,
+   "z": 106,
    "yaw": 5.74,
    "radius": 5,
    "filler": true
@@ -6048,8 +6048,8 @@
    "recipe": "cu_cloudberry",
    "name": "Cloudberry Bog",
    "kind": "forage",
-   "x": 1452,
-   "z": 1649,
+   "x": 1432,
+   "z": 1699,
    "yaw": 5.07,
    "radius": 4,
    "levelBase": 4
@@ -6067,26 +6067,26 @@
     1,
     2
    ],
-   "x": 1280,
-   "z": 208,
+   "x": 1348,
+   "z": 312,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1333,
-     217
+     1384,
+     301
     ],
     [
-     1273,
-     264
+     1359,
+     348
     ],
     [
-     1225,
-     200
+     1312,
+     323
     ],
     [
-     1303,
-     162
+     1337,
+     276
     ]
    ],
    "roam": true
@@ -6139,8 +6139,8 @@
    "recipe": "cu_lovers_stone",
    "name": "Lovers' Stone",
    "kind": "lore",
-   "x": 272,
-   "z": 215,
+   "x": 472,
+   "z": 542,
    "yaw": 2.09,
    "radius": 4,
    "levelBase": 7
@@ -6170,8 +6170,8 @@
    "recipe": "cu_herb_patch",
    "name": "Woundwort Patch",
    "kind": "forage",
-   "x": 718,
-   "z": 1048,
+   "x": 702,
+   "z": 1071,
    "yaw": 0.53,
    "radius": 4,
    "levelBase": 5
@@ -6182,8 +6182,8 @@
    "recipe": "cu_pine_resin",
    "name": "Weeping Pine",
    "kind": "forage",
-   "x": 1719,
-   "z": 215,
+   "x": 1708,
+   "z": 286,
    "yaw": 5.63,
    "radius": 4,
    "levelBase": 6
@@ -6201,8 +6201,8 @@
     1,
     2
    ],
-   "x": 888,
-   "z": 1720,
+   "x": 856,
+   "z": 1714,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -6213,8 +6213,8 @@
    "recipe": "cu_dead_traveller",
    "name": "Dead Traveller",
    "kind": "remains",
-   "x": 1553,
-   "z": 40,
+   "x": 1560,
+   "z": 332,
    "yaw": 4.4,
    "radius": 4,
    "levelBase": 6
@@ -6225,8 +6225,8 @@
    "recipe": "cu_old_battle",
    "name": "Old Skirmish",
    "kind": "remains",
-   "x": 928,
-   "z": 231,
+   "x": 907,
+   "z": 218,
    "yaw": 2.14,
    "radius": 7,
    "levelBase": 6
@@ -6308,22 +6308,22 @@
    "chatter": [
     "role.shepherd"
    ],
-   "x": 591,
-   "z": 1005,
+   "x": 572,
+   "z": 989,
    "yaw": 6.09,
    "radius": 6,
    "path": [
     [
-     640,
-     1024
+     534,
+     989
     ],
     [
-     552,
-     1019
+     591,
+     956
     ],
     [
-     586,
-     963
+     591,
+     1022
     ]
    ]
   },
@@ -6387,15 +6387,15 @@
    "monster": "road_brigand",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     2,
     3
    ],
-   "x": 39,
-   "z": 128,
+   "x": 369,
+   "z": 684,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -6406,8 +6406,8 @@
    "recipe": "cu_lovers_stone",
    "name": "Lovers' Stone",
    "kind": "lore",
-   "x": 1104,
-   "z": 304,
+   "x": 984,
+   "z": 306,
    "yaw": 4.27,
    "radius": 4,
    "levelBase": 6
@@ -6425,26 +6425,26 @@
     2,
     3
    ],
-   "x": 680,
-   "z": 1328,
+   "x": 659,
+   "z": 1299,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     658,
-     1363
+     670,
+     1271
     ],
     [
-     629,
-     1305
+     687,
+     1310
     ],
     [
-     708,
-     1295
+     648,
+     1327
     ],
     [
-     728,
-     1348
+     631,
+     1288
     ]
    ],
    "roam": true
@@ -6485,8 +6485,8 @@
     1,
     2
    ],
-   "x": 1185,
-   "z": 112,
+   "x": 965,
+   "z": 180,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -6498,7 +6498,7 @@
    "name": "Boundary Cross",
    "kind": "marker",
    "x": 1191,
-   "z": 304,
+   "z": 364,
    "yaw": 4.25,
    "radius": 3,
    "levelBase": 6
@@ -6512,22 +6512,22 @@
    "chatter": [
     "role.shepherd"
    ],
-   "x": 1409,
-   "z": 1137,
+   "x": 1397,
+   "z": 1169,
    "yaw": 1.06,
    "radius": 6,
    "path": [
     [
-     1446,
-     1119
+     1373,
+     1168
     ],
     [
-     1401,
-     1180
+     1409,
+     1149
     ],
     [
-     1372,
-     1104
+     1408,
+     1190
     ]
    ]
   },
@@ -6537,8 +6537,8 @@
    "recipe": "cu_old_battle",
    "name": "Old Skirmish",
    "kind": "remains",
-   "x": 406,
-   "z": 551,
+   "x": 429,
+   "z": 571,
    "yaw": 2.54,
    "radius": 7,
    "levelBase": 6
@@ -6567,8 +6567,8 @@
    "id": "broken_wheel_hollin_pass_d57",
    "kind": "broken_wheel",
    "name": "Broken Wheel",
-   "x": 464,
-   "z": 48,
+   "x": 654,
+   "z": 213,
    "yaw": 5.77,
    "radius": 4,
    "filler": true
@@ -6591,8 +6591,8 @@
    "recipe": "cu_sinkhole",
    "name": "Sinkhole",
    "kind": "hazard",
-   "x": 1651,
-   "z": 1530,
+   "x": 1670,
+   "z": 1544,
    "yaw": 6.18,
    "radius": 6,
    "levelBase": 4
@@ -6622,8 +6622,8 @@
    "recipe": "cu_pine_resin",
    "name": "Weeping Pine",
    "kind": "forage",
-   "x": 111,
-   "z": 1664,
+   "x": 104,
+   "z": 1681,
    "yaw": 5.38,
    "radius": 4,
    "levelBase": 5
@@ -6633,8 +6633,8 @@
    "id": "standing_stone_hollin_pass_d58",
    "kind": "standing_stone",
    "name": "Standing Stone",
-   "x": 1520,
-   "z": 536,
+   "x": 1504,
+   "z": 513,
    "yaw": 3,
    "radius": 4,
    "filler": true
@@ -6675,8 +6675,8 @@
    "recipe": "cu_cloudberry",
    "name": "Cloudberry Bog",
    "kind": "forage",
-   "x": 312,
-   "z": 1792,
+   "x": 294,
+   "z": 1788,
    "yaw": 2.54,
    "radius": 4,
    "levelBase": 5
@@ -6687,8 +6687,8 @@
    "recipe": "cu_childs_map",
    "name": "Child's Map",
    "kind": "lore",
-   "x": 1304,
-   "z": 928,
+   "x": 1294,
+   "z": 914,
    "yaw": 2.15,
    "radius": 3,
    "levelBase": 5
@@ -6753,33 +6753,33 @@
    "monster": "crag_hyena",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     1,
     2
    ],
-   "x": 360,
-   "z": 185,
+   "x": 653,
+   "z": 460,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     310,
-     233
+     662,
+     517
     ],
     [
-     300,
-     135
+     596,
+     469
     ],
     [
-     412,
-     112
+     644,
+     403
     ],
     [
-     424,
-     242
+     710,
+     451
     ]
    ],
    "roam": true
@@ -6809,8 +6809,8 @@
    "recipe": "cu_pine_resin",
    "name": "Weeping Pine",
    "kind": "forage",
-   "x": 512,
-   "z": 1825,
+   "x": 502,
+   "z": 1840,
    "yaw": 3.47,
    "radius": 4,
    "levelBase": 5
@@ -6835,22 +6835,22 @@
    "chatter": [
     "role.shepherd"
    ],
-   "x": 1807,
-   "z": 1232,
+   "x": 1818,
+   "z": 1254,
    "yaw": 3.07,
    "radius": 6,
    "path": [
     [
-     1830,
-     1227
+     1841,
+     1249
     ],
     [
-     1798,
-     1266
+     1809,
+     1288
     ],
     [
-     1779,
-     1223
+     1790,
+     1245
     ]
    ]
   },
@@ -6921,8 +6921,8 @@
     1,
     2
    ],
-   "x": 1407,
-   "z": 215,
+   "x": 1386,
+   "z": 328,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -6933,8 +6933,8 @@
    "recipe": "cu_crow_roost",
    "name": "Crow Roost",
    "kind": "nest",
-   "x": 1040,
-   "z": 40,
+   "x": 1037,
+   "z": 155,
    "yaw": 1.86,
    "radius": 5,
    "levelBase": 6
@@ -6945,33 +6945,33 @@
    "monster": "brigand_archer",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     2,
     3
    ],
-   "x": 496,
-   "z": 223,
+   "x": 756,
+   "z": 281,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     425,
-     205
+     685,
+     263
     ],
     [
-     516,
-     157
+     776,
+     215
     ],
     [
-     557,
-     226
+     817,
+     284
     ],
     [
-     493,
-     280
+     753,
+     338
     ]
    ],
    "roam": true
@@ -7032,22 +7032,22 @@
    "chatter": [
     "role.poacher"
    ],
-   "x": 568,
-   "z": 1230,
+   "x": 561,
+   "z": 1205,
    "yaw": 0.43,
    "radius": 6,
    "path": [
     [
-     598,
-     1195
+     587,
+     1226
     ],
     [
-     590,
-     1270
+     530,
+     1217
     ],
     [
-     533,
-     1227
+     566,
+     1172
     ]
    ]
   },
@@ -7057,8 +7057,8 @@
    "recipe": "cu_rune_ring",
    "name": "Little Stone Ring",
    "kind": "marker",
-   "x": 168,
-   "z": 40,
+   "x": 863,
+   "z": 510,
    "yaw": 3.57,
    "radius": 6,
    "levelBase": 7
@@ -7076,8 +7076,8 @@
     1,
     2
    ],
-   "x": 1081,
-   "z": 815,
+   "x": 1112,
+   "z": 823,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -7118,8 +7118,8 @@
    "recipe": "cu_mushroom_flush",
    "name": "Flush of Caps",
    "kind": "forage",
-   "x": 1574,
-   "z": 1353,
+   "x": 1596,
+   "z": 1356,
    "yaw": 1.28,
    "radius": 4,
    "levelBase": 4
@@ -7137,26 +7137,26 @@
     2,
     3
    ],
-   "x": 815,
-   "z": 1256,
+   "x": 824,
+   "z": 1289,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     886,
-     1231
+     772,
+     1261
     ],
     [
-     844,
-     1306
+     852,
+     1237
     ],
     [
-     754,
-     1293
+     876,
+     1317
     ],
     [
-     782,
-     1204
+     796,
+     1341
     ]
    ],
    "roam": true
@@ -7174,8 +7174,8 @@
     1,
     2
    ],
-   "x": 912,
-   "z": 920,
+   "x": 928,
+   "z": 949,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -7186,8 +7186,8 @@
    "recipe": "cu_empty_gallows_post",
    "name": "Weathered Post",
    "kind": "lore",
-   "x": 1056,
-   "z": 1136,
+   "x": 1051,
+   "z": 1152,
    "yaw": 5.57,
    "radius": 3,
    "levelBase": 5
@@ -7197,8 +7197,8 @@
    "id": "wayside_well_hollin_pass_d65",
    "kind": "wayside_well",
    "name": "Wayside Well",
-   "x": 1744,
-   "z": 920,
+   "x": 1729,
+   "z": 935,
    "yaw": 1.67,
    "radius": 4,
    "filler": true
@@ -7209,8 +7209,8 @@
    "recipe": "cu_tinkers_halt",
    "name": "Tinker's Halt",
    "kind": "camp",
-   "x": 1072,
-   "z": 1352,
+   "x": 1048,
+   "z": 1365,
    "yaw": 4.88,
    "radius": 6,
    "levelBase": 4
@@ -7240,8 +7240,8 @@
    "recipe": "cu_mushroom_flush",
    "name": "Flush of Caps",
    "kind": "forage",
-   "x": 1656,
-   "z": 112,
+   "x": 1644,
+   "z": 317,
    "yaw": 5.29,
    "radius": 4,
    "levelBase": 6
@@ -7293,8 +7293,8 @@
    "id": "cairn_hollin_pass_d67",
    "kind": "cairn",
    "name": "Cairn",
-   "x": 960,
-   "z": 40,
+   "x": 954,
+   "z": 154,
    "yaw": 1.35,
    "radius": 4,
    "filler": true
@@ -7324,26 +7324,26 @@
     1,
     2
    ],
-   "x": 560,
-   "z": 488,
+   "x": 592,
+   "z": 499,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     592,
-     556
+     599,
+     569
     ],
     [
-     488,
-     500
+     522,
+     506
     ],
     [
-     555,
-     394
+     585,
+     429
     ],
     [
-     652,
-     448
+     662,
+     492
     ]
    ],
    "roam": true
@@ -7373,8 +7373,8 @@
    "recipe": "cu_ruined_hearth",
    "name": "Ruined Hearth",
    "kind": "marker",
-   "x": 312,
-   "z": 40,
+   "x": 549,
+   "z": 562,
    "yaw": 3.01,
    "radius": 6,
    "levelBase": 7
@@ -7388,22 +7388,22 @@
    "chatter": [
     "role.surveyor"
    ],
-   "x": 808,
-   "z": 1392,
+   "x": 817,
+   "z": 1369,
    "yaw": 4.64,
    "radius": 6,
    "path": [
     [
-     845,
-     1375
+     854,
+     1352
     ],
     [
-     785,
-     1430
+     794,
+     1407
     ],
     [
-     771,
-     1356
+     780,
+     1333
     ]
    ]
   },
@@ -7412,8 +7412,8 @@
    "id": "frost_marker_hollin_pass_d68",
    "kind": "frost_marker",
    "name": "Snow Pole",
-   "x": 373,
-   "z": 1064,
+   "x": 359,
+   "z": 1077,
    "yaw": 1.4,
    "radius": 3,
    "filler": true
@@ -7442,8 +7442,8 @@
    "id": "fallen_pillar_hollin_pass_d69",
    "kind": "fallen_pillar",
    "name": "Fallen Pillar",
-   "x": 1408,
-   "z": 129,
+   "x": 1336,
+   "z": 136,
    "yaw": 5.47,
    "radius": 5,
    "filler": true
@@ -7453,8 +7453,8 @@
    "id": "toll_stone_hollin_pass_d70",
    "kind": "toll_stone",
    "name": "Old Toll Stone",
-   "x": 1480,
-   "z": 1962,
+   "x": 1502,
+   "z": 1961,
    "yaw": 5.28,
    "radius": 3,
    "filler": true
@@ -7496,26 +7496,26 @@
     2,
     3
    ],
-   "x": 952,
-   "z": 1128,
+   "x": 964,
+   "z": 1097,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1040,
-     1115
+     955,
+     1108
     ],
     [
-     981,
-     1206
+     953,
+     1088
     ],
     [
-     880,
-     1147
+     973,
+     1086
     ],
     [
-     942,
-     1067
+     975,
+     1106
     ]
    ],
    "roam": true
@@ -7669,26 +7669,26 @@
     1,
     2
    ],
-   "x": 1312,
-   "z": 1067,
+   "x": 1331,
+   "z": 1041,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1259,
-     991
+     1388,
+     974
     ],
     [
-     1392,
-     1015
+     1398,
+     1098
     ],
     [
-     1347,
-     1118
+     1274,
+     1108
     ],
     [
-     1240,
-     1131
+     1264,
+     984
     ]
    ],
    "roam": true
@@ -7706,8 +7706,8 @@
     1,
     2
    ],
-   "x": 376,
-   "z": 634,
+   "x": 397,
+   "z": 660,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -7728,8 +7728,8 @@
    "id": "banner_post_hollin_pass_d74",
    "kind": "banner_post",
    "name": "Faded Banner",
-   "x": 1434,
-   "z": 1408,
+   "x": 1451,
+   "z": 1416,
    "yaw": 5.27,
    "radius": 3,
    "filler": true
@@ -7740,8 +7740,8 @@
    "recipe": "cu_stone_watcher",
    "name": "Stone Watcher",
    "kind": "shrine",
-   "x": 1335,
-   "z": 1352,
+   "x": 1322,
+   "z": 1328,
    "yaw": 2.27,
    "radius": 5,
    "levelBase": 4
@@ -7752,8 +7752,8 @@
    "recipe": "cu_eagle_ledge",
    "name": "Eagle Ledge",
    "kind": "nest",
-   "x": 1387,
-   "z": 1843,
+   "x": 1408,
+   "z": 1846,
    "yaw": 6.04,
    "radius": 5,
    "levelBase": 3
@@ -7764,8 +7764,8 @@
    "recipe": "cu_ruined_hearth",
    "name": "Ruined Hearth",
    "kind": "marker",
-   "x": 688,
-   "z": 144,
+   "x": 791,
+   "z": 288,
    "yaw": 1.44,
    "radius": 6,
    "levelBase": 7
@@ -7776,8 +7776,8 @@
    "recipe": "cu_wanted_post",
    "name": "Wanted Post",
    "kind": "lore",
-   "x": 633,
-   "z": 280,
+   "x": 652,
+   "z": 270,
    "yaw": 5.74,
    "radius": 3,
    "levelBase": 6
@@ -7795,8 +7795,8 @@
     2,
     3
    ],
-   "x": 1800,
-   "z": 880,
+   "x": 1775,
+   "z": 900,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -7807,8 +7807,8 @@
    "recipe": "cu_buried_crock",
    "name": "Buried Crock",
    "kind": "cache",
-   "x": 1639,
-   "z": 1040,
+   "x": 1624,
+   "z": 1029,
    "yaw": 2.1,
    "radius": 4,
    "levelBase": 4
@@ -7842,33 +7842,33 @@
    "monster": "ironback_beetle",
    "with": null,
    "level": [
-    5,
-    6
+    6,
+    7
    ],
    "count": [
     2,
     3
    ],
-   "x": 1626,
-   "z": 393,
+   "x": 1595,
+   "z": 382,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1578,
-     362
+     1547,
+     351
     ],
     [
-     1656,
-     362
+     1625,
+     351
     ],
     [
-     1674,
-     420
+     1643,
+     409
     ],
     [
-     1600,
-     448
+     1569,
+     437
     ]
    ],
    "roam": true
@@ -7886,8 +7886,8 @@
     1,
     2
    ],
-   "x": 280,
-   "z": 656,
+   "x": 308,
+   "z": 731,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -7898,8 +7898,8 @@
    "recipe": "cu_horse_bones",
    "name": "Horse Bones",
    "kind": "remains",
-   "x": 944,
-   "z": 361,
+   "x": 962,
+   "z": 352,
    "yaw": 2.94,
    "radius": 5,
    "levelBase": 6
@@ -7910,8 +7910,8 @@
    "recipe": "cu_sinkhole",
    "name": "Sinkhole",
    "kind": "hazard",
-   "x": 2010,
-   "z": 182,
+   "x": 1941,
+   "z": 327,
    "yaw": 1.5,
    "radius": 6,
    "levelBase": 6
@@ -7933,15 +7933,15 @@
    "monster": "ridge_griffin",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     1,
     2
    ],
-   "x": 40,
-   "z": 40,
+   "x": 470,
+   "z": 623,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -7963,8 +7963,8 @@
    "recipe": "cu_lone_arch",
    "name": "Lone Arch",
    "kind": "marker",
-   "x": 850,
-   "z": 288,
+   "x": 847,
+   "z": 268,
    "yaw": 3.95,
    "radius": 5,
    "levelBase": 6
@@ -8013,26 +8013,26 @@
     2,
     3
    ],
-   "x": 992,
-   "z": 1343,
+   "x": 1022,
+   "z": 1328,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1022,
-     1361
+     1040,
+     1313
     ],
     [
-     967,
-     1386
+     1037,
+     1346
     ],
     [
-     959,
-     1331
+     1004,
+     1343
     ],
     [
-     1011,
-     1309
+     1007,
+     1310
     ]
    ],
    "roam": true
@@ -8043,8 +8043,8 @@
    "recipe": "cu_old_battle",
    "name": "Old Skirmish",
    "kind": "remains",
-   "x": 1680,
-   "z": 840,
+   "x": 1699,
+   "z": 819,
    "yaw": 2.33,
    "radius": 7,
    "levelBase": 5
@@ -8054,8 +8054,8 @@
    "id": "stone_trough_hollin_pass_d78",
    "kind": "stone_trough",
    "name": "Stone Trough",
-   "x": 1519,
-   "z": 312,
+   "x": 1487,
+   "z": 335,
    "yaw": 1.86,
    "radius": 4,
    "filler": true
@@ -8073,8 +8073,8 @@
     1,
     2
    ],
-   "x": 1559,
-   "z": 936,
+   "x": 1552,
+   "z": 968,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -8084,8 +8084,8 @@
    "id": "cold_campfire_hollin_pass_d79",
    "kind": "cold_campfire",
    "name": "Cold Campfire",
-   "x": 1481,
-   "z": 1786,
+   "x": 1480,
+   "z": 1766,
    "yaw": 3.77,
    "radius": 4,
    "filler": true
@@ -8154,8 +8154,8 @@
    "id": "boundary_stake_hollin_pass_d80",
    "kind": "boundary_stake",
    "name": "Boundary Stakes",
-   "x": 328,
-   "z": 1704,
+   "x": 335,
+   "z": 1723,
    "yaw": 4.36,
    "radius": 4,
    "filler": true
@@ -8166,8 +8166,8 @@
    "recipe": "cu_dead_traveller",
    "name": "Dead Traveller",
    "kind": "remains",
-   "x": 896,
-   "z": 48,
+   "x": 887,
+   "z": 145,
    "yaw": 1.51,
    "radius": 4,
    "levelBase": 7
@@ -8185,26 +8185,26 @@
     1,
     2
    ],
-   "x": 1303,
-   "z": 727,
+   "x": 1335,
+   "z": 726,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1302,
-     822
+     1351,
+     830
     ],
     [
-     1238,
+     1231,
+     742
+    ],
+    [
+     1319,
+     622
+    ],
+    [
+     1439,
      710
-    ],
-    [
-     1324,
-     641
-    ],
-    [
-     1365,
-     739
     ]
    ],
    "roam": true
@@ -8244,8 +8244,8 @@
    "id": "sheep_pen_hollin_pass_d82",
    "kind": "sheep_pen",
    "name": "Sheep Pen",
-   "x": 990,
-   "z": 1018,
+   "x": 969,
+   "z": 1011,
    "yaw": 4.6,
    "radius": 5,
    "filler": true
@@ -8255,8 +8255,8 @@
    "id": "frost_marker_hollin_pass_d83",
    "kind": "frost_marker",
    "name": "Snow Pole",
-   "x": 1393,
-   "z": 1487,
+   "x": 1410,
+   "z": 1497,
    "yaw": 2.95,
    "radius": 3,
    "filler": true
@@ -8340,8 +8340,8 @@
    "recipe": "cu_crow_roost",
    "name": "Crow Roost",
    "kind": "nest",
-   "x": 1825,
-   "z": 1411,
+   "x": 1821,
+   "z": 1434,
    "yaw": 5.75,
    "radius": 5,
    "levelBase": 4
@@ -8375,33 +8375,33 @@
    "monster": "brigand_archer",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     2,
     3
    ],
-   "x": 192,
-   "z": 264,
+   "x": 286,
+   "z": 656,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     145,
-     292
+     238,
+     625
     ],
     [
-     158,
-     219
+     317,
+     608
     ],
     [
-     252,
-     242
+     334,
+     687
     ],
     [
-     222,
-     329
+     255,
+     704
     ]
    ],
    "roam": true
@@ -8431,8 +8431,8 @@
    "recipe": "cu_hunters_blind",
    "name": "Hunter's Blind",
    "kind": "camp",
-   "x": 40,
-   "z": 576,
+   "x": 373,
+   "z": 636,
    "yaw": 0.36,
    "radius": 5,
    "levelBase": 7
@@ -8524,15 +8524,15 @@
    "monster": "ironback_beetle",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     2,
     3
    ],
-   "x": 65,
-   "z": 296,
+   "x": 328,
+   "z": 769,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -8561,26 +8561,26 @@
     1,
     2
    ],
-   "x": 1521,
-   "z": 1441,
+   "x": 1545,
+   "z": 1463,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1569,
+     1555,
+     1493
+    ],
+    [
+     1515,
+     1473
+    ],
+    [
+     1535,
+     1433
+    ],
+    [
+     1575,
      1453
-    ],
-    [
-     1524,
-     1488
-    ],
-    [
-     1475,
-     1442
-    ],
-    [
-     1527,
-     1379
     ]
    ],
    "roam": true
@@ -8590,8 +8590,8 @@
    "id": "shrine_niche_hollin_pass_d89",
    "kind": "shrine_niche",
    "name": "Shrine Niche",
-   "x": 465,
-   "z": 1135,
+   "x": 463,
+   "z": 1115,
    "yaw": 0.54,
    "radius": 3,
    "filler": true
@@ -8613,15 +8613,15 @@
    "monster": "frost_stalker",
    "with": null,
    "level": [
-    6,
-    7
+    5,
+    6
    ],
    "count": [
     2,
     3
    ],
-   "x": 1800,
-   "z": 126,
+   "x": 1764,
+   "z": 347,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -8632,8 +8632,8 @@
    "recipe": "cu_rune_ring",
    "name": "Little Stone Ring",
    "kind": "marker",
-   "x": 1128,
-   "z": 1072,
+   "x": 1105,
+   "z": 1087,
    "yaw": 4.26,
    "radius": 6,
    "levelBase": 5
@@ -8691,8 +8691,8 @@
     2,
     3
    ],
-   "x": 883,
-   "z": 1659,
+   "x": 913,
+   "z": 1639,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -8702,8 +8702,8 @@
    "id": "dolmen_hollin_pass_d91",
    "kind": "dolmen",
    "name": "Dolmen",
-   "x": 792,
-   "z": 88,
+   "x": 796,
+   "z": 162,
    "yaw": 4.02,
    "radius": 5,
    "filler": true
@@ -8774,8 +8774,8 @@
    "recipe": "cu_stone_watcher",
    "name": "Stone Watcher",
    "kind": "shrine",
-   "x": 773,
-   "z": 2012,
+   "x": 753,
+   "z": 2006,
    "yaw": 1.38,
    "radius": 5,
    "levelBase": 4
@@ -8785,8 +8785,8 @@
    "id": "roadside_grave_hollin_pass_d93",
    "kind": "roadside_grave",
    "name": "Roadside Grave",
-   "x": 390,
-   "z": 1128,
+   "x": 401,
+   "z": 1111,
    "yaw": 6.19,
    "radius": 4,
    "filler": true
@@ -8797,8 +8797,8 @@
    "recipe": "cu_witch_warning",
    "name": "Bone Warning",
    "kind": "lore",
-   "x": 120,
-   "z": 808,
+   "x": 143,
+   "z": 851,
    "yaw": 3.08,
    "radius": 4,
    "levelBase": 6
@@ -8809,15 +8809,15 @@
    "monster": "frost_stalker",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     1,
     2
    ],
-   "x": 112,
-   "z": 384,
+   "x": 438,
+   "z": 669,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -8829,7 +8829,7 @@
    "name": "Scout's Cairn",
    "kind": "cache",
    "x": 1916,
-   "z": 1689,
+   "z": 1726,
    "yaw": 0.54,
    "radius": 4,
    "levelBase": 3
@@ -8840,8 +8840,8 @@
    "recipe": "cu_rune_ring",
    "name": "Little Stone Ring",
    "kind": "marker",
-   "x": 1944,
-   "z": 240,
+   "x": 2013,
+   "z": 358,
    "yaw": 2.84,
    "radius": 6,
    "levelBase": 6
@@ -8871,8 +8871,8 @@
    "recipe": "cu_eagle_ledge",
    "name": "Eagle Ledge",
    "kind": "nest",
-   "x": 1266,
-   "z": 1435,
+   "x": 1290,
+   "z": 1460,
    "yaw": 4.83,
    "radius": 5,
    "levelBase": 4
@@ -8975,22 +8975,22 @@
    "chatter": [
     "role.shepherd"
    ],
-   "x": 1258,
-   "z": 1328,
+   "x": 1286,
+   "z": 1343,
    "yaw": 2.34,
    "radius": 6,
    "path": [
     [
-     1301,
-     1329
+     1297,
+     1318
     ],
     [
-     1240,
-     1355
+     1302,
+     1365
     ],
     [
-     1251,
-     1287
+     1259,
+     1346
     ]
    ]
   },
@@ -9019,8 +9019,8 @@
     1,
     2
    ],
-   "x": 656,
-   "z": 1134,
+   "x": 684,
+   "z": 1150,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -9041,8 +9041,8 @@
    "id": "mushroom_ring_hollin_pass_d98",
    "kind": "mushroom_ring",
    "name": "Mushroom Ring",
-   "x": 1280,
-   "z": 1591,
+   "x": 1276,
+   "z": 1570,
    "yaw": 1.33,
    "radius": 4,
    "filler": true
@@ -9114,8 +9114,8 @@
    "recipe": "cu_cloudberry",
    "name": "Cloudberry Bog",
    "kind": "forage",
-   "x": 1752,
-   "z": 272,
+   "x": 1723,
+   "z": 349,
    "yaw": 0.72,
    "radius": 4,
    "levelBase": 6
@@ -9137,15 +9137,15 @@
    "monster": "frost_stalker",
    "with": null,
    "level": [
-    5,
-    6
+    4,
+    5
    ],
    "count": [
     2,
     3
    ],
-   "x": 1656,
-   "z": 968,
+   "x": 1675,
+   "z": 997,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -9171,22 +9171,22 @@
    "chatter": [
     "role.shepherd"
    ],
-   "x": 583,
-   "z": 331,
+   "x": 670,
+   "z": 258,
    "yaw": 1.57,
    "radius": 6,
    "path": [
     [
-     592,
-     283
+     705,
+     273
     ],
     [
-     610,
-     370
+     639,
+     281
     ],
     [
-     542,
-     338
+     666,
+     220
     ]
    ]
   },
@@ -9285,8 +9285,8 @@
     2,
     3
    ],
-   "x": 1231,
-   "z": 815,
+   "x": 1250,
+   "z": 789,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -9297,8 +9297,8 @@
    "recipe": "cu_dead_traveller",
    "name": "Dead Traveller",
    "kind": "remains",
-   "x": 1107,
-   "z": 1485,
+   "x": 1119,
+   "z": 1424,
    "yaw": 1.43,
    "radius": 4,
    "levelBase": 4
@@ -9308,8 +9308,8 @@
    "id": "roadside_grave_hollin_pass_d103",
    "kind": "roadside_grave",
    "name": "Roadside Grave",
-   "x": 560,
-   "z": 1121,
+   "x": 551,
+   "z": 1142,
    "yaw": 5.48,
    "radius": 4,
    "filler": true
@@ -9320,8 +9320,8 @@
    "recipe": "cu_soldiers_tally",
    "name": "Soldier's Tally",
    "kind": "lore",
-   "x": 1434,
-   "z": 1238,
+   "x": 1427,
+   "z": 1221,
    "yaw": 3.33,
    "radius": 4,
    "levelBase": 4
@@ -9339,8 +9339,8 @@
     2,
     3
    ],
-   "x": 448,
-   "z": 1503,
+   "x": 480,
+   "z": 1509,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -9351,8 +9351,8 @@
    "recipe": "cu_wasp_bank",
    "name": "Wasp Bank",
    "kind": "nest",
-   "x": 1529,
-   "z": 1267,
+   "x": 1543,
+   "z": 1279,
    "yaw": 5.15,
    "radius": 4,
    "levelBase": 4
@@ -9363,8 +9363,8 @@
    "recipe": "cu_childs_map",
    "name": "Child's Map",
    "kind": "lore",
-   "x": 232,
-   "z": 151,
+   "x": 244,
+   "z": 802,
    "yaw": 0.87,
    "radius": 3,
    "levelBase": 7
@@ -9382,8 +9382,8 @@
     1,
     2
    ],
-   "x": 792,
-   "z": 1648,
+   "x": 740,
+   "z": 1676,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -9394,8 +9394,8 @@
    "recipe": "cu_rune_ring",
    "name": "Little Stone Ring",
    "kind": "marker",
-   "x": 1304,
-   "z": 96,
+   "x": 1377,
+   "z": 257,
    "yaw": 1.22,
    "radius": 6,
    "levelBase": 6
@@ -9417,8 +9417,8 @@
    "recipe": "cu_shepherds_hut",
    "name": "Shepherd's Lean-to",
    "kind": "camp",
-   "x": 184,
-   "z": 464,
+   "x": 286,
+   "z": 804,
    "yaw": 3.59,
    "radius": 6,
    "levelBase": 7
@@ -9436,26 +9436,26 @@
     2,
     3
    ],
-   "x": 592,
-   "z": 1360,
+   "x": 568,
+   "z": 1382,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     549,
-     1360
+     525,
+     1382
     ],
     [
-     592,
-     1313
+     568,
+     1335
     ],
     [
-     641,
-     1356
+     617,
+     1378
     ],
     [
-     596,
-     1395
+     572,
+     1417
     ]
    ],
    "roam": true
@@ -9466,15 +9466,15 @@
    "monster": "ironback_beetle",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     2,
     3
    ],
-   "x": 279,
-   "z": 394,
+   "x": 496,
+   "z": 650,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -9500,22 +9500,22 @@
    "chatter": [
     "role.poacher"
    ],
-   "x": 64,
-   "z": 425,
+   "x": 268,
+   "z": 744,
    "yaw": 0.35,
    "radius": 6,
    "path": [
     [
-     51,
-     463
+     255,
+     782
     ],
     [
-     40,
-     410
+     244,
+     729
     ],
     [
-     96,
-     419
+     300,
+     738
     ]
    ]
   },
@@ -9555,8 +9555,8 @@
    "id": "boundary_stake_hollin_pass_d105",
    "kind": "boundary_stake",
    "name": "Boundary Stakes",
-   "x": 1584,
-   "z": 225,
+   "x": 1576,
+   "z": 316,
    "yaw": 5.67,
    "radius": 4,
    "filler": true
@@ -9566,8 +9566,8 @@
    "id": "drying_rack_camp_hollin_pass_d106",
    "kind": "drying_rack_camp",
    "name": "Hunter's Rack",
-   "x": 1329,
-   "z": 1465,
+   "x": 1318,
+   "z": 1447,
    "yaw": 5.57,
    "radius": 4,
    "filler": true
@@ -9615,26 +9615,26 @@
     2,
     3
    ],
-   "x": 1097,
-   "z": 247,
+   "x": 945,
+   "z": 214,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1083,
-     307
+     950,
+     252
     ],
     [
-     1049,
-     236
+     907,
+     219
     ],
     [
-     1109,
-     208
+     940,
+     176
     ],
     [
-     1136,
-     253
+     983,
+     209
     ]
    ],
    "roam": true
@@ -9667,8 +9667,8 @@
    "id": "wayside_well_hollin_pass_d109",
    "kind": "wayside_well",
    "name": "Wayside Well",
-   "x": 295,
-   "z": 458,
+   "x": 405,
+   "z": 483,
    "yaw": 5.36,
    "radius": 4,
    "filler": true
@@ -9698,8 +9698,8 @@
    "recipe": "cu_pine_resin",
    "name": "Weeping Pine",
    "kind": "forage",
-   "x": 936,
-   "z": 1757,
+   "x": 918,
+   "z": 1752,
    "yaw": 5.54,
    "radius": 4,
    "levelBase": 4
@@ -9713,22 +9713,22 @@
    "chatter": [
     "role.herbalist"
    ],
-   "x": 471,
-   "z": 112,
+   "x": 571,
+   "z": 473,
    "yaw": 5.29,
    "radius": 6,
    "path": [
     [
-     505,
-     113
+     571,
+     497
     ],
     [
-     456,
-     130
+     550,
+     461
     ],
     [
-     455,
-     89
+     592,
+     461
     ]
    ]
   },
@@ -9757,8 +9757,8 @@
     2,
     3
    ],
-   "x": 1622,
-   "z": 1141,
+   "x": 1654,
+   "z": 1146,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -9836,8 +9836,8 @@
     1,
     2
    ],
-   "x": 1626,
-   "z": 1329,
+   "x": 1660,
+   "z": 1320,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -9894,8 +9894,8 @@
    "recipe": "cu_lone_arch",
    "name": "Lone Arch",
    "kind": "marker",
-   "x": 2008,
-   "z": 296,
+   "x": 1976,
+   "z": 370,
    "yaw": 5.36,
    "radius": 5,
    "levelBase": 5
@@ -9937,8 +9937,8 @@
    "recipe": "cu_wanted_post",
    "name": "Wanted Post",
    "kind": "lore",
-   "x": 1376,
-   "z": 680,
+   "x": 1386,
+   "z": 694,
    "yaw": 1.14,
    "radius": 3,
    "levelBase": 5
@@ -9948,8 +9948,8 @@
    "id": "lonely_pier_hollin_pass_d113",
    "kind": "lonely_pier",
    "name": "Bridge Pier",
-   "x": 1942,
-   "z": 1400,
+   "x": 1919,
+   "z": 1399,
    "yaw": 5.52,
    "radius": 5,
    "filler": true
@@ -9959,8 +9959,8 @@
    "id": "boundary_stake_hollin_pass_d114",
    "kind": "boundary_stake",
    "name": "Boundary Stakes",
-   "x": 479,
-   "z": 1202,
+   "x": 459,
+   "z": 1205,
    "yaw": 0.04,
    "radius": 4,
    "filler": true
@@ -9978,26 +9978,26 @@
     1,
     2
    ],
-   "x": 1680,
-   "z": 176,
+   "x": 1643,
+   "z": 345,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1599,
-     176
+     1562,
+     345
     ],
     [
-     1686,
-     124
+     1649,
+     293
     ],
     [
-     1742,
-     166
+     1705,
+     335
     ],
     [
-     1693,
-     237
+     1656,
+     406
     ]
    ],
    "roam": true
@@ -10015,8 +10015,8 @@
     2,
     3
    ],
-   "x": 880,
-   "z": 353,
+   "x": 846,
+   "z": 342,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -10041,22 +10041,22 @@
    "chatter": [
     "role.woodcutter"
    ],
-   "x": 1401,
-   "z": 1753,
+   "x": 1411,
+   "z": 1730,
    "yaw": 2.49,
    "radius": 6,
    "path": [
     [
-     1399,
-     1745
+     1409,
+     1722
     ],
     [
-     1411,
-     1758
+     1421,
+     1735
     ],
     [
-     1395,
-     1760
+     1405,
+     1737
     ]
    ]
   },
@@ -10095,8 +10095,8 @@
    "id": "drying_rack_camp_hollin_pass_d117",
    "kind": "drying_rack_camp",
    "name": "Hunter's Rack",
-   "x": 128,
-   "z": 504,
+   "x": 259,
+   "z": 691,
    "yaw": 2.1,
    "radius": 4,
    "filler": true
@@ -10126,8 +10126,8 @@
     2,
     3
    ],
-   "x": 167,
-   "z": 703,
+   "x": 317,
+   "z": 803,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -10187,8 +10187,8 @@
    "recipe": "cu_thin_ice",
    "name": "Thin Ice",
    "kind": "hazard",
-   "x": 801,
-   "z": 1542,
+   "x": 805,
+   "z": 1521,
    "yaw": 5.02,
    "radius": 5,
    "levelBase": 5
@@ -10244,22 +10244,22 @@
    "chatter": [
     "role.hermit"
    ],
-   "x": 1224,
-   "z": 888,
+   "x": 1248,
+   "z": 895,
    "yaw": 0.08,
    "radius": 6,
    "path": [
     [
-     1231,
-     889
-    ],
-    [
-     1218,
+     1255,
      896
     ],
     [
-     1224,
-     879
+     1242,
+     903
+    ],
+    [
+     1248,
+     886
     ]
    ]
   },
@@ -10311,26 +10311,26 @@
     2,
     3
    ],
-   "x": 806,
-   "z": 961,
+   "x": 788,
+   "z": 988,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     871,
-     957
+     772,
+     1010
     ],
     [
-     815,
-     1014
+     766,
+     972
     ],
     [
-     746,
-     980
+     804,
+     966
     ],
     [
-     789,
-     922
+     810,
+     1004
     ]
    ],
    "roam": true
@@ -10348,8 +10348,8 @@
     2,
     3
    ],
-   "x": 1760,
-   "z": 1160,
+   "x": 1751,
+   "z": 1193,
    "yaw": 0,
    "radius": 8,
    "stray": true

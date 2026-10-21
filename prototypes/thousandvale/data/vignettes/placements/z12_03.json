@@ -259,8 +259,8 @@
    "template": "sheep",
    "flavour": null,
    "settlement": "Orrinsford",
-   "x": 279,
-   "z": 763,
+   "x": 154,
+   "z": 679,
    "yaw": 2.36,
    "radius": 24,
    "level": 2
@@ -368,8 +368,8 @@
    "type": "vignette",
    "id": "fairy_ring",
    "name": "The Toadstool Ring",
-   "x": 1887,
-   "z": 1630,
+   "x": 1768,
+   "z": 1899,
    "yaw": 5.76,
    "radius": 9,
    "biome": "grassland",
@@ -396,8 +396,8 @@
    "type": "vignette",
    "id": "goblin_market_stones",
    "name": "The Moonlight Stones",
-   "x": 1988,
-   "z": 93,
+   "x": 1846,
+   "z": 94,
    "yaw": 0.63,
    "radius": 10,
    "biome": "grassland",
@@ -511,8 +511,8 @@
     2,
     4
    ],
-   "x": 205,
-   "z": 1974,
+   "x": 250,
+   "z": 1973,
    "yaw": 0,
    "radius": 10
   },
@@ -619,8 +619,8 @@
     2,
     4
    ],
-   "x": 1971,
-   "z": 1298,
+   "x": 1923,
+   "z": 1312,
    "yaw": 0,
    "radius": 10
   },
@@ -776,8 +776,8 @@
    "type": "waystone",
    "id": "ws_z12_03_door",
    "name": "Saint Orrin's Ossuary",
-   "x": 340.3,
-   "z": 737.7,
+   "x": 353.4,
+   "z": 758.6,
    "yaw": 0,
    "door": "door_1",
    "radius": 1
@@ -788,15 +788,15 @@
    "monster": "barrow_hound",
    "with": null,
    "level": [
-    2,
-    3
+    3,
+    4
    ],
    "count": [
     2,
     2
    ],
-   "x": 344,
-   "z": 773,
+   "x": 351,
+   "z": 805,
    "yaw": 0,
    "radius": 6,
    "doorGuard": true
@@ -912,8 +912,8 @@
     2,
     3
    ],
-   "x": 1852,
-   "z": 373,
+   "x": 1877,
+   "z": 335,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -942,8 +942,8 @@
     2,
     3
    ],
-   "x": 876,
-   "z": 887,
+   "x": 880,
+   "z": 932,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1002,8 +1002,8 @@
     2,
     3
    ],
-   "x": 80,
-   "z": 1397,
+   "x": 119,
+   "z": 1370,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1032,8 +1032,8 @@
     2,
     3
    ],
-   "x": 1129,
-   "z": 297,
+   "x": 1156,
+   "z": 261,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1272,8 +1272,8 @@
     2,
     3
    ],
-   "x": 280,
-   "z": 1348,
+   "x": 236,
+   "z": 1362,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1422,8 +1422,8 @@
     2,
     3
    ],
-   "x": 1460,
-   "z": 223,
+   "x": 1413,
+   "z": 229,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1445,15 +1445,15 @@
    "monster": "barrow_hound",
    "with": null,
    "level": [
-    2,
-    3
+    3,
+    4
    ],
    "count": [
     2,
     3
    ],
-   "x": 756,
-   "z": 758,
+   "x": 789,
+   "z": 790,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1572,8 +1572,8 @@
     2,
     3
    ],
-   "x": 931,
-   "z": 1976,
+   "x": 935,
+   "z": 1931,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1667,8 +1667,8 @@
    "id": "fallen_pillar_saint_orrins_rise_d2",
    "kind": "fallen_pillar",
    "name": "Fallen Pillar",
-   "x": 1545,
-   "z": 1442,
+   "x": 1571,
+   "z": 1521,
    "yaw": 5.81,
    "radius": 5,
    "filler": true
@@ -1724,22 +1724,22 @@
    "chatter": [
     "role.shepherd"
    ],
-   "x": 712,
-   "z": 1933,
+   "x": 726,
+   "z": 1973,
    "yaw": 5.57,
    "radius": 6,
    "path": [
     [
-     680,
-     1935
+     729,
+     2004
     ],
     [
-     725,
-     1897
+     697,
+     1960
     ],
     [
-     735,
-     1959
+     752,
+     1955
     ]
    ]
   },
@@ -1749,8 +1749,8 @@
    "recipe": "cu_oak_of_oaths",
    "name": "Oath Oak",
    "kind": "shrine",
-   "x": 1936,
-   "z": 1992,
+   "x": 1957,
+   "z": 2007,
    "yaw": 2.7,
    "radius": 6,
    "levelBase": 4
@@ -1791,8 +1791,8 @@
    "recipe": "cu_old_battle",
    "name": "Old Skirmish",
    "kind": "remains",
-   "x": 336,
-   "z": 1111,
+   "x": 357,
+   "z": 1124,
    "yaw": 4,
    "radius": 7,
    "levelBase": 3
@@ -1901,8 +1901,8 @@
     1,
     2
    ],
-   "x": 1815,
-   "z": 1276,
+   "x": 1847,
+   "z": 1266,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -1913,8 +1913,8 @@
    "recipe": "cu_pine_resin",
    "name": "Weeping Pine",
    "kind": "forage",
-   "x": 1534,
-   "z": 1811,
+   "x": 1516,
+   "z": 1805,
    "yaw": 4.11,
    "radius": 4,
    "levelBase": 4
@@ -2123,8 +2123,8 @@
    "recipe": "cu_ruined_hearth",
    "name": "Ruined Hearth",
    "kind": "marker",
-   "x": 1200,
-   "z": 760,
+   "x": 1177,
+   "z": 756,
    "yaw": 0.14,
    "radius": 6,
    "levelBase": 3
@@ -2299,8 +2299,8 @@
    "recipe": "cu_shepherds_hut",
    "name": "Shepherd's Lean-to",
    "kind": "camp",
-   "x": 2013,
-   "z": 1569,
+   "x": 1945,
+   "z": 1615,
    "yaw": 1.88,
    "radius": 6,
    "levelBase": 4
@@ -2311,8 +2311,8 @@
    "recipe": "cu_bramble_berries",
    "name": "Bramble Berries",
    "kind": "forage",
-   "x": 1680,
-   "z": 49,
+   "x": 1697,
+   "z": 57,
    "yaw": 3.68,
    "radius": 4,
    "levelBase": 2
@@ -2341,8 +2341,8 @@
     1,
     2
    ],
-   "x": 2006,
-   "z": 1712,
+   "x": 1971,
+   "z": 1711,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -2423,8 +2423,8 @@
    "id": "woodpile_stack_saint_orrins_rise_d12",
    "kind": "woodpile_stack",
    "name": "Woodpile",
-   "x": 1039,
-   "z": 1888,
+   "x": 1019,
+   "z": 1889,
    "yaw": 2.36,
    "radius": 4,
    "filler": true
@@ -2435,8 +2435,8 @@
    "recipe": "cu_cairn_cache",
    "name": "Scout's Cairn",
    "kind": "cache",
-   "x": 1316,
-   "z": 858,
+   "x": 1337,
+   "z": 873,
    "yaw": 0.96,
    "radius": 4,
    "levelBase": 3
@@ -2454,26 +2454,26 @@
     2,
     3
    ],
-   "x": 968,
-   "z": 825,
+   "x": 935,
+   "z": 820,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     931,
-     815
+     898,
+     810
     ],
     [
-     962,
-     778
+     929,
+     773
     ],
     [
-     1018,
-     842
+     985,
+     837
     ],
     [
-     972,
-     862
+     939,
+     857
     ]
    ],
    "roam": true
@@ -2531,7 +2531,7 @@
    "recipe": "cu_horse_bones",
    "name": "Horse Bones",
    "kind": "remains",
-   "x": 1606,
+   "x": 1586,
    "z": 518,
    "yaw": 5.96,
    "radius": 5,
@@ -2576,8 +2576,8 @@
    "id": "shrine_niche_saint_orrins_rise_d16",
    "kind": "shrine_niche",
    "name": "Shrine Niche",
-   "x": 1542,
-   "z": 919,
+   "x": 1510,
+   "z": 909,
    "yaw": 2.5,
    "radius": 3,
    "filler": true
@@ -2599,8 +2599,8 @@
    "recipe": "cu_lone_arch",
    "name": "Lone Arch",
    "kind": "marker",
-   "x": 320,
-   "z": 1908,
+   "x": 300,
+   "z": 1907,
    "yaw": 5.32,
    "radius": 5,
    "levelBase": 4
@@ -2667,8 +2667,8 @@
    "recipe": "cu_farmers_sign",
    "name": "Angry Sign",
    "kind": "lore",
-   "x": 1623,
-   "z": 648,
+   "x": 1629,
+   "z": 663,
    "yaw": 5.43,
    "radius": 3,
    "levelBase": 3
@@ -2761,8 +2761,8 @@
    "recipe": "cu_dead_traveller",
    "name": "Dead Traveller",
    "kind": "remains",
-   "x": 1591,
-   "z": 1652,
+   "x": 1583,
+   "z": 1635,
    "yaw": 4.75,
    "radius": 4,
    "levelBase": 4
@@ -2819,8 +2819,8 @@
    "recipe": "cu_childs_map",
    "name": "Child's Map",
    "kind": "lore",
-   "x": 1441,
-   "z": 1556,
+   "x": 1343,
+   "z": 1464,
    "yaw": 5.6,
    "radius": 3,
    "levelBase": 4
@@ -2831,8 +2831,8 @@
    "recipe": "cu_wild_garlic",
    "name": "Wild Garlic",
    "kind": "forage",
-   "x": 765,
-   "z": 500,
+   "x": 759,
+   "z": 518,
    "yaw": 3.45,
    "radius": 4,
    "levelBase": 2
@@ -2870,8 +2870,8 @@
    "id": "ribbon_tree_saint_orrins_rise_d21",
    "kind": "ribbon_tree",
    "name": "Ribbon Tree",
-   "x": 1685,
-   "z": 1264,
+   "x": 1756,
+   "z": 1247,
    "yaw": 1.68,
    "radius": 5,
    "filler": true
@@ -2912,8 +2912,8 @@
    "recipe": "cu_wayshrine",
    "name": "Wayfarer Shrine",
    "kind": "shrine",
-   "x": 744,
-   "z": 880,
+   "x": 760,
+   "z": 891,
    "yaw": 4.35,
    "radius": 4,
    "levelBase": 3
@@ -3120,8 +3120,8 @@
    "id": "wayside_well_saint_orrins_rise_d27",
    "kind": "wayside_well",
    "name": "Wayside Well",
-   "x": 1821,
-   "z": 1416,
+   "x": 1816,
+   "z": 1437,
    "yaw": 4.01,
    "radius": 4,
    "filler": true
@@ -3307,8 +3307,8 @@
     1,
     2
    ],
-   "x": 232,
-   "z": 1830,
+   "x": 264,
+   "z": 1839,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -3334,22 +3334,22 @@
    "chatter": [
     "role.hermit"
    ],
-   "x": 1468,
-   "z": 517,
+   "x": 1423,
+   "z": 532,
    "yaw": 5.86,
    "radius": 6,
    "path": [
     [
-     1476,
-     518
+     1431,
+     533
     ],
     [
-     1465,
-     523
+     1420,
+     538
     ],
     [
-     1465,
-     510
+     1420,
+     525
     ]
    ]
   },
@@ -3358,8 +3358,8 @@
    "id": "frost_marker_saint_orrins_rise_d31",
    "kind": "frost_marker",
    "name": "Snow Pole",
-   "x": 1450,
-   "z": 1036,
+   "x": 1463,
+   "z": 1049,
    "yaw": 1.22,
    "radius": 3,
    "filler": true
@@ -3419,25 +3419,25 @@
     1,
     2
    ],
-   "x": 1232,
+   "x": 1200,
    "z": 254,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1187,
+     1155,
      303
     ],
     [
-     1195,
+     1163,
      203
     ],
     [
-     1293,
+     1261,
      209
     ],
     [
-     1304,
+     1272,
      320
     ]
    ],
@@ -3456,8 +3456,8 @@
     1,
     2
    ],
-   "x": 1104,
-   "z": 1456,
+   "x": 1074,
+   "z": 1443,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -3726,8 +3726,8 @@
    "recipe": "cu_childs_map",
    "name": "Child's Map",
    "kind": "lore",
-   "x": 309,
-   "z": 1583,
+   "x": 297,
+   "z": 1567,
    "yaw": 2.31,
    "radius": 3,
    "levelBase": 3
@@ -3806,8 +3806,8 @@
    "recipe": "cu_rune_ring",
    "name": "Little Stone Ring",
    "kind": "marker",
-   "x": 841,
-   "z": 444,
+   "x": 823,
+   "z": 381,
    "yaw": 0.39,
    "radius": 6,
    "levelBase": 2
@@ -3945,8 +3945,8 @@
     1,
     2
    ],
-   "x": 735,
-   "z": 1065,
+   "x": 701,
+   "z": 1078,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -4174,8 +4174,8 @@
     1,
     2
    ],
-   "x": 184,
-   "z": 824,
+   "x": 244,
+   "z": 802,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -4197,8 +4197,8 @@
    "recipe": "cu_herb_patch",
    "name": "Woundwort Patch",
    "kind": "forage",
-   "x": 1752,
-   "z": 112,
+   "x": 1736,
+   "z": 121,
    "yaw": 3.52,
    "radius": 4,
    "levelBase": 2
@@ -4469,7 +4469,7 @@
    "recipe": "cu_buried_crock",
    "name": "Buried Crock",
    "kind": "cache",
-   "x": 824,
+   "x": 847,
    "z": 1227,
    "yaw": 1.04,
    "radius": 4,
@@ -4577,7 +4577,7 @@
    "kind": "stone_trough",
    "name": "Stone Trough",
    "x": 1263,
-   "z": 927,
+   "z": 947,
    "yaw": 4.62,
    "radius": 4,
    "filler": true
@@ -4587,8 +4587,8 @@
    "id": "roadside_grave_saint_orrins_rise_d49",
    "kind": "roadside_grave",
    "name": "Roadside Grave",
-   "x": 742,
-   "z": 1653,
+   "x": 773,
+   "z": 1668,
    "yaw": 2.94,
    "radius": 4,
    "filler": true
@@ -4651,8 +4651,8 @@
    "recipe": "cu_childs_map",
    "name": "Child's Map",
    "kind": "lore",
-   "x": 1768,
-   "z": 337,
+   "x": 1782,
+   "z": 347,
    "yaw": 3.98,
    "radius": 3,
    "levelBase": 3
@@ -4704,8 +4704,8 @@
    "id": "fallen_pillar_saint_orrins_rise_d51",
    "kind": "fallen_pillar",
    "name": "Fallen Pillar",
-   "x": 656,
-   "z": 893,
+   "x": 637,
+   "z": 905,
    "yaw": 2.82,
    "radius": 5,
    "filler": true
@@ -4763,8 +4763,8 @@
    "id": "bone_heap_saint_orrins_rise_d53",
    "kind": "bone_heap",
    "name": "Old Bones",
-   "x": 893,
-   "z": 1902,
+   "x": 912,
+   "z": 1894,
    "yaw": 2.7,
    "radius": 4,
    "filler": true
@@ -4841,8 +4841,8 @@
    "recipe": "cu_rockfall",
    "name": "Fresh Rockfall",
    "kind": "hazard",
-   "x": 1213,
-   "z": 844,
+   "x": 1198,
+   "z": 861,
    "yaw": 4.45,
    "radius": 6,
    "levelBase": 3
@@ -4936,8 +4936,8 @@
    "recipe": "cu_farmers_sign",
    "name": "Angry Sign",
    "kind": "lore",
-   "x": 1442,
-   "z": 112,
+   "x": 1458,
+   "z": 115,
    "yaw": 1.79,
    "radius": 3,
    "levelBase": 2
@@ -5047,22 +5047,22 @@
    "chatter": [
     "role.herbalist"
    ],
-   "x": 300,
-   "z": 1704,
+   "x": 293,
+   "z": 1727,
    "yaw": 0.69,
    "radius": 6,
    "path": [
     [
-     316,
-     1717
+     309,
+     1740
     ],
     [
-     277,
-     1722
+     270,
+     1745
     ],
     [
-     296,
-     1680
+     289,
+     1703
     ]
    ]
   },
@@ -5090,8 +5090,8 @@
     1,
     2
    ],
-   "x": 1652,
-   "z": 746,
+   "x": 1627,
+   "z": 766,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -5101,7 +5101,7 @@
    "id": "toll_stone_saint_orrins_rise_d61",
    "kind": "toll_stone",
    "name": "Old Toll Stone",
-   "x": 1284,
+   "x": 1302,
    "z": 783,
    "yaw": 5.77,
    "radius": 3,
@@ -5156,8 +5156,8 @@
    "recipe": "cu_pilgrims_rest",
    "name": "Pilgrim's Rest",
    "kind": "lore",
-   "x": 1441,
-   "z": 1997,
+   "x": 1420,
+   "z": 2005,
    "yaw": 3.59,
    "radius": 4,
    "levelBase": 4
@@ -5167,8 +5167,8 @@
    "id": "lonely_pier_saint_orrins_rise_d62",
    "kind": "lonely_pier",
    "name": "Bridge Pier",
-   "x": 1377,
-   "z": 1844,
+   "x": 1392,
+   "z": 1827,
    "yaw": 3.28,
    "radius": 5,
    "filler": true
@@ -5301,26 +5301,26 @@
     2,
     3
    ],
-   "x": 1860,
-   "z": 2011,
+   "x": 1828,
+   "z": 1996,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1817,
-     2043
+     1865,
+     2041
     ],
     [
-     1808,
-     1984
+     1783,
+     2033
     ],
     [
-     1913,
-     1958
+     1791,
+     1951
     ],
     [
-     1903,
-     2040
+     1873,
+     1959
     ]
    ],
    "roam": true
@@ -5392,8 +5392,8 @@
     1,
     2
    ],
-   "x": 743,
-   "z": 576,
+   "x": 757,
+   "z": 547,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -5504,8 +5504,8 @@
    "id": "shrine_niche_saint_orrins_rise_d70",
    "kind": "shrine_niche",
    "name": "Shrine Niche",
-   "x": 1959,
-   "z": 1507,
+   "x": 1976,
+   "z": 1521,
    "yaw": 2.97,
    "radius": 3,
    "filler": true
@@ -5535,8 +5535,8 @@
     2,
     3
    ],
-   "x": 1968,
-   "z": 1640,
+   "x": 1949,
+   "z": 1666,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -5649,8 +5649,8 @@
     1,
     2
    ],
-   "x": 1463,
-   "z": 41,
+   "x": 1457,
+   "z": 73,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -5761,26 +5761,26 @@
     1,
     2
    ],
-   "x": 992,
-   "z": 1576,
+   "x": 967,
+   "z": 1596,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     935,
-     1580
+     910,
+     1600
     ],
     [
-     996,
-     1516
+     971,
+     1536
     ],
     [
-     1055,
-     1571
+     1030,
+     1591
     ],
     [
-     1002,
-     1645
+     977,
+     1665
     ]
    ],
    "roam": true
@@ -5798,8 +5798,8 @@
     1,
     2
    ],
-   "x": 1119,
-   "z": 1283,
+   "x": 1085,
+   "z": 1291,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -5930,8 +5930,8 @@
    "recipe": "cu_farmers_sign",
    "name": "Angry Sign",
    "kind": "lore",
-   "x": 1795,
-   "z": 1610,
+   "x": 1810,
+   "z": 1603,
    "yaw": 2.47,
    "radius": 3,
    "levelBase": 4
@@ -5949,26 +5949,26 @@
     2,
     3
    ],
-   "x": 1691,
-   "z": 816,
+   "x": 1685,
+   "z": 784,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1673,
-     864
+     1667,
+     832
     ],
     [
-     1649,
-     790
+     1643,
+     758
     ],
     [
-     1719,
-     752
+     1713,
+     720
     ],
     [
-     1739,
-     840
+     1733,
+     808
     ]
    ],
    "roam": true
@@ -5978,8 +5978,8 @@
    "id": "roadside_grave_saint_orrins_rise_d78",
    "kind": "roadside_grave",
    "name": "Roadside Grave",
-   "x": 1090,
-   "z": 1889,
+   "x": 1078,
+   "z": 1918,
    "yaw": 0.26,
    "radius": 4,
    "filler": true
@@ -6033,8 +6033,8 @@
     2,
     3
    ],
-   "x": 1544,
-   "z": 472,
+   "x": 1521,
+   "z": 449,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -6226,26 +6226,26 @@
     1,
     2
    ],
-   "x": 925,
-   "z": 541,
+   "x": 889,
+   "z": 525,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     988,
-     514
+     972,
+     543
     ],
     [
-     938,
-     579
+     871,
+     608
     ],
     [
-     877,
-     556
+     806,
+     507
     ],
     [
-     908,
-     485
+     907,
+     442
     ]
    ],
    "roam": true
@@ -6349,8 +6349,8 @@
     1,
     2
    ],
-   "x": 1577,
-   "z": 584,
+   "x": 1582,
+   "z": 552,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -6494,7 +6494,7 @@
    "id": "shrine_niche_saint_orrins_rise_d83",
    "kind": "shrine_niche",
    "name": "Shrine Niche",
-   "x": 1440,
+   "x": 1422,
    "z": 593,
    "yaw": 2.95,
    "radius": 3,
@@ -6547,8 +6547,8 @@
    "id": "wayside_well_saint_orrins_rise_d85",
    "kind": "wayside_well",
    "name": "Wayside Well",
-   "x": 704,
-   "z": 824,
+   "x": 684,
+   "z": 822,
    "yaw": 5.47,
    "radius": 4,
    "filler": true
@@ -6593,22 +6593,22 @@
    "chatter": [
     "role.pilgrim"
    ],
-   "x": 871,
-   "z": 1103,
+   "x": 882,
+   "z": 1081,
    "yaw": 1.96,
    "radius": 6,
    "path": [
     [
-     863,
-     1105
+     874,
+     1083
     ],
     [
-     876,
-     1093
+     887,
+     1071
     ],
     [
-     875,
-     1110
+     886,
+     1088
     ]
    ]
   },
@@ -6618,8 +6618,8 @@
    "recipe": "cu_stone_watcher",
    "name": "Stone Watcher",
    "kind": "shrine",
-   "x": 1648,
-   "z": 1541,
+   "x": 1631,
+   "z": 1529,
    "yaw": 5.49,
    "radius": 5,
    "levelBase": 4
@@ -6690,8 +6690,8 @@
    "id": "shrine_niche_saint_orrins_rise_d87",
    "kind": "shrine_niche",
    "name": "Shrine Niche",
-   "x": 984,
-   "z": 1298,
+   "x": 1010,
+   "z": 1315,
    "yaw": 3.96,
    "radius": 3,
    "filler": true
@@ -6713,8 +6713,8 @@
    "recipe": "cu_herb_patch",
    "name": "Woundwort Patch",
    "kind": "forage",
-   "x": 161,
-   "z": 1049,
+   "x": 165,
+   "z": 1067,
    "yaw": 4.66,
    "radius": 4,
    "levelBase": 3
@@ -6749,8 +6749,8 @@
    "recipe": "cu_warrior_cairn",
    "name": "Warrior's Cairn",
    "kind": "shrine",
-   "x": 542,
-   "z": 1842,
+   "x": 563,
+   "z": 1848,
    "yaw": 5.94,
    "radius": 5,
    "levelBase": 4
@@ -6808,8 +6808,8 @@
    "recipe": "cu_wasp_bank",
    "name": "Wasp Bank",
    "kind": "nest",
-   "x": 978,
-   "z": 698,
+   "x": 1014,
+   "z": 694,
    "yaw": 2.09,
    "radius": 4,
    "levelBase": 2
@@ -6891,8 +6891,8 @@
    "recipe": "cu_sinkhole",
    "name": "Sinkhole",
    "kind": "hazard",
-   "x": 304,
-   "z": 1840,
+   "x": 301,
+   "z": 1862,
    "yaw": 1.17,
    "radius": 6,
    "levelBase": 4
@@ -6921,8 +6921,8 @@
     1,
     2
    ],
-   "x": 1467,
-   "z": 418,
+   "x": 1451,
+   "z": 389,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -7088,8 +7088,8 @@
    "recipe": "cu_lone_arch",
    "name": "Lone Arch",
    "kind": "marker",
-   "x": 594,
-   "z": 1527,
+   "x": 551,
+   "z": 1507,
    "yaw": 0.93,
    "radius": 5,
    "levelBase": 3
@@ -7131,8 +7131,8 @@
    "recipe": "cu_sinkhole",
    "name": "Sinkhole",
    "kind": "hazard",
-   "x": 668,
-   "z": 762,
+   "x": 676,
+   "z": 796,
    "yaw": 2.08,
    "radius": 6,
    "levelBase": 2
@@ -7173,26 +7173,26 @@
     2,
     3
    ],
-   "x": 467,
-   "z": 427,
+   "x": 475,
+   "z": 458,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     432,
-     388
+     440,
+     419
     ],
     [
-     501,
-     382
+     509,
+     413
     ],
     [
-     502,
-     456
+     510,
+     487
     ],
     [
-     435,
-     449
+     443,
+     480
     ]
    ],
    "roam": true
@@ -7346,8 +7346,8 @@
    "id": "sheep_pen_saint_orrins_rise_d98",
    "kind": "sheep_pen",
    "name": "Sheep Pen",
-   "x": 1616,
-   "z": 41,
+   "x": 1594,
+   "z": 42,
    "yaw": 3.67,
    "radius": 5,
    "filler": true
@@ -7365,8 +7365,8 @@
     1,
     2
    ],
-   "x": 696,
-   "z": 1980,
+   "x": 669,
+   "z": 1957,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -7438,26 +7438,26 @@
     1,
     2
    ],
-   "x": 121,
-   "z": 879,
+   "x": 153,
+   "z": 881,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     180,
-     873
+     212,
+     875
     ],
     [
-     128,
-     960
+     160,
+     962
     ],
     [
-     75,
-     899
+     107,
+     901
     ],
     [
-     89,
-     821
+     121,
+     823
     ]
    ],
    "roam": true
@@ -7502,8 +7502,8 @@
    "recipe": "cu_old_battle",
    "name": "Old Skirmish",
    "kind": "remains",
-   "x": 1536,
-   "z": 239,
+   "x": 1547,
+   "z": 261,
    "yaw": 4.99,
    "radius": 7,
    "levelBase": 2
@@ -7521,8 +7521,8 @@
     2,
     3
    ],
-   "x": 1092,
-   "z": 1951,
+   "x": 1062,
+   "z": 1965,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -7796,8 +7796,8 @@
    "id": "shrine_niche_saint_orrins_rise_d104",
    "kind": "shrine_niche",
    "name": "Shrine Niche",
-   "x": 728,
-   "z": 696,
+   "x": 727,
+   "z": 714,
    "yaw": 1.03,
    "radius": 3,
    "filler": true
@@ -7815,8 +7815,8 @@
     2,
     3
    ],
-   "x": 318,
-   "z": 1224,
+   "x": 347,
+   "z": 1240,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -7874,8 +7874,8 @@
     1,
     2
    ],
-   "x": 365,
-   "z": 1546,
+   "x": 370,
+   "z": 1579,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -7916,26 +7916,26 @@
     1,
     2
    ],
-   "x": 1163,
-   "z": 1454,
+   "x": 1159,
+   "z": 1421,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1114,
-     1425
+     1110,
+     1392
     ],
     [
-     1192,
-     1424
+     1188,
+     1391
     ],
     [
-     1211,
-     1499
+     1207,
+     1466
     ],
     [
-     1135,
-     1484
+     1131,
+     1451
     ]
    ],
    "roam": true
@@ -7945,8 +7945,8 @@
    "id": "cold_campfire_saint_orrins_rise_d106",
    "kind": "cold_campfire",
    "name": "Cold Campfire",
-   "x": 1736,
-   "z": 996,
+   "x": 1739,
+   "z": 1018,
    "yaw": 5.21,
    "radius": 4,
    "filler": true
@@ -8011,8 +8011,8 @@
    "recipe": "cu_farmers_sign",
    "name": "Angry Sign",
    "kind": "lore",
-   "x": 746,
-   "z": 438,
+   "x": 721,
+   "z": 442,
    "yaw": 5.97,
    "radius": 3,
    "levelBase": 2
@@ -8130,8 +8130,8 @@
    "recipe": "cu_rockfall",
    "name": "Fresh Rockfall",
    "kind": "hazard",
-   "x": 608,
-   "z": 1920,
+   "x": 614,
+   "z": 1897,
    "yaw": 3.35,
    "radius": 6,
    "levelBase": 4
@@ -8142,8 +8142,8 @@
    "recipe": "cu_warrior_cairn",
    "name": "Warrior's Cairn",
    "kind": "shrine",
-   "x": 816,
-   "z": 512,
+   "x": 808,
+   "z": 531,
    "yaw": 5.98,
    "radius": 5,
    "levelBase": 2
@@ -8162,7 +8162,7 @@
     3
    ],
    "x": 723,
-   "z": 1130,
+   "z": 1166,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -8215,26 +8215,26 @@
     2,
     3
    ],
-   "x": 275,
-   "z": 954,
+   "x": 276,
+   "z": 953,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     330,
-     940
+     331,
+     939
     ],
     [
-     270,
-     1012
+     271,
+     1011
     ],
     [
-     224,
-     966
+     225,
+     965
     ],
     [
-     280,
-     890
+     281,
+     889
     ]
    ],
    "roam": true
@@ -8267,8 +8267,8 @@
    "recipe": "cu_loose_stone",
    "name": "Loose Stone",
    "kind": "cache",
-   "x": 1385,
-   "z": 1085,
+   "x": 1402,
+   "z": 1155,
    "yaw": 3.62,
    "radius": 4,
    "levelBase": 3
@@ -8356,8 +8356,8 @@
    "id": "stone_trough_saint_orrins_rise_d115",
    "kind": "stone_trough",
    "name": "Stone Trough",
-   "x": 1158,
-   "z": 1217,
+   "x": 1139,
+   "z": 1208,
    "yaw": 2.32,
    "radius": 4,
    "filler": true
@@ -8554,8 +8554,8 @@
    "recipe": "cu_soldiers_tally",
    "name": "Soldier's Tally",
    "kind": "lore",
-   "x": 631,
-   "z": 733,
+   "x": 613,
+   "z": 734,
    "yaw": 3.22,
    "radius": 4,
    "levelBase": 2
@@ -8630,8 +8630,8 @@
     1,
     2
    ],
-   "x": 2008,
-   "z": 1241,
+   "x": 1981,
+   "z": 1259,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -8737,8 +8737,8 @@
    "recipe": "cu_buried_crock",
    "name": "Buried Crock",
    "kind": "cache",
-   "x": 1403,
-   "z": 461,
+   "x": 1362,
+   "z": 464,
    "yaw": 3.9,
    "radius": 4,
    "levelBase": 2
@@ -8791,8 +8791,8 @@
    "recipe": "cu_pine_resin",
    "name": "Weeping Pine",
    "kind": "forage",
-   "x": 733,
-   "z": 934,
+   "x": 731,
+   "z": 952,
    "yaw": 2.88,
    "radius": 4,
    "levelBase": 3
@@ -8844,8 +8844,8 @@
    "id": "toll_stone_saint_orrins_rise_d125",
    "kind": "toll_stone",
    "name": "Old Toll Stone",
-   "x": 1400,
-   "z": 1579,
+   "x": 1393,
+   "z": 1502,
    "yaw": 1.65,
    "radius": 3,
    "filler": true
@@ -9099,26 +9099,26 @@
     1,
     2
    ],
-   "x": 1696,
-   "z": 104,
+   "x": 1676,
+   "z": 129,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1686,
-     72
+     1666,
+     97
     ],
     [
-     1739,
-     99
+     1719,
+     124
     ],
     [
-     1705,
-     145
+     1685,
+     170
     ],
     [
-     1664,
-     108
+     1644,
+     133
     ]
    ],
    "roam": true
@@ -9159,8 +9159,8 @@
     2,
     3
    ],
-   "x": 104,
-   "z": 1034,
+   "x": 126,
+   "z": 1058,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -9171,8 +9171,8 @@
    "recipe": "cu_honey_tree",
    "name": "Honey Tree",
    "kind": "forage",
-   "x": 1976,
-   "z": 1599,
+   "x": 1968,
+   "z": 1621,
    "yaw": 5.18,
    "radius": 5,
    "levelBase": 4
@@ -9483,8 +9483,8 @@
     1,
     2
    ],
-   "x": 921,
-   "z": 674,
+   "x": 891,
+   "z": 690,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -9707,8 +9707,8 @@
    "recipe": "cu_lone_arch",
    "name": "Lone Arch",
    "kind": "marker",
-   "x": 736,
-   "z": 1005,
+   "x": 761,
+   "z": 958,
    "yaw": 2.3,
    "radius": 5,
    "levelBase": 3
@@ -9749,8 +9749,8 @@
     2,
     3
    ],
-   "x": 241,
-   "z": 839,
+   "x": 218,
+   "z": 890,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -9772,8 +9772,8 @@
    "recipe": "cu_ruined_hearth",
    "name": "Ruined Hearth",
    "kind": "marker",
-   "x": 1648,
-   "z": 248,
+   "x": 1630,
+   "z": 261,
    "yaw": 0.34,
    "radius": 6,
    "levelBase": 2
@@ -9796,8 +9796,8 @@
    "recipe": "cu_herb_patch",
    "name": "Woundwort Patch",
    "kind": "forage",
-   "x": 398,
-   "z": 776,
+   "x": 386,
+   "z": 794,
    "yaw": 3.43,
    "radius": 4,
    "levelBase": 2

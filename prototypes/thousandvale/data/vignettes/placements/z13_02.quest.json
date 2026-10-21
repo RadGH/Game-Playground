@@ -249,30 +249,6 @@
    "monster": "moor_hound",
    "with": null,
    "level": [
-    3,
-    3
-   ],
-   "count": [
-    3,
-    3
-   ],
-   "x": 40,
-   "z": 1419,
-   "yaw": 0,
-   "radius": 6,
-   "quest": "flour_and_fangs",
-   "hunt": true,
-   "respawnMin": [
-    1,
-    1.5
-   ]
-  },
-  {
-   "type": "camp",
-   "id": "quest_flour_and_fangs_0_1",
-   "monster": "moor_hound",
-   "with": null,
-   "level": [
     4,
     4
    ],
@@ -293,21 +269,69 @@
   },
   {
    "type": "camp",
+   "id": "quest_flour_and_fangs_0_1",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 52,
+   "z": 1378,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "flour_and_fangs",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
    "id": "quest_flour_and_fangs_0_2",
    "monster": "moor_hound",
    "with": null,
    "level": [
+    4,
+    4
+   ],
+   "count": [
     3,
     3
+   ],
+   "x": 67,
+   "z": 1342,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "flour_and_fangs",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_flour_and_fangs_0_3",
+   "monster": "moor_hound",
+   "with": null,
+   "level": [
+    4,
+    4
    ],
    "count": [
     1,
     1
    ],
-   "x": 42,
-   "z": 1395,
+   "x": 72,
+   "z": 1376,
    "yaw": 0,
-   "radius": 6,
+   "radius": 8,
    "quest": "flour_and_fangs",
    "hunt": true,
    "respawnMin": [
@@ -410,7 +434,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "fiery"
+    "packleader"
    ],
    "respawnMin": [
     4,
@@ -438,7 +462,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "frostbound"
+    "vicious"
    ],
    "respawnMin": [
     4,
@@ -466,7 +490,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "packleader"
+    "frostbound"
    ],
    "respawnMin": [
     4,
@@ -481,20 +505,20 @@
    "monster": "road_brigand",
    "with": null,
    "level": [
-    5,
-    5
+    4,
+    4
    ],
    "count": [
     1,
     1
    ],
-   "x": 1447,
-   "z": 1523,
+   "x": 1706,
+   "z": 1530,
    "yaw": 0,
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "stormlash"
+    "giant"
    ],
    "respawnMin": [
     4,
@@ -522,7 +546,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "fiery"
+    "packleader"
    ],
    "respawnMin": [
     4,
@@ -604,9 +628,9 @@
    "name": "Gwen Fenwick",
    "role": "carter",
    "at": "Lower Mossgate",
-   "x": 708,
+   "x": 700,
    "z": 1618,
-   "yaw": -1.768,
+   "yaw": 0.866,
    "cart": "cart_lower_mossgate",
    "placedBy": "content-towns",
    "quests": 0,
@@ -620,7 +644,7 @@
    "vehicle": "ox_cart",
    "town": "Lower Mossgate",
    "carter": "carter_lower_mossgate",
-   "x": 710,
+   "x": 698,
    "z": 1618,
    "yaw": -0.174,
    "radius": 2.2
@@ -631,9 +655,9 @@
    "name": "Hobb Fenwick",
    "role": "carter",
    "at": "Mirestead",
-   "x": 1052,
-   "z": 1096,
-   "yaw": 0.194,
+   "x": 1088,
+   "z": 1106,
+   "yaw": 1.807,
    "cart": "cart_mirestead",
    "placedBy": "content-towns",
    "quests": 0,
@@ -647,9 +671,9 @@
    "vehicle": "ox_cart",
    "town": "Mirestead",
    "carter": "carter_mirestead",
-   "x": 1052,
-   "z": 1094,
-   "yaw": -1.36,
+   "x": 1086,
+   "z": 1106,
+   "yaw": 0.173,
    "radius": 2.2
   },
   {

@@ -23,6 +23,7 @@ import { createSiteView } from './site-view.js';
 import { createSetPieceView } from './setpiece-view.js';
 import { createWallsView } from './walls-view.js';   // play-test 4 S7 (stream B): town perimeters + gates
 import { createGroundClutter } from './ground-clutter.js';   // 2026-10-17: grass tufts, ferns, stones, pebbles, lumps round the camera
+import { createGpuGrass } from './grass-gpu.js';             // 2026-10-20: the grass itself, drawn on the graphics card (Medium, High)
 import { perf, nextFrame } from './perf.js';
 import { parseNav } from '../rules/terrain-read.js';
 import { refineNav } from '../rules/nav-refine.js';       // Z37: trees and rocks block as circles the size of their models
@@ -52,7 +53,14 @@ export function createWorldStream(scene, { quality = 'high', horizon: hz0 = null
     for (const L of loaded.values()) { const b = L.bounds; if (L.T && x >= b.minX && x <= b.maxX && z >= b.minZ && z <= b.maxZ) return L; }
     return null;
   };
-  if (!NO_CLUTTER) createGroundClutter(scene, { quality, zoneAt: at }).then(c => { clutter = c; }).catch(e => console.warn('[clutter]', e.message));
+  // `?grass=0`: no GPU grass (the CPU tufts come back — the look before 2026-10-20, for before / after measuring)
+  const NO_GPU_GRASS = typeof location !== 'undefined' && new URLSearchParams(location.search).get('grass') === '0';
+  let grass = null;
+  if (!NO_CLUTTER && !NO_GPU_GRASS) { try { grass = createGpuGrass(scene, { quality, zoneAt: at, distance: opts.grassDistance || 'medium' }); } catch (e) { console.warn('[grass]', e.message); grass = null; } }
+  if (grass && !grass.active) grass = null;
+  const refreshGround = () => { clutter?.refresh(); grass?.refresh(); };
+  // the GPU grass replaces the clutter's tufts (the ferns, stones and lumps stay)
+  if (!NO_CLUTTER) createGroundClutter(scene, { quality, zoneAt: at, tufts: !grass }).then(c => { clutter = c; }).catch(e => console.warn('[clutter]', e.message));
   const NONE = { kind: 'none', surface: NaN, depth: 0 };
   const terrain = {
     get bounds() {
@@ -107,13 +115,13 @@ export function createWorldStream(scene, { quality = 'high', horizon: hz0 = null
         const vigOk = !extras.vignetteHash || !base.reader || extras.vignetteHash === base.reader.meta.inputHash;
         if (!NO_FOREST) extras.scatter = perf.span('zone:forest', () => growForest(extras.scatter, nav, { ox: q.bounds.minX, oz: q.bounds.minZ, clear: clearOf(extras.placements, vigOk ? extras.vignettes : []) }));
         if (!nav) return;
-        return nextFrame().then(() => { if (loaded.get(q.key) === L) { L.nav = perf.span('zone:navRefine', () => refineNav(nav, extras.scatter)); clutter?.refresh(); } });
+        return nextFrame().then(() => { if (loaded.get(q.key) === L) { L.nav = perf.span('zone:navRefine', () => refineNav(nav, extras.scatter)); refreshGround(); } });
       });
       const biomeColors = base.reader ? Object.fromEntries(base.reader.biomes.map(b => [b.key, b.color])) : null;
       const ground = createTerrainView(T, { quality, textureSize: quality === 'low' ? 256 : 512, biomeColors, clearings: opts.clearingsFor ? opts.clearingsFor(T, extras) : [] });
       scene.add(ground.group); L.views.push(ground); L.ground = ground;
       if (horizon && base.reader) horizon.setBiomes?.(base.reader.biomes);
-      loaded.set(q.key, L); clutter?.refresh();
+      loaded.set(q.key, L); refreshGround();
       syncHorizon();
       end();
       groundResolve(L);
@@ -153,7 +161,7 @@ export function createWorldStream(scene, { quality = 'high', horizon: hz0 = null
     for (const v of L.views) { scene.remove(v.group); v.dispose?.(); }
     solids?.remove(key);
     loaded.delete(key);
-    clutter?.refresh();
+    refreshGround();
     syncHorizon();
     end();
   }
@@ -174,6 +182,7 @@ export function createWorldStream(scene, { quality = 'high', horizon: hz0 = null
     for (const L of loaded.values()) for (const v of L.views) v.update?.(dt, pos || lastPos);
     end();
     if (clutter && (pos || lastPos)) perf.span('world:clutter', () => clutter.update(pos || lastPos));
+    if (grass && (pos || lastPos)) perf.span('world:grass', () => grass.update(pos || lastPos));
   }
 
   /** Load the zone under (x, z) now (login, a waystone jump) and resolve once its ground is drawn. */
@@ -191,7 +200,10 @@ export function createWorldStream(scene, { quality = 'high', horizon: hz0 = null
     get zones() { return zones; }, loaded,
     ready: (x, z) => !!at(x, z),
     zoneAt: (x, z) => at(x, z),
-    setVisible(v) { for (const L of loaded.values()) for (const view of L.views) view.group.visible = v; },
+    setVisible(v) { for (const L of loaded.values()) for (const view of L.views) view.group.visible = v; grass?.setVisible(v); if (clutter?.group) clutter.group.visible = v; },
+    /** Settings → Graphics → Grass distance (grass-types.js GRASS_DISTANCES id); applies at once. */
+    setGrassDistance(id) { grass?.setDistance(id); },
+    get grass() { return grass; }, get clutter() { return clutter; },
     /**
      * Q10: a service NPC's office (`info.office`) — dress the house it took over (a town plan with no plot of that
      * trade). Remembered, so a zone that loads later dresses it too.

@@ -51,10 +51,6 @@
       "name": "The Pimamouth"
     },
     {
-      "id": 13,
-      "name": "The Laibranhon"
-    },
-    {
       "id": 40,
       "name": "The Hefeck Run"
     }
@@ -132,13 +128,31 @@
     "z": 1026
   },
   "bridges": [],
+  "palette": "downs",
+  "continent": "torbor",
+  "biomeNames": {
+    "grassland": "Chalk Downs",
+    "temperateForest": "Oakwood",
+    "borealForest": "Pine Highwood",
+    "hills": "Heather Moor",
+    "hallowed": "Saint's Meadow",
+    "marsh": "Brack Fen",
+    "badlands": "Red Scarps",
+    "shrubland": "Gorse Heath",
+    "savanna": "Golden Wolds",
+    "veiledHills": "Blackthorn Scar",
+    "tundra": "High Fell",
+    "mountains": "Grey Crags",
+    "snowyPeaks": "Fell Tops",
+    "beach": "Shingle Shore"
+  },
   "summary": {
     "zone": "z14_04",
     "province": "Petbeck Basin",
     "inputHash": "63302176",
-    "rivers": 3,
-    "wetShare": 0.01,
-    "unwalkableShare": 0.004,
+    "rivers": 2,
+    "wetShare": 0.299,
+    "unwalkableShare": 0.316,
     "towns": [
       {
         "name": "Lowmoor",
@@ -202,15 +216,16 @@
     "bridges": 0,
     "paths": 6,
     "pathMetres": 240,
-    "scatter": 11931,
+    "scatter": 10146,
     "scatterKinds": {
-      "rock_large": 741,
-      "tree_acacia": 2426,
-      "bush": 5317,
-      "rock_small": 2298,
-      "tree_broadleaf": 208,
-      "boulder": 198,
-      "tree_dead": 114,
+      "bush": 2706,
+      "gorse": 2354,
+      "tree_broadleaf": 2323,
+      "rock_small": 1376,
+      "rock_large": 445,
+      "tree_birch": 286,
+      "boulder": 20,
+      "tree_old_oak": 7,
       "tree_conifer": 5,
       "hedge": 624
     },
@@ -229,12 +244,12 @@
       "z": 1026
     },
     "placements": 173,
-    "vignettesAvoided": 664
+    "vignettesAvoided": 660
   },
   "files": {
-    "terrain.bin": 499712,
-    "nav.bin": 19260,
-    "scatter.bin": 95532,
-    "placements.json": 92599
+    "terrain.bin": 476893,
+    "nav.bin": 23766,
+    "scatter.bin": 81252,
+    "placements.json": 92596
   }
 }

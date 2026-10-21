@@ -2171,10 +2171,11 @@ export class SpellFx {
    * world, asks three to compile them (compile() ignores the view frustum), then ends them before the
    * next frame draws. The programs stay cached because finished effects no longer dispose their
    * materials (see disposeObj). Call after setTextures(): a mapped material is a different shader.
+   * `{ draw: true }` (opt-in, 2026-10-20) also draws them once for real before they end.
    * @param {THREE.WebGLRenderer} renderer
    * @returns {Promise<void>}
    */
-  warm(renderer, camera = this.camera) {
+  warm(renderer, camera = this.camera, { draw = false } = {}) {
     if (!renderer || !camera) return Promise.resolve();
     const before = new Set(this.live);
     const at = new THREE.Vector3(0, -5000, 0), to = new THREE.Vector3(4, -5000, 0), ground = -5000;
@@ -2193,6 +2194,14 @@ export class SpellFx {
     const done = () => { for (const e of fresh) this._end(e); };
     try {
       const p = renderer.compileAsync ? renderer.compileAsync(this.root, camera, this.scene) : (renderer.compile(this.root, camera, this.scene), null);
+      // 2026-10-20 (Thousandvale, opt-in `draw`): also DRAW every warm effect once, wherever it is (culling off for the
+      // moment). Chrome on Windows finishes some shaders only at their first real draw (ANGLE on Direct3D).
+      if (draw && this.scene) {
+        const was = [];
+        this.root.traverse(o => { was.push([o, o.frustumCulled]); o.frustumCulled = false; });
+        try { renderer.render(this.scene, camera); } catch { /* best effort */ }
+        for (const [o, f] of was) o.frustumCulled = f;
+      }
       done();   // compile() has already acquired every program; the effects themselves can go now
       return Promise.resolve(p).then(() => {}, () => {});
     } catch { done(); return Promise.resolve(); }

@@ -1992,5 +1992,128 @@
     }
    }
   }
+ },
+ "classText": {
+  "_doc": "Feedback #113 (2026-10-21): \"Some classes like Tactician 'Grants extra actions, repositions allies, reshuffles enemy turn order' … does not fit the game at all.\" Farhold's classes.json role/hook lines were written for Emberveil's turn-based fights and name skills the classes no longer have (Shield Bash, Lay on Hands, Fireball, Meteor, Rejuvenation, two turns per round…). Each class's card line here is written from its Thousandvale skills and replaces Farhold's in memory (js/rules/tv-skills.js installTvClasses); tests/C/feedback-tv21.test.mjs checks that no card names a skill the class lacks or talks of turns and rounds.",
+  "warrior": {
+   "role": "Frontline Brawler",
+   "hook": "Wades into the thick of it: Cleave and Iron Gyre hit harder the more enemies stand around you, War Cry pulls them onto you, and Groundbreaker splits the ground in a long stunning line."
+  },
+  "fighter": {
+   "role": "Stance Duelist",
+   "hook": "Swaps between an Open stance (faster, harder hits) and a Closed one (heavy armour). Riposte and Sweeping Guard answer the next blow with a counter-strike, and Lunge and Master's Flurry change with your stance."
+  },
+  "paladin": {
+   "role": "Holy Bulwark",
+   "hook": "Every holy blade swing heals you, and Mercy's Touch mends a friend. Martyr's Vow spends your own health to shield the party, Daybreak Descent leaps to a friend in trouble, and Oathbound Rise lifts a fallen ally back up inside a barrier."
+  },
+  "ranger": {
+   "role": "Long-Range Hunter",
+   "hook": "Marks a Quarry and sends your followers after it. Long Draw hits harder the further the shot, snares guard the ground, Tracker's Leap jumps you clear, and Arrow Storm rains on a whole pack."
+  },
+  "rogue": {
+   "role": "Set-Up Assassin",
+   "hook": "Stuns, poisons and bleeds first, then cashes in: Gutting Strike and Sucker Punch hit hardest from behind, Grave Mark makes a target pay twice, and Slip Away leaves a decoy while you get round the back."
+  },
+  "cleric": {
+   "role": "Overflowing Healer",
+   "hook": "Heals that spill past full health turn into a barrier. Sanctuary holds a safe circle, Guardian Light tends the most hurt, Raise the Fallen brings a fallen friend back, and Falling Light both smites and heals."
+  },
+  "bard": {
+   "role": "Song Leader",
+   "hook": "Plays one song at a time — Valour speeds your allies, Ruin curses your enemies, Mending heals everyone near you — and switching songs plays its Finale. Mending Verse is a quick heal, and Grand Finale one huge blast that grows with your followers."
+  },
+  "mage": {
+   "role": "Frost Artillery",
+   "hook": "Builds Frostbite stacks with shards and blizzards, then shatters them: Rime Spear and Stillfrost deal more for every stack and use them up. Spellrush makes your next three spells hit harder and cost nothing."
+  },
+  "necromancer": {
+   "role": "Corpse Raiser",
+   "hook": "Every kill leaves a corpse to use. Raise Thralls from them, burn them in a Corpse Pyre, or call a whole March of the Buried. Grave Draught drains life back to you, and Unquiet Return drags a fallen friend back up — grave-touched for a while."
+  },
+  "warlock": {
+   "role": "Spreading Corruption",
+   "hook": "Pays in health for power: binds an imp, makes your curses tick twice as fast with Soul Pact, and opens a Void Rift that drags enemies in and copies your damage-over-time onto everything caught in it."
+  },
+  "demon_hunter": {
+   "role": "Grudge Hunter",
+   "hook": "Every hit you take and every chain you throw builds Grudge; Settle the Grudge spends it all in one piercing shot. Brands targets, hooks them in, tumbles away, and sets a hound on its quarry."
+  },
+  "scavenger": {
+   "role": "Lucky Opportunist",
+   "hook": "Every strike is a gamble: random statuses, random elements, traps and pitch bombs, and Big Score, which can hit for a fifth or for five times its damage, and pays gold on a kill."
+  },
+  "swashbuckler": {
+   "role": "Show-Off Duelist",
+   "hook": "Gains Flair for every flashy move, more when you change it up — a leap, a mocking parry, a matador's turn. Grandeur spends all your Flair in one sweeping strike."
+  },
+  "dragon_knight": {
+   "role": "Wyrm-Blooded Knight",
+   "hook": "Picks a Wyrm Temper — fire, frost or storm — and every breath, rend and leap follows it. Dragonscale throws back what hits you; Wyrm Ascendant turns your attacks into burning, splashing blows."
+  },
+  "pyromancer": {
+   "role": "Fire Stacker",
+   "hook": "Piles Burning stacks on everything with bolts, lines of fire and a trail of burning ground, then sets them all off at once with Flashover. Fallstone drops a falling rock on a whole group."
+  },
+  "stormcaller": {
+   "role": "Chain Lightning Caster",
+   "hook": "Shocked targets take more from everything. Forked Bolt jumps between enemies, Storm Orbs circle you and zap whatever comes close, Bolt Step flashes you away, and Eye of the Tempest is a long thunderstorm."
+  },
+  "druid": {
+   "role": "Shapeshifter",
+   "hook": "Changes shape and every skill changes with you: Briarback is a thorny tank, Moonpelt a fast wolf, Sporecap a spore-lobbing healer. Greensap heals the whole group, and Green Return brings a fallen friend back in a bloom of flowers."
+  },
+  "oracle": {
+   "role": "Foresight Protector",
+   "hook": "Sees trouble coming: Foresight wards everyone against the next big hit, Kind Omen heals and wards one friend, Thread of Fate takes damage for a friend, and Prophecy marks where the blast will fall before it lands."
+  },
+  "tactician": {
+   "role": "Battlefield Commander",
+   "hook": "Leads from the front and gives orders: Exploit the Gap punishes enemies busy with someone else, Lead the Charge and Reposition move the fight where you want it, Seize the Initiative speeds up every cooldown, and Battle Plan lays down a zone that speeds your allies and marks your enemies."
+  },
+  "chronomancer": {
+   "role": "Time Mage",
+   "hook": "Bends the clock: Quicken and Second Hand speed up you and your cooldowns, Lagging slows enemies down, Rewind puts you back where you were with the health you had, and Stasis Lock holds a foe still and lands all its damage at once."
+  },
+  "monk": {
+   "role": "Poise Fighter",
+   "hook": "Every palm strike, step and stance builds Poise, and Ninefold Staff spends it in a widening spin. Wind Step makes your next hit a sure critical, Sweeping Heel knocks foes down, and Mountain Fist punches a line through them."
+  },
+  "shaman": {
+   "role": "Spirit Post Caster",
+   "hook": "Plants spirit posts: one heals everyone near it, and the Great Post heals and strikes at once. Spirit Bolts jump between foes and heal on the way, Warding Spirits block the next few hits, and Call Back the Spirit returns a fallen friend at full health."
+  },
+  "witch_hunter": {
+   "role": "Silver Inquisitor",
+   "hook": "Silver strips magic: pins root and strip, nets silence, Null Circle shuts down casters and stops arrows inside it, and Writ of Guilt sends your followers after one target. Hits undead and casters hard."
+  },
+  "knight": {
+   "role": "Sworn Protector",
+   "hook": "Takes the blows meant for others: Sworn Guard and Sworn Ward link a friend so you take their damage, Challenge and Rim Strike pull enemies onto you, Rampart raises a wall, and the Unbroken Banner keeps everyone standing."
+  },
+  "sorcerer": {
+   "role": "Wild Magic Caster",
+   "hook": "Each Wild Bolt is a random element; Arcane Burst hits harder the more kinds of harm a target carries. Overchannel trades health for power, Transmute turns a foe into something harmless, and Sixfold Ruin strikes with every element in turn."
+  },
+  "runesmith": {
+   "role": "Rune-Forged Bulwark",
+   "hook": "Hammers runes into enemies and into anything that hits you, rends their armour, and lights your weapon with Forge Flame. Warding Glyph shields allies, and The Great Anvil falls with every rune you have laid."
+  },
+  "shadow_dancer": {
+   "role": "Afterimage Duelist",
+   "hook": "Every cut and step leaves an afterimage that strikes again a moment later. Umbral Step lands behind a target, Shroud hides your allies, Assassinate finishes the wounded, and Host of Shades copies everything you do."
+  },
+  "tinker": {
+   "role": "Gadgeteer",
+   "hook": "Fights with gadgets: bolts that go off twice, grenades that change element each throw, a turret, a grappling line and a pocket watch that patches you up. Spring Battery winds up the whole party."
+  },
+  "priest": {
+   "role": "Light and Shadow Healer",
+   "hook": "Heals by striking: every Shadow Lance and Twinlight spin mends the most hurt ally. Vigil saves everyone from one killing blow, Mark the Killer points out whoever needs to fall, and Second Dawn raises a fallen friend in the middle of a fight."
+  },
+  "enchanter": {
+   "role": "Sleep and Charm Controller",
+   "hook": "Puts whole packs to sleep with Drowse so you pick the fight; Arcane Jolt hits sleepers far harder. Beguile turns an enemy against its friends, Lethargy slows a crowd, and a Phantasm decoy puts its attackers to sleep."
+  }
  }
 }

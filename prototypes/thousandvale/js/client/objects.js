@@ -13,6 +13,7 @@ import { buildProp, buildRock } from '../../../../highdef-3d/js/kit/rocks.js';
 import { makeGlowTexture } from './decor.js';
 import { LIGHTS } from './lightpool.js';
 import { usePropKind } from '../sim/vignettes.js';
+import { boxSize } from './box-size.js';
 
 const REACH = 4;
 const KINDS = {
@@ -286,7 +287,7 @@ export function createObjects(scene, { heightAt = () => 0, onUse, onNear = null,
   // floating labels for objects that carry a story: "Cleared by Aldra's party, 4 minutes ago" on a door
   const _v = new THREE.Vector3();
   function drawLabels() {
-    const w = labelLayer.clientWidth, h = labelLayer.clientHeight;
+    const { w, h } = boxSize(labelLayer);      // 2026-10-20: no layout read per frame (box-size.js)
     for (const o of items.values()) {
       const text = o.banner ? `Cleared by ${o.banner.by}${o.banner.party > 1 ? "'s party" : ''}, ${agoText(o.banner.at)}` : null;
       if (!text) { if (o.labelEl) { o.labelEl.remove(); o.labelEl = null; } continue; }

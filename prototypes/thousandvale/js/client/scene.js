@@ -94,6 +94,10 @@ export function createScene(canvas, { quality = 'high' } = {}) {
   const S = 46;
   Object.assign(sun.shadow.camera, { left: -S, right: S, top: S, bottom: -S, near: 1, far: 260 });
   sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.6;
+  // 2026-10-20: softer shadow edges (same five samples, no extra cost); `?softshadows=0` / `?shafts=0` turn the new
+  // pieces off for before / after measuring
+  const flag = k => (typeof location !== 'undefined' ? new URLSearchParams(location.search).get(k) : null);
+  if (tier.softShadows && flag('softshadows') !== '0') sun.shadow.radius = tier.softShadows;
   scene.add(sun, sun.target);
 
   // G-ATMOS: drifting wisps of low cloud (over water and valleys, never round the player) and a soft round shadow under
@@ -101,7 +105,7 @@ export function createScene(canvas, { quality = 'high' } = {}) {
   const mist = createMist(scene, { count: tier.mist });
   const contact = createContactShadows(scene, { opacity: tier.contact });
   let actorList = null, lastFollow = 0, cloudBase = { night: 0, sunY: 1, weather: 'clear' };
-  const glow = tier.bloom ? createBloom(renderer, { strength: 0.3, threshold: 0.74 }) : null;
+  const glow = tier.bloom ? createBloom(renderer, { strength: 0.3, threshold: 0.74, shafts: tier.shafts && flag('shafts') !== '0' ? { sunDir } : null }) : null;
 
   /** Keep the sun and its shadow box centred on `p` (snapped to texels so shadows do not shimmer). */
   function follow(p) {
@@ -150,6 +154,7 @@ export function createScene(canvas, { quality = 'high' } = {}) {
     moodBright = bright; applyCarry();
     stars.visible = moon.visible = false;
     mist.setVisible(!dark); if (dark) ATMOS_U.uCloudK.value = 0;
+    if (glow && dark) glow.shafts = 0;          // no sun underground
     if (!dark && lastSky) applySky(lastSky);
   }
 
@@ -191,6 +196,8 @@ export function createScene(canvas, { quality = 'high' } = {}) {
     ATMOS_U.uSunDir.value.copy(keyDir); ATMOS_U.uSunCol.value.setRGB(...lit.key).multiplyScalar(Math.min(1.4, k.keyIntensity * 0.5));
     ATMOS_U.uSkyCol.value.setRGB(...k.horizon);
     cloudBase = { night: k.night, sunY: k.sun[1], weather: plan.weather };
+    // 2026-10-20: sun rays by day with the sun up, weaker under cloud; none at night
+    if (glow && tier.shafts && flag('shafts') !== '0') glow.shafts = Math.max(0, 1 - k.night * 1.8) * Math.min(1, Math.max(0, (k.sun[1] - 0.02) / 0.15)) * (plan.weather === 'cloudy' ? 0.45 : 1);
     ATMOS_U.uCloudK.value = tier.cloudShadows ? cloudShadowStrength(cloudBase) : 0;
     mist.setColour(scene.fog.color, k.night);
     renderer.toneMappingExposure = k.exposure;

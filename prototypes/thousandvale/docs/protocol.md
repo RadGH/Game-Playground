@@ -100,6 +100,7 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `guest` | gw | `name?:str:24, human?:str:2048` | 1 / 3 | Make a guest account. `human` = the Turnstile token when `welcome.human` asked for one (§14); 20 new accounts per network per hour. |
 | `auth` | gw | `token:str:64` | 1 / 3 | Log into an account. |
 | `chars` | gw | — | 2 / 4 | List my characters. |
+| `nameCheck` | gw | `name:str:24` | 2 / 6 | Feedback #98: is this name free for a new character (no character has it, no day-old tombstone keeps it)? Answer `nameR {name, free, msg}` (`free:null` = the store cannot say). |
 | `create` | gw | `name:str:24, cls:str:32, look?:obj` | 1 / 3 | New character (`cls` = a Farhold class id; `look` = Chibi 2 avatar JSON, ≤ 4 KB). Names: 2–16 letters/spaces/'-, unique per realm, banned-name filter. |
 | `play` | gw | `char:int, join?:str:8` | 1 / 3 | Ask for a ticket. `join` = a party code from a "join my party" link: you join that party and appear next to its leader (§11). A bad code answers `err {code:'noCode'}` and you enter normally. |
 | `party` | gw | `op:str:8, name?:str:24, code?:str:8, char?:int` | 2 / 10 | Party op (§11): `invite {name}`, `accept {char: partyId}`, `decline {char: partyId}`, `join {code}`, `code` (make a party if you have none; the answer `partyState` carries the code), `leave`, `kick {char}`, `lead {char}`. |
@@ -111,6 +112,9 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `cast` | p | `slot:int, aim?:vec2, target?:id, ct?:num, held?:num` | 10 / 15 | Use skill `slot` (0 = basic attack, 1..6 = the skill bar). `held` = seconds a slot-0 attack was held (bow draw / staff charge), clamped to 0..5. `aim` = ground point, `target` = local entity id (Tab target), `ct` = client clock ms (dodge windows, PLAN §7). Answered by `castR` only on refusal; success shows up as `ev` `cast`/`hit`. |
 | `target` | p | `id?:id` | 10 / 20 | Set (or clear) my current target (Tab target); others see it in the snapshot `target` field. Refused with `targetR` if the id is gone, an object, or more than 60 m away. Tab ORDER is the client's (`js/net/tab.js` `tabNext`). |
 | `say` | p | `text:str:200` | 1 / 5 | Say chat, heard within 40 m. |
+| `unstuck` | p | — | 0.2 / 2 | Feedback #96, `/reset` (and the pause menu's "Stuck? Reset my position"): moves you a little onto firm ground (in a dungeon, to the start of your floor) and sends the room again; a second within two minutes takes you home (out of a dungeon to its door). Not while dead or fighting. Answer `unstuckR`. |
+| `ach` | p | `op:str:8` | 1 / 4 | Feedback #106: `op:'list'` -> `achList`. |
+| `link` | p | `kind:str:8, uid?:str:40, id?:str:64, req?:int` | 2 / 6 | Feedback #107: make a chat link to something you hold — `kind:'item'` + `uid` (bag or worn), `'ach'` + `id` (earned), `'trophy'` + `id`. Answer `linkR {ok, req, id, kind, label, rarity}`; put `[[id]]` in a chat line and every reader gets the snapshot in that line's `links`. |
 | `respawn` | p | — | 1 / 2 | Get up after dying: in the wilds or town you wake in the town (a `joined` handoff, `via:'respawn'`); in a dungeon, at its entrance. |
 | `use` | p | `id:id` | 4 / 8 | Use an object within 4 m: a portal/door (dungeon entrance), stairs, an exit, a chest. Answer `used {id, ok, why?, kind?}`; a move arrives as a `joined` handoff. |
 | `item` | p | `op:str:8, uid:str:40, slot?:str:16` | 5 / 10 | `equip {uid, slot?}` (slot defaults to the item's own), `unequip {uid, slot?}`, `destroy {uid}`, `use {uid | 'id:<item id>'}` (potions + food, §18.10 -> `itemR`). The uid must be in YOUR bag (or worn, for unequip). Answers `bag` + `equip`, or `err {code:'item'|'bagFull'}`. |
@@ -248,6 +252,12 @@ Anything not in the table, a wrong type, NaN/Infinity, an unknown field or a str
 | `feedbackShotR` | `ok, id, why?, msg?, bytes?` | (both) Play-test 12 (#71): the screenshot was stored with report `id` (or why not). |
 | `questMarks` | `marks, full?` | §24.3: per-player quest markers over NPCs. |
 | `hits` | `l` | §24.6: the damage meter's rows (only while `meter {on:true}`). |
+| `unstuckR` | `ok, msg` | Feedback #96: what `/reset` did. |
+| `ach` | `id, name, desc, cat, reward, at` | Feedback #106: an achievement just earned (`reward` in words; it is in the post). |
+| `achList` | `list, trophies, points, of` | Feedback #106: every achievement with progress (`n` of `of`, `done` = wall ms) and the trophy shelf. |
+| `trophy` | `id, kind, name, desc, n, at` | Feedback #106: a trophy given (a world boss, a siege, a realm first); `n` = how many times. |
+| `linkR` | `ok, req, id?, kind?, label?, rarity?, msg?` | Feedback #107: the answer to `link`. A `chat` line naming `[[id]]` carries `links: {id: snapshot}`. |
+| `nameR` | `name, free, msg?` | Feedback #98: the answer to `nameCheck`. |
 | `meterR` | `on` | §24.6: answer to `meter`. |
 | `cartList` | `id, from, name, stops, gold, tokens` | §24.5: where this cart goes and what it costs. |
 | `cartR` | `op, ok, to, fare?, why?, msg?` | §24.5: answer to `cart` (`op:'go'`), and the arrival (`op:'arrive'`). |

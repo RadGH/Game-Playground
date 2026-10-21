@@ -72,9 +72,9 @@
       "type": "dungeon",
       "id": "door_1",
       "name": "Barrow entrance",
-      "x": 1061,
+      "x": 1085,
       "z": 1066,
-      "yaw": -3.247,
+      "yaw": 2.887,
       "pinned": true
     },
     {
@@ -91,133 +91,151 @@
     "z": 878
   },
   "bridges": [],
+  "palette": "downs",
+  "continent": "torbor",
+  "biomeNames": {
+    "grassland": "Chalk Downs",
+    "temperateForest": "Oakwood",
+    "borealForest": "Pine Highwood",
+    "hills": "Heather Moor",
+    "hallowed": "Saint's Meadow",
+    "marsh": "Brack Fen",
+    "badlands": "Red Scarps",
+    "shrubland": "Gorse Heath",
+    "savanna": "Golden Wolds",
+    "veiledHills": "Blackthorn Scar",
+    "tundra": "High Fell",
+    "mountains": "Grey Crags",
+    "snowyPeaks": "Fell Tops",
+    "beach": "Shingle Shore"
+  },
   "theme": {
     "kind": "marsh",
     "lakes": [
       {
         "name": "the Black Mere",
         "kind": "mere",
-        "x": 1439,
-        "z": 1151,
+        "x": 1407,
+        "z": 1183,
         "r": 90,
-        "level": 75.29
+        "level": 77.71
       },
       {
         "name": null,
         "kind": "pool",
-        "x": 1688,
-        "z": 1165,
-        "r": 23,
-        "level": 84.3
+        "x": 1115,
+        "z": 1166,
+        "r": 20,
+        "level": 85.97
       },
       {
         "name": null,
         "kind": "pool",
-        "x": 1281,
-        "z": 1344,
-        "r": 22,
-        "level": 83.11
+        "x": 1601,
+        "z": 910,
+        "r": 42,
+        "level": 73.2
       },
       {
         "name": null,
         "kind": "pool",
-        "x": 1062,
-        "z": 1200,
-        "r": 37,
-        "level": 84.72
-      },
-      {
-        "name": null,
-        "kind": "pool",
-        "x": 1461,
-        "z": 783,
+        "x": 1429,
+        "z": 815,
         "r": 38,
-        "level": 68.74
+        "level": 63.15
       },
       {
         "name": null,
         "kind": "pool",
-        "x": 1540,
-        "z": 981,
+        "x": 1588,
+        "z": 1320,
+        "r": 40,
+        "level": 82.18
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1420,
+        "z": 1417,
+        "r": 43,
+        "level": 81.66
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1239,
+        "z": 1036,
+        "r": 18,
+        "level": 78.07
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1378,
+        "z": 971,
+        "r": 33,
+        "level": 79.17
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1765,
+        "z": 1227,
+        "r": 26,
+        "level": 85.43
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1148,
+        "z": 1336,
+        "r": 25,
+        "level": 82.29
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1646,
+        "z": 1126,
+        "r": 43,
+        "level": 79.09
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1528,
+        "z": 1037,
+        "r": 20,
+        "level": 80.3
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1027,
+        "z": 1061,
         "r": 27,
-        "level": 75.89
+        "level": 72.21
       },
       {
         "name": null,
         "kind": "pool",
-        "x": 1667,
-        "z": 1328,
-        "r": 37,
-        "level": 83.98
+        "x": 1734,
+        "z": 1413,
+        "r": 41,
+        "level": 87.27
       },
       {
         "name": null,
         "kind": "pool",
-        "x": 1271,
-        "z": 1004,
-        "r": 18,
-        "level": 77.21
-      },
-      {
-        "name": null,
-        "kind": "pool",
-        "x": 1226,
-        "z": 1171,
-        "r": 21,
-        "level": 82.6
-      },
-      {
-        "name": null,
-        "kind": "pool",
-        "x": 1520,
-        "z": 1337,
-        "r": 21,
-        "level": 80
-      },
-      {
-        "name": null,
-        "kind": "pool",
-        "x": 1144,
-        "z": 1046,
-        "r": 19,
-        "level": 78.62
-      },
-      {
-        "name": null,
-        "kind": "pool",
-        "x": 1384,
-        "z": 1503,
-        "r": 34,
-        "level": 85.26
-      },
-      {
-        "name": null,
-        "kind": "pool",
-        "x": 1536,
-        "z": 1463,
-        "r": 18,
-        "level": 84.53
-      },
-      {
-        "name": null,
-        "kind": "pool",
-        "x": 1209,
-        "z": 1471,
-        "r": 39,
-        "level": 93.35
-      },
-      {
-        "name": null,
-        "kind": "pool",
-        "x": 1719,
-        "z": 908,
-        "r": 22,
-        "level": 75.61
+        "x": 1322,
+        "z": 1563,
+        "r": 44,
+        "level": 89.03
       }
     ],
     "fen": {
-      "x": 1439,
-      "z": 1151,
+      "x": 1407,
+      "z": 1183,
       "r": 430
     }
   },
@@ -226,8 +244,8 @@
     "province": "Petbeck Basin",
     "inputHash": "f3d4195e",
     "rivers": 0,
-    "wetShare": 0.014,
-    "unwalkableShare": 0.003,
+    "wetShare": 0.178,
+    "unwalkableShare": 0.164,
     "towns": [
       {
         "name": "Brackwater",
@@ -284,37 +302,42 @@
     ],
     "roads": 1,
     "bridges": 0,
-    "paths": 11,
-    "pathMetres": 1586,
-    "scatter": 11885,
+    "paths": 10,
+    "pathMetres": 1502,
+    "scatter": 19463,
     "scatterKinds": {
-      "bush": 5358,
-      "rock_small": 1838,
-      "tree_broadleaf": 2215,
-      "rock_large": 299,
-      "reed": 1214,
-      "tree_dead": 103,
-      "tree_conifer": 5,
-      "hedge": 816,
-      "tree_fruit": 37
+      "rock_small": 824,
+      "rock_large": 344,
+      "reed": 10306,
+      "tree_willow": 1326,
+      "bush": 3041,
+      "tree_dead": 270,
+      "tree_broadleaf": 2109,
+      "tree_birch": 160,
+      "boulder": 10,
+      "heather": 186,
+      "tree_old_oak": 29,
+      "tree_conifer": 9,
+      "hedge": 814,
+      "tree_fruit": 35
     },
     "sites": [
       "settlement(HUB) town Brackwater 1136 870 90",
       "settlement hamlet Eelwick 1164 427 40",
-      "dungeon door_1 Barrow entrance 1061 1066  -3.247",
+      "dungeon door_1 Barrow entrance 1085 1066  2.887",
       "event event_brackwater  1026 981 40"
     ],
     "spawn": {
       "x": 1136,
       "z": 878
     },
-    "placements": 195,
-    "vignettesAvoided": 654
+    "placements": 194,
+    "vignettesAvoided": 653
   },
   "files": {
-    "terrain.bin": 479030,
-    "nav.bin": 13866,
-    "scatter.bin": 95164,
-    "placements.json": 132918
+    "terrain.bin": 464453,
+    "nav.bin": 21768,
+    "scatter.bin": 155788,
+    "placements.json": 127784
   }
 }

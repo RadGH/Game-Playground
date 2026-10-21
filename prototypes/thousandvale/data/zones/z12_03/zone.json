@@ -111,8 +111,8 @@
       "id": "door_1",
       "name": "Barrow entrance",
       "x": 350,
-      "z": 735,
-      "yaw": -2.692,
+      "z": 767,
+      "yaw": -3.068,
       "pinned": true
     },
     {
@@ -166,6 +166,24 @@
       "w": 6
     }
   ],
+  "palette": "downs",
+  "continent": "torbor",
+  "biomeNames": {
+    "grassland": "Chalk Downs",
+    "temperateForest": "Oakwood",
+    "borealForest": "Pine Highwood",
+    "hills": "Heather Moor",
+    "hallowed": "Saint's Meadow",
+    "marsh": "Brack Fen",
+    "badlands": "Red Scarps",
+    "shrubland": "Gorse Heath",
+    "savanna": "Golden Wolds",
+    "veiledHills": "Blackthorn Scar",
+    "tundra": "High Fell",
+    "mountains": "Grey Crags",
+    "snowyPeaks": "Fell Tops",
+    "beach": "Shingle Shore"
+  },
   "summary": {
     "zone": "z12_03",
     "province": "Petbeck Basin",
@@ -246,18 +264,21 @@
     "roads": 10,
     "bridges": 3,
     "paths": 11,
-    "pathMetres": 1993,
-    "scatter": 16390,
+    "pathMetres": 2308,
+    "scatter": 18444,
     "scatterKinds": {
-      "bush": 5141,
-      "tree_broadleaf": 3574,
-      "rock_small": 2798,
-      "rock_large": 2341,
-      "reed": 219,
-      "tree_dead": 21,
-      "boulder": 299,
-      "tree_conifer": 1203,
-      "tree_acacia": 25,
+      "bush": 3467,
+      "tree_broadleaf": 4685,
+      "heather": 2923,
+      "rock_small": 2078,
+      "tree_conifer": 149,
+      "tree_birch": 577,
+      "rock_large": 2078,
+      "boulder": 222,
+      "tree_old_oak": 555,
+      "gorse": 876,
+      "tree_dead": 10,
+      "blackthorn": 55,
       "hedge": 732,
       "tree_fruit": 37
     },
@@ -266,7 +287,7 @@
       "settlement hamlet Pilgrim's Halt 672 240 46",
       "landmark ancientwood The Heme Heartwood 448 1472",
       "crossing ford Tethen Ford 313 571",
-      "dungeon door_1 Barrow entrance 350 735  -2.692",
+      "dungeon door_1 Barrow entrance 350 767  -3.068",
       "event event_saint_orrins_rise  327 872 40"
     ],
     "spawn": {
@@ -277,9 +298,9 @@
     "vignettesAvoided": 646
   },
   "files": {
-    "terrain.bin": 684393,
-    "nav.bin": 50899,
-    "scatter.bin": 131204,
-    "placements.json": 207284
+    "terrain.bin": 694923,
+    "nav.bin": 51653,
+    "scatter.bin": 147636,
+    "placements.json": 212735
   }
 }

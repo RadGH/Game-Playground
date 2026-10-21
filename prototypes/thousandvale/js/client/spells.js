@@ -35,7 +35,7 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
   let ready = false;
   Assets.open(new URL('../../../../assets/', import.meta.url).href)
     .then(a => a.fxTextures(THREE, { size: quality === 'low' ? 64 : 128 }))
-    .then(t => { fx.setTextures(t); ready = true; return renderer ? perf.span('spells:warm', () => fx.warm(renderer, camera)) : null; })
+    .then(t => { fx.setTextures(t); ready = true; return renderer ? perf.span('spells:warm', () => fx.warm(renderer, camera, { draw: true }))      /* 2026-10-20: drawn once too (Windows) */ : null; })
     .catch(() => { ready = true; /* geometry only still reads */ });
 
   const looks = new Map();
@@ -77,11 +77,47 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
   }
   function endZone(key) { const z = zones.get(key); if (!z) return 0; for (const e of z.entries) { try { fx._end(e); } catch {} } zones.delete(key); stats.zonesEnded = (stats.zonesEnded || 0) + 1; return 1; }
   /** U3: every ground zone a body laid down ends with it (its death arrives before the server's own clean-up does). */
-  function ownerGone(src) { let n = 0; if (src == null) return n; beams.drop(src); for (const [k, z] of [...zones]) if (z.src === src) n += endZone(k); return n; }
+  function ownerGone(src) { let n = 0; if (src == null) return n; beams.drop(src); endOrbs?.(src); for (const [k, z] of [...zones]) if (z.src === src) n += endZone(k); return n; }
   let seenSpellFx = false, seenImpacts = false;   // C's richer events, once seen, replace the client's own guesses
   const stats = { casts: 0, projectiles: 0, impacts: 0, areas: 0, statuses: 0, unknown: 0 };
 
   const actorAt = id => (id != null ? actors.get(id) : null);
+  // feedback dev#84 (Storm Orbs, "I don't see the orbs, and the lightning comes from me"): `fx orbs` used to draw three
+  // sparks once. The orbs are now drawn circling the caster for as long as they last, and each zap (`fx arc` from that
+  // caster) leaves from the orb nearest its target. Six pooled balls made at start and parked out of sight (never hidden:
+  // a hidden mesh is compiled on its first show, mid-fight — perf note in docs/perf.md)
+  const ORB_COLOR = { lightning: 0xffe860, fire: 0xff7a2a, ice: 0x9ad8ff, shadow: 0x9a6ad8, holy: 0xffe8a0, nature: 0x8ad860, arcane: 0xc08aff, poison: 0x9ad04a };
+  const orbGeo = new THREE.IcosahedronGeometry(0.17, 1);
+  const orbPool = Array.from({ length: 6 }, () => {
+    const m = new THREE.Mesh(orbGeo, new THREE.MeshBasicMaterial({ color: 0xffe860, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }));
+    m.scale.setScalar(0.0001); m.position.set(0, -9999, 0); m.frustumCulled = false; m.renderOrder = 5; scene.add(m); return m;
+  });
+  const orbits = new Map();       // caster id -> { n, until, el, meshes, at: [Vector3] }
+  function startOrbs(id, n, seconds, el) {
+    endOrbs(id);
+    const free = orbPool.filter(m => !m.userData.busy).slice(0, Math.max(1, Math.min(6, n)));
+    for (const m of free) { m.userData.busy = true; m.material.color.setHex(ORB_COLOR[el] || ORB_COLOR.lightning); }
+    orbits.set(id, { n: free.length, until: performance.now() + Math.min(60000, seconds * 1000), el, meshes: free, at: free.map(() => new THREE.Vector3()), t: 0 });
+    stats.orbits = (stats.orbits || 0) + 1;
+  }
+  function endOrbs(id) { const o = orbits.get(id); if (!o) return; for (const m of o.meshes) { m.userData.busy = false; m.scale.setScalar(0.0001); m.position.set(0, -9999, 0); } orbits.delete(id); }
+  function moveOrbs(dt) {
+    const now = performance.now();
+    for (const [id, o] of orbits) {
+      const a = actorAt(id);
+      if (!a || a.dead || now > o.until) { endOrbs(id); continue; }
+      o.t += dt;
+      const h = (a.height || 1.7) * 0.8;
+      o.meshes.forEach((m, i) => {
+        const ang = o.t * 2.4 + (i / o.n) * Math.PI * 2;
+        o.at[i].set(a.pos.x + Math.cos(ang) * 1.05, a.pos.y + h + Math.sin(o.t * 3 + i * 2) * 0.12, a.pos.z + Math.sin(ang) * 1.05);
+        m.position.copy(o.at[i]);
+        m.scale.setScalar(1 + Math.sin(o.t * 11 + i) * 0.18);      // a crackle
+      });
+    }
+  }
+  /** The drawn orb of `id` nearest `to` (a Vector3), or null. */
+  function orbNear(id, to) { const o = orbits.get(id); if (!o || !to) return null; let best = null, bd = Infinity; for (const p of o.at) { const d = p.distanceToSquared(to); if (d < bd) { bd = d; best = p; } } return best ? best.clone() : null; }
   const beams = createBeams(scene, { camera, actors, groundY });
   const chest = a => V(a.pos.x, a.pos.y + Math.max(0.5, a.height * 0.6), a.pos.z);
   const feet = (x, z) => V(x, groundY(x, z) + 0.05, z);
@@ -254,8 +290,9 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
         break;
       }
       case 'arc': case 'link': case 'linkShare': {
-        const from = ev.from ? V(ev.from.x, g(ev.from) + 1.1, ev.from.z) : a ? chest(a) : null;
-        projectile(from, target(ev.to), ev.kind === 'arc' ? el : 'arcane', { body: 'bolt', ms: 90 });
+        const to = target(ev.to);
+        const from = (ev.kind === 'arc' && orbNear(ev.id, to)) || (ev.from ? V(ev.from.x, g(ev.from) + 1.1, ev.from.z) : a ? chest(a) : null);
+        projectile(from, to, ev.kind === 'arc' ? el : 'arcane', { body: 'bolt', ms: 90 });
         break;
       }
       case 'impact': {
@@ -293,7 +330,7 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
         fx.status(a.group, s, ev.on !== false);
         break;
       }
-      case 'orbs': if (a) for (let i = 0; i < Math.min(6, ev.count || 3); i++) setTimeout(() => { const b = actorAt(ev.id); if (b) impactAt(V(b.pos.x + Math.cos(i * 2.1) * 1.2, b.pos.y + 1.3, b.pos.z + Math.sin(i * 2.1) * 1.2), el, { scale: 0.45 }); }, i * 120); break;
+      case 'orbs': if (a) { startOrbs(ev.id, ev.count || 3, +ev.seconds || 12, el); for (let i = 0; i < Math.min(6, ev.count || 3); i++) setTimeout(() => { const b = actorAt(ev.id); if (b) impactAt(V(b.pos.x + Math.cos(i * 2.1) * 1.2, b.pos.y + 1.3, b.pos.z + Math.sin(i * 2.1) * 1.2), el, { scale: 0.45 }); }, i * 120); } break;
       case 'wall': { const c = { x: ev.x, z: ev.z }; if (c.x != null) area({ element: el === 'arcane' ? 'nature' : el, area: { kind: ev.ring ? 'ring' : 'line', r: 4, len: 8 } }, c, a ? a.yaw + Math.PI / 2 : 0); break; }
       case 'taunt': if (a) fx.aoe({ points: ringPoints(a.pos, 3.5, 10), element: 'physical', stagger: 0.015, ground: g(a.pos) }); break;
       case 'empower': if (a) fx.cast({ at: chest(a), element: 'arcane', ms: 400, ground: g(a.pos) }); break;
@@ -352,11 +389,11 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
   }
 
   return {
-    ownerGone, endZone, zones, beams,
+    ownerGone, endZone, zones, beams, orbits, endOrbs,
     fx, onEvent, lookOf, stats, demo, setLevel, get level() { return level; }, get ready() { return ready; },
     update(dt) {
       fx.update(dt);
-      moveCarried(); beams.update(dt);
+      moveCarried(); beams.update(dt); moveOrbs(dt);
       if (lights) lights.setTransient(fx.lights(3));
     },
     /** Remove a body's auras (it left, died or changed room). */

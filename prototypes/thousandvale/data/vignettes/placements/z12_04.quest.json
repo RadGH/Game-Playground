@@ -16,8 +16,8 @@
     3,
     3
    ],
-   "x": 1331,
-   "z": 1950,
+   "x": 1398,
+   "z": 2012,
    "yaw": 0,
    "radius": 6,
    "quest": "cold_slimes",
@@ -40,8 +40,8 @@
     3,
     3
    ],
-   "x": 1318,
-   "z": 1962,
+   "x": 1385,
+   "z": 2024,
    "yaw": 0,
    "radius": 6,
    "quest": "cold_slimes",
@@ -64,8 +64,8 @@
     3,
     3
    ],
-   "x": 1333,
-   "z": 1926,
+   "x": 1400,
+   "z": 1988,
    "yaw": 0,
    "radius": 6,
    "quest": "cold_slimes",
@@ -88,8 +88,8 @@
     1,
     1
    ],
-   "x": 1338,
-   "z": 1960,
+   "x": 1405,
+   "z": 2022,
    "yaw": 0,
    "radius": 6,
    "quest": "cold_slimes",
@@ -112,8 +112,8 @@
     3,
     3
    ],
-   "x": 436,
-   "z": 868,
+   "x": 389,
+   "z": 872,
    "yaw": 0,
    "radius": 8,
    "quest": "serpent_season",
@@ -136,8 +136,8 @@
     3,
     3
    ],
-   "x": 423,
-   "z": 880,
+   "x": 376,
+   "z": 884,
    "yaw": 0,
    "radius": 8,
    "quest": "serpent_season",
@@ -160,8 +160,8 @@
     3,
     3
    ],
-   "x": 438,
-   "z": 844,
+   "x": 391,
+   "z": 848,
    "yaw": 0,
    "radius": 8,
    "quest": "serpent_season",
@@ -184,8 +184,8 @@
     1,
     1
    ],
-   "x": 443,
-   "z": 878,
+   "x": 396,
+   "z": 882,
    "yaw": 0,
    "radius": 8,
    "quest": "serpent_season",
@@ -208,8 +208,8 @@
     3,
     3
    ],
-   "x": 592,
-   "z": 1392,
+   "x": 570,
+   "z": 1193,
    "yaw": 0,
    "radius": 8,
    "quest": "tower_lights",
@@ -232,8 +232,8 @@
     3,
     3
    ],
-   "x": 579,
-   "z": 1404,
+   "x": 557,
+   "z": 1205,
    "yaw": 0,
    "radius": 8,
    "quest": "tower_lights",
@@ -253,11 +253,11 @@
     7
    ],
    "count": [
-    2,
-    2
+    1,
+    1
    ],
-   "x": 594,
-   "z": 1368,
+   "x": 572,
+   "z": 1169,
    "yaw": 0,
    "radius": 8,
    "quest": "tower_lights",
@@ -280,8 +280,8 @@
     3,
     3
    ],
-   "x": 1714,
-   "z": 1516,
+   "x": 1685,
+   "z": 1553,
    "yaw": 0,
    "radius": 8,
    "quest": "frogs_in_the_well",
@@ -304,8 +304,8 @@
     3,
     3
    ],
-   "x": 1701,
-   "z": 1528,
+   "x": 1672,
+   "z": 1565,
    "yaw": 0,
    "radius": 8,
    "quest": "frogs_in_the_well",
@@ -328,8 +328,8 @@
     2,
     2
    ],
-   "x": 1716,
-   "z": 1492,
+   "x": 1687,
+   "z": 1529,
    "yaw": 0,
    "radius": 8,
    "quest": "frogs_in_the_well",
@@ -386,7 +386,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "vicious"
+    "stormlash"
    ],
    "respawnMin": [
     4,
@@ -414,7 +414,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "frostbound"
+    "vicious"
    ],
    "respawnMin": [
     4,
@@ -442,7 +442,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "gilded"
+    "giant"
    ],
    "respawnMin": [
     4,

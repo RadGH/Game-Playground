@@ -317,6 +317,30 @@
   },
   {
    "type": "camp",
+   "id": "quest_down_the_well_1_1",
+   "monster": "cairn_rat",
+   "with": null,
+   "level": [
+    2,
+    2
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 2009,
+   "z": 1640,
+   "yaw": 0,
+   "radius": 6,
+   "quest": "down_the_well",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
    "id": "champ_z11_02_1",
    "monster": "shale_warden",
    "with": null,
@@ -402,7 +426,7 @@
   {
    "type": "camp",
    "id": "champ_z11_02_4",
-   "monster": "road_brigand",
+   "monster": "ash_wisp",
    "with": null,
    "level": [
     4,
@@ -412,8 +436,8 @@
     1,
     1
    ],
-   "x": 528,
-   "z": 928,
+   "x": 671,
+   "z": 1181,
    "yaw": 0,
    "radius": 5,
    "rank": "champion",
@@ -430,6 +454,34 @@
   {
    "type": "camp",
    "id": "champ_z11_02_5",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    4,
+    4
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 528,
+   "z": 928,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "fiery"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z11_02_6",
    "monster": "sporecap_walker",
    "with": null,
    "level": [
@@ -446,7 +498,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "venomous"
+    "gilded"
    ],
    "respawnMin": [
     4,
@@ -703,7 +755,7 @@
    "tier": "hamlet",
    "town": "Ashhaven",
    "post": "gate",
-   "gate": "ashhaven_gate_0",
+   "gate": "ashhaven_gate_1",
    "x": 736,
    "z": 968,
    "yaw": -0.697,

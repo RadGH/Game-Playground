@@ -10,6 +10,7 @@ import { clockText, timeName } from './daynight.js';
 import { soonText } from './ui/pt2-core.js';
 import { crateRewards } from './ui/pt5-core.js';
 import { eventListed } from './ui/pt10-core.js';
+import { HIDDEN } from './ui/hidden-events.js';
 
 const ROLE_NAME = { smith: 'Smith', merchant: 'Merchant', elder: 'Elder', innkeeper: 'Innkeeper', healer: 'Healer', unbinder: 'Unbinder', broker: 'Broker', guard: 'Guard' };
 /** What town folk say when the server sends no lines (their trade, said plainly). */
@@ -176,17 +177,22 @@ export function createWorldUi({ hud, net: getNet, me, room, onFootprints, onBann
     else if (r.op === 'turnin') { hud.toast(`Quest complete: ${name}`, 'good'); hud.chat(`"${name}" is done${r.reward ? ` — ${r.reward.gold || 0} gold${r.reward.items ? ' and an item' : ''}` : ''}.`, 'loot'); dialog.hidden = true; }
     else if (r.op === 'abandon') hud.toast(`Quest dropped: ${name}`, 'info');
   }
+  // feedback #108: the server repeats an event's start to everyone who walks into a new zone or room (so a late arrival
+  // sees the frame) — the chat line and the big callout are said ONCE per event per session, the frame still updates
+  const told = new Set();
+  const firstTime = (kind, ev) => { if (HIDDEN.has(ev)) return false; const k = kind + ':' + (ev.uid || ev.id || ev.name || '?'); if (told.has(k)) return false; told.add(k); if (told.size > 400) told.delete(told.values().next().value); return true; };
   // zone events (every copy runs its own, §15.3)
   function onZoneEvent(m) {
     const ev = m.ev || {};
     if (m.kind === 'soon') {
-      hud.chat(m.text || `${ev.name || 'Trouble'} is coming${m.at ? ` in ${mmss(m.at - Date.now())}` : ''}.`, 'event');
-      callout(m.at ? `${ev.name || 'Trouble'} — ${soonText(m.at).toLowerCase()}` : `${ev.name || 'Trouble'} approaches`, 'phase');
+      const fresh = firstTime('zn', ev);
+      if (fresh) hud.chat(m.text || `${ev.name || 'Trouble'} is coming${m.at ? ` in ${mmss(m.at - Date.now())}` : ''}.`, 'event');
+      if (fresh) callout(m.at ? `${ev.name || 'Trouble'} — ${soonText(m.at).toLowerCase()}` : `${ev.name || 'Trouble'} approaches`, 'phase');
       // R3: a real countdown in the event frame until it begins (never just "starting soon")
       zoneSoon = { name: ev.name || 'A zone event', at: m.at };
       soonTick();
     }
-    else if (m.kind === 'start') { zoneSoon = null; zoneLive(ev); hud.chat(m.text || `${ev.name} has begun nearby — join in, everyone shares the credit.`, 'event'); callout(`${ev.name || 'A zone event'} has begun!`, 'enrage'); onEventFrame({ name: ev.name, hp: ev.hp ?? 1, players: ev.players || 0 }); }
+    else if (m.kind === 'start') { zoneSoon = null; zoneLive(ev); if (firstTime('zs', ev)) { hud.chat(m.text || `${ev.name} has begun nearby — join in, everyone shares the credit.`, 'event'); callout(`${ev.name || 'A zone event'} has begun!`, 'enrage'); } onEventFrame({ name: ev.name, hp: ev.hp ?? 1, players: ev.players || 0 }); }
     else if (m.kind === 'end') { zoneSoon = null; if (liveZone && liveZone === (ev.uid || ev.id || ev.name) && !event.live) { liveZone = null; eventEl.className = 'tv-event ended'; eventEl.querySelector('.ev-kind').textContent = m.won ? 'Victory' : 'It is over'; eventEl.querySelector('.ev-time').textContent = ''; setTimeout(() => { if (!liveZone && !event.live) hideEv(); }, 8000); } if (api.tracker) { if (m.won) callout('Victory!', 'victory'); else if (m.called !== 'off') callout(`${ev.name || 'The event'} — failed`, 'phase'); if (Number.isFinite(m.next)) hud.chat(`${ev.name || 'It'} will be ready again in ${mmss(m.next - Date.now())}.`, 'system'); return; } if (m.called === 'off') { hud.chat(`${ev.name || 'The event'} was called off — everyone walked away.`, 'event'); return; } if (Number.isFinite(m.next)) hud.chat(`${ev.name || 'It'} will be ready again in ${mmss(m.next - Date.now())}.`, 'system'); hud.chat(m.won ? `${ev.name} is over — well fought!` : `${ev.name} faded away.`, 'event'); if (m.won) callout('Victory!', 'victory'); }
     else if (ev.name) onEventFrame({ name: `${ev.name}${ev.waves ? ` — wave ${ev.wave}/${ev.waves}` : ''}`, hp: ev.hp ?? 1, players: ev.players || 0 });
   }
@@ -241,9 +247,10 @@ export function createWorldUi({ hud, net: getNet, me, room, onFootprints, onBann
       eventEl.querySelector('.ev-name').textContent = ev.name || 'Something stirs';
       eventEl.querySelector('.ev-sub').textContent = `${ev.roamed ? 'It has broken out to ' : 'Gathering in '}${where(ev)}. Waystone travel to it will be free while it runs.`;
       eventEl.classList.toggle('roamed', !!ev.roamed);
-      if (m.text) hud.chat(m.text, 'event');        // the event's own announcement (and where it broke out to, M3)
-      hud.chat(`Realm event: ${ev.name} will rise in ${where(ev)} — ${soonText(event.at).toLowerCase()}.`, 'event');
-      callout(ev.roamed ? `${ev.name} has broken out — to ${where(ev)}!` : `${ev.name} stirs in ${where(ev)}`, 'phase');
+      const fresh = firstTime('rn' + (ev.roamed ? ev.roamed : ''), ev);
+      if (fresh && m.text) hud.chat(m.text, 'event');        // the event's own announcement (and where it broke out to, M3)
+      if (fresh) hud.chat(`Realm event: ${ev.name} will rise in ${where(ev)} — ${soonText(event.at).toLowerCase()}.`, 'event');
+      if (fresh) callout(ev.roamed ? `${ev.name} has broken out — to ${where(ev)}!` : `${ev.name} stirs in ${where(ev)}`, 'phase');
     } else if (m.kind === 'eventStart') {
       event.live = ev; event.at = 0;
       eventEl.className = 'tv-event live'; showEv('realm:' + (ev.uid || ev.id));
@@ -251,9 +258,11 @@ export function createWorldUi({ hud, net: getNet, me, room, onFootprints, onBann
       eventEl.querySelector('.ev-time').textContent = '';
       eventEl.querySelector('.ev-name').textContent = ev.name || 'A realm event';
       eventEl.querySelector('.ev-sub').textContent = `${where(ev)} — everyone who joins shares the credit; loot is your own.${ev.kind === 'worldboss' ? ' Fighters get a share of the World cache.' : ''}`;
-      if (m.text) hud.chat(m.text, 'event');
-      hud.chat(`${ev.name} has begun in ${where(ev)}! Waystone travel there is free.`, 'event');
-      callout(`${ev.name} has begun!`, 'enrage');
+      if (firstTime('rs', ev)) {
+        if (m.text) hud.chat(m.text, 'event');
+        hud.chat(`${ev.name} has begun in ${where(ev)}! Waystone travel there is free.`, 'event');
+        callout(`${ev.name} has begun!`, 'enrage');
+      }
     } else if (m.kind === 'eventEnd') {
       event.live = null; event.at = 0;
       eventEl.className = 'tv-event ended';

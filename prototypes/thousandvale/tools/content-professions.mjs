@@ -82,7 +82,9 @@ export const SKIN_HIDE = { ashback_salamander: 'salamander_hide' };
 // Round 11 (live #9): a high score (fine or perfect — what a decent player gets most of the time) now brings half as much
 // again AND one uncommon find, so each piece sells for less to keep the hour where the rule wants it: you carry home more
 // to craft with, not more coin. (Round 8: ore 2/6/26/38/64, gem 5/14/36/70/120, log 2/9/30/50/80, herb 2/7/32/48/78, hide 1/4/8/14/24.)
-export const RAW_PRICE = { ore: [1, 4, 15, 24, 40], gem: [2, 5, 20, 44, 75], log: [1, 6, 19, 38, 60], herb: [1, 4, 20, 36, 58], mushroom: [1, 4, 20, 36, 58], fibre: [1, 4, 20, 36, 58],
+// (Play-test 12, #81: the regenerated Torbor Downs spreads the high zones' trees and ore further apart — log tier 3/4 19/38 -> 22/46,
+// ore tier 4 24 -> 25 keep an hour of logging / mining at 70% of questing at levels 10 and 20.)
+export const RAW_PRICE = { ore: [1, 4, 15, 25, 40], gem: [2, 5, 20, 44, 75], log: [1, 6, 22, 46, 60], herb: [1, 4, 20, 36, 58], mushroom: [1, 4, 20, 36, 58], fibre: [1, 4, 20, 36, 58],
   hide: [1, 2, 4, 8, 14], resin: [1], meat: [1], fang: [1], find: [2] };
 const REFINE_MARKUP = 1.15;      // a refined good sells for its inputs x this (the mini-game's labour)
 

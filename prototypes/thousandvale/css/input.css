@@ -133,3 +133,20 @@ html[data-input="pad"] :focus { outline: none; }
 .tv-partyarrow span { position: absolute; left: 0; top: 13px; transform: translateX(-50%); white-space: nowrap; padding: 0 5px; border-radius: 7px; background: rgba(10, 14, 12, 0.72); color: #d9ffe2; font: 600 10.5px var(--sans, sans-serif); }
 .tv-partyarrow span:empty { display: none; }
 html[data-sheet]:not([data-sheet=""]) .tv-partyarrows { display: none; }
+
+/* feedback #94: Settings > Key bindings > Controller — the live controller test */
+.pad-test { margin: 8px 0 10px; padding: 8px 10px; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 6px; background: rgba(0, 0, 0, 0.25); }
+.pad-test h4 { margin: 0 0 6px; }
+.pad-none { margin: 4px 0; color: #ffb3a3; font-weight: 600; }
+.pad-card { padding: 6px 0; border-top: 1px solid rgba(255, 255, 255, 0.08); }
+.pad-card:first-child { border-top: 0; }
+.pad-card.playing .pad-name::after { content: ' · playing'; color: #8fe08a; font-weight: 700; }
+.pad-name { font-size: 12px; margin-bottom: 5px; overflow-wrap: anywhere; }
+.pad-name .warn { color: #ffd27a; font-style: normal; }
+.pad-btns { display: flex; flex-wrap: wrap; gap: 4px; }
+.pad-btn { min-width: 30px; padding: 2px 5px; text-align: center; font-size: 11px; border-radius: 4px; background: rgba(255, 255, 255, 0.08); color: var(--ink-faint, #aaa); transition: background 0.05s; }
+.pad-btn.on { background: #4fb2ff; color: #031522; font-weight: 700; }
+.pad-axes { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 4px 8px; margin-top: 6px; }
+.pad-axis { position: relative; display: block; height: 18px; border-radius: 3px; background: rgba(255, 255, 255, 0.07); overflow: hidden; }
+.pad-axis i { position: absolute; top: 0; bottom: 0; left: 50%; width: 0; background: #4fb2ff; }
+.pad-axis small { position: absolute; inset: 0; display: grid; place-items: center; font-size: 10px; text-shadow: 0 1px 2px #000; }

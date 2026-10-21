@@ -98,9 +98,9 @@
       "type": "dungeon",
       "id": "door_1",
       "name": "Barrow entrance",
-      "x": 1364,
-      "z": 1286,
-      "yaw": 1.664,
+      "x": 1346,
+      "z": 1259,
+      "yaw": 1.448,
       "pinned": true
     },
     {
@@ -117,13 +117,31 @@
     "z": 1278
   },
   "bridges": [],
+  "palette": "downs",
+  "continent": "torbor",
+  "biomeNames": {
+    "grassland": "Chalk Downs",
+    "temperateForest": "Oakwood",
+    "borealForest": "Pine Highwood",
+    "hills": "Heather Moor",
+    "hallowed": "Saint's Meadow",
+    "marsh": "Brack Fen",
+    "badlands": "Red Scarps",
+    "shrubland": "Gorse Heath",
+    "savanna": "Golden Wolds",
+    "veiledHills": "Blackthorn Scar",
+    "tundra": "High Fell",
+    "mountains": "Grey Crags",
+    "snowyPeaks": "Fell Tops",
+    "beach": "Shingle Shore"
+  },
   "summary": {
     "zone": "z13_04",
     "province": "Petbeck Basin",
     "inputHash": "e8ce72cb",
     "rivers": 1,
-    "wetShare": 0.004,
-    "unwalkableShare": 0.165,
+    "wetShare": 0.034,
+    "unwalkableShare": 0.264,
     "towns": [
       {
         "name": "Gorsehold",
@@ -190,18 +208,20 @@
     ],
     "roads": 2,
     "bridges": 0,
-    "paths": 13,
-    "pathMetres": 2248,
-    "scatter": 10864,
+    "paths": 11,
+    "pathMetres": 2290,
+    "scatter": 17276,
     "scatterKinds": {
-      "bush": 2653,
-      "rock_small": 3454,
-      "tree_broadleaf": 64,
-      "tree_dead": 239,
-      "boulder": 541,
-      "rock_large": 2242,
-      "tree_acacia": 458,
-      "tree_conifer": 355,
+      "gorse": 9990,
+      "bush": 2066,
+      "rock_small": 2124,
+      "tree_birch": 418,
+      "heather": 502,
+      "tree_broadleaf": 228,
+      "rock_large": 891,
+      "boulder": 176,
+      "tree_old_oak": 3,
+      "tree_conifer": 20,
       "hedge": 858
     },
     "sites": [
@@ -210,20 +230,20 @@
       "lair lair The Hitindack Lair 64 960",
       "settlement(HUB) town Gorsehold 1564 1286 90",
       "settlement hamlet Burnt Barns 1594 367 40",
-      "dungeon door_1 Barrow entrance 1364 1286  1.664",
+      "dungeon door_1 Barrow entrance 1346 1259  1.448",
       "event event_gorse_march  1326 1155 40"
     ],
     "spawn": {
       "x": 1560,
       "z": 1278
     },
-    "placements": 190,
-    "vignettesAvoided": 628
+    "placements": 188,
+    "vignettesAvoided": 638
   },
   "files": {
-    "terrain.bin": 705263,
-    "nav.bin": 46888,
-    "scatter.bin": 86996,
-    "placements.json": 147639
+    "terrain.bin": 718626,
+    "nav.bin": 40555,
+    "scatter.bin": 138292,
+    "placements.json": 146833
   }
 }

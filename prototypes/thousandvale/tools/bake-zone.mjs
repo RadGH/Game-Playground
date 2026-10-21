@@ -30,7 +30,7 @@ import { hashStr, clamp, smoothstep, makeNoise2D, fbm, subSeed } from '../../../
 import { planTown, overlaps, footprintOf, cultureFor, assignTrades } from '../../../proctown/js/townplan.js';
 import { FORMAT_VERSION, createTerrain, SCATTER_KINDS, NAV } from '../js/rules/terrain-read.js';
 import { encodeTerrain } from './bake-test-zone.mjs';
-import { decodeMacro, makeRefiner, bicubic, heightRange, RIVER_WIDTH, RIVER_DEPTH, crossingsOf, bridgeFor, DECK_LAND, coastWorld, BAYS } from './lib/world-core.mjs';
+import { decodeMacro, makeRefiner, bicubic, heightRange, RIVER_WIDTH, RIVER_DEPTH, crossingsOf, bridgeFor, DECK_LAND, coastWorld, downsWorld, BAYS } from './lib/world-core.mjs';
 import { addZoneSites, TOWN_RADIUS } from './lib/zone-sites.mjs';
 import { encodeScatter, encodeNav, sameLayerFile } from './lib/zone-layers.mjs';
 import { carveTheme, inFen, shoreDistance, cutCliff } from './lib/zone-theme.mjs';
@@ -39,6 +39,7 @@ import { planTownWalls, wallNav, wallPlacements, WALL_DEFAULTS } from './lib/zon
 import { HIGH_STREET_WIDTH } from './lib/gate-street-checks.mjs';
 import { STALL_R } from '../js/client/town-square.js';
 import { VHARLEN, VHARL_BIOME_NAMES, islandRoads } from './lib/vharlen.mjs';
+import { TORBOR_BIOME_NAMES } from './lib/torbor.mjs';
 import { SET_SURFACES, specsFor, layLanes, resolveSetPieces, prepareEPieces, carvePonds, paintSetPieces, setPieceScatter, setPieceKeepOff, setPiecePlacements, setPieceNav } from './lib/zone-setpieces.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -117,6 +118,9 @@ let E_SETPIECES = [];
 try { E_SETPIECES = JSON.parse(readFileSync(join(HERE, '..', 'data', 'vignettes', 'setpieces.json'), 'utf8')).vignettes || []; } catch { /* none */ }
 let TOWN_WALLS = WALL_DEFAULTS;
 try { TOWN_WALLS = JSON.parse(readFileSync(join(HERE, '..', 'data', 'world', 'town-walls.json'), 'utf8')); } catch { /* defaults */ }
+/** play-test 12 (#81): Torbor Downs' settlements pinned where they stood before the regenerated ground (data/world/town-pins.json) */
+let TOWN_PINS = {};
+try { TOWN_PINS = JSON.parse(readFileSync(join(HERE, '..', 'data', 'world', 'town-pins.json'), 'utf8')); } catch { /* none */ }
 let THEMES = {};
 try { THEMES = JSON.parse(readFileSync(join(HERE, '..', 'data', 'world', 'zone-themes.json'), 'utf8')); } catch { /* none */ }
 /** The E sheet zone id for a world zone, if any (written into meta so E can match on its own ids). */
@@ -125,14 +129,30 @@ function sheetIdFor(id) {
   return null;
 }
 
+/** play-test 12 (#81): stream E's placement types whose ground the regenerated Torbor Downs keeps (minimum disc radius, metres). */
+const PROTECTED_PLACES = { fort: 12, farm: 12, hook: 12, vignette: 12, rare: 12, cave: 12, waystone: 6, npc: 5, treasure_cache: 8, treasure_clue: 5 };
 let worldCache = null;
 export function loadWorld() {
   if (!worldCache) {
     const json = JSON.parse(readFileSync(join(WORLD_DIR, 'world.json'), 'utf8'));
-    const macro = decodeMacro(readFileSync(join(WORLD_DIR, 'macro.bin'))), ref = makeRefiner(macro);
+    // play-test 12 (#81): Torbor Downs' regenerated ground keeps its hills off the world's own roads, rivers, lakes, towns and
+    // doors (tools/lib/torbor.mjs), so the refiner is handed them
+    const pins = f => { try { return JSON.parse(readFileSync(join(WORLD_DIR, f), 'utf8')); } catch { return {}; } };
+    // …and stream E's named places in it (forts, farms, set pieces, caves, rares, waystones, wild quest NPCs, treasure): they
+    // keep the ground they were placed on, so a fort is never left half up a new hill
+    const places = [];
+    for (const zid of Object.values(PROVINCE_MAP.provinces?.torbor_downs?.map || {})) {
+      let pl = []; try { pl = JSON.parse(readFileSync(join(HERE, '..', 'data', 'vignettes', 'placements', `${zid}.json`), 'utf8')).placements || []; } catch { /* none */ }
+      // (not a set piece BOUND onto one of B's own pieces: it stands on that piece's ground, and protecting it as well made the
+      // two chase each other — the protected disc moved B's farm, the farm moved the bound piece, every bake)
+      for (const v of pl) if (Number.isFinite(v.x) && PROTECTED_PLACES[v.type] != null && !v.bound && (v.type !== 'vignette' || (v.radius || 0) >= 12))
+        places.push({ x: +zid.slice(1, 3) * ZM + v.x, z: +zid.slice(4, 6) * ZM + v.z, r: Math.max(PROTECTED_PLACES[v.type], v.radius || 0) });
+    }
+    const macro = decodeMacro(readFileSync(join(WORLD_DIR, 'macro.bin'))), ref = makeRefiner(macro, { world: json, townPins: pins('town-pins.json'), sitePins: pins('site-pins.json'), places });
     // play-test 11 (Z61): the rivers, roads and bridges the world bake drew, with the sea's BAYS applied (a river ends in
     // its mouth, a road at the waterline, heights moved with the ground) — identity for every line no bay reaches
-    worldCache = { json: coastWorld(json, ref), raw: json, macro, ref };
+    const fitted = downsWorld(json, ref);
+    worldCache = { json: coastWorld(fitted, ref), raw: fitted, macro, ref };
   }
   return worldCache;
 }
@@ -179,6 +199,9 @@ export function bakeZone(id, opts = {}) {
   // an expansion island (tools/lib/vharlen.mjs): its own ground, waters, biomes, settlements and roads — World Forge's
   // nodes, rivers, lakes and roads in the block were drawn for the old mainland and are left out
   const isl = ref.islandAt(ox + 1024, oz + 1024);
+  // Torbor Downs regenerated (play-test 12, #81, tools/lib/torbor.mjs): World Forge's places and lines as before, its own
+  // ground (in ref.baseGround already) and biomes
+  const downs = ref.downsAt(ox + 1024, oz + 1024);
   const pmEntry = Object.values(PROVINCE_MAP.provinces || {}).find(pm => Object.values(pm.map || {}).includes(id)) || null;
 
   // 1. base ground at world coordinates
@@ -259,7 +282,7 @@ export function bakeZone(id, opts = {}) {
       && placed.every(p => Math.hypot(p.x - x, p.z - z) >= p.radius + s.radius + LEVEL_EASE * 2);
     let best = null, bestS = Infinity;
     // play-test 11 (Z61): a bay's harbour town is pinned where it stood before the sea came in (world-core BAYS `town`)
-    const bayTown = BAYS.find(b => b.zone === id && b.town?.name === s.name)?.town;
+    const bayTown = BAYS.find(b => b.zone === id && b.town?.name === s.name)?.town || (downs ? TOWN_PINS[id]?.[s.name] : null);
     const reach = bayTown ? -1 : s.ask ? (ok(s.x, s.z) ? 0 : 48) : s.hub ? 480 : 320;
     if (bayTown) best = { x: bayTown.x, z: bayTown.z };
     for (let dz = -reach; dz <= reach; dz += 16) for (let dx = -reach; dx <= reach; dx += 16) {
@@ -590,7 +613,7 @@ export function bakeZone(id, opts = {}) {
   const FEN_NOISE = makeNoise2D(hashStr('fen:' + id));
   for (let j = 0; j < SIZE; j++) for (let i = 0; i < SIZE; i++) {
     const gi = i + AP, gj = j + AP, k = gj * G + gi;
-    let b = isl ? isl.biomeAt(wxOf(gi), wzOf(gj)) : m.biome[ref.warpedIndex(wxOf(gi), wzOf(gj))];
+    let b = isl ? isl.biomeAt(wxOf(gi), wzOf(gj)) : downs ? downs.biomeAt(wxOf(gi), wzOf(gj), ground[k]) : m.biome[ref.warpedIndex(wxOf(gi), wzOf(gj))];
     if (waterKind[k] && waterTop[k] > ground[k]) b = waterKind[k] === 1 ? COAST : LAKE;
     else if (b < 4 || b === 25) b = BEACH;
     else if (theme && !roadMask[k] && theme.beach.some(bb => shoreDistance(bb.lake, i * STEP, j * STEP) < bb.band)) b = BEACH;
@@ -637,6 +660,7 @@ export function bakeZone(id, opts = {}) {
     ...(cliff ? { cliff } : {}),
     // the island's own look (js/client/terrain-view.js, scatter-view.js) and what its biome ids are called there
     ...(isl ? { palette: 'vharl', continent: 'vharlen', biomeNames: VHARL_BIOME_NAMES, pools: islandPools(ox, oz) } : {}),
+    ...(downs ? { palette: 'downs', continent: 'torbor', biomeNames: TORBOR_BIOME_NAMES } : {}),
     ...(theme ? { theme: { kind: THEMES[id].theme, lakes: theme.lakes.map(l => ({ name: l.name, kind: l.kind, x: l.x, z: l.z, r: l.r, level: l.level })), fen: theme.fen } } : {}),
   };
   meta.inputHash = (hashStr(JSON.stringify({ id, w: W.inputHash, ZONE_BAKE_VERSION, FORMAT_VERSION, hub: opts.hub || null })) >>> 0).toString(16).padStart(8, '0');
@@ -710,7 +734,7 @@ export function bakeZone(id, opts = {}) {
         const o = j * SIZE + i, x = i * STEP, z = j * STEP; if (biome[o] !== ROAD_SURFACE_ID || Math.hypot(x - w.cx, z - w.cz) > lim) continue;
         if (w.gates.some(g => Math.hypot(g.x - x, g.z - z) < g.open / 2 - 0.2)) continue;
         if (keep.some(q => { const xs = q.pts; if (Math.abs(xs[0][0] - x) > 400) return false; return polyDist(q.pts, x, z)[0] <= q.width / 2 + 0.3; })) continue;
-        const b0 = isl ? isl.biomeAt(wxOf(i + AP), wzOf(j + AP)) : m.biome[ref.warpedIndex(wxOf(i + AP), wzOf(j + AP))];
+        const b0 = isl ? isl.biomeAt(wxOf(i + AP), wzOf(j + AP)) : downs ? downs.biomeAt(wxOf(i + AP), wzOf(j + AP), terrain.groundAt(x, z)) : m.biome[ref.warpedIndex(wxOf(i + AP), wzOf(j + AP))];
         biome[o] = b0 < 4 || b0 === 25 ? 4 : b0;
       }
   }
@@ -722,7 +746,7 @@ export function bakeZone(id, opts = {}) {
     ...meta.sites.filter(s => s.type === 'event' || s.type === 'camp').map(s => ({ x: s.x, z: s.z, r: s.r })),
     ...avoid, ...poolDiscs,
   ];
-  const scatter = scatterFor(W, zone, terrain, biome, keepClear, keepOff, isl ? VHARL_SCATTER : SCATTER_TABLE);
+  const scatter = scatterFor(W, zone, terrain, biome, keepClear, keepOff, isl ? VHARL_SCATTER : downs ? DOWNS_SCATTER : SCATTER_TABLE);
   const roadAtSample = (x, z) => biome[clamp(Math.round(z / STEP), 0, SIZE - 1) * SIZE + clamp(Math.round(x / STEP), 0, SIZE - 1)] === ROAD_SURFACE_ID;
   scatter.push(...setPieceScatter(pieces, { isWet: (x, z) => terrain.waterAt(x, z).kind !== 'none', onRoad: roadAtSample }));
   // decks for every world bridge whose span reaches into this zone (one on the edge is stamped by both zones)
@@ -776,7 +800,29 @@ export const VHARL_SCATTER = {
   mountains: [[14, 0.02], [15, 0.008]],
 };
 VHARL_SCATTER.steepRock = 14;             // a tree that would stand on a cliff becomes a basalt column cluster
-const TREE_KINDS = new Set([0, 1, 2, 3, 11, 12, 13]);
+/**
+ * Torbor Downs regenerated (play-test 12, #81; tools/lib/torbor.mjs TORBOR_BIOME_NAMES says what each id is there). Kinds:
+ * 0 broadleaf, 1 conifer, 3 dead, 4 bush, 5 small rock, 6 large rock, 7 boulder, 8 reed, 18 birch, 19 willow, 20 gorse,
+ * 21 heather, 22 blackthorn, 23 red sandstone, 24 old oak. Every biome has its OWN tree / bush / rock mix.
+ */
+export const DOWNS_SCATTER = {
+  grassland: [[0, 0.018], [4, 0.04], [5, 0.02], [6, 0.004], [24, 0.0015]],                              // Chalk Downs: open turf, hawthorn-ish bushes, the odd oak
+  temperateForest: [[0, 0.30], [18, 0.03], [4, 0.08], [5, 0.012], [6, 0.004]],                          // Oakwood
+  borealForest: [[1, 0.30], [18, 0.06], [4, 0.025], [5, 0.02], [6, 0.008], [7, 0.002]],                // Pine Highwood
+  hills: [[21, 0.16], [5, 0.035], [6, 0.014], [7, 0.004], [18, 0.012], [1, 0.006]],                     // Heather Moor
+  hallowed: [[24, 0.022], [0, 0.03], [4, 0.04], [5, 0.008]],                                             // Saint's Meadow
+  marsh: [[8, 0.2], [19, 0.03], [4, 0.025], [3, 0.006]],                                                 // Brack Fen
+  badlands: [[23, 0.035], [5, 0.04], [4, 0.04], [20, 0.02], [3, 0.004]],                                // Red Scarps
+  shrubland: [[20, 0.17], [4, 0.03], [5, 0.02], [18, 0.01], [6, 0.003]],                                 // Gorse Heath
+  savanna: [[4, 0.035], [5, 0.018], [0, 0.006], [20, 0.01], [6, 0.003]],                                 // Golden Wolds
+  veiledHills: [[22, 0.16], [3, 0.04], [5, 0.03], [6, 0.012], [7, 0.004]],                               // Blackthorn Scar
+  tundra: [[5, 0.05], [6, 0.03], [7, 0.01], [21, 0.04], [1, 0.006]],                                     // High Fell
+  mountains: [[5, 0.05], [6, 0.03], [7, 0.012], [1, 0.01]],                                              // Grey Crags
+  snowyPeaks: [[6, 0.02], [7, 0.01]],
+  beach: [[5, 0.03], [6, 0.004]],                                                                        // Shingle Shore
+};
+DOWNS_SCATTER.steepRock = 6;
+const TREE_KINDS = new Set([0, 1, 2, 3, 11, 12, 13, 18, 19, 24]);
 const SC = 6;   // scatter cell, metres (world-aligned)
 
 /** Hash of world cell coordinates → 0..1 (salted). */

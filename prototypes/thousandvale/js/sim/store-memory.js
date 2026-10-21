@@ -58,6 +58,12 @@ export function createMemoryStore({ now = () => Date.now(), data = null, onChang
       return Object.values(d.chars).filter(r => r.account === account).map(r => ({ ...brief(r), look: (r.blob && r.blob.look) || null,
         gear: JSON.parse(JSON.stringify(r.blob?.equipment?.equipment || r.blob?.equipment || {})) }));
     },
+    async nameFree(name) {      // feedback #98
+      const lower = String(name).toLowerCase();
+      if (Object.values(d.chars).some(r => r.cols.name.toLowerCase() === lower)) return { free: false };
+      const tomb = (d.tombstones || {})[lower];
+      return tomb && tomb.freeAt > now() ? { free: false, reserved: tomb.freeAt } : { free: true };
+    },
     async createChar(account, { name, cls, look = null, kit = null, limit = MAX_CHARS_PER_ACCOUNT }) {
       const lower = name.toLowerCase();
       if (Object.values(d.chars).some(r => r.cols.name.toLowerCase() === lower)) return { err: 'name' };

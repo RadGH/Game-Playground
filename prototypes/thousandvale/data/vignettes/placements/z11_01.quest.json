@@ -390,7 +390,7 @@
   {
    "type": "camp",
    "id": "champ_z11_01_1",
-   "monster": "ironback_beetle",
+   "monster": "glacier_maw",
    "with": null,
    "level": [
     6,
@@ -400,8 +400,8 @@
     1,
     1
    ],
-   "x": 1492,
-   "z": 462,
+   "x": 1595,
+   "z": 427,
    "yaw": 0,
    "radius": 5,
    "rank": "champion",
@@ -462,7 +462,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "giant"
+    "fiery"
    ],
    "respawnMin": [
     4,
@@ -490,7 +490,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "packleader"
+    "frostbound"
    ],
    "respawnMin": [
     4,
@@ -505,9 +505,9 @@
    "name": "Greta Icewell",
    "role": "angler",
    "at": "Hollin Toll",
-   "x": 1784,
-   "z": 252,
-   "yaw": -3.14,
+   "x": 1768,
+   "z": 312,
+   "yaw": -2.36,
    "angler": true,
    "quests": 0,
    "titled": true
@@ -572,9 +572,9 @@
    "name": "Gervase Eastmere",
    "role": "carter",
    "at": "Wolditford",
-   "x": 450,
-   "z": 826,
-   "yaw": -2.13,
+   "x": 454,
+   "z": 798,
+   "yaw": -1.813,
    "cart": "cart_wolditford",
    "placedBy": "content-towns",
    "quests": 0,
@@ -588,8 +588,8 @@
    "vehicle": "ox_cart",
    "town": "Wolditford",
    "carter": "carter_wolditford",
-   "x": 452,
-   "z": 826,
+   "x": 456,
+   "z": 798,
    "yaw": 3.068,
    "radius": 2.2
   },

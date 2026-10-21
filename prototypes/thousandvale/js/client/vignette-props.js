@@ -5,7 +5,7 @@
 // The server owns everything you can use (notes, chests, NPCs, monsters); this file only draws.
 
 import * as THREE from 'three';
-import { buildTree } from '../../../../highdef-3d/js/kit/trees.js';
+import { buildSceneryTree } from './tree-style.js';
 import { buildGroundDetail } from '../../../../highdef-3d/js/kit/rocks.js';
 import { createDecor, foliageMaterials } from './decor.js';
 import { localToWorld } from './town-view.js';
@@ -71,7 +71,7 @@ export async function createVignetteProps(T, placements, { quality = 'high' } = 
   // trees: a handful, full detail
   for (const p of list.filter(p => p.kind === 'tree')) {
     const sp = p.dead ? 'dead_snag' : p.id;
-    let b; try { b = buildTree(sp, { seed: 3000 + Math.round(p.x + p.z), lod: 0 }); } catch { continue; }
+    let b; try { b = buildSceneryTree(sp, { seed: 3000 + Math.round(p.x + p.z), lod: 0 }); } catch { continue; }
     const s = Math.min(1.6, p.scale * 0.62);
     for (const [geo, mat] of [[b.bark, mats.bark], [b.foliage, mats.leaf]]) {
       if (!geo) continue;

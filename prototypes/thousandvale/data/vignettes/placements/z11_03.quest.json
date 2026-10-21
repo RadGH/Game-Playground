@@ -280,8 +280,8 @@
     3,
     3
    ],
-   "x": 1081,
-   "z": 1945,
+   "x": 1147,
+   "z": 1985,
    "yaw": 0,
    "radius": 8,
    "quest": "lost_and_hound",
@@ -304,8 +304,8 @@
     3,
     3
    ],
-   "x": 1068,
-   "z": 1957,
+   "x": 1134,
+   "z": 1997,
    "yaw": 0,
    "radius": 8,
    "quest": "lost_and_hound",
@@ -328,8 +328,8 @@
     2,
     2
    ],
-   "x": 1083,
-   "z": 1921,
+   "x": 1149,
+   "z": 1961,
    "yaw": 0,
    "radius": 8,
    "quest": "lost_and_hound",
@@ -442,7 +442,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "ironclad"
+    "venomous"
    ],
    "respawnMin": [
     4,

@@ -11,7 +11,8 @@
 import { surfaceMaterial, surfaceVertexAttr, pageTier } from './surface-mat.js';
 import * as THREE from 'three';
 import { LIGHTS } from './lightpool.js';
-import { buildTree, buildBush, makeRng } from '../../../../highdef-3d/js/kit/trees.js';
+import { buildBush, makeRng } from '../../../../highdef-3d/js/kit/trees.js';
+import { buildSceneryTree as buildTree } from './tree-style.js';
 import { buildRock, buildProp } from '../../../../highdef-3d/js/kit/rocks.js';
 import { loadFoliageAtlas, makeSurface } from '../../../../highdef-3d/js/kit/textures.js';
 import { makeNoise2D, fbm } from '../../../../worldgen/js/noise.js';
@@ -40,6 +41,22 @@ function addWind(material, amount) {
   return material;
 }
 
+/**
+ * Leaf cards are double-sided, and three.js turns a card's normal round on its back face — so a card whose normal was
+ * set to point OUT of its clump (the storybook trees, js/client/tree-style.js: a clump lights like one soft ball) went
+ * near-black wherever you saw its back. Leaves keep the normal they were given on both sides (2026-10-20).
+ */
+function twoSidedLeaf(material) {
+  const prev = material.onBeforeCompile;
+  material.onBeforeCompile = (shader, r) => {
+    if (prev) prev(shader, r);
+    shader.fragmentShader = shader.fragmentShader.replace('#include <normal_fragment_begin>',
+      '#include <normal_fragment_begin>\n#ifdef DOUBLE_SIDED\n  normal *= faceDirection; nonPerturbedNormal = normal;\n#endif');
+  };
+  material.customProgramCacheKey = () => 'tv-leaf-2side';
+  return material;
+}
+
 /** One set of foliage materials per page (bark, leaves with wind, rock, props) — every view shares them. */
 const MAT_CACHE = new Map();
 export function foliageMaterials(cheap = false) {
@@ -51,12 +68,12 @@ export function foliageMaterials(cheap = false) {
     // Cheap mode (software renderers): Lambert, no wind, so a leaf pixel costs one texture read.
     return cheap ? {
       bark: new THREE.MeshLambertMaterial({ map: bark.map, vertexColors: true }),
-      leaf: new THREE.MeshLambertMaterial({ map: atlas.texture, alphaTest: 0.35, side: THREE.DoubleSide, vertexColors: true, emissive: '#1c2a12', emissiveMap: atlas.texture, emissiveIntensity: 0.5 }),
+      leaf: twoSidedLeaf(new THREE.MeshLambertMaterial({ map: atlas.texture, alphaTest: 0.35, side: THREE.DoubleSide, vertexColors: true, emissive: '#1c2a12', emissiveMap: atlas.texture, emissiveIntensity: 0.5 })),
       rock: new THREE.MeshLambertMaterial({ vertexColors: true, color: '#a29d94' }),
       prop: new THREE.MeshLambertMaterial({ vertexColors: true }),
     } : {
       bark: addWind(new THREE.MeshStandardMaterial({ map: bark.map, vertexColors: true, roughness: 0.95 }), 0.25),
-      leaf: addWind(new THREE.MeshStandardMaterial({ map: atlas.texture, alphaTest: 0.3, side: THREE.DoubleSide, vertexColors: true, roughness: 0.85, emissive: '#1c2a12', emissiveMap: atlas.texture, emissiveIntensity: 0.55 }), 0.5),
+      leaf: twoSidedLeaf(addWind(new THREE.MeshStandardMaterial({ map: atlas.texture, alphaTest: 0.3, side: THREE.DoubleSide, vertexColors: true, roughness: 0.85, emissive: '#1c2a12', emissiveMap: atlas.texture, emissiveIntensity: 0.55 }), 0.5)),
       rock: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, color: '#a29d94' }),
       prop: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.85 }),
     };

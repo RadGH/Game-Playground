@@ -24,8 +24,10 @@ export const BODY_R = 0.32;
 /**
  * Per scatter kind: the model radius at body height for each variant (scatter-view.js draws variant % list length) in
  * the kit piece's own units, the art scale the client draws it at, and its sideways squash. Measured by
- * tools/measure-scatter.mjs (trunk: the 25th percentile of bark vertices 0.25-0.8 up — the trunk, not its low
- * branches; rock: 85th percentile 0.25-1.5 up; basalt columns: 0.9 x the half-width of their box).
+ * tools/measure-scatter.mjs (trunk: the trunk SLICED at three heights 0.25-0.8 up, 60th percentile of the crossing points —
+ * the trunk, not its low branches; rock: 85th percentile 0.25-1.5 up; basalt columns: 0.9 x the half-width of their box).
+ * 2026-10-20: the storybook trees (js/client/tree-style.js) are FITTED to these radii (their `rB`/`rT` in
+ * tree-style-data.js), so the colliders — and every baked route that reads them — did not change with the new art.
  */
 export const SCATTER_COLLIDE = Object.freeze({
   tree_broadleaf: { r: [0.54, 0.56, 0.41], art: 0.62 },
@@ -40,6 +42,12 @@ export const SCATTER_COLLIDE = Object.freeze({
   tree_charred: { r: [0.34, 0.46], art: 0.62 },
   basalt_columns: { r: [1.35, 1.33, 1.25, 1.24], art: 1 },
   obsidian: { r: [1.13, 1.37, 1.31], art: 1 },
+  // Torbor Downs regenerated (play-test 12, #81). The willow's measured band leans off its spot (r 1.66, 1.19 off-centre):
+  // its upright trunk is ~0.6; the ancient oak's root flare measures 4.35 — its trunk proper is ~2.6
+  tree_birch: { r: [0.53], art: 0.6 },
+  tree_willow: { r: [0.6], art: 0.75 },
+  red_rock: { r: [0.94, 0.87], art: 1.25 },
+  tree_old_oak: { r: [2.6], art: 0.42, squash: 1.25 },
 });
 
 /** The collider radius (metres) of one scatter item: its drawn model's radius at the drawn scale, + the body. */

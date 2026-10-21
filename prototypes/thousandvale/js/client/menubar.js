@@ -19,6 +19,7 @@ const I = {
   perks: '<circle cx="12" cy="5" r="2.2"/><circle cx="5" cy="18" r="2.2"/><circle cx="19" cy="18" r="2.2"/><circle cx="12" cy="12.5" r="2.2"/><path d="M12 7.2v3.1M10.4 14l-3.8 2.6M13.6 14l3.8 2.6"/>',
   sheet: '<circle cx="12" cy="6" r="3"/><path d="M12 9v7M8 12h8M12 16l-3 5M12 16l3 5"/>',
   feedback: '<path d="M21 12a8 8 0 0 1-8 8H5l-2 2V12a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8Z"/><path d="M12 8v5"/><path d="M12 16h.01"/>',
+  achievements: '<path d="M8 21h8M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0Z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/>',
   help: '<circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
 };
 // Friends, guild, mail and the Group Finder live as TABS of the Party menu (play-test P18, ui/party-hub.js).
@@ -30,6 +31,7 @@ export const MENU = [
   { id: 'sheet', key: 'V', label: 'Character — stats and damage' },
   { id: 'skills', key: 'K', label: 'Skills and talents' },
   { id: 'perks', key: 'N', label: 'Perk forest' },
+  { id: 'achievements', key: 'Y', label: 'Achievements and trophies' },      // feedback #106
   { id: 'account', key: '', label: 'Account' },
   { id: 'feedback', key: '', label: 'Feedback — a suggestion or a bug report' },
   { id: 'help', key: 'F1', label: 'Controls' },

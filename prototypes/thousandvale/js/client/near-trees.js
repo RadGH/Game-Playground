@@ -6,6 +6,7 @@
 // / spruce at their middle detail, instanced, the scatter's own foliage materials so no new shader is compiled), set on
 // the real ground and sized to the spire it replaces; the spire itself is folded away in the canopy's vertex shader
 // (`aRoot` + `uNear`), so a slope never shows both. Re-filled when the camera has moved 20 m.
+// 2026-10-20: the near trees are the storybook conifers (js/client/tree-style.js); `kitH` is their built height (a test checks it).
 //
 //   const near = createNearTrees(scene, { quality, groundAt })
 //   near.canopyMaterial(baseMat) -> the canopy's material (the fold-away added; compiled once)
@@ -14,10 +15,10 @@
 //   near.stats -> { trees, roots, refills }
 
 import * as THREE from 'three';
-import { buildTree } from '../../../../highdef-3d/js/kit/trees.js';
+import { buildSceneryTree } from './tree-style.js';
 import { foliageMaterials } from './decor.js';
 
-export const NEAR_TREES = Object.freeze({ R: { high: 300, medium: 220, low: 0 }, cap: { high: 900, medium: 500, low: 0 }, species: ['pine', 'fir', 'spruce'], kitH: { pine: 19.7, fir: 16.2, spruce: 23.6 }, grow: 1.35 });
+export const NEAR_TREES = Object.freeze({ R: { high: 300, medium: 220, low: 0 }, cap: { high: 900, medium: 500, low: 0 }, species: ['pine', 'fir', 'spruce'], kitH: { pine: 18.9, fir: 15.6, spruce: 21.4 }, grow: 1.35 });
 
 export function createNearTrees(scene, { quality = 'high', groundAt = null } = {}) {
   const R = NEAR_TREES.R[quality] ?? 0, cap = NEAR_TREES.cap[quality] ?? 0;
@@ -29,7 +30,7 @@ export function createNearTrees(scene, { quality = 'high', groundAt = null } = {
   let ready = false;
   if (R > 0) foliageMaterials(quality === 'low').then(mats => {
     for (const sp of NEAR_TREES.species) {
-      const b = buildTree(sp, { seed: 1000 + sp.length * 13, lod: 1 });       // the scatter's own seed for the species: the same tree
+      const b = buildSceneryTree(sp, { seed: 1000 + sp.length * 13, lod: 1 });       // the scatter's own seed for the species: the same tree
       const parts = [];
       for (const [geo, mat] of [[b.bark, mats.bark], [b.foliage, mats.leaf]]) {
         if (!geo) continue;

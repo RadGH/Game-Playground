@@ -93,9 +93,9 @@
       "type": "dungeon",
       "id": "door_1",
       "name": "Barrow entrance",
-      "x": 1369,
-      "z": 1953,
-      "yaw": -2.755,
+      "x": 1394,
+      "z": 1973,
+      "yaw": 2.579,
       "pinned": true
     },
     {
@@ -112,6 +112,24 @@
     "z": 1854
   },
   "bridges": [],
+  "palette": "downs",
+  "continent": "torbor",
+  "biomeNames": {
+    "grassland": "Chalk Downs",
+    "temperateForest": "Oakwood",
+    "borealForest": "Pine Highwood",
+    "hills": "Heather Moor",
+    "hallowed": "Saint's Meadow",
+    "marsh": "Brack Fen",
+    "badlands": "Red Scarps",
+    "shrubland": "Gorse Heath",
+    "savanna": "Golden Wolds",
+    "veiledHills": "Blackthorn Scar",
+    "tundra": "High Fell",
+    "mountains": "Grey Crags",
+    "snowyPeaks": "Fell Tops",
+    "beach": "Shingle Shore"
+  },
   "theme": {
     "kind": "mere",
     "lakes": [
@@ -121,15 +139,15 @@
         "x": 1101,
         "z": 1645,
         "r": 150,
-        "level": 1032.62
+        "level": 1045.91
       },
       {
         "name": "the Reflection Mere",
         "kind": "mere",
         "x": 684,
-        "z": 1260,
+        "z": 1228,
         "r": 75,
-        "level": 1008.01
+        "level": 1007.52
       }
     ],
     "fen": null
@@ -191,17 +209,21 @@
     ],
     "roads": 4,
     "bridges": 0,
-    "paths": 6,
-    "pathMetres": 1016,
-    "scatter": 13450,
+    "paths": 8,
+    "pathMetres": 878,
+    "scatter": 14387,
     "scatterKinds": {
-      "bush": 1949,
-      "tree_conifer": 2183,
-      "rock_small": 4549,
-      "rock_large": 3540,
-      "boulder": 877,
-      "tree_acacia": 9,
-      "tree_broadleaf": 31,
+      "blackthorn": 1028,
+      "heather": 2931,
+      "rock_small": 4010,
+      "tree_dead": 166,
+      "tree_birch": 90,
+      "tree_conifer": 244,
+      "rock_large": 2706,
+      "boulder": 862,
+      "gorse": 1734,
+      "bush": 288,
+      "tree_broadleaf": 16,
       "hedge": 312
     },
     "sites": [
@@ -210,20 +232,20 @@
       "lair lair The Wondomol Nest 960 1472",
       "settlement(HUB) town Coldwater 1474 1846 90",
       "settlement hamlet Netherby 711 732 46",
-      "dungeon door_1 Barrow entrance 1369 1953  -2.755",
+      "dungeon door_1 Barrow entrance 1394 1973  2.579",
       "event event_coldwater  903 1790 40"
     ],
     "spawn": {
       "x": 1462,
       "z": 1854
     },
-    "placements": 162,
+    "placements": 164,
     "vignettesAvoided": 657
   },
   "files": {
-    "terrain.bin": 706505,
-    "nav.bin": 61136,
-    "scatter.bin": 107684,
-    "placements.json": 133711
+    "terrain.bin": 729046,
+    "nav.bin": 55407,
+    "scatter.bin": 115180,
+    "placements.json": 129945
   }
 }

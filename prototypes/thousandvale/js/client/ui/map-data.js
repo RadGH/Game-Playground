@@ -404,6 +404,7 @@ export function collectMarkers({ model, room, known = new Set(), fog = null, que
   }
   for (const m of party) if (Number.isFinite(m.x)) out.push({ id: 'pm:' + m.char, kind: 'party', x: m.x, z: m.z, name: m.name, sub: m.sub || 'Party member', priority: m.tracked ? 7 : 4, size: m.tracked ? 8 : 6, tracked: !!m.tracked });
   for (const p of pins) out.push({ id: 'pin:' + p.id, kind: 'pin', x: p.x, z: p.z, name: p.name || 'Your pin', sub: 'Click to remove', priority: 3, size: 7, act: 'unpin', pin: p.id });
-  if (me) out.push({ id: 'me', kind: 'me', x: me.x, z: me.z, name: 'You', sub: '', priority: 10, size: 8 });
+  // feedback #111 (2026-10-21): the facing never reached the arrow — `yaw` was dropped here, so it always pointed south
+  if (me) out.push({ id: 'me', kind: 'me', x: me.x, z: me.z, yaw: Number.isFinite(me.yaw) ? me.yaw : 0, name: 'You', sub: '', priority: 10, size: 8 });
   return out;
 }

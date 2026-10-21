@@ -107,7 +107,8 @@ export const CLIENT_MSGS = Object.freeze({
   guest:   { on: 'gw', fields: { name: '?str:24', human: '?str:2048' }, rate: 1, burst: 3 },
   auth:    { on: 'gw', fields: { token: 'str:64' }, rate: 1, burst: 3 },
   chars:   { on: 'gw', fields: {}, rate: 2, burst: 4 },
-  create:  { on: 'gw', fields: { name: 'str:24', cls: 'str:32', look: '?obj', kit: '?obj' }, rate: 1, burst: 3 },   // kit {armour, weapons}: play-test 5 T5
+  create:  { on: 'gw', fields: { name: 'str:24', cls: 'str:32', look: '?obj', kit: '?obj' }, rate: 1, burst: 3 },
+  nameCheck: { on: 'gw', fields: { name: 'str:24' }, rate: 2, burst: 6 },      // feedback #98: is this name free? -> nameR {name, free, msg}   // kit {armour, weapons}: play-test 5 T5
   play:    { on: 'gw', fields: { char: 'int', join: '?str:8' }, rate: 1, burst: 3 },
   party:   { on: 'gw', fields: { op: 'str:8', name: '?str:24', code: '?str:64', char: '?int' }, rate: 2, burst: 10 },
   chat:    { on: 'gw', fields: { ch: 'str:8', text: 'str:200', to: '?str:24' }, rate: 1, burst: 5 },
@@ -119,6 +120,9 @@ export const CLIENT_MSGS = Object.freeze({
   target:  { on: 'p', fields: { id: '?id' }, rate: 10, burst: 20 },
   say:     { on: 'p', fields: { text: 'str:200' }, rate: 1, burst: 5 },
   respawn: { on: 'p', fields: {}, rate: 1, burst: 2 },
+  unstuck: { on: 'p', fields: {}, rate: 0.2, burst: 2 },      // feedback #96: /reset (province.js unstuck)
+  ach:     { on: 'p', fields: { op: 'str:8' }, rate: 1, burst: 4 },      // feedback #106: the Achievements window (op 'list')
+  link:    { on: 'p', fields: { kind: 'str:8', uid: '?str:40', id: '?str:64', req: '?int' }, rate: 2, burst: 6 },      // feedback #107: a chat link
   use:     { on: 'p', fields: { id: 'id', to: '?str:16' }, rate: 4, burst: 8 },      // to (play-test 6 U12): a lift's floor, 'f:<n>'
   item:    { on: 'p', fields: { op: 'str:8', uid: '?str:40', slot: '?str:16', n: '?int', onto: '?str:40' }, rate: 5, burst: 10 },      // n / onto: split and merge a stack (owner feedback 7)
   travel:  { on: 'p', fields: { to: 'str:48' }, rate: 1, burst: 3 },
@@ -271,6 +275,10 @@ export const SERVER_MSGS = Object.freeze({
   cartR: ['op', 'ok', 'to', 'fare', 'why', 'msg'],
   cartRide: ['to', 'from', 'ms', 'fare'],
   meterR: ['on'],
+  unstuckR: ['ok', 'msg'],      // feedback #96: /reset
+  ach: ['id', 'name'], achList: ['list', 'trophies'], trophy: ['id', 'name'],      // feedback #106
+  linkR: ['ok'],      // feedback #107
+  nameR: ['name', 'free'],      // feedback #98
   adminReports: ['list', 'counts'],
   adminR: ['op', 'ok', 'id', 'state'],
   fishR: ['ok', 'state', 'at', 'why', 'msg'],

@@ -1,0 +1,265 @@
+{
+ "_doc": "Stream W-world (play-test 12, #81 Torbor regen): every Torbor Downs settlement pinned where the 2026-10-08 bake put it (zone metres, by settlement name). tools/bake-zone.mjs plants a pinned town here instead of searching for flat ground, and tools/lib/torbor.mjs keeps the new hills off it, so its plan, plot ids, offices and NPCs stay where they were.",
+ "z11_01": {
+  "Hollin Toll": {
+   "x": 1728,
+   "z": 560,
+   "r": 90
+  },
+  "Scree End": {
+   "x": 112,
+   "z": 1472,
+   "r": 46
+  },
+  "Wolditford": {
+   "x": 448,
+   "z": 880,
+   "r": 46
+  }
+ },
+ "z12_01": {
+  "Ashcombe": {
+   "x": 1408,
+   "z": 1328,
+   "r": 140
+  },
+  "Kettle Cross": {
+   "x": 933,
+   "z": 773,
+   "r": 46
+  }
+ },
+ "z13_01": {
+  "Brackwater": {
+   "x": 1136,
+   "z": 870,
+   "r": 90
+  },
+  "Eelwick": {
+   "x": 1164,
+   "z": 427,
+   "r": 40
+  }
+ },
+ "z14_01": {
+  "Saltmouth": {
+   "x": 880,
+   "z": 1616,
+   "r": 90
+  },
+  "Gull Steps": {
+   "x": 282,
+   "z": 1266,
+   "r": 46
+  }
+ },
+ "z11_02": {
+  "Copperdell": {
+   "x": 352,
+   "z": 448,
+   "r": 140
+  },
+  "Pickaxe Row": {
+   "x": 1008,
+   "z": 1664,
+   "r": 65
+  },
+  "Ashhaven": {
+   "x": 768,
+   "z": 944,
+   "r": 46
+  }
+ },
+ "z12_02": {
+  "Torborhold": {
+   "x": 592,
+   "z": 1264,
+   "r": 90
+  },
+  "Mawehaven": {
+   "x": 256,
+   "z": 1920,
+   "r": 40
+  },
+  "Wamonhold": {
+   "x": 1344,
+   "z": 1568,
+   "r": 46
+  }
+ },
+ "z13_02": {
+  "Halsbridge": {
+   "x": 1696,
+   "z": 1184,
+   "r": 140
+  },
+  "Mill End": {
+   "x": 208,
+   "z": 1456,
+   "r": 90
+  },
+  "Lower Mossgate": {
+   "x": 704,
+   "z": 1552,
+   "r": 46
+  },
+  "Mirestead": {
+   "x": 1136,
+   "z": 1072,
+   "r": 46
+  }
+ },
+ "z14_02": {
+  "Gullwick": {
+   "x": 1520,
+   "z": 352,
+   "r": 90
+  },
+  "Ferry Hythe": {
+   "x": 416,
+   "z": 560,
+   "r": 65
+  },
+  "Wyrmrow": {
+   "x": 848,
+   "z": 1872,
+   "r": 65
+  },
+  "Mirekeep": {
+   "x": 1008,
+   "z": 1264,
+   "r": 46
+  }
+ },
+ "z11_03": {
+  "Hermit's Rest": {
+   "x": 1104,
+   "z": 560,
+   "r": 140
+  },
+  "Charcoal Burners": {
+   "x": 256,
+   "z": 224,
+   "r": 65
+  },
+  "Wildhaven": {
+   "x": 1280,
+   "z": 224,
+   "r": 46
+  }
+ },
+ "z12_03": {
+  "Orrinsford": {
+   "x": 336,
+   "z": 576,
+   "r": 90
+  },
+  "Pilgrim's Halt": {
+   "x": 672,
+   "z": 240,
+   "r": 46
+  }
+ },
+ "z13_03": {
+  "Millbrook": {
+   "x": 544,
+   "z": 1648,
+   "r": 140
+  },
+  "Three Wheels": {
+   "x": 1664,
+   "z": 1248,
+   "r": 90
+  },
+  "Stormrow": {
+   "x": 1072,
+   "z": 144,
+   "r": 65
+  },
+  "Ravencross": {
+   "x": 448,
+   "z": 432,
+   "r": 46
+  },
+  "Wildmere": {
+   "x": 1600,
+   "z": 576,
+   "r": 46
+  }
+ },
+ "z14_03": {
+  "Redcliff": {
+   "x": 384,
+   "z": 864,
+   "r": 90
+  },
+  "Cinder Farm": {
+   "x": 1216,
+   "z": 1712,
+   "r": 65
+  },
+  "Ravenhaven": {
+   "x": 112,
+   "z": 224,
+   "r": 46
+  },
+  "Minfenrow": {
+   "x": 1104,
+   "z": 1088,
+   "r": 46
+  },
+  "Bipetwatch": {
+   "x": 320,
+   "z": 1424,
+   "r": 46
+  }
+ },
+ "z11_04": {
+  "Last Lantern": {
+   "x": 890,
+   "z": 1305,
+   "r": 90
+  },
+  "Thornwick": {
+   "x": 1772,
+   "z": 1900,
+   "r": 46
+  }
+ },
+ "z12_04": {
+  "Coldwater": {
+   "x": 1474,
+   "z": 1846,
+   "r": 90
+  },
+  "Netherby": {
+   "x": 711,
+   "z": 732,
+   "r": 46
+  }
+ },
+ "z13_04": {
+  "Gorsehold": {
+   "x": 1564,
+   "z": 1286,
+   "r": 90
+  },
+  "Burnt Barns": {
+   "x": 1594,
+   "z": 367,
+   "r": 40
+  }
+ },
+ "z14_04": {
+  "Lowmoor": {
+   "x": 1219,
+   "z": 1026,
+   "r": 90
+  },
+  "Deepdene": {
+   "x": 1347,
+   "z": 289,
+   "r": 40
+  }
+ }
+}

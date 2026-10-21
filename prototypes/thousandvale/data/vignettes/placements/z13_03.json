@@ -552,8 +552,8 @@
    "type": "vignette",
    "id": "pilgrim_footbath",
    "name": "The Footbath of Saint Ida",
-   "x": 66,
-   "z": 1988,
+   "x": 82,
+   "z": 1833,
    "yaw": 0.65,
    "radius": 11,
    "biome": "shrubland",
@@ -580,8 +580,8 @@
    "type": "vignette",
    "id": "rotting_gibbet_cage",
    "name": "The Crow Cage",
-   "x": 1180,
-   "z": 1970,
+   "x": 1159,
+   "z": 1829,
    "yaw": 4.9,
    "radius": 10,
    "biome": "shrubland",
@@ -757,8 +757,8 @@
     2,
     4
    ],
-   "x": 990,
-   "z": 1700,
+   "x": 953,
+   "z": 1726,
    "yaw": 0,
    "radius": 10
   },
@@ -829,8 +829,8 @@
     1,
     2
    ],
-   "x": 658,
-   "z": 1988,
+   "x": 614,
+   "z": 1978,
    "yaw": 0,
    "radius": 10
   },
@@ -1329,8 +1329,8 @@
    "id": "drying_rack_camp_millbrook_10",
    "kind": "drying_rack_camp",
    "name": "Hunter's Rack",
-   "x": 1164,
-   "z": 459,
+   "x": 1165,
+   "z": 433,
    "yaw": 5.28,
    "radius": 4,
    "filler": true
@@ -1648,8 +1648,8 @@
     2,
     3
    ],
-   "x": 65,
-   "z": 1570,
+   "x": 103,
+   "z": 1543,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1887,33 +1887,33 @@
    "monster": "carrion_moth",
    "with": null,
    "level": [
-    3,
-    4
+    4,
+    5
    ],
    "count": [
     2,
     3
    ],
-   "x": 169,
-   "z": 1225,
+   "x": 192,
+   "z": 1248,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     120,
-     1225
+     143,
+     1248
     ],
     [
-     167,
-     1183
+     190,
+     1206
     ],
     [
-     208,
-     1219
+     231,
+     1242
     ],
     [
-     161,
-     1265
+     184,
+     1288
     ]
    ],
    "roam": true
@@ -2075,26 +2075,26 @@
     1,
     2
    ],
-   "x": 1086,
-   "z": 1840,
+   "x": 1055,
+   "z": 1828,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1125,
-     1816
+     1094,
+     1804
     ],
     [
-     1120,
-     1893
+     1089,
+     1881
     ],
     [
-     1035,
-     1867
+     1004,
+     1855
     ],
     [
-     1073,
-     1791
+     1042,
+     1779
     ]
    ],
    "roam": true
@@ -2147,8 +2147,8 @@
    "recipe": "cu_mushroom_flush",
    "name": "Flush of Caps",
    "kind": "forage",
-   "x": 1560,
-   "z": 352,
+   "x": 1577,
+   "z": 345,
    "yaw": 3.31,
    "radius": 4,
    "levelBase": 4
@@ -2351,8 +2351,8 @@
    "recipe": "cu_bramble_berries",
    "name": "Bramble Berries",
    "kind": "forage",
-   "x": 1328,
-   "z": 1680,
+   "x": 1346,
+   "z": 1682,
    "yaw": 3.72,
    "radius": 4,
    "levelBase": 5
@@ -2363,8 +2363,8 @@
    "recipe": "cu_tinkers_halt",
    "name": "Tinker's Halt",
    "kind": "camp",
-   "x": 2000,
-   "z": 40,
+   "x": 1979,
+   "z": 33,
    "yaw": 5.55,
    "radius": 6,
    "levelBase": 4
@@ -2485,8 +2485,8 @@
    "recipe": "cu_charcoal_mound",
    "name": "Charcoal Clamp",
    "kind": "camp",
-   "x": 1351,
-   "z": 624,
+   "x": 1369,
+   "z": 609,
    "yaw": 5.58,
    "radius": 6,
    "levelBase": 4
@@ -2555,8 +2555,8 @@
    "id": "boundary_stake_millbrook_d7",
    "kind": "boundary_stake",
    "name": "Boundary Stakes",
-   "x": 1534,
-   "z": 40,
+   "x": 1518,
+   "z": 28,
    "yaw": 4.03,
    "radius": 4,
    "filler": true
@@ -2567,8 +2567,8 @@
    "recipe": "cu_oak_of_oaths",
    "name": "Oath Oak",
    "kind": "shrine",
-   "x": 2009,
-   "z": 927,
+   "x": 1985,
+   "z": 921,
    "yaw": 1.19,
    "radius": 6,
    "levelBase": 5
@@ -2881,8 +2881,8 @@
     2,
     3
    ],
-   "x": 792,
-   "z": 1096,
+   "x": 764,
+   "z": 1113,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -3015,8 +3015,8 @@
     1,
     2
    ],
-   "x": 352,
-   "z": 48,
+   "x": 349,
+   "z": 80,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -3039,8 +3039,8 @@
    "recipe": "cu_herb_patch",
    "name": "Woundwort Patch",
    "kind": "forage",
-   "x": 41,
-   "z": 1864,
+   "x": 37,
+   "z": 1886,
    "yaw": 0.6,
    "radius": 4,
    "levelBase": 4
@@ -3143,26 +3143,26 @@
     1,
     2
    ],
-   "x": 1160,
-   "z": 648,
+   "x": 1131,
+   "z": 632,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1108,
-     628
+     1079,
+     612
     ],
     [
-     1189,
-     575
+     1160,
+     559
     ],
     [
-     1211,
-     666
+     1182,
+     650
     ],
     [
-     1154,
-     700
+     1125,
+     684
     ]
    ],
    "roam": true
@@ -3403,8 +3403,8 @@
    "recipe": "cu_boundary_cross",
    "name": "Boundary Cross",
    "kind": "marker",
-   "x": 2008,
-   "z": 1168,
+   "x": 1975,
+   "z": 1202,
    "yaw": 4.87,
    "radius": 3,
    "levelBase": 5
@@ -3669,26 +3669,26 @@
     2,
     3
    ],
-   "x": 1264,
-   "z": 441,
+   "x": 1291,
+   "z": 423,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1285,
-     490
+     1243,
+     457
     ],
     [
-     1228,
-     474
+     1257,
+     375
     ],
     [
-     1227,
-     403
+     1339,
+     389
     ],
     [
-     1299,
-     421
+     1325,
+     471
     ]
    ],
    "roam": true
@@ -3741,8 +3741,8 @@
    "recipe": "cu_bramble_berries",
    "name": "Bramble Berries",
    "kind": "forage",
-   "x": 1066,
-   "z": 449,
+   "x": 1062,
+   "z": 431,
    "yaw": 4.89,
    "radius": 4,
    "levelBase": 4
@@ -4116,22 +4116,22 @@
    "chatter": [
     "role.surveyor"
    ],
-   "x": 1913,
-   "z": 967,
+   "x": 1930,
+   "z": 986,
    "yaw": 3.22,
    "radius": 6,
    "path": [
     [
-     1879,
-     902
+     2004,
+     941
     ],
     [
-     1987,
-     974
+     1932,
+     1072
     ],
     [
-     1884,
-     1022
+     1854,
+     944
     ]
    ]
   },
@@ -4214,8 +4214,8 @@
    "recipe": "cu_wasp_bank",
    "name": "Wasp Bank",
    "kind": "nest",
-   "x": 128,
-   "z": 1648,
+   "x": 144,
+   "z": 1657,
    "yaw": 1.06,
    "radius": 4,
    "levelBase": 4
@@ -4320,22 +4320,22 @@
    "chatter": [
     "role.shepherd"
    ],
-   "x": 968,
-   "z": 1936,
+   "x": 970,
+   "z": 1960,
    "yaw": 0.1,
    "radius": 6,
    "path": [
     [
-     1012,
-     1931
+     1014,
+     1955
     ],
     [
-     927,
-     1973
+     929,
+     1997
     ],
     [
-     942,
-     1881
+     944,
+     1905
     ]
    ]
   },
@@ -4497,8 +4497,8 @@
     1,
     2
    ],
-   "x": 1455,
-   "z": 95,
+   "x": 1474,
+   "z": 121,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -4658,22 +4658,22 @@
    "chatter": [
     "role.woodcutter"
    ],
-   "x": 1584,
-   "z": 112,
+   "x": 1574,
+   "z": 134,
    "yaw": 3.94,
    "radius": 6,
    "path": [
     [
-     1566,
-     97
+     1556,
+     119
     ],
     [
-     1609,
-     110
+     1599,
+     132
     ],
     [
-     1582,
-     131
+     1572,
+     153
     ]
    ]
   },
@@ -4702,8 +4702,8 @@
     2,
     3
    ],
-   "x": 136,
-   "z": 1351,
+   "x": 155,
+   "z": 1325,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -4810,8 +4810,8 @@
     1,
     2
    ],
-   "x": 520,
-   "z": 40,
+   "x": 547,
+   "z": 58,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -4837,22 +4837,22 @@
    "chatter": [
     "role.woodcutter"
    ],
-   "x": 617,
-   "z": 480,
+   "x": 635,
+   "z": 463,
    "yaw": 4.13,
    "radius": 6,
    "path": [
     [
-     620,
-     455
+     638,
+     438
     ],
     [
-     632,
-     488
+     650,
+     471
     ],
     [
-     594,
-     488
+     612,
+     471
     ]
    ]
   },
@@ -5186,22 +5186,22 @@
    "chatter": [
     "role.herbalist"
    ],
-   "x": 549,
-   "z": 1892,
+   "x": 551,
+   "z": 1867,
    "yaw": 5.61,
    "radius": 6,
    "path": [
     [
-     531,
-     1904
+     533,
+     1879
     ],
     [
-     547,
-     1877
+     549,
+     1852
     ],
     [
-     565,
-     1896
+     567,
+     1871
     ]
    ]
   },
@@ -5645,8 +5645,8 @@
    "recipe": "cu_lovers_stone",
    "name": "Lovers' Stone",
    "kind": "lore",
-   "x": 1519,
-   "z": 1159,
+   "x": 1506,
+   "z": 1128,
    "yaw": 2.11,
    "radius": 4,
    "levelBase": 4
@@ -5701,8 +5701,8 @@
     2,
     3
    ],
-   "x": 272,
-   "z": 1743,
+   "x": 304,
+   "z": 1737,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -5976,8 +5976,8 @@
     1,
     2
    ],
-   "x": 1856,
-   "z": 1097,
+   "x": 1826,
+   "z": 1111,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -6217,8 +6217,8 @@
    "recipe": "cu_rune_ring",
    "name": "Little Stone Ring",
    "kind": "marker",
-   "x": 224,
-   "z": 1817,
+   "x": 208,
+   "z": 1833,
    "yaw": 4.63,
    "radius": 6,
    "levelBase": 4
@@ -6690,8 +6690,8 @@
    "recipe": "cu_dead_traveller",
    "name": "Dead Traveller",
    "kind": "remains",
-   "x": 752,
-   "z": 496,
+   "x": 704,
+   "z": 509,
    "yaw": 4,
    "radius": 4,
    "levelBase": 3
@@ -6823,8 +6823,8 @@
     1,
     2
    ],
-   "x": 793,
-   "z": 552,
+   "x": 814,
+   "z": 579,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -6916,8 +6916,8 @@
    "id": "lost_signpost_millbrook_d55",
    "kind": "lost_signpost",
    "name": "Lost Signpost",
-   "x": 425,
-   "z": 40,
+   "x": 443,
+   "z": 43,
    "yaw": 2.81,
    "radius": 3,
    "filler": true
@@ -6971,8 +6971,8 @@
    "recipe": "cu_bramble_berries",
    "name": "Bramble Berries",
    "kind": "forage",
-   "x": 175,
-   "z": 2014,
+   "x": 161,
+   "z": 2001,
    "yaw": 1.59,
    "radius": 4,
    "levelBase": 4
@@ -7025,8 +7025,8 @@
    "recipe": "cu_poachers_end",
    "name": "Poacher's End",
    "kind": "remains",
-   "x": 1113,
-   "z": 503,
+   "x": 1122,
+   "z": 519,
    "yaw": 4.94,
    "radius": 4,
    "levelBase": 4
@@ -7137,26 +7137,26 @@
     2,
     3
    ],
-   "x": 115,
-   "z": 1879,
+   "x": 143,
+   "z": 1863,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     88,
-     1858
+     116,
+     1842
     ],
     [
-     149,
-     1851
+     177,
+     1835
     ],
     [
-     154,
-     1908
+     182,
+     1892
     ],
     [
-     88,
-     1902
+     116,
+     1886
     ]
    ],
    "roam": true
@@ -7197,8 +7197,8 @@
    "id": "banner_post_millbrook_d59",
    "kind": "banner_post",
    "name": "Faded Banner",
-   "x": 1352,
-   "z": 552,
+   "x": 1370,
+   "z": 558,
    "yaw": 6.25,
    "radius": 3,
    "filler": true
@@ -7240,8 +7240,8 @@
    "recipe": "cu_bramble_berries",
    "name": "Bramble Berries",
    "kind": "forage",
-   "x": 40,
-   "z": 1638,
+   "x": 90,
+   "z": 1658,
    "yaw": 2.05,
    "radius": 4,
    "levelBase": 4
@@ -7283,8 +7283,8 @@
    "recipe": "cu_hunters_blind",
    "name": "Hunter's Blind",
    "kind": "camp",
-   "x": 1472,
-   "z": 1208,
+   "x": 1452,
+   "z": 1221,
    "yaw": 2.96,
    "radius": 5,
    "levelBase": 4
@@ -7336,26 +7336,26 @@
     1,
     2
    ],
-   "x": 1608,
-   "z": 40,
+   "x": 1634,
+   "z": 92,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1642,
-     97
+     1668,
+     149
     ],
     [
-     1560,
-     91
+     1586,
+     143
     ],
     [
-     1567,
-     0
+     1593,
+     52
     ],
     [
-     1660,
-     5
+     1686,
+     57
     ]
    ],
    "roam": true
@@ -7467,8 +7467,8 @@
    "recipe": "cu_lovers_stone",
    "name": "Lovers' Stone",
    "kind": "lore",
-   "x": 263,
-   "z": 1593,
+   "x": 281,
+   "z": 1587,
    "yaw": 1.44,
    "radius": 4,
    "levelBase": 4
@@ -7517,26 +7517,26 @@
     1,
     2
    ],
-   "x": 136,
-   "z": 664,
+   "x": 144,
+   "z": 695,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     117,
-     627
+     125,
+     658
     ],
     [
-     179,
-     648
+     187,
+     679
     ],
     [
-     151,
-     701
+     159,
+     732
     ],
     [
-     91,
-     676
+     99,
+     707
     ]
    ],
    "roam": true
@@ -7547,8 +7547,8 @@
    "recipe": "cu_farmers_sign",
    "name": "Angry Sign",
    "kind": "lore",
-   "x": 1728,
-   "z": 881,
+   "x": 1740,
+   "z": 870,
    "yaw": 0.35,
    "radius": 3,
    "levelBase": 5
@@ -7690,26 +7690,26 @@
     2,
     3
    ],
-   "x": 1255,
-   "z": 1009,
+   "x": 1228,
+   "z": 1027,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1265,
-     937
+     1238,
+     955
     ],
     [
-     1330,
-     1015
+     1303,
+     1033
     ],
     [
-     1248,
-     1089
+     1221,
+     1107
     ],
     [
-     1195,
-     995
+     1168,
+     1013
     ]
    ],
    "roam": true
@@ -7909,8 +7909,8 @@
     1,
     2
    ],
-   "x": 1239,
-   "z": 2009,
+   "x": 1212,
+   "z": 1991,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -8329,8 +8329,8 @@
    "recipe": "cu_ruined_hearth",
    "name": "Ruined Hearth",
    "kind": "marker",
-   "x": 1040,
-   "z": 642,
+   "x": 1058,
+   "z": 656,
    "yaw": 4.02,
    "radius": 6,
    "levelBase": 4
@@ -8425,26 +8425,26 @@
     2,
     3
    ],
-   "x": 136,
-   "z": 1584,
+   "x": 141,
+   "z": 1616,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     93,
-     1618
+     98,
+     1650
     ],
     [
-     104,
-     1555
+     109,
+     1587
     ],
     [
-     186,
-     1566
+     191,
+     1598
     ],
     [
-     160,
-     1629
+     165,
+     1661
     ]
    ],
    "roam": true
@@ -8489,22 +8489,22 @@
    "chatter": [
     "role.woodcutter"
    ],
-   "x": 663,
-   "z": 542,
+   "x": 646,
+   "z": 516,
    "yaw": 2.02,
    "radius": 6,
    "path": [
     [
-     674,
-     548
+     657,
+     522
     ],
     [
-     650,
-     547
+     633,
+     521
     ],
     [
-     665,
-     527
+     648,
+     501
     ]
    ]
   },
@@ -8575,8 +8575,8 @@
     1,
     2
    ],
-   "x": 775,
-   "z": 1430,
+   "x": 788,
+   "z": 1400,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -9208,8 +9208,8 @@
     1,
     2
    ],
-   "x": 392,
-   "z": 95,
+   "x": 372,
+   "z": 121,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -9235,22 +9235,22 @@
    "chatter": [
     "role.hunter"
    ],
-   "x": 550,
-   "z": 674,
+   "x": 526,
+   "z": 683,
    "yaw": 1.93,
    "radius": 6,
    "path": [
     [
-     525,
-     678
+     501,
+     687
     ],
     [
-     555,
-     647
+     531,
+     656
     ],
     [
-     570,
-     693
+     546,
+     702
     ]
    ]
   },
@@ -9478,8 +9478,8 @@
    "recipe": "cu_sinkhole",
    "name": "Sinkhole",
    "kind": "hazard",
-   "x": 848,
-   "z": 1120,
+   "x": 866,
+   "z": 1107,
    "yaw": 3.5,
    "radius": 6,
    "levelBase": 4
@@ -9557,8 +9557,8 @@
     1,
     2
    ],
-   "x": 1376,
-   "z": 208,
+   "x": 1345,
+   "z": 220,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -9933,8 +9933,8 @@
     2,
     3
    ],
-   "x": 857,
-   "z": 177,
+   "x": 889,
+   "z": 176,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -10144,8 +10144,8 @@
    "recipe": "cu_oak_of_oaths",
    "name": "Oath Oak",
    "kind": "shrine",
-   "x": 584,
-   "z": 824,
+   "x": 577,
+   "z": 803,
    "yaw": 2.27,
    "radius": 6,
    "levelBase": 3
@@ -10184,8 +10184,8 @@
    "recipe": "cu_hunters_blind",
    "name": "Hunter's Blind",
    "kind": "camp",
-   "x": 664,
-   "z": 696,
+   "x": 685,
+   "z": 688,
    "yaw": 3.29,
    "radius": 5,
    "levelBase": 3
@@ -10226,8 +10226,8 @@
    "recipe": "cu_boundary_cross",
    "name": "Boundary Cross",
    "kind": "marker",
-   "x": 992,
-   "z": 672,
+   "x": 993,
+   "z": 688,
    "yaw": 3.89,
    "radius": 3,
    "levelBase": 4
@@ -10338,22 +10338,22 @@
    "chatter": [
     "role.herbalist"
    ],
-   "x": 1392,
-   "z": 1872,
+   "x": 1378,
+   "z": 1892,
    "yaw": 5.21,
    "radius": 6,
    "path": [
     [
-     1394,
-     1854
+     1380,
+     1874
     ],
     [
-     1407,
-     1892
+     1393,
+     1912
     ],
     [
-     1371,
-     1875
+     1357,
+     1895
     ]
    ]
   },

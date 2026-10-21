@@ -172,7 +172,7 @@
    "prof": "logging",
    "icon": "log",
    "tint": "#b0623a",
-   "price": 19
+   "price": 22
   },
   "moonpetal": {
    "id": "moonpetal",
@@ -222,7 +222,7 @@
    "prof": "mining",
    "icon": "ore",
    "tint": "#3b3f4a",
-   "price": 24
+   "price": 25
   },
   "sapphire": {
    "id": "sapphire",
@@ -243,7 +243,7 @@
    "prof": "logging",
    "icon": "log",
    "tint": "#5e5348",
-   "price": 38
+   "price": 46
   },
   "frostbloom": {
    "id": "frostbloom",
@@ -603,7 +603,7 @@
    "prof": "smithing",
    "icon": "bar",
    "tint": "#4a4f5c",
-   "price": 55,
+   "price": 57,
    "made": true
   },
   "heavy_leather": {
@@ -1208,7 +1208,7 @@
    "tier": 3,
    "ease": 0.4,
    "extra": 0.2,
-   "price": 163,
+   "price": 167,
    "desc": "A better pick: the timing windows are 20% wider and one node in 5 gives an extra piece. Takes no slot; the best one in your bag is used."
   },
   {
@@ -1241,7 +1241,7 @@
    "tier": 3,
    "ease": 0.4,
    "extra": 0.2,
-   "price": 163,
+   "price": 167,
    "desc": "A better hatchet: the timing windows are 20% wider and one node in 5 gives an extra piece. Takes no slot; the best one in your bag is used."
   },
   {
@@ -1274,7 +1274,7 @@
    "tier": 3,
    "ease": 0.4,
    "extra": 0.2,
-   "price": 163,
+   "price": 167,
    "desc": "A better skinning knife: the timing windows are 20% wider and one node in 5 gives an extra piece. Takes no slot; the best one in your bag is used."
   },
   {
@@ -1307,7 +1307,7 @@
    "tier": 3,
    "ease": 0.4,
    "extra": 0.2,
-   "price": 163,
+   "price": 167,
    "desc": "A better sickle: the timing windows are 20% wider and one node in 5 gives an extra piece. Takes no slot; the best one in your bag is used."
   }
  ],
@@ -3253,6 +3253,12 @@
      "from": 4
     },
     {
+     "key": "glaive",
+     "name": "Glaive",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
      "key": "g5_bardiche",
      "name": "Reaper's Bardiche",
      "slot": "weapon",
@@ -3317,10 +3323,22 @@
      "from": 4
     },
     {
+     "key": "glaive",
+     "name": "Glaive",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
      "key": "g5_bardiche",
      "name": "Reaper's Bardiche",
      "slot": "weapon",
      "from": 10
+    },
+    {
+     "key": "bardiche",
+     "name": "Bardiche",
+     "slot": "weapon",
+     "from": 12
     },
     {
      "key": "watchfire_glaive",
@@ -3387,10 +3405,22 @@
      "from": 4
     },
     {
+     "key": "glaive",
+     "name": "Glaive",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
      "key": "g5_bardiche",
      "name": "Reaper's Bardiche",
      "slot": "weapon",
      "from": 10
+    },
+    {
+     "key": "bardiche",
+     "name": "Bardiche",
+     "slot": "weapon",
+     "from": 12
     },
     {
      "key": "watchfire_glaive",
@@ -3457,10 +3487,22 @@
      "from": 4
     },
     {
+     "key": "glaive",
+     "name": "Glaive",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
      "key": "g5_bardiche",
      "name": "Reaper's Bardiche",
      "slot": "weapon",
      "from": 10
+    },
+    {
+     "key": "bardiche",
+     "name": "Bardiche",
+     "slot": "weapon",
+     "from": 12
     },
     {
      "key": "watchfire_glaive",
@@ -3527,10 +3569,22 @@
      "from": 4
     },
     {
+     "key": "glaive",
+     "name": "Glaive",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
      "key": "g5_bardiche",
      "name": "Reaper's Bardiche",
      "slot": "weapon",
      "from": 10
+    },
+    {
+     "key": "bardiche",
+     "name": "Bardiche",
+     "slot": "weapon",
+     "from": 12
     },
     {
      "key": "watchfire_glaive",
@@ -9048,10 +9102,22 @@
      "from": 4
     },
     {
+     "key": "glaive",
+     "name": "Glaive",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
      "key": "g5_bardiche",
      "name": "Reaper's Bardiche",
      "slot": "weapon",
      "from": 10
+    },
+    {
+     "key": "bardiche",
+     "name": "Bardiche",
+     "slot": "weapon",
+     "from": 12
     },
     {
      "key": "watchfire_glaive",

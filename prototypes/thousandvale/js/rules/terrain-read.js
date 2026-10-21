@@ -390,6 +390,12 @@ export const SCATTER_KINDS = Object.freeze([
   { key: 'tree_fern', solid: true, r: 0.3 }, { key: 'ironpalm', solid: true, r: 0.35 }, { key: 'tree_charred', solid: true, r: 0.35 },
   { key: 'basalt_columns', solid: true, r: 1.5 }, { key: 'obsidian', solid: true, r: 1.2 },
   { key: 'steam_vent', solid: false, r: 1.4 }, { key: 'sulphur_crust', solid: false, r: 1.2 },
+  // Torbor Downs regenerated (play-test 12, #81, tools/lib/torbor.mjs): silver birch on the highwood and the heath, crack
+  // willow in the fen, gorse on the heath, heather on the moor, blackthorn brakes in the Scar (walk through all three, like a
+  // bush), red sandstone outcrops on the scarps and the old spreading oaks of Saint's Meadow
+  { key: 'tree_birch', solid: true, r: 0.3 }, { key: 'tree_willow', solid: true, r: 0.45 },
+  { key: 'gorse', solid: false, r: 0.9 }, { key: 'heather', solid: false, r: 0.7 }, { key: 'blackthorn', solid: false, r: 1.0 },
+  { key: 'red_rock', solid: true, r: 1.5 }, { key: 'tree_old_oak', solid: true, r: 0.9 },
 ]);
 export const SCATTER_VERSION = 1;
 export const NAV_VERSION = 1;

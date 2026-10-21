@@ -79,9 +79,9 @@
       "type": "dungeon",
       "id": "door_1",
       "name": "Barrow entrance",
-      "x": 994,
+      "x": 1010,
       "z": 1171,
-      "yaw": -0.431,
+      "yaw": -0.73,
       "pinned": true
     },
     {
@@ -106,13 +106,31 @@
     "z": 1309
   },
   "bridges": [],
+  "palette": "downs",
+  "continent": "torbor",
+  "biomeNames": {
+    "grassland": "Chalk Downs",
+    "temperateForest": "Oakwood",
+    "borealForest": "Pine Highwood",
+    "hills": "Heather Moor",
+    "hallowed": "Saint's Meadow",
+    "marsh": "Brack Fen",
+    "badlands": "Red Scarps",
+    "shrubland": "Gorse Heath",
+    "savanna": "Golden Wolds",
+    "veiledHills": "Blackthorn Scar",
+    "tundra": "High Fell",
+    "mountains": "Grey Crags",
+    "snowyPeaks": "Fell Tops",
+    "beach": "Shingle Shore"
+  },
   "summary": {
     "zone": "z11_04",
     "province": "Petbeck Basin",
     "inputHash": "454aaea1",
     "rivers": 0,
-    "wetShare": 0,
-    "unwalkableShare": 0.113,
+    "wetShare": 0.003,
+    "unwalkableShare": 0.22,
     "towns": [
       {
         "name": "Last Lantern",
@@ -163,23 +181,26 @@
     ],
     "roads": 3,
     "bridges": 0,
-    "paths": 14,
-    "pathMetres": 2153,
-    "scatter": 13773,
+    "paths": 13,
+    "pathMetres": 1979,
+    "scatter": 13811,
     "scatterKinds": {
-      "rock_large": 3482,
-      "rock_small": 4905,
-      "tree_conifer": 2229,
-      "boulder": 1086,
-      "bush": 1257,
-      "tree_broadleaf": 34,
-      "hedge": 780
+      "rock_small": 3952,
+      "blackthorn": 2443,
+      "tree_dead": 335,
+      "rock_large": 2812,
+      "boulder": 885,
+      "tree_conifer": 200,
+      "heather": 2365,
+      "tree_birch": 8,
+      "hedge": 780,
+      "tree_broadleaf": 31
     },
     "sites": [
       "lair dungeon The Black Filfit 1344 960",
       "settlement(HUB) town Last Lantern 890 1305 90",
       "settlement hamlet Thornwick 1772 1900 46",
-      "dungeon door_1 Barrow entrance 994 1171  -0.431",
+      "dungeon door_1 Barrow entrance 1010 1171  -0.73",
       "event world_grimtallow  1161 1305 100",
       "event event_blackthorn_scar  877 1098 40"
     ],
@@ -187,13 +208,13 @@
       "x": 890,
       "z": 1309
     },
-    "placements": 176,
+    "placements": 175,
     "vignettesAvoided": 668
   },
   "files": {
-    "terrain.bin": 641191,
-    "nav.bin": 52927,
-    "scatter.bin": 110268,
-    "placements.json": 167978
+    "terrain.bin": 782820,
+    "nav.bin": 61093,
+    "scatter.bin": 110572,
+    "placements.json": 158916
   }
 }

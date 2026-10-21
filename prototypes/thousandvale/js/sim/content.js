@@ -179,6 +179,7 @@ export async function loadProvinceContent(readJson, readBytes, provinceId, { par
     hazards: await pdata('hazards'),      // [S] Expansion 1 §4: Vharlen's springs, geysers, vents (js/sim/hazards.js)
     packs: await pdata('packs'), packRoutes: await pdata('pack-routes'),      // [Packs] wandering packs (js/sim/packs.js) and the routes they walk (tools/content-packs.mjs)
     ships: await opt('data/provinces/ships.json'),      // [V] Expansion 1 §6: the realm's harbours and sailings (js/sim/ships.js)
+    achievements: await opt('data/rules/achievements.json'),      // feedback #106: achievements and trophies (js/sim/achievements.js)
     // Expansion 1: what the server needs to keep provinces apart — the starter (new characters begin there) and the
     // continent (waystones and free event travel never cross the sea; province-map `continent`, else the province itself)
     starterProvince: !!(sheet && Array.isArray(sheet.band) && sheet.band[0] <= 1), continent: map.continent || provinceId };

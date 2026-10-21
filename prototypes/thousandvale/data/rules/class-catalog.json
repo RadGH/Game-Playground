@@ -1,0 +1,2606 @@
+{
+ "_doc": "MADE by tools/class-catalog.mjs (do not edit): per class, the six skills as the game writes them (name, unlock level, card text, shape, element, cooldown, mana) and the class card line. Read by js/client/ui/calling-picker.js.",
+ "classes": {
+  "warrior": {
+   "name": "Warrior",
+   "role": "Frontline Brawler",
+   "hook": "Wades into the thick of it: Cleave and Iron Gyre hit harder the more enemies stand around you, War Cry pulls them onto you, and Groundbreaker splits the ground in a long stunning line.",
+   "signature": "stronger in a crowd",
+   "resource": null,
+   "armour": "heavy",
+   "weapons": [
+    "sword",
+    "hammer",
+    "sword2h",
+    "axe2h"
+   ],
+   "primary": "STR",
+   "skills": [
+    {
+     "id": "cleave",
+     "name": "Cleave",
+     "level": 1,
+     "desc": "Strikes everything within 4.5 m of you for 143% weapon damage. Deals 12% more damage for each enemy hit past the first, up to 48%.",
+     "shape": "around",
+     "element": "physical",
+     "cd": 7000,
+     "mp": 6,
+     "ally": false
+    },
+    {
+     "id": "breaching_shove",
+     "name": "Breaching Shove",
+     "level": 3,
+     "desc": "Strikes everything in an 80° arc 3 m in front of you, or as far and as wide as your weapon swings if that is more, for 148% weapon damage. Knocks targets back 4 m and stuns them for 0.6s.",
+     "shape": "melee",
+     "element": "physical",
+     "cd": 7000,
+     "mp": 6,
+     "ally": false
+    },
+    {
+     "id": "warcry",
+     "name": "War Cry",
+     "level": 6,
+     "desc": "Gives you Might: you deal 30% more damage for 12s. Enemies within 10 m attack you for 3s. Each enemy taunted adds 5% damage to the buff, up to 25%.",
+     "shape": "self",
+     "element": "physical",
+     "cd": 22000,
+     "mp": 10,
+     "ally": false
+    },
+    {
+     "id": "whirlwind",
+     "name": "Iron Gyre",
+     "level": 12,
+     "desc": "Spins 5 times, striking everything within 5.5 m of you for 194% weapon damage on every spin. Leaves the target Bleeding: a further 106% weapon damage over 6s. Pulls targets 0.5 m toward you. For 1.7s: -30% move speed.",
+     "shape": "around",
+     "element": "physical",
+     "cd": 12000,
+     "mp": 14,
+     "ally": false
+    },
+    {
+     "id": "iron_resolve",
+     "name": "Iron Resolve",
+     "level": 18,
+     "desc": "For 10s: take 6% less damage for each enemy within 6 m, up to 36%; every 4th hit you take releases a 4 m shockwave for 80% weapon damage.",
+     "shape": "self",
+     "element": "physical",
+     "cd": 30000,
+     "mp": 10,
+     "ally": false
+    },
+    {
+     "id": "groundbreaker",
+     "name": "Groundbreaker",
+     "level": 24,
+     "desc": "Fires a 2.4 m wide beam 18 m straight ahead, striking everything in the line for 1,186% weapon damage. Stuns targets for 1.2s. Leaves a 1.4 m patch for 5s all along the line that slows anything standing in it 60%. Deals 50% more damage to stunned targets.",
+     "shape": "beam",
+     "element": "physical",
+     "cd": 20000,
+     "mp": 22,
+     "ally": false
+    }
+   ]
+  },
+  "fighter": {
+   "name": "Fighter",
+   "role": "Stance Duelist",
+   "hook": "Swaps between an Open stance (faster, harder hits) and a Closed one (heavy armour). Riposte and Sweeping Guard answer the next blow with a counter-strike, and Lunge and Master's Flurry change with your stance.",
+   "signature": "stances and counters",
+   "resource": null,
+   "armour": "heavy",
+   "weapons": [
+    "sword",
+    "hammer",
+    "sword2h"
+   ],
+   "primary": "STR",
+   "skills": [
+    {
+     "id": "power_strike",
+     "name": "Precise Strike",
+     "level": 1,
+     "desc": "Strikes everything in a 92° arc 3.4 m in front of you, or as far and as wide as your weapon swings if that is more, for 190% weapon damage. A critical hit with this skill applies Marked (takes 15% more damage) for 4s. Ignores 40% of the target's armour.",
+     "shape": "melee",
+     "element": "physical",
+     "cd": 4000,
+     "mp": 0,
+     "ally": false
+    },
+    {
+     "id": "riposte",
+     "name": "Riposte",
+     "level": 3,
+     "desc": "For 1.2s, the next melee hit on you is negated; each is answered with a strike for 250% weapon damage that stuns for 0.8s. Unused, 50% of the cooldown comes back.",
+     "shape": "self",
+     "element": "physical",
+     "cd": 8000,
+     "mp": 4,
+     "ally": false
+    },
+    {
+     "id": "duelist_stance",
+     "name": "Duelist's Stance",
+     "level": 6,
+     "desc": "Steps to the next of 2: Open stance and Closed stance. Open stance: -15% armour, +15% attack speed and +20% damage. Closed stance: +50% armour and -10% damage.",
+     "shape": "self",
+     "element": "physical",
+     "cd": 1500,
+     "mp": 0,
+     "ally": false
+    },
+    {
+     "id": "lunge",
+     "name": "Lunge",
+     "level": 12,
+     "desc": "Strikes everything within 1.6 m of your path, and the enemy you reach, for 373% weapon damage. Dashes up to 8 m to the first enemy in the line. Changes with your shape or stance: Long Lunge (Open stance) and Shield Lunge (Closed stance).",
+     "shape": "dash",
+     "element": "physical",
+     "cd": 9000,
+     "mp": 8,
+     "ally": false
+    },
+    {
+     "id": "sweeping_guard",
+     "name": "Sweeping Guard",
+     "level": 18,
+     "desc": "Strikes everything in a 178° arc 3.6 m in front of you, or as far and as wide as your weapon swings if that is more, for 371% weapon damage. Marks targets with Riposted for 5s: they take 10% more damage from you. For 1.5s, the next 5 melee hits on you are reduced by 60% (from the front); the next cast of this skill deals 10% more for each hit, up to 50%.",
+     "shape": "melee",
+     "element": "physical",
+     "cd": 12000,
+     "mp": 10,
+     "ally": false
+    },
+    {
+     "id": "masters_flurry",
+     "name": "Master's Flurry",
+     "level": 24,
+     "desc": "Strikes 6 times over 1.5s, each strike at one spot within 3.4 m of you, 2.4 m across, for 195% weapon damage each. Each strike picks the enemy with the lowest health. Changes with your shape or stance: Open Flurry (Open stance) and Closed Flurry (Closed stance). For 1.5s: -50% move speed; when it ends strikes everything in a 69° arc 3.4 m in front of you for 160% weapon damage; knocks targets back 4 m.",
+     "shape": "around",
+     "element": "physical",
+     "cd": 22000,
+     "mp": 20,
+     "ally": false
+    }
+   ]
+  },
+  "paladin": {
+   "name": "Paladin",
+   "role": "Holy Bulwark",
+   "hook": "Every holy blade swing heals you, and Mercy's Touch mends a friend. Martyr's Vow spends your own health to shield the party, Daybreak Descent leaps to a friend in trouble, and Oathbound Rise lifts a fallen ally back up inside a barrier.",
+   "signature": "heal by hitting, protect with your own health",
+   "resource": null,
+   "armour": "medium",
+   "weapons": [
+    "sword",
+    "scepter"
+   ],
+   "primary": "STR",
+   "skills": [
+    {
+     "id": "sanctified_blade",
+     "name": "Sanctified Blade",
+     "level": 1,
+     "desc": "Strikes everything in an 80° arc 3.2 m in front of you, or as far and as wide as your weapon swings if that is more, for 173% weapon damage as holy. Each enemy hit restores 2% of your maximum health. Deals 50% more damage to undead and fiends.",
+     "shape": "melee",
+     "element": "holy",
+     "cd": 5000,
+     "mp": 4,
+     "ally": false
+    },
+    {
+     "id": "mercy_touch",
+     "name": "Mercy's Touch",
+     "level": 1,
+     "desc": "A touch: the party member must be within 6 m of you, or it lands on you. Heals you (or the party member you target) for 30% of maximum health. Party members = players in your party within 30 m.",
+     "shape": "self",
+     "element": "holy",
+     "cd": 10000,
+     "mp": 14,
+     "ally": true
+    },
+    {
+     "id": "consecrate",
+     "name": "Blessed Earth",
+     "level": 6,
+     "desc": "Strikes everything within 6.5 m of you for 334% weapon damage as holy. Places a zone 13 m across where you stand for 6s, striking 6 enemies within 6.5 m every 1s for 20% weapon damage, healing all allies inside 2% of maximum health every 1s. All allies = you, party members within 30 m and your followers (your own pets, summons and hired blades).",
+     "shape": "around",
+     "element": "holy",
+     "cd": 16000,
+     "mp": 20,
+     "ally": false
+    },
+    {
+     "id": "martyrs_vow",
+     "name": "Martyr's Vow",
+     "level": 12,
+     "desc": "Costs 15% of your maximum health, never taking you below 1 health. All allies get a barrier worth 25% of your maximum health for 8s. All allies = you, party members within 30 m and your followers (your own pets, summons and hired blades).",
+     "shape": "self",
+     "element": "holy",
+     "cd": 20000,
+     "mp": 0,
+     "ally": false
+    },
+    {
+     "id": "oathbound_rise",
+     "name": "Oathbound Rise",
+     "level": 18,
+     "desc": "Raises the fallen party member you target (else the nearest within 30 m) at 30% health. They return with a barrier worth 30% of their maximum health for 10s. 2s cast: moving cancels it and nothing is spent. Can be cast in combat. The fallen player chooses whether to stand up. 28 mana, 150s cooldown. Party members = players in your party within 30 m.",
+     "shape": "self",
+     "element": "holy",
+     "cd": 150000,
+     "mp": 28,
+     "ally": true
+    },
+    {
+     "id": "daybreak_descent",
+     "name": "Daybreak Descent",
+     "level": 24,
+     "desc": "Knocks targets back 3 m. Leaps up to 16 m to land beside the party member you target, else your follower nearest your aim, striking nothing on the way. On landing, strikes everything within 6 m for 220% weapon damage and leaves a 8 m zone for 4s. Every other ally heals 15% of their maximum health. All allies = you, party members within 30 m and your followers (your own pets, summons and hired blades).",
+     "shape": "dash",
+     "element": "holy",
+     "cd": 24000,
+     "mp": 28,
+     "ally": true
+    }
+   ]
+  },
+  "ranger": {
+   "name": "Ranger",
+   "role": "Long-Range Hunter",
+   "hook": "Marks a Quarry and sends your followers after it. Long Draw hits harder the further the shot, snares guard the ground, Tracker's Leap jumps you clear, and Arrow Storm rains on a whole pack.",
+   "signature": "the hunt",
+   "resource": null,
+   "armour": "light",
+   "weapons": [
+    "bow",
+    "crossbow",
+    "javelin"
+   ],
+   "primary": "DEX",
+   "skills": [
+    {
+     "id": "aimed_shot",
+     "name": "Long Draw",
+     "level": 1,
+     "desc": "Looses one shot out to 42 m for 205% weapon damage. Deals 4% more damage for every metre past 20 m, up to 60%. Ignores 50% of the target's armour.",
+     "shape": "bolt",
+     "element": "physical",
+     "cd": 5000,
+     "mp": 4,
+     "ally": false
+    },
+    {
+     "id": "hunters_snare",
+     "name": "Hunter's Snare",
+     "level": 3,
+     "desc": "Falls on a spot up to 20 m away striking everything within 2.5 m of that spot for 225% weapon damage as nature. Sets a trap where you aim that arms after 1s, lasts 30s and fires on the first enemy within 2 m, dealing 80% weapon damage and applying Rooted for 2s, at most 2 stand at once.",
+     "shape": "ground",
+     "element": "nature",
+     "cd": 10000,
+     "mp": 8,
+     "ally": false
+    },
+    {
+     "id": "multi_shot",
+     "name": "Broadhead Fan",
+     "level": 6,
+     "desc": "Looses 5 shots in an 11° fan out to 34 m, each for 80% weapon damage. Splits into 2 shards on a Quarry target, each striking an enemy within 6 m for 50% of the damage.",
+     "shape": "bolt",
+     "element": "physical",
+     "cd": 8000,
+     "mp": 10,
+     "ally": false
+    },
+    {
+     "id": "quarry_call",
+     "name": "Call the Quarry",
+     "level": 12,
+     "desc": "Looses one shot out to 40 m for 373% weapon damage. Marks targets with Quarry for 12s: they take 20% more damage from every source. Orders your followers — and your party members' followers within 30 m — to leap onto the target, the next attack dealing 50% more damage for 6s. Your followers = your own pets, summons and hired blades, never other players.",
+     "shape": "bolt",
+     "element": "physical",
+     "cd": 14000,
+     "mp": 10,
+     "ally": false
+    },
+    {
+     "id": "trackers_leap",
+     "name": "Tracker's Leap",
+     "level": 18,
+     "desc": "Strikes everything within 2.5 m of your path for 371% weapon damage. Dashes up to 9 m backward, away from where you aim. Your next skill within 3s deals 50% more damage.",
+     "shape": "dash",
+     "element": "physical",
+     "cd": 12000,
+     "mp": 8,
+     "ally": false
+    },
+    {
+     "id": "rain_of_arrows",
+     "name": "Arrow Storm",
+     "level": 24,
+     "desc": "Falls on a spot up to 32 m away and strikes everything within 6.5 m of it 8 times over 4s, for 86% weapon damage each time. Each strike lands at a random point inside the area, preferring enemies. Deals 50% more damage to Quarry targets.",
+     "shape": "ground",
+     "element": "physical",
+     "cd": 14000,
+     "mp": 16,
+     "ally": false
+    }
+   ]
+  },
+  "rogue": {
+   "name": "Rogue",
+   "role": "Set-Up Assassin",
+   "hook": "Stuns, poisons and bleeds first, then cashes in: Gutting Strike and Sucker Punch hit hardest from behind, Grave Mark makes a target pay twice, and Slip Away leaves a decoy while you get round the back.",
+   "signature": "set up, then cash in",
+   "resource": null,
+   "armour": "light",
+   "weapons": [
+    "dagger"
+   ],
+   "primary": "DEX",
+   "skills": [
+    {
+     "id": "eviscerate",
+     "name": "Gutting Strike",
+     "level": 1,
+     "desc": "Strikes everything in a 63° arc 2.8 m in front of you, or as far and as wide as your weapon swings if that is more, for 136% weapon damage. Leaves the target Bleeding: a further 52% weapon damage over 6s. Deals 80% more damage to stunned targets. Deals 30% more damage from behind the target.",
+     "shape": "melee",
+     "element": "physical",
+     "cd": 7000,
+     "mp": 8,
+     "ally": false
+    },
+    {
+     "id": "poison_dart",
+     "name": "Poison Dart",
+     "level": 3,
+     "desc": "Looses one bolt out to 34 m for 129% weapon damage as poison, splashing everything within 1.5 m of where the bolt lands. Adds 1 Poisoned stack to each target hit, up to 3.",
+     "shape": "bolt",
+     "element": "poison",
+     "cd": 5000,
+     "mp": 6,
+     "ally": false
+    },
+    {
+     "id": "sucker_punch",
+     "name": "Sucker Punch",
+     "level": 6,
+     "desc": "Strikes everything in a 57° arc 2.6 m in front of you, or as far and as wide as your weapon swings if that is more, for 216% weapon damage. Stuns targets for 1.6s. Deals 50% more damage from behind the target.",
+     "shape": "melee",
+     "element": "physical",
+     "cd": 10000,
+     "mp": 6,
+     "ally": false
+    },
+    {
+     "id": "grave_mark",
+     "name": "Grave Mark",
+     "level": 12,
+     "desc": "Looses one bolt out to 30 m for 539% weapon damage as shadow. Marks targets with Grave Marked for 10s: they take 25% more damage from you and take 30% of the damage dealt to them during the mark again when it ends.",
+     "shape": "bolt",
+     "element": "shadow",
+     "cd": 20000,
+     "mp": 12,
+     "ally": false
+    },
+    {
+     "id": "slip_away",
+     "name": "Slip Away",
+     "level": 18,
+     "desc": "Your next skill within 6s counts as from behind. Summons a decoy, each with 36% of your maximum health, that does not move or attack and draws every enemy near it for 4s; it takes no follower slot.",
+     "shape": "self",
+     "element": "shadow",
+     "cd": 22000,
+     "mp": 10,
+     "ally": false
+    },
+    {
+     "id": "knife_storm",
+     "name": "Knife Storm",
+     "level": 24,
+     "desc": "Strikes 8 times over 2.8s, each strike at one spot within 7 m of you, 2.4 m across, for 185% weapon damage each. Each strike lands at a random point inside the area, preferring enemies.",
+     "shape": "around",
+     "element": "physical",
+     "cd": 22000,
+     "mp": 22,
+     "ally": false
+    }
+   ]
+  },
+  "cleric": {
+   "name": "Cleric",
+   "role": "Overflowing Healer",
+   "hook": "Heals that spill past full health turn into a barrier. Sanctuary holds a safe circle, Guardian Light tends the most hurt, Raise the Fallen brings a fallen friend back, and Falling Light both smites and heals.",
+   "signature": "heals that overflow into protection; raising the fallen",
+   "resource": null,
+   "armour": "light",
+   "weapons": [
+    "staff",
+    "scepter",
+    "wand"
+   ],
+   "primary": "INT",
+   "skills": [
+    {
+     "id": "mend",
+     "name": "Mend",
+     "level": 1,
+     "desc": "Heals you (or the party member you target) for 35% of maximum health. Every other ally heals 20% of their maximum health. Healing past your maximum becomes a barrier, up to 10% of maximum health. All allies = you, party members within 30 m and your followers (your own pets, summons and hired blades).",
+     "shape": "self",
+     "element": "holy",
+     "cd": 14000,
+     "mp": 18,
+     "ally": true
+    },
+    {
+     "id": "sunlance",
+     "name": "Sunlance",
+     "level": 1,
+     "desc": "Fires a 1.4 m wide beam 24 m straight ahead, striking everything in the line for 174% weapon damage as holy. Each enemy hit heals all allies 2% of maximum health. Marks targets with Lit for 3s: they take 10% more damage from you. All allies = you, party members within 30 m and your followers (your own pets, summons and hired blades).",
+     "shape": "beam",
+     "element": "holy",
+     "cd": 6000,
+     "mp": 10,
+     "ally": false
+    },
+    {
+     "id": "raise_the_fallen",
+     "name": "Raise the Fallen",
+     "level": 6,
+     "desc": "Raises every fallen party member within 30 m at 50% health. 4s cast: moving cancels it and nothing is spent. Cannot be cast while a monster is attacking you. The fallen player chooses whether to stand up. Gives you Rallied: you deal 20% more damage and take 15% less damage for 8s. All allies get the same. Every other ally heals 30% of their maximum health. Revives all your own fallen followers at once at 50% health. All allies = you, party members within 30 m and your followers (your own pets, summons and hired blades).",
+     "shape": "self",
+     "element": "holy",
+     "cd": 60000,
+     "mp": 30,
+     "ally": false
+    },
+    {
+     "id": "sanctuary",
+     "name": "Sanctuary",
+     "level": 12,
+     "desc": "Lands on a spot up to 20 m away. Places a zone 10 m across where you aim for 6s, healing all allies inside 3% of maximum health every 1s, pushing enemies inside 2 m outward every second. All allies = you, party members within 30 m and your followers (your own pets, summons and hired blades).",
+     "shape": "ground",
+     "element": "holy",
+     "cd": 24000,
+     "mp": 26,
+     "ally": false
+    },
+    {
+     "id": "guardian_light",
+     "name": "Guardian Light",
+     "level": 18,
+     "desc": "Summons 1 Guardian Light for 20s; it takes no follower slot; it heals the most-hurt ally 6% every 2s. All allies = you, party members within 30 m and your followers (your own pets, summons and hired blades).",
+     "shape": "self",
+     "element": "holy",
+     "cd": 30000,
+     "mp": 24,
+     "ally": false
+    },
+    {
+     "id": "judgement",
+     "name": "Falling Light",
+     "level": 24,
+     "desc": "Falls on a spot up to 28 m away, 0.7s after you cast, striking everything within 3.5 m of that spot for 864% weapon damage as holy. Places a zone 7 m across where you aim for 1s, healing all allies inside 10% of maximum health every 1s. Deals 50% more damage to Lit targets. All allies = you, party members within 30 m and your followers (your own pets, summons and hired blades).",
+     "shape": "ground",
+     "element": "holy",
+     "cd": 14000,
+     "mp": 22,
+     "ally": false
+    }
+   ]
+  },
+  "bard": {
+   "name": "Bard",
+   "role": "Song Leader",
+   "hook": "Plays one song at a time — Valour speeds your allies, Ruin curses your enemies, Mending heals everyone near you — and switching songs plays its Finale. Mending Verse is a quick heal, and Grand Finale one huge blast that grows with your followers.",
+   "signature": "songs",
+   "resource": null,
+   "armour": "light",
+   "weapons": [
+    "dagger",
+    "wand"
+   ],
+   "primary": "INT",
+   "skills": [
+    {
+     "id": "discord_note",
+     "name": "Discord Note",
+     "level": 1,
+     "desc": "Looses one bolt out to 30 m for 130% weapon damage as arcane, splashing everything within 1.6 m of where the bolt lands. Bounces to 1 more target within 8 m, each bounce dealing 60% of the damage. Changes with your shape or stance: Marching Note (Ballad of Valour), Ruinous Note (Song of Ruin) and Mending Note (Air of Mending).",
+     "shape": "bolt",
+     "element": "arcane",
+     "cd": 3000,
+     "mp": 5,
+     "ally": false
+    },
+    {
+     "id": "mending_verse",
+     "name": "Mending Verse",
+     "level": 1,
+     "desc": "Gives you (or the party member you target) Mending: heals 25% of maximum health over 10s. Your followers are mended too. Heals you (or the party member you target) for 18% of maximum health. Your followers = your own pets, summons and hired blades, never other players.",
+     "shape": "self",
+     "element": "holy",
+     "cd": 9000,
+     "mp": 12,
+     "ally": true
+    },
+    {
+     "id": "ballad_of_valour",
+     "name": "Ballad of Valour",
+     "level": 6,
+     "desc": "Plays until you press it again or play another song. While in Ballad of Valour: within 10 m of you allies get Valour (attacks 25% faster and moves 10% faster). Switching away plays its Finale: for 4s, your followers: +40% damage. All allies = you, party members within 30 m and your followers (your own pets, summons and hired blades).",
+     "shape": "self",
+     "element": "holy",
+     "cd": 2000,
+     "mp": 8,
+     "ally": false
+    },
+    {
+     "id": "song_of_ruin",
+     "name": "Song of Ruin",
+     "level": 12,
+     "desc": "Plays until you press it again or play another song. While in Song of Ruin: within 10 m of you enemies get Cursed (takes 12% more damage and deals 10% less damage). Switching away plays its Finale: strikes everything within 10 m of you for 150% weapon damage as shadow; also applies Weakened (deals 35% less damage) for 5s.",
+     "shape": "self",
+     "element": "shadow",
+     "cd": 2000,
+     "mp": 8,
+     "ally": false
+    },
+    {
+     "id": "air_of_mending",
+     "name": "Air of Mending",
+     "level": 18,
+     "desc": "Plays until you press it again or play another song. While in Air of Mending: within 10 m of you allies heal 2% of maximum health a second. Switching away plays its Finale: heals all allies within it 15% of maximum health; removes 1 harmful status from every ally. All allies = you, party members within 30 m and your followers (your own pets, summons and hired blades).",
+     "shape": "self",
+     "element": "holy",
+     "cd": 2000,
+     "mp": 8,
+     "ally": false
+    },
+    {
+     "id": "grand_finale",
+     "name": "Grand Finale",
+     "level": 24,
+     "desc": "Strikes everything within 12 m of you for 1,971% weapon damage as arcane. Deals 25% more damage for each of your followers alive, up to 50%. Your followers = your own pets, summons and hired blades, never other players.",
+     "shape": "around",
+     "element": "arcane",
+     "cd": 30000,
+     "mp": 30,
+     "ally": false
+    }
+   ]
+  },
+  "mage": {
+   "name": "Mage",
+   "role": "Frost Artillery",
+   "hook": "Builds Frostbite stacks with shards and blizzards, then shatters them: Rime Spear and Stillfrost deal more for every stack and use them up. Spellrush makes your next three spells hit harder and cost nothing.",
+   "signature": "frost then shatter",
+   "resource": null,
+   "armour": "cloth",
+   "weapons": [
+    "staff",
+    "wand"
+   ],
+   "primary": "INT",
+   "skills": [
+    {
+     "id": "frost_shard",
+     "name": "Frost Shard",
+     "level": 1,
+     "desc": "Looses one bolt out to 34 m for 110% weapon damage as ice, splashing everything within 1.4 m of where the bolt lands. Adds 1 Frostbite stack to each target hit, up to 5.",
+     "shape": "bolt",
+     "element": "ice",
+     "cd": 2500,
+     "mp": 5,
+     "ally": false
+    },
+    {
+     "id": "frost_nova",
+     "name": "Rime Burst",
+     "level": 3,
+     "desc": "Strikes everything within 6 m of you for 183% weapon damage as ice. Knocks targets back 2 m. Adds 3 Frostbite stacks to each target hit, up to 5.",
+     "shape": "around",
+     "element": "ice",
+     "cd": 9000,
+     "mp": 14,
+     "ally": false
+    },
+    {
+     "id": "ice_lance",
+     "name": "Rime Spear",
+     "level": 6,
+     "desc": "Fires a 1.8 m wide beam 26 m straight ahead, striking everything in the line for 226% weapon damage as ice. Deals 20% more damage per Frostbite stack on the target, up to 100%, and removes the Frostbite.",
+     "shape": "beam",
+     "element": "ice",
+     "cd": 7000,
+     "mp": 12,
+     "ally": false
+    },
+    {
+     "id": "spellrush",
+     "name": "Spellrush",
+     "level": 12,
+     "desc": "Your next 3 skills within 10s deal 60% more damage and cost no mana.",
+     "shape": "self",
+     "element": "arcane",
+     "cd": 30000,
+     "mp": 20,
+     "ally": false
+    },
+    {
+     "id": "blizzard",
+     "name": "Whiteout",
+     "level": 18,
+     "desc": "Falls on a spot up to 30 m away and strikes everything within 5.5 m of it 6 times over 3s, for 110% weapon damage as ice each time. Adds 1 Frostbite stack to each target hit, up to 5.",
+     "shape": "ground",
+     "element": "ice",
+     "cd": 14000,
+     "mp": 24,
+     "ally": false
+    },
+    {
+     "id": "stillfrost",
+     "name": "Stillfrost",
+     "level": 24,
+     "desc": "Falls on a spot up to 30 m away, 1.5s after you cast, striking everything within 7 m of that spot for 1,848% weapon damage as ice. Deals 20% more damage per Frostbite stack on the target, up to 100%, and removes the Frostbite. Adds 5 Frostbite stacks to each target hit, up to 5.",
+     "shape": "ground",
+     "element": "ice",
+     "cd": 30000,
+     "mp": 34,
+     "ally": false
+    }
+   ]
+  },
+  "necromancer": {
+   "name": "Necromancer",
+   "role": "Corpse Raiser",
+   "hook": "Every kill leaves a corpse to use. Raise Thralls from them, burn them in a Corpse Pyre, or call a whole March of the Buried. Grave Draught drains life back to you, and Unquiet Return drags a fallen friend back up — grave-touched for a while.",
+   "signature": "corpses",
+   "resource": null,
+   "armour": "cloth",
+   "weapons": [
+    "staff",
+    "wand",
+    "scepter"
+   ],
+   "primary": "INT",
+   "skills": [
+    {
+     "id": "marrow_lance",
+     "name": "Marrow Lance",
+     "level": 1,
+     "desc": "Looses one bolt out to 34 m for 120% weapon damage as shadow. A kill with this skill: it leaves a corpse worth 2.",
+     "shape": "bolt",
+     "element": "shadow",
+     "cd": 3000,
+     "mp": 6,
+     "ally": false
+    },
+    {
+     "id": "raise_thrall",
+     "name": "Raise Thrall",
+     "level": 3,
+     "desc": "Summons 1 Bone Thrall to fight beside you. Summons 1 thrall with 50% more health from a corpse within 12 m; it has 50% more health.",
+     "shape": "summon",
+     "element": "shadow",
+     "cd": 26000,
+     "mp": 20,
+     "ally": false
+    },
+    {
+     "id": "corpse_pyre",
+     "name": "Corpse Pyre",
+     "level": 6,
+     "desc": "Falls on a spot up to 26 m away striking everything within 4 m of that spot for 216% weapon damage as shadow. Summons 5 burning corpses for 0.8s, one for each corpse within 10 m of where you aim, up to 5; each rises where its corpse lies; it takes no follower slot; when it ends it bursts for 100% weapon damage within 4 m.",
+     "shape": "ground",
+     "element": "shadow",
+     "cd": 10000,
+     "mp": 14,
+     "ally": false
+    },
+    {
+     "id": "drain",
+     "name": "Grave Draught",
+     "level": 12,
+     "desc": "Fires a 1.6 m wide beam 22 m straight ahead, striking everything in the line for 331% weapon damage as shadow. Heals you for 12% of the damage dealt. Every other ally heals 12% of their maximum health. All allies = you, party members within 30 m and your followers (your own pets, summons and hired blades).",
+     "shape": "beam",
+     "element": "shadow",
+     "cd": 9000,
+     "mp": 12,
+     "ally": false
+    },
+    {
+     "id": "unquiet_return",
+     "name": "Unquiet Return",
+     "level": 18,
+     "desc": "Raises the fallen party member you target (else the nearest within 30 m) at 60% health. They return Grave-touched for 20s: they deal 30% less damage and take 15% more damage. Instant. Can be cast in combat. The fallen player chooses whether to stand up. 24 mana, 60s cooldown. Party members = players in your party within 30 m.",
+     "shape": "self",
+     "element": "shadow",
+     "cd": 60000,
+     "mp": 24,
+     "ally": true
+    },
+    {
+     "id": "buried_march",
+     "name": "March of the Buried",
+     "level": 24,
+     "desc": "Summons 1 Buried Thrall, plus 1 for each corpse within 20 m (up to 8 in all), for 18s, one for each corpse within 20 m of where you aim plus 1, up to 8; each rises where its corpse lies; it takes no follower slot.",
+     "shape": "self",
+     "element": "shadow",
+     "cd": 60000,
+     "mp": 40,
+     "ally": false
+    }
+   ]
+  },
+  "warlock": {
+   "name": "Warlock",
+   "role": "Spreading Corruption",
+   "hook": "Pays in health for power: binds an imp, makes your curses tick twice as fast with Soul Pact, and opens a Void Rift that drags enemies in and copies your damage-over-time onto everything caught in it.",
+   "signature": "health as fuel, corruption that spreads",
+   "resource": null,
+   "armour": "cloth",
+   "weapons": [
+    "staff",
+    "wand"
+   ],
+   "primary": "INT",
+   "skills": [
+    {
+     "id": "gnawing_dark",
+     "name": "Gnawing Dark",
+     "level": 1,
+     "desc": "Looses one bolt out to 34 m for 90% weapon damage as shadow. Leaves the target Gnawed: a further 63% weapon damage over 8s.",
+     "shape": "bolt",
+     "element": "shadow",
+     "cd": 3000,
+     "mp": 6,
+     "ally": false
+    },
+    {
+     "id": "bind_imp",
+     "name": "Bind a Fiend",
+     "level": 3,
+     "desc": "Summons 1 Bound Imp to fight beside you. Costs 10% of your maximum health, never taking you below 1 health. Summons 1 Bound Imp whose bolts leave Gnawed; its attacks apply Gnawed.",
+     "shape": "summon",
+     "element": "shadow",
+     "cd": 32000,
+     "mp": 16,
+     "ally": false
+    },
+    {
+     "id": "curse",
+     "name": "Hex of Ruin",
+     "level": 6,
+     "desc": "Looses one bolt out to 34 m for 220% weapon damage as shadow, splashing everything within 5 m of where the bolt lands. Leaves the target Cursed: the target takes 25% more damage and moves 15% slower for 8s. Also applies Weakened (deals 15% less damage) for 8s.",
+     "shape": "bolt",
+     "element": "shadow",
+     "cd": 12000,
+     "mp": 14,
+     "ally": false
+    },
+    {
+     "id": "soul_pact",
+     "name": "Soul Pact",
+     "level": 12,
+     "desc": "Costs 20% of your maximum health, never taking you below 1 health. For 10s: the statuses you apply tick 2 times as fast.",
+     "shape": "self",
+     "element": "shadow",
+     "cd": 30000,
+     "mp": 0,
+     "ally": false
+    },
+    {
+     "id": "void_rift",
+     "name": "Void Rift",
+     "level": 18,
+     "desc": "Falls on a spot up to 26 m away and strikes everything within 5 m of it 4 times over 2s, for 153% weapon damage as shadow each time. Every pulse drags everything 2.5 m toward the middle. Copies Gnawed, Burning, Poisoned, Bleeding and Cursed from the target to up to 3 enemies within 5 m.",
+     "shape": "ground",
+     "element": "shadow",
+     "cd": 16000,
+     "mp": 24,
+     "ally": false
+    },
+    {
+     "id": "abyss_gate",
+     "name": "Abyss Gate",
+     "level": 24,
+     "desc": "Falls on a spot up to 26 m away striking everything within 4 m of that spot for 1,862% weapon damage as shadow. Places a post where you aim for 10s, striking a random enemy within 20 m every 0.8s for 20% weapon damage and applying Gnawed for 8s. Costs 10% of your maximum health, never taking you below 1 health.",
+     "shape": "ground",
+     "element": "shadow",
+     "cd": 40000,
+     "mp": 26,
+     "ally": false
+    }
+   ]
+  },
+  "demon_hunter": {
+   "name": "Demon Hunter",
+   "role": "Grudge Hunter",
+   "hook": "Every hit you take and every chain you throw builds Grudge; Settle the Grudge spends it all in one piercing shot. Brands targets, hooks them in, tumbles away, and sets a hound on its quarry.",
+   "signature": "grudge",
+   "resource": null,
+   "armour": "light",
+   "weapons": [
+    "crossbow",
+    "dagger"
+   ],
+   "primary": "DEX",
+   "skills": [
+    {
+     "id": "hex_bolt",
+     "name": "Brand Bolt",
+     "level": 1,
+     "desc": "Looses one bolt out to 40 m for 135% weapon damage as shadow. Marks targets with Brand for 8s: they take 15% more damage from you. Deals 50% more damage to fiends and aberrations. Gains 1 Grudge when you are hit.",
+     "shape": "bolt",
+     "element": "shadow",
+     "cd": 3500,
+     "mp": 4,
+     "ally": false
+    },
+    {
+     "id": "tumbling_shot",
+     "name": "Tumbling Shot",
+     "level": 3,
+     "desc": "Strikes everything within 2 m of your path for 172% weapon damage. Knocks targets back 2 m. Dashes up to 7 m backward, away from where you aim. Gains 1 Grudge when you cast it.",
+     "shape": "dash",
+     "element": "physical",
+     "cd": 8000,
+     "mp": 6,
+     "ally": false
+    },
+    {
+     "id": "chain_hook",
+     "name": "Chain Hook",
+     "level": 6,
+     "desc": "Fires a 1.2 m wide beam 18 m straight ahead, striking everything in the line for 270% weapon damage. Stuns targets for 0.8s. Pulls targets 12 m toward you. Gains 1 Grudge for each enemy hit.",
+     "shape": "beam",
+     "element": "physical",
+     "cd": 10000,
+     "mp": 8,
+     "ally": false
+    },
+    {
+     "id": "unleash_hound",
+     "name": "Unleash the Hound",
+     "level": 12,
+     "desc": "Gains 2 Grudge when you cast it. Orders your followers — and your party members' followers within 30 m — to leap onto the target, the next attack dealing 50% more damage for 8s. Revives all your own fallen followers at once at 50% health. Your followers = your own pets, summons and hired blades, never other players.",
+     "shape": "self",
+     "element": "physical",
+     "cd": 18000,
+     "mp": 10,
+     "ally": false
+    },
+    {
+     "id": "grudge_bolt",
+     "name": "Settle the Grudge",
+     "level": 18,
+     "desc": "Looses one bolt out to 40 m for 121% weapon damage as shadow. Spends all your Grudge: 35% more damage for each point spent. Spending 5 or more: passes through 9 more targets; stuns targets for 1s.",
+     "shape": "bolt",
+     "element": "shadow",
+     "cd": 6000,
+     "mp": 8,
+     "ally": false
+    },
+    {
+     "id": "night_hunt",
+     "name": "Night Hunt",
+     "level": 24,
+     "desc": "Gains 3 Grudge when you cast it. Casting this takes 6s off Settle the Grudge's cooldown. For 12s your attacks apply Brand. For 12s: +15% move speed.",
+     "shape": "self",
+     "element": "shadow",
+     "cd": 45000,
+     "mp": 30,
+     "ally": false
+    }
+   ]
+  },
+  "scavenger": {
+   "name": "Scavenger",
+   "role": "Lucky Opportunist",
+   "hook": "Every strike is a gamble: random statuses, random elements, traps and pitch bombs, and Big Score, which can hit for a fifth or for five times its damage, and pays gold on a kill.",
+   "signature": "luck",
+   "resource": null,
+   "armour": "light",
+   "weapons": [
+    "dagger",
+    "sword",
+    "hammer",
+    "javelin"
+   ],
+   "primary": "DEX",
+   "skills": [
+    {
+     "id": "lucky_strike",
+     "name": "Lucky Strike",
+     "level": 1,
+     "desc": "Strikes everything in an 80° arc 3 m in front of you, or as far and as wide as your weapon swings if that is more, for 150% weapon damage. Each hit applies one random status: Burning, Poisoned, Bleeding, Chilled, Shocked, Weakened and Snared.",
+     "shape": "melee",
+     "element": "physical",
+     "cd": 4000,
+     "mp": 3,
+     "ally": false
+    },
+    {
+     "id": "junk_toss",
+     "name": "Junk Toss",
+     "level": 3,
+     "desc": "Looses one shot out to 26 m for 177% weapon damage. Each cast deals a random element: physical, fire and poison.",
+     "shape": "bolt",
+     "element": "physical",
+     "cd": 6000,
+     "mp": 6,
+     "ally": false
+    },
+    {
+     "id": "scrounge",
+     "name": "Scrounge",
+     "level": 6,
+     "desc": "Heals you (or the party member you target) for 8% of maximum health. For 15s: +15% move speed; each hit you take restores 2 mana. Party members = players in your party within 30 m.",
+     "shape": "self",
+     "element": "physical",
+     "cd": 20000,
+     "mp": 6,
+     "ally": true
+    },
+    {
+     "id": "caltrop_scatter",
+     "name": "Caltrop Scatter",
+     "level": 12,
+     "desc": "Falls on a spot up to 16 m away striking everything within 4 m of that spot for 242% weapon damage. Sets a trap where you aim that arms after 0.5s, lasts 20s and fires on the first enemy within 2 m, dealing 80% weapon damage and applying Bleeding for 6s, at most 4 stand at once. Also applies Chilled (moves 50% slower) for 3s.",
+     "shape": "ground",
+     "element": "physical",
+     "cd": 12000,
+     "mp": 8,
+     "ally": false
+    },
+    {
+     "id": "pitch_bomb",
+     "name": "Rag-and-Pitch Bomb",
+     "level": 18,
+     "desc": "Falls on a spot up to 22 m away, 1s after you cast, striking everything within 4 m of that spot for 501% weapon damage as fire. Leaves a 3 m pool for 4s that deals 75% weapon damage over 4s to anything standing in it. Each cast deals a random element: fire, poison, lightning and ice.",
+     "shape": "ground",
+     "element": "fire",
+     "cd": 14000,
+     "mp": 12,
+     "ally": false
+    },
+    {
+     "id": "big_score",
+     "name": "Big Score",
+     "level": 24,
+     "desc": "Strikes everything in an 80° arc 3 m in front of you, or as far and as wide as your weapon swings if that is more, for 488% weapon damage. A kill with this skill: you find 25 gold. Deals between 20% and 500% of the listed damage, rolled each cast.",
+     "shape": "melee",
+     "element": "physical",
+     "cd": 22000,
+     "mp": 16,
+     "ally": false
+    }
+   ]
+  },
+  "swashbuckler": {
+   "name": "Swashbuckler",
+   "role": "Show-Off Duelist",
+   "hook": "Gains Flair for every flashy move, more when you change it up — a leap, a mocking parry, a matador's turn. Grandeur spends all your Flair in one sweeping strike.",
+   "signature": "flair, which rewards variety",
+   "resource": null,
+   "armour": "light",
+   "weapons": [
+    "sword",
+    "dagger"
+   ],
+   "primary": "DEX",
+   "skills": [
+    {
+     "id": "flourish",
+     "name": "Flourish",
+     "level": 1,
+     "desc": "Strikes everything in a 92° arc 3 m in front of you, or as far and as wide as your weapon swings if that is more, for 135% weapon damage. Gains 1 Flair when you cast it, 2 if your previous skill was a different one.",
+     "shape": "melee",
+     "element": "physical",
+     "cd": 3000,
+     "mp": 3,
+     "ally": false
+    },
+    {
+     "id": "daring_leap",
+     "name": "Daring Leap",
+     "level": 3,
+     "desc": "Strikes the enemy you reach for 213% weapon damage. Leaps up to 10 m to land behind the target, striking nothing on the way. On landing, strikes everything within 2.5 m for 40% weapon damage. Gains 1 Flair when you cast it. Your next skill within 3s counts as from behind.",
+     "shape": "dash",
+     "element": "physical",
+     "cd": 9000,
+     "mp": 6,
+     "ally": false
+    },
+    {
+     "id": "mocking_parry",
+     "name": "Mocking Parry",
+     "level": 6,
+     "desc": "For 1.5s, the next melee hit on you is negated; the attacker is taunted for 3s and you gain 2 Flair.",
+     "shape": "self",
+     "element": "physical",
+     "cd": 10000,
+     "mp": 4,
+     "ally": false
+    },
+    {
+     "id": "pinning_thrust",
+     "name": "Pinning Thrust",
+     "level": 12,
+     "desc": "Fires a 1 m wide beam 6 m straight ahead, striking everything in the line for 195% weapon damage. Also applies Rooted for 2s. Spends 1 Flair: 50% more damage for each point spent if you have it.",
+     "shape": "beam",
+     "element": "physical",
+     "cd": 8000,
+     "mp": 6,
+     "ally": false
+    },
+    {
+     "id": "matadors_turn",
+     "name": "Matador's Turn",
+     "level": 18,
+     "desc": "Strikes everything within 4 m of you for 371% weapon damage. Marks targets with Turned About for 3s: they take every hit as if it came from behind. Also applies Weakened (deals 20% less damage) for 3s. Gains 1 Flair for each enemy hit.",
+     "shape": "around",
+     "element": "physical",
+     "cd": 12000,
+     "mp": 10,
+     "ally": false
+    },
+    {
+     "id": "grandeur",
+     "name": "Grandeur",
+     "level": 24,
+     "desc": "Strikes everything in an 115° arc 4 m in front of you, or as far and as wide as your weapon swings if that is more, for 365% weapon damage. Spends all your Flair: 75% more damage for each point spent. Spending 5 or more: becomes a ring 6 m around you; is a certain critical hit.",
+     "shape": "melee",
+     "element": "physical",
+     "cd": 20000,
+     "mp": 12,
+     "ally": false
+    }
+   ]
+  },
+  "dragon_knight": {
+   "name": "Dragon Knight",
+   "role": "Wyrm-Blooded Knight",
+   "hook": "Picks a Wyrm Temper — fire, frost or storm — and every breath, rend and leap follows it. Dragonscale throws back what hits you; Wyrm Ascendant turns your attacks into burning, splashing blows.",
+   "signature": "wyrm tempers",
+   "resource": null,
+   "armour": "heavy",
+   "weapons": [
+    "sword2h",
+    "axe2h"
+   ],
+   "primary": "STR",
+   "skills": [
+    {
+     "id": "scale_rend",
+     "name": "Scale Rend",
+     "level": 1,
+     "desc": "Strikes everything in a 103° arc 3.4 m in front of you, or as far and as wide as your weapon swings if that is more, for 173% weapon damage as fire. Leaves the target Burning: a further 45% weapon damage over 5s. Its element and status follow your Wyrm Temper.",
+     "shape": "melee",
+     "element": "fire",
+     "cd": 5000,
+     "mp": 5,
+     "ally": false
+    },
+    {
+     "id": "flamethrower",
+     "name": "Wyrm's Breath",
+     "level": 3,
+     "desc": "Breathes a stream that strikes everything in a 52° cone 7 m in front of you 10 times over 2.2s, for 48% weapon damage as fire each time. Leaves the target Burning: a further 25% weapon damage over 5s. Changes with your shape or stance: Frost Breath (Frost Temper) and Storm Breath (Storm Temper). Its element and status follow your Wyrm Temper.",
+     "shape": "melee",
+     "element": "fire",
+     "cd": 10000,
+     "mp": 18,
+     "ally": false
+    },
+    {
+     "id": "wyrmfall",
+     "name": "Wyrmfall",
+     "level": 6,
+     "desc": "Knocks targets back 3 m. Leaps up to 14 m toward where you aim, striking nothing on the way. On landing, strikes everything within 5 m for 200% weapon damage. Its element and status follow your Wyrm Temper.",
+     "shape": "dash",
+     "element": "fire",
+     "cd": 14000,
+     "mp": 14,
+     "ally": false
+    },
+    {
+     "id": "wyrm_temper",
+     "name": "Wyrm Temper",
+     "level": 12,
+     "desc": "Steps to the next of 3: Fire Temper, Frost Temper and Storm Temper. Fire Temper: +15% damage and skills that follow the temper deal fire and apply Burning. Leaving it: strikes everything within 4 m of you for 60% weapon damage as fire and applies Burning for 5s. Frost Temper: +25% armour and skills that follow the temper deal ice and apply Chilled. Leaving it: strikes everything within 4 m of you for 60% weapon damage as ice and applies Chilled (moves 45% slower) for 4s. Storm Temper: +15% attack speed and skills that follow the temper deal lightning and apply Shocked. Leaving it: strikes everything within 4 m of you for 60% weapon damage as lightning and applies Shocked (takes 30% more damage) for 5s.",
+     "shape": "self",
+     "element": "fire",
+     "cd": 2000,
+     "mp": 0,
+     "ally": false
+    },
+    {
+     "id": "dragonscale",
+     "name": "Dragonscale",
+     "level": 18,
+     "desc": "For 8s: melee attackers take 40% of the hit back. You (or the party member you target) get a barrier worth 25% of maximum health for 8s. Party members = players in your party within 30 m.",
+     "shape": "self",
+     "element": "fire",
+     "cd": 22000,
+     "mp": 12,
+     "ally": true
+    },
+    {
+     "id": "wyrm_ascendant",
+     "name": "Wyrm Ascendant",
+     "level": 24,
+     "desc": "Changes with your shape or stance: Frost Ascendant (Frost Temper) and Storm Ascendant (Storm Temper). For 10s your attacks deal 15% more damage as fire, apply Burning and splash everything within 3 m.",
+     "shape": "self",
+     "element": "fire",
+     "cd": 40000,
+     "mp": 30,
+     "ally": false
+    }
+   ]
+  },
+  "pyromancer": {
+   "name": "Pyromancer",
+   "role": "Fire Stacker",
+   "hook": "Piles Burning stacks on everything with bolts, lines of fire and a trail of burning ground, then sets them all off at once with Flashover. Fallstone drops a falling rock on a whole group.",
+   "signature": "burn stacks",
+   "resource": null,
+   "armour": "cloth",
+   "weapons": [
+    "staff",
+    "wand",
+    "scepter"
+   ],
+   "primary": "INT",
+   "skills": [
+    {
+     "id": "firebolt",
+     "name": "Firebolt",
+     "level": 1,
+     "desc": "Looses one bolt out to 36 m for 150% weapon damage as fire, splashing everything within 2.6 m of where the bolt lands. Adds 1 Burning stack to each target hit, up to 5.",
+     "shape": "bolt",
+     "element": "fire",
+     "cd": 4000,
+     "mp": 8,
+     "ally": false
+    },
+    {
+     "id": "fire_wall",
+     "name": "Burning Line",
+     "level": 3,
+     "desc": "Falls on a spot up to 30 m away striking everything within 1.4 m of that spot for 187% weapon damage as fire. Laid as a 10 m line across the spot you aim at, 2 m wide. Leaves a 1.6 m pool for 5s that deals 105% weapon damage as fire over 5s to anything standing in it. Adds 2 Burning stacks to each target hit, up to 5.",
+     "shape": "ground",
+     "element": "fire",
+     "cd": 13000,
+     "mp": 18,
+     "ally": false
+    },
+    {
+     "id": "ember_stride",
+     "name": "Cinder Stride",
+     "level": 6,
+     "desc": "For 8s, every step leaves burning ground behind you, 3.6 m across, that lasts 2.5s and strikes whatever stands in it for 69% weapon damage as fire every 0.75s. Leaves a 3 m pool for 4s that deals 175% weapon damage as fire over 4s to anything standing in it. For 8s: +20% move speed.",
+     "shape": "self",
+     "element": "fire",
+     "cd": 20000,
+     "mp": 16,
+     "ally": false
+    },
+    {
+     "id": "stoke_familiar",
+     "name": "Stoke the Familiar",
+     "level": 12,
+     "desc": "For 10s, your followers: +50% damage; take 25% less damage. Orders your class companion to attack the target for 10s; meanwhile their attacks apply Burning. Revives all your own fallen followers at once at 60% health. Your followers = your own pets, summons and hired blades, never other players.",
+     "shape": "self",
+     "element": "fire",
+     "cd": 20000,
+     "mp": 14,
+     "ally": false
+    },
+    {
+     "id": "flashover",
+     "name": "Flashover",
+     "level": 18,
+     "desc": "Falls on a spot up to 30 m away striking everything within 6 m of that spot for 314% weapon damage as fire. Deals 60% of the remaining Burning damage on each target at once, leaving 1 stack.",
+     "shape": "ground",
+     "element": "fire",
+     "cd": 12000,
+     "mp": 16,
+     "ally": false
+    },
+    {
+     "id": "meteor",
+     "name": "Fallstone",
+     "level": 24,
+     "desc": "Falls on a spot up to 36 m away striking everything within 8 m of that spot for 1,415% weapon damage as fire. Adds 3 Burning stacks to each target hit, up to 5.",
+     "shape": "ground",
+     "element": "fire",
+     "cd": 22000,
+     "mp": 30,
+     "ally": false
+    }
+   ]
+  },
+  "stormcaller": {
+   "name": "Stormcaller",
+   "role": "Chain Lightning Caster",
+   "hook": "Shocked targets take more from everything. Forked Bolt jumps between enemies, Storm Orbs circle you and zap whatever comes close, Bolt Step flashes you away, and Eye of the Tempest is a long thunderstorm.",
+   "signature": "conductors",
+   "resource": null,
+   "armour": "cloth",
+   "weapons": [
+    "staff",
+    "wand"
+   ],
+   "primary": "INT",
+   "skills": [
+    {
+     "id": "chain_bolt",
+     "name": "Forked Bolt",
+     "level": 1,
+     "desc": "Looses one bolt out to 40 m for 110% weapon damage as lightning, splashing everything within 1.2 m of where the bolt lands. Leaves the target Shocked: the target takes 30% more damage for 5s. Bounces to 4 more targets within 8 m, each bounce dealing 80% of the damage.",
+     "shape": "bolt",
+     "element": "lightning",
+     "cd": 4000,
+     "mp": 8,
+     "ally": false
+    },
+    {
+     "id": "thunderclap",
+     "name": "Thunder Ring",
+     "level": 3,
+     "desc": "Strikes everything within 7 m of you for 178% weapon damage as lightning. Leaves the target Shocked: the target takes 30% more damage for 5s. Places a zone 14 m across around you for 6s, an enemy that crosses its edge, in or out, takes 100% weapon damage, a 0.6s stun and Shocked (takes 30% more damage) for 5s.",
+     "shape": "around",
+     "element": "lightning",
+     "cd": 12000,
+     "mp": 18,
+     "ally": false
+    },
+    {
+     "id": "storm_beam",
+     "name": "Storm Beam",
+     "level": 6,
+     "desc": "Fires a 2.4 m wide beam 30 m straight ahead, striking everything in the line for 76% weapon damage as lightning. Leaves the target Shocked: the target takes 30% more damage for 5s. Channels for up to 2.2s, striking every 0.4s; you move at 100% speed while channelling, and pressing the key again ends it early.",
+     "shape": "beam",
+     "element": "lightning",
+     "cd": 11000,
+     "mp": 20,
+     "ally": false
+    },
+    {
+     "id": "storm_orbs",
+     "name": "Storm Orbs",
+     "level": 12,
+     "desc": "For 12s, 3 orbs circle you in a fight; each one strikes the nearest enemy within 8 m every 1.2s for 58% weapon damage as lightning and leaves it Shocked. Leaves a 3 m pool for 4s that deals 175% weapon damage as lightning over 4s to anything standing in it, applying Shocked (takes 30% more damage) for 5s.",
+     "shape": "self",
+     "element": "lightning",
+     "cd": 24000,
+     "mp": 22,
+     "ally": false
+    },
+    {
+     "id": "bolt_step",
+     "name": "Bolt Step",
+     "level": 18,
+     "desc": "Carries you 12 m forward, striking everything within 2 m of your path for 386% weapon damage as lightning. Leaves the target Shocked: the target takes 30% more damage for 5s. For 0.8s: enemies cannot target you.",
+     "shape": "dash",
+     "element": "lightning",
+     "cd": 10000,
+     "mp": 10,
+     "ally": false
+    },
+    {
+     "id": "tempest_eye",
+     "name": "Eye of the Tempest",
+     "level": 24,
+     "desc": "Falls on a spot up to 30 m away and strikes everything within 9 m of it 12 times over 6s, for 209% weapon damage as lightning each time. Leaves the target Shocked: the target takes 30% more damage for 5s. Each strike lands at a random point inside the area, preferring enemies.",
+     "shape": "ground",
+     "element": "lightning",
+     "cd": 30000,
+     "mp": 34,
+     "ally": false
+    }
+   ]
+  },
+  "druid": {
+   "name": "Druid",
+   "role": "Shapeshifter",
+   "hook": "Changes shape and every skill changes with you: Briarback is a thorny tank, Moonpelt a fast wolf, Sporecap a spore-lobbing healer. Greensap heals the whole group, and Green Return brings a fallen friend back in a bloom of flowers.",
+   "signature": "shapes",
+   "resource": null,
+   "armour": "medium",
+   "weapons": [
+    "staff",
+    "scepter"
+   ],
+   "primary": "INT",
+   "skills": [
+    {
+     "id": "thornlash",
+     "name": "Thornlash",
+     "level": 1,
+     "desc": "Looses one bolt out to 30 m for 140% weapon damage as nature. Each enemy hit heals your nearest follower 3% of maximum health. Also applies Rooted for 0.6s, at most once per target every 6s. Changes with your shape or stance: Bramble Gore (Briarback), Venom Lunge (Fenrunner), Spore Lob (Sporecap) and Rending Leap (Moonpelt). Your followers = your own pets, summons and hired blades, never other players.",
+     "shape": "bolt",
+     "element": "nature",
+     "cd": 3000,
+     "mp": 5,
+     "ally": false
+    },
+    {
+     "id": "renew",
+     "name": "Greensap",
+     "level": 1,
+     "desc": "Gives you (or the party member you target) Mending: heals 25% of maximum health over 10s. Your followers are mended too. Heals you (or the party member you target) for 10% of maximum health. Changes with your shape or stance: Thornswell (Briarback), Shed Skin (Fenrunner), Mycel Web (Sporecap) and Lick Wounds (Moonpelt). Your followers = your own pets, summons and hired blades, never other players.",
+     "shape": "self",
+     "element": "nature",
+     "cd": 16000,
+     "mp": 14,
+     "ally": true
+    },
+    {
+     "id": "moonpelt_shape",
+     "name": "Moonpelt Shape",
+     "level": 6,
+     "desc": "Press again to return to your own body. While in Moonpelt shape: -15% armour, +25% move speed, +20% attack speed and your basic attack becomes 2 quick strikes 2.4 m in front of you for 60% weapon damage each that applies Bleeding.",
+     "shape": "self",
+     "element": "nature",
+     "cd": 1500,
+     "mp": 8,
+     "ally": false
+    },
+    {
+     "id": "green_return",
+     "name": "Green Return",
+     "level": 12,
+     "desc": "Raises the fallen party member you target (else the nearest within 30 m) at 20% health. They return with Mending (heals 25% of maximum health over 10s). 2.5s cast: moving cancels it and nothing is spent. Can be cast in combat. The fallen player chooses whether to stand up. 26 mana, 120s cooldown. Party members = players in your party within 30 m.",
+     "shape": "self",
+     "element": "nature",
+     "cd": 120000,
+     "mp": 26,
+     "ally": true
+    },
+    {
+     "id": "briarback_shape",
+     "name": "Briarback Shape",
+     "level": 18,
+     "desc": "Press again to return to your own body. While in Briarback shape: +60% armour, +30% maximum health, melee attackers take 15% of the hit back and your basic attack becomes a strike 2.8 m in front of you for 100% weapon damage. Entering it: enemies within 6 m attack you for 3s.",
+     "shape": "self",
+     "element": "nature",
+     "cd": 1500,
+     "mp": 8,
+     "ally": false
+    },
+    {
+     "id": "sporecap_shape",
+     "name": "Sporecap Shape",
+     "level": 24,
+     "desc": "Lasts 15s; casting it again ends it early. While in Sporecap shape: -40% move speed, +40% healing done, immune to poison, your basic attack becomes a lobbed strike out to 14 m that splashes 1.5 m for 70% weapon damage that applies Poisoned and an ally inside the splash heals 2% of maximum health. Entering it: applies Poisoned for 8s to everything within 6 m of you and heals all allies within it 10% of maximum health. Leaving it: strikes everything within 8 m of you for 150% weapon damage as poison, applies Poisoned for 8s and heals all allies within it 15% of maximum health. All allies = you, party members within 30 m and your followers (your own pets, summons and hired blades).",
+     "shape": "self",
+     "element": "nature",
+     "cd": 50000,
+     "mp": 30,
+     "ally": false
+    }
+   ]
+  },
+  "oracle": {
+   "name": "Oracle",
+   "role": "Foresight Protector",
+   "hook": "Sees trouble coming: Foresight wards everyone against the next big hit, Kind Omen heals and wards one friend, Thread of Fate takes damage for a friend, and Prophecy marks where the blast will fall before it lands.",
+   "signature": "foresight",
+   "resource": null,
+   "armour": "cloth",
+   "weapons": [
+    "staff",
+    "scepter"
+   ],
+   "primary": "INT",
+   "skills": [
+    {
+     "id": "omen_bolt",
+     "name": "Omen Bolt",
+     "level": 1,
+     "desc": "Looses one bolt out to 32 m for 120% weapon damage as arcane. Marks targets with Omen for 6s. Also applies Weakened (deals 25% less damage) for 3s.",
+     "shape": "bolt",
+     "element": "arcane",
+     "cd": 3000,
+     "mp": 5,
+     "ally": false
+    },
+    {
+     "id": "kind_omen",
+     "name": "Kind Omen",
+     "level": 1,
+     "desc": "Heals you (or the party member you target) for 15% of maximum health. You (or the party member you target) get a ward for 10s that completely negates the first hit worth more than 10% of maximum health. Party members = players in your party within 30 m.",
+     "shape": "self",
+     "element": "arcane",
+     "cd": 12000,
+     "mp": 12,
+     "ally": true
+    },
+    {
+     "id": "foresight",
+     "name": "Foresight",
+     "level": 6,
+     "desc": "All allies get a ward for 15s that completely negates the first hit worth more than 10% of maximum health. All allies = you, party members within 30 m and your followers (your own pets, summons and hired blades).",
+     "shape": "self",
+     "element": "arcane",
+     "cd": 16000,
+     "mp": 14,
+     "ally": false
+    },
+    {
+     "id": "prophecy",
+     "name": "Prophecy",
+     "level": 12,
+     "desc": "Falls on a spot up to 30 m away, 2.5s after you cast, striking everything within 6 m of that spot for 399% weapon damage as arcane. Places a zone 12 m across on the aimed enemy, following it for 2.5s, applying Chilled (moves 30% slower) to enemies inside while they stay in it. Deals 100% more damage to Omen targets.",
+     "shape": "ground",
+     "element": "arcane",
+     "cd": 14000,
+     "mp": 16,
+     "ally": false
+    },
+    {
+     "id": "fate_thread",
+     "name": "Thread of Fate",
+     "level": 18,
+     "desc": "Gives all allies Mending: heals 25% of maximum health over 10s. Links the party member you target (else the ally nearest you) to you for 8s: you take 50% of the damage dealt to it instead. All allies = you, party members within 30 m and your followers (your own pets, summons and hired blades).",
+     "shape": "self",
+     "element": "arcane",
+     "cd": 18000,
+     "mp": 12,
+     "ally": true
+    },
+    {
+     "id": "last_prophecy",
+     "name": "The Last Prophecy",
+     "level": 24,
+     "desc": "Places a zone 40 m across around you for 8s, applying Weakened (deals 25% less damage) to enemies inside while they stay in it. For 8s, your followers: +40% damage; when it ends strikes everything within 12 m of you for 300% weapon damage as arcane. Your followers = your own pets, summons and hired blades, never other players.",
+     "shape": "self",
+     "element": "arcane",
+     "cd": 60000,
+     "mp": 36,
+     "ally": false
+    }
+   ]
+  },
+  "tactician": {
+   "name": "Tactician",
+   "role": "Battlefield Commander",
+   "hook": "Leads from the front and gives orders: Exploit the Gap punishes enemies busy with someone else, Lead the Charge and Reposition move the fight where you want it, Seize the Initiative speeds up every cooldown, and Battle Plan lays down a zone that speeds your allies and marks your enemies.",
+   "signature": "orders",
+   "resource": null,
+   "armour": "medium",
+   "weapons": [
+    "sword",
+    "scepter"
+   ],
+   "primary": "INT",
+   "skills": [
+    {
+     "id": "exploit_gap",
+     "name": "Exploit the Gap",
+     "level": 1,
+     "desc": "Strikes everything in an 80° arc 3 m in front of you, or as far and as wide as your weapon swings if that is more, for 150% weapon damage. Marks targets with Flanked for 4s: they take 15% more damage from every source. Deals 40% more damage to an enemy that is attacking someone other than you.",
+     "shape": "melee",
+     "element": "physical",
+     "cd": 4000,
+     "mp": 4,
+     "ally": false
+    },
+    {
+     "id": "rally",
+     "name": "Rally",
+     "level": 3,
+     "desc": "Gives you Rallied: you deal 20% more damage and take 15% less damage for 8s. All allies get the same. Orders your followers — and your party members' followers within 30 m — to return to you for 3s. All allies = you, party members within 30 m and your followers (your own pets, summons and hired blades).",
+     "shape": "self",
+     "element": "holy",
+     "cd": 30000,
+     "mp": 18,
+     "ally": false
+    },
+    {
+     "id": "charge",
+     "name": "Lead the Charge",
+     "level": 6,
+     "desc": "Strikes everything within 2.4 m of your path for 306% weapon damage. Leaves the target Weakened: the target deals 35% less damage for 7s. Dashes up to 12 m toward where you aim. Your next skill within 6s deals 30% more damage and also empowers your followers' next attack and each party member's next skill. Each of your followers within 15 m moves with you to where you land. Your followers = your own pets, summons and hired blades, never other players.",
+     "shape": "dash",
+     "element": "physical",
+     "cd": 10000,
+     "mp": 10,
+     "ally": false
+    },
+    {
+     "id": "reposition",
+     "name": "Reposition",
+     "level": 12,
+     "desc": "Strikes everything within 1.5 m of your path for 306% weapon damage as arcane. Dashes up to 20 m and swaps places with the aimed enemy (not a boss), else your aimed follower. Your follower swapped with gets a barrier of 20% of maximum health. An enemy swapped with gets Weakened (deals 25% less damage) for 2s. Your followers = your own pets, summons and hired blades, never other players.",
+     "shape": "dash",
+     "element": "arcane",
+     "cd": 10000,
+     "mp": 6,
+     "ally": false
+    },
+    {
+     "id": "seize_initiative",
+     "name": "Seize the Initiative",
+     "level": 18,
+     "desc": "Casting this takes 30s off your followers' ability cooldowns. For 3s: your cooldowns run 2 times as fast. Your followers = your own pets, summons and hired blades, never other players.",
+     "shape": "self",
+     "element": "physical",
+     "cd": 30000,
+     "mp": 20,
+     "ally": false
+    },
+    {
+     "id": "battle_plan",
+     "name": "Battle Plan",
+     "level": 24,
+     "desc": "Places a zone 16 m across around you for 10s, striking the nearest enemy within 8 m every 2s for 80% weapon damage, giving allies inside Hastened (attacks 30% faster and moves 15% faster) while they stay in it, applying Marked (takes 25% more damage and moves 30% slower) to enemies inside while they stay in it. Orders your followers — and your party members' followers within 30 m — to attack the target for 10s. All allies = you, party members within 30 m and your followers (your own pets, summons and hired blades).",
+     "shape": "self",
+     "element": "physical",
+     "cd": 40000,
+     "mp": 30,
+     "ally": false
+    }
+   ]
+  },
+  "chronomancer": {
+   "name": "Chronomancer",
+   "role": "Time Mage",
+   "hook": "Bends the clock: Quicken and Second Hand speed up you and your cooldowns, Lagging slows enemies down, Rewind puts you back where you were with the health you had, and Stasis Lock holds a foe still and lands all its damage at once.",
+   "signature": "time",
+   "resource": null,
+   "armour": "cloth",
+   "weapons": [
+    "staff",
+    "wand"
+   ],
+   "primary": "INT",
+   "skills": [
+    {
+     "id": "second_hand",
+     "name": "Second Hand",
+     "level": 1,
+     "desc": "Looses one bolt out to 32 m for 110% weapon damage as arcane, splashing everything within 1 m of where the bolt lands. Adds 1 Lagging stack to each target hit, up to 4. Each enemy hit takes 0.2s off every other skill's cooldown.",
+     "shape": "bolt",
+     "element": "arcane",
+     "cd": 2500,
+     "mp": 4,
+     "ally": false
+    },
+    {
+     "id": "quicken",
+     "name": "Quicken",
+     "level": 3,
+     "desc": "Gives you Hastened: you attack 45% faster and move 30% faster for 10s. All allies get the same. Casting this takes 2s off every other skill's cooldown. All allies = you, party members within 30 m and your followers (your own pets, summons and hired blades).",
+     "shape": "self",
+     "element": "lightning",
+     "cd": 26000,
+     "mp": 16,
+     "ally": false
+    },
+    {
+     "id": "entropy_field",
+     "name": "Entropy Field",
+     "level": 6,
+     "desc": "Falls on a spot up to 30 m away and strikes everything within 5.5 m of it 8 times over 6s, for 48% weapon damage as arcane each time. Adds 1 Lagging stack to each target hit, up to 4. Deals 15% more damage for each different status on the target, up to 60%.",
+     "shape": "ground",
+     "element": "arcane",
+     "cd": 14000,
+     "mp": 18,
+     "ally": false
+    },
+    {
+     "id": "rewind",
+     "name": "Rewind",
+     "level": 12,
+     "desc": "Casting this takes 3s off every other skill's cooldown. Returns your position and health (only upward) to where they were 4s ago.",
+     "shape": "self",
+     "element": "arcane",
+     "cd": 30000,
+     "mp": 16,
+     "ally": false
+    },
+    {
+     "id": "stasis_lock",
+     "name": "Stasis Lock",
+     "level": 18,
+     "desc": "Looses one bolt out to 28 m without dealing damage. A non-boss target is held still and cannot be hurt for 4s; the damage dealt to it meanwhile lands at once, 150% of it, when it thaws. A boss is slowed 60% instead.",
+     "shape": "bolt",
+     "element": "arcane",
+     "cd": 16000,
+     "mp": 14,
+     "ally": false
+    },
+    {
+     "id": "stop_the_clock",
+     "name": "Stop the Clock",
+     "level": 24,
+     "desc": "Strikes everything within 25 m of you without dealing damage. For 4s: your cooldowns run 4 times as fast. A non-boss target is held still and cannot be hurt for 4s; the damage dealt to it meanwhile lands at once, 125% of it, when it thaws. A boss is slowed 60% instead.",
+     "shape": "around",
+     "element": "arcane",
+     "cd": 60000,
+     "mp": 40,
+     "ally": false
+    }
+   ]
+  },
+  "monk": {
+   "name": "Monk",
+   "role": "Poise Fighter",
+   "hook": "Every palm strike, step and stance builds Poise, and Ninefold Staff spends it in a widening spin. Wind Step makes your next hit a sure critical, Sweeping Heel knocks foes down, and Mountain Fist punches a line through them.",
+   "signature": "poise",
+   "resource": null,
+   "armour": "cloth",
+   "weapons": [
+    "staff"
+   ],
+   "primary": "DEX",
+   "skills": [
+    {
+     "id": "open_palm",
+     "name": "Open Palm",
+     "level": 1,
+     "desc": "Strikes everything in an 80° arc 2.8 m in front of you, or as far and as wide as your weapon swings if that is more, for 120% weapon damage. Knocks targets back 2 m. Gains 1 Poise when you cast it.",
+     "shape": "melee",
+     "element": "physical",
+     "cd": 3000,
+     "mp": 2,
+     "ally": false
+    },
+    {
+     "id": "wind_step",
+     "name": "Wind Step",
+     "level": 3,
+     "desc": "Strikes the enemy you reach for 175% weapon damage. Dashes up to 10 m to the first enemy in the line. Gains 1 Poise when you cast it. Your next skill within 3s is a certain critical hit.",
+     "shape": "dash",
+     "element": "physical",
+     "cd": 7000,
+     "mp": 5,
+     "ally": false
+    },
+    {
+     "id": "sweeping_heel",
+     "name": "Sweeping Heel",
+     "level": 6,
+     "desc": "Strikes everything within 3.5 m of you for 216% weapon damage. Stuns targets for 1.2s. Marks targets with Downed for 3s: they take 20% more damage from you.",
+     "shape": "around",
+     "element": "physical",
+     "cd": 10000,
+     "mp": 6,
+     "ally": false
+    },
+    {
+     "id": "inner_stillness",
+     "name": "Inner Stillness",
+     "level": 12,
+     "desc": "Heals you (or the party member you target) for 6% of maximum health. Gains 1 Poise when you cast it. Channels for up to 3s, striking every 1s; moving ends the channel, and pressing the key again ends it early. For 1.2s, the next 2 melee hits on you are reduced by 50%; you gain 1 Poise. Party members = players in your party within 30 m.",
+     "shape": "self",
+     "element": "physical",
+     "cd": 22000,
+     "mp": 0,
+     "ally": true
+    },
+    {
+     "id": "mountain_fist",
+     "name": "Mountain Fist",
+     "level": 18,
+     "desc": "Fires a 1.6 m wide beam 10 m straight ahead, striking everything in the line for 742% weapon damage. Stuns targets for 1.5s. Gains 2 Poise when you cast it.",
+     "shape": "beam",
+     "element": "physical",
+     "cd": 12000,
+     "mp": 10,
+     "ally": false
+    },
+    {
+     "id": "ninefold_staff",
+     "name": "Ninefold Staff",
+     "level": 24,
+     "desc": "Spins 3 times, striking everything within 3.5 m of you for 244% weapon damage on every spin. Each strike reaches 1.2 m further than the last. Spends all your Poise: 33% more damage for each point spent.",
+     "shape": "around",
+     "element": "physical",
+     "cd": 22000,
+     "mp": 16,
+     "ally": false
+    }
+   ]
+  },
+  "shaman": {
+   "name": "Shaman",
+   "role": "Spirit Post Caster",
+   "hook": "Plants spirit posts: one heals everyone near it, and the Great Post heals and strikes at once. Spirit Bolts jump between foes and heal on the way, Warding Spirits block the next few hits, and Call Back the Spirit returns a fallen friend at full health.",
+   "signature": "posts",
+   "resource": null,
+   "armour": "medium",
+   "weapons": [
+    "staff",
+    "scepter"
+   ],
+   "primary": "INT",
+   "skills": [
+    {
+     "id": "spirit_bolt",
+     "name": "Spirit Bolt",
+     "level": 1,
+     "desc": "Looses one bolt out to 32 m for 120% weapon damage as lightning. Bounces to 2 more targets within 8 m, each bounce dealing 70% of the damage. Each enemy hit heals all allies 2% of maximum health. All allies = you, party members within 30 m and your followers (your own pets, summons and hired blades).",
+     "shape": "bolt",
+     "element": "lightning",
+     "cd": 3000,
+     "mp": 5,
+     "ally": false
+    },
+    {
+     "id": "mending_post",
+     "name": "Mending Post",
+     "level": 1,
+     "desc": "With a party member targeted it is planted at their feet. Lands on a spot up to 12 m away. Heals you (or the party member you target) for 12% of maximum health. Places a post where you aim for 12s, healing all allies within 8 m of it 2% of maximum health every 1s, the post has 30% of your maximum health and can be broken, at most 2 stand at once. All allies = you, party members within 30 m and your followers (your own pets, summons and hired blades).",
+     "shape": "ground",
+     "element": "nature",
+     "cd": 18000,
+     "mp": 16,
+     "ally": true
+    },
+    {
+     "id": "call_back_the_spirit",
+     "name": "Call Back the Spirit",
+     "level": 6,
+     "desc": "Raises the fallen party member you target (else the nearest within 30 m) at full health and full mana. 8s cast: moving cancels it and nothing is spent. Cannot be cast while a monster is attacking you. The fallen player chooses whether to stand up. 20 mana, 10s cooldown. Party members = players in your party within 30 m.",
+     "shape": "self",
+     "element": "holy",
+     "cd": 10000,
+     "mp": 20,
+     "ally": true
+    },
+    {
+     "id": "call_spirit",
+     "name": "Call a Spirit",
+     "level": 12,
+     "desc": "Summons 1 Spirit Bear to fight beside you. Orders your class companion to leap onto the target, the next attack dealing 50% more damage for 4s. With the pack already called, casting this is a howl instead: the pack gets Hastened for 4s and they draw every enemy within 4 m of you for 4s.",
+     "shape": "summon",
+     "element": "holy",
+     "cd": 40000,
+     "mp": 26,
+     "ally": false
+    },
+    {
+     "id": "warding_spirits",
+     "name": "Warding Spirits",
+     "level": 18,
+     "desc": "All allies get a ward for 12s that completely negates 3 hits, each one of up to 8% of maximum health. All allies = you, party members within 30 m and your followers (your own pets, summons and hired blades).",
+     "shape": "self",
+     "element": "holy",
+     "cd": 24000,
+     "mp": 18,
+     "ally": false
+    },
+    {
+     "id": "great_post",
+     "name": "The Great Post",
+     "level": 24,
+     "desc": "Lands on a spot up to 16 m away. Places a post where you aim for 15s, striking 3 enemies within 12 m every 1.5s for 40% weapon damage, healing all allies within 12 m of it 2% of maximum health every 1.5s, the post has 50% of your maximum health and can be broken, each Spirit Bolt hit within 12 m of the post rings the post for 60% weapon damage. All allies = you, party members within 30 m and your followers (your own pets, summons and hired blades).",
+     "shape": "ground",
+     "element": "holy",
+     "cd": 50000,
+     "mp": 36,
+     "ally": false
+    }
+   ]
+  },
+  "witch_hunter": {
+   "name": "Witch Hunter",
+   "role": "Silver Inquisitor",
+   "hook": "Silver strips magic: pins root and strip, nets silence, Null Circle shuts down casters and stops arrows inside it, and Writ of Guilt sends your followers after one target. Hits undead and casters hard.",
+   "signature": "silver: silence, strip, cleanse",
+   "resource": null,
+   "armour": "medium",
+   "weapons": [
+    "crossbow",
+    "sword",
+    "dagger"
+   ],
+   "primary": "DEX",
+   "skills": [
+    {
+     "id": "pinning_shot",
+     "name": "Silvered Pin",
+     "level": 1,
+     "desc": "Looses 2 shots in a 5° fan out to 38 m, each for 81% weapon damage, splashing everything within 1.4 m of where a shot lands. Deals 50% more damage to undead. Also applies Rooted for 2s and Stripped for 6s.",
+     "shape": "bolt",
+     "element": "physical",
+     "cd": 6000,
+     "mp": 8,
+     "ally": false
+    },
+    {
+     "id": "silver_edge",
+     "name": "Silver Edge",
+     "level": 3,
+     "desc": "Strikes everything in an 80° arc 3 m in front of you, or as far and as wide as your weapon swings if that is more, for 120% weapon damage. Deals 60% more damage to casters and archers. Deals 50% more damage to undead. Removes 1 harmful status from you (or the party member you target). Party members = players in your party within 30 m.",
+     "shape": "melee",
+     "element": "physical",
+     "cd": 4000,
+     "mp": 3,
+     "ally": true
+    },
+    {
+     "id": "null_circle",
+     "name": "Null Circle",
+     "level": 6,
+     "desc": "Falls on a spot up to 16 m away striking everything within 6 m of that spot for 258% weapon damage as holy. Places a zone 12 m across where you aim for 8s, applying Silenced to enemies inside while they stay in it, enemy ranged hits on anyone within 6 m of its middle are stopped.",
+     "shape": "ground",
+     "element": "holy",
+     "cd": 18000,
+     "mp": 14,
+     "ally": false
+    },
+    {
+     "id": "writ_of_guilt",
+     "name": "Writ of Guilt",
+     "level": 12,
+     "desc": "Looses one bolt out to 40 m for 373% weapon damage as holy. Marks targets with Guilty for 10s: they take 25% more damage from every source. Orders your followers — and your party members' followers within 30 m — to attack the target for 10s. Your followers = your own pets, summons and hired blades, never other players.",
+     "shape": "bolt",
+     "element": "holy",
+     "cd": 14000,
+     "mp": 10,
+     "ally": false
+    },
+    {
+     "id": "iron_net",
+     "name": "Iron Net",
+     "level": 18,
+     "desc": "Looses one shot out to 20 m for 285% weapon damage, splashing everything within 4 m of where the shot lands. Also applies Rooted for 3s and Silenced for 3s.",
+     "shape": "bolt",
+     "element": "physical",
+     "cd": 12000,
+     "mp": 8,
+     "ally": false
+    },
+    {
+     "id": "purging_rite",
+     "name": "Rite of Purging",
+     "level": 24,
+     "desc": "Strikes everything within 12 m of you for 1,602% weapon damage as holy. Deals 50% more damage to champions, rares and bosses. Also applies Stripped for 8s. Removes 2 harmful statuses from every ally. All allies = you, party members within 30 m and your followers (your own pets, summons and hired blades).",
+     "shape": "around",
+     "element": "holy",
+     "cd": 30000,
+     "mp": 26,
+     "ally": false
+    }
+   ]
+  },
+  "knight": {
+   "name": "Knight",
+   "role": "Sworn Protector",
+   "hook": "Takes the blows meant for others: Sworn Guard and Sworn Ward link a friend so you take their damage, Challenge and Rim Strike pull enemies onto you, Rampart raises a wall, and the Unbroken Banner keeps everyone standing.",
+   "signature": "takes hits for others",
+   "resource": null,
+   "armour": "heavy",
+   "weapons": [
+    "sword",
+    "hammer"
+   ],
+   "primary": "STR",
+   "skills": [
+    {
+     "id": "shield_bash",
+     "name": "Rim Strike",
+     "level": 1,
+     "desc": "Strikes everything in a 126° arc 2.8 m in front of you, or as far and as wide as your weapon swings if that is more, for 151% weapon damage. Stuns targets for 1s. Each enemy hit is taunted to attack you for 3s.",
+     "shape": "melee",
+     "element": "physical",
+     "cd": 6000,
+     "mp": 6,
+     "ally": false
+    },
+    {
+     "id": "guard_stance",
+     "name": "Sworn Guard",
+     "level": 3,
+     "desc": "For 8s: -20% move speed; take 50% less damage from the front. Links the party member you target (else the ally nearest you) to you for 8s: you take 40% of the damage dealt to it instead. All allies = you, party members within 30 m and your followers (your own pets, summons and hired blades).",
+     "shape": "self",
+     "element": "holy",
+     "cd": 18000,
+     "mp": 8,
+     "ally": true
+    },
+    {
+     "id": "sworn_ward",
+     "name": "Sworn Ward",
+     "level": 6,
+     "desc": "Links the party member you target (else the ally nearest you) to you for 12s: you take 100% of the damage dealt to it above 20% of its health instead. All allies = you, party members within 30 m and your followers (your own pets, summons and hired blades).",
+     "shape": "self",
+     "element": "holy",
+     "cd": 18000,
+     "mp": 8,
+     "ally": true
+    },
+    {
+     "id": "challenge",
+     "name": "Challenge",
+     "level": 12,
+     "desc": "Strikes everything within 10 m of you for 255% weapon damage. Ranged targets are pulled 4 m toward you. Enemies within 10 m attack you for 4s.",
+     "shape": "around",
+     "element": "physical",
+     "cd": 12000,
+     "mp": 6,
+     "ally": false
+    },
+    {
+     "id": "rampart",
+     "name": "Rampart",
+     "level": 18,
+     "desc": "Lands on a spot up to 8 m away. Raises a 6 m wall across where you aim for 8s: enemies cannot walk through it and enemy ranged hits through it are stopped.",
+     "shape": "ground",
+     "element": "physical",
+     "cd": 20000,
+     "mp": 12,
+     "ally": false
+    },
+    {
+     "id": "unbroken_banner",
+     "name": "Unbroken Banner",
+     "level": 24,
+     "desc": "Places a zone 20 m across where you stand for 12s, giving allies inside Guarded (takes 20% less damage) while they stay in it. For 12s, all allies: cannot drop below 1 health; when it ends heals all allies within it 20% of maximum health. Enemies within 10 m attack you for 12s. All allies = you, party members within 30 m and your followers (your own pets, summons and hired blades).",
+     "shape": "self",
+     "element": "holy",
+     "cd": 60000,
+     "mp": 30,
+     "ally": false
+    }
+   ]
+  },
+  "sorcerer": {
+   "name": "Sorcerer",
+   "role": "Wild Magic Caster",
+   "hook": "Each Wild Bolt is a random element; Arcane Burst hits harder the more kinds of harm a target carries. Overchannel trades health for power, Transmute turns a foe into something harmless, and Sixfold Ruin strikes with every element in turn.",
+   "signature": "wild magic",
+   "resource": null,
+   "armour": "cloth",
+   "weapons": [
+    "staff",
+    "wand"
+   ],
+   "primary": "INT",
+   "skills": [
+    {
+     "id": "wild_bolt",
+     "name": "Wild Bolt",
+     "level": 1,
+     "desc": "Looses one bolt out to 34 m for 130% weapon damage as arcane, splashing everything within 1.2 m of where the bolt lands. Each cast deals a random element: fire, ice, lightning, shadow, poison and arcane.",
+     "shape": "bolt",
+     "element": "arcane",
+     "cd": 3000,
+     "mp": 5,
+     "ally": false
+    },
+    {
+     "id": "arcane_burst",
+     "name": "Arcane Burst",
+     "level": 3,
+     "desc": "Falls on a spot up to 34 m away striking everything within 5 m of that spot for 290% weapon damage as arcane. Leaves the target Cursed: the target takes 25% more damage and moves 15% slower for 8s. Deals 20% more damage for each different status on the target, up to 100%.",
+     "shape": "ground",
+     "element": "arcane",
+     "cd": 10000,
+     "mp": 18,
+     "ally": false
+    },
+    {
+     "id": "mana_rend",
+     "name": "Mana Rend",
+     "level": 6,
+     "desc": "Fires a 1.8 m wide beam 22 m straight ahead, striking everything in the line for 288% weapon damage as arcane. Each enemy hit restores 8 mana. Deals 60% more damage to casters and archers. Deals 60% more damage to champions, rares and bosses. Also applies Silenced for 2s.",
+     "shape": "beam",
+     "element": "arcane",
+     "cd": 10000,
+     "mp": 0,
+     "ally": false
+    },
+    {
+     "id": "overchannel",
+     "name": "Overchannel",
+     "level": 12,
+     "desc": "For 8s: +60% damage; every skill cast costs 3% of your maximum health.",
+     "shape": "self",
+     "element": "arcane",
+     "cd": 30000,
+     "mp": 0,
+     "ally": false
+    },
+    {
+     "id": "transmute",
+     "name": "Transmute",
+     "level": 18,
+     "desc": "Looses one bolt out to 26 m without dealing damage. A non-boss target becomes a small harmless creature for 5s: it deals no damage and moves 50% slower, and damage after the first 1s turns it back.",
+     "shape": "bolt",
+     "element": "arcane",
+     "cd": 18000,
+     "mp": 14,
+     "ally": false
+    },
+    {
+     "id": "sixfold_ruin",
+     "name": "Sixfold Ruin",
+     "level": 24,
+     "desc": "Falls on a spot up to 30 m away and strikes everything within 9 m of it 6 times over 2.1s, for 476% weapon damage as arcane each time. The strikes take each of 6 forms in turn and one strike each of fire, ice, lightning, shadow, poison and arcane.",
+     "shape": "ground",
+     "element": "arcane",
+     "cd": 34000,
+     "mp": 38,
+     "ally": false
+    }
+   ]
+  },
+  "runesmith": {
+   "name": "Runesmith",
+   "role": "Rune-Forged Bulwark",
+   "hook": "Hammers runes into enemies and into anything that hits you, rends their armour, and lights your weapon with Forge Flame. Warding Glyph shields allies, and The Great Anvil falls with every rune you have laid.",
+   "signature": "runes",
+   "resource": null,
+   "armour": "heavy",
+   "weapons": [
+    "hammer",
+    "axe2h"
+   ],
+   "primary": "STR",
+   "skills": [
+    {
+     "id": "rune_hammer",
+     "name": "Rune Hammer",
+     "level": 1,
+     "desc": "Strikes everything in an 80° arc 3.2 m in front of you, or as far and as wide as your weapon swings if that is more, for 173% weapon damage as arcane. Adds 1 Rune stack to each target hit, up to 3.",
+     "shape": "melee",
+     "element": "arcane",
+     "cd": 5000,
+     "mp": 5,
+     "ally": false
+    },
+    {
+     "id": "sunder",
+     "name": "Rend Plate",
+     "level": 3,
+     "desc": "Strikes everything in an 80° arc 3.2 m in front of you, or as far and as wide as your weapon swings if that is more, for 243% weapon damage. Marks targets with Rent for 8s: they take 15% more damage from every source and take 2 times the damage when a rune detonates on them.",
+     "shape": "melee",
+     "element": "physical",
+     "cd": 9000,
+     "mp": 8,
+     "ally": false
+    },
+    {
+     "id": "stoneskin",
+     "name": "Runeskin",
+     "level": 6,
+     "desc": "For 6s: take 40% less damage; melee attackers take 15% of the hit back; every melee attacker that hits you takes 1 Rune stack.",
+     "shape": "self",
+     "element": "physical",
+     "cd": 24000,
+     "mp": 14,
+     "ally": false
+    },
+    {
+     "id": "forge_flame",
+     "name": "Forge Flame",
+     "level": 12,
+     "desc": "For 12s your attacks deal 40% more damage as fire and apply Burning; every 4th attack bursts for 100% weapon damage within 3 m.",
+     "shape": "self",
+     "element": "fire",
+     "cd": 24000,
+     "mp": 12,
+     "ally": false
+    },
+    {
+     "id": "warding_glyph",
+     "name": "Warding Glyph",
+     "level": 18,
+     "desc": "Lands on a spot up to 14 m away. Places a zone 12 m across where you aim for 12s, giving allies inside Guarded (takes 25% less damage) while they stay in it, allies inside gain a barrier of 2% of maximum health every 1s, up to 15%. All allies = you, party members within 30 m and your followers (your own pets, summons and hired blades).",
+     "shape": "ground",
+     "element": "holy",
+     "cd": 20000,
+     "mp": 16,
+     "ally": false
+    },
+    {
+     "id": "great_anvil",
+     "name": "The Great Anvil",
+     "level": 24,
+     "desc": "Falls on a spot up to 20 m away, 1s after you cast, striking everything within 8 m of that spot for 2,996% weapon damage as arcane. Stuns targets for 2s. Places a post where you aim for 10s, each Rune Hammer hit within 8 m of the post rings the post for 120% weapon damage.",
+     "shape": "ground",
+     "element": "arcane",
+     "cd": 45000,
+     "mp": 30,
+     "ally": false
+    }
+   ]
+  },
+  "shadow_dancer": {
+   "name": "Shadow Dancer",
+   "role": "Afterimage Duelist",
+   "hook": "Every cut and step leaves an afterimage that strikes again a moment later. Umbral Step lands behind a target, Shroud hides your allies, Assassinate finishes the wounded, and Host of Shades copies everything you do.",
+   "signature": "afterimages",
+   "resource": null,
+   "armour": "light",
+   "weapons": [
+    "dagger"
+   ],
+   "primary": "DEX",
+   "skills": [
+    {
+     "id": "shade_cut",
+     "name": "Shade Cut",
+     "level": 1,
+     "desc": "Strikes everything in a 92° arc 2.8 m in front of you, or as far and as wide as your weapon swings if that is more, for 100% weapon damage as shadow. An afterimage where you stood repeats the strike 0.5s later for 50% of the damage.",
+     "shape": "melee",
+     "element": "shadow",
+     "cd": 3000,
+     "mp": 3,
+     "ally": false
+    },
+    {
+     "id": "shadowstep",
+     "name": "Umbral Step",
+     "level": 3,
+     "desc": "Strikes the enemy you reach for 320% weapon damage as shadow. Dashes up to 14 m to land behind the target. An afterimage where you stood repeats the strike 0.4s later for 40% of the damage.",
+     "shape": "dash",
+     "element": "shadow",
+     "cd": 9000,
+     "mp": 10,
+     "ally": false
+    },
+    {
+     "id": "smoke",
+     "name": "Shroud",
+     "level": 6,
+     "desc": "Places a zone 8 m across around you for 6s, giving allies inside Shrouded (takes 35% less damage) while they stay in it, applying Weakened (deals 20% less damage) to enemies inside while they stay in it. All allies = you, party members within 30 m and your followers (your own pets, summons and hired blades).",
+     "shape": "self",
+     "element": "shadow",
+     "cd": 20000,
+     "mp": 12,
+     "ally": false
+    },
+    {
+     "id": "cutting_waltz",
+     "name": "Cutting Waltz",
+     "level": 12,
+     "desc": "Strikes 5 times over 1.3s, each strike at one spot within 8 m of you, 2.4 m across, for 120% weapon damage as shadow each. Each strike lands at a random point inside the area, preferring enemies. An afterimage where you end up repeats the strike 0.6s later for 40% of the damage.",
+     "shape": "around",
+     "element": "shadow",
+     "cd": 14000,
+     "mp": 14,
+     "ally": false
+    },
+    {
+     "id": "execute",
+     "name": "Assassinate",
+     "level": 18,
+     "desc": "Strikes everything in a 69° arc 3 m in front of you, or as far and as wide as your weapon swings if that is more, for 689% weapon damage as shadow. A kill with this skill: the cooldown resets. Deals 100% more damage to targets below 30% health.",
+     "shape": "melee",
+     "element": "shadow",
+     "cd": 14000,
+     "mp": 12,
+     "ally": false
+    },
+    {
+     "id": "host_of_shades",
+     "name": "Host of Shades",
+     "level": 24,
+     "desc": "Summons 3 shades for 10s; it takes no follower slot. Your summoned copies repeat every skill you cast from where they stand, for 40% of the damage.",
+     "shape": "self",
+     "element": "shadow",
+     "cd": 50000,
+     "mp": 34,
+     "ally": false
+    }
+   ]
+  },
+  "tinker": {
+   "name": "Tinker",
+   "role": "Gadgeteer",
+   "hook": "Fights with gadgets: bolts that go off twice, grenades that change element each throw, a turret, a grappling line and a pocket watch that patches you up. Spring Battery winds up the whole party.",
+   "signature": "gadgets",
+   "resource": null,
+   "armour": "medium",
+   "weapons": [
+    "crossbow",
+    "dagger"
+   ],
+   "primary": "INT",
+   "skills": [
+    {
+     "id": "clockwork_bolt",
+     "name": "Clockwork Bolt",
+     "level": 1,
+     "desc": "Looses one shot out to 38 m for 110% weapon damage. Goes off again 1.2s later for 40% of the damage. Marks targets with Stuck for 4s: they take 10% more damage from every source. Orders your class companion to attack the target for 3s.",
+     "shape": "bolt",
+     "element": "physical",
+     "cd": 3000,
+     "mp": 4,
+     "ally": false
+    },
+    {
+     "id": "flask_grenade",
+     "name": "Flask Grenade",
+     "level": 3,
+     "desc": "Falls on a spot up to 24 m away striking everything within 3.5 m of that spot for 202% weapon damage as fire. Leaves the target Burning: a further 42% weapon damage over 5s. Each cast takes the next element in turn: fire, ice and poison.",
+     "shape": "ground",
+     "element": "fire",
+     "cd": 7000,
+     "mp": 8,
+     "ally": false
+    },
+    {
+     "id": "deploy_sentry",
+     "name": "Deploy Sentry",
+     "level": 6,
+     "desc": "Summons 1 Field Turret for 20s; it takes no follower slot.",
+     "shape": "self",
+     "element": "physical",
+     "cd": 30000,
+     "mp": 20,
+     "ally": false
+    },
+    {
+     "id": "pocket_watch",
+     "name": "Pocket Watch",
+     "level": 12,
+     "desc": "Heals you (or the party member you target) for 25% of maximum health. You (or the party member you target) get a ward for 6s that completely negates the first hit worth more than 15% of maximum health. Party members = players in your party within 30 m.",
+     "shape": "self",
+     "element": "arcane",
+     "cd": 22000,
+     "mp": 14,
+     "ally": true
+    },
+    {
+     "id": "grapple_line",
+     "name": "Grapple Line",
+     "level": 18,
+     "desc": "Strikes everything within 1.5 m of your path, and the enemy you reach, for 360% weapon damage. Stuns targets for 0.5s. Dashes up to 18 m out on a line and pulls you to whatever the line hits first.",
+     "shape": "dash",
+     "element": "physical",
+     "cd": 10000,
+     "mp": 6,
+     "ally": false
+    },
+    {
+     "id": "spring_battery",
+     "name": "Spring Battery",
+     "level": 24,
+     "desc": "For 10s, all allies: +40% attack speed; skills cost no mana; when it ends for 3s: -20% move speed. All allies = you, party members within 30 m and your followers (your own pets, summons and hired blades).",
+     "shape": "self",
+     "element": "lightning",
+     "cd": 40000,
+     "mp": 30,
+     "ally": false
+    }
+   ]
+  },
+  "priest": {
+   "name": "Priest",
+   "role": "Light and Shadow Healer",
+   "hook": "Heals by striking: every Shadow Lance and Twinlight spin mends the most hurt ally. Vigil saves everyone from one killing blow, Mark the Killer points out whoever needs to fall, and Second Dawn raises a fallen friend in the middle of a fight.",
+   "signature": "pre-paid revives and revenge",
+   "resource": null,
+   "armour": "light",
+   "weapons": [
+    "iron_mace",
+    "scepter",
+    "staff"
+   ],
+   "primary": "INT",
+   "skills": [
+    {
+     "id": "shadow_lance",
+     "name": "Shadow Lance",
+     "level": 1,
+     "desc": "Looses one bolt out to 38 m for 205% weapon damage as shadow, splashing everything within 2 m of where the bolt lands. Each enemy hit heals the most-hurt ally for 25% of the damage dealt. All allies = you, party members within 30 m and your followers (your own pets, summons and hired blades).",
+     "shape": "bolt",
+     "element": "shadow",
+     "cd": 5000,
+     "mp": 10,
+     "ally": false
+    },
+    {
+     "id": "dawn_prayer",
+     "name": "Prayer of Dawn",
+     "level": 1,
+     "desc": "Strikes everything within 10 m of you for 180% weapon damage as holy. Heals you (or the party member you target) for 20% of maximum health. Every other ally heals 20% of their maximum health. All allies = you, party members within 30 m and your followers (your own pets, summons and hired blades).",
+     "shape": "around",
+     "element": "holy",
+     "cd": 12000,
+     "mp": 16,
+     "ally": true
+    },
+    {
+     "id": "mark_the_killer",
+     "name": "Mark the Killer",
+     "level": 6,
+     "desc": "Looses one bolt out to 34 m for 193% weapon damage as shadow. Marks targets with Killer for 8s: they take 20% more damage from you.",
+     "shape": "bolt",
+     "element": "shadow",
+     "cd": 8000,
+     "mp": 9,
+     "ally": false
+    },
+    {
+     "id": "second_dawn",
+     "name": "Second Dawn",
+     "level": 12,
+     "desc": "Raises the fallen party member you target (else the nearest within 30 m) at 25% health. Instant. Can be cast in combat. The fallen player chooses whether to stand up. 30 mana, 180s cooldown. Party members = players in your party within 30 m.",
+     "shape": "self",
+     "element": "holy",
+     "cd": 180000,
+     "mp": 30,
+     "ally": true
+    },
+    {
+     "id": "vigil",
+     "name": "Vigil",
+     "level": 18,
+     "desc": "For 12s, all allies: the first killing blow leaves you at 1 health and ends it with a 6 m blast for 150% weapon damage. All allies = you, party members within 30 m and your followers (your own pets, summons and hired blades).",
+     "shape": "self",
+     "element": "holy",
+     "cd": 45000,
+     "mp": 24,
+     "ally": false
+    },
+    {
+     "id": "twinlight",
+     "name": "Twinlight",
+     "level": 24,
+     "desc": "Spins 6 times, striking everything within 14 m of you for 621% weapon damage as shadow on every spin. Each enemy hit heals the most-hurt ally for 25% of the damage dealt. Places a zone 28 m across around you for 6s, healing all allies inside 3% of maximum health every 1s. All allies = you, party members within 30 m and your followers (your own pets, summons and hired blades).",
+     "shape": "around",
+     "element": "shadow",
+     "cd": 40000,
+     "mp": 36,
+     "ally": false
+    }
+   ]
+  },
+  "enchanter": {
+   "name": "Enchanter",
+   "role": "Sleep and Charm Controller",
+   "hook": "Puts whole packs to sleep with Drowse so you pick the fight; Arcane Jolt hits sleepers far harder. Beguile turns an enemy against its friends, Lethargy slows a crowd, and a Phantasm decoy puts its attackers to sleep.",
+   "signature": "sleep and charm",
+   "resource": null,
+   "armour": "light",
+   "weapons": [
+    "staff",
+    "wand"
+   ],
+   "primary": "INT",
+   "skills": [
+    {
+     "id": "arcane_jolt",
+     "name": "Arcane Jolt",
+     "level": 1,
+     "desc": "Looses one bolt out to 34 m for 70% weapon damage as arcane. Deals 150% more damage to sleeping targets, and removes the sleeping.",
+     "shape": "bolt",
+     "element": "arcane",
+     "cd": 2500,
+     "mp": 4,
+     "ally": false
+    },
+    {
+     "id": "drowse",
+     "name": "Drowse",
+     "level": 3,
+     "desc": "Lands on a spot up to 30 m away, affecting everything within 5 m of it. Also applies Asleep for 6s.",
+     "shape": "ground",
+     "element": "arcane",
+     "cd": 14000,
+     "mp": 14,
+     "ally": false
+    },
+    {
+     "id": "beguile",
+     "name": "Beguile",
+     "level": 6,
+     "desc": "Looses one bolt out to 26 m without dealing damage. A non-boss target fights its own side for 10s, following you; when it ends the target is Weakened for 3s. Champions and rares turn for half as long; a boss is slowed 60% instead.",
+     "shape": "bolt",
+     "element": "arcane",
+     "cd": 24000,
+     "mp": 18,
+     "ally": false
+    },
+    {
+     "id": "lethargy",
+     "name": "Lethargy",
+     "level": 12,
+     "desc": "Lands on a spot up to 26 m away. Places a zone 12 m across where you aim for 8s, applying Lethargic (moves 50% slower) to enemies inside while they stay in it.",
+     "shape": "ground",
+     "element": "arcane",
+     "cd": 16000,
+     "mp": 14,
+     "ally": false
+    },
+    {
+     "id": "phantasm",
+     "name": "Phantasm",
+     "level": 18,
+     "desc": "Summons a decoy, each with 30% of your maximum health, that does not move or attack and draws every enemy near it for 8s; whatever strikes it gets Asleep for 2s; it takes no follower slot.",
+     "shape": "self",
+     "element": "arcane",
+     "cd": 22000,
+     "mp": 14,
+     "ally": false
+    },
+    {
+     "id": "enthrall",
+     "name": "Grand Enthrallment",
+     "level": 24,
+     "desc": "Strikes everything within 12 m of you without dealing damage. A non-boss target fights its own side for 6s; when it ends the target is Weakened for 4s. Champions and rares turn for half as long; a boss is slowed 60% instead.",
+     "shape": "around",
+     "element": "arcane",
+     "cd": 60000,
+     "mp": 40,
+     "ally": false
+    }
+   ]
+  },
+  "starcaller": {
+   "name": "Starcaller",
+   "role": "Arcane Star Caster",
+   "hook": "Throws golden stars, calls bigger ones down from the sky and lays fields of them on the ground. Stars that land fill your Constellation.",
+   "signature": "Constellation: from level 6 (when Called Star, the first skill that spends it, opens), Star Dart and Scattered Stars gain 1 Starlight for each enemy they hit (it holds 5); Called Star, Star Field and Heavens' Barrage spend it all for more damage, and do more still at five.",
+   "resource": "Starlight",
+   "armour": "cloth",
+   "weapons": [
+    "wand",
+    "staff",
+    "tome"
+   ],
+   "primary": "INT",
+   "skills": [
+    {
+     "id": "star_dart",
+     "name": "Star Dart",
+     "level": 1,
+     "desc": "Looses one bolt out to 34 m for 110% weapon damage as arcane, splashing everything within 1.4 m of where the bolt lands. From level 6, gains 1 Starlight for each enemy hit.",
+     "shape": "bolt",
+     "element": "arcane",
+     "cd": 2500,
+     "mp": 5,
+     "ally": false
+    },
+    {
+     "id": "star_volley",
+     "name": "Scattered Stars",
+     "level": 3,
+     "desc": "Looses 3 bolts in a 14° fan out to 30 m, each for 81% weapon damage as arcane, splashing everything within 1.4 m of where a bolt lands. From level 6, gains 1 Starlight for each enemy hit.",
+     "shape": "bolt",
+     "element": "arcane",
+     "cd": 7000,
+     "mp": 12,
+     "ally": false
+    },
+    {
+     "id": "called_star",
+     "name": "Called Star",
+     "level": 6,
+     "desc": "Falls on a spot up to 30 m away, 1s after you cast, striking everything within 5 m of that spot for 378% weapon damage as arcane. Stuns targets for 0.6s. Spends all your Starlight: 10% more damage for each point spent. Spending 5 or more: reaches 8 m.",
+     "shape": "ground",
+     "element": "arcane",
+     "cd": 10000,
+     "mp": 18,
+     "ally": false
+    },
+    {
+     "id": "star_field",
+     "name": "Star Field",
+     "level": 12,
+     "desc": "Falls on a spot up to 28 m away striking everything within 6 m of that spot for 232% weapon damage as arcane. Places a zone 12 m across where you aim for 8s, striking 6 enemies within 6 m every 1s for 25% weapon damage. Spends all your Starlight: 10% more damage for each point spent. Spending 5 or more: places a zone 12 m across where you aim for 12s, striking 6 enemies within 6 m every 1s for 25% weapon damage.",
+     "shape": "ground",
+     "element": "arcane",
+     "cd": 16000,
+     "mp": 22,
+     "ally": false
+    },
+    {
+     "id": "wheeling_stars",
+     "name": "Wheeling Stars",
+     "level": 18,
+     "desc": "For 12s, 3 orbs circle you in a fight; each one strikes the nearest enemy within 8 m every 1.2s for 68% weapon damage as arcane. You (or the party member you target) get a ward for 12s that completely negates 2 hits, each one of up to 15% of maximum health. Party members = players in your party within 30 m.",
+     "shape": "self",
+     "element": "arcane",
+     "cd": 24000,
+     "mp": 20,
+     "ally": true
+    },
+    {
+     "id": "sky_barrage",
+     "name": "Heavens' Barrage",
+     "level": 24,
+     "desc": "Falls on a spot up to 30 m away and strikes everything within 9 m of it 10 times over 4s, for 259% weapon damage as arcane each time. Each strike lands at a random point inside the area, preferring enemies. Spends all your Starlight: 8% more damage for each point spent. Spending 5 or more: reaches 11 m.",
+     "shape": "ground",
+     "element": "arcane",
+     "cd": 30000,
+     "mp": 34,
+     "ally": false
+    }
+   ]
+  },
+  "starblade": {
+   "name": "Star Blade",
+   "role": "Arcane Star Guardian",
+   "hook": "Fights up close with a sword of starlight: wraps itself in a star shield that strikes back, drags enemies in on star threads and pins them in place. Every blow you give or take fills your Constellation.",
+   "signature": "Constellation, the blade's way: from level 3 (when Star Aegis, the first skill that spends it, opens), Starcut, Star Tether and Comet Rush gain 1 Starlight for each enemy they hit, and every hit you take gains 1 (once a second at most) — it holds 5. Star Aegis, Binding Stars and Collapsing Star spend it all: a stronger star shield that strikes back harder, a longer hold, a heavier collapse — and more again at five.",
+   "resource": "Starlight",
+   "armour": "heavy",
+   "weapons": [
+    "sword",
+    "sword2h"
+   ],
+   "primary": "STR",
+   "skills": [
+    {
+     "id": "starcut",
+     "name": "Starcut",
+     "level": 1,
+     "desc": "Strikes everything in a 92° arc 3.2 m in front of you, or as far and as wide as your weapon swings if that is more, for 125% weapon damage as arcane. From level 3, gains 1 Starlight for each enemy hit. From level 3, every hit you take gains 1 Starlight (once every 1s at most).",
+     "shape": "melee",
+     "element": "arcane",
+     "cd": 4000,
+     "mp": 4,
+     "ally": false
+    },
+    {
+     "id": "star_aegis",
+     "name": "Star Aegis",
+     "level": 3,
+     "desc": "Spends all your Starlight if you have it. For 8s, the next 6 melee hits on you are reduced by 30%; each is answered with a strike for 90% weapon damage and you gain 1 Starlight. You (or the party member you target) get a barrier worth 12% of maximum health for 8s. Each Starlight spent adds 3% of maximum health to the barrier and makes each answering strike 20% stronger. Spending 5: the answering strikes also stun for 0.5s. Party members = players in your party within 30 m.",
+     "shape": "self",
+     "element": "arcane",
+     "cd": 18000,
+     "mp": 12,
+     "ally": true
+    },
+    {
+     "id": "star_tether",
+     "name": "Star Tether",
+     "level": 6,
+     "desc": "Strikes everything within 10 m of you for 100% weapon damage as arcane. Stuns targets for 0.5s. Pulls targets 6 m toward you. From level 3, gains 1 Starlight for each enemy hit. Enemies within 10 m attack you for 3s.",
+     "shape": "around",
+     "element": "arcane",
+     "cd": 12000,
+     "mp": 10,
+     "ally": false
+    },
+    {
+     "id": "comet_rush",
+     "name": "Comet Rush",
+     "level": 12,
+     "desc": "Strikes everything within 2.5 m of your path, and the enemy you reach, for 273% weapon damage as arcane. Stuns targets for 0.6s. Dashes up to 14 m to the first enemy in the line. From level 3, gains 1 Starlight for each enemy hit.",
+     "shape": "dash",
+     "element": "arcane",
+     "cd": 10000,
+     "mp": 8,
+     "ally": false
+    },
+    {
+     "id": "binding_stars",
+     "name": "Binding Stars",
+     "level": 18,
+     "desc": "Strikes everything within 7 m of you for 317% weapon damage as arcane. Places a zone 14 m across where you stand for 5s, striking 6 enemies within 7 m every 1s for 15% weapon damage, pulling enemies inside 1 m inward every second. Also applies Rooted for 2.5s. Spends all your Starlight: 8% more damage for each point spent if you have it. Each Starlight spent holds the root 0.3s longer. Spending 5: it also stuns what it hits for 1s.",
+     "shape": "around",
+     "element": "arcane",
+     "cd": 20000,
+     "mp": 18,
+     "ally": false
+    },
+    {
+     "id": "collapsing_star",
+     "name": "Collapsing Star",
+     "level": 24,
+     "desc": "Strikes everything within 8 m of you for 1,325% weapon damage as arcane. Stuns targets for 0.8s. Pulls targets 4 m toward you. Spends all your Starlight: 12% more damage for each point spent. Spending 5 or more: reaches 11 m.",
+     "shape": "around",
+     "element": "arcane",
+     "cd": 26000,
+     "mp": 26,
+     "ally": false
+    }
+   ]
+  }
+ }
+}

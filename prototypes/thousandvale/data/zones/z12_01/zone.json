@@ -106,13 +106,31 @@
     "z": 1336
   },
   "bridges": [],
+  "palette": "downs",
+  "continent": "torbor",
+  "biomeNames": {
+    "grassland": "Chalk Downs",
+    "temperateForest": "Oakwood",
+    "borealForest": "Pine Highwood",
+    "hills": "Heather Moor",
+    "hallowed": "Saint's Meadow",
+    "marsh": "Brack Fen",
+    "badlands": "Red Scarps",
+    "shrubland": "Gorse Heath",
+    "savanna": "Golden Wolds",
+    "veiledHills": "Blackthorn Scar",
+    "tundra": "High Fell",
+    "mountains": "Grey Crags",
+    "snowyPeaks": "Fell Tops",
+    "beach": "Shingle Shore"
+  },
   "summary": {
     "zone": "z12_01",
     "province": "Petbeck Basin",
     "inputHash": "89c56ef1",
     "rivers": 1,
-    "wetShare": 0.003,
-    "unwalkableShare": 0.035,
+    "wetShare": 0.115,
+    "unwalkableShare": 0.153,
     "towns": [
       {
         "name": "Ashcombe",
@@ -166,19 +184,22 @@
     ],
     "roads": 5,
     "bridges": 0,
-    "paths": 13,
-    "pathMetres": 2071,
-    "scatter": 15702,
+    "paths": 12,
+    "pathMetres": 1882,
+    "scatter": 25744,
     "scatterKinds": {
-      "rock_small": 1944,
-      "bush": 4785,
-      "tree_conifer": 4906,
-      "tree_broadleaf": 1891,
-      "rock_large": 732,
-      "boulder": 43,
-      "hedge": 1284,
-      "tree_fruit": 36,
-      "reed": 81
+      "rock_small": 1667,
+      "bush": 5063,
+      "tree_broadleaf": 12569,
+      "rock_large": 1338,
+      "tree_birch": 1443,
+      "boulder": 85,
+      "tree_old_oak": 67,
+      "heather": 1309,
+      "tree_conifer": 831,
+      "hedge": 1257,
+      "tree_fruit": 35,
+      "reed": 80
     },
     "sites": [
       "settlement(HUB) city Ashcombe 1408 1328 140",
@@ -191,13 +212,13 @@
       "x": 1412,
       "z": 1336
     },
-    "placements": 256,
+    "placements": 245,
     "vignettesAvoided": 620
   },
   "files": {
-    "terrain.bin": 552313,
-    "nav.bin": 32766,
-    "scatter.bin": 125700,
-    "placements.json": 195971
+    "terrain.bin": 569143,
+    "nav.bin": 52393,
+    "scatter.bin": 206036,
+    "placements.json": 177261
   }
 }

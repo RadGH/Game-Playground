@@ -112,8 +112,8 @@
     3,
     3
    ],
-   "x": 456,
-   "z": 1272,
+   "x": 1081,
+   "z": 1713,
    "yaw": 0,
    "radius": 8,
    "quest": "crabs_and_cutthroats",
@@ -133,11 +133,11 @@
     6
    ],
    "count": [
-    1,
-    1
+    3,
+    3
    ],
-   "x": 512,
-   "z": 1224,
+   "x": 1068,
+   "z": 1725,
    "yaw": 0,
    "radius": 8,
    "quest": "crabs_and_cutthroats",
@@ -321,15 +321,15 @@
    "monster": "carrion_moth",
    "with": null,
    "level": [
-    6,
-    6
+    7,
+    7
    ],
    "count": [
     3,
     3
    ],
-   "x": 752,
-   "z": 648,
+   "x": 1326,
+   "z": 986,
    "yaw": 0,
    "radius": 8,
    "quest": "battery_moths",
@@ -352,8 +352,8 @@
     3,
     3
    ],
-   "x": 808,
-   "z": 672,
+   "x": 1313,
+   "z": 998,
    "yaw": 0,
    "radius": 8,
    "quest": "battery_moths",
@@ -369,111 +369,15 @@
    "monster": "carrion_moth",
    "with": null,
    "level": [
-    6,
-    6
-   ],
-   "count": [
-    1,
-    1
-   ],
-   "x": 754,
-   "z": 624,
-   "yaw": 0,
-   "radius": 8,
-   "quest": "battery_moths",
-   "hunt": true,
-   "respawnMin": [
-    1,
-    1.5
-   ]
-  },
-  {
-   "type": "camp",
-   "id": "quest_battery_moths_0_3",
-   "monster": "carrion_moth",
-   "with": null,
-   "level": [
-    6,
-    6
+    7,
+    7
    ],
    "count": [
     3,
     3
    ],
-   "x": 687,
-   "z": 802,
-   "yaw": 0,
-   "radius": 8,
-   "quest": "battery_moths",
-   "hunt": true,
-   "respawnMin": [
-    1,
-    1.5
-   ]
-  },
-  {
-   "type": "camp",
-   "id": "quest_battery_moths_0_4",
-   "monster": "carrion_moth",
-   "with": null,
-   "level": [
-    6,
-    6
-   ],
-   "count": [
-    3,
-    3
-   ],
-   "x": 662,
-   "z": 789,
-   "yaw": 0,
-   "radius": 8,
-   "quest": "battery_moths",
-   "hunt": true,
-   "respawnMin": [
-    1,
-    1.5
-   ]
-  },
-  {
-   "type": "camp",
-   "id": "quest_battery_moths_0_5",
-   "monster": "carrion_moth",
-   "with": null,
-   "level": [
-    6,
-    6
-   ],
-   "count": [
-    3,
-    3
-   ],
-   "x": 700,
-   "z": 779,
-   "yaw": 0,
-   "radius": 8,
-   "quest": "battery_moths",
-   "hunt": true,
-   "respawnMin": [
-    1,
-    1.5
-   ]
-  },
-  {
-   "type": "camp",
-   "id": "quest_battery_moths_0_6",
-   "monster": "carrion_moth",
-   "with": null,
-   "level": [
-    6,
-    6
-   ],
-   "count": [
-    2,
-    2
-   ],
-   "x": 677,
-   "z": 804,
+   "x": 1328,
+   "z": 962,
    "yaw": 0,
    "radius": 8,
    "quest": "battery_moths",
@@ -486,18 +390,18 @@
   {
    "type": "camp",
    "id": "champ_z14_01_1",
-   "monster": "brigand_captain",
+   "monster": "fen_croaker",
    "with": null,
    "level": [
-    7,
-    7
+    6,
+    6
    ],
    "count": [
     1,
     1
    ],
-   "x": 618,
-   "z": 1535,
+   "x": 440,
+   "z": 1305,
    "yaw": 0,
    "radius": 5,
    "rank": "champion",
@@ -514,6 +418,34 @@
   {
    "type": "camp",
    "id": "champ_z14_01_2",
+   "monster": "brigand_captain",
+   "with": null,
+   "level": [
+    7,
+    7
+   ],
+   "count": [
+    1,
+    1
+   ],
+   "x": 618,
+   "z": 1535,
+   "yaw": 0,
+   "radius": 5,
+   "rank": "champion",
+   "affixes": [
+    "venomous"
+   ],
+   "respawnMin": [
+    4,
+    8
+   ],
+   "champion": true,
+   "hunt": true
+  },
+  {
+   "type": "camp",
+   "id": "champ_z14_01_3",
    "monster": "reed_serpent",
    "with": null,
    "level": [
@@ -530,7 +462,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "thorned"
+    "fiery"
    ],
    "respawnMin": [
     4,
@@ -541,7 +473,7 @@
   },
   {
    "type": "camp",
-   "id": "champ_z14_01_3",
+   "id": "champ_z14_01_4",
    "monster": "carrion_moth",
    "with": null,
    "level": [
@@ -558,7 +490,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "giant"
+    "packleader"
    ],
    "respawnMin": [
     4,
@@ -573,8 +505,8 @@
    "name": "Skipper Hale Tarrow",
    "role": "angler",
    "at": "Saltmouth",
-   "x": 800,
-   "z": 1296,
+   "x": 896,
+   "z": 1320,
    "yaw": -2.75,
    "angler": true,
    "quests": 0,

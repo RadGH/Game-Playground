@@ -237,6 +237,12 @@ export function connect(opts = {}) {
   }
 
   // ---- API ----
+  /** feedback #98: is a name free for a new character? -> Promise<{ free, msg }> (free: null when the server did not say) */
+  net.nameCheck = name => new Promise(resolve => {
+    const off = net.on('nameR', r => { if (String(r.name).toLowerCase() !== String(name).toLowerCase()) return; off(); clearTimeout(t); resolve(r); });
+    const t = setTimeout(() => { off(); resolve({ free: null }); }, 6000);
+    sendJ(gw, { t: 'nameCheck', name: String(name).slice(0, 24) });
+  });
   net.createChar = function ({ name, cls, look, kit }) {
     return new Promise((resolve, reject) => {
       createWaiter = { resolve, reject };
@@ -309,6 +315,10 @@ export function connect(opts = {}) {
   net.ignore = (name, on = true) => sendJ(gw, { t: 'ignore', name, on });
   net.say = text => sendJ(game, { t: 'say', text: String(text).slice(0, 200) });
   net.respawn = () => sendJ(game, { t: 'respawn' });
+  net.unstuck = () => sendJ(game, { t: 'unstuck' });      // feedback #96: /reset
+  net.achievements = () => sendJ(game, { t: 'ach', op: 'list' });      // feedback #106
+  let linkReq = 0;
+  net.link = (kind, ref) => { const req = ++linkReq; sendJ(game, kind === 'item' ? { t: 'link', kind, uid: String(ref), req } : { t: 'link', kind, id: String(ref), req }); return req; };      // feedback #107
   net.leave = () => { sendJ(game, { t: 'leave' }); sendJ(gw, { t: 'leave' }); stop(); setStatus('left'); };
   // ---- M3: accounts, channels, friends, guilds, the Callboard, reports, mail ----
   const pick = (o, a, keys) => { for (const k of keys) if (a[k] !== undefined && a[k] !== null) o[k] = a[k]; return o; };

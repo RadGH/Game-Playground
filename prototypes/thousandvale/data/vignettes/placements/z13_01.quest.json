@@ -16,8 +16,8 @@
     3,
     3
    ],
-   "x": 1081,
-   "z": 1099,
+   "x": 1130,
+   "z": 1068,
    "yaw": 0,
    "radius": 6,
    "quest": "eels_and_omens",
@@ -40,8 +40,8 @@
     3,
     3
    ],
-   "x": 1068,
-   "z": 1111,
+   "x": 1117,
+   "z": 1080,
    "yaw": 0,
    "radius": 6,
    "quest": "eels_and_omens",
@@ -64,8 +64,8 @@
     3,
     3
    ],
-   "x": 1083,
-   "z": 1075,
+   "x": 1132,
+   "z": 1044,
    "yaw": 0,
    "radius": 6,
    "quest": "eels_and_omens",
@@ -88,8 +88,8 @@
     1,
     1
    ],
-   "x": 1088,
-   "z": 1109,
+   "x": 1137,
+   "z": 1078,
    "yaw": 0,
    "radius": 6,
    "quest": "eels_and_omens",
@@ -105,17 +105,17 @@
    "monster": "bog_slime",
    "with": null,
    "level": [
-    6,
-    6
+    5,
+    5
    ],
    "count": [
     3,
     3
    ],
-   "x": 79,
-   "z": 445,
+   "x": 240,
+   "z": 544,
    "yaw": 0,
-   "radius": 5,
+   "radius": 8,
    "quest": "slime_jars",
    "hunt": true,
    "respawnMin": [
@@ -129,17 +129,17 @@
    "monster": "bog_slime",
    "with": null,
    "level": [
-    6,
-    6
+    5,
+    5
    ],
    "count": [
     3,
     3
    ],
-   "x": 66,
-   "z": 458,
+   "x": 227,
+   "z": 556,
    "yaw": 0,
-   "radius": 5,
+   "radius": 8,
    "quest": "slime_jars",
    "hunt": true,
    "respawnMin": [
@@ -153,17 +153,17 @@
    "monster": "bog_slime",
    "with": null,
    "level": [
-    6,
-    6
+    5,
+    5
    ],
    "count": [
-    1,
-    1
+    3,
+    3
    ],
-   "x": 81,
-   "z": 421,
+   "x": 242,
+   "z": 520,
    "yaw": 0,
-   "radius": 5,
+   "radius": 8,
    "quest": "slime_jars",
    "hunt": true,
    "respawnMin": [
@@ -184,8 +184,8 @@
     3,
     3
    ],
-   "x": 1048,
-   "z": 320,
+   "x": 1150,
+   "z": 242,
    "yaw": 0,
    "radius": 8,
    "quest": "frog_chorus",
@@ -201,15 +201,15 @@
    "monster": "fen_croaker",
    "with": null,
    "level": [
-    7,
-    7
+    6,
+    6
    ],
    "count": [
     3,
     3
    ],
-   "x": 1046,
-   "z": 257,
+   "x": 1137,
+   "z": 254,
    "yaw": 0,
    "radius": 8,
    "quest": "frog_chorus",
@@ -232,8 +232,8 @@
     3,
     3
    ],
-   "x": 1050,
-   "z": 296,
+   "x": 1152,
+   "z": 218,
    "yaw": 0,
    "radius": 8,
    "quest": "frog_chorus",
@@ -249,39 +249,15 @@
    "monster": "fen_croaker",
    "with": null,
    "level": [
-    7,
-    7
+    6,
+    6
    ],
    "count": [
     3,
     3
    ],
-   "x": 1053,
-   "z": 267,
-   "yaw": 0,
-   "radius": 8,
-   "quest": "frog_chorus",
-   "hunt": true,
-   "respawnMin": [
-    1,
-    1.5
-   ]
-  },
-  {
-   "type": "camp",
-   "id": "quest_frog_chorus_0_4",
-   "monster": "fen_croaker",
-   "with": null,
-   "level": [
-    6,
-    6
-   ],
-   "count": [
-    1,
-    1
-   ],
-   "x": 1030,
-   "z": 317,
+   "x": 1157,
+   "z": 252,
    "yaw": 0,
    "radius": 8,
    "quest": "frog_chorus",
@@ -304,8 +280,8 @@
     3,
     3
    ],
-   "x": 552,
-   "z": 799,
+   "x": 536,
+   "z": 771,
    "yaw": 0,
    "radius": 8,
    "quest": "lights_in_the_fen",
@@ -334,7 +310,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "stormlash"
+    "ironclad"
    ],
    "respawnMin": [
     4,
@@ -349,9 +325,9 @@
    "name": "Mog Eelwright",
    "role": "angler",
    "at": "Brackwater",
-   "x": 1136,
-   "z": 1024,
-   "yaw": 1.18,
+   "x": 1052,
+   "z": 1044,
+   "yaw": -1.18,
    "angler": true,
    "quests": 0,
    "titled": true
@@ -389,9 +365,9 @@
    "name": "Dickon Pike",
    "role": "carter",
    "at": "Eelwick",
-   "x": 1208,
-   "z": 446,
-   "yaw": 2.709,
+   "x": 1212,
+   "z": 442,
+   "yaw": -0.38,
    "cart": "cart_eelwick",
    "placedBy": "content-towns",
    "quests": 0,
@@ -405,8 +381,8 @@
    "vehicle": "ox_cart",
    "town": "Eelwick",
    "carter": "carter_eelwick",
-   "x": 1208,
-   "z": 448,
+   "x": 1212,
+   "z": 440,
    "yaw": 1.257,
    "radius": 2.2
   },

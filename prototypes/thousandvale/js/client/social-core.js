@@ -67,7 +67,7 @@ export function parseChatLine(raw, { active = 'say', reply = null, whisperTo = n
   const first = rest.split(/\s+/)[0] || '';
   return { kind: 'cmd', cmd: COMMAND_ALIASES[cmd] || cmd, arg: first, rest };
 }
-const COMMAND_ALIASES = { inv: 'invite', unfriend: 'unfriend', befriend: 'friend', ginv: 'ginvite', gquit: 'gleave', ignorelist: 'ignore' };
+const COMMAND_ALIASES = { inv: 'invite', unfriend: 'unfriend', befriend: 'friend', ginv: 'ginvite', gquit: 'gleave', ignorelist: 'ignore', stuck: 'reset', unstuck: 'reset' };
 
 /** What /help prints. */
 export const CHAT_HELP = [
@@ -76,6 +76,7 @@ export const CHAT_HELP = [
   '/friend Name · /unfriend Name · /ignore Name · /unignore Name · /report Name',
   '/follow [Name] · /unfollow · /tradewith [Name] · /settings',
   '/ginvite Name · /gleave · /motd text · /claim (save your account)',
+  '/reset (stuck? moves you onto firm ground; again within two minutes takes you home)',
 ];
 
 /**

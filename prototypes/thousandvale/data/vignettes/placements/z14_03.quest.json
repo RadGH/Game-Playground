@@ -16,10 +16,10 @@
     3,
     3
    ],
-   "x": 1985,
-   "z": 1590,
+   "x": 1697,
+   "z": 1324,
    "yaw": 0,
-   "radius": 4,
+   "radius": 8,
    "quest": "flags_over_redcliff",
    "hunt": true,
    "respawnMin": [
@@ -40,8 +40,8 @@
     3,
     3
    ],
-   "x": 1905,
-   "z": 1616,
+   "x": 1632,
+   "z": 1273,
    "yaw": 0,
    "radius": 8,
    "quest": "flags_over_redcliff",
@@ -57,15 +57,15 @@
    "monster": "road_brigand",
    "with": null,
    "level": [
-    8,
-    8
+    7,
+    7
    ],
    "count": [
     3,
     3
    ],
-   "x": 1728,
-   "z": 792,
+   "x": 1456,
+   "z": 1728,
    "yaw": 0,
    "radius": 8,
    "quest": "flags_over_redcliff",
@@ -81,15 +81,15 @@
    "monster": "road_brigand",
    "with": null,
    "level": [
-    8,
-    8
+    7,
+    7
    ],
    "count": [
     3,
     3
    ],
-   "x": 1715,
-   "z": 804,
+   "x": 1443,
+   "z": 1740,
    "yaw": 0,
    "radius": 8,
    "quest": "flags_over_redcliff",
@@ -105,39 +105,15 @@
    "monster": "road_brigand",
    "with": null,
    "level": [
-    8,
-    8
+    7,
+    7
    ],
    "count": [
     3,
     3
    ],
-   "x": 1730,
-   "z": 768,
-   "yaw": 0,
-   "radius": 8,
-   "quest": "flags_over_redcliff",
-   "hunt": true,
-   "respawnMin": [
-    1,
-    1.5
-   ]
-  },
-  {
-   "type": "camp",
-   "id": "quest_flags_over_redcliff_1_3",
-   "monster": "road_brigand",
-   "with": null,
-   "level": [
-    8,
-    8
-   ],
-   "count": [
-    1,
-    1
-   ],
-   "x": 1735,
-   "z": 802,
+   "x": 1458,
+   "z": 1704,
    "yaw": 0,
    "radius": 8,
    "quest": "flags_over_redcliff",
@@ -184,8 +160,32 @@
     3,
     3
    ],
-   "x": 1175,
-   "z": 2008,
+   "x": 1092,
+   "z": 1987,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "cinder_farm",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_cinder_farm_0_2",
+   "monster": "crag_hyena",
+   "with": null,
+   "level": [
+    8,
+    8
+   ],
+   "count": [
+    2,
+    2
+   ],
+   "x": 1107,
+   "z": 1951,
    "yaw": 0,
    "radius": 8,
    "quest": "cinder_farm",
@@ -201,17 +201,17 @@
    "monster": "sky_cultist",
    "with": null,
    "level": [
-    7,
-    7
+    8,
+    8
    ],
    "count": [
     3,
     3
    ],
-   "x": 1817,
-   "z": 154,
+   "x": 1712,
+   "z": 99,
    "yaw": 0,
-   "radius": 8,
+   "radius": 4,
    "quest": "cellar_cultists",
    "hunt": true,
    "respawnMin": [
@@ -232,8 +232,8 @@
     3,
     3
    ],
-   "x": 1760,
-   "z": 104,
+   "x": 1665,
+   "z": 139,
    "yaw": 0,
    "radius": 8,
    "quest": "cellar_cultists",
@@ -262,7 +262,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "venomous"
+    "gilded"
    ],
    "respawnMin": [
     4,
@@ -290,7 +290,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "thorned"
+    "giant"
    ],
    "respawnMin": [
     4,
@@ -318,7 +318,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "fiery"
+    "packleader"
    ],
    "respawnMin": [
     4,
@@ -346,7 +346,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "vicious"
+    "ironclad"
    ],
    "respawnMin": [
     4,
@@ -456,8 +456,8 @@
    "role": "carter",
    "at": "Minfenrow",
    "x": 1048,
-   "z": 1092,
-   "yaw": 3.142,
+   "z": 1084,
+   "yaw": 0,
    "cart": "cart_minfenrow",
    "placedBy": "content-towns",
    "quests": 0,
@@ -472,7 +472,7 @@
    "town": "Minfenrow",
    "carter": "carter_minfenrow",
    "x": 1048,
-   "z": 1094,
+   "z": 1082,
    "yaw": -1.571,
    "radius": 2.2
   },
@@ -482,9 +482,9 @@
    "name": "Orla Pennock",
    "role": "carter",
    "at": "Bipetwatch",
-   "x": 372,
-   "z": 1412,
-   "yaw": 0.785,
+   "x": 378,
+   "z": 1422,
+   "yaw": -2.505,
    "cart": "cart_bipetwatch",
    "placedBy": "content-towns",
    "quests": 0,
@@ -498,8 +498,8 @@
    "vehicle": "ox_cart",
    "town": "Bipetwatch",
    "carter": "carter_bipetwatch",
-   "x": 370,
-   "z": 1410,
+   "x": 380,
+   "z": 1424,
    "yaw": 2.356,
    "radius": 2.2
   },

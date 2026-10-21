@@ -86,6 +86,13 @@ export function installTvClasses(classData, skillData, cfg) {
     skillData.classes[row.id] = [...row.skills];
     report.classes.push(row.id);
   }
+  // feedback #113: the card line (role + hook) of every Farhold class, rewritten for real-time play from its own skills
+  for (const [id, t] of Object.entries(cfg.classText || {})) {
+    const c = id[0] !== '_' && classData.classes.find(x => x.id === id);
+    if (!c || !t) continue;
+    if (t.role) c.role = t.role;
+    if (t.hook) c.hook = t.hook;
+  }
   skillData._tvClasses = true;
   return report;
 }

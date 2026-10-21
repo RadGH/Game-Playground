@@ -10,7 +10,7 @@
     "mace":      { "group": "weapon", "bases": [["iron_mace", 1], ["hammer", 1], ["lantern_mace", 3], ["warhammer", 6], ["axle_club", 11]] },
     "dagger":    { "group": "weapon", "bases": [["dagger", 1], ["tithe_dagger", 4], ["houndmasters_lash", 8]] },
     "spear":     { "group": "weapon", "bases": [["spear", 1]] },
-    "polearm":   { "group": "weapon", "bases": [["halberd", 1]] },
+    "polearm":   { "group": "weapon", "bases": [["halberd", 1], ["glaive", 6], ["bardiche", 12]] },
     "javelin":   { "group": "weapon", "bases": [["javelin", 1], ["pathfinder_javelin", 4]] },
     "bow":       { "group": "weapon", "bases": [["shortbow", 1], ["bow", 3], ["roadwarden_bow", 8]] },
     "crossbow":  { "group": "weapon", "bases": [["crossbow", 1], ["stormpin_crossbow", 11]] },

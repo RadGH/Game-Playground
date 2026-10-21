@@ -272,7 +272,7 @@ export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onPick, 
     const nb = $('new-char'); if (nb) { nb.disabled = list.length >= cap; nb.dataset.tip = list.length >= cap ? `An account holds ${cap} characters. Delete one to make room.` : ''; }
     const label = T.mine.querySelector('.label');
     if (label) label.textContent = username ? `${username} — your characters` : 'Your characters';
-    if (list.length && !$('name').value) $('name').value = list[0].name;
+    // feedback #98: the new-character name box is NOT filled with a character you already have (that name would sign you in as it)
   }
 
   // ---- in game: the Account window ----

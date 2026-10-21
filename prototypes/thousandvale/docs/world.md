@@ -660,3 +660,138 @@ placement `{ quay, piers [{a, b, deck, width, main}], berth, master, dock }` is 
 content chain (docs/ON-HOLD.md step 4 + content-pools), `bake-horizon`, `bake-map`, `ship-routes --write`.
 The map's roads and rivers are the BUILT lines (`tools/lib/coast-lines.mjs` `builtLines`, written to `data/world/map/map.json` by
 `bake-map`): roads from the zone bakes, rivers from source (or the island's edge) to the sea; none over open sea.
+
+## 16. How trees are drawn — storybook trees (2026-10-20)
+
+Owner's report: "the new big trees look better from a distance. They have big interesting leaves. When you get closer it
+gets replaced with a spindly tree with tiny leaves. Can we have trees updated to look more cartoony and mythical."
+
+**Why it happened.** Trees came from the shared kit (`highdef-3d/js/kit/trees.js`), which builds two different trees: up
+close (detail levels 0 and 1, inside 80 / 240 m on High, 60 / 200 m on Medium — `scatter-view.js` `RANGES`) a real
+branching skeleton with ~100 small leaf cards on thin twigs, and far away (level 2) a cross of three big cards, each one
+leaf picture stretched over the whole crown. So the far tree showed a handful of huge painted leaves and the near one
+hundreds of small ones on bare branches. Forest giants (`js/rules/forest.js`, drawn 3-5x) made it worst, because they
+stay in view at the far level for longest.
+
+**What draws them now.** `js/client/tree-style.js` (numbers in `js/client/tree-style-data.js`, one row per tree name).
+Every tree is PLANNED once from its seed — trunk path, limbs, and a few round leaf clumps (centre + radius), or stacked
+skirts for a conifer, or fronds for a palm / tree fern — and the same plan is drawn at every level:
+
+| Level | Trunk | Crown |
+|---|---|---|
+| 0 (near) | 8 sides, fluted and twisting, root flare | each clump a small solid puff + 8 big leaf cards round it |
+| 1 (middle) | 6 sides | the same clumps: an 8-sided puff + 5 bigger cards |
+| 2 (far) | 3 sides | the same clumps as 2 crossed cards each (the far look the owner liked) |
+
+A leaf card is one whole leaf-cluster picture the size of most of a clump, so a leaf is a hand across at every distance.
+Clumps light like a soft ball (their normals point out of the clump), darker inside and underneath, lighter on the top
+rim; colours are a little more saturated than the kit's. Forms: `round` (oak, the old oak), `tall` (beech, birch — the
+birch's dark bands are pairs of close rings), `weep` (willow: a dome and a curtain of hanging strands), `tiers` (fir,
+spruce: stacked cones with a fringe of needle sprays), `crown` (pine: a bare trunk with four skirts at the top), `snag`
+(dead and charred trees: crooked limbs, kept at the far level because they ARE the silhouette), `palm` (ironpalm) and
+`fern` (Vharlen's tree fern, which used to be a one-level flat-shaded piece and now has three levels and wind). The old
+oak of Saint's Meadow carries ~20 small gold "glow" cards in its crown (`accent`).
+
+Same contract as the kit (position, normal, uv, colour, `aWind`; the kit's leaf atlas through `cellRect`), so the scatter's
+instancing, its two materials and the shared wind (`decor.js` `windUniform`) are unchanged, and draw calls are the same
+(two meshes per tree name per level). Triangles per tree, kit -> storybook (level 0 / 1 / 2): oak 3,303/840/22 ->
+760/162/22, beech 2,979/904/22 -> 840/194/22, birch 2,331/906/22 -> 1,224/482/22, pine 4,224/1,134/22 -> 456/142/18,
+fir 4,624/1,174/22 -> 536/164/21, spruce 4,872/1,430/22 -> 616/186/21, willow 5,335/1,248/22 -> 932/200/26, old oak
+6,232/1,200/22 -> 1,052/236/22, dead snag 364/180/28 -> 204/108/24, ironpalm 352/182/22 -> 272/86/14.
+
+**Where it is called.** `buildSceneryTree(name, opts)` — the storybook tree when the table has one, the kit tree
+otherwise — is used by `scatter-view.js`, `near-trees.js` (the real conifers that replace the horizon's spires within
+300 m; `NEAR_TREES.kitH` is the storybook height), `decor.js` (camps), `vignette-props.js` and `site-view.js`. The shared
+kit itself is untouched (Farhold and the highdef-3d page still get its trees). `?trees=kit` in the game address draws the
+old kit trees again, for before/after comparisons.
+
+**Leaves are two-sided now.** `decor.js` `twoSidedLeaf`: three.js turns a double-sided card's normal round on its back
+face, which made a card whose normal points out of its clump go near-black from behind. Leaf cards (trees, bushes, ferns)
+keep the same normal on both sides.
+
+**Colliders.** The trunks are FITTED to the colliders that were already there: each row's `rB` / `rT` was chosen so
+the trunk measures, at body height, what `js/rules/nav-refine.js` `SCATTER_COLLIDE` already said — so the new art moved
+no collider and no baked route (Torbor Downs' `tree_birch` gets its own `silver_birch` row because it has a different
+radius from the broadleaf birch). The chunkiness is in the flare, the fluting and the limbs. `tools/measure-scatter.mjs`
+now SLICES a trunk at three heights 0.25-0.8 up (a long tube with few rings often has no vertex inside that band), and
+`tests/D/tree-style.test.js` runs it and fails if the table and the drawn trunks drift more than 0.02 apart. Changing a
+trunk's radius means changing the table and re-baking.
+
+**Look at them.** `tree-gallery.html` (served with the game: `/prototypes/thousandvale/tree-gallery.html`): every tree
+at its three levels with the old kit tree behind it, a wood laid out to 560-700 m where each tree takes the level the
+game would give it (the red rings are the switch distances), and the leaf picture sheet. In the world:
+`tests/D/trees.spec.js` (near / middle / far shots of six woods, desktop High + phone Medium, draw calls and triangles;
+`TREES_FLAGS=&trees=kit` for the before run).
+
+**Adding a tree:** add a row to `STORY_TREES` (copy one of the same `form`), name it in `scatter-view.js` `KIND_ART`, run
+`tools/measure-scatter.mjs`, and either fit `rB`/`rT` to an existing `SCATTER_COLLIDE` row or add one (a new radius needs a re-bake), then look at it in the gallery.
+
+## 17. Grass on the graphics card, a different grass for each kind of ground (2026-10-20)
+
+Owner: "Are there any other visuals or shaders we can enable to improve visuals? Can we have GPU grass with various
+textures by biome or surface?"
+
+**What changed.** On Medium and High the grass is no longer the clutter's CPU tufts (`ground-clutter.js`, 18-blade clumps
+refilled on the CPU every 3 m, 30 / 46 m reach). It is a field of single blades placed entirely by the graphics card
+(`js/client/grass-gpu.js`), with WHAT grows where decided by a pure table (`js/client/grass-types.js`). The ferns, stones,
+heather bushes and lumps of earth stay in `ground-clutter.js` as they were. Low still has no grass, and `?atmos=0` (the
+look before 2026-10-16) has none either. `?grass=0` brings the CPU tufts back for before / after measuring.
+
+**Grass types** (`GRASS_TYPES`; index order is what the shader reads, so new types go at the end):
+
+| Type | Looks like | Where (Torbor Downs `downs` / Vharlen `vharl` / elsewhere) |
+|---|---|---|
+| turf | short bright blades, a few white and yellow specks | Chalk Downs, pasture |
+| meadow | medium blades, one in five with a white or yellow flower head | Saint's Meadow, orchards, patches in grassland |
+| wild | tall thin gold grass with seed heads | Golden Wolds, Gorse Heath, savanna, graveyards |
+| heather | short wide sprigs, most with a purple head | Heather Moor (in patches with fell grass) |
+| reed | very tall thin rushes, some with a brown cat-tail head | Brack Fen, lake shores, marsh |
+| forest | sparse dark grass | Oakwood, Pine Highwood, any forest floor |
+| fell | coarse grey-green grass | High Fell, hills, Grey Crags (thin) |
+| ash | thin olive / dark blades, a few ember-orange specks | Vharlen's grassland, savanna, ash plain (thin) |
+| jungle | broad floppy blades | Vharlen's rainforest, rainforest anywhere |
+| lush | mid-green ordinary grass | grassland outside Torbor, mixed into fens and meadows |
+| withered | dry grey-brown grass | Blackthorn Scar, blighted ground |
+| glimmer | pale lilac blades with pale blue heads | glimmerwaste |
+
+Each type has a height range, root width, how thick it grows, how stiff it is in the wind, how it tapers, root and tip
+colours and a flower head (share of blades, two colours, size). Each biome row picks a main type, how much of the ground it
+covers, and optionally a second type grown in ~14 m patches (`mix`). Provinces with a palette (`GRASS_PALETTES.downs`,
+`.vharl`) override the rows that differ. Nothing grows where `clutter-plan.js` `groundOpen` says no (roads, towns,
+buildings, solids, any water, off walkable ground), nor on steep ground, sand, ice, snow, crops or gravel.
+
+**How it stays still and on the ground** (the two ways grass usually goes wrong):
+- *An instance is a slot, not a blade.* One patch of slots follows you, but its centre moves in whole lattice squares and
+  every blade property is an integer hash of the square's world coordinates. So the same ground always grows the same
+  blade, whichever slot draws it, and walking moves you past the grass instead of dragging it along
+  (highdef-3d README "The grass belongs to the ground"). Each slot draws a CLUMP — 4 blades on Near / Medium, 5 on Far / Very far — on spokes round one root, splaying outward like the old tufts (single blades read as mown lawn; changed 2026-10-21).
+- *Blades stand on the drawn triangles.* The shader reads the SAME 2 m height samples `terrain-view.js` builds the ground
+  mesh from (copied into a small wrapping texture round you) and splits each square along the mesh's own diagonal. The
+  spec checks this: worst difference from `heightAt` 0.000 m over 400 points.
+- *30 km from the origin.* Everything is addressed as an integer origin plus a small fraction, so no square or texel jumps.
+
+**What grows where, on the card:** a wrapping 1 m-per-texel texture round you (128 or 256 texels across) holds the grass
+type, how much of the ground it covers, and a colour wobble. Walking only re-samples the strip that came into range
+(at most 2,600 texels a frame, nearest rows first). A zone loading, unloading or refining its nav map re-samples it all.
+
+**Cost.** One draw call per wedge of the patch on screen (eight wedges round you plus a disc at your feet, culled by the
+camera; 4-9 drawn). 6 (Near / Medium) or 8 triangles a blade. Blades on bare ground or past the edge collapse to a point and draw nothing.
+
+**Settings → Graphics → Grass distance** (applies at once): Automatic (Medium on phones and Medium quality, Far
+otherwise), Off, Near (28 m), Medium (42 m), Far (70 m), Very far (110 m). The slot budget grows more slowly than the
+area (`GRASS_DISTANCES`), so a far field is thinner further out; up to four clumps a lattice square near your feet
+(`RINGS` 1 / 0.4 / 0.25 / 0.15 of the radius), so inside ~15 m on Medium there are 1.4-2.9 clumps a square metre. Medium
+(the phone default) draws 5,000 clumps of 4 = 20,000 blades at 6 triangles each; Far 10,400 clumps of 5 = 52,000 and
+Very far 22,400 of 5 = 112,000 at 8.
+
+**Also new in the same round (gfx-tiers.js):**
+- `softShadows` — softer sun-shadow edges: three r186 always takes five shadow-map samples, the radius only spreads them,
+  so this costs nothing. Medium 1.6, High 2.6. `?softshadows=0` turns it off.
+- `shafts` — sun rays through trees and over ridges, High only (`postfx.js`): the finished frame is smeared toward the
+  sun's place on screen, keeping only its brightest parts, at a quarter of the pixels from the copy the glow already
+  makes. Strength follows daylight and cloud (`scene.js` `applySky`); none underground. `?shafts=0` turns it off.
+
+Tests: `tests/D/grass-types.test.js` (7 node tests: every biome any zone declares has a row, the downs and Vharlen get
+their own grass, nothing on roads / towns / water / steep, the shader table, the distances, the lattice cannot crawl),
+`tests/D/grass.spec.js` (screenshots of ten places on desktop High and phone Medium, the on-the-ground check, the
+no-crawl check with the wind frozen, and a sun-rays shot).

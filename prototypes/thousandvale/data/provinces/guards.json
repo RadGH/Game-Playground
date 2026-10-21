@@ -186,13 +186,13 @@
    "id": "kettle_cross_gate_0",
    "town": "Kettle Cross",
    "zone": "z12_01",
-   "x": 894.6,
-   "z": 793.7,
+   "x": 891.3,
+   "z": 785.6,
    "out": [
     -0.707,
     0.707
    ],
-   "width": 4.45,
+   "width": 5.46,
    "kind": "posts",
    "main": true
   },
@@ -296,6 +296,20 @@
   },
   {
    "id": "ashhaven_gate_0",
+   "town": "Ashhaven",
+   "zone": "z11_02",
+   "x": 778,
+   "z": 985.8,
+   "out": [
+    0,
+    1
+   ],
+   "width": 4.21,
+   "kind": "posts",
+   "main": false
+  },
+  {
+   "id": "ashhaven_gate_1",
    "town": "Ashhaven",
    "zone": "z11_02",
    "x": 736.7,
@@ -1096,11 +1110,11 @@
    "id": "thornwick_gate_0",
    "town": "Thornwick",
    "zone": "z11_04",
-   "x": 1731.5,
-   "z": 1916,
+   "x": 1743,
+   "z": 1867.5,
    "out": [
-    -0.93,
-    0.368
+    -0.666,
+    -0.746
    ],
    "width": 4.2,
    "kind": "posts",
@@ -1510,8 +1524,8 @@
    "name": "Kettle Cross Guard",
    "yaw": -0.785,
    "titled": false,
-   "x": 894,
-   "z": 788
+   "x": 892,
+   "z": 780
   },
   {
    "id": "guard_brackwater_0",
@@ -1839,7 +1853,7 @@
    "zone": "z11_02",
    "tier": "hamlet",
    "post": "gate",
-   "gate": "ashhaven_gate_0",
+   "gate": "ashhaven_gate_1",
    "rank": "guard",
    "name": "Ashhaven Guard",
    "yaw": -0.697,
@@ -3409,10 +3423,10 @@
    "gate": "thornwick_gate_0",
    "rank": "guard",
    "name": "Thornwick Guard",
-   "yaw": -1.194,
+   "yaw": -2.413,
    "titled": false,
-   "x": 1734,
-   "z": 1912
+   "x": 1748,
+   "z": 1868
   },
   {
    "id": "guard_coldwater_0",

@@ -1,5 +1,5 @@
 {
-  "_doc": "Stream C (play-test 5: T17 conversion affix, T23 gear catalog, plus two missing bases). Everything here is applied IN MEMORY to the item table at engine boot by js/rules/tv-gear.js (emberveil/data/items.json is shared with live games and is never written). `bases.armor` / `bases.weapon` = whole new item bases. `convert` = the T17 affix: on `chance` of magic-or-better PHYSICAL weapons (never a wand, staff, sceptre, orb, tome or quarterstaff \u2014 Farhold files those `magic` \u2014 and never a weapon that already carries a brand) one rolled property is replaced by a conversion: the weapon's damage is that element instead of physical (Farhold's own brand stat, so its registry applies and describes it), plus `value` (a fraction) more damage of that element. `catalog` = how a row of avatar-3d/data/gear-catalog.json (stream F) becomes an item base: `weapon` maps F's weapon `type` to the base whose numbers it copies; `armour` maps F's `archetype` to the armour weight and `piece` maps the game slot to the base suffix; `offhand` / `accessory` map F's `type` to a base; `forms` maps F's `form` word to the caster styles a new wand may be (picked by the row id) and `staffSpells` to a Farhold staff-spell key; `elements` renames F's element words to the six a caster can be attuned to (holy is not one of them: left to the roll). `focusByForm` picks the focus a catalog focus copies from its `form` (so its rider matches its look) and `shields` the shield a `shield:<shape>` tag copies. An item made from a catalog base keeps the TEMPLATE's key as its `baseKey` (every rule that asks 'is this a quarterstaff / a rapier / a reliquary' keeps working) and carries the catalog id as `g5` and `catalogBase`. Play-test 5 slots addendum: `back` (cloaks) and `waist` (belts) are Thousandvale's own equipment slots and `light` (a worn lantern or torch) is Farhold's; their bases carry their stats as intrinsic properties (the sheet sums every worn item's properties, whatever slot it is in). `families` are added to the loot pool, `slotOrder` is the paper doll's order. Owner feedback 8: W22 removed the `light` slot and every light base (see `lights`); W19 added backpacks to the `back` slot (see `packs`). W23 added two plain starter-grade weapon bases (`woodsman_axe`: a one-handed axe \u2014 the `_axe` key suffix gives it Farhold's axe rhythm, chopping blows that bleed; `militia_sabre`: a fast curved sword \u2014 the `_sabre` suffix) so kits can offer a hatchet pair and a sabre.",
+  "_doc": "Stream C (play-test 5: T17 conversion affix, T23 gear catalog, plus two missing bases). Everything here is applied IN MEMORY to the item table at engine boot by js/rules/tv-gear.js (emberveil/data/items.json is shared with live games and is never written). `bases.armor` / `bases.weapon` = whole new item bases. `convert` = the T17 affix: on `chance` of magic-or-better PHYSICAL weapons (never a wand, staff, sceptre, orb, tome or quarterstaff — Farhold files those `magic` — and never a weapon that already carries a brand) one rolled property is replaced by a conversion: the weapon's damage is that element instead of physical (Farhold's own brand stat, so its registry applies and describes it), plus `value` (a fraction) more damage of that element. `catalog` = how a row of avatar-3d/data/gear-catalog.json (stream F) becomes an item base: `weapon` maps F's weapon `type` to the base whose numbers it copies; `armour` maps F's `archetype` to the armour weight and `piece` maps the game slot to the base suffix; `offhand` / `accessory` map F's `type` to a base; `forms` maps F's `form` word to the caster styles a new wand may be (picked by the row id) and `staffSpells` to a Farhold staff-spell key; `elements` renames F's element words to the six a caster can be attuned to (holy is not one of them: left to the roll). `focusByForm` picks the focus a catalog focus copies from its `form` (so its rider matches its look) and `shields` the shield a `shield:<shape>` tag copies. An item made from a catalog base keeps the TEMPLATE's key as its `baseKey` (every rule that asks 'is this a quarterstaff / a rapier / a reliquary' keeps working) and carries the catalog id as `g5` and `catalogBase`. Play-test 5 slots addendum: `back` (cloaks) and `waist` (belts) are Thousandvale's own equipment slots and `light` (a worn lantern or torch) is Farhold's; their bases carry their stats as intrinsic properties (the sheet sums every worn item's properties, whatever slot it is in). `families` are added to the loot pool, `slotOrder` is the paper doll's order. Owner feedback 8: W22 removed the `light` slot and every light base (see `lights`); W19 added backpacks to the `back` slot (see `packs`). W23 added two plain starter-grade weapon bases (`woodsman_axe`: a one-handed axe — the `_axe` key suffix gives it Farhold's axe rhythm, chopping blows that bleed; `militia_sabre`: a fast curved sword — the `_sabre` suffix) so kits can offer a hatchet pair and a sabre. Feedback #103 (2026-10-21): glaive (from 6) and bardiche (from 12) join the halberd as two-handed polearms (loot-pool.json polearm family).",
   "bases": {
     "armor": {
       "cloth_gloves": {
@@ -124,6 +124,42 @@
         "critBonus": 0.03,
         "look": {
           "held": "saber"
+        }
+      },
+      "glaive": {
+        "name": "Glaive",
+        "type": "weapon",
+        "subtype": "polearm",
+        "weaponCategory": "heavy",
+        "dmg": [
+          15,
+          27
+        ],
+        "speed": 0.75,
+        "twoHanded": true,
+        "statScaling": "str_dex",
+        "reach": true,
+        "look": {
+          "held": "g5_bardiche",
+          "color": "#c9d2da"
+        }
+      },
+      "bardiche": {
+        "name": "Bardiche",
+        "type": "weapon",
+        "subtype": "polearm",
+        "weaponCategory": "heavy",
+        "dmg": [
+          19,
+          34
+        ],
+        "speed": 0.7,
+        "twoHanded": true,
+        "statScaling": "str",
+        "reach": true,
+        "bleedChance": 0.06,
+        "look": {
+          "held": "g5_bardiche"
         }
       }
     }

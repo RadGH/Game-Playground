@@ -110,6 +110,34 @@ export const GROUND_PALETTES = {
     // water over these biomes: hot (lake / caldera), sulphurous, muddy; the sea keeps the default colour
     water: { lake: '#3f7f72', desert: '#8f9a3a', marsh: '#5f5a3e', volcanic: '#4a8a76' },
   },
+  /**
+   * Torbor Downs regenerated (play-test 12, #81; tools/lib/torbor.mjs TORBOR_BIOME_NAMES): Torbor's own grass, forest floor,
+   * rock, sand and dirt, plus two layers of its own in the extra slots — a flowering MEADOW (in `sulphur`'s slot) and pale
+   * chalk GRAVEL / shingle (in `mud`'s) — and a colour per biome, so each region reads as itself: bright chalk turf, oak
+   * leaf-litter, cool pine needles, purple-brown heather, gold-flowered gorse, ripe-gold wolds, red sandstone, the near-black
+   * thorn of the Scar, grey fell scree, dark peat fen, pale shingle shores. Set-piece fields keep the default rules (setPieces).
+   */
+  downs: {
+    textures: { grass: ['grass', null], floor: ['forest_floor', null], rock: ['rock', null], sand: ['sand', '#e6dcc4'], path: ['dirt', null], sulphur: ['meadow', null], mud: ['gravel', '#d8d4ca'] },
+    low: { grass: '#5f7d3c', floor: '#4d4630', rock: '#7b766d', sand: '#b8a676', path: '#7a6446', sulphur: '#7a9a4a', mud: '#a9a397' },
+    detail: 1.5, setPieces: true,
+    biomes: {
+      grassland: { sulphur: 0.1, mul: [1.02, 1.1, 0.88] },
+      temperateForest: { forest: 0.8, mul: [0.98, 1.0, 0.86] },
+      borealForest: { forest: 0.72, rock: 0.08, mul: [0.78, 0.9, 0.9] },
+      hills: { forest: 0.32, sulphur: 0.12, mul: [1.06, 0.8, 0.98] },
+      hallowed: { sulphur: 0.72, mul: [1.08, 1.12, 0.94] },
+      marsh: { forest: 0.5, mul: [0.74, 0.84, 0.66] },
+      badlands: { rock: 0.3, path: 0.32, mul: [1.42, 0.86, 0.68] },
+      shrubland: { sand: 0.18, forest: 0.14, mul: [1.16, 1.08, 0.72] },
+      savanna: { path: 0.06, mul: [1.34, 1.16, 0.66] },
+      veiledHills: { forest: 0.5, rock: 0.12, mul: [0.66, 0.62, 0.66] },
+      tundra: { rock: 0.3, mud: 0.28, mul: [0.92, 0.96, 0.9] },
+      mountains: { rock: 0.9 }, snowyPeaks: { rock: 0.35, mud: 0.4, mul: [1.5, 1.52, 1.58] },
+      beach: { mud: 0.72, sand: 0.22 }, coast: { sand: 0.6, mud: 0.2 }, lake: { sand: 0.6, mud: 0.15 }, road: { path: 0.92 },
+    },
+    water: { marsh: '#4c5a46' },
+  },
 };
 
 export function createTerrainView(T, { textureSize = 512, quality = 'high', clearings = [], biomeColors = null, palette = null } = {}) {

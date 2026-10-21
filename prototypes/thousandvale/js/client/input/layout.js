@@ -19,7 +19,7 @@ export const PHONE_LAYOUT_ENABLED = true;
 export const PAD_ON_MS = 250, PAD_OFF_MS = 1500;
 
 const KEY = 'tv.layout';
-export const LAYOUTS = [['auto', 'Automatic'], ['desktop', 'Desktop'], ['phone', 'Phone'], ['pad', 'Controller']];
+export const LAYOUTS = [['auto', 'Automatic'], ['desktop', 'Keyboard and mouse'], ['phone', 'Touch (phone)'], ['pad', 'Controller']];      // feedback #94: named by how you play
 const CHOICES = new Set(LAYOUTS.map(l => l[0]));
 export function layoutChoice() { try { const v = localStorage.getItem(KEY); return CHOICES.has(v) && v !== 'auto' ? v : 'auto'; } catch { return 'auto'; } }
 export function setLayoutChoice(v) { try { if (v === 'auto') localStorage.removeItem(KEY); else localStorage.setItem(KEY, v); } catch { /* private window */ } return applyLayout(); }

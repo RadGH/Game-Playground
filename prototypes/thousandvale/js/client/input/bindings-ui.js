@@ -43,10 +43,10 @@ export function bindingsTab({ redraw }) {
   const tabs = h('div.chips.bind-tabs', { role: 'tablist' }, ...[['keyboard', 'Keyboard'], ['pad', 'Controller'], ['touch', 'Touch']].map(([id, label]) =>
     h('button.chip', { type: 'button', role: 'tab', 'aria-checked': String(sub === id), dataset: { bind: id }, onclick: () => { sub = id; redraw(); } }, label)));
   // 2026-10-16: the layout choice sits on the Controller tab too (Automatic switches to the controller layout on its own)
-  const layoutRow = () => h('label.set-row', {}, h('span', {}, 'Layout'), h('select', { dataset: { k: 'layout' }, onchange: e => { setLayoutChoice(e.target.value); redraw(); } }, ...LAYOUTS.map(([id, label]) => h('option', { value: id, selected: layoutChoice() === id }, label))));
+  const layoutRow = () => h('label.set-row', {}, h('span', {}, 'Control mode'), h('select', { dataset: { k: 'layout' }, onchange: e => { setLayoutChoice(e.target.value); redraw(); } }, ...LAYOUTS.map(([id, label]) => h('option', { value: id, selected: layoutChoice() === id }, label))));
   if (sub === 'pad') {
     const set = device.glyphs;
-    return [tabs, layoutRow(),
+    return [tabs, layoutRow(), padTester(),
       h('p.tiny-left', {}, 'Automatic switches to the controller layout while you play with a controller — Menu opens every window, the chat and the quest list fold away — and back as soon as you use the mouse, the keyboard or the screen. Pick Controller or Desktop to keep one.'),
       h('label.set-row', {}, h('span', {}, 'Button names'), h('select', { dataset: { k: 'glyphs' }, onchange: e => { device.setGlyphs(e.target.value); try { localStorage.setItem('tv.glyphs', e.target.value); } catch { /* private window */ } redraw(); } },
         h('option', { value: 'auto', selected: device.userGlyphs === 'auto' }, 'Automatic (from the controller)'), ...GLYPH_SETS.map(s => h('option', { value: s, selected: device.userGlyphs === s }, GLYPHS[s].name)))),
@@ -70,9 +70,53 @@ export function bindingsTab({ redraw }) {
     };
     return h('div.bind-row', {}, h('span', {}, a.label), btn, B.changed(a.id) ? h('button.ghost.small.bind-reset', { type: 'button', 'aria-label': `Put ${a.label} back`, title: 'Back to the usual key', onclick: () => { B.reset(a.id); save(); } }, '↺') : h('span.bind-reset'));
   };
-  return [tabs,
+  return [tabs, layoutRow(),
     h('div.bind-list', {}, ...GROUPS.map(g => h('section', {}, h('h4', {}, g), ...ACTIONS.filter(a => a.group === g && (a.key || a.run) && a.id !== 'command').map(row)))),
     h('div.row.end', {}, h('button.ghost.small', { type: 'button', dataset: { act: 'keys-default' }, onclick: () => { B.reset(); save(); } }, 'All keys back to the usual')),
     h('p.tiny-left', {}, 'A key that is already in use swaps places with the one you move. Mouse buttons and the chat keys (Enter, /) stay where they are.')];
+}
+/**
+ * Feedback #94 (2026-10-21, a Steam Deck through Chrome: "sometimes it works, sometimes it doesn't"): every controller
+ * the browser can see, live — its name, whether it uses the standard button map, which one is playing, each button
+ * lighting as it is pressed and each stick as a bar — so you can tell "the browser sees no pad" from "it sees one the
+ * game reads differently". It redraws itself every frame while it is on screen and stops when the window closes.
+ */
+const PAD_NAMES = ['A', 'B', 'X', 'Y', 'LB', 'RB', 'LT', 'RT', 'View', 'Menu', 'LS', 'RS', 'Up', 'Down', 'Left', 'Right', 'Home'];
+export function padTester() {
+  const box = h('div.pad-test', { dataset: { k: 'padtest' } }, h('h4', {}, 'Controller test'));
+  const list = h('div.pad-test-list');
+  const hint = h('p.tiny-left', {}, '');
+  box.append(list, hint);
+  let raf = 0;
+  const draw = () => {
+    if (!box.isConnected) { raf = 0; return; }
+    let pads = [];
+    try { pads = [...(navigator.getGamepads?.() || [])].filter(p => p && p.connected !== false); } catch { /* not allowed here */ }
+    const playing = ctx?.input?.pad?.padId || '';
+    if (!pads.length) {
+      if (list.dataset.n !== '0') { list.dataset.n = '0'; list.replaceChildren(h('p.pad-none', {}, 'No controller detected.')); }
+      hint.textContent = (typeof isSecureContext !== 'undefined' && !isSecureContext ? 'This page is not on a secure (https) address, so the browser hides controllers from it. ' : '') +
+        'Press any button on the controller — a browser only shows a page its controllers after a press. On a Steam Deck in a "non-Steam game" shortcut, set the shortcut\'s controller layout to "Gamepad" (not "Web browser" or "Keyboard + mouse"), or Steam turns the buttons into keys first.';
+    } else {
+      const sig = pads.map(p => p.index + p.id).join('|');
+      if (list.dataset.sig !== sig) {
+        list.dataset.sig = sig; list.dataset.n = String(pads.length);
+        list.replaceChildren(...pads.map(p => h('div.pad-card', { dataset: { index: String(p.index) } },
+          h('div.pad-name', {}, h('b', {}, `#${p.index + 1} `), p.id || 'Controller', p.mapping === 'standard' ? '' : h('em.warn', {}, ' — not a standard button map, some buttons may be elsewhere')),
+          h('div.pad-btns', {}, ...p.buttons.map((_, i) => h('span.pad-btn', { dataset: { b: String(i) } }, PAD_NAMES[i] || String(i)))),
+          h('div.pad-axes', {}, ...p.axes.map((_, i) => h('span.pad-axis', {}, h('i'), h('small', {}, `Axis ${i}`)))))));
+      }
+      hint.textContent = 'Press buttons and move the sticks: each one lights here. The controller in use is marked "playing".';
+      for (const p of pads) {
+        const card = list.querySelector(`.pad-card[data-index="${p.index}"]`); if (!card) continue;
+        card.classList.toggle('playing', !!playing && p.id === playing);
+        card.querySelectorAll('.pad-btn').forEach((b, i) => b.classList.toggle('on', !!(p.buttons[i] && (p.buttons[i].pressed || p.buttons[i].value > 0.5))));
+        card.querySelectorAll('.pad-axis i').forEach((bar, i) => { const v = Math.max(-1, Math.min(1, p.axes[i] || 0)); bar.style.left = `${50 + Math.min(0, v) * 50}%`; bar.style.width = `${Math.abs(v) * 50}%`; });
+      }
+    }
+    raf = requestAnimationFrame(draw);
+  };
+  queueMicrotask(() => { if (!raf) raf = requestAnimationFrame(draw); });
+  return box;
 }
 export { PAD_MENU };

@@ -203,6 +203,10 @@ test('T25 pools drain and move; open water does NOT take a line (round 11, live 
     assert.ok(fr[0].ok && fr[0].pool === other.id, 'E on a pool fishes that pool: ' + JSON.stringify(fr[0]));
     a.fish('stop'); await run(clock, 300);
     P.transfer(o, copy, { x: other.x + 40, z: other.z + 40 }, 'test'); await run(clock, 600);
+    // (no fight in the way: on the regenerated Torbor Downs a camp can stand within aggro range of that spot — play-test 12)
+    for (const m of copy.host.near(o.entity.x, o.entity.z, 80, x => x.kind === 'monster')) copy.remove(m);
+    o.lastHitAt = 0; if (o.entity.dead) o.entity.revive(1);
+    await run(clock, 6000);      // (the fight flag drops a few seconds after the last enemy is gone)
     const fr2 = on(a, 'fishR'); a.fish('cast', { pool: other.id }); await until(clock, () => fr2.length, 2000);
     assert.equal(fr2[0].why, 'noPool', 'too far from it');
     P.transfer(o, copy, { x: sh.x, z: sh.z }, 'test'); await run(clock, 600);

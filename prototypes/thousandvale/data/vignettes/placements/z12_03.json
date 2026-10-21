@@ -788,8 +788,8 @@
    "monster": "barrow_hound",
    "with": null,
    "level": [
-    2,
-    3
+    3,
+    4
    ],
    "count": [
     2,
@@ -1445,8 +1445,8 @@
    "monster": "barrow_hound",
    "with": null,
    "level": [
-    2,
-    3
+    3,
+    4
    ],
    "count": [
     2,

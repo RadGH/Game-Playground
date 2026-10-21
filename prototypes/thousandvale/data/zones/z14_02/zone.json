@@ -494,7 +494,7 @@
     "vignettesAvoided": 661
   },
   "files": {
-    "terrain.bin": 574092,
+    "terrain.bin": 574035,
     "nav.bin": 39147,
     "scatter.bin": 154516,
     "placements.json": 204050

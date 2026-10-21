@@ -12,6 +12,13 @@
 //           (nothing downstream of it); none inside an island continent's block (the island has its own waters)
 // Pure apart from what it is handed. tests/B/coast.test.js checks no segment of either lies over open sea.
 
+/**
+ * An island with its OWN waters (Vharlen): the world rivers under its block are the old mainland's and are not drawn.
+ * Torbor Downs regenerated (play-test 12, #81, profile 'downs') became an island too, but keeps the world rivers —
+ * world-core downsWorld re-fits them to its new hills — so they are drawn.
+ */
+export const ownWaters = c => c.kind === 'island' && c.profile !== 'downs';
+
 /** Is (x, z) open sea on the far horizon? (sea level water, not a lake or a river sheet) */
 export const seaAt = (H, x, z) => { const w = H.waterAt(x, z); return !!w && w.surface < 0.5 && w.depth > 0.6; };
 
@@ -56,7 +63,7 @@ export function clipToRect(pts, [x0, z0, x1, z1]) {
 export function builtLines({ W, H, PMAP, CONTINENTS, continentRect, placementsOf }) {
   const ZM = W.grid?.zoneMetres || 2048;
   const playable = Object.values(PMAP).map(p => [p.block[0] * ZM, p.block[1] * ZM, (p.block[0] + p.size[0]) * ZM, (p.block[1] + p.size[1]) * ZM]);
-  const islands = CONTINENTS.filter(c => c.kind === 'island').map(continentRect);
+  const islands = CONTINENTS.filter(ownWaters).map(continentRect);
   const inRect = (r, x, z) => x >= r[0] && z >= r[1] && x < r[2] && z < r[3];
   const inIsland = (x, z) => islands.some(r => x >= r.x0 && z >= r.z0 && x < r.x1 && z < r.z1);
   const roads = [];

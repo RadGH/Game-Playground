@@ -589,8 +589,8 @@
    "monster": "hollow_wraith",
    "with": null,
    "level": [
-    7,
-    8
+    8,
+    9
    ],
    "count": [
     2,
@@ -941,8 +941,8 @@
    "monster": "cinder_imp",
    "with": null,
    "level": [
-    7,
-    8
+    8,
+    9
    ],
    "count": [
     2,
@@ -1503,8 +1503,8 @@
    "monster": "sky_cultist",
    "with": null,
    "level": [
-    9,
-    10
+    8,
+    9
    ],
    "count": [
     2,
@@ -3401,8 +3401,8 @@
    "monster": "hollow_wraith",
    "with": null,
    "level": [
-    7,
-    8
+    8,
+    9
    ],
    "count": [
     2,
@@ -4104,8 +4104,8 @@
    "monster": "hollow_wraith",
    "with": null,
    "level": [
-    9,
-    10
+    8,
+    9
    ],
    "count": [
     1,
@@ -8518,8 +8518,8 @@
    "monster": "sky_cultist",
    "with": null,
    "level": [
-    8,
-    9
+    9,
+    10
    ],
    "count": [
     1,
@@ -9538,8 +9538,8 @@
    "monster": "sporecap_walker",
    "with": null,
    "level": [
-    9,
-    10
+    8,
+    9
    ],
    "count": [
     2,

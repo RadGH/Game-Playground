@@ -29,16 +29,20 @@ test('W18: the cover rule — forests are solid, hills and mountains are wooded,
   assert.equal(patchNoise(123, 456), patchNoise(123, 456)); assert.equal(hash2(5, 9, 2), hash2(5, 9, 2)); assert.notEqual(hash2(5, 9, 2), hash2(9, 5, 2));
 });
 
-test('W18: wooded land is painted canopy green — the Hills and Mountains round Torborhold are darker and greener than before', () => {
-  const ci = Math.floor(23000 / 2048), cj = Math.floor(6200 / 2048);             // the range the report looks at
+// Play-test 12 (#81): Torbor Downs was regenerated — the old "range west of Torborhold" (chunk 11,3) is now the Oakwood with
+// the sea a few hundred metres west of it. So the tests below measure the ISLAND (its 16 chunks, grid 11-14 x 1-4) rather
+// than one fixed spot, and the canopy test looks at whichever zone holds the most Mountains (the Grey Crags).
+const ISLAND = []; for (let cj = 1; cj <= 4; cj++) for (let ci = 11; ci <= 14; ci++) ISLAND.push([ci, cj]);
+const biomeCount = (ci, cj, key) => { let n = 0; for (let z = cj * 2048; z < (cj + 1) * 2048; z += g.step) for (let x = ci * 2048; x < (ci + 1) * 2048; x += g.step) if (g.keys[g.biome[Math.floor(z / g.step) * g.W + Math.floor(x / g.step)]] === key) n++; return n; };
+test('W18: wooded land is painted canopy green — most of Torbor Downs reads darker and greener than without the tint', () => {
   const lum = c => { let s = 0, gsum = 0, n = c.col.length / 3; for (let i = 0; i < n; i++) { s += c.col[i * 3] + c.col[i * 3 + 1] + c.col[i * 3 + 2]; gsum += c.col[i * 3 + 1] / Math.max(1e-6, c.col[i * 3] + c.col[i * 3 + 2]); } return { mean: s / n, green: gsum / n }; };
   let greener = 0, total = 0;
-  for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) {
-    const off = buildChunk(g, ci + a, cj + b, 64, 2, null, { trees: false }), on = buildChunk(g, ci + a, cj + b, 64, 2, null, {});
+  for (const [ci, cj] of ISLAND) {
+    const off = buildChunk(g, ci, cj, 64, 2, null, { trees: false }), on = buildChunk(g, ci, cj, 64, 2, null, {});
     assert.equal(on.tris, off.tris, 'the tint adds no geometry'); assert.equal(on.spires, 0, 'no shapes past the nearest ring');
     total++; if (lum(on).green > lum(off).green * 1.05 && lum(on).mean < lum(off).mean) greener++;
   }
-  assert.ok(greener >= 6, `${greener} of ${total} chunks near the range read as wooded`);
+  assert.ok(greener >= 10, `${greener} of ${total} chunks of the island read as wooded`);     // (11 measured: the fens, the fell and the crags are open ground)
 });
 
 test('W18: tree shapes — only on the nearest ring, inside the budget, on the ground, never under a loaded zone, the same every time', () => {
@@ -54,7 +58,7 @@ test('W18: tree shapes — only on the nearest ring, inside the budget, on the g
   }
   // (2026-10-14: only the two islands carry land, so far fewer of the sampled chunks have trees at all)
   assert.ok(withTrees >= 6 && most > 500, `${withTrees} chunks carry trees, the densest ${most}`);
-  const ci = Math.floor(23000 / 2048), cj = Math.floor(6200 / 2048);
+  const ci = 12, cj = 3;              // Saint Orrin's Rise: Saint's Meadow, the Oakwood and the crags (play-test 12 map)
   const hi = buildChunk(g, ci, cj, 64, 1, null, { spires: TREE_SPIRES.high }), again = buildChunk(g, ci, cj, 64, 1, null, { spires: TREE_SPIRES.high });
   assert.ok(hi.spires > 100, `${hi.spires} spires on the range's chunk`);
   assert.deepEqual(Array.from(hi.pos.slice(-60)), Array.from(again.pos.slice(-60)), 'deterministic');
@@ -92,9 +96,10 @@ test('W18: built off the main thread, with the horizon\'s own material (no new m
 
 test('W18: inside loaded zones the bare Mountains slopes get a canopy of their own (spires only, under the zones, inside the budget)', async () => {
   const { buildCanopy, CANOPY_SPIRES, CANOPY_BIOMES } = await import('../../js/client/horizon-grid.js');
-  const ci = 11, cj = 3, rect = { minX: ci * 2048, minZ: cj * 2048, maxX: (ci + 1) * 2048, maxZ: (cj + 1) * 2048 };     // the range west of Torborhold
+  const [ci, cj] = ISLAND.reduce((a, b) => (biomeCount(...b, 'mountains') > biomeCount(...a, 'mountains') ? b : a)), rect = { minX: ci * 2048, minZ: cj * 2048, maxX: (ci + 1) * 2048, maxZ: (cj + 1) * 2048 };     // the range west of Torborhold
   const c = buildCanopy(g, ci, cj, 64, [rect], { spires: CANOPY_SPIRES.high });
-  assert.ok(c && c.spires > 1200, `${c?.spires} canopy spires on the range's own zone`);
+  // (the regenerated island's Grey Crags are meant to be mostly bare rock: its region palette covers Mountains at 0.3)
+  assert.ok(c && c.spires > 200, `${c?.spires} canopy spires on the zone with the most Mountains (${ci}, ${cj})`);
   assert.ok(c.spires <= CANOPY_SPIRES.high); assert.equal(c.tris, c.spires * ST); assert.equal(c.pos.length, c.spires * SV * 3); assert.equal(c.roots.length, c.spires * 5, 'a root per spire (near-trees.js)');
   for (let s = 0; s < c.spires; s += 5) { const x = c.pos[(s * SV + APEX) * 3], z = c.pos[(s * SV + APEX) * 3 + 2]; assert.ok(x > rect.minX && x < rect.maxX && z > rect.minZ && z < rect.maxZ, 'under the loaded zone'); }
   assert.equal(buildCanopy(g, ci, cj, 64, [], { spires: 3600 }), null, 'no loaded zone: nothing (the horizon chunk has its own)');
@@ -105,5 +110,5 @@ test('W18: inside loaded zones the bare Mountains slopes get a canopy of their o
   if (half) for (let s = 0; s < half.spires; s++) assert.ok(half.pos[(s * SV + APEX) * 3] < rect.minX + 1024 + 1);
   // the whole 3 x 3 round the starter town: a few thousand triangles
   let n = 0; for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) { const r = { minX: (12 + a) * 2048, minZ: (2 + b) * 2048, maxX: (13 + a) * 2048, maxZ: (3 + b) * 2048 }; n += buildCanopy(g, 12 + a, 2 + b, 64, [r], { spires: CANOPY_SPIRES.high })?.spires || 0; }
-  assert.ok(n > 2000 && n * ST < 100000, `${n} spires, ${n * ST} triangles`);      // (92k measured; the nearest few hundred are real kit trees instead)
+  assert.ok(n > 600 && n * ST < 100000, `${n} spires, ${n * ST} triangles`);      // (play-test 12 map: ~1000 measured — less mountain round the start; 92k before)
 });

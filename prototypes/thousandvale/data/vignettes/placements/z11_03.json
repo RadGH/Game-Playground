@@ -1289,8 +1289,8 @@
    "monster": "moor_hound",
    "with": null,
    "level": [
-    5,
-    6
+    4,
+    5
    ],
    "count": [
     2,
@@ -7715,8 +7715,8 @@
    "monster": "gallows_owl",
    "with": null,
    "level": [
-    3,
-    4
+    2,
+    3
    ],
    "count": [
     1,
@@ -8708,6 +8708,78 @@
    "yaw": 0,
    "radius": 8,
    "stray": true
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_g1",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 1056,
+   "z": 912,
+   "yaw": 2.65,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_g2",
+   "recipe": "cu_boundary_cross",
+   "name": "Boundary Cross",
+   "kind": "marker",
+   "x": 1008,
+   "z": 864,
+   "yaw": 4.57,
+   "radius": 3,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_g3",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 401,
+   "z": 536,
+   "yaw": 1.96,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_g4",
+   "recipe": "cu_mushroom_flush",
+   "name": "Flush of Caps",
+   "kind": "forage",
+   "x": 528,
+   "z": 1070,
+   "yaw": 2.75,
+   "radius": 4,
+   "levelBase": 5
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_g5",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 976,
+   "z": 720,
+   "yaw": 1.74,
+   "radius": 4,
+   "levelBase": 4
+  },
+  {
+   "type": "curio",
+   "id": "cu_wychwood_g6",
+   "recipe": "cu_bramble_berries",
+   "name": "Bramble Berries",
+   "kind": "forage",
+   "x": 511,
+   "z": 644,
+   "yaw": 2.68,
+   "radius": 4,
+   "levelBase": 4
   }
  ],
  "features": [],

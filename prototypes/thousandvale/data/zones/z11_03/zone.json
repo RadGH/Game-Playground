@@ -342,15 +342,15 @@
     "bridges": 3,
     "paths": 11,
     "pathMetres": 1147,
-    "scatter": 28235,
+    "scatter": 28230,
     "scatterKinds": {
       "rock_small": 1910,
-      "rock_large": 3318,
+      "rock_large": 3317,
       "tree_conifer": 131,
       "tree_birch": 1294,
       "heather": 1320,
-      "tree_broadleaf": 12656,
-      "bush": 4492,
+      "tree_broadleaf": 12654,
+      "bush": 4490,
       "boulder": 281,
       "tree_old_oak": 19,
       "blackthorn": 1729,
@@ -372,12 +372,12 @@
       "z": 560
     },
     "placements": 390,
-    "vignettesAvoided": 558
+    "vignettesAvoided": 564
   },
   "files": {
     "terrain.bin": 724302,
-    "nav.bin": 71490,
-    "scatter.bin": 225964,
+    "nav.bin": 71486,
+    "scatter.bin": 225924,
     "placements.json": 253376
   }
 }

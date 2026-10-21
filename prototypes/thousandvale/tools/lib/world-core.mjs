@@ -150,12 +150,12 @@ export function coastWorld(W, ref) {
         const k = b.pts.findIndex(p => Math.hypot(p[0] - e[0], p[1] - e[1]) < 20);
         if (k < 0 || k < w - 1) continue;                                  // it joins above the mouth: nothing lost
         a.pts = [...a.pts, ...b.pts.slice(k + 1).map(p => [p[0], p[1], Math.min(p[2], e[2]), Math.max(p[3], e[3])])];
-        a.joined = b.r.id; grew = true; break;
+        a.joined = b.r.id; a.tailMouth = !!b.r.mouth; grew = true; break;
       }
     }
     if (!grew) break;
   }
-  const rivers = src.map(({ r: r0, pts: P, joined }) => {
+  const rivers = src.map(({ r: r0, pts: P, joined, tailMouth }) => {
     const r = P === r0.pts ? r0 : { ...r0, pts: P, joined };
     if (!touchesBay(r.bbox || bbOf(r.pts))) return r;
     const pts = []; let moved = false;
@@ -175,7 +175,11 @@ export function coastWorld(W, ref) {
     }
     if (!moved && pts.length === r.pts.length && r === r0) return r;       // the bay does not reach it
     for (let k = 1; k < pts.length; k++) if (pts[k][2] > pts[k - 1][2]) pts[k] = [pts[k][0], pts[k][1], pts[k - 1][2], pts[k][3]];   // never flows uphill
-    return { ...r, pts, bbox: bbOf(pts), ...(pts.length < r.pts.length ? { mouth: true } : {}) };
+    // play-test 12 (#81): a river that took over a lower course which already ran out to the open sea (downsWorld cut it at the
+    // regenerated coast: the Fackfalpot, on the Batpate Run's old course past the bay) ends in that mouth — at sea level, never under it
+    const endsAtSea = tailMouth && pts.length === r.pts.length;
+    if (endsAtSea) for (let k = 0; k < pts.length; k++) if (pts[k][2] < 0) pts[k] = [pts[k][0], pts[k][1], 0, pts[k][3]];
+    return { ...r, pts, bbox: bbOf(pts), ...(pts.length < r.pts.length || endsAtSea ? { mouth: true } : {}) };
   }).filter(r => r && r.pts.length >= 2);
   const roads = [];
   for (const r of W.roads) {
@@ -258,7 +262,8 @@ export function downsWorld(W, ref) {
     // world bake graded on the full-precision field, so a recomputed surface would differ by the u16 rounding everywhere)
     let run = Infinity, moved = a > 0 || b < r.pts.length - 1;
     for (const p of pts) {
-      const dz = delta(p[0], p[1]), s2 = +Math.min(run, p[2] + dz).toFixed(3);
+      // (never under sea level: a surface the profile lowered past 0 on land would run uphill into its own mouth)
+      const dz = delta(p[0], p[1]), s2 = +Math.max(0, Math.min(run, p[2] + dz)).toFixed(3);
       if (s2 !== p[2]) { p[2] = s2; moved = true; }
       run = p[2];
     }

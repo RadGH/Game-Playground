@@ -33,7 +33,8 @@ test('the start zone is hand-made: an inn at a crossroads, graveyards, farms wit
   const { P } = zone('z12_02');
   const kinds = {}; for (const p of P.filter(p => p.kind === 'set_piece')) kinds[p.data.piece] = (kinds[p.data.piece] || 0) + 1;
   for (const [k, n] of Object.entries({ inn: 1, graveyard: 3, farm: 4, orchard: 2, mill_pond: 1, clearing: 2, stone_circle: 1, sheepfold: 2, copse: 2, belt: 2 })) assert.ok((kinds[k] || 0) >= n, `${k}: ${kinds[k] || 0} < ${n}`);
-  assert.ok(P.filter(p => p.kind === 'field').length >= 40, 'farmland: at least 40 fields in the start zone');
+  // (40 before play-test 12's hills; the regenerated ground leaves the four farms 18 fields between them, the belts 20)
+  assert.ok(P.filter(p => p.kind === 'field').length >= 36, 'farmland: at least 36 fields in the start zone');
   // the inn sits by the crossing of its two lanes, and the signpost names where they go
   const inn = P.find(p => p.kind === 'set_piece' && p.data.piece === 'inn');
   assert.ok(Math.hypot(inn.x - inn.data.crossing.x, inn.z - inn.data.crossing.z) < 45, 'inn is at its crossroads');

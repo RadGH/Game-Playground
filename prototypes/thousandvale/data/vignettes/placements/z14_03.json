@@ -3718,8 +3718,8 @@
    "monster": "road_brigand",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     1,
@@ -7755,8 +7755,8 @@
    "monster": "road_brigand",
    "with": null,
    "level": [
-    6,
-    7
+    7,
+    8
    ],
    "count": [
     2,

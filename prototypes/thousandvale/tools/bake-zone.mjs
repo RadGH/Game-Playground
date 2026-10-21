@@ -143,7 +143,9 @@ export function loadWorld() {
     const places = [];
     for (const zid of Object.values(PROVINCE_MAP.provinces?.torbor_downs?.map || {})) {
       let pl = []; try { pl = JSON.parse(readFileSync(join(HERE, '..', 'data', 'vignettes', 'placements', `${zid}.json`), 'utf8')).placements || []; } catch { /* none */ }
-      for (const v of pl) if (Number.isFinite(v.x) && PROTECTED_PLACES[v.type] != null && (v.type !== 'vignette' || (v.radius || 0) >= 12))
+      // (not a set piece BOUND onto one of B's own pieces: it stands on that piece's ground, and protecting it as well made the
+      // two chase each other — the protected disc moved B's farm, the farm moved the bound piece, every bake)
+      for (const v of pl) if (Number.isFinite(v.x) && PROTECTED_PLACES[v.type] != null && !v.bound && (v.type !== 'vignette' || (v.radius || 0) >= 12))
         places.push({ x: +zid.slice(1, 3) * ZM + v.x, z: +zid.slice(4, 6) * ZM + v.z, r: Math.max(PROTECTED_PLACES[v.type], v.radius || 0) });
     }
     const macro = decodeMacro(readFileSync(join(WORLD_DIR, 'macro.bin'))), ref = makeRefiner(macro, { world: json, townPins: pins('town-pins.json'), sitePins: pins('site-pins.json'), places });

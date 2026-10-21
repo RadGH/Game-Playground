@@ -125,7 +125,11 @@ test('ECONOMY RULE: an hour of each gathering trade and of gather-then-refine ea
     // raw piece is already at the 1-gold floor and cannot be priced finer — there the hour may run to 120% (skinning 45%)
     const floor = x.level === 1 && FLOOR_IDS.every(id => content.materials[id].price === 1);
     if (x.addOn) continue;
-    assert.ok(x.share >= 0.7 && x.share <= (floor ? 1.2 : 1.0), `L${x.level} ${x.activity}: ${Math.round(x.share * 100)}% of questing (${x.goldPerHour} gold) — ${x.note}`);
+    // (play-test 12, #81: and a REFINED row at that floor carries the refine's own whole-gold step on top — a Bronze Bar of two
+    // 1-gold ores cannot sell for less than 3 — so on the regenerated Torbor Downs, where the start zones' boulders stand
+    // closer together, mining + smithing may run to 135%; the gathering row alone keeps the 120%)
+    const refined = / \+ /.test(x.activity);
+    assert.ok(x.share >= 0.7 && x.share <= (floor ? (refined ? 1.35 : 1.2) : 1.0), `L${x.level} ${x.activity}: ${Math.round(x.share * 100)}% of questing (${x.goldPerHour} gold) — ${x.note}`);
   }
   // refining is worth the trip, and never more than a fifth on top
   for (const m of Object.values(content.materials).filter(m => m.made)) {

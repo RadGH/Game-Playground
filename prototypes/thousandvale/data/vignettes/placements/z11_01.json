@@ -586,8 +586,8 @@
    "monster": "road_brigand",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     2,
@@ -712,8 +712,8 @@
    "monster": "stone_sentinel",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     1,
@@ -1205,8 +1205,8 @@
    "monster": "stone_sentinel",
    "with": null,
    "level": [
-    5,
-    6
+    6,
+    7
    ],
    "count": [
     2,
@@ -1475,8 +1475,8 @@
    "monster": "ridge_griffin",
    "with": null,
    "level": [
-    3,
-    4
+    4,
+    5
    ],
    "count": [
     2,
@@ -1822,8 +1822,8 @@
    "monster": "brigand_archer",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     1,
@@ -2133,8 +2133,8 @@
    "monster": "frost_stalker",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     2,
@@ -2386,8 +2386,8 @@
    "monster": "brigand_archer",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     1,
@@ -2446,8 +2446,8 @@
    "monster": "ridge_griffin",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     2,
@@ -2928,8 +2928,8 @@
    "monster": "glacier_maw",
    "with": null,
    "level": [
-    6,
-    7
+    5,
+    6
    ],
    "count": [
     1,
@@ -3043,8 +3043,8 @@
    "monster": "brigand_archer",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     1,
@@ -3573,8 +3573,8 @@
    "monster": "road_brigand",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     2,
@@ -4156,8 +4156,8 @@
    "monster": "frost_stalker",
    "with": null,
    "level": [
-    6,
-    7
+    5,
+    6
    ],
    "count": [
     2,
@@ -4253,8 +4253,8 @@
    "monster": "brigand_archer",
    "with": null,
    "level": [
-    5,
-    6
+    4,
+    5
    ],
    "count": [
     2,
@@ -4372,8 +4372,8 @@
    "monster": "road_brigand",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     1,
@@ -4988,8 +4988,8 @@
    "monster": "crag_hyena",
    "with": null,
    "level": [
-    5,
-    6
+    6,
+    7
    ],
    "count": [
     1,
@@ -5389,8 +5389,8 @@
    "monster": "ironback_beetle",
    "with": null,
    "level": [
-    6,
-    7
+    5,
+    6
    ],
    "count": [
     1,
@@ -6387,8 +6387,8 @@
    "monster": "road_brigand",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     2,
@@ -6753,8 +6753,8 @@
    "monster": "crag_hyena",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     1,
@@ -6945,8 +6945,8 @@
    "monster": "brigand_archer",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     2,
@@ -7842,8 +7842,8 @@
    "monster": "ironback_beetle",
    "with": null,
    "level": [
-    5,
-    6
+    6,
+    7
    ],
    "count": [
     2,
@@ -7933,8 +7933,8 @@
    "monster": "ridge_griffin",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     1,
@@ -8375,8 +8375,8 @@
    "monster": "brigand_archer",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     2,
@@ -8524,8 +8524,8 @@
    "monster": "ironback_beetle",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     2,
@@ -8613,8 +8613,8 @@
    "monster": "frost_stalker",
    "with": null,
    "level": [
-    6,
-    7
+    5,
+    6
    ],
    "count": [
     2,
@@ -8809,8 +8809,8 @@
    "monster": "frost_stalker",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     1,
@@ -9137,8 +9137,8 @@
    "monster": "frost_stalker",
    "with": null,
    "level": [
-    5,
-    6
+    4,
+    5
    ],
    "count": [
     2,
@@ -9466,8 +9466,8 @@
    "monster": "ironback_beetle",
    "with": null,
    "level": [
-    7,
-    8
+    6,
+    7
    ],
    "count": [
     2,

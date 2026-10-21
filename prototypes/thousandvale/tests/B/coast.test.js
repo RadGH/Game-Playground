@@ -8,7 +8,7 @@ import { parseTerrain, parseNav, NAV } from '../../js/rules/terrain-read.js';
 import { parseHorizon } from '../../js/rules/horizon-read.js';
 import { loadWorld } from '../../tools/bake-zone.mjs';
 import { BAYS, bayAt, CONTINENTS, continentRect } from '../../tools/lib/world-core.mjs';
-import { seaAt } from '../../tools/lib/coast-lines.mjs';
+import { seaAt, ownWaters } from '../../tools/lib/coast-lines.mjs';
 import { bakedHarbour } from '../../tools/ship-routes.mjs';
 
 const ROOT = new URL('../../', import.meta.url);
@@ -47,7 +47,7 @@ test('Z4: the map draws only built lines — no road or river point over open se
   const map = J('data/world/map/map.json');
   const ZM = 2048, blocks = Object.values(PMAP).map(p => [p.block[0] * ZM, p.block[1] * ZM, (p.block[0] + p.size[0]) * ZM, (p.block[1] + p.size[1]) * ZM]);
   const inBlock = (x, z) => blocks.some(b => x >= b[0] && z >= b[1] && x <= b[2] && z <= b[3]);
-  const islands = CONTINENTS.filter(c => c.kind === 'island').map(continentRect);
+  const islands = CONTINENTS.filter(ownWaters).map(continentRect);
   const bad = [];
   for (const r of map.roads) for (const [x, z] of along(r.pts, 8)) {
     if (seaAt(H, x, z)) { bad.push(`road ${r.id} over the sea at ${Math.round(x)},${Math.round(z)}`); break; }
@@ -66,10 +66,16 @@ test('Z4: the map draws only built lines — no road or river point over open se
 
 test('Z4: a river ends in its mouth at the sea — never downstream of it, never uphill', () => {
   const ended = W.rivers.filter(r => r.mouth);
-  assert.ok(ended.some(r => r.name === 'The Batpate Run') && ended.some(r => r.name === 'The Fackfalpot'), 'the Batpate Run and the Fackfalpot (which joined it below the bay) now end in Gullwick Bay');
+  // the Batpate Run ends in Gullwick Bay; the Fackfalpot (which joined it below the bay) runs on down its old course to the
+  // regenerated island's open coast south of the bay (play-test 12, #81)
+  assert.ok(ended.some(r => r.name === 'The Batpate Run') && ended.some(r => r.name === 'The Fackfalpot'), 'the Batpate Run and the Fackfalpot both end at the sea');
   for (const r of ended) {
     const end = r.pts[r.pts.length - 1];
-    assert.ok(bayAt(BAY, end[0], end[1]).s < 0 && ref.baseGround(end[0], end[1]) < 0, `${r.name} ends in the bay's water`);
+    // (the bay is in baseGround; the regenerated island's own coast is in continentGround, and on a cliff coast a river
+    // ends past the coastline where the cliff falls to the sea — world-core downsWorld's `wet`)
+    const TC = CONTINENTS.find(c => c.profile === 'downs');
+    assert.ok(ref.baseGround(end[0], end[1]) < 0 || ref.continentGround(end[0], end[1]) < 0.25 || ref.seaward(TC, end[0], end[1]) > 0, `${r.name} ends in the sea's water`);
+    if (r.name === 'The Batpate Run') assert.ok(bayAt(BAY, end[0], end[1]).s < 0, 'the Batpate Run ends in the bay');
     assert.equal(end[2], 0, `${r.name} meets the sea at sea level`);
     for (let k = 1; k < r.pts.length; k++) assert.ok(r.pts[k][2] <= r.pts[k - 1][2] + 1e-9, `${r.name} runs uphill at point ${k}`);
     for (const p of r.pts.slice(0, -2)) assert.ok(ref.baseGround(p[0], p[1]) > -0.5 || !(bayAt(BAY, p[0], p[1]).s < -2), `${r.name} runs on into the bay at ${p[0]},${p[1]}`);

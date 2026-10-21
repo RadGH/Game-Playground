@@ -554,8 +554,8 @@
    "monster": "ironback_beetle",
    "with": null,
    "level": [
-    5,
-    6
+    4,
+    5
    ],
    "count": [
     2,
@@ -2107,8 +2107,8 @@
    "monster": "road_brigand",
    "with": null,
    "level": [
-    3,
-    4
+    2,
+    3
    ],
    "count": [
     1,
@@ -3130,8 +3130,8 @@
    "monster": "road_brigand",
    "with": null,
    "level": [
-    3,
-    4
+    2,
+    3
    ],
    "count": [
     1,
@@ -6031,8 +6031,8 @@
    "monster": "crag_hyena",
    "with": null,
    "level": [
-    5,
-    6
+    4,
+    5
    ],
    "count": [
     2,
@@ -6073,8 +6073,8 @@
    "monster": "ironback_beetle",
    "with": null,
    "level": [
-    5,
-    6
+    4,
+    5
    ],
    "count": [
     1,
@@ -6560,8 +6560,8 @@
    "monster": "ironback_beetle",
    "with": null,
    "level": [
-    5,
-    6
+    4,
+    5
    ],
    "count": [
     1,
@@ -7384,8 +7384,8 @@
    "monster": "sporecap_walker",
    "with": null,
    "level": [
-    5,
-    6
+    4,
+    5
    ],
    "count": [
     2,

@@ -502,8 +502,8 @@
    "monster": "brigand_archer",
    "with": null,
    "level": [
-    6,
-    7
+    7,
+    8
    ],
    "count": [
     2,
@@ -520,8 +520,8 @@
    "monster": "brigand_archer",
    "with": null,
    "level": [
-    6,
-    7
+    7,
+    8
    ],
    "count": [
     2,
@@ -5827,8 +5827,8 @@
    "monster": "road_brigand",
    "with": null,
    "level": [
-    6,
-    7
+    7,
+    8
    ],
    "count": [
     2,
@@ -9282,8 +9282,8 @@
    "monster": "reed_serpent",
    "with": null,
    "level": [
-    6,
-    7
+    7,
+    8
    ],
    "count": [
     2,

@@ -145,9 +145,9 @@
    "id": "sp_brannock_fields",
    "name": "Brannock Fields",
    "kind": "farmland",
-   "x": 766,
-   "z": 792,
-   "yaw": 2.65,
+   "x": 778,
+   "z": 884,
+   "yaw": 1.53,
    "radius": 21.3,
    "bound": "hobbins_farm",
    "scale": 0.473,
@@ -170,21 +170,21 @@
     "role.farmer",
     "place.sp_brannock_fields"
    ],
-   "x": 727.3,
-   "z": 849.5,
+   "x": 679.9,
+   "z": 750.6,
    "yaw": 0,
    "path": [
     [
-     727.3,
-     849.5
+     679.9,
+     750.6
     ],
     [
-     729.3,
-     850.5
+     679.9,
+     753
     ],
     [
-     727.8,
-     851.7
+     678.2,
+     752.1
     ]
    ]
   },
@@ -199,21 +199,21 @@
     "role.farmer",
     "place.sp_brannock_fields"
    ],
-   "x": 728.8,
-   "z": 853.3,
+   "x": 677.2,
+   "z": 753.7,
    "yaw": 0,
    "path": [
     [
-     728.8,
-     853.3
+     677.2,
+     753.7
     ],
     [
-     730.8,
-     854.3
+     677.1,
+     756
     ],
     [
-     729.3,
-     855.5
+     675.5,
+     754.9
     ]
    ]
   },
@@ -228,25 +228,25 @@
     "role.orchard_keeper",
     "place.sp_brannock_fields"
    ],
-   "x": 735.5,
-   "z": 856,
+   "x": 677.7,
+   "z": 760.9,
    "yaw": 0,
    "path": [
     [
-     735.5,
-     856
+     677.7,
+     760.9
     ],
     [
-     733.1,
-     854.7
+     677.8,
+     758.2
     ],
     [
-     734.4,
-     852.3
+     680.6,
+     758.2
     ],
     [
-     736.8,
-     853.6
+     680.4,
+     761
     ]
    ]
   },
@@ -256,9 +256,9 @@
    "id": "sp_turnwater_mill",
    "name": "Turnwater Mill",
    "kind": "mill",
-   "x": 871,
-   "z": 1298,
-   "yaw": 1.4,
+   "x": 796.5,
+   "z": 1279.3,
+   "yaw": 0.9,
    "radius": 12,
    "bound": "torbor_mill_pond",
    "scale": 0.429,
@@ -276,8 +276,8 @@
    "id": "sp_saint_hulda_yard",
    "name": "Saint Hulda's Yard",
    "kind": "graveyard",
-   "x": 306,
-   "z": 1032,
+   "x": 390,
+   "z": 1060,
    "yaw": 1.8,
    "radius": 18.6,
    "bound": "hollow_chapel",
@@ -302,25 +302,25 @@
     "role.sexton",
     "place.sp_saint_hulda_yard"
    ],
-   "x": 387.2,
-   "z": 1056.8,
+   "x": 732.2,
+   "z": 1249.8,
    "yaw": 0,
    "path": [
     [
-     387.2,
-     1056.8
+     732.2,
+     1249.8
     ],
     [
-     387.9,
-     1059.8
+     732.9,
+     1252.8
     ],
     [
-     395.1,
-     1058.1
+     740.1,
+     1251.1
     ],
     [
-     395.4,
-     1059.4
+     740.4,
+     1252.4
     ]
    ]
   },
@@ -408,8 +408,8 @@
    "id": "sp_nine_maidens",
    "name": "The Nine Maidens",
    "kind": "standing_stones",
-   "x": 1474,
-   "z": 505,
+   "x": 1516,
+   "z": 528,
    "yaw": 0,
    "radius": 11,
    "bound": "grey_maidens",
@@ -1209,8 +1209,8 @@
     3,
     3
    ],
-   "x": 936,
-   "z": 1047,
+   "x": 975,
+   "z": 1024,
    "yaw": 0,
    "radius": 10
   },
@@ -2173,8 +2173,8 @@
    "monster": "moor_hound",
    "with": null,
    "level": [
-    3,
-    4
+    2,
+    3
    ],
    "count": [
     2,
@@ -2203,8 +2203,8 @@
    "monster": "thicket_boar",
    "with": null,
    "level": [
-    1,
-    2
+    2,
+    3
    ],
    "count": [
     2,
@@ -2785,8 +2785,8 @@
    "recipe": "cu_rune_ring",
    "name": "Little Stone Ring",
    "kind": "marker",
-   "x": 965,
-   "z": 726,
+   "x": 982,
+   "z": 743,
    "yaw": 0.5,
    "radius": 6,
    "levelBase": 2
@@ -5112,26 +5112,26 @@
     1,
     2
    ],
-   "x": 856,
-   "z": 818,
+   "x": 804,
+   "z": 762,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     925,
-     800
+     821,
+     731
     ],
     [
-     874,
-     887
+     835,
+     779
     ],
     [
      787,
-     836
+     793
     ],
     [
-     838,
-     749
+     773,
+     745
     ]
    ],
    "roam": true
@@ -6371,8 +6371,8 @@
    "recipe": "cu_wild_garlic",
    "name": "Wild Garlic",
    "kind": "forage",
-   "x": 1057,
-   "z": 1008,
+   "x": 1074,
+   "z": 1014,
    "yaw": 2.92,
    "radius": 4,
    "levelBase": 1
@@ -7886,8 +7886,8 @@
    "recipe": "cu_ruined_hearth",
    "name": "Ruined Hearth",
    "kind": "marker",
-   "x": 423,
-   "z": 792,
+   "x": 441,
+   "z": 779,
    "yaw": 2.39,
    "radius": 6,
    "levelBase": 1
@@ -8187,8 +8187,8 @@
     2,
     2
    ],
-   "x": 977,
-   "z": 1329,
+   "x": 932,
+   "z": 1350,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -8371,8 +8371,8 @@
    "monster": "thicket_boar",
    "with": null,
    "level": [
-    2,
-    3
+    1,
+    2
    ],
    "count": [
     1,
@@ -9066,8 +9066,8 @@
    "recipe": "cu_wild_garlic",
    "name": "Wild Garlic",
    "kind": "forage",
-   "x": 272,
-   "z": 920,
+   "x": 245,
+   "z": 908,
    "yaw": 1.9,
    "radius": 4,
    "levelBase": 1
@@ -9401,22 +9401,22 @@
    "chatter": [
     "role.surveyor"
    ],
-   "x": 761,
-   "z": 931,
+   "x": 762,
+   "z": 981,
    "yaw": 0.33,
    "radius": 6,
    "path": [
     [
-     759,
-     871
+     760,
+     921
     ],
     [
-     814,
-     959
+     815,
+     1009
     ],
     [
-     710,
-     963
+     711,
+     1013
     ]
    ]
   },
@@ -9565,8 +9565,8 @@
     1,
     2
    ],
-   "x": 801,
-   "z": 974,
+   "x": 840,
+   "z": 1026,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -9774,8 +9774,8 @@
    "monster": "road_brigand",
    "with": null,
    "level": [
-    2,
-    3
+    1,
+    2
    ],
    "count": [
     2,

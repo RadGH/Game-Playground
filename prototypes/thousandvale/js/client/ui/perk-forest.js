@@ -6,6 +6,11 @@
 //   const g = createPerkGraph(container, { describe: id => html, onTake: id => {}, onRefund: id => {} });
 //   g.set(forest, stateMap, { arms })   // redraw with node states: taken | open | reach | locked
 //   g.fit(); g.zoom(1.25); g.focus(id); g.destroy();
+//
+// Play-test 12 (#67): a phone has no hover, so a perk's card could never be read — you could take perks blind. A TAP
+// on a node now opens its card in a panel along the bottom of the forest (the same text the hover card shows) with
+// the button for what that node can do (Stage / Take back / Hand back). Tapping the same node again still stages it,
+// so the old one-tap-per-perk rhythm keeps working once you know the forest. A mouse is unchanged.
 
 import { registerTip, refreshTip, hideTip, tipOpen } from './tips.js';
 import { forestBounds, armSectors } from './talent-model.js';
@@ -24,6 +29,26 @@ export function createPerkGraph(host, { describe, onTake, onRefund, unit = 64 } 
   const armColor = k => arms.find(a => a.key === k)?.color || '#b8a888';
 
   registerTip('perk', () => (hover ? describe?.(hover) : null));
+
+  // ---- #67: the details panel a touch opens ----
+  const card = document.createElement('div'); card.className = 'pf-card'; card.hidden = true; card.setAttribute('role', 'dialog'); card.setAttribute('aria-label', 'Perk details');
+  wrap.appendChild(card);
+  let cardId = null;
+  for (const ev of ['pointerdown', 'pointerup', 'click', 'wheel']) card.addEventListener(ev, e => e.stopPropagation());
+  function drawCard() {
+    if (!cardId || !F?.byId.get(cardId)) { card.hidden = true; cardId = null; return; }
+    const st = ST.get(cardId) || 'locked';
+    const body = document.createElement('div'); body.className = 'pf-card-body'; body.innerHTML = describe?.(cardId) || '';
+    const row = document.createElement('div'); row.className = 'pf-card-act';
+    const btn = (label, cls, fn) => { const b = document.createElement('button'); b.type = 'button'; b.className = cls; b.textContent = label; b.onclick = fn; row.appendChild(b); return b; };
+    if (st === 'open') btn('Stage this perk', 'primary small', () => { onTake?.(cardId); });
+    else if (st === 'staged') btn('Take back', 'ghost small', () => { onTake?.(cardId); });
+    else if (st === 'taken' && onRefund) btn('Hand back', 'ghost small', () => { onRefund(cardId); });
+    btn('Close', 'ghost small', () => closeCard());
+    card.replaceChildren(body, row); card.hidden = false;
+  }
+  function openCard(id) { cardId = id; focusId = id; dirty = true; hideTip(); drawCard(); }
+  function closeCard() { cardId = null; card.hidden = true; dirty = true; }
 
   const toScreen = (x, y) => [(x - V.x) * V.s + V.w / 2, (y - V.y) * V.s + V.h / 2];
   const toWorld = (px, py) => [(px - V.w / 2) / V.s + V.x, (py - V.h / 2) / V.s + V.y];
@@ -154,7 +179,7 @@ export function createPerkGraph(host, { describe, onTake, onRefund, unit = 64 } 
     cv.setPointerCapture(e.pointerId);
     pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch = { d: Math.hypot(a.x - b.x, a.y - b.y) }; drag = null; return; }
-    drag = { x: e.clientX, y: e.clientY, vx: V.x, vy: V.y, moved: 0, button: e.button, id: nodeAt(e.offsetX, e.offsetY) };
+    drag = { x: e.clientX, y: e.clientY, vx: V.x, vy: V.y, moved: 0, button: e.button, touch: e.pointerType === 'touch', id: nodeAt(e.offsetX, e.offsetY) };
     clearTimeout(press);
     if (e.pointerType === 'touch') press = setTimeout(() => { if (drag && drag.moved < 6 && drag.id && (ST.get(drag.id) === 'taken' || ST.get(drag.id) === 'staged')) { onRefund?.(drag.id); drag = null; } }, 650);
   });
@@ -178,9 +203,10 @@ export function createPerkGraph(host, { describe, onTake, onRefund, unit = 64 } 
     if (pts.size < 2) pinch = null;
     if (drag && drag.moved <= 5 && drag.id) {
       if (drag.button === 2) onRefund?.(drag.id);
+      else if (drag.touch && cardId !== drag.id) openCard(drag.id);          // #67: the first tap reads the card
       else onTake?.(drag.id);
       focusId = drag.id; dirty = true;
-    }
+    } else if (drag && drag.moved <= 5 && drag.touch && !drag.id) closeCard();   // a tap on empty ground puts it away
     drag = null;
     cv.style.cursor = hover ? 'pointer' : 'grab';
   };
@@ -195,7 +221,7 @@ export function createPerkGraph(host, { describe, onTake, onRefund, unit = 64 } 
 
   return {
     canvas: cv, view: V,
-    set(forest, state, { arms: a } = {}) { const first = !F, isNew = F !== forest; F = forest; rim = Math.max(1, ...forest.nodes.map(n => Math.hypot(n.x, n.y))); ST = state || new Map(); if (a) arms = a; if (isNew) sectors = armSectors(forest); dirty = true; if (first) requestAnimationFrame(fit); },
+    set(forest, state, { arms: a } = {}) { const first = !F, isNew = F !== forest; F = forest; rim = Math.max(1, ...forest.nodes.map(n => Math.hypot(n.x, n.y))); ST = state || new Map(); if (a) arms = a; if (isNew) sectors = armSectors(forest); dirty = true; if (first) requestAnimationFrame(fit); if (cardId) drawCard(); },
     /** Q23: ring these node ids and dim the rest (null / [] = no search). Returns how many were found. */
     setSearch(ids) { found = ids && ids.length ? new Set(ids) : null; dirty = true; return found ? found.size : 0; },
     /** Zoom so every one of these nodes is on screen. */
@@ -217,6 +243,8 @@ export function createPerkGraph(host, { describe, onTake, onRefund, unit = 64 } 
     /** Screen position of a node (tests click real nodes). */
     screenOf(id) { const n = F?.byId.get(id); if (!n) return null; const [x, y] = toScreen(n.x, n.y); return { x, y }; },
     get hover() { return hover; },
+    /** #67: open / close the details panel (touch opens it with a tap; tests and the gallery call it). */
+    showCard: id => openCard(id), hideCard: () => closeCard(), get cardId() { return cardId; },
     destroy() { cancelAnimationFrame(raf); ro?.disconnect(); wrap.remove(); },
   };
 }

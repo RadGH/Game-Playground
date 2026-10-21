@@ -20,7 +20,15 @@
 import { CODES } from '../net/protocol.js';
 import { sha256Hex, randomHex } from './sha256.js';
 
-export const ACCOUNT_OPS = Object.freeze(['claim', 'login', 'logout', 'password', 'resetAsk', 'reset', 'info', 'peek', 'adopt']);
+export const ACCOUNT_OPS = Object.freeze(['claim', 'login', 'logout', 'password', 'resetAsk', 'reset', 'info', 'peek', 'adopt', 'qrMake', 'qrUse']);
+/**
+ * Play-test 12 (#73): sign a phone in by scanning a QR code on a screen that is already signed in. `qrMake` (a claimed
+ * account, signed in) mints a one-time code — 16 random bytes, only its hash kept, in memory only — that works ONCE, for
+ * ttlMs; making a new one throws the old one away. `qrUse {code}` (a signed-out socket) trades it for a fresh session
+ * token of that account, exactly what a password login hands out. The password never travels and never appears in
+ * the code. A wrong code counts against the address like a wrong password. A server restart forgets every code.
+ */
+export const QR_SIGNIN = Object.freeze({ ttlMs: 3 * 60000, max: 5000 });
 export const LOGIN_LIMITS = Object.freeze({
   ipFails: 20, ipWindowMs: 10 * 60000,          // failed logins from one address (above userFails, so it never trips first)
   userFails: 10, userWindowMs: 15 * 60000,      // failed logins on one username (owner 2026-10-15: 5 was too strict)
@@ -57,6 +65,9 @@ export function createAccounts({ store, hasher = null, mailer = null, verifyHuma
   const limiter = createLimiter(wallNow);
   const L = LOGIN_LIMITS;
   const resetLog = [];             // { at, username, email, code, until } for the admin page (last 50)
+  const qr = new Map();            // #73: sha256(code) -> { account, until }
+  const qrOf = new Map();          // account -> the hash of its live code (one at a time)
+  const qrSweep = () => { const t = wallNow(); for (const [k, v] of qr) if (v.until <= t) { qr.delete(k); if (qrOf.get(v.account) === k) qrOf.delete(v.account); } };
   const reply = (s, op, x) => s.sendJSON({ t: 'accountR', op, ...x });
   const fail = (s, op, why, msg) => reply(s, op, { ok: false, why, msg: msg || CODES[why] || why });
   const human = (s, m) => (verifyHuman ? Promise.resolve(m.human ? verifyHuman(m.human, s.ip) : false).catch(() => false) : Promise.resolve(true));
@@ -193,6 +204,37 @@ export function createAccounts({ store, hasher = null, mailer = null, verifyHuma
         const r = resetLog.find(x => x.account === account && !x.used); if (r) r.used = wallNow();
         return reply(s, op, { ok: true, msg: 'Password changed. Log in with it now.' });
       }
+      case 'qrMake': {
+        if (s.state !== 'authed') return 'order';
+        if (!s.claimed) return fail(s, op, 'claimFirst', 'Claim this account first (Account window): a phone signs in to a claimed account.');
+        qrSweep();
+        if (qr.size >= QR_SIGNIN.max) return fail(s, op, 'busy', 'Too many sign-in codes right now. Try again in a minute.');
+        const old = qrOf.get(s.account); if (old) qr.delete(old);
+        const code = randomHex(16), key = sha256Hex('qr:' + code);
+        qr.set(key, { account: s.account, until: wallNow() + QR_SIGNIN.ttlMs }); qrOf.set(s.account, key);
+        counters.qrMade = (counters.qrMade || 0) + 1;
+        return reply(s, op, { ok: true, code, ttl: QR_SIGNIN.ttlMs });
+      }
+      case 'qrUse': {
+        if (s.state !== 'anon') return 'order';
+        if (limited(s) && limiter.over(ipKey(s), L.ipFails, L.ipWindowMs)) return fail(s, op, 'tooManyLogins');
+        const code = String(m.code || '').trim().toLowerCase();
+        const key = /^[0-9a-f]{32}$/.test(code) ? sha256Hex('qr:' + code) : null;
+        const e = key ? qr.get(key) : null;
+        if (key && e) { qr.delete(key); if (qrOf.get(e.account) === key) qrOf.delete(e.account); }      // single use: gone before anything is awaited
+        if (!e || e.until <= wallNow()) { limiter.hit(ipKey(s)); return fail(s, op, 'auth', 'That sign-in code has been used or has run out. Make a new one on the signed-in screen.'); }
+        s.state = 'busy';
+        try {
+          const token = await store.newToken(e.account, 'session');
+          const a = await store.authToken(token);
+          if (!a || !a.claimed) { await store.revokeToken(token); s.state = 'anon'; return fail(s, op, 'auth', 'That account cannot be signed in to this way.'); }
+          if ((a.banned || 0) > wallNow()) { await store.revokeToken(token); s.state = 'anon'; s.sendJSON({ t: 'refuse', code: 'banned', msg: CODES.banned }); return s.closeSoon('banned'); }
+          s.state = 'anon';
+          counters.qrUsed = (counters.qrUsed || 0) + 1;
+          log('signed in by QR code', { account: e.account });
+          return reply(s, op, { ok: true, token, username: a.username || null });
+        } catch (err) { s.state = 'anon'; log('qr sign-in failed', err && err.message); return fail(s, op, 'auth', 'Signing in is not working right now.'); }
+      }
     }
     return 'op';
   }
@@ -203,5 +245,7 @@ export function createAccounts({ store, hasher = null, mailer = null, verifyHuma
     },
     resets: () => resetLog.slice().reverse().map(r => ({ ...r, live: !r.used && r.until > wallNow() })),
     limiter,
+    /** #73: live QR sign-in codes (tests). */
+    qrLive: () => { qrSweep(); return qr.size; },
   };
 }

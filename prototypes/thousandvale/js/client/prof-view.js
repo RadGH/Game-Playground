@@ -133,10 +133,19 @@ export function createProfView(scene, { actors = null, objects = null, camera = 
   // ---- skinning: a prompt on the corpse, and a small knife-coloured glint over it -------------------------------
   function setSkinnable(id, on, info = {}) {
     const key = 'skin:' + id;
-    if (!on) { if (skins.delete(id)) objects?.remove?.(key); const g = actors?.get(id); if (g) g.skinMark = false; return; }
-    const a = actors?.get(id); skins.set(id, { name: info.name || a?.name || 'the beast', x: a?.pos.x, z: a?.pos.z });
+    if (!on) { if (skins.delete(id)) { objects?.remove?.(key); relabelSkins(); } const g = actors?.get(id); if (g) g.skinMark = false; return; }
+    const a = actors?.get(id); skins.set(id, { name: info.name || a?.name || 'the beast', x: a?.pos.x, z: a?.pos.z, has: !!a });
     if (a) a.skinMark = true;      // [World #19] the body stays drawn while it can be skinned (actors.js fade) — never clickable (pick-rule emptyCorpse)
-    if (a) objects?.upsert?.({ id: key, type: 'skin', corpse: id, name: info.name || a.name, x: a.pos.x, z: a.pos.z, r: 1.6, source: 'prof' });
+    relabelSkins();
+  }
+  // play-test 12 (#69): E on a body skins every beast of yours within ten metres (ui/prof.js) — the prompt says so
+  const SKIN_BATCH_M = 10;
+  function relabelSkins() {
+    for (const [id, s] of skins) {
+      if (!s.has) continue;
+      let nearby = 0; for (const [j, t] of skins) if (j !== id && t.has && Math.hypot(t.x - s.x, t.z - s.z) <= SKIN_BATCH_M) nearby++;
+      objects?.upsert?.({ id: 'skin:' + id, type: 'skin', corpse: id, name: s.name, nearby, x: s.x, z: s.z, r: 1.6, source: 'prof' });
+    }
   }
 
   // ---- the worker: a loop and a tool in the hand ----------------------------------------------------------------

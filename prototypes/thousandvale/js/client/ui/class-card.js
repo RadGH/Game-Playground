@@ -69,5 +69,20 @@ export function drawClassCard(el, c) {
     mk('strong', 'cc-name', L.name), mk('span', 'cc-role', L.role),
     mk('p', 'cc-facts', L.facts.join(' · ')),
     ...(L.hook ? [mk('p', 'cc-hook', L.hook)] : []),
-    ...(L.signature ? [mk('p', 'cc-sig', L.signature)] : []));
+    ...(L.signature ? [sigPart(L, mk)] : []));
+}
+/**
+ * Play-test 12 (#64): the Star Blade's "way" paragraph is six lines long, and on a short screen it pushed "Next" off
+ * the bottom. A long signature folds into "How it plays" — open on a tall screen, folded on a phone or a short window —
+ * so step 1 always fits (and the title screen scrolls as well, css/pt12.css).
+ */
+export const SIG_FOLD = 140;
+function sigPart(L, mk) {
+  const p = mk('p', 'cc-sig', L.signature);
+  if (L.signature.length <= SIG_FOLD) return p;
+  const d = document.createElement('details'); d.className = 'cc-more';
+  const short = typeof innerHeight === 'number' && (innerHeight < 820 || document.documentElement.dataset.layout === 'phone');
+  d.open = !short;
+  d.append(mk('summary', '', `How the ${L.name} plays`), p);
+  return d;
 }

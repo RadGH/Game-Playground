@@ -14,6 +14,7 @@
 //   const body = await createTvBody(avatar, { anims });          // same options as createChibi2Character
 
 import { createChibi2Character, prepareChibi2 } from '../../../../avatar-3d/js/chibi2.js';
+import { dropRetired } from './retired-parts.js';      // #77
 
 /** 2 or 2.5 from a page's query string (pure — exported for tests). */
 export function chibiVersion(search = '') { return /(?:^|[?&])chibi=2(?:&|$)/.test(String(search || '')) ? 2 : 2.5; }
@@ -24,6 +25,7 @@ export const tvChibiOpts = (opts = {}, v = CHIBI_V) => (v >= 2.5 ? { ...opts, v2
 const breathe = () => new Promise(r => setTimeout(r, 0));
 /** A Chibi body for Thousandvale: the template baked in slices (no long task), then built from the cache. */
 export async function createTvBody(avatar, opts = {}) {
+  avatar = dropRetired(avatar);      // play-test 12 (#77): a monster's designed look or an old save may still name a blindfold
   const o = tvChibiOpts(opts);
   if (opts.trace == null) { try { await prepareChibi2(avatar, { ...o, slice: opts.slice || breathe, budget: opts.budget ?? 10 }); } catch { /* the build below reports it */ } }
   return createChibi2Character(avatar, o);

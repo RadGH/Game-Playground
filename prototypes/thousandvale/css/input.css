@@ -63,10 +63,24 @@ html[data-input="pad"] :focus { outline: none; }
 .tv-osk .osk-text { min-height: 34px; padding: 6px 10px; margin-bottom: 8px; border-radius: 6px; background: rgba(0, 0, 0, 0.5); border: 1px solid var(--edge, rgba(217, 178, 106, 0.38)); font-size: 16px; white-space: pre-wrap; word-break: break-word; }
 .tv-osk .osk-row { display: flex; gap: 5px; margin-top: 5px; justify-content: center; }
 .tv-osk .osk-key { flex: 1; min-width: 0; height: 40px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.16); background: #23201b; color: var(--ink, #f3ead8); font: 600 16px var(--sans, system-ui, sans-serif); cursor: pointer; }
-.tv-osk .osk-key.space { flex: 4; font-size: 13px; color: var(--ink-dim, #c7b99b); }
 .tv-osk .osk-key.on { background: linear-gradient(180deg, #8c6427, #5d3f16); border-color: var(--gold-hi, #f1d595); color: #fff; box-shadow: 0 0 12px rgba(241, 213, 149, 0.6); }
 .tv-osk .osk-help { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; font-size: 12px; color: var(--ink-dim, #c7b99b); justify-content: center; }
 .tv-osk .osk-help span { display: inline-flex; align-items: center; gap: 5px; }
+.tv-osk .osk-key.act { font-size: 14px; color: var(--ink-dim, #c7b99b); background: #1b1915; }
+.tv-osk .osk-key.act-done { color: var(--gold-hi, #f1d595); }
+.tv-osk .osk-key.lit { color: var(--gold-hi, #f1d595); border-color: var(--gold-hi, #f1d595); }
+.tv-osk .osk-key.on { color: #fff; background: linear-gradient(180deg, #8c6427, #5d3f16); }
+/* play-test 12 (#74): a wide or short screen (Steam Deck 1280x800, a 1024x576 window) gets a wide, low board that keeps
+   the middle of the screen clear: shorter keys, the typed text and the help on one line each, a gap to the bottom. */
+@media (min-aspect-ratio: 3/2), (max-height: 640px) {
+  .tv-osk { width: min(980px, 92vw); padding: 8px 12px 6px; bottom: 10px; }
+  .tv-osk .osk-text { min-height: 28px; padding: 4px 10px; margin-bottom: 4px; font-size: 15px; max-height: 52px; overflow: hidden; }
+  .tv-osk .osk-row { gap: 4px; margin-top: 4px; }
+  .tv-osk .osk-key { height: 34px; font-size: 15px; }
+  .tv-osk .osk-help { margin-top: 6px; flex-wrap: nowrap; overflow: hidden; }
+}
+@media (max-height: 600px) { .tv-osk .osk-key { height: 30px; } .tv-osk .osk-row { margin-top: 3px; } }
+@media (max-height: 460px) { .tv-osk .osk-key { height: 28px; } .tv-osk .osk-help { display: none; } }
 
 /* ---------------------------------------------------------------- binding tables (Settings > Key bindings, Help, the gallery's Controls scene) */
 .bind-tabs { margin-bottom: 8px; }

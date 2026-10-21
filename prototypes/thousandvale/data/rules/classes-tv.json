@@ -357,6 +357,7 @@
    "splash": 1.4,
    "projectiles": 3,
    "spread": 0.24,
+   "volleyEvery": 0.16,
    "cooldown": 7,
    "mp": 12,
    "resource": {

@@ -26,6 +26,8 @@ export const VIEW = Object.freeze({
   q: 0.125,                      // metres per snapshot position unit
 });
 const MAX_QUEUED_INPUTS = 30, MOVE_BUDGET_CAP = 500;
+/** play-test 12 (#75): how long a basic attack slows your stride on the server (the client holds IN.FIGHT 1100 ms, main.js) */
+const FIGHT_HOLD_SERVER_MS = 800;
 export const DORMANT_MS = 30000;      // a camp nobody has been within awakeR of for this long (and calm) is parked
 
 /** Y23 (round 10): a wilds camp's body comes back 90-150 s after it died (it was 30 s, on one clock a camp); a camp may name its own `respawnMs`. */
@@ -302,6 +304,10 @@ export function createRoom(opts) {
     // no fighting while swimming (P25): attacks and skills are refused; picking a target is still fine
     if ((e.state & STATE.swimming) && msg.t === 'cast') return { ok: false, why: 'swimming', text: 'You cannot fight while swimming.' };
     if (msg.target) { const t = entities.get(msg.target); if (!t) msg = { ...msg, target: undefined }; }
+    // play-test 12 (#75): a basic attack slows your stride for a moment (movement.js MOVE.fight). The client asks for it
+    // itself (IN.FIGHT, held FIGHT_HOLD_MS after each swing it sends); the server holds it a little LESS long, so an honest
+    // client is never corrected and one that leaves the bit off is still slowed.
+    if (msg.t === 'cast' && msg.slot === 0) { const c = clients.get(e.id); if (c) c.fightUntil = room.now() + FIGHT_HOLD_SERVER_MS; }
     return safe('intent', e, msg) || { ok: false, why: 'unknown' };
   };
   /** Say chat to everyone within VIEW.sayR; `deliver(recipientChar)` may veto (ignore lists). */
@@ -477,7 +483,8 @@ export function createRoom(opts) {
       c.budget -= dt;
       const st = { x: e.x, y: e.y, z: e.z, vy: e.vy, airborne: e.airborne, speedMul: e.speedMul || 1, glide: !!e.glide };      // [S]
       // W26 (round 8): while `e.held` (calling a mount, riding a cart) you STAND — the client's movement is ignored, facing still turns
-      stepMove(st, e.held ? { ...m, mx: 0, mz: 0, b: 0 } : m, dt, terrain);
+      const fight = c.fightUntil > room.now() && !(m.b & IN.FIGHT) ? { ...m, b: (m.b | 0) | IN.FIGHT } : m;      // #75 (room.intent)
+      stepMove(st, e.held ? { ...m, mx: 0, mz: 0, b: 0 } : fight, dt, terrain);
       commitMove(e, st);
       e.face(m.yaw);
       moved = true; lastB = e.held ? 0 : m.b; mxs = e.held ? 0 : m.mx; mzs = e.held ? 0 : m.mz;

@@ -8,6 +8,7 @@
   },
   "basic": { "default": 26, "bow": 30, "shortbow": 30, "longbow": 30, "crossbow": 30, "javelin": 24, "sling": 24, "wand": 22, "staff": 20, "scepter": 20 },
   "monster": { "default": 19, "physical": 26 },
+  "monsterAim": { "_doc": "Play-test 12 (#78): a MONSTER's shot does not home. It flies at a point and lands on whoever is within `radius` m (plus their body) of it on arrival. The point is where the target stood plus `lead` (0..1) of where it was heading over the flight; `leadByRole` overrides by bestiary role (an archer leads harder). `home: true` puts back the old always-hits shot.", "home": false, "lead": 0.3, "radius": 1.1, "leadByRole": { "archer": 0.6, "leader": 0.45 } },
   "special": { "ms": 160 },
   "proj": {
     "byElement": { "physical": "arrow", "fire": "firebolt", "ice": "shard" },

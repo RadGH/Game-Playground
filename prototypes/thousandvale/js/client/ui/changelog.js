@@ -44,7 +44,9 @@ export function createChangelog({ net = () => null, storage = null, load = null,
   // ---- the window
   const root = h('section.tv-changelog', { hidden: true, role: 'dialog', 'aria-label': 'Changelog', tabIndex: -1 },
     h('header.cl-head', {}, h('h3', {}, 'What\'s new'), h('span.cl-sub'), h('button.ghost.cl-x', { type: 'button', 'aria-label': 'Close', onclick: () => close() }, '×')),
-    h('div.cl-list'));
+    h('div.cl-list'),
+    // 2026-10-20 (owner): what is planned and not built yet — public/todo.html
+    h('footer.cl-foot', {}, h('a', { href: 'public/todo.html', target: '_blank', rel: 'noopener' }, 'What\'s still to do →')));
   root.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape') { close(); e.preventDefault(); } });
   for (const ev of ['pointerdown', 'mousedown', 'click', 'wheel', 'touchstart']) root.addEventListener(ev, e => e.stopPropagation());
   document.body.appendChild(root);

@@ -32,6 +32,33 @@ import('../../rules/item-text.js').then(m => { if (typeof m.affixText === 'funct
 const fload = Promise.all([import('../../../../farhold/js/effects.js'), import('../../../../farhold/js/rpg.js')])
   .then(([e, r]) => { F = { describe: e.describeAffix, score: r.itemScore, name: r.displayName }; }).catch(() => {});
 export const farholdReady = () => fload;
+// live #91 ("set items have no set bonuses"): the bonuses always applied (Farhold's rpg.setBonuses), but the card never said
+// so. The set table the server uses, converted the same way (attributes.js convertItemTable, tv-gear.js stripInert).
+let setTable = null, setPower = null;
+Promise.all([fetch(new URL('../../../../emberveil/data/items.json', import.meta.url)).then(r => r.json()), import('../../rules/attributes.js'), import('../../rules/tv-gear.js')])
+  .then(([items, A, G]) => { A.convertItemTable(items); G.stripInert(items); setTable = new Map((items.sets || []).map(s => [s.id, s])); }).catch(() => {});
+import('../../../../emberveil/js/effects.js').then(m => { if (typeof m.describeLegendary === 'function') setPower = m.describeLegendary; }).catch(() => {});
+/** For tests and the gallery: hand the card a set table without waiting for the load above. */
+export function setSetTable(sets) { setTable = new Map((sets || []).map(s => [s.id, s])); }
+/** The set block of a card: the set's name, how many pieces you wear, and every step's bonus (on ones ticked). */
+function setBlock(item, eq) {
+  const set = item?.setId && setTable?.get(item.setId); if (!set) return '';
+  const wornNow = Object.values(eq || {}).filter(i => i && i.setId === set.id);
+  const wearing = wornNow.some(i => i === item || (i.uid != null && i.uid === item.uid));
+  const n = wornNow.length, withIt = wearing ? n : n + 1;
+  const steps = Object.entries(set.partialBonuses || {}).map(([at, bonus]) => ({ at: +at, bonus })).sort((a, b) => a.at - b.at);
+  const rows = steps.map(st => {
+    const lines = Object.entries(st.bonus).filter(([k, v]) => k !== 'desc' && typeof v === 'number').map(([stat, value]) => affixText({ stat, value }));
+    const on = n >= st.at;
+    return `<li class="${on ? 'ic-set-on' : 'ic-dim'}">${st.at} pieces: ${esc(lines.join(', ') || st.bonus.desc || 'a bonus')}${on ? ' ✓' : ''}</li>`;
+  });
+  if (set.legendaryEffect && set.activationPieces) {
+    let txt = null; try { txt = setPower?.(set.legendaryEffect) || null; } catch { /* none */ }
+    if (txt) rows.push(`<li class="${n >= set.activationPieces ? 'ic-set-on' : 'ic-dim'}">${set.activationPieces} pieces: ${esc(who(txt))}${n >= set.activationPieces ? ' ✓' : ''}</li>`);
+  }
+  const head = `${esc(set.name)} set — you wear ${n} of ${set.pieces || set.items?.length || '?'}${!wearing && withIt !== n ? ` (${withIt} with this)` : ''}`;
+  return `<div class="ic-set"><div class="ic-set-head">${head}</div><ul class="ic-affixes">${rows.join('')}</ul></div>`;
+}
 export const scoreOf = it => (F.score ? F.score(it) : plainScore(it));
 export const nameOf = it => (F.name ? F.name(it) : String(it?.name || 'Item'));
 
@@ -137,6 +164,7 @@ export function itemCardHtml(item, { worn = false, level = null, equipment = nul
   }
   if (item.uniquePower || item.power?.text) said.push(item.power?.text || item.uniquePower);
   if (item.uniquePower || item.power?.text) b.push(`<div class="ic-legend">${esc(who(item.power?.text || item.uniquePower))}</div>`);
+  { const sb = setBlock(item, eq); if (sb) b.push(sb); }
   if (item.lore) b.push(`<div class="ic-lore">${esc(item.lore)}</div>`);
   if (slot && !worn) {
     const c = compareTo(item, eq, { score: scoreOf, alt: alt && !!altSlotOf(item) });

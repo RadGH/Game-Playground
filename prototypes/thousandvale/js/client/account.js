@@ -10,6 +10,7 @@ import { nameMatches, charLimit, limitText, deleteRefusal, deleteWarning } from 
 import { humanToken } from './turnstile.js';
 import { socketFactory } from '../net/sockets.js';
 import { PROTOCOL_VERSION } from '../net/protocol.js';
+import { qrSvg } from './qr.js';
 
 const $ = id => document.getElementById(id);
 
@@ -244,6 +245,10 @@ export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onPick, 
     const list = chars || [];
     T.mine.hidden = !list.length && !username;
     T.who.textContent = username ? `Logged in as ${username}` : '';
+    // #73: the title's own way to put this account on a phone
+    let qb = T.mine.querySelector('.qr-title');
+    if (username && !qb) { qb = h('button.linkish.qr-title', { type: 'button', onclick: () => qr.open() }, 'Sign in on your phone (QR code)'); T.chips.before(qb); }
+    if (qb) qb.hidden = !username;
     lastChars = list; lastUser = username;
     try { api.onChars?.(list, username); } catch { /* the title's front card (ui/title-front.js) */ }
     // play-test 2 Q25: the calling's real name ("Ranger"); Q13: the character's portrait (ui/portraits.js) when ready
@@ -312,7 +317,56 @@ export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onPick, 
       h('details', {}, h('summary', {}, 'Change password'),
         h('form.claim', { onsubmit: e => { e.preventDefault(); if (p1.value !== p2.value) { msg.textContent = 'The two new passwords do not match.'; return; } if (p1.value.length < 8) { msg.textContent = ACCOUNT_WHY.pass; return; } n.accountOp('password', { old: old.value, pass: p1.value }); } },
           old, p1, p2, msg, h('button.ghost.wide', { type: 'submit' }, 'Change password'))),
+      h('div.qr-offer', {}, h('button.ghost.wide', { type: 'button', dataset: { act: 'qr' }, onclick: () => qr.open() }, 'Sign in on your phone (QR code)')),
       h('div.row.end', {}, h('a.tiny-link', { href: 'public/privacy.html', target: '_blank', rel: 'noopener' }, 'Privacy'), h('span.grow'), h('button.ghost', { type: 'button', onclick: () => logout() }, 'Log out')));
+  }
+
+  // ---- play-test 12 (#73): sign a phone in with a QR code ----
+  // The server mints a one-time code for THIS signed-in account (account {op:'qrMake'}): it works once, for three minutes,
+  // and a new one cancels the old. The QR holds this page's address + ?signin=<code>; the phone opens it, trades the code
+  // for its own session (useSigninCode below, on the phone) and lands on the character list. The password never moves.
+  const qr = (() => {
+    const Q = { code: null, until: 0, timer: 0, err: '', busy: false };
+    const qp = createPanel({ id: 'qr-signin', title: 'Sign in on your phone', width: 340, cls: 'qr-panel', parent: document.body, onOpen: () => make(), onClose: () => { clearInterval(Q.timer); Q.code = null; } });
+    const linkFor = code => { const u = new URL(location.href); u.search = ''; u.hash = ''; const keep = new URLSearchParams(location.search); const v = new URLSearchParams(); if (keep.get('server')) v.set('server', keep.get('server')); v.set('signin', code); u.search = v.toString(); return u.href; };
+    function make() { const n = net(); Q.err = ''; Q.code = null; if (!n?.claimed) { Q.err = ACCOUNT_WHY.claimFirst || 'Claim this account first.'; draw2(); return; } Q.busy = true; n.accountOp('qrMake'); draw2(); setTimeout(() => { if (Q.busy) { Q.busy = false; Q.err = 'The server did not answer.'; draw2(); } }, 8000); }
+    function draw2() {
+      if (!qp.isOpen) return;
+      clearInterval(Q.timer);
+      const left = Math.max(0, Math.ceil((Q.until - Date.now()) / 1000));
+      if (Q.code && left > 0) {
+        const url = linkFor(Q.code), box = h('div.qr-code'); box.innerHTML = qrSvg(url, { ecl: 'M', px: 5, label: 'Scan to sign in' });      // our own encoder, our own string
+        const clock = h('b.qr-left', {}, `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`);
+        qp.fill(h('p', {}, 'Point your phone’s camera at this code and open the link. It signs the phone in to ', h('b', {}, net()?.username || 'this account'), ' — no password typed.'),
+          box, h('p.qr-meta', {}, 'Works once, for ', clock, '. Do not show it to anyone else.'),
+          h('div.row.end', {}, h('button.ghost.small', { type: 'button', dataset: { act: 'qr-new' }, onclick: () => make() }, 'New code'), h('span.grow'), h('button.primary.small', { type: 'button', onclick: () => qp.close() }, 'Done')));
+        Q.timer = setInterval(() => { const l = Math.max(0, Math.ceil((Q.until - Date.now()) / 1000)); clock.textContent = `${Math.floor(l / 60)}:${String(l % 60).padStart(2, '0')}`; if (!l) { Q.code = null; draw2(); } }, 1000);
+        return;
+      }
+      qp.fill(Q.busy ? h('p.dim', {}, 'Making a code…') : h('p', {}, Q.err || 'That code has run out.'),
+        h('div.row.end', {}, h('button.primary.small', { type: 'button', disabled: Q.busy, onclick: () => make() }, Q.err ? 'Try again' : 'Make a new code'), h('span.grow'), h('button.ghost.small', { type: 'button', onclick: () => qp.close() }, 'Close')));
+    }
+    return { panel: qp, open: () => qp.open(), onR(r) { if (r.op !== 'qrMake') return false; Q.busy = false; if (r.ok && r.code) { Q.code = r.code; Q.until = Date.now() + (r.ttl || 180000); Q.err = ''; } else Q.err = r.msg || ACCOUNT_WHY[r.why] || 'That did not work.'; draw2(); return true; }, get state() { return { open: qp.isOpen, code: Q.code, busy: Q.busy, err: Q.err, url: Q.code ? linkFor(Q.code) : null }; } };
+  })();
+  /**
+   * #73, the phone's side: the page was opened from the QR (?signin=<code>). Trade the code for this browser's own
+   * session before anything connects; the guest key this browser held is set aside (main.js's guestKey) so its guest
+   * characters can still be offered to the account. Resolves true when signed in.
+   */
+  async function useSigninCode(code, { tokens, guestKey: gk = null }) {
+    try { const u = new URL(location.href); u.searchParams.delete('signin'); history.replaceState(null, '', u.pathname + u.search + u.hash); } catch { /* old browser: the code is spent anyway */ }
+    let r;
+    try { r = await anonAccountOp('qrUse', { code: String(code).trim() }, { ...(netOpts?.() || {}), timeoutMs: 60000 }); } catch (err) { r = { ok: false, msg: err.message }; }      // (a phone still loading the world can be slow to read the answer)
+    if (!r || !r.ok || !r.token) {
+      tab('login');
+      T.note.textContent = (r && r.msg) || 'That sign-in code did not work. Make a new one on the signed-in screen.';
+      return false;
+    }
+    const old = tokens.get();
+    if (old && old !== r.token && gk) { try { localStorage.setItem(gk, old); } catch { /* private mode */ } }
+    tokens.set(r.token);
+    hud?.toast?.(`Signed in as ${r.username || 'your account'}.`, 'good');
+    return true;
   }
   function logout() {
     const n = net(); if (!n) return;
@@ -323,6 +377,7 @@ export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onPick, 
   function wire(n) {
     n.on('accountR', r => {
       if (r.op === 'login') return;            // the title handles its own
+      if (qr.onR(r)) return;                   // #73
       if (!r.ok) {
         const t = r.msg || ACCOUNT_WHY[r.why] || 'That did not work.';
         hud.toast(t, 'warn');
@@ -345,7 +400,7 @@ export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onPick, 
     b.dataset.tip = n && n.claimed ? `Account: ${n.username}` : 'Account: you are a guest — claim it to keep it (free)';
   }
 
-  const api = { wire, panel, draw, showChars, tab, refreshPill, portraitFor: null, onChars: null, hasChars: () => lastChars.length > 0,
+  const api = { wire, panel, draw, showChars, tab, refreshPill, qr, useSigninCode, portraitFor: null, onChars: null, hasChars: () => lastChars.length > 0,
     /** Redraw the title's character list (a portrait arrived, or a new charList). */
     redrawChars(chars = null) { if (chars) lastChars = chars; if (lastChars.length && !T.mine.hidden) showChars(lastChars, lastUser); } };
   return api;

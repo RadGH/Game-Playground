@@ -32,7 +32,7 @@ export const ANIMS = Object.freeze(['idle', 'walk', 'run', 'sprint', 'jump', 'fa
 export const ANIM_ID = Object.freeze(Object.fromEntries(ANIMS.map((n, i) => [n, i])));
 
 export const STATE = Object.freeze({ dead: 1, combat: 2, casting: 4, airborne: 8, swimming: 16, sprinting: 32, elite: 64, friendly: 128 });
-export const IN = Object.freeze({ SPRINT: 1, JUMP: 2 });
+export const IN = Object.freeze({ SPRINT: 1, JUMP: 2, FIGHT: 4 });      // FIGHT (play-test 12 #75): auto-attacking on the move — movement.js MOVE.fight
 
 /** Snapshot record mask bits (docs/protocol.md §4). */
 export const F = Object.freeze({ POS: 1, Y: 2, YAW: 4, HP: 8, ANIM: 16, STATE: 32, TARGET: 64, FULL: 128 });
@@ -127,7 +127,7 @@ export const CLIENT_MSGS = Object.freeze({
   trade:   { on: 'p', fields: { op: 'str:8', id: '?int', items: '?uids', gold: '?int' }, rate: 5, burst: 10 },
   leave:   { on: 'both', fields: {}, rate: 1, burst: 2 },
   // M3 (protocol v4, docs/protocol.md §16)
-  account: { on: 'gw', fields: { op: 'str:8', user: '?str:24', pass: '?str:128', old: '?str:128', email: '?str:120', code: '?str:16', human: '?str:2048', guest: '?str:64' }, rate: 0.5, burst: 4 },
+  account: { on: 'gw', fields: { op: 'str:8', user: '?str:24', pass: '?str:128', old: '?str:128', email: '?str:120', code: '?str:40', human: '?str:2048', guest: '?str:64' }, rate: 0.5, burst: 4 },      // play-test 12 (#73): code also carries a QR sign-in code (32 hex) — ops qrMake / qrUse
   friend:  { on: 'gw', fields: { op: 'str:8', name: '?str:24', char: '?int' }, rate: 1, burst: 5 },      // ops add | remove | list | seen (seen: clears the unseen badge; char = one, none = all)
   guild:   { on: 'gw', fields: { op: 'str:8', name: '?str:24', char: '?int', id: '?int', text: '?str:200' }, rate: 1, burst: 5 },
   callboard: { on: 'gw', fields: { op: 'str:8', dungeon: '?str:64', role: '?str:8', id: '?int' }, rate: 1, burst: 5 },
@@ -154,7 +154,9 @@ export const CLIENT_MSGS = Object.freeze({
   kits:    { on: 'gw', fields: { cls: 'str:32' }, rate: 10, burst: 40 },      // a creation screen may ask for every calling at once (30): none may be dropped silently
   revive:  { on: 'p', fields: { op: 'str:8', id: '?int' }, rate: 2, burst: 4 },
   sheet:   { on: 'p', fields: {}, rate: 2, burst: 4 },
-  feedback: { on: 'both', fields: { kind: '?str:16', text: '?str:2000', ctx: '?obj', ref: '?int', op: '?str:8', limit: '?int', before: '?int' }, rate: 0.5, burst: 10 },      // the real limit is js/sim/feedback.js (answered). ref (round 8, W29): a reply to your own report #ref
+  feedback: { on: 'both', fields: { kind: '?str:16', text: '?str:2000', ctx: '?obj', ref: '?int', op: '?str:8', limit: '?int', before: '?int', shot: '?bool' }, rate: 0.5, burst: 10 },      // the real limit is js/sim/feedback.js (answered). ref (round 8, W29): a reply to your own report #ref. shot (play-test 12, #71): a screenshot follows in feedbackShot parts
+  // play-test 12 (#71): a bug report's screenshot, after feedbackR {ok, id, shot:true}: part i of n of a JPEG/WebP data URL (frames are 16 kB, so it comes in pieces)
+  feedbackShot: { on: 'both', fields: { id: 'int', i: 'int', n: 'int', data: 'str:12000' }, rate: 8, burst: 40 },
   cart:    { on: 'p', fields: { op: 'str:8', id: 'id', to: '?str:48', token: '?bool' }, rate: 2, burst: 4 },      // owner feedback 8, W5: ox-cart travel — op list | go
   ship:    { on: 'p', fields: { op: 'str:8', id: '?id', to: '?str:48', party: '?bool' }, rate: 2, burst: 4 },      // [V] Expansion 1 §6: the voyage — op list | go | skip (js/sim/ships.js)
   emote:   { on: 'p', fields: { id: 'str:16' }, rate: 0.7, burst: 3 },      // owner feedback 10, Y5: wave | sit | dance | cheer | bow | point
@@ -167,7 +169,7 @@ export const CLIENT_MSGS = Object.freeze({
   cook:    { on: 'p', fields: { op: '?str:8', id: '?str:64', n: '?int' }, rate: 2, burst: 6 },
   // round 8 W9 (P-core, docs/protocol.md §25): professions — learn / gather / make. `inputs` = the mini-game's raw [t, v, t, v, …]
   prof:    { on: 'p', fields: { op: 'str:8', id: 'str:16', npc: 'id' }, rate: 2, burst: 6 },
-  gather:  { on: 'p', fields: { op: 'str:8', id: '?id', inputs: '?nums' }, rate: 4, burst: 8 },
+  gather:  { on: 'p', fields: { op: 'str:8', id: '?id', inputs: '?nums', batch: '?bool' }, rate: 4, burst: 8 },      // batch (play-test 12, #69): skin every beast of yours within gather.skinBatchReach, one after another
   craft:   { on: 'p', fields: { op: '?str:8', id: '?str:48', npc: '?id', base: '?str:48', n: '?int', uid: '?str:40', index: '?int', element: '?str:16', inputs: '?nums' }, rate: 4, burst: 10 },
   // round 11 (Market, owner #25; docs/protocol.md "Round 11 — Market"): browse | mine | sell {uid, price} | buy {id, price} | cancel {id}
   market:  { on: 'p', fields: { op: 'str:8', q: '?str:40', tab: '?str:8', slot: '?str:16', sort: '?str:8', page: '?int', uid: '?str:40', price: '?int', id: '?int' }, rate: 2, burst: 8 },
@@ -209,7 +211,7 @@ export const SERVER_MSGS = Object.freeze({
   travelR: ['ok', 'why', 'cost'],
   tradeState: ['trade', 'done', 'why'],
   // M3
-  accountR: ['op', 'ok', 'why', 'msg', 'username', 'claimed', 'chars', 'moved', 'left'],
+  accountR: ['op', 'ok', 'why', 'msg', 'username', 'claimed', 'chars', 'moved', 'left', 'code', 'ttl', 'token'],      // code/ttl (qrMake), token (qrUse): play-test 12 #73
   friends: ['list'],
   friendState: ['char', 'name', 'cls', 'level', 'online', 'zone'],
   guildState: ['guild'],
@@ -253,7 +255,8 @@ export const SERVER_MSGS = Object.freeze({
   eventTrack: ['uid', 'id', 'name', 'state', 'what', 'objective', 'endsAt', 'leftMs', 'reward', 'inside'],
   eventDone: ['uid', 'id', 'name', 'result', 'credited', 'xp', 'gold', 'items', 'text'],
   eventAt: ['uid'],
-  feedbackR: ['ok', 'id', 'first', 'why', 'msg', 'state', 'ref'],
+  feedbackR: ['ok', 'id', 'first', 'why', 'msg', 'state', 'ref', 'shot'],      // shot (#71): send the screenshot now
+  feedbackShotR: ['ok', 'id', 'why', 'msg', 'bytes'],
   feedbackMine: ['ok', 'list', 'more', 'why'],
   // owner feedback 8 (docs/protocol.md §24)
   questMarks: ['marks', 'full'],
@@ -279,7 +282,7 @@ export const SERVER_MSGS = Object.freeze({
   // round 8 W9 (P-core)
   profR: ['op', 'ok', 'id', 'why', 'msg', 'tool'],
   gatherR: ['ok', 'state', 'id', 'prof', 'node', 'game', 'why', 'msg'],
-  gatherDone: ['ok', 'id', 'prof', 'quality', 'score', 'marks', 'items', 'got', 'xp', 'skill', 'key', 'reopenMs', 'msg'],
+  gatherDone: ['ok', 'id', 'prof', 'quality', 'score', 'marks', 'items', 'got', 'xp', 'skill', 'key', 'reopenMs', 'msg', 'more'],      // more (#69): beasts still to skin in a batch
   skinnable: ['id', 'on', 'tier', 'minSkill', 'name'],
   craftList: ['ok', 'station', 'level', 'recipes'],
   craftR: ['ok', 'state', 'id', 'game', 'cost', 'why', 'msg'],

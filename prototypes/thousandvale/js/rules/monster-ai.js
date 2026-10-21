@@ -196,18 +196,49 @@ export function monsterStrike(field, e, victim, { element = 'physical', ranged =
  * An archer/caster's shot (main.js `onEnemyShoot`): it lands after its flight time, where it was
  * AIMED — a target that moved more than 2.6 m is missed. Queued on the field and resolved in
  * `tickShots`.
+ *
+ * Play-test 12 (#78, owner: "homing projectiles are OP and should not home in on the player — you should be able to
+ * dodge most projectiles"): owner feedback 8 (W2) made every monster shot HOME, so a slow shot you could see was still
+ * one you could never step out of. A monster's shot now flies at a POINT — where its target stands plus a part of
+ * where it is going (`projectiles.json` `monsterAim.lead`, by role) — and lands on whoever is still within
+ * `monsterAim.radius` of that point (plus their body) when it arrives. Standing still to cast gets you hit; moving
+ * sideways dodges most shots; an archer that leads harder is the one you must change direction for.
+ * A parity engine (no projectile table) keeps Farhold's own aimed shot and its 2.6 m dodge.
  */
 function shoot(field, e, target) {
   const spec = e.ranged || { range: 24, element: 'physical' };
-  const dist = Math.hypot(target.x - e.x, target.z - e.z);
-  // owner feedback 8 (W2): "you take damage without knowing where from" — a slower shot that is SEEN, and that homes
-  // (it lands unless its target died; Farhold's 2.6 m dodge would make every slow arrow miss a walking player)
   const P = field.room?.engine?.projectiles || null;
   const element = spec.element || 'physical';
   const speed = P ? monsterSpeed(P, element) : 40;
+  const A = P?.monsterAim || null;
+  let toX = target.x, toZ = target.z;
+  if (A && !A.home) {
+    // lead the target by a share of where it is heading over the flight (the field's velocity estimate, trackMotion)
+    const lead = Number.isFinite(A.leadByRole?.[e.role]) ? A.leadByRole[e.role] : A.lead;
+    const d0 = Math.hypot(target.x - e.x, target.z - e.z), t0 = flightOf(P, d0, speed);
+    toX += (target.mvx || 0) * t0 * lead; toZ += (target.mvz || 0) * t0 * lead;
+  }
+  const dist = Math.hypot(toX - e.x, toZ - e.z);
   const flight = P ? flightOf(P, dist, speed) : Math.max(0.11, dist / 40);
-  (field.shots || (field.shots = [])).push({ by: e, target, toX: target.x, toZ: target.z, fromX: e.x, fromZ: e.z, left: flight, element, home: !!P });
-  field.emit({ t: 'fx', kind: 'shot', id: e.id, to: target.id, element, ms: Math.round(flight * 1000), ...(P ? { from: { x: e.x, z: e.z }, ...projFields(P, { speed, proj: element === 'physical' ? null : projOf(P, { element }), home: true, skill: 'basic' }) } : {}) });
+  const homes = !!P && (!A || !!A.home);
+  (field.shots || (field.shots = [])).push({ by: e, target, toX, toZ, fromX: e.x, fromZ: e.z, left: flight, element, home: homes, radius: A ? A.radius + (target.bodyR || 0.4) : 2.6 });
+  field.emit({ t: 'fx', kind: 'shot', id: e.id, to: homes || !P ? target.id : { x: Math.round(toX * 100) / 100, z: Math.round(toZ * 100) / 100 }, ...(homes || !P ? {} : { aimAt: target.id }), element, ms: Math.round(flight * 1000), ...(P ? { from: { x: e.x, z: e.z }, ...projFields(P, { speed, proj: element === 'physical' ? null : projOf(P, { element }), home: homes, skill: 'basic' }) } : {}) });
+}
+
+/**
+ * Play-test 12 (#78): a cheap estimate of how fast each player is moving (metres a second, smoothed over ~0.3 s), so a
+ * monster can lead its shot. Players only (the bodies a shot is usually aimed at); allies keep 0 = aimed where they stand.
+ */
+function trackMotion(field, dt) {
+  if (!(dt > 0)) return;
+  const k = Math.min(1, dt / 0.3);
+  for (const p of field.players) {
+    if (p.mpx == null) { p.mpx = p.x; p.mpz = p.z; p.mvx = 0; p.mvz = 0; continue; }
+    let vx = (p.x - p.mpx) / dt, vz = (p.z - p.mpz) / dt;
+    if (Math.hypot(vx, vz) > 30) { vx = 0; vz = 0; }       // a teleport, a room change: not a velocity
+    p.mvx += (vx - p.mvx) * k; p.mvz += (vz - p.mvz) * k;
+    p.mpx = p.x; p.mpz = p.z;
+  }
 }
 
 function tickShots(field, dt) {
@@ -220,7 +251,7 @@ function tickShots(field, dt) {
     list.splice(i, 1);
     const v = s.target;
     if (!field.usable(v) || s.by.dying != null || s.by.removed) continue;
-    if (!s.home && Math.hypot(v.x - s.toX, v.z - s.toZ) > 2.6) continue;
+    if (!s.home && Math.hypot(v.x - s.toX, v.z - s.toZ) > (s.radius ?? 2.6)) continue;      // #78: it lands where it was aimed
     // owner feedback 10 (Y10): its target stepped behind a dungeon wall while it flew — it hits the wall
     if (field.sight && !field.sight(s.fromX ?? s.by.x, s.fromZ ?? s.by.z, v.x, v.z)) {
       const fx = s.fromX ?? s.by.x, fz = s.fromZ ?? s.by.z, ex = v.x - fx, ez = v.z - fz, len = Math.hypot(ex, ez) || 1, d = field.sight.reach(fx, fz, ex / len, ez / len, len);
@@ -232,6 +263,40 @@ function tickShots(field, dt) {
 }
 
 // --------------------------------------------------------------------------- movement helpers
+
+/**
+ * Play-test 12 (#75): metres a second a monster CLOSES at while it chases (combat.json `pursuit`). The bestiary speed is
+ * a stroll — a drake at 3.8 m/s could be kited forever by a player running at 8.1. Chasing runs faster, inside a band, and
+ * some bodies (skirmishers, champions, rares, bosses) sprint in short bursts when they have fallen behind. An engine
+ * without the knobs (parity) keeps Farhold's `e.speed`.
+ */
+export function chaseSpeed(field, e, gap = 0, target = null) {
+  const Pu = field.room?.engine?.combatCfg?.pursuit;
+  if (!Pu || !(e.speed > 0)) return e.speed;          // a body that cannot walk (a dummy, a post, a held totem) does not run either
+  // only a quarry that is getting AWAY (trackMotion's estimate, players: its speed away from this body) is run down. A
+  // player who stands and fights, or walks in to fight, meets a pack at its bestiary pace, as before — the run is the
+  // answer to kiting and fleeing, not a new difficulty for everyone
+  // once it has broken into a run it keeps running until it is in reach or the quarry stops getting away (a latch:
+  // without it a kited monster ran to `gapAbove` outside reach, walked, fell back, ran — and never landed a blow)
+  if (!target) { e.runDown = false; return e.speed; }
+  const dx = target.x - e.x, dz = target.z - e.z, d = Math.hypot(dx, dz) || 1;
+  const away = ((target.mvx || 0) * dx + (target.mvz || 0) * dz) / d, reach = e.reach || 2.4;
+  if (e.runDown) { if (gap <= reach || away < (Pu.movingAbove ?? 2) * 0.5) e.runDown = false; }
+  else if (gap > reach + (Pu.gapAbove ?? 3) && away >= (Pu.movingAbove ?? 2)) e.runDown = true;
+  if (!e.runDown) return e.speed;
+  let v = Math.max(e.speed, Math.min(Math.max(Pu.chaseMax, e.speed), Math.max(Pu.chaseMin, e.speed * Pu.chaseMul)));
+  const rank = e.boss ? 'boss' : e.rank;
+  const sprinter = (Pu.sprintRoles || []).includes(e.role) || (Pu.sprintKinds || []).includes(e.kind) || (Pu.sprintRanks || []).includes(rank);
+  if (sprinter && Pu.sprintSec > 0) {
+    const now = field.clock;
+    if (!(e.sprintUntil > now) && gap > (e.reach || 2.4) + Pu.sprintGap && !(e.sprintNext > now)) {
+      e.sprintUntil = now + Pu.sprintSec; e.sprintNext = now + Pu.sprintEverySec;
+      field.emit({ t: 'fx', kind: 'sprint', id: e.id, ms: Math.round(Pu.sprintSec * 1000) });
+    }
+    if (e.sprintUntil > now) v = Math.max(v, Pu.sprintSpeed);
+  }
+  return v;
+}
 
 function unstick(field, x, z, radius, fromX, fromZ) {
   let ox = x, oz = z;
@@ -728,7 +793,7 @@ export function tickMonsters(field, dtAll, hooks = {}) {
         if (adist <= (e.reach || 2.4) + 1) e.pathBest = null;
       }
       if (standOff > 0 && target) {
-        if (adist > standOff + 3 || !seen) speed = e.speed;                    // Y10: no line — come round the wall
+        if (adist > standOff + 3 || !seen) speed = chaseSpeed(field, e, adist - standOff, target);   // Y10: no line — come round the wall (#75: at a run)
         else if (adist < standOff * 0.55) { speed = e.speed * 0.8; e.facing += Math.PI; }
         if (seen && e.swingTimer <= 0 && adist <= e.ranged.range) {
           e.swingTimer = e.attackEvery;
@@ -740,7 +805,7 @@ export function tickMonsters(field, dtAll, hooks = {}) {
       } else if (!foe && !target) {
         speed = adist > 3.5 ? e.speed : 0;             // turned and following, nobody to fight
       } else if (foe && (adist > e.reach || !seen)) {
-        speed = e.speed;
+        speed = chaseSpeed(field, e, adist, foe);
       } else if (foe && e.swingTimer <= 0) {
         e.swingTimer = e.attackEvery;
         e.anim = 'attack';
@@ -763,7 +828,7 @@ export function tickMonsters(field, dtAll, hooks = {}) {
           if (!hit || hit.destroyed || hit.ok === false) { e.siege = null; e.siegeCheck = 0; }
         }
       } else if (adist > e.reach || !seen) {
-        speed = e.speed;
+        speed = chaseSpeed(field, e, adist, target);          // #75: a chase is a run, and a sprinter closes the gap
       } else if (e.swingTimer <= 0) {
         e.swingTimer = e.attackEvery;
         e.anim = 'attack';
@@ -881,6 +946,7 @@ export function tickMonsters(field, dtAll, hooks = {}) {
     }
   }
 
+  trackMotion(field, dtAll);
   tickShots(field, dtAll);
   spread(field);
 }

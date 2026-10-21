@@ -961,3 +961,12 @@ Everything hangs off `chest`; the back and chest surfaces are asked of `c.chestZ
 its straps lie over any body's shoulders. Thousandvale maps its item bases in `js/client/gear-look.js` (`PACK_BY_BASE`, `packLookId`):
 `sling_satchel`, `trail_rucksack`, `expedition_pack`, and the explorer's for a rare one. Contact sheet:
 `G5_IDS=g5_pack_satchel,g5_pack_rucksack,g5_pack_frame,g5_pack_explorer G5_VIEWS=back,left,front,chestBack flock … npx playwright test avatar-3d/tests/gear5-shots.spec.js`.
+
+## Rest clips (opt-in, 2026-10-17, Thousandvale play-test 12)
+
+`js/chibi2-motion-rest.js` registers `swimCrawl` (face-down front crawl), `swimTread` (upright, treading water) and
+`sitHold` (the seated pose `sitGround` ends in, held). The shared `swim` lies face UP and travels feet first (a
+backstroke), and `sitGround` loops its sit-down every 3.4 s; neither was changed. Use them by name in `anims`
+(`CHIBI2_REST_ANIMS`); play `sitGround` for `SIT_DOWN_MS` then `sitHold`. The crawl is floated for a game that holds a
+swimmer's feet 1.1 m under the surface (head just out).
+

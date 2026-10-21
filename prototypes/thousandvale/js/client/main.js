@@ -28,6 +28,7 @@ import { createHud } from './hud.js';
 import { createControls } from './controls.js';
 import { campPlacements, CAMP_RADIUS } from './camp.js';
 import { Predictor, MOVE } from './predict.js';
+const FIGHT_HOLD_MS = 1100;       // play-test 12 (#75): how long a basic attack slows your stride (IN.FIGHT)
 import { PLAYABLE_RACES, RACE_NAMES, loadLookData, defaultLook, loadMonsterLooks } from './looks.js';
 import { gearKey } from './gear-look.js';
 import { connect, localTokenStore } from '../net/client.js';
@@ -697,10 +698,11 @@ function onJoined(j) {
   // Every id in the old room is void now — except our own body, which keeps its model under the new id.
   const keep = prevSelf != null && actors.get(prevSelf) ? prevSelf : null;
   held.clear();
-  for (const id of [...actors.actors.keys()]) if (id !== keep) actors.remove(id);
+  for (const id of [...actors.actors.keys()]) if (id !== keep) { if (jumped) actors.remove(id); else actors.park(id); }   // #84: a walk across a town edge keeps a standing NPC's body for its copy in the new room
   if (keep != null) { actors.rekey(keep, S.selfId); statusSync.dead(S.selfId); }   // C/Q8: the kept body starts the new room with no stale aura or torch
   if (S.target != null) setTarget(null);
   tele.clear(); objects.clear(); boss.clear(); angling.clearPools(); profView.clear(); questMarks.roomChanged(); endCartRide(); carts.clear();
+  stars.reset();          // play-test 12 (#89): the old room's ids are void — your Starlight motes must not ride whoever gets your old id
   worldUi.joined(j);
   preview = null;
   const you = j.you;
@@ -1274,10 +1276,13 @@ function frame(now) {
           S.coastToastAt = performance.now(); hud.toast('The land falls away to the sea here. Ships sail from the harbours.', 'info');
         }
       }
+      // play-test 12 (#75): for FIGHT_HOLD_MS after each basic attack you move at MOVE.fight (the server holds it a little
+      // less long — room.js FIGHT_HOLD_SERVER_MS — so this side always asks first and is never corrected)
+      if (performance.now() - (S.net.lastBasicAt ?? -1e9) < FIGHT_HOLD_MS) it.b |= 4;      // IN.FIGHT
       const inp = S.predictor.apply(it);
       S.net.input(inp);
       S.lastInput = it;
-      S.movingSpeed = Math.hypot(it.mx, it.mz) > 0.01 && !S.self.dead ? (it.b & 1 ? MOVE.sprint : MOVE.run) : 0;
+      S.movingSpeed = Math.hypot(it.mx, it.mz) > 0.01 && !S.self.dead ? (it.b & 1 ? MOVE.sprint : MOVE.run) * (it.b & 4 ? MOVE.fight : 1) : 0;
       // Y7/Y35 (G2, report #45): auto-attack does not need you to stand still — in reach is enough (tryStrike measures it).
       // Moving by hand used to clear `chasing`, and with it the attack; the attack is `controls.auto` now.
       S.movingByHand = !!it.manual;
@@ -1367,10 +1372,13 @@ async function titleWorld() {
 const AUTO = AUTOPLAY;
 if (AUTO) Promise.all([loadLookData(), loadMonsterLooks()]).then(() => enterWorld());
 // A browser that already has an account: connect now and list its characters on the title screen (M3).
-else if (TOKENS().get() && q.get('fresh') !== '1') {
+// Play-test 12 (#73): a phone that scanned the sign-in QR code arrives with ?signin=<code> — that is traded for this
+// browser's own session first (account.js useSigninCode), then it connects like any signed-in browser.
+else (q.get('signin') ? account.useSigninCode(q.get('signin'), { tokens: TOKENS(), guestKey: tokenKey() + '.guest' }) : Promise.resolve(false)).then(() => {
+  if (!(TOKENS().get() && q.get('fresh') !== '1')) return;
   const net = startNet();
   net.ready.then(n => { if (S.phase === 'title') { account.showChars(n.chars, n.claimed ? n.username : null); if (n.chars?.length && S.titleStep !== 'look' && S.titleStep !== 'new' && $('signin').hidden) titleStep('front'); } }).catch(() => { titleFront?.set({ hasToken: true, failed: true }); });
-}
+});
 Promise.all([titleWorld(), loadLookData(), loadMonsterLooks()]).then(() => {
   rebuildPreview();
   $('loading').classList.add('done');
@@ -1379,7 +1387,7 @@ Promise.all([titleWorld(), loadLookData(), loadMonsterLooks()]).then(() => {
   S.warm = { done: false };
   import('./scatter-view.js').then(m => m.prewarmScatter({ quality })).catch(() => {})
     .then(() => Promise.all([import('./warmup.js'), loadMonsterLooks()]))
-    .then(([m, looks]) => m.warmBodies({ scene, renderer: view.renderer, camera, monsterLooks: looks, extras: [shots.sample(), moveMark.sample(), questMarks.sample(), weaponFx.sample(), lootMarks.sample(), formFx.sample(), spells.beams.sample(), sig.sample(), angling.sample(), profView.sample(), cropSample(), stars.sample()], extraTypes: ['wolf', 'boar', 'crocodile', 'mushroom', 'bear', 'cow'] }))
+    .then(([m, looks]) => m.warmBodies({ scene, renderer: view.renderer, camera, monsterLooks: looks, extras: [shots.sample(), moveMark.sample(), questMarks.sample(), weaponFx.sample(), lootMarks.sample(), formFx.sample(), spells.beams.sample(), sig.sample(), angling.sample(), profView.sample(), cropSample(), stars.sample(), tele.sample(), fx.sample()], extraTypes: ['wolf', 'boar', 'crocodile', 'mushroom', 'bear', 'cow'] }))
     .then(r => carts.prewarm().then(() => r, () => r))                     // W5: one ox cart built and compiled before anybody meets one
     .then(r => { S.warm = { done: true, ...r }; }, e => { S.warm = { done: true, error: e?.message }; });
 });

@@ -19,6 +19,7 @@
 import { createPanel, h, confirmBox } from '../ui-panel.js';
 import { createLogRing, feedbackCheck, feedbackCtx, feedbackPreview, FEEDBACK_MAX } from './pt5-core.js';
 import { REPORT_STATES, reportState, tidyMine, replyText, replyRef, noteHeading, completeCheck, NOTE_MAX } from './pt8-core.js';
+import { takeScreenshot } from './screenshot.js';
 
 export const LOG = createLogRing(40);
 let hooked = false;
@@ -42,6 +43,9 @@ const STATE = REPORT_STATES;
 export function createFeedback({ net, hud, context }) {
   installLogRing();
   const S = { kind: 'suggestion', text: '', sending: false, sent: null, timer: 0, tab: 'write' };
+  // play-test 12 (#71): an optional screenshot with a bug report — `want` the box is ticked, `hideUi` take the world only,
+  // `shot` the picture taken ({dataUrl, w, h, bytes, ui, fellBack}), `busy` taking one now, `err` why not
+  const P = { want: false, hideUi: true, shot: null, busy: false, err: '', pending: null };
   const M = { list: null, loading: false, err: '', open: null, why: '' };          // W29: my reports
   const panel = createPanel({ id: 'feedback', title: 'Feedback', width: 400, cls: 'feedback-panel', onOpen: () => { if (signedIn() && !M.list && !M.loading) loadMine(); draw(); } });
   const isAdmin = () => { const n = net(); return !!(n?.joined?.you?.admin || n?.joined?.you?.acct?.admin || n?.account?.admin || n?.admin); };
@@ -49,7 +53,7 @@ export function createFeedback({ net, hud, context }) {
   const send = o => {
     const n = net(); if (!n || n.status === 'closed') return false;
     if (o.t === 'feedback' && o.op) { if (typeof n.myReports === 'function') { n.myReports(); return true; } if (!n._raw) return false; n._raw('gw', JSON.stringify(o)); return true; }
-    if (o.t === 'feedback' && typeof n.feedback === 'function') { n.feedback(o.kind, o.text, o.ctx, o.ref); return true; }
+    if (o.t === 'feedback' && typeof n.feedback === 'function') { n.feedback(o.kind, o.text, o.ctx, o.ref, !!o.shot); return true; }
     if (o.t === 'admin' && typeof n.adminOp === 'function') { const { t, op, ...a } = o; n.adminOp(op, a); return true; }
     if (!n._raw) return false; n._raw('gw', JSON.stringify(o)); return true;
   };
@@ -90,6 +94,31 @@ export function createFeedback({ net, hud, context }) {
       h('div.row.end', {}, h('button.ghost.small', { type: 'button', onclick: () => { loadMine(); draw(); } }, 'Refresh'), h('span.grow'), h('button.ghost.small', { type: 'button', onclick: () => panel.close() }, 'Close')));
   }
 
+  // ---- #71: the screenshot box (bug reports only) ----
+  async function snap() {
+    if (P.busy) return;
+    P.busy = true; P.err = ''; draw();
+    const r = await takeScreenshot({ hideUi: P.hideUi, hide: [panel.root, ...document.querySelectorAll('.tv-tip, #tipbox')] });
+    P.busy = false;
+    if (r.error) { P.err = r.error; P.shot = null; } else P.shot = r;
+    draw();
+  }
+  function shotBox() {
+    const tick = (label, on, set, k) => h('label.fb-check', {}, h('input', { type: 'checkbox', checked: on, dataset: { k }, onchange: e => { set(e.target.checked); draw(); } }), ' ', label);
+    const kids = [tick('Attach a screenshot', P.want, v => { P.want = v; if (v && !P.shot && !P.busy) snap(); }, 'shot')];
+    if (P.want) {
+      kids.push(tick('Hide the interface (the world only)', P.hideUi, v => { P.hideUi = v; P.shot = null; snap(); }, 'hideui'));
+      if (P.busy) kids.push(h('p.tiny-left', {}, P.hideUi ? 'Taking the picture…' : 'Taking the picture — choose this tab and press Share if your browser asks.'));
+      else if (P.shot) kids.push(h('div.fb-shot', {}, h('img', { src: P.shot.dataUrl, alt: 'The screenshot that will be sent' }),
+        h('div.fb-shot-side', {}, h('small', {}, `${P.shot.w} × ${P.shot.h}, ${Math.round(P.shot.bytes / 1024)} kB${P.shot.ui ? ', with the interface' : ', the world only'}`),
+          P.shot.fellBack ? h('small.warn', {}, 'This browser cannot take a picture of the interface, so it shows the world only.') : null,
+          h('button.ghost.small', { type: 'button', dataset: { act: 'retake' }, onclick: () => snap() }, 'Take it again'),
+          h('button.ghost.small', { type: 'button', dataset: { act: 'noshot' }, onclick: () => { P.want = false; P.shot = null; draw(); } }, 'Remove'))));
+      else if (P.err) kids.push(h('p.note', {}, P.err, ' ', h('button.ghost.small', { type: 'button', onclick: () => snap() }, 'Try again')));
+    }
+    return h('div.fb-shotbox', {}, ...kids);
+  }
+
   function draw() {
     if (!panel.isOpen) return;
     if (S.tab === 'mine' && !signedIn()) S.tab = 'write';
@@ -115,7 +144,7 @@ export function createFeedback({ net, hud, context }) {
     }
     panel.fill(tabs(),
       h('div.chips.fb-kind', { role: 'radiogroup', 'aria-label': 'Kind of feedback' }, chip('suggestion', 'Suggestion'), chip('bug', 'Bug report')),
-      ta, count, details, note,
+      ta, count, S.kind === 'bug' ? shotBox() : null, details, note,
       h('div.row.end', {}, isAdmin() ? h('button.ghost.small', { type: 'button', dataset: { act: 'reports' }, onclick: () => reports.panel.open() }, 'Reports (admin)') : null,
         ...(isAdmin() ? adminTools.map(t => h('button.ghost.small', { type: 'button', dataset: { act: t.act }, onclick: () => t.run() }, t.label)) : []), h('span.grow'), h('button.ghost.small', { type: 'button', onclick: () => panel.close() }, 'Cancel'), go));
     function submit() {
@@ -124,6 +153,7 @@ export function createFeedback({ net, hud, context }) {
       const msg = { t: 'feedback', kind: S.kind, text: S.text.trim() };
       const ref = replyRef(msg.text, M.list); if (ref != null) msg.ref = ref;      // W29 (A): a reply names the report it answers
       if (S.kind === 'bug') msg.ctx = ctxNow();
+      if (S.kind === 'bug' && P.want && P.shot) { msg.shot = true; P.pending = P.shot.dataUrl; } else P.pending = null;
       if (!send(msg)) { note.textContent = 'You are not connected. Your text is still here — try again in a moment.'; return; }
       S.sending = true; go.disabled = true; go.textContent = 'Sending…';
       clearTimeout(S.timer);
@@ -138,7 +168,8 @@ export function createFeedback({ net, hud, context }) {
       h('div.fb-done', {}, h('span.fb-tick', { 'aria-hidden': 'true' }, '✓'), h('strong', {}, r.kind === 'bug' ? 'Bug report sent. Thank you.' : 'Suggestion sent. Thank you.'),
         h('p', {}, r.msg || 'A person reads every one of these.'),
         r.first ? h('p.fb-gift', {}, 'A letter is on its way to you with a small thank-you inside. Look in your mail (Party menu, Mail).') : null,
-        r.id != null ? h('p.tiny-left', {}, signedIn() ? `Reference: #${r.id}. You can follow it under My reports.` : `Reference: #${r.id}`) : null),
+        r.id != null ? h('p.tiny-left', {}, signedIn() ? `Reference: #${r.id}. You can follow it under My reports.` : `Reference: #${r.id}`) : null,
+        r.shot ? h('p.tiny-left.fb-shot-state', {}, r.shot === 'sent' ? 'The screenshot went with it.' : r.shot === 'failed' ? 'The screenshot did not go through — the report did.' : 'Sending the screenshot…') : null),
       h('div.row.end', {}, h('button.ghost.small', { type: 'button', dataset: { act: 'again' }, onclick: () => { S.sent = null; draw(); } }, 'Write another'), h('span.grow'), h('button.primary.small', { type: 'button', onclick: () => { S.sent = null; panel.close(); } }, 'Close')));
   }
 
@@ -192,6 +223,8 @@ export function createFeedback({ net, hud, context }) {
       S.sending = false; clearTimeout(S.timer);
       if (!r.ok) { if (panel.isOpen) { draw(); const note = panel.body.querySelector('.note'); if (note) note.textContent = r.msg || ({ slow: 'You sent one a moment ago. Wait a little and press Send again — your text is still here.', empty: 'Write a little more.', size: 'That is too long.', kind: 'Pick Suggestion or Bug report.', rate: 'You have sent a lot just now. Try again in a few minutes.', short: 'Write a little more.', long: 'That is too long.' }[r.why]) || 'That did not go through. Your text is still here.'; } else hud.toast(r.msg || 'Your feedback did not go through.', 'warn'); return; }
       S.sent = { kind: S.kind, id: r.id ?? null, first: !!r.first, msg: r.msg || '' }; S.text = '';
+      if (r.shot && P.pending && r.id != null && typeof n.feedbackShot === 'function') { n.feedbackShot(r.id, P.pending); S.sent.shot = 'sending'; }      // #71
+      P.pending = null; P.shot = null; P.want = false;
       if (M.list && r.id != null) M.list = null;      // the list is stale now; the tab loads it again
       hud.chat?.(`Your ${S.kind === 'bug' ? 'bug report' : 'suggestion'} was sent. Thank you.`, 'system');
       if (panel.isOpen) draw(); else hud.toast('Feedback sent. Thank you.', 'good');
@@ -209,8 +242,9 @@ export function createFeedback({ net, hud, context }) {
     // W29: my own reports (A may answer on `feedbackMine`, or on `feedbackR {op:'mine'}`)
     const mine = m => { M.loading = false; clearTimeout(M.timer); M.err = m.ok === false && m.why !== 'guest' ? (m.msg || 'That did not work.') : ''; M.why = m.why || ''; M.list = tidyMine(m.list || m.reports || []); if (panel.isOpen && S.tab === 'mine') draw(); else if (panel.isOpen) panel.body.querySelector('.fb-tabs')?.replaceWith(tabs() || ''); };
     n.on('feedbackMine', mine);
+    n.on('feedbackShotR', r => { if (S.sent && S.sent.id === r.id) { S.sent.shot = r.ok ? 'sent' : 'failed'; if (panel.isOpen && S.tab !== 'mine') draw(); } if (!r.ok) hud.toast(r.msg || 'The screenshot did not go through (the report did).', 'warn'); });
     n.on('joined', () => { if (panel.isOpen) draw(); });
   }
   return { panel, reports, wire, draw, setAdminTools(list) { adminTools = list || []; if (panel.isOpen) draw(); }, open(kind) { if (kind === 'mine') S.tab = 'mine'; else if (kind) { S.kind = kind; S.tab = 'write'; } S.sent = null; panel.open(); if (S.tab === 'mine') loadMine(); draw(); }, isAdmin, reply,
-    get state() { return { open: panel.isOpen, tab: S.tab, text: S.text, mine: M.list ? M.list.map(r => ({ id: r.id, state: r.state, note: r.note || '' })) : null, kind: S.kind, sending: S.sending, sent: S.sent, log: LOG.size, admin: isAdmin(), reports: { open: reports.panel.isOpen, n: R.list.length, sel: R.open, kind: R.kind, state: R.state } }; } };
+    get state() { return { shot: { want: P.want, hideUi: P.hideUi, busy: P.busy, has: !!P.shot, w: P.shot?.w || 0, ui: !!P.shot?.ui, err: P.err, sent: S.sent?.shot || null }, open: panel.isOpen, tab: S.tab, text: S.text, mine: M.list ? M.list.map(r => ({ id: r.id, state: r.state, note: r.note || '' })) : null, kind: S.kind, sending: S.sending, sent: S.sent, log: LOG.size, admin: isAdmin(), reports: { open: reports.panel.isOpen, n: R.list.length, sel: R.open, kind: R.kind, state: R.state } }; } };
 }

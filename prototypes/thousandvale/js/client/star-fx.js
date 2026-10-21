@@ -24,7 +24,7 @@
 
 import * as THREE from 'three';
 import { flightMs, fanBow, fanSide } from './projectile-kinds.js';
-import { STAR_GOLD, STAR_SHOT, skyfallPlan, skyAt, moteSeat, isStarShot, isStarSkill, starZone, starOrbs } from './star-looks.js';
+import { STAR_GOLD, STAR_SHOT, skyfallPlan, skyAt, moteSeat, MOTE_ARC, isStarShot, isStarSkill, starZone, starOrbs } from './star-looks.js';
 
 const TAU = Math.PI * 2;
 const UP = new THREE.Vector3(0, 1, 0), ZAX = new THREE.Vector3(0, 0, 1);
@@ -305,6 +305,11 @@ export function createStarFx(scene, { camera, actors = null, groundY = () => 0, 
 
   // ---- the Constellation
   /** How many Starlight a body holds (0..5). A fall is a spend: the motes it lost flare outward. */
+  /** #89: where mote `i` of body `a` is in the world — a still arc behind its shoulders, turned with its facing. */
+  function moteAt(a, i, full) {
+    const s = moteSeat(i, time, full), back = Math.atan2(-Math.cos(a.yaw || 0), -Math.sin(a.yaw || 0)) + s.a;
+    return { x: a.pos.x + Math.cos(back) * MOTE_ARC.radius, y: a.pos.y + (a.height || 1.7) * MOTE_ARC.height + s.lift + s.bob, z: a.pos.z + Math.sin(back) * MOTE_ARC.radius };
+  }
   function setMotes(id, n) {
     if (id == null) return;
     const had = motes.get(id)?.n || 0;
@@ -316,13 +321,24 @@ export function createStarFx(scene, { camera, actors = null, groundY = () => 0, 
   function flare(id, had, left) {
     const a = actors?.get?.(id); if (!a) return;
     stats.flares++;
-    const hy = a.pos.y + (a.height || 1.7) + 0.28;
     for (let i = left; i < had; i++) {
-      const s = moteSeat(i, time, had >= 5), x = a.pos.x + Math.cos(s.a) * 0.46, z = a.pos.z + Math.sin(s.a) * 0.46;
-      flashes.push({ kind: 'flash', x, y: hy, z, t: 0, ms: 320, size: 0.9 });
-      for (let k = 0; k < (low ? 3 : 6); k++) sparkle(x, hy, z, Math.cos(s.a) * 2.4 + rnd(1), 1.5 + Math.random() * 2, Math.sin(s.a) * 2.4 + rnd(1), 0.5 + Math.random() * 0.3, 0.12 + Math.random() * 0.08, 3);
+      const m = moteAt(a, i, had >= 5), dx = m.x - a.pos.x, dz = m.z - a.pos.z, l = Math.hypot(dx, dz) || 1;
+      flashes.push({ kind: 'flash', x: m.x, y: m.y, z: m.z, t: 0, ms: 320, size: 0.9 });
+      for (let k = 0; k < (low ? 3 : 6); k++) sparkle(m.x, m.y, m.z, dx / l * 2.4 + rnd(1), 1.5 + Math.random() * 2, dz / l * 2.4 + rnd(1), 0.5 + Math.random() * 0.3, 0.12 + Math.random() * 0.08, 3);
     }
     flashes.push({ kind: 'ring', x: a.pos.x, z: a.pos.z, t: 0, ms: 420, r0: 0.3, r1: 1.6 + had * 0.22, follow: id });
+  }
+
+  /**
+   * Play-test 12 (#89, owner: "why do the Gullwick guard and the training dummies have the starlight orbs over their
+   * heads?"): every id of the room you left is void the moment you enter another, and the next room hands the same small
+   * numbers to new bodies. The Constellation was keyed by id and nothing cleared it on a room change, so YOUR old id's
+   * motes (3 of 5, 5 of 5 — whatever you held as you walked through a gate) went on drawing over whoever got that id
+   * next: a guard, a dummy. main.js calls this as it drops the old room's bodies; the next frame puts your own back.
+   */
+  function reset() {
+    shots.length = 0; falls.length = 0; zones.clear(); orbits.length = 0; flashes.length = 0; motes.clear();
+    stats.resets = (stats.resets || 0) + 1;
   }
 
   /** Everything a body was throwing or calling is gone with it (the rules cancel the hits of the dead). */
@@ -512,16 +528,16 @@ export function createStarFx(scene, { camera, actors = null, groundY = () => 0, 
     for (const [id, m] of motes) {
       const a = actors?.get?.(id);
       if (!a || a.dead) continue;
-      const full = m.n >= 5, hy = a.pos.y + (a.height || 1.7) + 0.28;
+      const full = m.n >= 5;
       for (let i = 0; i < m.n; i++) {
-        const s = moteSeat(i, time, full);
         const born = i === m.n - 1 ? Math.min(1, (time - m.grew) / 0.25) : 1;          // the newest one swells in
-        const x = a.pos.x + Math.cos(s.a) * 0.46, z = a.pos.z + Math.sin(s.a) * 0.46, y = hy + s.bob;
-        const size = (full ? 0.115 : 0.095) * (0.4 + 0.6 * born) * (1 + (1 - born) * 1.2);
-        glowAt(x, y, z, size * 1.7, time * 1.5 + i, full ? 0.8 : 0.55);
-        glowAt(x, y, z, size, -time * 2 + i, 0.9, 0.5);
+        const { x, y, z } = moteAt(a, i, full);
+        const pulse = full ? 1 + 0.12 * Math.sin(time * 4) : 1;                          // five: they breathe together, they never wheel
+        const size = (full ? 0.115 : 0.095) * pulse * (0.4 + 0.6 * born) * (1 + (1 - born) * 1.2);
+        glowAt(x, y, z, size * 1.7, 0.4 + i, full ? 0.8 : 0.55);
+        glowAt(x, y, z, size, Math.PI / 4 + i, 0.9, 0.5);
       }
-      if (full && Math.random() < dt * (low ? 5 : 12)) { const s = moteSeat((Math.random() * 5) | 0, time, true); sparkle(a.pos.x + Math.cos(s.a) * 0.46, hy, a.pos.z + Math.sin(s.a) * 0.46, rnd(0.2), 0.4, rnd(0.2), 0.5, 0.08, 0); }
+      if (full && Math.random() < dt * (low ? 5 : 12)) { const p = moteAt(a, (Math.random() * 5) | 0, true); sparkle(p.x, p.y, p.z, rnd(0.2), 0.4, rnd(0.2), 0.5, 0.08, 0); }
     }
 
     // flashes, rings, pillars
@@ -580,7 +596,7 @@ export function createStarFx(scene, { camera, actors = null, groundY = () => 0, 
   }
 
   return {
-    onFx, onCast, onImpact, shot, skyfall, zone, zoneMove, zoneEnd, hasZone, orbs, setMotes, burst, groundBurst, ownerGone, update, sample, stats, group,
+    onFx, onCast, onImpact, shot, skyfall, zone, zoneMove, zoneEnd, hasZone, orbs, setMotes, burst, groundBurst, ownerGone, reset, update, sample, stats, group,
     /** What is on screen right now (specs and screenshots). */
     live: () => ({
       shots: shots.map(s => ({ k: +(s.t / s.ms).toFixed(2), x: s.pos.x, y: s.pos.y, z: s.pos.z })),

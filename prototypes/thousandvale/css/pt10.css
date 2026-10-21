@@ -109,3 +109,5 @@ html[data-layout="phone"] .uf-res em { display: none; }
 /* play-test 11 (Star Blade, #53): the calling's emblem on its card (ui/class-card.js classEmblemSvg) */
 .class-card .cc-emblem { float: right; width: 44px; height: 44px; margin: 0 0 4px 8px; filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.6)); }
 .class-card .cc-emblem svg { width: 44px; height: 44px; display: block; }
+/* 2026-10-20: the What's new window's link to the to-do list */
+.cl-foot { padding: 8px 16px 10px; border-top: 1px solid var(--edge); font-size: 13px; } .cl-foot a { color: var(--gold-hi); }

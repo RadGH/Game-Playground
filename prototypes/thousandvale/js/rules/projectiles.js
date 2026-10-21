@@ -8,8 +8,9 @@
 //
 //   fx { kind: 'bolt' | 'arrow' | 'shot', id, from: {x,z}, to: <entity id> | {x,z}, ms, speed, proj, home?: 1, skill }
 //
-// A projectile HOMES (decided simply, as the owner asked): it lands on its target wherever the target stands when it
+// A player's projectile HOMES (decided simply, as the owner asked): it lands on its target wherever the target stands when it
 // arrives, and if the target died on the way it strikes where the target fell — it never picks a new victim.
+// A MONSTER's shot does not (play-test 12 #78, `monsterAim`): it flies at a point and can be stepped out of.
 // `engine.projectiles` is null on a parity engine: Farhold's own speeds and aimed-at-a-point arrows are kept there.
 
 const num = (v, d) => (Number.isFinite(+v) && +v > 0 ? +v : d);
@@ -23,6 +24,13 @@ export function buildProjectiles(cfg) {
     basic: { default: 26, ...(cfg.basic || {}) },
     monster: { default: 19, ...(cfg.monster || {}) },
     special: { ms: num(cfg.special?.ms, 160) },
+    // play-test 12 (#78): a monster's shot flies at a point (monster-ai.js shoot); absent = the old homing shot
+    monsterAim: cfg.monsterAim && typeof cfg.monsterAim === 'object' ? {
+      home: !!cfg.monsterAim.home,
+      lead: Math.max(0, Math.min(1, Number.isFinite(+cfg.monsterAim.lead) ? +cfg.monsterAim.lead : 0.3)),
+      radius: num(cfg.monsterAim.radius, 1.1),
+      leadByRole: Object.fromEntries(Object.entries(cfg.monsterAim.leadByRole || {}).filter(([, v]) => Number.isFinite(+v)).map(([k, v]) => [k, Math.max(0, Math.min(1, +v))])),
+    } : null,
     proj: { default: cfg.proj?.default || 'orb', byElement: { ...(cfg.proj?.byElement || {}) }, byId: { ...(cfg.proj?.byId || {}) }, basic: { ...(cfg.proj?.basic || {}) } },
   };
 }

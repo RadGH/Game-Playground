@@ -3,6 +3,7 @@
 // randomChibi2, the generator Farhold's Randomise button uses), dressed in the class outfit
 // (avatar-3d/data/class-outfits.json). Same input -> same look on every screen.
 
+import { dropRetired } from './retired-parts.js';
 import { randomAvatar, makeRng } from '../../../../avatar-2d/js/random.js';
 import { partIds } from '../../../../avatar-2d/js/parts/index.js';
 import { randomChibi2, CHIBI2_RACES } from '../../../../avatar-3d/js/chibi2-races.js';
@@ -55,7 +56,7 @@ const cache = new Map();
 export async function avatarFor(look) {
   // A bare avatar JSON (no race/seed wrapper) is used as it is. `look.avatar` (protocol v6) is the face and body the
   // player chose in the editor: laid over the seeded body below, so clothes still follow the class / worn gear (P22).
-  if (look?.body && look?.headShape) return look;
+  if (look?.body && look?.headShape) return dropRetired(look);      // #77: no blindfold, whoever asks
   const race = PLAYABLE_RACES.includes(look?.race) ? look.race : 'human';
   const cls = look?.cls || 'warrior';
   const seed = (look?.seed >>> 0) || 1;
@@ -70,6 +71,7 @@ export async function avatarFor(look) {
   let a;
   if (worn) a = { ...base, ...gearLook(look.gear, gearOpts(cls)) };      // W25: the one set of options (icons use the same)
   else { const outfit = o[cls] || o.warrior; a = outfit ? dressAs(base, outfit) : base; }
+  a = dropRetired(a);                                                 // #77: the seeded face may roll a blindfold; it is drawn as none
   if (cache.size > 300) cache.delete(cache.keys().next().value);
   cache.set(key, a);
   return a;

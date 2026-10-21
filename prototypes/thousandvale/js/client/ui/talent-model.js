@@ -291,15 +291,23 @@ export function inSector(s, x, y) {
 }
 
 // ---- play-test 2 Q23: search the forest -------------------------------------------------------------------------
-/** Node ids whose name / kind / arm / text holds every word typed (case-insensitive). textOf(node) adds the card text. */
+/**
+ * Node ids whose OWN text — the name and the description on its card — holds every word typed (case-insensitive).
+ * textOf(node) supplies the description when the caller words it (default: node.desc).
+ * Play-test 12 (#80): this used to search the id, the kind and the arm's name too, and the caller handed in the whole
+ * tooltip (arm name and "click to stage it" lines included) — so "arcane" lit every node in The Deep Study (arm key
+ * `arcane`, ids `arcane_…`) whether or not the node had anything to do with arcane. Matches are whole-word starts, so
+ * "arc" finds "arcane" but "cane" does not.
+ */
 export function searchForest(F, query, textOf = null) {
   const words = String(query || '').toLowerCase().split(/\s+/).filter(Boolean);
   if (!words.length) return [];
-  const armName = new Map((F.arms || []).map(a => [a.key, a.name || a.key]));
+  const esc = w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const res = words.map(w => new RegExp(`(^|[^a-z0-9])${esc(w)}`));
   const hits = [];
   for (const n of F.nodes) {
-    const hay = `${n.name || ''} ${n.id} ${n.kind || ''} ${armName.get(n.arm) || ''} ${textOf ? textOf(n) || '' : ''}`.toLowerCase();
-    if (words.every(w => hay.includes(w))) hits.push(n.id);
+    const hay = `${n.name || ''} ${textOf ? textOf(n) || '' : n.desc || ''}`.toLowerCase();
+    if (res.every(r => r.test(hay))) hits.push(n.id);
   }
   return hits;
 }

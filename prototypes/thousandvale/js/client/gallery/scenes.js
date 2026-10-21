@@ -311,6 +311,7 @@ export const sceneById = id => SCENES.find(s => s.id === id) || null;
 export const NO_SCREEN = {
   'js/client/ui/painted-portraits.js': 'a helper of portraits.js: picks the painted portrait for a monster or townsfolk (graphics pass 2026-10-16) — seen in the target frame',      // G-PROPS
   'js/client/ui/net2.js': 'only sends messages (no markup)',
+  'js/client/ui/screenshot.js': 'a helper of feedback.js (play-test 12, #71): takes the bug-report screenshot — its box is in the Feedback window; tests/G/pt12-ui.spec.js photographs it in the real game',      // UI pt12
   'js/client/ui/svg-portrait.js': 'a helper of portraits.js — seen wherever a portrait is (Title — your characters, the HUD frames)',
   'js/client/ui/portrait-mode.js': 'a rule of portraits.js: where the live 3D portrait may be used (play-test 10, Y33) — no markup',
   'js/client/ui/keep-scroll.js': 'keeps every list\'s scroll position through a redraw (Y27) — no markup of its own; tests/D/pt10.spec.js exercises it',

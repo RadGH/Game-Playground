@@ -29,6 +29,15 @@ export const COMBAT_DEFAULTS = Object.freeze({
   // dagger hit gets `edgePct` more, and one from behind — more than `backDeg` degrees from where the target looks, the
   // same test a skill's "from behind" bonus uses — gets `backstabPct` more on top and makes it bleed (js/rules/field.js)
   dagger: { edgePct: 120, backstabPct: 50, backDeg: 100 },
+  // play-test 12 (#75, owner: "the enemies only ever walk … I can just kite them forever"): how fast a monster CLOSES on
+  // what it fights (js/rules/monster-ai.js chaseSpeed) — only while that quarry is moving AWAY from it faster than `movingAbove`
+  // m/s and more than `gapAbove` m outside its reach (a player who stands, or walks in, to fight meets the pack as before). Its bestiary speed is its stroll; chasing it runs at
+  // `chaseMul` x that, kept inside [chaseMin, chaseMax] (never slower than the bestiary speed). Some monsters SPRINT (champions do not: a pack's leader sprinting at a lone ranger lost tests/C/packs-balance) —
+  // by role (`sprintRoles`), kind (`sprintKinds`) or rank (`sprintRanks`): a burst at `sprintSpeed` for `sprintSec`,
+  // at most once every `sprintEverySec`, when it is more than `sprintGap` m outside its reach. The player runs at 8.1
+  // and auto-attacks on the move at 0.70 of that (movement.js MOVE.fight): a runner who stops attacking pulls away from
+  // nearly everything, a kiter does not, and a sprinter closes the gap now and then.
+  pursuit: { movingAbove: 2, gapAbove: 3, chaseMul: 1.35, chaseMin: 4.2, chaseMax: 5.8, sprintSpeed: 9.2, sprintSec: 1.8, sprintEverySec: 8, sprintGap: 5, sprintRoles: ['skirmisher'], sprintKinds: [], sprintRanks: ['rare', 'boss'] },
   // owner #2 / #61 (2026-10-15): a weapon's damage share by family, and the melee guard (js/rules/attributes.js)
   families: {
     heavy: { damagePct: 18, guardPct: 15, oneHandGuardPct: 10 },

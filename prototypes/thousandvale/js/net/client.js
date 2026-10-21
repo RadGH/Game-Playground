@@ -261,6 +261,7 @@ export function connect(opts = {}) {
   net.input = m => sendJ(game, { t: 'in', s: m.s, dt: m.dt, mx: m.mx, mz: m.mz, yaw: m.yaw, b: m.b | 0 });
   net.cast = ({ slot = 0, aim, target, ct, held } = {}) => {
     const o = { t: 'cast', slot };
+    if (slot === 0) net.lastBasicAt = (typeof performance !== 'undefined' ? performance : Date).now();      // play-test 12 (#75): main.js holds IN.FIGHT after it
     if (held != null) o.held = held;
     if (aim) o.aim = { x: aim.x, z: aim.z };
     if (target) o.target = target;
@@ -355,7 +356,13 @@ export function connect(opts = {}) {
   net.sheet = () => sendJ(game, { t: 'sheet' });                                    // -> sheet {core, advanced, abilities, angling}
   net.openItem = uid => sendJ(game, { t: 'item', op: 'open', uid: String(uid) });   // a crate / gift box -> itemR {opened}
   /** feedback('suggestion'|'bug', text, ctx?) -> feedbackR. Goes over the game socket when in the world (the server adds where you stand). */
-  net.feedback = (kind, text, ctx, ref) => sendJ(game && game.readyState === OPEN && net.joined ? game : gw, { t: 'feedback', kind, text: String(text).slice(0, 2000), ...(ctx ? { ctx } : {}), ...(Number.isSafeInteger(ref) ? { ref } : {}) });
+  net.feedback = (kind, text, ctx, ref, shot = false) => sendJ(game && game.readyState === OPEN && net.joined ? game : gw, { t: 'feedback', kind, text: String(text).slice(0, 2000), ...(ctx ? { ctx } : {}), ...(Number.isSafeInteger(ref) ? { ref } : {}), ...(shot ? { shot: true } : {}) });
+  /** Play-test 12 (#71): after `feedbackR {ok, id, shot:true}` — send the screenshot (a data URL) in 12 000-character parts on the same socket. Answer `feedbackShotR`. */
+  net.feedbackShot = (id, dataUrl, part = 12000) => {
+    const ws = game && game.readyState === OPEN && net.joined ? game : gw, s2 = String(dataUrl), n = Math.max(1, Math.ceil(s2.length / part));
+    for (let i = 0; i < n; i++) sendJ(ws, { t: 'feedbackShot', id, i, n, data: s2.slice(i * part, (i + 1) * part) });
+    return n;
+  };
   /** Round 9 (X6): deleteChar(id, typedName) -> `deleted {ok, char, name, freeAt, returned, why?, msg?}`; a fresh `charList {chars, limit}` follows a success. */
   net.deleteChar = (id, name) => sendJ(gw, { t: 'delete', char: id, name: String(name || '').slice(0, 24) });
   /** Round 9 (X1): who is online (admin accounts only) -> `adminOnline {ok, at, count, accounts, list}`. Always asked of the gateway, which knows every process. */
@@ -379,7 +386,7 @@ export function connect(opts = {}) {
   /** prof('learn'|'tool', {id, npc}) -> profR */
   net.prof = (op, a = {}) => sendJ(game, pick({ t: 'prof', op }, a, ['id', 'npc']));
   /** gather('start', {id?}) -> gatherR {game} ; gather('done', {id, inputs}) -> gatherDone ; gather('stop') */
-  net.gather = (op, a = {}) => sendJ(game, pick({ t: 'gather', op }, a, ['id', 'inputs']));
+  net.gather = (op, a = {}) => sendJ(game, pick({ t: 'gather', op }, a, ['id', 'inputs', 'batch']));      // batch: play-test 12 (#69)
   /** craft('list', {npc?}) -> craftList ; ('start', {id, base?, n?, uid?, index?, element?}) -> craftR ; ('done', {id, inputs}) -> craftDone ; ('quote', {id, uid, index?, element?}) -> craftQuote ; ('stop') */
   net.craft = (op, a = {}) => sendJ(game, pick({ t: 'craft', op }, a, ['id', 'npc', 'base', 'n', 'uid', 'index', 'element', 'inputs']));
   net.cook = (id, n) => sendJ(game, id ? (n ? { t: 'cook', id, n } : { t: 'cook', id }) : { t: 'cook' });

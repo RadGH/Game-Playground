@@ -68,6 +68,17 @@
 .pf-wrap { position: absolute; inset: 0; }
 .pf-canvas { display: block; touch-action: none; cursor: grab; }
 .pf-foot { flex: none; }
+/* play-test 12 (#67): the perk card a tap opens (phones have no hover) */
+.pf-card { position: absolute; left: 8px; right: 8px; bottom: 8px; z-index: 3; max-height: 55%; overflow-y: auto; padding: 10px 12px; border-radius: 10px;
+  background: rgba(16, 13, 10, 0.97); border: 1px solid var(--edge-strong, rgba(217, 178, 106, 0.7)); box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6); font-size: 14px; line-height: 1.4; }
+.pf-card[hidden] { display: none; }
+.pf-card .tip-title { font-family: var(--serif); font-size: 16px; color: var(--gold-hi); }
+.pf-card .tip-sub { font-size: 12px; color: var(--ink-faint); }
+.pf-card hr { border: 0; border-top: 1px solid var(--edge); margin: 6px 0; }
+.pf-card .good { color: var(--good); margin-top: 4px; font-size: 13px; } .pf-card .bad { color: var(--bad, #e07a6a); margin-top: 4px; font-size: 13px; }
+.pf-card-act { display: flex; gap: 8px; margin-top: 8px; justify-content: flex-end; }
+.pf-card-act button.primary { width: auto; }
+.pf-card-act button { min-height: 36px; }
 .pf-help { margin: 6px 0 0; font-size: 12px; color: var(--ink-faint); }
 .pf-help .g { color: var(--good); }
 .pf-totals { margin: 4px 0 0; font-size: 12.5px; color: var(--ink-dim); max-height: 3.2em; overflow-y: auto; }

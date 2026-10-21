@@ -2,6 +2,33 @@
  "_doc": "Player-facing changelog, newest first. The lead appends an entry at each publish (from the feedback reports' Completed notes). `id` is stable; the client remembers the last id a player has seen and highlights newer ones. Plain language, no internal names.",
  "entries": [
   {
+   "id": "2026-10-20",
+   "date": "2026-10-20",
+   "title": "Fairer fights, no more freezes, and lots of fixes from your reports",
+   "items": [
+    "Fixed the freezes during fights with spellcasting and shooting enemies, including ashback salamanders: their spell effects no longer rebuild their graphics every cast, and an area spell at your feet appears without a lock-up so you can step out in time.",
+    "Enemy arrows and spells no longer follow you. Keep moving and you can dodge most of them.",
+    "Enemies now run after you when you try to get away, and some sprint. Attacking while moving slows you, so stop attacking to escape.",
+    "Scattered Stars fires its stars one after another, like a volley. Starlight orbs only show over your own character and sit behind your shoulders instead of spinning like a daze.",
+    "Damage numbers that land at the same time spread apart so you can read each one.",
+    "Set pieces now show their set on the item card: how many pieces you wear and what each step gives, ticked when it's on. The bonuses always applied; the card just never said so.",
+    "The sceptre's card now says plainly that it only hits what's in reach and doesn't shoot.",
+    "Bulk skinning: press E on one of your kills and you skin every beast of yours within 10 m, one after another. Escape stops.",
+    "Bug reports can attach a screenshot, with an option to hide the interface.",
+    "Sign in on your phone with a QR code: Account, then 'Sign in on your phone'. The code works once, for 3 minutes, and never holds your password.",
+    "Selling a rare item asks once more, with 'Remember for this transaction' so that trader stops asking until you leave.",
+    "Controllers reach every key of the on-screen keyboard, and on wide screens like the Steam Deck the keyboard is wide and low with its own Delete, Capitals, Space and Send keys.",
+    "Perk search only lights perks whose own name or description has the word. On a phone, tap a perk to read it, and tap again to stage it.",
+    "On small screens, character creation scrolls so Next is always reachable, and the logo steps aside while you customise your look.",
+    "Swimming forward is a face-down front crawl, and treading water is upright. Sitting, eating and riding a cart sit down once and stay seated. When you fish, you turn to face the float.",
+    "No more dark seams in the sea while sailing, and the ship comes alongside gently instead of whipping round on arrival.",
+    "Folk standing at a town's edge, like Mistfall's carter, can be seen from inside and outside the town.",
+    "Fences and walls built in rings (watchtower yards, ruined forts, animal pens, Vharlen's goat walls) follow the ring instead of sticking out like spokes. The blindfold is gone from every face.",
+    "The ground looks better: grass, ferns, heather, stones and pebbles on the ground everywhere, a matte earth that no longer shines, and taller palm trees on Vharlen.",
+    "Want to know what's coming? There's a new To-do list link on the title screen and in What's new."
+   ]
+  },
+  {
    "id": "2026-10-16d",
    "date": "2026-10-16",
    "title": "A layout for controllers (Steam Deck and gamepads)",

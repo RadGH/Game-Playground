@@ -108,10 +108,21 @@ export function moteCount(res) {
 }
 /** Starlight only ever falls when it is SPENT (the big skills take all of it): that is the flare. */
 export const moteSpent = (before, after) => (before > 0 && after < before ? before - after : 0);
-/** Where mote `i` of five rides: an angle (radians) and a small bob, at `time` seconds. Five fixed seats, filled in order. */
+/**
+ * Where mote `i` of five rides, at `time` seconds. Five fixed seats, filled in order.
+ *
+ * Play-test 12 (#89, owner: "it looks like we are stunned"): the motes used to wheel round the top of the head — which is
+ * exactly how every game draws "dazed". They now hang STILL in a shallow arc behind the shoulders, turned with the body:
+ * `a` is the seat's angle round the body measured from straight BEHIND it (0 = the middle seat, ± to either side; add the
+ * body's facing — star-fx.js `moteAt`), `lift` how far above the arc's ends it sits (the middle is highest, a crown laid
+ * flat across the back), `bob` a slow breath. Full (five) they pulse together rather than spin.
+ */
+export const MOTE_ARC = Object.freeze({ spread: 0.42, radius: 0.5, height: 0.74, lift: 0.16 });
 export function moteSeat(i, time, full = false) {
-  const a = (i / 5) * Math.PI * 2 + time * (full ? 2.6 : 1.5);
-  return { a, bob: Math.sin(time * 2.2 + i * 1.3) * 0.045 };
+  const off = i - 2;                                   // seats -2..2 across the back
+  const a = off * MOTE_ARC.spread;
+  const lift = MOTE_ARC.lift * (1 - (off * off) / 4);
+  return { a, lift, bob: Math.sin(time * (full ? 2.4 : 1.6) + i * 1.3) * 0.03 };
 }
 
 /**

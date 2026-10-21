@@ -1,6 +1,6 @@
 {
  "_doc": "Stream E (play-test 5 T25 Angling) — MADE by tools/content-pools.mjs from stream B's baked water; do not edit by hand. `zones.<world zone>` = every fish-pool spot of that zone, WORLD metres: `x, z` in the water (where the ripples are drawn and the bobber lands), `shore` = a dry point a walker can reach, 3-11 m from it (stand there and cast), `water` river | lake | marsh | coast (what the catch table is rolled on), `band` = the zone's level band, `tier` 1 | 2 | 3 (C's fishing.pool(tier): skill 0 / 25 / 50), `road` = metres from the shore point to the nearest road (roadside pools are tier 1). `start: true` + `always: true` = the first quest's pool by Torborhold: always open, never fished out. `meta.<zone>.live` = how many of the listed spots are open at once (a pool closes after C's `catches` and another listed spot opens); `meta.<zone>.water` = what each BAKED water kind (terrain waterAt().kind: river / lake / sea) counts as in that zone, for a cast outside any pool. `anglers[]` = where each town's angler stands (world metres; tools/content-hunts.mjs copies them into <zone>.quest.json as npc records, role `angler`; their shop is shops.json kinds.angler).",
- "pools": 465,
+ "pools": 466,
  "zones": {
   "z11_01": [
    {
@@ -3471,7 +3471,7 @@
      4
     ],
     "tier": 1,
-    "road": 59
+    "road": 55
    },
    {
     "id": "pool_z12_02_10",
@@ -3487,10 +3487,26 @@
      4
     ],
     "tier": 1,
-    "road": 63
+    "road": 56
    },
    {
     "id": "pool_z12_02_11",
+    "x": 26116,
+    "z": 5510,
+    "shore": {
+     "x": 26112,
+     "z": 5506
+    },
+    "water": "river",
+    "band": [
+     1,
+     4
+    ],
+    "tier": 1,
+    "road": 60
+   },
+   {
+    "id": "pool_z12_02_12",
     "x": 24706,
     "z": 5900,
     "shore": {
@@ -3506,7 +3522,7 @@
     "road": 64
    },
    {
-    "id": "pool_z12_02_12",
+    "id": "pool_z12_02_13",
     "x": 24982,
     "z": 5600,
     "shore": {
@@ -3522,7 +3538,7 @@
     "road": 69
    },
    {
-    "id": "pool_z12_02_13",
+    "id": "pool_z12_02_14",
     "x": 25354,
     "z": 5384,
     "shore": {
@@ -3536,22 +3552,6 @@
     ],
     "tier": 1,
     "road": 70
-   },
-   {
-    "id": "pool_z12_02_14",
-    "x": 26116,
-    "z": 5510,
-    "shore": {
-     "x": 26112,
-     "z": 5506
-    },
-    "water": "river",
-    "band": [
-     1,
-     4
-    ],
-    "tier": 1,
-    "road": 72
    },
    {
     "id": "pool_z12_02_15",
@@ -6813,6 +6813,22 @@
     "town": "Gorsehold",
     "always": true,
     "fromTown": 428
+   },
+   {
+    "id": "pool_z13_04_2",
+    "x": 28626,
+    "z": 9660,
+    "shore": {
+     "x": 28622,
+     "z": 9656
+    },
+    "water": "river",
+    "band": [
+     6,
+     8
+    ],
+    "tier": 1,
+    "road": 371
    }
   ],
   "z14_04": [
@@ -7901,10 +7917,11 @@
     "river"
    ],
    "candidates": 57,
+   "scarce": true,
    "roadside": 0,
    "townPool": "pool_z13_04_1",
    "tiers": [
-    1,
+    2,
     0,
     0
    ]

@@ -2291,34 +2291,6 @@
     },
     {
      "kind": "prop",
-     "id": "cart_wheel",
-     "x": -8,
-     "z": 13,
-     "yaw": 1.3
-    },
-    {
-     "kind": "prop",
-     "id": "fence_post",
-     "x": -15.2,
-     "z": 14,
-     "yaw": 0
-    },
-    {
-     "kind": "prop",
-     "id": "fence_rail",
-     "x": -14,
-     "z": 14,
-     "yaw": 0
-    },
-    {
-     "kind": "prop",
-     "id": "fence_post",
-     "x": -12.8,
-     "z": 14,
-     "yaw": 0
-    },
-    {
-     "kind": "prop",
      "id": "signpost",
      "x": 0,
      "z": 24,
@@ -2531,6 +2503,34 @@
       "x": -18,
       "z": -14,
       "yaw": -4.72
+     },
+     {
+      "kind": "prop",
+      "id": "cart_wheel",
+      "x": -8,
+      "z": 13,
+      "yaw": 1.3
+     },
+     {
+      "kind": "prop",
+      "id": "fence_post",
+      "x": -15.2,
+      "z": 14,
+      "yaw": 0
+     },
+     {
+      "kind": "prop",
+      "id": "fence_rail",
+      "x": -14,
+      "z": 14,
+      "yaw": 0
+     },
+     {
+      "kind": "prop",
+      "id": "fence_post",
+      "x": -12.8,
+      "z": 14,
+      "yaw": 0
      }
     ],
     "_doc": "What this place also has when it stands on open ground at full size. Moved here by tools/content-fit.mjs because the piece is bound onto one of stream B's ground pieces, which is smaller and draws its own (wall, graves, buildings, stones). Nothing draws this block."

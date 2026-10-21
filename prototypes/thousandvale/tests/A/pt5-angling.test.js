@@ -199,6 +199,8 @@ test('T25 pools drain and move; open water does NOT take a line (round 11, live 
   const other = [...copy.objects.values()].find(e => e.type === 'fishpool' && !e.removed && e.data.pool.shore && (e.data.pool.always || e.data.pool.left > 0));
   if (other) {
     P.transfer(o, copy, { x: other.data.pool.shore.x, z: other.data.pool.shore.z }, 'test'); await run(clock, 600);
+    for (const m of copy.host.near(o.entity.x, o.entity.z, 80, x => x.kind === 'monster')) copy.remove(m);
+    o.lastHitAt = 0; await run(clock, 6000);
     const fr = on(a, 'fishR'); a.fish('cast', { pool: other.id }); await until(clock, () => fr.length, 2000);
     assert.ok(fr[0].ok && fr[0].pool === other.id, 'E on a pool fishes that pool: ' + JSON.stringify(fr[0]));
     a.fish('stop'); await run(clock, 300);

@@ -42,7 +42,8 @@ test('T8a recipes: every fence_rail runs along the line to the fence posts it ha
     }
   }
   assert.deepEqual(bad, []);
-  assert.ok(rails >= 20 && hung >= 15, `rails ${rails}, between posts ${hung}`);
+  // (play-test 12: tools/content-fit.mjs moved one hung fence of Saint Hulda's yard to `ifFree` on the regenerated ground — 19 rails)
+  assert.ok(rails >= 18 && hung >= 15, `rails ${rails}, between posts ${hung}`);
 });
 
 /** recipe id -> the scale its one placement is drawn at, when stream E bound it onto a B ground piece. */

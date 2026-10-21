@@ -41,7 +41,7 @@ const ZM = 2048;
 export const POOL = Object.freeze({ depth: 0.5, wade: 0.35, shelf: [0.22, 0.1], few: 12, shore: [3, 15], gap: 90, startGap: 80, max: 44, edge: 40, lattice: 6, roadside: 45, far: 220,
   // owner feedback 7 V3: more pools where a road runs beside or crosses the water (a second pass, closer together), a
   // pool of its own for every town with water in reach, and most pools open to a beginner
-  roadGap: 60, roadMax: 16, roadM: 35, townReach: 700, townRoadM: 40, tier1Share: 0.6, minPools: 6 });
+  roadGap: 60, roadMax: 16, roadM: 35, townReach: 700, townRoadM: 40, tier1Share: 0.6, minPools: 6, minGap: 56 });
 export const ANGLER = Object.freeze({ reach: 420, startPool: 150, toPool: 60 });
 /** Baked water kind -> angling water kind, by the zone's archetype (data/provinces/torbor_downs.json). */
 export const WATER_BY_ARCHETYPE = Object.freeze({
@@ -148,8 +148,10 @@ export function poolsForZone(F, { hub, archetype, band, gap = POOL.gap, eid = nu
     picked.push(c);
   }
   // play-test 12 (#81): a zone whose only reachable water is one cove or one stretch of river (the regenerated Gorse March
-  // meets the sea in cliffs) spaces its pools closer rather than offering a single one — down to 25 m, until it has POOL.minPools
-  for (const g2 of [gap / 2, 25]) {
+  // meets the sea in cliffs) spaces its pools closer rather than offering a single one — down to POOL.minGap (tests/E/
+  // playtest7-economy.test.js V3: no two pools nearer than 55 m), until it has POOL.minPools; if even that leaves too few,
+  // the zone is `scarce` (meta) — it has what fishing its water allows
+  for (const g2 of [gap / 1.4, POOL.minGap]) {
     if (picked.length >= POOL.minPools) break;
     for (const c of cands) {
       if (picked.length >= POOL.minPools) break;
@@ -176,7 +178,7 @@ export function poolsForZone(F, { hub, archetype, band, gap = POOL.gap, eid = nu
   // POOL.tier1Share of a zone's pools are tier 1.)
   const want = Math.min(picked.length, Math.max(2, Math.ceil(picked.length * POOL.tier1Share)));
   for (const p of picked.slice().sort((a, b) => a.road - b.road)) { if (picked.filter(q => q.tier === 1).length >= want) break; p.tier = 1; }
-  return { reach, waterOf, cands: cands.length, pools: picked };
+  return { reach, waterOf, cands: cands.length, pools: picked, scarce: picked.length > 0 && picked.length < POOL.minPools };
 }
 
 /** Where a town's angler stands: the reachable bank nearest the town centre, outside the buildings; else the town's edge. */
@@ -242,7 +244,7 @@ export function buildPools(prov = PROV) {
     if (legend && !pools.length && !legend.foundIn) problems.push(`${eid}: no water at all, and its legend ${legend.id} names no \`foundIn\` zone`);
     if (legend && legend.foundIn) { const there = out.zones[map[legend.foundIn]]; if (there && !there.some(p => p.water === legend.water)) problems.push(`${eid}: legend ${legend.id} is found in ${legend.foundIn}, which has no ${legend.water} pool`); }
     out.zones[wid] = pools;
-    out.meta[wid] = { sheet: eid, name: zs.name, band: zs.band, live: pools.length ? Math.min(pools.length, Math.max(2, Math.ceil(pools.length * 0.6), pools.filter(p => p.tier === 1).length + Math.ceil(pools.filter(p => p.tier > 1).length / 2))) : 0, water: R.waterOf, kinds, candidates: R.cands,
+    out.meta[wid] = { sheet: eid, name: zs.name, band: zs.band, live: pools.length ? Math.min(pools.length, Math.max(2, Math.ceil(pools.length * 0.6), pools.filter(p => p.tier === 1).length + Math.ceil(pools.filter(p => p.tier > 1).length / 2))) : 0, water: R.waterOf, kinds, candidates: R.cands, ...(R.scarce ? { scarce: true } : {}),
       // (live = every beginner pool and half of the better ones: something to grow into is always in sight)
       roadside: pools.filter(p => p.road <= POOL.roadside).length, townPool: (pools.find(p => p.town) || {}).id || null, tiers: [1, 2, 3].map(t => pools.filter(p => p.tier === t).length) };
     if (who && spot) out.anglers.push({ id: who.id, name: who.name, town: who.town, sheet: eid, zone: wid, x: spot.x + ox, z: spot.z + oz, yaw: spot.yaw, byWater: spot.water, fromTown: Math.round(spot.d),

@@ -38,7 +38,9 @@ test('T25 pools: every zone with water has pools a beginner may fish, more spots
   for (const [eid, wid] of Object.entries(MAP)) {
     const l = AP.zones[wid], m = AP.meta[wid], zs = SHEET.zones[eid];
     if (!l.length) { assert.equal(eid, 'blackthorn_scar', eid + ' has no pools'); continue; }       // the Scar has no water at all
-    assert.ok(l.length >= 6, `${eid}: ${l.length} pools`);
+    // (play-test 12, #81: a zone whose only reachable water is one cove — the regenerated Gorse March meets the sea in
+    // cliffs — has what its water allows, never two pools within 55 m; tools/content-pools.mjs marks it `scarce`)
+    assert.ok(l.length >= (m.scarce ? 2 : 6), `${eid}: ${l.length} pools${m.scarce ? ' (scarce water)' : ''}`);
     assert.ok(l.some(p => p.tier === 1), `${eid}: no tier-1 pool`);
     assert.ok(m.live >= 2 && m.live <= l.length, `${eid}: live ${m.live} of ${l.length}`);      // owner feedback 7 V3: most spots are open at once now
     for (const w of new Set(l.map(p => p.water))) {

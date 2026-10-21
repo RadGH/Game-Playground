@@ -86,7 +86,7 @@ function readTree(dir, out = []) {
   }
   return out;
 }
-const GAME_TEXT = Object.fromEntries(['farhold', 'emberveil', 'bannerline', 'thousandvale', 'party-quest'].map(g => [g, [...readTree(join(ROOT, 'prototypes', g, 'js')), ...readTree(join(ROOT, 'prototypes', g, 'data'))].join('\n')]));
+const GAME_TEXT = Object.fromEntries(['farhold', 'emberveil', 'bannerline', 'thousandvale'].map(g => [g, [...readTree(join(ROOT, 'prototypes', g, 'js')), ...readTree(join(ROOT, 'prototypes', g, 'data'))].join('\n')]));
 // the class outfit tables are shared: Farhold and Thousandvale dress from them, Emberveil from its own class-looks
 const OUTFITS = ['class-outfits.json', 'class-outfits-t2.json'].map(f => readFileSync(join(ROOT, 'avatar-3d/data', f), 'utf8')).join('\n');
 GAME_TEXT.farhold += OUTFITS; GAME_TEXT.thousandvale += OUTFITS;

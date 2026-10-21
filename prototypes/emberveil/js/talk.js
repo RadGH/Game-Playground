@@ -188,7 +188,7 @@ export function woundedFallback(report) {
   return 'We should take a rest. None of us is whole.';
 }
 
-// Adapted from prototypes/party-quest/js/talk.js: lingo speakers + combat reactions, no memory/relations here.
+// Adapted from Party Quest's js/talk.js (prototype removed 2026-10-21; in git history): lingo speakers + combat reactions, no memory/relations here.
 export class Talk {
   constructor({ lingo, game, voice = null }) { this.lingo = lingo; this.game = game; this.voice = voice; this.speakers = new Map(); this.muted = false; this.engineOverride = ''; this.fightLines = new Set(); this._fightKey = null; }
   /** lingo Speaker for a member/NPC (adds a lexicon entry so names, pronouns and pronunciation work). */

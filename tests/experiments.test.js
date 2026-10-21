@@ -63,8 +63,8 @@ test('no player-facing text on the home page uses a banned word', () => {
 test('the links the old home page had still exist', () => {
   const old = ['voice-lab/', 'lingo/', 'avatar-2d/', 'avatar-3d/', 'avatar-3d/chibi3.html', 'namegen/', 'items/', 'conversations/', 'meters/', 'assets/', 'library/',
     'avatar-3d/creatures.html', 'avatar-3d/vehicles.html', 'avatar-3d/mounts.html', 'avatar-3d/spellfx.html', 'sfx/', 'worldgen/', 'universe/', 'proctown/', 'proctown/kit.html',
-    'proctown/propkit.html', 'highdef-3d/', 'combined/', 'prototypes/party-quest/', 'prototypes/emberveil/', 'prototypes/frontier-foundry/', 'prototypes/farhold/',
-    'prototypes/tinyrts/', 'prototypes/lanternfall/', 'prototypes/bannerline/', 'prototypes/wildmarch/'];
+    'proctown/propkit.html', 'highdef-3d/', 'combined/', 'prototypes/emberveil/', 'prototypes/frontier-foundry/', 'prototypes/farhold/',
+    'prototypes/tinyrts/', 'prototypes/lanternfall/', 'prototypes/bannerline/'];
   const now = new Set(data.entries.map(e => e.href));
   assert.deepEqual(old.filter(h => !now.has(h)), []);
 });

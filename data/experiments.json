@@ -493,24 +493,6 @@
    "readme": "prototypes/thousandvale/docs/PLAN.md"
   },
   {
-   "id": "gravenhold",
-   "group": "prototypes",
-   "title": "Gravenhold",
-   "folder": "prototypes/gravenhold",
-   "summary": "A side experiment built by Codex: the Roguelike's quick dungeon runs rebuilt in 3D with Thousandvale's classes, skills, items and monsters, seen from a classic isometric camera with an optional tilt-shift look. Attacks and skills go through Thousandvale's real combat rules.",
-   "status": "prototype",
-   "statusNote": "Codex build in progress (milestones M0-M8); LAN only",
-   "date": "2026-10-16",
-   "isNew": true,
-   "tags": [
-    "3d",
-    "roguelike",
-    "codex",
-    "isometric"
-   ],
-   "href": "prototypes/gravenhold/"
-  },
-  {
    "id": "tumblefair",
    "group": "prototypes",
    "title": "Tumblefair",
@@ -626,37 +608,6 @@
     "action-rpg",
     "pixel physics",
     "spellcrafting"
-   ]
-  },
-  {
-   "id": "party-quest",
-   "group": "prototypes",
-   "title": "Party Quest",
-   "href": "prototypes/party-quest/",
-   "folder": "prototypes/party-quest",
-   "summary": "Assemble four adventurers, talk to townsfolk, take quests, travel by choosing directions, auto-battle with reactive banter, camp at night and listen to the party talk about the day.",
-   "status": "deprecated",
-   "date": "2026-09-10",
-   "tags": [
-    "party",
-    "auto-battler"
-   ],
-   "deprecated": "The first prototype. Still playable, but it uses the original procedural Chibi body and has not been touched since the later games replaced it."
-  },
-  {
-   "id": "wildmarch",
-   "group": "prototypes",
-   "title": "Wildmarch",
-   "href": "prototypes/wildmarch/",
-   "folder": "prototypes/wildmarch",
-   "summary": "Design bible for an online action RPG built on Farhold's systems, on one continent where you start with a torch and one spell and earn everything else. Thirty classes with six bespoke spells each and five-player dungeons with telegraphed mechanics. Documents only, with a built-in Markdown viewer.",
-   "status": "docs",
-   "statusNote": "not built",
-   "date": "2026-09-30",
-   "tags": [
-    "design docs",
-    "action-rpg",
-    "online"
    ]
   }
  ]

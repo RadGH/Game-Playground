@@ -617,6 +617,3 @@ network" button built from the page's hostname, hidden on the public site) and `
 
 `prototypes/emberveil/` rebuilds the user's Emberveil RPG: its own data (copied by `tools/build-emberveil-data.mjs`), a loot engine with affixes/uniques/sets, a stat + talent system, an auto-battle simulator and a branching world map, all presented with Mii bodies (30 class looks with new gear parts), creature bodies and Lingo barks. Read its README for what maps to what.
 
-## Worked example: Party Quest
-
-`prototypes/party-quest/` is a complete small game made only from the pieces above: party from the library, Lingo talk with memories and relationships for combat barks, town gossip and camp conversations, Name Forge NPCs, Item Vault loot and shops, Mii bodies on a cinematic stage, Formant voices. Its `README.md` maps each feature to the experiment it came from. Read `js/main.js` top to bottom for the glue.

@@ -22,7 +22,7 @@ export const ALLOW = Object.freeze([
   'lingo', 'meters', 'namegen', 'proctown', 'sfx', 'universe', 'voice-lab', 'worldgen',
   // prototypes (prototypes/tinyrts is a symlink to another repo, so a published copy cannot hold it)
   'prototypes/thousandvale', 'prototypes/farhold', 'prototypes/emberveil', 'prototypes/bannerline',
-  'prototypes/frontier-foundry', 'prototypes/lanternfall', 'prototypes/party-quest', 'prototypes/wildmarch',
+  'prototypes/frontier-foundry', 'prototypes/lanternfall',
   'prototypes/tumblefair',
 ]);
 /** Paths inside the allow-list that are still refused. */
@@ -30,7 +30,6 @@ export const DENY = Object.freeze([
   'prototypes/thousandvale/server', 'prototypes/thousandvale/ops', 'prototypes/thousandvale/tests',
   'prototypes/thousandvale/docs', 'prototypes/thousandvale/package.json', 'prototypes/thousandvale/package-lock.json',
   'library/synced',
-  'prototypes/gravenhold',      // 2026-10-16: Codex side experiment — on the dev site only, not public (yet)
   'avatar-3d/chibi4',      // owner 2026-10-16: Chibi 4 is a LAN-only experiment for a future game — never on a public server
 ]);
 /** A folder with one of these names is refused wherever it sits: server code, build tools, tests, notes. */

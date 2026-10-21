@@ -11,7 +11,7 @@ export const SLOT_LABEL = {
   weapon: 'Weapon', offhand: 'Off hand', head: 'Head', chest: 'Chest', legs: 'Legs', hands: 'Hands', feet: 'Feet',
   cape: 'Cape', necklace: 'Necklace', ring: 'Ring', light: 'Light', belt: 'Belt', decor: 'Kit / decoration', face: 'Face',
 };
-export const GAME_LABEL = { thousandvale: 'Thousandvale', farhold: 'Farhold', emberveil: 'Emberveil', bannerline: 'Bannerline', 'party-quest': 'Party Quest' };
+export const GAME_LABEL = { thousandvale: 'Thousandvale', farhold: 'Farhold', emberveil: 'Emberveil', bannerline: 'Bannerline' };
 /** The game slot a row belongs to when the catalog does not say (older rows, the stop-gap list). */
 const GAME_SLOT_OF = { held: 'weapon', offhand: 'offhand', hat: 'head', top: 'chest', bottom: 'legs', shoes: 'feet', cape: 'cape', decor: 'decor', accessory: 'face' };
 const DEFAULT_COLOUR = { held: '#b9c2cc', offhand: '#8d97a3', hat: '#8a9098', top: '#7a5a3a', bottom: '#5a4a3a', shoes: '#4a3a2a', cape: '#7a2a2a', decor: '#b08a4a', accessory: '#d8b040' };

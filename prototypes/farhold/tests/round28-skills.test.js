@@ -263,7 +263,7 @@ test('every generated skill card and every node line reads cleanly and carries a
   assert.deepEqual(bad, [], `\n  ${bad.join('\n  ')}`);
 });
 
-/** CLAUDE.md convention 9, wildmarch §12.5 and the plan's G7 WoW echoes. */
+/** CLAUDE.md convention 9, docs/banned-names.md and the plan's G7 WoW echoes. */
 const BANNED = ['heroic', 'mythic', 'keystone', 'war mode', 'horde', 'alliance', 'hearthstone', 'delve', 'renown',
   'rested', 'honored', 'revered', 'exalted', 'fury', 'focus', 'rage', 'combo point', 'garrote', 'cheap shot', 'prowl',
   'maul', 'rake', 'barkskin', 'totemic recall', 'soul shard', 'arcane charge', 'blink', 'counterspell', 'lay on hands',

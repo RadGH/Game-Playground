@@ -32,7 +32,7 @@ test('home page: groups, every card, search, status filter, working links', asyn
   await page.fill('#home-search', '');
   await page.click('#home-status .chip[data-status="deprecated"]');
   const dep = await page.$$eval('.xcard', els => els.map(e => e.dataset.id));
-  expect(dep).toEqual(expect.arrayContaining(['avatar-3d', 'combined', 'party-quest']));
+  expect(dep).toEqual(expect.arrayContaining(['avatar-3d', 'combined']));
   expect(dep.length).toBeLessThan(6);
   await page.click('#home-status .chip[data-status="all"]');
   expect(await page.locator('.xcard').count()).toBe(total);
@@ -51,7 +51,7 @@ test('home page: Thousandvale has a network button and a separate live link; no 
   const stored = await page.evaluate(() => window.homePage.live.thousandvale.url);
   expect(await live.getAttribute('href')).toBe(stored);
   expect(stored).toMatch(/^https:\/\//);
-  await expect(card).toContainText('address changes when the tunnel restarts');
+  await expect(card).toContainText('Hosted on games.radgh.com');   // the tunnel caveat went when the droplet replaced it (2026-10-14)
   expect(await card.evaluate(el => el.tagName)).toBe('ARTICLE');       // the card itself is not a link
 
   // the same page as GitHub Pages would draw it

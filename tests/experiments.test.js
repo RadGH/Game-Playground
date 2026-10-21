@@ -85,7 +85,9 @@ test('search and status filters', () => {
   assert.equal(filterEntries(all).length, all.length);
   assert.ok(filterEntries(all, { q: 'thousandvale online' }).some(e => e.id === 'thousandvale'));
   assert.ok(filterEntries(all, { q: 'sword dagger' }).some(e => e.id === 'armory'));
-  assert.ok(filterEntries(all, { status: 'deprecated' }).some(e => e.id === 'avatar-3d'), 'a partly deprecated card shows under Deprecated');
+  const dep = filterEntries(all, { status: 'deprecated' }).map(e => e.id);
+  for (const e of all.filter(e => e.status === 'deprecated' || e.deprecated)) assert.ok(dep.includes(e.id), `${e.id} (deprecated, or partly) shows under Deprecated`);
+  assert.ok(filterEntries([{ ...all[0], status: 'done', deprecated: 'one mode is old' }], { status: 'deprecated' }).length === 1, 'a partly deprecated card shows under Deprecated');
   assert.ok(filterEntries(all, { status: 'playable' }).every(e => e.status === 'playable'));
   assert.equal(filterEntries(all, { q: 'zzzz-no-such-thing' }).length, 0);
 });

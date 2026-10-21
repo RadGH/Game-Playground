@@ -18,7 +18,7 @@ from mathutils import Vector, Matrix, Quaternion
 from mathutils.bvhtree import BVHTree
 from mathutils.kdtree import KDTree
 
-UAL = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "assets", "quaternius", "anim", "UAL1_Standard.glb"))
+UAL = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "assets", "ual", "UAL1_Standard.glb"))
 CLIPS = {"idle": "Idle_Loop", "walk": "Walk_Loop", "run": "Jog_Fwd_Loop", "cast": "Spell_Simple_Shoot",
          "attack": "Sword_Attack", "hit": "Hit_Chest", "death": "Death01", "talk": "Idle_Talking_Loop"}
 LEGS = ("thigh_l", "thigh_r", "calf_l", "calf_r")

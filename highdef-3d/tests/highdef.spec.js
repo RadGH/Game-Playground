@@ -19,8 +19,6 @@ async function boot(page, url = PAGE) {
   page.on('console', m => {
     const t = m.text();
     if (m.type() !== 'error') return;
-    // the character's optional outfit pieces are allowed to be missing
-    if (/optional piece missing/.test(t)) return;
     errors.push(t.slice(0, 500));
   });
   await page.goto(url);
@@ -135,26 +133,14 @@ test('the time of day and the weather move the light', async ({ page }) => {
   expect(info.render.calls).toBeGreaterThan(20);
 });
 
-test('the character is there, animated, and the whole clip library is offered', async ({ page }) => {
+test('the world has no character in it (owner 2026-10-21: world only)', async ({ page }) => {
   await boot(page);
-  // the clip picker is the panel's longest select and holds the whole animation library
-  const longest = await page.evaluate(() => Math.max(
-    ...[...document.querySelectorAll('.hd-side select')].map(s => s.options.length)));
-  expect(longest, 'the animation library did not load').toBeGreaterThan(20);
-
-  // and the character really is in the scene, with its bones moving
-  const moved = await page.evaluate(async () => {
-    const scene = window.highdef.__scene;
-    let head = null;
-    scene.traverse(o => { if (!head && o.isBone && o.name === 'Head') head = o; });
-    if (!head) return 'no skeleton';
-    window.highdef.playState('dance');
-    const a = head.quaternion.toArray().join(',');
-    await new Promise(r => setTimeout(r, 700));
-    const b = head.quaternion.toArray().join(',');
-    return a === b ? 'frozen' : 'moving';
+  const found = await page.evaluate(() => {
+    let skinned = 0, bones = 0;
+    window.highdef.__scene.traverse(o => { if (o.isSkinnedMesh) skinned++; if (o.isBone) bones++; });
+    return { skinned, bones, viewpoint: !!window.highdef.__scene.getObjectByName('viewpoint') };
   });
-  expect(moved).toBe('moving');
+  expect(found).toEqual({ skinned: 0, bones: 0, viewpoint: true });
 });
 
 test('switching quality preset rebuilds without breaking', async ({ page }) => {

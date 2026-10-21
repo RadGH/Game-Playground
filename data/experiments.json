@@ -52,15 +52,14 @@
    "title": "Avatar 3D",
    "href": "avatar-3d/",
    "folder": "avatar-3d",
-   "summary": "Three.js character builder. Chibi 2 is the flagship: nine races (human, elf, dwarf, orc, giant, goblin, halfling, undead, beastkin), a roundness slider, self-contained outfits and about 90 animations with weapon-aware attacks and emotes. Reads the same character JSON as the 2D builder.",
+   "summary": "Three.js character builder, Chibi 2.5 only (the model every game builds on): nine races, a roundness slider, self-contained outfits, every 2.5 face and hair option with their extra fields, and about 90 animations with weapon-aware attacks and emotes. Reads the same character JSON as the 2D builder.",
    "status": "done",
-   "date": "2026-09-25",
+   "date": "2026-10-21",
    "tags": [
     "3d",
     "character",
     "three.js"
    ],
-   "deprecated": "Two of its three modes are deprecated: the original procedural Chibi and the Quaternius mesh mode are kept only for comparison. Build new work on Chibi 2.",
    "links": [
     {
      "label": "Chibi 2 comparison + benchmark",
@@ -69,6 +68,10 @@
     {
      "label": "Tier-2 class armour gallery",
      "href": "avatar-3d/armour2.html"
+    },
+    {
+     "label": "Chibi 1 (archived showcase)",
+     "href": "avatar-3d/chibi1.html"
     }
    ]
   },
@@ -80,7 +83,7 @@
    "folder": "avatar-3d",
    "summary": "Higher-detail characters with heroic proportions: one welded skin built from blended shapes, armour and clothes fitted to any body, physically based materials, a 66-bone rig with layered animation, face expressions and lip shapes, springy capes and hair, three levels of detail. Knight, Wizard and Orc Berserker, a full builder, a side-by-side with Chibi 2, a benchmark and a verdict.",
    "status": "prototype",
-   "statusNote": "no game uses it yet",
+   "statusNote": "on hold (2026-10-21) — no game uses it",
    "date": "2026-10-01",
    "tags": [
     "3d",
@@ -102,7 +105,7 @@
    "folder": "avatar-3d",
    "summary": "A step-by-step trial of a more realistic character system to replace Chibi 2: MakeHuman bodies from sliders with Codex-painted skin and hair, our own robe and armour measured off the body with the skin under them removed, skirt bones so feet never run through a robe (checked on every frame), and a three.js runtime with one mesh, one texture and three distance versions per character. Every step scored against the same reference sheet.",
    "status": "prototype",
-   "statusNote": "future game (too realistic for Thousandvale); LAN only",
+   "statusNote": "on hold (2026-10-21) — future game, too realistic for Thousandvale; LAN only",
    "date": "2026-10-16",
    "isNew": true,
    "tags": [
@@ -259,7 +262,7 @@
    "title": "3D High Def",
    "href": "highdef-3d/",
    "folder": "highdef-3d",
-   "summary": "A high-detail atmospheric world you can walk around in: a generated landscape with biomes, forests, weather and water, cascaded shadows, a physical sky the world reflects, height fog that glows toward the sun and a quarter of a million blades of grass. A free strategy camera or third person behind a rigged character. Every tree, rock and texture is generated in code.",
+   "summary": "A high-detail atmospheric world you can walk around in: a generated landscape with biomes, forests, weather and water, cascaded shadows, a physical sky the world reflects, height fog that glows toward the sun and a quarter of a million blades of grass. A free strategy camera or a walking third-person view (world only — no character). Every tree, rock and texture is generated in code.",
    "status": "done",
    "date": "2026-09-22",
    "tags": [

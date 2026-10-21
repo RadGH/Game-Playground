@@ -1,14 +1,18 @@
 # 3D High Def
 
-A high-detail, atmospheric 3D world in a browser — terrain, forest, weather, water and a character
-you can walk around in — built to find out how close plain three.js can get to the look of a
+A high-detail, atmospheric 3D world in a browser — terrain, forest, weather and water you can walk
+around in — built to find out how close plain three.js can get to the look of a
 modern outdoor game without a build step, a game engine or a downloaded world.
 
 **Open it:** `highdef-3d/index.html`. Press **V** to swap between the strategy camera and third
 person; **/** lists every key.
 
-Everything you see is generated in code. There is exactly one downloaded asset in the whole
-experiment — the character body, which is CC0 and already lived in `avatar-3d/assets/quaternius/`.
+**World only since 2026-10-21 (owner).** The CC0 rigged character (`js/character.js`) was removed, which let the
+Quaternius packs leave the repo. What the controller walks and the cameras follow is now an invisible viewpoint
+(`js/viewpoint.js`, same shape as the old character: group, radius, eye height, no-op animation calls), so the walking,
+swimming, collision and both cameras are unchanged. The Character panel and the F/G/R/B emote keys are gone.
+
+Everything you see is generated in code; there is no downloaded asset in this experiment.
 Every tree, rock, leaf, blade of grass, ground texture and bark texture is drawn or built at load
 time from a seed.
 
@@ -30,7 +34,7 @@ time from a seed.
 | `js/water.js` | Lakes and sea: depth colour, shoreline foam, sky reflection. |
 | `js/grass.js` | A quarter of a million blades, all positioned in the vertex shader. |
 | `js/vegetation.js` | Turns the scatter into instanced draws, with detail levels and a baked far ring. |
-| `js/character.js` | The rigged character and its animation blend tree. |
+| `js/viewpoint.js` | The invisible viewpoint the controller walks and the cameras follow (the character was removed 2026-10-21). |
 | `js/controller.js` | Walking, running, jumping, swimming, click-to-move. |
 | `js/cameras.js` | The strategy camera and the third-person camera, and the blend between them. |
 | `js/input.js` | Keys and mouse. Nothing here knows what a key means. |
@@ -252,12 +256,9 @@ The kit test resolves the bare `three` specifier to the vendored copy through a 
 - **Grass casts no shadow.** A quarter of a million blades in the shadow pass is not worth it.
 - **Nothing collides but trees and rocks.** Bushes, ferns and flowers are walked straight through
   on purpose.
-- **The character's outfit pieces are the free-tier Quaternius set**, so the wardrobe is two
-  outfits deep. The loader logs and skips a missing piece rather than failing.
 - **No sound.** `sfx/js/sfx.js` is the place to get it from if this grows into something.
 
 ## Licences
 
-The character body, clothes, hair and animation library are **CC0** (Quaternius); the licence files
-sit beside the assets in `avatar-3d/assets/quaternius/`. Three.js and its addons are MIT. Everything
+Three.js and its addons are MIT. Everything
 else in this folder — every model, texture and SVG — was generated or drawn for this experiment.

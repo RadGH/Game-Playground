@@ -281,22 +281,17 @@ test('rendering controls, paused billboards and comparison results remain consis
   await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeVisible(); expect(errors).toEqual([]);
 });
 
-test('the full avatar builder keeps Chibi 2 separate from the original renderer', async ({ page }) => {
+test('the full avatar builder builds Chibi 2.5 only', async ({ page }) => {
   const errors = []; page.on('pageerror', e => errors.push(e.message));
   page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await page.goto('/avatar-3d/'); await page.waitForFunction(() => window.avatar3d && !window.avatar3d.isBuilding());
-  await page.getByRole('button', { name: 'Chibi 2', exact: true }).click();
   await page.waitForFunction(() => !window.avatar3d.isBuilding() && !!window.avatar3d.character.skeleton);
-  await expect(page.locator('#status')).toContainText('Chibi 2:');
+  await expect(page.locator('#status')).toContainText('Chibi 2.5:');
   await page.locator('.anim-chips .chip', { hasText: /^cast$/ }).click();
   expect(await page.evaluate(() => window.avatar3d.character.anim)).toBe('cast');
-  // the original renderer is deprecated (2026-09-24) but still selectable for comparison
-  await page.getByRole('button', { name: 'Chibi (procedural) · deprecated', exact: true }).click();
-  await page.waitForFunction(() => !window.avatar3d.isBuilding() && !window.avatar3d.character.skeleton);
-  await expect(page.locator('#status')).toContainText('Chibi:');
-  await page.evaluate(() => { window.avatar3d.setMode('quaternius'); window.avatar3d.setMode('chibi2'); });
-  await page.waitForFunction(() => !window.avatar3d.isBuilding() && window.avatar3d.mode === 'chibi2' && !!window.avatar3d.character.skeleton, null, { timeout: 60000 });
-  await expect(page.locator('#status')).toContainText('Chibi 2:'); expect(errors).toEqual([]);
+  // one renderer since 2026-10-21: the page builds every look as 2.5, and the 2.5 details panel is drawn from CHIBI25_OPTIONS
+  await expect(page.locator('.c25-details select').first()).toBeVisible();
+  await expect(page.locator('#status')).toContainText('Chibi 2.5:'); expect(errors).toEqual([]);
 });
 
 test('batched sprites preserve appearance, visibility and disposal', async ({ page }) => {

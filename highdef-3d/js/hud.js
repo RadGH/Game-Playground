@@ -7,7 +7,6 @@
 import { el, knob, select, checkbox, button, panel, toast } from '../../shared/ui.js';
 import { PRESETS as QUALITY } from './quality.js';
 import { WEATHER } from './sky.js';
-import { PRESETS as CHARACTERS } from './character.js';
 
 export function createHud(root, app) {
   const side = el('aside', { class: 'hd-side', id: 'hd-side' });
@@ -90,28 +89,13 @@ export function createHud(root, app) {
     knob('Light shaft strength', { min: 0, max: 2, step: 0.02, value: 1 }, v => app.setGrade({ rays: v })),
   );
 
-  // --- character ------------------------------------------------------------------------------
-  widgets.clipPicker = select('Play a clip', ['—'], '—', v => { if (v !== '—') app.playClip(v); });
-  const charPanel = panel('Character',
-    select('Who', Object.entries(CHARACTERS).map(([k, v]) => ({ value: k, label: v.label })), 'ranger', v => app.setCharacter(v)),
-    el('div', { class: 'hd-seg' },
-      button('Wave', () => app.playState('wave')),
-      button('Dance', () => app.playState('dance')),
-      button('Sword', () => app.playState('swordIdle')),
-      button('Sit', () => app.playState('sit')),
-      button('Stand', () => app.playState(null)),
-    ),
-    widgets.clipPicker,
-    el('div', { class: 'hd-note', text: 'In the strategy view, click the ground to send them walking there.' }),
-  );
-
   // --- world ----------------------------------------------------------------------------------
   widgets.seed = el('input', { type: 'number', value: String(app.seed), style: { width: '9em' } });
   const worldPanel = panel('World',
     el('div', { class: 'row' }, el('label', { text: 'Seed' }), widgets.seed,
       button('Rebuild', () => app.rebuild(+widgets.seed.value))),
     el('div', { class: 'hd-seg' },
-      button('Go to character', () => app.focusCharacter()),
+      button('Go to viewpoint', () => app.focusViewpoint()),
       button('New spot', () => app.respawn()),
     ),
     knob('Plant density', { min: 0.2, max: 2.0, step: 0.05, value: 1, format: v => v.toFixed(2) + '×' }, v => app.setPlantDensity(v)),
@@ -126,8 +110,8 @@ export function createHud(root, app) {
   side.append(
     el('div', { class: 'hd-title' }, el('a', { href: '../', class: 'hd-back', text: '← Playground' }), el('h1', { text: '3D High Def' })),
     stats, crumb, shotPanel,
-    viewPanel, skyPanel, fogPanel, qualityPanel, gradePanel, charPanel, worldPanel,
-    el('div', { class: 'hd-note hd-foot', text: 'Every surface, plant and rock here is generated in code — no downloaded models except the character, which is CC0.' }),
+    viewPanel, skyPanel, fogPanel, qualityPanel, gradePanel, worldPanel,
+    el('div', { class: 'hd-note hd-foot', text: 'Every surface, plant and rock here is generated in code — no downloaded models at all.' }),
   );
   root.append(side, help);
 
@@ -149,12 +133,7 @@ export function createHud(root, app) {
     btns[1].classList.toggle('on', mode === 'follow');
   }
 
-  function setClips(names) {
-    const sel = widgets.clipPicker.select;
-    sel.innerHTML = '';
-    sel.append(el('option', { value: '—', text: '—' }));
-    for (const n of names) sel.append(el('option', { value: n, text: n }));
-  }
+
 
   /** After a preset change, put every knob back where the preset says it should be. */
   function syncQuality(q) {
@@ -169,12 +148,12 @@ export function createHud(root, app) {
     widgets.pixelRatio.set(q.pixelRatio);
   }
 
-  return { side, tick, toggle, setViewButton, setClips, syncQuality, widgets, toast, help };
+  return { side, tick, toggle, setViewButton, syncQuality, widgets, toast, help };
 }
 
 function buildHelp() {
   const rows = [
-    ['W A S D', 'Move — the character in third person, the view in the strategy camera'],
+    ['W A S D', 'Move — walk the viewpoint in third person, pan the view in the strategy camera'],
     ['Shift', 'Sprint (or pan the strategy view faster)'],
     ['Space', 'Jump'],
     ['Ctrl / C', 'Crouch'],
@@ -182,9 +161,8 @@ function buildHelp() {
     ['Z / X', 'Spin the strategy camera'],
     ['Mouse wheel', 'Zoom'],
     ['Right-drag', 'Spin and tilt'],
-    ['Left-click (strategy)', 'Send the character walking there'],
+    ['Left-click (strategy)', 'Send the viewpoint walking there'],
     ['V', 'Switch between the strategy view and third person'],
-    ['F / G / R / B', 'Wave · dance · swing · roll'],
     ['H', 'Show or hide the control panel'],
     ['F2', 'Save a screenshot'],
     ['/', 'This list'],

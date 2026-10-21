@@ -3,7 +3,7 @@
 // Boot order matters here and is not obvious, so it is worth writing down:
 //
 //   1. The world field is generated first and nothing else can start without it, because the
-//      terrain mesh, the grass, the scatter and the character's feet all read the same heightmap.
+//      terrain mesh, the grass, the scatter and the walking viewpoint all read the same heightmap.
 //   2. The renderer comes next, because the sky needs it — the sky renders itself into a reflection
 //      probe at build time, and that needs a live graphics context.
 //   3. The sky comes before anything that casts a shadow, because it owns the cascaded shadow rig
@@ -23,7 +23,7 @@ import { createWater } from './water.js';
 import { createGrass } from './grass.js';
 import { createVegetation } from './vegetation.js';
 import { scatterWorld } from './scatter.js';
-import { createCharacter, PRESETS as CHARACTERS, STATES } from './character.js';
+import { createViewpoint } from './viewpoint.js';
 import { createController } from './controller.js';
 import { createCameras } from './cameras.js';
 import { createInput } from './input.js';
@@ -62,7 +62,6 @@ let running = false, disposed = false;
 let clock = null;
 let dayCycle = false, dayLength = 300;
 let wantScreenshot = false;
-let characterName = 'ranger';
 let fpsSmooth = 60;
 
 const app = {
@@ -70,8 +69,8 @@ const app = {
   get seed() { return seed; },
   setCameraMode, setIsometric, setFov, setTime, setDayCycle, setDayLength, setWeather,
   setFog, setWind, setQuality, setPost, setGrassDensity, setViewDistance, setTreeDistance,
-  setShadowDistance, setPixelRatio, setGrade, playClip, playState, setCharacter,
-  rebuild, focusCharacter, respawn, setPlantDensity, screenshot,
+  setShadowDistance, setPixelRatio, setGrade,
+  rebuild, focusViewpoint, respawn, setPlantDensity, screenshot,
 };
 window.highdef = app;   // so the Playwright tests can drive it
 Object.defineProperty(app, '__renderer', { get: () => view.renderer });
@@ -189,7 +188,7 @@ async function boot() {
   if (grass.mesh) scene.add(grass.mesh);
 
   await progress(0.90, 'waking the traveller');
-  character = await createCharacter(characterName, { csm: sky.csm, shadows: true });
+  character = createViewpoint();
   scene.add(character.group);
   controller = createController(world, character, { vegetation });
 
@@ -204,7 +203,6 @@ async function boot() {
   input = input || createInput(view.renderer.domElement);
   if (!hud) {
     hud = createHud(document.body, app);
-    hud.setClips(character.clipNames);
     wireHud();
   }
 
@@ -244,12 +242,8 @@ function frame() {
   if (input.pressed('hud')) hud.toggle();
   if (input.pressed('help')) hud.help.classList.toggle('open');
   if (input.pressed('screenshot')) screenshot();
-  if (input.pressed('wave')) character.playOnce('wave');
-  if (input.pressed('dance')) character.setState('dance');
-  if (input.pressed('swing')) character.playOnce('swordSwing');
-  if (input.pressed('roll')) character.playOnce('roll');
 
-  // left-click on the ground in the strategy view sends the character there
+  // left-click on the ground in the strategy view sends the viewpoint there
   if (cameras.mode === 'overhead' && input.state.buttons.has(0) && !dragMoved) {
     const spot = pointerGround();
     if (spot) { controller.orderMoveTo(spot.x, spot.z); markClick(spot); }
@@ -487,44 +481,7 @@ async function setPlantDensity(v) {
   await rebuildScene();
 }
 
-async function setCharacter(name) {
-  characterName = CHARACTERS[name] ? name : 'ranger';
-  const at = controller.position.clone();
-  const facing = controller.state.facing;
-  scene.remove(character.group);
-  character.dispose();
-  character = await createCharacter(characterName, { csm: sky.csm, shadows: true });
-  scene.add(character.group);
-  controller = createController(world, character, { vegetation });
-  controller.spawn(at.x, at.z);
-  controller.state.facing = facing;
-  hud.setClips(character.clipNames);
-}
-
-/**
- * Play any clip from the library by name. Most map onto a named state; the rest (there are 43
- * clips and 22 states) are played straight, which is the point of offering the whole list.
- */
-function playClip(name) {
-  const state = Object.keys(STATES).find(k => STATES[k].clip === name);
-  controller.state.frozen = true;
-  if (state) { character.setState(state); return; }
-  for (const mixer of character.mixers) {
-    const clip = character.clips.get(name);
-    if (!clip) continue;
-    mixer.stopAllAction();
-    const a = mixer.clipAction(clip);
-    a.reset(); a.setEffectiveWeight(1); a.play();
-  }
-}
-function playState(name) {
-  if (!name) { controller.state.frozen = false; character.setLocomotion(0); return; }
-  controller.state.frozen = ['dance', 'sit', 'swordIdle', 'talk'].includes(name);
-  if (['wave', 'swordSwing', 'roll', 'punch', 'pickUp'].includes(name)) character.playOnce(name);
-  else character.setState(name);
-}
-
-function focusCharacter() { cameras.focusOn(controller.position.x, controller.position.z); }
+function focusViewpoint() { cameras.focusOn(controller.position.x, controller.position.z); }
 function respawn() {
   const s = world.findSpawn(Math.floor(Math.random() * 1e9));
   controller.spawn(s.x, s.z);

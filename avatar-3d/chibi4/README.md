@@ -71,7 +71,7 @@ head's outline at brow height (+3 cm for hair) and pulls hair inside the band (n
 Clip checks: `clip_report()` counts garment/hair vertices inside the visible body.
 
 ### Animation and the robe (step 6) — `tools/blender/c4anim.py`, `step6_robe_run.py`
-- Clips: Quaternius' **Universal Animation Library** (CC0; already vendored at `avatar-3d/assets/quaternius/anim/`)
+- Clips: Quaternius' **Universal Animation Library** (CC0; vendored at `avatar-3d/chibi4/assets/ual/` since 2026-10-21)
   uses the same UE-style bone names as MakeHuman's game rig. `retarget()` gives each bone the source bone's world
   rotation corrected for the two rest poses (T vs A) — measured 0.0° off on every limb.
 - `add_skirt_bones()` (8 round the hips, pivot at hip-joint height, to the hem), `skirt_weights()` (robe below the hips

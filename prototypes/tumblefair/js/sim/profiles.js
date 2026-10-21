@@ -19,12 +19,15 @@ export function createProfiles({ initial = {}, persist = null, randomToken, now 
   const get = token => { const p = token && all.get(token); if (p) p.seen = now(); return p || null; };
   const owns = (p, id) => free.includes(id) || p.owned.includes(id);
   /** What the owner's own browser is told. */
-  const view = p => ({ name: p.name, look: p.look, costume: p.costume, coins: p.coins, owned: [...free, ...p.owned], matches: p.matches, wins: p.wins });
+  // `ready`: this player has chosen a name or a look at least once (or has played) — a newcomer who opens an invite link is
+  // shown "pick a name and a look" before joining, instead of walking in as a random Pip or Dot (2026-10-20)
+  const view = p => ({ name: p.name, look: p.look, costume: p.costume, coins: p.coins, owned: [...free, ...p.owned], matches: p.matches, wins: p.wins, ready: !!p.ready || p.matches > 0 });
   function update(token, { name, look }) {
     const p = get(token); if (!p) return null;
     const out = {};
     if (name != null) { const n = cleanName(name); if (n) { p.name = n; out.name = n; } }
     if (look != null) { const r = cleanLook(look, p.look); if (r.ok) { p.look = r.look; out.look = r.look; } }
+    if (out.name || out.look) p.ready = true;
     touch(); return out;
   }
   function reward(token, coins, { won = false } = {}) { const p = get(token); if (!p) return null; p.coins += Math.max(0, Math.floor(coins)); p.matches++; if (won) p.wins++; touch(); return p.coins; }

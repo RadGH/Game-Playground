@@ -64,6 +64,25 @@ function showTitle() {
   lineup.show(true);
   if (S.me) lineup.sync([{ pid: 0, seat: 0, name: S.me.name, look: S.me.look, costume: S.me.costume }], { labels: false });
   const code = cleanCode(q.get('code') || '') || '';
+  // someone new who opened an invite link: make a character first, then one tap joins (2026-10-20)
+  // (S.inviting keeps this screen up after a name or look change marks the character as made)
+  const invite = code && S.me && !S.asDisplay && (S.inviting || !S.me.ready);
+  if (invite) {
+    S.inviting = true;
+    setScreen('title', `
+    <img class="logo" src="${ART}logo.webp" alt="Tumblefair" onerror="this.replaceWith(Object.assign(document.createElement('h1'),{className:'logo-text',textContent:'TUMBLEFAIR'}))">
+    <div class="panel title-panel invite">
+      <h2>You're invited!</h2>
+      <p class="note">Pick a name and a look for your character, then join room <b>${esc(code)}</b>.</p>
+      <label class="field"><span>Your name</span><input id="name" maxlength="14" autocomplete="off" autocapitalize="words" spellcheck="false" value="${esc(S.me?.name || '')}"></label>
+      <button class="btn" data-act="edit">Change look</button>
+      <input type="hidden" id="code" value="${code}"><input type="checkbox" id="as-display" hidden ${S.asDisplay ? 'checked' : ''}>
+      <button class="btn big primary" data-act="join">Join the game</button>
+      <p class="err">${esc(S.err)}</p>
+    </div>
+    <p class="foot">2–4 players · everyone plays on their own phone · <span class="net">${net.status === 'online' ? '' : 'connecting…'}</span></p>`);
+    return;
+  }
   setScreen('title', `
     <img class="logo" src="${ART}logo.webp" alt="Tumblefair" onerror="this.replaceWith(Object.assign(document.createElement('h1'),{className:'logo-text',textContent:'TUMBLEFAIR'}))">
     <div class="panel title-panel">
@@ -239,7 +258,9 @@ async function onPhase(pm) {
 
 // ------------------------------------------------------------------ network
 net.on('status', s => { document.body.dataset.net = s; const e = $('.foot .net'); if (e) e.textContent = s === 'online' ? '' : 'connecting…'; });
-const onWelcome = m => { S.me = m; if (!S.room) { showTitle(); const code = cleanCode(q.get('code') || ''); if (code && !S.tried) { S.tried = true; net.join(code, S.asDisplay); } } };
+// an invite link (?code=ABCD) joins at once — unless this phone has never made a character: then showTitle() asks for a
+// name and a look first, and its Join button joins (a big screen, ?display=1, never needs a character)
+const onWelcome = m => { S.me = m; if (!S.room) { showTitle(); const code = cleanCode(q.get('code') || ''); if (code && !S.tried && (m.ready || S.asDisplay)) { S.tried = true; net.join(code, S.asDisplay); } } };
 net.on('welcome', onWelcome);
 if (net.me) onWelcome(net.me);                      // the hello was answered while the page was still loading its data
 net.on('me', () => { S.me = net.me; if (!S.room) showTitle(); else if (S.phase === 'lobby') showLobby(); S.modal?.refresh?.(); });
@@ -252,7 +273,7 @@ net.on('room', r => {
   else drawHud();
 });
 net.on('phase', onPhase);
-net.on('left', () => { S.room = null; dropPlay(); dropBoard(); history.replaceState(null, '', location.pathname); showTitle(); });
+net.on('left', () => { S.room = null; S.inviting = false; dropPlay(); dropBoard(); history.replaceState(null, '', location.pathname); showTitle(); });
 net.on('kicked', () => { S.room = null; dropPlay(); dropBoard(); S.err = 'The host removed you from the room.'; showTitle(); });
 net.on('err', m => { if (!S.room) { S.err = m.msg; showTitle(); } else toast(m.msg, 'bad'); });
 net.on('bd', onBoard);
@@ -271,7 +292,7 @@ screen.addEventListener('click', e => {
   const act = b.dataset.act;
   switch (act) {
     case 'host': saveName(); S.err = ''; S.asDisplay = false; net.create(); break;
-    case 'join': { saveName(); const code = cleanCode($('#code').value); if (!code) { S.err = `The code is ${CODE_LENGTH} letters.`; showTitle(); break; } S.err = ''; S.asDisplay = $('#as-display').checked; net.join(code, S.asDisplay); break; }
+    case 'join': { saveName(); if (S.me && !S.me.ready) { net.send({ t: 'profile', name: $('#name')?.value.trim() || S.me.name }); S.me.ready = true; } const code = cleanCode($('#code').value); if (!code) { S.err = `The code is ${CODE_LENGTH} letters.`; showTitle(); break; } S.err = ''; S.asDisplay = $('#as-display').checked; net.join(code, S.asDisplay); break; }
     case 'leave': net.leave(); break;
     case 'copy': navigator.clipboard?.writeText(joinUrl(S.room.code)).then(() => toast('Invite link copied'), () => toast(joinUrl(S.room.code))) ?? toast(joinUrl(S.room.code)); break;
     case 'opt': net.send({ t: 'opt', key: b.dataset.key, value: b.dataset.num ? +b.dataset.num : b.dataset.bool ? b.dataset.bool === '1' : b.dataset.value }); break;

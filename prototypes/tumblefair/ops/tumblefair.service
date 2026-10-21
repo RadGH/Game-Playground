@@ -1,5 +1,5 @@
 # Tumblefair STABLE server: the published copy (tools/publish-tumblefair.sh) on port 8480. User unit.
-# This is the one to hand people, and the only one the public tunnel points at.
+# LAN testing copy. The public game runs on the games.radgh.com droplet (https://tumblefair.games.radgh.com/).
 [Unit]
 Description=Tumblefair stable server (published copy) on :8480
 After=network-online.target

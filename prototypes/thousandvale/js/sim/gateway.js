@@ -249,6 +249,12 @@ export function createGateway(opts) {
         const server = { via: 'gateway', build, protocol: PROTOCOL_VERSION, ...(env ? { env } : {}), ...(serverName ? { server: serverName } : {}), claimed: !!s.claimed, username: s.username || null, ...(pr ? { room: pr.room, province: pr.province, zone: pr.zone || null, online: !!pr.online } : {}), at: new Date(wallNow()).toISOString() };
         return feedback.submit(who, m, server).then(r => s.sendJSON({ t: 'feedbackR', ...r }), err => { log('feedback failed', err && err.message); s.sendJSON({ t: 'feedbackR', ok: false, why: 'failed', msg: 'That did not go through. Please try again.' }); });
       }
+      case 'feedbackShot': {      // play-test 12 (#71): the screenshot after a report (js/sim/feedback.js shot)
+        if (s.state !== 'authed') return bad(s, 'order');
+        const r = feedback.shot({ account: s.account }, m);
+        if (r) s.sendJSON(r);
+        return;
+      }
       case 'feedbackMine': {      // round 8, W29: my own reports (every character of the account sees the same list)
         if (s.state !== 'authed') return bad(s, 'order');
         return handlers.feedbackMine(s, m);

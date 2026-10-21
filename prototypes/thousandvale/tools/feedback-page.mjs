@@ -3,7 +3,7 @@
 //   node tools/feedback-report.mjs --json | node tools/feedback-page.mjs > ../../tools/scratch/feedback.html
 //   sudo "$(command -v node)" tools/feedback-report.mjs --env stable --json | node tools/feedback-page.mjs --round ~/claude/agent/mmo/round-playtest6.md > ...
 // The output folder (playground/tools/scratch/) is git-ignored: reports carry account ids and browser details.
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const raw = JSON.parse(readFileSync(0, 'utf8'));
 const rows = Array.isArray(raw) ? raw : (raw.reports || raw.rows || []);
@@ -13,6 +13,12 @@ if (ri > 0) for (const line of readFileSync(process.argv[ri + 1], 'utf8').split(
   const m = line.match(/^\|\s*(U\d+|—)\s*\|\s*([^|]+)\|\s*([^|]+)\|/); if (!m) continue;
   for (const n of m[2].matchAll(/#(\d+)/g)) plan.set(+n[1], { item: m[1], what: m[3].trim() });
 }
+// play-test 12 (#71): the screenshot sent with a report (tools/feedback-report.mjs --json puts its path in r.shot), inlined
+const MIME = { jpg: 'image/jpeg', webp: 'image/webp', png: 'image/png' };
+const shotImg = r => {
+  if (!r.shot || !existsSync(r.shot)) return '';
+  try { const ext = String(r.shot).split('.').pop(), src = `data:${MIME[ext] || 'image/jpeg'};base64,${readFileSync(r.shot).toString('base64')}`; return `<p class="shot"><img alt="Screenshot sent with #${esc(r.id)}" style="max-width:100%;max-height:520px;border-radius:6px" src="${src}"></p>`; } catch { return ''; }
+};
 const card = r => {
   const s = r.server || {}, c = r.client || {}, t = s.target, p = plan.get(r.id);
   const log = (c.log || c.logs || []).map(l => esc(typeof l === 'string' ? l : `[${l.k || l.kind || ''}] ${l.t || l.text || ''}`)).join('\n');
@@ -24,6 +30,7 @@ ${p ? `<p class="plan"><b>${p.item === '—' ? 'Declined' : 'Work item ' + esc(p
 ${r.ref != null ? `<p class="plan"><b>Reply to:</b> #${esc(r.ref)}</p>` : ''}
 ${r.note ? `<p class="plan"><b>Admin note:</b> ${esc(r.note)}</p>` : ''}
 ${r.state === 'completed' || r.done ? `<p class="plan done"><b>Completed:</b> ${esc(r.done || '(no note)')}</p>` : ''}
+${shotImg(r)}
 <p class="where">${esc(s.roomName || '')} · zone ${esc(s.zone || '')} · x ${esc(s.x)} z ${esc(s.z)} · ${esc(s.roomKind || '')}${t ? ` · target: ${esc(t.name)} (level ${esc(t.level)}${t.dead ? ', dead' : ''})` : ''} · build ${esc(s.build || '')}</p>
 <details><summary>Everything attached</summary><pre>${esc(JSON.stringify({ server: s, client: { ...c, log: undefined, logs: undefined } }, null, 1))}</pre>${log ? `<h4>Client log</h4><pre>${log}</pre>` : ''}</details>
 </article>`;

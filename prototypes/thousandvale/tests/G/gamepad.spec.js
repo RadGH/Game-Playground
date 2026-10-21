@@ -180,6 +180,30 @@ test.describe('controller — in the interface gallery', () => {
     expect(sent.some(m => (m.t === 'say' || m.t === 'chat') && /Qw/.test(m.text))).toBe(true);
   });
 
+  test('play-test 12 (#68/#74): the pad reaches the left column; the board is wide and low on a Steam Deck screen', async () => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await scene(page, 'hud');
+    await press(page, 'X', 60);
+    await page.evaluate(() => window.tvinput.osk.open(document.getElementById('chat-input')));
+    await press(page, 'RIGHT'); await press(page, 'LEFT');
+    expect(await page.evaluate(() => window.tvinput.osk.at)).toMatchObject({ r: 1, c: 0, key: 'q' });
+    await press(page, 'DOWN'); await press(page, 'A');                  // 'a' — the left column of the next row
+    expect(await page.locator('#chat-input').inputValue()).toBe('A');
+    await press(page, 'LEFT');                                         // wraps to the end of the row
+    expect((await page.evaluate(() => window.tvinput.osk.at)).c).toBeGreaterThan(5);
+    const box = await page.locator('.tv-osk').boundingBox();
+    expect(box.width, 'wide board on a wide screen').toBeGreaterThan(900);
+    expect(box.height, 'and low: it leaves the middle of the screen').toBeLessThan(330);
+    await page.screenshot({ path: join(SHOTS, 'osk-deck-1280x800.png') });
+    await page.setViewportSize({ width: 1024, height: 576 });
+    await page.waitForTimeout(100);
+    const b2 = await page.locator('.tv-osk').boundingBox();
+    expect(b2.height).toBeLessThan(300);
+    await page.screenshot({ path: join(SHOTS, 'osk-1024x576.png') });
+    await press(page, 'B');
+    await page.setViewportSize({ width: 1366, height: 768 });
+  });
+
   test('a PlayStation pad gets PlayStation glyphs; Settings can force a set', async () => {
     await page.addInitScript(() => { window.__padId = 'DualSense Wireless Controller (STANDARD GAMEPAD Vendor: 054c Product: 0ce6)'; });
     await scene(page, 'hud');

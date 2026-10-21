@@ -46,6 +46,7 @@ export const MOVE = Object.freeze({
   swim: 2.7,         // m/s swimming (Farhold's swim)
   swimSprint: 3.6,   // m/s swimming hard (IN.SPRINT)
   wade: 0.8,         // speed factor while wading (water above the ankle, below WADE_DEPTH)
+  fight: 0.7,        // speed factor with IN.FIGHT — auto-attacking while you move (play-test 12 #75: no kiting forever; 8.1 x 0.7 = 5.67 m/s, under combat.json pursuit.chaseMax)
   swimSink: 1.1,     // a swimmer floats this far below the surface (feet; the head stays above water)
   jumpV: 6.5,        // m/s upward at take-off
   gravity: 20,       // m/s²
@@ -95,6 +96,7 @@ export function stepMove(state, input, dtMs, terrain) {
   const swimming = here === 'swim' && !state.airborne;
   let speed = swimming ? ((b & IN.SPRINT) ? MOVE.swimSprint : MOVE.swim) : (b & IN.SPRINT) ? MOVE.sprint : MOVE.run;
   if (here === 'wade' && !state.airborne) speed *= MOVE.wade;
+  if ((b & IN.FIGHT) && !swimming) speed *= MOVE.fight;      // play-test 12 (#75): attacking on the move costs a quarter of your pace
   // riding (play-test 2, Q16): the mount's factor on land; the client predicts with the same `you.speedMul`
   if (!swimming && state.speedMul > 0 && state.speedMul !== 1) speed *= Math.min(3, state.speedMul);
   // [S] GLIDE (Expansion 1 §4, geysers): `state.glide` is set by the server when a geyser throws you and lasts until you

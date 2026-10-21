@@ -155,8 +155,13 @@ test('Y32: Constellation motes follow the Starlight count; a fall is a spend', (
   assert.equal(moteCount([{ id: 'flair', n: 4, max: 5 }]), 0, 'another calling\'s resource draws no stars');
   assert.equal(moteCount(null), 0);
   assert.equal(moteSpent(5, 0), 5); assert.equal(moteSpent(2, 3), 0); assert.equal(moteSpent(0, 0), 0);
+  // play-test 12 (#89, "it looks like we are stunned"): five still seats in an arc BEHIND the body — not a ring wheeling
+  // round the head. The angle is measured from straight behind; it never moves with time, and the arc stays at the back.
   const seats = [0, 1, 2, 3, 4].map(i => moteSeat(i, 0).a);
-  for (let i = 1; i < 5; i++) assert.ok(Math.abs(seats[i] - seats[i - 1] - Math.PI * 2 / 5) < 1e-9, 'five even seats');
+  for (let i = 1; i < 5; i++) assert.ok(seats[i] > seats[i - 1], 'seats run across the back in order');
+  assert.ok(Math.abs(seats[0] + seats[4]) < 1e-9 && Math.abs(seats[2]) < 1e-9, 'the arc is centred behind the body');
+  assert.ok(Math.max(...seats.map(Math.abs)) < Math.PI / 2, 'every seat is behind the shoulders, none in front of the face');
+  for (const t of [0.5, 3, 17]) for (const full of [false, true]) assert.deepEqual([0, 1, 2, 3, 4].map(i => moteSeat(i, t, full).a), seats, 'they never wheel round');
 });
 
 test('Y32: the Starcaller has an outfit of its own, and the shared tables are as they were', () => {

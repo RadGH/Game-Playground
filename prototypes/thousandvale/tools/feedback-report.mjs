@@ -11,13 +11,14 @@
 //                                                                   /var/lib/thousandvale/feedback-stable.jsonl as well)
 //   --state new|approved|declined|completed|trashed|all   (default: everything but trashed)      --kind bug|suggestion
 //   --since 2026-10-01     --limit 200     --no-logs (leave the client log lines out)     --json (raw rows instead of Markdown)
+//   A report sent with a screenshot (play-test 12) prints its file: <feedback dir>/feedback-shots/<env>-<id>.jpg — Read it to see it.
 //   > docs/feedback-2026-10-06.md            it only prints; redirect it where you want it
 //
 // Where the data lives: Postgres table `feedback` (schema v5) is the source of truth on dev and stable; every server ALSO
 // appends each report and each state change to <state>/feedback-<env>.jsonl (.data/ in the working tree for dev,
 // /var/lib/thousandvale/ for stable), which is what a server without a database (--db memory) leaves behind.
 import { readFileSync, existsSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { join, resolve, dirname } from 'node:path';
 import { loadEnv, parseArgs, GAME, rowsFromJsonl } from './lib/tv-env.mjs';
 
 const a = parseArgs(process.argv, { 'no-logs': 'bool', json: 'bool', help: 'bool' });
@@ -43,6 +44,13 @@ else {
     if (!existsSync(f)) { console.error(`No database settings (${e.file}: ${e.why || 'no PG* variables'}) and no file ${f}. Nothing to report.`); process.exit(1); }
     rows = rowsFromJsonl(readFileSync(f, 'utf8')); source = f;
   }
+}
+// play-test 12 (#71): a report's screenshot lives beside the feedback file, feedback-shots/<env>-<id>.<ext>
+const shotDir = join(file ? dirname(file) : (process.env.TV_FEEDBACK_DIR || (env === 'stable' ? '/var/lib/thousandvale' : join(GAME, '.data'))), 'feedback-shots');
+for (const r of rows) {
+  const env2 = (r.server && r.server.env) || env;
+  const f = r.shotFile ? join(shotDir, r.shotFile) : ['jpg', 'webp', 'png'].map(x => join(shotDir, `${env2}-${r.id}.${x}`)).find(existsSync);
+  if (f && existsSync(f)) r.shot = f;
 }
 const all = rows;
 rows = rows.filter(r => (want === 'all' ? true : want ? r.state === (want === 'trash' ? 'trashed' : want) : r.state !== 'trashed') && (!kind || r.kind === kind) && (!since || (r.at || 0) >= since)).slice(0, limit);
@@ -87,6 +95,7 @@ for (const k of ['bug', 'suggestion']) {
     if (cl) out.push(`- **Client said:** ${cl}`);
     for (const [k2, v] of Object.entries(c)) if (v && typeof v === 'object' && !Array.isArray(v)) out.push(`- **Client ${k2}:** ${flat(v) || JSON.stringify(v)}`);
     if (r.account != null || s.username) out.push(`- **Account:** ${r.account ?? '?'}${s.username ? ` (${s.username})` : ''}${r.char != null ? `, character ${r.char}` : ''}`);
+    if (r.shot) out.push(`- **Screenshot:** ${r.shot}`);
     if (r.ref != null) out.push(`- **Reply to:** #${r.ref}`);
     if (r.note) out.push(`- **Admin note:** ${esc(r.note)}`);
     if (r.state === 'completed' || r.done) out.push(`- **Completed${r.doneAt ? ' ' + when(r.doneAt) : ''}:** ${esc(r.done || '(no note)')}`);

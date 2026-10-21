@@ -264,6 +264,20 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
   const gotRow = (it, n, bonus = false) => ({ id: it.id, name: it.name, n, kind: it.kind, icon: it.icon || null, tint: it.tint || null, rarity: it.rarity || 'normal', ...(bonus ? { bonus: true } : {}) });
 
   // ---- gathering ----
+  /** #69: how far "Skin all nearby" reaches from where you stand (data/rules/professions.json gather.skinBatchReach). */
+  const batchReach = () => (G.skinBatchReach || 10) + 0.5;
+  /** The nearest beast of yours to skin within `reach` (null when none). */
+  function nearestSkin(o, reach) {
+    const e = o.entity; let best = null, bd = reach;
+    if (o.skins) for (const [id, s] of o.skins) { if (s.ent.removed || (s.ent.room && s.ent.room !== o.room)) continue; const d = Math.hypot(s.ent.x - e.x, s.ent.z - e.z); if (d <= bd) { bd = d; best = id; } }
+    return best;
+  }
+  /** #69: beasts of yours still waiting within the batch reach (sent as gatherDone.more so the client starts the next). */
+  function skinsLeft(o) {
+    const e = o.entity; let n = 0;
+    if (o.skins) for (const s of o.skins.values()) if (!s.ent.removed && (!s.ent.room || s.ent.room === o.room) && Math.hypot(s.ent.x - e.x, s.ent.z - e.z) <= batchReach()) n++;
+    return n;
+  }
   const gatherRefuse = (o, why, msg, extra = {}) => reply(o, 'gatherR', { ok: false, state: 'idle', why, msg, ...extra });
   function gatherStart(o, m, onlyProf = null) {
     const e = o.entity, ch = o.char, room = o.room;
@@ -271,6 +285,13 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
     if (b) return gatherRefuse(o, b.why, b.msg);
     ensureNodes(room);
     if (o.work) stop(o, 'restart', true);
+    // play-test 12 (#69): "Skin all nearby" — `gather {op:'start', batch:true}` with no id takes the nearest beast of
+    // yours within gather.skinBatchReach; each body is still its own mini-game, roll and experience (see gatherDone `more`)
+    if (m.batch && m.id == null) {
+      const best = nearestSkin(o, batchReach());
+      if (best == null) return gatherRefuse(o, 'far', 'Nothing left to skin nearby.', { batch: 'end' });
+      m = { ...m, id: best };
+    }
     let target = m.id != null ? room.entities.get(m.id) : nodeNear(o, onlyProf);
     if (!target || target.removed) return gatherRefuse(o, m.id != null ? 'unknown' : 'far', m.id != null ? 'That is gone.' : 'Nothing to gather in reach.');
     let node, key = null, skin = null;
@@ -284,7 +305,7 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
       node = P.skinOf(target.type, target.level || 1);
       if (!node) return gatherRefuse(o, 'noHide', P.skinRefusal(target.type) || 'There is nothing on that to skin.');      // (report #26: say WHY)
       if (!skin || skin.ent !== target) return gatherRefuse(o, 'notYours', 'You can only skin a beast you helped kill.');
-      if (Math.hypot(target.x - e.x, target.z - e.z) > (G.skinReach || 4) + 0.5) return gatherRefuse(o, 'far', 'Too far away.');
+      if (Math.hypot(target.x - e.x, target.z - e.z) > (m.batch ? batchReach() : (G.skinReach || 4) + 0.5)) return gatherRefuse(o, 'far', 'Too far away.');
     } else return gatherRefuse(o, 'unknown', 'You cannot gather that.');
     const prof = node.prof, skill = levelOf(ch, prof), tool = P.bestTool(ch.bag, prof);
     const can = P.canGather({ known: knows(ch, prof), skill, node, tool });
@@ -296,7 +317,7 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
     }
     const seed = (room.host.random('prof') * 4294967296) >>> 0;
     const game = P.gatherGame({ prof, tier: node.tier, skill, tool, seed });
-    begin(o, { kind: 'gather', prof, game, target, node, key, skin, tool, skill });
+    begin(o, { kind: 'gather', prof, game, target, node, key, skin, tool, skill, batch: !!(skin && m.batch) });
     counters.gatherStarts = (counters.gatherStarts || 0) + 1;
     reply(o, 'gatherR', { ok: true, state: 'play', id: target.id, prof, node: { kind: node.id || 'corpse', tier: node.tier, name: skin ? displayName(target, P.C.skins) : node.name }, game, ...(tool ? { tool: tool.id } : {}) });
   }
@@ -311,7 +332,7 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
       saved(o);
       stop(o, 'fail', true, 'fail', 'fail');
       counters.gatherFails = (counters.gatherFails || 0) + 1;
-      return reply(o, 'gatherDone', { ...base, ok: false, items: [], got: [], xp: 0, skill: skillView(g), reopenMs: 0, msg: w.skin ? 'A botched cut. Try again.' : 'You got nothing out of it. It is still there: try again.' });
+      return reply(o, 'gatherDone', { ...base, ok: false, items: [], got: [], xp: 0, skill: skillView(g), reopenMs: 0, ...(w.batch ? { more: skinsLeft(o) } : {}), msg: w.skin ? 'A botched cut. Try again.' : 'You got nothing out of it. It is still there: try again.' });
     }
     const rng = () => w.room.host.random('prof');
     const yields = P.gatherYield({ node: w.node, quality: r.quality, rng, tool: w.tool, extra: w.room.rules && w.room.rules.gatherBonus ? +w.room.rules.gatherBonus(o.entity) || 0 : 0 });      // (stream C, round 9: Forager's Covenant)
@@ -333,7 +354,7 @@ export function createProfessions({ layouts, online, provOf, grant, journal, que
     const added = grant(o, { items, gold: 0, reason: 'gather' }) || [];
     counters.gathered = (counters.gathered || 0) + 1;
     counters['gather_' + w.prof] = (counters['gather_' + w.prof] || 0) + 1;
-    reply(o, 'gatherDone', { ...base, ok: true, items: added, got, xp, skill: skillView(g), reopenMs, ...(high ? { highScore: true } : {}),
+    reply(o, 'gatherDone', { ...base, ok: true, items: added, got, xp, skill: skillView(g), reopenMs, ...(high ? { highScore: true } : {}), ...(w.batch ? { more: skinsLeft(o) } : {}),
       msg: `${P.qualityName(r.quality)} work${high ? ' — a high score: half as much again, and a find' : ''}: ${got.map(x => x.n + ' ' + x.name).join(', ')}.` });
     tell(o);
     for (const y of yields) if (!y.bonus && !y.find) for (let k = 0; k < y.n; k++) questEvent(o, { kind: 'gather', prof: w.prof, mat: y.id, tier: w.node.tier, x: e.x, z: e.z });

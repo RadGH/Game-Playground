@@ -16,6 +16,10 @@ forgotten — bring it up when the game is resumed.
 
 ## Where it stands
 
+- **2026-10-20 — round 12 shipped, then wrapped up again.** The to-do list is `public/todo.html` (players) and
+  `~/claude/agent/mmo/todo-after-pt12.md` (Claude, with file-level detail, waiting for the owner to confirm). The Torbor
+  Downs regeneration (#81) is parked ~80% done on branch `wip/torbor-regen`.
+
 - **2026-10-14 update: Expansion 1 shipped while on hold** — Torbor Downs is an island; Vharlen (levels 10–20) is a
   second island across the sea, reached by ship. Spec and leftovers: `docs/EXPANSION-1.md`.
 

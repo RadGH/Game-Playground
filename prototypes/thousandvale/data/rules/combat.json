@@ -15,5 +15,7 @@
   "sight": { "step": 0.5, "skip": 0.6, "ttl": 2 },
   "knockInterrupt": { "normal": 0.6, "champion": 0.3, "rare": 0.2, "boss": 0, "minPush": 0.5 },
   "dummy": { "hpMult": 400, "resetSec": 3, "reference": "road_brigand" },
-  "wanderer": { "hpMult": 0.5, "dmgMult": 2, "playerM": 40, "noticeM": 12, "leashM": 25, "respawnSec": 45, "savedBelow": 0.35, "helpedShare": 0.2, "quietSec": 4 }
+  "wanderer": { "hpMult": 0.5, "dmgMult": 2, "playerM": 40, "noticeM": 12, "leashM": 25, "respawnSec": 45, "savedBelow": 0.35, "helpedShare": 0.2, "quietSec": 4 },
+  "_pursuit": "Play-test 12 (#75): how fast a monster closes on what it fights (js/rules/monster-ai.js chaseSpeed), only while that quarry moves AWAY from it faster than movingAbove m/s and is more than gapAbove m outside its reach (standing or walking in to fight changes nothing). Chasing runs at chaseMul x its bestiary speed inside [chaseMin, chaseMax]; sprinters (by role / kind / rank) burst at sprintSpeed for sprintSec, at most every sprintEverySec, when more than sprintGap m outside reach. Players run at 8.1 m/s and auto-attack on the move at 0.70 of it (js/sim/movement.js MOVE.fight).",
+  "pursuit": { "movingAbove": 2, "gapAbove": 3, "chaseMul": 1.35, "chaseMin": 4.2, "chaseMax": 5.8, "sprintSpeed": 9.2, "sprintSec": 1.8, "sprintEverySec": 8, "sprintGap": 5, "sprintRoles": ["skirmisher"], "sprintKinds": [], "sprintRanks": ["rare", "boss"] }
 }

@@ -158,14 +158,18 @@ export function h(tag, props = {}, ...kids) {
 export function mountConfirm(box) { box.classList.add('tv-confirm'); document.body.appendChild(box); return box; }
 
 /** A modal-ish confirm drawn in the HUD (no browser confirm(): it freezes the frame loop and the socket pings). */
-export function confirmBox(text, { yes = 'Yes', no = 'Cancel', danger = false } = {}) {
+// play-test 12 (#85): `check: { label, onYes(checked) }` adds a check box above the buttons; onYes hears whether it was
+// ticked when the player says yes (the shop's "Remember for this transaction").
+export function confirmBox(text, { yes = 'Yes', no = 'Cancel', danger = false, check = null } = {}) {
   return new Promise(res => {
+    const tick = check ? h('input', { type: 'checkbox', dataset: { k: 'confirm-check' } }) : null;
     const box = h('div.tv-confirm', { role: 'alertdialog' },
       h('p', {}, text),
+      check ? h('label.confirm-check', {}, tick, ' ', check.label) : null,
       h('div.row', {},
         h('button.ghost', { onclick: () => done(false) }, no),
         h('button.' + (danger ? 'danger' : 'primary'), { onclick: () => done(true) }, yes)));
-    const done = v => { box.remove(); res(v); };
+    const done = v => { box.remove(); if (v && check) check.onYes?.(!!tick.checked); res(v); };
     box.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape') done(false); if (e.key === 'Enter') done(true); });
     mountConfirm(box);
     box.querySelector('button:last-child').focus();

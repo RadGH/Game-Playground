@@ -150,6 +150,7 @@ export function createAngling(scene, { actors = null, forms = null, spellFx = nu
     if (s.line) { scene.remove(s.line); s.line.geometry.dispose(); }
     if (s.fish) { s.fish.parent?.remove(s.fish); s.fish.material.dispose(); }
     actors?.setFishing?.(s.id, null);
+    const fa = actors?.get?.(s.id); if (fa) fa.faceAt = null;      // #87
     lines.delete(s.id);
   }
   /** Where a line lands when the server has not said: 5 m ahead of the angler. */
@@ -194,6 +195,8 @@ export function createAngling(scene, { actors = null, forms = null, spellFx = nu
     // walking off with a line out ends it on this screen too (the server says so a moment later)
     if (a.speed > 1.2 && s.t > 0.4 && s.phase !== 'catch') { drop(s); return; }
     const plan = phasePlan(s.phase), parts = a.body?.parts, far = a.lod === 'far' || !parts;
+    // play-test 12 (#87): the angler turns to face the float, so the rod points down the line (actors.js faceYaw)
+    if (s.has) { if (!a.faceAt) a.faceAt = { x: s.x, z: s.z }; else { a.faceAt.x = s.x; a.faceAt.z = s.z; } }
     // the rod rides the hand bone (a re-dress swaps the skeleton: re-parent when it changed)
     if (plan.rod && !far) { const bone = parts[ROD_MOUNT.bone]; if (bone && s.rod.parent !== bone) bone.add(s.rod); s.rod.visible = true; }
     else if (s.rod) s.rod.visible = false;

@@ -30,6 +30,7 @@ import { JOURNAL_FLUSH_MS } from './journal.js';
 import { createTrades, TRADE_OPS, TRADE_RANGE } from './trade.js';
 import { planDungeon as planTiers } from '../rules/dungeon-tiers.js';     // stream E's generator (js/sim/dungeon.js keeps the stand-in)
 import { caveDungeon } from './placements.js';
+import { edgeShared } from './edge-share.js';      // play-test 12 (#84)
 import { createBarkGate } from './barks.js';      // round 11 (World, #52)
 import { createEventRunner, eventReward, rewardPreview, ABANDON_MS } from './events.js';
 import { eventScale } from './director.js';
@@ -197,7 +198,7 @@ export function createProvince(opts) {
       const r = createRoom({
         id: `${L.key}/town:${i}`, name: t.name, kind: 'town', terrain: L.terrain, seed: roomSeed(seed, `${L.key}/town:${i}`), createRules, hooks: roomHooks, encounterInfo,
         area: { x: t.x, z: t.z, r: t.r }, gridArea: { x: t.x, z: t.z, r: t.r + 40 }, spawn: { x: t.x, z: t.z }, camps: [],
-        objects: [...townObjects(L, t, i)], meta: { province: L.key, town: i },
+        objects: [...townObjects(L, t, i), ...edgeShared(L, i)], meta: { province: L.key, town: i },      // #84: and the talk-only folk just outside its ring
         describeExtra: describeFor(L),
       });
       rooms.set(r.id, r); pv.towns.push(r);
@@ -309,6 +310,7 @@ export function createProvince(opts) {
         ...L.doors.map((d, i) => ({ type: d.kind === 'cave' ? 'cave' : 'portal', name: (d.kind !== 'cave' && d.sheet && d.sheet.dungeon && d.sheet.dungeon.name) || d.name, x: d.x, z: d.z, yaw: d.yaw, key: d.key || `door:${L.key}:${i}`, portal: { to: 'dungeon', door: i } })),
         ...L.waystones.filter(w => w.town === undefined).map(w => ({ type: 'waystone', name: 'Waystone', x: w.x, z: w.z, key: w.key, waystone: { key: w.key, name: w.name } })),
         ...L.objects.map(o => (o.guard ? { ...o, guard: { ...o.guard, level: guardLevel(L, L.towns.slice().sort((a, b) => Math.hypot(a.x - o.x, a.z - o.z) - Math.hypot(b.x - o.x, b.z - o.z))[0] || { x: o.x, z: o.z }) } } : o)),      // X7: a guard posted just outside a town's ring
+        ...edgeShared(L, null),      // #84: talk-only folk just inside a town's ring, seen from outside it too
       ],
       describeExtra: describeFor(L),
     });
@@ -520,6 +522,7 @@ export function createProvince(opts) {
       // play-test 5
       case 'revive': return reviveOp(o, m);
       case 'sheet': return wantSheet(o);
+      case 'feedbackShot': { const r = feedback.shot({ account: o.char.account }, m); if (r && o.conn) o.conn.sendJSON(r); return; }      // play-test 12 (#71)
       case 'feedback': if (m.op !== 'mine') return feedbackOp(o, m);      // falls through: `feedback {op:'mine'}` is D-UI's name for feedbackMine
       case 'feedbackMine': return void feedback.listMine({ account: o.char.account, claimed: !!o.claimed }, m).then(r => { if (o.conn) o.conn.sendJSON(r); }, err => { log('feedback list failed', err && err.message); if (o.conn) o.conn.sendJSON({ t: 'feedbackMine', ok: false, why: 'failed', list: [], more: false }); });
       case 'admin': return adminOp(o, m);

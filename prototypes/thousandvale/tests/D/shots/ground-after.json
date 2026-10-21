@@ -1,0 +1,68 @@
+{
+ "desktop": {
+  "downs@0.42": {
+   "calls": 519,
+   "tris": 6340811,
+   "frame": {
+    "median": 5099.7,
+    "p90": 5099.7
+   }
+  },
+  "downs@0.72": {
+   "calls": 450,
+   "tris": 6636233,
+   "frame": {
+    "median": 6399.8,
+    "p90": 6399.8
+   }
+  },
+  "town-edge@0.42": {
+   "calls": 394,
+   "tris": 4542568,
+   "frame": {
+    "median": 2416.6,
+    "p90": 2416.6
+   }
+  },
+  "town-edge@0.72": {
+   "calls": 407,
+   "tris": 4583684,
+   "frame": {
+    "median": 2483.2,
+    "p90": 2483.2
+   }
+  },
+  "vharl-inland@0.42": {
+   "calls": 165,
+   "tris": 1075364,
+   "frame": {
+    "median": 4099.8,
+    "p90": 4099.8
+   }
+  },
+  "vharl-inland@0.72": {
+   "calls": 213,
+   "tris": 1434211,
+   "frame": {
+    "median": 6416.4,
+    "p90": 6416.4
+   }
+  },
+  "vharl-2@0.42": {
+   "calls": 355,
+   "tris": 1588675,
+   "frame": {
+    "median": 2549.9,
+    "p90": 2549.9
+   }
+  },
+  "vharl-2@0.72": {
+   "calls": 377,
+   "tris": 1667232,
+   "frame": {
+    "median": 2183.2,
+    "p90": 2183.2
+   }
+  }
+ }
+}

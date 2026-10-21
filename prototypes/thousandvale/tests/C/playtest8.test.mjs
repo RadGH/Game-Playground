@@ -160,7 +160,7 @@ test('W14: a parity engine keeps Farhold\'s own flight (no table), so the frame-
 
 // ============================================================================ W2
 
-test('W2: EVERY ranged monster in the bestiary shoots a projectile you can see — from the shooter, slow enough, and the hit comes with its arrival even if you walk', () => {
+test('W2 + play-test 12 #78: EVERY ranged monster shoots a projectile you can see — from the shooter, slow enough, at a POINT (it does not home): standing still it lands with its arrival, stepped out of it misses', () => {
   const ranged = [...(engine.bestiary.enemies || []), ...(engine.bestiary.bosses || [])].filter(d => d.ranged);
   assert.ok(ranged.length >= 8, `${ranged.length} ranged monsters`);
   const bad = [];
@@ -172,16 +172,25 @@ test('W2: EVERY ranged monster in the bestiary shoots a projectile you can see �
     let fx = null;
     for (let i = 0; i < 200 && !fx; i++) { w.steps(1); fx = w.events.find(e => isProj(e) && e.kind === 'shot' && e.id === m.id); }
     if (!fx) { bad.push(`${def.id}: never shot`); continue; }
-    if (!fx.from || fx.to !== me.id || fx.home !== 1 || !(fx.speed > 0 && fx.speed <= 30) || !(fx.ms >= 180)) { bad.push(`${def.id}: ${JSON.stringify(fx).slice(0, 200)}`); continue; }
+    // #78: aimed at a point (`to` = {x, z}, `aimAt` = who), never `home`
+    if (!fx.from || fx.aimAt !== me.id || typeof fx.to !== 'object' || fx.home || !(fx.speed > 0 && fx.speed <= 30) || !(fx.ms >= 180)) { bad.push(`${def.id}: ${JSON.stringify(fx).slice(0, 200)}`); continue; }
     if (Math.hypot(fx.from.x - m.r.unit.x, fx.from.z - m.r.unit.z) > 3) bad.push(`${def.id}: the shot does not start at the shooter`);
+    if (Math.hypot(fx.to.x - me.r.unit.x, fx.to.z - me.r.unit.z) > 0.5) bad.push(`${def.id}: a still target was not aimed at where it stood`);
     const hitsBefore = w.events.filter(e => e.type === 'hit' && e.s === m.id && e.d === me.id && e.skill === 'shot').length;
     if (hitsBefore) bad.push(`${def.id}: damage before the projectile arrived`);
-    w.room.rules.room.run(() => { me.r.unit.x += 6; });           // walk out from under it: it homes
-    me.moveTo?.(me.r.unit.x, me.r.unit.z);
-    w.steps(Math.ceil(fx.ms / TICK_MS) + 2);
+    w.steps(Math.ceil(fx.ms / TICK_MS) + 2);                     // stood still: it lands, with its arrival
     const hit = w.events.find(e => e.type === 'hit' && e.s === m.id && e.d === me.id && e.skill === 'shot');
-    if (!hit) bad.push(`${def.id}: the shot never landed`);
+    if (!hit) bad.push(`${def.id}: the shot never landed on a target that stood still`);
     else if ((hit.tick - fx.tick) * TICK_MS < fx.ms - TICK_MS) bad.push(`${def.id}: landed after ${(hit.tick - fx.tick) * TICK_MS} ms of a ${fx.ms} ms flight`);
+    // the next shot: step 6 m aside while it flies — it lands where it was aimed, on nobody
+    let fx2 = null; const seen = w.events.length;
+    for (let i = 0; i < 400 && !fx2; i++) { w.steps(1); fx2 = w.events.slice(seen).find(e => isProj(e) && e.kind === 'shot' && e.id === m.id); }
+    if (!fx2) { bad.push(`${def.id}: no second shot`); continue; }
+    w.room.rules.room.run(() => { me.r.unit.x += 6; });
+    me.moveTo?.(me.r.unit.x, me.r.unit.z);
+    const after = w.events.length;
+    w.steps(Math.ceil(fx2.ms / TICK_MS) + 2);
+    if (w.events.slice(after).some(e => e.type === 'hit' && e.s === m.id && e.d === me.id && e.skill === 'shot')) bad.push(`${def.id}: a shot still hit a target that stepped 6 m out of it (it homed)`);
   }
   assert.deepEqual(bad, []);
 });
@@ -197,7 +206,7 @@ test('W2: a hit a monster lands from beyond arm\'s reach ALWAYS has a projectile
   const specials = far.filter(h => h.skill !== 'shot');
   let unseen = 0;
   for (const h of far) {
-    const seen = w.events.some(e => e.type === 'fx' && e.kind === 'shot' && e.id === h.s && e.to === me.id && e.tick <= h.tick && e.tick >= h.tick - 60);
+    const seen = w.events.some(e => e.type === 'fx' && e.kind === 'shot' && e.id === h.s && (e.to === me.id || e.aimAt === me.id) && e.tick <= h.tick && e.tick >= h.tick - 60);   // #78: an aimed shot names its mark in `aimAt`
     if (!seen) unseen++;
   }
   assert.equal(unseen, 0, 'every ranged hit could be seen coming');

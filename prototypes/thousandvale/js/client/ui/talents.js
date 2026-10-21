@@ -234,8 +234,7 @@ export function createTalentsUi({ net: getNet, hud, me }) {
   }
   function runSearch(q, count, zoom) {
     if (!graph || !S.src) return [];
-    const strip = t => String(t || '').replace(/<[^>]+>/g, ' ');
-    const ids = searchForest(S.src.forest, q, n => strip(perkTipHtml(n.id)));
+    const ids = searchForest(S.src.forest, q, n => (n.desc && n.desc !== n.name ? n.desc : ''));   // #80: the node's own words only
     const n = graph.setSearch(ids);
     count.textContent = q.trim() ? (n ? `${n} found` : 'none') : '';
     if (n && (zoom || n <= 24)) graph.fitIds(ids);
@@ -281,10 +280,11 @@ export function createTalentsUi({ net: getNet, hud, me }) {
     const n = S.src?.forest.byId.get(id); if (!n) return null;
     const st = stagedForest(S.src, S.perks, PS.list, lvl(), S.bonus, S.server.perks ? S.serverLeft : null).state.get(id);
     const arm = (S.src.forest.arms || []).find(a => a.key === n.arm);
-    const say = st === 'taken' ? (n.kind === 'hub' ? '<div class="tip-sub">Every arm starts here.</div>' : (S.server.perks ? '<div class="good">Yours. An Unbinder in town can hand it back (the end of a path only).</div>' : '<div class="good">Yours. Right-click to hand it back (only the end of a path).</div>'))
+    let say = st === 'taken' ? (n.kind === 'hub' ? '<div class="tip-sub">Every arm starts here.</div>' : (S.server.perks ? '<div class="good">Yours. An Unbinder in town can hand it back (the end of a path only).</div>' : '<div class="good">Yours. Right-click to hand it back (only the end of a path).</div>'))
       : st === 'staged' ? '<div class="good">Staged — not spent yet. Click it again to take it back; Accept keeps it.</div>'
       : st === 'open' ? '<div class="good">Click to stage it — 1 point. Nothing is spent until you press Accept.</div>' : st === 'reach' ? '<div class="bad">Next to your path, but you have no points left.</div>'
         : '<div class="bad">Take a perk that connects to this one first.</div>';
+    if (document.documentElement.dataset.layout === 'phone') say = say.replace(/Click to stage it/, 'Tap again (or press Stage) to stage it').replace(/Click it again/, 'Tap it again').replace('Right-click to hand it back', 'Hold it to hand it back');   // #67
     return `<div class="tip-title">${esc(n.name || n.id)}</div><div class="tip-sub">${esc(KIND_NAME[n.kind] || 'Perk')}${arm ? ` · ${esc(arm.name)}` : n.oddball ? ' · between the arms' : ''}</div>${n.desc && n.desc !== n.name ? `<hr><div>${esc(n.desc)}</div>` : ''}${say}`;
   }
   function takePerk(id) {

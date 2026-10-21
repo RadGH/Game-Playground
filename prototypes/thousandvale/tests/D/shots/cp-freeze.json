@@ -1,0 +1,520 @@
+{
+ "ashback salamanders (ranged poison shots)": {
+  "stalls": {
+   "busyLong": 0,
+   "maxBusyMs": 39,
+   "frames": [],
+   "longTasks": 0,
+   "maxTaskMs": 0
+  },
+  "links": 0,
+  "newPrograms": [],
+  "longFrames": 19,
+  "top": [
+   {
+    "name": "render",
+    "n": 19,
+    "ms": 266,
+    "max": 26
+   },
+   {
+    "name": "world:views",
+    "n": 19,
+    "ms": 45,
+    "max": 10
+   },
+   {
+    "name": "scatter:relod",
+    "n": 2,
+    "ms": 11,
+    "max": 6
+   },
+   {
+    "name": "terrain:chunk",
+    "n": 10,
+    "ms": 32,
+    "max": 5
+   },
+   {
+    "name": "world:clutter",
+    "n": 19,
+    "ms": 1,
+    "max": 1
+   },
+   {
+    "name": "actor:build",
+    "n": 19,
+    "ms": 0,
+    "max": 0
+   }
+  ],
+  "recent": [
+   {
+    "at": 252450,
+    "ms": 2200,
+    "spans": [
+     [
+      "render",
+      16
+     ],
+     [
+      "world:views",
+      0
+     ],
+     [
+      "actor:build",
+      0
+     ],
+     [
+      "world:clutter",
+      0
+     ]
+    ],
+    "tasks": [
+     2180
+    ]
+   },
+   {
+    "at": 254616,
+    "ms": 2167,
+    "spans": [
+     [
+      "render",
+      14
+     ],
+     [
+      "world:views",
+      1
+     ],
+     [
+      "terrain:chunk",
+      0
+     ],
+     [
+      "terrain:chunk",
+      0
+     ],
+     [
+      "actor:build",
+      0
+     ],
+     [
+      "world:clutter",
+      0
+     ]
+    ],
+    "tasks": []
+   },
+   {
+    "at": 256833,
+    "ms": 2217,
+    "spans": [
+     [
+      "render",
+      15
+     ],
+     [
+      "actor:build",
+      0
+     ],
+     [
+      "world:views",
+      0
+     ],
+     [
+      "world:clutter",
+      0
+     ]
+    ],
+    "tasks": [
+     2196
+    ]
+   },
+   {
+    "at": 257800,
+    "ms": 967,
+    "spans": [
+     [
+      "render",
+      8
+     ],
+     [
+      "world:clutter",
+      1
+     ],
+     [
+      "actor:build",
+      0
+     ],
+     [
+      "world:views",
+      0
+     ]
+    ],
+    "tasks": []
+   },
+   {
+    "at": 258700,
+    "ms": 900,
+    "spans": [
+     [
+      "render",
+      6
+     ],
+     [
+      "world:views",
+      0
+     ],
+     [
+      "actor:build",
+      0
+     ],
+     [
+      "world:clutter",
+      0
+     ]
+    ],
+    "tasks": [
+     884
+    ]
+   },
+   {
+    "at": 259683,
+    "ms": 983,
+    "spans": [
+     [
+      "render",
+      6
+     ],
+     [
+      "world:views",
+      0
+     ],
+     [
+      "actor:build",
+      0
+     ],
+     [
+      "world:clutter",
+      0
+     ]
+    ],
+    "tasks": []
+   }
+  ],
+  "linkStacks": [],
+  "keys": [],
+  "shotStats": {
+   "fired": 6,
+   "landed": 6,
+   "reused": 0,
+   "byModel": {
+    "orb": 6
+   },
+   "last": {
+    "model": "orb",
+    "element": "poison",
+    "ms": 632,
+    "dist": 11.91,
+    "from": [
+     25479.88,
+     155.51,
+     5360.52
+    ],
+    "shooter": 7005
+   },
+   "live": 0,
+   "pools": {
+    "arrow": 14,
+    "quarrel": 8,
+    "javelin": 4,
+    "knife": 6,
+    "axe": 4,
+    "stone": 8,
+    "firebolt": 8,
+    "orb": 10,
+    "shard": 6,
+    "spark": 6
+   }
+  }
+ },
+ "elite casters (telegraphed area spells)": {
+  "stalls": {
+   "busyLong": 0,
+   "maxBusyMs": 39,
+   "frames": [],
+   "longTasks": 0,
+   "maxTaskMs": 0
+  },
+  "links": 0,
+  "newPrograms": [],
+  "longFrames": 16,
+  "top": [
+   {
+    "name": "render",
+    "n": 16,
+    "ms": 301,
+    "max": 33
+   },
+   {
+    "name": "world:views",
+    "n": 16,
+    "ms": 7,
+    "max": 2
+   },
+   {
+    "name": "scatter:relod",
+    "n": 1,
+    "ms": 2,
+    "max": 2
+   },
+   {
+    "name": "terrain:chunk",
+    "n": 10,
+    "ms": 4,
+    "max": 1
+   },
+   {
+    "name": "world:clutter",
+    "n": 16,
+    "ms": 0,
+    "max": 0
+   },
+   {
+    "name": "actor:build",
+    "n": 16,
+    "ms": 0,
+    "max": 0
+   }
+  ],
+  "recent": [
+   {
+    "at": 305414,
+    "ms": 2300,
+    "spans": [
+     [
+      "render",
+      22
+     ],
+     [
+      "world:views",
+      0
+     ],
+     [
+      "actor:build",
+      0
+     ],
+     [
+      "world:clutter",
+      0
+     ]
+    ],
+    "tasks": []
+   },
+   {
+    "at": 307681,
+    "ms": 2267,
+    "spans": [
+     [
+      "render",
+      20
+     ],
+     [
+      "world:views",
+      1
+     ],
+     [
+      "terrain:chunk",
+      1
+     ],
+     [
+      "terrain:chunk",
+      0
+     ],
+     [
+      "actor:build",
+      0
+     ],
+     [
+      "world:clutter",
+      0
+     ]
+    ],
+    "tasks": [
+     2241
+    ]
+   },
+   {
+    "at": 310064,
+    "ms": 2383,
+    "spans": [
+     [
+      "render",
+      17
+     ],
+     [
+      "world:views",
+      0
+     ],
+     [
+      "actor:build",
+      0
+     ],
+     [
+      "world:clutter",
+      0
+     ]
+    ],
+    "tasks": []
+   },
+   {
+    "at": 312347,
+    "ms": 2283,
+    "spans": [
+     [
+      "render",
+      16
+     ],
+     [
+      "world:clutter",
+      0
+     ],
+     [
+      "actor:build",
+      0
+     ],
+     [
+      "world:views",
+      0
+     ]
+    ],
+    "tasks": [
+     2257
+    ]
+   },
+   {
+    "at": 314597,
+    "ms": 2250,
+    "spans": [
+     [
+      "render",
+      10
+     ],
+     [
+      "world:views",
+      1
+     ],
+     [
+      "terrain:chunk",
+      0
+     ],
+     [
+      "terrain:chunk",
+      0
+     ],
+     [
+      "actor:build",
+      0
+     ],
+     [
+      "world:clutter",
+      0
+     ]
+    ],
+    "tasks": []
+   },
+   {
+    "at": 316847,
+    "ms": 2250,
+    "spans": [
+     [
+      "render",
+      15
+     ],
+     [
+      "world:views",
+      0
+     ],
+     [
+      "actor:build",
+      0
+     ],
+     [
+      "world:clutter",
+      0
+     ]
+    ],
+    "tasks": [
+     2233
+    ]
+   }
+  ],
+  "linkStacks": [],
+  "keys": [],
+  "shotStats": {
+   "fired": 23,
+   "landed": 15,
+   "reused": 5,
+   "byModel": {
+    "orb": 21,
+    "stone": 2
+   },
+   "last": {
+    "model": "stone",
+    "element": "physical",
+    "ms": 160,
+    "dist": 11.07,
+    "from": [
+     25516.98,
+     155.01,
+     5360.18
+    ],
+    "shooter": 7022
+   },
+   "live": 0,
+   "pools": {
+    "arrow": 14,
+    "quarrel": 8,
+    "javelin": 4,
+    "knife": 6,
+    "axe": 4,
+    "stone": 8,
+    "firebolt": 8,
+    "orb": 10,
+    "shard": 6,
+    "spark": 6
+   }
+  }
+ },
+ "motes": {
+  "self": 102,
+  "motes": {},
+  "resets": 5
+ },
+ "numbers": [
+  {
+   "t": "123",
+   "x": 478.5,
+   "y": 314,
+   "w": 27,
+   "h": 26,
+   "onScreen": true
+  },
+  {
+   "t": "456",
+   "x": 488.9000244140625,
+   "y": 291.20001220703125,
+   "w": 32,
+   "h": 26,
+   "onScreen": true
+  },
+  {
+   "t": "789",
+   "x": 433.79998779296875,
+   "y": 265.20001220703125,
+   "w": 45,
+   "h": 38,
+   "onScreen": true
+  }
+ ]
+}

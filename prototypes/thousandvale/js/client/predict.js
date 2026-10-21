@@ -8,7 +8,7 @@
 // slope it would not let you climb, a knockback) the visible error is blended away over a few frames
 // instead of snapping. Pure: no DOM, no three.js.
 
-import { stepMove, MOVE } from '../sim/movement.js';
+import { stepMove, moveKind, MOVE } from '../sim/movement.js';
 export { MOVE };
 
 export class Predictor {
@@ -55,6 +55,14 @@ export class Predictor {
     while (this.pending.length && this.pending[0].s <= ack) this.pending.shift();
     const s = { x: p.x, y: p.y, z: p.z, vy: p.vy || 0, airborne: (p.vy || 0) !== 0, speedMul: this.speedMul, glide: !!p.glide };      // [S] a geyser's slow fall is part of the state
     if (!this.locked && this.terrain) for (const inp of this.pending) stepMove(s, inp, inp.dt, this.terrain);
+    // #88 (play-test 12): with no step left to replay (a snapshot that acked every input — a short round trip) `s` never
+    // went through stepMove, so it had no `swim`/`wade`: for the frames until the next local step you were "not
+    // swimming", the body dropped out of the stroke, and the next step started it again from its first frame — the
+    // stroke "restarting over and over rapidly". The server's own state answers it: where you are says what you are.
+    if (!('swim' in s) && this.terrain && (this.terrain.moveAt || this.terrain.waterAt)) {
+      const k = moveKind(this.terrain, s.x, s.z);
+      s.swim = k === 'swim' && !s.airborne; s.wade = k === 'wade';
+    }
     const dx = s.x - this.st.x, dy = s.y - this.st.y, dz = s.z - this.st.z;
     const d = Math.hypot(dx, dz);
     if (d > 6) { this.reset(s); this.corrections++; return d; }

@@ -1,0 +1,46 @@
+/* Play-test 12 (2026-10-17), stream UI — the small interface fixes of round 12. Loaded last from index.html. */
+
+/* #85: "Remember for this transaction" on the rare-sale question */
+.tv-confirm .confirm-check { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; font-size: 13px; color: var(--ink-dim); cursor: pointer; }
+.tv-confirm .confirm-check input { width: 18px; height: 18px; margin: 0; accent-color: var(--gold, #d9b26a); }
+html[data-layout="phone"] .tv-confirm .confirm-check { min-height: 44px; font-size: 15px; }
+html[data-layout="phone"] .tv-confirm .confirm-check input { width: 24px; height: 24px; }
+
+/* #65: on a phone, while the appearance editor is open during character creation, the logo, the Play / Log in tabs and
+   the footer links step aside so the figure has the top of the screen (the editor's own Preview still folds it away) */
+html[data-layout="phone"]:has(.tv-panel.appearance-panel.title-mode:not([hidden])) .title > :not(.loading) { visibility: hidden; }
+html[data-layout="phone"]:has(.tv-panel.appearance-panel.title-mode:not([hidden])) .title { background: none; }
+
+/* #64: step 1 of character creation on a short screen. The title screen is a fixed grid centred on the screen: with a
+   long calling card (the Star Blade's) it grew past the bottom and could not be scrolled, so "Next" was out of reach.
+   It scrolls now, keeps the top in reach (safe centring), and a short screen starts at the top. */
+.title { overflow-y: auto; align-content: safe center; }
+@media (max-height: 820px) {
+  html:not([data-layout="phone"]) .title { align-content: start; padding-top: 12px; padding-bottom: 48px; }
+  html:not([data-layout="phone"]) .title .brand { align-self: start; }
+  html:not([data-layout="phone"]) .title .brand h1 { font-size: 34px; margin: 0; }
+  html:not([data-layout="phone"]) .title-foot { position: static; grid-column: 1; margin: 10px 0 0; }
+}
+.class-card .cc-more { margin-top: 4px; }
+.class-card .cc-more > summary { cursor: pointer; color: var(--gold-hi, #f1d595); font-size: 13px; list-style-position: inside; }
+html[data-layout="phone"] .class-card .cc-more > summary { min-height: 44px; display: flex; align-items: center; }
+
+/* #71: a screenshot with a bug report */
+.feedback-panel .fb-shotbox { margin: 6px 0 4px; padding: 6px 9px; border: 1px solid var(--edge); border-radius: 6px; background: rgba(0, 0, 0, 0.25); }
+.feedback-panel .fb-check { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-dim); margin: 2px 0; cursor: pointer; }
+.feedback-panel .fb-check input { width: 16px; height: 16px; margin: 0; accent-color: var(--gold, #d9b26a); }
+.feedback-panel .fb-shot { display: flex; gap: 8px; align-items: flex-start; margin-top: 6px; }
+.feedback-panel .fb-shot img { width: 46%; max-width: 200px; border-radius: 4px; border: 1px solid var(--edge); display: block; }
+.feedback-panel .fb-shot-side { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--ink-faint); }
+.feedback-panel .fb-shot-side .warn { color: var(--warn, #e0b46a); }
+html[data-layout="phone"] .feedback-panel .fb-check { min-height: 44px; font-size: 15px; }
+html[data-layout="phone"] .feedback-panel .fb-check input { width: 22px; height: 22px; }
+
+/* #73: the sign-in QR code */
+.qr-panel { z-index: 1200; }
+.qr-panel .qr-code { display: flex; justify-content: center; margin: 8px 0; }
+.qr-panel .qr-code svg { width: min(260px, 70vw); height: auto; border-radius: 6px; image-rendering: pixelated; }
+.qr-panel .qr-meta { text-align: center; font-size: 13px; color: var(--ink-dim); }
+.qr-panel .qr-left { color: var(--gold-hi, #f1d595); font-variant-numeric: tabular-nums; }
+.qr-offer { margin: 8px 0; }
+.title .qr-title { display: block; margin: 2px 0 6px; font-size: 13px; }

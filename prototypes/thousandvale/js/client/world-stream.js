@@ -22,6 +22,7 @@ import { createTownView } from './town-view.js';
 import { createSiteView } from './site-view.js';
 import { createSetPieceView } from './setpiece-view.js';
 import { createWallsView } from './walls-view.js';   // play-test 4 S7 (stream B): town perimeters + gates
+import { createGroundClutter } from './ground-clutter.js';   // 2026-10-17: grass tufts, ferns, stones, pebbles, lumps round the camera
 import { perf, nextFrame } from './perf.js';
 import { parseNav } from '../rules/terrain-read.js';
 import { refineNav } from '../rules/nav-refine.js';       // Z37: trees and rocks block as circles the size of their models
@@ -43,11 +44,15 @@ export function createWorldStream(scene, { quality = 'high', horizon: hz0 = null
   const loaded = new Map();       // key -> { key, T, views[], bounds, ready }
   const loading = new Map();      // key -> promise
   let lastPos = null;
+  // `?clutter=0`: no ground clutter (before / after measuring)
+  const NO_CLUTTER = typeof location !== 'undefined' && new URLSearchParams(location.search).get('clutter') === '0';
+  let clutter = null;
 
   const at = (x, z) => {
     for (const L of loaded.values()) { const b = L.bounds; if (L.T && x >= b.minX && x <= b.maxX && z >= b.minZ && z <= b.maxZ) return L; }
     return null;
   };
+  if (!NO_CLUTTER) createGroundClutter(scene, { quality, zoneAt: at }).then(c => { clutter = c; }).catch(e => console.warn('[clutter]', e.message));
   const NONE = { kind: 'none', surface: NaN, depth: 0 };
   const terrain = {
     get bounds() {
@@ -102,13 +107,13 @@ export function createWorldStream(scene, { quality = 'high', horizon: hz0 = null
         const vigOk = !extras.vignetteHash || !base.reader || extras.vignetteHash === base.reader.meta.inputHash;
         if (!NO_FOREST) extras.scatter = perf.span('zone:forest', () => growForest(extras.scatter, nav, { ox: q.bounds.minX, oz: q.bounds.minZ, clear: clearOf(extras.placements, vigOk ? extras.vignettes : []) }));
         if (!nav) return;
-        return nextFrame().then(() => { if (loaded.get(q.key) === L) L.nav = perf.span('zone:navRefine', () => refineNav(nav, extras.scatter)); });
+        return nextFrame().then(() => { if (loaded.get(q.key) === L) { L.nav = perf.span('zone:navRefine', () => refineNav(nav, extras.scatter)); clutter?.refresh(); } });
       });
       const biomeColors = base.reader ? Object.fromEntries(base.reader.biomes.map(b => [b.key, b.color])) : null;
       const ground = createTerrainView(T, { quality, textureSize: quality === 'low' ? 256 : 512, biomeColors, clearings: opts.clearingsFor ? opts.clearingsFor(T, extras) : [] });
       scene.add(ground.group); L.views.push(ground); L.ground = ground;
       if (horizon && base.reader) horizon.setBiomes?.(base.reader.biomes);
-      loaded.set(q.key, L);
+      loaded.set(q.key, L); clutter?.refresh();
       syncHorizon();
       end();
       groundResolve(L);
@@ -148,6 +153,7 @@ export function createWorldStream(scene, { quality = 'high', horizon: hz0 = null
     for (const v of L.views) { scene.remove(v.group); v.dispose?.(); }
     solids?.remove(key);
     loaded.delete(key);
+    clutter?.refresh();
     syncHorizon();
     end();
   }
@@ -167,6 +173,7 @@ export function createWorldStream(scene, { quality = 'high', horizon: hz0 = null
     const end = perf.begin('world:views');
     for (const L of loaded.values()) for (const v of L.views) v.update?.(dt, pos || lastPos);
     end();
+    if (clutter && (pos || lastPos)) perf.span('world:clutter', () => clutter.update(pos || lastPos));
   }
 
   /** Load the zone under (x, z) now (login, a waystone jump) and resolve once its ground is drawn. */

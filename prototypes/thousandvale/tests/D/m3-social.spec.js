@@ -73,7 +73,7 @@ test('title screen: guest / log in tabs, privacy link, local fonts', async ({ br
   page.on('request', r => { if (/fonts\.(googleapis|gstatic)\.com|challenges\.cloudflare/.test(r.url())) remote.push(r.url()); });
   await page.goto(`${base}?quality=low`);
   await page.waitForSelector('#loading.done', { timeout: 60000 });
-  await expect(page.locator('.title-foot a')).toHaveAttribute('href', 'public/privacy.html');
+  await expect(page.locator('.title-foot a[href$="privacy.html"]')).toHaveAttribute('href', 'public/privacy.html');
   await page.screenshot({ path: join(SHOTS, 'm3-title-guest.png') });
   await page.click('#tab-login');
   await expect(page.locator('#signin')).toBeVisible();

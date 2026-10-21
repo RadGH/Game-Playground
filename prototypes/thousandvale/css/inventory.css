@@ -90,3 +90,7 @@
 
 .inv-doll .islot .slotname { text-shadow: 0 1px 2px #000, 0 0 4px #000; }
 .islot.empty { margin: 0; font-style: normal; }   /* social.css .empty is a paragraph style (10px margins) */
+/* live #91: a set piece's set block — the set's name, pieces worn, and each step's bonus (ticked when on) */
+.itemtip .ic-set { margin-top: 6px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 4px; }
+.itemtip .ic-set-head { color: #7fd47f; font-weight: 600; }
+.itemtip .ic-set-on { color: #9fe39f; }

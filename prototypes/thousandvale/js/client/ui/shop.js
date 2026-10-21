@@ -23,10 +23,13 @@ const BAG_MAX = 120;
 export const SHOP_ROLES = new Set(['merchant', 'smith', 'trader', 'stablehand', 'stable', 'stablemaster', 'stable_master', 'fletcher', 'armourer', 'armorer', 'jeweller', 'jeweler', 'alchemist', 'grocer', 'tailor', 'weaponsmith', 'provisioner', 'pedlar', 'peddler', 'quartermaster', 'outfitter', 'tanner', 'bowyer', 'herbalist', 'fishmonger', 'general']);
 
 export function createShop({ net, hud, actors, me, bag }) {
-  const S = { npc: null, view: null, tab: 'buy', cat: 'all', pending: false, sel: null, touch: false, sellTab: 'gear' };
-  const panel = createPanel({ id: 'shop', title: 'Shop', width: 420, cls: 'shop-panel', onClose: () => { S.npc = null; S.view = null; iconsActive(false, 'shop'); hideTip(); } });
+  // play-test 12 (#85): sureRare = "Remember for this transaction" was ticked on the rare-sale question — no more asking
+  // until this counter is left (the window closes: walking away, Escape, another shop)
+  const S = { npc: null, view: null, tab: 'buy', cat: 'all', pending: false, sel: null, touch: false, sellTab: 'gear', sureRare: false };
+  const panel = createPanel({ id: 'shop', title: 'Shop', width: 420, cls: 'shop-panel', onClose: () => { S.npc = null; S.view = null; S.sureRare = false; iconsActive(false, 'shop'); hideTip(); } });
 
   function open(npcId, name = null) {
+    if (S.npc !== npcId) S.sureRare = false;
     S.npc = npcId; S.view = null; S.tab = 'buy'; S.cat = 'all';
     send2.shop(net(), 'open', { npc: npcId });
     panel.setTitle(name || 'Shop', 'Opening the shutters…');
@@ -135,7 +138,10 @@ export function createShop({ net, hud, actors, me, bag }) {
   function buy(row, why) { if (why) { hud.toast(why, 'warn'); return; } hideTip(); send2.shop(net(), 'buy', { npc: S.npc, id: row.id }); }
   async function sell(it, price) {
     hideTip();
-    if ((RARITY_RANK[rarityOf(it)] ?? 0) >= RARITY_RANK.rare && !(await confirmBox(`Sell ${it.name} for ${goldText(price)}?`, { yes: 'Sell' }))) return;
+    const npc = S.npc;
+    if ((RARITY_RANK[rarityOf(it)] ?? 0) >= RARITY_RANK.rare && !S.sureRare
+      && !(await confirmBox(`Sell ${it.name} for ${goldText(price)}?`, { yes: 'Sell', check: { label: 'Remember for this transaction', onYes: on => { if (on && S.npc === npc) S.sureRare = true; } } }))) return;
+    if (S.npc !== npc) return;                                       // the counter was left while the question was up
     send2.shop(net(), 'sell', { npc: S.npc, uid: it.uid });
   }
   function back(row) { if (row.price > gold()) { hud.toast(`You need ${row.price - gold()} more gold.`, 'warn'); return; } hideTip(); send2.shop(net(), 'back', { npc: S.npc, uid: row.uid }); }
@@ -165,5 +171,5 @@ export function createShop({ net, hud, actors, me, bag }) {
     n.on('you', p => { if (p.gold != null && panel.isOpen) draw(); });
     n.on('joined', () => { if (panel.isOpen) panel.close(); });
   }
-  return { wire, open, tick, panel, get state() { return { npc: S.npc, tab: S.tab, sellTab: S.sellTab, view: S.view ? { name: S.view.name, stock: (S.view.stock || []).length, buyback: (S.view.buyback || []).length } : null }; }, setTab(t) { S.tab = t; draw(); } };
+  return { wire, open, tick, panel, get state() { return { npc: S.npc, tab: S.tab, sellTab: S.sellTab, sureRare: S.sureRare, view: S.view ? { name: S.view.name, stock: (S.view.stock || []).length, buyback: (S.view.buyback || []).length } : null }; }, setTab(t) { S.tab = t; draw(); } };
 }

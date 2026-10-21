@@ -301,6 +301,7 @@ export function createSpells(scene, { camera, renderer = null, actors, groundY =
       case 'summon': case 'companion': if (a) fx.pillar({ at: V(a.pos.x, g(a.pos), a.pos.z), radius: 1.2, element: 'arcane', ms: 800 }); break;
       case 'form': if (a) fx.pillar({ at: V(a.pos.x, g(a.pos), a.pos.z), radius: 1.5, element: 'nature', ms: 700 }); break;
       case 'modifier': if (a) fx.cast({ at: chest(a), element: 'shadow', ms: 600, ground: g(a.pos) }); break;
+      case 'sprint': if (a) fx.footfall({ at: feet(a.pos.x, a.pos.z), element: 'physical' }); break;     // play-test 12 (#75): a monster breaks into a sprint — a kick of dust as it goes
       default: break;
     }
   }

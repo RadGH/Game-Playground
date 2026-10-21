@@ -81,6 +81,20 @@ export function voyageProfile(L, T, V = VOYAGE) {
   return { vMax, T, k, at, speed: t => { t = Math.max(0, Math.min(T, t)); return rate(vMax, k)(at(t), t) * sc; } };
 }
 
+/**
+ * Pure (play-test 12, #86: "on arrival the boat does an impossibly quick 180 degree turn on a dime"). The heading she
+ * comes alongside with: the berth's own heading, or the opposite one (moored bow-in instead of bow-out), whichever is
+ * nearer the heading she arrives on — so the last turn is at most a quarter turn, never a spin. No berth: the route's.
+ */
+export function arrivalYaw(berth, routeYaw) {
+  if (!berth || !Number.isFinite(berth.yaw)) return routeYaw;
+  const a = berth.yaw, b = berth.yaw + Math.PI;
+  return Math.abs(angDelta(routeYaw, a)) <= Math.abs(angDelta(routeYaw, b)) ? a : Math.atan2(Math.sin(b), Math.cos(b));
+}
+/** Seconds a turn of (from -> to) is eased over: 3.2 s for nothing, plus TURN_SEC_PER_RAD for every radian (pure). */
+export const TURN_SEC_PER_RAD = 2.2;
+export const turnSec = (from, to) => 3.2 + TURN_SEC_PER_RAD * Math.abs(angDelta(from, to));
+
 // ---------------------------------------------------------------------------------------------------------------------
 // the ship
 
@@ -396,7 +410,13 @@ vec4 seaWaves(vec2 p, float r) {
   // the whole local sea stands uBase metres up so its troughs never dip under the far horizon's flat sea (-0.5 m);
   // the lift fades out toward the rim, where the horizon's sea takes over
   float lift = uBase * (1.0 - smoothstep(uFadeFrom * 0.6, uRadius, r));
-  return vec4(h * fade + lift, dx * fade, dz * fade, hs * fade);
+  // play-test 12 (#86, "seams in the water"): the six waves add up to 1.62 m, more than the 1.1 m lift, so where enough
+  // troughs lined up the local sea dipped UNDER the world's own water (y 0 by every coast) and the darker sea under it
+  // showed through as dark streaks along the wave fronts. The deepest troughs are now eased onto a floor 0.12 m above
+  // the world's water (an exponential knee 0.3 m above the floor: unchanged above it, never below the floor).
+  float y = h * fade + lift, floorY = lift - uBase + 0.12;
+  if (y < floorY + 0.3) y = floorY + 0.3 * exp((y - floorY - 0.3) / 0.3);
+  return vec4(y, dx * fade, dz * fade, hs * fade);
 }`;
 const SEA_VERT = /* glsl */`
 varying vec3 vW; varying float vR; varying vec2 vP; varying vec2 vL;
@@ -685,9 +705,10 @@ export function createShipVoyage(scene, { view, camera, actors, travel, hud, con
     V = {
       m, curve, L, T, ship, sea, gulls, spray, serpent, plume, frame, profile: voyageProfile(L, T),
       t0: performance.now(), t: 0, s: 0, x: pts[0].x, z: pts[0].z, yaw: fromBerth?.yaw ?? Math.atan2(tan0.x, tan0.z),
-      yaw0: fromBerth ? fromBerth.yaw : Math.atan2(tan0.x, tan0.z), yawEnd: toBerth ? toBerth.yaw : Math.atan2(tanN.x, tanN.z),
-      run: 0, cam: null, crew: Array.isArray(m.crew) ? m.crew : [], volcano: findVolcano(m.volcano || DATA?.volcano), arrived: false, poseAt: -1,
+      yaw0: fromBerth ? fromBerth.yaw : Math.atan2(tan0.x, tan0.z), yawEnd: arrivalYaw(toBerth, Math.atan2(tanN.x, tanN.z)),
+      run: 0, offX: 0, offZ: 0, cam: null, crew: Array.isArray(m.crew) ? m.crew : [], volcano: findVolcano(m.volcano || DATA?.volcano), arrived: false, poseAt: -1,
       fog: { near: scene.fog?.near, far: scene.fog?.far }, preloaded: false, serpentSaid: false,
+      tan0x: tan0.x, tan0z: tan0.z, tanNx: tanN.x, tanNz: tanN.z,
     };
     // the deck and the far rim: compile now so the first frame at sea does not stutter
     if (compile) { try { compile(ship.group); } catch { /* drawn anyway */ } }
@@ -727,15 +748,24 @@ export function createShipVoyage(scene, { view, camera, actors, travel, hud, con
     V.x = p.x; V.z = p.z;
     // heading: the berth's at cast-off, the route's at sea, the far berth's as she comes alongside
     let yaw = Math.atan2(tan.x, tan.z);
-    const a = smooth(t / 3.2), b = smooth((t - (V.T - 3.2)) / 3.2);
+    // #86: the turns take as long as they are big (TURN_SEC_PER_RAD), and the arrival turn is never more than a quarter
+    // turn (arrivalYaw: she comes alongside bow-in or bow-out, whichever is nearer the way she is going)
+    const wa = turnSec(V.yaw0, Math.atan2(V.tan0x, V.tan0z)), wb = turnSec(V.yawEnd, Math.atan2(V.tanNx, V.tanNz));
+    const a = smooth(t / wa), b = smooth((t - (V.T - wb)) / wb);
     yaw = V.yaw0 + angDelta(V.yaw0, yaw) * a;
     yaw = yaw + angDelta(yaw, V.yawEnd) * b;
-    V.yaw += angDelta(V.yaw, yaw) * Math.min(1, dt * 3.5 + (V.yaw === yaw ? 1 : 0));
+    V.yaw += angDelta(V.yaw, yaw) * Math.min(1, dt * 2.5 + (V.yaw === yaw ? 1 : 0));
     if (t < 0.05) V.yaw = yaw;
     const sail = smooth(t / 4) * (1 - smooth((t - V.T + 2) / 2));
     // Z49: the water runs past at the ship's OWN speed (it used to run at a fixed 11 m/s while the land rushed past at
     // hundreds — the sea seemed to flow the wrong way); capped where the land is far off and waves would streak
-    V.run += dt * Math.min(VOYAGE.flowMaxMps, Math.max(VOYAGE.visualMps * 0.3, V.profile.speed(t))) * Math.max(0.15, sail);
+    const flow = dt * Math.min(VOYAGE.flowMaxMps, Math.max(VOYAGE.visualMps * 0.3, V.profile.speed(t))) * Math.max(0.15, sail);
+    V.run += flow;
+    // play-test 12 (#86: "as the boat turns in … the water appears to move incredibly fast to the side"): the sea's offset
+    // was (sin yaw, cos yaw) x the WHOLE distance run — kilometres — so any turn swung the entire wave field round a circle
+    // that big in a second. The offset is now the distance sailed added up step by step along each step's own heading:
+    // a turn changes only where the NEXT metres go.
+    V.offX += Math.sin(V.yaw) * flow; V.offZ += Math.cos(V.yaw) * flow;
     const g = V.ship.group;
     g.position.set(V.x, VOYAGE.seaLift + 0.3 * Math.sin(t * 1.05) - 0.15, V.z);
     g.rotation.set(0.022 * Math.sin(t * 1.27 + 1), V.yaw, 0.045 * Math.sin(t * 0.83) + 0.05 * sail, 'YXZ');
@@ -790,7 +820,7 @@ export function createShipVoyage(scene, { view, camera, actors, travel, hud, con
     // the sea, the ship's own motion
     v.sea.mesh.position.set(v.x, 0, v.z);
     const U = v.sea.uniforms;
-    U.uTime.value = t; U.uOff.value.set(Math.sin(v.yaw) * v.run, Math.cos(v.yaw) * v.run);
+    U.uTime.value = t; U.uOff.value.set(v.offX, v.offZ);      // #86: the distance sailed, as a point (see pose())
     if (view?.sunDir) U.uSun.value.copy(view.sunDir);
     if (scene.fog) U.uSky.value.copy(scene.fog.color);
     const day = Math.max(0.12, Math.min(1, (view?.sun?.intensity ?? 2.4) / 2.4));

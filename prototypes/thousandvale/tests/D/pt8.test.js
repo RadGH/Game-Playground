@@ -82,7 +82,7 @@ test('W29: Reply starts a NEW report whose text begins "#<id> " (once), and name
   assert.equal(C.replyRef('#99 not mine', [{ id: 41 }]), null);
   assert.equal(C.replyRef('no reference', [{ id: 41 }]), null);
   const fb = src('js/client/ui/feedback.js');
-  assert.match(fb, /n\.myReports\(\)/); assert.match(fb, /n\.feedback\(o\.kind, o\.text, o\.ctx, o\.ref\)/);
+  assert.match(fb, /n\.myReports\(\)/); assert.match(fb, /n\.feedback\(o\.kind, o\.text, o\.ctx, o\.ref\b/);      // (play-test 12: a 5th argument, the screenshot flag, may follow)
   assert.match(fb, /n\.on\('feedbackMine'/);
 });
 test('W28: the admin sets Completed only with a note the player can read', () => {

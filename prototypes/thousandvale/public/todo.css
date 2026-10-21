@@ -1,0 +1,4 @@
+/* Thousandvale to-do list (public/todo.html) — on top of privacy.css's colours and layout. */
+.todo { padding-left: 1.2em; margin: 8px 0; }
+.todo li { margin: 0 0 10px; }
+.todo b { color: var(--gold); font-weight: normal; }

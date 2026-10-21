@@ -35,8 +35,12 @@ export const KIND_ART = [
   { key: 'hedge', bush: ['shrub'], scale: 1.15, squash: [1.5, 0.85, 1.5] },
   // Vharlen, the Burning Isle (stream T): `custom` pieces come from vharl-scatter-art.js (one variant per name);
   // `tint` darkens a kit tree's vertex colours (a charred trunk); `far` draws a custom piece out to the mid tree range
-  { key: 'tree_fern', custom: ['a', 'b', 'c'], scale: 1, far: true },
-  { key: 'ironpalm', tree: ['palm_fan'], scale: 0.62, tint: [0.62, 0.58, 0.55] },
+  // 2026-10-17 (owner: "the new [island] has very short palm trees"): `lift` = [y0, extra] in the piece's own units — the
+  // trunk below y0 is stretched and everything above it (the crown) is carried up `extra`, so the fronds keep their size.
+  // An ironpalm was 4.3 m (a broadleaf is ~7 m): now 9-10 m at scale 1, a tree fern 3.6 m -> 5.2 m. Collider radii in
+  // js/rules/nav-refine.js follow `scale` (the trunk got thicker with it), not `lift`.
+  { key: 'tree_fern', custom: ['a', 'b', 'c'], scale: 1, far: true, lift: [2.4, 1.6] },
+  { key: 'ironpalm', tree: ['palm_fan'], scale: 0.8, tint: [0.62, 0.58, 0.55], lift: [5, 5] },
   { key: 'tree_charred', tree: ['dead_snag', 'dead_pine'], scale: 0.62, tint: [0.22, 0.2, 0.19] },
   { key: 'basalt_columns', custom: ['a', 'b', 'c', 'd'], scale: 1, far: true },
   { key: 'obsidian', custom: ['a', 'b', 'c'], scale: 1 },
@@ -48,12 +52,24 @@ const artType = art => (art.custom ? 'custom' : art.tree ? 'tree' : art.bush ? '
 export const RANGES = { high: { tree: [80, 240, 700], small: 220, reed: 110 }, medium: { tree: [60, 200, 560], small: 170, reed: 90 }, low: { tree: [0, 90, 280], small: 70, reed: 40 } };
 
 const GEO = new Map();
-function geoFor(art, name, lod, tint = null) {
-  const k = `${art}|${name}|${lod}${tint ? '|' + tint.join(',') : ''}`;
+/** Raise a piece's crown (see KIND_ART `lift`): bark/custom below y0 stretched, crown and leaves carried up `extra`. */
+function liftGeo(geo, [y0, extra], isLeaf) {
+  if (!geo) return null;
+  const g = geo.clone(), p = g.getAttribute('position'), k = (y0 + extra) / y0;
+  for (let i = 0; i < p.count; i++) { const y = p.getY(i); p.setY(i, isLeaf || y > y0 ? y + extra : y * k); }
+  p.needsUpdate = true; g.computeBoundingBox(); g.computeBoundingSphere();     // normals kept: a trunk stretched upright barely tilts them, and the kit's leaf cards carry hand-set ones
+  return g;
+}
+
+function geoFor(art, name, lod, tint = null, lift = null) {
+  const k = `${art}|${name}|${lod}${tint ? '|' + tint.join(',') : ''}${lift ? '|L' + lift.join(',') : ''}`;
   if (!GEO.has(k)) {
     let g = null;
     try {
-      if (tint) {
+      if (lift) {
+        const b = geoFor(art, name, lod, tint);
+        g = b ? { bark: liftGeo(b.bark, lift, false), leaf: liftGeo(b.leaf, lift, true), rock: b.rock, custom: liftGeo(b.custom, lift, false), kind: b.kind } : null;
+      } else if (tint) {
         // a darker copy of the kit piece (same geometry, vertex colours scaled)
         const b = geoFor(art, name, lod);
         const dark = geo => { if (!geo) return null; const c = geo.clone(), col = c.getAttribute('color'); if (col) { for (let i = 0; i < col.count; i++) col.setXYZ(i, col.getX(i) * tint[0], col.getY(i) * tint[1], col.getZ(i) * tint[2]); col.needsUpdate = true; } return c; };
@@ -77,14 +93,14 @@ export async function prewarmScatter({ quality = 'high' } = {}) {
   const todo = [];
   for (const art of KIND_ART) {
     const type = artType(art);
-    for (const name of art[type]) for (const lod of (type === 'tree' ? (quality === 'low' ? [1, 2] : [0, 1, 2]) : [1])) todo.push([type, type === 'custom' ? `${art.key}:${name}` : name, lod, art.tint || null]);
+    for (const name of art[type]) for (const lod of (type === 'tree' ? (quality === 'low' ? [1, 2] : [0, 1, 2]) : [1])) todo.push([type, type === 'custom' ? `${art.key}:${name}` : name, lod, art.tint || null, art.lift || null]);
   }
   // (play-test 7) rest when 12 ms of building have been done, not before every piece: on a renderer that draws a frame
   // every few seconds an idle callback comes once a frame, and sixty waits were five minutes of boot
   let at = performance.now();
-  for (const [type, name, lod, tint] of todo) {
+  for (const [type, name, lod, tint, lift] of todo) {
     if (performance.now() - at > 12) { await new Promise(r => (typeof requestIdleCallback === 'function' ? requestIdleCallback(() => r(), { timeout: 400 }) : setTimeout(r, 30))); at = performance.now(); }
-    perf.span('scatter:prewarm', () => geoFor(type, name, lod, tint));
+    perf.span('scatter:prewarm', () => geoFor(type, name, lod, tint, lift));
   }
   return todo.length;
 }
@@ -131,7 +147,7 @@ export async function createScatterView(T, sc, { quality = 'high' } = {}) {
   for (const [pi, p] of protos.entries()) {
     const levels = p.type === 'tree' ? [0, 1, 2] : [1];
     p.meshes = levels.map(lod => {
-      const g = geoFor(p.type, p.name, lod, p.art.tint || null);
+      const g = geoFor(p.type, p.name, lod, p.art.tint || null, p.art.lift || null);
       const parts = [];
       if (g) for (const [geo, mat] of [[g.bark, mats.bark], [g.leaf, mats.leaf], [g.rock, mats.rock], [g.custom, g.custom ? vharlMaterial(g.kind, quality === 'low') : null]]) {
         if (!geo) continue;

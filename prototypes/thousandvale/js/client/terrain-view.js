@@ -89,6 +89,7 @@ export const SET_GROUND = {
   graveyard: { path: 0, tint: 0.5 }, orchard: { path: 0.05, tint: 0.4 }, gravel: { path: 0.7, tint: 0.55 },
 };
 /**
+ * (2026-10-17: the ash base is tinted a warm scoria brown — the owner's repaint of the island had reddish-brown earth.)
  * Ground palettes (stream T, docs/EXPANSION-1.md): a zone whose terrain meta says `palette: 'vharl'` (Vharlen, the
  * Burning Isle) is drawn with its own surfaces over the SAME biome ids — ash where Torbor Downs has grass, dark jungle
  * moss for the forest floor, black basalt for rock, black sand for sand, plus two layers Torbor never uses: sulphur crust
@@ -97,8 +98,8 @@ export const SET_GROUND = {
  */
 export const GROUND_PALETTES = {
   vharl: {
-    textures: { grass: ['ash', null], floor: ['moss', '#7e9a76'], rock: ['cliff', '#5c5a5e'], sand: ['sand', '#3c3936'], path: ['dirt', '#a39c94'], sulphur: ['sand', '#f2dc4a'], mud: ['mud', null] },
-    low: { grass: '#57534f', floor: '#33452c', rock: '#3a383b', sand: '#2e2b29', path: '#6a5f52', sulphur: '#bfa832', mud: '#3e3229' },
+    textures: { grass: ['ash', '#c8a088'], floor: ['moss', '#7e9a76'], rock: ['cliff', '#5c5a5e'], sand: ['sand', '#3c3936'], path: ['dirt', '#a39c94'], sulphur: ['sand', '#f2dc4a'], mud: ['mud', null] },
+    low: { grass: '#5e4c41', floor: '#33452c', rock: '#3a383b', sand: '#2e2b29', path: '#6a5f52', sulphur: '#bfa832', mud: '#3e3229' },
     biomes: {
       beach: { sand: 0.92 }, coast: { sand: 0.8 }, lake: { sand: 0.75 },
       rainforest: { forest: 0.86, mul: [0.92, 1.05, 0.9] }, shrubland: { forest: 0.55, mul: [0.95, 1.08, 0.92] }, savanna: { forest: 0.3, mul: [1.1, 1.12, 0.92] },
@@ -153,6 +154,16 @@ export function createTerrainView(T, { textureSize = 512, quality = 'high', clea
     const slope = T.slopeDeg(x, z), b = T.biomeKey(x, z), B = PAL.biomes[b] || {};
     let forest = B.forest || 0, sand = B.sand || 0, path = B.path || 0, sul = B.sulphur || 0, mud = B.mud || 0;
     let rock = Math.max(smooth(28, 40, slope), B.rock || 0);
+    // (the downs palette: a farm's fields, crops and yards are drawn by the default rules — bare earth and the field's tint)
+    const SP = PAL.setPieces ? SET_GROUND[b] : null;
+    if (SP) {
+      forest = 0; sand = 0; sul = 0; mud = 0; path = SP.path; rock = Math.min(rock, 0.15);
+      out[o] = 0; out[o + 1] = rock * (1 - path); out[o + 2] = 0; out[o + 3] = path * (1 - rock);
+      if (out2) { out2[o2] = 0; out2[o2 + 1] = 0; }
+      const hex = biomeColors?.[b]; col.setRGB(1, 1, 1);
+      if (hex) { bcol.set(hex); const l = (bcol.r + bcol.g + bcol.b) / 3 || 1, k = SP.tint; col.setRGB(1 - k + k * bcol.r / l, 1 - k + k * bcol.g / l, 1 - k + k * bcol.b / l); }
+      return col;
+    }
     const w = T.waterAt(x, z);
     if (w.depth > 0) sand = Math.max(sand, 0.7);
     for (const c of clearings) { const d = Math.hypot(x - c.x, z - c.z) / c.r; forest *= smooth(0.7, 1.2, d); path = Math.max(path, (1 - smooth(0.12, 0.6, d)) * 0.7); }
@@ -209,12 +220,33 @@ export function createTerrainView(T, { textureSize = 512, quality = 'high', clea
           }
           float macro = tvNoise(p * 0.012) * 0.5 + tvNoise(p * 0.041) * 0.5;
           c *= mix(0.84, 1.14, macro);
+          // 2026-10-17 ground pass: mottling — darker damp patches and paler dry ones a few metres across, and a fine
+          // speckle — so a field far enough out that its texture has blurred to one colour still is not one flat sheet
+          float blot = tvNoise(p * 0.19) * 0.6 + tvNoise(p * 0.53 + 17.0) * 0.4;
+          c *= mix(0.78, 1.1, smoothstep(0.22, 0.8, blot));
+          c *= 0.93 + 0.14 * tvNoise(p * 3.1);
           float camD = length(vW - cameraPosition);
           float near = 1.0 - smoothstep(18.0, 60.0, camD);
           vec3 det = texture2D(tGrass, p * 0.9).rgb;
-          c = mix(c, c * (det * ${PAL ? '2.2' : '1.5'} + 0.28), near * 0.25);
+          c = mix(c, c * (det * ${PAL ? (PAL.detail || 2.2).toFixed(1) : '1.5'} + 0.28), near * 0.25);
           diffuseColor.rgb *= c;
           ${clouds ? groundCloudGlsl : ''}
+        }`)
+      // 2026-10-17 ground pass — the ground is matte. MeshStandardMaterial keeps a 4% specular floor however rough it
+      // is, and at a low sun that floor becomes a broad sheen of sky colour across the whole field ("the ground
+      // reflects the sky and looks like plastic"). Earth has no such sheen: zero it.
+      .replace('#include <lights_physical_fragment>', '#include <lights_physical_fragment>\n material.specularColor = vec3(0.0); material.specularColorBlended = vec3(0.0); material.specularF90 = 0.0;')
+      // and lumpy: a world-space bump from value noise (~0.8 m clods) tilts the shading normal (strongest close, gone
+      // by ~90 m where it would only shimmer), so a flat field reads as clods and hollows rather than one sheet
+      .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
+        {
+          float fade = (1.0 - smoothstep(30.0, 90.0, length(vW - cameraPosition))) * (1.0 - vSplat.y);
+          if (fade > 0.01) {
+            vec2 q = vW.xz * 1.3; float e = 0.15;
+            float h0 = tvNoise(q), hx = tvNoise(q + vec2(e, 0.0)), hz = tvNoise(q + vec2(0.0, e));
+            vec3 tilt = vec3(h0 - hx, 0.0, h0 - hz) / e * 0.13 * fade;
+            normal = normalize(normal + mat3(viewMatrix) * tilt);
+          }
         }`);
   };
 

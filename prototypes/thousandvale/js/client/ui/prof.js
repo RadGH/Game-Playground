@@ -37,7 +37,7 @@ const load = path => fetch(new URL(path, import.meta.url)).then(r => (r.ok ? r.j
 
 export function createProf({ net, hud, bag = null, sheet = null, journal = null, sound = createProfSound() } = {}) {
   injectCss();
-  const S = { list: [], opened: new Map(), skins: new Map(), work: null, numbers: null, content: null, view: null, joinAt: 0, lastNpc: null };
+  const S = { list: [], opened: new Map(), skins: new Map(), work: null, numbers: null, content: null, view: null, joinAt: 0, lastNpc: null, batch: null };
   const words = () => S.numbers?.quality?.name || QUALITY_WORD;
   const mini = createMinigame({ sound, words });
   const dataP = Promise.all([load('../../../data/rules/professions.json'), load('../../../data/provinces/professions.json')]).then(([n, c]) => { S.numbers = n; S.content = c; redraw(); return { numbers: n, content: c }; });
@@ -61,7 +61,7 @@ export function createProf({ net, hud, bag = null, sheet = null, journal = null,
     const prof = m.prof || extra.prof || Object.keys(GAME_OF).find(p => GAME_OF[p] === m.game?.type);
     const res = await mini.play({ game: m.game, prof, mins: S.numbers?.quality?.min, tint: extra.tint || PROF_TINT[prof], title: extra.title, sub: extra.sub || PROF_NAME[prof] });
     if (S.work?.token !== token) return;                                  // something newer took over
-    if (!res) { S.work = null; craft.setBusy(false); send(kind, 'stop'); return; }
+    if (!res) { S.work = null; S.batch = null; craft.setBusy(false); send(kind, 'stop'); return; }      // walking away from one cut ends a batch (#69)
     S.work.sent = true;
     if (!send(kind, 'done', { id: m.id, inputs: res.inputs })) { S.work = null; craft.setBusy(false); mini.showResult({ quality: res.quality, note: 'Not connected — nothing was made.' }); }
   }
@@ -72,6 +72,7 @@ export function createProf({ net, hud, bag = null, sheet = null, journal = null,
     else if (msg) hud.toast(msg, 'warn');
   }
   function stopped(m) {
+    S.batch = null;
     if (mini.isOpen && mini.run && !mini.run.done) { mini.cancel(); const t = m.why in STOPPED ? STOPPED[m.why] : m.msg; if (t) hud.toast(t, 'info'); }
     S.work = null; craft.setBusy(false);
   }
@@ -83,14 +84,27 @@ export function createProf({ net, hud, bag = null, sheet = null, journal = null,
     return out;
   }
 
+  // play-test 12 (#69) — bulk skinning: E on a beast you killed skins it and then every other beast of yours within
+  // ten metres, one after another (gatherDone.more says how many are left; the next starts by itself once the result
+  // card has been read). Each body is still its own mini-game, roll and experience — the trade's rules are untouched.
+  // Escape (or stepping away) on any cut ends the run; a botched cut ends it too, so the body is yours to retry.
+  const BATCH_GAP_MS = 1300;
   function gather(id = null) {
     if (mini.isOpen && mini.run && !mini.run.done) return false;
+    if (id != null && S.skins.has(id)) { S.batch = { n: 1, left: null }; return send('gather', 'start', { id, batch: true }); }
+    S.batch = null;
     return send('gather', 'start', id != null ? { id } : {});
   }
+  function nextSkin() {
+    const b = S.batch; if (!b) return;
+    clearTimeout(b.t);
+    b.t = setTimeout(() => { if (S.batch !== b || S.work) return; if (mini.isOpen && mini.run && !mini.run.done) return; b.n++; send('gather', 'start', { batch: true }); }, BATCH_GAP_MS);
+  }
   function onGatherR(m) {
-    if (!m.ok) { if (m.state === 'idle' && S.work?.kind === 'gather') stopped(m); refused(m, 'You cannot work that.'); return; }
+    if (!m.ok) { const quiet = m.batch === 'end' && S.batch && S.batch.n > 1; S.batch = null; if (m.state === 'idle' && S.work?.kind === 'gather') stopped(m); if (!quiet) refused(m, 'You cannot work that.'); return; }
     if (m.state !== 'play' || !m.game) { if (m.state === 'idle') stopped(m); return; }
-    play('gather', m, { prof: m.prof, title: m.node?.name || null, sub: `${PROF_NAME[m.prof] || ''}${m.node?.tier ? ' · tier ' + m.node.tier : ''}`, tint: tintOf(m.prof, m.node?.kind) });
+    const more = S.batch && m.prof === 'skinning' && S.batch.left ? ` · ${S.batch.left - 1 > 0 ? `${S.batch.left - 1} more after this` : 'the last one'}` : '';
+    play('gather', m, { prof: m.prof, title: m.node?.name || null, sub: `${PROF_NAME[m.prof] || ''}${m.node?.tier ? ' · tier ' + m.node.tier : ''}${more}`, tint: tintOf(m.prof, m.node?.kind) });
   }
   function onGatherDone(m) {
     S.work = null; craft.setBusy(false);
@@ -99,6 +113,8 @@ export function createProf({ net, hud, bag = null, sheet = null, journal = null,
     mini.showResult({ quality: m.quality, title: m.highScore ? 'High score: half as much again, and a find' : null, items, lines: skillLines(m, m.prof), note: m.ok ? (m.reopenMs > 0 ? `Back in about ${Math.max(1, Math.round(m.reopenMs / 60000))} min` : null) : (m.msg || 'Nothing. It is still there: try again.'), stay: m.ok ? 3200 : 2600 });
     if (m.ok && items.length) hud.chat?.(`${words()[m.quality] || ''} work: ${items.map(i => `${i.count} ${i.name}`).join(', ')}.`, 'loot');
     if (m.skill?.up) hud.toast(`${PROF_NAME[m.prof]} ${m.skill.level}`, 'good');
+    if (S.batch && m.prof === 'skinning' && m.ok && m.more > 0) { S.batch.left = m.more; nextSkin(); }
+    else { if (S.batch && S.batch.n > 1 && m.ok) hud.chat?.(`Skinned ${S.batch.n} beasts.`, 'system'); S.batch = null; }
   }
 
   // ---- making ------------------------------------------------------------------------------------------------
@@ -202,7 +218,7 @@ export function createProf({ net, hud, bag = null, sheet = null, journal = null,
     S.view?.setSpentAll(S.opened);
   }
   function wire(n) {
-    n.on('joined', j => { S.joinAt = Date.now(); S.exact = false; S.skins.clear(); S.view?.clearSkins?.(); setList(j.you?.professions); const o = j.you?.opened; setOpened(Array.isArray(o) ? o : Object.keys(o || {})); if (S.work) { mini.cancel(); S.work = null; craft.setBusy(false); } mount(); });
+    n.on('joined', j => { S.joinAt = Date.now(); S.exact = false; S.skins.clear(); S.batch = null; S.view?.clearSkins?.(); setList(j.you?.professions); const o = j.you?.opened; setOpened(Array.isArray(o) ? o : Object.keys(o || {})); if (S.work) { mini.cancel(); S.work = null; craft.setBusy(false); } mount(); });
     n.on('you', p => { if (p.professions) setList(p.professions); });
     n.on('sheet', s => { if (s?.professions) setList(s.professions); });
     n.on('gatherR', onGatherR); n.on('gatherDone', onGatherDone);
@@ -233,7 +249,7 @@ export function createProf({ net, hud, bag = null, sheet = null, journal = null,
       if (res) setTimeout(() => mini.showResult({ quality: res.quality, lines: ['A practice round — nothing was made.'], stay: 2600 }), 250);
       return res;
     },
-    get state() { return { list: S.list, opened: [...S.opened.keys()], skins: [...S.skins.keys()], work: S.work ? { kind: S.work.kind, id: S.work.id, sent: !!S.work.sent } : null, mini: mini.state, craft: craft.state, trainer: { open: trainer.isOpen, npc: T.npc }, ready: !!S.numbers }; },
+    get state() { return { list: S.list, opened: [...S.opened.keys()], skins: [...S.skins.keys()], work: S.work ? { kind: S.work.kind, id: S.work.id, sent: !!S.work.sent } : null, batch: S.batch ? { n: S.batch.n, left: S.batch.left } : null, mini: mini.state, craft: craft.state, trainer: { open: trainer.isOpen, npc: T.npc }, ready: !!S.numbers }; },
     _test: { onGatherR, onGatherDone, onCraftR, onCraftDone, onUsed, onProfR, setList, teachersOf },
   };
   if (typeof window !== 'undefined') window.tvprof = api;

@@ -578,12 +578,12 @@ test('T15: off-hand focuses add their rider — Burst, Ward, Siphon, Echo — an
     assert.equal(s.w.room.rules.basic(s.mage).hands, 2); }
 });
 
-test('T16: a sceptre swings in melee with its element, never throws a bolt, and says so', () => {
+test('T16: a sceptre swings in melee with its element, never throws a bolt, and says so (live #92 wording)', () => {
   const w = world();
   const cleric = w.add('cleric');
   const sc = withWeapon(w, cleric, 'scepter', { attune: 'fire' });
   assert.equal(sc.castForm, 'melee');
-  assert.match(sc.attackText, /melee swing.*deals fire damage instead of physical.*never throws a bolt/);
+  assert.match(sc.attackText, /melee swing.*deals fire damage instead of physical.*does not shoot/);
   assert.equal(w.room.rules.attackRange(cleric), null, 'melee reach');
   const a = w.mob(0, 2.2);
   const from = w.events.length;

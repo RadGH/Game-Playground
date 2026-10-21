@@ -185,6 +185,12 @@ test('Q26 + Q23: on the real forest, every node sits inside its own arm\'s area;
   assert.ok(searchForest(F, 'zzzqqq').length === 0);
   const byText = searchForest(F, 'secret-word', n => (n.id === one.id ? 'a SECRET-WORD in the card' : ''));
   assert.deepEqual(byText, [one.id]);
+  // play-test 12 (#80): "arcane" finds only nodes whose own name or description says arcane — not the whole Deep Study arm
+  const arc = searchForest(F, 'arcane');
+  const deep = F.nodes.filter(n => n.arm === 'arcane');
+  assert.ok(deep.length > 3);
+  assert.ok(arc.length < deep.length, `"arcane" found ${arc.length} of the arm's ${deep.length} nodes`);
+  for (const id of arc) { const n = F.byId.get(id); assert.match(`${n.name} ${n.desc || ''}`.toLowerCase(), /arcane/, `${id} matched without saying arcane`); }
 });
 
 test('R3: an event says when — seconds, minutes, or "when someone comes near"; every state has a line', async () => {

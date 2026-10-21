@@ -16,6 +16,26 @@
 import { FEEDBACK_KINDS, FEEDBACK_STATES } from '../net/protocol.js';
 import { economy } from './economy-knobs.js';
 
+/**
+ * Play-test 12 (#71): a bug report may carry a screenshot. The report is sent as before with `shot: true`; its answer
+ * says `shot: true` (go ahead) and the picture follows as `feedbackShot {id, i, n, data}` parts — a JPEG / WebP / PNG
+ * data URL cut into pieces (a frame is 16 kB). Only the account that sent report `id`, within `ms`, at most `chars`
+ * characters in all (~200 kB of picture). When the last part is in, the picture goes to `sink({ev:'shot', id, mime, b64})`
+ * — server/load.mjs writes it beside the feedback file as feedback-shots/<env>-<id>.<ext>, which
+ * tools/feedback-report.mjs and tools/feedback-page.mjs show. Nothing is kept in the database.
+ */
+export const SHOT = Object.freeze({ chars: 280000, parts: 30, ms: 120000 });
+const SHOT_KIND = { jpeg: 'jpg', webp: 'webp', png: 'png' };
+/** Is this base64 the start of a real JPEG / WebP / PNG (not just a label that says so)? */
+export function shotMagic(mime, b64) {
+  let head;
+  try { head = globalThis.atob(String(b64).slice(0, 24)); } catch { return false; }
+  const at = i => head.charCodeAt(i);
+  if (mime === 'jpeg') return at(0) === 0xff && at(1) === 0xd8 && at(2) === 0xff;
+  if (mime === 'png') return at(0) === 0x89 && head.slice(1, 4) === 'PNG';
+  if (mime === 'webp') return head.slice(0, 4) === 'RIFF' && head.slice(8, 12) === 'WEBP';
+  return false;
+}
 export const FEEDBACK = Object.freeze({ textMax: 2000, ctxMax: 6000, logLines: 60, logLine: 300, depth: 4, keys: 40, str: 500, gapMs: 2000, perHour: 1000, list: 100, mine: 50 });
 export const THANKS = Object.freeze({
   subject: 'Thank you',
@@ -111,7 +131,9 @@ export function createFeedback({ env: envName = null, store, wallNow = () => Dat
       if (first) counters.feedbackGifts = (counters.feedbackGifts || 0) + 1;
       else if (store.feedbackGiftFailed) { try { await store.feedbackGiftFailed(who.char); } catch { /* next time */ } }
     }
-    return { ok: true, id: row.id, first, state: row.state, ...(ref != null ? { ref } : {}), msg: first ? 'Thank you! There is a letter for you in the post.' : 'Thank you! Your ' + (kind === 'bug' ? 'bug report' : 'suggestion') + ' was sent.' };
+    const wantShot = m.shot === true && !!sink && who.account != null;
+    if (wantShot) { shotSweep(); shots.set(row.id, { account: who.account, at: wallNow(), parts: [], n: 0, chars: 0 }); }
+    return { ok: true, id: row.id, first, state: row.state, ...(ref != null ? { ref } : {}), ...(wantShot ? { shot: true } : {}), msg: first ? 'Thank you! There is a letter for you in the post.' : 'Thank you! Your ' + (kind === 'bug' ? 'bug report' : 'suggestion') + ' was sent.' };
   }
 
   /** W29: the caller's OWN reports, newest first -> a `feedbackList` body. Asked by account, so every character of it sees the same list. */
@@ -149,5 +171,28 @@ export function createFeedback({ env: envName = null, store, wallNow = () => Dat
     return { t: 'adminR', op: m.op, ok: false, why: 'op', msg: 'Unknown admin call.' };
   }
   void filter;
-  return { submit, adminOp, listMine, view, mine, R };
+  // ---- play-test 12 (#71): the screenshot that follows a report ----
+  const shots = new Map();          // report id -> { account, at, parts[], n, chars }
+  function shotSweep() { const t = wallNow(); for (const [id, x] of shots) if (t - x.at > SHOT.ms) shots.delete(id); }
+  /** One `feedbackShot {id, i, n, data}` part -> null while more are due, else the `feedbackShotR` body. */
+  function shot(who, m) {
+    const id = m.id, x = shots.get(id);
+    const no = (why, msg) => { shots.delete(id); return { t: 'feedbackShotR', ok: false, id, why, msg }; };
+    // (answered once — on the first part — not once per part; the parts after a refusal fall here too and stay quiet)
+    if (!x || x.account !== who.account || wallNow() - x.at > SHOT.ms) return (m.i | 0) === 0 ? { t: 'feedbackShotR', ok: false, id, why: 'unknown', msg: 'That report is not waiting for a picture.' } : null;
+    const n = m.n | 0, i = m.i | 0;
+    if (n < 1 || n > SHOT.parts || i < 0 || i >= n || (x.n && x.n !== n) || typeof m.data !== 'string') return no('parts', 'The picture came in pieces that do not fit.');
+    x.n = n;
+    if (x.parts[i] == null) { x.parts[i] = m.data; x.chars += m.data.length; }
+    if (x.chars > SHOT.chars) return no('size', 'The picture is too big.');
+    for (let k = 0; k < n; k++) if (x.parts[k] == null) return null;
+    shots.delete(id);
+    const all = x.parts.join(''), mm = /^data:image\/(jpeg|webp|png);base64,([A-Za-z0-9+/]+={0,2})$/.exec(all);
+    if (!mm || !shotMagic(mm[1], mm[2])) return no('kind', 'That is not a picture.');
+    try { sink({ ev: 'shot', id, mime: mm[1], ext: SHOT_KIND[mm[1]], b64: mm[2] }); } catch (err) { log('feedback shot not kept', err && err.message); return no('failed', 'The picture was not kept.'); }
+    counters.feedbackShots = (counters.feedbackShots || 0) + 1;
+    return { t: 'feedbackShotR', ok: true, id, bytes: Math.floor(mm[2].length * 3 / 4) };
+  }
+
+  return { submit, adminOp, listMine, view, mine, R, shot, get shotsWaiting() { shotSweep(); return shots.size; } };
 }

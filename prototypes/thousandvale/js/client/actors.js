@@ -28,6 +28,8 @@ import { createMount, seatRider, mountSpecFor, CHIBI2_MOUNT_ANIMS } from '../../
 import { CHIBI2_DUAL_ANIMS, CHIBI2_ANGLE_ANIMS, CHIBI2_REVIVE_ANIMS, CHIBI2_DUAL_SECONDS, dualAttackFor, dualAttackByCount } from '../../../../avatar-3d/js/chibi2-motion-dual.js';
 import { CHIBI2_CLIP_SECONDS } from '../../../../avatar-3d/js/chibi2-motion.js';
 import { choosePick, pickable, NEAR } from './pick-rule.js';      // Y8: live beats corpse; an emptied corpse is not there to click
+import { CHIBI2_REST_ANIMS } from '../../../../avatar-3d/js/chibi2-motion-rest.js';   // play-test 12 (#88 #76): front crawl, treading water, a held seat
+import { latchSwim, restClip } from './rest-clip.js';
 import { CHIBI2_PROF_ANIMS } from '../../../../avatar-3d/js/chibi2-motion-prof.js';   // W9 (P-client): work loops — mine, chop, stoop-and-pick, skin, hammer, stitch, stir   // play-test 5: T6 dual-wield strikes, T25 angling, T4 standing back up
 
 /** A creature spec from what the server sent: `{ type, size?, seed, colors? }` — colour varied by seed within its family. */
@@ -78,7 +80,7 @@ export const EMOTE_CLIP = Object.freeze({ wave: 'wave', cheer: 'cheer', bow: 'bo
 export const EMOTE_HOLD = Object.freeze(new Set(['sit', 'dance']));
 /** How long a one-off emote plays, in ms: the server's `ms` when it sends one (a wave while the horse comes), else the clip's own length. */
 export function emoteMs(e, ms = null) { const clip = EMOTE_CLIP[e]; if (!clip) return 0; return ms > 0 ? Math.round(ms) : Math.round((CHIBI2_CLIP_SECONDS[clip] || 1.6) * 1000); }
-const CHIBI_ANIMS = ['idle', 'ready', 'walk', 'run', 'attack', 'cast', 'hit', 'guard', 'wave', 'talk', 'jump', 'dead', 'swim', 'sitGround', 'drink', 'cheer', 'bowGreet', 'point', 'dance', ...CHIBI2_MOUNT_ANIMS, ...CHIBI2_DUAL_ANIMS, ...CHIBI2_ANGLE_ANIMS, ...CHIBI2_REVIVE_ANIMS, ...CHIBI2_PROF_ANIMS];   // sitGround/drink: eating and drinking (S20)   // swim: P25; ride/rideGallop: Q16
+const CHIBI_ANIMS = ['idle', 'ready', 'walk', 'run', 'attack', 'cast', 'hit', 'guard', 'wave', 'talk', 'jump', 'dead', 'swim', 'sitGround', 'drink', 'cheer', 'bowGreet', 'point', 'dance', ...CHIBI2_MOUNT_ANIMS, ...CHIBI2_DUAL_ANIMS, ...CHIBI2_ANGLE_ANIMS, ...CHIBI2_REVIVE_ANIMS, ...CHIBI2_PROF_ANIMS, ...CHIBI2_REST_ANIMS];   // sitGround/drink: eating and drinking (S20)   // swim: P25; ride/rideGallop: Q16
 
 /** Clips that are a strike: asked for again = a new swing, so they restart (T6: the dual-wield strikes too). */
 const STRIKES = new Set(['attack', 'hit', ...CHIBI2_DUAL_ANIMS, 'fishCast', 'fishShow', 'standUp']);
@@ -143,6 +145,17 @@ const CLASS_TINT = { warrior: '#b04a3a', knight: '#9aa4b4', paladin: '#e0c060', 
 
 /** Is a Chibi 2 body what is showing for this actor? (a player in a druid shape is a beast until it changes back — U16) */
 const person = a => (a.kind === 'player' || !!a.humanoid) && !a.shape;
+/**
+ * Play-test 12 (#87: "when pressing E to fish, the character should turn to face the fishing spot so the rod and line are
+ * straight"): `a.faceAt` ({x, z}, set by angling-view.js while a line is out) turns a body that is standing still to face
+ * that point; walking, riding or dead it is ignored (the walk's own heading wins). Exported for tests.
+ */
+export function faceYaw(a) {
+  const f = a.faceAt;
+  if (!f || a.dead || a.mount || !(a.speed <= 0.4)) return null;
+  const dx = f.x - a.pos.x, dz = f.z - a.pos.z;
+  return Math.hypot(dx, dz) < 0.3 ? null : Math.atan2(dx, dz);
+}
 /**
  * U16 (play-test 6): the creature a shape is drawn as, from C's `shape` object `{ id, creature, scale, colors, upright }`.
  * Pure — exported for tests. -> { key (cache key), type (avatar-3d creature type), size, colors, upright } or null.
@@ -213,9 +226,35 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
     });
   }
 
+  /**
+   * Play-test 12 (#84): a walk across a town edge swaps rooms, and every entity id of the old room is void — so the
+   * townsperson you were looking at (now in both rooms, js/sim/edge-share.js) was thrown away and built again: a grey
+   * stand-in for a frame or more. `park(id)` keeps a STANDING NPC's body for PARK_MS instead; `add` hands it to the new
+   * room's copy when one arrives with the same name and look within PARK_NEAR metres. Whatever is not claimed goes.
+   */
+  const parked = [];
+  const PARK_MS = 1500, PARK_NEAR = 0.75;
+  function park(id) {
+    const a = actors.get(id);
+    if (!a || a.self || a.kind !== 'npc' || a.dead || a.pet || !a.body || a.speed > 0.3) { remove(id); return false; }      // a walker would freeze mid-step: let it go
+    actors.delete(id); a.parkedUntil = performance.now() + PARK_MS; parked.push(a);
+    return true;
+  }
+  function claimParked(info) {
+    if (!parked.length || info.kind !== 'npc') return null;
+    const look = JSON.stringify(info.look ?? null);
+    const i = parked.findIndex(p => p.name === info.name && Math.hypot(p.pos.x - info.x, p.pos.z - info.z) < PARK_NEAR && JSON.stringify(p.look ?? null) === look);
+    return i < 0 ? null : parked.splice(i, 1)[0];
+  }
+  function expireParked(now) {
+    for (let i = parked.length - 1; i >= 0; i--) if (now >= parked[i].parkedUntil) dispose(parked.splice(i, 1)[0]);   // never through the id map: the new room may reuse the id
+  }
+
   function add(info, { self = false } = {}) {
     let a = actors.get(info.id);
     if (a) { Object.assign(a, pick(info)); a.dead = a.hp <= 0; refreshPlate(a); return a; }
+    a = claimParked(info);
+    if (a) { a.id = info.id; a.group.userData.actorId = info.id; Object.assign(a, pick(info)); a.parkedUntil = 0; actors.set(a.id, a); refreshPlate(a); return a; }   // #84
     a = {
       id: info.id, kind: info.kind, self, ...pick(info), still: null,
       group: new THREE.Group(), model: null, body: null, anim: 'idle', oneShot: null, oneShotUntil: 0,
@@ -421,10 +460,13 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
 
   function remove(id) {
     const a = actors.get(id); if (!a) return;
+    dispose(a);
+    actors.delete(id);
+  }
+  function dispose(a) {
     dropMount(a); dropShape(a, true); scene.remove(a.group); a.body?.dispose?.(); a.plate?.root.remove();
     if (a.ripples) for (const r of a.ripples) { scene.remove(r); r.material.dispose(); }
     a.group.clear();           // detaches any spell aura riding the body (SpellFx drops an aura whose group has no parent)
-    actors.delete(id);
   }
 
   // --- nameplates (DOM, so text is crisp at any size) -------------------------------------------
@@ -508,6 +550,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
   }
   function update(dt, renderTime, { selfPos = null, selfYaw = 0, selfMoving = 0, selfSwim = false, selfAim = null, targetId = null, hoverId = null, sample = null, speed = null } = {}) {
     const now = performance.now();
+    if (parked.length) expireParked(now);
     // LOD: who gets a body (re-ranked four times a second)
     if (now >= lodAt) {
       lodAt = now + 250;
@@ -532,9 +575,9 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
     for (const a of actors.values()) {
       if (a.self && selfPos) {
         a.pos.set(selfPos.x, selfPos.y, selfPos.z);
-        a.yaw += angleDelta(a.yaw, selfYaw) * Math.min(1, dt * 16);
         a.speed = selfMoving;
-        a.swim = !!selfSwim;
+        a.yaw += angleDelta(a.yaw, faceYaw(a) ?? selfYaw) * Math.min(1, dt * (a.faceAt ? 8 : 16));   // #87: an angler turns to the float
+        a.swim = latchSwim(a, !!selfSwim, now);      // #88: a one-frame flicker of the flag no longer restarts the stroke
       } else {
         const s = a.still || (sample ? sample(a.id, renderTime) : null);
         if (s && a.dead && a.deadPos && Math.hypot(s.x - a.deadPos.x, s.z - a.deadPos.z) < 8) {
@@ -545,9 +588,9 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
         } else if (s) {
           if (a.dead) a.deadPos = { x: s.x, z: s.z };
           a.pos.set(s.x, s.y, s.z);
-          a.swim = !!s.swim;
+          a.swim = latchSwim(a, !!s.swim, now);
           // Turn smoothly toward the sampled facing (sample yaw already interpolates; this hides 3 Hz far updates).
-          a.yaw += angleDelta(a.yaw, s.yaw) * Math.min(1, dt * 12);
+          a.yaw += angleDelta(a.yaw, faceYaw(a) ?? s.yaw) * Math.min(1, dt * (a.faceAt ? 8 : 12));
         }
         a.speed = a.still ? (a.still.speed || 0) : speed ? speed(a.id, renderTime) : 0;
       }
@@ -555,7 +598,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
       // a little; the legs keep the running line. Past what the hips can turn, the whole body comes round the rest of the
       // way (a sideways run, a backpedal), so the shot always leaves toward the target. Standing still, you just face it.
       let aimYaw = null;
-      if (!a.dead && !a.mount && !a.shape && !a.swim && person(a)) {
+      if (!a.dead && !a.mount && !a.shape && !a.swim && person(a) && faceYaw(a) == null) {      // #87: an angler faces the float, not the aim
         if (a.self) aimYaw = selfAim;
         else if (a.kind === 'player' && a.tgt && now - (a.swingAt || 0) < 1800) { const t = actors.get(a.tgt); if (t && !t.dead) aimYaw = Math.atan2(t.pos.x - a.pos.x, t.pos.z - a.pos.z); }
       }
@@ -601,12 +644,13 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
         const sp = a.speed;
         want = a.flying && !a.humanoid ? 'fly' : sp > 4.2 ? 'run' : sp > 0.4 ? 'walk' : (a.kind === 'player' && now - (a.lastCombat || 0) < 5000 ? 'ready' : 'idle');
       }
+      if (!a.shape && (a.kind === 'player' || a.humanoid || a.kind === 'npc')) want = restClip(a, want, now, a.speed);   // #88 crawl/tread, #76 sit down once then hold
       if (want !== a.anim) setAnim(a, want);
       if (a.body?.setRate) {
         if (a.shape) a.shape.body.setRate?.(a.anim === 'run' ? Math.max(0.6, a.speed / 5.2) : a.anim === 'walk' ? Math.max(0.5, a.speed / 1.5) : 1);
         else if (a.kind === 'player' || a.humanoid) {
           const run = a.anim === 'run';
-          a.body.setRate(a.anim === 'run' || a.anim === 'walk' ? Math.max(0.5, a.speed * (run ? 0.65 : 1.05) / (run ? 3.4 : 2.0)) : a.anim === 'swim' ? (a.speed > 0.4 ? 1.1 : 0.45) : 1);
+          a.body.setRate(a.anim === 'run' || a.anim === 'walk' ? Math.max(0.5, a.speed * (run ? 0.65 : 1.05) / (run ? 3.4 : 2.0)) : a.anim === 'swimCrawl' ? 1 : a.anim === 'swim' ? (a.speed > 0.4 ? 1.1 : 0.45) : 1);
         } else a.body.setRate(a.anim === 'run' ? Math.max(0.6, a.speed / 5.2) : a.anim === 'walk' ? Math.max(0.5, a.speed / 1.5) : 1);
       }
       // far: drawn by the instanced crowd, no mixer at all
@@ -805,5 +849,5 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
     p.root.classList.toggle('self-plate', !!a.self);
   }
 
-  return { actors, lodStats, setShape, setScale, setMount, setEating, add, remove, rekey, say, update, setLook, playAttack, playClip, playEmote, setFishing, setWorking, playHit, setDead, setHp, pickAt, get: id => actors.get(id), refreshPlate };
+  return { actors, lodStats, park, setShape, setScale, setMount, setEating, add, remove, rekey, say, update, setLook, playAttack, playClip, playEmote, setFishing, setWorking, playHit, setDead, setHp, pickAt, get: id => actors.get(id), refreshPlate };
 }

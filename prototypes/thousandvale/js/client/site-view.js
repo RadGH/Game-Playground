@@ -39,6 +39,17 @@ export function loadSiteData(province = null) {
   return siteData.get(own);
 }
 
+/**
+ * Play-test 12 (#72, "walls here angled wrong" — the Torbor Watchtower's yard fence): the part yaw that lays a box ALONG a
+ * ring, for a ring point at angle `a` placed at (sin a, cos a) x r (the `ring` helper below), and a box whose long side is
+ * its local `long` axis ('x' = width, 'z' = depth). A part turns by three's rotation.y (local +x -> (cos y, -sin y), +z ->
+ * (sin y, cos y)) and the ring's tangent at a is (cos a, -sin a), so an x-long box wants y = a and a z-long one a + pi/2.
+ * Every ring here had been written with -a (+ pi/2): the mirror image, right only at four (or two) angles round the ring and
+ * square across it at the others — fence boards, ruined wall stubs, pen rails and Vharlen's goat walls all stuck out
+ * like spokes. Pure, exported for tests/W/anim-rest.test.js.
+ */
+export const ringYaw = (a, long = 'x') => (long === 'z' ? a + Math.PI / 2 : a);
+
 const FIRE = new Set(['campfire', 'torch_post', 'fire_ring', ...VHARL_FIRE]);
 const STONE_T = '#8a857c', DARK_STONE_T = '#6d6961', WOOD_T = '#6e553d', DARK_WOOD_T = '#4a3a2c', THATCH = '#a8925a', EARTH_T = '#5f6b45', VOID = '#0b0a0c';
 // [W] Vharlen's site colours: dark basalt, red-ochre footings, ironpalm wood, ash-grey earth
@@ -49,7 +60,7 @@ function islandFarm(template, R, part, solids, L) {
     for (let k = 0; k < 3; k++) { const lz = R * (0.05 + k * 0.32); part('box', 0, lz, -0.4 + k * 0.32, R * 1.3, 0.75, R * 0.3, ISLE.DARK_STONE); for (let i = -4; i <= 4; i++) part('box', i * R * 0.14, lz, 0.3 + k * 0.32, R * 0.08, 0.32, R * 0.24, i % 2 ? ISLE.TARO : ISLE.TARO2); }
   } else if (template === 'sheep') {           // a dry-stone ring of lava rock with a gap at the front
     const r = R * 0.62;
-    for (let a = 0; a < Math.PI * 2; a += 0.24) { const d = Math.atan2(Math.sin(a), Math.cos(a)); if (Math.abs(d) < 0.3) continue; part('box', Math.sin(a) * r, Math.cos(a) * r + R * 0.2, -0.2, 0.7, 1.0, r * 0.26, (Math.round(a * 10) % 2) ? ISLE.STONE : ISLE.DARK_STONE, -a + Math.PI / 2); }
+    for (let a = 0; a < Math.PI * 2; a += 0.24) { const d = Math.atan2(Math.sin(a), Math.cos(a)); if (Math.abs(d) < 0.3) continue; part('box', Math.sin(a) * r, Math.cos(a) * r + R * 0.2, -0.2, 0.7, 1.0, r * 0.26, (Math.round(a * 10) % 2) ? ISLE.STONE : ISLE.DARK_STONE, ringYaw(a, 'z')); }
   } else if (template === 'pig') {             // salt pans: shallow basalt-rimmed beds, white crust in some, brine in others
     for (let i = -1; i <= 1; i++) for (let j = 0; j <= 1; j++) { part('box', i * 3.4, R * 0.15 + j * 2.8, -0.2, 3.1, 0.38, 2.5, ISLE.DARK_STONE); part('box', i * 3.4, R * 0.15 + j * 2.8, 0.0, 2.7, 0.2, 2.1, (i + j) % 2 ? ISLE.SALT : ISLE.WATER); }
   } else if (template === 'mill') {            // the steam well: a covered vent under a thatched roof on posts, steam rising
@@ -86,7 +97,7 @@ export function sitePlan(placements, features, data, ox = 0, oz = 0) {
           part('cyl', 0, -3, -0.5, 4.6, 10.5, 4.6, STONE); part('cone', 0, -3, 10, 5.6, 3.2, 5.6, DARK_WOOD);
           part('cyl', 0, -3, 9.4, 5.2, 0.6, 5.2, DARK_STONE);
           solids.push({ ...L(0, -3), r: 2.6, h: 13 });
-          ring(R * 0.7, 0.16, 0.45, (lx, lz, a) => part('box', lx, lz, -0.3, 0.3, 1.6, 2.2, WOOD, -a));
+          ring(R * 0.7, 0.16, 0.45, (lx, lz, a) => part('box', lx, lz, -0.3, 0.3, 1.6, 2.2, WOOD, ringYaw(a, 'z')));
           break;
         case 'palisade_fort': case 'toll_fort': case 'warband_stockade': {
           const crude = p.template === 'warband_stockade';
@@ -107,7 +118,7 @@ export function sitePlan(placements, features, data, ox = 0, oz = 0) {
           break;
         case 'ruined_fort': {
           let h = 7;
-          ring(R * 0.85, 0.36, 0.3, (lx, lz, a) => { h = (h * 9301 + 49297) % 233280; const hh = 1 + (h / 233280) * 3.5; part('box', lx, lz, -0.4, 4.2, hh, 1.1, DARK_STONE, -a + Math.PI / 2); });
+          ring(R * 0.85, 0.36, 0.3, (lx, lz, a) => { h = (h * 9301 + 49297) % 233280; const hh = 1 + (h / 233280) * 3.5; part('box', lx, lz, -0.4, 4.2, hh, 1.1, DARK_STONE, ringYaw(a, 'x')); });
           part('cyl', -R * 0.4, -R * 0.3, -0.4, 3.4, 4.5, 3.4, STONE); solids.push({ ...L(-R * 0.4, -R * 0.3), r: 1.9, h: 4.5 });
           break;
         }
@@ -123,7 +134,7 @@ export function sitePlan(placements, features, data, ox = 0, oz = 0) {
         const burned = p.flavour === 'burned', colour = burned ? '#3a3330' : p.flavour === 'corrupted' ? '#5a4a6a' : '#b9a24e';
         for (let k = -4; k <= 4; k++) part('box', k * 1.6, R * 0.35, -0.15, 0.7, 0.45, R * 0.9, k % 2 ? colour : '#7a8a3a');
       } else if (p.template === 'sheep' || p.template === 'pig') {
-        ring(R * 0.62, 0.22, 0.25, (lx, lz, a) => { part('box', lx, lz + R * 0.2, -0.2, 0.14, 1.1, 0.14, WOOD); part('box', lx, lz + R * 0.2, 0.55, 0.08, 0.1, 2.0, WOOD, -a + Math.PI / 2); });
+        ring(R * 0.62, 0.22, 0.25, (lx, lz, a) => { part('box', lx, lz + R * 0.2, -0.2, 0.14, 1.1, 0.14, WOOD); part('box', lx, lz + R * 0.2, 0.55, 0.08, 0.1, 2.0, WOOD, ringYaw(a, 'z')); });
       } else if (p.template === 'orchard') {
         for (let i = -1; i <= 1; i++) for (let j = 0; j <= 2; j++) { const q = L(i * 5, j * 5); props.push({ kind: 'tree', id: (i + j) % 2 ? 'oak' : 'birch', x: q.x, z: q.z, yaw: i + j, scale: 0.8 }); }
       } else if (p.template === 'mill') {

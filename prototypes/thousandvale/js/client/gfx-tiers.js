@@ -15,13 +15,15 @@
 //   grade        warm highlights / cool shadows folded into the tone mapping (no extra pass)
 //   vignette     a soft darkening of the screen's corners (a page overlay, not a WebGL pass)
 //   bloom        a soft glow round bright things (lamps at night, the sun, spells) — one extra quarter-size pass; High only
+//   clutter      grass tufts, ferns, small bushes, stones and lumps of earth round the camera (ground-clutter.js; how far
+//                each layer reaches is clutter-plan.js CLUTTER_LAYERS) — about a dozen draw calls; not on Low
 
 export const ATMOS_TIERS = Object.freeze({
-  low:    Object.freeze({ water: 'basic',  sparkle: false, shoreWaves: false, cloudShadows: false, mist: 0,  terrainAO: true,  contact: 0.34, grade: false, vignette: 0.16, bloom: false, warmCool: true }),
-  medium: Object.freeze({ water: 'shaded', sparkle: true,  shoreWaves: true,  cloudShadows: true,  mist: 8,  terrainAO: true,  contact: 0.24, grade: true,  vignette: 0.2,  bloom: false, warmCool: true }),
-  high:   Object.freeze({ water: 'shaded', sparkle: true,  shoreWaves: true,  cloudShadows: true,  mist: 16, terrainAO: true,  contact: 0.2,  grade: true,  vignette: 0.2,  bloom: true,  warmCool: true }),
+  low:    Object.freeze({ water: 'basic',  sparkle: false, shoreWaves: false, cloudShadows: false, mist: 0,  terrainAO: true,  contact: 0.34, grade: false, vignette: 0.16, bloom: false, warmCool: true, clutter: false }),
+  medium: Object.freeze({ water: 'shaded', sparkle: true,  shoreWaves: true,  cloudShadows: true,  mist: 8,  terrainAO: true,  contact: 0.24, grade: true,  vignette: 0.2,  bloom: false, warmCool: true, clutter: true }),
+  high:   Object.freeze({ water: 'shaded', sparkle: true,  shoreWaves: true,  cloudShadows: true,  mist: 16, terrainAO: true,  contact: 0.2,  grade: true,  vignette: 0.2,  bloom: true,  warmCool: true, clutter: true }),
   // ?atmos=0: exactly the look before this round (the measuring baseline)
-  off:    Object.freeze({ water: 'legacy', sparkle: false, shoreWaves: false, cloudShadows: false, mist: 0,  terrainAO: false, contact: 0,    grade: false, vignette: 0,    bloom: false, warmCool: false }),
+  off:    Object.freeze({ water: 'legacy', sparkle: false, shoreWaves: false, cloudShadows: false, mist: 0,  terrainAO: false, contact: 0,    grade: false, vignette: 0,    bloom: false, warmCool: false, clutter: false }),
 });
 
 /** The row for a quality ('low' | 'medium' | 'high'; anything else reads as high) and the page's `atmos` flag. */
@@ -37,6 +39,7 @@ export function tierWords(quality) {
   on.push(t.water === 'shaded' ? 'moving water with foam at the shore' : 'water with shallows and shore foam');
   if (t.cloudShadows) on.push('cloud shadows');
   if (t.mist) on.push('drifting mist');
+  if (t.clutter) on.push('grass and stones on the ground');
   if (t.bloom) on.push('glow round lights');
   return on.join(', ');
 }

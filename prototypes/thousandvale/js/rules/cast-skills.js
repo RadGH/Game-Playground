@@ -1226,10 +1226,17 @@ export function castPlan(combat, ch, plan, { echo = false, intent = {}, slot = n
     } else {
       // a bolt (main.js fireBolt), one per projectile
       const n = plan.projectiles || 1;
+      // play-test 12 (#90, owner: "Scattered Stars still looks like it shoots just one bolt … shoot them one after
+      // another with a delay, more like magic missile"): a skill row with `volleyEvery` (seconds) throws its projectiles
+      // one after another from where the caster stands THEN — each its own throw, landing on its own — instead of a
+      // fan that left the hand on one frame and, with a Tab target, flew one path.
+      const every = Number(plan.volleyEvery ?? plan.skill?.volleyEvery) || 0;
       for (let k = 0; k < n; k++) {
         const off = n === 1 ? 0 : (k / (n - 1) - 0.5) * plan.spread;
         const cs = Math.cos(off), sn = Math.sin(off);
-        fireBolt(combat, rt, ch, plan, a, a.dx * cs - a.dz * sn, a.dx * sn + a.dz * cs, strikeOpts, collect, intent);
+        const throwOne = from => fireBolt(combat, rt, ch, plan, from, from.dx * cs - from.dz * sn, from.dx * sn + from.dz * cs, strikeOpts, collect, intent);
+        if (k === 0 || every <= 0) throwOne(a);
+        else combat.later(k * every, () => { if (ch.dead || ch.removed) return; rt.withCaster(ch, () => throwOne({ ...a, x: ch.x, z: ch.z, y: (ch.y || 0) + 1.6 })); }, ch.id);
       }
     }
     afterCast(combat, rt, ch, plan, { a, hpBefore, origin: castFrom, intent });

@@ -36,7 +36,7 @@ export const SCATTER_COLLIDE = Object.freeze({
   boulder: { r: [0.94], art: 1.4 },
   tree_fruit: { r: [0.54, 0.56], art: 0.3, squash: 1.4 },
   tree_fern: { r: [0.2, 0.2, 0.2], art: 1 },
-  ironpalm: { r: [0.17], art: 0.62 },
+  ironpalm: { r: [0.17], art: 0.8 },      // 2026-10-17: drawn at 0.8 (taller palms, scatter-view.js KIND_ART)
   tree_charred: { r: [0.34, 0.46], art: 0.62 },
   basalt_columns: { r: [1.35, 1.33, 1.25, 1.24], art: 1 },
   obsidian: { r: [1.13, 1.37, 1.31], art: 1 },

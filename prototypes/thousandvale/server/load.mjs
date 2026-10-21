@@ -1,9 +1,9 @@
 // Shared server loading (stream A): rules, store, provinces/zones as layouts, classes, the log line.
 // Used by server/main.mjs (gateway, and stage 1's single process) and server/province-proc.mjs (stage 2).
 
-import { readFileSync, existsSync, appendFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, existsSync, appendFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { dirname, resolve, join } from 'node:path';
+import { dirname, resolve, join, basename } from 'node:path';
 import { randomBytes } from 'node:crypto';
 import { loadZoneTerrain, standInTerrain } from '../js/sim/terrain.js';
 import { createMemoryStore } from '../js/sim/store-memory.js';
@@ -66,11 +66,20 @@ export function loadMotd() {
 }
 /** Owner feedback 10 (Y30): the lead's player-facing changelog (data/ops/changelog.json), served at /changelog.json. */
 export function loadChangelog() { try { return JSON.parse(readFileSync(join(GAME, 'data/ops/changelog.json'), 'utf8')); } catch { return null; } }
+/** Play-test 12 (#71): where a report's screenshot is kept — beside the feedback file. */
+export function feedbackShotFile(env, id, ext, file = feedbackFile(env)) { return join(dirname(file), 'feedback-shots', `${env}-${id}.${ext}`); }
 export function feedbackSink(env = 'dev', file = feedbackFile(env)) {
   let made = false;
   return row => {
     try {
       if (!made) { mkdirSync(dirname(file), { recursive: true }); made = true; }
+      if (row && row.ev === 'shot') {
+        // #71: a bug report's screenshot (js/sim/feedback.js checked kind, size and owner) -> its own file + a line naming it
+        const shot = feedbackShotFile(env, row.id | 0, /^(jpg|webp|png)$/.test(row.ext) ? row.ext : 'jpg', file), buf = Buffer.from(String(row.b64 || ''), 'base64');
+        mkdirSync(dirname(shot), { recursive: true });
+        writeFileSync(shot, buf, { mode: 0o600 });
+        row = { ev: 'shot', id: row.id, file: basename(shot), bytes: buf.length, at: Date.now() };
+      }
       appendFileSync(file, JSON.stringify(row) + '\n', { mode: 0o600 });
     } catch (err) { log('feedback file not written', { file, err: err.message }); }
   };

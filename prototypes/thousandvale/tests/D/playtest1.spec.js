@@ -107,7 +107,7 @@ test('P25: deep water is swum — prediction, the swim clip and ripples', async 
   await page.screenshot({ path: join(SHOTS, 'p25-swim.png') });
   console.log('[P25]', JSON.stringify(s));
   expect(s.swim).toBe(true);
-  expect(s.anim).toBe('swim');
+  expect(['swimCrawl', 'swimTread'], 'play-test 12 (#88): a person swims face down (crawl) or treads water').toContain(s.anim);
   expect(s.ripples).toBe(true);
   await page.evaluate(() => tv.hud(true));
 });

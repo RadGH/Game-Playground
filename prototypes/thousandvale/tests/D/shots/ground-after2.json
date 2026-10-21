@@ -1,0 +1,134 @@
+{
+ "desktop": {
+  "downs@0.42": {
+   "calls": 551,
+   "tris": 6649984,
+   "frame": {
+    "median": 6599.7,
+    "p90": 6599.7
+   }
+  },
+  "downs@0.72": {
+   "calls": 447,
+   "tris": 6674685,
+   "frame": {
+    "median": 6983,
+    "p90": 6983
+   }
+  },
+  "town-edge@0.42": {
+   "calls": 394,
+   "tris": 4598166,
+   "frame": {
+    "median": 2750,
+    "p90": 2750
+   }
+  },
+  "town-edge@0.72": {
+   "calls": 407,
+   "tris": 4647126,
+   "frame": {
+    "median": 2899.8,
+    "p90": 2899.8
+   }
+  },
+  "vharl-inland@0.42": {
+   "calls": 209,
+   "tris": 1473992,
+   "frame": {
+    "median": 1233.3,
+    "p90": 1533.3
+   }
+  },
+  "vharl-inland@0.72": {
+   "calls": 304,
+   "tris": 1741394,
+   "frame": {
+    "median": 1566.6,
+    "p90": 1683.4
+   }
+  },
+  "vharl-2@0.42": {
+   "calls": 367,
+   "tris": 1636537,
+   "frame": {
+    "median": 1466.6,
+    "p90": 1483.3
+   }
+  },
+  "vharl-2@0.72": {
+   "calls": 387,
+   "tris": 1680495,
+   "frame": {
+    "median": 1550,
+    "p90": 1566.6
+   }
+  }
+ },
+ "phone": {
+  "downs@0.42": {
+   "calls": 352,
+   "tris": 5387515,
+   "frame": {
+    "median": 2416.6,
+    "p90": 2416.6
+   }
+  },
+  "downs@0.72": {
+   "calls": 358,
+   "tris": 5388263,
+   "frame": {
+    "median": 2516.6,
+    "p90": 2516.6
+   }
+  },
+  "town-edge@0.42": {
+   "calls": 319,
+   "tris": 3718708,
+   "frame": {
+    "median": 1166.6,
+    "p90": 1233.3
+   }
+  },
+  "town-edge@0.72": {
+   "calls": 338,
+   "tris": 3767670,
+   "frame": {
+    "median": 1316.6,
+    "p90": 1566.6
+   }
+  },
+  "vharl-inland@0.42": {
+   "calls": 138,
+   "tris": 1180013,
+   "frame": {
+    "median": 633.3,
+    "p90": 1050
+   }
+  },
+  "vharl-inland@0.72": {
+   "calls": 230,
+   "tris": 1452945,
+   "frame": {
+    "median": 700,
+    "p90": 716.7
+   }
+  },
+  "vharl-2@0.42": {
+   "calls": 263,
+   "tris": 1409663,
+   "frame": {
+    "median": 700,
+    "p90": 733.4
+   }
+  },
+  "vharl-2@0.72": {
+   "calls": 284,
+   "tris": 1453267,
+   "frame": {
+    "median": 766.7,
+    "p90": 816.7
+   }
+  }
+ }
+}

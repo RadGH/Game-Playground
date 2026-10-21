@@ -22,6 +22,7 @@ const GOOD = {
   admin: { op: 'report', id: 4, state: 'approved', note: 'good one' }, fish: { op: 'land', held: 0.7 }, cook: { id: 'cook_fish_on_a_stick', n: 2 },
   prof: { op: 'learn', id: 'mining', npc: 9 }, gather: { op: 'done', id: 12, inputs: [410, 0, 980, 0, 1630, 0] }, craft: { op: 'start', id: 'blades_1', npc: 9, base: 'dagger' },   // W9 (P-core)
   market: { op: 'sell', uid: 'p0-abc', price: 250 },      // round 11 (Market, #25)
+  feedbackShot: { id: 12, i: 0, n: 3, data: 'data:image/jpeg;base64,/9j/4AAQ' },      // play-test 12 (#71)
 };
 
 test('every client message type has a valid example and the example passes', () => {

@@ -73,6 +73,19 @@ export function createTelegraphs(scene, { heightAt = () => 0, serverNow, posOf, 
   scene.add(group);
   let ground = heightAt;
   let mineAny = false;
+  // Play-test 12 (#83, owner: "the game locks up when enemies cast area spells at my feet, right before they go off"):
+  // every telegraph built its OWN ShaderMaterial and disposed it when it landed. three.js frees a program when the last
+  // material using it is disposed, so once a fight's telegraphs had all landed the next cast linked the shader again —
+  // a stall at exactly the moment the warning appears (9 links in a 36 s fight with two champions, cp-freeze.spec.js).
+  // ONE template is made here, compiled in the boot warm-up (`sample()`) and never disposed; each telegraph draws with a
+  // clone of it, which shares its program, so disposing a clone frees uniforms and nothing else.
+  const TEMPLATE = new THREE.ShaderMaterial({
+    vertexShader: VERT, fragmentShader: FRAG, transparent: true, depthWrite: false, fog: true,
+    polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4, side: THREE.DoubleSide,
+    uniforms: THREE.UniformsUtils.merge([THREE.UniformsLib.fog, { uColor: { value: new THREE.Color(ELEMENT.physical) }, uProg: { value: 0 }, uTime: { value: 0 }, uFlash: { value: 0 }, uFade: { value: 0 }, uMine: { value: 0 } }]),
+  });
+  TEMPLATE.name = 'telegraph';
+  const stats = { built: 0, materials: 0 };
 
   function build(t) {
     const { pts, idx } = localMesh(t);
@@ -88,11 +101,9 @@ export function createTelegraphs(scene, { heightAt = () => 0, serverNow, posOf, 
     g.setAttribute('aE', new THREE.BufferAttribute(e, 1));
     g.setAttribute('aS', new THREE.BufferAttribute(s, 1));
     g.setIndex(idx);
-    const mat = new THREE.ShaderMaterial({
-      vertexShader: VERT, fragmentShader: FRAG, transparent: true, depthWrite: false, fog: true,
-      polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4, side: THREE.DoubleSide,
-      uniforms: THREE.UniformsUtils.merge([THREE.UniformsLib.fog, { uColor: { value: new THREE.Color(ELEMENT[t.el] || ELEMENT.physical) }, uProg: { value: 0 }, uTime: { value: 0 }, uFlash: { value: 0 }, uFade: { value: 0 }, uMine: { value: 0 } }]),
-    });
+    const mat = TEMPLATE.clone();                       // #83: the template's program, never a new one
+    mat.uniforms.uColor.value.set(ELEMENT[t.el] || ELEMENT.physical);
+    stats.built++;
     const mesh = new THREE.Mesh(g, mat);
     mesh.frustumCulled = false; mesh.renderOrder = 3;
     t.mesh = mesh; t.local = pts; t.placedAt = null;
@@ -207,5 +218,14 @@ export function createTelegraphs(scene, { heightAt = () => 0, serverNow, posOf, 
     add, resolve, move, remove, clear, update, live,
     setGround(f) { ground = f; for (const t of live.values()) place(t, true); },
     get standingInDanger() { return mineAny; },
+    stats,
+    /** #83: a mesh drawn with the template, for the boot shader warm-up (warmup.js `extras`) — compiles the program once. */
+    sample() {
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.BufferAttribute(new Float32Array([0, 0, 0, 1, 0, 0, 0, 0, 1]), 3));
+      for (const a of ['aF', 'aE', 'aS']) g.setAttribute(a, new THREE.BufferAttribute(new Float32Array(3), 1));
+      const m = new THREE.Mesh(g, TEMPLATE); m.frustumCulled = false; m.name = 'telegraph-sample';
+      return m;
+    },
   };
 }

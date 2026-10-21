@@ -119,6 +119,15 @@ const hook = http.createServer(async (req, res) => {
       const r = WE.start(b.kind, o2.room, o2, b.arg || null);
       return send(200, r ? { ok: true, name: r.ev.name, x: r.at.x, z: r.at.z, uid: r.ev.uid } : { ok: false });
     }
+    if (req.url === '/spawn') {      // [CP, play-test 12 #79/#82/#83] n monsters of a type in a ring `dist` m round this player (the freeze spec)
+      if (b.wilds && o.room.kind !== 'wilds') { const pv = W.P.get(b.province || 'torbor_downs'); W.transfer(o, pv.copies[0], { x: +b.x || o.entity.x, z: +b.z || o.entity.z }, 'test'); await new Promise(r => setTimeout(r, 800)); }
+      const o2 = byName(b.name) || o, n = Math.max(1, Math.min(12, +b.n || 1)), dist = +b.dist || 14, ids = [];
+      for (let i = 0; i < n; i++) {
+        const a = (i / n) * Math.PI * 2, m = o2.room.spawn({ kind: 'monster', type: b.type || 'ashback_salamander', level: +b.level || 15, x: o2.entity.x + Math.cos(a) * dist, z: o2.entity.z + Math.sin(a) * dist, yaw: 0, rank: b.rank || 'normal', state: 0, data: { noRank: true, ...(b.encounter ? { encounter: b.encounter } : {}) } });
+        ids.push(m.id);
+      }
+      return send(200, { ok: true, ids, room: o2.room.kind, x: o2.entity.x, z: o2.entity.z });
+    }
     if (req.url === '/teleport') {
       const e = o.entity; e.moveTo(+b.x, +b.z, undefined, true);
       const c = o.room.clients.get(e.id); if (c) c.selfDirty = true;

@@ -4,6 +4,7 @@
 
 import * as THREE from 'three';
 import { makeGlowTexture } from './decor.js';
+import { boxSize } from './box-size.js';
 
 export function createFx(scene, { layer, camera }) {
   const numbers = [];
@@ -52,7 +53,7 @@ export function createFx(scene, { layer, camera }) {
 
   const _v = new THREE.Vector3();
   function update(dt) {
-    const w = layer?.clientWidth || 0, h = layer?.clientHeight || 0;
+    const { w, h } = boxSize(layer);      // 2026-10-20: no layout read per frame (box-size.js)
     for (let i = numbers.length - 1; i >= 0; i--) {
       const n = numbers[i];
       n.t += dt;

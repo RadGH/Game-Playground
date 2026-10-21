@@ -1,0 +1,199 @@
+{
+ "desktop": {
+  "chalk-downs": {
+   "calls": 490,
+   "tris": 2753240,
+   "biome": "grassland",
+   "grass": {
+    "blades": 52020,
+    "calls": 9,
+    "sampled": 93347,
+    "pending": 0,
+    "distance": "far",
+    "cell": 1.358,
+    "slots": 10404,
+    "clump": 5,
+    "trisPerBlade": 8,
+    "lastCalls": 9
+   },
+   "tufts": 0,
+   "clutterCalls": 5,
+   "frame": {
+    "median": 1150,
+    "p90": 1299.9
+   }
+  },
+  "ground": {
+   "worstMetres": 0
+  },
+  "crawl": {
+   "pixels": 770000,
+   "lit": 150919,
+   "changedFraction": 0.04257,
+   "changedWholeSquares": 0.17325
+  },
+  "saints-meadow": {
+   "calls": 333,
+   "tris": 3235130,
+   "biome": "hallowed",
+   "grass": {
+    "blades": 52020,
+    "calls": 9,
+    "sampled": 128317,
+    "pending": 0,
+    "distance": "far",
+    "cell": 1.358,
+    "slots": 10404,
+    "clump": 5,
+    "trisPerBlade": 8,
+    "lastCalls": 9
+   },
+   "tufts": 0,
+   "clutterCalls": 6,
+   "frame": {
+    "median": 2283.3,
+    "p90": 2283.3
+   }
+  },
+  "golden-wolds": {
+   "calls": 584,
+   "tris": 2056719,
+   "biome": "savanna",
+   "grass": {
+    "blades": 52020,
+    "calls": 9,
+    "sampled": 171855,
+    "pending": 0,
+    "distance": "far",
+    "cell": 1.358,
+    "slots": 10404,
+    "clump": 5,
+    "trisPerBlade": 8,
+    "lastCalls": 9
+   },
+   "tufts": 0,
+   "clutterCalls": 8,
+   "frame": {
+    "median": 1683.3,
+    "p90": 1683.3
+   }
+  },
+  "vharl-savanna": {
+   "calls": 187,
+   "tris": 1581736,
+   "biome": "savanna",
+   "grass": {
+    "blades": 52020,
+    "calls": 9,
+    "sampled": 294469,
+    "pending": 0,
+    "distance": "far",
+    "cell": 1.358,
+    "slots": 10404,
+    "clump": 5,
+    "trisPerBlade": 8,
+    "lastCalls": 9
+   },
+   "tufts": 0,
+   "clutterCalls": 7,
+   "frame": {
+    "median": 949.9,
+    "p90": 966.6
+   }
+  }
+ },
+ "phone": {
+  "chalk-downs": {
+   "calls": 353,
+   "tris": 2801886,
+   "biome": "grassland",
+   "grass": {
+    "blades": 19920,
+    "calls": 9,
+    "sampled": 49478,
+    "pending": 0,
+    "distance": "medium",
+    "cell": 1.175,
+    "slots": 4980,
+    "clump": 4,
+    "trisPerBlade": 6,
+    "lastCalls": 9
+   },
+   "tufts": 0,
+   "clutterCalls": 5,
+   "frame": {
+    "median": 716.7,
+    "p90": 783.3
+   }
+  },
+  "saints-meadow": {
+   "calls": 390,
+   "tris": 2441909,
+   "biome": "hallowed",
+   "grass": {
+    "blades": 19920,
+    "calls": 9,
+    "sampled": 70361,
+    "pending": 0,
+    "distance": "medium",
+    "cell": 1.175,
+    "slots": 4980,
+    "clump": 4,
+    "trisPerBlade": 6,
+    "lastCalls": 9
+   },
+   "tufts": 0,
+   "clutterCalls": 5,
+   "frame": {
+    "median": 1133.3,
+    "p90": 1149.9
+   }
+  },
+  "golden-wolds": {
+   "calls": 323,
+   "tris": 1421832,
+   "biome": "savanna",
+   "grass": {
+    "blades": 19920,
+    "calls": 9,
+    "sampled": 89043,
+    "pending": 0,
+    "distance": "medium",
+    "cell": 1.175,
+    "slots": 4980,
+    "clump": 4,
+    "trisPerBlade": 6,
+    "lastCalls": 9
+   },
+   "tufts": 0,
+   "clutterCalls": 3,
+   "frame": {
+    "median": 616.7,
+    "p90": 716.6
+   }
+  },
+  "vharl-savanna": {
+   "calls": 73,
+   "tris": 924809,
+   "biome": "savanna",
+   "grass": {
+    "blades": 19920,
+    "calls": 9,
+    "sampled": 165256,
+    "pending": 0,
+    "distance": "medium",
+    "cell": 1.175,
+    "slots": 4980,
+    "clump": 4,
+    "trisPerBlade": 6,
+    "lastCalls": 9
+   },
+   "tufts": 0,
+   "clutterCalls": 7,
+   "frame": {
+    "median": 566.6,
+    "p90": 850
+   }
+  }
+ }
+}

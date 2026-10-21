@@ -58,6 +58,7 @@ export const HELD_BY_SUBTYPE = {
  * resolves to a Chibi 2 model — tests/D/weapon-models.test.js checks it against avatar-3d's catalogue.
  */
 export const HELD_BY_BASE = {
+  glaive: 'g5_bardiche', bardiche: 'g5_bardiche',      // feedback #103: Thousandvale's two-handed polearms (data/rules/gear-tv.json bases)
   obsidian_scimitar: 'tv_scimitar', rimecut_sabre: 'fh_sabre', forager_blade: 'cleaver', breakers_pick: 'tv_warpick',
   axle_club: 'tv_club', watchfire_glaive: 'tv_glaive', warhorn_maul: 'fh_maul', iron_mace: 'fh_mace', lantern_mace: 'fh_mace',
   tithe_dagger: 'fh_dagger', houndmasters_lash: 'fh_dagger', pathfinder_javelin: 'fh_javelin', gravebound_scepter: 'fh_scepter',

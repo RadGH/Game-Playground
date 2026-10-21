@@ -1,0 +1,277 @@
+{
+ "desktop": {
+  "chalk-downs": {
+   "calls": 412,
+   "tris": 2193284,
+   "biome": "grassland",
+   "grass": null,
+   "tufts": 4031,
+   "clutterCalls": 6,
+   "frame": {
+    "median": 1199.9,
+    "p90": 1200
+   }
+  },
+  "saints-meadow": {
+   "calls": 315,
+   "tris": 3099832,
+   "biome": "hallowed",
+   "grass": null,
+   "tufts": 4175,
+   "clutterCalls": 7,
+   "frame": {
+    "median": 2349.9,
+    "p90": 2349.9
+   }
+  },
+  "heather-moor": {
+   "calls": 225,
+   "tris": 1344916,
+   "biome": "hills",
+   "grass": null,
+   "tufts": 2582,
+   "clutterCalls": 6,
+   "frame": {
+    "median": 966.8,
+    "p90": 983.3
+   }
+  },
+  "golden-wolds": {
+   "calls": 443,
+   "tris": 1341062,
+   "biome": "savanna",
+   "grass": null,
+   "tufts": 4341,
+   "clutterCalls": 9,
+   "frame": {
+    "median": 1283.4,
+    "p90": 1333.2
+   }
+  },
+  "brack-fen": {
+   "calls": 175,
+   "tris": 1016571,
+   "biome": "marsh",
+   "grass": null,
+   "tufts": 3782,
+   "clutterCalls": 5,
+   "frame": {
+    "median": 983.3,
+    "p90": 1066.5
+   }
+  },
+  "oakwood": {
+   "calls": 419,
+   "tris": 1245739,
+   "biome": "temperateForest",
+   "grass": null,
+   "tufts": 1782,
+   "clutterCalls": 9,
+   "frame": {
+    "median": 1899.9,
+    "p90": 1899.9
+   }
+  },
+  "high-fell": {
+   "calls": 146,
+   "tris": 605784,
+   "biome": "tundra",
+   "grass": null,
+   "tufts": 1433,
+   "clutterCalls": 5,
+   "frame": {
+    "median": 733.3,
+    "p90": 750
+   }
+  },
+  "blackthorn": {
+   "calls": 387,
+   "tris": 1055255,
+   "biome": "veiledHills",
+   "grass": null,
+   "tufts": 1128,
+   "clutterCalls": 6,
+   "frame": {
+    "median": 1383.3,
+    "p90": 1416.6
+   }
+  },
+  "vharl-inland": {
+   "calls": 233,
+   "tris": 1413814,
+   "biome": "rainforest",
+   "grass": null,
+   "tufts": 2113,
+   "clutterCalls": 8,
+   "frame": {
+    "median": 1183.3,
+    "p90": 1199.9
+   }
+  },
+  "vharl-savanna": {
+   "calls": 375,
+   "tris": 3194619,
+   "biome": "savanna",
+   "grass": null,
+   "tufts": 2475,
+   "clutterCalls": 8,
+   "frame": {
+    "median": 2166.6,
+    "p90": 2166.6
+   }
+  },
+  "vharl-glimmer": {
+   "calls": 250,
+   "tris": 962512,
+   "biome": "glimmerwaste",
+   "grass": null,
+   "tufts": 745,
+   "clutterCalls": 6,
+   "frame": {
+    "median": 533.3,
+    "p90": 1433.2
+   }
+  },
+  "sunrays": {
+   "shafts": 0,
+   "frame": {
+    "median": 183.3,
+    "p90": 200
+   }
+  }
+ },
+ "phone": {
+  "chalk-downs": {
+   "calls": 339,
+   "tris": 2769918,
+   "biome": "grassland",
+   "grass": null,
+   "tufts": 1259,
+   "clutterCalls": 6,
+   "frame": {
+    "median": 783.3,
+    "p90": 816.6
+   }
+  },
+  "saints-meadow": {
+   "calls": 329,
+   "tris": 2416847,
+   "biome": "hallowed",
+   "grass": null,
+   "tufts": 1357,
+   "clutterCalls": 6,
+   "frame": {
+    "median": 1133.3,
+    "p90": 1166.6
+   }
+  },
+  "heather-moor": {
+   "calls": 163,
+   "tris": 706898,
+   "biome": "hills",
+   "grass": null,
+   "tufts": 811,
+   "clutterCalls": 6,
+   "frame": {
+    "median": 433.3,
+    "p90": 483.4
+   }
+  },
+  "golden-wolds": {
+   "calls": 233,
+   "tris": 878770,
+   "biome": "savanna",
+   "grass": null,
+   "tufts": 1396,
+   "clutterCalls": 4,
+   "frame": {
+    "median": 500,
+    "p90": 983.3
+   }
+  },
+  "brack-fen": {
+   "calls": 191,
+   "tris": 1182326,
+   "biome": "marsh",
+   "grass": null,
+   "tufts": 1200,
+   "clutterCalls": 4,
+   "frame": {
+    "median": 466.7,
+    "p90": 566.6
+   }
+  },
+  "oakwood": {
+   "calls": 234,
+   "tris": 750737,
+   "biome": "temperateForest",
+   "grass": null,
+   "tufts": 560,
+   "clutterCalls": 6,
+   "frame": {
+    "median": 383.3,
+    "p90": 916.7
+   }
+  },
+  "high-fell": {
+   "calls": 134,
+   "tris": 848309,
+   "biome": "tundra",
+   "grass": null,
+   "tufts": 451,
+   "clutterCalls": 5,
+   "frame": {
+    "median": 416.7,
+    "p90": 449.9
+   }
+  },
+  "blackthorn": {
+   "calls": 337,
+   "tris": 1276542,
+   "biome": "veiledHills",
+   "grass": null,
+   "tufts": 377,
+   "clutterCalls": 6,
+   "frame": {
+    "median": 833.3,
+    "p90": 833.3
+   }
+  },
+  "vharl-inland": {
+   "calls": 162,
+   "tris": 1123887,
+   "biome": "rainforest",
+   "grass": null,
+   "tufts": 642,
+   "clutterCalls": 8,
+   "frame": {
+    "median": 583.3,
+    "p90": 883.3
+   }
+  },
+  "vharl-savanna": {
+   "calls": 254,
+   "tris": 2908546,
+   "biome": "savanna",
+   "grass": null,
+   "tufts": 820,
+   "clutterCalls": 8,
+   "frame": {
+    "median": 1366.6,
+    "p90": 1399.9
+   }
+  },
+  "vharl-glimmer": {
+   "calls": 208,
+   "tris": 1053343,
+   "biome": "glimmerwaste",
+   "grass": null,
+   "tufts": 146,
+   "clutterCalls": 6,
+   "frame": {
+    "median": 499.9,
+    "p90": 516.6
+   }
+  }
+ }
+}

@@ -104,7 +104,7 @@ export function createWorldMap({ atlas, net, me, hud, worldUi, inCombat = () => 
   }
   function zoomBy(f, sx = state.w / 2, sy = state.h / 2) { const z = zoomAt(view(), sx, sy, f, { min: 0.003, max: atlas.dungeon ? 40 : 4 }); Object.assign(state, z); state.preset = null; drawPresets(); }
   /** Y28: centre on you, close enough to see where you stand (a dungeon keeps its own zoom); the view stops being a preset. */
-  function locateMe() { const p = me(); if (!p) return; hideCard(); state.cx = p.x; state.cz = p.z; if (!atlas.dungeon && state.scale < 0.35) state.scale = 0.6; state.preset = null; state.ping = { x: p.x, z: p.z, t: performance.now() }; drawPresets(); }
+  function locateMe() { const p = me(); if (!p) return; hideCard(); state.cx = p.x; state.cz = p.z; if (!atlas.dungeon && state.scale < (isPhone() ? 1.2 : 0.35)) state.scale = isPhone() ? 1.5 : 0.6; state.preset = null; state.ping = { x: p.x, z: p.z, t: performance.now() }; drawPresets(); }
   function centreOnMe() { const p = me(); if (p) { state.cx = p.x; state.cz = p.z; if (state.scale < 0.2 && !atlas.dungeon) state.scale = 0.5; } }
 
   // ---- drawing ----
@@ -264,7 +264,11 @@ export function createWorldMap({ atlas, net, me, hud, worldUi, inCombat = () => 
     g.fillStyle = '#ffe07a'; g.fill(); g.lineWidth = 2; g.strokeStyle = '#1b130a'; g.stroke(); g.restore();
   }
   const evLine = e => `${e.sub || ''}${Number.isFinite(e.x) ? ' — ' + atlas.whereText(e, e.r) : ''}${HIDDEN.has(e) ? ' · hidden from your screen' : ''}`;
-  function showAt(x, z, scale) { state.cx = x; state.cz = z; if (scale) state.scale = Math.max(state.scale, scale); state.preset = null; drawPresets(); }
+  // feedback #111 (2026-10-21, on a phone: "the map moves but it doesn't get much larger"): on a phone "Show on map" zooms
+  // well in and folds the list away, so the place fills the screen
+  function isPhone() { return typeof document !== 'undefined' && document.documentElement.dataset.layout === 'phone'; }
+  function foldList() { const H = document.documentElement; if (!isPhone() || H.dataset.mapside === '1') return; H.dataset.mapside = '1'; const b = panel.el?.querySelector?.('.ph-mapside') || document.querySelector('#panel-map .ph-mapside'); if (b) { b.textContent = 'Show list'; b.classList.add('on'); } requestAnimationFrame(() => { size(); draw(); }); }
+  function showAt(x, z, scale) { state.cx = x; state.cz = z; if (scale) state.scale = Math.max(state.scale, scale * (isPhone() ? 2.5 : 1)); state.preset = null; foldList(); drawPresets(); }
   function travel(key) {
     const n = net(); if (!n) return;
     if (key !== 'event') {

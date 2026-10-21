@@ -192,7 +192,7 @@ test('T23: a catalog row becomes an item base with its template\'s numbers; a mi
     const d = await loadData();
     const rep = installTvGear(d.items, d.tvGear, bad);
     assert.deepEqual(rep.catalog, [], JSON.stringify(bad)?.slice(0, 40));
-    assert.deepEqual(rep.added, ['cloth_gloves', 'cloth_shoes', 'travel_cloak', 'leather_belt', 'sling_satchel', 'trail_rucksack', 'expedition_pack', 'woodsman_axe', 'militia_sabre'], 'Thousandvale\'s own bases are added regardless');
+    assert.deepEqual(rep.added, ['cloth_gloves', 'cloth_shoes', 'travel_cloak', 'leather_belt', 'sling_satchel', 'trail_rucksack', 'expedition_pack', 'woodsman_axe', 'militia_sabre', 'glaive', 'bardiche'], 'Thousandvale\'s own bases are added regardless');
   }
   // a whole engine boots without the file
   const e0 = createEngine({ ...(await loadData()), gearCatalog: null }, { seed: 3 });

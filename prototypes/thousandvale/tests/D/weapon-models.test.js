@@ -14,13 +14,16 @@ register('../../../../avatar-3d/tests/three-loader.mjs', import.meta.url);
 const THREE = await import('three');
 const { gearLook, heldLook, offhandLook, HELD_BY_BASE, OFFHAND_BY_BASE } = await import('../../js/client/gear-look.js');
 const { buildHeld, buildOffhand, buildGear } = await import('../../../../avatar-3d/js/chibi2-gear.js');
+const { buildGear5 } = await import('../../../../avatar-3d/js/chibi2-gear5.js');      // the g5_ models (chibi2.js builds them after chibi2-gear.js)
+const { isG5 } = await import('../../../../avatar-3d/js/chibi2-gear5-ids.js');
 const { holdFor, HELD_WEAPON_IDS, FARHOLD_WEAPON_INFO } = await import('../../../../avatar-3d/js/chibi2-weapon-ids.js');
 const { PARTS } = await import('../../../../avatar-2d/js/parts/index.js');
 
 const read = rel => JSON.parse(readFileSync(new URL(rel, import.meta.url)));
 const POOL = read('../../data/rules/loot-pool.json');
 const ITEMS = read('../../../emberveil/data/items.json');
-const BASES = { ...ITEMS.weaponBases, ...ITEMS.armorBases };
+const TVG = read('../../data/rules/gear-tv.json');      // Thousandvale's own bases (glaive, bardiche, woodsman's axe…), added in memory by js/rules/tv-gear.js
+const BASES = { ...ITEMS.weaponBases, ...ITEMS.armorBases, ...(TVG.bases?.weapon || {}), ...(TVG.bases?.armor || {}) };
 const baseOf = k => BASES[k] || null;
 
 /** A recording build context: counts the pieces each bone gets. */
@@ -44,7 +47,7 @@ test('S17: every weapon base the loot pool drops builds a held model, registered
     assert.ok(h.id && h.id !== 'none', `${key} draws nothing`);
     assert.ok(PARTS.held[h.id], `${key} -> ${h.id} is not a registered held part (the normaliser would drop it)`);
     const { c, bones } = recorder();
-    buildHeld({ ...blankAvatar(), held: h }, c);
+    if (isG5(h.id)) buildGear5({ ...blankAvatar(), held: h }, c); else buildHeld({ ...blankAvatar(), held: h }, c);
     assert.ok(handPieces(bones) >= 2, `${key} -> ${h.id} built ${handPieces(bones)} pieces in a hand`);
   }
 });

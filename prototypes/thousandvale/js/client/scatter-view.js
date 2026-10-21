@@ -9,7 +9,8 @@
 // past that (the far horizon takes over). The whole zone stays a few dozen draw calls.
 
 import * as THREE from 'three';
-import { buildTree, buildBush, buildFern } from '../../../../highdef-3d/js/kit/trees.js';
+import { buildBush, buildFern } from '../../../../highdef-3d/js/kit/trees.js';
+import { buildSceneryTree } from './tree-style.js';     // 2026-10-20: storybook trees (the same tree at every distance)
 import { buildRock } from '../../../../highdef-3d/js/kit/rocks.js';
 import { foliageMaterials, setWindTime } from './decor.js';
 import { buildVharlPiece, vharlMaterial } from './vharl-scatter-art.js';
@@ -39,7 +40,8 @@ export const KIND_ART = [
   // trunk below y0 is stretched and everything above it (the crown) is carried up `extra`, so the fronds keep their size.
   // An ironpalm was 4.3 m (a broadleaf is ~7 m): now 9-10 m at scale 1, a tree fern 3.6 m -> 5.2 m. Collider radii in
   // js/rules/nav-refine.js follow `scale` (the trunk got thicker with it), not `lift`.
-  { key: 'tree_fern', custom: ['a', 'b', 'c'], scale: 1, far: true, lift: [2.4, 1.6] },
+  // 2026-10-20: the tree fern is a storybook tree now (js/client/tree-style.js `story_fern_*`, three detail levels, wind)
+  { key: 'tree_fern', tree: ['story_fern_a', 'story_fern_b', 'story_fern_c'], scale: 1, lift: [2.4, 1.6] },
   { key: 'ironpalm', tree: ['palm_fan'], scale: 0.8, tint: [0.62, 0.58, 0.55], lift: [5, 5] },
   { key: 'tree_charred', tree: ['dead_snag', 'dead_pine'], scale: 0.62, tint: [0.22, 0.2, 0.19] },
   { key: 'basalt_columns', custom: ['a', 'b', 'c', 'd'], scale: 1, far: true },
@@ -48,7 +50,7 @@ export const KIND_ART = [
   { key: 'sulphur_crust', custom: ['a', 'b', 'c'], scale: 1 },
   // Torbor Downs regenerated (play-test 12, #81): silver birch, crack willow, gold-flowered gorse (a juniper warmed to
   // gold), moor heather, the near-black blackthorn brakes of the Scar, red sandstone outcrops, Saint's Meadow's old oaks
-  { key: 'tree_birch', tree: ['birch'], scale: 0.6 },
+  { key: 'tree_birch', tree: ['silver_birch'], scale: 0.6 },     // 2026-10-20: a storybook birch fitted to this kind's own collider
   { key: 'tree_willow', tree: ['willow'], scale: 0.75 },
   { key: 'gorse', bush: ['juniper'], scale: 1.25, tint: [1.35, 1.22, 0.5] },
   { key: 'heather', bush: ['heather'], scale: 1.3 },
@@ -84,7 +86,7 @@ function geoFor(art, name, lod, tint = null, lift = null) {
         const dark = geo => { if (!geo) return null; const c = geo.clone(), col = c.getAttribute('color'); if (col) { for (let i = 0; i < col.count; i++) col.setXYZ(i, col.getX(i) * tint[0], col.getY(i) * tint[1], col.getZ(i) * tint[2]); col.needsUpdate = true; } return c; };
         g = b ? { bark: dark(b.bark), leaf: dark(b.leaf), rock: dark(b.rock) } : null;
       } else if (art === 'custom') { const [kind, variant] = name.split(':'); const geo = buildVharlPiece(kind, variant); g = geo ? { custom: geo, kind } : null; }
-      else if (art === 'tree') { const b = buildTree(name, { seed: 1000 + name.length * 13, lod }); g = { bark: b.bark, leaf: b.foliage }; }
+      else if (art === 'tree') { const b = buildSceneryTree(name, { seed: 1000 + name.length * 13, lod }); g = { bark: b.bark, leaf: b.foliage }; }
       else if (art === 'bush') { const b = buildBush(name, { seed: 60 + name.length, lod: 1 }); g = { bark: b.bark, leaf: b.foliage }; }
       else if (art === 'fern') { const b = buildFern(name, { seed: 70 + name.length, lod: 1 }); g = { bark: b.bark || null, leaf: b.foliage }; }
       else if (art === 'rock') { g = { rock: buildRock(name, { seed: 40 + name.length, lod: 1, size: 2 }).geometry }; }

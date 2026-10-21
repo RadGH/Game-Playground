@@ -197,7 +197,7 @@ export function familyText(engine, item) {
   if (!f) return '';
   const pct = famCfg(engine)[f].damagePct || 0;
   const guard = meleeGuardOf(engine, item);
-  return `${WORD[f]}: +${pct}% damage.${guard ? ` In your main hand it takes ${guard}% off every hit you take.` : ''}`;
+  return `${WORD[f]}: +${pct}% damage.${guard ? ` In your main hand: ${guard}% damage reduction.` : ''}`;
 }
 
 // ------------------------------------------------------------------------------------------------ install

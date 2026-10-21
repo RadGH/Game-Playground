@@ -1,0 +1,439 @@
+{
+  "_doc": "Feedback #106 (2026-10-21): achievements and trophies. Read by js/sim/achievements.js. An achievement counts one tally (`track`) up to `n`; `reward` is posted to you when you earn it (`gold`, or a `gift` box of `minRarity` or better at your level). `first: true` also makes it a REALM FIRST: the first character in the realm to earn it gets the trophy named in `firstTrophy` and everyone hears it. Tallies: level (highest reached), kill, killRare, killChampion, killBoss (any boss: a dungeon's, an event's), clear (a dungeon's last boss), quest (handed in), event (an event won with a share), worldboss, siege, fish, gather, craft, cook, zones (zones entered), vharlen (reached the Burning Isle), ride, death, feedback (reports sent), feedbackDone (your reports the makers marked done). Trophies (`trophies`) are kept apart: counted per kind, shown on their own shelf, given by events (world bosses and sieges: one each time you are paid a share) and by realm firsts.",
+  "achievements": [
+    {
+      "id": "lv5",
+      "cat": "Growing",
+      "name": "Finding Your Feet",
+      "desc": "Reach level 5.",
+      "track": "level",
+      "n": 5,
+      "reward": {
+        "gold": 25
+      }
+    },
+    {
+      "id": "lv10",
+      "cat": "Growing",
+      "name": "Seasoned",
+      "desc": "Reach level 10.",
+      "track": "level",
+      "n": 10,
+      "reward": {
+        "gold": 80
+      }
+    },
+    {
+      "id": "lv15",
+      "cat": "Growing",
+      "name": "Known on the Roads",
+      "desc": "Reach level 15.",
+      "track": "level",
+      "n": 15,
+      "reward": {
+        "gift": {
+          "minRarity": "rare"
+        }
+      }
+    },
+    {
+      "id": "lv20",
+      "cat": "Growing",
+      "name": "Veteran of the Vale",
+      "desc": "Reach level 20.",
+      "track": "level",
+      "n": 20,
+      "reward": {
+        "gold": 300
+      },
+      "first": true,
+      "firstTrophy": "First to Twenty"
+    },
+    {
+      "id": "lv30",
+      "cat": "Growing",
+      "name": "Thirty Summers",
+      "desc": "Reach level 30.",
+      "track": "level",
+      "n": 30,
+      "reward": {
+        "gift": {
+          "minRarity": "legendary"
+        }
+      },
+      "first": true,
+      "firstTrophy": "First to Thirty"
+    },
+    {
+      "id": "kill100",
+      "cat": "Fighting",
+      "name": "Blooded",
+      "desc": "Defeat 100 enemies.",
+      "track": "kill",
+      "n": 100,
+      "reward": {
+        "gold": 30
+      }
+    },
+    {
+      "id": "kill1000",
+      "cat": "Fighting",
+      "name": "Bane of the Wilds",
+      "desc": "Defeat 1,000 enemies.",
+      "track": "kill",
+      "n": 1000,
+      "reward": {
+        "gift": {
+          "minRarity": "rare"
+        }
+      }
+    },
+    {
+      "id": "kill5000",
+      "cat": "Fighting",
+      "name": "A Name to Fear",
+      "desc": "Defeat 5,000 enemies.",
+      "track": "kill",
+      "n": 5000,
+      "reward": {
+        "gift": {
+          "minRarity": "legendary"
+        }
+      }
+    },
+    {
+      "id": "rare1",
+      "cat": "Fighting",
+      "name": "Something Unusual",
+      "desc": "Defeat a rare monster.",
+      "track": "killRare",
+      "n": 1,
+      "reward": {
+        "gold": 40
+      }
+    },
+    {
+      "id": "rare10",
+      "cat": "Fighting",
+      "name": "Rare Hunter",
+      "desc": "Defeat 10 rare monsters.",
+      "track": "killRare",
+      "n": 10,
+      "reward": {
+        "gift": {
+          "minRarity": "rare"
+        }
+      }
+    },
+    {
+      "id": "champ10",
+      "cat": "Fighting",
+      "name": "Champion Breaker",
+      "desc": "Defeat 10 champions.",
+      "track": "killChampion",
+      "n": 10,
+      "reward": {
+        "gold": 120
+      }
+    },
+    {
+      "id": "boss1",
+      "cat": "Dungeons",
+      "name": "The Big One",
+      "desc": "Defeat a boss.",
+      "track": "killBoss",
+      "n": 1,
+      "reward": {
+        "gold": 50
+      }
+    },
+    {
+      "id": "boss25",
+      "cat": "Dungeons",
+      "name": "Bossbreaker",
+      "desc": "Defeat 25 bosses.",
+      "track": "killBoss",
+      "n": 25,
+      "reward": {
+        "gift": {
+          "minRarity": "legendary"
+        }
+      }
+    },
+    {
+      "id": "clear1",
+      "cat": "Dungeons",
+      "name": "Down and Back",
+      "desc": "Clear a dungeon to its last boss.",
+      "track": "clear",
+      "n": 1,
+      "reward": {
+        "gold": 60
+      }
+    },
+    {
+      "id": "clear10",
+      "cat": "Dungeons",
+      "name": "Delver",
+      "desc": "Clear 10 dungeons.",
+      "track": "clear",
+      "n": 10,
+      "reward": {
+        "gift": {
+          "minRarity": "rare"
+        }
+      }
+    },
+    {
+      "id": "quest10",
+      "cat": "Questing",
+      "name": "Helping Hand",
+      "desc": "Hand in 10 quests.",
+      "track": "quest",
+      "n": 10,
+      "reward": {
+        "gold": 50
+      }
+    },
+    {
+      "id": "quest50",
+      "cat": "Questing",
+      "name": "Friend of the Vale",
+      "desc": "Hand in 50 quests.",
+      "track": "quest",
+      "n": 50,
+      "reward": {
+        "gift": {
+          "minRarity": "rare"
+        }
+      }
+    },
+    {
+      "id": "quest150",
+      "cat": "Questing",
+      "name": "Everybody's Errand-Runner",
+      "desc": "Hand in 150 quests.",
+      "track": "quest",
+      "n": 150,
+      "reward": {
+        "gift": {
+          "minRarity": "legendary"
+        }
+      }
+    },
+    {
+      "id": "event1",
+      "cat": "Events",
+      "name": "In the Thick of It",
+      "desc": "Win an event.",
+      "track": "event",
+      "n": 1,
+      "reward": {
+        "gold": 40
+      }
+    },
+    {
+      "id": "event25",
+      "cat": "Events",
+      "name": "Where the Trouble Is",
+      "desc": "Win 25 events.",
+      "track": "event",
+      "n": 25,
+      "reward": {
+        "gift": {
+          "minRarity": "rare"
+        }
+      }
+    },
+    {
+      "id": "worldboss1",
+      "cat": "Events",
+      "name": "Giant Slayer",
+      "desc": "Help bring down a world boss.",
+      "track": "worldboss",
+      "n": 1,
+      "reward": {
+        "gift": {
+          "minRarity": "rare"
+        }
+      }
+    },
+    {
+      "id": "siege1",
+      "cat": "Events",
+      "name": "Holding the Gate",
+      "desc": "Help break a siege of a town.",
+      "track": "siege",
+      "n": 1,
+      "reward": {
+        "gold": 60
+      }
+    },
+    {
+      "id": "fish1",
+      "cat": "Crafts",
+      "name": "First Bite",
+      "desc": "Catch a fish.",
+      "track": "fish",
+      "n": 1,
+      "reward": {
+        "gold": 10
+      }
+    },
+    {
+      "id": "fish100",
+      "cat": "Crafts",
+      "name": "Patient Angler",
+      "desc": "Catch 100 fish.",
+      "track": "fish",
+      "n": 100,
+      "reward": {
+        "gift": {
+          "minRarity": "rare"
+        }
+      }
+    },
+    {
+      "id": "gather100",
+      "cat": "Crafts",
+      "name": "Gatherer",
+      "desc": "Gather 100 times — ore, wood, herbs, hides.",
+      "track": "gather",
+      "n": 100,
+      "reward": {
+        "gold": 60
+      }
+    },
+    {
+      "id": "craft25",
+      "cat": "Crafts",
+      "name": "Made It Myself",
+      "desc": "Craft or cook 25 things.",
+      "track": "craft",
+      "n": 25,
+      "reward": {
+        "gold": 60
+      }
+    },
+    {
+      "id": "zones8",
+      "cat": "Exploring",
+      "name": "Wanderer",
+      "desc": "Set foot in 8 zones.",
+      "track": "zones",
+      "n": 8,
+      "reward": {
+        "gold": 50
+      }
+    },
+    {
+      "id": "zones16",
+      "cat": "Exploring",
+      "name": "Every Corner of the Downs",
+      "desc": "Set foot in 16 zones.",
+      "track": "zones",
+      "n": 16,
+      "reward": {
+        "gift": {
+          "minRarity": "rare"
+        }
+      }
+    },
+    {
+      "id": "vharlen",
+      "cat": "Exploring",
+      "name": "Across the Water",
+      "desc": "Sail to the Burning Isle.",
+      "track": "vharlen",
+      "n": 1,
+      "reward": {
+        "gold": 50
+      }
+    },
+    {
+      "id": "ride",
+      "cat": "Exploring",
+      "name": "In the Saddle",
+      "desc": "Ride a mount.",
+      "track": "ride",
+      "n": 1,
+      "reward": {
+        "gold": 15
+      }
+    },
+    {
+      "id": "death1",
+      "cat": "Odd Ones",
+      "name": "Knocked Flat",
+      "desc": "Fall in battle for the first time.",
+      "track": "death",
+      "n": 1,
+      "reward": null
+    },
+    {
+      "id": "death50",
+      "cat": "Odd Ones",
+      "name": "Getting Up Again",
+      "desc": "Fall in battle 50 times — and get up every time.",
+      "track": "death",
+      "n": 50,
+      "reward": {
+        "gold": 100
+      }
+    },
+    {
+      "id": "feedback1",
+      "cat": "The Makers",
+      "name": "Voice of the Vale",
+      "desc": "Send the makers your first suggestion or bug report (the Feedback button on the menu bar).",
+      "track": "feedback",
+      "n": 1,
+      "reward": null,
+      "rewardNote": "The thank-you letter with a gift box (rare or better) that the first report brings — js/sim/feedback.js THANKS — is this achievement's reward."
+    },
+    {
+      "id": "feedbackDone1",
+      "cat": "The Makers",
+      "name": "Heard and Built",
+      "desc": "One of your reports is marked done: your idea or fix is in the game.",
+      "track": "feedbackDone",
+      "n": 1,
+      "reward": {
+        "gift": {
+          "minRarity": "rare"
+        }
+      }
+    },
+    {
+      "id": "feedbackDone10",
+      "cat": "The Makers",
+      "name": "Shaping the Vale",
+      "desc": "Ten of your reports are marked done.",
+      "track": "feedbackDone",
+      "n": 10,
+      "reward": {
+        "gift": {
+          "minRarity": "legendary"
+        }
+      }
+    }
+  ],
+  "trophies": {
+    "worldboss": {
+      "name": "{boss} Felled",
+      "desc": "Helped bring down {boss}."
+    },
+    "siege": {
+      "name": "{event} Broken",
+      "desc": "Helped break {event}."
+    },
+    "realmFirst": {
+      "name": "Realm First: {what}",
+      "desc": "The first in the realm to {what2}."
+    },
+    "realmFirstEvent": {
+      "name": "Realm First: {boss}",
+      "desc": "In the first band to bring down {boss}."
+    }
+  }
+}

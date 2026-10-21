@@ -1,0 +1,530 @@
+{
+ "phases": [
+  {
+   "label": "start",
+   "at": 234350,
+   "compiles": 75
+  },
+  {
+   "label": "rift",
+   "at": 245415,
+   "compiles": 80
+  },
+  {
+   "label": "group",
+   "at": 304889,
+   "compiles": 80
+  },
+  {
+   "label": "levelup",
+   "at": 352027,
+   "compiles": 80
+  },
+  {
+   "label": "classes:enhanced",
+   "at": 369182,
+   "compiles": 80
+  },
+  {
+   "label": "classes:standard",
+   "at": 504347,
+   "compiles": 80
+  },
+  {
+   "label": "classes:reduced",
+   "at": 526657,
+   "compiles": 80
+  },
+  {
+   "label": "classes:off",
+   "at": 548940,
+   "compiles": 80
+  },
+  {
+   "label": "telegraphs",
+   "at": 573695,
+   "compiles": 80
+  },
+  {
+   "label": "end",
+   "at": 588224,
+   "compiles": 80
+  }
+ ],
+ "built": [
+  {
+   "phase": "start",
+   "name": "shader",
+   "what": "terrain/chunk-0-0 (MeshStandardMaterial, vertex colours)",
+   "site": "terrain-view.js:223",
+   "users": [
+    "terrain/chunk-0-0 (MeshStandardMaterial, vertex colours)",
+    "terrain/chunk-1-0 (MeshStandardMaterial, vertex colours)",
+    "terrain/chunk-2-0 (MeshStandardMaterial, vertex colours)"
+   ],
+   "frameMs": 1833,
+   "key": "physical,STANDARD,,highp,srgb,false,,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,fal"
+  },
+  {
+   "phase": "start",
+   "name": "shader",
+   "what": "terrain/water (MeshStandardMaterial, see-through)",
+   "site": "terrain-view.js:395",
+   "users": [
+    "terrain/water (MeshStandardMaterial, see-through)"
+   ],
+   "frameMs": 1833,
+   "key": "physical,STANDARD,,highp,srgb,false,,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,fal"
+  },
+  {
+   "phase": "start",
+   "name": "shader",
+   "what": null,
+   "site": null,
+   "users": [],
+   "frameMs": 1183,
+   "key": "physical,STANDARD,,SURF_DETAIL,,SURF_WEAR,,SURF_BUMP,,highp,srgb,false,,false,false,false,false,false,false,false,false,false,false,false,false,false,false,fals"
+  },
+  {
+   "phase": "start",
+   "name": "shader",
+   "what": null,
+   "site": null,
+   "users": [],
+   "frameMs": 1183,
+   "key": "physical,STANDARD,,highp,srgb,false,,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,fal"
+  },
+  {
+   "phase": "start",
+   "name": "shader",
+   "what": null,
+   "site": null,
+   "users": [],
+   "frameMs": 1183,
+   "key": "lambert,highp,srgb,false,,uv,false,false,false,false,false,false,uv,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,0,"
+  }
+ ],
+ "counts": {
+  "stutters": 318,
+  "compiles": 80,
+  "compilesAfterLoad": 5,
+  "worstMs": 4733,
+  "byCause": {
+   "shader": 22,
+   "gpu": 290,
+   "outside": 6
+  }
+ },
+ "stutters": [
+  {
+   "at": 566348,
+   "ms": 2517,
+   "busyMs": 23,
+   "spans": [
+    [
+     "render",
+     17
+    ],
+    [
+     "world:views",
+     0
+    ],
+    [
+     "world:clutter",
+     0
+    ],
+    [
+     "world:grass",
+     0
+    ]
+   ],
+   "tasks": [
+    2500
+   ],
+   "outside": false,
+   "compiles": [],
+   "heapMB": 26,
+   "heapDropMB": 0,
+   "draws": 996,
+   "tris": 3877343,
+   "programs": 75,
+   "textures": 235,
+   "geometries": 866,
+   "effects": 35,
+   "actors": 46,
+   "cause": {
+    "code": "gpu",
+    "text": "Waiting on the graphics card: the game's code took 23 ms of a 2517 ms frame"
+   }
+  },
+  {
+   "at": 568797,
+   "ms": 2450,
+   "busyMs": 21,
+   "spans": [
+    [
+     "render",
+     16
+    ],
+    [
+     "world:views",
+     0
+    ],
+    [
+     "world:grass",
+     0
+    ],
+    [
+     "world:clutter",
+     0
+    ]
+   ],
+   "tasks": [],
+   "outside": false,
+   "compiles": [],
+   "heapMB": 26,
+   "heapDropMB": 0,
+   "draws": 938,
+   "tris": 3868119,
+   "programs": 75,
+   "textures": 235,
+   "geometries": 868,
+   "effects": 39,
+   "actors": 46,
+   "cause": {
+    "code": "gpu",
+    "text": "Waiting on the graphics card: the game's code took 21 ms of a 2450 ms frame"
+   }
+  },
+  {
+   "at": 571231,
+   "ms": 2433,
+   "busyMs": 20,
+   "spans": [
+    [
+     "render",
+     16
+    ],
+    [
+     "world:views",
+     0
+    ],
+    [
+     "world:clutter",
+     0
+    ],
+    [
+     "world:grass",
+     0
+    ]
+   ],
+   "tasks": [
+    2415
+   ],
+   "outside": false,
+   "compiles": [],
+   "heapMB": 26,
+   "heapDropMB": 0,
+   "draws": 915,
+   "tris": 3867141,
+   "programs": 75,
+   "textures": 235,
+   "geometries": 862,
+   "effects": 30,
+   "actors": 46,
+   "cause": {
+    "code": "gpu",
+    "text": "Waiting on the graphics card: the game's code took 20 ms of a 2433 ms frame"
+   }
+  },
+  {
+   "at": 573647,
+   "ms": 2417,
+   "busyMs": 23,
+   "spans": [
+    [
+     "render",
+     16
+    ],
+    [
+     "world:grass",
+     0
+    ],
+    [
+     "world:views",
+     0
+    ],
+    [
+     "world:clutter",
+     0
+    ]
+   ],
+   "tasks": [],
+   "outside": false,
+   "compiles": [],
+   "heapMB": 26,
+   "heapDropMB": 0,
+   "draws": 893,
+   "tris": 3868295,
+   "programs": 75,
+   "textures": 235,
+   "geometries": 842,
+   "effects": 250,
+   "actors": 46,
+   "cause": {
+    "code": "gpu",
+    "text": "Waiting on the graphics card: the game's code took 23 ms of a 2417 ms frame"
+   }
+  },
+  {
+   "at": 576130,
+   "ms": 2483,
+   "busyMs": 25,
+   "spans": [
+    [
+     "render",
+     20
+    ],
+    [
+     "world:views",
+     0
+    ],
+    [
+     "world:clutter",
+     0
+    ],
+    [
+     "world:grass",
+     0
+    ]
+   ],
+   "tasks": [
+    2439
+   ],
+   "outside": false,
+   "compiles": [],
+   "heapMB": 26,
+   "heapDropMB": 0,
+   "draws": 1017,
+   "tris": 3892083,
+   "programs": 75,
+   "textures": 235,
+   "geometries": 869,
+   "effects": 376,
+   "actors": 46,
+   "cause": {
+    "code": "gpu",
+    "text": "Waiting on the graphics card: the game's code took 25 ms of a 2483 ms frame"
+   }
+  },
+  {
+   "at": 578580,
+   "ms": 2450,
+   "busyMs": 24,
+   "spans": [
+    [
+     "render",
+     18
+    ],
+    [
+     "world:views",
+     0
+    ],
+    [
+     "world:grass",
+     0
+    ],
+    [
+     "world:clutter",
+     0
+    ]
+   ],
+   "tasks": [
+    2421
+   ],
+   "outside": false,
+   "compiles": [],
+   "heapMB": 26,
+   "heapDropMB": 0,
+   "draws": 1014,
+   "tris": 3889347,
+   "programs": 75,
+   "textures": 235,
+   "geometries": 864,
+   "effects": 552,
+   "actors": 46,
+   "cause": {
+    "code": "gpu",
+    "text": "Waiting on the graphics card: the game's code took 24 ms of a 2450 ms frame"
+   }
+  },
+  {
+   "at": 581014,
+   "ms": 2433,
+   "busyMs": 26,
+   "spans": [
+    [
+     "render",
+     20
+    ],
+    [
+     "world:views",
+     0
+    ],
+    [
+     "world:clutter",
+     0
+    ],
+    [
+     "world:grass",
+     0
+    ]
+   ],
+   "tasks": [],
+   "outside": false,
+   "compiles": [],
+   "heapMB": 26,
+   "heapDropMB": 0,
+   "draws": 1016,
+   "tris": 3893417,
+   "programs": 75,
+   "textures": 235,
+   "geometries": 874,
+   "effects": 584,
+   "actors": 46,
+   "cause": {
+    "code": "gpu",
+    "text": "Waiting on the graphics card: the game's code took 26 ms of a 2433 ms frame"
+   }
+  },
+  {
+   "at": 583414,
+   "ms": 2400,
+   "busyMs": 24,
+   "spans": [
+    [
+     "render",
+     18
+    ],
+    [
+     "world:views",
+     0
+    ],
+    [
+     "world:clutter",
+     0
+    ],
+    [
+     "world:grass",
+     0
+    ]
+   ],
+   "tasks": [
+    2393
+   ],
+   "outside": false,
+   "compiles": [],
+   "heapMB": 26,
+   "heapDropMB": 0,
+   "draws": 997,
+   "tris": 3892031,
+   "programs": 75,
+   "textures": 235,
+   "geometries": 867,
+   "effects": 651,
+   "actors": 46,
+   "cause": {
+    "code": "gpu",
+    "text": "Waiting on the graphics card: the game's code took 24 ms of a 2400 ms frame"
+   }
+  },
+  {
+   "at": 585797,
+   "ms": 2383,
+   "busyMs": 22,
+   "spans": [
+    [
+     "render",
+     17
+    ],
+    [
+     "world:views",
+     0
+    ],
+    [
+     "world:clutter",
+     0
+    ],
+    [
+     "world:grass",
+     0
+    ]
+   ],
+   "tasks": [],
+   "outside": false,
+   "compiles": [],
+   "heapMB": 26,
+   "heapDropMB": 0,
+   "draws": 1045,
+   "tris": 3892423,
+   "programs": 75,
+   "textures": 235,
+   "geometries": 872,
+   "effects": 642,
+   "actors": 46,
+   "cause": {
+    "code": "gpu",
+    "text": "Waiting on the graphics card: the game's code took 22 ms of a 2383 ms frame"
+   }
+  },
+  {
+   "at": 588197,
+   "ms": 2400,
+   "busyMs": 23,
+   "spans": [
+    [
+     "render",
+     17
+    ],
+    [
+     "world:views",
+     0
+    ],
+    [
+     "world:clutter",
+     0
+    ],
+    [
+     "world:grass",
+     0
+    ]
+   ],
+   "tasks": [
+    2390
+   ],
+   "outside": false,
+   "compiles": [],
+   "heapMB": 26,
+   "heapDropMB": 0,
+   "draws": 1038,
+   "tris": 3887669,
+   "programs": 75,
+   "textures": 235,
+   "geometries": 864,
+   "effects": 645,
+   "actors": 46,
+   "cause": {
+    "code": "gpu",
+    "text": "Waiting on the graphics card: the game's code took 23 ms of a 2400 ms frame"
+   }
+  }
+ ],
+ "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+ "parallel": false,
+ "panel": {
+  "open": true,
+  "shown": true,
+  "stats": "Slowest of the last 240 frames: 4733 ms · stutters: 323 · shaders built while playing: 5"
+ },
+ "errors": []
+}

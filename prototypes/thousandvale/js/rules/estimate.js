@@ -78,7 +78,7 @@ export function coreRows(engine, u) {
     const extra = Math.round((d.familyPct || 0) - (engine.combatCfg?.families?.[d.family]?.damagePct ?? 0));
     rows.push({ id: 'familyPct', label: 'Weapon damage bonus', value: r1(d.familyPct), unit: '%', tip: `Your ${fam} adds this much to its damage, and so to every ability that is a share of its damage.${extra > 0 ? ` ${extra}% of it comes from gear and perks that raise ${fam} damage.` : ''}` });
   }
-  if (d.weaponGuard != null) rows.push({ id: 'weaponGuard', label: 'Melee guard', value: r1(d.weaponGuard || 0), unit: '%', tip: d.weaponGuard ? `A melee weapon in your main hand takes ${r1(d.weaponGuard)}% off every hit you take (two-handed melee weapons guard more than one-handed ones).` : 'Hold a melee weapon in your main hand and it takes a share off every hit you take. Bows, wands, staves and tomes do not guard.' });
+  if (d.weaponGuard != null) rows.push({ id: 'weaponGuard', label: 'Melee guard', value: r1(d.weaponGuard || 0), unit: '%', tip: d.weaponGuard ? `A melee weapon in your main hand: ${r1(d.weaponGuard)}% damage reduction (two-handed melee weapons guard more than one-handed ones).` : 'Hold a melee weapon in your main hand and it takes a share off every hit you take. Bows, wands, staves and tomes do not guard.' });
   return rows;
 }
 /** Y26: the "Attacks per second" rows (main hand; the off hand too when it holds a weapon that attacks). */

@@ -3253,6 +3253,12 @@
      "from": 4
     },
     {
+     "key": "glaive",
+     "name": "Glaive",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
      "key": "g5_bardiche",
      "name": "Reaper's Bardiche",
      "slot": "weapon",
@@ -3317,10 +3323,22 @@
      "from": 4
     },
     {
+     "key": "glaive",
+     "name": "Glaive",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
      "key": "g5_bardiche",
      "name": "Reaper's Bardiche",
      "slot": "weapon",
      "from": 10
+    },
+    {
+     "key": "bardiche",
+     "name": "Bardiche",
+     "slot": "weapon",
+     "from": 12
     },
     {
      "key": "watchfire_glaive",
@@ -3387,10 +3405,22 @@
      "from": 4
     },
     {
+     "key": "glaive",
+     "name": "Glaive",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
      "key": "g5_bardiche",
      "name": "Reaper's Bardiche",
      "slot": "weapon",
      "from": 10
+    },
+    {
+     "key": "bardiche",
+     "name": "Bardiche",
+     "slot": "weapon",
+     "from": 12
     },
     {
      "key": "watchfire_glaive",
@@ -3457,10 +3487,22 @@
      "from": 4
     },
     {
+     "key": "glaive",
+     "name": "Glaive",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
      "key": "g5_bardiche",
      "name": "Reaper's Bardiche",
      "slot": "weapon",
      "from": 10
+    },
+    {
+     "key": "bardiche",
+     "name": "Bardiche",
+     "slot": "weapon",
+     "from": 12
     },
     {
      "key": "watchfire_glaive",
@@ -3527,10 +3569,22 @@
      "from": 4
     },
     {
+     "key": "glaive",
+     "name": "Glaive",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
      "key": "g5_bardiche",
      "name": "Reaper's Bardiche",
      "slot": "weapon",
      "from": 10
+    },
+    {
+     "key": "bardiche",
+     "name": "Bardiche",
+     "slot": "weapon",
+     "from": 12
     },
     {
      "key": "watchfire_glaive",
@@ -9048,10 +9102,22 @@
      "from": 4
     },
     {
+     "key": "glaive",
+     "name": "Glaive",
+     "slot": "weapon",
+     "from": 6
+    },
+    {
      "key": "g5_bardiche",
      "name": "Reaper's Bardiche",
      "slot": "weapon",
      "from": 10
+    },
+    {
+     "key": "bardiche",
+     "name": "Bardiche",
+     "slot": "weapon",
+     "from": 12
     },
     {
      "key": "watchfire_glaive",

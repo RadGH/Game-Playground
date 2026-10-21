@@ -27,7 +27,7 @@ export const CHAT = Object.freeze({
 });
 export const PUBLIC_CHANNELS = Object.freeze(['zone', 'trade', 'world']);
 
-export function createChat({ store, presence, gwByChar, parties, guilds = null, friends = null, wallNow, filter = null, log = () => {}, counters = {}, mute = () => {}, opts = {} }) {
+export function createChat({ store, presence, gwByChar, parties, guilds = null, friends = null, wallNow, filter = null, log = () => {}, counters = {}, mute = () => {}, opts = {}, linksIn = null }) {
   const R = { ...CHAT, ...opts, autoMute: opts.autoMute === false ? null : { ...CHAT.autoMute, ...(opts.autoMute || {}) } };
   const ring = [];
   let pendingLog = [], lastFlush = wallNow(), lastPrune = 0;
@@ -66,7 +66,8 @@ export function createChat({ store, presence, gwByChar, parties, guilds = null, 
     const ch = m.ch, lvOk = Math.max(me.level || 1, s.alv || 1) >= R.publicLevel, open = !!s.claimed && lvOk;
     const gateMsg = what => (!s.claimed ? what + ' need a claimed account. Claim yours from the Account button — it is free.' : what + ' open when one of your characters reaches level ' + R.publicLevel + '.');
     if (PUBLIC_CHANNELS.includes(ch) && !open) return s.err('chatGate', gateMsg('Public channels'));
-    const base = { t: 'chat', ch, from: s.charId, name: me.name, text };
+    const lk = linksIn ? linksIn(text) : null;      // feedback #107: the snapshots this line links (made by the province, js/sim/province.js makeLink)
+    const base = { t: 'chat', ch, from: s.charId, name: me.name, text, ...(lk ? { links: lk } : {}) };
     let to = [], toKey = null;
     switch (ch) {
       case 'party': {

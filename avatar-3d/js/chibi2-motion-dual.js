@@ -13,6 +13,7 @@
 //
 //   two one-handers   dualSlashR  dualSlashL  dualCross      (swords, axes, maces: diagonal cuts)
 //   two daggers       dualStabR   dualStabL   dualFlurry     (forward-grip thrusts; the flurry is three fast ones)
+//   two spears        dualStabR   dualStabL   dualFlurry     (the same thrusts, a spear's reach)
 //   two two-handers   twinChopR   twinChopL   twinCrash      (one great weapon off its shoulder at a time, then both)
 //
 // `R` is the MAIN hand in this rig and `L` the off hand (see holdFor in chibi2-weapon-ids.js).
@@ -52,7 +53,11 @@ export const ROD_MOUNT = { bone: 'handR', position: [0, -0.035, 0.055], rotation
  */
 export const CATCH_MOUNT = { bone: 'handL', position: [0, 0.14, 0.12], rotation: [Math.PI / 2, 0, 0] };
 
-const DUAL_KINDS = new Set(['blade', 'dagger', 'haft', 'wand']);
+const DUAL_KINDS = new Set(['blade', 'dagger', 'haft', 'wand', 'polearm']);
+// Thousandvale feedback #102 (2026-10-21): "dual wield spear attack animation doesn't use the off hand at all" — a
+// one-handed spear is held `polearm`, which was not a pair kind, so two spears played the main hand's `attack` only.
+// A spear THRUSTS: it pairs like a dagger (stab, stab, flurry), and a spear beside a blade thrusts on its own turn.
+const THRUSTS = new Set(['dagger', 'polearm']);
 
 /**
  * Which clip a swing should play, from what is in both hands. `hand` is whose turn it is (`'main'` | `'off'`) and
@@ -64,8 +69,8 @@ export function dualAttackFor(hold, { hand = 'main', step = 0 } = {}) {
   const off = hand === 'off', both = !off && (step | 0) % 3 === 2;
   if (hold.dualTwo) return off ? 'twinChopL' : both ? 'twinCrash' : 'twinChopR';
   if (!DUAL_KINDS.has(hold.right) || !DUAL_KINDS.has(hold.left) || hold.right === 'wand') return null;
-  if (hold.right === 'dagger' && hold.left === 'dagger') return off ? 'dualStabL' : both ? 'dualFlurry' : 'dualStabR';
-  return off ? (hold.left === 'dagger' ? 'dualStabL' : 'dualSlashL') : both ? 'dualCross' : (hold.right === 'dagger' ? 'dualStabR' : 'dualSlashR');
+  if (THRUSTS.has(hold.right) && THRUSTS.has(hold.left)) return off ? 'dualStabL' : both ? 'dualFlurry' : 'dualStabR';
+  return off ? (THRUSTS.has(hold.left) ? 'dualStabL' : 'dualSlashL') : both ? 'dualCross' : (THRUSTS.has(hold.right) ? 'dualStabR' : 'dualSlashR');
 }
 
 /**

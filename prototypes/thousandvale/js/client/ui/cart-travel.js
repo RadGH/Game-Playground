@@ -12,8 +12,26 @@ import { createPanel, h } from '../ui-panel.js';
 import { cartRows, cartRefusal, rideText } from './pt8-core.js';
 import { distText } from './map-data.js';
 
+// feedback #101 / #105 (2026-10-21): "update the caravan NPC to show town sizes and maybe even NPC availability" — each stop
+// says how big the place is and who works there (data/world/town-info.json, made by tools/content-town-info.mjs)
+let infoP = null;
+const townInfo = () => (infoP ||= fetch(new URL('../../../data/world/town-info.json', import.meta.url)).then(r => (r.ok ? r.json() : null)).catch(() => null));
+const SIZE = { hamlet: 'Hamlet', village: 'Village', town: 'Town', city: 'City', capital: 'Capital' };
+const WHO = { smith: 'Smith', weaponsmith: 'Weapons', armourer: 'Armour', merchant: 'Merchant', general: null, innkeeper: 'Inn', inn: null, healer: 'Healer', stablehand: 'Stable', stable: null,
+  market: 'Market', trader: null, jeweller: 'Jeweller', trainer: 'Class trainer', bowyer: 'Bowyer', apothecary: 'Apothecary', tailor: 'Tailor', provisioner: 'Provisioner', barber: 'Barber',
+  broker: 'Broker', unbinder: 'Unbinder', elder: 'Elder', angler: 'Angler', prospector: 'Mining', logger: 'Logging', forager: 'Foraging', skinner: 'Skinning', scholar: 'Scholar', reeve: 'Reeve', hermit: 'Hermit' };
+const KEY_FIRST = ['Inn', 'Merchant', 'Smith', 'Healer', 'Stable', 'Market', 'Class trainer', 'Jeweller'];
+/** Who works in a town, in words: the ones a traveller looks for first. -> { short, all } */
+export function whoWorks(services = []) {
+  const names = [...new Set(services.map(r => WHO[r] === undefined ? r[0].toUpperCase() + r.slice(1) : WHO[r]).filter(Boolean))];
+  const key = KEY_FIRST.filter(n => names.includes(n)), rest = names.filter(n => !KEY_FIRST.includes(n));
+  const shown = key.slice(0, 5), more = names.length - shown.length;
+  return { short: names.length ? shown.join(' · ') + (more > 0 ? ` · +${more} more` : '') : 'Nobody to trade with — a carter and a few houses', all: [...key, ...rest].join(', ') };
+}
+
 export function createCartTravel({ net, hud, onOpen = null }) {
-  const S = { m: null, pick: null, going: false, timer: 0 };
+  const S = { m: null, pick: null, going: false, timer: 0, info: null };
+  townInfo().then(d => { S.info = d; draw(); });
   const panel = createPanel({ id: 'cart', title: 'Ox cart', width: 380, cls: 'cart-panel', onClose: () => { S.pick = null; S.going = false; clearTimeout(S.timer); } });
 
   const send = (id, to) => { const n = net(); if (!n) return false; if (typeof n.cart === 'function') { n.cart('go', id, to); return true; } if (!n._raw) return false; n._raw('game', JSON.stringify({ t: 'cart', op: 'go', id, to })); return true; };
@@ -29,8 +47,11 @@ export function createCartTravel({ net, hud, onOpen = null }) {
       const picked = S.pick === r.id;
       const cost = r.free ? 'Free' : r.token ? 'One cart token' : `${r.fare.toLocaleString()} gold`;
       const facts = [r.metres != null ? `${distText(r.metres)} by road` : '', r.secs != null ? rideText(r.secs) : '', r.level ? `level ${r.level} country` : ''].filter(Boolean).join(' · ');
+      const T = S.info?.towns?.[r.name] || S.info?.towns?.[String(r.name).replace(/ (gate|cart|stop)$/i, '')] || null, who = T ? whoWorks(T.services) : null;
       return h('li.cart-row' + (r.locked ? '.locked' : '') + (picked ? '.picked' : ''), { dataset: { stop: String(r.id) } },
-        h('div.cart-where', {}, h('b', {}, r.name), h('small', {}, facts), r.locked ? h('small.bad', {}, r.why) : null),
+        h('div.cart-where', {}, h('b', {}, r.name, T ? h('span.cart-size.size-' + T.size, {}, SIZE[T.size] || T.size) : null), h('small', {}, facts),
+          who ? h('small.cart-who', { dataset: { tip: who.all ? `Who works in ${r.name}: ${who.all}.` : `${r.name} has no traders.` } }, who.short) : null,
+          r.locked ? h('small.bad', {}, r.why) : null),
         h('span.cart-fare' + (r.free || r.token ? '.free' : ''), {}, cost),
         picked
           ? h('span.cart-confirm', {}, h('button.ghost.small', { type: 'button', dataset: { act: 'no' }, onclick: () => { S.pick = null; draw(); } }, 'Not now'),

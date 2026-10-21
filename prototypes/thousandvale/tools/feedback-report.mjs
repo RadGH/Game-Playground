@@ -11,6 +11,7 @@
 //                                                                   /var/lib/thousandvale/feedback-stable.jsonl as well)
 //   --state new|approved|declined|completed|trashed|all   (default: everything but trashed)      --kind bug|suggestion
 //   --since 2026-10-01     --limit 200     --no-logs (leave the client log lines out)     --json (raw rows instead of Markdown)
+//   --no-perf (leave the performance log out: 2026-10-20, every bug report carries one — stutters, their cause, shaders built)
 //   A report sent with a screenshot (play-test 12) prints its file: <feedback dir>/feedback-shots/<env>-<id>.jpg — Read it to see it.
 //   > docs/feedback-2026-10-06.md            it only prints; redirect it where you want it
 //
@@ -21,8 +22,8 @@ import { readFileSync, existsSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { loadEnv, parseArgs, GAME, rowsFromJsonl } from './lib/tv-env.mjs';
 
-const a = parseArgs(process.argv, { 'no-logs': 'bool', json: 'bool', help: 'bool' });
-if (a.help) { console.log(readFileSync(new URL(import.meta.url), 'utf8').split('\n').slice(1, 19).map(l => l.replace(/^\/\/ ?/, '')).join('\n')); process.exit(0); }
+const a = parseArgs(process.argv, { 'no-logs': 'bool', 'no-perf': 'bool', json: 'bool', help: 'bool' });
+if (a.help) { console.log(readFileSync(new URL(import.meta.url), 'utf8').split('\n').slice(1, 20).map(l => l.replace(/^\/\/ ?/, '')).join('\n')); process.exit(0); }
 const env = a.env || 'dev';
 const want = a.state || null, kind = a.kind || null, limit = Math.max(1, +a.limit || 500);
 const since = a.since ? Date.parse(a.since) : 0;
@@ -99,6 +100,9 @@ for (const k of ['bug', 'suggestion']) {
     if (r.ref != null) out.push(`- **Reply to:** #${r.ref}`);
     if (r.note) out.push(`- **Admin note:** ${esc(r.note)}`);
     if (r.state === 'completed' || r.done) out.push(`- **Completed${r.doneAt ? ' ' + when(r.doneAt) : ''}:** ${esc(r.done || '(no note)')}`);
+    // 2026-10-20: the client's performance log (js/client/perf-log.js reportLines): a header line, then stutters and shader builds, newest first
+    const perfLines = Array.isArray(c.perf) ? c.perf : [];
+    if (perfLines.length && !a['no-perf']) { out.push(''); out.push('Performance log (newest first):'); out.push(''); out.push('```'); for (const l of perfLines) out.push(esc(l).replace(/```/g, "'''")); out.push('```'); }
     const logs = Array.isArray(c.logs) ? c.logs : [];
     if (logs.length && !a['no-logs']) { out.push(''); out.push('Client log (oldest first):'); out.push(''); out.push('```'); for (const l of logs) out.push(esc(typeof l === 'string' ? l : JSON.stringify(l)).replace(/```/g, "'''")); out.push('```'); }
     out.push('');

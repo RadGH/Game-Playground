@@ -2,6 +2,21 @@
  "_doc": "Player-facing changelog, newest first. The lead appends an entry at each publish (from the feedback reports' Completed notes). `id` is stable; the client remembers the last id a player has seen and highlights newer ones. Plain language, no internal names.",
  "entries": [
   {
+   "id": "2026-10-21",
+   "date": "2026-10-21",
+   "title": "A new Torbor Downs, achievements, a new character screen, and fixes from your reports",
+   "items": [
+    "Torbor Downs is rebuilt: more hills and valleys, real coastlines where the land meets the sea, and a dozen named regions with their own ground, trees and grass. Every road, town and dungeon is where it was, and if you logged out somewhere that changed, you wake on good ground nearby.",
+    "Achievements and trophies: press Y. Many pay gold or a gift box by post. Help bring down a world boss or break a siege for a trophy, and be the first in the realm to do something for a Realm First that everyone hears about.",
+    "Link items, achievements and trophies in chat: Shift-click an item while you are typing, or press Link in the Achievements window.",
+    "A new character screen: the calling is chosen from cards showing every skill, the name box starts empty, and a taken name is said straight away instead of signing you in.",
+    "Towns now say how big they are (hamlet, village, town, city), every city has every shop, and the ox-cart window shows each stop's size and who works there.",
+    "New two-handed polearms: the Glaive and the Bardiche. Two spears now take turns, and every lightning bolt looks like lightning. Storm Orbs circle you.",
+    "Fixed: \"Not while you are fighting\" with nothing near you; the Brineglass Tubes dropping you on the corner of the sea (and /reset, or Stuck? in the menu, if you ever get stuck); boss rewards waiting on a body that was gone (they go to your bag now, with a reward card); the same event announced again at every zone; the damage meter reopening at log-in.",
+    "Also: your map arrow turns with you and the map works better on phones; a barrier shows on your health bar; guards come to help; a controller test in Settings; class descriptions match the real skills; trees look like storybook trees up close; new grass for every kind of ground."
+   ]
+  },
+  {
    "id": "2026-10-20",
    "date": "2026-10-20",
    "title": "Fairer fights, no more freezes, and lots of fixes from your reports",

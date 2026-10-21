@@ -468,6 +468,28 @@
      "sign": null,
      "light": false,
      "titled": true
+    },
+    {
+     "role": "jeweller",
+     "title": "Jeweller",
+     "name": "Miru Vakkatu",
+     "plot": "port_vharl_plot_3",
+     "want": "hut",
+     "x": 1160.89,
+     "z": 926.4,
+     "yaw": -2.1774,
+     "w": 4.73,
+     "d": 5.07,
+     "door": {
+      "x": 1157.8,
+      "z": 924.3,
+      "yaw": 0.964
+     },
+     "sign": "ring",
+     "light": true,
+     "shop": "jeweller",
+     "titled": true,
+     "city": true
     }
    ]
   },

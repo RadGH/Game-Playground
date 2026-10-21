@@ -45,7 +45,7 @@ test('1. the phone layout chooses itself; creating a character — name, calling
   await shot('01-title');
   await tap('#new-char');      // play-test 10 (Y29, D-UI): the title opens on the front card — "Create character" first
   await page.locator('#name').tap(); await page.locator('#name').fill(NAME);
-  await tap('#classes [data-cls="cleric"]');
+  await tap('#calling-open'); await tap('#classes [data-cls="cleric"]'); await tap('#calling-done');      // feedback #98: the calling picker
   await tap('#enter');
   await expect(page.locator('#panel-appearance')).toBeVisible({ timeout: 20000 });
   await page.waitForTimeout(1500);
@@ -249,6 +249,10 @@ test('6. the map (with its list folded away), casting a line from the wheel, and
   await expect(page.locator('#panel-map canvas').first()).toBeVisible({ timeout: 15000 });
   await page.waitForTimeout(3000);
   await shot('17-map');
+  // feedback #111: on a phone the map opens full-screen with its list folded away; the button brings the list back
+  await expect(page.locator('#panel-map .map-side')).toBeHidden();
+  await tap('#panel-map .ph-mapside');
+  await expect(page.locator('#panel-map .map-side')).toBeVisible();
   await tap('#panel-map .ph-mapside');
   await expect(page.locator('#panel-map .map-side')).toBeHidden();
   await shot('18-map-wide');

@@ -17,6 +17,10 @@ import { createBag } from '../bag.js';
 import { createWorldUi } from '../world-ui.js';
 import { createBossUi } from '../boss.js';
 import { createChat } from '../chat.js';
+import { createAchievementsWindow } from '../ui/achievements.js';      // feedback #106
+import { createCallingPicker } from '../ui/calling-picker.js';      // feedback #98
+import { createPerfPanel } from '../ui/perf-panel.js';      // 2026-10-20: the performance panel
+import { perf } from '../perf.js';
 import { createFriends } from '../friends.js';
 import { createGuild } from '../guild.js';
 import { createMail } from '../mail.js';
@@ -138,7 +142,25 @@ window.tvui11 = ui11;
 const ui10 = createUi10({ net: () => S.net, hud, actors, atlas: ui.atlas, me, pos: () => S.pos, worldMap: ui.worldMap, settings: ui2.settings, camYaw: () => S.yaw || 0, room: () => S.room });
 friends.tracker = ui10;
 const prof = createProf({ net: () => S.net, hud, bag, sheet: ui5.sheet, journal: ui.journal });   // W9 (P-client)
-const PANELS = { ...ui5.panels, ...ui8.panels, party: { toggle: () => social.toggleMenu() }, bag: { toggle: f => bag.toggle(f) }, friends: friends.panel, guild: guild.panel, mail: mail.panel, callboard: callboard.panel, account: account.panel, help, ...ui.panels };
+const achievements = createAchievementsWindow({ net: () => S.net, hud, chat });
+window.tvach = achievements;
+// the calling picker over a stand-in title (the gallery has no title screen of its own)
+const pick = { cls: 'tactician' };
+const callingPicker = createCallingPicker({ callings: () => window.__callings || [], current: () => pick.cls, onPick: id => { pick.cls = id; }, parent: document.body });
+window.tvpicker = { open: async () => { const { loadCallings } = await import('../ui/class-card.js'); window.__callings = await loadCallings(); callingPicker.open(); }, picker: callingPicker };
+// 2026-10-20: the performance panel (ui/perf-panel.js) over the page's own watchdog, fed a made-up minute of frames:
+// mostly smooth, a few slow ones, one stutter while a shader was built (the gallery draws no 3D frames of its own)
+const perfPanel = createPerfPanel({ perf, fps: () => 58, info: () => ({ build: 'gallery', quality: 'high', ua: 'gallery' }) });
+window.tvperf = {
+  open() {
+    let t = performance.now() + 1000;
+    perf.frame(t);
+    for (let i = 0; i < 240; i++) { const ms = i === 200 ? 1530 : i % 37 === 0 ? 48 : 15 + (i % 5); if (i === 200) perf.log.compile({ at: Math.round(t), name: 'MeshBasicMaterial', what: 'unnamed Mesh (MeshBasicMaterial, see-through, glowing)', site: 'spellfx.js:310', frameMs: ms, afterLoad: true }); perf.frameEnd(t + (i === 200 ? 1500 : 6)); t += ms; perf.frame(t); }
+    perfPanel.open();
+  },
+  panel: perfPanel,
+};
+const PANELS = { achievements: achievements.panel, ...ui5.panels, ...ui8.panels, party: { toggle: () => social.toggleMenu() }, bag: { toggle: f => bag.toggle(f) }, friends: friends.panel, guild: guild.panel, mail: mail.panel, callboard: callboard.panel, account: account.panel, help, ...ui.panels };
 for (const b of menubar.nav.querySelectorAll('.mb-btn')) if (!['party', 'bag'].includes(b.dataset.panel)) b.addEventListener('click', () => PANELS[b.dataset.panel].toggle());
 // the same key handler main.js has (windows, help, chat, Esc) — the input layer turns pads and touch into these keys
 window.addEventListener('keydown', e => {
@@ -292,7 +314,7 @@ function wireNet(net) {
   net.on('castR', r => hud.toast(r.text || 'You cannot do that.', 'warn'));
   // the same order main.js wires them in
   social.wire(net);
-  chat.wire(net); friends.wire(net); guild.wire(net); mail.wire(net); callboard.wire(net); account.wire(net);
+  chat.wire(net); achievements.wire(net); friends.wire(net); guild.wire(net); mail.wire(net); callboard.wire(net); account.wire(net);
   bag.wire(net);
   ui5.wire(net);
   ui8.wire(net); ui10.wire(net); ui11.wire(net);

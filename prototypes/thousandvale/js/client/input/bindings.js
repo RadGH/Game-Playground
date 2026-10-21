@@ -96,6 +96,7 @@ export const ACTIONS = [
   { id: 'bag', group: 'Windows', label: 'Bag and gear', key: 'KeyB', panel: 'bag', radial: true, touch: 'Quick wheel' },
   { id: 'sheet', group: 'Windows', label: 'Character: stats and damage', key: 'KeyV', panel: 'sheet', radial: true, touch: 'Quick wheel (a tab beside the bag)' },
   { id: 'skills', group: 'Windows', label: 'Skills and talents', key: 'KeyK', panel: 'skills', radial: true, touch: 'Quick wheel' },
+  { id: 'achievements', group: 'Windows', label: 'Achievements and trophies', key: 'KeyY', panel: 'achievements', radial: true, touch: 'Quick wheel, or the pause menu' },      // feedback #106
   { id: 'perks', group: 'Windows', label: 'Perk forest', key: 'KeyN', panel: 'perks', radial: true, touch: 'Quick wheel' },
   { id: 'party', group: 'Windows', label: 'Party menu: party, friends, guild, mail, Group Finder', key: 'KeyP', panel: 'party', radial: true, touch: 'Quick wheel: Social' },
   { id: 'friends', group: 'Windows', label: 'Friends tab', key: 'KeyO', panel: 'friends', touch: 'Social sheet, Friends tab' },
@@ -137,6 +138,7 @@ export const PAD_MENU_TILES = [
   { id: 'skills', group: 'You', label: 'Skills', sub: 'Skills and talents', panel: 'skills', icon: 'skills', action: 'skills' },
   { id: 'perks', group: 'You', label: 'Perks', sub: 'The perk forest', panel: 'perks', icon: 'perks', action: 'perks' },
   { id: 'journal', group: 'You', label: 'Journal', sub: 'Quests', panel: 'journal', icon: 'journal', action: 'journal' },
+  { id: 'achievements', group: 'You', label: 'Achievements', sub: 'And trophies', panel: 'achievements', icon: 'journal', action: 'achievements' },
   { id: 'map', group: 'You', label: 'Map', sub: 'Also: View', panel: 'map', icon: 'map', action: 'map' },
   { id: 'party', group: 'People', label: 'Party', sub: 'Invite, join link', panel: 'party', icon: 'party', action: 'party' },
   { id: 'friends', group: 'People', label: 'Friends', sub: 'Who is online', panel: 'friends', icon: 'friends' },
@@ -281,6 +283,7 @@ export const WHEEL = [
   { id: 'chat', label: 'Chat', icon: 'chat' },
   { id: 'party', label: 'Social', icon: 'party' },
   { id: 'journal', label: 'Journal', icon: 'journal' },
+  { id: 'achievements', label: 'Achievements', icon: 'journal' },      // feedback #106
 ];
 /** The second ring (phone: swipe the wheel; pad: tap RB while it is open): things you do, not windows. */
 export const WHEEL_ACTIONS = [

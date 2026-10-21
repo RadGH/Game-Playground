@@ -62,7 +62,7 @@ export function createReveal({ net, hud, bag }) {
     root.className = `tv-reveal open r-${r}` + (from === 'gift' ? ' gift' : '');
     root.replaceChildren(h('div.rv-card', {},
       h('div.rv-burst', { 'aria-hidden': 'true' }, ...Array.from({ length: 12 }, (_, i) => h('i', { style: `--a:${i * 30}deg` }))),
-      h('span.rv-from', {}, from === 'gift' ? 'A gift for you' : from === 'fish' ? 'Hauled up from the water' : 'Inside the crate'),
+      h('span.rv-from', {}, from === 'gift' ? 'A gift for you' : from === 'fish' ? 'Hauled up from the water' : from === 'event' ? 'Your share of the spoils' : from === 'achievement' ? 'Achievement reward' : 'Inside the crate'),
       pic,
       h('strong.rv-name.r-' + r, {}, nameOf(item)),
       h('span.rv-kind', {}, `${RARITY_NAME[rarityOf(item)] || 'Common'} ${slot ? (SLOT_NAME[slot] || slot).toLowerCase() : 'item'}`),
@@ -72,7 +72,7 @@ export function createReveal({ net, hud, bag }) {
       ok));
     root.hidden = false;
     ok.focus({ preventScroll: true });
-    hud.chat?.(`${from === 'gift' ? 'You unwrap the gift' : 'You open the crate'}: ${nameOf(item)}.`, 'loot rarity-' + r);
+    if (from !== 'event' && from !== 'achievement') hud.chat?.(`${from === 'gift' ? 'You unwrap the gift' : 'You open the crate'}: ${nameOf(item)}.`, 'loot rarity-' + r);
     S.timer = setTimeout(() => { if (S.shown === item) close(); }, 30000);      // it waits for you; it only tidies itself away after half a minute
   }
   function refuse(r) {

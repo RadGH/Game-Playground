@@ -277,7 +277,8 @@ test('Y32: the Starcaller has a card in creation and a picture for each of its s
   assert.ok(ids.every(id => skillIconIds().includes(id)), 'the original six remain in the shared library');
   assert.equal(skillIconSvg('unknown_future_skill'), null, 'a skill with no picture keeps its initials');
   assert.match(src('js/client/hud.js'), /skillIconSvg\(sk\.id, 40\)/);
-  assert.match(src('js/client/main.js'), /drawClassCard\(\$\('class-card'\)/);
+  // feedback #98: the calling's page is the picker's (js/client/ui/calling-picker.js), drawn into #class-card, made by main.js
+  assert.match(src('js/client/main.js'), /createCallingPicker\(/); assert.match(src('js/client/ui/calling-picker.js'), /id="class-card"/);
 });
 test('Y32: a class resource (Starlight) is five pips, glowing when full; a big pool is a bar', () => {
   assert.deepEqual(resView([{ id: 'starlight', n: 3, max: 5 }]), { id: 'starlight', name: 'Starlight', n: 3, max: 5, pips: true, full: false, tint: '#e6c14a', text: 'Starlight 3 / 5' });

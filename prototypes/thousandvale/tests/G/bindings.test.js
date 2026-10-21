@@ -49,9 +49,9 @@ test('main.js installs the input layer and ticks it; controls.js takes a stick; 
 test('re-binding: a free key moves; a key in use swaps; pairs that share a key stay together; fixed keys refuse', () => {
   const B = createBindings();
   assert.equal(B.keyOf('strike'), 'KeyF'); assert.equal(B.translate('KeyF'), undefined);
-  assert.deepEqual(B.set('strike', 'KeyY'), { ok: true, swapped: null });
-  assert.equal(B.keyOf('strike'), 'KeyY');
-  assert.equal(B.translate('KeyY'), 'KeyF', 'the new key is heard as the default one');
+  assert.deepEqual(B.set('strike', 'KeyI'), { ok: true, swapped: null });      // (KeyY is the Achievements window since feedback #106)
+  assert.equal(B.keyOf('strike'), 'KeyI');
+  assert.equal(B.translate('KeyI'), 'KeyF', 'the new key is heard as the default one');
   assert.equal(B.translate('KeyF'), null, 'the old key goes quiet');
   assert.equal(B.translate('KeyM'), undefined, 'untouched keys pass through untouched');
   // a key in use: the two swap
@@ -67,7 +67,7 @@ test('re-binding: a free key moves; a key in use swaps; pairs that share a key s
   assert.equal(B.set('jump', 'Escape').why, 'reserved');
   // overrides survive a round trip and reset
   const B2 = createBindings(B.overrides);
-  assert.equal(B2.keyOf('strike'), 'KeyY'); assert.equal(B2.label('strike'), 'Y');
+  assert.equal(B2.keyOf('strike'), 'KeyI'); assert.equal(B2.label('strike'), 'I');
   B2.reset('strike'); assert.equal(B2.keyOf('strike'), 'KeyF');
   B2.reset(); assert.deepEqual(B2.overrides, {});
   // garbage in storage is dropped

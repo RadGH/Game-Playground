@@ -170,7 +170,7 @@ test('Z60 (#61): a melee weapon in the main hand takes a share off every hit you
   assert.ok(two.d.weaponGuard > one.d.weaponGuard && one.d.weaponGuard > 0, `two-handed ${two.d.weaponGuard}% > one-handed ${one.d.weaponGuard}%`);
   assert.equal(bow.d.weaponGuard, 0); assert.equal(wand.d.weaponGuard, 0);
   assert.equal(two.d.resistAll, two.d.weaponGuard, 'it is the sheet\'s all-damage resistance (rpg.strike reads it)');
-  assert.match(familyText(eng, two.it), /takes 15% off every hit/);
+  assert.match(familyText(eng, two.it), /In your main hand: 15% damage reduction/);
   assert.doesNotMatch(familyText(eng, bow.it), /takes/);
   // in a fight: the same monster hits a greatsword-holder softer than a bow-holder
   const take = base => {

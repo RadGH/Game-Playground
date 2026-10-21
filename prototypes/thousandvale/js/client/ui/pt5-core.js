@@ -343,7 +343,7 @@ export function feedbackPreview(ctx) {
   const tech = [ctx.build && `build ${ctx.build}`, ctx.quality && `graphics ${ctx.quality}`, ctx.fps != null && `${ctx.fps} frames a second`, ctx.rtt != null && `${ctx.rtt} ms to the server`, ctx.screen].filter(Boolean).join(' · ');
   if (tech) out.push(`Game: ${tech}`);
   if (ctx.ua) out.push(`Browser: ${ctx.ua}`);
-  return { lines: out, log: ctx.log || [] };
+  return { lines: out, log: ctx.log || ctx.logs || [], perf: Array.isArray(ctx.perf) ? ctx.perf : [] };      // 2026-10-20: + the performance log
 }
 
 // ---- T20: mail needs bag room ---------------------------------------------------------------------------------------

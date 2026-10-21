@@ -465,6 +465,8 @@ export function pgM3({ pool, q, realm, SAVE_SQL, saveParams }) {
         return { id: r.rows[0].id, first };
       });
     },
+    /** feedback #106: { sent, done } — this character's reports, and how many the makers marked completed. */
+    async feedbackTally(char) { const r = await q("SELECT count(*)::int AS sent, count(*) FILTER (WHERE state = 'completed')::int AS done FROM feedback WHERE char_id = $1 AND realm = $2 AND state <> 'trashed'", [char, realm]); return r.rows[0] || { sent: 0, done: 0 }; },
     async hasFeedback(char) { const r = await q('SELECT 1 FROM feedback WHERE char_id = $1 LIMIT 1', [char]); return r.rows.length > 0; },
     async feedbackGiftFailed(char) { await q('UPDATE feedback SET gift = false WHERE char_id = $1', [char]); },
     async getFeedback(id) { const r = await q('SELECT * FROM feedback WHERE id = $1 AND realm = $2', [id, realm]); return r.rows.length ? fbRow(r.rows[0]) : null; },

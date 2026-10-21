@@ -24,8 +24,10 @@ export const BODY_R = 0.32;
 /**
  * Per scatter kind: the model radius at body height for each variant (scatter-view.js draws variant % list length) in
  * the kit piece's own units, the art scale the client draws it at, and its sideways squash. Measured by
- * tools/measure-scatter.mjs (trunk: the 25th percentile of bark vertices 0.25-0.8 up — the trunk, not its low
- * branches; rock: 85th percentile 0.25-1.5 up; basalt columns: 0.9 x the half-width of their box).
+ * tools/measure-scatter.mjs (trunk: the trunk SLICED at three heights 0.25-0.8 up, 60th percentile of the crossing points —
+ * the trunk, not its low branches; rock: 85th percentile 0.25-1.5 up; basalt columns: 0.9 x the half-width of their box).
+ * 2026-10-20: the storybook trees (js/client/tree-style.js) are FITTED to these radii (their `rB`/`rT` in
+ * tree-style-data.js), so the colliders — and every baked route that reads them — did not change with the new art.
  */
 export const SCATTER_COLLIDE = Object.freeze({
   tree_broadleaf: { r: [0.54, 0.56, 0.41], art: 0.62 },

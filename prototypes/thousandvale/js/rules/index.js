@@ -767,7 +767,7 @@ export function createRules(host, opts = {}) {
       if (second) regenClock -= 1;
       // who is being fought: one pass over the monsters a second, not one per player
       const fought = second ? new Set() : null;
-      if (second) for (const m of field.monsters) if (m.dying == null && m.targetId != null) fought.add(m.targetId);
+      if (second) for (const m of field.monsters) if (m.targetId != null && !fought.has(m.targetId)) { const t = field.get(m.targetId); if (t && fightsYou(m, t)) fought.add(m.targetId); }
       const night = second ? !!host.isNight?.() : null;
       for (const p of field.players) {
         if (p.channel) tickChannel(p, dt);
@@ -934,8 +934,14 @@ export function createRules(host, opts = {}) {
     }
     return { ok: false, why: 'notYet', text: `${name} does nothing yet.` };
   }
-  /** Fighting = a monster has you as its target. */
-  const combatNow = u => field.monsters.some(m => m.dying == null && m.targetId === u.id);
+  /**
+   * Fighting = an awake monster near you has you as its target. Feedback #104: it used to be ANY monster on the island
+   * with you as its target — one left behind when you ran (it falls asleep with nobody near and never lets go) or one
+   * stuck behind a wall kept you "fighting" forever: no mount, no recall, no regen.
+   */
+  const FIGHT_REACH = 60;
+  const fightsYou = (m, u) => m.dying == null && m.targetId === u.id && !m.asleep && Math.hypot(m.x - u.x, m.z - u.z) <= FIGHT_REACH;
+  const combatNow = u => field.monsters.some(m => fightsYou(m, u));
   /**
    * The shop buffs on an entity: { dmgPct, armorPct, mountSpeedPct, ... } (A: riding speed). Owner feedback 8 (W22): there
    * are no light items any more — `lightRange` is the SAME for everyone (LIGHT.radius), kept on this answer so a client
@@ -1453,6 +1459,8 @@ export function createRules(host, opts = {}) {
     sight: (ax, az, bx, bz) => (field.sight ? field.sight(ax, az, bx, bz) : true),
     /** owner feedback 10 (Y17): training dummies */
     spawnDummy, isDummy,
+    /** feedback #99: the barrier (temporary health) on a player, whole points — the HUD shows "184 / 174 (+10)". */
+    barrierOf: e => { const u = e?.r?.unit; return u && !u.dead ? Math.max(0, Math.round(u.barrier || 0)) : 0; },
     /** Y32: the owner's signature resources, shared by the join and change-only updates. */
     resources: e => {
       const u = e?.r?.unit; if (!u) return [];

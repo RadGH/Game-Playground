@@ -1,0 +1,32 @@
+/* feedback #106 / #107 (2026-10-21): the Achievements window (js/client/ui/achievements.js) and chat links (js/client/chat.js) */
+.ach-panel { width: min(520px, 94vw); }
+.ach-panel .tvp-body { max-height: min(70vh, 640px); overflow-y: auto; }
+.ach-tabs { margin-bottom: 8px; }
+.ach-list section { margin-bottom: 12px; }
+.ach-list h4 { margin: 4px 0 6px; font-family: var(--serif); color: var(--gold, #d9b26a); letter-spacing: 0.04em; }
+.ach-row { display: grid; grid-template-columns: 26px 1fr auto; gap: 8px; align-items: start; padding: 6px 8px; border-radius: 6px; background: rgba(255, 255, 255, 0.03); margin-bottom: 4px; border: 1px solid rgba(255, 255, 255, 0.05); }
+.ach-row.done { background: rgba(217, 178, 106, 0.08); border-color: rgba(217, 178, 106, 0.3); }
+.ach-mark { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; border: 1px solid rgba(255, 255, 255, 0.2); color: #1a1206; font-weight: 800; font-size: 13px; }
+.ach-row.done .ach-mark { background: linear-gradient(180deg, #ffe39a, #d9a83a); border-color: #ffe39a; }
+.ach-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ach-main strong { font-size: 14px; }
+.ach-main .dim { font-size: 12.5px; }
+.ach-first { color: #c9a8ff; font-weight: 600; }
+.ach-reward { font-size: 12px; color: #9fd8a0; }
+.ach-bar { height: 12px; margin-top: 3px; }
+.ach-bar i { background: linear-gradient(90deg, #8a6a2a, #e6c14a); }
+.ach-bar span { font-size: 10px; }
+.ach-side { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.ach-shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.ach-trophy { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 3px; padding: 10px 8px; border-radius: 8px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(217, 178, 106, 0.25); }
+.ach-trophy.first { border-color: #c9a8ff; background: rgba(160, 120, 255, 0.1); }
+.ach-cup { font-size: 28px; line-height: 1; }
+.ach-trophy.first .ach-cup { color: #e0c8ff; text-shadow: 0 0 10px rgba(200, 160, 255, 0.8); }
+.ach-trophy .tiny { font-size: 11px; }
+/* chat link chips: [Name] in the item's rarity colour, a card on hover */
+.chat-link { cursor: pointer; font-weight: 700; color: #eee; }
+.chat-link:hover, .chat-link:focus { text-decoration: underline; outline: none; }
+.chat-link.r-magic { color: #8fb4ff; } .chat-link.r-rare { color: #ffe17a; } .chat-link.r-legendary, .chat-link.r-unique { color: #ffb36a; } .chat-link.r-set { color: #8ff0a0; }
+.chat-link.r-ach { color: #ffe39a; } .chat-link.r-trophy { color: #e0c8ff; } .chat-link.gone { color: #888; cursor: default; font-weight: 400; }
+html[data-layout="phone"] .ach-row { grid-template-columns: 24px 1fr; }
+html[data-layout="phone"] .ach-side { grid-column: 2; flex-direction: row; justify-content: space-between; align-items: center; }

@@ -717,7 +717,7 @@ function runtimeOf(combat) {
     .filter(u => u !== ch && u.dead && !u.removed && ch.partyId != null && u.partyId === ch.partyId && Math.hypot(u.x - ch.x, u.z - ch.z) <= range)
     .sort((p, q) => Math.hypot(p.x - ch.x, p.z - ch.z) - Math.hypot(q.x - ch.x, q.z - ch.z));
   /** "Fighting" for a revive: a live monster has you as its target. */
-  rt.inCombat = ch => field.monsters.some(m => m.dying == null && m.targetId === ch.id);
+  rt.inCombat = ch => field.monsters.some(m => m.dying == null && m.targetId === ch.id && !m.asleep && Math.hypot(m.x - ch.x, m.z - ch.z) <= 60);   // feedback #104: same rule as index.js combatNow
   /** What the room is told about one revive (JSON only — A may hold it while the fallen player decides). */
   rt.reviveSpec = (ch, row) => {
     const rv = reviveOf(row);

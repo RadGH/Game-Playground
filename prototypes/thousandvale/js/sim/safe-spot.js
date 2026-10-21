@@ -43,13 +43,15 @@ const isWet = (terrain, x, z) => { const w = terrain.waterAt ? terrain.waterAt(x
  * bearing (the same input always gives the same answer). A spot must also have its 4 neighbours 1.5 m away good, so
  * nobody wakes up wedged against a wall or on a cliff lip.
  */
-export function safeSpot(terrain, at, { maxR = 160, farR = 800 } = {}) {
+export function safeSpot(terrain, at, { maxR = 160, farR = 800, nudge = false } = {}) {
   if (!at) return null;
-  const why = spotProblem(terrain, at.x, at.z);
+  // nudge (feedback #96, /reset): the spot may look fine on the map and still hold you (a prop, a bad seam) — always move
+  // at least 3 m, to the nearest roomy dry spot
+  const why = spotProblem(terrain, at.x, at.z) || (nudge ? 'stuck' : null);
   if (!why) return { x: at.x, z: at.z, moved: false, why: null };
   const roomy = (x, z) => !spotProblem(terrain, x, z) && [[1.5, 0], [-1.5, 0], [0, 1.5], [0, -1.5]].every(([dx, dz]) => !spotProblem(terrain, x + dx, z + dz));
   let wetPick = null;
-  for (let r = 2; r <= maxR; r += 2) {
+  for (let r = nudge ? 4 : 2; r <= maxR; r += 2) {
     const n = Math.max(8, Math.ceil((2 * Math.PI * r) / 2));
     for (let i = 0; i < n; i++) {
       const a = (i / n) * Math.PI * 2, x = at.x + Math.cos(a) * r, z = at.z + Math.sin(a) * r;

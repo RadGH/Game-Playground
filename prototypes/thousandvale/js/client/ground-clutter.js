@@ -6,7 +6,8 @@
 // FIXED world lattice round the camera — a cell's contents are a hash of the cell, so walking moves you past the
 // grass rather than dragging it along. Refilled only when the camera has moved 3 m. Nothing on Low quality.
 //
-//   const clutter = createGroundClutter(scene, { quality, zoneAt })    zoneAt(x, z) -> world-stream's loaded zone
+//   const clutter = createGroundClutter(scene, { quality, zoneAt, tufts })    zoneAt(x, z) -> world-stream's loaded zone;
+//                                    tufts: false when grass-gpu.js draws the grass (Medium / High since 2026-10-20)
 //   clutter.update(cam)       every frame (cheap unless the camera moved)
 //   clutter.refresh()         a zone was loaded or dropped: refill next update
 //   clutter.stats -> { tuft, detail, calls, refills, ms }
@@ -72,11 +73,12 @@ function partsFor(kind, mats) {
   return out;
 }
 
-export async function createGroundClutter(scene, { quality = 'high', zoneAt } = {}) {
+export async function createGroundClutter(scene, { quality = 'high', zoneAt, tufts = true } = {}) {
   const group = new THREE.Group(); group.name = 'ground-clutter';
   const stats = { tuft: 0, detail: 0, calls: 0, refills: 0, ms: 0 };
   const api = { group, stats, update() {}, refresh() {}, dispose() {} };
-  const reach = { tuft: CLUTTER_LAYERS.tuft.reach[quality] ?? 0, detail: CLUTTER_LAYERS.detail.reach[quality] ?? 0 };
+  const reach = { tuft: tufts ? CLUTTER_LAYERS.tuft.reach[quality] ?? 0 : 0,      // tufts: false = the GPU grass (grass-gpu.js) draws the grass
+    detail: CLUTTER_LAYERS.detail.reach[quality] ?? 0 };
   if (!atmosTierNow(quality).clutter || (!reach.tuft && !reach.detail)) return api;     // Low, and ?atmos=0 (the old look)
   scene.add(group);
   const mats = await foliageMaterials(false);
@@ -85,6 +87,7 @@ export async function createGroundClutter(scene, { quality = 'high', zoneAt } = 
   // one instanced mesh per (kind, part); per-instance colour carries the biome tint and each item's tone
   const meshes = {};
   for (const kind of Object.keys(CLUTTER_KINDS)) {
+    if (kind === 'tuft' && !reach.tuft) continue;
     const cap = kind === 'tuft' ? CLUTTER_LAYERS.tuft.cap : Math.ceil(CLUTTER_LAYERS.detail.cap / 2);
     meshes[kind] = partsFor(kind, mats).map(({ geo, mat }) => {
       const m = new THREE.InstancedMesh(geo, mat, cap);

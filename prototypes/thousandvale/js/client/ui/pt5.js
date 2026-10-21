@@ -155,6 +155,21 @@ export function createUi5(o) {
 
   function wire(n) {
     reveal.wire(n); tracker.wire(n); sheet.wire(n); feedback.wire(n); angling.wire(n);
+    // feedback #110 (2026-10-21): "boss type rewards should be presented with a screen" — a won event's items (already in
+    // your bag: the server puts them there) are shown one by one on the reveal card, the experience and gold beneath
+    n.on('eventDone', m => {
+      if (!m || !m.won || !Array.isArray(m.items) || !m.items.length) return;
+      const note = [m.name, m.xp ? `+${m.xp} XP` : '', m.gold ? `+${m.gold} gold` : ''].filter(Boolean).join(' · ');
+      setTimeout(() => {
+        const have = (bag.state.bag || []).slice().reverse(), used = new Set();
+        for (const want of m.items) {
+          const it = have.find(i => !used.has(i.uid) && i.name === want.name);
+          if (!it) continue;
+          used.add(it.uid);
+          reveal.show(it, { from: 'event', note });
+        }
+      }, 400);
+    });
     n.on('used', u => { if (u && u.ok && u.kind === 'lift' && Array.isArray(u.choices) && u.choices.length) liftAsk(u); });
     n.on('joined', () => { liftBox.hidden = true; });
     n.on('reviveAsk', reviveAsk);

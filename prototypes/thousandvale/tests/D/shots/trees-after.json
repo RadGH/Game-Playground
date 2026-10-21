@@ -1,0 +1,174 @@
+{
+ "desktop": {
+  "oakwood": {
+   "near": {
+    "calls": 450,
+    "tris": 3188992
+   },
+   "mid": {
+    "calls": 452,
+    "tris": 3249030
+   },
+   "far": {
+    "calls": 451,
+    "tris": 3280400
+   }
+  },
+  "giants-wood": {
+   "near": {
+    "calls": 446,
+    "tris": 3176419
+   },
+   "mid": {
+    "calls": 474,
+    "tris": 3040015
+   },
+   "far": {
+    "calls": 490,
+    "tris": 3062220
+   }
+  },
+  "pine-highwood": {
+   "near": {
+    "calls": 690,
+    "tris": 2582978
+   },
+   "mid": {
+    "calls": 429,
+    "tris": 1963307
+   },
+   "far": {
+    "calls": 565,
+    "tris": 3089167
+   }
+  },
+  "saints-meadow": {
+   "near": {
+    "calls": 174,
+    "tris": 875844
+   },
+   "mid": {
+    "calls": 470,
+    "tris": 2606861
+   },
+   "far": {
+    "calls": 619,
+    "tris": 3568708
+   }
+  },
+  "brack-fen": {
+   "near": {
+    "calls": 217,
+    "tris": 1195835
+   },
+   "mid": {
+    "calls": 326,
+    "tris": 1429952
+   },
+   "far": {
+    "calls": 413,
+    "tris": 2756654
+   }
+  },
+  "vharl-jungle": {
+   "near": {
+    "calls": 166,
+    "tris": 903406
+   },
+   "mid": {
+    "calls": 363,
+    "tris": 1835907
+   },
+   "far": {
+    "calls": 397,
+    "tris": 1883043
+   }
+  }
+ },
+ "phone": {
+  "oakwood": {
+   "near": {
+    "calls": 388,
+    "tris": 2702855
+   },
+   "mid": {
+    "calls": 386,
+    "tris": 2766819
+   },
+   "far": {
+    "calls": 369,
+    "tris": 2724867
+   }
+  },
+  "giants-wood": {
+   "near": {
+    "calls": 352,
+    "tris": 2452601
+   },
+   "mid": {
+    "calls": 365,
+    "tris": 2524681
+   },
+   "far": {
+    "calls": 375,
+    "tris": 2516161
+   }
+  },
+  "pine-highwood": {
+   "near": {
+    "calls": 308,
+    "tris": 1223133
+   },
+   "mid": {
+    "calls": 398,
+    "tris": 1845885
+   },
+   "far": {
+    "calls": 446,
+    "tris": 2484453
+   }
+  },
+  "saints-meadow": {
+   "near": {
+    "calls": 276,
+    "tris": 1489339
+   },
+   "mid": {
+    "calls": 331,
+    "tris": 1978367
+   },
+   "far": {
+    "calls": 339,
+    "tris": 2594061
+   }
+  },
+  "brack-fen": {
+   "near": {
+    "calls": 202,
+    "tris": 846362
+   },
+   "mid": {
+    "calls": 276,
+    "tris": 1783940
+   },
+   "far": {
+    "calls": 290,
+    "tris": 2182650
+   }
+  },
+  "vharl-jungle": {
+   "near": {
+    "calls": 160,
+    "tris": 1101031
+   },
+   "mid": {
+    "calls": 216,
+    "tris": 1231039
+   },
+   "far": {
+    "calls": 321,
+    "tris": 1524429
+   }
+  }
+ }
+}

@@ -184,6 +184,8 @@ export function createControls({ dom, camera, heightAt, onSelect, onAttack, onCy
     cam, intent, updateCamera,
     setTyping(v) { typing = v; if (v) keys.clear(); },
     stopChase() { chase = null; auto = null; },
+    /** feedback #83: walk back in on the auto-attack target (a knock-back threw it out of reach) without restarting the attack. */
+    resumeChase(id) { if (auto != null && id === auto) chase = id; },
     attack(id) { chase = id; auto = id; moveGoal = null; onAttack?.(id); },
     /** Y7/Y35 (G2): the id being auto-attacked (null = off); stopAuto() ends the attack and the walk toward it. */
     get auto() { return auto; },

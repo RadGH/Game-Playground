@@ -246,7 +246,7 @@ export function createRoom(opts) {
     client.inputs = [];
     client.ack = client.ack || 0;
     client.budget = 0;
-    client.lastSelf = null; client.lastVitals = null; client.lastResources = null; client.selfDirty = true;
+    client.lastSelf = null; client.lastVitals = null; client.lastResources = null; client.lastBarrier = null; client.selfDirty = true;
     clients.set(e.id, client);
   };
   room.detach = function (e) { clients.delete(e.id); };
@@ -311,8 +311,8 @@ export function createRoom(opts) {
     return safe('intent', e, msg) || { ok: false, why: 'unknown' };
   };
   /** Say chat to everyone within VIEW.sayR; `deliver(recipientChar)` may veto (ignore lists). */
-  room.say = function (e, text, deliver = null) {
-    const msg = JSON.stringify({ t: 'chat', ch: 'say', from: e.id, name: e.name, text });
+  room.say = function (e, text, deliver = null, links = null) {
+    const msg = JSON.stringify({ t: 'chat', ch: 'say', from: e.id, name: e.name, text, ...(links ? { links } : {}) });      // feedback #107: linked items / achievements
     for (const o of grid.query(e.x, e.z, VIEW.sayR)) {
       const c = clients.get(o.id);
       if (c && (!deliver || deliver(o.char))) c.send(msg);
@@ -635,6 +635,10 @@ export function createRoom(opts) {
       if (c.you && rules.resources) {
         const res = rules.resources(me), sig = JSON.stringify(res);
         if (sig !== c.lastResources) { c.lastResources = sig; c.you({ res }); }
+      }
+      if (c.you && rules.barrierOf) {       // feedback #99: the barrier on your health bar
+        const b = rules.barrierOf(me);
+        if (b !== (c.lastBarrier ?? 0)) { c.lastBarrier = b; c.you({ barrier: b }); }
       }
       let self = null, vitals = null;
       if (c.selfDirty || !c.lastSelf) { self = { x: me.x, y: me.y, z: me.z, vy: me.vy, glide: !!me.glide }; c.selfDirty = false; c.lastSelf = self; }      // [S] glide rides the self block (snapshot flag 8)

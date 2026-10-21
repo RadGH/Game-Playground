@@ -17,13 +17,19 @@
 //   bloom        a soft glow round bright things (lamps at night, the sun, spells) — one extra quarter-size pass; High only
 //   clutter      grass tufts, ferns, small bushes, stones and lumps of earth round the camera (ground-clutter.js; how far
 //                each layer reaches is clutter-plan.js CLUTTER_LAYERS) — about a dozen draw calls; not on Low
+//   softShadows  how far the sun's shadow edges are blurred (three's shadow.radius; 0 = three's default). Free: three r186
+//                always takes the same five shadow-map samples, the radius only spreads them out
+//   shafts       light shafts from the sun through trees and over ridges (postfx.js, from the same frame copy the glow
+//                uses: one more quarter-size pass) — High only
+//   grass        the grass itself drawn on the graphics card (grass-gpu.js; types per biome in grass-types.js), replacing
+//                the clutter's CPU tufts; how far it reaches is Settings → Grass distance — one draw call per visible wedge
 
 export const ATMOS_TIERS = Object.freeze({
-  low:    Object.freeze({ water: 'basic',  sparkle: false, shoreWaves: false, cloudShadows: false, mist: 0,  terrainAO: true,  contact: 0.34, grade: false, vignette: 0.16, bloom: false, warmCool: true, clutter: false }),
-  medium: Object.freeze({ water: 'shaded', sparkle: true,  shoreWaves: true,  cloudShadows: true,  mist: 8,  terrainAO: true,  contact: 0.24, grade: true,  vignette: 0.2,  bloom: false, warmCool: true, clutter: true }),
-  high:   Object.freeze({ water: 'shaded', sparkle: true,  shoreWaves: true,  cloudShadows: true,  mist: 16, terrainAO: true,  contact: 0.2,  grade: true,  vignette: 0.2,  bloom: true,  warmCool: true, clutter: true }),
+  low:    Object.freeze({ water: 'basic',  sparkle: false, shoreWaves: false, cloudShadows: false, mist: 0,  terrainAO: true,  contact: 0.34, grade: false, vignette: 0.16, bloom: false, warmCool: true, clutter: false, grass: false, softShadows: 0, shafts: false }),
+  medium: Object.freeze({ water: 'shaded', sparkle: true,  shoreWaves: true,  cloudShadows: true,  mist: 8,  terrainAO: true,  contact: 0.24, grade: true,  vignette: 0.2,  bloom: false, warmCool: true, clutter: true, grass: true, softShadows: 1.6, shafts: false }),
+  high:   Object.freeze({ water: 'shaded', sparkle: true,  shoreWaves: true,  cloudShadows: true,  mist: 16, terrainAO: true,  contact: 0.2,  grade: true,  vignette: 0.2,  bloom: true,  warmCool: true, clutter: true, grass: true, softShadows: 2.6, shafts: true }),
   // ?atmos=0: exactly the look before this round (the measuring baseline)
-  off:    Object.freeze({ water: 'legacy', sparkle: false, shoreWaves: false, cloudShadows: false, mist: 0,  terrainAO: false, contact: 0,    grade: false, vignette: 0,    bloom: false, warmCool: false, clutter: false }),
+  off:    Object.freeze({ water: 'legacy', sparkle: false, shoreWaves: false, cloudShadows: false, mist: 0,  terrainAO: false, contact: 0,    grade: false, vignette: 0,    bloom: false, warmCool: false, clutter: false, grass: false, softShadows: 0, shafts: false }),
 });
 
 /** The row for a quality ('low' | 'medium' | 'high'; anything else reads as high) and the page's `atmos` flag. */
@@ -39,8 +45,9 @@ export function tierWords(quality) {
   on.push(t.water === 'shaded' ? 'moving water with foam at the shore' : 'water with shallows and shore foam');
   if (t.cloudShadows) on.push('cloud shadows');
   if (t.mist) on.push('drifting mist');
-  if (t.clutter) on.push('grass and stones on the ground');
+  if (t.clutter) on.push(t.grass ? 'swaying grass and stones on the ground' : 'grass and stones on the ground');
   if (t.bloom) on.push('glow round lights');
+  if (t.shafts) on.push('sun rays');
   return on.join(', ');
 }
 

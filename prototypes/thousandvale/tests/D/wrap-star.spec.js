@@ -31,7 +31,7 @@ async function enter(page, name, race) {
   if (await page.locator('#new-char').isVisible().catch(() => false)) await page.click('#new-char');
   await page.fill('#name', name);
   await page.click(`#races .chip[data-race="${race}"]`);
-  await page.selectOption('#class-more', 'starcaller');
+  await page.click('#calling-open'); await page.click('#classes [data-cls="starcaller"]'); await page.click('#calling-done');      // feedback #98: the calling picker
   await page.click('#enter');
   await expect(page.locator('#panel-appearance')).toBeVisible({ timeout: 30000 });
   await page.click('#panel-appearance [data-act="save"]');
@@ -56,7 +56,7 @@ test('the creation screen: the Starcaller wears midnight and gold, on two bodies
   await expect(page.locator('#login')).toBeVisible();
   for (const race of ['human', 'dwarf']) {
     await page.click(`#races .chip[data-race="${race}"]`);
-    await page.selectOption('#class-more', 'starcaller');
+    await page.click('#calling-open'); await page.click('#classes [data-cls="starcaller"]'); await page.click('#calling-done');      // feedback #98: the calling picker
     await page.waitForFunction(r => { const a = thousandvale.actors.get('preview'); return a?.look?.cls === 'starcaller' && a.look.race === r && !!a.body; }, race, { timeout: 60000 });
     await page.waitForTimeout(3500);
     const worn = await page.evaluate(async () => { const m = await import(new URL('js/client/looks.js', location.href).href); const av = await m.avatarFor(thousandvale.actors.get('preview').look); return { top: av.top, hat: av.hat }; });

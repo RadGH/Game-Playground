@@ -82,6 +82,8 @@ button.icon { font-size: 20px; line-height: 1; }
 .bar i, .bar b { position: absolute; left: 0; top: 0; bottom: 0; width: 100%; }
 .bar.hp i { background: linear-gradient(180deg, var(--hp-hi), var(--hp) 60%, #8e231d); z-index: 2; transition: width 0.12s; }
 .bar.hp b { background: var(--hp-lag); opacity: 0.85; z-index: 1; }
+/* feedback #99: a barrier (temporary health) is a bright blue piece after the health; past a full bar it covers the end of it */
+.bar.hp em { position: absolute; top: 0; bottom: 0; z-index: 2; background: linear-gradient(180deg, #9fe6ff, #2fa8ff 60%, #1268c4); box-shadow: 0 0 6px rgba(80, 190, 255, 0.8); transition: left 0.12s, width 0.12s; }
 .bar span { position: absolute; inset: 0; z-index: 3; display: grid; place-items: center; font-size: 12px; font-weight: 700; text-shadow: 0 1px 2px #000; }
 .bar.xp { height: 6px; margin-top: 4px; }
 .bar.xp i { background: linear-gradient(90deg, #6a42b8, var(--xp)); transition: width 0.4s; }
@@ -329,3 +331,4 @@ button.icon { font-size: 20px; line-height: 1; }
 .plate.rank-elite .plate-lvl::after, .plate.rank-champion .plate-lvl::after { content: '+'; }
 .plate.rank-boss .plate-lvl { background: #6b1d14; }
 .chat-ch.party { color: #8fc7ff; }
+.zone-banner em { display: block; margin-top: 2px; font-style: normal; font-family: var(--serif); font-size: 15px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); }      /* feedback #101: the town size */

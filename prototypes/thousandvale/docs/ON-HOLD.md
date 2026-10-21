@@ -47,6 +47,7 @@ forgotten — bring it up when the game is resumed.
    A re-bake of a zone a sea BAY reaches (`tools/lib/world-core.mjs` `BAYS`, play-test 11 — Gullwick Bay, z14_02): bake it, run
    `tools/coast-content.mjs` (moves only the stream E placements the water took), bake it again, then the chain above plus
    `content-pools`, then `bake-horizon`, `bake-map` and `ship-routes --write`.
+   2026-10-21 (feedback #98 / #101): after `content-givers`, also `content-cities` (every city and capital keeps every shop: it only ADDS keepers, never moves or renames one) and `content-town-info` (town sizes + who works there, for the cart window); after any skill or class change, `class-catalog` (the calling picker's skill text). Each has `--check`, and `tests/D/feedback-tv21-ui.test.js` runs them.
    Never run `content-offices.mjs` alone (it renames shopkeepers). Do not run `place-vignettes.mjs` (it no longer
    reproduces the committed placements).
 5. Agents: at most three at a time; Playwright only under `flock /tmp/claude-1000/farhold-pw.lock`.

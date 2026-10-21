@@ -46,7 +46,7 @@ export function createMeterWindow({ net, hud, actors, selfId, bar, settings }) {
   const S = { on: false, rec: false, srv: false, dirty: false, last: 0, state: { mode: 'damage', scope: 'current' }, names: new Map(), party: [], records: 0 };
   const body = h('div.tv-meter');
   const foot = h('p.tiny.meter-foot');
-  const panel = createPanel({ id: 'meter', title: 'Damage meter', width: 380, cls: 'meter-panel', onOpen: () => { draw(true); }, onClose: () => { if (S.on && !S.closing) hud.toast('The damage meter keeps counting. /meter opens it again.', 'info'); } });
+  const panel = createPanel({ id: 'meter', title: 'Damage meter', width: 380, cls: 'meter-panel', onOpen: () => { draw(true); }, onClose: () => { if (S.on && !S.closing) { hud.toast('The damage meter keeps counting. /meter opens it again.', 'info'); S.on = false; settings?.set?.('meter', false); } } });   // feedback #93: closed stays closed at the next log-in
   panel.fill(body, foot,
     h('div.row.end', {}, h('button.ghost.small', { type: 'button', dataset: { act: 'reset' }, title: 'Forget every fight so far', onclick: () => reset() }, 'Reset'), h('span.grow'),
       h('button.ghost.small', { type: 'button', dataset: { act: 'off' }, title: 'Hide the window. It keeps counting every fight; /meter or Settings -> Game -> Damage meter shows it again.', onclick: () => settings?.set?.('meter', false) }, 'Hide')));

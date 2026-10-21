@@ -45,7 +45,7 @@ test('R1 + Q21 + Q25: new character = name/people/calling, then the editor in st
   await page.waitForSelector('#loading.done', { timeout: 120000 });
   await page.click('#new-char');      // play-test 10 (Y29): the title opens on the front card — "Create character" first
   await page.fill('#name', 'Wren');
-  await page.click('#classes [data-cls="ranger"]');
+  await page.click('#calling-open'); await page.click('#classes [data-cls="ranger"]'); await page.click('#calling-done');      // feedback #98: the calling picker
   await page.click('#enter');                       // step 1 -> step 2 (R1)
   await expect(page.locator('#panel-appearance')).toBeVisible();
   await page.waitForTimeout(2000);

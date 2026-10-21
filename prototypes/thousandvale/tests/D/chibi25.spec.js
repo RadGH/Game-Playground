@@ -38,7 +38,7 @@ async function create(page, name, shot) {
   await page.waitForSelector('#loading.done', { timeout: 120000 });
   await page.click('#new-char');
   await page.fill('#name', name);
-  await page.click('#classes [data-cls="mage"]');
+  await page.click('#calling-open'); await page.click('#classes [data-cls="mage"]'); await page.click('#calling-done');      // feedback #98: the calling picker
   await page.click('#enter');
   await expect(page.locator('#panel-appearance')).toBeVisible();
   const ap = '#panel-appearance';

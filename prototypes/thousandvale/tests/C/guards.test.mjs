@@ -210,3 +210,16 @@ test('W1, the hold rule on the LIVE path: Torborhold\'s posted guards alone clea
     assert.ok(rs.every(r => r.dead)); void gs;
   }
 });
+
+test('#100: a guard with nothing at its post runs to a raider on a player within 110 m of it and fights beside them', () => {
+  const w = world();
+  const me = w.add('warrior', 6, 0, 80); hold(me);
+  const g = w.guard(0, 0, 6);
+  const r = w.raider('road_brigand', 0, 83, 6);
+  w.R.room.run(() => { const u = r.r.unit; u.raider = true; u.state = 'chase'; u.targetId = me.id; (u.threat ||= new Map()).set(me.id, 50); });
+  w.steps(20 * 30);
+  const gu = g.r.unit;
+  assert.ok(w.events.some(e => e.type === 'hit' && e.d === r.id && e.s === g.id), 'the guard struck the raider beside the player');
+  assert.ok(Math.hypot(gu.post.x - (SX + 0), gu.post.z - (SZ + 0)) < 0.01, 'its post is where it was');
+  void gu;
+});

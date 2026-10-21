@@ -241,7 +241,8 @@ export function drawMarkers(ctx, view, markers, opts = {}) {
     // W15: a town the search did not find fades; one it found wears a gold ring.  W13: a hidden event is greyed.
     if (m.dim) ctx.globalAlpha = 0.38;
     if (m.found) { ctx.beginPath(); ctx.arc(x, y, (m.size || 6) * 1.9, 0, Math.PI * 2); ctx.lineWidth = 2.5; ctx.strokeStyle = '#ffd84a'; ctx.stroke(); ctx.lineWidth = 1; ctx.strokeStyle = '#3a2600'; ctx.beginPath(); ctx.arc(x, y, (m.size || 6) * 1.9 + 2, 0, Math.PI * 2); ctx.stroke(); }
-    drawIcon(ctx, m.kind, x, y, (m.size || 6) * (opts.minimap ? 0.85 : 1), m, t, view);
+    const phoneMe = m.kind === 'me' && !opts.minimap && typeof document !== 'undefined' && document.documentElement.dataset.layout === 'phone' ? 1.5 : 1;      // #111: bigger under a thumb
+    drawIcon(ctx, m.kind, x, y, (m.size || 6) * (opts.minimap ? 0.85 : 1) * phoneMe, m, t, view);
     if (m.dim) ctx.globalAlpha = 1;
 
   }
@@ -330,6 +331,9 @@ export function drawIcon(ctx, kind, x, y, size = 6, m = {}, t = 0, view = null) 
       const dx = Math.sin(yaw), dz = Math.cos(yaw), c = Math.cos(rot), s = Math.sin(rot);
       const sx = dx * c - dz * s, sy = dx * s + dz * c;
       ctx.rotate(Math.atan2(sy, sx) + Math.PI / 2);
+      // feedback #111: a soft cone ahead of you, so which way you face reads at any zoom
+      { const g = ctx.createRadialGradient(0, 0, S * 0.6, 0, 0, S * 4.2); g.addColorStop(0, 'rgba(255, 246, 216, 0.55)'); g.addColorStop(1, 'rgba(255, 246, 216, 0)');
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, S * 4.2, -Math.PI / 2 - 0.5, -Math.PI / 2 + 0.5); ctx.closePath(); ctx.fillStyle = g; ctx.fill(); }
       ctx.beginPath(); ctx.moveTo(0, -S * 1.25); ctx.lineTo(S * 0.85, S * 0.9); ctx.lineTo(0, S * 0.45); ctx.lineTo(-S * 0.85, S * 0.9); ctx.closePath();
       fill('#fff6d8', '#1b130a', 2);
       break;

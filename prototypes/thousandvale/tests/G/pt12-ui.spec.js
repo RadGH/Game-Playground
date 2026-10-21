@@ -41,8 +41,7 @@ test.describe('real game', () => {
     await page.waitForSelector('#loading.done', { timeout: 240000 });
     await page.locator('#new-char').click();
     await page.fill('#name', name);
-    const chip = page.locator('#classes [data-cls="starblade"]');
-    if (await chip.count()) await chip.click(); else await page.selectOption('#class-more', 'starblade');
+    await page.click('#calling-open'); await page.click('#classes [data-cls="starblade"]'); await page.click('#calling-done');      // feedback #98: the calling picker
     await expect(page.locator('#class-card')).toBeVisible();
     await page.waitForTimeout(300);
   }

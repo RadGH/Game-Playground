@@ -34,7 +34,7 @@ test('the creation screen: the Star Blade\'s card, emblem and night-blue plate',
   if (await page.locator('#new-char').isVisible().catch(() => false)) await page.click('#new-char');
   for (const race of ['human', 'dwarf']) {
     await page.click(`#races .chip[data-race="${race}"]`);
-    await page.selectOption('#class-more', 'starblade');
+    await page.click('#calling-open'); await page.click('#classes [data-cls="starblade"]'); await page.click('#calling-done');      // feedback #98: the calling picker
     await page.waitForFunction(r => { const a = thousandvale.actors.get('preview'); return a?.look?.cls === 'starblade' && a.look.race === r && !!a.body; }, race, { timeout: 60000 });
     await page.waitForTimeout(3500);
     await expect(page.locator('#class-card .cc-emblem svg')).toBeVisible();
@@ -58,7 +58,7 @@ test('in the world: the plate it starts in, and its six skills each drawing thei
   if (await page.locator('#new-char').isVisible().catch(() => false)) await page.click('#new-char');
   await page.fill('#name', name);
   await page.click('#races .chip[data-race="human"]');
-  await page.selectOption('#class-more', 'starblade');
+  await page.click('#calling-open'); await page.click('#classes [data-cls="starblade"]'); await page.click('#calling-done');      // feedback #98: the calling picker
   // (at 1100x700 the title's footer line — #build-tag — lies over the Next button and takes the pointer; found 2026-10-15, not this class's)
   await page.locator('#enter').evaluate(b => b.click());
   await expect(page.locator('#panel-appearance')).toBeVisible({ timeout: 30000 });

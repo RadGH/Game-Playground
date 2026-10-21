@@ -826,6 +826,50 @@
      "sign": null,
      "light": false,
      "titled": true
+    },
+    {
+     "role": "jeweller",
+     "title": "Jeweller",
+     "name": "Cecily Yeoman",
+     "plot": "ashcombe_plot_23",
+     "want": "house",
+     "x": 1445.59,
+     "z": 1306.91,
+     "yaw": -0.8604,
+     "w": 5.72,
+     "d": 8.3,
+     "door": {
+      "x": 1441.5,
+      "z": 1310.4,
+      "yaw": 2.281
+     },
+     "sign": "ring",
+     "light": true,
+     "shop": "jeweller",
+     "titled": true,
+     "city": true
+    },
+    {
+     "role": "trader",
+     "title": "Market trader",
+     "name": "Rhosyn Greenhill",
+     "plot": "ashcombe_plot_24",
+     "want": "house",
+     "x": 1451.63,
+     "z": 1315.28,
+     "yaw": -0.8604,
+     "w": 7.47,
+     "d": 5.07,
+     "door": {
+      "x": 1448.8,
+      "z": 1317.7,
+      "yaw": 2.281
+     },
+     "sign": "awning",
+     "light": true,
+     "shop": "market",
+     "titled": true,
+     "city": true
     }
    ]
   },
@@ -1969,6 +2013,28 @@
      "sign": null,
      "light": false,
      "titled": true
+    },
+    {
+     "role": "jeweller",
+     "title": "Jeweller",
+     "name": "Maud Yeoman",
+     "plot": "copperdell_plot_15",
+     "want": "house",
+     "x": 305.83,
+     "z": 431.75,
+     "yaw": 1.7749,
+     "w": 12.15,
+     "d": 7.26,
+     "door": {
+      "x": 310.6,
+      "z": 430.8,
+      "yaw": 4.916
+     },
+     "sign": "ring",
+     "light": true,
+     "shop": "jeweller",
+     "titled": true,
+     "city": true
     }
    ]
   },
@@ -4802,6 +4868,50 @@
      "sign": null,
      "light": false,
      "titled": true
+    },
+    {
+     "role": "jeweller",
+     "title": "Jeweller",
+     "name": "Sawyer Pike",
+     "plot": "millbrook_plot_12",
+     "want": "house",
+     "x": 552.52,
+     "z": 1688.68,
+     "yaw": 2.3898,
+     "w": 5.61,
+     "d": 9.01,
+     "door": {
+      "x": 556.4,
+      "z": 1684.5,
+      "yaw": 5.531
+     },
+     "sign": "ring",
+     "light": true,
+     "shop": "jeweller",
+     "titled": true,
+     "city": true
+    },
+    {
+     "role": "trader",
+     "title": "Market trader",
+     "name": "Corwin Tanner",
+     "plot": "millbrook_plot_6",
+     "want": "house",
+     "x": 518.18,
+     "z": 1676.34,
+     "yaw": -2.0661,
+     "w": 5.01,
+     "d": 6.53,
+     "door": {
+      "x": 514.3,
+      "z": 1674.2,
+      "yaw": 1.075
+     },
+     "sign": "awning",
+     "light": true,
+     "shop": "market",
+     "titled": true,
+     "city": true
     }
    ]
   },

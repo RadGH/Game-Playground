@@ -130,8 +130,10 @@ try {
     report.facts.starcaller = await page.locator('#classes [data-cls="starcaller"]').count() > 0;
     await state('title-new');
     await page.locator('#name').tap(); await page.locator('#name').fill(NAME);
+    await tapSel('#calling-open'); await sleep(500);      // feedback #98: the calling picker
     await tapSel(report.facts.starcaller ? '#classes [data-cls="starcaller"]' : '#classes [data-cls="cleric"]'); await sleep(500);
     await state('title-calling');
+    await tapSel('#calling-done'); await sleep(300);
     await tapSel('#enter');
     await page.locator('#panel-appearance').waitFor({ state: 'visible', timeout: 20000 }); await sleep(1500);
     await state('appearance');

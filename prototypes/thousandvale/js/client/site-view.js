@@ -199,7 +199,7 @@ export async function createSiteView(T, file, { quality = 'high' } = {}) {
   const mats = await foliageMaterials(cheap);
   const _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _e = new THREE.Euler(), _v = new THREE.Vector3(), _s = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0);
   // trees + ground details (shared with vignettes)
-  const { buildTree } = await import('../../../../highdef-3d/js/kit/trees.js');
+  const { buildSceneryTree: buildTree } = await import('./tree-style.js');
   const { buildGroundDetail } = await import('../../../../highdef-3d/js/kit/rocks.js');
   await nextFrame();                    // P1: the site pass is cut into frame-sized pieces
   const treeGeo = SITE_TREES;           // one cache for the page: each zone used to rebuild its species from scratch

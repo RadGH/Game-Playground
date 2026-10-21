@@ -15,10 +15,10 @@ const ICONS = {
 export function createHud({ onSlot, onChatSubmit, onChatFocus, onRise } = {}) {
   const el = {
     hud: $('hud'), selfName: $('self-name'), selfLevel: $('self-level'), selfInitial: $('self-initial'),
-    selfHp: $('self-hp-fill'), selfLag: $('self-hp-lag'), selfHpText: $('self-hp-text'), selfXp: $('self-xp-fill'), selfXpText: $('self-xp-text'), selfMp: $('self-mp'), selfMpFill: $('self-mp-fill'), selfMpText: $('self-mp-text'), tMp: $('target-mp'), tMpFill: $('target-mp-fill'), tMpText: $('target-mp-text'),
+    selfHp: $('self-hp-fill'), selfBarrier: $('self-hp-barrier'), selfLag: $('self-hp-lag'), selfHpText: $('self-hp-text'), selfXp: $('self-xp-fill'), selfXpText: $('self-xp-text'), selfMp: $('self-mp'), selfMpFill: $('self-mp-fill'), selfMpText: $('self-mp-text'), tMp: $('target-mp'), tMpFill: $('target-mp-fill'), tMpText: $('target-mp-text'),
     tFrame: $('target-frame'), tName: $('target-name'), tLevel: $('target-level'), tInitial: $('target-initial'), tHp: $('target-hp-fill'), tLag: $('target-hp-lag'), tHpText: $('target-hp-text'), tSub: $('target-sub'),
     toasts: $('toasts'), conn: $('conn'), connText: $('conn-text'), chatLog: $('chat-log'), chatForm: $('chat-form'), chatInput: $('chat-input'),
-    bar: $('actionbar'), death: $('death'), deathTimer: $('death-timer'), deathWait: $('death-wait'), rise: $('rise'), banner: $('zone-banner'), zoneName: $('zone-name'),
+    bar: $('actionbar'), death: $('death'), deathTimer: $('death-timer'), deathWait: $('death-wait'), rise: $('rise'), banner: $('zone-banner'), zoneName: $('zone-name'), zoneSize: $('zone-size'),
   };
   const lag = { self: 1, target: 1, targetId: null };
 
@@ -60,6 +60,12 @@ export function createHud({ onSlot, onChatSubmit, onChatFocus, onRise } = {}) {
   }
 
   const fmt = n => Math.max(0, Math.round(n)).toLocaleString();
+  // 2026-10-20: write to the page only when the value changes (reading textContent / an inline style costs no layout)
+  const put = (node, v) => { if (node && node.textContent !== v) node.textContent = v; };
+  const width = (node, pct) => { if (!node) return; const v = pct.toFixed(1) + '%'; if (node.style.width !== v) node.style.width = v; };
+  const hide = (node, on) => { if (node && node.hidden !== on) node.hidden = on; };
+  const cls = (node, c, on) => { if (node && node.classList.contains(c) !== on) node.classList.toggle(c, on); };
+  const tip = (node, v) => { if (node && node.dataset.tip !== v) node.dataset.tip = v; };
   const escH = t => String(t ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   /** The action-bar skill card (name, unlock, cost, cooldown, who it reaches, what it does). */
   function skillTip(sk) {
@@ -74,42 +80,56 @@ export function createHud({ onSlot, onChatSubmit, onChatFocus, onRise } = {}) {
 
   return {
     show() { el.hud.hidden = false; },
-    setSelf({ name, level, hp, hpMax, xp, next, mp, mpMax }) {
-      if (name != null) { el.selfName.textContent = name; el.selfInitial.textContent = (name[0] || '?').toUpperCase(); }
-      if (level != null) el.selfLevel.textContent = level;
-      if (hp != null && hpMax) { const f = Math.max(0, Math.min(1, hp / hpMax)); el.selfHp.style.width = (f * 100) + '%'; el.selfHpText.textContent = `${fmt(hp)} / ${fmt(hpMax)}`; lag.selfTarget = f; }
+    setSelf({ name, level, hp, hpMax, xp, next, mp, mpMax, barrier }) {
+      // 2026-10-20: this runs on every snapshot (20 a second) — each write only when the value changed (see put/width)
+      if (name != null) { put(el.selfName, name); put(el.selfInitial, (name[0] || '?').toUpperCase()); }
+      if (level != null) put(el.selfLevel, String(level));
+      if (hp != null && hpMax) {
+        const f = Math.max(0, Math.min(1, hp / hpMax)), b = Math.max(0, Math.round(barrier || 0));
+        width(el.selfHp, f * 100); lag.selfTarget = f;
+        // feedback #99: "184 / 174 (+10)" — health plus barrier over the maximum, the barrier in brackets, a blue piece on the bar
+        put(el.selfHpText, b ? `${fmt(hp + b)} / ${fmt(hpMax)} (+${fmt(b)})` : `${fmt(hp)} / ${fmt(hpMax)}`);
+        if (el.selfBarrier) {
+          hide(el.selfBarrier, !b);
+          if (b) { const w = Math.min(1, b / hpMax), left = Math.min(f, 1 - w); const k = `${left.toFixed(4)}|${w.toFixed(4)}`; if (el.selfBarrier._k !== k) { el.selfBarrier._k = k; el.selfBarrier.style.left = left * 100 + '%'; el.selfBarrier.style.width = w * 100 + '%'; } }
+        }
+      }
       // R6: the bar under health is MANA (the one XP bar sits under the action bar, ui/pt2.js); number on hover
-      if (el.selfMp) { const has = mpMax > 0; el.selfMp.hidden = !has; if (has) { const f = Math.max(0, Math.min(1, (mp || 0) / mpMax)); el.selfMpFill.style.width = (f * 100) + '%'; el.selfMpText.textContent = `${fmt(mp)} / ${fmt(mpMax)}`; el.selfMp.dataset.tip = `Mana: ${fmt(mp)} / ${fmt(mpMax)}`; } }
-      if (xp != null && next && el.selfXp) { el.selfXp.style.width = Math.min(100, xp / next * 100) + '%'; el.selfXpText.textContent = `${fmt(xp)} / ${fmt(next)} XP`; el.selfXp.parentElement.dataset.tip = `Experience: ${fmt(xp)} / ${fmt(next)}`; }
+      if (el.selfMp) { const has = mpMax > 0; hide(el.selfMp, !has); if (has) { const f = Math.max(0, Math.min(1, (mp || 0) / mpMax)); width(el.selfMpFill, f * 100); const t = `${fmt(mp)} / ${fmt(mpMax)}`; put(el.selfMpText, t); tip(el.selfMp, `Mana: ${t}`); } }
+      if (xp != null && next && el.selfXp) { width(el.selfXp, Math.min(100, xp / next * 100)); put(el.selfXpText, `${fmt(xp)} / ${fmt(next)} XP`); tip(el.selfXp.parentElement, `Experience: ${fmt(xp)} / ${fmt(next)}`); }
     },
     setTarget(a) {
-      if (!a) { el.tFrame.hidden = true; lag.targetId = null; return; }
-      el.tFrame.hidden = false;
-      el.tFrame.classList.toggle('hostile', !!a.hostile);
+      // 2026-10-20 (the owner's stutter report): main.js calls this every FRAME and on every snapshot while something is
+      // targeted. It used to rewrite every text and width each time — ~60 ms of every 1.8 s in his trace, and each write
+      // made the next layout read (damage numbers, name plates) lay the page out again. Now only what changed is written.
+      if (!a) { hide(el.tFrame, true); lag.targetId = null; return; }
+      hide(el.tFrame, false);
+      cls(el.tFrame, 'hostile', !!a.hostile);
       // S4: rares, elites, mini bosses and bosses get a bigger frame and health bar with their rank on it
       const rk = a.kind === 'monster' && a.rank && a.rank !== 'normal' ? String(a.rank) : '';
       if (el.tFrame.dataset.rank !== rk) { el.tFrame.dataset.rank = rk; el.tFrame.classList.toggle('ranked', !!rk); }
       // R6: the target's mana when the server sends it (party frames / targetVitals), else hidden
-      if (el.tMp) { const has = a.mpMax > 0 && !(a.hp <= 0); el.tMp.hidden = !has; if (has) { el.tMpFill.style.width = (Math.max(0, Math.min(1, a.mp / a.mpMax)) * 100) + '%'; el.tMpText.textContent = `${fmt(a.mp)} / ${fmt(a.mpMax)}`; el.tMp.dataset.tip = `Mana: ${fmt(a.mp)} / ${fmt(a.mpMax)}`; } }
-      el.tName.textContent = a.name; el.tLevel.textContent = a.level; el.tInitial.textContent = (a.name[0] || '?').toUpperCase();
+      if (el.tMp) { const has = a.mpMax > 0 && !(a.hp <= 0); hide(el.tMp, !has); if (has) { width(el.tMpFill, Math.max(0, Math.min(1, a.mp / a.mpMax)) * 100); const t = `${fmt(a.mp)} / ${fmt(a.mpMax)}`; put(el.tMpText, t); tip(el.tMp, `Mana: ${t}`); } }
+      put(el.tName, a.name); put(el.tLevel, String(a.level)); put(el.tInitial, (a.name[0] || '?').toUpperCase());
       const f = Math.max(0, Math.min(1, a.hp / (a.hpMax || 1)));
-      el.tHp.style.width = (f * 100) + '%';
-      el.tHpText.textContent = a.hp <= 0 ? 'Dead' : `${fmt(a.hp)} / ${fmt(a.hpMax)}`;
+      width(el.tHp, f * 100);
+      put(el.tHpText, a.hp <= 0 ? 'Dead' : `${fmt(a.hp)} / ${fmt(a.hpMax)}`);
       // play-test 2 Q25: a player shows their calling ("Ranger"), town folk their trade — never a blanket "Adventurer"
       const nice = t => String(t || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-      el.tSub.textContent = a.kind === 'monster' ? (a.hp <= 0 ? 'Slain' : `${a.rank && a.rank !== 'normal' ? nice(a.rank) + ' · ' : ''}${a.family ? a.family[0].toUpperCase() + a.family.slice(1) : 'Beast'}`)
-        : a.kind === 'player' ? (a.formName ? `${a.formName} · ` : '') + (a.clsName || nice(a.look?.cls) || 'Adventurer') : a.pet ? 'Companion' : a.role ? nice(a.role) : 'Townsfolk';
+      put(el.tSub, a.kind === 'monster' ? (a.hp <= 0 ? 'Slain' : `${a.rank && a.rank !== 'normal' ? nice(a.rank) + ' · ' : ''}${a.family ? a.family[0].toUpperCase() + a.family.slice(1) : 'Beast'}`)
+        : a.kind === 'player' ? (a.formName ? `${a.formName} · ` : '') + (a.clsName || nice(a.look?.cls) || 'Adventurer') : a.pet ? 'Companion' : a.role ? nice(a.role) : 'Townsfolk');
       if (lag.targetId !== a.id) { lag.target = f; lag.targetId = a.id; }
       lag.targetTarget = f;
     },
     tick(dt) {
       // The yellow "chunk lost" bars ease down after a beat.
-      if (lag.selfTarget != null) { lag.self += (lag.selfTarget - lag.self) * (lag.selfTarget < lag.self ? Math.min(1, dt * 2.2) : 1); el.selfLag.style.width = (lag.self * 100) + '%'; }
-      if (lag.targetTarget != null) { lag.target += (lag.targetTarget - lag.target) * (lag.targetTarget < lag.target ? Math.min(1, dt * 2.2) : 1); el.tLag.style.width = (lag.target * 100) + '%'; }
+      if (lag.selfTarget != null) { lag.self += (lag.selfTarget - lag.self) * (lag.selfTarget < lag.self ? Math.min(1, dt * 2.2) : 1); width(el.selfLag, lag.self * 100); }
+      if (lag.targetTarget != null) { lag.target += (lag.targetTarget - lag.target) * (lag.targetTarget < lag.target ? Math.min(1, dt * 2.2) : 1); width(el.tLag, lag.target * 100); }
       const now = performance.now();
       for (const s of slots) {
         const left = Math.max(0, s.until - now);
-        s.cd.style.setProperty('--p', left > 0 ? (left / s.len * 100).toFixed(1) + '%' : '0%');
+        const v = left > 0 ? (left / s.len * 100).toFixed(1) + '%' : '0%';
+        if (s.p !== v) { s.p = v; s.cd.style.setProperty('--p', v); }      // 2026-10-20: seven style writes a frame -> only a key that is cooling down
       }
     },
     cooldown(i, ms) { const s = slots[i]; if (!s) return; s.until = performance.now() + ms; s.len = ms; },
@@ -145,12 +165,13 @@ export function createHud({ onSlot, onChatSubmit, onChatFocus, onRise } = {}) {
     chat,
     focusChat() { el.chatInput.focus(); },
     death(secondsLeft) {
-      if (secondsLeft == null) { el.death.hidden = true; return; }
-      el.death.hidden = false; el.deathTimer.textContent = Math.max(0, Math.ceil(secondsLeft));
-      el.deathWait.hidden = secondsLeft <= 0; el.rise.hidden = secondsLeft > 0;
+      if (secondsLeft == null) { hide(el.death, true); return; }      // (every frame: writes only on a change)
+      hide(el.death, false); put(el.deathTimer, String(Math.max(0, Math.ceil(secondsLeft))));
+      hide(el.deathWait, secondsLeft <= 0); hide(el.rise, secondsLeft > 0);
     },
-    zone(name) {
+    zone(name, size = '') {
       el.zoneName.textContent = name;
+      if (el.zoneSize) { el.zoneSize.textContent = size || ''; el.zoneSize.hidden = !size; }      // feedback #101: "City", "Village"…
       el.banner.classList.add('show');
       setTimeout(() => el.banner.classList.remove('show'), 3800);
     },

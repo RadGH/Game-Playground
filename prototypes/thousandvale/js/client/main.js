@@ -47,6 +47,9 @@ import { createBag } from './bag.js';
 import { loadSkillData, barFromData, barFromServer, initials } from './skillbar.js';
 import { createMenubar } from './menubar.js';
 import { createChat } from './chat.js';
+import { createAchievementsWindow } from './ui/achievements.js';      // feedback #106
+import { createCallingPicker } from './ui/calling-picker.js';      // feedback #98
+import { skillIconSvg } from './ui/skill-icons.js';
 import { createFriends } from './friends.js';
 import { createGuild } from './guild.js';
 import { createMail } from './mail.js';
@@ -60,6 +63,7 @@ import { loadZoneNames, learnZone } from './names.js';
 import { humanFn } from './turnstile.js';
 import { createUiSuite } from './ui/suite.js';   // D-UI play-test 1: map, minimap, journal, party menu, tooltips, talents
 import { perf, compileBeforeShow } from './perf.js';
+import { perfPanelWanted, createPerfPanel } from './ui/perf-panel.js';   // 2026-10-20: the performance panel (Settings, F9, ?perf=1)
 import { LIGHTS } from './lightpool.js';
 import { createTransition, isJump } from './transition.js';
 import { createSpells } from './spells.js';
@@ -90,11 +94,12 @@ import { createUi10 } from './ui/pt10.js';
 import { createUi11 } from './ui/pt11.js';        // round 11: the Mount button (#29)        // D-UI play-test 10: changelog, tracking a friend, emotes
 import { createUi8 } from './ui/pt8.js';          // D-UI play-test 8: ox-cart window, damage meter, quest marks on the map
 import { createUi5 } from './ui/pt5.js';          // D-UI play-test 5: kit step, crates, event tracker, character sheet, feedback, angling
-import { savedQuality, savedFxLevel } from './ui/settings.js';
+import { savedQuality, savedFxLevel, savedGrass } from './ui/settings.js';
+import { grassDistanceFor } from './grass-types.js';   // 2026-10-20: Settings → Grass distance
 import { createSigFx } from './sig-fx.js';                 // 2026-10-14: every class's signature spell shapes
 import { createTitleFront, rememberGear, rememberedGear } from './ui/title-front.js';   // D-UI play-test 10 (Y29): the title's front card + whose figure it shows
 import { titleCharLook } from './ui/pt10-core.js';
-import { loadCallings, drawClassCard } from './ui/class-card.js';
+import { loadCallings } from './ui/class-card.js';
 import { lookWith, lookCustom } from './ui/appearance-core.js';
 import { avatarFor } from './looks.js';
 import { installInput } from './input/index.js';
@@ -131,6 +136,8 @@ if (quality === 'low') setCropDetail(8, 60); else if (quality === 'medium') setC
 const view = createScene($('view'), { quality });
 const { scene, camera } = view;
 perf.hookGl(view.renderer.getContext());
+perf.watch(view.renderer, scene);         // 2026-10-20: every shader built while playing goes in the performance log, named
+if (perfPanelWanted()) perf.traceMaterials(THREE);   // the panel is on (or ?perf=1 / ?perf=trace): remember where each material is made
 LIGHTS.attach(scene, { count: quality === 'low' ? 4 : 8 });   // the page's fixed lights (lightpool.js: no recompiles)
 const actors = createActors(scene, { plateLayer: $('plates'), camera, quality, renderer: view.renderer, waterAt: (x, z) => (D.view ? null : WS.terrain.waterAt(x, z)) });
 view.atmos.setActors(actors.actors);      // G-ATMOS (2026-10-16): a soft round shadow under each character near the camera
@@ -195,8 +202,11 @@ const S = {
 // --- the outdoor world: zones streamed around you (world-stream.js), the far horizon beyond them ----------
 const STARTER_ZONE = q.get('zone') || 'z12_02';
 const SOLIDS = createSolids();
+// 2026-10-20: Settings → Graphics → Grass distance ('auto' = Medium on a phone, Far otherwise; none on Low)
+const grassDistance = () => grassDistanceFor(q.get('grass') && q.get('grass') !== '0' ? q.get('grass') : savedGrass(), { quality, phone: looksLikePhone() });
 const WS = createWorldStream(scene, { quality, solids: SOLIDS, onZoneReady: L => { L.town?.setNight(S.night || 0); L.setpieces?.setNight(S.night || 0); if (!D.view) objects.setGround(WS.terrain.heightAt); }, opts: {
   compile: group => compileBeforeShow(view.renderer, group, camera, scene),
+  grassDistance: grassDistance(),
   // A zone with no baked scatter (the M0 test zone) gets the old random woods and the waystone camp.
   fallbackDecor: async T => {
     const camp = T.spawn;
@@ -219,6 +229,9 @@ async function useWorld(room, at) {
 }
 const groundY = (x, z) => (D.view ? 0 : WS.terrain.heightAt(x, z));
 /** What prediction walks on outdoors — WITH the water layer, so swimming and wading predict what the server does (P25/P2). */
+/** Feedback #101: the size of the town a room is ("City", "Town"…), from the room's own town list; '' outside a town. */
+const SIZE_WORD = { hamlet: 'Hamlet', village: 'Village', town: 'Town', city: 'City', capital: 'Capital city' };
+function townSizeWord(room) { if (!room || room.kind !== 'town') return ''; const t = (room.towns || []).find(x => x.name === room.name); return SIZE_WORD[t?.size] || ''; }
 function outdoorTerrain() { return { heightAt: WS.terrain.heightAt, walkable: WS.terrain.walkable, waterAt: WS.terrain.waterAt, moveAt: WS.terrain.moveAt, bounds: WS.terrain.bounds, nav: WS.terrain.nav }; }   // nav: walls/houses (play-test 4)
 
 // --- dungeon instances (drawn from joined.room.dungeon; the outdoor ground is hidden, not thrown away) ---
@@ -226,7 +239,13 @@ const D = { view: null, roomId: null };
 function enterDungeon(room) {
   if (D.roomId !== room.id || !D.view) {
     if (D.view) { scene.remove(D.view.group); D.view.dispose?.(); }
-    D.view = createDungeonView(room.dungeon, { quality }); D.roomId = room.id;
+    try { D.view = createDungeonView(room.dungeon, { quality }); }
+    catch (err) {      // feedback #96: never leave a player standing in the outdoor world at a dungeon's coordinates, with no word
+      console.error('[dungeon] could not draw', room.dungeon?.family, err);
+      hud.toast('This place could not be drawn. Type /reset to be taken back outside.', 'bad'); hud.chat('This place could not be drawn. Type /reset to be taken back outside.', 'bad');
+      return;
+    }
+    D.roomId = room.id;
     scene.add(D.view.group);
   }
   WS.setVisible(false); W.horizon?.setVisible(false); footprints.setVisible(false);
@@ -292,6 +311,7 @@ const worldUi = createWorldUi({ hud, net: () => S.net, me: () => S.predictor.pos
 const me = () => ({ name: S.self.name, level: S.self.level, cls: S.self.cls, char: S.net?.joined?.you?.char ?? null, inGuild: !!guild?.guild });
 const chat = createChat({ net: () => S.net, hud, social, me, onTyping: on => controls.setTyping(on), actions: {
   openAccount: () => account.panel.open(), openFriends: () => friends.panel.open(),
+  openAchievements: () => achievements.panel.open(),      // feedback #107: a chip for an achievement or trophy
   friendAdd: n => friends.add(n), friendRemove: n => friends.remove(n), isFriend: n => friends.isFriend(n),
   guildInvite: n => guild.invite(n), canGuildInvite: () => guild.canInvite(),
   command: (cmd, arg, rest) => ui2.command(cmd, arg, rest) || ui5.command(cmd, arg, rest) || ui8.command(cmd, arg, rest) || ui10.command(cmd, arg, rest),
@@ -327,7 +347,7 @@ const input = installInput({ controls, hud, setTarget: id => setTarget(id), targ
   mount: () => toggleMount(), attackButton: () => attackButton(), tracker: () => ui10,
   waterAt: (x, z) => (D.view ? null : WS.terrain.waterAt(x, z)), pools: () => angling.list(),
   project: (x, y, z) => { const v = camera.position.clone().set(x, y ?? groundY(x, z) + 1.4, z).project(camera); return { x: (v.x + 1) / 2 * innerWidth, y: (1 - v.y) / 2 * innerHeight, behind: v.z > 1 }; } });
-ui2.settings.on((k, v) => { if (k === 'fx') { spells.setLevel(v); sig.setLevel(v); } });     // Spell effects: at once, no reload
+ui2.settings.on((k, v) => { if (k === 'fx') { spells.setLevel(v); sig.setLevel(v); } if (k === 'grass') WS.setGrassDistance(grassDistance()); });     // Spell effects, Grass distance: at once, no reload
 const ui8 = createUi8({ net: () => S.net, hud, actors, worldUi, feedback: ui5.feedback, atlas: ui.atlas, settings: ui2.settings, selfId: () => S.selfId, bar: () => S.bar });
 const ui10 = createUi10({ net: () => S.net, hud, actors, atlas: ui.atlas, me, pos: () => S.predictor.pos, worldMap: ui.worldMap, settings: ui2.settings, camYaw: () => controls.cam.yaw, room: () => S.room });
 friends.tracker = ui10;
@@ -337,7 +357,9 @@ window.tvui11 = ui11;
 // W9 (P-client): professions — the 3D side and the interface's controller
 const profView = createProfView(scene, { actors, objects, camera, groundY: (x, z) => groundY(x, z), selfId: () => S.selfId });
 const prof = createProf({ net: () => S.net, hud, bag, sheet: ui5.sheet, journal: ui.journal }); prof.setView(profView);
-const PANELS = { ...ui5.panels, ...ui8.panels, party: { toggle: () => social.toggleMenu() }, bag: { toggle: f => bag.toggle(f) }, friends: friends.panel, guild: guild.panel, mail: mail.panel, market: market.panel, callboard: callboard.panel, account: account.panel, help, ...ui.panels };
+const achievements = createAchievementsWindow({ net: () => S.net, hud, chat });      // feedback #106
+bag.setLinkHook?.(it => (chat.composing() && it?.uid != null ? chat.linkThing('item', it.uid) : false));      // feedback #107: Shift-click an item while writing in chat
+const PANELS = { achievements: achievements.panel, ...ui5.panels, ...ui8.panels, party: { toggle: () => social.toggleMenu() }, bag: { toggle: f => bag.toggle(f) }, friends: friends.panel, guild: guild.panel, mail: mail.panel, market: market.panel, callboard: callboard.panel, account: account.panel, help, ...ui.panels };
 for (const b of menubar.nav.querySelectorAll('.mb-btn')) if (!['party', 'bag'].includes(b.dataset.panel)) b.addEventListener('click', () => PANELS[b.dataset.panel].toggle());
 window.addEventListener('keydown', e => {
   if (S.phase !== 'world' || (document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))) return;
@@ -365,8 +387,10 @@ async function loadClasses() {
   if (list.length) { CALLINGS = list; return list; }
   return STARTERS.map(id => ({ id, name: id[0].toUpperCase() + id.slice(1) }));
 }
+let callingPicker = null;
 function initTitle() {
-  $('name').value = q.get('name') || store.get('name', '') || '';
+  // feedback #98: a NEW character gets a new name — the box is never filled from the last one typed (?name= still fills it, for tests)
+  $('name').value = q.get('name') || '';
   if (q.get('tab') === 'login') account.tab('login');
   if (PLAYABLE_RACES.includes(q.get('race'))) S.look.race = q.get('race');
   for (const r of PLAYABLE_RACES) {
@@ -374,16 +398,10 @@ function initTitle() {
     b.onclick = () => { S.look.race = r; refreshChips(); rebuildPreview(); };
     $('races').appendChild(b);
   }
+  // feedback #98: every calling as a card in its own picker, the chosen one's page beside it, the figure in view
+  callingPicker = createCallingPicker({ callings: () => CALLINGS, current: () => S.cls, onPick: id => { S.cls = id; refreshChips(); rebuildPreview(); } });
+  $('calling-open')?.addEventListener('click', () => callingPicker.open());
   loadClasses().then(list => {
-    const name = id => list.find(c => c.id === id)?.name || id;
-    for (const id of STARTERS.filter(id => list.some(c => c.id === id))) {
-      const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.role = 'radio'; b.dataset.cls = id; b.textContent = name(id);
-      b.onclick = () => { S.cls = id; refreshChips(); rebuildPreview(); };
-      $('classes').appendChild(b);
-    }
-    const more = $('class-more');
-    more.innerHTML = '<option value="">More callings…</option>' + list.filter(c => !STARTERS.includes(c.id)).map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-    more.onchange = () => { if (more.value) { S.cls = more.value; refreshChips(); rebuildPreview(); } };
     if (!list.some(c => c.id === S.cls)) S.cls = 'warrior';
     refreshChips(); rebuildPreview();
   });
@@ -424,9 +442,15 @@ const AUTOPLAY = (q.get('autoplay') === '1' || q.get('auto') === '1') && !!q.get
 function refreshTitleFigure() { if (S.phase === 'world' || !W.spot) return; if (preview && actors.get('preview')) actors.setLook('preview', titleLook()); else rebuildPreview(); }
 function refreshChips() {
   for (const b of document.querySelectorAll('#races .chip')) b.setAttribute('aria-checked', String(b.dataset.race === S.look.race));
-  for (const b of document.querySelectorAll('#classes .chip')) b.setAttribute('aria-checked', String(b.dataset.cls === S.cls));
-  const more = $('class-more'); if (more) more.value = STARTERS.includes(S.cls) ? '' : S.cls;
-  drawClassCard($('class-card'), CALLINGS.find(c => c.id === S.cls) || null);      // Y32: what the calling is, before you pick it
+  // feedback #98: the form shows the chosen calling (its emblem and line); the picker holds the cards and the full page
+  const c = CALLINGS.find(x => x.id === S.cls) || null, btn = $('calling-open');
+  if (btn) {
+    btn.querySelector('.cn-text b').textContent = c?.name || S.cls;
+    btn.querySelector('.cn-text small').textContent = callingPicker?.catalog()?.classes?.[S.cls]?.role || c?.role || '';
+    const first = callingPicker?.catalog()?.classes?.[S.cls]?.skills?.[0]?.id;
+    btn.querySelector('.cp-emblem').innerHTML = first ? skillIconSvg(first, 32) || '' : '';
+  }
+  callingPicker?.refresh();
 }
 function rebuildPreview() {
   if (!W.spot || S.phase === 'world') return;
@@ -471,13 +495,23 @@ function titleStep(step) {
   if (step !== 'look' && S.titleBare) { S.titleBare = false; previewLook(S.look, 'title'); }
   if (step !== 'kit' && S.titleGear) { S.titleGear = null; previewLook(S.look, 'title'); }
   if (step === 'new') setTimeout(() => $('name').focus(), 0);
+  // feedback #98: making a character, the title clears away (logo, tabs, links) so the figure is in view — on a phone above all
+  $('title')?.classList.toggle('making', step !== 'front');
+  if (step === 'new' && was === 'front' && !q.get('name')) { $('name').value = ''; $('login-note').textContent = ''; }      // a new character, a new name
+  if (step !== 'new') callingPicker?.close();
 }
-function toAppearance() {
+async function toAppearance() {
   const name = cleanName($('name').value);
   if (!name || name.length < 2) { $('login-note').textContent = 'Pick a name of 2–16 letters.'; return; }
   $('login-note').textContent = '';
-  // an existing character of yours with that name: just play it
-  if (S.net?.chars?.some(c => c.name.toLowerCase() === name.toLowerCase())) { enterWorld(); return; }
+  // feedback #98: a name somebody already has is said NOW, not after the face and the gear (the server's word; no answer = carry on)
+  const go = $('enter'); if (go) { go.disabled = true; go.textContent = 'Checking the name…'; }
+  try { const net = S.net || await kitNet(); if (net?.nameCheck && !net.chars?.some(c => c.name.toLowerCase() === name.toLowerCase())) { const r = await net.nameCheck(name); if (r && r.free === false) { $('login-note').textContent = r.msg || 'That name is taken. Try another.'; return; } } }
+  catch { /* the last step still checks */ }
+  finally { if (go) { go.disabled = false; go.textContent = 'Next: appearance'; } }
+  // feedback #98: a name you already use is NOT a way in to that character (it used to sign you straight in as it): say so
+  const mine = S.net?.chars?.find(c => c.name.toLowerCase() === name.toLowerCase());
+  if (mine) { $('login-note').textContent = `You already have a character called ${mine.name}. Pick another name — or play ${mine.name} from Your characters.`; return; }
   titleStep('look');
   S.titleBare = true; previewLook(S.look, 'title');
   ui5.kits.load(S.cls);                                  // T5: have the starting kits ready by the time the face is done
@@ -570,7 +604,9 @@ async function enterWorld(pick = null) {
   const timer = setTimeout(() => { if (S.phase === 'joining' && net.status !== 'online') fail(mode === 'ws' ? 'Cannot reach the game server. Add ?offline=1 to play against an in-browser server.' : 'The in-browser server did not start.'); }, 20000);
   try {
     await net.ready;
-    let ch = pick || net.chars.find(c => c.name.toLowerCase() === name.toLowerCase());
+    // feedback #98: creating never quietly plays an existing character of that name (only ?autoplay=1, the specs' way in, does)
+    let ch = pick || (AUTOPLAY ? net.chars.find(c => c.name.toLowerCase() === name.toLowerCase()) : null);
+    if (!ch && net.chars.some(c => c.name.toLowerCase() === name.toLowerCase())) { clearTimeout(timer); fail(`You already have a character called ${name}. Pick another name.`); return; }
     if (!ch) { const look = lookWith(S.look, lookCustom(S.look)); ch = await net.createChar({ name, cls: S.cls, look, kit: S.kit || undefined }); ui2.lookStore.set(name, look); }
     const join = (q.get('join') || '').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 8) || null;
     await net.play(ch.id, join ? { join } : {});
@@ -609,6 +645,7 @@ function wireNet(net) {
     if (patch.xpNext != null) S.self.next = patch.xpNext;
     if (patch.hpMax != null) S.self.hpMax = patch.hpMax;
     if (patch.hp != null) S.self.hp = patch.hp;
+    if (patch.barrier != null) S.self.barrier = patch.barrier;      // feedback #99
     if ('reach' in patch || patch.attackRange != null) S.reach = basicReach();
     hud.setSelf(S.self);
     if (Array.isArray(patch.bar)) refreshBar();   // §15.10: level-up, form/stance, talent pick (client.js merged it into joined.you)
@@ -632,7 +669,7 @@ function wireNet(net) {
   net.on('chat', m => { if (m.ch === 'say' && m.from != null) actors.say(m.from, m.text); });   // the line itself: chat.js
   net.on('zone', z => learnZone(z.zone, z.name));
   social.wire(net);
-  chat.wire(net); friends.wire(net); guild.wire(net); mail.wire(net); market.wire(net); callboard.wire(net); account.wire(net);
+  chat.wire(net); achievements.wire(net); friends.wire(net); guild.wire(net); mail.wire(net); market.wire(net); callboard.wire(net); account.wire(net);
   bag.wire(net);
   ui5.wire(net);
   ui8.wire(net); ui10.wire(net); ui11.wire(net);
@@ -679,6 +716,7 @@ function wireNet(net) {
   net.on('eventTrack', gatePing); net.on('zoneEvent', gatePing); net.on('realm', gatePing);
   net.on('questMarks', m => questMarks.onMessage(m));        // W12 (protocol v8: whole map with `full`, then patches)
   net.on('fishPools', m => { try { angling.setKnown(m.open || m.list || []); } catch {} });
+  net.on('unstuckR', r => { if (r.msg) hud.chat(r.msg, r.ok ? 'system' : 'bad'); });      // feedback #96: /reset
   net.on('castR', r => {
     if (r.slot > 0 && S.cds) { S.cds[r.slot] = 0; hud.cooldown(r.slot, 0); }
     if (r.why === 'cooldown' && !(r.slot > 0)) { S.swing.ms = Math.min(2500, S.swing.ms + 60); return; }
@@ -723,7 +761,7 @@ function onJoined(j) {
     hud.setSelf(S.self);
     refreshBar();
     if (S.phase !== 'world') startWorld(j);
-    else if (prevRoom && prevRoom.id !== j.room.id && j.room.name !== prevRoom.name) { hud.zone(j.room.name); hud.chat(`You enter ${j.room.name}.`, 'system'); if (j.room.dungeon) hud.chat('Find the stairs down; the reward waits past the boss.', 'system'); }
+    else if (prevRoom && prevRoom.id !== j.room.id && j.room.name !== prevRoom.name) { const sz = townSizeWord(j.room); hud.zone(j.room.name, sz); hud.chat(sz ? `You enter ${j.room.name}, ${/^[aeiou]/i.test(sz) ? 'an' : 'a'} ${sz.toLowerCase()}.` : `You enter ${j.room.name}.`, 'system'); if (j.room.dungeon) hud.chat('Find the stairs down; the reward waits past the boss.', 'system'); }
     else if (!prevRoom || prevRoom.id === j.room.id) hud.toast('Reconnected.', 'good');
     if (travel.covered) travel.reveal();
   });
@@ -1288,6 +1326,9 @@ function frame(now) {
       S.movingByHand = !!it.manual;
       if (controls.auto != null && (!t || !t.hostile)) controls.stopAuto();      // the target was cleared or swapped for a friend: the attack is over
       if (controls.auto != null && (it.inRange || it.manual || controls.chasing == null)) tryStrike(false);
+      // feedback #83: a knock-back throws the target out of reach — with your hands off the controls, a melee fighter walks
+      // back in and keeps swinging (moving by hand or with the stick drops the walk, not the attack)
+      if (controls.auto != null && controls.chasing == null && !it.manual && t && t.hostile && !t.dead && (S.reach || 0) < 8 && Math.hypot(t.pos.x - S.predictor.pos.x, t.pos.z - S.predictor.pos.z) > S.reach + 0.6) controls.resumeChase(t.id);
     }
     if (steps === 5 || !online) S.acc = Math.min(S.acc, TICK_MS);
     const drawn = ships.ridePos(carts.ridePos(S.predictor.render(S.acc / TICK_MS, dt)));      // W5: on a cart you are drawn on its bed; [V] at sea, on the ship's deck
@@ -1326,9 +1367,11 @@ function frame(now) {
     const { x: px, z: pz } = W.spot, py = groundY(px, pz);
     const ang = 0.35 + Math.sin(titleOrbit) * 0.35, dist = 6.2;
     camera.position.set(px + Math.sin(ang) * dist, py + 2.2, pz + Math.cos(ang) * dist);
-    const side = window.innerWidth > 760 ? 1.9 : 0;
-    // on a phone the editor / kit panel fills the lower half: look lower, so the figure stands in the upper half
-    const low = !side && (S.titleStep === 'look' || S.titleStep === 'kit') ? 1.25 : 0;
+    // feedback #98: with the calling picker open the figure stands in the clear right of it (desktop) / between its strip and its sheet (phone)
+    const picking = !!callingPicker?.isOpen;
+    const side = window.innerWidth > 760 ? (picking ? 3.1 : 1.9) : 0;
+    // on a phone the form / editor / kit panel fills the lower half: look lower, so the figure stands in the upper half
+    const low = !side && (S.titleStep === 'look' || S.titleStep === 'kit' || S.titleStep === 'new') ? (picking ? 0.85 : S.titleStep === 'new' ? 1.75 : 1.25) : 0;
     camera.lookAt(px - Math.cos(ang) * side, py + 1.15 - low, pz + Math.sin(ang) * side);
     if (preview?.still) preview.still.yaw = ang;
     actors.update(dt, 0, {});
@@ -1352,6 +1395,7 @@ function frame(now) {
   W.horizon?.update(camera.position);       // far-horizon chunk LOD (built in a worker; cheap when nothing changes)
   perf.span('render', () => view.render());
   if (S.phase === 'world') ui2.pass();         // Q13: live portraits, drawn with this frame's renderer in the same task
+  perf.afterRender();                          // 2026-10-20: a shader built in this frame is named in the performance log
   perf.setPrograms(view.renderer.info.programs?.length || 0);
   perf.frameEnd();
 }
@@ -1389,7 +1433,8 @@ Promise.all([titleWorld(), loadLookData(), loadMonsterLooks()]).then(() => {
     .then(() => Promise.all([import('./warmup.js'), loadMonsterLooks()]))
     .then(([m, looks]) => m.warmBodies({ scene, renderer: view.renderer, camera, monsterLooks: looks, extras: [shots.sample(), moveMark.sample(), questMarks.sample(), weaponFx.sample(), lootMarks.sample(), formFx.sample(), spells.beams.sample(), sig.sample(), angling.sample(), profView.sample(), cropSample(), stars.sample(), tele.sample(), fx.sample()], extraTypes: ['wolf', 'boar', 'crocodile', 'mushroom', 'bear', 'cow'] }))
     .then(r => carts.prewarm().then(() => r, () => r))                     // W5: one ox cart built and compiled before anybody meets one
-    .then(r => { S.warm = { done: true, ...r }; }, e => { S.warm = { done: true, error: e?.message }; });
+    .then(r => { S.warm = { done: true, ...r }; }, e => { S.warm = { done: true, error: e?.message }; })
+    .then(() => perf.loaded());                                             // 2026-10-20: shaders built from here on are "while playing"
 });
 
 // --- test hook (stream G's two-player spec; also handy in the console) -----------------------------------
@@ -1597,3 +1642,12 @@ window.tv = tv;
 window.thousandvale = { stars, onEvent, held, ui10, tracking: () => ui10.tracking(), titleFront: () => titleFront, moveMark, prof, profView, shots, questMarks, carts, input, formFx, reviveFx, angling, lootMarks, weaponFx, statusSync, S, W, D, WS, view, actors, spells, LIGHTS, travel, camera, controls, hud, fx, tv, tele, boss, objects, social, bag, worldUi, footprints, chat, friends, guild, mail, callboard, account, ui, ui2, ui5, ui8 };
 window.thousandvale.ships = ships;      // [V]
 window.thousandvale.vharl = vharl;      // [S]
+
+// 2026-10-20 (the owner's combat-stutter report): what a stutter in the performance log says about the scene, and the
+// performance panel (ui/perf-panel.js: Settings → Graphics → Performance panel, F9, or ?perf=1)
+perf.setContext(() => {
+  const p = S.predictor.pos; let near = 0;
+  for (const a of actors.actors.values()) if (Math.abs(a.pos.x - p.x) + Math.abs(a.pos.z - p.z) < 60) near++;
+  return { effects: (spells.fx.liveCount || 0) + (sig.live || 0) + tele.count, actors: near };
+});
+window.thousandvale.perfPanel = createPerfPanel({ perf, settings: ui2.settings, fps: () => FPS.fps, info: () => ({ build: `${q.get('build') || 'dev'} @ ${location.host}`, quality, ua: navigator.userAgent }) });

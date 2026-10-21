@@ -59,7 +59,8 @@ test('Z37: walls, towers, buildings and water answer exactly as before — only 
 
 test('Z37: every solid kind the client draws has a measured collider; the server and the client wrap the SAME way', () => {
   for (const k of SCATTER_KINDS) if (k.solid) assert.ok(SCATTER_COLLIDE[k.key], k.key);
-  for (const [k, c] of Object.entries(SCATTER_COLLIDE)) assert.ok(c.r.every(v => v > 0.1 && v < 2) && c.art > 0, k);
+  // (< 3: Saint's Meadow's old oak, tree_old_oak, is a 2.7 m trunk on purpose — it failed the old < 2 since it landed)
+  for (const [k, c] of Object.entries(SCATTER_COLLIDE)) assert.ok(c.r.every(v => v > 0.1 && v < 3) && c.art > 0, k);
   // a trunk is a trunk: a broadleaf at scale 1 is well under the old 1.5 m stamp
   assert.ok(colliderRadius('tree_broadleaf', 1, 0) < 0.8);
   const content = src('js/sim/content.js'), ws = src('js/client/world-stream.js');

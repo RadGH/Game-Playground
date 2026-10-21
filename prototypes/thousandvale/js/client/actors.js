@@ -30,6 +30,7 @@ import { CHIBI2_CLIP_SECONDS } from '../../../../avatar-3d/js/chibi2-motion.js';
 import { choosePick, pickable, NEAR } from './pick-rule.js';      // Y8: live beats corpse; an emptied corpse is not there to click
 import { CHIBI2_REST_ANIMS } from '../../../../avatar-3d/js/chibi2-motion-rest.js';   // play-test 12 (#88 #76): front crawl, treading water, a held seat
 import { latchSwim, restClip } from './rest-clip.js';
+import { boxSize } from './box-size.js';
 import { CHIBI2_PROF_ANIMS } from '../../../../avatar-3d/js/chibi2-motion-prof.js';   // W9 (P-client): work loops — mine, chop, stoop-and-pick, skin, hammer, stitch, stir   // play-test 5: T6 dual-wield strikes, T25 angling, T4 standing back up
 
 /** A creature spec from what the server sent: `{ type, size?, seed, colors? }` — colour varied by seed within its family. */
@@ -494,7 +495,7 @@ export function createActors(scene, { plateLayer, camera, quality = 'high', rend
   const _v = new THREE.Vector3(), _w = new THREE.Vector3();
   function updatePlates(targetId, hoverId) {
     if (!plateLayer) return;
-    const w = plateLayer.clientWidth, h = plateLayer.clientHeight;
+    const { w, h } = boxSize(plateLayer);      // 2026-10-20: no layout read per frame (box-size.js)
     // the PLATE_MAX nearest get a plate (plus whoever you target or hover); the rest stay hidden
     const order = [];
     for (const a of actors.values()) if (a.plate) order.push([camera.position.distanceToSquared(a.group.position), a]);

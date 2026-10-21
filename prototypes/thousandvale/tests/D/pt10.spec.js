@@ -484,14 +484,19 @@ soft('desktop 1366 x 800: every item of play-test 10 in the world', async ({ bro
   await expect(page.locator('#login')).toBeVisible(); await expect(page.locator('#back-front')).toBeVisible();
   await page.waitForFunction(() => thousandvale.actors.get('preview')?.look?.cls === thousandvale.S.cls, null, { timeout: 15000 });
   // Y32: the calling's card, for the Starcaller
-  await page.selectOption('#class-more', 'starcaller');
+  // feedback #98: the calling picker — cards on one side, the chosen calling's page (its six skills and their pictures) beside them
+  await page.click('#calling-open');
+  await page.click('#classes [data-cls="starcaller"]');
   await expect(page.locator('#class-card')).toBeVisible();
+  await expect(page.locator('#class-card .cp-skill')).toHaveCount(6, { timeout: 10000 });
   const card = await page.locator('#class-card').innerText();
-  expect(card).toContain('Starcaller'); expect(card.toUpperCase()).toContain('ARCANE STAR CASTER'); expect(card).toContain('Cloth · Intelligence · Mana'); expect(card).toContain('golden stars'); expect(card).toContain('Constellation');
+  expect(card).toContain('Starcaller'); expect(card.toUpperCase()).toContain('ARCANE STAR CASTER'); expect(card).toContain('Cloth armour'); expect(card).toContain('golden stars'); expect(card).toContain('Constellation'); expect(card).toContain('Star Dart');
   await page.waitForTimeout(2500);
   await shot('y32-class-card');
   await page.click('#classes [data-cls="warrior"]');
   expect(await page.locator('#class-card').innerText()).toContain('Warrior');
+  await page.click('#calling-done');
+  await expect(page.locator('#calling-open')).toContainText('Warrior');
   await page.click('#back-front');
   await expect(page.locator('#front')).toBeVisible();
   await page.waitForFunction(() => thousandvale.actors.get('preview')?.look?.cls === 'paladin', null, { timeout: 15000 });
@@ -648,7 +653,7 @@ soft('phone 393 x 852: the portrait stays in its frame; lists, confirms, the map
   const nb = await rect(page, '#new-char'); expect(nb.x).toBeGreaterThanOrEqual(0); expect(nb.r).toBeLessThanOrEqual(W); expect(nb.h).toBeGreaterThanOrEqual(44);
   await page.locator('#new-char').tap();
   await expect(page.locator('#login')).toBeVisible();
-  await page.selectOption('#class-more', 'starcaller');
+  await page.locator('#calling-open').tap(); await page.locator('#classes [data-cls="starcaller"]').tap();      // feedback #98: the calling picker
   await expect(page.locator('#class-card')).toContainText('Constellation');
   const cc = await rect(page, '#class-card'); expect(cc.x).toBeGreaterThanOrEqual(0); expect(cc.r).toBeLessThanOrEqual(W);
   await page.locator('#class-card').scrollIntoViewIfNeeded();

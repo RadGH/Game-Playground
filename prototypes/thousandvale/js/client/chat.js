@@ -5,6 +5,7 @@
 
 import { CHANNELS, CHANNEL_BY_ID, tabOf, linePrefix, parseChatLine, CHAT_HELP, channelGate, ERR_TEXT, accountLevel } from './social-core.js';
 import { h, createPanel } from './ui-panel.js';
+import { rememberItems } from './ui/item-card.js';      // feedback #107: a linked item's card on hover
 
 const $ = id => document.getElementById(id);
 const MAX_LINES = 300;
@@ -85,14 +86,15 @@ export function createChat({ net: getNet, hud, social, me, actions = {}, onTypin
     if (!mine && m.name && S.muted.has(m.name.toLowerCase()) && m.ch !== 'system') return null;
     const tab = tabOf(m.ch);
     const p = h('p', { className: 'ch-' + (m.ch || 'system') + (m.echo ? ' echo' : '') });
-    if (m.ch === 'system') p.append(h('b', {}, `[${m.name || 'The Vale'}]: `), m.text);
+    const T = () => linkParts(m.text, m.links);      // feedback #107: [[L…]] -> a chip with the thing's card
+    if (m.ch === 'system') p.append(h('b', {}, `[${m.name || 'The Vale'}]: `), ...T());
     else if (m.ch === 'w') {
-      if (m.echo) p.append(h('b', {}, '[To '), nameEl(m.to), h('b', {}, ']: '), m.text);
-      else { p.append(h('b', {}, '['), nameEl(m.name, m.from), h('b', {}, ' whispers]: '), m.text); S.reply = m.name; if (!S.whisperTo) S.whisperTo = m.name; }
+      if (m.echo) p.append(h('b', {}, '[To '), nameEl(m.to), h('b', {}, ']: '), ...T());
+      else { p.append(h('b', {}, '['), nameEl(m.name, m.from), h('b', {}, ' whispers]: '), ...T()); S.reply = m.name; if (!S.whisperTo) S.whisperTo = m.name; }
     } else {
       const label = m.ch === 'say' ? '' : `${CHANNEL_BY_ID[m.ch]?.label || m.ch}`;
       if (label) p.append(h('b.chl', {}, `[${label}] `));
-      p.append(h('b', {}, '['), nameEl(m.name, m.ch === 'say' ? null : m.from), h('b', {}, ']: '), m.text);
+      p.append(h('b', {}, '['), nameEl(m.name, m.ch === 'say' ? null : m.from), h('b', {}, ']: '), ...T());
     }
     p.dataset.tip = linePrefix(m);
     append(p, tab);
@@ -100,7 +102,61 @@ export function createChat({ net: getNet, hud, social, me, actions = {}, onTypin
   }
 
   // ---- sending ----
+  // ---- feedback #107: links to items, achievements and trophies ----
+  // The server makes a link from what you hold (js/sim/province.js makeLink) and answers its id; the box shows "[Name]"
+  // and the id goes out in its place on Enter. A line arriving with `links` turns each [[id]] into a chip.
+  S.pending = new Map();         // "[Name]" in the box -> link id
+  const wantLink = new Map();    // req -> true (only our own answers are put in the box)
+  function linkChip(v) {
+    const r = v.rarity || (v.kind === 'item' ? 'normal' : v.kind);
+    const chip = h('span.chat-link.r-' + r, { tabIndex: 0, dataset: { link: v.kind } }, `[${v.label || 'link'}]`);
+    if (v.kind === 'item' && v.item) { rememberItems([v.item]); chip.dataset.tipRender = 'item'; chip.dataset.tipItem = String(v.item.uid); }
+    else chip.dataset.tip = `${v.kind === 'trophy' ? 'Trophy' : 'Achievement'}: ${v.label}${v.n > 1 ? ` ×${v.n}` : ''}${v.desc ? ` — ${v.desc}` : ''}${v.who ? ` (${v.who}'s)` : ''}`;
+    if (v.kind !== 'item') chip.addEventListener('click', () => actions.openAchievements?.(v.kind === 'trophy' ? 'trophies' : 'ach'));
+    return chip;
+  }
+  function linkParts(text, links) {
+    const t = String(text ?? '');
+    if (!t.includes('[[')) return [t];
+    const out = [];
+    let last = 0;
+    for (const m of t.matchAll(/\[\[(L[0-9a-z]{2,10})\]\]/g)) {
+      if (m.index > last) out.push(t.slice(last, m.index));
+      const v = links && links[m[1]];
+      out.push(v ? linkChip(v) : h('span.chat-link.gone', {}, '[a link]'));
+      last = m.index + m[0].length;
+    }
+    if (last < t.length) out.push(t.slice(last));
+    return out;
+  }
+  /** Ask the server for a link to `ref` (an item uid, an achievement id, a trophy id); it lands in the chat box. */
+  function linkThing(kind, ref) {
+    const n = net();
+    if (!n?.link) return false;
+    wantLink.set(n.link(kind, ref), true);
+    return true;
+  }
+  function onLinkR(r) {
+    if (!r || !wantLink.delete(r.req)) return;
+    if (!r.ok) { line(r.msg || 'That cannot be linked.', 'bad'); return; }
+    let label = `[${r.label}]`;
+    for (let k = 2; S.pending.has(label) && S.pending.get(label) !== r.id; k++) label = `[${r.label} ${k}]`;
+    S.pending.set(label, r.id);
+    const v = el.input.value, at = el.input === document.activeElement && Number.isFinite(el.input.selectionStart) ? el.input.selectionStart : v.length;
+    const pad = at > 0 && !/\s$/.test(v.slice(0, at)) ? ' ' : '';
+    el.input.value = v.slice(0, at) + pad + label + ' ' + v.slice(at);
+    el.input.focus();
+    const c = at + pad.length + label.length + 1; try { el.input.setSelectionRange(c, c); } catch { /* not a text box */ }
+  }
+  /** The chat box is being written in (Shift-click on an item then links it instead of splitting it / swapping hands). */
+  let blurAt = -1e9;
+  el.input.addEventListener('blur', () => { blurAt = performance.now(); });
+  const composing = () => document.activeElement === el.input || el.input.value.trim() !== '' || performance.now() - blurAt < 1500;
+  /** A local line with a link chip (an achievement or trophy you just earned). */
+  function systemLink(before, v, after = '') { const p = h('p', { className: 'system ach-line' }, before, linkChip(v), after); append(p, 'all'); return p; }
   function submit(raw) {
+    // [Name] placeholders the box holds for links -> their ids
+    if (S.pending.size) { for (const [label, id] of S.pending) raw = String(raw).split(label).join(`[[${id}]]`); S.pending.clear(); }
     const r = parseChatLine(raw, { active: S.send, reply: S.reply, whisperTo: S.whisperTo });
     const n = net();
     if (!n) return true;
@@ -148,6 +204,7 @@ export function createChat({ net: getNet, hud, social, me, actions = {}, onTypin
       case 'mute': if (arg) muteLocal(arg, true); return true;
       case 'unmute': if (arg) muteLocal(arg, false); return true;
       case 'claim': actions.openAccount?.(); return true;
+      case 'reset': if (n.unstuck) { n.unstuck(); line('Getting you unstuck…', 'system'); } return true;      // feedback #96
     }
     if (actions.command?.(cmd, arg, rest)) return true;      // play-test 2: /follow, /trade, /settings (ui/pt2.js)
     line(`Unknown command /${cmd}. Type /help.`, 'bad');
@@ -209,6 +266,7 @@ export function createChat({ net: getNet, hud, social, me, actions = {}, onTypin
 
   function wire(n) {
     n.on('chat', m => incoming(m));
+    n.on('linkR', onLinkR);      // feedback #107
     n.on('err', e => {
       if (e.code === 'chatGate') gateLine(e.msg || ERR_TEXT.chatGate, 'chatGate');
       else if (['slow', 'muted', 'ignored'].includes(e.code)) line(e.msg || ERR_TEXT[e.code], 'bad');
@@ -225,7 +283,7 @@ export function createChat({ net: getNet, hud, social, me, actions = {}, onTypin
 
   setTab(S.tab);
   return {
-    wire, line, incoming, submit, nameMenu, setTab, setSend, reportBox,
+    wire, line, incoming, submit, nameMenu, setTab, setSend, reportBox, linkThing, systemLink, composing, linkParts,
     focus(prefill = '') { if (prefill) el.input.value = prefill; el.input.focus(); },
     whisper(name) { S.whisperTo = name; setTab('w'); setSend('w', name); el.input.focus(); },
     get state() { return S; },

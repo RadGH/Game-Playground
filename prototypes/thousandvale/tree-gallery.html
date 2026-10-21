@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Thousandvale Trees</title>
+<meta name="description" content="Every tree Thousandvale draws, in the storybook style and the old kit style, at each detail level and in a field at real game distances.">
+<link rel="stylesheet" href="css/tree-gallery.css">
+<script type="importmap">{ "imports": { "three": "../../vendor/three/three.module.js", "three/addons/": "../../vendor/three/addons/" } }</script>
+</head>
+<body>
+<header class="tg-top">
+  <h1>Thousandvale <span>trees</span></h1>
+  <label>Show <select id="tg-view">
+    <option value="lods">Detail levels side by side</option>
+    <option value="forest">A wood at game distances</option>
+    <option value="atlas">The leaf picture sheet</option>
+  </select></label>
+  <label>Style <select id="tg-style">
+    <option value="both">Storybook (front) and old kit (back)</option>
+    <option value="story">Storybook</option>
+    <option value="kit">Old kit</option>
+  </select></label>
+  <label>Tree <select id="tg-species"></select></label>
+  <label>Quality <select id="tg-quality"><option>high</option><option selected>medium</option><option>low</option></select></label>
+  <label class="tg-check"><input type="checkbox" id="tg-giant"> Giant (x4)</label>
+  <span class="tg-grow"></span>
+  <span id="tg-stats" class="tg-stats"></span>
+</header>
+<canvas id="tg-view3d" aria-label="Trees"></canvas>
+<p class="tg-help">Drag to turn, wheel to zoom. In "A wood at game distances" every tree switches detail level exactly where the game does (the red rings), so a swap you can see here is a swap you would see in the world.</p>
+<script type="module" src="js/client/tree-gallery.js"></script>
+</body>
+</html>

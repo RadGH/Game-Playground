@@ -36,7 +36,7 @@ const SLOT_GLYPH = { head: '⛑', necklace: '◎', chest: '▣', hands: '✋', l
 export function createBag({ net: getNet, hud, me = null }) {
   const root = $('bag');
   const btn = $('bag-btn');
-  let useHook = null;
+  let useHook = null, linkHook = null;
   const toggleFns = new Set();
   /** T7 (play-test 5): the Doubled Grasp perk lets a two-handed weapon sit in each hand. */
   const dual2h = () => hasDual2h(getNet()?.joined?.you);
@@ -279,6 +279,8 @@ export function createBag({ net: getNet, hud, me = null }) {
     const cells = list.map(it => {
       const d = slotEl(it);
       d.onclick = e => {
+        // feedback #107: Shift-click while you are writing in the chat box = a link to it in the message
+        if (e.shiftKey && linkHook && linkHook(it)) return;
         // §23.1: Shift-click a stack = split some off (before anything would drink it)
         if (e.shiftKey && it.count > 1) { splitAsk(it); return; }
         if (useHook && useHook(it)) return;
@@ -386,6 +388,8 @@ export function createBag({ net: getNet, hud, me = null }) {
     get max() { return bagMax(); }, takeOff, get dual2h() { return dual2h(); },
     /** fn(item) -> true when it USED the item (a consumable) instead of wearing it. */
     setUseHook(fn) { useHook = fn; },
+    /** feedback #107: `fn(item)` -> true when it put a link to the item in the chat box */
+    setLinkHook(fn) { linkHook = fn; },
     /** Kept for older callers: the card is the shared tooltip now (data-tip-render="item"). */
     card() {}, hideCard: hideTip,
     get isOpen() { return !root.hidden; },

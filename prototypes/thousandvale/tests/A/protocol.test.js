@@ -23,6 +23,7 @@ const GOOD = {
   prof: { op: 'learn', id: 'mining', npc: 9 }, gather: { op: 'done', id: 12, inputs: [410, 0, 980, 0, 1630, 0] }, craft: { op: 'start', id: 'blades_1', npc: 9, base: 'dagger' },   // W9 (P-core)
   market: { op: 'sell', uid: 'p0-abc', price: 250 },      // round 11 (Market, #25)
   feedbackShot: { id: 12, i: 0, n: 3, data: 'data:image/jpeg;base64,/9j/4AAQ' },      // play-test 12 (#71)
+  unstuck: {}, ach: { op: 'list' }, link: { kind: 'item', uid: 'p0-abc', req: 3 }, nameCheck: { name: 'Aldra' },      // feedback 2026-10-21 (#96, #106, #107, #98)
 };
 
 test('every client message type has a valid example and the example passes', () => {

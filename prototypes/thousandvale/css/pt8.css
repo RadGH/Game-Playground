@@ -126,3 +126,8 @@ html[data-layout="phone"] .tv-meter .meter-head button, html[data-layout="phone"
 html[data-layout="phone"] .tv-meter .meter-row { height: var(--tap, 44px); line-height: var(--tap, 44px); }
 html[data-layout="phone"] .tv-meter .meter-crumb { min-height: var(--tap, 44px); display: flex; align-items: center; }
 html[data-layout="phone"] .my-list, html[data-layout="phone"] .cart-list { max-height: none; }
+/* feedback #101 / #105: the size of each stop and who works there */
+.cart-size { display: inline-block; margin-left: 8px; padding: 0 6px; border-radius: 9px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; vertical-align: 2px; background: rgba(255, 255, 255, 0.08); color: var(--ink-dim); }
+.cart-size.size-city, .cart-size.size-capital { background: rgba(230, 193, 74, 0.2); color: #ffe17a; }
+.cart-size.size-town { background: rgba(143, 180, 255, 0.16); color: #b9cfff; }
+.cart-who { display: block; color: #9fd8a0; }

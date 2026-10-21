@@ -28,6 +28,20 @@ let sliceAt = 0;
 const idle = async () => { const now = performance.now(); if (now - sliceAt < 10) return; await rest(); sliceAt = performance.now(); };
 const CHIBI_ANIMS = ['idle', 'ready', 'walk', 'run', 'attack', 'cast', 'hit', 'guard', 'wave', 'talk', 'jump', 'dead', 'swim'];
 
+/**
+ * Draw `group` (in `scene`) once for real, every piece of it whatever the camera sees, then put culling back. Used by
+ * the warm-up so a shader's first draw — not just its compile — happens at load. Never throws.
+ */
+export async function drawOnce(renderer, scene, camera, group) {
+  if (!renderer || !scene || !camera || !group) return false;
+  await new Promise(r => (typeof requestAnimationFrame === 'function' ? requestAnimationFrame(() => r()) : setTimeout(r, 16)));
+  const was = [];
+  group.traverse(o => { was.push([o, o.frustumCulled]); o.frustumCulled = false; });
+  const vis = group.visible; group.visible = true;
+  try { perf.span('warm:draw', () => renderer.render(scene, camera)); return true; } catch { return false; }
+  finally { for (const [o, f] of was) o.frustumCulled = f; group.visible = vis; }
+}
+
 export async function warmBodies({ scene, renderer, camera, monsterLooks = {}, maxHumanoids = 12, extraTypes = ['wolf'], extras = [] } = {}) {
   const pen = new THREE.Group(); pen.name = 'shader-warm-pen'; pen.position.set(0, -6000, 0);
   scene.add(pen);
@@ -71,6 +85,13 @@ export async function warmBodies({ scene, renderer, camera, monsterLooks = {}, m
   pen.children.forEach((c, i) => c.position.set((i % 8) * 3, 0, Math.floor(i / 8) * 3));
   const before = renderer.info.programs?.length || 0;
   try { await Promise.race([renderer.compileAsync(pen, camera, scene), new Promise(r => setTimeout(r, 8000))]); } catch { /* best effort */ }
+  // 2026-10-20 (the owner's stutter trace, Chrome on Windows): compiling is not the whole job there. Chrome draws WebGL
+  // through ANGLE on Direct3D, which finishes some shaders only at their first real DRAW (a body's bone indices, for
+  // one, are whole numbers and need their own version of the shader) — in his trace the graphics process sat busy for
+  // 1.8 s right after a fight's first new shader. So everything in the pen is drawn ONCE now, for real, into the
+  // normal frame: culling is turned off for the pen, so every piece is drawn where it stands, 6 km under the world,
+  // where it covers no pixel. One extra frame at load; the next frame draws over it.
+  await drawOnce(renderer, scene, camera, pen);
   pen.visible = false;
   return { creatures, humanoids: people, programs: (renderer.info.programs?.length || 0) - before };
 }

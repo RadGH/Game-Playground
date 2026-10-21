@@ -41,7 +41,7 @@ test('S24: every event pays every participant a rare-or-better and scaled bonus 
   a.close(); await srv.stop();
 });
 
-test('S24: winning a zone event: "Event complete" with the numbers, the rare waits on the boss as my own share', async () => {
+test('S24 / #109: winning a zone event: "Event complete" with the numbers, the rare goes straight into my bag', async () => {
   const { srv, clock, world } = await realServer();
   const P = world.province, L = world.layouts[0];
   const def = L.zoneEvents.find(e => e.boss === 'event_grandmother_skein') || L.zoneEvents.find(e => e.eid === 'test');
@@ -65,6 +65,8 @@ test('S24: winning a zone event: "Event complete" with the numbers, the rare wai
   assert.match(d.text, /^Event complete: \+\d+ XP, \+\d+ gold/);
   assert.ok(d.xp > 0 && d.gold > 0 && d.items.some(it => RARE_UP.has(it.rarity)), JSON.stringify(d));
   assert.ok(chat.some(m => m.ch === 'system' && /Event complete/.test(m.text)), 'said in chat');
+  assert.equal(d.onBody, undefined, '#109: nothing waits on a body that may be gone');
+  assert.ok(d.items.every(it => o.char.bag.some(b => b.name === it.name)), 'the share is in the bag');
   if (d.onBody) {
     assert.ok(spark.some(m => m.id === d.onBody && m.on && RARE_UP.has(m.best)), 'the body sparkles in the item\'s rarity for me');
     if (o.entity.dead) o.entity.revive(1);              // the waves may have dropped the watcher; standing again to loot

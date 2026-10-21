@@ -27,7 +27,7 @@ import { forget } from './threat.js';
 const num = (v, d) => (Number.isFinite(+v) ? +v : d);
 export const GUARD_DEFAULTS = Object.freeze({
   reference: 'road_brigand', levelOver: 2, hpMult: 4, dmgMult: 0.2, armor: 6, respawnSec: 75, leashM: 45, reachM: 2.6,
-  healsOutOfCombatSec: 8, vsBossMult: 0.02, threatMult: 3, noticeM: 30, speed: 5.2, newcomerThreatMult: 0.25,
+  healsOutOfCombatSec: 8, vsBossMult: 0.02, threatMult: 3, noticeM: 30, speed: 5.2, newcomerThreatMult: 0.25, rallyM: 110,
 });
 
 /**
@@ -196,6 +196,21 @@ export function attachGuards(room, { cfg = null, wanderer = null } = {}) {
         const d = dist(m, g);
         if (d < bd) { bd = d; t = m; }
       }
+      // feedback #100 (2026-10-21, a siege of Torborhold: "guards should at least pretend to help"): nothing at its own
+      // post, a guard runs to a raider that is on a PLAYER within `rallyM` of it, and fights beside them (its hits are
+      // still small; it is seen helping). It walks back to its post when that fight is over.
+      g.leashNow = g.leash;
+      if (!t && !g.wanderer && num(R.rallyM, 0) > g.leash) {
+        for (const m of foes) {
+          if (m.dying != null || m.targetId == null) continue;
+          const v = field.get(m.targetId);
+          if (!v || v.kind !== 'player' || v.dead) continue;
+          if (Math.hypot(m.x - g.post.x, m.z - g.post.z) > num(R.rallyM, 0)) continue;
+          const d = dist(m, g);
+          if (d < bd) { bd = d; t = m; }
+        }
+        if (t) g.leashNow = num(R.rallyM, 0) + g.reach;
+      }
       g.target = t; g.targetId = t ? t.id : null;
       let speed = 0;
       if (t) {
@@ -239,7 +254,7 @@ export function attachGuards(room, { cfg = null, wanderer = null } = {}) {
         speed *= 1 - (slowOf(g) || 0);
         const nx = g.x + Math.sin(g.facing) * speed * dt, nz = g.z + Math.cos(g.facing) * speed * dt;
         const B = field.terrain?.blocked;
-        if (!(B && B(nx, nz) && !B(g.x, g.z)) && Math.hypot(nx - g.post.x, nz - g.post.z) <= g.leash) { g.x = nx; g.z = nz; }
+        if (!(B && B(nx, nz) && !B(g.x, g.z)) && Math.hypot(nx - g.post.x, nz - g.post.z) <= (g.leashNow || g.leash)) { g.x = nx; g.z = nz; }
         g.y = field.terrain ? groundAt(field.terrain, g.x, g.z, g.y) : 0;
       }
       if (g.swingTimer <= 0 || !t) g.anim = speed > 0 ? 'walk' : 'idle';

@@ -124,7 +124,36 @@ export function createGateway(opts) {
       case 'status': p.status = m.status; return;
       case 'eventState': director.onState(m); return;
       case 'eventNear': director.near(m.id, m.levels || []); return;      // R3: someone walked up to a realm event
+      // feedback #107: a chat link made in a province
+      case 'link': if (m.id && m.snap) { links.set(m.id, m.snap); if (links.size > LINK_MAX) links.delete(links.keys().next().value); } return;
+      // feedback #106: achievements that only the gateway can decide
+      case 'achAsk': return void achFeedback(m.char, p);
+      case 'realmFirst': return void realmFirst(p, m);
     }
+  }
+  /** Feedback #106: how many reports this character sent and how many the makers marked done -> its province. */
+  async function achFeedback(char, p = null) {
+    if (char == null || !store.feedbackTally) return;
+    let t = null;
+    try { t = await store.feedbackTally(char); } catch (err) { log('feedback tally failed', err && err.message); return; }
+    const proc = p || procs.get(presence.get(char)?.proc);
+    if (t && proc) proc.bus.send({ k: 'achFeedback', char, sent: t.sent | 0, done: t.done | 0 });
+  }
+  /** Feedback #106: a realm first. world_state `first:<id>` holds who; the first claim wins, said to everyone. */
+  async function realmFirst(p, m) {
+    if (!m.id || !store.getWorld || !store.setWorld) return;
+    const key = 'first:' + String(m.id).slice(0, 80);
+    let had = null;
+    try { had = await store.getWorld(key); } catch { return; }
+    if (had) return;
+    const names = (m.names || []).slice(0, 12);
+    await store.setWorld(key, { chars: (m.chars || []).slice(0, 40), names, at: wallNow(), what: m.what || m.id });
+    const who = names.length > 2 ? `${names.slice(0, -1).join(', ')} and ${names.at(-1)}` : names.join(' and ');
+    const text = m.event ? `Realm first! ${who} brought down ${m.what} — the first in the realm to do it.` : `Realm first! ${who} — ${m.what}.`;
+    const d = JSON.stringify({ t: 'chat', ch: 'system', from: 0, name: 'The Vale', text, realmFirst: true });
+    for (const g of gwByChar.values()) g.send(d);
+    chat.logLine({ ch: 'system', name: 'realm first', text });
+    p.bus.send({ k: 'realmFirstR', id: m.id, event: !!m.event, what: m.what, chars: m.chars || [], won: true });
   }
   /** A province process moves a character to a province another process holds: ticket there, tell the client. */
   function relocate(from, m) {
@@ -247,7 +276,7 @@ export function createGateway(opts) {
         const pr = s.charId != null ? presence.get(s.charId) : null;
         const who = { account: s.account, char: pr ? pr.char : null, name: pr ? pr.name : null, cls: pr ? pr.cls : null, level: pr ? pr.level : null };
         const server = { via: 'gateway', build, protocol: PROTOCOL_VERSION, ...(env ? { env } : {}), ...(serverName ? { server: serverName } : {}), claimed: !!s.claimed, username: s.username || null, ...(pr ? { room: pr.room, province: pr.province, zone: pr.zone || null, online: !!pr.online } : {}), at: new Date(wallNow()).toISOString() };
-        return feedback.submit(who, m, server).then(r => s.sendJSON({ t: 'feedbackR', ...r }), err => { log('feedback failed', err && err.message); s.sendJSON({ t: 'feedbackR', ok: false, why: 'failed', msg: 'That did not go through. Please try again.' }); });
+        return feedback.submit(who, m, server).then(r => { s.sendJSON({ t: 'feedbackR', ...r }); if (r && r.ok) achFeedback(who.char); }, err => { log('feedback failed', err && err.message); s.sendJSON({ t: 'feedbackR', ok: false, why: 'failed', msg: 'That did not go through. Please try again.' }); });
       }
       case 'feedbackShot': {      // play-test 12 (#71): the screenshot after a report (js/sim/feedback.js shot)
         if (s.state !== 'authed') return bad(s, 'order');
@@ -270,6 +299,12 @@ export function createGateway(opts) {
       case 'look': return lookOp(s, m);
       case 'party': return onParty(s, m);
       case 'chat': { if (!CHAT_CHANNELS.includes(m.ch)) return bad(s, 'channel'); return chat.chat(s, m); }
+      case 'nameCheck': {      // feedback #98: say a name is taken on step 1, not after the face and the gear are chosen
+        const name = String(m.name || '').trim();
+        if (!name || !nameOk(name)) return s.sendJSON({ t: 'nameR', name, free: false, msg: 'Names are 2–16 letters.' });
+        if (!store.nameFree) return s.sendJSON({ t: 'nameR', name, free: null });
+        return Promise.resolve(store.nameFree(name)).then(r => s.sendJSON({ t: 'nameR', name, free: !!r.free, msg: r.free ? '' : r.reserved ? 'That name was just given up and is kept for a day. Pick another.' : 'That name is taken. Try another.' }), () => s.sendJSON({ t: 'nameR', name, free: null }));
+      }
       case 'ignore': return onIgnore(s, m);
       case 'account': {
         if (s.busyAccount) return s.err('busy');
@@ -415,7 +450,7 @@ export function createGateway(opts) {
   const gwNonce = randomHex(4);
   const sysmail = createSystemMail({ store, newUid: () => `gw-${gwNonce}-${(++gwUid).toString(36)}`, wallNow, notify: c => mailNote(c), log, counters });
   const handlers = { feedbackMine: (s, m) => feedback.listMine({ account: s.account, claimed: !!s.claimed }, m).then(r => s.sendJSON(r), err => { log('feedback list failed', err && err.message); s.sendJSON({ t: 'feedbackMine', ok: false, why: 'failed', list: [], more: false }); }) };
-  const feedback = createFeedback({ env, store, wallNow, sink: feedbackSink, sysmail, log, counters, filter: chatFilter, opts: feedbackOpts });
+  const feedback = createFeedback({ env, store, wallNow, sink: feedbackSink, sysmail, log, counters, filter: chatFilter, opts: feedbackOpts, onDone: c => achFeedback(c) });
 
   // ---- play-test 2: class names (Q25), account settings (Q15), a title-screen look (Q21) ----
   function clsName(id) {
@@ -687,7 +722,10 @@ export function createGateway(opts) {
   const accounts = createAccounts({ store, hasher, mailer, verifyHuman, wallNow, log, filter: chatFilter, sendAll, kickChar, counters, trustIps: unlimitedIps, charLimit: CHAR_LIMIT });
   const friends = createFriends({ store, presence, gwByChar, log, wallNow, onList: (c, ids) => pushSocial(c, { friends: ids }) });
   const guilds = createGuilds({ store, presence, gwByChar, wallNow, filter: chatFilter, charge, log, counters, opts: guildOpts });
-  const chat = createChat({ store, presence, gwByChar, parties, guilds, friends, wallNow, filter: chatFilter, log, counters, mute, opts: chatOpts });
+  // feedback #107: chat link snapshots the provinces made (an item, achievement or trophy the speaker holds), by id
+  const links = new Map(), LINK_MAX = 8000;
+  const linksIn = text => { let out = null; for (const [, id] of String(text).matchAll(/\[\[(L[0-9a-z]{2,10})\]\]/g)) { const v = links.get(id); if (v) (out ||= {})[id] = v; } return out; };
+  const chat = createChat({ store, presence, gwByChar, parties, guilds, friends, wallNow, filter: chatFilter, log, counters, mute, opts: chatOpts, linksIn });
   const callboard = createCallboard({ parties, presence, gwByChar, partyChanged: list => partyChanged(list), sendTo, procOf: c => procOfChar(c), now, wallNow, log, opts: callboardOpts });
   let lastMailSweep = now();
   function sweepMail() {

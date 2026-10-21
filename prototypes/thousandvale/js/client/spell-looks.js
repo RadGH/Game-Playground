@@ -55,7 +55,8 @@ export function skillLook(id, sk = {}) {
     case 'bolt': {
       const count = Math.max(1, Math.min(7, sk.projectiles || sk.count || (sk.ricochet ? 1 : 1)));
       look.cast = 'hand';
-      look.travel = { kind: 'projectile', body: pick(BODIES[el] || BODIES.arcane, 5), count, spread: count > 1 ? 0.22 : 0, ricochet: !!sk.ricochet };
+      // feedback dev#82: "Forked Bolt shoots a round projectile" — a lightning bolt is always the jagged bolt, never the helix ball
+      look.travel = { kind: 'projectile', body: el === 'lightning' ? 'bolt' : pick(BODIES[el] || BODIES.arcane, 5), count, spread: count > 1 ? 0.22 : 0, ricochet: !!sk.ricochet };
       if (sk.splash) look.area = { kind: 'burst', r: +sk.splash };
       break;
     }

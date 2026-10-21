@@ -50,7 +50,8 @@ export function loadCallings() {
     const get = async u => { try { const r = await fetch(u); return r.ok ? await r.json() : null; } catch { return null; } };
     const [f, tv] = await Promise.all([get(new URL('../../../../farhold/data/classes.json', import.meta.url)), get(new URL('../../../data/rules/classes-tv.json', import.meta.url))]);
     const out = [];
-    for (const c of [...(f?.classes || []), ...(tv?.classes || [])]) if (c && c.id && !out.some(x => x.id === c.id)) out.push({ ...c, name: c.name || c.id });
+    const text = tv?.classText || {};      // feedback #113: the real-time card line (rules/tv-skills.js applies the same on the server)
+    for (const c of [...(f?.classes || []), ...(tv?.classes || [])]) if (c && c.id && !out.some(x => x.id === c.id)) out.push({ ...c, ...(text[c.id] && c.id[0] !== '_' ? { role: text[c.id].role || c.role, hook: text[c.id].hook || c.hook } : {}), name: c.name || c.id });
     return out;
   })();
   return listP;

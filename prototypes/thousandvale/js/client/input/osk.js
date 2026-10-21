@@ -79,7 +79,7 @@ export function createOsk({ parent = document.body, glyphs = null } = {}) {
     /** Where the cursor is (tests + the gallery). */
     get at() { const key = OSK_ROWS[S.r][S.c]; return { r: S.r, c: S.c, key: key.k === 'char' ? key.ch : key.k }; },
     open(input) { S.input = input; S.r = 1; S.c = 0; S.sx = null; S.shift = !input.value; root.hidden = false; draw(); },
-    close() { root.hidden = true; S.input = null; },
+    close() { S.input = null; if (!root.hidden) root.hidden = true; },   // already shut: no attribute write (pad-layout.js watches it and would take the chat box's focus away)
     move(dx, dy) { Object.assign(S, oskStep(OSK_ROWS, S, dx, dy)); draw(); },
     type() {
       const key = OSK_ROWS[S.r][S.c];

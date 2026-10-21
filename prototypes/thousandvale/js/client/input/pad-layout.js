@@ -95,7 +95,10 @@ export function createPadLayout({ api = {}, focus = null, osk = null, run = null
   chatInput?.addEventListener('focus', () => chatOpen(true));
   chatInput?.addEventListener('blur', () => setTimeout(() => { if (!(osk?.isOpen && osk.input === chatInput)) chatOpen(false); }, 0));
   // B on the on-screen keyboard puts the chat away too (otherwise the box keeps the focus and the pad drives nothing)
-  if (osk?.root && typeof MutationObserver !== 'undefined') new MutationObserver(() => { if (osk.root.hidden && document.activeElement === chatInput) chatInput.blur(); if (osk.root.hidden && document.activeElement !== chatInput) chatOpen(false); }).observe(osk.root, { attributes: true, attributeFilter: ['hidden'] });
+  // Only when it really went from open to shut: on a phone the first letter typed counts as 'keyboard', which asks the
+  // (never opened) on-screen keyboard to close, and blurring the box then dropped the phone's own keyboard mid-word.
+  let oskWasOpen = !!osk?.isOpen;
+  if (osk?.root && typeof MutationObserver !== 'undefined') new MutationObserver(() => { const shut = osk.root.hidden, was = oskWasOpen; oskWasOpen = !shut; if (!shut || !was) return; if (document.activeElement === chatInput) chatInput.blur(); else chatOpen(false); }).observe(osk.root, { attributes: true, attributeFilter: ['hidden'] });
 
   // ------------------------------------------------------------------ the one-line tracker
   const keep = !html.dataset.gallery;      // the gallery's frames start every scene folded

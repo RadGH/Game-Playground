@@ -57,6 +57,7 @@ export function installInput(api = {}) {
     pause: () => (out.layout === 'pad' ? padLayout.toggle() : api.pause?.()),
     hudInfo: () => (out.layout === 'phone' ? document.querySelector('.ph-info')?.click() : padLayout.toggleInfo()),
     radial: () => radial.open({ hold: false }),
+    fish: () => api.fish?.(),      // 2026-10-21: X had cast nothing since fishing moved to fishing spots (main.js fishAction)
     chat: () => { if (out.layout === 'pad') padLayout.chatOpen(true);      // the folded chat's box is display:none — unfold it first or it cannot take the focus
       api.chat?.(); if (device.current === 'pad') setTimeout(() => { const i = document.getElementById('chat-input'); if (i) osk.open(i); }, 30); },
   };

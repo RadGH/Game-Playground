@@ -18,3 +18,11 @@ prototypes/thousandvale/tests/G/shots/
 
 # CPU profiles from perf hunts
 *.cpuprofile
+
+# Test screenshots stay on this machine (2026-10-21): 2,778 versions of them were
+# 1.2 GB of the GitHub upload. Spec outputs (.json, .txt) are still committed.
+**/tests/**/shots/**/*.png
+**/tests/**/shots/**/*.jpg
+**/tests/**/shots/**/*.jpeg
+**/tests/**/shots/**/*.webp
+**/tests/**/shots/**/*.cpuprofile

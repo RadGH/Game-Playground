@@ -30,11 +30,13 @@ export function initTitleLite({ S, account, ui2, ui5, startNet, races, raceNames
     for (const id of STARTERS.filter(id => classes.some(c => c.id === id))) {
       const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.role = 'radio'; b.dataset.cls = id; b.textContent = name(id);
       b.onclick = () => { S.cls = id; refresh(); };
-      $('classes').appendChild(b);
+      $('classes')?.appendChild(b);
     }
-    const more = $('class-more');
-    more.innerHTML = '<option value="">More callings…</option>' + classes.filter(c => !STARTERS.includes(c.id)).map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-    more.onchange = () => { if (more.value) { S.cls = more.value; refresh(); } };
+    const more = $('class-more');      // gone from index.html since the calling picker (feedback #98, ui/calling-picker.js owns #classes)
+    if (more) {
+      more.innerHTML = '<option value="">More callings…</option>' + classes.filter(c => !STARTERS.includes(c.id)).map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      more.onchange = () => { if (more.value) { S.cls = more.value; refresh(); } };
+    }
     refresh();
   });
   $('build-tag').textContent = 'client gallery · recorded data';

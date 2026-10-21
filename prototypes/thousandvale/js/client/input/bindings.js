@@ -83,7 +83,7 @@ export const ACTIONS = [
   // ---- world
   { id: 'interact', group: 'World', label: 'Use, talk, open, loot a body — in a loot window: take the selected item', key: 'KeyE', pad: pad('A', false, 'when a prompt shows'), ctx: 'prompt', touch: 'Tap the prompt' },
   { id: 'camp', group: 'World', label: 'Make camp (wilds)', key: 'KeyC', pad: pad('RB', true), touch: 'Quick wheel: Camp' },
-  { id: 'fish', group: 'World', label: 'Cast a line / reel in (at a fishing spot)', key: 'KeyX', pad: pad('A', true), touch: 'The “Fish here” prompt at a fishing spot, or the quick wheel' },
+  { id: 'fish', group: 'World', label: 'Cast a line / reel in (at a fishing spot)', key: 'KeyX', run: 'fish', pad: pad('A', true), touch: 'The “Fish here” prompt at a fishing spot, or the quick wheel' },
   { id: 'hook', group: 'World', label: 'Hook a bite; hold to reel during the tug', key: 'Space', shares: 'jump', pad: pad('A', false, 'while fishing'), ctx: 'fishing', touch: 'The Hook / Reel button (replaces Attack)' },
   // W9 (P-client): the profession mini-games (js/client/ui/prof-minigame.js). ctx 'prof' = only while a mini-game is on screen
   { id: 'profWork', group: 'World', label: 'Mini-game: work (strike, pick, stop — hold to lift the knife)', key: 'Space', shares: 'jump', pad: pad('A', false, 'in a mini-game'), ctx: 'prof', touch: 'Tap the mini-game panel' },

@@ -32,7 +32,14 @@ const profiles = createProfiles({ initial, cosmetics: data.cosmetics, cleanLook,
 const hub = createHub({ data, profiles, build, log: (what, d) => console.log(new Date().toISOString(), what, JSON.stringify(d)) });
 
 const feedback = createFeedback(dataDir, { build });
-const ipOf = req => { const peer = req.socket.remoteAddress || '', loop = /^(127\.0\.0\.1|::1|::ffff:127\.0\.0\.1)$/.test(peer); return loop && req.headers['cf-connecting-ip'] ? String(req.headers['cf-connecting-ip']) : peer; };
+// The visitor's address: behind a proxy on this machine (Caddy on the games.radgh.com droplet sends X-Forwarded-For; the old
+// Cloudflare tunnel sent CF-Connecting-IP) every peer is loopback, so the proxy's header is believed — but only from loopback
+const ipOf = req => {
+  const peer = req.socket.remoteAddress || '', loop = /^(127\.0\.0\.1|::1|::ffff:127\.0\.0\.1)$/.test(peer);
+  if (!loop) return peer;
+  const fwd = req.headers['cf-connecting-ip'] || String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+  return fwd ? String(fwd) : peer;
+};
 const serveStatic = createStaticHandler(publicDir ? resolve(publicDir) : PLAY, { allowAll: !!publicDir });
 const started = Date.now();
 const server = http.createServer((req, res) => {
@@ -49,8 +56,7 @@ server.on('upgrade', (req, socket, head) => {
   if (req.url.split('?')[0] !== '/ws') { socket.destroy(); return; }
   const origin = req.headers.origin;
   if (origin) { let ok = false; try { ok = new URL(origin).host === req.headers.host; } catch { /* bad origin */ } if (!ok) { socket.write('HTTP/1.1 403 Forbidden\r\n\r\n'); socket.destroy(); return; } }
-  const peer = req.socket.remoteAddress || '', loop = peer === '127.0.0.1' || peer === '::1' || peer === '::ffff:127.0.0.1';
-  const ip = loop && req.headers['cf-connecting-ip'] ? String(req.headers['cf-connecting-ip']) : peer;   // behind the tunnel every peer is loopback
+  const ip = ipOf(req);
   if ((perIp.get(ip) || 0) >= MAX_PER_IP) { socket.write('HTTP/1.1 429 Too Many Requests\r\n\r\n'); socket.destroy(); return; }
   wss.handleUpgrade(req, socket, head, ws => {
     perIp.set(ip, (perIp.get(ip) || 0) + 1);

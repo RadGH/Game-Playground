@@ -4,11 +4,13 @@
 //   node tools/feedback-report.mjs --env stable --html <file.html>           a page with the pictures (put it somewhere git-ignored)
 //   node tools/feedback-report.mjs --env stable --mark 3,4 --state done --note "what was done"
 // Reports live in ~/.local/share/tumblefair/<env>/feedback/<id>.json (+ <id>.jpg). No sudo needed.
+//   node tools/feedback-report.mjs --dir /var/lib/tumblefair                 the public server's (on the droplet, as root)
 import { readdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
 const arg = (n, d) => { const i = process.argv.indexOf('--' + n); return i > 0 ? process.argv[i + 1] : d; };
-const env = arg('env', 'stable'), dir = join(homedir(), '.local/share/tumblefair', env, 'feedback');
+// --dir <data dir>: another server's data folder (the games.radgh.com droplet keeps it in /var/lib/tumblefair)
+const env = arg('env', 'stable'), dir = arg('dir', null) ? join(arg('dir', null), 'feedback') : join(homedir(), '.local/share/tumblefair', env, 'feedback');
 if (!existsSync(dir)) { console.log(`no reports yet (${dir})`); process.exit(0); }
 const all = readdirSync(dir).filter(f => f.endsWith('.json')).map(f => JSON.parse(readFileSync(join(dir, f), 'utf8'))).sort((a, b) => a.id - b.id);
 const mark = arg('mark', null);

@@ -5,8 +5,8 @@
     "updated": "2026-10-14"
   },
   "tumblefair": {
-    "url": "https://seems-glen-produces-occasional.trycloudflare.com/",
-    "note": "Cloudflare quick tunnel to Tumblefair's stable server (:8480) — the address changes when the tunnel restarts (prototypes/tumblefair/ops/install.sh --url)",
-    "updated": "2026-10-13"
+    "url": "https://tumblefair.games.radgh.com/",
+    "note": "Hosted on games.radgh.com (our own server). Send a room link: https://tumblefair.games.radgh.com/prototypes/tumblefair/?code=ABCD",
+    "updated": "2026-10-20"
   }
 }

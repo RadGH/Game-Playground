@@ -68,6 +68,8 @@ input[type=text], input:not([type]) { user-select: text; -webkit-user-select: te
 .join-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
 .join-row input { text-transform: uppercase; letter-spacing: 6px; text-align: center; }
 .title-panel .row .btn { flex: 1; }
+.title-panel.invite h2 { margin: 0; text-align: center; }
+.title-panel.invite .note { margin: 0; text-align: center; }
 .check { font-size: 14px; display: flex; gap: 8px; align-items: center; }
 .check input { width: 20px; height: 20px; }
 .foot { margin: 0; color: #cfe6ea; font-size: 13px; text-align: center; }

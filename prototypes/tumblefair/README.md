@@ -6,9 +6,18 @@ minigame, play it, collect tickets, buy prize ribbons — most ribbons after the
 join as **the big screen** and just watch. Built 2026-10-13 from the owner's design document (saved in
 `~/claude/agent/partygame/design-brainstorm-gdoc.txt`) and reference picture.
 
-- **Play (LAN, stable):** `http://<LAN-IP>:8480/` · **dev (working tree):** `:8483` · **public link:** `ops/install.sh --url`
+- **Play (public):** https://tumblefair.games.radgh.com/ — on the games.radgh.com droplet (2026-10-20; it replaced the
+  Cloudflare quick tunnel). **LAN, stable:** `http://<LAN-IP>:8480/` · **dev (working tree):** `:8483`
+- **Invite link:** the lobby's QR code and "Copy invite link" give `…/prototypes/tumblefair/?code=ABCD`. Opening it joins
+  that room at once; a phone that has never made a character is first asked for a name and a look ("You're invited!",
+  `js/client/main.js` showTitle), then one tap joins. Profiles are per browser (a token in localStorage), so the public
+  server's players start fresh — nothing carries over from the old tunnel address.
   (a Cloudflare quick tunnel; recorded in the playground's `data/live-links.json` under `tumblefair`)
-- **Publish:** commit, then `tools/publish-tumblefair.sh`
+- **Publish:** commit, then `tools/publish-tumblefair.sh` (the LAN copy on :8480). **Public:** the playground's
+  `tools/publish-stable.sh` + `tools/publish-pages.sh` (puts the commit in the gh-pages snapshot), then
+  `cd ~/claude/rads-game-server && tools/deploy.sh update tumblefair` (production: only when the owner asks). A restart
+  ends the rooms in progress (they live in memory). Bug reports from the public server: `ssh rgs` and
+  `cd /srv/tumblefair/current/app/prototypes/tumblefair && /opt/rgs/node/bin/node tools/feedback-report.mjs --dir /var/lib/tumblefair`
 - Minigame contract: **`docs/MINIGAMES.md`** — read it before adding a game.
 
 ## What it tests

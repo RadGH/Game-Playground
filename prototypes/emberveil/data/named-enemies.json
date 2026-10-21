@@ -207,7 +207,7 @@
    ],
    "look": {
     "race": "human",
-    "extras": "soot",
+    "extras": "dirt",
     "hat": "wide_brim"
    },
    "lore": "Sells the water. Charges in blood."
@@ -224,7 +224,7 @@
    ],
    "look": {
     "race": "undead",
-    "extras": "soot",
+    "extras": "dirt",
     "hat": "hood"
    },
    "lore": "Married into the Cinderborn. Never left the altar."

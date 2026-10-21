@@ -610,9 +610,8 @@ export function buildAccessory(a, c) {
 // ---------------------------------------------------------------- face and body marks
 export function buildMarks(a, c) {
   const id = a.extras.id, xc = a.extras.color, { add, head, H, W, T, faceWidth, faceDepth } = c;
-  if (id === 'soot') {
-    for (const [x, y, z, sx, sy] of [[-0.19, 0.12, 0.262, 0.08, 0.035], [0.20, 0.14, 0.26, 0.06, 0.03], [0.08, 0.43, 0.245, 0.06, 0.025]]) head(new THREE.SphereGeometry(1, 10, 6), xc, { position: [x * faceWidth, y, z * faceDepth], scale: [sx, sy, 0.008] });
-  } else if (id === 'war_stripe') {
+  // 'soot' was removed 2026-10-21 (owner); a Chibi 2.5 face PAINTS the war stripe into the skin (chibi25-face.js)
+  if (id === 'war_stripe' && !c.rig?.v25) {
     head(profile([[0.215, 0.342, 0.279], [0.29, 0.340, 0.277]], 20), xc, { scale: [faceWidth, 1, faceDepth] });
   } else if (id === 'lightning_arcs') {
     const s = lift(xc, 0.25);

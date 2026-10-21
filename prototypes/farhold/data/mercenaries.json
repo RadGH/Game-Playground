@@ -116,7 +116,7 @@
         "hair": { "id": "wavy", "color": "#8a3a20" }, "eyes": { "id": "glow", "color": "#ff9a40" },
         "top": { "id": "robe", "color": "#7a3a22", "color2": "#5a2a18" },
         "bottom": { "id": "pants", "color": "#4a2a1a" }, "shoes": { "id": "sandals", "color": "#5a4430" },
-        "extras": { "id": "soot" },
+        "extras": { "id": "dirt" },
         "held": { "id": "flame", "color": "#ff8a40" }, "decor": { "id": "ember_censer", "color": "#c06a30" }
       } }
     },

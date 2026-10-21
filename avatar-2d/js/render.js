@@ -29,9 +29,10 @@ export const DEFAULT_AVATAR = {
 
 /**
  * Ids that were REMOVED and what an old saved look gets instead (rather than the slot's default). 2026-10-21: the
- * owner dropped the eye "Glowing + light tear" (glow_tear) — an old look keeps glowing eyes.
+ * owner dropped the eye "Glowing + light tear" (glow_tear) — an old look keeps glowing eyes. Round 2 dropped the marks
+ * "Scar across the nose", "Face tattoo" and "Soot smudges": an old look shows no mark.
  */
-export const RENAMED_PARTS = { eyes: { glow_tear: 'glow' } };
+export const RENAMED_PARTS = { eyes: { glow_tear: 'glow' }, extras: { nose_scar: 'none', tattoo: 'none', soot: 'none' } };   // marks removed 2026-10-21 (owner round 2)
 
 /** Deep-merge missing fields from DEFAULT_AVATAR and drop unknown part ids (fallback to defaults). */
 export function normalizeAvatar(a = {}) {

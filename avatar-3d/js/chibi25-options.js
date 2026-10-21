@@ -43,7 +43,7 @@ export const CHIBI25_OPTIONS = {
     facialHair: slot(['none', 'stubble', 'goatee', 'mustache', 'full', 'long', 'chinstrap', 'soul_patch', 'braided_beard'],
       ['mutton_chops', 'handlebar', 'van_dyke', 'short_beard', 'forked_beard', 'sideburns'],
       { mutton_chops: 'Mutton chops', handlebar: 'Handlebar moustache', van_dyke: 'Van Dyke', short_beard: 'Short beard', forked_beard: 'Forked beard', sideburns: 'Sideburns' }),
-    extras: slot(['none', 'freckles', 'freckles_heavy', 'blush', 'scar', 'scar_cheek', 'nose_scar', 'burn_scar', 'warpaint', 'cheek_stripes', 'eye_black', 'tattoo', 'face_glyphs', 'paint_dots', 'third_eye', 'wrinkles', 'soot', 'dirt', 'mud', 'blood', 'brand', 'undead_skin'],
+    extras: slot(['none', 'freckles', 'freckles_heavy', 'blush', 'scar', 'scar_cheek', 'burn_scar', 'warpaint', 'cheek_stripes', 'eye_black', 'face_glyphs', 'paint_dots', 'third_eye', 'wrinkles', 'dirt', 'mud', 'blood', 'brand', 'undead_skin'],
       ['freckles_nose', 'beauty_mark', 'scar_brow', 'scar_lip', 'war_mask', 'chin_lines', 'tear_mark', 'star_mark', 'moon_mark', 'blush_soft'],
       { freckles_nose: 'Freckles over the nose', beauty_mark: 'Beauty mark', scar_brow: 'Scar through the brow', scar_lip: 'Scar on the lip', war_mask: 'War paint (band over the eyes)', chin_lines: 'Chin tattoo lines', tear_mark: 'Tear mark', star_mark: 'Star mark', moon_mark: 'Moon mark', blush_soft: 'Soft blush' }),
   },

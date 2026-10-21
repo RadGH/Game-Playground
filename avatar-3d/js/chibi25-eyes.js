@@ -1,5 +1,5 @@
 // Chibi 2.5 eyes at runtime (part A): blinking, idle glances and looking at a point. Only bone transforms change —
-// the eyelid bones' y scale, the pupil bones' x/y and (optionally) a small head turn — so it costs a few multiplies a
+// the eye bones' y scale (a blink squashes the eye, round 2), the eyelid bones' scale, the pupil bones' x/y and (optionally) a small head turn — so it costs a few multiplies a
 // frame per character: no geometry rebuild, no material or light change, no shader recompile.
 //
 // Used by chibi2.js's controller for a 2.5 look; the controller exposes it as:
@@ -85,9 +85,16 @@ export class EyeDriver25 {
     if (dead || anim === 'sleep') lid = 1;
     if (!spec.blinks) lid = 0;
     this.k = lid;
+    // ROUND 2 (2026-10-21): the EYE closes — its bone is squashed toward a line a third of the way down the eye (scaled,
+    // then moved so that line stays put), so a blink never shows anything outside the eye's outline and an open eye has
+    // no lid sheet over it. The eyelid bone (a child of the head) brings in the shut eye's lash line near the end.
+    const sy = 1 - 0.975 * lid, line = this.lidLine ??= (spec.sides[0].dy + spec.squashY);
+    const lash = lid < 0.5 ? 0 : clamp((lid - 0.5) / 0.4, 0, 1);
     for (const s of ['L', 'R']) {
+      const e = B['eye' + s], rest = e.userData.rest;
+      if (rest) { e.scale.y = sy; e.position.y = rest.y + line * (1 - sy); }
       const b = B['eyelid' + s]; if (!b) continue;
-      if (lid < 0.02) b.scale.setScalar(1e-4); else b.scale.set(1, lid, 1);
+      if (lash <= 0) b.scale.setScalar(1e-4); else b.scale.setScalar(lash * lash * (3 - 2 * lash));
     }
   }
 }

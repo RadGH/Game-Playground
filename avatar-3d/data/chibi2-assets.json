@@ -487,17 +487,6 @@
       ]
     },
     {
-      "id": "extras_soot",
-      "slot": "extras",
-      "variant": "soot",
-      "name": "Soot smudges",
-      "renderer": "chibi2",
-      "source": "avatar-3d/js/chibi2-gear.js",
-      "usedBy": [
-        "emberveil:runesmith"
-      ]
-    },
-    {
       "id": "extras_war_stripe",
       "slot": "extras",
       "variant": "war_stripe",

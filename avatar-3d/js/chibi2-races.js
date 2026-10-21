@@ -188,7 +188,7 @@ export const CHIBI2_RACES = {
     weights: {
       eyes: { hollow: 8, narrow: 2, tired: 2, dot: 2, glow: 3 },
       mouth: { stitched: 4, frown: 3, neutral: 2, fangs: 2, sad_open: 2 },
-      extras: { none: 4, scar: 2, soot: 2 },
+      extras: { none: 4, scar: 2, dirt: 2 },
       hair: { bald: 5, slicked: 2, long: 3, wavy: 1, hood_hair: 2, tonsure: 1 },
       facialHair: { none: 10, stubble: 1, long: 1 },
       top: { rags: 6, coat: 2, robe: 3, chainmail: 2, tunic: 1 },

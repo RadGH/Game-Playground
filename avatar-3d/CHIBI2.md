@@ -27,7 +27,7 @@ clipping, body builder options). Rules both follow:
    groups, in `js/chibi25-options.js` (`CHIBI25_OPTIONS`) — a game exposes them explicitly; nothing is added to an
    existing game's lists.
 4. **Rig.** v2 keeps its 22 bones in the same order. A 2.5 rig APPENDS bones at the end (part A: `eyelidL`,
-   `eyelidR`, children of `eyeL`/`eyeR`). Names starting `eye`/`pupil` are skipped by the clip builders. Part B
+   `eyelidR`; since 2026-10-21 round 2 children of the HEAD, at the line a blink closes to). Names starting `eye`/`pupil` are skipped by the clip builders. Part B
    appends its own after A's if it needs any, and documents them here.
 5. **Files.** Part A owns `js/chibi2-face.js` (its v2 path untouched; 2.5 goes to `js/chibi25-face.js`),
    `js/chibi25-hair.js`, `js/chibi25-options.js` (part B adds its own body lists in the same file under
@@ -310,6 +310,41 @@ Moved fixtures (deliberate, not rewritten): v2 hashes `class:oracle` (glow_tear 
 `hat:cap:spiky`, `hat:wide_brim:spiky`; `gear5-baseline.json` rows `hat:wizard/helmet/chain_coif/war_helm/wolf_helm` and
 the class looks wearing them. Tools: `chibi25-sheet.html` takes `&zoom=`, `&dy=` (camera aim) and
 `&set=path:value,...` (any base-look field; write `#` as `%23`).
+
+### Round 2 (owner, 2026-10-21, the page now builds 2.5)
+
+* **Marks removed**: `nose_scar` ("Scar across the nose"), `tattoo` ("Face tattoo"), `soot` ("Soot smudges") — out of the 2D
+  parts, `CHIBI25_OPTIONS`, both face builders and `chibi2-gear.js` `buildMarks`, Thousandvale's appearance list and the
+  library's NPC decal list. `RENAMED_PARTS.extras` (`avatar-2d/js/render.js`) maps an old saved look to `none`. Data:
+  `soot` -> `dirt` (avatar-2d presets, chibi2-presets, farhold classes + mercenaries, emberveil class-looks / enemy-looks /
+  named-enemies, library defaults, the two emberveil build tools, chibi2-races weights); `tattoo` -> `none`. The 2D
+  `dirt` is now just "Dirt".
+* **Every face mark is a DECAL cut out of the head shell** (`decal()` in `js/chibi25-face.js`), not a disc or tube in
+  front of the face. A mark is a shape (signed distance in head units: `P2.disc/stroke/poly/union/minus`); the shell's
+  own triangles under it are kept, split only where the cut line CURVES (or where a feature smaller than a triangle could
+  hide: `minEdge` = the layer's smallest feature), and clipped exactly along the edge; the pieces sit 3 mm out along the
+  skin's normals with the skin's normals, so they light as the skin does, follow the face round the jaw and lie UNDER the
+  eyes, brows and mouth (war paint and blackened eyes can no longer clip them). Straight edges are exact at any size,
+  curves are chains of short cuts, so edges are crisp (M3) for a few hundred triangles a mark. A soft mark (blush, dirt,
+  rot, burn, eye black, cheeks) is two crisp steps (45% outside, full inside). Stubble and the chinstrap are decals too
+  (round 1's painted shell was "very blurry") and stop at the front of the ear. Painting into the shell's vertex colours
+  with an adaptive mesh was tried first: crisp edges needed thousands of triangles a mark. Only the third eye is still a
+  shape, laid along the forehead's slope. Forehead marks now lie under a fringe, as skin does. `war_stripe` is painted
+  all the way round on a 2.5 face (chibi2-gear.js still builds its band for v2).
+* **Blink = the eye closes** (M5): the controller (`chibi25-eyes.js`) squashes the EYE bone toward a line a third of the
+  way down the eye (`spec.squashY`), so nothing of a blink can ever show outside the eye's outline, and an open eye has
+  no lid sheet on it (the old domed lid pulled down as a circle bigger than the eye, and a glance down left it as a thin
+  oval at the top). `eyelidL/R` are now children of the HEAD at that line (contract 4 still holds: appended after the 22
+  v2 bones) and carry only the shut eye's lash line, which grows in over the last 40% of the close. Eye bones keep their
+  rest position in `userData.rest`.
+* **One hug for every eye piece** (M6): round 1 bent the white and rim back onto the face but not the lids, lash lines or
+  iris, so from the side the lid and its line hung in front of the eye. `hug()` is now a function of position only and
+  every piece takes it (iris, pupil and highlights too), so depths relative to each other never change.
+* **Resting lids** (M4, M8: angry, sleepy, tired, hooded, droopy): a grid over the eye's own outline (tilt included — a
+  tilted eye's corner used to come out above the half-disc lid) from the lid's edge up, reaching 20% past the outline,
+  in the exact skin colour with the skin's normals; high only over the white and iris, down to the rim at the outline and
+  to the skin at its outer edge — the face folding over the eye, no disc, no step, no darker rim.
+* Budget: Emberveil class looks max 8,306 (warrior); stubble on the tinker costs ~330.
 
 ## Chibi 2.5 part B — the body (2026-10-16)
 

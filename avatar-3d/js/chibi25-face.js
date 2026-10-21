@@ -109,15 +109,17 @@ export function eyeSpec25(a, H) {
   if (e.top) for (let i = 0; i <= 16; i++) { const u = -1 + i / 8; maxTop = Math.max(maxTop, e.top(u) + Math.abs(tilt * u)); }
   else maxTop = 1;
   const blinks = a.eyes?.blink !== false && kind !== 'closed';
-  return { id, e, kind, rx, ry, tilt, irx, iry, icy, irisId, sides, limX, limY, pivotY: maxTop * ry * 1.14, blinks, winkR: !!e.winkR, lidded: !!e.restLid || id === 'narrow' || id === 'sharp' };
+  return { id, e, kind, rx, ry, tilt, irx, iry, icy, irisId, sides, limX, limY, pivotY: maxTop * ry * 1.14, squashY: -0.3 * ry, blinks, winkR: !!e.winkR, lidded: !!e.restLid || id === 'narrow' || id === 'sharp' };
 }
 
 /** Which eye an eyepatch covers: -1 = the character's LEFT (screen right in a front view), as the 2D picture draws it. */
 const PATCH_SIDE = -1;
 
 /**
- * Add the two eyelid bones to a 2.5 rig (children of the eye bones, at the top of each eye's outline), AFTER the 22
- * v2 bones. Called by chibi2.js `acquire()` for every actor, so a cached template's rig gets the same pivots.
+ * Add the two eyelid bones to a 2.5 rig, AFTER the 22 v2 bones. Called by chibi2.js `acquire()` for every actor, so a
+ * cached template's rig gets the same pivots. ROUND 2 (2026-10-21): a blink squashes the EYE bone (see chibi25-eyes.js),
+ * so the eyelid bones are children of the HEAD now, at the line the eye closes to (a third of the way down it), turned
+ * as the eye is; they carry the shut eye's lash line only. Each eye bone keeps its rest position in `userData.rest`.
  */
 export function addEyelids(rig, a) {
   const H = rig.headScale, spec = eyeSpec25(a, H);
@@ -136,10 +138,12 @@ export function addEyelids(rig, a) {
   rig.byName.eyeR.rotation.y = yaw; rig.byName.eyeL.rotation.y = -yaw; rig.eyeYaw = yaw;
   for (const [side, i] of [['L', 0], ['R', 1]]) {
     const b = new THREE.Bone(); b.name = 'eyelid' + side;
-    const { dx, dy } = spec.sides[i];
-    b.position.set(dx, dy + spec.pivotY, 0);
+    const { dx, dy } = spec.sides[i], eye = rig.byName['eye' + side];
+    eye.userData.rest = eye.position.clone();
+    b.rotation.copy(eye.rotation);
+    b.position.copy(eye.position).add(new THREE.Vector3(dx, dy + spec.squashY, 0).applyEuler(eye.rotation));
     b.userData.index = rig.bones.length; rig.bones.push(b); rig.byName[b.name] = b;
-    rig.byName['eye' + side].add(b);
+    rig.byName.head.add(b);
     b.scale.set(1, 1, 1);
   }
   rig.eyes25 = spec;
@@ -177,6 +181,106 @@ function domedSheet(pts, c, z, rings = [0.55, 0.85, 1]) {
   return g;
 }
 const flat = (shape, z, dome = () => 0) => { const g = new THREE.ShapeGeometry(shape, 2), p = g.attributes.position; for (let i = 0; i < p.count; i++) p.setZ(i, z + dome(p.getX(i), p.getY(i))); g.computeVertexNormals(); return g; };
+
+// ------------------------------------------------------------------ PAINT (owner review round 2, 2026-10-21)
+/**
+ * Face marks, stubble and the chinstrap are PAINTED into the head shell's vertex colours instead of floating as discs
+ * and tubes over a curved face (which clipped and floated). A layer is a signed distance in head units (+ inside) with
+ * a colour, an opacity and a small anti-alias `band`; the shell is refined ONLY where a layer's edge crosses it, so an
+ * edge is crisp (a triangle a few mm wide) without paying for a fine mesh everywhere. Shape helpers below; all pure.
+ */
+export const P2 = {
+  disc: (cx, cy, r, ry = r) => (x, y) => (1 - Math.hypot((x - cx) / r, (y - cy) / ry)) * Math.min(r, ry),
+  /** a stroke along a polyline, `w` its half-width (one number, or one per point) */
+  stroke: (pts, w) => (x, y) => {
+    let best = -1e9;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const [ax, ay] = pts[i], [bx, by] = pts[i + 1], dx = bx - ax, dy = by - ay, L2 = dx * dx + dy * dy || 1e-12;
+      const t = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / L2)), d = Math.hypot(x - ax - dx * t, y - ay - dy * t);
+      const wi = Array.isArray(w) ? w[i] + (w[i + 1] - w[i]) * t : w;
+      best = Math.max(best, wi - d);
+    }
+    return best;
+  },
+  /** inside a polygon (+ distance to its nearest edge inside, - outside) */
+  poly: pts => (x, y) => {
+    let inside = false, d = 1e9;
+    for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+      const [xi, yi] = pts[i], [xj, yj] = pts[j];
+      if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) inside = !inside;
+      const dx = xj - xi, dy = yj - yi, t = Math.max(0, Math.min(1, ((x - xi) * dx + (y - yi) * dy) / (dx * dx + dy * dy || 1e-12)));
+      d = Math.min(d, Math.hypot(x - xi - dx * t, y - yi - dy * t));
+    }
+    return inside ? d : -d;
+  },
+  union: (...f) => (x, y) => Math.max(...f.map(g => g(x, y))),
+  minus: (a, b) => (x, y) => Math.min(a(x, y), -b(x, y)),
+};
+const sstep = (e0, e1, x) => { const t = clamp((x - e0) / (e1 - e0), 0, 1); return t * t * (3 - 2 * t); };
+/**
+ * A DECAL cut out of a surface (round 2): every triangle of `tris` ([pa, pb, pc, na, nb, nc], head units) that the
+ * layer covers is kept (its triangles ARE the face's facets, so the inside needs no splitting to follow the face), split finer only along a CURVED edge (or `hc` if a caller wants it) — the
+ * face), and CLIPPED exactly along the layer's edge — so a straight edge is exact at any size and a curved one is a
+ * chain of short straight cuts: crisp, with no fine mesh anywhere else. The pieces lie on the very facets the face is
+ * drawn with, `lift` out along the skin's own normals, with the skin's normals (so they light exactly as the skin
+ * does): paint on the face, not a disc in front of it. A soft layer (band > 0.003) is cut where it has faded to
+ * nothing and carries its fade in `alpha` per vertex. Pure: returns { position, normal, alpha } arrays.
+ */
+export function decal(tris, L, lift, hc = Infinity) {
+  const soft = L.band > 0.003, cut = soft ? -L.band : 0, h = L.h || 0.012;
+  const g = p => Math.min(L.shape(p[0], p[1]), (p[2] - L.zMin) * 2) - cut;
+  const P = [], N = [], A = [];
+  const mixv = (p, q, t) => [p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t, p[2] + (q[2] - p[2]) * t];
+  const nrm = n => { const l = Math.hypot(n[0], n[1], n[2]) || 1; return [n[0] / l, n[1] / l, n[2] / l]; };
+  const emit = (p, n) => { const q = nrm(n); P.push(p[0] + q[0] * lift, p[1] + q[1] * lift, p[2] + q[2] * lift); N.push(...q); A.push(soft ? L.alpha * sstep(-L.band, L.band, Math.min(L.shape(p[0], p[1]), (p[2] - L.zMin) * 2)) : L.alpha); };
+  const rec = (a, b, c, na, nb, nc, depth) => {
+    const da = g(a), db = g(b), dc = g(c), M = [(a[0] + b[0] + c[0]) / 3, (a[1] + b[1] + c[1]) / 3, (a[2] + b[2] + c[2]) / 3];
+    const R = 1.3 * Math.max(Math.hypot(a[0] - M[0], a[1] - M[1], a[2] - M[2]), Math.hypot(b[0] - M[0], b[1] - M[1], b[2] - M[2]), Math.hypot(c[0] - M[0], c[1] - M[1], c[2] - M[2]));
+    const dm = g(M);
+    if (dm < -R && da < 0 && db < 0 && dc < 0) return;                      // nowhere near the layer
+    const size = Math.max(Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]), Math.hypot(b[0] - c[0], b[1] - c[1], b[2] - c[2]), Math.hypot(c[0] - a[0], c[1] - a[1], c[2] - a[2]));
+    const inside = da > 0 && db > 0 && dc > 0 && dm - R > (soft ? 2 * L.band : 0);   // wholly in (past any fade)
+    // split only where it changes the picture: where the cut line CURVES inside the triangle (the cut is straight per
+    // triangle, so a straight edge is exact at any size), where something smaller than the triangle could hide between
+    // its corners (`h` = the layer's smallest feature), across a soft fade, and inside, just enough to bend with the face
+    const ins = [da >= 0, db >= 0, dc >= 0], allIn = ins[0] && ins[1] && ins[2], allOut = !ins[0] && !ins[1] && !ins[2];
+    const fade = soft && size > L.band * 2.5 && Math.max(da, db, dc, dm) > 0 && Math.min(da, db, dc, dm) < 2 * L.band;
+    let split;
+    if (depth >= 16) split = false;
+    else if (allIn) split = size > hc || fade || (size > h && dm < R);
+    else if (allOut) split = size > h;
+    else {
+      const V3 = [[a, da], [b, db], [c, dc]], cuts = [];
+      for (let i = 0; i < 3; i++) { const [p, dp] = V3[i], [q, dq] = V3[(i + 1) % 3]; if ((dp >= 0) !== (dq >= 0)) cuts.push(mixv(p, q, dp / (dp - dq))); }
+      const off = cuts.length === 2 ? Math.abs(g(mixv(cuts[0], cuts[1], 0.5))) : 1;
+      split = (off > (soft ? L.band * 0.3 : 0.0015) && size > 0.003) || fade || (size > h && Math.abs(dm) < R * 0.5 && off > 0.0006);
+    }
+    if (split) {
+      const ab = mixv(a, b, 0.5), bc = mixv(b, c, 0.5), ca = mixv(c, a, 0.5), nab = mixv(na, nb, 0.5), nbc = mixv(nb, nc, 0.5), nca = mixv(nc, na, 0.5);
+      rec(a, ab, ca, na, nab, nca, depth + 1); rec(ab, b, bc, nab, nb, nbc, depth + 1); rec(ca, bc, c, nca, nbc, nc, depth + 1); rec(ab, bc, ca, nab, nbc, nca, depth + 1);
+      return;
+    }
+    if (inside || (da >= 0 && db >= 0 && dc >= 0)) { emit(a, na); emit(b, nb); emit(c, nc); return; }
+    // clip to g >= 0 (Sutherland-Hodgman with one plane), then fan
+    const V = [[a, na, da], [b, nb, db], [c, nc, dc]], out = [];
+    for (let i = 0; i < 3; i++) {
+      const [p, np, dp] = V[i], [q, nq, dq] = V[(i + 1) % 3];
+      if (dp >= 0) out.push([p, np]);
+      if ((dp >= 0) !== (dq >= 0)) { const t = dp / (dp - dq); out.push([mixv(p, q, t), mixv(np, nq, t)]); }
+    }
+    for (let i = 1; i + 1 < out.length; i++) { emit(...out[0]); emit(...out[i]); emit(...out[i + 1]); }
+  };
+  for (const [a, b, c, na, nb, nc] of tris) rec(a, b, c, na, nb, nc, 0);
+  return { position: P, normal: N, alpha: A };
+}
+/** the triangles of an (indexed or not) geometry, with its normals: the source a decal is cut from */
+function trianglesOf(geo) {
+  const p = geo.attributes.position, n = geo.attributes.normal, idx = geo.index ? geo.index.array : null, out = [];
+  const V = i => [p.getX(i), p.getY(i), p.getZ(i)], Nn = i => [n.getX(i), n.getY(i), n.getZ(i)];
+  const count = idx ? idx.length : p.count;
+  for (let t = 0; t < count; t += 3) { const [a, b, c] = idx ? [idx[t], idx[t + 1], idx[t + 2]] : [t, t + 1, t + 2]; out.push([V(a), V(b), V(c), Nn(a), Nn(b), Nn(c)]); }
+  return out;
+}
 
 /**
  * Build the 2.5 face. `c` carries head() (head units, scaled by H), add(), ellipsoid(), strip(), tag() and, for the
@@ -228,10 +332,18 @@ export function buildFace25(a, rig, c) {
 
   // ---------------------------------------------------------------- the head shell
   tag('face:head');
-  // stubble and a chinstrap are PAINTED into this shell (2026-10-21, see the facial hair section); the shell is then
-  // built there, once the mouth's height is known
-  const paintedBeard = a.facialHair?.id === 'stubble' || a.facialHair?.id === 'chinstrap';
-  if (!paintedBeard) head(profile(rings, 20), skin);
+  // the shell is built LAST (see "the head shell, painted" at the end): stubble, the chinstrap, the cheeks and every face
+  // mark are paint layers pushed on the way and baked into its vertex colours (owner review round 2, 2026-10-21)
+  const paint = [];
+  // a paint layer: `sd` the shape (head units, + inside), `h` how finely a CURVED edge is followed, `band` > 0.003 a soft
+  // fade, `zMin` how far round the head it may reach (0.02: the front only)
+  // A soft layer is two crisp steps (an outer one at 45% and the full colour inside): a per-vertex fade needs vertices
+  // across the whole fade and cost thousands of triangles; two cut edges cost a few hundred.
+  const layer = (sd, colour, { alpha = 1, band = 0, minEdge = 0.012, zMin = 0.02 } = {}) => {
+    if (band <= 0.003) { paint.push({ shape: sd, colour: alpha < 1 ? mix(skin, colour, alpha) : colour, alpha: 1, band: 0, h: minEdge, zMin }); return; }
+    paint.push({ shape: (x, y) => sd(x, y) + band * 0.6, colour: mix(skin, colour, alpha * 0.45), alpha: 1, band: 0, h: minEdge, zMin });
+    paint.push({ shape: (x, y) => sd(x, y) - band * 0.4, colour: alpha < 1 ? mix(skin, colour, alpha) : colour, alpha: 1, band: 0, h: minEdge, zMin });
+  };
   if (muzzle > 0) head(sphere(), shade(skin, 0.03), { position: [0, MZ.y, MZ.z], scale: [MZ.rx, MZ.ry, MZ.rz] });
   if (face.hollow > 0.5) for (const s of [-1, 1]) dotFace(s * 0.19, 0.17, 0.07, shade(skin, -0.12), -0.004, 0.2);
 
@@ -298,10 +410,14 @@ export function buildFace25(a, rig, c) {
   };
   /**
    * HUG: bend an eye piece's outer part back onto the skin. (ox, oy) is where the geometry's origin sits in eye space,
-   * (cx, cy) the eye's centre. Inside `from` (55%) of the outline nothing moves (lids: only OUTSIDE the eye's outline, so a lid always stays in front of the iris, wherever it is looking) (the iris, which slides with the gaze, stays in
-   * front of the white); from there to the rim the piece follows the face down, so no corner stands off it.
+   * (cx, cy) the eye's centre. Inside 55% of the outline nothing moves; from there out the piece follows the face down,
+   * so no corner stands off it. ROUND 2 (owner, "lid/lash line floating off the eye" from the side): EVERY eye piece —
+   * white, rim, iris, pupil, highlights, lashes, the resting lid and its line — now takes exactly the same bend at the
+   * same point (it is a function of position only), so their depths relative to each other never change. Round 1 bent
+   * the white but not the lids, so a lid hung up to 2 cm in front of an eye that had been bent back under it.
    */
   const hug = (g, s, ox, oy, cx, cy, k = 1, from = 0.55) => {
+    k = 1; from = 0.55;   // one field for every piece (see above)
     const p = g.attributes.position;
     for (let i = 0; i < p.count; i++) {
       const x = p.getX(i) + ox, y = p.getY(i) + oy, r = Math.hypot((x - cx) / (rx * k), (y - cy) / (ry * k));
@@ -357,29 +473,32 @@ export function buildFace25(a, rig, c) {
         add(flat(shape2d('round', rx * 0.55, ry * 0.55), Z.iris), pupil, mix(irisColour, '#000000', 0.35), { position: [dx, dy - ry * 0.05, 0] });
       } else {
         const iy = dy + spec.icy;
+        // the iris, pupil and highlights take the same bend as the white at rest (round 2), so a resting lid's edge and the
+        // lash line always sit in front of them
+        const addP = (g, colour, px, py) => add(hug(g, s, px, py, dx, dy), pupil, colour, { position: [px, py, 0] });
         if (spec.irisId !== 'none') {
           if (E.irisRim) {
             // a darker rim round the iris (the reference picture's iris): the dark disc, then the iris 12% smaller over it
-            add(flat(shape2d('round', spec.irx, spec.iry), Z.iris - 0.0006 * H), pupil, mix(irisColour, '#0c1418', 0.55), { position: [dx, iy, 0] });
-            add(flat(shape2d('round', spec.irx * 0.86, spec.iry * 0.86), Z.iris), pupil, irisColour, { position: [dx, iy, 0] });
-          } else add(flat(shape2d('round', spec.irx, spec.iry), Z.iris), pupil, irisColour, { position: [dx, iy, 0] });
-          if (spec.irisId === 'ring') add(flat(shape2d('ring', spec.irx * 1.0, spec.iry * 1.0), Z.iris + 0.0012 * H), pupil, shade(irisColour, -0.35), { position: [dx, iy, 0] });
-          else add(flat(shape2d('round', spec.irx * 0.7, spec.iry * 0.45), Z.iris + 0.0008 * H), pupil, mix(irisColour, '#ffffff', 0.25), { position: [dx, iy - spec.iry * 0.4, 0] });   // the lit lower half, a cartoon iris
+            addP(flat(shape2d('round', spec.irx, spec.iry), Z.iris - 0.0006 * H), mix(irisColour, '#0c1418', 0.55), dx, iy);
+            addP(flat(shape2d('round', spec.irx * 0.86, spec.iry * 0.86), Z.iris), irisColour, dx, iy);
+          } else addP(flat(shape2d('round', spec.irx, spec.iry), Z.iris), irisColour, dx, iy);
+          if (spec.irisId === 'ring') addP(flat(shape2d('ring', spec.irx * 1.0, spec.iry * 1.0), Z.iris + 0.0012 * H), shade(irisColour, -0.35), dx, iy);
+          else addP(flat(shape2d('round', spec.irx * 0.7, spec.iry * 0.45), Z.iris + 0.0008 * H), mix(irisColour, '#ffffff', 0.25), dx, iy - spec.iry * 0.4);   // the lit lower half, a cartoon iris
         }
         const pk = spec.irisId === 'none' ? [0.9, 0.9] : [0.52, 0.6];
         if (pupilId !== 'none') {
           const pr = pupilId === 'dot' ? 0.5 : pupilId === 'slit' ? 1.0 : 1;
-          add(flat(shape2d(pupilId, Math.max(spec.irx, rx * 0.45) * pk[0] * pr * (pupilId === 'dot' ? 0.6 : 1), Math.max(spec.iry, ry * 0.45) * pk[1] * pr * (pupilId === 'dot' ? 0.6 : 1) * (pupilId === 'slit' ? 1.15 : 1)), Z.pupil), pupil, pupilId === 'heart' ? '#c8304a' : '#17272c', { position: [dx, iy + 0.003 * H, 0] });
+          addP(flat(shape2d(pupilId, Math.max(spec.irx, rx * 0.45) * pk[0] * pr * (pupilId === 'dot' ? 0.6 : 1), Math.max(spec.iry, ry * 0.45) * pk[1] * pr * (pupilId === 'dot' ? 0.6 : 1) * (pupilId === 'slit' ? 1.15 : 1)), Z.pupil), pupilId === 'heart' ? '#c8304a' : '#17272c', dx, iy + 0.003 * H);
         }
         // highlights: under a resting lid they sit lower so they never show above the lid's edge
         const hy = E.restLid ? -0.15 : 0.32, shine = '#ffffff';
         if (E.highlight === 'star') {
-          add(flat(shape2d('star', 0.03 * H, 0.03 * H), Z.shine), pupil, shine, { position: [dx - s * spec.irx * 0.3, iy + spec.iry * hy, 0] });
-          add(flat(shape2d('star', 0.014 * H, 0.014 * H), Z.shine), pupil, shine, { position: [dx + s * spec.irx * 0.42, iy + spec.iry * 0.5, 0] });   // a second, smaller twinkle
-        } else if (spec.irisId === 'story') add(flat(shape2d('round', 0.024 * H, 0.03 * H), Z.shine), pupil, shine, { position: [dx - s * spec.irx * 0.3, iy + spec.iry * 0.36, 0] });
-        else add(flat(shape2d('round', 0.014 * H, 0.017 * H), Z.shine), pupil, shine, { position: [dx - s * spec.irx * 0.32, iy + spec.iry * hy, 0] });
-        if (E.highlight === 2 || E.highlight === 'star') add(flat(shape2d('round', 0.007 * H, 0.008 * H), Z.shine), pupil, shine, { position: [dx + s * spec.irx * 0.35, iy - spec.iry * 0.35, 0] });
-        if (spec.id === 'button') add(flat(shape2d('round', 0.008 * H, 0.008 * H), Z.shine), pupil, shine, { position: [dx + s * rx * 0.3, dy - ry * 0.35, 0] });
+          addP(flat(shape2d('star', 0.03 * H, 0.03 * H), Z.shine), shine, dx - s * spec.irx * 0.3, iy + spec.iry * hy);
+          addP(flat(shape2d('star', 0.014 * H, 0.014 * H), Z.shine), shine, dx + s * spec.irx * 0.42, iy + spec.iry * 0.5);   // a second, smaller twinkle
+        } else if (spec.irisId === 'story') addP(flat(shape2d('round', 0.024 * H, 0.03 * H), Z.shine), shine, dx - s * spec.irx * 0.3, iy + spec.iry * 0.36);
+        else addP(flat(shape2d('round', 0.014 * H, 0.017 * H), Z.shine), shine, dx - s * spec.irx * 0.32, iy + spec.iry * hy);
+        if (E.highlight === 2 || E.highlight === 'star') addP(flat(shape2d('round', 0.007 * H, 0.008 * H), Z.shine), shine, dx + s * spec.irx * 0.35, iy - spec.iry * 0.35);
+        if (spec.id === 'button') addP(flat(shape2d('round', 0.008 * H, 0.008 * H), Z.shine), shine, dx + s * rx * 0.3, dy - ry * 0.35);
       }
     }
     // ---- lashes: on the outline's top edge, lifted to the lid level so the iris never covers them
@@ -413,40 +532,54 @@ export function buildFace25(a, rig, c) {
       const u = s * (0.35 + k * 0.25), x = dx + u * rx * 1.08, y = dy + E.bot(u) * ry * 1.08;
       add(hug(taperedCurve([[x, y, Z.white + 0.004 * H], [x + s * 0.008 * H, y - 0.018 * H, Z.white + 0.004 * H]], [0.004 * H, 0.001 * H], 3, 2), s, 0, 0, dx, dy), eye, lash);
     }
-    // ---- the resting lids of the lidded shapes (sleepy, tired, angry, hooded): a sheet over the eye's dome above a curve
+    // ---- the resting lids of the lidded shapes (sleepy, tired, angry, hooded, droopy)
+    /**
+     * ROUND 2 (owner: angry's lid "a separate disc standing off the face with a darker rim"; droopy "see through the top
+     * of the eyelid at the eye underneath"). The lid was a half-disc 12% wider than the eye, at the lash's depth (4 cm in
+     * front of the skin) all the way to its edge, ignoring the eye's tilt (so a tilted eye's corner came out above it),
+     * and coloured a shade off the skin. Now it is a grid over the eye's own outline (tilt included) from the lid's edge
+     * up, reaching 20% past the outline over the skin, in the skin's own colour and the skin's normals; it is high only
+     * where it covers the white and iris and comes down to the rim and then to the skin at its outer edge, so it reads as
+     * the face folding over the eye: no disc, no step, no rim.
+     */
     if (E.restLid) {
-      const lrx = rx * 1.12, lry = ry * 1.12, N = 14, pts = [], edgePts = [];
-      const edge = u => { const lim = ell(u); return Math.max(-lim, Math.min(lim, E.restLid(u, s))); };
-      for (let i = 0; i <= N; i++) { const t = i / N * Math.PI, u = Math.cos(t), v = Math.sin(t); if (v >= edge(u)) pts.push([u, v]); }
-      for (let i = 0; i <= N; i++) { const u = -1 + 2 * i / N; edgePts.push([u, edge(u)]); }
-      const poly = [];
-      for (const q of [...pts, ...edgePts]) { const last = poly[poly.length - 1]; if (!last || Math.hypot(q[0] - last[0], q[1] - last[1]) > 1e-3) poly.push(q); }
-      if (poly.length > 2 && Math.hypot(poly[0][0] - poly[poly.length - 1][0], poly[0][1] - poly[poly.length - 1][1]) < 1e-3) poly.pop();
-      const lidZ = (x, y) => Z.lid - 0.004 * H + 0.006 * H * Math.sqrt(Math.max(0, 1 - (x / lrx) ** 2 - (y / lry) ** 2));
-      add(hug(ringSheet(poly.map(([u, v]) => [u * lrx, v * lry]), lidZ), s, dx, dy, dx, dy, 1, 1), eye, lidColour, { position: [dx, dy, 0] });
-      const line = edgePts.filter(([u, v]) => Math.abs(v) < ell(u) - 0.01 || Math.abs(u) < 0.95);
-      if (line.length > 2) add(hug(taperedCurve(line.map(([u, v]) => [dx + u * lrx, dy + v * lry, lidZ(u * lrx, v * lry) + 0.003 * H]), [0.004 * H, 0.008 * H, 0.004 * H], 4, 12), s, 0, 0, dx, dy, 1, 1), eye, lash);
-      if (E.crease) add(hug(taperedCurve([-0.9, -0.3, 0.3, 0.9].map(u => [dx + u * lrx, dy + lry * 1.06 + (1 - u * u) * 0.01 * H, Z.lid]), [0.002 * H, 0.004 * H, 0.004 * H, 0.002 * H], 3, 8), s, 0, 0, dx, dy, 1, 1), eye, shade(skin, -0.16));
+      const K = 1.2, NC = 18, NR = 5, top = u => (E.top(u) + tilt * u * s) * ry, bot = u => (E.bot(u) + tilt * u * s) * ry;
+      const edgeAt = u => (Math.max(E.bot(u), Math.min(E.top(u), E.restLid(u, s))) + tilt * u * s) * ry;
+      const yTop = x => top(x / (rx * K)) * K;
+      const yEdge = x => { const u = x / rx; if (Math.abs(u) <= 1) return Math.min(edgeAt(u), yTop(x)); const e1 = edgeAt(Math.sign(u)), t = (Math.abs(u) - 1) / (K - 1); return e1 + (yTop(x) - e1) * t; };
+      const rr = (x, y) => Math.hypot(x / rx, (y - tilt * clamp(x / rx, -1, 1) * s * ry) / (ry * (y > 0 ? Math.max(0.3, E.top(0)) : 1)));   // measured against the eye's own (tilted) outline
+      const lidZ = (x, y) => {
+        // high over the iris, still above the white's edge (and the rim) out to the rim's own edge at 1.1, then down to the skin
+        const r = rr(x, y), hi = Z.lid - 0.004 * H, rim = Z.white + 0.007 * H;
+        if (r <= 0.8) return hi;
+        if (r <= 1.1) return rim + (hi - rim) * (1 - sstep(0.8, 1.1, r));
+        return rim + (0.002 * H - rim) * sstep(1.1, K, r);
+      };
+      const P = [], I = [];
+      for (let i = 0; i <= NC; i++) { const x = (-1 + 2 * i / NC) * rx * K, y0 = yEdge(x), y1 = yTop(x); for (let j = 0; j <= NR; j++) { const y = y0 + (y1 - y0) * j / NR; P.push(x, y, lidZ(x, y)); } }
+      for (let i = 0; i < NC; i++) for (let j = 0; j < NR; j++) { const q = i * (NR + 1) + j, w = q + NR + 1; I.push(q, w, w + 1, q, w + 1, q + 1); }
+      const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setIndex(I);
+      // face +z whichever way the grid ran
+      g.computeVertexNormals(); if (g.attributes.normal.getZ(Math.floor(P.length / 6)) < 0) { for (let t = 0; t < I.length; t += 3) [I[t + 1], I[t + 2]] = [I[t + 2], I[t + 1]]; g.setIndex(I); }
+      g.userData.keepNormals = true;
+      add(skinNormals(hug(g, s, dx, dy, dx, dy), s, dx, dy), eye, skin, { position: [dx, dy, 0] });
+      const line = []; for (let i = 0; i <= 14; i++) { const u = -0.97 + 1.94 * i / 14, x = u * rx, y = edgeAt(u); if (y < top(u) - 0.004 * ry) line.push([dx + x, dy + y, lidZ(x, y) + 0.003 * H]); }
+      if (line.length > 2) add(hug(taperedCurve(line, [0.004 * H, 0.008 * H, 0.004 * H], 4, 12), s, 0, 0, dx, dy), eye, lash);
+      if (E.crease) add(hug(taperedCurve([-0.9, -0.3, 0.3, 0.9].map(u => [dx + u * rx * 1.08, dy + top(u) * 1.1 + 0.012 * H, 0.004 * H]), [0.002 * H, 0.004 * H, 0.004 * H, 0.002 * H], 3, 8), s, 0, 0, dx, dy), eye, shade(skin, -0.16));
     }
     if (E.bags) {
       const hx = eyeBone.x * s + dx, hy = eyeBone.y + dy - ry * 1.35;
       onFace([[hx - s * rx * 0.7, hy + ry * 0.1], [hx, hy - ry * 0.08], [hx + s * rx * 0.6, hy + ry * 0.12]].map(([x, y]) => [x / H, y / H]), [0.002, 0.004, 0.002], shade(skin, -0.14));
     }
-    // ---- THE BLINK LID: the eye's own outline, closed, hung from the eyelid bone at the top of the eye.
-    if (spec.blinks && E.top) {
-      // a touch bigger than the rim (1.1) and in front of the top lash, so a shut eye shows only skin and its lash line
-      const k = 1.2, pts = outline(k).map(([x, y]) => [x, y - spec.pivotY]);
-      // domed like an eyelid: well in front of the iris in the middle, back down to the face at the rim (a flat sheet at
-      // one depth stood out from the face like a goggle lens in three-quarter view)
-      const lz = (x, y) => { const r2 = (x / (rx * k)) ** 2 + ((y + spec.pivotY) / (ry * k)) ** 2; return 0.014 * H + 0.036 * H * Math.sqrt(Math.max(0, 1 - r2 * r2)); };
-      const lidSheet = domedSheet(pts, [0, -spec.pivotY], lz); lidSheet.userData.keepNormals = true;
-      add(skinNormals(hug(lidSheet, s, dx, dy + spec.pivotY, dx, dy, 1, 1), s, dx, dy + spec.pivotY), lidBone, lidColour, { position: [0, 0, 0] });
-      const N = 14, bottom = Array.from({ length: N + 1 }, (_, i) => { const u = -1 + 2 * i / N; const x = u * rx * k * 0.96, y = (E.bot(u) + tilt * u * s) * ry * k * 0.96 - spec.pivotY; return [x, y, lz(x, y) + 0.002 * H]; });
-      add(hug(taperedCurve(bottom.filter((_, i) => i > 0 && i < N), [0.004 * H, 0.009 * H, 0.009 * H, 0.004 * H], 4, 12), s, dx, dy + spec.pivotY, dx, dy, 1, 1), lidBone, lash);
-    } else if (spec.blinks && spec.kind !== 'closed') {
-      // dot and glow eyes: an elliptic lid
-      const k = 1.15, eRy = ry * k, pts = Array.from({ length: 16 }, (_, i) => { const t = i / 16 * Math.PI * 2; return [Math.cos(t) * rx * k, Math.sin(t) * eRy - spec.pivotY]; });
-      add(skinNormals(flat(shapeOf(pts), Z.lid + 0.006 * H), s, dx, dy + spec.pivotY), lidBone, lidColour);
+    // ---- THE BLINK (round 2). The eye itself closes: the controller squashes the EYE bone toward a line a third of the way
+    // down the eye (chibi25-eyes.js), so nothing of a blink can ever show outside the eye's own outline and there is no
+    // lid sheet waiting at the top of an open eye (the old domed lid made a thin oval there, and pulled down as a circle
+    // bigger than the eye). The eyelid bone (a child of the head, see addEyelids) carries only the shut eye's lash line,
+    // which grows in over the last part of the close.
+    if (spec.blinks) {
+      const pts = Array.from({ length: 9 }, (_, i) => { const u = -1 + i / 4, x = u * rx * 1.0, y = -(1 - u * u) * ry * 0.06 + tilt * u * s * ry * 0.3; return [x, y, Z.lid]; });
+      const arc = taperedCurve(pts, [0.005 * H, 0.011 * H, 0.013 * H, 0.011 * H, 0.005 * H], 4, 12);
+      add(hug(arc, s, dx, dy + spec.squashY, dx, dy), lidBone, lash, { position: [0, 0, 0] });
     }
   }
 
@@ -497,21 +630,23 @@ export function buildFace25(a, rig, c) {
   const NS = { wide: [0.075, 0.042, 0.052], snout: [0.075, 0.042, 0.052], long: [0.032, 0.08, 0.07], hook: [0.035, 0.075, 0.065], button: [0.055, 0.05, 0.052], dot: [0.026, 0.026, 0.028], upturned: [0.042, 0.044, 0.05], pointed: [0.03, 0.06, 0.085], round: [0.062, 0.058, 0.06], flat: [0.085, 0.034, 0.03] };
   const nsk = (NS[nose] || [0.041, 0.052, 0.045]).map(v => v * noseScale);
   let noseBottom = noseY - 0.03;
+  // nose pieces are added at the END, with the paint (freckles over the nose lie ON the nose)
+  const noseParts = [], headN = (g, c, o = {}) => noseParts.push([g, c, o]);
   if (nose !== 'none') {
     const nz = faceZ(0, noseY) + nsk[2] * 0.25;
     const rotX = { upturned: -0.45, hook: 0.3, pointed: -0.2, long: 0.12 }[nose] || 0;
-    if (nose === 'pointed') head(new THREE.ConeGeometry(1, 1, 6), shade(skin, -0.05), { position: [0, noseY, nz], scale: [nsk[0], nsk[2] * 1.4, nsk[1]], rotation: [Math.PI / 2 + rotX, 0, 0] });
+    if (nose === 'pointed') headN(new THREE.ConeGeometry(1, 1, 6), shade(skin, -0.05), { position: [0, noseY, nz], scale: [nsk[0], nsk[2] * 1.4, nsk[1]], rotation: [Math.PI / 2 + rotX, 0, 0] });
     else if (nose === 'hook') {
       // ONE curved piece from the bridge, out over a rounded ridge and down to a tip that hooks under (owner review
       // 2026-10-21: the hump used to be a second ball stuck on top — "the nose has a lump on top")
       const k = noseScale, z0 = faceZ(0, noseY);
-      head(taperedCurve([[0, noseY + 0.06 * k, faceZ(0, noseY + 0.06 * k) - 0.006], [0, noseY + 0.025 * k, z0 + 0.03 * k], [0, noseY - 0.012 * k, z0 + 0.05 * k], [0, noseY - 0.04 * k, z0 + 0.04 * k], [0, noseY - 0.05 * k, z0 + 0.018 * k]], [0.018 * k, 0.026 * k, 0.03 * k, 0.022 * k, 0.012 * k], 6, 10), shade(skin, -0.05));
-    } else head(sphere(), shade(skin, -0.05), { position: [0, noseY, nz], scale: nsk, rotation: [rotX, 0, 0] });
-    if (nose === 'long') head(sphere(), shade(skin, -0.03), { position: [0, noseY - nsk[1] * 0.55, nz + nsk[2] * 0.35], scale: [nsk[0] * 1.15, nsk[1] * 0.35, nsk[2] * 0.6] });   // a long nose has a tip, so it is not the hook any more
-    if (nose === 'upturned') head(sphere(), shade(skin, -0.03), { position: [0, noseY - nsk[1] * 0.3, nz + nsk[2] * 0.55], scale: [nsk[0] * 0.75, nsk[1] * 0.5, nsk[2] * 0.5], rotation: [-0.6, 0, 0] });
-    if (nose === 'snout' || muzzle > 0) for (const s of [-1, 1]) head(sphere(), '#2a2222', { position: [s * nsk[0] * 0.38, noseY - nsk[1] * 0.2, nz + nsk[2] * 0.85], scale: [0.014, 0.009, 0.008] });
-    else if (nose === 'hook') for (const s of [-1, 1]) head(sphere(), shade(skin, -0.2), { position: [s * 0.016 * noseScale, noseY - 0.04 * noseScale, faceZ(0, noseY) + 0.022 * noseScale], scale: [0.009, 0.006, 0.006] });
-    else if (nose !== 'dot') for (const s of [-1, 1]) head(sphere(), shade(skin, -0.2), { position: [s * nsk[0] * 0.42, noseY - nsk[1] * 0.45, nz + nsk[2] * (nose === 'upturned' ? 0.75 : 0.55)], scale: [0.009, 0.006, 0.005] });
+      headN(taperedCurve([[0, noseY + 0.06 * k, faceZ(0, noseY + 0.06 * k) - 0.006], [0, noseY + 0.025 * k, z0 + 0.03 * k], [0, noseY - 0.012 * k, z0 + 0.05 * k], [0, noseY - 0.04 * k, z0 + 0.04 * k], [0, noseY - 0.05 * k, z0 + 0.018 * k]], [0.018 * k, 0.026 * k, 0.03 * k, 0.022 * k, 0.012 * k], 6, 10), shade(skin, -0.05));
+    } else headN(sphere(), shade(skin, -0.05), { position: [0, noseY, nz], scale: nsk, rotation: [rotX, 0, 0] });
+    if (nose === 'long') headN(sphere(), shade(skin, -0.03), { position: [0, noseY - nsk[1] * 0.55, nz + nsk[2] * 0.35], scale: [nsk[0] * 1.15, nsk[1] * 0.35, nsk[2] * 0.6] });   // a long nose has a tip, so it is not the hook any more
+    if (nose === 'upturned') headN(sphere(), shade(skin, -0.03), { position: [0, noseY - nsk[1] * 0.3, nz + nsk[2] * 0.55], scale: [nsk[0] * 0.75, nsk[1] * 0.5, nsk[2] * 0.5], rotation: [-0.6, 0, 0] });
+    if (nose === 'snout' || muzzle > 0) for (const s of [-1, 1]) headN(sphere(), '#2a2222', { position: [s * nsk[0] * 0.38, noseY - nsk[1] * 0.2, nz + nsk[2] * 0.85], scale: [0.014, 0.009, 0.008] });
+    else if (nose === 'hook') for (const s of [-1, 1]) headN(sphere(), shade(skin, -0.2), { position: [s * 0.016 * noseScale, noseY - 0.04 * noseScale, faceZ(0, noseY) + 0.022 * noseScale], scale: [0.009, 0.006, 0.006] });
+    else if (nose !== 'dot') for (const s of [-1, 1]) headN(sphere(), shade(skin, -0.2), { position: [s * nsk[0] * 0.42, noseY - nsk[1] * 0.45, nz + nsk[2] * (nose === 'upturned' ? 0.75 : 0.55)], scale: [0.009, 0.006, 0.005] });
     noseBottom = noseY - nsk[1] * 0.85;
   }
 
@@ -544,31 +679,20 @@ export function buildFace25(a, rig, c) {
   /**
    * STUBBLE AND CHINSTRAP ARE PAINT, NOT SHEETS (owner review 2026-10-21, "overlapping shapes on the chin"). They were
    * sheets lifted 3-5 mm off the face along +z only; under the jaw the skin faces DOWN, so a +z lift is no gap at
-   * all there and the sheet z-fought the skin in flecks. A texture would need a UV set and a texture in a pipeline
-   * that has neither (every Chibi colour is a vertex colour), so the beard is painted into the head shell's own
-   * vertex colours instead: the shell is built finer (rings every 0.028 below the cheekbone, 28 sides) and each vertex
-   * takes skin, beard or a blend — one surface, nothing to fight, and the soft edge reads as stubble. Thick beards
-   * (full, short, long…) stay geometry: they have real depth.
+   * all there and the sheet z-fought the skin in flecks. Round 1 painted them into the shell's vertex colours (soft,
+   * "very blurry" — the owner); round 2 cuts them out of the shell's own facets as DECALS (see `decal()`): they lie on
+   * the face along its normals, so the jaw's underside is covered like the front, and the edge is an exact cut. Thick
+   * beards (full, short, long…) stay geometry: they have real depth.
    */
-  if (paintedBeard) {
+  if (fh === 'stubble' || fh === 'chinstrap') {
     const strap = x => Math.min(jawTop(x, 0.04, 0.27), Math.abs(x) * 0.15 + (Math.abs(x) > 0.26 ? (Math.abs(x) - 0.26) * 3 : 0));
     const lipTop = x => mouthY + 0.05 - (x / (mouthW + 0.02)) ** 2 * 0.02;
-    const soft = 0.018, ink = fh === 'stubble' ? mix(skin, beardColour, 0.42) : beardColour;
-    const paint = (X, Y) => {
-      const x = X / H, y = Y / H;
-      let t = THREE.MathUtils.clamp(((fh === 'stubble' ? jawTop(x, 0.1, 0.27) : strap(x)) - y) / soft + 0.5, 0, 1);
-      if (fh === 'stubble' && Math.abs(x) < mouthW + 0.03 && y > mouthY + 0.008) t = Math.max(t, THREE.MathUtils.clamp((lipTop(x) - y) / 0.012 + 0.5, 0, 1) * THREE.MathUtils.clamp((y - mouthY - 0.012) / 0.008 + 0.5, 0, 1) * THREE.MathUtils.clamp((mouthW + 0.03 - Math.abs(x)) / 0.012, 0, 1));
-      return t <= 0 ? null : mix(skin, ink, t);
-    };
-    const fine = [];
-    for (let i = 0; i < rings.length; i++) {
-      fine.push(rings[i]);
-      const q = rings[i + 1];
-      if (q && q[0] <= 0.26) for (let y = rings[i][0] + 0.028; y < q[0] - 0.01; y += 0.028) fine.push(ringAt(rings, y));
+    const beardZ = { zMin: 0.0 };   // up to the front of the ear, never round behind it
+    if (fh === 'chinstrap') layer((x, y) => strap(x) - y, beardColour, { minEdge: 0.03, ...beardZ });
+    else {
+      layer((x, y) => jawTop(x, 0.1, 0.27) - y, mix(skin, beardColour, 0.42), { minEdge: 0.05, ...beardZ });
+      layer((x, y) => Math.min(lipTop(x) - y, y - mouthY - 0.014, mouthW + 0.03 - Math.abs(x)), mix(skin, beardColour, 0.42), { minEdge: 0.03 });
     }
-    tag('face:head');
-    head(profile(fine, 28), skin, { colorAt: paint });
-    tag('face:beard');
   }
   if (fh === 'sideburns' || fh === 'mutton_chops') for (const s of [-1, 1]) {
     const x0 = s * 0.33, x1 = s * (fh === 'mutton_chops' ? 0.15 : 0.27);
@@ -659,63 +783,102 @@ export function buildFace25(a, rig, c) {
 
   // ---------------------------------------------------------------- cheeks
   tag('face:marks');
-  if (a.body.cheeks) for (const s of [-1, 1]) dotFace(s * 0.2, 0.14, 0.045, mix(skin, '#e06a6a', 0.25), 0.001, 0.25);
+  const { disc, stroke, poly, union, minus } = P2;
+  if (a.body.cheeks) for (const s of [-1, 1]) layer(disc(s * 0.2, 0.14, 0.05, 0.04), mix(skin, '#e06a6a', 0.25), { band: 0.014, minEdge: 0.04 });
 
   // ---------------------------------------------------------------- marks
+  /**
+   * EVERY MARK IS PAINT (owner review round 2, 2026-10-21: "flat discs on a curved surface… better if they could bake
+   * into the existing model"; war paint clipped between the eyes, blackened eyes clipped the eyes). Each mark is a
+   * paint layer on the head shell (and the nose), so it follows the face exactly and lies UNDER the eyes, brows and
+   * mouth instead of fighting them. Only the third eye stays a shape, laid along the forehead's own slope.
+   * Forehead marks now lie under a fringe like skin does. Removed in this round: nose_scar, tattoo, soot.
+   */
   const xid = a.extras.id, xc = a.extras.color || '#8a2e2e';
   const eyeLow = (eyeBone.y - ry * 1.15) / H, cheekY = Math.min(0.17, eyeLow - 0.03);
   const eyeX = s => (eyeBone.x * s + eyeInfo[s > 0 ? 1 : 0].dx) / H;
   const browY = (eyeBone.y + spec.pivotY) / H + 0.04;
-  // things on the FOREHEAD sit in front of a fringe (the hair is built after the face and pressed behind `browTop`)
   const forehead = Math.max(browTop + 0.012, 0.42);
-  if (xid === 'freckles' || xid === 'freckles_heavy') for (const s of [-1, 1]) for (let i = 0; i < (xid === 'freckles' ? 4 : 8); i++) dotFace(s * (0.1 + (i % 4) * 0.04), cheekY - 0.01 - Math.floor(i / 4) * 0.035 - (i % 2) * 0.018, 0.009, shade(skin, -0.2));
-  if (xid === 'freckles_nose') for (let i = 0; i < 9; i++) { const x = (i - 4) * 0.032, y = noseY + 0.02 - Math.abs(i - 4) * 0.006 + (i % 2) * 0.012; dotFace(x, y, 0.008, shade(skin, -0.2), Math.abs(x) < 0.04 ? 0.03 : 0.004); }
-  if (xid === 'blush' || xid === 'blush_soft') for (const s of [-1, 1]) dotFace(s * 0.2, cheekY - 0.02, xid === 'blush' ? 0.06 : 0.07, mix(skin, xid === 'blush' ? xc : '#e87a8a', xid === 'blush' ? 0.5 : 0.28), 0.001, 0.2);
-  if (xid === 'third_eye') { const y = forehead + 0.02; dotFace(0, y, 0.045, '#fff8e8', 0.02, 0.25); dotFace(0, y, 0.02, a.eyes.color, 0.026, 0.4); }
+  const scarInk = mix(skin, xc, 0.7), dots = (list, r, colour, opt) => layer(union(...list.map(([x, y, rr]) => disc(x, y, rr || r))), colour, opt);
+  if (xid === 'freckles' || xid === 'freckles_heavy') { const L = []; for (const s of [-1, 1]) for (let i = 0; i < (xid === 'freckles' ? 4 : 8); i++) L.push([s * (0.1 + (i % 4) * 0.04), cheekY - 0.01 - Math.floor(i / 4) * 0.035 - (i % 2) * 0.018]); dots(L, 0.009, shade(skin, -0.2), { minEdge: 0.009 }); }
+  if (xid === 'freckles_nose') { const L = []; for (let i = 0; i < 9; i++) L.push([(i - 4) * 0.032, noseY + 0.02 - Math.abs(i - 4) * 0.006 + (i % 2) * 0.012]); dots(L, 0.008, shade(skin, -0.2), { minEdge: 0.008 }); }
+  if (xid === 'blush' || xid === 'blush_soft') { const r = xid === 'blush' ? 0.06 : 0.07; layer(union(disc(-0.2, cheekY - 0.02, r, r * 0.75), disc(0.2, cheekY - 0.02, r, r * 0.75)), mix(skin, xid === 'blush' ? xc : '#e87a8a', xid === 'blush' ? 0.5 : 0.28), { band: xid === 'blush' ? 0.012 : 0.022, minEdge: 0.04 }); }
   if (xid === 'scar' || xid === 'scar_brow') {
     // "Scar (eye)": from above the brow, over the closed line of the lid, down the cheek — the eye itself is skipped
-    const x = eyeX(-1) + 0.02;
-    onFace([[x - 0.03, browY + 0.05], [x - 0.015, browY - 0.01]], [0.006, 0.008], mix(skin, xc, 0.7), { lift: 0.008, steps: 4 });
-    if (xid === 'scar') onFace([[x + 0.0, eyeLow - 0.005], [x + 0.012, eyeLow - 0.07], [x + 0.02, eyeLow - 0.12]], [0.008, 0.007, 0.003], mix(skin, xc, 0.7));
-    for (const t of [0.25, 0.7]) { const yy = browY + 0.05 - 0.06 * t; onFace([[x - 0.045, yy - 0.004], [x - 0.005, yy + 0.008]], 0.003, mix(skin, xc, 0.5), { lift: 0.01, steps: 2 }); }
+    const x = eyeX(-1) + 0.02, parts = [stroke([[x - 0.03, browY + 0.05], [x - 0.015, browY - 0.01]], [0.005, 0.007])];
+    if (xid === 'scar') parts.push(stroke([[x, eyeLow - 0.005], [x + 0.012, eyeLow - 0.07], [x + 0.02, eyeLow - 0.12]], [0.007, 0.006, 0.002]));
+    layer(union(...parts), scarInk, { minEdge: 0.01 });
+    layer(union(...[0.25, 0.7].map(t => { const yy = browY + 0.05 - 0.06 * t; return stroke([[x - 0.045, yy - 0.004], [x - 0.005, yy + 0.008]], 0.0026); })), mix(skin, xc, 0.5), { minEdge: 0.005 });
   }
-  if (xid === 'scar_lip') onFace([[0.025, mouthY + 0.05], [0.03, mouthY], [0.035, mouthY - 0.04]], [0.004, 0.006, 0.003], mix(skin, xc, 0.6), { lift: 0.007 });
-  if (xid === 'scar_cheek') onFace([[0.15, cheekY], [0.2, cheekY - 0.05], [0.24, cheekY - 0.1]], [0.006, 0.009, 0.004], mix(skin, xc, 0.7));
-  if (xid === 'nose_scar') { onFace([[-0.07, noseY + 0.035], [0, noseY + 0.005], [0.07, noseY - 0.025]], [0.006, 0.008, 0.006], mix(skin, xc, 0.75), { lift: 0.04, steps: 8 }); }
-  if (xid === 'burn_scar') dotFace(0.18, cheekY - 0.04, 0.07, mix(skin, '#8a3a3a', 0.35), 0.001, 0.2);
+  if (xid === 'scar_lip') layer(stroke([[0.025, mouthY + 0.05], [0.03, mouthY], [0.035, mouthY - 0.04]], [0.003, 0.005, 0.002]), mix(skin, xc, 0.6), { minEdge: 0.006 });
+  if (xid === 'scar_cheek') layer(stroke([[0.15, cheekY], [0.2, cheekY - 0.05], [0.24, cheekY - 0.1]], [0.005, 0.008, 0.003]), scarInk, { minEdge: 0.01 });
+  if (xid === 'burn_scar') {
+    // a mottled patch with a ragged edge, darker in the middle
+    const cx = 0.18, cy = cheekY - 0.04, rag = (x, y) => disc(cx, cy, 0.07, 0.056)(x, y) + 0.006 * Math.sin(Math.atan2(y - cy, x - cx) * 5 + 1);
+    layer(rag, mix(skin, '#8a3a3a', 0.3), { band: 0.004, minEdge: 0.05 }); layer(disc(cx + 0.01, cy - 0.005, 0.035, 0.028), mix(skin, '#7a2a2a', 0.42), { band: 0.008, minEdge: 0.028 });
+  }
   if (xid === 'warpaint' || xid === 'war_mask') {
-    // the 2D war paint: a band across the eyes and a line down the forehead (v2 drew cheek stripes, the same as cheek_stripes)
-    facePatch(-0.31, 0.31, eyeLow + 0.005, (eyeBone.y + spec.pivotY) / H + 0.005, xc, 0.002, (x, y) => xid === 'war_mask' || Math.abs(x) > 0.06 || y < eyeLow + 0.03, 22, 6);
-    if (xid === 'warpaint') onFace([[0, forehead + 0.07], [0, forehead - 0.01]], [0.012, 0.009], xc, { lift: 0.018 });
+    // the 2D war paint: a band across the eyes (painted UNDER the eyes and brows, so nothing between them can clip)
+    // and, for warpaint, a clear bridge over the nose and a line down the forehead
+    const top = (eyeBone.y + spec.pivotY) / H + 0.005, band = poly([[-0.31, eyeLow + 0.005], [0.31, eyeLow + 0.005], [0.31, top], [-0.31, top]]);
+    layer(xid === 'war_mask' ? band : union(minus(band, poly([[-0.06, eyeLow + 0.03], [0.06, eyeLow + 0.03], [0.06, top + 0.02], [-0.06, top + 0.02]])), stroke([[0, forehead + 0.07], [0, forehead - 0.01]], [0.011, 0.008])), xc, { minEdge: 0.016 });
   }
-  if (xid === 'cheek_stripes') for (const s of [-1, 1]) for (let k = 0; k < 3; k++) onFace([[s * 0.1, cheekY - k * 0.035], [s * 0.24, cheekY - 0.01 - k * 0.035]], 0.009, xc, { lift: 0.002 });
-  if (xid === 'eye_black') for (const { s, dx } of eyeInfo) { const cx = (eyeBone.x * s + dx) / H, cy = eyeBone.y / H; dotFace(cx, cy - 0.01, 0.12, mix(skin, '#1a1418', 0.7), -0.004, 0.1); }
-  if (xid === 'tattoo') onFace([[0.27, forehead + 0.04], [0.3, cheekY + 0.06], [0.28, cheekY - 0.02], [0.24, cheekY - 0.06]], [0.005, 0.006, 0.005, 0.003], xc, { lift: 0.004, steps: 14 });
-  if (xid === 'face_glyphs') {
-    onFace([[0, forehead + 0.05], [0, forehead - 0.01]], 0.007, xc, { lift: 0.018 }); onFace([[-0.03, forehead + 0.02], [0.03, forehead + 0.02]], 0.007, xc, { lift: 0.018 });
-    for (const s of [-1, 1]) onFace([[s * 0.22, cheekY + 0.01], [s * 0.18, cheekY - 0.03], [s * 0.22, cheekY - 0.07]], 0.006, xc, { lift: 0.003 });
+  if (xid === 'war_stripe') layer(poly([[-0.4, 0.215], [0.4, 0.215], [0.4, 0.29], [-0.4, 0.29]]), xc, { minEdge: 0.07, zMin: -1 });   // all the way round (chibi2-gear.js builds it for a v2 look)
+  if (xid === 'cheek_stripes') layer(union(...[-1, 1].flatMap(s => [0, 1, 2].map(k => stroke([[s * 0.1, cheekY - k * 0.035], [s * 0.24, cheekY - 0.01 - k * 0.035]], 0.008)))), xc, { minEdge: 0.016 });
+  if (xid === 'eye_black') for (const { s, dx, dy } of eyeInfo) {
+    // painted AROUND the eye on the skin; the eye is drawn over it, so nothing of it can come through the eye
+    const cx = (eyeBone.x * s + dx) / H, cy = (eyeBone.y + dy) / H;
+    layer(disc(cx, cy - 0.006, rx / H * 1.5, Math.max(ry, spec.pivotY) / H * 1.32), mix(skin, '#1a1418', 0.7), { band: 0.01, minEdge: 0.08 });
   }
-  if (xid === 'chin_lines') for (let k = -2; k <= 2; k++) onFace([[k * 0.025, mouthY - 0.035], [k * 0.03, -0.03]], 0.005, xc, { lift: 0.004, steps: 3 });
-  if (xid === 'paint_dots') { for (const s of [-1, 1]) for (let k = 0; k < 3; k++) { dotFace(s * (0.12 + k * 0.04), cheekY - 0.02, 0.014, xc); dotFace(s * (0.07 + k * 0.045), browY + 0.03 - k * 0.006, 0.011, xc, 0.008); } }
-  if (xid === 'dirt' || xid === 'mud') for   // soot is drawn by chibi2-gear.js buildMarks, as in v2
-  (const [x, y, r] of [[-0.19, cheekY - 0.04, 0.03], [-0.16, cheekY - 0.07, 0.02], [0.2, cheekY - 0.02, 0.028], [0.23, cheekY - 0.05, 0.018], [0.1, Math.min(0.45, forehead), 0.022], [0.13, Math.min(0.43, forehead - 0.02), 0.015]]) dotFace(x, y, r, mix(skin, xid === 'soot' ? '#222222' : '#5a4030', 0.35), y > 0.38 ? 0.012 : -0.001, 0.05);
-  if (xid === 'blood') { onFace([[0.24, cheekY + 0.08], [0.25, cheekY + 0.02], [0.24, cheekY - 0.03]], [0.012, 0.008, 0.003], '#8a1a1a', { lift: 0.002 }); for (const [x, y] of [[0.19, cheekY + 0.03], [0.2, cheekY - 0.05], [-0.18, cheekY - 0.06]]) dotFace(x, y, 0.011, '#8a1a1a'); }
-  if (xid === 'brand') { const y = forehead + 0.035; dotFace(0, y, 0.035, mix(skin, '#7a2a2a', 0.5), 0.016, 0.2); onFace([[-0.025, y], [0.025, y]], 0.004, '#5a1a1a', { lift: 0.02 }); onFace([[0, y + 0.025], [0, y - 0.025]], 0.004, '#5a1a1a', { lift: 0.02 }); }
+  if (xid === 'face_glyphs') layer(union(stroke([[0, forehead + 0.05], [0, forehead - 0.01]], 0.006), stroke([[-0.03, forehead + 0.02], [0.03, forehead + 0.02]], 0.006), ...[-1, 1].map(s => stroke([[s * 0.22, cheekY + 0.01], [s * 0.18, cheekY - 0.03], [s * 0.22, cheekY - 0.07]], 0.005))), xc, { minEdge: 0.01 });
+  if (xid === 'chin_lines') layer(union(...[-2, -1, 0, 1, 2].map(k => stroke([[k * 0.025, mouthY - 0.035], [k * 0.03, -0.03]], 0.0045))), xc, { minEdge: 0.009, zMin: -0.02 });
+  if (xid === 'paint_dots') { const L = []; for (const s of [-1, 1]) for (let k = 0; k < 3; k++) L.push([s * (0.12 + k * 0.04), cheekY - 0.02, 0.014], [s * (0.07 + k * 0.045), browY + 0.03 - k * 0.006, 0.011]); dots(L, 0.012, xc, { minEdge: 0.011 }); }
+  if (xid === 'dirt' || xid === 'mud') {
+    const smear = [[-0.19, cheekY - 0.04, 0.03], [-0.16, cheekY - 0.07, 0.02], [0.2, cheekY - 0.02, 0.028], [0.23, cheekY - 0.05, 0.018], [0.1, Math.min(0.45, forehead), 0.022], [0.13, Math.min(0.43, forehead - 0.02), 0.015]];
+    layer(union(...smear.map(([x, y, r]) => (px, py) => disc(x, y, r * 1.2, r * 0.8)(px, py) + 0.003 * Math.sin(px * 160 + py * 90))), mix(skin, xid === 'mud' ? '#4a3622' : '#5a4030', xid === 'mud' ? 0.55 : 0.4), { band: 0.005, minEdge: 0.015 });
+  }
+  if (xid === 'blood') layer(union(stroke([[0.24, cheekY + 0.08], [0.25, cheekY + 0.02], [0.24, cheekY - 0.03]], [0.01, 0.007, 0.002]), ...[[0.19, cheekY + 0.03], [0.2, cheekY - 0.05], [-0.18, cheekY - 0.06]].map(([x, y]) => disc(x, y, 0.01))), '#8a1a1a', { minEdge: 0.01 });
+  if (xid === 'brand') { const y = forehead + 0.035; layer(disc(0, y, 0.035), mix(skin, '#7a2a2a', 0.5), { band: 0.004, minEdge: 0.03 }); layer(union(stroke([[-0.025, y], [0.025, y]], 0.004), stroke([[0, y + 0.025], [0, y - 0.025]], 0.004)), '#5a1a1a', { minEdge: 0.008 }); }
   if (xid === 'wrinkles') {
-    for (let k = 0; k < 2; k++) onFace([[-0.13, forehead + 0.03 + k * 0.035], [0, forehead + 0.035 + k * 0.035], [0.13, forehead + 0.03 + k * 0.035]], 0.003, shade(skin, -0.12), { lift: 0.012 });
-    for (const { s, dx } of eyeInfo) { const x = (eyeBone.x * s + dx) / H + s * (rx / H) * 1.25, y = eyeBone.y / H; for (const d of [-0.02, 0.0, 0.02]) onFace([[x, y + d * 0.5], [x + s * 0.035, y + d * 1.5]], 0.0025, shade(skin, -0.12), { lift: 0.001, steps: 2 }); }
+    const W = shade(skin, -0.12), L = [0, 1].map(k => stroke([[-0.13, forehead + 0.03 + k * 0.035], [0, forehead + 0.035 + k * 0.035], [0.13, forehead + 0.03 + k * 0.035]], 0.0028));
+    for (const { s, dx } of eyeInfo) { const x = (eyeBone.x * s + dx) / H + s * (rx / H) * 1.25, y = eyeBone.y / H; for (const d of [-0.02, 0.0, 0.02]) L.push(stroke([[x, y + d * 0.5], [x + s * 0.035, y + d * 1.5]], 0.0024)); }
+    layer(union(...L), W, { minEdge: 0.005 });
   }
   if (xid === 'undead_skin') {
-    for (const [x, y, r] of [[-0.2, browY + 0.02, 0.05], [0.21, cheekY - 0.05, 0.055]]) dotFace(x, y, r, mix(skin, '#6a8a4a', 0.5), 0.002, 0.15);
-    for (let k = 0; k < 3; k++) onFace([[-0.04 + k * 0.03, mouthY - 0.03], [-0.04 + k * 0.03, mouthY - 0.065]], 0.004, '#3a3030', { lift: 0.004, steps: 2 });
+    layer(union(disc(-0.2, browY + 0.02, 0.05, 0.04), disc(0.21, cheekY - 0.05, 0.055, 0.045)), mix(skin, '#6a8a4a', 0.5), { band: 0.008, minEdge: 0.04 });
+    layer(union(...[0, 1, 2].map(k => stroke([[-0.04 + k * 0.03, mouthY - 0.03], [-0.04 + k * 0.03, mouthY - 0.065]], 0.0038))), '#3a3030', { minEdge: 0.0076 });
   }
-  if (xid === 'beauty_mark') dotFace(0.1, mouthY + 0.035, 0.011, '#3a2420', 0.004, 0.5);
-  if (xid === 'tear_mark') { const x = eyeX(1), y = eyeLow - 0.035; faceFill([[x, y + 0.012], [x + 0.012, y - 0.008], [x, y - 0.022], [x - 0.012, y - 0.008]], xc, 0.004); }
-  if (xid === 'star_mark' || xid === 'moon_mark') {
-    const x = 0.2, y = cheekY - 0.02, sh = xid === 'star_mark' ? shape2d('star', 0.035, 0.035) : null;
-    if (sh) { const g = new THREE.ShapeGeometry(sh, 1), p = g.attributes.position; for (let i = 0; i < p.count; i++) p.setXYZ(i, x + p.getX(i), y + p.getY(i), faceZ(x + p.getX(i), y + p.getY(i), 0.004)); g.computeVertexNormals(); head(g, xc); }
-    else { const pts = []; for (let i = 0; i <= 10; i++) { const t = -1.9 + i / 10 * 3.8; pts.push([x + Math.cos(t) * 0.032, y + Math.sin(t) * 0.032]); } for (let i = 10; i >= 0; i--) { const t = -1.6 + i / 10 * 3.2; pts.push([x + 0.012 + Math.cos(t) * 0.024, y + Math.sin(t) * 0.026]); } faceFill(pts, xc, 0.004); }
+  if (xid === 'beauty_mark') layer(disc(0.1, mouthY + 0.035, 0.0105), '#3a2420', { minEdge: 0.01 });
+  if (xid === 'tear_mark') { const x = eyeX(1), y = eyeLow - 0.035; layer(poly([[x, y + 0.012], [x + 0.012, y - 0.008], [x, y - 0.022], [x - 0.012, y - 0.008]]), xc, { minEdge: 0.01 }); }
+  if (xid === 'star_mark') { const x = 0.2, y = cheekY - 0.02; layer(poly(Array.from({ length: 10 }, (_, i) => { const t = Math.PI / 2 + i / 10 * Math.PI * 2, r = i % 2 ? 0.0158 : 0.035; return [x + Math.cos(t) * r, y + Math.sin(t) * r]; })), xc, { minEdge: 0.01 }); }
+  if (xid === 'moon_mark') { const x = 0.2, y = cheekY - 0.02; layer(minus(disc(x, y, 0.032), disc(x + 0.014, y + 0.006, 0.026)), xc, { minEdge: 0.006 }); }
+  if (xid === 'third_eye') {
+    // a SHAPE (it is an eye, not paint), laid along the forehead's own slope so its rim sits on the skin all round
+    const y = forehead + 0.02, z = faceZ(0, y), slope = (faceZ(0, y + 0.01) - faceZ(0, y - 0.01)) / 0.02, tilt = Math.atan(-slope);
+    const n = new THREE.Vector3(0, -slope, 1).normalize();
+    head(sphere(), '#fff8e8', { position: [0, y + n.y * 0.004, z + n.z * 0.004], scale: [0.045, 0.045, 0.011], rotation: [tilt, 0, 0] });
+    head(sphere(), a.eyes.color, { position: [0, y + n.y * 0.011, z + n.z * 0.011], scale: [0.02, 0.02, 0.006], rotation: [tilt, 0, 0] });
   }
+
+  // ---------------------------------------------------------------- the head shell, and the paint ON it
+  tag('face:head');
+  const shell = profile(rings, 20), shellTris = paint.length ? trianglesOf(shell) : null;
+  head(shell, skin);
+  tag('face:nose');
+  let noseTris = null;
+  for (const [g, c, o] of noseParts) { if (!noseTris && paint.length && xid === 'freckles_nose') { const m = new THREE.Matrix4().compose(new THREE.Vector3(...(o.position || [0, 0, 0])), new THREE.Quaternion().setFromEuler(new THREE.Euler(...(o.rotation || [0, 0, 0]))), new THREE.Vector3(...(o.scale || [1, 1, 1]))); const gg = g.clone(); gg.applyMatrix4(m); gg.computeVertexNormals(); noseTris = trianglesOf(gg); } head(g, c, o); }
+  tag('face:marks');
+  paint.forEach((L, k) => {
+    const lift = 0.0028 + k * 0.0009;
+    for (const src of [shellTris, noseTris]) {
+      if (!src) continue;
+      const d = decal(src, L, lift);
+      if (!d.position.length) continue;
+      const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(d.position, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(d.normal, 3));
+      const c0 = new THREE.Color(skin), c1 = new THREE.Color(L.colour), cc = new THREE.Color();
+      head(g, L.colour, L.band > 0.003 ? { colorAt: (x, y, z, i) => '#' + cc.copy(c0).lerp(c1, d.alpha[i]).getHexString() } : {});
+    }
+  });
 
   // ---------------------------------------------------------------- things worn on the face
   tag('face:worn');

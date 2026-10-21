@@ -41,7 +41,7 @@ export function lexiconEntryFor(ch) { return { id: ch.id, type: 'person', proper
 export function makeNpc(opts, deps) {
   const seed = opts.seed ?? Math.floor(Math.random() * 1e9); const rng = makeRng(seed); const role = opts.role || 'villager';
   const ch = makeCharacter({ ...opts, seed, kind: 'npc', title: opts.title || role, avatar: opts.avatar || randomAvatar(deps.avatarPresets, { race: AVATAR_RACE[opts.race] || opts.race || 'human', seed, allowBespoke: !!opts.allowBespoke }) }, deps);
-  const decals = ['none', 'none', 'freckles', 'scar', 'scar_cheek', 'dirt', 'soot', 'mud', 'paint_dots', 'blood', 'brand', 'pale', 'cheek_stripes', 'eye_black', 'burn_scar', 'nose_scar', 'freckles_heavy', 'war_stripe', 'warpaint'];
+  const decals = ['none', 'none', 'freckles', 'scar', 'scar_cheek', 'dirt', 'mud', 'paint_dots', 'blood', 'brand', 'pale', 'cheek_stripes', 'eye_black', 'burn_scar', 'freckles_heavy', 'war_stripe', 'warpaint'];
   const decal = opts.decal === 'random' || opts.decal == null ? rng.pick(decals) : opts.decal; ch.avatar.extras = { id: decal, color: rng.pick(['#c83a2a', '#333', '#8a6a3a', '#e0e0e0', '#5a3a8a']) };
   ch.voice = voiceFor({ role, gender: ch.gender, seed }); ch.role = role; return ch;
 }

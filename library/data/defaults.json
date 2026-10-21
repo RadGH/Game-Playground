@@ -74,7 +74,7 @@
       "color": "#2a6a4a"
      },
      "extras": {
-      "id": "tattoo",
+      "id": "none",
       "color": "#2a7a5a"
      }
     },
@@ -853,7 +853,7 @@
       "color": "#c9a227"
      },
      "extras": {
-      "id": "tattoo",
+      "id": "none",
       "color": "#7fe0ee"
      }
     },
@@ -4238,7 +4238,7 @@
       "id": "none"
      },
      "extras": {
-      "id": "soot",
+      "id": "dirt",
       "color": "#333"
      },
      "cape": {
@@ -12282,7 +12282,7 @@
       "color": "#333333"
      },
      "extras": {
-      "id": "tattoo",
+      "id": "none",
       "color": "#c85ad0"
      },
      "cape": {
@@ -12419,7 +12419,7 @@
       "color": "#b08a3a"
      },
      "extras": {
-      "id": "soot",
+      "id": "dirt",
       "color": "#4a4038"
      },
      "cape": {

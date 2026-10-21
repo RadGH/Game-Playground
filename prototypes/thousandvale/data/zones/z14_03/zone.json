@@ -270,13 +270,31 @@
       "w": 6
     }
   ],
+  "palette": "downs",
+  "continent": "torbor",
+  "biomeNames": {
+    "grassland": "Chalk Downs",
+    "temperateForest": "Oakwood",
+    "borealForest": "Pine Highwood",
+    "hills": "Heather Moor",
+    "hallowed": "Saint's Meadow",
+    "marsh": "Brack Fen",
+    "badlands": "Red Scarps",
+    "shrubland": "Gorse Heath",
+    "savanna": "Golden Wolds",
+    "veiledHills": "Blackthorn Scar",
+    "tundra": "High Fell",
+    "mountains": "Grey Crags",
+    "snowyPeaks": "Fell Tops",
+    "beach": "Shingle Shore"
+  },
   "summary": {
     "zone": "z14_03",
     "province": "Petbeck Basin",
     "inputHash": "106d6a71",
     "rivers": 4,
-    "wetShare": 0.014,
-    "unwalkableShare": 0.004,
+    "wetShare": 0.155,
+    "unwalkableShare": 0.183,
     "towns": [
       {
         "name": "Redcliff",
@@ -470,19 +488,22 @@
     ],
     "roads": 15,
     "bridges": 6,
-    "paths": 14,
-    "pathMetres": 692,
-    "scatter": 18867,
+    "paths": 13,
+    "pathMetres": 472,
+    "scatter": 15226,
     "scatterKinds": {
-      "tree_broadleaf": 8200,
-      "bush": 5876,
-      "reed": 1221,
-      "rock_small": 1608,
-      "rock_large": 344,
-      "tree_dead": 88,
-      "tree_acacia": 339,
-      "boulder": 6,
-      "tree_conifer": 15,
+      "rock_small": 2542,
+      "gorse": 2558,
+      "bush": 3659,
+      "red_rock": 1529,
+      "tree_dead": 146,
+      "rock_large": 556,
+      "tree_birch": 349,
+      "boulder": 22,
+      "tree_broadleaf": 2645,
+      "tree_conifer": 17,
+      "tree_old_oak": 14,
+      "heather": 19,
       "hedge": 1170
     },
     "sites": [
@@ -500,13 +521,13 @@
       "x": 388,
       "z": 864
     },
-    "placements": 463,
+    "placements": 462,
     "vignettesAvoided": 634
   },
   "files": {
-    "terrain.bin": 510608,
-    "nav.bin": 34962,
-    "scatter.bin": 151020,
-    "placements.json": 260903
+    "terrain.bin": 627044,
+    "nav.bin": 48734,
+    "scatter.bin": 121892,
+    "placements.json": 254033
   }
 }

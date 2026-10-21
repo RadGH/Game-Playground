@@ -40,6 +40,12 @@ export const SCATTER_COLLIDE = Object.freeze({
   tree_charred: { r: [0.34, 0.46], art: 0.62 },
   basalt_columns: { r: [1.35, 1.33, 1.25, 1.24], art: 1 },
   obsidian: { r: [1.13, 1.37, 1.31], art: 1 },
+  // Torbor Downs regenerated (play-test 12, #81). The willow's measured band leans off its spot (r 1.66, 1.19 off-centre):
+  // its upright trunk is ~0.6; the ancient oak's root flare measures 4.35 — its trunk proper is ~2.6
+  tree_birch: { r: [0.53], art: 0.6 },
+  tree_willow: { r: [0.6], art: 0.75 },
+  red_rock: { r: [0.94, 0.87], art: 1.25 },
+  tree_old_oak: { r: [2.6], art: 0.42, squash: 1.25 },
 });
 
 /** The collider radius (metres) of one scatter item: its drawn model's radius at the drawn scale, + the body. */

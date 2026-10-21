@@ -91,6 +91,24 @@
     "z": 878
   },
   "bridges": [],
+  "palette": "downs",
+  "continent": "torbor",
+  "biomeNames": {
+    "grassland": "Chalk Downs",
+    "temperateForest": "Oakwood",
+    "borealForest": "Pine Highwood",
+    "hills": "Heather Moor",
+    "hallowed": "Saint's Meadow",
+    "marsh": "Brack Fen",
+    "badlands": "Red Scarps",
+    "shrubland": "Gorse Heath",
+    "savanna": "Golden Wolds",
+    "veiledHills": "Blackthorn Scar",
+    "tundra": "High Fell",
+    "mountains": "Grey Crags",
+    "snowyPeaks": "Fell Tops",
+    "beach": "Shingle Shore"
+  },
   "theme": {
     "kind": "marsh",
     "lakes": [
@@ -100,31 +118,23 @@
         "x": 1439,
         "z": 1151,
         "r": 90,
-        "level": 75.29
+        "level": 77
       },
       {
         "name": null,
         "kind": "pool",
-        "x": 1688,
-        "z": 1165,
-        "r": 23,
-        "level": 84.3
+        "x": 1147,
+        "z": 1134,
+        "r": 20,
+        "level": 83.37
       },
       {
         "name": null,
         "kind": "pool",
-        "x": 1281,
-        "z": 1344,
-        "r": 22,
-        "level": 83.11
-      },
-      {
-        "name": null,
-        "kind": "pool",
-        "x": 1062,
-        "z": 1200,
-        "r": 37,
-        "level": 84.72
+        "x": 1633,
+        "z": 878,
+        "r": 42,
+        "level": 76.54
       },
       {
         "name": null,
@@ -132,23 +142,23 @@
         "x": 1461,
         "z": 783,
         "r": 38,
-        "level": 68.74
+        "level": 57.97
       },
       {
         "name": null,
         "kind": "pool",
-        "x": 1540,
-        "z": 981,
-        "r": 27,
-        "level": 75.89
+        "x": 1620,
+        "z": 1288,
+        "r": 40,
+        "level": 83.81
       },
       {
         "name": null,
         "kind": "pool",
-        "x": 1667,
-        "z": 1328,
-        "r": 37,
-        "level": 83.98
+        "x": 1452,
+        "z": 1385,
+        "r": 43,
+        "level": 80.79
       },
       {
         "name": null,
@@ -156,63 +166,71 @@
         "x": 1271,
         "z": 1004,
         "r": 18,
-        "level": 77.21
+        "level": 77.22
       },
       {
         "name": null,
         "kind": "pool",
-        "x": 1226,
-        "z": 1171,
-        "r": 21,
-        "level": 82.6
+        "x": 1410,
+        "z": 939,
+        "r": 33,
+        "level": 78.84
       },
       {
         "name": null,
         "kind": "pool",
-        "x": 1520,
-        "z": 1337,
-        "r": 21,
-        "level": 80
+        "x": 1797,
+        "z": 1195,
+        "r": 26,
+        "level": 86.38
       },
       {
         "name": null,
         "kind": "pool",
-        "x": 1144,
-        "z": 1046,
-        "r": 19,
-        "level": 78.62
+        "x": 1180,
+        "z": 1304,
+        "r": 25,
+        "level": 84.3
       },
       {
         "name": null,
         "kind": "pool",
-        "x": 1384,
-        "z": 1503,
-        "r": 34,
-        "level": 85.26
+        "x": 1678,
+        "z": 1094,
+        "r": 43,
+        "level": 79.44
       },
       {
         "name": null,
         "kind": "pool",
-        "x": 1536,
-        "z": 1463,
-        "r": 18,
-        "level": 84.53
+        "x": 1560,
+        "z": 1005,
+        "r": 20,
+        "level": 78.81
       },
       {
         "name": null,
         "kind": "pool",
-        "x": 1209,
-        "z": 1471,
-        "r": 39,
-        "level": 93.35
+        "x": 1792,
+        "z": 977,
+        "r": 38,
+        "level": 80.21
       },
       {
         "name": null,
         "kind": "pool",
-        "x": 1719,
-        "z": 908,
-        "r": 22,
-        "level": 75.61
+        "x": 1570,
+        "z": 1513,
+        "r": 33,
+        "level": 85.76
+      },
+      {
+        "name": null,
+        "kind": "pool",
+        "x": 1250,
+        "z": 1507,
+        "r": 42,
+        "level": 90.67
       }
     ],
     "fen": {
@@ -226,8 +244,8 @@
     "province": "Petbeck Basin",
     "inputHash": "f3d4195e",
     "rivers": 0,
-    "wetShare": 0.014,
-    "unwalkableShare": 0.003,
+    "wetShare": 0.178,
+    "unwalkableShare": 0.165,
     "towns": [
       {
         "name": "Brackwater",
@@ -284,19 +302,24 @@
     ],
     "roads": 1,
     "bridges": 0,
-    "paths": 11,
-    "pathMetres": 1586,
-    "scatter": 11885,
+    "paths": 10,
+    "pathMetres": 1496,
+    "scatter": 19468,
     "scatterKinds": {
-      "bush": 5358,
-      "rock_small": 1838,
-      "tree_broadleaf": 2215,
-      "rock_large": 299,
-      "reed": 1214,
-      "tree_dead": 103,
-      "tree_conifer": 5,
-      "hedge": 816,
-      "tree_fruit": 37
+      "rock_small": 833,
+      "rock_large": 407,
+      "reed": 10304,
+      "tree_willow": 1327,
+      "bush": 3032,
+      "tree_dead": 274,
+      "tree_broadleaf": 2058,
+      "tree_birch": 156,
+      "boulder": 9,
+      "heather": 180,
+      "tree_old_oak": 29,
+      "tree_conifer": 9,
+      "hedge": 815,
+      "tree_fruit": 35
     },
     "sites": [
       "settlement(HUB) town Brackwater 1136 870 90",
@@ -308,13 +331,13 @@
       "x": 1136,
       "z": 878
     },
-    "placements": 195,
+    "placements": 194,
     "vignettesAvoided": 654
   },
   "files": {
-    "terrain.bin": 479030,
-    "nav.bin": 13866,
-    "scatter.bin": 95164,
-    "placements.json": 132918
+    "terrain.bin": 464572,
+    "nav.bin": 21993,
+    "scatter.bin": 155828,
+    "placements.json": 128391
   }
 }

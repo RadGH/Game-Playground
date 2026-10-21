@@ -223,13 +223,31 @@
       "w": 4.5
     }
   ],
+  "palette": "downs",
+  "continent": "torbor",
+  "biomeNames": {
+    "grassland": "Chalk Downs",
+    "temperateForest": "Oakwood",
+    "borealForest": "Pine Highwood",
+    "hills": "Heather Moor",
+    "hallowed": "Saint's Meadow",
+    "marsh": "Brack Fen",
+    "badlands": "Red Scarps",
+    "shrubland": "Gorse Heath",
+    "savanna": "Golden Wolds",
+    "veiledHills": "Blackthorn Scar",
+    "tundra": "High Fell",
+    "mountains": "Grey Crags",
+    "snowyPeaks": "Fell Tops",
+    "beach": "Shingle Shore"
+  },
   "summary": {
     "zone": "z12_02",
     "province": "Petbeck Basin",
     "inputHash": "0ba48d02",
     "rivers": 2,
     "wetShare": 0.005,
-    "unwalkableShare": 0.034,
+    "unwalkableShare": 0.039,
     "towns": [
       {
         "name": "Torborhold",
@@ -319,19 +337,21 @@
     "roads": 13,
     "bridges": 6,
     "paths": 25,
-    "pathMetres": 2904,
-    "scatter": 18723,
+    "pathMetres": 3311,
+    "scatter": 17281,
     "scatterKinds": {
-      "bush": 5776,
-      "rock_large": 1068,
-      "rock_small": 1964,
-      "tree_broadleaf": 7935,
-      "boulder": 107,
-      "tree_conifer": 186,
-      "reed": 297,
-      "tree_dead": 16,
-      "hedge": 1314,
-      "tree_fruit": 60
+      "heather": 2410,
+      "rock_small": 2330,
+      "rock_large": 1053,
+      "bush": 3965,
+      "tree_broadleaf": 5195,
+      "boulder": 151,
+      "tree_birch": 501,
+      "tree_conifer": 67,
+      "tree_old_oak": 89,
+      "hedge": 1377,
+      "tree_fruit": 66,
+      "reed": 77
     },
     "sites": [
       "settlement(HUB) town Torborhold 592 1264 90",
@@ -347,13 +367,13 @@
       "x": 588,
       "z": 1264
     },
-    "placements": 365,
+    "placements": 358,
     "vignettesAvoided": 676
   },
   "files": {
-    "terrain.bin": 605250,
-    "nav.bin": 42276,
-    "scatter.bin": 149868,
-    "placements.json": 288592
+    "terrain.bin": 617370,
+    "nav.bin": 39252,
+    "scatter.bin": 138332,
+    "placements.json": 293894
   }
 }

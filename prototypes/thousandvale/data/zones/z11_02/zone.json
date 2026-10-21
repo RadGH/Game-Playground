@@ -165,13 +165,31 @@
       "w": 5.4
     }
   ],
+  "palette": "downs",
+  "continent": "torbor",
+  "biomeNames": {
+    "grassland": "Chalk Downs",
+    "temperateForest": "Oakwood",
+    "borealForest": "Pine Highwood",
+    "hills": "Heather Moor",
+    "hallowed": "Saint's Meadow",
+    "marsh": "Brack Fen",
+    "badlands": "Red Scarps",
+    "shrubland": "Gorse Heath",
+    "savanna": "Golden Wolds",
+    "veiledHills": "Blackthorn Scar",
+    "tundra": "High Fell",
+    "mountains": "Grey Crags",
+    "snowyPeaks": "Fell Tops",
+    "beach": "Shingle Shore"
+  },
   "summary": {
     "zone": "z11_02",
     "province": "Petbeck Basin",
     "inputHash": "36526177",
     "rivers": 4,
-    "wetShare": 0.01,
-    "unwalkableShare": 0.088,
+    "wetShare": 0.021,
+    "unwalkableShare": 0.152,
     "towns": [
       {
         "name": "Copperdell",
@@ -254,20 +272,22 @@
     ],
     "roads": 12,
     "bridges": 2,
-    "paths": 14,
-    "pathMetres": 2945,
-    "scatter": 22563,
+    "paths": 15,
+    "pathMetres": 3249,
+    "scatter": 31490,
     "scatterKinds": {
-      "tree_broadleaf": 8430,
-      "tree_conifer": 3417,
-      "bush": 5178,
-      "rock_large": 1356,
-      "boulder": 91,
-      "rock_small": 1719,
-      "reed": 1072,
-      "tree_dead": 61,
-      "hedge": 1204,
-      "tree_fruit": 35
+      "tree_birch": 2560,
+      "tree_conifer": 9068,
+      "rock_small": 2123,
+      "rock_large": 2930,
+      "heather": 3258,
+      "bush": 3237,
+      "boulder": 247,
+      "tree_broadleaf": 6779,
+      "tree_old_oak": 33,
+      "hedge": 1146,
+      "tree_fruit": 35,
+      "reed": 74
     },
     "sites": [
       "settlement(HUB) city Copperdell 352 448 140",
@@ -282,13 +302,13 @@
       "x": 348,
       "z": 444
     },
-    "placements": 346,
+    "placements": 339,
     "vignettesAvoided": 598
   },
   "files": {
-    "terrain.bin": 626178,
-    "nav.bin": 51612,
-    "scatter.bin": 180588,
-    "placements.json": 265980
+    "terrain.bin": 689720,
+    "nav.bin": 74078,
+    "scatter.bin": 252004,
+    "placements.json": 268935
   }
 }

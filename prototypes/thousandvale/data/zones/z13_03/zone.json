@@ -249,6 +249,24 @@
       "w": 5.2
     }
   ],
+  "palette": "downs",
+  "continent": "torbor",
+  "biomeNames": {
+    "grassland": "Chalk Downs",
+    "temperateForest": "Oakwood",
+    "borealForest": "Pine Highwood",
+    "hills": "Heather Moor",
+    "hallowed": "Saint's Meadow",
+    "marsh": "Brack Fen",
+    "badlands": "Red Scarps",
+    "shrubland": "Gorse Heath",
+    "savanna": "Golden Wolds",
+    "veiledHills": "Blackthorn Scar",
+    "tundra": "High Fell",
+    "mountains": "Grey Crags",
+    "snowyPeaks": "Fell Tops",
+    "beach": "Shingle Shore"
+  },
   "summary": {
     "zone": "z13_03",
     "province": "Petbeck Basin",
@@ -399,21 +417,25 @@
     ],
     "roads": 16,
     "bridges": 6,
-    "paths": 16,
-    "pathMetres": 1302,
-    "scatter": 18898,
+    "paths": 15,
+    "pathMetres": 815,
+    "scatter": 23460,
     "scatterKinds": {
-      "tree_broadleaf": 6868,
-      "bush": 6981,
-      "rock_large": 426,
-      "rock_small": 1945,
-      "reed": 562,
-      "tree_dead": 43,
-      "boulder": 42,
-      "tree_acacia": 115,
-      "tree_conifer": 14,
+      "bush": 4646,
+      "rock_small": 2161,
+      "rock_large": 993,
+      "tree_broadleaf": 6418,
+      "tree_birch": 886,
+      "gorse": 5418,
+      "red_rock": 32,
+      "tree_old_oak": 105,
+      "boulder": 32,
+      "heather": 752,
+      "tree_dead": 6,
+      "tree_conifer": 29,
       "hedge": 1867,
-      "tree_fruit": 35
+      "tree_fruit": 35,
+      "reed": 80
     },
     "sites": [
       "settlement(HUB) city Millbrook 544 1648 140",
@@ -430,13 +452,13 @@
       "x": 540,
       "z": 1656
     },
-    "placements": 511,
+    "placements": 510,
     "vignettesAvoided": 623
   },
   "files": {
-    "terrain.bin": 546076,
-    "nav.bin": 31716,
-    "scatter.bin": 151268,
-    "placements.json": 311846
+    "terrain.bin": 573205,
+    "nav.bin": 33486,
+    "scatter.bin": 187764,
+    "placements.json": 301111
   }
 }

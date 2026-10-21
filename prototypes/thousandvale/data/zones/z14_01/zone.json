@@ -100,16 +100,34 @@
     "z": 1620
   },
   "bridges": [],
+  "palette": "downs",
+  "continent": "torbor",
+  "biomeNames": {
+    "grassland": "Chalk Downs",
+    "temperateForest": "Oakwood",
+    "borealForest": "Pine Highwood",
+    "hills": "Heather Moor",
+    "hallowed": "Saint's Meadow",
+    "marsh": "Brack Fen",
+    "badlands": "Red Scarps",
+    "shrubland": "Gorse Heath",
+    "savanna": "Golden Wolds",
+    "veiledHills": "Blackthorn Scar",
+    "tundra": "High Fell",
+    "mountains": "Grey Crags",
+    "snowyPeaks": "Fell Tops",
+    "beach": "Shingle Shore"
+  },
   "theme": {
     "kind": "shore",
     "lakes": [
       {
         "name": "the Salt Mere",
         "kind": "shore",
-        "x": 1034,
-        "z": 1066,
+        "x": 778,
+        "z": 1034,
         "r": 320,
-        "level": 62.29
+        "level": 26.82
       }
     ],
     "fen": null
@@ -119,8 +137,8 @@
     "province": "Petbeck Basin",
     "inputHash": "2d4e6443",
     "rivers": 1,
-    "wetShare": 0.077,
-    "unwalkableShare": 0.054,
+    "wetShare": 0.357,
+    "unwalkableShare": 0.374,
     "towns": [
       {
         "name": "Saltmouth",
@@ -186,15 +204,22 @@
     ],
     "roads": 3,
     "bridges": 0,
-    "paths": 8,
-    "pathMetres": 1607,
-    "scatter": 10428,
+    "paths": 7,
+    "pathMetres": 1331,
+    "scatter": 14270,
     "scatterKinds": {
-      "bush": 5123,
-      "rock_small": 1887,
-      "tree_broadleaf": 2168,
-      "rock_large": 298,
-      "tree_conifer": 406,
+      "rock_large": 460,
+      "bush": 1742,
+      "rock_small": 998,
+      "tree_broadleaf": 1043,
+      "tree_old_oak": 19,
+      "reed": 5963,
+      "tree_willow": 788,
+      "heather": 2013,
+      "tree_birch": 222,
+      "boulder": 74,
+      "tree_conifer": 228,
+      "tree_dead": 174,
       "hedge": 546
     },
     "sites": [
@@ -207,13 +232,13 @@
       "x": 872,
       "z": 1620
     },
-    "placements": 182,
+    "placements": 181,
     "vignettesAvoided": 631
   },
   "files": {
-    "terrain.bin": 467923,
-    "nav.bin": 14789,
-    "scatter.bin": 83508,
-    "placements.json": 127457
+    "terrain.bin": 455458,
+    "nav.bin": 26235,
+    "scatter.bin": 114244,
+    "placements.json": 122571
   }
 }

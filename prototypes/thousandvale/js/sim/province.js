@@ -59,6 +59,7 @@ import { createWildEvents } from './wild-events.js';      // [Packs] the six wil
 import { createProfessions } from './professions.js';      // W9 (P-core)
 import { configureEconomy, economy, chestGold, treasureGold, eventGold, travelFare as fareOf, cartFare, withEconomy, clearProvinceEconomies } from './economy-knobs.js';
 import { mountRefusal, mountSpeedMul, dismounts, MOUNT_RULES } from '../rules/mount.js';   // stream C's riding rules (when, how fast, what throws you)
+import { safeSpot, nearestTown } from './safe-spot.js';     // play-test 12 (#81): saved spots after a re-bake
 
 const LEASE_MS = 30000, HEARTBEAT_MS = 10000, TICKET_WAIT_MS = 3000;
 export const BAG_MAX = 120;
@@ -628,16 +629,22 @@ export function createProvince(opts) {
     const [prov, rest] = rid.includes('/') ? rid.split('/') : [starterPv.L.key, rid];
     const pv = P.get(prov) || starterPv;
     const at = Number.isFinite(ch.x) ? { x: ch.x, z: ch.z } : null;
-    if (rest.startsWith('town')) { const r = rooms.get(rid); return { room: r || pv.towns[0], at: r ? at : null }; }
+    // play-test 12 (#81): a saved spot the ground has changed under (a re-bake: sea, cliff, a wall) wakes you on the nearest
+    // good ground; with none within 160 m, in the nearest town (js/sim/safe-spot.js)
+    if (rest.startsWith('town')) { const r = rooms.get(rid); const s = r && at ? safeSpot(pv.L.terrain, at) : null; return { room: r || pv.towns[0], at: s ? { x: s.x, z: s.z } : null }; }
     if (rest.startsWith('i:')) {
       const inst = rooms.get(rid);
       if (inst && canEnter(inst, ch)) return { room: inst, at };
-      const back = ch.exit || pv.L.gate;
+      const back = ch.exit || pv.L.gate, ok = safeSpot(pv.L.terrain, back) || back;
       ch.exit = null;
-      return { room: pickCopy(ch, null, pv), at: { x: back.x, z: back.z } };
+      return { room: pickCopy(ch, null, pv), at: { x: ok.x, z: ok.z } };
     }
     // a saved wilds spot that is no longer good ground (another bake, another world) wakes you in town instead
-    if (rest.startsWith('wilds') && at && P.has(prov) && (!pv.L.terrain.walkable || pv.L.terrain.walkable(at.x, at.z))) return { room: roomAt(pv, at, ch), at };
+    if (rest.startsWith('wilds') && at && P.has(prov)) {
+      const s = safeSpot(pv.L.terrain, at);
+      if (s) { const p = { x: s.x, z: s.z }; return { room: roomAt(pv, p, ch), at: p }; }
+      return { room: pv.towns[nearestTown(pv.L.towns, at)] || pv.towns[0], at: null };
+    }
     return { room: pv.towns[0], at: null };
   }
   /** The room holding point p in a province: the town whose circle it is in, else a wilds copy. */

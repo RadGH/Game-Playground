@@ -305,13 +305,31 @@
       "w": 3
     }
   ],
+  "palette": "downs",
+  "continent": "torbor",
+  "biomeNames": {
+    "grassland": "Chalk Downs",
+    "temperateForest": "Oakwood",
+    "borealForest": "Pine Highwood",
+    "hills": "Heather Moor",
+    "hallowed": "Saint's Meadow",
+    "marsh": "Brack Fen",
+    "badlands": "Red Scarps",
+    "shrubland": "Gorse Heath",
+    "savanna": "Golden Wolds",
+    "veiledHills": "Blackthorn Scar",
+    "tundra": "High Fell",
+    "mountains": "Grey Crags",
+    "snowyPeaks": "Fell Tops",
+    "beach": "Shingle Shore"
+  },
   "summary": {
     "zone": "z14_02",
     "province": "Petbeck Basin",
     "inputHash": "b8a99ae8",
     "rivers": 5,
-    "wetShare": 0.051,
-    "unwalkableShare": 0.04,
+    "wetShare": 0.125,
+    "unwalkableShare": 0.147,
     "towns": [
       {
         "name": "Gullwick",
@@ -438,17 +456,23 @@
     "roads": 12,
     "bridges": 3,
     "paths": 11,
-    "pathMetres": 642,
-    "scatter": 21037,
+    "pathMetres": 659,
+    "scatter": 19351,
     "scatterKinds": {
-      "rock_small": 1328,
-      "tree_broadleaf": 8721,
-      "bush": 5367,
-      "tree_conifer": 1402,
-      "rock_large": 324,
-      "reed": 3128,
-      "tree_dead": 220,
-      "boulder": 1,
+      "reed": 8819,
+      "tree_willow": 1149,
+      "bush": 2977,
+      "tree_broadleaf": 817,
+      "tree_dead": 345,
+      "rock_small": 1791,
+      "tree_old_oak": 3,
+      "rock_large": 112,
+      "tree_birch": 110,
+      "heather": 38,
+      "boulder": 9,
+      "red_rock": 1130,
+      "gorse": 1494,
+      "tree_conifer": 11,
       "hedge": 546
     },
     "sites": [
@@ -470,9 +494,9 @@
     "vignettesAvoided": 661
   },
   "files": {
-    "terrain.bin": 479827,
-    "nav.bin": 36869,
-    "scatter.bin": 168380,
-    "placements.json": 205569
+    "terrain.bin": 574206,
+    "nav.bin": 39125,
+    "scatter.bin": 154892,
+    "placements.json": 204050
   }
 }

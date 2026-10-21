@@ -202,13 +202,31 @@
       "w": 4.5
     }
   ],
+  "palette": "downs",
+  "continent": "torbor",
+  "biomeNames": {
+    "grassland": "Chalk Downs",
+    "temperateForest": "Oakwood",
+    "borealForest": "Pine Highwood",
+    "hills": "Heather Moor",
+    "hallowed": "Saint's Meadow",
+    "marsh": "Brack Fen",
+    "badlands": "Red Scarps",
+    "shrubland": "Gorse Heath",
+    "savanna": "Golden Wolds",
+    "veiledHills": "Blackthorn Scar",
+    "tundra": "High Fell",
+    "mountains": "Grey Crags",
+    "snowyPeaks": "Fell Tops",
+    "beach": "Shingle Shore"
+  },
   "summary": {
     "zone": "z13_02",
     "province": "Petbeck Basin",
     "inputHash": "b3a20e5d",
     "rivers": 2,
     "wetShare": 0.006,
-    "unwalkableShare": 0.001,
+    "unwalkableShare": 0.002,
     "towns": [
       {
         "name": "Halsbridge",
@@ -329,20 +347,26 @@
     ],
     "roads": 15,
     "bridges": 5,
-    "paths": 18,
-    "pathMetres": 1973,
-    "scatter": 18225,
+    "paths": 19,
+    "pathMetres": 2232,
+    "scatter": 18703,
     "scatterKinds": {
-      "tree_broadleaf": 8062,
-      "rock_large": 354,
-      "rock_small": 1788,
-      "bush": 6049,
-      "reed": 207,
-      "tree_dead": 11,
-      "tree_conifer": 11,
-      "hedge": 1662,
-      "tree_fruit": 72,
-      "boulder": 9
+      "bush": 4651,
+      "rock_large": 783,
+      "tree_broadleaf": 6191,
+      "rock_small": 2085,
+      "tree_willow": 138,
+      "tree_dead": 39,
+      "reed": 832,
+      "tree_birch": 551,
+      "tree_old_oak": 116,
+      "heather": 1191,
+      "tree_conifer": 47,
+      "boulder": 46,
+      "red_rock": 189,
+      "gorse": 226,
+      "hedge": 1546,
+      "tree_fruit": 72
     },
     "sites": [
       "settlement(HUB) city Halsbridge 1696 1184 140",
@@ -357,13 +381,13 @@
       "x": 1696,
       "z": 1180
     },
-    "placements": 427,
+    "placements": 423,
     "vignettesAvoided": 612
   },
   "files": {
-    "terrain.bin": 496737,
-    "nav.bin": 31303,
-    "scatter.bin": 145884,
-    "placements.json": 289229
+    "terrain.bin": 524000,
+    "nav.bin": 32675,
+    "scatter.bin": 149708,
+    "placements.json": 293479
   }
 }

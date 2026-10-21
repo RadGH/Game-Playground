@@ -106,13 +106,31 @@
     "z": 1309
   },
   "bridges": [],
+  "palette": "downs",
+  "continent": "torbor",
+  "biomeNames": {
+    "grassland": "Chalk Downs",
+    "temperateForest": "Oakwood",
+    "borealForest": "Pine Highwood",
+    "hills": "Heather Moor",
+    "hallowed": "Saint's Meadow",
+    "marsh": "Brack Fen",
+    "badlands": "Red Scarps",
+    "shrubland": "Gorse Heath",
+    "savanna": "Golden Wolds",
+    "veiledHills": "Blackthorn Scar",
+    "tundra": "High Fell",
+    "mountains": "Grey Crags",
+    "snowyPeaks": "Fell Tops",
+    "beach": "Shingle Shore"
+  },
   "summary": {
     "zone": "z11_04",
     "province": "Petbeck Basin",
     "inputHash": "454aaea1",
     "rivers": 0,
-    "wetShare": 0,
-    "unwalkableShare": 0.113,
+    "wetShare": 0.003,
+    "unwalkableShare": 0.222,
     "towns": [
       {
         "name": "Last Lantern",
@@ -164,16 +182,19 @@
     "roads": 3,
     "bridges": 0,
     "paths": 14,
-    "pathMetres": 2153,
-    "scatter": 13773,
+    "pathMetres": 2010,
+    "scatter": 13801,
     "scatterKinds": {
-      "rock_large": 3482,
-      "rock_small": 4905,
-      "tree_conifer": 2229,
-      "boulder": 1086,
-      "bush": 1257,
-      "tree_broadleaf": 34,
-      "hedge": 780
+      "rock_small": 3958,
+      "blackthorn": 2443,
+      "tree_dead": 335,
+      "rock_large": 2800,
+      "boulder": 882,
+      "tree_conifer": 206,
+      "heather": 2358,
+      "tree_birch": 8,
+      "hedge": 780,
+      "tree_broadleaf": 31
     },
     "sites": [
       "lair dungeon The Black Filfit 1344 960",
@@ -191,9 +212,9 @@
     "vignettesAvoided": 668
   },
   "files": {
-    "terrain.bin": 641191,
-    "nav.bin": 52927,
-    "scatter.bin": 110268,
-    "placements.json": 167978
+    "terrain.bin": 781573,
+    "nav.bin": 61135,
+    "scatter.bin": 110492,
+    "placements.json": 159955
   }
 }

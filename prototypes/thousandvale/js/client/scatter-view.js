@@ -17,7 +17,7 @@ import { perf } from './perf.js';
 
 const BUCKET = 128;
 /** Scatter kinds the camera cannot pass (index = SCATTER_KINDS): radius and height at scale 1. */
-const SCATTER_SOLID = { 6: { r: 1.2, h: 1.8 }, 7: { r: 2.1, h: 2.8 }, 14: { r: 1.4, h: 3.2 }, 15: { r: 1.1, h: 1.4 } };
+const SCATTER_SOLID = { 6: { r: 1.2, h: 1.8 }, 7: { r: 2.1, h: 2.8 }, 14: { r: 1.4, h: 3.2 }, 15: { r: 1.1, h: 1.4 }, 23: { r: 1.4, h: 2.2 } };
 /** scatter kind (terrain-read SCATTER_KINDS order) -> the kit pieces it may be drawn as. */
 export const KIND_ART = [
   { key: 'tree_broadleaf', tree: ['oak', 'beech', 'birch'], scale: 0.62 },
@@ -46,6 +46,15 @@ export const KIND_ART = [
   { key: 'obsidian', custom: ['a', 'b', 'c'], scale: 1 },
   { key: 'steam_vent', custom: ['a', 'b'], scale: 1 },
   { key: 'sulphur_crust', custom: ['a', 'b', 'c'], scale: 1 },
+  // Torbor Downs regenerated (play-test 12, #81): silver birch, crack willow, gold-flowered gorse (a juniper warmed to
+  // gold), moor heather, the near-black blackthorn brakes of the Scar, red sandstone outcrops, Saint's Meadow's old oaks
+  { key: 'tree_birch', tree: ['birch'], scale: 0.6 },
+  { key: 'tree_willow', tree: ['willow'], scale: 0.75 },
+  { key: 'gorse', bush: ['juniper'], scale: 1.25, tint: [1.35, 1.22, 0.5] },
+  { key: 'heather', bush: ['heather'], scale: 1.3 },
+  { key: 'blackthorn', bush: ['bramble'], scale: 1.4, squash: [1.3, 0.9, 1.3], tint: [0.5, 0.45, 0.5] },
+  { key: 'red_rock', rock: ['boulder', 'mossy_boulder'], scale: 1.25, tint: [1.45, 0.8, 0.6] },
+  { key: 'tree_old_oak', tree: ['ancient_oak'], scale: 0.42, squash: [1.25, 1, 1.25] },
 ];
 const artType = art => (art.custom ? 'custom' : art.tree ? 'tree' : art.bush ? 'bush' : art.rock ? 'rock' : 'fern');
 /** How far each class of thing is drawn, by quality: [full detail, simplified, cards / last]. */

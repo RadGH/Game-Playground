@@ -26,6 +26,8 @@ const ROOT = new URL('../', import.meta.url);
 const J = p => JSON.parse(readFileSync(new URL(p, ROOT), 'utf8'));
 const CHECK = process.argv.includes('--check');
 const DISC = new Set(['vignette', 'fort', 'farm', 'cave', 'camp', 'rare', 'hook', 'wayside', 'curio', 'folk']);
+/** What may simply go when no fair spot is left within ~1.2 km (`--province` only): a lore curio or a wayside stone is scenery. */
+const DROPPABLE = new Set(['curio', 'wayside']);
 
 /** The province contexts exactly as tests/E/placement.test.js builds them. */
 function contexts(prov) {
@@ -86,10 +88,16 @@ function loopAt(ctx, x, z, r, n, seed) {
 
 const report = [];
 let changed = false;
-for (const bay of BAYS) {
+// play-test 12 (#81, Torbor Downs regenerated): `--province=<id>` treats EVERY zone of the province like a bay zone — the
+// new hills and the new coastline moved the ground under all of them (run: bake --province -> this -> bake again)
+const PROV = (process.argv.find(a => a.startsWith('--province=')) || '').split('=')[1] || null;
+const TARGETS = PROV ? Object.values(J('data/world/province-map.json').provinces[PROV].map).map(zone => BAYS.find(b => b.zone === zone) || { zone }) : BAYS;
+const CTX = new Map();
+for (const bay of TARGETS) {
   const pm = Object.entries(J('data/world/province-map.json').provinces).find(([, v]) => Object.values(v.map || {}).includes(bay.zone));
   if (!pm) continue;
-  const { Z, PINS } = contexts(pm[0]);
+  if (!CTX.has(pm[0])) CTX.set(pm[0], contexts(pm[0]));
+  const { Z, PINS } = CTX.get(pm[0]);
   const z = Object.values(Z).find(q => q.wid === bay.zone), ctx = z.ctx, pl = z.file.placements;
   try {
     const head = JSON.parse(execSync(`git show HEAD:./${z.fileName}`, { cwd: new URL('.', ROOT), encoding: 'utf8', maxBuffer: 1 << 26, stdio: ['ignore', 'pipe', 'ignore'] })).placements;
@@ -132,14 +140,20 @@ for (const bay of BAYS) {
     }
   }
   // 2. every placement the sea took (or whose loop now runs into it)
+  const gone = new Set();
   for (const p of pl) {
     const why = problemOf(ctx, p) || (nearHarbour(p) ? 'by the harbour' : null); if (!why) continue;
     const ox = p.x, oz = p.z, R = p.radius ?? 1.5;
     let spot = null;
     const nearScore = (x, z0) => -Math.hypot(x - ox, z0 - oz) - (p.template === 'fishing_plot' || p.role === 'fisher' ? Math.max(0, ctx.waterDist(x, z0) - R - 12) * 3 : 0);
     const score = (x, z0) => (nearHarbour(p, x, z0) || (p.type === 'curio' && sameCurioNear(ctx, p, x, z0)) || ((p.stray || p.roam) && settlementEdge(ctx, x, z0) < 70) ? -Infinity : nearScore(x, z0));
-    if (DISC.has(p.type) && p.radius != null) spot = findSpot(ctx, rngFor(p.id + ':coast'), ruleKind(p), R, { near: { x: ox, z: oz, min: 0, max: 450 }, spread: 0, tries: 6000, score });
-    else spot = findPoint(ctx, rngFor(p.id + ':coast'), { x: ox, z: oz, min: 0, max: 300 }, { allowTown: true, prefer: nearScore });
+    // (a second, wider look — play-test 12, #81: the regenerated Torbor Downs took whole stretches of coast and hillside)
+    for (const reach of PROV ? [1, 2.6] : [1]) {
+      if (spot) break;
+      if (DISC.has(p.type) && p.radius != null) spot = findSpot(ctx, rngFor(p.id + ':coast' + (reach > 1 ? ':wide' : '')), ruleKind(p), R, { near: { x: ox, z: oz, min: 0, max: 450 * reach }, spread: 0, tries: 6000 * reach, score });
+      else spot = findPoint(ctx, rngFor(p.id + ':coast' + (reach > 1 ? ':wide' : '')), { x: ox, z: oz, min: 0, max: 300 * reach }, { allowTown: true, prefer: nearScore });
+    }
+    if (!spot && PROV && DROPPABLE.has(p.type)) { gone.add(p); report.push(`${bay.zone} ${p.type} ${p.id} (${why}): no fair spot within ${Math.round(450 * 2.6)} m — REMOVED (scenery only)`); changed = true; continue; }
     if (!spot) { report.push(`${bay.zone} ${p.id} (${why}): NO fair spot within reach`); continue; }
     p.x = spot.x; p.z = spot.z;
     if (Array.isArray(p.path) && p.path.length) {
@@ -152,6 +166,7 @@ for (const bay of BAYS) {
     report.push(`${bay.zone} ${p.type} ${p.id} (${why}): (${ox}, ${oz}) -> (${p.x}, ${p.z})${still ? `  STILL: ${still}` : ''}`);
     changed = true;
   }
+  if (gone.size) z.file.placements = pl.filter(p => !gone.has(p));
   if (changed && !CHECK) {
     writeFileSync(new URL(z.fileName, ROOT), JSON.stringify(z.file, null, 1) + '\n');
     writeFileSync(new URL('data/world/site-pins.json', ROOT), JSON.stringify(PINS, null, 1).replace(/[\u007f-\uffff]/g, c => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0')) + '\n');

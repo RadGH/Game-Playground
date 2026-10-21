@@ -13,6 +13,7 @@
 
 import { makeNoise2D, fbm, ridged, subSeed, clamp } from '../../../../worldgen/js/noise.js';
 import { makeVolcanic } from './vharlen.mjs';
+import { makeDowns, TORBOR } from './torbor.mjs';
 
 export const MACRO_MAGIC = 'TVWM';
 export const MACRO_VERSION = 1;
@@ -44,7 +45,10 @@ export const WORLD = {
  * `ids` are the zone columns/rows in world zones (block = [zx, zy] of the top-left zone, size = [w, h]).
  */
 export const CONTINENTS = [
-  { id: 'torbor', province: 'torbor_downs', kind: 'block', block: [11, 1], size: [4, 4], fall: 1100, wander: 1000, depth: 70, bays: [
+  // play-test 12 (#81, owner 2026-10-17): Torbor Downs regenerated — its own ground (tools/lib/torbor.mjs: hills between the
+  // roads, regions with their own biomes) and a coastline INSIDE the block, so the walkable land reaches the shore. Was
+  // kind 'block' (the square left bit-exact, the coast outside it, fall 1100 / wander 1000).
+  { id: 'torbor', province: 'torbor_downs', kind: 'island', block: [11, 1], size: [4, 4], fall: 260, wander: 0, depth: 70, profile: 'downs', bays: [
     // play-test 11 (owner, Z61): "edit the world east of Gullwick so that Gullwick actually sits on the coastline and has
     // a real harbor". A sea inlet from the open sea, 2 km west through the coast and into z14_02, to its head just south-
     // east of Gullwick's wall (Gullwick's World Forge name was Tideford). The Batpate Run now ends in it. See BAYS below.
@@ -207,6 +211,110 @@ export function coastWorld(W, ref) {
   return { ...W, rivers, roads, bridges };
 }
 
+/**
+ * Torbor Downs regenerated (play-test 12, #81; tools/lib/torbor.mjs): the world bake's rivers, roads and bridges in and
+ * round the Torbor block, re-fitted to the new ground. world.json is graded on the old pangea ground, and inside the block
+ * the new ground equals it within PROTECT_NEAR metres of every road and river — so most heights come out the same number;
+ * only where the coast eased the land down (or the sea took it) do they move.
+ *   * a river is cut where it first meets the sea (its mouth: one last point 10 m out at sea level), and a river that rose
+ *     out at sea (the land it came from is gone) starts 250 m inland of the coast instead; of several dry stretches the
+ *     longest is kept; its surface is the running minimum of the new ground - 0.8 (the world bake's own rule)
+ *   * a road is cut at the waterline (each dry run of 2+ points kept, ids `<id>c<n>` when it splits) and its graded height
+ *     recomputed exactly as the world bake does (the ground averaged over ±3 points)
+ *   * every bridge on a Torbor road is rebuilt from the re-fitted lines (crossingsOf + bridgeFor, twins merged, shared decks)
+ * Uses ref.continentGround (no bays): the bays are applied after, by coastWorld. Lines whose box misses the block are the
+ * same objects. Pure.
+ */
+export function downsWorld(W, ref) {
+  const c = CONTINENTS.find(q => q.profile === 'downs'); if (!c) return W;
+  const R = continentRect(c), pad = 400;
+  const touches = bb => !(bb[2] < R.x0 - pad || bb[0] > R.x1 + pad || bb[3] < R.z0 - pad || bb[1] > R.z1 + pad);
+  const bbOf = pts => [Math.min(...pts.map(p => p[0])), Math.min(...pts.map(p => p[1])), Math.max(...pts.map(p => p[0])), Math.max(...pts.map(p => p[1]))];
+  const g = (x, z) => ref.continentGround(x, z);
+  // off the land: in the sea, or past the coastline where the ground is still falling to it (a cliff coast)
+  const wet = (x, z) => g(x, z) < 0.25 || ref.seaward(c, x, z) > 0;
+  const delta = (x, z) => g(x, z) - ref.mainland(x, z);
+  const shore = (a, b) => { let lo = 0, hi = 1; for (let k = 0; k < 24; k++) { const t = (lo + hi) / 2; if (wet(a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t)) hi = t; else lo = t; } return lo; };
+  const rivers = [];
+  for (const r of W.rivers) {
+    if (!touches(r.bbox)) { rivers.push(r); continue; }
+    // dry runs (index ranges) along the river
+    const dry = r.pts.map(p => !wet(p[0], p[1]));
+    const runs = []; let s = -1;
+    for (let k = 0; k <= dry.length; k++) { if (k < dry.length && dry[k]) { if (s < 0) s = k; } else if (s >= 0) { runs.push([s, k - 1]); s = -1; } }
+    if (!runs.length) continue;
+    let [a, b] = runs.sort((p, q) => (q[1] - q[0]) - (p[1] - p[0]) || p[0] - q[0])[0];
+    // a river that rose out at sea now rises 250 m inland of the coast
+    if (a > 0) { let L = 0; while (a < b && L < 250) { L += Math.hypot(r.pts[a + 1][0] - r.pts[a][0], r.pts[a + 1][1] - r.pts[a][1]); a++; } }
+    if (b - a < 4) continue;
+    const pts = r.pts.slice(a, b + 1).map(p => [p[0], p[1], p[2], p[3]]);
+    let mouth = null;
+    if (b < r.pts.length - 1) {                                        // it runs into the sea: its mouth
+      const A = r.pts[b], Bq = r.pts[b + 1], t = shore(A, Bq), dx = Bq[0] - A[0], dz = Bq[1] - A[1], L = Math.hypot(dx, dz) || 1;
+      const sx = A[0] + dx * t, sz = A[1] + dz * t;
+      mouth = [[+sx.toFixed(2), +sz.toFixed(2), 0, A[3]], [+(sx + dx / L * 10).toFixed(2), +(sz + dz / L * 10).toFixed(2), 0, A[3]]];
+    }
+    // surfaces moved by what the profile moved the ground (delta to the pangea ground, both from the decoded macro: the
+    // world bake graded on the full-precision field, so a recomputed surface would differ by the u16 rounding everywhere)
+    let run = Infinity, moved = a > 0 || b < r.pts.length - 1;
+    for (const p of pts) {
+      const dz = delta(p[0], p[1]), s2 = +Math.min(run, p[2] + dz).toFixed(3);
+      if (s2 !== p[2]) { p[2] = s2; moved = true; }
+      run = p[2];
+    }
+    if (mouth) { mouth[0][2] = +Math.max(0, Math.min(run, 0.4)).toFixed(3); pts.push(...mouth); }
+    rivers.push(moved ? { ...r, pts, bbox: bbOf(pts), ...(b < r.pts.length - 1 ? { mouth: true } : {}), ...(a > 0 ? { spring: true } : {}) } : r);
+  }
+  const roads = [];
+  for (const r of W.roads) {
+    if (!touches(r.bbox)) { roads.push(r); continue; }
+    const runs = []; let cur = []; const cuts = new Set();
+    for (let k = 0; k < r.pts.length; k++) {
+      const p = r.pts[k], w = wet(p[0], p[1]);
+      if (k > 0) {
+        const q = r.pts[k - 1], qw = wet(q[0], q[1]);
+        if (w !== qw) { const A = w ? q : p, Bq = w ? p : q, t = shore(A, Bq), s = [+(A[0] + (Bq[0] - A[0]) * t).toFixed(2), +(A[1] + (Bq[1] - A[1]) * t).toFixed(2), 0]; cuts.add(s); if (w) { cur.push(s); runs.push(cur); cur = []; } else cur.push(s); }
+      }
+      if (!w) cur.push([p[0], p[1], p[2]]);
+    }
+    if (cur.length) runs.push(cur);
+    const kept = runs.filter(p => p.length >= 2);
+    kept.forEach((pts, n) => {
+      const dl = pts.map(p => delta(p[0], p[1]));
+      for (let k = 0; k < pts.length; k++) {
+        let sum = 0, m = 0; for (let q = Math.max(0, k - 3); q <= Math.min(pts.length - 1, k + 3); q++) { sum += dl[q]; m++; }
+        if (sum !== 0) pts[k][2] = +(pts[k][2] + sum / m).toFixed(3);
+      }
+      for (const p of pts) if (cuts.has(p)) p[2] = +Math.max(0.3, g(p[0], p[1])).toFixed(3);      // the shore end: on the beach
+      const same = kept.length === 1 && runs.length === 1 && pts.length === r.pts.length && pts.every((p, k) => p[2] === r.pts[k][2]);
+      roads.push(same ? r : { ...r, ...(kept.length > 1 ? { id: `${r.id}c${n}` } : {}), pts, bbox: bbOf(pts), ...(pts.length < r.pts.length ? { shore: true } : {}) });
+    });
+  }
+  // bridges: the world's own outside the block; inside it, rebuilt from the re-fitted roads and rivers (bake-world's rule)
+  const bridges = W.bridges.filter(b => !(b.x >= R.x0 - pad && b.x < R.x1 + pad && b.z >= R.z0 - pad && b.z < R.z1 + pad));
+  const fresh = [];
+  for (const rd of roads) {
+    if (!touches(rd.bbox)) continue;
+    for (const cr of crossingsOf(rd.pts, rivers)) {
+      const b = bridgeFor(rd.pts, cr, rd.width);
+      if (!(b.x >= R.x0 - pad && b.x < R.x1 + pad && b.z >= R.z0 - pad && b.z < R.z1 + pad)) continue;
+      if (wet(b.x, b.z)) continue;
+      const twin = fresh.find(o => Math.hypot(o.x - b.x, o.z - b.z) < 14);
+      if (twin) { (twin.alsoRoads ||= []).push(rd.id); continue; }
+      fresh.push({ road: rd.id, ...b });
+    }
+  }
+  for (let pass = 0; pass < 4; pass++) for (const p of fresh) for (const q of fresh) {
+    if (p === q || p.deck === q.deck) continue;
+    const gap = Math.min(...[p.a, p.b].flatMap(e => [q.a, q.b].map(f => Math.hypot(e[0] - f[0], e[1] - f[1]))));
+    if (gap < p.ramp + q.ramp + 10) { const h = Math.max(p.deck, q.deck); p.deck = h; q.deck = h; }
+  }
+  // a rebuilt bridge that is the world's own to the centimetre is the world's own object (bit-exact zones where nothing moved)
+  const old = W.bridges;
+  for (const b of fresh) { const o = old.find(q => q.road === b.road && q.river === b.river && Math.hypot(q.x - b.x, q.z - b.z) < 0.01 && q.deck === b.deck && q.span === b.span); bridges.push(o || b); }
+  return { ...W, rivers, roads, bridges, downs: true };
+}
+
 /** World-fixed height quantisation, so a u16 means the same metres in every zone (edges match to the bit). */
 export function heightRange(world = WORLD) {
   return { min: -world.seaMetres - 80, max: world.landMetres + 260 };
@@ -271,7 +379,7 @@ export function macroIndex(m, wx, wz) {
  * The refine functions for one world: base ground (before rivers/lakes/towns), biome warp noise.
  * Everything takes WORLD metres. Seeded from the world seed only.
  */
-export function makeRefiner(m) {
+export function makeRefiner(m, extra = {}) {
   const M = m.macroMetres;
   const seed = subSeed(m.seed, 'thousandvale-zone-detail');
   const nA = makeNoise2D(subSeed(seed, 'a')), nB = makeNoise2D(subSeed(seed, 'b')), nC = makeNoise2D(subSeed(seed, 'c'));
@@ -294,6 +402,7 @@ export function makeRefiner(m) {
    * coastline wanders by low-frequency noise, so the edge of a block or the rim of an island is never a clean line.
    */
   function seaward(c, wx, wz) {
+    if (c.profile === 'downs') return profileOf(c).seaward(wx, wz);
     const r = continentRect(c);
     const wander = (fbm(nCoast, wx / 1700, wz / 1700, { octaves: 3 }) - 0.5) * 2 * c.wander;
     if (c.kind === 'island') {
@@ -319,8 +428,11 @@ export function makeRefiner(m) {
     const c = continentAt(wx, wz);
     let h = c && c.profile ? continentProfile(c, wx, wz, mainland(wx, wz)) : mainland(wx, wz);
     if (best <= 0 && !(near.kind === 'island')) return h;      // inside a block: exactly the old ground
-    const t = smooth(best / near.fall);
     if (best <= 0) return h;
+    // Torbor Downs (play-test 12): a high coast falls further, so its sea cliffs stand at ~50 degrees rather than as a wall
+    let t = smooth(best / (near.profile === 'downs' ? near.fall + 0.2 * Math.max(0, h) : near.fall));
+    // …and is under the sea within 220 m of the old block edge, so no land is left standing outside the walkable zones
+    if (near.profile === 'downs') { const r = continentRect(near), out = Math.hypot(Math.max(r.x0 - wx, 0, wx - r.x1), Math.max(r.z0 - wz, 0, wz - r.z1)); if (out > 0) t = Math.max(t, smooth(out / 220)); }
     const floor = -near.depth - 30 * smooth((best - near.fall) / 4000) + (fbm(nC, wx / 600, wz / 600, { octaves: 2 }) - 0.5) * 12;
     // the land slopes into the water: a high edge (Torbor Downs' southern mountains) becomes sea cliffs
     return h + (floor - h) * t;
@@ -333,14 +445,32 @@ export function makeRefiner(m) {
   const profiles = {};
   function profileOf(c) {
     if (!(c.id in profiles)) {
-      profiles[c.id] = c.profile === 'volcanic' ? makeVolcanic({ seed: m.seed, seaward: (x, z) => seaward(c, x, z) }) : null;
+      profiles[c.id] = c.profile === 'volcanic' ? makeVolcanic({ seed: m.seed, seaward: (x, z) => seaward(c, x, z) })
+        : c.profile === 'downs' ? downsProfile() : null;
       if (profiles[c.id]) profiles[c.id].ground = baseGround;     // with the coast's fall to the sea (roads, pools)
     }
     return profiles[c.id];
   }
+  /** Torbor Downs' profile needs the world's own lines and pins (tools/lib/torbor.mjs): makeRefiner(macro, { world, townPins, sitePins }). */
+  function downsProfile() {
+    if (!extra.world) throw new Error('world-core: Torbor Downs (profile "downs") needs makeRefiner(macro, { world, townPins, sitePins, places })');
+    const at = (zid, p) => ({ x: +zid.slice(1, 3) * ZM + p.x, z: +zid.slice(4, 6) * ZM + p.z });
+    const protectDiscs = [], townDiscs = [];
+    for (const [zid, towns] of Object.entries(extra.townPins || {})) if (/^z\d\d_\d\d$/.test(zid)) for (const t of Object.values(towns)) {
+      const w = at(zid, t); protectDiscs.push({ ...w, r: (t.r || 50) + 70 }); townDiscs.push({ ...w, r: (t.r || 50) + 20 });
+    }
+    for (const [zid, pins] of Object.entries(extra.sitePins || {})) if (/^z\d\d_\d\d$/.test(zid)) for (const [k, p] of Object.entries(pins)) {
+      if (!k.startsWith('door')) continue;
+      const w = at(zid, p); if (w.x < TORBOR.block.x0 || w.x >= TORBOR.block.x1 || w.z < TORBOR.block.z0 || w.z >= TORBOR.block.z1) continue;
+      protectDiscs.push({ ...w, r: 26 }); townDiscs.push({ ...w, r: 20 });
+    }
+    for (const p of extra.places || []) protectDiscs.push({ x: p.x, z: p.z, r: p.r + 6, coast: false });
+    for (const b of BAYS) if (b.harbour) { const q = b.harbour.quay, w = at(b.zone, { x: (q.x0 + q.x1) / 2, z: (q.z0 + q.z1) / 2 }); townDiscs.push({ ...w, r: 70 }); protectDiscs.push({ ...w, r: 60, coast: false }); }
+    return makeDowns({ seed: m.seed, macroMetres: m.macroMetres, macroWidth: m.width, world: extra.world, protectDiscs, townDiscs, mainland, rugged: (x, z) => clamp(bicubic(m, m.slope, x / M, z / M), 0, 1) });
+  }
   function continentProfile(c, wx, wz, ground) {
     const P = profileOf(c); if (!P) return ground;
-    const h = P.height(wx, wz), r = continentRect(c);
+    const h = c.profile === 'downs' ? P.height(wx, wz, ground) : P.height(wx, wz), r = continentRect(c);
     const edge = Math.min(wx - r.x0, r.x1 - wx, wz - r.z0, r.z1 - wz);
     return h + (ground - h) * (1 - smooth(edge / 100));
   }
@@ -354,7 +484,9 @@ export function makeRefiner(m) {
   function meander(x, z) {
     return [(fbm(nWX, x / 300, z / 300, { octaves: 2 }) - 0.5) * 50, (fbm(nWZ, x / 300, z / 300, { octaves: 2 }) - 0.5) * 50];
   }
-  return { baseGround, bayDelta, continentGround, mainland, warpedIndex, meander, metres, seaward, profileOf, islandAt: (wx, wz) => { const c = continentAt(wx, wz); return c && c.profile ? profileOf(c) : null; } };
+  return { baseGround, bayDelta, continentGround, mainland, warpedIndex, meander, metres, seaward, profileOf, islandAt: (wx, wz) => { const c = continentAt(wx, wz); return c && c.profile === 'volcanic' ? profileOf(c) : null; },
+    /** Torbor Downs' regenerated ground (tools/lib/torbor.mjs) when (wx, wz) is in its block, else null. */
+    downsAt: (wx, wz) => { const c = continentAt(wx, wz); return c && c.profile === 'downs' ? profileOf(c) : null; } };
 }
 
 export const RIVER_WIDTH = [0, 7, 14, 24];

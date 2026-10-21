@@ -1,0 +1,196 @@
+{
+ "_doc": "tools/torbor-look-places.mjs (play-test 12, #81): one place per Torbor Downs biome, Torborhold and three coasts. World metres; eye = camera offset from the spot, looking back past it.",
+ "places": [
+  {
+   "key": "torborhold",
+   "x": 25288,
+   "z": 5360,
+   "eye": [
+    14,
+    5,
+    4
+   ],
+   "biome": "start town"
+  },
+  {
+   "key": "borealForest",
+   "biome": "Pine Highwood",
+   "x": 23448,
+   "z": 2248,
+   "eye": [
+    9,
+    4.2,
+    9
+   ],
+   "zone": "z11_01"
+  },
+  {
+   "key": "hills",
+   "biome": "Heather Moor",
+   "x": 24736,
+   "z": 4296,
+   "eye": [
+    9,
+    4.2,
+    9
+   ],
+   "zone": "z12_02"
+  },
+  {
+   "key": "temperateForest",
+   "biome": "Oakwood",
+   "x": 25856,
+   "z": 5456,
+   "eye": [
+    9,
+    4.2,
+    9
+   ],
+   "zone": "z12_02"
+  },
+  {
+   "key": "grassland",
+   "biome": "Chalk Downs",
+   "x": 25376,
+   "z": 4216,
+   "eye": [
+    9,
+    4.2,
+    9
+   ],
+   "zone": "z12_02"
+  },
+  {
+   "key": "hallowed",
+   "biome": "Saint's Meadow",
+   "x": 25256,
+   "z": 3128,
+   "eye": [
+    9,
+    4.2,
+    9
+   ],
+   "zone": "z12_01"
+  },
+  {
+   "key": "marsh",
+   "biome": "Brack Fen",
+   "x": 27584,
+   "z": 2328,
+   "eye": [
+    9,
+    4.2,
+    9
+   ],
+   "zone": "z13_01"
+  },
+  {
+   "key": "badlands",
+   "biome": "Red Scarps",
+   "x": 28424,
+   "z": 5576,
+   "eye": [
+    9,
+    4.2,
+    9
+   ],
+   "zone": "z13_02"
+  },
+  {
+   "key": "shrubland",
+   "biome": "Gorse Heath",
+   "x": 29272,
+   "z": 5936,
+   "eye": [
+    9,
+    4.2,
+    9
+   ],
+   "zone": "z14_02"
+  },
+  {
+   "key": "savanna",
+   "biome": "Golden Wolds",
+   "x": 30352,
+   "z": 7544,
+   "eye": [
+    9,
+    4.2,
+    9
+   ],
+   "zone": "z14_03"
+  },
+  {
+   "key": "veiledHills",
+   "biome": "Blackthorn Scar",
+   "x": 24088,
+   "z": 7944,
+   "eye": [
+    9,
+    4.2,
+    9
+   ],
+   "zone": "z11_03"
+  },
+  {
+   "key": "tundra",
+   "biome": "High Fell",
+   "x": 22648,
+   "z": 8592,
+   "eye": [
+    9,
+    4.2,
+    9
+   ],
+   "zone": "z11_04"
+  },
+  {
+   "key": "snowyPeaks",
+   "biome": "Fell Tops",
+   "x": 23568,
+   "z": 9112,
+   "eye": [
+    9,
+    4.2,
+    9
+   ],
+   "zone": "z11_04"
+  },
+  {
+   "key": "coast-z13_01",
+   "biome": "Shingle Shore",
+   "x": 27194,
+   "z": 2378,
+   "eye": [
+    11.19,
+    5,
+    4.32
+   ],
+   "zone": "z13_01"
+  },
+  {
+   "key": "coast-z14_02",
+   "biome": "Shingle Shore",
+   "x": 30472,
+   "z": 5176,
+   "eye": [
+    -9.8,
+    5,
+    6.93
+   ],
+   "zone": "z14_02"
+  },
+  {
+   "key": "coast-z14_04",
+   "biome": "Shingle Shore",
+   "x": 29332,
+   "z": 10112,
+   "eye": [
+    2.2,
+    5,
+    -11.8
+   ],
+   "zone": "z14_04"
+  }
+ ]
+}

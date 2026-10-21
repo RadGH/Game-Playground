@@ -112,6 +112,24 @@
     "z": 1854
   },
   "bridges": [],
+  "palette": "downs",
+  "continent": "torbor",
+  "biomeNames": {
+    "grassland": "Chalk Downs",
+    "temperateForest": "Oakwood",
+    "borealForest": "Pine Highwood",
+    "hills": "Heather Moor",
+    "hallowed": "Saint's Meadow",
+    "marsh": "Brack Fen",
+    "badlands": "Red Scarps",
+    "shrubland": "Gorse Heath",
+    "savanna": "Golden Wolds",
+    "veiledHills": "Blackthorn Scar",
+    "tundra": "High Fell",
+    "mountains": "Grey Crags",
+    "snowyPeaks": "Fell Tops",
+    "beach": "Shingle Shore"
+  },
   "theme": {
     "kind": "mere",
     "lakes": [
@@ -121,15 +139,15 @@
         "x": 1101,
         "z": 1645,
         "r": 150,
-        "level": 1032.62
+        "level": 1045.91
       },
       {
         "name": "the Reflection Mere",
         "kind": "mere",
         "x": 684,
-        "z": 1260,
+        "z": 1228,
         "r": 75,
-        "level": 1008.01
+        "level": 1007.52
       }
     ],
     "fen": null
@@ -191,17 +209,21 @@
     ],
     "roads": 4,
     "bridges": 0,
-    "paths": 6,
-    "pathMetres": 1016,
-    "scatter": 13450,
+    "paths": 7,
+    "pathMetres": 861,
+    "scatter": 14383,
     "scatterKinds": {
-      "bush": 1949,
-      "tree_conifer": 2183,
-      "rock_small": 4549,
-      "rock_large": 3540,
-      "boulder": 877,
-      "tree_acacia": 9,
-      "tree_broadleaf": 31,
+      "blackthorn": 1034,
+      "heather": 2927,
+      "rock_small": 4016,
+      "tree_dead": 165,
+      "tree_birch": 90,
+      "tree_conifer": 244,
+      "rock_large": 2699,
+      "boulder": 860,
+      "gorse": 1732,
+      "bush": 288,
+      "tree_broadleaf": 16,
       "hedge": 312
     },
     "sites": [
@@ -217,13 +239,13 @@
       "x": 1462,
       "z": 1854
     },
-    "placements": 162,
+    "placements": 163,
     "vignettesAvoided": 657
   },
   "files": {
-    "terrain.bin": 706505,
-    "nav.bin": 61136,
-    "scatter.bin": 107684,
-    "placements.json": 133711
+    "terrain.bin": 729055,
+    "nav.bin": 55352,
+    "scatter.bin": 115148,
+    "placements.json": 129216
   }
 }

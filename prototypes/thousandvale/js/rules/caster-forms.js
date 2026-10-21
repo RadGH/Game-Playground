@@ -291,7 +291,7 @@ export function staffText(tv, spell, item, statuses = {}, forms = null) {
 export function sceptreText(item, statuses = {}) {
   const el = elementOf(item);
   const span = meleeSpanOf(item, 0);
-  return `Basic attack: a melee swing${span?.reach ? ` reaching ${m(span.reach)}` : ''} that deals ${el} damage instead of physical.${leaves(item, statuses)} It strikes only what is in reach — unlike a wand, it does not shoot anything.`;
+  return `Basic attack: a melee swing${span?.reach ? ` reaching ${m(span.reach)}` : ''} that deals ${el} damage instead of physical.${leaves(item, statuses)}`;
 }
 
 export function riderText(r) {

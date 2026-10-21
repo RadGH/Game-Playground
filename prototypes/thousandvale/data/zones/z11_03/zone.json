@@ -200,13 +200,31 @@
       "w": 4.31
     }
   ],
+  "palette": "downs",
+  "continent": "torbor",
+  "biomeNames": {
+    "grassland": "Chalk Downs",
+    "temperateForest": "Oakwood",
+    "borealForest": "Pine Highwood",
+    "hills": "Heather Moor",
+    "hallowed": "Saint's Meadow",
+    "marsh": "Brack Fen",
+    "badlands": "Red Scarps",
+    "shrubland": "Gorse Heath",
+    "savanna": "Golden Wolds",
+    "veiledHills": "Blackthorn Scar",
+    "tundra": "High Fell",
+    "mountains": "Grey Crags",
+    "snowyPeaks": "Fell Tops",
+    "beach": "Shingle Shore"
+  },
   "summary": {
     "zone": "z11_03",
     "province": "Petbeck Basin",
     "inputHash": "a23813e6",
     "rivers": 3,
-    "wetShare": 0.006,
-    "unwalkableShare": 0.184,
+    "wetShare": 0.007,
+    "unwalkableShare": 0.198,
     "towns": [
       {
         "name": "Hermit's Rest",
@@ -323,17 +341,21 @@
     "roads": 12,
     "bridges": 3,
     "paths": 11,
-    "pathMetres": 982,
-    "scatter": 15434,
+    "pathMetres": 1116,
+    "scatter": 28263,
     "scatterKinds": {
-      "rock_small": 2298,
-      "bush": 4690,
-      "tree_broadleaf": 4958,
-      "rock_large": 1567,
-      "boulder": 270,
-      "tree_conifer": 578,
-      "tree_acacia": 23,
-      "hedge": 1050
+      "rock_small": 1917,
+      "rock_large": 3289,
+      "tree_conifer": 131,
+      "tree_birch": 1298,
+      "heather": 1321,
+      "tree_broadleaf": 12693,
+      "bush": 4493,
+      "boulder": 280,
+      "tree_old_oak": 19,
+      "blackthorn": 1723,
+      "tree_dead": 260,
+      "hedge": 839
     },
     "sites": [
       "settlement(HUB) city Hermit's Rest 1104 560 140",
@@ -349,13 +371,13 @@
       "x": 1100,
       "z": 560
     },
-    "placements": 397,
+    "placements": 390,
     "vignettesAvoided": 558
   },
   "files": {
-    "terrain.bin": 689751,
-    "nav.bin": 49694,
-    "scatter.bin": 123556,
-    "placements.json": 256054
+    "terrain.bin": 724370,
+    "nav.bin": 71488,
+    "scatter.bin": 226188,
+    "placements.json": 253135
   }
 }

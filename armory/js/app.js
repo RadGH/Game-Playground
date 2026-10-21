@@ -10,6 +10,7 @@ import { makeStore } from '../../shared/store.js';
 import { installTooltips } from '../../shared/tooltip.js';
 import { fmt } from '../../shared/format.js';
 import { createChibi2Character } from '../../avatar-3d/js/chibi2.js';
+import { attachHeldFlame } from '../../avatar-3d/js/held-flame.js';
 import * as motion from '../../avatar-3d/js/chibi2-motion.js';
 import * as dualMotion from '../../avatar-3d/js/chibi2-motion-dual.js';      // importing it registers the dual-wield, angling and revive clips
 import { CHIBI2_RACES, CHIBI2_RACE_IDS } from '../../avatar-3d/js/chibi2-races.js';
@@ -31,7 +32,7 @@ const label = (map, v) => map[v] || String(v).replace(/_/g, ' ').replace(/^\w/, 
 // ---------------------------------------------------------------- animation list
 // every clip the motion module offers
 const ANIM_GROUPS = Object.fromEntries(Object.entries(motion.CHIBI2_ANIM_GROUPS).map(([k, v]) => [k, [...v]]));
-let ANIMS = [...new Set([...motion.CHIBI2_EVERY_ANIMS, ...motion.CHIBI2_SWIM_ANIMS])];
+let ANIMS = [...new Set([...motion.CHIBI2_EVERY_ANIMS, ...motion.CHIBI2_SWIM_ANIMS, ...(motion.CHIBI2_MUSIC_ANIMS || [])])];
 for (const [name, v] of [...Object.entries(motion), ...Object.entries(dualMotion)]) {
   // any opt-in list the motion module exports later (CHIBI2_DUAL_ANIMS…) is picked up without a change here
   if (!/^CHIBI2_\w+_ANIMS$/.test(name) || !Array.isArray(v)) continue;
@@ -187,7 +188,7 @@ function ensureScene() {
   scene.addTicker(dt => {
     if (!actor) return;
     const speed = Number(view().speed);
-    actor.setRate(speed > 0 ? speed : 1); actor.update(speed > 0 ? dt : 0);     // paused still holds the pose it stopped on
+    actor.setRate(speed > 0 ? speed : 1); actor.update(speed > 0 ? dt : 0); flame?.update(dt);     // paused still holds the pose it stopped on
     // a one-shot falls back to idle when it ends: play it again while "repeat" is on
     if ($('anim-loop').checked && view().anim !== 'idle' && actor.anim === 'idle' && motion.ONE_SHOTS.has(view().anim)) {
       loopTimer += dt; if (loopTimer > 0.45) { loopTimer = 0; actor.setAnim(view().anim, 0.1, true); }
@@ -212,10 +213,12 @@ async function rebuild() {
   try { next = await createChibi2Character(look, { anims: ANIMS, v25: true }); }
   catch (e) { console.error(e); $('stage').classList.remove('busy'); $('stage-msg').textContent = 'Could not build this model: ' + e.message; return; }
   if (seq !== buildSeq) { next.dispose(); return; }
+  flame?.dispose(); flame = null;
   if (actor) { scene.scene.remove(actor.group); actor.dispose(); }
   if (alone) { scene.scene.remove(alone); alone.userData.dispose(); alone = null; }
   extract?.dispose();
   actor = next; base = bare;
+  flame = attachHeldFlame(actor, look);   // a lit torch / cresset burns here as it does in the games
   // for headwear the shown body has hair, so measure a bald twin instead of the one on screen
   if (row.slot === 'hat' && v.hair !== 'none') {
     const twin = await createChibi2Character(dress(baselineFor(row, bodyOpts), row, { ...lookOpts(row, v), hand }), { anims: ['idle'], v25: true });
@@ -453,6 +456,7 @@ function select(key, { scroll = false } = {}) {
   if (scroll) document.querySelector(`.gcard[data-key="${CSS.escape(key)}"]`)?.scrollIntoView({ block: 'center' });
 }
 const camSet = new Set();
+let flame = null;
 /** "Auto adjust camera" (on unless turned off; remembered in this browser). */
 const autoCam = () => $('auto-cam')?.checked !== false;
 

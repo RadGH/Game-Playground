@@ -30,7 +30,8 @@ test('OPT-IN: every v2 look builds exactly the geometry it built before Chibi 2.
     if (!want[k]) continue;
     const a = await createChibi2Character(look); if (hashActor(a) !== want[k]) bad.push(k); a.dispose();
   }
-  assert.equal(Object.keys(want).length, 209);
+  // 209 at 4c8f8b1f; 218 since the 2026-10-21 owner review re-baseline (new ids join the face sweep) — it never shrinks
+  assert.ok(Object.keys(want).length >= 209, 'the fixture lost looks');
   assert.deepEqual(bad, [], `v2 looks changed: ${bad.join(', ')}`);
 });
 

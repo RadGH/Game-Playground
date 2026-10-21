@@ -27,10 +27,17 @@ export const DEFAULT_AVATAR = {
   decor: { id: 'none', color: '#6a4a2a' },
 };
 
+/**
+ * Ids that were REMOVED and what an old saved look gets instead (rather than the slot's default). 2026-10-21: the
+ * owner dropped the eye "Glowing + light tear" (glow_tear) — an old look keeps glowing eyes.
+ */
+export const RENAMED_PARTS = { eyes: { glow_tear: 'glow' } };
+
 /** Deep-merge missing fields from DEFAULT_AVATAR and drop unknown part ids (fallback to defaults). */
 export function normalizeAvatar(a = {}) {
   const out = JSON.parse(JSON.stringify(DEFAULT_AVATAR));
   for (const [k, v] of Object.entries(a || {})) { if (v && typeof v === 'object' && out[k] && typeof out[k] === 'object') Object.assign(out[k], v); else if (k in out) out[k] = v; }
+  for (const [slot, map] of Object.entries(RENAMED_PARTS)) { const cur = out[slot]?.id; if (cur in map) out[slot].id = map[cur]; }
   for (const slot of SLOTS) { const cur = out[slot]?.id ?? out[slot]; if (typeof cur === 'string' && !PARTS[slot]?.[cur]) { if (typeof out[slot] === 'string') out[slot] = DEFAULT_AVATAR[slot]; else out[slot].id = DEFAULT_AVATAR[slot].id; } }
   return out;
 }

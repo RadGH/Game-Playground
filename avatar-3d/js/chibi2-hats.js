@@ -20,8 +20,10 @@ const tone = (c, k) => '#' + new THREE.Color(c).multiplyScalar(k).getHexString()
 const lift = (c, k) => '#' + new THREE.Color(c).lerp(new THREE.Color('#ffffff'), k).getHexString();
 
 /** Hats that sit over the crown and hide the hair under them (a fringe may still show). */
+// 'helmet' added 2026-10-21 (owner review, H5): the plain helmet was missing, so a Chibi 2 look built the whole hair cap,
+// the fringe and every lock under it and they all came out through the steel
 export const HATS_COVER_CROWN = ['cap', 'leather_cap', 'bandana', 'straw', 'top_hat', 'chain_coif',
-  'war_helm', 'great_helm', 'plate_helm', 'wolf_helm', 'rune_helm', 'tricorn'];
+  'war_helm', 'great_helm', 'plate_helm', 'wolf_helm', 'rune_helm', 'tricorn', 'helmet'];
 /**
  * 2026-09-25 class helms. Built HERE, not by chibi2.js's generic `/helm/` dome (which every id with
  * "helm" in it used to fall into, so a paladin's great helm and a knight's plate helm were the same
@@ -52,9 +54,19 @@ export function buildExtraHat(a, c) {
       head(profile([[0.395, 0.362, 0.311], [0.44, 0.362, 0.311]], 16), dk, { metal: true });
       head(profile([[0.60, 0.035, 0.12], [0.672, 0.02, 0.07]], 8), dk, { position: [0, 0, -0.02], metal: true });   // a crest ridge front to back
       head(new THREE.BoxGeometry(0.05, 0.2, 0.03), st, { position: [0, 0.32, 0.325], rotation: [-0.12, 0, 0], metal: true });   // nasal
+      /**
+       * CHEEK GUARDS (owner review 2026-10-21, H6: "ear pieces too low, clip through the ears and appear floating"). They
+       * were flat boxes hung at the ear's own height with a gap to the helm above them. Now each is a curved plate that
+       * HANGS FROM THE BRIM (y 0.41) down the cheek to 0.17, following the head's curve a little outside it, and spans the
+       * cheek between the eye's outer corner and the front of the ear — so it is joined to the helm and never meets the ear.
+       */
       for (const s of [-1, 1]) {
-        head(new THREE.BoxGeometry(0.03, 0.2, 0.14), st, { position: [s * 0.34, 0.2, 0.03], rotation: [0.1, 0, s * 0.1], metal: true });
-        head(new THREE.SphereGeometry(0.018, 5, 4), trim, { position: [s * 0.36, 0.27, 0.06], metal: true });
+        const plate = new THREE.CylinderGeometry(1, 0.955, 0.24, 5, 2, true, s > 0 ? 0.92 : -1.36, 0.44);
+        head(plate, st, { position: [0, 0.29, 0.0], scale: [0.362, 1, 0.312], metal: true });
+        head(new THREE.CylinderGeometry(1, 1, 0.02, 5, 1, true, s > 0 ? 0.92 : -1.36, 0.44), dk, { position: [0, 0.175, 0.0], scale: [0.35, 1, 0.3], metal: true });   // a turned lower edge
+        const t = s * 1.14;
+        head(new THREE.SphereGeometry(0.018, 5, 4), trim, { position: [Math.sin(t) * 0.37, 0.36, Math.cos(t) * 0.32], metal: true });
+        head(new THREE.SphereGeometry(0.016, 5, 4), trim, { position: [Math.sin(t) * 0.355, 0.23, Math.cos(t) * 0.305], metal: true });
       }
       // The lining is copied BEFORE the curtain is placed: `head` moves a geometry in place, so a copy
       // taken afterwards was placed twice and floated a metre over the helm (2026-09-29, same fault
@@ -105,6 +117,9 @@ export function buildExtraHat(a, c) {
       // muzzle over the brow, two upright ears, amber eyes, and the pelt down the back of the neck
       const fur = a.hat.color || '#7a7068', belly = lift(fur, 0.35), dk = tone(fur, 0.6);
       dome(head, fur, { cy: 0.35, r: [0.385, 0.32, 0.345], tilt: -0.1, open: 0.56 });
+      // the hide's underside (H7, "see through the underside of the helm"): a darker lining a hair inside the dome, so from
+      // below the helm is a closed, dark hollow rather than the fur's own back faces
+      dome(head, tone(fur, 0.45), { cy: 0.35, r: [0.378, 0.314, 0.338], tilt: -0.1, open: 0.56 });
       head(new THREE.SphereGeometry(1, 10, 6), fur, { position: [0, 0.58, 0.2], scale: [0.16, 0.1, 0.2], rotation: [0.25, 0, 0] });
       head(new THREE.SphereGeometry(1, 10, 6), belly, { position: [0, 0.52, 0.32], scale: [0.1, 0.06, 0.14], rotation: [0.35, 0, 0] });
       head(new THREE.SphereGeometry(1, 6, 4), '#1a1614', { position: [0, 0.55, 0.45], scale: [0.04, 0.03, 0.03] });
@@ -113,9 +128,13 @@ export function buildExtraHat(a, c) {
         head(new THREE.ConeGeometry(0.04, 0.11, 4), tone(fur, 0.5), { position: [s * 0.2, 0.69, 0.045], rotation: [-0.15, 0, s * -0.3] });
         head(new THREE.SphereGeometry(1, 6, 4), '#e8a830', { position: [s * 0.09, 0.625, 0.3], scale: [0.03, 0.02, 0.015] });
         // the pelt's forelegs, knotted over the shoulders
+        // owner review 2026-10-21 (H7, "see through the tips of the legs"): a tube is open at its ends, so each leg now ends
+        // in a closed paw and the pelt's tail end tapers to a point
         head(taperedCurve([[s * 0.3, 0.3, 0.0], [s * 0.34, 0.08, 0.06], [s * 0.26, -0.12, 0.16]], [0.07, 0.055, 0.03], 5, 6), fur, { });
+        head(new THREE.SphereGeometry(1, 7, 5), dk, { position: [s * 0.255, -0.13, 0.168], scale: [0.042, 0.036, 0.046] });
+        head(new THREE.SphereGeometry(1, 7, 5), fur, { position: [s * 0.3, 0.3, 0.0], scale: [0.072, 0.072, 0.072] });   // the shoulder, closing the leg's top
       }
-      head(taperedCurve([[0, 0.45, -0.3], [0, 0.2, -0.38], [0, -0.1, -0.33], [0, -0.35, -0.3]], [0.26, 0.22, 0.17, 0.04], 7, 8), fur, { scale: [1, 1, 0.55] });
+      head(taperedCurve([[0, 0.45, -0.3], [0, 0.2, -0.38], [0, -0.1, -0.33], [0, -0.3, -0.3], [0, -0.38, -0.28]], [0.26, 0.22, 0.17, 0.08, 0.004], 7, 9), fur, { scale: [1, 1, 0.55] });
       head(taperedCurve([[0, 0.4, -0.33], [0, 0.1, -0.4]], [0.05, 0.03], 4, 3), dk);
       return;
     }
@@ -231,13 +250,30 @@ export function buildExtraHat(a, c) {
       // radii put the top one in the air as a halo and the other three inside the shell where nobody saw them;
       // the arc is turned in the geometry, because a z rotation in `head` also turned the axis the squash is on).
       const BROW = 1.08, GAP = 1.9, R = [0.39, 0.38, 0.34], CY = 0.3;        // BROW: polar angle of the opening's top edge (y ~0.47)
-      head(new THREE.SphereGeometry(1, 16, 5, 0, Math.PI * 2, 0, BROW + 0.04), darkSteel, { position: [0, CY, -0.02], scale: R, metal: true });
-      head(new THREE.SphereGeometry(1, 16, 7, Math.PI / 2 + GAP / 2, Math.PI * 2 - GAP, BROW, 2.3 - BROW), darkSteel, { position: [0, CY, -0.02], scale: R, metal: true });
-      const at = y => R[0] * Math.sqrt(Math.max(0, 1 - ((y - CY) / R[1]) ** 2)) + 0.003;
+      /**
+       * MAIL, NOT PLATE (owner review 2026-10-21, H8: "looks like plate — make it read as chainmail"). The hood was a smooth
+       * steel shell with four thin rings round it. Now the shell is a fine lattice whose ROWS alternate: every other row
+       * of rings a lighter steel and pushed out ~5 mm, the rows between a darker steel — so it reads as rows of links
+       * (concentric round the crown, as a coif is knitted) with a corrugated outline, and no texture. (A per-vertex
+       * checker was tried first: the quads' diagonals turned it into a swirl.) Same two pieces as before.
+       */
+      const light = lift(darkSteel, 0.28), deep = tone(darkSteel, 0.62);
+      const mail = (w, h, p0, pl, t0, tl) => {
+        const g = new THREE.SphereGeometry(1, w, h, p0, pl, t0, tl), p = g.attributes.position, odd = [];
+        for (let i = 0; i < p.count; i++) {
+          const iy = Math.floor(i / (w + 1)), o = iy % 2 === 1;
+          odd.push(o);
+          if (o && iy > 0) { const k = 1.014; p.setXYZ(i, p.getX(i) * k, p.getY(i) * k, p.getZ(i) * k); }
+        }
+        g.computeVertexNormals();
+        head(g, darkSteel, { position: [0, CY, -0.02], scale: R, metal: true, colorAt: (x, y, z, i) => odd[i] ? light : deep });
+      };
+      mail(16, 12, 0, Math.PI * 2, 0, BROW + 0.04);
+      mail(14, 14, Math.PI / 2 + GAP / 2, Math.PI * 2 - GAP, BROW, 2.3 - BROW);
+      const at = y => R[0] * Math.sqrt(Math.max(0, 1 - ((y - CY) / R[1]) ** 2)) + 0.006;
       const yBrow = CY + R[1] * Math.cos(BROW + 0.04);
-      head(new THREE.TorusGeometry(at(yBrow), 0.008, 3, 24), tone(darkSteel, 0.7), { position: [0, yBrow, -0.02], rotation: [Math.PI / 2, 0, 0], scale: [1, R[2] / R[0], 1], metal: true });
-      for (let k = 0; k < 4; k++) { const y = 0.42 - k * 0.1; head(new THREE.TorusGeometry(at(y), 0.006, 3, 20, Math.PI * 2 - GAP).rotateZ(Math.PI / 2 + GAP / 2), tone(darkSteel, 0.7), { position: [0, y, -0.02], rotation: [Math.PI / 2, 0, 0], scale: [1, R[2] / R[0], 1], metal: true }); }
-      add(profile([[0.27 * T, 0.24 * W, 0.17 * W, -0.01], [0.33 * T, 0.16 * W, 0.13 * W, -0.012], [0.4 * T, 0.1, 0.09, -0.015]], 14), 'chest', darkSteel, { metal: true });
+      head(new THREE.TorusGeometry(at(yBrow), 0.011, 4, 26), tone(darkSteel, 0.8), { position: [0, yBrow, -0.02], rotation: [Math.PI / 2, 0, 0], scale: [1, R[2] / R[0], 1], metal: true });   // a leather-bound brow edge
+      add(profile([[0.27 * T, 0.24 * W, 0.17 * W, -0.01], [0.3 * T, 0.2 * W, 0.15 * W, -0.011], [0.33 * T, 0.16 * W, 0.13 * W, -0.012], [0.4 * T, 0.1, 0.09, -0.015]], 22), 'chest', darkSteel, { metal: true, colorAt: (x, y, z, i) => Math.floor(i / 23) % 2 ? light : deep });   // the mantle, in the same mail
       return;
     }
   }

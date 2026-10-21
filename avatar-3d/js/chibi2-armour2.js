@@ -219,7 +219,8 @@ function capeBack(id, W, T, v = 0.32) {
  * there, a little proud of whatever the hat is. Hats not listed use the default.
  */
 export const BROW = {
-  default: [0, 0.47, 0.37], hood: [0, 0.53, 0.43], wizard: [0, 0.52, 0.41], circlet: [0, 0.44, 0.345], headband: [0, 0.43, 0.35],
+  default: [0, 0.47, 0.37], hood: [0, 0.53, 0.43], wizard: [0, 0.53, 0.262],   // wizard: on the lowered crown (2026-10-21)
+  circlet: [0, 0.44, 0.345], headband: [0, 0.43, 0.35],
   war_helm: [0, 0.48, 0.38], horned_helm: [0, 0.48, 0.38], great_helm: [0, 0.47, 0.385], plate_helm: [0, 0.5, 0.37], dragon_helm: [0, 0.4, 0.38],
   rune_helm: [0, 0.47, 0.38], wolf_helm: [0, 0.56, 0.36], bone_headdress: [0, 0.45, 0.35], tricorn: [0, 0.6, 0.36], feather_cap: [0, 0.5, 0.37],
   wide_brim: [0, 0.55, 0.33], leather_cap: [0, 0.48, 0.37], goggles_up: [0, 0.55, 0.36], chain_coif: [0, 0.48, 0.37],
@@ -302,7 +303,7 @@ function mantle(a, c, dc, trim, emblem, ec) {
   const { add, W, T, chestZ } = c;
   // the collar: an open cone behind the head, flaring as it rises, both faces drawn
   const collar = new THREE.CylinderGeometry(0.2 * W, 0.13 * W, 0.24, 18, 1, true, Math.PI * 0.62, Math.PI * 0.76);
-  const back = collar.clone(); { const idx = back.index.array; for (let i = 0; i < idx.length; i += 3) [idx[i], idx[i + 1]] = [idx[i + 1], idx[i]]; back.computeVertexNormals(); }
+  const back = collar.clone(); { const p = back.attributes.position, n = back.attributes.normal; for (let i = 0; i < p.count; i++) p.setXYZ(i, p.getX(i) - n.getX(i) * 0.003, p.getY(i), p.getZ(i) - n.getZ(i) * 0.003); const idx = back.index.array; for (let i = 0; i < idx.length; i += 3) [idx[i], idx[i + 1]] = [idx[i + 1], idx[i]]; back.computeVertexNormals(); }   // (2026-10-21: a hair inside the collar — double-sided material)
   add(collar, 'chest', dc, { position: [0, 0.4 * T, -0.02] }); add(back, 'chest', tone(dc, 0.6), { position: [0, 0.4 * T, -0.02] });
   // piping round the collar's top edge, in the emblem colour
   const edge = [];
@@ -343,6 +344,12 @@ function harness(a, c, dc, trim, emblem, ec) {
   const pts = [];
   for (let k = 0; k <= 8; k++) { const t = k / 8, x = (0.17 - 0.36 * t) * W, y = (0.29 - 0.42 * t) * T; pts.push([x, y, chestZ(x, y, 1, 0.022)]); }
   add(taperedCurve(pts, [0.024, 0.024, 0.024], 4, 16), 'chest', tone(dc, 0.75));
+  // B10 (2026-10-21 owner review): the baldric carries on over the right shoulder and down the back to the left hip, and
+  // closes round the left side, in one piece with the front run (it used to stop in the air at the shoulder)
+  if (c.wrap) {
+    const P = Math.PI, l = c.topStyle?.armor === 'plate' || c.topStyle?.armor === 'scale' ? 0.04 : 0.024;
+    c.wrap.strap(add, [[0.17 * W, 0.95], [0.15 * W, P / 2], [-0.19 * W, P + 1.02]], 0.024, tone(dc, 0.75), { lift: l, n: 22, extraStart: [pts[1]], extraEnd: [c.wrap.side(-0.13 * T, -1, l + 0.03), pts[8]] });
+  }
   for (const t of [0.2, 0.8]) { const [x, y, z] = pts[Math.round(t * 8)]; add(new THREE.BoxGeometry(0.03, 0.03, 0.012), 'chest', trim, { position: [x, y, z + 0.018], rotation: [0, 0, 0.9], metal: true }); }
   // the buckle IS the emblem
   const mid = pts[4];

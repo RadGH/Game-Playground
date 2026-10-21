@@ -142,8 +142,7 @@ export function baselineFor(row, opts = {}) {
 
 /** Which hand choices make sense for a row. A weapon can always be tried in either hand — that is the point. */
 export function handModes(row) {
-  // a two-hander (bows, crossbows, staves, greatswords…) is held in both hands at once: never in the off hand, never paired
-  if (row.slot === 'held') return row.hands === 2 ? ['main'] : ['main', 'off', 'both'];
+  if (row.slot === 'held') return ['main', 'off', 'both'];
   if (row.slot === 'offhand') return ['off'];
   return [];
 }

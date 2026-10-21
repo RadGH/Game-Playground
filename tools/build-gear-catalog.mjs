@@ -18,7 +18,7 @@ import { fileURLToPath } from 'node:url';
 import { join, resolve } from 'node:path';
 import { PARTS } from '../avatar-2d/js/parts/index.js';
 import { G5_TABLES, isG5 } from '../avatar-3d/js/chibi2-gear5-ids.js';
-import { FARHOLD_WEAPON_INFO, FARHOLD_OFFHAND_INFO } from '../avatar-3d/js/chibi2-weapon-ids.js';
+import { FARHOLD_WEAPON_INFO, FARHOLD_OFFHAND_INFO, isTwoHandedHeld } from '../avatar-3d/js/chibi2-weapon-ids.js';
 import { TOP_STYLES, BOTTOM_STYLES, SHOE_STYLES } from '../avatar-3d/js/chibi2-body.js';
 import { createChibi2Character, CHIBI2_ONLY_PARTS } from '../avatar-3d/js/chibi2.js';
 import { CLASS_HATS } from '../avatar-3d/js/chibi2-hats.js';
@@ -139,7 +139,7 @@ const vocab = slot => [...new Set([...Object.keys(PARTS[slot] || {}), ...(CHIBI2
 for (const id of vocab('held')) {
   if (!await builds('held', id)) continue;
   const fh = FARHOLD_WEAPON_INFO[id];
-  row({ id, kind: 'weapon', slot: 'held', gameSlot: 'weapon', type: HELD_TYPE[id] || (fh && FAMILY_TYPE[fh.family]) || 'sword', hands: fh ? fh.hands : HELD_TWO.has(id) ? 2 : 1,
+  row({ id, kind: 'weapon', slot: 'held', gameSlot: 'weapon', type: HELD_TYPE[id] || (fh && FAMILY_TYPE[fh.family]) || 'sword', hands: (fh ? fh.hands === 2 : HELD_TWO.has(id)) || isTwoHandedHeld(id) ? 2 : 1,   // W11 (2026-10-21): the builder's own two-handed rule decides too
     file: id.startsWith('tv_') ? 'avatar-3d/js/chibi2-weapons-tv.js' : fh ? 'avatar-3d/js/chibi2-weapons.js' : 'avatar-3d/js/chibi2-gear.js',
     builder: id.startsWith('tv_') ? `TV_BUILDERS.${id}` : fh ? `BUILDERS.${id}` : `buildHeld('${id}')`, name: nameOf('held', id), form: HELD_FORM[id], color: '#c8ccd6',
     offhandToo: !!PARTS.offhand[id] });
@@ -165,16 +165,17 @@ for (const [slot, styles, gameSlot, arch] of [['top', TOP_STYLES, 'chest', TOP_A
     row({ id, kind: 'armour', slot, gameSlot, type: gameSlot, archetype: a, file: 'avatar-3d/js/chibi2-body.js', builder: `${slot.toUpperCase()}_STYLES.${id}`.replace('SHOES_', 'SHOE_'), name: nameOf(slot, id), color: ARCH_COLOUR[a] });
   }
 }
-for (const id of vocab('cape')) if (await builds('cape', id)) row({ id, kind: 'accessory', slot: 'cape', gameSlot: 'cape', type: CAPE_TYPE, file: 'avatar-3d/js/chibi2-gear.js', builder: `buildCape('${id}')`, name: nameOf('cape', id) });
+// (2026-10-21: scarves can be worn in the back slot too — they are typed 'scarf' there, as in the accessory slot)
+for (const id of vocab('cape')) if (await builds('cape', id)) row({ id, kind: 'accessory', slot: 'cape', gameSlot: 'cape', type: /scarf|cowl|neckerchief/.test(id) ? 'scarf' : CAPE_TYPE, file: 'avatar-3d/js/chibi2-gear.js', builder: `buildCape('${id}')`, name: nameOf('cape', id) });
 for (const id of vocab('decor')) if (await builds('decor', id)) {
   const type = DECOR_TYPE[id] || 'decor';
   row({ id, kind: 'accessory', slot: 'decor', gameSlot: DECOR_SLOT[type] || null, type, file: T2_DECOR.includes(id) ? 'avatar-3d/js/chibi2-armour2.js' : 'avatar-3d/js/chibi2-gear.js',
     builder: T2_DECOR.includes(id) ? `buildArmour2('${id}')` : `buildDecor('${id}')`, name: nameOf('decor', id), tags: [T2_DECOR.includes(id) && 'tier2'] });
 }
 for (const id of vocab('accessory')) if (await builds('accessory', id)) {
-  const type = ACC_TYPE[id] || 'face';
-  row({ id, kind: 'accessory', slot: 'accessory', gameSlot: type === 'amulet' ? 'necklace' : null, type, file: ACC_TYPE[id] ? 'avatar-3d/js/chibi2-gear.js' : 'avatar-3d/js/chibi2-face.js',
-    builder: ACC_TYPE[id] ? `buildAccessory('${id}')` : `buildFace('${id}')`, name: nameOf('accessory', id) });
+  const type = ACC_TYPE[id] || (/^scarf_(trailing|cowl|striped)$|^neckerchief$/.test(id) ? 'scarf' : 'face');
+  row({ id, kind: 'accessory', slot: 'accessory', gameSlot: type === 'amulet' ? 'necklace' : null, type, file: ACC_TYPE[id] || type === 'scarf' ? 'avatar-3d/js/chibi2-gear.js' : 'avatar-3d/js/chibi2-face.js',
+    builder: ACC_TYPE[id] || type === 'scarf' ? `buildAccessory('${id}')` : `buildFace('${id}')`, name: nameOf('accessory', id) });
 }
 
 // ---- Thousandvale's items made FROM the catalog (stream C, js/rules/tv-gear.js + data/rules/gear-tv.json): each new row

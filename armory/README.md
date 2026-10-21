@@ -89,8 +89,9 @@ the real builders every time, so a changed model changes its numbers with no fil
   it at an angle, the box of the item and the body together, 1.2x further out for a two-hander; headwear close on the
   head; capes from behind; shoes low. Untick it to keep the camera where you left it.
 * **Builds Chibi 2.5** (`{ v25: true }`), like Thousandvale, so the faces and hair match the game.
-* **Two-handers are main-hand only**: `handModes(row)` returns `['main']` for a held row with `hands: 2` (bows,
-  crossbows, staves, greatswords…), so Off hand / Both hands are disabled for them (a test walks every such row).
+* **Two-handers take both hands only when the off hand is empty** (the shared builder's rule: `holdFor().twoHand`);
+  a pair is still drawn as before (a stricter "main hand only" rule was tried and withdrawn the same day).
+* A held **torch / cresset burns** (`attachHeldFlame` from `avatar-3d/js/held-flame.js`, ticked with the actor).
 
 ## Thumbnails without freezing the page
 

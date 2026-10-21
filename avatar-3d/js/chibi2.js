@@ -7,7 +7,7 @@ import { buildBody } from './chibi2-body.js';
 import { buildFace, HEAD_SHAPES } from './chibi2-face.js';
 import { buildExtraHat, HATS_COVER_CROWN, CLASS_HATS, HELM_BRIM } from './chibi2-hats.js';
 import { raceOf } from './chibi2-races.js';
-import { holdFor } from './chibi2-weapon-ids.js';
+import { holdFor, applyHandsRule } from './chibi2-weapon-ids.js';
 import { buildArmour2 } from './chibi2-armour2.js';
 import { buildGear5 } from './chibi2-gear5.js';
 import { G5_HATS_COVER_CROWN, G5_HAT_BRIM } from './chibi2-gear5-ids.js';
@@ -21,7 +21,7 @@ import { needsSkirt, addSkirtBones, strideFor, applyBody25, race25 } from './chi
 export { CHIBI2_ANIMS, CHIBI2_SWIM_ANIMS, CHIBI2_ALL_ANIMS };
 const templates = new Map();
 /** Hats with a brim the hair shows beneath, and the height (head units) the hair is cut off at. */
-const HAT_BRIM = { wizard: 0.5, wide_brim: 0.41, straw: 0.43, top_hat: 0.51, feather_cap: 0.43, bard_red_feather: 0.43, cap: 0.44, bandana: 0.44, leather_cap: 0.4, ...HELM_BRIM, ...G5_HAT_BRIM };
+const HAT_BRIM = { wizard: 0.445, wide_brim: 0.41, straw: 0.43, top_hat: 0.51, feather_cap: 0.43, bard_red_feather: 0.43, cap: 0.44, bandana: 0.44, leather_cap: 0.4, ...HELM_BRIM, ...G5_HAT_BRIM };
 const sphere = () => new THREE.SphereGeometry(1, 10, 6);
 const ring = (r, tube) => new THREE.TorusGeometry(r, tube, 4, 12);
 
@@ -111,10 +111,10 @@ function buildTemplate(a, rig, opts = {}) {
     if (hairId === 'bangs') {
       for (let i = 0; i < 7; i++) { const x = (i - 3) * 0.075; head(taperedCurve([[x, 0.49, 0.16], [x + (i - 3) * 0.008, 0.43, 0.245], [x + (i - 3) * 0.012, 0.31, 0.26]], [0.065, 0.075, 0.006], 6, 6), i % 2 ? shade(hair, 0.08) : hair); }
     }
-    if (hairId === 'spiky' && !hoodUp) {
+    if (hairId === 'spiky' && !hoodUp && !headwearCoversCrown) {   // 2026-10-21: spikes stood out through every helm
       for (let i = 0; i < 7; i++) { const x = (i - 3) * 0.09; head(taperedCurve([[x, 0.36, 0.20], [x * 1.1, 0.50 + (i % 2) * 0.05, 0.17], [x * 1.2, 0.68 + (i % 3) * 0.06, 0.04]], [0.07, 0.05, 0.004], 5, 5), hair); }
     }
-    if (hairId === 'mohawk' && !hoodUp) {
+    if (hairId === 'mohawk' && !hoodUp && !headwearCoversCrown) {   // 2026-10-21: the fin stood out through every helm
       for (let i = 0; i < 5; i++) head(taperedCurve([[0, 0.46 + i * 0.025, 0.1], [0, 0.6 + i * 0.015, 0.1], [0, 0.83 - i * 0.035, 0.0]], [0.075, 0.065, 0.008], 5, 5), i % 2 ? shade(hair, 0.10) : hair);
     }
     if (hairId === 'pixie' && !hoodUp) for (const s of [-1, 1]) head(taperedCurve([[s * 0.05, 0.52, 0.14], [s * 0.2, 0.47, 0.235], [s * 0.315, 0.36, 0.12]], [0.07, 0.055, 0.008], 6, 6), hair); // swept above the brow, never across it
@@ -126,7 +126,7 @@ function buildTemplate(a, rig, opts = {}) {
       head(new THREE.SphereGeometry(1, 14, 9), hair, { position: [0, 0.47, -0.05], scale: [0.50, 0.42, 0.44] });
       for (const [x, y, r] of [[-0.40, 0.42, 0.11], [-0.26, 0.66, 0.10], [0, 0.72, 0.12], [0.26, 0.66, 0.10], [0.40, 0.42, 0.11]]) head(sphere(), hair, { position: [x, y, 0.08], scale: [r, r, r * 0.85] });
     }
-    if (hairId === 'mohawk' && !hoodUp) head(profile([[0.32, 0.09, 0.08], [0.48, 0.11, 0.09], [0.60, 0.035, 0.035]], 8), hair);
+    if (hairId === 'mohawk' && !hoodUp && !headwearCoversCrown) head(profile([[0.32, 0.09, 0.08], [0.48, 0.11, 0.09], [0.60, 0.035, 0.035]], 8), hair);
     if (!headwearCoversCrown) for (const s of [-1, 1]) head(taperedCurve([[s * 0.28, 0.45, -0.02], [s * 0.335, 0.31, 0.008], [s * 0.30, 0.15, 0.052]], [0.06, 0.043, 0.002], 6, 6), shade(hair, -0.07));
     if (hairId === 'wavy' && !headwearCoversCrown) for (const s of [-1, 1]) head(taperedCurve([[s * 0.27, 0.46, -0.06], [s * 0.36, 0.33, 0.0], [s * 0.30, 0.20, 0.03], [s * 0.37, 0.05, -0.01], [s * 0.31, -0.08, -0.04], [s * 0.36, -0.20, -0.06]], [0.07, 0.065, 0.06, 0.055, 0.045, 0.01], 6, 14), shade(hair, 0.06));
     if (hairId === 'bob' && !headwearCoversCrown) {
@@ -158,8 +158,16 @@ function buildTemplate(a, rig, opts = {}) {
     head(profile([[0.405, 0.357, 0.302], [0.435, 0.357, 0.302]], 16), trim, { metal: true });
     if (a.hat.id === 'horned_helm') for (const s of [-1, 1]) head(taperedCurve([[s * 0.30, 0.50, 0.02], [s * 0.50, 0.58, 0.03], [s * 0.56, 0.80, -0.02]], [0.065, 0.042, 0.006], 6, 7), '#d9cfa8');
   } else if (a.hat.id === 'wizard') {
-    head(profile([[0.51, 0.47, 0.36], [0.54, 0.46, 0.355], [0.555, 0.32, 0.25]], 16), a.hat.color);
-    head(profile([[0.53, 0.30, 0.23], [0.8, 0.17, 0.145, -0.035], [1.02, 0.09, 0.06, -0.10], [1.08, 0.003, 0.004, -0.18]], 12), a.hat.color);
+    /**
+     * Owner review 2026-10-21 (H2: "the hat floats high; its underside is invisible"). The brim sat at y 0.51 — a hand's
+     * width above the brows, with bare forehead or a slab of hair under it — and was ONE surface, so from below it
+     * vanished. It now sits 0.06 lower, just over the brows, with a crown wide enough to clear the skull and the hair at
+     * that height, and the brim is a CLOSED ring (top, rolled edge, underside back to the crown) in a darker under-colour.
+     */
+    const hc = a.hat.color || '#3a3a8a', under = shade(hc, -0.28);
+    head(profile([[0.465, 0.338, 0.292], [0.6, 0.238, 0.203, -0.02], [0.78, 0.152, 0.132, -0.05], [0.98, 0.076, 0.062, -0.11], [1.04, 0.003, 0.004, -0.17]], 14), hc);
+    head(profile([[0.47, 0.34, 0.294], [0.456, 0.54, 0.44], [0.452, 0.565, 0.46], [0.44, 0.56, 0.455]], 18), hc);
+    head(profile([[0.44, 0.56, 0.455], [0.445, 0.34, 0.294]], 18), under);
   } else if (a.hat.id === 'feather_cap' || a.hat.id === 'bard_red_feather') {
     // Bespoke Bard cap: low-poly felt silhouette, stitched brim, band and a head-weighted feather.
     const hat = a.hat.color || '#b02020', feather = a.hat.color2 || '#3aa65a';
@@ -186,7 +194,7 @@ function buildTemplate(a, rig, opts = {}) {
     buildAviatorCap(a, head, leather);
   } else buildExtraHat(a, { add, head, H, W, T, trim, leather, steel, darkSteel });
   // Held and off-hand items, accessories, marks, capes, greaves and decorations live in chibi2-gear.js.
-  const gearCtx = { add, head, ellipsoid, strip, H, W, T, L: rig.leg, A: rig.arm, trim, leather, steel, darkSteel, skin: a.body.skin, faceWidth, faceDepth, chestZ: body.chestZ, hipsZ: body.hipsZ, faceZ: face.faceZ, topStyle: body.top, LW: body.LW, rig };
+  const gearCtx = { add, head, ellipsoid, strip, H, W, T, L: rig.leg, A: rig.arm, trim, leather, steel, darkSteel, skin: a.body.skin, faceWidth, faceDepth, chestZ: body.chestZ, hipsZ: body.hipsZ, faceZ: face.faceZ, topStyle: body.top, LW: body.LW, rig, wrap: body.wrap, chestRings: body.chestRings };
   tagAs('gear');
   buildGear(a, gearCtx);
   tagAs('armour2');
@@ -198,7 +206,7 @@ function buildTemplate(a, rig, opts = {}) {
 
 /** The face builder's drawing kit with every colour replaced by one (and no metal): a mannequin's carved face. */
 function mannequinCtx(add, colour, H) {
-  const one = (g, bone, _c, options = {}) => add(g, bone, colour, { ...options, metal: false });
+  const one = (g, bone, _c, options = {}) => add(g, bone, colour, { ...options, metal: false, colorAt: null });   // one colour: no painted stubble either
   const ellipsoid = (bone, _c, position, scale, options = {}) => one(sphere(), bone, colour, { position, scale, ...options });
   const strip = (bone, points, radius, _c, options = {}) => one(taperedCurve(points, [radius, radius, radius], 4, 4), bone, colour, options);
   const head = (g, _c, options = {}) => one(g, 'head', colour, { ...options, position: (options.position || [0, 0, 0]).map(v => v * H), scale: (options.scale || [1, 1, 1]).map(v => v * H) });
@@ -431,7 +439,7 @@ function normalizeForChibi2(avatar) {
 
 /** The normalised look, its rig and its template cache key (shared by `acquire` and `prepareChibi2`). */
 function rigFor(avatar, anims, opts) {
-  const a = normalizeForChibi2(avatar);
+  const a = applyHandsRule(normalizeForChibi2(avatar));      // W11 (2026-10-21): no off-hand item with a two-hander, except a worn quiver
   if (opts.v25 && !isV25(a)) a.body = { ...a.body, v: 2.5 };      // `{ v25: true }` = the flag in the look (so it is in the cache key)
   const v25 = isV25(a), rig = createRig(a.body, v25 ? race25(a, raceOf(a)) : raceOf(a));
   rig.v25 = v25;

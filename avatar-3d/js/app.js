@@ -8,10 +8,11 @@ import { PARTS, SLOTS, SLOT_LABELS, COLOR_SLOTS, partIds } from '../../avatar-2d
 import { randomAvatar } from '../../avatar-2d/js/random.js';
 import { createScene } from './scene.js';
 import { createChibi2Character } from './chibi2.js';
-import { CHIBI2_EVERY_ANIMS, CHIBI2_ANIM_GROUPS } from './chibi2-motion.js';
+import { CHIBI2_EVERY_ANIMS, CHIBI2_MUSIC_ANIMS, CHIBI2_ANIM_GROUPS } from './chibi2-motion.js';
 import { CHIBI2_RACES, CHIBI2_RACE_IDS, randomChibi2, roundOf } from './chibi2-races.js';
 import { makeRng } from '../../avatar-2d/js/random.js';
 import { CHIBI25_OPTIONS } from './chibi25-options.js';
+import { attachHeldFlame } from './held-flame.js';
 // chibi2-v2.html loads this same page with <body data-version="2">: the OLD Chibi 2 (v2) builder, kept to compare with 2.5.
 const V2 = document.body.dataset.version === '2';
 
@@ -43,11 +44,12 @@ async function rebuild() {
   if (building) { pending = true; return; } building = true; setStatus('building ' + mode + '…');
   const selectedMode = mode;
   try {
+    flame?.dispose(); flame = null;
     if (character) { scene.scene.remove(character.group); character.dispose(); character = null; }
-    const next = await createChibi2Character(avatar, { anims: CHIBI2_EVERY_ANIMS, v25: !V2 });
+    const next = await createChibi2Character(avatar, { anims: [...CHIBI2_EVERY_ANIMS, ...CHIBI2_MUSIC_ANIMS], v25: !V2 });
     if (mode !== selectedMode) { next.dispose(); pending = true; }
     else {
-      character = next;
+      character = next; flame = attachHeldFlame(character, avatar);
       scene.scene.add(character.group); character.setAnim('idle'); character.setHandsFree?.(handsFreeCb.value); renderAnims();
       const h = character.metrics?.().totalHeight; anchorsInfo.textContent = h ? `height ≈ ${h.toFixed(2)} m` : '';
       setStatus(`${V2 ? 'Chibi 2 (v2)' : 'Chibi 2.5'}: ${character.stats().triangles.toLocaleString()} triangles / ${character.stats().meshes} meshes`);
@@ -55,7 +57,8 @@ async function rebuild() {
   } catch (e) { console.error(e); setStatus('error: ' + e.message); toast(e.message); }
   building = false; if (pending) { pending = false; rebuild(); }
 }
-scene.addTicker((dt, t) => character?.update(dt, t));
+let flame = null;
+scene.addTicker((dt, t) => { character?.update(dt, t); flame?.update(dt); });
 /** Kept for old callers and tests: there is one renderer now. */
 function setMode() { rebuild(); }
 

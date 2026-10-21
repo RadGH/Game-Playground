@@ -5084,3 +5084,10 @@ The request: give every class its own abilities instead of sharing them, make ta
 **How the content was written.** Five agents wrote six classes each at the same time. Each kept its rows in its own staging file (`data/r28-batches/<batch>.json`), and `tools/merge-r28-batch.mjs` is the only thing that writes `skills.json`/`classes.json`: it takes a lock, copies the rows in and regenerates every card inside the same lock, so no batch could overwrite another's.
 
 **Not built** (plan §13 has the reasons): silence cancelling a warband leader's passive aura; shade copies repeating every rider of a cast; Iron Gyre is deliberately above its balance band.
+
+## 2026-10-21 — the held torch (owner review of the shared Chibi 2 weapons)
+
+The held torch lost its pointed flame cones (a rag-bound round head now); the fire is `avatar-3d/js/held-flame.js`,
+hung on the player's grip in `applyGearLook` (js/main.js) and ticked with the actor. No light is toggled — `js/light.js`
+still owns the one torch light. (A stricter two-handed rule was tried the same day and withdrawn by the owner: equip
+rules are unchanged; the figure only takes a two-handed grip when the off hand is empty.)

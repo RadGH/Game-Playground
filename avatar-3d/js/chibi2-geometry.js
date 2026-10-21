@@ -130,15 +130,21 @@ function grade25(attr) {
 
 export class SkinBuilder {
   constructor(rig) { this.rig = rig; this.buckets = { cloth: [], metal: [] }; }
-  add(geometry, boneName, color, { position = [0, 0, 0], scale = [1, 1, 1], rotation = [0, 0, 0], metal = false, bend = null, skinTo = null, weigh = null } = {}) {
+  add(geometry, boneName, color, { position = [0, 0, 0], scale = [1, 1, 1], rotation = [0, 0, 0], metal = false, bend = null, skinTo = null, weigh = null, colorAt = null } = {}) {
     // `skinTo` places the piece in one bone's space but skins it to another (a weapon authored in
     // hand space, carried by the grip bone). Both are at rest in the bind pose, so nothing moves.
     const bone = this.rig.byName[boneName], skin = skinTo ? this.rig.byName[skinTo] : bone, count = geometry.attributes.position.count;
     const local = new THREE.Matrix4().compose(new THREE.Vector3(...position), new THREE.Quaternion().setFromEuler(new THREE.Euler(...rotation)), new THREE.Vector3(...scale));
     geometry.applyMatrix4(local);
     const skinIndices = new Uint16Array(count * 4), weights = new Float32Array(count * 4), colors = new Float32Array(count * 3);
-    const c = new THREE.Color(color), p = geometry.attributes.position;
+    const c = new THREE.Color(color), p = geometry.attributes.position, c0 = c.clone();
+    /**
+     * `colorAt(x, y, z, i)` (opt-in, 2026-10-21): a colour PAINTED per vertex (i = vertex index), in the piece's own space after
+     * position/scale/rotation — stubble painted into the head's skin instead of a second sheet a hair above it
+     * (which z-fought on the jaw). Returns a colour or null for the piece's own colour. Unset = one colour, as before.
+     */
     for (let i = 0; i < count; i++) {
+      if (colorAt) { const v = colorAt(p.getX(i), p.getY(i), p.getZ(i), i); c.set(v == null ? c0 : v); }
       const mix = bend ? THREE.MathUtils.smoothstep(-p.getY(i), bend.at - bend.width, bend.at + bend.width) : 0;
       skinIndices[i * 4] = skin.userData.index;
       skinIndices[i * 4 + 1] = bend ? this.rig.byName[bend.bone].userData.index : 0;
@@ -195,7 +201,9 @@ export class SkinBuilder {
       if (!geometry) throw new Error('Chibi 2 geometry assembly failed');
       geometry.computeBoundingSphere();
       if (this.rig.v25) grade25(geometry.attributes.color);
-      const material = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: name === 'metal' ? 0.38 : (this.rig.v25 ? 0.97 : 0.82), metalness: name === 'metal' ? 0.65 : 0 });
+      // Double-sided (owner 2026-10-21): hair, hats, collars and hems are open shells, and from behind
+      // or below a front-only material made them see-through. Same draw calls; back faces get flipped normals.
+      const material = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: name === 'metal' ? 0.38 : (this.rig.v25 ? 0.97 : 0.82), metalness: name === 'metal' ? 0.65 : 0, side: THREE.DoubleSide });
       if (this.rig.v25 && name === 'cloth') material.envMapIntensity = 0.55;
       result.push({ name, geometry, material });
     }

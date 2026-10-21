@@ -62,8 +62,6 @@ test('looks: main / off / both hands, a field row merges into its slot, the base
   const base = mannequin(), frozen = JSON.stringify(base);
   const dagger = rows[0];
   assert.deepEqual(handModes(dagger), ['main', 'off', 'both']); assert.equal(defaultHand(dagger), 'main');
-  // two-handers (owner 2026-10-21): main hand only — never the off hand, never a pair
-  for (const r of rows.filter(r => r.slot === 'held' && r.hands === 2)) assert.deepEqual(handModes(r), ['main'], r.key);
   assert.deepEqual(handModes(findRow(rows, 'offhand:fh_dagger')), ['off']); assert.deepEqual(handModes(findRow(rows, 'war_helm')), []);
   const main = dress(base, dagger, { hand: 'main', quality: 2 });
   assert.equal(main.held.id, 'fh_dagger'); assert.equal(main.held.quality, 2); assert.equal(main.offhand.id, 'none');

@@ -32,10 +32,19 @@ export const SHOE25 = {
 export const CAPE25 = {
   long_cloak: { name: 'Long cloak (to the ankle)', alias2d: 'cape' },
   scarf: { name: 'Scarf', alias2d: 'cape' },
+  // 2026-10-21 owner review (B9): more scarves, worn in the back slot OR the accessory slot (ACCESSORY25), built by
+  // chibi2-gear.js buildScarf. Not 2.5-only: any body may wear them. 2D: the paper doll's scarf drawing.
+  scarf_trailing: { name: 'Trailing scarf (tails down the back)', alias2d: 'scarf', alias2dSlot: 'accessory' },
+  scarf_cowl: { name: 'Wool cowl', alias2d: 'scarf', alias2dSlot: 'accessory' },
+  scarf_striped: { name: 'Striped scarf', alias2d: 'scarf', alias2dSlot: 'accessory' },
+  neckerchief: { name: 'Knotted neckerchief', alias2d: 'scarf', alias2dSlot: 'accessory' },
 };
 
+/** The same scarves in the accessory slot (the old accessory 'scarf' is already registered there). */
+export const ACCESSORY25 = Object.fromEntries(['scarf_trailing', 'scarf_cowl', 'scarf_striped', 'neckerchief'].map(id => [id, { ...CAPE25[id] }]));
+
 /** Everything above, by slot: what chibi2-parts.js registers and what CHIBI25_OPTIONS.body lists. */
-export const OUTFIT25 = { top: TOP25, bottom: BOTTOM25, shoes: SHOE25, cape: CAPE25 };
+export const OUTFIT25 = { top: TOP25, bottom: BOTTOM25, shoes: SHOE25, cape: CAPE25, accessory: ACCESSORY25 };
 
 /** One outfit per long garment, for the robe test (tests/chibi25-robe.test.js) and the body sheet's robe strip. */
 export const ROBE_LOOKS = {

@@ -221,6 +221,96 @@ of the hair painted magenta, hair drawn green); the sheet page has links to thes
 separate from the cap a little in a big nod, which no test measures in motion; curls and braids are low-poly beads by
 design; the bowl and the braided crown read slightly hat-like from the side.
 
+## 2026-10-21 owner review — overview (lead)
+
+The owner reviewed the Avatar 3D page and the Armory and sent ~50 reports. Three agents did the head, the clothes and
+straps, and the weapons (the three sections below); the lead did the rest:
+
+* **Two root causes.** The Avatar 3D page built **v2** looks, so every 2.5-only id (eyes cat…heart, brows after Bushy,
+  mouths from Laugh on) fell back to a v2 part and looked identical — the page and the Armory now build 2.5. And the
+  character material was front-faces-only, so every open shell (hair, a hat's underside, collars, hems) was see-through
+  from behind or below: `SkinBuilder.finish()` (chibi2-geometry.js) now makes it `side: THREE.DoubleSide` — same draw
+  calls; coplanar inner "lining" copies were removed or pushed inward by the agents so they do not flicker.
+* **Pages.** Avatar 3D is Chibi 2.5 only, with a "Chibi 2.5 details" panel drawn from `CHIBI25_OPTIONS.fields`;
+  `chibi1.html` (archived Chibi 1) and `chibi2-v2.html` (the old v2 build, for comparison) are showcase pages;
+  Quaternius is gone from the repo; Chibi 3/4 are labelled on hold. Armory: "Auto adjust camera", two-handers main hand
+  only, a burning flame on a held torch / cresset (`attachHeldFlame`, `js/held-flame.js`).
+* **Shoes: the sole ring is gone** (owner, same day: "a ring around the bottom that isn't connected to the shoe … could
+  just be outright removed"). Boots / shoes / pointed / heavy had an open dark band a few mm off the foot all the way
+  round, sandals a leather one, heavy boots a steel one; all three are deleted in `chibi2-body.js`. The g5 shoes' rings
+  are straps and cuffs that touch the boot, and stay.
+* **`V2_BODY_FIXES = true`** (chibi2-body.js): the body-wide fixes (arm-top holes, the neck gap, the V-neck, lines laid on
+  the chest) reach v2 too, so Farhold / Emberveil / Bannerline lose the holes as well. What keeps `chibi2-v2.html`
+  distinct is the v2 face, hair and proportions. Both fixtures (`chibi2-v2-hashes.json`, `gear5-baseline.json`) were
+  re-baselined on purpose after all of this.
+
+* **The two-handed rule was scaled back the same day** (owner: "Can the new two handed rule only apply if an off hand
+  is actually blank? … side effects for some weapon combinations"). Nothing is dropped or refused any more —
+  `offhandAllowed()` is always true and `applyHandsRule()` returns the look unchanged (both kept for callers); the
+  two-handed GRIP is taken only when the off hand is empty (`holdFor().twoHand`, and the lute's
+  `luteHold(p, strum, fret, leftFree)`: with something in the off hand only the right arm holds the lute). The Farhold
+  and Thousandvale equip-rule changes and their tests were reverted; the catalog's `offhandToo` is back as it was
+  (`hands: 2` stays accurate for every bow, crossbow, staff and lute). The weapons section below describes the
+  withdrawn version under W11.
+* **Eyepatch (same day):** the eye under the patch is not built at all — white, iris, pupil, lashes and the blink lid
+  (`chibi25-face.js`, the eye loop skips `PATCH_SIDE`) — so nothing can clip through it or blink under it. The patch
+  moved to the character's LEFT eye (`PATCH_SIDE = -1`, screen-left in a front view), the eye the 2D picture patches.
+
+## 2026-10-21 owner review — head
+
+The owner reviewed the Avatar 3D page and the Armory. Most of what he saw was the **v2** build (the page built v2 looks,
+so every 2.5-only eye/brow/mouth fell back to v2 and the v2 hair showed its old holes); the page now builds 2.5. What
+changed (2.5 face/hair unless it says "shared"; shared headwear moves v2 hashes on purpose):
+
+* **Stubble and chinstrap are painted, not sheets** (`chibi25-face.js`, F1). They were sheets lifted 3-5 mm along +z;
+  under the jaw the skin faces down, so there was no gap and they z-fought in flecks. A texture would need UVs and a
+  texture in a pipeline that is all vertex colour, so the head shell is built finer for these two looks (rings every
+  0.028 below the cheekbone, 28 sides) and each vertex takes skin / beard / a blend through the new opt-in
+  `SkinBuilder.add(..., { colorAt(x, y, z, i) })` (`chibi2-geometry.js`). Thick beards stay geometry.
+* **Hook nose** is one curved piece (the hump was a second ball on top, F2).
+* **Eyes are turned to the face** (F3): `addEyelids` turns each eye bone (y) to the face's slope at the eye
+  (`rig.eyeYaw`), and `hug()` bends the outer part of every eye piece (rim, white, lashes, lids, lash wings) back onto the
+  skin, so the outer corner and the wing no longer stand off a face that has curved away (almond's "floating bit"). The
+  white and rim are `domedSheet`s with inner rings (a ShapeGeometry only has outline vertices); lids are only bent
+  OUTSIDE the eye's outline so a lid always stays in front of the iris. The outline has 12 points a side (was 14) to keep
+  the eye's triangle count level.
+* **Distinct eyes** (F4): cat (narrow lens, strong up-tilt, slit pupil, flick), droopy (a resting lid falling to the outer
+  corner), sparkle (big star + second twinkle, darker iris rim). Each 2.5-only eye differs at a glance on
+  `chibi25-sheet.html?slot=eyes`.
+* **`glow_tear` removed** (F5): data files use `glow`; `normalizeAvatar` maps it through `RENAMED_PARTS`
+  (`avatar-2d/js/render.js`) and `eyeSpec25` too, so an old saved look keeps glowing eyes.
+* **`eyes.height`** (F6): a slider 0.7 (flat) .. 1 (as drawn) .. 1.35 (tall) scaling every eye's height (iris, gaze
+  limits, lids, brows follow). Listed in `CHIBI25_OPTIONS.fields.eyes.height`; `EYE_HEIGHT` in chibi25-face.js.
+* **Brows** (F7): `curved` is a thin high crescent (it read as arched), the unibrow's bridge overlaps both brows; new
+  **`bold`** brow (thick at the inner end, tapering).
+* **Tusks** (F8) are cones from a base sunk in the lower lip to a tip in front of the upper lip.
+* **`storybook` eye** (F10, the reference picture): iris filling most of the eye with a darker rim, bold upper lash with a
+  short wing, a big and a small highlight. Pairs with the `bold` brow, a small nose and `eyes.y` > 0 (eyes lower). Both
+  ids are `bespoke` with 2D pictures (`chibi2-parts.js`). A bigger step would be a painted face texture (UVs on the head
+  shell + a per-character atlas), which this low-poly vertex-colour pipeline does not have.
+* **Hair** (H1, H3, H4): the 2.5 hair (hair pass 2) was audited again from eight angles for every style: see-through
+  counts are at the bald baseline (12-43 px of 8 x 170 px views; bald 17), tops closed, nothing floating. Bob, long wavy and
+  the human wayfarer's side part are closed from above. The v2 hair is unchanged (Farhold/Emberveil/Bannerline).
+* **Headwear, shared** (H2, H5-H8): `wizard` sits 0.06 lower on a crown that clears the skull, with a closed brim and a
+  darker underside (`HAT_BRIM.wizard` 0.445, `HAT_FIT.wizard` shell [0.445, 0.4], armour2 `BROW.wizard`); `helmet` joins
+  `HATS_COVER_CROWN` and v2 `spiky`/`mohawk` no longer build under a crown-covering hat; `war_helm` cheek guards are curved
+  plates hanging from the brim in front of the ear; `wolf_helm` has a dark hide lining, closed paws and a pelt tail that
+  ends in a point (a tube is open at its ends); `chain_coif` is mail: a finer lattice whose rows alternate lighter and
+  pushed out ~5 mm (a per-vertex checker swirled along the quads' diagonals), mantle the same.
+* **Worn on the face, 2.5** (H9-H11): sized from the look's own eyes (`eyes.height` included) and built in the eye's
+  turned plane. Eyepatch: domed, edge on the skin, a strap over the ear, round the back and across the forehead.
+  Blindfold: covers both eyes and their lash wings, ties above the ears with a knot. Glasses: rectangular frames, arms
+  from each frame's outer edge back over the ear; round glasses / sunglasses / monocle share the arms. Goggles: cups sized
+  to the eyes reaching back to the skin, a broad strap round the back.
+* Material is DoubleSide since this review (`finish()`); the remaining hat linings are 0.6-1% inside their shells and
+  showed no z-fighting in the sheets.
+
+Moved fixtures (deliberate, not rewritten): v2 hashes `class:oracle` (glow_tear -> glow in the data), `preset:12`
+(wizard), `outfit:warrior` (war_helm), `outfit:druid` (wolf_helm), `hat:wizard:*`, `hat:war_helm:*`, `hat:chain_coif:*`,
+`hat:cap:spiky`, `hat:wide_brim:spiky`; `gear5-baseline.json` rows `hat:wizard/helmet/chain_coif/war_helm/wolf_helm` and
+the class looks wearing them. Tools: `chibi25-sheet.html` takes `&zoom=`, `&dy=` (camera aim) and
+`&set=path:value,...` (any base-look field; write `#` as `%23`).
+
 ## Chibi 2.5 part B — the body (2026-10-16)
 
 Owner: "fix clipping issues, improve the robe clipping with feet running animation, but keeping the low poly cartoon
@@ -970,3 +1060,86 @@ backstroke), and `sitGround` loops its sit-down every 3.4 s; neither was changed
 (`CHIBI2_REST_ANIMS`); play `sitGround` for `SIT_DOWN_MS` then `sitHold`. The crawl is floated for a game that holds a
 swimmer's feet 1.1 m under the surface (head just out).
 
+
+## 2026-10-21 owner review — weapons
+
+The owner went through the Avatar 3D page and the Armory. Every item below is shared by v2 and 2.5 (gear is the same
+code), so v2 looks holding these items hash differently on purpose.
+
+| # | Report | Cause and fix | Where |
+|---|---|---|---|
+| W1 | Sword / Greatsword / Twin daggers: blade not joined to the hilt | the old `sword()` started its blade 3 cm under the guard; the blade now starts inside it. The `fh_` blades (`fh_sword`, `fh_longsword`) start 1 cm higher; `fh_greatsword`'s ricasso reaches into the guard and its blade into the ricasso (there were 2 cm and 4 cm gaps) | chibi2-gear.js `buildHeld` `sword`; chibi2-weapons.js |
+| W2 | Curved saber curves the wrong way | the blade was turned a quarter turn about y, so its FLAT led every cut. A sword's edges are its x sides and the clips lead with +x (measured: the blade's fastest frame in `attack`/`overhead`/`chop` moves +x). Unturned, the convex side is +x; the guard crosses along x | chibi2-gear.js `saber` |
+| W3 | Lute floats in front | new hold kind `lute` (chibi2-weapon-ids.js). The lute is built in PLAYING position in the right hand's space (`LUTE_FRAME`), measured against `LUTE_POSE` (chibi2-motion.js): right forearm across the bowl, left hand on the neck under the pegbox. Every clip that does not put the hands away keeps that hold; `attack` with a lute plays `lutePlay` hard. **New opt-in clip** `lutePlay` in `CHIBI2_MUSIC_ANIMS` (group "Music"): strums with the wrist (the grip counter-turns, so the lute stays put), the left hand walks the neck, the head nods. A lute is two-handed: nothing is drawn in the off hand with it | chibi2-gear.js `lute`; chibi2-motion.js `luteHold`, `lutePlay` |
+| W4 | Off-hand Dagger a cylinder; Orb needs a handle; Effigy floats | a real parrying dagger (grip, capped guard, ring pommel, leaf blade with a fuller). The orb, reliquary, effigy, warded focus and totem were built 4.5 cm in front of the palm on nothing: all now sit on the grip line (z 0.055) with a handle through the fist (the effigy's bound legs are its handle) | chibi2-gear.js `buildOffhand` |
+| W5 | `fh_axe`: floating wire behind the head; head not joined to the shaft | the edge rod was at +z while the head is extruded toward −z; the head's back stopped 2–3 cm out from the haft. `axeHead` now runs into the haft, `axeEye` wraps a socket round the join, and `axeEdge` follows the head's own rim on the head's side (`fh_halberd` shares `axeHead`, so its head now meets its haft too) | chibi2-weapons.js |
+| W6 | `fh_greataxe`: the edge does not line up with the head | same `axeEdge`, once per head, plus one eye | chibi2-weapons.js |
+| W7 | `g5_recurve` string clips through the limbs (check every bow) | a straight string ran through limbs that bend back past it. `bowStringPath(limbs)` samples each limb's back edge (centre + radius) and strings the upper hull tip to tip, so the string lies on a recurve's ears and is free across the middle. Applied to `bow` and `g5_recurve`; the crossbow and arbalest strings run back from the prod tips and never cross the prod (checked, unchanged) | chibi2-weapons.js; chibi2-gear.js `bow`; chibi2-gear5-weapons.js `g5_recurve` |
+| W8 | Dagger guard edges see-through | `taperedCurve` is an open tube; every cross guard (fh `guard()`, the old `sword()`, the saber, the new off-hand dagger) gets a ball on each end (`endCaps`, 24 tris each). The `daggers` / `fh_daggers` ids STAY: Emberveil's class and enemy looks, items.json dagger bases (`look.held: "daggers"`), Farhold `rpg.js` (every dagger item is drawn as `fh_daggers`, a knife in each hand when the off hand is empty), class outfits, Farhold mercenaries and warbands use them | chibi2-weapons.js `guard`, `endCaps` |
+| W9 | `fh_wand` orb off-centre | the shaft is tilted about x but the stone, collar and sparks were placed on the un-tilted line; they now sit on the tilted line (`on(y)`), the stone on the shaft's tip | chibi2-weapons.js `fh_wand` |
+| W10 | torch / cresset: rounded rag head, fire in games | no flame cones any more: `KIT.rag` — a rag ball bound with cord, charred at the end; the cresset's basket holds a pitch-rag ball with embers. The fire is `js/held-flame.js` (below) | chibi2-gear.js `torch`; chibi2-gear5-offhand.js `g5_cresset` |
+| W11 | Two-handed rule | `isTwoHandedHeld`, `offhandAllowed`, `applyHandsRule` in chibi2-weapon-ids.js: a bow, crossbow, two-handed melee weapon, polearm, staff or lute in the main hand means NOTHING in the off hand except a worn quiver (`quiver`, `g5_hipquiver`); a two-hander in the off hand with something in the main hand likewise. The one pair allowed is two melee two-handers (Farhold's Doubled Grasp). Applied in `rigFor` (chibi2.js), `buildGear` and `buildGear5`, and `holdFor`. Catalog `hands` now also asks `isTwoHandedHeld`, and `offhandToo` is never set on a two-hander | chibi2-weapon-ids.js, chibi2.js, chibi2-gear.js, chibi2-gear5.js, tools/build-gear-catalog.mjs |
+
+**The held flame** (`avatar-3d/js/held-flame.js`, opt-in, any page):
+
+```js
+import { attachHeldFlame, createHeldFlame, heldFlameSpot, HELD_FLAME_AT } from '../avatar-3d/js/held-flame.js';
+const flame = attachHeldFlame(actor, avatar);   // a Chibi 2 actor + the look it was built from; null if nothing burns
+flame?.update(dt);                              // each frame (moves/scales three sprites, keeps the flame upright)
+flame?.dispose();                               // when the look changes (setAvatar rebuilds the bones) or the actor goes
+```
+
+Three additive sprites parented to the grip bone that carries the torch (`HELD_FLAME_AT`: `torch`, `g5_cresset`), so the
+flame follows the hand and vanishes when a clip puts the hands away. One shared texture and one shared material per
+colour, created once; no light is added or toggled (that recompiles every lit material — keep one game light and move
+it). `createHeldFlame({ color, size })` gives a free-standing flame for anything else. Farhold hangs it on the player in
+`applyGearLook`. Thousandvale draws no held torches (light items were removed in play-test 8), so nothing to wire there.
+
+**v2 looks this moved** (chibi25.test.js fixture, NOT rewritten): class:fighter, paladin, ranger, rogue, bard,
+demon_hunter, tactician, witch_hunter, knight, shadow_dancer; preset:0, 3, 4, 6, 8, 10, 12, 13; outfit:warrior,
+fighter, paladin, ranger, rogue, tactician. `tests/fixtures/gear5-baseline.json`: the 30 `held:` / `offhand:` weapon
+rows these items touch were re-measured (the class rows were left: other streams move them too).
+
+## 2026-10-21 owner review — clothes and straps
+
+The owner reviewed the Avatar 3D page and the Armory. Ten items, B1-B10. The character material is double-sided now
+(`chibi2-geometry.js` `finish()`, set by the lead), so a reversed copy of a sheet on the SAME surface would flicker:
+every such copy in the clothes / capes / g5 armour is either gone (capes, tabard) or drawn a hair inside the sheet
+(coat tails, loincloth, `chibi2-gear5-armour.js` `inner()`, the t2 mantle collar).
+
+**Which builds it reaches.** `V2_BODY_FIXES` in `chibi2-body.js` (false): the fixes that touch EVERY look — the arm cap,
+the neck closure, the V-neck, the surface-hugging collars and lines (`FX` in `buildBody`) — are 2.5-only, because the v2
+hash fixture sweeps faces over one robed base and would move all 209 looks (other streams rely on it). Everything
+garment-specific (coat tails, loincloth, harness, strapped leather, apron strap, footwraps, kilt, cuisses, capes,
+scarves, every strap) is built the same for v2 and 2.5. Set the constant true and re-baseline with `--force` when the
+owner accepts the body-wide fixes for Farhold / Emberveil / Bannerline.
+
+| item | what was wrong | fix |
+|---|---|---|
+| B1 tops: holes on top of the shoulders | the upper arm profile STARTED with an open ring 2.4 cm across (3.6-6 cm under a puffed or short sleeve, which offset it again); and the torso's top ring stopped 1.5-2 cm short of the neck | FX: the arm closes in a dome (and the sleeve offset leaves the apex closed); one more torso ring closes onto the neck — it is part of `chestRings`, so `chestZ` now answers up to the neck |
+| "Longcoat" (`coat`, `trench`, `open_coat`, `duster`) | the tails' lining copy was cloned AFTER `add()` had already moved the tail into hips space, so it was moved TWICE and stood as a flat sheet beside the chest (the "holes" the owner saw at the shoulders). The loincloth had the same bug | clone first, draw a hair inside (v2 + 2.5) |
+| B2 V-neck covered at the throat | the V ended at 0.27T and the torso cloth carried on to the neck above it | FX: the opening runs up to where the torso meets the neck and is the neck's width there; edges laid point by point |
+| B3 something poking through the upper chest | every `onChest` line ran in straight chords between 3-4 points, sinking into a round chest mid-way and coming out at the points — the apron's neck strap showed as two arcs through its own bib | FX: lines resampled every 3 cm onto the surface; the round collar is a ring ON the torso; the hood roll lies on the shoulders; the apron strap is one loop from the bib round the BACK of the neck (v2 + 2.5) |
+| B4 harness straps don't meet over the shoulder | front X and back X were two pieces stopping short of the shoulder | each strap is ONE piece: back hip -> over its shoulder -> other front hip (`chibi2-straps.js`); same for `strapped_leather` |
+| B5 kilt / pleated skirt clip at the waist edge | the hands hang exactly where a kilt flares; v2's kilt had no room for the top of the thigh | `rig.armSpread` for kilts/skirts (0.08 v2, 0.14 2.5); v2 kilt 2 cm roomier with the pleats moved out with it. Also found: the 2.5 LOINCLOTH flapped level in idle — `driveSkirt` measured how wide a leg is "seen" from the axis, so a thigh near the axis covered every direction; for an arc surface it is now measured at the cloth's radius (`chibi25-body.js`) |
+| B6 fan-kneed cuisses, no groin armour | — | two hooped fauld lames round the hips, a shaped groin plate, and a two-lame tasset on each thigh riding the leg |
+| B7 footwraps not lined up | five rings each tipped about the KNEE (not their own centre), so they stood staggered | one even spiral strip up the shin, tied off; the foot turns lie on the foot ellipsoid and slant |
+| B8 capes flat at the shoulders | a flat sheet behind the back | `drape(..., { yoke: true })`: the top rows are laid ON the body over the shoulder tops and shoulder balls and round the back of the neck, then hang; the cloth over each shoulder rides that arm up to 92% (cape, travel cloak, long cloak, tattered cape; the half cape keeps its arm-riding lump) |
+| B9 scarf see-through at the front | the neck loop was an OPEN tube whose ends met at the front, tails ended in open mouths | closed tubes, tails taper shut (`buildScarf`). New: `scarf_trailing`, `scarf_cowl`, `scarf_striped`, `neckerchief` in BOTH the accessory and the cape (back) slot; `scarf` works in both too |
+| B10 strap not over the shoulder | every strap was one curve down the front starting in the air | `crossStrap` (a closed bandolier loop over one shoulder to the other hip: quiver, herb satchel, scroll case, waterskin, bandolier) and `packStrap` (pack top -> over the shoulder -> down the chest -> under the arm -> pack foot: gear pack, bedroll pack, storm rods); the t2 harness baldric continues down the back. The g5 backpacks' straps were already continuous and are unchanged |
+
+**`js/chibi2-straps.js`** (new): `makeWrap(chestRings, { T, grow, spheres })` -> `surface(x, phi, lift)` casts a ray
+from a horizontal axis through mid-chest (phi 0 forward, PI/2 up over the shoulder, PI back) and stops where it leaves
+the torso (or a shoulder ball); `strap(add, [[x, phi], ...], r, colour, opts)` samples a path on it; `loop()` closes it
+round the flank; `side(y, s)`; `armWeigh()`. `buildBody` returns it as `body.wrap` and `chibi2.js` hands it (and
+`chestRings`) to the gear builders as `c.wrap`.
+
+New ids (all in `chibi25-outfits.js` `CAPE25` / `ACCESSORY25`, registered `bespoke` through `chibi2-parts.js`, 2D =
+the paper doll's scarf recoloured): `scarf_trailing`, `scarf_cowl`, `scarf_striped`, `neckerchief`. Gear catalog
+rebuilt (+8 rows; scarves are `type: 'scarf'` in the cape slot too).
+
+**Measured** (2.5 Emberveil class looks, `tests/chibi25-clip-body.test.js`'s survey): capes / packs / straps vs upper
+arms 0 frames (a strap's closing run hugs the flank, a pack strap goes under the arm low at the ribs); straps vs
+forearms 1-2 frames in `cast` (~1 cm). Costs: a cross strap ~250 triangles, a pack strap pair ~350, footwraps +280, a
+cape yoke ~+60, the cowl ~580. Not fixed here: a v2 kilt still has no skirt bones, so a running thigh goes through it
+(2.5 is the fix); the g5 hip quiver / girdle straps live in `chibi2-gear5-offhand.js` (the weapons stream's file).

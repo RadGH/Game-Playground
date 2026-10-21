@@ -159,12 +159,11 @@ export function buildFace(a, rig, c) {
     // Round eyes on a slight bulge: z of the eye's own front at (x, y) in eye-bone space.
     const eyeFront = (x, y, lift = 0) => 0.012 * H + 0.016 * H * Math.sqrt(Math.max(0, 1 - ((x - dx) / (ex * 1.08)) ** 2 - ((y - dy) / (ey * 1.08)) ** 2)) + lift;
     eyeInfo.push({ s, dx, dy });
-    if (eyeId === 'glow' || eyeId === 'glow_tear') {
+    if (eyeId === 'glow') {
       const glow = mix(a.eyes.color, '#ffffff', 0.3);
       ellipsoid(eye, mix(a.eyes.color, '#000000', 0.65), [dx, dy, 0], [ex * 1.1, ey * 1.1, 0.016 * H]);
       ellipsoid(eye, glow, [dx, dy - 0.004 * H, 0.014 * H], [ex * 0.92, ey * 0.92, 0.018 * H]);
       ellipsoid(pupil, '#ffffff', [dx - s * 0.02 * H, dy + 0.025 * H, 0.03 * H], [0.02 * H, 0.016 * H, 0.006 * H]);
-      if (eyeId === 'glow_tear') { const bx = eyeBone.x * s + dx + s * 0.02 * H, by = eyeBone.y + dy; add(taperedCurve([[bx, by - ey * 0.8, 0.268 * H], [bx + s * 0.01 * H, by - ey * 1.6, 0.27 * H], [bx, by - ey * 2.3, 0.262 * H]], [0.012, 0.01, 0.004], 4, 5), 'head', glow); }
     } else if (eyeId === 'dot') {
       ellipsoid(pupil, '#17272c', [dx, dy, 0.02 * H], [ex, ey, 0.013 * H]);
       ellipsoid(pupil, '#ffffff', [dx - s * 0.012 * H, dy + 0.014 * H, 0.035 * H], [0.012 * H, 0.014 * H, 0.004 * H]);
@@ -189,7 +188,7 @@ export function buildFace(a, rig, c) {
       return [x, y, eyeFront(x, y, 0.004 * H)];
     });
     // upper lash line on every open eye, thicker at the outer corner
-    if (!['dot', 'glow', 'glow_tear', 'hollow', 'narrow', 'sleepy', 'tired', 'angry'].includes(eyeId)) {
+    if (!['dot', 'glow', 'hollow', 'narrow', 'sleepy', 'tired', 'angry'].includes(eyeId)) {
       const pts = arc(s > 0 ? 0.25 : Math.PI - 0.25, s > 0 ? Math.PI - 0.2 : 0.2, 1.0);
       add(taperedCurve(pts, s > 0 ? [0.008, 0.01, 0.006] : [0.006, 0.01, 0.008], 4, 8), eye, lash);
     }

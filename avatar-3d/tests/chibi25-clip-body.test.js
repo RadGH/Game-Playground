@@ -38,7 +38,8 @@ test('2.5 class looks: capes and mantles stay off the arms, nothing held sits in
   const v2 = await survey(false), v25 = await survey(true);
   // the "before" really had the problem (so the test is measuring something)
   assert.ok((v2.tot['back>upper'] || 0) > 500, `Chibi 2 capelets vs arms: ${v2.tot['back>upper']}`);
-  assert.ok((v2.tot['held>head'] || 0) > 40, `Chibi 2 held vs head: ${v2.tot['held>head']}`);
+  // (2026-10-21, W3: the lute is held in playing position now in v2 too — it was most of v2's 87 frames; ~11 remain, the maces)
+  assert.ok((v2.tot['held>head'] || 0) > 5, `Chibi 2 held vs head: ${v2.tot['held>head']}`);
   assert.equal(v25.tot['back>upper'] || 0, 0, `2.5 capes/capelets/packs inside an upper arm (${v25.where['back>upper']})`);
   assert.ok((v25.tot['held>head'] || 0) <= 3, `2.5 held items in the head: ${v25.tot['held>head']} frames (${v25.where['held>head']})`);
   assert.ok((v25.deep['held>head'] || 0) <= 0.015, `2.5 held item ${((v25.deep['held>head'] || 0) * 100).toFixed(1)} cm into a head (${v25.where['held>head']})`);

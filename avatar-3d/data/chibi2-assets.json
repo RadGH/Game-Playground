@@ -601,19 +601,9 @@
       "source": "avatar-3d/js/chibi2.js",
       "usedBy": [
         "emberveil:demon_hunter",
-        "emberveil:sorcerer",
-        "emberveil:enchanter"
-      ]
-    },
-    {
-      "id": "eyes_glow_tear",
-      "slot": "eyes",
-      "variant": "glow_tear",
-      "name": "Glowing eyes with a light tear",
-      "renderer": "chibi2",
-      "source": "avatar-3d/js/chibi2.js",
-      "usedBy": [
-        "emberveil:oracle"
+        "emberveil:enchanter",
+        "emberveil:oracle",
+        "emberveil:sorcerer"
       ]
     },
     {

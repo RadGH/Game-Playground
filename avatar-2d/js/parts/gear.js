@@ -64,7 +64,6 @@ export const EXTRA_MARKS = {
 };
 export const EXTRA_EYES = {
   glow: { bespoke: true, name: 'Glowing (no pupil)', svg: `<ellipse rx="12" ry="9" fill="${E}"/><ellipse rx="16" ry="12" fill="${E}" opacity=".35"><animate attributeName="opacity" values=".25;.5;.25" dur="2s" repeatCount="indefinite"/></ellipse><ellipse rx="6" ry="4" cx="-2" cy="-2" fill="#fff" opacity=".6"/>` },
-  glow_tear: { bespoke: true, name: 'Glowing + light tear', svg: `<ellipse rx="12" ry="9" fill="${E}"/><ellipse rx="16" ry="12" fill="${E}" opacity=".35"/><path d="M4 8 Q6 18 4 26" stroke="${E}" stroke-width="3" stroke-linecap="round" opacity=".7"/>` },
 };
 export const cape = {
   none: { name: 'None', pieces: [] },

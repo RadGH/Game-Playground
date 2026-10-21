@@ -6,7 +6,7 @@
 // drawn. Off-hand WEAPONS reuse the main-hand drawing, moved to the left hand, so a character with a
 // sword in each hand shows two swords in the portrait too.
 import { top, bottom, shoes } from './clothes.js';
-import { cape, held, offhand as offhandCatalog } from './gear.js';
+import { cape, held, offhand as offhandCatalog, EXTRA_ACCESSORIES } from './gear.js';
 import { accessory } from './accessories.js';
 import { G5_TABLES } from '../../../avatar-3d/js/chibi2-gear5-ids.js';
 import { OUTFIT25 } from '../../../avatar-3d/js/chibi25-outfits.js';
@@ -149,6 +149,8 @@ Object.assign(CHIBI2_2D.offhand, {
       sparkle: drawn('Sparkle', `<ellipse rx="13" ry="16" fill="#fff"/><ellipse cy="2" rx="10" ry="12" fill="${E}"/><ellipse cy="3" rx="5" ry="6" fill="#111"/><path d="M-4 -8 L-3 -4 L1 -3 L-3 -2 L-4 2 L-5 -2 L-9 -3 L-5 -4 Z" fill="#fff"/><circle cx="4" cy="7" r="1.6" fill="#fff"/>`),
       hooded: drawn('Hooded', `<ellipse rx="12" ry="12" fill="#fff"/>${irisAt(1, 2, 6.5)}<path d="M-13 -3 L13 -3 L13 -13 L-13 -13 Z" fill="${S}"/><path d="M-13 -3 L13 -3" stroke="#222" stroke-width="2.5"/><path d="M-11 -8 Q0 -11 11 -8" stroke="${SD}" stroke-width="1.5" fill="none"/>`),
       lashes: drawn('Long lashes', `<ellipse rx="12" ry="13" fill="#fff"/>${irisAt(1, 1, 7)}<path d="M-12 -4 Q0 -17 12 -4 M5 -11 L9 -16 M9 -8 L14 -12 M12 -4 L17 -6" stroke="#222" stroke-width="2.5" fill="none" stroke-linecap="round"/>`),
+      // owner review 2026-10-21 (the reference picture): big iris with a dark rim, bold upper lash with a wing, two highlights
+      storybook: drawn('Storybook', `<ellipse rx="13" ry="15" fill="#fff"/><circle cx="0" cy="1" r="11" fill="#1a2a30" opacity=".85"/><circle cx="0" cy="1" r="9.5" fill="${E}"/><circle cx="0" cy="2" r="5" fill="#111"/><ellipse cx="-4" cy="-4" rx="3" ry="3.6" fill="#fff"/><circle cx="4" cy="6" r="1.5" fill="#fff"/><path d="M-13 -2 Q-2 -19 13 -5 L17 -8" stroke="#1a1414" stroke-width="4" fill="none" stroke-linecap="round"/>`),
       heart: drawn('Heart pupils', `<ellipse rx="12" ry="13" fill="#fff"/><circle cx="1" cy="1" r="8" fill="${E}"/><path d="M1 6 L-4 0 C-6 -3 -2 -6 1 -3 C4 -6 8 -3 6 0 Z" fill="#c8304a"/>`),
     },
     brows: {
@@ -158,6 +160,7 @@ Object.assign(CHIBI2_2D.offhand, {
       soft: drawn('Soft short', `<ellipse cx="-2" cy="-1" rx="7" ry="2.6" fill="${HD}"/>`),
       split: drawn('Split (scarred)', `<path d="M-14 0 L-3 -2 M3 -2 L14 -1" stroke="${HD}" stroke-width="4" stroke-linecap="round"/>`),
       dots: drawn('Dots (noble)', `<ellipse cx="2" cy="-3" rx="4" ry="3" fill="${HD}"/>`),
+      bold: drawn('Bold', `<path d="M-15 4 Q-6 -6 15 -3 L14 1 Q-4 -1 -15 4 Z" fill="${HD}" stroke="${HD}" stroke-width="2" stroke-linejoin="round"/>`),
       curved: drawn('High curve', `<path d="M-14 3 Q-4 -12 14 -2" stroke="${HD}" stroke-width="3.5" stroke-linecap="round" fill="none"/>`),
     },
     mouth: {
@@ -236,13 +239,15 @@ Object.assign(CHIBI2_2D.offhand, {
 // CHIBI 2.5 (part B, 2026-10-16): new tops, bottoms, shoes and capes (avatar-3d/js/chibi25-outfits.js). `bespoke` keeps them
 // out of every seeded random roll, so no game's random NPCs change; the paper doll draws each one's nearest kin.
 {
-  const cats = { top, bottom, shoes, cape };
+  const cats = { top, bottom, shoes, cape, accessory: { ...accessory, ...EXTRA_ACCESSORIES } };
   for (const [slot, table] of Object.entries(OUTFIT25)) {
     CHIBI2_2D[slot] = CHIBI2_2D[slot] || {};
     for (const [id, row] of Object.entries(table)) {
       if (CHIBI2_2D[slot][id] || cats[slot][id]) continue;
-      const from = row.alias2d;
-      CHIBI2_2D[slot][id] = { name: row.name, alias: from, bespoke: true, get pieces() { return cats[slot][from]?.pieces || []; } };
+      const from = row.alias2d, src = cats[row.alias2dSlot || slot];
+      // (2026-10-21: a scarf in the cape slot draws the accessory scarf, recoloured with the cape's colour)
+      const recolour = row.alias2dSlot && row.alias2dSlot !== slot ? svg => svg.replaceAll('--acc', '--' + slot) : svg => svg;
+      CHIBI2_2D[slot][id] = { name: row.name, alias: from, bespoke: true, get pieces() { return (src[from]?.pieces || []).map(p => ({ ...p, svg: recolour(p.svg) })); } };
     }
   }
 }

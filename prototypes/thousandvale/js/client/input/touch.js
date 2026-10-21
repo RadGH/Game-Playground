@@ -124,9 +124,9 @@ export function createTouch({ api, input, run, radial }) {
   const fishState = () => document.querySelector('.tv-fish:not([hidden])')?.dataset.state || 'idle';
   let water = null, waterAt = 0;
   tap(fish, () => {
-    if (fishState() !== 'idle') { actionKey('fish'); return; }                     // a line is out: this reels it in
+    if (fishState() !== 'idle') { run('fish', 'fish'); return; }                     // a line is out: this reels it in
     if (api.self && !water) { api.hud?.toast?.('No water in reach. Stand at the water’s edge and face it.', 'warn'); fishHint(); return; }
-    fishHint(); actionKey('fish');
+    fishHint(); run('fish', 'fish');
   });
   // the first time (per character) you could fish, say how — the owner asked "how to fish on mobile"
   const hintBox = document.createElement('div'); hintBox.className = 'ph-hint'; hintBox.hidden = true; hintBox.setAttribute('role', 'dialog'); hintBox.setAttribute('aria-label', 'How to fish'); ui.appendChild(hintBox);
@@ -426,7 +426,8 @@ export function createTouch({ api, input, run, radial }) {
     const mSmall = mount.querySelector('small'); if (api.self && mSmall.textContent !== mText) { mSmall.textContent = mText; mount.setAttribute('aria-label', mText === 'Calling…' ? 'Calling your mount: tap to call it off' : mText); mount.classList.toggle('on', !!me?.mount); mount.classList.toggle('calling', !!me?.calling && !me?.mount); }
     if (me?.calling && !me.mount) mount.style.setProperty('--p', Math.max(0, Math.min(1, (nowT - me.calling.at) / Math.max(1, me.calling.until - me.calling.at))).toFixed(3));
     // Y34 — Fish: there only with a rod; lit only when a cast would land (the server's own rule, input/water-reach.js)
-    const rodBtn = document.querySelector('.fish-btn'), hasRod = fishHint.demo || (rodBtn ? !rodBtn.hidden : false);
+    // (angling.js says: since play-test 11 its old cast button is never on the page, so asking that button meant no Fish button ever)
+    const rodBtn = document.querySelector('.fish-btn'), hasRod = fishHint.demo || (api.hasRod ? api.hasRod() : rodBtn ? !rodBtn.hidden : false);
     if (fish.hidden === hasRod) fish.hidden = !hasRod;
     if (hasRod && nowT - waterAt > 350) {
       waterAt = nowT;

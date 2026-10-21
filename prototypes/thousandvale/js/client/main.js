@@ -341,7 +341,7 @@ const ui5 = createUi5({ atlas: ui.atlas, objects, inDungeon: () => !!D.view, loo
   targetId: () => S.target, setTarget: id => setTarget(id), stats: () => ({ fps: FPS.fps }), zoneName: () => document.getElementById('zone-name')?.textContent || null,
   ensureNet: () => kitNet(), onKitPreview: g => { S.titleGear = g; previewLook(S.look, 'title'); }, onKitBack: () => { if (S.phase === 'title') { S.titleGear = null; toAppearance(); } }, onKitCreate: c => { S.kit = c; enterWorld(); } });
 // T27: one binding table (js/client/input/bindings.js) drives the keyboard, the gamepad, the hints and — when switched on — touch
-const input = installInput({ controls, hud, setTarget: id => setTarget(id), targetId: () => S.target, pause: () => ui2.escape(), panels: () => PANELS /* 2026-10-16: the controller menu's tiles (input/pad-layout.js) */, inWorld: () => S.phase === 'world', dead: () => S.self.dead, settings: ui2.settings, chat: () => chat.focus(), cycleTarget: any => cycleTarget(any),
+const input = installInput({ controls, hud, fish: () => fishAction(), hasRod: () => !!ui5?.angling?.state?.hasRod, setTarget: id => setTarget(id), targetId: () => S.target, pause: () => ui2.escape(), panels: () => PANELS /* 2026-10-16: the controller menu's tiles (input/pad-layout.js) */, inWorld: () => S.phase === 'world', dead: () => S.self.dead, settings: ui2.settings, chat: () => chat.focus(), cycleTarget: any => cycleTarget(any),
   // Y34/Y35/Y36 (G2): what the phone's own controls need to know and do (docs/requests.md "Round 10 contracts — G")
   self: () => (S.selfId != null && S.phase === 'world' ? { x: S.predictor.pos.x, z: S.predictor.pos.z, yaw: S.lastInput?.yaw ?? controls.cam.yaw, mount: S.self.mount || null, calling: S.mountCall ? { at: S.mountCall.at, until: S.mountCall.until } : null, dead: !!S.self.dead, room: S.room?.id ?? null, indoors: !!D.view } : null),
   mount: () => toggleMount(), attackButton: () => attackButton(), tracker: () => ui10,
@@ -1142,6 +1142,18 @@ function attackButton() {
   controls.attack(S.target);                      // -> onAttack -> tryStrike(true); out of reach, the controls walk you in
   return true;
 }
+/**
+ * The Fish action (X, hold LT + A, the quick wheel, the phone's Fish button). Since play-test 11 you fish at a fishing
+ * spot, and the old X handler went with that — but every one of those still pressed X, so none of them did anything.
+ * A line out: reel in. Otherwise cast at the spot you stand by (the E prompt's), or plain: the server says why not
+ * (no rod, no fishing spot) in angling.js's own words.
+ */
+function fishAction() {
+  if (S.phase !== 'world' || !ui5?.angling) return;
+  const A = ui5.angling, f = objects.focus;
+  if (A.state.state !== 'idle') return A.castOrStop();
+  A.castOrStop(f && f.type === 'fishpool' ? f.id : null);
+}
 function tryStrike(fromKey, slot = 0) {
   if (S.phase !== 'world' || S.self.dead || !S.net) return false;
   const t = actors.get(S.target);
@@ -1641,6 +1653,7 @@ const tv = {
 window.tv = tv;
 window.thousandvale = { stars, onEvent, held, ui10, tracking: () => ui10.tracking(), titleFront: () => titleFront, moveMark, prof, profView, shots, questMarks, carts, input, formFx, reviveFx, angling, lootMarks, weaponFx, statusSync, S, W, D, WS, view, actors, spells, LIGHTS, travel, camera, controls, hud, fx, tv, tele, boss, objects, social, bag, worldUi, footprints, chat, friends, guild, mail, callboard, account, ui, ui2, ui5, ui8 };
 window.thousandvale.ships = ships;      // [V]
+window.thousandvale.target = id => setTarget(id);      // specs: aim at one body (tests/G/phone-play.spec.js 3b)
 window.thousandvale.vharl = vharl;      // [S]
 
 // 2026-10-20 (the owner's combat-stutter report): what a stutter in the performance log says about the scene, and the

@@ -22,7 +22,9 @@ export function captureNextKey(fn) { capture = fn; }
 
 function onKey(e) {
   if (e.tvSynth) return;
-  if (e.type === 'keydown' && !e.repeat) device.seen('keyboard');
+  // a phone's own keyboard typing into a text box is still the touch screen (it does not switch the hints to keys)
+  const softKeys = device.current === 'touch' && e.target?.closest?.('input, textarea, [contenteditable]');
+  if (e.type === 'keydown' && !e.repeat && !softKeys) device.seen('keyboard');
   if (capture) {
     e.preventDefault(); e.stopImmediatePropagation();
     if (e.type === 'keydown' && !e.repeat && !/^(Shift|Control|Alt|Meta)/.test(e.code)) { const fn = capture; capture = null; fn(e.code === 'Escape' ? null : e.code); }

@@ -71,7 +71,8 @@ test.describe('controller — in the interface gallery', () => {
     }
     await setBtn(page, 'LT', true); await page.waitForTimeout(60);
     expect(await page.evaluate(() => document.documentElement.dataset.padMod)).toBe('1');
-    for (const [btn, code] of [['Y', 'Digit5'], ['B', 'Digit6'], ['UP', 'Digit7'], ['RIGHT', 'Digit8'], ['DOWN', 'Digit9'], ['LEFT', 'Digit0'], ['X', 'KeyH'], ['A', 'KeyX'], ['RB', 'KeyC']]) { await press(page, btn); expect(await synth(page), 'LT+' + btn).toContain(code); }
+    for (const [btn, code] of [['Y', 'Digit5'], ['B', 'Digit6'], ['UP', 'Digit7'], ['RIGHT', 'Digit8'], ['DOWN', 'Digit9'], ['LEFT', 'Digit0'], ['X', 'KeyH'], ['RB', 'KeyC']]) { await press(page, btn); expect(await synth(page), 'LT+' + btn).toContain(code); }
+    // (LT+A is Fish: it runs the game's fish action itself rather than pressing X — 2026-10-21, X had cast nothing since play-test 11)
     await setBtn(page, 'LT', false);
     // the left stick reaches the game's controls as a vector; the right stick as the camera
     await stick(page, { 0: 0, 1: -1, 2: 0.6 }); await page.waitForTimeout(80);
@@ -92,7 +93,7 @@ test.describe('controller — in the interface gallery', () => {
     await scene(page, 'hud');
     await setBtn(page, 'LB', true); await page.waitForTimeout(120);
     await expect(page.locator('.tv-radial')).toBeVisible();
-    expect(await page.locator('.tv-radial .rd-slice').count()).toBe(8);
+    expect(await page.locator('.tv-radial .rd-slice').count()).toBe(9);      // the windows ring: Achievements joined it (feedback #106)
     await stick(page, { 2: 0, 3: -1 }); await page.waitForTimeout(100);                 // straight up = the first slice: the bag
     await expect(page.locator('.tv-radial .rd-slice.on')).toHaveText('Bag');
     await page.screenshot({ path: join(SHOTS, 'wheel.png') });

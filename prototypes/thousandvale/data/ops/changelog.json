@@ -13,7 +13,10 @@
     "Towns now say how big they are (hamlet, village, town, city), every city has every shop, and the ox-cart window shows each stop's size and who works there.",
     "New two-handed polearms: the Glaive and the Bardiche. Two spears now take turns, and every lightning bolt looks like lightning. Storm Orbs circle you.",
     "Fixed: \"Not while you are fighting\" with nothing near you; the Brineglass Tubes dropping you on the corner of the sea (and /reset, or Stuck? in the menu, if you ever get stuck); boss rewards waiting on a body that was gone (they go to your bag now, with a reward card); the same event announced again at every zone; the damage meter reopening at log-in.",
-    "Also: your map arrow turns with you and the map works better on phones; a barrier shows on your health bar; guards come to help; a controller test in Settings; class descriptions match the real skills; trees look like storybook trees up close; new grass for every kind of ground."
+    "Also: your map arrow turns with you and the map works better on phones; a barrier shows on your health bar; guards come to help; a controller test in Settings; class descriptions match the real skills; trees look like storybook trees up close; new grass for every kind of ground.",
+    "On a phone, typing in chat no longer closes the keyboard after the first letter.",
+    "On phones, the Fish button shows again when you have a rod, and Fish (that button, the quick wheel, X on a keyboard, hold LT + A on a controller) casts a line again; both had stopped working when fishing moved to fishing spots.",
+    "On a slow phone the quick wheel no longer closes the moment it opens."
    ]
   },
   {

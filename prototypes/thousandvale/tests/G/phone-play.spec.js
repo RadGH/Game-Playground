@@ -87,17 +87,20 @@ test('2. the thumb stick walks the character; nothing you can press is under 44 
 test('3. target a monster, fight it with the attack and skill buttons, loot the body', async () => {
   test.setTimeout(300000);
   await hook('/level', { name: NAME, level: 30 });        // sturdy enough that the fight is about the buttons, not about surviving a pack
+  // and nothing can kill it (again after every move: a new zone works the sheet out afresh): the hunt for a monster can stand it still beside a pack for half a minute (the rebuilt Torbor Downs
+  // has a rat swarm at Turnwater Mill by the start), a level does not soften a level-1 bite, and a dead body's Attack is greyed out
+  await hook('/tough', { name: NAME });
   // stand near the closest monster (the walk there is not what this checks)
   const near = async () => page.evaluate(() => { const y = tv.state().you; return tv.state().ents.filter(e => e.kind === 'monster' && !e.dead && !/dummy/i.test(thousandvale.S.mirror.infos.get(e.id)?.type || thousandvale.S.mirror.infos.get(e.id)?.name || '')).map(e => ({ ...e, d: Math.hypot(e.x - y.x, e.z - y.z) })).sort((p, q) => p.d - q.d)[0] || null; });
   let m = await near();
   // none by the waystone: look a little way out of town in each direction
   const home = await you();
-  for (const [dx, dz] of [[220, 0], [0, 220], [-220, 0], [0, -220], [380, 380], [-380, 380], [380, -380], [-380, -380]]) { if (m) break; await hook('/teleport', { name: NAME, x: home.x + dx, z: home.z + dz }); await page.waitForTimeout(4500); m = await near(); }
+  for (const [dx, dz] of [[220, 0], [0, 220], [-220, 0], [0, -220], [380, 380], [-380, 380], [380, -380], [-380, -380]]) { if (m) break; await hook('/teleport', { name: NAME, x: home.x + dx, z: home.z + dz }); await hook('/tough', { name: NAME }); await page.waitForTimeout(4500); m = await near(); }
   test.skip(!m, 'no monster in view of the starter town in this bake');
   // stand by it (monsters wander: do it again if the Target button finds nothing within its 40 m)
   for (let i = 0; i < 5; i++) {
     m = (await near()) || m;
-    await hook('/teleport', { name: NAME, x: m.x + 3, z: m.z + 3 });
+    await hook('/teleport', { name: NAME, x: m.x + 3, z: m.z + 3 }); await hook('/tough', { name: NAME });
     await page.waitForTimeout(3000);
     await tap('.ph-target');
     if (await page.locator('#target-frame').isVisible().catch(() => false)) break;
@@ -109,7 +112,7 @@ test('3. target a monster, fight it with the attack and skill buttons, loot the 
   // and stand out of reach with the stick pushed AWAY, so the tap has to end that push, turn you and walk you in.
   await page.evaluate(() => thousandvale.input.run('targetClear'));
   m = (await near()) || m;
-  await hook('/teleport', { name: NAME, x: m.x + 9, z: m.z + 9 });
+  await hook('/teleport', { name: NAME, x: m.x + 9, z: m.z + 9 }); await hook('/tough', { name: NAME });
   await page.waitForTimeout(2500);
   expect(await page.evaluate(() => tv.state().target || null), 'no target before the tap').toBeNull();
   const z = await page.locator('.ph-stickzone').boundingBox();
@@ -156,7 +159,13 @@ test('3b. Y35: a second tap switches auto-attack off (hammering the button does 
   await page.evaluate(() => { for (const x of document.querySelectorAll('.tv-panel:not([hidden]) .tvp-x')) x.click(); thousandvale.controls.stopAuto(); });
   let m = await near();
   if (m) {
-    await hook('/teleport', { name: NAME, x: m.x + 14, z: m.z + 14 }); await page.waitForTimeout(2500);
+    await hook('/teleport', { name: NAME, x: m.x + 14, z: m.z + 14 }); await hook('/tough', { name: NAME }); await page.waitForTimeout(2500);      // (step 3's note: nothing can kill it)
+    // a target that lives through any number of blows (a training dummy, as the search above prefers): at level 30 every rat
+    // of the rebuilt start dies to one, and a dead target ends
+    // auto-attack by itself — which is right, and would read here as "the tap switched it off"
+    const sp = await hook('/spawn', { name: NAME, type: 'training_dummy', level: 30, dist: 12 });
+    await page.waitForFunction(id => tv.state().ents.some(e => e.id === id), sp.ids[0], { timeout: 10000 });
+    await page.evaluate(id => thousandvale.target(id), sp.ids[0]);
     await attack.tap();
     await expect.poll(auto).toBe(true);
     // hammering (the owner's old habit): presses closer together than 0.6 s all mean "attack". Sent from inside the page —
@@ -235,11 +244,13 @@ test('5. the perk forest: stage a pick with a tap on the graph, Accept spends it
   const id = await page.evaluate(() => { const t = thousandvale.ui.talents, F = t.source.forest, have = new Set([F.start.id, ...t.state.perks]); const n = F.nodes.find(x => !have.has(x.id) && (F.neighbours.get(x.id) || []).some(y => have.has(y))); t.graph.focus(n.id); return n.id; });
   await page.waitForTimeout(500);
   const p = await page.evaluate(i => { const t = thousandvale.ui.talents, c = document.querySelector('#panel-perks canvas').getBoundingClientRect(), s = t.graph.screenOf(i); return { x: c.left + s.x, y: c.top + s.y }; }, id);
-  await page.touchscreen.tap(p.x, p.y);
+  await page.touchscreen.tap(p.x, p.y);      // #67: on a phone the first tap shows the perk's card ...
+  await page.waitForTimeout(500);
+  await page.touchscreen.tap(p.x, p.y);      // ... and a second tap stages it
   await expect.poll(() => T().then(t => t.staged)).toBe(t0.staged + 1);
   await shot('15-perk-staged');
   await page.locator('#panel-perks [data-stage="accept"]').tap();
-  await expect.poll(() => T().then(t => t.held), { timeout: 8000 }).toBe(t0.held + 1);
+  await expect.poll(() => T().then(t => t.held), { timeout: 20000 }).toBe(t0.held + 1);      // (the server's answer; a busy test machine can take a while)
   await shot('16-perk-accepted');
 });
 
@@ -272,7 +283,7 @@ test('6. the map (with its list folded away), casting a line from the wheel, and
   await tap('.ph-wheel'); await page.locator('.tv-radial .rd-slice[data-id="pause"]').tap();
   await expect(page.locator('#panel-pause')).toBeVisible();
   await shot('21-menu');
-  await page.locator('#panel-pause .ph-extra').first().tap();
+  await page.locator('#panel-pause .ph-extra', { hasText: /Feedback/ }).tap();      // (Y34 put "What do these buttons do?" first)
   await expect(page.locator('#panel-feedback textarea')).toBeVisible({ timeout: 8000 });
   await page.locator('#panel-feedback textarea').fill('Played on a phone-sized screen: the thumb stick and the arcs work.');
   await shot('22-feedback');
@@ -285,16 +296,19 @@ test('6b. an event is never invisible behind the closed bubble: a chip names it 
   test.setTimeout(120000);
   await page.evaluate(() => { for (let i = 0; i < 4; i++) for (const x of document.querySelectorAll('.tv-panel:not([hidden]) .tvp-x, #bag:not([hidden]) #bag-close')) x.click(); }); await page.waitForTimeout(400);
   await expect(page.locator('#right-col')).toBeHidden();                       // collapsed is the phone's resting state (owner feedback 7, V7)
-  await page.evaluate(() => { const y = tv.state().you; tv.fake('eventTrack', { uid: 'e1', id: 'wolves_ford', name: 'Wolves at the Ford', state: 'live', what: 'A starving pack is crossing the ford toward the farms.', objective: { text: 'Defeat the three packs, then the pack mother', n: 2, of: 4 }, leftMs: 372000, endsAt: Date.now() + 372000, rewardText: 'Event cache: a rare item or better', inside: true, inRange: true, players: 3, x: y.x, z: y.z, r: 40 }); });
+  // a made-up event: the server's own list (eventSync, every 15 s) does not have it and takes the card away again, and the
+  // checks and pictures here can take longer than that on a software renderer — so say it again before each look
+  const track = () => page.evaluate(() => { const y = tv.state().you; tv.fake('eventTrack', { uid: 'e1', id: 'wolves_ford', name: 'Wolves at the Ford', state: 'live', what: 'A starving pack is crossing the ford toward the farms.', objective: { text: 'Defeat the three packs, then the pack mother', n: 2, of: 4 }, leftMs: 372000, endsAt: Date.now() + 372000, rewardText: 'Event cache: a rare item or better', inside: true, inRange: true, players: 3, x: y.x, z: y.z, r: 40 }); });
+  await track();
   await expect(page.locator('.ph-chip')).toBeVisible({ timeout: 5000 });
   await expect(page.locator('.ph-chip')).toContainText('Wolves at the Ford');
   await expect(page.locator('.ph-info')).toHaveClass(/pulse/);
   await expect(page.locator('.ph-info b')).not.toHaveText('');
-  await shot('23b-event-chip');
-  await page.locator('.ph-chip').tap();
-  await expect(page.locator('#right-col .et-card')).toBeVisible();
-  await expect(page.locator('#right-col .et-card')).toContainText('Defeat the three packs');
-  await shot('23c-event-open');
+  await track(); await page.locator('.ph-chip').tap();      // (the chip itself folds away after 7 s)
+  await track();
+  await expect(page.locator('#right-col .et-card[data-key="e1"]')).toBeVisible();
+  await expect(page.locator('#right-col .et-card[data-key="e1"]')).toContainText('Defeat the three packs');
+  await shot('23c-event-open');      // (23b, the chip on its own, is not taken any more: it folds away while a picture is drawn)
   // a boss call-out is drawn in the centre column, which the bubble never hides
   await page.locator('.ph-info').tap();
   await page.evaluate(() => thousandvale.boss.callout('The Screelhag draws breath!', 'warn', null, true));

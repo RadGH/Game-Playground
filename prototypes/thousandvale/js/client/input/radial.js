@@ -72,7 +72,11 @@ export function createRadial({ run, parent = document.body } = {}) {
     return w.id;
   }
   function swap() { if (S.custom) return; S.ring = (S.ring + 1) % lists().length; S.at = -1; draw(); }
-  root.addEventListener('click', () => { if (performance.now() - S.openedAt > 400) close(); });   // (the tap that opened it also 'clicks' the overlay a moment later)
+  // (the tap that opened it also 'clicks' the overlay a moment later — and on a slow phone that can be well past 400 ms:
+  // only a press that STARTED on the open overlay closes it)
+  let downOnOpen = false;
+  root.addEventListener('pointerdown', () => { downOnOpen = S.open && performance.now() - S.openedAt > 50; }, true);
+  root.addEventListener('click', () => { if (downOnOpen && performance.now() - S.openedAt > 400) close(); downOnOpen = false; });
   hub.addEventListener('click', e => { e.stopPropagation(); swap(); });   // touch: tap the middle for the other ring (things you do: mount, fish, camp, map, help)
   /** Y5: one more ring after Windows and Do (tap the middle / RB steps through them). `items` = [{ id, label, html?, sub? }]. */
   function addRing({ title = '', items = [], onPick = null } = {}) { if (!items.length) return -1; extra.push({ title, items, onPick }); return 1 + extra.length; }

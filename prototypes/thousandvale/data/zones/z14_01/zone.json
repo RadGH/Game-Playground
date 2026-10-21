@@ -124,10 +124,10 @@
       {
         "name": "the Salt Mere",
         "kind": "shore",
-        "x": 778,
+        "x": 810,
         "z": 1034,
         "r": 320,
-        "level": 26.82
+        "level": 32.35
       }
     ],
     "fen": null
@@ -137,8 +137,8 @@
     "province": "Petbeck Basin",
     "inputHash": "2d4e6443",
     "rivers": 1,
-    "wetShare": 0.357,
-    "unwalkableShare": 0.374,
+    "wetShare": 0.358,
+    "unwalkableShare": 0.371,
     "towns": [
       {
         "name": "Saltmouth",
@@ -204,22 +204,22 @@
     ],
     "roads": 3,
     "bridges": 0,
-    "paths": 7,
-    "pathMetres": 1331,
-    "scatter": 14270,
+    "paths": 8,
+    "pathMetres": 1135,
+    "scatter": 14188,
     "scatterKinds": {
-      "rock_large": 460,
+      "rock_large": 461,
       "bush": 1742,
-      "rock_small": 998,
-      "tree_broadleaf": 1043,
-      "tree_old_oak": 19,
-      "reed": 5963,
-      "tree_willow": 788,
-      "heather": 2013,
-      "tree_birch": 222,
-      "boulder": 74,
-      "tree_conifer": 228,
-      "tree_dead": 174,
+      "rock_small": 986,
+      "tree_broadleaf": 1040,
+      "tree_old_oak": 20,
+      "reed": 6016,
+      "tree_willow": 798,
+      "heather": 1904,
+      "tree_birch": 213,
+      "boulder": 69,
+      "tree_conifer": 218,
+      "tree_dead": 175,
       "hedge": 546
     },
     "sites": [
@@ -232,13 +232,13 @@
       "x": 872,
       "z": 1620
     },
-    "placements": 181,
-    "vignettesAvoided": 631
+    "placements": 182,
+    "vignettesAvoided": 628
   },
   "files": {
-    "terrain.bin": 455458,
-    "nav.bin": 26235,
-    "scatter.bin": 114244,
-    "placements.json": 122571
+    "terrain.bin": 454365,
+    "nav.bin": 25980,
+    "scatter.bin": 113588,
+    "placements.json": 118590
   }
 }

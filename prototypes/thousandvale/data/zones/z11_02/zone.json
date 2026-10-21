@@ -189,7 +189,7 @@
     "inputHash": "36526177",
     "rivers": 4,
     "wetShare": 0.021,
-    "unwalkableShare": 0.152,
+    "unwalkableShare": 0.151,
     "towns": [
       {
         "name": "Copperdell",
@@ -273,18 +273,18 @@
     "roads": 12,
     "bridges": 2,
     "paths": 15,
-    "pathMetres": 3249,
-    "scatter": 31490,
+    "pathMetres": 3261,
+    "scatter": 31453,
     "scatterKinds": {
-      "tree_birch": 2560,
-      "tree_conifer": 9068,
-      "rock_small": 2123,
-      "rock_large": 2930,
-      "heather": 3258,
-      "bush": 3237,
-      "boulder": 247,
-      "tree_broadleaf": 6779,
-      "tree_old_oak": 33,
+      "tree_birch": 2565,
+      "tree_conifer": 9075,
+      "rock_small": 2134,
+      "rock_large": 2889,
+      "heather": 3265,
+      "bush": 3226,
+      "boulder": 248,
+      "tree_broadleaf": 6762,
+      "tree_old_oak": 34,
       "hedge": 1146,
       "tree_fruit": 35,
       "reed": 74
@@ -302,13 +302,13 @@
       "x": 348,
       "z": 444
     },
-    "placements": 339,
+    "placements": 341,
     "vignettesAvoided": 598
   },
   "files": {
-    "terrain.bin": 689720,
-    "nav.bin": 74078,
-    "scatter.bin": 252004,
-    "placements.json": 268935
+    "terrain.bin": 689039,
+    "nav.bin": 74105,
+    "scatter.bin": 251708,
+    "placements.json": 269775
   }
 }

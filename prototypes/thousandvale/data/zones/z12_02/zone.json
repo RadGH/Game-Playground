@@ -336,22 +336,22 @@
     ],
     "roads": 13,
     "bridges": 6,
-    "paths": 25,
-    "pathMetres": 3311,
-    "scatter": 17281,
+    "paths": 26,
+    "pathMetres": 3242,
+    "scatter": 17280,
     "scatterKinds": {
-      "heather": 2410,
-      "rock_small": 2330,
-      "rock_large": 1053,
-      "bush": 3965,
-      "tree_broadleaf": 5195,
-      "boulder": 151,
+      "heather": 2421,
+      "rock_small": 2326,
+      "rock_large": 1071,
+      "bush": 3966,
+      "tree_broadleaf": 5166,
+      "boulder": 150,
       "tree_birch": 501,
       "tree_conifer": 67,
-      "tree_old_oak": 89,
+      "tree_old_oak": 88,
       "hedge": 1377,
       "tree_fruit": 66,
-      "reed": 77
+      "reed": 81
     },
     "sites": [
       "settlement(HUB) town Torborhold 592 1264 90",
@@ -367,13 +367,13 @@
       "x": 588,
       "z": 1264
     },
-    "placements": 358,
+    "placements": 360,
     "vignettesAvoided": 676
   },
   "files": {
-    "terrain.bin": 617370,
-    "nav.bin": 39252,
-    "scatter.bin": 138332,
-    "placements.json": 293894
+    "terrain.bin": 616607,
+    "nav.bin": 39282,
+    "scatter.bin": 138324,
+    "placements.json": 294644
   }
 }

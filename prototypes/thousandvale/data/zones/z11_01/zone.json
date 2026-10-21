@@ -181,7 +181,7 @@
     "province": "Petbeck Basin",
     "inputHash": "6a42e50c",
     "rivers": 2,
-    "wetShare": 0.186,
+    "wetShare": 0.187,
     "unwalkableShare": 0.252,
     "towns": [
       {
@@ -272,17 +272,17 @@
     "roads": 10,
     "bridges": 1,
     "paths": 11,
-    "pathMetres": 2532,
-    "scatter": 29966,
+    "pathMetres": 2536,
+    "scatter": 29751,
     "scatterKinds": {
-      "rock_small": 1927,
-      "tree_conifer": 15271,
-      "bush": 1983,
-      "rock_large": 4906,
-      "tree_birch": 3228,
-      "heather": 840,
+      "rock_small": 1917,
+      "tree_conifer": 15167,
+      "rock_large": 4845,
+      "bush": 1971,
+      "tree_birch": 3217,
+      "heather": 832,
       "boulder": 239,
-      "tree_broadleaf": 800,
+      "tree_broadleaf": 791,
       "hedge": 772
     },
     "sites": [
@@ -302,9 +302,9 @@
     "vignettesAvoided": 640
   },
   "files": {
-    "terrain.bin": 671050,
-    "nav.bin": 77416,
-    "scatter.bin": 239812,
-    "placements.json": 211498
+    "terrain.bin": 668870,
+    "nav.bin": 76965,
+    "scatter.bin": 238092,
+    "placements.json": 211752
   }
 }

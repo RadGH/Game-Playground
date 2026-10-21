@@ -79,9 +79,9 @@
       "type": "dungeon",
       "id": "door_1",
       "name": "Barrow entrance",
-      "x": 994,
+      "x": 1010,
       "z": 1171,
-      "yaw": -0.431,
+      "yaw": -0.73,
       "pinned": true
     },
     {
@@ -130,7 +130,7 @@
     "inputHash": "454aaea1",
     "rivers": 0,
     "wetShare": 0.003,
-    "unwalkableShare": 0.222,
+    "unwalkableShare": 0.22,
     "towns": [
       {
         "name": "Last Lantern",
@@ -181,17 +181,17 @@
     ],
     "roads": 3,
     "bridges": 0,
-    "paths": 14,
-    "pathMetres": 2010,
-    "scatter": 13801,
+    "paths": 13,
+    "pathMetres": 1979,
+    "scatter": 13811,
     "scatterKinds": {
-      "rock_small": 3958,
+      "rock_small": 3952,
       "blackthorn": 2443,
       "tree_dead": 335,
-      "rock_large": 2800,
-      "boulder": 882,
-      "tree_conifer": 206,
-      "heather": 2358,
+      "rock_large": 2812,
+      "boulder": 885,
+      "tree_conifer": 200,
+      "heather": 2365,
       "tree_birch": 8,
       "hedge": 780,
       "tree_broadleaf": 31
@@ -200,7 +200,7 @@
       "lair dungeon The Black Filfit 1344 960",
       "settlement(HUB) town Last Lantern 890 1305 90",
       "settlement hamlet Thornwick 1772 1900 46",
-      "dungeon door_1 Barrow entrance 994 1171  -0.431",
+      "dungeon door_1 Barrow entrance 1010 1171  -0.73",
       "event world_grimtallow  1161 1305 100",
       "event event_blackthorn_scar  877 1098 40"
     ],
@@ -208,13 +208,13 @@
       "x": 890,
       "z": 1309
     },
-    "placements": 176,
+    "placements": 175,
     "vignettesAvoided": 668
   },
   "files": {
-    "terrain.bin": 781573,
-    "nav.bin": 61135,
-    "scatter.bin": 110492,
-    "placements.json": 159955
+    "terrain.bin": 782820,
+    "nav.bin": 61093,
+    "scatter.bin": 110572,
+    "placements.json": 158916
   }
 }

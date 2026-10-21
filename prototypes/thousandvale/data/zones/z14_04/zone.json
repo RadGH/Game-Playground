@@ -151,8 +151,8 @@
     "province": "Petbeck Basin",
     "inputHash": "63302176",
     "rivers": 2,
-    "wetShare": 0.297,
-    "unwalkableShare": 0.315,
+    "wetShare": 0.299,
+    "unwalkableShare": 0.316,
     "towns": [
       {
         "name": "Lowmoor",
@@ -216,15 +216,15 @@
     "bridges": 0,
     "paths": 6,
     "pathMetres": 240,
-    "scatter": 10258,
+    "scatter": 10146,
     "scatterKinds": {
-      "bush": 2748,
-      "gorse": 2373,
-      "tree_broadleaf": 2341,
-      "rock_small": 1400,
-      "rock_large": 449,
-      "tree_birch": 288,
-      "boulder": 23,
+      "bush": 2706,
+      "gorse": 2354,
+      "tree_broadleaf": 2323,
+      "rock_small": 1376,
+      "rock_large": 445,
+      "tree_birch": 286,
+      "boulder": 20,
       "tree_old_oak": 7,
       "tree_conifer": 5,
       "hedge": 624
@@ -244,12 +244,12 @@
       "z": 1026
     },
     "placements": 173,
-    "vignettesAvoided": 664
+    "vignettesAvoided": 660
   },
   "files": {
-    "terrain.bin": 477044,
-    "nav.bin": 23866,
-    "scatter.bin": 82148,
+    "terrain.bin": 476893,
+    "nav.bin": 23766,
+    "scatter.bin": 81252,
     "placements.json": 92596
   }
 }

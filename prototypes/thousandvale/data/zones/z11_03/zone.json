@@ -132,9 +132,9 @@
       "type": "dungeon",
       "id": "door_1",
       "name": "Barrow entrance",
-      "x": 873,
-      "z": 718,
-      "yaw": 2.73,
+      "x": 879,
+      "z": 733,
+      "yaw": 2.226,
       "pinned": true
     },
     {
@@ -341,20 +341,20 @@
     "roads": 12,
     "bridges": 3,
     "paths": 11,
-    "pathMetres": 1116,
-    "scatter": 28263,
+    "pathMetres": 1147,
+    "scatter": 28235,
     "scatterKinds": {
-      "rock_small": 1917,
-      "rock_large": 3289,
+      "rock_small": 1910,
+      "rock_large": 3318,
       "tree_conifer": 131,
-      "tree_birch": 1298,
-      "heather": 1321,
-      "tree_broadleaf": 12693,
-      "bush": 4493,
-      "boulder": 280,
+      "tree_birch": 1294,
+      "heather": 1320,
+      "tree_broadleaf": 12656,
+      "bush": 4492,
+      "boulder": 281,
       "tree_old_oak": 19,
-      "blackthorn": 1723,
-      "tree_dead": 260,
+      "blackthorn": 1729,
+      "tree_dead": 246,
       "hedge": 839
     },
     "sites": [
@@ -364,7 +364,7 @@
       "lair dungeon The Fifar Undercroft 192 1344",
       "crossing ford Wiwat Ford 1286 218",
       "crossing ford Fahibeck Ford 1042 772",
-      "dungeon door_1 Barrow entrance 873 718  2.73",
+      "dungeon door_1 Barrow entrance 879 733  2.226",
       "event event_wychwood  1112 792 40"
     ],
     "spawn": {
@@ -375,9 +375,9 @@
     "vignettesAvoided": 558
   },
   "files": {
-    "terrain.bin": 724370,
-    "nav.bin": 71488,
-    "scatter.bin": 226188,
-    "placements.json": 253135
+    "terrain.bin": 724302,
+    "nav.bin": 71490,
+    "scatter.bin": 225964,
+    "placements.json": 253376
   }
 }

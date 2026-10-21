@@ -28,6 +28,14 @@ const CHECK = process.argv.includes('--check');
 const DISC = new Set(['vignette', 'fort', 'farm', 'cave', 'camp', 'rare', 'hook', 'wayside', 'curio', 'folk']);
 /** What may simply go when no fair spot is left within ~1.2 km (`--province` only): a lore curio or a wayside stone is scenery. */
 const DROPPABLE = new Set(['curio', 'wayside']);
+/**
+ * `--province` only: a camp, rare or set piece that has to MOVE keeps 130 m + its radius from a settlement's edge. A town's
+ * farmland is laid out by the bake round whatever E left free, so a thing moved to a town's doorstep was simply taken
+ * again by the next bake's fields (the Ashcombe colossus went back and forth three rounds running).
+ */
+const FARM_SHY = new Set(['hook', 'rare', 'camp']);
+/** …and 100 m from the bake's own farms, orchards and fields, which shift a little every bake as the ground under them is levelled. */
+const farmNear = (ctx, x, z, R) => ctx.siteDiscs.some(d => (d.kind === 'field' || d.kind === 'set_piece' || d.kind === 'set_building') && Math.hypot(d.x - x, d.z - z) < R + d.r + 100);
 
 /** The province contexts exactly as tests/E/placement.test.js builds them. */
 function contexts(prov) {
@@ -146,12 +154,18 @@ for (const bay of TARGETS) {
     const ox = p.x, oz = p.z, R = p.radius ?? 1.5;
     let spot = null;
     const nearScore = (x, z0) => -Math.hypot(x - ox, z0 - oz) - (p.template === 'fishing_plot' || p.role === 'fisher' ? Math.max(0, ctx.waterDist(x, z0) - R - 12) * 3 : 0);
-    const score = (x, z0) => (nearHarbour(p, x, z0) || (p.type === 'curio' && sameCurioNear(ctx, p, x, z0)) || ((p.stray || p.roam) && settlementEdge(ctx, x, z0) < 70) ? -Infinity : nearScore(x, z0));
+    const score = (x, z0) => (nearHarbour(p, x, z0) || (p.type === 'curio' && sameCurioNear(ctx, p, x, z0)) || ((p.stray || p.roam) && settlementEdge(ctx, x, z0) < 70) || (PROV && FARM_SHY.has(p.type) && (settlementEdge(ctx, x, z0) < R + 130 || ctx.townDist(x, z0) < R + 90 || farmNear(ctx, x, z0, R))) ? -Infinity : nearScore(x, z0));
     // (a second, wider look — play-test 12, #81: the regenerated Torbor Downs took whole stretches of coast and hillside)
     for (const reach of PROV ? [1, 2.6] : [1]) {
       if (spot) break;
       if (DISC.has(p.type) && p.radius != null) spot = findSpot(ctx, rngFor(p.id + ':coast' + (reach > 1 ? ':wide' : '')), ruleKind(p), R, { near: { x: ox, z: oz, min: 0, max: 450 * reach }, spread: 0, tries: 6000 * reach, score });
       else spot = findPoint(ctx, rngFor(p.id + ':coast' + (reach > 1 ? ':wide' : '')), { x: ox, z: oz, min: 0, max: 300 * reach }, { allowTown: true, prefer: nearScore });
+    }
+    // (last: anywhere in the zone, nearest first — a big set piece in a corner the new hills or sea took)
+    // and if the new ground has no open disc that big anywhere, the set piece is drawn smaller (down to half) where it fits
+    if (!spot && PROV && DISC.has(p.type) && p.radius != null) for (const k of [1, 0.75, 0.6, 0.5]) {
+      spot = findSpot(ctx, rngFor(p.id + ':coast:zone' + k), ruleKind(p), Math.round(R * k), { spread: 0, tries: 30000, score });
+      if (spot) { if (k < 1) { report.push(`${bay.zone} ${p.id}: radius ${R} -> ${Math.round(R * k)} (no open ground that big left)`); p.radius = Math.round(R * k); } break; }
     }
     if (!spot && PROV && DROPPABLE.has(p.type)) { gone.add(p); report.push(`${bay.zone} ${p.type} ${p.id} (${why}): no fair spot within ${Math.round(450 * 2.6)} m — REMOVED (scenery only)`); changed = true; continue; }
     if (!spot) { report.push(`${bay.zone} ${p.id} (${why}): NO fair spot within reach`); continue; }

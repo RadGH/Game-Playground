@@ -330,8 +330,8 @@
    "type": "vignette",
    "id": "dark_lighthouse",
    "name": "The Dark Lighthouse",
-   "x": 1221,
-   "z": 1563,
+   "x": 1273,
+   "z": 1695,
    "yaw": 0.73,
    "radius": 10,
    "biome": "grassland",
@@ -372,8 +372,8 @@
    "type": "vignette",
    "id": "eel_traps",
    "name": "The Eel Weir",
-   "x": 1923,
-   "z": 1836,
+   "x": 1756,
+   "z": 1846,
    "yaw": 4.07,
    "radius": 11,
    "biome": "grassland",
@@ -414,8 +414,8 @@
    "type": "vignette",
    "id": "smugglers_beacon",
    "name": "The False Beacon",
-   "x": 1950,
-   "z": 61,
+   "x": 1826,
+   "z": 239,
    "yaw": 2.7,
    "radius": 11,
    "biome": "grassland",
@@ -587,8 +587,8 @@
     2,
     4
    ],
-   "x": 656,
-   "z": 1744,
+   "x": 691,
+   "z": 1715,
    "yaw": 0,
    "radius": 10
   },
@@ -605,8 +605,8 @@
     2,
     4
    ],
-   "x": 302,
-   "z": 1636,
+   "x": 330,
+   "z": 1600,
    "yaw": 0,
    "radius": 10
   },
@@ -981,8 +981,8 @@
    "id": "beehive_row_gullwick_0",
    "kind": "beehive_row",
    "name": "Beehive Row",
-   "x": 1633,
-   "z": 1532,
+   "x": 1631,
+   "z": 1510,
    "yaw": 3.83,
    "radius": 5,
    "filler": true
@@ -1000,8 +1000,8 @@
     2,
     3
    ],
-   "x": 1987,
-   "z": 1474,
+   "x": 1769,
+   "z": 1621,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1030,8 +1030,8 @@
     2,
     3
    ],
-   "x": 1408,
-   "z": 1260,
+   "x": 1385,
+   "z": 1221,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1071,8 +1071,8 @@
    "id": "cold_campfire_gullwick_6",
    "kind": "cold_campfire",
    "name": "Cold Campfire",
-   "x": 1564,
-   "z": 1824,
+   "x": 1548,
+   "z": 1810,
    "yaw": 2,
    "radius": 4,
    "filler": true
@@ -1161,8 +1161,8 @@
    "id": "cold_campfire_gullwick_12",
    "kind": "cold_campfire",
    "name": "Cold Campfire",
-   "x": 184,
-   "z": 1413,
+   "x": 166,
+   "z": 1422,
    "yaw": 3.15,
    "radius": 4,
    "filler": true
@@ -1210,8 +1210,8 @@
     2,
     3
    ],
-   "x": 184,
-   "z": 1844,
+   "x": 231,
+   "z": 1836,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1270,8 +1270,8 @@
     2,
     3
    ],
-   "x": 1436,
-   "z": 1636,
+   "x": 1488,
+   "z": 1665,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1281,8 +1281,8 @@
    "id": "league_stone_gullwick_20",
    "kind": "league_stone",
    "name": "League Stone",
-   "x": 1791,
-   "z": 1360,
+   "x": 1770,
+   "z": 1340,
    "yaw": 0.6,
    "radius": 3,
    "filler": true
@@ -1330,8 +1330,8 @@
     2,
     3
    ],
-   "x": 1740,
-   "z": 1976,
+   "x": 1573,
+   "z": 1705,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1371,8 +1371,8 @@
    "id": "drying_rack_camp_gullwick_26",
    "kind": "drying_rack_camp",
    "name": "Hunter's Rack",
-   "x": 1821,
-   "z": 1640,
+   "x": 1801,
+   "z": 1652,
    "yaw": 5.78,
    "radius": 4,
    "filler": true
@@ -1390,8 +1390,8 @@
     2,
     3
    ],
-   "x": 1128,
-   "z": 1760,
+   "x": 1116,
+   "z": 1716,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1491,8 +1491,8 @@
    "id": "beehive_row_gullwick_34",
    "kind": "beehive_row",
    "name": "Beehive Row",
-   "x": 1228,
-   "z": 1348,
+   "x": 1206,
+   "z": 1354,
    "yaw": 2.02,
    "radius": 5,
    "filler": true
@@ -1510,8 +1510,8 @@
     2,
     3
    ],
-   "x": 1596,
-   "z": 1328,
+   "x": 1580,
+   "z": 1371,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1540,8 +1540,8 @@
     2,
     3
    ],
-   "x": 1987,
-   "z": 893,
+   "x": 1827,
+   "z": 885,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1551,8 +1551,8 @@
    "id": "drying_rack_camp_gullwick_38",
    "kind": "drying_rack_camp",
    "name": "Hunter's Rack",
-   "x": 104,
-   "z": 1667,
+   "x": 112,
+   "z": 1687,
    "yaw": 0.3,
    "radius": 4,
    "filler": true
@@ -1570,8 +1570,8 @@
     2,
     3
    ],
-   "x": 1959,
-   "z": 1280,
+   "x": 1827,
+   "z": 1221,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1630,8 +1630,8 @@
     2,
     3
    ],
-   "x": 1383,
-   "z": 1452,
+   "x": 1340,
+   "z": 1432,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1641,8 +1641,8 @@
    "id": "wayside_well_gullwick_44",
    "kind": "wayside_well",
    "name": "Wayside Well",
-   "x": 2008,
-   "z": 1669,
+   "x": 1812,
+   "z": 1738,
    "yaw": 0.95,
    "radius": 4,
    "filler": true
@@ -1787,8 +1787,8 @@
     2,
     3
    ],
-   "x": 583,
-   "z": 1273,
+   "x": 584,
+   "z": 1241,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -1814,22 +1814,22 @@
    "chatter": [
     "role.surveyor"
    ],
-   "x": 1439,
-   "z": 1976,
+   "x": 1427,
+   "z": 1955,
    "yaw": 5.96,
    "radius": 6,
    "path": [
     [
-     1472,
-     2011
+     1438,
+     1968
     ],
     [
-     1400,
-     1982
+     1410,
+     1958
     ],
     [
-     1460,
-     1931
+     1433,
+     1939
     ]
    ]
   },
@@ -1839,8 +1839,8 @@
    "recipe": "cu_oak_of_oaths",
    "name": "Oath Oak",
    "kind": "shrine",
-   "x": 1903,
-   "z": 2001,
+   "x": 1703,
+   "z": 1894,
    "yaw": 2.08,
    "radius": 6,
    "levelBase": 6
@@ -1858,8 +1858,8 @@
     1,
     2
    ],
-   "x": 40,
-   "z": 2008,
+   "x": 34,
+   "z": 1976,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -1924,8 +1924,8 @@
    "recipe": "cu_lone_arch",
    "name": "Lone Arch",
    "kind": "marker",
-   "x": 2008,
-   "z": 224,
+   "x": 1913,
+   "z": 238,
    "yaw": 1.05,
    "radius": 5,
    "levelBase": 6
@@ -1947,8 +1947,8 @@
    "id": "fallen_tree_gullwick_d3",
    "kind": "fallen_tree",
    "name": "Fallen Tree",
-   "x": 2009,
-   "z": 512,
+   "x": 2001,
+   "z": 452,
    "yaw": 2.64,
    "radius": 6,
    "filler": true
@@ -1966,8 +1966,8 @@
     1,
     2
    ],
-   "x": 152,
-   "z": 1024,
+   "x": 181,
+   "z": 1038,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -2018,8 +2018,8 @@
    "recipe": "cu_rune_ring",
    "name": "Little Stone Ring",
    "kind": "marker",
-   "x": 728,
-   "z": 1594,
+   "x": 707,
+   "z": 1586,
    "yaw": 0.24,
    "radius": 6,
    "levelBase": 5
@@ -2079,26 +2079,26 @@
     2,
     3
    ],
-   "x": 816,
-   "z": 1328,
+   "x": 848,
+   "z": 1327,
    "yaw": 0,
    "radius": 8,
    "path": [
-    [
-     882,
-     1330
-    ],
     [
      836,
      1400
     ],
     [
-     736,
-     1343
+     775,
+     1315
     ],
     [
-     806,
-     1248
+     860,
+     1254
+    ],
+    [
+     921,
+     1339
     ]
    ],
    "roam": true
@@ -2116,8 +2116,8 @@
     1,
     2
    ],
-   "x": 1840,
-   "z": 1024,
+   "x": 1788,
+   "z": 1077,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -2316,7 +2316,7 @@
    "recipe": "cu_crow_roost",
    "name": "Crow Roost",
    "kind": "nest",
-   "x": 1777,
+   "x": 1730,
    "z": 1503,
    "yaw": 1.69,
    "radius": 5,
@@ -2370,8 +2370,8 @@
    "id": "broken_wheel_gullwick_d7",
    "kind": "broken_wheel",
    "name": "Broken Wheel",
-   "x": 1424,
-   "z": 1792,
+   "x": 1435,
+   "z": 1809,
    "yaw": 4.21,
    "radius": 4,
    "filler": true
@@ -2382,8 +2382,8 @@
    "recipe": "cu_mushroom_flush",
    "name": "Flush of Caps",
    "kind": "forage",
-   "x": 184,
-   "z": 1552,
+   "x": 192,
+   "z": 1535,
    "yaw": 4.71,
    "radius": 4,
    "levelBase": 5
@@ -2473,8 +2473,8 @@
    "id": "dolmen_gullwick_d8",
    "kind": "dolmen",
    "name": "Dolmen",
-   "x": 1864,
-   "z": 1175,
+   "x": 1842,
+   "z": 1171,
    "yaw": 5.27,
    "radius": 5,
    "filler": true
@@ -2563,8 +2563,8 @@
     1,
     2
    ],
-   "x": 1601,
-   "z": 1960,
+   "x": 1691,
+   "z": 1977,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -2761,8 +2761,8 @@
    "recipe": "cu_wasp_bank",
    "name": "Wasp Bank",
    "kind": "nest",
-   "x": 2010,
-   "z": 1937,
+   "x": 1800,
+   "z": 1786,
    "yaw": 1.16,
    "radius": 4,
    "levelBase": 6
@@ -2807,22 +2807,22 @@
    "chatter": [
     "role.surveyor"
    ],
-   "x": 608,
-   "z": 1624,
+   "x": 589,
+   "z": 1642,
    "yaw": 1.34,
    "radius": 6,
    "path": [
     [
-     542,
-     1611
+     551,
+     1622
     ],
     [
-     650,
-     1570
+     625,
+     1619
     ],
     [
-     607,
-     1670
+     591,
+     1685
     ]
    ]
   },
@@ -2893,8 +2893,8 @@
     2,
     3
    ],
-   "x": 1312,
-   "z": 1648,
+   "x": 1287,
+   "z": 1627,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -2954,8 +2954,8 @@
    "recipe": "cu_oak_of_oaths",
    "name": "Oath Oak",
    "kind": "shrine",
-   "x": 1201,
-   "z": 2008,
+   "x": 1223,
+   "z": 2004,
    "yaw": 0.38,
    "radius": 6,
    "levelBase": 6
@@ -3055,8 +3055,8 @@
     2,
     3
    ],
-   "x": 1926,
-   "z": 1584,
+   "x": 1775,
+   "z": 1666,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -3066,8 +3066,8 @@
    "id": "lost_signpost_gullwick_d14",
    "kind": "lost_signpost",
    "name": "Lost Signpost",
-   "x": 208,
-   "z": 1722,
+   "x": 225,
+   "z": 1729,
    "yaw": 5.35,
    "radius": 3,
    "filler": true
@@ -3097,26 +3097,26 @@
     2,
     3
    ],
-   "x": 280,
-   "z": 1920,
+   "x": 305,
+   "z": 1899,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     312,
-     1976
+     337,
+     1955
     ],
     [
-     233,
-     1934
+     258,
+     1913
     ],
     [
-     241,
-     1858
+     266,
+     1837
     ],
     [
-     322,
-     1905
+     347,
+     1884
     ]
    ],
    "roam": true
@@ -3157,8 +3157,8 @@
    "id": "milestone_gullwick_d15",
    "kind": "milestone",
    "name": "Milestone",
-   "x": 1801,
-   "z": 1873,
+   "x": 1718,
+   "z": 1876,
    "yaw": 0.87,
    "radius": 3,
    "filler": true
@@ -3200,8 +3200,8 @@
    "recipe": "cu_farmers_sign",
    "name": "Angry Sign",
    "kind": "lore",
-   "x": 1872,
-   "z": 1440,
+   "x": 1755,
+   "z": 1350,
    "yaw": 4.94,
    "radius": 3,
    "levelBase": 6
@@ -3243,8 +3243,8 @@
    "recipe": "cu_bramble_berries",
    "name": "Bramble Berries",
    "kind": "forage",
-   "x": 1834,
-   "z": 1751,
+   "x": 1806,
+   "z": 1760,
    "yaw": 3.66,
    "radius": 4,
    "levelBase": 6
@@ -3277,8 +3277,8 @@
    "recipe": "cu_wanted_post",
    "name": "Wanted Post",
    "kind": "lore",
-   "x": 1713,
-   "z": 1616,
+   "x": 1724,
+   "z": 1631,
    "yaw": 6.1,
    "radius": 3,
    "levelBase": 6
@@ -3333,8 +3333,8 @@
     2,
     3
    ],
-   "x": 432,
-   "z": 1624,
+   "x": 433,
+   "z": 1659,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -3441,8 +3441,8 @@
    "id": "cold_campfire_gullwick_d19",
    "kind": "cold_campfire",
    "name": "Cold Campfire",
-   "x": 2016,
-   "z": 335,
+   "x": 1973,
+   "z": 341,
    "yaw": 2.86,
    "radius": 4,
    "filler": true
@@ -3453,8 +3453,8 @@
    "recipe": "cu_sinkhole",
    "name": "Sinkhole",
    "kind": "hazard",
-   "x": 1512,
-   "z": 1728,
+   "x": 1517,
+   "z": 1750,
    "yaw": 2.71,
    "radius": 6,
    "levelBase": 6
@@ -3514,7 +3514,7 @@
    "kind": "stone_trough",
    "name": "Stone Trough",
    "x": 1143,
-   "z": 1648,
+   "z": 1670,
    "yaw": 1.79,
    "radius": 4,
    "filler": true
@@ -3638,8 +3638,8 @@
    "recipe": "cu_drowned_saint",
    "name": "Drowned Saint",
    "kind": "shrine",
-   "x": 1880,
-   "z": 920,
+   "x": 1802,
+   "z": 923,
    "yaw": 0.56,
    "radius": 5,
    "levelBase": 6
@@ -3680,8 +3680,8 @@
    "id": "woodpile_stack_gullwick_d22",
    "kind": "woodpile_stack",
    "name": "Woodpile",
-   "x": 39,
-   "z": 1079,
+   "x": 55,
+   "z": 1067,
    "yaw": 5.48,
    "radius": 4,
    "filler": true
@@ -3754,8 +3754,8 @@
     1,
     2
    ],
-   "x": 1672,
-   "z": 1880,
+   "x": 1687,
+   "z": 1850,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -3808,26 +3808,26 @@
     1,
     2
    ],
-   "x": 1272,
-   "z": 1440,
+   "x": 1260,
+   "z": 1471,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1341,
-     1415
+     1277,
+     1494
     ],
     [
-     1293,
-     1539
+     1237,
+     1488
     ],
     [
-     1187,
-     1449
+     1243,
+     1448
     ],
     [
-     1239,
-     1362
+     1283,
+     1454
     ]
    ],
    "roam": true
@@ -3845,8 +3845,8 @@
     1,
     2
    ],
-   "x": 1815,
-   "z": 1263,
+   "x": 1784,
+   "z": 1274,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -3872,22 +3872,22 @@
    "chatter": [
     "role.fisher"
    ],
-   "x": 1934,
-   "z": 863,
+   "x": 1821,
+   "z": 821,
    "yaw": 6.14,
    "radius": 6,
    "path": [
     [
-     1926,
-     852
+     1813,
+     810
     ],
     [
-     1943,
-     863
+     1830,
+     821
     ],
     [
-     1928,
-     874
+     1815,
+     832
     ]
    ]
   },
@@ -3897,8 +3897,8 @@
    "recipe": "cu_old_battle",
    "name": "Old Skirmish",
    "kind": "remains",
-   "x": 2008,
-   "z": 1768,
+   "x": 1741,
+   "z": 1667,
    "yaw": 0.53,
    "radius": 7,
    "levelBase": 6
@@ -3939,8 +3939,8 @@
    "recipe": "cu_heron_nest",
    "name": "Heron Rookery",
    "kind": "nest",
-   "x": 152,
-   "z": 1271,
+   "x": 145,
+   "z": 1248,
    "yaw": 5.16,
    "radius": 6,
    "levelBase": 5
@@ -3958,8 +3958,8 @@
     1,
     2
    ],
-   "x": 1024,
-   "z": 1745,
+   "x": 999,
+   "z": 1767,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -4030,8 +4030,8 @@
    "id": "milestone_gullwick_d25",
    "kind": "milestone",
    "name": "Milestone",
-   "x": 1912,
-   "z": 1688,
+   "x": 1792,
+   "z": 1695,
    "yaw": 3.58,
    "radius": 3,
    "filler": true
@@ -4061,8 +4061,8 @@
    "recipe": "cu_boundary_cross",
    "name": "Boundary Cross",
    "kind": "marker",
-   "x": 1369,
-   "z": 1873,
+   "x": 1351,
+   "z": 1875,
    "yaw": 4.2,
    "radius": 3,
    "levelBase": 6
@@ -4076,22 +4076,22 @@
    "chatter": [
     "role.herbalist"
    ],
-   "x": 1952,
-   "z": 990,
+   "x": 1796,
+   "z": 950,
    "yaw": 1.62,
    "radius": 6,
    "path": [
     [
-     1933,
-     998
+     1793,
+     963
     ],
     [
-     1949,
-     970
+     1786,
+     941
     ],
     [
-     1967,
-     1000
+     1809,
+     946
     ]
    ]
   },
@@ -4131,8 +4131,8 @@
    "id": "lost_signpost_gullwick_d26",
    "kind": "lost_signpost",
    "name": "Lost Signpost",
-   "x": 256,
-   "z": 1008,
+   "x": 246,
+   "z": 993,
    "yaw": 2.58,
    "radius": 3,
    "filler": true
@@ -4233,8 +4233,8 @@
    "id": "cold_campfire_gullwick_d28",
    "kind": "cold_campfire",
    "name": "Cold Campfire",
-   "x": 2008,
-   "z": 1184,
+   "x": 1849,
+   "z": 1145,
    "yaw": 3.76,
    "radius": 4,
    "filler": true
@@ -4245,8 +4245,8 @@
    "recipe": "cu_old_battle",
    "name": "Old Skirmish",
    "kind": "remains",
-   "x": 2008,
-   "z": 1368,
+   "x": 1761,
+   "z": 1307,
    "yaw": 5.08,
    "radius": 7,
    "levelBase": 6
@@ -4307,8 +4307,8 @@
    "recipe": "cu_wild_garlic",
    "name": "Wild Garlic",
    "kind": "forage",
-   "x": 1753,
-   "z": 1704,
+   "x": 1748,
+   "z": 1722,
    "yaw": 0.43,
    "radius": 4,
    "levelBase": 6
@@ -4326,8 +4326,8 @@
     2,
     3
    ],
-   "x": 1440,
-   "z": 1536,
+   "x": 1402,
+   "z": 1531,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -4380,26 +4380,26 @@
     2,
     3
    ],
-   "x": 1088,
-   "z": 1857,
+   "x": 1098,
+   "z": 1825,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1151,
-     1893
+     1098,
+     1872
     ],
     [
-     1074,
-     1914
+     1051,
+     1825
     ],
     [
-     1013,
-     1822
+     1098,
+     1778
     ],
     [
-     1121,
-     1781
+     1145,
+     1825
     ]
    ],
    "roam": true
@@ -4530,8 +4530,8 @@
     1,
     2
    ],
-   "x": 1881,
-   "z": 1344,
+   "x": 1732,
+   "z": 1369,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -4657,8 +4657,8 @@
    "recipe": "cu_wild_garlic",
    "name": "Wild Garlic",
    "kind": "forage",
-   "x": 130,
-   "z": 1759,
+   "x": 148,
+   "z": 1754,
    "yaw": 0.72,
    "radius": 4,
    "levelBase": 5
@@ -4699,8 +4699,8 @@
    "recipe": "cu_shepherds_hut",
    "name": "Shepherd's Lean-to",
    "kind": "camp",
-   "x": 1512,
-   "z": 1279,
+   "x": 1490,
+   "z": 1272,
    "yaw": 4.66,
    "radius": 6,
    "levelBase": 6
@@ -4718,26 +4718,26 @@
     1,
     2
    ],
-   "x": 1632,
-   "z": 1769,
+   "x": 1626,
+   "z": 1737,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1560,
-     1741
+     1617,
+     1728
     ],
     [
-     1693,
-     1695
+     1635,
+     1728
     ],
     [
-     1697,
-     1812
+     1635,
+     1746
     ],
     [
-     1579,
-     1839
+     1617,
+     1746
     ]
    ],
    "roam": true
@@ -4843,8 +4843,8 @@
    "recipe": "cu_sinkhole",
    "name": "Sinkhole",
    "kind": "hazard",
-   "x": 104,
-   "z": 1447,
+   "x": 146,
+   "z": 1455,
    "yaw": 3.35,
    "radius": 6,
    "levelBase": 5
@@ -4885,8 +4885,8 @@
     1,
     2
    ],
-   "x": 1368,
-   "z": 1720,
+   "x": 1376,
+   "z": 1688,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -4939,26 +4939,26 @@
     1,
     2
    ],
-   "x": 2008,
-   "z": 136,
+   "x": 1924,
+   "z": 142,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1991,
-     173
+     1908,
+     152
     ],
     [
-     1974,
-     114
+     1914,
+     126
     ],
     [
-     2027,
-     94
+     1940,
+     132
     ],
     [
-     2036,
-     159
+     1934,
+     158
     ]
    ],
    "roam": true
@@ -5120,26 +5120,26 @@
     1,
     2
    ],
-   "x": 1872,
-   "z": 1919,
+   "x": 1758,
+   "z": 1796,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1803,
-     1903
+     1743,
+     1809
     ],
     [
-     1875,
-     1862
+     1745,
+     1781
     ],
     [
-     1929,
-     1926
+     1773,
+     1783
     ],
     [
-     1860,
-     1985
+     1771,
+     1811
     ]
    ],
    "roam": true
@@ -5180,8 +5180,8 @@
     1,
     2
    ],
-   "x": 1896,
-   "z": 1096,
+   "x": 1819,
+   "z": 1140,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -5232,8 +5232,8 @@
    "recipe": "cu_old_battle",
    "name": "Old Skirmish",
    "kind": "remains",
-   "x": 1944,
-   "z": 279,
+   "x": 1925,
+   "z": 263,
    "yaw": 0.46,
    "radius": 7,
    "levelBase": 6
@@ -5293,26 +5293,26 @@
     1,
     2
    ],
-   "x": 1207,
-   "z": 1798,
+   "x": 1190,
+   "z": 1826,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1143,
-     1751
+     1180,
+     1824
     ],
     [
-     1267,
-     1752
+     1192,
+     1816
     ],
     [
-     1273,
-     1861
+     1200,
+     1828
     ],
     [
-     1154,
-     1845
+     1188,
+     1836
     ]
    ],
    "roam": true
@@ -5353,8 +5353,8 @@
    "id": "wayside_well_gullwick_d41",
    "kind": "wayside_well",
    "name": "Wayside Well",
-   "x": 1280,
-   "z": 1281,
+   "x": 1291,
+   "z": 1299,
    "yaw": 2.45,
    "radius": 4,
    "filler": true
@@ -5395,8 +5395,8 @@
     2,
     3
    ],
-   "x": 1877,
-   "z": 844,
+   "x": 1796,
+   "z": 838,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -5419,8 +5419,8 @@
    "recipe": "cu_rune_ring",
    "name": "Little Stone Ring",
    "kind": "marker",
-   "x": 1840,
-   "z": 1560,
+   "x": 1736,
+   "z": 1562,
    "yaw": 5.71,
    "radius": 6,
    "levelBase": 6
@@ -5450,8 +5450,8 @@
    "recipe": "cu_mushroom_flush",
    "name": "Flush of Caps",
    "kind": "forage",
-   "x": 121,
-   "z": 1977,
+   "x": 116,
+   "z": 1995,
    "yaw": 5.58,
    "radius": 4,
    "levelBase": 5
@@ -5504,8 +5504,8 @@
     1,
     2
    ],
-   "x": 2008,
-   "z": 1560,
+   "x": 1713,
+   "z": 1586,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -5627,8 +5627,8 @@
    "recipe": "cu_drowned_saint",
    "name": "Drowned Saint",
    "kind": "shrine",
-   "x": 210,
-   "z": 1337,
+   "x": 230,
+   "z": 1341,
    "yaw": 3.1,
    "radius": 5,
    "levelBase": 5
@@ -5658,8 +5658,8 @@
    "recipe": "cu_boundary_cross",
    "name": "Boundary Cross",
    "kind": "marker",
-   "x": 2008,
-   "z": 1856,
+   "x": 1761,
+   "z": 1752,
    "yaw": 1.5,
    "radius": 3,
    "levelBase": 6
@@ -5739,22 +5739,22 @@
    "chatter": [
     "role.shepherd"
    ],
-   "x": 1487,
-   "z": 1849,
+   "x": 1492,
+   "z": 1824,
    "yaw": 4.74,
    "radius": 6,
    "path": [
     [
-     1538,
-     1834
+     1469,
+     1842
     ],
     [
-     1476,
-     1895
-    ],
-    [
-     1457,
+     1488,
      1795
+    ],
+    [
+     1519,
+     1835
     ]
    ]
   },
@@ -5825,26 +5825,26 @@
     1,
     2
    ],
-   "x": 1996,
-   "z": 483,
+   "x": 1967,
+   "z": 466,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     2029,
-     555
+     2010,
+     509
     ],
     [
-     1933,
-     506
+     1924,
+     509
     ],
     [
-     1968,
-     391
+     1924,
+     423
     ],
     [
-     2044,
-     447
+     2010,
+     423
     ]
    ],
    "roam": true
@@ -5874,8 +5874,8 @@
    "recipe": "cu_eel_trap",
    "name": "Eel Trap",
    "kind": "fishing",
-   "x": 273,
-   "z": 1176,
+   "x": 269,
+   "z": 1157,
    "yaw": 1.22,
    "radius": 4,
    "levelBase": 5
@@ -6186,8 +6186,8 @@
    "recipe": "cu_fishing_rock",
    "name": "Fishing Rock",
    "kind": "fishing",
-   "x": 104,
-   "z": 1560,
+   "x": 84,
+   "z": 1568,
    "yaw": 1.95,
    "radius": 5,
    "levelBase": 5
@@ -6336,8 +6336,8 @@
     2,
     3
    ],
-   "x": 1984,
-   "z": 2008,
+   "x": 1679,
+   "z": 1811,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -6347,8 +6347,8 @@
    "id": "cottage_corner_gullwick_d52",
    "kind": "cottage_corner",
    "name": "Ruined Cottage",
-   "x": 710,
-   "z": 1513,
+   "x": 685,
+   "z": 1516,
    "yaw": 1.13,
    "radius": 6,
    "filler": true
@@ -6378,26 +6378,26 @@
     1,
     2
    ],
-   "x": 1665,
-   "z": 2006,
+   "x": 1529,
+   "z": 1837,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1657,
-     1953
+     1535,
+     1846
     ],
     [
-     1711,
-     1998
+     1520,
+     1843
     ],
     [
-     1668,
-     2040
+     1523,
+     1828
     ],
     [
-     1635,
-     2018
+     1538,
+     1831
     ]
    ],
    "roam": true
@@ -6427,8 +6427,8 @@
    "recipe": "cu_empty_gallows_post",
    "name": "Weathered Post",
    "kind": "lore",
-   "x": 1912,
-   "z": 1504,
+   "x": 1730,
+   "z": 1524,
    "yaw": 0.04,
    "radius": 3,
    "levelBase": 6
@@ -6493,8 +6493,8 @@
    "recipe": "cu_buried_crock",
    "name": "Buried Crock",
    "kind": "cache",
-   "x": 1935,
-   "z": 1400,
+   "x": 1800,
+   "z": 1251,
    "yaw": 3.91,
    "radius": 4,
    "levelBase": 6
@@ -6547,8 +6547,8 @@
    "recipe": "cu_poachers_end",
    "name": "Poacher's End",
    "kind": "remains",
-   "x": 1936,
-   "z": 1200,
+   "x": 1780,
+   "z": 1214,
    "yaw": 5.71,
    "radius": 4,
    "levelBase": 6
@@ -6566,26 +6566,26 @@
     1,
     2
    ],
-   "x": 1639,
-   "z": 1255,
+   "x": 1668,
+   "z": 1270,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1670,
-     1191
+     1612,
+     1256
     ],
     [
-     1712,
-     1278
+     1682,
+     1214
     ],
     [
-     1610,
-     1299
+     1724,
+     1284
     ],
     [
-     1573,
-     1216
+     1654,
+     1326
     ]
    ],
    "roam": true
@@ -6630,22 +6630,22 @@
    "chatter": [
     "role.shepherd"
    ],
-   "x": 1702,
-   "z": 1487,
+   "x": 1686,
+   "z": 1506,
    "yaw": 0.28,
    "radius": 6,
    "path": [
     [
-     1678,
-     1532
+     1699,
+     1506
     ],
     [
-     1685,
-     1439
+     1680,
+     1518
     ],
     [
-     1743,
-     1493
+     1679,
+     1495
     ]
    ]
   },
@@ -6655,8 +6655,8 @@
    "recipe": "cu_lovers_stone",
    "name": "Lovers' Stone",
    "kind": "lore",
-   "x": 1800,
-   "z": 1432,
+   "x": 1727,
+   "z": 1428,
    "yaw": 1.34,
    "radius": 4,
    "levelBase": 6
@@ -6716,8 +6716,8 @@
     2,
     3
    ],
-   "x": 616,
-   "z": 1191,
+   "x": 624,
+   "z": 1222,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -6747,26 +6747,26 @@
     2,
     3
    ],
-   "x": 1352,
-   "z": 1799,
+   "x": 1341,
+   "z": 1768,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1416,
-     1837
+     1336,
+     1785
     ],
     [
-     1322,
-     1857
+     1324,
+     1763
     ],
     [
-     1296,
-     1767
+     1346,
+     1751
     ],
     [
-     1369,
-     1754
+     1358,
+     1773
     ]
    ],
    "roam": true
@@ -6830,8 +6830,8 @@
    "recipe": "cu_poachers_end",
    "name": "Poacher's End",
    "kind": "remains",
-   "x": 102,
-   "z": 1831,
+   "x": 96,
+   "z": 1814,
    "yaw": 5.93,
    "radius": 4,
    "levelBase": 5
@@ -6912,8 +6912,8 @@
    "recipe": "cu_buried_crock",
    "name": "Buried Crock",
    "kind": "cache",
-   "x": 1904,
-   "z": 1761,
+   "x": 1793,
+   "z": 1721,
    "yaw": 4.51,
    "radius": 4,
    "levelBase": 6
@@ -6931,26 +6931,26 @@
     2,
     3
    ],
-   "x": 544,
-   "z": 1488,
+   "x": 510,
+   "z": 1489,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     531,
-     1573
+     499,
+     1485
     ],
     [
-     468,
-     1452
+     514,
+     1478
     ],
     [
-     553,
-     1420
+     521,
+     1493
     ],
     [
-     632,
-     1497
+     506,
+     1500
     ]
    ],
    "roam": true
@@ -7088,8 +7088,8 @@
    "id": "roadside_grave_gullwick_d60",
    "kind": "roadside_grave",
    "name": "Roadside Grave",
-   "x": 1081,
-   "z": 1697,
+   "x": 1060,
+   "z": 1693,
    "yaw": 4.48,
    "radius": 4,
    "filler": true
@@ -7183,22 +7183,22 @@
    "chatter": [
     "role.shepherd"
    ],
-   "x": 1768,
-   "z": 1578,
+   "x": 1744,
+   "z": 1587,
    "yaw": 2.7,
    "radius": 6,
    "path": [
     [
-     1816,
-     1607
+     1745,
+     1562
     ],
     [
-     1729,
-     1602
+     1765,
+     1601
     ],
     [
-     1784,
-     1534
+     1721,
+     1598
     ]
    ]
   },
@@ -7208,8 +7208,8 @@
    "recipe": "cu_old_battle",
    "name": "Old Skirmish",
    "kind": "remains",
-   "x": 1529,
-   "z": 1960,
+   "x": 1445,
+   "z": 1905,
    "yaw": 1.8,
    "radius": 7,
    "levelBase": 6
@@ -7227,8 +7227,8 @@
     1,
     2
    ],
-   "x": 1888,
-   "z": 1257,
+   "x": 1772,
+   "z": 1242,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -7250,8 +7250,8 @@
    "recipe": "cu_bog_body",
    "name": "Bog Body",
    "kind": "remains",
-   "x": 168,
-   "z": 1480,
+   "x": 169,
+   "z": 1498,
    "yaw": 1.26,
    "radius": 4,
    "levelBase": 5
@@ -7484,26 +7484,26 @@
     2,
     3
    ],
-   "x": 640,
-   "z": 1815,
+   "x": 609,
+   "z": 1807,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     680,
-     1769
+     579,
+     1853
     ],
     [
-     709,
-     1839
+     563,
+     1777
     ],
     [
-     602,
-     1856
+     639,
+     1761
     ],
     [
-     577,
-     1792
+     655,
+     1837
     ]
    ],
    "roam": true
@@ -7556,8 +7556,8 @@
    "recipe": "cu_childs_map",
    "name": "Child's Map",
    "kind": "lore",
-   "x": 1920,
-   "z": 183,
+   "x": 1911,
+   "z": 169,
    "yaw": 4.99,
    "radius": 3,
    "levelBase": 6
@@ -7575,8 +7575,8 @@
     1,
     2
    ],
-   "x": 1568,
-   "z": 1511,
+   "x": 1540,
+   "z": 1528,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -7822,8 +7822,8 @@
     1,
     2
    ],
-   "x": 831,
-   "z": 1561,
+   "x": 857,
+   "z": 1542,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -8320,8 +8320,8 @@
    "recipe": "cu_bramble_berries",
    "name": "Bramble Berries",
    "kind": "forage",
-   "x": 1375,
-   "z": 1081,
+   "x": 1358,
+   "z": 1073,
    "yaw": 4.08,
    "radius": 4,
    "levelBase": 6
@@ -8339,8 +8339,8 @@
     1,
     2
    ],
-   "x": 1735,
-   "z": 1904,
+   "x": 1712,
+   "z": 1820,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -8370,26 +8370,26 @@
     1,
     2
    ],
-   "x": 1345,
-   "z": 1944,
+   "x": 1326,
+   "z": 1918,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1381,
-     1874
+     1302,
+     1925
     ],
     [
-     1392,
-     1972
+     1319,
+     1894
     ],
     [
-     1311,
-     1991
+     1350,
+     1911
     ],
     [
-     1286,
-     1916
+     1333,
+     1942
     ]
    ],
    "roam": true
@@ -8460,8 +8460,8 @@
    "id": "cold_campfire_gullwick_d74",
    "kind": "cold_campfire",
    "name": "Cold Campfire",
-   "x": 231,
-   "z": 1592,
+   "x": 218,
+   "z": 1609,
    "yaw": 5.54,
    "radius": 4,
    "filler": true
@@ -8561,26 +8561,26 @@
     1,
     2
    ],
-   "x": 1840,
-   "z": 1497,
+   "x": 1688,
+   "z": 1469,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1798,
-     1544
+     1696,
+     1457
     ],
     [
-     1785,
-     1480
+     1700,
+     1477
     ],
     [
-     1861,
-     1427
+     1680,
+     1481
     ],
     [
-     1885,
-     1528
+     1676,
+     1461
     ]
    ],
    "roam": true
@@ -8652,8 +8652,8 @@
     2,
     3
    ],
-   "x": 152,
-   "z": 1360,
+   "x": 159,
+   "z": 1392,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -8707,8 +8707,8 @@
    "recipe": "cu_horse_bones",
    "name": "Horse Bones",
    "kind": "remains",
-   "x": 1231,
-   "z": 1496,
+   "x": 1227,
+   "z": 1516,
    "yaw": 3.2,
    "radius": 5,
    "levelBase": 6
@@ -8718,8 +8718,8 @@
    "id": "boundary_stake_gullwick_d77",
    "kind": "boundary_stake",
    "name": "Boundary Stakes",
-   "x": 1561,
-   "z": 1904,
+   "x": 1542,
+   "z": 1895,
    "yaw": 5.33,
    "radius": 4,
    "filler": true
@@ -8749,26 +8749,26 @@
     1,
     2
    ],
-   "x": 1735,
-   "z": 1216,
+   "x": 1711,
+   "z": 1193,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1767,
-     1197
+     1743,
+     1174
     ],
     [
-     1758,
-     1257
+     1734,
+     1234
     ],
     [
-     1702,
-     1246
+     1678,
+     1223
     ],
     [
-     1723,
-     1179
+     1699,
+     1156
     ]
    ],
    "roam": true
@@ -8786,8 +8786,8 @@
     2,
     3
    ],
-   "x": 640,
-   "z": 1424,
+   "x": 665,
+   "z": 1444,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -8838,8 +8838,8 @@
    "recipe": "cu_spring_altar",
    "name": "Spring Altar",
    "kind": "shrine",
-   "x": 1915,
-   "z": 843,
+   "x": 1878,
+   "z": 827,
    "yaw": 5.36,
    "radius": 5,
    "levelBase": 6
@@ -8930,26 +8930,26 @@
     1,
     2
    ],
-   "x": 1434,
-   "z": 1192,
+   "x": 1459,
+   "z": 1171,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1468,
-     1148
+     1483,
+     1209
     ],
     [
-     1482,
-     1236
+     1421,
+     1195
     ],
     [
-     1401,
-     1233
+     1435,
+     1133
     ],
     [
-     1400,
-     1146
+     1497,
+     1147
     ]
    ],
    "roam": true
@@ -8960,8 +8960,8 @@
    "recipe": "cu_rune_ring",
    "name": "Little Stone Ring",
    "kind": "marker",
-   "x": 1800,
-   "z": 2008,
+   "x": 1707,
+   "z": 1921,
    "yaw": 4.54,
    "radius": 6,
    "levelBase": 6
@@ -8990,8 +8990,8 @@
     1,
     2
    ],
-   "x": 1656,
-   "z": 1632,
+   "x": 1623,
+   "z": 1635,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -9103,26 +9103,26 @@
     2,
     3
    ],
-   "x": 1880,
-   "z": 1632,
+   "x": 1765,
+   "z": 1698,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1828,
-     1674
+     1767,
+     1708
     ],
     [
-     1824,
-     1584
+     1755,
+     1700
     ],
     [
-     1921,
-     1582
+     1763,
+     1688
     ],
     [
-     1936,
-     1671
+     1775,
+     1696
     ]
    ],
    "roam": true
@@ -9194,8 +9194,8 @@
     1,
     2
    ],
-   "x": 152,
-   "z": 1704,
+   "x": 161,
+   "z": 1667,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -9328,8 +9328,8 @@
     1,
     2
    ],
-   "x": 1744,
-   "z": 1400,
+   "x": 1695,
+   "z": 1371,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -9380,8 +9380,8 @@
    "recipe": "cu_honey_tree",
    "name": "Honey Tree",
    "kind": "forage",
-   "x": 1944,
-   "z": 1135,
+   "x": 1784,
+   "z": 1153,
    "yaw": 2.69,
    "radius": 5,
    "levelBase": 6
@@ -9422,8 +9422,8 @@
    "recipe": "cu_wild_garlic",
    "name": "Wild Garlic",
    "kind": "forage",
-   "x": 239,
-   "z": 1392,
+   "x": 221,
+   "z": 1390,
    "yaw": 4.51,
    "radius": 4,
    "levelBase": 5
@@ -9441,8 +9441,8 @@
     1,
     2
    ],
-   "x": 416,
-   "z": 1148,
+   "x": 420,
+   "z": 1180,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -9483,26 +9483,26 @@
     1,
     2
    ],
-   "x": 1169,
-   "z": 1513,
+   "x": 1146,
+   "z": 1488,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1243,
+     1138,
+     1518
+    ],
+    [
+     1116,
+     1480
+    ],
+    [
+     1154,
      1458
     ],
     [
-     1227,
-     1572
-    ],
-    [
-     1120,
-     1591
-    ],
-    [
-     1117,
-     1431
+     1176,
+     1496
     ]
    ],
    "roam": true
@@ -9513,8 +9513,8 @@
    "recipe": "cu_boundary_cross",
    "name": "Boundary Cross",
    "kind": "marker",
-   "x": 1952,
-   "z": 1344,
+   "x": 1729,
+   "z": 1398,
    "yaw": 5.82,
    "radius": 3,
    "levelBase": 6
@@ -9543,7 +9543,7 @@
     1,
     2
    ],
-   "x": 1960,
+   "x": 1720,
    "z": 1727,
    "yaw": 0,
    "radius": 8,
@@ -9570,22 +9570,22 @@
    "chatter": [
     "role.surveyor"
    ],
-   "x": 1736,
-   "z": 1334,
+   "x": 1732,
+   "z": 1310,
    "yaw": 3.01,
    "radius": 6,
    "path": [
     [
-     1735,
-     1388
+     1695,
+     1309
     ],
     [
-     1680,
-     1291
+     1751,
+     1278
     ],
     [
-     1806,
-     1311
+     1750,
+     1343
     ]
    ]
   },
@@ -9614,8 +9614,8 @@
     1,
     2
    ],
-   "x": 223,
-   "z": 1496,
+   "x": 235,
+   "z": 1527,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -9656,26 +9656,26 @@
     2,
     3
    ],
-   "x": 1408,
-   "z": 1391,
+   "x": 1379,
+   "z": 1406,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1338,
-     1396
+     1400,
+     1427
     ],
     [
-     1403,
-     1326
+     1358,
+     1427
     ],
     [
-     1482,
-     1380
+     1358,
+     1385
     ],
     [
-     1432,
-     1443
+     1400,
+     1385
     ]
    ],
    "roam": true
@@ -9705,8 +9705,8 @@
    "recipe": "cu_bog_hole",
    "name": "Sucking Mire",
    "kind": "hazard",
-   "x": 194,
-   "z": 1775,
+   "x": 197,
+   "z": 1754,
    "yaw": 4.4,
    "radius": 5,
    "levelBase": 5
@@ -9824,8 +9824,8 @@
    "id": "standing_stone_gullwick_d89",
    "kind": "standing_stone",
    "name": "Standing Stone",
-   "x": 1984,
-   "z": 1617,
+   "x": 1774,
+   "z": 1768,
    "yaw": 2.73,
    "radius": 4,
    "filler": true
@@ -9836,8 +9836,8 @@
    "recipe": "cu_sinkhole",
    "name": "Sinkhole",
    "kind": "hazard",
-   "x": 488,
-   "z": 1648,
+   "x": 511,
+   "z": 1652,
    "yaw": 2.1,
    "radius": 6,
    "levelBase": 5
@@ -9919,22 +9919,22 @@
    "chatter": [
     "role.fisher"
    ],
-   "x": 1776,
-   "z": 1016,
+   "x": 1764,
+   "z": 1038,
    "yaw": 1.21,
    "radius": 6,
    "path": [
     [
-     1764,
-     1027
+     1744,
+     1043
     ],
     [
-     1775,
-     1000
+     1770,
+     1018
     ],
     [
-     1797,
-     1027
+     1779,
+     1053
     ]
    ]
   },
@@ -9944,8 +9944,8 @@
    "recipe": "cu_charcoal_mound",
    "name": "Charcoal Clamp",
    "kind": "camp",
-   "x": 2008,
-   "z": 952,
+   "x": 1865,
+   "z": 845,
    "yaw": 2.19,
    "radius": 6,
    "levelBase": 6
@@ -10017,8 +10017,8 @@
    "recipe": "cu_childs_map",
    "name": "Child's Map",
    "kind": "lore",
-   "x": 1848,
-   "z": 1808,
+   "x": 1803,
+   "z": 1805,
    "yaw": 1.2,
    "radius": 3,
    "levelBase": 6
@@ -10077,8 +10077,8 @@
    "id": "shrine_niche_gullwick_d91",
    "kind": "shrine_niche",
    "name": "Shrine Niche",
-   "x": 578,
-   "z": 1359,
+   "x": 563,
+   "z": 1348,
    "yaw": 2.3,
    "radius": 3,
    "filler": true
@@ -10123,22 +10123,22 @@
    "chatter": [
     "role.surveyor"
    ],
-   "x": 2008,
-   "z": 1240,
+   "x": 1786,
+   "z": 1127,
    "yaw": 5.29,
    "radius": 6,
    "path": [
     [
-     2002,
-     1177
+     1780,
+     1064
     ],
     [
-     2046,
-     1266
+     1824,
+     1153
     ],
     [
-     1975,
-     1269
+     1753,
+     1156
     ]
    ]
   },
@@ -10209,26 +10209,26 @@
     2,
     3
    ],
-   "x": 304,
-   "z": 1848,
+   "x": 274,
+   "z": 1833,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     256,
-     1818
+     254,
+     1797
     ],
     [
-     317,
-     1793
+     310,
+     1813
     ],
     [
-     343,
-     1858
+     294,
+     1869
     ],
     [
-     277,
-     1887
+     238,
+     1853
     ]
    ],
    "roam": true
@@ -10280,8 +10280,8 @@
    "recipe": "cu_bog_body",
    "name": "Bog Body",
    "kind": "remains",
-   "x": 1824,
-   "z": 926,
+   "x": 1788,
+   "z": 910,
    "yaw": 1.86,
    "radius": 4,
    "levelBase": 6
@@ -10299,8 +10299,8 @@
     1,
     2
    ],
-   "x": 97,
-   "z": 1505,
+   "x": 59,
+   "z": 1534,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -10460,22 +10460,22 @@
    "chatter": [
     "role.surveyor"
    ],
-   "x": 1968,
-   "z": 368,
+   "x": 1979,
+   "z": 392,
    "yaw": 6.15,
    "radius": 6,
    "path": [
     [
-     2029,
-     375
+     2009,
+     416
     ],
     [
-     1937,
-     407
+     1943,
+     406
     ],
     [
-     1931,
-     315
+     1985,
+     354
     ]
    ]
   },
@@ -10504,8 +10504,8 @@
     2,
     3
    ],
-   "x": 1479,
-   "z": 1592,
+   "x": 1496,
+   "z": 1622,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -10515,8 +10515,8 @@
    "id": "cold_campfire_gullwick_d96",
    "kind": "cold_campfire",
    "name": "Cold Campfire",
-   "x": 2009,
-   "z": 279,
+   "x": 1966,
+   "z": 317,
    "yaw": 5.47,
    "radius": 4,
    "filler": true
@@ -10682,8 +10682,8 @@
     1,
     2
    ],
-   "x": 1568,
-   "z": 2008,
+   "x": 1428,
+   "z": 1990,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -10716,8 +10716,8 @@
    "id": "roadside_grave_gullwick_d100",
    "kind": "roadside_grave",
    "name": "Roadside Grave",
-   "x": 356,
-   "z": 1345,
+   "x": 349,
+   "z": 1325,
    "yaw": 3.75,
    "radius": 4,
    "filler": true
@@ -10735,8 +10735,8 @@
     2,
     3
    ],
-   "x": 1616,
-   "z": 1896,
+   "x": 1654,
+   "z": 1776,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -10832,8 +10832,8 @@
     1,
     2
    ],
-   "x": 1168,
-   "z": 1695,
+   "x": 1194,
+   "z": 1662,
    "yaw": 0,
    "radius": 8,
    "stray": true

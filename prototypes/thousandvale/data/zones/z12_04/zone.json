@@ -93,9 +93,9 @@
       "type": "dungeon",
       "id": "door_1",
       "name": "Barrow entrance",
-      "x": 1369,
-      "z": 1953,
-      "yaw": -2.755,
+      "x": 1394,
+      "z": 1973,
+      "yaw": 2.579,
       "pinned": true
     },
     {
@@ -209,19 +209,19 @@
     ],
     "roads": 4,
     "bridges": 0,
-    "paths": 7,
-    "pathMetres": 861,
-    "scatter": 14383,
+    "paths": 8,
+    "pathMetres": 878,
+    "scatter": 14387,
     "scatterKinds": {
-      "blackthorn": 1034,
-      "heather": 2927,
-      "rock_small": 4016,
-      "tree_dead": 165,
+      "blackthorn": 1028,
+      "heather": 2931,
+      "rock_small": 4010,
+      "tree_dead": 166,
       "tree_birch": 90,
       "tree_conifer": 244,
-      "rock_large": 2699,
-      "boulder": 860,
-      "gorse": 1732,
+      "rock_large": 2706,
+      "boulder": 862,
+      "gorse": 1734,
       "bush": 288,
       "tree_broadleaf": 16,
       "hedge": 312
@@ -232,20 +232,20 @@
       "lair lair The Wondomol Nest 960 1472",
       "settlement(HUB) town Coldwater 1474 1846 90",
       "settlement hamlet Netherby 711 732 46",
-      "dungeon door_1 Barrow entrance 1369 1953  -2.755",
+      "dungeon door_1 Barrow entrance 1394 1973  2.579",
       "event event_coldwater  903 1790 40"
     ],
     "spawn": {
       "x": 1462,
       "z": 1854
     },
-    "placements": 163,
+    "placements": 164,
     "vignettesAvoided": 657
   },
   "files": {
-    "terrain.bin": 729055,
-    "nav.bin": 55352,
-    "scatter.bin": 115148,
-    "placements.json": 129216
+    "terrain.bin": 729046,
+    "nav.bin": 55407,
+    "scatter.bin": 115180,
+    "placements.json": 129945
   }
 }

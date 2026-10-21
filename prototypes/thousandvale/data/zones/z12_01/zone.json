@@ -129,8 +129,8 @@
     "province": "Petbeck Basin",
     "inputHash": "89c56ef1",
     "rivers": 1,
-    "wetShare": 0.116,
-    "unwalkableShare": 0.155,
+    "wetShare": 0.115,
+    "unwalkableShare": 0.153,
     "towns": [
       {
         "name": "Ashcombe",
@@ -184,20 +184,20 @@
     ],
     "roads": 5,
     "bridges": 0,
-    "paths": 13,
-    "pathMetres": 2151,
-    "scatter": 25749,
+    "paths": 12,
+    "pathMetres": 1882,
+    "scatter": 25744,
     "scatterKinds": {
-      "rock_small": 1659,
-      "bush": 5050,
-      "tree_broadleaf": 12514,
-      "rock_large": 1345,
-      "tree_birch": 1439,
-      "boulder": 88,
-      "tree_old_oak": 69,
-      "heather": 1314,
-      "tree_conifer": 840,
-      "hedge": 1316,
+      "rock_small": 1667,
+      "bush": 5063,
+      "tree_broadleaf": 12569,
+      "rock_large": 1338,
+      "tree_birch": 1443,
+      "boulder": 85,
+      "tree_old_oak": 67,
+      "heather": 1309,
+      "tree_conifer": 831,
+      "hedge": 1257,
       "tree_fruit": 35,
       "reed": 80
     },
@@ -212,13 +212,13 @@
       "x": 1412,
       "z": 1336
     },
-    "placements": 247,
+    "placements": 245,
     "vignettesAvoided": 620
   },
   "files": {
-    "terrain.bin": 569726,
-    "nav.bin": 52420,
-    "scatter.bin": 206076,
-    "placements.json": 184540
+    "terrain.bin": 569303,
+    "nav.bin": 52393,
+    "scatter.bin": 206036,
+    "placements.json": 177261
   }
 }

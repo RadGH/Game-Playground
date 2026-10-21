@@ -98,9 +98,9 @@
       "type": "dungeon",
       "id": "door_1",
       "name": "Barrow entrance",
-      "x": 1364,
-      "z": 1286,
-      "yaw": 1.664,
+      "x": 1346,
+      "z": 1259,
+      "yaw": 1.448,
       "pinned": true
     },
     {
@@ -208,20 +208,20 @@
     ],
     "roads": 2,
     "bridges": 0,
-    "paths": 13,
-    "pathMetres": 2323,
-    "scatter": 17389,
+    "paths": 11,
+    "pathMetres": 2290,
+    "scatter": 17279,
     "scatterKinds": {
-      "gorse": 10069,
-      "bush": 2092,
-      "rock_small": 2136,
-      "tree_birch": 422,
+      "gorse": 9990,
+      "bush": 2066,
+      "rock_small": 2124,
+      "tree_birch": 418,
       "heather": 504,
-      "tree_broadleaf": 227,
-      "rock_large": 888,
-      "boulder": 172,
+      "tree_broadleaf": 228,
+      "rock_large": 892,
+      "boulder": 176,
       "tree_old_oak": 3,
-      "tree_conifer": 18,
+      "tree_conifer": 20,
       "hedge": 858
     },
     "sites": [
@@ -230,20 +230,20 @@
       "lair lair The Hitindack Lair 64 960",
       "settlement(HUB) town Gorsehold 1564 1286 90",
       "settlement hamlet Burnt Barns 1594 367 40",
-      "dungeon door_1 Barrow entrance 1364 1286  1.664",
+      "dungeon door_1 Barrow entrance 1346 1259  1.448",
       "event event_gorse_march  1326 1155 40"
     ],
     "spawn": {
       "x": 1560,
       "z": 1278
     },
-    "placements": 190,
+    "placements": 188,
     "vignettesAvoided": 628
   },
   "files": {
-    "terrain.bin": 718674,
-    "nav.bin": 40575,
-    "scatter.bin": 139196,
-    "placements.json": 148356
+    "terrain.bin": 718626,
+    "nav.bin": 40557,
+    "scatter.bin": 138316,
+    "placements.json": 146833
   }
 }

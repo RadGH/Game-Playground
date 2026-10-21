@@ -111,8 +111,8 @@
       "id": "door_1",
       "name": "Barrow entrance",
       "x": 350,
-      "z": 735,
-      "yaw": -2.692,
+      "z": 767,
+      "yaw": -3.068,
       "pinned": true
     },
     {
@@ -264,19 +264,19 @@
     "roads": 10,
     "bridges": 3,
     "paths": 11,
-    "pathMetres": 2211,
-    "scatter": 18468,
+    "pathMetres": 2308,
+    "scatter": 18444,
     "scatterKinds": {
-      "bush": 3465,
-      "tree_broadleaf": 4693,
+      "bush": 3467,
+      "tree_broadleaf": 4685,
       "heather": 2923,
-      "rock_small": 2080,
-      "tree_conifer": 150,
-      "tree_birch": 581,
-      "rock_large": 2083,
+      "rock_small": 2078,
+      "tree_conifer": 149,
+      "tree_birch": 577,
+      "rock_large": 2078,
       "boulder": 222,
-      "tree_old_oak": 557,
-      "gorse": 880,
+      "tree_old_oak": 555,
+      "gorse": 876,
       "tree_dead": 10,
       "blackthorn": 55,
       "hedge": 732,
@@ -287,7 +287,7 @@
       "settlement hamlet Pilgrim's Halt 672 240 46",
       "landmark ancientwood The Heme Heartwood 448 1472",
       "crossing ford Tethen Ford 313 571",
-      "dungeon door_1 Barrow entrance 350 735  -2.692",
+      "dungeon door_1 Barrow entrance 350 767  -3.068",
       "event event_saint_orrins_rise  327 872 40"
     ],
     "spawn": {
@@ -298,9 +298,9 @@
     "vignettesAvoided": 646
   },
   "files": {
-    "terrain.bin": 694814,
-    "nav.bin": 51605,
-    "scatter.bin": 147828,
-    "placements.json": 210705
+    "terrain.bin": 694923,
+    "nav.bin": 51653,
+    "scatter.bin": 147636,
+    "placements.json": 212735
   }
 }

@@ -293,8 +293,8 @@
     "province": "Petbeck Basin",
     "inputHash": "106d6a71",
     "rivers": 4,
-    "wetShare": 0.155,
-    "unwalkableShare": 0.183,
+    "wetShare": 0.156,
+    "unwalkableShare": 0.179,
     "towns": [
       {
         "name": "Redcliff",
@@ -488,20 +488,20 @@
     ],
     "roads": 15,
     "bridges": 6,
-    "paths": 13,
-    "pathMetres": 472,
-    "scatter": 15226,
+    "paths": 14,
+    "pathMetres": 545,
+    "scatter": 15214,
     "scatterKinds": {
       "rock_small": 2542,
-      "gorse": 2558,
-      "bush": 3659,
-      "red_rock": 1529,
+      "gorse": 2539,
+      "bush": 3654,
+      "red_rock": 1543,
       "tree_dead": 146,
-      "rock_large": 556,
-      "tree_birch": 349,
-      "boulder": 22,
-      "tree_broadleaf": 2645,
+      "rock_large": 562,
+      "tree_birch": 347,
+      "tree_broadleaf": 2639,
       "tree_conifer": 17,
+      "boulder": 22,
       "tree_old_oak": 14,
       "heather": 19,
       "hedge": 1170
@@ -521,13 +521,13 @@
       "x": 388,
       "z": 864
     },
-    "placements": 462,
+    "placements": 463,
     "vignettesAvoided": 634
   },
   "files": {
-    "terrain.bin": 627044,
-    "nav.bin": 48734,
-    "scatter.bin": 121892,
-    "placements.json": 254033
+    "terrain.bin": 620727,
+    "nav.bin": 48059,
+    "scatter.bin": 121796,
+    "placements.json": 256309
   }
 }

@@ -222,8 +222,8 @@
    "template": "pig",
    "flavour": null,
    "settlement": "Thornwick",
-   "x": 1684,
-   "z": 1944,
+   "x": 1678,
+   "z": 1818,
    "yaw": 1.96,
    "radius": 18,
    "level": 8
@@ -235,8 +235,8 @@
    "template": "pig",
    "flavour": "corrupted",
    "settlement": "Last Lantern",
-   "x": 701,
-   "z": 1410,
+   "x": 769,
+   "z": 1533,
    "yaw": 1.57,
    "radius": 18,
    "level": 8
@@ -345,8 +345,8 @@
    "type": "vignette",
    "id": "chained_tree",
    "name": "The Chained Oak",
-   "x": 143,
-   "z": 1779,
+   "x": 472,
+   "z": 1563,
    "yaw": 5.51,
    "radius": 11,
    "biome": "mountains",
@@ -373,8 +373,8 @@
    "type": "vignette",
    "id": "drift_mine_entry",
    "name": "The Drift Entry",
-   "x": 1482,
-   "z": 660,
+   "x": 1941,
+   "z": 959,
    "yaw": 2.2,
    "radius": 10,
    "biome": "mountains",
@@ -387,8 +387,8 @@
    "type": "vignette",
    "id": "gallows_crossroads",
    "name": "Gallows Crossroads",
-   "x": 1522,
-   "z": 1448,
+   "x": 1669,
+   "z": 1529,
    "yaw": 5.54,
    "radius": 10,
    "biome": "mountains",
@@ -429,8 +429,8 @@
    "type": "vignette",
    "id": "siege_camp_leftovers",
    "name": "The Abandoned Siege Camp",
-   "x": 123,
-   "z": 1380,
+   "x": 647,
+   "z": 1381,
    "yaw": 5.15,
    "radius": 15,
    "biome": "mountains",
@@ -470,8 +470,8 @@
     2,
     4
    ],
-   "x": 477,
-   "z": 1132,
+   "x": 454,
+   "z": 1093,
    "yaw": 0,
    "radius": 10
   },
@@ -488,8 +488,8 @@
     2,
     4
    ],
-   "x": 1867,
-   "z": 1505,
+   "x": 1819,
+   "z": 1480,
    "yaw": 0,
    "radius": 10
   },
@@ -524,8 +524,8 @@
     2,
     4
    ],
-   "x": 1185,
-   "z": 897,
+   "x": 1206,
+   "z": 947,
    "yaw": 0,
    "radius": 10
   },
@@ -560,8 +560,8 @@
     2,
     4
    ],
-   "x": 1122,
-   "z": 1595,
+   "x": 1042,
+   "z": 1596,
    "yaw": 0,
    "radius": 10
   },
@@ -578,8 +578,8 @@
     2,
     4
    ],
-   "x": 405,
-   "z": 1589,
+   "x": 370,
+   "z": 1526,
    "yaw": 0,
    "radius": 10
   },
@@ -596,8 +596,8 @@
     2,
     4
    ],
-   "x": 1304,
-   "z": 1161,
+   "x": 1267,
+   "z": 1187,
    "yaw": 0,
    "radius": 10
   },
@@ -632,8 +632,8 @@
     2,
     4
    ],
-   "x": 1452,
-   "z": 1719,
+   "x": 1419,
+   "z": 1752,
    "yaw": 0,
    "radius": 10
   },
@@ -650,8 +650,8 @@
     2,
     4
    ],
-   "x": 463,
-   "z": 1975,
+   "x": 792,
+   "z": 1943,
    "yaw": 0,
    "radius": 10
   },
@@ -660,30 +660,30 @@
    "id": "rare_thornbound_crawler",
    "slot": 0,
    "name": "The Thornbound Crawler",
-   "x": 928,
-   "z": 1988,
+   "x": 962,
+   "z": 1937,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     840,
+     874,
+     1931
+    ],
+    [
+     930,
+     1852
+    ],
+    [
+     1012,
+     1894
+    ],
+    [
+     1018,
      1982
     ],
     [
-     896,
-     1903
-    ],
-    [
-     978,
-     1945
-    ],
-    [
-     984,
-     2033
-    ],
-    [
-     912,
-     2044
+     946,
+     1993
     ]
    ],
    "respawnMin": [
@@ -697,30 +697,30 @@
    "id": "rare_scab",
    "slot": 1,
    "name": "Scab",
-   "x": 359,
-   "z": 1802,
+   "x": 193,
+   "z": 1429,
    "yaw": 0,
    "radius": 15,
    "path": [
     [
-     429,
-     1836
+     199,
+     1470
     ],
     [
-     353,
-     1866
+     156,
+     1447
     ],
     [
-     312,
-     1790
+     164,
+     1400
     ],
     [
-     338,
-     1757
+     212,
+     1393
     ],
     [
-     418,
-     1771
+     233,
+     1436
     ]
    ],
    "respawnMin": [
@@ -753,8 +753,8 @@
    "type": "waystone",
    "id": "ws_z11_04_door",
    "name": "The Blackthorn Warrens",
-   "x": 990.3,
-   "z": 1161.6,
+   "x": 1011.2,
+   "z": 1179.9,
    "yaw": 0,
    "door": "door_1",
    "radius": 1
@@ -772,8 +772,8 @@
     2,
     2
    ],
-   "x": 1022,
-   "z": 1145,
+   "x": 1052,
+   "z": 1195,
    "yaw": 0,
    "radius": 6,
    "doorGuard": true
@@ -869,8 +869,8 @@
    "id": "milestone_blackthorn_scar_0",
    "kind": "milestone",
    "name": "Milestone",
-   "x": 1833,
-   "z": 491,
+   "x": 1815,
+   "z": 495,
    "yaw": 0.43,
    "radius": 3,
    "filler": true
@@ -888,8 +888,8 @@
     2,
     3
    ],
-   "x": 159,
-   "z": 209,
+   "x": 213,
+   "z": 184,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -918,8 +918,8 @@
     2,
     3
    ],
-   "x": 760,
-   "z": 235,
+   "x": 728,
+   "z": 267,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -948,8 +948,8 @@
     2,
     3
    ],
-   "x": 706,
-   "z": 907,
+   "x": 730,
+   "z": 964,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -959,8 +959,8 @@
    "id": "drying_rack_camp_blackthorn_scar_6",
    "kind": "drying_rack_camp",
    "name": "Hunter's Rack",
-   "x": 1740,
-   "z": 735,
+   "x": 1760,
+   "z": 736,
    "yaw": 1.05,
    "radius": 4,
    "filler": true
@@ -978,8 +978,8 @@
     2,
     3
    ],
-   "x": 1623,
-   "z": 344,
+   "x": 1867,
+   "z": 298,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -989,8 +989,8 @@
    "id": "cold_campfire_blackthorn_scar_8",
    "kind": "cold_campfire",
    "name": "Cold Campfire",
-   "x": 555,
-   "z": 38,
+   "x": 550,
+   "z": 58,
    "yaw": 1.66,
    "radius": 4,
    "filler": true
@@ -1008,8 +1008,8 @@
     2,
     3
    ],
-   "x": 60,
-   "z": 1985,
+   "x": 723,
+   "z": 1792,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1019,8 +1019,8 @@
    "id": "boundary_stake_blackthorn_scar_10",
    "kind": "boundary_stake",
    "name": "Boundary Stakes",
-   "x": 206,
-   "z": 721,
+   "x": 201,
+   "z": 752,
    "yaw": 5.43,
    "radius": 4,
    "filler": true
@@ -1038,8 +1038,8 @@
     2,
     3
    ],
-   "x": 373,
-   "z": 1345,
+   "x": 337,
+   "z": 1372,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1101,8 +1101,8 @@
    "id": "milestone_blackthorn_scar_16",
    "kind": "milestone",
    "name": "Milestone",
-   "x": 1460,
-   "z": 2008,
+   "x": 1441,
+   "z": 2010,
    "yaw": 4.13,
    "radius": 3,
    "filler": true
@@ -1120,8 +1120,8 @@
     2,
     3
    ],
-   "x": 60,
-   "z": 1164,
+   "x": 250,
+   "z": 1302,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1131,8 +1131,8 @@
    "id": "bone_heap_blackthorn_scar_18",
    "kind": "bone_heap",
    "name": "Old Bones",
-   "x": 1736,
-   "z": 1320,
+   "x": 1720,
+   "z": 1307,
    "yaw": 6.01,
    "radius": 4,
    "filler": true
@@ -1150,8 +1150,8 @@
     2,
     3
    ],
-   "x": 212,
-   "z": 460,
+   "x": 175,
+   "z": 489,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1161,8 +1161,8 @@
    "id": "cairn_blackthorn_scar_20",
    "kind": "cairn",
    "name": "Cairn",
-   "x": 40,
-   "z": 1588,
+   "x": 207,
+   "z": 1494,
    "yaw": 0.47,
    "radius": 4,
    "filler": true
@@ -1270,8 +1270,8 @@
     2,
     3
    ],
-   "x": 672,
-   "z": 1988,
+   "x": 778,
+   "z": 1897,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1281,7 +1281,7 @@
    "id": "boundary_stake_blackthorn_scar_28",
    "kind": "boundary_stake",
    "name": "Boundary Stakes",
-   "x": 1340,
+   "x": 1320,
    "z": 1548,
    "yaw": 6.2,
    "radius": 4,
@@ -1311,8 +1311,8 @@
    "id": "cold_campfire_blackthorn_scar_30",
    "kind": "cold_campfire",
    "name": "Cold Campfire",
-   "x": 276,
-   "z": 1168,
+   "x": 296,
+   "z": 1162,
    "yaw": 0.3,
    "radius": 4,
    "filler": true
@@ -1330,8 +1330,8 @@
     2,
     3
    ],
-   "x": 714,
-   "z": 674,
+   "x": 727,
+   "z": 912,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1341,8 +1341,8 @@
    "id": "lost_signpost_blackthorn_scar_32",
    "kind": "lost_signpost",
    "name": "Lost Signpost",
-   "x": 1252,
-   "z": 1760,
+   "x": 1236,
+   "z": 1747,
    "yaw": 6.03,
    "radius": 3,
    "filler": true
@@ -1360,8 +1360,8 @@
     2,
     3
    ],
-   "x": 684,
-   "z": 428,
+   "x": 646,
+   "z": 457,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1390,8 +1390,8 @@
     2,
     3
    ],
-   "x": 260,
-   "z": 1988,
+   "x": 329,
+   "z": 1695,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1401,8 +1401,8 @@
    "id": "milestone_blackthorn_scar_36",
    "kind": "milestone",
    "name": "Milestone",
-   "x": 351,
-   "z": 116,
+   "x": 349,
+   "z": 97,
    "yaw": 0.11,
    "radius": 3,
    "filler": true
@@ -1450,8 +1450,8 @@
     2,
     3
    ],
-   "x": 376,
-   "z": 644,
+   "x": 338,
+   "z": 670,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1461,8 +1461,8 @@
    "id": "boundary_stake_blackthorn_scar_40",
    "kind": "boundary_stake",
    "name": "Boundary Stakes",
-   "x": 580,
-   "z": 1816,
+   "x": 577,
+   "z": 1836,
    "yaw": 6.02,
    "radius": 4,
    "filler": true
@@ -1480,8 +1480,8 @@
     2,
     3
    ],
-   "x": 1472,
-   "z": 1264,
+   "x": 1371,
+   "z": 1241,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1510,8 +1510,8 @@
     2,
     3
    ],
-   "x": 220,
-   "z": 1548,
+   "x": 280,
+   "z": 1411,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1540,8 +1540,8 @@
     2,
     3
    ],
-   "x": 1438,
-   "z": 81,
+   "x": 1488,
+   "z": 167,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1592,8 +1592,8 @@
     2,
     3
    ],
-   "x": 632,
-   "z": 1232,
+   "x": 567,
+   "z": 1292,
    "yaw": 0,
    "radius": 10,
    "filler": true
@@ -1603,8 +1603,8 @@
    "id": "cold_campfire_blackthorn_scar_50",
    "kind": "cold_campfire",
    "name": "Cold Campfire",
-   "x": 400,
-   "z": 445,
+   "x": 401,
+   "z": 466,
    "yaw": 5.44,
    "radius": 4,
    "filler": true
@@ -1634,8 +1634,8 @@
    "recipe": "cu_shepherds_hut",
    "name": "Shepherd's Lean-to",
    "kind": "camp",
-   "x": 1983,
-   "z": 271,
+   "x": 1967,
+   "z": 292,
    "yaw": 1.83,
    "radius": 6,
    "levelBase": 6
@@ -1657,8 +1657,8 @@
    "recipe": "cu_loose_stone",
    "name": "Loose Stone",
    "kind": "cache",
-   "x": 1680,
-   "z": 1472,
+   "x": 1663,
+   "z": 1465,
    "yaw": 2.72,
    "radius": 4,
    "levelBase": 8
@@ -1668,8 +1668,8 @@
    "id": "bone_heap_blackthorn_scar_d2",
    "kind": "bone_heap",
    "name": "Old Bones",
-   "x": 529,
-   "z": 1448,
+   "x": 548,
+   "z": 1457,
    "yaw": 2.49,
    "radius": 4,
    "filler": true
@@ -1711,8 +1711,8 @@
     2,
     3
    ],
-   "x": 555,
-   "z": 1001,
+   "x": 587,
+   "z": 1009,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -1723,8 +1723,8 @@
    "recipe": "cu_stone_watcher",
    "name": "Stone Watcher",
    "kind": "shrine",
-   "x": 1168,
-   "z": 1056,
+   "x": 1187,
+   "z": 1064,
    "yaw": 4.95,
    "radius": 5,
    "levelBase": 7
@@ -1735,8 +1735,8 @@
    "recipe": "cu_frozen_climber",
    "name": "Frozen Climber",
    "kind": "remains",
-   "x": 1443,
-   "z": 1102,
+   "x": 1447,
+   "z": 1127,
    "yaw": 2.15,
    "radius": 4,
    "levelBase": 7
@@ -1765,8 +1765,8 @@
     1,
     2
    ],
-   "x": 1376,
-   "z": 1872,
+   "x": 1427,
+   "z": 1834,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -1776,8 +1776,8 @@
    "id": "frost_marker_blackthorn_scar_d4",
    "kind": "frost_marker",
    "name": "Snow Pole",
-   "x": 952,
-   "z": 427,
+   "x": 978,
+   "z": 444,
    "yaw": 1.7,
    "radius": 3,
    "filler": true
@@ -1795,8 +1795,8 @@
     1,
     2
    ],
-   "x": 1812,
-   "z": 45,
+   "x": 1862,
+   "z": 30,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -1841,8 +1841,8 @@
    "id": "frost_marker_blackthorn_scar_d6",
    "kind": "frost_marker",
    "name": "Snow Pole",
-   "x": 2005,
-   "z": 1034,
+   "x": 2004,
+   "z": 1052,
    "yaw": 5.87,
    "radius": 3,
    "filler": true
@@ -1852,8 +1852,8 @@
    "id": "cairn_blackthorn_scar_d7",
    "kind": "cairn",
    "name": "Cairn",
-   "x": 285,
-   "z": 849,
+   "x": 301,
+   "z": 862,
    "yaw": 1.79,
    "radius": 4,
    "filler": true
@@ -1875,8 +1875,8 @@
    "id": "boundary_stake_blackthorn_scar_d8",
    "kind": "boundary_stake",
    "name": "Boundary Stakes",
-   "x": 339,
-   "z": 314,
+   "x": 364,
+   "z": 328,
    "yaw": 1.66,
    "radius": 4,
    "filler": true
@@ -1906,8 +1906,8 @@
     1,
     2
    ],
-   "x": 1104,
-   "z": 1744,
+   "x": 1074,
+   "z": 1762,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -1941,8 +1941,8 @@
    "recipe": "cu_warrior_cairn",
    "name": "Warrior's Cairn",
    "kind": "shrine",
-   "x": 1842,
-   "z": 627,
+   "x": 1830,
+   "z": 611,
    "yaw": 2.43,
    "radius": 5,
    "levelBase": 6
@@ -1972,8 +1972,8 @@
    "recipe": "cu_warrior_cairn",
    "name": "Warrior's Cairn",
    "kind": "shrine",
-   "x": 2008,
-   "z": 1552,
+   "x": 1921,
+   "z": 1571,
    "yaw": 3.91,
    "radius": 5,
    "levelBase": 8
@@ -2026,8 +2026,8 @@
    "recipe": "cu_lone_arch",
    "name": "Lone Arch",
    "kind": "marker",
-   "x": 1536,
-   "z": 1600,
+   "x": 1515,
+   "z": 1603,
    "yaw": 1.85,
    "radius": 5,
    "levelBase": 8
@@ -2049,8 +2049,8 @@
    "id": "milestone_blackthorn_scar_d11",
    "kind": "milestone",
    "name": "Milestone",
-   "x": 250,
-   "z": 43,
+   "x": 242,
+   "z": 60,
    "yaw": 2.98,
    "radius": 3,
    "filler": true
@@ -2061,8 +2061,8 @@
    "recipe": "cu_stone_watcher",
    "name": "Stone Watcher",
    "kind": "shrine",
-   "x": 515,
-   "z": 1307,
+   "x": 499,
+   "z": 1294,
    "yaw": 6.15,
    "radius": 5,
    "levelBase": 8
@@ -2084,8 +2084,8 @@
    "recipe": "cu_rockfall",
    "name": "Fresh Rockfall",
    "kind": "hazard",
-   "x": 1599,
-   "z": 1328,
+   "x": 1616,
+   "z": 1342,
    "yaw": 2.18,
    "radius": 6,
    "levelBase": 8
@@ -2115,8 +2115,8 @@
     1,
     2
    ],
-   "x": 240,
-   "z": 1297,
+   "x": 206,
+   "z": 1302,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -2141,22 +2141,22 @@
    "chatter": [
     "role.surveyor"
    ],
-   "x": 648,
-   "z": 1096,
+   "x": 664,
+   "z": 1078,
    "yaw": 5.65,
    "radius": 6,
    "path": [
     [
-     633,
+     651,
+     1111
+    ],
+    [
+     642,
      1050
     ],
     [
-     698,
-     1102
-    ],
-    [
-     607,
-     1119
+     699,
+     1073
     ]
    ]
   },
@@ -2185,8 +2185,8 @@
     1,
     2
    ],
-   "x": 1861,
-   "z": 1298,
+   "x": 1860,
+   "z": 1266,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -2219,8 +2219,8 @@
    "id": "shrine_niche_blackthorn_scar_d15",
    "kind": "shrine_niche",
    "name": "Shrine Niche",
-   "x": 1707,
-   "z": 207,
+   "x": 1725,
+   "z": 208,
    "yaw": 6.15,
    "radius": 3,
    "filler": true
@@ -2243,8 +2243,8 @@
    "recipe": "cu_rockfall",
    "name": "Fresh Rockfall",
    "kind": "hazard",
-   "x": 512,
-   "z": 1682,
+   "x": 530,
+   "z": 1692,
    "yaw": 5.58,
    "radius": 6,
    "levelBase": 9
@@ -2285,8 +2285,8 @@
     1,
     2
    ],
-   "x": 232,
-   "z": 1680,
+   "x": 295,
+   "z": 1525,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -2296,8 +2296,8 @@
    "id": "boundary_stake_blackthorn_scar_d17",
    "kind": "boundary_stake",
    "name": "Boundary Stakes",
-   "x": 1784,
-   "z": 828,
+   "x": 1764,
+   "z": 815,
    "yaw": 3.56,
    "radius": 4,
    "filler": true
@@ -2311,22 +2311,22 @@
    "chatter": [
     "role.pilgrim"
    ],
-   "x": 1733,
-   "z": 1192,
+   "x": 1746,
+   "z": 1171,
    "yaw": 4.94,
    "radius": 6,
    "path": [
     [
-     1729,
-     1193
+     1744,
+     1161
     ],
     [
-     1734,
-     1188
+     1756,
+     1174
     ],
     [
-     1736,
-     1197
+     1738,
+     1178
     ]
    ]
   },
@@ -2336,8 +2336,8 @@
    "recipe": "cu_herb_patch",
    "name": "Woundwort Patch",
    "kind": "forage",
-   "x": 1248,
-   "z": 1632,
+   "x": 1256,
+   "z": 1649,
    "yaw": 4.43,
    "radius": 4,
    "levelBase": 8
@@ -2378,8 +2378,8 @@
    "recipe": "cu_eagle_ledge",
    "name": "Eagle Ledge",
    "kind": "nest",
-   "x": 1550,
-   "z": 494,
+   "x": 1554,
+   "z": 523,
    "yaw": 1.35,
    "radius": 5,
    "levelBase": 6
@@ -2390,8 +2390,8 @@
    "recipe": "cu_eagle_ledge",
    "name": "Eagle Ledge",
    "kind": "nest",
-   "x": 1020,
-   "z": 575,
+   "x": 1038,
+   "z": 653,
    "yaw": 4.36,
    "radius": 5,
    "levelBase": 7
@@ -2402,8 +2402,8 @@
    "recipe": "cu_loose_stone",
    "name": "Loose Stone",
    "kind": "cache",
-   "x": 157,
-   "z": 861,
+   "x": 170,
+   "z": 880,
    "yaw": 3.28,
    "radius": 4,
    "levelBase": 8
@@ -2414,8 +2414,8 @@
    "recipe": "cu_stone_watcher",
    "name": "Stone Watcher",
    "kind": "shrine",
-   "x": 40,
-   "z": 1856,
+   "x": 348,
+   "z": 1640,
    "yaw": 5.94,
    "radius": 5,
    "levelBase": 9
@@ -2426,8 +2426,8 @@
    "recipe": "cu_frozen_climber",
    "name": "Frozen Climber",
    "kind": "remains",
-   "x": 1892,
-   "z": 967,
+   "x": 1906,
+   "z": 988,
    "yaw": 4.73,
    "radius": 4,
    "levelBase": 7
@@ -2457,8 +2457,8 @@
    "recipe": "cu_shepherds_hut",
    "name": "Shepherd's Lean-to",
    "kind": "camp",
-   "x": 1496,
-   "z": 1838,
+   "x": 1508,
+   "z": 1821,
    "yaw": 2.82,
    "radius": 6,
    "levelBase": 8
@@ -2469,8 +2469,8 @@
    "recipe": "cu_tinkers_halt",
    "name": "Tinker's Halt",
    "kind": "camp",
-   "x": 1576,
-   "z": 1736,
+   "x": 1590,
+   "z": 1718,
    "yaw": 6.12,
    "radius": 6,
    "levelBase": 8
@@ -2488,8 +2488,8 @@
     2,
     3
    ],
-   "x": 161,
-   "z": 1904,
+   "x": 421,
+   "z": 1716,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -2500,8 +2500,8 @@
    "recipe": "cu_warrior_cairn",
    "name": "Warrior's Cairn",
    "kind": "shrine",
-   "x": 176,
-   "z": 1104,
+   "x": 181,
+   "z": 1084,
    "yaw": 0.47,
    "radius": 5,
    "levelBase": 8
@@ -2511,8 +2511,8 @@
    "id": "league_stone_blackthorn_scar_d19",
    "kind": "league_stone",
    "name": "League Stone",
-   "x": 680,
-   "z": 1749,
+   "x": 681,
+   "z": 1767,
    "yaw": 3.76,
    "radius": 3,
    "filler": true
@@ -2523,8 +2523,8 @@
    "recipe": "cu_loose_stone",
    "name": "Loose Stone",
    "kind": "cache",
-   "x": 384,
-   "z": 1216,
+   "x": 385,
+   "z": 1198,
    "yaw": 0.53,
    "radius": 4,
    "levelBase": 8
@@ -2553,8 +2553,8 @@
     1,
     2
    ],
-   "x": 623,
-   "z": 1520,
+   "x": 607,
+   "z": 1492,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -2580,22 +2580,22 @@
    "chatter": [
     "role.gravedigger"
    ],
-   "x": 40,
-   "z": 1705,
+   "x": 237,
+   "z": 1457,
    "yaw": 5.15,
    "radius": 6,
    "path": [
     [
-     50,
-     1717
+     247,
+     1469
     ],
     [
-     30,
-     1711
+     227,
+     1463
     ],
     [
-     42,
-     1692
+     239,
+     1444
     ]
    ]
   },
@@ -2666,8 +2666,8 @@
     1,
     2
    ],
-   "x": 912,
-   "z": 120,
+   "x": 894,
+   "z": 151,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -2697,26 +2697,26 @@
     1,
     2
    ],
-   "x": 40,
-   "z": 1288,
+   "x": 121,
+   "z": 1268,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     70,
-     1338
+     146,
+     1276
     ],
     [
-     1,
-     1315
+     113,
+     1293
     ],
     [
-     6,
-     1250
+     96,
+     1260
     ],
     [
-     74,
-     1248
+     129,
+     1243
     ]
    ],
    "roam": true
@@ -2727,8 +2727,8 @@
    "recipe": "cu_loose_stone",
    "name": "Loose Stone",
    "kind": "cache",
-   "x": 39,
-   "z": 1468,
+   "x": 242,
+   "z": 1520,
    "yaw": 5.06,
    "radius": 4,
    "levelBase": 9
@@ -2750,8 +2750,8 @@
    "recipe": "cu_loose_stone",
    "name": "Loose Stone",
    "kind": "cache",
-   "x": 734,
-   "z": 756,
+   "x": 736,
+   "z": 737,
    "yaw": 0.71,
    "radius": 4,
    "levelBase": 7
@@ -2776,22 +2776,22 @@
    "chatter": [
     "role.shepherd"
    ],
-   "x": 1346,
-   "z": 2007,
+   "x": 1368,
+   "z": 1997,
    "yaw": 2.17,
    "radius": 6,
    "path": [
     [
-     1308,
-     2010
+     1330,
+     2000
     ],
     [
-     1366,
-     1968
+     1388,
+     1958
     ],
     [
-     1363,
-     2046
+     1385,
+     2036
     ]
    ]
   },
@@ -2801,8 +2801,8 @@
    "recipe": "cu_warrior_cairn",
    "name": "Warrior's Cairn",
    "kind": "shrine",
-   "x": 1465,
-   "z": 992,
+   "x": 1458,
+   "z": 973,
    "yaw": 0.85,
    "radius": 5,
    "levelBase": 7
@@ -2843,8 +2843,8 @@
    "recipe": "cu_rockfall",
    "name": "Fresh Rockfall",
    "kind": "hazard",
-   "x": 358,
-   "z": 1096,
+   "x": 326,
+   "z": 1095,
    "yaw": 1.8,
    "radius": 6,
    "levelBase": 8
@@ -2862,8 +2862,8 @@
     1,
     2
    ],
-   "x": 1142,
-   "z": 49,
+   "x": 1150,
+   "z": 80,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -2874,8 +2874,8 @@
    "recipe": "cu_eagle_ledge",
    "name": "Eagle Ledge",
    "kind": "nest",
-   "x": 1794,
-   "z": 1413,
+   "x": 1773,
+   "z": 1422,
    "yaw": 3.53,
    "radius": 5,
    "levelBase": 8
@@ -2920,8 +2920,8 @@
    "recipe": "cu_soldiers_tally",
    "name": "Soldier's Tally",
    "kind": "lore",
-   "x": 522,
-   "z": 1568,
+   "x": 540,
+   "z": 1565,
    "yaw": 0.02,
    "radius": 4,
    "levelBase": 8
@@ -2951,8 +2951,8 @@
     1,
     2
    ],
-   "x": 568,
-   "z": 1928,
+   "x": 645,
+   "z": 1882,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -3015,26 +3015,26 @@
     2,
     3
    ],
-   "x": 1352,
-   "z": 1665,
+   "x": 1322,
+   "z": 1636,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1314,
-     1629
+     1340,
+     1586
     ],
     [
-     1405,
-     1599
+     1372,
+     1654
     ],
     [
-     1405,
-     1710
+     1304,
+     1686
     ],
     [
-     1277,
-     1697
+     1272,
+     1618
     ]
    ],
    "roam": true
@@ -3044,8 +3044,8 @@
    "id": "bone_heap_blackthorn_scar_d30",
    "kind": "bone_heap",
    "name": "Old Bones",
-   "x": 441,
-   "z": 947,
+   "x": 422,
+   "z": 938,
    "yaw": 6.1,
    "radius": 4,
    "filler": true
@@ -3056,8 +3056,8 @@
    "recipe": "cu_pine_resin",
    "name": "Weeping Pine",
    "kind": "forage",
-   "x": 264,
-   "z": 1042,
+   "x": 244,
+   "z": 1039,
    "yaw": 1.91,
    "radius": 4,
    "levelBase": 8
@@ -3095,8 +3095,8 @@
    "id": "lost_signpost_blackthorn_scar_d31",
    "kind": "lost_signpost",
    "name": "Lost Signpost",
-   "x": 1340,
-   "z": 883,
+   "x": 1321,
+   "z": 886,
    "yaw": 0.82,
    "radius": 3,
    "filler": true
@@ -3137,8 +3137,8 @@
    "recipe": "cu_cairn_cache",
    "name": "Scout's Cairn",
    "kind": "cache",
-   "x": 1281,
-   "z": 1048,
+   "x": 1277,
+   "z": 1029,
    "yaw": 3.04,
    "radius": 4,
    "levelBase": 7
@@ -3170,8 +3170,8 @@
    "id": "league_stone_blackthorn_scar_d35",
    "kind": "league_stone",
    "name": "League Stone",
-   "x": 1031,
-   "z": 1664,
+   "x": 1020,
+   "z": 1649,
    "yaw": 0.35,
    "radius": 3,
    "filler": true
@@ -3189,8 +3189,8 @@
     1,
     2
    ],
-   "x": 137,
-   "z": 1631,
+   "x": 271,
+   "z": 1548,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -3215,22 +3215,22 @@
    "chatter": [
     "role.gravedigger"
    ],
-   "x": 177,
-   "z": 1209,
+   "x": 170,
+   "z": 1196,
    "yaw": 4.22,
    "radius": 6,
    "path": [
     [
-     179,
-     1203
+     172,
+     1190
     ],
     [
-     180,
-     1214
+     173,
+     1201
     ],
     [
-     171,
-     1210
+     164,
+     1197
     ]
    ]
   },
@@ -3240,8 +3240,8 @@
    "recipe": "cu_cairn_cache",
    "name": "Scout's Cairn",
    "kind": "cache",
-   "x": 1904,
-   "z": 1608,
+   "x": 1919,
+   "z": 1696,
    "yaw": 1.48,
    "radius": 4,
    "levelBase": 8
@@ -3282,8 +3282,8 @@
    "recipe": "cu_old_battle",
    "name": "Old Skirmish",
    "kind": "remains",
-   "x": 1263,
-   "z": 1863,
+   "x": 1280,
+   "z": 1881,
    "yaw": 4.08,
    "radius": 7,
    "levelBase": 9
@@ -3312,8 +3312,8 @@
     1,
     2
    ],
-   "x": 1079,
-   "z": 1489,
+   "x": 1039,
+   "z": 1525,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -3324,8 +3324,8 @@
    "recipe": "cu_pine_resin",
    "name": "Weeping Pine",
    "kind": "forage",
-   "x": 1104,
-   "z": 968,
+   "x": 1117,
+   "z": 983,
    "yaw": 3.35,
    "radius": 4,
    "levelBase": 7
@@ -3366,8 +3366,8 @@
     2,
     3
    ],
-   "x": 1519,
-   "z": 1167,
+   "x": 1551,
+   "z": 1190,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -3377,8 +3377,8 @@
    "id": "bone_heap_blackthorn_scar_d40",
    "kind": "bone_heap",
    "name": "Old Bones",
-   "x": 1638,
-   "z": 450,
+   "x": 1647,
+   "z": 432,
    "yaw": 4.18,
    "radius": 4,
    "filler": true
@@ -3408,8 +3408,8 @@
     2,
     3
    ],
-   "x": 641,
-   "z": 826,
+   "x": 659,
+   "z": 926,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -3443,8 +3443,8 @@
    "recipe": "cu_cairn_cache",
    "name": "Scout's Cairn",
    "kind": "cache",
-   "x": 631,
-   "z": 500,
+   "x": 605,
+   "z": 429,
    "yaw": 1.43,
    "radius": 4,
    "levelBase": 7
@@ -3466,8 +3466,8 @@
    "recipe": "cu_tinkers_halt",
    "name": "Tinker's Halt",
    "kind": "camp",
-   "x": 1831,
-   "z": 724,
+   "x": 1807,
+   "z": 698,
    "yaw": 5.18,
    "radius": 6,
    "levelBase": 7
@@ -3493,22 +3493,22 @@
    "chatter": [
     "role.pilgrim"
    ],
-   "x": 417,
-   "z": 40,
+   "x": 392,
+   "z": 35,
    "yaw": 0.42,
    "radius": 6,
    "path": [
     [
-     413,
-     36
+     388,
+     31
     ],
     [
-     423,
-     40
+     398,
+     35
     ],
     [
-     414,
-     46
+     389,
+     41
     ]
    ]
   },
@@ -3518,8 +3518,8 @@
    "recipe": "cu_stone_watcher",
    "name": "Stone Watcher",
    "kind": "shrine",
-   "x": 1569,
-   "z": 1017,
+   "x": 1591,
+   "z": 1006,
    "yaw": 0.02,
    "radius": 5,
    "levelBase": 7
@@ -3537,8 +3537,8 @@
     1,
     2
    ],
-   "x": 1632,
-   "z": 1232,
+   "x": 1602,
+   "z": 1246,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -3560,8 +3560,8 @@
    "recipe": "cu_childs_map",
    "name": "Child's Map",
    "kind": "lore",
-   "x": 1904,
-   "z": 1760,
+   "x": 1913,
+   "z": 1746,
    "yaw": 3.41,
    "radius": 3,
    "levelBase": 8
@@ -3579,8 +3579,8 @@
     1,
     2
    ],
-   "x": 1686,
-   "z": 316,
+   "x": 1659,
+   "z": 296,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -3591,8 +3591,8 @@
    "recipe": "cu_cairn_cache",
    "name": "Scout's Cairn",
    "kind": "cache",
-   "x": 1545,
-   "z": 613,
+   "x": 1531,
+   "z": 625,
    "yaw": 6.24,
    "radius": 4,
    "levelBase": 7
@@ -3645,8 +3645,8 @@
     2,
     3
    ],
-   "x": 1123,
-   "z": 810,
+   "x": 1158,
+   "z": 816,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -3669,8 +3669,8 @@
    "recipe": "cu_cloudberry",
    "name": "Cloudberry Bog",
    "kind": "forage",
-   "x": 1624,
-   "z": 1552,
+   "x": 1605,
+   "z": 1556,
    "yaw": 4.11,
    "radius": 4,
    "levelBase": 8
@@ -3700,8 +3700,8 @@
     2,
     3
    ],
-   "x": 1534,
-   "z": 140,
+   "x": 1574,
+   "z": 82,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -3711,8 +3711,8 @@
    "id": "lost_signpost_blackthorn_scar_d45",
    "kind": "lost_signpost",
    "name": "Lost Signpost",
-   "x": 136,
-   "z": 1488,
+   "x": 226,
+   "z": 1500,
    "yaw": 2.51,
    "radius": 3,
    "filler": true
@@ -3722,8 +3722,8 @@
    "id": "shrine_niche_blackthorn_scar_d46",
    "kind": "shrine_niche",
    "name": "Shrine Niche",
-   "x": 107,
-   "z": 53,
+   "x": 62,
+   "z": 38,
    "yaw": 2.62,
    "radius": 3,
    "filler": true
@@ -3734,8 +3734,8 @@
    "recipe": "cu_soldiers_tally",
    "name": "Soldier's Tally",
    "kind": "lore",
-   "x": 1958,
-   "z": 1466,
+   "x": 1901,
+   "z": 1565,
    "yaw": 4.35,
    "radius": 4,
    "levelBase": 8
@@ -3765,8 +3765,8 @@
    "recipe": "cu_warrior_cairn",
    "name": "Warrior's Cairn",
    "kind": "shrine",
-   "x": 304,
-   "z": 1608,
+   "x": 291,
+   "z": 1586,
    "yaw": 3.93,
    "radius": 5,
    "levelBase": 9
@@ -3788,8 +3788,8 @@
    "recipe": "cu_cloudberry",
    "name": "Cloudberry Bog",
    "kind": "forage",
-   "x": 1840,
-   "z": 1196,
+   "x": 1820,
+   "z": 1189,
    "yaw": 0.56,
    "radius": 4,
    "levelBase": 7
@@ -3807,8 +3807,8 @@
     1,
     2
    ],
-   "x": 361,
-   "z": 1966,
+   "x": 516,
+   "z": 1738,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -3819,8 +3819,8 @@
    "recipe": "cu_eagle_ledge",
    "name": "Eagle Ledge",
    "kind": "nest",
-   "x": 160,
-   "z": 2008,
+   "x": 1098,
+   "z": 2002,
    "yaw": 1.72,
    "radius": 5,
    "levelBase": 9
@@ -3850,8 +3850,8 @@
     2,
     3
    ],
-   "x": 1400,
-   "z": 1192,
+   "x": 1422,
+   "z": 1168,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -3861,8 +3861,8 @@
    "id": "bone_heap_blackthorn_scar_d48",
    "kind": "bone_heap",
    "name": "Old Bones",
-   "x": 188,
-   "z": 131,
+   "x": 210,
+   "z": 139,
    "yaw": 3.57,
    "radius": 4,
    "filler": true
@@ -3872,8 +3872,8 @@
    "id": "roadside_grave_blackthorn_scar_d49",
    "kind": "roadside_grave",
    "name": "Roadside Grave",
-   "x": 256,
-   "z": 1880,
+   "x": 387,
+   "z": 1657,
    "yaw": 0.04,
    "radius": 4,
    "filler": true
@@ -3884,8 +3884,8 @@
    "recipe": "cu_bramble_berries",
    "name": "Bramble Berries",
    "kind": "forage",
-   "x": 1760,
-   "z": 128,
+   "x": 1768,
+   "z": 145,
    "yaw": 1.45,
    "radius": 4,
    "levelBase": 6
@@ -3903,26 +3903,26 @@
     1,
     2
    ],
-   "x": 1886,
-   "z": 1396,
+   "x": 1890,
+   "z": 1393,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1851,
-     1330
+     1917,
+     1424
     ],
     [
-     1937,
-     1388
+     1859,
+     1420
     ],
     [
-     1902,
-     1437
+     1863,
+     1362
     ],
     [
-     1819,
-     1421
+     1921,
+     1366
     ]
    ],
    "roam": true
@@ -3955,8 +3955,8 @@
    "id": "woodpile_stack_blackthorn_scar_d51",
    "kind": "woodpile_stack",
    "name": "Woodpile",
-   "x": 1613,
-   "z": 189,
+   "x": 1620,
+   "z": 167,
    "yaw": 2.21,
    "radius": 4,
    "filler": true
@@ -3967,8 +3967,8 @@
    "recipe": "cu_pine_resin",
    "name": "Weeping Pine",
    "kind": "forage",
-   "x": 1144,
-   "z": 288,
+   "x": 1140,
+   "z": 316,
    "yaw": 2.3,
    "radius": 4,
    "levelBase": 6
@@ -4020,8 +4020,8 @@
    "id": "league_stone_blackthorn_scar_d53",
    "kind": "league_stone",
    "name": "League Stone",
-   "x": 1550,
-   "z": 379,
+   "x": 1568,
+   "z": 383,
    "yaw": 0.99,
    "radius": 3,
    "filler": true
@@ -4051,26 +4051,26 @@
     2,
     3
    ],
-   "x": 536,
-   "z": 1216,
+   "x": 564,
+   "z": 1199,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     486,
-     1253
+     573,
+     1163
     ],
     [
-     518,
-     1176
+     600,
+     1208
     ],
     [
-     570,
-     1195
+     555,
+     1235
     ],
     [
-     552,
-     1268
+     528,
+     1190
     ]
    ],
    "roam": true
@@ -4081,8 +4081,8 @@
    "recipe": "cu_bramble_berries",
    "name": "Bramble Berries",
    "kind": "forage",
-   "x": 853,
-   "z": 286,
+   "x": 835,
+   "z": 293,
    "yaw": 4.27,
    "radius": 4,
    "levelBase": 7
@@ -4111,8 +4111,8 @@
     1,
     2
    ],
-   "x": 1520,
-   "z": 1928,
+   "x": 1552,
+   "z": 1914,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -4122,8 +4122,8 @@
    "id": "roadside_grave_blackthorn_scar_d55",
    "kind": "roadside_grave",
    "name": "Roadside Grave",
-   "x": 1490,
-   "z": 281,
+   "x": 1499,
+   "z": 252,
    "yaw": 2.76,
    "radius": 4,
    "filler": true
@@ -4192,8 +4192,8 @@
    "id": "bone_heap_blackthorn_scar_d56",
    "kind": "bone_heap",
    "name": "Old Bones",
-   "x": 770,
-   "z": 518,
+   "x": 787,
+   "z": 583,
    "yaw": 0.87,
    "radius": 4,
    "filler": true
@@ -4216,8 +4216,8 @@
    "recipe": "cu_spring_altar",
    "name": "Spring Altar",
    "kind": "shrine",
-   "x": 1344,
-   "z": 1784,
+   "x": 1352,
+   "z": 1810,
    "yaw": 5.16,
    "radius": 5,
    "levelBase": 8
@@ -4235,8 +4235,8 @@
     1,
     2
    ],
-   "x": 473,
-   "z": 617,
+   "x": 475,
+   "z": 585,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -4247,8 +4247,8 @@
    "recipe": "cu_eagle_ledge",
    "name": "Eagle Ledge",
    "kind": "nest",
-   "x": 104,
-   "z": 300,
+   "x": 87,
+   "z": 287,
    "yaw": 4.15,
    "radius": 5,
    "levelBase": 7
@@ -4281,8 +4281,8 @@
    "recipe": "cu_cairn_cache",
    "name": "Scout's Cairn",
    "kind": "cache",
-   "x": 2017,
-   "z": 810,
+   "x": 2001,
+   "z": 829,
    "yaw": 2.39,
    "radius": 4,
    "levelBase": 7
@@ -4300,8 +4300,8 @@
     2,
     3
    ],
-   "x": 1182,
-   "z": 1695,
+   "x": 1202,
+   "z": 1646,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -4312,8 +4312,8 @@
    "recipe": "cu_cairn_cache",
    "name": "Scout's Cairn",
    "kind": "cache",
-   "x": 592,
-   "z": 1729,
+   "x": 588,
+   "z": 1749,
    "yaw": 1.03,
    "radius": 4,
    "levelBase": 9
@@ -4355,8 +4355,8 @@
    "recipe": "cu_eagle_ledge",
    "name": "Eagle Ledge",
    "kind": "nest",
-   "x": 1080,
-   "z": 1072,
+   "x": 1112,
+   "z": 1097,
    "yaw": 5.13,
    "radius": 5,
    "levelBase": 7
@@ -4420,8 +4420,8 @@
    "recipe": "cu_warrior_cairn",
    "name": "Warrior's Cairn",
    "kind": "shrine",
-   "x": 516,
-   "z": 817,
+   "x": 507,
+   "z": 835,
    "yaw": 6.02,
    "radius": 5,
    "levelBase": 8
@@ -4432,8 +4432,8 @@
    "recipe": "cu_soldiers_tally",
    "name": "Soldier's Tally",
    "kind": "lore",
-   "x": 1366,
-   "z": 1058,
+   "x": 1352,
+   "z": 1073,
    "yaw": 6.05,
    "radius": 4,
    "levelBase": 7
@@ -4451,8 +4451,8 @@
     2,
     3
    ],
-   "x": 915,
-   "z": 909,
+   "x": 919,
+   "z": 941,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -4474,8 +4474,8 @@
    "recipe": "cu_loose_stone",
    "name": "Loose Stone",
    "kind": "cache",
-   "x": 1247,
-   "z": 965,
+   "x": 1235,
+   "z": 980,
    "yaw": 1.4,
    "radius": 4,
    "levelBase": 7
@@ -4486,8 +4486,8 @@
    "recipe": "cu_cloudberry",
    "name": "Cloudberry Bog",
    "kind": "forage",
-   "x": 423,
-   "z": 1680,
+   "x": 458,
+   "z": 1670,
    "yaw": 0.93,
    "radius": 4,
    "levelBase": 9
@@ -4498,8 +4498,8 @@
    "recipe": "cu_frozen_climber",
    "name": "Frozen Climber",
    "kind": "remains",
-   "x": 936,
-   "z": 529,
+   "x": 891,
+   "z": 526,
    "yaw": 1.31,
    "radius": 4,
    "levelBase": 7
@@ -4510,8 +4510,8 @@
    "recipe": "cu_loose_stone",
    "name": "Loose Stone",
    "kind": "cache",
-   "x": 857,
-   "z": 201,
+   "x": 875,
+   "z": 203,
    "yaw": 5.03,
    "radius": 4,
    "levelBase": 6
@@ -4521,8 +4521,8 @@
    "id": "boundary_stake_blackthorn_scar_d62",
    "kind": "boundary_stake",
    "name": "Boundary Stakes",
-   "x": 1217,
-   "z": 1129,
+   "x": 1224,
+   "z": 1109,
    "yaw": 0.65,
    "radius": 4,
    "filler": true
@@ -4552,8 +4552,8 @@
    "recipe": "cu_buried_crock",
    "name": "Buried Crock",
    "kind": "cache",
-   "x": 1744,
-   "z": 1696,
+   "x": 1763,
+   "z": 1698,
    "yaw": 1.19,
    "radius": 4,
    "levelBase": 8
@@ -4567,22 +4567,22 @@
    "chatter": [
     "role.shepherd"
    ],
-   "x": 1904,
-   "z": 232,
+   "x": 1919,
+   "z": 181,
    "yaw": 2.6,
    "radius": 6,
    "path": [
     [
-     1893,
-     185
+     1908,
+     134
     ],
     [
-     1939,
-     247
+     1954,
+     196
     ],
     [
-     1861,
-     252
+     1876,
+     201
     ]
    ]
   },
@@ -4610,8 +4610,8 @@
    "id": "frost_marker_blackthorn_scar_d63",
    "kind": "frost_marker",
    "name": "Snow Pole",
-   "x": 539,
-   "z": 623,
+   "x": 552,
+   "z": 607,
    "yaw": 2.77,
    "radius": 3,
    "filler": true
@@ -4622,8 +4622,8 @@
    "recipe": "cu_frozen_climber",
    "name": "Frozen Climber",
    "kind": "remains",
-   "x": 627,
-   "z": 960,
+   "x": 637,
+   "z": 975,
    "yaw": 2.91,
    "radius": 4,
    "levelBase": 8
@@ -4641,26 +4641,26 @@
     1,
     2
    ],
-   "x": 455,
-   "z": 1513,
+   "x": 497,
+   "z": 1514,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     437,
-     1438
-    ],
-    [
-     509,
-     1521
+     472,
+     1550
     ],
     [
      461,
-     1570
+     1489
     ],
     [
-     379,
-     1507
+     522,
+     1478
+    ],
+    [
+     533,
+     1539
     ]
    ],
    "roam": true
@@ -4671,8 +4671,8 @@
    "recipe": "cu_pine_resin",
    "name": "Weeping Pine",
    "kind": "forage",
-   "x": 1484,
-   "z": 550,
+   "x": 1475,
+   "z": 567,
    "yaw": 1.6,
    "radius": 4,
    "levelBase": 7
@@ -4683,8 +4683,8 @@
    "recipe": "cu_loose_stone",
    "name": "Loose Stone",
    "kind": "cache",
-   "x": 513,
-   "z": 1768,
+   "x": 481,
+   "z": 1777,
    "yaw": 2.37,
    "radius": 4,
    "levelBase": 9
@@ -4705,8 +4705,8 @@
    "id": "lost_signpost_blackthorn_scar_d65",
    "kind": "lost_signpost",
    "name": "Lost Signpost",
-   "x": 1145,
-   "z": 638,
+   "x": 1148,
+   "z": 620,
    "yaw": 4.8,
    "radius": 3,
    "filler": true
@@ -4724,8 +4724,8 @@
     2,
     3
    ],
-   "x": 1176,
-   "z": 1792,
+   "x": 1141,
+   "z": 1780,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -4779,8 +4779,8 @@
    "recipe": "cu_loose_stone",
    "name": "Loose Stone",
    "kind": "cache",
-   "x": 2012,
-   "z": 637,
+   "x": 2018,
+   "z": 609,
    "yaw": 4.74,
    "radius": 4,
    "levelBase": 6
@@ -4833,8 +4833,8 @@
     2,
     3
    ],
-   "x": 510,
-   "z": 1865,
+   "x": 542,
+   "z": 1760,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -4860,22 +4860,22 @@
    "chatter": [
     "role.surveyor"
    ],
-   "x": 1608,
-   "z": 1432,
+   "x": 1584,
+   "z": 1433,
    "yaw": 2.31,
    "radius": 6,
    "path": [
     [
-     1627,
-     1476
+     1531,
+     1392
     ],
     [
-     1560,
-     1403
+     1646,
+     1407
     ],
     [
-     1649,
-     1405
+     1576,
+     1500
     ]
    ]
   },
@@ -4904,8 +4904,8 @@
     1,
     2
    ],
-   "x": 609,
-   "z": 1431,
+   "x": 579,
+   "z": 1443,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -4915,8 +4915,8 @@
    "id": "cairn_blackthorn_scar_d67",
    "kind": "cairn",
    "name": "Cairn",
-   "x": 1928,
-   "z": 825,
+   "x": 1945,
+   "z": 812,
    "yaw": 3.49,
    "radius": 4,
    "filler": true
@@ -4927,8 +4927,8 @@
    "recipe": "cu_rune_ring",
    "name": "Little Stone Ring",
    "kind": "marker",
-   "x": 1065,
-   "z": 1823,
+   "x": 1043,
+   "z": 1826,
    "yaw": 3.03,
    "radius": 6,
    "levelBase": 9
@@ -4976,26 +4976,26 @@
     2,
     3
    ],
-   "x": 1663,
-   "z": 1720,
+   "x": 1680,
+   "z": 1756,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1625,
+     1662,
+     1783
+    ],
+    [
+     1653,
+     1738
+    ],
+    [
+     1698,
      1729
     ],
     [
-     1647,
-     1691
-    ],
-    [
-     1703,
-     1699
-    ],
-    [
-     1676,
-     1766
+     1707,
+     1774
     ]
    ],
    "roam": true
@@ -5006,8 +5006,8 @@
    "recipe": "cu_frozen_climber",
    "name": "Frozen Climber",
    "kind": "remains",
-   "x": 322,
-   "z": 1263,
+   "x": 317,
+   "z": 1243,
    "yaw": 4.64,
    "radius": 4,
    "levelBase": 8
@@ -5017,8 +5017,8 @@
    "id": "cairn_blackthorn_scar_d69",
    "kind": "cairn",
    "name": "Cairn",
-   "x": 213,
-   "z": 799,
+   "x": 195,
+   "z": 789,
    "yaw": 4.24,
    "radius": 4,
    "filler": true
@@ -5036,8 +5036,8 @@
     1,
     2
    ],
-   "x": 544,
-   "z": 2008,
+   "x": 669,
+   "z": 1906,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -5048,8 +5048,8 @@
    "recipe": "cu_stone_watcher",
    "name": "Stone Watcher",
    "kind": "shrine",
-   "x": 1424,
-   "z": 1800,
+   "x": 1445,
+   "z": 1808,
    "yaw": 6.13,
    "radius": 5,
    "levelBase": 8
@@ -5063,22 +5063,22 @@
    "chatter": [
     "role.gravedigger"
    ],
-   "x": 922,
-   "z": 626,
+   "x": 888,
+   "z": 678,
    "yaw": 4.13,
    "radius": 6,
    "path": [
     [
-     934,
-     623
+     900,
+     675
     ],
     [
-     917,
-     634
+     883,
+     686
     ],
     [
-     915,
-     620
+     881,
+     672
     ]
    ]
   },
@@ -5088,8 +5088,8 @@
    "recipe": "cu_pine_resin",
    "name": "Weeping Pine",
    "kind": "forage",
-   "x": 760,
-   "z": 2008,
+   "x": 816,
+   "z": 1977,
    "yaw": 0.66,
    "radius": 4,
    "levelBase": 9
@@ -5130,8 +5130,8 @@
    "recipe": "cu_soldiers_tally",
    "name": "Soldier's Tally",
    "kind": "lore",
-   "x": 1489,
-   "z": 1536,
+   "x": 1496,
+   "z": 1518,
    "yaw": 3.59,
    "radius": 4,
    "levelBase": 8
@@ -5149,26 +5149,26 @@
     2,
     3
    ],
-   "x": 232,
-   "z": 1768,
+   "x": 568,
+   "z": 1649,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     231,
-     1711
+     564,
+     1663
     ],
     [
-     297,
-     1774
+     554,
+     1645
     ],
     [
-     229,
-     1814
+     572,
+     1635
     ],
     [
-     190,
-     1763
+     582,
+     1653
     ]
    ],
    "roam": true
@@ -5209,8 +5209,8 @@
    "recipe": "cu_frozen_climber",
    "name": "Frozen Climber",
    "kind": "remains",
-   "x": 1311,
-   "z": 271,
+   "x": 1294,
+   "z": 277,
    "yaw": 5.97,
    "radius": 4,
    "levelBase": 6
@@ -5251,8 +5251,8 @@
    "recipe": "cu_soldiers_tally",
    "name": "Soldier's Tally",
    "kind": "lore",
-   "x": 96,
-   "z": 1087,
+   "x": 80,
+   "z": 1097,
    "yaw": 5.23,
    "radius": 4,
    "levelBase": 8
@@ -5316,8 +5316,8 @@
    "recipe": "cu_warrior_cairn",
    "name": "Warrior's Cairn",
    "kind": "shrine",
-   "x": 1012,
-   "z": 238,
+   "x": 992,
+   "z": 237,
    "yaw": 1.96,
    "radius": 5,
    "levelBase": 6
@@ -5397,8 +5397,8 @@
    "recipe": "cu_cloudberry",
    "name": "Cloudberry Bog",
    "kind": "forage",
-   "x": 416,
-   "z": 744,
+   "x": 398,
+   "z": 746,
    "yaw": 6.24,
    "radius": 4,
    "levelBase": 7
@@ -5420,8 +5420,8 @@
    "id": "cairn_blackthorn_scar_d78",
    "kind": "cairn",
    "name": "Cairn",
-   "x": 1552,
-   "z": 1240,
+   "x": 1540,
+   "z": 1221,
    "yaw": 0.11,
    "radius": 4,
    "filler": true
@@ -5431,8 +5431,8 @@
    "id": "cold_campfire_blackthorn_scar_d79",
    "kind": "cold_campfire",
    "name": "Cold Campfire",
-   "x": 1440,
-   "z": 1920,
+   "x": 1433,
+   "z": 1941,
    "yaw": 5.35,
    "radius": 4,
    "filler": true
@@ -5450,8 +5450,8 @@
     1,
     2
    ],
-   "x": 1783,
-   "z": 197,
+   "x": 1802,
+   "z": 171,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -5462,8 +5462,8 @@
    "recipe": "cu_eagle_ledge",
    "name": "Eagle Ledge",
    "kind": "nest",
-   "x": 456,
-   "z": 1360,
+   "x": 455,
+   "z": 1340,
    "yaw": 0.41,
    "radius": 5,
    "levelBase": 8
@@ -5477,22 +5477,22 @@
    "chatter": [
     "role.pilgrim"
    ],
-   "x": 1105,
-   "z": 888,
+   "x": 1128,
+   "z": 900,
    "yaw": 4.7,
    "radius": 6,
    "path": [
     [
-     1096,
-     883
+     1119,
+     895
     ],
     [
-     1112,
-     885
+     1135,
+     897
     ],
     [
-     1104,
-     896
+     1127,
+     908
     ]
    ]
   },
@@ -5512,8 +5512,8 @@
    "id": "bone_heap_blackthorn_scar_d81",
    "kind": "bone_heap",
    "name": "Old Bones",
-   "x": 134,
-   "z": 774,
+   "x": 133,
+   "z": 751,
    "yaw": 3.16,
    "radius": 4,
    "filler": true
@@ -5546,8 +5546,8 @@
    "recipe": "cu_stone_watcher",
    "name": "Stone Watcher",
    "kind": "shrine",
-   "x": 203,
-   "z": 237,
+   "x": 182,
+   "z": 233,
    "yaw": 0.8,
    "radius": 5,
    "levelBase": 7
@@ -5558,8 +5558,8 @@
    "recipe": "cu_bramble_berries",
    "name": "Bramble Berries",
    "kind": "forage",
-   "x": 1472,
-   "z": 1642,
+   "x": 1451,
+   "z": 1640,
    "yaw": 3.29,
    "radius": 4,
    "levelBase": 8
@@ -5569,8 +5569,8 @@
    "id": "cold_campfire_blackthorn_scar_d84",
    "kind": "cold_campfire",
    "name": "Cold Campfire",
-   "x": 344,
-   "z": 1672,
+   "x": 364,
+   "z": 1676,
    "yaw": 0.5,
    "radius": 4,
    "filler": true
@@ -5600,8 +5600,8 @@
     1,
     2
    ],
-   "x": 288,
-   "z": 1359,
+   "x": 328,
+   "z": 1315,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -5611,8 +5611,8 @@
    "id": "cairn_blackthorn_scar_d85",
    "kind": "cairn",
    "name": "Cairn",
-   "x": 1886,
-   "z": 886,
+   "x": 1907,
+   "z": 896,
    "yaw": 1.92,
    "radius": 4,
    "filler": true
@@ -5642,8 +5642,8 @@
     2,
     3
    ],
-   "x": 511,
-   "z": 497,
+   "x": 514,
+   "z": 465,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -5654,8 +5654,8 @@
    "recipe": "cu_pine_resin",
    "name": "Weeping Pine",
    "kind": "forage",
-   "x": 1835,
-   "z": 1617,
+   "x": 1802,
+   "z": 1619,
    "yaw": 1.33,
    "radius": 4,
    "levelBase": 8
@@ -5677,8 +5677,8 @@
    "recipe": "cu_cairn_cache",
    "name": "Scout's Cairn",
    "kind": "cache",
-   "x": 544,
-   "z": 1376,
+   "x": 526,
+   "z": 1380,
    "yaw": 1.69,
    "radius": 4,
    "levelBase": 8
@@ -5688,8 +5688,8 @@
    "id": "bone_heap_blackthorn_scar_d87",
    "kind": "bone_heap",
    "name": "Old Bones",
-   "x": 250,
-   "z": 430,
+   "x": 242,
+   "z": 451,
    "yaw": 3,
    "radius": 4,
    "filler": true
@@ -5730,8 +5730,8 @@
    "id": "cold_campfire_blackthorn_scar_d88",
    "kind": "cold_campfire",
    "name": "Cold Campfire",
-   "x": 658,
-   "z": 741,
+   "x": 638,
+   "z": 744,
    "yaw": 6.01,
    "radius": 4,
    "filler": true
@@ -5741,8 +5741,8 @@
    "id": "roadside_grave_blackthorn_scar_d89",
    "kind": "roadside_grave",
    "name": "Roadside Grave",
-   "x": 1613,
-   "z": 887,
+   "x": 1626,
+   "z": 903,
    "yaw": 3.2,
    "radius": 4,
    "filler": true
@@ -5764,8 +5764,8 @@
    "recipe": "cu_stone_watcher",
    "name": "Stone Watcher",
    "kind": "shrine",
-   "x": 416,
-   "z": 1912,
+   "x": 892,
+   "z": 2001,
    "yaw": 4.87,
    "radius": 5,
    "levelBase": 9
@@ -5776,8 +5776,8 @@
    "recipe": "cu_cloudberry",
    "name": "Cloudberry Bog",
    "kind": "forage",
-   "x": 1025,
-   "z": 624,
+   "x": 1026,
+   "z": 695,
    "yaw": 3.75,
    "radius": 4,
    "levelBase": 7
@@ -5788,8 +5788,8 @@
    "recipe": "cu_soldiers_tally",
    "name": "Soldier's Tally",
    "kind": "lore",
-   "x": 105,
-   "z": 1551,
+   "x": 891,
+   "z": 1517,
    "yaw": 0.81,
    "radius": 4,
    "levelBase": 9
@@ -5800,8 +5800,8 @@
    "recipe": "cu_soldiers_tally",
    "name": "Soldier's Tally",
    "kind": "lore",
-   "x": 791,
-   "z": 736,
+   "x": 788,
+   "z": 716,
    "yaw": 4.38,
    "radius": 4,
    "levelBase": 7
@@ -5842,8 +5842,8 @@
     2,
     3
    ],
-   "x": 686,
-   "z": 256,
+   "x": 676,
+   "z": 287,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -5868,22 +5868,22 @@
    "chatter": [
     "role.gravedigger"
    ],
-   "x": 1176,
-   "z": 976,
+   "x": 1178,
+   "z": 1002,
    "yaw": 1.11,
    "radius": 6,
    "path": [
     [
-     1176,
-     985
+     1178,
+     1011
     ],
     [
-     1169,
-     971
+     1171,
+     997
     ],
     [
-     1184,
-     972
+     1186,
+     998
     ]
    ]
   },
@@ -5934,8 +5934,8 @@
    "recipe": "cu_cairn_cache",
    "name": "Scout's Cairn",
    "kind": "cache",
-   "x": 1560,
-   "z": 1520,
+   "x": 1556,
+   "z": 1538,
    "yaw": 5.99,
    "radius": 4,
    "levelBase": 8
@@ -5953,26 +5953,26 @@
     1,
     2
    ],
-   "x": 974,
-   "z": 159,
+   "x": 966,
+   "z": 190,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     983,
-     116
-    ],
-    [
-     1013,
-     167
-    ],
-    [
-     964,
-     197
-    ],
-    [
-     936,
+     975,
      147
+    ],
+    [
+     1005,
+     198
+    ],
+    [
+     956,
+     228
+    ],
+    [
+     928,
+     178
     ]
    ],
    "roam": true
@@ -5990,8 +5990,8 @@
     1,
     2
    ],
-   "x": 1936,
-   "z": 1544,
+   "x": 1950,
+   "z": 1433,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -6020,8 +6020,8 @@
     2,
     3
    ],
-   "x": 416,
-   "z": 1280,
+   "x": 425,
+   "z": 1313,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -6032,7 +6032,7 @@
    "kind": "boundary_stake",
    "name": "Boundary Stakes",
    "x": 304,
-   "z": 1536,
+   "z": 1557,
    "yaw": 4.9,
    "radius": 4,
    "filler": true
@@ -6043,8 +6043,8 @@
    "recipe": "cu_loose_stone",
    "name": "Loose Stone",
    "kind": "cache",
-   "x": 2008,
-   "z": 1624,
+   "x": 2006,
+   "z": 1584,
    "yaw": 5.6,
    "radius": 4,
    "levelBase": 8
@@ -6062,8 +6062,8 @@
     1,
     2
    ],
-   "x": 1149,
-   "z": 1471,
+   "x": 1134,
+   "z": 1500,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -6073,8 +6073,8 @@
    "id": "banner_post_blackthorn_scar_d97",
    "kind": "banner_post",
    "name": "Faded Banner",
-   "x": 539,
-   "z": 102,
+   "x": 533,
+   "z": 85,
    "yaw": 1.19,
    "radius": 3,
    "filler": true
@@ -6115,26 +6115,26 @@
     2,
     3
    ],
-   "x": 1536,
-   "z": 1672,
+   "x": 1532,
+   "z": 1674,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1522,
-     1729
+     1559,
+     1663
     ],
     [
-     1485,
-     1653
+     1543,
+     1701
     ],
     [
-     1557,
-     1624
+     1505,
+     1685
     ],
     [
-     1615,
-     1696
+     1521,
+     1647
     ]
    ],
    "roam": true
@@ -6164,8 +6164,8 @@
    "recipe": "cu_rockfall",
    "name": "Fresh Rockfall",
    "kind": "hazard",
-   "x": 896,
-   "z": 984,
+   "x": 918,
+   "z": 987,
    "yaw": 4.16,
    "radius": 6,
    "levelBase": 7
@@ -6176,8 +6176,8 @@
    "recipe": "cu_wayshrine",
    "name": "Wayfarer Shrine",
    "kind": "shrine",
-   "x": 596,
-   "z": 445,
+   "x": 583,
+   "z": 426,
    "yaw": 1.57,
    "radius": 4,
    "levelBase": 7
@@ -6188,8 +6188,8 @@
    "recipe": "cu_cairn_cache",
    "name": "Scout's Cairn",
    "kind": "cache",
-   "x": 1642,
-   "z": 1020,
+   "x": 1663,
+   "z": 1016,
    "yaw": 5.34,
    "radius": 4,
    "levelBase": 7
@@ -6245,8 +6245,8 @@
    "id": "milestone_blackthorn_scar_d101",
    "kind": "milestone",
    "name": "Milestone",
-   "x": 768,
-   "z": 405,
+   "x": 776,
+   "z": 385,
    "yaw": 0.52,
    "radius": 3,
    "filler": true
@@ -6287,8 +6287,8 @@
    "recipe": "cu_herb_patch",
    "name": "Woundwort Patch",
    "kind": "forage",
-   "x": 1649,
-   "z": 742,
+   "x": 1630,
+   "z": 724,
    "yaw": 0.84,
    "radius": 4,
    "levelBase": 7
@@ -6329,8 +6329,8 @@
    "recipe": "cu_pine_resin",
    "name": "Weeping Pine",
    "kind": "forage",
-   "x": 129,
-   "z": 1701,
+   "x": 47,
+   "z": 708,
    "yaw": 6.19,
    "radius": 4,
    "levelBase": 9
@@ -6344,22 +6344,22 @@
    "chatter": [
     "role.surveyor"
    ],
-   "x": 1528,
-   "z": 1320,
+   "x": 1529,
+   "z": 1292,
    "yaw": 1.78,
    "radius": 6,
    "path": [
     [
-     1550,
-     1350
+     1558,
+     1279
     ],
     [
-     1498,
-     1322
+     1526,
+     1323
     ],
     [
-     1550,
-     1297
+     1503,
+     1273
     ]
    ]
   },
@@ -6369,8 +6369,8 @@
    "recipe": "cu_cairn_cache",
    "name": "Scout's Cairn",
    "kind": "cache",
-   "x": 89,
-   "z": 1913,
+   "x": 154,
+   "z": 1391,
    "yaw": 0.32,
    "radius": 4,
    "levelBase": 9
@@ -6399,8 +6399,8 @@
    "id": "boundary_stake_blackthorn_scar_d104",
    "kind": "boundary_stake",
    "name": "Boundary Stakes",
-   "x": 1561,
-   "z": 1808,
+   "x": 1551,
+   "z": 1807,
    "yaw": 2.06,
    "radius": 4,
    "filler": true
@@ -6410,8 +6410,8 @@
    "id": "banner_post_blackthorn_scar_d105",
    "kind": "banner_post",
    "name": "Faded Banner",
-   "x": 670,
-   "z": 683,
+   "x": 687,
+   "z": 671,
    "yaw": 2.48,
    "radius": 3,
    "filler": true
@@ -6429,26 +6429,26 @@
     1,
     2
    ],
-   "x": 111,
-   "z": 1848,
+   "x": 566,
+   "z": 1692,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     163,
-     1859
+     570,
+     1677
     ],
     [
-     100,
-     1902
+     581,
+     1696
     ],
     [
-     61,
-     1844
+     562,
+     1707
     ],
     [
-     109,
-     1800
+     551,
+     1688
     ]
    ],
    "roam": true
@@ -6488,8 +6488,8 @@
    "id": "shrine_niche_blackthorn_scar_d107",
    "kind": "shrine_niche",
    "name": "Shrine Niche",
-   "x": 1112,
-   "z": 1672,
+   "x": 1107,
+   "z": 1654,
    "yaw": 3.12,
    "radius": 3,
    "filler": true
@@ -6500,8 +6500,8 @@
    "recipe": "cu_frozen_climber",
    "name": "Frozen Climber",
    "kind": "remains",
-   "x": 213,
-   "z": 877,
+   "x": 197,
+   "z": 868,
    "yaw": 5.23,
    "radius": 4,
    "levelBase": 8
@@ -6542,8 +6542,8 @@
    "recipe": "cu_childs_map",
    "name": "Child's Map",
    "kind": "lore",
-   "x": 1272,
-   "z": 1568,
+   "x": 1287,
+   "z": 1575,
    "yaw": 4.72,
    "radius": 3,
    "levelBase": 8
@@ -6561,8 +6561,8 @@
     1,
     2
    ],
-   "x": 1764,
-   "z": 1634,
+   "x": 1757,
+   "z": 1602,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -6572,8 +6572,8 @@
    "id": "roadside_grave_blackthorn_scar_d109",
    "kind": "roadside_grave",
    "name": "Roadside Grave",
-   "x": 1963,
-   "z": 1859,
+   "x": 1959,
+   "z": 1879,
    "yaw": 5.86,
    "radius": 4,
    "filler": true
@@ -6625,26 +6625,26 @@
     1,
     2
    ],
-   "x": 1784,
-   "z": 672,
+   "x": 1752,
+   "z": 665,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1837,
-     717
+     1727,
+     634
     ],
     [
-     1761,
-     722
+     1783,
+     640
     ],
     [
-     1729,
-     622
+     1777,
+     696
     ],
     [
-     1825,
-     615
+     1721,
+     690
     ]
    ],
    "roam": true
@@ -6662,8 +6662,8 @@
     2,
     3
    ],
-   "x": 786,
-   "z": 631,
+   "x": 754,
+   "z": 632,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -6674,8 +6674,8 @@
    "recipe": "cu_loose_stone",
    "name": "Loose Stone",
    "kind": "cache",
-   "x": 1200,
-   "z": 1584,
+   "x": 1218,
+   "z": 1586,
    "yaw": 3.06,
    "radius": 4,
    "levelBase": 8
@@ -6689,22 +6689,22 @@
    "chatter": [
     "role.surveyor"
    ],
-   "x": 265,
-   "z": 1480,
+   "x": 264,
+   "z": 1455,
    "yaw": 5.18,
    "radius": 6,
    "path": [
     [
-     322,
-     1444
+     340,
+     1413
     ],
     [
-     267,
-     1560
+     263,
+     1542
     ],
     [
-     204,
-     1434
+     190,
+     1410
     ]
    ]
   },
@@ -6732,8 +6732,8 @@
     2,
     3
    ],
-   "x": 559,
-   "z": 1625,
+   "x": 528,
+   "z": 1594,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -6744,8 +6744,8 @@
    "recipe": "cu_stone_watcher",
    "name": "Stone Watcher",
    "kind": "shrine",
-   "x": 1123,
-   "z": 107,
+   "x": 1106,
+   "z": 96,
    "yaw": 0.93,
    "radius": 5,
    "levelBase": 6
@@ -6763,8 +6763,8 @@
     2,
     3
    ],
-   "x": 1837,
-   "z": 1750,
+   "x": 1805,
+   "z": 1760,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -6787,8 +6787,8 @@
    "recipe": "cu_cairn_cache",
    "name": "Scout's Cairn",
    "kind": "cache",
-   "x": 951,
-   "z": 848,
+   "x": 919,
+   "z": 837,
    "yaw": 2.82,
    "radius": 4,
    "levelBase": 7
@@ -6809,8 +6809,8 @@
    "id": "boundary_stake_blackthorn_scar_d114",
    "kind": "boundary_stake",
    "name": "Boundary Stakes",
-   "x": 1448,
-   "z": 1424,
+   "x": 1435,
+   "z": 1440,
    "yaw": 6.12,
    "radius": 4,
    "filler": true
@@ -6889,8 +6889,8 @@
    "id": "banner_post_blackthorn_scar_d117",
    "kind": "banner_post",
    "name": "Faded Banner",
-   "x": 151,
-   "z": 683,
+   "x": 157,
+   "z": 704,
    "yaw": 1.11,
    "radius": 3,
    "filler": true
@@ -6943,8 +6943,8 @@
    "recipe": "cu_stone_watcher",
    "name": "Stone Watcher",
    "kind": "shrine",
-   "x": 815,
-   "z": 1016,
+   "x": 795,
+   "z": 1021,
    "yaw": 5.28,
    "radius": 5,
    "levelBase": 8
@@ -6985,8 +6985,8 @@
     2,
     3
    ],
-   "x": 1368,
-   "z": 1128,
+   "x": 1290,
+   "z": 1130,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -7007,8 +7007,8 @@
    "id": "lost_signpost_blackthorn_scar_d121",
    "kind": "lost_signpost",
    "name": "Lost Signpost",
-   "x": 1688,
-   "z": 1568,
+   "x": 1703,
+   "z": 1556,
    "yaw": 0.9,
    "radius": 3,
    "filler": true
@@ -7026,8 +7026,8 @@
     2,
     3
    ],
-   "x": 89,
-   "z": 983,
+   "x": 66,
+   "z": 960,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -7091,8 +7091,8 @@
     1,
     2
    ],
-   "x": 288,
-   "z": 1104,
+   "x": 268,
+   "z": 1079,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -7102,8 +7102,8 @@
    "id": "cairn_blackthorn_scar_d124",
    "kind": "cairn",
    "name": "Cairn",
-   "x": 263,
-   "z": 1230,
+   "x": 246,
+   "z": 1243,
    "yaw": 3.9,
    "radius": 4,
    "filler": true
@@ -7125,8 +7125,8 @@
    "id": "banner_post_blackthorn_scar_d125",
    "kind": "banner_post",
    "name": "Faded Banner",
-   "x": 1728,
-   "z": 1416,
+   "x": 1716,
+   "z": 1400,
    "yaw": 3.04,
    "radius": 3,
    "filler": true
@@ -7144,8 +7144,8 @@
     2,
     3
    ],
-   "x": 710,
-   "z": 1801,
+   "x": 684,
+   "z": 1823,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -7167,8 +7167,8 @@
    "recipe": "cu_warrior_cairn",
    "name": "Warrior's Cairn",
    "kind": "shrine",
-   "x": 617,
-   "z": 1872,
+   "x": 630,
+   "z": 1852,
    "yaw": 5.32,
    "radius": 5,
    "levelBase": 9
@@ -7179,8 +7179,8 @@
    "recipe": "cu_eagle_ledge",
    "name": "Eagle Ledge",
    "kind": "nest",
-   "x": 1999,
-   "z": 713,
+   "x": 2015,
+   "z": 589,
    "yaw": 5.27,
    "radius": 5,
    "levelBase": 7
@@ -7191,8 +7191,8 @@
    "recipe": "cu_cairn_cache",
    "name": "Scout's Cairn",
    "kind": "cache",
-   "x": 192,
-   "z": 1040,
+   "x": 209,
+   "z": 1034,
    "yaw": 5.56,
    "radius": 4,
    "levelBase": 8
@@ -7214,8 +7214,8 @@
    "recipe": "cu_sinkhole",
    "name": "Sinkhole",
    "kind": "hazard",
-   "x": 1949,
-   "z": 332,
+   "x": 1928,
+   "z": 343,
    "yaw": 4.37,
    "radius": 6,
    "levelBase": 6
@@ -7248,8 +7248,8 @@
    "recipe": "cu_frozen_climber",
    "name": "Frozen Climber",
    "kind": "remains",
-   "x": 304,
-   "z": 1928,
+   "x": 464,
+   "z": 1767,
    "yaw": 5.8,
    "radius": 4,
    "levelBase": 9
@@ -7260,8 +7260,8 @@
    "recipe": "cu_shepherds_hut",
    "name": "Shepherd's Lean-to",
    "kind": "camp",
-   "x": 1264,
-   "z": 138,
+   "x": 1282,
+   "z": 120,
    "yaw": 1.7,
    "radius": 6,
    "levelBase": 6
@@ -7282,8 +7282,8 @@
    "id": "toll_stone_blackthorn_scar_d131",
    "kind": "toll_stone",
    "name": "Old Toll Stone",
-   "x": 1635,
-   "z": 651,
+   "x": 1654,
+   "z": 659,
    "yaw": 0.1,
    "radius": 3,
    "filler": true
@@ -7305,8 +7305,8 @@
    "recipe": "cu_rockfall",
    "name": "Fresh Rockfall",
    "kind": "hazard",
-   "x": 83,
-   "z": 841,
+   "x": 61,
+   "z": 834,
    "yaw": 0.3,
    "radius": 6,
    "levelBase": 8
@@ -7371,8 +7371,8 @@
    "recipe": "cu_eagle_ledge",
    "name": "Eagle Ledge",
    "kind": "nest",
-   "x": 651,
-   "z": 892,
+   "x": 679,
+   "z": 898,
    "yaw": 2.7,
    "radius": 5,
    "levelBase": 8
@@ -7470,8 +7470,8 @@
    "id": "cold_campfire_blackthorn_scar_d137",
    "kind": "cold_campfire",
    "name": "Cold Campfire",
-   "x": 482,
-   "z": 1003,
+   "x": 473,
+   "z": 1024,
    "yaw": 6.12,
    "radius": 4,
    "filler": true
@@ -7513,8 +7513,8 @@
     1,
     2
    ],
-   "x": 656,
-   "z": 352,
+   "x": 652,
+   "z": 384,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -7554,8 +7554,8 @@
    "id": "roadside_grave_blackthorn_scar_d139",
    "kind": "roadside_grave",
    "name": "Roadside Grave",
-   "x": 128,
-   "z": 1152,
+   "x": 110,
+   "z": 1143,
    "yaw": 0.75,
    "radius": 4,
    "filler": true
@@ -7566,8 +7566,8 @@
    "recipe": "cu_eagle_ledge",
    "name": "Eagle Ledge",
    "kind": "nest",
-   "x": 209,
-   "z": 1615,
+   "x": 389,
+   "z": 1689,
    "yaw": 1.91,
    "radius": 5,
    "levelBase": 9
@@ -7577,8 +7577,8 @@
    "id": "cold_campfire_blackthorn_scar_d140",
    "kind": "cold_campfire",
    "name": "Cold Campfire",
-   "x": 120,
-   "z": 912,
+   "x": 110,
+   "z": 893,
    "yaw": 1.93,
    "radius": 4,
    "filler": true
@@ -7607,8 +7607,8 @@
     2,
     3
    ],
-   "x": 478,
-   "z": 79,
+   "x": 443,
+   "z": 100,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -7619,8 +7619,8 @@
    "recipe": "cu_rockfall",
    "name": "Fresh Rockfall",
    "kind": "hazard",
-   "x": 1820,
-   "z": 467,
+   "x": 1826,
+   "z": 531,
    "yaw": 1.14,
    "radius": 6,
    "levelBase": 6
@@ -7631,8 +7631,8 @@
    "recipe": "cu_cairn_cache",
    "name": "Scout's Cairn",
    "kind": "cache",
-   "x": 581,
-   "z": 968,
+   "x": 612,
+   "z": 1023,
    "yaw": 6.27,
    "radius": 4,
    "levelBase": 8
@@ -7650,8 +7650,8 @@
     2,
     3
    ],
-   "x": 1239,
-   "z": 1448,
+   "x": 1204,
+   "z": 1449,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -7692,26 +7692,26 @@
     1,
     2
    ],
-   "x": 1158,
-   "z": 1537,
+   "x": 1202,
+   "z": 1545,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1141,
-     1464
+     1214,
+     1555
     ],
     [
-     1210,
-     1497
+     1192,
+     1557
     ],
     [
-     1204,
-     1615
+     1190,
+     1535
     ],
     [
-     1074,
-     1562
+     1212,
+     1533
     ]
    ],
    "roam": true
@@ -7729,8 +7729,8 @@
     2,
     3
    ],
-   "x": 394,
-   "z": 597,
+   "x": 425,
+   "z": 607,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -7741,8 +7741,8 @@
    "recipe": "cu_rockfall",
    "name": "Fresh Rockfall",
    "kind": "hazard",
-   "x": 49,
-   "z": 1398,
+   "x": 640,
+   "z": 1291,
    "yaw": 4.09,
    "radius": 6,
    "levelBase": 9
@@ -7783,8 +7783,8 @@
     1,
     2
    ],
-   "x": 327,
-   "z": 1039,
+   "x": 385,
+   "z": 1045,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -7826,8 +7826,8 @@
     1,
     2
    ],
-   "x": 1586,
-   "z": 1188,
+   "x": 1618,
+   "z": 1194,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -7837,8 +7837,8 @@
    "id": "frost_marker_blackthorn_scar_d144",
    "kind": "frost_marker",
    "name": "Snow Pole",
-   "x": 338,
-   "z": 161,
+   "x": 315,
+   "z": 140,
    "yaw": 5.76,
    "radius": 3,
    "filler": true
@@ -7848,8 +7848,8 @@
    "id": "bone_heap_blackthorn_scar_d145",
    "kind": "bone_heap",
    "name": "Old Bones",
-   "x": 1015,
-   "z": 733,
+   "x": 1026,
+   "z": 751,
    "yaw": 6.07,
    "radius": 4,
    "filler": true
@@ -7860,8 +7860,8 @@
    "recipe": "cu_soldiers_tally",
    "name": "Soldier's Tally",
    "kind": "lore",
-   "x": 447,
-   "z": 1199,
+   "x": 429,
+   "z": 1203,
    "yaw": 3.95,
    "radius": 4,
    "levelBase": 8
@@ -7879,26 +7879,26 @@
     1,
     2
    ],
-   "x": 1054,
-   "z": 1004,
+   "x": 1029,
+   "z": 1025,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1089,
-     957
+     1049,
+     1076
     ],
     [
-     1101,
-     1035
+     978,
+     1045
     ],
     [
-     998,
-     1053
+     1009,
+     974
     ],
     [
-     1021,
-     944
+     1080,
+     1005
     ]
    ],
    "roam": true
@@ -7916,8 +7916,8 @@
     1,
     2
    ],
-   "x": 1353,
-   "z": 1487,
+   "x": 1337,
+   "z": 1516,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -7989,8 +7989,8 @@
    "recipe": "cu_pine_resin",
    "name": "Weeping Pine",
    "kind": "forage",
-   "x": 163,
-   "z": 294,
+   "x": 150,
+   "z": 278,
    "yaw": 0.03,
    "radius": 4,
    "levelBase": 7
@@ -8023,8 +8023,8 @@
    "id": "boundary_stake_blackthorn_scar_d150",
    "kind": "boundary_stake",
    "name": "Boundary Stakes",
-   "x": 336,
-   "z": 1160,
+   "x": 355,
+   "z": 1173,
    "yaw": 4.36,
    "radius": 4,
    "filler": true
@@ -8035,8 +8035,8 @@
    "recipe": "cu_frozen_climber",
    "name": "Frozen Climber",
    "kind": "remains",
-   "x": 49,
-   "z": 1525,
+   "x": 850,
+   "z": 1958,
    "yaw": 2.4,
    "radius": 4,
    "levelBase": 9
@@ -8057,8 +8057,8 @@
    "id": "milestone_blackthorn_scar_d152",
    "kind": "milestone",
    "name": "Milestone",
-   "x": 1552,
-   "z": 1872,
+   "x": 1570,
+   "z": 1871,
    "yaw": 3.45,
    "radius": 3,
    "filler": true
@@ -8103,22 +8103,22 @@
    "chatter": [
     "role.gravedigger"
    ],
-   "x": 200,
-   "z": 1961,
+   "x": 429,
+   "z": 1595,
    "yaw": 6.28,
    "radius": 6,
    "path": [
     [
-     196,
-     1954
+     425,
+     1588
     ],
     [
-     211,
-     1964
+     440,
+     1598
     ],
     [
-     194,
-     1970
+     423,
+     1604
     ]
    ]
   },
@@ -8127,8 +8127,8 @@
    "id": "milestone_blackthorn_scar_d153",
    "kind": "milestone",
    "name": "Milestone",
-   "x": 685,
-   "z": 819,
+   "x": 669,
+   "z": 805,
    "yaw": 3.08,
    "radius": 3,
    "filler": true
@@ -8158,8 +8158,8 @@
    "recipe": "cu_cloudberry",
    "name": "Cloudberry Bog",
    "kind": "forage",
-   "x": 2009,
-   "z": 1735,
+   "x": 2017,
+   "z": 1714,
    "yaw": 1.47,
    "radius": 4,
    "levelBase": 8
@@ -8177,26 +8177,26 @@
     1,
     2
    ],
-   "x": 608,
-   "z": 2006,
+   "x": 722,
+   "z": 1928,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     574,
-     2044
+     747,
+     1916
     ],
     [
-     569,
-     1993
+     734,
+     1953
     ],
     [
-     625,
-     1965
+     697,
+     1940
     ],
     [
-     660,
-     2023
+     710,
+     1903
     ]
    ],
    "roam": true
@@ -8226,8 +8226,8 @@
    "recipe": "cu_soldiers_tally",
    "name": "Soldier's Tally",
    "kind": "lore",
-   "x": 1546,
-   "z": 655,
+   "x": 1524,
+   "z": 651,
    "yaw": 4.98,
    "radius": 4,
    "levelBase": 7
@@ -8249,8 +8249,8 @@
    "recipe": "cu_rockfall",
    "name": "Fresh Rockfall",
    "kind": "hazard",
-   "x": 41,
-   "z": 1782,
+   "x": 867,
+   "z": 1560,
    "yaw": 4.57,
    "radius": 6,
    "levelBase": 9
@@ -8281,7 +8281,7 @@
    "name": "Fresh Rockfall",
    "kind": "hazard",
    "x": 1288,
-   "z": 1504,
+   "z": 1526,
    "yaw": 0.97,
    "radius": 6,
    "levelBase": 8
@@ -8311,8 +8311,8 @@
     1,
     2
    ],
-   "x": 1455,
-   "z": 1160,
+   "x": 1460,
+   "z": 1193,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -8344,8 +8344,8 @@
    "id": "frost_marker_blackthorn_scar_d157",
    "kind": "frost_marker",
    "name": "Snow Pole",
-   "x": 1224,
-   "z": 1032,
+   "x": 1213,
+   "z": 1017,
    "yaw": 2.32,
    "radius": 3,
    "filler": true
@@ -8355,8 +8355,8 @@
    "id": "cold_campfire_blackthorn_scar_d158",
    "kind": "cold_campfire",
    "name": "Cold Campfire",
-   "x": 886,
-   "z": 502,
+   "x": 916,
+   "z": 517,
    "yaw": 6.12,
    "radius": 4,
    "filler": true
@@ -8374,8 +8374,8 @@
     2,
     3
    ],
-   "x": 215,
-   "z": 1151,
+   "x": 237,
+   "z": 1122,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -8385,8 +8385,8 @@
    "id": "cold_campfire_blackthorn_scar_d159",
    "kind": "cold_campfire",
    "name": "Cold Campfire",
-   "x": 362,
-   "z": 272,
+   "x": 388,
+   "z": 258,
    "yaw": 1.95,
    "radius": 4,
    "filler": true
@@ -8396,8 +8396,8 @@
    "id": "bone_heap_blackthorn_scar_d160",
    "kind": "bone_heap",
    "name": "Old Bones",
-   "x": 853,
-   "z": 340,
+   "x": 831,
+   "z": 341,
    "yaw": 2.76,
    "radius": 4,
    "filler": true
@@ -8426,8 +8426,8 @@
     2,
     3
    ],
-   "x": 472,
-   "z": 1632,
+   "x": 504,
+   "z": 1627,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -8437,8 +8437,8 @@
    "id": "roadside_grave_blackthorn_scar_d162",
    "kind": "roadside_grave",
    "name": "Roadside Grave",
-   "x": 464,
-   "z": 1728,
+   "x": 483,
+   "z": 1720,
    "yaw": 0.09,
    "radius": 4,
    "filler": true
@@ -8449,7 +8449,7 @@
    "recipe": "cu_warrior_cairn",
    "name": "Warrior's Cairn",
    "kind": "shrine",
-   "x": 1871,
+   "x": 1893,
    "z": 122,
    "yaw": 3.18,
    "radius": 5,
@@ -8460,8 +8460,8 @@
    "id": "cottage_corner_blackthorn_scar_d163",
    "kind": "cottage_corner",
    "name": "Ruined Cottage",
-   "x": 1446,
-   "z": 242,
+   "x": 1454,
+   "z": 206,
    "yaw": 4.54,
    "radius": 6,
    "filler": true
@@ -8485,7 +8485,7 @@
    "name": "Old Skirmish",
    "kind": "remains",
    "x": 1719,
-   "z": 560,
+   "z": 586,
    "yaw": 0.23,
    "radius": 7,
    "levelBase": 6
@@ -8495,8 +8495,8 @@
    "id": "cold_campfire_blackthorn_scar_d164",
    "kind": "cold_campfire",
    "name": "Cold Campfire",
-   "x": 127,
-   "z": 1031,
+   "x": 147,
+   "z": 1036,
    "yaw": 3.86,
    "radius": 4,
    "filler": true
@@ -8506,8 +8506,8 @@
    "id": "roadside_grave_blackthorn_scar_d165",
    "kind": "roadside_grave",
    "name": "Roadside Grave",
-   "x": 712,
-   "z": 1626,
+   "x": 695,
+   "z": 1639,
    "yaw": 0.43,
    "radius": 4,
    "filler": true
@@ -8525,8 +8525,8 @@
     1,
     2
    ],
-   "x": 1320,
-   "z": 1840,
+   "x": 1282,
+   "z": 1912,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -8548,8 +8548,8 @@
    "recipe": "cu_loose_stone",
    "name": "Loose Stone",
    "kind": "cache",
-   "x": 1631,
-   "z": 497,
+   "x": 1494,
+   "z": 472,
    "yaw": 2.78,
    "radius": 4,
    "levelBase": 6
@@ -8559,8 +8559,8 @@
    "id": "banner_post_blackthorn_scar_d167",
    "kind": "banner_post",
    "name": "Faded Banner",
-   "x": 640,
-   "z": 1695,
+   "x": 632,
+   "z": 1678,
    "yaw": 2.97,
    "radius": 3,
    "filler": true
@@ -8578,8 +8578,8 @@
     2,
     3
    ],
-   "x": 1710,
-   "z": 1253,
+   "x": 1724,
+   "z": 1224,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -8601,8 +8601,8 @@
    "recipe": "cu_soldiers_tally",
    "name": "Soldier's Tally",
    "kind": "lore",
-   "x": 408,
-   "z": 2008,
+   "x": 1069,
+   "z": 2006,
    "yaw": 3.83,
    "radius": 4,
    "levelBase": 9
@@ -8620,26 +8620,26 @@
     1,
     2
    ],
-   "x": 1824,
-   "z": 1558,
+   "x": 1803,
+   "z": 1523,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1833,
-     1495
+     1844,
+     1538
     ],
     [
-     1874,
-     1579
+     1788,
+     1564
+    ],
+    [
+     1762,
+     1508
     ],
     [
      1818,
-     1606
-    ],
-    [
-     1778,
-     1552
+     1482
     ]
    ],
    "roam": true
@@ -8692,8 +8692,8 @@
    "recipe": "cu_loose_stone",
    "name": "Loose Stone",
    "kind": "cache",
-   "x": 1207,
-   "z": 40,
+   "x": 1215,
+   "z": 57,
    "yaw": 3.39,
    "radius": 4,
    "levelBase": 6
@@ -8711,8 +8711,8 @@
     2,
     3
    ],
-   "x": 225,
-   "z": 976,
+   "x": 235,
+   "z": 945,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -8722,8 +8722,8 @@
    "id": "milestone_blackthorn_scar_d170",
    "kind": "milestone",
    "name": "Milestone",
-   "x": 296,
-   "z": 1704,
+   "x": 321,
+   "z": 1653,
    "yaw": 5.59,
    "radius": 3,
    "filler": true
@@ -8745,8 +8745,8 @@
    "id": "boundary_stake_blackthorn_scar_d171",
    "kind": "boundary_stake",
    "name": "Boundary Stakes",
-   "x": 1366,
-   "z": 607,
+   "x": 1385,
+   "z": 598,
    "yaw": 6.23,
    "radius": 4,
    "filler": true
@@ -8768,8 +8768,8 @@
    "id": "shrine_niche_blackthorn_scar_d172",
    "kind": "shrine_niche",
    "name": "Shrine Niche",
-   "x": 98,
-   "z": 1450,
+   "x": 137,
+   "z": 1352,
    "yaw": 2.9,
    "radius": 3,
    "filler": true
@@ -8799,26 +8799,26 @@
     1,
     2
    ],
-   "x": 1480,
-   "z": 1776,
+   "x": 1465,
+   "z": 1754,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1442,
-     1734
+     1477,
+     1719
     ],
     [
-     1511,
-     1748
+     1500,
+     1766
     ],
     [
-     1515,
-     1819
+     1453,
+     1789
     ],
     [
-     1428,
-     1800
+     1430,
+     1742
     ]
    ],
    "roam": true
@@ -8836,8 +8836,8 @@
     1,
     2
    ],
-   "x": 1308,
-   "z": 80,
+   "x": 1296,
+   "z": 50,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -8906,8 +8906,8 @@
     1,
     2
    ],
-   "x": 40,
-   "z": 1104,
+   "x": 61,
+   "z": 1064,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -8917,8 +8917,8 @@
    "id": "league_stone_blackthorn_scar_d174",
    "kind": "league_stone",
    "name": "League Stone",
-   "x": 160,
-   "z": 1568,
+   "x": 213,
+   "z": 1514,
    "yaw": 3.3,
    "radius": 3,
    "filler": true
@@ -8928,8 +8928,8 @@
    "id": "bone_heap_blackthorn_scar_d175",
    "kind": "bone_heap",
    "name": "Old Bones",
-   "x": 1311,
-   "z": 1095,
+   "x": 1307,
+   "z": 1073,
    "yaw": 1.07,
    "radius": 4,
    "filler": true
@@ -8940,8 +8940,8 @@
    "recipe": "cu_frozen_climber",
    "name": "Frozen Climber",
    "kind": "remains",
-   "x": 33,
-   "z": 130,
+   "x": 57,
+   "z": 207,
    "yaw": 3.27,
    "radius": 4,
    "levelBase": 7
@@ -8951,8 +8951,8 @@
    "id": "cold_campfire_blackthorn_scar_d176",
    "kind": "cold_campfire",
    "name": "Cold Campfire",
-   "x": 375,
-   "z": 1410,
+   "x": 385,
+   "z": 1430,
    "yaw": 0.58,
    "radius": 4,
    "filler": true
@@ -8985,8 +8985,8 @@
    "recipe": "cu_cloudberry",
    "name": "Cloudberry Bog",
    "kind": "forage",
-   "x": 127,
-   "z": 1961,
+   "x": 737,
+   "z": 1891,
    "yaw": 1.22,
    "radius": 4,
    "levelBase": 9
@@ -8996,8 +8996,8 @@
    "id": "lost_signpost_blackthorn_scar_d179",
    "kind": "lost_signpost",
    "name": "Lost Signpost",
-   "x": 432,
-   "z": 672,
+   "x": 451,
+   "z": 669,
    "yaw": 1.27,
    "radius": 3,
    "filler": true
@@ -9033,22 +9033,22 @@
    "chatter": [
     "role.gravedigger"
    ],
-   "x": 1617,
-   "z": 1611,
+   "x": 1623,
+   "z": 1636,
    "yaw": 5.67,
    "radius": 6,
    "path": [
     [
+     1631,
+     1642
+    ],
+    [
+     1615,
+     1640
+    ],
+    [
      1625,
-     1617
-    ],
-    [
-     1609,
-     1615
-    ],
-    [
-     1619,
-     1602
+     1627
     ]
    ]
   },
@@ -9058,8 +9058,8 @@
    "recipe": "cu_wayshrine",
    "name": "Wayfarer Shrine",
    "kind": "shrine",
-   "x": 1561,
-   "z": 320,
+   "x": 1589,
+   "z": 314,
    "yaw": 5.76,
    "radius": 4,
    "levelBase": 6
@@ -9091,8 +9091,8 @@
    "id": "cairn_blackthorn_scar_d184",
    "kind": "cairn",
    "name": "Cairn",
-   "x": 503,
-   "z": 1929,
+   "x": 554,
+   "z": 1867,
    "yaw": 6.26,
    "radius": 4,
    "filler": true
@@ -9103,8 +9103,8 @@
    "recipe": "cu_wanted_post",
    "name": "Wanted Post",
    "kind": "lore",
-   "x": 1881,
-   "z": 583,
+   "x": 1843,
+   "z": 577,
    "yaw": 5.6,
    "radius": 3,
    "levelBase": 6
@@ -9136,8 +9136,8 @@
    "id": "milestone_blackthorn_scar_d187",
    "kind": "milestone",
    "name": "Milestone",
-   "x": 72,
-   "z": 1639,
+   "x": 281,
+   "z": 1612,
    "yaw": 2.98,
    "radius": 3,
    "filler": true
@@ -9148,8 +9148,8 @@
    "recipe": "cu_rockfall",
    "name": "Fresh Rockfall",
    "kind": "hazard",
-   "x": 874,
-   "z": 634,
+   "x": 894,
+   "z": 622,
    "yaw": 0.6,
    "radius": 6,
    "levelBase": 7
@@ -9159,8 +9159,8 @@
    "id": "boundary_stake_blackthorn_scar_d188",
    "kind": "boundary_stake",
    "name": "Boundary Stakes",
-   "x": 1744,
-   "z": 1104,
+   "x": 1754,
+   "z": 1086,
    "yaw": 3.81,
    "radius": 4,
    "filler": true
@@ -9189,8 +9189,8 @@
     1,
     2
    ],
-   "x": 568,
-   "z": 1496,
+   "x": 576,
+   "z": 1527,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -9201,8 +9201,8 @@
    "recipe": "cu_ruined_hearth",
    "name": "Ruined Hearth",
    "kind": "marker",
-   "x": 1440,
-   "z": 1863,
+   "x": 1461,
+   "z": 1900,
    "yaw": 6.18,
    "radius": 6,
    "levelBase": 8
@@ -9243,26 +9243,26 @@
     2,
     3
    ],
-   "x": 1328,
-   "z": 1728,
+   "x": 1322,
+   "z": 1693,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1251,
-     1716
+     1355,
+     1652
     ],
     [
-     1366,
-     1666
+     1363,
+     1726
     ],
     [
-     1410,
-     1742
+     1289,
+     1734
     ],
     [
-     1309,
-     1778
+     1281,
+     1660
     ]
    ],
    "roam": true
@@ -9348,8 +9348,8 @@
    "id": "milestone_blackthorn_scar_d194",
    "kind": "milestone",
    "name": "Milestone",
-   "x": 1519,
-   "z": 792,
+   "x": 1532,
+   "z": 779,
    "yaw": 4.12,
    "radius": 3,
    "filler": true
@@ -9392,8 +9392,8 @@
    "id": "roadside_grave_blackthorn_scar_d198",
    "kind": "roadside_grave",
    "name": "Roadside Grave",
-   "x": 489,
-   "z": 1408,
+   "x": 497,
+   "z": 1430,
    "yaw": 3.61,
    "radius": 4,
    "filler": true
@@ -9414,8 +9414,8 @@
    "id": "standing_stone_blackthorn_scar_d200",
    "kind": "standing_stone",
    "name": "Standing Stone",
-   "x": 1828,
-   "z": 80,
+   "x": 1833,
+   "z": 60,
    "yaw": 1.72,
    "radius": 4,
    "filler": true
@@ -9425,8 +9425,8 @@
    "id": "bone_heap_blackthorn_scar_d201",
    "kind": "bone_heap",
    "name": "Old Bones",
-   "x": 384,
-   "z": 1720,
+   "x": 417,
+   "z": 1657,
    "yaw": 2.3,
    "radius": 4,
    "filler": true
@@ -9436,8 +9436,8 @@
    "id": "lost_signpost_blackthorn_scar_d202",
    "kind": "lost_signpost",
    "name": "Lost Signpost",
-   "x": 2008,
-   "z": 1496,
+   "x": 2020,
+   "z": 1476,
    "yaw": 5.32,
    "radius": 3,
    "filler": true
@@ -9477,8 +9477,8 @@
    "id": "shrine_niche_blackthorn_scar_d204",
    "kind": "shrine_niche",
    "name": "Shrine Niche",
-   "x": 1076,
-   "z": 607,
+   "x": 1086,
+   "z": 577,
    "yaw": 3.19,
    "radius": 3,
    "filler": true
@@ -9508,26 +9508,26 @@
     2,
     3
    ],
-   "x": 1616,
-   "z": 1792,
+   "x": 1488,
+   "z": 1670,
    "yaw": 0,
    "radius": 8,
    "path": [
     [
-     1639,
-     1853
+     1506,
+     1650
     ],
     [
-     1573,
-     1808
+     1508,
+     1688
     ],
     [
-     1602,
-     1750
+     1470,
+     1690
     ],
     [
-     1672,
-     1780
+     1468,
+     1652
     ]
    ],
    "roam": true
@@ -9545,8 +9545,8 @@
     2,
     3
    ],
-   "x": 320,
-   "z": 2008,
+   "x": 517,
+   "z": 1542,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -9598,8 +9598,8 @@
     1,
     2
    ],
-   "x": 779,
-   "z": 553,
+   "x": 720,
+   "z": 639,
    "yaw": 0,
    "radius": 8,
    "stray": true
@@ -9610,8 +9610,8 @@
    "recipe": "cu_rune_ring",
    "name": "Little Stone Ring",
    "kind": "marker",
-   "x": 721,
-   "z": 374,
+   "x": 701,
+   "z": 364,
    "yaw": 4.52,
    "radius": 6,
    "levelBase": 7
@@ -9651,8 +9651,8 @@
    "id": "shrine_niche_blackthorn_scar_d208",
    "kind": "shrine_niche",
    "name": "Shrine Niche",
-   "x": 1485,
-   "z": 880,
+   "x": 1503,
+   "z": 884,
    "yaw": 4.97,
    "radius": 3,
    "filler": true
@@ -9673,8 +9673,8 @@
    "id": "boundary_stake_blackthorn_scar_d210",
    "kind": "boundary_stake",
    "name": "Boundary Stakes",
-   "x": 1728,
-   "z": 440,
+   "x": 1705,
+   "z": 454,
    "yaw": 5.42,
    "radius": 4,
    "filler": true
@@ -9729,22 +9729,22 @@
    "chatter": [
     "role.gravedigger"
    ],
-   "x": 232,
-   "z": 1088,
+   "x": 211,
+   "z": 1074,
    "yaw": 1.48,
    "radius": 6,
    "path": [
     [
-     237,
-     1093
+     216,
+     1079
     ],
     [
-     225,
-     1088
+     204,
+     1074
     ],
     [
-     234,
-     1083
+     213,
+     1069
     ]
    ]
   },
@@ -9754,8 +9754,8 @@
    "recipe": "cu_shepherds_hut",
    "name": "Shepherd's Lean-to",
    "kind": "camp",
-   "x": 1123,
-   "z": 1808,
+   "x": 1101,
+   "z": 1810,
    "yaw": 4.84,
    "radius": 6,
    "levelBase": 8
@@ -9765,8 +9765,8 @@
    "id": "league_stone_blackthorn_scar_d213",
    "kind": "league_stone",
    "name": "League Stone",
-   "x": 237,
-   "z": 285,
+   "x": 208,
+   "z": 274,
    "yaw": 0.71,
    "radius": 3,
    "filler": true

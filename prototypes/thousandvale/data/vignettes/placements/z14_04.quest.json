@@ -105,15 +105,15 @@
    "monster": "sporecap_walker",
    "with": null,
    "level": [
-    9,
-    9
+    10,
+    10
    ],
    "count": [
     3,
     3
    ],
-   "x": 1181,
-   "z": 1426,
+   "x": 1369,
+   "z": 1168,
    "yaw": 0,
    "radius": 8,
    "quest": "mushroom_men",
@@ -129,15 +129,15 @@
    "monster": "sporecap_walker",
    "with": null,
    "level": [
-    9,
-    9
+    10,
+    10
    ],
    "count": [
     3,
     3
    ],
-   "x": 1168,
-   "z": 1438,
+   "x": 1356,
+   "z": 1180,
    "yaw": 0,
    "radius": 8,
    "quest": "mushroom_men",
@@ -153,15 +153,39 @@
    "monster": "sporecap_walker",
    "with": null,
    "level": [
-    9,
-    9
+    10,
+    10
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1371,
+   "z": 1144,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "mushroom_men",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_mushroom_men_0_3",
+   "monster": "sporecap_walker",
+   "with": null,
+   "level": [
+    10,
+    10
    ],
    "count": [
     2,
     2
    ],
-   "x": 1183,
-   "z": 1402,
+   "x": 1376,
+   "z": 1178,
    "yaw": 0,
    "radius": 8,
    "quest": "mushroom_men",
@@ -184,8 +208,8 @@
     3,
     3
    ],
-   "x": 1167,
-   "z": 82,
+   "x": 1134,
+   "z": 92,
    "yaw": 0,
    "radius": 8,
    "quest": "the_lurker_below",
@@ -208,8 +232,8 @@
     3,
     3
    ],
-   "x": 1154,
-   "z": 94,
+   "x": 1121,
+   "z": 104,
    "yaw": 0,
    "radius": 8,
    "quest": "the_lurker_below",
@@ -232,8 +256,8 @@
     2,
     2
    ],
-   "x": 1169,
-   "z": 58,
+   "x": 1136,
+   "z": 68,
    "yaw": 0,
    "radius": 8,
    "quest": "the_lurker_below",
@@ -310,7 +334,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "packleader"
+    "vicious"
    ],
    "respawnMin": [
     4,

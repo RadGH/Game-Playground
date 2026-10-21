@@ -9,15 +9,15 @@
    "monster": "road_brigand",
    "with": null,
    "level": [
-    4,
-    4
+    5,
+    5
    ],
    "count": [
     3,
     3
    ],
-   "x": 376,
-   "z": 723,
+   "x": 136,
+   "z": 214,
    "yaw": 0,
    "radius": 8,
    "quest": "the_broken_keep",
@@ -33,15 +33,15 @@
    "monster": "road_brigand",
    "with": null,
    "level": [
-    4,
-    4
+    5,
+    5
    ],
    "count": [
     3,
     3
    ],
-   "x": 363,
-   "z": 735,
+   "x": 123,
+   "z": 226,
    "yaw": 0,
    "radius": 8,
    "quest": "the_broken_keep",
@@ -57,15 +57,15 @@
    "monster": "road_brigand",
    "with": null,
    "level": [
-    4,
-    4
+    5,
+    5
    ],
    "count": [
     3,
     3
    ],
-   "x": 378,
-   "z": 699,
+   "x": 138,
+   "z": 190,
    "yaw": 0,
    "radius": 8,
    "quest": "the_broken_keep",
@@ -81,15 +81,39 @@
    "monster": "road_brigand",
    "with": null,
    "level": [
-    4,
-    4
+    5,
+    5
    ],
    "count": [
     3,
     3
    ],
-   "x": 383,
-   "z": 733,
+   "x": 143,
+   "z": 224,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "the_broken_keep",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_the_broken_keep_0_4",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    5,
+    5
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 118,
+   "z": 211,
    "yaw": 0,
    "radius": 8,
    "quest": "the_broken_keep",
@@ -112,8 +136,8 @@
     3,
     3
    ],
-   "x": 1376,
-   "z": 1722,
+   "x": 1348,
+   "z": 1739,
    "yaw": 0,
    "radius": 8,
    "quest": "bones_in_the_dust",
@@ -136,8 +160,8 @@
     3,
     3
    ],
-   "x": 1363,
-   "z": 1734,
+   "x": 1335,
+   "z": 1751,
    "yaw": 0,
    "radius": 8,
    "quest": "bones_in_the_dust",
@@ -160,8 +184,8 @@
     3,
     3
    ],
-   "x": 1378,
-   "z": 1698,
+   "x": 1350,
+   "z": 1715,
    "yaw": 0,
    "radius": 8,
    "quest": "bones_in_the_dust",
@@ -184,8 +208,8 @@
     1,
     1
    ],
-   "x": 1383,
-   "z": 1732,
+   "x": 1355,
+   "z": 1749,
    "yaw": 0,
    "radius": 8,
    "quest": "bones_in_the_dust",
@@ -334,7 +358,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "vicious"
+    "stormlash"
    ],
    "respawnMin": [
     4,
@@ -362,7 +386,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "giant"
+    "fiery"
    ],
    "respawnMin": [
     4,
@@ -390,7 +414,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "frostbound"
+    "vicious"
    ],
    "respawnMin": [
     4,
@@ -445,9 +469,9 @@
    "name": "Dickon Thatcher",
    "role": "carter",
    "at": "Kettle Cross",
-   "x": 888,
-   "z": 804,
-   "yaw": -2.348,
+   "x": 866,
+   "z": 814,
+   "yaw": -2.327,
    "cart": "cart_kettle_cross",
    "placedBy": "content-towns",
    "quests": 0,
@@ -461,8 +485,8 @@
    "vehicle": "ox_cart",
    "town": "Kettle Cross",
    "carter": "carter_kettle_cross",
-   "x": 890,
-   "z": 806,
+   "x": 868,
+   "z": 816,
    "yaw": -0.785,
    "radius": 2.2
   },
@@ -652,8 +676,8 @@
    "town": "Kettle Cross",
    "post": "gate",
    "gate": "kettle_cross_gate_0",
-   "x": 894,
-   "z": 788,
+   "x": 892,
+   "z": 780,
    "yaw": -0.785,
    "titled": false
   },

@@ -310,7 +310,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "gilded"
+    "thorned"
    ],
    "respawnMin": [
     4,
@@ -338,7 +338,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "ironclad"
+    "gilded"
    ],
    "respawnMin": [
     4,
@@ -366,7 +366,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "venomous"
+    "thorned"
    ],
    "respawnMin": [
     4,
@@ -394,7 +394,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "fiery"
+    "frostbound"
    ],
    "respawnMin": [
     4,

@@ -326,7 +326,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "gilded"
+    "thorned"
    ],
    "respawnMin": [
     4,
@@ -381,9 +381,9 @@
    "name": "Wat Quarrie",
    "role": "carter",
    "at": "Pilgrim's Halt",
-   "x": 632,
-   "z": 202,
-   "yaw": -0.795,
+   "x": 626,
+   "z": 210,
+   "yaw": 2.651,
    "cart": "cart_pilgrim_s_halt",
    "placedBy": "content-towns",
    "quests": 0,
@@ -397,8 +397,8 @@
    "vehicle": "ox_cart",
    "town": "Pilgrim's Halt",
    "carter": "carter_pilgrim_s_halt",
-   "x": 634,
-   "z": 200,
+   "x": 624,
+   "z": 212,
    "yaw": -2.238,
    "radius": 2.2
   },

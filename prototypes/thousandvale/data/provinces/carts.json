@@ -108,19 +108,19 @@
    "x": 22976,
    "z": 2928,
    "gate": "wolditford_gate_0",
-   "fromGate": 12,
+   "fromGate": 40,
    "carter": {
     "id": "carter_wolditford",
     "name": "Gervase Eastmere",
-    "x": 450,
-    "z": 826,
-    "yaw": -2.13
+    "x": 454,
+    "z": 798,
+    "yaw": -1.813
    },
    "cart": {
     "id": "cart_wolditford",
     "model": "ox_cart",
-    "x": 452,
-    "z": 826,
+    "x": 456,
+    "z": 798,
     "yaw": 3.068
    }
   },
@@ -158,19 +158,19 @@
    "x": 25509,
    "z": 2821,
    "gate": "kettle_cross_gate_0",
-   "fromGate": 13,
+   "fromGate": 38,
    "carter": {
     "id": "carter_kettle_cross",
     "name": "Dickon Thatcher",
-    "x": 888,
-    "z": 804,
-    "yaw": -2.348
+    "x": 866,
+    "z": 814,
+    "yaw": -2.327
    },
    "cart": {
     "id": "cart_kettle_cross",
     "model": "ox_cart",
-    "x": 890,
-    "z": 806,
+    "x": 868,
+    "z": 816,
     "yaw": -0.785
    }
   },
@@ -208,19 +208,19 @@
    "x": 27788,
    "z": 2475,
    "gate": "eelwick_gate_0",
-   "fromGate": 15,
+   "fromGate": 16,
    "carter": {
     "id": "carter_eelwick",
     "name": "Dickon Pike",
-    "x": 1208,
-    "z": 446,
-    "yaw": 2.709
+    "x": 1212,
+    "z": 442,
+    "yaw": -0.38
    },
    "cart": {
     "id": "cart_eelwick",
     "model": "ox_cart",
-    "x": 1208,
-    "z": 448,
+    "x": 1212,
+    "z": 440,
     "yaw": 1.257
    }
   },
@@ -332,7 +332,7 @@
    "sheet": "delvers_hill",
    "x": 23296,
    "z": 5040,
-   "gate": "ashhaven_gate_0",
+   "gate": "ashhaven_gate_1",
    "fromGate": 15,
    "carter": {
     "id": "carter_ashhaven",
@@ -487,14 +487,14 @@
    "carter": {
     "id": "carter_lower_mossgate",
     "name": "Gwen Fenwick",
-    "x": 708,
+    "x": 700,
     "z": 1618,
-    "yaw": -1.768
+    "yaw": 0.866
    },
    "cart": {
     "id": "cart_lower_mossgate",
     "model": "ox_cart",
-    "x": 710,
+    "x": 698,
     "z": 1618,
     "yaw": -0.174
    }
@@ -508,20 +508,20 @@
    "x": 27760,
    "z": 5168,
    "gate": "mirestead_gate_0",
-   "fromGate": 46,
+   "fromGate": 18,
    "carter": {
     "id": "carter_mirestead",
     "name": "Hobb Fenwick",
-    "x": 1052,
-    "z": 1096,
-    "yaw": 0.194
+    "x": 1088,
+    "z": 1106,
+    "yaw": 1.807
    },
    "cart": {
     "id": "cart_mirestead",
     "model": "ox_cart",
-    "x": 1052,
-    "z": 1094,
-    "yaw": -1.36
+    "x": 1086,
+    "z": 1106,
+    "yaw": 0.173
    }
   },
   {
@@ -737,15 +737,15 @@
    "carter": {
     "id": "carter_pilgrim_s_halt",
     "name": "Wat Quarrie",
-    "x": 632,
-    "z": 202,
-    "yaw": -0.795
+    "x": 626,
+    "z": 210,
+    "yaw": 2.651
    },
    "cart": {
     "id": "cart_pilgrim_s_halt",
     "model": "ox_cart",
-    "x": 634,
-    "z": 200,
+    "x": 624,
+    "z": 212,
     "yaw": -2.238
    }
   },
@@ -858,20 +858,20 @@
    "x": 28224,
    "z": 6720,
    "gate": "wildmere_gate_0",
-   "fromGate": 16,
+   "fromGate": 45,
    "carter": {
     "id": "carter_wildmere",
     "name": "Tegan Coombe",
-    "x": 1644,
-    "z": 540,
-    "yaw": -2.19
+    "x": 1654,
+    "z": 508,
+    "yaw": 0.818
    },
    "cart": {
     "id": "cart_wildmere",
     "model": "ox_cart",
-    "x": 1646,
-    "z": 542,
-    "yaw": 2.356
+    "x": 1652,
+    "z": 506,
+    "yaw": 2.515
    }
   },
   {
@@ -958,19 +958,19 @@
    "x": 29776,
    "z": 7232,
    "gate": "minfenrow_gate_1",
-   "fromGate": 14,
+   "fromGate": 13,
    "carter": {
     "id": "carter_minfenrow",
     "name": "Kitt Sallow",
     "x": 1048,
-    "z": 1092,
-    "yaw": 3.142
+    "z": 1084,
+    "yaw": 0
    },
    "cart": {
     "id": "cart_minfenrow",
     "model": "ox_cart",
     "x": 1048,
-    "z": 1094,
+    "z": 1082,
     "yaw": -1.571
    }
   },
@@ -987,15 +987,15 @@
    "carter": {
     "id": "carter_bipetwatch",
     "name": "Orla Pennock",
-    "x": 372,
-    "z": 1412,
-    "yaw": 0.785
+    "x": 378,
+    "z": 1422,
+    "yaw": -2.505
    },
    "cart": {
     "id": "cart_bipetwatch",
     "model": "ox_cart",
-    "x": 370,
-    "z": 1410,
+    "x": 380,
+    "z": 1424,
     "yaw": 2.356
    }
   },
@@ -1037,16 +1037,16 @@
    "carter": {
     "id": "carter_thornwick",
     "name": "Blanche Furlong",
-    "x": 1724,
-    "z": 1926,
-    "yaw": -2.553
+    "x": 1738,
+    "z": 1856,
+    "yaw": -0.877
    },
    "cart": {
     "id": "cart_thornwick",
     "model": "ox_cart",
-    "x": 1724,
-    "z": 1928,
-    "yaw": -1.194
+    "x": 1740,
+    "z": 1854,
+    "yaw": -2.413
    }
   },
   {
@@ -1137,15 +1137,15 @@
    "carter": {
     "id": "carter_burnt_barns",
     "name": "Tibbot Ashby",
-    "x": 1636,
-    "z": 386,
-    "yaw": -0.203
+    "x": 1632,
+    "z": 396,
+    "yaw": 2.562
    },
    "cart": {
     "id": "cart_burnt_barns",
     "model": "ox_cart",
-    "x": 1638,
-    "z": 384,
+    "x": 1630,
+    "z": 398,
     "yaw": 1.027
    }
   },

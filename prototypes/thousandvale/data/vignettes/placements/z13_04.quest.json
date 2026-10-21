@@ -112,8 +112,8 @@
     3,
     3
    ],
-   "x": 2009,
-   "z": 999,
+   "x": 1746,
+   "z": 1637,
    "yaw": 0,
    "radius": 8,
    "quest": "hyenas_in_the_gorse",
@@ -129,15 +129,15 @@
    "monster": "crag_hyena",
    "with": null,
    "level": [
-    8,
-    8
+    7,
+    7
    ],
    "count": [
     3,
     3
    ],
-   "x": 1996,
-   "z": 1011,
+   "x": 1816,
+   "z": 1600,
    "yaw": 0,
    "radius": 8,
    "quest": "hyenas_in_the_gorse",
@@ -157,35 +157,11 @@
     8
    ],
    "count": [
-    3,
-    3
-   ],
-   "x": 2011,
-   "z": 975,
-   "yaw": 0,
-   "radius": 8,
-   "quest": "hyenas_in_the_gorse",
-   "hunt": true,
-   "respawnMin": [
-    1,
-    1.5
-   ]
-  },
-  {
-   "type": "camp",
-   "id": "quest_hyenas_in_the_gorse_0_3",
-   "monster": "crag_hyena",
-   "with": null,
-   "level": [
-    8,
-    8
-   ],
-   "count": [
     2,
     2
    ],
-   "x": 2016,
-   "z": 1009,
+   "x": 1748,
+   "z": 1613,
    "yaw": 0,
    "radius": 8,
    "quest": "hyenas_in_the_gorse",
@@ -249,15 +225,15 @@
    "monster": "road_brigand",
    "with": null,
    "level": [
-    8,
-    8
+    7,
+    7
    ],
    "count": [
     3,
     3
    ],
-   "x": 1822,
-   "z": 1162,
+   "x": 1858,
+   "z": 1177,
    "yaw": 0,
    "radius": 8,
    "quest": "redoubt_relief",
@@ -273,6 +249,30 @@
    "monster": "road_brigand",
    "with": null,
    "level": [
+    8,
+    8
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1936,
+   "z": 1152,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "redoubt_relief",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_redoubt_relief_0_2",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
     7,
     7
    ],
@@ -280,8 +280,32 @@
     3,
     3
    ],
-   "x": 1886,
-   "z": 1194,
+   "x": 1860,
+   "z": 1153,
+   "yaw": 0,
+   "radius": 8,
+   "quest": "redoubt_relief",
+   "hunt": true,
+   "respawnMin": [
+    1,
+    1.5
+   ]
+  },
+  {
+   "type": "camp",
+   "id": "quest_redoubt_relief_0_3",
+   "monster": "road_brigand",
+   "with": null,
+   "level": [
+    8,
+    8
+   ],
+   "count": [
+    3,
+    3
+   ],
+   "x": 1943,
+   "z": 1162,
    "yaw": 0,
    "radius": 8,
    "quest": "redoubt_relief",
@@ -358,7 +382,7 @@
    "radius": 5,
    "rank": "champion",
    "affixes": [
-    "packleader"
+    "frostbound"
    ],
    "respawnMin": [
     4,
@@ -413,9 +437,9 @@
    "name": "Tibbot Ashby",
    "role": "carter",
    "at": "Burnt Barns",
-   "x": 1636,
-   "z": 386,
-   "yaw": -0.203,
+   "x": 1632,
+   "z": 396,
+   "yaw": 2.562,
    "cart": "cart_burnt_barns",
    "placedBy": "content-towns",
    "quests": 0,
@@ -429,8 +453,8 @@
    "vehicle": "ox_cart",
    "town": "Burnt Barns",
    "carter": "carter_burnt_barns",
-   "x": 1638,
-   "z": 384,
+   "x": 1630,
+   "z": 398,
    "yaw": 1.027,
    "radius": 2.2
   },

@@ -6,7 +6,8 @@ The town planner, the building kit, and two pages to tune them on.
 tuned on this page is the town you walk into in the game. There is no second copy to drift.
 
 Open them at `http://<LAN-IP>:8400/proctown/` (the plan) and
-`http://<LAN-IP>:8400/proctown/kit.html` (the building kit gallery).
+`http://<LAN-IP>:8400/proctown/kit.html` (the building kit gallery). `propkit.html` is the set-piece kit and
+`tvprops.html` is every Thousandvale-only prop (see "Thousandvale props gallery").
 
 ## Why it exists
 
@@ -228,6 +229,44 @@ for (const mesh of instanceParts(THREE, placed, material)) scene.add(mesh);   //
 Tests: `node --test proctown/tests/propkit.test.js` (every model builds from MESHES with finite positive sizes
 and hex colours, deterministic per seed, nothing deeper than 0.6 m, E's model ids all exist, crop fields stay in
 their plot and under the cap, fence lines follow their points).
+
+## Thousandvale props gallery (tvprops.html)
+
+`tvprops.html` shows every visual asset that only Thousandvale has — the things that are not proctown buildings or
+propkit set pieces — so they can be reviewed in one place without walking the game. **159 tiles in 13 groups.**
+Click a tile to orbit it on the right (a 1 m grid on the ground for scale, a Night switch for fires, lamps and window
+glass). Each tile shows the id, its measured size (w x h x d metres) and the source file; `#id=<group>:<id>` deep-links
+one, `?group=<group>` opens on a group.
+
+**One copy.** Nothing on the page is a model of its own: `js/tvprops-catalog.js` imports each builder from
+`prototypes/thousandvale/js/client/` and calls it the way the game does (same arguments, same material settings,
+same scale, the game's top graphics tier). Change a builder in the game and the gallery shows it on reload. Where the
+game turns a part list into meshes inside a function we cannot import (town-view.js's `push`, prof-view.js's node
+placement), the few lines that do the turning are repeated in the catalogue with a comment naming the game lines they
+follow. No game file was changed to make this page.
+
+| Group | Tiles | From | How it is called |
+|---|---|---|---|
+| Vharlen props | 43 | `vharl-props.js` `buildVharlProp(id)` | decor.js's prop material; `VHARL_FIRE` ids get decor.js's flame. Names and expected sizes from `data/vignettes/vharlen-props.json` (a tile notes it when the model and the data disagree) |
+| Vharlen scatter | 15 | `vharl-scatter-art.js` `buildVharlPiece(kind, variant)` | every kind x variant scatter-view.js uses, with `vharlMaterial(kind)`. The tree fern is the older low-poly one: the game draws storybook ferns now |
+| Street clutter | 15 | `prop-clutter.js` `CLUTTER_MODELS` via `placeModel` | town-view.js's unit shapes (incl. lathe barrel / sack) and `instancedKit` |
+| Buildings + trim | 12 | `prop-clutter.js` `buildingTrim` + `doorClutter`, `town-view.js` `buildingLook` | six real baked buildings (Gullwick, Port Vharl, Gorsehold from `data/zones/*/placements.json`), each whole and "trim only" (the building see-through) |
+| Gathering nodes | 21 | `prof-models.js` `NODE_PARTS` / `PART_GEOMETRY` / `oreChunkGeometry` | boulder x4 with ore chunks, tree x4, herb, mushroom, fibre — each kind also spent — and the five ore chunks |
+| Stations | 4 | `prof-models.js` `stationGeometry` | forge, workbench, still, temper, with their fire glint |
+| Profession tools | 7 | `prof-models.js` `toolGeometry` | pick, hatchet, knife, sickle, hammer, needle, spoon (hand units, standing on the grip) |
+| Fishing | 3 | `angling-view.js` `rodGeometry` / `floatGeometry` / `fishGeometry` | stood on the ground |
+| Camp + events | 3 | `held-view.js` `createHeld` (cage shut and open), `dummy-model.js` `createDummyBody` | the dummy is knocked every 3 s so you can see it rock |
+| Harbour | 4 | `harbour-view.js` through `town-view.js` `createTownView` | Gullwick's real quay record (whole, `harbourParts` only, `harbourExtras` only) over a water plane, and Port Vharl's `portDressing` beach |
+| Town square | 3 | `town-square.js` `squareFurniture` through `createTownView` | Gullwick, Port Vharl and Gorsehold squares: well, stalls, square clutter |
+| Markers | 13 | `loot-marker.js` `createLootMarkers`, `quest-marks.js` `createQuestMarks` | six loot rarities, five quest marks, two travel marks, over a grey stand-in body |
+| Dungeon rooms | 16 | `dungeon-view.js` `createDungeonView` | every look in `LOOKS`, on a made-up 20 x 16 m room with a corridor (`sampleDungeon()` in the catalogue) — no server needed |
+
+Rules the page keeps: a builder that throws shows its error on its own tile and the rest carry on
+(`window.tvprops.errors` lists them); thumbnails come from one small shared renderer built one row at a time; lamps,
+torches and fires use the game's own light pool (`lightpool.js`). Data files are fetched where the game keeps them.
+
+Not shown here: the ship and other vehicles (avatar-3d `vehicles.html`), creatures, buildings' office dressing
+(Set-piece Kit page), terrain and trees.
 
 ## The plan page
 

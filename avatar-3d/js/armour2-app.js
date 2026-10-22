@@ -24,6 +24,19 @@ async function main() {
   const [t1, t2] = await Promise.all([loadClassOutfits(), loadClassOutfits2()]);
   const items = [];   // { look, label }
   if (view === 'emblems') for (const e of EMBLEM_IDS) items.push({ label: e, look: dressAs(BASE, { ...t2.knight, top: { ...t2.knight.top, emblem: e } }) });
+  else if (view === 'wear') {
+    // Thousandvale's own classes cut the armour they WEAR in their colours (data/class-outfits-tv.json `wear`, drawn by
+    // the game's gear-look.js): each weight they own, worn by anyone else (plain) and by the class itself.
+    const [{ gearLook }, itemTable, tv] = await Promise.all([import('../../prototypes/thousandvale/js/client/gear-look.js'),
+      fetch('../prototypes/emberveil/data/items.json').then(r => r.json()), fetch('../prototypes/thousandvale/data/class-outfits-tv.json').then(r => r.json())]);
+    const B = { ...itemTable.weaponBases, ...itemTable.armorBases }, baseOf = k => B[k] || null;
+    const KIT = { cloth: ['cloth_helm', 'cloth_chest', 'cloth_legs', 'light_boots'], medium: ['medium_helm', 'medium_chest', 'medium_legs', 'medium_boots'], heavy: ['heavy_helm', 'heavy_chest', 'heavy_legs', 'heavy_boots'] };
+    for (const [cls, cuts] of Object.entries(tv.wear || {})) for (const weight of Object.keys(cuts)) {
+      const kit = Object.fromEntries((KIT[weight] || []).filter(baseOf).map(k => [B[k].slot, { ...B[k], base: k, baseKey: k }]));
+      items.push({ label: `${weight} (plain)`, look: { ...BASE, ...gearLook(kit, { baseOf }) } });
+      items.push({ label: `${cls} ${weight}`, look: { ...BASE, ...gearLook(kit, { baseOf, classWear: cuts }) } });
+    }
+  }
   else if (view === 'kits') for (const k of T2_DECOR) for (const cls of Object.keys(t2).filter(c => t2[c].decor.id === k).slice(0, 3)) items.push({ label: `${k} (${cls})`, look: dressAs(BASE, t2[cls]) });
   else for (const cls of Object.keys(t2)) {
     items.push({ label: `${cls} 1`, look: t1[cls] ? dressAs(BASE, t1[cls]) : BASE });

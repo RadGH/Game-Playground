@@ -80,7 +80,7 @@ export function createView(ctx) {
   function setPhase(next) {
     if (next === ph) return; const prev = ph; ph = next;
     if (next === 'music') { tunes.start('jig'); fiddler?.setPose('dance'); }
-    else if (next === 'scramble') { tunes.stop(true); fiddler?.setPose('idle'); show(myOut() || ctx.me == null ? 'STOP!' : 'STOP! Press A!', 'stop', 1300); ctx.sfx('hvf.bell'); }
+    else if (next === 'scramble') { tunes.stop(true); fiddler?.setPose('idle'); show(myOut() || ctx.me == null ? 'STOP!' : ctx.btn('STOP! Press A!'), 'stop', 1300); ctx.sfx('hvf.bell'); }
     else if (next === 'done') { tunes.stop(false); fiddler?.setPose('clap'); }
   }
   return {
@@ -96,7 +96,7 @@ export function createView(ctx) {
       let icon = '🎻', text = '';
       if (s.ph === 'ready') { icon = '⏳'; text = 'Get ready…'; }
       else if (s.ph === 'music') { icon = '🎻'; text = s.h ? 'Hiccup! Not yet…' : init.solo ? `${k} bale${k === 1 ? '' : 's'} · stay close!` : `Round ${s.r} · ${k} bale${k === 1 ? '' : 's'} · keep walking!`; }
-      else if (s.ph === 'scramble') { icon = '🛑'; text = mine === 'sat' ? 'You got a bale!' : mine === 'stand' ? `Grab a bale — press A! (${free} free)` : `${free} bale${free === 1 ? '' : 's'} left!`; }
+      else if (s.ph === 'scramble') { icon = '🛑'; text = mine === 'sat' ? 'You got a bale!' : mine === 'stand' ? ctx.btn(`Grab a bale — press A! (${free} free)`) : `${free} bale${free === 1 ? '' : 's'} left!`; }
       else if (s.ph === 'result') { icon = '🌾'; text = mine === 'sat' ? 'Safe!' : mine === 'out' ? 'Cheer them on!' : 'Next round…'; }
       else { icon = '🏆'; text = 'Done!'; }
       if (mine === 'out' && s.ph !== 'done') { icon = '📣'; text = init.solo ? 'Out of tries!' : 'You’re on the cheer wagon!'; }

@@ -232,7 +232,7 @@ body[data-phase=game] .fb-btn { width: 28px; height: 28px; font-size: 15px; opac
 /* pop-ups: Done never scrolls away (pinned to the bottom of the costume and minigame lists, and the editor's title row
    with its Done stays at the top) */
 .modal .panel > .btn[data-close] { position: sticky; bottom: calc(var(--sb) + 4px); z-index: 3; box-shadow: 0 5px 0 var(--ink), 0 -10px 24px 6px var(--paper); }
-.modal.editor .row.head { position: sticky; top: calc(var(--st) - 2px); z-index: 3; background: var(--paper); margin: -14px -16px 0; padding: 10px 16px 8px; border-radius: 18px 18px 0 0; }
+.modal.side .row.head, .modal.editor .row.head { position: sticky; top: calc(var(--st) - 2px); z-index: 3; background: var(--paper); margin: -14px -16px 0; padding: 10px 16px 8px; border-radius: 18px 18px 0 0; }
 /* narrow phones: a results row is place | name | award, with the game score on a second line under the name */
 @media (max-width: 440px) {
   .places li { grid-template-columns: 34px minmax(0, 1fr) auto; grid-template-areas: 'pl who award' 'pl score score'; row-gap: 0; }
@@ -255,3 +255,26 @@ body[data-season=halloween] #screen.title::before, body[data-season=halloween] #
 body[data-phase=game] .bats, body[data-phase=board] .bats, body[data-phase=intro] .bats { display: none; }
 .costume { margin-top: 6px; } .costume .tag { top: -9px; right: auto; left: 50%; transform: translateX(-50%); font-size: 9px; padding: 2px 6px; white-space: nowrap; }
 .costume .tag.t-halloween { background: #ff8a1a; }
+/* ---- the look editor (round 6): a side panel / bottom sheet; the camera frames your character in the rest ---- */
+.modal.editor, .modal.side { padding: 0; background: none; display: block; overscroll-behavior: contain; }
+.modal.side .panel.sheet, .modal.editor .panel.sheet { min-height: 100%; box-shadow: none; display: grid; align-content: start; gap: 8px; }
+.modal.side .row.head, .modal.editor .row.head { top: 0; margin: -14px -16px 0; }
+@media (min-aspect-ratio: 1/1) {
+  .modal.editor, .modal.side { inset: 0 0 0 auto; width: min(470px, 58vw); }
+  .modal.side .panel.sheet, .modal.editor .panel.sheet { border-radius: 22px 0 0 22px; border-right: 0; padding-bottom: calc(var(--sb) + 16px); }
+}
+@media (max-aspect-ratio: 1/1) {
+  .modal.editor, .modal.side { inset: auto 0 0 0; height: 58vh; height: 58dvh; }
+  .modal.side .panel.sheet, .modal.editor .panel.sheet { border-radius: 22px 22px 0 0; border-bottom: 0; padding-bottom: calc(var(--sb) + 16px); }
+  .modal.side .row.head, .modal.editor .row.head { top: 0; }
+}
+.ed-h { margin: 6px 0 0; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: #47606a; }
+.presets { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 6px; }
+.preset { display: grid; justify-items: center; gap: 2px; padding: 4px 2px 6px; border: 3px solid var(--ink); border-radius: 12px; background: #fff; font-size: 12px; }
+.preset img { width: 54px; height: 54px; border-radius: 50%; background: var(--paper2); }
+.preset:active { transform: translateY(2px); }
+body.editing #screen, body.editing #hud, body.editing .bats, body.editing #tags { visibility: hidden; }   /* the editor shows only you */
+.shop-sel { display: grid; gap: 4px; background: #fff; border: 3px solid var(--ink); border-radius: 14px; padding: 8px 10px; } .shop-sel b { font-size: 18px; } .shop-sel span { font-size: 13px; color: #47606a; font-weight: 600; }
+.shop-sel { position: sticky; top: 52px; z-index: 2; }
+.costume.sel { outline: 4px solid #ff8a1a; outline-offset: 1px; }
+.modal.side .costumes { grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); }

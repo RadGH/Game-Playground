@@ -107,6 +107,11 @@ export function createView(ctx) {
         else piece(T, ev.x, swingY(T), ev.w, CANDY[ev.y % CANDY.length], 'tumble', { vx: Math.sign(ev.x) * 1.5, vy: 0, spin: 3 });
         if (T.pid === ctx.me) { ctx.sfx('bad'); const p = worldPos(T, ev.x, BH * ev.y + 1); floatText(stage, p.x, p.y, p.z, 'Missed!', 'bad'); }
       } else if (ev.e === 'topple' && T) {
+        // a drop that set off the topple arrives in the same update as the topple, while its block is still falling on
+        // screen: landing it after the trim drew the tower one block too tall (the top block level with the next swing).
+        // Any block still falling onto this tower is dropped; it is one of ev.lost, so it tumbles off with the rest (owner, 2026-10-22).
+        for (const f of fx.filter(f => f.T === T && f.kind === 'fall')) kill(f);         // (it is in ev.lost, so it tumbles off below)
+        T.fallingMine = null; T.pressed = false;
         ev.lost.forEach(([x, w], i) => { const y = BH * (ev.h + i + 0.5), s = (i % 2 ? 1 : -1) * (0.6 + i * 0.15); piece(T, x, y, w, CANDY[(ev.h + i) % CANDY.length], 'chip', { vx: s * 2 + (x > 0 ? 1 : -1), vy: 1 + i * 0.3, spin: -s * 3 }); });
         T.stack.length = ev.h; redraw(T);
         const p = worldPos(T, 0, BH * ev.h + 1.2); floatText(stage, p.x, p.y, p.z, 'TOPPLED!', 'bad');

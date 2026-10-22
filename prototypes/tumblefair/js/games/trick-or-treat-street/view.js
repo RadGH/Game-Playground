@@ -283,7 +283,7 @@ export function createView(ctx) {
         const fl = lastFlags(ctx.me);
         if (fl & F.STUN) setPill('👻', 'Spooked! Hold on…', 'warn');
         else if (fl & F.FROZEN) setPill('🚪', 'Knock knock…');
-        else if (nearLit(ctx.me)) setPill('🅰️', 'Press A to KNOCK!', 'go');
+        else if (nearLit(ctx.me)) setPill('🅰️', ctx.btn('Press A to KNOCK!'), 'go');
         else if (fl & F.SLOW) setPill('🟢', 'Slimed — slow for a bit', 'slime');
         else setPill('🎃', rush ? 'CANDY RUSH! Go go go!' : 'Walk to a GLOWING door', rush ? 'rush' : '');
       }

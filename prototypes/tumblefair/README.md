@@ -192,6 +192,21 @@ a second set).
 
 Known gap: a phone that reconnects mid-drawing sees a blank canvas (its strokes are kept on the server and appear in the gallery).
 
+## Looks, costumes and button names (round 6, 2026-10-22)
+
+- **Look editor and costume shop** are a side panel (a bottom sheet on a phone held upright); the menus behind hide and
+  the camera frames your own character close up, turning slowly (`lineup.focus`). The editor has **Quick looks**
+  (`js/client/look-tidy.js` PRESETS). The shop lets you tap ANY costume to try it on (`lineup.preview`, only on your
+  screen), then Wear (owned) or Buy (enough coins); otherwise it says how many coins you still need.
+- **Tidy random faces** (`look-tidy.js` tidyFace, from the look's seed): parts the editor does not offer (2.5's
+  removed soot/dirt) become defaults, face marks and accessories are usually none, unusual eyes/mouths/hair mostly
+  become everyday ones. Editor choices always win. `tests/look-tidy.test.js`.
+- **Button names follow the device** (`js/client/buttons.js` btnText; views use `ctx.btn(text)`): instructions are
+  written controller-first ("press A", "B = bump"); on a keyboard they read Space / E, on a phone the on-screen
+  button's label, with a controller A / B. `tests/buttons.test.js`.
+- **Wobble Tower**: a drop that sets off a topple no longer lands after the trim (the tower was drawn one block too
+  tall, level with the next swinging block).
+
 ## Holidays (round 6, 2026-10-22)
 
 `js/shared/seasons.js` is the one table of holidays (Halloween = October 1-31; Christmas and Valentine's are written in

@@ -14,9 +14,17 @@ export function createLineup(stage) {
   floor.position.y = -0.3; floor.receiveShadow = true; group.add(floor);
   const rim = new THREE.Mesh(new THREE.TorusGeometry(7.75, 0.22, 10, 48).rotateX(Math.PI / 2), new THREE.MeshStandardMaterial({ color: '#12222a' })); rim.position.y = -0.05; group.add(rim);
   const actors = new Map(), tags = new Map(), busy = new Set();
-  let shown = false, poses = {}, wantKey = '';
+  let lastOpts = {}, shown = false, poses = {}, wantKey = '', focusPid = null, trial = null, lastList = [], rowView = null, t = 0;
+  /** Frame one character close up (the look editor), or null for the whole row again. */
+  function applyFocus() {
+    const a = focusPid != null && actors.get(focusPid);
+    if (!a) { if (rowView) stage.setView(rowView); return; }
+    const p = a.group.position; stage.setView({ cx: p.x, cz: p.z, hw: 0.75, hd: 0.5, pitch: 8, tall: a.height + 0.25, yaw: 0 });
+  }
   function slots(n) { const out = []; for (let i = 0; i < n; i++) out.push({ x: (i - (n - 1) / 2) * 1.9, z: Math.abs(i - (n - 1) / 2) * -0.35 }); return out; }
   async function sync(list, { labels = true, me = null } = {}) {
+    lastList = list; lastOpts = { labels, me };
+    if (trial) list = list.map(m => (m.pid === trial.pid ? { ...m, costume: trial.costume } : m));   // the shop's try-on
     wantKey = JSON.stringify(list.map(m => [m.pid, m.seat]));
     for (const [pid, a] of actors) if (!list.some(m => m.pid === pid)) { a.dispose(); actors.delete(pid); tags.get(pid)?.remove(); tags.delete(pid); }
     const at = slots(list.length);
@@ -33,13 +41,20 @@ export function createLineup(stage) {
       a.place(at[i].x, 0, at[i].z, 0);
       a.setPose(poses[m.pid] || 'idle');
     }));
-    stage.setView({ cx: 0, cz: 0, hw: Math.max(2.4, list.length * 1.05 + 0.6), hd: 1.6, pitch: 16, tall: 2.6, yaw: 0 });
+    rowView = { cx: 0, cz: 0, hw: Math.max(2.4, list.length * 1.05 + 0.6), hd: 1.6, pitch: 16, tall: 2.6, yaw: 0 };
+    if (focusPid != null && actors.has(focusPid)) applyFocus(); else stage.setView(rowView);
   }
   return {
     group, actors, sync,
     show(on) { if (on === shown) return; shown = on; if (on) stage.root.add(group); else group.removeFromParent(); for (const t of tags.values()) t.el.style.visibility = on ? '' : 'hidden'; },
     setPoses(p) { poses = p; for (const [pid, a] of actors) a.setPose(poses[pid] || 'idle'); },
     play(pid, name, ms) { actors.get(pid)?.play(name, ms); },
-    frame(dt) { if (shown) for (const a of actors.values()) a.update(dt); },
+    frame(dt) {
+      if (!shown) return; t += dt;
+      for (const [pid, a] of actors) { a.update(dt); if (a.body?.group) a.body.group.rotation.y = pid === focusPid ? Math.sin(t * 0.7) * 0.5 : 0; }   // a slow turn so the editor shows the sides too
+    },
+    focus(pid) { focusPid = pid; applyFocus(); },
+    /** Try a costume on one character (the shop), only on this screen; null = back to what they wear. */
+    preview(pid, costume) { trial = costume ? { pid, costume } : null; const a = actors.get(pid), m = lastList.find(x => x.pid === pid); if (a && m) a.setLook({ ...m, costume: costume || m.costume }); },
   };
 }

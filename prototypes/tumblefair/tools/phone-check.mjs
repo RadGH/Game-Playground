@@ -12,7 +12,7 @@ import { chromium, webkit } from '@playwright/test';
 const arg = (n, d) => { const i = process.argv.indexOf('--' + n); return i > 0 ? process.argv[i + 1] : d; };
 const URL0 = arg('url', 'http://127.0.0.1:8480/prototypes/tumblefair/');
 const OUT = new URL('../tests/shots/', import.meta.url).pathname;
-const PHONES = [{ name: 'se', width: 375, height: 667 }, { name: 'tall', width: 393, height: 852 }, { name: 'land', width: 852, height: 393 }];
+const PHONES = [{ name: 'desk', width: 1280, height: 720, desk: true }, { name: 'se', width: 375, height: 667 }, { name: 'tall', width: 393, height: 852 }, { name: 'land', width: 852, height: 393 }];
 const browser = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
 const fails = [], errors = [];
 async function swipe(page, cdp, x, y, dy) {
@@ -28,7 +28,7 @@ async function reachable(page, sel) {
     const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); return hit && (hit === b || b.contains(hit)) ? 'ok' : 'covered by ' + (hit?.className || hit?.tagName); }, sel);
 }
 for (const ph of PHONES) {
-  const ctx = await browser.newContext({ viewport: { width: ph.width, height: ph.height }, hasTouch: true, isMobile: true, deviceScaleFactor: 2 });
+  const ctx = await browser.newContext({ viewport: { width: ph.width, height: ph.height }, hasTouch: true, isMobile: !ph.desk, deviceScaleFactor: ph.desk ? 1 : 2 });
   const page = await ctx.newPage(), cdp = await ctx.newCDPSession(page);
   page.on('pageerror', e => errors.push(`${ph.name}: ${e.message}`));
   await page.goto(URL0 + '?quality=low');
@@ -56,15 +56,21 @@ for (const ph of PHONES) {
   for (const [act, sel] of [['shop', '.modal [data-close]'], ['pool', '.modal [data-close]'], ['edit', '.modal [data-close]']]) {
     if (!(await page.$(`[data-act=${act}]`))) continue;
     await page.evaluate(() => { const s = document.querySelector('#screen'); s.scrollTop = 0; });
-    await page.click(`[data-act=${act}]`); await page.waitForTimeout(900);
+    await page.click(`[data-act=${act}]`); await page.waitForTimeout(act === 'pool' ? 900 : 2200);
+    if (act === 'shop') { const cs = await page.$$('.modal .costume'); if (cs[30]) { await cs[30].scrollIntoViewIfNeeded(); await cs[30].click(); await page.waitForTimeout(2500); } }
+    if (act !== 'pool') {         // the look editor and the shop must leave your character in view (owner 2026-10-22: settings scrolled over it)
+      const free = await page.evaluate(() => { const r = document.querySelector('.modal.editor, .modal.side').getBoundingClientRect(); return { l: r.left, t: r.top, w: innerWidth, h: innerHeight }; });
+      const clear = free.l > free.w * 0.35 || free.t > free.h * 0.3; if (!clear) fails.push(`${ph.name} edit: the panel covers the character (${JSON.stringify(free)})`);
+    }
     await page.screenshot({ path: `${OUT}phone-${ph.name}-${act}.png` });
     const m0 = await page.evaluate(() => document.querySelector('.modal')?.scrollTop ?? -1);
-    for (let k = 0; k < 8; k++) await swipe(page, cdp, ph.width / 2, ph.height * 0.85, -ph.height * 0.6);
+    if (ph.desk) { await page.mouse.move(ph.width - 150, ph.height * 0.6); for (let k = 0; k < 8; k++) { await page.mouse.wheel(0, 600); await page.waitForTimeout(150); } }
+    else for (let k = 0; k < 8; k++) await swipe(page, cdp, ph.width / 2, ph.height * 0.85, -ph.height * 0.6);
     const m1 = await page.evaluate(() => { const m = document.querySelector('.modal'); return m ? [m.scrollTop, m.scrollHeight - m.clientHeight] : [-1, 0]; });
     if (m1[1] > 4 && m1[0] <= m0) fails.push(`${ph.name} ${act}: the list did not scroll`);
     await page.screenshot({ path: `${OUT}phone-${ph.name}-${act}-bottom.png` });
     const r = await reachable(page, sel); if (r !== 'ok') fails.push(`${ph.name} ${act}: Done ${r}`);
-    await page.evaluate(() => document.querySelector('.modal')?.remove());
+    await page.click('.modal [data-close]').catch(() => page.evaluate(() => document.querySelector('.modal')?.remove())); await page.waitForTimeout(300);
   }
   await ctx.close();
 }

@@ -12,6 +12,7 @@ import { SEASONS, seasonByDate, seasonName, inSeason } from '../shared/seasons.j
 import { qrSvg, joinUrl } from './qr.js';
 import { h, esc } from './gamehud.js';
 import { createEditor } from './editor.js';
+import { btnText } from './buttons.js';
 import { createSounds } from './sounds.js';
 import { installFeedback } from './feedback.js';
 import { SEATS, cleanCode, CODE_LENGTH } from '../shared/protocol.js';
@@ -62,11 +63,12 @@ function safeFor(kind) {
   const portraitMode = innerHeight > innerWidth;
   stage.setSafe(kind === 'arena' ? { top: 0.13, bottom: isTouch() ? (portraitMode ? 0.3 : 0.06) : 0.09, left: 0.03, right: 0.03 }
     : kind === 'board' ? { top: 0.14, bottom: 0.2, left: 0.03, right: 0.03 }
+    : kind === 'editor' ? (portraitMode ? { top: 0.07, bottom: 0.6, left: 0.06, right: 0.06 } : { top: 0.08, bottom: 0.06, left: 0.04, right: Math.min(0.62, 470 / innerWidth + 0.04) })
     : kind === 'lobby' ? (portraitMode ? { top: 0.1, bottom: 0.62, left: 0.04, right: 0.04 } : { top: 0.16, bottom: 0.12, left: 0.04, right: 0.5 })
     : { top: 0.1, bottom: 0.5, left: 0.04, right: 0.04 });
 }
-addEventListener('resize', () => safeFor(S.safeKind || 'title'));
-const setSafe = kind => { S.safeKind = kind; safeFor(kind); };
+addEventListener('resize', () => safeFor(S.modal?.editor ? 'editor' : S.safeKind || 'title'));
+const setSafe = kind => { S.safeKind = kind; safeFor(S.modal?.editor ? 'editor' : kind); };   // the look editor keeps its framing while the lobby redraws
 
 // ------------------------------------------------------------------ title
 function showTitle() {
@@ -232,7 +234,7 @@ function showIntro() {
   const ctl = m.kind === 'arena' ? (isTouch() ? `Left thumb: move.${m.controls?.a ? ` Big button: ${m.controls.a}.` : ''}${m.controls?.b ? ` Small button: ${m.controls.b}.` : ''}` : `WASD or arrows: move.${m.controls?.a ? ` Space: ${m.controls.a}.` : ''}${m.controls?.b ? ` E: ${m.controls.b}.` : ''}`) : 'Tap your choices on this screen.';
   setScreen('intro', `<div class="panel intro-card"><img src="${ART}${m.card}.webp" alt="" onerror="this.remove()">
     ${pm.season === 'halloween' && !m.season ? '<p class="season-ribbon halloween">Halloween edition</p>' : ''}<h1 class="shout">${esc(m.title)}</h1><p class="blurb">${esc(m.blurb)}</p>
-    <ul>${m.how.map(l => `<li>${esc(l)}</li>`).join('')}</ul><p class="ctl">${esc(ctl)}</p>${pm.difficulty && S.room.match?.mode === 'endless' ? `<p class="note">Difficulty: <b>${esc(pm.difficulty)}</b></p>` : ''}
+    <ul>${m.how.map(l => `<li>${btnText(esc(l), m.controls, { html: true })}</li>`).join('')}</ul><p class="ctl">${esc(ctl)}</p>${pm.difficulty && S.room.match?.mode === 'endless' ? `<p class="note">Difficulty: <b>${esc(pm.difficulty)}</b></p>` : ''}
     ${can ? `<button class="btn big primary" data-act="skip">${S.skips.includes(me.pid) ? 'Ready ✓' : "I'm ready"}</button>` : '<p class="note">Watching this one.</p>'}
     <p class="note">Starts in <b class="count">${left()}</b> · ${S.skips.length}/${pm.players.length} ready</p></div>`);
   hud.innerHTML = '';
@@ -369,29 +371,47 @@ screen.addEventListener('change', e => { if (e.target.id === 'name') saveName();
 addEventListener('pointerdown', () => sfx.unlock(), { once: true });
 
 // ------------------------------------------------------------------ look editor and costume shop (modals)
-function closeModal() { S.modal?.el.remove(); S.modal = null; }
+function closeModal() { const wasEditor = S.modal?.editor; S.modal?.onClose?.(); S.modal?.el.remove(); S.modal = null; if (wasEditor) { document.body.classList.remove('editing'); lineup.focus(null); safeFor(S.safeKind || 'title'); } }
 function openEditor() {
   closeModal();
   const ed = createEditor({ look: S.me.look, races: RACES, raceNames: RACE_NAMES, onChange: look => net.send({ t: 'profile', look }), onClose: closeModal });
-  document.body.append(ed.el); S.modal = ed;
+  document.body.append(ed.el); S.modal = ed; ed.editor = true;
+  document.body.classList.add('editing'); lineup.focus(S.room ? S.room.you : 0); safeFor('editor');
 }
+/** The costume shop (round 6): a side panel like the look editor, with your character framed beside it. Tap any costume
+ *  to TRY IT ON (only on this screen: nobody else sees it), then Wear it if you own it or Buy it if you can afford it.
+ *  Browsing the expensive ones is the point (owner 2026-10-22: "so I can at least browse the future options"). */
 function openShop() {
   closeModal();
-  const el = h('div', 'modal shop');
+  const el = h('div', 'modal side shop');
+  let sel = S.me.costume;
+  const me = () => (S.room ? S.room.you : 0);
+  const preview = id => lineup.preview(me(), id === S.me.costume ? null : id);
   const draw = () => {
-    el.innerHTML = `<div class="panel"><h2>Costumes <span class="coins">${ICON.coin}${S.me.coins}</span></h2><p class="note">Costumes are only for show. Win coins by finishing matches.</p>
-      <div class="costumes">${costumes().filter(c => inSeason(c, seasonByDate())).sort((a, b) => !!b.season - !!a.season).map(c => { const own = S.me.owned.includes(c.id), on = S.me.costume === c.id; return `<button class="costume${on ? ' on' : ''}${own ? ' own' : ''}" data-id="${c.id}" ${!own && S.me.coins < c.price ? 'data-poor="1"' : ''}><img src="${portrait({ look: S.me.look, costume: c.id })}" alt="">${c.tag ? `<i class="tag t-${esc(c.tag.toLowerCase())}">${esc(c.tag)}</i>` : ''}<b>${esc(c.name)}</b><span>${on ? 'Wearing' : own ? 'Wear' : `${ICON.coin}${c.price}`}</span></button>`; }).join('')}</div>
-      <button class="btn big" data-close="1">Done</button></div>`;
+    const c = costumes().find(x => x.id === sel) || costumes()[0], own = S.me.owned.includes(c.id), on = S.me.costume === c.id;
+    const act = on ? '<button class="btn big" disabled>Wearing it</button>'
+      : own ? `<button class="btn big primary" data-wear="1">Wear ${esc(c.name)}</button>`
+      : S.me.coins >= c.price ? `<button class="btn big primary" data-buy="1">Buy for ${ICON.coin}${c.price}</button>`
+      : `<button class="btn big" disabled>${ICON.coin}${c.price - S.me.coins} more coins needed</button>`;
+    el.innerHTML = `<div class="panel sheet">
+      <div class="row head"><h2>Costumes <span class="coins">${ICON.coin}${S.me.coins}</span></h2><button class="btn small primary" data-close="1">Done</button></div>
+      <div class="shop-sel"><b>${esc(c.name)}</b><span>${on ? 'You are wearing this.' : own ? 'Yours. Tap Wear to put it on.' : `Trying it on. Costs ${c.price} coins.`}</span>${act}</div>
+      <p class="note">Tap any costume to try it on. Costumes are only for show; win coins by finishing matches.</p>
+      <div class="costumes">${costumes().filter(x => inSeason(x, seasonByDate())).sort((a, b) => !!b.season - !!a.season).map(x => { const o = S.me.owned.includes(x.id), w = S.me.costume === x.id; return `<button class="costume${w ? ' on' : ''}${o ? ' own' : ''}${x.id === sel ? ' sel' : ''}" data-id="${x.id}" ${!o && S.me.coins < x.price ? 'data-poor="1"' : ''}><img src="${portrait({ look: S.me.look, costume: x.id })}" alt="">${x.tag ? `<i class="tag t-${esc(x.tag.toLowerCase())}">${esc(x.tag)}</i>` : ''}<b>${esc(x.name)}</b><span>${w ? 'Wearing' : o ? 'Owned' : `${ICON.coin}${x.price}`}</span></button>`; }).join('')}</div>
+      </div>`;
   };
   el.addEventListener('click', e => {
-    if (e.target.closest('[data-close]') || e.target === el) return closeModal();
+    if (e.target.closest('[data-close]')) return closeModal();
+    const c = costumes().find(x => x.id === sel);
+    if (e.target.closest('[data-wear]')) { net.send({ t: 'equip', id: c.id }); sfx('good'); return; }
+    if (e.target.closest('[data-buy]')) { if (confirm(`Buy ${c.name} for ${c.price} coins?`)) { net.send({ t: 'buy', id: c.id }); net.send({ t: 'equip', id: c.id }); sfx('coins'); } return; }
     const b = e.target.closest('.costume'); if (!b) return;
-    const c = costumes().find(x => x.id === b.dataset.id);
-    if (S.me.owned.includes(c.id)) net.send({ t: 'equip', id: c.id });
-    else if (S.me.coins >= c.price) { if (confirm(`Buy ${c.name} for ${c.price} coins?`)) { net.send({ t: 'buy', id: c.id }); net.send({ t: 'equip', id: c.id }); } }
-    else toast(`${c.name} costs ${c.price} coins. You have ${S.me.coins}.`, 'bad');
+    sel = b.dataset.id; preview(sel); sfx('tap');
+    const y = el.scrollTop; draw(); el.scrollTop = y;
   });
-  draw(); document.body.append(el); S.modal = { el, refresh: draw };
+  draw(); document.body.append(el);
+  S.modal = { el, refresh: () => { const y = el.scrollTop; draw(); el.scrollTop = y; preview(sel); }, editor: true, onClose: () => lineup.preview(me(), null) };
+  document.body.classList.add('editing'); lineup.focus(me()); safeFor('editor');
 }
 
 /** The host picks which minigames can come up (round 5). Nothing ticked = every game. Remembered on this phone. */

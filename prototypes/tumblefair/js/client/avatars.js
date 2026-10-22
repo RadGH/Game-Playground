@@ -12,6 +12,7 @@ import { CHIBI2_ANIMS } from '../../../../avatar-3d/js/chibi2.js';
 import { createTvBody } from '../../../thousandvale/js/client/chibi-version.js';   // Chibi 2.5 bodies, baked in slices (no long stall); ?chibi=2 for the old ones
 import { CHIBI2_EMOTE_ANIMS } from '../../../../avatar-3d/js/chibi2-motion.js';
 import { applyCustom } from '../../../thousandvale/js/client/ui/appearance-core.js';
+import { tidyFace } from './look-tidy.js';
 import { svgPortrait } from '../../../thousandvale/js/client/ui/svg-portrait.js';
 import { SEATS } from '../shared/protocol.js';
 
@@ -35,7 +36,7 @@ export function avatarOf(look, costume = 'cos_none') {
   const key = JSON.stringify([look, costume]);
   if (cache.has(key)) return cache.get(key);
   const race = RACES.includes(look?.race) ? look.race : 'human', seed = (look?.seed >>> 0) || 1;
-  let av = applyCustom(randomChibi2(randomAvatar, presets, { race, seed, makeRng, known: (slot, id) => partIds(slot).includes(id) }), look?.custom || null);
+  let av = applyCustom(tidyFace(randomChibi2(randomAvatar, presets, { race, seed, makeRng, known: (slot, id) => partIds(slot).includes(id) }), seed), look?.custom || null);   // tidied: round 6
   av.held = { id: 'none' }; av.offhand = { id: 'none' };                       // nobody carries a sword round the fair
   if (!inSeason(costumeOf(costume), seasonByDate())) costume = 'cos_none';     // a holiday costume out of season: own clothes
   const outfit = costumeOf(costume).outfit;

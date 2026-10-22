@@ -12,6 +12,7 @@ import { GAMES, loadView } from '../games/metas.js';
 import { createActor, portrait } from './avatars.js';
 import { createServerClock, createTrack } from './interp.js';
 import { dressArena } from './halloween.js';
+import { btnText } from './buttons.js';
 
 
 export async function createPlay({ stage, net, controls, intro, members, me, uiRoot, sfx = () => {} }) {
@@ -41,6 +42,7 @@ export async function createPlay({ stage, net, controls, intro, members, me, uiR
     stage.setView({ cx: 0, cz: 0, hw: hw + 0.5, hd: hd + 0.5, pitch: (meta.pitch || 54) + (tallScreen ? 12 : 0), tall: 2.2, yaw: 0 }, { instant: true });
   }
   const ctx = {
+    btn: s => btnText(s, meta.controls),          // "press A" -> Space / E on a keyboard, the button's label on a phone (buttons.js)
     THREE, stage, group, ui, init: intro.init, season: intro.season || null, meta, players, me: playing ? me : null, watching: !playing,
     player: pid => players.find(p => p.pid === pid), actor: pid => actors.get(pid) || null,
     send: (a, d) => net.send({ t: 'act', a, ...(d !== undefined ? { d } : {}) }), sfx, arena: AR,

@@ -244,11 +244,11 @@ export function createView(ctx) {
       if (ended) setPill('🎃', 'Done! Happy Halloween!');
       else if (ctx.me == null || !s) setPill('👻', phase === 'play' ? 'Ghosts are hunting!' : 'Get ready…');
       else if (phase !== 'play') setPill('⏳', 'Next round…');
-      else if (init.solo) setPill('🏃', g.safe ? 'Phew! Run!' : 'RUN! (A = dash)', g.safe ? 'go' : '');
+      else if (init.solo) setPill('🏃', g.safe ? 'Phew! Run!' : ctx.btn('RUN! (A = dash)'), g.safe ? 'go' : '');
       else if (s.ro === 2 && (s.flags & F.FROZEN)) setPill('🙈', 'Counting… then tag them!', 'ghost');
-      else if (s.ro > 0) setPill('👻', 'GHOST: tag them! (A = BOO!)', 'ghost');
+      else if (s.ro > 0) setPill('👻', ctx.btn('GHOST: tag them! (A = BOO!)'), 'ghost');
       else if (s.flags & F.STUN) setPill('😱', 'Eek! Run!', 'warn');
-      else setPill('🏃', 'HUMAN: run! (A = dash)', 'human');
+      else setPill('🏃', ctx.btn('HUMAN: run! (A = dash)'), 'human');
     },
     dispose() {
       tunes.dispose(); kit.dispose();

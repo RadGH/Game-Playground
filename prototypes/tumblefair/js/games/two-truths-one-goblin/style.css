@@ -1,0 +1,57 @@
+/* Two Truths, One Goblin — a fortune-teller's tent: purple cloth, gold trim, three big claim cards. */
+.game-two-truths-one-goblin { pointer-events: auto; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding: calc(var(--st) + 10px) calc(var(--sr) + 12px) calc(var(--sb) + 48px) calc(var(--sl) + 12px);
+  background: repeating-linear-gradient(100deg, #3e1f5e 0 46px, #4a2670 46px 92px); user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.game-two-truths-one-goblin > * { flex: none; }
+.tg-top { display: flex; gap: 12px; align-items: center; justify-content: center; color: #fff; font: 900 22px/1.1 var(--font); -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; text-align: center; }
+.tg-chips { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.tg-chips .sc { font-style: normal; font-weight: 900; background: #ffe9a8; border-radius: 8px; padding: 0 6px; }
+.tg-chips .delta { font-size: 12px; } .tg-chips .delta:empty { display: none; } .tg-chips .delta.good { color: #1d8a37; }
+.tg-chips .chip.tell { outline: 4px solid #ffd23f; } .tg-chips .chip.in { outline: 4px solid var(--mint); }
+.tg-cpu .face { background: #9b4fe0; } .tg-cpu .face svg { width: 100%; height: 100%; display: block; }
+.tg-teller { display: flex; gap: 10px; align-items: center; color: #fff; font: 800 clamp(18px, 4.6vw, 24px)/1.15 var(--font); }
+.tg-teller:empty { display: none; }
+.tg-face { width: 44px; height: 44px; border-radius: 50%; border: 3px solid var(--seat, #9b4fe0); background: var(--seat, #9b4fe0); overflow: hidden; display: block; flex: none; box-shadow: 0 0 0 2px var(--ink); }
+.tg-face img, .tg-face svg { width: 100%; height: 100%; display: block; }
+.tg-note { margin: 0; color: #f0e2ff; text-align: center; font-size: 15px; max-width: 620px; min-height: 1.3em; }
+
+/* ---- the Teller arranging (their phone only) ---- */
+.tg-prep, .tg-wait, .tg-cards { display: none; width: min(100%, 620px); }
+.game-two-truths-one-goblin[data-phase=prep][data-role=teller]:not(.watching) .tg-prep { display: grid; gap: 10px; }
+.game-two-truths-one-goblin[data-phase=prep]:is([data-role=guesser], .watching) .tg-wait { display: grid; justify-items: center; }
+.game-two-truths-one-goblin:is([data-phase=guess], [data-phase=reveal]) .tg-cards { display: grid; gap: 12px; }
+.tg-hand { display: grid; gap: 10px; }
+.tg-hc { position: relative; background: var(--paper); border: 4px solid var(--ink); border-radius: 16px; padding: 10px 12px 10px 46px; display: grid; gap: 6px; box-shadow: 0 4px 0 var(--ink); }
+.tg-hc.gob { background: #e6f9df; border-color: #1d6a2a; }
+.tg-hc q { font: 800 17px/1.2 var(--font); }
+.tg-badge { display: flex; align-items: center; gap: 4px; font: 900 13px/1 var(--font); letter-spacing: .5px; }
+.tg-badge svg { width: 26px; height: 26px; }
+.tg-hc.true .tg-badge { color: #1d5a8a; } .tg-hc.gob .tg-badge { color: #1d6a2a; }
+.tg-hb { display: flex; gap: 6px; flex-wrap: wrap; }
+.tg-hb button { min-height: 44px; border: 3px solid var(--ink); border-radius: 12px; background: #fff; font: 800 14px/1 var(--font); padding: 4px 10px; box-shadow: 0 3px 0 var(--ink); }
+.tg-l { position: absolute; left: -2px; top: -2px; width: 38px; height: 38px; display: grid; place-items: center; background: var(--sun); border: 3px solid var(--ink); border-radius: 12px 0 12px 0; font: 900 20px/1 var(--font); }
+.tg-plant { background: #c9f5d2; font-size: 16px; line-height: 1.2; text-align: left; }
+.tg-plant small { display: block; font-size: 13px; font-weight: 700; }
+.tg-ready { background: var(--mint); color: #fff; -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; }
+.tg-wait svg { width: 120px; height: 120px; animation: tg-bob 1.2s ease-in-out infinite; }
+.tg-wait p { margin: 0; color: #fff; font: 900 22px/1.1 var(--font); }
+@keyframes tg-bob { 50% { transform: translateY(-8px) rotate(4deg); } }
+
+/* ---- the three claims ---- */
+.tg-card { position: relative; display: grid; gap: 6px; justify-items: center; min-height: 84px; padding: 16px 14px 12px 50px; background: var(--paper); border: 4px solid var(--ink); border-radius: 16px; box-shadow: 0 5px 0 var(--ink); text-align: center; cursor: pointer; }
+.tg-card q { font: 800 clamp(18px, 4.8vw, 26px)/1.2 var(--font); quotes: '“' '”'; }
+.game-two-truths-one-goblin[data-phase=guess][data-role=guesser]:not(.watching) .tg-card.picked { background: var(--sun); outline: 5px solid #fff; transform: translateY(-3px); }
+.game-two-truths-one-goblin[data-phase=guess][data-role=guesser]:not(.watching) .tg-card.picked::after { content: 'My pick: the Goblin?'; position: absolute; bottom: -14px; right: 14px; background: #ff5f5f; color: #fff; border: 3px solid var(--ink); border-radius: 10px; padding: 0 10px; font-size: 13px; }
+.game-two-truths-one-goblin:is([data-phase=reveal], .watching, [data-role=teller]) .tg-card { pointer-events: none; }
+.tg-stamp { display: none; align-items: center; gap: 6px; font: 900 18px/1 var(--font); border: 4px solid currentColor; border-radius: 10px; padding: 3px 10px; transform: rotate(-4deg); background: #fff; }
+.tg-stamp svg { width: 30px; height: 30px; }
+.tg-card.gob { background: #dff7d6; animation: tg-shake .5s 2; } .tg-card.gob .tg-stamp { display: flex; color: #1d6a2a; }
+.tg-card.truth { opacity: .8; } .tg-card.truth .tg-stamp { display: flex; color: #1d5a8a; font-size: 14px; }
+@keyframes tg-shake { 25% { transform: rotate(-1.5deg); } 75% { transform: rotate(1.5deg); } }
+.tg-who { display: flex; gap: 4px; } .tg-who:empty { display: none; }
+.tg-who .tg-face { width: 30px; height: 30px; }
+
+@media (min-aspect-ratio: 1/1) and (min-width: 900px) {
+  .game-two-truths-one-goblin:is([data-phase=guess], [data-phase=reveal]) .tg-cards { width: min(100%, 1200px); grid-template-columns: repeat(3, 1fr); }
+  .watching .tg-card q { font-size: clamp(22px, 2.4vw, 34px); }
+}

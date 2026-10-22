@@ -16,3 +16,19 @@ test('creatures page builds all body plans', async ({ page }) => {
   const spec = await page.evaluate(() => window.creatures3d.spec); expect(spec.colors.body).toBe('#2244aa'); expect(spec.features.wings).toBe(false); expect(spec.features.horns).toBe(true);
   expect(errors).toEqual([]);
 });
+
+// Thousandvale's own monsters (read live from its data files) build on the page, creatures and Chibi 2.5 humanoids alike.
+test('creatures page shows every Thousandvale monster', async ({ page }) => {
+  test.setTimeout(180_000); const errors = []; page.on('pageerror', e => errors.push(e.message));
+  await page.goto('avatar-3d/creatures.html'); await page.waitForFunction(() => !!window.creatures3d, null, { timeout: 60_000 });
+  const list = await page.evaluate(() => window.creatures3d.tvMonsters.map(m => ({ id: m.id, kind: m.kind })));
+  expect(list.length).toBeGreaterThanOrEqual(15);
+  expect(list.some(m => m.kind === 'humanoid')).toBe(true);
+  for (const m of list) {
+    await page.click(`[data-tv="${m.id}"]`); await page.waitForFunction(() => !window.creatures3d.isBuilding(), null, { timeout: 60_000 });
+    const h = await page.evaluate(() => { const c = window.creatures3d.character; c.update(0.1, 0.1); return c.metrics().height; });
+    expect(h, m.id).toBeGreaterThan(0.2);
+    expect(await page.locator('#status').textContent()).toContain('Thousandvale');
+  }
+  expect(errors).toEqual([]);
+});

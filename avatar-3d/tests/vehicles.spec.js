@@ -23,3 +23,20 @@ test('vehicles page builds every type', async ({ page }) => {
   expect(await page.evaluate(() => window.vehicles3d.spec.colors.cloth)).toBe('#2244aa');
   expect(errors).toEqual([]);
 });
+
+// Thousandvale's ship (sails set + moored at its jetty) and ox carts, imported from its client modules.
+test('vehicles page shows the Thousandvale ship and carts', async ({ page }) => {
+  test.setTimeout(120_000); const errors = []; page.on('pageerror', e => errors.push(e.message));
+  await page.goto('avatar-3d/vehicles.html'); await page.waitForFunction(() => !!window.vehicles3d && !window.vehicles3d.isBuilding(), null, { timeout: 60_000 });
+  const ids = await page.evaluate(() => window.vehicles3d.tvVehicles);
+  expect(ids).toEqual(expect.arrayContaining(['tv_ship_sail', 'tv_ship_moored', 'tv_cart']));
+  for (const id of ids) {
+    await page.click(`[data-tv="${id}"]`); await page.waitForFunction(() => !window.vehicles3d.isBuilding(), null, { timeout: 60_000 });
+    const m = await page.evaluate(() => { const v = window.vehicles3d.vehicle; v.update(0.1, 0.1); return v.metrics(); });
+    expect(m.length, id).toBeGreaterThan(id.startsWith('tv_ship') ? 20 : 2);
+  }
+  // back to a plain vehicle: the page's own stage (dark background, near camera) comes back
+  await page.evaluate(() => window.vehicles3d.set({ type: 'wagon' })); await page.waitForFunction(() => !window.vehicles3d.isBuilding());
+  expect(await page.evaluate(() => [window.vehicles3d.scene.scene.fog, window.vehicles3d.scene.camera.far])).toEqual([null, 100]);
+  expect(errors).toEqual([]);
+});

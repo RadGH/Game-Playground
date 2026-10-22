@@ -90,6 +90,11 @@ lobby -> [ board -> vote -> intro -> game -> results ] x rounds -> final -> lobb
 
 ## Minigames
 
+40 games. Round 4 (2026-10-21) added 26: the owner's five (Wobblewheel Rally — racing, Boardwalk Brawl — side-scrolling
+brawler, Fling Ring — toss-out, Ring-a-Ding Rumble — boxing, Costume Catwalk — dress-up runway) and every unbuilt game
+of the design document's 30-game list. Several were tuned against perfect bots (Kitchen Catastrophe targets, Castle
+Defense waves, Dragon's Weak Spot): ease them after a real play-test if they feel hard.
+
 | id | kind | what |
 |---|---|---|
 | `paint-panic` | arena | walk to paint the floor your colour; paint buckets splat a circle; most tiles in 45 s |
@@ -169,6 +174,15 @@ device and the page's last errors. Read them with `node tools/feedback-report.mj
 `--html <file>` (with pictures), `--mark 3,4 --state done --note "…"`. Stored in `~/.local/share/tumblefair/<env>/feedback/`.
 
 ## What worked / what didn't
+
+- **Round 4 (2026-10-21):** the lobby on a phone could not reach "Change look"/"Costumes" — the join-code box was pinned
+  over the panel and the panel was stacked with `align-content: end`, which pushes overflow off the TOP where no scroll
+  reaches. The lobby is a flex column with an auto margin now, and the code box folds to one line (remembered).
+- **Board art vs spaces (bug report #1):** the backdrop was painted separately from the formula-laid spaces, so they
+  never lined up. Fix: draw the board's own loop as a guide picture, have Codex paint the fairground over it, then
+  `tools/fit-board.py` slides each space sideways onto the middle of the painted path (`data/boards/fairground-fit.json`).
+- Characters are Chibi 2.5 (Thousandvale's `createTvBody`); the look editor shows the 2.5 extras.
+- The browser loads `js/games/metas.js` (generated, meta only) instead of every game's rules.
 
 - The lens-shift camera (`stage.js solve()`) is what made one scene readable on a 1280×720 TV and a 393×852 phone:
   fit the rectangle into the free part of the screen, then slide the picture, so the angle never changes.

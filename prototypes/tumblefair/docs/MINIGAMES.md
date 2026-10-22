@@ -1,6 +1,7 @@
 # Writing a Tumblefair minigame
 
-A minigame is one folder, `js/games/<id>/`, with two files and one line in `js/games/index.js`. The room does
+A minigame is one folder, `js/games/<id>/`, with two files and one line in `js/games/index.js` — then run
+`node tools/build-metas.mjs` (the browser loads only the metas, `js/games/metas.js`; `tests/metas.test.js` fails until you do). The room does
 everything else: it seats the players, shows the vote card and the intro card, starts and stops the clock, turns
 your result into tickets or points, and handles phones that drop and come back. **A game never touches scores,
 coins, the board or the network directly.**

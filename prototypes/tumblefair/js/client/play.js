@@ -8,7 +8,7 @@
 import * as THREE from 'three';
 import { TICK_MS, SEATS } from '../shared/protocol.js';
 import { stepBody, unpackBody, F, DT } from '../shared/arena.js';
-import { GAMES, loadView } from '../games/index.js';
+import { GAMES, loadView } from '../games/metas.js';
 import { createActor, portrait } from './avatars.js';
 import { createServerClock, createTrack } from './interp.js';
 

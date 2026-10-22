@@ -14,7 +14,7 @@ import { createEditor } from './editor.js';
 import { createSounds } from './sounds.js';
 import { installFeedback } from './feedback.js';
 import { SEATS, cleanCode, CODE_LENGTH } from '../shared/protocol.js';
-import { GAMES, gameIds } from '../games/index.js';
+import { GAMES, gameIds } from '../games/metas.js';     // meta only: the rules stay on the server
 
 const $ = s => document.querySelector(s);
 const screen = $('#screen'), hud = $('#hud'), toasts = $('#toasts');

@@ -181,7 +181,7 @@ body[data-phase=game] .fb-btn { width: 28px; height: 28px; font-size: 15px; opac
 .ed-row.sub span { padding-left: 10px; font-size: 12px; color: #47606a; }
 .sw.clear { width: auto; padding: 0 8px; font: 700 12px var(--font); background: #fff; }
 /* the connection readout (main.js drawNet) */
-.netq { position: fixed; z-index: 16; top: calc(var(--st, 0px) + 2px); right: 52px; pointer-events: none; font: 700 11px var(--font); color: #fff; background: rgba(13, 34, 40, .6); border-radius: 999px; padding: 2px 8px 2px 18px; }
+.netq { position: fixed; z-index: 16; top: calc(var(--st, 0px) + 50px); right: 6px; pointer-events: none; font: 700 11px var(--font); color: #fff; background: rgba(13, 34, 40, .6); border-radius: 999px; padding: 2px 8px 2px 18px; }
 .netq::before { content: ''; position: absolute; left: 7px; top: 50%; width: 7px; height: 7px; margin-top: -3.5px; border-radius: 50%; background: #3fcf6a; }
 .netq.ok::before { background: #f2c230; } .netq.bad::before { background: #e84a4a; }
 .netq[hidden] { display: none; }

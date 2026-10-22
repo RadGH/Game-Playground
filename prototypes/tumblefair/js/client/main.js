@@ -20,7 +20,7 @@ const $ = s => document.querySelector(s);
 const screen = $('#screen'), hud = $('#hud'), toasts = $('#toasts');
 const ART = new URL('../../assets/art/', import.meta.url).href;
 const q = new URLSearchParams(location.search);
-const S = { me: null, room: null, phase: null, pm: null, play: null, playP: null, board: null, boardP: null, modal: null, ends: 0, bd: { tickets: {}, ribbons: {}, pid: null, ask: null, rolled: null }, votes: {}, skips: [], asDisplay: q.get('display') === '1', err: '' };
+const S = { codeSmall: (() => { try { return !!localStorage.getItem('tumblefair.codeSmall'); } catch { return false; } })(), me: null, room: null, phase: null, pm: null, play: null, playP: null, board: null, boardP: null, modal: null, ends: 0, bd: { tickets: {}, ribbons: {}, pid: null, ask: null, rolled: null }, votes: {}, skips: [], asDisplay: q.get('display') === '1', err: '' };
 
 await loadAvatarData();
 const stage = createStage($('#view'));
@@ -105,9 +105,10 @@ async function showLobby() {
   const r = S.room, host = isHost(), me = mine(), n = seated().length;
   const modes = { board: ['The Fairground Loop', 'Roll dice round the board, buy ribbons, play a minigame every round.'], marathon: ['Minigame Marathon', 'No board. Vote, play, repeat. Most points wins.'], endless: ['The Fair Never Closes', 'Keep playing, harder and harder. Every 3 games you vote to go on or finish.'] };
   setScreen('lobby', `
-    <div class="panel lobby-code">
+    <div class="panel lobby-code${S.codeSmall ? ' small' : ''}">
       <div class="qr" id="qr"></div>
-      <div><span class="lbl">Join at <b>${esc(location.host)}</b> with code</span><div class="code">${r.code}</div><button class="btn small" data-act="copy">Copy invite link</button></div>
+      <div class="code-txt"><span class="lbl">Join at <b>${esc(location.host)}</b> with code</span><div class="code">${r.code}</div><button class="btn small" data-act="copy">Copy invite link</button></div>
+      <button class="code-fold" data-act="fold" aria-label="${S.codeSmall ? 'Show the QR code' : 'Make this smaller'}">${S.codeSmall ? 'QR ▾' : '▴'}</button>
     </div>
     <div class="panel lobby-main">
       <h2>Players <small>${n} of 4</small></h2>
@@ -294,6 +295,7 @@ screen.addEventListener('click', e => {
     case 'host': saveName(); S.err = ''; S.asDisplay = false; net.create(); break;
     case 'join': { saveName(); if (S.me && !S.me.ready) { net.send({ t: 'profile', name: $('#name')?.value.trim() || S.me.name }); S.me.ready = true; } const code = cleanCode($('#code').value); if (!code) { S.err = `The code is ${CODE_LENGTH} letters.`; showTitle(); break; } S.err = ''; S.asDisplay = $('#as-display').checked; net.join(code, S.asDisplay); break; }
     case 'leave': net.leave(); break;
+    case 'fold': S.codeSmall = !S.codeSmall; try { localStorage.setItem('tumblefair.codeSmall', S.codeSmall ? '1' : ''); } catch { /* private mode */ } showLobby(); break;
     case 'copy': navigator.clipboard?.writeText(joinUrl(S.room.code)).then(() => toast('Invite link copied'), () => toast(joinUrl(S.room.code))) ?? toast(joinUrl(S.room.code)); break;
     case 'opt': net.send({ t: 'opt', key: b.dataset.key, value: b.dataset.num ? +b.dataset.num : b.dataset.bool ? b.dataset.bool === '1' : b.dataset.value }); break;
     case 'start': net.send({ t: 'start' }); break;
@@ -337,11 +339,23 @@ function openShop() {
 }
 
 // ------------------------------------------------------------------ the frame loop
-let lastT = performance.now(), lastCount = -1;
+let lastT = performance.now(), lastCount = -1, netAt = 0;
+// The connection readout (round 4): the round trip to the server and how uneven it is, in the corner during a match,
+// so "it lags" can be told apart from "this phone's line is bad". Green under 80 ms, amber under 160, red above.
+const netq = h('div', 'netq'); document.body.append(netq);
+function drawNet(t) {
+  if (t - netAt < 1000) return; netAt = t;
+  const on = !!S.room && S.phase && S.phase !== 'lobby' && net.status === 'online';
+  netq.hidden = !on; if (!on) return;
+  const j = S.play?.net?.().jitter ?? 0, ms = net.ping + Math.round(j), q = ms < 80 ? 'good' : ms < 160 ? 'ok' : 'bad';
+  netq.className = 'netq ' + q; netq.textContent = `${net.ping} ms${j > 25 ? ` ±${Math.round(j)}` : ''}`;
+  netq.title = 'Round trip to the server (± how uneven it is)';
+}
 function frame(t) {
   const dt = Math.min(0.1, (t - lastT) / 1000); lastT = t;
   lineup.frame(dt); S.board?.frame(dt); S.play?.frame(dt);
   stage.render(dt);
+  drawNet(t);
   const c = left(); if (c !== lastCount) { lastCount = c; for (const e of document.querySelectorAll('.count')) e.textContent = c; }
   requestAnimationFrame(frame);
 }

@@ -1,4 +1,4 @@
-// Players' characters, from the same avatar system Thousandvale uses (Chibi 2), in the two forms this game needs:
+// Players' characters, from the same avatar system Thousandvale uses (Chibi 2.5 since 2026-10-21), in the two forms this game needs:
 //   actor(member)     a 3D body with a seat-colour ring under its feet, for the board and the arena games
 //   portrait(member)  a 2D head-shot (an SVG data URL) for every flat screen: lobby rows, votes, drawing, results
 // A look on the wire is tiny — { race, seed, custom? } plus a costume id — and every browser rebuilds the same avatar.
@@ -7,7 +7,8 @@ import { randomAvatar, makeRng } from '../../../../avatar-2d/js/random.js';
 import { partIds } from '../../../../avatar-2d/js/parts/index.js';
 import { randomChibi2 } from '../../../../avatar-3d/js/chibi2-races.js';
 import { loadClassOutfits, dressAs } from '../../../../avatar-3d/js/class-outfits.js';
-import { createChibi2Character, CHIBI2_ANIMS } from '../../../../avatar-3d/js/chibi2.js';
+import { CHIBI2_ANIMS } from '../../../../avatar-3d/js/chibi2.js';
+import { createTvBody } from '../../../thousandvale/js/client/chibi-version.js';   // Chibi 2.5 bodies, baked in slices (no long stall); ?chibi=2 for the old ones
 import { CHIBI2_EMOTE_ANIMS } from '../../../../avatar-3d/js/chibi2-motion.js';
 import { applyCustom } from '../../../thousandvale/js/client/ui/appearance-core.js';
 import { svgPortrait } from '../../../thousandvale/js/client/ui/svg-portrait.js';
@@ -61,7 +62,7 @@ export async function createActor(m, { scale = 1 } = {}) {
   const disc = new THREE.Mesh(discGeo, new THREE.MeshBasicMaterial({ color: seat.color, transparent: true, opacity: 0.28, depthWrite: false }));
   ring.position.y = 0.03; disc.position.y = 0.025; ring.renderOrder = 2; disc.renderOrder = 1;
   group.add(ring, disc);
-  let body = await createChibi2Character(avatarOf(m.look, m.costume), { anims: ANIMS });
+  let body = await createTvBody(avatarOf(m.look, m.costume), { anims: ANIMS });
   body.group.scale.setScalar(scale); group.add(body.group);
   const A = { group, body, pid: m.pid, seat: m.seat, ring, pose: 'idle', speed: 0, key: JSON.stringify([m.look, m.costume]), height: body.metrics().totalHeight * scale };
   let held = 'idle', shotUntil = 0;

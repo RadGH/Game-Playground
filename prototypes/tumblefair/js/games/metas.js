@@ -1737,6 +1737,188 @@ export const GAMES = Object.freeze({
    "card": "card-lantern-leap",
    "css": true
   }
+ },
+ "trick-or-treat-street": {
+  "meta": {
+   "id": "trick-or-treat-street",
+   "title": "Trick-or-Treat Street",
+   "blurb": "Knock on the glowing doors for candy — but watch out for tricks!",
+   "how": [
+    "Walk up to a GLOWING door and press A to knock.",
+    "Treats: candy +1 to +3, or a BIG BAR +5!",
+    "Tricks: a ghost says BOO (spooked!) or slime slows you down.",
+    "B = bump someone to make them spill a candy. Most candy wins!"
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 60,
+   "scoring": "points",
+   "unit": "candy",
+   "tags": [
+    "action",
+    "holiday"
+   ],
+   "season": "halloween",
+   "controls": {
+    "stick": true,
+    "a": "Knock",
+    "b": "Bump"
+   },
+   "move": {
+    "speed": 5.4,
+    "accel": 28,
+    "stunDrag": 4,
+    "slowMul": 0.45
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 9.5,
+    "hd": 5.6,
+    "wall": true,
+    "posts": [
+     {
+      "x": -4.6,
+      "z": 1.6,
+      "r": 0.28
+     },
+     {
+      "x": 4.6,
+      "z": 1.6,
+      "r": 0.28
+     },
+     {
+      "x": 0,
+      "z": 2.6,
+      "r": 0.62
+     }
+    ]
+   },
+   "pitch": 56,
+   "card": "card-trick-or-treat-street",
+   "css": true
+  }
+ },
+ "ghost-tag": {
+  "meta": {
+   "id": "ghost-tag",
+   "title": "Ghost Tag",
+   "blurb": "One friendly ghost, everyone else runs — get tagged and you turn into a ghost too!",
+   "how": [
+    "Human? RUN! A = a quick dash. A ghost touch makes you a ghost.",
+    "Ghost? Float after the humans and tag them (+3 each). A = BOO!",
+    "Humans score 1 a second. Last human standing +5!",
+    "Everyone starts as the ghost once."
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 90,
+   "scoring": "points",
+   "unit": "pts",
+   "tags": [
+    "action",
+    "holiday"
+   ],
+   "season": "halloween",
+   "controls": {
+    "stick": true,
+    "a": "Dash / Boo"
+   },
+   "move": {
+    "speed": 5.2,
+    "accel": 30,
+    "stunDrag": 3,
+    "boostMul": 1.1
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 9,
+    "hd": 6,
+    "wall": true
+   },
+   "pitch": 58,
+   "card": "card-ghost-tag",
+   "css": true
+  }
+ },
+ "pumpkin-carve-off": {
+  "meta": {
+   "id": "pumpkin-carve-off",
+   "title": "Pumpkin Carve-Off",
+   "blurb": "Carve the secret face on your pumpkin, then vote for the best lantern!",
+   "how": [
+    "You each get a secret pumpkin to carve. Only you can see yours.",
+    "Draw on the pumpkin with your finger: every line glows.",
+    "The lanterns light up at night: vote for the best (not your own!).",
+    "Every vote is a point, and the Night Judge gives a ribbon too."
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 80,
+   "scoring": "vote",
+   "unit": "points",
+   "tags": [
+    "social",
+    "holiday"
+   ],
+   "season": "halloween",
+   "card": "card-pumpkin-carve-off",
+   "css": true
+  }
+ },
+ "apple-bobbing": {
+  "meta": {
+   "id": "apple-bobbing",
+   "title": "Apple Bobbing",
+   "blurb": "Dunk your face and bite the bobbing apples, but not the rubber spider!",
+   "how": [
+    "An apple bobs back and forth in your lane of the tub.",
+    "Press BITE when it is right under your face.",
+    "Golden apples are worth 3. Miss and you get a splash face!",
+    "Leave the rubber spider alone: biting it loses a point."
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 48,
+   "scoring": "points",
+   "unit": "apples",
+   "tags": [
+    "action",
+    "holiday"
+   ],
+   "season": "halloween",
+   "card": "card-apple-bobbing",
+   "css": true
+  }
+ },
+ "monster-mash": {
+  "meta": {
+   "id": "monster-mash",
+   "title": "Monster Mash",
+   "blurb": "Dance to the spooky beat: tap the arrows right on time!",
+   "how": [
+    "Arrows slide down your phone towards the line.",
+    "Tap the matching button as each one reaches the line.",
+    "Your character dances the move: Wave, Hop, Zombie or Clap!",
+    "Perfect taps and long combos score big. Highest score wins!"
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 48,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "action",
+    "holiday"
+   ],
+   "season": "halloween",
+   "card": "card-monster-mash",
+   "css": true
+  }
  }
 });
 export const gameIds = () => Object.keys(GAMES);

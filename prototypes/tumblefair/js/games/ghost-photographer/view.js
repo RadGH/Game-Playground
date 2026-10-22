@@ -116,7 +116,7 @@ export function createView(ctx) {
   function drawClues(pv) {
     if (me == null) return;
     const key = JSON.stringify(pv); if (key === clueKey) return; clueKey = key;
-    const lampLine = pv.lamp ? `<div class="gp-you-lamp">${init.solo ? 'Lantern + camera: walk to a clue, A = snap' : 'You carry the LANTERN: walk ghosts into the light!'} <i>${pv.fc > 0 ? `flash in ${pv.fc}` : 'B = flash ready'}</i></div>` : '';
+    const lampLine = pv.lamp ? `<div class="gp-you-lamp">${init.solo ? ctx.btn('Lantern + camera: walk to a clue, A = snap') : 'You carry the LANTERN: walk ghosts into the light!'} <i>${pv.fc > 0 ? `flash in ${pv.fc}` : ctx.btn('B = flash ready')}</i></div>` : '';
     const cards = pv.clues.map(c => {
       const k = KINDS[c.k], head = `<b><i style="background:${k.color}"></i>${esc(k.name)}</b><small>${c.life} s</small>`;
       if (c.t === 'room') return `<div class="gp-clue">${head}${miniMap(c.room)}<span>Shimmer in <u>${esc(ROOMS[c.room].name)}</u></span></div>`;
@@ -164,7 +164,7 @@ export function createView(ctx) {
       } else if (ev.e === 'flash') { flashT = 1; flashRing.position.set(ev.x, 0.06, ev.z); flashDisc.position.set(ev.x, 0.05, ev.z); ctx.sfx('pick'); }
       else if (ev.e === 'lantern') { if (ev.pid === me) { showBanner('You have the lantern!', 'good'); ctx.sfx('pick'); } else showBanner(`${name(ev.pid)} has the lantern`, '', 1100); }
       else if (ev.e === 'spawn') { ctx.sfx('trap'); showBanner('New clue!', 'warn', 900); }
-      else if (ev.e === 'busy') floatText(stage, ctx.pos(me)?.x ?? 0, 2, ctx.pos(me)?.z ?? 0, 'Hands full! B = flash', '');
+      else if (ev.e === 'busy') floatText(stage, ctx.pos(me)?.x ?? 0, 2, ctx.pos(me)?.z ?? 0, ctx.btn('Hands full! B = flash'), '');
       else if (ev.e === 'nolamp') floatText(stage, ctx.pos(me)?.x ?? 0, 2, ctx.pos(me)?.z ?? 0, 'Only the lantern can flash', '');
       else if (ev.e === 'end') { showBanner(ev.ok ? 'Album full!' : 'They got away…', ev.ok ? 'good' : 'bad', 4000); ctx.sfx(ev.ok ? 'win' : 'bad'); }
     },

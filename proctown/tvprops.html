@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thousandvale Props</title>
+<link rel="stylesheet" href="../shared/style.css">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="tvprops.css">
+<script type="importmap">{ "imports": { "three": "../vendor/three/three.module.js", "three/addons/": "../vendor/three/addons/" } }</script>
+</head>
+<body class="tv-body">
+<div class="tv-bar">
+  <a href="../" class="muted">&larr; Playground</a>
+  <h1>Thousandvale Props</h1>
+  <span class="muted small">Every Thousandvale-only prop, scatter piece, station, tool, marker and dungeon look — built by the game's own
+    files in <code>prototypes/thousandvale/js/client/</code>. Click a tile to orbit it.
+    Also: <a href="propkit.html">Set-piece Kit</a> · <a href="kit.html">Building Kit</a></span>
+  <label>Show <select id="group"><option value="all">Everything</option></select></label>
+  <label>Find <input id="find" type="search" placeholder="id or file"></label>
+  <label class="chk"><input type="checkbox" id="night"> Night</label>
+  <span id="stats" class="muted small"></span>
+</div>
+<div class="tv-main">
+  <section class="tv-grid-wrap"><div id="grid" class="tv-grid"></div></section>
+  <section class="tv-viewer">
+    <div id="view" class="tv-view"></div>
+    <div id="info" class="tv-info muted small">Pick a tile.</div>
+  </section>
+</div>
+<script type="module" src="js/tvprops-app.js"></script>
+</body>
+</html>

@@ -25,6 +25,8 @@
 //   ships.active / ships.state      for tests: { t, total, s, L, x, z, yaw, phase }
 //
 // Pure helpers (exported for tests): voyageProfile(L, T), buildShip({ furled }).
+// Also exported (2026-10-22, for the avatar-3d Vehicles gallery — no behaviour change): buildPier, createSea, createGulls,
+// createSpray, createSerpent, createPlume.
 
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
@@ -362,7 +364,7 @@ export function buildShip({ furled = false } = {}) {
 }
 
 /** A wooden jetty from `from` (on the shore) to `to` (beside the berth), world metres; deck ~1.3 m above the sea. */
-function buildPier(from, to, heightAt) {
+export function buildPier(from, to, heightAt) {
   const M = materials(), dx = to[0] - from[0], dz = to[1] - from[1], len = Math.hypot(dx, dz) + 4, yaw = Math.atan2(dx, dz);
   const parts = [], posts = [];
   const shoreY = Math.max(0.4, heightAt ? heightAt(from[0], from[1]) : 0.6);
@@ -500,7 +502,7 @@ function seaGeometry(R = VOYAGE.seaRadius) {
   g.boundingSphere = new THREE.Sphere(new THREE.Vector3(), R + 10);
   return g;
 }
-function createSea() {
+export function createSea() {
   const uniforms = THREE.UniformsUtils.merge([THREE.UniformsLib.fog, {
     uTime: { value: 0 }, uOff: { value: new THREE.Vector2() }, uBase: { value: VOYAGE.seaLift }, uFadeFrom: { value: VOYAGE.seaFadeFrom }, uRadius: { value: VOYAGE.seaRadius },
     uSun: { value: new THREE.Vector3(0.3, 0.8, 0.2) }, uSky: { value: new THREE.Color('#c9d9e6') }, uDeep: { value: new THREE.Color('#0b2d42') }, uShallow: { value: new THREE.Color('#1f6070') }, uDay: { value: 1 },
@@ -514,7 +516,7 @@ function createSea() {
 // ---------------------------------------------------------------------------------------------------------------------
 // gulls, spray, the brine-wyrm, the ash plume
 
-function createGulls(n = 7) {
+export function createGulls(n = 7) {
   const M = new THREE.MeshStandardMaterial({ color: '#f2f2ee', roughness: 0.8, side: THREE.DoubleSide });
   const tip = new THREE.MeshStandardMaterial({ color: '#4a4f55', roughness: 0.8, side: THREE.DoubleSide });
   const list = [];
@@ -544,7 +546,7 @@ function createGulls(n = 7) {
   };
 }
 
-function createSpray(n = 140) {
+export function createSpray(n = 140) {
   const T = textures();
   const pos = new Float32Array(n * 3), vel = new Float32Array(n * 3), life = new Float32Array(n).fill(-1);
   const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
@@ -568,7 +570,7 @@ function createSpray(n = 140) {
 }
 
 /** The brine-wyrm: a ridged sea serpent, five coils that arch out of the water in turn, a finned head, splashes. */
-function createSerpent() {
+export function createSerpent() {
   const skin = new THREE.MeshStandardMaterial({ color: '#1f4a45', roughness: 0.55, metalness: 0.1 });
   const belly = new THREE.MeshStandardMaterial({ color: '#7f9a6a', roughness: 0.6 });
   const fin = new THREE.MeshStandardMaterial({ color: '#7a2f2a', roughness: 0.6, side: THREE.DoubleSide });
@@ -623,7 +625,7 @@ function createSerpent() {
 }
 
 /** Vharlen's ash: a leaning column of slow smoke over the peak, and a dull red glow in the crater. */
-function createPlume() {
+export function createPlume() {
   const T = textures(), group = new THREE.Group(); group.name = 'ash-plume';
   const puffs = [];
   for (let i = 0; i < 46; i++) {

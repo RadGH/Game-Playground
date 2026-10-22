@@ -1,0 +1,21 @@
+/* Spell FX page: the two tabs and the Thousandvale stage. */
+[hidden] { display: none !important; }
+
+.sfx-tabs { display: flex; gap: 4px; }
+.sfx-tabs button { padding: 4px 12px; border-radius: 14px; background: var(--bg3); border: 1px solid var(--border); color: var(--fg); cursor: pointer; }
+.sfx-tabs button.on { background: var(--accent); color: #000; border-color: var(--accent); }
+
+.tv-viewport { width: 100%; height: 600px; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; position: relative; }
+.tv-viewport canvas { width: 100% !important; height: 100% !important; display: block; }
+.tv-viewport .overlay { position: absolute; left: 8px; bottom: 8px; font-size: 11px; color: var(--fg2); background: rgba(0,0,0,.4); padding: 3px 6px; border-radius: 4px; pointer-events: none; }
+.tv-viewport .caption { position: absolute; left: 8px; top: 8px; font-size: 13px; color: #fff; background: rgba(0,0,0,.5); padding: 4px 8px; border-radius: 4px; pointer-events: none; max-width: 70%; }
+
+.tv-skills { display: flex; flex-direction: column; gap: 6px; }
+.tv-skill { text-align: left; padding: 6px 8px; border-radius: 6px; background: var(--bg3); border: 1px solid var(--border); color: var(--fg); cursor: pointer; }
+.tv-skill:hover { border-color: var(--accent); }
+.tv-skill .name { font-weight: 600; }
+.tv-skill .meta { font-size: 11px; color: var(--fg2); }
+.tv-btns { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+.tv-btns button { font-size: 12px; padding: 3px 8px; }
+.tv-missing { color: #ffb070; }
+@media (max-width: 900px) { .tv-viewport { height: 420px; } }

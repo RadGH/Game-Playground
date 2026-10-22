@@ -19,6 +19,19 @@ export function treasureSvg(id, c) {
     mask: `<path d="M4 24 C14 18 24 20 32 26 C40 20 50 18 60 24 C60 40 50 46 42 46 C36 46 34 40 32 38 C30 40 28 46 22 46 C14 46 4 40 4 24 Z" fill="${c}" ${O}/><ellipse cx="20" cy="31" rx="7" ry="4.5" fill="#173a5c" ${O} stroke-width="2"/><ellipse cx="44" cy="31" rx="7" ry="4.5" fill="#173a5c" ${O} stroke-width="2"/>`,
     bell: `<path d="M32 6 C30 6 29 8 29 10 C18 12 14 22 14 34 C14 42 10 46 8 48 H56 C54 46 50 42 50 34 C50 22 46 12 35 10 C35 8 34 6 32 6 Z" fill="${c}" ${O}/><circle cx="32" cy="54" r="5" fill="#fff" ${O}/>`,
     medal: `<path d="M18 4 H30 L34 26 H22 Z" fill="#2f7ff0" ${O} stroke-width="2"/><path d="M46 4 H34 L30 26 H42 Z" fill="#e8383d" ${O} stroke-width="2"/><circle cx="32" cy="42" r="17" fill="${c}" ${O}/><path d="M32 30 L35.5 38 L44 38.5 L37.5 44 L39.5 52 L32 47.5 L24.5 52 L26.5 44 L20 38.5 L28.5 38 Z" fill="#fff" ${O} stroke-width="2"/>`,
+    // Halloween (round 6): spooky-cute things, each mostly in its colour so colour questions still work
+    pumpkin: `<path d="M32 16 C14 14 6 26 8 40 C10 54 22 58 32 56 C42 58 54 54 56 40 C58 26 50 14 32 16 Z" fill="${c}" ${O}/><path d="M24 18 C18 30 18 46 24 56 M40 18 C46 30 46 46 40 56" fill="none" ${O} stroke-width="2"/><path d="M32 16 C31 10 34 6 38 5" fill="none" stroke="#3f7a2a" stroke-width="5" stroke-linecap="round"/>`,
+    hat: `<path d="M22 46 L32 8 L44 4 L38 14 L42 46 Z" fill="${c}" ${O}/><ellipse cx="32" cy="48" rx="28" ry="7" fill="${c}" ${O}/><path d="M23 40 H41" stroke="#fff" stroke-width="5" opacity=".8"/>`,
+    potion: `<path d="M26 6 H38 V20 C50 24 54 34 52 44 C50 54 42 58 32 58 C22 58 14 54 12 44 C10 34 14 24 26 20 Z" fill="#fff" ${O}/><path d="M14 38 C22 34 42 42 50 36 C52 46 46 56 32 56 C18 56 12 48 14 38 Z" fill="${c}"/><path d="M26 6 H38 V20 C50 24 54 34 52 44 C50 54 42 58 32 58 C22 58 14 54 12 44 C10 34 14 24 26 20 Z" fill="none" ${O}/><rect x="24" y="2" width="16" height="7" rx="2" fill="#a0703a" ${O} stroke-width="2"/><circle cx="26" cy="46" r="3" fill="#fff" opacity=".7"/>`,
+    broom: `<path d="M50 6 L28 36" stroke="#0d2228" stroke-width="8" stroke-linecap="round"/><path d="M50 6 L28 36" stroke="#a0703a" stroke-width="4" stroke-linecap="round"/><path d="M26 32 L36 40 L24 60 C16 60 6 54 4 48 Z" fill="${c}" ${O}/><path d="M22 40 L12 52 M28 44 L20 58" ${O} stroke-width="2"/>`,
+    candy: `<path d="M18 32 L4 20 L8 32 L4 44 Z M46 32 L60 20 L56 32 L60 44 Z" fill="${c}" ${O}/><ellipse cx="32" cy="32" rx="16" ry="13" fill="${c}" ${O}/><path d="M24 24 L40 40" stroke="#fff" stroke-width="4" opacity=".75" stroke-linecap="round"/>`,
+    candle: `<path d="M32 4 C26 12 26 18 32 20 C38 18 38 12 32 4 Z" fill="#ffcf4a" ${O} stroke-width="2"/><rect x="22" y="22" width="20" height="30" rx="3" fill="${c}" ${O}/><path d="M26 22 V30 M36 22 V34" stroke="#fff" stroke-width="3" opacity=".6" stroke-linecap="round"/><ellipse cx="32" cy="54" rx="18" ry="5" fill="#b8c4cc" ${O}/>`,
+    bat: `<path d="M32 24 C24 12 10 12 2 20 C8 22 10 28 8 34 C14 30 20 32 22 38 C26 34 30 36 32 40 C34 36 38 34 42 38 C44 32 50 30 56 34 C54 28 56 22 62 20 C54 12 40 12 32 24 Z" fill="${c}" ${O}/><path d="M26 22 L24 14 L30 20 M38 22 L40 14 L34 20" fill="${c}" ${O} stroke-width="2"/><circle cx="28" cy="27" r="2.4" fill="#fff"/><circle cx="36" cy="27" r="2.4" fill="#fff"/>`,
+    ghost: `<path d="M14 58 V28 C14 10 50 10 50 28 V58 L44 52 L38 58 L32 52 L26 58 L20 52 Z" fill="${c}" ${O}/><ellipse cx="25" cy="30" rx="3.5" ry="5" fill="#0d2228"/><ellipse cx="39" cy="30" rx="3.5" ry="5" fill="#0d2228"/><path d="M28 40 Q32 44 36 40" fill="none" ${O} stroke-width="2.5"/>`,
+    cauldron: `<path d="M8 22 H56 C58 40 50 54 32 54 C14 54 6 40 8 22 Z" fill="${c}" ${O}/><ellipse cx="32" cy="22" rx="24" ry="6" fill="#7dff5a" ${O}/><circle cx="24" cy="14" r="4" fill="#9cff7a" ${O} stroke-width="2"/><circle cx="38" cy="10" r="3" fill="#9cff7a" ${O} stroke-width="2"/><path d="M14 54 L10 60 M50 54 L54 60" ${O}/>`,
+    moon: `<path d="M40 6 C22 8 10 22 12 38 C14 52 28 62 44 58 C30 54 22 42 24 30 C26 18 34 10 40 6 Z" fill="${c}" ${O}/><circle cx="22" cy="40" r="2.5" fill="#0d2228"/><path d="M20 48 Q24 50 28 48" fill="none" ${O} stroke-width="2"/><path d="M48 18 l2 5 l5 1 l-5 2 l-2 5 l-2 -5 l-5 -2 l5 -1 Z" fill="#fff" ${O} stroke-width="1.5"/>`,
+    lolly: `<path d="M32 34 V62" stroke="#0d2228" stroke-width="7" stroke-linecap="round"/><path d="M32 34 V62" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/><circle cx="32" cy="22" r="18" fill="${c}" ${O}/><path d="M32 22 m-10 0 a10 10 0 1 1 10 10 a6 6 0 1 1 -4 -8" fill="none" stroke="#fff" stroke-width="3" opacity=".85" stroke-linecap="round"/>`,
+    cat: `<path d="M14 58 C10 44 14 30 22 26 L18 8 L30 20 H34 L46 8 L42 26 C50 30 54 44 50 58 Z" fill="${c}" ${O}/><ellipse cx="26" cy="36" rx="3.5" ry="4.5" fill="#ffd23f" ${O} stroke-width="1.5"/><ellipse cx="38" cy="36" rx="3.5" ry="4.5" fill="#ffd23f" ${O} stroke-width="1.5"/><path d="M30 44 L32 46 L34 44 M18 44 H8 M46 44 H56" fill="none" ${O} stroke-width="2"/>`,
   }[id] || '';
   return `<svg viewBox="0 0 64 64" class="mh-ic" aria-hidden="true">${body}</svg>`;
 }
@@ -28,7 +41,7 @@ export function createView(ctx) {
   const { ui, players, me, init } = ctx, T = init.treasures, C = init.colours;
   const byPid = new Map(players.map(p => [p.pid, p])), watching = me == null;
   ui.innerHTML = `
-    <div class="mh-top"><span class="mh-title">Memory Heist</span><span class="clock"><b>--</b></span></div>
+    <div class="mh-top"><span class="mh-title">${ctx.season === 'halloween' ? 'Haunted Heist' : 'Memory Heist'}</span><span class="clock"><b>--</b></span></div>
     <div class="mh-stage">
       <div class="mh-vault" style="--ar:${(init.w / init.h).toFixed(3)}"><div class="mh-door"><i></i><b>VAULT</b></div><div class="mh-grid" style="--w:${init.w};--h:${init.h}"></div></div>
       <div class="mh-quiz"><p class="mh-qn"></p><p class="mh-q"></p><div class="mh-opts"></div></div>
@@ -68,7 +81,7 @@ export function createView(ctx) {
       if (g.vault) drawVault(g.vault);
       $('.clock b').textContent = g.left;
       $('.clock').classList.toggle('hurry', g.phase === 'q' && g.left <= 3);
-      $('.mh-title').textContent = g.phase === 'study' ? 'Remember everything!' : g.phase === 'end' ? 'What was in the vault' : 'Memory Heist';
+      $('.mh-title').textContent = g.phase === 'study' ? 'Remember everything!' : g.phase === 'end' ? 'What was in the vault' : ctx.season === 'halloween' ? 'Haunted Heist' : 'Memory Heist';
       for (const p of players) {
         const r = ui.querySelector(`.mh-players [data-pid="${p.pid}"]`); r.querySelector('.sc').textContent = g.scores[p.pid];
         r.classList.toggle('in', g.phase === 'q' && g.in.includes(p.pid));

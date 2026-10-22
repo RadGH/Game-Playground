@@ -26,7 +26,7 @@ const COMMON_TYPES = {
 
 const BOARDS = [
   {
-    id: 'fairground', title: 'The Fairground Loop', backdrop: 'board-fairground-loop', N: 24, RX: 15.5, RZ: 11.5, sq: 0.72,
+    id: 'fairground', title: 'The Fairground Loop', backdrop: 'board-fairground-loop', seasonBackdrops: { halloween: 'board-fairground-loop-halloween' }, N: 24, RX: 15.5, RZ: 11.5, sq: 0.72,
     about: 'Starter board. Walk the loop, pick up tickets, buy prize ribbons at the two booths. The shortcut through the middle saves six spaces and has two puddles and the jackpot on it.',
     // the loop, clockwise from the gate at the bottom (round 5: five ticket stands became a duck pond, dice duels and a bumper cart)
     loop: ['start', 'ticket', 'chance', 'duck', 'fork', 'pit', 'ticket', 'booth', 'duel', 'chance', 'pit', 'bumper',
@@ -61,7 +61,7 @@ function build(B) {
   from.next = ['s' + (B.from + 1), 'c0']; from.labels = B.labels; from.type = 'fork';
   const FIT = fileURLToPath(new URL(`../data/boards/${B.id}-fit.json`, import.meta.url));
   if (existsSync(FIT)) { const fit = JSON.parse(readFileSync(FIT, 'utf8')); for (const s of spaces) if (fit[s.id]) [s.x, s.z] = fit[s.id]; }
-  const board = { id: B.id, title: B.title, backdrop: B.backdrop, ...(B.guideField ? { guideField: B.guideField } : {}), size: 40, start: 's0', about: B.about, types: { ...COMMON_TYPES, ...B.types }, spaces };
+  const board = { id: B.id, title: B.title, backdrop: B.backdrop, ...(B.guideField ? { guideField: B.guideField } : {}), ...(B.seasonBackdrops ? { seasonBackdrops: B.seasonBackdrops } : {}), size: 40, start: 's0', about: B.about, types: { ...COMMON_TYPES, ...B.types }, spaces };
   writeFileSync(fileURLToPath(new URL(`../data/boards/${B.id}.json`, import.meta.url)), JSON.stringify(board, null, 1) + '\n');
   console.log(`${B.id}: ${spaces.length} spaces`);
 }

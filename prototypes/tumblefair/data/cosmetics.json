@@ -1,5 +1,5 @@
 {
- "about": "Costumes bought with coins. A costume is only clothes: it never changes how you play. `outfit` is either a key of avatar-3d/data/class-outfits.json (worn without the things it carries) or, from round 5, an object of avatar slots laid straight over the look ({ hat, top, bottom, shoes, cape, accessory, decor, extras, ears: { id, color, color2 } }; every id is checked by tests/costumes.test.js). null = the look's own clothes. price 0 = everyone owns it. `tag` = a little label in the shop ('New', 'Spooky').",
+ "about": "Costumes bought with coins. A costume is only clothes: it never changes how you play. `outfit` is either a key of avatar-3d/data/class-outfits.json (worn without the things it carries) or, from round 5, an object of avatar slots laid straight over the look ({ hat, top, bottom, shoes, cape, accessory, decor, extras, ears: { id, color, color2 } }; every id is checked by tests/costumes.test.js). null = the look's own clothes. price 0 = everyone owns it. `tag` = a little label in the shop ('New', 'Spooky'). `season` (round 6) = only in the shop, and only worn, while that holiday is on by the date (js/shared/seasons.js); outside it the costume is hidden and its wearer is drawn in their own clothes.",
  "items": [
   {
    "id": "cos_none",
@@ -341,7 +341,8 @@
    },
    "name": "Pumpkin Head",
    "price": 0,
-   "tag": "Spooky"
+   "tag": "Halloween",
+   "season": "halloween"
   },
   {
    "id": "cos_blackcat",
@@ -380,7 +381,8 @@
    },
    "name": "Black Cat",
    "price": 0,
-   "tag": "Spooky"
+   "tag": "Halloween",
+   "season": "halloween"
   },
   {
    "id": "cos_lifeguard",
@@ -583,7 +585,8 @@
    },
    "name": "Scarecrow",
    "price": 60,
-   "tag": "Spooky"
+   "tag": "Halloween",
+   "season": "halloween"
   },
   {
    "id": "cos_icecream",
@@ -1082,7 +1085,8 @@
    },
    "name": "Mummy Mix-up",
    "price": 120,
-   "tag": "Spooky"
+   "tag": "Halloween",
+   "season": "halloween"
   },
   {
    "id": "cos_ghost",
@@ -1114,7 +1118,8 @@
    },
    "name": "Bedsheet Ghost",
    "price": 120,
-   "tag": "Spooky"
+   "tag": "Halloween",
+   "season": "halloween"
   },
   {
    "id": "cos_witch",
@@ -1149,7 +1154,8 @@
    },
    "name": "Hedge Witch",
    "price": 140,
-   "tag": "Spooky"
+   "tag": "Halloween",
+   "season": "halloween"
   },
   {
    "id": "cos_nightvisitor",
@@ -1186,7 +1192,8 @@
    },
    "name": "Night Visitor",
    "price": 140,
-   "tag": "Spooky"
+   "tag": "Halloween",
+   "season": "halloween"
   },
   {
    "id": "cos_viking",
@@ -1363,6 +1370,493 @@
    "name": "Golden Ticket",
    "price": 250,
    "tag": "New"
+  },
+  {
+   "id": "cos_zombie",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "none"
+    },
+    "top": {
+     "id": "rags",
+     "color": "#6a7a5a",
+     "color2": "#8a5a3a"
+    },
+    "bottom": {
+     "id": "ragged",
+     "color": "#4a4a6a"
+    },
+    "shoes": {
+     "id": "wraps",
+     "color": "#8a8070"
+    },
+    "extras": {
+     "id": "undead_skin",
+     "color": "#9ac08a"
+    },
+    "accessory": {
+     "id": "none"
+    },
+    "cape": {
+     "id": "none"
+    }
+   },
+   "name": "Shuffling Zombie",
+   "price": 0,
+   "tag": "Halloween",
+   "season": "halloween"
+  },
+  {
+   "id": "cos_werewolf",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "wolf_helm",
+     "color": "#8a8a92",
+     "color2": "#3a3a42"
+    },
+    "top": {
+     "id": "fur_tunic",
+     "color": "#7a7a82"
+    },
+    "bottom": {
+     "id": "ragged",
+     "color": "#4a3a2a"
+    },
+    "shoes": {
+     "id": "hooves",
+     "color": "#3a3a42"
+    },
+    "ears": {
+     "id": "wolf_ears",
+     "color": "#7a7a82"
+    },
+    "cape": {
+     "id": "none"
+    },
+    "accessory": {
+     "id": "none"
+    }
+   },
+   "name": "Full Moon Howler",
+   "price": 60,
+   "tag": "Halloween",
+   "season": "halloween"
+  },
+  {
+   "id": "cos_candycorn",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "wizard",
+     "color": "#ffffff",
+     "color2": "#ffb020"
+    },
+    "top": {
+     "id": "tunic",
+     "color": "#ff8a1a",
+     "color2": "#ffd23f"
+    },
+    "bottom": {
+     "id": "leggings",
+     "color": "#ffd23f"
+    },
+    "shoes": {
+     "id": "sneakers",
+     "color": "#ffffff"
+    },
+    "accessory": {
+     "id": "none"
+    },
+    "cape": {
+     "id": "none"
+    }
+   },
+   "name": "Candy Corn Kid",
+   "price": 0,
+   "tag": "Halloween",
+   "season": "halloween"
+  },
+  {
+   "id": "cos_ghostpirate",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "tricorn",
+     "color": "#7adcc8",
+     "color2": "#2a6a6a"
+    },
+    "top": {
+     "id": "coat",
+     "color": "#4aa89a",
+     "color2": "#c8fff4"
+    },
+    "bottom": {
+     "id": "baggy",
+     "color": "#a8e8dc"
+    },
+    "shoes": {
+     "id": "knee_boots",
+     "color": "#2a5a5a"
+    },
+    "extras": {
+     "id": "pale",
+     "color": "#d8fff8"
+    },
+    "accessory": {
+     "id": "eyepatch",
+     "color": "#1a3a3a"
+    },
+    "cape": {
+     "id": "tattered_cape",
+     "color": "#7adcc8"
+    }
+   },
+   "name": "Ghost Pirate",
+   "price": 100,
+   "tag": "Halloween",
+   "season": "halloween"
+  },
+  {
+   "id": "cos_boltmonster",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "none"
+    },
+    "top": {
+     "id": "coat",
+     "color": "#2a2a32",
+     "color2": "#5a5a62"
+    },
+    "bottom": {
+     "id": "pants",
+     "color": "#3a3a42"
+    },
+    "shoes": {
+     "id": "heavy",
+     "color": "#1a1a1a"
+    },
+    "extras": {
+     "id": "undead_skin",
+     "color": "#8ad07a"
+    },
+    "accessory": {
+     "id": "none"
+    },
+    "cape": {
+     "id": "none"
+    }
+   },
+   "name": "Bolt-Neck Monster",
+   "price": 80,
+   "tag": "Halloween",
+   "season": "halloween"
+  },
+  {
+   "id": "cos_owl",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "feather_cap",
+     "color": "#8a5a3a",
+     "color2": "#ffd23f"
+    },
+    "top": {
+     "id": "tunic",
+     "color": "#7a5a3a",
+     "color2": "#e8d8b8"
+    },
+    "bottom": {
+     "id": "leggings",
+     "color": "#5a3a2a"
+    },
+    "shoes": {
+     "id": "boots",
+     "color": "#ffb020"
+    },
+    "cape": {
+     "id": "feather_mantle",
+     "color": "#8a6a4a"
+    },
+    "accessory": {
+     "id": "round_glasses",
+     "color": "#ffd23f"
+    }
+   },
+   "name": "Night Owl",
+   "price": 60,
+   "tag": "Halloween",
+   "season": "halloween"
+  },
+  {
+   "id": "cos_bat",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "hood",
+     "color": "#2a1a3a"
+    },
+    "top": {
+     "id": "hoodie",
+     "color": "#2a1a3a",
+     "color2": "#8a3ad8"
+    },
+    "bottom": {
+     "id": "leggings",
+     "color": "#2a1a3a"
+    },
+    "shoes": {
+     "id": "slippers",
+     "color": "#2a1a3a"
+    },
+    "ears": {
+     "id": "pointed",
+     "color": "#2a1a3a"
+    },
+    "cape": {
+     "id": "cape",
+     "color": "#3a2a4a",
+     "color2": "#8a3ad8"
+    },
+    "accessory": {
+     "id": "none"
+    }
+   },
+   "name": "Little Bat",
+   "price": 40,
+   "tag": "Halloween",
+   "season": "halloween"
+  },
+  {
+   "id": "cos_spider",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "none"
+    },
+    "top": {
+     "id": "hoodie",
+     "color": "#1a1a1a",
+     "color2": "#d02a2a"
+    },
+    "bottom": {
+     "id": "leggings",
+     "color": "#1a1a1a"
+    },
+    "shoes": {
+     "id": "sneakers",
+     "color": "#d02a2a"
+    },
+    "extras": {
+     "id": "paint_dots",
+     "color": "#ffffff"
+    },
+    "accessory": {
+     "id": "goggles",
+     "color": "#d02a2a"
+    },
+    "cape": {
+     "id": "none"
+    }
+   },
+   "name": "Itsy Spider",
+   "price": 40,
+   "tag": "Halloween",
+   "season": "halloween"
+  },
+  {
+   "id": "cos_dolly",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "flower",
+     "color": "#f4e8ff",
+     "color2": "#b8a8d8"
+    },
+    "top": {
+     "id": "bodice_dress",
+     "color": "#e8d8ff",
+     "color2": "#ffffff"
+    },
+    "bottom": {
+     "id": "leggings",
+     "color": "#ffffff"
+    },
+    "shoes": {
+     "id": "shoes",
+     "color": "#3a2a4a"
+    },
+    "extras": {
+     "id": "blush",
+     "color": "#ff9ab0"
+    },
+    "accessory": {
+     "id": "none"
+    },
+    "cape": {
+     "id": "shawl",
+     "color": "#d8c8f0"
+    }
+   },
+   "name": "Creaky Doll",
+   "price": 100,
+   "tag": "Halloween",
+   "season": "halloween"
+  },
+  {
+   "id": "cos_cobweb",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "crown",
+     "color": "#b8b8c8"
+    },
+    "top": {
+     "id": "gown",
+     "color": "#f0f0f8",
+     "color2": "#a8a8b8"
+    },
+    "bottom": {
+     "id": "leggings",
+     "color": "#e8e8f0"
+    },
+    "shoes": {
+     "id": "pointed",
+     "color": "#c8c8d8"
+    },
+    "cape": {
+     "id": "long_cloak",
+     "color": "#d8d8e8",
+     "color2": "#a8a8b8"
+    },
+    "extras": {
+     "id": "pale",
+     "color": "#f0f0ff"
+    },
+    "accessory": {
+     "id": "none"
+    }
+   },
+   "name": "Cobweb Royal",
+   "price": 140,
+   "tag": "Halloween",
+   "season": "halloween"
+  },
+  {
+   "id": "cos_trickortreater",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "cap",
+     "color": "#ff8a1a"
+    },
+    "top": {
+     "id": "hoodie",
+     "color": "#ff8a1a",
+     "color2": "#2a2a2a"
+    },
+    "bottom": {
+     "id": "pants",
+     "color": "#2a2a2a"
+    },
+    "shoes": {
+     "id": "sneakers",
+     "color": "#ff8a1a"
+    },
+    "cape": {
+     "id": "cape",
+     "color": "#2a2a2a",
+     "color2": "#ff8a1a"
+    },
+    "accessory": {
+     "id": "mask",
+     "color": "#2a2a2a"
+    }
+   },
+   "name": "Trick-or-Treater",
+   "price": 0,
+   "tag": "Halloween",
+   "season": "halloween"
+  },
+  {
+   "id": "cos_mushroom",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "wide_brim",
+     "color": "#d02a2a",
+     "color2": "#ffffff"
+    },
+    "top": {
+     "id": "tunic",
+     "color": "#f4ecd8",
+     "color2": "#d02a2a"
+    },
+    "bottom": {
+     "id": "shorts",
+     "color": "#e8dcc0"
+    },
+    "shoes": {
+     "id": "slippers",
+     "color": "#8a5a3a"
+    },
+    "extras": {
+     "id": "paint_dots",
+     "color": "#ffffff"
+    },
+    "accessory": {
+     "id": "none"
+    },
+    "cape": {
+     "id": "none"
+    }
+   },
+   "name": "Toadstool Sprite",
+   "price": 80,
+   "tag": "Halloween",
+   "season": "halloween"
+  },
+  {
+   "id": "cos_pumpkinking",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "crown",
+     "color": "#ff8a1a",
+     "color2": "#2a8a2a"
+    },
+    "top": {
+     "id": "doublet",
+     "color": "#1a1a22",
+     "color2": "#ff8a1a"
+    },
+    "bottom": {
+     "id": "breeches",
+     "color": "#1a1a22"
+    },
+    "shoes": {
+     "id": "pointed",
+     "color": "#ff8a1a"
+    },
+    "cape": {
+     "id": "cape",
+     "color": "#ff8a1a",
+     "color2": "#1a1a22"
+    },
+    "extras": {
+     "id": "warpaint",
+     "color": "#1a1a1a"
+    },
+    "accessory": {
+     "id": "none"
+    }
+   },
+   "name": "Pumpkin King",
+   "price": 200,
+   "tag": "Halloween",
+   "season": "halloween"
   }
  ]
 }

@@ -19,3 +19,37 @@
 /* ---- Stack Attack ---- */
 .tag.sa-height { font-size: 16px; padding: 1px 10px; }
 .tag.sa-height span::after { content: ' high'; font-size: 11px; font-weight: 600; }
+
+/* ---- Halloween reskins (round 6): the intro ribbon; per-game rules use .game-<id>.season-halloween (play.js adds it) ---- */
+.season-ribbon.halloween { margin: -4px 0 -2px; padding: 3px 16px 3px 14px; font-weight: 900; font-size: 14px; letter-spacing: .4px; text-transform: uppercase;
+  color: #fff4e4; background: linear-gradient(90deg, #7a3cc8, #ff7a14); border: 2.5px solid #1d1430; border-radius: 999px; box-shadow: 0 3px 0 #1d1430; rotate: -2deg; }
+.season-ribbon.halloween::before { content: ''; display: inline-block; width: 14px; height: 12px; margin-right: 6px; vertical-align: -1px; border-radius: 50% 50% 46% 46%;
+  background: radial-gradient(circle at 50% 60%, #ffd36b 0 18%, transparent 20%), #ff8a1a; box-shadow: inset 0 0 0 1.5px #1d1430; }
+/* Jellybean Jar at Halloween: a candy-shop counter at night */
+.game-jellybean-jar.season-halloween { background: repeating-linear-gradient(90deg, #3a2160 0 34px, #2c1a4a 34px 68px); }
+.game-jellybean-jar.season-halloween .jj-title { color: #ff8a1a; }
+.game-jellybean-jar.season-halloween .jj-ask b { color: #7a3cc8; }
+.game-jellybean-jar.season-halloween .jj-sent { color: #7dff5a; text-shadow: 0 2px 0 #1d1430; }
+/* Coinstorm at Halloween: a dusk sky, candy in place of coins (wrapped sweets in three flavours) */
+.game-coinstorm.season-halloween { background: linear-gradient(#2c1a4a, #6a3d8f 55%, #3f5e3a 55.2%, #2b4a2c); }
+.game-coinstorm.season-halloween.storm { background: linear-gradient(#1a1228, #3b3458 55%, #2f4a32 55.2%, #1f3522); }
+.game-coinstorm.season-halloween.sun { background: linear-gradient(#ff9a3a, #ffd08a 55%, #5f8a4a 55.2%, #3f6a35); }
+.game-coinstorm.season-halloween .cn-coins i { border-radius: 40%; background: radial-gradient(circle at 35% 35%, #ffe0b0, #ff8a1a 60%, #c45400); position: relative; margin: 0 5px; }
+.game-coinstorm.season-halloween .cn-coins i:nth-child(3n+2) { background: radial-gradient(circle at 35% 35%, #ead4ff, #9b5be0 60%, #5a2a99); }
+.game-coinstorm.season-halloween .cn-coins i:nth-child(3n) { background: radial-gradient(circle at 35% 35%, #e4ffd8, #6fd14a 60%, #2f8a1f); }
+.game-coinstorm.season-halloween .cn-coins i::before, .game-coinstorm.season-halloween .cn-coins i::after { content: ''; position: absolute; top: 2px; width: 7px; height: 8px; background: inherit; border: 2px solid var(--ink); clip-path: polygon(0 0, 100% 50%, 0 100%); }
+.game-coinstorm.season-halloween .cn-coins i::before { left: -8px; rotate: 180deg; } .game-coinstorm.season-halloween .cn-coins i::after { right: -8px; }
+.game-coinstorm.season-halloween .cn-note { color: #fff4e4; text-shadow: 0 2px 0 #1d1430; }
+/* Memory Heist at Halloween: a haunted vault in purple, cells like little lit windows */
+.game-memory-heist.season-halloween { background: radial-gradient(circle at 50% 35%, #4b2f74, #170f26 75%); }
+.game-memory-heist.season-halloween .mh-vault { background: #4a3a66; box-shadow: inset 0 0 0 6px #7a62a6, 0 8px 0 var(--ink); }
+.game-memory-heist.season-halloween .mh-cell { background: radial-gradient(circle at 50% 40%, #574b66, #1e1828); }
+.game-memory-heist.season-halloween .mh-door { background: radial-gradient(circle, #b9a3d6 0 18%, #7a62a6 19% 40%, #9a84c4 41% 100%); }
+/* Trapdoor Treasury at Halloween: a candy vault — purple dusk over the art, candy bursting out instead of gold */
+.game-trapdoor-treasury.season-halloween { background: linear-gradient(rgba(50, 16, 90, .62), rgba(20, 8, 40, .85)), var(--vault) center 40% / cover no-repeat, #24123a; }
+.game-trapdoor-treasury.season-halloween .tt-chest { background: rgba(40, 18, 70, .6); border-color: rgba(255, 160, 80, .45); }
+.game-trapdoor-treasury.season-halloween .tt-chest.mine { background: rgba(255, 138, 26, .3); border-color: #ff8a1a; box-shadow: 0 0 0 4px #ff8a1a, 0 0 26px rgba(255, 138, 26, .6); }
+.game-trapdoor-treasury.season-halloween .tt-coins i { border-radius: 40%; background: radial-gradient(circle at 35% 35%, #ffe0b0, #ff8a1a 55%, #c45400); border-color: #3a1a0e; }
+.game-trapdoor-treasury.season-halloween .tt-coins i:nth-child(odd) { background: radial-gradient(circle at 35% 35%, #ead4ff, #9b5be0 55%, #5a2a99); }
+.game-trapdoor-treasury.season-halloween .tt-bank { background: #ff9a3a; }
+.game-trapdoor-treasury.season-halloween .tt-bank.mine { background: #ffd08a; }

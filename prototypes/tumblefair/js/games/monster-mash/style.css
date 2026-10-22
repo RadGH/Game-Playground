@@ -1,0 +1,53 @@
+/* Monster Mash — the graveyard stage shows through at the top; the arrow highway and four big dance buttons fill the
+   bottom of a phone, each button its own colour AND its own arrow and word. */
+.game-monster-mash { pointer-events: auto; display: flex; flex-direction: column; align-items: center; gap: 6px; overflow-x: hidden; overflow-y: auto;
+  padding: calc(var(--st) + 8px) calc(var(--sr) + 10px) calc(var(--sb) + 14px) calc(var(--sl) + 10px);
+  background: linear-gradient(rgba(29, 20, 48, 0) 36%, rgba(29, 20, 48, .6) 56%, rgba(20, 12, 36, .92)); color: #fff; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.game-monster-mash > * { flex: none; }
+.mm-top { display: flex; gap: 12px; align-items: center; justify-content: center; }
+.mm-sec { color: #c9a0ff; font: 900 23px/1.1 var(--font); -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; text-shadow: 0 2px 0 var(--ink); }
+.mm-board { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
+.mm-board .chip { color: var(--ink); padding-right: 8px; }
+.mm-board .sc { font-style: normal; background: #efe2ff; border-radius: 8px; padding: 0 7px; }
+.mm-board .chip.me { box-shadow: 0 0 0 3px #fff; }
+.mm-board .chip.lead { background: var(--sun); }
+.mm-cb { font-size: 12px; color: #a020c0; } .mm-cb:empty { display: none; }
+
+.mm-play { margin-top: auto; display: grid; justify-items: center; gap: 6px; width: min(100%, 540px); }
+.mm-lane { position: relative; width: 100%; height: clamp(150px, 28dvh, 290px); }
+.mm-lane canvas { width: 100%; height: 100%; display: block; }
+.mm-judge { position: absolute; left: 0; right: 0; top: 34%; text-align: center; font: 900 28px/1 var(--font); color: #fff; -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; opacity: 0; pointer-events: none; }
+.mm-judge.pop { animation: mm-pop .55s ease-out; }
+.mm-judge.perfect { color: var(--sun); } .mm-judge.good { color: #8fe0ff; } .mm-judge.miss, .mm-judge.stray { color: #ff8a8a; }
+@keyframes mm-pop { 0% { opacity: 1; transform: scale(1.3); } 60% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(-14px); } }
+.mm-count { position: absolute; inset: 0; display: grid; place-items: center; font: 900 72px/1 var(--font); color: #ffb32a; -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; pointer-events: none; }
+.mm-me { display: flex; gap: 12px; align-items: baseline; min-height: 30px; }
+.mm-score { font: 900 28px/1 var(--font); -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; }
+.mm-combo { font: 900 16px/1 var(--font); color: var(--sun); }
+.mm-pads { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; width: 100%; }
+.mm-pad { height: clamp(78px, 13dvh, 120px); border: 4px solid var(--ink); border-radius: 20px; background: var(--c); box-shadow: 0 6px 0 var(--ink); color: #fff; padding: 4px 2px;
+  display: grid; place-items: center; align-content: center; gap: 2px; touch-action: none; -webkit-tap-highlight-color: transparent; }
+.mm-pad svg { width: 46%; max-width: 52px; height: auto; color: #fff; }
+.mm-pad b { font: 900 15px/1 var(--font); color: var(--ink); background: rgba(255, 255, 255, .85); border-radius: 8px; padding: 2px 6px; }
+.mm-pad.hit { animation: mm-press .15s ease-out; }
+@keyframes mm-press { 0% { transform: translateY(5px); box-shadow: 0 1px 0 var(--ink); filter: brightness(1.35); } 100% { transform: none; } }
+.mm-note { margin: 0; color: #f6eaff; text-align: center; font-size: 14px; text-shadow: 0 1px 0 var(--ink); }
+.mm-note:empty { display: none; }
+.game-monster-mash.watching .mm-pads, .game-monster-mash.watching .mm-me { display: none; }
+.game-monster-mash.watching .mm-lane { height: clamp(130px, 30dvh, 280px); width: min(100%, 420px); }
+.game-monster-mash.watching .mm-play { width: 100%; }
+.game-monster-mash[data-phase=end] .mm-pads { opacity: .4; pointer-events: none; }
+@media (min-width: 760px) and (min-height: 560px) { .mm-board .chip { font-size: 17px; } }
+/* a phone on its side: lane on the left, the four buttons in a 2 x 2 block on the right, the stage above both */
+@media (max-height: 500px) {
+  .mm-board { display: none; }
+  .mm-play { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: 'lane pads' 'me pads'; align-items: end; column-gap: 14px; width: min(100%, 760px); }
+  .mm-lane { grid-area: lane; height: 34dvh; } .mm-me { grid-area: me; min-height: 0; } .mm-score { font-size: 20px; }
+  .mm-pads { grid-area: pads; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .mm-pad { height: 21dvh; min-height: 56px; } .mm-pad svg { width: 30%; } .mm-pad b { font-size: 13px; }
+  .mm-moon { display: none; }
+}
+.mm-moon { position: absolute; right: 7%; top: calc(var(--st) + 120px); width: 64px; height: 64px; border-radius: 50%; pointer-events: none; flex: none;
+  background: radial-gradient(circle at 38% 36%, #fffbe0, #ffe9a0 60%, #f3cf6a); box-shadow: 0 0 40px 12px rgba(255, 233, 160, .22); }
+.mm-moon::after { content: ''; position: absolute; left: 24%; top: 30%; width: 14%; height: 14%; border-radius: 50%; background: #f0cf73; box-shadow: 20px 12px 0 2px #f0cf73; opacity: .7; }
+@media (min-aspect-ratio: 1/1) { .mm-moon { top: calc(var(--st) + 150px); right: 4%; width: 72px; height: 72px; } }

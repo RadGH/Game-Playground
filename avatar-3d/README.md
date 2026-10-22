@@ -81,6 +81,25 @@ Bespoke Chibi 2 accessories are tracked in `data/chibi2-assets.json`; Emberveil'
 
 The gallery (`creatures.html`) now animates (nothing used to tick the creature, so every clip chip showed a statue) and has a **Designed looks** panel listing `creature-variants.json`.
 
+### Thousandvale monsters on the gallery (2026-10-22)
+
+`creatures.html` has a **Thousandvale monsters** panel (right side): every Thousandvale-only monster look, read LIVE from
+Thousandvale's own files — nothing is copied into avatar-3d:
+
+- `prototypes/thousandvale/data/monster-looks.json` — `{ type: look }` (today: `grove_wolf`)
+- `prototypes/thousandvale/data/rules/monsters-tv.json` — `monsters[].look`: the Vharlen island set (scoria crawler,
+  ashback salamander, pumice golem, vent wisp, glasswing, steamwood prowler, sulphur toad, obsidian warden, mudback
+  lurker, the world boss Ossathra, fallow deer, cinderhorn goat) and three Slagborn humanoids (raider, firecaller, chief)
+
+`js/tv-monsters-gallery.js` loads them with the game's precedence (monsters-tv.json wins) and builds each one the way
+Thousandvale's client does (`prototypes/thousandvale/js/client/actors.js` `build()`): a creature look is
+`createCreature({ ...look.creature, size }, { detail: 0.8 })` then `compactCreature()` (a boss: detail 1 and 1.45x the
+size, as `rankScale('boss')`); a humanoid look (`look.avatar`) goes through Thousandvale's own `createTvBody`
+(`js/client/chibi-version.js`, Chibi 2.5); a `flying` look hovers 1.3 m up and plays `fly`. The chips are split into
+Creatures and Humanoids; hovering one shows the monster's description, level range and source file; the camera frames
+each body by its drawn size. A missing file adds nothing (no error). `window.creatures3d.pickTv(id)` / `.tvMonsters`
+are there for tests. A new row in either Thousandvale file shows up on the page with no change here.
+
 ## Vehicles — `js/vehicles.js`, demo `vehicles.html`
 
 Procedural travel vehicles in the same chunky primitive style, for games with a road in them. Seven
@@ -111,6 +130,26 @@ axles run along z), so a scene rotates the group to aim it. `metrics().hitch` is
 stands and `.seat` is where a driver would sit, if a game wants to put a hero on the bench.
 `vehicleModelFor(id)` maps a game's own vehicle ids onto the catalog — Emberveil's `VEHICLES` keys
 (`none` → nothing drawn, `mule` → `pack_mule`, and the rest one to one).
+
+### Thousandvale's ship and carts on the gallery (2026-10-22)
+
+`vehicles.html` has a **Thousandvale** panel (right side) with four entries, all imported from Thousandvale's client
+(`js/tv-vehicles-gallery.js`; nothing copied):
+
+| Entry | From | What it shows |
+|---|---|---|
+| Ship — under sail | `prototypes/thousandvale/js/client/ship-view.js` `buildShip({ furled: false })` | the Saltwren, three masts, eleven sails set, on the voyage's animated sea (`createSea`) with its wake, `createGulls`, bow spray (`createSpray`), the brine-wyrm breaching every 13 s off the starboard bow (`createSerpent`) and Vharlen's ash plume on the horizon (`createPlume`); posed with the voyage's pitch and roll |
+| Ship — moored at its jetty | `buildShip({ furled: true })` + `buildPier` | sails furled, bobbing at the water line beside Port Vharl's jetty (berth and pier from `data/provinces/ships.json`) |
+| Ox cart (Thousandvale) | `carts-view.js` `createCarts()` | the paid fast-travel cart exactly as the game builds it: `CART_SPEC` (this file's `ox_cart` pulled by `CART_HORSE`, a bay draft horse) backed up between the shafts |
+| Ox cart with the ox (OX) | `carts-view.js` `OX` | the older ox look (still exported, no longer used by the game), with the same shaft adjustment |
+
+A ship entry gives the page a sky, fog and a far camera (31 m long, 35 m tall) and hides the floor disc; the left panel
+then has **At sea** checkboxes for the sea, gulls, spray, brine-wyrm and plume (with the sea off the ship stands on its
+keel in the sky). Picking any ordinary vehicle puts the page's own stage back. For this, ship-view.js now `export`s
+`buildPier`, `createSea`, `createGulls`, `createSpray`, `createSerpent` and `createPlume` (export only, no change in how
+they work). The built harbour of `harbour-view.js` (Gullwick's quay, piers, sheds, rowboats) is NOT here: it is a list of
+parts for the town kit's instanced meshes and needs a baked zone's harbour record, so it belongs with town props, not
+with the ship. `window.vehicles3d.pickTv(id)` / `.tvVehicles` are there for tests.
 
 Emberveil 2 parks the party's vehicle behind them on the world stage, stands it at the edge of the camp
 circle in the firelight, and rolls it across the stage during a crossing
@@ -332,7 +371,25 @@ Other helpers: `statusesOn(target)`, `pulseStatus(target, type)` (one swell, for
 
 ### Gallery — `spellfx.html`
 
-Two chibi bodies on a stage, element chips, cast/projectile/impact/heal/revive/zone buttons, a **Channelled & area** panel (breath for 2 s, an orbiting orb that zaps the other body, pillar, vortex, storm, a line of footprints — all with the selected element), a status checkbox per body, and **Play everything** which fires all 11 elements then all 23 auras in order. `window.spellfxDemo` exposes the same API for tests, plus `breath(id, sec)`, `breathPulse(id)`, `orb(id)` (toggle), `pillar(id)`, `vortex(id)`, `storm(id)`, `footsteps(id)`, `footfall(id, x, z)`, `stats()`, `lights()`, and `freeze()` / `unfreeze()` / `step(sec, n)` — the effects layer stops advancing while the scene keeps rendering, which is how the screenshot tools catch a burst at its peak.
+Two chibi bodies on a stage, element chips, cast/projectile/impact/heal/revive/zone buttons, a **Channelled & area** panel (breath for 2 s, an orbiting orb that zaps the other body, pillar, vortex, storm, a line of footprints — all with the selected element), a status checkbox per body, and **Play everything** which fires all 11 elements then all 23 auras in order. `window.spellfxDemo` exposes the same API for tests, plus `breath(id, sec)`, `breathPulse(id)`, `orb(id)` (toggle), `pillar(id)`, `vortex(id)`, `storm(id)`, `footsteps(id)`, `footfall(id, x, z)`, `stats()`, `lights()`, and `freeze()` / `unfreeze()` / `step(sec, n)` — the effects layer stops advancing while the scene keeps rendering, which is how the screenshot tools catch a burst at its peak. That is the **Shared effects** tab; it loads exactly as before.
+
+### Gallery, Thousandvale tab — `spellfx.html#tv` (2026-10-22)
+
+The second tab shows every effect Thousandvale draws on top of this module. Nothing is copied: `js/spellfx-tv.js` imports the game's own client files from `prototypes/thousandvale/js/client/` and plays the part of the game server, sending the same events the rules send (`cast`, `hit`, `fx {kind…}`) to the same modules in the same order as the game's `main.js`. It is built the first time the tab opens (`js/spellfx-tabs.js`), so a problem in it cannot take the shared tab down; a module or data file that will not load is listed in a **Not loaded** panel and its buttons are left out.
+
+| Group | What it shows | Where it comes from |
+|---|---|---|
+| Class + skills | All 32 classes (the 30 shared ones, the Starcaller and the Star Blade), each dressed as itself on a Chibi 2.5 body (`loadClassRoster()` from `js/class-outfits.js`); the class's six skills as buttons, plus **Play all six**. A skill draws the element effects, then the class's signature shapes on top (192 skills in all) | `spells.js` (→ this module's `SpellFx`), `sig-looks.js` + `sig-fx.js`; skill list `data/rules/class-catalog.json`, skill numbers Farhold's `skills.json` + `classes-tv.json` |
+| Starcaller / Star Blade | Thrown and fanned stars, a called star falling on its mark, the Star Field rune, Wheeling Stars, the Heavens' Barrage, Constellation motes (0–5 Starlight); the Star Blade's gold glint, gold starburst on hits and its arcane drawn white-gold | `star-looks.js` + `star-fx.js` (the wire events are listed at the top of `star-looks.js`) |
+| Caster attack forms | All 17 `styles` of `caster-forms.json` (bolt, burst, fan, chain, seeking, heavy, cone, beam, nova, lob, fork, ward, pool and the four tome forms) in any element; staff spells (cone, wave, jet, nova, dome, wall, mortar); the four focus riders; the sceptre's elemental swing | `form-fx.js` (`formLook`), `weapon-fx.js` |
+| Weapon swings | A basic swing of eight weapon types | `weapon-fx.js` (`weaponLook`) |
+| Shot models | The 10 bodies a shot can be (arrow, quarrel, javelin, knife, axe, stone, firebolt, orb, shard, spark) | `projectiles.js` + `projectile-kinds.js` (`MODELS`) |
+| Held beam | A channelled beam with a flare per pulse, any element | `beam-fx.js` (through `spells.js`) |
+| Revives | The six class revives: the target falls, the caster raises it | `revive-fx.js` |
+| Island hazards | The Burning Isle's first hot spring, geyser and lava vent from `data/provinces/vharlen-hazards.json`, moved onto the stage: geyser rumble + eruption (and one that throws a body), vent warning + fire spout, ashfall on/off. The spring's water is a stand-in disc (in the game it is the terrain's), and the danger circles are the game's telegraph system, not shown here | `vharlen-fx.js` (sites read through its `fetchJson` option) |
+| Settings | The game's **Spell effects** levels (Enhanced / Standard / Reduced / Off) | `fx-level.js` |
+
+`window.tvFx` drives it for screenshots: `setClass(id)`, `skills()`, `play(skillId)`, `playAll()`, `form(key)`, `staff(shape)`, `rider(kind)`, `swing(type, opts)`, `shot(model)`, `beam(seconds)`, `revive(style)`, `geyser({ toss })`, `vent()`, `ash(on)`, `setLevel(level)`, `motes(n)`, `stats()`, `emit(ev)` (send any event yourself) and `log` (the events sent). When a Thousandvale effect module changes its options or its events, this page is the second place to check after the game's `main.js`.
 
 ## Quick use from a game
 

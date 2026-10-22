@@ -11,13 +11,15 @@ import { stepBody, unpackBody, F, DT } from '../shared/arena.js';
 import { GAMES, loadView } from '../games/metas.js';
 import { createActor, portrait } from './avatars.js';
 import { createServerClock, createTrack } from './interp.js';
+import { dressArena } from './halloween.js';
+import { btnText } from './buttons.js';
 
 
 export async function createPlay({ stage, net, controls, intro, members, me, uiRoot, sfx = () => {} }) {
   const def = GAMES[intro.game], meta = def.meta, arena = meta.kind === 'arena';
   const AR = intro.init?.arena || meta.arena;          // a game whose layout comes from the seed sends its arena in init()
   const group = new THREE.Group(); group.name = 'game-' + meta.id; stage.root.add(group);
-  const ui = document.createElement('div'); ui.className = `game game-${meta.id} kind-${meta.kind}`; uiRoot.append(ui);
+  const ui = document.createElement('div'); ui.className = `game game-${meta.id} kind-${meta.kind}${intro.season ? ' season-' + intro.season : ''}`; uiRoot.append(ui);
   const memberOf = pid => members().find(m => m.pid === pid) || intro.players.find(p => p.pid === pid) || { pid, name: '?', seat: 0 };
   const players = intro.players.map(p => { const m = memberOf(p.pid); return { pid: p.pid, seat: p.seat, name: m.name || p.name, color: SEATS[p.seat].color, dark: SEATS[p.seat].dark, shape: SEATS[p.seat].shape, portrait: m.look ? portrait(m) : '', look: m.look || null, costume: m.costume }; });
   const playing = me != null && players.some(p => p.pid === me);
@@ -40,7 +42,8 @@ export async function createPlay({ stage, net, controls, intro, members, me, uiR
     stage.setView({ cx: 0, cz: 0, hw: hw + 0.5, hd: hd + 0.5, pitch: (meta.pitch || 54) + (tallScreen ? 12 : 0), tall: 2.2, yaw: 0 }, { instant: true });
   }
   const ctx = {
-    THREE, stage, group, ui, init: intro.init, meta, players, me: playing ? me : null, watching: !playing,
+    btn: s => btnText(s, meta.controls),          // "press A" -> Space / E on a keyboard, the button's label on a phone (buttons.js)
+    THREE, stage, group, ui, init: intro.init, season: intro.season || null, meta, players, me: playing ? me : null, watching: !playing,
     player: pid => players.find(p => p.pid === pid), actor: pid => actors.get(pid) || null,
     send: (a, d) => net.send({ t: 'act', a, ...(d !== undefined ? { d } : {}) }), sfx, arena: AR,
     /** A character that is not a player (an enemy, a judge, a model on the runway): { look: { race, seed, custom? }, costume?, seat? }.
@@ -55,6 +58,8 @@ export async function createPlay({ stage, net, controls, intro, members, me, uiR
   const mod = await loadView(meta.id);
   const view = mod.createView(ctx) || {};
   if (disposed) { view.dispose?.(); }
+  // a season's shared arena dressing (js/client/halloween.js); a view may steer it with `halloween: {…}` or opt out with `false`
+  const dress = arena && ctx.season === 'halloween' && view.halloween !== false && !disposed ? dressArena(ctx, view.halloween || {}) : null;
 
   function start() { live = true; if (arena && playing) controls.set({ stick: true, ...meta.controls }); view.start?.(); }
   function snap(msg) {
@@ -99,6 +104,7 @@ export async function createPlay({ stage, net, controls, intro, members, me, uiR
       }
     }
     view.frame?.(dt, performance.now() / 1000);
+    dress?.frame(dt, performance.now() / 1000);
   }
   function dispose() {
     disposed = true; live = false;
@@ -107,6 +113,7 @@ export async function createPlay({ stage, net, controls, intro, members, me, uiR
     for (const t of tags) t.remove();
     for (const a of actors.values()) a.dispose();
     for (const a of [...npcs]) a.dispose();
+    try { dress?.dispose(); } catch (e) { console.error(e); }
     stage.clear(group); group.removeFromParent(); ui.remove();
   }
   return { meta, start, snap, frame, dispose, net: () => ({ jitter: Math.round(clock.jitter), behind: Math.round(clock.delay(0)), pending: pending.length }), actor: pid => actors.get(pid) || null, event: ev => view.event?.(ev), priv: d => view.priv?.(d), get state() { return lastG; }, players, DT };

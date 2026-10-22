@@ -129,7 +129,7 @@ export const G5_SHOES = {
  * normaliser, so no 2D registration is needed.
  */
 export const G5_GLOVES = {
-  g5_cloth_handwraps: { archetype: 'cloth', name: 'Silk Handwraps', color: '#d8c8a0', color2: '#5a4a7a', minLevel: 1 },
+  g5_cloth_handwraps: { archetype: 'cloth', name: 'Cloth Gloves', color: '#cfc9b8', color2: '#5a4a7a', minLevel: 1 },
   g5_leather_gloves: { archetype: 'leather', name: 'Studded Longgloves', color: '#5a3a24', color2: '#b8a070', minLevel: 2 },
   g5_mail_mitts: { archetype: 'mail', name: 'Mail Mittens', color: '#7a8088', color2: '#6a4a30', minLevel: 5 },
   g5_plate_gauntlets: { archetype: 'plate', name: 'Hourglass Gauntlets', color: '#a0a8b2', color2: '#d8b040', minLevel: 9 },

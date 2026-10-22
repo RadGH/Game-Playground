@@ -13,6 +13,14 @@ export const TREASURES = [
   { id: 'coin', name: 'Coin', many: 'coins' }, { id: 'lamp', name: 'Lamp', many: 'lamps' }, { id: 'scroll', name: 'Scroll', many: 'scrolls' },
   { id: 'mask', name: 'Mask', many: 'masks' }, { id: 'bell', name: 'Bell', many: 'bells' }, { id: 'medal', name: 'Star Medal', many: 'star medals' },
 ];
+const PLAIN = TREASURES;
+/** Halloween (round 6): the same twelve slots, spooky-cute things (same count, so every vault and question works alike). */
+export const TREASURES_HW = [
+  { id: 'pumpkin', name: 'Pumpkin', many: 'pumpkins' }, { id: 'hat', name: 'Witch Hat', many: 'witch hats' }, { id: 'potion', name: 'Potion', many: 'potions' },
+  { id: 'broom', name: 'Broom', many: 'brooms' }, { id: 'candy', name: 'Candy', many: 'candies' }, { id: 'candle', name: 'Candle', many: 'candles' },
+  { id: 'bat', name: 'Bat', many: 'bats' }, { id: 'ghost', name: 'Ghost', many: 'ghosts' }, { id: 'cauldron', name: 'Cauldron', many: 'cauldrons' },
+  { id: 'moon', name: 'Moon', many: 'moons' }, { id: 'lolly', name: 'Lollipop', many: 'lollipops' }, { id: 'cat', name: 'Cat', many: 'cats' },
+];
 export const COLOURS = [
   { id: 'gold', name: 'Gold', hex: '#f4c430' }, { id: 'red', name: 'Red', hex: '#e8383d' }, { id: 'blue', name: 'Blue', hex: '#2f7ff0' },
   { id: 'green', name: 'Green', hex: '#2fbf57' }, { id: 'purple', name: 'Purple', hex: '#9b4fe0' }, { id: 'silver', name: 'Silver', hex: '#b8c4cc' },
@@ -43,7 +51,7 @@ function choices(rng, right, others, n = 4) {
   return { opts, a: opts.indexOf(right) };
 }
 /** Five questions about a vault, different kinds of question where possible. Each: { kind, text, opts:[{t, k?|c?|n?}], a }. */
-export function makeQuestions(rng, vault, w, h) {
+export function makeQuestions(rng, vault, w, h, TREASURES = PLAIN) {
   const count = new Map(); vault.forEach(([k]) => count.set(k, (count.get(k) || 0) + 1));
   const present = [...count.keys()], absent = TREASURES.map((_, i) => i).filter(k => !count.has(k));
   const kindOpt = k => ({ t: TREASURES[k].name, k });
@@ -86,10 +94,11 @@ export function makeQuestions(rng, vault, w, h) {
   return rng.shuffle(out.slice(1)).reduce((list, q) => (list.push(q), list), [out[0]]);   // a corner question opens; the rest shuffled
 }
 
-export function create({ rng, players, difficulty = 'normal' }) {
+export function create({ rng, players, difficulty = 'normal', season = null }) {
+  const T = season === 'halloween' ? TREASURES_HW : TREASURES;
   const pids = players.map(p => p.pid);
   const [w, h] = SIZES[difficulty] || SIZES.normal;
-  const vault = makeVault(rng, w, h), qs = makeQuestions(rng, vault, w, h);
+  const vault = makeVault(rng, w, h), qs = makeQuestions(rng, vault, w, h, T);
   const score = Object.fromEntries(pids.map(p => [p, 0]));
   let phase = 'study', qi = -1, left = STUDY_S[difficulty] || STUDY_S.normal, over = false;
   let picks = {}, took = {}, gain = null, tally = Object.fromEntries(pids.map(p => [p, 0]));
@@ -100,7 +109,7 @@ export function create({ rng, players, difficulty = 'normal' }) {
     phase = 'ans'; left = ANS_S;
   }
   return {
-    init: () => ({ w, h, treasures: TREASURES, colours: COLOURS, questions: qs.length, qs: Q_S, ...(phase === 'study' || phase === 'end' ? { vault } : {}) }),
+    init: () => ({ w, h, treasures: T, colours: COLOURS, questions: qs.length, qs: Q_S, ...(phase === 'study' || phase === 'end' ? { vault } : {}) }),
     act(pid, a, d) {
       if (phase !== 'q' || a !== 'ans' || !pids.includes(pid) || pid in picks) return;
       if (!Number.isInteger(d) || d < 0 || d >= qs[qi].opts.length) return;

@@ -1,10 +1,12 @@
 // "Change look": the same choices Thousandvale's character creator offers (its appearance tables are imported, not
-// copied) in a sheet that leaves the 3D character visible above it. Every change is sent at once, so the character
+// copied) in a side panel (a bottom sheet on a phone held upright) while the camera frames your own character close up
+// in the space that is left (round 6: the old sheet scrolled up over the character). Quick looks = look-tidy.js PRESETS. Every change is sent at once, so the character
 // on screen IS the preview — and so is what the other players see in the lobby.
 // Chibi 2.5 (2026-10-21): every slot's 2.5 ids, the per-part extras (`fields`: pupils, iris, odd eyes, brow thickness,
 // ear size, a second hair colour) and the body picks (body type, posture), exactly as Thousandvale's editor offers them.
 import { FACE_SLOTS, BODY_DIALS, BODY_PICKS, PALETTES, PART_NAMES, slotIds, customFrom, lookWith } from '../../../thousandvale/js/client/ui/appearance-core.js';
-import { avatarOf } from './avatars.js';
+import { avatarOf, portrait } from './avatars.js';
+import { PRESETS } from './look-tidy.js';
 import { h } from './gamehud.js';
 
 export function createEditor({ look, races, raceNames, onChange, onClose }) {
@@ -31,6 +33,9 @@ export function createEditor({ look, races, raceNames, onChange, onClose }) {
     el.innerHTML = `<div class="panel sheet">
       <div class="row head"><h2>Your look</h2><button class="btn small" data-reroll="1">Surprise me</button><button class="btn small primary" data-close="1">Done</button></div>
       <div class="row races">${races.map(r => `<button class="pill${cur.race === r ? ' on' : ''}" data-race="${r}">${raceNames[r]}</button>`).join('')}</div>
+      <h3 class="ed-h">Quick looks</h3>
+      <div class="presets">${PRESETS.map(p => `<button class="preset" data-preset="${p.id}"><img src="${portrait({ look: lookWith(cur, { body: custom.body, headShape: custom.headShape, ...p.custom }), costume: 'cos_none' })}" alt=""><b>${p.name}</b></button>`).join('')}</div>
+      <h3 class="ed-h">Fine tune</h3>
       <div class="ed-grid">
         ${FACE_SLOTS.map(s => { const ids = slotIds(s, cur.race), v = s.slot === 'headShape' ? custom.headShape : custom[s.slot]?.id; return `<div class="ed-row"><span>${s.label}</span>${stepper(`data-slot="${s.slot}"`, nice(s.slot, v || ids[0]))}${s.color ? `<div class="sws">${sw(PALETTES[s.color], custom[s.slot]?.color || '', s.slot)}</div>` : ''}</div>${fieldRows(s)}`; }).join('')}
         <div class="ed-row"><span>Skin</span><div class="sws">${sw(PALETTES.skin, custom.body?.skin || '', 'skin')}</div></div>
@@ -42,6 +47,8 @@ export function createEditor({ look, races, raceNames, onChange, onClose }) {
     const t = e.target;
     if (t.closest('[data-close]') || t === el) return onClose();
     if (t.closest('[data-reroll]')) { cur = { race: cur.race, seed: (Math.random() * 2 ** 31) >>> 0, v: 1 }; custom = customFrom(avatarOf(cur)) || { body: {} }; push(); return draw(); }
+    const pre = t.closest('[data-preset]');
+    if (pre) { const p = PRESETS.find(x => x.id === pre.dataset.preset); custom = { ...custom, ...JSON.parse(JSON.stringify(p.custom)) }; return commit(); }
     const race = t.closest('[data-race]');
     if (race) { cur = { race: race.dataset.race, seed: cur.seed, v: 1 }; custom = customFrom(avatarOf(cur)) || { body: {} }; push(); return draw(); }
     const pick = t.closest('[data-pick]');

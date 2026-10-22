@@ -1,0 +1,24 @@
+/* Ghost Tag: the "what are you" pill, round banners, the ghost mark on score chips, and the solo lanterns. */
+.game-ghost-tag .gt-banner { position: absolute; left: 50%; top: 44%; transform: translate(-50%, -50%) scale(.6); opacity: 0; pointer-events: none; text-align: center; max-width: 94vw;
+  font: 900 clamp(30px, 8.5vw, 72px)/1.05 var(--font); color: #ffd23f; -webkit-text-stroke: 2px #241a3d; paint-order: stroke fill; text-shadow: 0 4px 0 #241a3d; transition: transform .15s, opacity .15s; }
+.gt-banner small { display: block; font-size: .5em; color: #fff; margin-bottom: 4px; }
+.gt-banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.gt-banner.boo { color: #dff2ff; animation: gt-wob .2s infinite; }
+.gt-banner.round { color: #bfe3ff; }
+@keyframes gt-wob { 0%, 100% { margin-left: 0; } 50% { margin-left: 5px; } }
+.game-ghost-tag .gt-pill { position: absolute; top: calc(var(--st) + 58px); left: 50%; transform: translateX(-50%); display: flex; gap: 8px; align-items: center; pointer-events: none; max-width: 96vw;
+  padding: 4px 14px; border-radius: 999px; background: rgba(255, 240, 214, .95); border: 3px solid #241a3d; box-shadow: 0 3px 0 #241a3d; font: 800 16px/1.2 var(--font); white-space: nowrap; transition: background .15s; }
+.gt-pill span { overflow: hidden; text-overflow: ellipsis; }
+.gt-pill i { font-style: normal; font-size: 20px; }
+.gt-pill.ghost { background: #cfe6ff; }
+.gt-pill.human { background: #ffe3a8; }
+.gt-pill.warn { background: #ffc4c4; }
+.gt-pill.go { background: #c9f5d2; }
+.scorebar .chip.gt-ghost { background: #cfe6ff; }
+.game-ghost-tag .scorebar .chip { position: relative; }
+.scorebar .chip.gt-ghost::after { content: '👻'; position: absolute; right: -6px; top: -9px; font-size: 16px; line-height: 1; }
+.game-ghost-tag .gt-lives { position: absolute; top: calc(var(--st) + 98px); left: 50%; transform: translateX(-50%); display: flex; gap: 4px; align-items: center; pointer-events: none;
+  padding: 2px 12px; border-radius: 999px; background: rgba(36, 26, 61, .75); color: #fff; font: 900 16px/1.4 var(--font); }
+.gt-lives span.gone { filter: grayscale(1); opacity: .35; }
+.gt-lives b { margin-left: 6px; }
+@media (max-width: 520px) { .game-ghost-tag .gt-pill { top: calc(var(--st) + 52px); font-size: 13px; } .game-ghost-tag .gt-lives { top: calc(var(--st) + 86px); } }

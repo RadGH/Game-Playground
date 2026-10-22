@@ -1,6 +1,7 @@
 // What a player keeps between matches: a name, a look, coins, and the costumes they own. Keyed by a secret token the
 // server hands out on first visit and the browser stores — no accounts, no passwords, nothing personal.
 // Pure: the server gives it `initial` (read from disk) and `persist(all)` (write to disk); tests give it neither.
+import { inSeason, seasonByDate, seasonName } from '../shared/seasons.js';
 import { cleanName } from '../shared/protocol.js';
 
 export function createProfiles({ initial = {}, persist = null, randomToken, now = () => Date.now(), cosmetics, cleanLook }) {
@@ -34,12 +35,13 @@ export function createProfiles({ initial = {}, persist = null, randomToken, now 
   function buy(token, id) {
     const p = get(token), c = byId.get(id);
     if (!p || !c) return { ok: false, msg: 'No such costume.' };
+    if (!inSeason(c, seasonByDate(new Date(now())))) return { ok: false, msg: `${c.name} is only in the shop for ${seasonName(c.season)}.` };
     if (owns(p, id)) return { ok: false, msg: 'You already own that.' };
     if (p.coins < c.price) return { ok: false, msg: `That costs ${c.price} coins. You have ${p.coins}.` };
     p.coins -= c.price; p.owned.push(id); touch();
     return { ok: true };
   }
-  function equip(token, id) { const p = get(token); if (!p || !byId.has(id) || !owns(p, id)) return false; p.costume = id; touch(); return true; }
+  function equip(token, id) { const p = get(token); if (!p || !byId.has(id) || !owns(p, id) || !inSeason(byId.get(id), seasonByDate(new Date(now())))) return false; p.costume = id; touch(); return true; }
   function flush() { if (!dirty || !persist) return; dirty = false; persist(Object.fromEntries(all)); }
   return { create, get, view, update, reward, buy, equip, flush, get size() { return all.size; } };
 }

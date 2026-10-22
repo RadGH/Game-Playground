@@ -14,7 +14,7 @@ import { CHIBI2_PROF_ANIMS } from '../../../avatar-3d/js/chibi2-motion-prof.js';
 
 const at = p => new URL(p, import.meta.url);
 const presets = JSON.parse(readFileSync(at('../../../avatar-2d/data/presets.json')));
-const outfits = { ...JSON.parse(readFileSync(at('../../../avatar-3d/data/class-outfits.json'))).classes, ...(JSON.parse(readFileSync(at('../data/class-outfits-tv.json'))).classes || {}) };
+const outfits = JSON.parse(readFileSync(at('../../../avatar-3d/data/class-outfits.json'))).classes;   // all 32 classes (the star classes moved in 2026-10-22)
 const ANIMS = ['idle', 'ready', 'walk', 'run', 'attack', 'cast', 'hit', 'guard', 'wave', 'talk', 'jump', 'dead', 'swim', 'sitGround', 'drink', 'cheer', 'bowGreet', 'point', 'dance', ...CHIBI2_MOUNT_ANIMS, ...CHIBI2_DUAL_ANIMS, ...CHIBI2_ANGLE_ANIMS, ...CHIBI2_REVIVE_ANIMS, ...CHIBI2_PROF_ANIMS];
 const N = +(process.argv.find(a => a.startsWith('--n='))?.slice(4) || 99);
 const races = ['human', 'elf', 'dwarf', 'halfling'];

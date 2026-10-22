@@ -103,14 +103,14 @@ export function createView(ctx) {
   function jobText(g) {
     const me = ctx.me, p = ctx.pos(me); if (!p) return ['', ''];
     const carry = g.carry[me], ci = g.c.findIndex(c => c[2] === me);
-    if (ci >= 0) { const n = g.c[ci][0]; return n ? [`Cannon: aim with the stick, A to fire (${n} ball${n === 1 ? '' : 's'}). B to step off.`, 'go'] : ['Out of ammo! B to step off and fetch a crate (or shout for one).', 'warn']; }
+    if (ci >= 0) { const n = g.c[ci][0]; return n ? [ctx.btn(`Cannon: aim with the stick, A to fire (${n} ball${n === 1 ? '' : 's'}). B to step off.`), 'go'] : [ctx.btn('Out of ammo! B to step off and fetch a crate (or shout for one).'), 'warn']; }
     const nearSeat = init.cannons.findIndex(x => Math.hypot(p.x - x, p.z - init.seatZ) < 1.2);
-    if (carry === 'ammo') return nearSeat >= 0 ? ['A: load the cannon (+3 balls)', 'go'] : ['Carrying AMMO: take it to a cannon.', ''];
-    if (carry === 'plank') { const s = segOf(p.x); return p.z < -1.65 ? (g.segs[s] < 100 ? ['A: patch this wall!', 'go'] : ['This stretch is fine: find a damaged one.', '']) : ['Carrying a PLANK: take it to a damaged wall.', '']; }
-    if (Math.hypot(p.x - init.piles.ammo.x, p.z - init.piles.ammo.z) < 1.6) return ['A: pick up an AMMO crate', 'go'];
-    if (Math.hypot(p.x - init.piles.plank.x, p.z - init.piles.plank.z) < 1.6) return ['A: pick up a PLANK', 'go'];
-    if (nearSeat >= 0 && g.c[nearSeat][2] < 0) return ['A: man the cannon', 'go'];
-    if (p.z < -1.65) return ['A: bonk the creatures at the wall!', 'go'];
+    if (carry === 'ammo') return nearSeat >= 0 ? [ctx.btn('A: load the cannon (+3 balls)'), 'go'] : ['Carrying AMMO: take it to a cannon.', ''];
+    if (carry === 'plank') { const s = segOf(p.x); return p.z < -1.65 ? (g.segs[s] < 100 ? [ctx.btn('A: patch this wall!'), 'go'] : ['This stretch is fine: find a damaged one.', '']) : ['Carrying a PLANK: take it to a damaged wall.', '']; }
+    if (Math.hypot(p.x - init.piles.ammo.x, p.z - init.piles.ammo.z) < 1.6) return [ctx.btn('A: pick up an AMMO crate'), 'go'];
+    if (Math.hypot(p.x - init.piles.plank.x, p.z - init.piles.plank.z) < 1.6) return [ctx.btn('A: pick up a PLANK'), 'go'];
+    if (nearSeat >= 0 && g.c[nearSeat][2] < 0) return [ctx.btn('A: man the cannon'), 'go'];
+    if (p.z < -1.65) return [ctx.btn('A: bonk the creatures at the wall!'), 'go'];
     const low = g.segs.findIndex(hp => hp < 40); const free = g.c.findIndex(c => c[2] < 0);
     return [low >= 0 ? 'A wall is cracking! Fetch a PLANK (right).' : free >= 0 ? 'Man a CANNON, or fetch AMMO (left).' : 'Fetch AMMO (left) for the gunners.', ''];
   }

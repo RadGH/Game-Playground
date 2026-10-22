@@ -187,7 +187,7 @@ function legPoints(pose, rig) {
     const hip = new THREE.Vector3(x * 0.115 * W, 0, 0);
     const knee = hip.clone().add(new THREE.Vector3(0, -L * 0.51, 0).applyQuaternion(qLeg));
     const ankle = knee.clone().add(new THREE.Vector3(0, -L * 0.49, 0).applyQuaternion(qKnee));
-    const r = 0.1 * LW * (rig.legThick || 1) + (rig.skirt?.legPad || 0);   // the shin's own thickness (and a boot or greave over it)
+    const r = 0.1 * LW * (rig.shinThick || rig.legThick || 1) + (rig.skirt?.legPad || 0);   // the shin's own thickness (and a boot or greave over it)
     const pts = [[knee, r], [knee.clone().lerp(ankle, 0.35), r], [knee.clone().lerp(ankle, 0.7), r * 0.85], [ankle, r * 0.8]];
     for (const [fx, fy, fz, fr] of [[0, -0.01, 0.2, 0.04], [0, 0.03, 0.1, 0.06], [0, -0.01, -0.07, 0.05], [0.08, 0, 0.06, 0.03], [-0.08, 0, 0.06, 0.03]]) {
       pts.push([ankle.clone().add(new THREE.Vector3(fx * fk, fy * fk, fz * fk).applyQuaternion(qFoot)), fr]);
@@ -296,10 +296,24 @@ const clamp01 = v => Math.min(1, Math.max(0, v));
  * The race record a 2.5 body is built from: the race's own proportions with the body options folded in (shape,
  * shoulders, legs, height range, posture). A NEW object — the shared CHIBI2_RACES table is never written.
  */
+/**
+ * 2.5-only proportion fixes per race (2026-10-22, resume-site bug report), multiplied over CHIBI2_RACES — that table
+ * is shared with v2 looks, whose meshes are hashed, so it is not edited.
+ *   giant:    "torso, limbs and head don't feel like one character" — a 1.55x torso and 1.75x legs under a 0.9 head
+ *             read as a small head on a pole. The head comes up to match the frame (limbs: see LIMB_BULK).
+ *   halfling: "head looks too big for the body" on a petite halfling — a touch smaller (the slider now reaches further too).
+ */
+export const RACE25_TUNE = { giant: { head: 1.25, neck: 0.9 }, halfling: { head: 0.88 } };
+/** headSize on a 2.5 body spans 0.72x..1.28x (v2: 0.86x..1.14x; 0.5 is the same 1.0x in both). */
+export const HEAD25_RANGE = [0.72, 1.28];
+
 export function race25(a, race) {
   const b = a?.body || {}, rb = race?.body || {};
   const shape = SHAPES[b.shape] || SHAPES.average, k = key => Number.isFinite(rb[key]) ? rb[key] : 1;
+  const tune = RACE25_TUNE[race?.id || a?.body?.race] || {};
   const h = clamp01(num(b.height, 0.5));
+  // createRig maps headSize over v2's 0.86..1.14; this factor turns that into HEAD25_RANGE
+  const hs = clamp01(num(b.headSize, 0.5)), headRange = (HEAD25_RANGE[0] + hs * (HEAD25_RANGE[1] - HEAD25_RANGE[0])) / (0.86 + hs * 0.28);
   // a wider height range than v2: legs 0.7..1.3 of the v2 middle (v2: 0.8..1.2), the torso 0.9..1.1 (v2: 0.94..1.06)
   const legRange = (0.7 + h * 0.6) / (0.8 + h * 0.4), torsoRange = (0.9 + h * 0.2) / (0.94 + h * 0.12);
   const body = {
@@ -309,6 +323,8 @@ export function race25(a, race) {
     width: k('width') * (shape.width || 1),
     shoulders: k('shoulders') * (shape.shoulders || 1) * (0.85 + clamp01(num(b.shoulders, 0.5)) * 0.3),
     arm: k('arm') * (shape.arm || 1),
+    head: k('head') * (shape.head || 1) * (tune.head || 1) * headRange,
+    neck: k('neck') * (tune.neck || 1),
     round: clamp01((Number.isFinite(rb.round) ? rb.round : 0) + (shape.round || 0)),
   };
   const pp = POSTURES[b.posture] || POSTURES.neutral, rp = race?.posture || { chest: 0, head: 0, knees: 0 };
@@ -318,8 +334,17 @@ export function race25(a, race) {
 /** After createRig: what the mesh builder reads that the rig itself does not carry (limb thickness). */
 export function applyBody25(rig, a) {
   const b = a?.body || {}, shape = SHAPES[b.shape] || SHAPES.average;
-  rig.armThick = (shape.armT || 1) * (0.8 + clamp01(num(b.arms, 0.5)) * 0.4);
+  // LIMB_BULK (2026-10-22): a long limb at a normal thickness reads as a stick — a giant's 1.75x leg was as thin as a
+  // human's. A limb more than 1.2x a human's thickens by the square root of how much past that it is — only a giant-sized
+  // frame moves (an orc's 1.1-1.25x limbs and everything smaller are left as they were).
+  const legBulk = Math.sqrt(Math.max(1, rig.leg / 0.53 / 1.2)), armBulk = Math.sqrt(Math.max(1, rig.torso * rig.arm / 1.2));
+  rig.armThick = (shape.armT || 1) * (0.8 + clamp01(num(b.arms, 0.5)) * 0.4) * armBulk;
+  // The legs' share goes on the SHIN and the foot only (`shinThick`, `footK`, read by chibi2-body.js; undefined on v2 = 1):
+  // a fuller thigh came through a skirt's or a kilt's cloth at the hip line, and the shins and feet are what read as
+  // "sturdy" anyway.
   rig.legThick = shape.legT || 1;
+  rig.shinThick = rig.legThick * legBulk;
+  rig.footK = legBulk;
   // an explicit roundness on the look still wins over the shape's (createRig read body.round first), so a shape
   // only moves roundness when the look leaves it unset — that is the race default plus the shape's offset
   if (!Number.isFinite(b.round) && shape.round) rig.round = clamp01(rig.round);

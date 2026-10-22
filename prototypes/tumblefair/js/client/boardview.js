@@ -14,10 +14,11 @@ export const SPACE_LOOK = {
 };
 const OFFS = [[-0.5, -0.38], [0.5, -0.38], [-0.5, 0.48], [0.5, 0.48]];
 
-export async function createBoardView({ stage, def, members, me, assetBase }) {
+export async function createBoardView({ stage, def, members, me, assetBase, season = null }) {
   const group = new THREE.Group(); group.name = 'board'; stage.root.add(group);
   const byId = new Map(def.spaces.map(s => [s.id, s]));
-  const tex = await loadTexture(`${assetBase}${def.backdrop}.webp`);
+  // a holiday repaint of the same board (same paths, round 6) when there is one, else the usual picture
+  const tex = (season && def.seasonBackdrops?.[season] && await loadTexture(`${assetBase}${def.seasonBackdrops[season]}.webp`).catch(() => null)) || await loadTexture(`${assetBase}${def.backdrop}.webp`);
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(def.size, def.size).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ map: tex, color: tex ? '#ffffff' : '#3f8f5a', roughness: 1 }));
   ground.receiveShadow = true; group.add(ground);
   const skirt = new THREE.Mesh(new THREE.PlaneGeometry(400, 400).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#12323a' })); skirt.position.y = -0.05; group.add(skirt);

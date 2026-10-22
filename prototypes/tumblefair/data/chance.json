@@ -184,6 +184,61 @@
    "do": "steal",
    "n": 2,
    "text": "{p} rings the strongman bell. {o} lost the bet and pays 2 tickets."
+  },
+  {
+   "id": "h_treat",
+   "w": 3,
+   "season": "halloween",
+   "do": "tickets",
+   "n": 4,
+   "text": "Trick or treat! {p} gets a full-size candy bar. +4 tickets."
+  },
+  {
+   "id": "h_trick",
+   "w": 2,
+   "season": "halloween",
+   "do": "tickets",
+   "n": -2,
+   "text": "Trick! A rubber spider drops on {p}, who drops 2 tickets."
+  },
+  {
+   "id": "h_bats",
+   "w": 2,
+   "season": "halloween",
+   "do": "allmove",
+   "n": 1,
+   "text": "A flutter of friendly bats! Everyone is swept 1 space forward."
+  },
+  {
+   "id": "h_ghost_swap",
+   "w": 2,
+   "season": "halloween",
+   "do": "swap",
+   "text": "Boo! A ghost scares {p} and {o} so much they swap places."
+  },
+  {
+   "id": "h_witch",
+   "w": 2,
+   "season": "halloween",
+   "do": "boost",
+   "boost": "gold",
+   "text": "A friendly witch gives {p} a lucky broom ride. Next roll uses two dice!"
+  },
+  {
+   "id": "h_cauldron",
+   "w": 2,
+   "season": "halloween",
+   "do": "pinata",
+   "n": 3,
+   "m": 1,
+   "text": "{p} stirs a bubbling cauldron of sweets: +3 for {p}, +1 for everyone else."
+  },
+  {
+   "id": "h_pumpkin",
+   "w": 1,
+   "season": "halloween",
+   "do": "ribbonother",
+   "text": "The giant pumpkin contest! The judges pick {o}'s pumpkin: a ribbon for {o}!"
   }
  ],
  "bulletins": [
@@ -277,6 +332,49 @@
    "title": "A Lovely Evening",
    "text": "Nothing unusual is happening at the fair tonight. Probably.",
    "mods": {}
+  },
+  {
+   "id": "h_trick_or_treat",
+   "w": 4,
+   "season": "halloween",
+   "title": "Trick or Treat Night!",
+   "text": "Every ticket stand hands out extra candy: they pay 5 this round.",
+   "mods": {
+    "ticket": 5
+   }
+  },
+  {
+   "id": "h_haunted",
+   "w": 3,
+   "season": "halloween",
+   "title": "The Haunting Hour",
+   "text": "The ghosts are restless: puddles are ghostly goo and cost 4 this round.",
+   "mods": {
+    "pit": 4
+   }
+  },
+  {
+   "id": "h_costume_parade",
+   "w": 3,
+   "season": "halloween",
+   "title": "Costume Parade!",
+   "text": "Everyone marches 2 spaces forward in their costumes.",
+   "mods": {
+    "parade": 2
+   }
+  },
+  {
+   "id": "h_candy_rain",
+   "w": 2,
+   "season": "halloween",
+   "title": "Candy Rain",
+   "text": "Candy falls from the sky! Everyone grabs a handful of tickets.",
+   "mods": {
+    "pinata": [
+     2,
+     4
+    ]
+   }
   }
  ]
 }

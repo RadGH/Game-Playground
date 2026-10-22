@@ -2,6 +2,9 @@
  "id": "fairground",
  "title": "The Fairground Loop",
  "backdrop": "board-fairground-loop",
+ "seasonBackdrops": {
+  "halloween": "board-fairground-loop-halloween"
+ },
  "size": 40,
  "start": "s0",
  "about": "Starter board. Walk the loop, pick up tickets, buy prize ribbons at the two booths. The shortcut through the middle saves six spaces and has two puddles and the jackpot on it.",

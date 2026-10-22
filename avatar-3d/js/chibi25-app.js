@@ -10,12 +10,13 @@ import { PARTS } from '../../avatar-2d/js/parts/index.js';
 import { CHIBI25_OPTIONS, asV25 } from './chibi25-options.js';
 import { CHIBI2_RACES } from './chibi2-races.js';
 import { installTooltips } from '../../shared/tooltip.js';
+import { loadClassRoster } from './class-outfits.js';
 
 const $ = id => document.getElementById(id);
 const presets = (await (await fetch('./data/chibi2-presets.json')).json()).presets;
-let classLooks = {};
-try { classLooks = (await (await fetch('../prototypes/emberveil/data/class-looks.json')).json()).classes || {}; } catch { /* page still works without them */ }
-const starts = [...presets.map(p => ({ name: p.name, avatar: p.avatar })), ...Object.entries(classLooks).map(([id, c]) => ({ name: 'Class: ' + id.replace(/_/g, ' '), avatar: c.avatar }))];
+// every class in every game (all 32, incl. Thousandvale's Starcaller and Star Blade); the page still works without them
+const classLooks = await loadClassRoster();
+const starts = [...presets.map(p => ({ name: p.name, avatar: p.avatar })), ...classLooks.map(c => ({ name: 'Class: ' + c.name, avatar: c.avatar }))];
 const q = new URLSearchParams(location.search);
 let look = normalizeAvatar(starts[0].avatar);
 look.held = { id: 'none' }; look.offhand = { id: 'none' };

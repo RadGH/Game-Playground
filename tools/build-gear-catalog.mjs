@@ -193,6 +193,21 @@ for (const id of vocab('accessory')) if (await builds('accessory', id)) {
       const b = table.weaponBases[r.base] || table.armorBases[r.base];
       r.items = [{ game: 'thousandvale', base: r.base, template: b.tvFrom || null, slot: b.slot || (b.type === 'weapon' ? 'weapon' : null) }];
     }
+    // Thousandvale's own plain weapon / armour bases (woodsman_axe, militia_sabre, glaive, bardiche, cloth gloves and
+    // shoes — 2026-10-22): they draw an existing model, so they are noted on that row like items.json's bases are
+    const onRow = (slot, id, key, extra = {}) => {
+      const r = id && id !== 'none' && rows.find(x => x.id === id && x.slot === slot);
+      if (r && !r.items.some(i => i.base === key)) r.items.push({ game: 'thousandvale', base: key, ...extra });
+    };
+    for (const [key, b] of Object.entries(cfg.bases?.weapon || {})) onRow('held', heldLook({ ...table.weaponBases[key], baseKey: key }).id, key, { slot: 'weapon' });
+    for (const [key, b] of Object.entries(cfg.bases?.armor || {})) {
+      if (['back', 'waist', 'light'].includes(b.slot)) continue;
+      if (b.slot === 'offhand') { onRow('offhand', offhandLook({ ...table.armorBases[key], baseKey: key }).id, key, { slot: b.slot }); continue; }
+      const look = gearLook({ [b.slot]: { ...table.armorBases[key], baseKey: key } });
+      const part = { head: 'hat', chest: 'top', legs: 'bottom', feet: 'shoes' }[b.slot];
+      if (part) onRow(part, look[part]?.id, key, { slot: b.slot });
+      else if (b.slot === 'hands') onRow('top', look.top?.gloves?.id, key, { slot: b.slot });   // gloves ride on the top
+    }
     for (const [key, b] of Object.entries(cfg.bases?.armor || {})) {
       if (!['back', 'waist', 'light'].includes(b.slot)) continue;
       const look = gearLook({ [b.slot]: { ...b, baseKey: key } });

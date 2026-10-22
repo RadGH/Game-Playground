@@ -3,7 +3,7 @@
 //   chibi25-body-sheet.html?mode=robe&garment=robe&clip=run        a side-on strip of one stride, Chibi 2 row then 2.5 row
 //     &frames=8 &view=side|front|quarter|back &race=human &body={"shape":"heavy"}
 //   chibi25-body-sheet.html?mode=outfits&set=classes               one row per class look, at idle / walk / run / attack
-//     set=classes (Emberveil's 30 class looks) | t1 (class-outfits.json) | t2 (class-outfits-t2.json) | tv (Thousandvale-only)
+//     set=classes (all 32 class looks: Emberveil's 30 + Thousandvale's two) | t1 (class-outfits.json) | t2 (class-outfits-t2.json) | tv (Thousandvale-only)
 //     &clips=idle,walk,run,attack &view=quarter &v=2 (the v2 build) &from=0&count=10 (a page of rows)
 //   chibi25-body-sheet.html?mode=bodies                            the body options: every shape, posture, tail
 //
@@ -12,7 +12,7 @@ import * as THREE from 'three';
 import { createChibi2Character } from './chibi2.js';
 import { CHIBI2_ANIMS, CHIBI2_CLIP_SECONDS, CHIBI2_COMBAT_ALL, CHIBI2_MOUNT_ANIMS, CHIBI2_RIDE_ANIMS, ONE_SHOTS } from './chibi2-motion.js';
 import { CHIBI25_MOVE_ANIMS } from './chibi25-motion.js';
-import { dressAs } from './class-outfits.js';
+import { dressAs, loadClassRoster } from './class-outfits.js';
 import { SHAPES, POSTURES, TAILS } from './chibi25-body-options.js';
 import { ROBE_LOOKS } from './chibi25-outfits.js';
 
@@ -77,11 +77,15 @@ if (mode === 'robe') {
 } else if (mode === 'outfits') {
   const set = q.get('set') || 'classes', clips = (q.get('clips') || 'idle,walk,run,attack').split(','), isV2 = q.get('v') === '2';
   let looks = [];
-  if (set === 'classes') looks = Object.entries(mage).map(([id, c]) => [id, c.avatar]);
-  else {
-    const file = set === 't1' ? 'data/class-outfits.json' : set === 't2' ? 'data/class-outfits-t2.json' : '../prototypes/thousandvale/data/class-outfits-tv.json';
-    const t = await json(file), table = set === 'tv' ? { ...(t.classes || {}), ...Object.fromEntries(Object.entries(t.tier2 || {}).map(([k, v]) => [k + ' (tier 2)', v])) } : t.classes;
-    looks = Object.entries(table).map(([id, o]) => [id, dressAs(mage[id]?.avatar || base, o)]);
+  const roster = await loadClassRoster(), lookOf = id => roster.find(c => c.id === id)?.avatar || mage[id]?.avatar || base;
+  if (set === 'classes') looks = roster.map(c => [c.id, c.avatar]);
+  else if (set === 'tv') {
+    // the Thousandvale-only classes: their outfits sit in the shared tables since 2026-10-22, tier 1 and tier 2
+    const [t1, t2] = await Promise.all([json('data/class-outfits.json'), json('data/class-outfits-t2.json')]);
+    for (const c of roster.filter(r => r.game === 'thousandvale')) looks.push([c.id, dressAs(c.avatar, t1.classes[c.id])], [c.id + ' (tier 2)', dressAs(c.avatar, t2.classes[c.id])]);
+  } else {
+    const t = await json(set === 't1' ? 'data/class-outfits.json' : 'data/class-outfits-t2.json');
+    looks = Object.entries(t.classes).map(([id, o]) => [id, dressAs(lookOf(id), o)]);
   }
   if (q.get('ids')) { const want = q.get('ids').split(','); looks = looks.filter(([id]) => want.includes(id)); }
   const from = +(q.get('from') || 0), count = +(q.get('count') || looks.length);

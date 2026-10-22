@@ -109,11 +109,26 @@ lobby -> [ board -> vote -> intro -> game -> results ] x rounds -> final -> lobb
 
 ## Minigames
 
-52 games. Round 5 (2026-10-22) added 12 (Tiptoe Tiger, Hay Bale Scramble, Fizzpop Pass, Bumper Bash, Sheep Shuffle, Mole Mallet, Rope Rumble, Lantern Leap, Jellybean Jar, Quick Draw, Pin the Tail, Size Up — Size Up draws 153 Font Awesome Pro icons, copied in by `tools/build-size-up-icons.mjs`). Round 4 (2026-10-21) added 26: the owner's five (Wobblewheel Rally — racing, Boardwalk Brawl — side-scrolling
+57 games (5 of them Halloween-only, see "Holidays"). Round 5 (2026-10-22) added 12 (Tiptoe Tiger, Hay Bale Scramble, Fizzpop Pass, Bumper Bash, Sheep Shuffle, Mole Mallet, Rope Rumble, Lantern Leap, Jellybean Jar, Quick Draw, Pin the Tail, Size Up — Size Up draws 153 Font Awesome Pro icons, copied in by `tools/build-size-up-icons.mjs`). Round 4 (2026-10-21) added 26: the owner's five (Wobblewheel Rally — racing, Boardwalk Brawl — side-scrolling
 brawler, Fling Ring — toss-out, Ring-a-Ding Rumble — boxing, Costume Catwalk — dress-up runway) and every unbuilt game
 of the design document's 30-game list. Several were tuned against perfect bots (Kitchen Catastrophe targets, Castle
 Defense waves, Dragon's Weak Spot): ease them after a real play-test if they feel hard. Round 5 (2026-10-22) eased those three by about one step
 before the first family evening, added a lobby difficulty choice, and added the new games marked "round 5" below.
+
+**Halloween reskins (round 6, 2026-10-22).** While the season is Halloween (`js/shared/seasons.js`: October, or the
+host's Holidays option), every ARENA game gets a shared dressing from `js/client/halloween.js` (dusk light — the
+stage's lights dimmed and tinted, never switched off, and put back after the game — a purple sky, ground mist outside
+the play area, glowing jack-o'-lanterns, circling bats and little ghosts; all instanced, no extra lights), the intro card
+shows a "Halloween edition" ribbon, and eleven games dress up: Balloon Stampede (dusk playroom, jack-o'-lantern gold
+balloons, ghost greys), Cannonball Catch (pumpkins for cannonballs, a lavender castle with lit windows), Jellybean Jar
+("Candy Jar": candy corn, eyeball gumballs, pumpkins in a cauldron, ghost balloons), Lantern Leap (jack-o'-lanterns on
+the pads, bats for fireflies), Mole Mallet (moles in witch hats, the bomb becomes a fizzing TRICK ball), Sheep Shuffle
+(ghost sheep, pumpkins for hay, BOO!), Coinstorm (wrapped candy for coins, dusk sky), Snowball Showdown (glowing slime
+balls, pumpkin-headed snowmen, a lavender rink on a purple sea), Paint Panic (purple flagstones, slime cauldrons),
+Memory Heist ("Haunted Heist": twelve spooky treasures — the only sim change, names in `init`) and Trapdoor Treasury
+(purple dusk over its art, candy bursting out). Looks only: `tests/halloween-reskins.test.js` plays each with and
+without the season and checks the results are identical. Size Up was left plain (its pictures are icon data, not worth
+a second set).
 
 | id | kind | what |
 |---|---|---|
@@ -169,8 +184,52 @@ before the first family evening, added a lobby difficulty choice, and added the 
 | `hay-bale-scramble` | arena | round 5. musical bales: a fiddler on a barrel plays a jig (`tunes.js`) while a ring of one-fewer-than-players hay bales turns like a carousel; music stops = ring stops, free bales glow, A beside a free bale sits (first come); left standing = out to the cheer wagon; a fiddle hiccup (music cuts out but the ring keeps turning) catches early presses — A during music = stumble; B = barge (seated players are safe); nobody sat = round again; last one standing; solo: five bales VANISH one by one after the stop, one fewer each time you make it, three tries |
 | `fizzpop-pass` | arena | round 5. hot potato with a cream pie on a picnic lawn (two tables + a party cake to dodge round): bump someone (or A within 1.9 m) to pass; a fresh holder must hold 0.45 s and cannot pass straight back to the giver for 1.6 s; the holder runs 17% faster; hidden fuse 6-11 s, the fizz (sparks, shake, ticks) climbs in 4 steps with a per-round random offset so it is never exact; SPLAT = lose a life (2, or 3 for two players), everyone still standing +1, last one standing +2; out players sit on the OUT blanket; solo plays pass with Dot and Pip (CPU; they juggle a fresh pie for 0.7 s), +1 a CPU splat, 3 lives |
 | `bumper-bash` | arena | round 5. bumper cars (`move.mode: 'car'`, drifty grip) in a square rink with bouncy padded walls and a striped pole; ram a car: from behind 3, side 2, nose to nose 1 (the car that was driving into the other harder scores); the hit car spins out and cannot be scored on until it recovers; ★ stars +2, ⚡ bolts = 2.6 s turbo (+1 a hit while charged); fair-organ music; 70 s, most points; solo bashes three drifting target cars (two players get one to fight over) |
+| `trick-or-treat-street` | arena | **Halloween, Oct only** (round 6, `meta.season: 'halloween'`). A moonlit street of candy-coloured houses (5 along the back, 2 down each side); a LIT door glows (warm door, yellow windows, light pool + ring, jack-o'-lantern, a floating sweet over it); A by a lit door = knock: you wait 0.5 s on the step, then a treat (+1/+2/+3, BIG BAR +5) or a harmless trick (a cartoon bedsheet ghost pops out: BOO, spooked 1.1 s and nudged off the step; or slime: slowed 3 s, green puddle); a knocked door goes dark 5-8 s, at most players+2 lit at once; CANDY RUSH in the last 12 s relights doors fast; B = bump: the bumped player spills one candy on the road for anyone to grab (then safe 1.4 s); pumpkin buckets in seat colours fill up; portrait phones follow their own character; solo = score attack, medals 20/35/50 |
+| `ghost-tag` | arena | **Halloween, Oct only** (round 6). A moonlit pumpkin patch with lavender gravestones and jack-o'-lanterns (seeded layout, mirrored left-right, sent as `arena.blocks/posts`), lantern posts and a crooked tree; one round per player, each player starts as the ghost exactly once (2 s counting, eyes covered); ghosts float, glow pale blue, go see-through with sparkles and run 10% faster; a touch turns a human into a ghost (rises 0.8 s); one button A: human = quick dash, ghost = BOO! (nearby humans stumble 0.35 s); humans carry torch beams; points = 1 a second survived as a human + 3 a tag + 5 for the last human standing (still human at the bell, or the last one tagged); solo: bedsheet CPU ghosts drift in (one more every 9 s, each quicker), 3 lanterns (a catch shoos them to the corners), score = seconds survived; `spooky-kit.js` (night lighting that restores the stage, sheet ghost, jack-o'-lantern, glow sprite) is shared with Trick-or-Treat Street |
+| `pumpkin-carve-off` | screen | **Halloween, Oct only** (round 6). Everyone gets a secret prompt (50 in `sim.js`: "a surprised pumpkin", "a pirate pumpkin", "a pumpkin who lost its sock"…) and carves a big orange pumpkin with a finger in 42 s: thin knife / big scoop, Undo, Clear, Done; every cut draws as a dark rind edge with a candle glow inside (cuts travel like Draw the Disaster's strokes, `[tool, "xxyy…"]`, chunked, `restore()` gives a returning phone its carving). The TV shows a row of blank pumpkins that wobble as their carver cuts. Then the lanterns light up in a row at night (anonymous, numbered, a CSS candle flicker): vote for the best, not your own (2 players may say "both"); the prompts and carvers only appear at the reveal. Points = votes + the Night Judge's ribbon (+1) by a printed rule: most carved / most separate cuts / most even face (a 32x32 grid mirrored left-right); solo: the judge scores 0-10 (carving up to 6 + evenness up to 4) |
+| `apple-bobbing` | screen | **Halloween, Oct only** (round 6). A night-time wooden tub cut into one lane per player; your face hangs over the middle of yours and an apple bobs side to side (two sines, seeded; everyone gets the same 90 apples in the same order, getting quicker). Press BITE (or Space / tap the tub) when it is under your face: a glowing bite band turns green and says NOW. A bite dunks your face in: up with the apple (red 1, golden 3, quicker), or a SPLASH face (1.2 s pause, so mashing loses to timing), or a rubber spider on your nose (-1, never below 0; leave it and it bobs away in 2.6 s). The phone counts its own clock from the start and sends only WHEN it pressed (`bite {k, t}`); the server checks t (not in the future, at most 1 s old, never backwards) and judges the bite at that time itself, so lag never moves the apple. Phone: your lane big, the others small above, one huge button; TV: one long tub with every lane. Ties on apples go to fewer splashes; solo: medals at 8 / 15 / 22 |
+| `monster-mash` | screen | **Halloween, Oct only** (round 6). A rhythm dance on a graveyard stage at night (the shared Halloween dressing: dim purple light, glowing pumpkins, bats, ghosts; plus tombstones, a bouncing backup ghost and a moon). Arrows slide down four lanes to a line in time with a synthesized "graveyard doo-wop" (Am F Dm E, kick/snare/hats, walking bass, organ stabs, a wobbly theremin, a pluck on every arrow); tap the matching big button — Wave / Hop / Zombie / Clap (each its own colour, arrow and word; arrow keys or D F J K too) — and your character dances it (Chibi clips wave / jump / cast / clap; `dance` pose from a 12 combo, a shrug on a miss, cheer or bow at the end). Seeded chart in four sections (warm-up, eighths, off-beats, finale), never four of one button in a row; perfect 100 / good 50 x combo (x2/x3/x4 at 8/16/24); a wrong button breaks the combo. Timing judged ON THE PHONE against its audio clock (like One Button Orchestra); everyone sees each player's last move. Solo: score attack with a grade |
 
 Known gap: a phone that reconnects mid-drawing sees a blank canvas (its strokes are kept on the server and appear in the gallery).
+
+## Looks, costumes and button names (round 6, 2026-10-22)
+
+- **Look editor and costume shop** are a side panel (a bottom sheet on a phone held upright); the menus behind hide and
+  the camera frames your own character close up, turning slowly (`lineup.focus`). The editor has **Quick looks**
+  (`js/client/look-tidy.js` PRESETS). The shop lets you tap ANY costume to try it on (`lineup.preview`, only on your
+  screen), then Wear (owned) or Buy (enough coins); otherwise it says how many coins you still need.
+- **Tidy random faces** (`look-tidy.js` tidyFace, from the look's seed): parts the editor does not offer (2.5's
+  removed soot/dirt) become defaults, face marks and accessories are usually none, unusual eyes/mouths/hair mostly
+  become everyday ones. Editor choices always win. `tests/look-tidy.test.js`.
+- **Button names follow the device** (`js/client/buttons.js` btnText; views use `ctx.btn(text)`): instructions are
+  written controller-first ("press A", "B = bump"); on a keyboard they read Space / E, on a phone the on-screen
+  button's label, with a controller A / B. `tests/buttons.test.js`.
+- **Wobble Tower**: a drop that sets off a topple no longer lands after the trim (the tower was drawn one block too
+  tall, level with the next swinging block).
+
+## Holidays (round 6, 2026-10-22)
+
+`js/shared/seasons.js` is the one table of holidays (Halloween = October 1-31; Christmas and Valentine's are written in
+as comments, not built). Everything seasonal checks it:
+- **Holiday minigames** (`meta.season: 'halloween'`, tag `holiday`): Trick-or-Treat Street, Ghost Tag, Pumpkin
+  Carve-Off, Apple Bobbing, Monster Mash. Only offered while the season is on. The host's **Holidays** option in the
+  lobby is Auto (by the server's date, the default), a holiday by name (forces it on any day of the year), or Off. In
+  the minigame picker they are their own "Holidays" group.
+- **Reskins**: every game is created with `season`, and the browser has `ctx.season`. In season, every arena game gets
+  the shared dusk dressing (`js/client/halloween.js`: dimmed lights, purple sky and mist, jack-o'-lanterns, bats and
+  ghosts outside the play area), and 11 games reskin themselves (Balloon Stampede, Cannonball Catch, Jellybean Jar ->
+  Candy Jar, Lantern Leap, Mole Mallet, Sheep Shuffle, Coinstorm, Snowball Showdown, Paint Panic, Memory Heist ->
+  Haunted Heist, Trapdoor Treasury). The intro card says "Halloween edition". Out of season every game is unchanged
+  (`tests/halloween-reskins.test.js`).
+- **Costumes** with `season` (20 Halloween ones, 5 free) are in the shop and can be worn only while the season is on
+  BY THE DATE (the host option does not unlock them); outside it the shop hides them and the server draws their
+  wearer in their own clothes (`room.js` pub, `profiles.js` buy/equip, `avatars.js`).
+- **Board**: seasonal Wheel of Whatever results and Fair Bulletins (`data/chance.json` `season`), and a board may name
+  `seasonBackdrops` (the Fairground Loop has a Halloween-night repaint with the same paths).
+- **Menus**: `body[data-season]` themes the colours; a few bats cross the title and lobby.
+
+To add a holiday: a row in `SEASONS`, `season: '<id>'` on its content, `body[data-season=<id>]` styles, and (optional)
+reskins reading `ctx.season`. `tests/seasons.test.js` checks every `season` names a real row.
 
 ## Online play and lag (round 4, 2026-10-21)
 

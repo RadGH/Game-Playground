@@ -49,6 +49,22 @@ lobby -> [ board -> vote -> intro -> game -> results ] x rounds -> final -> lobb
   tickets, mud puddle −3, Wheel of Whatever (`data/chance.json`: 10 weighted events — steal, give, swap, move,
   everyone +2, a free ribbon), Hall of Mirrors (swap places), the gate (+5 each lap). After everyone has moved, a
   minigame. Final order: ribbons, then tickets.
+- **Round 5 board additions (2026-10-22):** two boards (the host picks): **The Fairground Loop** and the **Moonlit
+  Pier** (`data/boards/pier.json`: 26 + 4 spaces, the Ghost Train shortcut straight up the middle, Friendly Ghost
+  spaces that whisk you to a random loop space). Both boards are built by `tools/build-board.mjs` from one table each.
+  New spaces: **Duck Pond** (pick one of three ducks hiding 1-10 tickets), **Dice Duel** (you and a random player
+  each roll; the higher takes 4), **Bumper Cart/Boat** (zoom 3 ahead). The **Wheel of Whatever** has 27 results
+  (golden die = two dice next roll, sticky candy floss = 1-3, piñata, tax collector, lost and found, pony ride to the
+  next booth (buys a ribbon if you can), carousel moves everyone, coin flip, fog machine shuffles everyone, raffle
+  ribbon for someone else, back to the gate, treat everyone, swap tickets…). A **Fair Bulletin** is read at the start
+  of every round after the first (`data/chance.json` `bulletins`: Ticket Rain, Ribbon Sale, Mud Season, The Parade,
+  Double Prize Day, Piñata Party, Underdog Hour, Golden Ducks, Duel Day, A Lovely Evening) and the last round is
+  always **Last Call** (ticket stands, jackpots and puddles count double). At the end, a **Bonus Ribbons** screen
+  (phase `bonus`) hands out two awards drawn from six (Minigame Star, Ticket Magnet, Long Walker, Bad Luck Charm, Dice
+  Champion, Wheel Fan); ties share, and nobody gets one when everyone is tied. Rules tested in `tests/board.test.js`.
+- **Lobby (round 5):** difficulty (Family / Normal / Tricky, sent to every minigame) and a **minigame picker** (cards
+  grouped by kind, All / None / Only Action…; nothing ticked = every game; the host's list is remembered on their
+  phone).
 - **Minigame Marathon:** no board — vote, play, repeat; 4/3/2/1 points.
 - **The Fair Never Closes** (endless): marathon scoring with no set length; difficulty steps easy → normal → hard every 3 games, and after every 3 the players vote to keep going or finish (a tie keeps it open; 30 games at most).
 - **Teams** (any mode, 2 or 4 players): Red & Green against Blue & Pink (seat % 2); team totals on the bar, results and final; your team's place is your place.
@@ -58,7 +74,9 @@ lobby -> [ board -> vote -> intro -> game -> results ] x rounds -> final -> lobb
   tickets (co-op 6 each, or 2 on a loss); marathon: 4/3/2/1 points.
 - **Coins** (kept between matches, `js/sim/profiles.js`): 10 per match + 5 a ribbon (or 1 a point) + 2 a minigame
   won + 10 for the winner. They buy **costumes** (`data/cosmetics.json`: the 24 class outfits worn without their
-  weapons, renamed for the fair; 4 free). Costumes never change how you play.
+  weapons, renamed for the fair, plus 35 written out slot by slot in round 5 — Pirate Captain, Lifeguard, Juggler,
+  Rodeo Rider, Moon Walker, Tiger Cub, eight 'Spooky' ones for Halloween…; 10 free; `tests/costumes.test.js` checks
+  every part id). Costumes never change how you play.
 - **Phones that drop** come back to the same seat and score (a token in localStorage; the room keeps a seat 90 s in a
   match). Someone who joins mid-match watches until the next minigame and is seated then if a seat is free (the
   design doc's rule). The host leaving hands the room to the next player.
@@ -84,21 +102,23 @@ lobby -> [ board -> vote -> intro -> game -> results ] x rounds -> final -> lobb
 | `js/client/avatars.js` | look → Chibi 2 actor / SVG portrait; ONE clip list game-wide |
 | `js/client/boardview.js`, `lineup.js` | the 3D board; the podium line-up behind the lobby and the final |
 | `js/client/controls.js` | stick, buttons, keys, gamepad |
+| `js/client/tunes.js` | little looping Web Audio tunes for game views (`start('jig' / 'sing' / 'boogie')`, `stop(scratch)`, `mute`) and made-up sounds (`fx('roar' / 'scratch' / 'tick' / 'boing' / 'honk' / 'pop' / 'ding')`); no files, silent if audio cannot run |
 | `assets/art/` | Codex-made pictures (logo, cards, board backdrop) as webp; `tools/art.sh` converts from `assets/inbox/` (git-ignored PNGs) |
 | `ops/` | user units: `tumblefair` (stable :8480), `tumblefair-dev` (:8483), `tumblefair-tunnel` (public link); `install.sh` |
 | `tools/look.mjs` | opens N headless pages, runs a match to a phase, saves screenshots (`tests/shots/`) |
 
 ## Minigames
 
-40 games. Round 4 (2026-10-21) added 26: the owner's five (Wobblewheel Rally — racing, Boardwalk Brawl — side-scrolling
+52 games. Round 5 (2026-10-22) added 12 (Tiptoe Tiger, Hay Bale Scramble, Fizzpop Pass, Bumper Bash, Sheep Shuffle, Mole Mallet, Rope Rumble, Lantern Leap, Jellybean Jar, Quick Draw, Pin the Tail, Size Up — Size Up draws 153 Font Awesome Pro icons, copied in by `tools/build-size-up-icons.mjs`). Round 4 (2026-10-21) added 26: the owner's five (Wobblewheel Rally — racing, Boardwalk Brawl — side-scrolling
 brawler, Fling Ring — toss-out, Ring-a-Ding Rumble — boxing, Costume Catwalk — dress-up runway) and every unbuilt game
 of the design document's 30-game list. Several were tuned against perfect bots (Kitchen Catastrophe targets, Castle
-Defense waves, Dragon's Weak Spot): ease them after a real play-test if they feel hard.
+Defense waves, Dragon's Weak Spot): ease them after a real play-test if they feel hard. Round 5 (2026-10-22) eased those three by about one step
+before the first family evening, added a lobby difficulty choice, and added the new games marked "round 5" below.
 
 | id | kind | what |
 |---|---|---|
 | `paint-panic` | arena | walk to paint the floor your colour; paint buckets splat a circle; most tiles in 45 s |
-| `trapdoor-treasury` | screen | 6 rounds: pick a chest (bigger = shakier floor) or BANK; a trapdoor empties your sack; banked gold counts |
+| `trapdoor-treasury` | screen | 6 rounds: pick a chest (bigger = shakier floor) or BANK; a trapdoor empties your sack; banked gold counts. Round 5: painted vault, chests, trapdoor, sack and piggy-bank safe (Codex, `assets/art/tt-*.webp`); chests open one after another with a coin burst or drop through the trapdoor; pickers' faces over each chest |
 | `meteor-dash` | arena | hex island over lava; meteors (1.2 s warning ring) knock you back and break tiles, the edge crumbles; A = hop; last one standing |
 | `snowball-showdown` | arena | slippery ice ring; A = throw, B = shove-dash; 3 lives, KO credit within 3 s; solo = snowman targets |
 | `stack-attack` | arena | carry blocks to your corner pad (gold = 2), grab on a rival's pad steals their top block, B = shove makes a carrier drop; tallest tower |
@@ -137,6 +157,18 @@ Defense waves, Dragon's Weak Spot): ease them after a real play-test if they fee
 | `dragons-weak-spot` | arena, co-op | a goofy fairground dragon behind the yard: ATTACK phases telegraph fire rings (get out) and a fire sweep (the arc glows, then B = hop as the flame reaches you; a burn costs a team heart, 3 + 1 a player); then it gets DIZZY and four scales open (Sun/Moon/Star/Leaf, colour + picture, each with a pad): hit them in a secret 2-4 step order, each phone privately shows only SOME steps (rotating holders), so call them out; stand on the pad + A = 10 damage, the whole order adds a bonus, the wrong scale makes it flinch (window -1.5 s); beat its health before the bell; scores = damage; solo sees the one step it is on |
 | `ghost-photographer` | arena, co-op | invisible ghosts drift round a funhouse floor of nine named rooms; each ghost's clue is on ONE phone (room it is in / footprints on a mini map / a cold-spot thermometer from your own character); one player carries the LANTERN (passes every 12 s): ghosts near it show for everyone and slow, B = big flash; everyone else A = snap the frame in front of them; catch the goal (50-75% of the ghosts by team size); a catch = 2 to the photographer, +1 clue holder, +1 lantern if lit; solo carries a smaller lantern AND the camera with every clue |
 | `storm-shelter` | screen, co-op | three meters (Heat, Roof, Food, 0-10, start 6); 13 beats of 5 s: an event card (`deck.js`, 45: hit + 2-3 trade-off choices, team vote, tie = first voted) plus wind that grows with team size and the storm; each player plays one card a beat from a private hand of 3 (10 kinds; a meter caps at 10, so talk); any meter at 0 = lost; the beat ends early once all are in; scores = meter points your cards really added; solo holds 4 and plays 2 |
+| `jellybean-jar` | screen | round 5. 3 rounds of "how many?": a jar of jellybeans, a gumball machine, a paddling pool of rubber ducks or a bunch of balloons (one each round, 18-45 / 50-110 / 110-220 of them), drawn from the seed by `jar-art.js` (hex packing clipped to the container, filled to a level); a big number pad (every digit is a draft, OK locks); the reveal dims everything and lights it up one by one while a counter climbs and every guess waits on a guess-o-meter; closeness 0-10 + exact +5 + closest +5 (ties share); solo = score out of 45 |
+| `quick-draw` | screen | round 5. 7 rounds: wait for the BELL, first tap wins (3, 2nd 1 with 3+ players); fake-outs (hen, balloon pop, cow, the words BALL / BELT, never in the last 0.9 s) and any tap before the bell = out of the round, -1 (never below 0); no clock while waiting. Fair-ish timing: the server rings, each phone times its OWN reaction from the frame it showed the bell, the server keeps that number inside what it saw (no slower than its own count, no more than 0.7 s of lag forgiven, under 90 ms = a guess); solo = points for speed (5 under 0.25 s) |
+| `pin-the-tail` | screen | round 5. 5 rounds in a 160 x 120 SVG paddock: a donkey / pony / goat / pig / cow / sheep shows its tail spot (a star) for 2.6 s, then a trick per round (blurry, hidden, trots across, the paddock spins 180, two animals swap places) and everyone taps where the tail goes (tap again to move, Done locks); 0-10 by distance + closest +3; reveal puts the tail back and every pin in seat colour with name and points; solo = score out of 50 |
+| `size-up` | screen | round 5. 8 quick questions (rounds 4 and 8 have three things): BIGGER / SMALLER / HEAVIER / LIGHTER / FASTER / SLOWER over 153 things in `items.js` (rough real size m, weight kg, top speed km/h for things that move), only asked when values differ 2.5x+ ("bigger" needs size AND weight to agree), close calls preferred; first tap final; right = 5 + up to 5 for speed (phone-timed like Quick Draw); reveal shows real values and "about 7x heavier"; pictures are Font Awesome Pro duotone icons (`icons.js`, built by `tools/build-size-up-icons.mjs`) |
+| `sheep-shuffle` | arena | a meadow with a straw pen in each player's corner (fenced on its two inner sides, gap at the inner corner, flag + painted seat shape + live count); sheep graze and run from anyone within ~3 m, so you herd by walking BEHIND them; A = BAA! scares every sheep in a 50° cone ahead into a sprint (the only thing that moves a penned sheep, so walk into a rival pen and BAA toward its gap to steal); golden sheep count 3; the field restocks; score = what is in your pen at the bell; solo: score attack |
+| `mole-mallet` | arena | a garden lawn with 20 holes; moles pop up all over (4 solo → 10 with four players) and duck back after ~2 s; A swings your mallet at the spot in front of you (a ring there turns gold when a mole is under it): brown +1, gold +3 (quick), black bomb-mole = BOOM, dizzy 1.6 s, no points lost; bonking a player makes them dizzy 1.1 s, then they blink and cannot be bonked for 2.3 s; most points wins; solo: score attack |
+| `rope-rumble` | arena (no stick) | tug of war on a village green, best of three pulls: solo vs Big Barnaby (a CPU strongman), 1v1, a three-way rope star for three, 2v2 for four; tap PULL (or the drum on screen) once per drum beat — a tap is judged ON THE PHONE (perfect = full heave, a bit off = 0.6, extra taps in the same beat do nothing, so rhythm beats mashing) and sent as `pull {n, q}`; drag the ribbon over your chalk line; on time-out the side it leans toward wins; plain A presses without a view are judged on the server's beat |
+| `lantern-leap` | arena | a lily pond between a dock and a reedy bank; lily pads with paper lanterns drift across in four lanes (each its own way), new ones float in and fresh ones bob up in big gaps; a pad you stand on wobbles (turns yellow) then sinks; you ride your pad; A = leap (further than a walk); coins +1 and fireflies +3 sit on pads; fall in = splash back to the dock and lose your streak (4+ in a row = +1 a pickup, 8+ = +2); most points wins; solo: score attack |
+| `tiptoe-tiger` | arena | round 5. creep up a mown strip toward a cardboard tiger on a stage; while it SINGS (back turned, `tunes.js` lullaby) you may walk; the TELL (0.45 s: music scratches off, tail shoots up, red "!", FREEZE! banner) comes before it LOOKS — anyone still moving faster than 0.55 m/s after a 0.35 s grace is roared back to the start line in an arc (and safe until the next song); about one in four tells after the first is a fake-out half-turn; hold A = statue (stock-still); first to the bell wins and ends it, else furthest at the bell; solo = the same race on the clock |
+| `hay-bale-scramble` | arena | round 5. musical bales: a fiddler on a barrel plays a jig (`tunes.js`) while a ring of one-fewer-than-players hay bales turns like a carousel; music stops = ring stops, free bales glow, A beside a free bale sits (first come); left standing = out to the cheer wagon; a fiddle hiccup (music cuts out but the ring keeps turning) catches early presses — A during music = stumble; B = barge (seated players are safe); nobody sat = round again; last one standing; solo: five bales VANISH one by one after the stop, one fewer each time you make it, three tries |
+| `fizzpop-pass` | arena | round 5. hot potato with a cream pie on a picnic lawn (two tables + a party cake to dodge round): bump someone (or A within 1.9 m) to pass; a fresh holder must hold 0.45 s and cannot pass straight back to the giver for 1.6 s; the holder runs 17% faster; hidden fuse 6-11 s, the fizz (sparks, shake, ticks) climbs in 4 steps with a per-round random offset so it is never exact; SPLAT = lose a life (2, or 3 for two players), everyone still standing +1, last one standing +2; out players sit on the OUT blanket; solo plays pass with Dot and Pip (CPU; they juggle a fresh pie for 0.7 s), +1 a CPU splat, 3 lives |
+| `bumper-bash` | arena | round 5. bumper cars (`move.mode: 'car'`, drifty grip) in a square rink with bouncy padded walls and a striped pole; ram a car: from behind 3, side 2, nose to nose 1 (the car that was driving into the other harder scores); the hit car spins out and cannot be scored on until it recovers; ★ stars +2, ⚡ bolts = 2.6 s turbo (+1 a hit while charged); fair-organ music; 70 s, most points; solo bashes three drifting target cars (two players get one to fight over) |
 
 Known gap: a phone that reconnects mid-drawing sees a blank canvas (its strokes are kept on the server and appear in the gallery).
 

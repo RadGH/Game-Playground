@@ -1,0 +1,33 @@
+/* Rope Rumble: the tug bar, the drum you tap in time with, the count-in and the verdicts. */
+.game-rope-rumble .rr-top { position: absolute; top: calc(var(--st) + 56px); left: 50%; transform: translateX(-50%); width: min(94vw, 560px); display: grid; gap: 6px; pointer-events: none; }
+.game-rope-rumble .rr-round { justify-self: center; background: var(--ink); color: #fff; border-radius: 12px; padding: 3px 12px; font-weight: 800; font-size: 15px; }
+.game-rope-rumble .rr-wins { color: var(--c); font-size: 14px; letter-spacing: 1px; -webkit-text-stroke: .5px #fff; }
+.game-rope-rumble .rr-tug { display: grid; grid-template-columns: auto 1fr auto; gap: 6px; align-items: center; }
+.game-rope-rumble .rr-tug span, .game-rope-rumble .rr-mini span { background: var(--c); color: #fff; border: 2px solid var(--ink); border-radius: 999px; padding: 1px 8px; font-weight: 800; font-size: 13px; max-width: 30vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 0 rgba(0, 0, 0, .5); }
+.game-rope-rumble .rr-track { position: relative; height: 18px; border: 3px solid var(--ink); border-radius: 999px; background: linear-gradient(90deg, var(--a) 0 4%, #fff8e7 4% 96%, var(--b) 96%); }
+.game-rope-rumble .rr-mid { position: absolute; left: 50%; top: -3px; bottom: -3px; width: 2px; background: var(--ink); opacity: .4; }
+.game-rope-rumble .rr-rib { position: absolute; top: 50%; left: 50%; width: 16px; height: 26px; transform: translate(-50%, -50%); background: #ff2a3a; border: 3px solid var(--ink); border-radius: 5px; transition: left .08s linear; }
+.game-rope-rumble .rr-mini { display: grid; grid-template-columns: 34% 1fr; gap: 6px; align-items: center; }
+.game-rope-rumble .rr-mtrack { height: 14px; border: 3px solid var(--ink); border-radius: 999px; background: #fff8e7; overflow: hidden; position: relative; }
+.game-rope-rumble .rr-mtrack b { position: absolute; left: 0; top: 0; bottom: 0; width: 50%; background: var(--c); }
+.game-rope-rumble .rr-mtrack::after { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 4px; background: var(--ink); }
+.game-rope-rumble .rr-drum { position: absolute; left: 50%; bottom: calc(var(--sb) + 64px); width: 112px; height: 112px; transform: translateX(-50%); pointer-events: auto; touch-action: none; cursor: pointer; }
+.game-rope-rumble .rr-drum.watch { pointer-events: none; }
+.game-rope-rumble .rr-ring { position: absolute; left: 50%; top: 50%; width: 112px; height: 112px; border: 6px solid #fff; border-radius: 50%; box-shadow: 0 0 0 3px var(--ink); transform: translate(-50%, -50%); }
+.game-rope-rumble .rr-skin { position: absolute; inset: 8px; border-radius: 50%; display: grid; place-items: center; text-align: center; background: radial-gradient(#fff8e7 55%, #f0d9a8); border: 5px solid #c0392b; box-shadow: 0 0 0 3px var(--ink), 0 6px 0 3px var(--ink); font: 900 22px/1 var(--font); color: var(--ink); }
+.game-rope-rumble .rr-skin small { font-size: 11px; font-weight: 800; }
+.game-rope-rumble .rr-drum.live .rr-skin { background: radial-gradient(#ffe58a 55%, #ffd23f); }
+.game-rope-rumble .rr-say { position: absolute; left: 50%; bottom: 122px; transform: translateX(-50%) scale(.6); opacity: 0; white-space: nowrap; font: 900 26px/1 var(--font); color: #fff; -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; transition: transform .12s, opacity .12s; }
+.game-rope-rumble .rr-say.on { opacity: 1; transform: translateX(-50%) scale(1); }
+.game-rope-rumble .rr-say.good { color: var(--sun); } .game-rope-rumble .rr-say.bad { color: var(--pop); } .game-rope-rumble .rr-say.meh { color: #fff; font-size: 20px; }
+.game-rope-rumble .rr-shout { position: absolute; left: 50%; top: 38%; transform: translate(-50%, -50%); font: 900 clamp(30px, 9vw, 72px)/1 var(--font); color: #fff; -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; text-shadow: 0 5px 0 var(--ink); text-align: center; opacity: 0; pointer-events: none; white-space: nowrap; }
+.game-rope-rumble .rr-shout.on { opacity: 1; animation: pop .3s ease-out; }
+.game-rope-rumble .rr-shout.count { font-size: clamp(54px, 16vw, 120px); }
+.game-rope-rumble .rr-shout.go { color: var(--sun); }
+.tag.rr-cpu { background: #b5743a; }
+/* phones: the PULL button is bottom right, so the drum sits to its left */
+@media (max-width: 520px) {
+  .game-rope-rumble .rr-drum { left: 30%; bottom: calc(var(--sb) + 44px); }
+  .game-rope-rumble .rr-shout { font-size: 34px; white-space: normal; width: 90vw; }
+  .game-rope-rumble .rr-shout.count { font-size: 80px; }
+}

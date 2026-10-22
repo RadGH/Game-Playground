@@ -1,5 +1,5 @@
 {
- "about": "Costumes bought with coins. A costume is only clothes: it never changes how you play. `outfit` is a key of avatar-3d/data/class-outfits.json (worn without the things it carries); null = the look's own clothes. price 0 = everyone owns it.",
+ "about": "Costumes bought with coins. A costume is only clothes: it never changes how you play. `outfit` is either a key of avatar-3d/data/class-outfits.json (worn without the things it carries) or, from round 5, an object of avatar slots laid straight over the look ({ hat, top, bottom, shoes, cape, accessory, decor, extras, ears: { id, color, color2 } }; every id is checked by tests/costumes.test.js). null = the look's own clothes. price 0 = everyone owns it. `tag` = a little label in the shop ('New', 'Spooky').",
  "items": [
   {
    "id": "cos_none",
@@ -175,6 +175,1194 @@
    "outfit": "dragon_knight",
    "name": "Dragon Float",
    "price": 220
+  },
+  {
+   "id": "cos_beach",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "straw",
+     "color": "#e8c87a"
+    },
+    "top": {
+     "id": "tshirt",
+     "color": "#3ec6e0"
+    },
+    "bottom": {
+     "id": "shorts",
+     "color": "#ff7a4a"
+    },
+    "shoes": {
+     "id": "sandals",
+     "color": "#8a5a3a"
+    },
+    "accessory": {
+     "id": "sunglasses",
+     "color": "#222222"
+    },
+    "cape": {
+     "id": "none"
+    }
+   },
+   "name": "Beach Day",
+   "price": 0,
+   "tag": "New"
+  },
+  {
+   "id": "cos_pirate",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "tricorn",
+     "color": "#2a2a32",
+     "color2": "#d8b040"
+    },
+    "top": {
+     "id": "coat",
+     "color": "#9a1e2a",
+     "color2": "#d8b040"
+    },
+    "bottom": {
+     "id": "baggy",
+     "color": "#e8dfc8"
+    },
+    "shoes": {
+     "id": "knee_boots",
+     "color": "#3a2a1a"
+    },
+    "accessory": {
+     "id": "eyepatch",
+     "color": "#1a1a1a"
+    },
+    "cape": {
+     "id": "none"
+    }
+   },
+   "name": "Pirate Captain",
+   "price": 0,
+   "tag": "New"
+  },
+  {
+   "id": "cos_sports",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "headband",
+     "color": "#ff3a5a"
+    },
+    "top": {
+     "id": "tshirt",
+     "color": "#2a9a4a",
+     "color2": "#ffffff"
+    },
+    "bottom": {
+     "id": "shorts",
+     "color": "#ffffff"
+    },
+    "shoes": {
+     "id": "sneakers",
+     "color": "#ff3a5a"
+    },
+    "cape": {
+     "id": "none"
+    },
+    "accessory": {
+     "id": "none"
+    }
+   },
+   "name": "Sports Day",
+   "price": 0,
+   "tag": "New"
+  },
+  {
+   "id": "cos_sleepy",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "hood_down",
+     "color": "#6a7ad8"
+    },
+    "top": {
+     "id": "hoodie",
+     "color": "#8a9aff",
+     "color2": "#ffffff"
+    },
+    "bottom": {
+     "id": "baggy",
+     "color": "#6a7ad8"
+    },
+    "shoes": {
+     "id": "slippers",
+     "color": "#ffd0e0"
+    },
+    "cape": {
+     "id": "none"
+    },
+    "accessory": {
+     "id": "none"
+    }
+   },
+   "name": "Sleepyhead",
+   "price": 0,
+   "tag": "New"
+  },
+  {
+   "id": "cos_pumpkin",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "wizard",
+     "color": "#ff8a1a",
+     "color2": "#2a8a2a"
+    },
+    "top": {
+     "id": "tunic",
+     "color": "#ff8a1a",
+     "color2": "#2a8a2a"
+    },
+    "bottom": {
+     "id": "pants",
+     "color": "#2a2a2a"
+    },
+    "shoes": {
+     "id": "pointed",
+     "color": "#2a8a2a"
+    },
+    "extras": {
+     "id": "warpaint",
+     "color": "#1a1a1a"
+    },
+    "cape": {
+     "id": "none"
+    },
+    "accessory": {
+     "id": "none"
+    }
+   },
+   "name": "Pumpkin Head",
+   "price": 0,
+   "tag": "Spooky"
+  },
+  {
+   "id": "cos_blackcat",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "none"
+    },
+    "top": {
+     "id": "hoodie",
+     "color": "#22222a",
+     "color2": "#ffd23f"
+    },
+    "bottom": {
+     "id": "leggings",
+     "color": "#22222a"
+    },
+    "shoes": {
+     "id": "slippers",
+     "color": "#22222a"
+    },
+    "ears": {
+     "id": "cat_ears",
+     "color": "#22222a"
+    },
+    "extras": {
+     "id": "cheek_stripes",
+     "color": "#ffffff"
+    },
+    "cape": {
+     "id": "none"
+    },
+    "accessory": {
+     "id": "none"
+    }
+   },
+   "name": "Black Cat",
+   "price": 0,
+   "tag": "Spooky"
+  },
+  {
+   "id": "cos_lifeguard",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "cap",
+     "color": "#ff2a2a"
+    },
+    "top": {
+     "id": "tank",
+     "color": "#ff2a2a",
+     "color2": "#ffffff"
+    },
+    "bottom": {
+     "id": "shorts",
+     "color": "#ff2a2a"
+    },
+    "shoes": {
+     "id": "barefoot"
+    },
+    "accessory": {
+     "id": "sunglasses",
+     "color": "#111111"
+    },
+    "cape": {
+     "id": "none"
+    }
+   },
+   "name": "Lifeguard",
+   "price": 40,
+   "tag": "New"
+  },
+  {
+   "id": "cos_farmhand",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "straw",
+     "color": "#e8c87a",
+     "color2": "#c03030"
+    },
+    "top": {
+     "id": "tshirt",
+     "color": "#c03030"
+    },
+    "bottom": {
+     "id": "g5_leather_chaps",
+     "color": "#3a5aa8"
+    },
+    "shoes": {
+     "id": "boots",
+     "color": "#5a3a1a"
+    },
+    "accessory": {
+     "id": "neckerchief",
+     "color": "#c03030"
+    },
+    "cape": {
+     "id": "none"
+    }
+   },
+   "name": "Farm Hand",
+   "price": 40,
+   "tag": "New"
+  },
+  {
+   "id": "cos_candy",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "bandana",
+     "color": "#ff8fc8"
+    },
+    "top": {
+     "id": "hoodie",
+     "color": "#ffb0d8",
+     "color2": "#ffffff"
+    },
+    "bottom": {
+     "id": "baggy",
+     "color": "#ff8fc8"
+    },
+    "shoes": {
+     "id": "sneakers",
+     "color": "#ffffff"
+    },
+    "accessory": {
+     "id": "none"
+    },
+    "cape": {
+     "id": "none"
+    }
+   },
+   "name": "Candy Floss Fan",
+   "price": 40,
+   "tag": "New"
+  },
+  {
+   "id": "cos_juggler",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "feather_cap",
+     "color": "#ffd23f",
+     "color2": "#ff3a3a"
+    },
+    "top": {
+     "id": "doublet",
+     "color": "#ff3a3a",
+     "color2": "#ffd23f"
+    },
+    "bottom": {
+     "id": "baggy",
+     "color": "#3a6aff"
+    },
+    "shoes": {
+     "id": "pointed",
+     "color": "#ffd23f"
+    },
+    "extras": {
+     "id": "paint_dots",
+     "color": "#ff3a3a"
+    },
+    "cape": {
+     "id": "none"
+    },
+    "accessory": {
+     "id": "none"
+    }
+   },
+   "name": "Juggler",
+   "price": 60,
+   "tag": "New"
+  },
+  {
+   "id": "cos_trapeze",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "circlet",
+     "color": "#e8e8ff"
+    },
+    "top": {
+     "id": "tank",
+     "color": "#ff3a6a",
+     "color2": "#ffffff"
+    },
+    "bottom": {
+     "id": "leggings",
+     "color": "#ffffff"
+    },
+    "shoes": {
+     "id": "slippers",
+     "color": "#ff3a6a"
+    },
+    "cape": {
+     "id": "shoulder_cape",
+     "color": "#ff3a6a"
+    },
+    "accessory": {
+     "id": "none"
+    }
+   },
+   "name": "Trapeze Star",
+   "price": 60,
+   "tag": "New"
+  },
+  {
+   "id": "cos_scarecrow",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "straw",
+     "color": "#d8b860"
+    },
+    "top": {
+     "id": "rags",
+     "color": "#c8762a",
+     "color2": "#5a8a3a"
+    },
+    "bottom": {
+     "id": "ragged",
+     "color": "#5a6aa8"
+    },
+    "shoes": {
+     "id": "barefoot"
+    },
+    "extras": {
+     "id": "paint_dots",
+     "color": "#d84a2a"
+    },
+    "accessory": {
+     "id": "neckerchief",
+     "color": "#c03030"
+    },
+    "cape": {
+     "id": "none"
+    }
+   },
+   "name": "Scarecrow",
+   "price": 60,
+   "tag": "Spooky"
+  },
+  {
+   "id": "cos_icecream",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "cap",
+     "color": "#ff9ec8"
+    },
+    "top": {
+     "id": "apron",
+     "color": "#ffffff",
+     "color2": "#ff9ec8"
+    },
+    "bottom": {
+     "id": "pants",
+     "color": "#ffffff"
+    },
+    "shoes": {
+     "id": "sneakers",
+     "color": "#ff9ec8"
+    },
+    "accessory": {
+     "id": "neckerchief",
+     "color": "#ff9ec8"
+    },
+    "cape": {
+     "id": "none"
+    }
+   },
+   "name": "Ice Cream Seller",
+   "price": 60,
+   "tag": "New"
+  },
+  {
+   "id": "cos_rodeo",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "wide_brim",
+     "color": "#b8864a"
+    },
+    "top": {
+     "id": "vest",
+     "color": "#8a5a2a",
+     "color2": "#ffffff"
+    },
+    "bottom": {
+     "id": "pants",
+     "color": "#3a5a9a"
+    },
+    "shoes": {
+     "id": "knee_boots",
+     "color": "#6a3a1a"
+    },
+    "accessory": {
+     "id": "neckerchief",
+     "color": "#d02a2a"
+    },
+    "cape": {
+     "id": "none"
+    }
+   },
+   "name": "Rodeo Rider",
+   "price": 80,
+   "tag": "New"
+  },
+  {
+   "id": "cos_explorer",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "wide_brim",
+     "color": "#c8b07a"
+    },
+    "top": {
+     "id": "travel_shirt",
+     "color": "#c8b07a"
+    },
+    "bottom": {
+     "id": "shorts",
+     "color": "#a8905a"
+    },
+    "shoes": {
+     "id": "knee_boots",
+     "color": "#5a3a1a"
+    },
+    "cape": {
+     "id": "g5_pack_explorer",
+     "color": "#7a5a2a"
+    },
+    "accessory": {
+     "id": "round_glasses",
+     "color": "#3a2a1a"
+    }
+   },
+   "name": "Jungle Explorer",
+   "price": 80,
+   "tag": "New"
+  },
+  {
+   "id": "cos_lumberjack",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "leather_cap",
+     "color": "#c03030"
+    },
+    "top": {
+     "id": "travel_shirt",
+     "color": "#c03030",
+     "color2": "#1a1a1a"
+    },
+    "bottom": {
+     "id": "pants",
+     "color": "#3a5a9a"
+    },
+    "shoes": {
+     "id": "boots",
+     "color": "#5a3a1a"
+    },
+    "accessory": {
+     "id": "none"
+    },
+    "cape": {
+     "id": "none"
+    }
+   },
+   "name": "Lumberjack",
+   "price": 80,
+   "tag": "New"
+  },
+  {
+   "id": "cos_scientist",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "none"
+    },
+    "top": {
+     "id": "coat",
+     "color": "#f4f4f4",
+     "color2": "#5ab0ff"
+    },
+    "bottom": {
+     "id": "pants",
+     "color": "#3a3a4a"
+    },
+    "shoes": {
+     "id": "shoes",
+     "color": "#2a2a2a"
+    },
+    "accessory": {
+     "id": "goggles",
+     "color": "#5ab0ff"
+    },
+    "cape": {
+     "id": "none"
+    }
+   },
+   "name": "Science Fair Champ",
+   "price": 80,
+   "tag": "New"
+  },
+  {
+   "id": "cos_daisy",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "flower",
+     "color": "#ffffff",
+     "color2": "#ffd23f"
+    },
+    "top": {
+     "id": "dress",
+     "color": "#ffe46a",
+     "color2": "#ffffff"
+    },
+    "bottom": {
+     "id": "leggings",
+     "color": "#ffffff"
+    },
+    "shoes": {
+     "id": "sandals",
+     "color": "#c8964a"
+    },
+    "accessory": {
+     "id": "round_glasses",
+     "color": "#ff8fc8"
+    },
+    "cape": {
+     "id": "none"
+    }
+   },
+   "name": "Daisy Dreamer",
+   "price": 80,
+   "tag": "New"
+  },
+  {
+   "id": "cos_snowday",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "hood",
+     "color": "#e8f0ff"
+    },
+    "top": {
+     "id": "coat",
+     "color": "#3a7ad8",
+     "color2": "#ffffff"
+    },
+    "bottom": {
+     "id": "pants",
+     "color": "#2a3a6a"
+    },
+    "shoes": {
+     "id": "knee_boots",
+     "color": "#ffffff"
+    },
+    "cape": {
+     "id": "scarf_striped",
+     "color": "#ff3a3a",
+     "color2": "#ffffff"
+    },
+    "accessory": {
+     "id": "none"
+    }
+   },
+   "name": "Snow Day",
+   "price": 100,
+   "tag": "New"
+  },
+  {
+   "id": "cos_bandleader",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "feather_cap",
+     "color": "#c01a2a",
+     "color2": "#ffd23f"
+    },
+    "top": {
+     "id": "doublet",
+     "color": "#c01a2a",
+     "color2": "#ffd23f"
+    },
+    "bottom": {
+     "id": "breeches",
+     "color": "#ffffff"
+    },
+    "shoes": {
+     "id": "boots",
+     "color": "#1a1a1a"
+    },
+    "cape": {
+     "id": "shoulder_cape",
+     "color": "#ffd23f"
+    },
+    "accessory": {
+     "id": "none"
+    }
+   },
+   "name": "Marching Band",
+   "price": 100,
+   "tag": "New"
+  },
+  {
+   "id": "cos_tutu",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "circlet",
+     "color": "#ffd0f0"
+    },
+    "top": {
+     "id": "bodice_dress",
+     "color": "#ffb0e0",
+     "color2": "#ffffff"
+    },
+    "bottom": {
+     "id": "pleated_skirt",
+     "color": "#ffd0f0"
+    },
+    "shoes": {
+     "id": "slippers",
+     "color": "#ffb0e0"
+    },
+    "cape": {
+     "id": "none"
+    },
+    "accessory": {
+     "id": "none"
+    }
+   },
+   "name": "Tutu Twirler",
+   "price": 100,
+   "tag": "New"
+  },
+  {
+   "id": "cos_detective",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "wide_brim",
+     "color": "#7a5a3a"
+    },
+    "top": {
+     "id": "trench",
+     "color": "#c8a87a",
+     "color2": "#7a5a3a"
+    },
+    "bottom": {
+     "id": "pants",
+     "color": "#4a3a2a"
+    },
+    "shoes": {
+     "id": "shoes",
+     "color": "#3a2a1a"
+    },
+    "accessory": {
+     "id": "monocle",
+     "color": "#d8b040"
+    },
+    "cape": {
+     "id": "none"
+    }
+   },
+   "name": "Mystery Solver",
+   "price": 100,
+   "tag": "New"
+  },
+  {
+   "id": "cos_rockstar",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "none"
+    },
+    "top": {
+     "id": "open_coat",
+     "color": "#1a1a1a",
+     "color2": "#d02a6a"
+    },
+    "bottom": {
+     "id": "leggings",
+     "color": "#1a1a1a"
+    },
+    "shoes": {
+     "id": "heavy",
+     "color": "#1a1a1a"
+    },
+    "accessory": {
+     "id": "sunglasses",
+     "color": "#d02a6a"
+    },
+    "extras": {
+     "id": "star_mark",
+     "color": "#ffd23f"
+    },
+    "cape": {
+     "id": "none"
+    }
+   },
+   "name": "Rock Star",
+   "price": 120,
+   "tag": "New"
+  },
+  {
+   "id": "cos_disco",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "none"
+    },
+    "top": {
+     "id": "silks",
+     "color": "#ffd23f",
+     "color2": "#ffffff"
+    },
+    "bottom": {
+     "id": "wide_trousers",
+     "color": "#ffffff"
+    },
+    "shoes": {
+     "id": "shoes",
+     "color": "#ffd23f"
+    },
+    "accessory": {
+     "id": "sunglasses",
+     "color": "#ff3ad8"
+    },
+    "cape": {
+     "id": "none"
+    }
+   },
+   "name": "Disco Dancer",
+   "price": 120,
+   "tag": "New"
+  },
+  {
+   "id": "cos_hero",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "none"
+    },
+    "top": {
+     "id": "tshirt",
+     "color": "#d82a2a",
+     "color2": "#ffd23f"
+    },
+    "bottom": {
+     "id": "leggings",
+     "color": "#2a4ad8"
+    },
+    "shoes": {
+     "id": "knee_boots",
+     "color": "#d82a2a"
+    },
+    "cape": {
+     "id": "cape",
+     "color": "#d82a2a",
+     "color2": "#ffd23f"
+    },
+    "accessory": {
+     "id": "mask",
+     "color": "#2a4ad8"
+    }
+   },
+   "name": "Caped Wonder",
+   "price": 120,
+   "tag": "New"
+  },
+  {
+   "id": "cos_gnome",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "wizard",
+     "color": "#d82a2a"
+    },
+    "top": {
+     "id": "tunic",
+     "color": "#3a6ad8",
+     "color2": "#8a5a2a"
+    },
+    "bottom": {
+     "id": "pants",
+     "color": "#7a5a2a"
+    },
+    "shoes": {
+     "id": "boots",
+     "color": "#5a3a1a"
+    },
+    "accessory": {
+     "id": "none"
+    },
+    "cape": {
+     "id": "none"
+    }
+   },
+   "name": "Garden Gnome",
+   "price": 120,
+   "tag": "New"
+  },
+  {
+   "id": "cos_mummy",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "g5_cloth_wrap",
+     "color": "#e8dcc0"
+    },
+    "top": {
+     "id": "wraps",
+     "color": "#e8dcc0"
+    },
+    "bottom": {
+     "id": "ragged",
+     "color": "#e8dcc0"
+    },
+    "shoes": {
+     "id": "wraps",
+     "color": "#e8dcc0"
+    },
+    "extras": {
+     "id": "pale",
+     "color": "#e8e0d0"
+    },
+    "accessory": {
+     "id": "none"
+    },
+    "cape": {
+     "id": "none"
+    }
+   },
+   "name": "Mummy Mix-up",
+   "price": 120,
+   "tag": "Spooky"
+  },
+  {
+   "id": "cos_ghost",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "hood",
+     "color": "#f8f8ff"
+    },
+    "top": {
+     "id": "robe",
+     "color": "#f8f8ff"
+    },
+    "bottom": {
+     "id": "leggings",
+     "color": "#f0f0ff"
+    },
+    "shoes": {
+     "id": "slippers",
+     "color": "#f8f8ff"
+    },
+    "cape": {
+     "id": "tattered_cape",
+     "color": "#e8e8f8"
+    },
+    "accessory": {
+     "id": "none"
+    }
+   },
+   "name": "Bedsheet Ghost",
+   "price": 120,
+   "tag": "Spooky"
+  },
+  {
+   "id": "cos_witch",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "wide_brim",
+     "color": "#2a1a3a",
+     "color2": "#8a3ad8"
+    },
+    "top": {
+     "id": "gown",
+     "color": "#4a2a6a",
+     "color2": "#8a3ad8"
+    },
+    "bottom": {
+     "id": "leggings",
+     "color": "#2a1a3a"
+    },
+    "shoes": {
+     "id": "pointed",
+     "color": "#1a1a1a"
+    },
+    "cape": {
+     "id": "tattered_cape",
+     "color": "#2a1a3a"
+    },
+    "accessory": {
+     "id": "pendant",
+     "color": "#8aff6a"
+    }
+   },
+   "name": "Hedge Witch",
+   "price": 140,
+   "tag": "Spooky"
+  },
+  {
+   "id": "cos_nightvisitor",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "none"
+    },
+    "top": {
+     "id": "high_collar_robe",
+     "color": "#1a1a22",
+     "color2": "#b01a2a"
+    },
+    "bottom": {
+     "id": "pants",
+     "color": "#1a1a22"
+    },
+    "shoes": {
+     "id": "pointed",
+     "color": "#1a1a1a"
+    },
+    "cape": {
+     "id": "long_cloak",
+     "color": "#1a1a22",
+     "color2": "#b01a2a"
+    },
+    "extras": {
+     "id": "pale",
+     "color": "#e8e4f0"
+    },
+    "accessory": {
+     "id": "none"
+    }
+   },
+   "name": "Night Visitor",
+   "price": 140,
+   "tag": "Spooky"
+  },
+  {
+   "id": "cos_viking",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "horned_helm",
+     "color": "#a8a8b0"
+    },
+    "top": {
+     "id": "fur_tunic",
+     "color": "#8a5a2a"
+    },
+    "bottom": {
+     "id": "kilt",
+     "color": "#3a5a3a"
+    },
+    "shoes": {
+     "id": "heavy",
+     "color": "#5a3a1a"
+    },
+    "cape": {
+     "id": "fur_mantle",
+     "color": "#d8c8a8"
+    },
+    "extras": {
+     "id": "war_stripe",
+     "color": "#2a5ad8"
+    },
+    "accessory": {
+     "id": "none"
+    }
+   },
+   "name": "Longship Fan",
+   "price": 140,
+   "tag": "New"
+  },
+  {
+   "id": "cos_royal",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "crown",
+     "color": "#ffd23f"
+    },
+    "top": {
+     "id": "gown",
+     "color": "#7a2ad8",
+     "color2": "#ffd23f"
+    },
+    "bottom": {
+     "id": "leggings",
+     "color": "#f4f0ff"
+    },
+    "shoes": {
+     "id": "pointed",
+     "color": "#ffd23f"
+    },
+    "cape": {
+     "id": "long_cloak",
+     "color": "#d01a2a",
+     "color2": "#ffffff"
+    },
+    "accessory": {
+     "id": "earrings",
+     "color": "#ffd23f"
+    }
+   },
+   "name": "Royal Highness",
+   "price": 160,
+   "tag": "New"
+  },
+  {
+   "id": "cos_moonwalker",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "plate_helm",
+     "color": "#f0f0f8"
+    },
+    "top": {
+     "id": "g5_plate_cuirass",
+     "color": "#f0f0f8",
+     "color2": "#ff8a1a"
+    },
+    "bottom": {
+     "id": "g5_plate_cuisses",
+     "color": "#f0f0f8"
+    },
+    "shoes": {
+     "id": "g5_plate_sabatons",
+     "color": "#f0f0f8"
+    },
+    "cape": {
+     "id": "g5_pack_frame",
+     "color": "#c8c8d0"
+    },
+    "accessory": {
+     "id": "none"
+    }
+   },
+   "name": "Moon Walker",
+   "price": 180,
+   "tag": "New"
+  },
+  {
+   "id": "cos_tiger",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "wolf_helm",
+     "color": "#ff9a2a",
+     "color2": "#1a1a1a"
+    },
+    "top": {
+     "id": "fur_tunic",
+     "color": "#ff9a2a"
+    },
+    "bottom": {
+     "id": "leggings",
+     "color": "#ff9a2a"
+    },
+    "shoes": {
+     "id": "hooves",
+     "color": "#1a1a1a"
+    },
+    "extras": {
+     "id": "cheek_stripes",
+     "color": "#1a1a1a"
+    },
+    "cape": {
+     "id": "none"
+    },
+    "accessory": {
+     "id": "none"
+    }
+   },
+   "name": "Tiger Cub",
+   "price": 180,
+   "tag": "New"
+  },
+  {
+   "id": "cos_golden",
+   "kind": "costume",
+   "outfit": {
+    "hat": {
+     "id": "top_hat",
+     "color": "#ffd23f",
+     "color2": "#1a1a1a"
+    },
+    "top": {
+     "id": "doublet",
+     "color": "#ffd23f",
+     "color2": "#ffffff"
+    },
+    "bottom": {
+     "id": "breeches",
+     "color": "#ffd23f"
+    },
+    "shoes": {
+     "id": "shoes",
+     "color": "#ffd23f"
+    },
+    "cape": {
+     "id": "cape",
+     "color": "#ffd23f",
+     "color2": "#ffffff"
+    },
+    "accessory": {
+     "id": "monocle",
+     "color": "#ffd23f"
+    }
+   },
+   "name": "Golden Ticket",
+   "price": 250,
+   "tag": "New"
   }
  ]
 }

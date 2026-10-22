@@ -1,0 +1,10 @@
+/* Hay Bale Scramble: the big call-outs (STOP!, who is out) and the little status pill under the score bar. */
+.game-hay-bale-scramble .hay-banner { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%) scale(.6); opacity: 0; pointer-events: none; text-align: center;
+  font: 900 clamp(44px, 13vw, 96px)/1 var(--font); color: var(--sun); -webkit-text-stroke: 2.5px var(--ink); paint-order: stroke fill; text-shadow: 0 5px 0 var(--ink); white-space: nowrap; transition: transform .15s, opacity .15s; }
+.hay-banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.hay-banner.stop { color: #ff4d5e; } .hay-banner.go { color: #8ff07a; } .hay-banner.small { font-size: clamp(26px, 7.5vw, 46px); }
+.game-hay-bale-scramble .hay-pill { position: absolute; top: calc(var(--st) + 58px); left: 50%; transform: translateX(-50%); display: flex; gap: 8px; align-items: center; pointer-events: none; max-width: calc(100vw - 24px);
+  padding: 4px 14px; border-radius: 999px; background: rgba(255, 248, 231, .95); border: 3px solid var(--ink); box-shadow: 0 3px 0 var(--ink); font: 800 16px/1.2 var(--font); white-space: nowrap; transition: background .15s; }
+.hay-pill i { font-style: normal; font-size: 20px; } .hay-pill span { overflow: hidden; text-overflow: ellipsis; }
+.hay-pill[data-ph=music] { background: #c9f5d2; } .hay-pill[data-ph=scramble] { background: #ffb3ba; } .hay-pill[data-ph=result] { background: #ffe9a8; }
+@media (max-width: 520px) { .game-hay-bale-scramble .hay-pill { top: calc(var(--st) + 52px); font-size: 14px; } }

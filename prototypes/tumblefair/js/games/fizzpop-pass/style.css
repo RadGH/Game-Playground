@@ -1,0 +1,13 @@
+/* Fizzpop Pass: the big call-outs (SPLAT!, Got it!) and the little status pill under the score bar. */
+.game-fizzpop-pass .fzp-banner { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%) scale(.6); opacity: 0; pointer-events: none; text-align: center;
+  font: 900 clamp(40px, 12vw, 90px)/1 var(--font); color: var(--sun); -webkit-text-stroke: 2.5px var(--ink); paint-order: stroke fill; text-shadow: 0 5px 0 var(--ink); white-space: nowrap; transition: transform .15s, opacity .15s; }
+.fzp-banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.fzp-banner.hot { color: #ff4d5e; } .fzp-banner.go { color: #8ff07a; } .fzp-banner.small { font-size: clamp(26px, 7.5vw, 46px); }
+.game-fizzpop-pass .fzp-pill { position: absolute; top: calc(var(--st) + 58px); left: 50%; transform: translateX(-50%); display: flex; gap: 8px; align-items: center; pointer-events: none; max-width: calc(100vw - 24px);
+  padding: 4px 14px; border-radius: 999px; background: rgba(255, 248, 231, .95); border: 3px solid var(--ink); box-shadow: 0 3px 0 var(--ink); font: 800 16px/1.2 var(--font); white-space: nowrap; }
+.fzp-pill i { font-style: normal; font-size: 20px; } .fzp-pill span { overflow: hidden; text-overflow: ellipsis; }
+.fzp-pill[data-hot="1"] { background: #ff8a95; animation: fzp-throb .5s infinite; }
+@keyframes fzp-throb { 50% { transform: translateX(-50%) scale(1.06); } }
+@media (max-width: 520px) { .game-fizzpop-pass .fzp-pill { top: calc(var(--st) + 52px); font-size: 14px; } }
+
+.tag.fzp-cpu { background: #ff8a1f; }

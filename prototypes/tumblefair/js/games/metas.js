@@ -55,7 +55,8 @@ export const GAMES = Object.freeze({
    "tags": [
     "chance"
    ],
-   "card": "card-trapdoor-treasury"
+   "card": "card-trapdoor-treasury",
+   "css": true
   }
  },
  "meteor-dash": {
@@ -1262,6 +1263,478 @@ export const GAMES = Object.freeze({
     "puzzle"
    ],
    "card": "card-storm-shelter",
+   "css": true
+  }
+ },
+ "jellybean-jar": {
+  "meta": {
+   "id": "jellybean-jar",
+   "title": "Jellybean Jar",
+   "blurb": "How many are in there? The closest guess wins!",
+   "how": [
+    "Look at the jar (or the pool, or the balloons) and guess how many.",
+    "Type your number on the pad and press OK. You can change it until time is up.",
+    "Closest guess wins the round. Spot on = big bonus!",
+    "Three rounds, and the piles get bigger."
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 98,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "puzzle",
+    "social"
+   ],
+   "card": "card-jellybean-jar",
+   "css": true
+  }
+ },
+ "quick-draw": {
+  "meta": {
+   "id": "quick-draw",
+   "title": "Quick Draw",
+   "blurb": "Wait for the BELL, then tap first! Do not fall for the fakes!",
+   "how": [
+    "Watch your phone. When the big BELL rings, tap as fast as you can!",
+    "First tap wins the round (3 points), second gets 1.",
+    "Fake-outs! A hen, a pop, a moo, or the word BALL. Tap on those and you are out of the round (-1).",
+    "Seven rounds."
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 80,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "action"
+   ],
+   "card": "card-quick-draw",
+   "css": true
+  }
+ },
+ "pin-the-tail": {
+  "meta": {
+   "id": "pin-the-tail",
+   "title": "Pin the Tail",
+   "blurb": "Remember where the tail goes, then pin it with your eyes shut!",
+   "how": [
+    "An animal shows where its tail goes (the glowing star). Remember it!",
+    "Then it hides. Tap where the tail goes. You can tap again to move your pin.",
+    "Closest pin wins the round. Each round has a trick: slides, spins and swaps!",
+    "Five rounds."
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 84,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "puzzle",
+    "action"
+   ],
+   "card": "card-pin-the-tail",
+   "css": true
+  }
+ },
+ "size-up": {
+  "meta": {
+   "id": "size-up",
+   "title": "Size Up",
+   "blurb": "Bigger? Heavier? Faster? Tap the right one, quick!",
+   "how": [
+    "Two things appear with a question: which is BIGGER, HEAVIER, FASTER…?",
+    "Tap your answer. Your first tap counts!",
+    "Right = 5 points, plus up to 5 more for being quick.",
+    "Eight questions. Some have three things!"
+   ],
+   "kind": "ui",
+   "min": 1,
+   "max": 4,
+   "seconds": 96,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "puzzle",
+    "action"
+   ],
+   "card": "card-size-up",
+   "css": true
+  }
+ },
+ "tiptoe-tiger": {
+  "meta": {
+   "id": "tiptoe-tiger",
+   "title": "Tiptoe Tiger",
+   "blurb": "Creep up while the tiger sings — freeze when it turns, and ring its bell first!",
+   "how": [
+    "Walk forward while the tiger has its back to you.",
+    "Its tail twitches and FREEZE! pops up — let go of the stick!",
+    "Moving while it looks = ROAR, back to the start.",
+    "Hold A to stand like a statue. Ring the bell to win!"
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 75,
+   "scoring": "points",
+   "unit": "m",
+   "tags": [
+    "action"
+   ],
+   "controls": {
+    "stick": true,
+    "a": "Statue"
+   },
+   "move": {
+    "speed": 2.7,
+    "accel": 22,
+    "stunDrag": 3
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 5.5,
+    "hd": 10.5,
+    "wall": true,
+    "blocks": [
+     {
+      "x": 0,
+      "z": -9.25,
+      "hw": 5.5,
+      "hd": 1.25
+     }
+    ]
+   },
+   "pitch": 52,
+   "card": "card-tiptoe-tiger",
+   "css": true
+  }
+ },
+ "hay-bale-scramble": {
+  "meta": {
+   "id": "hay-bale-scramble",
+   "title": "Hay Bale Scramble",
+   "blurb": "When the fiddle stops, grab a hay bale — the last one standing is out!",
+   "how": [
+    "Walk round the bales while the fiddle plays.",
+    "Music stops? Run to a free bale and press A to sit!",
+    "One bale too few — whoever is left standing is out.",
+    "B barges. Press A too soon and you stumble!"
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 100,
+   "scoring": "survival",
+   "unit": "rounds",
+   "tags": [
+    "action"
+   ],
+   "controls": {
+    "stick": true,
+    "a": "Sit",
+    "b": "Barge"
+   },
+   "move": {
+    "speed": 5.2,
+    "accel": 22,
+    "stunDrag": 2.5
+   },
+   "arena": {
+    "shape": "circle",
+    "r": 7.2,
+    "wall": true,
+    "posts": [
+     {
+      "x": 0,
+      "z": 0,
+      "r": 0.75
+     }
+    ],
+    "blocks": [
+     {
+      "x": 0,
+      "z": -6,
+      "hw": 2.2,
+      "hd": 0.75
+     }
+    ]
+   },
+   "pitch": 58,
+   "card": "card-hay-bale-scramble",
+   "css": true
+  }
+ },
+ "fizzpop-pass": {
+  "meta": {
+   "id": "fizzpop-pass",
+   "title": "Fizzpop Pass",
+   "blurb": "Pass the fizzing pie before it pops — don’t be holding it when it goes SPLAT!",
+   "how": [
+    "Got the pie? Bump into someone to pass it (or press A next to them).",
+    "It fizzes faster near the end — but nobody knows exactly when!",
+    "You cannot pass it straight back to who gave it to you.",
+    "Splatted = lose a life. Last one standing wins!"
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 100,
+   "scoring": "points",
+   "unit": "pts",
+   "tags": [
+    "action"
+   ],
+   "controls": {
+    "stick": true,
+    "a": "Pass"
+   },
+   "move": {
+    "speed": 5,
+    "accel": 20,
+    "stunDrag": 2.5,
+    "boostMul": 1.17
+   },
+   "arena": {
+    "shape": "circle",
+    "r": 6.6,
+    "wall": true,
+    "posts": [
+     {
+      "x": 0,
+      "z": 0.3,
+      "r": 0.65
+     }
+    ],
+    "blocks": [
+     {
+      "x": -3.2,
+      "z": -2.1,
+      "hw": 1,
+      "hd": 0.55
+     },
+     {
+      "x": 3.2,
+      "z": 2.3,
+      "hw": 1,
+      "hd": 0.55
+     }
+    ]
+   },
+   "pitch": 58,
+   "card": "card-fizzpop-pass",
+   "css": true
+  }
+ },
+ "bumper-bash": {
+  "meta": {
+   "id": "bumper-bash",
+   "title": "Bumper Bash",
+   "blurb": "Bash the other bumper cars — hits from behind score the most!",
+   "how": [
+    "Point the stick where you want to drive.",
+    "Ram a car: from behind 3, side 2, nose to nose 1.",
+    "Grab ★ stars for points and ⚡ bolts for a turbo.",
+    "The walls are bouncy!"
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 70,
+   "scoring": "points",
+   "unit": "pts",
+   "tags": [
+    "action"
+   ],
+   "controls": {
+    "stick": true
+   },
+   "move": {
+    "mode": "car",
+    "speed": 6.3,
+    "accel": 3.6,
+    "turn": 3.9,
+    "grip": 4.5,
+    "boostMul": 1.5,
+    "stunDrag": 1.7
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 8,
+    "hd": 8,
+    "wall": true,
+    "posts": [
+     {
+      "x": 0,
+      "z": 0,
+      "r": 0.75
+     }
+    ]
+   },
+   "pitch": 64,
+   "card": "card-bumper-bash",
+   "css": true
+  }
+ },
+ "sheep-shuffle": {
+  "meta": {
+   "id": "sheep-shuffle",
+   "title": "Sheep Shuffle",
+   "blurb": "Herd the woolly sheep into your own pen!",
+   "how": [
+    "Sheep run away from you — walk BEHIND them to steer them.",
+    "Get them through the gap into the pen in YOUR colour.",
+    "BAA! scares sheep in front of you — even out of a rival's pen.",
+    "Golden sheep count 3. Most sheep penned at the bell wins!"
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 70,
+   "scoring": "points",
+   "unit": "sheep",
+   "tags": [
+    "action"
+   ],
+   "controls": {
+    "stick": true,
+    "a": "BAA!"
+   },
+   "move": {
+    "speed": 6,
+    "accel": 24,
+    "stunDrag": 2
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 9.5,
+    "hd": 7,
+    "wall": true
+   },
+   "pitch": 60,
+   "card": "card-sheep-shuffle",
+   "css": true
+  }
+ },
+ "mole-mallet": {
+  "meta": {
+   "id": "mole-mallet",
+   "title": "Mole Mallet",
+   "blurb": "Bonk the moles as they pop up — but not the bombs!",
+   "how": [
+    "Moles pop out of the holes: run onto one and press BONK!",
+    "Golden moles are worth 3, but they are quick.",
+    "A mole in a black helmet is a BOMB — bonk it and you get dizzy.",
+    "Bonk a player to make them dizzy too. Most bonks wins!"
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 60,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "action"
+   ],
+   "controls": {
+    "stick": true,
+    "a": "BONK!"
+   },
+   "move": {
+    "speed": 6.4,
+    "accel": 30,
+    "stunDrag": 3
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 8.5,
+    "hd": 6.3,
+    "wall": true
+   },
+   "pitch": 60,
+   "card": "card-mole-mallet"
+  }
+ },
+ "rope-rumble": {
+  "meta": {
+   "id": "rope-rumble",
+   "title": "Rope Rumble",
+   "blurb": "Tug of war! Pull in time with the drum!",
+   "how": [
+    "Tap PULL once on every drum beat — on the beat is strongest.",
+    "Mashing is weaker than a steady rhythm!",
+    "Drag the red ribbon over your line to win the pull.",
+    "Best of three pulls."
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 62,
+   "scoring": "points",
+   "unit": "pulls",
+   "tags": [
+    "action"
+   ],
+   "controls": {
+    "stick": false,
+    "a": "PULL"
+   },
+   "move": {
+    "speed": 1,
+    "accel": 10
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 5.4,
+    "hd": 2.6,
+    "wall": true
+   },
+   "pitch": 50,
+   "card": "card-rope-rumble",
+   "css": true
+  }
+ },
+ "lantern-leap": {
+  "meta": {
+   "id": "lantern-leap",
+   "title": "Lantern Leap",
+   "blurb": "Hop across the sinking lily pads and grab the coins!",
+   "how": [
+    "Walk and LEAP from pad to pad to grab coins and fireflies.",
+    "A pad WOBBLES after you step on it — then it sinks!",
+    "Fall in and you splash back to the dock and lose your streak.",
+    "A long streak makes every pickup worth more. Most points wins!"
+   ],
+   "kind": "arena",
+   "min": 1,
+   "max": 4,
+   "seconds": 60,
+   "scoring": "points",
+   "unit": "points",
+   "tags": [
+    "action"
+   ],
+   "controls": {
+    "stick": true,
+    "a": "LEAP"
+   },
+   "move": {
+    "speed": 5.2,
+    "accel": 28,
+    "stunDrag": 4,
+    "boostMul": 1.45
+   },
+   "arena": {
+    "shape": "rect",
+    "hw": 9,
+    "hd": 7,
+    "wall": true
+   },
+   "pitch": 58,
+   "card": "card-lantern-leap",
    "css": true
   }
  }

@@ -1,0 +1,41 @@
+/* Pin the Tail — a sunny paddock in a wooden frame; pins are push-pins in seat colours with names. */
+.game-pin-the-tail { pointer-events: auto; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: calc(var(--st) + 8px) calc(var(--sr) + 10px) calc(var(--sb) + 40px) calc(var(--sl) + 10px);
+  background: linear-gradient(#ffcf8a, #ffe8c2 40%, #f7d9a8); }
+.game-pin-the-tail > * { flex: none; }
+.pt-top { display: flex; gap: 10px; align-items: center; justify-content: center; width: 100%; padding-right: 36px; }
+.pt-title { font: 900 22px/1.1 var(--font); color: #ff8a3d; -webkit-text-stroke: 1.2px var(--ink); paint-order: stroke fill; text-shadow: 0 3px 0 var(--ink); }
+.pt-round { font-weight: 900; font-size: 14px; text-transform: uppercase; background: var(--ink); color: #fff; border-radius: 999px; padding: 3px 10px; }
+.pt-banner { font: 900 19px/1.15 var(--font); background: #fff; border: 3px solid var(--ink); border-radius: 999px; padding: 3px 14px; box-shadow: 0 3px 0 var(--ink); text-align: center; }
+.pt-banner:empty { display: none; }
+@media (max-aspect-ratio: 1/1) { .pt-banner { max-width: calc(100% - 92px); font-size: 17px; } }
+.pt-boardwrap { position: relative; width: min(100%, 1000px, calc((100vh - 230px) * 1.333)); min-width: min(100%, 300px); border: 6px solid #8a5225; border-radius: 14px; box-shadow: 0 6px 0 var(--ink), inset 0 0 0 3px var(--ink); background: #8a5225; overflow: hidden; }
+.pt-board { display: block; width: 100%; height: auto; touch-action: manipulation; }
+.game-pin-the-tail[data-phase=guess]:not(.watching) .pt-board { cursor: crosshair; }
+.pt-world { transform-box: view-box; }
+.pt-an { transition: opacity .35s; }
+.pt-an.gone { opacity: 0; }
+.pt-animals.blurred { filter: url(#pt-blur); opacity: .55; }
+.pt-target { animation: pt-pulse .7s ease-in-out infinite alternate; transform-box: fill-box; }
+@keyframes pt-pulse { from { opacity: .75; } to { opacity: 1; } }
+.pt-lbl { font: 900 6px var(--font); fill: #fff; stroke: var(--ink); stroke-width: 1.4px; paint-order: stroke fill; }
+.pt-pin.best .pt-lbl { fill: var(--sun); }
+.pt-pin.mine .pt-lbl { fill: #fff; }
+.pt-hint { position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%); font: 900 18px/1 var(--font); color: #fff; -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; pointer-events: none; text-shadow: 0 2px 0 var(--ink); }
+.pt-hint:empty { display: none; }
+.game-pin-the-tail[data-phase=guess] .pt-hint { animation: bob .8s infinite; }
+
+.pt-actions { display: flex; justify-content: center; width: min(100%, 520px); }
+.pt-done { flex: 1; min-height: 56px; background: var(--mint); color: #fff; -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; }
+.pt-done:disabled { background: #fff; color: #6a5a60; -webkit-text-stroke: 0; opacity: .85; }
+.game-pin-the-tail:is(.watching, :not([data-phase=guess])) .pt-actions { visibility: hidden; height: 0; margin: -4px 0; overflow: hidden; }
+
+.pt-players { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.pt-players .chip .sc { font-style: normal; font-weight: 900; background: #ffe9a8; border-radius: 8px; padding: 0 6px; }
+.pt-st { font-size: 12px; color: #6a5a60; } .pt-st:empty { display: none; } .pt-st.in { color: #1d8a37; } .pt-st.best { color: #b06000; }
+.pt-players .chip.in { outline: 4px solid var(--mint); }
+.pt-note { margin: 0; text-align: center; font: 800 17px/1.25 var(--font); color: var(--ink); max-width: 600px; min-height: 1.3em; }
+.game-pin-the-tail[data-phase=end] .pt-boardwrap, .game-pin-the-tail[data-phase=end] .pt-banner { display: none; }
+.game-pin-the-tail[data-phase=end] .pt-players { margin-top: 14vh; }
+.game-pin-the-tail[data-phase=end] .pt-players .chip { font-size: 20px; } .game-pin-the-tail[data-phase=end] .pt-players .chip .face { width: 52px; height: 52px; }
+@media (min-aspect-ratio: 1/1) { .watching .pt-banner { font-size: 24px; } }

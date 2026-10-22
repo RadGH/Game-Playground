@@ -1,0 +1,12 @@
+/* Bumper Bash: 3-2-1-GO and call-outs, and a pill with the scoring rule (lights up while you have a turbo). */
+.game-bumper-bash .bmp-banner { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%) scale(.6); opacity: 0; pointer-events: none; text-align: center;
+  font: 900 clamp(44px, 13vw, 96px)/1 var(--font); color: var(--sun); -webkit-text-stroke: 2.5px var(--ink); paint-order: stroke fill; text-shadow: 0 5px 0 var(--ink); white-space: nowrap; transition: transform .15s, opacity .15s; }
+.bmp-banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.bmp-banner.go { color: #8ff07a; } .bmp-banner.small { font-size: clamp(26px, 7.5vw, 46px); }
+.game-bumper-bash .bmp-pill { position: absolute; top: calc(var(--st) + 58px); left: 50%; transform: translateX(-50%); display: flex; gap: 10px; align-items: center; pointer-events: none;
+  padding: 4px 14px; border-radius: 999px; background: rgba(255, 248, 231, .95); border: 3px solid var(--ink); box-shadow: 0 3px 0 var(--ink); font: 800 15px/1.2 var(--font); white-space: nowrap; }
+.bmp-pill span b { font-weight: 600; font-size: 13px; }
+.bmp-pill .bmp-turbo { display: none; background: var(--sky); border-radius: 999px; padding: 0 8px; }
+.bmp-pill.turbo .bmp-turbo { display: inline; }
+@media (max-width: 520px) { .game-bumper-bash .bmp-pill { top: calc(var(--st) + 52px); font-size: 14px; gap: 7px; } }
+.tag.bmp-cpu { background: #ff8a1f; }

@@ -11,9 +11,10 @@ import { makeRng } from '../shared/rng.js';
 import { GAMES, eligible } from '../games/index.js';
 import { createBoardMatch, boardStandings } from './board.js';
 
-export const TIMES = Object.freeze({ VOTE_MS: 10000, INTRO_MS: 7000, RESULTS_MS: 8000, FINAL_MS: 20000, GONE_LOBBY_MS: 15000, GONE_MATCH_MS: 90000, EMPTY_MS: 60000, GAME_GRACE_MS: 3000 });
+export const TIMES = Object.freeze({ VOTE_MS: 10000, INTRO_MS: 7000, RESULTS_MS: 8000, FINAL_MS: 20000, GONE_LOBBY_MS: 15000, GONE_MATCH_MS: 90000, EMPTY_MS: 60000, GAME_GRACE_MS: 3000, BONUS_MS: 11000 });
 export const OPTS = Object.freeze({
   mode: { values: ['board', 'marathon', 'endless'], def: 'board' },
+  board: { values: ['fairground', 'pier'], def: 'fairground' },          // round 5: the Moonlit Pier
   teams: { values: [false, true], def: false },
   rounds: { min: 2, max: 8, def: 4 },
   shortlist: { min: 2, max: 4, def: 3 },
@@ -32,7 +33,7 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
   const rng = makeRng(seed);
   const members = new Map();          // pid -> member
   let nextPid = 1, hostPid = null, phase = 'lobby', until = 0, emptySince = null;
-  const opts = { mode: OPTS.mode.def, teams: OPTS.teams.def, rounds: OPTS.rounds.def, shortlist: OPTS.shortlist.def, difficulty: OPTS.difficulty.def, pool: [] };
+  const opts = { board: OPTS.board.def, mode: OPTS.mode.def, teams: OPTS.teams.def, rounds: OPTS.rounds.def, shortlist: OPTS.shortlist.def, difficulty: OPTS.difficulty.def, pool: [] };
   let match = null;                    // { mode, round, rounds, points, wins, played, board, lastGame }
   let vote = null, game = null, lastPhaseMsg = null, tickNo = 0;
 
@@ -45,7 +46,7 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
   const cast = obj => { const s = JSON.stringify(obj); for (const m of members.values()) if (m.connected && m.send) m.send(s); };
   function roomMsg(m) {
     return { t: 'room', code, phase, host: hostPid, you: m.pid, opts, members: [...members.values()].map(pub),
-      match: match ? { mode: match.mode, round: match.round, rounds: match.rounds, points: match.points, wins: match.wins, board: match.board ? match.board.view() : null } : null };
+      match: match ? { mode: match.mode, round: match.round, rounds: match.rounds, points: match.points, wins: match.wins, board: match.board ? match.board.view() : null, boardId: match.boardId || null } : null };
   }
   const syncRoom = () => { for (const m of members.values()) send(m, roomMsg(m)); };
   function setPhase(p, msg = {}, ms = 0) { phase = p; until = ms ? now() + ms : 0; lastPhaseMsg = { t: 'phase', phase: p, ms, ...msg }; syncRoom(); cast(lastPhaseMsg); }
@@ -103,7 +104,8 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
     for (const m of players) { match.points[m.pid] = 0; match.wins[m.pid] = 0; m.ready = false; }
     if (match.mode === 'board') {
       const names = new Proxy({}, { get: (_, pid) => members.get(+pid)?.name });
-      match.board = createBoardMatch({ def: data.boards.fairground, chance: data.chance, order: players.map(m => m.pid), rng: rng.fork(), names, emit: ev => cast({ t: 'bd', ...ev }) });
+      match.boardId = data.boards[opts.board] ? opts.board : 'fairground';
+      match.board = createBoardMatch({ def: data.boards[match.boardId], chance: data.chance, order: players.map(m => m.pid), rng: rng.fork(), names, emit: ev => cast({ t: 'bd', ...ev }) });
     }
     log('match', { code, mode: match.mode, players: players.length });
     nextRound();
@@ -116,7 +118,7 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
     }
     if (match.round >= match.rounds) return finish();
     match.round++;
-    if (match.mode === 'board') { setPhase('board', { round: match.round, rounds: match.rounds }); match.board.beginRound(now()); }
+    if (match.mode === 'board') { setPhase('board', { round: match.round, rounds: match.rounds }); match.board.beginRound(now(), match.round, match.rounds); }
     else startVote();
   }
   function startVote() {
@@ -188,10 +190,10 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
     const alone = game.players.length === 1;
     for (const pid of game.players) {
       if (!(pid in match.points)) continue;
-      if (mode === 'board') match.board.give(pid, award[pid] || 0); else match.points[pid] += award[pid] || 0;
+      if (mode === 'board') { award[pid] = (award[pid] || 0) * match.board.gameMul(); match.board.give(pid, award[pid], false); } else match.points[pid] += award[pid] || 0;
     }
     if (res.coop ? res.coop.success : !alone) for (const pid of (res.coop ? game.players : res.order[0] || [])) if (pid in match.wins) match.wins[pid]++;
-    const msg = { game: game.id, result: res, award, unit: mode === 'board' ? 'tickets' : 'points', teams: teamTotals() };
+    const msg = { game: game.id, result: res, award, unit: mode === 'board' ? 'tickets' : 'points', teams: teamTotals(), round: match.round, mul: mode === 'board' ? match.board.gameMul() : 1 };
     game = null;
     for (const m of members.values()) m.skip = false;
     setPhase('results', msg, TIMES.RESULTS_MS);
@@ -215,6 +217,11 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
     return rows;
   }
   function finish() {
+    if (match.mode === 'board' && !match.bonusDone) {                 // the closing ceremony: bonus ribbons first
+      match.bonusDone = true;
+      const awards = match.board.bonus(match.wins);
+      if (awards.length) return setPhase('bonus', { awards }, TIMES.BONUS_MS);
+    }
     const rows = standings(), payout = {}, teams = teamTotals();
     if (teams) for (const r of rows) r.place = teams.find(t => t.pids.includes(r.pid))?.place ?? r.place;   // in teams, your team's place is yours
     for (const r of rows) {
@@ -242,7 +249,7 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
       case 'opt': {
         if (m.pid !== hostPid || phase !== 'lobby') return;
         const o = OPTS[msg.key];
-        if (msg.key === 'pool') { if (Array.isArray(msg.value)) opts.pool = msg.value.filter(id => typeof id === 'string' && GAMES[id]).slice(0, 40); }
+        if (msg.key === 'pool') { if (Array.isArray(msg.value)) opts.pool = msg.value.filter(id => typeof id === 'string' && GAMES[id]).slice(0, 120); }
         else if (!o) return;
         else if (o.values) { if (o.values.includes(msg.value)) opts[msg.key] = msg.value; }   // (teams: true / false)
         else if (Number.isInteger(msg.value)) opts[msg.key] = Math.max(o.min, Math.min(o.max, msg.value));
@@ -260,7 +267,7 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
         return;
       }
       case 'skip': {
-        if ((phase !== 'intro' && phase !== 'results' && phase !== 'final') || m.seat == null) return;
+        if ((phase !== 'intro' && phase !== 'results' && phase !== 'final' && phase !== 'bonus') || m.seat == null) return;
         m.skip = true; cast({ t: 'skips', pids: active().filter(a => a.skip).map(a => a.pid) });
         if (active().every(a => a.skip)) until = Math.min(until, now() + 400);
         return;
@@ -290,6 +297,7 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
       case 'intro': if (t >= until) beginPlay(); break;
       case 'game': tickGame(); break;
       case 'results': if (t >= until) nextRound(); break;
+      case 'bonus': if (t >= until) finish(); break;
       case 'final': if (t >= until) toLobby(); break;
     }
   }

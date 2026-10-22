@@ -33,7 +33,7 @@ export const RULES = {
   aimMax: 1.15, aimRate: 3.4, fireCool: 0.55, ballSpeed: 16, ballRange: 17, hitDmg: 2, splash: 1.4,
   piles: { ammo: { x: -5.6, z: 1.9 }, plank: { x: 5.6, z: 1.9 } }, pileReach: 1.55,
   wallReach: -1.65, bonkCool: 0.5, bonkReach: 1.7,
-  scale: { 1: 0.42, 2: 0.8, 3: 1.05, 4: 1.25 }, diff: { easy: 0.8, normal: 1, hard: 1.2 },
+  scale: { 1: 0.42, 2: 0.8, 3: 1.05, 4: 1.25 }, diff: { easy: 0.7, normal: 0.9, hard: 1.15 },   // round 5: eased 10% from the bot-tuned waves
   waves: [
     { at: 3, g: [{ k: 'blob', n: 5, every: 1.3 }] },
     { at: 16, g: [{ k: 'blob', n: 5, every: 1.2 }, { k: 'hop', n: 3, every: 1.6, delay: 2 }] },

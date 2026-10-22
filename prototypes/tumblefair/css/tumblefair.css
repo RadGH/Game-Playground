@@ -125,13 +125,32 @@ input[type=text], input:not([type]) { user-select: text; -webkit-user-select: te
 .die { position: absolute; top: 38%; left: 50%; width: 110px; height: 110px; margin: -55px; display: grid; place-items: center; background: #fff; border: 6px solid var(--ink); border-radius: 24px; box-shadow: 0 8px 0 var(--ink); font: 900 72px/1 var(--font); animation: tumble .9s cubic-bezier(.2, 1.4, .4, 1); }
 @keyframes tumble { from { transform: rotate(-540deg) scale(.2); } }
 .ask { display: grid; gap: 8px; text-align: center; } .ask h3 { margin: 0; }
+/* round 5: the Fair Bulletin, two dice, dice duels, the duck pond */
+.bulletin { position: absolute; top: calc(var(--st) + 70px); left: 50%; transform: translateX(-50%); width: min(92vw, 440px); text-align: center; background: #fff3b8; color: var(--ink); border: 5px solid var(--ink); border-radius: 20px; box-shadow: 0 8px 0 var(--ink); padding: 10px 16px 14px; animation: pop .45s cubic-bezier(.2, 1.5, .4, 1); z-index: 3; }
+.bulletin small { font-weight: 900; letter-spacing: .12em; color: #b0306a; } .bulletin h2 { margin: 2px 0 4px; font-size: 30px; } .bulletin p { margin: 0; font-weight: 700; }
+.mods { position: absolute; top: calc(var(--st) + 52px); left: 10px; background: #b0306a; color: #fff; font-weight: 900; font-size: 13px; padding: 4px 10px; border-radius: 999px; border: 3px solid var(--ink); }
+.dice2 { position: absolute; top: 38%; left: 50%; transform: translate(-50%, -50%); display: flex; gap: 14px; align-items: center; }
+.dice2 .die { position: static; margin: 0; width: 92px; height: 92px; font-size: 58px; }
+.die.gold { background: linear-gradient(160deg, #fff6b0, #f2b600); } .die.sticky { background: #ffd0ec; }
+.dice2.duel { top: 30%; } .duel .die { flex-direction: column; font-size: 50px; } .duel .die small { font: 800 12px/1 var(--font); max-width: 84px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.duel .die.won { background: #c9f7c2; transform: scale(1.12); transition: transform .3s .9s; } .duel .vs { font: 900 26px/1 var(--font); color: #fff; -webkit-text-stroke: 2px var(--ink); }
+.ducks { display: flex; gap: 10px; justify-content: center; }
+.btn.duck { display: grid; justify-items: center; gap: 2px; min-width: 88px; padding: 8px; } .duck-svg { width: 64px; height: 56px; }
+.duck.d0 { color: #ffd23f; } .duck.d1 { color: #5cc8ff; } .duck.d2 { color: #ff8fc8; } .duck span { color: var(--ink); font-size: 14px; }
+.awards { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; width: 100%; }
+.award-row { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 8px; align-items: center; background: #fff; border: 3px solid var(--ink); border-radius: 14px; padding: 8px 10px; text-align: left; opacity: 0; animation: pop2 .5s cubic-bezier(.2, 1.5, .4, 1) forwards; }
+.award-row b { display: block; font-size: 20px; } .award-row small { color: #47606a; } .award-row .who { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; }
+.ribbon-badge { width: 44px; height: 44px; display: grid; place-items: center; background: #ff5f8f; border-radius: 50%; border: 3px solid var(--ink); } .ribbon-badge svg { width: 26px; height: 26px; }
+@keyframes pop2 { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: none; } }
 
 /* ---- vote ---- */
 #screen.vote, #screen.intro, #screen.results, #screen.final { display: grid; place-items: center; align-content: center; gap: 12px; padding: calc(var(--st) + 60px) 12px calc(var(--sb) + 12px); overflow-y: auto; }
 #screen.vote { background: rgba(13, 34, 40, .55); } #screen.results { background: rgba(13, 34, 40, .45); }
 .vote-cards { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; width: 100%; }
 .vote-card { flex: 1 1 150px; max-width: 260px; padding: 0; border: 4px solid var(--ink); border-radius: 18px; overflow: hidden; background: var(--paper); box-shadow: 0 6px 0 var(--ink); text-align: left; }
-.vote-card.mine { outline: 5px solid var(--sun); } .vote-card.won { outline: 6px solid var(--mint); transform: scale(1.04); }
+.vote-card { outline: 5px solid transparent; outline-offset: 0; transition: outline-color .15s, transform .25s; } .vote-card:active { transform: none; }
+.vote-card.mine { outline-color: var(--sun); } .vote-card.won { outline: 5px solid var(--mint); transform: scale(1.03); }
+.gcard .who { display: flex; flex-wrap: wrap; gap: 2px; align-items: center; height: 28px; overflow: hidden; }
 .gcard { display: grid; gap: 2px; } .gcard img { width: 100%; aspect-ratio: 3/2; object-fit: cover; display: block; background: #29535c; }
 .gcard b { padding: 6px 10px 0; font-size: 18px; } .gcard > span { padding: 0 10px 6px; font-size: 13px; color: #47606a; font-weight: 600; } .gcard .who { padding: 0 8px 8px; min-height: 24px; text-decoration: none; }
 #screen.vote .note { color: #fff; font-size: 18px; }
@@ -185,3 +204,15 @@ body[data-phase=game] .fb-btn { width: 28px; height: 28px; font-size: 15px; opac
 .netq::before { content: ''; position: absolute; left: 7px; top: 50%; width: 7px; height: 7px; margin-top: -3.5px; border-radius: 50%; background: #3fcf6a; }
 .netq.ok::before { background: #f2c230; } .netq.bad::before { background: #e84a4a; }
 .netq[hidden] { display: none; }
+.costume { position: relative; } .costume .tag { position: absolute; top: 4px; right: 4px; font: 900 10px/1 var(--font); font-style: normal; background: #3ecf5a; color: #fff; border: 2px solid var(--ink); border-radius: 999px; padding: 3px 6px; }
+.costume .tag.t-spooky { background: #8a3ad8; }
+.blurb.double { background: #fff3b8; border: 3px solid var(--ink); border-radius: 12px; padding: 4px 10px; font-weight: 900; }
+/* round 5: the host's minigame list */
+.modal.pool { padding-top: calc(var(--st) + 16px); align-items: start; }
+.modal.pool .panel { width: min(100%, 760px); } .modal.pool h3 { margin: 8px 0 0; }
+.pool-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+.pool-g { position: relative; display: grid; gap: 1px; padding: 0 0 6px; border: 3px solid var(--ink); border-radius: 12px; overflow: hidden; background: #e4ecee; text-align: left; opacity: .55; filter: grayscale(.8); }
+.pool-g.on { opacity: 1; filter: none; background: #fff; }
+.pool-g img { width: 100%; aspect-ratio: 3/2; object-fit: cover; background: #29535c; } .pool-g b { padding: 0 6px; font-size: 14px; } .pool-g small { padding: 0 6px; color: #47606a; }
+.pool-g .tick { position: absolute; top: 4px; right: 4px; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; background: #3ecf5a; color: #fff; font: 900 16px/1 var(--font); font-style: normal; border: 2px solid var(--ink); }
+.pool-g:not(.on) .tick { background: #fff; }

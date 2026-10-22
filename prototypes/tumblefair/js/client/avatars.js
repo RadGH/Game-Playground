@@ -37,7 +37,10 @@ export function avatarOf(look, costume = 'cos_none') {
   let av = applyCustom(randomChibi2(randomAvatar, presets, { race, seed, makeRng, known: (slot, id) => partIds(slot).includes(id) }), look?.custom || null);
   av.held = { id: 'none' }; av.offhand = { id: 'none' };                       // nobody carries a sword round the fair
   const outfit = costumeOf(costume).outfit;
-  if (outfit && outfits[outfit]) av = dressAs(av, outfits[outfit], { hands: false });
+  if (typeof outfit === 'string' && outfits[outfit]) av = dressAs(av, outfits[outfit], { hands: false });
+  else if (outfit && typeof outfit === 'object') {                          // round 5: a costume written out slot by slot
+    av = { ...av }; for (const [slot, part] of Object.entries(outfit)) if (slot !== 'held' && slot !== 'offhand') av[slot] = { ...(av[slot] || {}), ...part };
+  }
   if (cache.size > 200) cache.clear();
   cache.set(key, av);
   return av;

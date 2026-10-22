@@ -24,7 +24,18 @@ import * as costumeCatwalk from './costume-catwalk/sim.js';
 import * as oneButtonOrchestra from './one-button-orchestra/sim.js';
 import * as goingGoingGone from './going-going-gone/sim.js';
 
-export const GAMES = Object.freeze(Object.fromEntries([paintPanic, trapdoorTreasury, meteorDash, snowballShowdown, stackAttack, drawTheDisaster, memoryHeist, circuitScramble, laserLimbo, cannonballCatch, balloonStampede, captionClash, patternImpostor, coinstorm, boardwalkBrawl, flingRing, wobblewheelRally, ringADingRumble, costumeCatwalk, oneButtonOrchestra, goingGoingGone].map(g => [g.meta.id, g])));
+import * as tileFlipRace from './tile-flip-race/sim.js';
+import * as monsterForecast from './monster-forecast/sim.js';
+import * as wobbleTower from './wobble-tower/sim.js';
+import * as ropeBridgePanic from './rope-bridge-panic/sim.js';
+import * as slipperyDelivery from './slippery-delivery/sim.js';
+import * as portalRouting from './portal-routing/sim.js';
+import * as wordRelay from './word-relay/sim.js';
+import * as safecracker from './safecracker/sim.js';
+
+import * as treasureMapBluff from './treasure-map-bluff/sim.js';
+import * as auctionOfChaos from './auction-of-chaos/sim.js';
+export const GAMES = Object.freeze(Object.fromEntries([paintPanic, trapdoorTreasury, meteorDash, snowballShowdown, stackAttack, drawTheDisaster, memoryHeist, circuitScramble, laserLimbo, cannonballCatch, balloonStampede, captionClash, patternImpostor, coinstorm, boardwalkBrawl, flingRing, wobblewheelRally, ringADingRumble, costumeCatwalk, oneButtonOrchestra, goingGoingGone, tileFlipRace, monsterForecast, wobbleTower, ropeBridgePanic, slipperyDelivery, portalRouting, wordRelay, safecracker, treasureMapBluff, auctionOfChaos].map(g => [g.meta.id, g])));
 export const gameIds = () => Object.keys(GAMES);
 export const metaOf = id => GAMES[id]?.meta || null;
 export const loadView = id => import(`./${id}/view.js`);

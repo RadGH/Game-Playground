@@ -6,6 +6,10 @@ import { createProfiles } from '../js/sim/profiles.js';
 import { cleanLook } from '../../thousandvale/js/sim/looks.js';
 import { PROTOCOL, TICK_MS } from '../js/shared/protocol.js';
 import { GAMES } from '../js/games/index.js';
+import { runBall as prRun } from '../js/games/portal-routing/sim.js';
+import { RULE as wrRule } from '../js/games/word-relay/sim.js';
+import { WORDS as wrWords } from '../js/games/word-relay/words.js';
+import { score as scScore } from '../js/games/safecracker/sim.js';
 
 const json = p => JSON.parse(readFileSync(fileURLToPath(new URL('../' + p, import.meta.url)), 'utf8'));
 export const DATA = { boards: { fairground: json('data/boards/fairground.json') }, chance: json('data/chance.json'), cosmetics: json('data/cosmetics.json') };
@@ -54,6 +58,64 @@ export function world({ seed = 7 } = {}) {
 }
 /** Presses that make sense in each non-arena game, so bots can finish them. One entry per game id. */
 export const UI_BOTS = {
+  // auction-of-chaos: bids a little on each lot (by pid and lot, never more than it has) and locks in
+  'auction-of-chaos': P => {
+    const g = P.last.s?.g, k = P.last.phase; if (g?.phase !== 'bid' || !k || k.acL === g.lot) return;
+    k.acL = g.lot; P.send({ t: 'act', a: 'bid', d: Math.min(g.chips[P.pid], (P.pid + g.lot) % 4 + 1) }); P.send({ t: 'act', a: 'lock', d: true });
+  },
+  // treasure-map-bluff: says one thing, picks a route (by pid and round), locks in — once a round
+  'treasure-map-bluff': P => {
+    const g = P.last.s?.g, k = P.last.phase; if (g?.phase !== 'plan' || !k || k.tmR === g.round) return;
+    k.tmR = g.round; P.send({ t: 'act', a: 'say', d: { k: 'safe', r: P.pid % 4 } });
+    P.send({ t: 'act', a: 'pick', d: (P.pid + g.round) % 4 }); P.send({ t: 'act', a: 'lock', d: true });
+  },
+  // portal-routing: finds the gate settings that roll the marble home (tries them all), flips its own gates to match
+  'portal-routing': P => {
+    const g = P.last.s?.g, k = P.last.phase; if (!g || !k || g.phase === 'clear') return;
+    const init = k.prInit || (k.prInit = P.got.findLast(m => m.t === 'phase' && m.phase === 'intro')?.init); if (!init) return;
+    P.prTick = (P.prTick || 0) + 1; if (P.prTick % 4) return;
+    const s = init.stages[g.stage], n = s.gates.length;
+    if (k.prStage !== g.stage) { k.prStage = g.stage; k.prPlan = null; for (let m = 0; m < 1 << n && !k.prPlan; m++) { const st = [...Array(n).keys()].map(i => (m >> i) & 1); if (prRun(s, st) === 'goal') k.prPlan = st; } }
+    const seat = P.room.members.find(m => m.pid === P.pid)?.seat;
+    const i = k.prPlan ? s.gates.findIndex((ci, j) => s.cells[ci].own === seat && +g.st[j] !== k.prPlan[j]) : -1;
+    if (i >= 0) P.send({ t: 'act', a: 'flip', d: i });
+  },
+  // word-relay: sends a dictionary word that fits the letter and rule (a different one per player), once a link, after a pause
+  'word-relay': P => {
+    const g = P.last.s?.g, k = P.last.phase; if (g?.phase !== 'go' || !k) return;
+    if (k.wrLink !== g.link) { k.wrLink = g.link; k.wrWait = 20 + P.pid * 7; k.wrTry = 0; }
+    if (--k.wrWait > 0 || k.wrTry >= 3 || g.got.some(x => x[0] === P.pid)) return;
+    k.wrWait = 12; const t = wrRule[g.rule].test, seen = new Set([...g.chain.map(c => c[0]), ...g.got.map(x => x[1])]);
+    const fits = wrWords.split(' ').filter(w => w[0] === g.letter && w.length >= 3 && t(w) && !seen.has(w));
+    if (fits.length) P.send({ t: 'act', a: 'word', d: fits[(P.pid * 5 + k.wrTry++) % fits.length] });
+  },
+  // safecracker: guesses the first code that agrees with every answer so far (a small search), twice a second
+  'safecracker': P => {
+    const g = P.last.s?.g, me = P.last.gp?.d, k = P.last.phase; if (!g || !me || !k) return;
+    const init = k.scInit || (k.scInit = P.got.findLast(m => m.t === 'phase' && m.phase === 'intro')?.init); if (!init) return;
+    const L = init.levels[me.lvl]; if (!L || me.lock) return;
+    P.scTick = (P.scTick || 0) + 1; if (P.scTick % 10) return;
+    const key = me.lvl + ':' + me.guesses.length + ':' + JSON.stringify(me.seen); if (k.scKey === key) return; k.scKey = key;
+    const hist = me.guesses.map(([gs, hit, near]) => ({ g: [...gs].map(Number), hit, near }));
+    for (let n = 0; n < L.sym ** L.len; n++) {
+      const c = []; for (let i = 0, v = n; i < L.len; i++, v = Math.floor(v / L.sym)) c.push(v % L.sym + 1);
+      if (!L.rep && new Set(c).size < L.len) continue;
+      if (Object.entries(me.seen || {}).some(([i, v]) => c[+i] !== v)) continue;
+      if (hist.every(h => { const r = scScore(c, h.g); return r.hit === h.hit && r.near === h.near; })) { P.send({ t: 'act', a: 'guess', d: c }); return; }
+    }
+  },
+  // monster-forecast: one pick a round while the tell plays (not always the right one)
+  'monster-forecast': P => { const g = P.last.s?.g, k = P.last.phase; if (g?.phase !== 'tell' || !k || k.mfR === g.round) return; k.mfR = g.round; P.send({ t: 'act', a: 'pick', d: ['dodge', 'block', 'counter'][(P.pid + g.round) % 3] }); },
+  // tile-flip-race: picks the first tile it may take (a different one by pid), skipping every third flip
+  'tile-flip-race': P => {
+    const g = P.last.s?.g, k = P.last.phase; if (g?.phase !== 'play' || !k || k.tfF === g.flip) return;
+    const init = k.tfInit || (k.tfInit = P.got.findLast(m => m.t === 'phase' && m.phase === 'intro')?.init); if (!init) return;
+    k.tfF = g.flip; if ((g.flip + P.pid) % 3 === 0) return;
+    const me = String(init.who.findIndex(w => w.pid === P.pid)), homes = init.who.map(w => w.home), W = init.w, N = W * init.h;
+    const near = i => [i - W, i + W, i % W ? i - 1 : -1, (i + 1) % W ? i + 1 : -1].some(j => j >= 0 && j < N && g.o[j] === me);
+    const ok = []; for (let i = 0; i < N; i++) if (init.values[i] > 0 && g.o[i] !== me && !homes.includes(i) && near(i)) ok.push(i);
+    if (ok.length) P.send({ t: 'act', a: 'pick', d: ok[P.pid % ok.length] });
+  },
   // costume-catwalk: wears one piece in four slots, picks a pose, says ready; then votes for the next look along
   'costume-catwalk': P => {
     const g = P.last.s?.g, k = P.last.phase, me = P.last.gp?.d; if (!g || !k || !me?.tray) return;

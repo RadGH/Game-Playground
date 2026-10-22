@@ -1,0 +1,46 @@
+/* Safecracker — a bank vault: steel greys, brass keys, a green "right" lamp and an amber "moved" ring. */
+.game-safecracker { pointer-events: auto; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding: calc(var(--st) + 10px) 12px calc(var(--sb) + 14px); background: linear-gradient(90deg, rgba(255, 255, 255, .04) 50%, transparent 50%) 0 0 / 40px 40px, linear-gradient(#3d4652, #1b2027); color: #fff; }
+.game-safecracker > * { flex: none; }
+.sc-top { display: flex; gap: 12px; align-items: center; justify-content: center; font: 900 22px/1.1 var(--font); -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; }
+.sc-mine { width: min(100%, 460px); display: grid; gap: 10px; background: #59636f; border: 4px solid var(--ink); border-radius: 20px; box-shadow: 0 7px 0 var(--ink), inset 0 0 0 6px #6d7884; padding: 12px; }
+.sc-head { display: flex; gap: 10px; align-items: center; } .sc-head b { display: block; font: 900 20px/1.1 var(--font); } .sc-head small { font-size: 13px; color: #e6edf3; }
+.sc-safe { width: 52px; height: 52px; flex: none; } .sc-safe svg { width: 100%; height: 100%; }
+.sc-safe .body { fill: #8a96a2; stroke: var(--ink); stroke-width: 5; } .sc-safe .door { fill: #b6c0ca; stroke: var(--ink); stroke-width: 4; }
+.sc-safe .dial { fill: #e2b04a; stroke: var(--ink); stroke-width: 4; } .sc-safe .ticks, .sc-safe .hand { stroke: var(--ink); stroke-width: 4; stroke-linecap: round; } .sc-safe .foot { fill: var(--ink); }
+.game-safecracker.is-locked .sc-safe .dial { animation: sc-turn .5s linear infinite; transform-origin: 50px 48px; }
+@keyframes sc-turn { to { transform: rotate(360deg); } }
+.sc-slots { display: flex; gap: 8px; justify-content: center; }
+.sc-slot { position: relative; width: 54px; height: 64px; display: grid; place-items: center; border: 4px solid var(--ink); border-radius: 12px; background: #1b2027; color: #7ae0a0; font: 900 34px/1 var(--font); box-shadow: inset 0 4px 0 rgba(0, 0, 0, .4); }
+.sc-slot.known { background: #f3e2a8; color: var(--ink); } .sc-slot.known::after { content: '🔓'; position: absolute; top: 1px; right: 2px; font-size: 11px; }
+.sc-keys { display: grid; grid-template-columns: repeat(var(--cols, 3), 1fr); gap: 8px; }
+.sc-key { min-height: 60px; border: 4px solid var(--ink); border-radius: 14px; background: linear-gradient(#ffe08a, #e2b04a); font: 900 30px/1 var(--font); color: var(--ink); box-shadow: 0 5px 0 #7a5a1c; cursor: pointer; }
+.sc-key:active { transform: translateY(3px); box-shadow: 0 2px 0 #7a5a1c; }
+.sc-key:disabled, .sc-back:disabled, .sc-try:disabled, .sc-listen:disabled { opacity: .45; }
+.sc-row { display: grid; grid-template-columns: 76px 1fr; gap: 8px; }
+.sc-back { min-height: 56px; border: 4px solid var(--ink); border-radius: 14px; background: #d4dbe2; font: 900 26px/1 var(--font); color: var(--ink); box-shadow: 0 5px 0 var(--ink); }
+.sc-try { min-height: 56px; background: #7ae0a0; }
+.sc-listen { min-height: 56px; border: 4px dashed var(--ink); border-radius: 14px; background: #ffb86b; color: var(--ink); padding: 6px 10px; display: grid; gap: 2px; text-align: center; }
+.sc-listen b { font: 900 17px/1.1 var(--font); } .sc-listen span { font-size: 12px; font-weight: 700; }
+.sc-msg { margin: 0; min-height: 1.3em; text-align: center; font-weight: 800; font-size: 16px; } .sc-msg.bad { color: #ffb3b3; } .sc-msg.good { color: var(--sun); }
+.sc-hist { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.sc-hist li { display: grid; grid-template-columns: auto auto 1fr; gap: 10px; align-items: center; background: #1b2027; border-radius: 10px; padding: 4px 10px; }
+.sc-hist li:first-child { outline: 3px solid var(--sun); }
+.sc-hist b { font: 900 22px/1 var(--font); letter-spacing: .08em; color: #7ae0a0; } .sc-hist small { text-align: right; font-size: 13px; font-weight: 700; }
+.sc-pegs { display: inline-flex; gap: 4px; }
+.sc-pegs i { width: 15px; height: 15px; border-radius: 50%; border: 2px solid #5a6470; display: block; }
+.sc-pegs i.hit { background: #3ecf5a; border-color: #0d2228; }
+.sc-pegs i.near { background: transparent; border: 4px solid #ffb02e; }
+.sc-players { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.sc-players .chip em { font-style: normal; } .sc-players .chip .sc-lv { font-size: 12px; font-weight: 700; opacity: .8; } .sc-players .chip .sc-p { font-weight: 900; min-width: 1.6em; text-align: right; }
+.sc-players .chip.lead { background: var(--sun); } .sc-players .chip.me { outline: 4px solid var(--sun); } .sc-players .chip.locked { opacity: .6; }
+.sc-cpu .face { display: grid; place-items: center; font-style: normal; font-size: 11px; font-weight: 900; }
+.sc-wall { display: none; }
+.game-safecracker.watching .sc-mine { display: none; }
+.game-safecracker.watching .sc-wall { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; width: min(100%, 1000px); }
+.sc-card { background: color-mix(in srgb, var(--seat) 25%, #59636f); border: 4px solid var(--ink); border-radius: 18px; box-shadow: 0 6px 0 var(--ink); padding: 10px; display: grid; gap: 6px; justify-items: center; }
+.sc-card > b { font: 900 22px/1 var(--font); } .sc-card small { font-size: 14px; } .sc-card.done { background: var(--sun); color: var(--ink); } .sc-card.locked { animation: shake .4s; }
+.sc-card ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.game-safecracker.all-open .sc-keys, .game-safecracker.all-open .sc-row, .game-safecracker.all-open .sc-listen { display: none; }
+@media (max-height: 760px) { .sc-key { min-height: 50px; } .sc-slot { height: 54px; } }
+.sc-players .chip, .sc-card .chip { color: var(--ink); }

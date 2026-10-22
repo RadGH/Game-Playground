@@ -79,7 +79,8 @@ lobby -> [ board -> vote -> intro -> game -> results ] x rounds -> final -> lobb
 | `js/games/<id>/` | one folder per minigame: `sim.js` (rules) + `view.js` (drawing); `js/games/index.js` lists them |
 | `js/client/main.js` | the screens: title, lobby, board, vote, intro, results, final, look editor, costume shop |
 | `js/client/stage.js` | renderer + a camera that frames a ground rectangle inside the free part of the screen (lens shift) |
-| `js/client/play.js` | hosts a minigame view; stick → server 20×/s, own character predicted, others interpolated 100 ms back |
+| `js/client/play.js` | hosts a minigame view; stick → server 20×/s, own character predicted, others drawn from `interp.js` |
+| `js/client/interp.js` | the server clock + per-player history that draws other players smoothly (see "Online play and lag") |
 | `js/client/avatars.js` | look → Chibi 2 actor / SVG portrait; ONE clip list game-wide |
 | `js/client/boardview.js`, `lineup.js` | the 3D board; the podium line-up behind the lobby and the final |
 | `js/client/controls.js` | stick, buttons, keys, gamepad |
@@ -105,8 +106,37 @@ lobby -> [ board -> vote -> intro -> game -> results ] x rounds -> final -> lobb
 | `caption-clash` | screen | one silly picture for everyone (`data/scenes.json`, 42 scenes drawn from SVG props in `kit.js`); 40 s to write a caption (80 letters, cleaned; "Give me a starter" offers 3 openers), anonymous vote (not your own), points = votes + one judge's ribbon by a printed rule (shortest / most same-letter words / most words; tie = finished first) |
 | `pattern-impostor` | screen | 6 rounds of 6-9 SVG tiles (shape x colour x size x pattern x count) that all follow a rule but one; first right tap 5/3/2/1, a wrong tap locks you out; rounds 5-6 are pairing rules; every puzzle checked for a second answer |
 | `coinstorm` | screen | 5 rounds: split 10 coins between Piggy Bank (keep), Windmill (x2 unless yours is the biggest pile) and Storm Cloud (x3 or 0, forecast shown); everyone reveals together; solo plays against "the Gust" |
+| `boardwalk-brawl` | arena, co-op with points | side-scrolling brawler down a long fairground street (levels are data: `levels.js`, 3 streets, one per seed); the screen only scrolls forward and stops at each wave (the window is two moving `arena.blocks`, so phones predict the screen edge); A = 3-punch combo, B = jump kick (no damage taken in the air); stand by a downed friend to lift them; boss at the end pays everyone +30; all down = over |
+| `fling-ring` | arena | hold A by someone to lift them, let go to throw (longer hold = further); B = shove (makes a carrier drop); carried? mash to wriggle free; 3 decks as data (`levels.js`: shrinking raft, turning carousel with a sweeper bar, pier with gaps + rolling barrels); 3 lives, last one standing, ties by KOs; solo throws Bumbles |
+| `wobblewheel-rally` | arena | top-down kart race, whole track on one screen; kart steering (`move.mode: 'car'`, stick = heading); 4 hand-made layouts x mirror x direction (16), sent as `arena.segs` from init(); 3-5 laps by length, progress counted only along the track (no cutting); ? boxes (Zoom Jar / Slick / Bonk Ball, odds by place), arrow pads (F.BOOST), mud (F.SLOW); A = item, B = hop (clears hazards, landing bumps a kart); placings = finish order then distance; 15 s window after the first finish; solo races two CPU karts |
+| `ring-a-ding-rumble` | arena | boxing in a roped ring, 2-4 at once (free-for-all); A tap = jab, A hold = big swing (on release or by itself at full), B = block (front only; big swings drain puff and can break a guard), B + stick = dodge; puff (stamina) so mashing runs dry; health 0 = knockdown (2.2 s, back up with less), third = out; knocked into the ropes = bounce; points: jab 1, swing 2, knockdown +2; order = still standing (by points), then last out first; solo spars with "Bolster" (CPU) |
 
 Known gap: a phone that reconnects mid-drawing sees a blank canvas (its strokes are kept on the server and appear in the gallery).
+
+## Online play and lag (round 4, 2026-10-21)
+
+The owner reported that online play "lags pretty bad but only in some game modes" — the arena games, where you watch
+and touch other players. Measured, not guessed (`tests/interp.test.js`, `tests/netcode.test.js`):
+
+- **Other players were drawn wrong, not late.** `play.js` kept the last two updates and timed the slide between them
+  from when each one ARRIVED; with an update every 50 ms each arrival restarted a "wait, then slide" timer, so everyone
+  else stood frozen on ~90% of frames and was drawn 330-650 ms behind, then jumped. `js/client/interp.js` keeps a short
+  history per player stamped with the server's tick and a clock that follows the line's real delay and measures its
+  jitter; others are drawn one tick + the jitter behind (~95 ms on a clean line, ~145 ms with 0-60 ms of wifi jitter),
+  never frozen, and carry on at their last speed for up to two ticks when an update is late.
+- **A late phone was moved twice.** The server "coasted" a phone whose input was late on its last input, then applied
+  the real inputs when they came as well — movement the phone never predicted, so its own character snapped forward.
+  Every input is now applied exactly once, in order; a late phone waits and catches up 3 a tick.
+- **Bandwidth is not the problem:** 5-10 KB/s per phone in every arena game.
+- **Instant own actions:** a view's optional `input(inp)` hook runs the moment your phone sends a button press, so a
+  punch or throw animates before the server answers.
+- The round trip (± jitter) shows in the top corner during a match: green under 80 ms, amber under 160, red above.
+- The droplet is in San Francisco; from the owner's home the round trip is ~25 ms.
+
+**LAN / wifi play:** yes. The VM runs the stable server on the house network: phones on the same wifi open
+`http://<LAN-IP>:8480/` (the lobby's QR code and invite link then use that address, so everyone stays on the LAN). It is
+only as new as the last `tools/publish-tumblefair.sh`. Anyone with Node can also run their own:
+`node prototypes/tumblefair/server/main.mjs --port 8480` from a checkout, and phones join at that machine's address.
 
 ## Bug reports and suggestions
 

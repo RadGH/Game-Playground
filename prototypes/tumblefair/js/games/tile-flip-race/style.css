@@ -1,0 +1,54 @@
+/* Tile Flip Race — a picnic-blanket board on a lawn: cream tiles, owned tiles take the owner's colour + shape. */
+.game-tile-flip-race { pointer-events: auto; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: calc(var(--st) + 10px) calc(var(--sr) + 10px) calc(var(--sb) + 48px) calc(var(--sl) + 10px);
+  background: repeating-linear-gradient(45deg, #5fae4f 0 22px, #66b856 22px 44px); user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.game-tile-flip-race > * { flex: none; }
+.tf-top { display: flex; gap: 12px; align-items: center; justify-content: center; color: #fff; font: 900 22px/1.1 var(--font); -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; }
+.tf-chips { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.tf-chips .sc { font-style: normal; font-weight: 900; background: #fff3c4; border-radius: 8px; padding: 0 6px; }
+.tf-chips .bn { font-size: 11px; font-weight: 800; color: #47606a; }
+.tf-chips .chip.in { outline: 4px solid #fff; }
+.tf-chips .chip.lead { background: var(--sun); }
+.tf-cpu .face { display: grid; place-items: center; font-style: normal; font-size: 11px; font-weight: 900; color: #fff; background: var(--seat); clip-path: polygon(25% 3%, 75% 3%, 100% 50%, 75% 97%, 25% 97%, 0 50%); border-radius: 0 !important; }
+
+.tf-board { --cell: min(calc((100vw - 70px) / var(--w)), calc((100dvh - 250px) / var(--w)), 92px); display: grid; grid-template-columns: repeat(var(--w), var(--cell)); gap: 3px;
+  padding: 6px; background: #8a5225; border: 4px solid var(--ink); border-radius: 16px; box-shadow: 0 6px 0 var(--ink); }
+.tf-tile { position: relative; width: var(--cell); height: var(--cell); min-width: 40px; min-height: 40px; padding: 0; border: 3px solid var(--ink); border-radius: 10px; background: var(--paper);
+  display: grid; place-items: center; font: 900 calc(var(--cell) * .42)/1 var(--font); color: var(--ink); -webkit-tap-highlight-color: transparent; transition: background .25s; }
+.tf-tile.owned { background: var(--c); }
+.tf-tile.owned .tf-dot { background: rgba(255, 255, 255, .7); }
+.tf-own { position: absolute; right: 2px; top: 2px; width: 34%; height: 34%; fill: #fff; stroke: var(--ink); stroke-width: 1.6; pointer-events: none; }
+.tf-tile:not(.owned) .tf-own { display: none; }
+.tf-tile.home::after { content: ''; position: absolute; left: 3px; bottom: 3px; width: 30%; height: 30%; background: var(--ink); clip-path: polygon(50% 0, 100% 45%, 85% 45%, 85% 100%, 15% 100%, 15% 45%, 0 45%); opacity: .75; }
+.tf-dot { width: 22%; height: 22%; border-radius: 50%; background: #c9b48a; border: 2px solid var(--ink); }
+.tf-star { color: var(--sun); -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; }
+.tf-gem { color: #39d0e0; -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; font-size: 1.1em; }
+.tf-tile.rock { background: #6d6a66; border-color: #3a3836; }
+.tf-rock { width: 70%; height: 55%; background: #8f8b85; border: 3px solid #3a3836; border-radius: 45% 50% 35% 40%; }
+.tf-tile.can { box-shadow: 0 0 0 3px #fff, 0 0 12px 4px rgba(255, 255, 255, .8); animation: tf-glow 1s ease-in-out infinite alternate; }
+@keyframes tf-glow { to { box-shadow: 0 0 0 3px #fff, 0 0 4px 1px rgba(255, 255, 255, .4); } }
+.tf-tile.picked { outline: 5px dashed var(--me); outline-offset: -2px; animation: none; transform: scale(.92); }
+.tf-tile.picked::before { content: 'PICK'; position: absolute; bottom: 1px; left: 0; right: 0; font-size: 10px; letter-spacing: .5px; color: var(--ink); background: rgba(255, 255, 255, .85); }
+.tf-tile.flip { animation: tf-flip .45s ease-out; }
+.tf-tile.stolen { animation: tf-flip .45s ease-out, tf-steal .6s .1s; }
+@keyframes tf-flip { 0% { transform: rotateY(90deg) scale(1.1); } 100% { transform: none; } }
+@keyframes tf-steal { 50% { box-shadow: 0 0 0 5px var(--pop); } }
+.tf-tile.nope { animation: tf-nope .3s; }
+@keyframes tf-nope { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+.tf-bump { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); font: 900 13px/1 var(--font); color: #fff; -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; text-decoration: none; opacity: 0; pointer-events: none; white-space: nowrap; z-index: 2; }
+.tf-tile.bounce { animation: tf-nope .35s 2; }
+.tf-tile.bounce .tf-bump { animation: tf-pop 1s ease-out; }
+@keyframes tf-pop { 0% { opacity: 1; transform: translate(-50%, -50%) scale(1.4); } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -130%); } }
+.game-tile-flip-race:not([data-phase=play]) .tf-tile, .game-tile-flip-race.watching .tf-tile { pointer-events: none; }
+
+.tf-timer { position: relative; width: min(100%, 420px); height: 18px; border: 3px solid var(--ink); border-radius: 10px; background: #fff; overflow: hidden; }
+.tf-timer i { position: absolute; inset: 0; background: var(--sun); transform-origin: left; }
+.tf-timer span { position: relative; display: block; text-align: center; font: 900 11px/12px var(--font); text-transform: uppercase; letter-spacing: 1px; }
+.game-tile-flip-race:not([data-phase=play]) .tf-timer { visibility: hidden; }
+.tf-note { margin: 0; color: #fff; text-align: center; min-height: 1.3em; font-size: 15px; font-weight: 800; text-shadow: 0 2px 0 var(--ink); max-width: 520px; }
+.game-tile-flip-race[data-phase=end] .tf-note { font-size: 20px; }
+@media (min-aspect-ratio: 1/1) { .tf-board { --cell: min(calc((100dvh - 236px) / var(--w)), 92px); } }
+.tf-legend { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; background: rgba(255, 255, 255, .9); border: 3px solid var(--ink); border-radius: 999px; padding: 2px 12px; font: 800 13px/1.4 var(--font); }
+.tf-legend span { display: inline-flex; align-items: center; gap: 4px; }
+.tf-legend .tf-dot { display: inline-block; width: 10px; height: 10px; }
+.tf-legend .tf-home { width: 12px; height: 12px; background: var(--ink); clip-path: polygon(50% 0, 100% 45%, 85% 45%, 85% 100%, 15% 100%, 15% 45%, 0 45%); display: inline-block; }

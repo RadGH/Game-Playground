@@ -1,0 +1,53 @@
+/* Monster Forecast — the 3D stage shows through the top; a cheat sheet and three big answer buttons sit at the bottom. */
+.game-monster-forecast { pointer-events: auto; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: calc(var(--st) + 8px) calc(var(--sr) + 10px) calc(var(--sb) + 48px) calc(var(--sl) + 10px);
+  background: linear-gradient(rgba(40, 20, 60, 0) 46%, rgba(40, 20, 60, .5) 60%, rgba(28, 12, 44, .9)); user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.game-monster-forecast > * { flex: none; }
+.mf-top { display: flex; gap: 12px; align-items: center; justify-content: center; color: #fff; font: 900 20px/1.1 var(--font); -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; text-shadow: 0 2px 0 var(--ink); text-align: center; }
+.mf-chips { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; }
+.mf-chips .sc { font-style: normal; font-weight: 900; background: #ffe9a8; border-radius: 8px; padding: 0 6px; }
+.mf-st { font-size: 12px; } .mf-st:empty { display: none; } .mf-st.good { color: #1d8a37; } .mf-st.bad { color: #c22; }
+.mf-say { min-height: 38px; display: grid; place-items: center; }
+.mf-say:not(:empty) { background: #fff; border: 3px solid var(--ink); border-radius: 18px; padding: 4px 14px; font: 900 18px/1.2 var(--font); box-shadow: 0 4px 0 var(--ink); animation: mf-pop .3s ease-out; }
+@keyframes mf-pop { from { transform: scale(.6); opacity: 0; } }
+.mf-banner { min-height: 0; display: flex; gap: 10px; align-items: center; justify-content: center; }
+.mf-banner:not(:empty) { background: var(--sun); border: 4px solid var(--ink); border-radius: 18px; padding: 4px 14px; box-shadow: 0 4px 0 var(--ink); animation: mf-pop .3s ease-out; }
+.mf-banner b { font: 900 22px/1.1 var(--font); }
+
+.mf-panel { margin-top: auto; display: grid; gap: 8px; width: min(100%, 560px); }
+.mf-sheet { background: var(--paper); border: 4px solid var(--ink); border-radius: 16px; padding: 6px 8px; box-shadow: 0 4px 0 var(--ink); display: grid; gap: 3px; }
+.mf-sheet-h { font: 900 13px/1.2 var(--font); text-transform: uppercase; letter-spacing: .5px; color: #7a3e9a; }
+.mf-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'move ans' 'tells ans'; gap: 0 8px; align-items: center; padding: 3px 4px; border-radius: 10px; }
+.mf-row + .mf-row { border-top: 2px dashed #e0cfb0; }
+.mf-row.hot { background: #fff1a8; outline: 3px solid var(--ink); }
+.mf-move { grid-area: move; font: 900 15px/1.15 var(--font); }
+.mf-tells { grid-area: tells; display: flex; flex-wrap: wrap; gap: 3px; align-items: center; font-size: 13px; }
+.mf-tells i { font-style: normal; font-weight: 800; background: #efe2ff; border: 2px solid var(--ink); border-radius: 8px; padding: 0 6px; }
+.mf-tells u { text-decoration: none; font-size: 11px; color: #7a8a90; }
+.mf-ans { grid-area: ans; display: inline-flex; align-items: center; gap: 3px; font: 900 14px/1 var(--font); border: 3px solid var(--ink); border-radius: 999px; padding: 2px 8px 2px 3px; text-transform: uppercase; }
+.mf-ans svg { width: 22px; height: 22px; }
+.mf-dodge { background: #c9f5d2; } .mf-block { background: #cfe9ff; } .mf-counter { background: #ffd9c2; }
+.mf-fake { display: none; margin: 2px 0 0; font: 900 13px/1.2 var(--font); color: #c22; text-align: center; }
+.game-monster-forecast[data-tier="3"] .mf-fake { display: block; }
+
+.mf-btns { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.mf-btn { min-height: 92px; border: 4px solid var(--ink); border-radius: 20px; box-shadow: 0 6px 0 var(--ink); display: grid; justify-items: center; align-content: center; gap: 1px; padding: 6px 2px; color: var(--ink); -webkit-tap-highlight-color: transparent; }
+.mf-btn svg { width: 38px; height: 38px; }
+.mf-btn b { font: 900 19px/1 var(--font); text-transform: uppercase; }
+.mf-btn small { font-size: 11px; font-weight: 800; color: #47606a; line-height: 1.1; }
+.mf-btn.on { transform: translateY(4px); box-shadow: 0 2px 0 var(--ink); outline: 5px solid #fff; }
+.mf-btn.on::after { content: '✓'; position: absolute; top: -10px; right: -8px; width: 28px; height: 28px; display: grid; place-items: center; background: var(--ink); color: #fff; font: 900 16px/1 var(--font); border-radius: 50%; border: 3px solid #fff; }
+.mf-btn { position: relative; }
+.picked .mf-btn:not(.on) { opacity: .6; }
+.game-monster-forecast:not([data-phase=tell]):not([data-phase=pick]) .mf-btns { opacity: .45; pointer-events: none; }
+.game-monster-forecast.watching .mf-btns { display: none; }
+.mf-note { margin: 0; color: #fff; text-align: center; min-height: 1.3em; font-size: 15px; font-weight: 800; text-shadow: 0 2px 0 var(--ink); max-width: 560px; }
+.game-monster-forecast[data-phase=end] .mf-note { font-size: 20px; }
+
+/* landscape phones and TVs: the sheet and the buttons side by side, under the stage */
+@media (min-aspect-ratio: 1/1) {
+  .mf-panel { width: min(100%, 1100px); grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); align-items: end; }
+  .game-monster-forecast.watching .mf-panel { grid-template-columns: minmax(0, 720px); justify-content: center; }
+  .watching .mf-move { font-size: 20px; } .watching .mf-tells { font-size: 16px; } .watching .mf-ans { font-size: 17px; }
+}
+@media (min-aspect-ratio: 1/1) and (max-height: 500px) { .mf-btn { min-height: 64px; } .mf-btn small { display: none; } .mf-say:not(:empty) { font-size: 15px; } }

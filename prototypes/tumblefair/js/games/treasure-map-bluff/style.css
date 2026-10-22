@@ -1,0 +1,71 @@
+/* Treasure Map Bluff — a captain's table: dark wood, a parchment map, speech bubbles for claims. */
+.game-treasure-map-bluff { pointer-events: auto; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: calc(var(--st) + 10px) calc(var(--sr) + 10px) calc(var(--sb) + 48px) calc(var(--sl) + 10px);
+  background: repeating-linear-gradient(90deg, #5a3a22 0 60px, #61402a 60px 120px); user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.game-treasure-map-bluff > * { flex: none; }
+.tm-top { display: flex; gap: 12px; align-items: center; justify-content: center; color: #fff; font: 900 22px/1.1 var(--font); -webkit-text-stroke: 1px #0d2228; paint-order: stroke fill; text-align: center; }
+.tm-chips { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.tm-chips .sc { font-style: normal; font-weight: 900; background: #ffe9a8; border-radius: 8px; padding: 0 6px; }
+.tm-chips .sc::after { content: ' gold'; font-weight: 600; font-size: 11px; }
+.tm-chips .delta { font-size: 12px; } .tm-chips .delta:empty { display: none; } .tm-chips .delta.good { color: #1d8a37; } .tm-chips .delta.bad { color: #c22; }
+.tm-chips .chip.in { outline: 4px solid var(--mint); }
+.tm-cpu .face { background: #3ecf5a; } .tm-cpu .face svg { width: 100%; height: 100%; display: block; }
+
+.tm-map { width: min(100%, 560px); }
+.tm-svg { width: 100%; height: auto; display: block; filter: drop-shadow(0 6px 0 rgba(0, 0, 0, .35)); overflow: visible; }
+.tm-path { transition: stroke .2s, stroke-width .2s; }
+.tm-path.mine { stroke: #e8434f; stroke-width: 6; stroke-dasharray: 6 7; }
+.tm-dest { cursor: pointer; outline: none; }
+.tm-node { fill: #fff8e7; stroke: #3b2414; stroke-width: 4; }
+.tm-dest.known .tm-node { fill: #fff1c4; stroke-dasharray: none; }
+.tm-dest[data-c=unknown] .tm-node { fill: #e8d3a4; stroke-dasharray: 6 5; }
+.tm-dest.mine .tm-node { fill: #ffd23f; stroke: #e8434f; stroke-width: 6; }
+.tm-dest:focus-visible .tm-node { stroke: #3d8bff; }
+.tm-letter { font: 900 20px/1 var(--font); fill: #fff; stroke: #3b2414; stroke-width: 5px; paint-order: stroke fill; }
+.tm-word { font: 900 11px/1 var(--font); fill: #3b2414; letter-spacing: .3px; }
+.tm-dest[data-c=gold] .tm-word { fill: #8a5a00; } .tm-dest[data-c=trap] .tm-word { fill: #b01818; }
+.game-treasure-map-bluff[data-phase=reveal] .tm-dest[data-c=gold] .tm-node { fill: #ffe066; animation: tm-glow .6s 3; }
+.game-treasure-map-bluff[data-phase=reveal] .tm-dest[data-c=trap] .tm-node { fill: #ffb3b3; }
+@keyframes tm-glow { 50% { stroke-width: 9; } }
+.game-treasure-map-bluff:not([data-phase=plan]) .tm-dest, .game-treasure-map-bluff.watching .tm-dest { pointer-events: none; }
+
+.tm-act { width: min(100%, 560px); display: flex; }
+.tm-lock { flex: 1; background: var(--mint); color: #fff; -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; }
+.tm-lock:disabled { background: #c9b48a; -webkit-text-stroke: 0; color: #5a4a3a; box-shadow: 0 3px 0 var(--ink); }
+.tm-lock.on { background: #fff; color: var(--ink); -webkit-text-stroke: 0; }
+
+.tm-feed { width: min(100%, 560px); display: grid; gap: 5px; min-height: 44px; }
+.tm-claim { display: flex; align-items: center; gap: 8px; background: #fff; border: 3px solid var(--ink); border-radius: 16px 16px 16px 4px; padding: 3px 10px 3px 3px; font: 800 15px/1.2 var(--font); animation: tm-in .25s ease-out; }
+.tm-claim.me { background: #fff6cf; }
+.tm-claim span { display: grid; flex: 1; } .tm-claim small { font-size: 11px; color: #6b5a48; }
+@keyframes tm-in { from { transform: translateY(8px); opacity: 0; } }
+.tm-true, .tm-fib { font: 900 13px/1 var(--font); border: 3px solid var(--ink); border-radius: 8px; padding: 3px 6px; transform: rotate(-6deg); }
+.tm-true { background: #c9f5d2; color: #1d8a37; } .tm-fib { background: #ffd8d8; color: #c22; }
+.tm-face { width: 34px; height: 34px; border-radius: 50%; border: 3px solid var(--seat); background: var(--seat); overflow: hidden; display: block; flex: none; }
+.tm-face img, .tm-face svg { width: 100%; height: 100%; display: block; }
+.tm-parrot { --seat: #1d8a37; }
+.tm-quiet { margin: 0; color: #f2deb0; text-align: center; font-style: italic; }
+
+.tm-say { width: min(100%, 560px); background: #f2deb0; border: 4px solid var(--ink); border-radius: 16px; padding: 6px 8px 8px; display: grid; gap: 6px; box-shadow: 0 4px 0 var(--ink); }
+.tm-say-h { font: 900 15px/1.1 var(--font); display: flex; justify-content: space-between; align-items: baseline; }
+.tm-say-h small { font-size: 12px; color: #6b5a48; }
+.tm-rsel { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.tm-r { min-height: 44px; border: 3px solid var(--ink); border-radius: 12px; background: #fff; font: 900 20px/1 var(--font); }
+.tm-r.on { background: var(--sun); box-shadow: inset 0 -4px 0 rgba(0, 0, 0, .2); outline: 3px solid #e8434f; }
+.tm-lines { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.tm-line { min-height: 44px; border: 3px solid var(--ink); border-radius: 14px; background: #fff; font: 800 14px/1.15 var(--font); padding: 4px 8px; box-shadow: 0 3px 0 var(--ink); }
+.tm-line.needs-r { background: #fff6cf; }
+.tm-line:disabled { opacity: .4; }
+.game-treasure-map-bluff:not([data-phase=plan]) .tm-say, .game-treasure-map-bluff.watching .tm-say,
+.game-treasure-map-bluff:not([data-phase=plan]) .tm-act, .game-treasure-map-bluff.watching .tm-act { display: none; }
+.tm-note { margin: 0; color: #fff; text-align: center; min-height: 1.3em; font-size: 15px; font-weight: 800; text-shadow: 0 2px 0 #0d2228; max-width: 560px; }
+.game-treasure-map-bluff[data-phase=reveal] .tm-note, .game-treasure-map-bluff[data-phase=end] .tm-note { font-size: 19px; }
+
+/* landscape phones and TVs: map on the left, claims on the right */
+@media (min-aspect-ratio: 1/1) {
+  .game-treasure-map-bluff { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); grid-template-areas: 'top top' 'chips chips' 'map feed' 'map say' 'act say' 'note note'; align-content: start; justify-items: stretch; column-gap: 14px;
+    width: 100%; max-width: 1200px; margin: 0 auto; }
+  .tm-top { grid-area: top; } .tm-chips { grid-area: chips; } .tm-map { grid-area: map; width: 100%; max-width: calc((100dvh - 150px) * 1.33); justify-self: center; } .tm-feed { grid-area: feed; width: 100%; align-content: start; }
+  .tm-say { grid-area: say; width: 100%; align-self: start; } .tm-act { grid-area: act; width: 100%; } .tm-note { grid-area: note; max-width: none; }
+  .game-treasure-map-bluff.watching .tm-claim { font-size: 19px; } .game-treasure-map-bluff.watching .tm-face { width: 44px; height: 44px; }
+}

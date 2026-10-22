@@ -35,7 +35,16 @@ import * as safecracker from './safecracker/sim.js';
 
 import * as treasureMapBluff from './treasure-map-bluff/sim.js';
 import * as auctionOfChaos from './auction-of-chaos/sim.js';
-export const GAMES = Object.freeze(Object.fromEntries([paintPanic, trapdoorTreasury, meteorDash, snowballShowdown, stackAttack, drawTheDisaster, memoryHeist, circuitScramble, laserLimbo, cannonballCatch, balloonStampede, captionClash, patternImpostor, coinstorm, boardwalkBrawl, flingRing, wobblewheelRally, ringADingRumble, costumeCatwalk, oneButtonOrchestra, goingGoingGone, tileFlipRace, monsterForecast, wobbleTower, ropeBridgePanic, slipperyDelivery, portalRouting, wordRelay, safecracker, treasureMapBluff, auctionOfChaos].map(g => [g.meta.id, g])));
+import * as kitchenCatastrophe from './kitchen-catastrophe/sim.js';
+import * as castleDefense from './castle-defense/sim.js';
+import * as defuseTogether from './defuse-together/sim.js';
+import * as alibiAssembly from './alibi-assembly/sim.js';
+import * as secretArchitect from './secret-architect/sim.js';
+import * as twoTruthsOneGoblin from './two-truths-one-goblin/sim.js';
+import * as dragonsWeakSpot from './dragons-weak-spot/sim.js';
+import * as ghostPhotographer from './ghost-photographer/sim.js';
+import * as stormShelter from './storm-shelter/sim.js';
+export const GAMES = Object.freeze(Object.fromEntries([paintPanic, trapdoorTreasury, meteorDash, snowballShowdown, stackAttack, drawTheDisaster, memoryHeist, circuitScramble, laserLimbo, cannonballCatch, balloonStampede, captionClash, patternImpostor, coinstorm, boardwalkBrawl, flingRing, wobblewheelRally, ringADingRumble, costumeCatwalk, oneButtonOrchestra, goingGoingGone, tileFlipRace, monsterForecast, wobbleTower, ropeBridgePanic, slipperyDelivery, portalRouting, wordRelay, safecracker, treasureMapBluff, auctionOfChaos, alibiAssembly, secretArchitect, twoTruthsOneGoblin, dragonsWeakSpot, kitchenCatastrophe, castleDefense, defuseTogether, ghostPhotographer, stormShelter].map(g => [g.meta.id, g])));
 export const gameIds = () => Object.keys(GAMES);
 export const metaOf = id => GAMES[id]?.meta || null;
 export const loadView = id => import(`./${id}/view.js`);

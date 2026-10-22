@@ -1,0 +1,45 @@
+/* Storm Shelter: the 3D shelter fills the top (phone) or the left (wide screen); the panel scrolls with the whole
+   game layer, never on its own (a scrolling panel blanks the 3D view on phones). */
+.game-storm-shelter { pointer-events: auto; overflow-y: auto; overflow-x: hidden; }
+.game-storm-shelter .ss-panel { position: relative; margin: calc(var(--st) + 36vh) auto 0; width: min(560px, calc(100% - 16px)); padding-bottom: calc(var(--sb) + 56px);
+  display: flex; flex-direction: column; gap: 7px; font: 800 14px/1.2 var(--font); color: var(--ink); }
+@media (min-aspect-ratio: 23/20) { .game-storm-shelter .ss-panel { margin: calc(var(--st) + 66px) calc(var(--sr) + 10px) 0 auto; width: min(560px, 48vw); } }
+.ss-meters { display: flex; flex-direction: column; gap: 4px; padding: 6px 10px; border-radius: 14px; background: #fff8e7; border: 3px solid var(--ink); box-shadow: 0 3px 0 var(--ink); }
+.ss-meter { display: grid; grid-template-columns: 22px 46px 1fr 28px 34px; align-items: center; gap: 6px; }
+.ss-ic { font-size: 18px; }
+.ss-meter b { font-size: 13px; text-transform: uppercase; }
+.ss-bar { height: 14px; border-radius: 8px; background: #d8cdb6; border: 2px solid var(--ink); overflow: hidden; }
+.ss-bar i { display: block; height: 100%; transition: width .35s; }
+.ss-meter[data-k=heat] .ss-bar i { background: #ff8a3d; } .ss-meter[data-k=roof] .ss-bar i { background: #9b7ad8; } .ss-meter[data-k=food] .ss-bar i { background: #e8b94a; }
+.ss-meter em { font-style: normal; font-weight: 900; font-size: 17px; text-align: right; }
+.ss-meter.low em { color: #d6203a; animation: ss-throb .6s infinite; }
+.ss-meter.low .ss-bar { border-color: #d6203a; }
+@keyframes ss-throb { 50% { opacity: .4; } }
+.ss-d { text-decoration: none; font-size: 13px; font-weight: 900; opacity: 0; transition: opacity .2s; }
+.ss-d.show { opacity: 1; } .ss-d.up { color: #1f8a3a; } .ss-d.down { color: #d6203a; }
+.ss-beat { display: flex; align-items: center; gap: 8px; color: #fff; text-shadow: 0 2px 0 var(--ink); }
+.ss-tbar { flex: 1; height: 8px; border-radius: 5px; background: rgba(255, 255, 255, .25); overflow: hidden; }
+.ss-tbar i { display: block; height: 100%; background: #9fc4e8; }
+.ss-event { display: flex; flex-direction: column; gap: 6px; }
+.ss-card { display: flex; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 14px; background: #1d2b30; color: #fff; border: 3px solid #9fc4e8; box-shadow: 0 3px 0 var(--ink); }
+.ss-card b { font-size: 18px; } .ss-card p { margin: 2px 0 0; font-size: 13px; font-weight: 700; opacity: .9; }
+.ss-art { font-size: 30px; line-height: 1; }
+.ss-hits { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; color: #fff; text-shadow: 0 1px 0 var(--ink); font-size: 12px; }
+.ss-fx { font-style: normal; font-size: 12px; font-weight: 900; padding: 1px 6px; border-radius: 999px; background: #e8e2d4; color: var(--ink); white-space: nowrap; text-shadow: none; }
+.ss-fx.up { background: #c9f2c4; } .ss-fx.down { background: #ffd0d4; }
+.ss-choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 6px; }
+.ss-ch, .ss-cardbtn { min-height: 52px; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 8px; border-radius: 12px; border: 3px solid var(--ink); background: #fff8e7; color: var(--ink); font: 800 14px/1.15 var(--font); box-shadow: 0 3px 0 var(--ink); cursor: pointer; }
+.ss-ch span, .ss-cardbtn span { display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; }
+.ss-ch em, .ss-cardbtn em { font-style: normal; font-size: 12px; min-height: 14px; }
+.ss-ch.on { background: var(--sun); transform: translateY(-2px); }
+.ss-handh { color: #fff; text-shadow: 0 2px 0 var(--ink); margin-top: 2px; }
+.ss-hand { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 6px; }
+.ss-cardbtn .ss-art { font-size: 24px; }
+.ss-cardbtn.on { background: #8ff07a; transform: translateY(-4px); }
+.ss-cardbtn:disabled { opacity: .7; cursor: default; }
+.ss-last { color: #fff; font-size: 12px; text-shadow: 0 1px 0 var(--ink); min-height: 14px; }
+.ss-final { padding: 12px; border-radius: 14px; background: #1d2b30; color: #fff; text-align: center; font-size: 18px; border: 3px solid #9fc4e8; }
+.ss-final.good { border-color: #8ff07a; } .ss-final.bad { border-color: #ff7a7a; }
+.game-storm-shelter.watching .ss-handh, .game-storm-shelter.watching .ss-hand { display: none; }
+.game-storm-shelter.watching .ss-ch { pointer-events: none; }
+.scorebar .chip.ss-in::after { content: '✓'; margin-left: 2px; font-weight: 900; color: #1f8a3a; }

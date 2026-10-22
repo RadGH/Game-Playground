@@ -10,6 +10,7 @@ import { runBall as prRun } from '../js/games/portal-routing/sim.js';
 import { RULE as wrRule } from '../js/games/word-relay/sim.js';
 import { WORDS as wrWords } from '../js/games/word-relay/words.js';
 import { score as scScore } from '../js/games/safecracker/sim.js';
+import { solve as dtSolve } from '../js/games/defuse-together/sim.js';
 
 const json = p => JSON.parse(readFileSync(fileURLToPath(new URL('../' + p, import.meta.url)), 'utf8'));
 export const DATA = { boards: { fairground: json('data/boards/fairground.json') }, chance: json('data/chance.json'), cosmetics: json('data/cosmetics.json') };
@@ -56,8 +57,52 @@ export function world({ seed = 7 } = {}) {
   }
   return { hub, profiles, phone, run, phones, get now() { return t; }, advance: ms => { t += ms; } };
 }
+const DT_TABLE = {};   // defuse-together bots: room code:round:module -> the rule lines read out so far
 /** Presses that make sense in each non-arena game, so bots can finish them. One entry per game id. */
 export const UI_BOTS = {
+  // storm-shelter: each beat votes the first choice and plays its first card(s) once (the private hand says how many)
+  'storm-shelter': P => {
+    const g = P.last.s?.g, k = P.last.phase; if (g?.ph !== 'beat' || !k || k.ssB === g.beat) return;
+    k.ssB = g.beat; P.send({ t: 'act', a: 'vote', d: 0 }); P.send({ t: 'act', a: 'play', d: 0 });
+    if (P.room.members.filter(m => m.seat != null).length === 1) P.send({ t: 'act', a: 'play', d: 1 });
+  },
+  // defuse-together: readers post their torn pages to a shared table for the room (as if read aloud); the holder waits
+  // a little (talking), then does what the pages together say, one press a few ticks apart
+  'defuse-together': P => {
+    const g = P.last.s?.g, me = P.last.gp?.d; if (!g || !me || g.phase !== 'go' || me.mod !== g.mod) return;
+    const id = `${P.room.code}:${P.room.match?.round}:${g.mod}`, page = DT_TABLE[id] || (DT_TABLE[id] = { lines: new Map(), wait: 30 });
+    if (me.role !== 'op') page.lines.set(P.pid, me.lines);
+    if (me.role === 'read') return;
+    if (--page.wait > 0 || page.wait % 4) return;
+    const acts = dtSolve(g.dev, [...page.lines.values()].flat());
+    if (acts?.length) P.send({ t: 'act', a: acts[0][0], d: acts[0][1] });
+  },
+  // alibi-assembly: picks its own slots while building, remembers the alibi, answers from memory (yes to every yes/no)
+  'alibi-assembly': P => {
+    const g = P.last.s?.g, k = P.last.phase; if (!g || !k) return;
+    const init = k.aaInit || (k.aaInit = P.got.findLast(m => m.t === 'phase' && m.phase === 'intro')?.init); if (!init) return;
+    if (g.picks) k.aaPicks = g.picks;
+    if (g.phase === 'build') init.slots.forEach((s, i) => { if (s.owner === P.pid && g.picks[i] == null && !(k.aaSent ||= new Set()).has(i)) { k.aaSent.add(i); P.send({ t: 'act', a: 'pick', d: { s: i, o: (P.pid + i) % 4 } }); } });
+    const d = P.last.gp?.d;
+    if (g.phase === 'ask' && d?.q && k.aaQ !== d.qi) {
+      k.aaQ = d.qi; const si = init.slots.findIndex(s => s.ask === d.q.text), pk = k.aaPicks?.[si];
+      P.send({ t: 'act', a: 'ans', d: { i: d.qi, o: si >= 0 && pk != null ? Math.max(0, d.q.opts.indexOf(init.slots[si].opts[pk])) : 0 } });
+    }
+  },
+  // secret-architect: the Architect drops a pin and says a line; builders tap six cells (by pid and round), then Done
+  'secret-architect': P => {
+    const g = P.last.s?.g, k = P.last.phase; if (g?.phase !== 'build' || !k || k.saR === g.round) return;
+    k.saR = g.round;
+    if (g.arch === P.pid) { P.send({ t: 'act', a: 'mark', d: { c: 14, k: 'p' } }); P.send({ t: 'act', a: 'say', d: 'warm' }); return; }
+    for (let j = 0; j < 6; j++) P.send({ t: 'act', a: 'tap', d: (P.pid * 7 + g.round * 3 + j * 5) % 36 });
+    P.send({ t: 'act', a: 'done', d: true });
+  },
+  // two-truths-one-goblin: the Teller says Ready at once; guessers pick a card (by pid and round) once a round
+  'two-truths-one-goblin': P => {
+    const g = P.last.s?.g, k = P.last.phase; if (!g || !k) return;
+    if (g.phase === 'prep' && g.teller === P.pid && k.tgP !== g.round) { k.tgP = g.round; P.send({ t: 'act', a: 'ready' }); }
+    if (g.phase === 'guess' && g.teller !== P.pid && k.tgG !== g.round) { k.tgG = g.round; P.send({ t: 'act', a: 'guess', d: (P.pid + g.round) % 3 }); }
+  },
   // auction-of-chaos: bids a little on each lot (by pid and lot, never more than it has) and locks in
   'auction-of-chaos': P => {
     const g = P.last.s?.g, k = P.last.phase; if (g?.phase !== 'bid' || !k || k.acL === g.lot) return;

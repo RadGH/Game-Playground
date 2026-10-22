@@ -1,0 +1,21 @@
+/* Castle Defense: wave + hearts under the score bar, your job line above the buttons, cannon / pile labels, banner. */
+.game-castle-defense > * { pointer-events: none !important; }
+.cd-hud { position: absolute; top: calc(var(--st) + 56px); left: 50%; transform: translateX(-50%); display: flex; gap: 12px; align-items: center; white-space: nowrap;
+  padding: 4px 14px; border-radius: 999px; background: rgba(255, 248, 231, .95); border: 3px solid var(--ink); box-shadow: 0 3px 0 var(--ink); font: 800 15px/1.2 var(--font); color: var(--ink); }
+.cd-wave b { font-size: 18px; font-weight: 900; }
+.cd-hearts { color: #e8343b; font-size: 18px; letter-spacing: -1px; -webkit-text-stroke: .6px var(--ink); }
+.cd-job { position: absolute; left: 50%; bottom: calc(var(--sb) + 150px); transform: translateX(-50%); max-width: 92vw; text-align: center; padding: 6px 14px; border-radius: 14px;
+  background: rgba(43, 29, 14, .86); color: #fff; font: 800 15px/1.25 var(--font); border: 3px solid var(--ink); }
+.cd-job.go { background: var(--sun); color: var(--ink); }
+.cd-job.warn { background: #ff4d6d; color: #fff; animation: cd-bob .5s infinite alternate; }
+@keyframes cd-bob { to { transform: translateX(-50%) translateY(-4px); } }
+.tag.cd-ammo { background: #3b3f4a; font-weight: 900; }
+.tag.cd-ammo.empty { background: #ff4d6d; animation: cd-blink .5s infinite alternate; }
+@keyframes cd-blink { to { opacity: .55; } }
+.tag.cd-pile { background: #ffd23f; color: var(--ink); text-shadow: none; font-weight: 900; }
+.cd-banner { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%) scale(.6); opacity: 0;
+  font: 900 clamp(32px, 9vw, 64px)/1 var(--font); color: var(--sun); -webkit-text-stroke: 2.5px var(--ink); paint-order: stroke fill; text-shadow: 0 5px 0 var(--ink); white-space: nowrap; transition: transform .25s, opacity .25s; }
+.cd-banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.cd-banner.lose { color: #ff4d6d; }
+@media (min-width: 900px) { .cd-job { bottom: calc(var(--sb) + 62px); } }
+@media (max-width: 520px) { .cd-hud { top: calc(var(--st) + 52px); font-size: 13px; padding: 3px 10px; } .cd-job { font-size: 14px; } }

@@ -2,6 +2,17 @@
  "_doc": "Player-facing changelog, newest first. The lead appends an entry at each publish (from the feedback reports' Completed notes). `id` is stable; the client remembers the last id a player has seen and highlights newer ones. Plain language, no internal names.",
  "entries": [
   {
+   "id": "2026-10-22",
+   "date": "2026-10-22",
+   "title": "Sign in with your phone, class armour, and tidier characters",
+   "items": [
+    "Sign in with your phone: on a PC or console, choose Log in, then \"Sign in with your phone (QR code)\". Scan the code, log in on your phone (your password manager can fill it in), check the code matches, and tap Yes — the other screen signs in. Your password is never typed on the big screen.",
+    "Every calling now starts in its own armour. You still choose your starting weapons, and no two choices show the same weapons any more.",
+    "Characters look tidier: glasses have proper rectangular frames, hair and hats no longer show gaps, blades meet their hilts, and many clothes, straps and helmets no longer let you see through them.",
+    "Armour takes the colour of your top, short capes sit over broad shoulders, and giants and halflings are better proportioned."
+   ]
+  },
+  {
    "id": "2026-10-21",
    "date": "2026-10-21",
    "title": "A new Torbor Downs, achievements, a new character screen, and fixes from your reports",

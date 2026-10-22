@@ -119,7 +119,7 @@ async function showLobby() {
   setScreen('lobby', `
     <div class="panel lobby-code${S.codeSmall ? ' small' : ''}">
       <div class="qr" id="qr"></div>
-      <div class="code-txt"><span class="lbl">Join at <b>${esc(location.host)}</b> with code</span><div class="code">${r.code}</div><button class="btn small" data-act="copy">Copy invite link</button></div>
+      <div class="code-txt"><span class="lbl">Join at <b>${esc(location.host)}</b> with code</span><div class="code">${r.code}</div><button class="btn small" data-act="copy">Copy invite link</button> <button class="btn small" data-act="bigqr" title="Show the QR code full screen">Big QR</button></div>
       <button class="code-fold" data-act="fold" aria-label="${S.codeSmall ? 'Show the QR code' : 'Make this smaller'}">${S.codeSmall ? 'QR ▾' : '▴'}</button>
     </div>
     <div class="panel lobby-main">
@@ -353,6 +353,7 @@ screen.addEventListener('click', e => {
     case 'join': { saveName(); if (S.me && !S.me.ready) { net.send({ t: 'profile', name: $('#name')?.value.trim() || S.me.name }); S.me.ready = true; } const code = cleanCode($('#code').value); if (!code) { S.err = `The code is ${CODE_LENGTH} letters.`; showTitle(); break; } S.err = ''; S.asDisplay = $('#as-display').checked; net.join(code, S.asDisplay); break; }
     case 'leave': net.leave(); break;
     case 'fold': S.codeSmall = !S.codeSmall; try { localStorage.setItem('tumblefair.codeSmall', S.codeSmall ? '1' : ''); } catch { /* private mode */ } showLobby(); break;
+    case 'bigqr': showBigQr(); break;
     case 'copy': navigator.clipboard?.writeText(joinUrl(S.room.code)).then(() => toast('Invite link copied'), () => toast(joinUrl(S.room.code))) ?? toast(joinUrl(S.room.code)); break;
     case 'opt': net.send({ t: 'opt', key: b.dataset.key, value: b.dataset.num ? +b.dataset.num : b.dataset.bool ? b.dataset.bool === '1' : b.dataset.value }); break;
     case 'start': net.send({ t: 'start' }); break;
@@ -446,8 +447,33 @@ function openPool() {
   draw(); document.body.append(el); S.modal = { el, refresh: () => {} };
 }
 
+// ------------------------------------------------------------------ the big QR code (owner 2026-10-22)
+// "Add a QR code button to join from. Useful with a TV and several people on phones." A full-screen code anyone in the
+// room can read from the sofa — in the lobby, and mid-match too (a late joiner watches, then gets a seat at the next
+// minigame). The corner button shows on the big screen and on a computer the whole time, and on a phone in the lobby.
+const qrBtn = h('button', 'qr-btn', 'QR'); qrBtn.type = 'button'; qrBtn.title = 'Show a QR code to join this game'; qrBtn.hidden = true;
+qrBtn.onclick = () => showBigQr(); document.body.append(qrBtn);
+let bigQr = null;
+function showBigQr() {
+  if (!S.room?.code) return;
+  bigQr?.remove();
+  const code = S.room.code, el = h('div', 'qr-big', `<div class="qr-card"><div class="qr-pic"></div><p class="qr-say">Scan to join</p>
+    <p class="qr-code">${esc(code)}</p><p class="qr-at">or open <b>${esc(location.host)}</b> and type the code</p><p class="qr-close">Tap anywhere to close</p></div>`);
+  el.addEventListener('click', () => closeBigQr());
+  document.body.append(el); bigQr = el;
+  qrSvg(joinUrl(code)).then(svg => { const e = el.querySelector('.qr-pic'); if (e) e.innerHTML = svg; }).catch(() => { const e = el.querySelector('.qr-pic'); if (e) e.textContent = 'The QR code could not be drawn — use the code below.'; });
+}
+function closeBigQr() { bigQr?.remove(); bigQr = null; }
+addEventListener('keydown', e => { if (e.key === 'Escape' && bigQr) closeBigQr(); });
+function drawQrBtn() {
+  const inRoom = !!S.room?.code && net.status === 'online';
+  qrBtn.hidden = !(inRoom && (S.phase === 'lobby' || mine()?.display || !isTouch()));
+  if (!S.room && bigQr) closeBigQr();
+}
+window.tumblefairQr = { show: () => showBigQr(), close: () => closeBigQr(), get open() { return !!bigQr; }, get button() { return !qrBtn.hidden; } };      // specs
+
 // ------------------------------------------------------------------ the frame loop
-let lastT = performance.now(), lastCount = -1, netAt = 0;
+let lastT = performance.now(), lastCount = -1, netAt = 0, qrAt = 0;
 // The connection readout (round 4): the round trip to the server and how uneven it is, in the corner during a match,
 // so "it lags" can be told apart from "this phone's line is bad". Green under 80 ms, amber under 160, red above.
 const netq = h('div', 'netq'); document.body.append(netq);
@@ -464,6 +490,7 @@ function frame(t) {
   lineup.frame(dt); S.board?.frame(dt); S.play?.frame(dt);
   stage.render(dt);
   drawNet(t);
+  if (t - qrAt > 500) { qrAt = t; drawQrBtn(); }
   const c = left(); if (c !== lastCount) { lastCount = c; for (const e of document.querySelectorAll('.count')) e.textContent = c; }
   requestAnimationFrame(frame);
 }

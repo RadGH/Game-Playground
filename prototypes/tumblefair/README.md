@@ -12,6 +12,11 @@ join as **the big screen** and just watch. Built 2026-10-13 from the owner's des
   that room at once; a phone that has never made a character is first asked for a name and a look ("You're invited!",
   `js/client/main.js` showTitle), then one tap joins. Profiles are per browser (a token in localStorage), so the public
   server's players start fresh — nothing carries over from the old tunnel address.
+- **Big QR code (2026-10-22):** a "QR" button in the top corner (and "Big QR" in the lobby) opens the join code full
+  screen, big enough to scan from the sofa off a TV. It shows in the lobby on every device, and during a match on the big
+  screen and on a computer (not on a phone mid-game, where it would sit on the controls); a mid-match joiner watches, then
+  gets a seat at the next minigame. `js/client/main.js` showBigQr, `css/tumblefair.css` `.qr-btn` / `.qr-big`;
+  `window.tumblefairQr` for specs.
   (a Cloudflare quick tunnel; recorded in the playground's `data/live-links.json` under `tumblefair`)
 - **Publish:** commit, then `tools/publish-tumblefair.sh` (the LAN copy on :8480). **Public:** the playground's
   `tools/publish-stable.sh` + `tools/publish-pages.sh` (puts the commit in the gh-pages snapshot), then

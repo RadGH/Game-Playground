@@ -1,5 +1,5 @@
 {
- "_doc": "Stream C (play-test 5, T5): the starting equipment a new character chooses after the look screen. Per class: exactly 3 `armour` sets ({id, name, blurb, pieces: [armour base keys]}, 3 pieces each, budget bases only — cloth/light/medium/heavy helm, chest, legs, gauntlets, boots; never plate/runed/scaled/dragon gear, never heavier than the class wears) and 3-6 `weapons` packs ({id, name, blurb, main, off?, style?, element?, spell?}). `main`/`off` are item base keys (emberveil items.json weaponBases/armorBases, plus the foci Farhold's foci.js adds in memory: grimoire, seer_orb, reliquary, psalter, effigy). For a caster: `element` is the wand/staff/sceptre's element (fire, ice, lightning, poison, shadow, arcane — Farhold has no holy attunement), `spell` a staff's spell key (Farhold weapons.js STAFF_SPELLS for that element), `style` a wand's castStyle (docs/requests.md 'Round 5 contracts — C', T15). The FIRST weapons pack of a class is its old Farhold starter, so a character made with no choice gets what it got before; the first armour set contains the old starting armour. Blurbs say what the thing IS and carry no numbers. Read by js/rules/starter-kits.js (kitsFor / validKit / starterGear); checked by tests/C/starter-kits.test.mjs. This file is GENERATED from a table (the generator lived in the agent scratchpad) but is the source of truth now: edit it by hand. Owner feedback 6 (U15): no pack is strictly worse than another — every pack fills BOTH hands (a one-hander always has a shield, buckler, focus or second weapon beside it) or is a two-hander; every class with a shield has a one-hander-and-shield pack. Owner feedback 8 (W23, 'too many similar items'): 4-6 packs a class, no two of them near-duplicates (the measure is in js/rules/starter-kits.js packSignature: hands, attack family, reach band, element, tempo — two packs must differ on at least two, and no more than two packs of a class share a hand shape); every armour set has a `lean` (see `leans`). `role` and `diff` on the kit screen are WRITTEN BY CODE from the signature, never stored here.",
+ "_doc": "Stream C (play-test 5, T5): the starting equipment a new character chooses after the look screen. Per class: exactly ONE `armour` set (owner 2026-10-22: no armour choice — each class starts in its own; it holds the old Farhold starting armour) ({id, name, blurb, pieces: [armour base keys]}, 3 pieces each, budget bases only — cloth/light/medium/heavy helm, chest, legs, gauntlets, boots; never plate/runed/scaled/dragon gear, never heavier than the class wears) and 3-6 `weapons` packs ({id, name, blurb, main, off?, style?, element?, spell?, itemName?, offName?} — itemName names the weapon itself when two packs of one class would otherwise show the same weapon name; a caster off hand takes the pack's element). `main`/`off` are item base keys (emberveil items.json weaponBases/armorBases, plus the foci Farhold's foci.js adds in memory: grimoire, seer_orb, reliquary, psalter, effigy). For a caster: `element` is the wand/staff/sceptre's element (fire, ice, lightning, poison, shadow, arcane — Farhold has no holy attunement), `spell` a staff's spell key (Farhold weapons.js STAFF_SPELLS for that element), `style` a wand's castStyle (docs/requests.md 'Round 5 contracts — C', T15). The FIRST weapons pack of a class is its old Farhold starter, so a character made with no choice gets what it got before; the first armour set contains the old starting armour. Blurbs say what the thing IS and carry no numbers. Read by js/rules/starter-kits.js (kitsFor / validKit / starterGear); checked by tests/C/starter-kits.test.mjs. This file is GENERATED from a table (the generator lived in the agent scratchpad) but is the source of truth now: edit it by hand. Owner feedback 6 (U15): no pack is strictly worse than another — every pack fills BOTH hands (a one-hander always has a shield, buckler, focus or second weapon beside it) or is a two-hander; every class with a shield has a one-hander-and-shield pack. Owner feedback 8 (W23, 'too many similar items'): 4-6 packs a class, no two of them near-duplicates (the measure is in js/rules/starter-kits.js packSignature: hands, attack family, reach band, element, tempo — two packs must differ on at least two, and no more than two packs of a class share a hand shape); every armour set has a `lean` (see `leans`). `role` and `diff` on the kit screen are WRITTEN BY CODE from the signature, never stored here.",
  "version": 2,
  "classes": {
   "warrior": {
@@ -14,28 +14,6 @@
       "heavy_gauntlets"
      ],
      "lean": "guard"
-    },
-    {
-     "id": "march_harness",
-     "name": "Marching Harness",
-     "blurb": "Mail chest, heavy helm and mail boots. Nothing on: legs, gloves.",
-     "pieces": [
-      "medium_chest",
-      "heavy_helm",
-      "medium_boots"
-     ],
-     "lean": "keen"
-    },
-    {
-     "id": "pit_leathers",
-     "name": "Pit Fighter's Leathers",
-     "blurb": "Leather chest, leather gauntlets and leather boots. Nothing on: head, legs.",
-     "pieces": [
-      "light_chest",
-      "light_gauntlets",
-      "light_boots"
-     ],
-     "lean": "swift"
     }
    ],
    "weapons": [
@@ -87,28 +65,6 @@
       "heavy_gauntlets"
      ],
      "lean": "guard"
-    },
-    {
-     "id": "duel_mail",
-     "name": "Duellist's Mail",
-     "blurb": "Mail chest, mail gauntlets and mail boots. Nothing on: head, legs.",
-     "pieces": [
-      "medium_chest",
-      "medium_gauntlets",
-      "medium_boots"
-     ],
-     "lean": "keen"
-    },
-    {
-     "id": "salle_leathers",
-     "name": "Salle Leathers",
-     "blurb": "Leather chest, leather helm and leather legs. Nothing on: gloves, boots.",
-     "pieces": [
-      "light_chest",
-      "light_helm",
-      "light_legs"
-     ],
-     "lean": "swift"
     }
    ],
    "weapons": [
@@ -159,28 +115,6 @@
       "medium_gauntlets"
      ],
      "lean": "guard"
-    },
-    {
-     "id": "pilgrim_harness",
-     "name": "Road Pilgrim's Harness",
-     "blurb": "Mail chest, leather boots and mail legs. Nothing on: head, gloves.",
-     "pieces": [
-      "medium_chest",
-      "light_boots",
-      "medium_legs"
-     ],
-     "lean": "keen"
-    },
-    {
-     "id": "penitent_wraps",
-     "name": "Penitent's Leathers",
-     "blurb": "Leather chest, leather gauntlets and leather boots. Nothing on: head, legs.",
-     "pieces": [
-      "light_chest",
-      "light_gauntlets",
-      "light_boots"
-     ],
-     "lean": "swift"
     }
    ],
    "weapons": [
@@ -233,28 +167,6 @@
       "light_gauntlets"
      ],
      "lean": "swift"
-    },
-    {
-     "id": "hide_hood",
-     "name": "Stalker's Hood and Hides",
-     "blurb": "Leather chest, leather helm and leather legs. Nothing on: gloves, boots.",
-     "pieces": [
-      "light_chest",
-      "light_helm",
-      "light_legs"
-     ],
-     "lean": "keen"
-    },
-    {
-     "id": "warden_greens",
-     "name": "Warden's Greens",
-     "blurb": "Cloth chest, cloth helm and leather boots. Nothing on: legs, gloves.",
-     "pieces": [
-      "cloth_chest",
-      "cloth_helm",
-      "light_boots"
-     ],
-     "lean": "guard"
     }
    ],
    "weapons": [
@@ -305,28 +217,6 @@
       "light_gauntlets"
      ],
      "lean": "swift"
-    },
-    {
-     "id": "rooftop_hood",
-     "name": "Rooftop Hood and Wraps",
-     "blurb": "Leather chest, leather helm and leather legs. Nothing on: gloves, boots.",
-     "pieces": [
-      "light_chest",
-      "light_helm",
-      "light_legs"
-     ],
-     "lean": "keen"
-    },
-    {
-     "id": "fence_coat",
-     "name": "Fence's Soft Coat",
-     "blurb": "Cloth chest, cloth helm and leather boots. Nothing on: legs, gloves.",
-     "pieces": [
-      "cloth_chest",
-      "cloth_helm",
-      "light_boots"
-     ],
-     "lean": "guard"
     }
    ],
    "weapons": [
@@ -371,28 +261,6 @@
       "medium_boots"
      ],
      "lean": "wise"
-    },
-    {
-     "id": "alms_coat",
-     "name": "Almoner's Coat",
-     "blurb": "Leather chest, mail helm and leather boots. Nothing on: legs, gloves.",
-     "pieces": [
-      "light_chest",
-      "medium_helm",
-      "light_boots"
-     ],
-     "lean": "focus"
-    },
-    {
-     "id": "wayside_robe",
-     "name": "Wayside Robe",
-     "blurb": "Cloth chest, cloth helm and leather boots. Nothing on: legs, gloves.",
-     "pieces": [
-      "cloth_chest",
-      "cloth_helm",
-      "light_boots"
-     ],
-     "lean": "ward"
     }
    ],
    "weapons": [
@@ -459,28 +327,6 @@
       "light_legs"
      ],
      "lean": "wise"
-    },
-    {
-     "id": "tavern_best",
-     "name": "Tavern Best",
-     "blurb": "Leather chest, leather boots and leather helm. Nothing on: legs, gloves.",
-     "pieces": [
-      "light_chest",
-      "light_boots",
-      "light_helm"
-     ],
-     "lean": "focus"
-    },
-    {
-     "id": "festival_silks",
-     "name": "Festival Silks",
-     "blurb": "Cloth chest, cloth helm and leather boots. Nothing on: legs, gloves.",
-     "pieces": [
-      "cloth_chest",
-      "cloth_helm",
-      "light_boots"
-     ],
-     "lean": "ward"
     }
    ],
    "weapons": [
@@ -536,28 +382,6 @@
       "cloth_legs"
      ],
      "lean": "wise"
-    },
-    {
-     "id": "travel_robes",
-     "name": "Travelling Scholar's Robes",
-     "blurb": "Cloth chest, cloth legs and leather boots. Nothing on: head, gloves.",
-     "pieces": [
-      "cloth_chest",
-      "cloth_legs",
-      "light_boots"
-     ],
-     "lean": "focus"
-    },
-    {
-     "id": "lab_wraps",
-     "name": "Workroom Wraps",
-     "blurb": "Cloth chest, cloth helm and leather gauntlets. Nothing on: legs, boots.",
-     "pieces": [
-      "cloth_chest",
-      "cloth_helm",
-      "light_gauntlets"
-     ],
-     "lean": "ward"
     }
    ],
    "weapons": [
@@ -597,10 +421,10 @@
     },
     {
      "id": "sceptre_orb",
-     "name": "Battle-Mage Sceptre and Orb",
-     "blurb": "Sceptre: one-handed, MELEE; its swings deal fire damage, with an orb in the off hand (your hits burst around the enemy struck).",
+     "name": "Battle-Mage Sceptre and Scrying Glass",
+     "blurb": "Sceptre: one-handed, MELEE; its swings deal fire damage, with a seer's orb (a focus with its own power).",
      "main": "scepter",
-     "off": "orb",
+     "off": "seer_orb",
      "element": "fire"
     }
    ]
@@ -617,28 +441,6 @@
       "cloth_legs"
      ],
      "lean": "wise"
-    },
-    {
-     "id": "barrow_shroud",
-     "name": "Barrow Shroud",
-     "blurb": "Cloth chest, cloth legs and leather boots. Nothing on: head, gloves.",
-     "pieces": [
-      "cloth_chest",
-      "cloth_legs",
-      "light_boots"
-     ],
-     "lean": "focus"
-    },
-    {
-     "id": "embalmer_wraps",
-     "name": "Embalmer's Wraps",
-     "blurb": "Cloth chest, cloth helm and leather gauntlets. Nothing on: legs, boots.",
-     "pieces": [
-      "cloth_chest",
-      "cloth_helm",
-      "light_gauntlets"
-     ],
-     "lean": "ward"
     }
    ],
    "weapons": [
@@ -678,10 +480,10 @@
     },
     {
      "id": "sceptre_grimoire",
-     "name": "Tomb Sceptre and Grimoire",
-     "blurb": "Sceptre: one-handed, MELEE; its swings deal shadow damage, with a grimoire (a focus: mana and its own power).",
+     "name": "Tomb Sceptre and Skull-Glass",
+     "blurb": "Sceptre: one-handed, MELEE; its swings deal shadow damage, with a seer's orb (a focus with its own power).",
      "main": "scepter",
-     "off": "grimoire",
+     "off": "seer_orb",
      "element": "shadow"
     }
    ]
@@ -698,28 +500,6 @@
       "cloth_legs"
      ],
      "lean": "wise"
-    },
-    {
-     "id": "crossroads_coat",
-     "name": "Crossroads Coat",
-     "blurb": "Cloth chest, cloth legs and leather boots. Nothing on: head, gloves.",
-     "pieces": [
-      "cloth_chest",
-      "cloth_legs",
-      "light_boots"
-     ],
-     "lean": "focus"
-    },
-    {
-     "id": "binding_wraps",
-     "name": "Binder's Wraps",
-     "blurb": "Cloth chest, cloth helm and leather gauntlets. Nothing on: legs, boots.",
-     "pieces": [
-      "cloth_chest",
-      "cloth_helm",
-      "light_gauntlets"
-     ],
-     "lean": "ward"
     }
    ],
    "weapons": [
@@ -759,10 +539,10 @@
     },
     {
      "id": "sceptre_orb",
-     "name": "Pactblade Sceptre and Orb",
-     "blurb": "Sceptre: one-handed, MELEE; its swings deal shadow damage, with an orb in the off hand (your hits burst around the enemy struck).",
+     "name": "Pactblade Sceptre and Witch-Eye",
+     "blurb": "Sceptre: one-handed, MELEE; its swings deal shadow damage, with a seer's orb (a focus with its own power).",
      "main": "scepter",
-     "off": "orb",
+     "off": "seer_orb",
      "element": "shadow"
     }
    ]
@@ -779,28 +559,6 @@
       "light_gauntlets"
      ],
      "lean": "swift"
-    },
-    {
-     "id": "stake_coat",
-     "name": "Staker's Hood and Coat",
-     "blurb": "Leather chest, leather helm and leather legs. Nothing on: gloves, boots.",
-     "pieces": [
-      "light_chest",
-      "light_helm",
-      "light_legs"
-     ],
-     "lean": "keen"
-    },
-    {
-     "id": "ash_cloak",
-     "name": "Ashen Travelling Gear",
-     "blurb": "Cloth chest, cloth helm and leather boots. Nothing on: legs, gloves.",
-     "pieces": [
-      "cloth_chest",
-      "cloth_helm",
-      "light_boots"
-     ],
-     "lean": "guard"
     }
    ],
    "weapons": [
@@ -851,28 +609,6 @@
       "light_gauntlets"
      ],
      "lean": "swift"
-    },
-    {
-     "id": "picker_hood",
-     "name": "Picker's Hood and Breeches",
-     "blurb": "Leather chest, leather helm and leather legs. Nothing on: gloves, boots.",
-     "pieces": [
-      "light_chest",
-      "light_helm",
-      "light_legs"
-     ],
-     "lean": "keen"
-    },
-    {
-     "id": "rag_layers",
-     "name": "Rag Layers",
-     "blurb": "Cloth chest, cloth helm and leather boots. Nothing on: legs, gloves.",
-     "pieces": [
-      "cloth_chest",
-      "cloth_helm",
-      "light_boots"
-     ],
-     "lean": "guard"
     }
    ],
    "weapons": [
@@ -931,28 +667,6 @@
       "light_helm"
      ],
      "lean": "swift"
-    },
-    {
-     "id": "captain_coat",
-     "name": "Captain's Cast-Offs",
-     "blurb": "Leather chest, leather gauntlets and leather legs. Nothing on: head, boots.",
-     "pieces": [
-      "light_chest",
-      "light_gauntlets",
-      "light_legs"
-     ],
-     "lean": "keen"
-    },
-    {
-     "id": "port_finery",
-     "name": "Port-Town Finery",
-     "blurb": "Cloth chest, cloth helm and leather boots. Nothing on: legs, gloves.",
-     "pieces": [
-      "cloth_chest",
-      "cloth_helm",
-      "light_boots"
-     ],
-     "lean": "guard"
     }
    ],
    "weapons": [
@@ -998,28 +712,6 @@
       "heavy_gauntlets"
      ],
      "lean": "guard"
-    },
-    {
-     "id": "wyrm_rider",
-     "name": "Rider's Harness",
-     "blurb": "Heavy chest, mail legs and heavy boots. Nothing on: head, gloves.",
-     "pieces": [
-      "heavy_chest",
-      "medium_legs",
-      "heavy_boots"
-     ],
-     "lean": "keen"
-    },
-    {
-     "id": "cinder_leathers",
-     "name": "Scorch-Proof Leathers",
-     "blurb": "Mail chest, mail legs and leather boots. Nothing on: head, gloves.",
-     "pieces": [
-      "medium_chest",
-      "medium_legs",
-      "light_boots"
-     ],
-     "lean": "swift"
     }
    ],
    "weapons": [
@@ -1070,28 +762,6 @@
       "cloth_legs"
      ],
      "lean": "wise"
-    },
-    {
-     "id": "soot_coat",
-     "name": "Soot-Stained Coat",
-     "blurb": "Cloth chest, cloth legs and leather boots. Nothing on: head, gloves.",
-     "pieces": [
-      "cloth_chest",
-      "cloth_legs",
-      "light_boots"
-     ],
-     "lean": "focus"
-    },
-    {
-     "id": "firewalker_wraps",
-     "name": "Firewalker's Wraps",
-     "blurb": "Cloth chest, leather boots and leather gauntlets. Nothing on: head, legs.",
-     "pieces": [
-      "cloth_chest",
-      "light_boots",
-      "light_gauntlets"
-     ],
-     "lean": "ward"
     }
    ],
    "weapons": [
@@ -1101,7 +771,8 @@
      "blurb": "Staff: two-handed; its attack is a short cone of fire in front of you.",
      "main": "staff",
      "element": "fire",
-     "spell": "cone"
+     "spell": "cone",
+     "itemName": "Charwood Staff"
     },
     {
      "id": "staff_burst",
@@ -1109,7 +780,8 @@
      "blurb": "Staff: two-handed; its attack is a thrown blast of fire that bursts where it lands.",
      "main": "staff",
      "element": "fire",
-     "spell": "burst"
+     "spell": "burst",
+     "itemName": "Bombard Staff"
     },
     {
      "id": "wand_pool",
@@ -1118,7 +790,8 @@
      "main": "wand",
      "off": "grimoire",
      "style": "pool",
-     "element": "fire"
+     "element": "fire",
+     "itemName": "Tinder Wand"
     },
     {
      "id": "wand_nova",
@@ -1127,14 +800,15 @@
      "main": "wand",
      "off": "orb",
      "style": "nova",
-     "element": "fire"
+     "element": "fire",
+     "itemName": "Flare Wand"
     },
     {
      "id": "sceptre_grimoire",
-     "name": "Brand Sceptre and Grimoire",
-     "blurb": "Sceptre: one-handed, MELEE; its swings deal fire damage, with a grimoire (a focus: mana and its own power).",
+     "name": "Brand Sceptre and Effigy",
+     "blurb": "Sceptre: one-handed, MELEE; its swings deal fire damage, with an effigy (a focus with its own power).",
      "main": "scepter",
-     "off": "grimoire",
+     "off": "effigy",
      "element": "fire"
     }
    ]
@@ -1151,28 +825,6 @@
       "cloth_legs"
      ],
      "lean": "wise"
-    },
-    {
-     "id": "hilltop_coat",
-     "name": "Hilltop Coat",
-     "blurb": "Cloth chest, cloth legs and leather boots. Nothing on: head, gloves.",
-     "pieces": [
-      "cloth_chest",
-      "cloth_legs",
-      "light_boots"
-     ],
-     "lean": "focus"
-    },
-    {
-     "id": "kite_wraps",
-     "name": "Kite-Flyer's Wraps",
-     "blurb": "Cloth chest, cloth helm and leather gauntlets. Nothing on: legs, boots.",
-     "pieces": [
-      "cloth_chest",
-      "cloth_helm",
-      "light_gauntlets"
-     ],
-     "lean": "ward"
     }
    ],
    "weapons": [
@@ -1183,7 +835,8 @@
      "main": "wand",
      "style": "chain",
      "element": "lightning",
-     "off": "orb"
+     "off": "orb",
+     "itemName": "Forked-Sky Wand"
     },
     {
      "id": "wand_beam",
@@ -1192,7 +845,8 @@
      "main": "wand",
      "off": "grimoire",
      "style": "beam",
-     "element": "lightning"
+     "element": "lightning",
+     "itemName": "Bright-Line Wand"
     },
     {
      "id": "staff_arc",
@@ -1200,7 +854,8 @@
      "blurb": "Staff: two-handed; its attack is a bolt of lightning; charged, it jumps between enemies.",
      "main": "staff",
      "element": "lightning",
-     "spell": "arc"
+     "spell": "arc",
+     "itemName": "Lightning-Struck Staff"
     },
     {
      "id": "staff_nova",
@@ -1208,14 +863,15 @@
      "blurb": "Staff: two-handed; its attack is a ring of lightning around you.",
      "main": "staff",
      "element": "lightning",
-     "spell": "nova"
+     "spell": "nova",
+     "itemName": "Thunderhead Staff"
     },
     {
      "id": "sceptre_orb",
-     "name": "Stormrod and Orb",
-     "blurb": "Sceptre: one-handed, MELEE; its swings deal lightning damage, with an orb in the off hand (your hits burst around the enemy struck).",
+     "name": "Stormrod and Warding Stone",
+     "blurb": "Sceptre: one-handed, MELEE; its swings deal lightning damage, with a warded focus in the off hand (a barrier that refills).",
      "main": "scepter",
-     "off": "orb",
+     "off": "warded_focus",
      "element": "lightning"
     }
    ]
@@ -1232,28 +888,6 @@
       "medium_boots"
      ],
      "lean": "wise"
-    },
-    {
-     "id": "bark_harness",
-     "name": "Bark and Hide Harness",
-     "blurb": "Leather chest, mail helm and mail legs. Nothing on: gloves, boots.",
-     "pieces": [
-      "light_chest",
-      "medium_helm",
-      "medium_legs"
-     ],
-     "lean": "focus"
-    },
-    {
-     "id": "moss_leathers",
-     "name": "Moss Leathers",
-     "blurb": "Leather chest, leather gauntlets and leather boots. Nothing on: head, legs.",
-     "pieces": [
-      "light_chest",
-      "light_gauntlets",
-      "light_boots"
-     ],
-     "lean": "ward"
     }
    ],
    "weapons": [
@@ -1269,7 +903,8 @@
      "blurb": "Staff: two-handed; its attack is a short cone of poison in front of you.",
      "main": "staff",
      "element": "poison",
-     "spell": "cone"
+     "spell": "cone",
+     "itemName": "Spore Staff"
     },
     {
      "id": "staff_lob",
@@ -1277,7 +912,8 @@
      "blurb": "Staff: two-handed; its attack is a thrown blast of poison that bursts where it lands.",
      "main": "staff",
      "element": "poison",
-     "spell": "lob"
+     "spell": "lob",
+     "itemName": "Seedpod Staff"
     },
     {
      "id": "sceptre_effigy",
@@ -1308,28 +944,6 @@
       "cloth_legs"
      ],
      "lean": "wise"
-    },
-    {
-     "id": "pilgrim_robes",
-     "name": "Robes of the Long Road",
-     "blurb": "Cloth chest, cloth legs and leather boots. Nothing on: head, gloves.",
-     "pieces": [
-      "cloth_chest",
-      "cloth_legs",
-      "light_boots"
-     ],
-     "lean": "focus"
-    },
-    {
-     "id": "augur_wraps",
-     "name": "Augur's Wraps",
-     "blurb": "Cloth chest, cloth helm and leather gauntlets. Nothing on: legs, boots.",
-     "pieces": [
-      "cloth_chest",
-      "cloth_helm",
-      "light_gauntlets"
-     ],
-     "lean": "ward"
     }
    ],
    "weapons": [
@@ -1368,10 +982,10 @@
     },
     {
      "id": "wand_nova",
-     "name": "Stillwater Wand and Glass",
-     "blurb": "Wand: one-handed; instead of a bolt it bursts in a ring around you, with a seeing glass (a focus) in the off hand.",
+     "name": "Stillwater Wand and Orb",
+     "blurb": "Wand: one-handed; instead of a bolt it bursts in a ring around you, with an orb in the off hand (your hits burst around the enemy struck).",
      "main": "wand",
-     "off": "seer_orb",
+     "off": "orb",
      "style": "nova",
      "element": "ice"
     }
@@ -1389,28 +1003,6 @@
       "medium_boots"
      ],
      "lean": "wise"
-    },
-    {
-     "id": "field_harness",
-     "name": "Field Harness",
-     "blurb": "Mail chest, leather boots and leather gauntlets. Nothing on: head, legs.",
-     "pieces": [
-      "medium_chest",
-      "light_boots",
-      "light_gauntlets"
-     ],
-     "lean": "focus"
-    },
-    {
-     "id": "scout_leathers",
-     "name": "Forward Scout's Leathers",
-     "blurb": "Leather chest, leather helm and leather legs. Nothing on: gloves, boots.",
-     "pieces": [
-      "light_chest",
-      "light_helm",
-      "light_legs"
-     ],
-     "lean": "ward"
     }
    ],
    "weapons": [
@@ -1462,28 +1054,6 @@
       "cloth_legs"
      ],
      "lean": "wise"
-    },
-    {
-     "id": "hourglass_coat",
-     "name": "Hourglass Coat",
-     "blurb": "Cloth chest, cloth legs and leather boots. Nothing on: head, gloves.",
-     "pieces": [
-      "cloth_chest",
-      "cloth_legs",
-      "light_boots"
-     ],
-     "lean": "focus"
-    },
-    {
-     "id": "pendulum_wraps",
-     "name": "Pendulum Wraps",
-     "blurb": "Cloth chest, cloth helm and leather gauntlets. Nothing on: legs, boots.",
-     "pieces": [
-      "cloth_chest",
-      "cloth_helm",
-      "light_gauntlets"
-     ],
-     "lean": "ward"
     }
    ],
    "weapons": [
@@ -1523,10 +1093,10 @@
     },
     {
      "id": "sceptre_orb",
-     "name": "Hour-Hand Sceptre and Orb",
-     "blurb": "Sceptre: one-handed, MELEE; its swings deal arcane damage, with an orb in the off hand (your hits burst around the enemy struck).",
+     "name": "Hour-Hand Sceptre and Warding Charm",
+     "blurb": "Sceptre: one-handed, MELEE; its swings deal arcane damage, with a warded focus in the off hand (a barrier that refills).",
      "main": "scepter",
-     "off": "orb",
+     "off": "warded_focus",
      "element": "arcane"
     }
    ]
@@ -1543,28 +1113,6 @@
       "cloth_legs"
      ],
      "lean": "swift"
-    },
-    {
-     "id": "novice_robes",
-     "name": "Novice's Robes",
-     "blurb": "Cloth chest, cloth helm and cloth legs. Nothing on: gloves, boots.",
-     "pieces": [
-      "cloth_chest",
-      "cloth_helm",
-      "cloth_legs"
-     ],
-     "lean": "keen"
-    },
-    {
-     "id": "mountain_bindings",
-     "name": "Mountain Bindings",
-     "blurb": "Cloth chest, leather boots and leather gauntlets. Nothing on: head, legs.",
-     "pieces": [
-      "cloth_chest",
-      "light_boots",
-      "light_gauntlets"
-     ],
-     "lean": "guard"
     }
    ],
    "weapons": [
@@ -1609,28 +1157,6 @@
       "medium_boots"
      ],
      "lean": "wise"
-    },
-    {
-     "id": "totem_harness",
-     "name": "Bone and Hide Harness",
-     "blurb": "Leather chest, mail helm and mail legs. Nothing on: gloves, boots.",
-     "pieces": [
-      "light_chest",
-      "medium_helm",
-      "medium_legs"
-     ],
-     "lean": "focus"
-    },
-    {
-     "id": "fen_leathers",
-     "name": "Fen-Walker's Leathers",
-     "blurb": "Leather chest, leather gauntlets and leather boots. Nothing on: head, legs.",
-     "pieces": [
-      "light_chest",
-      "light_gauntlets",
-      "light_boots"
-     ],
-     "lean": "ward"
     }
    ],
    "weapons": [
@@ -1694,28 +1220,6 @@
       "medium_legs"
      ],
      "lean": "swift"
-    },
-    {
-     "id": "writ_mail",
-     "name": "Writ-Bearer's Mail",
-     "blurb": "Mail chest, mail helm and mail gauntlets. Nothing on: legs, boots.",
-     "pieces": [
-      "medium_chest",
-      "medium_helm",
-      "medium_gauntlets"
-     ],
-     "lean": "keen"
-    },
-    {
-     "id": "lantern_leathers",
-     "name": "Night-Watch Leathers",
-     "blurb": "Leather chest, leather boots and leather helm. Nothing on: legs, gloves.",
-     "pieces": [
-      "light_chest",
-      "light_boots",
-      "light_helm"
-     ],
-     "lean": "guard"
     }
    ],
    "weapons": [
@@ -1773,28 +1277,6 @@
       "heavy_gauntlets"
      ],
      "lean": "guard"
-    },
-    {
-     "id": "tourney_harness",
-     "name": "Tourney Harness",
-     "blurb": "Heavy chest, heavy helm and heavy boots. Nothing on: legs, gloves.",
-     "pieces": [
-      "heavy_chest",
-      "heavy_helm",
-      "heavy_boots"
-     ],
-     "lean": "keen"
-    },
-    {
-     "id": "squire_mail",
-     "name": "Squire's Mail",
-     "blurb": "Mail chest, mail helm and mail legs. Nothing on: gloves, boots.",
-     "pieces": [
-      "medium_chest",
-      "medium_helm",
-      "medium_legs"
-     ],
-     "lean": "swift"
     }
    ],
    "weapons": [
@@ -1845,28 +1327,6 @@
       "cloth_legs"
      ],
      "lean": "wise"
-    },
-    {
-     "id": "hedge_coat",
-     "name": "Hedge-Road Coat",
-     "blurb": "Cloth chest, cloth legs and leather boots. Nothing on: head, gloves.",
-     "pieces": [
-      "cloth_chest",
-      "cloth_legs",
-      "light_boots"
-     ],
-     "lean": "focus"
-    },
-    {
-     "id": "spark_wraps",
-     "name": "Spark-Scorched Wraps",
-     "blurb": "Cloth chest, cloth helm and leather gauntlets. Nothing on: legs, boots.",
-     "pieces": [
-      "cloth_chest",
-      "cloth_helm",
-      "light_gauntlets"
-     ],
-     "lean": "ward"
     }
    ],
    "weapons": [
@@ -1906,10 +1366,10 @@
     },
     {
      "id": "sceptre_orb",
-     "name": "Wildfire Sceptre and Orb",
-     "blurb": "Sceptre: one-handed, MELEE; its swings deal fire damage, with an orb in the off hand (your hits burst around the enemy struck).",
+     "name": "Wildfire Sceptre and Scrying Orb",
+     "blurb": "Sceptre: one-handed, MELEE; its swings deal fire damage, with a seer's orb (a focus with its own power).",
      "main": "scepter",
-     "off": "orb",
+     "off": "seer_orb",
      "element": "fire"
     }
    ]
@@ -1926,28 +1386,6 @@
       "heavy_boots"
      ],
      "lean": "guard"
-    },
-    {
-     "id": "anvil_harness",
-     "name": "Anvil Harness",
-     "blurb": "Mail chest, heavy helm and mail boots. Nothing on: legs, gloves.",
-     "pieces": [
-      "medium_chest",
-      "heavy_helm",
-      "medium_boots"
-     ],
-     "lean": "keen"
-    },
-    {
-     "id": "apron_leathers",
-     "name": "Apron and Leathers",
-     "blurb": "Leather chest, leather gauntlets and leather boots. Nothing on: head, legs.",
-     "pieces": [
-      "light_chest",
-      "light_gauntlets",
-      "light_boots"
-     ],
-     "lean": "swift"
     }
    ],
    "weapons": [
@@ -1991,28 +1429,6 @@
       "light_helm"
      ],
      "lean": "swift"
-    },
-    {
-     "id": "soft_step",
-     "name": "Soft-Step Wraps",
-     "blurb": "Leather chest, leather gauntlets and leather legs. Nothing on: head, boots.",
-     "pieces": [
-      "light_chest",
-      "light_gauntlets",
-      "light_legs"
-     ],
-     "lean": "keen"
-    },
-    {
-     "id": "masque_silks",
-     "name": "Masquerade Silks",
-     "blurb": "Cloth chest, cloth helm and leather boots. Nothing on: legs, gloves.",
-     "pieces": [
-      "cloth_chest",
-      "cloth_helm",
-      "light_boots"
-     ],
-     "lean": "guard"
     }
    ],
    "weapons": [
@@ -2058,28 +1474,6 @@
       "medium_legs"
      ],
      "lean": "wise"
-    },
-    {
-     "id": "rivet_harness",
-     "name": "Riveted Harness",
-     "blurb": "Mail chest, leather boots and leather gauntlets. Nothing on: head, legs.",
-     "pieces": [
-      "medium_chest",
-      "light_boots",
-      "light_gauntlets"
-     ],
-     "lean": "focus"
-    },
-    {
-     "id": "tool_leathers",
-     "name": "Tool-Belt Leathers",
-     "blurb": "Leather chest, leather gauntlets and leather legs. Nothing on: head, boots.",
-     "pieces": [
-      "light_chest",
-      "light_gauntlets",
-      "light_legs"
-     ],
-     "lean": "ward"
     }
    ],
    "weapons": [
@@ -2137,28 +1531,6 @@
       "medium_boots"
      ],
      "lean": "wise"
-    },
-    {
-     "id": "vesper_coat",
-     "name": "Vesper Coat",
-     "blurb": "Cloth chest, cloth helm and mail boots. Nothing on: legs, gloves.",
-     "pieces": [
-      "cloth_chest",
-      "cloth_helm",
-      "medium_boots"
-     ],
-     "lean": "focus"
-    },
-    {
-     "id": "dawn_robes",
-     "name": "Robes of the Early Bell",
-     "blurb": "Cloth chest, cloth helm and leather boots. Nothing on: legs, gloves.",
-     "pieces": [
-      "cloth_chest",
-      "cloth_helm",
-      "light_boots"
-     ],
-     "lean": "ward"
     }
    ],
    "weapons": [
@@ -2225,28 +1597,6 @@
       "light_helm"
      ],
      "lean": "wise"
-    },
-    {
-     "id": "glamour_hood",
-     "name": "Hood and Hose of Glamour",
-     "blurb": "Leather chest, leather helm and leather legs. Nothing on: gloves, boots.",
-     "pieces": [
-      "light_chest",
-      "light_helm",
-      "light_legs"
-     ],
-     "lean": "focus"
-    },
-    {
-     "id": "salon_robes",
-     "name": "Salon Robes",
-     "blurb": "Cloth chest, cloth helm and leather boots. Nothing on: legs, gloves.",
-     "pieces": [
-      "cloth_chest",
-      "cloth_helm",
-      "light_boots"
-     ],
-     "lean": "ward"
     }
    ],
    "weapons": [
@@ -2286,10 +1636,10 @@
     },
     {
      "id": "sceptre_orb",
-     "name": "Glamour Sceptre and Orb",
-     "blurb": "Sceptre: one-handed, MELEE; its swings deal frost damage, with an orb in the off hand (your hits burst around the enemy struck).",
+     "name": "Glamour Sceptre and Looking-Glass",
+     "blurb": "Sceptre: one-handed, MELEE; its swings deal frost damage, with a seer's orb (a focus with its own power).",
      "main": "scepter",
-     "off": "orb",
+     "off": "seer_orb",
      "element": "ice"
     }
    ]
@@ -2306,28 +1656,6 @@
       "cloth_legs"
      ],
      "lean": "wise"
-    },
-    {
-     "id": "wayfarer_coat",
-     "name": "Star-Reader's Coat",
-     "blurb": "Cloth chest, cloth legs and leather boots. Nothing on: head, gloves.",
-     "pieces": [
-      "cloth_chest",
-      "cloth_legs",
-      "light_boots"
-     ],
-     "lean": "focus"
-    },
-    {
-     "id": "gilt_wraps",
-     "name": "Gilt-Thread Wraps",
-     "blurb": "Cloth chest, cloth helm and leather gauntlets. Nothing on: legs, boots.",
-     "pieces": [
-      "cloth_chest",
-      "cloth_helm",
-      "light_gauntlets"
-     ],
-     "lean": "ward"
     }
    ],
    "weapons": [
@@ -2338,7 +1666,8 @@
      "main": "wand",
      "off": "orb",
      "style": "seeking",
-     "element": "arcane"
+     "element": "arcane",
+     "itemName": "Wishing Wand"
     },
     {
      "id": "wand_cone",
@@ -2347,7 +1676,8 @@
      "main": "wand",
      "off": "grimoire",
      "style": "cone",
-     "element": "arcane"
+     "element": "arcane",
+     "itemName": "Stardust Wand"
     },
     {
      "id": "staff_lob",
@@ -2355,7 +1685,8 @@
      "blurb": "Staff: two-handed; its attack lobs a blast of arcane force that bursts where it lands.",
      "main": "staff",
      "element": "arcane",
-     "spell": "lob"
+     "spell": "lob",
+     "itemName": "Zenith Staff"
     },
     {
      "id": "staff_nova",
@@ -2363,7 +1694,8 @@
      "blurb": "Staff: two-handed; its attack is a ring of arcane force around you.",
      "main": "staff",
      "element": "arcane",
-     "spell": "nova"
+     "spell": "nova",
+     "itemName": "Turning-Sky Staff"
     },
     {
      "id": "tome_rune",
@@ -2388,28 +1720,6 @@
       "heavy_gauntlets"
      ],
      "lean": "guard"
-    },
-    {
-     "id": "comet_harness",
-     "name": "Comet Rider's Harness",
-     "blurb": "Plate chest, mail legs and plate boots. Nothing on: head, gloves.",
-     "pieces": [
-      "heavy_chest",
-      "medium_legs",
-      "heavy_boots"
-     ],
-     "lean": "keen"
-    },
-    {
-     "id": "night_watch_mail",
-     "name": "Night-Watch Mail",
-     "blurb": "Mail chest, mail helm and leather boots. Nothing on: legs, gloves.",
-     "pieces": [
-      "medium_chest",
-      "medium_helm",
-      "light_boots"
-     ],
-     "lean": "ward"
     }
    ],
    "weapons": [

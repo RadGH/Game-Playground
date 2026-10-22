@@ -232,3 +232,4 @@
 .tvt-node.staged { border: 2px dashed #8fd0ff; background: linear-gradient(180deg, rgba(50, 90, 130, 0.6), rgba(24, 44, 66, 0.6)); cursor: pointer; }
 .tvt-tick.staged { color: #8fd0ff; }
 .tvt-tier.spent .tvt-node.open { opacity: 1; }
+.kit-choice.fixed { cursor: default; }      /* owner 2026-10-22: the class's own armour, shown not chosen */

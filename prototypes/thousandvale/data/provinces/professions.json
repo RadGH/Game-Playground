@@ -5251,6 +5251,12 @@
      "from": 1
     },
     {
+     "key": "g5_cloth_handwraps",
+     "name": "Cloth Gloves",
+     "slot": "hands",
+     "from": 1
+    },
+    {
      "key": "cloth_shoes",
      "name": "Cloth Shoes",
      "slot": "feet",
@@ -5296,12 +5302,6 @@
      "key": "g5_cloth_wrap",
      "name": "Scholar's Headwrap",
      "slot": "head",
-     "from": 1
-    },
-    {
-     "key": "g5_cloth_handwraps",
-     "name": "Silk Handwraps",
-     "slot": "hands",
      "from": 1
     }
    ]
@@ -5329,6 +5329,12 @@
      "from": 1
     },
     {
+     "key": "g5_cloth_handwraps",
+     "name": "Cloth Gloves",
+     "slot": "hands",
+     "from": 1
+    },
+    {
      "key": "cloth_shoes",
      "name": "Cloth Shoes",
      "slot": "feet",
@@ -5374,12 +5380,6 @@
      "key": "g5_cloth_wrap",
      "name": "Scholar's Headwrap",
      "slot": "head",
-     "from": 1
-    },
-    {
-     "key": "g5_cloth_handwraps",
-     "name": "Silk Handwraps",
-     "slot": "hands",
      "from": 1
     }
    ]
@@ -5407,6 +5407,12 @@
      "from": 1
     },
     {
+     "key": "g5_cloth_handwraps",
+     "name": "Cloth Gloves",
+     "slot": "hands",
+     "from": 1
+    },
+    {
      "key": "cloth_shoes",
      "name": "Cloth Shoes",
      "slot": "feet",
@@ -5452,12 +5458,6 @@
      "key": "g5_cloth_wrap",
      "name": "Scholar's Headwrap",
      "slot": "head",
-     "from": 1
-    },
-    {
-     "key": "g5_cloth_handwraps",
-     "name": "Silk Handwraps",
-     "slot": "hands",
      "from": 1
     }
    ]
@@ -5485,79 +5485,7 @@
      "from": 1
     },
     {
-     "key": "cloth_shoes",
-     "name": "Cloth Shoes",
-     "slot": "feet",
-     "from": 1
-    },
-    {
-     "key": "g5_cloth_curltoes",
-     "name": "Curl-toe Slippers",
-     "slot": "feet",
-     "from": 1
-    },
-    {
-     "key": "cloth_helm",
-     "name": "Hood",
-     "slot": "head",
-     "from": 1
-    },
-    {
-     "key": "g5_cloth_vestment",
-     "name": "Layered Vestment",
-     "slot": "chest",
-     "from": 1
-    },
-    {
-     "key": "cloth_legs",
-     "name": "Linen Leggings",
-     "slot": "legs",
-     "from": 1
-    },
-    {
-     "key": "g5_cloth_pleats",
-     "name": "Pleated Wideleg",
-     "slot": "legs",
-     "from": 1
-    },
-    {
-     "key": "cloth_chest",
-     "name": "Robes",
-     "slot": "chest",
-     "from": 1
-    },
-    {
-     "key": "g5_cloth_wrap",
-     "name": "Scholar's Headwrap",
-     "slot": "head",
-     "from": 1
-    },
-    {
      "key": "g5_cloth_handwraps",
-     "name": "Silk Handwraps",
-     "slot": "hands",
-     "from": 1
-    }
-   ]
-  },
-  {
-   "id": "clothwork_5",
-   "prof": "outfitting",
-   "tier": 5,
-   "skill": 90,
-   "name": "Sunsteel-grade Cloth Armour",
-   "pattern": "clothwork",
-   "desc": "Robes, hoods, wraps and shoes. You choose the pattern; the item comes out at up to level 50, and how well you work decides how good.",
-   "kind": "gear",
-   "needs": [
-    {
-     "id": "sunsilk_bolt",
-     "n": 4
-    }
-   ],
-   "bases": [
-    {
-     "key": "cloth_gloves",
      "name": "Cloth Gloves",
      "slot": "hands",
      "from": 1
@@ -5609,11 +5537,83 @@
      "name": "Scholar's Headwrap",
      "slot": "head",
      "from": 1
+    }
+   ]
+  },
+  {
+   "id": "clothwork_5",
+   "prof": "outfitting",
+   "tier": 5,
+   "skill": 90,
+   "name": "Sunsteel-grade Cloth Armour",
+   "pattern": "clothwork",
+   "desc": "Robes, hoods, wraps and shoes. You choose the pattern; the item comes out at up to level 50, and how well you work decides how good.",
+   "kind": "gear",
+   "needs": [
+    {
+     "id": "sunsilk_bolt",
+     "n": 4
+    }
+   ],
+   "bases": [
+    {
+     "key": "cloth_gloves",
+     "name": "Cloth Gloves",
+     "slot": "hands",
+     "from": 1
     },
     {
      "key": "g5_cloth_handwraps",
-     "name": "Silk Handwraps",
+     "name": "Cloth Gloves",
      "slot": "hands",
+     "from": 1
+    },
+    {
+     "key": "cloth_shoes",
+     "name": "Cloth Shoes",
+     "slot": "feet",
+     "from": 1
+    },
+    {
+     "key": "g5_cloth_curltoes",
+     "name": "Curl-toe Slippers",
+     "slot": "feet",
+     "from": 1
+    },
+    {
+     "key": "cloth_helm",
+     "name": "Hood",
+     "slot": "head",
+     "from": 1
+    },
+    {
+     "key": "g5_cloth_vestment",
+     "name": "Layered Vestment",
+     "slot": "chest",
+     "from": 1
+    },
+    {
+     "key": "cloth_legs",
+     "name": "Linen Leggings",
+     "slot": "legs",
+     "from": 1
+    },
+    {
+     "key": "g5_cloth_pleats",
+     "name": "Pleated Wideleg",
+     "slot": "legs",
+     "from": 1
+    },
+    {
+     "key": "cloth_chest",
+     "name": "Robes",
+     "slot": "chest",
+     "from": 1
+    },
+    {
+     "key": "g5_cloth_wrap",
+     "name": "Scholar's Headwrap",
+     "slot": "head",
      "from": 1
     }
    ]

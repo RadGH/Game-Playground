@@ -324,7 +324,7 @@ const mail = createMail({ net: () => S.net, hud, bag, me, inTown: () => S.room?.
 const market = createMarket({ net: () => S.net, hud, bag, me });
 const callboard = createCallboard({ net: () => S.net, hud, me });
 const account = createAccount({ net: () => S.net, hud, me, guestKey: { get: () => { try { return localStorage.getItem(tokenKey() + '.guest'); } catch { return null; } }, clear: () => { try { localStorage.removeItem(tokenKey() + '.guest'); } catch {} } }, netOpts: () => ({ mode: netMode(), url: q.get('server') || undefined, build: q.get('build') || 'dev' }),
-  onLogin: (user, pass) => loginFromTitle(user, pass), onGuest: name => guestForAccount(name), onPick: ch => enterWorld(ch), onLoggedOut: () => backToTitle(), onTitleStep: step => titleStep(step) });
+  onLogin: (user, pass) => loginFromTitle(user, pass), onToken: token => loginWithToken(token), onGuest: name => guestForAccount(name), onPick: ch => enterWorld(ch), onLoggedOut: () => backToTitle(), onTitleStep: step => titleStep(step) });
 const help = createHelp();
 loadZoneNames();
 const ui = createUiSuite({ net: () => S.net, hud, room: () => S.room, actors, objects, worldUi, social, chat, panels: { friends: friends.panel, guild: guild.panel, mail: mail.panel, market: market.panel, callboard: callboard.panel },
@@ -528,7 +528,8 @@ function sightLine(ax, az, bx, bz) {
 async function toKit() {
   titleStep('kit');
   S.titleBare = false;
-  const name = id => document.querySelector(`#classes [data-cls="${id}"]`)?.textContent || [...($('class-more')?.options || [])].find(o => o.value === id)?.textContent || id;
+  const cardName = id => { const card = document.querySelector(`#classes [data-cls="${id}"]`); return card?.querySelector('.cp-name')?.textContent || card?.textContent || ''; };      // the calling card also holds its role line
+  const name = id => cardName(id) || [...($('class-more')?.options || [])].find(o => o.value === id)?.textContent || id;
   // the kits may take a few seconds to arrive (a first connection): say so — never a title screen with no card and no word
   const note = $('loading'), text = $('loading-text'), was = text?.textContent;
   if (note && text) { text.textContent = 'Laying out your starting gear…'; note.classList.remove('done'); }
@@ -571,6 +572,16 @@ async function loginFromTitle(user, pass) {
     const t = setTimeout(() => { off(); rej(new Error('The server did not answer.')); }, 15000);
     net.ready.then(n => { clearTimeout(t); off(); res(n.chars); });
   });
+}
+/** Title "Sign in with your phone": the phone approved this screen and the server handed it a session token (account.js pair). */
+async function loginWithToken(token) {
+  const toks = TOKENS(), old = toks.get();
+  if (old && old !== token && !(S.net && S.net.claimed)) { try { localStorage.setItem(tokenKey() + '.guest', old); } catch {} }
+  dropNet(); toks.set(token);
+  const net = startNet();
+  const ok = await Promise.race([net.ready.then(() => true, () => false), new Promise(r => setTimeout(() => r(false), 15000))]);
+  if (!ok) { dropNet(); if (old) toks.set(old); throw new Error('The server did not answer.'); }
+  return net.chars;
 }
 /** Title "Create an account": this browser's guest, connected (a fresh one when the page is logged in to another account). */
 async function guestForAccount(name) {
@@ -1428,13 +1439,10 @@ async function titleWorld() {
 const AUTO = AUTOPLAY;
 if (AUTO) Promise.all([loadLookData(), loadMonsterLooks()]).then(() => enterWorld());
 // A browser that already has an account: connect now and list its characters on the title screen (M3).
-// Play-test 12 (#73): a phone that scanned the sign-in QR code arrives with ?signin=<code> — that is traded for this
-// browser's own session first (account.js useSigninCode), then it connects like any signed-in browser.
-else (q.get('signin') ? account.useSigninCode(q.get('signin'), { tokens: TOKENS(), guestKey: tokenKey() + '.guest' }) : Promise.resolve(false)).then(() => {
-  if (!(TOKENS().get() && q.get('fresh') !== '1')) return;
+else if (TOKENS().get() && q.get('fresh') !== '1') {
   const net = startNet();
   net.ready.then(n => { if (S.phase === 'title') { account.showChars(n.chars, n.claimed ? n.username : null); if (n.chars?.length && S.titleStep !== 'look' && S.titleStep !== 'new' && $('signin').hidden) titleStep('front'); } }).catch(() => { titleFront?.set({ hasToken: true, failed: true }); });
-});
+}
 Promise.all([titleWorld(), loadLookData(), loadMonsterLooks()]).then(() => {
   rebuildPreview();
   $('loading').classList.add('done');

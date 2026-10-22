@@ -131,7 +131,7 @@ export const CLIENT_MSGS = Object.freeze({
   trade:   { on: 'p', fields: { op: 'str:8', id: '?int', items: '?uids', gold: '?int' }, rate: 5, burst: 10 },
   leave:   { on: 'both', fields: {}, rate: 1, burst: 2 },
   // M3 (protocol v4, docs/protocol.md §16)
-  account: { on: 'gw', fields: { op: 'str:8', user: '?str:24', pass: '?str:128', old: '?str:128', email: '?str:120', code: '?str:40', human: '?str:2048', guest: '?str:64' }, rate: 0.5, burst: 4 },      // play-test 12 (#73): code also carries a QR sign-in code (32 hex) — ops qrMake / qrUse
+  account: { on: 'gw', fields: { op: 'str:8', user: '?str:24', pass: '?str:128', old: '?str:128', email: '?str:120', code: '?str:40', human: '?str:2048', guest: '?str:64' }, rate: 0.5, burst: 4 },      // code also carries a phone sign-in code (32 hex) — ops pairAsk / pairPeek / pairAuth / pairOk / pairNo (2026-10-22)
   friend:  { on: 'gw', fields: { op: 'str:8', name: '?str:24', char: '?int' }, rate: 1, burst: 5 },      // ops add | remove | list | seen (seen: clears the unseen badge; char = one, none = all)
   guild:   { on: 'gw', fields: { op: 'str:8', name: '?str:24', char: '?int', id: '?int', text: '?str:200' }, rate: 1, burst: 5 },
   callboard: { on: 'gw', fields: { op: 'str:8', dungeon: '?str:64', role: '?str:8', id: '?int' }, rate: 1, burst: 5 },
@@ -215,7 +215,7 @@ export const SERVER_MSGS = Object.freeze({
   travelR: ['ok', 'why', 'cost'],
   tradeState: ['trade', 'done', 'why'],
   // M3
-  accountR: ['op', 'ok', 'why', 'msg', 'username', 'claimed', 'chars', 'moved', 'left', 'code', 'ttl', 'token'],      // code/ttl (qrMake), token (qrUse): play-test 12 #73
+  accountR: ['op', 'ok', 'why', 'msg', 'username', 'claimed', 'chars', 'moved', 'left', 'code', 'ttl', 'token', 'check'],      // code/ttl/check (pairAsk), token (pairDone, to the waiting screen): phone sign-in 2026-10-22
   friends: ['list'],
   friendState: ['char', 'name', 'cls', 'level', 'online', 'zone'],
   guildState: ['guild'],

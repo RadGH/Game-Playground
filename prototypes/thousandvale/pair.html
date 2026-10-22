@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Thousandvale sign-in</title>
+<link rel="stylesheet" href="css/fonts/fonts.css">
+<link rel="stylesheet" href="css/pair.css">
+</head>
+<body>
+<!-- Sign a PC or console in from this phone (js/client/pair.js). Opened from the QR code on the other screen. -->
+<main class="pair" id="pair">
+  <h1>Thousandvale</h1>
+  <p class="lede" id="pair-lede">Connecting…</p>
+  <p class="check" id="pair-check" hidden>The other screen shows <b id="pair-word"></b></p>
+
+  <section id="pair-remember" hidden>
+    <button type="button" class="primary" id="pair-as"></button>
+    <p class="tiny"><button type="button" class="linkish" id="pair-other">Use a different account</button></p>
+  </section>
+
+  <form id="pair-form" autocomplete="on" hidden>
+    <label for="pair-user">Username</label>
+    <input id="pair-user" name="username" maxlength="20" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+    <label for="pair-pass">Password</label>
+    <input id="pair-pass" name="password" type="password" maxlength="128" autocomplete="current-password" required>
+    <button type="submit" class="primary" id="pair-go">Log in</button>
+  </form>
+
+  <section id="pair-confirm" hidden>
+    <p>Sign the other screen in as <b id="pair-who"></b>?</p>
+    <p class="warn">Only say yes if that screen is in front of you and shows <b id="pair-word2"></b>.</p>
+    <div class="row">
+      <button type="button" class="primary" id="pair-yes">Yes, sign it in</button>
+      <button type="button" class="ghost" id="pair-no">No</button>
+    </div>
+  </section>
+
+  <p class="note" id="pair-note"></p>
+  <p class="tiny" id="pair-play" hidden><a href="index.html">Play on this phone instead</a></p>
+</main>
+<script type="module" src="js/client/pair.js"></script>
+</body>
+</html>

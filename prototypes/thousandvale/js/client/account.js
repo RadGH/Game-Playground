@@ -60,7 +60,7 @@ export function guestMovedText(r) {
 }
 
 /** @param o.guestKey  { get(), clear() } the guest key this browser held before a sign-in (main.js sets it aside) */
-export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onPick, onLoggedOut, onTitleStep = null, guestKey = null, onGuest = null }) {
+export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onToken = null, onPick, onLoggedOut, onTitleStep = null, guestKey = null, onGuest = null }) {
   const net = () => getNet();
   const T = {
     tabNew: $('tab-new'), tabLogin: $('tab-login'), newForm: $('login'), signin: $('signin'), user: $('signin-user'), pass: $('signin-pass'),
@@ -245,10 +245,6 @@ export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onPick, 
     const list = chars || [];
     T.mine.hidden = !list.length && !username;
     T.who.textContent = username ? `Logged in as ${username}` : '';
-    // #73: the title's own way to put this account on a phone
-    let qb = T.mine.querySelector('.qr-title');
-    if (username && !qb) { qb = h('button.linkish.qr-title', { type: 'button', onclick: () => qr.open() }, 'Sign in on your phone (QR code)'); T.chips.before(qb); }
-    if (qb) qb.hidden = !username;
     lastChars = list; lastUser = username;
     try { api.onChars?.(list, username); } catch { /* the title's front card (ui/title-front.js) */ }
     // play-test 2 Q25: the calling's real name ("Ranger"); Q13: the character's portrait (ui/portraits.js) when ready
@@ -317,56 +313,84 @@ export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onPick, 
       h('details', {}, h('summary', {}, 'Change password'),
         h('form.claim', { onsubmit: e => { e.preventDefault(); if (p1.value !== p2.value) { msg.textContent = 'The two new passwords do not match.'; return; } if (p1.value.length < 8) { msg.textContent = ACCOUNT_WHY.pass; return; } n.accountOp('password', { old: old.value, pass: p1.value }); } },
           old, p1, p2, msg, h('button.ghost.wide', { type: 'submit' }, 'Change password'))),
-      h('div.qr-offer', {}, h('button.ghost.wide', { type: 'button', dataset: { act: 'qr' }, onclick: () => qr.open() }, 'Sign in on your phone (QR code)')),
       h('div.row.end', {}, h('a.tiny-link', { href: 'public/privacy.html', target: '_blank', rel: 'noopener' }, 'Privacy'), h('span.grow'), h('button.ghost', { type: 'button', onclick: () => logout() }, 'Log out')));
   }
 
-  // ---- play-test 12 (#73): sign a phone in with a QR code ----
-  // The server mints a one-time code for THIS signed-in account (account {op:'qrMake'}): it works once, for three minutes,
-  // and a new one cancels the old. The QR holds this page's address + ?signin=<code>; the phone opens it, trades the code
-  // for its own session (useSigninCode below, on the phone) and lands on the character list. The password never moves.
-  const qr = (() => {
-    const Q = { code: null, until: 0, timer: 0, err: '', busy: false };
-    const qp = createPanel({ id: 'qr-signin', title: 'Sign in on your phone', width: 340, cls: 'qr-panel', parent: document.body, onOpen: () => make(), onClose: () => { clearInterval(Q.timer); Q.code = null; } });
-    const linkFor = code => { const u = new URL(location.href); u.search = ''; u.hash = ''; const keep = new URLSearchParams(location.search); const v = new URLSearchParams(); if (keep.get('server')) v.set('server', keep.get('server')); v.set('signin', code); u.search = v.toString(); return u.href; };
-    function make() { const n = net(); Q.err = ''; Q.code = null; if (!n?.claimed) { Q.err = ACCOUNT_WHY.claimFirst || 'Claim this account first.'; draw2(); return; } Q.busy = true; n.accountOp('qrMake'); draw2(); setTimeout(() => { if (Q.busy) { Q.busy = false; Q.err = 'The server did not answer.'; draw2(); } }, 8000); }
+  // ---- sign this screen in FROM a phone (owner 2026-10-22; replaces play-test 12's #73, which went the other way) ----
+  // For a PC or console where typing a password is a chore and the password manager lives on the phone. This screen,
+  // signed out, opens its own socket and asks `account {op:'pairAsk'}`: a one-time code + a 4-letter check word. The QR
+  // holds pair.html?pair=<code>; the phone opens it, signs in with its password manager, sees the same check word and
+  // confirms (js/client/pair.js). The server then sends THIS socket `accountR {op:'pairDone', token}`, and `onToken`
+  // (main.js) connects with it like any signed-in browser. A code lasts three minutes and is renewed while the window
+  // is open; closing the window closes the socket, which kills the code.
+  const pair = (() => {
+    const P = { code: null, check: '', until: 0, timer: 0, err: '', busy: false, sock: null, done: false };
+    const pp = createPanel({ id: 'pair-signin', title: 'Sign in with your phone', width: 360, cls: 'qr-panel', parent: document.body, onOpen: () => start(), onClose: () => stop() });
+    const linkFor = code => {
+      const u = new URL('pair.html', location.href), keep = new URLSearchParams(location.search), o = netOpts?.() || {};
+      const v = new URLSearchParams(); if (keep.get('server')) v.set('server', keep.get('server')); if (o.build) v.set('b', o.build); v.set('pair', code);
+      u.search = v.toString(); u.hash = ''; return u.href;
+    };
+    function stop() { clearInterval(P.timer); P.code = null; P.busy = false; const so = P.sock; P.sock = null; try { so?.close(); } catch { /* gone */ } }
+    function ask() { P.code = null; P.err = ''; P.busy = true; P.sock?.send(JSON.stringify({ t: 'account', op: 'pairAsk' })); draw2(); }
+    function start() {
+      stop(); P.err = ''; P.done = false; P.busy = true; draw2();
+      const o = netOpts?.() || {};
+      if ((o.mode || 'ws') !== 'ws') { P.busy = false; P.err = 'Phone sign-in needs the online server.'; draw2(); return; }
+      let so;
+      try { so = socketFactory('ws', { url: o.url })('/gw'); } catch (err) { P.busy = false; P.err = 'Cannot reach the game server.'; draw2(); return; }
+      P.sock = so;
+      so.onopen = () => so.send(JSON.stringify({ t: 'hello', v: PROTOCOL_VERSION, build: o.build || 'dev' }));
+      so.onmessage = ev => {
+        if (P.sock !== so || typeof ev.data !== 'string') return;
+        let m; try { m = JSON.parse(ev.data); } catch { return; }
+        if (m.t === 'welcome') ask();
+        else if (m.t === 'refuse' || m.t === 'err') { P.busy = false; P.err = m.msg || 'The server refused.'; draw2(); }
+        else if (m.t === 'accountR' && m.op === 'pairAsk') {
+          P.busy = false;
+          if (m.ok && m.code) { P.code = m.code; P.check = m.check || ''; P.until = Date.now() + (m.ttl || 180000); } else P.err = m.msg || ACCOUNT_WHY[m.why] || 'That did not work.';
+          draw2();
+        } else if (m.t === 'accountR' && m.op === 'pairDone') {
+          if (!m.ok || !m.token) { P.code = null; P.err = m.msg || 'The phone did not sign this screen in.'; draw2(); return; }
+          P.done = true; stop(); signIn(m.token, m.username);
+        }
+      };
+      so.onclose = () => { if (P.sock !== so) return; P.sock = null; clearInterval(P.timer); if (!P.done && pp.isOpen) { P.busy = false; P.code = null; P.err = P.err || 'Lost the connection to the game server.'; draw2(); } };
+    }
+    async function signIn(token, username) {
+      pp.fill(h('p', {}, 'Signing in as ', h('b', {}, username || 'your account'), '…'));
+      try {
+        const chars = await onToken(token);
+        pp.close();
+        hud?.toast?.(`Signed in as ${username || 'your account'}.`, 'good');
+        showChars(chars, net()?.username || username); front();
+      } catch (err) { P.err = err.message || 'Could not sign in.'; pp.isOpen ? draw2() : (T.note.textContent = P.err); }
+    }
+    const mmss = l => `${Math.floor(l / 60)}:${String(l % 60).padStart(2, '0')}`;
     function draw2() {
-      if (!qp.isOpen) return;
-      clearInterval(Q.timer);
-      const left = Math.max(0, Math.ceil((Q.until - Date.now()) / 1000));
-      if (Q.code && left > 0) {
-        const url = linkFor(Q.code), box = h('div.qr-code'); box.innerHTML = qrSvg(url, { ecl: 'M', px: 5, label: 'Scan to sign in' });      // our own encoder, our own string
-        const clock = h('b.qr-left', {}, `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`);
-        qp.fill(h('p', {}, 'Point your phone’s camera at this code and open the link. It signs the phone in to ', h('b', {}, net()?.username || 'this account'), ' — no password typed.'),
-          box, h('p.qr-meta', {}, 'Works once, for ', clock, '. Do not show it to anyone else.'),
-          h('div.row.end', {}, h('button.ghost.small', { type: 'button', dataset: { act: 'qr-new' }, onclick: () => make() }, 'New code'), h('span.grow'), h('button.primary.small', { type: 'button', onclick: () => qp.close() }, 'Done')));
-        Q.timer = setInterval(() => { const l = Math.max(0, Math.ceil((Q.until - Date.now()) / 1000)); clock.textContent = `${Math.floor(l / 60)}:${String(l % 60).padStart(2, '0')}`; if (!l) { Q.code = null; draw2(); } }, 1000);
+      if (!pp.isOpen) return;
+      clearInterval(P.timer);
+      const left = Math.max(0, Math.ceil((P.until - Date.now()) / 1000));
+      if (P.code && left > 0) {
+        const url = linkFor(P.code), box = h('div.qr-code'); box.innerHTML = qrSvg(url, { ecl: 'M', px: 5, label: 'Scan with your phone to sign in' });      // our own encoder, our own string
+        const clock = h('b.qr-left', {}, mmss(left));
+        pp.fill(h('p', {}, 'Scan this with your phone’s camera and log in there — your password manager can fill it in. Then confirm, and this screen signs in.'),
+          box,
+          h('p.pair-check', {}, 'Your phone will show this code: ', h('b', {}, P.check)),
+          h('p.qr-meta', {}, 'Waiting for your phone… new code in ', clock),
+          h('p.qr-meta', {}, h('a', { href: url, target: '_blank', rel: 'noopener' }, 'Open the link on this device instead')),
+          h('div.row.end', {}, h('span.grow'), h('button.ghost.small', { type: 'button', onclick: () => pp.close() }, 'Cancel')));
+        P.timer = setInterval(() => { const l = Math.max(0, Math.ceil((P.until - Date.now()) / 1000)); clock.textContent = mmss(l); if (!l) { clearInterval(P.timer); ask(); } }, 1000);
         return;
       }
-      qp.fill(Q.busy ? h('p.dim', {}, 'Making a code…') : h('p', {}, Q.err || 'That code has run out.'),
-        h('div.row.end', {}, h('button.primary.small', { type: 'button', disabled: Q.busy, onclick: () => make() }, Q.err ? 'Try again' : 'Make a new code'), h('span.grow'), h('button.ghost.small', { type: 'button', onclick: () => qp.close() }, 'Close')));
+      pp.fill(P.busy ? h('p.dim', {}, 'Making a code…') : h('p', {}, P.err || 'That code has run out.'),
+        h('div.row.end', {}, h('button.primary.small', { type: 'button', disabled: P.busy, onclick: () => (P.sock ? ask() : start()) }, 'New code'), h('span.grow'), h('button.ghost.small', { type: 'button', onclick: () => pp.close() }, 'Cancel')));
     }
-    return { panel: qp, open: () => qp.open(), onR(r) { if (r.op !== 'qrMake') return false; Q.busy = false; if (r.ok && r.code) { Q.code = r.code; Q.until = Date.now() + (r.ttl || 180000); Q.err = ''; } else Q.err = r.msg || ACCOUNT_WHY[r.why] || 'That did not work.'; draw2(); return true; }, get state() { return { open: qp.isOpen, code: Q.code, busy: Q.busy, err: Q.err, url: Q.code ? linkFor(Q.code) : null }; } };
+    return { panel: pp, open: () => pp.open(), get state() { return { open: pp.isOpen, code: P.code, check: P.check, busy: P.busy, err: P.err, url: P.code ? linkFor(P.code) : null }; } };
   })();
-  /**
-   * #73, the phone's side: the page was opened from the QR (?signin=<code>). Trade the code for this browser's own
-   * session before anything connects; the guest key this browser held is set aside (main.js's guestKey) so its guest
-   * characters can still be offered to the account. Resolves true when signed in.
-   */
-  async function useSigninCode(code, { tokens, guestKey: gk = null }) {
-    try { const u = new URL(location.href); u.searchParams.delete('signin'); history.replaceState(null, '', u.pathname + u.search + u.hash); } catch { /* old browser: the code is spent anyway */ }
-    let r;
-    try { r = await anonAccountOp('qrUse', { code: String(code).trim() }, { ...(netOpts?.() || {}), timeoutMs: 60000 }); } catch (err) { r = { ok: false, msg: err.message }; }      // (a phone still loading the world can be slow to read the answer)
-    if (!r || !r.ok || !r.token) {
-      tab('login');
-      T.note.textContent = (r && r.msg) || 'That sign-in code did not work. Make a new one on the signed-in screen.';
-      return false;
-    }
-    const old = tokens.get();
-    if (old && old !== r.token && gk) { try { localStorage.setItem(gk, old); } catch { /* private mode */ } }
-    tokens.set(r.token);
-    hud?.toast?.(`Signed in as ${r.username || 'your account'}.`, 'good');
-    return true;
+  if (T.signin && onToken) {
+    const row = h('p.tiny.pair-offer', {}, h('button.linkish', { type: 'button', id: 'signin-phone', onclick: () => pair.open() }, 'Sign in with your phone (QR code)'));
+    T.signin.insertBefore(row, T.forgot.closest('p'));
   }
   function logout() {
     const n = net(); if (!n) return;
@@ -377,7 +401,6 @@ export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onPick, 
   function wire(n) {
     n.on('accountR', r => {
       if (r.op === 'login') return;            // the title handles its own
-      if (qr.onR(r)) return;                   // #73
       if (!r.ok) {
         const t = r.msg || ACCOUNT_WHY[r.why] || 'That did not work.';
         hud.toast(t, 'warn');
@@ -400,7 +423,7 @@ export function createAccount({ net: getNet, hud, me, netOpts, onLogin, onPick, 
     b.dataset.tip = n && n.claimed ? `Account: ${n.username}` : 'Account: you are a guest — claim it to keep it (free)';
   }
 
-  const api = { wire, panel, draw, showChars, tab, refreshPill, qr, useSigninCode, portraitFor: null, onChars: null, hasChars: () => lastChars.length > 0,
+  const api = { wire, panel, draw, showChars, tab, refreshPill, pair, portraitFor: null, onChars: null, hasChars: () => lastChars.length > 0,
     /** Redraw the title's character list (a portrait arrived, or a new charList). */
     redrawChars(chars = null) { if (chars) lastChars = chars; if (lastChars.length && !T.mine.hidden) showChars(lastChars, lastUser); } };
   return api;

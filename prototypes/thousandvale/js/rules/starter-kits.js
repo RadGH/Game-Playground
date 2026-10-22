@@ -139,6 +139,9 @@ function makeItem(engine, classId, kitId, baseKey, tune = null, lean = null) {
     if (tune.style) { item.castStyle = tune.style; item.wandBehaviour = tune.style; }
   }
   attuneWeapon(item);
+  // owner 2026-10-22: two packs of one class must never LOOK the same, so a pack may name its own weapon ("Charwood
+  // Staff" and "Bombard Staff" are both fire staves; their attacks differ, and now their names say so)
+  if (tune && tune.itemName && item.type === 'weapon') item.name = tune.itemName;
   item.starter = true;
   if (lean) applyLean(item, lean.row, lean.id);
   // what a caster item IS (its style's own card sentence, a focus's rider): js/rules/tv-gear.js, when the engine has it
@@ -149,7 +152,8 @@ function makeItem(engine, classId, kitId, baseKey, tune = null, lean = null) {
 /** The items of one weapon pack: main first, then the off hand. */
 function packItems(engine, classId, pack) {
   const main = makeItem(engine, classId, pack.id, pack.main, pack);
-  const off = pack.off ? makeItem(engine, classId, pack.id + ':off', pack.off) : null;
+  // a caster off hand (orb, tome) takes the pack's element: an icicle wand comes with a frost orb, not a random one
+  const off = pack.off ? makeItem(engine, classId, pack.id + ':off', pack.off, pack.element ? { element: pack.element, itemName: pack.offName || null } : (pack.offName ? { itemName: pack.offName } : null)) : null;
   return [main, off].filter(Boolean);
 }
 

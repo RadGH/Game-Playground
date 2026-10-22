@@ -1657,3 +1657,21 @@ Owner: "stuttering … usually smooth exploring, and once I start getting target
 - **Tier-1 outfits** for the bard, demon hunter, scavenger, shadow dancer, swashbuckler and witch hunter (shared
   `avatar-3d/data/class-outfits.json`).
 
+
+## 2026-10-22 — sign in with your phone; one armour set per class; no look-alike weapon packs
+- **Sign in with your phone** (owner: "playing on PC or console > sign in on phone > use your password manager > confirm >
+  the PC signs in"). The Log in tab has "Sign in with your phone (QR code)": the signed-out screen shows a QR code and a
+  4-letter check word; the phone opens `pair.html` (a small page, no 3D), logs in with a real username/password form
+  (`autocomplete` username / current-password, so a password manager fills it), sees the same check word, confirms, and
+  the screen signs itself in. The password never reaches the screen. A phone already signed in to a claimed account
+  approves with one tap. Server ops `pairAsk/pairPeek/pairAuth/pairOk/pairNo` in `js/sim/accounts.js`; client
+  `js/client/account.js` (pair) + `js/client/pair.js`; main.js `loginWithToken`. The old play-test 12 feature (a
+  signed-in screen made a code that signed a PHONE in, `qrMake`/`qrUse`, `?signin=`) is removed.
+  Tests: `tests/A/pair-signin.test.js`, `tests/G/pt12-ui.spec.js` (phone sign-in).
+- **Starting armour is the class's own**: `data/rules/starter-kits.json` keeps one armour set per class (the first,
+  which holds its old Farhold armour); the starting-gear step shows it with every piece but offers no choice.
+- **Weapon packs that look different**: two packs of one class showed the same item names (pyromancer: "Flame Staff"
+  twice and "Flame Wand" twice; stormcaller, druid and starcaller the same), a grimoire or orb turned up in two packs,
+  and an off-hand orb had a random element (an icicle wand with a flame orb). A pack may now name its own weapon
+  (`itemName`), a caster off hand takes the pack's element, and eleven classes' packs were changed so no weapon name
+  and no focus kind repeats inside a class. `tests/C/starter-kits.test.mjs` checks what the player reads.

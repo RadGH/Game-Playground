@@ -20,15 +20,20 @@
 import { CODES } from '../net/protocol.js';
 import { sha256Hex, randomHex } from './sha256.js';
 
-export const ACCOUNT_OPS = Object.freeze(['claim', 'login', 'logout', 'password', 'resetAsk', 'reset', 'info', 'peek', 'adopt', 'qrMake', 'qrUse']);
+export const ACCOUNT_OPS = Object.freeze(['claim', 'login', 'logout', 'password', 'resetAsk', 'reset', 'info', 'peek', 'adopt', 'pairAsk', 'pairPeek', 'pairAuth', 'pairOk', 'pairNo']);
 /**
- * Play-test 12 (#73): sign a phone in by scanning a QR code on a screen that is already signed in. `qrMake` (a claimed
- * account, signed in) mints a one-time code — 16 random bytes, only its hash kept, in memory only — that works ONCE, for
- * ttlMs; making a new one throws the old one away. `qrUse {code}` (a signed-out socket) trades it for a fresh session
- * token of that account, exactly what a password login hands out. The password never travels and never appears in
- * the code. A wrong code counts against the address like a wrong password. A server restart forgets every code.
+ * Sign a PC or console in FROM a phone (owner 2026-10-22, replaces play-test 12's #73, which went the other way).
+ * The screen that wants to play is signed out: it asks `pairAsk` on its own socket and gets a one-time code (16 random
+ * bytes, only its hash kept, in memory only) plus a short `check` word, and shows both as a QR code. The phone opens the
+ * link (pair.html), reads the check word back with `pairPeek {code}`, signs in with a real username + password form
+ * (so its password manager fills it) through `pairAuth {code, user, pass}` — which checks the password and remembers
+ * the account ON THAT PHONE SOCKET without signing it in — and then `pairOk {code}` hands the WAITING screen a fresh
+ * session token (accountR op 'pairDone'). A phone that is already signed in may approve straight away (`auth` first,
+ * then `pairOk`). `pairNo {code}` tells the screen the phone said no. A code works once, for ttlMs; asking again
+ * replaces the socket's old code; a closed screen socket kills its code. The password never reaches the screen.
  */
-export const QR_SIGNIN = Object.freeze({ ttlMs: 3 * 60000, max: 5000 });
+export const PAIR_SIGNIN = Object.freeze({ ttlMs: 3 * 60000, max: 5000 });
+const PAIR_LETTERS = 'ACDEFHJKLMNPQRTVWXY34679';      // no 0/O, 1/I, 2/Z, 5/S, 8/B look-alikes
 export const LOGIN_LIMITS = Object.freeze({
   ipFails: 20, ipWindowMs: 10 * 60000,          // failed logins from one address (above userFails, so it never trips first)
   userFails: 10, userWindowMs: 15 * 60000,      // failed logins on one username (owner 2026-10-15: 5 was too strict)
@@ -65,9 +70,11 @@ export function createAccounts({ store, hasher = null, mailer = null, verifyHuma
   const limiter = createLimiter(wallNow);
   const L = LOGIN_LIMITS;
   const resetLog = [];             // { at, username, email, code, until } for the admin page (last 50)
-  const qr = new Map();            // #73: sha256(code) -> { account, until }
-  const qrOf = new Map();          // account -> the hash of its live code (one at a time)
-  const qrSweep = () => { const t = wallNow(); for (const [k, v] of qr) if (v.until <= t) { qr.delete(k); if (qrOf.get(v.account) === k) qrOf.delete(v.account); } };
+  const pairs = new Map();         // sha256(code) -> { s: the waiting screen's socket, check, until }
+  const pairSweep = () => { const t = wallNow(); for (const [k, v] of pairs) if (v.until <= t || v.s.closed) { pairs.delete(k); if (v.s.pairKey === k) v.s.pairKey = null; } };
+  const pairOf = code => { const c = String(code || '').trim().toLowerCase(); if (!/^[0-9a-f]{32}$/.test(c)) return null; const key = sha256Hex('pair:' + c); pairSweep(); const e = pairs.get(key); return e ? { key, e } : null; };
+  const checkWord = () => { const h = randomHex(4); let w = ''; for (let i = 0; i < 4; i++) w += PAIR_LETTERS[parseInt(h.slice(i * 2, i * 2 + 2), 16) % PAIR_LETTERS.length]; return w; };
+  const pairGone = 'That sign-in code has been used or has run out. Make a new one on the screen you want to play on.';
   const reply = (s, op, x) => s.sendJSON({ t: 'accountR', op, ...x });
   const fail = (s, op, why, msg) => reply(s, op, { ok: false, why, msg: msg || CODES[why] || why });
   const human = (s, m) => (verifyHuman ? Promise.resolve(m.human ? verifyHuman(m.human, s.ip) : false).catch(() => false) : Promise.resolve(true));
@@ -204,36 +211,64 @@ export function createAccounts({ store, hasher = null, mailer = null, verifyHuma
         const r = resetLog.find(x => x.account === account && !x.used); if (r) r.used = wallNow();
         return reply(s, op, { ok: true, msg: 'Password changed. Log in with it now.' });
       }
-      case 'qrMake': {
-        if (s.state !== 'authed') return 'order';
-        if (!s.claimed) return fail(s, op, 'claimFirst', 'Claim this account first (Account window): a phone signs in to a claimed account.');
-        qrSweep();
-        if (qr.size >= QR_SIGNIN.max) return fail(s, op, 'busy', 'Too many sign-in codes right now. Try again in a minute.');
-        const old = qrOf.get(s.account); if (old) qr.delete(old);
-        const code = randomHex(16), key = sha256Hex('qr:' + code);
-        qr.set(key, { account: s.account, until: wallNow() + QR_SIGNIN.ttlMs }); qrOf.set(s.account, key);
-        counters.qrMade = (counters.qrMade || 0) + 1;
-        return reply(s, op, { ok: true, code, ttl: QR_SIGNIN.ttlMs });
-      }
-      case 'qrUse': {
+      case 'pairAsk': {
         if (s.state !== 'anon') return 'order';
+        pairSweep();
+        if (s.pairKey) pairs.delete(s.pairKey);
+        if (pairs.size >= PAIR_SIGNIN.max) return fail(s, op, 'busy', 'Too many sign-in codes right now. Try again in a minute.');
+        const code = randomHex(16), key = sha256Hex('pair:' + code), check = checkWord();
+        pairs.set(key, { s, check, until: wallNow() + PAIR_SIGNIN.ttlMs }); s.pairKey = key;
+        counters.pairMade = (counters.pairMade || 0) + 1;
+        return reply(s, op, { ok: true, code, check, ttl: PAIR_SIGNIN.ttlMs });
+      }
+      case 'pairPeek': {
+        if (s.state !== 'anon' && s.state !== 'authed') return 'order';
         if (limited(s) && limiter.over(ipKey(s), L.ipFails, L.ipWindowMs)) return fail(s, op, 'tooManyLogins');
-        const code = String(m.code || '').trim().toLowerCase();
-        const key = /^[0-9a-f]{32}$/.test(code) ? sha256Hex('qr:' + code) : null;
-        const e = key ? qr.get(key) : null;
-        if (key && e) { qr.delete(key); if (qrOf.get(e.account) === key) qrOf.delete(e.account); }      // single use: gone before anything is awaited
-        if (!e || e.until <= wallNow()) { limiter.hit(ipKey(s)); return fail(s, op, 'auth', 'That sign-in code has been used or has run out. Make a new one on the signed-in screen.'); }
+        const p = pairOf(m.code);
+        if (!p) { limiter.hit(ipKey(s)); return fail(s, op, 'gone', pairGone); }
+        return reply(s, op, { ok: true, check: p.e.check, ...(s.state === 'authed' && s.claimed ? { username: s.username } : {}) });
+      }
+      case 'pairAuth': {
+        if (s.state !== 'anon') return 'order';
+        const username = cleanUsername(m.user);
+        const uKey = 'user:' + String(username || m.user || '').toLowerCase();
+        if (limited(s) && (limiter.over(ipKey(s), L.ipFails, L.ipWindowMs) || limiter.over(uKey, L.userFails, L.userWindowMs))) return fail(s, op, 'tooManyLogins');
+        if (!pairOf(m.code)) { limiter.hit(ipKey(s)); return fail(s, op, 'gone', pairGone); }
+        if (!username || typeof m.pass !== 'string') { limiter.hit(ipKey(s)); return fail(s, op, 'auth', 'Wrong username or password.'); }
         s.state = 'busy';
         try {
-          const token = await store.newToken(e.account, 'session');
-          const a = await store.authToken(token);
-          if (!a || !a.claimed) { await store.revokeToken(token); s.state = 'anon'; return fail(s, op, 'auth', 'That account cannot be signed in to this way.'); }
-          if ((a.banned || 0) > wallNow()) { await store.revokeToken(token); s.state = 'anon'; s.sendJSON({ t: 'refuse', code: 'banned', msg: CODES.banned }); return s.closeSoon('banned'); }
+          const info = await store.loginInfo(username);
+          const ok = !!(info && info.passHash) && await hasher.verifyPassword(m.pass, info.passHash);
           s.state = 'anon';
-          counters.qrUsed = (counters.qrUsed || 0) + 1;
-          log('signed in by QR code', { account: e.account });
-          return reply(s, op, { ok: true, token, username: a.username || null });
-        } catch (err) { s.state = 'anon'; log('qr sign-in failed', err && err.message); return fail(s, op, 'auth', 'Signing in is not working right now.'); }
+          if (!ok) { limiter.hit(ipKey(s)); limiter.hit(uKey); return fail(s, op, 'auth', 'Wrong username or password.'); }
+          if (info.banned > wallNow()) { s.sendJSON({ t: 'refuse', code: 'banned', msg: CODES.banned }); return s.closeSoon('banned'); }
+          limiter.clear(uKey);
+          const a = await store.accountInfo(info.account);
+          s.pairAccount = { account: info.account, username: a ? a.username : username };
+          return reply(s, op, { ok: true, username: s.pairAccount.username });
+        } catch (err) { s.state = 'anon'; log('pair sign-in failed', err && err.message); return fail(s, op, 'auth', 'Signing in is not working right now.'); }
+      }
+      case 'pairOk': case 'pairNo': {
+        if (s.state !== 'anon' && s.state !== 'authed') return 'order';
+        const who = s.pairAccount || (s.state === 'authed' && s.claimed ? { account: s.account, username: s.username } : null);
+        if (!who) return fail(s, op, 'auth', 'Sign in on this phone first.');
+        const p = pairOf(m.code);
+        if (!p) return fail(s, op, 'gone', pairGone);
+        pairs.delete(p.key); if (p.e.s.pairKey === p.key) p.e.s.pairKey = null;      // single use: gone before anything is awaited
+        const screen = p.e.s;
+        if (op === 'pairNo') { reply(screen, 'pairDone', { ok: false, why: 'declined', msg: 'The phone said no. Make a new code to try again.' }); return reply(s, op, { ok: true }); }
+        try {
+          const token = await store.newToken(who.account, 'session');
+          const a = await store.authToken(token);
+          if (!a || !a.claimed) { await store.revokeToken(token); return fail(s, op, 'auth', 'That account cannot be signed in to this way.'); }
+          if ((a.banned || 0) > wallNow()) { await store.revokeToken(token); return fail(s, op, 'banned', CODES.banned); }
+          if (screen.closed) { await store.revokeToken(token); return fail(s, op, 'gone', 'The other screen closed its sign-in code. Make a new one there.'); }
+          reply(screen, 'pairDone', { ok: true, token, username: a.username || who.username || null });
+          s.pairAccount = null;
+          counters.pairUsed = (counters.pairUsed || 0) + 1;
+          log('screen signed in from a phone', { account: who.account });
+          return reply(s, op, { ok: true, username: a.username || who.username || null });
+        } catch (err) { log('pair approve failed', err && err.message); return fail(s, op, 'auth', 'Signing in is not working right now.'); }
       }
     }
     return 'op';
@@ -245,7 +280,7 @@ export function createAccounts({ store, hasher = null, mailer = null, verifyHuma
     },
     resets: () => resetLog.slice().reverse().map(r => ({ ...r, live: !r.used && r.until > wallNow() })),
     limiter,
-    /** #73: live QR sign-in codes (tests). */
-    qrLive: () => { qrSweep(); return qr.size; },
+    /** Live phone sign-in codes (tests). */
+    pairLive: () => { pairSweep(); return pairs.size; },
   };
 }

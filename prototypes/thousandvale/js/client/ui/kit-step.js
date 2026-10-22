@@ -1,5 +1,5 @@
-// T5 (play-test 5): step 3 of making a character — choose your starting equipment. Three budget armour sets for your
-// calling and several weapon packs (sword and shield, a pair of blades, a two-hander; casters get wands, staves and
+// T5 (play-test 5): step 3 of making a character — choose your starting equipment. Your calling's own armour set (one,
+// shown but not chosen since 2026-10-22) and several weapon packs (sword and shield, a pair of blades, a two-hander; casters get wands, staves and
 // focuses). Whatever you pick is put on the 3D figure at once (onPreview), and every piece is listed with its real
 // numbers — the same item card as the bag on hover, and a plain line under it for touch screens.
 //
@@ -71,14 +71,25 @@ export function createKitStep({ parent = null, onPreview, onBack, onCreate, askS
       k.blurb && k.blurb !== k.diff ? h('p.kit-blurb', {}, k.blurb) : null,
       on ? h('ul.kit-items', {}, ...k.items.map(itemRow)) : h('p.kit-short', {}, k.items.map(nameOf).join(' · ')));
   }
+  function fixedArmour(k) {
+    const t = kitTotals(kitGear(k, null));
+    return h('section.kit-group.kit-fixed', { 'aria-label': 'Armour', dataset: { group: 'armour-fixed', id: k.id } },
+      h('h4', {}, 'Armour'),
+      h('div.kit-choice.on.fixed', {},
+        h('div.kit-head', {}, h('strong', {}, k.name), k.role ? h('span.kit-role', {}, k.role) : null, h('em', {}, `${t.armour} armour in all`)),
+        h('p.kit-blurb', {}, `Every ${S.className || 'one of your calling'} starts in this. Better pieces drop as you play.`),
+        h('ul.kit-items', {}, ...k.items.map(itemRow))));
+  }
   function draw() {
     if (!panel.isOpen || !S.kits) return;
     panel.setTitle('Starting equipment', `Step 3 of 3${S.className ? ' — ' + S.className : ''}`);
     const go = h('button.primary.small', { type: 'button', dataset: { act: 'create' }, disabled: S.busy, onclick: () => { S.busy = true; S.created = true; go.disabled = true; go.textContent = 'Entering…'; onCreate?.({ armour: S.armour, weapons: S.weapons }); } }, S.busy ? 'Entering…' : 'Create character');
     panel.fill(
-      h('p.kit-intro', {}, 'Plain, honest gear to start with. You will find better within the hour — pick what you want to fight in. It shows on your figure as you choose.'),
+      h('p.kit-intro', {}, 'Plain, honest gear to start with. You will find better within the hour — pick the weapons you want to fight with. They show on your figure as you choose.'),
       h('div.kit-body', {},
-        S.kits.armour.length ? h('section.kit-group', { role: 'radiogroup', 'aria-label': 'Armour' }, h('h4', {}, 'Armour'), ...S.kits.armour.map(k => choice('armour', k, k.id === S.armour))) : null,
+        // owner 2026-10-22: no armour choice — a class starts in its own set, shown (with every piece) but not picked
+        S.kits.armour.length === 1 ? fixedArmour(S.kits.armour[0])
+          : S.kits.armour.length ? h('section.kit-group', { role: 'radiogroup', 'aria-label': 'Armour' }, h('h4', {}, 'Armour'), ...S.kits.armour.map(k => choice('armour', k, k.id === S.armour))) : null,
         S.kits.weapons.length ? h('section.kit-group', { role: 'radiogroup', 'aria-label': 'Weapons' }, h('h4', {}, 'Weapons'), ...S.kits.weapons.map(k => choice('weapons', k, k.id === S.weapons))) : null),
       h('p.note', { dataset: { k: 'kit-note' } }),
       h('div.row.kit-foot', {}, h('button.ghost.small', { type: 'button', dataset: { act: 'back' }, onclick: () => panel.close() }, '‹ Appearance'), h('span.grow'), go));

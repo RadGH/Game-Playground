@@ -300,6 +300,17 @@ const B = {
 
 /** Ids that burn (a flame sprite and a light, as the kit's campfire): js/client/site-view.js / vignette-props.js. */
 export const VHARL_FIRE = new Set(['vh_glass_kiln', 'vh_scoria_ring']);
+/**
+ * Where a burning prop's flames go, in the prop's own space (x, y above its base, z; turned with the prop), with the
+ * sprite size. A prop not listed gets decor.js's default — one flame low over its middle, which is right for an open
+ * ring of stones. The kiln needs its own (2026-10-22): the default sat inside its 1.9 m dome, so it never showed.
+ */
+export const VHARL_FIRE_AT = {
+  vh_glass_kiln: [
+    { x: 0, y: 0.45, z: 1.42, w: 0.75, h: 0.85, light: true },     // the glowing mouth, in front of its face
+    { x: 0, y: 2.5, z: 0, w: 0.45, h: 0.7 },                       // a lick of flame out of the chimney
+  ],
+};
 /** Every island prop id this file draws. */
 export const VHARL_PROP_IDS = Object.freeze(Object.keys(B));
 

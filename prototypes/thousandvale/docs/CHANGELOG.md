@@ -1647,3 +1647,13 @@ Owner: "stuttering … usually smooth exploring, and once I start getting target
 - **G** And the phone's Fish button never showed at all since play-test 11: `input/touch.js` decided "has a rod" from angling.js's old cast button, which is no longer put on the page, so the answer was always no. It asks `api.hasRod()` (angling's own `hasRod`) now.
 - **G** The quick wheel could close itself the moment it opened on a slow device: the tap that opens it also "clicks" the overlay, and only the first 400 ms were ignored. `input/radial.js` now closes only on a press that started on the open overlay.
 - **G** Also in phone-play.spec.js: 6 picks the pause menu's Feedback button by name (Y34 put "What do these buttons do?" first), 6b re-sends its made-up event (the server's own event list every 15 s takes an unknown one away) and picks its own card (a real world boss can be listed too), 5 waits up to 20 s for the perk answer. All 13 steps + phone-chat pass (8.8 min).
+
+## 2026-10-22 — glass kiln flame, cloth gloves, six class outfits
+- **The glass kiln's fire shows**: the flame sprite sat 1 m up in the middle of a 1.9 m dome. Burning props can now list
+  their own flame points (`vharl-props.js` `VHARL_FIRE_AT`, turned with the prop by `decor.js`): the kiln burns at its
+  mouth and out of its chimney. `tests/W/vharlen-dressing.test.js` checks no flame point is shut inside its model.
+- **Cloth Gloves have a visible model**: they drew bare-fingered wraps a shade off skin, which a robe's sleeve hid
+  completely. Now the whole hand is gloved (avatar-3d `g5_cloth_handwraps`).
+- **Tier-1 outfits** for the bard, demon hunter, scavenger, shadow dancer, swashbuckler and witch hunter (shared
+  `avatar-3d/data/class-outfits.json`).
+

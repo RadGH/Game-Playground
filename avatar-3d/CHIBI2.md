@@ -1187,3 +1187,30 @@ arms 0 frames (a strap's closing run hugs the flank, a pack strap goes under the
 forearms 1-2 frames in `cast` (~1 cm). Costs: a cross strap ~250 triangles, a pack strap pair ~350, footwraps +280, a
 cape yoke ~+60, the cowl ~580. Not fixed here: a v2 kilt still has no skirt bones, so a running thigh goes through it
 (2.5 is the fix); the g5 hip quiver / girdle straps live in `chibi2-gear5-offhand.js` (the weapons stream's file).
+
+## 2026-10-22 — resume-site bug report (Chibi 2.5 only; every v2 look is unchanged, `chibi25.test.js` holds them to their hashes)
+
+From `~/claude/resume/assets/chibi/BUG-REPORT-PROMPT.md`; tests in `tests/chibi25-site-report.test.js`.
+
+- **Armour follows the top's colour.** `plate`, `scale_plate` and `chainmail` sleeves, the plate high collar and the mail
+  rings were a fixed dark steel (`#536a73`). On 2.5 they follow `top.color` (plate/scale arm a shade under the chest, mail
+  the shirt itself); a `surcoat`'s mail takes `color2` (the coat colour is the cloth over it). The plate shoulder caps take
+  `top.color` with the rivet on `color2`, so a tabard and coloured shoulders can be worn together (`chibi2-body.js`, `mail`/`mailDeep`).
+- **Capelets clear any shoulder.** The fur mantle / shoulder cape / feather mantle were cut to the body's width only; the
+  2.5 shoulders slider, a broad/heavy shape and the arms slider put the top of the upper arm 10+ cm outside them (the
+  "glitchy orc"). `buildCape` widens the capelet by `sw` (shoulder bone + arm radius vs the cut); `sw` is 1 for a body
+  whose shoulder already fits (`chibi2-gear.js`).
+- **Giants**: `RACE25_TUNE` (chibi25-body.js) raises a giant's head x1.25 and shortens its neck; `LIMB_BULK` thickens
+  limbs longer than 1.2x a human's by the square root of the excess — arms (`armThick`), shins (`shinThick`, new) and feet
+  (`footK`, new), not thighs (they came through skirts). Only giant-sized frames move.
+- **Halflings**: head x0.88. **headSize** on any 2.5 body now spans 0.72x..1.28x (`HEAD25_RANGE`; v2 0.86x..1.14x).
+- Changed looks to recheck: anything wearing `plate` / `scale_plate` / `chainmail` / `surcoat` on 2.5; any 2.5 giant or
+  halfling; any 2.5 look with a non-default headSize; 2.5 capelets on wide-shouldered bodies (orcs, broad, heavy).
+
+**Cloth gloves** (`g5_cloth_handwraps`, now named "Cloth Gloves", linen `#cfc9b8`): the hand is covered (a mitt) with
+wraps over the knuckles; the bare-fingered wraps it was vanished inside a robe's sleeve. `gear-catalog.test.js` checks every
+glove model covers the fingers.
+
+**Class outfits**: bard, demon hunter, scavenger, shadow dancer, swashbuckler and witch hunter have tier-1 outfits in
+`data/class-outfits.json` (32 now), so they appear in the outfit pickers, the tier-2 gallery's tier-1 column, and Farhold
+/ Thousandvale dress those classes in them.

@@ -630,22 +630,31 @@ export function buildCape(a, c) {
   // CHIBI 2.5: the capelet stood exactly where the shoulder is, so the top of each upper arm came through it (3-6 cm,
   // more when the arms pump). On a 2.5 body it is cut a little wider over the shoulders and the cloth over each one
   // rides that arm part of the way, so it lifts with the shoulder instead of the shoulder coming through it.
-  const v25 = !!c.rig?.v25, cw = v25 ? 1.12 : 1;
-  const onShoulders = v25 ? { weigh: (x, y) => { const k = THREE.MathUtils.smoothstep(Math.abs(x), 0.1 * W, 0.26 * W) * (1 - THREE.MathUtils.smoothstep(y, 0.26 * T, 0.34 * T)) * 0.95; return [['chest', 1 - k], [x < 0 ? 'armL' : 'armR', k]]; } } : {};
+  // 2026-10-22 (resume-site bug report: "orc with big body sliders looks glitchy"): the capelet was cut to the body's
+  // WIDTH only, but the 2.5 shoulders slider, a broad/heavy shape and the arms slider move the arm out and thicken it —
+  // an orc at shoulders 0.8 + arms 0.85 had the top of each upper arm 10+ cm outside the mantle, so green shoulder
+  // came through the fur in patches. `sw` widens the whole capelet (and the arm-riding band) to clear the shoulder it
+  // has to cover; it is 1 for every body whose shoulder already fits (all default bodies), so those do not move.
+  const v25 = !!c.rig?.v25;
+  const shX = c.rig?.byName?.armR ? Math.abs(c.rig.byName.armR.position.x) : 0.255 * W;
+  const armR = 0.0675 * Math.pow(W, 0.65) * (c.rig?.armThick || 1);
+  const sw = v25 ? Math.max(1, (shX + armR + 0.012) / (0.336 * W)) : 1;
+  const cw = v25 ? 1.12 * sw : 1, cd = v25 ? 1.06 * (1 + (sw - 1) * 0.5) : 1;   // cd: front-to-back, half as much (the arm is round)
+  const onShoulders = v25 ? { weigh: (x, y) => { const k = THREE.MathUtils.smoothstep(Math.abs(x), 0.1 * W * sw, 0.26 * W * sw * (1 - (sw - 1) * 0.25)) * (1 - THREE.MathUtils.smoothstep(y, 0.26 * T, 0.34 * T)) * 0.95; return [['chest', 1 - k], [x < 0 ? 'armL' : 'armR', k]]; } } : {};
   const capelet = (low) => {
-    add(profile([[low * T, 0.30 * W * cw, 0.215 * W * (v25 ? 1.06 : 1), -0.01], [0.22 * T, 0.29 * W * cw, 0.205 * W * (v25 ? 1.06 : 1), -0.01], [0.30 * T, 0.26 * W * (v25 ? 1.08 : 1), 0.18 * W, -0.012], [0.335 * T, 0.15, 0.12, -0.02], [0.37 * T, 0.09, 0.08, -0.02]], 16), 'chest', cc, onShoulders);
-    add(profile([[low * T - 0.012, 0.305 * W * cw, 0.22 * W * (v25 ? 1.06 : 1), -0.01], [low * T + 0.01, 0.305 * W * cw, 0.22 * W * (v25 ? 1.06 : 1), -0.01]], 16), 'chest', tone(cc, 0.75), onShoulders);
+    add(profile([[low * T, 0.30 * W * cw, 0.215 * W * cd, -0.01], [0.22 * T, 0.29 * W * cw, 0.205 * W * cd, -0.01], [0.30 * T, 0.26 * W * (v25 ? 1.08 * sw : 1), 0.18 * W, -0.012], [0.335 * T, 0.15, 0.12, -0.02], [0.37 * T, 0.09, 0.08, -0.02]], 16), 'chest', cc, onShoulders);
+    add(profile([[low * T - 0.012, 0.305 * W * cw, 0.22 * W * cd, -0.01], [low * T + 0.01, 0.305 * W * cw, 0.22 * W * cd, -0.01]], 16), 'chest', tone(cc, 0.75), onShoulders);
   };
   if (id === 'shoulder_cape' || id === 'fur_mantle') {
     capelet(id === 'fur_mantle' ? 0.17 : 0.12);
-    if (id === 'fur_mantle') for (let k = 0; k < 14; k++) { const t = k / 14 * Math.PI * 2; add(new THREE.ConeGeometry(0.03, 0.08, 4), 'chest', tone(cc, 0.8), { position: [Math.sin(t) * 0.30 * W * cw, 0.15 * T, Math.cos(t) * 0.215 * W * (v25 ? 1.06 : 1) - 0.01], rotation: [Math.PI, 0, 0], ...onShoulders }); }
+    if (id === 'fur_mantle') for (let k = 0; k < 14; k++) { const t = k / 14 * Math.PI * 2; add(new THREE.ConeGeometry(0.03, 0.08, 4), 'chest', tone(cc, 0.8), { position: [Math.sin(t) * 0.30 * W * cw, 0.15 * T, Math.cos(t) * 0.215 * W * cd - 0.01], rotation: [Math.PI, 0, 0], ...onShoulders }); }
     return;
   }
   if (id === 'feather_mantle') {
     capelet(0.18);
     for (let k = 0; k < 10; k++) {
       const t = k / 10 * Math.PI * 2, sx = Math.sin(t), cz = Math.cos(t);
-      add(taperedCurve([[sx * 0.29 * W * cw, 0.20 * T, cz * 0.21 * W - 0.01], [sx * 0.32 * W * cw, 0.11 * T, cz * 0.235 * W - 0.01], [sx * 0.335 * W * cw, 0.03 * T, cz * 0.245 * W - 0.01]], [0.022, 0.03, 0.004], 3, 4), 'chest', k % 2 ? bone : lift(cc, 0.35), onShoulders);
+      add(taperedCurve([[sx * 0.29 * W * cw, 0.20 * T, cz * 0.21 * W * (v25 ? cd / 1.06 : 1) - 0.01], [sx * 0.32 * W * cw, 0.11 * T, cz * 0.235 * W * (v25 ? cd / 1.06 : 1) - 0.01], [sx * 0.335 * W * cw, 0.03 * T, cz * 0.245 * W * (v25 ? cd / 1.06 : 1) - 0.01]], [0.022, 0.03, 0.004], 3, 4), 'chest', k % 2 ? bone : lift(cc, 0.35), onShoulders);
     }
     return;
   }

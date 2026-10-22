@@ -16,7 +16,7 @@ import { buildSceneryTree as buildTree } from './tree-style.js';
 import { buildRock, buildProp } from '../../../../highdef-3d/js/kit/rocks.js';
 import { loadFoliageAtlas, makeSurface } from '../../../../highdef-3d/js/kit/textures.js';
 import { makeNoise2D, fbm } from '../../../../worldgen/js/noise.js';
-import { buildVharlProp } from './vharl-props.js';     // [W] Vharlen's own wilderness props (`vh_` ids)
+import { buildVharlProp, VHARL_FIRE_AT } from './vharl-props.js';     // [W] Vharlen's own wilderness props (`vh_` ids) + where a burning one's flames go
 
 const SPECIES = ['pine', 'fir', 'oak', 'birch'];
 const VARIANTS = 2;
@@ -207,7 +207,16 @@ export async function createDecor(hf, { placements = [], paths = [], seed = 7, a
     const y = hf.heightAt(x, z) - 0.02;
     if (!batches.has(id)) batches.set(id, []);
     batches.get(id).push({ x, y, z, yaw: yaw || 0 });
-    if (data.fire) {
+    if (data.fire && VHARL_FIRE_AT[id]) {
+      // a prop with its own flame points (vharl-props.js): each one turned with the prop's yaw
+      const c = Math.cos(yaw || 0), s = Math.sin(yaw || 0);
+      for (const f of VHARL_FIRE_AT[id]) {
+        const fx = x + f.x * c + f.z * s, fz = z - f.x * s + f.z * c;
+        const fl = new THREE.Sprite(flameMat); fl.scale.set(f.w, f.h, 1);
+        fl.position.set(fx, y + f.y, fz); group.add(fl); flames.push(fl);
+        if (f.light && lights.length < 3) lights.push(LIGHTS.add({ x: fx, y: y + f.y + 0.3, z: fz, color: '#ffae5c', intensity: 8, distance: 9, decay: 1.6, flicker: 0.14, owner: group }));
+      }
+    } else if (data.fire) {
       const top = id === 'torch_post' ? 2.05 : 0.45;
       const fl = new THREE.Sprite(flameMat); fl.scale.set(id === 'torch_post' ? 0.6 : 1.3, id === 'torch_post' ? 0.9 : 1.7, 1);
       fl.position.set(x, y + top + (id === 'torch_post' ? 0.25 : 0.55), z); group.add(fl); flames.push(fl);

@@ -220,3 +220,29 @@ test('loadGearCatalog reads the same file', async () => {
   assert.equal(c.rows.length, CATALOG.rows.length);
   assert.equal(c.byId('g5_wand_bell').form, 'cone');
 });
+
+test('every glove model covers the fingers, so it shows under a robe\'s sleeve (cloth gloves were bare-fingered wraps, 2026-10-22)', async () => {
+  const THREE = await import('three');
+  const { createChibi2Character } = await import('../js/chibi2.js');
+  const { G5_GLOVE_BUILDERS } = await import('../js/chibi2-gear5-armour.js');
+  // vertices on the hand bones, in the hand's own space, out at the fingers (below the knuckles, 9 cm+ down the hand)
+  const fingers = async look => {
+    const a = await createChibi2Character(look); let n = 0; const v = new THREE.Vector3();
+    a.group.traverse(o => {
+      if (!o.isSkinnedMesh) return;
+      const bones = o.skeleton.bones, g = o.geometry, si = g.attributes.skinIndex, sw = g.attributes.skinWeight, pos = g.attributes.position;
+      for (let i = 0; i < si.count; i++) {
+        const b = si.getX(i); if (sw.getX(i) < 0.5 || !/^hand[LR]$/.test(bones[b].name)) continue;
+        v.fromBufferAttribute(pos, i).applyMatrix4(o.bindMatrix).applyMatrix4(o.skeleton.boneInverses[b]);
+        if (v.y < -0.09) n++;
+      }
+    });
+    a.dispose(); return n;
+  };
+  const robe = { body: { race: 'human', skin: '#c87850', v: 2.5 }, top: { id: 'robe', color: '#3a3a7a' }, bottom: { id: 'pants', color: '#2a2a40' } };
+  const bare = await fingers(robe);
+  for (const id of Object.keys(G5_GLOVE_BUILDERS)) {
+    const n = await fingers({ ...robe, top: { ...robe.top, gloves: { id, color: '#9aa0b0', color2: '#4a4a6a' } } });
+    assert.ok(n > bare + 10, `${id}: the fingers are bare (${n - bare} glove vertices past the knuckles)`);
+  }
+});

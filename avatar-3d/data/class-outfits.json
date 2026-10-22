@@ -221,6 +221,66 @@
       "decor": { "id": "pauldrons", "color": "#c9d3e6" },
       "held": { "id": "sword", "color": "#c9d3e6" },
       "offhand": { "id": "none" }
+    },
+    "bard": {
+      "hat": { "id": "feather_cap", "color": "#a82a3a", "color2": "#2a8a8a" },
+      "top": { "id": "doublet", "color": "#a82a3a", "color2": "#e0c070" },
+      "bottom": { "id": "pants", "color": "#3a2a4a" },
+      "shoes": { "id": "boots", "color": "#4a2e1a" },
+      "cape": { "id": "scarf", "color": "#2a8a8a" },
+      "decor": { "id": "belt_pouches", "color": "#6a4a2a" },
+      "held": { "id": "lute", "color": "#8a5a2a" },
+      "offhand": { "id": "none" }
+    },
+    "demon_hunter": {
+      "hat": { "id": "hood_down", "color": "#3a2020", "color2": "#7a2a2a" },
+      "top": { "id": "strapped_leather", "color": "#4a2a1a", "color2": "#6a2a1a" },
+      "bottom": { "id": "leggings", "color": "#2a1a1a" },
+      "shoes": { "id": "knee_boots", "color": "#221a18" },
+      "cape": { "id": "scarf_cowl", "color": "#3a1414" },
+      "decor": { "id": "bone_charms", "color": "#d8cfb8" },
+      "held": { "id": "fh_sabre", "color": "#c0c0c8" },
+      "offhand": { "id": "fh_dagger", "color": "#c0c0c8" }
+    },
+    "scavenger": {
+      "hat": { "id": "goggles_up", "color": "#6a5a3a", "color2": "#c8a040" },
+      "top": { "id": "rags", "color": "#6a4a2a", "color2": "#8a6a4a" },
+      "bottom": { "id": "ragged", "color": "#4a3a2a" },
+      "shoes": { "id": "wraps", "color": "#6a5a40" },
+      "cape": { "id": "neckerchief", "color": "#7a5a30" },
+      "decor": { "id": "gear_pack", "color": "#6a5a3a" },
+      "held": { "id": "cleaver", "color": "#8a8a80" },
+      "offhand": { "id": "none" }
+    },
+    "shadow_dancer": {
+      "hat": { "id": "none" },
+      "top": { "id": "silks", "color": "#16161e", "color2": "#5a1a6a" },
+      "bottom": { "id": "leggings", "color": "#121216" },
+      "shoes": { "id": "slippers", "color": "#18181e" },
+      "cape": { "id": "scarf_cowl", "color": "#1e1428" },
+      "decor": { "id": "knife_rig", "color": "#3a2a4a" },
+      "held": { "id": "fh_daggers", "color": "#8a8f98" },
+      "offhand": { "id": "fh_dagger", "color": "#8a8f98" }
+    },
+    "swashbuckler": {
+      "hat": { "id": "bandana", "color": "#b02020" },
+      "top": { "id": "open_coat", "color": "#b02020", "color2": "#f0e0c0" },
+      "bottom": { "id": "breeches", "color": "#2a2a3a" },
+      "shoes": { "id": "knee_boots", "color": "#2a1a14" },
+      "cape": { "id": "none" },
+      "decor": { "id": "knife_rig", "color": "#5a3a1a" },
+      "held": { "id": "fh_rapier", "color": "#d0d0d8" },
+      "offhand": { "id": "none" }
+    },
+    "witch_hunter": {
+      "hat": { "id": "wide_brim", "color": "#151515", "color2": "#8a6a2a" },
+      "top": { "id": "trench", "color": "#1a1a1a", "color2": "#5a3a1a" },
+      "bottom": { "id": "pants", "color": "#222222" },
+      "shoes": { "id": "knee_boots", "color": "#151515" },
+      "cape": { "id": "none" },
+      "decor": { "id": "belt_lantern", "color": "#3a3a3a" },
+      "held": { "id": "crossbow", "color": "#6a4a2a" },
+      "offhand": { "id": "none" }
     }
   }
 }

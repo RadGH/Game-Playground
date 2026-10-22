@@ -617,12 +617,17 @@ export const G5_SHOE_BUILDERS = {
 
 // ================================================================ HANDS  (avatar.top.gloves)
 export const G5_GLOVE_BUILDERS = {
-  /** Cloth: handwraps — cloth wound round the palm and up the forearm, fingers bare, two ribbon ends at the wrist. */
+  /**
+   * Cloth: cloth gloves — the whole hand in soft cloth, wound over the knuckles in the trim colour, cloth turns up the
+   * forearm and two ribbon ends at the wrist. (2026-10-22: they were bare-fingered wraps a shade off skin, which a robe's
+   * sleeve hid completely — "nothing shows when they're worn". The hand itself is covered now, so they read under any sleeve.)
+   */
   g5_cloth_handwraps(a, c, gloves) {
     const [col, col2] = tint(gloves, G5_GLOVES.g5_cloth_handwraps), { add } = c, M = limbs(c), { HK, Fa, LW } = M;
     for (const [side, s] of SIDES) {
       const hand = 'hand' + side, elbow = 'elbow' + side;
-      for (let i = 0; i < 3; i++) add(new THREE.TorusGeometry(0.058 * HK, 0.014 * HK, 3, 8), hand, i % 2 ? tone(col, 0.86) : col, { position: [0, (-0.012 - i * 0.026) * HK, 0.003], rotation: [PI / 2 + 0.18 * (i % 2 ? 1 : -1), 0, 0.12], scale: [1.06, 1.0, 1] });
+      mitt(c, side, s, HK, col, { grow: 1.08 });
+      for (let i = 0; i < 3; i++) add(new THREE.TorusGeometry(0.064 * HK, 0.011 * HK, 3, 8), hand, i === 1 ? col2 : tone(col, 0.8), { position: [0, (-0.02 - i * 0.026) * HK, 0.003], rotation: [PI / 2 + 0.18 * (i % 2 ? 1 : -1), 0, 0.12], scale: [1.08, 1.0, 1] });
       // the forearm: overlapping turns of cloth, each a little askew, from the wrist to below the elbow
       // (under a bell sleeve only the turns at the wrist are drawn: the rest would poke through the cloth)
       for (let i = c.body?.top?.sleeve === 'bell' ? 5 : 0; i < 6; i++) {

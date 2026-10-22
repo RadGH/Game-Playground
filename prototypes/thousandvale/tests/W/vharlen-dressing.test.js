@@ -173,3 +173,24 @@ test('Torbor Downs carries none of the island\'s dressing, and the client draws 
   const vp = readFileSync(at('js/client/vignette-props.js'), 'utf8');
   assert.match(vp, /const DRAWN_WAYSIDE = \['vharlen-wayside'\];/, 'Torbor\'s wayside dressing stays undrawn, as it always was');
 });
+
+test('every burning island prop shows its flame: at least one flame point is not shut inside the model (the glass kiln\'s was)', { skip: !existsSync(at('../../avatar-3d/tests/three-register.mjs')) && 'the playground three loader is not here' }, () => {
+  const code = `
+    import * as THREE from 'three';
+    import { buildVharlProp, VHARL_FIRE, VHARL_FIRE_AT } from ${JSON.stringify(at('js/client/vharl-props.js'))};
+    const out = {};
+    for (const id of VHARL_FIRE) {
+      const mesh = new THREE.Mesh(buildVharlProp(id), new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }));
+      // decor.js's default point (one flame low over the middle) when the prop lists none of its own
+      const pts = VHARL_FIRE_AT[id] || [{ x: 0, y: 1.0, z: 0 }];
+      const dirs = [[1,0,0],[-1,0,0],[0,1,0],[0,0,1],[0,0,-1],[0.7,0.7,0],[-0.7,0.7,0],[0,0.7,0.7],[0,0.7,-0.7]];
+      const ray = new THREE.Raycaster();
+      // a point is shut in when every way out of it hits the model
+      out[id] = pts.map(p => dirs.filter(d => { ray.set(new THREE.Vector3(p.x, p.y, p.z), new THREE.Vector3(...d).normalize()); return ray.intersectObject(mesh).length === 0; }).length);
+    }
+    console.log(JSON.stringify(out));`;
+  const r = JSON.parse(execFileSync(process.execPath, ['--import', at('../../avatar-3d/tests/three-register.mjs'), '--input-type=module', '-e', code], { encoding: 'utf8' }));
+  for (const [id, open] of Object.entries(r)) assert.ok(open.every(n => n > 0), `${id}: a flame point with no way out of the model (${JSON.stringify(open)} open directions)`);
+  // decor.js places a listed prop's flames at its own points
+  assert.match(readFileSync(at('js/client/decor.js'), 'utf8'), /VHARL_FIRE_AT\[id\]/);
+});

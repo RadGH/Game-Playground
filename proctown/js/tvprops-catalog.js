@@ -12,7 +12,7 @@
 // A build may throw: the page catches it and shows the error on that tile.
 
 import * as THREE from 'three';
-import { buildVharlProp, VHARL_PROP_IDS, VHARL_FIRE } from '../../prototypes/thousandvale/js/client/vharl-props.js';
+import { buildVharlProp, VHARL_PROP_IDS, VHARL_FIRE, VHARL_FIRE_AT } from '../../prototypes/thousandvale/js/client/vharl-props.js';
 import { buildVharlPiece, vharlMaterial } from '../../prototypes/thousandvale/js/client/vharl-scatter-art.js';
 import { CLUTTER_IDS, placeModel, buildingTrim, doorClutter } from '../../prototypes/thousandvale/js/client/prop-clutter.js';
 import { NODE_PARTS, PART_GEOMETRY, TINT_PARTS, chunkPlacements, trunkRadius, oreChunkGeometry, stationGeometry, STATION_KINDS, toolGeometry, TOOL_KINDS, glintGeometry } from '../../prototypes/thousandvale/js/client/prof-models.js';
@@ -109,9 +109,10 @@ for (const id of VHARL_PROP_IDS) {
       surfaceVertexAttr(geo);
       const g = new THREE.Group();
       const m = new THREE.Mesh(geo, propMat()); m.castShadow = m.receiveShadow = true; g.add(m);
-      let fl = null;
-      if (VHARL_FIRE.has(id)) { fl = flameSprite(0.45 + 0.55); g.add(fl); }
-      return { object: g, update: fl ? (dt, t) => flicker(fl, t) : null };
+      // flames where decor.js puts them: the prop's own points (VHARL_FIRE_AT), else one low over the middle
+      const fls = [];
+      if (VHARL_FIRE.has(id)) for (const f of VHARL_FIRE_AT[id] || [{ x: 0, y: 1.0, z: 0, w: 1.3, h: 1.7 }]) { const fl = flameSprite(f.y, f.w, f.h); fl.position.x = f.x; fl.position.z = f.z; fl.userData.k = f.h / 1.7; g.add(fl); fls.push(fl); }
+      return { object: g, update: fls.length ? (dt, t) => fls.forEach(fl => flicker(fl, t, fl.userData.k)) : null };
     },
   });
 }

@@ -60,7 +60,7 @@ export const CHIBI25_BODY_OPTIONS = {
     shoulders: { min: 0, max: 1, default: 0.5 },
     legs: { min: 0, max: 1, default: 0.5, note: 'leg length against the torso' },
     arms: { min: 0, max: 1, default: 0.5, note: 'arm thickness' },
-    headSize: { min: 0, max: 1, default: 0.5 },
+    headSize: { min: 0, max: 1, default: 0.5, note: '2.5 maps it over 0.72x..1.28x (v2: 0.86x..1.14x; 0.5 is the same); halflings and giants carry a 2.5 head tune (chibi25-body.js RACE25_TUNE)' },
   },
   raceTails: RACE_TAILS,
   /** The new clothes (any body may wear them; long hems want a 2.5 body). */

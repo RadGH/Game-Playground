@@ -179,6 +179,13 @@ export function buildBody(a, rig, c) {
   if (rig.skirt) rig.skirt.legPad = (bot.armor ? 0.025 : bot.loose ? 0.022 : 0) + (shoe.foot === 'heavy' ? 0.015 : 0);
   const shirt = top.shirt ? cloth2 : cloth;           // what the sleeves are made of under a vest or jerkin
   const torsoColour = top.bare ? skin : top.under ? cloth2 : cloth;
+  // 2.5 (2026-10-22, resume-site bug report: "paladin plate: shoulders and upper arms render gray while the rest of the
+  // armor is white"): armoured sleeves, a plate collar and a mail shirt's rings were a fixed dark steel whatever the
+  // top's colour. On a 2.5 body they follow the top — a plate / scale arm a shade under the chest, a mail shirt's
+  // sleeves the shirt itself, and a surcoat's mail (the coat's colour is the cloth over it) `color2` when given.
+  // v2 keeps the steel: its looks are hashed.
+  const mail = !rig.v25 ? darkSteel : a.top.id === 'surcoat' ? (a.top.color2 || darkSteel) : top.armor === 'mail' ? (cloth || darkSteel) : (cloth ? shade(cloth, -0.08) : darkSteel);
+  const mailDeep = !rig.v25 ? darkSteel : shade(mail, -0.22);
   // 2.5: a breastplate or a scale shell stands off the chest, so the arms are held that much wider in every clip (the
   // upper arm went 3-6 cm into the plate on every frame)
   if (rig.v25) rig.armSpread = top.armor === 'plate' || top.armor === 'scale' ? 0.12 : top.armor === 'mail' ? 0.03 : 0;
@@ -287,7 +294,7 @@ export function buildBody(a, rig, c) {
     add(profile([[0.14 * T, 0.002, 0.002, chestZ(0, 0.14 * T)], [0.2 * T, 0.03 * W, 0.006, chestZ(0, 0.2 * T) - 0.003], [0.27 * T, 0.055 * W, 0.006, chestZ(0, 0.27 * T) - 0.004]], 8), 'chest', top.shirt ? shirt : skin);
     if (top.collar === 'laced') for (let i = 0; i < 3; i++) onChest([[-0.022, (0.25 - i * 0.035) * T], [0.022, (0.23 - i * 0.035) * T]], 0.004, lining, { lift: 0.008 });
   } else if (top.collar === 'high') {
-    add(profile([[0.27 * T, neckR + 0.03, neckR + 0.024], [0.345 * T, neckR + 0.022, neckR + 0.018]], 12), 'chest', top.armor ? darkSteel : lining, { metal: !!top.armor });
+    add(profile([[0.27 * T, neckR + 0.03, neckR + 0.024], [0.345 * T, neckR + 0.022, neckR + 0.018]], 12), 'chest', top.armor ? mailDeep : lining, { metal: !!top.armor });
   } else if (top.collar === 'crossed') {
     for (const s of [-1, 1]) onChest([[s * 0.09 * W, neckTop], [-s * 0.035 * W, 0.12 * T]], 0.02, cloth2);
   } else if (FX && top.collar === 'hooded') {
@@ -370,7 +377,7 @@ export function buildBody(a, rig, c) {
     bandChest(-0.1 * T, 0.03, a.top.color2 || trim, 0.04, true);
   }
   if (top.armor === 'mail') {
-    for (let i = 0; i < 6; i++) { const y = (0.2 - i * 0.055) * T; bandChest(y, 0.008, darkSteel, 0.004, true); }
+    for (let i = 0; i < 6; i++) { const y = (0.2 - i * 0.055) * T; bandChest(y, 0.008, mailDeep, 0.004, true); }
   }
   if (top.armor === 'scale') {
     for (let row = 0; row < 5; row++) for (let k = -3; k <= 3; k++) {
@@ -387,7 +394,7 @@ export function buildBody(a, rig, c) {
     [(y0 + y1) / 2, ringAt(hipsRings, -0.05)[1] + 0.02 + flare * 0.4, ringAt(hipsRings, -0.05)[2] + 0.025 + flare * 0.35, extraZ * 0.5],
     [y1, ringAt(hipsRings, -0.08)[1] + 0.03 + flare, ringAt(hipsRings, -0.08)[2] + 0.03 + flare * 0.8, extraZ],
   ];
-  const hem = top.hem, hemColour = top.armor === 'mail' ? darkSteel : cloth;
+  const hem = top.hem, hemColour = top.armor === 'mail' ? mail : cloth;
   if (hem === 'short' || hem === 'peplum' || hem === 'mail') {
     add(profile(hemRings(0.06, hem === 'peplum' ? -0.1 : -0.17, hem === 'peplum' ? 0.05 : 0.035), 16), 'hips', hemColour, { metal: hem === 'mail' });
     if (hem !== 'mail') bandHips(-0.165 * (hem === 'peplum' ? 0.6 : 1), 0.014, lining, 0.03 + 0.035);
@@ -491,8 +498,9 @@ export function buildBody(a, rig, c) {
   // ---------------------------------------------------------------- arms
   const Ua = 0.21 * T * A, Fa = 0.205 * T * A;
   const sleeveLong = ['long', 'mail', 'bell', 'puff'].includes(top.sleeve);
-  const upperColour = top.sleeve === 'none' ? skin : top.sleeve === 'mail' ? darkSteel : shirt;
-  const foreColour = sleeveLong ? (top.sleeve === 'mail' ? darkSteel : shirt) : skin;
+  // (armoured sleeves: `mail`, see the torso)
+  const upperColour = top.sleeve === 'none' ? skin : top.sleeve === 'mail' ? mail : shirt;
+  const foreColour = sleeveLong ? (top.sleeve === 'mail' ? mail : shirt) : skin;
   const armT = R * 0.016;
   for (const [side, s] of [['L', -1], ['R', 1]]) {
     const arm = 'arm' + side, elbow = 'elbow' + side, hand = 'hand' + side;
@@ -533,9 +541,12 @@ export function buildBody(a, rig, c) {
     ellipsoid(hand, shade(skin, -0.05), [-s * 0.046 * HK, -0.013 * HK, 0.025 * HK], [0.03 * HK, 0.043 * HK, 0.034 * HK]);
     for (let i = 0; i < 2; i++) strip(hand, [[-0.033 * HK, (-0.043 - i * 0.018) * HK, 0.054 * HK], [0, (-0.048 - i * 0.018) * HK, 0.061 * HK], [0.027 * HK, (-0.043 - i * 0.018) * HK, 0.054 * HK]], 0.0026, shade(skin, -0.26));
     if (top.armor === 'plate' && a.decor?.id !== 'pauldrons') {
-      ellipsoid(arm, darkSteel, [s * 0.015, 0.008, 0], [0.132, 0.074, 0.117], { metal: true });
-      ellipsoid(arm, steel, [s * 0.025, 0.038, 0], [0.126, 0.066, 0.112], { metal: true });
-      ellipsoid(arm, trim, [s * 0.023, 0.053, 0.102], [0.015, 0.016, 0.008], { metal: true });
+      // 2.5: the shoulder caps follow the top too (lower plate a shade darker, the rivet on `color2`), so a tabard and
+      // coloured shoulders can be worn together without spending the decor slot on pauldrons
+      const capLow = rig.v25 && cloth ? shade(cloth, -0.18) : darkSteel, capTop = rig.v25 && cloth ? cloth : steel, capRivet = rig.v25 ? (a.top.color2 || trim) : trim;
+      ellipsoid(arm, capLow, [s * 0.015, 0.008, 0], [0.132, 0.074, 0.117], { metal: true });
+      ellipsoid(arm, capTop, [s * 0.025, 0.038, 0], [0.126, 0.066, 0.112], { metal: true });
+      ellipsoid(arm, capRivet, [s * 0.023, 0.053, 0.102], [0.015, 0.016, 0.008], { metal: true });
     }
     if (top.armor === 'scale' && a.decor?.id !== 'pauldrons') ellipsoid(arm, a.top.color, [s * 0.02, 0.03, 0], [0.12, 0.065, 0.11], { metal: true });
     if (a.top.id === 'fur_tunic') ellipsoid(arm, a.top.color2 || '#d8c8a8', [s * 0.01, 0.03, 0], [0.1, 0.06, 0.1]);
@@ -558,7 +569,8 @@ export function buildBody(a, rig, c) {
       add(profile(thigh.filter(r => r[0] < thighCut + 0.02), 10), leg, skin, { bend: kneeBend });
     }
     // shin on the knee bone: calf, then ankle
-    const shin = lwl([[0.012, 0.079 + calfT + loose * 0.8, 0.081 + calfT + loose * 0.8], [-L * 0.12, 0.081 + calfT + loose * 0.8, 0.087 + calfT + loose * 0.8], [-L * 0.3, 0.068 + calfT * 0.6 + loose * 0.7, 0.072 + calfT * 0.6 + loose * 0.7], [-L * 0.46, 0.058 + loose * 0.5, 0.062 + loose * 0.5], [-L * 0.5, 0.056, 0.06]]);
+    const lws = rr => rr.map(([y, x, z, o]) => [y, x * LW * (rig.shinThick || rig.legThick || 1), z * LW * (rig.shinThick || rig.legThick || 1), o]);
+    const shin = lws([[0.012, 0.079 + calfT + loose * 0.8, 0.081 + calfT + loose * 0.8], [-L * 0.12, 0.081 + calfT + loose * 0.8, 0.087 + calfT + loose * 0.8], [-L * 0.3, 0.068 + calfT * 0.6 + loose * 0.7, 0.072 + calfT * 0.6 + loose * 0.7], [-L * 0.46, 0.058 + loose * 0.5, 0.062 + loose * 0.5], [-L * 0.5, 0.056, 0.06]]);
     const shinCloth = legCloth >= 1 ? pants : legCloth > 0.5 ? (bot.stockings ? '#e8e2d2' : null) : null;
     if (legCloth > 0.5 && legCloth < 1 && !bot.stockings) {
       // cropped: cloth to `legCloth` of the shin, skin under it
@@ -601,7 +613,7 @@ export function buildBody(a, rig, c) {
     const fk = shoe.foot;
     const footColour = fk === 'bare' ? skin : fk === 'hoof' ? shade(shoesC, -0.4) : fk === 'wrap' ? skin : shoesC;
     const footScale = fk === 'bare' ? [0.1, 0.055, 0.145] : fk === 'heavy' ? [0.12, 0.075, 0.17] : fk === 'slipper' ? [0.108, 0.052, 0.145] : fk === 'hoof' ? [0.09, 0.08, 0.1] : fk === 'pointed' ? [0.095, 0.058, 0.17] : fk === 'shoe' ? [0.1, 0.058, 0.152] : [0.103, 0.062, 0.159];
-    ellipsoid(foot, footColour, [0, -0.005, fk === 'hoof' ? 0.02 : 0.047], footScale.map(v => v * (0.85 + LW * 0.15)));
+    ellipsoid(foot, footColour, [0, -0.005, fk === 'hoof' ? 0.02 : 0.047], footScale.map(v => v * (0.85 + LW * 0.15) * (rig.footK || 1)));
     if (fk === 'pointed') add(taperedCurve([[0, 0.0, 0.16], [0, 0.02, 0.23], [0, 0.07, 0.25]], [0.04, 0.02, 0.004], 5, 5), foot, shoesC);
     if (fk === 'hoof') add(profile([[-0.06, 0.08, 0.08], [0.02, 0.07, 0.07]], 8), foot, shade(shoesC, -0.55), { position: [0, 0, 0.02] });
     if (fk === 'sandal') {
@@ -612,7 +624,7 @@ export function buildBody(a, rig, c) {
     }
     if (fk === 'wrap') {
       // B7: the foot turns lie ON the foot (the same ellipsoid as above) and slant, the way a wrap crosses the instep
-      const k = 0.85 + LW * 0.15, fr = footScale.map(v => v * k), fc = [0, -0.005, 0.047];
+      const k = (0.85 + LW * 0.15) * (rig.footK || 1), fr = footScale.map(v => v * k), fc = [0, -0.005, 0.047];
       for (const [zz, tilt] of [[-0.02, 0.035], [0.04, -0.035], [0.1, 0.03]]) {
         const pts = [];
         for (let j = 0; j <= 8; j++) {

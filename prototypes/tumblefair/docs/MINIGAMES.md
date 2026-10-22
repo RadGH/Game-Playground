@@ -86,6 +86,26 @@ triangle counts small (instanced meshes for anything repeated); no scrolling box
 view behind it in Chromium — let the whole `ui` scroll instead); every tap target ≥ 44 px; colour is never the only
 cue (seat shapes, labels).
 
+## Seasons (reskins and holiday games)
+
+`js/shared/seasons.js` is the one table of holidays (Halloween = October 1-31; the host's Holidays option can force one
+on or turn them off). The room creates every game with `season` (null or an id such as `'halloween'`) and the browser
+gets the same value as `ctx.season`; the game's `ui` element also carries the class `season-<id>`.
+
+- **Reskin a regular game** (looks only): in `view.js`, `const HW = ctx.season === 'halloween'` and pick colours,
+  geometry, words and sounds from it; per-game CSS goes under `.game-<id>.season-halloween`. The plain game must stay
+  exactly the same when the season is null. Only touch `sim.js` if something the browser is SENT must change (Memory
+  Heist swaps its treasure names: `create({ ..., season })` picks the list, and the rules and rng calls stay identical).
+  Add the game to `tests/halloween-reskins.test.js` (plays it with and without the season and requires the same result).
+- **Shared kit**: `js/client/halloween.js` — `pumpkinGeo`, `stemGeo`, `ghostGeo`, `witchHatGeo`, `faceTexture` (a carved,
+  smiling jack-o'-lantern face), `glowTexture`, `spriteTexture('bat' | 'ghost' | 'candy')`, `PALETTE`.
+- **Arena dressing** (automatic): play.js calls `dressArena` for every arena game while it is Halloween — dusk light
+  (dimmed, never switched off, restored after), a purple sky, mist outside the play area, jack-o'-lanterns, bats and
+  ghosts. If the defaults land on your scenery, return `halloween: { spots: [[x, y, z], …], ghosts: [[x, y, z], …],
+  y: groundHeight, mist: false }` from `createView`, or `halloween: false` to dress the arena yourself.
+- **A holiday-only game**: `meta.season: 'halloween'` (it is offered only while the season is on) and `tags: [..., 'holiday']`.
+- Family friendly: spooky-cute, never scary (round faces, smiles, no teeth or blood).
+
 ## Testing
 
 - `tests/room.test.js` plays whole matches with bots for every game in the registry — a UI game needs a bot entry

@@ -1,9 +1,9 @@
 // Little looping tunes and a few made-up sounds for minigames, synthesized with Web Audio (no files). Any game view
 // may use it; nothing else depends on it.
 //   const tunes = createTunes();
-//   tunes.start('jig')        loop a tune ('jig' = fiddle reel, 'sing' = a sing-song tiger lullaby, 'boogie' = fair organ)
+//   tunes.start('jig')        loop a tune ('jig' = fiddle reel, 'sing' = a sing-song tiger lullaby, 'boogie' = fair organ, 'spooky' = Halloween creep)
 //   tunes.stop(true)          stop (true = with a record scratch)       tunes.mute(on)  silence it without losing the beat
-//   tunes.fx('roar' | 'scratch' | 'tick' | 'boing' | 'honk' | 'pop' | 'whistle', pitch?)
+//   tunes.fx('roar' | 'scratch' | 'tick' | 'boing' | 'honk' | 'pop' | 'whistle' | 'ding' | 'knock' | 'boo' | 'slime' | 'chime', pitch?)
 //   tunes.dispose()           call from the view's dispose()
 // Browsers only play sound after a tap; by the time a minigame starts the player has tapped plenty. If the audio
 // context cannot run, every call is silently nothing — a sound must never break a game.
@@ -20,6 +20,12 @@ const TUNES = {
     [2, 1], [5, .5], [5, .5], [9, 1], [7, 1], [5, .5], [4, .5], [2, .5], [-1, .5], [0, 2]] },
   boogie: { bpm: 132, key: 523, wave: 'square', cut: 1800, vib: 0, bass: [-24, -20, -17, -15], notes: [
     [0, .5], [4, .5], [7, .5], [9, .5], [10, .5], [9, .5], [7, .5], [4, .5], [5, .5], [9, .5], [12, .5], [14, .5], [15, .5], [14, .5], [12, .5], [9, .5]] },
+  // spooky-cute (Halloween games): a tiptoeing minor-key creep with a little giggle at the end of each line
+  spooky: { bpm: 126, key: 440, wave: 'triangle', cut: 2400, vib: 7, bass: [-24, -17, -21, -16], notes: [
+    [0, .5], [3, .5], [7, .5], [3, .5], [6, .5], [3, .5], [0, 1],
+    [-2, .5], [2, .5], [5, .5], [2, .5], [3, .5], [2, .5], [-1, 1],
+    [0, .5], [3, .5], [7, .5], [12, .5], [11, .5], [7, .5], [8, .5], [7, .5],
+    [3, .5], [6, .5], [5, .5], [2, .5], [0, .25], [12, .25], [0, .25], [12, .25], [null, 1]] },
 };
 
 export function createTunes({ volume = 0.32 } = {}) {
@@ -92,6 +98,10 @@ export function createTunes({ volume = 0.32 } = {}) {
         else if (name === 'honk') { tone(at, 'square', 330 * pitch, 320 * pitch, 0.18, 0.18, master, 1400); tone(at, 'square', 415 * pitch, 405 * pitch, 0.14, 0.18, master, 1400); }
         else if (name === 'pop') { noise(at, 'lowpass', 3000, 300, 0.8, 0.9, 0.35); tone(at, 'sine', 160, 50, 0.7, 0.3); }
         else if (name === 'whistle') { tone(at, 'sine', 1400, 2300, 0.18, 0.18); tone(at + 0.2, 'sine', 2300, 1500, 0.15, 0.22); }
+        else if (name === 'knock') { for (const k of [0, 0.16]) { tone(at + k, 'sine', 190 * pitch, 90 * pitch, 0.7, 0.09); noise(at + k, 'lowpass', 900, 200, 1, 0.5, 0.06); } }
+        else if (name === 'boo') { tone(at, 'sine', 300 * pitch, 520 * pitch, 0.3, 0.35, master, 0, 9); tone(at + 0.3, 'sine', 520 * pitch, 260 * pitch, 0.28, 0.5, master, 0, 9); }
+        else if (name === 'slime') { tone(at, 'sine', 420 * pitch, 90 * pitch, 0.45, 0.32); noise(at + 0.05, 'lowpass', 700, 120, 3, 0.5, 0.3); }
+        else if (name === 'chime') { tone(at, 'sine', 1568 * pitch, 1568 * pitch, 0.18, 0.25); tone(at + 0.07, 'sine', 2093 * pitch, 2093 * pitch, 0.16, 0.35); }
         else if (name === 'ding') { tone(at, 'sine', 1320 * pitch, 1320 * pitch, 0.35, 1.2); tone(at, 'sine', 3300 * pitch, 3300 * pitch, 0.08, 0.6); }
       } catch { /* never break the game for a sound */ }
     },

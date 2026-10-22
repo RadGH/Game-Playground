@@ -4,14 +4,15 @@
 // by one as a big counter climbs (fast at first, slowing near the end), while each player's guess waits on the
 // guess-o-meter and pops when the counter passes it.
 import { esc, chip } from '../../client/gamehud.js';
-import { svg, NAMES } from './jar-art.js';
+import { svg, NAMES as PLAIN_NAMES, NAMES_HW, MANY_HW } from './jar-art.js';
 
 const COUNT_MS = 3600;
 
 export function createView(ctx) {
   const { ui, players, me, init } = ctx, watching = me == null;
+  const HW = ctx.season === 'halloween', NAMES = HW ? NAMES_HW : PLAIN_NAMES;      // Halloween: candy corn, eyeballs, a cauldron, ghosts
   ui.innerHTML = `
-    <div class="jj-top"><span class="jj-title">Jellybean Jar</span><span class="jj-round"></span><span class="clock"><b>--</b></span></div>
+    <div class="jj-top"><span class="jj-title">${HW ? 'Candy Jar' : 'Jellybean Jar'}</span><span class="jj-round"></span><span class="clock"><b>--</b></span></div>
     <div class="jj-main">
       <div class="jj-stage"><div class="jj-pic"></div><div class="jj-count" aria-live="polite"><b>0</b><span></span></div></div>
       <div class="jj-side">
@@ -44,7 +45,7 @@ export function createView(ctx) {
   });
 
   function drawPicture(g) {
-    $('.jj-pic').innerHTML = svg(g.thing, g.n, g.look, g.fill);
+    $('.jj-pic').innerHTML = svg(g.thing, g.n, g.look, g.fill, ctx.season);
     items = [...ui.querySelectorAll('.jj-it')];
     $('.jj-count span').textContent = NAMES[g.thing];
     $('.jj-ask').innerHTML = `How many <b>${esc(NAMES[g.thing])}</b>?`;
@@ -95,7 +96,7 @@ export function createView(ctx) {
       const r = g.reveal, nm = pid => players.find(p => p.pid === pid)?.name || '?';
       if (r.exact.length) return `Spot on! ${r.exact.map(nm).join(' and ')} guessed exactly ${r.n}!`;
       if (r.closest.length) return `${r.closest.map(nm).join(' and ')} ${r.closest.length > 1 ? 'were' : 'was'} closest! There were ${r.n}.`;
-      return `There were ${r.n} ${NAMES[g.thing].split(' ')[0]}.`;
+      return `There were ${r.n} ${HW ? MANY_HW[g.thing] : NAMES[g.thing].split(' ')[0]}.`;
     }
     if (watching) return `${g.in.length} of ${players.length} locked in`;
     return ok ? 'Locked in. You can still change it.' : 'Type your guess, then press OK.';

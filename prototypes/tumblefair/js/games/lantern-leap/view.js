@@ -6,17 +6,18 @@
 import { RULES, bonusFor } from './sim.js';
 import { scoreBar, floatText, h } from '../../client/gamehud.js';
 import { F } from '../../shared/arena.js';
+import { pumpkinGeo, spriteTexture } from '../../client/halloween.js';
 
 const MAXP = 48, MAXC = 12, WY = -0.16;      // water surface height
 export function createView(ctx) {
   const { THREE, group, stage, meta } = ctx;
-  const { hw, hd } = meta.arena, { dock, bank } = ctx.init;
+  const { hw, hd } = meta.arena, { dock, bank } = ctx.init, HW = ctx.season === 'halloween';     // Halloween: a moonlit pond, jack-o'-lanterns on the pads, bats for fireflies
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), v = new THREE.Vector3(), sc = new THREE.Vector3(), e3 = new THREE.Euler(), col = new THREE.Color();
   const std = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.8, ...extra });
   // ---- water and surroundings
-  const grass = new THREE.Mesh(new THREE.PlaneGeometry(90, 70).rotateX(-Math.PI / 2), std('#62c25a')); grass.position.y = -0.45; grass.receiveShadow = true; group.add(grass);      // below the water, so the pond shows
-  const water = new THREE.Mesh(new THREE.PlaneGeometry(hw * 2 + 6, dock - bank).rotateX(-Math.PI / 2), std('#2fb5c8', { roughness: 0.12, metalness: 0.2 })); water.position.set(0, WY, (dock + bank) / 2); water.receiveShadow = true; group.add(water);
-  const deep = new THREE.Mesh(new THREE.PlaneGeometry(hw * 2 + 6, (dock - bank) * 0.55).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#1d8fb0', transparent: true, opacity: 0.35, depthWrite: false })); deep.position.set(0, WY + 0.005, (dock + bank) / 2); group.add(deep);
+  const grass = new THREE.Mesh(new THREE.PlaneGeometry(90, 70).rotateX(-Math.PI / 2), std(HW ? '#2f5236' : '#62c25a')); grass.position.y = -0.45; grass.receiveShadow = true; group.add(grass);      // below the water, so the pond shows
+  const water = new THREE.Mesh(new THREE.PlaneGeometry(hw * 2 + 6, dock - bank).rotateX(-Math.PI / 2), std(HW ? '#2b6f86' : '#2fb5c8', { roughness: 0.12, metalness: 0.2 })); water.position.set(0, WY, (dock + bank) / 2); water.receiveShadow = true; group.add(water);
+  const deep = new THREE.Mesh(new THREE.PlaneGeometry(hw * 2 + 6, (dock - bank) * 0.55).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: HW ? '#2a2860' : '#1d8fb0', transparent: true, opacity: 0.35, depthWrite: false })); deep.position.set(0, WY + 0.005, (dock + bank) / 2); group.add(deep);
   // sparkles on the water
   const SP = 40, sparkle = new THREE.InstancedMesh(new THREE.PlaneGeometry(0.35, 0.06).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#e9fbff', transparent: true, opacity: 0.7, depthWrite: false }), SP);
   group.add(sparkle);
@@ -28,24 +29,24 @@ export function createView(ctx) {
   for (let i = 0; i < NPOST; i++) { m4.makeTranslation(-hw + i * hw * 2 / (NPOST - 1), -0.2, dock + 0.05); dposts.setMatrixAt(i, m4); }
   dposts.castShadow = true; group.add(dposts);
   // the far bank: grass, reeds, cattails, lantern posts
-  const bankM = new THREE.Mesh(new THREE.BoxGeometry(hw * 2 + 6, 0.3, -bank + 3), std('#7fd06a')); bankM.position.set(0, -0.15, bank - (-bank + 3) / 2); bankM.receiveShadow = true; group.add(bankM);
+  const bankM = new THREE.Mesh(new THREE.BoxGeometry(hw * 2 + 6, 0.3, -bank + 3), std(HW ? '#4a7246' : '#7fd06a')); bankM.position.set(0, -0.15, bank - (-bank + 3) / 2); bankM.receiveShadow = true; group.add(bankM);
   const RE = 60, reeds = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.03, 0.05, 1.2, 4).translate(0, 0.6, 0), std('#3f9a3a'), RE), tails = new THREE.InstancedMesh(new THREE.CapsuleGeometry(0.07, 0.22, 2, 6), std('#7a4a26'), RE / 3);
   for (let i = 0; i < RE; i++) { const x = -hw - 2 + ((i * 0.618) % 1) * (hw * 2 + 4), z = bank - 0.35 - (i % 4) * 0.5, s = 0.7 + (i % 5) * 0.15; m4.compose(v.set(x, 0, z), q.setFromEuler(e3.set((i % 3 - 1) * 0.12, 0, (i % 4 - 1.5) * 0.08)), sc.set(1, s, 1)); reeds.setMatrixAt(i, m4); if (i % 3 === 0) { m4.compose(v.set(x, 1.2 * s, z), q.identity(), sc.setScalar(1)); tails.setMatrixAt(i / 3, m4); } }
   group.add(reeds, tails);
-  const LP = 5, lposts = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.07, 0.07, 2.2, 6), std('#5b3a22'), LP), lheads = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.22, 0.22, 0.4, 10), std('#ffb347', { emissive: '#ff8a1f', emissiveIntensity: 0.9 }), LP);
+  const LP = 5, lposts = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.07, 0.07, 2.2, 6), std('#5b3a22'), LP), lheads = new THREE.InstancedMesh(HW ? pumpkinGeo(THREE, 0.32) : new THREE.CylinderGeometry(0.22, 0.22, 0.4, 10), std(HW ? '#ff8a1a' : '#ffb347', { emissive: '#ff8a1f', emissiveIntensity: 0.9 }), LP);
   for (let i = 0; i < LP; i++) { const x = -hw + 1 + i * (hw * 2 - 2) / (LP - 1); m4.makeTranslation(x, 1.1, bank - 1.6); lposts.setMatrixAt(i, m4); m4.makeTranslation(x, 2.3, bank - 1.6); lheads.setMatrixAt(i, m4); }
   lposts.castShadow = true; group.add(lposts, lheads);
   // side banks so the pond reads as a pond
-  for (const sx of [-1, 1]) { const sb = new THREE.Mesh(new THREE.BoxGeometry(5.5, 1.2, dock - bank + 0.1), std("#74c862")); sb.position.set(sx * (hw + 2.75 + 0.3), -0.1, (dock + bank) / 2); sb.receiveShadow = true; sb.castShadow = true; group.add(sb); }      // raised a little: pads float in and out from under them
+  for (const sx of [-1, 1]) { const sb = new THREE.Mesh(new THREE.BoxGeometry(5.5, 1.2, dock - bank + 0.1), std(HW ? "#43703f" : "#74c862")); sb.position.set(sx * (hw + 2.75 + 0.3), -0.1, (dock + bank) / 2); sb.receiveShadow = true; sb.castShadow = true; group.add(sb); }      // raised a little: pads float in and out from under them
   // ---- pads, lanterns, coins, fireflies
   const padGeo = new THREE.CylinderGeometry(1, 1, 0.1, 28, 1, false, 0.35, Math.PI * 2 - 0.7).translate(0, -0.05, 0);
   const pads = new THREE.InstancedMesh(padGeo, std('#ffffff', { roughness: 0.55 }), MAXP); pads.setColorAt(0, new THREE.Color('#3fbf4f')); pads.count = 0; pads.receiveShadow = true; pads.castShadow = true; group.add(pads);
   const veins = new THREE.InstancedMesh(new THREE.RingGeometry(0.42, 0.47, 24).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#2f8f3a', transparent: true, opacity: 0.5, depthWrite: false }), MAXP); veins.count = 0; group.add(veins);
-  const lanterns = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.19, 0.19, 0.36, 10), std('#ff8a3a', { emissive: '#ff7a1a', emissiveIntensity: 0.8, roughness: 0.6 }), MAXP); lanterns.count = 0; group.add(lanterns);
-  const caps = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.06, 0.2, 0.12, 10), std('#ffcf4a', { roughness: 0.4 }), MAXP); caps.count = 0; group.add(caps);
-  const coinM = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.42, 0.42, 0.11, 20).rotateX(Math.PI / 2), std('#ffd23f', { roughness: 0.25, metalness: 0.6, emissive: '#b07a00', emissiveIntensity: 0.35 }), MAXC); coinM.count = 0; coinM.castShadow = true; group.add(coinM);
-  const flyM = new THREE.InstancedMesh(new THREE.SphereGeometry(0.2, 12, 8), new THREE.MeshBasicMaterial({ color: '#d9ff4d' }), MAXC); flyM.count = 0; group.add(flyM);
-  const haloM = new THREE.InstancedMesh(new THREE.SphereGeometry(0.5, 12, 8), new THREE.MeshBasicMaterial({ color: '#eaff7a', transparent: true, opacity: 0.28, depthWrite: false }), MAXC); haloM.count = 0; group.add(haloM);
+  const lanterns = new THREE.InstancedMesh(HW ? pumpkinGeo(THREE, 0.24) : new THREE.CylinderGeometry(0.19, 0.19, 0.36, 10), std(HW ? '#ff7a14' : '#ff8a3a', { emissive: '#ff7a1a', emissiveIntensity: 0.8, roughness: 0.6 }), MAXP); lanterns.count = 0; group.add(lanterns);
+  const caps = new THREE.InstancedMesh(HW ? new THREE.CylinderGeometry(0.03, 0.045, 0.14, 6).translate(0, -0.1, 0) : new THREE.CylinderGeometry(0.06, 0.2, 0.12, 10), std(HW ? '#4c7a2a' : '#ffcf4a', { roughness: 0.4 }), MAXP); caps.count = 0; group.add(caps);
+  const coinM = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.42, 0.42, 0.11, 20).rotateX(Math.PI / 2), std('#ffd23f', { roughness: 0.25, metalness: 0.6, emissive: HW ? '#e0a000' : '#b07a00', emissiveIntensity: HW ? 0.7 : 0.35 }), MAXC); coinM.count = 0; coinM.castShadow = true; group.add(coinM);
+  const flyM = new THREE.InstancedMesh(HW ? new THREE.PlaneGeometry(0.8, 0.8) : new THREE.SphereGeometry(0.2, 12, 8), HW ? new THREE.MeshBasicMaterial({ map: spriteTexture(THREE, 'bat'), transparent: true, alphaTest: 0.3, side: THREE.DoubleSide }) : new THREE.MeshBasicMaterial({ color: '#d9ff4d' }), MAXC); flyM.count = 0; group.add(flyM);
+  const haloM = new THREE.InstancedMesh(new THREE.SphereGeometry(0.5, 12, 8), new THREE.MeshBasicMaterial({ color: HW ? '#c08aff' : '#eaff7a', transparent: true, opacity: 0.28, depthWrite: false }), MAXC); haloM.count = 0; group.add(haloM);
   const padMap = new Map(), coinMap = new Map();
   const C_FRESH = new THREE.Color('#3fbf4f'), C_STEP = new THREE.Color('#79d24a'), C_WOB = new THREE.Color('#d6b23a');
   // ---- splashes
@@ -62,6 +63,7 @@ export function createView(ctx) {
   const tip = h('div', 'll-tip', 'Pads <b>wobble</b> then <b>sink</b> — keep hopping!'); ctx.ui.append(tip); setTimeout(() => tip.classList.add('gone'), 6000);
   const flags = new Map(), ys = new Map();
   return {
+    halloween: { spots: [[-hw - 1.4, 0.5, (dock + bank) / 2 + 2], [hw + 1.5, 0.5, (dock + bank) / 2 - 1.5], [-hw - 2.6, 0.5, (dock + bank) / 2 - 2.5], [hw + 2.8, 0.5, (dock + bank) / 2 + 2.6], [-hw * 0.5, 0, bank - 2.6], [hw * 0.55, 0, bank - 2.5]] },
     state(g) {
       let seen = new Set();
       for (const [id, x, z, r, w, y] of g.pd) { seen.add(id); const p = padMap.get(id); if (p) { p.tx = x; p.z = z; p.w = w; p.ty = y; } else padMap.set(id, { x, tx: x, z, r, w, y, ty: y, ph: id * 1.7 }); }
@@ -109,7 +111,7 @@ export function createView(ctx) {
       for (const [id, c] of coinMap) {
         c.x += (c.tx - c.x) * k; c.z += (c.tz - c.z) * k; c.born = Math.min(1, c.born + dt * 3);
         const s = c.born < 1 ? Math.sin(c.born * Math.PI / 2) * 1.2 : 1;
-        if (c.k) { if (fi >= MAXC) continue; const y = 0.75 + Math.sin(t * 3 + id) * 0.15, wx = Math.sin(t * 2.3 + id) * 0.12; m4.compose(v.set(c.x + wx, y, c.z), q.identity(), sc.setScalar(s)); flyM.setMatrixAt(fi, m4); m4.compose(v.set(c.x + wx, y, c.z), q.identity(), sc.setScalar(s * (1 + Math.sin(t * 8 + id) * 0.15))); haloM.setMatrixAt(fi++, m4); }
+        if (c.k) { if (fi >= MAXC) continue; const y = 0.75 + Math.sin(t * 3 + id) * 0.15, wx = Math.sin(t * 2.3 + id) * 0.12; m4.compose(v.set(c.x + wx, y, c.z), HW ? q.copy(stage.camera.quaternion) : q.identity(), HW ? sc.set(s * (0.6 + 0.4 * Math.abs(Math.sin(t * 9 + id))), s, s) : sc.setScalar(s)); flyM.setMatrixAt(fi, m4); q.identity(); m4.compose(v.set(c.x + wx, y, c.z), q.identity(), sc.setScalar(s * (1 + Math.sin(t * 8 + id) * 0.15))); haloM.setMatrixAt(fi++, m4); }
         else { if (ci >= MAXC) continue; m4.compose(v.set(c.x, 0.6 + Math.sin(t * 3 + id) * 0.06, c.z), q.setFromEuler(e3.set(-0.5, t * 2.5 + id, 0, 'YXZ')), sc.setScalar(s)); coinM.setMatrixAt(ci++, m4); }
       }
       coinM.count = ci; flyM.count = haloM.count = fi;

@@ -7,44 +7,45 @@
 import { RULES, CANNON_X } from './sim.js';
 import { scoreBar, floatText, h } from '../../client/gamehud.js';
 import { F } from '../../shared/arena.js';
+import { pumpkinGeo, stemGeo } from '../../client/halloween.js';
 
 const PEAK = 7.5;
 export function createView(ctx) {
   const { THREE, group, stage, meta } = ctx;
-  const { hw, hd } = meta.arena, CASTLE_Z = -hd - 1.25;            // its front wall is the back edge of the courtyard
+  const { hw, hd } = meta.arena, CASTLE_Z = -hd - 1.25, HW = ctx.season === 'halloween';     // Halloween: a dusk courtyard, a lavender castle with lit windows, pumpkins for cannonballs            // its front wall is the back edge of the courtyard
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), v = new THREE.Vector3(), sc = new THREE.Vector3(), e3 = new THREE.Euler();
   const std = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.75, ...extra });
   // ---- ground, courtyard, path, hedges
-  const field = new THREE.Mesh(new THREE.PlaneGeometry(80, 60).rotateX(-Math.PI / 2), std('#69c95a')); field.position.y = -0.02; field.receiveShadow = true; group.add(field);
-  const yard = new THREE.Mesh(new THREE.PlaneGeometry(hw * 2, hd * 2).rotateX(-Math.PI / 2), std('#8ee070')); yard.position.y = 0; yard.receiveShadow = true; group.add(yard);
-  const stoneGeo = new THREE.CylinderGeometry(0.42, 0.46, 0.08, 7), NS = 46, stones = new THREE.InstancedMesh(stoneGeo, std('#e9dcc0', { flatShading: true }), NS);
+  const field = new THREE.Mesh(new THREE.PlaneGeometry(80, 60).rotateX(-Math.PI / 2), std(HW ? '#3d6142' : '#69c95a')); field.position.y = -0.02; field.receiveShadow = true; group.add(field);
+  const yard = new THREE.Mesh(new THREE.PlaneGeometry(hw * 2, hd * 2).rotateX(-Math.PI / 2), std(HW ? '#5b8550' : '#8ee070')); yard.position.y = 0; yard.receiveShadow = true; group.add(yard);
+  const stoneGeo = new THREE.CylinderGeometry(0.42, 0.46, 0.08, 7), NS = 46, stones = new THREE.InstancedMesh(stoneGeo, std(HW ? '#b3a2c8' : '#e9dcc0', { flatShading: true }), NS);
   for (let i = 0; i < NS; i++) {
     const across = i < 22, k = across ? i : i - 22, x = across ? -hw + 0.4 + k * (hw * 2 - 0.8) / 21 : (k % 2 ? 0.45 : -0.45), z = across ? (k % 2 ? 0.4 : -0.4) : -hd + 0.4 + k * (hd * 2 - 0.8) / 23;
     m4.compose(v.set(x, 0.02, z), q.setFromEuler(e3.set(0, i, 0)), sc.setScalar(0.8 + (i % 3) * 0.12)); stones.setMatrixAt(i, m4);
   }
   stones.receiveShadow = true; group.add(stones);
-  const hedgeGeo = new THREE.BoxGeometry(1, 0.9, 1), hedgeN = 2 * 12 + 18, hedges = new THREE.InstancedMesh(hedgeGeo, std('#2f9e44', { roughness: 1 }), hedgeN);
+  const hedgeGeo = new THREE.BoxGeometry(1, 0.9, 1), hedgeN = 2 * 12 + 18, hedges = new THREE.InstancedMesh(hedgeGeo, std(HW ? '#2b5a3a' : '#2f9e44', { roughness: 1 }), hedgeN);
   let hi = 0;
   for (const sx of [-1, 1]) for (let k = 0; k < 12; k++) { m4.compose(v.set(sx * (hw + 0.55), 0.45, -hd + 0.45 + k * (hd * 2 - 0.9) / 11), q.identity(), sc.set(1, 1 + (k % 2) * 0.12, 1)); hedges.setMatrixAt(hi++, m4); }
   for (let k = 0; k < 18; k++) { if (k === 8 || k === 9) { m4.compose(v.set(0, -5, 0), q.identity(), sc.setScalar(0.01)); hedges.setMatrixAt(hi++, m4); continue; } m4.compose(v.set(-hw - 0.05 + k * (hw * 2 + 0.1) / 17, 0.35, hd + 0.55), q.identity(), sc.set(1, 0.75, 1)); hedges.setMatrixAt(hi++, m4); }
   hedges.castShadow = true; group.add(hedges);
   // ---- the castle
   const castle = new THREE.Group(); castle.position.set(0, 0, CASTLE_Z); group.add(castle);
-  const wallMat = std('#fbe7c6'), trimMat = std('#e2c28f');
+  const wallMat = std(HW ? '#b9a3d6' : '#fbe7c6'), trimMat = std(HW ? '#7f62ae' : '#e2c28f');
   const keep = new THREE.Mesh(new THREE.BoxGeometry(11, 3.2, 2.4), wallMat); keep.position.y = 1.6; keep.castShadow = keep.receiveShadow = true; castle.add(keep);
   const merlons = new THREE.InstancedMesh(new THREE.BoxGeometry(0.6, 0.6, 0.6), trimMat, 10);
   for (let k = 0; k < 10; k++) { m4.makeTranslation(-4.95 + k * 1.1, 3.5, 1.0); merlons.setMatrixAt(k, m4); }
   castle.add(merlons);
   const gate = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 0.3, 20, 1, false, 0, Math.PI).rotateZ(Math.PI / 2).rotateY(Math.PI / 2), std('#5a3a22')); gate.position.set(0, 0.9, 1.15); gate.scale.set(1, 1.3, 1); castle.add(gate);
   const gateLow = new THREE.Mesh(new THREE.BoxGeometry(2, 0.9, 0.3), std('#5a3a22')); gateLow.position.set(0, 0.45, 1.15); castle.add(gateLow);
-  const ROOF = ['#ff4d6d', '#3d8bff', '#ffd23f', '#3d8bff', '#ff4d6d'];
+  const ROOF = HW ? ['#ff7a14', '#3a2160', '#ff9a3a', '#3a2160', '#ff7a14'] : ['#ff4d6d', '#3d8bff', '#ffd23f', '#3d8bff', '#ff4d6d'];
   [-5.6, -2.8, 0, 2.8, 5.6].forEach((x, i) => {
     const tall = i === 2 ? 5.2 : (i % 2 ? 3.9 : 4.6), r = i === 2 ? 1.25 : 0.95;
     const tw = new THREE.Mesh(new THREE.CylinderGeometry(r, r * 1.05, tall, 18), wallMat); tw.position.set(x, tall / 2, i === 2 ? -0.4 : 0.2); tw.castShadow = true; castle.add(tw);
     const roof = new THREE.Mesh(new THREE.ConeGeometry(r * 1.25, 1.8, 18), std(ROOF[i], { roughness: 0.5 })); roof.position.set(x, tall + 0.9, tw.position.z); roof.castShadow = true; castle.add(roof);
     const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1, 6), std('#ffffff')); pole.position.set(x, tall + 2.2, tw.position.z); castle.add(pole);
     const flag = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.42, 0.04), std(ROOF[(i + 1) % 5])); flag.position.set(x + 0.36, tall + 2.5, tw.position.z); castle.add(flag);
-    const win = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.6, 0.1), std('#3b2a7a')); win.position.set(x, tall * 0.62, tw.position.z + r); castle.add(win);
+    const win = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.6, 0.1), HW ? new THREE.MeshBasicMaterial({ color: '#ffcf5a', toneMapped: false }) : std('#3b2a7a')); win.position.set(x, tall * 0.62, tw.position.z + r); castle.add(win);
   });
   // ---- cannons on platforms off each side, barrels pointing up and in
   const cannons = [];
@@ -57,15 +58,17 @@ export function createView(ctx) {
     cannons.push({ c, barrel, kick: 0, sx });
   }
   // ---- balls: iron sphere + landing ring + shadow + filling timer disc
-  const ballGeo = new THREE.SphereGeometry(0.42, 16, 10), ironMat = std('#26262e', { metalness: 0.5, roughness: 0.35 });
+  const ballGeo = HW ? pumpkinGeo(THREE, 0.46) : new THREE.SphereGeometry(0.42, 16, 10), ironMat = HW ? std('#ff7a14', { roughness: 0.5, emissive: '#a83a00', emissiveIntensity: 0.35 }) : std('#26262e', { metalness: 0.5, roughness: 0.35 });
+  const stemG = HW ? stemGeo(THREE, 0.46) : null, stemMat = HW ? std('#4c7a2a') : null;
+  const withStem = m => { if (stemG) m.add(new THREE.Mesh(stemG, stemMat)); return m; };
   const ringGeo = new THREE.RingGeometry(0.86, 1, 40).rotateX(-Math.PI / 2), discGeo = new THREE.CircleGeometry(1, 32).rotateX(-Math.PI / 2);
   const balls = new Map(), fx = [];
   function addBall([id, fx0, fz0, x, z, left, total, big]) {
     const B = { id, from: new THREE.Vector3(fx0, 2.6, fz0), x, z, left, total, big, seen: true };
     const s = big ? 1.5 : 1;
-    B.ball = new THREE.Mesh(ballGeo, ironMat); B.ball.scale.setScalar(s); B.ball.castShadow = true;
+    B.ball = withStem(new THREE.Mesh(ballGeo, ironMat)); B.ball.scale.setScalar(s); B.ball.castShadow = true;
     B.ring = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({ color: big ? '#ff3b3b' : '#ffffff', transparent: true, opacity: 0.95, depthWrite: false }));
-    B.fill = new THREE.Mesh(discGeo, new THREE.MeshBasicMaterial({ color: big ? '#ff8a8a' : '#fff36b', transparent: true, opacity: 0.7, depthWrite: false }));
+    B.fill = new THREE.Mesh(discGeo, new THREE.MeshBasicMaterial({ color: big ? '#ff8a8a' : HW ? '#ffb347' : '#fff36b', transparent: true, opacity: 0.7, depthWrite: false }));
     B.shadow = new THREE.Mesh(discGeo, new THREE.MeshBasicMaterial({ color: '#1d4a1d', transparent: true, opacity: 0.2, depthWrite: false }));
     const R = RULES.catchR;
     B.ring.scale.setScalar(R); B.ring.position.set(x, 0.06, z); B.fill.position.set(x, 0.05, z); B.shadow.position.set(x, 0.04, z);
@@ -89,6 +92,7 @@ export function createView(ctx) {
   const drawHearts = n => { const s = '♥'.repeat(n) + '♡'.repeat(Math.max(0, maxHp - n)); if (heartsEl.textContent !== s) heartsEl.textContent = s; };
   drawHearts(maxHp);
   return {
+    halloween: { spots: [[-hw * 0.8, 0, hd + 1.7], [-hw * 0.25, 0, hd + 2.0], [hw * 0.3, 0, hd + 1.9], [hw * 0.8, 0, hd + 1.7], [-hw - 1.6, 0, -hd - 1.2], [hw + 1.6, 0, -hd - 1.3]], ghosts: [[-hw - 2.5, 2.2, -hd - 3], [hw + 2.4, 2.6, -hd - 3.4], [-1.5, 6.8, -hd - 3.4]] },
     start() { showBanner('Wave 1!'); },
     state(g) {
       for (const B of balls.values()) B.seen = false;
@@ -106,9 +110,9 @@ export function createView(ctx) {
         floatText(stage, ev.x, 2.2, ev.z, ev.big ? '+1 +1' : '+1', 'good');
         for (const pid of ev.pids) ctx.actor(pid)?.play('cheer', 520);
       } else if (ev.e === 'miss') {
-        const ball = new THREE.Mesh(ballGeo, ironMat); ball.position.set(ev.x, 0.4, ev.z); group.add(ball);
+        const ball = withStem(new THREE.Mesh(ballGeo, ironMat)); ball.position.set(ev.x, 0.4, ev.z); group.add(ball);
         fx.push({ kind: 'bounce', p: ball, t: 0, from: new THREE.Vector3(ev.x, 0.4, ev.z), hurt: ev.hurt });
-        puff(ev.x, 0.3, ev.z, '#c9a27a'); ctx.sfx('splat');
+        puff(ev.x, 0.3, ev.z, HW ? '#ff9a3a' : '#c9a27a'); ctx.sfx('splat');
       } else if (ev.e === 'squash') { flat.set(ev.pid, performance.now() + RULES.squash * 1000); ctx.sfx('hit'); const a = ctx.actor(ev.pid); if (a) floatText(stage, a.group.position.x, 1.8, a.group.position.z, 'Need two!', 'bad'); }
       else if (ev.e === 'dive') { if (ev.pid === ctx.me) ctx.sfx('tap'); }
       else if (ev.e === 'wave') { showBanner(`Wave ${ev.n}!`); ctx.sfx('pick'); }

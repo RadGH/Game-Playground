@@ -8,6 +8,7 @@ import { createLineup } from './lineup.js';
 import { createBoardView, SPACE_LOOK } from './boardview.js';
 import { createPlay } from './play.js';
 import { loadAvatarData, portrait, costumes, RACES, RACE_NAMES } from './avatars.js';
+import { SEASONS, seasonByDate, seasonName, inSeason } from '../shared/seasons.js';
 import { qrSvg, joinUrl } from './qr.js';
 import { h, esc } from './gamehud.js';
 import { createEditor } from './editor.js';
@@ -30,6 +31,14 @@ const sfx = createSounds();
 const net = connect();
 const BOARDS = Object.fromEntries(await Promise.all(['fairground', 'pier'].map(async id => [id, await (await fetch(new URL(`../../data/boards/${id}.json`, import.meta.url))).json()])));
 window.tumblefair = { S, net, stage, lineup, controls, GAMES };
+/** The holiday look of the menus (round 6): body[data-season], plus a few bats crossing the sky at Halloween. */
+function setSeason(id) {
+  if (document.body.dataset.season === (id || '')) return;
+  document.body.dataset.season = id || '';
+  document.querySelector('.bats')?.remove();
+  if (id === 'halloween') { const b = document.createElement('div'); b.className = 'bats'; b.innerHTML = '<i></i><i></i><i></i>'; document.body.append(b); }
+}
+setSeason(seasonByDate());
 installFeedback({ stage, net, getS: () => S });                       // for tests and the console
 
 // ------------------------------------------------------------------ helpers
@@ -125,7 +134,8 @@ async function showLobby() {
       <div class="row opts"><span>Play as</span><button class="pill${!r.opts.teams ? ' on' : ''}" data-act="opt" data-key="teams" data-bool="0" ${host ? '' : 'disabled'}>Everyone for themselves</button><button class="pill${r.opts.teams ? ' on' : ''}" data-act="opt" data-key="teams" data-bool="1" ${host ? '' : 'disabled'}>Teams</button>
         ${r.opts.teams ? `<span class="est">${n === 3 ? 'Teams need 2 or 4 players' : 'Red &amp; Green vs Blue &amp; Pink'}</span>` : ''}</div>
       <div class="row opts"><span>Difficulty</span>${[['easy', 'Family'], ['normal', 'Normal'], ['hard', 'Tricky']].map(([v, t]) => `<button class="pill${r.opts.difficulty === v ? ' on' : ''}" data-act="opt" data-key="difficulty" data-value="${v}" ${host ? '' : 'disabled'}>${t}</button>`).join('')}</div>
-      <div class="row opts"><span>Minigames</span><button class="pill on" data-act="pool">${r.opts.pool?.length ? `${r.opts.pool.length} picked` : `All ${Object.keys(GAMES).length}`}</button>${host ? '<span class="est">tap to choose</span>' : ''}</div>
+      <div class="row opts"><span>Holidays</span>${[['auto', `Auto${r.dateSeason ? ` (${seasonName(r.dateSeason)})` : ''}`], ...SEASONS.map(x => [x.id, x.name]), ['off', 'Off']].map(([v, t]) => `<button class="pill${(r.opts.holiday || 'auto') === v ? ' on' : ''}" data-act="opt" data-key="holiday" data-value="${v}" ${host ? '' : 'disabled'}>${esc(t)}</button>`).join('')}</div>
+      <div class="row opts"><span>Minigames</span><button class="pill on" data-act="pool">${r.opts.pool?.length ? `${r.opts.pool.length} picked` : `All ${Object.values(GAMES).filter(g => inSeason(g.meta, r.season)).length}`}</button>${host ? '<span class="est">tap to choose</span>' : ''}</div>
       <div class="lobby-go">${host ? `<button class="btn big primary" data-act="start">${n < 2 ? 'Start (solo practice)' : 'Start the game'}</button>` : `<p class="note">${me?.wait ? 'The seats are full. You will join when one frees up.' : 'Waiting for the host to start…'}</p>`}
       <button class="btn small ghost" data-act="leave">Leave</button></div>
     </div>`);
@@ -146,7 +156,7 @@ function drawHud() {
 async function ensureBoard() {
   const id = BOARDS[S.room?.match?.boardId] ? S.room.match.boardId : 'fairground';
   if (S.board && S.board.id !== id) dropBoard();
-  if (!S.board && !S.boardP) S.boardP = createBoardView({ stage, def: BOARDS[id], members, me: S.room.you, assetBase: ART }).then(b => { b.id = id; S.board = b; S.boardP = null; if (S.room?.match?.board) b.sync(S.room.match.board); return b; });
+  if (!S.board && !S.boardP) S.boardP = createBoardView({ stage, season: S.room?.season || null, def: BOARDS[id], members, me: S.room.you, assetBase: ART }).then(b => { b.id = id; S.board = b; S.boardP = null; if (S.room?.match?.board) b.sync(S.room.match.board); return b; });
   return S.board || S.boardP;
 }
 function dropBoard() { S.board?.dispose(); S.board = null; }
@@ -221,7 +231,7 @@ function showIntro() {
   const pm = S.pm, m = GAMES[pm.game].meta, me = mine(), can = me?.seat != null && pm.players.some(p => p.pid === me.pid);
   const ctl = m.kind === 'arena' ? (isTouch() ? `Left thumb: move.${m.controls?.a ? ` Big button: ${m.controls.a}.` : ''}${m.controls?.b ? ` Small button: ${m.controls.b}.` : ''}` : `WASD or arrows: move.${m.controls?.a ? ` Space: ${m.controls.a}.` : ''}${m.controls?.b ? ` E: ${m.controls.b}.` : ''}`) : 'Tap your choices on this screen.';
   setScreen('intro', `<div class="panel intro-card"><img src="${ART}${m.card}.webp" alt="" onerror="this.remove()">
-    <h1 class="shout">${esc(m.title)}</h1><p class="blurb">${esc(m.blurb)}</p>
+    ${pm.season === 'halloween' && !m.season ? '<p class="season-ribbon halloween">Halloween edition</p>' : ''}<h1 class="shout">${esc(m.title)}</h1><p class="blurb">${esc(m.blurb)}</p>
     <ul>${m.how.map(l => `<li>${esc(l)}</li>`).join('')}</ul><p class="ctl">${esc(ctl)}</p>${pm.difficulty && S.room.match?.mode === 'endless' ? `<p class="note">Difficulty: <b>${esc(pm.difficulty)}</b></p>` : ''}
     ${can ? `<button class="btn big primary" data-act="skip">${S.skips.includes(me.pid) ? 'Ready ✓' : "I'm ready"}</button>` : '<p class="note">Watching this one.</p>'}
     <p class="note">Starts in <b class="count">${left()}</b> · ${S.skips.length}/${pm.players.length} ready</p></div>`);
@@ -309,6 +319,7 @@ if (net.me) onWelcome(net.me);                      // the hello was answered wh
 net.on('me', () => { S.me = net.me; if (!S.room) showTitle(); else if (S.phase === 'lobby') showLobby(); S.modal?.refresh?.(); });
 net.on('wallet', () => { S.me = net.me; });
 net.on('room', r => {
+  setSeason(r.season ?? r.dateSeason ?? null);
   // a host's last minigame list comes back with them (round 5)
   if (r.phase === 'lobby' && r.host === r.you && S.poolFor !== r.code) { S.poolFor = r.code; try { const v = JSON.parse(localStorage.getItem('tumblefair.pool') || '[]').filter(id => GAMES[id]); if (v.length && !r.opts.pool?.length) net.send({ t: 'opt', key: 'pool', value: v }); } catch {} }
   const first = !S.room; S.room = r;
@@ -369,7 +380,7 @@ function openShop() {
   const el = h('div', 'modal shop');
   const draw = () => {
     el.innerHTML = `<div class="panel"><h2>Costumes <span class="coins">${ICON.coin}${S.me.coins}</span></h2><p class="note">Costumes are only for show. Win coins by finishing matches.</p>
-      <div class="costumes">${costumes().map(c => { const own = S.me.owned.includes(c.id), on = S.me.costume === c.id; return `<button class="costume${on ? ' on' : ''}${own ? ' own' : ''}" data-id="${c.id}" ${!own && S.me.coins < c.price ? 'data-poor="1"' : ''}><img src="${portrait({ look: S.me.look, costume: c.id })}" alt="">${c.tag ? `<i class="tag t-${esc(c.tag.toLowerCase())}">${esc(c.tag)}</i>` : ''}<b>${esc(c.name)}</b><span>${on ? 'Wearing' : own ? 'Wear' : `${ICON.coin}${c.price}`}</span></button>`; }).join('')}</div>
+      <div class="costumes">${costumes().filter(c => inSeason(c, seasonByDate())).sort((a, b) => !!b.season - !!a.season).map(c => { const own = S.me.owned.includes(c.id), on = S.me.costume === c.id; return `<button class="costume${on ? ' on' : ''}${own ? ' own' : ''}" data-id="${c.id}" ${!own && S.me.coins < c.price ? 'data-poor="1"' : ''}><img src="${portrait({ look: S.me.look, costume: c.id })}" alt="">${c.tag ? `<i class="tag t-${esc(c.tag.toLowerCase())}">${esc(c.tag)}</i>` : ''}<b>${esc(c.name)}</b><span>${on ? 'Wearing' : own ? 'Wear' : `${ICON.coin}${c.price}`}</span></button>`; }).join('')}</div>
       <button class="btn big" data-close="1">Done</button></div>`;
   };
   el.addEventListener('click', e => {
@@ -384,19 +395,21 @@ function openShop() {
 }
 
 /** The host picks which minigames can come up (round 5). Nothing ticked = every game. Remembered on this phone. */
-const TAG_NAMES = { action: 'Action', puzzle: 'Puzzle', social: 'Talk & vote', chance: 'Luck', coop: 'Team up' };
+const TAG_NAMES = { holiday: 'Holidays', action: 'Action', puzzle: 'Puzzle', social: 'Talk & vote', chance: 'Luck', coop: 'Team up' };
 function openPool() {
   closeModal();
   const host = isHost(), el = h('div', 'modal pool');
   let pick = new Set(S.room.opts.pool?.length ? S.room.opts.pool : Object.keys(GAMES));
   const send = () => { const all = pick.size === Object.keys(GAMES).length; const v = all ? [] : [...pick]; net.send({ t: 'opt', key: 'pool', value: v }); try { localStorage.setItem('tumblefair.pool', JSON.stringify(v)); } catch {} };
   const draw = () => {
-    const groups = {};
-    for (const [id, g] of Object.entries(GAMES)) { const t = g.meta.tags?.[0] || 'action'; (groups[t] ||= []).push([id, g.meta]); }
+    const groups = { holiday: [] };
+    for (const [id, g] of Object.entries(GAMES)) { const t = g.meta.season ? 'holiday' : g.meta.tags?.[0] || 'action'; (groups[t] ||= []).push([id, g.meta]); }
+    if (!groups.holiday.length) delete groups.holiday;
+    const season = S.room.season;
     el.innerHTML = `<div class="panel"><h2>Minigames <small>${pick.size} of ${Object.keys(GAMES).length}</small></h2>
       <p class="note">${host ? 'Untick the games you do not want tonight. The vote only offers ticked games that fit the number of players.' : 'Only the host can change this.'}</p>
       ${host ? `<div class="row"><button class="btn small" data-all="1">All</button><button class="btn small" data-all="0">None</button>${Object.entries(TAG_NAMES).map(([t, n]) => `<button class="btn small" data-tag="${t}">Only ${n}</button>`).join('')}</div>` : ''}
-      ${Object.entries(groups).map(([t, list]) => `<h3>${esc(TAG_NAMES[t] || t)}</h3><div class="pool-grid">${list.sort((a, b) => a[1].title.localeCompare(b[1].title)).map(([id, m]) => `<button class="pool-g${pick.has(id) ? ' on' : ''}" data-id="${id}" ${host ? '' : 'disabled'}><img src="${ART}${m.card}.webp" alt="" loading="lazy" onerror="this.style.visibility='hidden'"><b>${esc(m.title)}</b><small>${m.min === m.max ? m.min : `${m.min}–${m.max}`} players</small><i class="tick">${pick.has(id) ? '✓' : ''}</i></button>`).join('')}</div>`).join('')}
+      ${Object.entries(groups).map(([t, list]) => `<h3>${esc(TAG_NAMES[t] || t)}</h3>${t === 'holiday' ? `<p class="note">${season ? `On now: ${esc(seasonName(season))}.` : 'Off right now.'} Holiday games only come up while their holiday is on: by the date (Auto), or set Holidays in the lobby to switch one on any time.</p>` : ''}<div class="pool-grid">${list.sort((a, b) => a[1].title.localeCompare(b[1].title)).map(([id, m]) => `<button class="pool-g${pick.has(id) ? ' on' : ''}${m.season && m.season !== season ? ' asleep' : ''}" data-id="${id}" ${host ? '' : 'disabled'}><img src="${ART}${m.card}.webp" alt="" loading="lazy" onerror="this.style.visibility='hidden'"><b>${esc(m.title)}</b><small>${m.season && m.season !== season ? `${esc(seasonName(m.season))} only` : `${m.min === m.max ? m.min : `${m.min}–${m.max}`} players`}</small><i class="tick">${pick.has(id) ? '✓' : ''}</i></button>`).join('')}</div>`).join('')}
       <button class="btn big primary" data-close="1">Done</button></div>`;
   };
   el.addEventListener('click', e => {

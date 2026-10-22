@@ -1,0 +1,37 @@
+/* Apple Bobbing — a tub of water on a night-time porch: purple sky, orange bunting, the tub fills the middle of a phone
+   and one huge BITE button sits under it. Spooky-cute. */
+.game-apple-bobbing { pointer-events: auto; display: flex; flex-direction: column; align-items: center; gap: 6px; overflow-x: hidden; overflow-y: auto;
+  padding: calc(var(--st) + 8px) calc(var(--sr) + 10px) calc(var(--sb) + 14px) calc(var(--sl) + 10px);
+  background: repeating-linear-gradient(90deg, #ff8a1a 0 18px, transparent 18px 36px) top / 100% 10px no-repeat,
+    radial-gradient(90% 60% at 80% 0%, #4a3478 0%, transparent 70%), linear-gradient(#241a3d, #140f26 70%, #1d1430);
+  color: #fff; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.game-apple-bobbing > * { flex: none; }
+.ab-top { display: flex; gap: 12px; align-items: center; justify-content: center; margin-top: 8px; }
+.ab-title { color: #ff8a8a; font: 900 24px/1.1 var(--font); -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; text-shadow: 0 3px 0 var(--ink); }
+.ab-board { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
+.ab-board .chip { color: var(--ink); padding-right: 10px; }
+.ab-board .sc { font-style: normal; background: #ffe0e0; border-radius: 8px; padding: 0 7px; }
+.ab-board .chip.lead { background: var(--sun); }
+.ab-board .chip.me { box-shadow: 0 0 0 3px #fff; }
+.ab-tub { position: relative; width: min(100%, 560px); height: clamp(230px, 46dvh, 460px); flex: 1 1 auto; min-height: 230px; max-height: 520px; }
+.ab-tub canvas { width: 100%; height: 100%; display: block; touch-action: none; }
+.ab-count { position: absolute; inset: 0; display: grid; place-items: center; font: 900 76px/1 var(--font); color: var(--sun); -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; pointer-events: none; }
+.ab-count:empty { display: none; }
+.ab-me { display: flex; gap: 12px; align-items: baseline; justify-content: center; min-height: 34px; }
+.ab-score { font: 900 28px/1 var(--font); -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; }
+.ab-say { font: 900 18px/1 var(--font); opacity: 0; }
+.ab-say.pop { animation: ab-pop .9s ease-out; }
+.ab-say.red, .ab-say.gold { color: var(--sun); } .ab-say.splash { color: #9fd4ff; } .ab-say.spider { color: var(--pop); }
+@keyframes ab-pop { 0% { opacity: 1; transform: scale(1.3); } 70% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+.ab-btn { width: min(100%, 520px); height: clamp(84px, 15dvh, 130px); border-radius: 28px; border-width: 5px; background: #ff5f5f; color: #fff; box-shadow: 0 7px 0 var(--ink);
+  font: 900 40px/1 var(--font); -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; display: grid; place-items: center; align-content: center; touch-action: none; -webkit-tap-highlight-color: transparent; }
+.ab-btn small { font-size: 13px; font-weight: 800; -webkit-text-stroke: 0; color: #fff; letter-spacing: .5px; }
+.ab-btn.wait { background: #8a6a7a; }
+.ab-btn.hit { animation: ab-press .16s ease-out; }
+@keyframes ab-press { 0% { transform: translateY(5px); box-shadow: 0 2px 0 var(--ink); } 100% { transform: none; } }
+.ab-note { margin: 0; color: #f6eaff; text-align: center; font-size: 14px; text-shadow: 0 1px 0 var(--ink); }
+.ab-note:empty { display: none; }
+.game-apple-bobbing.watching .ab-btn, .game-apple-bobbing.watching .ab-me { display: none; }
+.game-apple-bobbing.watching .ab-tub { width: min(100%, 1280px); height: calc(100dvh - 170px); max-height: none; }
+.game-apple-bobbing[data-phase=end] .ab-btn { opacity: .4; pointer-events: none; }
+@media (max-height: 520px) { .ab-tub { height: 52dvh; min-height: 160px; } .ab-btn { height: 64px; font-size: 28px; } .ab-btn small { display: none; } }

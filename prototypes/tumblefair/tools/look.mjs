@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // A quick look at the running dev server (port 8480) in a headless browser, for whoever is building: opens N pages
 // (one host + joiners), optionally starts a match, and saves screenshots to tests/shots/look-*.png.
-//   node prototypes/tumblefair/tools/look.mjs [--players 2] [--mode board|marathon] [--until lobby|board|vote|intro|game|results|final] [--phone] [--wait ms] [--pool id,id] [--board pier] [--round n (with --until: wait for that round)] [--shots n,ms (n more screenshots every ms)]
+//   node prototypes/tumblefair/tools/look.mjs [--players 2] [--mode board|marathon] [--until lobby|board|vote|intro|game|results|final] [--phone] [--wait ms] [--pool id,id] [--board pier] [--round n (with --until: wait for that round)] [--shots n,ms (n more screenshots every ms)] [--holiday off|halloween|auto]
 // Run it from the playground root under the browser lock:  flock /tmp/claude-1000/farhold-pw.lock node ...
 import { chromium } from '@playwright/test';
 const arg = (n, d) => { const i = process.argv.indexOf('--' + n); return i > 0 ? process.argv[i + 1] : d; };
@@ -30,6 +30,7 @@ if (until !== 'title') {
   for (let i = 1; i < N; i++) { const p = await open(i, URL0 + '?code=' + code); await p.waitForTimeout(600); if (await p.$('.invite [data-act=join]')) await p.click('.invite [data-act=join]'); await p.waitForFunction(() => window.tumblefair.S.room, null, { timeout: 20000 }); }
   await host.waitForTimeout(2500);
   if (process.argv.includes('--teams')) await host.evaluate(() => { tumblefair.net.send({ t: 'opt', key: 'teams', value: true }); tumblefair.net.send({ t: 'opt', key: 'mode', value: 'endless' }); });
+  if (arg('holiday', '')) await host.evaluate(v => tumblefair.net.send({ t: 'opt', key: 'holiday', value: v }), arg('holiday', ''));     // --holiday off|halloween|auto
   await host.waitForTimeout(800);
   if (until === 'lobby') { for (const [i, p] of pages.entries()) await p.screenshot({ path: `${OUT}look-${tag}-p${i}.png` }); }
   else {

@@ -8,30 +8,31 @@ import { RULES, KIND } from './sim.js';
 import { SEATS } from '../../shared/protocol.js';
 import { scoreBar, floatText } from '../../client/gamehud.js';
 import { F } from '../../shared/arena.js';
+import { witchHatGeo } from '../../client/halloween.js';
 
 const MAXM = 24;
 export function createView(ctx) {
   const { THREE, group, stage, meta } = ctx;
-  const { hw, hd } = meta.arena, holes = ctx.init.holes;
+  const { hw, hd } = meta.arena, holes = ctx.init.holes, HW = ctx.season === 'halloween';     // Halloween: a dusk garden, moles in witch hats, the bomb is a fizzing TRICK ball
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), v = new THREE.Vector3(), sc = new THREE.Vector3(), e3 = new THREE.Euler();
   const std = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.8, ...extra });
   // ---- garden
-  const out = new THREE.Mesh(new THREE.PlaneGeometry(90, 70).rotateX(-Math.PI / 2), std('#6cc35a')); out.position.y = -0.03; out.receiveShadow = true; group.add(out);
+  const out = new THREE.Mesh(new THREE.PlaneGeometry(90, 70).rotateX(-Math.PI / 2), std(HW ? '#355e3a' : '#6cc35a')); out.position.y = -0.03; out.receiveShadow = true; group.add(out);
   const TX = 10, TZ = 8, tiles = new THREE.InstancedMesh(new THREE.PlaneGeometry(hw * 2 / TX, hd * 2 / TZ).rotateX(-Math.PI / 2), std('#ffffff', { roughness: 0.95 }), TX * TZ);
-  const G2 = [new THREE.Color('#8fe07a'), new THREE.Color('#7bd168')];
+  const G2 = HW ? [new THREE.Color('#5d8a50'), new THREE.Color('#517c47')] : [new THREE.Color('#8fe07a'), new THREE.Color('#7bd168')];
   for (let i = 0; i < TX * TZ; i++) { const cx = i % TX, cz = Math.floor(i / TX); m4.makeTranslation(-hw + (cx + 0.5) * hw * 2 / TX, 0, -hd + (cz + 0.5) * hd * 2 / TZ); tiles.setMatrixAt(i, m4); tiles.setColorAt(i, G2[(cx + cz) % 2]); }
   tiles.receiveShadow = true; group.add(tiles);
   // picket fence round the lawn
-  const per = Math.round(hw * 2 / 0.45) * 2 + Math.round(hd * 2 / 0.45) * 2, pickets = new THREE.InstancedMesh(new THREE.BoxGeometry(0.22, 0.85, 0.07), std('#ffffff', { roughness: 0.6 }), per);
+  const per = Math.round(hw * 2 / 0.45) * 2 + Math.round(hd * 2 / 0.45) * 2, pickets = new THREE.InstancedMesh(new THREE.BoxGeometry(0.22, 0.85, 0.07), std(HW ? '#cbbde6' : '#ffffff', { roughness: 0.6 }), per);
   let pk = 0;
   for (let k = 0, N = Math.round(hw * 2 / 0.45); k < N; k++) for (const sz of [-1, 1]) { m4.compose(v.set(-hw + (k + 0.5) * hw * 2 / N, 0.42, sz * (hd + 0.25)), q.identity(), sc.set(1, 1 + (k % 2) * 0.1, 1)); pickets.setMatrixAt(pk++, m4); }
   for (let k = 0, N = Math.round(hd * 2 / 0.45); k < N; k++) for (const sx of [-1, 1]) { m4.compose(v.set(sx * (hw + 0.25), 0.42, -hd + (k + 0.5) * hd * 2 / N), q.setFromEuler(e3.set(0, Math.PI / 2, 0)), sc.set(1, 1 + (k % 2) * 0.1, 1)); pickets.setMatrixAt(pk++, m4); }
   pickets.count = pk; pickets.castShadow = true; group.add(pickets);
-  const railMat = std('#f4efe6');
+  const railMat = std(HW ? '#b9a8da' : '#f4efe6');
   for (const sz of [-1, 1]) for (const y of [0.25, 0.62]) { const r = new THREE.Mesh(new THREE.BoxGeometry(hw * 2 + 0.6, 0.08, 0.05), railMat); r.position.set(0, y, sz * (hd + 0.3)); group.add(r); }
   for (const sx of [-1, 1]) for (const y of [0.25, 0.62]) { const r = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.08, hd * 2 + 0.6), railMat); r.position.set(sx * (hw + 0.3), y, 0); group.add(r); }
   // flower beds and a carrot patch outside
-  const FB = 90, blooms = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.2, 0), std('#ffffff', { flatShading: true }), FB), BC = ['#ff5f8f', '#ffd23f', '#b48cff', '#ff8a3d', '#ffffff'].map(c => new THREE.Color(c));
+  const FB = 90, blooms = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.2, 0), std('#ffffff', { flatShading: true }), FB), BC = (HW ? ['#ff7a14', '#9b5be0', '#ffd36b', '#ff9a3a', '#7dd84a'] : ['#ff5f8f', '#ffd23f', '#b48cff', '#ff8a3d', '#ffffff']).map(c => new THREE.Color(c));
   for (let i = 0; i < FB; i++) { const side = i % 4, t = ((i * 0.618) % 1) * 2 - 1; const x = side < 2 ? t * (hw + 1) : (side === 2 ? -1 : 1) * (hw + 1.1 + (i % 3) * 0.35), z = side < 2 ? (side ? 1 : -1) * (hd + 1.0 + (i % 3) * 0.35) : t * hd; m4.compose(v.set(x, 0.25, z), q.identity(), sc.setScalar(0.8 + (i % 3) * 0.25)); blooms.setMatrixAt(i, m4); blooms.setColorAt(i, BC[i % 5]); }
   group.add(blooms);
   const bed = std('#8a5a34', { roughness: 1 });
@@ -44,12 +45,13 @@ export function createView(ctx) {
   // ---- moles (instanced by part); a clip plane would cost too much, so a mole's lower half simply sinks into the pit
   const mk = (geo, mat, n) => { const im = new THREE.InstancedMesh(geo, mat, n); im.count = 0; im.castShadow = true; group.add(im); return im; };
   const bodyGeo = new THREE.SphereGeometry(0.46, 16, 12);
-  const bodies = [mk(bodyGeo, std('#8a5a3a', { roughness: 0.9 }), MAXM), mk(bodyGeo, std('#ffcf2a', { roughness: 0.3, metalness: 0.4, emissive: '#c08000', emissiveIntensity: 0.5 }), MAXM), mk(bodyGeo, std('#26262e', { roughness: 0.35, metalness: 0.3 }), MAXM)];
+  const bodies = [mk(bodyGeo, std('#8a5a3a', { roughness: 0.9 }), MAXM), mk(bodyGeo, std('#ffcf2a', { roughness: 0.3, metalness: 0.4, emissive: '#c08000', emissiveIntensity: 0.5 }), MAXM), mk(bodyGeo, std(HW ? '#3a2160' : '#26262e', { roughness: 0.35, metalness: 0.3 }), MAXM)];
   const bellies = mk(new THREE.SphereGeometry(0.3, 12, 8), std('#e9c9a0'), MAXM);
   const noses = mk(new THREE.SphereGeometry(0.1, 10, 8), std('#ff7aa8', { roughness: 0.4 }), MAXM);
-  const eyeGeo = new THREE.SphereGeometry(0.065, 8, 6), eyes = mk(eyeGeo, new THREE.MeshBasicMaterial({ color: '#111111' }), MAXM * 2), redEyes = mk(eyeGeo, new THREE.MeshBasicMaterial({ color: '#ff2a2a' }), MAXM * 2);
+  const eyeGeo = new THREE.SphereGeometry(0.065, 8, 6), eyes = mk(eyeGeo, new THREE.MeshBasicMaterial({ color: '#111111' }), MAXM * 2), redEyes = mk(eyeGeo, new THREE.MeshBasicMaterial({ color: HW ? '#7dff5a' : '#ff2a2a' }), MAXM * 2);
   const paws = mk(new THREE.SphereGeometry(0.11, 8, 6), std('#f2c7a5'), MAXM * 2);
-  const fuses = mk(new THREE.CylinderGeometry(0.035, 0.035, 0.3, 6), std('#c9a46a'), MAXM), sparks = mk(new THREE.IcosahedronGeometry(0.11, 0), new THREE.MeshBasicMaterial({ color: '#ffb31a' }), MAXM);
+  const fuses = mk(new THREE.CylinderGeometry(0.035, 0.035, 0.3, 6), std('#c9a46a'), MAXM), sparks = mk(new THREE.IcosahedronGeometry(0.11, 0), new THREE.MeshBasicMaterial({ color: HW ? '#7dff5a' : '#ffb31a' }), MAXM);
+  const hats = HW ? mk(witchHatGeo(THREE, 0.34), std('#ffffff', { roughness: 0.7 }), MAXM) : null, HAT = [new THREE.Color('#6a32b8'), new THREE.Color('#ff8a1a'), new THREE.Color('#2a1840')];
   const moles = new Map();     // id -> { hole, kind, h, th, bonk, squash }
   // ---- mallets on every player
   const mallets = new Map();
@@ -89,8 +91,8 @@ export function createView(ctx) {
         ctx.sfx(ev.pid === ctx.me ? (ev.k === KIND.GOLD ? 'coins' : 'good') : 'hit');
       } else if (ev.e === 'boom') {
         const m = moles.get(ev.id); if (m) m.bonk = 1;
-        burst(ev.x, ev.z, '#ff8a1f', 2.2); burst(ev.x, ev.z, '#333333', 1.6);
-        floatText(stage, ev.x, 1.6, ev.z, 'BOOM!', 'bad'); ctx.sfx(ev.pid === ctx.me ? 'out' : 'trap');
+        burst(ev.x, ev.z, HW ? '#7dff5a' : '#ff8a1f', 2.2); burst(ev.x, ev.z, HW ? '#9b5be0' : '#333333', 1.6);
+        floatText(stage, ev.x, 1.6, ev.z, HW ? 'TRICK!' : 'BOOM!', 'bad'); ctx.sfx(ev.pid === ctx.me ? 'out' : 'trap');
       } else if (ev.e === 'bop') {
         burst(ev.x, ev.z, '#ffffff', 0.8); floatText(stage, ev.x, 2.2, ev.z, 'BONK!', 'bad'); ctx.sfx('hit');
       }
@@ -99,7 +101,7 @@ export function createView(ctx) {
     frame(dt, t) {
       if (myCool > 0) myCool -= dt;
       const k = 1 - Math.exp(-dt * 20), cnt = [0, 0, 0];
-      let ni = 0, nb = 0, nr = 0, ne = 0;
+      let ni = 0, nb = 0, nr = 0, ne = 0, nh = 0;
       for (const m of moles.values()) {
         m.h += (m.th - m.h) * k; if (m.bonk) m.squash = Math.min(1, m.squash + dt * 6);
         const H = holes[m.hole], i = cnt[m.kind]++; if (i >= MAXM || ni >= MAXM) continue;
@@ -116,8 +118,10 @@ export function createView(ctx) {
           const fi = cnt[2] - 1; m4.compose(v.set(H.x + 0.08, top + 0.1, H.z), q.setFromEuler(e3.set(0, 0, -0.4)), sc.setScalar(m.squash ? 0.001 : 1)); fuses.setMatrixAt(fi, m4);
           m4.compose(v.set(H.x + 0.17, top + 0.25, H.z), q.setFromEuler(e3.set(t * 7, t * 5, 0)), sc.setScalar(m.squash ? 0.001 : 0.8 + Math.sin(t * 40 + m.hole) * 0.35)); sparks.setMatrixAt(fi, m4);
         }
+        if (hats && m.kind !== KIND.BOMB) { m4.compose(v.set(H.x, top - 0.1, H.z), q.setFromEuler(e3.set(-0.15, wob, wob * 0.5)), sc.setScalar(m.squash ? 1 - m.squash * 0.4 : 1)); hats.setMatrixAt(nh, m4); hats.setColorAt(nh++, HAT[m.kind]); }
         ni++;
       }
+      if (hats) { hats.count = nh; hats.instanceMatrix.needsUpdate = true; if (hats.instanceColor) hats.instanceColor.needsUpdate = true; }
       bodies.forEach((b, i) => { b.count = Math.min(MAXM, cnt[i]); b.instanceMatrix.needsUpdate = true; });
       bellies.count = nb; noses.count = ni; eyes.count = ne * 2; redEyes.count = nr * 2; paws.count = ni * 2; fuses.count = sparks.count = Math.min(MAXM, cnt[2]);
       for (const im of [bellies, noses, eyes, redEyes, paws, fuses, sparks]) im.instanceMatrix.needsUpdate = true;

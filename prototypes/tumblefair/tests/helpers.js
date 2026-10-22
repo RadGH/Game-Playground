@@ -11,6 +11,7 @@ import { RULE as wrRule } from '../js/games/word-relay/sim.js';
 import { WORDS as wrWords } from '../js/games/word-relay/words.js';
 import { score as scScore } from '../js/games/safecracker/sim.js';
 import { solve as dtSolve } from '../js/games/defuse-together/sim.js';
+import { appleX as abX, settle as abSettle, bite as abBite, newLane as abLane } from '../js/games/apple-bobbing/sim.js';
 
 const json = p => JSON.parse(readFileSync(fileURLToPath(new URL('../' + p, import.meta.url)), 'utf8'));
 export const DATA = { boards: { fairground: json('data/boards/fairground.json'), pier: json('data/boards/pier.json') }, chance: json('data/chance.json'), cosmetics: json('data/cosmetics.json') };
@@ -60,6 +61,33 @@ export function world({ seed = 7 } = {}) {
 const DT_TABLE = {};   // defuse-together bots: room code:round:module -> the rule lines read out so far
 /** Presses that make sense in each non-arena game, so bots can finish them. One entry per game id. */
 export const UI_BOTS = {
+  // pumpkin-carve-off: carves two eyes and a smile, says done; then votes for the next lantern along that is not its own
+  'pumpkin-carve-off': P => {
+    const g = P.last.s?.g, k = P.last.phase, me = P.last.gp?.d; if (!g?.judge || !k) return;
+    const hx = (x, y) => x.toString(16).padStart(2, '0') + y.toString(16).padStart(2, '0');
+    if (g.phase === 'carve' && !k.pcDone) { k.pcDone = true; [[[90, 100], [100, 110]], [[156, 100], [166, 110]], [[80, 170], [128, 196 + P.pid * 4], [176, 170]]].forEach((pts, i) => P.send({ t: 'act', a: 'cut', d: { s: i + 1, w: i === 2 ? 0 : 1, p: pts.map(([x, y]) => hx(x, y)).join('') } })); P.send({ t: 'act', a: 'done', d: true }); }
+    if (g.phase === 'vote' && !k.pcVoted && me?.mine != null) { k.pcVoted = true; const n = P.room.members.filter(m => m.seat != null).length; P.send({ t: 'act', a: 'vote', d: n === 2 && P.pid % 2 ? 'both' : (me.mine + 1) % n }); }
+  },
+  // apple-bobbing: counts its own clock from the first 'play' state, bites when its apple is under its face (every
+  // fourth apple a little late, so it splashes), and leaves the rubber spiders alone
+  'apple-bobbing': P => {
+    const g = P.last.s?.g, k = P.last.phase; if (!g || g.phase === 'count' || !k) return;
+    const init = k.abInit || (k.abInit = P.got.findLast(m => m.t === 'phase' && m.phase === 'intro')?.init); if (!init) return;
+    k.abT = (k.abT ?? -0.05) + 0.05; const t = Math.max(0, k.abT - 0.05); if (t > init.play) return;
+    const L = k.abLane || (k.abLane = abLane()); abSettle(L, init.apples, t);
+    const ap = init.apples[L.k]; if (!ap || ap.kind === 'spider' || t < L.from || t < L.stun) return;
+    const x = Math.abs(abX(ap, t - L.from)), z = init.zone[ap.kind], sloppy = (L.k + P.pid) % 4 === 0 && L.splash < 6;
+    if (sloppy ? x < z * 1.4 || x > z * 2.2 : x > z * 0.8) return;
+    const kk = L.k; abBite(L, init.apples, t); P.send({ t: 'act', a: 'bite', d: { k: kk, t } });
+  },
+  // monster-mash: like the orchestra bot: judges each arrow just after its time (every sixth missed, every third good)
+  'monster-mash': P => {
+    const g = P.last.s?.g, k = P.last.phase; if (g?.phase !== 'play' || !k) return;
+    const init = k.mmInit || (k.mmInit = P.got.findLast(m => m.t === 'phase' && m.phase === 'intro')?.init); if (!init) return;
+    k.mmT = (k.mmT || 0) + 0.05; k.mmN = k.mmN ?? -1;
+    const ss = 30 / init.chart.bpm;
+    while (k.mmN + 1 < init.chart.steps.length && init.chart.steps[k.mmN + 1] * ss < k.mmT - 0.05) { const n = ++k.mmN; if ((n + P.pid) % 6) P.send({ t: 'act', a: 'hit', d: { n, q: (n + P.pid) % 3 ? 0 : 1 } }); }
+  },
   // jellybean-jar: one guess a round near the real count (a different miss per player), locked in
   'jellybean-jar': P => { const g = P.last.s?.g, k = P.last.phase; if (g?.phase !== 'guess' || !k || k.jjR === g.round) return; k.jjR = g.round; P.send({ t: 'act', a: 'guess', d: { n: g.n + (P.pid % 4) * 4, ok: true } }); },
   // quick-draw: taps once each bell (its own reaction time differs per player)

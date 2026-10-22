@@ -5,38 +5,43 @@
 import { RULES } from './sim.js';
 import { scoreBar, floatText } from '../../client/gamehud.js';
 import { F } from '../../shared/arena.js';
+import { pumpkinGeo, witchHatGeo, faceTexture } from '../../client/halloween.js';
 
 export function createView(ctx) {
   const { THREE, group, stage, meta } = ctx;
-  const R = meta.arena.r;
+  const R = meta.arena.r, HW = ctx.season === 'halloween';     // Halloween: a lavender rink on a purple sea, glowing slime balls, pumpkin-headed snowmen
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), v = new THREE.Vector3(), sc = new THREE.Vector3(), e3 = new THREE.Euler();
   // ---- sea, floes, bergs
-  const sea = new THREE.Mesh(new THREE.CircleGeometry(70, 40).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: '#1f6fa8', roughness: 0.35, metalness: 0.1 })); sea.position.y = -3.4; group.add(sea);
-  const floes = new THREE.InstancedMesh(new THREE.CylinderGeometry(1, 1, 0.3, 7), new THREE.MeshStandardMaterial({ color: '#e8f6ff', roughness: 0.5 }), 22);
-  const bergs = new THREE.InstancedMesh(new THREE.ConeGeometry(1, 2.4, 5), new THREE.MeshStandardMaterial({ color: '#d4f0ff', roughness: 0.4, flatShading: true }), 7);
+  const sea = new THREE.Mesh(new THREE.CircleGeometry(70, 40).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: HW ? '#2a2058' : '#1f6fa8', roughness: 0.35, metalness: 0.1 })); sea.position.y = -3.4; group.add(sea);
+  const floes = new THREE.InstancedMesh(new THREE.CylinderGeometry(1, 1, 0.3, 7), new THREE.MeshStandardMaterial({ color: HW ? '#b9a8e0' : '#e8f6ff', roughness: 0.5 }), 22);
+  const bergs = new THREE.InstancedMesh(new THREE.ConeGeometry(1, 2.4, 5), new THREE.MeshStandardMaterial({ color: HW ? '#a894d8' : '#d4f0ff', roughness: 0.4, flatShading: true }), 7);
   for (let i = 0; i < 22; i++) { const a = i * 2.7, r = 11 + (i * 5.3) % 14; m4.compose(v.set(Math.sin(a) * r, -3.3, Math.cos(a) * r), q.setFromEuler(e3.set(0, a, 0)), sc.set(0.5 + (i % 4) * 0.4, 1, 0.4 + (i % 3) * 0.4)); floes.setMatrixAt(i, m4); }
   for (let i = 0; i < 7; i++) { const a = i * 0.9 + 0.4, r = 15 + (i * 3.7) % 8; m4.compose(v.set(Math.sin(a) * r, -2.4, Math.cos(a) * r), q.identity(), sc.set(1 + (i % 3) * 0.5, 1 + (i % 2) * 0.6, 1 + (i % 3) * 0.4)); bergs.setMatrixAt(i, m4); }
   group.add(floes, bergs);
   // ---- the rink: ice slab, painted rings, snow packed round the side
-  const ice = new THREE.Mesh(new THREE.CylinderGeometry(R, R * 0.86, 1.6, 56), new THREE.MeshStandardMaterial({ color: '#bfeaff', roughness: 0.12, metalness: 0.15 }));
+  const ice = new THREE.Mesh(new THREE.CylinderGeometry(R, R * 0.86, 1.6, 56), new THREE.MeshStandardMaterial({ color: HW ? '#cdbdf2' : '#bfeaff', roughness: 0.12, metalness: 0.15 }));
   ice.position.y = -0.8; ice.receiveShadow = true; group.add(ice);
-  const paint = new THREE.MeshBasicMaterial({ color: '#5fb6ff', transparent: true, opacity: 0.55, depthWrite: false });
+  const paint = new THREE.MeshBasicMaterial({ color: HW ? '#ff8a1a' : '#5fb6ff', transparent: true, opacity: 0.55, depthWrite: false });
   for (const [a, b] of [[2.6, 2.8], [5.4, 5.6], [R - 0.55, R - 0.35]]) { const ring = new THREE.Mesh(new THREE.RingGeometry(a, b, 64).rotateX(-Math.PI / 2), paint); ring.position.y = 0.01; group.add(ring); }
-  const dot = new THREE.Mesh(new THREE.CircleGeometry(0.7, 32).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: '#ff5a7a', transparent: true, opacity: 0.7, depthWrite: false })); dot.position.y = 0.012; group.add(dot);
-  const LUMPS = 46, lumps = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.7, 0), new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.9, flatShading: true }), LUMPS);
+  const dot = new THREE.Mesh(new THREE.CircleGeometry(0.7, 32).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: HW ? '#7dd84a' : '#ff5a7a', transparent: true, opacity: 0.7, depthWrite: false })); dot.position.y = 0.012; group.add(dot);
+  const LUMPS = 46, lumps = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.7, 0), new THREE.MeshStandardMaterial({ color: HW ? '#e6dcff' : '#ffffff', roughness: 0.9, flatShading: true }), LUMPS);
   for (let i = 0; i < LUMPS; i++) { const a = i / LUMPS * Math.PI * 2, r = R - 0.05; m4.compose(v.set(Math.sin(a) * r, -0.62 - (i % 3) * 0.12, Math.cos(a) * r), q.setFromEuler(e3.set(i, i * 2, 0)), sc.setScalar(0.75 + (i % 4) * 0.12)); lumps.setMatrixAt(i, m4); }
   lumps.castShadow = true; group.add(lumps);
   // ---- snowballs, puffs, snowmen
-  const ballGeo = new THREE.SphereGeometry(0.24, 12, 8), ballMat = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.6 });
+  const ballGeo = new THREE.SphereGeometry(0.24, 12, 8), ballMat = HW ? new THREE.MeshStandardMaterial({ color: '#8dff5a', roughness: 0.25, emissive: '#3fbf2a', emissiveIntensity: 0.7 }) : new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.6 });
   const balls = new Map(), puffs = [], snowmen = new Map();
   const puffGeo = new THREE.IcosahedronGeometry(0.5, 0);
-  function puff(x, z, y = 1) { const p = new THREE.Mesh(puffGeo, new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.9, depthWrite: false })); p.position.set(x, y, z); group.add(p); puffs.push({ p, t: 0 }); }
+  function puff(x, z, y = 1) { const p = new THREE.Mesh(puffGeo, new THREE.MeshBasicMaterial({ color: HW ? '#9cff7a' : '#ffffff', transparent: true, opacity: 0.9, depthWrite: false })); p.position.set(x, y, z); group.add(p); puffs.push({ p, t: 0 }); }
   const snowMat = new THREE.MeshStandardMaterial({ color: '#f7fbff', roughness: 0.8 }), coal = new THREE.MeshStandardMaterial({ color: '#222' }), carrot = new THREE.MeshStandardMaterial({ color: '#ff8a1f' });
   const sGeo = [new THREE.SphereGeometry(0.62, 14, 10), new THREE.SphereGeometry(0.46, 14, 10), new THREE.SphereGeometry(0.34, 14, 10)], eyeGeo = new THREE.SphereGeometry(0.05, 6, 4), noseGeo = new THREE.ConeGeometry(0.07, 0.35, 8).rotateX(Math.PI / 2);
+  const headGeo = HW ? pumpkinGeo(THREE, 0.4) : null, headMat = HW ? new THREE.MeshStandardMaterial({ color: '#ff7a14', roughness: 0.5, emissive: '#a83a00', emissiveIntensity: 0.3 }) : null;
+  const faceGeo = HW ? new THREE.PlaneGeometry(0.56, 0.56) : null, faceMat = HW ? new THREE.MeshBasicMaterial({ map: faceTexture(THREE), transparent: true, depthWrite: false, toneMapped: false }) : null;
+  const hatGeo = HW ? witchHatGeo(THREE, 0.36) : null, hatMat = HW ? new THREE.MeshStandardMaterial({ color: '#6a32b8', roughness: 0.7 }) : null;
   function makeSnowman() {
     const g = new THREE.Group(); let y = 0.55;
-    sGeo.forEach((geo, i) => { const s = new THREE.Mesh(geo, snowMat); s.position.y = y; s.castShadow = true; g.add(s); y += [0.85, 0.66, 0][i]; });
+    sGeo.forEach((geo, i) => { const s = new THREE.Mesh(HW && i === 2 ? headGeo : geo, HW && i === 2 ? headMat : snowMat); s.position.y = y; s.castShadow = true; g.add(s); y += [0.85, 0.66, 0][i]; });
     for (const sx of [-0.12, 0.12]) { const e = new THREE.Mesh(eyeGeo, coal); e.position.set(sx, 2.12, 0.3); g.add(e); }
+    if (HW) { const f = new THREE.Mesh(faceGeo, faceMat); f.position.set(0, 2.08, 0.47); g.add(f); const hat = new THREE.Mesh(hatGeo, hatMat); hat.position.y = 2.3; hat.rotation.z = 0.12; g.add(hat); return g; }
     const n = new THREE.Mesh(noseGeo, carrot); n.position.set(0, 2.04, 0.45); g.add(n);
     const hat = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.26, 0.34, 12), new THREE.MeshStandardMaterial({ color: '#c8324a' })); hat.position.y = 2.42; g.add(hat);
     return g;
@@ -47,7 +52,10 @@ export function createView(ctx) {
   for (const p of ctx.players) { const c = bar.el.querySelector(`[data-pid="${p.pid}"]`); const hEl = document.createElement('i'); hEl.className = 'sb-lives'; c?.querySelector('.nm')?.after(hEl); hearts.set(p.pid, hEl); }
   const name = pid => (pid === ctx.me ? 'You' : ctx.players.find(p => p.pid === pid)?.name || '?');
   const flagsOf = new Map();
+  // Halloween dressing: pumpkins riding the ice floes, the mist down at sea level
+  const floeSpots = [0, 1, 2, 3, 4, 5, 6, 7, 8].map(i => { const a = i * 2.7, r = 11 + (i * 5.3) % 14; return [Math.sin(a) * r, -3.15, Math.cos(a) * r]; });
   return {
+    halloween: { y: -3.2, spots: floeSpots, ghosts: [[-R - 2.6, 4.6, -R * 0.3], [R + 2.4, 4.9, -R * 0.5], [0.6, 5.4, -R - 3]] },
     state(g) {
       const seen = new Set();
       for (const [id, x, z] of g.s) {

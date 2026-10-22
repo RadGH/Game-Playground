@@ -109,7 +109,7 @@ lobby -> [ board -> vote -> intro -> game -> results ] x rounds -> final -> lobb
 
 ## Minigames
 
-40 games. Round 4 (2026-10-21) added 26: the owner's five (Wobblewheel Rally — racing, Boardwalk Brawl — side-scrolling
+52 games. Round 5 (2026-10-22) added 12 (Tiptoe Tiger, Hay Bale Scramble, Fizzpop Pass, Bumper Bash, Sheep Shuffle, Mole Mallet, Rope Rumble, Lantern Leap, Jellybean Jar, Quick Draw, Pin the Tail, Size Up — Size Up draws 153 Font Awesome Pro icons, copied in by `tools/build-size-up-icons.mjs`). Round 4 (2026-10-21) added 26: the owner's five (Wobblewheel Rally — racing, Boardwalk Brawl — side-scrolling
 brawler, Fling Ring — toss-out, Ring-a-Ding Rumble — boxing, Costume Catwalk — dress-up runway) and every unbuilt game
 of the design document's 30-game list. Several were tuned against perfect bots (Kitchen Catastrophe targets, Castle
 Defense waves, Dragon's Weak Spot): ease them after a real play-test if they feel hard. Round 5 (2026-10-22) eased those three by about one step

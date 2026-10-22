@@ -238,3 +238,18 @@ body[data-phase=game] .fb-btn { width: 28px; height: 28px; font-size: 15px; opac
   .places li { grid-template-columns: 34px minmax(0, 1fr) auto; grid-template-areas: 'pl who award' 'pl score score'; row-gap: 0; }
   .places .pl { grid-area: pl; } .places li > .chip { grid-area: who; } .places .award { grid-area: award; } .places .score { grid-area: score; font-size: 12px; }
 }
+.pool-g.asleep { opacity: .45; } .pool-g.asleep small { color: #8a3ad8; font-weight: 800; }
+/* ---- round 6: the Halloween theme for the menus (body[data-season] is set from the room, or the date before one) ---- */
+body[data-season=halloween] { --bg: #1d1430; }
+body[data-season=halloween] .panel { background: #fff4e4; border-color: #1d1430; box-shadow: 0 7px 0 #1d1430; }
+body[data-season=halloween] .btn.primary { background: #ff8a1a; }
+body[data-season=halloween] .pill.on, body[data-season=halloween] .mode.on { background: #ffb347; }
+body[data-season=halloween] #screen.title::before, body[data-season=halloween] #screen.lobby::before { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: -1;
+  background: radial-gradient(circle at 82% 12%, rgba(255, 240, 190, .22) 0 50px, transparent 52px), linear-gradient(180deg, rgba(40, 18, 70, .55), rgba(29, 20, 48, 0) 45%); }
+.bats { position: fixed; inset: 0; pointer-events: none; z-index: 19; overflow: hidden; }
+.bats i { position: absolute; width: 34px; height: 16px; background: #120a1e; clip-path: polygon(0 30%, 18% 0, 30% 40%, 42% 10%, 50% 35%, 58% 10%, 70% 40%, 82% 0, 100% 30%, 76% 100%, 60% 70%, 50% 90%, 40% 70%, 24% 100%); animation: bat 9s linear infinite; opacity: .8; }
+.bats i:nth-child(2) { top: 18%; animation-duration: 12s; animation-delay: -4s; transform: scale(.7); } .bats i:nth-child(3) { top: 8%; animation-duration: 15s; animation-delay: -9s; }
+.bats i:nth-child(1) { top: 26%; }
+@keyframes bat { from { left: -40px; translate: 0 0; } 25% { translate: 0 -18px; } 50% { translate: 0 10px; } 75% { translate: 0 -12px; } to { left: 105%; translate: 0 0; } }
+@media (prefers-reduced-motion: reduce) { .bats { display: none; } }
+body[data-phase=game] .bats, body[data-phase=board] .bats, body[data-phase=intro] .bats { display: none; }

@@ -10,6 +10,7 @@ import { DT, packBody } from '../shared/arena.js';
 import { makeRng } from '../shared/rng.js';
 import { GAMES, eligible } from '../games/index.js';
 import { createBoardMatch, boardStandings } from './board.js';
+import { SEASON_IDS, effectiveSeason, seasonByDate, inSeason } from '../shared/seasons.js';
 
 export const TIMES = Object.freeze({ VOTE_MS: 10000, INTRO_MS: 7000, RESULTS_MS: 8000, FINAL_MS: 20000, GONE_LOBBY_MS: 15000, GONE_MATCH_MS: 90000, EMPTY_MS: 60000, GAME_GRACE_MS: 3000, BONUS_MS: 11000 });
 export const OPTS = Object.freeze({
@@ -19,6 +20,7 @@ export const OPTS = Object.freeze({
   rounds: { min: 2, max: 8, def: 4 },
   shortlist: { min: 2, max: 4, def: 3 },
   difficulty: { values: ['easy', 'normal', 'hard'], def: 'normal' },
+  holiday: { values: ['auto', 'off', ...SEASON_IDS], def: 'auto' },        // holiday minigames + reskins: by the date, never, or forced on
 });
 /** What a minigame placing is worth, best first. Board mode pays tickets, the marathon pays points. */
 /** Endless: a 'keep going?' vote after every this many minigames; it gets harder every ENDLESS_STEP; never more than ENDLESS_MAX. */
@@ -33,7 +35,10 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
   const rng = makeRng(seed);
   const members = new Map();          // pid -> member
   let nextPid = 1, hostPid = null, phase = 'lobby', until = 0, emptySince = null;
-  const opts = { board: OPTS.board.def, mode: OPTS.mode.def, teams: OPTS.teams.def, rounds: OPTS.rounds.def, shortlist: OPTS.shortlist.def, difficulty: OPTS.difficulty.def, pool: [] };
+  const opts = { board: OPTS.board.def, mode: OPTS.mode.def, teams: OPTS.teams.def, rounds: OPTS.rounds.def, shortlist: OPTS.shortlist.def, difficulty: OPTS.difficulty.def, holiday: OPTS.holiday.def, pool: [] };
+  const date = () => new Date(now());
+  const season = () => effectiveSeason(opts.holiday, date());              // holiday games + reskins (the host can force it)
+  const costumeOk = id => inSeason(data.cosmetics?.items?.find(c => c.id === id), seasonByDate(date()));   // costumes: the date only
   let match = null;                    // { mode, round, rounds, points, wins, played, board, lastGame }
   let vote = null, game = null, lastPhaseMsg = null, tickNo = 0;
 
@@ -41,11 +46,11 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
   const seated = () => [...members.values()].filter(m => m.seat != null).sort((a, b) => a.seat - b.seat);
   const active = () => seated().filter(m => m.connected);
   const freeSeat = () => { for (let s = 0; s < MAX_SEATS; s++) if (![...members.values()].some(m => m.seat === s)) return s; return null; };
-  const pub = m => ({ pid: m.pid, name: m.name, look: m.look, costume: m.costume, seat: m.seat, ready: m.ready, on: m.connected, display: m.display, wait: m.seat == null && !m.display });
+  const pub = m => ({ pid: m.pid, name: m.name, look: m.look, costume: costumeOk(m.costume) ? m.costume : 'cos_none', seat: m.seat, ready: m.ready, on: m.connected, display: m.display, wait: m.seat == null && !m.display });
   const send = (m, obj) => { if (m.connected && m.send) m.send(JSON.stringify(obj)); };
   const cast = obj => { const s = JSON.stringify(obj); for (const m of members.values()) if (m.connected && m.send) m.send(s); };
   function roomMsg(m) {
-    return { t: 'room', code, phase, host: hostPid, you: m.pid, opts, members: [...members.values()].map(pub),
+    return { t: 'room', code, phase, host: hostPid, you: m.pid, opts, season: season(), dateSeason: seasonByDate(date()), members: [...members.values()].map(pub),
       match: match ? { mode: match.mode, round: match.round, rounds: match.rounds, points: match.points, wins: match.wins, board: match.board ? match.board.view() : null, boardId: match.boardId || null } : null };
   }
   const syncRoom = () => { for (const m of members.values()) send(m, roomMsg(m)); };
@@ -97,7 +102,7 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
     promote();
     const players = active();
     if (!players.length) return err(by, 'empty', 'Nobody is seated yet.');
-    if (!eligible(players.length, opts.pool).length) return err(by, 'pool', 'No minigame in the chosen pool fits this many players.');
+    if (!eligible(players.length, opts.pool, season()).length) return err(by, 'pool', 'No minigame in the chosen pool fits this many players.');
     if (opts.teams && players.length === 3) return err(by, 'teams', 'Teams need 2 or 4 players (red + green against blue + pink).');
     match = { mode: opts.mode, round: 0, rounds: opts.mode === 'endless' ? null : opts.rounds, points: {}, wins: {}, played: [], board: null, lastGame: null, teams: opts.teams ? {} : null };
     if (match.teams) for (const m of players) match.teams[m.pid] = m.seat % 2;
@@ -105,11 +110,13 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
     if (match.mode === 'board') {
       const names = new Proxy({}, { get: (_, pid) => members.get(+pid)?.name });
       match.boardId = data.boards[opts.board] ? opts.board : 'fairground';
-      match.board = createBoardMatch({ def: data.boards[match.boardId], chance: data.chance, order: players.map(m => m.pid), rng: rng.fork(), names, emit: ev => cast({ t: 'bd', ...ev }) });
+      match.board = createBoardMatch({ def: data.boards[match.boardId], chance: seasonal(data.chance, season()), order: players.map(m => m.pid), rng: rng.fork(), names, emit: ev => cast({ t: 'bd', ...ev }) });
     }
     log('match', { code, mode: match.mode, players: players.length });
     nextRound();
   }
+  /** The board's chance events and bulletins, with this season's added (and other seasons' left out). */
+  const seasonal = (ch, s) => ({ ...ch, events: ch.events.filter(e => inSeason(e, s)), bulletins: (ch.bulletins || []).filter(e => inSeason(e, s)) });
   function nextRound() {
     if (match.mode === 'endless') {
       if (match.round >= ENDLESS.MAX) return finish();
@@ -124,7 +131,7 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
   function startVote() {
     promote();
     const n = active().length || 1;
-    let pool = eligible(n, opts.pool); if (!pool.length) pool = eligible(n);
+    let pool = eligible(n, opts.pool, season()); if (!pool.length) pool = eligible(n, [], season());
     const fresh = pool.filter(id => !match.played.includes(id)), notLast = pool.filter(id => id !== match.lastGame);
     // unplayed games first, then anything but the one just played, then whatever is left
     const ranked = [...rng.shuffle(fresh), ...rng.shuffle(notLast.filter(id => !fresh.includes(id))), ...pool.filter(id => id === match.lastGame && !fresh.includes(id))];
@@ -147,12 +154,12 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
     const def = GAMES[id], players = active();
     const list = players.map(m => ({ pid: m.pid, seat: m.seat, name: m.name }));
     const difficulty = match.mode === 'endless' ? ['easy', 'normal', 'hard'][Math.min(2, Math.floor((match.round - 1) / ENDLESS.STEP))] : opts.difficulty;   // the endless fair gets harder
-    const inst = def.create({ seed: Math.floor(rng() * 2 ** 31), rng: rng.fork(), players: list, difficulty });
+    const inst = def.create({ seed: Math.floor(rng() * 2 ** 31), rng: rng.fork(), players: list, difficulty, season: season() });
     for (const m of members.values()) { m.queue.length = 0; m.lastIn = null; m.starve = 0; m.ack = 0; m.skip = false; }
     game = { id, def, inst, players: list.map(p => p.pid), started: false, endsAt: 0, lastState: '', lastPriv: new Map(), gone: new Set() };
-    game.introMsg = { t: 'phase', phase: 'intro', game: id, players: list, round: match.round, rounds: match.rounds, difficulty };
+    game.introMsg = { t: 'phase', phase: 'intro', game: id, players: list, round: match.round, rounds: match.rounds, difficulty, season: season() };
     match.played.push(id); match.lastGame = id;
-    setPhase('intro', { game: id, players: list, init: inst.init(), b: bodiesOf(inst), round: match.round, rounds: match.rounds, difficulty }, TIMES.INTRO_MS);
+    setPhase('intro', { game: id, players: list, init: inst.init(), b: bodiesOf(inst), round: match.round, rounds: match.rounds, difficulty, season: season() }, TIMES.INTRO_MS);
     if (inst.priv) for (const m of players) send(m, { t: 'gp', d: inst.priv(m.pid) });
   }
   function beginPlay() {

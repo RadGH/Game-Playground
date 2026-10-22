@@ -56,9 +56,15 @@ import * as sheepShuffle from './sheep-shuffle/sim.js';
 import * as moleMallet from './mole-mallet/sim.js';
 import * as ropeRumble from './rope-rumble/sim.js';
 import * as lanternLeap from './lantern-leap/sim.js';
-export const GAMES = Object.freeze(Object.fromEntries([paintPanic, trapdoorTreasury, meteorDash, snowballShowdown, stackAttack, drawTheDisaster, memoryHeist, circuitScramble, laserLimbo, cannonballCatch, balloonStampede, captionClash, patternImpostor, coinstorm, boardwalkBrawl, flingRing, wobblewheelRally, ringADingRumble, costumeCatwalk, oneButtonOrchestra, goingGoingGone, tileFlipRace, monsterForecast, wobbleTower, ropeBridgePanic, slipperyDelivery, portalRouting, wordRelay, safecracker, treasureMapBluff, auctionOfChaos, alibiAssembly, secretArchitect, twoTruthsOneGoblin, dragonsWeakSpot, kitchenCatastrophe, castleDefense, defuseTogether, ghostPhotographer, stormShelter, jellybeanJar, quickDraw, pinTheTail, sizeUp, tiptoeTiger, hayBaleScramble, fizzpopPass, bumperBash, sheepShuffle, moleMallet, ropeRumble, lanternLeap].map(g => [g.meta.id, g])));
+import * as trickOrTreatStreet from './trick-or-treat-street/sim.js';
+import * as ghostTag from './ghost-tag/sim.js';
+import * as pumpkinCarveOff from './pumpkin-carve-off/sim.js';
+import * as appleBobbing from './apple-bobbing/sim.js';
+import * as monsterMash from './monster-mash/sim.js';
+export const GAMES = Object.freeze(Object.fromEntries([paintPanic, trapdoorTreasury, meteorDash, snowballShowdown, stackAttack, drawTheDisaster, memoryHeist, circuitScramble, laserLimbo, cannonballCatch, balloonStampede, captionClash, patternImpostor, coinstorm, boardwalkBrawl, flingRing, wobblewheelRally, ringADingRumble, costumeCatwalk, oneButtonOrchestra, goingGoingGone, tileFlipRace, monsterForecast, wobbleTower, ropeBridgePanic, slipperyDelivery, portalRouting, wordRelay, safecracker, treasureMapBluff, auctionOfChaos, alibiAssembly, secretArchitect, twoTruthsOneGoblin, dragonsWeakSpot, kitchenCatastrophe, castleDefense, defuseTogether, ghostPhotographer, stormShelter, jellybeanJar, quickDraw, pinTheTail, sizeUp, tiptoeTiger, hayBaleScramble, fizzpopPass, bumperBash, sheepShuffle, moleMallet, ropeRumble, lanternLeap, trickOrTreatStreet, ghostTag, pumpkinCarveOff, appleBobbing, monsterMash].map(g => [g.meta.id, g])));
 export const gameIds = () => Object.keys(GAMES);
 export const metaOf = id => GAMES[id]?.meta || null;
 export const loadView = id => import(`./${id}/view.js`);
 /** Games that can be played by `n` players, from `pool` (empty = every game). */
-export const eligible = (n, pool = []) => gameIds().filter(id => (!pool.length || pool.includes(id)) && GAMES[id].meta.min <= n && GAMES[id].meta.max >= n);
+/** Games that fit n players, from the host's pool (empty = all), in season (a holiday game only while its season is on). */
+export const eligible = (n, pool = [], season = null) => gameIds().filter(id => (!pool.length || pool.includes(id)) && GAMES[id].meta.min <= n && GAMES[id].meta.max >= n && (!GAMES[id].meta.season || GAMES[id].meta.season === season));

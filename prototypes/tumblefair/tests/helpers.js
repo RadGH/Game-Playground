@@ -54,6 +54,27 @@ export function world({ seed = 7 } = {}) {
 }
 /** Presses that make sense in each non-arena game, so bots can finish them. One entry per game id. */
 export const UI_BOTS = {
+  // costume-catwalk: wears one piece in four slots, picks a pose, says ready; then votes for the next look along
+  'costume-catwalk': P => {
+    const g = P.last.s?.g, k = P.last.phase, me = P.last.gp?.d; if (!g || !k || !me?.tray) return;
+    if (g.phase === 'dress' && !k.ckDressed) { k.ckDressed = true; for (const s of ['hat', 'top', 'bottom', 'prop']) P.send({ t: 'act', a: 'wear', d: { s, i: P.pid % me.tray[s].length } }); P.send({ t: 'act', a: 'pose', d: P.pid % 4 }); P.send({ t: 'act', a: 'done', d: true }); }
+    if (g.phase === 'vote' && !k.ckVoted && me.mine != null && g.show.length > 1) { k.ckVoted = true; P.send({ t: 'act', a: 'vote', d: (me.mine + 1) % g.show.length }); }
+  },
+  // one-button-orchestra: counts its own clock from the first 'play' state and judges each note just after its time
+  // (every seventh one missed, every third one only good)
+  'one-button-orchestra': P => {
+    const g = P.last.s?.g, k = P.last.phase; if (g?.phase !== 'play' || !k) return;
+    const init = k.obInit || (k.obInit = P.got.findLast(m => m.t === 'phase' && m.phase === 'intro')?.init); if (!init) return;
+    k.obT = (k.obT || 0) + 0.05; k.obN = k.obN ?? -1;
+    const ss = 30 / init.chart.bpm;
+    while (k.obN + 1 < init.chart.steps.length && init.chart.steps[k.obN + 1] * ss < k.obT - 0.05) { const n = ++k.obN; if ((n + P.pid) % 7) P.send({ t: 'act', a: 'hit', d: { n, q: (n + P.pid) % 3 ? 0 : 1 } }); }
+  },
+  // going-going-gone: rummages a little, bids a small amount, locks in — once a round
+  'going-going-gone': P => {
+    const g = P.last.s?.g, k = P.last.phase; if (g?.phase !== 'bid' || !k || k.ggR === g.round) return;
+    k.ggR = g.round; P.send({ t: 'act', a: 'mash' });
+    P.send({ t: 'act', a: 'bid', d: Math.min(g.energy[P.pid], (P.pid + g.round) % 5 + 1) }); P.send({ t: 'act', a: 'lock', d: true });
+  },
   'trapdoor-treasury': P => { const g = P.last.s?.g; if (g?.phase === 'pick' && P.pickedRound !== g.round) { P.pickedRound = g.round; P.send({ t: 'act', a: 'pick', d: g.round % 3 === 0 ? 'bank' : (P.pid + g.round) % 3 }); } },
   // draws three lines and says done, then votes for the next picture along that is not its own
   'draw-the-disaster': P => {

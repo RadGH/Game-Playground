@@ -16,8 +16,15 @@ import * as balloonStampede from './balloon-stampede/sim.js';
 import * as captionClash from './caption-clash/sim.js';
 import * as patternImpostor from './pattern-impostor/sim.js';
 import * as coinstorm from './coinstorm/sim.js';
+import * as boardwalkBrawl from './boardwalk-brawl/sim.js';
+import * as flingRing from './fling-ring/sim.js';
+import * as wobblewheelRally from './wobblewheel-rally/sim.js';
+import * as ringADingRumble from './ring-a-ding-rumble/sim.js';
+import * as costumeCatwalk from './costume-catwalk/sim.js';
+import * as oneButtonOrchestra from './one-button-orchestra/sim.js';
+import * as goingGoingGone from './going-going-gone/sim.js';
 
-export const GAMES = Object.freeze(Object.fromEntries([paintPanic, trapdoorTreasury, meteorDash, snowballShowdown, stackAttack, drawTheDisaster, memoryHeist, circuitScramble, laserLimbo, cannonballCatch, balloonStampede, captionClash, patternImpostor, coinstorm].map(g => [g.meta.id, g])));
+export const GAMES = Object.freeze(Object.fromEntries([paintPanic, trapdoorTreasury, meteorDash, snowballShowdown, stackAttack, drawTheDisaster, memoryHeist, circuitScramble, laserLimbo, cannonballCatch, balloonStampede, captionClash, patternImpostor, coinstorm, boardwalkBrawl, flingRing, wobblewheelRally, ringADingRumble, costumeCatwalk, oneButtonOrchestra, goingGoingGone].map(g => [g.meta.id, g])));
 export const gameIds = () => Object.keys(GAMES);
 export const metaOf = id => GAMES[id]?.meta || null;
 export const loadView = id => import(`./${id}/view.js`);

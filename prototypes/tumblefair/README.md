@@ -228,7 +228,7 @@ device and the page's last errors. Read them with `node tools/feedback-report.mj
 
 `npm test` here (node): `tests/room.test.js` plays whole matches with bot phones for 1–4 players in both modes,
 reconnects, late joiners, host handover, the shop, input cleaning; one test file per minigame. Browser checks:
-`tools/look.mjs` (screenshots) and `tests/tumblefair.spec.js` (Playwright, run from the playground root under the lock).
+`tools/phone-check.mjs` (round 5: real touch drags on three phone sizes + a WebKit pass — the menus scroll and Start/Done are reachable; the iPhone lobby could not scroll because `#screen` had `pointer-events: none`, which WebKit will not scroll), `tools/look.mjs` (screenshots) and `tests/tumblefair.spec.js` (Playwright, run from the playground root under the lock).
 
 ## Not built yet (parked 2026-10-13 when the owner said "wrap up")
 

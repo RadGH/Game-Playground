@@ -1,0 +1,19 @@
+/* Slippery Delivery: your cart count (and, solo, the medal targets) under the score bar, the PIES and RUSH x2 labels
+   in the square, the banner. */
+.game-slippery-delivery > * { pointer-events: none !important; }
+.game-slippery-delivery .sd-hud { position: absolute; top: calc(var(--st) + 58px); left: 50%; transform: translateX(-50%); display: flex; gap: 10px; align-items: center; white-space: nowrap;
+  padding: 4px 12px; border-radius: 999px; background: rgba(255, 248, 231, .94); border: 3px solid var(--ink); box-shadow: 0 3px 0 var(--ink); font: 800 15px/1.2 var(--font); }
+.sd-hud b { font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: .5px; opacity: .75; }
+.sd-hud em { font-style: normal; font-weight: 900; font-size: 18px; }
+.sd-cart.full em { color: #c2330f; }
+.sd-medals { display: flex; gap: 4px; }
+.sd-medals i { font-style: normal; font-size: 12px; padding: 0 6px; border-radius: 999px; background: #e9e2cf; opacity: .7; }
+.sd-medals i.got { opacity: 1; background: var(--sun); border: 2px solid var(--ink); }
+.sd-medals i.got::before { content: '★ '; }
+.tag.sd-pies { background: #ffd23f; color: var(--ink); text-shadow: none; font-weight: 900; }
+.tag.sd-rush { background: #ff5f5f; font-weight: 900; font-size: 14px; animation: sd-bob .5s infinite alternate; }
+@keyframes sd-bob { to { margin-top: -4px; } }
+.game-slippery-delivery .sd-banner { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%) scale(.6); opacity: 0;
+  font: 900 clamp(32px, 9vw, 64px)/1 var(--font); color: var(--sun); -webkit-text-stroke: 2.5px var(--ink); paint-order: stroke fill; text-shadow: 0 5px 0 var(--ink); white-space: nowrap; transition: transform .25s, opacity .25s; }
+.sd-banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+@media (max-width: 520px) { .game-slippery-delivery .sd-hud { top: calc(var(--st) + 52px); gap: 6px; font-size: 13px; padding: 3px 10px; } .sd-medals i { font-size: 10px; padding: 0 4px; } }

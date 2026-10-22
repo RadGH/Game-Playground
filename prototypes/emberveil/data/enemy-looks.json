@@ -3457,7 +3457,7 @@
      "color": "#2a1010"
     },
     "eyes": {
-     "id": "glow_tear",
+     "id": "glow",
      "color": "#ff8a20",
      "x": 0,
      "y": 0,
@@ -6433,7 +6433,7 @@
      "color": "#333333"
     },
     "extras": {
-     "id": "tattoo",
+     "id": "none",
      "color": "#c85ad0"
     },
     "cape": {
@@ -6557,7 +6557,7 @@
      "color": "#b08a3a"
     },
     "extras": {
-     "id": "soot",
+     "id": "dirt",
      "color": "#4a4038"
     },
     "cape": {

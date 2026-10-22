@@ -278,7 +278,6 @@
     "warpaint",
     "scar",
     "scar_cheek",
-    "tattoo",
     "none"
    ],
    "body": {
@@ -730,7 +729,7 @@
      "color": "#2a6a4a"
     },
     "extras": {
-     "id": "tattoo",
+     "id": "none",
      "color": "#2a7a5a"
     }
    }
@@ -1032,7 +1031,7 @@
      "color": "#c9a227"
     },
     "extras": {
-     "id": "tattoo",
+     "id": "none",
      "color": "#7fe0ee"
     }
    }
@@ -2688,7 +2687,7 @@
      "color": "#d98a3a"
     },
     "eyes": {
-     "id": "glow_tear",
+     "id": "glow",
      "color": "#40e0ff"
     },
     "brows": {
@@ -3322,7 +3321,7 @@
      "id": "none"
     },
     "extras": {
-     "id": "soot",
+     "id": "dirt",
      "color": "#333"
     },
     "cape": {

@@ -10,6 +10,7 @@ import { makeStore } from '../../shared/store.js';
 import { installTooltips } from '../../shared/tooltip.js';
 import { fmt } from '../../shared/format.js';
 import { createChibi2Character } from '../../avatar-3d/js/chibi2.js';
+import { attachHeldFlame } from '../../avatar-3d/js/held-flame.js';
 import * as motion from '../../avatar-3d/js/chibi2-motion.js';
 import * as dualMotion from '../../avatar-3d/js/chibi2-motion-dual.js';      // importing it registers the dual-wield, angling and revive clips
 import { CHIBI2_RACES, CHIBI2_RACE_IDS } from '../../avatar-3d/js/chibi2-races.js';
@@ -31,7 +32,7 @@ const label = (map, v) => map[v] || String(v).replace(/_/g, ' ').replace(/^\w/, 
 // ---------------------------------------------------------------- animation list
 // every clip the motion module offers
 const ANIM_GROUPS = Object.fromEntries(Object.entries(motion.CHIBI2_ANIM_GROUPS).map(([k, v]) => [k, [...v]]));
-let ANIMS = [...new Set([...motion.CHIBI2_EVERY_ANIMS, ...motion.CHIBI2_SWIM_ANIMS])];
+let ANIMS = [...new Set([...motion.CHIBI2_EVERY_ANIMS, ...motion.CHIBI2_SWIM_ANIMS, ...(motion.CHIBI2_MUSIC_ANIMS || [])])];
 for (const [name, v] of [...Object.entries(motion), ...Object.entries(dualMotion)]) {
   // any opt-in list the motion module exports later (CHIBI2_DUAL_ANIMS…) is picked up without a change here
   if (!/^CHIBI2_\w+_ANIMS$/.test(name) || !Array.isArray(v)) continue;
@@ -55,7 +56,7 @@ const baseKeyCache = new Map();
 async function baseKeys(avatar) {
   const k = JSON.stringify(avatar);
   if (!baseKeyCache.has(k)) {
-    const c = await createChibi2Character(avatar, { anims: ['idle'] });
+    const c = await createChibi2Character(avatar, { anims: ['idle'], v25: true });
     baseKeyCache.set(k, { keys: vertexKeys(c), stats: characterStats(c) }); c.dispose();
     if (baseKeyCache.size > 24) baseKeyCache.delete(baseKeyCache.keys().next().value);
   }
@@ -80,7 +81,7 @@ function summarise(row, extract, base, character, hand) {
 function thumbJob(row) {
   return async stage => {
     const body = baselineFor(row), base = await baseKeys(body);
-    const character = await createChibi2Character(dress(body, row, lookOpts(row)), { anims: ['idle'] });
+    const character = await createChibi2Character(dress(body, row, lookOpts(row)), { anims: ['idle'], v25: true });
     const extract = extractAdded(character, base.keys);
     state.measured.set(row.key, summarise(row, extract, base, character, defaultHand(row)));
     let thing, cleanup;
@@ -187,7 +188,7 @@ function ensureScene() {
   scene.addTicker(dt => {
     if (!actor) return;
     const speed = Number(view().speed);
-    actor.setRate(speed > 0 ? speed : 1); actor.update(speed > 0 ? dt : 0);     // paused still holds the pose it stopped on
+    actor.setRate(speed > 0 ? speed : 1); actor.update(speed > 0 ? dt : 0); flame?.update(dt);     // paused still holds the pose it stopped on
     // a one-shot falls back to idle when it ends: play it again while "repeat" is on
     if ($('anim-loop').checked && view().anim !== 'idle' && actor.anim === 'idle' && motion.ONE_SHOTS.has(view().anim)) {
       loopTimer += dt; if (loopTimer > 0.45) { loopTimer = 0; actor.setAnim(view().anim, 0.1, true); }
@@ -209,16 +210,18 @@ async function rebuild() {
   const hand = v.hand || defaultHand(row);
   const look = dress(body, row, { ...lookOpts(row, v), hand });
   let next;
-  try { next = await createChibi2Character(look, { anims: ANIMS }); }
+  try { next = await createChibi2Character(look, { anims: ANIMS, v25: true }); }
   catch (e) { console.error(e); $('stage').classList.remove('busy'); $('stage-msg').textContent = 'Could not build this model: ' + e.message; return; }
   if (seq !== buildSeq) { next.dispose(); return; }
+  flame?.dispose(); flame = null;
   if (actor) { scene.scene.remove(actor.group); actor.dispose(); }
   if (alone) { scene.scene.remove(alone); alone.userData.dispose(); alone = null; }
   extract?.dispose();
   actor = next; base = bare;
+  flame = attachHeldFlame(actor, look);   // a lit torch / cresset burns here as it does in the games
   // for headwear the shown body has hair, so measure a bald twin instead of the one on screen
   if (row.slot === 'hat' && v.hair !== 'none') {
-    const twin = await createChibi2Character(dress(baselineFor(row, bodyOpts), row, { ...lookOpts(row, v), hand }), { anims: ['idle'] });
+    const twin = await createChibi2Character(dress(baselineFor(row, bodyOpts), row, { ...lookOpts(row, v), hand }), { anims: ['idle'], v25: true });
     extract = extractAdded(twin, bare.keys); live = summarise(row, extract, bare, twin, hand); twin.dispose();
   } else { extract = extractAdded(actor, bare.keys); live = summarise(row, extract, bare, actor, hand); }
   live.hand = hand; live.holds = holdsFor(row, hand);
@@ -280,7 +283,20 @@ function setCamera(preset) {
   if (!scene || !actor) return;
   const parts = actor.parts, H = actor.metrics().height, t = new THREE.Vector3(0, H * 0.5, 0);
   let dist = H * 2.7, yaw = 0.35, pitch = 0.12;
-  if (preset === 'item' && extract?.triangles) { extract.box.getCenter(t); dist = Math.max(0.6, extract.size.length() * 2.6); }
+  if (preset === 'auto') {
+    // Owner 2026-10-21: frame each item so the whole thing shows — from the side of the hand that holds it, at an
+    // angle, further out for a two-hander; headwear close on the head; capes from behind; shoes low.
+    const row = current(), hand = view().hand || defaultHand(row || {});
+    if (row && (row.slot === 'held' || row.slot === 'offhand') && extract?.triangles) {
+      const box = extract.box.clone().union(new THREE.Box3(new THREE.Vector3(-0.3, 0, -0.2), new THREE.Vector3(0.3, H, 0.2)));
+      box.getCenter(t); const size = box.getSize(new THREE.Vector3()).length();
+      dist = Math.max(H * 1.9, size * 1.55) * (row.hands === 2 ? 1.2 : 1);
+      yaw = hand === 'both' ? 0.45 : hand === 'off' ? -0.75 : 0.75; pitch = 0.16;
+    } else if (row?.slot === 'hat' || row?.field === 'hat') { t.set(0, H * 0.8, 0); dist = H * 1.25; yaw = 0.55; pitch = 0.18; }
+    else if (row?.slot === 'cape') { yaw = Math.PI - 0.55; pitch = 0.15; }
+    else if (row?.slot === 'shoes') { t.set(0, H * 0.15, 0); dist = H * 1.3; yaw = 0.7; pitch = 0.3; }
+    else yaw = 0.5;
+  } else if (preset === 'item' && extract?.triangles) { extract.box.getCenter(t); dist = Math.max(0.6, extract.size.length() * 2.6); }
   else if (preset === 'handR' || preset === 'handL') { parts[preset]?.getWorldPosition(t); dist = 1.25; yaw = preset === 'handR' ? 0.9 : -0.9; pitch = 0.2; }
   else if (preset === 'back') yaw = Math.PI - 0.35;
   else if (preset === 'side') yaw = Math.PI / 2;
@@ -406,7 +422,7 @@ function drawControls() {
   const modes = handModes(row), hand = v.hand || defaultHand(row);
   $('hands').hidden = !modes.length;
   $('hands').replaceChildren(el('span', { class: 'lbl', text: 'Hand' }), ...[['main', 'Main hand'], ['off', 'Off hand'], ['both', 'Both hands']].map(([id, text]) =>
-    el('button', { type: 'button', class: 'seg' + (hand === id ? ' on' : ''), 'data-hand': id, disabled: modes.includes(id) ? null : '', text, onclick: () => { v.hand = id; if (id === 'both' && bothClip(row)) v.anim = bothClip(row); else if (id !== 'both' && (ANIM_GROUPS['Dual wield'] || []).includes(v.anim)) v.anim = 'idle'; update({ build: true }); } })));
+    el('button', { type: 'button', class: 'seg' + (hand === id ? ' on' : ''), 'data-hand': id, disabled: modes.includes(id) ? null : '', text, onclick: () => { v.hand = id; if (id === 'both' && bothClip(row)) v.anim = bothClip(row); else if (id !== 'both' && (ANIM_GROUPS['Dual wield'] || []).includes(v.anim)) v.anim = 'idle'; update({ build: true, reframe: true }); } })));
   $('anim').value = ANIMS.includes(v.anim) ? v.anim : 'idle';
   for (const [id, key] of [['race', 'race'], ['height', 'height'], ['build', 'build'], ['hair', 'hair'], ['quality', 'quality'], ['speed', 'speed']]) $(id).value = v[key];
   $('quality-row').hidden = !(row.slot === 'held' || row.slot === 'offhand');
@@ -435,13 +451,16 @@ function select(key, { scroll = false } = {}) {
   if (view().hand === 'both' && view().anim === 'idle' && !/[#&]anim=/.test(location.hash) && bothClip(row)) view().anim = bothClip(row);
   window.armory.ready = false;
   drawHead(); drawControls(); drawStats(); drawHold(); drawItems(); drawFlag(); drawIcon();
-  rebuild().then(() => { if (state.id === key && !camSet.has('once')) { setCamera('body'); camSet.add('once'); } });
+  rebuild().then(() => { if (state.id !== key) return; if (autoCam()) setCamera('auto'); else if (!camSet.has('once')) { setCamera('body'); camSet.add('once'); } });
   writeHash();
   if (scroll) document.querySelector(`.gcard[data-key="${CSS.escape(key)}"]`)?.scrollIntoView({ block: 'center' });
 }
 const camSet = new Set();
+let flame = null;
+/** "Auto adjust camera" (on unless turned off; remembered in this browser). */
+const autoCam = () => $('auto-cam')?.checked !== false;
 
-function update({ build = false } = {}) { drawControls(); writeHash(); if (build) rebuild(); }
+function update({ build = false, reframe = false } = {}) { drawControls(); writeHash(); if (build) rebuild().then(() => { if (reframe && autoCam()) setCamera('auto'); }); }
 function writeHash() { const h = formatHash(state); if (h !== location.hash) history.replaceState(null, '', h || location.pathname + location.search); }
 function refresh() { drawFilters(); drawGrid(); drawHead(); writeHash(); }
 function step(d) { const i = shown.findIndex(r => r.key === state.id); const next = shown[(i + d + shown.length) % shown.length]; if (next) select(next.key, { scroll: true }); }
@@ -462,6 +481,8 @@ function wire() {
   for (const id of ['race', 'height', 'build', 'hair', 'quality']) $(id).addEventListener('change', () => { view()[id] = $(id).value; update({ build: true }); });
   $('speed').addEventListener('change', () => { view().speed = $('speed').value; writeHash(); });
   for (const b of document.querySelectorAll('[data-cam]')) b.addEventListener('click', () => setCamera(b.dataset.cam));
+  try { $('auto-cam').checked = localStorage.getItem('armory.autoCam') !== '0'; } catch { /* private window: stays on */ }
+  $('auto-cam').addEventListener('change', () => { try { localStorage.setItem('armory.autoCam', $('auto-cam').checked ? '1' : '0'); } catch { /* ignore */ } if ($('auto-cam').checked) setCamera('auto'); });
   $('t-alone').addEventListener('click', () => { const v = view(); v.alone = v.alone === '1' ? '' : '1'; if (v.alone !== '1') v.wire = ''; applyAlone(); if (v.alone !== '1') setCamera('body'); writeHash(); });
   $('t-wire').addEventListener('click', () => { const v = view(); v.wire = v.wire === '1' ? '' : '1'; applyAlone(); if (v.wire !== '1' && v.alone !== '1') setCamera('body'); writeHash(); });
   $('t-spin').addEventListener('click', () => { const on = $('t-spin').classList.toggle('on'); scene?.setTurntable(on ? 0.8 : 0); });

@@ -1,0 +1,81 @@
+/* Secret Architect — blueprint paper: deep blue, a fine white grid, chalk-white blocks and red pins. */
+.game-secret-architect { pointer-events: auto; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: calc(var(--st) + 10px) calc(var(--sr) + 12px) calc(var(--sb) + 48px) calc(var(--sl) + 12px);
+  background: #1d4f8c; background-image: linear-gradient(rgba(255,255,255,.07) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.07) 1px, transparent 1px); background-size: 22px 22px;
+  user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.game-secret-architect > * { flex: none; }
+.sa-top { display: flex; gap: 12px; align-items: center; justify-content: center; color: #fff; font: 900 22px/1.1 var(--font); -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; }
+.sa-chips { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.sa-chips .sc { font-style: normal; font-weight: 900; background: #ffe9a8; border-radius: 8px; padding: 0 6px; }
+.sa-tag { font-size: 11px; } .sa-tag:empty { display: none; }
+.sa-chips .chip.arch { outline: 4px solid #ff5f5f; }
+.sa-role { margin: 0; color: #fff; font: 900 clamp(18px, 4.6vw, 24px)/1.2 var(--font); text-align: center; max-width: 600px; }
+.sa-note { margin: 0; color: #d6e6ff; text-align: center; font-size: 14px; max-width: 600px; }
+
+/* ---- grids ---- */
+.sa-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; padding: 6px; background: #0f3260; border: 4px solid #fff; border-radius: 12px; aspect-ratio: 1; box-sizing: border-box; }
+.sa-grid .sa-c { position: relative; display: block; border: 2px solid rgba(255,255,255,.35); border-radius: 6px; background: transparent; padding: 0; min-width: 0; min-height: 0; aspect-ratio: 1; }
+.sa-grid button.sa-c { cursor: pointer; }
+.sa-c.on { background: #fff; border-color: #fff; box-shadow: inset 0 -5px 0 #b9cde8; }
+.sa-c.bp { background: #9fd0ff; border-color: #fff; }
+.sa-c.bp.on { background: #fff; }
+.sa-c.pin::after { content: ''; position: absolute; left: 50%; top: 50%; width: 46%; height: 46%; transform: translate(-50%, -50%); border-radius: 50%; background: #ff5f5f; border: 3px solid var(--ink); box-sizing: border-box; }
+.sa-c.x::after { content: '✕'; position: absolute; inset: 0; display: grid; place-items: center; color: #ffd23f; font: 900 clamp(16px, 5vw, 28px)/1 var(--font); -webkit-text-stroke: 1px var(--ink); }
+.sa-mine, .sa-bp, .sa-board { width: min(100%, 420px); }
+.sa-mine.peeking { outline: 4px dashed var(--sun); }
+.sa-mini { width: 96px; gap: 2px; padding: 3px; border-width: 3px; border-radius: 8px; }
+.sa-mini .sa-c { border-width: 1px; border-radius: 2px; }
+.sa-c.hit { background: #fff; border-color: #fff; }
+.sa-c.miss { border: 2px dashed #ffd23f; }
+.sa-c.extra { background: repeating-linear-gradient(45deg, #ff8a8a 0 3px, transparent 3px 6px); border-color: #ff8a8a; }
+
+/* ---- sections by role and phase ---- */
+.sa-arch, .sa-build, .sa-tv, .sa-show { display: none; width: min(100%, 520px); }
+.game-secret-architect[data-role=arch]:not([data-phase=show]) .sa-arch { display: grid; gap: 8px; justify-items: center; }
+.game-secret-architect[data-role=build]:is([data-phase=build], [data-phase=peek]) .sa-build { display: grid; gap: 8px; justify-items: center; }
+.game-secret-architect.watching:not([data-phase=show]) .sa-tv { display: grid; gap: 8px; justify-items: center; }
+.game-secret-architect[data-phase=show] .sa-show { display: block; }
+.game-secret-architect[data-phase=show] .sa-feed, .game-secret-architect[data-role=arch] .sa-feed { display: none; }
+
+.sa-feed { width: min(100%, 520px); display: grid; gap: 4px; }
+.sa-feed:empty { display: none; }
+.sa-msg { display: flex; align-items: center; gap: 8px; background: #fff; border: 3px solid var(--ink); border-radius: 16px 16px 16px 4px; padding: 2px 10px 2px 2px; font: 800 14px/1.2 var(--font); opacity: .75; }
+.sa-msg.last { opacity: 1; font-size: 18px; background: #fff6cf; animation: sa-in .25s ease-out; }
+@keyframes sa-in { from { transform: translateY(6px); opacity: 0; } }
+.sa-quiet { margin: 0; color: #d6e6ff; text-align: center; font-style: italic; }
+.sa-face { width: 30px; height: 30px; border-radius: 50%; border: 3px solid var(--seat); background: var(--seat); overflow: hidden; display: block; flex: none; }
+.sa-face img { width: 100%; height: 100%; display: block; }
+
+.sa-tools { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: min(100%, 420px); }
+.sa-tool { min-height: 48px; border: 3px solid var(--ink); border-radius: 12px; background: #fff; font: 900 17px/1 var(--font); display: flex; gap: 8px; align-items: center; justify-content: center; }
+.sa-tool small { font-size: 12px; font-weight: 700; color: #4a5a6a; }
+.sa-tool.on { background: var(--sun); outline: 3px solid #fff; }
+.sa-pin { width: 18px; height: 18px; border-radius: 50%; background: #ff5f5f; border: 3px solid var(--ink); }
+.sa-x { color: #c99a00; font-style: normal; font-size: 20px; }
+.sa-say-h, .sa-bl-h { width: min(100%, 420px); color: #fff; font: 900 15px/1 var(--font); display: flex; justify-content: space-between; }
+.sa-say-h small { color: #d6e6ff; font-size: 12px; }
+.sa-name { width: min(100%, 420px); font-size: 17px; background: #ffb3c0; }
+.sa-name:disabled, .sa-line:disabled { opacity: .45; }
+.sa-lines { width: min(100%, 420px); display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.sa-line { min-height: 44px; border: 3px solid var(--ink); border-radius: 12px; background: #fff; font: 800 14px/1.15 var(--font); padding: 4px 6px; box-shadow: 0 3px 0 var(--ink); }
+.sa-builders { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.sa-bl, .sa-rc { display: grid; gap: 4px; justify-items: center; background: rgba(0,0,0,.2); border-radius: 12px; padding: 6px; color: #fff; }
+.sa-bl .chip, .sa-rc .chip { font-size: 12px; color: var(--ink); }
+.sa-pct { font-size: 13px; color: #fff; }
+
+.sa-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: min(100%, 420px); }
+.sa-btns .big-btn { font-size: 18px; padding: 12px; }
+.sa-peek { background: var(--sky); grid-column: 1 / -1; } .sa-peek[hidden] { display: none; }
+.sa-clear { background: #fff; }
+.sa-done { background: var(--mint); color: #fff; -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; }
+.sa-done.on { background: #fff; color: var(--ink); -webkit-text-stroke: 0; font-size: 15px; }
+.sa-counts { color: #fff; }
+
+.sa-res { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.sa-res .sa-mini { width: 120px; }
+.sa-tgt { background: rgba(255,255,255,.15); outline: 3px solid #fff; } .sa-tgt b { font-size: 14px; }
+.sa-rc.me { outline: 3px solid var(--sun); }
+.sa-ar { align-content: center; }
+.sa-key { flex-basis: 100%; margin: 0; display: flex; gap: 6px; align-items: center; justify-content: center; color: #fff; font-size: 13px; }
+.sa-key .sa-c { width: 16px; height: 16px; display: inline-block; position: static; }
+.watching .sa-res .sa-mini { width: 180px; }

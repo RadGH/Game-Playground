@@ -26,6 +26,19 @@ import { G5_TOP_STYLES, G5_BOTTOM_STYLES, G5_SHOE_STYLES } from './chibi2-gear5-
 // chibi25-outfits.js). A v2 look (no `body.v`) never reaches any of it.
 import { skirtWeigh, registerSkirtSurface } from './chibi25-body.js';
 import { TOP25, BOTTOM25, SHOE25 } from './chibi25-outfits.js';
+// 2026-10-21 owner review (clothes and straps): straps that wrap the body and go over the shoulder in one piece
+import { makeWrap } from './chibi2-straps.js';
+
+/**
+ * 2026-10-21 OWNER REVIEW — which fixes reach a v2 (Chibi 2) look. Fixes that touch EVERY look (the hole on top of
+ * each arm, the gap round the neck, the V-neck, straps laid on the chest surface) are 2.5-only while this is false,
+ * because the v2 hash fixture (tests/fixtures/chibi2-v2-hashes.json) sweeps faces over one robed base and would
+ * move all 209 looks at once — and other agents rely on it to prove they changed nothing. Garment-specific fixes
+ * (coat tails, loincloth, apron strap, harness, footwraps, kilt waist, cuisses) apply to v2 too. Turned ON the same
+ * day (lead): the holes the owner reported are bugs in Farhold / Emberveil / Bannerline too, and what keeps v2 distinct
+ * for the chibi2-v2.html comparison is its face, hair and proportions, not the holes. The v2 fixture was re-baselined.
+ */
+export const V2_BODY_FIXES = true;
 
 const sphere = () => new THREE.SphereGeometry(1, 10, 6);
 const low = () => new THREE.SphereGeometry(1, 8, 5);
@@ -154,6 +167,8 @@ export function buildBody(a, rig, c) {
   // `cols` tags the piece for the robe test (tools/chibi25-measure.mjs reads it as a grid of rows x cols; SkinBuilder ignores it).
   // `thick`: a thick-legged 2.5 body (heavy, stocky, broad) needs the cloth that much wider at the hip line
   const thick = rig.skirt ? Math.max(0, (rig.legThick || 1) - 1) * 0.15 * Math.pow(W, 0.65) : 0;
+  // FX: the 2026-10-21 body-wide fixes (see V2_BODY_FIXES)
+  const FX = !!rig.v25 || V2_BODY_FIXES;
   const SK = !!rig.skirt, skirt = (o = {}, cols = 0, bone = 'hips') => ({ ...o, ...(SK ? { weigh: skirtWeigh(rig, bone) } : {}), ...(cols ? { tag: 'garment:' + cols } : {}) });
   // Limbs thicken with the body: a giant's or a dwarf's arms and legs at human thickness read as sticks.
   const LW = Math.pow(W, 0.65);
@@ -167,6 +182,10 @@ export function buildBody(a, rig, c) {
   // 2.5: a breastplate or a scale shell stands off the chest, so the arms are held that much wider in every clip (the
   // upper arm went 3-6 cm into the plate on every frame)
   if (rig.v25) rig.armSpread = top.armor === 'plate' || top.armor === 'scale' ? 0.12 : top.armor === 'mail' ? 0.03 : 0;
+  // B5 (2026-10-21, "the kilt clips through at the edge of the waist"): a kilt / skirt flares out exactly where the
+  // hands hang, so the hands and forearms went through its sides in every clip. The arms are held off it, as they are
+  // off a breastplate (v2 and 2.5 — only a look wearing one moves).
+  if (bot.garment === 'kilt' || bot.garment === 'skirt') rig.armSpread = Math.max(rig.armSpread || 0, rig.v25 ? 0.14 : 0.08);
 
   // ---------------------------------------------------------------- torso
   // Chest-bone space. The waist, a chest, then shoulders that SLOPE into the neck — the old profile
@@ -181,24 +200,45 @@ export function buildBody(a, rig, c) {
     const b = bump(y, -0.03, 0.13), up = bump(y, 0.16, 0.08);
     return [y * T, (rx * Sx(y) + R * (0.085 * b + 0.022 * up)) * W, (rz + R * (0.14 * b + 0.015 * up)) * W, (z + R * 0.065 * b) * W];
   });
+  // FX: the torso's top ring stopped 1.5-2 cm short of the neck, an open ring you could look down into from above;
+  // one more ring closes it onto the neck (just inside the neck's own surface, so there is no seam). It is part of
+  // the surface everything asks (chestZ), so a V-neck or a strap can run right up to the neck.
+  const neckR0 = 0.066 + R * 0.014 + (W - 1) * 0.03;
+  if (FX) chestRings.push([0.33 * T, neckR0 * 0.99, neckR0 * 0.94, 0]);
   const hipsRings = [
     [-0.125, 0.09, 0.08, 0], [-0.105, 0.172 + R * 0.03, 0.123 + R * 0.03, 0], [-0.05, 0.196 + R * 0.07, 0.133 + R * 0.08, R * 0.018],
     [0.0, 0.195 + R * 0.075, 0.131 + R * 0.1, R * 0.035], [0.05, 0.188 + R * 0.075, 0.128 + R * 0.115, R * 0.045],
   ].map(([y, rx, rz, z]) => [y, rx * W, rz * W, z * W]);
   const chestZ = (x, y, side = 1, lift = 0) => surfaceZ(chestRings, x, y, side, lift);
+  // straps that lie on the body and go over the shoulder in one piece (chibi2-straps.js); handed to the gear too
+  const shoulderBalls = ['armL', 'armR'].map(n => { const q = rig.byName[n].position; return [q.x, q.y - 0.005, q.z, 0.092 * Math.pow(W, 0.65) * (rig.armThick || 1) + R * 0.016]; });
+  const wrap = makeWrap(chestRings, { T, spheres: shoulderBalls });
   const hipsZ = (x, y, side = 1, lift = 0) => surfaceZ(hipsRings, x, y, side, lift);
   const chestRX = y => ringAt(chestRings, y)[1];
   add(profile(chestRings, 16), 'chest', torsoColour);
   add(profile(hipsRings, 14), 'hips', bot.leg > 0 || bot.garment === 'kilt' || bot.garment === 'skirt' ? pants : skin);
   // neck
-  const neckR = 0.066 + R * 0.014 + (W - 1) * 0.03;
+  const neckR = neckR0;
   add(profile([[0.27 * T, neckR * 1.05, neckR], [0.33 * T, neckR, neckR * 0.95], [rig.byName.head.position.y + 0.02, neckR * 0.94, neckR * 0.92]], 10), 'chest', skin);
 
   /** A curve laid on the chest surface. pts are [x, y] in chest space; `lift` above the surface. */
-  const onChest = (pts, r, colour, { lift = 0.006, side = 1, metal = false, sides = 4 } = {}) =>
-    add(taperedCurve(pts.map(([x, y]) => [x, y, chestZ(x, y, side, lift + r * 0.6)]), [r, r, r], sides, Math.max(4, pts.length * 3)), 'chest', colour, { metal });
-  const onHips = (pts, r, colour, { lift = 0.006, side = 1, metal = false } = {}) =>
-    add(taperedCurve(pts.map(([x, y]) => [x, y, hipsZ(x, y, side, lift + r * 0.6)]), [r, r, r], 4, Math.max(4, pts.length * 3)), 'hips', colour, { metal });
+  // FX (B3, "something pokes through the upper chest"): a curve through 3-4 points ran in straight chords between
+  // them, so on a round chest it sank into the body mid-way and came out at the points (the apron's neck strap showed
+  // as two loose arcs through its own bib). FX resamples the path every ~3 cm and puts each sample on the surface.
+  const dense = (pts, step = 0.03) => {
+    if (!FX) return pts;
+    const out = [];
+    for (let i = 0; i < pts.length - 1; i++) {
+      const [x0, y0] = pts[i], [x1, y1] = pts[i + 1], n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, y1 - y0) / step));
+      for (let k = 0; k < n; k++) out.push([x0 + (x1 - x0) * k / n, y0 + (y1 - y0) * k / n]);
+    }
+    out.push(pts[pts.length - 1]);
+    return out;
+  };
+  const onChest = (pts0, r, colour, { lift = 0.006, side = 1, metal = false, sides = 4 } = {}, pts = dense(pts0)) =>
+    add(taperedCurve(pts.map(([x, y]) => [x, y, chestZ(x, y, side, lift + r * 0.6)]), [r, r, r], FX && r <= 0.006 ? 3 : sides, Math.max(4, FX ? Math.min(pts.length + 1, 20) : pts.length * 3)), 'chest', colour, { metal });
+  const onHips = (pts0, r, colour, { lift = 0.006, side = 1, metal = false } = {}, pts = dense(pts0)) =>
+    add(taperedCurve(pts.map(([x, y]) => [x, y, hipsZ(x, y, side, lift + r * 0.6)]), [r, r, r], 4, Math.max(4, FX ? Math.min(pts.length + 2, 36) : pts.length * 3)), 'hips', colour, { metal });
   const studChest = (x, y, s, colour, metal = true, lift = 0.004) => ellipsoid('chest', colour, [x, y, chestZ(x, y, 1, lift)], [s, s, s * 0.6], { metal });
   /** A band all the way round the torso at chest height y. */
   const bandChest = (y, h, colour, grow2 = 0.008, metal = false) => {
@@ -221,7 +261,26 @@ export function buildBody(a, rig, c) {
   const neckTop = 0.3 * T;
   if (top.collar === 'round' || top.collar === 'scoop') {
     const y = top.collar === 'scoop' ? 0.25 * T : 0.285 * T;
-    add(taperedCurve(Array.from({ length: 13 }, (_, i) => { const t = -Math.PI + i / 12 * Math.PI * 2, x = Math.sin(t) * chestRX(y) * 0.52; return [x, y + (Math.cos(t) > 0 ? -Math.cos(t) * (top.collar === 'scoop' ? 0.05 : 0.02) : 0), chestZ(x, y, Math.cos(t) >= 0 ? 1 : -1, 0.004) * (Math.abs(Math.cos(t)) < 0.2 ? 0.9 : 1)]; }), [0.011, 0.011], 4, 24), 'chest', lining);
+    if (FX) {
+      // FX: the neckline is a ring ON the torso where it has narrowed to ~1.6 necks (dipping at the front), so it hugs
+      // the body all the way round — the 13-point ring through hand-set depths sank between its points, which from
+      // behind read as a dark slot across the back of the neck
+      let yc = 0.25 * T; while (yc < 0.32 * T && ringAt(chestRings, yc)[1] > neckR0 * 1.7) yc += 0.002;
+      const dip = top.collar === 'scoop' ? 0.05 : 0.02;
+      add(taperedCurve(Array.from({ length: 25 }, (_, i) => { const t = -Math.PI + i / 24 * Math.PI * 2, yy = yc - Math.max(0, Math.cos(t)) * dip, r = ringAt(chestRings, yy); return [Math.sin(t) * (r[1] + 0.006), yy, (r[3] || 0) + Math.cos(t) * (r[2] + 0.006)]; }), [0.011, 0.011], 4, 36), 'chest', lining);
+    } else add(taperedCurve(Array.from({ length: 13 }, (_, i) => { const t = -Math.PI + i / 12 * Math.PI * 2, x = Math.sin(t) * chestRX(y) * 0.52; return [x, y + (Math.cos(t) > 0 ? -Math.cos(t) * (top.collar === 'scoop' ? 0.05 : 0.02) : 0), chestZ(x, y, Math.cos(t) >= 0 ? 1 : -1, 0.004) * (Math.abs(Math.cos(t)) < 0.2 ? 0.9 : 1)]; }), [0.011, 0.011], 4, 24), 'chest', lining);
+  } else if (FX && (top.collar === 'v' || top.collar === 'laced')) {
+    // FX (B2, "Robe long has a V neck but a part around the neck also covers it"): the V stopped at 0.27T and the
+    // torso cloth carried on up to the neck above it — a band across the throat closing the V. Now the opening runs
+    // right up to where the torso meets the neck and is as wide as the neck there, so the V is open at the top.
+    const yTop = 0.33 * T, yLow = (top.collar === 'laced' ? 0.17 : 0.13) * T;
+    const hw = y => { const t = Math.max(0, (y - yLow) / (yTop - yLow)); return Math.min(chestRX(y) * 0.97, t * (0.25 + 0.75 * t) * neckR0 * 1.06 + t * 0.012); };
+    const g = new THREE.PlaneGeometry(1, 1, 6, 6), p = g.attributes.position;
+    for (let i = 0; i < p.count; i++) { const u = p.getX(i), v = 0.5 - p.getY(i), y = yTop + (yLow - yTop) * v, x = u * 2 * hw(y); p.setXYZ(i, x, y, chestZ(x, y, 1, 0.003)); }
+    g.computeVertexNormals(); add(g, 'chest', top.shirt ? shirt : skin);
+    // the edges of the V, laid on the surface point by point
+    for (const s of [-1, 1]) onChest(Array.from({ length: 9 }, (_, i) => { const y = yTop - 0.004 + (yLow - yTop + 0.004) * i / 8; return [s * hw(y), y]; }), 0.009, top.shirt ? cloth : lining);
+    if (top.collar === 'laced') for (let i = 0; i < 3; i++) onChest([[-0.022, (0.25 - i * 0.035) * T], [0.022, (0.23 - i * 0.035) * T]], 0.004, lining, { lift: 0.008 });
   } else if (top.collar === 'v' || top.collar === 'laced') {
     for (const s of [-1, 1]) onChest([[s * 0.075 * W, neckTop], [s * 0.04 * W, 0.2 * T], [0, 0.14 * T]], 0.011, top.shirt ? cloth : lining);
     // the V shows what is under it: skin for a shirt, the shirt for a jerkin
@@ -231,6 +290,11 @@ export function buildBody(a, rig, c) {
     add(profile([[0.27 * T, neckR + 0.03, neckR + 0.024], [0.345 * T, neckR + 0.022, neckR + 0.018]], 12), 'chest', top.armor ? darkSteel : lining, { metal: !!top.armor });
   } else if (top.collar === 'crossed') {
     for (const s of [-1, 1]) onChest([[s * 0.09 * W, neckTop], [-s * 0.035 * W, 0.12 * T]], 0.02, cloth2);
+  } else if (FX && top.collar === 'hooded') {
+    // FX: the lowered hood lies ON the shoulders and round the back of the neck (the 9-point curve at fixed depths sank
+    // into the upper back and broke up into loose pieces seen from behind); its two ends taper shut at the front
+    let yc = 0.25 * T; while (yc < 0.32 * T && ringAt(chestRings, yc)[1] > neckR0 * 2.1) yc += 0.002;
+    add(taperedCurve(Array.from({ length: 17 }, (_, i) => { const t = -2.3 + i / 16 * 4.6, back = Math.max(0, -Math.cos(t)), yy = yc + back * 0.012 * T, r = ringAt(chestRings, yy); return [Math.sin(t) * (r[1] + 0.02 + back * 0.012), yy + 0.015, (r[3] || 0) + Math.cos(t) * (r[2] + 0.024 + back * 0.03)]; }), [0.012, 0.032, 0.05, 0.056, 0.05, 0.032, 0.012], 6, 24), 'chest', lining);
   } else if (top.collar === 'hooded') {
     add(taperedCurve(Array.from({ length: 9 }, (_, i) => { const t = -2.2 + i / 8 * 4.4, back = Math.max(0, -Math.cos(t)); return [Math.sin(t) * (0.14 + back * 0.04) * W, (0.285 + back * 0.03) * T, Math.cos(t) * (0.1 + back * 0.05) * W - 0.01]; }), [0.03, 0.05, 0.05, 0.03], 6, 14), 'chest', lining);
   } else if (top.collar === 'lapels') {
@@ -265,17 +329,23 @@ export function buildBody(a, rig, c) {
     for (let i = 0; i < 5; i++) { const y = (0.2 - i * 0.07) * T, rx = chestRX(y) * 0.92; onChest([[-rx, y], [0, y], [rx, y]], 0.004, lining, { lift: 0.001 }); }
     for (const x of [-0.08, 0, 0.08]) onChest([[x * W, 0.25 * T], [x * W, waistY]], 0.004, lining, { lift: 0.001 });
   }
-  if (f === 'straps') for (const s of [-1, 1]) {
-    onChest([[s * 0.15 * W, 0.27 * T], [0, 0.07 * T], [-s * 0.15 * W, -0.1 * T]], 0.018, leather, { lift: 0.008 });
-    studChest(0, 0.07 * T, 0.022, trim, true, 0.024);
+  if (f === 'straps') {
+    // (2026-10-21) each strap carries on over its shoulder and down the back as an X, in one piece (it stopped at the shoulder)
+    for (const s of [-1, 1]) wrap.strap(add, [[-s * 0.15 * W, Math.PI + 0.95], [0, Math.PI + 0.25], [s * 0.14 * W, Math.PI / 2], [s * 0.15 * W, 0.6], [0, -0.3], [-s * 0.15 * W, -0.95]], 0.016, leather, { lift: 0.006, n: 34 });
+    ellipsoid('chest', trim, wrap.surface(0, -0.3, 0.02), [0.022, 0.022, 0.013], { metal: true });
   }
   if (f === 'sash') onChest([[-0.19 * W, 0.24 * T], [0, 0.1 * T], [0.19 * W, -0.05 * T]], 0.026, cloth2);
   if (f === 'patches') { ellipsoid('chest', shade(cloth, 0.2), [0.08 * W, 0.08 * T, chestZ(0.08 * W, 0.08 * T, 1, 0.003)], [0.045, 0.04, 0.006]); onChest([[-0.12 * W, 0.18 * T], [-0.07 * W, 0.12 * T]], 0.004, lining); }
   if (f === 'wraps') for (let i = 0; i < 4; i++) { const y = (0.18 - i * 0.06) * T, rx = chestRX(y); onChest([[-rx * 0.95, y + 0.02], [0, y - 0.01], [rx * 0.95, y + 0.02]], 0.012, i % 2 ? cloth : shade(cloth, -0.1), { lift: 0.004 }); }
   if (f === 'harness') {
-    for (const s of [-1, 1]) onChest([[s * 0.13 * W, 0.28 * T], [0, 0.06 * T], [-s * 0.16 * W, -0.1 * T]], 0.02, cloth, { lift: 0.006 });
-    ellipsoid('chest', trim, [0, 0.06 * T, chestZ(0, 0.06 * T, 1, 0.02)], [0.04, 0.04, 0.012], { metal: true });
-    for (const s of [-1, 1]) onChest([[s * 0.13 * W, 0.28 * T], [0, 0.1 * T], [-s * 0.16 * W, -0.1 * T]], 0.02, cloth, { lift: 0.006, side: -1 });
+    // B4 (2026-10-21, "the straps do not connect over the shoulders"): the front X and the back X were two pieces
+    // that each stopped short of the shoulder. Each strap is now ONE piece: back hip -> back centre -> over its
+    // shoulder -> front centre -> the other front hip, lying on the body the whole way (chibi2-straps.js).
+    for (const s of [-1, 1]) wrap.strap(add, [[-s * 0.16 * W, Math.PI + 0.98], [0, Math.PI + 0.12], [s * 0.13 * W, Math.PI / 2], [s * 0.12 * W, 0.55], [0, -0.38], [-s * 0.16 * W, -0.98]], 0.018, cloth, { lift: 0.004, n: 36 });
+    const boss = wrap.surface(0, -0.38, 0.016);
+    ellipsoid('chest', trim, boss, [0.04, 0.04, 0.012], { metal: true });
+    const bossB = wrap.surface(0, Math.PI + 0.12, 0.014);
+    ellipsoid('chest', trim, bossB, [0.03, 0.03, 0.01], { metal: true });
   }
   if (f === 'apron') {
     // a smith's apron over the shirt: a bib on the chest, a skirt to the knee, a strap round the neck
@@ -283,7 +353,10 @@ export function buildBody(a, rig, c) {
     const g2 = new THREE.PlaneGeometry(1, 1, 4, 4), p2 = g2.attributes.position;
     for (let i = 0; i < p2.count; i++) { const u = p2.getX(i), v = 0.5 - p2.getY(i), y = 0.04 - v * (0.2 + L * 0.35), hw = (0.15 + v * 0.03) * W, x = u * 2 * hw; p2.setXYZ(i, x, y, hipsZ(x, Math.max(y, -0.1), 1, 0.02) + v * 0.04); }
     g2.computeVertexNormals(); add(g2, 'hips', cloth);
-    onChest([[-0.1 * W, 0.22 * T], [-0.07 * W, 0.3 * T], [0.07 * W, 0.3 * T], [0.1 * W, 0.22 * T]], 0.008, cloth, { lift: 0.01 });
+    // B3 (2026-10-21): the neck strap ran in chords from the bib's corners to two points at the neck, sank into the
+    // chest between them and came out as two loose arcs through the bib (the owner's screenshot). It is one loop now
+    // from one corner of the bib, up the chest, round the BACK of the neck and down to the other corner.
+    wrap.strap(add, [[-0.095 * W, 0.62], [-0.105 * W, Math.PI / 2], [0, Math.PI * 0.72], [0.105 * W, Math.PI / 2], [0.095 * W, 0.62]], 0.009, cloth, { lift: 0.012, n: 28 });
     ellipsoid('hips', shade(cloth, -0.2), [0.07 * W, -0.07, hipsZ(0.07 * W, -0.07, 1, 0.03)], [0.05, 0.04, 0.012]);
   }
 
@@ -357,7 +430,11 @@ export function buildBody(a, rig, c) {
         const fl = 1 + v * 0.35;
         p.setXYZ(i, p.getX(i) * (rr[1] + 0.02 + (SK ? 0.01 + thick : 0)) * fl, y, p.getZ(i) * (rr[2] + 0.025 + (SK ? 0.025 : 0)) * fl + rr[3]);   // 2.5: room at the hip line (see longHem)
       }
-      g.computeVertexNormals(); add(g, 'hips', cloth, skirt({}, 9)); add(backfaced(g), 'hips', lining, skirt());
+      // (2026-10-21, "Longcoat": the lining copy was cloned AFTER add() had already moved the tail into place, so it
+      // was moved twice and stood as a flat sheet up beside the chest. It is cloned first now, and drawn a hair inside
+      // the tail — the material is double-sided, so a copy on the same surface would flicker.)
+      const inner = backfaced(g, 0.985);
+      g.computeVertexNormals(); add(g, 'hips', cloth, skirt({}, 9)); add(inner, 'hips', lining, skirt());
     }
     // the tails cover the sides and the back; the legs show (and may stride) through the open front
     if (SK) { const r0 = ringAt(hipsRings, -0.08); registerSkirtSurface(rig, [[0.04, r0[1] + 0.03 + thick, r0[2] + 0.05, r0[3]], [y1, (r0[1] + 0.03 + thick) * 1.35, (r0[2] + 0.05) * 1.35, r0[3]]], { arc: [0.35, Math.PI * 2 - 0.35], hem: y1 }); }
@@ -391,18 +468,21 @@ export function buildBody(a, rig, c) {
   if (bot.garment === 'skirt') longHem(-(L * (bot.length ?? 0.42)), 0.06, pants);
   if (bot.garment === 'kilt') {
     const kl = bot.length ?? 0.46, k0 = ringAt(hipsRings, 0.05), k1 = ringAt(hipsRings, -0.08);
-    const kw = SK ? 0.02 + Math.max(0, 0.5 - L) * 0.3 + thick : 0;     // 2.5: room for the thigh at the hip line (see longHem)
+    // 2.5: room for the thigh at the hip line (see longHem). B5 (2026-10-21): v2 had none, and the top of each thigh came
+    // through the kilt's sides at the waist edge even standing still — it gets 2 cm too.
+    const kw = SK ? 0.02 + Math.max(0, 0.5 - L) * 0.3 + thick : 0.02;
     const kr = [[0.05, k0[1] + 0.012, k0[2] + 0.012], [-0.08, k1[1] + 0.03 + kw * 0.5 + thick * 0.5, k1[2] + 0.03 + kw], ...(SK ? [0.33, 0.66].map(t => [-0.08 + (-(L * kl) + 0.08) * t, k1[1] + 0.03 + 0.035 * t, k1[2] + 0.03 + 0.03 * t]) : []), [-(L * kl), k1[1] + 0.065, k1[2] + 0.06]];
     add(profile(kr, 16), 'hips', pants, skirt({}, 17));
     // 2.5: the pleats are one segment each, so they get three on a skirt-boned body (they bend with the cloth)
-    for (let k = 0; k < 12; k++) { const t = k / 12 * Math.PI * 2, rr = k1; add(taperedCurve([[Math.sin(t) * (rr[1] + 0.03), -0.05, Math.cos(t) * (rr[2] + 0.03)], [Math.sin(t) * (rr[1] + 0.066), -(L * (bot.length != null ? bot.length - 0.02 : 0.44)), Math.cos(t) * (rr[2] + 0.061)]], [0.004, 0.004], 3, SK ? 3 : 1), 'hips', shade(pants, -0.2), skirt()); }
+    for (let k = 0; k < 12; k++) { const t = k / 12 * Math.PI * 2, rr = k1; add(taperedCurve([[Math.sin(t) * (rr[1] + 0.032 + kw * 0.5), -0.05, Math.cos(t) * (rr[2] + 0.032 + kw)], [Math.sin(t) * (rr[1] + 0.068), -(L * (bot.length != null ? bot.length - 0.02 : 0.44)), Math.cos(t) * (rr[2] + 0.063)]], [0.004, 0.004], 3, SK ? 3 : 1), 'hips', shade(pants, -0.2), skirt()); }
     if (SK) registerSkirtSurface(rig, kr, { hem: -(L * kl) });
   }
   if (bot.garment === 'loincloth') {
     for (const side of [1, -1]) {
       const g = new THREE.PlaneGeometry(0.16 * W, L * 0.42, 2, 3), p = g.attributes.position;
       for (let i = 0; i < p.count; i++) { const y = p.getY(i) - L * 0.21 + 0.02, x = p.getX(i) * (1 + (0.02 - y) * 0.4); p.setXYZ(i, x, y, side * (hipsZ(x * 0.6, Math.max(-0.1, y), 1, 0.016) + Math.max(0, -y - 0.1) * 0.12)); }
-      g.computeVertexNormals(); add(g, 'hips', pants, skirt({}, 3)); add(backfaced(g), 'hips', shade(pants, -0.15), skirt());
+      // (2026-10-21: the inner face was cloned after add() had moved the flap — moved twice; now cloned first, a hair inside)
+      g.computeVertexNormals(); const inner = backfaced(g, 1, side * -0.003); add(g, 'hips', pants, skirt({}, 3)); add(inner, 'hips', shade(pants, -0.15), skirt());
     }
     // the two flaps hang front and back; a leg passes between them at the sides
     if (SK) { const r0 = ringAt(hipsRings, -0.08); for (const arc of [[-0.6, 0.6], [Math.PI - 0.6, Math.PI + 0.6]]) registerSkirtSurface(rig, [[-0.06, r0[1] + 0.016, r0[2] + 0.016, 0], [-(L * 0.42) + 0.02, r0[1] + 0.03, r0[2] + 0.016 + (L * 0.32) * 0.12, 0]], { arc, hem: -(L * 0.42) + 0.02 }); }
@@ -420,11 +500,14 @@ export function buildBody(a, rig, c) {
     // 2.5: `rig.armThick` / `rig.legThick` (body shape + the arms slider) thicken the limbs on top of LW
     const lw = rr => rr.map(([y, x, z, o]) => [y, x * LW * (rig.armThick || 1), z * LW * (rig.armThick || 1), o]);
     const lwl = rr => rr.map(([y, x, z, o]) => [y, x * LW * (rig.legThick || 1), z * LW * (rig.legThick || 1), o]);
-    const upper = lw([[0.05, 0.012, 0.012], [0.035, 0.07 + armT, 0.068 + armT], [-0.02, 0.09 + armT, 0.086 + armT], [-0.09, 0.083 + armT, 0.08 + armT], [-Ua * 0.75, 0.074 + armT * 0.8, 0.072 + armT * 0.8], [-Ua - 0.012, 0.067 + armT * 0.6, 0.066 + armT * 0.6]]);
+    // FX: the shoulder ball ended in an open ring 2.4 cm across (3.6-6 cm under a puffed / short sleeve) on top of
+    // every arm — "holes at the top of the shoulders you can see through". It now closes in a dome.
+    const upper = lw([...(FX ? [[0.062, 0.0015, 0.0015], [0.056, 0.038 + armT, 0.037 + armT]] : [[0.05, 0.012, 0.012]]), [0.035, 0.07 + armT, 0.068 + armT], [-0.02, 0.09 + armT, 0.086 + armT], [-0.09, 0.083 + armT, 0.08 + armT], [-Ua * 0.75, 0.074 + armT * 0.8, 0.072 + armT * 0.8], [-Ua - 0.012, 0.067 + armT * 0.6, 0.066 + armT * 0.6]]);
     if (top.sleeve === 'short' || top.sleeve === 'rolled' || top.sleeve === 'puff') {
       // sleeve to the middle of the upper arm (rolled: to just above the elbow), then skin
       const cut = top.sleeve === 'rolled' ? -Ua * 0.82 : -Ua * 0.5;
-      const sl = upper.filter(r => r[0] > cut).map(([y, x, z]) => [y, x + (top.sleeve === 'puff' ? 0.018 : 0.006), z + (top.sleeve === 'puff' ? 0.018 : 0.006)]);
+      // (FX: the dome's apex stays closed — the sleeve's own offset opened it back into a hole)
+      const sl = upper.filter(r => r[0] > cut).map(([y, x, z], i) => FX && i === 0 ? [y + (top.sleeve === 'puff' ? 0.016 : 0.005), x, z] : [y, x + (top.sleeve === 'puff' ? 0.018 : 0.006), z + (top.sleeve === 'puff' ? 0.018 : 0.006)]);
       const cr = ringAt(upper, cut);
       sl.push([cut, cr[1] + 0.008, cr[2] + 0.008]);
       add(profile(sl, 10), arm, shirt, { bend });
@@ -496,10 +579,22 @@ export function buildBody(a, rig, c) {
       add(profile([[topY2, tr[1] + 0.013, tr[2] + 0.013], ...sh], 10), knee, a.shoes.color, { metal: shoe.foot === 'heavy' && a.bottom.id === 'greaves' });
       if (shoe.cuff) add(profile([[topY2 - 0.02, tr[1] + 0.02, tr[2] + 0.02], [topY2 + 0.012, tr[1] + 0.022, tr[2] + 0.022]], 10), knee, shade(a.shoes.color, -0.2));
     }
-    if (shoe.foot === 'wrap') for (let i = 0; i < 5; i++) {
-      // cloth wound round the shin: each turn hugs the shin at its own height
-      const y = -L * (0.27 + i * 0.045), r = ringAt(shin, y);
-      add(profile([[y - 0.012, r[1] + 0.008, r[2] + 0.008], [y + 0.012, r[1] + 0.008, r[2] + 0.008]], 10), knee, i % 2 ? a.shoes.color : shade(a.shoes.color, -0.12), { rotation: [0.12 * (i % 2 ? 1 : -1), 0, 0] });
+    if (shoe.foot === 'wrap') {
+      // B7 (2026-10-21, "footwraps do not look lined up"): five separate rings, each tipped the other way about the
+      // KNEE (not about its own centre), so they sat staggered front and back. Now ONE strip of cloth wound up the
+      // shin from the ankle in an even spiral, each turn overlapping the one below, tied off at the top.
+      const yA = -L * 0.445, yB = -L * 0.49 * (1 - shoe.shaft), turns = 4.5, N = 36, hw = 0.016;
+      const pos = [], idx = [];
+      for (let k = 0; k <= N; k++) {
+        const t = k / N, ang = t * turns * Math.PI * 2 * s, y = yA + (yB - yA) * t;
+        for (const e of [-1, 1]) { const yy = y + e * hw + (e < 0 ? -0.004 : 0), rr = ringAt(shin, yy), grow = 0.008 + (e < 0 ? 0.003 : 0); pos.push(Math.sin(ang) * (rr[1] + grow), yy, Math.cos(ang) * (rr[2] + grow)); }
+        if (k < N) { const a0 = k * 2; idx.push(a0, a0 + 2, a0 + 1, a0 + 1, a0 + 2, a0 + 3); }
+      }
+      const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals();
+      add(g, knee, a.shoes.color);
+      // the tie at the top (each turn's lower edge stands 3 mm proud of the one under it, so the turns read without a trim)
+      const tr = ringAt(shin, yB);
+      add(profile([[yB - 0.012, tr[1] + 0.014, tr[2] + 0.014], [yB + 0.012, tr[1] + 0.014, tr[2] + 0.014]], 10), knee, shade(a.shoes.color, -0.18));
     }
     // feet
     const shoesC = a.shoes.color;
@@ -512,20 +607,33 @@ export function buildBody(a, rig, c) {
     if (fk === 'sandal') {
       ellipsoid(foot, skin, [0, 0.005, 0.05], [0.094, 0.05, 0.14]);
       for (const z of [0.02, 0.075]) strip(foot, [[-0.07, 0.02, z], [0, 0.055, z + 0.01], [0.07, 0.02, z]], 0.009, leather);
-      add(profile([[-0.06, 0.1, 0.15], [-0.05, 0.1, 0.15]], 10), foot, leather, { position: [0, 0, 0.05] });
+      // (the open leather ring that stood round the sole was removed 2026-10-21 — owner: "a ring around the bottom that
+      // isn't connected to the shoe … could just be outright removed")
     }
-    if (fk === 'wrap') for (const z of [0.0, 0.06, 0.12]) strip(foot, [[-0.075, 0.0, z], [0, 0.05, z + 0.01], [0.075, 0.0, z]], 0.012, a.shoes.color);
+    if (fk === 'wrap') {
+      // B7: the foot turns lie ON the foot (the same ellipsoid as above) and slant, the way a wrap crosses the instep
+      const k = 0.85 + LW * 0.15, fr = footScale.map(v => v * k), fc = [0, -0.005, 0.047];
+      for (const [zz, tilt] of [[-0.02, 0.035], [0.04, -0.035], [0.1, 0.03]]) {
+        const pts = [];
+        for (let j = 0; j <= 8; j++) {
+          const ang = -Math.PI / 2 + j / 8 * Math.PI, x = Math.sin(ang), z = zz + x * tilt * s, q = 1 - ((z - fc[2]) / fr[2]) ** 2;
+          if (q <= 0.02) continue;
+          const sq = Math.sqrt(q);
+          pts.push([x * (fr[0] * sq + 0.006), fc[1] + Math.cos(ang) * (fr[1] * sq + 0.006), z]);
+        }
+        if (pts.length > 2) add(taperedCurve(pts, pts.map(() => 0.01), 4, 10), foot, j2(a.shoes.color, zz));
+      }
+    }
     if (fk === 'bare') for (let t = 0; t < 3; t++) ellipsoid(foot, shade(skin, -0.05), [(-0.04 + t * 0.035) * s, 0.0, 0.19], [0.022, 0.02, 0.02]);
     if (['boot', 'heavy', 'shoe', 'pointed'].includes(fk)) {
-      // a sole, and laces for anything that is not a slipper
-      add(profile([[-0.066, 0.075, 0.12, 0.048], [-0.05, 0.105, 0.154, 0.048], [-0.042, 0.104, 0.15, 0.048]], 12), foot, '#2c3032');
+      // laces for anything that is not a slipper (the separate dark sole ring was removed 2026-10-21: it was an open band
+      // a few millimetres off the foot all the way round, so it read as a loose ring under the shoe)
       if (fk !== 'pointed') for (const z of [0.03, 0.07]) strip(foot, [[-0.035, 0.05, z], [0, 0.057, z + 0.008], [0.035, 0.05, z]], 0.006, shade(shoesC, -0.3));
     }
-    if (fk === 'heavy') add(ring(0.11, 0.018), foot, darkSteel, { position: [0, -0.025, 0.02], rotation: [Math.PI / 2, 0, 0], metal: true });
   }
   // ---------------------------------------------------------------- 2.5: a tail (body.tail, chibi25-body-options.js TAILS)
   if (rig.v25 && a.body.tail && a.body.tail !== 'none') buildTail(a, rig, { add, hipsZ, skin, W, L });
-  return { chestZ, hipsZ, chestRX, chestRings, hipsRings, neckR, top, bot, shoe, LW };
+  return { chestZ, hipsZ, chestRX, chestRings, hipsRings, neckR, top, bot, shoe, LW, wrap };
 }
 
 /**
@@ -552,9 +660,13 @@ function buildTail(a, rig, { add, hipsZ, skin, W, L }) {
   void L;
 }
 
-/** Reversed-winding copy of a geometry, for the inside of a sheet. */
-function backfaced(g) {
+/** Footwrap turns alternate a shade (B7). */
+const j2 = (c, z) => (Math.round(z * 100) % 2 ? shade(c, -0.1) : c);
+
+/** Reversed-winding copy of a geometry, for the inside of a sheet (`k` scales x/z toward the axis, `dz` moves it). */
+function backfaced(g, k = 1, dz = 0) {
   const b = g.clone();
+  if (k !== 1 || dz) { const p = b.attributes.position; for (let i = 0; i < p.count; i++) p.setXYZ(i, p.getX(i) * k, p.getY(i), p.getZ(i) * k + dz); }
   if (!b.index) b.setIndex(Array.from({ length: b.attributes.position.count }, (_, i) => i));
   const idx = b.index.array;
   for (let i = 0; i < idx.length; i += 3) [idx[i], idx[i + 1]] = [idx[i + 1], idx[i]];

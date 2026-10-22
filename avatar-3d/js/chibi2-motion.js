@@ -86,6 +86,16 @@ export const CHIBI2_EMOTE_ANIMS = [
  */
 export const CHIBI2_COMBAT_RIDE = [...CHIBI2_COMBAT_ALL, ...CHIBI2_RIDE_ANIMS, ...CHIBI2_WORK_ANIMS, ...CHIBI2_MELEE_ANIMS, ...CHIBI2_EMOTE_ANIMS];
 export const CHIBI2_COMBAT_RIDE_WORK = CHIBI2_COMBAT_RIDE;
+/**
+ * MUSIC, opt-in — added 2026-10-21 (owner review W3: "the lute just floats in front"). A lute is now carried in the
+ * PLAYING position whatever the clip (see `LUTE_POSE` / `carry`); `lutePlay` is the same hold, strumming: the right
+ * wrist flicks over the strings (the grip counter-turns, so the lute itself stays put), the left hand walks the neck,
+ * the head nods the beat. Its own list, so nothing that builds today's lists changes.
+ *
+ *   createChibi2Character(avatar, { anims: [...CHIBI2_ANIMS, ...CHIBI2_MUSIC_ANIMS] })
+ */
+export const CHIBI2_MUSIC_ANIMS = ['lutePlay'];
+
 /** Every clip there is — the avatar page and tests ask for this. */
 export const CHIBI2_EVERY_ANIMS = CHIBI2_COMBAT_RIDE;
 
@@ -99,6 +109,7 @@ export const CHIBI2_ANIM_GROUPS = {
   Work: CHIBI2_WORK_ANIMS,
   Ride: CHIBI2_RIDE_ANIMS,
   Swim: CHIBI2_SWIM_ANIMS,
+  Music: CHIBI2_MUSIC_ANIMS,
 };
 
 export const ONE_SHOTS = new Set([
@@ -133,6 +144,7 @@ const LENGTHS = {
   cheer: 1.6, bowGreet: 1.8, point: 1.4, shrug: 1.2, nod: 1.0, headShake: 1.2, laugh: 1.6, clap: 1.4,
   salute: 1.6, kneel: 3, sitGround: 3.4, pray: 3, dance: 1.6, lookAround: 3.2, crossArms: 3,
   stretch: 2.2, drink: 2.2, sleep: 3.6,
+  lutePlay: 1.6,
 };
 export const CHIBI2_CLIP_SECONDS = LENGTHS;
 
@@ -142,7 +154,7 @@ export const CHIBI2_CLIP_SECONDS = LENGTHS;
  * WHAT IS IN EACH HAND, which decides how every clip carries it. chibi2.js works this out from the
  * avatar's `held` / `offhand` ids with `holdFor()` and hands it to `createClips` on the rig.
  *
- *   right   none | blade | dagger | haft | heavy | polearm | staff | wand | caster | crossbow
+ *   right   none | blade | dagger | haft | heavy | polearm | staff | wand | caster | crossbow | lute
  *   left    none | shield | blade | dagger | haft | heavy | book | orb | torch | bow | caster
  *   twoHand the right-hand weapon takes both hands (the left hand rides its haft)
  *   dualTwo a two-hander in EACH hand
@@ -337,9 +349,31 @@ function base(ctx) {
   return p;
 }
 
+/**
+ * THE LUTE IS HELD TO BE PLAYED (owner review 2026-10-21, W3). Both arms, whatever the clip that carries it: the right
+ * forearm across the bowl with the hand over the strings, the left hand up on the neck by the other shoulder. The grip
+ * is NOT turned — the lute is built in this hand's space already in playing position (chibi2-gear.js LUTE_FRAME was
+ * measured against exactly these angles), so a change here must be matched there. `strum` (-1..1) flicks the wrist;
+ * the grip takes the opposite turn so the instrument stays where it is and only the hand moves.
+ */
+const LUTE_LETS_GO = new Set(['dead', 'swim', 'swimBack', 'swimSide', 'swimCrawl', 'swimTread']);
+export const LUTE_POSE = { armR: [-0.5, -0.8, -0.1], elbowR: [-1.0, 0, 0], armL: [-0.8, 0.4, -0.1], elbowL: [-1.2, 0, 0] };
+function luteHold(p, strum = 0, fret = 0, leftFree = true) {
+  // owner, same day: the two-handed hold applies only when the off hand is EMPTY — with something in it, the left arm
+  // keeps carrying that and only the right arm holds the lute (strumming, the neck resting on the arm)
+  for (const [b, r] of Object.entries(LUTE_POSE)) if (leftFree || b.endsWith('R')) p[b] = [...r];
+  p.handR = [strum * 0.28, 0, 0]; p.gripR = [-strum * 0.28, 0, 0];
+  if (leftFree) { p.handL = [0, 0, 0.15 + fret * 0.12]; p.elbowL[0] += fret * 0.06; }
+}
+
 /** How the hands carry what is in them: `mode` idle | walk | ready. Returns the aims. */
 function carry(p, ctx, mode, swing = 0) {
   const h = ctx.hold, aims = {};
+  if (h.right === 'lute') {
+    if (h.left === 'none') { luteHold(p); return { R: false }; }
+    const aims = carry(p, { ...ctx, hold: { ...h, right: 'none' } }, mode, swing);   // the off hand carries its own thing
+    luteHold(p, 0, 0, false); return { ...aims, R: false };
+  }
   const rp = REST_PITCH[h.right];
   if (h.right === 'heavy' && mode !== 'ready') {            // (2026-10-06: also with a second two-hander in the left hand — the right one hung at the hip pointing backwards)
     // a two-hander over the right shoulder: hand at the chest, forearm up, the blade back past the head
@@ -397,6 +431,9 @@ function poseAt(name, u, ctx) {
   aims = clip(p, u, cycle, ctx, out);
   if (aims === undefined) aims = carry(p, ctx, 'idle');
   out.aim = aims || {};
+  // W3 (2026-10-21): a lute stays in both hands, in playing position, through every clip that does not put the hands
+  // away (a strike with a lute is `lutePlay` played hard — see attackFor)
+  if (h.right === 'lute' && clip !== CLIPS.lutePlay && !HANDS_FREE.has(name) && !LUTE_LETS_GO.has(name)) { luteHold(p, 0, 0, h.left === 'none'); out.aim = { ...out.aim, R: false }; }
   /**
    * NO WEAPON IS EVER LEFT UN-AIMED (2026-10-06, Thousandvale play-test 5, T22: "dual-wielded daggers are held 90
    * degrees wrong, not by the handle"). A held item is authored running straight out of the fist along the forearm
@@ -454,6 +491,7 @@ function lockToFist(p, name, ctx, aims) {
 
 /** `attack` plays the strike the hands suggest, so a game that only ever asks for `attack` still gets the right one. */
 function attackFor(h) {
+  if (h.right === 'lute') return 'lutePlay';
   if (h.dualTwo) return 'twinCleave';
   if (h.left === 'bow') return 'shoot';
   if (h.right === 'crossbow') return 'shoot';
@@ -487,6 +525,19 @@ function phases(u, w0, w1, s0, s1, r0) {
 }
 
 const CLIPS = {
+  // ---------------------------------------------------------------- music (CHIBI2_MUSIC_ANIMS, opt-in)
+  lutePlay(p, u, cy, ctx, o) {
+    // four strums a loop (down, up, down-down), a weight shift on the half bar, the head nodding the beat
+    const strum = sin(cy * 4) * (0.7 + 0.3 * sin(cy * 2)), fret = sin(cy) > 0 ? 1 : -1;
+    const shift = sin(cy);
+    p.hips[2] = shift * 0.03; p.chest[2] = -shift * 0.02; p.legL[2] = -shift * 0.03; p.legR[2] = -shift * 0.03;
+    p.kneeL[0] += Math.max(0, shift) * 0.12; p.kneeR[0] += Math.max(0, -shift) * 0.12;
+    p.chest[0] += 0.05; p.head[0] += 0.08 + Math.abs(sin(cy * 2)) * 0.07; p.head[1] = -0.2 + shift * 0.08;
+    o.bob = -Math.abs(sin(cy * 2)) * 0.008; o.sway = shift * 0.01;
+    if (ctx.hold.right !== 'lute') return carry(p, ctx, 'idle');     // nothing to play: just the sway
+    luteHold(p, strum, fret * ss(Math.abs(sin(cy)), 0.2, 0.6), ctx.hold.left === 'none');
+    return { R: false };
+  },
   // ---------------------------------------------------------------- standing, walking, running
   idle(p, u, cy, ctx, o) {
     // breathing (the chest lifts and the shoulders ride up with it), a slow weight shift from foot

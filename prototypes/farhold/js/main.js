@@ -137,6 +137,7 @@ import { createSkillBar, applyStatus, tickStatuses, slowOf, buffsOf, outgoingFro
 import { installFoci } from './foci.js';
 import { dressClassLooks, wearClassLook } from './classwear.js';
 import { loadClassOutfits } from '../../../avatar-3d/js/class-outfits.js';
+import { attachHeldFlame } from '../../../avatar-3d/js/held-flame.js';   // 2026-10-21 (W10): the torch's fire (the model's flame cones are gone)
 import { installWarbands, createWarbandMap, holderLine } from './warbands.js';
 import { installUniques, resolveAttack, afterKill as uniquesAfterKill, afterDamaged as uniquesAfterDamaged, tickAuras } from './uniques.js';
 import { EFFECTS as FX_TABLE } from './effects.js';
@@ -6265,6 +6266,16 @@ async function begin({ items, balance, bestiary, talents, campaignData, classLoo
     // phase 8: armour you can see — the base's tier picks the Chibi 2 part
     Object.assign(next, rpg.gearLook(player));
     actor.setAvatar(next);        // keeps the clip set it was built with
+    // 2026-10-21 (owner review W10): a held torch is a rag-bound head now and its FIRE is a few flickering sprites on the
+    // grip (avatar-3d/js/held-flame.js) — no light toggled, nothing compiled; light.js still owns the one torch light.
+    // setAvatar rebuilds the bones synchronously, so the old flame goes with them and a new one is hung on the new grip.
+    actor.heldFlame?.dispose();
+    actor.heldFlame = attachHeldFlame(actor, next);
+    if (!actor.flameTicks) {
+      const update = actor.update.bind(actor);
+      actor.update = dt => { update(dt); actor.heldFlame?.update(dt); };
+      actor.flameTicks = true;
+    }
   }
   applyGearLook();
 

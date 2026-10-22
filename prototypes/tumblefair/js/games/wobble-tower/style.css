@@ -1,0 +1,14 @@
+/* Wobble Tower: the big centred DROP button, the height + wobble meter over each tower, the banner. */
+.game-wobble-tower > * { pointer-events: none !important; }
+body:has(.game-wobble-tower) .ph-a { right: auto; left: 50%; margin-left: -78px; width: 156px; height: 156px; font-size: 28px; bottom: calc(var(--sb) + 28px); }
+.tag.wt-meter { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 2px 10px 5px; font: 900 20px/1 var(--font); min-width: 46px; }
+.tag.wt-meter .wt-wob { display: block; width: 52px; height: 7px; border-radius: 4px; background: rgba(255, 255, 255, .55); overflow: hidden; border: 1.5px solid var(--ink); }
+.tag.wt-meter .wt-wob b { display: block; height: 100%; width: 0; background: #3ecf5a; transition: width .15s; }
+.tag.wt-meter.danger .wt-wob b { background: #ff4d4d; }
+.tag.wt-meter.danger::after { content: '!'; position: absolute; right: -10px; top: -8px; width: 20px; height: 20px; border-radius: 50%; background: #ff4d4d; color: #fff; font: 900 15px/20px var(--font); text-align: center; border: 2px solid var(--ink); animation: wt-shake .3s infinite; }
+@keyframes wt-shake { 50% { transform: rotate(14deg) scale(1.1); } }
+.game-wobble-tower .wt-banner { position: absolute; left: 50%; top: 34%; transform: translate(-50%, -50%) scale(.6); opacity: 0;
+  font: 900 clamp(36px, 10vw, 70px)/1 var(--font); color: var(--sun); -webkit-text-stroke: 2.5px var(--ink); paint-order: stroke fill; text-shadow: 0 5px 0 var(--ink); white-space: nowrap; transition: transform .2s, opacity .2s; }
+.wt-banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.wt-banner.bad { color: #ff7a7a; }
+@media (max-width: 520px) { .tag.wt-meter { font-size: 16px; padding: 1px 7px 4px; min-width: 36px; } .tag.wt-meter .wt-wob { width: 40px; height: 6px; } }

@@ -27,7 +27,7 @@ if (until !== 'title') {
   await host.click('[data-act=host]');
   await host.waitForFunction(() => window.tumblefair.S.room, null, { timeout: 20000 });
   const code = await host.evaluate(() => tumblefair.S.room.code);
-  for (let i = 1; i < N; i++) { const p = await open(i, URL0 + '?code=' + code); await p.waitForFunction(() => window.tumblefair.S.room, null, { timeout: 20000 }); }
+  for (let i = 1; i < N; i++) { const p = await open(i, URL0 + '?code=' + code); await p.waitForTimeout(600); if (await p.$('.invite [data-act=join]')) await p.click('.invite [data-act=join]'); await p.waitForFunction(() => window.tumblefair.S.room, null, { timeout: 20000 }); }
   await host.waitForTimeout(2500);
   if (process.argv.includes('--teams')) await host.evaluate(() => { tumblefair.net.send({ t: 'opt', key: 'teams', value: true }); tumblefair.net.send({ t: 'opt', key: 'mode', value: 'endless' }); });
   await host.waitForTimeout(800);

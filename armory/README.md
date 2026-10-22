@@ -82,6 +82,17 @@ the real builders every time, so a changed model changes its numbers with no fil
 | `tests/armory.test.js` | Node: rows, filters, links, looks, baselines, item rows, flag export. |
 | `tests/armory.spec.js` | Playwright: opens, filters, thumbnails are real pictures, a deep link opens both hands + an attack clip and the preview is not blank, flags persist and export, phone width. |
 
+## 2026-10-21 owner review
+
+* **Auto adjust camera** (checkbox under View, on by default, remembered per browser in `localStorage['armory.autoCam']`):
+  opening an item or switching hands frames it with `setCamera('auto')` — a held item from the side of the hand that holds
+  it at an angle, the box of the item and the body together, 1.2x further out for a two-hander; headwear close on the
+  head; capes from behind; shoes low. Untick it to keep the camera where you left it.
+* **Builds Chibi 2.5** (`{ v25: true }`), like Thousandvale, so the faces and hair match the game.
+* **Two-handers take both hands only when the off hand is empty** (the shared builder's rule: `holdFor().twoHand`);
+  a pair is still drawn as before (a stricter "main hand only" rule was tried and withdrawn the same day).
+* A held **torch / cresset burns** (`attachHeldFlame` from `avatar-3d/js/held-flame.js`, ticked with the actor).
+
 ## Thumbnails without freezing the page
 
 `createThumbnailer({ size })` owns **one** WebGL context for every picture on the page. A card asks for its

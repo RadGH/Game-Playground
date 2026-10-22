@@ -1,17 +1,25 @@
 # Avatar 3D — Three.js character builder
 
-Three renderers for the **same avatar JSON** that Avatar 2D produces. **Chibi 2 is the flagship** and
-the page opens on it; the other two are **deprecated** (kept, labelled, for comparison only).
+**2026-10-21 (owner): the page is Chibi 2 only, and it builds every look as Chibi 2.5** (`createChibi2Character(look, { v25: true })`,
+the same as Thousandvale). Until then the page built v2 looks, so every 2.5-only id (eyes cat…heart, the brows after Bushy,
+the mouths from Laugh on) silently fell back to a v2 part and looked the same. A **Chibi 2.5 details** panel draws one control
+per field in `CHIBI25_OPTIONS.fields` (pupil, iris, eye height, brow thickness, colours…) straight from that table, and the
+2.5 body controls (`js/chibi25-body-ui.js`) sit under it. The character material is double-sided since the same day, so an
+open shell (hair, a hat's underside, a collar) is never see-through from behind.
 
-0. **Chibi 2 (flagship)** — see item 3 and [CHIBI2.md](CHIBI2.md). Since the 2026-09-24 overhaul: nine
-   races (`body.race`: human, elf, dwarf, orc, giant, goblin, halfling, undead, beast) that change the
-   body's proportions and roll race-weighted looks, a roundness slider (`body.round`), optional round
-   cheeks (`body.cheeks`), self-contained outfits, a face rebuilt on the face's own surface, weapons
-   aimed through grip bones, and ~90 animations including weapon-family attacks and emotes.
-
-1. **Mii-style (procedural) — DEPRECATED** — `js/mii.js`. Body from primitives (capsules, rounded boxes, spheres), the face drawn from the 2D face parts onto a curved patch in front of the head (the Mii technique), procedural hair/hat/ear/clothing meshes mapped from the 2D ids, body height/width/headSize as group scaling, and procedural animations (idle, walk, run, wave, talk, dead). Zero downloads, everything authored in code, so Claude can extend it.
-2. **Quaternius (CC0 meshes) — DEPRECATED** — `js/quaternius.js`. Universal Base Characters body (male/female), 6 hairstyles + beard, Modular Outfits – Fantasy (Peasant, Ranger sets) and the Universal Animation Library (43 clips), all on one skeleton. Real modelled characters with real animation; the 2D ids are mapped onto the nearest mesh; face sliders do not apply.
-3. **Chibi 2** — `js/chibi2.js` (+ `chibi2-body.js`, `chibi2-face.js`, `chibi2-hats.js`, `chibi2-races.js`, `chibi2-motion.js`, `chibi2-gear.js`, `chibi2-weapons.js`). Profiled procedural surfaces compiled into two skinned meshes, a 22-bone rig (18 at milestone 1), modelled facial features (eyes, brows, noses, mouths, facial hair and marks), layered equipment and 12 animation states. The Vanguard preset is about 8,000 triangles. This is a focused humanoid foundation; existing part ids are accepted but not all have distinct models. [Architecture, supported mappings, integration and benchmark](CHIBI2.md).
+* **Chibi 2 / 2.5 (flagship)** — [CHIBI2.md](CHIBI2.md). Nine races (`body.race`), roundness (`body.round`), round cheeks,
+  self-contained outfits, a face built on the face's own surface, weapons aimed through grip bones, ~90 animations.
+  `js/chibi2.js` (+ `chibi2-body.js`, `chibi2-face.js`, `chibi25-*.js`, `chibi2-hats.js`, `chibi2-races.js`,
+  `chibi2-motion.js`, `chibi2-gear.js`, `chibi2-weapons.js`): profiled procedural surfaces compiled into two skinned meshes.
+* **Chibi 1 — ARCHIVED** — `chibi1.html` + `js/chibi1-app.js` over `js/mii.js`: the first 3D character (primitives with the
+  2D face painted onto a face patch), kept as a showcase to look back on. Nothing new is built for it.
+* **Chibi 2 v2 — ARCHIVED for comparison** — `chibi2-v2.html` is this same page (`js/app.js`) with `<body data-version="2">`:
+  it builds the old v2 look (no `v25`), the model Farhold, Emberveil and Bannerline still use. 2.5-only menu ids fall back
+  to a v2 part there. Shared gear fixes and the double-sided material apply to v2 too; the v2 face and hair do not change.
+* **Quaternius — REMOVED from the site (2026-10-21).** `js/quaternius.js` and `assets/quaternius/` are gone (highdef-3d
+  became world-only the same day, so nothing loaded them). The one file Chibi 4's Blender rebuild needs, the CC0 Universal
+  Animation Library, moved to `chibi4/assets/ual/` with its licence.
+* **Chibi 3 and Chibi 4 — experiments ON HOLD** (pages kept, labelled).
 
 Open: `http://<LAN-IP>:8400/avatar-3d/`. Presets, random generation and the slot catalog are shared with `../avatar-2d/`.
 
@@ -334,21 +342,18 @@ Two chibi bodies on a stage, element chips, cast/projectile/impact/heal/revive/z
 ```js
 import { createScene } from '/avatar-3d/js/scene.js';           // optional boilerplate (renderer, lights, orbit, ground, loop)
 import { createMiiCharacter } from '/avatar-3d/js/mii.js';
-import { createQuaterniusCharacter, CLIPS } from '/avatar-3d/js/quaternius.js';
 
 const scene = createScene(document.querySelector('#stage'));
 const npc = await createMiiCharacter(character.avatar);          // { group, update(dt,t), setAnim, setAvatar, metrics, dispose }
 scene.scene.add(npc.group); npc.setAnim('walk');
 scene.addTicker((dt, t) => npc.update(dt, t));
 
-const hero = await createQuaterniusCharacter(character.avatar);  // { group, update(dt), setAnim(idle|walk|run|talk|wave|dead | any clip name), play, clips, mixers }
-hero.play('Sword_Attack');
 ```
-Both return a `group` with `userData.character = true`; put several in one scene for crowds (Mii characters are ~60 draw calls each; Quaternius ones ~6 skinned meshes with 1K textures).
+Returns a `group` with `userData.character = true` (Chibi 1 is archived; games build Chibi 2 — see CHIBI2.md).
 
 ## JSON → 3D mapping
 
-| JSON field | Mii mode | Quaternius mode |
+| JSON field | Mii mode (Chibi 1, archived) | Quaternius mode (removed 2026-10-21) |
 |---|---|---|
 | `body.height/width/headSize` | legs group scaled about the feet, torso about the hip, head by headSize only (`metrics()` gives hipY/neckY/totalHeight) | bone scale: `thigh_l/r` Y (0.8–1.25), `spine_01` XZ (0.8–1.25, undone at `neck_01`), `Head` uniform; root lifted so feet stay on the ground |
 | `body.skin` | material colour | light or dark base texture chosen by brightness, then tinted toward the colour |
@@ -365,10 +370,8 @@ Both return a `group` with `userData.character = true`; put several in one scene
 
 Mapping table: `MAP` in `quaternius.js`. Animation names for `setAnim`: `idle walk run talk wave dead` (both modes) or any raw clip name in Quaternius mode (`CLIPS`).
 
-## Assets (`assets/quaternius/`, CC0)
-`base/` Superhero_Male/Female_FullBody.gltf + light/dark skin, hair, eye textures · `hair/` Eyebrows_*, Hair_Beard, Hair_Buns, Hair_Buzzed, Hair_BuzzedFemale, Hair_Long, Hair_SimpleParted · `outfits/` Male/Female × Peasant/Ranger × Arms/Body/Legs/Feet (+ Ranger hood, pauldrons) with 1K textures · `anim/UAL1_Standard.glb` (43 clips, no root motion). Textures were downscaled from 2K/4K to 1K/512 for the repo. Licenses in `LICENSE-quaternius*.txt`. Free tier only; the paid "Source" packs add 6 bodies × 3 proportions, 20 hairstyles, 12 outfits — same loader would work.
-
-Skeleton bone names (shared by every file): root, pelvis, spine_01..03, neck_01, Head, clavicle/upperarm/lowerarm/hand_l/r + fingers, thigh/calf/foot/ball_l/r.
+## Assets
+The Quaternius CC0 packs were removed 2026-10-21 (see the top of this file).
 
 ## Implementation notes
 - **Face patch**: `SphereGeometry` segment (±57° around the front, ±54° vertically) at 1.012× the skull radius with polygon offset, transparent `MeshStandardMaterial`; the texture is the 2D face SVG cropped to `viewBox 84 69 132 132` (head centre 150,135). Change `faceSVG()` in `face-texture.js` to include/exclude layers.
@@ -386,4 +389,3 @@ Mode switch, orbit camera, animation chips (procedural or clip list), turntable,
 ## Ideas / limits
 - Accessories (glasses, eyepatch) are not built in 3D yet; `mask`/`scarf` etc. would be simple meshes.
 - Mii mode has no mouth animation; a cheap approach is swapping the face texture between two mouth states while talking.
-- Quaternius face could take the 2D face texture as a decal on the head mesh if the UV island were known.

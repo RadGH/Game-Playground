@@ -1,0 +1,14 @@
+/* Fling Ring: the throw-power bar while you carry someone, the MASH prompt while you are carried, and a Bumble's
+   "!" before it shoves. Words as well as colour. */
+.fr-power { position: absolute; left: 50%; bottom: calc(var(--sb) + 200px); transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 4px; pointer-events: none !important; }
+.fr-power[hidden], .fr-mash[hidden] { display: none; }
+.fr-power span { background: var(--ink); color: #fff; font: 800 14px/1 var(--font); padding: 5px 12px; border-radius: 999px; }
+.fr-power i { display: block; width: 180px; height: 14px; border: 3px solid var(--ink); border-radius: 8px; background: #fff; overflow: hidden; }
+.fr-power b { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #ffd23f, #ff5f5f); }
+.fr-mash { position: absolute; left: 50%; bottom: calc(var(--sb) + 210px); transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; color: var(--sun); -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; pointer-events: none !important; animation: fr-shake .12s linear infinite alternate; }
+.fr-mash b { font: 900 44px/1 var(--font); }
+.fr-mash span { font: 900 24px/1 var(--font); color: #fff; }
+.fr-mash.bump b { transform: scale(1.12); }
+@keyframes fr-shake { from { transform: translateX(-52%) rotate(-3deg); } to { transform: translateX(-48%) rotate(3deg); } }
+.tag.fr-warn { background: #ff3b3b; font-size: 20px; padding: 0 10px; }
+@media (min-width: 900px) { .fr-power { bottom: 80px; } .fr-mash { bottom: 90px; } }

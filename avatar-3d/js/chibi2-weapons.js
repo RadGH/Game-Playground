@@ -85,13 +85,62 @@ function pommel(c, bone, y, kind, size, colour) {
  * why every sword in the game read as a stick with a bar across it.
  */
 function guard(c, bone, y, span, sweep, thick, colour) {
-  c.add(taperedCurve([
+  const pts = [
     [-span, y + sweep * 0.9, Z],
     [-span * 0.4, y + sweep * 0.15, Z + thick * 0.3],
     [0, y, Z + thick * 0.4],
     [span * 0.4, y + sweep * 0.15, Z + thick * 0.3],
     [span, y + sweep * 0.9, Z],
-  ], [thick * 0.5, thick, thick * 1.2, thick, thick * 0.5], 5, 8), bone, colour, { metal: true });
+  ];
+  c.add(taperedCurve(pts, [thick * 0.5, thick, thick * 1.2, thick, thick * 0.5], 5, 8), bone, colour, { metal: true });
+  endCaps(c, bone, pts, thick * 0.5, colour);
+}
+
+/**
+ * OWNER REVIEW 2026-10-21 (W8): "the edges of the guard are see-through". `taperedCurve` is an OPEN tube, so each end
+ * of a cross guard was a hole you could look into and through. A small ball on each end closes it (and rounds the
+ * quillon tip the way a real one is finished). 24 triangles a ball.
+ */
+function endCaps(c, bone, pts, r, colour, o = {}) {
+  for (const p of [pts[0], pts[pts.length - 1]]) c.add(new THREE.SphereGeometry(1, 6, 3), bone, colour, { position: p, scale: [r, r, r], metal: true, ...o });
+}
+
+/**
+ * OWNER REVIEW 2026-10-21 (W7): "the bowstring clips through the limbs — it should rest along the BACK edge of the
+ * limbs". A string drawn straight between two points ran through the middle of every limb that bent back past it
+ * (the recurve's limbs bow back 9 cm behind the line it was drawn on). This walks the limbs as built — each limb a
+ * list of [along, back] points with a radius — keeps the back edge of every sample (`back` + radius + a hair), and
+ * strings the UPPER HULL of those points tip to tip: straight where the string is free, lying along a limb where the
+ * limb curves into it (the ears of a recurve), and never inside one. Returns the polyline as [along, back] pairs.
+ */
+function bowStringPath(limbs) {
+  const pts = [];
+  for (const { pts: lp, radii } of limbs) {
+    const curve = new THREE.CatmullRomCurve3(lp.map(([a, b]) => new THREE.Vector3(a, b, 0)));
+    for (let i = 0; i <= 24; i++) {
+      const t = i / 24, v = curve.getPointAt(t), f = t * (radii.length - 1);
+      const r = THREE.MathUtils.lerp(radii[Math.floor(f)], radii[Math.min(radii.length - 1, Math.floor(f) + 1)], f % 1);
+      pts.push([v.x, v.y + r + 0.003]);
+    }
+  }
+  pts.sort((p, q) => p[0] - q[0]);
+  const hull = [];                                   // the upper hull, left to right (monotone chain)
+  for (const p of pts) {
+    while (hull.length >= 2) {
+      const [a, b] = hull.slice(-2), cross = (b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0]);
+      if (cross >= 0) hull.pop(); else break;
+    }
+    hull.push(p);
+  }
+  // keep the corners only: a point the string barely bends at (under ~7 degrees) costs a tube segment for nothing
+  const out = [hull[0]];
+  for (let i = 1; i < hull.length - 1; i++) {
+    const a = out[out.length - 1], b = hull[i], n = hull[i + 1];
+    const t1 = Math.atan2(b[1] - a[1], b[0] - a[0]), t2 = Math.atan2(n[1] - b[1], n[0] - b[0]);
+    if (Math.abs(t2 - t1) > 0.12) out.push(b);
+  }
+  out.push(hull[hull.length - 1]);
+  return out;
 }
 
 /**
@@ -155,11 +204,43 @@ function axeHead(k = 1, inset = 1) {
   if (inset !== 1) {
     return axeHead(k).map(([x, y]) => [cx * k + (x - cx * k) * inset, cy * k + (y - cy * k) * inset]);
   }
+  // OWNER REVIEW 2026-10-21 (W5): the back of the head used to curve in to a neck 2-3 cm OUT from the haft
+  // (x 0.03-0.052 against a haft radius of ~0.02), so the head floated beside the shaft. It now runs into the haft
+  // (x 0.008, inside it) and `axeEye` wraps an iron socket round the join, which is how a real head is hung.
   return [
-    [0.022, 0.095], [0.06, 0.128], [0.115, 0.132], [0.152, 0.075], [0.166, -0.005],
-    [0.148, -0.082], [0.104, -0.138], [0.062, -0.152], [0.042, -0.118],
-    [0.052, -0.055], [0.038, 0.01], [0.030, 0.06],
+    [0.008, 0.088], [0.06, 0.128], [0.115, 0.132], [0.152, 0.075], [0.166, -0.005],
+    [0.148, -0.082], [0.104, -0.138], [0.062, -0.152], [0.040, -0.122],
+    [0.008, -0.092], [0.008, 0.0],
   ].map(([x, y]) => [x * k, y * k]);
+}
+/** The outer rim of `axeHead` — the cutting edge — from the top corner round to the beard. */
+const AXE_EDGE = [[0.115, 0.132], [0.152, 0.075], [0.166, -0.005], [0.148, -0.082], [0.104, -0.138]];
+/**
+ * The socket ("eye") a head is hung on: a collar round the haft as tall as the head's neck. `k` as axeHead.
+ */
+function axeEye(c, bone, y, k, r, colour) {
+  c.add(profile([[y - 0.1 * k, r * 1.15, r * 1.15], [y - 0.085 * k, r * 1.45, r * 1.45], [y + 0.075 * k, r * 1.45, r * 1.45], [y + 0.09 * k, r * 1.15, r * 1.15]], 8), bone, colour, { position: [0, 0, Z], metal: true });
+}
+/**
+ * OWNER REVIEW 2026-10-21 (W5/W6): the bright edge used to be a rod through three made-up points (and on the
+ * one-handed axe it was on the BACK of the head, +z, while the head is extruded toward -z: "a floating wire").
+ * It now follows the head's own rim point for point, on the side the head is on (`side` -1 = -z, +1 = +z).
+ */
+function axeEdge(c, bone, y, k, side, colour) {
+  const pts = AXE_EDGE.map(([x, yy]) => [0, y + yy * k, Z + side * (x * k + 0.001)]);
+  c.add(taperedCurve(pts, [0.006, 0.008, 0.009, 0.008, 0.006].map(r => r * Math.min(1.3, k)), 4, 10), bone, colour, { metal: true });
+  endCaps(c, bone, pts, 0.006 * Math.min(1.3, k), colour);
+}
+
+/**
+ * A torch head (W10, 2026-10-21): a rounded bundle of rag on the end of the stick at `y` (hand space, the head runs
+ * on down -y), bound with cord, the far end charred. Used by the torch (chibi2-gear.js) and the cresset (chibi2-gear5-offhand.js).
+ */
+function rag(c, bone, z, y, k = 1, cloth = '#cbb38a') {
+  const char = '#3a2a20';
+  c.add(new THREE.SphereGeometry(1, 8, 6), bone, cloth, { position: [0, y - 0.035 * k, z], scale: [0.045 * k, 0.07 * k, 0.045 * k] });
+  c.add(new THREE.SphereGeometry(1, 8, 3, 0, Math.PI * 2, Math.PI * 0.55, Math.PI * 0.45), bone, char, { position: [0, y - 0.037 * k, z], scale: [0.047 * k, 0.072 * k, 0.047 * k] });
+  for (const [dy, r] of [[-0.005, 0.04], [-0.05, 0.045]]) c.add(new THREE.TorusGeometry(r * k, 0.006 * k, 3, 10), bone, '#5a4630', { position: [0, y + dy * k, z], rotation: [Math.PI / 2, 0, 0.3] });
 }
 
 /** A rarity gem. Only appears at quality 2 and above, which is what makes rarity READ. */
@@ -188,14 +269,14 @@ const BUILDERS = {
     grip(c, 'handR', -0.13, 0.06, 0.019);
     pommel(c, 'handR', 0.09, 'wheel', 0.030, c.trim);
     guard(c, 'handR', -0.13, 0.11, 0.035, 0.016, c.trim);
-    blade(c, 'handR', -0.15, -0.73, 0.050, hc);
+    blade(c, 'handR', -0.14, -0.73, 0.050, hc);            // W1: from -0.15, 1 mm short of the guard's skin
     if (q >= 2) gem(c, 'handR', 0.09, 0.018, hc);
   },
   fh_longsword(c, hc, q) {
     grip(c, 'handR', -0.15, 0.10, 0.019);
     pommel(c, 'handR', 0.13, 'scent', 0.030, c.trim);
     guard(c, 'handR', -0.15, 0.12, 0.04, 0.016, c.trim);
-    blade(c, 'handR', -0.17, -0.81, 0.048, hc);
+    blade(c, 'handR', -0.16, -0.81, 0.048, hc);
     if (q >= 2) gem(c, 'handR', 0.13, 0.018, hc);
   },
   /**
@@ -208,12 +289,13 @@ const BUILDERS = {
     pommel(c, 'handR', 0.18, 'fishtail', 0.042, c.trim);
     guard(c, 'handR', -0.22, 0.15, 0.05, 0.020, c.trim);
     // the ricasso: an unsharpened stretch above the guard, wrapped, for the second hand
-    c.add(profile([[-0.36, 0.030, 0.014], [-0.24, 0.034, 0.015]], 4), 'handR', tone(hc, 0.8), { position: [0, 0, Z], metal: true });
+    // W1 (2026-10-21): the ricasso reaches up INTO the guard (it stopped 2 cm short) and the blade starts inside it (4 cm gap)
+    c.add(profile([[-0.40, 0.030, 0.014], [-0.215, 0.034, 0.015]], 4), 'handR', tone(hc, 0.8), { position: [0, 0, Z], metal: true });
     for (const s of [-1, 1]) {
       c.add(profile([[-0.38, 0.010, 0.010], [-0.38, 0.010, 0.010]], 4), 'handR', c.trim, { position: [s * 0.05, 0, Z], metal: true });
       c.add(new THREE.ConeGeometry(0.014, 0.055, 5), 'handR', c.trim, { position: [s * 0.055, -0.37, Z], rotation: [0, 0, -s * 1.2], metal: true });
     }
-    blade(c, 'handR', -0.40, -1.16, 0.062, hc);
+    blade(c, 'handR', -0.38, -1.16, 0.062, hc);
     if (q >= 2) gem(c, 'handR', 0.18, 0.022, hc);
   },
   /** A sabre: single edged, a belly to the curve, and a knuckle bow over the hand. */
@@ -256,7 +338,8 @@ const BUILDERS = {
     // the cheek is inset and darker, the edge stands proud and lighter — the two together are what
     // stop an axe head reading as a shovel blade from ten metres away
     c.add(extrude(axeHead(1, 0.62), 0.030), 'handR', tone(hc, 0.72), { position: [0, -0.46, Z], rotation: [0, Math.PI / 2, 0], metal: true });
-    c.add(taperedCurve([[0, -0.32, Z + 0.152], [0, -0.46, Z + 0.166], [0, -0.60, Z + 0.104]], [0.008, 0.010, 0.008], 4, 6), 'handR', lift(hc, 0.4), { metal: true });
+    axeEye(c, 'handR', -0.46, 1, 0.019, tone(hc, 0.85));
+    axeEdge(c, 'handR', -0.46, 1, -1, lift(hc, 0.4));        // the head is extruded toward -z (rotation y +90 sends x to -z)
     c.add(new THREE.ConeGeometry(0.02, 0.07, 4), 'handR', tone(hc, 0.8), { position: [0, -0.46, Z - 0.07], rotation: [Math.PI / 2, 0, 0], metal: true });
     if (q >= 2) gem(c, 'handR', -0.40, 0.016, hc);
   },
@@ -271,10 +354,10 @@ const BUILDERS = {
       const inner = flip > 0 ? cheek : cheek.map(([x, y]) => [-x, y]).reverse();
       c.add(extrude(turn, 0.026), 'handR', hc, { position: [0, -0.78, Z], rotation: [0, Math.PI / 2, 0], metal: true });
       c.add(extrude(inner, 0.032), 'handR', tone(hc, 0.72), { position: [0, -0.78, Z], rotation: [0, Math.PI / 2, 0], metal: true });
-      c.add(taperedCurve([
-        [0, -0.58, Z + flip * 0.22], [0, -0.79, Z + flip * 0.241], [0, -1.00, Z + flip * 0.151],
-      ], [0.009, 0.012, 0.009], 4, 6), 'handR', lift(hc, 0.4), { metal: true });
+      // W6: the edge follows each head's own rim (it was a three-point rod that missed the outline by up to 5 cm)
+      axeEdge(c, 'handR', -0.78, 1.45, -flip, lift(hc, 0.4));
     }
+    axeEye(c, 'handR', -0.78, 1.45, 0.021, tone(hc, 0.85));
     c.add(new THREE.ConeGeometry(0.026, 0.10, 5), 'handR', tone(hc, 0.85), { position: [0, -0.99, Z], rotation: [Math.PI, 0, 0], metal: true });
     c.add(profile([[0.20, 0.030, 0.030], [0.24, 0.024, 0.024]], 8), 'handR', IRON, { position: [0, 0, Z], metal: true });
     if (q >= 2) gem(c, 'handR', -0.60, 0.020, hc);
@@ -385,10 +468,14 @@ const BUILDERS = {
     for (const y of [-0.22, -0.14]) {
       c.add(profile([[y - 0.008, 0.016, 0.016], [y + 0.008, 0.016, 0.016]], 6), R, GOLD, { position: [0, 0, Z], rotation: tilt, metal: true });
     }
-    c.add(new THREE.IcosahedronGeometry(1, 0), R, lift(hc, 0.4), { position: [0, -0.32, Z + 0.011], rotation: tilt, scale: [0.026, 0.034, 0.026] });
-    c.add(new THREE.TorusGeometry(0.022, 0.006, 4, 8), R, GOLD, { position: [0, -0.285, Z + 0.010], rotation: [Math.PI / 2 - 0.35, 0, 0], metal: true });
+    // OWNER REVIEW 2026-10-21 (W9): the shaft is tilted about x, but the stone, its collar and the q3 sparks were
+    // placed at UN-tilted points, so the stone hung 9 cm off the end of the shaft. Every piece on the shaft's line is
+    // now placed on the tilted line (`on(y)`), and the stone sits down in its collar on the shaft's tip.
+    const on = (y, x = 0, dz = 0) => { const v = new THREE.Vector3(x, y, dz).applyEuler(new THREE.Euler(...tilt)); return [v.x, v.y, v.z + Z]; };
+    c.add(new THREE.IcosahedronGeometry(1, 0), R, lift(hc, 0.4), { position: on(-0.325), rotation: tilt, scale: [0.026, 0.034, 0.026] });
+    c.add(new THREE.TorusGeometry(0.019, 0.006, 4, 8), R, GOLD, { position: on(-0.296), rotation: [Math.PI / 2 - 0.35, 0, 0], metal: true });
     if (q >= 3) {
-      for (const s of [-1, 1]) c.add(new THREE.OctahedronGeometry(1), R, lift(hc, 0.6), { position: [s * 0.03, -0.30, Z + 0.02], scale: [0.010, 0.014, 0.010] });
+      for (const s of [-1, 1]) c.add(new THREE.OctahedronGeometry(1), R, lift(hc, 0.6), { position: on(-0.31, s * 0.03, 0.01), rotation: tilt, scale: [0.010, 0.014, 0.010] });
     }
   },
 
@@ -460,7 +547,8 @@ for (const id of [...Object.keys(BUILDERS), ...Object.keys(TV_BUILDERS)]) {
   if (!FARHOLD_HELD.includes(id)) throw new Error(`chibi2-weapons: "${id}" is built but not catalogued`);
 }
 /** The parts vocabulary, lent to the play-test 4 models in chibi2-weapons-tv.js (same helpers, same look). */
-export const KIT = { Z, WOOD, IRON, STEEL, DARK, GOLD, tone, lift, low, extrude, grip, pommel, guard, blade, haft, langets, collar, axeHead, gem };
+export const KIT = { Z, WOOD, IRON, STEEL, DARK, GOLD, tone, lift, low, extrude, grip, pommel, guard, blade, haft, langets, collar, axeHead, gem, endCaps, bowStringPath, axeEye, axeEdge, rag };
+export { endCaps, bowStringPath, rag };
 
 /**
  * Build one, or return false if the id belongs to the original vocabulary.

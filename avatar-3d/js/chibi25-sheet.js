@@ -8,6 +8,7 @@
 //   &slot=hat&hair=long                     every hat over one hair
 //   &cols=2                                 rows per line of the page
 //   &blink=0.5                              eyelids part-closed (0..1), &look=x,y pupils pushed (-1..1)
+//   &zoom=2.5                               closer camera · &set=accessory.id:glasses,eyes.height:tall any base-look field
 //   &views=all                              eight angles: front, three quarters, side, back three quarters, back, other side, top, low
 //   &xray=1                                 SEE-THROUGH check (hair pass 2): every back face that can be seen is painted magenta and
 //                                           counted (the material is front-side only, so a visible back face = a hole you look through)
@@ -30,6 +31,8 @@ const base = {
 };
 if (q.get('eyes')) base.eyes.id = q.get('eyes');
 if (q.get('beard')) base.facialHair.id = q.get('beard');
+// &set=accessory.id:glasses,eyes.height:tall — any field of the base look (2026-10-21 owner review)
+for (const kv of (q.get('set') || '').split(',').filter(Boolean)) { const [path, val] = kv.split(':'); const keys = path.split('.'); let o = base; for (const k of keys.slice(0, -1)) o = o[k] ??= {}; o[keys.at(-1)] = isNaN(+val) || val === '' ? val : +val; }
 const opt = CHIBI25_OPTIONS.face[slot];
 let ids = q.get('ids') ? q.get('ids').split(',') : (q.get('only') === 'new' && opt ? opt.added : Object.keys(PARTS[slot] || {}));
 if (slot === 'headShape') ids = Object.keys(PARTS.headShape);
@@ -87,10 +90,10 @@ for (const id of ids) {
   actor.update(0.016);
   const head = actor.parts.head, hp = new THREE.Vector3(); head.updateWorldMatrix(true, false); head.getWorldPosition(hp);
   const H = actor.metrics().height;
-  const centre = hp.clone().add(new THREE.Vector3(0, 0.27 * (H / 1.6), 0.0));
+  const centre = hp.clone().add(new THREE.Vector3(0, (0.27 + +(q.get('dy') || 0)) * (H / 1.6), 0.0));   // &dy=-0.08 lowers the camera's aim
   const counts = {};
   for (const v of views) {
-    const [yaw, pitch] = ANG[v] || [0, 0.04], dist = 2.2 * (H / 1.6);
+    const [yaw, pitch] = ANG[v] || [0, 0.04], dist = 2.2 * (H / 1.6) / +(q.get('zoom') || 1);   // &zoom=2 for a close-up
     camera.position.set(centre.x + Math.sin(yaw) * Math.cos(pitch) * dist, centre.y + Math.sin(pitch) * dist, centre.z + Math.cos(yaw) * Math.cos(pitch) * dist);
     camera.lookAt(centre); renderer.render(scene, camera);
     if (xray) counts[v] = magenta();

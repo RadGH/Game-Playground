@@ -1,0 +1,35 @@
+/* Ghost Photographer: the team strip, the banner, ghost name tags, and the phone's clue cards (mini maps, footprints,
+   thermometer). Nothing is tappable: the stick and buttons are the controls. */
+.game-ghost-photographer > * { pointer-events: none !important; }
+.game-ghost-photographer .gp-hud { position: absolute; top: calc(var(--st) + 58px); left: 50%; transform: translateX(-50%); display: flex; gap: 10px; align-items: center; white-space: nowrap;
+  padding: 4px 12px; border-radius: 999px; background: rgba(255, 248, 231, .94); border: 3px solid var(--ink); box-shadow: 0 3px 0 var(--ink); font: 800 15px/1.2 var(--font); }
+.gp-hud b { font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: .5px; opacity: .75; }
+.gp-hud em { font-style: normal; font-weight: 900; }
+.gp-lamp { background: #ffe9a8; border-radius: 999px; padding: 0 8px; }
+.game-ghost-photographer .gp-banner { position: absolute; left: 50%; top: 46%; transform: translate(-50%, -50%) scale(.6); opacity: 0;
+  font: 900 clamp(26px, 8vw, 58px)/1 var(--font); color: var(--sun); -webkit-text-stroke: 2.5px var(--ink); paint-order: stroke fill; text-shadow: 0 5px 0 var(--ink); white-space: nowrap; transition: transform .25s, opacity .25s; }
+.gp-banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.gp-banner.good { color: #8ff07a; } .gp-banner.bad { color: #ff7a7a; } .gp-banner.warn { color: #c9b6ff; }
+.tag.gp-tag { background: #2a1733; color: #fff; font-size: 13px; }
+.game-ghost-photographer .gp-clues { position: absolute; top: calc(var(--st) + 98px); left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100% - 12px);
+  display: flex; flex-direction: column; align-items: center; gap: 4px; font: 800 13px/1.2 var(--font); }
+.gp-cards { display: flex; gap: 6px; justify-content: center; }
+.gp-clue { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 7px 5px; border-radius: 12px; background: #2a1733; color: #fff; border: 2px solid #c9b6ff; box-shadow: 0 3px 0 var(--ink); min-width: 96px; max-width: 118px; text-align: center; }
+.gp-clue b { display: flex; align-items: center; gap: 4px; font-size: 13px; }
+.gp-clue b i { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; }
+.gp-clue small { font-size: 10px; opacity: .8; margin-top: -2px; }
+.gp-clue span { font-size: 11px; line-height: 1.15; }
+.gp-clue u { text-decoration: none; color: #ffd23f; }
+.gp-map { width: 90px; height: 60px; border-radius: 4px; background: #fff; }
+.gp-thermo { display: flex; gap: 3px; align-items: flex-end; height: 40px; }
+.gp-thermo i { width: 14px; border-radius: 4px; background: #4a3a55; border: 2px solid #fff; }
+.gp-thermo i:nth-child(1) { height: 12px; } .gp-thermo i:nth-child(2) { height: 20px; } .gp-thermo i:nth-child(3) { height: 28px; } .gp-thermo i:nth-child(4) { height: 36px; }
+.gp-thermo i.on { background: #7fd9ff; }
+.gp-thermo.t0 i.on { background: #2f8bff; }
+.gp-you-lamp, .gp-none { padding: 4px 10px; border-radius: 14px; background: #ffe9a8; color: var(--ink); border: 2px solid var(--ink); font-size: 12px; text-align: center; }
+.gp-you-lamp i { display: inline-block; white-space: nowrap; font-style: normal; background: var(--ink); color: #fff; border-radius: 999px; padding: 0 6px; margin-left: 4px; }
+.gp-none { background: #f4e3ff; }
+@media (max-width: 520px) { .game-ghost-photographer .gp-hud { top: calc(var(--st) + 52px); gap: 6px; font-size: 13px; padding: 3px 10px; } .gp-hud b { font-size: 10px; } .game-ghost-photographer .gp-clues { top: calc(var(--st) + 88px); } }
+/* a wide screen has room beside the floor: the clue cards stand on the left, out of the way of the back rooms */
+@media (min-aspect-ratio: 5/4) { .game-ghost-photographer .gp-clues { left: calc(var(--sl) + 10px); transform: none; top: calc(var(--st) + 110px); align-items: flex-start; max-width: 260px; }
+  .game-ghost-photographer .gp-cards { flex-direction: column; } }

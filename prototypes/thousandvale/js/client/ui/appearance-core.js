@@ -42,7 +42,7 @@ export const FACE_SLOTS = [
   { slot: 'facialHair', label: 'Beard', color: 'hair', ids: plus(['none', 'stubble', 'goatee', 'mustache', 'full', 'long', 'chinstrap', 'soul_patch', 'braided_beard'], 'facialHair') },
   // R1 "face, accessories, hair": glasses, earrings, a scarf… and marks on the skin. A new character starts with NONE of either.
   { slot: 'accessory', label: 'Accessory', color: 'cloth', ids: ['none', 'glasses', 'round_glasses', 'monocle', 'eyepatch', 'goggles', 'earrings', 'nose_ring', 'sunglasses', 'scarf', 'pendant', 'prayer_beads'] },
-  { slot: 'extras', label: 'Face marks', ids: plus(['none', 'freckles', 'blush', 'scar', 'scar_cheek', 'warpaint', 'tattoo', 'wrinkles', 'freckles_heavy', 'cheek_stripes', 'war_stripe'], 'extras') },
+  { slot: 'extras', label: 'Face marks', ids: plus(['none', 'freckles', 'blush', 'scar', 'scar_cheek', 'warpaint', 'wrinkles', 'freckles_heavy', 'cheek_stripes', 'war_stripe'], 'extras') },
 ];
 export const BODY_DIALS = [
   { key: 'height', label: 'Height', min: 0, max: 1 },

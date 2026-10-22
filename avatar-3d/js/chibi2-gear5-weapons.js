@@ -272,13 +272,21 @@ export const G5_WEAPON_BUILDERS = {
     const L = 'handL', G = [0, -0.035, 0.055];
     const at = ([x, y, z]) => [x + G[0], y + G[1], z + G[2]];
     c.add(profile([[-0.07, 0.024, 0.021], [0, 0.02, 0.019], [0.07, 0.024, 0.021]], 8), L, '#3a2a1c', { position: G, rotation: [PI / 2, 0, 0] });
+    const limbs = [];
     for (const k of [-1, 1]) {
-      c.add(taperedCurve([at([0, -0.012, k * 0.06]), at([0, 0.03, k * 0.2]), at([0, 0.092, k * 0.33]), at([0, 0.085, k * 0.41])], [0.025, 0.021, 0.015, 0.012], 5, 9), L, hc, { metal: true });
+      const limb = { pts: [[k * 0.06, -0.012], [k * 0.2, 0.03], [k * 0.33, 0.092], [k * 0.41, 0.085]], radii: [0.025, 0.021, 0.015, 0.012] };
+      const ear = { pts: [[k * 0.41, 0.085], [k * 0.465, 0.06], [k * 0.5, 0.012]], radii: [0.012, 0.01, 0.005] };
+      limbs.push(limb, ear);
+      c.add(taperedCurve(limb.pts.map(([zz, yy]) => at([0, yy, zz])), limb.radii, 5, 9), L, hc, { metal: true });
       // the ear: a stiff horn tip curling back toward the target
-      c.add(taperedCurve([at([0, 0.085, k * 0.41]), at([0, 0.06, k * 0.465]), at([0, 0.012, k * 0.5])], [0.012, 0.01, 0.005], 5, 6), L, BONE);
+      c.add(taperedCurve(ear.pts.map(([zz, yy]) => at([0, yy, zz])), ear.radii, 5, 6), L, BONE);
       for (const z of [0.13, 0.4]) c.add(new THREE.TorusGeometry(0.02, 0.006, 4, 8), L, GOLD, { position: at([0, z < 0.2 ? 0.006 : 0.087, k * z]), metal: true });
     }
-    poly(c, L, [at([0, 0.07, -0.452]), at([0, 0.07, 0.452])], 0.004, '#e8e0c0');
+    // OWNER REVIEW 2026-10-21 (W7): "the bowstring clips through the limbs". It ran straight at y 0.07 between points
+    // INSIDE the ears, and the limbs bow back to y 0.09 + their radius, so 15 cm of each limb stood behind the string.
+    // It is now strung tip to tip along the limbs' back edge (KIT.bowStringPath): lying on the ears where a recurve's
+    // string lies, and free across the middle.
+    poly(c, L, KIT.bowStringPath(limbs).map(([zz, yy]) => at([0, yy, zz])), 0.004, '#e8e0c0');
     if (q >= 2) c.add(new THREE.IcosahedronGeometry(1, 0), L, lift(hc, 0.4), { position: at([0, -0.03, 0]), scale: [0.012, 0.012, 0.016], metal: true });
   },
   /**

@@ -274,11 +274,10 @@ export const G5_OFFHAND_BUILDERS = {
       c.add(taperedCurve([[sx * 0.028, -0.38, tz + cz * 0.028], [sx * 0.058, -0.45, tz + cz * 0.058], [sx * 0.07, -0.53, tz + cz * 0.07]], [0.006, 0.006, 0.006], 3, 4), L, IRON, { metal: true });
     }
     for (const [y, r] of [[-0.45, 0.058], [-0.53, 0.07]]) c.add(tor(r, 0.007, 12), L, IRON, { position: [0, y, tz], rotation: [Math.PI / 2, 0, 0], metal: true });
-    for (const [dx, dz, y] of [[0.02, 0.01, -0.44], [-0.02, -0.015, -0.47], [0.005, 0.02, -0.5]]) c.add(ico(), L, '#3a2a22', { position: [dx, y, tz + dz], scale: [0.03, 0.026, 0.03] });
-    c.add(ico(), L, '#ff5a1a', { position: [0, -0.5, tz], scale: [0.036, 0.022, 0.036] });
-    c.add(new THREE.ConeGeometry(0.05, 0.17, 6), L, fire, { position: [0, -0.61, tz], rotation: [Math.PI, 0, 0] });
-    c.add(new THREE.ConeGeometry(0.028, 0.11, 5), L, '#ffd27a', { position: [0.004, -0.59, tz + 0.004], rotation: [Math.PI, 0, 0] });
-    for (const s of [-1, 1]) c.add(new THREE.ConeGeometry(0.022, 0.09, 5), L, fire, { position: [s * 0.036, -0.57, tz], rotation: [Math.PI, 0, s * 0.3] });
+    // OWNER REVIEW 2026-10-21 (W10): no more pointed flame cones. The basket holds a ROUND bundle of pitch-soaked rag
+    // (KIT.rag, the torch's head) with embers glowing between the bars; the fire is the game's (held-flame.js).
+    KIT.rag(c, L, tz, -0.43, 1.15, '#5a4632');
+    for (const [dx, dz, y] of [[0.035, 0.02, -0.47], [-0.03, -0.025, -0.5], [0.01, 0.035, -0.52]]) c.add(ico(), L, '#ff5a1a', { position: [dx, y, tz + dz], scale: [0.016, 0.014, 0.016] });
     if (q >= 2) c.add(tor(0.034, 0.006, 10), L, BRASS, { position: [0, -0.33, tz], rotation: [Math.PI / 2, 0, 0], metal: true });
   },
 };

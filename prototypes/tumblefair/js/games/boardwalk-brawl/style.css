@@ -1,0 +1,22 @@
+/* Boardwalk Brawl: a health bar on each score chip, the wave counter + boss bar under the scores, the GO arrow, and
+   the "!" a roughneck shows before it swings. Words + shapes as well as colour. */
+.scorebar .chip .bb-hp { display: block; position: absolute; left: 30px; right: 8px; bottom: 2px; height: 4px; border-radius: 3px; background: rgba(13, 34, 40, .35); overflow: hidden; }
+.scorebar .chip .bb-hp b { display: block; height: 100%; width: 100%; background: #3ecf5a; transition: width .2s; }
+.scorebar .chip .bb-hp.low b { background: #ff5f5f; }
+.scorebar .chip:has(.bb-hp) { position: relative; padding-bottom: 6px; }
+.bb-hud { position: absolute; top: calc(var(--st) + 50px); left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 4px; pointer-events: none !important; }
+.bb-wave { background: var(--ink); color: #fff; font: 800 14px/1 var(--font); padding: 5px 12px; border-radius: 999px; }
+.bb-boss { display: flex; align-items: center; gap: 8px; background: var(--paper); border: 3px solid var(--ink); border-radius: 12px; padding: 3px 10px; font: 800 14px/1 var(--font); }
+.bb-boss[hidden] { display: none; }
+.bb-boss i { display: block; width: 140px; height: 10px; border-radius: 6px; background: #4a2030; overflow: hidden; border: 2px solid var(--ink); }
+.bb-boss u { display: block; height: 100%; background: linear-gradient(#ff7a5a, #e0303a); transition: width .2s; }
+.bb-go { position: absolute; right: 14px; top: 42%; display: flex; flex-direction: column; align-items: center; color: var(--sun); font: 900 26px/1 var(--font); -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; animation: bb-go .6s ease-in-out infinite alternate; pointer-events: none !important; }
+.bb-go[hidden] { display: none; }
+.bb-go b { font-size: 48px; }
+@keyframes bb-go { from { transform: translateX(0); } to { transform: translateX(10px); } }
+.tag.bb-warn { background: #ff3b3b; font-size: 22px; padding: 0 12px; animation: bb-warn .2s ease-in-out infinite alternate; }
+@keyframes bb-warn { to { transform-origin: center; filter: brightness(1.4); } }
+.tag.bb-help { background: var(--paper); color: var(--ink); text-shadow: none; }
+.bb-banner.boss { background: #3a1020; color: var(--sun); }
+.bb-banner.bad { background: var(--pop); color: #fff; }
+@media (max-width: 520px) { .bb-hud { top: calc(var(--st) + 64px); } .bb-boss i { width: 100px; } .bb-go { right: 6px; } }

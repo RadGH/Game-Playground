@@ -25,13 +25,13 @@ export const CHIBI25_OPTIONS = {
       { crown_braid: 'Braided crown', side_shave: 'Side shave', wolf_cut: 'Wolf cut', half_up: 'Half-up knot', ribbon_loops: 'Ribbon loops', cornrows: 'Cornrows', warrior_braids: 'Warrior braids', feathered: 'Feathered', curly_bob: 'Curly bob', puff: 'Top puff', rolled_tail: 'Rolled tail', bowl: 'Bowl cut', court_cut: 'Court cut',
         undercut: 'Undercut', topknot: 'Top knot', high_ponytail: 'High ponytail', twin_tails: 'Twin tails', messy: 'Messy', pompadour: 'Pompadour', locs: 'Locs', long_braid: 'Long braid', mullet: 'Mullet', side_swept: 'Side swept' }),
     eyes: slot(
-      ['round', 'almond', 'narrow', 'wide', 'sleepy', 'angry', 'dot', 'anime', 'happy', 'wink', 'hollow', 'slit', 'tired', 'glow', 'glow_tear'],
-      ['cat', 'doe', 'droopy', 'sharp', 'button', 'sparkle', 'hooded', 'lashes', 'heart'],
-      { cat: 'Cat (upswept)', doe: 'Doe (big, lower lashes)', droopy: 'Droopy (downturned)', sharp: 'Sharp (slanted)', button: 'Button (beady)', sparkle: 'Sparkle', hooded: 'Hooded', lashes: 'Long lashes', heart: 'Heart pupils' }),
+      ['round', 'almond', 'narrow', 'wide', 'sleepy', 'angry', 'dot', 'anime', 'happy', 'wink', 'hollow', 'slit', 'tired', 'glow'],
+      ['cat', 'doe', 'droopy', 'sharp', 'button', 'sparkle', 'hooded', 'lashes', 'heart', 'storybook'],
+      { storybook: 'Storybook', cat: 'Cat (upswept)', doe: 'Doe (big, lower lashes)', droopy: 'Droopy (downturned)', sharp: 'Sharp (slanted)', button: 'Button (beady)', sparkle: 'Sparkle', hooded: 'Hooded', lashes: 'Long lashes', heart: 'Heart pupils' }),
     brows: slot(
       ['straight', 'arched', 'angry', 'worried', 'thick', 'thin', 'none', 'raised'],
-      ['bushy', 'unibrow', 'slanted', 'soft', 'split', 'dots', 'curved'],
-      { bushy: 'Bushy', unibrow: 'Unibrow', slanted: 'Slanted', soft: 'Soft short', split: 'Split (scarred)', dots: 'Dots (noble)', curved: 'High curve' }),
+      ['bushy', 'unibrow', 'slanted', 'soft', 'split', 'dots', 'curved', 'bold'],
+      { bold: 'Bold', bushy: 'Bushy', unibrow: 'Unibrow', slanted: 'Slanted', soft: 'Soft short', split: 'Split (scarred)', dots: 'Dots (noble)', curved: 'High curve' }),
     mouth: slot(
       ['smile', 'neutral', 'frown', 'open', 'grin', 'smirk', 'o', 'tongue', 'fangs', 'sad_open', 'stitched', 'tusks'],
       ['laugh', 'cat', 'pout', 'gritted', 'wavy', 'buck', 'fang', 'shark'],
@@ -43,7 +43,7 @@ export const CHIBI25_OPTIONS = {
     facialHair: slot(['none', 'stubble', 'goatee', 'mustache', 'full', 'long', 'chinstrap', 'soul_patch', 'braided_beard'],
       ['mutton_chops', 'handlebar', 'van_dyke', 'short_beard', 'forked_beard', 'sideburns'],
       { mutton_chops: 'Mutton chops', handlebar: 'Handlebar moustache', van_dyke: 'Van Dyke', short_beard: 'Short beard', forked_beard: 'Forked beard', sideburns: 'Sideburns' }),
-    extras: slot(['none', 'freckles', 'freckles_heavy', 'blush', 'scar', 'scar_cheek', 'nose_scar', 'burn_scar', 'warpaint', 'cheek_stripes', 'eye_black', 'tattoo', 'face_glyphs', 'paint_dots', 'third_eye', 'wrinkles', 'soot', 'dirt', 'mud', 'blood', 'brand', 'undead_skin'],
+    extras: slot(['none', 'freckles', 'freckles_heavy', 'blush', 'scar', 'scar_cheek', 'burn_scar', 'warpaint', 'cheek_stripes', 'eye_black', 'face_glyphs', 'paint_dots', 'third_eye', 'wrinkles', 'dirt', 'mud', 'blood', 'brand', 'undead_skin'],
       ['freckles_nose', 'beauty_mark', 'scar_brow', 'scar_lip', 'war_mask', 'chin_lines', 'tear_mark', 'star_mark', 'moon_mark', 'blush_soft'],
       { freckles_nose: 'Freckles over the nose', beauty_mark: 'Beauty mark', scar_brow: 'Scar through the brow', scar_lip: 'Scar on the lip', war_mask: 'War paint (band over the eyes)', chin_lines: 'Chin tattoo lines', tear_mark: 'Tear mark', star_mark: 'Star mark', moon_mark: 'Moon mark', blush_soft: 'Soft blush' }),
   },
@@ -55,6 +55,8 @@ export const CHIBI25_OPTIONS = {
       white: { type: 'color', default: '#fff8e8' },
       colorR: { type: 'color', default: null, note: 'right eye colour (odd eyes); unset = same as color' },
       blink: { type: 'boolean', default: true, note: 'false = never blinks (a statue, a construct)' },
+      // owner review 2026-10-21: one height for every eye shape (almond is a wide lens, most others tall ovals)
+      height: { type: 'range', min: 0.7, max: 1.35, step: 0.05, default: 1, names: { 0.7: 'Flat', 1: 'As drawn', 1.35: 'Tall' }, note: 'scales the eye\'s height only; 0.85 rounds a tall oval, 1.2 makes almond rounder' },
     },
     brows: { thick: { type: 'range', min: 0.5, max: 1.8, default: 1 }, color: { type: 'color', default: null, note: 'unset = hair colour' } },
     mouth: { color: { type: 'color', default: '#b5484d' } },

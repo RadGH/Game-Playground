@@ -36,6 +36,17 @@ function backfaced(g) {
   for (let i = 0; i < idx.length; i += 3) [idx[i], idx[i + 1]] = [idx[i + 1], idx[i]];
   b.computeVertexNormals(); return b;
 }
+/**
+ * The inside face of a sheet, a hair INSIDE it (2026-10-21: the character material is double-sided now, and a reversed
+ * copy on the very same surface flickers through the outside). Take it BEFORE the original is placed.
+ */
+const inner_ = (g, d) => inner(g, d);
+function inner(g, d = 0.003) {
+  const b = g.clone(); b.computeVertexNormals();
+  const p = b.attributes.position, n = b.attributes.normal;
+  for (let i = 0; i < p.count; i++) p.setXYZ(i, p.getX(i) - n.getX(i) * d, p.getY(i) - n.getY(i) * d, p.getZ(i) - n.getZ(i) * d);
+  return backfaced(b);
+}
 /** Linear interpolation of lathe rings [y, rx, rz, zoff] at height y (rings in either order). */
 function ringAt(rings, y) {
   const rs = rings[0][0] <= rings[rings.length - 1][0] ? rings : [...rings].reverse();
@@ -76,7 +87,7 @@ function sheet(c, bone, fn, colour, { nu = 3, nv = 4, metal = false, inner = nul
   const g = new THREE.PlaneGeometry(1, 1, nu, nv), p = g.attributes.position;
   for (let i = 0; i < p.count; i++) { const q = fn(p.getX(i) + 0.5, 0.5 - p.getY(i)); p.setXYZ(i, q[0], q[1], q[2]); }
   g.computeVertexNormals();
-  const b = backfaced(g);
+  const b = inner_(g);
   c.add(g, bone, colour, { metal, bend }); c.add(b, bone, inner || tone(colour, 0.7), { metal, bend });
 }
 /** Flat outline extruded along z, centred on z = 0. */
@@ -220,7 +231,7 @@ export const G5_TOP_BUILDERS = {
       mp.setY(i, y - k * edge * 0.13 * T); mp.setZ(i, z + Math.sign(z) * k * edge * 0.012);
     }
     m.computeVertexNormals();
-    const mIn = backfaced(m);
+    const mIn = inner(m);
     add(m, 'chest', col2); add(mIn, 'chest', tone(col2, 0.6));
     for (const zs of [1, -1]) add(octa(), 'chest', '#d8b040', { position: [0, 0.03 * T, zs * 0.232 * W - 0.01], scale: [0.02, 0.03, 0.012], metal: true });
     // a second, shorter collar layer in the robe's own colour
@@ -292,7 +303,7 @@ export const G5_TOP_BUILDERS = {
     const yk = profile([[0.37 * T, 0.095, 0.085, -0.02], [0.335 * T, 0.155, 0.125, -0.02], [0.3 * T, 0.268 * W, 0.186 * W, -0.012], [0.235 * T, 0.296 * W, 0.21 * W, -0.01], [0.19 * T, 0.3 * W, 0.214 * W, -0.01]], 16), yp = yk.attributes.position;
     for (let i = 0; i < yp.count; i++) if (yp.getY(i) < 0.2 * T) { const t = Math.atan2(yp.getX(i), yp.getZ(i)); yp.setY(i, yp.getY(i) - Math.abs(Math.sin(t * 4)) * 0.035 * T); }
     yk.computeVertexNormals();
-    const ykIn = backfaced(yk);
+    const ykIn = inner(yk);
     add(yk, 'chest', col2); add(ykIn, 'chest', tone(col2, 0.6));
     for (let k = 0; k < 8; k++) { const t = (k + 0.5) / 8 * PI * 2; add(octa(), 'chest', '#c8ccd6', { position: [Math.sin(t) * 0.29 * W, 0.24 * T, Math.cos(t) * 0.206 * W - 0.01], scale: [0.014, 0.014, 0.014], metal: true }); }
     add(new THREE.BoxGeometry(0.07, 0.03, 0.014), 'chest', tone(col2, 0.6), { position: [0, 0.285 * T, 0.2 * W - 0.012], rotation: [-0.5, 0, 0] });
@@ -306,7 +317,7 @@ export const G5_TOP_BUILDERS = {
     const hr = ringAt(B.hipsRings, -0.08), y1 = -L * 0.44;
     for (const s of [-1, 1]) {
       const rings = [[0.02, hb[1] + 0.02, hb[2] + 0.022, hb[3]], [-0.09, hr[1] + 0.04, hr[2] + 0.045, 0], [y1, hr[1] + 0.075, hr[2] + 0.075, 0]];
-      const g = arcProfile(rings, s * PI / 2, PI / 2 - 0.16, 7), gi = backfaced(g);
+      const g = arcProfile(rings, s * PI / 2, PI / 2 - 0.16, 7), gi = inner(g);
       add(g, 'hips', col, { metal: true }); add(gi, 'hips', tone(col, 0.5), { metal: true });
       add(arcProfile([[y1 - 0.012, hr[1] + 0.079, hr[2] + 0.079, 0], [y1 + 0.012, hr[1] + 0.077, hr[2] + 0.077, 0]], s * PI / 2, PI / 2 - 0.16, 7), 'hips', dk, { metal: true });
       add(arcProfile([[(y1 - 0.09) / 2 - 0.006, hr[1] + 0.061, hr[2] + 0.063, 0], [(y1 - 0.09) / 2 + 0.006, hr[1] + 0.06, hr[2] + 0.062, 0]], s * PI / 2, PI / 2 - 0.16, 7), 'hips', dk, { metal: true });
@@ -379,7 +390,7 @@ export const G5_BOTTOM_BUILDERS = {
       add(profile(span(M.thigh, -0.005, -L * 0.5, 0.02), 10), leg, col, { bend });
       // shin: the bell
       const k0 = ringAt(M.shin, 0.0), flare = [[0.0, k0[1] + 0.02, k0[2] + 0.02, 0], [-L * 0.2, k0[1] + 0.045, k0[2] + 0.05, 0], [-L * 0.4, k0[1] + 0.07, k0[2] + 0.08, 0.01]];
-      const g = profile(flare, 10), gi = backfaced(g);
+      const g = profile(flare, 10), gi = inner(g);
       add(g, knee, col); add(gi, knee, tone(col, 0.5));
       add(profile([[-L * 0.4 - 0.014, k0[1] + 0.074, k0[2] + 0.084, 0.01], [-L * 0.4 + 0.012, k0[1] + 0.072, k0[2] + 0.082, 0.01]], 10), knee, col2);
       // the pleats: sharp creases down the bell
@@ -480,6 +491,28 @@ export const G5_BOTTOM_BUILDERS = {
       add(profile(gr, 10), knee, col, { metal: true });
       add(taperedCurve(gr.map(([y, , rz]) => [0, y, rz + 0.002]), [0.008, 0.011, 0.008], 3, 5), knee, hi, { metal: true });
       band(c, knee, M.shin, -L * 0.43, 0.02, 0.022, col2, { metal: true });
+      // B6 (2026-10-21, "the groin has no armour"): a TASSET on each thigh — two lames hung from the faulds over the
+      // front and outside of the thigh, riding the leg so a stride never puts the thigh through them
+      for (let k = 0; k < 2; k++) {
+        const ts = span(M.thigh, 0.03 - k * 0.055, -0.03 - k * 0.055, 0.034 + k * 0.006);
+        add(arcProfile(ts.map(([y, rx, rz], i) => [y, rx + i * 0.004, rz + i * 0.006, 0]), s * 0.4, 1.35, 7), leg, k ? dk : col, { metal: true });
+      }
+    }
+    // the FAULDS: two hooped lames round the hips under the belt line, and a shaped plate over the groin between the
+    // tassets. The lames keep to the hips' width at the top of the thighs (the hip rings narrow below that into the
+    // crotch, which would have cut them through the legs).
+    const H = c.body?.hipsRings;
+    if (H) {
+      const hr = (y, d) => { const r = ringAt(H, Math.max(y, -0.05)); return [y, r[1] + d, r[2] + d * 1.1, r[3] || 0]; };
+      for (let k = 0; k < 2; k++) {
+        const y0 = 0.055 - k * 0.045, y1 = y0 - 0.055, d = 0.024 + k * 0.007;
+        add(profile([hr(y0, d), hr(y1, d + 0.01)], 16), 'hips', k ? dk : col, { metal: true });
+        add(profile([hr(y1 + 0.006, d + 0.012), hr(y1 - 0.004, d + 0.012)], 16), 'hips', k ? col2 : hi, { metal: true });
+      }
+      // the groin plate: front only, narrowing to a rounded point between the legs
+      const g0 = hr(-0.045, 0.04), g1 = hr(-0.1, 0.034), g2 = [-0.15, g1[1] * 0.4, g1[2] * 0.92, g1[3]];
+      add(arcProfile([g0, g1, g2], 0, 0.42, 6), 'hips', col, { metal: true });
+      add(octa(), 'hips', col2, { position: [0, -0.085, g1[2] + (g1[3] || 0) + 0.008], scale: [0.016, 0.022, 0.01], metal: true });
     }
   },
 };

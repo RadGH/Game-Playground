@@ -225,7 +225,9 @@ export function driveSkirt(pose, rig, margin = 0.04, scale = null) {
       if (q.y + r < surf.hem) continue;                     // wholly under the hem: allowed
       let ang = Math.atan2(q.x, q.z); if (ang < 0) ang += Math.PI * 2;
       const dist = Math.hypot(q.x, q.z);
-      if (!inArc(ang, surf.arc, Math.asin(Math.min(1, (r + margin) / Math.max(0.05, dist))))) continue;
+      // (2026-10-21: the angle a leg covers is measured where the CLOTH is, not at the leg's own centre — a thigh near the
+      // axis "covered" every direction, so a front/back flap such as the loincloth was lifted level in idle)
+      if (!inArc(ang, surf.arc, Math.asin(Math.min(1, (r + margin) / Math.max(0.05, dist, surf.arc ? surf.rings[0][1] : 0))))) continue;
       ang = intoArc(ang, surf.arc);
       const rho = dist + r + margin;
       // the rest profile in this direction, cached per 5 degrees on the surface (a clip bakes ~30 frames a second)

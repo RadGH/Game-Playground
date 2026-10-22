@@ -67,7 +67,7 @@ const RIGHT_KIND = {
   quarterstaff: 'staff', staff_orb: 'staff', staff_skull: 'staff', staff_crook: 'staff', staff_crystal: 'staff', staff_totem: 'staff',
   fh_wand: 'wand', wand: 'wand',
   tv_scimitar: 'blade', tv_warpick: 'heavy', tv_club: 'haft', tv_glaive: 'polearm',
-  lute: 'caster', book: 'caster', hourglass: 'caster', orb: 'caster', flame: 'caster', lightning: 'caster', ring_rune: 'caster',
+  lute: 'lute', book: 'caster', hourglass: 'caster', orb: 'caster', flame: 'caster', lightning: 'caster', ring_rune: 'caster',
   crossbow: 'crossbow', bow: 'none', none: 'none',
   ...G5_RIGHT_KIND,                           // PLAY-TEST 5 (T23): the g5_ models (chibi2-gear5-ids.js) — new ids only
 };
@@ -92,7 +92,31 @@ const EDGE_AXIS = { fh_axe: '-z', fh_greataxe: '-z', fh_halberd: '-z', fh_hammer
  * second wand in the off hand fell through to the shield builder and drew nothing (or a heater
  * shield), so a dual-wielding caster looked one-handed.
  */
-export const HELD_WEAPON_IDS = Object.keys(RIGHT_KIND).filter(id => !['caster', 'none', 'crossbow'].includes(RIGHT_KIND[id]));   // PLAY-TEST 5 (T7): staves too — a second staff in the off hand fell through to the shield builder
+export const HELD_WEAPON_IDS = Object.keys(RIGHT_KIND).filter(id => !['caster', 'none', 'crossbow', 'lute'].includes(RIGHT_KIND[id]));   // PLAY-TEST 5 (T7): staves too — a second staff in the off hand fell through to the shield builder
+
+// ---------------------------------------------------------------- two-handed items (owner review 2026-10-21, W11)
+/**
+ * What takes BOTH hands when the off hand is free: every bow (the bow is in the left fist, the right draws), every
+ * crossbow, every two-handed melee weapon and polearm, every staff, and a lute. Owner, same day, after a stricter
+ * version: "Can the new two handed rule only apply if an off hand is actually blank?" — so nothing is ever dropped or
+ * refused: an off-hand item is always drawn and carried, and the two-handed GRIP is taken only when that hand is empty
+ * (`holdFor().twoHand`, the lute's `luteHold(…, leftFree)`). Equip rules in the games are unchanged.
+ */
+const STAFF_KIND = new Set(['staff']);
+export const RANGED_TWO_HANDED = new Set([...BOW_IDS, 'crossbow', ...Object.keys(G5_RIGHT_KIND).filter(id => G5_RIGHT_KIND[id] === 'crossbow')]);
+/** Off-hand ids that are WORN (on the back or the hip), not held. */
+export const WORN_OFFHAND_IDS = new Set(['quiver', 'g5_hipquiver']);
+/** Does the item in the main hand take both hands (when the off hand is free)? Unknown ids are one-handed. */
+export function isTwoHandedHeld(id) {
+  if (!id || id === 'none') return false;
+  return TWO_HANDED.has(id) || RANGED_TWO_HANDED.has(id) || STAFF_KIND.has(RIGHT_KIND[id]) || RIGHT_KIND[id] === 'lute';
+}
+/** A two-handed MELEE weapon (not a bow, crossbow, staff or lute). */
+export function isMeleeTwoHanded(id) { return TWO_HANDED.has(id) && ['heavy', 'polearm'].includes(RIGHT_KIND[id]); }
+/** Kept for callers (held-flame.js, the gear builders): an off-hand item is always drawn — see the note above. */
+export function offhandAllowed() { return true; }
+/** Kept for callers: the look unchanged (nothing is dropped from the off hand any more). */
+export function applyHandsRule(a) { return a; }
 
 /** `{ right, left, twoHand, dualTwo, dual }` for an avatar — see chibi2-motion.js. */
 export function holdFor(a) {

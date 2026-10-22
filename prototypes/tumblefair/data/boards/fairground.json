@@ -1,10 +1,10 @@
 {
  "id": "fairground",
  "title": "The Fairground Loop",
- "backdrop": "board-fairground",
+ "backdrop": "board-fairground-loop",
  "size": 40,
  "start": "s0",
- "about": "Starter board. Walk the loop, pick up tickets, buy prize ribbons at the two booths. The shortcut through the middle saves eight spaces and has two puddles and the jackpot on it.",
+ "about": "Starter board. Walk the loop, pick up tickets, buy prize ribbons at the two booths. The shortcut through the middle saves six spaces and has two puddles and the jackpot on it.",
  "types": {
   "start": {
    "name": "Front Gate",
@@ -57,7 +57,7 @@
    "id": "s0",
    "type": "start",
    "x": 0,
-   "z": 11.5,
+   "z": 11.72,
    "next": [
     "s1"
    ]
@@ -65,8 +65,8 @@
   {
    "id": "s1",
    "type": "ticket",
-   "x": -5.86,
-   "z": 11.22,
+   "x": -3.83,
+   "z": 11.61,
    "next": [
     "s2"
    ]
@@ -74,8 +74,8 @@
   {
    "id": "s2",
    "type": "chance",
-   "x": -9.41,
-   "z": 10.37,
+   "x": -7.65,
+   "z": 11.42,
    "next": [
     "s3"
    ]
@@ -83,8 +83,8 @@
   {
    "id": "s3",
    "type": "ticket",
-   "x": -12.08,
-   "z": 8.96,
+   "x": -11.12,
+   "z": 9.8,
    "next": [
     "s4"
    ]
@@ -93,7 +93,7 @@
    "id": "s4",
    "type": "fork",
    "x": -13.98,
-   "z": 6.98,
+   "z": 7.25,
    "next": [
     "s5",
     "c0"
@@ -106,8 +106,8 @@
   {
    "id": "s5",
    "type": "pit",
-   "x": -15.12,
-   "z": 4.35,
+   "x": -15.39,
+   "z": 3.68,
    "next": [
     "s6"
    ]
@@ -115,8 +115,8 @@
   {
    "id": "s6",
    "type": "ticket",
-   "x": -15.5,
-   "z": 0,
+   "x": -15.77,
+   "z": -0.13,
    "next": [
     "s7"
    ]
@@ -124,8 +124,8 @@
   {
    "id": "s7",
    "type": "booth",
-   "x": -15.12,
-   "z": -4.35,
+   "x": -14.97,
+   "z": -3.88,
    "next": [
     "s8"
    ]
@@ -133,8 +133,8 @@
   {
    "id": "s8",
    "type": "ticket",
-   "x": -13.98,
-   "z": -6.98,
+   "x": -12.54,
+   "z": -6.84,
    "next": [
     "s9"
    ]
@@ -142,8 +142,8 @@
   {
    "id": "s9",
    "type": "chance",
-   "x": -12.08,
-   "z": -8.96,
+   "x": -9.41,
+   "z": -9.03,
    "next": [
     "s10"
    ]
@@ -151,8 +151,8 @@
   {
    "id": "s10",
    "type": "pit",
-   "x": -9.41,
-   "z": -10.37,
+   "x": -5.91,
+   "z": -10.59,
    "next": [
     "s11"
    ]
@@ -160,8 +160,8 @@
   {
    "id": "s11",
    "type": "ticket",
-   "x": -5.86,
-   "z": -11.22,
+   "x": -2.11,
+   "z": -11.05,
    "next": [
     "s12"
    ]
@@ -169,8 +169,8 @@
   {
    "id": "s12",
    "type": "mirror",
-   "x": 0,
-   "z": -11.5,
+   "x": 1.71,
+   "z": -11.01,
    "next": [
     "s13"
    ]
@@ -178,8 +178,8 @@
   {
    "id": "s13",
    "type": "ticket",
-   "x": 5.86,
-   "z": -11.22,
+   "x": 5.53,
+   "z": -10.69,
    "next": [
     "s14"
    ]
@@ -187,26 +187,26 @@
   {
    "id": "s14",
    "type": "chance",
-   "x": 9.41,
-   "z": -10.37,
+   "x": 9.1,
+   "z": -9.32,
    "next": [
     "s15"
    ]
   },
   {
    "id": "s15",
-   "type": "ticket",
-   "x": 12.08,
-   "z": -8.96,
+   "type": "join",
+   "x": 12.32,
+   "z": -7.24,
    "next": [
     "s16"
    ]
   },
   {
    "id": "s16",
-   "type": "join",
-   "x": 13.98,
-   "z": -6.98,
+   "type": "ticket",
+   "x": 15.41,
+   "z": -4.98,
    "next": [
     "s17"
    ]
@@ -214,8 +214,8 @@
   {
    "id": "s17",
    "type": "pit",
-   "x": 15.12,
-   "z": -4.35,
+   "x": 17,
+   "z": -1.5,
    "next": [
     "s18"
    ]
@@ -223,8 +223,8 @@
   {
    "id": "s18",
    "type": "ticket",
-   "x": 15.5,
-   "z": 0,
+   "x": 17.53,
+   "z": 2.3,
    "next": [
     "s19"
    ]
@@ -232,8 +232,8 @@
   {
    "id": "s19",
    "type": "booth",
-   "x": 15.12,
-   "z": 4.35,
+   "x": 16.86,
+   "z": 6.07,
    "next": [
     "s20"
    ]
@@ -241,8 +241,8 @@
   {
    "id": "s20",
    "type": "chance",
-   "x": 13.98,
-   "z": 6.98,
+   "x": 14.7,
+   "z": 9.23,
    "next": [
     "s21"
    ]
@@ -250,8 +250,8 @@
   {
    "id": "s21",
    "type": "ticket",
-   "x": 12.08,
-   "z": 8.96,
+   "x": 11.41,
+   "z": 11.18,
    "next": [
     "s22"
    ]
@@ -259,8 +259,8 @@
   {
    "id": "s22",
    "type": "pit",
-   "x": 9.41,
-   "z": 10.37,
+   "x": 7.65,
+   "z": 11.86,
    "next": [
     "s23"
    ]
@@ -268,8 +268,8 @@
   {
    "id": "s23",
    "type": "ticket",
-   "x": 5.86,
-   "z": 11.22,
+   "x": 3.83,
+   "z": 11.61,
    "next": [
     "s0"
    ]
@@ -277,8 +277,8 @@
   {
    "id": "c0",
    "type": "pit",
-   "x": -8.39,
-   "z": 5.07,
+   "x": -8.77,
+   "z": 4.25,
    "next": [
     "c1"
    ]
@@ -286,8 +286,8 @@
   {
    "id": "c1",
    "type": "chance",
-   "x": -2.8,
-   "z": 2.82,
+   "x": -3.26,
+   "z": 1.84,
    "next": [
     "c2"
    ]
@@ -295,8 +295,8 @@
   {
    "id": "c2",
    "type": "jackpot",
-   "x": 2.8,
-   "z": 0.03,
+   "x": 1.97,
+   "z": -1.14,
    "next": [
     "c3"
    ]
@@ -304,10 +304,10 @@
   {
    "id": "c3",
    "type": "pit",
-   "x": 8.39,
-   "z": -3.31,
+   "x": 6.99,
+   "z": -4.45,
    "next": [
-    "s16"
+    "s15"
    ]
   }
  ]

@@ -1,6 +1,7 @@
 # Writing a Tumblefair minigame
 
-A minigame is one folder, `js/games/<id>/`, with two files and one line in `js/games/index.js`. The room does
+A minigame is one folder, `js/games/<id>/`, with two files and one line in `js/games/index.js` — then run
+`node tools/build-metas.mjs` (the browser loads only the metas, `js/games/metas.js`; `tests/metas.test.js` fails until you do). The room does
 everything else: it seats the players, shows the vote card and the intro card, starts and stops the clock, turns
 your result into tickets or points, and handles phones that drop and come back. **A game never touches scores,
 coins, the board or the network directly.**
@@ -28,6 +29,9 @@ export const meta = {
   move: { speed: 6, accel: 26, carryMul: 0.8, stunDrag: 1.2 },   // read by shared/arena.js stepBody (accel low = ice)
   arena: { shape: 'rect', hw: 9, hd: 7, wall: true } | { shape: 'circle', r: 8, wall: false },
   pitch: 54,                     // optional camera angle in degrees (more = more top-down)
+  // move.mode: 'car' = kart steering (stick = heading wanted; turn rad/s, accel, grip); F.BOOST / F.SLOW scale the speed
+  // by move.boostMul (1.6) / move.slowMul (0.5). arena.blocks / posts / segs are solid obstacles stepBody already
+  // collides with. A layout generated from the seed: return it from init() as `arena` (the browser predicts with it).
 };
 export function create({ seed, rng, players, difficulty }) { ... return game; }
 //   rng: seeded (shared/rng.js: rng(), rng.int(a,b), rng.range, rng.pick, rng.shuffle, rng.chance). Use ONLY this.
@@ -63,8 +67,16 @@ export function createView(ctx) { ... return { state(g), event(ev), priv(d), fra
 `ctx`:
 - `THREE`, `stage` (`stage.tag(obj, {text, seat})`, `stage.toScreen(x,y,z)`), `group` (a THREE.Group: put every 3D thing of the game here — it is emptied and freed for you)
 - `ui` (a DOM element over the canvas, removed for you; `pointer-events` are off on `.game` — set `pointer-events: auto` on what should be tappable)
-- `init`, `meta`, `players` (`[{ pid, seat, name, color, dark, shape, portrait }]` — `portrait` is an `<img src>` of the player's face from the avatar system: use it for every flat screen such as drawing, voting and results), `me` (your pid, or null when this device is only watching), `watching`
+- `init`, `meta`, `players` (`[{ pid, seat, name, color, dark, shape, portrait, look, costume }]` — `portrait` is an `<img src>` of the player's face from the avatar system: use it for every flat screen such as drawing, voting and results; `look` + `costume` let a ui game build the player's 3D character with `createActor({ look, costume, seat })`, e.g. One Button Orchestra's band), `me` (your pid, or null when this device is only watching), `watching`
 - `actor(pid)` (arena: the player's 3D character: `.group`, `.body.group` to attach props to, `.play(clip, ms)`; the room positions and animates it from the body; `pose()` may return a held clip name such as 'hit', 'dead', 'cheer', 'sitGround', 'ready', 'jump')
+- `arena` (the arena in use: `init.arena` if the game sent one, else `meta.arena`)
+- `createActor({ look: { race, seed }, costume?, seat? }, { scale })` → a Chibi 2 character that is not a player (an
+  enemy, a referee, a runway model); added to `group`, freed with the game; `.place(x,y,z,yaw)`, `.setPose`, `.play`,
+  `.setSpeed`, `.update(dt)` (call it from `frame`)
+- `camera({ cx, cz, hw, hd, pitch?, yaw? }, { instant })` — frame another rectangle; call every frame to follow (side scrollers)
+- `pos(pid)` → where that player's character is drawn now (yours predicted, others interpolated)
+- `view.input(inp)` (optional, arena) — called the moment YOUR phone sends a button press, before the server answers:
+  play the punch/throw animation here so your own action never waits for the round trip
 - `send(a, d)` (= `act` on the server), `sfx(name)` ('tap', 'good', 'bad', 'win', 'hit', 'throw', 'splat', 'out', 'pick', 'coins', 'trap')
 
 Shared DOM bits: `js/client/gamehud.js` — `scoreBar(ctx, {unit})` (chips + clock; call `.set(scores, left)`), `chip(p)`, `h()`, `esc()`, `floatText(stage, x, y, z, text, cls)`.

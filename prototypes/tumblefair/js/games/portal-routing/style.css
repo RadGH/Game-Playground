@@ -1,0 +1,56 @@
+/* Portal Routing — stone islands with brass rails over a starry chasm; gates in their owner's colour, portals glow. */
+.game-portal-routing { pointer-events: auto; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: calc(var(--st) + 10px) 12px calc(var(--sb) + 14px); background: radial-gradient(circle at 30% 20%, #3b2a6b, #140d2a 70%); }
+.game-portal-routing > * { flex: none; }
+.pr-top { display: flex; gap: 12px; align-items: center; justify-content: center; color: #fff; font: 900 22px/1.1 var(--font); -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; }
+.pr-goal { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center; color: #fff; font-size: 15px; }
+.pr-pips { display: flex; gap: 4px; }
+.pr-pips i { width: 18px; height: 18px; border-radius: 50%; border: 3px solid var(--ink); background: #4a3d70; display: block; }
+.pr-pips i.goal { box-shadow: 0 0 0 3px #fff; } .pr-pips i.done { background: var(--sun); }
+.pr-boardwrap { position: relative; }
+.pr-board { --cell: min(calc((100vw - 52px) / var(--cols, 7)), calc((100dvh - 330px) / var(--rows, 6)), 104px); width: calc(var(--cell) * var(--cols, 7) + 16px); height: auto; display: block;
+  background: #0b0718; border: 5px solid var(--ink); border-radius: 18px; box-shadow: 0 7px 0 var(--ink); touch-action: manipulation; }
+.pr-void { fill: #120c26; stroke: #1d1640; stroke-width: 1; }
+.pr-island { fill: #6f6a86; stroke: #2a2440; stroke-width: 4; }
+.pr-bed { fill: none; stroke: #2a2440; stroke-width: 30; stroke-linecap: round; }
+.pr-rail { fill: none; stroke: #e2b04a; stroke-width: 14; stroke-linecap: round; }
+.pr-start circle { fill: #2fbf57; stroke: var(--ink); stroke-width: 5; } .pr-start path { fill: #fff; stroke: var(--ink); stroke-width: 3; }
+.pr-flag .pr-cup { fill: #fff3b8; stroke: var(--ink); stroke-width: 5; } .pr-flag .pole { stroke: var(--ink); stroke-width: 5; } .pr-flag .cloth { fill: var(--pop, #ff4d6d); stroke: var(--ink); stroke-width: 3; }
+.pr-pit circle { fill: #050308; stroke: #ff4d4d; stroke-width: 5; stroke-dasharray: 10 7; } .pr-pit path { stroke: #ff4d4d; stroke-width: 5; stroke-linecap: round; }
+.pr-portal .ring { fill: var(--pc); stroke: var(--ink); stroke-width: 5; } .pr-portal .hole { fill: #120c26; }
+.pr-portal text { fill: #fff; font: 900 30px/1 var(--font); stroke: var(--ink); stroke-width: 1.5; paint-order: stroke fill; }
+
+.pr-portal .ring { stroke-dasharray: 22 8; animation: pr-spin 2.4s linear infinite; }
+@keyframes pr-spin { to { stroke-dashoffset: -60; } }
+.pr-gate .hit { fill: color-mix(in srgb, var(--seat) 45%, #6f6a86); stroke: var(--ink); stroke-width: 4; }
+.pr-gate.mine .hit { fill: color-mix(in srgb, var(--seat) 70%, #fff); stroke: #fff; stroke-width: 7; cursor: pointer; }
+.pr-gate.mine { animation: pr-pulse 1.1s ease-in-out infinite; }
+@keyframes pr-pulse { 50% { opacity: .82; } }
+.pr-arm { fill: none; stroke-width: 14; stroke-linecap: round; transition: stroke .15s; }
+.pr-gate.s0 .a0, .pr-gate.s1 .a1 { stroke: #e2b04a; }
+.pr-gate.s0 .a1, .pr-gate.s1 .a0 { stroke: #2a2440; stroke-dasharray: 6 10; }
+.pr-bar { stroke: #ff4d4d; stroke-width: 11; stroke-linecap: round; opacity: 0; transition: opacity .15s; filter: drop-shadow(0 0 0 var(--ink)) drop-shadow(0 2px 0 var(--ink)); }
+.pr-gate.s0 .b1, .pr-gate.s1 .b0 { opacity: 1; }
+.pr-hub { fill: var(--seat); stroke: var(--ink); stroke-width: 4; }
+.pr-num { fill: #fff; font: 900 22px/1 var(--font); stroke: var(--ink); stroke-width: 1.2; paint-order: stroke fill; pointer-events: none; }
+.pr-gate .own { fill: var(--seat); stroke: var(--ink); stroke-width: 2; }
+.game-portal-routing:not(.watching) .pr-gate:not(.mine) { opacity: .8; }
+.pr-marble { fill: #e8f4ff; stroke: var(--ink); stroke-width: 5; } .pr-shadow { fill: rgba(0, 0, 0, .4); } .pr-shine { fill: #fff; }
+.pr-ball { transition: none; pointer-events: none; }
+.pr-pop { fill: none; stroke: #fff; stroke-width: 8; animation: pr-pop .55s ease-out forwards; transform-box: fill-box; transform-origin: center; }
+@keyframes pr-pop { from { opacity: 1; transform: scale(.4); } to { opacity: 0; transform: scale(1.6); } }
+.pr-banner { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(.6); opacity: 0; pointer-events: none; font: 900 clamp(30px, 8vw, 60px)/1 var(--font); color: var(--sun); -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; text-shadow: 0 5px 0 var(--ink); white-space: nowrap; }
+.pr-banner.show { animation: pr-banner 1.4s ease-out forwards; }
+@keyframes pr-banner { 15% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(-4deg); } 75% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(-4deg); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.1) rotate(-4deg); } }
+.pr-mine { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; max-width: 640px; }
+.pr-minehead { width: 100%; text-align: center; color: #fff; font-weight: 800; font-size: 15px; }
+.pr-btn { min-width: 92px; min-height: 64px; display: grid; grid-template-columns: auto auto; grid-template-rows: auto auto; align-items: center; column-gap: 6px; padding: 6px 12px;
+  border: 4px solid var(--ink); border-radius: 16px; background: color-mix(in srgb, var(--seat) 75%, #fff); box-shadow: 0 5px 0 var(--seat-dark, var(--ink)); font-family: var(--font); color: var(--ink); cursor: pointer; }
+.pr-btn small { font-size: 12px; font-weight: 800; grid-row: 1; } .pr-btn b { font-size: 28px; grid-row: 1 / 3; grid-column: 2; }
+.pr-btn .dir { grid-row: 2; font-weight: 900; font-size: 14px; white-space: nowrap; }
+.pr-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--seat-dark, var(--ink)); }
+.pr-players { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.pr-players .chip.me { background: #fff3b8; outline: 4px solid var(--sun); }
+.pr-mark { width: 22px; height: 22px; display: block; } .pr-mark svg { width: 100%; height: 100%; fill: var(--seat); stroke: var(--ink); stroke-width: 2; }
+.pr-note { margin: 0; color: #fff; text-align: center; min-height: 1.3em; font-size: 15px; max-width: 640px; }
+.game-portal-routing.watching .pr-board { --cell: min(calc((100vw - 52px) / var(--cols, 7)), calc((100dvh - 230px) / var(--rows, 6)), 130px); }

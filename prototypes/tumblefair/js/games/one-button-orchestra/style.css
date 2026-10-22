@@ -1,0 +1,40 @@
+/* One Button Orchestra — a bandstand at dusk: the 3D band up top shows through; the note lane and one huge button
+   fill the bottom of a phone. */
+.game-one-button-orchestra { pointer-events: auto; display: flex; flex-direction: column; align-items: center; gap: 6px; overflow-x: hidden; overflow-y: auto;
+  padding: calc(var(--st) + 8px) calc(var(--sr) + 10px) calc(var(--sb) + 52px) calc(var(--sl) + 10px);
+  background: linear-gradient(rgba(42, 18, 54, 0) 38%, rgba(42, 18, 54, .55) 60%, rgba(30, 12, 40, .85)); user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.game-one-button-orchestra > * { flex: none; }
+.ob-top { display: flex; gap: 12px; align-items: center; justify-content: center; }
+.ob-sec { color: #fff; font: 900 22px/1.1 var(--font); -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; text-shadow: 0 2px 0 var(--ink); }
+.ob-board { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
+.ob-board .chip { padding-right: 8px; }
+.ob-inst { font-style: normal; font-size: 11px; font-weight: 900; text-transform: uppercase; color: #6a4428; }
+.ob-cb { font-size: 12px; color: #c22; min-width: 0; }
+.ob-cb:empty { display: none; }
+
+.ob-play { margin-top: auto; display: grid; grid-template-rows: auto auto auto; justify-items: center; gap: 6px; width: min(100%, 520px); flex: 0 1 auto; min-height: 0; }
+.ob-lane { position: relative; width: 100%; height: clamp(150px, 30dvh, 300px); }
+.ob-lane canvas { width: 100%; height: 100%; display: block; }
+.ob-judge { position: absolute; left: 0; right: 0; top: 30%; text-align: center; font: 900 28px/1 var(--font); color: #fff; -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; opacity: 0; pointer-events: none; }
+.ob-judge.pop { animation: ob-pop .55s ease-out; }
+.ob-judge.perfect { color: var(--sun); } .ob-judge.good { color: var(--sky); } .ob-judge.miss, .ob-judge.stray { color: var(--pop); }
+@keyframes ob-pop { 0% { opacity: 1; transform: scale(1.3); } 60% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: translateY(-14px); } }
+.ob-count { position: absolute; inset: 0; display: grid; place-items: center; font: 900 72px/1 var(--font); color: var(--sun); -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; pointer-events: none; }
+.ob-me { display: flex; gap: 12px; align-items: baseline; color: #fff; }
+.ob-score { font: 900 30px/1 var(--font); -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; }
+.ob-combo { font: 900 17px/1 var(--font); color: var(--sun); }
+.ob-btn { width: 100%; height: clamp(84px, 15dvh, 140px); border: 5px solid var(--ink); border-radius: 28px; background: var(--sun); box-shadow: 0 7px 0 var(--ink);
+  font: 900 40px/1 var(--font); color: var(--ink); display: grid; place-items: center; align-content: center; touch-action: none; -webkit-tap-highlight-color: transparent; }
+.ob-btn small { font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
+.ob-btn.hit { animation: ob-press .14s ease-out; }
+@keyframes ob-press { 0% { transform: translateY(5px); box-shadow: 0 2px 0 var(--ink); background: #fff3b8; } 100% { transform: none; } }
+.ob-note { margin: 0; color: #fff; text-align: center; font-size: 14px; text-shadow: 0 1px 0 var(--ink); }
+.ob-note:empty { display: none; }
+
+/* watching: no button, no personal score; a slimmer lane */
+.game-one-button-orchestra.watching .ob-btn, .game-one-button-orchestra.watching .ob-me { display: none; }
+.game-one-button-orchestra.watching .ob-lane { height: clamp(120px, 28dvh, 260px); }
+.game-one-button-orchestra[data-phase=end] .ob-btn { opacity: .4; pointer-events: none; }
+@media (min-width: 760px) and (min-height: 560px) { .ob-board .chip { font-size: 17px; } }
+/* a phone on its side: a shorter lane and button so everything fits without scrolling */
+@media (max-height: 500px) { .ob-lane { height: 110px; } .ob-btn { height: 70px; font-size: 30px; } .ob-board .chip { font-size: 13px; } }

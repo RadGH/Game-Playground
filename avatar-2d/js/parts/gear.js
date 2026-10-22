@@ -47,7 +47,6 @@ export const EXTRA_ACCESSORIES = {
 };
 export const EXTRA_MARKS = {
   burn_scar: { name: 'Burn scar', pieces: [{ layer: 'extras', svg: `<path d="M176 150 C190 146 202 156 206 172 C198 178 186 178 178 168 C172 162 170 154 176 150 Z" fill="${X}" opacity=".45"/>` }] },
-  nose_scar: { name: 'Scar across the nose', pieces: [{ layer: 'extras', svg: `<path d="M132 164 L170 178" stroke="${X}" stroke-width="3" stroke-linecap="round"/><path d="M142 164 L144 174 M154 170 L156 180" stroke="${X}" stroke-width="2"/>` }] },
   mud: { name: 'Mud', pieces: [{ layer: 'extras', svg: `<g fill="${X}" opacity=".5"><ellipse cx="108" cy="188" rx="12" ry="6"/><ellipse cx="190" cy="120" rx="8" ry="5"/><ellipse cx="150" cy="200" rx="6" ry="3"/><ellipse cx="120" cy="120" rx="5" ry="3"/></g>` }] },
   paint_dots: { name: 'Painted dots', pieces: [{ layer: 'extras', svg: `<g fill="${X}">${[110, 124, 138].map(x => `<circle cx="${x}" cy="${128 + (x - 110) * 0.3}" r="3.5"/>`).join('')}${[162, 176, 190].map(x => `<circle cx="${x}" cy="${136 - (x - 162) * 0.3}" r="3.5"/>`).join('')}</g>` }] },
   blood: { name: 'Blood splatter', pieces: [{ layer: 'extras', svg: `<g fill="${X}" opacity=".8"><circle cx="118" cy="178" r="4"/><circle cx="126" cy="186" r="2.5"/><circle cx="112" cy="190" r="2"/><circle cx="184" cy="108" r="3"/><circle cx="192" cy="116" r="1.8"/></g>` }] },
@@ -56,7 +55,6 @@ export const EXTRA_MARKS = {
   cheek_stripes: { name: 'Cheek stripes', pieces: [{ layer: 'extras', svg: `<g stroke="${X}" stroke-width="3" stroke-linecap="round"><path d="M96 168 L114 172 M96 178 L114 182 M96 188 L114 190"/><path d="M204 168 L186 172 M204 178 L186 182 M204 188 L186 190"/></g>` }] },
   eye_black: { name: 'Blackened eyes', pieces: [{ layer: 'extras', svg: `<g fill="${X}" opacity=".55"><ellipse cx="122" cy="150" rx="20" ry="13"/><ellipse cx="178" cy="150" rx="20" ry="13"/></g>` }] },
   freckles_heavy: { name: 'Heavy freckles', pieces: [{ layer: 'extras', svg: `<g fill="${X}" opacity=".6">${[0,1,2,3,4,5,6,7,8,9,10,11].map(i => `<circle cx="${112 + (i * 37) % 76}" cy="${156 + (i * 23) % 28}" r="1.6"/>`).join('')}</g>` }] },
-  soot: { name: 'Soot smudges', pieces: [{ layer: 'extras', svg: `<g fill="${X}" opacity=".45"><ellipse cx="112" cy="170" rx="14" ry="8"/><ellipse cx="192" cy="164" rx="12" ry="7"/><ellipse cx="160" cy="118" rx="10" ry="5"/></g>` }] },
   war_stripe: { name: 'War-stripe across the eyes', pieces: [{ layer: 'extras', svg: `<path d="M80 150 Q150 138 220 150 L220 166 Q150 154 80 166 Z" fill="${X}" opacity=".8"/>` }] },
   lightning_arcs: { bespoke: true, name: 'Lightning arcs', pieces: [{ layer: 'extras', svg: `<g stroke="${X}" stroke-width="2.5" fill="none" stroke-linecap="round"><path d="M96 110 L106 124 L100 132 L112 148"/><path d="M204 100 L196 116 L204 122 L194 140"/><path d="M150 66 L156 78 L148 84 L156 96"/></g>` }] },
   face_glyphs: { bespoke: true, name: 'Tribal paint glyphs', pieces: [{ layer: 'extras', svg: `<g stroke="${X}" stroke-width="3" fill="none" stroke-linecap="round"><path d="M104 176 L112 184 L104 192"/><path d="M196 176 L188 184 L196 192"/><path d="M150 104 L150 116 M144 110 L156 110"/></g>` }] },
@@ -64,7 +62,6 @@ export const EXTRA_MARKS = {
 };
 export const EXTRA_EYES = {
   glow: { bespoke: true, name: 'Glowing (no pupil)', svg: `<ellipse rx="12" ry="9" fill="${E}"/><ellipse rx="16" ry="12" fill="${E}" opacity=".35"><animate attributeName="opacity" values=".25;.5;.25" dur="2s" repeatCount="indefinite"/></ellipse><ellipse rx="6" ry="4" cx="-2" cy="-2" fill="#fff" opacity=".6"/>` },
-  glow_tear: { bespoke: true, name: 'Glowing + light tear', svg: `<ellipse rx="12" ry="9" fill="${E}"/><ellipse rx="16" ry="12" fill="${E}" opacity=".35"/><path d="M4 8 Q6 18 4 26" stroke="${E}" stroke-width="3" stroke-linecap="round" opacity=".7"/>` },
 };
 export const cape = {
   none: { name: 'None', pieces: [] },

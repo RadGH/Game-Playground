@@ -1,0 +1,38 @@
+/* Dragon's Weak Spot: the dragon's health + team hearts + window pips under the score bar, the banner, and the phone's
+   private card with its steps of the secret order. Nothing here is tappable (the stick and buttons are the controls). */
+.game-dragons-weak-spot > * { pointer-events: none !important; }
+.game-dragons-weak-spot .dw-hud { position: absolute; top: calc(var(--st) + 58px); left: 50%; transform: translateX(-50%); width: min(440px, calc(100% - 16px));
+  display: flex; flex-direction: column; gap: 3px; padding: 5px 12px; border-radius: 16px; background: rgba(255, 248, 231, .94); border: 3px solid var(--ink); box-shadow: 0 3px 0 var(--ink); font: 800 14px/1.2 var(--font); }
+.dw-hp { display: flex; align-items: center; gap: 8px; }
+.dw-hp b { font-size: 12px; text-transform: uppercase; letter-spacing: .5px; opacity: .75; }
+.dw-hp em { order: 1; font-style: normal; font-weight: 900; min-width: 2.2em; text-align: left; }
+.dw-hp .dw-bar { order: 2; margin-right: 34px; }
+.dw-bar { flex: 1; height: 14px; border-radius: 8px; background: #2b3a3e; border: 2px solid var(--ink); overflow: hidden; }
+.dw-bar i { display: block; height: 100%; width: 100%; background: linear-gradient(#7fe08a, #3cae4a); transition: width .25s; }
+.dw-row { display: flex; align-items: center; gap: 8px; min-height: 22px; }
+.dw-hearts { color: #ff3b5c; font-size: 18px; letter-spacing: 1px; -webkit-text-stroke: .6px var(--ink); }
+.dw-hearts.low { animation: dw-throb .6s infinite; }
+@keyframes dw-throb { 50% { opacity: .45; } }
+.dw-pips { display: flex; gap: 4px; }
+.dw-pips i { font-style: normal; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; background: #fff; border: 2px solid var(--ink); }
+.dw-pips i.done { background: #8ff07a; }
+.dw-pips i.now { background: var(--sun); transform: scale(1.15); }
+.dw-wbar { flex: 1; height: 8px; border-radius: 5px; background: #d8cdb6; overflow: hidden; visibility: hidden; }
+.dw-hud[data-ph=window] .dw-wbar { visibility: visible; }
+.dw-wbar i { display: block; height: 100%; background: #ff9b3d; }
+.game-dragons-weak-spot .dw-banner { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%) scale(.6); opacity: 0;
+  font: 900 clamp(28px, 8vw, 60px)/1 var(--font); color: var(--sun); -webkit-text-stroke: 2.5px var(--ink); paint-order: stroke fill; text-shadow: 0 5px 0 var(--ink); white-space: nowrap; transition: transform .25s, opacity .25s; }
+.dw-banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.dw-banner.good { color: #8ff07a; } .dw-banner.bad { color: #ff7a7a; } .dw-banner.warn { color: #ffb04a; }
+/* the private card: one row under the hud, out of the way of the stick and buttons */
+.game-dragons-weak-spot .dw-card { position: absolute; top: calc(var(--st) + 126px); left: 50%; transform: translateX(-50%) translateY(-8px); opacity: 0; transition: opacity .2s, transform .2s;
+  display: flex; align-items: center; gap: 8px; max-width: calc(100% - 16px); padding: 5px 10px; border-radius: 14px; background: #1d2b30; color: #fff; border: 3px solid var(--sun); box-shadow: 0 3px 0 var(--ink); font: 800 14px/1.2 var(--font); white-space: nowrap; }
+.dw-card.show { opacity: 1; transform: translateX(-50%); }
+.dw-card small { font-size: 11px; opacity: .9; text-align: left; }
+.dw-card p { margin: 0; font-size: 13px; text-align: center; }
+.dw-step { display: flex; align-items: center; gap: 4px; padding: 2px 8px 2px 4px; border-radius: 10px; background: #fff8e7; color: var(--ink); }
+.dw-step u { text-decoration: none; font-size: 13px; width: 20px; height: 20px; border-radius: 50%; background: var(--ink); color: #fff; display: grid; place-items: center; }
+.dw-step b { font-size: 13px; text-transform: uppercase; }
+.dw-step.now { outline: 3px solid var(--sun); }
+.dw-step.done { opacity: .45; }
+@media (max-width: 520px) { .game-dragons-weak-spot .dw-hud { top: calc(var(--st) + 52px); padding: 4px 10px; } .game-dragons-weak-spot .dw-card { top: calc(var(--st) + 114px); gap: 5px; padding: 4px 8px; } .dw-step { padding: 2px 6px 2px 3px; } .dw-step b { font-size: 12px; } }

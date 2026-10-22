@@ -159,12 +159,11 @@ export function buildFace(a, rig, c) {
     // Round eyes on a slight bulge: z of the eye's own front at (x, y) in eye-bone space.
     const eyeFront = (x, y, lift = 0) => 0.012 * H + 0.016 * H * Math.sqrt(Math.max(0, 1 - ((x - dx) / (ex * 1.08)) ** 2 - ((y - dy) / (ey * 1.08)) ** 2)) + lift;
     eyeInfo.push({ s, dx, dy });
-    if (eyeId === 'glow' || eyeId === 'glow_tear') {
+    if (eyeId === 'glow') {
       const glow = mix(a.eyes.color, '#ffffff', 0.3);
       ellipsoid(eye, mix(a.eyes.color, '#000000', 0.65), [dx, dy, 0], [ex * 1.1, ey * 1.1, 0.016 * H]);
       ellipsoid(eye, glow, [dx, dy - 0.004 * H, 0.014 * H], [ex * 0.92, ey * 0.92, 0.018 * H]);
       ellipsoid(pupil, '#ffffff', [dx - s * 0.02 * H, dy + 0.025 * H, 0.03 * H], [0.02 * H, 0.016 * H, 0.006 * H]);
-      if (eyeId === 'glow_tear') { const bx = eyeBone.x * s + dx + s * 0.02 * H, by = eyeBone.y + dy; add(taperedCurve([[bx, by - ey * 0.8, 0.268 * H], [bx + s * 0.01 * H, by - ey * 1.6, 0.27 * H], [bx, by - ey * 2.3, 0.262 * H]], [0.012, 0.01, 0.004], 4, 5), 'head', glow); }
     } else if (eyeId === 'dot') {
       ellipsoid(pupil, '#17272c', [dx, dy, 0.02 * H], [ex, ey, 0.013 * H]);
       ellipsoid(pupil, '#ffffff', [dx - s * 0.012 * H, dy + 0.014 * H, 0.035 * H], [0.012 * H, 0.014 * H, 0.004 * H]);
@@ -189,7 +188,7 @@ export function buildFace(a, rig, c) {
       return [x, y, eyeFront(x, y, 0.004 * H)];
     });
     // upper lash line on every open eye, thicker at the outer corner
-    if (!['dot', 'glow', 'glow_tear', 'hollow', 'narrow', 'sleepy', 'tired', 'angry'].includes(eyeId)) {
+    if (!['dot', 'glow', 'hollow', 'narrow', 'sleepy', 'tired', 'angry'].includes(eyeId)) {
       const pts = arc(s > 0 ? 0.25 : Math.PI - 0.25, s > 0 ? Math.PI - 0.2 : 0.2, 1.0);
       add(taperedCurve(pts, s > 0 ? [0.008, 0.01, 0.006] : [0.006, 0.01, 0.008], 4, 8), eye, lash);
     }
@@ -338,16 +337,15 @@ export function buildFace(a, rig, c) {
     for (const t of [0.3, 0.6]) { const x = -0.08 - 0.11 * t, y = cheekY + 0.01 - 0.14 * t; onFace([[x - 0.018, y - 0.01], [x + 0.018, y + 0.01]], 0.003, mix(skin, xc, 0.5), { lift: 0.006, steps: 2 }); }
   }
   if (xid === 'scar_cheek') onFace([[0.15, cheekY], [0.2, cheekY - 0.05], [0.24, cheekY - 0.1]], [0.006, 0.009, 0.004], mix(skin, xc, 0.7));
-  if (xid === 'nose_scar') onFace([[-0.04, noseY + 0.03], [0.04, noseY - 0.02]], 0.005, mix(skin, xc, 0.7), { lift: 0.03 });
   if (xid === 'burn_scar') dotFace(0.18, cheekY - 0.04, 0.07, mix(skin, '#8a3a3a', 0.35), 0.001, 0.2);
   if (xid === 'warpaint' || xid === 'cheek_stripes') for (const s of [-1, 1]) for (let k = 0; k < (xid === 'warpaint' ? 2 : 3); k++) onFace([[s * 0.1, cheekY - k * 0.035], [s * 0.24, cheekY - 0.01 - k * 0.035]], 0.009, xc, { lift: 0.002 });
   if (xid === 'eye_black') for (const s of [-1, 1]) onFace([[s * 0.07, cheekY + 0.005], [s * 0.2, cheekY + 0.01]], 0.013, '#1a1a1a', { lift: 0.002 });
-  if (xid === 'tattoo' || xid === 'face_glyphs') for (const s of xid === 'tattoo' ? [1] : [-1, 1]) {
+  if (xid === 'face_glyphs') for (const s of [-1, 1]) {   // 'tattoo' removed 2026-10-21 (owner)
     const pts = []; for (let k = 0; k <= 8; k++) { const t = k / 8 * Math.PI * 1.6; pts.push([s * (0.2 + Math.cos(t) * 0.035 * (1 - k / 12)), cheekY - 0.04 + Math.sin(t) * 0.035 * (1 - k / 12)]); }
     onFace(pts, 0.005, xc, { lift: 0.002, steps: 16 });
   }
   if (xid === 'paint_dots') for (const s of [-1, 1]) for (let k = 0; k < 3; k++) dotFace(s * (0.12 + k * 0.04), cheekY - 0.02, 0.014, xc);
-  if (xid === 'dirt' || xid === 'mud' || xid === 'soot') for (const [x, y, r] of [[-0.19, cheekY - 0.04, 0.03], [-0.16, cheekY - 0.07, 0.02], [0.2, cheekY - 0.02, 0.028], [0.23, cheekY - 0.05, 0.018], [0.1, 0.45, 0.022], [0.13, 0.43, 0.015]]) dotFace(x, y, r, mix(skin, xid === 'soot' ? '#222222' : '#5a4030', 0.35), -0.001, 0.05);
+  if (xid === 'dirt' || xid === 'mud') for (const [x, y, r] of [[-0.19, cheekY - 0.04, 0.03], [-0.16, cheekY - 0.07, 0.02], [0.2, cheekY - 0.02, 0.028], [0.23, cheekY - 0.05, 0.018], [0.1, 0.45, 0.022], [0.13, 0.43, 0.015]]) dotFace(x, y, r, mix(skin, xid === 'soot' ? '#222222' : '#5a4030', 0.35), -0.001, 0.05);
   if (xid === 'blood') onFace([[0.08, 0.44], [0.1, 0.36], [0.09, 0.3]], [0.012, 0.008, 0.003], '#8a1a1a', { lift: 0.002 });
   if (xid === 'brand') { dotFace(-0.2, cheekY - 0.04, 0.035, mix(skin, '#7a2a2a', 0.5), 0.001, 0.2); onFace([[-0.215, cheekY - 0.02], [-0.185, cheekY - 0.06]], 0.004, '#5a1a1a'); }
   if (xid === 'wrinkles') {

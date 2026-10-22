@@ -1770,7 +1770,7 @@
      "color": "#d98a3a"
     },
     "eyes": {
-     "id": "glow_tear",
+     "id": "glow",
      "color": "#40e0ff"
     },
     "brows": {
@@ -2607,7 +2607,7 @@
      "id": "none"
     },
     "extras": {
-     "id": "soot",
+     "id": "dirt",
      "color": "#333"
     },
     "cape": {

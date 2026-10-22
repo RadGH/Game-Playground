@@ -162,10 +162,14 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
     const { inst, def } = game, arena = def.meta.kind === 'arena';
     if (arena) for (const pid of game.players) {
       const m = members.get(pid); if (!m) { inst.input(pid, null); continue; }
-      let n = 0;
-      while (m.queue.length && n < 2) { const inp = m.queue.shift(); inst.input(pid, inp); m.lastIn = inp; m.ack = inp.s; n++; }
+      // Every input a phone sends is applied exactly once, in order, because the phone predicts its own character by
+      // replaying those same inputs (play.js). A late phone simply waits (its character holds still for a tick or two)
+      // and then catches up 3 a tick; the old "coast on the last input" applied movement the phone never predicted and
+      // THEN the real inputs as well, so the player was moved twice and their own screen snapped forward.
+      let n = 0; const cap = m.queue.length > 3 ? 3 : 2;
+      while (m.queue.length && n < cap) { const inp = m.queue.shift(); inst.input(pid, inp); m.lastIn = inp; m.ack = inp.s; n++; }
       if (n) m.starve = 0;
-      else if (++m.starve >= 3 || !m.connected) inst.input(pid, m.starve < 8 && m.connected ? m.lastIn : null);   // a stalled phone coasts, then stops
+      else if (++m.starve >= 8 || !m.connected) inst.input(pid, null);                  // gone for 0.4 s: stop
     }
     inst.step(DT);
     if (inst.events?.length) { for (const ev of inst.events) { if (ev.to != null) { const m = members.get(ev.to); if (m) send(m, { t: 'ge', ...ev, to: undefined }); } else cast({ t: 'ge', ...ev }); } inst.events.length = 0; }
@@ -263,7 +267,8 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
       }
       case 'in': {
         if (phase !== 'game' || !game || game.def.meta.kind !== 'arena' || !game.players.includes(m.pid)) return;
-        if (m.queue.length < 6) m.queue.push({ s: msg.s, mx: Math.max(-1, Math.min(1, msg.mx)), mz: Math.max(-1, Math.min(1, msg.mz)), b: msg.b & (IN.A | IN.B) });
+        m.queue.push({ s: msg.s, mx: Math.max(-1, Math.min(1, msg.mx)), mz: Math.max(-1, Math.min(1, msg.mz)), b: msg.b & (IN.A | IN.B) });
+        if (m.queue.length > 12) { const old = m.queue.shift(); m.queue[0].b |= old.b; }   // hopelessly behind: drop the oldest step (never a button press)
         return;
       }
       case 'act': if (phase === 'game' && game?.inst.act && game.players.includes(m.pid)) game.inst.act(m.pid, msg.a, msg.d); return;

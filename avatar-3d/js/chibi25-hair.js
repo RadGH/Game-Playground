@@ -40,7 +40,7 @@ const TAU = Math.PI * 2, SAG = 0.009;
  */
 export const HAT_FIT = {
   hood: { hood: true }, hood_down: { backPad: 0.07 },          // a lowered hood lies on the back: it covers nothing on the head
-  wizard: { shell: [0.5, 0.42] }, wide_brim: { shell: [0.41, 0.39] }, straw: { shell: [0.43, 0.41] }, top_hat: { shell: [0.51, 0.5] },
+  wizard: { shell: [0.445, 0.4] }, wide_brim: { shell: [0.41, 0.39] }, straw: { shell: [0.43, 0.41] }, top_hat: { shell: [0.51, 0.5] },
   feather_cap: { shell: [0.43, 0.4] }, bard_red_feather: { shell: [0.43, 0.4] }, cap: { shell: [0.44, 0.36] }, bandana: { shell: [0.44, 0.33] },
   leather_cap: { shell: [0.4, 0.3] }, horned_helm: { shell: [0.43, 0.38] }, helmet: { shell: [0.43, 0.38] }, war_helm: { shell: [0.42, 0.2] },
   plate_helm: { shell: [0.42, 0.28] }, rune_helm: { shell: [0.42, 0.36] }, wolf_helm: { shell: [0.44, 0.2], noHang: true }, tricorn: { shell: [0.46, 0.46] },

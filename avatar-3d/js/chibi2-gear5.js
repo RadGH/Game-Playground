@@ -15,6 +15,7 @@
 //   chibi2-gear5-offhand.js   shields, foci, quiver, torch — and the worn accessories (cloak, lantern, belt, torc, ring)
 //   chibi2-backpacks.js       backpacks, worn on the back in place of a cloak (cape.id = g5_pack_*)
 import { isG5, G5_HELD, G5_OFFHAND } from './chibi2-gear5-ids.js';
+import { offhandAllowed } from './chibi2-weapon-ids.js';
 import { G5_WEAPON_BUILDERS } from './chibi2-gear5-weapons.js';
 import { G5_HAT_BUILDERS, G5_TOP_BUILDERS, G5_BOTTOM_BUILDERS, G5_SHOE_BUILDERS, G5_GLOVE_BUILDERS } from './chibi2-gear5-armour.js';
 import { G5_PACK_BUILDERS } from './chibi2-backpacks.js';
@@ -53,7 +54,7 @@ export function buildGear5(a, c) {
 
   // ---- in the hands
   const g = gripped(c);
-  const held = a.held?.id, off = a.offhand?.id;
+  const held = a.held?.id, off = offhandAllowed(held, a.offhand?.id) ? a.offhand?.id : 'none';   // W11: no off-hand item with a two-hander
   if (G5_HELD[held]) G5_WEAPON_BUILDERS[held]?.(g, a.held.color || '#c8ccd6', q(a.held), a, a.held);
   if (G5_OFFHAND[off]) G5_OFFHAND_BUILDERS[off]?.(g, a.offhand.color || G5_OFFHAND[off].color || '#9aa3ad', q(a.offhand), a, a.offhand);
   else if (G5_HELD[off]) G5_WEAPON_BUILDERS[off]?.(swapped(g), a.offhand.color || '#c8ccd6', q(a.offhand), a, a.offhand);   // a second weapon, in the left hand

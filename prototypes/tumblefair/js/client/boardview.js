@@ -10,7 +10,7 @@ export const SPACE_LOOK = {
   start: { color: '#3ecf5a', label: 'GO' }, ticket: { color: '#ffd23f', label: '+3' }, join: { color: '#ffd23f', label: '+3' },
   pit: { color: '#8a5a3a', label: '-3' }, chance: { color: '#a45cff', label: '?' }, booth: { color: '#ff5f8f', label: '★' },
   mirror: { color: '#39d0e0', label: '⇄' }, jackpot: { color: '#ff9f1c', label: '+8' }, fork: { color: '#ffffff', label: '⑂' },
-  duck: { color: '#7fd8ff', label: '', draw: 'duck' }, duel: { color: '#ff6a3d', label: '', draw: 'die' }, bumper: { color: '#8cf06a', label: '»' },
+  duck: { color: '#7fd8ff', label: '', draw: 'duck' }, duel: { color: '#ff6a3d', label: '', draw: 'die' }, bumper: { color: '#8cf06a', label: '»' }, ghost: { color: '#c9b8ff', label: '', draw: 'ghost' },
 };
 const OFFS = [[-0.5, -0.38], [0.5, -0.38], [-0.5, 0.48], [0.5, 0.48]];
 
@@ -43,6 +43,10 @@ export async function createBoardView({ stage, def, members, me, assetBase }) {
         g.beginPath(); g.arc(80, 48, 17, 0, 7); g.fill(); g.stroke();
         g.fillStyle = '#ff8a1a'; g.beginPath(); g.moveTo(95, 46); g.lineTo(112, 52); g.lineTo(95, 58); g.closePath(); g.fill(); g.stroke();
         g.fillStyle = '#12222a'; g.beginPath(); g.arc(84, 44, 3.5, 0, 7); g.fill();
+      } else if (L.draw === 'ghost') {
+        g.lineWidth = 5; g.strokeStyle = '#12222a'; g.fillStyle = '#ffffff';
+        g.beginPath(); g.moveTo(36, 100); g.lineTo(36, 58); g.arc(64, 58, 28, Math.PI, 0); g.lineTo(92, 100); for (let k = 0; k < 4; k++) g.quadraticCurveTo(85 - k * 14, 88, 78 - k * 14, 100); g.closePath(); g.fill(); g.stroke();
+        g.fillStyle = '#12222a'; for (const x of [54, 74]) { g.beginPath(); g.ellipse(x, 60, 5, 7, 0, 0, 7); g.fill(); } g.beginPath(); g.ellipse(64, 78, 6, 5, 0, 0, 7); g.fill();
       } else if (L.draw === 'die') {
         g.lineWidth = 6; g.strokeStyle = '#12222a'; g.fillStyle = '#fff'; g.beginPath(); g.roundRect(30, 30, 68, 68, 12); g.fill(); g.stroke();
         g.fillStyle = '#12222a'; for (const [x, y] of [[46, 46], [82, 46], [64, 64], [46, 82], [82, 82]]) { g.beginPath(); g.arc(x, y, 6, 0, 7); g.fill(); }

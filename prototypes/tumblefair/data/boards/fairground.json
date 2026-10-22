@@ -65,6 +65,11 @@
    "name": "Bumper Cart",
    "icon": "cart",
    "text": "Zoom 3 spaces ahead."
+  },
+  "ghost": {
+   "name": "Friendly Ghost",
+   "icon": "ghost",
+   "text": "Boo! A ghost whisks you somewhere else on the loop."
   }
  },
  "spaces": [

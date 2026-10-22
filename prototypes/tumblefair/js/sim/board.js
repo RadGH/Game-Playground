@@ -136,6 +136,10 @@ export function createBoardMatch({ def, chance, order, rng, names = {}, emit = (
     else if (sp.type === 'mirror') { const o = others(pid); if (o.length) { const w = rng.pick(o); [S.pos[pid], S.pos[w]] = [S.pos[w], S.pos[pid]]; fx.kind = 'swap'; fx.with = w; fx.text = `${name(pid)} and ${name(w)} swap places!`; } else fx.text = 'Nobody to swap with.'; }
     else if (sp.type === 'chance') { Object.assign(fx, spin(pid)); ms = BOARD.CHANCE_MS; S.stats[pid].chance++; }
     else if (sp.type === 'duel') { Object.assign(fx, duel(pid)); ms = BOARD.DUEL_MS; }
+    else if (sp.type === 'ghost') {                                     // a friendly ghost: off to a random space on the loop
+      const loop = []; let at = def.start; do { loop.push(at); at = byId.get(at).next[0]; } while (at !== def.start && loop.length < 200);
+      const to = rng.pick(loop.filter(id => id !== sp.id && byId.get(id).type !== 'ghost')); S.pos[pid] = to; fx.kind = 'swap'; fx.text = `Boo! A friendly ghost whisks ${name(pid)} away to somewhere else on the pier.`;
+    }
     else if (sp.type === 'bumper') { const path = stepForward(pid, BOARD.BUMPER); fx.path = path; fx.text = `Bumper cart! ${name(pid)} zooms ${path.length} spaces ahead.`; }
     else if (sp.type === 'duck') {
       const prizes = rng.shuffle(BOARD.DUCKS.slice()).slice(0, 3).map(n => n * mod('duckMul', 1));

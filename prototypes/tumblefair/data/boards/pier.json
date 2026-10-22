@@ -1,0 +1,353 @@
+{
+ "id": "pier",
+ "title": "Moonlit Pier",
+ "backdrop": "board-pier",
+ "guideField": "#2a4a7a",
+ "size": 40,
+ "start": "s0",
+ "about": "Round 5 (2026-10-22): a spooky-but-friendly seaside pier at night. Friendly ghosts whisk you about, and the Ghost Train tunnel straight up the middle is quick but haunted.",
+ "types": {
+  "start": {
+   "name": "Pier Gate",
+   "icon": "gate",
+   "text": "Pass the gate: +5 tickets."
+  },
+  "ticket": {
+   "name": "Ticket Stand",
+   "icon": "ticket",
+   "text": "+3 tickets."
+  },
+  "pit": {
+   "name": "Wave Splash",
+   "icon": "puddle",
+   "text": "A wave soaks you: lose 3 tickets."
+  },
+  "chance": {
+   "name": "Wheel of Whatever",
+   "icon": "wheel",
+   "text": "Spin for a surprise."
+  },
+  "booth": {
+   "name": "Prize Booth",
+   "icon": "ribbon",
+   "text": "Pass by with 10 tickets to buy a ribbon."
+  },
+  "mirror": {
+   "name": "Hall of Mirrors",
+   "icon": "mirror",
+   "text": "Swap places with another player."
+  },
+  "jackpot": {
+   "name": "Jackpot",
+   "icon": "star",
+   "text": "+8 tickets."
+  },
+  "fork": {
+   "name": "Crossroads",
+   "icon": "fork",
+   "text": "Choose your way."
+  },
+  "join": {
+   "name": "Ticket Stand",
+   "icon": "ticket",
+   "text": "+3 tickets."
+  },
+  "duck": {
+   "name": "Duck Pond",
+   "icon": "duck",
+   "text": "Pick one of three ducks: each hides 1 to 10 tickets."
+  },
+  "duel": {
+   "name": "Dice Duel",
+   "icon": "dice",
+   "text": "Roll against another player: the higher roll takes 4 tickets."
+  },
+  "bumper": {
+   "name": "Bumper Boat",
+   "icon": "cart",
+   "text": "Zoom 3 spaces ahead."
+  },
+  "ghost": {
+   "name": "Friendly Ghost",
+   "icon": "ghost",
+   "text": "Boo! A ghost whisks you somewhere else on the loop."
+  }
+ },
+ "spaces": [
+  {
+   "id": "s0",
+   "type": "start",
+   "x": 0,
+   "z": 11.12,
+   "next": [
+    "s1"
+   ]
+  },
+  {
+   "id": "s1",
+   "type": "ticket",
+   "x": -3.42,
+   "z": 10.86,
+   "next": [
+    "s2"
+   ]
+  },
+  {
+   "id": "s2",
+   "type": "duck",
+   "x": -6.8,
+   "z": 10.37,
+   "next": [
+    "s3"
+   ]
+  },
+  {
+   "id": "s3",
+   "type": "chance",
+   "x": -9.84,
+   "z": 8.79,
+   "next": [
+    "s4"
+   ]
+  },
+  {
+   "id": "s4",
+   "type": "pit",
+   "x": -12.82,
+   "z": 7.12,
+   "next": [
+    "s5"
+   ]
+  },
+  {
+   "id": "s5",
+   "type": "fork",
+   "x": -14.57,
+   "z": 4.19,
+   "next": [
+    "s6",
+    "c0"
+   ],
+   "labels": [
+    "Along the pier",
+    "The Ghost Train"
+   ]
+  },
+  {
+   "id": "s6",
+   "type": "ticket",
+   "x": -15.25,
+   "z": 0.82,
+   "next": [
+    "s7"
+   ]
+  },
+  {
+   "id": "s7",
+   "type": "booth",
+   "x": -15.09,
+   "z": -2.6,
+   "next": [
+    "s8"
+   ]
+  },
+  {
+   "id": "s8",
+   "type": "ghost",
+   "x": -13.74,
+   "z": -5.75,
+   "next": [
+    "s9"
+   ]
+  },
+  {
+   "id": "s9",
+   "type": "chance",
+   "x": -11.02,
+   "z": -7.82,
+   "next": [
+    "s10"
+   ]
+  },
+  {
+   "id": "s10",
+   "type": "duel",
+   "x": -8.11,
+   "z": -9.62,
+   "next": [
+    "s11"
+   ]
+  },
+  {
+   "id": "s11",
+   "type": "ticket",
+   "x": -4.94,
+   "z": -10.93,
+   "next": [
+    "s12"
+   ]
+  },
+  {
+   "id": "s12",
+   "type": "bumper",
+   "x": -1.55,
+   "z": -11.41,
+   "next": [
+    "s13"
+   ]
+  },
+  {
+   "id": "s13",
+   "type": "mirror",
+   "x": 1.87,
+   "z": -11.35,
+   "next": [
+    "s14"
+   ]
+  },
+  {
+   "id": "s14",
+   "type": "join",
+   "x": 5.28,
+   "z": -11.12,
+   "next": [
+    "s15"
+   ]
+  },
+  {
+   "id": "s15",
+   "type": "chance",
+   "x": 8.38,
+   "z": -9.68,
+   "next": [
+    "s16"
+   ]
+  },
+  {
+   "id": "s16",
+   "type": "pit",
+   "x": 11.48,
+   "z": -8.23,
+   "next": [
+    "s17"
+   ]
+  },
+  {
+   "id": "s17",
+   "type": "booth",
+   "x": 14.19,
+   "z": -6.13,
+   "next": [
+    "s18"
+   ]
+  },
+  {
+   "id": "s18",
+   "type": "ticket",
+   "x": 15.97,
+   "z": -3.2,
+   "next": [
+    "s19"
+   ]
+  },
+  {
+   "id": "s19",
+   "type": "ghost",
+   "x": 16.54,
+   "z": 0.17,
+   "next": [
+    "s20"
+   ]
+  },
+  {
+   "id": "s20",
+   "type": "duck",
+   "x": 16.93,
+   "z": 3.57,
+   "next": [
+    "s21"
+   ]
+  },
+  {
+   "id": "s21",
+   "type": "duel",
+   "x": 15.81,
+   "z": 6.81,
+   "next": [
+    "s22"
+   ]
+  },
+  {
+   "id": "s22",
+   "type": "chance",
+   "x": 13.41,
+   "z": 9.25,
+   "next": [
+    "s23"
+   ]
+  },
+  {
+   "id": "s23",
+   "type": "pit",
+   "x": 10.23,
+   "z": 10.52,
+   "next": [
+    "s24"
+   ]
+  },
+  {
+   "id": "s24",
+   "type": "ticket",
+   "x": 6.83,
+   "z": 10.99,
+   "next": [
+    "s25"
+   ]
+  },
+  {
+   "id": "s25",
+   "type": "bumper",
+   "x": 3.41,
+   "z": 10.87,
+   "next": [
+    "s0"
+   ]
+  },
+  {
+   "id": "c0",
+   "type": "ghost",
+   "x": -7.25,
+   "z": 2.9,
+   "next": [
+    "c1"
+   ]
+  },
+  {
+   "id": "c1",
+   "type": "chance",
+   "x": -4.9,
+   "z": -0.85,
+   "next": [
+    "c2"
+   ]
+  },
+  {
+   "id": "c2",
+   "type": "jackpot",
+   "x": -2.6,
+   "z": -4.65,
+   "next": [
+    "c3"
+   ]
+  },
+  {
+   "id": "c3",
+   "type": "ghost",
+   "x": -0.25,
+   "z": -8.4,
+   "next": [
+    "s13"
+   ]
+  }
+ ]
+}

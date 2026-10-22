@@ -22,7 +22,7 @@ const arg = (name, def) => { const i = process.argv.indexOf('--' + name); return
 const port = +arg('port', process.env.PORT || 8480), host = arg('host', '0.0.0.0'), publicDir = arg('public', null);
 const build = arg('build', 'dev'), dataDir = resolve(arg('data', join(GAME, '.data')));
 const json = p => JSON.parse(readFileSync(join(GAME, p), 'utf8'));
-const data = { boards: { fairground: json('data/boards/fairground.json') }, chance: json('data/chance.json'), cosmetics: json('data/cosmetics.json') };
+const data = { boards: { fairground: json('data/boards/fairground.json'), pier: json('data/boards/pier.json') }, chance: json('data/chance.json'), cosmetics: json('data/cosmetics.json') };
 
 mkdirSync(dataDir, { recursive: true });
 const profileFile = join(dataDir, 'profiles.json');

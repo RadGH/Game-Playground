@@ -13,7 +13,7 @@ import { score as scScore } from '../js/games/safecracker/sim.js';
 import { solve as dtSolve } from '../js/games/defuse-together/sim.js';
 
 const json = p => JSON.parse(readFileSync(fileURLToPath(new URL('../' + p, import.meta.url)), 'utf8'));
-export const DATA = { boards: { fairground: json('data/boards/fairground.json') }, chance: json('data/chance.json'), cosmetics: json('data/cosmetics.json') };
+export const DATA = { boards: { fairground: json('data/boards/fairground.json'), pier: json('data/boards/pier.json') }, chance: json('data/chance.json'), cosmetics: json('data/cosmetics.json') };
 
 export function world({ seed = 7 } = {}) {
   let t = 1000, n = 0;
@@ -60,6 +60,14 @@ export function world({ seed = 7 } = {}) {
 const DT_TABLE = {};   // defuse-together bots: room code:round:module -> the rule lines read out so far
 /** Presses that make sense in each non-arena game, so bots can finish them. One entry per game id. */
 export const UI_BOTS = {
+  // jellybean-jar: one guess a round near the real count (a different miss per player), locked in
+  'jellybean-jar': P => { const g = P.last.s?.g, k = P.last.phase; if (g?.phase !== 'guess' || !k || k.jjR === g.round) return; k.jjR = g.round; P.send({ t: 'act', a: 'guess', d: { n: g.n + (P.pid % 4) * 4, ok: true } }); },
+  // quick-draw: taps once each bell (its own reaction time differs per player)
+  'quick-draw': P => { const g = P.last.s?.g, k = P.last.phase; if (g?.phase !== 'bell' || !k || k.qdR === g.round) return; k.qdR = g.round; P.send({ t: 'act', a: 'tap', d: { r: g.round, rt: 200 + (P.pid % 4) * 40 } }); },
+  // pin-the-tail: one pin a round (by pid), then Done
+  'pin-the-tail': P => { const g = P.last.s?.g, k = P.last.phase; if (g?.phase !== 'guess' || !k || k.ptR === g.round) return; k.ptR = g.round; P.send({ t: 'act', a: 'pin', d: [30 + (P.pid % 4) * 25, 50] }); P.send({ t: 'act', a: 'done' }); },
+  // size-up: one answer a question (by pid and round)
+  'size-up': P => { const g = P.last.s?.g, k = P.last.phase; if (g?.phase !== 'q' || !k || k.suR === g.round) return; k.suR = g.round; P.send({ t: 'act', a: 'pick', d: { i: (P.pid + g.round) % g.ids.length, ms: 600 } }); },
   // storm-shelter: each beat votes the first choice and plays its first card(s) once (the private hand says how many)
   'storm-shelter': P => {
     const g = P.last.s?.g, k = P.last.phase; if (g?.ph !== 'beat' || !k || k.ssB === g.beat) return;

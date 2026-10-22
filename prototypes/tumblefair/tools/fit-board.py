@@ -7,6 +7,7 @@ keeping the spaces in their order and evenly spread, then writes data/boards/<id
 tools/build-board.mjs reads over its formula positions. Run it after changing the backdrop:
 
     python3 prototypes/tumblefair/tools/fit-board.py [fairground] [--debug out.png]
+    python3 prototypes/tumblefair/tools/fit-board.py pier --guide guide.png     (the layout guide to paint over)
 
 Needs Pillow + numpy + scikit-image (pip install --user scikit-image).
 """
@@ -20,8 +21,18 @@ GAME = os.path.dirname(HERE)
 board_id = next((a for a in sys.argv[1:] if not a.startswith('--') and not a.endswith('.png')), 'fairground')
 debug = sys.argv[sys.argv.index('--debug') + 1] if '--debug' in sys.argv else None
 B = json.load(open(os.path.join(GAME, 'data/boards', board_id + '.json')))
-img = Image.open(os.path.join(GAME, 'assets/art', B['backdrop'] + '.webp')).convert('RGB')
-S = img.size[0]; k = S / B['size']
+if '--guide' in sys.argv:                          # draw the layout guide Codex paints over (round 5): field, path, gate stub
+    out = sys.argv[sys.argv.index('--guide') + 1]; S0 = 1600; kk = S0 / B['size']; P = lambda x, z: ((x + B['size'] / 2) * kk, (z + B['size'] / 2) * kk)
+    g = Image.new('RGB', (S0, S0), (18, 50, 58)); d = ImageDraw.Draw(g)
+    d.rounded_rectangle([90, 90, S0 - 90, S0 - 90], 90, fill=tuple(int(B.get('guideField', '#5a9a4a')[i:i + 2], 16) for i in (1, 3, 5)))
+    by = {s_['id']: s_ for s_ in B['spaces']}; W = 70
+    for s_ in B['spaces']:
+        for n in s_['next']: d.line([P(s_['x'], s_['z']), P(by[n]['x'], by[n]['z'])], fill=(232, 200, 140), width=W)
+    for s_ in B['spaces']: x, y = P(s_['x'], s_['z']); d.ellipse([x - W / 2, y - W / 2, x + W / 2, y + W / 2], fill=(232, 200, 140))
+    x, y = P(by[B['start']]['x'], by[B['start']]['z']); d.rectangle([x - W / 2 + 10, y, x + W / 2 - 10, S0 - 90], fill=(232, 200, 140))
+    g.save(out); print('guide', out); sys.exit(0)
+img = None if '--guide' in sys.argv else Image.open(os.path.join(GAME, 'assets/art', B['backdrop'] + '.webp')).convert('RGB')
+S = img.size[0] if img else 1600; k = S / B['size']
 to_px = lambda x, z: ((x + B['size'] / 2) * k, (z + B['size'] / 2) * k)
 to_w = lambda px, py: (px / k - B['size'] / 2, py / k - B['size'] / 2)
 
@@ -102,3 +113,5 @@ if debug:
         for n in sp[i]['next']: d.line([tuple(p), tuple(pos[n])], fill=(255, 255, 255), width=5)
     for i, p in pos.items(): d.ellipse([p[0] - 22, p[1] - 22, p[0] + 22, p[1] + 22], fill=(255, 40, 40) if i in off else (40, 120, 255), outline=(0, 0, 0), width=4)
     im.resize((800, 800)).save(debug)
+# (pier, round 5: Codex hid the Ghost Train's lower end under its tunnel arch, so c0-c3 were placed by hand in
+#  data/boards/pier-fit.json along the painted shortcut. Re-running this overwrites them: put them back.)

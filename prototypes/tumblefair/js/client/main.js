@@ -28,7 +28,7 @@ const controls = createControls($('#controls'));
 const lineup = createLineup(stage);
 const sfx = createSounds();
 const net = connect();
-const boardDef = await (await fetch(new URL('../../data/boards/fairground.json', import.meta.url))).json();
+const BOARDS = Object.fromEntries(await Promise.all(['fairground', 'pier'].map(async id => [id, await (await fetch(new URL(`../../data/boards/${id}.json`, import.meta.url))).json()])));
 window.tumblefair = { S, net, stage, lineup, controls, GAMES };
 installFeedback({ stage, net, getS: () => S });                       // for tests and the console
 
@@ -104,7 +104,7 @@ async function showLobby() {
   lineup.show(true); lineup.setPoses({});
   lineup.sync(seated(), { me: S.room.you });
   const r = S.room, host = isHost(), me = mine(), n = seated().length;
-  const modes = { board: ['The Fairground Loop', 'Roll dice round the board, buy ribbons, play a minigame every round.'], marathon: ['Minigame Marathon', 'No board. Vote, play, repeat. Most points wins.'], endless: ['The Fair Never Closes', 'Keep playing, harder and harder. Every 3 games you vote to go on or finish.'] };
+  const modes = { board: ['Board Game', 'Roll dice round the board, buy ribbons, play a minigame every round.'], marathon: ['Minigame Marathon', 'No board. Vote, play, repeat. Most points wins.'], endless: ['The Fair Never Closes', 'Keep playing, harder and harder. Every 3 games you vote to go on or finish.'] };
   setScreen('lobby', `
     <div class="panel lobby-code${S.codeSmall ? ' small' : ''}">
       <div class="qr" id="qr"></div>
@@ -118,6 +118,7 @@ async function showLobby() {
       ${me?.display ? '<p class="note">This screen is watching. Players join on their phones.</p>' : `<div class="row"><button class="btn" data-act="edit">Change look</button><button class="btn" data-act="shop">Costumes <span class="coins">${ICON.coin}${S.me?.coins ?? 0}</span></button></div>`}
       <h2>Game</h2>
       <div class="modes">${Object.entries(modes).map(([id, [t, d]]) => `<button class="mode${r.opts.mode === id ? ' on' : ''}" data-act="opt" data-key="mode" data-value="${id}" ${host ? '' : 'disabled'}><b>${t}</b><span>${d}</span></button>`).join('')}</div>
+      ${r.opts.mode === 'board' ? `<div class="row opts"><span>Board</span>${Object.values(BOARDS).map(b => `<button class="pill${r.opts.board === b.id ? ' on' : ''}" data-act="opt" data-key="board" data-value="${b.id}" ${host ? '' : 'disabled'}>${esc(b.title)}</button>`).join('')}</div>` : ''}
       ${r.opts.mode === 'endless' ? '' : `<div class="row opts"><span>Rounds</span>${[3, 4, 5, 6].map(v => `<button class="pill${r.opts.rounds === v ? ' on' : ''}" data-act="opt" data-key="rounds" data-num="${v}" ${host ? '' : 'disabled'}>${v}</button>`).join('')}
         <span class="est">about ${Math.round(r.opts.rounds * (r.opts.mode === 'board' ? 2.6 : 1.6))} min</span></div>`}
       <div class="row opts"><span>Play as</span><button class="pill${!r.opts.teams ? ' on' : ''}" data-act="opt" data-key="teams" data-bool="0" ${host ? '' : 'disabled'}>Everyone for themselves</button><button class="pill${r.opts.teams ? ' on' : ''}" data-act="opt" data-key="teams" data-bool="1" ${host ? '' : 'disabled'}>Teams</button>
@@ -142,7 +143,9 @@ function drawHud() {
 
 // ------------------------------------------------------------------ board
 async function ensureBoard() {
-  if (!S.board && !S.boardP) S.boardP = createBoardView({ stage, def: boardDef, members, me: S.room.you, assetBase: ART }).then(b => { S.board = b; S.boardP = null; if (S.room?.match?.board) b.sync(S.room.match.board); return b; });
+  const id = BOARDS[S.room?.match?.boardId] ? S.room.match.boardId : 'fairground';
+  if (S.board && S.board.id !== id) dropBoard();
+  if (!S.board && !S.boardP) S.boardP = createBoardView({ stage, def: BOARDS[id], members, me: S.room.you, assetBase: ART }).then(b => { b.id = id; S.board = b; S.boardP = null; if (S.room?.match?.board) b.sync(S.room.match.board); return b; });
   return S.board || S.boardP;
 }
 function dropBoard() { S.board?.dispose(); S.board = null; }

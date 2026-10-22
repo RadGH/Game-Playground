@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // A quick look at the running dev server (port 8480) in a headless browser, for whoever is building: opens N pages
 // (one host + joiners), optionally starts a match, and saves screenshots to tests/shots/look-*.png.
-//   node prototypes/tumblefair/tools/look.mjs [--players 2] [--mode board|marathon] [--until lobby|board|vote|intro|game|results|final] [--phone] [--wait ms] [--pool id,id] [--round n (with --until: wait for that round)] [--shots n,ms (n more screenshots every ms)]
+//   node prototypes/tumblefair/tools/look.mjs [--players 2] [--mode board|marathon] [--until lobby|board|vote|intro|game|results|final] [--phone] [--wait ms] [--pool id,id] [--board pier] [--round n (with --until: wait for that round)] [--shots n,ms (n more screenshots every ms)]
 // Run it from the playground root under the browser lock:  flock /tmp/claude-1000/farhold-pw.lock node ...
 import { chromium } from '@playwright/test';
 const arg = (n, d) => { const i = process.argv.indexOf('--' + n); return i > 0 ? process.argv[i + 1] : d; };
@@ -33,7 +33,7 @@ if (until !== 'title') {
   await host.waitForTimeout(800);
   if (until === 'lobby') { for (const [i, p] of pages.entries()) await p.screenshot({ path: `${OUT}look-${tag}-p${i}.png` }); }
   else {
-    await host.evaluate(([m, pl]) => { tumblefair.net.send({ t: 'opt', key: 'mode', value: m }); if (pl) tumblefair.net.send({ t: 'opt', key: 'pool', value: pl.split(',') }); if (location.search.includes('teams')) tumblefair.net.send({ t: 'opt', key: 'teams', value: true }); tumblefair.net.send({ t: 'opt', key: 'rounds', value: 2 }); }, [mode, pool]);
+    await host.evaluate(([m, pl, boardArg]) => { tumblefair.net.send({ t: 'opt', key: 'mode', value: m }); if (boardArg) tumblefair.net.send({ t: 'opt', key: 'board', value: boardArg }); if (pl) tumblefair.net.send({ t: 'opt', key: 'pool', value: pl.split(',') }); if (location.search.includes('teams')) tumblefair.net.send({ t: 'opt', key: 'teams', value: true }); tumblefair.net.send({ t: 'opt', key: 'rounds', value: 2 }); }, [mode, pool, arg('board', '')]);
     await host.click('[data-act=start]');
     const t0 = Date.now();
     while (Date.now() - t0 < 240000) {

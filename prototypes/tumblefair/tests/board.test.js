@@ -49,6 +49,18 @@ test('whole matches with the timers answering: 1-4 players, many seeds, nothing 
   }
 });
 
+test('the Moonlit Pier: whole matches, ghosts send you somewhere real on the loop', () => {
+  const pier = JSON.parse(readFileSync(new URL('../data/boards/pier.json', import.meta.url)));
+  for (let n = 1; n <= 4; n++) for (let seed = 1; seed <= 15; seed++) {
+    const evs = [];
+    const B = createBoardMatch({ def: pier, chance, order: Array.from({ length: n }, (_, i) => i + 1), rng: makeRng(seed), names: { 1: 'A', 2: 'B', 3: 'C', 4: 'D' }, emit: e => evs.push(e) });
+    playRounds(B, 5);
+    for (const p of B.S.order) assert.ok(B.byId.has(B.S.pos[p]));
+    for (const e of evs) if (e.text) assert.ok(!e.text.includes('{') && !e.text.includes('undefined'), e.text);
+  }
+  assert.ok(pier.spaces.filter(s => s.type === 'ghost').length >= 3);
+});
+
 test('the bulletin: none in round 1, one from round 2, Last Call in the last round (doubles a ticket stand)', () => {
   const { B, evs } = match(2, 3);
   B.beginRound(0, 1, 3); assert.equal(evs.filter(e => e.ev === 'bulletin').length, 0);

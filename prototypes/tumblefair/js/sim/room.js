@@ -14,6 +14,7 @@ import { createBoardMatch, boardStandings } from './board.js';
 export const TIMES = Object.freeze({ VOTE_MS: 10000, INTRO_MS: 7000, RESULTS_MS: 8000, FINAL_MS: 20000, GONE_LOBBY_MS: 15000, GONE_MATCH_MS: 90000, EMPTY_MS: 60000, GAME_GRACE_MS: 3000, BONUS_MS: 11000 });
 export const OPTS = Object.freeze({
   mode: { values: ['board', 'marathon', 'endless'], def: 'board' },
+  board: { values: ['fairground', 'pier'], def: 'fairground' },          // round 5: the Moonlit Pier
   teams: { values: [false, true], def: false },
   rounds: { min: 2, max: 8, def: 4 },
   shortlist: { min: 2, max: 4, def: 3 },
@@ -32,7 +33,7 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
   const rng = makeRng(seed);
   const members = new Map();          // pid -> member
   let nextPid = 1, hostPid = null, phase = 'lobby', until = 0, emptySince = null;
-  const opts = { mode: OPTS.mode.def, teams: OPTS.teams.def, rounds: OPTS.rounds.def, shortlist: OPTS.shortlist.def, difficulty: OPTS.difficulty.def, pool: [] };
+  const opts = { board: OPTS.board.def, mode: OPTS.mode.def, teams: OPTS.teams.def, rounds: OPTS.rounds.def, shortlist: OPTS.shortlist.def, difficulty: OPTS.difficulty.def, pool: [] };
   let match = null;                    // { mode, round, rounds, points, wins, played, board, lastGame }
   let vote = null, game = null, lastPhaseMsg = null, tickNo = 0;
 
@@ -45,7 +46,7 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
   const cast = obj => { const s = JSON.stringify(obj); for (const m of members.values()) if (m.connected && m.send) m.send(s); };
   function roomMsg(m) {
     return { t: 'room', code, phase, host: hostPid, you: m.pid, opts, members: [...members.values()].map(pub),
-      match: match ? { mode: match.mode, round: match.round, rounds: match.rounds, points: match.points, wins: match.wins, board: match.board ? match.board.view() : null } : null };
+      match: match ? { mode: match.mode, round: match.round, rounds: match.rounds, points: match.points, wins: match.wins, board: match.board ? match.board.view() : null, boardId: match.boardId || null } : null };
   }
   const syncRoom = () => { for (const m of members.values()) send(m, roomMsg(m)); };
   function setPhase(p, msg = {}, ms = 0) { phase = p; until = ms ? now() + ms : 0; lastPhaseMsg = { t: 'phase', phase: p, ms, ...msg }; syncRoom(); cast(lastPhaseMsg); }
@@ -103,7 +104,8 @@ export function createRoom({ code, now, seed = 1, data, profiles = null, log = (
     for (const m of players) { match.points[m.pid] = 0; match.wins[m.pid] = 0; m.ready = false; }
     if (match.mode === 'board') {
       const names = new Proxy({}, { get: (_, pid) => members.get(+pid)?.name });
-      match.board = createBoardMatch({ def: data.boards.fairground, chance: data.chance, order: players.map(m => m.pid), rng: rng.fork(), names, emit: ev => cast({ t: 'bd', ...ev }) });
+      match.boardId = data.boards[opts.board] ? opts.board : 'fairground';
+      match.board = createBoardMatch({ def: data.boards[match.boardId], chance: data.chance, order: players.map(m => m.pid), rng: rng.fork(), names, emit: ev => cast({ t: 'bd', ...ev }) });
     }
     log('match', { code, mode: match.mode, players: players.length });
     nextRound();

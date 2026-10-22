@@ -12,7 +12,8 @@ import { iconSvg, iconInfo } from '../../../../icons/js/catalog.js';
 const J = p => JSON.parse(readFileSync(new URL(`../../${p}`, import.meta.url), 'utf8'));
 const tv = J('data/rules/classes-tv.json');
 const blade = tv.classes.find(c => c.id === 'starblade');
-const outfits = J('data/class-outfits-tv.json');
+// the tier-1 / tier-2 outfits live in the shared avatar-3d tables (moved 2026-10-22); `wear` stays Thousandvale's
+const outfits = { classes: J('../../avatar-3d/data/class-outfits.json').classes, tier2: J('../../avatar-3d/data/class-outfits-t2.json').classes, wear: J('data/class-outfits-tv.json').wear };
 
 test('the creation card says what a Star Blade is, in the class row\'s own words, with its own emblem', () => {
   const L = classCardLines(blade);

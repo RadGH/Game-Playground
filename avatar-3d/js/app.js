@@ -13,6 +13,7 @@ import { CHIBI2_RACES, CHIBI2_RACE_IDS, randomChibi2, roundOf } from './chibi2-r
 import { makeRng } from '../../avatar-2d/js/random.js';
 import { CHIBI25_OPTIONS } from './chibi25-options.js';
 import { attachHeldFlame } from './held-flame.js';
+import { loadClassRoster } from './class-outfits.js';
 // chibi2-v2.html loads this same page with <body data-version="2">: the OLD Chibi 2 (v2) builder, kept to compare with 2.5.
 const V2 = document.body.dataset.version === '2';
 
@@ -68,7 +69,10 @@ for (const p of DATA.presets) presetGrid.append(el('div', { class: 'card', oncli
 const mini2d = el('div', { class: 'mini2d' });
 const raceGrid = el('div', { class: 'presets' });
 for (const p of C2.presets.filter(p => p.race)) raceGrid.append(el('div', { class: 'card', onclick: () => { avatar = normalizeAvatar(p.avatar); name = p.name; changed(); syncUI(); }, html: renderSVG(p.avatar) + `<div>${p.name}</div>` }));
-main.append(panel('Chibi 2 races and looks', raceGrid), panel('Presets (shared with Avatar 2D)', presetGrid));
+// every class of every game (2026-10-22): Emberveil/Farhold's 30 + Thousandvale's Starcaller and Star Blade
+const classGrid = el('div', { class: 'presets' });
+for (const c of await loadClassRoster()) classGrid.append(el('div', { class: 'card', 'data-class': c.id, title: c.game === 'thousandvale' ? 'Thousandvale only' : '', onclick: () => { avatar = normalizeAvatar(c.avatar); name = c.name; changed(); syncUI(); }, html: renderSVG(c.avatar) + `<div>${c.name}</div>` }));
+main.append(panel('Chibi 2 races and looks', raceGrid), panel('Classes (all games)', classGrid), panel('Presets (shared with Avatar 2D)', presetGrid));
 
 // ---------- left: same slot editor as 2D (subset relevant to 3D) ----------
 const left = document.getElementById('left');

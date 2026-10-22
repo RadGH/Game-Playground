@@ -10,6 +10,9 @@ import { PARTS } from '../../avatar-2d/js/parts/index.js';
 
 const DATA = JSON.parse(readFileSync(new URL('../data/class-outfits.json', import.meta.url)));
 const LOOKS = JSON.parse(readFileSync(new URL('../../prototypes/emberveil/data/class-looks.json', import.meta.url)));
+// the classes that exist only in Thousandvale (Starcaller, Star Blade) carry their own look in classes-tv.json
+const TV = JSON.parse(readFileSync(new URL('../../prototypes/thousandvale/data/rules/classes-tv.json', import.meta.url)));
+for (const c of TV.classes) LOOKS.classes[c.id] ??= { avatar: c.look };
 
 test('every outfit part survives the shared normaliser', () => {
   for (const [cls, outfit] of Object.entries(DATA.classes)) {

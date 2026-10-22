@@ -17,11 +17,15 @@ const T1 = JSON.parse(readFileSync(new URL('../data/class-outfits.json', import.
 const CLASSES = JSON.parse(readFileSync(new URL('../../prototypes/farhold/data/classes.json', import.meta.url)));
 const classIds = (Array.isArray(CLASSES.classes || CLASSES) ? (CLASSES.classes || CLASSES).map(c => c.id) : Object.keys(CLASSES.classes || CLASSES));
 const LOOKS = JSON.parse(readFileSync(new URL('../../prototypes/emberveil/data/class-looks.json', import.meta.url)));
+// Thousandvale's own two classes (2026-10-22: moved in from its data/class-outfits-tv.json so the galleries show them).
+// They were hand-made there: their emblem is the star whatever armour-tiers.json's theme says, and their tier-1 outfit
+// already carries it.
+const STAR = ['starcaller', 'starblade'];
 
 test('every one of the 30 classes has a complete tier-2 outfit with an emblem and a t2 kit', async () => {
   const { EMBLEM_IDS, T2_DECOR } = await import('../js/chibi2-armour2.js');
   assert.equal(classIds.length, 30);
-  for (const cls of classIds) {
+  for (const cls of [...classIds, ...STAR]) {
     const o = T2[cls];
     assert.ok(o, `${cls}: no tier-2 outfit`);
     for (const slot of OUTFIT_SLOTS) assert.ok(o[slot]?.id, `${cls}.${slot} missing`);
@@ -63,6 +67,7 @@ test('every class emblem agrees with Thousandvale armour-tiers.json (theme, trim
   const AT = JSON.parse(readFileSync(new URL('../../prototypes/thousandvale/data/rules/armour-tiers.json', import.meta.url)));
   const { EMBLEMS } = await import('../js/chibi2-armour2.js');
   for (const [cls, o] of Object.entries(T2)) {
+    if (STAR.includes(cls)) { assert.equal(o.top.emblem, 'star', cls); continue; }
     const th = AT.themes[AT.classes[cls].theme];
     assert.equal(o.theme, AT.classes[cls].theme, cls);
     assert.equal(EMBLEMS[o.top.emblem], EMBLEMS[th.emblem], `${cls}: ${o.top.emblem} vs ${th.emblem}`);
@@ -98,14 +103,14 @@ test('every emblem and every kit builds; looks naming neither build the same geo
   const { buildArmour2 } = await import('../js/chibi2-armour2.js');
   const base = LOOKS.classes.warrior.avatar;
   // tier 1, and every Emberveil class look: buildArmour2 must not add a single piece (byte-identical builds)
-  const looks = [...Object.values(T1).map(o => dressAs(base, o)), ...Object.values(LOOKS.classes).map(c => c.avatar)];
+  const looks = [...Object.entries(T1).filter(([c]) => !STAR.includes(c)).map(([, o]) => dressAs(base, o)), ...Object.values(LOOKS.classes).map(c => c.avatar)];
   for (const look of looks) {
     let added = 0;
     buildArmour2(normalizeAvatar(look), { add: () => { added++; }, W: 1, T: 1, chestZ: () => 0.15, hipsZ: () => 0.15, topStyle: {} });
     assert.equal(added, 0, `buildArmour2 drew on a look with no emblem/t2 kit (${look.top?.id})`);
   }
   // tier 2: every class builds, adds geometry over its tier-1 self, and stays inside a budget
-  for (const cls of classIds) {
+  for (const cls of [...classIds, ...STAR]) {
     const look = dressAs(base, T2[cls]);
     const c2 = await createChibi2Character(look);
     const tris = count(c2);

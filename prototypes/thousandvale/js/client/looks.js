@@ -31,11 +31,11 @@ export async function loadLookData() {
   if (!outfits2) outfits2 = loadClassOutfits2();
   if (!armourThemes) armourThemes = fetch(new URL('../../data/rules/armour-tiers.json', import.meta.url)).then(r => (r.ok ? r.json() : {})).then(d => d.themes || {}).catch(() => ({}));
   if (!gearCatalog) gearCatalog = Promise.resolve().then(() => loadGearCatalog()).catch(() => null);      // absent = the older tables draw everything
-  // wrap-up (Y32): outfits of Thousandvale-only classes (the Starcaller). The shared avatar-3d tables are Farhold's and
-  // Emberveil's too and are not written; data/class-outfits-tv.json is laid over them here, in memory.
+  // wrap-up (Y32): the Starcaller's and Star Blade's OUTFITS are in the shared avatar-3d tables (moved 2026-10-22, so the
+  // galleries show them); data/class-outfits-tv.json keeps only how those classes cut their WORN pieces (`wear`).
   if (!tvOutfits) tvOutfits = fetch(new URL('../../data/class-outfits-tv.json', import.meta.url)).then(r => (r.ok ? r.json() : {})).catch(() => ({}));
   const [p, o, b, o2, th, gc, tv] = await Promise.all([presets, outfits, bases, outfits2, armourThemes, gearCatalog, tvOutfits]);
-  loaded = { presets: p, outfits: { ...o, ...(tv.classes || {}) }, bases: b, outfits2: { ...o2, ...(tv.tier2 || {}) }, themes: th, catalog: gc, wear: tv.wear || {} };
+  loaded = { presets: p, outfits: o, bases: b, outfits2: o2, themes: th, catalog: gc, wear: tv.wear || {} };
   return loaded;
 }
 

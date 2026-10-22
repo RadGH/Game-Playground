@@ -37,6 +37,96 @@ const R = {
   priest:       ['hood', 'trim_robe', '#e8e4d8', '#6a3a8a', 'pants', '#c8c0b0', 'slippers', '#a89a8a', 'cape', '#4a2a5a', 't2_vestments', '#ece6da', '#8a5ab0', 'cross', '#b080e0', 'fh_scepter', 'book'],
   enchanter:    ['circlet', 'high_collar_robe', '#6a2a7a', '#ffd0f8', 'pants', '#4a1e5a', 'pointed', '#3a1a4a', 'shoulder_cape', '#5a1e6a', 't2_mantle', '#5a1e6a', '#ffd0f8', 'eye', '#ff90f0', 'fh_wand', 'orb'],
 };
+// The two Thousandvale-only classes (wrap-up Y32 Starcaller, play-test 11 Star Blade) were hand-made in Thousandvale's
+// data/class-outfits-tv.json, emblem and all (the star, not their theme's rune), and moved here 2026-10-22 so every
+// gallery shows all 32 classes. Copied as written, after the generated rows.
+const LITERAL = {
+ "starcaller": {
+  "theme": "rune",
+  "set": "Zenith-Thread Robes",
+  "hat": {
+   "id": "wizard",
+   "color": "#1c1f4a",
+   "color2": "#e6c14a",
+   "emblem": "star",
+   "emblemColor": "#ffe89a"
+  },
+  "top": {
+   "id": "high_collar_robe",
+   "color": "#1c1f4a",
+   "color2": "#e6c14a",
+   "emblem": "star",
+   "emblemColor": "#ffe89a"
+  },
+  "bottom": {
+   "id": "pants",
+   "color": "#161838"
+  },
+  "shoes": {
+   "id": "slippers",
+   "color": "#2a2440"
+  },
+  "cape": {
+   "id": "none"
+  },
+  "decor": {
+   "id": "t2_mantle",
+   "color": "#262a66",
+   "color2": "#e6c14a"
+  },
+  "held": {
+   "id": "staff_crystal",
+   "color": "#e6c14a"
+  },
+  "offhand": {
+   "id": "none",
+   "color": "#8a8f98"
+  }
+ },
+ "starblade": {
+  "theme": "rune",
+  "set": "Nightsteel Plate",
+  "hat": {
+   "id": "plate_helm",
+   "color": "#1a2350",
+   "color2": "#e6c14a",
+   "emblem": "star",
+   "emblemColor": "#ffe89a"
+  },
+  "top": {
+   "id": "plate",
+   "color": "#1a2350",
+   "color2": "#e6c14a",
+   "emblem": "star",
+   "emblemColor": "#ffe89a"
+  },
+  "bottom": {
+   "id": "greaves",
+   "color": "#2a3466"
+  },
+  "shoes": {
+   "id": "heavy",
+   "color": "#1a2350"
+  },
+  "cape": {
+   "id": "cape",
+   "color": "#141a3e"
+  },
+  "decor": {
+   "id": "t2_pauldrons",
+   "color": "#1a2350",
+   "color2": "#e6c14a"
+  },
+  "held": {
+   "id": "sword",
+   "color": "#c9d3e6"
+  },
+  "offhand": {
+   "id": "none",
+   "color": "#8a8f98"
+  }
+ }
+};
 const classes = {};
 for (const [id, r] of Object.entries(R)) {
   let [hat, top, tc, c2, bottom, bc, shoes, sc, cape, cc, decor, dc, trim, emblem, ec, held, offhand] = r;
@@ -53,6 +143,7 @@ for (const [id, r] of Object.entries(R)) {
     held: { id: held, color: '#c8d0d8' }, offhand: { id: offhand, color: '#8a8f98' },
   };
 }
-const doc = 'Tier-2 class outfits for Chibi 2 (Thousandvale play-test 4, S18, 2026-10-05). One per class (all 30 Farhold/Emberveil/Thousandvale classes), complete (every slot), so it never depends on the tier-1 table. Each carries an emblem (`top.emblem`/`emblemColor` on chest and back, `hat.emblem` on the helm brow; ids in avatar-3d/js/chibi2-armour2.js EMBLEM_IDS) and one of the five tier-2 decor kits (t2_pauldrons, t2_mantle, t2_harness, t2_vestments, t2_wildmantle; decor.color2 = trim). `theme`/`set` and the emblem, trim (color2) and glow (emblemColor) follow prototypes/thousandvale/data/rules/armour-tiers.json (stream C/E) so a class preview and a dropped themed piece agree. Read with class-outfits.js loadClassOutfits2(); `dressAs(avatar, t2[cls])` dresses a body; `tier2Dress(look, t2[cls], opts)` lays the tier-2 pieces over a gear-driven look. Every id survives the shared normaliser (tests/class-outfits-t2.test.js). Regenerate with `node tools/build-class-outfits-t2.mjs` (the hand-kept table lives there).';
+Object.assign(classes, LITERAL);
+const doc = 'Tier-2 class outfits for Chibi 2 (Thousandvale play-test 4, S18, 2026-10-05). One per class (the 30 Farhold/Emberveil/Thousandvale classes plus the Thousandvale-only Starcaller and Star Blade), complete (every slot), so it never depends on the tier-1 table. Each carries an emblem (`top.emblem`/`emblemColor` on chest and back, `hat.emblem` on the helm brow; ids in avatar-3d/js/chibi2-armour2.js EMBLEM_IDS) and one of the five tier-2 decor kits (t2_pauldrons, t2_mantle, t2_harness, t2_vestments, t2_wildmantle; decor.color2 = trim). `theme`/`set` and the emblem, trim (color2) and glow (emblemColor) follow prototypes/thousandvale/data/rules/armour-tiers.json (stream C/E) so a class preview and a dropped themed piece agree. Read with class-outfits.js loadClassOutfits2(); `dressAs(avatar, t2[cls])` dresses a body; `tier2Dress(look, t2[cls], opts)` lays the tier-2 pieces over a gear-driven look. Every id survives the shared normaliser (tests/class-outfits-t2.test.js). Regenerate with `node tools/build-class-outfits-t2.mjs` (the hand-kept table lives there).';
 writeFileSync('/home/radgh/claude/playground/avatar-3d/data/class-outfits-t2.json', JSON.stringify({ _doc: doc, slots: ['hat', 'top', 'bottom', 'shoes', 'cape', 'decor', 'held', 'offhand'], classes }, null, 1) + '\n');
 console.log(Object.keys(classes).length);

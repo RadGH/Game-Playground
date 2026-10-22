@@ -1,5 +1,5 @@
 {
- "_doc": "Tier-2 class outfits for Chibi 2 (Thousandvale play-test 4, S18, 2026-10-05). One per class (all 30 Farhold/Emberveil/Thousandvale classes), complete (every slot), so it never depends on the tier-1 table. Each carries an emblem (`top.emblem`/`emblemColor` on chest and back, `hat.emblem` on the helm brow; ids in avatar-3d/js/chibi2-armour2.js EMBLEM_IDS) and one of the five tier-2 decor kits (t2_pauldrons, t2_mantle, t2_harness, t2_vestments, t2_wildmantle; decor.color2 = trim). `theme`/`set` and the emblem, trim (color2) and glow (emblemColor) follow prototypes/thousandvale/data/rules/armour-tiers.json (stream C/E) so a class preview and a dropped themed piece agree. Read with class-outfits.js loadClassOutfits2(); `dressAs(avatar, t2[cls])` dresses a body; `tier2Dress(look, t2[cls], opts)` lays the tier-2 pieces over a gear-driven look. Every id survives the shared normaliser (tests/class-outfits-t2.test.js). Regenerate with `node tools/build-class-outfits-t2.mjs` (the hand-kept table lives there).",
+ "_doc": "Tier-2 class outfits for Chibi 2 (Thousandvale play-test 4, S18, 2026-10-05). One per class (the 30 Farhold/Emberveil/Thousandvale classes plus the Thousandvale-only Starcaller and Star Blade), complete (every slot), so it never depends on the tier-1 table. Each carries an emblem (`top.emblem`/`emblemColor` on chest and back, `hat.emblem` on the helm brow; ids in avatar-3d/js/chibi2-armour2.js EMBLEM_IDS) and one of the five tier-2 decor kits (t2_pauldrons, t2_mantle, t2_harness, t2_vestments, t2_wildmantle; decor.color2 = trim). `theme`/`set` and the emblem, trim (color2) and glow (emblemColor) follow prototypes/thousandvale/data/rules/armour-tiers.json (stream C/E) so a class preview and a dropped themed piece agree. Read with class-outfits.js loadClassOutfits2(); `dressAs(avatar, t2[cls])` dresses a body; `tier2Dress(look, t2[cls], opts)` lays the tier-2 pieces over a gear-driven look. Every id survives the shared normaliser (tests/class-outfits-t2.test.js). Regenerate with `node tools/build-class-outfits-t2.mjs` (the hand-kept table lives there).",
  "slots": [
   "hat",
   "top",
@@ -1289,6 +1289,91 @@
    },
    "offhand": {
     "id": "orb",
+    "color": "#8a8f98"
+   }
+  },
+  "starcaller": {
+   "theme": "rune",
+   "set": "Zenith-Thread Robes",
+   "hat": {
+    "id": "wizard",
+    "color": "#1c1f4a",
+    "color2": "#e6c14a",
+    "emblem": "star",
+    "emblemColor": "#ffe89a"
+   },
+   "top": {
+    "id": "high_collar_robe",
+    "color": "#1c1f4a",
+    "color2": "#e6c14a",
+    "emblem": "star",
+    "emblemColor": "#ffe89a"
+   },
+   "bottom": {
+    "id": "pants",
+    "color": "#161838"
+   },
+   "shoes": {
+    "id": "slippers",
+    "color": "#2a2440"
+   },
+   "cape": {
+    "id": "none"
+   },
+   "decor": {
+    "id": "t2_mantle",
+    "color": "#262a66",
+    "color2": "#e6c14a"
+   },
+   "held": {
+    "id": "staff_crystal",
+    "color": "#e6c14a"
+   },
+   "offhand": {
+    "id": "none",
+    "color": "#8a8f98"
+   }
+  },
+  "starblade": {
+   "theme": "rune",
+   "set": "Nightsteel Plate",
+   "hat": {
+    "id": "plate_helm",
+    "color": "#1a2350",
+    "color2": "#e6c14a",
+    "emblem": "star",
+    "emblemColor": "#ffe89a"
+   },
+   "top": {
+    "id": "plate",
+    "color": "#1a2350",
+    "color2": "#e6c14a",
+    "emblem": "star",
+    "emblemColor": "#ffe89a"
+   },
+   "bottom": {
+    "id": "greaves",
+    "color": "#2a3466"
+   },
+   "shoes": {
+    "id": "heavy",
+    "color": "#1a2350"
+   },
+   "cape": {
+    "id": "cape",
+    "color": "#141a3e"
+   },
+   "decor": {
+    "id": "t2_pauldrons",
+    "color": "#1a2350",
+    "color2": "#e6c14a"
+   },
+   "held": {
+    "id": "sword",
+    "color": "#c9d3e6"
+   },
+   "offhand": {
+    "id": "none",
     "color": "#8a8f98"
    }
   }

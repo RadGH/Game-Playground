@@ -93,3 +93,30 @@ export function tier2Dress(look, outfit2, { chest = true, head = false, element 
   if (head && out.hat && out.hat.id && out.hat.id !== 'none') out.hat = { ...out.hat, color2: trim || outfit2.hat?.color2 || out.hat.color2, emblem: e, emblemColor: col };
   return out;
 }
+
+// ---------------------------------------------------------------- the whole class roster (2026-10-22)
+//
+//   import { loadClassRoster } from '../../avatar-3d/js/class-outfits.js';
+//   const roster = await loadClassRoster();   // [{ id, name, game, avatar }] — all 32 classes
+//
+// For galleries and builders, so a class that exists in only one game still shows up. Emberveil's 30 class looks
+// (prototypes/emberveil/data/class-looks.json, shared with Farhold) come first, then the classes that exist only in
+// Thousandvale (prototypes/thousandvale/data/rules/classes-tv.json — the Starcaller and the Star Blade), each dressed
+// in its tier-1 outfit from data/class-outfits.json. Never throws: a missing file just leaves its classes out.
+
+const titleCase = id => id.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+const fetchJSON = async url => { try { const r = await fetch(url); return r.ok ? await r.json() : null; } catch { return null; } };
+
+export async function loadClassRoster({
+  emberveil = new URL('../../prototypes/emberveil/data/class-looks.json', import.meta.url).href,
+  thousandvale = new URL('../../prototypes/thousandvale/data/rules/classes-tv.json', import.meta.url).href,
+} = {}) {
+  const [ev, tv, outfits] = await Promise.all([fetchJSON(emberveil), fetchJSON(thousandvale), loadClassOutfits()]);
+  const out = [];
+  for (const [id, c] of Object.entries(ev?.classes || {})) out.push({ id, name: c.className || titleCase(id), game: 'shared', avatar: c.avatar });
+  for (const c of tv?.classes || []) {
+    if (!c?.id || out.some(r => r.id === c.id)) continue;
+    out.push({ id: c.id, name: c.name || titleCase(c.id), game: 'thousandvale', avatar: dressAs(c.look || {}, outfits[c.id]) });
+  }
+  return out;
+}

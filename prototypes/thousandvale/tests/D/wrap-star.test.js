@@ -16,7 +16,9 @@ import { partIds } from '../../../../avatar-2d/js/parts/index.js';
 const at = p => fileURLToPath(new URL('../../' + p, import.meta.url));
 const src = p => readFileSync(at(p), 'utf8');
 const json = p => JSON.parse(src(p));
-const TV = json('data/rules/classes-tv.json'), PROJ = json('data/rules/projectiles.json'), OUT = json('data/class-outfits-tv.json');
+const TV = json('data/rules/classes-tv.json'), PROJ = json('data/rules/projectiles.json'), OUT_TV = json('data/class-outfits-tv.json');
+// the outfits are in the shared avatar-3d tables (moved 2026-10-22); `wear` stays in the game's own file
+const OUT = { classes: json('../../avatar-3d/data/class-outfits.json').classes, tier2: json('../../avatar-3d/data/class-outfits-t2.json').classes, wear: OUT_TV.wear };
 const CLS = TV.classes.find(c => c.id === 'starcaller');
 
 /** The events the rules send for a skill row, in the shapes docs/requests.md "Round 10 contracts — C (Starcaller, Y32)" gives. */
@@ -164,7 +166,7 @@ test('Y32: Constellation motes follow the Starlight count; a fall is a spend', (
   for (const t of [0.5, 3, 17]) for (const full of [false, true]) assert.deepEqual([0, 1, 2, 3, 4].map(i => moteSeat(i, t, full).a), seats, 'they never wheel round');
 });
 
-test('Y32: the Starcaller has an outfit of its own, and the shared tables are as they were', () => {
+test('Y32: the Starcaller has an outfit of its own, kept once in the shared tables', () => {
   const o = OUT.classes.starcaller, t2 = OUT.tier2.starcaller, wear = OUT.wear.starcaller;
   assert.equal(CLS.outfit, 'starcaller');
   assert.ok(o && t2 && wear?.cloth);
@@ -181,12 +183,13 @@ test('Y32: the Starcaller has an outfit of its own, and the shared tables are as
   // dressed for the title preview
   const dressed = dressAs({ body: {}, top: { id: 'tshirt' }, hat: { id: 'none' } }, o);
   assert.equal(dressed.top.id, 'trim_robe'); assert.equal(dressed.hat.id, 'wizard');
-  // the shared files were not touched: no 31st row there (other games' tests count them)
+  // one copy: the outfits are in the shared tables (moved 2026-10-22 so the galleries show them), not in this game's file
   const T1 = JSON.parse(readFileSync(at('../../avatar-3d/data/class-outfits.json'), 'utf8')).classes, T2 = JSON.parse(readFileSync(at('../../avatar-3d/data/class-outfits-t2.json'), 'utf8')).classes;
-  assert.equal('starcaller' in T1, false); assert.equal('starcaller' in T2, false); assert.equal(Object.keys(T2).length, 30);
-  // looks.js is where the two are joined
+  assert.deepEqual(T1.starcaller, o); assert.deepEqual(T2.starcaller, t2);
+  assert.equal('classes' in OUT_TV, false); assert.equal('tier2' in OUT_TV, false);
+  // looks.js reads the shared tables and takes only `wear` from the game's file
   const looks = src('js/client/looks.js');
-  assert.match(looks, /class-outfits-tv\.json/); assert.match(looks, /\.\.\.o, \.\.\.\(tv\.classes/); assert.match(looks, /classWear:/);
+  assert.match(looks, /class-outfits-tv\.json/); assert.match(looks, /classWear:/);
 });
 
 test('Y32: in the world a Starcaller\'s cloth is midnight and gold; everything else is as it was', () => {
@@ -228,6 +231,7 @@ test('Y32: the hooks are where they must be — the stars see an event before th
   assert.equal(/PointLight|SpotLight|\.clone\(\)\s*;?\s*\/\/ material|material\.clone/.test(fx), false);
   assert.equal(/SphereGeometry|IcosahedronGeometry/.test(fx), false, 'no glowing spheres');
   // names: nothing banned in what a player can read
-  const text = (JSON.stringify([OUT.classes, OUT.tier2, OUT.wear]) + JSON.stringify(TV.classes) + Object.values(TV.skills).map(s => s.name).join(' ')).toLowerCase();
+  const star = ['starcaller', 'starblade'];
+  const text = (JSON.stringify([star.map(c => OUT.classes[c]), star.map(c => OUT.tier2[c]), OUT.wear]) + JSON.stringify(TV.classes) + Object.values(TV.skills).map(s => s.name).join(' ')).toLowerCase();
   for (const w of ['starfall', 'ember', 'veil', 'muster']) assert.equal(new RegExp(`\\b${w}`).test(text), false, `"${w}" is not used`);
 });

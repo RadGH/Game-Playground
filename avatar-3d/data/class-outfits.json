@@ -1,5 +1,5 @@
 {
-  "_doc": "Class outfits for Chibi 2 (2026-09-25). An OUTFIT is only the clothes, the headwear and the carried items — no face, no body — so any game can dress any body as any class: `dressAs(avatar, outfit)` in avatar-3d/js/class-outfits.js lays these slots over an avatar and leaves the rest alone. Keys are the Emberveil/Farhold class ids. `held`/`offhand` are what the class LOOKS like it carries in a portrait; a game that equips real items (Farhold) draws its own hands. Every id here exists in avatar-2d/js/parts (chibi2-parts.js registers the Chibi 2-only ones), so the shared normaliser keeps them. Classes a player asked to be distinct: the horned helm is the FIGHTER's alone; warrior, knight, paladin, runesmith, druid, shaman and tactician each have their own headwear.",
+  "_doc": "Class outfits for Chibi 2 (2026-09-25). An OUTFIT is only the clothes, the headwear and the carried items — no face, no body — so any game can dress any body as any class: `dressAs(avatar, outfit)` in avatar-3d/js/class-outfits.js lays these slots over an avatar and leaves the rest alone. Keys are the Emberveil/Farhold class ids, plus the Thousandvale-only Starcaller and Star Blade (moved here from Thousandvale's data/class-outfits-tv.json 2026-10-22 so every gallery shows all 32 classes). `held`/`offhand` are what the class LOOKS like it carries in a portrait; a game that equips real items (Farhold) draws its own hands. Every id here exists in avatar-2d/js/parts (chibi2-parts.js registers the Chibi 2-only ones), so the shared normaliser keeps them. Classes a player asked to be distinct: the horned helm is the FIGHTER's alone; warrior, knight, paladin, runesmith, druid, shaman and tactician each have their own headwear.",
   "slots": ["hat", "top", "bottom", "shoes", "cape", "decor", "held", "offhand"],
   "classes": {
     "warrior": {
@@ -201,6 +201,26 @@
       "shoes": { "id": "pointed", "color": "#2a2a3a" },
       "cape": { "id": "shoulder_cape", "color": "#6a3a9a" },
       "decor": { "id": "rune_bracers", "color": "#c090ff" }
+    },
+    "starcaller": {
+      "hat": { "id": "wizard", "color": "#1c1f4a", "color2": "#e6c14a", "emblem": "star", "emblemColor": "#ffd75a" },
+      "top": { "id": "trim_robe", "color": "#1c1f4a", "color2": "#e6c14a", "emblem": "star", "emblemColor": "#ffd75a" },
+      "bottom": { "id": "pants", "color": "#161838" },
+      "shoes": { "id": "slippers", "color": "#2a2440" },
+      "cape": { "id": "shoulder_cape", "color": "#262a66" },
+      "decor": { "id": "rune_bracers", "color": "#e6c14a" },
+      "held": { "id": "staff_orb", "color": "#e6c14a" },
+      "offhand": { "id": "none" }
+    },
+    "starblade": {
+      "hat": { "id": "plate_helm", "color": "#1a2350", "color2": "#c9d3e6", "emblem": "star", "emblemColor": "#e6c14a" },
+      "top": { "id": "plate", "color": "#1a2350", "color2": "#c9d3e6", "emblem": "star", "emblemColor": "#e6c14a" },
+      "bottom": { "id": "greaves", "color": "#2a3466" },
+      "shoes": { "id": "heavy", "color": "#1a2350" },
+      "cape": { "id": "cape", "color": "#141a3e" },
+      "decor": { "id": "pauldrons", "color": "#c9d3e6" },
+      "held": { "id": "sword", "color": "#c9d3e6" },
+      "offhand": { "id": "none" }
     }
   }
 }

@@ -529,6 +529,15 @@ The Chibi 2 page has a **Class outfit** picker that dresses whichever preset is 
 file survives the shared 2D normaliser (`tests/class-outfits.test.js`). Farhold draws each class's
 starting armour from these (its `js/classwear.js`).
 
+**All 32 classes (2026-10-22).** The two classes that exist only in Thousandvale — the Starcaller and the
+Star Blade — have their tier-1 rows in `data/class-outfits.json` and their tier-2 rows in
+`data/class-outfits-t2.json` (hand-made, star emblem, kept as `LITERAL` in `tools/build-class-outfits-t2.mjs`).
+They used to live only in Thousandvale's `data/class-outfits-tv.json`, so no gallery showed them; that file
+now holds only `wear` (how those classes cut the armour they wear — see `armour2.html?view=wear`).
+For a page that lists classes, `loadClassRoster()` returns `[{ id, name, game, avatar }]` for all 32
+(Emberveil's 30 class looks + Thousandvale's `classes-tv.json` looks dressed in their outfit); the Avatar 3D
+page ("Classes (all games)"), the Chibi 2.5 builder and the body sheet use it.
+
 **New headwear** (`js/chibi2-hats.js`, `CLASS_HATS`, dispatched by chibi2.js BEFORE its generic
 `/helm/` dome — any id containing "helm" used to become the same grey bowl): `war_helm` (nasal, cheek
 guards, mail curtain — warrior), `great_helm` (closed barrel, eye slit, gold cross — paladin),

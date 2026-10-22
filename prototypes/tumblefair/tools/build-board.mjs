@@ -6,8 +6,9 @@ import { writeFileSync, readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 const N = 24, RX = 15.5, RZ = 11.5;
 // the loop, clockwise from the gate at the bottom
-const LOOP = ['start', 'ticket', 'chance', 'ticket', 'fork', 'pit', 'ticket', 'booth', 'ticket', 'chance', 'pit', 'ticket',
-  'mirror', 'ticket', 'chance', 'join', 'ticket', 'pit', 'ticket', 'booth', 'chance', 'ticket', 'pit', 'ticket'];
+// (round 5: five ticket stands became a duck pond, dice duels and a bumper cart)
+const LOOP = ['start', 'ticket', 'chance', 'duck', 'fork', 'pit', 'ticket', 'booth', 'duel', 'chance', 'pit', 'bumper',
+  'mirror', 'ticket', 'chance', 'join', 'duck', 'pit', 'ticket', 'booth', 'chance', 'duel', 'pit', 'ticket'];
 const SHORT = ['pit', 'chance', 'jackpot', 'pit'];            // the shortcut: 4 spaces instead of 12, two of them bad
 const spaces = [];
 for (let i = 0; i < N; i++) {
@@ -34,6 +35,9 @@ const board = {
     jackpot: { name: 'Jackpot', icon: 'star', text: '+8 tickets.' },
     fork: { name: 'Crossroads', icon: 'fork', text: 'Choose your way.' },
     join: { name: 'Ticket Stand', icon: 'ticket', text: '+3 tickets.' },
+    duck: { name: 'Duck Pond', icon: 'duck', text: 'Pick one of three ducks: each hides 1 to 10 tickets.' },
+    duel: { name: 'Dice Duel', icon: 'dice', text: 'Roll against another player: the higher roll takes 4 tickets.' },
+    bumper: { name: 'Bumper Cart', icon: 'cart', text: 'Zoom 3 spaces ahead.' },
   },
   spaces,
 };

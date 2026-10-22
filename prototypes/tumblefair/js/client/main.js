@@ -42,12 +42,13 @@ const left = () => Math.max(0, Math.ceil((S.ends - performance.now()) / 1000));
 function toast(text, cls = '') { const e = h('div', 'toast ' + cls); e.textContent = text; toasts.append(e); setTimeout(() => e.classList.add('out'), 2600); setTimeout(() => e.remove(), 3100); }
 const face = m => `<i class="face">${m?.look ? `<img src="${portrait(m)}" alt="">` : ''}</i>`;
 const chipOf = (m, extra = '') => { const s = seatOf(m); return `<span class="chip${m.pid === S.room?.you ? ' me' : ''}${m.on === false ? ' off' : ''}" data-pid="${m.pid}" ${s ? `data-shape="${s.shape}" style="--seat:${s.color};--seat-dark:${s.dark}"` : ''}>${face(m)}<b class="nm">${esc(m.name)}</b>${extra}</span>`; };
+const DUCK = `<svg viewBox="0 0 64 56" class="duck-svg" aria-hidden="true"><ellipse cx="30" cy="38" rx="24" ry="14" fill="currentColor" stroke="#12222a" stroke-width="3"/><circle cx="44" cy="20" r="12" fill="currentColor" stroke="#12222a" stroke-width="3"/><path d="M54 20 l9 3 -9 4z" fill="#ff8a1a" stroke="#12222a" stroke-width="2"/><circle cx="47" cy="17" r="2.6" fill="#12222a"/><path d="M14 34 q10 -8 20 2" fill="none" stroke="#12222a" stroke-width="2.5" opacity=".5"/></svg>`;
 const ICON = {
   ticket: '<svg class="ic" viewBox="0 0 24 24"><path fill="currentColor" d="M3 7h18v3a2 2 0 0 0 0 4v3H3v-3a2 2 0 0 0 0-4z"/></svg>',
   ribbon: '<svg class="ic" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a7 7 0 0 1 4.5 12.4L18 22l-6-3-6 3 1.5-7.600A7 7 0 0 1 12 2z"/></svg>',
   coin: '<svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><circle cx="12" cy="12" r="6.5" fill="none" stroke="rgba(0,0,0,.35)" stroke-width="2"/></svg>',
 };
-function setScreen(cls, html) { screen.className = cls; screen.innerHTML = html; }
+function setScreen(cls, html) { screen.className = cls; screen.innerHTML = html; delete screen.dataset.vote; }
 function safeFor(kind) {
   const portraitMode = innerHeight > innerWidth;
   stage.setSafe(kind === 'arena' ? { top: 0.13, bottom: isTouch() ? (portraitMode ? 0.3 : 0.06) : 0.09, left: 0.03, right: 0.03 }
@@ -121,6 +122,8 @@ async function showLobby() {
         <span class="est">about ${Math.round(r.opts.rounds * (r.opts.mode === 'board' ? 2.6 : 1.6))} min</span></div>`}
       <div class="row opts"><span>Play as</span><button class="pill${!r.opts.teams ? ' on' : ''}" data-act="opt" data-key="teams" data-bool="0" ${host ? '' : 'disabled'}>Everyone for themselves</button><button class="pill${r.opts.teams ? ' on' : ''}" data-act="opt" data-key="teams" data-bool="1" ${host ? '' : 'disabled'}>Teams</button>
         ${r.opts.teams ? `<span class="est">${n === 3 ? 'Teams need 2 or 4 players' : 'Red &amp; Green vs Blue &amp; Pink'}</span>` : ''}</div>
+      <div class="row opts"><span>Difficulty</span>${[['easy', 'Family'], ['normal', 'Normal'], ['hard', 'Tricky']].map(([v, t]) => `<button class="pill${r.opts.difficulty === v ? ' on' : ''}" data-act="opt" data-key="difficulty" data-value="${v}" ${host ? '' : 'disabled'}>${t}</button>`).join('')}</div>
+      <div class="row opts"><span>Minigames</span><button class="pill on" data-act="pool">${r.opts.pool?.length ? `${r.opts.pool.length} picked` : `All ${Object.keys(GAMES).length}`}</button>${host ? '<span class="est">tap to choose</span>' : ''}</div>
       ${host ? `<button class="btn big primary" data-act="start">${n < 2 ? 'Start (solo practice)' : 'Start the game'}</button>` : `<p class="note">${me?.wait ? 'The seats are full. You will join when one frees up.' : 'Waiting for the host to start…'}</p>`}
       <button class="btn small ghost" data-act="leave">Leave</button>
     </div>`);
@@ -147,25 +150,37 @@ function showBoard() {
   setSafe('board'); lineup.show(false);
   const b = S.bd, turn = members().find(m => m.pid === b.pid), my = b.pid === S.room.you;
   let body = '';
-  if (b.ask && my) body = `<div class="panel ask"><h3>${b.ask.kind === 'booth' ? 'Prize Booth' : 'Crossroads'}</h3><div class="row">${b.ask.options.map((o, i) => `<button class="btn big${i === 0 ? ' primary' : ''}" data-act="choose" data-i="${i}">${esc(o)}</button>`).join('')}</div></div>`;
-  else if (b.ask) body = `<div class="banner">${esc(turn?.name || '')} is deciding…</div>`;
+  if (b.ask && my && b.ask.kind === 'duck') body = `<div class="panel ask duck-ask"><h3>Duck Pond: pick a duck!</h3><div class="row ducks">${b.ask.options.map((o, i) => `<button class="btn big duck d${i}" data-act="choose" data-i="${i}" aria-label="${esc(o)}">${DUCK}<span>${esc(o.split(' ')[0])}</span></button>`).join('')}</div></div>`;
+  else if (b.ask && my) body = `<div class="panel ask"><h3>${b.ask.kind === 'booth' ? 'Prize Booth' : 'Crossroads'}</h3><div class="row">${b.ask.options.map((o, i) => `<button class="btn big${i === 0 ? ' primary' : ''}" data-act="choose" data-i="${i}">${esc(o)}</button>`).join('')}</div></div>`;
+  else if (b.ask) body = `<div class="banner">${esc(turn?.name || '')} ${b.ask.kind === 'duck' ? 'is picking a duck…' : 'is deciding…'}</div>`;
   else if (b.sub === 'roll' && my) body = `<button class="btn huge primary roll" data-act="roll">ROLL!</button>`;
   else if (b.sub === 'roll') body = `<div class="banner">${esc(turn?.name || '')}'s turn</div>`;
-  setScreen('board', `${b.rolled ? `<div class="die" data-n="${b.rolled}">${b.rolled}</div>` : ''}${b.text ? `<div class="banner fx">${esc(b.text)}</div>` : ''}<div class="board-foot">${body}</div>`);
+  const dice = b.dice ? `<div class="dice2">${b.dice.map(n => `<div class="die ${b.boost === 'gold' ? 'gold' : 'sticky'}">${n}</div>`).join('')}</div>` : b.rolled ? `<div class="die" data-n="${b.rolled}">${b.rolled}</div>` : '';
+  const duel = b.duel ? `<div class="dice2 duel">${b.duel.dice.map((n, i) => `<div class="die${b.duel.winner === b.duel.pids[i] ? ' won' : ''}"><small>${esc(b.duel.names[i])}</small>${n}</div>`).join('<b class="vs">VS</b>')}</div>` : '';
+  const bull = b.bulletin ? `<div class="bulletin"><small>FAIR BULLETIN · Round ${b.bulletin.round}</small><h2>${esc(b.bulletin.title)}</h2><p>${esc(b.bulletin.text)}</p></div>` : '';
+  const mod = b.mods ? `<div class="mods" title="This round">${esc(b.mods)}</div>` : '';
+  setScreen('board', `${bull}${mod}${dice}${duel}${b.text ? `<div class="banner fx">${esc(b.text)}</div>` : ''}<div class="board-foot">${body}</div>`);
   drawHud();
 }
 function onBoard(ev) {
   const b = S.bd;
   S.board?.event(ev);
+  if (ev.ev === 'bulletin') {
+    b.bulletin = { title: ev.title, text: ev.text, round: ev.round }; b.mods = ev.id === 'quiet' ? '' : ev.title.replace(/!$/, '');
+    Object.assign(b.tickets, ev.tickets || {}); Object.assign(b.ribbons, ev.ribbons || {}); b.text = ''; sfx('open');
+    setTimeout(() => { if (S.bd.bulletin?.title === ev.title) { S.bd.bulletin = null; if (S.phase === 'board') showBoard(); } }, 4000);
+  }
+  if (ev.ev === 'turn') { b.bulletin = null; b.duel = null; b.dice = null; b.boost = null; }
   if (ev.ev === 'turn') { b.pid = ev.pid; b.sub = 'roll'; b.ask = null; b.rolled = null; b.text = ''; if (ev.pid === S.room?.you) { sfx('turn'); navigator.vibrate?.(60); } }
-  if (ev.ev === 'rolled') { b.sub = 'move'; b.rolled = ev.n; sfx('dice'); }
-  if (ev.ev === 'step') { b.tickets[ev.pid] = ev.tickets; setTimeout(() => { S.bd.rolled = null; if (S.phase === 'board') showBoard(); }, 600); if (ev.lap) toast(`${members().find(m => m.pid === ev.pid)?.name || ''} passes the gate: +5 tickets`); }
+  if (ev.ev === 'rolled') { b.sub = 'move'; b.rolled = ev.n; b.dice = ev.dice || null; b.boost = ev.boost || null; sfx('dice'); }
+  if (ev.ev === 'step') { b.tickets[ev.pid] = ev.tickets; setTimeout(() => { S.bd.rolled = null; S.bd.dice = null; if (S.phase === 'board') showBoard(); }, 600); if (ev.lap) toast(`${members().find(m => m.pid === ev.pid)?.name || ''} passes the gate: +5 tickets`); }
   if (ev.ev === 'ask') { b.ask = { kind: ev.kind, options: ev.options }; b.sub = 'ask'; }
   if (ev.ev === 'chose') { b.ask = null; b.sub = 'move'; }
   if (ev.ev === 'fx') {
     if (ev.tickets && typeof ev.tickets === 'object') Object.assign(b.tickets, ev.tickets); else if (ev.tickets != null) b.tickets[ev.pid] = ev.tickets;
     if (ev.ribbons && typeof ev.ribbons === 'object') Object.assign(b.ribbons, ev.ribbons); else if (ev.ribbons != null) b.ribbons[ev.pid] = ev.ribbons;
     b.text = ev.text || ''; b.sub = 'fx';
+    b.duel = ev.kind === 'duel' && ev.dice ? { dice: ev.dice, pids: [ev.pid, ev.with], winner: ev.winner, names: [ev.pid, ev.with].map(p => members().find(m => m.pid === p)?.name || '') } : null;
     if (ev.text) sfx(ev.kind === 'ribbon' ? 'win' : (ev.d ?? 0) < 0 || ev.kind === 'pit' ? 'bad' : 'good');
   }
   if (S.phase === 'board') showBoard();
@@ -173,11 +188,20 @@ function onBoard(ev) {
 
 // ------------------------------------------------------------------ vote / intro / results / final
 function card(id, extra = '') { const m = GAMES[id].meta; return `<span class="gcard"><img src="${ART}${m.card}.webp" alt="" onerror="this.style.visibility='hidden'"><b>${esc(m.title)}</b><span>${esc(m.blurb)}</span>${extra}</span>`; }
+const voteDots = i => Object.entries(S.votes).filter(([, v]) => v === i).map(([pid]) => { const m = members().find(x => x.pid === +pid); return m ? `<i class="dot" style="background:${seatOf(m)?.color}"></i>` : ''; }).join('');
 function showVote() {
   setSafe('title'); const pm = S.pm, me = mine(), can = me?.seat != null;
+  // a vote arriving only changes the highlight and the dots, in place: rebuilding the screen reloaded every picture
+  // and reset the scroll, so the cards jumped about each time anyone tapped (owner, 2026-10-22)
+  const cards = screen.classList.contains('vote') && screen.querySelectorAll('.vote-card');
+  if (cards && cards.length === pm.options.length && screen.dataset.vote === pm.options.join()) {
+    cards.forEach((c, i) => { c.classList.toggle('mine', S.votes[S.room.you] === i); c.classList.toggle('won', S.voted === i); const w = c.querySelector('.who'); if (w) w.innerHTML = voteDots(i); });
+    return;
+  }
   setScreen('vote', `<h1 class="shout">Vote for the next game!</h1>
-    <div class="vote-cards">${pm.options.map((id, i) => `<button class="vote-card${S.votes[S.room.you] === i ? ' mine' : ''}${S.voted === i ? ' won' : ''}" data-act="vote" data-i="${i}" ${can ? '' : 'disabled'}>${card(id, `<u class="who">${Object.entries(S.votes).filter(([, v]) => v === i).map(([pid]) => { const m = members().find(x => x.pid === +pid); return m ? `<i class="dot" style="background:${seatOf(m)?.color}"></i>` : ''; }).join('')}</u>`)}</button>`).join('')}</div>
+    <div class="vote-cards">${pm.options.map((id, i) => `<button class="vote-card${S.votes[S.room.you] === i ? ' mine' : ''}${S.voted === i ? ' won' : ''}" data-act="vote" data-i="${i}" ${can ? '' : 'disabled'}>${card(id, `<u class="who">${voteDots(i)}</u>`)}</button>`).join('')}</div>
     <p class="note">${can ? 'Tap a card.' : 'Watching.'} <b class="count">${left()}</b></p>`);
+  screen.dataset.vote = pm.options.join();
   drawHud();
 }
 function showContinue() {
@@ -205,10 +229,23 @@ function showResults() {
   for (const g of pm.result.order) { for (const pid of g) { const mem = members().find(x => x.pid === pid); if (mem) rows.push(`<li class="p${place + 1}"><span class="pl">${pm.result.coop ? '' : ['1st', '2nd', '3rd', '4th'][place]}</span>${chipOf(mem)}<span class="score">${pm.result.scores?.[pid] ?? ''} ${esc(pm.result.scores?.[pid] === 1 ? String(pm.result.unit || '').replace(/s$/, '') : pm.result.unit || '')}</span><span class="award">+${pm.award[pid] ?? 0} ${pm.unit === 'tickets' ? ICON.ticket : ''}${pm.unit}</span></li>`); } place += g.length; }
   setScreen('results', `<div class="panel results-card"><h1 class="shout">${esc(m.title)}</h1>
     ${pm.result.coop ? `<p class="blurb">${pm.result.coop.success ? 'You did it together!' : 'So close. Better luck next time!'}</p>` : ''}
+    ${pm.mul > 1 ? `<p class="blurb double">Double Prize Day: tickets x${pm.mul}!</p>` : ''}
     <ol class="places">${rows.join('')}</ol>
     ${pm.teams ? `<p class="team-line">${pm.teams.map(t => `<b class="team t${t.team}">${esc(t.name)} ${pm.unit === 'tickets' ? t.tickets + ' tickets' : t.points + ' pts'}</b>`).join(' ')}</p>` : ''}
     ${me?.seat != null ? `<button class="btn big primary" data-act="skip">${S.skips.includes(me.pid) ? 'Ready ✓' : 'Continue'}</button>` : ''}<p class="note">Next in <b class="count">${left()}</b></p></div>`);
   drawHud();
+}
+/** The closing ceremony (board mode): two bonus ribbons, revealed one at a time. */
+function showBonus() {
+  const pm = S.pm; setSafe('lobby'); dropBoard(); lineup.show(true);
+  const order = seated();
+  lineup.sync(order, { me: S.room.you });
+  const me = mine();
+  const rows = pm.awards.map((a, i) => `<li class="award-row" style="animation-delay:${1.2 + i * 3}s"><span class="ribbon-badge">${ICON.ribbon}</span><span><b>${esc(a.title)}</b><small>${esc(a.text)} (${a.value})</small></span><span class="who">${a.pids.map(p => { const m = members().find(x => x.pid === p); return m ? chipOf(m) : ''; }).join('')}</span></li>`).join('');
+  setScreen('final', `<div class="panel final-card bonus-card"><h1 class="shout">Bonus Ribbons!</h1><p class="note">The fair is closing. The judges have two more ribbons to hand out…</p><ol class="awards">${rows}</ol>
+    ${me?.seat != null ? `<button class="btn big primary" data-act="skip">${S.skips.includes(me.pid) ? 'Ready ✓' : 'Continue'}</button>` : ''}<p class="note">Results in <b class="count">${left()}</b></p></div>`);
+  pm.awards.forEach((a, i) => setTimeout(() => { if (S.phase !== 'bonus') return; sfx('win'); lineup.setPoses?.(Object.fromEntries(seated().map(m => [m.pid, a.pids.includes(m.pid) ? 'cheer' : 'clap']))); }, 1200 + i * 3000));
+  hud.innerHTML = '';
 }
 function showFinal() {
   const pm = S.pm, me = mine(); setSafe('lobby'); dropBoard();
@@ -252,6 +289,7 @@ async function onPhase(pm) {
     }
     case 'game': setScreen('playing', ''); hud.innerHTML = ''; if (S.play) S.play.start(); sfx('go'); break;
     case 'results': controls.set(null); S.teams = pm.teams || null; showResults(); sfx('open'); break;
+    case 'bonus': showBonus(); break;
     case 'final': showFinal(); break;
   }
   if (prev !== pm.phase) drawHud();
@@ -267,8 +305,10 @@ if (net.me) onWelcome(net.me);                      // the hello was answered wh
 net.on('me', () => { S.me = net.me; if (!S.room) showTitle(); else if (S.phase === 'lobby') showLobby(); S.modal?.refresh?.(); });
 net.on('wallet', () => { S.me = net.me; });
 net.on('room', r => {
+  // a host's last minigame list comes back with them (round 5)
+  if (r.phase === 'lobby' && r.host === r.you && S.poolFor !== r.code) { S.poolFor = r.code; try { const v = JSON.parse(localStorage.getItem('tumblefair.pool') || '[]').filter(id => GAMES[id]); if (v.length && !r.opts.pool?.length) net.send({ t: 'opt', key: 'pool', value: v }); } catch {} }
   const first = !S.room; S.room = r;
-  if (r.match?.board) { Object.assign(S.bd.tickets, r.match.board.tickets); Object.assign(S.bd.ribbons, r.match.board.ribbons); S.bd.pid = r.match.board.pid; S.bd.sub = S.bd.sub || r.match.board.sub; if (r.match.board.ask && !S.bd.ask) S.bd.ask = r.match.board.ask; S.board?.sync(r.match.board); }
+  if (r.match?.board) { Object.assign(S.bd.tickets, r.match.board.tickets); Object.assign(S.bd.ribbons, r.match.board.ribbons); S.bd.pid = r.match.board.pid; S.bd.mods = r.match.board.bulletin && r.match.board.bulletin.id !== 'quiet' ? r.match.board.bulletin.title.replace(/!$/, '') : ''; S.bd.sub = S.bd.sub || r.match.board.sub; if (r.match.board.ask && !S.bd.ask) S.bd.ask = r.match.board.ask; S.board?.sync(r.match.board); }
   if (first) { history.replaceState(null, '', `?code=${r.code}${S.asDisplay ? '&display=1' : ''}`); if (r.phase === 'lobby') onPhase({ phase: 'lobby' }); }
   else if (r.phase === 'lobby' && S.phase === 'lobby') showLobby();
   else drawHud();
@@ -306,6 +346,7 @@ screen.addEventListener('click', e => {
     case 'skip': net.send({ t: 'skip' }); break;
     case 'edit': saveName(); openEditor(); break;
     case 'shop': saveName(); openShop(); break;
+    case 'pool': openPool(); break;
   }
 });
 screen.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.id === 'code') $('[data-act="join"]')?.click(); if (e.key === 'Enter' && e.target.id === 'name') e.target.blur(); });
@@ -324,7 +365,7 @@ function openShop() {
   const el = h('div', 'modal shop');
   const draw = () => {
     el.innerHTML = `<div class="panel"><h2>Costumes <span class="coins">${ICON.coin}${S.me.coins}</span></h2><p class="note">Costumes are only for show. Win coins by finishing matches.</p>
-      <div class="costumes">${costumes().map(c => { const own = S.me.owned.includes(c.id), on = S.me.costume === c.id; return `<button class="costume${on ? ' on' : ''}${own ? ' own' : ''}" data-id="${c.id}" ${!own && S.me.coins < c.price ? 'data-poor="1"' : ''}><img src="${portrait({ look: S.me.look, costume: c.id })}" alt=""><b>${esc(c.name)}</b><span>${on ? 'Wearing' : own ? 'Wear' : `${ICON.coin}${c.price}`}</span></button>`; }).join('')}</div>
+      <div class="costumes">${costumes().map(c => { const own = S.me.owned.includes(c.id), on = S.me.costume === c.id; return `<button class="costume${on ? ' on' : ''}${own ? ' own' : ''}" data-id="${c.id}" ${!own && S.me.coins < c.price ? 'data-poor="1"' : ''}><img src="${portrait({ look: S.me.look, costume: c.id })}" alt="">${c.tag ? `<i class="tag t-${esc(c.tag.toLowerCase())}">${esc(c.tag)}</i>` : ''}<b>${esc(c.name)}</b><span>${on ? 'Wearing' : own ? 'Wear' : `${ICON.coin}${c.price}`}</span></button>`; }).join('')}</div>
       <button class="btn big" data-close="1">Done</button></div>`;
   };
   el.addEventListener('click', e => {
@@ -336,6 +377,36 @@ function openShop() {
     else toast(`${c.name} costs ${c.price} coins. You have ${S.me.coins}.`, 'bad');
   });
   draw(); document.body.append(el); S.modal = { el, refresh: draw };
+}
+
+/** The host picks which minigames can come up (round 5). Nothing ticked = every game. Remembered on this phone. */
+const TAG_NAMES = { action: 'Action', puzzle: 'Puzzle', social: 'Talk & vote', chance: 'Luck', coop: 'Team up' };
+function openPool() {
+  closeModal();
+  const host = isHost(), el = h('div', 'modal pool');
+  let pick = new Set(S.room.opts.pool?.length ? S.room.opts.pool : Object.keys(GAMES));
+  const send = () => { const all = pick.size === Object.keys(GAMES).length; const v = all ? [] : [...pick]; net.send({ t: 'opt', key: 'pool', value: v }); try { localStorage.setItem('tumblefair.pool', JSON.stringify(v)); } catch {} };
+  const draw = () => {
+    const groups = {};
+    for (const [id, g] of Object.entries(GAMES)) { const t = g.meta.tags?.[0] || 'action'; (groups[t] ||= []).push([id, g.meta]); }
+    el.innerHTML = `<div class="panel"><h2>Minigames <small>${pick.size} of ${Object.keys(GAMES).length}</small></h2>
+      <p class="note">${host ? 'Untick the games you do not want tonight. The vote only offers ticked games that fit the number of players.' : 'Only the host can change this.'}</p>
+      ${host ? `<div class="row"><button class="btn small" data-all="1">All</button><button class="btn small" data-all="0">None</button>${Object.entries(TAG_NAMES).map(([t, n]) => `<button class="btn small" data-tag="${t}">Only ${n}</button>`).join('')}</div>` : ''}
+      ${Object.entries(groups).map(([t, list]) => `<h3>${esc(TAG_NAMES[t] || t)}</h3><div class="pool-grid">${list.sort((a, b) => a[1].title.localeCompare(b[1].title)).map(([id, m]) => `<button class="pool-g${pick.has(id) ? ' on' : ''}" data-id="${id}" ${host ? '' : 'disabled'}><img src="${ART}${m.card}.webp" alt="" loading="lazy" onerror="this.style.visibility='hidden'"><b>${esc(m.title)}</b><small>${m.min === m.max ? m.min : `${m.min}–${m.max}`} players</small><i class="tick">${pick.has(id) ? '✓' : ''}</i></button>`).join('')}</div>`).join('')}
+      <button class="btn big primary" data-close="1">Done</button></div>`;
+  };
+  el.addEventListener('click', e => {
+    if (e.target.closest('[data-close]') || e.target === el) { if (host && !pick.size) { toast('Pick at least one game (or tap All).', 'bad'); return; } return closeModal(); }
+    if (!host) return;
+    const a = e.target.closest('[data-all]'), t = e.target.closest('[data-tag]'), g = e.target.closest('.pool-g');
+    if (a) pick = new Set(a.dataset.all === '1' ? Object.keys(GAMES) : []);
+    else if (t) pick = new Set(Object.keys(GAMES).filter(id => GAMES[id].meta.tags?.includes(t.dataset.tag)));
+    else if (g) { if (pick.has(g.dataset.id)) pick.delete(g.dataset.id); else pick.add(g.dataset.id); }
+    else return;
+    if (pick.size) send();
+    const y = el.scrollTop; draw(); el.scrollTop = y;
+  });
+  draw(); document.body.append(el); S.modal = { el, refresh: () => {} };
 }
 
 // ------------------------------------------------------------------ the frame loop

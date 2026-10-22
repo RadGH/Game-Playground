@@ -35,7 +35,7 @@ export const RULES = {
   stepDmg: 10, comboPer: 5,                            // a finished order adds comboPer x its length
   wrongCost: 1.5, strikeCool: 0.45,
   lengths: [2, 3, 3, 4, 4, 4, 4, 4],                   // order length per window
-  hp: { easy: 135, normal: 170, hard: 205 },
+  hp: { easy: 115, normal: 150, hard: 190 },   // round 5: eased from the bot-tuned numbers
   hearts: 3, heartsPer: 1,
   ringR: 1.35, ringWarn: [1.45, 1.45, 1.25, 1.1], aimed: 0.75,
   slots: [0.5, 3.2, 6.1],                              // attack starts inside the attack phase

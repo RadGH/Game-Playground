@@ -4,7 +4,7 @@
 export const meta = {
   id: 'trapdoor-treasury', title: 'Trapdoor Treasury', blurb: 'Grab gold, bank it, or push your luck over a trapdoor!',
   how: ['Pick a chest each round. Bigger chests have shakier floors.', 'A trapdoor empties your sack.', 'BANK to make your sack safe. Only banked gold counts!'],
-  kind: 'ui', min: 1, max: 4, seconds: 75, scoring: 'points', unit: 'gold', tags: ['chance'], card: 'card-trapdoor-treasury',
+  kind: 'ui', min: 1, max: 4, seconds: 75, scoring: 'points', unit: 'gold', tags: ['chance'], card: 'card-trapdoor-treasury', css: true,
 };
 export const CHESTS = [
   { id: 'safe', name: 'Tin Box', lo: 2, hi: 3, risk: 0 },

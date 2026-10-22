@@ -39,7 +39,7 @@ export const RECIPES = [
 ].map(r => ({ ...r, steps: r.steps.map(s => I[s]) }));
 
 export const RULES = {
-  target: { 1: 6, 2: 8, 3: 9, 4: 10 }, diff: { easy: -2, normal: 0, hard: 2 },
+  target: { 1: 6, 2: 7, 3: 8, 4: 9 }, diff: { easy: -2, normal: 0, hard: 2 },   // round 5: one dish easier than the bot-tuned numbers, for real families
   maxOpen: 3, gap: 7, patience: 16, perStep: 5, soloPatience: 1.35, spoilCost: 3, tier1At: 18,
   reach: 1.35, trayReach: 1.6,
 };

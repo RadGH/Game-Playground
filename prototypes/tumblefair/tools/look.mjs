@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // A quick look at the running dev server (port 8480) in a headless browser, for whoever is building: opens N pages
 // (one host + joiners), optionally starts a match, and saves screenshots to tests/shots/look-*.png.
-//   node prototypes/tumblefair/tools/look.mjs [--players 2] [--mode board|marathon] [--until lobby|board|vote|intro|game|results|final] [--phone] [--wait ms] [--pool id,id]
+//   node prototypes/tumblefair/tools/look.mjs [--players 2] [--mode board|marathon] [--until lobby|board|vote|intro|game|results|final] [--phone] [--wait ms] [--pool id,id] [--round n (with --until: wait for that round)] [--shots n,ms (n more screenshots every ms)]
 // Run it from the playground root under the browser lock:  flock /tmp/claude-1000/farhold-pw.lock node ...
 import { chromium } from '@playwright/test';
 const arg = (n, d) => { const i = process.argv.indexOf('--' + n); return i > 0 ? process.argv[i + 1] : d; };
@@ -37,8 +37,8 @@ if (until !== 'title') {
     await host.click('[data-act=start]');
     const t0 = Date.now();
     while (Date.now() - t0 < 240000) {
-      const ph = await host.evaluate(() => tumblefair.S.phase);
-      if (ph === until) break;
+      const [ph, rd] = await host.evaluate(() => [tumblefair.S.phase, tumblefair.S.room?.match?.round || 0]);
+      if (ph === until && rd >= +arg('round', 0)) break;
       for (const p of pages) await p.evaluate(() => { const S = tumblefair.S, net = tumblefair.net;
         if (S.phase === 'board') { if (S.bd.pid === S.room.you && S.bd.sub === 'roll') net.send({ t: 'roll' }); if (S.bd.ask && S.bd.pid === S.room.you) net.send({ t: 'choose', i: 0 }); }
         if (S.phase === 'vote' && !(S.room.you in S.votes)) net.send({ t: 'vote', i: 0 });
@@ -48,6 +48,8 @@ if (until !== 'title') {
     }
     await host.waitForTimeout(wait);
     for (const [i, p] of pages.entries()) await p.screenshot({ path: `${OUT}look-${tag}-p${i}.png` });
+    const [more, every] = (arg('shots', '0,0')).split(',').map(Number);
+    for (let k = 1; k <= more; k++) { await host.waitForTimeout(every); for (const [i, p] of pages.entries()) await p.screenshot({ path: `${OUT}look-${tag}-p${i}-${k}.png` }); }
   }
 }
 console.log(JSON.stringify({ phase: await host.evaluate(() => tumblefair.S.phase), errors: errors.slice(0, 12) }, null, 1));

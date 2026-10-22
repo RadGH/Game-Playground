@@ -46,7 +46,9 @@ for (const n of [1, 2, 3, 4]) for (const mode of ['board', 'marathon']) {
       assert.ok(GAMES[g.game]);
       const placed = g.result.order.flat().sort();
       assert.deepEqual(placed, all.map(p => p.pid).sort(), 'everyone is placed exactly once');
-      assert.equal(g.award[g.result.order[0][0]], g.result.coop ? AWARDS[g.result.coop.success ? 'coopWin' : 'coopLose'][mode] : AWARDS[mode][0], 'first place (or the co-op award)');
+      const base = g.result.coop ? AWARDS[g.result.coop.success ? 'coopWin' : 'coopLose'][mode] : AWARDS[mode][0];
+      const doubled = host.got.some(m => m.t === 'bd' && m.ev === 'bulletin' && m.id === 'double_prizes' && m.round === g.round);   // Double Prize Day
+      assert.ok([base, base * 2].includes(g.award[g.result.order[0][0]]) && (doubled || g.award[g.result.order[0][0]] === base), 'first place (or the co-op award)');
     }
     for (const p of all) { assert.ok(final.payout[p.pid] >= PAYOUT.base); assert.equal(p.me.coins, final.payout[p.pid], 'coins reached the profile'); }
     assert.equal(final.standings[0].place, 1);

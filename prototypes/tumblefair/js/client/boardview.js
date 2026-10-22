@@ -10,6 +10,7 @@ export const SPACE_LOOK = {
   start: { color: '#3ecf5a', label: 'GO' }, ticket: { color: '#ffd23f', label: '+3' }, join: { color: '#ffd23f', label: '+3' },
   pit: { color: '#8a5a3a', label: '-3' }, chance: { color: '#a45cff', label: '?' }, booth: { color: '#ff5f8f', label: '★' },
   mirror: { color: '#39d0e0', label: '⇄' }, jackpot: { color: '#ff9f1c', label: '+8' }, fork: { color: '#ffffff', label: '⑂' },
+  duck: { color: '#7fd8ff', label: '', draw: 'duck' }, duel: { color: '#ff6a3d', label: '', draw: 'die' }, bumper: { color: '#8cf06a', label: '»' },
 };
 const OFFS = [[-0.5, -0.38], [0.5, -0.38], [-0.5, 0.48], [0.5, 0.48]];
 
@@ -36,6 +37,16 @@ export async function createBoardView({ stage, def, members, me, assetBase }) {
       g.fillStyle = L.color; g.fillRect(0, 0, w, w);
       g.fillStyle = 'rgba(255,255,255,.28)'; g.beginPath(); g.arc(w / 2, w / 2, w * 0.42, 0, 7); g.fill();
       g.fillStyle = '#12222a'; g.font = `900 ${L.label.length > 1 ? 62 : 78}px system-ui, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(L.label, w / 2, w / 2 + 4);
+      if (L.draw === 'duck') {                           // drawn, not an emoji: phones and the TV lack the same emoji fonts
+        g.lineWidth = 5; g.strokeStyle = '#12222a'; g.fillStyle = '#ffd23f';
+        g.beginPath(); g.ellipse(58, 76, 34, 20, 0, 0, 7); g.fill(); g.stroke();
+        g.beginPath(); g.arc(80, 48, 17, 0, 7); g.fill(); g.stroke();
+        g.fillStyle = '#ff8a1a'; g.beginPath(); g.moveTo(95, 46); g.lineTo(112, 52); g.lineTo(95, 58); g.closePath(); g.fill(); g.stroke();
+        g.fillStyle = '#12222a'; g.beginPath(); g.arc(84, 44, 3.5, 0, 7); g.fill();
+      } else if (L.draw === 'die') {
+        g.lineWidth = 6; g.strokeStyle = '#12222a'; g.fillStyle = '#fff'; g.beginPath(); g.roundRect(30, 30, 68, 68, 12); g.fill(); g.stroke();
+        g.fillStyle = '#12222a'; for (const [x, y] of [[46, 46], [82, 46], [64, 64], [46, 82], [82, 82]]) { g.beginPath(); g.arc(x, y, 6, 0, 7); g.fill(); }
+      }
     }));
     const top = new THREE.Mesh(topGeo, new THREE.MeshStandardMaterial({ map: topTex.get(s.type), roughness: 0.6 })); top.material.userData.shared = false; top.position.set(s.x, 0.31, s.z); top.receiveShadow = true; group.add(top); tops.push(top);
   }
@@ -74,6 +85,7 @@ export async function createBoardView({ stage, def, members, me, assetBase }) {
       queue.push({ kind: 'fx', ev });
     }
     if (ev.ev === 'roundEnd') queue.push({ kind: 'wide' });
+    if (ev.ev === 'bulletin') { queue.push({ kind: 'wide' }); queue.push({ kind: 'fx', ev: { ...ev, pid: null } }); }
   }
   function frame(dt) {
     for (const a of actors.values()) a?.update(dt);
@@ -84,7 +96,9 @@ export async function createBoardView({ stage, def, members, me, assetBase }) {
       else if (cur.kind === 'fx') {
         const ev = cur.ev, a = actors.get(ev.pid);
         if (ev.pos) for (const [k, id] of Object.entries(ev.pos)) { const pid = +k; if (at.get(pid) !== id) { at.set(pid, id); const b = actors.get(pid), p = spot(pid, id); b?.place(p.x, 0.31, p.z); } }
-        if (a) a.play((ev.d ?? 0) < 0 || ev.kind === 'pit' ? 'hit' : ev.kind === 'none' ? 'idle' : 'cheer', 1200);
+        if (a && ev.kind === 'duel' && ev.winner != null) { a.play(ev.winner === ev.pid ? 'cheer' : 'hit', 1400); actors.get(ev.with)?.play(ev.winner === ev.with ? 'cheer' : 'hit', 1400); }
+        else if (a) a.play((ev.d ?? 0) < 0 || ev.kind === 'pit' ? 'hit' : ev.kind === 'none' || ev.kind === 'duckpond' ? 'idle' : 'cheer', 1200);
+        if (ev.ev === 'bulletin') for (const b of actors.values()) b?.play('cheer', 1200);
         if (ev.pid === focus) look(ev.pid);
         cur = null;
       } else if (cur.kind === 'walk') { cur.from = spot(cur.pid, at.get(cur.pid)); cur.i = 0; cur.per = cur.ms / cur.path.length / 1000; look(cur.pid); }

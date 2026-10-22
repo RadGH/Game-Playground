@@ -1,15 +1,282 @@
 {
-  "about": "The Wheel of Whatever: what a chance space can do. `w` is the weight. `do` is read by js/sim/board.js (CHANCE_DO); `{p}` is the player who landed, `{o}` another player picked at random.",
-  "events": [
-    { "id": "found", "w": 5, "do": "tickets", "n": 5, "text": "{p} found a roll of tickets under the bench. +5 tickets!" },
-    { "id": "spill", "w": 4, "do": "tickets", "n": -4, "text": "{p} dropped their popcorn AND their tickets. -4 tickets." },
-    { "id": "share", "w": 3, "do": "all", "n": 2, "text": "Free samples! Everyone gets 2 tickets." },
-    { "id": "pickpocket", "w": 3, "do": "steal", "n": 3, "text": "{p} wins the ring toss and {o} pays up. {p} takes 3 tickets from {o}." },
-    { "id": "generous", "w": 2, "do": "give", "n": 3, "text": "{p} feels generous and hands {o} 3 tickets." },
-    { "id": "tailwind", "w": 3, "do": "move", "n": 3, "text": "The crowd sweeps {p} along. Forward 3 spaces!" },
-    { "id": "wrongway", "w": 2, "do": "move", "n": -2, "text": "{p} took a wrong turn at the candy floss. Back 2 spaces." },
-    { "id": "mirror", "w": 2, "do": "swap", "text": "A magician's trick! {p} and {o} swap places." },
-    { "id": "leader", "w": 2, "do": "robin", "n": 4, "text": "The ticket inspector checks whoever has the most. They hand 4 tickets to {p}." },
-    { "id": "ribbon", "w": 1, "do": "ribbon", "text": "Grand prize! {p} wins a ribbon outright!" }
-  ]
+ "about": "The Wheel of Whatever: what a chance space can do, and the Fair Bulletins read out at the start of each round (round 5). `w` is the weight. `do` is read by js/sim/board.js spin(); `{p}` is the player who landed, `{o}` another player picked at random. A bulletin's `mods` are explained at LAST_CALL in board.js.",
+ "events": [
+  {
+   "id": "found",
+   "w": 5,
+   "do": "tickets",
+   "n": 5,
+   "text": "{p} found a roll of tickets under the bench. +5 tickets!"
+  },
+  {
+   "id": "spill",
+   "w": 4,
+   "do": "tickets",
+   "n": -4,
+   "text": "{p} dropped their popcorn AND their tickets. -4 tickets."
+  },
+  {
+   "id": "share",
+   "w": 3,
+   "do": "all",
+   "n": 2,
+   "text": "Free samples! Everyone gets 2 tickets."
+  },
+  {
+   "id": "pickpocket",
+   "w": 3,
+   "do": "steal",
+   "n": 3,
+   "text": "{p} wins the ring toss and {o} pays up. {p} takes 3 tickets from {o}."
+  },
+  {
+   "id": "generous",
+   "w": 2,
+   "do": "give",
+   "n": 3,
+   "text": "{p} feels generous and hands {o} 3 tickets."
+  },
+  {
+   "id": "tailwind",
+   "w": 3,
+   "do": "move",
+   "n": 3,
+   "text": "The crowd sweeps {p} along. Forward 3 spaces!"
+  },
+  {
+   "id": "wrongway",
+   "w": 2,
+   "do": "move",
+   "n": -2,
+   "text": "{p} took a wrong turn at the candy floss. Back 2 spaces."
+  },
+  {
+   "id": "mirror",
+   "w": 2,
+   "do": "swap",
+   "text": "A magician's trick! {p} and {o} swap places."
+  },
+  {
+   "id": "leader",
+   "w": 2,
+   "do": "robin",
+   "n": 4,
+   "text": "The ticket inspector checks whoever has the most. They hand 4 tickets to {p}."
+  },
+  {
+   "id": "ribbon",
+   "w": 1,
+   "do": "ribbon",
+   "text": "Grand prize! {p} wins a ribbon outright!"
+  },
+  {
+   "id": "golden_die",
+   "w": 3,
+   "do": "boost",
+   "boost": "gold",
+   "text": "{p} finds a golden die in the hay! Next roll uses two dice."
+  },
+  {
+   "id": "candy_floss",
+   "w": 2,
+   "do": "boost",
+   "boost": "slow",
+   "text": "{p} steps in candy floss. Sticky shoes: next roll is only 1 to 3."
+  },
+  {
+   "id": "pinata",
+   "w": 3,
+   "do": "pinata",
+   "n": 4,
+   "m": 1,
+   "text": "{p} whacks a piñata! {p} grabs 4 tickets, everyone else scrambles for 1."
+  },
+  {
+   "id": "tax",
+   "w": 2,
+   "do": "tax",
+   "n": 2,
+   "over": 10,
+   "text": "{p} dresses up as the ticket collector. Everyone with more than 10 tickets pays 2."
+  },
+  {
+   "id": "lost_found",
+   "w": 2,
+   "do": "lowest",
+   "n": 5,
+   "text": "Lost and found! Whoever has the fewest tickets gets 5. That's {o}."
+  },
+  {
+   "id": "pony",
+   "w": 2,
+   "do": "tobooth",
+   "text": "A pony ride carries {p} all the way to the next prize booth!"
+  },
+  {
+   "id": "carousel",
+   "w": 2,
+   "do": "allmove",
+   "n": 2,
+   "text": "The carousel spins too fast! Everyone is flung 2 spaces forward."
+  },
+  {
+   "id": "coin_flip",
+   "w": 3,
+   "do": "flip",
+   "n": 5,
+   "text": "{p} bets 5 tickets on a coin flip..."
+  },
+  {
+   "id": "fog",
+   "w": 1,
+   "do": "shuffle",
+   "text": "The fog machine goes off! When it clears, everyone is somewhere else."
+  },
+  {
+   "id": "balloon",
+   "w": 3,
+   "do": "tickets",
+   "n": 2,
+   "text": "{p} wins a balloon animal. +2 tickets and a big smile."
+  },
+  {
+   "id": "seagull",
+   "w": 2,
+   "do": "tickets",
+   "n": -3,
+   "text": "A seagull swoops off with {p}'s tickets! -3."
+  },
+  {
+   "id": "raffle",
+   "w": 1,
+   "do": "ribbonother",
+   "text": "Raffle time! The lucky number belongs to {o}, who wins a ribbon!"
+  },
+  {
+   "id": "coat",
+   "w": 1,
+   "do": "tostart",
+   "text": "{p} left their coat at the gate and runs back for it. (+5 for passing the gate.)"
+  },
+  {
+   "id": "face_paint",
+   "w": 2,
+   "do": "tickets",
+   "n": 1,
+   "text": "{p} gets their face painted as a tiger. Roar! +1 ticket."
+  },
+  {
+   "id": "treat",
+   "w": 2,
+   "do": "treat",
+   "n": 1,
+   "text": "{p} buys everyone candy floss: 1 ticket each from {p}'s pocket."
+  },
+  {
+   "id": "mixup",
+   "w": 1,
+   "do": "swaptickets",
+   "text": "{p} and {o} drop their ticket rolls in a puddle and pick up the wrong ones. They swap tickets!"
+  },
+  {
+   "id": "strongman",
+   "w": 2,
+   "do": "steal",
+   "n": 2,
+   "text": "{p} rings the strongman bell. {o} lost the bet and pays 2 tickets."
+  }
+ ],
+ "bulletins": [
+  {
+   "id": "ticket_rain",
+   "w": 3,
+   "title": "Ticket Rain!",
+   "text": "Ticket stands pay 6 this round.",
+   "mods": {
+    "ticket": 6
+   }
+  },
+  {
+   "id": "ribbon_sale",
+   "w": 3,
+   "title": "Ribbon Sale!",
+   "text": "Prize ribbons cost only 7 tickets this round.",
+   "mods": {
+    "ribbonCost": 7
+   }
+  },
+  {
+   "id": "mud_season",
+   "w": 2,
+   "title": "Mud Season",
+   "text": "The puddles are deeper: they cost 5 tickets this round.",
+   "mods": {
+    "pit": 5
+   }
+  },
+  {
+   "id": "parade",
+   "w": 2,
+   "title": "The Parade Passes!",
+   "text": "Everyone dances 2 spaces forward with the band.",
+   "mods": {
+    "parade": 2
+   }
+  },
+  {
+   "id": "double_prizes",
+   "w": 3,
+   "title": "Double Prize Day",
+   "text": "This round's minigame pays double tickets!",
+   "mods": {
+    "gameMul": 2
+   }
+  },
+  {
+   "id": "pinata_party",
+   "w": 2,
+   "title": "Piñata Party!",
+   "text": "A giant piñata bursts over the fair. Everyone grabs a handful of tickets.",
+   "mods": {
+    "pinata": [
+     1,
+     4
+    ]
+   }
+  },
+  {
+   "id": "underdog",
+   "w": 2,
+   "title": "Underdog Hour",
+   "text": "Whoever is in last place gets a golden die (two dice next roll).",
+   "mods": {
+    "underdog": true
+   }
+  },
+  {
+   "id": "golden_ducks",
+   "w": 2,
+   "title": "Golden Ducks",
+   "text": "Duck pond prizes are doubled this round.",
+   "mods": {
+    "duckMul": 2
+   }
+  },
+  {
+   "id": "duel_day",
+   "w": 2,
+   "title": "Duel Day",
+   "text": "Dice duels take 6 tickets this round. Roll high!",
+   "mods": {
+    "duel": 6
+   }
+  },
+  {
+   "id": "quiet",
+   "w": 1,
+   "title": "A Lovely Evening",
+   "text": "Nothing unusual is happening at the fair tonight. Probably.",
+   "mods": {}
+  }
+ ]
 }

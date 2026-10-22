@@ -50,6 +50,21 @@
    "name": "Ticket Stand",
    "icon": "ticket",
    "text": "+3 tickets."
+  },
+  "duck": {
+   "name": "Duck Pond",
+   "icon": "duck",
+   "text": "Pick one of three ducks: each hides 1 to 10 tickets."
+  },
+  "duel": {
+   "name": "Dice Duel",
+   "icon": "dice",
+   "text": "Roll against another player: the higher roll takes 4 tickets."
+  },
+  "bumper": {
+   "name": "Bumper Cart",
+   "icon": "cart",
+   "text": "Zoom 3 spaces ahead."
   }
  },
  "spaces": [
@@ -82,7 +97,7 @@
   },
   {
    "id": "s3",
-   "type": "ticket",
+   "type": "duck",
    "x": -11.12,
    "z": 9.8,
    "next": [
@@ -132,7 +147,7 @@
   },
   {
    "id": "s8",
-   "type": "ticket",
+   "type": "duel",
    "x": -12.54,
    "z": -6.84,
    "next": [
@@ -159,7 +174,7 @@
   },
   {
    "id": "s11",
-   "type": "ticket",
+   "type": "bumper",
    "x": -2.11,
    "z": -11.05,
    "next": [
@@ -204,7 +219,7 @@
   },
   {
    "id": "s16",
-   "type": "ticket",
+   "type": "duck",
    "x": 15.41,
    "z": -4.98,
    "next": [
@@ -249,7 +264,7 @@
   },
   {
    "id": "s21",
-   "type": "ticket",
+   "type": "duel",
    "x": 11.41,
    "z": 11.18,
    "next": [

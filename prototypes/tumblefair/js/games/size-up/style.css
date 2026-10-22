@@ -1,0 +1,64 @@
+/* Size Up — a quiz-show stage: bright teal with spotlights, chunky white picture cards. */
+.game-size-up { pointer-events: auto; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: calc(var(--st) + 8px) calc(var(--sr) + 10px) calc(var(--sb) + 40px) calc(var(--sl) + 10px);
+  background: radial-gradient(circle at 20% 0%, rgba(255, 255, 255, .35), transparent 40%), radial-gradient(circle at 80% 0%, rgba(255, 255, 255, .3), transparent 40%), linear-gradient(#21b5b8, #137a8c); }
+.game-size-up > * { flex: none; }
+.su-top { display: flex; gap: 10px; align-items: center; justify-content: center; width: 100%; padding-right: 36px; }
+.su-title { font: 900 22px/1.1 var(--font); color: var(--sun); -webkit-text-stroke: 1.2px var(--ink); paint-order: stroke fill; text-shadow: 0 3px 0 var(--ink); }
+.su-round { font-weight: 900; font-size: 14px; text-transform: uppercase; background: var(--ink); color: #fff; border-radius: 999px; padding: 3px 10px; }
+.su-q { font: 900 28px/1.1 var(--font); color: #fff; -webkit-text-stroke: 1.5px var(--ink); paint-order: stroke fill; text-shadow: 0 4px 0 var(--ink); text-align: center; min-height: 1.1em; }
+.su-nw { white-space: nowrap; }
+.su-key { display: inline-block; padding: 0 8px; border-radius: 10px; border: 3px solid var(--ink); -webkit-text-stroke: 1px var(--ink); text-shadow: none; box-shadow: 0 3px 0 var(--ink); }
+.su-key.su-m { background: #ff8a3d; } .su-key.su-kg { background: #8e44ad; } .su-key.su-kmh { background: #e8434f; }
+.su-bar { width: min(100%, 560px); height: 12px; border: 3px solid var(--ink); border-radius: 8px; background: rgba(13, 34, 40, .35); overflow: hidden; }
+.su-bar i { display: block; height: 100%; width: 100%; background: var(--sun); }
+.game-size-up:not([data-phase=q]) .su-bar { visibility: hidden; }
+
+.su-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; width: min(100%, 620px); }
+.su-cards[data-n="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.su-card { position: relative; display: grid; justify-items: center; align-content: start; gap: 4px; padding: 10px 6px 12px; min-height: 180px;
+  background: var(--paper); border: 5px solid var(--ink); border-radius: 22px; box-shadow: 0 6px 0 var(--ink); color: var(--ink); font: inherit; touch-action: manipulation; transition: transform .12s, opacity .2s, background .2s; }
+.su-card:not(:disabled):active { transform: translateY(4px); box-shadow: 0 2px 0 var(--ink); }
+.su-ic { width: 100%; display: grid; place-items: center; }
+.su-ic svg { width: min(100%, 120px); height: 100px; display: block; filter: drop-shadow(0 3px 0 rgba(13, 34, 40, .25)); }
+.su-cards[data-n="3"] .su-ic svg { height: 74px; }
+.su-nm { font: 900 20px/1.1 var(--font); text-align: center; }
+.su-cards[data-n="3"] .su-nm { font-size: 16px; }
+.su-val { font: 800 15px/1.15 var(--font); color: #47606a; text-align: center; }
+.su-val:empty, .su-who:empty, .su-mark:empty { display: none; }
+.su-who { display: flex; gap: 3px; flex-wrap: wrap; justify-content: center; }
+.su-face { width: 28px; height: 28px; border-radius: 50%; border: 3px solid var(--seat); background: var(--seat); overflow: hidden; display: grid; place-items: center; font-style: normal; font-weight: 900; color: #fff; }
+.su-face img { width: 100%; height: 100%; display: block; }
+.su-mark { position: absolute; top: -14px; right: -6px; background: #1d8a37; color: #fff; font: 900 16px/1 var(--font); padding: 5px 9px; border: 3px solid var(--ink); border-radius: 12px; transform: rotate(8deg); }
+.su-card.mine { background: #fff4b8; outline: 5px solid #fff; transform: scale(1.03); }
+.su-card.mine::after { content: 'YOUR PICK'; position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; font: 900 11px/1 var(--font); padding: 4px 8px; border-radius: 8px; white-space: nowrap; }
+.su-card.dim { opacity: .55; }
+.su-card:disabled { cursor: default; }
+.game-size-up[data-phase=reveal] .su-card { opacity: 1; }
+.su-card.right { background: #c9f5d2; border-color: #1d8a37; animation: bob .5s 2; }
+.su-card.wrong { background: #ffd8d8; }
+.su-card.wrong .su-ic { opacity: .6; }
+.su-say { margin: 0; font: 900 20px/1.2 var(--font); text-align: center; color: var(--ink); background: var(--sun); border: 4px solid var(--ink); border-radius: 16px; padding: 6px 14px; box-shadow: 0 4px 0 var(--ink); max-width: 620px; }
+.su-say:empty { display: none; }
+
+.su-players { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.su-players .chip .sc { font-style: normal; font-weight: 900; background: #ffe9a8; border-radius: 8px; padding: 0 6px; }
+.su-st { font-size: 12px; color: #6a5a60; } .su-st:empty { display: none; } .su-st.in { color: #1d8a37; } .su-st.bad { color: #c22; }
+.su-players .chip.in { outline: 4px solid var(--mint); }
+.su-note { margin: 0; color: #fff; text-align: center; font: 800 17px/1.25 var(--font); text-shadow: 0 2px 0 var(--ink); min-height: 1.3em; }
+.game-size-up[data-phase=end] :is(.su-cards, .su-q) { display: none; }
+.game-size-up[data-phase=ready] .su-cards { display: none; }
+.game-size-up[data-phase=end] .su-players { margin-top: 14vh; }
+.game-size-up[data-phase=end] .su-players .chip { font-size: 20px; } .game-size-up[data-phase=end] .su-players .chip .face { width: 52px; height: 52px; }
+
+@media (max-aspect-ratio: 1/1) { .su-q { padding: 0 46px; } .su-card { min-height: min(38vh, 330px); } .su-ic svg { height: min(20vh, 160px); width: 100%; } .su-cards[data-n="3"] .su-ic svg { height: min(13vh, 100px); } .su-nm { font-size: 22px; } }
+@media (max-width: 420px) { .su-q { font-size: 23px; } .su-cards[data-n="3"] .su-card { min-height: 200px; padding: 8px 4px 10px; } .su-cards[data-n="3"] .su-ic svg { height: 90px; } .su-cards[data-n="3"] .su-nm { font-size: 14px; } }
+@media (min-aspect-ratio: 1/1) {
+  .su-cards { width: min(100%, 980px); gap: 18px; }
+  .su-card { min-height: min(46vh, 340px); }
+  .su-ic svg { width: min(100%, 220px); height: min(26vh, 190px); }
+  .su-cards[data-n="3"] .su-ic svg { height: min(22vh, 150px); }
+  .su-nm, .su-cards[data-n="3"] .su-nm { font-size: 26px; }
+  .su-val { font-size: 20px; }
+  .su-q { font-size: 40px; }
+}

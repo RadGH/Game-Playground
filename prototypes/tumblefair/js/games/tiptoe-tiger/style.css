@@ -1,0 +1,15 @@
+/* Tiptoe Tiger: the big call-outs (FREEZE!, ROAR!) and the little status pill under the score bar. */
+.game-tiptoe-tiger .tpt-banner { position: absolute; left: 50%; top: 46%; transform: translate(-50%, -50%) scale(.6); opacity: 0; pointer-events: none; text-align: center;
+  font: 900 clamp(44px, 13vw, 96px)/1 var(--font); color: var(--sun); -webkit-text-stroke: 2.5px var(--ink); paint-order: stroke fill; text-shadow: 0 5px 0 var(--ink); white-space: nowrap; transition: transform .15s, opacity .15s; }
+.tpt-banner.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.tpt-banner.freeze { color: #ff4d5e; animation: tpt-shake .12s infinite; }
+.tpt-banner.go { color: #8ff07a; } .tpt-banner.small { font-size: clamp(26px, 7.5vw, 46px); }
+@keyframes tpt-shake { 0%, 100% { margin-left: 0; } 50% { margin-left: 6px; } }
+.game-tiptoe-tiger .tpt-pill { position: absolute; top: calc(var(--st) + 58px); left: 50%; transform: translateX(-50%); display: flex; gap: 8px; align-items: center; pointer-events: none;
+  padding: 4px 14px; border-radius: 999px; background: rgba(255, 248, 231, .95); border: 3px solid var(--ink); box-shadow: 0 3px 0 var(--ink); font: 800 16px/1.2 var(--font); white-space: nowrap; transition: background .15s; }
+.tpt-pill i { font-style: normal; font-size: 20px; }
+.tpt-pill[data-ph=sing] { background: #c9f5d2; }
+.tpt-pill[data-ph=tell], .tpt-pill[data-ph=look] { background: #ffb3ba; }
+.tpt-pill[data-ph=fake] { background: #ffe9a8; }
+@media (max-width: 520px) { .game-tiptoe-tiger .tpt-pill { top: calc(var(--st) + 52px); font-size: 14px; } }
+.tpt-pill b { font: 900 15px/1 var(--font); background: var(--ink); color: #fff; border-radius: 999px; padding: 3px 8px; }

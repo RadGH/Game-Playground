@@ -1,0 +1,97 @@
+/* Costume Catwalk — a fashion show at the fair: a velvet theme card, wardrobe buttons like clothes tags, a 3D runway
+   behind a see-through screen while the models walk. The whole `ui` scrolls if it must; nothing scrolls inside it. */
+.game-costume-catwalk { pointer-events: auto; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: calc(var(--st) + 8px) calc(var(--sr) + 10px) calc(var(--sb) + 52px) calc(var(--sl) + 10px); }
+.game-costume-catwalk > * { flex: none; }
+.game-costume-catwalk[data-phase=dress]:not(.watching) { background: radial-gradient(ellipse at 50% 0%, #6a2a5a, #2a1236 72%); }
+
+/* ---- the theme card and the clock ---- */
+.ck-top { display: flex; gap: 10px; align-items: center; justify-content: center; width: min(100%, 620px); }
+.ck-theme { flex: 1; display: grid; justify-items: center; text-align: center; background: var(--paper); border: 4px solid var(--ink); border-radius: 16px; box-shadow: 0 4px 0 var(--ink); padding: 4px 10px 6px; line-height: 1.15; }
+.ck-theme small { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: #8a3a6a; }
+.ck-theme b { font: 900 clamp(20px, 5.4vw, 28px)/1.05 var(--font); }
+.ck-theme em { font-style: normal; font-size: 13px; color: #47606a; }
+.ck-likes { font-size: 13px; font-weight: 800; margin-top: 2px; }
+.ck-tag { font-style: normal; display: inline-block; font-size: 11px; font-weight: 900; border: 2px solid var(--ink); border-radius: 8px; padding: 0 5px; background: #fff; margin: 1px; }
+.ck-tag.fit { background: var(--sun); }
+.game-costume-catwalk:not([data-phase=dress]) .ck-theme em, .game-costume-catwalk:not([data-phase=dress]) .ck-likes { display: none; }
+
+/* ---- dressing (a phone that plays) ---- */
+.ck-dress, .ck-wait, .ck-run, .ck-gallery { display: none; }
+.game-costume-catwalk[data-phase=dress]:not(.watching) .ck-dress { display: grid; gap: 8px; width: min(100%, 620px); grid-template-columns: 128px 1fr; grid-template-areas: 'look slots' 'opts opts' 'pose pose' 'done done'; }
+.ck-look { grid-area: look; display: grid; justify-items: center; align-content: start; gap: 4px; }
+.ck-doll { width: 128px; height: 170px; background: radial-gradient(circle at 50% 70%, #fff6d0, #e8d4b0 70%); border: 4px solid var(--ink); border-radius: 16px; overflow: hidden; display: grid; place-items: center; }
+.ck-doll svg { width: 128px; height: 170px; display: block; }
+.ck-tally { display: grid; gap: 1px; color: #fff; font-size: 12px; text-align: center; line-height: 1.2; }
+.ck-tally b { color: var(--sun); font-size: 15px; }
+.ck-slots { grid-area: slots; display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; align-content: start; }
+.ck-slot { min-height: 44px; border: 3px solid var(--ink); border-radius: 12px; background: #fff; padding: 2px 6px; text-align: left; display: grid; line-height: 1.1; box-shadow: 0 3px 0 var(--ink); }
+.ck-slot b { font-size: 14px; } .ck-slot em { font-style: normal; font-size: 11px; color: #6a7a80; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ck-slot.filled { background: #e8fbe8; } .ck-slot.filled em { color: #1d7a37; font-weight: 800; }
+.ck-slot.sel { background: var(--sun); outline: 3px solid #fff; }
+.ck-opts { grid-area: opts; display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+.ck-opt { min-height: 64px; border: 3px solid var(--ink); border-radius: 14px; background: var(--paper); padding: 5px 8px; text-align: left; display: grid; gap: 2px; align-content: start; box-shadow: 0 4px 0 var(--ink); position: relative; }
+.ck-opt b { font: 900 15px/1.1 var(--font); }
+.ck-col { display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; }
+.ck-sw { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--ink); display: inline-block; flex: none; }
+.ck-tags { display: flex; flex-wrap: wrap; gap: 2px; }
+.ck-star { font-style: normal; font-size: 11px; font-weight: 900; color: #a06000; }
+.ck-on { font-style: normal; font-size: 11px; font-weight: 800; color: #6a7a80; }
+.ck-opt.on { background: #c9f5c9; outline: 4px solid var(--mint); }
+.ck-opt.on .ck-on { color: #1d7a37; }
+.ck-opt.none { min-height: 52px; background: #eee; }
+.ck-pose { grid-area: pose; display: flex; align-items: center; justify-content: space-between; gap: 8px; color: #fff; font-weight: 800; }
+.ck-pose b { color: var(--sun); }
+.ck-pp { width: 48px; height: 48px; border: 3px solid var(--ink); border-radius: 14px; background: #fff; color: var(--ink); display: grid; place-items: center; font-size: 20px; box-shadow: 0 3px 0 var(--ink); }
+.ck-done { grid-area: done; background: var(--mint); color: #fff; -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; }
+.ck-done.on { background: #fff; color: var(--ink); -webkit-text-stroke: 0; font-size: 17px; }
+.is-done .ck-opts, .is-done .ck-slots { opacity: .75; }
+
+/* ---- a screen that only watches, while everyone dresses ---- */
+.game-costume-catwalk[data-phase=dress].watching .ck-wait { display: grid; justify-items: center; gap: 8px; margin-top: auto; }
+.ck-shout { margin: 0; color: #fff; font: 900 22px/1.1 var(--font); -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; text-align: center; }
+.ck-dressers { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.ck-dressers .chip.in .st { color: #1d8a37; }
+.ck-dressers .st { font-style: normal; font-size: 12px; }
+
+/* ---- the runway: the 3D stage shows through; one caption bar at the bottom ---- */
+.game-costume-catwalk[data-phase=runway] .ck-run { display: grid; justify-items: center; margin-top: auto; background: var(--paper); border: 4px solid var(--ink); border-radius: 16px; box-shadow: 0 4px 0 var(--ink); padding: 6px 18px; text-align: center; }
+.ck-runno { font: 900 24px/1.1 var(--font); }
+.ck-runpose { font-size: 14px; color: #47606a; }
+
+/* ---- vote and reveal ---- */
+.game-costume-catwalk:is([data-phase=vote], [data-phase=reveal]) .ck-gallery { display: grid; gap: 6px; justify-items: center; width: min(100%, 760px); margin-top: auto; }
+.ck-ghead { margin: 0; color: #fff; font: 900 20px/1.1 var(--font); -webkit-text-stroke: 1px var(--ink); paint-order: stroke fill; }
+.ck-ghead:empty { display: none; }
+.ck-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; width: 100%; }
+@media (max-width: 520px) { .ck-cards { grid-template-columns: repeat(2, 1fr); } .ck-pic svg { width: 66px; height: 88px; } .ck-card { padding: 4px 4px 6px; } }
+.ck-card { position: relative; display: grid; justify-items: center; gap: 2px; border: 4px solid var(--ink); border-radius: 16px; background: var(--paper); padding: 6px 6px 8px; box-shadow: 0 4px 0 var(--ink); min-height: 44px; }
+.ck-no { font: 900 16px/1 var(--font); }
+.ck-pic svg { width: 90px; height: 120px; display: block; }
+.ck-fits { font-size: 12px; color: #47606a; font-weight: 700; }
+.ck-card.mine { opacity: .6; }
+.ck-flag { font-style: normal; font-size: 12px; font-weight: 900; color: #1d7a37; min-height: 0; } .ck-flag:empty { display: none; } .ck-card.mine .ck-flag { color: #8a3a6a; }
+.ck-card.picked { outline: 5px solid var(--sun); background: #fff3b8; }
+.ck-ribbon { display: none; font-style: normal; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #2f6fe0; color: #fff; font-size: 11px; font-weight: 900; border: 2px solid var(--ink); border-radius: 8px; padding: 0 6px; white-space: nowrap; }
+.ck-card.ribbon .ck-ribbon { display: block; }
+.ck-by:empty, .ck-vt:empty, .ck-pts:empty { display: none; }
+.ck-vt { display: flex; gap: 3px; } .ck-vt em { font-size: 12px; color: #7a8a90; font-style: normal; }
+.ck-pts { font: 900 22px/1 var(--font); color: #1d8a37; }
+.ck-face { width: 26px; height: 26px; border-radius: 50%; border: 3px solid var(--seat); background: var(--seat); overflow: hidden; display: block; }
+.ck-face img { width: 100%; height: 100%; display: block; }
+.ck-both.picked { outline: 5px solid var(--mint); }
+.game-costume-catwalk:is(.watching, [data-phase=reveal]) .ck-card { pointer-events: none; }
+.ck-note { margin: 0; color: #fff; text-align: center; font-size: 14px; max-width: 620px; text-shadow: 0 1px 0 var(--ink), 0 0 6px rgba(0,0,0,.6); }
+.ck-note:empty { display: none; }
+.tag.ck-lt span { background: var(--sun); color: var(--ink); }
+
+/* a wide screen: the doll beside the slots and options */
+@media (min-width: 760px) {
+  .game-costume-catwalk[data-phase=dress]:not(.watching) .ck-dress { grid-template-columns: 170px 1fr 1.4fr; grid-template-areas: 'look slots opts' 'pose pose pose' 'done done done'; width: min(100%, 900px); }
+  .ck-doll, .ck-doll svg { width: 160px; height: 213px; }
+  .game-costume-catwalk:is([data-phase=vote], [data-phase=reveal]) .ck-gallery { width: min(100%, 980px); }
+  .ck-cards { grid-template-columns: repeat(auto-fit, minmax(150px, 190px)); justify-content: center; }
+  .ck-pic svg { width: 78px; height: 104px; }
+}
+/* a short landscape phone: smaller doll */
+@media (max-height: 520px) { .ck-pic svg { width: 66px; height: 88px; } }

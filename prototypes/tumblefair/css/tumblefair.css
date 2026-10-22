@@ -14,6 +14,10 @@ body { position: fixed; inset: 0; overflow: hidden; overscroll-behavior: none; }
 #tags { z-index: 5; overflow: hidden; } #game-ui { z-index: 10; } #hud { z-index: 15; } #screen { z-index: 20; } #toasts { z-index: 60; }
 #boot { position: fixed; inset: 0; display: grid; place-items: center; background: var(--bg); color: var(--sun); font: 900 44px/1 var(--font); z-index: 99; }
 #screen > *, #hud > *, #game-ui .game > * { pointer-events: auto; }
+/* A menu screen takes touches itself (round 5 fix): a scroller with pointer-events: none can't be scrolled by a finger
+   on a phone (the browser picks what to scroll by what is under the finger), so the lobby could not be scrolled down to
+   Start. Nothing behind a menu screen needs a tap; the game and board screens keep letting touches through. */
+#screen.title, #screen.lobby, #screen.vote, #screen.intro, #screen.results, #screen.final { pointer-events: auto; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
 input, button { font: inherit; color: inherit; }
 input[type=text], input:not([type]) { user-select: text; -webkit-user-select: text; }
 
@@ -216,3 +220,21 @@ body[data-phase=game] .fb-btn { width: 28px; height: 28px; font-size: 15px; opac
 .pool-g img { width: 100%; aspect-ratio: 3/2; object-fit: cover; background: #29535c; } .pool-g b { padding: 0 6px; font-size: 14px; } .pool-g small { padding: 0 6px; color: #47606a; }
 .pool-g .tick { position: absolute; top: 4px; right: 4px; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; background: #3ecf5a; color: #fff; font: 900 16px/1 var(--font); font-style: normal; border: 2px solid var(--ink); }
 .pool-g:not(.on) .tick { background: #fff; }
+/* round 5 phone pass: compact mode buttons (the chosen mode's description shows once, underneath), and Start pinned to
+   the bottom of the screen while the lobby scrolls under it */
+.mode-desc { margin: -2px 0 0; font-size: 13px; font-weight: 600; color: #47606a; }
+.modes { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.mode { padding: 8px 6px; text-align: center; place-content: center; min-height: 52px; } .mode b { font-size: 14px; line-height: 1.15; } .mode span { display: none; }
+.lobby-go { position: sticky; bottom: 0; z-index: 2; display: grid; gap: 4px; justify-items: center; margin: 0 -16px -14px; padding: 12px 16px 12px; border-radius: 0 0 18px 18px; background: linear-gradient(rgba(255, 248, 232, 0), var(--paper) 22%); }
+.lobby-go .btn.big { width: 100%; }
+.lobby-main .row.opts { gap: 6px; } .lobby-main .row.opts > span:first-child { min-width: 5.2em; font-weight: 800; font-size: 13px; }
+@media (max-width: 420px) { .lobby-main h2 { font-size: 13px; } .lobby-main .pill { padding: 6px 10px; font-size: 14px; } }
+/* pop-ups: Done never scrolls away (pinned to the bottom of the costume and minigame lists, and the editor's title row
+   with its Done stays at the top) */
+.modal .panel > .btn[data-close] { position: sticky; bottom: calc(var(--sb) + 4px); z-index: 3; box-shadow: 0 5px 0 var(--ink), 0 -10px 24px 6px var(--paper); }
+.modal.editor .row.head { position: sticky; top: calc(var(--st) - 2px); z-index: 3; background: var(--paper); margin: -14px -16px 0; padding: 10px 16px 8px; border-radius: 18px 18px 0 0; }
+/* narrow phones: a results row is place | name | award, with the game score on a second line under the name */
+@media (max-width: 440px) {
+  .places li { grid-template-columns: 34px minmax(0, 1fr) auto; grid-template-areas: 'pl who award' 'pl score score'; row-gap: 0; }
+  .places .pl { grid-area: pl; } .places li > .chip { grid-area: who; } .places .award { grid-area: award; } .places .score { grid-area: score; font-size: 12px; }
+}

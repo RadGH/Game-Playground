@@ -118,6 +118,7 @@ async function showLobby() {
       ${me?.display ? '<p class="note">This screen is watching. Players join on their phones.</p>' : `<div class="row"><button class="btn" data-act="edit">Change look</button><button class="btn" data-act="shop">Costumes <span class="coins">${ICON.coin}${S.me?.coins ?? 0}</span></button></div>`}
       <h2>Game</h2>
       <div class="modes">${Object.entries(modes).map(([id, [t, d]]) => `<button class="mode${r.opts.mode === id ? ' on' : ''}" data-act="opt" data-key="mode" data-value="${id}" ${host ? '' : 'disabled'}><b>${t}</b><span>${d}</span></button>`).join('')}</div>
+      <p class="mode-desc">${esc(modes[r.opts.mode]?.[1] || '')}</p>
       ${r.opts.mode === 'board' ? `<div class="row opts"><span>Board</span>${Object.values(BOARDS).map(b => `<button class="pill${r.opts.board === b.id ? ' on' : ''}" data-act="opt" data-key="board" data-value="${b.id}" ${host ? '' : 'disabled'}>${esc(b.title)}</button>`).join('')}</div>` : ''}
       ${r.opts.mode === 'endless' ? '' : `<div class="row opts"><span>Rounds</span>${[3, 4, 5, 6].map(v => `<button class="pill${r.opts.rounds === v ? ' on' : ''}" data-act="opt" data-key="rounds" data-num="${v}" ${host ? '' : 'disabled'}>${v}</button>`).join('')}
         <span class="est">about ${Math.round(r.opts.rounds * (r.opts.mode === 'board' ? 2.6 : 1.6))} min</span></div>`}
@@ -125,8 +126,8 @@ async function showLobby() {
         ${r.opts.teams ? `<span class="est">${n === 3 ? 'Teams need 2 or 4 players' : 'Red &amp; Green vs Blue &amp; Pink'}</span>` : ''}</div>
       <div class="row opts"><span>Difficulty</span>${[['easy', 'Family'], ['normal', 'Normal'], ['hard', 'Tricky']].map(([v, t]) => `<button class="pill${r.opts.difficulty === v ? ' on' : ''}" data-act="opt" data-key="difficulty" data-value="${v}" ${host ? '' : 'disabled'}>${t}</button>`).join('')}</div>
       <div class="row opts"><span>Minigames</span><button class="pill on" data-act="pool">${r.opts.pool?.length ? `${r.opts.pool.length} picked` : `All ${Object.keys(GAMES).length}`}</button>${host ? '<span class="est">tap to choose</span>' : ''}</div>
-      ${host ? `<button class="btn big primary" data-act="start">${n < 2 ? 'Start (solo practice)' : 'Start the game'}</button>` : `<p class="note">${me?.wait ? 'The seats are full. You will join when one frees up.' : 'Waiting for the host to start…'}</p>`}
-      <button class="btn small ghost" data-act="leave">Leave</button>
+      <div class="lobby-go">${host ? `<button class="btn big primary" data-act="start">${n < 2 ? 'Start (solo practice)' : 'Start the game'}</button>` : `<p class="note">${me?.wait ? 'The seats are full. You will join when one frees up.' : 'Waiting for the host to start…'}</p>`}
+      <button class="btn small ghost" data-act="leave">Leave</button></div>
     </div>`);
   qrSvg(joinUrl(r.code)).then(svg => { const e = $('#qr'); if (e) e.innerHTML = svg; }).catch(() => {});
 }
